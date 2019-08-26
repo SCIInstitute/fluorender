@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include "MeshFactory.hpp"
 #include <Mesh/MeshGroup.hpp>
 
+#include <iostream>
+
 using namespace fluo;
 
 MeshFactory::MeshFactory()
@@ -51,6 +53,8 @@ void MeshFactory::createDefault()
 		MeshData* md = new MeshData();
 		md->setName(default_object_name_);
 		objects_.push_front(md);
+
+        std::cout << "Debugging starts here." << std::endl;
 
 		//add default values here
 		md->addValue("data path", std::wstring());//path to obj file

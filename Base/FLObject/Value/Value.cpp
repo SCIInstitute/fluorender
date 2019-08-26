@@ -1535,7 +1535,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 
 	return false;
 }
-
+/*
 bool ValueSet::getValue(const std::string &name, Referenced** value)
 {
 	Value* val = findValue(name);
@@ -1847,4 +1847,4 @@ bool ValueSet::getValue(const std::string &name, FLTYPE::GLint4 &value)
 	else
 		return false;
 }
-
+*/

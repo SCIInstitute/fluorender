@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 //#include <Calculate/VolumeSampler.h>
 
-#include <VolumeData/VolumeData.hpp>
+#include "VolumeData.hpp"
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/Plane.h>
 #include <Formats/base_reader.h>
@@ -579,7 +579,9 @@ void VolumeData::OnSpacingChanged(Event& event)
 	double tformarray[16];
 	temp->get(tformarray);
 	tform.set(tformarray);
-	setValue("tex transform", tform, Event(Event::NOTIFY_NONE));
+    Event texTransform;
+    texTransform.setNotifyFlags(Event::NOTIFY_NONE);
+    setValue("tex transform", tform, texTransform);
 }
 
 void VolumeData::OnBaseSpacingChanged(Event& event)
@@ -606,7 +608,9 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	double tformarray[16];
 	temp->get(tformarray);
 	tform.set(tformarray);
-	setValue("tex transform", tform, Event(Event::NOTIFY_NONE));
+    Event texTransform;
+    texTransform.setNotifyFlags(Event::NOTIFY_NONE);
+    setValue("tex transform", tform, texTransform);
 }
 
 void VolumeData::OnSpacingScaleChanged(Event& event)
@@ -645,7 +649,9 @@ void VolumeData::OnLevelChanged(Event& event)
 	double tformarray[16];
 	temp->get(tformarray);
 	tform.set(tformarray);
-	setValue("tex transform", tform, Event(Event::NOTIFY_NONE));
+    Event texTransform;
+    texTransform.setNotifyFlags(Event::NOTIFY_NONE);
+    setValue("tex transform", tform, texTransform);
 }
 
 void VolumeData::OnDisplayChanged(Event& event)
@@ -1302,7 +1308,8 @@ void VolumeData::AddEmptyData(int bits,
 			return;
 		}
 		memset((void*)val8, 0, sizeof(uint8)*nx*ny*nz);
-		nrrdWrap(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+        //nrrdWrap(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz); //may be deprecated
+        nrrdWrap_va(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 		setValue("bits", long(8));
 	}
 	else if (bits == 16)
@@ -1316,13 +1323,21 @@ void VolumeData::AddEmptyData(int bits,
 			return;
 		}
 		memset((void*)val16, 0, sizeof(uint16)*nx*ny*nz);
-		nrrdWrap(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+        //nrrdWrap(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz); //may be deprecated
+        nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 		setValue("bits", long(16));
 	}
+    /*
 	nrrdAxisInfoSet(nv, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet(nv, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
 	nrrdAxisInfoSet(nv, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 	nrrdAxisInfoSet(nv, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
+    these may be deprecated
+    */
+    nrrdAxisInfoSet_va(nv, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+    nrrdAxisInfoSet_va(nv, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
+    nrrdAxisInfoSet_va(nv, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+    nrrdAxisInfoSet_va(nv, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
 
 	//resolution
 	setValue("res x", long(nv->axis[0].size));
@@ -1374,7 +1389,9 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_scalar_scale(int_scale);
 	m_vr->set_gm_scale(int_scale);
 
-	OnMipModeChanged(Event());
+    Event newEvent;
+
+    OnMipModeChanged(newEvent);
 }
 
 void VolumeData::LoadMask(Nrrd* mask)
@@ -1453,11 +1470,20 @@ void VolumeData::AddEmptyMask(int mode)
 		}
 		double spcx, spcy, spcz;
 		m_tex->get_spacings(spcx, spcy, spcz);
+        /*
 		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
+
+        these may be deprecated
+        */
+        nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
+        nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+        nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+        nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+        nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
 
 		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
 	}
@@ -1553,11 +1579,20 @@ void VolumeData::AddEmptyLabel(int mode)
 
 		double spcx, spcy, spcz;
 		m_tex->get_spacings(spcx, spcy, spcz);
+        /*
 		nrrdWrap(nrrd_label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
 		nrrdAxisInfoSet(nrrd_label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 		nrrdAxisInfoSet(nrrd_label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 		nrrdAxisInfoSet(nrrd_label, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
 		nrrdAxisInfoSet(nrrd_label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+
+        these may be deprecated
+        */
+        nrrdWrap_va(nrrd_label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
+        nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+        nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+        nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
+        nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
 
 		m_tex->set_nrrd(nrrd_label, m_tex->nlabel());
 	}
@@ -1896,7 +1931,8 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 							}
 						}
 				}
-				nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+                //nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz); may be deprecated
+                nrrdWrap_va(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 			}
 			else if (bits == 16)
 			{
@@ -1935,12 +1971,21 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 							}
 						}
 				}
-				nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+                //nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz); may be deprecated
+                nrrdWrap_va(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 			}
+            /*
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
+
+            these may be deprecated
+            */
+            nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+            nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
+            nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+            nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
 
 			data = baked_data;
 			delete_data = true;
@@ -2204,7 +2249,9 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		if (estimate)
 		{
 			double est_thresh = m_vr->get_estimated_thresh();
-			setValue("estimate thresh", est_thresh, Event(Event::NOTIFY_SELF));
+            Event estimateThreshEvent;
+            estimateThreshEvent.setNotifyFlags(Event::NOTIFY_SELF);
+            setValue("estimate thresh", est_thresh, estimateThreshEvent);
 		}
 	}
 }
@@ -2318,7 +2365,8 @@ void VolumeData::SetShuffledID(unsigned int* val)
 	unsigned int x, y, z;
 	unsigned int res;
 	unsigned int len = 0;
-	unsigned int r = FLTYPE::Max(resx, FLTYPE::Max(resy, resz));
+    //unsigned int r = FLTYPE::Max(resx, FLTYPE::Max(resy, resz));
+    unsigned int r = std::max(resx, std::max(resy,resz)); // is there a reason not to do this?
 	while (r > 0)
 	{
 		r /= 2;

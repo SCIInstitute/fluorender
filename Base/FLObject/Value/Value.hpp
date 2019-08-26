@@ -327,6 +327,39 @@ public:
 	/** All the get value functions */
 	bool getValue(ValueTuple&);
 	//generic types
+
+    bool getValue(const std::string &name, Referenced** value)
+    {
+        Value* val = findValue(name);
+        if(val)
+        {
+            *value = const_cast<Referenced*>((dynamic_cast<TemplateValue<Referenced*>*>(val))->getValue());
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
+
+    template <typename V>
+    bool getValue(const std::string &name, V &value)
+    {
+        Value* val = findValue(name);
+        if(val)
+        {
+            value = (dynamic_cast<TemplateValue<V>*>(val))->getValue();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    /*
 	bool getValue(const std::string &name, Referenced** value);
 	bool getValue(const std::string &name, bool &value);
 	bool getValue(const std::string &name, char &value);
@@ -354,6 +387,7 @@ public:
 	bool getValue(const std::string &name, FLTYPE::Transform &value);
 	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
 	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
+    */
 
 	Values& getValues() {return _values;}
 	const Values& getValues() const {return _values;}
