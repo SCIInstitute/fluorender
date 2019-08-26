@@ -90,8 +90,6 @@ public:
 	bool GetPaintUse2d() {return m_use2d;}
 
 	void Select(double radius);
-	//mode: 0-nomral; 1-posterized
-	void Label(int mode=0);
 	int SetLabelBySize();
 	int CompIslandCount(double min_voxels, double max_voxels);
 	void CompExportMultiChann(bool select);

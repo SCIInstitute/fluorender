@@ -187,33 +187,6 @@ void VolumeSelector::Select(double radius)
 		m_vd->GetVR()->return_mask();
 }
 
-//mode: 0-normal; 1-posterized; 2-noraml,copy; 3-poster, copy
-void VolumeSelector::Label(int mode)
-{
-	if (!m_vd)
-		return;
-
-	int label_mode = 0;
-	if (mode==2||mode==3)
-		label_mode = 2;
-	//insert the label volume to m_vd
-	m_vd->AddEmptyLabel(label_mode);
-
-	//apply ids to the label volume
-	m_vd->DrawLabel(0, mode, m_label_thresh, m_label_falloff);
-
-	//filter the label volume by maximum intensity filtering
-	for (int i=0; i<m_iter_label; i++)
-	{
-		m_vd->DrawLabel(1, mode, m_label_thresh, m_label_falloff);
-		if (m_prog_diag)
-		{
-			m_progress++;
-			m_prog_diag->Update(95*(m_progress+1)/m_total_pr);
-		}
-	}
-}
-
 int VolumeSelector::SetLabelBySize()
 {
 	int return_val = 0;
@@ -947,39 +920,5 @@ Annotations* VolumeSelector::GetAnnotations()
 
 void VolumeSelector::Test()
 {
-	/*  if (!m_vd)
-	return;
-
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
-	m_iter_label = Max(nx, Max(ny, nz))/10;
-
-	int bins = 100;
-	int value = 0;
-
-	FILE* pfile = fopen("stats.bins", "wb");
-
-	value = bins+1;
-	fwrite(&value, sizeof(int), 1, pfile);
-
-	for (int i=0; i<bins+1; i++)
-	{
-	m_label_thresh = double(i)/double(bins);
-	Label(0);
-	m_vd->GetVR()->return_label();
-	CompIslandCount(0.0, -1.0);
-
-	value = m_comps.size();
-	fwrite(&value, sizeof(int), 1, pfile);
-
-	unordered_map <unsigned int, Component> :: const_iterator comp_iter;
-	for (comp_iter=m_comps.begin(); comp_iter!=m_comps.end(); comp_iter++)
-	{
-	value = comp_iter->second.counter;
-	fwrite(&value, sizeof(int), 1, pfile);
-	}
-	}
-
-	fclose(pfile);*/
 }
 

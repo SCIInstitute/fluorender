@@ -170,10 +170,6 @@ namespace FLIVR
 			double ini_thresh, double gm_falloff, double scl_falloff,
 			double scl_translate, double w2d, double bins, bool ortho,
 			bool estimate);
-		//generate the labeling assuming the mask is already generated
-		//type: 0-initialization; 1-maximum intensity filtering
-		//mode: 0-normal; 1-posterized
-		void draw_label(int type, int mode, double thresh, double gm_falloff);
 
 		double calc_hist_3d(GLuint, GLuint, size_t, size_t, size_t);
 
