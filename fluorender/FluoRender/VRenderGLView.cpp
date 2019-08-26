@@ -6225,6 +6225,8 @@ void VRenderGLView::RunGenerateComp(int index, wxFileConfig &fconfig)
 	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
 	bool use_sel;
 	fconfig.Read("use_sel", &use_sel);
+	double tfac = 1.0;
+	fconfig.Read("th_factor", &tfac);
 	std::vector<VolumeData*> vlist;
 	if (chan_mode == 0)
 	{
@@ -6248,7 +6250,7 @@ void VRenderGLView::RunGenerateComp(int index, wxFileConfig &fconfig)
 		i != vlist.end(); ++i)
 	{
 		m_cur_vol = *i;
-		vr_frame->GetComponentDlg()->PlayCmd(use_sel);
+		vr_frame->GetComponentDlg()->PlayCmd(use_sel, tfac);
 	}
 }
 
