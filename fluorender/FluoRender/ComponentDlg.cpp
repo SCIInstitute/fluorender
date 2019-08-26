@@ -1012,6 +1012,7 @@ void ComponentDlg::GetSettings()
 	m_use_sel = false;
 	m_iter = 50;
 	m_thresh = 0.5;
+	m_tfactor = 1.0;
 	m_use_dist_field = false;
 	m_dist_strength = 0.5;
 	m_max_dist = 30;
@@ -1720,7 +1721,7 @@ void ComponentDlg::ResetCmd()
 	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
-void ComponentDlg::PlayCmd(bool use_sel)
+void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
 {
 	//disable first
 	m_fixate = false;
@@ -1729,7 +1730,10 @@ void ComponentDlg::PlayCmd(bool use_sel)
 
 	if (m_command.empty())
 	{
+		//the threshold factor is used to lower the threshold value for semi auto segmentation
+		m_tfactor = tfactor;
 		GenerateComp(use_sel, false);
+		m_tfactor = 1.0;
 		return;
 	}
 
@@ -1815,7 +1819,7 @@ void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
 {
-	PlayCmd(m_use_sel);
+	PlayCmd(m_use_sel, 1.0);
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent &event)
@@ -2895,7 +2899,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 		{
 			cg.DistDensityField(
 				m_diff, m_iter,
-				m_thresh,
+				m_thresh*m_tfactor,
 				m_falloff,
 				m_dist_filter_size,
 				m_max_dist,
@@ -2910,7 +2914,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 		{
 			cg.DistGrow(
 				m_diff, m_iter,
-				m_thresh,
+				m_thresh*m_tfactor,
 				m_falloff ,
 				m_dist_filter_size,
 				m_max_dist,
@@ -2927,14 +2931,19 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_density_window_size,
 				m_density_stats_size,
 				m_diff, m_iter,
-				m_thresh,
+				m_thresh*m_tfactor,
 				m_falloff,
 				m_density_thresh,
 				scale);
 		}
 		else
 		{
-			cg.Grow(m_diff, m_iter, m_thresh, m_falloff, scale);
+			cg.Grow(
+				m_diff,
+				m_iter,
+				m_thresh*m_tfactor,
+				m_falloff,
+				scale);
 		}
 	}
 

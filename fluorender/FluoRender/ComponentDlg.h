@@ -205,7 +205,7 @@ public:
 
 	void AddCmd(const std::string &type);
 	void ResetCmd();
-	void PlayCmd(bool use_sel);
+	void PlayCmd(bool use_sel, double tfactor);
 
 	//in and out cell lists
 	FL::CellList &GetInCells()
@@ -230,6 +230,7 @@ private:
 	bool m_use_sel;
 	int m_iter;
 	double m_thresh;
+	double m_tfactor;
 	//distance field
 	bool m_use_dist_field;
 	double m_dist_strength;
