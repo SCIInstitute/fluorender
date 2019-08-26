@@ -1626,15 +1626,6 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 	}
 }
 
-//draw label (create the label)
-//type: 0-initialize; 1-maximum intensity filtering
-//mode: 0-normal; 1-posterized; 2-copy values; 3-poster, copy
-void VolumeData::DrawLabel(int type, int mode, double thresh, double gm_falloff)
-{
-	if (m_vr)
-		m_vr->draw_label(type, mode, thresh, gm_falloff);
-}
-
 //calculation
 void VolumeData::Calculate(int type, VolumeData *vd_a, VolumeData *vd_b)
 {

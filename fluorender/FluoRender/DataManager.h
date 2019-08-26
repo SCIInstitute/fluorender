@@ -267,10 +267,6 @@ public:
 	void DrawMask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
 		double w2d, double bins, int order, bool ortho=false, bool estimate=false);
-	//draw label (create the label)
-	//type: 0-initialize; 1-maximum intensity filtering
-	//mode: 0-normal; 1-posterized, 2-copy values
-	void DrawLabel(int type, int mode, double thresh, double gm_falloff);
 
 	//calculation
 	void Calculate(int type, VolumeData* vd_a, VolumeData* vd_b);
