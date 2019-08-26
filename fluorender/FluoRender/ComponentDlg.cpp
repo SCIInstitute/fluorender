@@ -145,6 +145,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
+	EVT_CHECKBOX(ID_UseSelChk, ComponentDlg::OnUseSelChk)
 	EVT_BUTTON(ID_GenerateBtn, ComponentDlg::OnGenerate)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ComponentDlg::OnAutoUpdate)
 	EVT_BUTTON(ID_ClusterBtn, ComponentDlg::OnCluster)
