@@ -11600,22 +11600,46 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 						continue;
 					px = (p2.x() + 1.0)*nx / 2.0;
 					py = (p2.y() + 1.0)*ny / 2.0;
-					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					if (ruler->GetNumPoint() > 1 && j == 0)
+					{
+						//starting point is diamond
+						float w2 = 1.41421356 * w;
+						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					}
+					else
+					{
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					}
 					num += 8;
 					if (j > 0)
 					{

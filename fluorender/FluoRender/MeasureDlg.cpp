@@ -692,6 +692,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_RulerBtn, MeasureDlg::OnNewRuler)
 	EVT_MENU(ID_RulerMPBtn, MeasureDlg::OnNewRulerMP)
 	EVT_MENU(ID_EllipseBtn, MeasureDlg::OnEllipse)
+	EVT_MENU(ID_RulerFlipBtn, MeasureDlg::OnRulerFlip)
 	EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
 	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
 	EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
@@ -751,10 +752,13 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	//toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL | wxTB_HORZ_LAYOUT);
-	bitmap = wxGetBitmapFromMemory(ruler_edit);
+	bitmap = wxGetBitmapFromMemory(flip_ruler);
 #ifdef _DARWIN
-	m_toolbar1->SetToolBitmapSize(bitmap.GetSize());
+	m_toolbar2->SetToolBitmapSize(bitmap.GetSize());
 #endif
+	m_toolbar2->AddTool(ID_RulerFlipBtn, "Flip Ruler", bitmap,
+		"Reverse the order of ruler points");
+	bitmap = wxGetBitmapFromMemory(ruler_edit);
 	m_toolbar2->AddCheckTool(ID_RulerEditBtn, "Edit",
 		bitmap, wxNullBitmap,
 		"Select and move ruler points");
@@ -767,16 +771,23 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	bitmap = wxGetBitmapFromMemory(tape);
 	m_toolbar2->AddTool(ID_DistanceBtn, "Distance", bitmap,
 		"Calculate distances");
+	m_toolbar2->Realize();
+	//toolbar3
+	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL | wxTB_HORZ_LAYOUT);
 	bitmap = wxGetBitmapFromMemory(delet);
-	m_toolbar2->AddTool(ID_DeleteBtn, "Delete", bitmap,
+#ifdef _DARWIN
+	m_toolbar3->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_toolbar3->AddTool(ID_DeleteBtn, "Delete", bitmap,
 		"Delete a selected ruler");
 	bitmap = wxGetBitmapFromMemory(del_all);
-	m_toolbar2->AddTool(ID_DeleteAllBtn,"Delete All", bitmap,
+	m_toolbar3->AddTool(ID_DeleteAllBtn,"Delete All", bitmap,
 		"Delete all rulers");
 	bitmap = wxGetBitmapFromMemory(save);
-	m_toolbar2->AddTool(ID_ExportBtn, "Export", bitmap,
+	m_toolbar3->AddTool(ID_ExportBtn, "Export", bitmap,
 		"Export rulers to a text file");
-	m_toolbar2->Realize();
+	m_toolbar3->Realize();
 
 	//options
 	wxBoxSizer *sizer_1 = new wxStaticBoxSizer(
@@ -836,6 +847,8 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizerV->Add(m_toolbar1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(m_toolbar2, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(m_toolbar3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -1073,6 +1086,45 @@ void MeasureDlg::OnEllipse(wxCommandEvent& event)
 	else
 	{
 		m_view->SetIntMode(1);
+	}
+}
+
+void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+
+	int count = 0;
+	std::vector<int> sel;
+	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			int index = sel[i];
+			if (0 > index || ruler_list->size() <= index)
+				continue;
+			Ruler* r = (*ruler_list)[index];
+			if (r)
+				r->Reverse();
+			count++;
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			Ruler* r = (*ruler_list)[i];
+			if (r)
+				r->Reverse();
+			count++;
+		}
+	}
+
+	if (count)
+	{
+		m_view->RefreshGL();
+		GetSettings(m_view);
 	}
 }
 

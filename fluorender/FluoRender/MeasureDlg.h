@@ -115,6 +115,7 @@ public:
 		ID_RulerBtn,
 		ID_RulerMPBtn,
 		ID_EllipseBtn,
+		ID_RulerFlipBtn,
 		ID_RulerEditBtn,
 		ID_RulerAvgBtn,
 		ID_ProfileBtn,
@@ -148,6 +149,7 @@ private:
 	//tool bar
 	wxToolBar *m_toolbar1;
 	wxToolBar *m_toolbar2;
+	wxToolBar *m_toolbar3;
 	//options
 	wxRadioButton *m_view_plane_rd;
 	wxRadioButton *m_max_intensity_rd;
@@ -163,6 +165,7 @@ private:
 	void OnNewRuler(wxCommandEvent& event);
 	void OnNewRulerMP(wxCommandEvent& event);
 	void OnEllipse(wxCommandEvent& event);
+	void OnRulerFlip(wxCommandEvent& event);
 	void OnRulerEdit(wxCommandEvent& event);
 	void OnRulerAvg(wxCommandEvent& event);
 	void OnProfile(wxCommandEvent& event);

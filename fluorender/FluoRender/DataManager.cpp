@@ -3528,6 +3528,12 @@ void Ruler::Clear()
 	m_ruler.clear();
 }
 
+void Ruler::Reverse()
+{
+	if (m_ruler.size() > 1)
+		std::reverse(std::begin(m_ruler), std::end(m_ruler));
+}
+
 wxString Ruler::GetDelInfoValues(wxString del)
 {
 	wxString output;
