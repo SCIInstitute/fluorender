@@ -270,7 +270,8 @@ public:
 	const static unsigned char ellipse_png[687];
 	/* tape.png - 1138 bytes */
 	const static unsigned char tape_png[1138];
-
+	/* flip_ruler.png - 952 bytes */
+	const static unsigned char flip_ruler_png[952];
 
 	//movie play export icons
 	/* minus.png - 426 bytes */

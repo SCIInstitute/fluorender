@@ -838,6 +838,7 @@ public:
 	void SetTransform(Transform *tform);
 
 	void Clear();
+	void Reverse();
 
 	//display functions
 	void SetDisp(bool disp)
