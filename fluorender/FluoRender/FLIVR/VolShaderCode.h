@@ -695,9 +695,9 @@ namespace FLIVR
 	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
 	"	}\n" \
 	"	//VOL_COLOR_OUTPUT\n" \
-	"	float shd = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
 	"		(n.w+n.z);\n" \
-	"	sel.xyz *= loc1.y>0.0?shd:1.0;\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
 	"	FragColor = sel*l.w;\n" \
 	"\n"
 
@@ -736,9 +736,9 @@ namespace FLIVR
 	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
 	"	}\n" \
 	"	//VOL_COLOR_OUTPUT\n" \
-	"	float shd = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
 	"		(n.w+n.z);\n" \
-	"	sel.xyz *= loc1.y>0.0?shd:1.0;\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
 	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
 	"\n"
 
