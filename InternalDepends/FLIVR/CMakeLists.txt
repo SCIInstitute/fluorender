@@ -4,6 +4,7 @@ include_directories(${OpenCL_INCLUDE_DIRS})
 include_directories(${FLObject_INCLUDES})
 include_directories(${freetype_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
+include_directories(${OPENGL_INCLUDE_DIRS})
 
 set(HEADER_FILES BBox.h
         Color.h
