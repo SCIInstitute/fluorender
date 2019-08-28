@@ -464,6 +464,7 @@ bool TrackMapProcessor::LinkFrames(
 	float data_value1, data_value2;
 	unsigned int label_value1, label_value2;
 	pVertex v1, v2;
+	pCell cl1, cl2;
 
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
@@ -487,8 +488,10 @@ bool TrackMapProcessor::LinkFrames(
 			data_value2 = ((unsigned short*)data2)[index] * m_map->m_scale / 65535.0f;
 		}
 
-		v1 = GetVertex(GetCell(f1, label_value1));
-		v2 = GetVertex(GetCell(f2, label_value2));
+		cl1 = GetCell(f1, label_value1);
+		cl2 = GetCell(f2, label_value2);
+		v1 = GetVertex(cl1);
+		v2 = GetVertex(cl2);
 		if (!v1 || !v2)
 			continue;
 
@@ -3482,6 +3485,7 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 	InterGraph &inter_graph = m_map->m_inter_graph_list.at(
 		f1 > f2 ? f2 : f1);
 	pVertex v1, v2;
+	pCell cl1, cl2;
 
 	size_t index;
 	size_t i, j, k;
@@ -3528,8 +3532,11 @@ bool TrackMapProcessor::LinkAddedCells(CellList &list, size_t f1, size_t f2)
 				data_value2 = ((unsigned short*)data2)[index] * m_map->m_scale / 65535.0f;
 			}
 
-			v1 = GetVertex(GetCell(f1, label_value1));
-			v2 = GetVertex(GetCell(f2, label_value2));
+			
+			cl1 = GetCell(f1, label_value1);
+			cl2 = GetCell(f2, label_value2);
+			v1 = GetVertex(cl1);
+			v2 = GetVertex(cl2);
 			if (!v1 || !v2)
 				continue;
 
