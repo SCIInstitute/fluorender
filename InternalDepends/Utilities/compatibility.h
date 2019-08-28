@@ -301,7 +301,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 #include <sys/stat.h>
 #include <vector>
 #include <iostream>
-#include "tiffio.h"
+#include <tiffio.h>
 #include <codecvt>
 
 #define GETCURRENTDIR getcwd

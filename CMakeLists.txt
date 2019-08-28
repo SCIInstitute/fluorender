@@ -66,6 +66,7 @@ include_directories(${Teem_INCLUDE_DIR})
 include_directories(${FFmpeg_INCLUDE_DIR})
 include_directories(${glm_INCLUDE_DIR})
 include_directories(${pole_INCLUDE_DIR})
+include_directories(${libtiff_INCLUDE_DIR})
 
 add_subdirectory(InternalDepends)
 add_subdirectory(Base)
