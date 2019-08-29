@@ -515,6 +515,7 @@ void VRenderView::CreateBar()
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
 
+	m_options_toolbar->SetRows(1);
 	m_options_toolbar->Realize();
 
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
