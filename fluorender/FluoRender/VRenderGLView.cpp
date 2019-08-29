@@ -6052,8 +6052,8 @@ void VRenderGLView::RunCalculate(int index, wxFileConfig &fconfig)
 	fconfig.Read("vol_a", &vol_a_index, 0);
 	int vol_b_index;
 	fconfig.Read("vol_b", &vol_b_index, 0);
-	wxString sOperand;
-	fconfig.Read("operand", &sOperand, "");
+	wxString sOper;
+	fconfig.Read("operator", &sOper, "");
 
 	//get volumes
 	VolumeData* vol_a = 0;
@@ -6068,15 +6068,15 @@ void VRenderGLView::RunCalculate(int index, wxFileConfig &fconfig)
 	//calculate
 	SetVolumeA(vol_a);
 	SetVolumeB(vol_b);
-	if (sOperand == "subtract")
+	if (sOper == "subtract")
 		Calculate(1, "", false);
-	else if (sOperand == "add")
+	else if (sOper == "add")
 		Calculate(2, "", false);
-	else if (sOperand == "divide")
+	else if (sOper == "divide")
 		Calculate(3, "", false);
-	else if (sOperand == "colocate")
+	else if (sOper == "colocate")
 		Calculate(4, "", false);
-	else if (sOperand == "fill")
+	else if (sOper == "fill")
 		Calculate(9, "", false);
 }
 
