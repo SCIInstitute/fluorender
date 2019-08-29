@@ -865,6 +865,9 @@ VRenderFrame::VRenderFrame(
 				wxGetBitmapFromMemory(icon_calculations));
 			break;
 		}
+		SetSaveProject(m_setting_dlg->GetProjSave());
+		SetSaveAlpha(m_setting_dlg->GetSaveAlpha());
+		SetSaveFloat(m_setting_dlg->GetSaveFloat());
 	}
 
 	if (fullscreen)
