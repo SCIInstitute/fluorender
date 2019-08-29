@@ -7,7 +7,7 @@ start_frame=0
 end_frame=1
 vol_a=1
 vol_b=0
-operand=subtract
+operator=subtract
 [tasks/task1]
 type=save_volume
 time_mode=0
