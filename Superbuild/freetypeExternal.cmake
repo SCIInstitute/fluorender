@@ -50,6 +50,8 @@ ExternalProject_Add(freetype_external_download
   CMAKE_ARGS ${freetype_external_download_CMAKE_ARGS} 
     -DCMAKE_PREFIX_PATH=${Master_Root}
   CMAKE_CACHE_ARGS
+    -DCMAKE_C_COMPILER:PATH=${Compiler}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
     -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
 	  -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}

@@ -3,7 +3,8 @@ project(Fluorender)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_CXX_STANDARD 17)
+set(Compiler ${CMAKE_CXX_COMPILER} CACHE INTERNAL "")
 
 if(UNIX)
   find_program(NASM_EXE NAMES nasm)

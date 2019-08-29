@@ -13,6 +13,9 @@ ExternalProject_Add(pole_external_download
   UPDATE_COMMAND ""
   INSTALL_DIR ""
   INSTALL_COMMAND ""
+  CMAKE_CACHE_ARGS
+    -DCMAKE_C_COMPILER:PATH=${Compiler}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
 )
 
 ExternalProject_Get_Property(pole_external_download BINARY_DIR)

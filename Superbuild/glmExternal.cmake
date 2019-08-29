@@ -6,12 +6,14 @@ set(glm_TAG "0.9.9.5")
 include(CheckCXXCompilerFlag)
 
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
-if(HAVE_FLAG_STD_CXX17)
+check_cxx_compiler_flag("/std:c++17" HAVE_FLAG_STD_CXX17VS)
+if(HAVE_FLAG_STD_CXX17 OR HAVE_FLAG_STD_CXX17VS)
   message(STATUS "Enabling C++17 Support for GLM")
   set(flag "17")
 else()
   check_cxx_compiler_flag(-std=c++11 HAVE_FLAG_STD_CXX11)
-  if(HAVE_FLAG_STD_CXX11)
+  check_cxx_compiler_flag("/std:c++11" HAVE_FLAG_STD_CXX11VS)
+  if(HAVE_FLAG_STD_CXX11 OR HAVE_FLAG_STD_CXX11VS)
     message(STATUS "Enabling C++11 Support for GLM")
     set(flag "11")
   else()
@@ -29,6 +31,8 @@ ExternalProject_Add(glm_external_download
   INSTALL_DIR ""
   INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS 
+    -DCMAKE_C_COMPILER:PATH=${Compiler}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DGLM_TEST_ENABLE_CXX_${flag}:BOOL=ON
 )

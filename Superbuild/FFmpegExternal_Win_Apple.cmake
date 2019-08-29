@@ -7,15 +7,39 @@ elseif( APPLE )
   set( FFmpeg_url "https://ffmpeg.zeranoe.com/builds/macos64/dev/ffmpeg-4.2-macos64-dev.zip")
 endif()
 
-ExternalProject_Add(FFmpeg_external_download
-  URL ${FFmpeg_url}
-  UPDATE_COMMAND ""
-  PATCH_COMMAND ""
-  INSTALL_COMMAND ""
-  INSTALL_DIR ""
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-)
+if(${GeneratorName} STREQUAL "Ninja")
+  ExternalProject_Add(FFmpeg_external_download
+    URL ${FFmpeg_url}
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    INSTALL_COMMAND ""
+    INSTALL_DIR ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+	BUILD_BYPRODUCTS
+	  <SOURCE_DIR>/lib/${prefix}avutil${suffix}
+      <SOURCE_DIR>/lib/${prefix}avformat${suffix}
+      <SOURCE_DIR>/lib/${prefix}avcodec${suffix}
+      <SOURCE_DIR>/lib/${prefix}avdevice${suffix}
+      <SOURCE_DIR>/lib/${prefix}avfilter${suffix}
+      <SOURCE_DIR>/lib/${prefix}postproc${suffix}
+      <SOURCE_DIR>/lib/${prefix}swresample${suffix}
+      <SOURCE_DIR>/lib/${prefix}swscale${suffix}
+	CMAKE_CACHE_ARGS
+      -DCMAKE_C_COMPILER:PATH=${Compiler}
+      -DCMAKE_CXX_COMPILER:PATH=${Compiler}
+  )
+else()
+  ExternalProject_Add(FFmpeg_external_download
+    URL ${FFmpeg_url}
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    INSTALL_COMMAND ""
+    INSTALL_DIR ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+  )
+endif()
 
 #CACHE PATH "" seems to write the path to a file that I can set 
 #library paths to. 

@@ -10,7 +10,7 @@ include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
 link_directories(${FLObject_LIBRARY_DIR})
 
 add_executable(Test main.cpp objecttest.cpp asserts.hpp tests.hpp)
-add_dependencies(Test FLObject)
+add_dependencies(Test FLObject Boost_external_download FFmpeg_external_download)
 target_link_libraries(Test 
   FLObject 
   ${Boost_LIBRARIES}

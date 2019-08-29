@@ -49,6 +49,8 @@ ExternalProject_Add(Teem_external_download
   CMAKE_ARGS ${Teem_external_download_CMAKE_ARGS} 
     -DCMAKE_PREFIX_PATH=${Master_Root}
   CMAKE_CACHE_ARGS
+    -DCMAKE_C_COMPILER:PATH=${Compiler}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
@@ -57,7 +59,7 @@ ExternalProject_Add(Teem_external_download
     -DTeem_USE_NRRD_INTERNALS:BOOL=ON
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
     -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
-	-DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
+	  -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
 )
 
 ExternalProject_Get_Property(Teem_external_download BINARY_DIR)

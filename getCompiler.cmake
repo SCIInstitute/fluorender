@@ -1,4 +1,4 @@
-set(GeneratorName ${CMAKE_GENERATOR})
+set(GeneratorName ${CMAKE_GENERATOR} CACHE INTERNAL "")
 
 message(STATUS "Generator: ${GeneratorName}")
 
