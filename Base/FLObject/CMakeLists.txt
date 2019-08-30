@@ -3,6 +3,7 @@ project(FLObject)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(${SceneGraph_INCLUDES})
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
 
 set(HEADER_FILES Event/Event.hpp
                  EventHandler/EventHandler.hpp
@@ -56,7 +57,7 @@ target_include_directories(FLObject PUBLIC Event
 
 add_dependencies(FLObject Boost_external_download)
 
-target_link_libraries(FLObject SceneGraph)
+target_link_libraries(FLObject SceneGraph ${Boost_LIBRARIES})
 
 install(TARGETS FLObject
         LIBRARY DESTINATION lib

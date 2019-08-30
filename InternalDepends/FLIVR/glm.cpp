@@ -11,7 +11,6 @@ coordinate generation (spheremap and planar projections) + more.
 
 */
 
-#include "GL/glew.h"
 #include "Color.h"
 #include <math.h>
 #include <stdio.h>

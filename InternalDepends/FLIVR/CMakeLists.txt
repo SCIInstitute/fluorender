@@ -4,7 +4,7 @@ include_directories(${OpenCL_INCLUDE_DIRS})
 include_directories(${FLObject_INCLUDES})
 include_directories(${freetype_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
-include_directories(${OPENGL_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIR})
 
 set(HEADER_FILES BBox.h
         Color.h
@@ -67,5 +67,5 @@ set(FLIVR_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
 link_directories(${FLObject_LIBRARY_DIR})
 add_library(FLIVR STATIC ${HEADER_FILES} ${SOURCES}) 
-target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES})
+target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES})
 add_dependencies(FLIVR FLObject freetype_external_download)

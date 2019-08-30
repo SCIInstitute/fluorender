@@ -2,7 +2,7 @@ project(SceneGraph)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories(${FLObject_INCLUDES} ${FLIVR_INCLUDE_DIRS})
+include_directories(${FLObject_INCLUDES} ${FLIVR_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
 
 set(HEADER_FILES Annotations/Annotations.hpp
                  Data/MeshData/MeshData.hpp
@@ -58,7 +58,7 @@ target_include_directories(SceneGraph PUBLIC Annotations
     Utilities
     )
 
-target_link_libraries(SceneGraph FLObject FLIVR)
+target_link_libraries(SceneGraph FLObject FLIVR ${Boost_LIBRARIES})
 
 install(TARGETS SceneGraph
         LIBRARY DESTINATION lib

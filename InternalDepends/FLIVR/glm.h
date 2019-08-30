@@ -13,6 +13,7 @@ coordinate generation (spheremap and planar projections) + more.
 #if !defined(glm_h)
 #define glm_h
 
+
 #include <GL/glew.h>
 
 #ifndef M_PI
