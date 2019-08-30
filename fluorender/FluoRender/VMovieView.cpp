@@ -990,7 +990,7 @@ void VMovieView::EnableRot() {
 }
 
 void VMovieView::OnHelpBtn(wxCommandEvent &event) {
-	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=41"));
+	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=58"));
 }
 
 void VMovieView::DisableTime() {
