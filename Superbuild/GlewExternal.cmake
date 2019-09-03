@@ -8,6 +8,7 @@ ExternalProject_Add(glew_external_download
   URL_HASH ${Glew_Hash}
   UPDATE_COMMAND ""
   SOURCE_SUBDIR "build/cmake"
+  INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler}

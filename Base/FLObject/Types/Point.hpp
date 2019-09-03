@@ -387,17 +387,17 @@ namespace FLTYPE
 
 	inline Point Min(const Point& p1, const Point& p2)
 	{
-		double x = std::min(p1.x_, p2.x_);
-		double y = std::min(p1.y_, p2.y_);
-		double z = std::min(p1.z_, p2.z_);
+        double x = (std::min)(p1.x_, p2.x_);
+        double y = (std::min)(p1.y_, p2.y_);
+        double z = (std::min)(p1.z_, p2.z_);
 		return Point(x, y, z);
 	}
 
 	inline Point Max(const Point& p1, const Point& p2)
 	{
-		double x = std::max(p1.x_, p2.x_);
-		double y = std::max(p1.y_, p2.y_);
-		double z = std::max(p1.z_, p2.z_);
+        double x = (std::max)(p1.x_, p2.x_);
+        double y = (std::max)(p1.y_, p2.y_);
+        double z = (std::max)(p1.z_, p2.z_);
 		return Point(x, y, z);
 	}
 

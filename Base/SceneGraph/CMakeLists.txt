@@ -2,7 +2,7 @@ project(SceneGraph)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories(${FLObject_INCLUDES} ${FLIVR_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+include_directories(${FLObject_INCLUDES} ${FLIVR_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS} ${glew_INCLUDE_DIR})
 
 set(HEADER_FILES Annotations/Annotations.hpp
                  Data/MeshData/MeshData.hpp

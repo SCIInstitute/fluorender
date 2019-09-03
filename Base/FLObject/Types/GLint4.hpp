@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GLINT4_HPP
 #define GLINT4_HPP
 
-#include <Glew/GL/glew.h>
+#include <GL/glew.h>
 #include <string>
 #include <iosfwd>
 #include <iostream>

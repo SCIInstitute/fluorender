@@ -49,10 +49,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ctime>
 #include <sys/types.h>
 #include <ctype.h>
-//#include <wx/wx.h>
 #include "tiffio.h"
 #include <direct.h>
 #include <codecvt>
+#include <QString>
 
 #define GETCURRENTDIR _getcwd
 
@@ -179,12 +179,12 @@ inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
 inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
 
 inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
-inline int STOI(const wxChar * s) { return (s ? _wtoi(s) : 0); }
-inline int STOI(wxChar * s) { return (s ? _wtoi(s) : 0); }
+inline int STOI(const QString * s) { return (s ? s->toInt() : 0); }
+inline int STOI(QString * s) { return (s ? s->toInt() : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
-inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
-inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
+inline double STOD(QString * s) { return (s ? s->toFloat() : 0.0); }
+inline double STOD(const QString * s) { return (s ? s->toFloat() : 0.0); }
 
 inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
 

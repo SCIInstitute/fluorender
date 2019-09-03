@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <assert.h>
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 namespace FLTYPE
 {
@@ -487,16 +488,19 @@ namespace FLTYPE
 
 	inline Vector Min(const Vector &v1, const Vector &v2)
 	{
-		return Vector(std::min(v1.x(), v2.x()),
-			std::min(v1.y(), v2.y()),
-			std::min(v1.z(), v2.z()));
+
+
+        return Vector((std::min)(v1.x(), v2.x()),
+            (std::min)(v1.y(), v2.y()),
+            (std::min)(v1.z(), v2.z()));
+
 	}
 
 	inline Vector Max(const Vector &v1, const Vector &v2)
 	{
-		return Vector(std::max(v1.x(), v2.x()),
-			std::max(v1.y(), v2.y()),
-			std::max(v1.z(), v2.z()));
+        return Vector((std::max)(v1.x(), v2.x()),
+            (std::max)(v1.y(), v2.y()),
+            (std::max)(v1.z(), v2.z()));
 	}
 
 } // End namespace FLTYPE

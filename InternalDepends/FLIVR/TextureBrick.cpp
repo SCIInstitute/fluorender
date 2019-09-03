@@ -147,14 +147,14 @@ namespace FLIVR
 	{
 		// set up vertices
 		Point corner[8];
-		corner[0] = bbox.min();
-		corner[1] = Point(bbox.min().x(), bbox.min().y(), bbox.max().z());
-		corner[2] = Point(bbox.min().x(), bbox.max().y(), bbox.min().z());
-		corner[3] = Point(bbox.min().x(), bbox.max().y(), bbox.max().z());
-		corner[4] = Point(bbox.max().x(), bbox.min().y(), bbox.min().z());
-		corner[5] = Point(bbox.max().x(), bbox.min().y(), bbox.max().z());
-		corner[6] = Point(bbox.max().x(), bbox.max().y(), bbox.min().z());
-		corner[7] = bbox.max();
+        corner[0] = bbox.getMin();
+        corner[1] = Point(bbox.getMin().x(), bbox.getMin().y(), bbox.getMax().z());
+        corner[2] = Point(bbox.getMin().x(), bbox.getMax().y(), bbox.getMin().z());
+        corner[3] = Point(bbox.getMin().x(), bbox.getMax().y(), bbox.getMax().z());
+        corner[4] = Point(bbox.getMax().x(), bbox.getMin().y(), bbox.getMin().z());
+        corner[5] = Point(bbox.getMax().x(), bbox.getMin().y(), bbox.getMax().z());
+        corner[6] = Point(bbox.getMax().x(), bbox.getMax().y(), bbox.getMin().z());
+        corner[7] = bbox.getMax();
 
 		// set up edges
 		edge_[0] = Ray(corner[0], corner[2] - corner[0]);
@@ -175,14 +175,14 @@ namespace FLIVR
 	{
 		// set up vertices
 		Point corner[8];
-		corner[0] = bbox.min();
-		corner[1] = Point(bbox.min().x(), bbox.min().y(), bbox.max().z());
-		corner[2] = Point(bbox.min().x(), bbox.max().y(), bbox.min().z());
-		corner[3] = Point(bbox.min().x(), bbox.max().y(), bbox.max().z());
-		corner[4] = Point(bbox.max().x(), bbox.min().y(), bbox.min().z());
-		corner[5] = Point(bbox.max().x(), bbox.min().y(), bbox.max().z());
-		corner[6] = Point(bbox.max().x(), bbox.max().y(), bbox.min().z());
-		corner[7] = bbox.max();
+        corner[0] = bbox.getMin();
+        corner[1] = Point(bbox.getMin().x(), bbox.getMin().y(), bbox.getMax().z());
+        corner[2] = Point(bbox.getMin().x(), bbox.getMax().y(), bbox.getMin().z());
+        corner[3] = Point(bbox.getMin().x(), bbox.getMax().y(), bbox.getMax().z());
+        corner[4] = Point(bbox.getMax().x(), bbox.getMin().y(), bbox.getMin().z());
+        corner[5] = Point(bbox.getMax().x(), bbox.getMin().y(), bbox.getMax().z());
+        corner[6] = Point(bbox.getMax().x(), bbox.getMax().y(), bbox.getMin().z());
+        corner[7] = bbox.getMax();
 
 		// set up edges
 		tex_edge_[0] = Ray(corner[0], corner[2] - corner[0]);
@@ -208,14 +208,14 @@ namespace FLIVR
 			return;
 
 		Point corner[8];
-		corner[0] = bbox_.min();
-		corner[1] = Point(bbox_.min().x(), bbox_.min().y(), bbox_.max().z());
-		corner[2] = Point(bbox_.min().x(), bbox_.max().y(), bbox_.min().z());
-		corner[3] = Point(bbox_.min().x(), bbox_.max().y(), bbox_.max().z());
-		corner[4] = Point(bbox_.max().x(), bbox_.min().y(), bbox_.min().z());
-		corner[5] = Point(bbox_.max().x(), bbox_.min().y(), bbox_.max().z());
-		corner[6] = Point(bbox_.max().x(), bbox_.max().y(), bbox_.min().z());
-		corner[7] = bbox_.max();
+        corner[0] = bbox_.getMin();
+        corner[1] = Point(bbox_.getMin().x(), bbox_.getMin().y(), bbox_.getMax().z());
+        corner[2] = Point(bbox_.getMin().x(), bbox_.getMax().y(), bbox_.getMin().z());
+        corner[3] = Point(bbox_.getMin().x(), bbox_.getMax().y(), bbox_.getMax().z());
+        corner[4] = Point(bbox_.getMax().x(), bbox_.getMin().y(), bbox_.getMin().z());
+        corner[5] = Point(bbox_.getMax().x(), bbox_.getMin().y(), bbox_.getMax().z());
+        corner[6] = Point(bbox_.getMax().x(), bbox_.getMax().y(), bbox_.getMin().z());
+        corner[7] = bbox_.getMax();
 
 		double tmin = Dot(corner[0] - view.origin(), view.direction());
 		double tmax = tmin;

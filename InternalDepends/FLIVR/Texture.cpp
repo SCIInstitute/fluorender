@@ -135,8 +135,8 @@ namespace FLIVR
 		{
 			for (unsigned int i = 0; i < (*bricks_).size(); i++)
 			{
-				Point minp((*bricks_)[i]->bbox().min());
-				Point maxp((*bricks_)[i]->bbox().max());
+                Point minp((*bricks_)[i]->bbox().getMin());
+                Point maxp((*bricks_)[i]->bbox().getMax());
 				Vector diag((*bricks_)[i]->bbox().diagonal());
 				minp += diag / 1000.;
 				maxp -= diag / 1000.;
@@ -215,8 +215,8 @@ namespace FLIVR
 
 			for (i = 0; i < quota_bricks_.size(); i++)
 			{
-				Point minp(quota_bricks_[i]->bbox().min());
-				Point maxp(quota_bricks_[i]->bbox().max());
+                Point minp(quota_bricks_[i]->bbox().getMin());
+                Point maxp(quota_bricks_[i]->bbox().getMax());
 				Vector diag(quota_bricks_[i]->bbox().diagonal());
 				minp += diag / 1000.;
 				maxp -= diag / 1000.;
@@ -288,9 +288,9 @@ namespace FLIVR
 		bool underz = true;
 		for (int i = 0; i < 8; i++)
 		{
-			const Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
-				(i & 2) ? bbox.min().y() : bbox.max().y(),
-				(i & 4) ? bbox.min().z() : bbox.max().z());
+            const Point pold((i & 1) ? bbox.getMin().x() : bbox.getMax().x(),
+                (i & 2) ? bbox.getMin().y() : bbox.getMax().y(),
+                (i & 4) ? bbox.getMin().z() : bbox.getMax().z());
 			const Point p = pr_.project(mv_.project(pold));
 			overx = overx && (p.x() > 1.0);
 			overy = overy && (p.y() > 1.0);
@@ -384,8 +384,8 @@ namespace FLIVR
 			//when all of them equal to old values, the result should be the same as an old one.  
 			if (size[0] != nx() || size[1] != ny() || size[2] != nz() ||
 				numc != nc() || numb[0] != nb(0) ||
-				bb.min() != bbox()->min() ||
-				bb.max() != bbox()->max() ||
+                bb.getMin() != bbox()->getMin() ||
+                bb.getMax() != bbox()->getMax() ||
 				vmn != vmin() ||
 				vmx != vmax() ||
 				gmn != gmin() ||
@@ -425,11 +425,11 @@ namespace FLIVR
 		}
 
 		BBox tempb;
-		tempb.extend(transform_.project(bbox_.min()));
-		tempb.extend(transform_.project(bbox_.max()));
-		spcx_ = (tempb.max().x() - tempb.min().x()) / double(nx_);
-		spcy_ = (tempb.max().y() - tempb.min().y()) / double(ny_);
-		spcz_ = (tempb.max().z() - tempb.min().z()) / double(nz_);
+        tempb.extend(transform_.project(bbox_.getMin()));
+        tempb.extend(transform_.project(bbox_.getMax()));
+        spcx_ = (tempb.getMax().x() - tempb.getMin().x()) / double(nx_);
+        spcy_ = (tempb.getMax().y() - tempb.getMin().y()) / double(ny_);
+        spcz_ = (tempb.getMax().z() - tempb.getMin().z()) / double(nz_);
 
 		set_nrrd(nv_nrrd, 0);
 		set_nrrd(gm_nrrd, 1);

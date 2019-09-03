@@ -29,7 +29,7 @@
 #ifndef SLIVR_TextureBrick_h
 #define SLIVR_TextureBrick_h
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "Ray.h"
 #include "BBox.h"
 #include "Plane.h"

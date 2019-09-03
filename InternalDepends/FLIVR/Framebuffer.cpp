@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "Framebuffer.h"
 
 namespace FLIVR

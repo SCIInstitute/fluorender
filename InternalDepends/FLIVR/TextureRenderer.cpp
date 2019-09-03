@@ -518,6 +518,13 @@ namespace FLIVR
 
 	bool TextureRenderer::test_against_view(const BBox &bbox, bool persp)
 	{
+
+        // Renamed bbox.min() and bbox.max() to getMin and getMax, it makes
+        // no sense to name something after the fashion of something in the
+        // standard library, this function, and the class will need to be
+        // thought about more carefully.
+
+
 		memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16 * sizeof(float));
 		memcpy(prmat_, glm::value_ptr(m_proj_mat), 16 * sizeof(float));
 
@@ -542,11 +549,11 @@ namespace FLIVR
 		bool underx = true;
 		bool undery = true;
 		bool underz = true;
-		for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)  // What does this do? And why is there an 8? Also what is i & 1,2,4?
 		{
-			const Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
-				(i & 2) ? bbox.min().y() : bbox.max().y(),
-				(i & 4) ? bbox.min().z() : bbox.max().z());
+            const Point pold((i & 1) ? bbox.getMin().x() : bbox.getMax().x(),
+                (i & 2) ? bbox.getMin().y() : bbox.getMax().y(),
+                (i & 4) ? bbox.getMin().z() : bbox.getMax().z());
 			const Point p = pr.project(mv.project(pold));
 			overx = overx && (p.x() > 1.0);
 			overy = overy && (p.y() > 1.0);

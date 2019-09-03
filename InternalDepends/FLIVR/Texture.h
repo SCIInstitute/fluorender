@@ -112,20 +112,20 @@ namespace FLIVR
 		{
 			BBox b;
 			get_bounds(b);
-			xmin = b.min().x();
-			ymin = b.min().y();
-			zmin = b.min().z();
+            xmin = b.getMin().x();
+            ymin = b.getMin().y();
+            zmin = b.getMin().z();
 
-			xmax = b.max().x();
-			ymax = b.max().y();
-			zmax = b.max().z();
+            xmax = b.getMax().x();
+            ymax = b.getMax().y();
+            zmax = b.getMax().z();
 		}
 
 		inline 
 			void get_bounds(BBox &b) const 
 		{
-			b.extend(transform_.project(bbox_.min()));
-			b.extend(transform_.project(bbox_.max()));
+            b.extend(transform_.project(bbox_.getMin()));
+            b.extend(transform_.project(bbox_.getMax()));
 		}
 
 		inline BBox *bbox() { return &bbox_; }

@@ -37,11 +37,12 @@
 
 namespace FLIVR
 {
+/*
 #ifdef _WIN32
 #undef min
 #undef max
 #endif
-
+*/
 	double MultiVolumeRenderer::sw_ = 0.0;
 
 	MultiVolumeRenderer::MultiVolumeRenderer()
@@ -408,21 +409,21 @@ namespace FLIVR
 				//for brick transformation
 				float matrix[16];
 				BBox bbox = b->dbox();
-				matrix[0] = float(bbox.max().x()-bbox.min().x());
+                matrix[0] = float(bbox.getMax().x()-bbox.getMin().x());
 				matrix[1] = 0.0f;
 				matrix[2] = 0.0f;
 				matrix[3] = 0.0f;
 				matrix[4] = 0.0f;
-				matrix[5] = float(bbox.max().y()-bbox.min().y());
+                matrix[5] = float(bbox.getMax().y()-bbox.getMin().y());
 				matrix[6] = 0.0f;
 				matrix[7] = 0.0f;
 				matrix[8] = 0.0f;
 				matrix[9] = 0.0f;
-				matrix[10] = float(bbox.max().z()-bbox.min().z());
+                matrix[10] = float(bbox.getMax().z()-bbox.getMin().z());
 				matrix[11] = 0.0f;
-				matrix[12] = float(bbox.min().x());
-				matrix[13] = float(bbox.min().y());
-				matrix[14] = float(bbox.min().z());
+                matrix[12] = float(bbox.getMin().x());
+                matrix[13] = float(bbox.getMin().y());
+                matrix[14] = float(bbox.getMin().z());
 				matrix[15] = 1.0f;
 				shader->setLocalParamMatrix(2, matrix);
 
@@ -869,8 +870,8 @@ namespace FLIVR
 		//reorder result
 		for (i = 0; i < result->size(); i++)
 		{
-			Point minp((*result)[i]->bbox().min());
-			Point maxp((*result)[i]->bbox().max());
+            Point minp((*result)[i]->bbox().getMin());
+            Point maxp((*result)[i]->bbox().getMax());
 			Vector diag((*result)[i]->bbox().diagonal());
 			minp += diag / 1000.;
 			maxp -= diag / 1000.;

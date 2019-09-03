@@ -33,11 +33,12 @@ DEALINGS IN THE SOFTWARE.
 #include <BBox.hpp>
 #include <iostream>
 
+/*
 #ifdef _WIN32
 #  undef min
 #  undef max
 #endif
-
+*/
 namespace FLIVR
 {
 	class Vector;
@@ -167,8 +168,8 @@ namespace FLIVR
 		{
 			if(b.valid())
 			{
-				extend(b.min());
-				extend(b.max());
+                extend(b.getMin());
+                extend(b.getMax());
 			}
 		}
 
@@ -192,8 +193,8 @@ namespace FLIVR
 		{
 			if (is_valid_)
 			{
-				cmin_ = Max(cmin_, box.min());
-				cmax_ = Min(cmax_, box.max());
+                cmin_ = Max(cmin_, box.getMin());
+                cmax_ = Min(cmax_, box.getMax());
 				if (!(cmin_ <= cmax_))
 					is_valid_ = false;
 			}
@@ -233,10 +234,10 @@ namespace FLIVR
 		//! Scale the bounding box by s, centered around o
 		void scale(double s, const Vector &o);
 
-		inline Point min() const
+        inline Point getMin() const
 		{ return cmin_; }
 
-		inline Point max() const
+        inline Point getMax() const
 		{ return cmax_; }
 
 		inline Vector diagonal() const
@@ -279,20 +280,20 @@ namespace FLIVR
 		BBox ibox;
 		if (!box1.valid() || !box2.valid())
 			return ibox;
-		if (box1.max().x() < box2.min().x())
+        if (box1.getMax().x() < box2.getMin().x())
 			return ibox;
-		if (box1.min().x() > box2.max().x())
+        if (box1.getMin().x() > box2.getMax().x())
 			return ibox;
-		if (box1.max().y() < box2.min().y())
+        if (box1.getMax().y() < box2.getMin().y())
 			return ibox;
-		if (box1.min().y() > box2.max().y())
+        if (box1.getMin().y() > box2.getMax().y())
 			return ibox;
-		if (box1.max().z() < box2.min().z())
+        if (box1.getMax().z() < box2.getMin().z())
 			return ibox;
-		if (box1.min().z() > box2.max().z())
+        if (box1.getMin().z() > box2.getMax().z())
 			return ibox;
-		Point min = Max(box1.min(), box2.min());
-		Point max = Min(box1.max(), box2.max());
+        Point min = Max(box1.getMin(), box2.getMin());
+        Point max = Min(box1.getMax(), box2.getMax());
 		ibox = BBox(min, max);
 		return ibox;
 	}
@@ -301,17 +302,17 @@ namespace FLIVR
 	{
 		if (!valid() || !box.valid())
 			return false;
-		if (max().x() < box.min().x())
+        if (getMax().x() < box.getMin().x())
 			return false;
-		if (min().x() > box.max().x())
+        if (getMin().x() > box.getMax().x())
 			return false;
-		if (max().y() < box.min().y())
+        if (getMax().y() < box.getMin().y())
 			return false;
-		if (min().y() > box.max().y())
+        if (getMin().y() > box.getMax().y())
 			return false;
-		if (max().z() < box.min().z())
+        if (getMax().z() < box.getMin().z())
 			return false;
-		if (min().z() > box.max().z())
+        if (getMin().z() > box.getMax().z())
 			return false;
 		return true;
 	}

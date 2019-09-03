@@ -561,8 +561,8 @@ void VolumeData::OnSpacingChanged(Event& event)
 	m_tex->set_spacings(spc_x, spc_y, spc_z);
 	FLIVR::BBox bbox;
 	m_tex->get_bounds(bbox);
-	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
-	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
+    FLTYPE::Point box_min(bbox.getMin().x(), bbox.getMin().y(), bbox.getMin().z());
+    FLTYPE::Point box_max(bbox.getMax().x(), bbox.getMax().y(), bbox.getMax().z());
 	FLTYPE::BBox bounds(box_min, box_max);
 	event.setNotifyFlags(Event::NOTIFY_PARENT | Event::NOTIFY_AGENT);
 	setValue("bounds", bounds, event);
@@ -637,8 +637,8 @@ void VolumeData::OnLevelChanged(Event& event)
 	m_tex->setLevel(level);
 	FLIVR::BBox bbox;
 	m_tex->get_bounds(bbox);
-	FLTYPE::Point box_min(bbox.min().x(), bbox.min().y(), bbox.min().z());
-	FLTYPE::Point box_max(bbox.max().x(), bbox.max().y(), bbox.max().z());
+    FLTYPE::Point box_min(bbox.getMin().x(), bbox.getMin().y(), bbox.getMin().z());
+    FLTYPE::Point box_max(bbox.getMax().x(), bbox.getMax().y(), bbox.getMax().z());
 	FLTYPE::BBox bounds(box_min, box_max);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
 	setValue("bounds", bounds, event);
@@ -1145,8 +1145,8 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 
 		m_vr = new FLIVR::VolumeRenderer(m_tex, planelist, true);
 		FLTYPE::BBox bounds;
-		FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
-		FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
+        FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
+        FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
 		bounds.extend(pmin);
 		bounds.extend(pmax);
 		setValue("bounds", bounds);
@@ -1346,8 +1346,8 @@ void VolumeData::AddEmptyData(int bits,
 
 	//bounding box
 	FLTYPE::BBox bounds;
-	FLTYPE::Point pmax(nv->axis[0].max, nv->axis[1].max, nv->axis[2].max);
-	FLTYPE::Point pmin(nv->axis[0].min, nv->axis[1].min, nv->axis[2].min);
+    FLTYPE::Point pmax(nv->axis[0].max, nv->axis[1].max, nv->axis[2].max);
+    FLTYPE::Point pmin(nv->axis[0].min, nv->axis[1].min, nv->axis[2].min);
 	bounds.extend(pmin);
 	bounds.extend(pmax);
 	setValue("bounds", bounds);
@@ -2366,7 +2366,7 @@ void VolumeData::SetShuffledID(unsigned int* val)
 	unsigned int res;
 	unsigned int len = 0;
     //unsigned int r = FLTYPE::Max(resx, FLTYPE::Max(resy, resz));
-    unsigned int r = std::max(resx, std::max(resy,resz)); // is there a reason not to do this?
+    unsigned int r = (std::max)(resx, (std::max)(resy,resz)); // is there a reason not to do this?
 	while (r > 0)
 	{
 		r /= 2;

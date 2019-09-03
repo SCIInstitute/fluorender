@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iosfwd>
 #include <iostream>
 
-#include <Glew/GL/glew.h>
+#include <GL/glew.h>
 
 namespace FLTYPE
 {
