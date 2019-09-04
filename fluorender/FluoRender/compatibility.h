@@ -257,18 +257,17 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 }
 
 inline void FIND_FILES(std::wstring m_path_name,
-	std::wstring search_ext,
+	std::wstring search_mask,
 	std::vector<std::wstring> &m_batch_list,
-	int &m_cur_batch, std::wstring regex = L"")
+	int &m_cur_batch)
 {
 	std::wstring search_path = m_path_name.substr(0,
 		m_path_name.find_last_of(L'\\')) + L'\\';
-	std::wstring search_str = regex + L"*" + search_ext;
-	if (std::string::npos == search_str.find(m_path_name))
-		search_str = m_path_name + search_str;
+	if (std::string::npos == search_mask.find(m_path_name))
+		search_mask = m_path_name + search_mask;
 	WIN32_FIND_DATAW FindFileData;
 	HANDLE hFind;
-	hFind = FindFirstFileW(search_str.c_str(), &FindFileData);
+	hFind = FindFirstFileW(search_mask.c_str(), &FindFileData);
 	if (hFind != INVALID_HANDLE_VALUE)
 	{
 		int cnt = 0;
