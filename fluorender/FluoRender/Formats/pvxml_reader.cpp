@@ -634,6 +634,26 @@ bool PVXMLReader::GetSliceSeq()
 	return false;
 }
 
+void PVXMLReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool PVXMLReader::GetChannSeq()
+{
+	return false;
+}
+
+void PVXMLReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int PVXMLReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void PVXMLReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;

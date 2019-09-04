@@ -239,6 +239,26 @@ bool ImageJReader::GetSliceSeq()
 	return m_slice_seq;
 }
 
+void ImageJReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool ImageJReader::GetChannSeq()
+{
+	return false;
+}
+
+void ImageJReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int ImageJReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void ImageJReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;

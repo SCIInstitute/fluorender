@@ -69,6 +69,12 @@ public:
 	virtual void SetSliceSeq(bool ss) = 0;
 	//get the reader flag to read z stack sequence
 	virtual bool GetSliceSeq() = 0;
+	//read channels
+	virtual void SetChannSeq(bool cs) = 0;
+	virtual bool GetChannSeq() = 0;
+	//digit order
+	virtual void SetDigitOrder(int order) = 0;
+	virtual int GetDigitOrder() = 0;
 	//set time identifier
 	//time identifier is a string to identify each file in a sequence as a time point
 	//in UI, it is set in the open file dialog as option "time sequence identifier"

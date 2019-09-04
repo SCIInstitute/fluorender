@@ -108,6 +108,8 @@ BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
 END_EVENT_TABLE()
 
 bool VRenderFrame::m_sliceSequence = false;
+bool VRenderFrame::m_channSequence = false;
+int VRenderFrame::m_digitOrder = 0;
 bool VRenderFrame::m_compression = false;
 bool VRenderFrame::m_skip_brick = false;
 wxString VRenderFrame::m_time_id = "_T";
@@ -1090,11 +1092,25 @@ void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
 }
 
 //open dialog options
-void VRenderFrame::OnCh1Check(wxCommandEvent &event)
+void VRenderFrame::OnCh11Check(wxCommandEvent &event)
 {
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		m_sliceSequence = ch1->GetValue();
+	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
+	if (ch11)
+		m_sliceSequence = ch11->GetValue();
+}
+
+void VRenderFrame::OnCh12Check(wxCommandEvent &event)
+{
+	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
+	if (ch12)
+		m_channSequence = ch12->GetValue();
+}
+
+void VRenderFrame::OnCmbChange(wxCommandEvent &event)
+{
+	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
+	if (combo)
+		m_digitOrder = combo->GetSelection();
 }
 
 void VRenderFrame::OnTxt1Change(wxCommandEvent &event)
@@ -1121,16 +1137,47 @@ void VRenderFrame::OnCh3Check(wxCommandEvent &event)
 wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(640, 110));
+	wxStaticText* st;
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL );
 
 	//slice sequence check box
-	wxCheckBox* ch1 = new wxCheckBox(panel, ID_READ_ZSLICES,
-		"Read a sequence as Z slices (the last digits in filenames are used to identify the sequence)");
-	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh1Check), NULL, panel);
-	ch1->SetValue(m_sliceSequence);
+	wxCheckBox* ch11 = new wxCheckBox(panel, ID_READ_ZSLICE,
+		"Read file# as Z sections");
+	ch11->Connect(ch11->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderFrame::OnCh11Check), NULL, panel);
+	ch11->SetValue(m_sliceSequence);
+
+	//slice sequence check box
+	wxCheckBox* ch12 = new wxCheckBox(panel, ID_READ_CHANN,
+		"Read file# as channels");
+	ch12->Connect(ch12->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(VRenderFrame::OnCh12Check), NULL, panel);
+	ch12->SetValue(m_channSequence);
+
+	//digit order
+	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
+		"Order", wxDefaultPosition, wxSize(-1, 10), 0, NULL, wxCB_READONLY);
+	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
+		wxCommandEventHandler(VRenderFrame::OnCmbChange), NULL, panel);
+	std::vector<std::string> combo_list;
+	combo_list.push_back("Channel first");
+	combo_list.push_back("Z section first");
+	for (size_t i = 0; i < combo_list.size(); ++i)
+		combo->Append(combo_list[i]);
+	combo->SetSelection(m_digitOrder);
+
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(panel, 0,
+		"Digit order:");
+	sizer1->Add(ch11);
+	sizer1->Add(10, 10);
+	sizer1->Add(ch12);
+	sizer1->Add(10, 10);
+	sizer1->Add(st);
+	sizer1->Add(5, 5);
+	sizer1->Add(combo, 0, wxALIGN_TOP);
 
 	//compression
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
@@ -1147,26 +1194,26 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	ch3->SetValue(m_skip_brick);
 
 	//time sequence identifier
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
 		"", wxDefaultPosition, wxSize(80, 20));
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
-	wxStaticText* st = new wxStaticText(panel, 0,
+	st = new wxStaticText(panel, 0,
 		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
-	sizer1->Add(txt1);
-	sizer1->Add(10, 10);
-	sizer1->Add(st);
+	sizer2->Add(txt1);
+	sizer2->Add(10, 10);
+	sizer2->Add(st);
 
 	group1->Add(10, 10);
-	group1->Add(ch1);
+	group1->Add(sizer1);
 	group1->Add(10, 10);
 	group1->Add(ch2);
 	group1->Add(10, 10);
 	group1->Add(ch3);
 	group1->Add(10, 10);
-	group1->Add(sizer1);
+	group1->Add(sizer2);
 	group1->Add(10, 10);
 
 	panel->SetSizerAndFit(group1);

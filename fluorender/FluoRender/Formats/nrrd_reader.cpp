@@ -151,6 +151,26 @@ bool NRRDReader::GetSliceSeq()
 	return false;
 }
 
+void NRRDReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool NRRDReader::GetChannSeq()
+{
+	return false;
+}
+
+void NRRDReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int NRRDReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void NRRDReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;

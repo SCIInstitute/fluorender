@@ -189,6 +189,26 @@ bool OIFReader::GetSliceSeq()
 	return false;
 }
 
+void OIFReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool OIFReader::GetChannSeq()
+{
+	return false;
+}
+
+void OIFReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int OIFReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void OIFReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;

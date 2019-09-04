@@ -4699,6 +4699,10 @@ m_vol_exb(0.0),
 
 	//slice sequence
 	m_sliceSequence = false;
+	//read channels
+	m_channSequence = false;
+	//digit order
+	m_digitOrder = 0;
 	//compression
 	m_compression = false;
 	//skip brick
@@ -4861,6 +4865,16 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			reader->SetSliceSeq(m_sliceSequence);
 			preprocess = true;
 		}
+		if (reader->GetChannSeq() != m_channSequence)
+		{
+			reader->SetChannSeq(m_channSequence);
+			preprocess = true;
+		}
+		if (reader->GetDigitOrder() != m_digitOrder)
+		{
+			reader->SetDigitOrder(m_digitOrder);
+			preprocess = true;
+		}
 		if (reader->GetTimeId() != m_timeId.ToStdWstring())
 		{
 			wstring str_w = m_timeId.ToStdWstring();
@@ -4902,6 +4916,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		wstring str_w = pathname.ToStdWstring();
 		reader->SetFile(str_w);
 		reader->SetSliceSeq(m_sliceSequence);
+		reader->SetChannSeq(m_channSequence);
+		reader->SetDigitOrder(m_digitOrder);
 		str_w = m_timeId.ToStdWstring();
 		reader->SetTimeId(str_w);
 		reader_return = reader->Preprocess();

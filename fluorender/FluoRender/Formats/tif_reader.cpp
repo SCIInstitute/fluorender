@@ -35,6 +35,8 @@ TIFReader::TIFReader()
 	m_alignment = 0;
 
 	m_slice_seq = false;
+	m_chann_seq = false;
+	m_digit_order = 0;
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
@@ -1018,6 +1020,26 @@ void TIFReader::SetSliceSeq(bool ss)
 bool TIFReader::GetSliceSeq()
 {
 	return m_slice_seq;
+}
+
+void TIFReader::SetChannSeq(bool cs)
+{
+	m_chann_seq = cs;
+}
+
+bool TIFReader::GetChannSeq()
+{
+	return m_chann_seq;
+}
+
+void TIFReader::SetDigitOrder(int order)
+{
+	m_digit_order = order;
+}
+
+int TIFReader::GetDigitOrder()
+{
+	return m_digit_order;
 }
 
 void TIFReader::SetTimeId(wstring &id)

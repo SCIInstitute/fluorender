@@ -69,6 +69,26 @@ bool LBLReader::GetSliceSeq()
 	return false;
 }
 
+void LBLReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool LBLReader::GetChannSeq()
+{
+	return false;
+}
+
+void LBLReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int LBLReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void LBLReader::SetTimeId(wstring &id)
 {
 }
