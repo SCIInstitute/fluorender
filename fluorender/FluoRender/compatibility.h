@@ -259,7 +259,8 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 inline void FIND_FILES(std::wstring m_path_name,
 	std::wstring search_ext,
 	std::vector<std::wstring> &m_batch_list,
-	int &m_cur_batch, std::wstring regex = L"") {
+	int &m_cur_batch, std::wstring regex = L"")
+{
 	std::wstring search_path = m_path_name.substr(0,
 		m_path_name.find_last_of(L'\\')) + L'\\';
 	std::wstring search_str = regex + L"*" + search_ext;

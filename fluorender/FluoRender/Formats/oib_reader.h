@@ -50,7 +50,11 @@ class OIBReader : public BaseReader
       void SetFile(wstring &file);
       void SetSliceSeq(bool ss);
       bool GetSliceSeq();
-      void SetTimeId(wstring &id);
+	  void SetChannSeq(bool cs);
+	  bool GetChannSeq();
+	  void SetDigitOrder(int order);
+	  int GetDigitOrder();
+	  void SetTimeId(wstring &id);
       wstring GetTimeId();
       int Preprocess();
       void SetBatch(bool batch);

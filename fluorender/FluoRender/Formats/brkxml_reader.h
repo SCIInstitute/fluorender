@@ -24,6 +24,10 @@ public:
 	void SetDir(wstring &dir);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeSeq(bool ss);
 	bool GetTimeSeq();
 	void SetTimeId(wstring &id);

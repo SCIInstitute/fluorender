@@ -621,6 +621,26 @@ bool LSMReader::GetSliceSeq()
 	return false;
 }
 
+void LSMReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool LSMReader::GetChannSeq()
+{
+	return false;
+}
+
+void LSMReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int LSMReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void LSMReader::SetTimeId(wstring &id)
 {
 	//do nothing

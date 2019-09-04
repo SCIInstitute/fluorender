@@ -414,6 +414,10 @@ private:
 
 	//if slices are sequence
 	static bool m_sliceSequence;
+	//read channels
+	static bool m_channSequence;
+	//digit order
+	static int m_digitOrder;
 	//compression
 	static bool m_compression;
 	//brick skipping
@@ -448,7 +452,9 @@ private:
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
 
 	//open dialog options
-	void OnCh1Check(wxCommandEvent &event);
+	void OnCh11Check(wxCommandEvent &event);
+	void OnCh12Check(wxCommandEvent &event);
+	void OnCmbChange(wxCommandEvent &event);
 	void OnTxt1Change(wxCommandEvent &event);
 	void OnCh2Check(wxCommandEvent &event);
 	void OnCh3Check(wxCommandEvent &event);

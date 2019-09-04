@@ -69,6 +69,26 @@ bool MSKReader::GetSliceSeq()
 	return false;
 }
 
+void MSKReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool MSKReader::GetChannSeq()
+{
+	return false;
+}
+
+void MSKReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int MSKReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void MSKReader::SetTimeId(wstring &id)
 {
 }

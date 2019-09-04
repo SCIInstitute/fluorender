@@ -1331,6 +1331,8 @@ public:
 	void SetVolumeDefault(VolumeData* vd);
 	//load volume options
 	void SetSliceSequence(bool ss) {m_sliceSequence = ss;}
+	void SetChannSequence(bool cs) { m_channSequence = cs; }
+	void SetDigitOrder(int order) { m_digitOrder = order; }
 	void SetCompression(bool compression) {m_compression = compression;}
 	void SetSkipBrick(bool skip) {m_skip_brick = skip;}
 	void SetTimeId(wxString str) {m_timeId = str;}
@@ -1452,6 +1454,10 @@ private:
 
 	//slice sequence
 	bool m_sliceSequence;
+	//read channels
+	bool m_channSequence;
+	//digit order
+	int m_digitOrder;//0:chann first; 1:slice first
 	//compression
 	bool m_compression;
 	//skip brick
