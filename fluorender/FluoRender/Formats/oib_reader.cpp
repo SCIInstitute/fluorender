@@ -241,7 +241,7 @@ void OIBReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES(search_path, L".oib", m_batch_list, m_cur_batch);
+		FIND_FILES(search_path, L"*.oib", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

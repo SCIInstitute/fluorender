@@ -792,7 +792,7 @@ void BRKXMLReader::SetBatch(bool batch)
    {
       //read the directory info
       wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(slash)) + slash;
-      FIND_FILES(search_path,L".vvd",m_batch_list,m_cur_batch);
+      FIND_FILES(search_path,L"*.vvd",m_batch_list,m_cur_batch);
       m_batch = true;
    }
    else

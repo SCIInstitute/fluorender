@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <stdint.h>
 #include <string>
+#include <deque>
 
 using namespace std;
 
@@ -203,6 +204,17 @@ private:
 		vector<SliceInfo> slices;
 	};
 	vector<TimeDataInfo> m_4d_seq;
+
+	struct NamePattern
+	{
+		size_t start;
+		size_t end;
+		size_t len;//0:indefinite
+		int type;//0:string; 1:digits
+		int use;//0:z sections; 1:channels; 2:time
+		wstring str;//content
+	};
+	deque<NamePattern> m_name_patterns;
 
 	bool m_slice_seq;
 	bool m_chann_seq;
@@ -383,6 +395,12 @@ private:
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
 	//read tiff
 	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
+
+	//name pattern
+	void AnalyzeNamePattern(std::wstring &path_name);
+	void AddPatternR(wchar_t c, size_t pos);//add backwards
+	std::wstring GetSearchString(int mode);
+	int GetPatternNumber(std::wstring &name, int mode);
 
 	//invalidate page info
 	bool TagInInfo(uint16_t tag);

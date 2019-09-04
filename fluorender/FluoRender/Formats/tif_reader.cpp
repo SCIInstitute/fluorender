@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "tif_reader.h"
+#include <boost/filesystem.hpp>
 #include "../compatibility.h"
 
 TIFReader::TIFReader()
@@ -267,6 +268,7 @@ int TIFReader::Preprocess()
 		//it is not an ImageJ hyperstack, do the usual processing
 		//build 4d sequence
 		//search time sequence files
+		AnalyzeNamePattern(m_path_name);
 		std::vector<std::wstring> list;
 		if (!FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
 		{
@@ -313,46 +315,25 @@ int TIFReader::Preprocess()
 		{
 			wstring slice_str = m_4d_seq[t].slices[0].slice;
 
-			if (m_slice_seq)
+			if (m_slice_seq || m_chann_seq)
 			{
-				//extract common string in name
-				size_t pos2 = slice_str.find_last_of(L'.');
-				size_t begin2 = 0;
-				int64_t end2 = -1;
-				for (i = int(pos2) - 1; i >= 0; i--)
+				//search slice sequence
+				std::vector<std::wstring> list;
+				std::wstring search_mask = GetSearchString(0);
+				FIND_FILES(path, search_mask, list, m_cur_time);
+				m_4d_seq[t].type = 1;
+				m_4d_seq[t].slices.clear();
+				for (size_t f = 0; f < list.size(); f++)
 				{
-					if (iswdigit(slice_str[i]) && end2 == -1)
-						end2 = i;
-					if (!iswdigit(slice_str[i]) && end2 != -1)
-					{
-						begin2 = i;
-						break;
-					}
+					SliceInfo slice;
+					slice.slice = list.at(f);
+					slice.slicenumber = GetPatternNumber(list.at(f), 0);
+					m_4d_seq[t].slices.push_back(slice);
 				}
-				if (end2 != -1)
-				{
-					//search slice sequence
-					std::vector<std::wstring> list;
-					std::wstring search_ext = slice_str.substr(end2 + 1);
-					std::wstring regex = slice_str.substr(0, begin2 + 1);
-					FIND_FILES(path, search_ext, list, m_cur_time, regex);
-					m_4d_seq[t].type = 1;
-					m_4d_seq[t].slices.clear();
-					for (size_t f = 0; f < list.size(); f++) {
-						size_t start_idx = begin2 + 1;
-						size_t end_idx = list.at(f).find(search_ext);
-						size_t size = end_idx - start_idx;
-						std::wstring fileno = list.at(f).substr(start_idx, size);
-						SliceInfo slice;
-						slice.slice = list.at(f);
-						slice.slicenumber = WSTOI(fileno);
-						m_4d_seq[t].slices.push_back(slice);
-					}
-					if (m_4d_seq[t].slices.size() > 0)
-						std::sort(m_4d_seq[t].slices.begin(),
-							m_4d_seq[t].slices.end(),
-							TIFReader::tif_slice_sort);
-				}
+				if (m_4d_seq[t].slices.size() > 0)
+					std::sort(m_4d_seq[t].slices.begin(),
+						m_4d_seq[t].slices.end(),
+						TIFReader::tif_slice_sort);
 			}
 			else
 			{
@@ -1058,7 +1039,7 @@ void TIFReader::SetBatch(bool batch)
 	{
 		//separate path and name
 		wstring search_path = GET_PATH(m_path_name);
-		wstring suffix = GET_SUFFIX(m_path_name);
+		wstring suffix = L"*" + GET_SUFFIX(m_path_name);
 		FIND_FILES(search_path, suffix, m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
@@ -1819,3 +1800,172 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	return nrrdout;
 }
 
+void TIFReader::AnalyzeNamePattern(std::wstring &path_name)
+{
+	m_name_patterns.clear();
+
+	boost::filesystem::path p(path_name);
+	std::wstring path = p.stem().wstring();
+	std::wstring name = p.filename().wstring();
+	if (name.empty())
+		return;
+
+	size_t end_pos = name.find_last_of(L'.');
+	bool suf = true;
+	if (end_pos == std::wstring::npos)
+	{
+		end_pos = name.length();
+		suf = false;
+	}
+	for (int i = int(end_pos) - 1; i >= 0; --i)
+		AddPatternR(name[i], i);
+	//add suffix
+	if (suf)
+	{
+		NamePattern np;
+		np.start = end_pos;
+		np.end = name.length() - 1;
+		np.len = np.end - np.start + 1;
+		np.type = 0;
+		np.use = 0;
+		np.str = name.substr(np.start);
+		m_name_patterns.push_back(np);
+	}
+	//find time id
+	size_t tid_pos = name.find(m_time_id);
+	if (tid_pos != std::wstring::npos)
+	{
+		size_t tid_start = tid_pos + m_time_id.length();
+		for (auto it = m_name_patterns.begin();
+			it != m_name_patterns.end(); ++it)
+		{
+			if (it->type == 1 &&
+				it->start == tid_start)
+			{
+				it->use = 2;
+				break;
+			}
+		}
+	}
+	//find z and chann
+	int counter = 0;
+	for (auto it = m_name_patterns.rbegin();
+		it != m_name_patterns.rend(); ++it)
+	{
+		if (counter == 2)
+			break;
+		if (it->type == 1 &&
+			it->use != 2)
+		{
+			if (counter == 0)
+			{
+				if (m_digit_order == 0)
+					it->use = 0;
+				else
+					it->use = 1;
+			}
+			else if (counter == 1)
+			{
+				if (m_digit_order == 0)
+					it->use = 1;
+				else
+					it->use = 0;
+			}
+			counter++;
+		}
+	}
+}
+
+void TIFReader::AddPatternR(wchar_t c, size_t pos)
+{
+	int type = iswdigit(c) ? 1 : 0;
+
+	if (m_name_patterns.empty())
+	{
+		NamePattern np;
+		np.start = pos;
+		np.end = pos;
+		np.len = 1;
+		np.type = type;
+		np.use = 0;
+		np.str = c;
+		m_name_patterns.push_front(np);
+	}
+	else
+	{
+		NamePattern &np0 = m_name_patterns.front();
+		if (np0.type == type)
+		{
+			np0.start = pos;
+			np0.len = np0.end - np0.start + 1;
+			np0.str.insert(0, 1, c);
+		}
+		else
+		{
+			NamePattern np;
+			np.start = pos;
+			np.end = pos;
+			np.len = 1;
+			np.type = type;
+			np.use = 0;
+			np.str = c;
+			m_name_patterns.push_front(np);
+		}
+	}
+}
+
+std::wstring TIFReader::GetSearchString(int mode)
+{
+	std::wstring str;
+	if (mode == 0)
+	{
+		//get slices
+		for (auto it = m_name_patterns.begin();
+			it != m_name_patterns.end(); ++it)
+		{
+			if (it->type == 1 &&
+				it->use == 0)
+				str += L"*";
+			else
+				str + it->str;
+		}
+	}
+	return str;
+}
+
+int TIFReader::GetPatternNumber(std::wstring &name, int mode)
+{
+	int number = 0;
+	std::wstring str;
+	if (mode == 0)
+	{
+		//slice numbder
+		for (auto it = m_name_patterns.begin();
+			it != m_name_patterns.end(); ++it)
+		{
+			if (it->type == 1 &&
+				it->use == 0)
+			{
+				auto pit = std::prev(it);
+				if (pit != m_name_patterns.end())
+					str = pit->str;
+				break;
+			}
+		}
+		size_t pos = std::wstring::npos;
+		if (!str.empty())
+			pos = name.find(str);
+		if (pos == std::wstring::npos)
+			pos = 0;
+		for (size_t i = pos; i < name.size(); ++i)
+		{
+			if (iswdigit(name[i]))
+				str + name[i];
+			else
+				break;
+		}
+		number = WSTOI(str);
+	}
+
+	return number;
+}
