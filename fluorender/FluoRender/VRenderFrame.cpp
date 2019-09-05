@@ -1396,6 +1396,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 		m_data_mgr.SetSliceSequence(m_sliceSequence);
+		m_data_mgr.SetChannSequence(m_channSequence);
+		m_data_mgr.SetDigitOrder(m_digitOrder);
 		m_data_mgr.SetCompression(m_compression);
 		m_data_mgr.SetSkipBrick(m_skip_brick);
 		m_data_mgr.SetTimeId(m_time_id);

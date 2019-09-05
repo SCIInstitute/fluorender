@@ -319,7 +319,11 @@ int TIFReader::Preprocess()
 			{
 				//search slice sequence
 				std::vector<std::wstring> list;
-				std::wstring search_mask = GetSearchString(0);
+				std::wstring search_mask;
+				if (m_slice_seq)
+					search_mask = GetSearchString(0);
+				else if (m_chann_seq)
+					search_mask = GetSearchString(1);
 				FIND_FILES(path, search_mask, list, m_cur_time);
 				m_4d_seq[t].type = 1;
 				m_4d_seq[t].slices.clear();
@@ -327,7 +331,10 @@ int TIFReader::Preprocess()
 				{
 					SliceInfo slice;
 					slice.slice = list.at(f);
-					slice.slicenumber = GetPatternNumber(list.at(f), 0);
+					if (m_slice_seq)
+						slice.slicenumber = GetPatternNumber(list.at(f), 0);
+					else if (m_chann_seq)
+						slice.slicenumber = GetPatternNumber(list.at(f), 1);
 					m_4d_seq[t].slices.push_back(slice);
 				}
 				if (m_4d_seq[t].slices.size() > 0)
@@ -1917,18 +1924,15 @@ void TIFReader::AddPatternR(wchar_t c, size_t pos)
 std::wstring TIFReader::GetSearchString(int mode)
 {
 	std::wstring str;
-	if (mode == 0)
+	for (auto it = m_name_patterns.begin();
+		it != m_name_patterns.end(); ++it)
 	{
-		//get slices
-		for (auto it = m_name_patterns.begin();
-			it != m_name_patterns.end(); ++it)
-		{
-			if (it->type == 1 &&
-				it->use == 0)
-				str += L"*";
-			else
-				str + it->str;
-		}
+		if (it->type == 1 &&
+			(mode < 0 ||
+			(mode >=0 && it->use == mode)))
+			str += L"*";
+		else
+			str += it->str;
 	}
 	return str;
 }
@@ -1937,35 +1941,33 @@ int TIFReader::GetPatternNumber(std::wstring &name, int mode)
 {
 	int number = 0;
 	std::wstring str;
-	if (mode == 0)
+	//slice/channel numbder
+	for (auto it = m_name_patterns.begin();
+		it != m_name_patterns.end(); ++it)
 	{
-		//slice numbder
-		for (auto it = m_name_patterns.begin();
-			it != m_name_patterns.end(); ++it)
+		if (it->type == 1 &&
+			(mode < 0 ||
+			(mode >= 0 && it->use == mode)))
 		{
-			if (it->type == 1 &&
-				it->use == 0)
-			{
-				auto pit = std::prev(it);
-				if (pit != m_name_patterns.end())
-					str = pit->str;
-				break;
-			}
+			auto pit = std::prev(it);
+			if (pit != m_name_patterns.end())
+				str = pit->str;
+			break;
 		}
-		size_t pos = std::wstring::npos;
-		if (!str.empty())
-			pos = name.find(str);
-		if (pos == std::wstring::npos)
-			pos = 0;
-		for (size_t i = pos; i < name.size(); ++i)
-		{
-			if (iswdigit(name[i]))
-				str + name[i];
-			else
-				break;
-		}
-		number = WSTOI(str);
 	}
+	size_t pos = std::wstring::npos;
+	if (!str.empty())
+		pos = name.find(str);
+	if (pos == std::wstring::npos)
+		pos = 0;
+	for (size_t i = pos; i < name.size(); ++i)
+	{
+		if (iswdigit(name[i]))
+			str + name[i];
+		else
+			break;
+	}
+	number = WSTOI(str);
 
 	return number;
 }
