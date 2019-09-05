@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdint.h>
 #include <string>
 #include <deque>
+#include <set>
 
 using namespace std;
 
@@ -215,6 +216,8 @@ private:
 		wstring str;//content
 	};
 	deque<NamePattern> m_name_patterns;
+	set<int> m_slice_count;
+	set<int> m_chann_count;//counting total numbers in preprocessing
 
 	bool m_slice_seq;
 	bool m_chann_seq;
@@ -400,7 +403,7 @@ private:
 	void AnalyzeNamePattern(std::wstring &path_name);
 	void AddPatternR(wchar_t c, size_t pos);//add backwards
 	std::wstring GetSearchString(int mode);
-	int GetPatternNumber(std::wstring &name, int mode);
+	int GetPatternNumber(std::wstring &path_name, int mode, bool count=false);
 
 	//invalidate page info
 	bool TagInInfo(uint16_t tag);
