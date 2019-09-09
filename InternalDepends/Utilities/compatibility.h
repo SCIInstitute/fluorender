@@ -36,6 +36,13 @@ DEALINGS IN THE SOFTWARE.
 
 #ifdef _WIN32 //WINDOWS ONLY
 
+// need this because std::byte has been introduced into the standard
+// microsoft has yet to come up with an appropriate fix. It would be
+// better, to get rid of any window's calls if possible, however the
+// java code needs a handler in order for the program to run without
+// crashing. Maybe looking into boost will have something similar.
+#define byte win_byte_override
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
@@ -45,7 +52,7 @@ DEALINGS IN THE SOFTWARE.
 #include <locale>
 #include <vector>
 #include <windows.h>
-#include <ole2.h>
+//#include <ole2.h>
 #include <ctime>
 #include <sys/types.h>
 #include <ctype.h>

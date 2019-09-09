@@ -4,7 +4,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #find_package(FLObject)
 
-include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject ${OPENGL_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject ${OPENGL_INCLUDE_DIRS} ${glew_INCLUDE_DIR})
 #include_directories(${FLObject_INCLUDES})
 
 link_directories(${FLObject_LIBRARY_DIR})
