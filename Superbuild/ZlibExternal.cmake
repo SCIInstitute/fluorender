@@ -25,7 +25,7 @@
 #  DEALINGS IN THE SOFTWARE.
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
-SET(zlib_GIT_TAG "origin/master")
+SET(zlib_GIT_TAG "v1.2.11")
 
 
 # If CMake ever allows overriding the checkout command or adding flags,
@@ -38,8 +38,8 @@ ExternalProject_Add(Zlib_external_download
   INSTALL_DIR ""
   INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS
-    -DCMAKE_C_COMPILER:PATH=${Compiler}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
+    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON

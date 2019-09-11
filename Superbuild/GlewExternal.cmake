@@ -10,8 +10,8 @@ ExternalProject_Add(glew_external_download
   SOURCE_SUBDIR "build/cmake"
   INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS
-    -DCMAKE_C_COMPILER:PATH=${Compiler}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
+    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
 )
 
 ExternalProject_Get_Property(glew_external_download BINARY_DIR)

@@ -4,7 +4,8 @@ project(Fluorender)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_CXX_STANDARD 17)
-set(Compiler ${CMAKE_CXX_COMPILER} CACHE INTERNAL "")
+set(Compiler_C ${CMAKE_C_COMPILER} CACHE INTERNAL "")
+set(Compiler_CXX ${CMAKE_CXX_COMPILER} CACHE INTERNAL "")
 
 if(UNIX)
   find_program(NASM_EXE NAMES nasm)
@@ -37,10 +38,6 @@ find_package(Qt5Gui REQUIRED)
 find_package(Java COMPONENTS Development REQUIRED)
 find_package(JNI REQUIRED)
 
-if(${OpenCL_FOUND})
-  message(STATUS "Found OpenCL")
-endif()
-
 #headers
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5OpenGL_INCLUDE_DIRS})
@@ -68,6 +65,7 @@ include_directories(${FFmpeg_INCLUDE_DIR})
 include_directories(${glm_INCLUDE_DIR})
 include_directories(${pole_INCLUDE_DIR})
 include_directories(${libtiff_INCLUDE_DIR})
+include_directories(${glew_INCLUDE_DIR})
 
 add_subdirectory(InternalDepends)
 add_subdirectory(Base)

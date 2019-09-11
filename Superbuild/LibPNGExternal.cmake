@@ -26,7 +26,7 @@
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 SET(libpng_GIT_TAG "origin/master")
-SET(libpng_DEPENDENCIES "Zlib")
+SET(libpng_DEPENDENCIES "Zlib_external_download")
 
 
 #needs to be combined here or the cmake file will not find zlib
@@ -52,8 +52,8 @@ ExternalProject_Add(LibPNG_external_download
   LIST_SEPARATOR |
   CMAKE_ARGS ${LibPNG_external_CMAKE_ARGS} -DCMAKE_PREFIX_PATH=${Zlib_Root}
   CMAKE_CACHE_ARGS
-    -DCMAKE_C_COMPILER:PATH=${Compiler}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
+    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON

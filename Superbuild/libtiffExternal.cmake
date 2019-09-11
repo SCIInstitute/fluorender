@@ -52,8 +52,8 @@ ExternalProject_Add(libtiff_external_download
   LIST_SEPARATOR |
   CMAKE_ARGS ${libtiff_external_CMAKE_ARGS} -DCMAKE_PREFIX_PATH=${Zlib_Root}
   CMAKE_CACHE_ARGS
-    -DCMAKE_C_COMPILER:PATH=${Compiler}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
+    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
 )
 

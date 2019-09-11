@@ -31,8 +31,8 @@ ExternalProject_Add(glm_external_download
   INSTALL_DIR ""
   INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS 
-    -DCMAKE_C_COMPILER:PATH=${Compiler}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler}
+    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DGLM_TEST_ENABLE_CXX_${flag}:BOOL=ON
 )
