@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _COLOCALIZATIONDLG_H_
 
 #include <wx/wx.h>
+#include <wx/tglbtn.h>
+#include <wx/grid.h>
+#include <wx/clipbrd.h>
 
 class DataGroup;
 
@@ -37,9 +40,23 @@ class ColocalizationDlg : public wxPanel
 public:
 	enum
 	{
-		ID_OutputText = ID_COLOCALIZE,
-		ID_OutputBtn,
-		ID_CalcColocalizationBtn
+		ID_ColocalizeBtn = ID_COLOCALIZE,
+		ID_UseSelChk,
+		ID_AutoUpdateBtn,
+		//settings
+		ID_ProductRdb,
+		ID_MinValueRdb,
+		ID_LogicalAndRdb,
+		//formats
+		ID_IntWeightedRdb,
+		ID_VoxCountRdb,
+		ID_IntWghtRatioRdb,
+		ID_VoxCountRatioRdb,
+
+		//output
+		ID_HistoryChk,
+		ID_ClearHistBtn,
+		ID_OutputGrid
 	};
 
 	ColocalizationDlg(wxWindow* frame,
@@ -51,6 +68,14 @@ public:
 		m_group = group;
 	}
 
+	//output
+	void SetOutput(wxString &titles, wxString &values);
+	void CopyData();
+	void PasteData();
+
+	//settings
+	void GetSettings();
+
 private:
 	wxWindow* m_frame;
 	wxString m_output_file;
@@ -58,19 +83,50 @@ private:
 	//current view
 	DataGroup *m_group;
 
-	//interface
+	//use selection
+	bool m_use_mask;
+	//format
+	bool m_voxel_count;
+	bool m_get_ratio;
 	//output
-	wxTextCtrl *m_output_text;
-	wxButton *m_output_btn;
+	bool m_hold_history;
+
+	//interface
 	//colocalization
-	wxButton *m_colocalization_btn;
+	wxButton *m_colocalize_btn;
+	wxCheckBox* m_use_sel_chk;
+	wxToggleButton* m_auto_update_btn;
+	//settings
+	wxRadioButton* m_product_rdb;
+	wxRadioButton* m_min_value_rdb;
+	wxRadioButton* m_logical_and_rdb;
+	//format
+	wxRadioButton* m_int_weighted_rdb;
+	wxRadioButton* m_vox_count_rdb;
+	wxRadioButton* m_int_wght_ratio_rdb;
+	wxRadioButton* m_vox_count_ratio_rdb;
+
+	//output
+	wxCheckBox* m_history_chk;
+	wxButton* m_clear_hist_btn;
+	wxGrid *m_output_grid;
 
 private:
-	//output
-	void OnOutputText(wxCommandEvent &event);
-	void OnOutputBtn(wxCommandEvent &event);
 	//calculate
-	void OnColocalizationBtn(wxCommandEvent &event);
+	void OnColocalizenBtn(wxCommandEvent &event);
+	void OnUseSelChk(wxCommandEvent &event);
+	void OnAutoUpdate(wxCommandEvent &event);
+	//settings
+	void OnMethodRdb(wxCommandEvent &event);
+	//format
+	void OnFormatRdb(wxCommandEvent &event);
+
+	//output
+	void OnHistoryChk(wxCommandEvent& event);
+	void OnClearHistBtn(wxCommandEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
+	void OnSelectCell(wxGridEvent& event);
+	void OnGridLabelClick(wxGridEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

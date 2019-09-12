@@ -29,88 +29,274 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "DataManager.h"
 #include <Calculate/Compare.h>
-#include <fstream>
 
 BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
-EVT_TEXT(ID_OutputText, ColocalizationDlg::OnOutputText)
-EVT_BUTTON(ID_OutputBtn, ColocalizationDlg::OnOutputBtn)
-EVT_BUTTON(ID_CalcColocalizationBtn, ColocalizationDlg::OnColocalizationBtn)
+	EVT_BUTTON(ID_ColocalizeBtn, ColocalizationDlg::OnColocalizenBtn)
+	EVT_CHECKBOX(ID_UseSelChk, ColocalizationDlg::OnUseSelChk)
+	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ColocalizationDlg::OnAutoUpdate)
+	//settings
+	EVT_RADIOBUTTON(ID_ProductRdb, ColocalizationDlg::OnMethodRdb)
+	EVT_RADIOBUTTON(ID_MinValueRdb, ColocalizationDlg::OnMethodRdb)
+	EVT_RADIOBUTTON(ID_LogicalAndRdb, ColocalizationDlg::OnMethodRdb)
+	//format
+	EVT_RADIOBUTTON(ID_IntWeightedRdb, ColocalizationDlg::OnFormatRdb)
+	EVT_RADIOBUTTON(ID_VoxCountRdb, ColocalizationDlg::OnFormatRdb)
+	EVT_RADIOBUTTON(ID_IntWghtRatioRdb, ColocalizationDlg::OnFormatRdb)
+	EVT_RADIOBUTTON(ID_VoxCountRatioRdb, ColocalizationDlg::OnFormatRdb)
+	//output
+	EVT_CHECKBOX(ID_HistoryChk, ColocalizationDlg::OnHistoryChk)
+	EVT_BUTTON(ID_ClearHistBtn, ColocalizationDlg::OnClearHistBtn)
+	EVT_KEY_DOWN(ColocalizationDlg::OnKeyDown)
+	EVT_GRID_SELECT_CELL(ColocalizationDlg::OnSelectCell)
+	EVT_GRID_LABEL_LEFT_CLICK(ColocalizationDlg::OnGridLabelClick)
 END_EVENT_TABLE()
 
 ColocalizationDlg::ColocalizationDlg(wxWindow* frame,
 	wxWindow* parent) :
 wxPanel(parent, wxID_ANY,
-wxDefaultPosition, wxSize(400, 165),
+wxDefaultPosition, wxSize(500, 500),
 0, "ColocalizationDlg"),
 m_frame(parent),
-m_group(0)
+m_group(0),
+m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	wxStaticText* st = 0;
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	wxStaticText *st = new wxStaticText(this, 0,
+	st = new wxStaticText(this, 0,
 		"Select a group of volume channels and compute pair-wise collocalization");
 	sizerV->Add(10, 10);
 	sizerV->Add(st, 0, wxALIGN_CENTER);
 
-	//output
-	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Output file:",
-		wxDefaultPosition, wxSize(75, 20));
-	m_output_text = new wxTextCtrl(this, ID_OutputText, "");
-	m_output_btn = new wxButton(this, ID_OutputBtn, "Browse...");
-	sizer_1->Add(10, 10);
-	sizer_1->Add(st, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_output_text, 1, wxALIGN_CENTER);
-	sizer_1->Add(m_output_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(10, 10);
-	//calculate
-	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	m_colocalization_btn = new wxButton(this, ID_CalcColocalizationBtn, "Colocalization",
+	//controls
+	wxBoxSizer* sizer1 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Colocalization Settings"), wxVERTICAL);
+	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Overlapping Calculation:",
 		wxDefaultPosition, wxDefaultSize);
-	sizer_2->AddStretchSpacer(1);
-	sizer_2->Add(m_colocalization_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(10, 10);
+	m_product_rdb = new wxRadioButton(this, ID_ProductRdb, "Product",
+		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+	m_min_value_rdb = new wxRadioButton(this, ID_MinValueRdb, "Min Value",
+		wxDefaultPosition, wxDefaultSize);
+	m_logical_and_rdb = new wxRadioButton(this, ID_LogicalAndRdb, "Threshold + Logical AND",
+		wxDefaultPosition, wxDefaultSize);
+	m_product_rdb->SetValue(true);
+	m_min_value_rdb->SetValue(false);
+	m_logical_and_rdb->SetValue(false);
+	sizer1_1->Add(10, 10);
+	sizer1_1->Add(st, 0, wxALIGN_CENTER);
+	sizer1_1->Add(10, 10);
+	sizer1_1->Add(m_product_rdb, 0, wxALIGN_CENTER);
+	sizer1_1->Add(10, 10);
+	sizer1_1->Add(m_min_value_rdb, 0, wxALIGN_CENTER);
+	sizer1_1->Add(10, 10);
+	sizer1_1->Add(m_logical_and_rdb, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Output Format:",
+		wxDefaultPosition, wxDefaultSize);
+	m_int_weighted_rdb = new wxRadioButton(this, ID_IntWeightedRdb, "Intensity Weighted",
+		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
+	m_vox_count_rdb = new wxRadioButton(this, ID_VoxCountRdb, "Voxel Count",
+		wxDefaultPosition, wxDefaultSize);
+	m_int_wght_ratio_rdb = new wxRadioButton(this, ID_IntWghtRatioRdb, "Intensity Weight Ratio",
+		wxDefaultPosition, wxDefaultSize);
+	m_vox_count_ratio_rdb = new wxRadioButton(this, ID_VoxCountRatioRdb, "Voxel Count Ratio",
+		wxDefaultPosition, wxDefaultSize);
+	m_int_weighted_rdb->SetValue(true);
+	m_vox_count_rdb->SetValue(false);
+	m_int_wght_ratio_rdb->SetValue(false);
+	m_vox_count_ratio_rdb->SetValue(false);
+	sizer1_2->Add(10, 10);
+	sizer1_2->Add(st, 0, wxALIGN_CENTER);
+	sizer1_2->Add(10, 10);
+	sizer1_2->Add(m_int_weighted_rdb, 0, wxALIGN_CENTER);
+	sizer1_2->Add(10, 10);
+	sizer1_2->Add(m_vox_count_rdb, 0, wxALIGN_CENTER);
+	sizer1_3->Add(st->GetSize().GetX()+20, -1);
+	sizer1_3->Add(m_int_wght_ratio_rdb, 0, wxALIGN_CENTER);
+	sizer1_3->Add(10, 10);
+	sizer1_3->Add(m_vox_count_ratio_rdb, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
+	m_use_sel_chk = new wxCheckBox(this, ID_UseSelChk, "Use Selection",
+		wxDefaultPosition, wxDefaultSize);
+	m_colocalize_btn = new wxButton(this, ID_ColocalizeBtn, "Colocalize",
+		wxDefaultPosition, wxSize(75, -1));
+	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn, "Auto Update",
+		wxDefaultPosition, wxSize(75, -1));
+	sizer1_4->AddStretchSpacer(1);
+	sizer1_4->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
+	sizer1_4->Add(m_colocalize_btn, 0, wxALIGN_CENTER);
+	sizer1_4->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
+	sizer1->Add(5, 5);
+	sizer1->Add(sizer1_1, 0, wxEXPAND);
+	sizer1->Add(5, 5);
+	sizer1->Add(sizer1_2, 0, wxEXPAND);
+	sizer1->Add(5, 5);
+	sizer1->Add(sizer1_3, 0, wxEXPAND);
+	sizer1->Add(5, 5);
+	sizer1->Add(sizer1_4, 0, wxEXPAND);
+	sizer1->Add(5, 5);
+
+	//output
+	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Output"),
+		wxVERTICAL);
+	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
+		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
+	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
+		"Clear History", wxDefaultPosition, wxSize(75, -1));
+	sizer2_1->AddStretchSpacer(1);
+	sizer2_1->Add(m_history_chk, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
+	//grid
+	m_output_grid = new wxGrid(this, ID_OutputGrid);
+	m_output_grid->CreateGrid(0, 1);
+	m_output_grid->Fit();
+	sizer2->Add(5, 5);
+	sizer2->Add(sizer2_1, 0, wxEXPAND);
+	sizer2->Add(5, 5);
+	sizer2->Add(m_output_grid, 1, wxEXPAND);
+	sizer2->Add(5, 5);
 
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_1, 0, wxEXPAND);
+	sizerV->Add(sizer1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 0, wxEXPAND);
+	sizerV->Add(sizer2, 1, wxEXPAND);
 	sizerV->Add(10, 10);
 
 	SetSizer(sizerV);
 	Layout();
+
+	GetSettings();
 }
 
 ColocalizationDlg::~ColocalizationDlg()
 {
 }
 
-void ColocalizationDlg::OnOutputText(wxCommandEvent &event)
+void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 {
-	m_output_file = m_output_text->GetValue();
+	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k;
+	int id_idx = -1;
+
+	k = 0;
+	cur_line = titles;
+	do
+	{
+		cur_field = cur_line.BeforeFirst('\t');
+		cur_line = cur_line.AfterFirst('\t');
+		if (m_output_grid->GetNumberCols() <= k)
+			m_output_grid->InsertCols(k);
+		m_output_grid->SetColLabelValue(k, cur_field);
+		if (cur_field == "ID")
+			id_idx = k;
+		++k;
+	} while (cur_line.IsEmpty() == false);
+
+	Color c;
+	long lval;
+	wxColor color;
+
+	i = 0;
+	copy_data = values;
+	do
+	{
+		k = 0;
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		if (m_output_grid->GetNumberRows() <= i ||
+			m_hold_history)
+			m_output_grid->InsertRows(i);
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			m_output_grid->SetCellValue(i, k, cur_field);
+			if (k == id_idx)
+			{
+				if (cur_field.ToLong(&lval))
+				{
+					c = Color(1.0, 0.0, 0.0);
+					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+					m_output_grid->SetCellBackgroundColour(i, k, color);
+				}
+			}
+			++k;
+		} while (cur_line.IsEmpty() == false);
+		++i;
+	} while (copy_data.IsEmpty() == false);
+
+	if (m_output_grid->GetNumberCols() > k)
+		m_output_grid->DeleteCols(k,
+			m_output_grid->GetNumberCols() - k);
+
+	m_output_grid->AutoSizeColumns();
 }
 
-void ColocalizationDlg::OnOutputBtn(wxCommandEvent &event)
+void ColocalizationDlg::CopyData()
 {
-	wxFileDialog *fopendlg = new wxFileDialog(
-		this, "Choose the output file",
-		"", "colocalization_result.txt",
-		"*.txt", wxFD_OPEN);
+	int i, k;
+	wxString copy_data;
+	bool something_in_this_line;
 
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
+	copy_data.Clear();
+
+	bool t = m_output_grid->IsSelection();
+
+	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
 	{
-		m_output_file = fopendlg->GetPath();
-		m_output_text->SetValue(m_output_file);
+		something_in_this_line = false;
+		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
+		{
+			if (m_output_grid->IsInSelection(i, k))
+			{
+				if (something_in_this_line == false)
+				{  // first field in this line => may need a linefeed
+					if (copy_data.IsEmpty() == false)
+					{     // ... if it is not the very first field
+						copy_data = copy_data + wxT("\n");  // next LINE
+					}
+					something_in_this_line = true;
+				}
+				else
+				{
+					// if not the first field in this line we need a field seperator (TAB)
+					copy_data = copy_data + wxT("\t");  // next COLUMN
+				}
+				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
+			}
+		}
 	}
 
-	if (fopendlg)
-		delete fopendlg;
+	if (wxTheClipboard->Open())
+	{
+		// This data objects are held by the clipboard,
+		// so do not delete them in the app.
+		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
+		wxTheClipboard->Close();
+	}
 }
 
-void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
+void ColocalizationDlg::PasteData()
+{
+}
+
+void ColocalizationDlg::GetSettings()
+{
+	m_use_mask = false;
+	m_voxel_count = false;
+	m_get_ratio = false;
+}
+
+void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent &event)
 {
 	if (!m_group)
 		return;
@@ -143,11 +329,13 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 				continue;
 
 			FL::ChannelCompare compare(vd1, vd2);
+			compare.SetUseMask(m_use_mask);
+			compare.SetCountVoxel(m_voxel_count);
 			//get threshold values
-			double th1, th2;
-			th1 = vd1->GetLeftThresh();
-			th2 = vd2->GetLeftThresh();
-			compare.Compare(th1, th2);
+			//double th1, th2;
+			//th1 = vd1->GetLeftThresh();
+			//th2 = vd2->GetLeftThresh();
+			compare.Product();
 			rm[x][y] = compare.Result();
 			rm[y][x] = compare.Result();
 			y++;
@@ -155,74 +343,94 @@ void ColocalizationDlg::OnColocalizationBtn(wxCommandEvent &event)
 		x++;
 	}
 
-	//output
-	std::wstring filename = m_output_file.ToStdWstring();
-	std::ofstream outfile;
-	//print names
-	outfile.open(ws2s(filename), std::ofstream::out);
-	outfile << "\t";
-	for (int i = 0; i < num; ++i)
-	{
-		outfile << m_group->GetVolumeData(i)->GetName();
-		if (i == num-1)
-			outfile << "\n";
-		else
-			outfile << "\t";
-	}
-	//print adj matrix
+	wxString titles;
 	for (size_t i = 0; i < num; ++i)
 	{
-		outfile << m_group->GetVolumeData(i)->GetName();
-		outfile << "\t";
-		for (size_t j = 0; j < num; ++j)
-		{
-			outfile << rm[i][j];
-			if (j < num - 1)
-				outfile << "\t";
-		}
-		outfile << "\n";
-	}
-	outfile.close();
-
-	//nomralize
-/*	bool norm = false;
-	//getValue("normalize", norm);
-	if (norm)
-	{
-		for (size_t i = 0; i < num; ++i)
-		{
-			//sum
-			double sum = 0;
-			for (size_t j = 0; j < num; ++j)
-			{
-				sum += rm[i][j];
-			}
-			//divide
-			if (sum < 1)
-				continue;
-			for (size_t j = 0; j < num; ++j)
-			{
-				rm[i][j] /= sum;
-			}
-		}
-		//output
-		std::wstring filename_markov = filename;
-		if (pos != std::wstring::npos)
-			filename_markov.insert(pos, L"_markov");
+		titles += wxString::Format("%d", int(i+1));
+		if (i < num - 1)
+			titles += "\t";
 		else
-			filename_markov += L"_markov";
-		outfile.open(filename_markov, std::ofstream::out);
-		for (size_t i = 0; i < num; ++i)
-		{
-			for (size_t j = 0; j < num; ++j)
-			{
-				outfile << rm[i][j];
-				if (j < num - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-		}
-		outfile.close();
-	}*/
+			titles += "\n";
+	}
+	wxString values;
+	for (int it1 = 0; it1 < num; ++it1)
+	for (int it2 = 0; it2 < num; ++it2)
+	{
+		if (m_voxel_count)
+			values += wxString::Format("%.0f", rm[it1][it2]);
+		else
+			values += wxString::Format("%f", rm[it1][it2]);
+		if (it2 < num - 1)
+			values += "\t";
+		else
+			values += "\n";
+	}
+	SetOutput(titles, values);
+
 }
 
+void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
+{
+	m_use_mask = m_use_sel_chk->GetValue();
+}
+
+void ColocalizationDlg::OnAutoUpdate(wxCommandEvent &event)
+{
+
+}
+
+void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)
+{
+
+}
+
+void ColocalizationDlg::OnFormatRdb(wxCommandEvent &event)
+{
+	if (m_vox_count_rdb->GetValue() ||
+		m_vox_count_ratio_rdb->GetValue())
+		m_voxel_count = true;
+	else
+		m_voxel_count = false;
+
+	if (m_int_wght_ratio_rdb->GetValue() ||
+		m_vox_count_ratio_rdb->GetValue())
+		m_get_ratio = true;
+	else
+		m_get_ratio = false;
+}
+
+void ColocalizationDlg::OnHistoryChk(wxCommandEvent& event)
+{
+	m_hold_history = m_history_chk->GetValue();
+}
+
+void ColocalizationDlg::OnClearHistBtn(wxCommandEvent& event)
+{
+	m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
+}
+
+void ColocalizationDlg::OnKeyDown(wxKeyEvent& event)
+{
+	if (wxGetKeyState(WXK_CONTROL))
+	{
+		if (event.GetKeyCode() == wxKeyCode('C'))
+			CopyData();
+		else if (event.GetKeyCode() == wxKeyCode('V'))
+			PasteData();
+	}
+	event.Skip();
+}
+
+void ColocalizationDlg::OnSelectCell(wxGridEvent& event)
+{
+	int r = event.GetRow();
+	int c = event.GetCol();
+	m_output_grid->SelectBlock(r, c, r, c);
+	event.Skip();
+}
+
+void ColocalizationDlg::OnGridLabelClick(wxGridEvent& event)
+{
+	m_output_grid->SetFocus();
+	event.Skip();
+}
