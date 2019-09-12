@@ -47,8 +47,12 @@ namespace FL
 		{ m_use_mask = use_mask; }
 		bool GetUseMask()
 		{ return m_use_mask; }
+		void SetCountVoxel(bool bval)
+		{ m_count_voxel = bval; }
+		bool GetCountVoxel()
+		{ return m_count_voxel;}
 
-		void Compare(float, float);
+		void Product();
 		void Average(float weight, FLIVR::Argument& avg);
 		double Result()
 		{ return m_result; }
@@ -56,6 +60,7 @@ namespace FL
 	private:
 		VolumeData *m_vd1, *m_vd2;
 		bool m_use_mask;//use mask instead of data
+		bool m_count_voxel;//count number instead of intensity
 		bool m_init;
 		double m_result;
 
