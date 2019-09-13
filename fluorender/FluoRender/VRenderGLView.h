@@ -641,7 +641,9 @@ public:
 	static bool m_linked_rot;
 	static VRenderGLView* m_master_linked_view;
 	//count after paint
-	bool m_count;
+	bool m_paint_count;
+	//colocalize after paint
+	bool m_paint_colocalize;
 
 private:
 	bool m_drawing;

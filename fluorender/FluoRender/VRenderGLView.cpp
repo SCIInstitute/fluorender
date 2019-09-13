@@ -311,7 +311,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	m_count(false)
+	m_paint_count(false),
+	m_paint_colocalize(false)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -2118,17 +2119,22 @@ void VRenderGLView::Segment()
 	}
 
 	bool count = false;
+	bool colocal = false;
 	unsigned int sum = 0;
 	float wsum = 0.0;
-	if (m_count &&
-		(m_selector.GetMode() == 1 ||
-			m_selector.GetMode() == 2 ||
-			m_selector.GetMode() == 3 ||
-			m_selector.GetMode() == 4 ||
-			m_selector.GetMode() == 5 ||
-			m_selector.GetMode() == 7 ||
-			m_selector.GetMode() == 8))
-		count = true;
+	if (m_selector.GetMode() == 1 ||
+		m_selector.GetMode() == 2 ||
+		m_selector.GetMode() == 3 ||
+		m_selector.GetMode() == 4 ||
+		m_selector.GetMode() == 5 ||
+		m_selector.GetMode() == 7 ||
+		m_selector.GetMode() == 8)
+	{
+		if (m_paint_count)
+			count = true;
+		if (m_paint_colocalize)
+			colocal = true;
+	}
 	if (count)
 		CountVoxels(sum, wsum);
 
@@ -2169,6 +2175,10 @@ void VRenderGLView::Segment()
 				vr_frame->GetBrushToolDlg()->SetOutput(data, unit);
 			}
 		}
+	}
+	if (colocal && vr_frame->GetColocalizationDlg())
+	{
+		vr_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -4610,6 +4620,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('c')) &&
 			!m_clear_mask)
 		{
+			if (frame && frame->GetTree())
+				frame->GetTree()->BrushClear();
 			if (frame && frame->GetTraceDlg())
 				frame->GetTraceDlg()->CompClear();
 			m_clear_mask = true;

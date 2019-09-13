@@ -1089,6 +1089,12 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 		m_vd->SetLeftThresh(val);
 
 	RefreshVRenderViews(false, true);
+
+	//update colocalization
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetColocalizationDlg() &&
+		frame->GetColocalizationDlg()->GetThreshUpdate())
+		frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VPropView::OnRightThreshChange(wxScrollEvent & event)
@@ -1131,6 +1137,13 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 
 		RefreshVRenderViews(false, true);
 	}
+
+	//update colocalization
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetColocalizationDlg() &&
+		frame->GetColocalizationDlg()->GetThreshUpdate())
+		frame->GetColocalizationDlg()->Colocalize();
+
 }
 
 //3

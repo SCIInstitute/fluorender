@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-const char* str_cl_chann_colcount = \
+const char* str_cl_chann_threshold = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
@@ -49,28 +49,67 @@ const char* str_cl_chann_colcount = \
 "	unsigned int ngz,\n" \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
-"	float th1,\n" \
-"	float th2,\n" \
-"	__global unsigned int* count)\n" \
+"	__global float* sum,\n" \
+"	float4 th)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
+"	float lsum = 0.0;\n" \
+"	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"		for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"			for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"			{\n" \
-"				float v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"				float v2 = read_imagef(chann2, samp, ijk).x;\n" \
-"				if (v1 > th1 && v2 > th2)\n" \
-"					lsum++;\n" \
-"			}\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
+"			lsum += 1.0;\n" \
+"	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	count[index] = lsum;\n" \
-"}\n";
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n" \
+"\n" \
+"//with mask\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum,\n" \
+"	float4 th,\n" \
+"	__read_only image3d_t mask1,\n" \
+"	__read_only image3d_t mask2)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float m, v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		m = read_imagef(mask1, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		m = read_imagef(mask2, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
+"			lsum += 1.0;\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n" \
+;
 
 const char* str_cl_chann_dotprod = \
 "const sampler_t samp =\n" \
@@ -212,6 +251,146 @@ const char* str_cl_chann_dotprod = \
 "}\n" \
 ;
 
+const char* str_cl_chann_minvalue = \
+"const sampler_t samp =\n" \
+"CLK_NORMALIZED_COORDS_FALSE |\n" \
+"CLK_ADDRESS_CLAMP |\n" \
+"CLK_FILTER_NEAREST;\n" \
+"\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		lsum += min(v1, v2);\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n"
+"\n" \
+"//product with mask\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum,\n" \
+"	__read_only image3d_t mask1,\n" \
+"	__read_only image3d_t mask2)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float m, v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		m = read_imagef(mask1, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		m = read_imagef(mask2, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		lsum += min(v1, v2);\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n" \
+"\n" \
+"//count voxels\n" \
+"__kernel void kernel_2(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		if (min(v1, v2) > 1e-6)\n" \
+"			lsum += 1.0;\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n"
+"\n" \
+"//product with mask\n" \
+"__kernel void kernel_3(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum,\n" \
+"	__read_only image3d_t mask1,\n" \
+"	__read_only image3d_t mask2)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float m, v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		m = read_imagef(mask1, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		m = read_imagef(mask2, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		if (min(v1, v2) > 1e-6)\n" \
+"			lsum += 1.0;\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n" \
+;
+
 const char* str_cl_chann_sum = \
 "const sampler_t samp =\n" \
 "CLK_NORMALIZED_COORDS_FALSE |\n" \
@@ -255,7 +434,7 @@ const char* str_cl_chann_sum = \
 ChannelCompare::ChannelCompare(VolumeData* vd1, VolumeData* vd2)
 	: m_vd1(vd1), m_vd2(vd2),
 	m_use_mask(false),
-	m_count_voxel(false),
+	m_int_weighted(false),
 	m_init(false)
 {
 }
@@ -412,14 +591,14 @@ void ChannelCompare::Product()
 	string name = "kernel_0";
 	if (m_use_mask)
 	{
-		if (m_count_voxel)
-			name = "kernel_3";
-		else
+		if (m_int_weighted)
 			name = "kernel_1";
+		else
+			name = "kernel_3";
 	}
 	else
 	{
-		if (m_count_voxel)
+		if (!m_int_weighted)
 			name = "kernel_2";
 	}
 	if (kernel_prog->valid())
@@ -528,6 +707,270 @@ void ChannelCompare::Product()
 
 		//sum
 		for (int i=0; i< gsxyz; ++i)
+			m_result += sum[i];
+		delete[] sum;
+	}
+}
+
+void ChannelCompare::MinValue()
+{
+	m_result = 0.0;
+
+	if (!CheckBricks())
+		return;
+
+	//create program and kernels
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_chann_minvalue);
+	if (!kernel_prog)
+		return;
+	int kernel_index = -1;
+	string name = "kernel_0";
+	if (m_use_mask)
+	{
+		if (m_int_weighted)
+			name = "kernel_1";
+		else
+			name = "kernel_3";
+	}
+	else
+	{
+		if (!m_int_weighted)
+			name = "kernel_2";
+	}
+	if (kernel_prog->valid())
+	{
+		kernel_index = kernel_prog->findKernel(name);
+		if (kernel_index == -1)
+			kernel_index = kernel_prog->createKernel(name);
+	}
+	else
+		kernel_index = kernel_prog->createKernel(name);
+
+	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		FLIVR::TextureBrick* b1 = (*bricks1)[i];
+		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		long nx, ny, nz, bits1, bits2;
+		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
+			continue;
+		//get tex ids
+		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
+		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint mid1, mid2;
+		if (m_use_mask)
+		{
+			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
+			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+		}
+
+		//compute workload
+		size_t ng;
+		kernel_prog->getWorkGroupSize(kernel_index, &ng);
+		//try to make gsxyz equal to ng
+		//ngx*ngy*ngz = nx*ny*nz/ng
+		//z
+		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
+		//optimize
+		long ngz = OptimizeGroupSize(nz, targetz);
+		//xy
+		long targetx;
+		long targety;
+		if (ngz == 1)
+		{
+			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
+			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
+		}
+		else
+		{
+			targetx = std::ceil(double(nx) * targetz / nz);
+			targety = std::ceil(double(ny) * targetz / nz);
+		}
+		//optimize
+		long ngx = OptimizeGroupSize(nx, targetx);
+		long ngy = OptimizeGroupSize(ny, targety);
+
+		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
+		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
+		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
+		long gsxyz = gsx * gsy * gsz;
+		long gsxy = gsx * gsy;
+
+		size_t local_size[3] = { 1, 1, 1 };
+		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+
+		//set
+		//unsigned int count = 0;
+		float *sum = new float[gsxyz];
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(kernel_index, 1,
+			CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(kernel_index, 2,
+			sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog->setKernelArgConst(kernel_index, 3,
+			sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog->setKernelArgConst(kernel_index, 4,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_index, 5,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_index, 6,
+			sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog->setKernelArgBuf(kernel_index, 7,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(float)*(gsxyz), (void*)(sum));
+		if (m_use_mask)
+		{
+			kernel_prog->setKernelArgTex3D(kernel_index, 8,
+				CL_MEM_READ_ONLY, mid1);
+			kernel_prog->setKernelArgTex3D(kernel_index, 9,
+				CL_MEM_READ_ONLY, mid2);
+		}
+
+		//execute
+		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+		//read back
+		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
+
+		//release buffer
+		kernel_prog->releaseAll();
+		//kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
+		//kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
+		//kernel_prog->releaseMemObject(sizeof(float)*(gsxyz), sum);
+
+		//sum
+		for (int i = 0; i < gsxyz; ++i)
+			m_result += sum[i];
+		delete[] sum;
+	}
+}
+
+void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
+{
+	m_result = 0.0;
+
+	if (!CheckBricks())
+		return;
+
+	//create program and kernels
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_chann_threshold);
+	if (!kernel_prog)
+		return;
+	int kernel_index = -1;
+	string name = "kernel_0";
+	if (m_use_mask)
+			name = "kernel_1";
+	if (kernel_prog->valid())
+	{
+		kernel_index = kernel_prog->findKernel(name);
+		if (kernel_index == -1)
+			kernel_index = kernel_prog->createKernel(name);
+	}
+	else
+		kernel_index = kernel_prog->createKernel(name);
+
+	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		FLIVR::TextureBrick* b1 = (*bricks1)[i];
+		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		long nx, ny, nz, bits1, bits2;
+		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
+			continue;
+		//get tex ids
+		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
+		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint mid1, mid2;
+		if (m_use_mask)
+		{
+			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
+			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+		}
+
+		//compute workload
+		size_t ng;
+		kernel_prog->getWorkGroupSize(kernel_index, &ng);
+		//try to make gsxyz equal to ng
+		//ngx*ngy*ngz = nx*ny*nz/ng
+		//z
+		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
+		//optimize
+		long ngz = OptimizeGroupSize(nz, targetz);
+		//xy
+		long targetx;
+		long targety;
+		if (ngz == 1)
+		{
+			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
+			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
+		}
+		else
+		{
+			targetx = std::ceil(double(nx) * targetz / nz);
+			targety = std::ceil(double(ny) * targetz / nz);
+		}
+		//optimize
+		long ngx = OptimizeGroupSize(nx, targetx);
+		long ngy = OptimizeGroupSize(ny, targety);
+
+		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
+		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
+		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
+		long gsxyz = gsx * gsy * gsz;
+		long gsxy = gsx * gsy;
+
+		size_t local_size[3] = { 1, 1, 1 };
+		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+
+		//set
+		//unsigned int count = 0;
+		float *sum = new float[gsxyz];
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
+			CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(kernel_index, 1,
+			CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(kernel_index, 2,
+			sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog->setKernelArgConst(kernel_index, 3,
+			sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog->setKernelArgConst(kernel_index, 4,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_index, 5,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_index, 6,
+			sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog->setKernelArgBuf(kernel_index, 7,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(float)*(gsxyz), (void*)(sum));
+		cl_float4 th = {th1, th2, th3, th4};
+		kernel_prog->setKernelArgConst(kernel_index, 8,
+			sizeof(cl_float4), (void*)(&th));
+		if (m_use_mask)
+		{
+			kernel_prog->setKernelArgTex3D(kernel_index, 9,
+				CL_MEM_READ_ONLY, mid1);
+			kernel_prog->setKernelArgTex3D(kernel_index, 10,
+				CL_MEM_READ_ONLY, mid2);
+		}
+
+		//execute
+		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+		//read back
+		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
+
+		//release buffer
+		kernel_prog->releaseAll();
+
+		//sum
+		for (int i = 0; i < gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 	}
