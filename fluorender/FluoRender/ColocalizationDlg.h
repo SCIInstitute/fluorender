@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 
 class DataGroup;
+class VRenderView;
 
 class ColocalizationDlg : public wxPanel
 {
@@ -48,10 +49,9 @@ public:
 		ID_MinValueRdb,
 		ID_LogicalAndRdb,
 		//formats
-		ID_IntWeightedRdb,
-		ID_VoxCountRdb,
-		ID_IntWghtRatioRdb,
-		ID_VoxCountRatioRdb,
+		ID_IntWeightBtn,
+		ID_RatioBtn,
+		ID_PhysicalBtn,
 
 		//output
 		ID_HistoryChk,
@@ -63,10 +63,17 @@ public:
 		wxWindow* parent);
 	~ColocalizationDlg();
 
+	void SetView(VRenderView* vrv)
+	{
+		m_view = vrv;
+	}
 	void SetGroup(DataGroup* group)
 	{
 		m_group = group;
 	}
+
+	//execute
+	void Colocalize();
 
 	//output
 	void SetOutput(wxString &titles, wxString &values);
@@ -76,18 +83,28 @@ public:
 	//settings
 	void GetSettings();
 
+	bool GetThreshUpdate()
+	{
+		return m_auto_update && (m_method == 2);
+	}
+
 private:
 	wxWindow* m_frame;
 	wxString m_output_file;
 
 	//current view
+	VRenderView* m_view;
 	DataGroup *m_group;
 
 	//use selection
 	bool m_use_mask;
+	bool m_auto_update;
+	//method
+	int m_method;//0:dot product; 1:min value; 2:threshold
 	//format
-	bool m_voxel_count;
+	bool m_int_weighted;
 	bool m_get_ratio;
+	bool m_physical_size;
 	//output
 	bool m_hold_history;
 
@@ -101,10 +118,9 @@ private:
 	wxRadioButton* m_min_value_rdb;
 	wxRadioButton* m_logical_and_rdb;
 	//format
-	wxRadioButton* m_int_weighted_rdb;
-	wxRadioButton* m_vox_count_rdb;
-	wxRadioButton* m_int_wght_ratio_rdb;
-	wxRadioButton* m_vox_count_ratio_rdb;
+	wxToggleButton* m_int_weight_btn;
+	wxToggleButton* m_ratio_btn;
+	wxToggleButton* m_physical_btn;
 
 	//output
 	wxCheckBox* m_history_chk;
@@ -119,7 +135,9 @@ private:
 	//settings
 	void OnMethodRdb(wxCommandEvent &event);
 	//format
-	void OnFormatRdb(wxCommandEvent &event);
+	void OnIntWeightBtn(wxCommandEvent &event);
+	void OnRatioBtn(wxCommandEvent &event);
+	void OnPhysicalBtn(wxCommandEvent &event);
 
 	//output
 	void OnHistoryChk(wxCommandEvent& event);

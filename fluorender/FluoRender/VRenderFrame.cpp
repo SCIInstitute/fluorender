@@ -2004,6 +2004,7 @@ void VRenderFrame::UpdateTree(wxString name)
 						GetTraceDlg()->GetSettings(vrv);
 						GetOclDlg()->GetSettings(vrv);
 						GetComponentDlg()->SetView(vrv);
+						GetColocalizationDlg()->SetView(vrv);
 					}
 				}
 				break;
@@ -2079,6 +2080,7 @@ void VRenderFrame::UpdateTree(wxString name)
 							GetTraceDlg()->GetSettings(vrv);
 							GetOclDlg()->GetSettings(vrv);
 							GetComponentDlg()->SetView(vrv);
+							GetColocalizationDlg()->SetView(vrv);
 						}
 					}
 					if (name == group->GetName())
@@ -2235,7 +2237,7 @@ void VRenderFrame::OnSelection(int type,
 		if (m_annotation_prop)
 			m_annotation_prop->Show(false);
 		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(0);
+			m_colocalization_dlg->SetGroup(group);
 		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
 		m_aui_mgr.Update();
 		break;
@@ -2288,7 +2290,7 @@ void VRenderFrame::OnSelection(int type,
 				m_annotation_prop->Show(false);
 		}
 		if (m_colocalization_dlg)
-			m_colocalization_dlg->SetGroup(0);
+			m_colocalization_dlg->SetGroup(group);
 		break;
 	case 3:  //mesh
 		if (md)

@@ -983,7 +983,7 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 {
 	if (m_cur_view)
-		m_cur_view->m_glview->m_count = m_auto_update_btn->GetValue();
+		m_cur_view->m_glview->m_paint_count = m_auto_update_btn->GetValue();
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)
