@@ -403,7 +403,7 @@ void ColocalizationDlg::Colocalize()
 		{
 			if (rm[it2][it2])
 				values += wxString::Format("%f",
-					rm[it1][it2] * 100.0 / rm[it2][it2]);
+					rm[it1][it2] * 100.0 / rm[it1][it1]);
 			else
 				values += "0";
 		}
