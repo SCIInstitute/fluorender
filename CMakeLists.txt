@@ -72,4 +72,4 @@ add_subdirectory(Base)
 
 #add_subdirectory(Processor)
 #add_subdirectory(Renderer)
-add_subdirectory(Tester)
+#add_subdirectory(Tester)
