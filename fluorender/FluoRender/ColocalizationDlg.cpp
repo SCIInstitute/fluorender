@@ -108,9 +108,9 @@ m_hold_history(false)
 	sizer1_2->Add(10, 10);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(10, 10);
-	sizer1_2->Add(m_int_weight_btn, 0, wxALIGN_CENTER);
-	sizer1_2->Add(10, 10);
 	sizer1_2->Add(m_ratio_btn, 0, wxALIGN_CENTER);
+	sizer1_2->Add(10, 10);
+	sizer1_2->Add(m_int_weight_btn, 0, wxALIGN_CENTER);
 	sizer1_2->Add(10, 10);
 	sizer1_2->Add(m_physical_btn, 0, wxALIGN_CENTER);
 	sizer1_2->Add(10, 10);
