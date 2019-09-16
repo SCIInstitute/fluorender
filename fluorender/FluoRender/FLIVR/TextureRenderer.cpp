@@ -911,6 +911,8 @@ namespace FLIVR
 
 		TextureBrick* brick = (*bricks)[bindex];
 		int c = brick->nmask();
+		if (c < 0)
+			return result;
 
 		glActiveTexture(GL_TEXTURE0 + (unit > 0 ? unit : c));
 

@@ -42,6 +42,7 @@ BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
 	EVT_TOGGLEBUTTON(ID_IntWeightBtn, ColocalizationDlg::OnIntWeightBtn)
 	EVT_TOGGLEBUTTON(ID_RatioBtn, ColocalizationDlg::OnRatioBtn)
 	EVT_TOGGLEBUTTON(ID_PhysicalBtn, ColocalizationDlg::OnPhysicalBtn)
+	EVT_TOGGLEBUTTON(ID_ColorMapBtn, ColocalizationDlg::OnColorMapBtn)
 	//output
 	EVT_CHECKBOX(ID_HistoryChk, ColocalizationDlg::OnHistoryChk)
 	EVT_BUTTON(ID_ClearHistBtn, ColocalizationDlg::OnClearHistBtn)
@@ -98,9 +99,12 @@ m_hold_history(false)
 		wxDefaultPosition, wxSize(75, -1));
 	m_physical_btn = new wxToggleButton(this, ID_PhysicalBtn, "Physical Size",
 		wxDefaultPosition, wxSize(75, -1));
+	m_colormap_btn = new wxToggleButton(this, ID_ColorMapBtn, "Color Map",
+		wxDefaultPosition, wxSize(75, -1));
 	m_int_weight_btn->SetValue(false);
 	m_ratio_btn->SetValue(false);
 	m_physical_btn->SetValue(false);
+	m_colormap_btn->SetValue(false);
 	sizer1_2->Add(10, 10);
 	sizer1_2->Add(st, 0, wxALIGN_CENTER);
 	sizer1_2->Add(10, 10);
@@ -109,6 +113,8 @@ m_hold_history(false)
 	sizer1_2->Add(m_ratio_btn, 0, wxALIGN_CENTER);
 	sizer1_2->Add(10, 10);
 	sizer1_2->Add(m_physical_btn, 0, wxALIGN_CENTER);
+	sizer1_2->Add(10, 10);
+	sizer1_2->Add(m_colormap_btn, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_use_sel_chk = new wxCheckBox(this, ID_UseSelChk, "Use Selection",
 		wxDefaultPosition, wxDefaultSize);
@@ -173,7 +179,6 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 	wxString cur_field;
 	wxString cur_line;
 	int i, k;
-	int id_idx = -1;
 
 	k = 0;
 	cur_line = titles;
@@ -184,14 +189,16 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 		if (m_output_grid->GetNumberCols() <= k)
 			m_output_grid->InsertCols(k);
 		m_output_grid->SetColLabelValue(k, cur_field);
-		if (cur_field == "ID")
-			id_idx = k;
 		++k;
 	} while (cur_line.IsEmpty() == false);
 
 	Color c;
-	long lval;
+	double val;
 	wxColor color;
+	VolumeData* vd = 0;
+	if (m_colormap && m_view)
+		vd = m_view->m_glview->m_cur_vol;
+	bool colormap = m_colormap && vd && (m_cm_max - m_cm_min) > 0.0;
 
 	i = 0;
 	copy_data = values;
@@ -208,14 +215,16 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 			cur_field = cur_line.BeforeFirst('\t');
 			cur_line = cur_line.AfterFirst('\t');
 			m_output_grid->SetCellValue(i, k, cur_field);
-			if (k == id_idx)
+			if (colormap && cur_field.ToDouble(&val))
 			{
-				if (cur_field.ToLong(&lval))
-				{
-					c = Color(1.0, 0.0, 0.0);
-					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-					m_output_grid->SetCellBackgroundColour(i, k, color);
-				}
+				c = vd->GetColorFromColormap((val - m_cm_min)/(m_cm_max - m_cm_min));
+				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+				m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			else
+			{
+				color = *wxWHITE;
+				m_output_grid->SetCellBackgroundColour(i, k, color);
 			}
 			++k;
 		} while (cur_line.IsEmpty() == false);
@@ -226,7 +235,7 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 		m_output_grid->DeleteCols(k,
 			m_output_grid->GetNumberCols() - k);
 
-	m_output_grid->AutoSizeColumns();
+	m_output_grid->AutoSizeColumns(false);
 }
 
 void ColocalizationDlg::CopyData()
@@ -285,6 +294,7 @@ void ColocalizationDlg::GetSettings()
 	m_int_weighted = false;
 	m_get_ratio = false;
 	m_physical_size = false;
+	m_colormap = false;
 }
 
 //execute
@@ -384,12 +394,21 @@ void ColocalizationDlg::Colocalize()
 	}
 
 	wxString titles;
+	wxString name;
+	double v;
+	ResetMinMax();
 	for (size_t i = 0; i < num; ++i)
 	{
 		if (m_get_ratio)
 			titles += wxString::Format("%d (%%)", int(i + 1));
 		else
 			titles += wxString::Format("%d", int(i + 1));
+		VolumeData* vd = m_group->GetVolumeData(i);
+		if (vd)
+			name = vd->GetName();
+		else
+			name = "";
+		titles += ": " + name;
 		if (i < num - 1)
 			titles += "\t";
 		else
@@ -402,24 +421,34 @@ void ColocalizationDlg::Colocalize()
 		if (m_get_ratio)
 		{
 			if (rm[it2][it2])
-				values += wxString::Format("%f",
-					rm[it1][it2] * 100.0 / rm[it1][it1]);
+			{
+				v = rm[it1][it2] * 100.0 / rm[it1][it1];
+				SetMinMax(v);
+				values += wxString::Format("%f", v);
+			}
 			else
+			{
+				SetMinMax(0.0);
 				values += "0";
+			}
 		}
 		else
 		{
 			if (m_physical_size)
 			{
-				values += wxString::Format("%f", rm[it1][it2] * spc);
+				v = rm[it1][it2] * spc;
+				SetMinMax(v);
+				values += wxString::Format("%f", v);
 				values += unit;
 			}
 			else
 			{
+				v = rm[it1][it2];
+				SetMinMax(v);
 				if (m_int_weighted)
-					values += wxString::Format("%f", rm[it1][it2]);
+					values += wxString::Format("%f", v);
 				else
-					values += wxString::Format("%.0f", rm[it1][it2]);
+					values += wxString::Format("%.0f", v);
 			}
 		}
 		if (it2 < num - 1)
@@ -483,6 +512,14 @@ void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
 void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
 {
 	m_physical_size = m_physical_btn->GetValue();
+
+	if (m_auto_update)
+		Colocalize();
+}
+
+void ColocalizationDlg::OnColorMapBtn(wxCommandEvent &event)
+{
+	m_colormap = m_colormap_btn->GetValue();
 
 	if (m_auto_update)
 		Colocalize();

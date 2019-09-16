@@ -629,6 +629,8 @@ void ChannelCompare::Product()
 		{
 			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
 			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+			if (mid1 < 0 || mid2 < 0)
+				continue;
 		}
 
 		//compute workload
@@ -766,6 +768,8 @@ void ChannelCompare::MinValue()
 		{
 			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
 			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+			if (mid1 < 0 || mid2 < 0)
+				continue;
 		}
 
 		//compute workload
@@ -893,6 +897,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		{
 			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
 			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+			if (mid1 < 0 || mid2 < 0)
+				continue;
 		}
 
 		//compute workload
