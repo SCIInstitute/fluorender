@@ -2003,59 +2003,62 @@ int VolumeData::GetColormapProj()
 
 Color VolumeData::GetColorFromColormap(double value)
 {
-	Color color;
+	Color rb;
 	double v = (value - m_colormap_low_value) /
 		(m_colormap_hi_value - m_colormap_low_value);
-	double cv = Clamp(v, 0.0, 1.0);
+	double valu = Clamp(v, 0.0, 1.0);
+	double inv = GetColormapInv();
 	switch (m_colormap)
 	{
-	case 0:
+	case 0://rainbow
 	default:
-		color.r(Clamp(4.0*v - 2.0, 0.0, 1.0));
-		color.g(Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
-		color.b(Clamp(-4.0*v + 2.0, 0.0, 1.0));
+		rb.r(Clamp((4.0*valu - 2.0)*inv, 0.0, 1.0));
+		rb.g(Clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0));
+		rb.b(Clamp((2.0 - 4.0*valu)*inv, 0.0, 1.0));
 		break;
-	case 1:
-		color.r(Clamp(-4.0*v + 2.0, 0.0, 1.0));
-		color.g(Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
-		color.b(Clamp(4.0*v - 2.0, 0.0, 1.0));
+	case 1://hot
+		rb.r(Clamp(inv*2.0*valu+(inv>0.0?0.0:2.0), 0.0, 1.0));
+		rb.g(Clamp(inv*(4.0*valu - 2.0), 0.0, 1.0));
+		rb.b(Clamp(inv*4.0*valu+(inv>0.0?-3.0:1.0), 0.0, 1.0));
 		break;
-	case 2:
-		color.r(Clamp(2.0*v, 0.0, 1.0));
-		color.g(Clamp(4.0*v - 2.0, 0.0, 1.0));
-		color.b(Clamp(4.0*v - 3.0, 0.0, 1.0));
+	case 2://cool
+		rb.r(Clamp(inv>0.0?valu:(1.0-valu), 0.0, 1.0));
+		rb.g(Clamp(inv>0.0?(1.0-valu):valu, 0.0, 1.0));
+		rb.b(1.0);
 		break;
-	case 3:
-		color.r(cv);
-		color.g(Clamp(1.0 - v, 0.0, 1.0));
-		color.b(1.0);
+	case 3://diverging
+		rb.r(Clamp(inv>0.0?(valu<0.5?valu*0.9+0.25:0.7):(valu<0.5?0.7:-0.9*valu+1.15), 0.0, 1.0));
+		rb.g(Clamp(inv>0.0?(valu<0.5?valu*0.8+0.3:1.4-1.4*valu):(valu<0.5?1.4*valu:-0.8*valu+1.1), 0.0, 1.0));
+		rb.b(Clamp(inv>0.0?(valu<0.5?-0.1*valu+0.75:-1.1*valu+1.25):(valu<0.5?1.1*valu+0.15:0.1*valu+0.65), 0.0, 1.0));
 		break;
-	case 4:
-		color.r(Clamp(v<0.5 ? v*0.9 + 0.25 : 0.7, 0.0, 1.0));
-		color.g(Clamp(v<0.5 ? v*0.8 + 0.3 : (1.0 - v)*1.4, 0.0, 1.0));
-		color.b(Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
+	case 4://monochrome
+	{
+		double cv = (inv > 0.0 ? 0.0 : 1.0) + inv * Clamp(valu, 0.0, 1.0);
+		rb.r(cv);
+		rb.g(cv);
+		rb.b(cv);
+	}
 		break;
-	case 5:
-		color.r(cv);
-		color.g(cv);
-		color.b(cv);
+	case 5://high-key
+	{
+		Color w(1.0, 1.0, 1.0);
+		rb = (inv > 0.0 ? w : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : w) * valu;
+	}
 		break;
-	case 6:
-		color.r(1.0 - cv);
-		color.g(1.0 - cv);
-		color.b(1.0 - cv);
+	case 6://low-key
+	{
+		Color l = m_color * 0.1;
+		rb = (inv > 0.0 ? m_color : l) * (1.0 - valu) + (inv > 0.0 ? l : m_color) * valu;
+	}
 		break;
-	case 7:
-		color = m_color * cv;
-		break;
-	case 8:
-		color = Color(1.0, 1.0, 1.0) * (1 - cv) + m_color * cv;
-		break;
-	case 9:
-		color = m_color * (1 - cv * 0.9);
+	case 7://increased transp
+	{
+		Color l(0.0, 0.0, 0.0);
+		rb = (inv > 0.0 ? l : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : l) * valu;
+	}
 		break;
 	}
-	return color;
+	return rb;
 }
 
 void VolumeData::SetShuffle(int val)

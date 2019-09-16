@@ -1608,6 +1608,12 @@ void VPropView::OnColormapInvBtn(wxCommandEvent &event)
 		m_vd->SetColormapInv(val ? -1.0 : 1.0);
 
 	RefreshVRenderViews(false, true);
+
+	//update colocalization
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetColocalizationDlg() &&
+		frame->GetColocalizationDlg()->GetColormapUpdate())
+		frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VPropView::OnColormapCombo(wxCommandEvent &event)
@@ -1628,6 +1634,12 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 		m_vd->SetColormap(colormap);
 
 	RefreshVRenderViews(false, true);
+
+	//update colocalization
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetColocalizationDlg() &&
+		frame->GetColocalizationDlg()->GetColormapUpdate())
+		frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VPropView::OnColormapCombo2(wxCommandEvent &event)

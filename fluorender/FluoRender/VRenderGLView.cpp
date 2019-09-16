@@ -2606,8 +2606,49 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 {
 	m_calculator.Calculate(type);
 	VolumeData* vd = m_calculator.GetResult(add);
-	if (vd)
+	VolumeData* vd_a = m_calculator.GetVolumeA();
+	if (vd && vd_a)
 	{
+		//clipping planes
+		vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
+		if (planes && vd->GetVR())
+			vd->GetVR()->set_planes(planes);
+		//transfer function
+		vd->Set3DGamma(vd_a->Get3DGamma());
+		vd->SetBoundary(vd_a->GetBoundary());
+		vd->SetOffset(vd_a->GetOffset());
+		vd->SetLeftThresh(vd_a->GetLeftThresh());
+		vd->SetRightThresh(vd_a->GetRightThresh());
+		FLIVR::Color col = vd_a->GetColor();
+		vd->SetColor(col);
+		vd->SetAlpha(vd_a->GetAlpha());
+		//shading
+		vd->SetShading(vd_a->GetShading());
+		double amb, diff, spec, shine;
+		vd_a->GetMaterial(amb, diff, spec, shine);
+		vd->SetMaterial(amb, diff, spec, shine);
+		//shadow
+		vd->SetShadow(vd_a->GetShadow());
+		double shadow;
+		vd_a->GetShadowParams(shadow);
+		vd->SetShadowParams(shadow);
+		//sample rate
+		vd->SetSampleRate(vd_a->GetSampleRate());
+		//2d adjusts
+		col = vd_a->GetGamma();
+		vd->SetGamma(col);
+		col = vd_a->GetBrightness();
+		vd->SetBrightness(col);
+		col = vd_a->GetHdr();
+		vd->SetHdr(col);
+		vd->SetSyncR(vd_a->GetSyncR());
+		vd->SetSyncG(vd_a->GetSyncG());
+		vd->SetSyncB(vd_a->GetSyncB());
+		//max
+		vd->SetScalarScale(vd_a->GetScalarScale());
+		vd->SetGMScale(vd_a->GetGMScale());
+		vd->SetMaxValue(vd_a->GetMaxValue());
+
 		if (type == 1 ||
 			type == 2 ||
 			type == 3 ||
@@ -2620,51 +2661,6 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (vr_frame)
 			{
-				//copy 2d adjust & color
-				VolumeData* vd_a = m_calculator.GetVolumeA();
-				if (vd_a)
-				{
-					//clipping planes
-					vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
-					if (planes && vd->GetVR())
-						vd->GetVR()->set_planes(planes);
-					//transfer function
-					vd->Set3DGamma(vd_a->Get3DGamma());
-					vd->SetBoundary(vd_a->GetBoundary());
-					vd->SetOffset(vd_a->GetOffset());
-					vd->SetLeftThresh(vd_a->GetLeftThresh());
-					vd->SetRightThresh(vd_a->GetRightThresh());
-					FLIVR::Color col = vd_a->GetColor();
-					vd->SetColor(col);
-					vd->SetAlpha(vd_a->GetAlpha());
-					//shading
-					vd->SetShading(vd_a->GetShading());
-					double amb, diff, spec, shine;
-					vd_a->GetMaterial(amb, diff, spec, shine);
-					vd->SetMaterial(amb, diff, spec, shine);
-					//shadow
-					vd->SetShadow(vd_a->GetShadow());
-					double shadow;
-					vd_a->GetShadowParams(shadow);
-					vd->SetShadowParams(shadow);
-					//sample rate
-					vd->SetSampleRate(vd_a->GetSampleRate());
-					//2d adjusts
-					col = vd_a->GetGamma();
-					vd->SetGamma(col);
-					col = vd_a->GetBrightness();
-					vd->SetBrightness(col);
-					col = vd_a->GetHdr();
-					vd->SetHdr(col);
-					vd->SetSyncR(vd_a->GetSyncR());
-					vd->SetSyncG(vd_a->GetSyncG());
-					vd->SetSyncB(vd_a->GetSyncB());
-					//max
-					vd->SetScalarScale(vd_a->GetScalarScale());
-					vd->SetGMScale(vd_a->GetGMScale());
-					vd->SetMaxValue(vd_a->GetMaxValue());
-				}
-
 				if (add)
 				{
 					vr_frame->GetDataManager()->AddVolumeData(vd);
@@ -2675,16 +2671,14 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 6 ||
 						type == 9)
 					{
-						if (vd_a)
-							vd_a->SetDisp(false);
+						vd_a->SetDisp(false);
 					}
 					else if (type == 1 ||
 						type == 2 ||
 						type == 3 ||
 						type == 4)
 					{
-						if (vd_a)
-							vd_a->SetDisp(false);
+						vd_a->SetDisp(false);
 						VolumeData* vd_b = m_calculator.GetVolumeB();
 						if (vd_b)
 							vd_b->SetDisp(false);
@@ -2696,15 +2690,11 @@ void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
 		}
 		else if (type == 7)
 		{
-			VolumeData* vd_a = m_calculator.GetVolumeA();
-			if (vd_a)
-			{
-				vd_a->Replace(vd);
-				delete vd;
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame)
-					vr_frame->GetPropView()->SetVolumeData(vd_a);
-			}
+			vd_a->Replace(vd);
+			delete vd;
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame)
+				vr_frame->GetPropView()->SetVolumeData(vd_a);
 		}
 		RefreshGL(5);
 	}
@@ -9476,7 +9466,7 @@ void VRenderGLView::DrawColormap()
 		m_value_5 = (m_value_4 + high) / 2.0;
 		max_val = m_cur_vol->GetMaxValue();
 		enable_alpha = m_cur_vol->GetEnableAlpha();
-        Color vd_color = m_cur_vol->GetColor();
+		Color vd_color = m_cur_vol->GetColor();
 		SetColormapColors(m_cur_vol->GetColormap(),
 			vd_color, m_cur_vol->GetColormapInv());
 	}

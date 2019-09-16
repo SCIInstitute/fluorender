@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
+#include <limits>
 
 class DataGroup;
 class VRenderView;
@@ -52,6 +53,7 @@ public:
 		ID_IntWeightBtn,
 		ID_RatioBtn,
 		ID_PhysicalBtn,
+		ID_ColorMapBtn,
 
 		//output
 		ID_HistoryChk,
@@ -87,6 +89,10 @@ public:
 	{
 		return m_auto_update && (m_method == 2);
 	}
+	bool GetColormapUpdate()
+	{
+		return m_auto_update && m_colormap;
+	}
 
 private:
 	wxWindow* m_frame;
@@ -105,8 +111,12 @@ private:
 	bool m_int_weighted;
 	bool m_get_ratio;
 	bool m_physical_size;
+	bool m_colormap;
 	//output
 	bool m_hold_history;
+	//colormap
+	double m_cm_min;
+	double m_cm_max;
 
 	//interface
 	//colocalization
@@ -121,6 +131,7 @@ private:
 	wxToggleButton* m_int_weight_btn;
 	wxToggleButton* m_ratio_btn;
 	wxToggleButton* m_physical_btn;
+	wxToggleButton* m_colormap_btn;
 
 	//output
 	wxCheckBox* m_history_chk;
@@ -128,6 +139,17 @@ private:
 	wxGrid *m_output_grid;
 
 private:
+	//reset min max
+	void ResetMinMax()
+	{
+		m_cm_min = std::numeric_limits<double>::max();
+		m_cm_max = -m_cm_min;
+	}
+	void SetMinMax(double v)
+	{
+		m_cm_min = std::min(v, m_cm_min);
+		m_cm_max = std::max(v, m_cm_max);
+	}
 	//calculate
 	void OnColocalizenBtn(wxCommandEvent &event);
 	void OnUseSelChk(wxCommandEvent &event);
@@ -138,6 +160,7 @@ private:
 	void OnIntWeightBtn(wxCommandEvent &event);
 	void OnRatioBtn(wxCommandEvent &event);
 	void OnPhysicalBtn(wxCommandEvent &event);
+	void OnColorMapBtn(wxCommandEvent &event);
 
 	//output
 	void OnHistoryChk(wxCommandEvent& event);
