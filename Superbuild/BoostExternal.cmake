@@ -72,6 +72,7 @@ if(WIN32)
   set(BOOST_ROOT ${CMAKE_BINARY_DIR}/Boost CACHE INTERNAL "")
 else()
   set(Boost_INCLUDE_DIR ${CMAKE_BINARY_DIR}/Boost/include CACHE INTERNAL "")
+  set(BOOST_ROOT ${CMAKE_BINARY_DIR}/Boost CACHE INTERNAL "")
 endif()
 
 ExternalProject_Get_Property(Boost_external_download BINARY_DIR)
@@ -79,4 +80,4 @@ SET(Boost_DIR ${BINARY_DIR} CACHE INTERNAL "")
 
 add_library(Boost_external STATIC IMPORTED)
 
-message(STATUS "Boost_DIR: ${Boost_DIR}")
+message(STATUS "Boost_DIR: ${BOOST_ROOT}")

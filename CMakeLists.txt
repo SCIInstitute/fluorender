@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(Compiler_C ${CMAKE_C_COMPILER} CACHE INTERNAL "")
 set(Compiler_CXX ${CMAKE_CXX_COMPILER} CACHE INTERNAL "")
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   find_program(NASM_EXE NAMES nasm)
   
   if(NOT NASM_EXE)
@@ -22,7 +22,7 @@ if(UNIX)
   endif()
 endif()
 
-if(WIN32)
+if(WIN32 OR APPLE)
   include(getCompiler.cmake)
 endif()
 

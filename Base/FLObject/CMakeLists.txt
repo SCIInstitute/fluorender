@@ -5,8 +5,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories(${SceneGraph_INCLUDES})
 include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS} ${glew_INCLUDE_DIR})
 
-message(STATUS "NANI KORES?!?!?! ${glew_INCLUDE_DIR}")
-
 set(HEADER_FILES Event/Event.hpp
                  EventHandler/EventHandler.hpp
                  Object/CopyOp.hpp

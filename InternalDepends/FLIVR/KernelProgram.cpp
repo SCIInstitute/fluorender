@@ -10,7 +10,7 @@ namespace FLIVR
 	cl_context KernelProgram::context_ = 0;
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
-#ifdef _DARWIN
+#ifdef __APPLE__
     CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
@@ -64,10 +64,10 @@ namespace FLIVR
 			size_t *param_value_size_ret) = NULL;
 		myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
 #endif
-#if defined(_DARWIN) || defined(__linux__)
+#if defined(__APPLE__) || defined(__linux__)
 	cl_context_properties properties[] =
 	{
-#if defined(_DARWIN) 
+#if defined(__APPLE__)
 		CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
 		(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
 #elif defined(__linux__)
@@ -136,7 +136,7 @@ namespace FLIVR
 				delete[] devices;
 			}
 #endif
-#ifdef _DARWIN
+#ifdef __APPLE__
 			properties[3] = (cl_context_properties)(platforms[i]);
 			if (device_id_ >= 0 && device_id_ < device_num)
 				device_ = devices[device_id_];

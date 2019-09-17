@@ -12,7 +12,7 @@
 #include <CL/cl_gl.h>
 #include <CL/cl_gl_ext.h>
 #endif
-#ifdef _DARWIN
+#ifdef __APPLE__
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_gl.h>
 #include <OpenCL/cl_gl_ext.h>
@@ -109,7 +109,7 @@ namespace FLIVR
 		std::string &getInfo();
 
 		friend class VolKernel;
-#ifdef _DARWIN
+#ifdef __APPLE__
 		static CGLContextObj gl_context_;
 #endif
 	protected:

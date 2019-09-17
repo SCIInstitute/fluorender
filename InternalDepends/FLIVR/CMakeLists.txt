@@ -7,6 +7,10 @@ include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${glew_INCLUDE_DIR})
 
+if(APPLE)
+  include_directories(${Boost_INCLUDE_DIR})
+endif()
+
 set(HEADER_FILES BBox.h
         Color.h
 				Framebuffer.h
@@ -68,5 +72,11 @@ set(FLIVR_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
 link_directories(${FLObject_LIBRARY_DIR} ${glew_LIBRARY_DIR})
 add_library(FLIVR STATIC ${HEADER_FILES} ${SOURCES}) 
-target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES})
-add_dependencies(FLIVR FLObject freetype_external_download glew_external_download)
+
+if(APPLE)
+  target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
+  add_dependencies(FLIVR FLObject freetype_external_download glew_external_download Boost_external_download)
+else()
+  target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
+  add_dependencies(FLIVR FLObject freetype_external_download glew_external_download)
+endif()

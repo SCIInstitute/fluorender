@@ -35,7 +35,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+
+#if defined(_WIN32) || defined(__linux__)
 #include <filesystem>
+#else
+#include <boost/filesystem.hpp> //Boost is used for OSX since XCode 11 is not yet released.
+#endif
 
 using namespace std;
 
@@ -571,8 +576,11 @@ namespace FLIVR
 		{
 			bool found_cache = false;
             wstring wxcfname = finfo->cache_filename;
-
-            if (finfo->cached && std::filesystem::exists(wxcfname)) //requires C++17 support. Will need to talk to Yong about this.
+#ifdef __APPLE__  //Boost is used for OSX since XCode 11 is not yet released.
+            if (finfo->cached && boost::filesystem::exists(wxcfname)) //requires C++17 support. Will need to talk to Yong about this.
+#else
+            if (finfo->cached && std::filesystem::exists(wxcfname))
+#endif
 				found_cache = true;
 			else
 			{
@@ -582,7 +590,11 @@ namespace FLIVR
 				if (itr != cache_table_.end())
 				{
 					wxcfname = itr->second;
+#ifdef __APPLE__  //Boost is used for OSX since XCode 11 is not yet released.
+                    if (boost::filesystem::exists(wxcfname))
+#else
                     if (std::filesystem::exists(wxcfname))
+#endif
 						found_cache = true;
 				}
 
