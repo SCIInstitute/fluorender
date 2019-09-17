@@ -66,7 +66,7 @@ const char* str_cl_chann_threshold = \
 "		v1 = read_imagef(chann1, samp, ijk).x;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
-"			lsum += 1.0;\n" \
+"			lsum += v1;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -74,6 +74,74 @@ const char* str_cl_chann_threshold = \
 "\n" \
 "//with mask\n" \
 "__kernel void kernel_1(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum,\n" \
+"	float4 th,\n" \
+"	__read_only image3d_t mask1,\n" \
+"	__read_only image3d_t mask2)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float m, v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		m = read_imagef(mask1, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		m = read_imagef(mask2, samp, ijk).x;\n" \
+"		if (m < 1e-6) continue;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
+"			lsum += v1;\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__read_only image3d_t chann1,\n" \
+"	__read_only image3d_t chann2,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global float* sum,\n" \
+"	float4 th)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	float lsum = 0.0;\n" \
+"	float v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
+"			lsum += 1.0;\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
+"}\n" \
+"\n" \
+"//with mask\n" \
+"__kernel void kernel_3(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
 "	unsigned int ngx,\n" \
@@ -868,7 +936,17 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	int kernel_index = -1;
 	string name = "kernel_0";
 	if (m_use_mask)
+	{
+		if (m_int_weighted)
 			name = "kernel_1";
+		else
+			name = "kernel_3";
+	}
+	else
+	{
+		if (!m_int_weighted)
+			name = "kernel_2";
+	}
 	if (kernel_prog->valid())
 	{
 		kernel_index = kernel_prog->findKernel(name);
