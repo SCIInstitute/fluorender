@@ -350,11 +350,59 @@ void ColocalizationDlg::Colocalize()
 	}
 
 	//fill the matrix
-	size_t x = 0, y = 0;
-	for (int it1 = 0; it1 < num; ++it1)
+	if (m_method == 0 || m_method == 1 ||
+		(m_method == 2 && !m_int_weighted))
 	{
-		y = x;
-		for (int it2 = it1; it2 < num; ++it2)
+		//dot product and min value
+		//symmetric matrix
+		size_t x = 0, y = 0;
+		for (int it1 = 0; it1 < num; ++it1)
+		{
+			y = x;
+			for (int it2 = it1; it2 < num; ++it2)
+			{
+				VolumeData* vd1 = m_group->GetVolumeData(it1);
+				VolumeData* vd2 = m_group->GetVolumeData(it2);
+				if (!vd1 || !vd2 ||
+					!vd1->GetDisp() ||
+					!vd2->GetDisp())
+					continue;
+
+				FL::ChannelCompare compare(vd1, vd2);
+				compare.SetUseMask(m_use_mask);
+				compare.SetIntWeighted(m_int_weighted);
+				switch (m_method)
+				{
+				case 0://dot product
+					compare.Product();
+					break;
+				case 1://min value
+					compare.MinValue();
+					break;
+				case 2://threshold
+				{
+					//get threshold values
+					float th1, th2, th3, th4;
+					th1 = (float)(vd1->GetLeftThresh());
+					th2 = (float)(vd1->GetRightThresh());
+					th3 = (float)(vd2->GetLeftThresh());
+					th4 = (float)(vd2->GetRightThresh());
+					compare.Threshold(th1, th2, th3, th4);
+				}
+				break;
+				}
+				rm[x][y] = compare.Result();
+				rm[y][x] = compare.Result();
+				y++;
+			}
+			x++;
+		}
+	}
+	else if (m_method == 2 && m_int_weighted)
+	{
+		//threshold, asymmetrical
+		for (int it1 = 0; it1 < num; ++it1)
+		for (int it2 = 0; it2 < num; ++it2)
 		{
 			VolumeData* vd1 = m_group->GetVolumeData(it1);
 			VolumeData* vd2 = m_group->GetVolumeData(it2);
@@ -366,31 +414,15 @@ void ColocalizationDlg::Colocalize()
 			FL::ChannelCompare compare(vd1, vd2);
 			compare.SetUseMask(m_use_mask);
 			compare.SetIntWeighted(m_int_weighted);
-			switch (m_method)
-			{
-			case 0://dot product
-				compare.Product();
-				break;
-			case 1://min value
-				compare.MinValue();
-				break;
-			case 2://threshold
-			{
-				//get threshold values
-				float th1, th2, th3, th4;
-				th1 = (float)(vd1->GetLeftThresh());
-				th2 = (float)(vd1->GetRightThresh());
-				th3 = (float)(vd2->GetLeftThresh());
-				th4 = (float)(vd2->GetRightThresh());
-				compare.Threshold(th1, th2, th3, th4);
-			}
-			break;
-			}
-			rm[x][y] = compare.Result();
-			rm[y][x] = compare.Result();
-			y++;
+			//get threshold values
+			float th1, th2, th3, th4;
+			th1 = (float)(vd1->GetLeftThresh());
+			th2 = (float)(vd1->GetRightThresh());
+			th3 = (float)(vd2->GetLeftThresh());
+			th4 = (float)(vd2->GetRightThresh());
+			compare.Threshold(th1, th2, th3, th4);
+			rm[it1][it2] = compare.Result();
 		}
-		x++;
 	}
 
 	wxString titles;
