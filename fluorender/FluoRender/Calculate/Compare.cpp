@@ -44,6 +44,8 @@ const char* str_cl_chann_threshold = \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -63,8 +65,8 @@ const char* str_cl_chann_threshold = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
 "			lsum += v1;\n" \
 "	}\n" \
@@ -76,6 +78,8 @@ const char* str_cl_chann_threshold = \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -101,8 +105,8 @@ const char* str_cl_chann_threshold = \
 "		if (m < 1e-6) continue;\n" \
 "		m = read_imagef(mask2, samp, ijk).x;\n" \
 "		if (m < 1e-6) continue;\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
 "			lsum += v1;\n" \
 "	}\n" \
@@ -112,6 +116,8 @@ const char* str_cl_chann_threshold = \
 "__kernel void kernel_2(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -131,8 +137,8 @@ const char* str_cl_chann_threshold = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
@@ -144,6 +150,8 @@ const char* str_cl_chann_threshold = \
 "__kernel void kernel_3(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -169,8 +177,8 @@ const char* str_cl_chann_threshold = \
 "		if (m < 1e-6) continue;\n" \
 "		m = read_imagef(mask2, samp, ijk).x;\n" \
 "		if (m < 1e-6) continue;\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
@@ -188,6 +196,8 @@ const char* str_cl_chann_dotprod = \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -206,8 +216,8 @@ const char* str_cl_chann_dotprod = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		lsum += v1 * v2;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -218,6 +228,8 @@ const char* str_cl_chann_dotprod = \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -242,8 +254,8 @@ const char* str_cl_chann_dotprod = \
 "		if (m < 1e-6) continue;\n" \
 "		m = read_imagef(mask2, samp, ijk).x;\n" \
 "		if (m < 1e-6) continue;\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		lsum += v1 * v2;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -254,6 +266,8 @@ const char* str_cl_chann_dotprod = \
 "__kernel void kernel_2(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -272,8 +286,8 @@ const char* str_cl_chann_dotprod = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 * v2 > 1e-6)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
@@ -285,6 +299,8 @@ const char* str_cl_chann_dotprod = \
 "__kernel void kernel_3(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -309,8 +325,8 @@ const char* str_cl_chann_dotprod = \
 "		if (m < 1e-6) continue;\n" \
 "		m = read_imagef(mask2, samp, ijk).x;\n" \
 "		if (m < 1e-6) continue;\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 * v2 > 1e-6)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
@@ -328,6 +344,8 @@ const char* str_cl_chann_minvalue = \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -346,8 +364,8 @@ const char* str_cl_chann_minvalue = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		lsum += min(v1, v2);\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -358,6 +376,8 @@ const char* str_cl_chann_minvalue = \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -382,8 +402,8 @@ const char* str_cl_chann_minvalue = \
 "		if (m < 1e-6) continue;\n" \
 "		m = read_imagef(mask2, samp, ijk).x;\n" \
 "		if (m < 1e-6) continue;\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		lsum += min(v1, v2);\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -394,6 +414,8 @@ const char* str_cl_chann_minvalue = \
 "__kernel void kernel_2(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -412,8 +434,8 @@ const char* str_cl_chann_minvalue = \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (min(v1, v2) > 1e-6)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
@@ -425,6 +447,8 @@ const char* str_cl_chann_minvalue = \
 "__kernel void kernel_3(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
@@ -449,8 +473,8 @@ const char* str_cl_chann_minvalue = \
 "		if (m < 1e-6) continue;\n" \
 "		m = read_imagef(mask2, samp, ijk).x;\n" \
 "		if (m < 1e-6) continue;\n" \
-"		v1 = read_imagef(chann1, samp, ijk).x;\n" \
-"		v2 = read_imagef(chann2, samp, ijk).x;\n" \
+"		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (min(v1, v2) > 1e-6)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
@@ -468,6 +492,8 @@ const char* str_cl_chann_sum = \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -476,14 +502,16 @@ const char* str_cl_chann_sum = \
 "	int4 ijk = (int4)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2), 1);\n" \
 "	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	float value1 = read_imagef(chann1, samp, ijk).x;\n" \
-"	float value2 = read_imagef(chann2, samp, ijk).x;\n" \
+"	float value1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"	float value2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "	sum[index] += value1 + value2;\n" \
 "}\n" \
 "\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t chann1,\n" \
 "	__read_only image3d_t chann2,\n" \
+"	float ss1,\n" \
+"	float ss2,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
@@ -494,8 +522,8 @@ const char* str_cl_chann_sum = \
 "	int4 ijk = (int4)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2), 1);\n" \
 "	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	float value1 = read_imagef(chann1, samp, ijk).x;\n" \
-"	float value2 = read_imagef(chann2, samp, ijk).x;\n" \
+"	float value1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
+"	float value2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "	sum[index] += value1 * w1 + value2 * w2;\n" \
 "}\n";
 
@@ -681,6 +709,8 @@ void ChannelCompare::Product()
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(m_vd1->GetScalarScale());
+	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -744,23 +774,27 @@ void ChannelCompare::Product()
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
 			CL_MEM_READ_ONLY, tid2);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(float), (void*)(&ss1));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_index, 7,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_index, 8,
 			sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 7,
+		kernel_prog->setKernelArgBuf(kernel_index, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*(gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
-			kernel_prog->setKernelArgTex3D(kernel_index, 8,
+			kernel_prog->setKernelArgTex3D(kernel_index, 10,
 				CL_MEM_READ_ONLY, mid1);
-			kernel_prog->setKernelArgTex3D(kernel_index, 9,
+			kernel_prog->setKernelArgTex3D(kernel_index, 11,
 				CL_MEM_READ_ONLY, mid2);
 		}
 
@@ -820,6 +854,8 @@ void ChannelCompare::MinValue()
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(m_vd1->GetScalarScale());
+	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -883,23 +919,27 @@ void ChannelCompare::MinValue()
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
 			CL_MEM_READ_ONLY, tid2);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(float), (void*)(&ss1));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_index, 7,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_index, 8,
 			sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 7,
+		kernel_prog->setKernelArgBuf(kernel_index, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*(gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
-			kernel_prog->setKernelArgTex3D(kernel_index, 8,
+			kernel_prog->setKernelArgTex3D(kernel_index, 10,
 				CL_MEM_READ_ONLY, mid1);
-			kernel_prog->setKernelArgTex3D(kernel_index, 9,
+			kernel_prog->setKernelArgTex3D(kernel_index, 11,
 				CL_MEM_READ_ONLY, mid2);
 		}
 
@@ -959,6 +999,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(m_vd1->GetScalarScale());
+	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1022,26 +1064,30 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
 			CL_MEM_READ_ONLY, tid2);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(float), (void*)(&ss1));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_index, 7,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_index, 8,
 			sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 7,
+		kernel_prog->setKernelArgBuf(kernel_index, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*(gsxyz), (void*)(sum));
 		cl_float4 th = {th1, th2, th3, th4};
-		kernel_prog->setKernelArgConst(kernel_index, 8,
+		kernel_prog->setKernelArgConst(kernel_index, 10,
 			sizeof(cl_float4), (void*)(&th));
 		if (m_use_mask)
 		{
-			kernel_prog->setKernelArgTex3D(kernel_index, 9,
+			kernel_prog->setKernelArgTex3D(kernel_index, 11,
 				CL_MEM_READ_ONLY, mid1);
-			kernel_prog->setKernelArgTex3D(kernel_index, 10,
+			kernel_prog->setKernelArgTex3D(kernel_index, 12,
 				CL_MEM_READ_ONLY, mid2);
 		}
 
@@ -1084,6 +1130,8 @@ void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(m_vd1->GetScalarScale());
+	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1108,23 +1156,27 @@ void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
 			CL_MEM_READ_ONLY, tid2);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
+			sizeof(float), (void*)(&ss1));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
+			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_index, 5,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_index, 6,
 			sizeof(unsigned int), (void*)(&nz));
 		if (!avg.buffer)
 		{
 			sum = new float[nxyz];
 			std::memset(sum, 0, sizeof sum);
-			kernel_prog->setKernelArgBuf(kernel_index, 5,
+			kernel_prog->setKernelArgBuf(kernel_index, 7,
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 				sizeof(float)*(nxyz), (void*)(sum));
 		}
 		else
 		{
 			avg.kernel_index = kernel_index;
-			avg.index = 5;
+			avg.index = 7;
 			kernel_prog->setKernelArgument(avg);
 		}
 
