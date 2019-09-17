@@ -236,6 +236,7 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 			m_output_grid->GetNumberCols() - k);
 
 	m_output_grid->AutoSizeColumns(false);
+	m_output_grid->ClearSelection();
 }
 
 void ColocalizationDlg::CopyData()
