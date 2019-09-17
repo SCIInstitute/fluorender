@@ -288,7 +288,7 @@ const char* str_cl_chann_dotprod = \
 "	{\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (v1 * v2 > 1e-6)\n" \
+"		if (v1 * v2 > 0.0)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -327,7 +327,7 @@ const char* str_cl_chann_dotprod = \
 "		if (m < 1e-6) continue;\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (v1 * v2 > 1e-6)\n" \
+"		if (v1 * v2 > 0.0)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -436,7 +436,7 @@ const char* str_cl_chann_minvalue = \
 "	{\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (min(v1, v2) > 1e-6)\n" \
+"		if (min(v1, v2) > 0.0)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -475,7 +475,7 @@ const char* str_cl_chann_minvalue = \
 "		if (m < 1e-6) continue;\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (min(v1, v2) > 1e-6)\n" \
+"		if (min(v1, v2) > 0.0)\n" \
 "			lsum += 1.0;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
