@@ -124,7 +124,7 @@
    </property>
    <property name="maximumSize">
     <size>
-     <width>400</width>
+     <width>441</width>
      <height>300</height>
     </size>
    </property>
@@ -610,7 +610,7 @@
    </property>
    <property name="maximumSize">
     <size>
-     <width>400</width>
+     <width>441</width>
      <height>300</height>
     </size>
    </property>
@@ -1083,8 +1083,8 @@
    </property>
    <property name="maximumSize">
     <size>
-     <width>524287</width>
-     <height>500</height>
+     <width>441</width>
+     <height>351</height>
     </size>
    </property>
    <property name="baseSize">
@@ -1680,7 +1680,7 @@
              <enum>QTabWidget::Rounded</enum>
             </property>
             <property name="currentIndex">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="elideMode">
              <enum>Qt::ElideNone</enum>
