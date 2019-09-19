@@ -219,6 +219,7 @@ public:
 	//empty mask
 	//mode: 0-zeros; 1-255; 2-leave as is
 	void AddEmptyMask(int mode, bool change=true);
+	void AddMask(Nrrd* mask);
 	//load label
 	void LoadLabel(Nrrd* label);
 	Nrrd* GetLabel(bool ret);
