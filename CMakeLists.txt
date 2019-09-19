@@ -1,12 +1,46 @@
+# /*
+# For more information, please see: http://software.sci.utah.edu
+# 
+# The MIT License
+# 
+# Copyright (c) 2018 Scientific Computing and Imaging Institute,
+# University of Utah.
+# 
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+# */
+
 cmake_minimum_required(VERSION 3.0)
 project(Fluorender)
 
+# Places the final runtime binary in a bin directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# Set the standard to C++17 as std::apply and std::filesystem are used
+# The compilers are also cached internally so they may be passed in the superbuild
+#
+# TODO: Throw a fatal error if a C++17 compiler is not found.
 set(CMAKE_CXX_STANDARD 17)
 set(Compiler_C ${CMAKE_C_COMPILER} CACHE INTERNAL "")
 set(Compiler_CXX ${CMAKE_CXX_COMPILER} CACHE INTERNAL "")
 
+# Check if nasm is installed with Linux. Throw a fatal error if it is not found
 if(UNIX AND NOT APPLE)
   find_program(NASM_EXE NAMES nasm)
   
@@ -22,10 +56,12 @@ if(UNIX AND NOT APPLE)
   endif()
 endif()
 
+# Finds the compiler being used
 if(WIN32 OR APPLE)
   include(getCompiler.cmake)
 endif()
 
+# This will determine the static library suffix's, may not be needed.
 include(setPreSuffix.cmake)
 
 # Required packages
@@ -55,8 +91,10 @@ add_definitions(${Qt5OpenGL_DEFINITIONS})
 add_definitions(${Qt5Core_DEFINITIONS})
 add_definitions(${Qt5Gui_DEFINITIONS})
 
+# This will look for the Superbuild
 Include(${CMAKE_SOURCE_DIR}/Superbuild/Superbuild.cmake)
 
+# These are defined here because Superbuild.cmake defines their locations
 set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIR})
 
 include_directories(${Boost_INCLUDE_DIRS})

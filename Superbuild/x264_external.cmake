@@ -1,5 +1,6 @@
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
+# This is the offical repo for x264. The tag is their stable release.
 set( x264_url "https://code.videolan.org/videolan/x264.git")
 set( x264_TAG "origin/stable")
 
