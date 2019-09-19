@@ -7,6 +7,7 @@ This is the open-source repository for FluoRender, an interactive rendering tool
 If you use FluoRender in work that leads to published research, we humbly ask that you add the following to the 'Acknowledgments' section of your paper: "This work was made possible in part by software funded by the NIH: Fluorender: Visualization-Based and Interactive Analysis for Multichannel Microscopy Data, R01EB023947." If you would like to cite FluoRender, you may reference the following publication: Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualization for many-channel fluorescence data analysis. BMC Bioinformatics, 18:280.
 
 **Author:** Yong Wan
+
 **Developer:** Brig Bagley
 
 ## Build from Source Instructions 
@@ -20,8 +21,11 @@ Each OS will need an OpenCL compatible CPU and an OpenGL compatible GPU.
 This may or may not work with AMD CPU's or GPU's and is currently not supported by Fluorender developers. Everything had been built and run on Intel CPU's and NVIDIA GPU's.
 
 C++17 (See individual build requirements for your OS)
+
 Cmake Version greater than 3.0 (See individual build requirements for your OS)
+
 Java JDK (See individual build requirements for your OS) 
+
 [QT Creator 5](https://www.qt.io/download) or greater (Choose open source.)
 
 ### Requirements for Linux
