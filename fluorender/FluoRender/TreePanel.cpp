@@ -319,7 +319,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.AppendSeparator();
 				menu.Append(ID_CopyMask, "Copy Mask");
 				if (m_vd_copy)
-					menu.Append(ID_PasteMask, "PasteMask");
+					menu.Append(ID_PasteMask, "Paste Mask");
 				menu.Append(ID_RandomizeColor, "Randomize Colors");
 				menu.Append(ID_AddDataGroup, "Add Volume Group");
 				menu.Append(ID_RemoveData, "Delete");
@@ -2206,7 +2206,10 @@ void TreePanel::ExpandAll()
 void TreePanel::DeleteAll()
 {
 	if (m_datatree)
+	{
 		m_datatree->DeleteAll();
+		m_datatree->m_vd_copy = 0;
+	}
 }
 
 void TreePanel::TraversalDelete(wxTreeItemId item)
