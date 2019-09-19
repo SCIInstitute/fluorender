@@ -56,6 +56,8 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_Component, DataTreeCtrl::OnComponent)
 	EVT_MENU(ID_Calculations, DataTreeCtrl::OnCalculations)
 	EVT_MENU(ID_RandomizeColor, DataTreeCtrl::OnRandomizeColor)
+	EVT_MENU(ID_CopyMask, DataTreeCtrl::OnCopyMask)
+	EVT_MENU(ID_PasteMask, DataTreeCtrl::OnPasteMask)
 	EVT_TREE_SEL_CHANGED(wxID_ANY, DataTreeCtrl::OnSelChanged)
 	EVT_TREE_SEL_CHANGING(wxID_ANY, DataTreeCtrl::OnSelChanging)
 	EVT_TREE_DELETE_ITEM(wxID_ANY, DataTreeCtrl::OnDeleting)
@@ -76,7 +78,8 @@ DataTreeCtrl::DataTreeCtrl(
 wxTreeCtrl(parent, id, pos, size, style),
 	m_frame(frame),
 	m_fixed(false),
-	m_scroll_pos(-1)
+	m_scroll_pos(-1),
+	m_vd_copy(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -314,6 +317,9 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_Isolate, "Isolate");
 				menu.Append(ID_ShowAll, "Show All");
 				menu.AppendSeparator();
+				menu.Append(ID_CopyMask, "Copy Mask");
+				if (m_vd_copy)
+					menu.Append(ID_PasteMask, "PasteMask");
 				menu.Append(ID_RandomizeColor, "Randomize Colors");
 				menu.Append(ID_AddDataGroup, "Add Volume Group");
 				menu.Append(ID_RemoveData, "Delete");
@@ -965,6 +971,39 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 	UpdateSelection();
 	vr_frame->RefreshVRenderViews();
+}
+
+void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
+{
+	if (m_fixed)
+		return;
+	wxTreeItemId sel_item = GetSelection();
+	if (!sel_item.IsOk()) return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+
+	wxString name = GetItemText(sel_item);
+	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	if (vd && vd->GetMask(true))
+		m_vd_copy = vd;
+}
+
+void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
+{
+	if (m_fixed)
+		return;
+	wxTreeItemId sel_item = GetSelection();
+	if (!sel_item.IsOk()) return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+
+	wxString name = GetItemText(sel_item);
+	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	if (vd && m_vd_copy)
+	{
+		vd->AddMask(m_vd_copy->GetMask(false));
+		vr_frame->RefreshVRenderViews();
+	}
 }
 
 //

@@ -45,6 +45,8 @@ public:
 				//5-group; 6-mesh group
 };
 
+class VolumeData;
+
 class DataTreeCtrl: public wxTreeCtrl
 {
 	enum
@@ -69,7 +71,9 @@ class DataTreeCtrl: public wxTreeCtrl
 		ID_Colocalization,
 		ID_Convert,
 		ID_Ocl,
-		ID_RandomizeColor
+		ID_RandomizeColor,
+		ID_CopyMask,
+		ID_PasteMask
 	};
 
 public:
@@ -142,6 +146,8 @@ private:
 	//remember the pos
 	int m_scroll_pos;
 
+	VolumeData* m_vd_copy;//for copying mask source
+
 private:
 	//change the color of just one icon of the dual,
 	//either enable(type=0), or disable(type=1)
@@ -169,6 +175,8 @@ private:
 	void OnComponent(wxCommandEvent& event);
 	void OnCalculations(wxCommandEvent& event);
 	void OnRandomizeColor(wxCommandEvent& event);
+	void OnCopyMask(wxCommandEvent& event);
+	void OnPasteMask(wxCommandEvent& event);
 
 	void OnSelChanged(wxTreeEvent& event);
 	void OnSelChanging(wxTreeEvent& event);
