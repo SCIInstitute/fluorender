@@ -73,7 +73,8 @@ class DataTreeCtrl: public wxTreeCtrl
 		ID_Ocl,
 		ID_RandomizeColor,
 		ID_CopyMask,
-		ID_PasteMask
+		ID_PasteMask,
+		ID_MergeMask
 	};
 
 public:
@@ -177,6 +178,7 @@ private:
 	void OnRandomizeColor(wxCommandEvent& event);
 	void OnCopyMask(wxCommandEvent& event);
 	void OnPasteMask(wxCommandEvent& event);
+	void OnMergeMask(wxCommandEvent& event);
 
 	void OnSelChanged(wxTreeEvent& event);
 	void OnSelChanging(wxTreeEvent& event);

@@ -58,6 +58,7 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_RandomizeColor, DataTreeCtrl::OnRandomizeColor)
 	EVT_MENU(ID_CopyMask, DataTreeCtrl::OnCopyMask)
 	EVT_MENU(ID_PasteMask, DataTreeCtrl::OnPasteMask)
+	EVT_MENU(ID_MergeMask, DataTreeCtrl::OnMergeMask)
 	EVT_TREE_SEL_CHANGED(wxID_ANY, DataTreeCtrl::OnSelChanged)
 	EVT_TREE_SEL_CHANGING(wxID_ANY, DataTreeCtrl::OnSelChanging)
 	EVT_TREE_DELETE_ITEM(wxID_ANY, DataTreeCtrl::OnDeleting)
@@ -319,7 +320,10 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.AppendSeparator();
 				menu.Append(ID_CopyMask, "Copy Mask");
 				if (m_vd_copy)
+				{
 					menu.Append(ID_PasteMask, "Paste Mask");
+					menu.Append(ID_MergeMask, "Merge Mask");
+				}
 				menu.Append(ID_RandomizeColor, "Randomize Colors");
 				menu.Append(ID_AddDataGroup, "Add Volume Group");
 				menu.Append(ID_RemoveData, "Delete");
@@ -1002,6 +1006,24 @@ void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
 	if (vd && m_vd_copy)
 	{
 		vd->AddMask(m_vd_copy->GetMask(false));
+		vr_frame->RefreshVRenderViews();
+	}
+}
+
+void DataTreeCtrl::OnMergeMask(wxCommandEvent& event)
+{
+	if (m_fixed)
+		return;
+	wxTreeItemId sel_item = GetSelection();
+	if (!sel_item.IsOk()) return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+
+	wxString name = GetItemText(sel_item);
+	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	if (vd && m_vd_copy)
+	{
+		vd->AddMask(m_vd_copy->GetMask(false), true);
 		vr_frame->RefreshVRenderViews();
 	}
 }

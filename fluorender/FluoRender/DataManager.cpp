@@ -705,7 +705,7 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	}
 }
 
-void VolumeData::AddMask(Nrrd* mask)
+void VolumeData::AddMask(Nrrd* mask, bool merge)
 {
 	if (!mask || !mask->data || !m_tex || !m_vr)
 		return;
@@ -749,7 +749,19 @@ void VolumeData::AddMask(Nrrd* mask)
 
 	if (val8)
 	{
-		memcpy(val8, mask->data, mem_size * sizeof(uint8));
+		if (merge && !empty)
+		{
+			for (unsigned long long index = 0;
+				index < mem_size; ++index)
+			{
+				val8[index] = std::max(val8[index],
+					((uint8*)(mask->data))[index]);
+			}
+		}
+		else
+		{
+			memcpy(val8, mask->data, mem_size * sizeof(uint8));
+		}
 		m_vr->clear_tex_mask();
 	}
 }
