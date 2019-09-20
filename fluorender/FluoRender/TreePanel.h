@@ -74,7 +74,9 @@ class DataTreeCtrl: public wxTreeCtrl
 		ID_RandomizeColor,
 		ID_CopyMask,
 		ID_PasteMask,
-		ID_MergeMask
+		ID_MergeMask,
+		ID_ExcludeMask,
+		ID_IntersectMask
 	};
 
 public:
@@ -135,6 +137,9 @@ public:
 	void BrushCreate();
 	void BrushCreateInv();
 
+	//mask operations
+	void PasteMask(int op);
+
 	friend class TreePanel;
 
 private:
@@ -155,7 +160,6 @@ private:
 	void ChangeIconColor(int which, wxColor c, int type);
 
 	void OnContextMenu(wxContextMenuEvent &event );
-
 	void OnToggleDisp(wxCommandEvent& event);
 	void OnIsolate(wxCommandEvent& event);
 	void OnShowAll(wxCommandEvent& event);
@@ -179,6 +183,8 @@ private:
 	void OnCopyMask(wxCommandEvent& event);
 	void OnPasteMask(wxCommandEvent& event);
 	void OnMergeMask(wxCommandEvent& event);
+	void OnExcludeMask(wxCommandEvent& event);
+	void OnIntersectMask(wxCommandEvent& event);
 
 	void OnSelChanged(wxTreeEvent& event);
 	void OnSelChanging(wxTreeEvent& event);

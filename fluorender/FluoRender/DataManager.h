@@ -219,7 +219,7 @@ public:
 	//empty mask
 	//mode: 0-zeros; 1-255; 2-leave as is
 	void AddEmptyMask(int mode, bool change=true);
-	void AddMask(Nrrd* mask, bool merge=false);
+	void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
 	//load label
 	void LoadLabel(Nrrd* label);
 	Nrrd* GetLabel(bool ret);
