@@ -59,6 +59,8 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_CopyMask, DataTreeCtrl::OnCopyMask)
 	EVT_MENU(ID_PasteMask, DataTreeCtrl::OnPasteMask)
 	EVT_MENU(ID_MergeMask, DataTreeCtrl::OnMergeMask)
+	EVT_MENU(ID_ExcludeMask, DataTreeCtrl::OnExcludeMask)
+	EVT_MENU(ID_IntersectMask, DataTreeCtrl::OnIntersectMask)
 	EVT_TREE_SEL_CHANGED(wxID_ANY, DataTreeCtrl::OnSelChanged)
 	EVT_TREE_SEL_CHANGING(wxID_ANY, DataTreeCtrl::OnSelChanging)
 	EVT_TREE_DELETE_ITEM(wxID_ANY, DataTreeCtrl::OnDeleting)
@@ -318,15 +320,18 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_Isolate, "Isolate");
 				menu.Append(ID_ShowAll, "Show All");
 				menu.AppendSeparator();
+				menu.Append(ID_RandomizeColor, "Randomize Colors");
+				menu.Append(ID_AddDataGroup, "Add Volume Group");
+				menu.Append(ID_RemoveData, "Delete");
+				menu.AppendSeparator();
 				menu.Append(ID_CopyMask, "Copy Mask");
 				if (m_vd_copy)
 				{
 					menu.Append(ID_PasteMask, "Paste Mask");
 					menu.Append(ID_MergeMask, "Merge Mask");
+					menu.Append(ID_ExcludeMask, "Exclude Mask");
+					menu.Append(ID_IntersectMask, "Intersect Mask");
 				}
-				menu.Append(ID_RandomizeColor, "Randomize Colors");
-				menu.Append(ID_AddDataGroup, "Add Volume Group");
-				menu.Append(ID_RemoveData, "Delete");
 				menu.AppendSeparator();
 				menu.Append(ID_Edit, "Paint Brush...");
 				menu.Append(ID_Measurement, "Measurement...");
@@ -994,38 +999,22 @@ void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
 
 void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
 {
-	if (m_fixed)
-		return;
-	wxTreeItemId sel_item = GetSelection();
-	if (!sel_item.IsOk()) return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-
-	wxString name = GetItemText(sel_item);
-	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && m_vd_copy)
-	{
-		vd->AddMask(m_vd_copy->GetMask(false));
-		vr_frame->RefreshVRenderViews();
-	}
+	PasteMask(0);
 }
 
 void DataTreeCtrl::OnMergeMask(wxCommandEvent& event)
 {
-	if (m_fixed)
-		return;
-	wxTreeItemId sel_item = GetSelection();
-	if (!sel_item.IsOk()) return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	PasteMask(1);
+}
 
-	wxString name = GetItemText(sel_item);
-	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && m_vd_copy)
-	{
-		vd->AddMask(m_vd_copy->GetMask(false), true);
-		vr_frame->RefreshVRenderViews();
-	}
+void DataTreeCtrl::OnExcludeMask(wxCommandEvent& event)
+{
+	PasteMask(2);
+}
+
+void DataTreeCtrl::OnIntersectMask(wxCommandEvent& event)
+{
+	PasteMask(3);
 }
 
 //
@@ -2083,6 +2072,25 @@ void DataTreeCtrl::BrushCreateInv()
 				}
 			}
 		}
+	}
+}
+
+//mask operations
+void DataTreeCtrl::PasteMask(int op)
+{
+	if (m_fixed)
+		return;
+	wxTreeItemId sel_item = GetSelection();
+	if (!sel_item.IsOk()) return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+
+	wxString name = GetItemText(sel_item);
+	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	if (vd && m_vd_copy)
+	{
+		vd->AddMask(m_vd_copy->GetMask(false), op);
+		vr_frame->RefreshVRenderViews();
 	}
 }
 
