@@ -2494,19 +2494,30 @@ void VRenderGLView::ChangeBrushSize(int value)
 {
 	if (!value) return;
 
-	if (m_use_brush_radius2 && m_selector.GetMode() != 8)
-	{
-		double delta = value * m_brush_radius2 / 2000.0;
-		m_brush_radius2 += delta;
-		m_brush_radius2 = max(1.0, m_brush_radius2);
-		m_brush_radius1 = min(m_brush_radius2, m_brush_radius1);
-	}
-	else
+	if (m_selector.GetMode() == 8 ||
+		!m_use_brush_radius2)
 	{
 		double delta = value * m_brush_radius1 / 1000.0;
 		m_brush_radius1 += delta;
 		m_brush_radius1 = max(m_brush_radius1, 1.0);
 		m_brush_radius2 = m_brush_radius1;
+	}
+	else
+	{
+		if (wxGetKeyState(WXK_CONTROL))
+		{
+			double delta = value * m_brush_radius1 / 1000.0;
+			m_brush_radius1 += delta;
+			m_brush_radius1 = max(m_brush_radius1, 1.0);
+			m_brush_radius2 = max(m_brush_radius2, m_brush_radius1);
+		}
+		else
+		{
+			double delta = value * m_brush_radius2 / 2000.0;
+			m_brush_radius2 += delta;
+			m_brush_radius2 = max(1.0, m_brush_radius2);
+			m_brush_radius1 = min(m_brush_radius2, m_brush_radius1);
+		}
 	}
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -12423,7 +12434,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			else
 			{
-				//				RefreshGL(27);
+				//RefreshGL(27);
 				return;
 			}
 		}
@@ -12467,15 +12478,15 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.MiddleUp())
 	{
 		//SetSortBricks();
-		//		RefreshGL(28);
+		//RefreshGL(28);
 		return;
 	}
 	if (event.RightUp())
 	{
 		if (m_int_mode == 1)
 		{
-			//			RefreshGL(27);
-			//			return;
+			//RefreshGL(27);
+			//return;
 		}
 		if (m_int_mode == 5 &&
 			!event.AltDown())

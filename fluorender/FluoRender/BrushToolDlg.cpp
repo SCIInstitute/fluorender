@@ -728,7 +728,7 @@ void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 	if (frame && frame->GetTree() &&
 		frame->GetTree()->GetTreeCtrl())
 		frame->GetTree()->GetTreeCtrl()->CopyMask();
-	UpdateUndoRedo();
+	UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
@@ -737,6 +737,7 @@ void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
 	if (frame && frame->GetTree() &&
 		frame->GetTree()->GetTreeCtrl())
 		frame->GetTree()->GetTreeCtrl()->PasteMask(0);
+	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
@@ -745,6 +746,7 @@ void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
 	if (frame && frame->GetTree() &&
 		frame->GetTree()->GetTreeCtrl())
 		frame->GetTree()->GetTreeCtrl()->PasteMask(1);
+	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
@@ -753,6 +755,7 @@ void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
 	if (frame && frame->GetTree() &&
 		frame->GetTree()->GetTreeCtrl())
 		frame->GetTree()->GetTreeCtrl()->PasteMask(2);
+	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
@@ -761,6 +764,7 @@ void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
 	if (frame && frame->GetTree() &&
 		frame->GetTree()->GetTreeCtrl())
 		frame->GetTree()->GetTreeCtrl()->PasteMask(3);
+	UpdateUndoRedo();
 }
 
 //selection adjustment
