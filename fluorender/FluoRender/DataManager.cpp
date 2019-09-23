@@ -743,6 +743,9 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	}
 	else
 	{
+		if (Texture::mask_undo_num_ > 0 &&
+			GetTexture())
+			GetTexture()->push_mask();
 		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
 		val8 = (uint8*)nrrd_mask->data;
 	}

@@ -985,15 +985,8 @@ void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
 {
 	if (m_fixed)
 		return;
-	wxTreeItemId sel_item = GetSelection();
-	if (!sel_item.IsOk()) return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
 
-	wxString name = GetItemText(sel_item);
-	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && vd->GetMask(true))
-		vr_frame->m_vd_copy = vd;
+	CopyMask();
 }
 
 void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
@@ -2075,6 +2068,19 @@ void DataTreeCtrl::BrushCreateInv()
 }
 
 //mask operations
+void DataTreeCtrl::CopyMask()
+{
+	wxTreeItemId sel_item = GetSelection();
+	if (!sel_item.IsOk()) return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (!vr_frame) return;
+
+	wxString name = GetItemText(sel_item);
+	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	if (vd && vd->GetMask(true))
+		vr_frame->m_vd_copy = vd;
+}
+
 void DataTreeCtrl::PasteMask(int op)
 {
 	if (m_fixed)
@@ -2086,7 +2092,8 @@ void DataTreeCtrl::PasteMask(int op)
 
 	wxString name = GetItemText(sel_item);
 	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && vr_frame->m_vd_copy)
+	if (vd && vr_frame->m_vd_copy &&
+		vd != vr_frame->m_vd_copy)
 	{
 		vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
 		vr_frame->RefreshVRenderViews();

@@ -138,6 +138,7 @@ public:
 	void BrushCreateInv();
 
 	//mask operations
+	void CopyMask();
 	void PasteMask(int op);
 
 	friend class TreePanel;

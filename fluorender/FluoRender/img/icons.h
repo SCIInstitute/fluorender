@@ -249,6 +249,16 @@ public:
 	const static unsigned char redo_png[873];
 	/* undo.png - 853 bytes */
 	const static unsigned char undo_png[853];
+	/* mask_copy.png - 727 bytes */
+	const static unsigned char mask_copy_png[727];
+	/* mask_exclude.png - 774 bytes */
+	const static unsigned char mask_exclude_png[774];
+	/* mask_intersect.png - 675 bytes */
+	const static unsigned char mask_intersect_png[675];
+	/* mask_paste.png - 769 bytes */
+	const static unsigned char mask_paste_png[769];
+	/* mask_union.png - 816 bytes */
+	const static unsigned char mask_union_png[816];
 
 
 	//ruler tool icons
