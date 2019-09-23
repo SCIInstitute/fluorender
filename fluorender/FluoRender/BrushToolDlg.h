@@ -64,6 +64,12 @@ public:
 		ID_BrushSolid,
 		ID_BrushUndo,
 		ID_BrushRedo,
+		//toolbar2
+		ID_MaskCopy,
+		ID_MaskPaste,
+		ID_MaskMerge,
+		ID_MaskExclude,
+		ID_MaskIntersect,
 		//selection strength
 		//falloff
 		ID_BrushSclTranslateSldr,
@@ -117,6 +123,7 @@ public:
 	void SelectBrush(int id);
 	//update undo status
 	void UpdateUndoRedo();
+	void UpdateMaskTb();
 
 	//output
 	void SetOutput(const GridData &data, const wxString &unit);
@@ -140,6 +147,7 @@ private:
 	//paint tools
 	//toolbar
 	wxToolBar *m_toolbar;
+	wxToolBar *m_mask_tb;
 
 	//stop at boundary
 	wxCheckBox* m_edge_detect_chk;
@@ -197,6 +205,12 @@ private:
 	void OnBrushClear(wxCommandEvent& event);
 	void OnBrushCreate(wxCommandEvent& event);
 	void OnBrushSolid(wxCommandEvent& event);
+	//mask toolbar
+	void OnMaskCopy(wxCommandEvent& event);
+	void OnMaskPaste(wxCommandEvent& event);
+	void OnMaskMerge(wxCommandEvent& event);
+	void OnMaskExclude(wxCommandEvent& event);
+	void OnMaskIntersect(wxCommandEvent& event);
 	//selection adjustment
 	//2d influence
 	void OnBrush2dinflChange(wxScrollEvent &event);

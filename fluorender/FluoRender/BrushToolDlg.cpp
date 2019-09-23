@@ -49,6 +49,12 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_TOOL(ID_BrushErase, BrushToolDlg::OnBrushErase)
 	EVT_TOOL(ID_BrushCreate, BrushToolDlg::OnBrushCreate)
 	EVT_TOOL(ID_BrushSolid, BrushToolDlg::OnBrushSolid)
+	//mask tools
+	EVT_TOOL(ID_MaskCopy, BrushToolDlg::OnMaskCopy)
+	EVT_TOOL(ID_MaskPaste, BrushToolDlg::OnMaskPaste)
+	EVT_TOOL(ID_MaskMerge, BrushToolDlg::OnMaskMerge)
+	EVT_TOOL(ID_MaskExclude, BrushToolDlg::OnMaskExclude)
+	EVT_TOOL(ID_MaskIntersect, BrushToolDlg::OnMaskIntersect)
 	//selection adjustment
 	//translate
 	EVT_COMMAND_SCROLL(ID_BrushSclTranslateSldr, BrushToolDlg::OnBrushSclTranslateChange)
@@ -96,7 +102,7 @@ END_EVENT_TABLE()
 BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 	wxDefaultPosition,
-	wxSize(500, 500),
+	wxSize(500, 620),
 	0, "BrushToolDlg"),
 	m_frame(parent),
 	m_cur_view(0),
@@ -163,6 +169,34 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_toolbar->AddTool(ID_BrushClear, "Reset All",
 		bitmap, "Reset all highlighted structures");
 	m_toolbar->Realize();
+
+	//mask tools
+	m_mask_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
+	bitmap = wxGetBitmapFromMemory(mask_copy);
+#ifdef _DARWIN
+	m_mask_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_mask_tb->AddTool(
+		ID_MaskCopy, "Copy", bitmap,
+		"Copy current selection mask to clipboard");
+	bitmap = wxGetBitmapFromMemory(mask_paste);
+	m_mask_tb->AddTool(
+		ID_MaskPaste, "Paste", bitmap,
+		"Paste selection mask from clipboard");
+	bitmap = wxGetBitmapFromMemory(mask_union);
+	m_mask_tb->AddTool(
+		ID_MaskMerge, "Merge", bitmap,
+		"Merge selection mask from clipboard with current");
+	bitmap = wxGetBitmapFromMemory(mask_exclude);
+	m_mask_tb->AddTool(
+		ID_MaskExclude, "Exclude", bitmap,
+		"Exclude clipboard's selection mask from current");
+	bitmap = wxGetBitmapFromMemory(mask_intersect);
+	m_mask_tb->AddTool(
+		ID_MaskIntersect, "Intersect", bitmap,
+		"Intersect selection mask from clipboard with current");
+	m_mask_tb->Realize();
 
 	//Selection adjustment
 	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
@@ -362,6 +396,8 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_toolbar, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
+	sizer_v->Add(m_mask_tb, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
@@ -503,6 +539,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	m_history_chk->SetValue(m_hold_history);
 
 	UpdateUndoRedo();
+	UpdateMaskTb();
 }
 
 void BrushToolDlg::SelectBrush(int id)
@@ -544,6 +581,16 @@ void BrushToolDlg::UpdateUndoRedo()
 				vd->GetTexture()->get_redo());
 		}
 	}
+}
+
+void BrushToolDlg::UpdateMaskTb()
+{
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	bool bval = vr_frame && vr_frame->m_vd_copy;
+	m_mask_tb->EnableTool(ID_MaskPaste, bval);
+	m_mask_tb->EnableTool(ID_MaskMerge, bval);
+	m_mask_tb->EnableTool(ID_MaskExclude, bval);
+	m_mask_tb->EnableTool(ID_MaskIntersect, bval);
 }
 
 //brush commands
@@ -672,6 +719,48 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 	}
 	vr_frame->RefreshVRenderViews();
 	UpdateUndoRedo();
+}
+
+//mask tools
+void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree() &&
+		frame->GetTree()->GetTreeCtrl())
+		frame->GetTree()->GetTreeCtrl()->CopyMask();
+	UpdateUndoRedo();
+}
+
+void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree() &&
+		frame->GetTree()->GetTreeCtrl())
+		frame->GetTree()->GetTreeCtrl()->PasteMask(0);
+}
+
+void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree() &&
+		frame->GetTree()->GetTreeCtrl())
+		frame->GetTree()->GetTreeCtrl()->PasteMask(1);
+}
+
+void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree() &&
+		frame->GetTree()->GetTreeCtrl())
+		frame->GetTree()->GetTreeCtrl()->PasteMask(2);
+}
+
+void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree() &&
+		frame->GetTree()->GetTreeCtrl())
+		frame->GetTree()->GetTreeCtrl()->PasteMask(3);
 }
 
 //selection adjustment
