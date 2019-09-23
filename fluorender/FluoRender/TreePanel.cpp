@@ -2095,8 +2095,13 @@ void DataTreeCtrl::PasteMask(int op)
 	if (vd && vr_frame->m_vd_copy &&
 		vd != vr_frame->m_vd_copy)
 	{
+		if (Texture::mask_undo_num_ > 0 &&
+			vd->GetTexture())
+			vd->GetTexture()->push_mask();
 		vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
 		vr_frame->RefreshVRenderViews();
+		if (vr_frame->GetBrushToolDlg())
+			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 	}
 }
 
