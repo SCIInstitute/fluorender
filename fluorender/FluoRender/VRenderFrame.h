@@ -356,6 +356,7 @@ public:
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
 	VMovieView* m_movie_view;
+	VolumeData* m_vd_copy;//for copying mask source
 
 private:
 	wxAuiManager m_aui_mgr;

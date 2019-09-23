@@ -152,8 +152,6 @@ private:
 	//remember the pos
 	int m_scroll_pos;
 
-	VolumeData* m_vd_copy;//for copying mask source
-
 private:
 	//change the color of just one icon of the dual,
 	//either enable(type=0), or disable(type=1)

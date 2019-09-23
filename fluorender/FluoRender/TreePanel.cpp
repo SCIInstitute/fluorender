@@ -81,8 +81,7 @@ DataTreeCtrl::DataTreeCtrl(
 wxTreeCtrl(parent, id, pos, size, style),
 	m_frame(frame),
 	m_fixed(false),
-	m_scroll_pos(-1),
-	m_vd_copy(0)
+	m_scroll_pos(-1)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -325,7 +324,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_RemoveData, "Delete");
 				menu.AppendSeparator();
 				menu.Append(ID_CopyMask, "Copy Mask");
-				if (m_vd_copy)
+				if (vr_frame->m_vd_copy)
 				{
 					menu.Append(ID_PasteMask, "Paste Mask");
 					menu.Append(ID_MergeMask, "Merge Mask");
@@ -994,7 +993,7 @@ void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
 	wxString name = GetItemText(sel_item);
 	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 	if (vd && vd->GetMask(true))
-		m_vd_copy = vd;
+		vr_frame->m_vd_copy = vd;
 }
 
 void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
@@ -2087,9 +2086,9 @@ void DataTreeCtrl::PasteMask(int op)
 
 	wxString name = GetItemText(sel_item);
 	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && m_vd_copy)
+	if (vd && vr_frame->m_vd_copy)
 	{
-		vd->AddMask(m_vd_copy->GetMask(false), op);
+		vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
 		vr_frame->RefreshVRenderViews();
 	}
 }
@@ -2238,7 +2237,9 @@ void TreePanel::DeleteAll()
 	if (m_datatree)
 	{
 		m_datatree->DeleteAll();
-		m_datatree->m_vd_copy = 0;
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+			vr_frame->m_vd_copy = 0;
 	}
 }
 
