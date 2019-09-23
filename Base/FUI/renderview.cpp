@@ -40,6 +40,10 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
         newRenderView = std::make_unique<FluoGLWidget>();
     }
 
+    populateLeftToolBar(leftToolBar);
+    populateRightToolBar(rightToolBar);
+    populateTopToolBar(topToolBar);
+    populateBottomToolBar(bottomToolBar);
 
     newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newRenderView.release()));
     newBaseWindow->addToolBar(Qt::LeftToolBarArea,leftToolBar.release());
@@ -56,6 +60,37 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget.release());
 }
 
+void RenderView::populateLeftToolBar(std::unique_ptr<QToolBar> &leftToolBar)
+{
+  auto newSlider = std::make_unique<QSlider>(new QSlider);
+  auto newSpinBox = std::make_unique<QDoubleSpinBox>(new QDoubleSpinBox);
+
+  newSlider->setOrientation(Qt::Vertical);
+
+  // TODO: Find out how to not get this to crash, the slider needs to be
+  //       in the middle of the toolbar.
+
+  //QLayout *sliderLayout = newSlider->layout();
+  //sliderLayout->setAlignment(newSlider.release(),Qt::AlignHCenter);
+  leftToolBar->addWidget(newSlider.release());
+  leftToolBar->addWidget(newSpinBox.release());
+}
+
+void RenderView::populateRightToolBar(std::unique_ptr<QToolBar> &rightToolBar)
+{
+
+}
+
+void RenderView::populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar)
+{
+
+}
+
+void RenderView::populateBottomToolBar(std::unique_ptr<QToolBar> &bottomToolBar)
+{
+
+}
+
 /*
  * This creates my toolbars, the orientation is set, and is returned.
  */
@@ -68,9 +103,9 @@ std::unique_ptr<QToolBar> RenderView::genToolProp(Qt::Orientation ori)
     newToolBar->setStyleSheet("QToolBar {background: rgb(222,225,232)}");
 
     if(ori == Qt::Horizontal)
-        newToolBar->setFixedHeight(25);
+        newToolBar->setFixedHeight(45);
     else
-        newToolBar->setFixedWidth(25);
+        newToolBar->setFixedWidth(45);
 
     return newToolBar;
 }

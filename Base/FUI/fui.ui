@@ -1137,14 +1137,14 @@
            </widget>
           </item>
           <item row="2" column="2" colspan="2">
-           <widget class="QSlider" name="horizontalSlider">
+           <widget class="QSlider" name="playBackSlider">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
           <item row="1" column="3" colspan="3">
-           <widget class="QComboBox" name="comboBox_2">
+           <widget class="QComboBox" name="renderViewCombo">
             <property name="minimumSize">
              <size>
               <width>101</width>
@@ -1178,7 +1178,7 @@
            </widget>
           </item>
           <item row="2" column="4">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox">
+           <widget class="QDoubleSpinBox" name="playBackSpinBox">
             <property name="maximumSize">
              <size>
               <width>51</width>
@@ -1683,7 +1683,7 @@
               <item row="0" column="0">
                <layout class="QGridLayout" name="gridLayout_9">
                 <item row="0" column="0" colspan="2">
-                 <widget class="QCheckBox" name="checkBox_2">
+                 <widget class="QCheckBox" name="basic_rotationCheckBox">
                   <property name="minimumSize">
                    <size>
                     <width>70</width>
@@ -1699,7 +1699,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0" colspan="3">
-                 <widget class="QRadioButton" name="radioButton">
+                 <widget class="QRadioButton" name="basic_xRadioButton">
                   <property name="text">
                    <string>X</string>
                   </property>
@@ -1709,7 +1709,7 @@
                  </widget>
                 </item>
                 <item row="2" column="0" colspan="2">
-                 <widget class="QRadioButton" name="radioButton_2">
+                 <widget class="QRadioButton" name="basic_yRadioButton">
                   <property name="text">
                    <string>Y</string>
                   </property>
@@ -1736,7 +1736,7 @@
                  </widget>
                 </item>
                 <item row="2" column="7" colspan="2">
-                 <widget class="QComboBox" name="comboBox">
+                 <widget class="QComboBox" name="basic_styleCombo">
                   <property name="minimumSize">
                    <size>
                     <width>62</width>
@@ -1768,7 +1768,7 @@
                  </widget>
                 </item>
                 <item row="3" column="0" colspan="3">
-                 <widget class="QRadioButton" name="radioButton_3">
+                 <widget class="QRadioButton" name="basic_zRadioButton">
                   <property name="text">
                    <string>Z</string>
                   </property>
@@ -1778,7 +1778,7 @@
                  </widget>
                 </item>
                 <item row="4" column="0" colspan="4">
-                 <widget class="QCheckBox" name="checkBox_3">
+                 <widget class="QCheckBox" name="basic_timeSeqBatchCheckBox">
                   <property name="text">
                    <string>Time Sequence / Batch</string>
                   </property>
@@ -1810,22 +1810,6 @@
                   </property>
                  </widget>
                 </item>
-                <item row="5" column="1" colspan="2">
-                 <widget class="QLineEdit" name="lineEdit_2">
-                  <property name="minimumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
                 <item row="5" column="3">
                  <widget class="QLabel" name="label_5">
                   <property name="minimumSize">
@@ -1839,38 +1823,6 @@
                   </property>
                  </widget>
                 </item>
-                <item row="5" column="4" colspan="2">
-                 <widget class="QLineEdit" name="lineEdit_3">
-                  <property name="minimumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="8">
-                 <widget class="QLineEdit" name="lineEdit_4">
-                  <property name="minimumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
                 <item row="6" column="5" colspan="3">
                  <widget class="QLabel" name="label_6">
                   <property name="minimumSize">
@@ -1881,22 +1833,6 @@
                   </property>
                   <property name="text">
                    <string>Movie Length:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="6" column="8">
-                 <widget class="QLineEdit" name="lineEdit_5">
-                  <property name="minimumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>31</width>
-                    <height>20</height>
-                   </size>
                   </property>
                  </widget>
                 </item>
@@ -1914,7 +1850,13 @@
                  </widget>
                 </item>
                 <item row="2" column="2">
-                 <widget class="QSpinBox" name="spinBox_6">
+                 <widget class="QSpinBox" name="basic_degreesSpinBox">
+                  <property name="minimumSize">
+                   <size>
+                    <width>43</width>
+                    <height>20</height>
+                   </size>
+                  </property>
                   <property name="maximum">
                    <number>360</number>
                   </property>
@@ -1922,6 +1864,18 @@
                    <number>360</number>
                   </property>
                  </widget>
+                </item>
+                <item row="5" column="8">
+                 <widget class="QSpinBox" name="basic_currentTimeSpinBox"/>
+                </item>
+                <item row="6" column="8">
+                 <widget class="QSpinBox" name="basic_movieLenSpinBox"/>
+                </item>
+                <item row="5" column="2">
+                 <widget class="QSpinBox" name="basic_startTimeSpinBox"/>
+                </item>
+                <item row="5" column="5">
+                 <widget class="QSpinBox" name="basic_endTimeSpinBox"/>
                 </item>
                </layout>
               </item>
@@ -1949,14 +1903,14 @@
                  </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QSpinBox" name="spinBox">
+                 <widget class="QSpinBox" name="advanced_FPSSpinBox">
                   <property name="value">
                    <number>30</number>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="2">
-                 <widget class="QComboBox" name="comboBox_3">
+                 <widget class="QComboBox" name="advanced_StyleCombo">
                   <property name="minimumSize">
                    <size>
                     <width>62</width>
@@ -1976,28 +1930,28 @@
                  </widget>
                 </item>
                 <item row="2" column="3">
-                 <widget class="QPushButton" name="pushButton">
+                 <widget class="QPushButton" name="advanced_addButton">
                   <property name="text">
                    <string>Add</string>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="4">
-                 <widget class="QPushButton" name="pushButton_2">
+                 <widget class="QPushButton" name="advanced_deleteButton">
                   <property name="text">
                    <string>Delete</string>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="5">
-                 <widget class="QPushButton" name="pushButton_3">
+                 <widget class="QPushButton" name="advanced_delAllButton">
                   <property name="text">
                    <string>Del. All</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0" colspan="6">
-                 <widget class="QTableWidget" name="tableWidget">
+                 <widget class="QTableWidget" name="advanced_Table">
                   <column>
                    <property name="text">
                     <string>ID</string>
@@ -2044,14 +1998,14 @@
                  </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QPushButton" name="pushButton_4">
+                 <widget class="QPushButton" name="autoKey_generateButton">
                   <property name="text">
                    <string>Generate</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0" colspan="2">
-                 <widget class="QTreeWidget" name="treeWidget_2">
+                 <widget class="QTreeWidget" name="autoKey_table">
                   <column>
                    <property name="text">
                     <string>Auto Key Type</string>
@@ -2093,7 +2047,7 @@
                  </widget>
                 </item>
                 <item row="0" column="0" colspan="2">
-                 <widget class="QCheckBox" name="checkBox_4">
+                 <widget class="QCheckBox" name="cropping_enableCheckBox">
                   <property name="layoutDirection">
                    <enum>Qt::RightToLeft</enum>
                   </property>
@@ -2103,7 +2057,7 @@
                  </widget>
                 </item>
                 <item row="0" column="4">
-                 <widget class="QPushButton" name="tempReset">
+                 <widget class="QPushButton" name="cropping_tempReset">
                   <property name="text">
                    <string>Reset</string>
                   </property>
@@ -2117,7 +2071,7 @@
                  </widget>
                 </item>
                 <item row="2" column="4">
-                 <widget class="QSpinBox" name="spinBox_3"/>
+                 <widget class="QSpinBox" name="cropping_ySpinBox"/>
                 </item>
                 <item row="2" column="3">
                  <widget class="QLabel" name="label_16">
@@ -2127,7 +2081,7 @@
                  </widget>
                 </item>
                 <item row="2" column="2">
-                 <widget class="QSpinBox" name="spinBox_2"/>
+                 <widget class="QSpinBox" name="cropping_xSpinBox"/>
                 </item>
                 <item row="2" column="1">
                  <widget class="QLabel" name="label_15">
@@ -2137,7 +2091,7 @@
                  </widget>
                 </item>
                 <item row="4" column="4">
-                 <widget class="QSpinBox" name="spinBox_5"/>
+                 <widget class="QSpinBox" name="cropping_heightSpinBox"/>
                 </item>
                 <item row="4" column="3">
                  <widget class="QLabel" name="label_19">
@@ -2147,7 +2101,7 @@
                  </widget>
                 </item>
                 <item row="4" column="2">
-                 <widget class="QSpinBox" name="spinBox_4"/>
+                 <widget class="QSpinBox" name="cropping_widthSpinBox"/>
                 </item>
                 <item row="4" column="1">
                  <widget class="QLabel" name="label_18">
@@ -2168,7 +2122,7 @@
               <item row="0" column="0">
                <layout class="QGridLayout" name="gridLayout_13">
                 <item row="0" column="0">
-                 <widget class="QCheckBox" name="checkBox_5">
+                 <widget class="QCheckBox" name="four_enableCheckBox">
                   <property name="text">
                    <string>Enable execution of a script on 4D data during play</string>
                   </property>
@@ -2189,24 +2143,24 @@
                  </widget>
                 </item>
                 <item row="2" column="1" colspan="2">
-                 <widget class="QPushButton" name="pushButton_5">
+                 <widget class="QPushButton" name="four_browseButton">
                   <property name="text">
                    <string>Browse...</string>
                   </property>
                  </widget>
                 </item>
                 <item row="3" column="0" colspan="2">
-                 <widget class="QLineEdit" name="lineEdit_7"/>
+                 <widget class="QLineEdit" name="four_lineEdit"/>
                 </item>
                 <item row="3" column="2">
-                 <widget class="QPushButton" name="pushButton_6">
+                 <widget class="QPushButton" name="four_xButton">
                   <property name="text">
                    <string>X</string>
                   </property>
                  </widget>
                 </item>
                 <item row="4" column="0" colspan="3">
-                 <widget class="QTreeWidget" name="treeWidget">
+                 <widget class="QTreeWidget" name="four_treeWidget">
                   <column>
                    <property name="text">
                     <string>Built-in Script Files</string>
@@ -2291,7 +2245,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_7">
+           <widget class="QSpinBox" name="fpsSpinBox">
             <property name="maximum">
              <number>144</number>
             </property>
@@ -2334,53 +2288,53 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QGridLayout" name="gridLayout_22">
+    <layout class="QGridLayout" name="gridLayout_31">
      <item row="0" column="0">
-      <layout class="QGridLayout" name="gridLayout_21">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_23">
-         <property name="text">
-          <string>Gam.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_24">
-         <property name="text">
-          <string>Lum.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_25">
-         <property name="text">
-          <string>Eql.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="3">
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string/>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_20">
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string/>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_22">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_21">
           <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_20">
+            <item row="0" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_24">
+              <property name="text">
+               <string>Lum.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_23">
+              <property name="text">
+               <string>Gam.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>Eql.</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_4">
-            <item row="0" column="0">
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_22">
               <property name="text">
                <string>Red:</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QToolButton" name="toolButton_4">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
+            <item row="0" column="2" alignment="Qt::AlignHCenter">
              <widget class="QToolButton" name="toolButton">
               <property name="text">
                <string>...</string>
@@ -2406,8 +2360,8 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QSlider" name="verticalSlider">
+            <item row="2" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="redGammaSlider">
               <property name="maximum">
                <number>4</number>
               </property>
@@ -2422,8 +2376,8 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QSlider" name="verticalSlider_2">
+            <item row="2" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="redLuminanceSlider">
               <property name="maximum">
                <number>256</number>
               </property>
@@ -2438,8 +2392,8 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
-             <widget class="QSlider" name="verticalSlider_12">
+            <item row="2" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="redEqlSlider">
               <property name="maximum">
                <number>1</number>
               </property>
@@ -2455,14 +2409,14 @@
              </widget>
             </item>
             <item row="3" column="0" colspan="3">
-             <widget class="QPushButton" name="pushButton_7">
+             <widget class="QPushButton" name="redResetButton">
               <property name="text">
                <string>Reset</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+            <item row="4" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QDoubleSpinBox" name="redGamSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2480,8 +2434,8 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="2">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+            <item row="4" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QDoubleSpinBox" name="redEqlSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2496,21 +2450,14 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
+            <item row="5" column="0" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_26">
               <property name="text">
-               <string>Red:</string>
+               <string>Green:</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
-             <widget class="QToolButton" name="toolButton_5">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="2">
+            <item row="5" column="2" alignment="Qt::AlignHCenter">
              <widget class="QToolButton" name="toolButton_2">
               <property name="text">
                <string>...</string>
@@ -2536,8 +2483,8 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="0">
-             <widget class="QSlider" name="verticalSlider_4">
+            <item row="7" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="greenGammaSlider">
               <property name="maximum">
                <number>4</number>
               </property>
@@ -2552,8 +2499,8 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="1">
-             <widget class="QSlider" name="verticalSlider_3">
+            <item row="7" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="greenLuminanceSlider">
               <property name="maximum">
                <number>256</number>
               </property>
@@ -2568,8 +2515,8 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="2">
-             <widget class="QSlider" name="verticalSlider_13">
+            <item row="7" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="greenEqlSlider">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
@@ -2579,14 +2526,14 @@
              </widget>
             </item>
             <item row="8" column="0" colspan="3">
-             <widget class="QPushButton" name="pushButton_8">
+             <widget class="QPushButton" name="greenResetButton">
               <property name="text">
                <string>Reset</string>
               </property>
              </widget>
             </item>
-            <item row="9" column="0">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+            <item row="9" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QDoubleSpinBox" name="greenGamSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2604,8 +2551,8 @@
               </property>
              </widget>
             </item>
-            <item row="9" column="2">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+            <item row="9" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QDoubleSpinBox" name="greenEqlSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2620,21 +2567,14 @@
               </property>
              </widget>
             </item>
-            <item row="10" column="0">
+            <item row="10" column="0" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_27">
               <property name="text">
                <string>Blue:</string>
               </property>
              </widget>
             </item>
-            <item row="10" column="1">
-             <widget class="QToolButton" name="toolButton_6">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="2">
+            <item row="10" column="2" alignment="Qt::AlignHCenter">
              <widget class="QToolButton" name="toolButton_3">
               <property name="text">
                <string>...</string>
@@ -2660,8 +2600,8 @@
               </property>
              </widget>
             </item>
-            <item row="12" column="0">
-             <widget class="QSlider" name="verticalSlider_5">
+            <item row="12" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="blueGammaSlider">
               <property name="maximum">
                <number>4</number>
               </property>
@@ -2676,8 +2616,8 @@
               </property>
              </widget>
             </item>
-            <item row="12" column="1">
-             <widget class="QSlider" name="verticalSlider_6">
+            <item row="12" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="blueLuminanceSlider">
               <property name="maximum">
                <number>256</number>
               </property>
@@ -2692,8 +2632,8 @@
               </property>
              </widget>
             </item>
-            <item row="12" column="2">
-             <widget class="QSlider" name="verticalSlider_14">
+            <item row="12" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QSlider" name="blueEqlSlider">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
@@ -2703,14 +2643,14 @@
              </widget>
             </item>
             <item row="13" column="0" colspan="3">
-             <widget class="QPushButton" name="pushButton_9">
+             <widget class="QPushButton" name="blueResetButton">
               <property name="text">
                <string>Reset</string>
               </property>
              </widget>
             </item>
-            <item row="14" column="0">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
+            <item row="14" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QDoubleSpinBox" name="blueGamSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2728,8 +2668,8 @@
               </property>
              </widget>
             </item>
-            <item row="14" column="2">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
+            <item row="14" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QDoubleSpinBox" name="blueEqlSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2744,8 +2684,8 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QSpinBox" name="spinBox_3">
+            <item row="4" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QSpinBox" name="redLumSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2760,8 +2700,8 @@
               </property>
              </widget>
             </item>
-            <item row="9" column="1">
-             <widget class="QSpinBox" name="spinBox_5">
+            <item row="9" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QSpinBox" name="greenLumSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2776,8 +2716,8 @@
               </property>
              </widget>
             </item>
-            <item row="14" column="1">
-             <widget class="QSpinBox" name="spinBox_8">
+            <item row="14" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QSpinBox" name="blueLumSpinBox">
               <property name="maximumSize">
                <size>
                 <width>41</width>
@@ -2789,15 +2729,36 @@
               </property>
               <property name="value">
                <number>35</number>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" alignment="Qt::AlignHCenter">
+             <widget class="Line" name="line_16">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" alignment="Qt::AlignHCenter">
+             <widget class="Line" name="line_17">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" alignment="Qt::AlignHCenter">
+             <widget class="Line" name="line_18">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
               </property>
              </widget>
             </item>
            </layout>
           </item>
          </layout>
-        </widget>
-       </item>
-      </layout>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -2890,21 +2851,21 @@
              </widget>
             </item>
             <item row="1" column="0" colspan="3">
-             <widget class="QSpinBox" name="spinBox_9">
+             <widget class="QSpinBox" name="xSalmSpinBox">
               <property name="maximum">
                <number>640</number>
               </property>
              </widget>
             </item>
             <item row="1" column="3" colspan="3">
-             <widget class="QSpinBox" name="spinBox_10">
+             <widget class="QSpinBox" name="yGreenSpinBox">
               <property name="maximum">
                <number>640</number>
               </property>
              </widget>
             </item>
             <item row="1" column="6" colspan="3">
-             <widget class="QSpinBox" name="spinBox_11">
+             <widget class="QSpinBox" name="zPurpleSpinBox">
               <property name="maximum">
                <number>88</number>
               </property>
@@ -2968,7 +2929,7 @@
              </widget>
             </item>
             <item row="3" column="0">
-             <widget class="QSlider" name="verticalSlider_7">
+             <widget class="QSlider" name="xSalmSlider">
               <property name="maximum">
                <number>640</number>
               </property>
@@ -2981,7 +2942,7 @@
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="Line" name="line_4">
+             <widget class="Line" name="salmonVertLine">
               <property name="styleSheet">
                <string notr="true">QFrame[frameShape=&quot;5&quot;]
 {
@@ -3000,7 +2961,7 @@
              </widget>
             </item>
             <item row="3" column="2">
-             <widget class="QSlider" name="verticalSlider_8">
+             <widget class="QSlider" name="xMagentaSlider">
               <property name="maximum">
                <number>640</number>
               </property>
@@ -3016,7 +2977,7 @@
              </widget>
             </item>
             <item row="3" column="3">
-             <widget class="QSlider" name="verticalSlider_10">
+             <widget class="QSlider" name="yGreenSlider">
               <property name="maximum">
                <number>640</number>
               </property>
@@ -3029,7 +2990,7 @@
              </widget>
             </item>
             <item row="3" column="4">
-             <widget class="Line" name="line_5">
+             <widget class="Line" name="greenVertLine">
               <property name="styleSheet">
                <string notr="true">QFrame[frameShape=&quot;5&quot;]
 {	
@@ -3048,7 +3009,7 @@
              </widget>
             </item>
             <item row="3" column="5">
-             <widget class="QSlider" name="verticalSlider_9">
+             <widget class="QSlider" name="yYellowSlider">
               <property name="maximum">
                <number>640</number>
               </property>
@@ -3064,7 +3025,7 @@
              </widget>
             </item>
             <item row="3" column="6">
-             <widget class="QSlider" name="verticalSlider_15">
+             <widget class="QSlider" name="zPurpleSlider">
               <property name="maximum">
                <number>88</number>
               </property>
@@ -3077,7 +3038,7 @@
              </widget>
             </item>
             <item row="3" column="7">
-             <widget class="Line" name="line_6">
+             <widget class="Line" name="purpleVertLine">
               <property name="styleSheet">
                <string notr="true">QFrame[frameShape=&quot;5&quot;]
 {	
@@ -3096,7 +3057,7 @@
              </widget>
             </item>
             <item row="3" column="8">
-             <widget class="QSlider" name="verticalSlider_11">
+             <widget class="QSlider" name="zCyanSlider">
               <property name="maximum">
                <number>88</number>
               </property>
@@ -3169,7 +3130,7 @@
              </widget>
             </item>
             <item row="5" column="0" colspan="3">
-             <widget class="QSpinBox" name="spinBox_12">
+             <widget class="QSpinBox" name="xMagentaSpinBox">
               <property name="maximum">
                <number>640</number>
               </property>
@@ -3179,7 +3140,7 @@
              </widget>
             </item>
             <item row="5" column="3" colspan="3">
-             <widget class="QSpinBox" name="spinBox_13">
+             <widget class="QSpinBox" name="yYellowSpinBox">
               <property name="maximum">
                <number>640</number>
               </property>
@@ -3189,7 +3150,7 @@
              </widget>
             </item>
             <item row="5" column="6" colspan="3">
-             <widget class="QSpinBox" name="spinBox_14">
+             <widget class="QSpinBox" name="zCyanSpinBox">
               <property name="maximum">
                <number>88</number>
               </property>
@@ -3230,21 +3191,21 @@
           </item>
           <item row="4" column="0">
            <layout class="QGridLayout" name="gridLayout_25">
-            <item row="0" column="0">
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_31">
               <property name="text">
                <string>Set Clip</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item row="0" column="1" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_32">
               <property name="text">
                <string>Slab</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
+            <item row="0" column="2" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_33">
               <property name="text">
                <string>Width</string>
@@ -3252,37 +3213,37 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QPushButton" name="pushButton_10">
+             <widget class="QPushButton" name="yzButton">
               <property name="text">
                <string>YZ</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QPushButton" name="pushButton_11">
+             <widget class="QPushButton" name="xzButton">
               <property name="text">
                <string>XZ</string>
               </property>
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QPushButton" name="pushButton_12">
+             <widget class="QPushButton" name="xyButton">
               <property name="text">
                <string>XY</string>
               </property>
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QSpinBox" name="spinBox_15"/>
+             <widget class="QSpinBox" name="yzSpinBox"/>
             </item>
             <item row="2" column="1">
-             <widget class="QSpinBox" name="spinBox_16"/>
+             <widget class="QSpinBox" name="xzSpinBox"/>
             </item>
             <item row="2" column="2">
-             <widget class="QSpinBox" name="spinBox_17"/>
+             <widget class="QSpinBox" name="xySpinBox"/>
             </item>
             <item row="3" column="0" colspan="3">
-             <widget class="QPushButton" name="pushButton_13">
+             <widget class="QPushButton" name="resetClipsButton">
               <property name="text">
                <string>Reset Clips</string>
               </property>
@@ -3312,14 +3273,14 @@
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QPushButton" name="pushButton_14">
+               <widget class="QPushButton" name="alignToViewButton">
                 <property name="text">
                  <string>Align to View</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="0">
-               <widget class="QPushButton" name="pushButton_15">
+               <widget class="QPushButton" name="resetTo0Button">
                 <property name="text">
                  <string>Reset to 0</string>
                 </property>
@@ -3351,7 +3312,7 @@
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QSpinBox" name="spinBox_18">
+               <widget class="QSpinBox" name="xRotationSpinBox">
                 <property name="minimum">
                  <number>-180</number>
                 </property>
@@ -3361,7 +3322,7 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QSpinBox" name="spinBox_19">
+               <widget class="QSpinBox" name="yRotationSpinBox">
                 <property name="minimum">
                  <number>-180</number>
                 </property>
@@ -3371,7 +3332,7 @@
                </widget>
               </item>
               <item row="1" column="2">
-               <widget class="QSpinBox" name="spinBox_20">
+               <widget class="QSpinBox" name="zRotationSpinBox">
                 <property name="minimum">
                  <number>-180</number>
                 </property>
@@ -3381,7 +3342,7 @@
                </widget>
               </item>
               <item row="2" column="0" alignment="Qt::AlignHCenter">
-               <widget class="QSlider" name="verticalSlider_16">
+               <widget class="QSlider" name="xRotationSlider">
                 <property name="minimum">
                  <number>-180</number>
                 </property>
@@ -3397,7 +3358,7 @@
                </widget>
               </item>
               <item row="2" column="1" alignment="Qt::AlignHCenter">
-               <widget class="QSlider" name="verticalSlider_17">
+               <widget class="QSlider" name="yRotationSlider">
                 <property name="minimum">
                  <number>-180</number>
                 </property>
@@ -3413,7 +3374,7 @@
                </widget>
               </item>
               <item row="2" column="2" alignment="Qt::AlignHCenter">
-               <widget class="QSlider" name="verticalSlider_18">
+               <widget class="QSlider" name="zRotationSlider">
                 <property name="minimum">
                  <number>-180</number>
                 </property>
@@ -3459,31 +3420,38 @@
      <height>100</height>
     </size>
    </property>
+   <property name="windowTitle">
+    <string>Properties</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QGridLayout" name="gridLayout_7">
-     <item row="0" column="0">
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="baseSize">
-        <size>
-         <width>0</width>
-         <height>200</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>GroupBox</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>9</y>
+       <width>2125</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>0</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+    </widget>
    </widget>
   </widget>
   <action name="actionTestSplit">
