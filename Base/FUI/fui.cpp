@@ -46,14 +46,14 @@ void FUI::setDockWidgetSizes()
     ui->DatasetsWidget->setMinimumHeight(thirdHeight);
     ui->WorkspaceWidget->setMinimumHeight(thirdHeight);
     ui->RecordWidget->setMinimumHeight(thirdHeight);
-    ui->TestWidget1->setMinimumHeight(thirdHeight);
-    ui->TestWidget2->setMinimumHeight(thirdHeight);
+    ui->OutputAdjustmentsWidget->setMinimumHeight(thirdHeight);
+    ui->ClippingPanesWidget->setMinimumHeight(thirdHeight);
 
     ui->DatasetsWidget->setMaximumHeight(modifiedHeight);
     ui->WorkspaceWidget->setMaximumHeight(modifiedHeight);
     ui->RecordWidget->setMaximumHeight(modifiedHeight);
-    ui->TestWidget1->setMaximumHeight(windowSize - 100);
-    ui->TestWidget2->setMaximumHeight(windowSize - 100);
+    ui->OutputAdjustmentsWidget->setMaximumHeight(windowSize - 100);
+    ui->ClippingPanesWidget->setMaximumHeight(windowSize - 100);
 
 }
 

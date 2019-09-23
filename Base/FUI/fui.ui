@@ -583,19 +583,6 @@
        <property name="title">
         <string>GroupBox</string>
        </property>
-       <widget class="QCheckBox" name="checkBox">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>40</y>
-          <width>121</width>
-          <height>81</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Split UI</string>
-        </property>
-       </widget>
       </widget>
      </item>
     </layout>
@@ -1104,7 +1091,7 @@
      <item row="0" column="0">
       <widget class="QGroupBox" name="groupBox_6">
        <property name="title">
-        <string>GroupBox</string>
+        <string/>
        </property>
        <layout class="QGridLayout" name="gridLayout_14">
         <item row="0" column="0">
@@ -2321,17 +2308,23 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="TestWidget1">
+  <widget class="QDockWidget" name="OutputAdjustmentsWidget">
    <property name="minimumSize">
     <size>
      <width>235</width>
-     <height>300</height>
+     <height>408</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
      <width>600</width>
      <height>1500</height>
+    </size>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -2368,7 +2361,7 @@
        <item row="1" column="0" colspan="3">
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>GroupBox</string>
+          <string/>
          </property>
          <layout class="QGridLayout" name="gridLayout_20">
           <item row="0" column="0">
@@ -2415,22 +2408,49 @@
             </item>
             <item row="2" column="0">
              <widget class="QSlider" name="verticalSlider">
+              <property name="maximum">
+               <number>4</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
              <widget class="QSlider" name="verticalSlider_2">
+              <property name="maximum">
+               <number>256</number>
+              </property>
+              <property name="value">
+               <number>35</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item row="2" column="2">
              <widget class="QSlider" name="verticalSlider_12">
+              <property name="maximum">
+               <number>1</number>
+              </property>
+              <property name="singleStep">
+               <number>1</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2449,15 +2469,14 @@
                 <height>22</height>
                </size>
               </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
-              <property name="maximumSize">
-               <size>
-                <width>41</width>
-                <height>22</height>
-               </size>
+              <property name="maximum">
+               <double>4.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -2468,6 +2487,12 @@
                 <width>41</width>
                 <height>22</height>
                </size>
+              </property>
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
@@ -2513,15 +2538,33 @@
             </item>
             <item row="7" column="0">
              <widget class="QSlider" name="verticalSlider_4">
+              <property name="maximum">
+               <number>4</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item row="7" column="1">
              <widget class="QSlider" name="verticalSlider_3">
+              <property name="maximum">
+               <number>256</number>
+              </property>
+              <property name="value">
+               <number>35</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2529,6 +2572,9 @@
              <widget class="QSlider" name="verticalSlider_13">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2547,15 +2593,14 @@
                 <height>22</height>
                </size>
               </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
-              <property name="maximumSize">
-               <size>
-                <width>41</width>
-                <height>22</height>
-               </size>
+              <property name="maximum">
+               <double>4.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -2566,6 +2611,12 @@
                 <width>41</width>
                 <height>22</height>
                </size>
+              </property>
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
               </property>
              </widget>
             </item>
@@ -2611,15 +2662,33 @@
             </item>
             <item row="12" column="0">
              <widget class="QSlider" name="verticalSlider_5">
+              <property name="maximum">
+               <number>4</number>
+              </property>
+              <property name="value">
+               <number>1</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
             <item row="12" column="1">
              <widget class="QSlider" name="verticalSlider_6">
+              <property name="maximum">
+               <number>256</number>
+              </property>
+              <property name="value">
+               <number>35</number>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2627,6 +2696,9 @@
              <widget class="QSlider" name="verticalSlider_14">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2645,15 +2717,14 @@
                 <height>22</height>
                </size>
               </property>
-             </widget>
-            </item>
-            <item row="14" column="1">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
-              <property name="maximumSize">
-               <size>
-                <width>41</width>
-                <height>22</height>
-               </size>
+              <property name="maximum">
+               <double>4.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -2664,6 +2735,60 @@
                 <width>41</width>
                 <height>22</height>
                </size>
+              </property>
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.010000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="spinBox_3">
+              <property name="maximumSize">
+               <size>
+                <width>41</width>
+                <height>22</height>
+               </size>
+              </property>
+              <property name="maximum">
+               <number>256</number>
+              </property>
+              <property name="value">
+               <number>35</number>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QSpinBox" name="spinBox_5">
+              <property name="maximumSize">
+               <size>
+                <width>41</width>
+                <height>22</height>
+               </size>
+              </property>
+              <property name="maximum">
+               <number>256</number>
+              </property>
+              <property name="value">
+               <number>35</number>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1">
+             <widget class="QSpinBox" name="spinBox_8">
+              <property name="maximumSize">
+               <size>
+                <width>41</width>
+                <height>22</height>
+               </size>
+              </property>
+              <property name="maximum">
+               <number>256</number>
+              </property>
+              <property name="value">
+               <number>35</number>
               </property>
              </widget>
             </item>
@@ -2677,35 +2802,639 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="TestWidget2">
+  <widget class="QDockWidget" name="ClippingPanesWidget">
    <property name="minimumSize">
     <size>
-     <width>200</width>
-     <height>300</height>
+     <width>279</width>
+     <height>493</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
      <width>600</width>
-     <height>300</height>
+     <height>1500</height>
     </size>
    </property>
    <property name="features">
     <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
-    <string>Test2</string>
+    <string>Clipping Planes</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QGridLayout" name="gridLayout_5">
-     <item row="0" column="0">
+     <item row="0" column="1">
       <widget class="QGroupBox" name="groupBox_5">
        <property name="title">
-        <string>GroupBox</string>
+        <string/>
        </property>
+       <layout class="QGridLayout" name="gridLayout_30">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_29">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_24">
+            <item row="0" column="0">
+             <widget class="QToolButton" name="toolButton_7">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QToolButton" name="toolButton_8">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QToolButton" name="toolButton_9">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="Line" name="line_13">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <layout class="QGridLayout" name="gridLayout_23">
+            <item row="0" column="0" colspan="3" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_28">
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3" colspan="3" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6" colspan="3" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_30">
+              <property name="text">
+               <string>Z</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="3">
+             <widget class="QSpinBox" name="spinBox_9">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3" colspan="3">
+             <widget class="QSpinBox" name="spinBox_10">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="6" colspan="3">
+             <widget class="QSpinBox" name="spinBox_11">
+              <property name="maximum">
+               <number>88</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="3">
+             <widget class="Line" name="line_7">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;4&quot;]
+{
+	color: rgb(255, 145, 164);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>4</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3" colspan="3">
+             <widget class="Line" name="line_8">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;4&quot;]
+{	
+	color: rgb(0, 255, 59);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>4</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="6" colspan="3">
+             <widget class="Line" name="line_9">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;4&quot;]
+{	
+	color: rgb(170, 170, 255);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>4</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QSlider" name="verticalSlider_7">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="Line" name="line_4">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;5&quot;]
+{
+	color: rgb(255, 145, 164);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>2</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QSlider" name="verticalSlider_8">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+              <property name="value">
+               <number>640</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QSlider" name="verticalSlider_10">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4">
+             <widget class="Line" name="line_5">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;5&quot;]
+{	
+	color: rgb(0, 255, 59);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>2</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="5">
+             <widget class="QSlider" name="verticalSlider_9">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+              <property name="value">
+               <number>640</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="6">
+             <widget class="QSlider" name="verticalSlider_15">
+              <property name="maximum">
+               <number>88</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="7">
+             <widget class="Line" name="line_6">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;5&quot;]
+{	
+	color: rgb(170, 170, 255);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>2</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="8">
+             <widget class="QSlider" name="verticalSlider_11">
+              <property name="maximum">
+               <number>88</number>
+              </property>
+              <property name="value">
+               <number>88</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="3">
+             <widget class="Line" name="line_10">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;4&quot;]
+{
+	color: rgb(255, 85, 255);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>4</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3" colspan="3">
+             <widget class="Line" name="line_11">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;4&quot;]
+{
+	color: rgb(255, 255, 0);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>4</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="6" colspan="3">
+             <widget class="Line" name="line_12">
+              <property name="styleSheet">
+               <string notr="true">QFrame[frameShape=&quot;4&quot;]
+{
+	color: rgb(0, 255, 255);
+}</string>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>4</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="3">
+             <widget class="QSpinBox" name="spinBox_12">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+              <property name="value">
+               <number>640</number>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3" colspan="3">
+             <widget class="QSpinBox" name="spinBox_13">
+              <property name="maximum">
+               <number>640</number>
+              </property>
+              <property name="value">
+               <number>640</number>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="6" colspan="3">
+             <widget class="QSpinBox" name="spinBox_14">
+              <property name="maximum">
+               <number>88</number>
+              </property>
+              <property name="value">
+               <number>88</number>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0" colspan="3">
+             <widget class="QToolButton" name="toolButton_10">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3" colspan="3">
+             <widget class="QToolButton" name="toolButton_11">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="6" colspan="3">
+             <widget class="QToolButton" name="toolButton_12">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <widget class="Line" name="line_14">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <layout class="QGridLayout" name="gridLayout_25">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
+               <string>Set Clip</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_32">
+              <property name="text">
+               <string>Slab</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_33">
+              <property name="text">
+               <string>Width</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pushButton_10">
+              <property name="text">
+               <string>YZ</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="pushButton_11">
+              <property name="text">
+               <string>XZ</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="pushButton_12">
+              <property name="text">
+               <string>XY</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QSpinBox" name="spinBox_15"/>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="spinBox_16"/>
+            </item>
+            <item row="2" column="2">
+             <widget class="QSpinBox" name="spinBox_17"/>
+            </item>
+            <item row="3" column="0" colspan="3">
+             <widget class="QPushButton" name="pushButton_13">
+              <property name="text">
+               <string>Reset Clips</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="5" column="0">
+           <widget class="Line" name="line_15">
+            <property name="lineWidth">
+             <number>4</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <layout class="QGridLayout" name="gridLayout_28">
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="gridLayout_26">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_34">
+                <property name="text">
+                 <string>Rotations:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="pushButton_14">
+                <property name="text">
+                 <string>Align to View</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="pushButton_15">
+                <property name="text">
+                 <string>Reset to 0</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QGridLayout" name="gridLayout_27">
+              <item row="0" column="0" alignment="Qt::AlignHCenter">
+               <widget class="QLabel" name="label_35">
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" alignment="Qt::AlignHCenter">
+               <widget class="QLabel" name="label_36">
+                <property name="text">
+                 <string>Y</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2" alignment="Qt::AlignHCenter">
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Z</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QSpinBox" name="spinBox_18">
+                <property name="minimum">
+                 <number>-180</number>
+                </property>
+                <property name="maximum">
+                 <number>180</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="spinBox_19">
+                <property name="minimum">
+                 <number>-180</number>
+                </property>
+                <property name="maximum">
+                 <number>180</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QSpinBox" name="spinBox_20">
+                <property name="minimum">
+                 <number>-180</number>
+                </property>
+                <property name="maximum">
+                 <number>180</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" alignment="Qt::AlignHCenter">
+               <widget class="QSlider" name="verticalSlider_16">
+                <property name="minimum">
+                 <number>-180</number>
+                </property>
+                <property name="maximum">
+                 <number>180</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="invertedAppearance">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1" alignment="Qt::AlignHCenter">
+               <widget class="QSlider" name="verticalSlider_17">
+                <property name="minimum">
+                 <number>-180</number>
+                </property>
+                <property name="maximum">
+                 <number>180</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="invertedAppearance">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2" alignment="Qt::AlignHCenter">
+               <widget class="QSlider" name="verticalSlider_18">
+                <property name="minimum">
+                 <number>-180</number>
+                </property>
+                <property name="maximum">
+                 <number>180</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="invertedAppearance">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
