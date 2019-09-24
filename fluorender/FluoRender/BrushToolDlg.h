@@ -66,6 +66,7 @@ public:
 		ID_BrushRedo,
 		//toolbar2
 		ID_MaskCopy,
+		ID_MaskCopyData,
 		ID_MaskPaste,
 		ID_MaskMerge,
 		ID_MaskExclude,
@@ -207,6 +208,7 @@ private:
 	void OnBrushSolid(wxCommandEvent& event);
 	//mask toolbar
 	void OnMaskCopy(wxCommandEvent& event);
+	void OnMaskCopyData(wxCommandEvent& event);
 	void OnMaskPaste(wxCommandEvent& event);
 	void OnMaskMerge(wxCommandEvent& event);
 	void OnMaskExclude(wxCommandEvent& event);

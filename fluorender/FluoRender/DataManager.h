@@ -220,6 +220,7 @@ public:
 	//mode: 0-zeros; 1-255; 2-leave as is
 	void AddEmptyMask(int mode, bool change=true);
 	void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
+	void AddMask16(Nrrd* mask, int op, double scale);//16-bit data
 	//load label
 	void LoadLabel(Nrrd* label);
 	Nrrd* GetLabel(bool ret);

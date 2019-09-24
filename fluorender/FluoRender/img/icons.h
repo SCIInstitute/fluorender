@@ -259,6 +259,8 @@ public:
 	const static unsigned char mask_paste_png[769];
 	/* mask_union.png - 816 bytes */
 	const static unsigned char mask_union_png[816];
+	/* copy_data.png - 525 bytes */
+	const static unsigned char copy_data_png[525];
 
 
 	//ruler tool icons

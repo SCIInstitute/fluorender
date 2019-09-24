@@ -788,6 +788,93 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	}
 }
 
+void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
+{
+	if (!mask || !mask->data || !m_tex || !m_vr)
+		return;
+	if (mask->dim != 3 ||
+		mask->axis[0].size != m_res_x ||
+		mask->axis[1].size != m_res_y ||
+		mask->axis[2].size != m_res_z)
+		return;
+
+	Nrrd *nrrd_mask = 0;
+	uint8 *val8 = 0;
+	unsigned long long mem_size = (unsigned long long)m_res_x*
+		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+	//prepare the texture bricks for the mask
+	bool empty = m_tex->add_empty_mask();
+	if (empty)
+	{
+		//add the nrrd data for mask
+		nrrd_mask = nrrdNew();
+		val8 = new (std::nothrow) uint8[mem_size];
+		if (!val8)
+		{
+			wxMessageBox("Not enough memory. Please save project and restart.");
+			return;
+		}
+		double spcx, spcy, spcz;
+		m_tex->get_spacings(spcx, spcy, spcz);
+		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMax, spcx*m_res_x, spcy*m_res_y, spcz*m_res_z);
+
+		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
+	}
+	else
+	{
+		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
+		val8 = (uint8*)nrrd_mask->data;
+	}
+
+	if (val8)
+	{
+		if (op > 0 && !empty)
+		{
+			switch (op)
+			{
+			case 1://union
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					val8[index] = std::max(val8[index],
+						uint8(scale*((uint16*)(mask->data))[index]));
+				}
+				break;
+			case 2://exclude
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					if (std::min(val8[index],
+						uint8(scale*((uint16*)(mask->data))[index])) > 0)
+						val8[index] = 0;
+				}
+				break;
+			case 3://intersect
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					val8[index] = std::min(val8[index],
+						uint8(scale*((uint16*)(mask->data))[index]));
+				}
+				break;
+			}
+		}
+		else//replace
+		{
+			for (unsigned long long index = 0;
+				index < mem_size; ++index)
+			{
+				val8[index] = uint8(scale*((uint16*)(mask->data))[index]);
+			}
+		}
+		m_vr->clear_tex_mask();
+	}
+}
+
 //volume label
 void VolumeData::LoadLabel(Nrrd* label)
 {
