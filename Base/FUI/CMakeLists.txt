@@ -55,7 +55,7 @@ set(SOURCES
   )
   
 set(UI_FILES
-    fui.ui
+    FUI.ui
   )
 
 # For everything QT Related 
