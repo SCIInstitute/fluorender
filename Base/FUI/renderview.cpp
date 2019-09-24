@@ -60,20 +60,32 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget.release());
 }
 
+std::unique_ptr<QSlider> RenderView::createLeftSlider()
+{
+    auto newSlider = std::make_unique<QSlider>();
+    newSlider->setOrientation(Qt::Vertical);
+    newSlider->setRange(0,1);
+
+    return newSlider;
+}
 void RenderView::populateLeftToolBar(std::unique_ptr<QToolBar> &leftToolBar)
 {
-  auto newSlider = std::make_unique<QSlider>(new QSlider);
-  auto newSpinBox = std::make_unique<QDoubleSpinBox>(new QDoubleSpinBox);
 
-  newSlider->setOrientation(Qt::Vertical);
+  auto widget = std::make_unique<QWidget>(new QWidget);
+  QVBoxLayout *newVertLayout = new QVBoxLayout;
+  QDoubleSpinBox *newSpinBox = new QDoubleSpinBox;
+  newSpinBox->setMinimumSize(41,22);
 
-  // TODO: Find out how to not get this to crash, the slider needs to be
-  //       in the middle of the toolbar.
+  std::unique_ptr<QSlider> test = createLeftSlider();
 
-  //QLayout *sliderLayout = newSlider->layout();
-  //sliderLayout->setAlignment(newSlider.release(),Qt::AlignHCenter);
-  leftToolBar->addWidget(newSlider.release());
-  leftToolBar->addWidget(newSpinBox.release());
+  newVertLayout->setAlignment(Qt::AlignVCenter);
+  newVertLayout->addWidget(test.release());
+
+  widget->setLayout(newVertLayout);
+
+  leftToolBar->addWidget(widget.release());
+  leftToolBar->addWidget(newSpinBox);
+
 }
 
 void RenderView::populateRightToolBar(std::unique_ptr<QToolBar> &rightToolBar)

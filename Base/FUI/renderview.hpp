@@ -11,6 +11,7 @@
 #include <QString>
 #include <QSlider>
 #include <QDoubleSpinBox>
+#include <QVBoxLayout>
 #include <QLayout>
 
 #include <memory>
@@ -29,6 +30,8 @@ class RenderView : public QMainWindow
     void populateRightToolBar(std::unique_ptr<QToolBar> &rightToolBar);
     void populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar);
     void populateBottomToolBar(std::unique_ptr<QToolBar> &bottomToolBar);
+
+    std::unique_ptr<QSlider> createLeftSlider();
 
     bool getMainWindowStatus();
 
