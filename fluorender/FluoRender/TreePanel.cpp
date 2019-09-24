@@ -986,7 +986,7 @@ void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
 	if (m_fixed)
 		return;
 
-	CopyMask();
+	CopyMask(false);
 }
 
 void DataTreeCtrl::OnPasteMask(wxCommandEvent& event)
@@ -2068,7 +2068,7 @@ void DataTreeCtrl::BrushCreateInv()
 }
 
 //mask operations
-void DataTreeCtrl::CopyMask()
+void DataTreeCtrl::CopyMask(bool copy_data)
 {
 	wxTreeItemId sel_item = GetSelection();
 	if (!sel_item.IsOk()) return;
@@ -2077,8 +2077,11 @@ void DataTreeCtrl::CopyMask()
 
 	wxString name = GetItemText(sel_item);
 	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && vd->GetMask(true))
+	if (vd)
+	{
 		vr_frame->m_vd_copy = vd;
+		vr_frame->m_copy_data = copy_data;
+	}
 }
 
 void DataTreeCtrl::PasteMask(int op)
@@ -2092,13 +2095,28 @@ void DataTreeCtrl::PasteMask(int op)
 
 	wxString name = GetItemText(sel_item);
 	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-	if (vd && vr_frame->m_vd_copy &&
-		vd != vr_frame->m_vd_copy)
+	if (vd && vr_frame->m_vd_copy)
 	{
+		//prevent self copying
+		if (!vr_frame->m_copy_data &&
+			vd == vr_frame->m_vd_copy)
+			return;
+
+		//undo/redo
 		if (Texture::mask_undo_num_ > 0 &&
 			vd->GetTexture())
 			vd->GetTexture()->push_mask();
-		vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
+		if (vr_frame->m_copy_data)
+		{
+			Nrrd* data = vr_frame->m_vd_copy->GetVolume(false);
+			if (vr_frame->m_vd_copy->GetBits() == 16)
+				vd->AddMask16(data, op, vr_frame->m_vd_copy->GetScalarScale());
+			else
+				vd->AddMask(data, op);
+		}
+		else
+			vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
+
 		vr_frame->RefreshVRenderViews();
 		if (vr_frame->GetBrushToolDlg())
 			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();

@@ -157,7 +157,8 @@ VRenderFrame::VRenderFrame(
 	m_cur_sel_vol(-1),
 	m_cur_sel_mesh(-1),
 	m_benchmark(benchmark),
-	m_vd_copy(0)
+	m_vd_copy(0),
+	m_copy_data(false)
 {
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);

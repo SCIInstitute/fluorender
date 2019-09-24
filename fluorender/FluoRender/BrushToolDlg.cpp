@@ -51,6 +51,7 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_TOOL(ID_BrushSolid, BrushToolDlg::OnBrushSolid)
 	//mask tools
 	EVT_TOOL(ID_MaskCopy, BrushToolDlg::OnMaskCopy)
+	EVT_TOOL(ID_MaskCopyData, BrushToolDlg::OnMaskCopyData)
 	EVT_TOOL(ID_MaskPaste, BrushToolDlg::OnMaskPaste)
 	EVT_TOOL(ID_MaskMerge, BrushToolDlg::OnMaskMerge)
 	EVT_TOOL(ID_MaskExclude, BrushToolDlg::OnMaskExclude)
@@ -180,6 +181,11 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_mask_tb->AddTool(
 		ID_MaskCopy, "Copy", bitmap,
 		"Copy current selection mask to clipboard");
+	bitmap = wxGetBitmapFromMemory(copy_data);
+	m_mask_tb->AddTool(
+		ID_MaskCopyData, "Data-Mask", bitmap,
+		"Copy current channel data as mask to clipboard");
+	m_mask_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(mask_paste);
 	m_mask_tb->AddTool(
 		ID_MaskPaste, "Paste", bitmap,
@@ -727,7 +733,16 @@ void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree() &&
 		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->CopyMask();
+		frame->GetTree()->GetTreeCtrl()->CopyMask(false);
+	UpdateMaskTb();
+}
+
+void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
+{
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree() &&
+		frame->GetTree()->GetTreeCtrl())
+		frame->GetTree()->GetTreeCtrl()->CopyMask(true);
 	UpdateMaskTb();
 }
 
