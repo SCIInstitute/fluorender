@@ -239,7 +239,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_frame_h(-1),
 	//post image processing
 	m_gamma(Color(1.0, 1.0, 1.0)),
-	m_brightness(Color(1.0, 1.0, 1.0)),
+	m_brightness(Color(1.135, 1.135, 1.135)),
 	m_hdr(0.0, 0.0, 0.0),
 	m_sync_r(false),
 	m_sync_g(false),
