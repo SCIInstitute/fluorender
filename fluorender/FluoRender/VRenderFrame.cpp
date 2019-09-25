@@ -666,16 +666,16 @@ VRenderFrame::VRenderFrame(
 	//set view default settings
 	if (m_adjust_view && vrv)
 	{
-		Color gamma, brightness, hdr;
-		bool sync_r, sync_g, sync_b;
-		m_adjust_view->GetDefaults(gamma, brightness, hdr,
-			sync_r, sync_g, sync_b);
-		vrv->m_glview->SetGamma(gamma);
-		vrv->m_glview->SetBrightness(brightness);
-		vrv->m_glview->SetHdr(hdr);
-		vrv->m_glview->SetSyncR(sync_r);
-		vrv->m_glview->SetSyncG(sync_g);
-		vrv->m_glview->SetSyncB(sync_b);
+		//Color gamma, brightness, hdr;
+		//bool sync_r, sync_g, sync_b;
+		//m_adjust_view->GetDefaults(gamma, brightness, hdr,
+		//	sync_r, sync_g, sync_b);
+		//vrv->m_glview->SetGamma(gamma);
+		//vrv->m_glview->SetBrightness(brightness);
+		//vrv->m_glview->SetHdr(hdr);
+		vrv->m_glview->SetSyncR(true);
+		vrv->m_glview->SetSyncG(true);
+		vrv->m_glview->SetSyncB(true);
 	}
 
 	//drop target
@@ -976,15 +976,15 @@ wxString VRenderFrame::CreateView(int row)
 	//set view default settings
 	if (m_adjust_view && vrv)
 	{
-		Color gamma, brightness, hdr;
+		/*Color gamma, brightness, hdr;
 		bool sync_r, sync_g, sync_b;
 		m_adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
 		vrv->m_glview->SetGamma(gamma);
 		vrv->m_glview->SetBrightness(brightness);
-		vrv->m_glview->SetHdr(hdr);
-		vrv->m_glview->SetSyncR(sync_r);
-		vrv->m_glview->SetSyncG(sync_g);
-		vrv->m_glview->SetSyncB(sync_b);
+		vrv->m_glview->SetHdr(hdr);*/
+		vrv->m_glview->SetSyncR(true);
+		vrv->m_glview->SetSyncG(true);
+		vrv->m_glview->SetSyncB(true);
 	}
 
 	//add volumes

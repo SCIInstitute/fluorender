@@ -443,7 +443,7 @@ void AdjustView::GetSettings()
 		m_g_brightness_sldr->SetValue(Brightness2UIP(g_brightness));
 		m_g_hdr_sldr->SetValue(Hdr2UIP(g_hdr));
 		m_g_gamma_text->ChangeValue(wxString::Format("%.2f", g_gamma));
-		m_g_brightness_text->ChangeValue(wxString::Format("%d", int(g_brightness)));
+		m_g_brightness_text->ChangeValue(wxString::Format("%d", Brightness2UIP(g_brightness)));
 		m_g_hdr_text->ChangeValue(wxString::Format("%.2f", g_hdr));
 		//blue
 		m_sync_b_chk->ToggleTool(ID_SyncBChk,sync_b);
