@@ -10,5 +10,13 @@
   <file alias="lightOn.svg">Resources/lightbulb-on-solid.svg</file>
   <file alias="fullCircle.svg">Resources/circle-regular.svg</file>
   <file alias="halfCircle.svg">Resources/adjust-solid.svg</file>
+  <file alias="camera.svg">Resources/camera-solid.avg</file>
+  <file alias="unlink.svg">Resources/unlink-solid.avg</file>
+  <file alias="tag.svg">Resources/tag-solid.avg</file>
+  <file alias="stepBack.svg">Resources/step-backward-solid.avg</file>
+  <file alias="3dPlane.svg">Resources/project-diagram-solid.avg</file>
+  <file alias="plus.svg">Resources/plus-solid.avg</file>
+  <file alias="play.svg">Resources/play-solid.avg</file>
+  <file alias="ungroupLayers.svg">Resources/object-ungroup-solid.avg</file>
 </qresource>
 </RCC>
