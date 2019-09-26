@@ -21,6 +21,7 @@
 #include <QComboBox>
 #include <QPixmap>
 #include <QIcon>
+#include <QColorDialog>
 
 #include <memory>
 #include <iostream>
@@ -46,6 +47,7 @@ class RenderView : public QMainWindow
     std::unique_ptr<QComboBox> genComboBox(const QStringList &items);
 
 
+
     bool getMainWindowStatus();
 
     template<class SpinBoxType, typename V>
@@ -61,6 +63,7 @@ class RenderView : public QMainWindow
     std::unique_ptr<QToolBar> genToolProp(Qt::Orientation ori);
     bool isMainWindow = false;
     QStringList labels = {"NA","+X","-X","+Y","-Y","+Z","-Z"};
+    QStringList scales = {"nm","μm","mm"};
 };
 
 #endif // RENDERVIEW_HPP

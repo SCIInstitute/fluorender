@@ -20,5 +20,13 @@
   <file alias="save.svg">Resources/save-solid.svg</file>
   <file alias="play.svg">Resources/play-solid.svg</file>
   <file alias="ungroupLayers.svg">Resources/object-ungroup-solid.svg</file>
+  <file alias="depth.svg">Resources/bezier-curve-solid.svg</file>
+  <file alias="byColor.svg">Resources/border-all-solid.svg</file>
+  <file alias="info.svg">Resources/info-circle-solid.svg</file>
+  <file alias="byScale.svg">Resources/balance-scale-solid.svg</file>
+  <file alias="ruler.svg">Resources/ruler-horizontal-solid.svg</file>
+  <file alias="bird.svg">Resources/dove-solid.svg</file>
+  <file alias="saveConfigs.svg">Resources/hdd-regular.svg</file>
+  <file alias="default.svg">Resources/vector-square-solid.svg</file>
 </qresource>
 </RCC>

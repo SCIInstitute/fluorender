@@ -149,8 +149,69 @@ void RenderView::populateRightToolBar(std::unique_ptr<QToolBar> &rightToolBar)
 
 void RenderView::populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar)
 {
-  auto resetButton = genActionButton(":/reset.svg");
-  topToolBar->addAction(resetButton.release());
+
+  QHBoxLayout *perspectiveLayout = new QHBoxLayout;
+  QHBoxLayout *backgroundLayout = new QHBoxLayout;
+  QHBoxLayout *scaleLayout = new QHBoxLayout;
+
+  auto perspectiveWidget = std::make_unique<QWidget>();
+  auto backgroundWidget = std::make_unique<QWidget>();
+  auto scaleWidget = std::make_unique<QWidget>();
+  auto colorDialogWidget = std::make_unique<QPushButton>();
+  auto captureWidget = std::make_unique<QPushButton>();
+  auto perspectiveAngleSlider = genSlider(Qt::Horizontal,0,100);
+  auto colorDialog = std::make_unique<QColorDialog>(colorDialogWidget.get());
+
+  auto perspectiveAngleLabel = genLabel("Perspective Angle:");
+  auto backgroundLabel = genLabel("Background:");
+
+  auto renderViewLayersAction = genActionButton(":/ungroupLayers.svg");
+  auto renderViewDepthAction = genActionButton(":/depth.svg");
+  auto renderViewColorsAction = genActionButton(":/byColor.svg");
+  auto centerAxisAction = genActionButton(":/3dPlane.svg");
+  auto infoAction = genActionButton(":/info.svg");
+  auto labelAction = genActionButton(":/tag.svg");
+  auto defaultScale = genActionButton(":/default.svg");
+  auto scaleSpinBox = genSpinBox<QSpinBox,int>(0,999);
+  auto scaleDropDown = genComboBox(scales);
+  auto perspectiveSpinBox = genSpinBox<QSpinBox,int>(0,100);
+  auto freeFlyAction = genActionButton(":/bird.svg");
+  auto saveConfigsAction = genActionButton(":/saveConfigs.svg");
+
+  perspectiveLayout->addWidget(perspectiveAngleLabel.release());
+  perspectiveLayout->addWidget(perspectiveAngleSlider.release());
+  perspectiveLayout->addWidget(perspectiveSpinBox.release());
+
+  backgroundLayout->addWidget(backgroundLabel.release());
+  backgroundLayout->addWidget(colorDialogWidget.release());
+
+  scaleLayout->addWidget(scaleSpinBox.release());
+  scaleLayout->addWidget(scaleDropDown.release());
+
+  perspectiveWidget->setLayout(perspectiveLayout);
+  backgroundWidget->setLayout(backgroundLayout);
+  scaleWidget->setLayout(scaleLayout);
+
+  captureWidget->setIcon(QIcon(":/camera.svg"));
+  captureWidget->setText(" Capture");
+
+  topToolBar->addAction(renderViewLayersAction.release());
+  topToolBar->addAction(renderViewDepthAction.release());
+  topToolBar->addAction(renderViewColorsAction.release());
+  topToolBar->addSeparator();
+  topToolBar->addWidget(captureWidget.release());
+  topToolBar->addSeparator();
+  topToolBar->addAction(centerAxisAction.release());
+  topToolBar->addAction(infoAction.release());
+  topToolBar->addAction(labelAction.release());
+  topToolBar->addSeparator();
+  topToolBar->addAction(defaultScale.release());
+  topToolBar->addWidget(scaleWidget.release());
+  topToolBar->addWidget(perspectiveWidget.release());
+  topToolBar->addAction(freeFlyAction.release());
+  topToolBar->addSeparator();
+  topToolBar->addWidget(backgroundWidget.release());
+  topToolBar->addAction(saveConfigsAction.release());
 }
 
 void RenderView::populateBottomToolBar(std::unique_ptr<QToolBar> &bottomToolBar)
