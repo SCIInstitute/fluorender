@@ -57,6 +57,7 @@ set(SOURCES
 	  fui.cpp
 	  renderview.cpp
 	  main.cpp
+    genToolbarObjects.cpp
     renderviewBottomTB.cpp
     renderviewTopTB.cpp
     renderviewLeftTB.cpp

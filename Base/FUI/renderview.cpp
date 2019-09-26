@@ -18,7 +18,9 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
 
     auto newBaseWindow = std::make_unique<QMainWindow>(new QMainWindow);
     auto baseDockWidget = std::make_unique<QDockWidget>(new QDockWidget);
-    auto leftToolBar = genToolProp(Qt::Vertical);
+
+    auto leftToolBar = std::make_unique<LeftToolbar>();
+    //auto leftToolBar = genToolProp(Qt::Vertical);
     auto topToolBar = genToolProp(Qt::Horizontal);
     auto rightToolBar = genToolProp(Qt::Vertical);
     auto bottomToolBar = genToolProp(Qt::Horizontal);
@@ -42,7 +44,7 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
         newRenderView = std::make_unique<FluoGLWidget>();
     }
 
-    populateLeftToolBar(leftToolBar);
+    //populateLeftToolBar(leftToolBar);
     populateRightToolBar(rightToolBar);
     populateTopToolBar(topToolBar);
     populateBottomToolBar(bottomToolBar);
@@ -62,7 +64,37 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget.release());
 }
 
+std::unique_ptr<QSlider> RenderView::genSlider(Qt::Orientation ori, int floor, int ceiling)
+{
+    auto newSlider = std::make_unique<QSlider>();
+    newSlider->setOrientation(ori);
+    newSlider->setRange(floor,ceiling);
 
+    return newSlider;
+}
+
+std::unique_ptr<QLabel> RenderView::genLabel(const QString &text)
+{
+    auto newLabel = std::make_unique<QLabel>(text);
+    return newLabel;
+}
+
+
+std::unique_ptr<QAction> RenderView::genActionButton(const QString &imgName)
+{
+    auto newActionButton = std::make_unique<QAction>();
+    newActionButton->setIcon(QIcon(imgName));
+
+    return newActionButton;
+}
+
+std::unique_ptr<QComboBox> RenderView::genComboBox(const QStringList &items)
+{
+    auto newComboBox = std::make_unique<QComboBox>();
+    newComboBox->addItems(items);
+
+    return newComboBox;
+}
 
 void RenderView::populateLeftToolBar(std::unique_ptr<QToolBar> &leftToolBar)
 {

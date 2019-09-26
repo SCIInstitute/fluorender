@@ -22,6 +22,7 @@ LeftToolbar::LeftToolbar()
   this->addAction(resetButton.release());
 
   this->setMovable(false);
+  this->setStyleSheet("QToolBar {background: rgb(222,225,232)}");
   this->setOrientation(Qt::Vertical);
   this->setFixedWidth(35);
 }

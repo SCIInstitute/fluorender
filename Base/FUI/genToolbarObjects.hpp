@@ -13,40 +13,17 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-std::unique_ptr<QSlider> genSlider(Qt::Orientation ori, int floor, int ceiling)
-{
-    auto newSlider = std::make_unique<QSlider>();
-    newSlider->setOrientation(ori);
-    newSlider->setRange(floor,ceiling);
+std::unique_ptr<QSlider> genSlider(Qt::Orientation ori, int floor, int ceiling);
 
-    return newSlider;
-}
-
-std::unique_ptr<QLabel> genLabel(const QString &text)
-{
-    auto newLabel = std::make_unique<QLabel>(text);
-    return newLabel;
-}
+std::unique_ptr<QLabel> genLabel(const QString &text);
 
 
-std::unique_ptr<QAction> genActionButton(const QString &imgName)
-{
-    auto newActionButton = std::make_unique<QAction>();
-    newActionButton->setIcon(QIcon(imgName));
+std::unique_ptr<QAction> genActionButton(const QString &imgName);
 
-    return newActionButton;
-}
-
-std::unique_ptr<QComboBox> genComboBox(const QStringList &items)
-{
-    auto newComboBox = std::make_unique<QComboBox>();
-    newComboBox->addItems(items);
-
-    return newComboBox;
-}
+std::unique_ptr<QComboBox> genComboBox(const QStringList &items);
 
 template<class SpinBoxType, typename V>
-std::unique_ptr<SpinBoxType> genSpinBox(V floor, V ceiling)
+inline std::unique_ptr<SpinBoxType> genSpinBox(V floor, V ceiling)
 {
   auto newSpinBox = std::make_unique<SpinBoxType>();
   newSpinBox->setRange(floor,ceiling);
