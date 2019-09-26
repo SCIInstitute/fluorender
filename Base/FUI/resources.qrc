@@ -1,0 +1,12 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file alias="reset.svg">Resources/undo-solid.svg</file>
+  <file alias="globe.svg">Resources/globe-solid.svg</file>
+  <file alias="plane.svg">Resources/arrows-alt-h-solid.svg</file>
+  <file alias="fortyFive.svg">Resources/ruler-combined-solid.svg</file>
+  <file alias="tv.svg">Resources/tv-solid.svg</file>
+  <file alias="layer.svg">Resources/layer-group-solid.svg</file>
+  <file alias="lightOff.svg">Resources/lightbulb-off-solid.svg</file>
+  <file alias="lightOn.svg">Resources/lightbulb-on-solid.svg</file>
+</qresource>
+</RCC>

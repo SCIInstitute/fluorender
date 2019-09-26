@@ -9,13 +9,22 @@
 #include <QFrame>
 #include <QPalette>
 #include <QString>
+#include <QStringList>
 #include <QSlider>
 #include <QDoubleSpinBox>
+#include <QSpinBox>
 #include <QVBoxLayout>
-#include <QLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QAction>
+#include <QPushButton>
+#include <QComboBox>
+#include <QPixmap>
+#include <QIcon>
 
 #include <memory>
 #include <iostream>
+#include <vector>
 
 #include "fluoglwidget.hpp"
 
@@ -31,13 +40,27 @@ class RenderView : public QMainWindow
     void populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar);
     void populateBottomToolBar(std::unique_ptr<QToolBar> &bottomToolBar);
 
-    std::unique_ptr<QSlider> createLeftSlider();
+    std::unique_ptr<QSlider> genSlider(Qt::Orientation ori, int floor, int ceiling);
+    std::unique_ptr<QLabel> genLabel(const QString &text);
+    std::unique_ptr<QAction> genActionButton(const QString &imgName);
+    std::unique_ptr<QComboBox> genComboBox(const QStringList &items);
+
 
     bool getMainWindowStatus();
+
+    template<class SpinBoxType, typename V>
+    std::unique_ptr<SpinBoxType> genSpinBox(V floor, V ceiling)
+    {
+      auto newSpinBox = std::make_unique<SpinBoxType>();
+      newSpinBox->setRange(floor,ceiling);
+      newSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+      return newSpinBox;
+    }
 
   private:
     std::unique_ptr<QToolBar> genToolProp(Qt::Orientation ori);
     bool isMainWindow = false;
+    QStringList labels = {"NA","+X","-X","+Y","-Y","+Z","-Z"};
 };
 
 #endif // RENDERVIEW_HPP

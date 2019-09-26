@@ -58,6 +58,10 @@ set(UI_FILES
     FUI.ui
   )
 
+set(RESOURCE_FILE
+    resources.qrc
+)
+
 # For everything QT Related 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -71,6 +75,7 @@ add_executable(FUI
     ${HEADER_FILES}
 	  ${SOURCES}
 	  ${UI_FILES}
+    ${RESOURCE_FILE}
   )
  
 # This works like target_link_libraries, however this is how CMake can take

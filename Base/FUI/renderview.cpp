@@ -14,6 +14,8 @@
  */
 RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QMainWindow (parent)
 {
+    Q_INIT_RESOURCE(resources);
+
     auto newBaseWindow = std::make_unique<QMainWindow>(new QMainWindow);
     auto baseDockWidget = std::make_unique<QDockWidget>(new QDockWidget);
     auto leftToolBar = genToolProp(Qt::Vertical);
@@ -60,37 +62,87 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget.release());
 }
 
-std::unique_ptr<QSlider> RenderView::createLeftSlider()
+std::unique_ptr<QSlider> RenderView::genSlider(Qt::Orientation ori, int floor, int ceiling)
 {
     auto newSlider = std::make_unique<QSlider>();
-    newSlider->setOrientation(Qt::Vertical);
-    newSlider->setRange(0,1);
+    newSlider->setOrientation(ori);
+    newSlider->setRange(floor,ceiling);
 
     return newSlider;
 }
+
+std::unique_ptr<QLabel> RenderView::genLabel(const QString &text)
+{
+    auto newLabel = std::make_unique<QLabel>(text);
+    return newLabel;
+}
+
+
+std::unique_ptr<QAction> RenderView::genActionButton(const QString &imgName)
+{
+    auto newActionButton = std::make_unique<QAction>();
+    newActionButton->setIcon(QIcon(imgName));
+
+    return newActionButton;
+}
+
+std::unique_ptr<QComboBox> RenderView::genComboBox(const QStringList &items)
+{
+    auto newComboBox = std::make_unique<QComboBox>();
+    newComboBox->addItems(items);
+
+    return newComboBox;
+}
+
 void RenderView::populateLeftToolBar(std::unique_ptr<QToolBar> &leftToolBar)
 {
 
   auto widget = std::make_unique<QWidget>(new QWidget);
   QVBoxLayout *newVertLayout = new QVBoxLayout;
-  QDoubleSpinBox *newSpinBox = new QDoubleSpinBox;
-  newSpinBox->setMinimumSize(41,22);
 
-  std::unique_ptr<QSlider> test = createLeftSlider();
+  std::unique_ptr<QSlider> newSlider = genSlider(Qt::Vertical,0,1); //TODO: Figure out some way to change to double
+  auto newDoubleSpinBox = genSpinBox<QDoubleSpinBox,double>(0.0,1.0);
 
   newVertLayout->setAlignment(Qt::AlignVCenter);
-  newVertLayout->addWidget(test.release());
+  newVertLayout->addWidget(newSlider.release());
 
   widget->setLayout(newVertLayout);
 
+  auto resetButton = genActionButton(":/reset.svg");
+
   leftToolBar->addWidget(widget.release());
-  leftToolBar->addWidget(newSpinBox);
+  leftToolBar->addWidget(newDoubleSpinBox.release());
+  leftToolBar->insertSeparator(resetButton.get());
+  leftToolBar->addAction(resetButton.release());
 
 }
 
 void RenderView::populateRightToolBar(std::unique_ptr<QToolBar> &rightToolBar)
 {
+  auto widget = std::make_unique<QWidget>();
+  QVBoxLayout *newVertLayout = new QVBoxLayout;
 
+  std::unique_ptr<QSlider> newSlider = genSlider(Qt::Vertical,35,999);
+
+  auto newSpinBox = genSpinBox<QSpinBox,int>(35,999);
+  auto resetButton = genActionButton(":/reset.svg");
+  auto zoomTVButton = genActionButton(":/tv.svg");
+  auto lightBulbOffButton = genActionButton(":/lightOff.svg");
+  auto zoomLabel = genLabel("Zoom");
+  zoomLabel->setAlignment(Qt::AlignVCenter);
+
+  newVertLayout->setAlignment(Qt::AlignCenter);
+  newVertLayout->addWidget(newSlider.release());
+
+  widget->setLayout(newVertLayout);
+
+  rightToolBar->addWidget(zoomLabel.release());
+  rightToolBar->addAction(lightBulbOffButton.release());
+  rightToolBar->addWidget(widget.release());
+  rightToolBar->addWidget(newSpinBox.release());
+  rightToolBar->insertSeparator(zoomTVButton.get());
+  rightToolBar->addAction(zoomTVButton.release());
+  rightToolBar->addAction(resetButton.release());
 }
 
 void RenderView::populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar)
@@ -100,7 +152,45 @@ void RenderView::populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar)
 
 void RenderView::populateBottomToolBar(std::unique_ptr<QToolBar> &bottomToolBar)
 {
+  auto sliderWidgets = std::make_unique<QWidget>();
+  QHBoxLayout *newHoriLayout = new QHBoxLayout;
 
+  auto xLabel = genLabel("X:");
+  auto yLabel = genLabel("Y:");
+  auto zLabel = genLabel("Z:");
+
+  auto xSlider = genSlider(Qt::Horizontal,0,360);
+  auto ySlider = genSlider(Qt::Horizontal,0,360);
+  auto zSlider = genSlider(Qt::Horizontal,0,360);
+
+  auto xSpinBox = genSpinBox<QDoubleSpinBox,double>(0.0,360);
+  auto ySpinBox = genSpinBox<QDoubleSpinBox,double>(0.0,360);
+  auto zSpinBox = genSpinBox<QDoubleSpinBox,double>(0.0,360);
+
+  auto labelDropDown = genComboBox(labels);
+  auto resetButton = genActionButton(":/reset.svg");
+  auto fortyFiveButton = genActionButton(":/fortyFive.svg");
+  auto globeButton = genActionButton(":/globe.svg");
+  auto planeButton = genActionButton(":/plane.svg");
+
+  newHoriLayout->setAlignment(Qt::AlignHCenter);
+  newHoriLayout->addWidget(xLabel.release());
+  newHoriLayout->addWidget(xSlider.release());
+  newHoriLayout->addWidget(xSpinBox.release());
+  newHoriLayout->addWidget(yLabel.release());
+  newHoriLayout->addWidget(ySlider.release());
+  newHoriLayout->addWidget(ySpinBox.release());
+  newHoriLayout->addWidget(zLabel.release());
+  newHoriLayout->addWidget(zSlider.release());
+  newHoriLayout->addWidget(zSpinBox.release());
+  newHoriLayout->addWidget(labelDropDown.release());
+
+  sliderWidgets->setLayout(newHoriLayout);
+
+  bottomToolBar->addAction(fortyFiveButton.release());
+  bottomToolBar->addAction(globeButton.release());
+  bottomToolBar->addWidget(sliderWidgets.release());
+  bottomToolBar->addAction(resetButton.release());
 }
 
 /*
@@ -115,9 +205,9 @@ std::unique_ptr<QToolBar> RenderView::genToolProp(Qt::Orientation ori)
     newToolBar->setStyleSheet("QToolBar {background: rgb(222,225,232)}");
 
     if(ori == Qt::Horizontal)
-        newToolBar->setFixedHeight(45);
+        newToolBar->setFixedHeight(35);
     else
-        newToolBar->setFixedWidth(45);
+        newToolBar->setFixedWidth(35);
 
     return newToolBar;
 }
