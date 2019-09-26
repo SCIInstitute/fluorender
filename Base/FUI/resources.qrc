@@ -16,6 +16,8 @@
   <file alias="stepBack.svg">Resources/step-backward-solid.svg</file>
   <file alias="3dPlane.svg">Resources/project-diagram-solid.svg</file>
   <file alias="plus.svg">Resources/plus-solid.svg</file>
+  <file alias="minus.svg">Resources/minus-solid.svg</file>
+  <file alias="save.svg">Resources/save-solid.svg</file>
   <file alias="play.svg">Resources/play-solid.svg</file>
   <file alias="ungroupLayers.svg">Resources/object-ungroup-solid.svg</file>
 </qresource>
