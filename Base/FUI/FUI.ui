@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>2143</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSplit_Render_View">
@@ -1119,7 +1119,11 @@
              </size>
             </property>
             <property name="text">
-             <string>Save</string>
+             <string> Save...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/save.svg</normaloff>:/save.svg</iconset>
             </property>
            </widget>
           </item>
@@ -1673,7 +1677,7 @@
              <enum>QTabWidget::Rounded</enum>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>3</number>
             </property>
             <property name="elideMode">
              <enum>Qt::ElideNone</enum>
@@ -1883,6 +1887,26 @@
                 <item row="5" column="5">
                  <widget class="QSpinBox" name="basic_endTimeSpinBox"/>
                 </item>
+                <item row="5" column="7">
+                 <widget class="QToolButton" name="toolButton_10">
+                  <property name="styleSheet">
+                   <string notr="true">qproperty-icon: url(&quot;:/minus.svg&quot;)</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="9">
+                 <widget class="QToolButton" name="toolButton_11">
+                  <property name="styleSheet">
+                   <string notr="true">qproperty-icon: url(&quot;:/plus.svg&quot;)</string>
+                  </property>
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
              </layout>
@@ -2065,7 +2089,11 @@
                 <item row="0" column="4">
                  <widget class="QPushButton" name="cropping_tempReset">
                   <property name="text">
-                   <string>Reset</string>
+                   <string> Reset</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="resources.qrc">
+                    <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
                   </property>
                  </widget>
                 </item>
@@ -2272,7 +2300,7 @@
    <property name="minimumSize">
     <size>
      <width>235</width>
-     <height>408</height>
+     <height>461</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -2427,7 +2455,11 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
             <item row="3" column="0" colspan="3">
              <widget class="QPushButton" name="redResetButton">
               <property name="text">
-               <string>Reset</string>
+               <string> Reset</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
             </item>
@@ -2551,7 +2583,11 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
             <item row="8" column="0" colspan="3">
              <widget class="QPushButton" name="greenResetButton">
               <property name="text">
-               <string>Reset</string>
+               <string> Reset</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
             </item>
@@ -2675,7 +2711,11 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
             <item row="13" column="0" colspan="3">
              <widget class="QPushButton" name="blueResetButton">
               <property name="text">
-               <string>Reset</string>
+               <string> Reset</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
             </item>
@@ -2796,8 +2836,8 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
   <widget class="QDockWidget" name="ClippingPanesWidget">
    <property name="minimumSize">
     <size>
-     <width>297</width>
-     <height>527</height>
+     <width>298</width>
+     <height>604</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -3311,7 +3351,11 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
             <item row="3" column="0" colspan="3">
              <widget class="QPushButton" name="resetClipsButton">
               <property name="text">
-               <string>Reset Clips</string>
+               <string> Reset Clips</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
             </item>
@@ -3348,7 +3392,11 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
               <item row="2" column="0">
                <widget class="QPushButton" name="resetTo0Button">
                 <property name="text">
-                 <string>Reset to 0</string>
+                 <string> Reset to 0</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
                 </property>
                </widget>
               </item>
@@ -3574,7 +3622,9 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>
