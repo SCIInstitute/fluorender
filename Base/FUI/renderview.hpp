@@ -25,7 +25,6 @@
 
 #include <memory>
 #include <iostream>
-#include <vector>
 
 #include "fluoglwidget.hpp"
 
@@ -50,14 +49,7 @@ class RenderView : public QMainWindow
 
     bool getMainWindowStatus();
 
-    template<class SpinBoxType, typename V>
-    std::unique_ptr<SpinBoxType> genSpinBox(V floor, V ceiling)
-    {
-      auto newSpinBox = std::make_unique<SpinBoxType>();
-      newSpinBox->setRange(floor,ceiling);
-      newSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-      return newSpinBox;
-    }
+
 
   private:
     std::unique_ptr<QToolBar> genToolProp(Qt::Orientation ori);
