@@ -149,7 +149,8 @@ void RenderView::populateRightToolBar(std::unique_ptr<QToolBar> &rightToolBar)
 
 void RenderView::populateTopToolBar(std::unique_ptr<QToolBar> &topToolBar)
 {
-
+  auto resetButton = genActionButton(":/reset.svg");
+  topToolBar->addAction(resetButton.release());
 }
 
 void RenderView::populateBottomToolBar(std::unique_ptr<QToolBar> &bottomToolBar)
