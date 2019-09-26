@@ -20,10 +20,9 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     auto baseDockWidget = std::make_unique<QDockWidget>(new QDockWidget);
 
     auto leftToolBar = std::make_unique<LeftToolbar>();
-    //auto leftToolBar = genToolProp(Qt::Vertical);
     auto topToolBar = genToolProp(Qt::Horizontal);
-    auto rightToolBar = genToolProp(Qt::Vertical);
-    auto bottomToolBar = genToolProp(Qt::Horizontal);
+    auto rightToolBar = std::make_unique<RightToolbar>();
+    auto bottomToolBar = std::make_unique<BottomToolbar>();
 
 
     // TODO: Instead of creating a new OpenGLWidget, I need to create a class
@@ -45,9 +44,9 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     }
 
     //populateLeftToolBar(leftToolBar);
-    populateRightToolBar(rightToolBar);
+    //populateRightToolBar(rightToolBar);
     populateTopToolBar(topToolBar);
-    populateBottomToolBar(bottomToolBar);
+    //populateBottomToolBar(bottomToolBar);
 
     newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newRenderView.release()));
     newBaseWindow->addToolBar(Qt::LeftToolBarArea,leftToolBar.release());

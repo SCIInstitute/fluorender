@@ -7,6 +7,9 @@ class LeftToolbar : public QToolBar
 {
   public:
     LeftToolbar();
+    void initializeActions();
+    void addWidgets();
+    void setToolbarProperties();
 
   private:
     std::unique_ptr<QAction> fullCircle;

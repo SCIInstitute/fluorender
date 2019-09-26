@@ -12,6 +12,7 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QStringList>
 
 std::unique_ptr<QSlider> genSlider(Qt::Orientation ori, int floor, int ceiling);
 

@@ -28,6 +28,8 @@
 
 #include "fluoglwidget.hpp"
 #include "renderviewLeftTB.hpp"
+#include "renderviewRightTB.hpp"
+#include "renderviewBottomTB.hpp"
 
 class RenderView : public QMainWindow
 {
