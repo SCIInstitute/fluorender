@@ -109,7 +109,9 @@ void RenderView::populateLeftToolBar(std::unique_ptr<QToolBar> &leftToolBar)
   widget->setLayout(newVertLayout);
 
   auto resetButton = genActionButton(":/reset.svg");
+  auto fullCircle = genActionButton(":/fullCircle.svg");
 
+  leftToolBar->addAction(fullCircle.release());
   leftToolBar->addWidget(widget.release());
   leftToolBar->addWidget(newDoubleSpinBox.release());
   leftToolBar->insertSeparator(resetButton.get());

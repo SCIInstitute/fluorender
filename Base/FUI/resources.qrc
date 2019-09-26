@@ -8,5 +8,7 @@
   <file alias="layer.svg">Resources/layer-group-solid.svg</file>
   <file alias="lightOff.svg">Resources/lightbulb-off-solid.svg</file>
   <file alias="lightOn.svg">Resources/lightbulb-on-solid.svg</file>
+  <file alias="fullCircle.svg">Resources/circle-regular.svg</file>
+  <file alias="halfCircle.svg">Resources/adjust-solid.svg</file>
 </qresource>
 </RCC>
