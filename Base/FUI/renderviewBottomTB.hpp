@@ -32,7 +32,7 @@ class BottomToolbar : public QToolBar
     std::unique_ptr<QWidget> sliderWidgets;
     std::unique_ptr<QHBoxLayout> sliderLayout;
 
-    QStringList labels = {"NA","+X","-X","+Y","-Y","+Z","-Z"};
+    const QStringList labels = {"NA","+X","-X","+Y","-Y","+Z","-Z"};
 };
 
 #endif
