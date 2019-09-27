@@ -45,6 +45,11 @@ set(HEADER_FILES
     fui.hpp
     renderview.hpp
     controller.hpp
+    genToolbarObjects.hpp
+    renderviewBottomTB.hpp
+    renderviewTopTB.hpp
+    renderviewLeftTB.hpp
+    renderviewRightTB.hpp
   )
   
 set(SOURCES
@@ -52,6 +57,11 @@ set(SOURCES
 	  fui.cpp
 	  renderview.cpp
 	  main.cpp
+    genToolbarObjects.cpp
+    renderviewBottomTB.cpp
+    renderviewTopTB.cpp
+    renderviewLeftTB.cpp
+    renderviewRightTB.cpp
   )
   
 set(UI_FILES
