@@ -36,9 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
 #include "img/icons.h"
+#include <Debug.h>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -312,7 +314,15 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_drawing(false),
 	m_refresh(false),
 	m_paint_count(false),
-	m_paint_colocalize(false)
+	m_paint_colocalize(false),
+	//vr settings
+	m_enable_vr(false),
+	m_use_openvr(false),
+	m_vr_eye_offset(6.0),
+	m_vr_eye_idx(0),
+#ifdef _WIN32
+	m_controller(0)
+#endif
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -339,7 +349,11 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		m_enable_touch = true;
 	else
 		m_enable_touch = false;
+
+	//xbox controller
+	m_controller = new XboxController(1);
 #endif
+
 	LoadBrushSettings();
 
 	m_timer = new nv::Timer(10);
@@ -447,6 +461,29 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 }
 #endif
 
+void VRenderGLView::InitOpenVR()
+{
+#ifdef _WIN32
+	//openvr initilization
+	vr::EVRInitError vr_error;
+	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	if (vr_error == vr::VRInitError_None &&
+		vr::VRCompositor())
+	{
+		m_use_openvr = true;
+		//get render size
+		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+		//get eye offset
+		//vr::HmdMatrix34_t eye_mat;
+		//eye_mat = m_vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+		//double eye_x = eye_mat.m[0][3];
+		//double eye_y = eye_mat.m[1][3];
+		//double eye_z = eye_mat.m[2][3];
+		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
+	}//otherwise use default settings
+#endif
+}
+
 VRenderGLView::~VRenderGLView()
 {
 	if (m_benchmark)
@@ -476,6 +513,20 @@ VRenderGLView::~VRenderGLView()
 		m_hTab = 0;
 		UnloadWintab();
 	}
+#endif
+
+#ifdef _WIN32
+	if (m_enable_vr && m_use_openvr)
+	{
+		//vr shutdown
+		vr::VR_Shutdown();
+		//UnloadVR();
+	}
+#endif
+
+#ifdef _WIN32
+	if (m_controller)
+		delete m_controller;
 #endif
 
 	m_loader.StopAll();
@@ -600,37 +651,58 @@ void VRenderGLView::Clear()
 	m_layer_list.clear();
 }
 
-void VRenderGLView::HandleProjection(int nx, int ny)
+void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 {
-	double aspect = (double)nx / (double)ny;
 	if (!m_free)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
-	if (aspect>1.0)
+
+	double aspect = (double)nx / (double)ny;
+	m_ortho_left = -m_radius * aspect / m_scale_factor;
+	m_ortho_right = -m_ortho_left;
+	m_ortho_bottom = -m_radius / m_scale_factor;
+	m_ortho_top = -m_ortho_bottom;
+
+	if (vr && m_use_openvr)
 	{
-		m_ortho_left = -m_radius*aspect / m_scale_factor;
-		m_ortho_right = -m_ortho_left;
-		m_ortho_bottom = -m_radius / m_scale_factor;
-		m_ortho_top = -m_ortho_bottom;
+		//get projection matrix
+		vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
+		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
+		static int ti[] = { 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 };
+		for (int i = 0; i < 16; ++i)
+			glm::value_ptr(m_proj_mat)[i] =
+			((float*)(proj_mat.m))[ti[i]];
+
+		/*{//not used
+			double aspect;
+			aspect = (double)nx / (double)ny;
+			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
+			m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
+			m_ortho_right = aspect * m_ortho_top + frustum_shift *
+				(m_vr_eye_idx ? 1.0 : -1.0);
+			m_ortho_left = -aspect * m_ortho_top + frustum_shift *
+				(m_vr_eye_idx ? -1.0 : 1.0);
+			m_ortho_bottom = -m_ortho_top;
+			m_proj_mat = glm::frustum(
+				m_ortho_left, m_ortho_right,
+				m_ortho_bottom, m_ortho_top,
+				m_near_clip, m_far_clip);
+		}*/
 	}
 	else
 	{
-		m_ortho_left = -m_radius / m_scale_factor;
-		m_ortho_right = -m_ortho_left;
-		m_ortho_bottom = -m_radius / aspect / m_scale_factor;
-		m_ortho_top = -m_ortho_bottom;
-	}
-	if (m_persp)
-	{
-		m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
-	}
-	else
-	{
-		m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
-			-m_far_clip / 100.0, m_far_clip);
+		if (m_persp)
+		{
+			m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
+		}
+		else
+		{
+			m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
+				-m_far_clip / 100.0, m_far_clip);
+		}
 	}
 }
 
-void VRenderGLView::HandleCamera()
+void VRenderGLView::HandleCamera(bool vr)
 {
 	Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
@@ -642,13 +714,31 @@ void VRenderGLView::HandleCamera()
 	m_transy = pos.y();
 	m_transz = pos.z();
 
+	glm::vec3 eye(m_transx, m_transy, m_transz);
+	glm::vec3 center(0.0);
+	glm::vec3 up(m_up.x(), m_up.y(), m_up.z());
+
 	if (m_free)
-		m_mv_mat = glm::lookAt(glm::vec3(m_transx + m_ctrx, m_transy + m_ctry, m_transz + m_ctrz),
-			glm::vec3(m_ctrx, m_ctry, m_ctrz),
-			glm::vec3(m_up.x(), m_up.y(), m_up.z()));
+	{
+		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
+		eye += center;
+		//m_mv_mat = glm::lookAt(glm::vec3(m_transx + m_ctrx, m_transy + m_ctry, m_transz + m_ctrz),
+		//	glm::vec3(m_ctrx, m_ctry, m_ctrz),
+		//	glm::vec3(m_up.x(), m_up.y(), m_up.z()));
+	}
+
+	if (vr && m_enable_vr)
+	{
+		glm::vec3 offset((m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
+		m_mv_mat = glm::lookAt(
+			eye + offset,
+			center + offset,
+			up);
+	}
 	else
-		m_mv_mat = glm::lookAt(glm::vec3(m_transx, m_transy, m_transz),
-			glm::vec3(0.0), glm::vec3(m_up.x(), m_up.y(), m_up.z()));
+	{
+		m_mv_mat = glm::lookAt(eye, center, up);
+	}
 }
 
 //depth buffer calculation
@@ -738,8 +828,8 @@ void VRenderGLView::CalcFogRange()
 //draw the volume data only
 void VRenderGLView::Draw()
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	// clear color and depth buffers
 	glClearDepth(1.0);
@@ -752,9 +842,9 @@ void VRenderGLView::Draw()
 		DrawGradBg();
 
 	//projection
-	HandleProjection(nx, ny);
+	HandleProjection(nx, ny, true);
 	//Transformation
-	HandleCamera();
+	HandleCamera(true);
 
 	if (m_draw_all)
 	{
@@ -808,8 +898,8 @@ void VRenderGLView::Draw()
 void VRenderGLView::DrawDP()
 {
 	int i;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	string name;
 	Framebuffer* peel_buffer = 0;
 
@@ -825,9 +915,9 @@ void VRenderGLView::DrawDP()
 		DrawGradBg();
 
 	//projection
-	HandleProjection(nx, ny);
+	HandleProjection(nx, ny, true);
 	//Transformation
-	HandleCamera();
+	HandleCamera(true);
 
 	if (m_draw_all)
 	{
@@ -894,7 +984,7 @@ void VRenderGLView::DrawDP()
 		}
 
 		//bind back the framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		BindRenderBuffer();
 
 		//restore fog
 		m_use_fog = use_fog_save;
@@ -1090,8 +1180,8 @@ void VRenderGLView::DrawDP()
 //peel==true -- depth peeling
 void VRenderGLView::DrawMeshes(int peel)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -1143,8 +1233,8 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	PrepFinalBuffer();
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	//draw
 	if (m_load_update ||
@@ -1441,8 +1531,7 @@ void VRenderGLView::DrawVolumes(int peel)
 void VRenderGLView::DrawAnnotations()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -1749,8 +1838,7 @@ void VRenderGLView::DrawBrush()
 	if (reg.Contains(pos1))
 	{
 		int nx, ny;
-		nx = GetGLSize().x;
-		ny = GetGLSize().y;
+		GetRenderSize(nx, ny);
 		float sx, sy;
 		sx = 2.0 / nx;
 		sy = 2.0 / ny;
@@ -1824,8 +1912,7 @@ void VRenderGLView::DrawBrush()
 void VRenderGLView::PaintStroke()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	double pressure = m_use_press && m_pressure > 0.0 ?
 		1.0 + (m_pressure - 0.5)*0.4 : 1.0;
@@ -1930,7 +2017,7 @@ void VRenderGLView::PaintStroke()
 	}
 
 	//bind back the window frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	BindRenderBuffer();
 	glBlendEquation(GL_FUNC_ADD);
 	RefreshGL(3);
 }
@@ -2773,8 +2860,7 @@ void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
 void VRenderGLView::PrepFinalBuffer()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	//generate textures & buffer objects
 	glActiveTexture(GL_TEXTURE0);
@@ -2805,7 +2891,7 @@ void VRenderGLView::DrawFinalBuffer()
 		return;
 
 	//bind back the window frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	BindRenderBuffer();
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
@@ -2845,11 +2931,151 @@ void VRenderGLView::DrawFinalBuffer()
 		!m_free)
 	{
 		unsigned char pixel[4];
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx, ny;
+		GetRenderSize(nx, ny);
 		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 		m_pin_pick_thresh = 0.8 * double(pixel[3]) / 255.0;
 	}
+}
+
+//vr buffers
+void VRenderGLView::GetRenderSize(int &nx, int &ny)
+{
+	if (m_use_openvr)
+	{
+		nx = m_vr_size[0];
+		ny = m_vr_size[1];
+	}
+	else
+	{
+		nx = GetGLSize().x;
+		ny = GetGLSize().y;
+		if (m_enable_vr)
+			nx /= 2;
+	}
+}
+
+void VRenderGLView::PrepVRBuffer()
+{
+	if (m_use_openvr)
+	{
+		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
+		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+	}
+
+	int nx, ny;
+	GetRenderSize(nx, ny);
+
+	//generate textures & buffer objects
+	glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+	//frame buffer for one eye
+	std::string vr_buf_name;
+	if (m_vr_eye_idx)
+		vr_buf_name = "vr right";
+	else
+		vr_buf_name = "vr left";
+
+	Framebuffer* vr_buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			FB_UChar_RGBA, nx, ny, vr_buf_name);
+	if (vr_buffer)
+		vr_buffer->protect();
+}
+
+void VRenderGLView::BindRenderBuffer()
+{
+	if (m_enable_vr)
+	{
+		std::string vr_buf_name;
+		if (m_vr_eye_idx)
+			vr_buf_name = "vr right";
+		else
+			vr_buf_name = "vr left";
+		Framebuffer* vr_buffer =
+			TextureRenderer::framebuffer_manager_.framebuffer(
+				vr_buf_name);
+		if (vr_buffer)
+			vr_buffer->bind();
+	}
+	else
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void VRenderGLView::ClearVRBuffer()
+{
+	BindRenderBuffer();
+	//clear color buffer to black for compositing
+	glClearDepth(1.0);
+	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void VRenderGLView::DrawVRBuffer()
+{
+	int vr_x, vr_y, gl_x, gl_y;
+	GetRenderSize(vr_x, vr_y);
+	gl_x = GetGLSize().x;
+	gl_y = GetGLSize().y;
+	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, gl_x, vp_y);
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+
+	ShaderProgram* img_shader =
+		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	//left eye
+	Framebuffer* buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			"vr left");
+	if (buffer)
+		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	VertexArray* quad_va =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
+	if (quad_va)
+		quad_va->draw();
+	//openvr left eye
+	if (m_use_openvr)
+	{
+		vr::Texture_t left_eye = {};
+		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		left_eye.eType = vr::TextureType_OpenGL;
+		left_eye.eColorSpace = vr::ColorSpace_Gamma;
+		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
+	}
+	//right eye
+	buffer =
+		TextureRenderer::framebuffer_manager_.framebuffer(
+			"vr right");
+	if (buffer)
+		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	quad_va =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
+	if (quad_va)
+		quad_va->draw();
+	//openvr left eye
+	if (m_use_openvr)
+	{
+		vr::Texture_t right_eye = {};
+		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		right_eye.eType = vr::TextureType_OpenGL;
+		right_eye.eColorSpace = vr::ColorSpace_Gamma;
+		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
+	}
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }
 
 //Draw the volmues with compositing
@@ -2878,8 +3104,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 		return;
 
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
@@ -2943,8 +3168,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -3141,8 +3366,8 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -3440,8 +3665,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 void VRenderGLView::DrawOLShading(VolumeData* vd)
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
@@ -3553,8 +3778,7 @@ bool VRenderGLView::GetMeshShadow(double &val)
 void VRenderGLView::DrawOLShadowsMesh(double darkness)
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 
 	//shadow pass
 	//bind the fbo
@@ -3603,7 +3827,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//
 	//bind fbo for final composition
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	BindRenderBuffer();
 	glActiveTexture(GL_TEXTURE0);
 	if (overlay_buffer)
 	{
@@ -3656,8 +3880,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	if (vlist.empty())
 		return;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 1, 1, 1, 1 };
 
@@ -3891,8 +4115,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	if (!m_mvr)
 		return;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
@@ -4363,6 +4587,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_pre_draw = true;
 	}
 
+	if (m_use_openvr)
+	{
+		refresh = true;
+		//m_retain_finalbuffer = true;
+	}
+
 	if (frame && frame->GetBenchmark())
 	{
 		double fps = 1.0 / m_timer->average();
@@ -4691,6 +4921,125 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_vrv->m_ortho_view_cmb->Select(5);
 		else
 			m_vrv->m_ortho_view_cmb->Select(6);
+	}
+#endif
+
+#ifdef _WIN32
+	//xinput controller
+	if (m_controller->IsConnected())
+	{
+		XINPUT_STATE xstate = m_controller->GetState();
+		double dzone = 0.2;
+		double sclr = 15.0;
+		double leftx = double(xstate.Gamepad.sThumbLX) / 32767.0;
+		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
+		double lefty = double(xstate.Gamepad.sThumbLY) / 32767.0;
+		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
+		double rghtx = double(xstate.Gamepad.sThumbRX) / 32767.0;
+		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
+		double rghty = double(xstate.Gamepad.sThumbRY) / 32767.0;
+		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
+		int px = 0;
+		int py = 0;
+		int inc = 5;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) py = -inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) py = inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
+
+		int nx = GetGLSize().x;
+		int ny = GetGLSize().y;
+		//horizontal move
+		if (leftx != 0.0)
+		{
+			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head.normalize();
+			Vector side = Cross(m_up, m_head);
+			Vector trans = side * (leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
+			m_obj_transx += trans.x();
+			m_obj_transy += trans.y();
+			m_obj_transz += trans.z();
+			m_interactive = true;
+			m_rot_center_dirty = true;
+			refresh = true;
+		}
+		//zoom/dolly
+		if (lefty != 0.0)
+		{
+			double delta = lefty * sclr / (double)ny;
+			m_scale_factor += m_scale_factor * delta;
+			m_vrv->UpdateScaleFactor(false);
+			if (m_free)
+			{
+				Vector pos(m_transx, m_transy, m_transz);
+				pos.normalize();
+				Vector ctr(m_ctrx, m_ctry, m_ctrz);
+				ctr -= delta * pos * 1000;
+				m_ctrx = ctr.x();
+				m_ctry = ctr.y();
+				m_ctrz = ctr.z();
+			}
+			m_interactive = true;
+			refresh = true;
+		}
+		//rotate
+		if (rghtx != 0.0 || rghty != 0.0)
+		{
+			Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
+			m_q *= q_delta;
+			m_q.Normalize();
+			Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+			Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+			m_transx = cam_pos2.x;
+			m_transy = cam_pos2.y;
+			m_transz = cam_pos2.z;
+			Quaternion up(0.0, 1.0, 0.0, 0.0);
+			Quaternion up2 = (-m_q) * up * m_q;
+			m_up = Vector(up2.x, up2.y, up2.z);
+			m_q.ToEuler(m_rotx, m_roty, m_rotz);
+			if (m_roty > 360.0)
+				m_roty -= 360.0;
+			if (m_roty < 0.0)
+				m_roty += 360.0;
+			if (m_rotx > 360.0)
+				m_rotx -= 360.0;
+			if (m_rotx < 0.0)
+				m_rotx += 360.0;
+			if (m_rotz > 360.0)
+				m_rotz -= 360.0;
+			if (m_rotz < 0.0)
+				m_rotz += 360.0;
+			wxString str = wxString::Format("%.1f", m_rotx);
+			m_vrv->m_x_rot_text->ChangeValue(str);
+			str = wxString::Format("%.1f", m_roty);
+			m_vrv->m_y_rot_text->ChangeValue(str);
+			str = wxString::Format("%.1f", m_rotz);
+			m_vrv->m_z_rot_text->ChangeValue(str);
+			if (!m_vrv->m_rot_slider)
+			{
+				m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
+				m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
+				m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+			}
+			m_interactive = true;
+			refresh = true;
+		}
+		//pan
+		if (px != 0 || py != 0)
+		{
+			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head.normalize();
+			Vector side = Cross(m_up, m_head);
+			Vector trans =
+				side * (double(px)*(m_ortho_right - m_ortho_left) / double(nx)) +
+				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny));
+			m_obj_transx += trans.x();
+			m_obj_transy += trans.y();
+			m_obj_transz += trans.z();
+			m_interactive = true;
+			m_rot_center_dirty = true;
+			refresh = true;
+		}
 	}
 #endif
 
@@ -5468,7 +5817,7 @@ void VRenderGLView::ReadPixels(
 	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 
 	if (m_enlarge || fp32)
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		BindRenderBuffer();
 }
 
 void VRenderGLView::PostDraw()
@@ -6568,8 +6917,8 @@ void VRenderGLView::ForceDraw()
 	if (m_resize)
 		m_retain_finalbuffer = false;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	PopMeshList();
 	if (m_md_pop_list.size()>0)
@@ -6579,6 +6928,12 @@ void VRenderGLView::ForceDraw()
 
 	m_drawing = true;
 	PreDraw();
+
+	if (m_enable_vr)
+	{
+		PrepVRBuffer();
+		BindRenderBuffer();
+	}
 
 	switch (m_draw_type)
 	{
@@ -6655,15 +7010,28 @@ void VRenderGLView::ForceDraw()
 //#endif
 	}
 
-	SwapBuffers();
+	//swap
+	if (m_enable_vr)
+	{
+		if (m_vr_eye_idx)
+		{
+			DrawVRBuffer();
+			m_vr_eye_idx = 0;
+			SwapBuffers();
+		}
+		else
+		{
+			m_vr_eye_idx = 1;
+			RefreshGL(99);
+		}
+	}
+	else
+		SwapBuffers();
+
 	m_timer->sample();
 	m_drawing = false;
-#ifdef _DEBUG
-	std::wostringstream os;
-	os << "buffer swapped" << "\t" <<
-		m_interactive << "\n";
-	OutputDebugString(os.str().c_str());
-#endif
+
+	DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
 
 	if (m_resize)
 		m_resize = false;
@@ -6747,8 +7115,8 @@ double VRenderGLView::Get121ScaleFactor()
 {
 	double result = 1.0;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	double aspect = (double)nx / (double)ny;
 
 	double spc_x = 1.0;
@@ -8858,8 +9226,7 @@ void VRenderGLView::DrawCamCtr()
 void VRenderGLView::DrawFrame()
 {
 	int nx, ny;
-	nx = GetGLSize().x;
-	ny = GetGLSize().y;
+	GetRenderSize(nx, ny);
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
 	VertexArray* va_frame =
@@ -8903,8 +9270,8 @@ void VRenderGLView::DrawScaleBar()
 	double offset = 0.0;
 	if (m_draw_legend)
 		offset = m_sb_height;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -9001,8 +9368,8 @@ void VRenderGLView::DrawLegend()
 	double font_height =
 		TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 
 	double xoffset = 10.0;
 	double yoffset = 10.0;
@@ -9487,8 +9854,8 @@ void VRenderGLView::DrawColormap()
 	if (m_draw_legend)
 		offset = m_sb_height;
 
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
+	int nx, ny;
+	GetRenderSize(nx, ny);
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -9831,13 +10198,13 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 }
 
-Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
+Quaternion VRenderGLView::Trackball(double dx, double dy)
 {
 	Quaternion q;
 	Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
-	if (p1x == p2x && p1y == p2y)
+	if (dx == 0.0 && dy == 0.0)
 	{
 		/* Zero rotation */
 		return q;
@@ -9845,12 +10212,12 @@ Quaternion VRenderGLView::Trackball(int p1x, int p1y, int p2x, int p2y)
 
 	if (m_rot_lock)
 	{
-		if (abs(p2x - p1x)<50 &&
-			abs(p2y - p1y)<50)
+		if (abs(dx)<50 &&
+			abs(dy)<50)
 			return q;
 	}
 
-	a = Vector(p1y - p2y, p2x - p1x, 0.0);
+	a = Vector(-dy, dx, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
 	Quaternion q_a(a);
@@ -10216,12 +10583,12 @@ void VRenderGLView::StartLoopUpdate()
 		else
 			TextureRenderer::active_view_ = m_vrv->m_id;
 
-		int nx = GetGLSize().x;
-		int ny = GetGLSize().y;
+		int nx, ny;
+		GetRenderSize(nx, ny);
 		//projection
-		HandleProjection(nx, ny);
+		HandleProjection(nx, ny, true);
 		//Transformation
-		HandleCamera();
+		HandleCamera(true);
 		glm::mat4 mv_temp = m_mv_mat;
 		//translate object
 		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
@@ -10651,14 +11018,7 @@ void VRenderGLView::HaltLoopUpdate()
 void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 {
 	//for debugging refresh events
-#ifdef _DEBUG
-	std::wostringstream os;
-	os << m_vrv->m_id << "\t" <<
-		"refresh" << "\t" <<
-		debug_code << "\t" <<
-		m_interactive << "\n";
-	OutputDebugString(os.str().c_str());
-#endif
+	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
 	m_updating = true;
 	if (start_loop)
 		StartLoopUpdate();
@@ -12535,7 +12895,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				if (event.LeftIsDown() && !event.ControlDown())
 				{
-					Quaternion q_delta = Trackball(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
+					Quaternion q_delta = Trackball(
+						event.GetX() - old_mouse_X, old_mouse_Y - event.GetY());
 					if (m_rot_lock && q_delta.IsIdentity())
 						hold_old = true;
 					m_q *= q_delta;
@@ -12779,6 +13140,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame && vr_frame->GetMovieView() &&
 			vr_frame->GetMovieView()->GetRunning())
+			return;
+		if (m_enable_vr)
 			return;
 
 		m_retain_finalbuffer = true;
@@ -13024,8 +13387,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 	if (!vd) return;
 
 	int nx, ny;
-	nx = GetSize().x;
-	ny = GetSize().y;
+	GetRenderSize(nx, ny);
 	if (m_enlarge)
 	{
 		nx = int(nx * m_enlarge_scale);

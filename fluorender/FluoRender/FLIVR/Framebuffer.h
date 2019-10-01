@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2018 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #ifdef __linux__
-  #include <algorithm>
+#include <algorithm>
 #endif
 
 namespace FLIVR
@@ -39,6 +39,7 @@ namespace FLIVR
 	enum FBTexType
 	{
 		FBTex_Render_RGBA = 0,
+		FBTex_UChar_RGBA,
 		FBTex_3D_Int,
 		FBTex_Render_Int32,
 		FBTex_Depth_Float,
@@ -71,6 +72,7 @@ namespace FLIVR
 	enum FBType
 	{
 		FB_Render_RGBA = 0,
+		FB_UChar_RGBA,
 		FB_3D_Int,
 		FB_Pick_Int32_Float,
 		FB_Depth_Float,
@@ -151,6 +153,7 @@ namespace FLIVR
 			switch (type_)
 			{
 			case FBTex_Render_RGBA:
+			case FBTex_UChar_RGBA:
 			case FBTex_Render_Int32:
 			case FBTex_Depth_Float:
 			default:
@@ -170,6 +173,7 @@ namespace FLIVR
 			switch (type_)
 			{
 			case FBTex_Render_RGBA:
+			case FBTex_UChar_RGBA:
 			case FBTex_Render_Int32:
 			case FBTex_Depth_Float:
 			default:
@@ -196,6 +200,11 @@ namespace FLIVR
 				glBindTexture(GL_TEXTURE_2D, id_);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
 					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
+				break;
+			case FBTex_UChar_RGBA:
+				glBindTexture(GL_TEXTURE_2D, id_);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nx_, ny_, 0,
+					GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 				break;
 			case FBTex_Render_Int32:
 				glBindTexture(GL_TEXTURE_2D, id_);
@@ -249,6 +258,7 @@ namespace FLIVR
 		switch (type_)
 		{
 		case FB_Render_RGBA:
+		case FB_UChar_RGBA:
 		case FB_Pick_Int32_Float:
 		case FB_Depth_Float:
 		default:

@@ -71,7 +71,10 @@ DEALINGS IN THE SOFTWARE.
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
 #include <Wacom/Utils.h>
+#include <XInput/XboxController.h>
 #endif
+
+#include <openvr.h>
 
 #define VOL_METHOD_SEQ    1
 #define VOL_METHOD_MULTI  2
@@ -552,6 +555,16 @@ public:
 		}
 	}
 
+	//stereo/vr
+	void SetStereo(bool bval)
+	{
+		m_enable_vr = bval;
+	}
+	void SetEyeDist(double dval)
+	{
+		m_vr_eye_offset = dval / 2.0;
+	}
+
 	//read pixels
 	void ReadPixels(
 		int chann, bool fp32,
@@ -950,11 +963,23 @@ private:
 	//selected labels
 	FL::CellList m_sel_labels;
 
+	//enable vr
+	bool m_enable_vr;
+	bool m_use_openvr;
+	uint32_t m_vr_size[2];
+	double m_vr_eye_offset;
+	int m_vr_eye_idx;//0: left; 1: right
+	vr::IVRSystem *m_vr_system;
+#ifdef _WIN32
+	XboxController* m_controller;
+#endif
+
 private:
 #ifdef _WIN32
 	//wacom tablet
 	HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
 #endif
+	void InitOpenVR();
 
 	void DrawBounds();
 	void DrawGrid();
@@ -992,10 +1017,17 @@ private:
 								   //5: same as 2 (15)
 								   //annotation layer
 	void DrawAnnotations();
+	//framebuffer
+	void BindRenderBuffer();
+	void GetRenderSize(int &nx, int &ny);
 	//draw out the framebuffer after composition
 	void PrepFinalBuffer();
 	void ClearFinalBuffer();
 	void DrawFinalBuffer();
+	//vr buffers
+	void PrepVRBuffer();
+	void ClearVRBuffer();
+	void DrawVRBuffer();
 	//different volume drawing modes
 	void DrawVolumesMulti(vector<VolumeData*> &list, int peel = 0);
 	void DrawVolumesComp(vector<VolumeData*> &list, bool mask = false, int peel = 0);
@@ -1020,9 +1052,9 @@ private:
 	void DisplayStroke();
 
 	//handle camera
-	void HandleProjection(int nx, int ny);
-	void HandleCamera();
-	Quaternion Trackball(int p1x, int p1y, int p2x, int p2y);
+	void HandleProjection(int nx, int ny, bool vr = false);
+	void HandleCamera(bool vr = false);
+	Quaternion Trackball(double dx, double dy);
 	Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
 	void A2Q();

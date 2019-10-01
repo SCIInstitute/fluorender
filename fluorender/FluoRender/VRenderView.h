@@ -552,6 +552,20 @@ public:
 	//set full screen
 	void SetFullScreen();
 
+	//stereo/vr
+	void InitOpenVR()
+	{
+		if (m_glview) m_glview->InitOpenVR();
+	}
+	void SetStereo(bool bval)
+	{
+		if (m_glview) m_glview->SetStereo(bval);
+	}
+	void SetEyeDist(double dval)
+	{
+		if (m_glview) m_glview->SetEyeDist(dval);
+	}
+
 public:
 	wxWindow* m_frame;
 	static int m_max_id;

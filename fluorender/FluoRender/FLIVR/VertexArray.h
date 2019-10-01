@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2018 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -70,6 +70,8 @@ namespace FLIVR
 		VA_Unmanaged = 1,
 		VA_Norm_Square,
 		VA_Norm_Square_d,
+		VA_Left_Square,
+		VA_Right_Square,
 		VA_Brush_Circles,
 		VA_Bound_Cube,
 		VA_Clip_Planes,
@@ -337,6 +339,8 @@ namespace FLIVR
 		case VA_Norm_Square:
 		case VA_Norm_Square_d:
 		case VA_Text:
+		case VA_Left_Square:
+		case VA_Right_Square:
 			draw_norm_square();
 			break;
 		case VA_Brush_Circles:

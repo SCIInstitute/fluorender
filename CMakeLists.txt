@@ -387,6 +387,23 @@ else()
   include_directories(${FREETYPE_INCLUDE_DIRS})
 endif()
 
+# OpenVR
+if(WIN32)
+	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenVR/headers)
+	if(${ARCHITECTURE} MATCHES 64)
+		file(GLOB OpenVR_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenVR/lib/win64/*.lib)
+	endif()
+endif()
+
+#XInput
+if(WIN32)
+	include_directories(${FluoRender_SOURCE_DIR}/fluorender/XInput)
+	file(GLOB xip_src fluorender/XInput/*.cpp)
+	file(GLOB xip_hdr fluorender/XInput/*.h)
+	add_library(XINPUT_OBJ OBJECT
+		${xip_src} ${xip_hdr})
+endif()
+
 # other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -551,7 +568,9 @@ elseif(WIN32)
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
       $<TARGET_OBJECTS:TEEM_OBJ>
-      $<TARGET_OBJECTS:WACUTILS_OBJ>)
+      $<TARGET_OBJECTS:WACUTILS_OBJ>
+      $<TARGET_OBJECTS:XINPUT_OBJ>
+      )
     add_executable(Tester
       ${tester_src} ${tester_hdr}
       #$<TARGET_OBJECTS:FLIVR_OBJ>
@@ -614,10 +633,12 @@ if(UNIX OR APPLE OR MINGW)
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
+    XInput.lib
     ${FFMPEG_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}
+    ${OpenVR_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES})
   target_link_libraries(Tester
@@ -670,6 +691,14 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Benchmark"
   "$<TARGET_FILE_DIR:FluoRender>")
+
+# openvr
+if(WIN32)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/fluorender/OpenVR/lib/win64/openvr_api.dll"
+	"$<TARGET_FILE_DIR:FluoRender>")
+endif()
 
 # make the Executable dir
 if(WIN32)
