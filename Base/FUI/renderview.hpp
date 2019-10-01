@@ -9,19 +9,6 @@
 #include <QFrame>
 #include <QPalette>
 #include <QString>
-#include <QStringList>
-#include <QSlider>
-#include <QDoubleSpinBox>
-#include <QSpinBox>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QAction>
-#include <QPushButton>
-#include <QComboBox>
-#include <QPixmap>
-#include <QIcon>
-#include <QColorDialog>
 
 #include <memory>
 #include <iostream>
@@ -44,6 +31,10 @@ class RenderView : public QMainWindow
 
   private:
     bool isMainWindow = false;
+    LeftToolbar* leftToolBar = new LeftToolbar();
+    TopToolbar* topToolBar = new TopToolbar();
+    RightToolbar* rightToolBar = new RightToolbar();
+    BottomToolbar* bottomToolBar = new BottomToolbar();
 
 };
 

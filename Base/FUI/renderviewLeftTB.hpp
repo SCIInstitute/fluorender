@@ -2,22 +2,35 @@
 #define RENDERVIEW_LEFT_TOOLBAR_HPP
 
 #include "genToolbarObjects.hpp"
+#include <vector>
 
 class LeftToolbar : public QToolBar
 {
+  Q_OBJECT
+
+  public slots:
+    void on_toggleButton_clicked() { rotateImages(); }
+
   public:
     LeftToolbar();
-    void initializeActions();
-    void addWidgets();
-    void setToolbarProperties();
 
   private:
-    std::unique_ptr<QAction> fullCircle;
-    std::unique_ptr<QAction> resetButton;
-    std::unique_ptr<QSlider> slider;
-    std::unique_ptr<QDoubleSpinBox> spinBox;
-    std::unique_ptr<QWidget> sliderSpinBoxWidget;
-    std::unique_ptr<QVBoxLayout> sliderSpinBoxLayout;
+    void initializeActions();
+    void disableSliderSpin();
+    void enableSliderSpin();
+    void addWidgets();
+    void setToolbarProperties();
+    void rotateImages();
+
+    QAction* toggleAction;
+    QAction* resetButton;
+    QSlider *slider;
+    QDoubleSpinBox* spinBox;
+    QWidget* sliderSpinBoxWidget;
+    QVBoxLayout* sliderSpinBoxLayout;
+
+    int imageID = 0;
+    const std::vector<QString> images = {":/fullCircle.svg",":/halfCircle.svg"};
 };
 
 #endif

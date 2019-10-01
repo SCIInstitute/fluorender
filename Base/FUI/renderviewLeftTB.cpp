@@ -4,34 +4,64 @@ LeftToolbar::LeftToolbar()
 {
   setToolbarProperties();
   initializeActions();
-
+  disableSliderSpin();
   sliderSpinBoxLayout->setAlignment(Qt::AlignHCenter);
-  sliderSpinBoxLayout->addWidget(slider.release());
-  sliderSpinBoxLayout->addWidget(spinBox.release());
+  sliderSpinBoxLayout->addWidget(slider);
 
-  sliderSpinBoxWidget->setLayout(sliderSpinBoxLayout.release());
+  sliderSpinBoxWidget->setLayout(sliderSpinBoxLayout);
+
+  connect(toggleAction,SIGNAL(triggered()),this,SLOT(on_toggleButton_clicked()));
 
   addWidgets();
 
 }
 
+void LeftToolbar::rotateImages()
+{
+  if(imageID == 1)
+  {
+    imageID = 0;
+    toggleAction->setIcon(QIcon(images[imageID]));
+    disableSliderSpin();
+  }
+  else
+  {
+    imageID += 1;
+    toggleAction->setIcon(QIcon(images[imageID]));
+    enableSliderSpin();
+  }
+}
+
 void LeftToolbar::initializeActions()
 {
-  sliderSpinBoxWidget = std::make_unique<QWidget>();
-  sliderSpinBoxLayout = std::make_unique<QVBoxLayout>();
+  sliderSpinBoxWidget = new QWidget();
+  sliderSpinBoxLayout = new QVBoxLayout();
 
   slider = genSlider(Qt::Vertical,0,1);
   spinBox = genSpinBox<QDoubleSpinBox,double>(0.0,1.0);
-  fullCircle = genActionButton(":/fullCircle.svg");
+  toggleAction = genActionButton(":/fullCircle.svg");
   resetButton = genActionButton(":/reset.svg");
+}
+
+void LeftToolbar::disableSliderSpin()
+{
+  slider->setEnabled(false);
+  spinBox->setEnabled(false);
+}
+
+void LeftToolbar::enableSliderSpin()
+{
+  slider->setEnabled(true);
+  spinBox->setEnabled(true);
 }
 
 void LeftToolbar::addWidgets()
 {
-  this->addAction(fullCircle.release());
-  this->addWidget(sliderSpinBoxWidget.release());
+  this->addAction(toggleAction);
+  this->addWidget(sliderSpinBoxWidget);
+  this->addWidget(spinBox);
   this->addSeparator();
-  this->addAction(resetButton.release());
+  this->addAction(resetButton);
 }
 
 void LeftToolbar::setToolbarProperties()

@@ -12,15 +12,15 @@ class RightToolbar : public QToolBar
     void setToolbarProperties();
 
   private:
-    std::unique_ptr<QLabel> zoomLabel;
-    std::unique_ptr<QAction> lightBulb;
-    std::unique_ptr<QSlider> slider;
-    std::unique_ptr<QSpinBox> spinBox;
-    std::unique_ptr<QAction> tvButton;
-    std::unique_ptr<QAction> resetButton;
+    QLabel* zoomLabel;
+    QAction* lightBulb;
+    QSlider* slider;
+    QSpinBox* spinBox;
+    QAction* tvButton;
+    QAction* resetButton;
 
-    std::unique_ptr<QWidget> sliderSpinBoxWidget;
-    std::unique_ptr<QVBoxLayout> sliderSpinBoxLayout;
+    QWidget* sliderSpinBoxWidget;
+    QVBoxLayout* sliderSpinBoxLayout;
 };
 
 #endif

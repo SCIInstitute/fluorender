@@ -6,9 +6,65 @@ TopToolbar::TopToolbar()
   setToolbarProperties();
   initializeActionsAndWidgets();
   addWidgetsToLayout();
+  setRenderActionGroupSettings();
+  setInformationGroupSettings();
+  setScaleGroupSettings();
   setLayouts();
   addActionsToToolbar();
 
+  connect(renderViewLayersAction,SIGNAL(triggered()),this,SLOT(on_layers_clicked()));
+  connect(renderViewDepthAction,SIGNAL(triggered()),this,SLOT(on_depth_clicked()));
+  connect(renderViewColorsAction,SIGNAL(triggered()),this,SLOT(on_colors_clicked()));
+  connect(defaultScale,SIGNAL(triggered()),this,SLOT(on_scale_clicked()));
+
+}
+
+void TopToolbar::checkFlags(QAction* currentFlag)
+{
+  if(!flagControl.empty())
+  {
+    flagControl[false]->setEnabled(true);
+    currentFlag->setEnabled(false);
+    flagControl[false] = currentFlag;
+  }
+  else
+  {
+    currentFlag->setEnabled(false);
+    flagControl[false] = currentFlag;
+  }
+}
+
+void TopToolbar::enableScaleGroupActions()
+{
+  if(imageID == 0)
+  {
+    scaleSpinBox->setEnabled(false);
+    scaleDropDown->setEnabled(false);
+  }
+  else if(imageID == 1)
+  {
+    scaleSpinBox->setEnabled(true);
+  }
+  else
+  {
+    scaleDropDown->setEnabled(true);
+  }
+}
+
+void TopToolbar::rotateImage(QAction* currentAction)
+{
+  if(imageID == 2)
+  {
+    imageID = 0;
+    currentAction->setIcon(QIcon(images[imageID]));
+    enableScaleGroupActions();
+  }
+  else
+  {
+    imageID += 1;
+    currentAction->setIcon(QIcon(images[imageID]));
+    enableScaleGroupActions();
+  }
 }
 
 void TopToolbar::initializeActionsAndWidgets()
@@ -24,27 +80,27 @@ void TopToolbar::initializeActionsAndWidgets()
 
 void TopToolbar::initializeLayouts()
 {
-  perspectiveLayout = std::make_unique<QHBoxLayout>();
-  backgroundLayout = std::make_unique<QHBoxLayout>();
-  scaleLayout = std::make_unique<QHBoxLayout>();
+  perspectiveLayout = new QHBoxLayout();
+  backgroundLayout = new QHBoxLayout();
+  scaleLayout = new QHBoxLayout();
 }
 
 void TopToolbar::initializeWidgets()
 {
-  perspectiveWidget = std::make_unique<QWidget>();
-  backgroundWidget = std::make_unique<QWidget>();
-  scaleWidget = std::make_unique<QWidget>();
+  perspectiveWidget = new QWidget();
+  backgroundWidget = new QWidget();
+  scaleWidget = new QWidget();
 }
 
 void TopToolbar::initializePushButtons()
 {
-  colorDialogWidget = std::make_unique<QPushButton>();
-  captureWidget = std::make_unique<QPushButton>();
+  colorDialogWidget = new QPushButton();
+  captureWidget = new QPushButton();
 }
 
 void TopToolbar::initializeColorDiaSlider()
 {
-  colorDialog = std::make_unique<QColorDialog>(colorDialogWidget.get());
+  colorDialog = new QColorDialog(colorDialogWidget);
   perspectiveSlider = genSlider(Qt::Horizontal,0,100);
 }
 
@@ -67,6 +123,25 @@ void TopToolbar::initializeActions()
   saveConfigsAction = genActionButton(":/saveConfigs.svg");
 }
 
+void TopToolbar::setRenderActionGroupSettings()
+{
+  renderViewLayersAction->setEnabled(false);
+  flagControl[false] = renderViewLayersAction;
+}
+
+void TopToolbar::setInformationGroupSettings()
+{
+  centerAxisAction->setCheckable(true);
+  infoAction->setCheckable(true);
+  labelAction->setCheckable(true);
+}
+
+void TopToolbar::setScaleGroupSettings()
+{
+  scaleSpinBox->setEnabled(false);
+  scaleDropDown->setEnabled(false);
+}
+
 void TopToolbar::initialzeSpinBoxes()
 {
   scaleSpinBox = genSpinBox<QSpinBox,int>(0,999);
@@ -76,53 +151,53 @@ void TopToolbar::initialzeSpinBoxes()
 
 void TopToolbar::addWidgetsToLayout()
 {
-    perspectiveLayout->addWidget(perspectiveLabel.release());
-    perspectiveLayout->addWidget(perspectiveSlider.release());
-    perspectiveLayout->addWidget(perspectiveSpinBox.release());
+  perspectiveLayout->addWidget(perspectiveLabel);
+  perspectiveLayout->addWidget(perspectiveSlider);
+  perspectiveLayout->addWidget(perspectiveSpinBox);
 
-    backgroundLayout->addWidget(backgroundLabel.release());
-    backgroundLayout->addWidget(colorDialogWidget.release());
+  backgroundLayout->addWidget(backgroundLabel);
+  backgroundLayout->addWidget(colorDialogWidget);
 
-    scaleLayout->addWidget(scaleSpinBox.release());
-    scaleLayout->addWidget(scaleDropDown.release());
+  scaleLayout->addWidget(scaleSpinBox);
+  scaleLayout->addWidget(scaleDropDown);
 
 }
 
 void TopToolbar::setLayouts()
 {
-    perspectiveWidget->setLayout(perspectiveLayout.release());
-    backgroundWidget->setLayout(backgroundLayout.release());
-    scaleWidget->setLayout(scaleLayout.release());
+  perspectiveWidget->setLayout(perspectiveLayout);
+  backgroundWidget->setLayout(backgroundLayout);
+  scaleWidget->setLayout(scaleLayout);
 }
 
 void TopToolbar::addActionsToToolbar()
 {
-    captureWidget->setIcon(QIcon(":/camera.svg"));
-    captureWidget->setText(" Capture");
+  captureWidget->setIcon(QIcon(":/camera.svg"));
+  captureWidget->setText(" Capture");
 
-    this->addAction(renderViewLayersAction.release());
-    this->addAction(renderViewDepthAction.release());
-    this->addAction(renderViewColorsAction.release());
-    this->addSeparator();
-    this->addWidget(captureWidget.release());
-    this->addSeparator();
-    this->addAction(centerAxisAction.release());
-    this->addAction(infoAction.release());
-    this->addAction(labelAction.release());
-    this->addSeparator();
-    this->addAction(defaultScale.release());
-    this->addWidget(scaleWidget.release());
-    this->addWidget(perspectiveWidget.release());
-    this->addAction(freeFlyAction.release());
-    this->addSeparator();
-    this->addWidget(backgroundWidget.release());
-    this->addAction(saveConfigsAction.release());
+  this->addAction(renderViewLayersAction);
+  this->addAction(renderViewDepthAction);
+  this->addAction(renderViewColorsAction);
+  this->addSeparator();
+  this->addWidget(captureWidget);
+  this->addSeparator();
+  this->addAction(centerAxisAction);
+  this->addAction(infoAction);
+  this->addAction(labelAction);
+  this->addSeparator();
+  this->addAction(defaultScale);
+  this->addWidget(scaleWidget);
+  this->addWidget(perspectiveWidget);
+  this->addAction(freeFlyAction);
+  this->addSeparator();
+  this->addWidget(backgroundWidget);
+  this->addAction(saveConfigsAction);
 }
 
 void TopToolbar::setToolbarProperties()
 {
-    this->setMovable(false);
-    this->setStyleSheet("QToolBar {background: rgb(222,225,232)}");
-    this->setOrientation(Qt::Horizontal);
-    this->setFixedHeight(35);
+  this->setMovable(false);
+  this->setStyleSheet("QToolBar {background: rgb(222,225,232)}");
+  this->setOrientation(Qt::Horizontal);
+  this->setFixedHeight(35);
 }

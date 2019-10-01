@@ -5,12 +5,12 @@ BottomToolbar::BottomToolbar()
   setToolbarProperties();
   initializeActions();
 
-  sliderLayout = std::make_unique<QHBoxLayout>();
-  sliderWidgets = std::make_unique<QWidget>();
+  sliderLayout = new QHBoxLayout();
+  sliderWidgets = new QWidget();
 
   addWidgetsToLayout();
 
-  sliderWidgets->setLayout(sliderLayout.release());
+  sliderWidgets->setLayout(sliderLayout);
 
   addWidgetsToToolbar();
 }
@@ -51,24 +51,24 @@ void BottomToolbar::initializeActions()
 void BottomToolbar::addWidgetsToLayout()
 {
   sliderLayout->setAlignment(Qt::AlignHCenter);
-  sliderLayout->addWidget(xLabel.release());
-  sliderLayout->addWidget(xSlider.release());
-  sliderLayout->addWidget(xSpinBox.release());
-  sliderLayout->addWidget(yLabel.release());
-  sliderLayout->addWidget(ySlider.release());
-  sliderLayout->addWidget(ySpinBox.release());
-  sliderLayout->addWidget(zLabel.release());
-  sliderLayout->addWidget(zSlider.release());
-  sliderLayout->addWidget(zSpinBox.release());
-  sliderLayout->addWidget(labelDropDown.release());
+  sliderLayout->addWidget(xLabel);
+  sliderLayout->addWidget(xSlider);
+  sliderLayout->addWidget(xSpinBox);
+  sliderLayout->addWidget(yLabel);
+  sliderLayout->addWidget(ySlider);
+  sliderLayout->addWidget(ySpinBox);
+  sliderLayout->addWidget(zLabel);
+  sliderLayout->addWidget(zSlider);
+  sliderLayout->addWidget(zSpinBox);
+  sliderLayout->addWidget(labelDropDown);
 }
 
 void BottomToolbar::addWidgetsToToolbar()
 {
-  this->addAction(angleButton.release());
-  this->addAction(globeButton.release());
-  this->addWidget(sliderWidgets.release());
-  this->addAction(resetButton.release());
+  this->addAction(angleButton);
+  this->addAction(globeButton);
+  this->addWidget(sliderWidgets);
+  this->addAction(resetButton);
 }
 
 void BottomToolbar::setToolbarProperties()

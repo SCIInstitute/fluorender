@@ -2303,7 +2303,7 @@
   <widget class="QDockWidget" name="OutputAdjustmentsWidget">
    <property name="minimumSize">
     <size>
-     <width>235</width>
+     <width>50</width>
      <height>461</height>
     </size>
    </property>
@@ -2846,7 +2846,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
   <widget class="QDockWidget" name="ClippingPanesWidget">
    <property name="minimumSize">
     <size>
-     <width>298</width>
+     <width>50</width>
      <height>604</height>
     </size>
    </property>

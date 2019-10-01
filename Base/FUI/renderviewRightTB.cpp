@@ -7,18 +7,17 @@ RightToolbar::RightToolbar()
   initializeActions();
 
   sliderSpinBoxLayout->setAlignment(Qt::AlignHCenter);
-  sliderSpinBoxLayout->addWidget(slider.release());
-  sliderSpinBoxLayout->addWidget(spinBox.release());
+  sliderSpinBoxLayout->addWidget(slider);
 
-  sliderSpinBoxWidget->setLayout(sliderSpinBoxLayout.release());
+  sliderSpinBoxWidget->setLayout(sliderSpinBoxLayout);
 
   addWidgets();
 }
 
 void RightToolbar::initializeActions()
 {
-  sliderSpinBoxWidget = std::make_unique<QWidget>();
-  sliderSpinBoxLayout = std::make_unique<QVBoxLayout>();
+  sliderSpinBoxWidget = new QWidget();
+  sliderSpinBoxLayout = new QVBoxLayout();
 
   zoomLabel = genLabel("Zoom");
   lightBulb = genActionButton(":/lightOff.svg");
@@ -30,12 +29,13 @@ void RightToolbar::initializeActions()
 
 void RightToolbar::addWidgets()
 {
-  this->addWidget(zoomLabel.release());
-  this->addAction(lightBulb.release());
-  this->addWidget(sliderSpinBoxWidget.release());
+  this->addWidget(zoomLabel);
+  this->addAction(lightBulb);
+  this->addWidget(sliderSpinBoxWidget);
+  this->addWidget(spinBox);
   this->addSeparator();
-  this->addAction(tvButton.release());
-  this->addAction(resetButton.release());
+  this->addAction(tvButton);
+  this->addAction(resetButton);
 }
 
 void RightToolbar::setToolbarProperties()

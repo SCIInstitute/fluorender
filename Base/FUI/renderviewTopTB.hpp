@@ -4,11 +4,25 @@
 #include "genToolbarObjects.hpp"
 #include <QPushButton>
 #include <QColorDialog>
+#include <unordered_map>
+#include <vector>
 
 class TopToolbar : public QToolBar
 {
+  Q_OBJECT
+
+  public slots:
+    void on_layers_clicked() { checkFlags(renderViewLayersAction); }
+    void on_depth_clicked() { checkFlags(renderViewDepthAction); }
+    void on_colors_clicked() { checkFlags(renderViewColorsAction); }
+    void on_scale_clicked() { rotateImage(defaultScale); }
+
+  private slots:
+
   public:
     TopToolbar();
+
+  private:
     void initializeActionsAndWidgets();
     void initializeLayouts();
     void initializeWidgets();
@@ -16,47 +30,58 @@ class TopToolbar : public QToolBar
     void initializeColorDiaSlider();
     void initializeLabels();
     void initializeActions();
+    void setRenderActionGroupSettings();
+    void setInformationGroupSettings();
+    void setScaleGroupSettings();
     void initialzeSpinBoxes();
     void addWidgetsToLayout();
     void setLayouts();
     void addActionsToToolbar();
     void setToolbarProperties();
 
-  private:
-    std::unique_ptr<QHBoxLayout> perspectiveLayout;
-    std::unique_ptr<QHBoxLayout> backgroundLayout;
-    std::unique_ptr<QHBoxLayout> scaleLayout;
+    void checkFlags(QAction* currentFlag);
+    void rotateImage(QAction* currentAction);
+    void enableScaleGroupActions();
 
-    std::unique_ptr<QWidget> perspectiveWidget;
-    std::unique_ptr<QWidget> backgroundWidget;
-    std::unique_ptr<QWidget> scaleWidget;
+    QHBoxLayout* perspectiveLayout;
+    QHBoxLayout* backgroundLayout;
+    QHBoxLayout* scaleLayout;
 
-    std::unique_ptr<QPushButton> colorDialogWidget;
-    std::unique_ptr<QPushButton> captureWidget;
+    QWidget* perspectiveWidget;
+    QWidget* backgroundWidget;
+    QWidget* scaleWidget;
 
-    std::unique_ptr<QColorDialog> colorDialog;
+    QPushButton* colorDialogWidget;
+    QPushButton* captureWidget;
 
-    std::unique_ptr<QSlider> perspectiveSlider;
+    QColorDialog* colorDialog;
 
-    std::unique_ptr<QLabel> perspectiveLabel;
-    std::unique_ptr<QLabel> backgroundLabel;
+    QSlider* perspectiveSlider;
 
-    std::unique_ptr<QAction> renderViewLayersAction;
-    std::unique_ptr<QAction> renderViewDepthAction;
-    std::unique_ptr<QAction> renderViewColorsAction;
-    std::unique_ptr<QAction> centerAxisAction;
-    std::unique_ptr<QAction> infoAction;
-    std::unique_ptr<QAction> labelAction;
-    std::unique_ptr<QAction> defaultScale;
-    std::unique_ptr<QAction> freeFlyAction;
-    std::unique_ptr<QAction> saveConfigsAction;
+    QLabel* perspectiveLabel;
+    QLabel* backgroundLabel;
 
-    std::unique_ptr<QSpinBox> scaleSpinBox;
-    std::unique_ptr<QSpinBox> perspectiveSpinBox;
+    QAction* renderViewLayersAction;
+    QAction* renderViewDepthAction;
+    QAction* renderViewColorsAction;
+    QAction* centerAxisAction;
+    QAction* infoAction;
+    QAction* labelAction;
+    QAction* defaultScale;
+    QAction* freeFlyAction;
+    QAction* saveConfigsAction;
 
-    std::unique_ptr<QComboBox> scaleDropDown;
+    QSpinBox* scaleSpinBox;
+    QSpinBox* perspectiveSpinBox;
+
+    QComboBox* scaleDropDown;
+
+    int imageID = 0;
 
     const QStringList scales = {"nm","μm","mm"};
+    const std::vector<QString> images = { ":/default.svg",":/ruler.svg",":/byScale.svg" };
+
+    std::unordered_map<bool,QAction*> flagControl;
 
 };
 
