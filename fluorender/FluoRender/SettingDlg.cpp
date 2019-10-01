@@ -57,6 +57,10 @@ EVT_COMMAND_SCROLL(ID_PinThreshSldr, SettingDlg::OnPinThresholdChange)
 EVT_TEXT(ID_PinThreshText, SettingDlg::OnPinThresholdEdit)
 //link render views rotations
 EVT_CHECKBOX(ID_RotLinkChk, SettingDlg::OnRotLink)
+//stereo
+EVT_CHECKBOX(ID_StereoChk, SettingDlg::OnStereoCheck)
+EVT_COMMAND_SCROLL(ID_EyeDistSldr, SettingDlg::OnEyeDistChange)
+EVT_TEXT(ID_EyeDistText, SettingDlg::OnEyeDistEdit)
 //override vox
 EVT_CHECKBOX(ID_OverrideVoxChk, SettingDlg::OnOverrideVoxCheck)
 //wavelength to color
@@ -227,6 +231,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 
 wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 {
+	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	vald_fp2.SetRange(-180.0, 180.0);
@@ -325,6 +330,28 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group5->Add(sizer5_1, 0, wxEXPAND);
 	group5->Add(10, 5);
 
+	//stereo
+	wxBoxSizer* group6 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Stereo & OpenVR"), wxVERTICAL);
+	wxBoxSizer *sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_stereo_chk = new wxCheckBox(page, ID_StereoChk,
+		"Enable stereo rendering.");
+	sizer6_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer6_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Eye distance");
+	m_eye_dist_sldr = new wxSlider(page, ID_EyeDistSldr, 200, 0, 2000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_eye_dist_text = new wxTextCtrl(page, ID_EyeDistText, "20.0",
+		wxDefaultPosition, wxSize(40, 20), 0, vald_fp1);
+	sizer6_2->Add(st, 0, wxALIGN_CENTER);
+	sizer6_2->Add(m_eye_dist_sldr, 1, wxEXPAND);
+	sizer6_2->Add(m_eye_dist_text, 0, wxALIGN_CENTER);
+	group6->Add(10, 5);
+	group6->Add(sizer6_1, 0, wxEXPAND);
+	group6->Add(10, 5);
+	group6->Add(sizer6_2, 0, wxEXPAND);
+	group6->Add(10, 5);
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 
 	sizerV->Add(10, 10);
@@ -337,6 +364,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizerV->Add(group4, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group5, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group6, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -766,6 +795,8 @@ void SettingDlg::GetSettings()
 	m_time_id = "_T";
 	m_grad_bg = false;
 	m_pin_threshold = 10.0;
+	m_stereo = false;
+	m_eye_dist = 20.0;
 	m_override_vox = true;
 	m_soft_threshold = 0.0;
 	m_run_script = false;
@@ -892,6 +923,13 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/pin threshold");
 		fconfig.Read("value", &m_pin_threshold, 10.0);
+	}
+	//stereo
+	if (fconfig.Exists("/stereo"))
+	{
+		fconfig.SetPath("/stereo");
+		fconfig.Read("enable_stereo", &m_stereo, false);
+		fconfig.Read("eye dist", &m_eye_dist, 20.0);
 	}
 	//test mode
 	if (fconfig.Exists("/test mode"))
@@ -1146,6 +1184,10 @@ void SettingDlg::UpdateUI()
 	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", m_pin_threshold*100.0));
 	//gradient background
 	m_grad_bg_chk->SetValue(m_grad_bg);
+	//stereo
+	m_stereo_chk->SetValue(m_stereo);
+	m_eye_dist_sldr->SetValue(int(m_eye_dist*10.0));
+	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", m_eye_dist));
 	//override vox
 	m_override_vox_chk->SetValue(m_override_vox);
 	//wavelength to color
@@ -1273,6 +1315,10 @@ void SettingDlg::SaveSettings()
 
 	fconfig.SetPath("/pin threshold");
 	fconfig.Write("value", m_pin_threshold);
+
+	fconfig.SetPath("/stereo");
+	fconfig.Write("enable_stereo", m_stereo);
+	fconfig.Write("eye dist", m_eye_dist);
 
 	fconfig.SetPath("/test mode");
 	fconfig.Write("speed", m_test_speed);
@@ -1776,6 +1822,49 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 		VRenderView* view = vr_frame->GetView(0);
 		if (view)
 			view->RefreshGL();
+	}
+}
+
+//stereo
+void SettingDlg::OnStereoCheck(wxCommandEvent &event)
+{
+	m_stereo = m_stereo_chk->GetValue();
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && 0 < vr_frame->GetViewNum())
+	{
+		VRenderView* view = vr_frame->GetView(0);
+		if (view)
+		{
+			view->SetStereo(m_stereo);
+			view->RefreshGL();
+		}
+	}
+}
+
+void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
+{
+	m_eye_dist = double(m_eye_dist_sldr->GetValue()) / 10.0;
+	wxString str = wxString::Format("%.1f", m_eye_dist);
+	m_eye_dist_text->SetValue(str);
+}
+
+void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
+{
+	wxString str = m_eye_dist_text->GetValue();
+	double dval;
+	str.ToDouble(&dval);
+	m_eye_dist_sldr->SetValue(int(dval * 10.0));
+	m_eye_dist = dval;
+
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && 0 < vr_frame->GetViewNum())
+	{
+		VRenderView* view = vr_frame->GetView(0);
+		if (view)
+		{
+			view->SetEyeDist(m_eye_dist);
+			view->RefreshGL();
+		}
 	}
 }
 
