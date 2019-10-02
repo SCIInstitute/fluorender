@@ -40,6 +40,7 @@ struct GridData
 {
 	int voxel_sum;
 	double voxel_wsum;
+	double avg_int;
 	double size;
 	double wsize;
 };

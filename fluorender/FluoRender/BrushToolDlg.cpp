@@ -385,11 +385,12 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer3_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
 	m_output_grid = new wxGrid(this, ID_OutputGrid);
-	m_output_grid->CreateGrid(0, 4);
+	m_output_grid->CreateGrid(0, 5);
 	m_output_grid->SetColLabelValue(0, "Voxel Count");
 	m_output_grid->SetColLabelValue(1, "Voxel Count\n(Int. Weighted)");
-	m_output_grid->SetColLabelValue(2, "Physical Size");
-	m_output_grid->SetColLabelValue(3, "Physical Size\n(Int. Weighted)");
+	m_output_grid->SetColLabelValue(2, "Average\nIntensity");
+	m_output_grid->SetColLabelValue(3, "Physical Size");
+	m_output_grid->SetColLabelValue(4, "Physical Size\n(Int. Weighted)");
 	m_output_grid->Fit();
 	sizer3->Add(5, 5);
 	sizer3->Add(sizer3_1, 0, wxEXPAND);
@@ -1038,8 +1039,10 @@ void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 	m_output_grid->SetCellValue(0, 1,
 		wxString::Format("%f", data.voxel_wsum));
 	m_output_grid->SetCellValue(0, 2,
-		wxString::Format("%f", data.size) + unit);
+		wxString::Format("%f", data.avg_int));
 	m_output_grid->SetCellValue(0, 3,
+		wxString::Format("%f", data.size) + unit);
+	m_output_grid->SetCellValue(0, 4,
 		wxString::Format("%f", data.wsize) + unit);
 	//m_output_grid->Fit();
 }
@@ -1061,6 +1064,14 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 	data.voxel_sum = counter.GetSum();
 	double scale = sel_vol->GetScalarScale();
 	data.voxel_wsum = counter.GetWeightedSum() * scale;
+	if (data.voxel_sum)
+	{
+		data.avg_int = data.voxel_wsum / data.voxel_sum;
+		if (sel_vol->GetBits() == 8)
+			data.avg_int *= 255.0;
+		else if (sel_vol->GetBits() == 16)
+			data.avg_int *= sel_vol->GetMaxValue();
+	}
 	double spcx, spcy, spcz;
 	sel_vol->GetSpacings(spcx, spcy, spcz);
 	double vvol = spcx * spcy * spcz;
