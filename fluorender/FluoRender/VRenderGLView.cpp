@@ -1513,19 +1513,19 @@ void VRenderGLView::DrawVolumes(int peel)
 		RefreshGL(2);
 	}
 
-	if (TextureRenderer::get_mem_swap())
-	{
-		//if (finished_bricks == 0)
-		//{
-		//	if (m_nodraw_count == 100)
-		//	{
-		//		TextureRenderer::set_done_update_loop();
-		//		m_nodraw_count = 0;
-		//	}
-		//	else
-		//		m_nodraw_count++;
-		//}
-	}
+	//if (TextureRenderer::get_mem_swap())
+	//{
+	//	if (finished_bricks == 0)
+	//	{
+	//		if (m_nodraw_count == 100)
+	//		{
+	//			TextureRenderer::set_done_update_loop();
+	//			m_nodraw_count = 0;
+	//		}
+	//		else
+	//			m_nodraw_count++;
+	//	}
+	//}
 }
 
 void VRenderGLView::DrawAnnotations()
@@ -10574,6 +10574,10 @@ void VRenderGLView::StartLoopUpdate()
 	//  TextureRenderer::get_start_update_loop() &&
 	//  !TextureRenderer::get_done_update_loop())
 	//  return;
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	bool draw_label = vr_frame &&
+		vr_frame->GetSettingDlg() &&
+		vr_frame->GetSettingDlg()->GetRunScript();
 
 	if (TextureRenderer::get_mem_swap())
 	{
@@ -10652,7 +10656,8 @@ void VRenderGLView::StartLoopUpdate()
 						//mask
 						if (vd->GetTexture() &&
 							vd->GetTexture()->nmask() != -1 &&
-							vd->GetTexture()->nlabel() == -1)
+							(!draw_label || (draw_label &&
+							vd->GetTexture()->nlabel() == -1)))
 							total_num++;
 					}
 				}
