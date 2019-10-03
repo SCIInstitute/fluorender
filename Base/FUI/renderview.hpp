@@ -28,6 +28,7 @@ class RenderView : public QMainWindow
     RenderView(bool hasFeatures, int renderNumber) : RenderView(nullptr,hasFeatures,renderNumber) {}
 
     bool getMainWindowStatus();
+    void callDestructor() { rightToolBar->sayHello(); }
 
   private:
     bool isMainWindow = false;

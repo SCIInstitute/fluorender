@@ -1056,6 +1056,19 @@
        <property name="title">
         <string>GroupBox</string>
        </property>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>60</y>
+          <width>171</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Test Right Destructor</string>
+        </property>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -2303,7 +2316,7 @@
   <widget class="QDockWidget" name="OutputAdjustmentsWidget">
    <property name="minimumSize">
     <size>
-     <width>50</width>
+     <width>177</width>
      <height>461</height>
     </size>
    </property>
@@ -2846,7 +2859,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
   <widget class="QDockWidget" name="ClippingPanesWidget">
    <property name="minimumSize">
     <size>
-     <width>50</width>
+     <width>297</width>
      <height>604</height>
     </size>
    </property>

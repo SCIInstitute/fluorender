@@ -1,5 +1,5 @@
 #include "renderviewRightTB.hpp"
-
+#include <iostream>
 RightToolbar::RightToolbar()
 {
 
@@ -13,7 +13,6 @@ RightToolbar::RightToolbar()
   sliderSpinBoxWidget->setLayout(sliderSpinBoxLayout);
 
   addWidgets();
-
 
 }
 

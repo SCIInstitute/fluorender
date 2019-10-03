@@ -16,8 +16,8 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
 {
     Q_INIT_RESOURCE(resources);
 
-    auto newBaseWindow = std::make_unique<QMainWindow>();
-    auto baseDockWidget = std::make_unique<QDockWidget>();
+    auto newBaseWindow = new QMainWindow();
+    auto baseDockWidget = new QDockWidget();
 
 
     // TODO: Instead of creating a new OpenGLWidget, I need to create a class
@@ -44,13 +44,12 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     newBaseWindow->addToolBar(Qt::RightToolBarArea, rightToolBar);
     newBaseWindow->addToolBar(Qt::BottomToolBarArea,bottomToolBar);
 
-    baseDockWidget->setWidget(newBaseWindow.release());
-
+    baseDockWidget->setWidget(newBaseWindow);
 
 
     this->setWindowFlags(Qt::Widget);
     baseDockWidget->setWindowTitle("Renderview " + QString::number(renderNumber));
-    this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget.release());
+    this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget);
 
     connect(topToolBar, &TopToolbar::sendColor,newRenderView, &FluoGLWidget::receiveColor);
 

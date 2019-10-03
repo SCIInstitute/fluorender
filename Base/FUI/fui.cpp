@@ -786,6 +786,7 @@ void FUI::on_actionOne_View_triggered()
 
     auto extractedWindow = extractWindow(mainRenderView);
 
+    qDeleteAll(ui->splitter->findChildren<RenderView*>());
     qDeleteAll(ui->splitter->findChildren<QSplitter*>());
     qDeleteAll(ui->splitter->findChildren<QFrame*>());
 

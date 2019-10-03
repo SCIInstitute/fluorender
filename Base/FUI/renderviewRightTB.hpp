@@ -2,15 +2,15 @@
 #define RENDERVIEW_RIGHT_TOOLBAR_HPP
 
 #include "genToolbarObjects.hpp"
-
+#include <iostream>
 class RightToolbar : public QToolBar
 {
   Q_OBJECT
 
-  public slots:
-
   public:
     RightToolbar();
+    void sayHello() { std::cout << "Hello." << std::endl; }
+    ~RightToolbar() { zoomLabel = nullptr; }
 
 
   private:

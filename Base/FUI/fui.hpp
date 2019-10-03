@@ -74,6 +74,7 @@ private:
 
     // This is my hash table, where the key is a boolean and the value is a QAction.
     std::unordered_map<bool,QAction*> flagControl;
+
 };
 
 #endif // FUI_HPP
