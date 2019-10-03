@@ -49,13 +49,13 @@ private:
     Ui::FUI *ui;
 
     void setDockWidgetSizes();
-    void checkFlags(std::reference_wrapper<QAction*> currentFlag);
+    void checkFlags(QAction* currentFlag);
 
-    std::unique_ptr<QFrame> createNewRenderWindow(bool hasFeatures);
-    std::unique_ptr<QFrame> extractWindow(QObject *toExtract);
-    std::unique_ptr<QSplitter> createNewSplitter(Qt::Orientation orientation);
-    std::unique_ptr<QSplitter> moveSplitter(Qt::Orientation orientation, int renderIndex);
-    std::unique_ptr<QSplitter> flipSplitter(Qt::Orientation orientation, int view1, int view2);
+    QFrame* createNewRenderWindow(bool hasFeatures);
+    QFrame* extractWindow(QObject *toExtract);
+    QSplitter* createNewSplitter(Qt::Orientation orientation);
+    QSplitter* moveSplitter(Qt::Orientation orientation, int renderIndex);
+    QSplitter* flipSplitter(Qt::Orientation orientation, int view1, int view2);
 
 
     // These are the indices of the left and right child of the main Splitter

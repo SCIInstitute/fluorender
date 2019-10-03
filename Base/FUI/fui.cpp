@@ -15,7 +15,7 @@ FUI::FUI(QWidget *parent) :
 
     // This creates our main Render Viewer and adds it to the splitter.
     auto baseRenderWindow = createNewRenderWindow(false);
-    ui->splitter->addWidget(baseRenderWindow.release());
+    ui->splitter->addWidget(baseRenderWindow);
 
 
     // This opens the program in full screen and sets the allowed ares to dock.
@@ -70,16 +70,16 @@ void FUI::setDockWidgetSizes()
  *
  * TODO: Find better way to number windows.
  */
-std::unique_ptr<QFrame> FUI::createNewRenderWindow(bool hasFeatures)
+QFrame* FUI::createNewRenderWindow(bool hasFeatures)
 {
     QGridLayout *baseLayout = new QGridLayout();
-    auto newBaseFrame = std::make_unique<QFrame>(new QFrame);
-    auto newRenderView = std::make_unique<RenderView>(hasFeatures,renderViewcounter);
+    auto newBaseFrame = new QFrame();
+    auto newRenderView = new RenderView(hasFeatures,renderViewcounter);
 
     newBaseFrame->setFrameStyle(QFrame::StyledPanel);
     newBaseFrame->setFrameShadow(QFrame::Sunken);
 
-    baseLayout->addWidget(newRenderView.release());
+    baseLayout->addWidget(newRenderView);
     newBaseFrame->setLayout(baseLayout);
     renderViewcounter+=1;
 
@@ -96,10 +96,10 @@ std::unique_ptr<QFrame> FUI::createNewRenderWindow(bool hasFeatures)
  * This function takes a QObject, extracts the target child and puts it
  * back into a new Frame.
  */
-std::unique_ptr<QFrame> FUI::extractWindow(QObject *toExtract)
+QFrame* FUI::extractWindow(QObject *toExtract)
 {
     QGridLayout *baseLayout = new QGridLayout();
-    auto newBaseFrame = std::make_unique<QFrame>(new QFrame);
+    auto newBaseFrame = new QFrame();
     RenderView *extracted = qobject_cast<RenderView*>(toExtract->children().at(1));
 
     newBaseFrame->setFrameStyle(QFrame::StyledPanel);
@@ -122,15 +122,15 @@ std::unique_ptr<QFrame> FUI::extractWindow(QObject *toExtract)
  * set inside. The widgets are added to the new QSplitter, the sizes are then set
  * appropriately, and it is then returned.
  */
-std::unique_ptr<QSplitter> FUI::createNewSplitter(Qt::Orientation orientation)
+QSplitter* FUI::createNewSplitter(Qt::Orientation orientation)
 {
-    auto newSplitter = std::make_unique<QSplitter>(new QSplitter);
+    auto newSplitter = new QSplitter();
     auto newTopWindow = createNewRenderWindow(true);
     auto newBottomWindow = createNewRenderWindow(true);
 
     newSplitter->setOrientation(orientation);
-    newSplitter->addWidget(newTopWindow.release());
-    newSplitter->addWidget(newBottomWindow.release());
+    newSplitter->addWidget(newTopWindow);
+    newSplitter->addWidget(newBottomWindow);
 
     newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
@@ -150,13 +150,13 @@ std::unique_ptr<QSplitter> FUI::createNewSplitter(Qt::Orientation orientation)
  * QSplitter. It also takes the index of the render view window that needs to be
  * moved. The size of the new QSplitter is then set appropriately and is returned.
  */
-std::unique_ptr<QSplitter> FUI::moveSplitter(Qt::Orientation orientation, int renderIndex)
+QSplitter* FUI::moveSplitter(Qt::Orientation orientation, int renderIndex)
 {
-    auto newSplitter = std::make_unique<QSplitter>(new QSplitter);
+    auto newSplitter = new QSplitter();
     auto newWindow = createNewRenderWindow(true);
     newSplitter->setOrientation(orientation);
     newSplitter->addWidget(std::move(ui->splitter->widget(renderIndex)));
-    newSplitter->addWidget(newWindow.release());
+    newSplitter->addWidget(newWindow);
 
     newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
@@ -175,9 +175,9 @@ std::unique_ptr<QSplitter> FUI::moveSplitter(Qt::Orientation orientation, int re
  * inside the new QSplitter. The size of the new QSplitter is then set
  * appropriately and it is returned.
  */
-std::unique_ptr<QSplitter> FUI::flipSplitter(Qt::Orientation orientation, int view1, int view2)
+QSplitter* FUI::flipSplitter(Qt::Orientation orientation, int view1, int view2)
 {
-    auto newSplitter = std::make_unique<QSplitter>(new QSplitter);
+    auto newSplitter = new QSplitter();
 
     newSplitter->setOrientation(orientation);
 
@@ -207,17 +207,17 @@ std::unique_ptr<QSplitter> FUI::flipSplitter(Qt::Orientation orientation, int vi
  * hash table. If the hash table, flag control, is empty then the menu
  * item is set to be disabled and is inserted into the hash table.
  */
-void FUI::checkFlags(std::reference_wrapper<QAction*> currentFlag)
+void FUI::checkFlags(QAction* currentFlag)
 {
     if(!flagControl.empty())
     {
         flagControl[false]->setEnabled(true);
-        currentFlag.get()->setEnabled(false);
+        currentFlag->setEnabled(false);
         flagControl[false] = currentFlag;
     }
     else
     {
-        currentFlag.get()->setEnabled(false);
+        currentFlag->setEnabled(false);
         flagControl[false] = currentFlag;
     }
 }
@@ -252,7 +252,7 @@ void FUI::checkFlags(std::reference_wrapper<QAction*> currentFlag)
 void FUI::on_actionSplit_HalfV_triggered()
 {
 
-    checkFlags(std::ref(ui->actionSplit_HalfV));
+    checkFlags(ui->actionSplit_HalfV);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
@@ -288,7 +288,7 @@ void FUI::on_actionSplit_HalfV_triggered()
     else
     {
         auto newRenderWindow = createNewRenderWindow(true);
-        ui->splitter->addWidget(newRenderWindow.release());
+        ui->splitter->addWidget(newRenderWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=1;
     }
@@ -305,7 +305,7 @@ void FUI::on_actionSplit_HalfV_triggered()
 void FUI::on_actionSplit_HalfH_triggered()
 {
 
-    checkFlags(std::ref(ui->actionSplit_HalfH));
+    checkFlags(ui->actionSplit_HalfH);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
@@ -341,7 +341,7 @@ void FUI::on_actionSplit_HalfH_triggered()
     else
     {
         auto newRenderWindow = createNewRenderWindow(true);
-        ui->splitter->addWidget(newRenderWindow.release());
+        ui->splitter->addWidget(newRenderWindow);
         ui->splitter->setOrientation(Qt::Vertical);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=1;
@@ -386,14 +386,14 @@ void FUI::on_actionSplit_HalfH_triggered()
 void FUI::on_actionSplit_Right_Half_triggered()
 {
 
-    checkFlags(std::ref(ui->actionSplit_Right_Half));
+    checkFlags(ui->actionSplit_Right_Half);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
         auto moveWindow = moveSplitter(Qt::Vertical, M_RENDERIND_NEI);
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveWindow.release());
+        ui->splitter->addWidget(moveWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=1;
     }
@@ -410,8 +410,8 @@ void FUI::on_actionSplit_Right_Half_triggered()
         auto extractMainWindow = extractWindow(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow.release());
-        ui->splitter->addWidget(flippedSplitter.release());
+        ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow);
+        ui->splitter->addWidget(flippedSplitter);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
         mainWindowPanelCounter-=1;
@@ -432,7 +432,7 @@ void FUI::on_actionSplit_Right_Half_triggered()
         auto newWindows = createNewSplitter(Qt::Vertical);
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(newWindows.release());
+        ui->splitter->addWidget(newWindows);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=2;
     }
@@ -450,14 +450,14 @@ void FUI::on_actionSplit_Right_Half_triggered()
 void FUI::on_actionSplit_Bottom_Half_triggered()
 {
 
-    checkFlags(std::ref(ui->actionSplit_Bottom_Half));
+    checkFlags(ui->actionSplit_Bottom_Half);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
         auto moveWindow = moveSplitter(Qt::Horizontal,M_RENDERIND_NEI);
 
         ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(moveWindow.release());
+        ui->splitter->addWidget(moveWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=1;
 
@@ -475,8 +475,8 @@ void FUI::on_actionSplit_Bottom_Half_triggered()
         auto extractMainWindow = extractWindow(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
         ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(flippedSplitter.release());
-        ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow.release());
+        ui->splitter->addWidget(flippedSplitter);
+        ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter-=1;
         neighborWindowPanelCounter+=1;
@@ -496,7 +496,7 @@ void FUI::on_actionSplit_Bottom_Half_triggered()
         auto newWindows = createNewSplitter(Qt::Horizontal);
 
         ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(newWindows.release());
+        ui->splitter->addWidget(newWindows);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=2;
     }
@@ -540,7 +540,7 @@ void FUI::on_actionSplit_Bottom_Half_triggered()
 void FUI::on_actionSplit_Left_Half_triggered()
 {
 
-    checkFlags(std::ref(ui->actionSplit_Left_Half));
+    checkFlags(ui->actionSplit_Left_Half);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
@@ -549,7 +549,7 @@ void FUI::on_actionSplit_Left_Half_triggered()
         auto moveWindow = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveWindow.release());
+        ui->splitter->addWidget(moveWindow);
         ui->splitter->addWidget(newRenderView);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter+=1;
@@ -561,8 +561,8 @@ void FUI::on_actionSplit_Left_Half_triggered()
         auto extractNeighWindow = extractWindow(ui->splitter->widget(M_RENDERIND_NEI-1)->children().at(0));
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter.release());
-        ui->splitter->addWidget(extractNeighWindow.release());
+        ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter);
+        ui->splitter->addWidget(extractNeighWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
         mainWindowPanelCounter+=1;
@@ -590,8 +590,8 @@ void FUI::on_actionSplit_Left_Half_triggered()
         auto newRenderView = createNewRenderWindow(true);
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveRenderView.release());
-        ui->splitter->addWidget(newRenderView.release());
+        ui->splitter->addWidget(moveRenderView);
+        ui->splitter->addWidget(newRenderView);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter+=1;
         neighborWindowPanelCounter+=1;
@@ -608,7 +608,7 @@ void FUI::on_actionSplit_Left_Half_triggered()
 void FUI::on_actionSplit_Top_Half_triggered()
 {
 
-    checkFlags(std::ref(ui->actionSplit_Top_Half));
+    checkFlags(ui->actionSplit_Top_Half);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
@@ -617,7 +617,7 @@ void FUI::on_actionSplit_Top_Half_triggered()
 
 
         ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(moveWindow.release());
+        ui->splitter->addWidget(moveWindow);
         ui->splitter->addWidget(newRenderView);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter+=1;
@@ -629,8 +629,8 @@ void FUI::on_actionSplit_Top_Half_triggered()
         auto extractNeighWindow = extractWindow(ui->splitter->widget(M_RENDERIND_NEI-1)->children().at(0));
 
         ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter.release());
-        ui->splitter->addWidget(extractNeighWindow.release());
+        ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter);
+        ui->splitter->addWidget(extractNeighWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
         mainWindowPanelCounter+=1;
@@ -658,8 +658,8 @@ void FUI::on_actionSplit_Top_Half_triggered()
         auto newRenderView = createNewRenderWindow(true);
 
         ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(moveRenderView.release());
-        ui->splitter->addWidget(newRenderView.release());
+        ui->splitter->addWidget(moveRenderView);
+        ui->splitter->addWidget(newRenderView);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter+=1;
         neighborWindowPanelCounter+=1;
@@ -699,7 +699,7 @@ void FUI::on_actionSplit_Top_Half_triggered()
  */
 void FUI::on_actionSplit_All_triggered()
 {
-    checkFlags(std::ref(ui->actionSplit_All));
+    checkFlags(ui->actionSplit_All);
 
     if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
     {
@@ -707,8 +707,8 @@ void FUI::on_actionSplit_All_triggered()
         auto moveNeighRenderView = moveSplitter(Qt::Vertical, M_RENDERIND_NEI - 1); //
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveMainRenderView.release());
-        ui->splitter->addWidget(moveNeighRenderView.release());
+        ui->splitter->addWidget(moveMainRenderView);
+        ui->splitter->addWidget(moveNeighRenderView);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter+=1;
         neighborWindowPanelCounter+=1;
@@ -720,11 +720,11 @@ void FUI::on_actionSplit_All_triggered()
         auto flippedSplitter = flipSplitter(Qt::Vertical, M_RENDERIND_NEI, MAINRENDERINDEX);
         auto newWindow = createNewRenderWindow(true);
 
-        neighborSplitter->addWidget(newWindow.release());
+        neighborSplitter->addWidget(newWindow);
         neighborSplitter->setOrientation(Qt::Vertical);
         neighborSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-        ui->splitter->addWidget(flippedSplitter.release());
+        ui->splitter->addWidget(flippedSplitter);
         ui->splitter->addWidget(std::move(ui->splitter->widget(MAINRENDERINDEX)));
         ui->splitter->setOrientation(Qt::Horizontal);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
@@ -739,7 +739,7 @@ void FUI::on_actionSplit_All_triggered()
         temp->setOrientation(Qt::Vertical);
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveNeighborWindow.release());
+        ui->splitter->addWidget(moveNeighborWindow);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         neighborWindowPanelCounter+=1;
 
@@ -750,8 +750,8 @@ void FUI::on_actionSplit_All_triggered()
         auto newWindows = createNewSplitter(Qt::Vertical);
 
         ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveRenderView.release());
-        ui->splitter->addWidget(newWindows.release());
+        ui->splitter->addWidget(moveRenderView);
+        ui->splitter->addWidget(newWindows);
         ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
         mainWindowPanelCounter+=1;
         neighborWindowPanelCounter+=2;
@@ -775,7 +775,7 @@ void FUI::on_actionSplit_All_triggered()
  */
 void FUI::on_actionOne_View_triggered()
 {
-    checkFlags(std::ref(ui->actionOne_View));
+    checkFlags(ui->actionOne_View);
 
     QObject *mainRenderView;
 
@@ -793,6 +793,6 @@ void FUI::on_actionOne_View_triggered()
     neighborWindowPanelCounter = 0;
     renderViewcounter = 1;
 
-    ui->splitter->addWidget(extractedWindow.release());
+    ui->splitter->addWidget(extractedWindow);
 
 }

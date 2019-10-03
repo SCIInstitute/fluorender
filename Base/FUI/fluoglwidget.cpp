@@ -28,28 +28,7 @@ void FluoGLWidget::paintGL()
 {
     float r,g,b;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-/*
-    glBegin(GL_LINES);
-    qColortoRGB(Qt::red,r,g,b);
-    glColor3f(r,g,b);
-    glVertex3f(-1.0f,0.0f,0.0f);
-    glVertex3f(1.0f,0.0f,0.0f);
-    glEnd();
 
-    glBegin(GL_LINES);
-    qColortoRGB(Qt::blue,r,g,b);
-    glColor3f(r,g,b);
-    glVertex3f(0.0f,-1.0f,0.0f);
-    glVertex3f(0.0f,1.0f,0.0f);
-    glEnd();
-
-    glBegin(GL_LINES);
-    qColortoRGB(Qt::green,r,g,b);
-    glColor3f(r,g,b);
-    glVertex3f(0.0f,0.0f,-1.0f);
-    glVertex3f(0.0f,0.0f,1.0f);
-    glEnd();
-*/
     if(isMain)
     {
         glBegin(GL_TRIANGLES);
@@ -119,6 +98,6 @@ void FluoGLWidget::receiveColor(const QColor &color)
 void FluoGLWidget::updateBackgroundColor(float r, float g, float b, float a)
 {
   glClearColor(r,g,b,a);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   update();
 }
