@@ -5,6 +5,7 @@ RightToolbar::RightToolbar()
 
   setToolbarProperties();
   initializeActions();
+  setActionProperties();
 
   sliderSpinBoxLayout->setAlignment(Qt::AlignHCenter);
   sliderSpinBoxLayout->addWidget(slider);
@@ -12,6 +13,8 @@ RightToolbar::RightToolbar()
   sliderSpinBoxWidget->setLayout(sliderSpinBoxLayout);
 
   addWidgets();
+
+
 }
 
 void RightToolbar::initializeActions()
@@ -25,6 +28,12 @@ void RightToolbar::initializeActions()
   spinBox = genSpinBox<QSpinBox,int>(35,999);
   tvButton = genActionButton(":/tv.svg");
   resetButton = genActionButton(":/reset.svg");
+}
+
+void RightToolbar::setActionProperties()
+{
+  lightBulb->setCheckable(true);
+  tvButton->setCheckable(true);
 }
 
 void RightToolbar::addWidgets()

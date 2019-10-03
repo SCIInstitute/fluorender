@@ -4,6 +4,7 @@
 #include "genToolbarObjects.hpp"
 #include <QPushButton>
 #include <QColorDialog>
+#include <QPalette>
 #include <unordered_map>
 #include <vector>
 
@@ -11,16 +12,21 @@ class TopToolbar : public QToolBar
 {
   Q_OBJECT
 
+  signals:
+    void sendColor(const QColor &toSend);
+
   public slots:
     void on_layers_clicked() { checkFlags(renderViewLayersAction); }
     void on_depth_clicked() { checkFlags(renderViewDepthAction); }
     void on_colors_clicked() { checkFlags(renderViewColorsAction); }
     void on_scale_clicked() { rotateImage(defaultScale); }
+    void on_color_clicked();
 
   private slots:
 
   public:
     TopToolbar();
+    void updateBackgroundColor(){ emit sendColor(Color); }
 
   private:
     void initializeActionsAndWidgets();
@@ -42,6 +48,8 @@ class TopToolbar : public QToolBar
     void checkFlags(QAction* currentFlag);
     void rotateImage(QAction* currentAction);
     void enableScaleGroupActions();
+    void setColorWidgetcolor(QColor color);
+
 
     QHBoxLayout* perspectiveLayout;
     QHBoxLayout* backgroundLayout;
@@ -77,7 +85,7 @@ class TopToolbar : public QToolBar
     QComboBox* scaleDropDown;
 
     int imageID = 0;
-
+    QColor Color;
     const QStringList scales = {"nm","μm","mm"};
     const std::vector<QString> images = { ":/default.svg",":/ruler.svg",":/byScale.svg" };
 

@@ -106,3 +106,19 @@ void FluoGLWidget::renderHexagon(float r, float g, float b)
     glVertex3f(0.4f,-0.4f,-1.0f);
     glVertex3f(0.8f,0.0f,-1.0f);
 }
+
+void FluoGLWidget::receiveColor(const QColor &color)
+{
+  float r,g,b;
+  float a = normalize_0_1(RGB_MAX,RGB_MIN,RGB_MAX);
+
+  qColortoRGB(color,r,g,b);
+  updateBackgroundColor(r,g,b,a);
+}
+
+void FluoGLWidget::updateBackgroundColor(float r, float g, float b, float a)
+{
+  glClearColor(r,g,b,a);
+  glClear(GL_COLOR_BUFFER_BIT);
+  update();
+}

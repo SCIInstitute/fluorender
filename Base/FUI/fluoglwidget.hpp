@@ -12,6 +12,9 @@ class FluoGLWidget : public QOpenGLWindow, public QOpenGLFunctions
 {
     Q_OBJECT
 
+    public slots:
+      void receiveColor(const QColor& color);
+
     public:
         FluoGLWidget(QWidget *parent = nullptr, bool ifMain = false);
         FluoGLWidget(bool ifMain) : FluoGLWidget(nullptr,ifMain){}
@@ -26,6 +29,8 @@ class FluoGLWidget : public QOpenGLWindow, public QOpenGLFunctions
         void renderTriangle(float r, float g, float b);
         void renderHexagon(float r, float g, float b);
         float normalize_0_1(float val, float min, float max) const;
+
+        void updateBackgroundColor(float r, float g, float b, float a);
 
         bool isMain;
         const float RGB_MIN = 1.0f;

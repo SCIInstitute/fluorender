@@ -24,21 +24,21 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     //       that inherits an OpenGLWidget/OpenGLWindow.
     //auto newRenderView = std::make_unique<QOpenGLWidget>(new QOpenGLWidget);
 
-    std::unique_ptr<FluoGLWidget> newRenderView;
+    FluoGLWidget* newRenderView;
     //auto newRenderView = std::make_unique<FluoGLWidget>(new FluoGLWidget);
 
     if(!hasFeatures)
     {
         baseDockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
         isMainWindow = true;
-        newRenderView = std::make_unique<FluoGLWidget>(true);
+        newRenderView = new FluoGLWidget(true);
     }
     else
     {
-        newRenderView = std::make_unique<FluoGLWidget>();
+        newRenderView = new FluoGLWidget();
     }
 
-    newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newRenderView.release()));
+    newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newRenderView));
     newBaseWindow->addToolBar(Qt::LeftToolBarArea,leftToolBar);
     newBaseWindow->addToolBar(Qt::TopToolBarArea,topToolBar);
     newBaseWindow->addToolBar(Qt::RightToolBarArea, rightToolBar);
@@ -51,6 +51,8 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
     this->setWindowFlags(Qt::Widget);
     baseDockWidget->setWindowTitle("Renderview " + QString::number(renderNumber));
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget.release());
+
+    connect(topToolBar, &TopToolbar::sendColor,newRenderView, &FluoGLWidget::receiveColor);
 
 }
 

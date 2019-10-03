@@ -16,6 +16,7 @@ TopToolbar::TopToolbar()
   connect(renderViewDepthAction,SIGNAL(triggered()),this,SLOT(on_depth_clicked()));
   connect(renderViewColorsAction,SIGNAL(triggered()),this,SLOT(on_colors_clicked()));
   connect(defaultScale,SIGNAL(triggered()),this,SLOT(on_scale_clicked()));
+  connect(colorDialogWidget,SIGNAL(clicked()),this,SLOT(on_color_clicked()));
 
 }
 
@@ -23,14 +24,14 @@ void TopToolbar::checkFlags(QAction* currentFlag)
 {
   if(!flagControl.empty())
   {
-    flagControl[false]->setEnabled(true);
-    currentFlag->setEnabled(false);
-    flagControl[false] = currentFlag;
+    flagControl[true]->setChecked(false);
+    currentFlag->setChecked(true);
+    flagControl[true] = currentFlag;
   }
   else
   {
-    currentFlag->setEnabled(false);
-    flagControl[false] = currentFlag;
+    currentFlag->setChecked(true);
+    flagControl[true] = currentFlag;
   }
 }
 
@@ -67,6 +68,19 @@ void TopToolbar::rotateImage(QAction* currentAction)
   }
 }
 
+void TopToolbar::setColorWidgetcolor(QColor color)
+{
+  if(color.isValid())
+  {
+    QPalette pal = colorDialogWidget->palette();
+    pal.setColor(QPalette::Button,color);
+    colorDialogWidget->setAutoFillBackground(true);
+    colorDialogWidget->setPalette(pal);
+    colorDialogWidget->update();
+    Color = color;
+  }
+}
+
 void TopToolbar::initializeActionsAndWidgets()
 {
   initializeLayouts();
@@ -96,6 +110,9 @@ void TopToolbar::initializePushButtons()
 {
   colorDialogWidget = new QPushButton();
   captureWidget = new QPushButton();
+
+  colorDialogWidget->setFlat(true);
+  setColorWidgetcolor(QColor(Qt::black));
 }
 
 void TopToolbar::initializeColorDiaSlider()
@@ -125,8 +142,12 @@ void TopToolbar::initializeActions()
 
 void TopToolbar::setRenderActionGroupSettings()
 {
-  renderViewLayersAction->setEnabled(false);
-  flagControl[false] = renderViewLayersAction;
+  renderViewLayersAction->setCheckable(true);
+  renderViewDepthAction->setCheckable(true);
+  renderViewColorsAction->setCheckable(true);
+
+  renderViewLayersAction->setChecked(true);
+  flagControl[true] = renderViewLayersAction;
 }
 
 void TopToolbar::setInformationGroupSettings()
@@ -200,4 +221,11 @@ void TopToolbar::setToolbarProperties()
   this->setStyleSheet("QToolBar {background: rgb(222,225,232)}");
   this->setOrientation(Qt::Horizontal);
   this->setFixedHeight(35);
+}
+
+void TopToolbar::on_color_clicked()
+{
+
+  setColorWidgetcolor(colorDialog->getColor());
+  updateBackgroundColor();
 }

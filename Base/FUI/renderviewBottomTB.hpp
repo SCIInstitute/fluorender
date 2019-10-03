@@ -2,9 +2,15 @@
 #define RENDERVIEW_BOTTOM_TOOLBAR_HPP
 
 #include "genToolbarObjects.hpp"
+#include <vector>
 
 class BottomToolbar : public QToolBar
 {
+  Q_OBJECT
+
+  public slots:
+    void on_sliderButton_clicked() { rotateImages(); }
+
   public:
     BottomToolbar();
 
@@ -18,6 +24,8 @@ class BottomToolbar : public QToolBar
     void addWidgetsToToolbar();
     void setToolbarProperties();
 
+    void rotateImages();
+
     QLabel* xLabel;
     QLabel* yLabel;
     QLabel* zLabel;
@@ -29,12 +37,15 @@ class BottomToolbar : public QToolBar
     QDoubleSpinBox* zSpinBox;
     QComboBox* labelDropDown;
     QAction* angleButton;
-    QAction* globeButton;
+    QAction* sliderButton;
     QAction* resetButton;
     QWidget* sliderWidgets;
     QHBoxLayout* sliderLayout;
 
     const QStringList labels = {"NA","+X","-X","+Y","-Y","+Z","-Z"};
+
+    int imageID = 0;
+    const std::vector<QString> images = {":/globe.svg",":/plane.svg"};
 };
 
 #endif

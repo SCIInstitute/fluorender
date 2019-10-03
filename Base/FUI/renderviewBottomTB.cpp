@@ -13,6 +13,22 @@ BottomToolbar::BottomToolbar()
   sliderWidgets->setLayout(sliderLayout);
 
   addWidgetsToToolbar();
+
+  connect(sliderButton,SIGNAL(triggered()),this,SLOT(on_sliderButton_clicked()));
+}
+
+void BottomToolbar::rotateImages()
+{
+  if(imageID == 1)
+  {
+    imageID = 0;
+    sliderButton->setIcon(QIcon(images[imageID]));
+  }
+  else
+  {
+    imageID += 1;
+    sliderButton->setIcon(QIcon(images[imageID]));
+  }
 }
 
 void BottomToolbar::initializeLabels()
@@ -45,7 +61,9 @@ void BottomToolbar::initializeActions()
   labelDropDown = genComboBox(labels);
   resetButton = genActionButton(":/reset.svg");
   angleButton = genActionButton(":/fortyFive.svg");
-  globeButton = genActionButton(":/globe.svg");
+  sliderButton = genActionButton(":/globe.svg");
+
+  angleButton->setCheckable(true);
 }
 
 void BottomToolbar::addWidgetsToLayout()
@@ -66,7 +84,7 @@ void BottomToolbar::addWidgetsToLayout()
 void BottomToolbar::addWidgetsToToolbar()
 {
   this->addAction(angleButton);
-  this->addAction(globeButton);
+  this->addAction(sliderButton);
   this->addWidget(sliderWidgets);
   this->addAction(resetButton);
 }

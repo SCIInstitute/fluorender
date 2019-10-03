@@ -5,13 +5,20 @@
 
 class RightToolbar : public QToolBar
 {
+  Q_OBJECT
+
+  public slots:
+
   public:
     RightToolbar();
+
+
+  private:
     void initializeActions();
+    void setActionProperties();
     void addWidgets();
     void setToolbarProperties();
 
-  private:
     QLabel* zoomLabel;
     QAction* lightBulb;
     QSlider* slider;
