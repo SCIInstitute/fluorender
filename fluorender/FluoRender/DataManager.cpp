@@ -4723,6 +4723,15 @@ void DataGroup::RandomizeColor()
 	}
 }
 
+void DataGroup::AddMask(Nrrd* mask, int op)
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->AddMask(mask, op);
+	}
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int MeshGroup::m_num = 0;
 MeshGroup::MeshGroup()
