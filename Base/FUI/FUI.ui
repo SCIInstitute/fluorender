@@ -1056,19 +1056,6 @@
        <property name="title">
         <string>GroupBox</string>
        </property>
-       <widget class="QPushButton" name="pushButton">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>60</y>
-          <width>171</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Test Right Destructor</string>
-        </property>
-       </widget>
       </widget>
      </item>
     </layout>
