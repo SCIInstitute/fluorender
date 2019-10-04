@@ -356,10 +356,8 @@ void ColocalizationDlg::Colocalize()
 	{
 		//dot product and min value
 		//symmetric matrix
-		size_t x = 0, y = 0;
 		for (int it1 = 0; it1 < num; ++it1)
 		{
-			y = x;
 			for (int it2 = it1; it2 < num; ++it2)
 			{
 				VolumeData* vd1 = m_group->GetVolumeData(it1);
@@ -392,11 +390,10 @@ void ColocalizationDlg::Colocalize()
 				}
 				break;
 				}
-				rm[x][y] = compare.Result();
-				rm[y][x] = compare.Result();
-				y++;
+				rm[it1][it2] = compare.Result();
+				if (it1 != it2)
+					rm[it2][it1] = compare.Result();
 			}
-			x++;
 		}
 	}
 	else if (m_method == 2 && m_int_weighted)
