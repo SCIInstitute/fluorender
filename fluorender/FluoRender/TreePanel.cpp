@@ -2095,6 +2095,31 @@ void DataTreeCtrl::PasteMask(int op)
 
 	wxString name = GetItemText(sel_item);
 	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	VRenderView* vrv = 0;
+	DataGroup* group = 0;
+	wxTreeItemId par_item = GetItemParent(sel_item);
+	if (par_item.IsOk())
+	{
+		LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+		if (par_item_data && par_item_data->type == 5)
+		{
+			//par is group
+			wxString str = GetItemText(GetItemParent(par_item));
+			vrv = vr_frame->GetView(str);
+			str = GetItemText(par_item);
+			group = vrv->GetGroup(str);
+		}
+		else if (par_item_data && par_item_data->type == 1)
+		{
+			//par is view
+			wxString str = GetItemText(par_item);
+			vrv = vr_frame->GetView(str);
+		}
+	}
+	bool apply_group = false;
+	if (vrv)
+		apply_group = vrv->m_glview->GetVolumeSelector()->GetSelectGroup();
+
 	if (vd && vr_frame->m_vd_copy)
 	{
 		//prevent self copying
@@ -2116,6 +2141,22 @@ void DataTreeCtrl::PasteMask(int op)
 		}
 		else
 			vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
+
+		if (apply_group)
+		{
+			Nrrd* data = vd->GetMask(false);
+			if (data)
+			{
+				if (group)
+					group->AddMask(data, 0);
+				else
+				{
+					for (int i = 0; i < vrv->GetGroupNum(); ++i)
+						vrv->GetGroup(i)->AddMask(data, 0);
+				}
+
+			}
+		}
 
 		vr_frame->RefreshVRenderViews();
 		if (vr_frame->GetBrushToolDlg())

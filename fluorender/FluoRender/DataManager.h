@@ -1217,6 +1217,8 @@ public:
 	//randomize color
 	void RandomizeColor();
 
+	void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
+
 private:
 	static int m_num;
 	//wxString m_name;

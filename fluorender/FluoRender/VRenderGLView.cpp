@@ -7496,6 +7496,28 @@ DataGroup* VRenderGLView::GetGroup(wxString &name)
 	return 0;
 }
 
+DataGroup* VRenderGLView::GetGroup(int index)
+{
+	int i;
+	int count = 0;
+
+	for (i = 0; i < (int)m_layer_list.size(); i++)
+	{
+		if (!m_layer_list[i])
+			continue;
+		if (m_layer_list[i]->IsA() == 5)
+		{
+			if (count == index)
+			{
+				DataGroup* group = (DataGroup*)m_layer_list[i];
+				return group;
+			}
+			count++;
+		}
+	}
+	return 0;
+}
+
 int VRenderGLView::GetAny()
 {
 	PopVolumeList();

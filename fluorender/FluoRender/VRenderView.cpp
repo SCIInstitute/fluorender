@@ -868,6 +868,14 @@ DataGroup* VRenderView::GetGroup(wxString &name)
 		return 0;
 }
 
+DataGroup* VRenderView::GetGroup(int index)
+{
+	if (m_glview)
+		return m_glview->GetGroup(index);
+	else
+		return 0;
+}
+
 DataGroup* VRenderView::AddVolumeData(VolumeData* vd, wxString group_name)
 {
 	if (m_glview) {

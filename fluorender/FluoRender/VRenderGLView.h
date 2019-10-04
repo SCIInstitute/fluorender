@@ -157,6 +157,7 @@ public:
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
 	DataGroup* GetGroup(wxString &name);
+	DataGroup* GetGroup(int index);
 	MeshGroup* GetMGroup(wxString str);
 	//add
 	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name = "");
