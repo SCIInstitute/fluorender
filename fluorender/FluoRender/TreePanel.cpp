@@ -2161,6 +2161,9 @@ void DataTreeCtrl::PasteMask(int op)
 		vr_frame->RefreshVRenderViews();
 		if (vr_frame->GetBrushToolDlg())
 			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		if (vr_frame->GetColocalizationDlg() &&
+			vrv->m_glview->m_paint_colocalize)
+			vr_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
