@@ -35,5 +35,15 @@
   <file alias="mainTB-openMesh.svg">Resources/Main-Toolbar-Images/dice-d20-solid.svg</file>
   <file alias="mainTB-paintBrush.svg">Resources/Main-Toolbar-Images/paint-brush-solid.svg</file>
   <file alias="mainTB-settings.svg">Resources/Main-Toolbar-Images/cogs-solid.svg</file>
+  <file alias="workspace-eye.svg">Resources/Workspace-Images/eye-regular.svg</file>
+  <file alias="workspace-newVolume.svg">Resources/Workspace-Images/file-new-volume.svg</file>
+  <file alias="workspace-newMesh.svg">Resources/Workspace-Images/file-new-mesh.svg</file>
+  <file alias="workspace-deleteSelection.svg">Resources/Workspace-Images/trash-solid.svg</file>
+  <file alias="workspace-highLight.svg">Resources/Workspace-Images/paint-brush-plus-solid.svg</file>
+  <file alias="workspace-diffuse.svg">Resources/Workspace-Images/paint-brush-circle-solid.svg</file>
+  <file alias="workspace-resetSelect.svg">Resources/Workspace-Images/paint-brush-minus-solid.svg</file>
+  <file alias="workspace-resetAll.svg">Resources/Workspace-Images/brush-solid.svg</file>
+  <file alias="workspace-eraseHighlight.svg">Resources/Workspace-Images/eraser-solid.svg</file>
+  <file alias="workspace-extract.svg">Resources/Workspace-Images/cut-solid.svg</file>
 </qresource>
 </RCC>
