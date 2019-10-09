@@ -1122,7 +1122,7 @@
              <string> Save...</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset>
               <normaloff>:/save.svg</normaloff>:/save.svg</iconset>
             </property>
            </widget>
@@ -2096,7 +2096,7 @@
                    <string> Reset</string>
                   </property>
                   <property name="icon">
-                   <iconset resource="resources.qrc">
+                   <iconset>
                     <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
                   </property>
                  </widget>
@@ -2462,7 +2462,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset>
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -2593,7 +2593,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset>
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -2724,7 +2724,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset>
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -3373,7 +3373,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset Clips</string>
               </property>
               <property name="icon">
-               <iconset resource="resources.qrc">
+               <iconset>
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -3414,7 +3414,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                  <string> Reset to 0</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="resources.qrc">
+                 <iconset>
                   <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
                 </property>
                </widget>
@@ -3639,11 +3639,44 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
     <string>One View</string>
    </property>
   </action>
+  <action name="actionOpen_Volume">
+   <property name="text">
+    <string>Open Volume</string>
+   </property>
+  </action>
+  <action name="actionOpen_Project">
+   <property name="text">
+    <string>Open Project</string>
+   </property>
+  </action>
+  <action name="actionSave_Project">
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionShow_Hide_UI">
+   <property name="text">
+    <string>Show/Hide UI</string>
+   </property>
+  </action>
+  <action name="actionOpen_Mesh">
+   <property name="text">
+    <string>Open Mesh</string>
+   </property>
+  </action>
+  <action name="actionPaint_Brush">
+   <property name="text">
+    <string>Paint Brush</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>

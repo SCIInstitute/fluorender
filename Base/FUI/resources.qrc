@@ -28,5 +28,12 @@
   <file alias="bird.svg">Resources/dove-solid.svg</file>
   <file alias="saveConfigs.svg">Resources/hdd-regular.svg</file>
   <file alias="default.svg">Resources/vector-square-solid.svg</file>
+  <file alias="mainTB-stack.svg">Resources/Main-Toolbar-Images/layer-group-solid.svg</file>
+  <file alias="mainTB-openProj.svg">Resources/Main-Toolbar-Images/door-open-solid.svg</file>
+  <file alias="mainTB-saveProj.svg">Resources/Main-Toolbar-Images/save-solid.svg</file>
+  <file alias="mainTB-showHide.svg">Resources/Main-Toolbar-Images/laptop-code-solid.svg</file>
+  <file alias="mainTB-openMesh.svg">Resources/Main-Toolbar-Images/dice-d20-solid.svg</file>
+  <file alias="mainTB-paintBrush.svg">Resources/Main-Toolbar-Images/pain-brush-solid.svg</file>
+  <file alias="mainTB-settings.svg">Resources/Main-Toolbar-Images/cogs-solid.svg</file>
 </qresource>
 </RCC>
