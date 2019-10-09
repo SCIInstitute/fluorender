@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>2143</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSplit_Render_View">
@@ -112,7 +112,17 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionTestSplit"/>
+   <addaction name="actionOpen_Volume"/>
+   <addaction name="actionOpen_Project"/>
+   <addaction name="actionSave_Project"/>
+   <addaction name="separator"/>
+   <addaction name="actionShow_Hide_UI"/>
+   <addaction name="separator"/>
+   <addaction name="actionOpen_Mesh"/>
+   <addaction name="actionPaint_Brush"/>
+   <addaction name="separator"/>
+   <addaction name="actionSettings"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="DatasetsWidget">
@@ -1122,7 +1132,7 @@
              <string> Save...</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="resources.qrc">
               <normaloff>:/save.svg</normaloff>:/save.svg</iconset>
             </property>
            </widget>
@@ -2096,7 +2106,7 @@
                    <string> Reset</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="resources.qrc">
                     <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
                   </property>
                  </widget>
@@ -2303,7 +2313,7 @@
   <widget class="QDockWidget" name="OutputAdjustmentsWidget">
    <property name="minimumSize">
     <size>
-     <width>177</width>
+     <width>185</width>
      <height>461</height>
     </size>
    </property>
@@ -2462,7 +2472,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="resources.qrc">
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -2593,7 +2603,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="resources.qrc">
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -2724,7 +2734,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="resources.qrc">
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -2846,7 +2856,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
   <widget class="QDockWidget" name="ClippingPanesWidget">
    <property name="minimumSize">
     <size>
-     <width>297</width>
+     <width>298</width>
      <height>604</height>
     </size>
    </property>
@@ -3373,7 +3383,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                <string> Reset Clips</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="resources.qrc">
                 <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
               </property>
              </widget>
@@ -3414,7 +3424,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
                  <string> Reset to 0</string>
                 </property>
                 <property name="icon">
-                 <iconset>
+                 <iconset resource="resources.qrc">
                   <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
                 </property>
                </widget>
@@ -3640,43 +3650,73 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    </property>
   </action>
   <action name="actionOpen_Volume">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/layer.svg</normaloff>:/layer.svg</iconset>
+   </property>
    <property name="text">
     <string>Open Volume</string>
    </property>
   </action>
   <action name="actionOpen_Project">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/mainTB-openProj.svg</normaloff>:/mainTB-openProj.svg</iconset>
+   </property>
    <property name="text">
     <string>Open Project</string>
    </property>
   </action>
   <action name="actionSave_Project">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/mainTB-saveProj.svg</normaloff>:/mainTB-saveProj.svg</iconset>
+   </property>
    <property name="text">
     <string>Save Project</string>
    </property>
   </action>
   <action name="actionShow_Hide_UI">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/mainTB-showHide.svg</normaloff>:/mainTB-showHide.svg</iconset>
+   </property>
    <property name="text">
     <string>Show/Hide UI</string>
    </property>
   </action>
   <action name="actionOpen_Mesh">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/mainTB-openMesh.svg</normaloff>:/mainTB-openMesh.svg</iconset>
+   </property>
    <property name="text">
     <string>Open Mesh</string>
    </property>
   </action>
   <action name="actionPaint_Brush">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/mainTB-paintBrush.svg</normaloff>:/mainTB-paintBrush.svg</iconset>
+   </property>
    <property name="text">
     <string>Paint Brush</string>
    </property>
   </action>
   <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/mainTB-settings.svg</normaloff>:/mainTB-settings.svg</iconset>
+   </property>
    <property name="text">
     <string>Settings</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>

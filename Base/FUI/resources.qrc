@@ -33,7 +33,7 @@
   <file alias="mainTB-saveProj.svg">Resources/Main-Toolbar-Images/save-solid.svg</file>
   <file alias="mainTB-showHide.svg">Resources/Main-Toolbar-Images/laptop-code-solid.svg</file>
   <file alias="mainTB-openMesh.svg">Resources/Main-Toolbar-Images/dice-d20-solid.svg</file>
-  <file alias="mainTB-paintBrush.svg">Resources/Main-Toolbar-Images/pain-brush-solid.svg</file>
+  <file alias="mainTB-paintBrush.svg">Resources/Main-Toolbar-Images/paint-brush-solid.svg</file>
   <file alias="mainTB-settings.svg">Resources/Main-Toolbar-Images/cogs-solid.svg</file>
 </qresource>
 </RCC>
