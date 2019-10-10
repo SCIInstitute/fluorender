@@ -235,7 +235,12 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 		m_output_grid->DeleteCols(k,
 			m_output_grid->GetNumberCols() - k);
 
-	m_output_grid->AutoSizeColumns(false);
+	//m_output_grid->AutoSizeColumns(false);
+	if (m_physical_size && !m_get_ratio)
+		m_output_grid->SetDefaultColSize(100, true);
+	else
+		m_output_grid->SetDefaultColSize(70, true);
+	m_output_grid->ForceRefresh();
 	m_output_grid->ClearSelection();
 }
 
