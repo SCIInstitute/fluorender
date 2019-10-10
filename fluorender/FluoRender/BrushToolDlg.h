@@ -128,6 +128,7 @@ public:
 	void UpdateMaskTb();
 
 	//output
+	void Update();
 	void SetOutput(const GridData &data, const wxString &unit);
 	void CopyData();
 	void PasteData();

@@ -426,7 +426,6 @@ public:
 	void Set2dWeights();
 	//segment volumes in current view
 	void Segment();
-	void CountVoxels(unsigned int &sum, float &wsum);
 
 	//brush properties
 	//load default;

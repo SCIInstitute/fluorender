@@ -2210,7 +2210,11 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		//frame
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame && vr_frame->GetBrushToolDlg())
+		{
+			if (m_view->m_glview->m_paint_count)
+				vr_frame->GetBrushToolDlg()->Update();
 			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		}
 	}
 }
 
@@ -2250,7 +2254,11 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	//frame
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		if (m_view->m_glview->m_paint_count)
+			vr_frame->GetBrushToolDlg()->Update();
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	}
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
@@ -2268,7 +2276,11 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 	//frame
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		if (m_view->m_glview->m_paint_count)
+			vr_frame->GetBrushToolDlg()->Update();
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	}
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
@@ -3083,7 +3095,11 @@ void ComponentDlg::SelectFullComp()
 	//frame
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
+	{
+		if (m_view->m_glview->m_paint_count)
+			vr_frame->GetBrushToolDlg()->Update();
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	}
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
@@ -3225,6 +3241,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 			m_output_grid->GetNumberCols() - k);
 
 	m_output_grid->AutoSizeColumns();
+	m_output_grid->ClearSelection();
 }
 
 void ComponentDlg::OnHistoryChk(wxCommandEvent& event)

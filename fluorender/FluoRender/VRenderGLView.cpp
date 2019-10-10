@@ -2222,62 +2222,16 @@ void VRenderGLView::Segment()
 		if (m_paint_colocalize)
 			colocal = true;
 	}
-	if (count)
-		CountVoxels(sum, wsum);
 
 	//update
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (vr_frame)
 	{
-		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
-		if (count)
-		{
-			GridData data;
-			VolumeData* sel_vol = m_selector.GetVolume();
-			if (sel_vol)
-			{
-				data.voxel_sum = sum;
-				double scale = sel_vol->GetScalarScale();
-				data.voxel_wsum = wsum * scale;
-				double spcx, spcy, spcz;
-				sel_vol->GetSpacings(spcx, spcy, spcz);
-				double vvol = spcx * spcy * spcz;
-				vvol = vvol == 0.0 ? 1.0 : vvol;
-				data.size = data.voxel_sum * vvol;
-				data.wsize = data.voxel_wsum * vvol;
-				wxString unit;
-				switch (m_sb_unit)
-				{
-				case 0:
-					unit = L"nm\u00B3";
-					break;
-				case 1:
-				default:
-					unit = L"\u03BCm\u00B3";
-					break;
-				case 2:
-					unit = L"mm\u00B3";
-					break;
-				}
-				vr_frame->GetBrushToolDlg()->SetOutput(data, unit);
-			}
-		}
+		if (count && vr_frame->GetBrushToolDlg())
+			vr_frame->GetBrushToolDlg()->Update();
+		if (colocal && vr_frame->GetColocalizationDlg())
+			vr_frame->GetColocalizationDlg()->Colocalize();
 	}
-	if (colocal && vr_frame->GetColocalizationDlg())
-	{
-		vr_frame->GetColocalizationDlg()->Colocalize();
-	}
-}
-
-void VRenderGLView::CountVoxels(unsigned int &sum, float &wsum)
-{
-	if (!m_cur_vol)
-		return;
-	FL::CountVoxels counter(m_cur_vol);
-	counter.SetUseMask(true);
-	counter.Count();
-	sum = counter.GetSum();
-	wsum = counter.GetWeightedSum();
 }
 
 //brush properties

@@ -1026,28 +1026,8 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 	}
 }
 
-//output
-void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
-{
-	if (m_output_grid->GetNumberRows()==0 ||
-		m_hold_history)
-	{
-		m_output_grid->InsertRows();
-	}
-	m_output_grid->SetCellValue(0, 0,
-		wxString::Format("%d", data.voxel_sum));
-	m_output_grid->SetCellValue(0, 1,
-		wxString::Format("%f", data.voxel_wsum));
-	m_output_grid->SetCellValue(0, 2,
-		wxString::Format("%f", data.avg_int));
-	m_output_grid->SetCellValue(0, 3,
-		wxString::Format("%f", data.size) + unit);
-	m_output_grid->SetCellValue(0, 4,
-		wxString::Format("%f", data.wsize) + unit);
-	//m_output_grid->Fit();
-}
-
-void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
+//update
+void BrushToolDlg::Update()
 {
 	GridData data;
 	VolumeData* sel_vol = 0;
@@ -1097,6 +1077,34 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 	}
 
 	SetOutput(data, unit);
+}
+
+//output
+void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
+{
+	if (m_output_grid->GetNumberRows()==0 ||
+		m_hold_history)
+	{
+		m_output_grid->InsertRows();
+	}
+	m_output_grid->SetCellValue(0, 0,
+		wxString::Format("%d", data.voxel_sum));
+	m_output_grid->SetCellValue(0, 1,
+		wxString::Format("%f", data.voxel_wsum));
+	m_output_grid->SetCellValue(0, 2,
+		wxString::Format("%f", data.avg_int));
+	m_output_grid->SetCellValue(0, 3,
+		wxString::Format("%f", data.size) + unit);
+	m_output_grid->SetCellValue(0, 4,
+		wxString::Format("%f", data.wsize) + unit);
+	//m_output_grid->Fit();
+	m_output_grid->AutoSizeColumns();
+	m_output_grid->ClearSelection();
+}
+
+void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
+{
+	Update();
 }
 
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
