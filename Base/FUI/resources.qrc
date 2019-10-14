@@ -45,5 +45,12 @@
   <file alias="workspace-resetAll.svg">Resources/Workspace-Images/brush-solid.svg</file>
   <file alias="workspace-eraseHighlight.svg">Resources/Workspace-Images/eraser-solid.svg</file>
   <file alias="workspace-extract.svg">Resources/Workspace-Images/cut-solid.svg</file>
+  <file alias="datasets-addDataset.svg">Resources/Datasets-Images/add-dataset.svg</file>
+  <file alias="datasets-renameDataset.svg">Resources/Datasets-Images/rename-dataset.svg</file>
+  <file alias="datasets-saveDataset.svg">Resources/Datasets-Images/save-solid.svg</file>
+  <file alias="datasets-bake.svg">Resources/Datasets-Images/cookie-solid.svg</file>
+  <file alias="datasets-saveMask.svg">Resources/Datasets-Images/save-mask.svg</file>
+  <file alias="datasets-deleteDataset.svg">Resources/Datasets-Images/backspace-solid.svg</file>
+  <file alias="datasets-deleteAll.svg">Resources/Datasets-Images/trash-solid.svg</file>
 </qresource>
 </RCC>
