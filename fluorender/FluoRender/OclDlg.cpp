@@ -284,7 +284,8 @@ void OclDlg::OnIterationsChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_iterations_txt->SetValue(str);
+	if (str != m_iterations_txt->GetValue())
+		m_iterations_txt->SetValue(str);
 }
 
 void OclDlg::OnIterationsEdit(wxCommandEvent &event)

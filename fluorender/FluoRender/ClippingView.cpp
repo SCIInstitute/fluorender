@@ -953,7 +953,9 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 void ClippingView::OnX1ClipChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	m_x1_clip_text->SetValue(wxString::Format("%d", ival));
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_x1_clip_text->GetValue())
+		m_x1_clip_text->SetValue(str);
 }
 
 void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
@@ -1068,7 +1070,9 @@ void ClippingView::OnX2ClipChange(wxScrollEvent &event)
 		ival = ival2;
 		m_x2_clip_sldr->SetValue(ival);
 	}
-	m_x2_clip_text->SetValue(wxString::Format("%d", ival));
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_x2_clip_text->GetValue())
+		m_x2_clip_text->SetValue(str);
 }
 
 void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
@@ -1177,7 +1181,9 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 void ClippingView::OnY1ClipChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	m_y1_clip_text->SetValue(wxString::Format("%d", ival));
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_y1_clip_text->GetValue())
+		m_y1_clip_text->SetValue(str);
 }
 
 void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
@@ -1293,7 +1299,9 @@ void ClippingView::OnY2ClipChange(wxScrollEvent &event)
 		ival = ival2;
 		m_y2_clip_sldr->SetValue(ival);
 	}
-	m_y2_clip_text->SetValue(wxString::Format("%d", ival));
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_y2_clip_text->GetValue())
+		m_y2_clip_text->SetValue(str);
 }
 
 void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
@@ -1402,7 +1410,9 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 void ClippingView::OnZ1ClipChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
-	m_z1_clip_text->SetValue(wxString::Format("%d", ival));
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_z1_clip_text->GetValue())
+		m_z1_clip_text->SetValue(str);
 }
 
 void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
@@ -1517,7 +1527,9 @@ void ClippingView::OnZ2ClipChange(wxScrollEvent &event)
 		ival = ival2;
 		m_z2_clip_sldr->SetValue(ival);
 	}
-	m_z2_clip_text->SetValue(wxString::Format("%d", ival));
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_z2_clip_text->GetValue())
+		m_z2_clip_text->SetValue(str);
 }
 
 void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
@@ -1819,7 +1831,8 @@ void ClippingView::OnXRotChange(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
 	wxString str = wxString::Format("%.1f", double(val));
-	m_x_rot_text->SetValue(str);
+	if (str != m_x_rot_text->GetValue())
+		m_x_rot_text->SetValue(str);
 }
 
 void ClippingView::OnXRotEdit(wxCommandEvent &event)
@@ -1850,7 +1863,8 @@ void ClippingView::OnYRotChange(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
 	wxString str = wxString::Format("%.1f", double(val));
-	m_y_rot_text->SetValue(str);
+	if (str != m_y_rot_text->GetValue())
+		m_y_rot_text->SetValue(str);
 }
 
 void ClippingView::OnYRotEdit(wxCommandEvent &event)
@@ -1881,7 +1895,8 @@ void ClippingView::OnZRotChange(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
 	wxString str = wxString::Format("%.1f", double(val));
-	m_z_rot_text->SetValue(str);
+	if (str != m_z_rot_text->GetValue())
+		m_z_rot_text->SetValue(str);
 }
 
 void ClippingView::OnZRotEdit(wxCommandEvent &event)

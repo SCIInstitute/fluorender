@@ -297,7 +297,8 @@ void MPropView::OnShineChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition();
 	wxString str = wxString::Format("%.0f", val);
-	m_shine_text->SetValue(str);
+	if (str != m_shine_text->GetValue())
+		m_shine_text->SetValue(str);
 }
 
 void MPropView::OnShineText(wxCommandEvent& event)
@@ -318,7 +319,8 @@ void MPropView::OnAlphaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 255.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_alpha_text->SetValue(str);
+	if (str != m_alpha_text->GetValue())
+		m_alpha_text->SetValue(str);
 }
 
 void MPropView::OnAlphaText(wxCommandEvent& event)
@@ -339,7 +341,8 @@ void MPropView::OnScaleChange(wxScrollEvent & event)
 {
 	double val = event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_scale_text->SetValue(str);
+	if (str != m_scale_text->GetValue())
+		m_scale_text->SetValue(str);
 }
 
 void MPropView::OnScaleText(wxCommandEvent& event)
@@ -377,7 +380,8 @@ void MPropView::OnShadowChange(wxScrollEvent& event)
 {
 	double val = event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_shadow_text->SetValue(str);
+	if (str != m_shadow_text->GetValue())
+		m_shadow_text->SetValue(str);
 }
 
 void MPropView::OnShadowText(wxCommandEvent& event)
@@ -415,7 +419,8 @@ void MPropView::OnSizeChange(wxScrollEvent& event)
 {
 	int val = event.GetPosition();
 	wxString str = wxString::Format("%d", val);
-	m_size_text->SetValue(str);
+	if (str != m_size_text->GetValue())
+		m_size_text->SetValue(str);
 }
 
 void MPropView::OnSizeText(wxCommandEvent& event)

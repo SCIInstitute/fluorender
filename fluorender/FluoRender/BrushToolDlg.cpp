@@ -790,7 +790,8 @@ void BrushToolDlg::OnBrushSclTranslateChange(wxScrollEvent &event)
 	int ival = event.GetPosition();
 	double val = double(ival)/10.0;
 	wxString str = wxString::Format("%.1f", val);
-	m_brush_scl_translate_text->SetValue(str);
+	if (str != m_brush_scl_translate_text->GetValue())
+		m_brush_scl_translate_text->SetValue(str);
 }
 
 void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
@@ -812,7 +813,8 @@ void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent &event)
 	int ival = event.GetPosition();
 	double val = double(ival) / 1000.0;
 	wxString str = wxString::Format("%.3f", val);
-	m_brush_gm_falloff_text->SetValue(str);
+	if (str != m_brush_gm_falloff_text->GetValue())
+		m_brush_gm_falloff_text->SetValue(str);
 }
 
 void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
@@ -834,7 +836,8 @@ void BrushToolDlg::OnBrush2dinflChange(wxScrollEvent &event)
 	int ival = event.GetPosition();
 	double val = double(ival)/100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_brush_2dinfl_text->SetValue(str);
+	if (str != m_brush_2dinfl_text->GetValue())
+		m_brush_2dinfl_text->SetValue(str);
 }
 
 void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
@@ -915,7 +918,8 @@ void BrushToolDlg::OnBrushSize1Change(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_brush_size1_text->SetValue(str);
+	if (str != m_brush_size1_text->GetValue())
+		m_brush_size1_text->SetValue(str);
 }
 
 void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
@@ -972,7 +976,8 @@ void BrushToolDlg::OnBrushSize2Change(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_brush_size2_text->SetValue(str);
+	if (str != m_brush_size2_text->GetValue())
+		m_brush_size2_text->SetValue(str);
 }
 
 void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)

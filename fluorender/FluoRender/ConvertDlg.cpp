@@ -166,7 +166,8 @@ void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent &event)
 	int ival = event.GetPosition();
 	double val = double(ival)/100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_cnv_vol_mesh_thresh_text->SetValue(str);
+	if (str != m_cnv_vol_mesh_thresh_text->GetValue())
+		m_cnv_vol_mesh_thresh_text->SetValue(str);
 }
 
 void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent &event)
@@ -182,7 +183,8 @@ void ConvertDlg::OnCnvVolMeshDownsampleChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_cnv_vol_mesh_downsample_text->SetValue(str);
+	if (str != m_cnv_vol_mesh_downsample_text->GetValue())
+		m_cnv_vol_mesh_downsample_text->SetValue(str);
 }
 
 void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent &event)
@@ -198,7 +200,8 @@ void ConvertDlg::OnCnvVolMeshDownsampleZChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_cnv_vol_mesh_downsample_z_text->SetValue(str);
+	if (str != m_cnv_vol_mesh_downsample_z_text->GetValue())
+		m_cnv_vol_mesh_downsample_z_text->SetValue(str);
 }
 
 void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent &event)

@@ -1574,7 +1574,8 @@ void SettingDlg::OnPeelingLayersChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_peeling_layers_text->SetValue(str);
+	if (str != m_peeling_layers_text->GetValue())
+		m_peeling_layers_text->SetValue(str);
 }
 
 void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
@@ -1664,7 +1665,8 @@ void SettingDlg::OnShadowDirChange(wxScrollEvent &event)
 {
 	double deg = double(m_shadow_dir_sldr->GetValue());
 	wxString str = wxString::Format("%.2f", deg);
-	m_shadow_dir_text->SetValue(str);
+	if (str != m_shadow_dir_text->GetValue())
+		m_shadow_dir_text->SetValue(str);
 }
 
 void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
@@ -1786,7 +1788,8 @@ void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
 {
 	double dval = double(m_pin_threshold_sldr->GetValue());
 	wxString str = wxString::Format("%.0f", dval*10.0);
-	m_pin_threshold_text->SetValue(str);
+	if (str != m_pin_threshold_text->GetValue())
+		m_pin_threshold_text->SetValue(str);
 }
 
 void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
@@ -1845,7 +1848,8 @@ void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
 {
 	m_eye_dist = double(m_eye_dist_sldr->GetValue()) / 10.0;
 	wxString str = wxString::Format("%.1f", m_eye_dist);
-	m_eye_dist_text->SetValue(str);
+	if (str != m_eye_dist_text->GetValue())
+		m_eye_dist_text->SetValue(str);
 }
 
 void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
@@ -2016,7 +2020,8 @@ void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival * 100);
-	m_graphics_mem_text->SetValue(str);
+	if (str != m_graphics_mem_text->GetValue())
+		m_graphics_mem_text->SetValue(str);
 }
 
 void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
@@ -2034,7 +2039,8 @@ void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival * 10);
-	m_large_data_text->SetValue(str);
+	if (str != m_large_data_text->GetValue())
+		m_large_data_text->SetValue(str);
 }
 
 void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
@@ -2052,7 +2058,8 @@ void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", 2 << (ival - 1));
-	m_block_size_text->SetValue(str);
+	if (str != m_block_size_text->GetValue())
+		m_block_size_text->SetValue(str);
 }
 
 void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
@@ -2070,7 +2077,8 @@ void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival * 10);
-	m_response_time_text->SetValue(str);
+	if (str != m_response_time_text->GetValue())
+		m_response_time_text->SetValue(str);
 }
 
 void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
@@ -2088,7 +2096,8 @@ void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_detail_level_offset_text->SetValue(str);
+	if (str != m_detail_level_offset_text->GetValue())
+		m_detail_level_offset_text->SetValue(str);
 }
 
 void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
@@ -2180,7 +2189,8 @@ void SettingDlg::OnLineWidthSldr(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_line_width_text->SetValue(str);
+	if (str != m_line_width_text->GetValue())
+		m_line_width_text->SetValue(str);
 }
 
 void SettingDlg::OnLineWidthText(wxCommandEvent &event)
@@ -2209,7 +2219,8 @@ void SettingDlg::OnPaintHistDepthChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_paint_hist_depth_text->SetValue(str);
+	if (str != m_paint_hist_depth_text->GetValue())
+		m_paint_hist_depth_text->SetValue(str);
 }
 
 void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)

@@ -1897,7 +1897,8 @@ void VRenderView::OnDepthAttenFactorChange(wxScrollEvent& event)
 {
 	double atten_factor = m_depth_atten_factor_sldr->GetValue()/100.0;
 	wxString str = wxString::Format("%.2f", atten_factor);
-	m_depth_atten_factor_text->SetValue(str);
+	if (str != m_depth_atten_factor_text->GetValue())
+		m_depth_atten_factor_text->SetValue(str);
 }
 
 void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
@@ -1977,7 +1978,8 @@ void VRenderView::OnScaleFactorChange(wxScrollEvent& event)
 	int scale_factor = m_scale_factor_sldr->GetValue();
 	m_glview->m_scale_factor = scale_factor/100.0;
 	wxString str = wxString::Format("%d", scale_factor);
-	m_scale_factor_text->SetValue(str);
+	if (str != m_scale_factor_text->GetValue())
+		m_scale_factor_text->SetValue(str);
 }
 
 void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
@@ -2178,12 +2180,18 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 			m_x_rotating = false;
 		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
 			str = wxString::Format("%.1f", lock?(rotx + 45):(rotx + 1));
-			m_x_rot_text->SetValue(str);
-			m_skip_thumb = true;
+			if (str != m_x_rot_text->GetValue())
+			{
+				m_x_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
 		} else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
 			str = wxString::Format("%.1f", lock?(rotx - 45):(rotx - 1));
-			m_x_rot_text->SetValue(str);
-			m_skip_thumb = true;
+			if (str != m_x_rot_text->GetValue())
+			{
+				m_x_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
 		}
 	}
 	else
@@ -2192,7 +2200,8 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 		if (lock)
 			pos = int(double(pos) / 45.0) * 45;
 		str = wxString::Format("%.1f", double(pos));
-		m_x_rot_text->SetValue(str);
+		if (str != m_x_rot_text->GetValue())
+			m_x_rot_text->SetValue(str);
 	}
 }
 
@@ -2218,13 +2227,19 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 			m_y_rotating = false;
 		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
 			str = wxString::Format("%.1f", lock ? (roty + 45) : (roty + 1));
-			m_y_rot_text->SetValue(str);
-			m_skip_thumb = true;
+			if (str != m_y_rot_text->GetValue())
+			{
+				m_y_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
 		}
 		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
 			str = wxString::Format("%.1f", lock ? (roty - 45) : (roty - 1));
-			m_y_rot_text->SetValue(str);
-			m_skip_thumb = true;
+			if (str != m_y_rot_text->GetValue())
+			{
+				m_y_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
 		}
 	}
 	else
@@ -2233,7 +2248,8 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 		if (lock)
 			pos = int(double(pos) / 45.0) * 45;
 		str = wxString::Format("%.1f", double(pos));
-		m_y_rot_text->SetValue(str);
+		if (str != m_y_rot_text->GetValue())
+			m_y_rot_text->SetValue(str);
 	}
 }
 
@@ -2259,13 +2275,19 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 			m_z_rotating = false;
 		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
 			str = wxString::Format("%.1f", lock ? (rotz + 45) : (rotz + 1));
-			m_z_rot_text->SetValue(str);
-			m_skip_thumb = true;
+			if (str != m_z_rot_text->GetValue())
+			{
+				m_z_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
 		}
 		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
 			str = wxString::Format("%.1f", lock ? (rotz - 45) : (rotz - 1));
-			m_z_rot_text->SetValue(str);
-			m_skip_thumb = true;
+			if (str != m_z_rot_text->GetValue())
+			{
+				m_z_rot_text->SetValue(str);
+				m_skip_thumb = true;
+			}
 		}
 	}
 	else
@@ -2274,7 +2296,8 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 		if (lock)
 			pos = int(double(pos) / 45.0) * 45;
 		str = wxString::Format("%.1f", double(pos));
-		m_z_rot_text->SetValue(str);
+		if (str != m_z_rot_text->GetValue())
+			m_z_rot_text->SetValue(str);
 	}
 }
 
@@ -2534,7 +2557,9 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 void VRenderView::OnAovChange(wxScrollEvent& event)
 {
 	int val = m_aov_sldr->GetValue();
-	m_aov_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_aov_text->GetValue())
+		m_aov_text->SetValue(str);
 }
 
 void VRenderView::OnAovText(wxCommandEvent& event)
