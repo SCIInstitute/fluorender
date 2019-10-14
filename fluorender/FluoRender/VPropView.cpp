@@ -940,7 +940,8 @@ void VPropView::OnGammaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_gamma_text->SetValue(str);
+	if (str != m_gamma_text->GetValue())
+		m_gamma_text->SetValue(str);
 }
 
 void VPropView::OnGammaText(wxCommandEvent& event)
@@ -974,7 +975,8 @@ void VPropView::OnBoundaryChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 2000.0;
 	wxString str = wxString::Format("%.4f", val);
-	m_boundary_text->SetValue(str);
+	if (str != m_boundary_text->GetValue())
+		m_boundary_text->SetValue(str);
 }
 
 void VPropView::OnBoundaryText(wxCommandEvent& event)
@@ -1010,7 +1012,8 @@ void VPropView::OnSaturationChange(wxScrollEvent & event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_saturation_text->SetValue(str);
+	if (str != m_saturation_text->GetValue())
+		m_saturation_text->SetValue(str);
 }
 
 void VPropView::OnSaturationText(wxCommandEvent& event)
@@ -1056,7 +1059,8 @@ void VPropView::OnLeftThreshChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_left_thresh_text->SetValue(str);
+	if (str != m_left_thresh_text->GetValue())
+		m_left_thresh_text->SetValue(str);
 }
 
 void VPropView::OnLeftThreshText(wxCommandEvent &event)
@@ -1108,7 +1112,8 @@ void VPropView::OnRightThreshChange(wxScrollEvent & event)
 		m_right_thresh_sldr->SetValue(ival);
 	}
 	wxString str = wxString::Format("%d", ival);
-	m_right_thresh_text->SetValue(str);
+	if (str != m_right_thresh_text->GetValue())
+		m_right_thresh_text->SetValue(str);
 }
 
 void VPropView::OnRightThreshText(wxCommandEvent &event)
@@ -1162,7 +1167,8 @@ void VPropView::OnLuminanceChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_luminance_text->SetValue(str);
+	if (str != m_luminance_text->GetValue())
+		m_luminance_text->SetValue(str);
 }
 
 void VPropView::OnLuminanceText(wxCommandEvent &event)
@@ -1236,7 +1242,8 @@ void VPropView::OnShadowChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_shadow_text->SetValue(str);
+	if (str != m_shadow_text->GetValue())
+		m_shadow_text->SetValue(str);
 }
 
 void VPropView::OnShadowText(wxCommandEvent &event)
@@ -1289,7 +1296,8 @@ void VPropView::OnAlphaChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_alpha_text->SetValue(str);
+	if (str != m_alpha_text->GetValue())
+		m_alpha_text->SetValue(str);
 }
 
 void VPropView::OnAlphaText(wxCommandEvent& event)
@@ -1329,7 +1337,8 @@ void VPropView::OnSampleChange(wxScrollEvent & event)
 {
 	double val = event.GetPosition() / 10.0;
 	wxString str = wxString::Format("%.1f", val);
-	m_sample_text->SetValue(str);
+	if (str != m_sample_text->GetValue())
+		m_sample_text->SetValue(str);
 }
 
 void VPropView::OnSampleText(wxCommandEvent& event)
@@ -1387,7 +1396,8 @@ void VPropView::OnHiShadingChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 10.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_hi_shading_text->SetValue(str);
+	if (str != m_hi_shading_text->GetValue())
+		m_hi_shading_text->SetValue(str);
 }
 
 void VPropView::OnHiShadingText(wxCommandEvent &event)
@@ -1410,7 +1420,8 @@ void VPropView::OnLowShadingChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_low_shading_text->SetValue(str);
+	if (str != m_low_shading_text->GetValue())
+		m_low_shading_text->SetValue(str);
 }
 
 void VPropView::OnLowShadingText(wxCommandEvent &event)
@@ -1518,7 +1529,8 @@ void VPropView::OnColormapHighValueChange(wxScrollEvent &event)
 		m_colormap_high_value_sldr->SetValue(iVal);
 	}
 	wxString str = wxString::Format("%d", iVal);
-	m_colormap_high_value_text->SetValue(str);
+	if (str != m_colormap_high_value_text->GetValue())
+		m_colormap_high_value_text->SetValue(str);
 }
 
 void VPropView::OnColormapHighValueText(wxCommandEvent &event)
@@ -1557,7 +1569,8 @@ void VPropView::OnColormapLowValueChange(wxScrollEvent &event)
 {
 	int iVal = m_colormap_low_value_sldr->GetValue();
 	wxString str = wxString::Format("%d", iVal);
-	m_colormap_low_value_text->SetValue(str);
+	if (str != m_colormap_low_value_text->GetValue())
+		m_colormap_low_value_text->SetValue(str);
 }
 
 void VPropView::OnColormapLowValueText(wxCommandEvent &event)

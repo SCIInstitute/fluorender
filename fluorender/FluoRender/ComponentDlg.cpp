@@ -1244,7 +1244,9 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 void ComponentDlg::OnIterSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_iter_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_iter_text->GetValue())
+		m_iter_text->SetValue(str);
 }
 
 void ComponentDlg::OnIterText(wxCommandEvent &event)
@@ -1261,7 +1263,9 @@ void ComponentDlg::OnIterText(wxCommandEvent &event)
 void ComponentDlg::OnThreshSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
-	m_thresh_text->SetValue(wxString::Format("%.3f", val));
+	wxString str = wxString::Format("%.3f", val);
+	if (str != m_thresh_text->GetValue())
+		m_thresh_text->SetValue(str);
 }
 
 void ComponentDlg::OnThreshText(wxCommandEvent &event)
@@ -1320,7 +1324,9 @@ void ComponentDlg::EnableDiff(bool value)
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
-	m_dist_strength_text->SetValue(wxString::Format("%.3f", val));
+	wxString str = wxString::Format("%.3f", val);
+	if (str != m_dist_strength_text->GetValue())
+		m_dist_strength_text->SetValue(str);
 }
 
 void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
@@ -1345,7 +1351,9 @@ void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_dist_filter_size_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_dist_filter_size_text->GetValue())
+		m_dist_filter_size_text->SetValue(str);
 }
 
 void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
@@ -1362,7 +1370,9 @@ void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_max_dist_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_max_dist_text->GetValue())
+		m_max_dist_text->SetValue(str);
 }
 
 void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
@@ -1381,7 +1391,9 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
-	m_dist_thresh_text->SetValue(wxString::Format("%.3f", val));
+	wxString str = wxString::Format("%.3f", val);
+	if (str != m_dist_thresh_text->GetValue())
+		m_dist_thresh_text->SetValue(str);
 }
 
 void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
@@ -1406,7 +1418,9 @@ void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
 void ComponentDlg::OnFalloffSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
-	m_falloff_text->SetValue(wxString::Format("%.3f", val));
+	wxString str = wxString::Format("%.3f", val);
+	if (str != m_falloff_text->GetValue())
+		m_falloff_text->SetValue(str);
 }
 
 void ComponentDlg::OnFalloffText(wxCommandEvent &event)
@@ -1488,7 +1502,9 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent &event)
 void ComponentDlg::OnDensitySldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 1000.0;
-	m_density_text->SetValue(wxString::Format("%.3f", val));
+	wxString str = wxString::Format("%.3f", val);
+	if (str != m_density_text->GetValue())
+		m_density_text->SetValue(str);
 }
 
 void ComponentDlg::OnDensityText(wxCommandEvent &event)
@@ -1505,7 +1521,9 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_density_window_size_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_density_window_size_text->GetValue())
+		m_density_window_size_text->SetValue(str);
 }
 
 void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
@@ -1522,7 +1540,9 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_density_stats_size_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_density_stats_size_text->GetValue())
+		m_density_stats_size_text->SetValue(str);
 }
 
 void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
@@ -1575,7 +1595,9 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_fix_size_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_fix_size_text->GetValue())
+		m_fix_size_text->SetValue(str);
 }
 
 void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
@@ -1623,7 +1645,9 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_clean_iter_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_clean_iter_text->GetValue())
+		m_clean_iter_text->SetValue(str);
 }
 
 void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
@@ -1640,7 +1664,9 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_clean_limit_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_clean_limit_text->GetValue())
+		m_clean_limit_text->SetValue(str);
 }
 
 void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
@@ -2032,7 +2058,9 @@ void ComponentDlg::OnClusterMethodKmeansCheck(wxCommandEvent &event)
 void ComponentDlg::OnClusterClnumSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_cluster_clnum_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_cluster_clnum_text->GetValue())
+		m_cluster_clnum_text->SetValue(str);
 }
 
 void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
@@ -2046,7 +2074,9 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
 void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_cluster_maxiter_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_cluster_maxiter_text->GetValue())
+		m_cluster_maxiter_text->SetValue(str);
 }
 
 void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
@@ -2060,7 +2090,9 @@ void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
 void ComponentDlg::OnClusterTolSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_cluster_tol_text->SetValue(wxString::Format("%.2f", double(val) / 100.0));
+	wxString str = wxString::Format("%.2f", double(val) / 100.0);
+	if (str != m_cluster_tol_text->GetValue())
+		m_cluster_tol_text->SetValue(str);
 }
 
 void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
@@ -2074,7 +2106,9 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_cluster_size_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_cluster_size_text->GetValue())
+		m_cluster_size_text->SetValue(str);
 }
 
 void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
@@ -2088,7 +2122,9 @@ void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
 void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 10.0;
-	m_cluster_eps_text->SetValue(wxString::Format("%.1f", val));
+	wxString str = wxString::Format("%.1f", val);
+	if (str != m_cluster_eps_text->GetValue())
+		m_cluster_eps_text->SetValue(str);
 }
 
 void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
@@ -2519,7 +2555,9 @@ void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
-	m_dist_neighbor_text->SetValue(wxString::Format("%d", val));
+	wxString str = wxString::Format("%d", val);
+	if (str != m_dist_neighbor_text->GetValue())
+		m_dist_neighbor_text->SetValue(str);
 }
 
 void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)

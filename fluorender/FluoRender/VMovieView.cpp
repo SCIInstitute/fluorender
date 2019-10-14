@@ -1159,8 +1159,9 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 	double movie_time;
 	m_movie_time->GetValue().ToDouble(&movie_time);
 	m_cur_time = pcnt*movie_time;
-	wxString st = wxString::Format("%.2f", m_cur_time);
-	m_progress_text->ChangeValue(st);
+	wxString str = wxString::Format("%.2f", m_cur_time);
+	if (str != m_progress_text->GetValue())
+		m_progress_text->ChangeValue(str);
 }
 
 void VMovieView::SetRendering(double pcnt) {

@@ -1075,7 +1075,8 @@ void TraceDlg::OnGhostNumChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_ghost_num_text->SetValue(str);
+	if (str != m_ghost_num_text->GetValue())
+		m_ghost_num_text->SetValue(str);
 }
 
 void TraceDlg::OnGhostNumText(wxCommandEvent &event)
@@ -1131,7 +1132,8 @@ void TraceDlg::OnCellSizeChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_cell_size_text->SetValue(str);
+	if (str != m_cell_size_text->GetValue())
+		m_cell_size_text->SetValue(str);
 }
 
 void TraceDlg::OnCellSizeText(wxCommandEvent &event)
@@ -1224,7 +1226,8 @@ void TraceDlg::OnCompUncertainLowChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_comp_uncertain_low_text->SetValue(str);
+	if (str != m_comp_uncertain_low_text->GetValue())
+		m_comp_uncertain_low_text->SetValue(str);
 }
 
 void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)

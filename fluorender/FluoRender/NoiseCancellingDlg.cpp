@@ -201,7 +201,8 @@ void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%.1f", double (ival)/10.0);
-	m_threshold_text->SetValue(str);
+	if (str != m_threshold_text->GetValue())
+		m_threshold_text->SetValue(str);
 }
 
 void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
@@ -227,7 +228,8 @@ void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	m_voxel_text->SetValue(str);
+	if (str != m_voxel_text->GetValue())
+		m_voxel_text->SetValue(str);
 }
 
 void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
