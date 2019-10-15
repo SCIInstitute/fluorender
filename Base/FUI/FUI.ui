@@ -591,105 +591,191 @@
      <item row="0" column="0">
       <widget class="QGroupBox" name="groupBox_2">
        <property name="title">
-        <string>GroupBox</string>
+        <string/>
        </property>
-       <widget class="QToolButton" name="toolButton_22">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">qproperty-icon: url(&quot;:/datasets-addDataset.svg&quot;);</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-       <widget class="QToolButton" name="toolButton_23">
-        <property name="geometry">
-         <rect>
-          <x>60</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">qproperty-icon: url(&quot;:/datasets-renameDataset.svg&quot;);</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-       <widget class="QToolButton" name="toolButton_24">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-       <widget class="QToolButton" name="toolButton_25">
-        <property name="geometry">
-         <rect>
-          <x>130</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-       <widget class="QToolButton" name="toolButton_26">
-        <property name="geometry">
-         <rect>
-          <x>170</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-       <widget class="QToolButton" name="toolButton_27">
-        <property name="geometry">
-         <rect>
-          <x>210</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-       <widget class="QToolButton" name="toolButton_28">
-        <property name="geometry">
-         <rect>
-          <x>250</x>
-          <y>30</y>
-          <width>26</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
+       <layout class="QGridLayout" name="gridLayout_38">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_36">
+          <item row="2" column="0">
+           <widget class="QTreeWidget" name="treeWidget_2">
+            <column>
+             <property name="text">
+              <string notr="true">1</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_2" native="true">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(222,225,232)</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_35">
+             <item row="0" column="0">
+              <layout class="QGridLayout" name="gridLayout_34">
+               <item row="0" column="0">
+                <widget class="QToolButton" name="toolButton_22">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-addDataset.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="2">
+                <widget class="QToolButton" name="toolButton_23">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-renameDataset.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="4">
+                <widget class="QToolButton" name="toolButton_24">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-saveDataset.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="5">
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="6">
+                <widget class="QToolButton" name="toolButton_25">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-bake.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="7">
+                <spacer name="horizontalSpacer_4">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="8">
+                <widget class="QToolButton" name="toolButton_26">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-saveMask.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="9">
+                <spacer name="horizontalSpacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="10">
+                <widget class="QToolButton" name="toolButton_27">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-deleteDataset.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="11">
+                <spacer name="horizontalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>18</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="12">
+                <widget class="QToolButton" name="toolButton_28">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/datasets-deleteAll.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="Line" name="line_19">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -698,7 +784,7 @@
   <widget class="QDockWidget" name="WorkspaceWidget">
    <property name="minimumSize">
     <size>
-     <width>400</width>
+     <width>404</width>
      <height>300</height>
     </size>
    </property>
@@ -1157,154 +1243,259 @@
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_1">
-    <layout class="QGridLayout" name="gridLayout_33">
+    <layout class="QGridLayout" name="gridLayout_37">
      <item row="0" column="0">
-      <layout class="QGridLayout" name="gridLayout_32">
-       <item row="0" column="0">
-        <widget class="QWidget" name="widget" native="true">
-         <property name="maximumSize">
-          <size>
-           <width>441</width>
-           <height>51</height>
-          </size>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_7">
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string/>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_33">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_32">
+          <item row="1" column="0">
+           <widget class="Line" name="line_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="0">
-             <widget class="QToolButton" name="toolButton_12">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-eye.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QToolButton" name="toolButton_13">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-newVolume.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QToolButton" name="toolButton_14">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-newMesh.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QToolButton" name="toolButton_15">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-deleteSelection.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="4">
-             <widget class="Line" name="line_4">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="5">
-             <widget class="QToolButton" name="toolButton_16">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-highLight.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="6">
-             <widget class="QToolButton" name="toolButton_17">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-diffuse.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="7">
-             <widget class="QToolButton" name="toolButton_18">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-resetSelect.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="8">
-             <widget class="QToolButton" name="toolButton_19">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-resetAll.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="9">
-             <widget class="Line" name="line_5">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="10">
-             <widget class="QToolButton" name="toolButton_20">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-eraseHighlight.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="11">
-             <widget class="QToolButton" name="toolButton_21">
-              <property name="styleSheet">
-               <string notr="true">qproperty-icon: url(&quot;:/workspace-extract.svg&quot;);</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0" colspan="12">
-             <widget class="Line" name="line_6">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QWidget" name="widget" native="true">
+            <property name="maximumSize">
+             <size>
+              <width>441</width>
+              <height>51</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(222,225,232)</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_7">
+             <item row="0" column="0">
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="0" column="5">
+                <spacer name="horizontalSpacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="0">
+                <widget class="QToolButton" name="toolButton_12">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-eye.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QToolButton" name="toolButton_13">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-newVolume.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="6">
+                <widget class="QToolButton" name="toolButton_15">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-deleteSelection.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="13">
+                <spacer name="horizontalSpacer_12">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="1">
+                <spacer name="horizontalSpacer_5">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="11">
+                <spacer name="horizontalSpacer_11">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="9">
+                <spacer name="horizontalSpacer_10">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="8">
+                <widget class="QToolButton" name="toolButton_16">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-highLight.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="12">
+                <widget class="QToolButton" name="toolButton_18">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-resetSelect.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <spacer name="horizontalSpacer_8">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="18">
+                <widget class="QToolButton" name="toolButton_21">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-extract.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="15">
+                <widget class="Line" name="line_5">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="7">
+                <widget class="Line" name="line_4">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="14">
+                <widget class="QToolButton" name="toolButton_19">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-resetAll.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="16">
+                <widget class="QToolButton" name="toolButton_20">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-eraseHighlight.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="4">
+                <widget class="QToolButton" name="toolButton_14">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-newMesh.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="10">
+                <widget class="QToolButton" name="toolButton_17">
+                 <property name="styleSheet">
+                  <string notr="true">qproperty-icon: url(&quot;:/workspace-diffuse.svg&quot;);</string>
+                 </property>
+                 <property name="text">
+                  <string>...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="17">
+                <spacer name="horizontalSpacer_13">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QTreeWidget" name="treeWidget">
+            <column>
+             <property name="text">
+              <string notr="true">1</string>
+             </property>
+            </column>
+           </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QGroupBox" name="groupBox">
-         <property name="title">
-          <string/>
-         </property>
-        </widget>
-       </item>
-      </layout>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -1925,7 +2116,7 @@
              <enum>QTabWidget::Rounded</enum>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <property name="elideMode">
              <enum>Qt::ElideNone</enum>
