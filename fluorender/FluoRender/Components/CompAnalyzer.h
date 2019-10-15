@@ -91,7 +91,7 @@ namespace FL
 		void OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header = "");
 		void OutputCompListStr(std::string &str, int verbose, std::string comp_header="");
 		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
-		bool GenAnnotations(Annotations &ann, bool consistent);
+		bool GenAnnotations(Annotations &ann, bool consistent, int type);
 		//color_type: 1-id-based; 2-size-based
 		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
 		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);

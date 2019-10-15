@@ -147,7 +147,8 @@ public:
 		ID_OutputRgbRb,
 		ID_OutputRandomBtn,
 		ID_OutputSizeBtn,
-		ID_OutputAnnBtn,
+		ID_OutputIdBtn,
+		ID_OutputSnBtn,
 		//Distance
 		ID_DistNeighborCheck,
 		ID_DistNeighborSldr,
@@ -400,7 +401,8 @@ private:
 	wxRadioButton* m_output_rgb_rb;
 	wxButton* m_output_random_btn;
 	wxButton* m_output_size_btn;
-	wxButton* m_output_ann_btn;
+	wxButton* m_output_id_btn;
+	wxButton* m_output_sn_btn;
 	//distance
 	wxCheckBox* m_dist_neighbor_check;
 	wxSlider* m_dist_neighbor_sldr;
@@ -528,7 +530,7 @@ private:
 	void OutputMulti(int color_type);
 	void OutputRgb(int color_type);
 	void OnOutputChannels(wxCommandEvent &event);
-	void OnOutputAnn(wxCommandEvent &event);
+	void OnOutputAnnotation(wxCommandEvent &event);
 	//distance
 	void OnDistNeighborCheck(wxCommandEvent &event);
 	void OnDistNeighborSldr(wxScrollEvent &event);

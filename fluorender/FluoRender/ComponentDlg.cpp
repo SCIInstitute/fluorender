@@ -136,7 +136,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_RADIOBUTTON(ID_OutputRgbRb, ComponentDlg::OnOutputTypeRadio)
 	EVT_BUTTON(ID_OutputRandomBtn, ComponentDlg::OnOutputChannels)
 	EVT_BUTTON(ID_OutputSizeBtn, ComponentDlg::OnOutputChannels)
-	EVT_BUTTON(ID_OutputAnnBtn, ComponentDlg::OnOutputAnn)
+	EVT_BUTTON(ID_OutputIdBtn, ComponentDlg::OnOutputAnnotation)
+	EVT_BUTTON(ID_OutputSnBtn, ComponentDlg::OnOutputAnnotation)
 	//distance
 	EVT_CHECKBOX(ID_DistNeighborCheck, ComponentDlg::OnDistNeighborCheck)
 	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
@@ -835,13 +836,16 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(100, 23));
 	m_output_size_btn = new wxButton(page, ID_OutputSizeBtn, "Size-based",
 		wxDefaultPosition, wxSize(100, 23));
-	m_output_ann_btn = new wxButton(page, ID_OutputAnnBtn, "Annotations",
+	m_output_id_btn = new wxButton(page, ID_OutputIdBtn, "IDs",
+		wxDefaultPosition, wxSize(65, 23));
+	m_output_sn_btn = new wxButton(page, ID_OutputSnBtn, "Serial No.",
 		wxDefaultPosition, wxSize(100, 23));
 	sizer32->Add(5, 5);
 	sizer32->Add(st, 0, wxALIGN_CENTER);
 	sizer32->Add(m_output_random_btn, 0, wxALIGN_CENTER);
 	sizer32->Add(m_output_size_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_ann_btn, 0, wxALIGN_CENTER);
+	sizer32->Add(m_output_id_btn, 0, wxALIGN_CENTER);
+	sizer32->Add(m_output_sn_btn, 0, wxALIGN_CENTER);
 	sizer32->Add(5, 5);
 	//
 	sizer3->Add(10, 10);
@@ -2245,11 +2249,17 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 
 		//frame
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetBrushToolDlg())
+		if (vr_frame)
 		{
-			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update();
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			if (vr_frame->GetBrushToolDlg())
+			{
+				if (m_view->m_glview->m_paint_count)
+					vr_frame->GetBrushToolDlg()->Update();
+				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			}
+			if (vr_frame->GetColocalizationDlg() &&
+				m_view->m_glview->m_paint_colocalize)
+				vr_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }
@@ -2289,11 +2299,17 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 
 	//frame
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (vr_frame)
 	{
-		if (m_view->m_glview->m_paint_count)
-			vr_frame->GetBrushToolDlg()->Update();
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		if (vr_frame->GetBrushToolDlg())
+		{
+			if (m_view->m_glview->m_paint_count)
+				vr_frame->GetBrushToolDlg()->Update();
+			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		}
+		if (vr_frame->GetColocalizationDlg() &&
+			m_view->m_glview->m_paint_colocalize)
+			vr_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2311,11 +2327,17 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 
 	//frame
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (vr_frame)
 	{
-		if (m_view->m_glview->m_paint_count)
-			vr_frame->GetBrushToolDlg()->Update();
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		if (vr_frame->GetBrushToolDlg())
+		{
+			if (m_view->m_glview->m_paint_count)
+				vr_frame->GetBrushToolDlg()->Update();
+			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		}
+		if (vr_frame->GetColocalizationDlg() &&
+			m_view->m_glview->m_paint_colocalize)
+			vr_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2519,14 +2541,17 @@ void ComponentDlg::OnOutputChannels(wxCommandEvent &event)
 		OutputRgb(color_type);
 }
 
-void ComponentDlg::OnOutputAnn(wxCommandEvent &event)
+void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 {
+	int type = 0;
+	if (event.GetId() == ID_OutputSnBtn)
+		type = 1;
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	Annotations* ann = new Annotations();
-	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent))
+	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent, type))
 	{
 		ann->SetVolume(vd);
 		ann->SetTransform(vd->GetTexture()->transform());
@@ -3132,11 +3157,17 @@ void ComponentDlg::SelectFullComp()
 
 	//frame
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (vr_frame)
 	{
-		if (m_view->m_glview->m_paint_count)
-			vr_frame->GetBrushToolDlg()->Update();
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		if (vr_frame->GetBrushToolDlg())
+		{
+			if (m_view->m_glview->m_paint_count)
+				vr_frame->GetBrushToolDlg()->Update();
+			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		}
+		if (vr_frame->GetColocalizationDlg() &&
+			m_view->m_glview->m_paint_colocalize)
+			vr_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -3242,7 +3273,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	VolumeData* vd = 0;
 	if (m_view && m_view->m_glview->m_cur_vol)
 		vd = m_view->m_glview->m_cur_vol;
-	long lval;
+	unsigned long lval;
 	wxColor color;
 
 	i = 0;
@@ -3262,7 +3293,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 			m_output_grid->SetCellValue(i, k, cur_field);
 			if (k == id_idx && vd)
 			{
-				if (cur_field.ToLong(&lval))
+				if (cur_field.ToULong(&lval))
 				{
 					c = Color(lval, vd->GetShuffle());
 					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
