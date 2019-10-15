@@ -920,7 +920,7 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	return surface_vox ? 1 : 0;
 }
 
-bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
+bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int type)
 {
 	if (!m_vd)
 		return false;
@@ -948,9 +948,11 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
 
 	std::string sinfo;
 	ostringstream oss;
+	std::string str;
 
 	int bn = m_vd->GetAllBrickNum();
 	m_comp_graph.ClearVisited();
+	int count = 1;
 	for (auto i = m_comp_list.begin();
 		i != m_comp_list.end(); ++i)
 	{
@@ -967,10 +969,19 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent)
 		oss << double(i->second->sumi)*spcx*spcy*spcz << "\t";
 		oss << i->second->mean;
 		sinfo = oss.str();
-		ann.AddText(std::to_string(i->second->id),
+		switch (type)
+		{
+		case 0://id
+			str = std::to_string(i->second->id);
+			break;
+		case 1://sn
+			str = std::to_string(count);
+		}
+		ann.AddText(str,
 			FLIVR::Point(i->second->pos.x()/nx,
 			i->second->pos.y()/ny, i->second->pos.z()/nz),
 			sinfo);
+		++count;
 	}
 	return true;
 }
