@@ -332,10 +332,10 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 
 	//stereo
 	wxBoxSizer* group6 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Stereo & OpenVR"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Stereo && SteamVR"), wxVERTICAL);
 	wxBoxSizer *sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_stereo_chk = new wxCheckBox(page, ID_StereoChk,
-		"Enable stereo rendering.");
+		"Enable stereo (Install SteamVR and restart. Otherwise side-by-side only.)");
 	sizer6_1->Add(m_stereo_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer6_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Eye distance");
