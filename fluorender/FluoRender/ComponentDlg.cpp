@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Cluster/dbscan.h"
 #include "Cluster/kmeans.h"
 #include "Cluster/exmax.h"
+#include <wx/splitter.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -172,26 +173,36 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY);
+	mainsizer->Add(splittermain, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
+
+	wxPanel *panelgroup1 = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	wxBoxSizer* sizerT = new wxBoxSizer(wxHORIZONTAL);
+	sizerT->SetSizeHints(panelgroup1);
 	//notebook
-	m_notebook = new wxNotebook(this, ID_Notebook);
+	m_notebook = new wxNotebook(panelgroup1, ID_Notebook);
 	m_notebook->AddPage(CreateCompGenPage(m_notebook), "Generate");
 	m_notebook->AddPage(CreateClusteringPage(m_notebook), "Cluster");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
+	sizerT->Add(m_notebook, 1, wxALL | wxEXPAND, 5);
+	panelgroup1->SetSizer(sizerT);
 
+	wxPanel *panelgroup2 = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_generate_prg = new wxGauge(this, ID_GeneratePrg, 100,
+	m_generate_prg = new wxGauge(panelgroup2, ID_GeneratePrg, 100,
 		wxDefaultPosition, wxSize(-1, 18));
-	m_use_sel_chk = new wxCheckBox(this, ID_UseSelChk, "Use Sel.",
+	m_use_sel_chk = new wxCheckBox(panelgroup2, ID_UseSelChk, "Use Sel.",
 		wxDefaultPosition, wxDefaultSize);
-	m_generate_btn = new wxButton(this, ID_GenerateBtn, "Generate",
+	m_generate_btn = new wxButton(panelgroup2, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
-	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn, "Auto Update",
+	m_auto_update_btn = new wxToggleButton(panelgroup2, ID_AutoUpdateBtn, "Auto Update",
 		wxDefaultPosition, wxSize(75, -1));
-	m_cluster_btn = new wxButton(this, ID_ClusterBtn, "Cluster",
+	m_cluster_btn = new wxButton(panelgroup2, ID_ClusterBtn, "Cluster",
 		wxDefaultPosition, wxSize(75, -1));
-	m_analyze_btn = new wxButton(this, ID_AnalyzeBtn, "Analyze",
+	m_analyze_btn = new wxButton(panelgroup2, ID_AnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(75, -1));
-	m_analyze_sel_btn = new wxButton(this, ID_AnalyzeSelBtn, "Anlyz. Sel.",
+	m_analyze_sel_btn = new wxButton(panelgroup2, ID_AnalyzeSelBtn, "Anlyz. Sel.",
 		wxDefaultPosition, wxSize(75, -1));
 	sizer1->Add(10, 10);
 	sizer1->Add(m_generate_prg, 1, wxEXPAND);
@@ -206,19 +217,19 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 	//stats text
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Output"),
+		new wxStaticBox(panelgroup2, wxID_ANY, "Output"),
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_history_chk = new wxCheckBox(this, ID_HistoryChk,
+	m_history_chk = new wxCheckBox(panelgroup2, ID_HistoryChk,
 		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
-	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
+	m_clear_hist_btn = new wxButton(panelgroup2, ID_ClearHistBtn,
 		"Clear History", wxDefaultPosition, wxSize(75, -1));
 	sizer2_1->AddStretchSpacer(1);
 	sizer2_1->Add(m_history_chk, 0, wxALIGN_CENTER);
 	sizer2_1->Add(5, 5);
 	sizer2_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
-	m_output_grid = new wxGrid(this, ID_OutputGrid);
+	m_output_grid = new wxGrid(panelgroup2, ID_OutputGrid);
 	m_output_grid->CreateGrid(0, 1);
 	m_output_grid->Fit();
 	sizer2->Add(5, 5);
@@ -229,16 +240,24 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 	//all controls
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
-	sizerv->Add(10, 10);
-	sizerv->Add(m_notebook, 0, wxEXPAND);
+	sizerv->SetMinSize(100, 100);
+	//sizerv->Add(10, 10);
+	//sizerv->Add(m_notebook, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer2, 1, wxEXPAND);
 	sizerv->Add(10, 10);
+	panelgroup2->SetSizer(sizerv);
 
-	SetSizer(sizerv);
-	Layout();
+	splittermain->SetSashGravity(1.0);
+	splittermain->SplitHorizontally(panelgroup1, panelgroup2);
+
+	SetSizer(mainsizer);
+	mainsizer->SetSizeHints(this);
+
+	//SetSizer(sizerv);
+	//Layout();
 
 	GetSettings();
 }
