@@ -4511,9 +4511,12 @@ void VRenderGLView::PickVolume()
 
 void VRenderGLView::OnIdle(wxIdleEvent& event)
 {
+	event.RequestMore();
+
 	bool refresh = false;
 	bool ref_stat = false;
 	bool start_loop = true;
+	bool set_focus = false;
 	m_retain_finalbuffer = false;
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
@@ -4617,6 +4620,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_draw_mask = false;
 			refresh = true;
+			set_focus = true;
 		}
 		if (!wxGetKeyState(wxKeyCode('V')) &&
 			!m_draw_mask)
@@ -4642,6 +4646,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_obj_transz += trans.z();
 			//if (m_persp) SetSortBricks();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_move_left &&
 			(!wxGetKeyState(WXK_CONTROL) ||
@@ -4663,6 +4668,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_obj_transz += trans.z();
 			//if (m_persp) SetSortBricks();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_move_right &&
 			(!wxGetKeyState(WXK_CONTROL) ||
@@ -4683,6 +4689,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_obj_transz += trans.z();
 			//if (m_persp) SetSortBricks();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_move_up &&
 			(!wxGetKeyState(WXK_CONTROL) ||
@@ -4703,6 +4710,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_obj_transz += trans.z();
 			//if (m_persp) SetSortBricks();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_move_down &&
 			(!wxGetKeyState(WXK_CONTROL) ||
@@ -4719,6 +4727,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetMovieView())
 				frame->GetMovieView()->UpFrame();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_tseq_forward &&
 			!wxGetKeyState(wxKeyCode('d')) &&
@@ -4732,6 +4741,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetMovieView())
 				frame->GetMovieView()->DownFrame();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_tseq_backward &&
 			!wxGetKeyState(wxKeyCode('a')))
@@ -4746,6 +4756,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetClippingView())
 				frame->GetClippingView()->MoveLinkedClippingPlanes(1);
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_clip_up &&
 			!wxGetKeyState(wxKeyCode('s')))
@@ -4758,6 +4769,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetClippingView())
 				frame->GetClippingView()->MoveLinkedClippingPlanes(0);
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_clip_down &&
 			!wxGetKeyState(wxKeyCode('w')))
@@ -4773,6 +4785,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetTraceDlg())
 				frame->GetTraceDlg()->CellUpdate();
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_cell_full &&
 			!wxGetKeyState(wxKeyCode('f')))
@@ -4785,6 +4798,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetTraceDlg())
 				frame->GetTraceDlg()->CellLink(false);
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_cell_link &&
 			!wxGetKeyState(wxKeyCode('l')))
@@ -4797,6 +4811,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetTraceDlg())
 				frame->GetTraceDlg()->CellNewID(false);
 			refresh = true;
+			set_focus = true;
 		}
 		if (m_cell_new_id &&
 			!wxGetKeyState(wxKeyCode('n')))
@@ -4811,6 +4826,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				frame->GetTraceDlg()->CompClear();
 			m_clear_mask = true;
 			refresh = true;
+			set_focus = true;
 		}
 		if (!wxGetKeyState(wxKeyCode('c')) &&
 			m_clear_mask)
@@ -4822,6 +4838,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetList())
 				frame->GetList()->SaveAllMasks();
 			m_save_mask = true;
+			set_focus = true;
 		}
 		if (!wxGetKeyState(wxKeyCode('m')) &&
 			m_save_mask)
@@ -4835,15 +4852,18 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('[')))
 		{
 			ChangeBrushSize(-10);
+			set_focus = true;
 		}
 		if (wxGetKeyState(wxKeyCode(']')))
 		{
 			ChangeBrushSize(10);
+			set_focus = true;
 		}
 
 		//forced refresh
 		if (wxGetKeyState(WXK_F5))
 		{
+			SetFocus();
 			m_clear_buffer = true;
 			m_updating = true;
 			if (frame && frame->GetStatusBar())
@@ -4997,12 +5017,13 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	}
 #endif
 
+	if (set_focus)
+		SetFocus();
 	if (refresh)
 	{
 		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(15, ref_stat, start_loop);
-		SetFocus();
 	}
 }
 
