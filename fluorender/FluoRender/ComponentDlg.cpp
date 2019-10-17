@@ -3312,9 +3312,16 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 		++i;
 	} while (copy_data.IsEmpty() == false);
 
-	if (m_output_grid->GetNumberCols() > k)
-		m_output_grid->DeleteCols(k,
-			m_output_grid->GetNumberCols() - k);
+	//delete columnsand rows if the old has more
+	if (!m_hold_history)
+	{
+		if (m_output_grid->GetNumberCols() > k)
+			m_output_grid->DeleteCols(k,
+				m_output_grid->GetNumberCols() - k);
+		if (m_output_grid->GetNumberRows() > i)
+			m_output_grid->DeleteRows(i,
+				m_output_grid->GetNumberRows() - i);
+	}
 
 	m_output_grid->AutoSizeColumns();
 	m_output_grid->ClearSelection();
