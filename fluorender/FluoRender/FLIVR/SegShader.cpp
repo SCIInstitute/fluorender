@@ -203,6 +203,7 @@ namespace FLIVR
 	"	vec3 ray = t.xyz;\n" \
 	"	vec4 cray;\n" \
 	"	bool flag = false;\n" \
+	"	float th = loc7.x<0.01?0.01:loc7.x;\n" \
 	"	while (true)\n" \
 	"	{\n" \
 	"		ray += step;\n" \
@@ -214,9 +215,9 @@ namespace FLIVR
 	"		v.x = texture(tex0, ray).x;\n" \
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
-	"		if (cray.x > loc7.x && flag)\n" \
+	"		if (cray.x > th && flag)\n" \
 	"			discard;\n" \
-	"		if (cray.x <= loc7.x)\n" \
+	"		if (cray.x <= th)\n" \
 	"			flag = true;\n" \
 	"	}\n" \
 	"	FragColor = vec4(1.0);\n" \
@@ -234,6 +235,7 @@ namespace FLIVR
 	"	vec3 ray = t.xyz;\n" \
 	"	vec4 cray;\n" \
 	"	bool flag = false;\n" \
+	"	float th = loc7.x<0.01?0.01:loc7.x;\n" \
 	"	while (true)\n" \
 	"	{\n" \
 	"		ray += step;\n" \
@@ -245,12 +247,12 @@ namespace FLIVR
 	"		v.x = texture(tex0, ray).x;\n" \
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
-	"		if (cray.x > loc7.x && flag)\n" \
+	"		if (cray.x > th && flag)\n" \
 	"		{\n" \
 	"			FragColor = vec4(0.0);\n" \
 	"			return;\n" \
 	"		}\n" \
-	"		if (cray.x <= loc7.x)\n" \
+	"		if (cray.x <= th)\n" \
 	"			flag = true;\n" \
 	"	}\n" \
 	"	FragColor = vec4(1.0);\n" \
