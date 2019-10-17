@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
+#include <wx/splitter.h>
 
 class VRenderView;
 class VolumeData;
@@ -187,12 +188,12 @@ public:
 	}
 
 	//update progress
-	void UpdateProgress()
-	{
-		m_prog += m_prog_bit;
-		m_generate_prg->SetValue(int(m_prog));
-		wxGetApp().Yield();
-	}
+	//void UpdateProgress()
+	//{
+	//	m_prog += m_prog_bit;
+	//	m_generate_prg->SetValue(int(m_prog));
+	//	wxGetApp().Yield();
+	//}
 
 	void GenerateComp(bool use_sel, bool command=true);
 	void Fixate(bool command = true);
@@ -410,7 +411,6 @@ private:
 	wxButton* m_dist_output_btn;
 
 	//execute
-	wxGauge* m_generate_prg;
 	wxCheckBox* m_use_sel_chk;
 	wxButton* m_generate_btn;
 	wxToggleButton* m_auto_update_btn;
@@ -554,6 +554,9 @@ private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
 	void OnGridLabelClick(wxGridEvent& event);
+
+	//splitter
+	void OnSplitterDclick(wxSplitterEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

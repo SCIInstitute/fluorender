@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include "Cluster/dbscan.h"
 #include "Cluster/kmeans.h"
 #include "Cluster/exmax.h"
-#include <wx/splitter.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -159,12 +158,14 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
 	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
 	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
+	//split
+	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
 END_EVENT_TABLE()
 
 ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	: wxPanel(parent, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(500, 720),
+		wxSize(500, 650),
 		0, "ComponentDlg"),
 	m_frame(parent),
 	m_view(0),
@@ -174,12 +175,13 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	wxEventBlocker blocker(this);
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
-	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY);
+	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxSP_THIN_SASH | wxSP_BORDER | wxSP_LIVE_UPDATE);
+	splittermain->SetMinimumPaneSize(160);
 	mainsizer->Add(splittermain, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
 
 	wxPanel *panelgroup1 = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerT = new wxBoxSizer(wxHORIZONTAL);
-	sizerT->SetSizeHints(panelgroup1);
 	//notebook
 	m_notebook = new wxNotebook(panelgroup1, ID_Notebook);
 	m_notebook->AddPage(CreateCompGenPage(m_notebook), "Generate");
@@ -190,8 +192,6 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 	wxPanel *panelgroup2 = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_generate_prg = new wxGauge(panelgroup2, ID_GeneratePrg, 100,
-		wxDefaultPosition, wxSize(-1, 18));
 	m_use_sel_chk = new wxCheckBox(panelgroup2, ID_UseSelChk, "Use Sel.",
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panelgroup2, ID_GenerateBtn, "Generate",
@@ -204,9 +204,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_analyze_sel_btn = new wxButton(panelgroup2, ID_AnalyzeSelBtn, "Anlyz. Sel.",
 		wxDefaultPosition, wxSize(75, -1));
-	sizer1->Add(10, 10);
-	sizer1->Add(m_generate_prg, 1, wxEXPAND);
-	sizer1->Add(10, 10);
+	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
@@ -239,25 +237,19 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizer2->Add(5, 5);
 
 	//all controls
-	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
-	sizerv->SetMinSize(100, 100);
-	//sizerv->Add(10, 10);
-	//sizerv->Add(m_notebook, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer1, 0, wxEXPAND);
-	sizerv->Add(10, 10);
-	sizerv->Add(sizer2, 1, wxEXPAND);
-	sizerv->Add(10, 10);
-	panelgroup2->SetSizer(sizerv);
+	wxBoxSizer* sizerB = new wxBoxSizer(wxVERTICAL);
+	sizerB->Add(10, 10);
+	sizerB->Add(sizer1, 0, wxEXPAND);
+	sizerB->Add(10, 10);
+	sizerB->Add(sizer2, 1, wxEXPAND);
+	sizerB->Add(10, 10);
+	panelgroup2->SetSizer(sizerB);
 
-	splittermain->SetSashGravity(1.0);
-	splittermain->SplitHorizontally(panelgroup1, panelgroup2);
+	splittermain->SetSashGravity(0.9);
+	splittermain->SplitHorizontally(panelgroup1, panelgroup2, 160);
 
 	SetSizer(mainsizer);
-	mainsizer->SetSizeHints(this);
-
-	//SetSizer(sizerv);
-	//Layout();
+	Layout();
 
 	GetSettings();
 }
@@ -598,7 +590,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 
 wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 	wxStaticText *st = 0;
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -734,13 +726,14 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
+	page->SetScrollRate(10, 10);
 
 	return page;
 }
 
 wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 	wxStaticText *st = 0;
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -854,11 +847,11 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
 		wxDefaultPosition, wxSize(100, 23));
 	m_output_size_btn = new wxButton(page, ID_OutputSizeBtn, "Size-based",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, wxSize(85, 23));
 	m_output_id_btn = new wxButton(page, ID_OutputIdBtn, "IDs",
 		wxDefaultPosition, wxSize(65, 23));
 	m_output_sn_btn = new wxButton(page, ID_OutputSnBtn, "Serial No.",
-		wxDefaultPosition, wxSize(100, 23));
+		wxDefaultPosition, wxSize(75, 23));
 	sizer32->Add(5, 5);
 	sizer32->Add(st, 0, wxALIGN_CENTER);
 	sizer32->Add(m_output_random_btn, 0, wxALIGN_CENTER);
@@ -879,23 +872,27 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Neighbors:",
 		wxDefaultPosition, wxSize(100, 20), wxALIGN_LEFT);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
 		wxDefaultPosition, wxSize(60, 23));
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
-	sizer41->Add(m_dist_neighbor_sldr, 1, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
+	sizer42->Add(5, 5);
+	sizer42->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
+	sizer42->Add(5, 5);
+	sizer42->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
+	sizer42->Add(5, 5);
+	sizer42->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
+	sizer42->Add(5, 5);
 	//
 	sizer4->Add(10, 10);
 	sizer4->Add(sizer41, 0, wxEXPAND);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer42, 0, wxEXPAND);
 	sizer4->Add(10, 10);
 
 	//note
@@ -923,6 +920,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
+	page->SetScrollRate(10, 10);
 
 	m_analysis_min_check->SetValue(false);
 	m_analysis_min_spin->Disable();
@@ -2964,10 +2962,6 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	int bn = vd->GetAllBrickNum();
 	double scale = vd->GetScalarScale();
 
-	//m_prog_bit = 97.0f / float(bn * 3);
-	//m_prog = 0.0f;
-	m_generate_prg->SetValue(0);
-
 	FL::ComponentGenerator cg(vd);
 	//boost::signals2::connection connection =
 	//	cg.m_sig_progress.connect(boost::bind(
@@ -3062,7 +3056,6 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
-	m_generate_prg->SetValue(100);
 	//connection.disconnect();
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -3108,12 +3101,10 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 
-	m_generate_prg->SetValue(0);
-
 	FL::ComponentGenerator cg(vd);
-	boost::signals2::connection connection =
-		cg.m_sig_progress.connect(boost::bind(
-			&ComponentDlg::UpdateProgress, this));
+	//boost::signals2::connection connection =
+	//	cg.m_sig_progress.connect(boost::bind(
+	//		&ComponentDlg::UpdateProgress, this));
 
 	cg.SetUseMask(use_sel);
 
@@ -3131,8 +3122,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
-	m_generate_prg->SetValue(100);
-	connection.disconnect();
+	//connection.disconnect();
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -3211,11 +3201,10 @@ void ComponentDlg::Analyze(bool sel)
 	int bn = vd->GetAllBrickNum();
 	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent?1:0));
 	m_prog = 0.0f;
-	m_generate_prg->SetValue(0);
 
-	boost::signals2::connection connection =
-		m_comp_analyzer.m_sig_progress.connect(boost::bind(
-		&ComponentDlg::UpdateProgress, this));
+	//boost::signals2::connection connection =
+	//	m_comp_analyzer.m_sig_progress.connect(boost::bind(
+	//	&ComponentDlg::UpdateProgress, this));
 
 	m_comp_analyzer.SetVolume(vd);
 	if (m_colocal)
@@ -3262,8 +3251,7 @@ void ComponentDlg::Analyze(bool sel)
 		SetOutput(str1, str2);
 	}
 
-	m_generate_prg->SetValue(100);
-	connection.disconnect();
+	//connection.disconnect();
 }
 
 void ComponentDlg::SetOutput(wxString &titles, wxString &values)
@@ -3366,6 +3354,11 @@ void ComponentDlg::OnGridLabelClick(wxGridEvent& event)
 {
 	m_output_grid->SetFocus();
 	event.Skip();
+}
+
+void ComponentDlg::OnSplitterDclick(wxSplitterEvent& event)
+{
+	event.Skip(false);
 }
 
 void ComponentDlg::CopyData()
