@@ -12,6 +12,7 @@
 #include <functional>
 #include <unordered_map>
 #include <algorithm>
+#include <vector>
 
 #include "renderview.hpp"
 
@@ -57,6 +58,9 @@ private:
     QSplitter* moveSplitter(Qt::Orientation orientation, int renderIndex);
     QSplitter* flipSplitter(Qt::Orientation orientation, int view1, int view2);
 
+    void updateRenderviewID(RenderView* view);
+    void deleteRenderviewID(const RenderView* view);
+
 
     // These are the indices of the left and right child of the main Splitter
     const int MAINRENDERINDEX = 0;
@@ -74,6 +78,7 @@ private:
 
     // This is my hash table, where the key is a boolean and the value is a QAction.
     std::unordered_map<bool,QAction*> flagControl;
+    std::vector<const RenderView*> renderviews = {nullptr,nullptr,nullptr,nullptr};
 
 };
 

@@ -24,11 +24,12 @@ class RenderView : public QMainWindow
     Q_OBJECT
 
   public:
-    RenderView(QWidget *parent = nullptr, bool hasFeatures = true, int renderNumber = 0);
-    RenderView(bool hasFeatures, int renderNumber) : RenderView(nullptr,hasFeatures,renderNumber) {}
+    RenderView(QWidget *parent = nullptr, bool hasFeatures = true);
+    RenderView(bool hasFeatures) : RenderView(nullptr,hasFeatures) {}
 
     bool getMainWindowStatus();
-    void callDestructor() { rightToolBar->sayHello(); }
+    void updateID(int i);
+    int getId() const { return id; }
 
   private:
     bool isMainWindow = false;
@@ -36,6 +37,9 @@ class RenderView : public QMainWindow
     TopToolbar* topToolBar = new TopToolbar();
     RightToolbar* rightToolBar = new RightToolbar();
     BottomToolbar* bottomToolBar = new BottomToolbar();
+    QDockWidget* baseDockWidget = new QDockWidget();
+
+    int id;
 
 };
 

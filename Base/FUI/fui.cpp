@@ -57,6 +57,24 @@ void FUI::setDockWidgetSizes()
 
 }
 
+void FUI::updateRenderviewID(RenderView* view)
+{
+  for (int i = 0; i < renderviews.size(); ++i)
+  {
+    if(renderviews[i] == nullptr)
+    {
+      view->updateID(i);
+      renderviews[i] = view;
+      break;
+    }
+  }
+}
+
+void FUI::deleteRenderviewID(const RenderView* view)
+{
+  int id = view->getId();
+  renderviews[id] = nullptr;
+}
 /*
  * This function creates a new Render Window inside a QFrame. The boolean
  * hasFeatures, differentiates whether or not it is the main window. The main
@@ -74,14 +92,14 @@ QFrame* FUI::createNewRenderWindow(bool hasFeatures)
 {
     QGridLayout *baseLayout = new QGridLayout();
     auto newBaseFrame = new QFrame();
-    auto newRenderView = new RenderView(hasFeatures,renderViewcounter);
+    auto newRenderView = new RenderView(hasFeatures);
 
     newBaseFrame->setFrameStyle(QFrame::StyledPanel);
     newBaseFrame->setFrameShadow(QFrame::Sunken);
 
+    updateRenderviewID(newRenderView);
     baseLayout->addWidget(newRenderView);
     newBaseFrame->setLayout(baseLayout);
-    renderViewcounter+=1;
 
     return newBaseFrame;
 
@@ -261,13 +279,24 @@ void FUI::on_actionSplit_HalfV_triggered()
     else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
     {
       QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+      QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+
+      RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+      deleteRenderviewID(view);
+
       ui->splitter->replaceWidget(M_RENDERIND_NEI,temp);
       ui->splitter->setOrientation(Qt::Horizontal);
       neighborWindowPanelCounter-=1;
+
     }
     else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
     {
       QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+      QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+
+      RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+      deleteRenderviewID(view);
+
       ui->splitter->replaceWidget(MAINRENDERINDEX,temp);
       ui->splitter->setOrientation(Qt::Horizontal);
       mainWindowPanelCounter-=1;
@@ -277,6 +306,15 @@ void FUI::on_actionSplit_HalfV_triggered()
     {
         QFrame *mainWindow = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
         QFrame *extractedNeighbor = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+
+        QFrame *toDelete1 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+        QFrame *toDelete2 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+
+        RenderView *view1 = qobject_cast<RenderView*>(toDelete1->children().at(1));
+        RenderView *view2 = qobject_cast<RenderView*>(toDelete2->children().at(1));
+
+        deleteRenderviewID(view1);
+        deleteRenderviewID(view2);
 
         ui->splitter->setOrientation(Qt::Horizontal);
         ui->splitter->replaceWidget(MAINRENDERINDEX,extractedNeighbor);
@@ -314,6 +352,11 @@ void FUI::on_actionSplit_HalfH_triggered()
     else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
     {
         QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+
+        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+        deleteRenderviewID(view);
+
         ui->splitter->replaceWidget(M_RENDERIND_NEI,temp);
         ui->splitter->setOrientation(Qt::Vertical);
         neighborWindowPanelCounter-=1;
@@ -321,6 +364,11 @@ void FUI::on_actionSplit_HalfH_triggered()
     else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
     {
       QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+      QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+
+      RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+      deleteRenderviewID(view);
+
       ui->splitter->replaceWidget(MAINRENDERINDEX,temp);
       ui->splitter->setOrientation(Qt::Vertical);
       mainWindowPanelCounter-=1;
@@ -330,6 +378,15 @@ void FUI::on_actionSplit_HalfH_triggered()
     {
         QFrame *mainWindow = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
         QFrame *extractedNeighbor = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+
+        QFrame *toDelete1 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+        QFrame *toDelete2 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+
+        RenderView *view1 = qobject_cast<RenderView*>(toDelete1->children().at(1));
+        RenderView *view2 = qobject_cast<RenderView*>(toDelete2->children().at(1));
+
+        deleteRenderviewID(view1);
+        deleteRenderviewID(view2);
 
         ui->splitter->setOrientation(Qt::Vertical);
         ui->splitter->replaceWidget(MAINRENDERINDEX,extractedNeighbor);
@@ -421,6 +478,11 @@ void FUI::on_actionSplit_Right_Half_triggered()
     {
         QFrame *extractMain = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
         QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+
+        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+        deleteRenderviewID(view);
+
         temp->setOrientation(Qt::Vertical);
 
         ui->splitter->replaceWidget(MAINRENDERINDEX,extractMain);
@@ -485,6 +547,11 @@ void FUI::on_actionSplit_Bottom_Half_triggered()
     {
         QFrame *extractMain = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
         QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+
+        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+        deleteRenderviewID(view);
+
         temp->setOrientation(Qt::Horizontal);
 
         ui->splitter->replaceWidget(MAINRENDERINDEX,extractMain);
@@ -578,6 +645,10 @@ void FUI::on_actionSplit_Left_Half_triggered()
     {
         QFrame *extractNeigh = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
         QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+
+        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+        deleteRenderviewID(view);
         temp->setOrientation(Qt::Vertical);
 
         ui->splitter->replaceWidget(M_RENDERIND_NEI,extractNeigh);
@@ -646,6 +717,11 @@ void FUI::on_actionSplit_Top_Half_triggered()
     {
         QFrame *extractNeigh = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
         QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+
+        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+        deleteRenderviewID(view);
+
         temp->setOrientation(Qt::Horizontal);
 
         ui->splitter->replaceWidget(M_RENDERIND_NEI,extractNeigh);
@@ -776,6 +852,9 @@ void FUI::on_actionSplit_All_triggered()
 void FUI::on_actionOne_View_triggered()
 {
     checkFlags(ui->actionOne_View);
+
+    for(int i = 1; i < renderviews.size();++i)
+      renderviews[i] = nullptr;
 
     QObject *mainRenderView;
 

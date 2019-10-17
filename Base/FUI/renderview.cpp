@@ -12,12 +12,12 @@
  * The newly created QMainWindow then adds the dock widget and all of
  * the features that comes with it.
  */
-RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QMainWindow (parent)
+RenderView::RenderView(QWidget *parent, bool hasFeatures) : QMainWindow (parent)
 {
     Q_INIT_RESOURCE(resources);
 
     auto newBaseWindow = new QMainWindow();
-    auto baseDockWidget = new QDockWidget();
+
 
 
     // TODO: Instead of creating a new OpenGLWidget, I need to create a class
@@ -48,11 +48,16 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures, int renderNumber) : QM
 
 
     this->setWindowFlags(Qt::Widget);
-    baseDockWidget->setWindowTitle("Renderview " + QString::number(renderNumber));
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget);
 
     connect(topToolBar, &TopToolbar::sendColor,newRenderView, &FluoGLWidget::receiveColor);
 
+}
+
+void RenderView::updateID(int i)
+{
+  id = i;
+  baseDockWidget->setWindowTitle("Renderview " + QString::number(id));
 }
 
 // This is simply for debugging.
