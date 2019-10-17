@@ -1067,9 +1067,6 @@ void DataTreeCtrl::UpdateSelection()
 									vr_frame->GetAdjustView()->SetGroupLink(group);
 									vr_frame->OnSelection(2, vrv, group, vd, 0);
 									vrv->SetVolumeA(vd);
-									vr_frame->GetBrushToolDlg()->GetSettings(vrv);
-									vr_frame->GetMeasureDlg()->GetSettings(vrv);
-									vr_frame->GetTraceDlg()->GetSettings(vrv);
 								}
 							}
 							else if (par_item_data && par_item_data->type == 1)
@@ -1083,9 +1080,6 @@ void DataTreeCtrl::UpdateSelection()
 									vr_frame->GetAdjustView()->SetGroupLink(0);
 									vr_frame->OnSelection(2, vrv, 0, vd);
 									vrv->SetVolumeA(vd);
-									vr_frame->GetBrushToolDlg()->GetSettings(vrv);
-									vr_frame->GetMeasureDlg()->GetSettings(vrv);
-									vr_frame->GetTraceDlg()->GetSettings(vrv);
 								}
 							}
 						}

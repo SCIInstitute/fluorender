@@ -2228,6 +2228,25 @@ void VRenderFrame::OnSelection(int type,
 	if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
 		m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
 
+	if (m_brush_tool_dlg)
+		m_brush_tool_dlg->GetSettings(vrv);
+	if (m_colocalization_dlg)
+		m_colocalization_dlg->SetView(vrv);
+	if (m_component_dlg)
+		m_component_dlg->SetView(vrv);
+	if (m_counting_dlg)
+		m_counting_dlg->GetSettings(vrv);
+	if (m_measure_dlg)
+		m_measure_dlg->GetSettings(vrv);
+	if (m_noise_cancelling_dlg)
+		m_noise_cancelling_dlg->GetSettings(vrv);
+	if (m_ocl_dlg)
+		m_ocl_dlg->GetSettings(vrv);
+	if (m_recorder_dlg)
+		m_recorder_dlg->GetSettings(vrv);
+	if (m_trace_dlg)
+		m_trace_dlg->GetSettings(vrv);
+
 	switch (type)
 	{
 	case 0:  //root
