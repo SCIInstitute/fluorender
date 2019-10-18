@@ -887,6 +887,8 @@ void VRenderGLView::Draw()
 		if (m_draw_rulers)
 			DrawRulers();
 
+		DrawCells();
+
 		//traces
 		DrawTraces();
 
@@ -1168,6 +1170,8 @@ void VRenderGLView::DrawDP()
 
 		if (m_draw_rulers)
 			DrawRulers();
+
+		DrawCells();
 
 		//traces
 		DrawTraces();
@@ -12113,7 +12117,6 @@ void VRenderGLView::DrawRulers()
 
 	if (shader && shader->valid())
 		shader->release();
-	//glDisable(GL_LINE_SMOOTH);
 
 	//draw text
 	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
@@ -12413,6 +12416,136 @@ int VRenderGLView::RulerDistance(int index)
 		delete fopendlg;
 
 	return 1;
+}
+
+//draw highlighted comps
+void VRenderGLView::DrawCells()
+{
+	if (m_cell_list.empty())
+		return;
+	double width = 1.0;
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		width = frame->GetSettingDlg()->GetLineWidth();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	ShaderProgram* shader =
+		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	glm::mat4 matrix = glm::ortho(float(0),
+		float(GetGLSize().x), float(0), float(GetGLSize().y));
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
+
+	VertexArray* va_rulers =
+		TextureRenderer::vertex_array_manager_.vertex_array(VA_Rulers);
+	if (va_rulers)
+	{
+		vector<float> verts;
+		unsigned int num = DrawCellVerts(verts);
+		if (num)
+		{
+			va_rulers->buffer_data(VABuf_Coord,
+				sizeof(float)*verts.size(),
+				&verts[0], GL_STREAM_DRAW);
+			va_rulers->set_param(0, num);
+			va_rulers->draw();
+		}
+	}
+
+	if (shader && shader->valid())
+		shader->release();
+}
+
+unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
+{
+	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float px, py;
+
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+
+	//estimate
+	int vert_num = m_cell_list.size();
+	verts.reserve(vert_num * 8 * 3 * 2);
+
+	unsigned int num = 0;
+	Point p1, p2, p3, p4;
+	Color c = GetTextColor();
+	for (auto it = m_cell_list.begin();
+		it != m_cell_list.end(); ++it)
+	{
+		BBox box = it->second->GetBox();
+		GetCellPoints(box, p1, p2, p3, p4, mv, p);
+
+		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p2.x()); verts.push_back(p2.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p2.x()); verts.push_back(p2.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p3.x()); verts.push_back(p3.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p3.x()); verts.push_back(p3.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p4.x()); verts.push_back(p4.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p4.x()); verts.push_back(p4.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		num += 8;
+	}
+
+	return num;
+}
+
+void VRenderGLView::GetCellPoints(BBox& box,
+	Point& p1, Point& p2, Point& p3, Point& p4,
+	Transform& mv, Transform& p)
+{
+	//get 8 points of box
+	Point pp[8];
+	pp[0] = Point(box.min().x(), box.min().y(), box.min().z());
+	pp[1] = Point(box.min().x(), box.min().y(), box.max().z());
+	pp[2] = Point(box.min().x(), box.max().y(), box.min().z());
+	pp[3] = Point(box.min().x(), box.max().y(), box.max().z());
+	pp[4] = Point(box.max().x(), box.min().y(), box.min().z());
+	pp[5] = Point(box.max().x(), box.min().y(), box.max().z());
+	pp[6] = Point(box.max().x(), box.max().y(), box.min().z());
+	pp[7] = Point(box.max().x(), box.max().y(), box.max().z());
+
+	double minx = std::numeric_limits<double>::max();
+	double maxx = -std::numeric_limits<double>::max();
+	double miny = std::numeric_limits<double>::max();
+	double maxy = -std::numeric_limits<double>::max();
+
+	for (int i = 0; i < 8; ++i)
+	{
+		pp[i] = mv.transform(pp[i]);
+		pp[i] = p.transform(pp[i]);
+		minx = std::min(minx, pp[i].x());
+		maxx = std::max(maxx, pp[i].x());
+		miny = std::min(miny, pp[i].y());
+		maxy = std::max(maxy, pp[i].y());
+	}
+
+	int nx = GetGLSize().x;
+	int ny = GetGLSize().y;
+
+	p1 = Point((minx+1)*nx/2, (miny+1)*ny/2, 0.0);
+	p2 = Point((maxx+1)*nx/2, (miny+1)*ny/2, 0.0);
+	p3 = Point((maxx+1)*nx/2, (maxy+1)*ny/2, 0.0);
+	p4 = Point((minx+1)*nx/2, (maxy+1)*ny/2, 0.0);
 }
 
 //traces
