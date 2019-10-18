@@ -220,6 +220,9 @@ public:
 	void CopyData();
 	void PasteData();
 
+	//select comps
+	void GetSelection();
+
 private:
 	wxWindow* m_frame;
 	VRenderView* m_view;
@@ -557,6 +560,7 @@ private:
 	void OnClearHistBtn(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
+	void OnRangeSelect(wxGridRangeSelectEvent& event);
 	void OnGridLabelClick(wxGridEvent& event);
 
 	//splitter

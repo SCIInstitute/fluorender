@@ -527,8 +527,15 @@ public:
 	Ruler* GetRuler(unsigned int id);
 	int RulerProfile(int index);
 	int RulerDistance(int index);
-	//public mouse
 
+	//draw highlighted comps
+	void DrawCells();
+	unsigned int DrawCellVerts(vector<float>& verts);
+	void GetCellPoints(BBox& box,
+		Point& p1, Point& p2, Point& p3, Point& p4,
+		Transform& mv, Transform& p);
+
+	//public mouse
 	void OnMouse(wxMouseEvent& event);
 
 	//traces
@@ -570,6 +577,12 @@ public:
 		int chann, bool fp32,
 		int &x, int &y, int &w, int &h,
 		void** image);
+
+	//set cell list
+	void SetCellList(FL::CellList &list)
+	{
+		m_cell_list = list;
+	}
 
 public:
 	//set gl context
@@ -685,6 +698,8 @@ private:
 	TraceGroup* m_trace_group;
 	//multivolume
 	MultiVolumeRenderer* m_mvr;
+	//highlighted comps
+	FL::CellList m_cell_list;
 	//fisrt volume data in the depth groups
 	//VolumeData* m_first_depth_vd;
 	//initializaion

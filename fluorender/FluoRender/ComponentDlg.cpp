@@ -157,6 +157,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
 	EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
 	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
+	EVT_GRID_RANGE_SELECT(ComponentDlg::OnRangeSelect)
 	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
 	//split
 	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
@@ -3353,9 +3354,19 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 
 void ComponentDlg::OnSelectCell(wxGridEvent& event)
 {
-	int r = event.GetRow();
-	int c = event.GetCol();
-	m_output_grid->SelectBlock(r, c, r, c);
+	//int r = event.GetRow();
+	//int c = event.GetCol();
+	//m_output_grid->SelectBlock(r, c, r, c);
+
+	GetSelection();
+
+	event.Skip();
+}
+
+void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
+{
+	GetSelection();
+
 	event.Skip();
 }
 
@@ -3451,4 +3462,95 @@ void ComponentDlg::PasteData()
 			k = k2;
 		} while (copy_data.IsEmpty() == false);
 	*/
+}
+
+void ComponentDlg::GetSelection()
+{
+	FL::CompList* list = m_comp_analyzer.GetCompList();
+	if (!list || list->empty())
+		return;
+
+	wxString str;
+	unsigned long ulval;
+	bool sel_all = false;
+	std::vector<unsigned int> ids;
+	//selected cells are retrieved using different functions
+	wxArrayInt seli = m_output_grid->GetSelectedCols();
+	if (seli.GetCount() > 0)
+		sel_all = true;
+	if (!sel_all)
+	{
+		seli = m_output_grid->GetSelectedRows();
+		for (size_t i = 0; i < seli.GetCount(); ++i)
+		{
+			str = m_output_grid->GetCellValue(seli[i], 0);
+			str.ToULong(&ulval);
+			if (ulval)
+				ids.push_back(ulval);
+		}
+		wxGridCellCoordsArray sela =
+			m_output_grid->GetSelectionBlockBottomRight();
+		for (size_t i = 0; i < sela.GetCount(); ++i)
+		{
+			str = m_output_grid->GetCellValue(sela[i].GetRow(), 0);
+			str.ToULong(&ulval);
+			if (ulval)
+				ids.push_back(ulval);
+		}
+		sela = m_output_grid->GetSelectionBlockTopLeft();
+		for (size_t i = 0; i < sela.GetCount(); ++i)
+		{
+			str = m_output_grid->GetCellValue(sela[i].GetRow(), 0);
+			str.ToULong(&ulval);
+			if (ulval)
+				ids.push_back(ulval);
+		}
+		sela = m_output_grid->GetSelectedCells();
+		for (size_t i = 0; i < sela.GetCount(); ++i)
+		{
+			str = m_output_grid->GetCellValue(sela[i].GetRow(), 0);
+			str.ToULong(&ulval);
+			if (ulval)
+				ids.push_back(ulval);
+		}
+	}
+
+	FL::CellList cell_list;
+	if (sel_all)
+	{
+		for (auto it = list->begin(); it != list->end(); ++it)
+		{
+			FL::pCell cell(new FL::Cell(it->second->id));
+			cell->SetSizeUi(it->second->sumi);
+			cell->SetSizeF(it->second->sumd);
+			cell->SetCenter(it->second->pos);
+			cell->SetBox(it->second->box);
+			cell_list.insert(pair<unsigned int, FL::pCell>
+				(it->second->id, cell));
+		}
+	}
+	else
+	{
+		for (auto id : ids)
+		{
+			auto it = list->find(id);
+			if (it != list->end())
+			{
+				FL::pCell cell(new FL::Cell(id));
+				cell->SetSizeUi(it->second->sumi);
+				cell->SetSizeF(it->second->sumd);
+				cell->SetCenter(it->second->pos);
+				cell->SetBox(it->second->box);
+				cell_list.insert(pair<unsigned int, FL::pCell>
+					(id, cell));
+			}
+		}
+	}
+
+	if (m_view && m_view->m_glview)
+	{
+		m_view->m_glview->SetCellList(cell_list);
+		m_view->RefreshGL(false);
+	}
+
 }
