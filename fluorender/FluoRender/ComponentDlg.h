@@ -300,6 +300,10 @@ private:
 	//output
 	bool m_hold_history;
 
+	//split window
+	wxPanel *panel_top;
+	wxPanel *panel_bot;
+
 	//tab control
 	wxNotebook *m_notebook;
 	//wxScrolledWindow* m_adv_page;
