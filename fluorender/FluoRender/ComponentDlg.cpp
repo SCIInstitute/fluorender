@@ -180,29 +180,29 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	splittermain->SetMinimumPaneSize(160);
 	mainsizer->Add(splittermain, 1, wxBOTTOM | wxLEFT | wxEXPAND, 5);
 
-	wxPanel *panelgroup1 = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	panel_top = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerT = new wxBoxSizer(wxHORIZONTAL);
 	//notebook
-	m_notebook = new wxNotebook(panelgroup1, ID_Notebook);
+	m_notebook = new wxNotebook(panel_top, ID_Notebook);
 	m_notebook->AddPage(CreateCompGenPage(m_notebook), "Generate");
 	m_notebook->AddPage(CreateClusteringPage(m_notebook), "Cluster");
 	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
 	sizerT->Add(m_notebook, 1, wxALL | wxEXPAND, 5);
-	panelgroup1->SetSizer(sizerT);
+	panel_top->SetSizer(sizerT);
 
-	wxPanel *panelgroup2 = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
+	panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	m_use_sel_chk = new wxCheckBox(panelgroup2, ID_UseSelChk, "Use Sel.",
+	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Sel.",
 		wxDefaultPosition, wxDefaultSize);
-	m_generate_btn = new wxButton(panelgroup2, ID_GenerateBtn, "Generate",
+	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
 		wxDefaultPosition, wxSize(75, -1));
-	m_auto_update_btn = new wxToggleButton(panelgroup2, ID_AutoUpdateBtn, "Auto Update",
+	m_auto_update_btn = new wxToggleButton(panel_bot, ID_AutoUpdateBtn, "Auto Update",
 		wxDefaultPosition, wxSize(75, -1));
-	m_cluster_btn = new wxButton(panelgroup2, ID_ClusterBtn, "Cluster",
+	m_cluster_btn = new wxButton(panel_bot, ID_ClusterBtn, "Cluster",
 		wxDefaultPosition, wxSize(75, -1));
-	m_analyze_btn = new wxButton(panelgroup2, ID_AnalyzeBtn, "Analyze",
+	m_analyze_btn = new wxButton(panel_bot, ID_AnalyzeBtn, "Analyze",
 		wxDefaultPosition, wxSize(75, -1));
-	m_analyze_sel_btn = new wxButton(panelgroup2, ID_AnalyzeSelBtn, "Anlyz. Sel.",
+	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Anlyz. Sel.",
 		wxDefaultPosition, wxSize(75, -1));
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
@@ -215,19 +215,19 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 	//stats text
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(panelgroup2, wxID_ANY, "Output"),
+		new wxStaticBox(panel_bot, wxID_ANY, "Output"),
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_history_chk = new wxCheckBox(panelgroup2, ID_HistoryChk,
+	m_history_chk = new wxCheckBox(panel_bot, ID_HistoryChk,
 		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
-	m_clear_hist_btn = new wxButton(panelgroup2, ID_ClearHistBtn,
+	m_clear_hist_btn = new wxButton(panel_bot, ID_ClearHistBtn,
 		"Clear History", wxDefaultPosition, wxSize(75, -1));
 	sizer2_1->AddStretchSpacer(1);
 	sizer2_1->Add(m_history_chk, 0, wxALIGN_CENTER);
 	sizer2_1->Add(5, 5);
 	sizer2_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
-	m_output_grid = new wxGrid(panelgroup2, ID_OutputGrid);
+	m_output_grid = new wxGrid(panel_bot, ID_OutputGrid);
 	m_output_grid->CreateGrid(0, 1);
 	m_output_grid->Fit();
 	sizer2->Add(5, 5);
@@ -243,13 +243,14 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizerB->Add(10, 10);
 	sizerB->Add(sizer2, 1, wxEXPAND);
 	sizerB->Add(10, 10);
-	panelgroup2->SetSizer(sizerB);
+	panel_bot->SetSizer(sizerB);
 
 	splittermain->SetSashGravity(0.9);
-	splittermain->SplitHorizontally(panelgroup1, panelgroup2, 160);
+	splittermain->SplitHorizontally(panel_top, panel_bot, 160);
 
 	SetSizer(mainsizer);
-	Layout();
+	panel_top->Layout();
+	panel_bot->Layout();
 
 	GetSettings();
 }
@@ -750,12 +751,12 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_comp_id_x_btn = new wxButton(page, ID_CompIdXBtn, "X",
 		wxDefaultPosition, wxSize(23, 23));
 	//size limiters
-	m_analysis_min_check = new wxCheckBox(page, ID_AnalysisMinCheck, "Min Size:",
+	m_analysis_min_check = new wxCheckBox(page, ID_AnalysisMinCheck, "Min:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_analysis_min_spin = new wxSpinCtrl(page, ID_AnalysisMinSpin, "0",
 		wxDefaultPosition, wxSize(80, 23), wxSP_ARROW_KEYS, 0,
 		std::numeric_limits<int>::max(), 0);
-	m_analysis_max_check = new wxCheckBox(page, ID_AnalysisMaxCheck, "Max Size:",
+	m_analysis_max_check = new wxCheckBox(page, ID_AnalysisMaxCheck, "Max:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_analysis_max_spin = new wxSpinCtrl(page, ID_AnalysisMaxSpin, "100",
 		wxDefaultPosition, wxSize(80, 23), wxSP_ARROW_KEYS, 0,
@@ -870,23 +871,23 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		new wxStaticBox(page, wxID_ANY, "Distances"),
 		wxVERTICAL);
 	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
-	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Neighbors:",
-		wxDefaultPosition, wxSize(100, 20), wxALIGN_LEFT);
+	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Filter Nearest Neighbors",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
+		wxDefaultPosition, wxDefaultSize);
 	sizer41->Add(5, 5);
 	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
 	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
-		wxDefaultPosition, wxSize(60, 23));
 	sizer42->Add(5, 5);
 	sizer42->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
 	sizer42->Add(5, 5);
 	sizer42->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
-	sizer42->Add(5, 5);
-	sizer42->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
 	sizer42->Add(5, 5);
 	//
 	sizer4->Add(10, 10);
@@ -2431,7 +2432,8 @@ void ComponentDlg::EnableGenerate()
 		m_analyze_sel_btn->Show();
 		break;
 	}
-	Layout();
+	panel_top->Layout();
+	panel_bot->Layout();
 }
 
 //output
