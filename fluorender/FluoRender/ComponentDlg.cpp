@@ -3515,6 +3515,11 @@ void ComponentDlg::GetSelection()
 		}
 	}
 
+	Point p1, p2;
+	BBox bb;
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
 	FL::CellList cell_list;
 	if (sel_all)
 	{
@@ -3523,8 +3528,16 @@ void ComponentDlg::GetSelection()
 			FL::pCell cell(new FL::Cell(it->second->id));
 			cell->SetSizeUi(it->second->sumi);
 			cell->SetSizeF(it->second->sumd);
-			cell->SetCenter(it->second->pos);
-			cell->SetBox(it->second->box);
+			p1 = it->second->pos;
+			p1.scale(sx, sy, sz);
+			cell->SetCenter(p1);
+			bb = it->second->box;
+			p1 = bb.min();
+			p2 = bb.max();
+			p1.scale(sx, sy, sz);
+			p2.scale(sx, sy, sz);
+			bb = BBox(p1, p2);
+			cell->SetBox(bb);
 			cell_list.insert(pair<unsigned int, FL::pCell>
 				(it->second->id, cell));
 		}
@@ -3539,8 +3552,16 @@ void ComponentDlg::GetSelection()
 				FL::pCell cell(new FL::Cell(id));
 				cell->SetSizeUi(it->second->sumi);
 				cell->SetSizeF(it->second->sumd);
-				cell->SetCenter(it->second->pos);
-				cell->SetBox(it->second->box);
+				p1 = it->second->pos;
+				p1.scale(sx, sy, sz);
+				cell->SetCenter(p1);
+				bb = it->second->box;
+				p1 = bb.min();
+				p2 = bb.max();
+				p1.scale(sx, sy, sz);
+				p2.scale(sx, sy, sz);
+				bb = BBox(p1, p2);
+				cell->SetBox(bb);
 				cell_list.insert(pair<unsigned int, FL::pCell>
 					(id, cell));
 			}
