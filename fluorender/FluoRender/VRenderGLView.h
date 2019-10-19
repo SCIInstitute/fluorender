@@ -1113,10 +1113,11 @@ private:
 	void Pick();
 	void PickMesh();
 	void PickVolume();
+	void SetCompSelection(VolumeData* vd, Point& p);
 
 	//get mouse point in 3D
 	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
-	double GetPointVolume(Point &mp, double mx, double my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
+	double GetPointVolume(Point &mp, Point &ip, double mx, double my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
 	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
 	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd);
 	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
