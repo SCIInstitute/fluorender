@@ -3573,5 +3573,38 @@ void ComponentDlg::GetSelection()
 		m_view->m_glview->SetCellList(cell_list);
 		m_view->RefreshGL(false);
 	}
+}
 
+void ComponentDlg::SetSelection(std::set<unsigned int>& ids)
+{
+	if (ids.empty())
+		return;
+
+	wxString str;
+	unsigned long ulval;
+	bool flag = false;
+	int lasti = -1;
+	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
+	{
+		str = m_output_grid->GetCellValue(i, 0);
+		if (!str.ToULong(&ulval))
+			continue;
+		if (ids.find(ulval) != ids.end())
+		{
+			if (!flag)
+			{
+				m_output_grid->ClearSelection();
+				flag = true;
+			}
+			m_output_grid->SelectRow(i, true);
+			lasti = i;
+		}
+	}
+
+	if (flag)
+	{
+		GetSelection();
+		if (lasti >= 0)
+			m_output_grid->GoToCell(lasti, 0);
+	}
 }

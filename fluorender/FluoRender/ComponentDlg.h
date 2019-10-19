@@ -222,6 +222,7 @@ public:
 
 	//select comps
 	void GetSelection();
+	void SetSelection(std::set<unsigned int>& ids);
 
 private:
 	wxWindow* m_frame;

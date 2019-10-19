@@ -4463,7 +4463,7 @@ void VRenderGLView::PickVolume()
 {
 	double dist = 0.0;
 	double min_dist = -1.0;
-	Point p;
+	Point p, ip;
 	VolumeData* vd = 0;
 	VolumeData* picked_vd = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -4472,7 +4472,7 @@ void VRenderGLView::PickVolume()
 		if (!vd) continue;
 		int mode = 2;
 		if (vd->GetMode() == 1) mode = 1;
-		dist = GetPointVolume(p, old_mouse_X, old_mouse_Y, vd, mode, true, 0.5);
+		dist = GetPointVolume(p, ip, old_mouse_X, old_mouse_Y, vd, mode, true, 0.5);
 		if (dist > 0.0)
 		{
 			if (min_dist < 0.0)
@@ -4510,6 +4510,44 @@ void VRenderGLView::PickVolume()
 			frame->GetTree()->SetFocus();
 			frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
 		}
+		//update label selection
+		SetCompSelection(picked_vd, ip);
+	}
+}
+
+void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p)
+{
+	if (!vd || !vd->GetTexture())
+		return;
+	//get label data
+	Nrrd* nrrd_label = vd->GetLabel(false);
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	int ix = (int)(p.x() + 0.5);
+	int iy = (int)(p.y() + 0.5);
+	int iz = (int)(p.z() + 0.5);
+	if (ix < 0 || ix >= nx ||
+		iy < 0 || iy >= ny ||
+		iz < 0 || iz >= nz)
+		return;
+	unsigned long long index = (unsigned long long)nx * ny * iz +
+		(unsigned long long)nx * iy + ix;
+	unsigned int id = data_label[index];
+	if (!id)
+		return;
+
+	//update selection
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetComponentDlg())
+	{
+		std::set<unsigned int> ids;
+		ids.insert(id);
+		frame->GetComponentDlg()->SetSelection(ids);
 	}
 }
 
@@ -4574,12 +4612,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (m_pin_rot_center && m_rot_center_dirty &&
 		m_cur_vol && !m_free)
 	{
-		Point p;
+		Point p, ip;
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		int mode = 2;
 		if (m_cur_vol->GetMode() == 1) mode = 1;
-		double dist = GetPointVolume(p,
+		double dist = GetPointVolume(p, ip,
 			nx / 2.0, ny / 2.0,
 			m_cur_vol, mode, true, m_pin_pick_thresh);
 		if (dist <= 0.0)
@@ -11033,7 +11071,7 @@ void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
 	Refresh(erase);
 }
 
-double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
+double VRenderGLView::GetPointVolume(Point& mp, Point &ip, double mx, double my,
 	VolumeData* vd, int mode, bool use_transf, double thresh)
 {
 	if (!vd)
@@ -11203,7 +11241,8 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 				{
 					if (value > max_int)
 					{
-						mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						//mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						ip = Point(xx, yy, zz);
 						max_int = value;
 						counter++;
 					}
@@ -11215,7 +11254,8 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 					{
 						alpha = 1.0 - pow(Clamp(1.0 - value, 0.0, 1.0), vd->GetSampleRate());
 						max_int += alpha*(1.0 - max_int);
-						mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						//mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
+						ip = Point(xx, yy, zz);
 						counter++;
 					}
 					if (max_int > thresh || max_int >= 1.0)
@@ -11230,6 +11270,9 @@ double VRenderGLView::GetPointVolume(Point& mp, double mx, double my,
 
 	if (counter == 0)
 		return -1.0;
+
+	mp = ip + Vector(0.5);
+	mp.scale(spcx, spcy, spcz);
 
 	if (mode == 1)
 	{
@@ -11669,10 +11712,10 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 	}
 	else
 	{
-		Point p;
+		Point p, ip;
 		if (m_point_volume_mode)
 		{
-			double t = GetPointVolume(p, mx, my, m_cur_vol,
+			double t = GetPointVolume(p, ip, mx, my, m_cur_vol,
 				m_point_volume_mode, m_ruler_use_transf);
 			if (t <= 0.0)
 			{
@@ -13150,11 +13193,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (event.LeftIsDown() &&
 				m_p0)
 			{
-				Point point;
+				Point point, ip;
 				bool failed = false;
 				if (m_point_volume_mode)
 				{
-					double t = GetPointVolume(point,
+					double t = GetPointVolume(point, ip,
 						event.GetX(), event.GetY(),
 						m_cur_vol, m_point_volume_mode,
 						m_ruler_use_transf);
