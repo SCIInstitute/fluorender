@@ -12556,23 +12556,22 @@ void VRenderGLView::GetCellPoints(BBox& box,
 	Point& p1, Point& p2, Point& p3, Point& p4,
 	Transform& mv, Transform& p)
 {
-	//get 8 points of box
-	Point pp[8];
-	pp[0] = Point(box.min().x(), box.min().y(), box.min().z());
-	pp[1] = Point(box.min().x(), box.min().y(), box.max().z());
-	pp[2] = Point(box.min().x(), box.max().y(), box.min().z());
-	pp[3] = Point(box.min().x(), box.max().y(), box.max().z());
-	pp[4] = Point(box.max().x(), box.min().y(), box.min().z());
-	pp[5] = Point(box.max().x(), box.min().y(), box.max().z());
-	pp[6] = Point(box.max().x(), box.max().y(), box.min().z());
-	pp[7] = Point(box.max().x(), box.max().y(), box.max().z());
+	//get 6 points of the jack of bbox
+	Point pp[6];
+	Point c = box.center();
+	pp[0] = Point(box.min().x(), c.y(), c.z());
+	pp[1] = Point(box.max().x(), c.y(), c.z());
+	pp[2] = Point(c.x(), box.min().y(), c.z());
+	pp[3] = Point(c.x(), box.max().y(), c.z());
+	pp[4] = Point(c.x(), c.y(), box.min().z());
+	pp[5] = Point(c.x(), c.y(), box.max().z());
 
 	double minx = std::numeric_limits<double>::max();
 	double maxx = -std::numeric_limits<double>::max();
 	double miny = std::numeric_limits<double>::max();
 	double maxy = -std::numeric_limits<double>::max();
 
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 6; ++i)
 	{
 		pp[i] = mv.transform(pp[i]);
 		pp[i] = p.transform(pp[i]);
