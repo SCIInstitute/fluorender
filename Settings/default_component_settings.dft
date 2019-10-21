@@ -1,3 +1,4 @@
+use_sel=0
 iter=50
 thresh=0.5
 use_dist_field=0

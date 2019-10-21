@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=24.1
+ver_minor=24.2
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -24,6 +24,9 @@ x=0
 y=0
 [pin\ threshold]
 value=10
+[stereo]
+enable_stereo=0
+eye\ dist=20
 [test\ mode]
 speed=0
 param=0
