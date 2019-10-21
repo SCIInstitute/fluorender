@@ -24,21 +24,20 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures) : QMainWindow (parent)
     //       that inherits an OpenGLWidget/OpenGLWindow.
     //auto newRenderView = std::make_unique<QOpenGLWidget>(new QOpenGLWidget);
 
-    FluoGLWidget* newRenderView;
-    //auto newRenderView = std::make_unique<FluoGLWidget>(new FluoGLWidget);
+    QSurfaceFormat format;
+    format.setSamples(16);
+    TriangleWindow* newTriangleWindow = new TriangleWindow();
+    newTriangleWindow->setFormat(format);
+    newTriangleWindow->setAnimating(true);
 
     if(!hasFeatures)
     {
         baseDockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
         isMainWindow = true;
-        newRenderView = new FluoGLWidget(true);
-    }
-    else
-    {
-        newRenderView = new FluoGLWidget();
     }
 
-    newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newRenderView));
+
+    newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newTriangleWindow));
     newBaseWindow->addToolBar(Qt::LeftToolBarArea,leftToolBar);
     newBaseWindow->addToolBar(Qt::TopToolBarArea,topToolBar);
     newBaseWindow->addToolBar(Qt::RightToolBarArea, rightToolBar);
@@ -50,7 +49,7 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures) : QMainWindow (parent)
     this->setWindowFlags(Qt::Widget);
     this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget);
 
-    connect(topToolBar, &TopToolbar::sendColor,newRenderView, &FluoGLWidget::receiveColor);
+    //connect(topToolBar, &TopToolbar::sendColor,newRenderView, &FluoGLWidget::receiveColor);
 
 }
 

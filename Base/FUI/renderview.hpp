@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "fluoglwidget.hpp"
+#include "testTriangle.hpp"
 #include "renderviewLeftTB.hpp"
 #include "renderviewRightTB.hpp"
 #include "renderviewBottomTB.hpp"

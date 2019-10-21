@@ -50,6 +50,8 @@ set(HEADER_FILES
     renderviewTopTB.hpp
     renderviewLeftTB.hpp
     renderviewRightTB.hpp
+    renderCanvas.hpp
+    testTriangle.hpp
   )
   
 set(SOURCES
@@ -62,6 +64,8 @@ set(SOURCES
     renderviewTopTB.cpp
     renderviewLeftTB.cpp
     renderviewRightTB.cpp
+    renderCanvas.cpp
+    testTriangle.cpp
   )
   
 set(UI_FILES
