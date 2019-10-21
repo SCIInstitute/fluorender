@@ -1117,7 +1117,7 @@ private:
 	void Pick();
 	void PickMesh();
 	void PickVolume();
-	void SetCompSelection(VolumeData* vd, Point& p);
+	void SetCompSelection(VolumeData* vd, Point& p, int mode);//node: 0-exclusive; 1-add or remove
 
 	//get mouse point in 3D
 	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value

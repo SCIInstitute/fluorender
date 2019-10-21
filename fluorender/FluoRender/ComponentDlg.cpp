@@ -3376,14 +3376,14 @@ void ComponentDlg::OnSelectCell(wxGridEvent& event)
 	//int c = event.GetCol();
 	//m_output_grid->SelectBlock(r, c, r, c);
 
-	GetSelection();
+	GetCompSelection();
 
 	event.Skip();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 {
-	GetSelection();
+	GetCompSelection();
 
 	event.Skip();
 }
@@ -3590,26 +3590,30 @@ bool ComponentDlg::GetCellList(FL::CellList &cl)
 	return true;
 }
 
-void ComponentDlg::GetSelection()
+void ComponentDlg::GetCompSelection()
 {
-	FL::CellList cl;
-	if (m_view && m_view->m_glview &&
-		GetCellList(cl))
+	if (m_view && m_view->m_glview)
 	{
+		FL::CellList cl;
+		GetCellList(cl);
 		m_view->m_glview->SetCellList(cl);
 		m_view->RefreshGL(false);
 	}
 }
 
-void ComponentDlg::SetSelection(std::set<unsigned int>& ids)
+void ComponentDlg::SetCompSelection(std::set<unsigned int>& ids, int mode)
 {
 	if (ids.empty())
 		return;
 
 	wxString str;
 	unsigned long ulval;
-	bool flag = false;
+	bool flag = mode==1;
 	int lasti = -1;
+	wxArrayInt sel = m_output_grid->GetSelectedRows();
+	std::set<int> rows;
+	for (int i = 0; i < sel.GetCount(); ++i)
+		rows.insert(sel[i]);
 	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
 	{
 		str = m_output_grid->GetCellValue(i, 0);
@@ -3622,14 +3626,27 @@ void ComponentDlg::SetSelection(std::set<unsigned int>& ids)
 				m_output_grid->ClearSelection();
 				flag = true;
 			}
-			m_output_grid->SelectRow(i, true);
-			lasti = i;
+			if (mode == 0)
+			{
+				m_output_grid->SelectRow(i, true);
+				lasti = i;
+			}
+			else
+			{
+				if (rows.find(i) != rows.end())
+					m_output_grid->DeselectRow(i);
+				else
+				{
+					m_output_grid->SelectRow(i, true);
+					lasti = i;
+				}
+			}
 		}
 	}
 
 	if (flag)
 	{
-		GetSelection();
+		GetCompSelection();
 		if (lasti >= 0)
 			m_output_grid->GoToCell(lasti, 0);
 	}
