@@ -224,8 +224,8 @@ public:
 
 	//select comps
 	bool GetCellList(FL::CellList &cl);
-	void GetSelection();
-	void SetSelection(std::set<unsigned int>& ids);
+	void GetCompSelection();
+	void SetCompSelection(std::set<unsigned int>& ids, int mode);
 	void IncludeComps();
 	void ExcludeComps();
 

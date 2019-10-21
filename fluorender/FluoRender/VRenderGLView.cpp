@@ -4465,6 +4465,7 @@ void VRenderGLView::PickMesh()
 
 void VRenderGLView::PickVolume()
 {
+	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
 	double min_dist = -1.0;
 	Point p, ip;
@@ -4515,11 +4516,11 @@ void VRenderGLView::PickVolume()
 			frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
 		}
 		//update label selection
-		SetCompSelection(picked_vd, ip);
+		SetCompSelection(picked_vd, ip, kmode);
 	}
 }
 
-void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p)
+void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p, int mode)
 {
 	if (!vd || !vd->GetTexture())
 		return;
@@ -4551,7 +4552,7 @@ void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p)
 	{
 		std::set<unsigned int> ids;
 		ids.insert(id);
-		frame->GetComponentDlg()->SetSelection(ids);
+		frame->GetComponentDlg()->SetCompSelection(ids, mode);
 	}
 }
 
