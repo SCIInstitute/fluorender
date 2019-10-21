@@ -7,6 +7,8 @@
 #include <QMainWindow>
 #include <QColor>
 
+//class RenderCanvas
+
 //class FluoGLWidget : public QOpenGLWidget, public QOpenGLFunctions
 class FluoGLWidget : public QOpenGLWindow, public QOpenGLFunctions
 {
