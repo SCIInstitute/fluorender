@@ -167,6 +167,8 @@ public:
 		ID_AnalyzeSelBtn,
 
 		//output
+		ID_IncludeBtn,
+		ID_ExcludeBtn,
 		ID_HistoryChk,
 		ID_ClearHistBtn,
 		ID_OutputGrid
@@ -221,8 +223,11 @@ public:
 	void PasteData();
 
 	//select comps
+	bool GetCellList(FL::CellList &cl);
 	void GetSelection();
 	void SetSelection(std::set<unsigned int>& ids);
+	void IncludeComps();
+	void ExcludeComps();
 
 private:
 	wxWindow* m_frame;
@@ -427,6 +432,8 @@ private:
 	wxButton* m_analyze_sel_btn;
 
 	//output
+	wxButton* m_include_btn;
+	wxButton* m_exclude_btn;
 	wxCheckBox* m_history_chk;
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
@@ -557,6 +564,8 @@ private:
 	void Analyze(bool sel);
 
 	//output
+	void OnIncludeBtn(wxCommandEvent &event);
+	void OnExcludeBtn(wxCommandEvent &event);
 	void OnHistoryChk(wxCommandEvent& event);
 	void OnClearHistBtn(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);

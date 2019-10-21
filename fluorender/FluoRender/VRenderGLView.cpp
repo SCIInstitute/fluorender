@@ -297,6 +297,10 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_cell_link(false),
 	//new cell id
 	m_cell_new_id(false),
+	//comp include
+	m_comp_include(false),
+	//comp exclude
+	m_comp_exclude(false),
 	//timer for fullscreen
 	m_fullscreen_trigger(this, ID_ftrigger),
 	//nodraw count
@@ -4901,6 +4905,32 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			ChangeBrushSize(10);
 			set_focus = true;
 		}
+		//comp include
+		if (wxGetKeyState(WXK_RETURN) &&
+			!m_comp_include)
+		{
+			if (frame && frame->GetComponentDlg())
+				frame->GetComponentDlg()->IncludeComps();
+			m_comp_include = true;
+			refresh = true;
+			set_focus = true;
+		}
+		if (!wxGetKeyState(WXK_RETURN) &&
+			m_comp_include)
+			m_comp_include = false;
+		//comp exclude
+		if (wxGetKeyState(wxKeyCode('\\')) &&
+			!m_comp_exclude)
+		{
+			if (frame && frame->GetComponentDlg())
+				frame->GetComponentDlg()->ExcludeComps();
+			m_comp_exclude = true;
+			refresh = true;
+			set_focus = true;
+		}
+		if (!wxGetKeyState(wxKeyCode('\\')) &&
+			m_comp_exclude)
+			m_comp_exclude = false;
 
 		//forced refresh
 		if (wxGetKeyState(WXK_F5))

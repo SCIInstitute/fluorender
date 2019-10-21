@@ -153,6 +153,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_AnalyzeBtn, ComponentDlg::OnAnalyze)
 	EVT_BUTTON(ID_AnalyzeSelBtn, ComponentDlg::OnAnalyzeSel)
 	//output
+	EVT_BUTTON(ID_IncludeBtn, ComponentDlg::OnIncludeBtn)
+	EVT_BUTTON(ID_ExcludeBtn, ComponentDlg::OnExcludeBtn)
 	EVT_CHECKBOX(ID_HistoryChk, ComponentDlg::OnHistoryChk)
 	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
 	EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
@@ -219,10 +221,16 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		new wxStaticBox(panel_bot, wxID_ANY, "Output"),
 		wxVERTICAL);
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_include_btn = new wxButton(panel_bot, ID_IncludeBtn,
+		"Include", wxDefaultPosition, wxSize(75, -1));
+	m_exclude_btn = new wxButton(panel_bot, ID_ExcludeBtn,
+		"Exclude", wxDefaultPosition, wxSize(75, -1));
 	m_history_chk = new wxCheckBox(panel_bot, ID_HistoryChk,
 		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(panel_bot, ID_ClearHistBtn,
 		"Clear History", wxDefaultPosition, wxSize(75, -1));
+	sizer2_1->Add(m_include_btn, 0, wxALIGN_CENTER);
+	sizer2_1->Add(m_exclude_btn, 0, wxALIGN_CENTER);
 	sizer2_1->AddStretchSpacer(1);
 	sizer2_1->Add(m_history_chk, 0, wxALIGN_CENTER);
 	sizer2_1->Add(5, 5);
@@ -3330,6 +3338,16 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	m_output_grid->ClearSelection();
 }
 
+void ComponentDlg::OnIncludeBtn(wxCommandEvent &event)
+{
+	IncludeComps();
+}
+
+void ComponentDlg::OnExcludeBtn(wxCommandEvent &event)
+{
+	ExcludeComps();
+}
+
 void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
 {
 	m_hold_history = m_history_chk->GetValue();
@@ -3464,11 +3482,11 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-void ComponentDlg::GetSelection()
+bool ComponentDlg::GetCellList(FL::CellList &cl)
 {
 	FL::CompList* list = m_comp_analyzer.GetCompList();
 	if (!list || list->empty())
-		return;
+		return false;
 
 	wxString str;
 	unsigned long ulval;
@@ -3520,7 +3538,6 @@ void ComponentDlg::GetSelection()
 	double sx = list->sx;
 	double sy = list->sy;
 	double sz = list->sz;
-	FL::CellList cell_list;
 	if (sel_all)
 	{
 		for (auto it = list->begin(); it != list->end(); ++it)
@@ -3538,7 +3555,7 @@ void ComponentDlg::GetSelection()
 			p2.scale(sx, sy, sz);
 			bb = BBox(p1, p2);
 			cell->SetBox(bb);
-			cell_list.insert(pair<unsigned int, FL::pCell>
+			cl.insert(pair<unsigned int, FL::pCell>
 				(it->second->id, cell));
 		}
 	}
@@ -3562,15 +3579,24 @@ void ComponentDlg::GetSelection()
 				p2.scale(sx, sy, sz);
 				bb = BBox(p1, p2);
 				cell->SetBox(bb);
-				cell_list.insert(pair<unsigned int, FL::pCell>
+				cl.insert(pair<unsigned int, FL::pCell>
 					(id, cell));
 			}
 		}
 	}
 
-	if (m_view && m_view->m_glview)
+	if (cl.empty())
+		return false;
+	return true;
+}
+
+void ComponentDlg::GetSelection()
+{
+	FL::CellList cl;
+	if (m_view && m_view->m_glview &&
+		GetCellList(cl))
 	{
-		m_view->m_glview->SetCellList(cell_list);
+		m_view->m_glview->SetCellList(cl);
 		m_view->RefreshGL(false);
 	}
 }
@@ -3606,5 +3632,112 @@ void ComponentDlg::SetSelection(std::set<unsigned int>& ids)
 		GetSelection();
 		if (lasti >= 0)
 			m_output_grid->GoToCell(lasti, 0);
+	}
+}
+
+void ComponentDlg::IncludeComps()
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	FL::CellList cl;
+	if (GetCellList(cl))
+	{
+		//clear complist
+		FL::CompList *list = m_comp_analyzer.GetCompList();
+		for (auto it = list->begin();
+			it != list->end();)
+		{
+			if (cl.find(it->second->id) == cl.end())
+				it = list->erase(it);
+			else
+				++it;
+		}
+		//select cl
+		FL::ComponentSelector comp_selector(vd);
+		comp_selector.SelectList(cl);
+		m_output_grid->ClearGrid();
+		string titles, values;
+		m_comp_analyzer.OutputFormHeader(titles);
+		m_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+
+		cl.clear();
+		m_view->m_glview->SetCellList(cl);
+		m_view->RefreshGL(false);
+
+		//frame
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			if (vr_frame->GetBrushToolDlg())
+			{
+				if (m_view->m_glview->m_paint_count)
+					vr_frame->GetBrushToolDlg()->Update();
+				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			}
+			if (vr_frame->GetColocalizationDlg() &&
+				m_view->m_glview->m_paint_colocalize)
+				vr_frame->GetColocalizationDlg()->Colocalize();
+		}
+	}
+}
+
+void ComponentDlg::ExcludeComps()
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+
+	FL::CellList cl;
+	if (GetCellList(cl))
+	{
+		//clear complist
+		FL::CompList *list = m_comp_analyzer.GetCompList();
+		for (auto it = list->begin();
+			it != list->end();)
+		{
+			if (cl.find(it->second->id) != cl.end())
+				it = list->erase(it);
+			else
+				++it;
+		}
+		FL::ComponentSelector comp_selector(vd);
+		std::vector<unsigned int> ids;
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+			ids.push_back(it->second->id);
+		comp_selector.Delete(ids);
+		m_output_grid->ClearGrid();
+		string titles, values;
+		m_comp_analyzer.OutputFormHeader(titles);
+		m_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+
+		cl.clear();
+		m_view->m_glview->SetCellList(cl);
+		m_view->RefreshGL(false);
+
+		//frame
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			if (vr_frame->GetBrushToolDlg())
+			{
+				if (m_view->m_glview->m_paint_count)
+					vr_frame->GetBrushToolDlg()->Update();
+				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			}
+			if (vr_frame->GetColocalizationDlg() &&
+				m_view->m_glview->m_paint_colocalize)
+				vr_frame->GetColocalizationDlg()->Colocalize();
+		}
 	}
 }
