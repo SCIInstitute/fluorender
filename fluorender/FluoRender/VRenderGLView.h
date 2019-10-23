@@ -988,10 +988,11 @@ private:
 	uint32_t m_vr_size[2];
 	double m_vr_eye_offset;
 	int m_vr_eye_idx;//0: left; 1: right
-	vr::IVRSystem *m_vr_system;
 #ifdef _WIN32
 	XboxController* m_controller;
 #endif
+
+    vr::IVRSystem *m_vr_system;
 
 private:
 #ifdef _WIN32
