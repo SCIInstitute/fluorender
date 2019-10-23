@@ -323,8 +323,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_enable_vr(false),
 	m_use_openvr(false),
 	m_vr_eye_offset(6.0),
-	m_vr_eye_idx(0),
+	m_vr_eye_idx(0)
 #ifdef _WIN32
+	,
 	m_controller(0)
 #endif
 {
