@@ -556,7 +556,9 @@ public:
 	//stereo/vr
 	void InitOpenVR()
 	{
+#ifdef _WIN32
 		if (m_glview) m_glview->InitOpenVR();
+#endif
 	}
 	void SetStereo(bool bval)
 	{
