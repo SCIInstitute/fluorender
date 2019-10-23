@@ -989,17 +989,17 @@ private:
 	double m_vr_eye_offset;
 	int m_vr_eye_idx;//0: left; 1: right
 #ifdef _WIN32
+	vr::IVRSystem *m_vr_system;
 	XboxController* m_controller;
 #endif
 
-    vr::IVRSystem *m_vr_system;
 
 private:
 #ifdef _WIN32
 	//wacom tablet
 	HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
-#endif
 	void InitOpenVR();
+#endif
 
 	void DrawBounds();
 	void DrawGrid();

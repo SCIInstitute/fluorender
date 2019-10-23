@@ -464,11 +464,9 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 	return hctx;
 }
-#endif
 
 void VRenderGLView::InitOpenVR()
 {
-#ifdef _WIN32
 	//openvr initilization
 	vr::EVRInitError vr_error;
 	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
@@ -486,8 +484,8 @@ void VRenderGLView::InitOpenVR()
 		//double eye_z = eye_mat.m[2][3];
 		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
 	}//otherwise use default settings
-#endif
 }
+#endif
 
 VRenderGLView::~VRenderGLView()
 {
@@ -669,6 +667,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 
 	if (vr && m_use_openvr)
 	{
+#ifdef _WIN32
 		//get projection matrix
 		vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
 		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
@@ -692,6 +691,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 				m_ortho_bottom, m_ortho_top,
 				m_near_clip, m_far_clip);
 		}*/
+#endif
 	}
 	else
 	{
@@ -2922,8 +2922,10 @@ void VRenderGLView::PrepVRBuffer()
 {
 	if (m_use_openvr)
 	{
+#ifdef _WIN32
 		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
 		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+#endif
 	}
 
 	int nx, ny;
@@ -3007,11 +3009,13 @@ void VRenderGLView::DrawVRBuffer()
 	//openvr left eye
 	if (m_use_openvr)
 	{
+#ifdef _WIN32
 		vr::Texture_t left_eye = {};
 		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		left_eye.eType = vr::TextureType_OpenGL;
 		left_eye.eColorSpace = vr::ColorSpace_Gamma;
 		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
+#endif
 	}
 	//right eye
 	buffer =
@@ -3026,11 +3030,13 @@ void VRenderGLView::DrawVRBuffer()
 	//openvr left eye
 	if (m_use_openvr)
 	{
+#ifdef _WIN32
 		vr::Texture_t right_eye = {};
 		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
 		right_eye.eType = vr::TextureType_OpenGL;
 		right_eye.eColorSpace = vr::ColorSpace_Gamma;
 		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
+#endif
 	}
 
 	if (img_shader && img_shader->valid())
