@@ -388,8 +388,8 @@ else()
 endif()
 
 # OpenVR
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenVR/headers)
 if(WIN32)
-	include_directories(${FluoRender_SOURCE_DIR}/fluorender/OpenVR/headers)
 	if(${ARCHITECTURE} MATCHES 64)
 		file(GLOB OpenVR_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/OpenVR/lib/win64/*.lib)
 	endif()
