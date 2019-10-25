@@ -90,3 +90,8 @@ void RenderCanvas::renderNow()
     if (m_animating)
         renderLater();
 }
+
+void RenderCanvas::setCurrentContext()
+{
+  m_context->makeCurrent(this);
+}

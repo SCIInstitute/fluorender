@@ -57,3 +57,26 @@ void TriangleWindow::render()
 
   ++m_frame;
 }
+
+float TriangleWindow::normalize(float val)
+{
+  return (val-1.0f)/(255.0f-1.0f);
+}
+
+std::tuple<float,float,float> TriangleWindow::getRGB(const QColor &color)
+{
+  float r = normalize(color.red());
+  float g = normalize(color.green());
+  float b = normalize(color.blue());
+
+  return std::make_tuple(r,g,b);
+}
+
+void TriangleWindow::updateBackgroundColor(const QColor& color)
+{
+  auto [r,g,b] = getRGB(color);
+  setCurrentContext();
+  glClearColor(r,g,b,color.alpha());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  renderNow();
+}
