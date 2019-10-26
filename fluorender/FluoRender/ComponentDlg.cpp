@@ -157,7 +157,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_ExcludeBtn, ComponentDlg::OnExcludeBtn)
 	EVT_CHECKBOX(ID_HistoryChk, ComponentDlg::OnHistoryChk)
 	EVT_BUTTON(ID_ClearHistBtn, ComponentDlg::OnClearHistBtn)
-	EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
+	//EVT_KEY_DOWN(ComponentDlg::OnKeyDown)
 	EVT_GRID_SELECT_CELL(ComponentDlg::OnSelectCell)
 	EVT_GRID_RANGE_SELECT(ComponentDlg::OnRangeSelect)
 	EVT_GRID_LABEL_LEFT_CLICK(ComponentDlg::OnGridLabelClick)
@@ -239,6 +239,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_output_grid = new wxGrid(panel_bot, ID_OutputGrid);
 	m_output_grid->CreateGrid(0, 1);
 	m_output_grid->Fit();
+	m_output_grid->Connect(wxID_ANY, wxEVT_KEY_DOWN,
+		wxKeyEventHandler(ComponentDlg::OnKeyDown), NULL, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
 	sizer2->Add(5, 5);
