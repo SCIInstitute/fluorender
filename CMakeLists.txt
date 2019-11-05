@@ -309,6 +309,13 @@ file(GLOB clstr_hdr fluorender/FluoRender/Cluster/*.h)
 add_library(CLUSTER_OBJ OBJECT
   ${clstr_src} ${clstr_hdr})
 
+# Distance
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Distance)
+file(GLOB dist_src fluorender/FluoRender/Distance/*.cpp)
+file(GLOB dist_hdr fluorender/FluoRender/Distance/*.h)
+add_library(DISTANCE_OBJ OBJECT
+  ${dist_src} ${dist_hdr})
+
 # Calculate
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Calculate)
 file(GLOB calc_src fluorender/FluoRender/Calculate/*.cpp)
@@ -480,6 +487,7 @@ if(APPLE)
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:SKELETON_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
@@ -512,6 +520,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:SKELETON_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
+    $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
@@ -574,6 +583,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:SKELETON_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>
       $<TARGET_OBJECTS:POLE_OBJ>
