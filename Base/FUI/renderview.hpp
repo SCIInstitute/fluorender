@@ -41,6 +41,7 @@ class RenderView : public QMainWindow
     QDockWidget* baseDockWidget = new QDockWidget();
 
     int id;
+    const int samples = 16;
 
 };
 

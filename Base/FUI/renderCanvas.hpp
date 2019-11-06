@@ -22,6 +22,7 @@ class RenderCanvas : public QWindow, protected QOpenGLFunctions
     virtual void initialize();
 
     void setAnimating(bool animating);
+    void setCurrentContext();
 
   public slots:
     void renderLater();
