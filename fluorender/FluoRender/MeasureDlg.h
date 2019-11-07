@@ -28,7 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
+#include <wx/spinctrl.h>
 #include "FLIVR/Color.h"
+#include <Distance/DistCalculator.h>
 
 #ifndef _MEASUREDLG_H_
 #define _MEASUREDLG_H_
@@ -117,9 +119,12 @@ public:
 		ID_EllipseBtn,
 		ID_RulerFlipBtn,
 		ID_RulerEditBtn,
+		ID_RulerMoveBtn,
 		ID_RulerAvgBtn,
 		ID_ProfileBtn,
 		ID_DistanceBtn,
+		ID_RelaxBtn,
+		ID_RelaxValueSpin,
 		ID_DeleteBtn,
 		ID_DeleteAllBtn,
 		ID_ExportBtn,
@@ -139,6 +144,9 @@ public:
 	VRenderView* GetView();
 	void UpdateList();
 
+	//processing
+	void Relax(int idx);
+
 private:
 	wxWindow* m_frame;
 	//current view
@@ -150,6 +158,7 @@ private:
 	wxToolBar *m_toolbar1;
 	wxToolBar *m_toolbar2;
 	wxToolBar *m_toolbar3;
+	wxSpinCtrlDouble* m_relax_value_spin;
 	//options
 	wxRadioButton *m_view_plane_rd;
 	wxRadioButton *m_max_intensity_rd;
@@ -157,6 +166,9 @@ private:
 	wxCheckBox *m_use_transfer_chk;
 	wxCheckBox *m_transient_chk;
 	wxCheckBox *m_df_f_chk;
+
+	FL::DistCalculator m_calculator;
+	bool m_edited;
 
 private:
 	void OnNewLocator(wxCommandEvent& event);
@@ -167,9 +179,12 @@ private:
 	void OnEllipse(wxCommandEvent& event);
 	void OnRulerFlip(wxCommandEvent& event);
 	void OnRulerEdit(wxCommandEvent& event);
+	void OnRulerMove(wxCommandEvent& event);
 	void OnRulerAvg(wxCommandEvent& event);
 	void OnProfile(wxCommandEvent& event);
 	void OnDistance(wxCommandEvent& event);
+	void OnRelax(wxCommandEvent& event);
+	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);
 	void OnExport(wxCommandEvent& event);

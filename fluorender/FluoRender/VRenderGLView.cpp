@@ -1256,7 +1256,8 @@ void VRenderGLView::DrawVolumes(int peel)
 			m_int_mode == 3 ||
 			m_int_mode == 4 ||
 			m_int_mode == 5 ||
-			(m_int_mode == 6 &&
+			((m_int_mode == 6 ||
+			m_int_mode == 9) &&
 				!m_p0) ||
 			m_int_mode == 8 ||
 			m_force_clear)))
@@ -11692,6 +11693,7 @@ bool VRenderGLView::GetEditingRulerPoint(double mx, double my,
 						break;
 					}
 				}
+				m_sel_ruler = ruler;
 				return true;
 			}
 		}
@@ -12944,7 +12946,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	//mouse button down operations
 	if (event.LeftDown())
 	{
-		if (m_int_mode == 6)
+		if (m_int_mode == 6 ||
+			m_int_mode == 9)
 		{
 			Point *p0 = 0;
 			Point *p1 = 0;
@@ -12963,7 +12966,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
 				event.AltDown()) ||
-				(m_int_mode == 6 &&
+				((m_int_mode == 6 ||
+				m_int_mode == 9) &&
 					m_p0 == 0))
 		{
 			old_mouse_X = event.GetX();
@@ -13031,7 +13035,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(27);
 			return;
 		}
-		else if (m_int_mode == 6)
+		else if (m_int_mode == 6 || m_int_mode == 9)
 		{
 			m_p0 = 0;
 		}
@@ -13097,7 +13101,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
 				event.AltDown()) ||
-				(m_int_mode == 6 &&
+				((m_int_mode == 6 ||
+				m_int_mode == 9) &&
 					m_p0 == 0))
 		{
 			//disable picking
@@ -13225,7 +13230,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				}
 			}
 		}
-		else if (m_int_mode == 6)
+		else if (m_int_mode == 6 || m_int_mode == 9)
 		{
 			if (event.LeftIsDown() &&
 				m_p0)
@@ -13255,33 +13260,50 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				}
 				if (!failed)
 				{
-					m_p0->x(point.x());
-					m_p0->y(point.y());
-					m_p0->z(point.z());
-					if (m_p1)
+					if (m_int_mode == 6)
 					{
-						if (event.AltDown())
+						m_p0->x(point.x());
+						m_p0->y(point.y());
+						m_p0->z(point.z());
+						if (m_p1)
 						{
-							Point c = Point((*m_p2 + *m_p3) / 2.0);
-							Vector v0 = *m_p0 - c;
-							Vector v2 = *m_p2 - c;
-							Vector axis = Cross(v2, v0);
-							axis = Cross(axis, v2);
-							axis.normalize();
-							*m_p0 = Point(c + axis * v0.length());
-							*m_p1 = c + (c - *m_p0);
+							if (event.AltDown())
+							{
+								Point c = Point((*m_p2 + *m_p3) / 2.0);
+								Vector v0 = *m_p0 - c;
+								Vector v2 = *m_p2 - c;
+								Vector axis = Cross(v2, v0);
+								axis = Cross(axis, v2);
+								axis.normalize();
+								*m_p0 = Point(c + axis * v0.length());
+								*m_p1 = c + (c - *m_p0);
+							}
+							else
+							{
+								Point c = Point((*m_p0 + *m_p1 + *m_p2 + *m_p3) / 4.0);
+								Vector v0 = *m_p0 - c;
+								Vector v2 = *m_p2 - c;
+								Vector axis = Cross(v2, v0);
+								Vector a2 = Cross(v0, axis);
+								a2.normalize();
+								*m_p2 = Point(c + a2 * v2.length());
+								*m_p3 = Point(c - a2 * v2.length());
+								*m_p1 = c + (c - *m_p0);
+							}
 						}
-						else
+					}
+					else
+					{
+						if (m_sel_ruler)
 						{
-							Point c = Point((*m_p0 + *m_p1 + *m_p2 + *m_p3) / 4.0);
-							Vector v0 = *m_p0 - c;
-							Vector v2 = *m_p2 - c;
-							Vector axis = Cross(v2, v0);
-							Vector a2 = Cross(v0, axis);
-							a2.normalize();
-							*m_p2 = Point(c + a2 * v2.length());
-							*m_p3 = Point(c - a2 * v2.length());
-							*m_p1 = c + (c - *m_p0);
+							Vector displace = point - *m_p0;
+							for (int i = 0; i < m_sel_ruler->GetNumPoint(); ++i)
+							{
+								Point* p = m_sel_ruler->GetPoint(i);
+								p->x(p->x() + displace.x());
+								p->y(p->y() + displace.y());
+								p->z(p->z() + displace.z());
+							}
 						}
 					}
 					RefreshGL(35);

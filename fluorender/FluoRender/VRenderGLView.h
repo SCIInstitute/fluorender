@@ -690,6 +690,7 @@ private:
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	vector <Ruler*> m_ruler_list;
+	Ruler* m_sel_ruler;
 	Point* m_p0;
 	Point* m_p1;
 	Point* m_p2;
@@ -728,6 +729,7 @@ private:
 					 //6-edit ruler
 					 //7-paint ruler mode
 					 //8-same as 4, but for paint ruler mode
+					 //9-move ruler
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;
