@@ -30,16 +30,185 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 DistCalculator::DistCalculator() :
+	m_init(false),
 	m_comp_list(0),
 	m_ruler(0)
 {
+	m_f1 = 1;
+	m_f2 = 2;
+	m_f3 = 1.5;
 }
 
-ComponentAnalyzer::~ComponentAnalyzer()
+DistCalculator::~DistCalculator()
 {
 }
 
-void ComponentAnalyzer::CenterRuler()
+void DistCalculator::CenterRuler(bool init, int iter)
 {
+	if (!m_init || init)
+	{
+		BuildSpring();
+		BuildCloud();
+		m_rest = GetRestDist();
+		m_init = true;
+	}
+
+	for (int it = 0; it < iter; ++it)
+	for (int i = 0; i < m_spring.size(); ++i)
+		UpdateSpringNode(i);
+
+	UpdateRuler();
 }
 
+void DistCalculator::BuildSpring()
+{
+	if (!m_ruler)
+		return;
+	if (m_ruler->GetNumPoint() < 2)
+		return;
+
+	if (!m_spring.empty())
+		m_spring.clear();
+
+	//build a spring form the ruler
+	double dist;
+	for (int i = 0; i < m_ruler->GetNumPoint() - 1; ++i)
+	{
+		if (i == 0)
+		{
+			SpringNode node;
+			node.p = *(m_ruler->GetPoint(i));
+			node.prevd = 0.0;
+			node.nextd = 0.0;
+			m_spring.push_back(node);
+		}
+		SpringNode &node1 = m_spring.at(i);
+		SpringNode node2;
+		node2.p = *(m_ruler->GetPoint(i + 1));
+		dist = (node2.p - node1.p).length();
+		node1.nextd = dist;
+		node2.prevd = dist;
+		node2.nextd = 0.0;
+		m_spring.push_back(node2);
+	}
+}
+
+void DistCalculator::BuildCloud()
+{
+	if (!m_comp_list)
+		return;
+	if (m_comp_list->empty())
+		return;
+	if (!m_cloud.empty())
+		m_cloud.clear();
+
+	double sx = m_comp_list->sx;
+	double sy = m_comp_list->sy;
+	double sz = m_comp_list->sz;
+
+	Point p;
+	for (auto it = m_comp_list->begin();
+		it != m_comp_list->end(); ++it)
+	{
+		p = it->second->GetPos(sx, sy, sz);
+		m_cloud.push_back(p);
+	}
+}
+
+double DistCalculator::GetRestDist()
+{
+	int size = m_cloud.size();
+	if (size < 2)
+		return 1.0;
+
+	int num = size * (size - 1) / 2;
+	double sumd = 0.0;
+	Point p1, p2;
+	for (int i = 0; i < size - 1; ++i)
+	for (int j = i + 1; j < size - 1; ++j)
+	{
+		p1 = m_cloud[i];
+		p2 = m_cloud[j];
+		sumd += (p1 - p2).length();
+	}
+
+	return sumd / num / 2.0;
+}
+
+void DistCalculator::UpdateSpringNode(int idx)
+{
+	SpringNode& node = m_spring.at(idx);
+	int sz = m_spring.size();
+	Point pos = node.p;
+	Vector force, f1, f2, f3;
+
+	double dist, ang;
+	Vector dir, dir2;
+	//from cloud
+	for (int i = 0; i < m_cloud.size(); ++i)
+	{
+		dir = m_cloud[i] - pos;
+		dist = std::max(m_rest, dir.length());
+		dir.normalize();
+		f1 += dir / dist;
+	}
+	//from neighbors
+	if (idx > 0)
+	{
+		SpringNode& prev = m_spring.at(idx - 1);
+		dir = prev.p - pos;
+		dist = dir.length();
+		dir.normalize();
+		f2 += dir * (dist - node.prevd);
+	}
+	if (idx < sz - 1)
+	{
+		SpringNode& next = m_spring.at(idx + 1);
+		dir = next.p - pos;
+		dist = dir.length();
+		dir.normalize();
+		f2 += dir * (dist - node.nextd);
+	}
+	//angular
+	if (idx > 0 && idx < sz - 1)
+	{
+		SpringNode& prev = m_spring.at(idx - 1);
+		dir = prev.p - pos;
+		SpringNode& next = m_spring.at(idx + 1);
+		dir2 = next.p - pos;
+		dir.normalize();
+		dir2.normalize();
+		ang = Dot(dir, dir2)+1.0;
+		dir = dir + dir2;
+		dir.normalize();
+		f3 += dir * ang;
+	}
+
+	double norm = (node.prevd + node.nextd) / 100.0;
+	f1.normalize();
+	f1 *= norm;
+	f2.normalize();
+	f2 *= norm;
+	f3.normalize();
+	f3 *= norm;
+	force = m_f1 * f1 + m_f2 * f2 + m_f3 * f3;
+	node.p = pos + force;
+}
+
+void DistCalculator::UpdateRuler()
+{
+	if (!m_ruler)
+		return;
+
+	if (m_ruler->GetNumPoint() != m_spring.size())
+		return;
+
+	Point* p;
+	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
+	{
+		p = m_ruler->GetPoint(i);
+		p->x(m_spring[i].p.x());
+		p->y(m_spring[i].p.y());
+		p->z(m_spring[i].p.z());
+	}
+}

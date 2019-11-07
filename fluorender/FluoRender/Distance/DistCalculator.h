@@ -41,30 +41,62 @@ namespace FL
 
 		void SetCompList(CompList* list)
 		{
-			m_comp_list = list;
+			if (list != m_comp_list)
+			{
+				m_comp_list = list;
+				m_init = false;
+			}
 		}
 		CompList* GetCompList()
 		{
-			return &m_comp_list;
+			return m_comp_list;
 		}
 		void SetRuler(Ruler* ruler)
 		{
-			m_ruler = ruler;
+			if (ruler != m_ruler)
+			{
+				m_ruler = ruler;
+				m_init = false;
+			}
 		}
 		Ruler* GetRuler()
 		{
 			return m_ruler;
 		}
+		void SetF1(double val)
+		{
+			m_f1 = val;
+		}
 
-		void CenterRuler();
+		void CenterRuler(bool init, int iter=1);
 
 	private:
+		bool m_init;
 		//components
 		CompList *m_comp_list;
 		//Ruler
 		Ruler *m_ruler;
+		//spring properties
+		double m_rest;
+		double m_f1;
+		double m_f2;
+		double m_f3;
+
+		struct SpringNode
+		{
+			Point p;
+			double prevd;
+			double nextd;
+		};
+		std::vector<SpringNode> m_spring;
+		std::vector<Point> m_cloud;
 
 	private:
+		void BuildSpring();
+		void BuildCloud();
+		double GetRestDist();
+		void UpdateSpringNode(int idx);
+		void UpdateRuler();
 	};
 }
 #endif//FL_CompAnalyzer_h
