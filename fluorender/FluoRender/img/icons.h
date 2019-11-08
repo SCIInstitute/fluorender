@@ -284,6 +284,10 @@ public:
 	const static unsigned char tape_png[1138];
 	/* flip_ruler.png - 952 bytes */
 	const static unsigned char flip_ruler_png[952];
+	/* move.png - 952 bytes */
+	const static unsigned char move_png[952];
+	/* relax.png - 976 bytes */
+	const static unsigned char relax_png[976];
 
 	//movie play export icons
 	/* minus.png - 426 bytes */

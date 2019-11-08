@@ -62,6 +62,28 @@ void DistCalculator::CenterRuler(bool init, int iter)
 	UpdateRuler();
 }
 
+void DistCalculator::Project()
+{
+	if (!m_comp_list)
+		return;
+	BuildSpring();
+	if (m_spring.empty())
+		return;
+
+	double sx = m_comp_list->sx;
+	double sy = m_comp_list->sy;
+	double sz = m_comp_list->sz;
+
+	Point p0, pp;
+	for (auto it = m_comp_list->begin();
+		it != m_comp_list->end(); ++it)
+	{
+		p0 = it->second->GetPos(sx, sy, sz);
+		SpringProject(p0, pp);
+		it->second->proj = pp;
+	}
+}
+
 void DistCalculator::BuildSpring()
 {
 	if (!m_ruler)
@@ -84,6 +106,7 @@ void DistCalculator::BuildSpring()
 			node.p = *(m_ruler->GetPoint(i));
 			node.prevd = 0.0;
 			node.nextd = 0.0;
+			node.dist = 0.0;
 			m_spring.push_back(node);
 		}
 		
@@ -96,6 +119,7 @@ void DistCalculator::BuildSpring()
 			node1.nextd = dist;
 			node2.prevd = dist;
 			node2.nextd = 0.0;
+			node2.dist = node1.dist + dist;
 			m_spring.push_back(node2);
 		}
 	}
@@ -239,4 +263,48 @@ void DistCalculator::UpdateRuler()
 		p->y(m_spring[i].p.y());
 		p->z(m_spring[i].p.z());
 	}
+}
+
+void DistCalculator::SpringProject(Point &p0, Point &pp)
+{
+	if (m_spring.empty())
+		return;
+	int sz = m_spring.size();
+	if (sz < 2)
+	{
+		pp = Point(p0 - m_spring[0].p);
+		return;
+	}
+
+	//find closest segment
+	int minidx = -1;
+	double dist;
+	double mind = std::numeric_limits<double>::max();
+	Point mp;
+	for (int i = 0; i < sz - 1; ++i)
+	{
+		SpringNode &node1 = m_spring.at(i);
+		SpringNode &node2 = m_spring.at(i + 1);
+		mp = Point((node1.p + node2.p) / 2.0);
+		dist = (mp - p0).length2();
+		if (dist < mind)
+		{
+			mind = dist;
+			minidx = i;
+		}
+	}
+
+	if (minidx < 0 || minidx >= sz - 1)
+		return;
+
+	//project
+	Point p1 = m_spring[minidx].p;
+	Point p2 = m_spring[minidx + 1].p;
+	Vector axis = p2 - p1;
+	axis.normalize();
+	Vector vp0 = p0 - p1;
+	double len = vp0.length();
+	double ppx = Dot(vp0, axis);
+	double ppy = sqrt(len * len - ppx * ppx);
+	pp = Point(ppx + m_spring[minidx].dist, ppy, 0.0);
 }

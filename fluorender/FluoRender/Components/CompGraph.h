@@ -114,6 +114,7 @@ namespace FL
 		double dist;//distance to a point
 		FLIVR::Point pos;
 		FLIVR::BBox box;
+		FLIVR::Point proj;//projected point
 		std::vector<unsigned int> cosumi;
 		std::vector<double> cosumd;
 		CompVert v;
