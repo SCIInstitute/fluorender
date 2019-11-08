@@ -69,6 +69,7 @@ namespace FL
 		}
 
 		void CenterRuler(bool init, int iter=1);
+		void Project();
 
 	private:
 		bool m_init;
@@ -87,6 +88,7 @@ namespace FL
 			Point p;
 			double prevd;
 			double nextd;
+			double dist;
 		};
 		std::vector<SpringNode> m_spring;
 		std::vector<Point> m_cloud;
@@ -97,6 +99,7 @@ namespace FL
 		double GetRestDist();
 		void UpdateSpringNode(int idx);
 		void UpdateRuler();
+		void SpringProject(Point &p0, Point &pp);
 	};
 }
 #endif//FL_CompAnalyzer_h

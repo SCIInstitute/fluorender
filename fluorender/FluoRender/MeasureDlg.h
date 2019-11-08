@@ -117,16 +117,17 @@ public:
 		ID_RulerBtn,
 		ID_RulerMPBtn,
 		ID_EllipseBtn,
-		ID_RulerFlipBtn,
-		ID_RulerEditBtn,
 		ID_RulerMoveBtn,
+		ID_RulerEditBtn,
+		ID_RulerFlipBtn,
 		ID_RulerAvgBtn,
-		ID_ProfileBtn,
-		ID_DistanceBtn,
 		ID_RelaxBtn,
 		ID_RelaxValueSpin,
 		ID_DeleteBtn,
 		ID_DeleteAllBtn,
+		ID_ProfileBtn,
+		ID_DistanceBtn,
+		ID_ProjectBtn,
 		ID_ExportBtn,
 		ID_ViewPlaneRd,
 		ID_MaxIntensityRd,
@@ -146,6 +147,7 @@ public:
 
 	//processing
 	void Relax(int idx);
+	void Project(int idx);
 
 private:
 	wxWindow* m_frame;
@@ -177,16 +179,17 @@ private:
 	void OnNewRuler(wxCommandEvent& event);
 	void OnNewRulerMP(wxCommandEvent& event);
 	void OnEllipse(wxCommandEvent& event);
-	void OnRulerFlip(wxCommandEvent& event);
-	void OnRulerEdit(wxCommandEvent& event);
 	void OnRulerMove(wxCommandEvent& event);
+	void OnRulerEdit(wxCommandEvent& event);
+	void OnRulerFlip(wxCommandEvent& event);
 	void OnRulerAvg(wxCommandEvent& event);
-	void OnProfile(wxCommandEvent& event);
-	void OnDistance(wxCommandEvent& event);
 	void OnRelax(wxCommandEvent& event);
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);
+	void OnProfile(wxCommandEvent& event);
+	void OnDistance(wxCommandEvent& event);
+	void OnProject(wxCommandEvent& event);
 	void OnExport(wxCommandEvent& event);
 	void OnIntensityMethodCheck(wxCommandEvent& event);
 	void OnUseTransferCheck(wxCommandEvent& event);

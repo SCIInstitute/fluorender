@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <sstream>
 #include <fstream>
+#include <iostream>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -692,17 +693,18 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_RulerBtn, MeasureDlg::OnNewRuler)
 	EVT_MENU(ID_RulerMPBtn, MeasureDlg::OnNewRulerMP)
 	EVT_MENU(ID_EllipseBtn, MeasureDlg::OnEllipse)
-	EVT_MENU(ID_RulerFlipBtn, MeasureDlg::OnRulerFlip)
-	EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
 	EVT_MENU(ID_RulerMoveBtn, MeasureDlg::OnRulerMove)
+	EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
+	EVT_MENU(ID_RulerFlipBtn, MeasureDlg::OnRulerFlip)
 	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
-	EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
-	EVT_MENU(ID_DistanceBtn, MeasureDlg::OnDistance)
 	EVT_MENU(ID_RelaxBtn, MeasureDlg::OnRelax)
+	EVT_SPINCTRLDOUBLE(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueSpin)
 	EVT_MENU(ID_DeleteBtn, MeasureDlg::OnDelete)
 	EVT_MENU(ID_DeleteAllBtn, MeasureDlg::OnDeleteAll)
+	EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
+	EVT_MENU(ID_DistanceBtn, MeasureDlg::OnDistance)
+	EVT_MENU(ID_ProjectBtn, MeasureDlg::OnProject)
 	EVT_MENU(ID_ExportBtn, MeasureDlg::OnExport)
-	EVT_SPINCTRLDOUBLE(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueSpin)
 	EVT_RADIOBUTTON(ID_ViewPlaneRd, MeasureDlg::OnIntensityMethodCheck)
 	EVT_RADIOBUTTON(ID_MaxIntensityRd, MeasureDlg::OnIntensityMethodCheck)
 	EVT_RADIOBUTTON(ID_AccIntensityRd, MeasureDlg::OnIntensityMethodCheck)
@@ -741,11 +743,11 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		bitmap, wxNullBitmap,
 		"Add protractors to measure angles by clicking at three points");
 	bitmap = wxGetBitmapFromMemory(add_ruler);
-	m_toolbar1->AddCheckTool(ID_RulerBtn, "2pt Ruler",
+	m_toolbar1->AddCheckTool(ID_RulerBtn, "2-point",
 		bitmap, wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points");
 	bitmap = wxGetBitmapFromMemory(add_ruler);
-	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "2+pt Ruler",
+	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "Multipoint",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
 	bitmap = wxGetBitmapFromMemory(ellipse);
@@ -756,35 +758,31 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	//toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL | wxTB_HORZ_LAYOUT);
-	bitmap = wxGetBitmapFromMemory(flip_ruler);
+	bitmap = wxGetBitmapFromMemory(move);
 #ifdef _DARWIN
 	m_toolbar2->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_toolbar2->AddTool(ID_RulerFlipBtn, "Flip", bitmap,
-		"Reverse the order of ruler points");
+	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
+		bitmap, wxNullBitmap,
+		"Select and move ruler");
 	bitmap = wxGetBitmapFromMemory(ruler_edit);
 	m_toolbar2->AddCheckTool(ID_RulerEditBtn, "Edit",
 		bitmap, wxNullBitmap,
 		"Select and move ruler points");
-	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
-		bitmap, wxNullBitmap,
-		"Select and move ruler");
+	bitmap = wxGetBitmapFromMemory(flip_ruler);
+	m_toolbar2->AddTool(ID_RulerFlipBtn, "Flip", bitmap,
+		"Reverse the order of ruler points");
 	bitmap = wxGetBitmapFromMemory(average);
-	m_toolbar2->AddTool(ID_RulerAvgBtn, "Avg", bitmap,
+	m_toolbar2->AddTool(ID_RulerAvgBtn, "Average", bitmap,
 		"Compute a center for selected rulers");
-	bitmap = wxGetBitmapFromMemory(profile);
-	m_toolbar2->AddTool(ID_ProfileBtn, "Profile", bitmap,
-		"Add intensity profile along curve. Use \"Export\" to view results");
-	bitmap = wxGetBitmapFromMemory(tape);
-	m_toolbar2->AddTool(ID_DistanceBtn, "Dist", bitmap,
-		"Calculate distances");
+	bitmap = wxGetBitmapFromMemory(relax);
 	m_toolbar2->AddTool(ID_RelaxBtn, "Relax", bitmap,
 		"Relax ruler by components");
 	m_relax_value_spin = new wxSpinCtrlDouble(
-		m_toolbar2, ID_RelaxValueSpin, "1.0",
+		m_toolbar2, ID_RelaxValueSpin, "1.5",
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
-		0, 100, 1.0, 0.1);
+		0, 100, 1.5, 0.1);
 	m_toolbar2->AddControl(m_relax_value_spin);
 	m_toolbar2->Realize();
 	//toolbar3
@@ -799,6 +797,15 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	bitmap = wxGetBitmapFromMemory(del_all);
 	m_toolbar3->AddTool(ID_DeleteAllBtn,"Delete All", bitmap,
 		"Delete all rulers");
+	bitmap = wxGetBitmapFromMemory(profile);
+	m_toolbar3->AddTool(ID_ProfileBtn, "Profile", bitmap,
+		"Add intensity profile along curve. Use \"Export\" to view results");
+	bitmap = wxGetBitmapFromMemory(tape);
+	m_toolbar3->AddTool(ID_DistanceBtn, "Dist", bitmap,
+		"Calculate distances");
+	bitmap = wxGetBitmapFromMemory(profile);
+	m_toolbar3->AddTool(ID_ProjectBtn, "Project", bitmap,
+		"Project components onto ruler");
 	bitmap = wxGetBitmapFromMemory(save);
 	m_toolbar3->AddTool(ID_ExportBtn, "Export", bitmap,
 		"Export rulers to a text file");
@@ -1237,7 +1244,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		avg /= double(count);
 		Ruler* ruler = new Ruler();
 		ruler->SetRulerType(2);
-		ruler->SetName("Avrg");
+		ruler->SetName("Average");
 		ruler->AddPoint(avg);
 		ruler->SetTimeDep(m_view->m_glview->m_ruler_time_dep);
 		ruler->SetTime(m_view->m_glview->m_tseq_cur_num);
@@ -1292,6 +1299,78 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 			}
 		}
 	}
+}
+
+void MeasureDlg::OnProject(wxCommandEvent& event)
+{
+	if (m_view)
+	{
+		std::vector<int> sel;
+		if (m_rulerlist->GetCurrSelection(sel))
+		{
+			//export selected
+			for (size_t i = 0; i < sel.size(); ++i)
+				Project(sel[i]);
+		}
+	}
+}
+
+void MeasureDlg::Project(int idx)
+{
+	if (!m_view)
+		return;
+	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	if (!ruler_list)
+		return;
+	if (idx < 0 || idx >= ruler_list->size())
+		return;
+	Ruler* ruler = ruler_list->at(idx);
+	FL::ComponentAnalyzer* analyzer =
+		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
+	FL::CompList* list = 0;
+	if (!analyzer)
+		return;
+	list = analyzer->GetCompList();
+	if (list->empty())
+		return;
+
+	m_calculator.SetCompList(list);
+	m_calculator.SetRuler(ruler);
+	m_calculator.Project();
+
+	std::vector<FL::CompInfo> comps;
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+		comps.push_back(*(it->second));
+	std::sort(comps.begin(), comps.end(),
+		[](const FL::CompInfo &a, const FL::CompInfo &b) -> bool
+		{ return a.proj.x() < b.proj.x(); });
+
+	//export
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save Analysis Data", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg->GetPath();
+		string str = filename.ToStdString();
+		
+		std::ofstream ofs;
+		ofs.open(str, std::ofstream::out);
+		
+		for (auto it = comps.begin();
+			it != comps.end(); ++it)
+		{
+			ofs << it->id << "\t";
+			ofs << it->proj.x() << "\t";
+			ofs << it->proj.y() << "\n";
+		}
+		ofs.close();
+	}
+	if (fopendlg)
+		delete fopendlg;
 }
 
 void MeasureDlg::Relax(int idx)
