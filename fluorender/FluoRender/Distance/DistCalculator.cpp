@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DistCalculator.h"
+#include <limits>
+#include <algorithm>
 
 using namespace FL;
 
@@ -36,7 +38,7 @@ DistCalculator::DistCalculator() :
 {
 	m_f1 = 1;
 	m_f2 = 2;
-	m_f3 = 1.5;
+	m_f3 = 2;
 }
 
 DistCalculator::~DistCalculator()
@@ -64,7 +66,8 @@ void DistCalculator::BuildSpring()
 {
 	if (!m_ruler)
 		return;
-	if (m_ruler->GetNumPoint() < 2)
+	int rn = m_ruler->GetNumPoint();
+	if (rn < 1)
 		return;
 
 	if (!m_spring.empty())
@@ -72,7 +75,8 @@ void DistCalculator::BuildSpring()
 
 	//build a spring form the ruler
 	double dist;
-	for (int i = 0; i < m_ruler->GetNumPoint() - 1; ++i)
+	int n = rn == 1 ? 1 : rn - 1;
+	for (int i = 0; i < n; ++i)
 	{
 		if (i == 0)
 		{
@@ -82,14 +86,18 @@ void DistCalculator::BuildSpring()
 			node.nextd = 0.0;
 			m_spring.push_back(node);
 		}
-		SpringNode &node1 = m_spring.at(i);
-		SpringNode node2;
-		node2.p = *(m_ruler->GetPoint(i + 1));
-		dist = (node2.p - node1.p).length();
-		node1.nextd = dist;
-		node2.prevd = dist;
-		node2.nextd = 0.0;
-		m_spring.push_back(node2);
+		
+		if (rn > 1)
+		{
+			SpringNode &node1 = m_spring.at(i);
+			SpringNode node2;
+			node2.p = *(m_ruler->GetPoint(i + 1));
+			dist = (node2.p - node1.p).length();
+			node1.nextd = dist;
+			node2.prevd = dist;
+			node2.nextd = 0.0;
+			m_spring.push_back(node2);
+		}
 	}
 }
 
@@ -122,17 +130,23 @@ double DistCalculator::GetRestDist()
 		return 1.0;
 
 	int num = size * (size - 1) / 2;
+	double len;
 	double sumd = 0.0;
+	double mind = std::numeric_limits<double>::max();
 	Point p1, p2;
 	for (int i = 0; i < size - 1; ++i)
 	for (int j = i + 1; j < size - 1; ++j)
 	{
 		p1 = m_cloud[i];
 		p2 = m_cloud[j];
-		sumd += (p1 - p2).length();
+		len = (p1 - p2).length();
+		sumd += len;
+		mind = std::min(mind, len);
 	}
 
-	return sumd / num / 2.0;
+	//return sumd / num / 2.0;
+	//return mind * 2.0;
+	return (mind + sumd / num) / 4.0;
 }
 
 void DistCalculator::UpdateSpringNode(int idx)
@@ -145,12 +159,25 @@ void DistCalculator::UpdateSpringNode(int idx)
 	double dist, ang;
 	Vector dir, dir2;
 	//from cloud
+	std::vector<double> lens;
 	for (int i = 0; i < m_cloud.size(); ++i)
 	{
 		dir = m_cloud[i] - pos;
-		dist = std::max(m_rest, dir.length2());
+		lens.push_back(dir.length());
+	}
+	std::sort(lens.begin(), lens.end());
+	double scale = (idx == 0 || idx == sz - 1) ? 1.0 : 2.0;
+	int loc = int(scale * m_cloud.size() / sz + 1.0);
+	loc = std::min(loc, int(m_cloud.size() - 1));
+	for (int i = 0; i < m_cloud.size(); ++i)
+	{
+		dir = m_cloud[i] - pos;
+		dist = dir.length();
+		if (dist > lens[loc])
+			continue;
+		dist = std::max(m_rest, dist);
 		dir.normalize();
-		f1 += dir / dist;
+		f1 += dir / dist / dist;
 	}
 	//from neighbors
 	if (idx > 0)
@@ -185,6 +212,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	}
 
 	double norm = (node.prevd + node.nextd) / 100.0;
+	norm = std::max(1 / 100.0, norm);
 	f1.normalize();
 	f1 *= norm;
 	f2.normalize();

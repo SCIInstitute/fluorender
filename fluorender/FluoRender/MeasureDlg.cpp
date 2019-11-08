@@ -780,12 +780,13 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		"Calculate distances");
 	m_toolbar2->AddTool(ID_RelaxBtn, "Relax", bitmap,
 		"Relax ruler by components");
-	m_toolbar2->Realize();
 	m_relax_value_spin = new wxSpinCtrlDouble(
-		this, ID_RelaxValueSpin, "1.0",
+		m_toolbar2, ID_RelaxValueSpin, "1.0",
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 100, 1.0, 0.1);
+	m_toolbar2->AddControl(m_relax_value_spin);
+	m_toolbar2->Realize();
 	//toolbar3
 	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL | wxTB_HORZ_LAYOUT);
@@ -860,10 +861,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(m_toolbar1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	wxBoxSizer *sizer_tb2 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_tb2->Add(m_toolbar2, 0, wxEXPAND);
-	sizer_tb2->Add(m_relax_value_spin, 0, wxALIGN_CENTER);
-	sizerV->Add(sizer_tb2, 0, wxEXPAND);
+	sizerV->Add(m_toolbar2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(m_toolbar3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -1226,8 +1224,11 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
 			Ruler* r = (*ruler_list)[i];
-			avg += r->GetCenter();
-			count++;
+			if (r->GetDisp())
+			{
+				avg += r->GetCenter();
+				count++;
+			}
 		}
 	}
 
@@ -1262,7 +1263,10 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 			//export all
 			vector<Ruler*>* ruler_list = m_view->GetRulerList();
 			for (size_t i = 0; i < ruler_list->size(); ++i)
-				m_view->RulerProfile(i);
+			{
+				if ((*ruler_list)[i]->GetDisp())
+					m_view->RulerProfile(i);
+			}
 		}
 	}
 }
@@ -1282,7 +1286,10 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 		{
 			vector<Ruler*>* ruler_list = m_view->GetRulerList();
 			for (size_t i = 0; i < ruler_list->size(); ++i)
-				m_view->RulerDistance(i);
+			{
+				if ((*ruler_list)[i]->GetDisp())
+					m_view->RulerDistance(i);
+			}
 		}
 	}
 }
@@ -1328,7 +1335,10 @@ void MeasureDlg::OnRelax(wxCommandEvent& event)
 	{
 		vector<Ruler*>* ruler_list = m_view->GetRulerList();
 		for (size_t i = 0; i < ruler_list->size(); ++i)
-			Relax(i);
+		{
+			if ((*ruler_list)[i]->GetDisp())
+				Relax(i);
+		}
 	}
 }
 
