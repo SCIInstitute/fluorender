@@ -148,7 +148,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	for (int i = 0; i < m_cloud.size(); ++i)
 	{
 		dir = m_cloud[i] - pos;
-		dist = std::max(m_rest, dir.length());
+		dist = std::max(m_rest, dir.length2());
 		dir.normalize();
 		f1 += dir / dist;
 	}
