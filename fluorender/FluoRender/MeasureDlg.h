@@ -148,6 +148,7 @@ public:
 	//processing
 	void Relax(int idx);
 	void Project(int idx);
+	void SetEdit() { m_edited = true; }
 
 private:
 	wxWindow* m_frame;

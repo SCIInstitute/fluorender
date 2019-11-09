@@ -13309,7 +13309,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					RefreshGL(35);
 					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 					if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+					{
 						vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+						vr_frame->GetMeasureDlg()->SetEdit();
+					}
 				}
 			}
 		}

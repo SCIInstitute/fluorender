@@ -1179,7 +1179,7 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
 	else
 		m_view->SetIntMode(1);
 
-	m_edited = true;
+	//m_edited = true;
 }
 
 void MeasureDlg::OnRulerMove(wxCommandEvent& event)
@@ -1202,7 +1202,7 @@ void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 	else
 		m_view->SetIntMode(1);
 
-	m_edited = true;
+	//m_edited = true;
 }
 
 void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
