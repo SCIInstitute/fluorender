@@ -11,7 +11,7 @@ class MyStyle : public QProxyStyle
   public:
     using QProxyStyle::QProxyStyle;
 
-    int styleHInt(Qstyle::SyleHint hint, const QStyleOption* option = nullptr,
+    int styleHint(QStyle::StyleHint hint, const QStyleOption* option = nullptr,
                   const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const
     {
       if(hint == QStyle::SH_Slider_AbsoluteSetButtons)

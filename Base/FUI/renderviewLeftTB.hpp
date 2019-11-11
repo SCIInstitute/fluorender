@@ -2,7 +2,9 @@
 #define RENDERVIEW_LEFT_TOOLBAR_HPP
 
 #include "genToolbarObjects.hpp"
+#include "CustomWidgets/fluoSlider.hpp"
 #include <vector>
+
 
 class LeftToolbar : public QToolBar
 {
@@ -24,10 +26,11 @@ class LeftToolbar : public QToolBar
 
     QAction* toggleAction;
     QAction* resetButton;
-    QSlider *slider;
+    //QSlider *slider;
     QDoubleSpinBox* spinBox;
     QWidget* sliderSpinBoxWidget;
     QVBoxLayout* sliderSpinBoxLayout;
+    FluoSlider *slider;
 
     int imageID = 0;
     const std::vector<QString> images = {":/fullCircle.svg",":/halfCircle.svg"};

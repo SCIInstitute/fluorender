@@ -37,7 +37,8 @@ void LeftToolbar::initializeActions()
   sliderSpinBoxWidget = new QWidget();
   sliderSpinBoxLayout = new QVBoxLayout();
 
-  slider = genSlider(Qt::Vertical,0,1);
+  //slider = genSlider(Qt::Vertical,0,1);
+  slider = new FluoSlider(Qt::Vertical,0,1);
   spinBox = genSpinBox<QDoubleSpinBox,double>(0.0,1.0);
   toggleAction = genActionButton(":/fullCircle.svg");
   resetButton = genActionButton(":/reset.svg");
