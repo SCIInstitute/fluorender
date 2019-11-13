@@ -742,11 +742,11 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_toolbar1->AddCheckTool(ID_ProtractorBtn, "Protractor",
 		bitmap, wxNullBitmap,
 		"Add protractors to measure angles by clicking at three points");
-	bitmap = wxGetBitmapFromMemory(add_ruler);
+	bitmap = wxGetBitmapFromMemory(two_point);
 	m_toolbar1->AddCheckTool(ID_RulerBtn, "2-point",
 		bitmap, wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points");
-	bitmap = wxGetBitmapFromMemory(add_ruler);
+	bitmap = wxGetBitmapFromMemory(multi_point);
 	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "Multipoint",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
@@ -779,10 +779,10 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_toolbar2->AddTool(ID_RelaxBtn, "Relax", bitmap,
 		"Relax ruler by components");
 	m_relax_value_spin = new wxSpinCtrlDouble(
-		m_toolbar2, ID_RelaxValueSpin, "1.5",
+		m_toolbar2, ID_RelaxValueSpin, "2",
 		wxDefaultPosition, wxSize(50, 23),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
-		0, 100, 1.5, 0.1);
+		0, 100, 2, 0.1);
 	m_toolbar2->AddControl(m_relax_value_spin);
 	m_toolbar2->Realize();
 	//toolbar3
@@ -944,13 +944,16 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 
 		m_use_transfer_chk->SetValue(m_view->m_glview->m_ruler_use_transf);
 		m_transient_chk->SetValue(m_view->m_glview->m_ruler_time_dep);
-		//ruler exports df/f
 		VRenderFrame* frame = (VRenderFrame*)m_frame;
 		if (frame && frame->GetSettingDlg())
 		{
+			//ruler exports df/f
 			bool bval = frame->GetSettingDlg()->GetRulerDF_F();
 			m_df_f_chk->SetValue(bval);
 			m_rulerlist->m_ruler_df_f = bval;
+			//relax
+			m_relax_value_spin->SetValue(
+				frame->GetSettingDlg()->GetRulerRelaxF1());
 		}
 	}
 }
@@ -1410,21 +1413,16 @@ void MeasureDlg::OnRelax(wxCommandEvent& event)
 		for (size_t i = 0; i < sel.size(); ++i)
 			Relax(sel[i]);
 	}
-	else
-	{
-		vector<Ruler*>* ruler_list = m_view->GetRulerList();
-		for (size_t i = 0; i < ruler_list->size(); ++i)
-		{
-			if ((*ruler_list)[i]->GetDisp())
-				Relax(i);
-		}
-	}
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
 	m_calculator.SetF1(dval);
+	//relax
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 }
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)

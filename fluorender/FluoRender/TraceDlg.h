@@ -366,8 +366,8 @@ private:
 	void OnMapConsistentBtn(wxCommandEvent& event);
 	void OnMapMergeBtn(wxCommandEvent& event);
 	void OnMapSplitBtn(wxCommandEvent& event);
-	void OnMapSimilarSpin(wxSpinEvent& event);
-	void OnMapContactSpin(wxSpinEvent& event);
+	void OnMapSimilarSpin(wxSpinDoubleEvent& event);
+	void OnMapContactSpin(wxSpinDoubleEvent& event);
 	//selection page
 	//component tools
 	void OnCompIDText(wxCommandEvent &event);
