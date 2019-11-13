@@ -264,8 +264,10 @@ public:
 
 
 	//ruler tool icons
-	/* add_ruler.png - 922 bytes */
-	const static unsigned char add_ruler_png[922];
+	/* multi_point.png - 812 bytes */
+	const static unsigned char multi_point_png[812];
+	/* two_point.png - 650 bytes */
+	const static unsigned char two_point_png[650];
 	/* drill.png - 819 bytes */
 	const static unsigned char drill_png[819];
 	/* locator.png - 971 bytes */
@@ -274,8 +276,8 @@ public:
 	const static unsigned char profile_png[1207];
 	/* protractor.png - 1172 bytes */
 	const static unsigned char protractor_png[1172];
-	/* ruler_edit.png - 828 bytes */
-	const static unsigned char ruler_edit_png[828];
+	/* ruler_edit.png - 941 bytes */
+	const static unsigned char ruler_edit_png[941];
 	/* average.png - 383 bytes */
 	const static unsigned char average_png[383];
 	/* ellipse.png - 687 bytes */

@@ -816,6 +816,7 @@ void SettingDlg::GetSettings()
 	m_point_volume_mode = 0;
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
+	m_ruler_relax_f1 = 2.0;
 	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
@@ -1067,6 +1068,12 @@ void SettingDlg::GetSettings()
 	{
 		fconfig.SetPath("/ruler time dependent");
 		fconfig.Read("value", &m_ruler_time_dep);
+	}
+	//ruler relax f1
+	if (fconfig.Exists("/ruler relax f1"))
+	{
+		fconfig.SetPath("/ruler relax f1");
+		fconfig.Read("value", &m_ruler_relax_f1);
 	}
 	//ruler exports df/f
 	if (fconfig.Exists("/ruler df_f"))
@@ -1409,6 +1416,10 @@ void SettingDlg::SaveSettings()
 	//ruler time dependent
 	fconfig.SetPath("/ruler time dependent");
 	fconfig.Write("value", m_ruler_time_dep);
+
+	//ruler relax f1
+	fconfig.SetPath("/ruler relax f1");
+	fconfig.Write("value", m_ruler_relax_f1);
 
 	//ruler exports df/f
 	fconfig.SetPath("/ruler df_f");

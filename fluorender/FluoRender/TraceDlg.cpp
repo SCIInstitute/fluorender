@@ -303,8 +303,8 @@ EVT_SPINCTRL(ID_MapSizeSpin, TraceDlg::OnMapSizeSpin)
 EVT_TOGGLEBUTTON(ID_MapConsistentBtn, TraceDlg::OnMapConsistentBtn)
 EVT_TOGGLEBUTTON(ID_MapMergeBtn, TraceDlg::OnMapMergeBtn)
 EVT_TOGGLEBUTTON(ID_MapSplitBtn, TraceDlg::OnMapSplitBtn)
-EVT_SPINCTRL(ID_MapSimilarSpin, TraceDlg::OnMapSimilarSpin)
-EVT_SPINCTRL(ID_MapContactSpin, TraceDlg::OnMapContactSpin)
+EVT_SPINCTRLDOUBLE(ID_MapSimilarSpin, TraceDlg::OnMapSimilarSpin)
+EVT_SPINCTRLDOUBLE(ID_MapContactSpin, TraceDlg::OnMapContactSpin)
 //selection page
 //component tools
 EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
@@ -1311,7 +1311,7 @@ void TraceDlg::OnMapSplitBtn(wxCommandEvent& event)
 		vr_frame->GetSettingDlg()->SetTrySplit(m_try_split);
 }
 
-void TraceDlg::OnMapSimilarSpin(wxSpinEvent& event)
+void TraceDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
 {
 	m_similarity = m_map_similar_spin->GetValue();
 	//save settings
@@ -1320,7 +1320,7 @@ void TraceDlg::OnMapSimilarSpin(wxSpinEvent& event)
 		vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
 }
 
-void TraceDlg::OnMapContactSpin(wxSpinEvent& event)
+void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 {
 	m_contact_factor = m_map_contact_spin->GetValue();
 	//save settings
