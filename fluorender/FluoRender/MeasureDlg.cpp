@@ -1392,8 +1392,8 @@ void MeasureDlg::Relax(int idx)
 	if (!analyzer)
 		return;
 	list = analyzer->GetCompList();
-	if (list->empty())
-		return;
+	//if (list->empty())
+	//	return;
 
 	m_calculator.SetF1(m_relax_value_spin->GetValue());
 	m_calculator.SetCompList(list);
