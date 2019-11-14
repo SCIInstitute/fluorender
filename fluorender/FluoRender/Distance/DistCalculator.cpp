@@ -38,7 +38,7 @@ DistCalculator::DistCalculator() :
 {
 	m_f1 = 1;
 	m_f2 = 2;
-	m_f3 = 2;
+	m_f3 = 3;
 }
 
 DistCalculator::~DistCalculator()
@@ -239,11 +239,12 @@ void DistCalculator::UpdateSpringNode(int idx)
 	norm = std::max(1 / 100.0, norm);
 	f1.normalize();
 	f1 *= norm;
+	f2 = m_f2 * f2 + m_f3 * f3;
 	f2.normalize();
-	f2 *= norm;
-	f3.normalize();
-	f3 *= norm;
-	force = m_f1 * f1 + m_f2 * f2 + m_f3 * f3;
+	f2 *= norm * 2.0;
+	//f3.normalize();
+	//f3 *= norm;
+	force = m_f1 * f1 + m_f2 * f2;
 	node.p = pos + force;
 }
 
