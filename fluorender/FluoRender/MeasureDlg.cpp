@@ -1160,6 +1160,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 		m_view->RefreshGL();
 		GetSettings(m_view);
 	}
+	m_edited = true;
 }
 
 void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
