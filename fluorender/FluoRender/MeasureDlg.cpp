@@ -699,6 +699,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
 	EVT_MENU(ID_RelaxBtn, MeasureDlg::OnRelax)
 	EVT_SPINCTRLDOUBLE(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueSpin)
+	EVT_TEXT(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueText)
 	EVT_MENU(ID_DeleteBtn, MeasureDlg::OnDelete)
 	EVT_MENU(ID_DeleteAllBtn, MeasureDlg::OnDeleteAll)
 	EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
@@ -1424,6 +1425,18 @@ void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+}
+
+void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
+{
+	//wxString str = m_relax_value_spin->GetLabel();
+	//double dval;
+	//str.ToDouble(&dval);
+	//m_calculator.SetF1(dval);
+	////relax
+	//VRenderFrame* frame = (VRenderFrame*)m_frame;
+	//if (frame && frame->GetSettingDlg())
+	//	frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 }
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)
