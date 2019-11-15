@@ -186,6 +186,7 @@ private:
 	void OnRulerAvg(wxCommandEvent& event);
 	void OnRelax(wxCommandEvent& event);
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
+	void OnRelaxValueText(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);
 	void OnProfile(wxCommandEvent& event);
