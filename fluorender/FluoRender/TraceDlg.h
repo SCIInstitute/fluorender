@@ -362,12 +362,16 @@ private:
 	void OnRefineAllBtn(wxCommandEvent &event);
 	//settings
 	void OnMapIterSpin(wxSpinEvent& event);
+	void OnMapIterText(wxCommandEvent& event);
 	void OnMapSizeSpin(wxSpinEvent& event);
+	void OnMapSizeText(wxCommandEvent& event);
 	void OnMapConsistentBtn(wxCommandEvent& event);
 	void OnMapMergeBtn(wxCommandEvent& event);
 	void OnMapSplitBtn(wxCommandEvent& event);
 	void OnMapSimilarSpin(wxSpinDoubleEvent& event);
+	void OnMapSimilarText(wxCommandEvent& event);
 	void OnMapContactSpin(wxSpinDoubleEvent& event);
+	void OnMapContactText(wxCommandEvent& event);
 	//selection page
 	//component tools
 	void OnCompIDText(wxCommandEvent &event);
@@ -401,7 +405,8 @@ private:
 	void OnCellCombineID(wxCommandEvent& event);
 	void OnCellSeparateID(wxCommandEvent& event);
 	void OnCellSegment(wxCommandEvent& event);
-	void OnCellSegText(wxSpinEvent& event);
+	void OnCellSegSpin(wxSpinEvent& event);
+	void OnCellSegText(wxCommandEvent& event);
 	//analysis page
 	//conversion
 	void OnConvertToRulers(wxCommandEvent &event);
