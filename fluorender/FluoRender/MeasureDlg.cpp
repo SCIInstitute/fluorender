@@ -1429,14 +1429,16 @@ void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 {
-	//wxString str = m_relax_value_spin->GetLabel();
-	//double dval;
-	//str.ToDouble(&dval);
-	//m_calculator.SetF1(dval);
-	////relax
-	//VRenderFrame* frame = (VRenderFrame*)m_frame;
-	//if (frame && frame->GetSettingDlg())
-	//	frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	wxString str = m_relax_value_spin->GetText()->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+	{
+		m_calculator.SetF1(dval);
+		//relax
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		if (frame && frame->GetSettingDlg())
+			frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	}
 }
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)

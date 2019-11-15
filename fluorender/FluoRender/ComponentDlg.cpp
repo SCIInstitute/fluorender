@@ -121,8 +121,10 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompIdXBtn, ComponentDlg::OnCompIdXBtn)
 	EVT_CHECKBOX(ID_AnalysisMinCheck, ComponentDlg::OnAnalysisMinCheck)
 	EVT_SPINCTRL(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinSpin)
+	EVT_TEXT(ID_AnalysisMinSpin, ComponentDlg::OnAnalysisMinText)
 	EVT_CHECKBOX(ID_AnalysisMaxCheck, ComponentDlg::OnAnalysisMaxCheck)
 	EVT_SPINCTRL(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxSpin)
+	EVT_TEXT(ID_AnalysisMaxSpin, ComponentDlg::OnAnalysisMaxText)
 	EVT_BUTTON(ID_CompFullBtn, ComponentDlg::OnCompFull)
 	EVT_BUTTON(ID_CompExclusiveBtn, ComponentDlg::OnCompExclusive)
 	EVT_BUTTON(ID_CompAppendBtn, ComponentDlg::OnCompAppend)
@@ -2219,6 +2221,11 @@ void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent &event)
 	m_min_num = m_analysis_min_spin->GetValue();
 }
 
+void ComponentDlg::OnAnalysisMinText(wxCommandEvent &event)
+{
+	m_min_num = m_analysis_min_spin->GetValue();
+}
+
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 {
 	if (m_analysis_max_check->GetValue())
@@ -2234,6 +2241,11 @@ void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 }
 
 void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
+{
+	m_max_num = m_analysis_max_spin->GetValue();
+}
+
+void ComponentDlg::OnAnalysisMaxText(wxCommandEvent &event)
 {
 	m_max_num = m_analysis_max_spin->GetValue();
 }

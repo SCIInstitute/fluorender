@@ -299,12 +299,16 @@ EVT_BUTTON(ID_RefineTBtn, TraceDlg::OnRefineTBtn)
 EVT_BUTTON(ID_RefineAllBtn, TraceDlg::OnRefineAllBtn)
 //settings
 EVT_SPINCTRL(ID_MapIterSpin, TraceDlg::OnMapIterSpin)
+EVT_TEXT(ID_MapIterSpin, TraceDlg::OnMapIterText)
 EVT_SPINCTRL(ID_MapSizeSpin, TraceDlg::OnMapSizeSpin)
+EVT_TEXT(ID_MapSizeSpin, TraceDlg::OnMapSizeText)
 EVT_TOGGLEBUTTON(ID_MapConsistentBtn, TraceDlg::OnMapConsistentBtn)
 EVT_TOGGLEBUTTON(ID_MapMergeBtn, TraceDlg::OnMapMergeBtn)
 EVT_TOGGLEBUTTON(ID_MapSplitBtn, TraceDlg::OnMapSplitBtn)
 EVT_SPINCTRLDOUBLE(ID_MapSimilarSpin, TraceDlg::OnMapSimilarSpin)
+EVT_TEXT(ID_MapSimilarSpin, TraceDlg::OnMapSimilarText)
 EVT_SPINCTRLDOUBLE(ID_MapContactSpin, TraceDlg::OnMapContactSpin)
+EVT_TEXT(ID_MapContactSpin, TraceDlg::OnMapContactText)
 //selection page
 //component tools
 EVT_TEXT(ID_CompIDText, TraceDlg::OnCompIDText)
@@ -343,7 +347,8 @@ EVT_BUTTON(ID_CellReplaceIDBtn, TraceDlg::OnCellReplaceID)
 EVT_BUTTON(ID_CellCombineIDBtn, TraceDlg::OnCellCombineID)
 EVT_BUTTON(ID_CellSeparateBtn, TraceDlg::OnCellSeparateID)
 EVT_BUTTON(ID_CellSegBtn, TraceDlg::OnCellSegment)
-EVT_SPINCTRL(ID_CellSegText, TraceDlg::OnCellSegText)
+EVT_SPINCTRL(ID_CellSegText, TraceDlg::OnCellSegSpin)
+EVT_TEXT(ID_CellSegText, TraceDlg::OnCellSegText)
 //analysis page
 //conversion
 EVT_BUTTON(ID_ConvertToRulersBtn, TraceDlg::OnConvertToRulers)
@@ -1275,7 +1280,25 @@ void TraceDlg::OnMapIterSpin(wxSpinEvent& event)
 		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
 }
 
+void TraceDlg::OnMapIterText(wxCommandEvent& event)
+{
+	m_iter_num = m_map_iter_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+}
+
 void TraceDlg::OnMapSizeSpin(wxSpinEvent& event)
+{
+	m_size_thresh = m_map_size_spin->GetValue();
+	//save settings
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && vr_frame->GetSettingDlg())
+		vr_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+}
+
+void TraceDlg::OnMapSizeText(wxCommandEvent& event)
 {
 	m_size_thresh = m_map_size_spin->GetValue();
 	//save settings
@@ -1320,6 +1343,20 @@ void TraceDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
 		vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
 }
 
+void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
+{
+	wxString str = m_map_similar_spin->GetText()->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+	{
+		m_similarity = dval;
+		//save settings
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetSettingDlg())
+			vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+	}
+}
+
 void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 {
 	m_contact_factor = m_map_contact_spin->GetValue();
@@ -1329,6 +1366,19 @@ void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 		vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
 }
 
+void TraceDlg::OnMapContactText(wxCommandEvent& event)
+{
+	wxString str = m_map_contact_spin->GetText()->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+	{
+		m_contact_factor = dval;
+		//save settings
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame && vr_frame->GetSettingDlg())
+			vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+	}
+}
 
 //analysis
 void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
@@ -2674,7 +2724,12 @@ void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 
 }
 
-void TraceDlg::OnCellSegText(wxSpinEvent& event)
+void TraceDlg::OnCellSegSpin(wxSpinEvent& event)
+{
+	m_clnum = m_cell_segment_text->GetValue();
+}
+
+void TraceDlg::OnCellSegText(wxCommandEvent& event)
 {
 	m_clnum = m_cell_segment_text->GetValue();
 }

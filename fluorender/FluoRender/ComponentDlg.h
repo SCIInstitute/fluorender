@@ -530,8 +530,10 @@ private:
 	void OnCompIdXBtn(wxCommandEvent &event);
 	void OnAnalysisMinCheck(wxCommandEvent &event);
 	void OnAnalysisMinSpin(wxSpinEvent &event);
+	void OnAnalysisMinText(wxCommandEvent &event);
 	void OnAnalysisMaxCheck(wxCommandEvent &event);
 	void OnAnalysisMaxSpin(wxSpinEvent &event);
+	void OnAnalysisMaxText(wxCommandEvent &event);
 	void OnCompFull(wxCommandEvent &event);
 	void OnCompExclusive(wxCommandEvent &event);
 	void OnCompAppend(wxCommandEvent &event);
