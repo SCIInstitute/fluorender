@@ -695,6 +695,8 @@ private:
 	Point* m_p1;
 	Point* m_p2;
 	Point* m_p3;
+	//grow point
+	Point m_grow_point;
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
@@ -730,6 +732,7 @@ private:
 					 //7-paint ruler mode
 					 //8-same as 4, but for paint ruler mode
 					 //9-move ruler
+					 //10-grow, click and hold to activate
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;

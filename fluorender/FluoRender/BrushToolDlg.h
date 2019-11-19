@@ -65,6 +65,7 @@ public:
 		ID_BrushSolid,
 		ID_BrushUndo,
 		ID_BrushRedo,
+		ID_Grow,
 		//toolbar2
 		ID_MaskCopy,
 		ID_MaskCopyData,
@@ -208,6 +209,7 @@ private:
 	void OnBrushClear(wxCommandEvent& event);
 	void OnBrushCreate(wxCommandEvent& event);
 	void OnBrushSolid(wxCommandEvent& event);
+	void OnGrow(wxCommandEvent& event);
 	//mask toolbar
 	void OnMaskCopy(wxCommandEvent& event);
 	void OnMaskCopyData(wxCommandEvent& event);
