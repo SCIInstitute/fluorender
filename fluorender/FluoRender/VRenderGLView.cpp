@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
+#include <Selection/Diffusion.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -4955,6 +4956,18 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (frame && frame->GetStatusBar())
 				frame->GetStatusBar()->PopStatusText();
 			return;
+		}
+
+		//grow
+		if (m_int_mode == 10 &&
+			wxGetMouseState().LeftIsDown() &&
+			m_grow_point.x() >= 0.0)
+		{
+			FL::Diffusion diffs(m_cur_vol);
+			diffs.Grow(m_selector.GetBrushIniThresh(),
+				m_selector.GetBrushGmFalloff(),
+				m_selector.GetBrushSclFalloff(),
+				m_selector.GetBrushSclTranslate());
 		}
 	}
 
@@ -12984,6 +12997,24 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_clear_paint = true;
 			m_press_peak = 0.0;
 			RefreshGL(26);
+		}
+
+		if (m_int_mode == 10)
+		{
+			Point point, ip;
+			int mode = 2;
+			if (m_cur_vol->GetMode() == 1) mode = 1;
+			double t = GetPointVolume(point, ip,
+				event.GetX(), event.GetY(),
+				m_cur_vol, mode, 0.5);
+			if (t > 0.0)
+			{
+				m_grow_point = ip;
+				FL::Diffusion diffs(m_cur_vol);
+				diffs.Init(m_grow_point);
+			}
+			else
+				m_grow_point = Point(-1);
 		}
 		return;
 	}

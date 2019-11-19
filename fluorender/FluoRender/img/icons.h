@@ -245,6 +245,8 @@ public:
 	static const unsigned char brush_erase_png[993];
 	/* brush_solid.png - 788 bytes */
 	const static unsigned char brush_solid_png[788];
+	/* grow.png - 1038 bytes */
+	const static unsigned char grow_png[1038];
 	/* redo.png - 873 bytes */
 	const static unsigned char redo_png[873];
 	/* undo.png - 853 bytes */

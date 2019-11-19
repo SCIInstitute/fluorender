@@ -49,6 +49,7 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_TOOL(ID_BrushErase, BrushToolDlg::OnBrushErase)
 	EVT_TOOL(ID_BrushCreate, BrushToolDlg::OnBrushCreate)
 	EVT_TOOL(ID_BrushSolid, BrushToolDlg::OnBrushSolid)
+	EVT_TOOL(ID_Grow, BrushToolDlg::OnGrow)
 	//mask tools
 	EVT_TOOL(ID_MaskCopy, BrushToolDlg::OnMaskCopy)
 	EVT_TOOL(ID_MaskCopyData, BrushToolDlg::OnMaskCopyData)
@@ -155,9 +156,14 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		bitmap, wxNullBitmap,
 		"Highlight structures with solid mask");
 	bitmap = wxGetBitmapFromMemory(brush_desel);
-	m_toolbar->AddCheckTool(ID_BrushDesel, "Unselect",
+	m_toolbar->AddCheckTool(ID_BrushDesel, "Unsel",
 		bitmap, wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)");
+	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(grow);
+	m_toolbar->AddCheckTool(ID_Grow, "Grow",
+		bitmap, wxNullBitmap,
+		"Click and hold mouse button to grow selection mask from a point");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
@@ -167,7 +173,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		bitmap, "Extract highlighted structures out and create a new volume");
 	bitmap = wxGetBitmapFromMemory(brush_clear);
 	m_toolbar->AddSeparator();
-	m_toolbar->AddTool(ID_BrushClear, "Reset All",
+	m_toolbar->AddTool(ID_BrushClear, "Reset",
 		bitmap, "Reset all highlighted structures");
 	m_toolbar->Realize();
 
@@ -183,7 +189,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		"Copy current selection mask to clipboard");
 	bitmap = wxGetBitmapFromMemory(copy_data);
 	m_mask_tb->AddTool(
-		ID_MaskCopyData, "Data-Mask", bitmap,
+		ID_MaskCopyData, "Data", bitmap,
 		"Copy current channel data as mask to clipboard");
 	m_mask_tb->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(mask_paste);
@@ -555,6 +561,7 @@ void BrushToolDlg::SelectBrush(int id)
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	switch (id)
 	{
@@ -569,6 +576,9 @@ void BrushToolDlg::SelectBrush(int id)
 		break;
 	case ID_BrushSolid:
 		m_toolbar->ToggleTool(ID_BrushSolid, true);
+		break;
+	case ID_Grow:
+		m_toolbar->ToggleTool(ID_Grow, true);
 	}
 
 	GetSettings(m_cur_view);
@@ -606,6 +616,7 @@ void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
@@ -624,6 +635,7 @@ void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
@@ -642,6 +654,7 @@ void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
@@ -649,11 +662,23 @@ void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 	GetSettings(m_cur_view);
 }
 
+void BrushToolDlg::OnGrow(wxCommandEvent &event)
+{
+	m_toolbar->ToggleTool(ID_BrushAppend, false);
+	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+	m_toolbar->ToggleTool(ID_BrushDesel, false);
+	m_toolbar->ToggleTool(ID_BrushSolid, false);
+
+	if (m_cur_view)
+		m_cur_view->SetIntMode(10);
+}
+
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 {
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
@@ -680,6 +705,7 @@ void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())
@@ -692,6 +718,7 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	m_toolbar->ToggleTool(ID_Grow, false);
 
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetTree())

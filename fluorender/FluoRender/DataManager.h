@@ -136,6 +136,8 @@ public:
 	//soft threshold
 	static void SetSoftThreshsold(double val)
 	{m_sw = val;}
+	double GetSoftThreshold()
+	{ return m_sw; }
 
 	//associated layer
 	TreeLayer* GetAssociated()

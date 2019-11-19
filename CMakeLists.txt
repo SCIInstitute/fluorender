@@ -302,6 +302,13 @@ file(GLOB cmp_hdr fluorender/FluoRender/Components/*.h)
 add_library(COMPONENTS_OBJ OBJECT
   ${cmp_src} ${cmp_hdr})
 
+# Selection
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Selection)
+file(GLOB sel_src fluorender/FluoRender/Selection/*.cpp)
+file(GLOB sel_hdr fluorender/FluoRender/Selection/*.h)
+add_library(SELECTION_OBJ OBJECT
+  ${sel_src} ${sel_hdr})
+
 # Cluster
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Cluster)
 file(GLOB clstr_src fluorender/FluoRender/Cluster/*.cpp)
@@ -485,6 +492,7 @@ if(APPLE)
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
+    $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:SKELETON_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
@@ -518,6 +526,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
+    $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:SKELETON_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
@@ -581,6 +590,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:SKELETON_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
