@@ -121,7 +121,7 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, TextureBrick* b)
 	delete[] val;
 }
 
-void Diffusion::Init(Point &ip)
+void Diffusion::Init(Point &ip, double ini_thresh)
 {
 	//debug
 #ifdef _DEBUG
@@ -212,8 +212,11 @@ void Diffusion::Init(Point &ip)
 		cl_float3 ipp = { float(ip.x()), float(ip.y()), float(ip.z()) };
 		kernel_prog->setKernelArgConst(kernel_index, 13,
 			sizeof(cl_float3), (void*)(&ipp));
-		unsigned char init_val = 255;
+		float thresh = float(ini_thresh);
 		kernel_prog->setKernelArgConst(kernel_index, 14,
+			sizeof(float), (void*)(&thresh));
+		unsigned char init_val = 255;
+		kernel_prog->setKernelArgConst(kernel_index, 15,
 			sizeof(unsigned char), (void*)(&init_val));
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
@@ -230,7 +233,7 @@ void Diffusion::Init(Point &ip)
 	}
 }
 
-void Diffusion::Grow(double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate)
+void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate)
 {
 	//debug
 #ifdef _DEBUG
@@ -342,7 +345,8 @@ void Diffusion::Grow(double ini_thresh, double gm_falloff, double scl_falloff, d
 		kernel_prog->setKernelArgConst(kernel_index, 15,
 			sizeof(cl_float4), (void*)(&loc7));
 		//execute
-		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+		for (int i = 0; i<iter; ++i)
+			kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
 		////debug
