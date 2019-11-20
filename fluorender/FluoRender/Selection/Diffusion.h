@@ -43,8 +43,8 @@ namespace FL
 		Diffusion(VolumeData* vd);
 		~Diffusion();
 
-		void Init(Point& ip);
-		void Grow(double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate);
+		void Init(Point& ip, double ini_thresh);
+		void Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate);
 
 	private:
 		VolumeData *m_vd;

@@ -19,11 +19,15 @@ const char* str_cl_diffusion = \
 "	float3 scl,\n" \
 "	float3 trl,\n" \
 "	float3 p,\n" \
+"	float thresh,\n" \
 "	unsigned char val)\n" \
 "{\n" \
 "	unsigned int i = (int)(p.x);\n" \
 "	unsigned int j = (int)(p.y);\n" \
 "	unsigned int k = (int)(p.z);\n" \
+"	float v = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
+"	if (v <= thresh)\n" \
+"		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
 "	pt = pt * scl + trl;\n" \

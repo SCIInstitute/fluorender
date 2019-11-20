@@ -4964,9 +4964,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			event.RequestMore();
 			FL::Diffusion diffs(m_cur_vol);
-			diffs.Grow(m_selector.GetBrushIniThresh(),
-				m_selector.GetBrushGmFalloff(),
-				m_selector.GetBrushSclFalloff(),
+			diffs.Grow(m_selector.GetBrushIteration() / 2,
+				m_selector.GetBrushSclTranslate(),
+				m_selector.GetEdgeDetect()?m_selector.GetBrushGmFalloff():1.0,
+				0.008,
 				m_selector.GetBrushSclTranslate());
 			m_cur_vol->GetVR()->clear_tex_current();
 			refresh = true;
@@ -13013,7 +13014,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				m_grow_point = ip;
 				FL::Diffusion diffs(m_cur_vol);
-				diffs.Init(m_grow_point);
+				diffs.Init(m_grow_point,
+					m_selector.GetBrushIniThresh());
 				m_cur_vol->GetVR()->clear_tex_current();
 			}
 			else
