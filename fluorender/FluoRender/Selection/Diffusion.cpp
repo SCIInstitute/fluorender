@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "Diffusion.h"
 #include "cl_code.h"
+#ifdef _DEBUG
+#include <fstream>
+#endif
 
 using namespace FL;
 
@@ -55,7 +58,8 @@ void Diffusion::GetMask(size_t brick_num, TextureBrick* b, void** val)
 	if (!b)
 		return;
 
-	Nrrd* nrrd_label = m_vd->GetMask(true);
+	m_vd->AddEmptyMask(0, false);
+	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (brick_num > 1)
 	{
 		int c = b->nmask();
@@ -84,9 +88,9 @@ void Diffusion::GetMask(size_t brick_num, TextureBrick* b, void** val)
 	}
 	else
 	{
-		if (!nrrd_label)
+		if (!nrrd_mask)
 			return;
-		*val = (void*)(nrrd_label->data);
+		*val = (void*)(nrrd_mask->data);
 	}
 }
 
@@ -119,6 +123,12 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, TextureBrick* b)
 
 void Diffusion::Init(Point &ip)
 {
+	//debug
+#ifdef _DEBUG
+	unsigned int* val = 0;
+	std::ofstream ofs;
+#endif
+
 	if (!CheckBricks())
 		return;
 
@@ -166,7 +176,7 @@ void Diffusion::Init(Point &ip)
 			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val);
+			sizeof(unsigned char)*nx*ny*nz, val);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -208,7 +218,11 @@ void Diffusion::Init(Point &ip)
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val, val);
+		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
+		////debug
+		//ofs.open("E:/DATA/Test/colocal/test.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned char));
+		//ofs.close();
 
 		//release buffer
 		kernel_prog->releaseAll();
@@ -218,6 +232,12 @@ void Diffusion::Init(Point &ip)
 
 void Diffusion::Grow(double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate)
 {
+	//debug
+#ifdef _DEBUG
+	unsigned int* val = 0;
+	std::ofstream ofs;
+#endif
+
 	if (!CheckBricks())
 		return;
 
@@ -279,7 +299,7 @@ void Diffusion::Grow(double ini_thresh, double gm_falloff, double scl_falloff, d
 			CL_MEM_READ_ONLY, did);
 		kernel_prog->setKernelArgBuf(kernel_index, 1,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val);
+			sizeof(unsigned char)*nx*ny*nz, val);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -324,7 +344,11 @@ void Diffusion::Grow(double ini_thresh, double gm_falloff, double scl_falloff, d
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val, val);
+		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
+		//debug
+		ofs.open("E:/DATA/Test/colocal/test.bin", std::ios::out | std::ios::binary);
+		ofs.write((char*)val, nx*ny*nz*sizeof(unsigned char));
+		ofs.close();
 
 		//release buffer
 		kernel_prog->releaseAll();

@@ -34,7 +34,7 @@ const char* str_cl_diffusion = \
 "		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
 "		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
 "		return;\n" \
-"	atomic_xchg(mask+index, val);\n" \
+"	mask[index] = val;\n" \
 "}\n" \
 "__kernel void kernel_1(\n" \
 "	__read_only image3d_t data,\n" \
@@ -76,8 +76,8 @@ const char* str_cl_diffusion = \
 "	n.x -= read_imagef(data, samp, (int4)(i-1, j, k, 1)).x;\n" \
 "	n.y += read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
 "	n.y -= read_imagef(data, samp, (int4)(i, j-1, k, 1)).x;\n" \
-"	n.z += read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)+min((float)(nz)/(float)(nx), 1.0), 1.0)).x;\n" \
-"	n.z -= read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)-min((float)(nz)/(float)(nx), 1.0), 1.0)).x;\n" \
+"	n.z += read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)+min((float)(nz)/(float)(nx), 1.0f), 1.0)).x;\n" \
+"	n.z -= read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)-min((float)(nz)/(float)(nx), 1.0f), 1.0)).x;\n" \
 "	v.y = length(n);\n" \
 "	v.y = 0.5 * (loc2.x<0.0?(1.0+v.y*loc2.x):v.y*loc2.x);\n" \
 "	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L\n" \
@@ -88,13 +88,13 @@ const char* str_cl_diffusion = \
 "	else\n" \
 "	{\n" \
 "		v.x = (v.x < loc2.z ? (loc3.w - loc2.z + v.x) / loc3.w : (loc2.w<1.0 && v.x>loc2.w ? (loc3.w - v.x + loc2.w) / loc3.w : 1.0))*v.x;\n" \
-"		v.x = (loc3.y > 0.0 ? clamp(v.y / loc3.y, 0.0, 1.0 + loc3.y*10.0) : 1.0)*v.x;\n" \
-"		c = pow(clamp(v.x / loc3.z, loc3.x<1.0 ? -(loc3.x - 1.0)*0.00001 : 0.0, loc3.x>1.0 ? 0.9999 : 1.0), loc3.x);\n" \
+"		v.x = (loc3.y > 0.0 ? clamp(v.y / loc3.y, 0.0f, 1.0f + loc3.y*10.0f) : 1.0)*v.x;\n" \
+"		c = pow(clamp(v.x / loc3.z, loc3.x<1.0 ? -(loc3.x - 1.0f)*0.00001f : 0.0f, loc3.x>1.0 ? 0.9999f : 1.0f), loc3.x);\n" \
 "	}\n" \
 "	//SEG_BODY_DB_GROW_STOP_FUNC\n" \
 "	if (c <= 0.0001)\n" \
 "		return;\n" \
-"	v.x = c > 1.0 ? 1.0 : c.x;\n" \
+"	v.x = c > 1.0 ? 1.0 : c;\n" \
 "	float stop =\n" \
 "		(loc7.y >= 1.0 ? 1.0 : (v.y > sqrt(loc7.y)*2.12 ? 0.0 : exp(-v.y*v.y / loc7.y)))*\n" \
 "		(v.x > loc7.w ? 1.0 : (loc7.z > 0.0 ? (v.x < loc7.w - sqrt(loc7.z)*2.12 ? 0.0 : exp(-(v.x - loc7.w)*(v.x - loc7.w) / loc7.z)) : 0.0));\n" \
@@ -133,6 +133,7 @@ const char* str_cl_diffusion = \
 "			return;\n" \
 "	}\n" \
 "	cc = clamp(cc * (unsigned char)(stop * 255.0), 0, 255);\n" \
-"	atomic_xchg(mask+index, cc);\n" \
+"	mask[index] = cc;\n" \
+"}\n" \
 ;
 

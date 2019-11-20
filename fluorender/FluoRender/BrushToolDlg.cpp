@@ -664,13 +664,22 @@ void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 
 void BrushToolDlg::OnGrow(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
+	bool bval = m_toolbar->GetToolState(ID_Grow);
+	if (bval)
+	{
+		m_toolbar->ToggleTool(ID_BrushAppend, false);
+		m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+		m_toolbar->ToggleTool(ID_BrushDesel, false);
+		m_toolbar->ToggleTool(ID_BrushSolid, false);
 
-	if (m_cur_view)
-		m_cur_view->SetIntMode(10);
+		if (m_cur_view)
+			m_cur_view->SetIntMode(10);
+	}
+	else
+	{
+		if (m_cur_view)
+			m_cur_view->SetIntMode();
+	}
 }
 
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
