@@ -4567,9 +4567,6 @@ void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p, int mode)
 
 void VRenderGLView::OnIdle(wxIdleEvent& event)
 {
-	if (m_use_openvr)
-		event.RequestMore();
-
 	bool refresh = false;
 	bool ref_stat = false;
 	bool start_loop = true;
@@ -4603,6 +4600,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 	if (m_use_openvr)
 	{
+		event.RequestMore();
 		refresh = true;
 		//m_retain_finalbuffer = true;
 	}
@@ -4964,6 +4962,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetMouseState().LeftIsDown() &&
 			m_grow_point.x() >= 0.0)
 		{
+			event.RequestMore();
 			FL::Diffusion diffs(m_cur_vol);
 			diffs.Grow(m_selector.GetBrushIniThresh(),
 				m_selector.GetBrushGmFalloff(),
@@ -13005,16 +13004,17 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 10)
 		{
 			Point point, ip;
-			int mode = 2;
+			int mode = 1;
 			if (m_cur_vol->GetMode() == 1) mode = 1;
 			double t = GetPointVolume(point, ip,
 				event.GetX(), event.GetY(),
-				m_cur_vol, mode, true, 0.5);
+				m_cur_vol, mode, true);
 			if (t > 0.0)
 			{
 				m_grow_point = ip;
 				FL::Diffusion diffs(m_cur_vol);
 				diffs.Init(m_grow_point);
+				m_cur_vol->GetVR()->clear_tex_current();
 			}
 			else
 				m_grow_point = Point(-1);

@@ -209,7 +209,7 @@ void Diffusion::Init(Point &ip)
 			sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(kernel_index, 12,
 			sizeof(cl_float3), (void*)(&trl));
-		cl_float3 ipp = { ip.x(), ip.y(), ip.z() };
+		cl_float3 ipp = { float(ip.x()), float(ip.y()), float(ip.z()) };
 		kernel_prog->setKernelArgConst(kernel_index, 13,
 			sizeof(cl_float3), (void*)(&ipp));
 		unsigned char init_val = 255;
@@ -335,20 +335,20 @@ void Diffusion::Grow(double ini_thresh, double gm_falloff, double scl_falloff, d
 		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, 1.0, lo_thresh, hi_thresh };
 		kernel_prog->setKernelArgConst(kernel_index, 13,
 			sizeof(cl_float4), (void*)(&loc2));
-		cl_float4 loc3 = { 1.0 / gamma3d, gm_thresh, offset, sw };
+		cl_float4 loc3 = { 1.0f / gamma3d, gm_thresh, offset, sw };
 		kernel_prog->setKernelArgConst(kernel_index, 14,
 			sizeof(cl_float4), (void*)(&loc3));
-		cl_float4 loc7 = { ini_thresh, gm_falloff, scl_falloff, scl_translate };
+		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
 		kernel_prog->setKernelArgConst(kernel_index, 15,
 			sizeof(cl_float4), (void*)(&loc7));
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
-		//debug
-		ofs.open("E:/DATA/Test/colocal/test.bin", std::ios::out | std::ios::binary);
-		ofs.write((char*)val, nx*ny*nz*sizeof(unsigned char));
-		ofs.close();
+		////debug
+		//ofs.open("E:/DATA/Test/colocal/test.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned char));
+		//ofs.close();
 
 		//release buffer
 		kernel_prog->releaseAll();
