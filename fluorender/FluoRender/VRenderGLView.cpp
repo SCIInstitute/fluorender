@@ -4964,7 +4964,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			event.RequestMore();
 			FL::Diffusion diffs(m_cur_vol);
-			diffs.Grow(m_selector.GetBrushIteration() / 2,
+			diffs.Grow(m_selector.GetBrushIteration() / 5,
 				m_selector.GetBrushSclTranslate(),
 				m_selector.GetEdgeDetect()?m_selector.GetBrushGmFalloff():1.0,
 				0.008,
