@@ -143,6 +143,10 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		ID_BrushRedo, "Redo", bitmap,
 		"Redo the rollback brush operation");
 	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(grow);
+	m_toolbar->AddCheckTool(ID_Grow, "Grow",
+		bitmap, wxNullBitmap,
+		"Click and hold mouse button to grow selection mask from a point");
 	bitmap = wxGetBitmapFromMemory(brush_append);
 	m_toolbar->AddCheckTool(ID_BrushAppend, "Select",
 		bitmap, wxNullBitmap,
@@ -159,11 +163,6 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Unsel",
 		bitmap, wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)");
-	m_toolbar->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(grow);
-	m_toolbar->AddCheckTool(ID_Grow, "Grow",
-		bitmap, wxNullBitmap,
-		"Click and hold mouse button to grow selection mask from a point");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmapFromMemory(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
@@ -557,29 +556,15 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 
 void BrushToolDlg::SelectBrush(int id)
 {
+	//disable all
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
-
-	switch (id)
-	{
-	case ID_BrushAppend:
-		m_toolbar->ToggleTool(ID_BrushAppend, true);
-		break;
-	case ID_BrushDiffuse:
-		m_toolbar->ToggleTool(ID_BrushDiffuse, true);
-		break;
-	case ID_BrushDesel:
-		m_toolbar->ToggleTool(ID_BrushDesel, true);
-		break;
-	case ID_BrushSolid:
-		m_toolbar->ToggleTool(ID_BrushSolid, true);
-		break;
-	case ID_Grow:
-		m_toolbar->ToggleTool(ID_Grow, true);
-	}
+	//enable brush
+	if (id > 0)
+		m_toolbar->ToggleTool(id, true);
 
 	GetSettings(m_cur_view);
 }
@@ -680,6 +665,10 @@ void BrushToolDlg::OnGrow(wxCommandEvent &event)
 		if (m_cur_view)
 			m_cur_view->SetIntMode();
 	}
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetTree())
+		frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
+	GetSettings(m_cur_view);
 }
 
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)

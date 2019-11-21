@@ -13017,6 +13017,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				diffs.Init(m_grow_point,
 					m_selector.GetBrushIniThresh());
 				m_cur_vol->GetVR()->clear_tex_current();
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (vr_frame && vr_frame->GetBrushToolDlg())
+					vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			else
 				m_grow_point = Point(-1);
