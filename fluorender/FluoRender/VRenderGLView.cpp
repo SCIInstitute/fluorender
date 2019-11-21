@@ -4971,6 +4971,15 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				m_selector.GetBrushSclTranslate());
 			m_cur_vol->GetVR()->clear_tex_current();
 			refresh = true;
+			//update
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (vr_frame)
+			{
+				if (m_paint_count && vr_frame->GetBrushToolDlg())
+					vr_frame->GetBrushToolDlg()->Update();
+				if (m_paint_colocalize && vr_frame->GetColocalizationDlg())
+					vr_frame->GetColocalizationDlg()->Colocalize();
+			}
 		}
 	}
 
