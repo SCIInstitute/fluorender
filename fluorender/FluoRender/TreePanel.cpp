@@ -2442,20 +2442,10 @@ void TreePanel::SelectBrush(int id)
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_datatree->m_fixed = false;
 
-	switch (id)
+	if (id)
 	{
-	case ID_BrushAppend:
-		m_toolbar->ToggleTool(ID_BrushAppend, true);
+		m_toolbar->ToggleTool(id, true);
 		m_datatree->m_fixed = true;
-		break;
-	case ID_BrushDiffuse:
-		m_toolbar->ToggleTool(ID_BrushDiffuse, true);
-		m_datatree->m_fixed = true;
-		break;
-	case ID_BrushDesel:
-		m_toolbar->ToggleTool(ID_BrushDesel, true);
-		m_datatree->m_fixed = true;
-		break;
 	}
 }
 
@@ -2668,6 +2658,46 @@ void TreePanel::BrushSolid(bool state)
 		if (vr_frame)
 		{
 			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			{
+				VRenderView* vrv = vr_frame->GetView(i);
+				if (vrv)
+				{
+					vrv->SetIntMode(1);
+					m_datatree->m_fixed = false;
+				}
+			}
+		}
+	}
+}
+
+void TreePanel::BrushGrow(bool state)
+{
+	m_toolbar->ToggleTool(ID_BrushAppend, false);
+	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+	m_toolbar->ToggleTool(ID_BrushDesel, false);
+
+	if (state)
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			for (int i = 0; i < vr_frame->GetViewNum(); i++)
+			{
+				VRenderView* vrv = vr_frame->GetView(i);
+				if (vrv)
+				{
+					vrv->SetIntMode(10);
+					m_datatree->m_fixed = true;
+				}
+			}
+		}
+	}
+	else
+	{
+		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+		if (vr_frame)
+		{
+			for (int i = 0; i < vr_frame->GetViewNum(); i++)
 			{
 				VRenderView* vrv = vr_frame->GetView(i);
 				if (vrv)

@@ -58,7 +58,6 @@ void Diffusion::GetMask(size_t brick_num, TextureBrick* b, void** val)
 	if (!b)
 		return;
 
-	m_vd->AddEmptyMask(0, false);
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (brick_num > 1)
 	{
@@ -131,6 +130,13 @@ void Diffusion::Init(Point &ip, double ini_thresh)
 
 	if (!CheckBricks())
 		return;
+
+	//add empty mask if there is no mask
+	//then, push the mask for undos
+	m_vd->AddEmptyMask(0, false);
+	if (Texture::mask_undo_num_ > 0 &&
+		m_vd->GetTexture())
+		m_vd->GetTexture()->push_mask();
 
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::

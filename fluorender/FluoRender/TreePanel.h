@@ -271,6 +271,7 @@ public:
 	void BrushErase();
 	void BrushCreate();
 	void BrushSolid(bool state);
+	void BrushGrow(bool state);
 
 private:
 	wxWindow* m_frame;
