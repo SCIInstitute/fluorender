@@ -3713,11 +3713,9 @@ bool Ruler::AddPoint(Point &point)
 	if (m_ruler.empty())
 	{
 		m_ruler.push_back(RulerBranch());
-		m_ruler[0].push_back(std::make_shared<Point>(point));
-		return true;
+		m_ruler.back().push_back(std::make_shared<Point>(point));
 	}
-
-	if (m_ruler_type == 2 &&
+	else if (m_ruler_type == 2 &&
 		m_ruler.back().size() == 1)
 		return false;
 	else if ((m_ruler_type == 0 ||
@@ -3728,20 +3726,19 @@ bool Ruler::AddPoint(Point &point)
 		m_ruler.back().size() == 3)
 		return false;
 	else
-	{
 		m_ruler.back().push_back(std::make_shared<Point>(point));
-		if (m_ruler_type == 2 &&
-			m_ruler.back().size() == 1)
-			m_finished = true;
-		else if ((m_ruler_type == 0 ||
-			m_ruler_type == 3) &&
-			m_ruler.back().size() == 2)
-			m_finished = true;
-		else if (m_ruler_type == 4 &&
-			m_ruler.back().size() == 3)
-			m_finished = true;
-		return true;
-	}
+
+	if (m_ruler_type == 2 &&
+		m_ruler.back().size() == 1)
+		m_finished = true;
+	else if ((m_ruler_type == 0 ||
+		m_ruler_type == 3) &&
+		m_ruler.back().size() == 2)
+		m_finished = true;
+	else if (m_ruler_type == 4 &&
+		m_ruler.back().size() == 3)
+		m_finished = true;
+	return true;
 }
 
 void Ruler::SetTransform(Transform *tform)
