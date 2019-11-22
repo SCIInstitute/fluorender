@@ -3558,17 +3558,45 @@ Ruler::~Ruler()
 }
 
 //data
+int Ruler::GetNumBranch()
+{
+	return m_ruler.size();
+}
+
 int Ruler::GetNumPoint()
 {
-	return (int)m_ruler.size();
+	//branch should be all connected
+	//if there are more than one branch
+	//the first point of a branch other than the first is shared
+	//exclude it from num count
+	int count = 0;
+	bool first = true;
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
+	{
+		count += first ? it->size() : it->size() - 1;
+		first = false;
+	}
+	return count;
 }
 
 Point *Ruler::GetPoint(int index)
 {
-	if (index>=0 && (size_t)index<m_ruler.size())
-		return &(m_ruler[index]);
-	else
+	if (index < 0)
 		return 0;
+	int count = 0;
+	int size;
+	bool first = true;
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
+	{
+		size = it->size();
+		if (index >= count && index < count + size)
+			return (*it)[index - count].get();
+		count += first ? size : size - 1;
+		first = false;
+	}
+	return 0;
 }
 
 int Ruler::GetRulerType()
@@ -3596,11 +3624,15 @@ double Ruler::GetLength()
 	double length = 0.0;
 	Point p1, p2;
 
-	for (unsigned int i=1; i<m_ruler.size(); ++i)
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
 	{
-		p1 = m_ruler[i-1];
-		p2 = m_ruler[i];
-		length += (p2-p1).length();
+		for (size_t i=1; i<it->size(); ++i)
+		{
+			p1 = *(*it)[i-1].get();
+			p2 = *(*it)[i].get();
+			length += (p2-p1).length();
+		}
 	}
 
 	return length;
@@ -3611,13 +3643,17 @@ double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 	double length = 0.0;
 	Point p1, p2;
 
-	for (unsigned int i=1; i<m_ruler.size(); ++i)
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
 	{
-		p1 = m_ruler[i-1];
-		p2 = m_ruler[i];
-		p1 = Point(p1.x()/spcx, p1.y()/spcy, p1.z()/spcz);
-		p2 = Point(p2.x()/spcx, p2.y()/spcy, p2.z()/spcz);
-		length += (p2-p1).length();
+		for (size_t i = 1; i < it->size(); ++i)
+		{
+			p1 = *(*it)[i - 1].get();
+			p2 = *(*it)[i].get();
+			p1 = Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
+			p2 = Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+			length += (p2 - p1).length();
+		}
 	}
 
 	return length;
@@ -3627,12 +3663,15 @@ double Ruler::GetAngle()
 {
 	double angle = 0.0;
 
+	if (m_ruler.empty())
+		return angle;
+
 	if (m_ruler_type == 0 ||
 		m_ruler_type == 3)
 	{
-		if (m_ruler.size() >= 2)
+		if (m_ruler[0].size() >= 2)
 		{
-			Vector v = m_ruler[1] - m_ruler[0];
+			Vector v = *m_ruler[0][1].get() - *m_ruler[0][0].get();
 			v.normalize();
 			angle = atan2(-v.y(), (v.x()>0.0?1.0:-1.0)*sqrt(v.x()*v.x() + v.z()*v.z()));
 			angle = r2d(angle);
@@ -3641,12 +3680,12 @@ double Ruler::GetAngle()
 	}
 	else if (m_ruler_type == 4)
 	{
-		if (m_ruler.size() >=3)
+		if (m_ruler[0].size() >=3)
 		{
 			Vector v1, v2;
-			v1 = m_ruler[0] - m_ruler[1];
+			v1 = *m_ruler[0][0].get() - *m_ruler[0][1].get();
 			v1.normalize();
-			v2 = m_ruler[2] - m_ruler[1];
+			v2 = *m_ruler[0][2].get() - *m_ruler[0][1].get();
 			v2.normalize();
 			angle = acos(Dot(v1, v2));
 			angle = r2d(angle);
@@ -3658,34 +3697,48 @@ double Ruler::GetAngle()
 
 void Ruler::Scale(double spcx, double spcy, double spcz)
 {
+	bool first = true;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
-		m_ruler[i].scale(spcx, spcy, spcz);
+	{
+		for (size_t j = first?0:1; j < m_ruler[i].size(); ++j)
+		{
+			m_ruler[i][j]->scale(spcx, spcy, spcz);
+		}
+		first = false;
+	}
 }
 
 bool Ruler::AddPoint(Point &point)
 {
+	if (m_ruler.empty())
+	{
+		m_ruler.push_back(RulerBranch());
+		m_ruler[0].push_back(std::make_shared<Point>(point));
+		return true;
+	}
+
 	if (m_ruler_type == 2 &&
-		m_ruler.size() == 1)
+		m_ruler.back().size() == 1)
 		return false;
 	else if ((m_ruler_type == 0 ||
 		m_ruler_type == 3) &&
-		m_ruler.size() == 2)
+		m_ruler.back().size() == 2)
 		return false;
 	else if (m_ruler_type == 4 &&
-		m_ruler.size() == 3)
+		m_ruler.back().size() == 3)
 		return false;
 	else
 	{
-		m_ruler.push_back(point);
+		m_ruler.back().push_back(std::make_shared<Point>(point));
 		if (m_ruler_type == 2 &&
-			m_ruler.size() == 1)
+			m_ruler.back().size() == 1)
 			m_finished = true;
 		else if ((m_ruler_type == 0 ||
 			m_ruler_type == 3) &&
-			m_ruler.size() == 2)
+			m_ruler.back().size() == 2)
 			m_finished = true;
 		else if (m_ruler_type == 4 &&
-			m_ruler.size() == 3)
+			m_ruler.back().size() == 3)
 			m_finished = true;
 		return true;
 	}
@@ -3703,8 +3756,10 @@ void Ruler::Clear()
 
 void Ruler::Reverse()
 {
-	if (m_ruler.size() > 1)
-		std::reverse(std::begin(m_ruler), std::end(m_ruler));
+	if (m_ruler.empty())
+		return;
+	if (m_ruler[0].size() > 1)
+		std::reverse(std::begin(m_ruler[0]), std::end(m_ruler[0]));
 }
 
 wxString Ruler::GetDelInfoValues(wxString del)
@@ -3729,8 +3784,9 @@ wxString Ruler::GetPosValues()
 	//x string
 	output += "x\t";
 	for (size_t i = 0; i < m_ruler.size(); ++i)
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
 	{
-		output += std::to_string(m_ruler[i].x());
+		output += std::to_string(m_ruler[i][j]->x());
 		if (i == m_ruler.size() - 1)
 			output += "\n";
 		else
@@ -3739,8 +3795,9 @@ wxString Ruler::GetPosValues()
 	//y string
 	output += "y\t";
 	for (size_t i = 0; i < m_ruler.size(); ++i)
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
 	{
-		output += std::to_string(m_ruler[i].y());
+		output += std::to_string(m_ruler[i][j]->y());
 		if (i == m_ruler.size() - 1)
 			output += "\n";
 		else
@@ -3749,8 +3806,9 @@ wxString Ruler::GetPosValues()
 	//z string
 	output += "z\t";
 	for (size_t i = 0; i < m_ruler.size(); ++i)
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
 	{
-		output += std::to_string(m_ruler[i].z());
+		output += std::to_string(m_ruler[i][j]->z());
 		if (i == m_ruler.size() - 1)
 			output += "\n";
 		else
@@ -3766,10 +3824,12 @@ wxString Ruler::GetPosNames()
 
 	output += "Coords\t";
 
+	int count = 1;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
+	for (size_t j = 0; j < m_ruler[i].size(); ++j)
 	{
-		output += "Point" + std::to_string(i+1);
-		if (i == m_ruler.size() - 1)
+		output += "Point" + std::to_string(count++);
+		if (i == m_ruler[i].size() - 1)
 			output += "\n";
 		else
 			output += "\t";
@@ -3784,11 +3844,13 @@ void Ruler::SaveProfile(wxString &filename)
 
 void Ruler::FinishEllipse(Vector view)
 {
-	if (m_ruler_type != 5 || m_ruler.size() != 2)
+	if (m_ruler_type != 5 ||
+		m_ruler.empty() ||
+		m_ruler.back().size() != 2)
 		return;
 
-	Point p0 = m_ruler[0];
-	Point p1 = m_ruler[1];
+	Point p0 = *m_ruler.back()[0].get();
+	Point p1 = *m_ruler.back()[1].get();
 	Vector p01 = p0 - p1;
 	Vector axis = Cross(p01, view);
 	axis.normalize();
@@ -3814,14 +3876,23 @@ void Ruler::FinishEllipse(Vector view)
 Point Ruler::GetCenter()
 {
 	Point result;
-	if (m_ruler.empty())
+	if (m_ruler.empty() ||
+		m_ruler.back().empty())
 		return result;
+	bool first = true;
+	int count = 0;
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
 	{
-		result += *it;
+		for (size_t i = first?0:1; i<it->size(); ++i)
+		{
+			result += *(*it)[i].get();
+			count++;
+		}
+		first = false;
 	}
-	result /= m_ruler.size();
+	if (count)
+		result /= count;
 	return result;
 }
 
