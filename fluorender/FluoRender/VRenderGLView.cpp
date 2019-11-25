@@ -11758,6 +11758,28 @@ bool VRenderGLView::GetRulerFinished()
 
 void VRenderGLView::AddRulerPoint(int mx, int my)
 {
+	if (m_ruler_type == 1)
+	{
+		Point *p0 = 0;
+		Point *p1 = 0;
+		Point *p2 = 0;
+		Point *p3 = 0;
+		if (GetEditingRulerPoint(mx, my,
+			&p0, &p1, &p2, &p3))
+		{
+			if (m_ruler_list.size())
+			{
+				Ruler* ruler = m_ruler_list[m_ruler_list.size() - 1];
+				if (ruler &&
+					ruler->GetDisp() &&
+					!ruler->GetFinished())
+				{
+					ruler->AddBranch(*p0);
+				}
+			}
+			return;
+		}
+	}
 	if (m_ruler_type == 3)
 	{
 		Point p1, p2;
