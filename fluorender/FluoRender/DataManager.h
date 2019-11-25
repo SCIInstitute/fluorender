@@ -806,6 +806,9 @@ public:
 	double m_accum;
 };
 
+typedef std::shared_ptr<Point> pPoint;
+typedef std::vector<pPoint> RulerBranch;
+
 class Ruler : public TreeLayer
 {
 public:
@@ -830,6 +833,7 @@ public:
 	int GetNumBranch();
 	int GetNumPoint();
 	Point* GetPoint(int index);
+	pPoint FindPoint(Point& point);
 	int GetRulerType();
 	void SetRulerType(int type);
 	bool GetFinished();
@@ -841,6 +845,7 @@ public:
 
 	bool AddPoint(Point &point);
 	void SetTransform(Transform *tform);
+	bool AddBranch(Point &point);
 
 	void Clear();
 	void Reverse();
@@ -943,8 +948,6 @@ private:
 	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 						//4: protractor; 5: ellipse
 	bool m_finished;
-	typedef std::shared_ptr<Point> pPoint;
-	typedef std::vector<pPoint> RulerBranch;
 	vector<RulerBranch> m_ruler;
 	bool m_disp;
 	Transform *m_tform;
