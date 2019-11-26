@@ -833,6 +833,8 @@ public:
 	int GetNumBranch();
 	int GetNumPoint();
 	Point* GetPoint(int index);
+	int GetNumBranchPoint(int nbranch);
+	Point* GetPoint(int nbranch, int index);
 	pPoint FindPoint(Point& point);
 	int GetRulerType();
 	void SetRulerType(int type);
