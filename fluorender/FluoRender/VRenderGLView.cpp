@@ -12097,6 +12097,80 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					DrawRulerArc(ppc, pps[3], pps[0], c, mv, p, verts, num);
 				}
 			}
+			else if (ruler->GetRulerType() == 1 &&
+				ruler->GetNumBranch() > 1)
+			{
+				//multiple branches
+				for (int bi = 0; bi < ruler->GetNumBranch(); ++bi)
+				for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
+				{
+					p2 = *ruler->GetPoint(bi, j);
+					p2 = mv.transform(p2);
+					p2 = p.transform(p2);
+					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
+						(!m_persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
+						continue;
+					px = (p2.x() + 1.0)*nx / 2.0;
+					py = (p2.y() + 1.0)*ny / 2.0;
+					if (bi == 0 && j == 0)
+					{
+						//starting point is diamond
+						float w2 = 1.41421356 * w;
+						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					}
+					else
+					{
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					}
+					num += 8;
+					if (j > 0)
+					{
+						p1 = *ruler->GetPoint(bi, j-1);
+						p1 = mv.transform(p1);
+						p1 = p.transform(p1);
+						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
+							(!m_persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
+							continue;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						px = (p1.x() + 1.0)*nx / 2.0;
+						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
+						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						num += 2;
+					}
+				}
+			}
 			else
 			{
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
@@ -12196,7 +12270,6 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					}
 				}
 			}
-
 		}
 	}
 

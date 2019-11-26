@@ -3599,6 +3599,25 @@ Point *Ruler::GetPoint(int index)
 	return 0;
 }
 
+int Ruler::GetNumBranchPoint(int nb)
+{
+	int branch_num = GetNumBranch();
+	if (nb < 0 || nb >= branch_num)
+		return 0;
+	return m_ruler.at(nb).size();
+}
+
+Point* Ruler::GetPoint(int nb, int index)
+{
+	int branch_num = GetNumBranch();
+	if (nb < 0 || nb >= branch_num)
+		return 0;
+	RulerBranch &branch = m_ruler.at(nb);
+	if (index < 0 || index >= branch.size())
+		return 0;
+	return branch[index].get();
+}
+
 pPoint Ruler::FindPoint(Point& point)
 {
 	bool first = true;
