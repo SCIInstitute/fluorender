@@ -50,6 +50,12 @@ set(HEADER_FILES
     renderviewTopTB.hpp
     renderviewLeftTB.hpp
     renderviewRightTB.hpp
+    renderCanvas.hpp
+    testTriangle.hpp
+    CustomWidgets/fluoSlider.hpp
+    CustomWidgets/fluoSliderStyle.hpp
+    CustomWidgets/fluoSpinbox.hpp
+    CustomWidgets/fluoSpinboxDouble.hpp
   )
   
 set(SOURCES
@@ -62,6 +68,8 @@ set(SOURCES
     renderviewTopTB.cpp
     renderviewLeftTB.cpp
     renderviewRightTB.cpp
+    renderCanvas.cpp
+    testTriangle.cpp
   )
   
 set(UI_FILES

@@ -3,8 +3,8 @@
 
 #include <functional>
 #include <vector>
-#include <iostream>
 #include <utility>
+#include <any>
 
 /*
  * This templated class takes a reference of classes in any variety. It uses
@@ -25,12 +25,13 @@ class Controller
     Controller(Classes&...objects) : objects(objects...){}
     Controller(std::tuple<Classes&...> tup) : objects(tup){}
 
-    void setValues(int value)
+    template<typename T>
+    void setValues(T value)
     {
       std::apply([&](auto&...x) { (x.updateValue(value),...);}, objects);
     }
 
-    void getValues(std::vector<int> &values) const
+    void getValues(std::vector<std::any> &values) const
     {
       std::apply([&](auto&...x) { (values.push_back(x.get()),...);}, objects);
     }
@@ -38,6 +39,11 @@ class Controller
     std::tuple<Classes&...> getObjects() const
     {
       return objects;
+    }
+
+    constexpr std::size_t getSize() const
+    {
+      return std::tuple_size<decltype(objects)>::value;
     }
 
   private:

@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "fluoglwidget.hpp"
+#include "testTriangle.hpp"
 #include "renderviewLeftTB.hpp"
 #include "renderviewRightTB.hpp"
 #include "renderviewBottomTB.hpp"
@@ -40,6 +41,7 @@ class RenderView : public QMainWindow
     QDockWidget* baseDockWidget = new QDockWidget();
 
     int id;
+    const int samples = 16;
 
 };
 

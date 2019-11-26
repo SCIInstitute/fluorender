@@ -14,9 +14,9 @@
  */
 RenderView::RenderView(QWidget *parent, bool hasFeatures) : QMainWindow (parent)
 {
-    Q_INIT_RESOURCE(resources);
+  Q_INIT_RESOURCE(resources);
 
-    auto newBaseWindow = new QMainWindow();
+  auto newBaseWindow = new QMainWindow();
 
 
 
@@ -24,33 +24,32 @@ RenderView::RenderView(QWidget *parent, bool hasFeatures) : QMainWindow (parent)
     //       that inherits an OpenGLWidget/OpenGLWindow.
     //auto newRenderView = std::make_unique<QOpenGLWidget>(new QOpenGLWidget);
 
-    FluoGLWidget* newRenderView;
-    //auto newRenderView = std::make_unique<FluoGLWidget>(new FluoGLWidget);
+  QSurfaceFormat format;
+  format.setSamples(samples);
+  TriangleWindow* newTriangleWindow = new TriangleWindow();
+  newTriangleWindow->setFormat(format);
+  newTriangleWindow->setAnimating(true);
 
-    if(!hasFeatures)
-    {
-        baseDockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-        isMainWindow = true;
-        newRenderView = new FluoGLWidget(true);
-    }
-    else
-    {
-        newRenderView = new FluoGLWidget();
-    }
-
-    newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newRenderView));
-    newBaseWindow->addToolBar(Qt::LeftToolBarArea,leftToolBar);
-    newBaseWindow->addToolBar(Qt::TopToolBarArea,topToolBar);
-    newBaseWindow->addToolBar(Qt::RightToolBarArea, rightToolBar);
-    newBaseWindow->addToolBar(Qt::BottomToolBarArea,bottomToolBar);
-
-    baseDockWidget->setWidget(newBaseWindow);
+  if(!hasFeatures)
+  {
+    baseDockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    isMainWindow = true;
+  }
 
 
-    this->setWindowFlags(Qt::Widget);
-    this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget);
+  newBaseWindow->setCentralWidget(QWidget::createWindowContainer(newTriangleWindow));
+  newBaseWindow->addToolBar(Qt::LeftToolBarArea,leftToolBar);
+  newBaseWindow->addToolBar(Qt::TopToolBarArea,topToolBar);
+  newBaseWindow->addToolBar(Qt::RightToolBarArea, rightToolBar);
+  newBaseWindow->addToolBar(Qt::BottomToolBarArea,bottomToolBar);
 
-    connect(topToolBar, &TopToolbar::sendColor,newRenderView, &FluoGLWidget::receiveColor);
+  baseDockWidget->setWidget(newBaseWindow);
+
+
+  this->setWindowFlags(Qt::Widget);
+  this->addDockWidget(Qt::RightDockWidgetArea, baseDockWidget);
+
+  connect(topToolBar, &TopToolbar::sendColor,newTriangleWindow, &TriangleWindow::updateBackgroundColor);
 
 }
 
@@ -63,6 +62,6 @@ void RenderView::updateID(int i)
 // This is simply for debugging.
 bool RenderView::getMainWindowStatus()
 {
-    return isMainWindow;
+  return isMainWindow;
 }
 
