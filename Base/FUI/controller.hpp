@@ -41,6 +41,11 @@ class Controller
       return objects;
     }
 
+    constexpr std::size_t getSize() const
+    {
+      return std::tuple_size<decltype(objects)>::value;
+    }
+
   private:
     std::tuple<Classes&...> objects;
 };

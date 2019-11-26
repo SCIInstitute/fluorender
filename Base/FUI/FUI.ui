@@ -784,7 +784,7 @@
   <widget class="QDockWidget" name="WorkspaceWidget">
    <property name="minimumSize">
     <size>
-     <width>404</width>
+     <width>424</width>
      <height>300</height>
     </size>
    </property>
