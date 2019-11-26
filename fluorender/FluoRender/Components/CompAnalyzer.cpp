@@ -681,7 +681,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (m_vd && m_vd->GetAllBrickNum() > 1)
 		str = "BRICK_ID\t";
 
-	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tSurfaceN\tSurfaceI\tMean\tSigma\tMin\tMax\tDist";
+	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist";
 
 	if (m_colocal)
 	{
@@ -709,6 +709,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	double sx = m_comp_list.sx;
 	double sy = m_comp_list.sy;
 	double sz = m_comp_list.sz;
+	double size_scale = sx * sy * sz;
 	double scale = m_vd->GetScalarScale();
 
 	m_comp_graph.ClearVisited();
@@ -758,6 +759,8 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << i->second->pos.z()*sz << "\t";
 		stream << i->second->sumi << "\t";
 		stream << i->second->sumd * scale << "\t";
+		stream << size_scale * i->second->sumi << "\t";
+		stream << size_scale * i->second->sumd * scale << "\t";
 		stream << i->second->ext_sumi << "\t";
 		stream << i->second->ext_sumd * scale << "\t";
 		stream << i->second->mean << "\t";
