@@ -15,10 +15,10 @@
 
 #include "fluoglwidget.hpp"
 #include "testTriangle.hpp"
-#include "renderviewLeftTB.hpp"
-#include "renderviewRightTB.hpp"
-#include "renderviewBottomTB.hpp"
-#include "renderviewTopTB.hpp"
+#include <FluoToolbar/renderviewLeftTB.hpp>
+#include <FluoToolbar/renderviewRightTB.hpp>
+#include <FluoToolbar/renderviewBottomTB.hpp>
+#include <FluoToolbar/renderviewTopTB.hpp>
 
 class RenderView : public QMainWindow
 {

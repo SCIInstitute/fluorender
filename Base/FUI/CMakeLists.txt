@@ -45,11 +45,11 @@ set(HEADER_FILES
     fui.hpp
     renderview.hpp
     controller.hpp
-    genToolbarObjects.hpp
-    renderviewBottomTB.hpp
-    renderviewTopTB.hpp
-    renderviewLeftTB.hpp
-    renderviewRightTB.hpp
+    FluoToolbar/genToolbarObjects.hpp
+    FluoToolbar/renderviewBottomTB.hpp
+    FluoToolbar/renderviewTopTB.hpp
+    FluoToolbar/renderviewLeftTB.hpp
+    FluoToolbar/renderviewRightTB.hpp
     renderCanvas.hpp
     testTriangle.hpp
     CustomWidgets/fluoSlider.hpp
@@ -63,11 +63,11 @@ set(SOURCES
 	  fui.cpp
 	  renderview.cpp
 	  main.cpp
-    genToolbarObjects.cpp
-    renderviewBottomTB.cpp
-    renderviewTopTB.cpp
-    renderviewLeftTB.cpp
-    renderviewRightTB.cpp
+    FluoToolbar/genToolbarObjects.cpp
+    FluoToolbar/renderviewBottomTB.cpp
+    FluoToolbar/renderviewTopTB.cpp
+    FluoToolbar/renderviewLeftTB.cpp
+    FluoToolbar/renderviewRightTB.cpp
     renderCanvas.cpp
     testTriangle.cpp
   )

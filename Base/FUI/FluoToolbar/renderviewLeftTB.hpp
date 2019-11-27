@@ -2,7 +2,7 @@
 #define RENDERVIEW_LEFT_TOOLBAR_HPP
 
 #include "genToolbarObjects.hpp"
-#include "CustomWidgets/fluoSlider.hpp"
+#include <CustomWidgets/fluoSlider.hpp>
 #include <vector>
 
 
