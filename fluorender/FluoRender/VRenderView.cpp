@@ -207,6 +207,16 @@ wxPanel(parent, id, pos, size, style),
 	attriblist.Depth(depth_bit);
 	attriblist.SampleBuffers(1);
 	attriblist.Samplers(samples);
+	if (gl_major_ver == 3)
+	{
+		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
+		attriblist.AddAttribute(kCGLOGLPVersion_GL3_Core);
+	}
+	else if (gl_major_ver == 4)
+	{
+		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
+		attriblist.AddAttribute(kCGLOGLPVersion_GL4_Core);
+	}
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
@@ -289,6 +299,16 @@ wxPanel(parent, id, pos, size, style),
 	//check ret. this is an error code when the pixel format is invalid.
 	int ret = m_glview->GetPixelFormat(&pfd);
 #endif
+	
+	//get actual version
+	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
+	glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
+	if (vr_frame && vr_frame->GetSettingDlg())
+	{
+		vr_frame->GetSettingDlg()->SetGLMajorVer(gl_major_ver);
+		vr_frame->GetSettingDlg()->SetGLMinorVer(gl_minor_ver);
+	}
+
 	CreateBar();
 	if (m_glview) {
 		m_glview->SetSBText(L"50 \u03BCm");
