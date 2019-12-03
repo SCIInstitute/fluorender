@@ -3585,15 +3585,21 @@ Point *Ruler::GetPoint(int index)
 	if (index < 0)
 		return 0;
 	int count = 0;
-	int size;
+	int size, seq, inc;
 	bool first = true;
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
 	{
 		size = it->size();
-		if (index >= count && index < count + size)
-			return (*it)[index - count].get();
-		count += first ? size : size - 1;
+		inc = first ? size : size - 1;;
+		if (index >= count && index < count + inc)
+		{
+			seq = index - count;
+			if (!first && size > seq+1)
+				seq++;
+			return (*it)[seq].get();
+		}
+		count += inc;
 		first = false;
 	}
 	return 0;
