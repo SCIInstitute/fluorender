@@ -632,7 +632,7 @@ else()
 endif()
 
 if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
+  set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
   # make sure png is static linked
   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
@@ -658,7 +658,8 @@ if(UNIX OR APPLE OR MINGW)
     ${OpenCL_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${TIFF_LIBRARIES})
+    ${TIFF_LIBRARIES}
+    ${ZLIB_LIBRARIES})
 #${JNI_LIBRARIES})   
 elseif(WIN32)
   target_link_libraries(FluoRender

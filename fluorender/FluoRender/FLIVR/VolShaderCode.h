@@ -666,6 +666,7 @@ namespace FLIVR
 	"	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);\n" \
 	"\n"
 
+#ifdef _WIN32
 #define VOL_RASTER_BLEND_LABEL \
 	"	//VOL_RASTER_BLEND_LABEL\n" \
 	"	uint label = texture(tex3, t.stp).x; //get mask value\n" \
@@ -741,5 +742,81 @@ namespace FLIVR
 	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
 	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
 	"\n"
+#else
+#define VOL_RASTER_BLEND_LABEL \
+	"	//VOL_RASTER_BLEND_LABEL\n" \
+	"	uint label = texture(tex3, t.stp).x; //get mask value\n" \
+	"	vec4 sel = vec4(0.2,\n" \
+	"					0.4,\n" \
+	"					0.4, 1.0);\n" \
+	"	float hue, p2, p3;\n" \
+	"	if (label > uint(0))\n" \
+	"	{\n" \
+	"		uint cv = label % uint(0xfd);\n" \
+	"		uint si = uint(loc5.w);\n" \
+	"		cv = ((cv << si) << 24 >> 24) | ((cv >> (8 - si)) << 24 >> 24);\n" \
+	"		hue = float(cv)/45.0;\n" \
+	"		p2 = 1.0 - hue + floor(hue);\n" \
+	"		p3 = hue - floor(hue);\n" \
+	"		if (hue < 1.0)\n" \
+	"			sel = vec4(1.0, p3, 1.0, 1.0);\n" \
+	"		else if (hue < 2.0)\n" \
+	"			sel = vec4(p2, 1.0, 1.0, 1.0);\n" \
+	"		else if (hue < 3.0)\n" \
+	"			sel = vec4(1.0, 1.0, p3, 1.0);\n" \
+	"		else if (hue < 4.0)\n" \
+	"			sel = vec4(1.0, p2, 1.0, 1.0);\n" \
+	"		else if (hue < 5.0)\n" \
+	"			sel = vec4(p3, 1.0, 1.0, 1.0);\n" \
+	"		else\n" \
+	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
+	"	}\n" \
+	"	//VOL_COLOR_OUTPUT\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
+	"	FragColor = sel*l.w;\n" \
+	"\n"
 
+#define VOL_RASTER_BLEND_LABEL_MASK \
+	"	//VOL_RASTER_BLEND_LABEL_MASK\n" \
+	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
+	"	if (cmask.x <= loc6.w)\n" \
+	"	{\n" \
+	"		FragColor = c*l.w;\n" \
+	"		return;\n" \
+	"	}\n" \
+	"	uint label = texture(tex3, t.stp).x; //get mask value\n" \
+	"	vec4 sel = vec4(0.1,\n" \
+	"					0.2,\n" \
+	"					0.2, 0.5);\n" \
+	"	float hue, p2, p3;\n" \
+	"	if (label > uint(0))\n" \
+	"	{\n" \
+	"		uint cv = label % uint(0xfd);\n" \
+	"		uint si = uint(loc5.w);\n" \
+	"		cv = ((cv << si) << 24 >> 24) | ((cv >> (8 - si)) << 24 >> 24);\n" \
+	"		hue = float(cv)/45.0;\n" \
+	"		p2 = 1.0 - hue + floor(hue);\n" \
+	"		p3 = hue - floor(hue);\n" \
+	"		if (hue < 1.0)\n" \
+	"			sel = vec4(1.0, p3, 0.0, 1.0);\n" \
+	"		else if (hue < 2.0)\n" \
+	"			sel = vec4(p2, 1.0, 0.0, 1.0);\n" \
+	"		else if (hue < 3.0)\n" \
+	"			sel = vec4(0.0, 1.0, p3, 1.0);\n" \
+	"		else if (hue < 4.0)\n" \
+	"			sel = vec4(0.0, p2, 1.0, 1.0);\n" \
+	"		else if (hue < 5.0)\n" \
+	"			sel = vec4(p3, 0.0, 1.0, 1.0);\n" \
+	"		else\n" \
+	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
+	"	}\n" \
+	"	//VOL_COLOR_OUTPUT\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
+	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
+	"\n"
+#endif
 }//namespace FLIVR
