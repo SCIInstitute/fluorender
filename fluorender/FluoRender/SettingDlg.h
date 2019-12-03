@@ -239,7 +239,9 @@ public:
 	int GetSamples() {return m_samples;}
 	//context attrib
 	int GetGLMajorVer() {return m_gl_major_ver;}
+    void SetGLMajorVer(int v) {m_gl_major_ver = v;}
 	int GetGLMinorVer() {return m_gl_minor_ver;}
+    void SetGLMinorVer(int v) {m_gl_minor_ver = v;}
 	int GetGLProfileMask() {return m_gl_profile_mask;}
 	//cl device
 	int GetCLPlatformID() { return m_cl_platform_id; }
