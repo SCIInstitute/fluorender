@@ -12363,7 +12363,7 @@ void VRenderGLView::DrawRulers()
 	}
 }
 
-vector<Ruler*>* VRenderGLView::GetRulerList()
+RulerList* VRenderGLView::GetRulerList()
 {
 	return &m_ruler_list;
 }

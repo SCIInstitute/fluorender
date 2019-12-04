@@ -507,7 +507,7 @@ public:
 	{
 		if (m_glview) m_glview->FinishRuler();
 	}
-	vector<Ruler*>* GetRulerList()
+	RulerList* GetRulerList()
 	{
 		if (m_glview) return m_glview->GetRulerList(); else return 0;
 	}
