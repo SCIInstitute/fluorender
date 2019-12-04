@@ -808,6 +808,9 @@ public:
 
 typedef std::shared_ptr<Point> pPoint;
 typedef std::vector<pPoint> RulerBranch;
+class Ruler;
+typedef std::vector<Ruler*> RulerList;
+typedef std::vector<Ruler*>::iterator RulerListIter;
 
 class Ruler : public TreeLayer
 {
@@ -971,9 +974,6 @@ private:
 	//brush size if brush is used along with the ruler
 	double m_brush_size;
 };
-
-typedef std::vector<Ruler*> RulerList;
-typedef std::vector<Ruler*>::iterator RulerListIter;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class TraceGroup : public TreeLayer

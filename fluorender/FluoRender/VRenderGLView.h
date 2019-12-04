@@ -523,7 +523,7 @@ public:
 		vector<float> &verts, unsigned int& num);
 	unsigned int DrawRulersVerts(vector<float> &verts);
 	void DrawRulers();
-	vector<Ruler*>* GetRulerList();
+	RulerList* GetRulerList();
 	Ruler* GetRuler(unsigned int id);
 	int RulerProfile(int index);
 	int RulerDistance(int index);
@@ -689,7 +689,7 @@ private:
 	vector <TreeLayer*> m_layer_list;
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
-	vector <Ruler*> m_ruler_list;
+	RulerList m_ruler_list;
 	Ruler* m_sel_ruler;
 	Point* m_p0;
 	Point* m_p1;
