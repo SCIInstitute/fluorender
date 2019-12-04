@@ -754,7 +754,7 @@ namespace FLIVR
 	"	{\n" \
 	"		uint cv = label % uint(0xfd);\n" \
 	"		uint si = uint(loc5.w);\n" \
-	"		cv = ((cv << si) << 24 >> 24) | ((cv >> (8 - si)) << 24 >> 24);\n" \
+	"		cv = ((cv << si) << 24 >> 24) | (cv >> (8 - si));\n" \
 	"		hue = float(cv)/45.0;\n" \
 	"		p2 = 1.0 - hue + floor(hue);\n" \
 	"		p3 = hue - floor(hue);\n" \
@@ -795,7 +795,7 @@ namespace FLIVR
 	"	{\n" \
 	"		uint cv = label % uint(0xfd);\n" \
 	"		uint si = uint(loc5.w);\n" \
-	"		cv = ((cv << si) << 24 >> 24) | ((cv >> (8 - si)) << 24 >> 24);\n" \
+	"		cv = ((cv << si) << 24 >> 24) | (cv >> (8 - si));\n" \
 	"		hue = float(cv)/45.0;\n" \
 	"		p2 = 1.0 - hue + floor(hue);\n" \
 	"		p3 = hue - floor(hue);\n" \
