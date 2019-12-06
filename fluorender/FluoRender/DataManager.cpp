@@ -3605,6 +3605,31 @@ Point *Ruler::GetPoint(int index)
 	return 0;
 }
 
+pPoint Ruler::GetPPoint(int index)
+{
+	if (index < 0)
+		return 0;
+	int count = 0;
+	int size, seq, inc;
+	bool first = true;
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
+	{
+		size = it->size();
+		inc = first ? size : size - 1;;
+		if (index >= count && index < count + inc)
+		{
+			seq = index - count;
+			if (!first && size > seq + 1)
+				seq++;
+			return (*it)[seq];
+		}
+		count += inc;
+		first = false;
+	}
+	return 0;
+}
+
 int Ruler::GetNumBranchPoint(int nb)
 {
 	int branch_num = GetNumBranch();
@@ -3788,25 +3813,16 @@ void Ruler::SetTransform(Transform *tform)
 	m_tform = tform;
 }
 
-bool Ruler::AddBranch(Point &point)
+bool Ruler::AddBranch(pPoint point)
 {
-	if (m_ruler.empty())
-	{
-		m_ruler.push_back(RulerBranch());
-		m_ruler.back().push_back(std::make_shared<Point>(point));
-		return true;
-	}
-
-	if (m_ruler_type != 1)
+	if (!point ||
+		m_ruler.empty() ||
+		m_ruler_type != 1)
 		return false;
 
-	//find existing point
-	pPoint p0 = FindPoint(point);
-	if (!p0)
-		return false;
 	//add branch
 	m_ruler.push_back(RulerBranch());
-	m_ruler.back().push_back(p0);
+	m_ruler.back().push_back(point);
 	return true;
 }
 

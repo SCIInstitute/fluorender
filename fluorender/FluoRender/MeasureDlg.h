@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
+#include "RulerHandler.h"
 #include "FLIVR/Color.h"
 #include <Distance/DistCalculator.h>
 
@@ -154,6 +155,7 @@ private:
 	wxWindow* m_frame;
 	//current view
 	VRenderView* m_view;
+	RulerHandler *m_rhdl;
 
 	//list ctrl
 	RulerListCtrl *m_rulerlist;

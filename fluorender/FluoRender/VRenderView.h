@@ -493,20 +493,7 @@ public:
 		if (m_glview) return m_glview->GetKernelExecutor(); else return 0;
 	}
 
-	//set ruler type
-	int GetRulerType()
-	{
-		if (m_glview) return m_glview->GetRulerType();
-		else return 0;
-	}
-	void SetRulerType(int type)
-	{
-		if (m_glview) m_glview->SetRulerType(type);
-	}
-	void FinishRuler()
-	{
-		if (m_glview) m_glview->FinishRuler();
-	}
+	//rulers
 	RulerList* GetRulerList()
 	{
 		if (m_glview) return m_glview->GetRulerList(); else return 0;
@@ -514,6 +501,10 @@ public:
 	Ruler* GetRuler(unsigned int id)
 	{
 		if (m_glview) return m_glview->GetRuler(id); else return 0;
+	}
+	RulerHandler* GetRulerHandler()
+	{
+		if (m_glview) return &m_glview->m_ruler_handler; else return 0;
 	}
 	int RulerProfile(int index)
 	{
