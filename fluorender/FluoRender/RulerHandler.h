@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 
 class VRenderGLView;
+class wxFileConfig;
 
 class RulerHandler
 {
@@ -92,6 +93,9 @@ public:
 
 	void AddRulerPoint(int mx, int my);
 	void AddPaintRulerPoint();
+
+	void Save(wxFileConfig &fconfig, int vi);
+	void Read(wxFileConfig &fconfig);
 
 private:
 	VRenderGLView *m_view;
