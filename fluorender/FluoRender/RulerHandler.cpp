@@ -27,9 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerHandler.h"
+#include "VRenderGLView.h"
+#include <glm/gtc/type_ptr.hpp>
 
 RulerHandler::RulerHandler() :
-	m_ruler(0)
+	m_view(0),
+	m_ruler(0),
+	m_ruler_list(0),
+	m_point(0),
+	m_pindex(-1)
 {
 
 }
@@ -39,20 +45,34 @@ RulerHandler::~RulerHandler()
 
 }
 
-bool RulerHandler::GetTransform()
-{
-	return true;
-}
-
 bool RulerHandler::FindEditingRuler(double mx, double my)
 {
-	if (!GetTransform())
+	if (!m_view || !m_ruler_list)
 		return false;
 
+	//get view size
+	wxSize view_size = m_view->GetGLSize();
+	int nx = view_size.x;
+	int ny = view_size.y;
+	if (nx <= 0 || ny <= 0)
+		return false;
+
+	//get aspect, norm xy
 	double x, y;
-	x = mx * 2.0 / double(m_nx) - 1.0;
-	y = 1.0 - my * 2.0 / double(m_ny);
-	double aspect = (double)m_nx / (double)m_ny;
+	x = mx * 2.0 / double(nx) - 1.0;
+	y = 1.0 - my * 2.0 / double(ny);
+	double aspect = (double)nx / (double)ny;
+
+	//get persp
+	bool persp = m_view->GetPersp();
+
+	//get transform
+	glm::mat4 mv_temp = m_view->GetObjectMat();
+	glm::mat4 prj_temp = m_view->GetProjection();
+	Transform mv;
+	Transform prj;
+	mv.set(glm::value_ptr(mv_temp));
+	prj.set(glm::value_ptr(prj_temp));
 
 	Point *point = 0;
 	int i, j;
@@ -68,10 +88,10 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 			point = ruler->GetPoint(j);
 			if (!point) continue;
 			ptemp = *point;
-			ptemp = m_mdv.transform(ptemp);
-			ptemp = m_prj.transform(ptemp);
-			if ((m_persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
-				(!m_persp && (ptemp.z() >= 0.0 || ptemp.z() <= -1.0)))
+			ptemp = mv.transform(ptemp);
+			ptemp = prj.transform(ptemp);
+			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
+				(!persp && (ptemp.z() >= 0.0 || ptemp.z() <= -1.0)))
 				continue;
 			if (x<ptemp.x() + 0.01 / aspect &&
 				x>ptemp.x() - 0.01 / aspect &&

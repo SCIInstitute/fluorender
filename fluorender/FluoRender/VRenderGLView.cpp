@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <wx/stdpaths.h>
@@ -141,10 +140,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_md_pop_dirty(true),
 	//ruler type
 	m_ruler_type(0),
-	m_p0(0),
-	m_p1(0),
-	m_p2(0),
-	m_p3(0),
 	//traces
 	m_trace_group(0),
 	//multivolume
@@ -368,6 +363,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		m_benchmark = true;
 	else
 		m_benchmark = false;
+
+	m_ruler_handler.SetView(this);
+	m_ruler_handler.SetRulerList(&m_ruler_list);
 }
 
 #ifdef _WIN32
@@ -1246,6 +1244,8 @@ void VRenderGLView::DrawVolumes(int peel)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
+	Point *p0 = m_ruler_handler.GetPoint();
+
 	//draw
 	if (m_load_update ||
 		(!m_retain_finalbuffer &&
@@ -1259,7 +1259,7 @@ void VRenderGLView::DrawVolumes(int peel)
 			m_int_mode == 5 ||
 			((m_int_mode == 6 ||
 			m_int_mode == 9) &&
-				!m_p0) ||
+				!p0) ||
 			m_int_mode == 8 ||
 			m_force_clear)))
 	{
@@ -11631,102 +11631,6 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 	return (mp - mp1).length();
 }
 
-bool VRenderGLView::GetEditingRulerPoint(double mx, double my,
-	Point** p0, Point** p1, Point** p2, Point** p3)
-{
-	Point *point = 0;
-
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
-
-	if (nx <= 0 || ny <= 0)
-		return false;
-
-	double x, y;
-	x = mx * 2.0 / double(nx) - 1.0;
-	y = 1.0 - my * 2.0 / double(ny);
-	double aspect = (double)nx / (double)ny;
-
-	//projection
-	HandleProjection(nx, ny);
-	//Transformation
-	HandleCamera();
-	glm::mat4 mv_temp;
-	//translate object
-	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty + 180.0)), glm::vec3(0.0, 1.0, 0.0));
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz + 180.0)), glm::vec3(0.0, 0.0, 1.0));
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-	//center object
-	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-
-	Transform mv;
-	Transform p;
-	mv.set(glm::value_ptr(mv_temp));
-	p.set(glm::value_ptr(m_proj_mat));
-
-	int i, j;
-	Point ptemp;
-	for (i = 0; i<(int)m_ruler_list.size(); i++)
-	{
-		Ruler* ruler = m_ruler_list[i];
-		if (!ruler) continue;
-		if (!ruler->GetDisp()) continue;
-		bool get_p2 = ruler->GetRulerType() == 5
-			&& ruler->GetNumPoint() == 4;
-
-		for (j = 0; j<ruler->GetNumPoint(); j++)
-		{
-			point = ruler->GetPoint(j);
-			if (!point) continue;
-			ptemp = *point;
-			ptemp = mv.transform(ptemp);
-			ptemp = p.transform(ptemp);
-			if ((m_persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
-				(!m_persp && (ptemp.z() >= 0.0 || ptemp.z() <= -1.0)))
-				continue;
-			if (x<ptemp.x() + 0.01 / aspect &&
-				x>ptemp.x() - 0.01 / aspect &&
-				y<ptemp.y() + 0.01 &&
-				y>ptemp.y() - 0.01)
-			{
-				*p0 = point;
-				if (get_p2)
-				{
-					switch (j)
-					{
-					case 0:
-						*p1 = ruler->GetPoint(1);
-						*p2 = ruler->GetPoint(2);
-						*p3 = ruler->GetPoint(3);
-						break;
-					case 1:
-						*p1 = ruler->GetPoint(0);
-						*p2 = ruler->GetPoint(3);
-						*p3 = ruler->GetPoint(2);
-						break;
-					case 2:
-						*p1 = ruler->GetPoint(3);
-						*p2 = ruler->GetPoint(1);
-						*p3 = ruler->GetPoint(0);
-						break;
-					case 3:
-						*p1 = ruler->GetPoint(2);
-						*p2 = ruler->GetPoint(0);
-						*p3 = ruler->GetPoint(1);
-						break;
-					}
-				}
-				m_sel_ruler = ruler;
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
 int VRenderGLView::GetRulerType()
 {
 	return m_ruler_type;
@@ -11764,8 +11668,7 @@ void VRenderGLView::AddRulerPoint(int mx, int my)
 		Point *p1 = 0;
 		Point *p2 = 0;
 		Point *p3 = 0;
-		if (GetEditingRulerPoint(mx, my,
-			&p0, &p1, &p2, &p3))
+		if (m_ruler_handler.FindEditingRuler(mx, my))
 		{
 			if (m_ruler_list.size())
 			{
@@ -13069,26 +12972,21 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 6 ||
 			m_int_mode == 9)
 		{
-			Point *p0 = 0;
-			Point *p1 = 0;
-			Point *p2 = 0;
-			Point *p3 = 0;
-			if (GetEditingRulerPoint(event.GetX(), event.GetY(),
-				&p0, &p1, &p2, &p3))
-			{
-				m_p0 = p0;
-				m_p1 = p1;
-				m_p2 = p2;
-				m_p3 = p3;
-			}
+			m_ruler_handler.FindEditingRuler(
+				event.GetX(), event.GetY());
+			//Point *p0, *p1, *p2, *p3;
+			//GetEditingRulerPoint(event.GetX(), event.GetY(),
+			//	&p0, &p1, &p2, &p3);
 		}
+
+		Point *p0 = m_ruler_handler.GetPoint();
 
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
 				event.AltDown()) ||
 				((m_int_mode == 6 ||
 				m_int_mode == 9) &&
-					m_p0 == 0))
+					p0 == 0))
 		{
 			old_mouse_X = event.GetX();
 			old_mouse_Y = event.GetY();
@@ -13180,7 +13078,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 6 || m_int_mode == 9)
 		{
-			m_p0 = 0;
+			m_ruler_handler.SetPoint(0);
 		}
 		else if (m_int_mode == 7)
 		{
@@ -13240,13 +13138,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				double(old_mouse_Y - event.GetY())*
 				double(old_mouse_Y - event.GetY()))));
 
+		Point *p0 = m_ruler_handler.GetPoint();
 		bool hold_old = false;
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
 				event.AltDown()) ||
 				((m_int_mode == 6 ||
 				m_int_mode == 9) &&
-					m_p0 == 0))
+					p0 == 0))
 		{
 			//disable picking
 			m_pick = false;
@@ -13375,8 +13274,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 6 || m_int_mode == 9)
 		{
+			Point* p0 = m_ruler_handler.GetPoint();
 			if (event.LeftIsDown() &&
-				m_p0)
+				p0)
 			{
 				Point point, ip;
 				bool failed = false;
@@ -13389,7 +13289,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					if (t <= 0.0)
 						t = GetPointPlane(point,
 							event.GetX(), event.GetY(),
-							m_p0);
+							p0);
 					if (t <= 0.0)
 						failed = true;
 				}
@@ -13397,7 +13297,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				{
 					double t = GetPointPlane(point,
 						event.GetX(), event.GetY(),
-						m_p0);
+						p0);
 					if (t <= 0.0)
 						failed = true;
 				}
@@ -13405,44 +13305,49 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				{
 					if (m_int_mode == 6)
 					{
-						m_p0->x(point.x());
-						m_p0->y(point.y());
-						m_p0->z(point.z());
-						if (m_p1)
+						p0->x(point.x());
+						p0->y(point.y());
+						p0->z(point.z());
+
+						Point *p1 = m_ruler_handler.GetEllipsePoint(1);
+						Point *p2 = m_ruler_handler.GetEllipsePoint(2);
+						Point *p3 = m_ruler_handler.GetEllipsePoint(3);
+						if (p1 && p2 && p3)
 						{
 							if (event.AltDown())
 							{
-								Point c = Point((*m_p2 + *m_p3) / 2.0);
-								Vector v0 = *m_p0 - c;
-								Vector v2 = *m_p2 - c;
+								Point c = Point((*p2 + *p3) / 2.0);
+								Vector v0 = *p0 - c;
+								Vector v2 = *p2 - c;
 								Vector axis = Cross(v2, v0);
 								axis = Cross(axis, v2);
 								axis.normalize();
-								*m_p0 = Point(c + axis * v0.length());
-								*m_p1 = c + (c - *m_p0);
+								*p0 = Point(c + axis * v0.length());
+								*p1 = c + (c - *p0);
 							}
 							else
 							{
-								Point c = Point((*m_p0 + *m_p1 + *m_p2 + *m_p3) / 4.0);
-								Vector v0 = *m_p0 - c;
-								Vector v2 = *m_p2 - c;
+								Point c = Point((*p0 + *p1 + *p2 + *p3) / 4.0);
+								Vector v0 = *p0 - c;
+								Vector v2 = *p2 - c;
 								Vector axis = Cross(v2, v0);
 								Vector a2 = Cross(v0, axis);
 								a2.normalize();
-								*m_p2 = Point(c + a2 * v2.length());
-								*m_p3 = Point(c - a2 * v2.length());
-								*m_p1 = c + (c - *m_p0);
+								*p2 = Point(c + a2 * v2.length());
+								*p3 = Point(c - a2 * v2.length());
+								*p1 = c + (c - *p0);
 							}
 						}
 					}
 					else
 					{
-						if (m_sel_ruler)
+						Ruler* sel_ruler = m_ruler_handler.GetRuler();
+						if (sel_ruler)
 						{
-							Vector displace = point - *m_p0;
-							for (int i = 0; i < m_sel_ruler->GetNumPoint(); ++i)
+							Vector displace = point - *p0;
+							for (int i = 0; i < sel_ruler->GetNumPoint(); ++i)
 							{
-								Point* p = m_sel_ruler->GetPoint(i);
+								Point* p = sel_ruler->GetPoint(i);
 								p->x(p->x() + displace.x());
 								p->y(p->y() + displace.y());
 								p->z(p->z() + displace.z());
