@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeSelector.h"
 #include "KernelExecutor.h"
 #include "Calculate/VolumeCalculator.h"
-
+#include "RulerHandler.h"
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/KernelProgram.h"
@@ -59,6 +59,7 @@ DEALINGS IN THE SOFTWARE.
 #include "NV/Timer.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _WIN32
 //#include <Windows.h>
@@ -584,6 +585,31 @@ public:
 		m_cell_list = list;
 	}
 
+	//get view info for external ops
+	//get size, considering enlargement
+	wxSize GetGLSize();
+	glm::mat4 GetModelView()
+	{
+		return m_mv_mat;
+	}
+	glm::mat4 GetProjection()
+	{
+		return m_proj_mat;
+	}
+	glm::mat4 GetObjectMat()
+	{
+		glm::mat4 obj_mat = m_mv_mat;
+		//translate object
+		obj_mat = glm::translate(obj_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + 180.0)), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + 180.0)), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		obj_mat = glm::translate(obj_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		return obj_mat;
+	}
+
 public:
 	//set gl context
 	bool m_set_gl;
@@ -690,11 +716,6 @@ private:
 	//ruler list
 	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	RulerList m_ruler_list;
-	Ruler* m_sel_ruler;
-	Point* m_p0;
-	Point* m_p1;
-	Point* m_p2;
-	Point* m_p3;
 	//grow point
 	Point m_grow_point;
 	//traces
@@ -998,6 +1019,8 @@ private:
 	XboxController* m_controller;
 #endif
 
+	//handle rulers
+	RulerHandler m_ruler_handler;
 
 private:
 #ifdef _WIN32
@@ -1131,7 +1154,6 @@ private:
 	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
 	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd);
 	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
-	bool GetEditingRulerPoint(double mx, double my, Point** p0, Point** p1, Point** p2, Point** p3);
 
 	//brush sets
 	void ChangeBrushSetsIndex();
@@ -1149,9 +1171,6 @@ private:
 
 	//draw quad
 	void DrawViewQuad();
-
-	//get size, considering enlargement
-	wxSize GetGLSize();
 
 	void switchLevel(VolumeData *vd);
 
