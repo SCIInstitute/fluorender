@@ -3254,35 +3254,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//rulers
 			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-			vector<Ruler*>* ruler_list = vrv->GetRulerList();
-			if (ruler_list && ruler_list->size())
-			{
-				fconfig.Write("num", static_cast<unsigned int>(ruler_list->size()));
-				for (size_t ri=0; ri<ruler_list->size(); ++ri)
-				{
-					Ruler* ruler = (*ruler_list)[ri];
-					if (!ruler) continue;
-					fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, (int)ri));
-					fconfig.Write("name", ruler->GetName());
-					fconfig.Write("type", ruler->GetRulerType());
-					fconfig.Write("display", ruler->GetDisp());
-					fconfig.Write("transient", ruler->GetTimeDep());
-					fconfig.Write("time", ruler->GetTime());
-					fconfig.Write("info_names", ruler->GetInfoNames());
-					fconfig.Write("info_values", ruler->GetInfoValues());
-					fconfig.Write("use_color", ruler->GetUseColor());
-					fconfig.Write("color", wxString::Format("%f %f %f",
-						ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
-					fconfig.Write("num", ruler->GetNumPoint());
-					for (size_t rpi=0; rpi<ruler->GetNumPoint(); ++rpi)
-					{
-						Point* rp = ruler->GetPoint(rpi);
-						if (!rp) continue;
-						fconfig.SetPath(wxString::Format("/views/%d/rulers/%d/points/%d", i, (int)ri, (int)rpi));
-						fconfig.Write("point", wxString::Format("%f %f %f", rp->x(), rp->y(), rp->z()));
-					}
-				}
-			}
+			vrv->GetRulerHandler()->Save(fconfig, i);
 		}
 	}
 	//clipping planes

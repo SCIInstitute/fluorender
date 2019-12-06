@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RulerHandler.h"
 #include "VRenderGLView.h"
 #include <glm/gtc/type_ptr.hpp>
+#include <wx/fileconf.h>
 
 RulerHandler::RulerHandler() :
 	m_view(0),
@@ -283,3 +284,46 @@ void RulerHandler::AddPaintRulerPoint()
 	}
 }
 
+void RulerHandler::Save(wxFileConfig &fconfig, int vi)
+{
+	if (m_ruler_list && m_ruler_list->size())
+	{
+		fconfig.Write("num", static_cast<unsigned int>(m_ruler_list->size()));
+		for (size_t ri = 0; ri < m_ruler_list->size(); ++ri)
+		{
+			Ruler* ruler = (*m_ruler_list)[ri];
+			if (!ruler) continue;
+			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
+			fconfig.Write("name", ruler->GetName());
+			fconfig.Write("type", ruler->GetRulerType());
+			fconfig.Write("display", ruler->GetDisp());
+			fconfig.Write("transient", ruler->GetTimeDep());
+			fconfig.Write("time", ruler->GetTime());
+			fconfig.Write("info_names", ruler->GetInfoNames());
+			fconfig.Write("info_values", ruler->GetInfoValues());
+			fconfig.Write("use_color", ruler->GetUseColor());
+			fconfig.Write("color", wxString::Format("%f %f %f",
+				ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
+			fconfig.Write("num", ruler->GetNumBranch());
+			for (size_t rbi = 0; rbi < ruler->GetNumBranch(); ++rbi)
+			{
+				fconfig.SetPath(wxString::Format(
+					"/views/%d/rulers/%d/branches/%d", vi, (int)ri, (int)rbi));
+				fconfig.Write("num", ruler->GetNumBranchPoint(rbi));
+
+				for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
+				{
+					Point* rp = ruler->GetPoint(rbi, rpi);
+					if (!rp) continue;
+					fconfig.Write(wxString::Format("point%d", (int)rpi),
+						wxString::Format("%f %f %f", rp->x(), rp->y(), rp->z()));
+				}
+			}
+		}
+	}
+}
+
+void RulerHandler::Read(wxFileConfig &fconfig)
+{
+
+}
