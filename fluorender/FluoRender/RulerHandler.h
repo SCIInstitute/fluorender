@@ -64,26 +64,44 @@ public:
 		return m_ruler_list;
 	}
 
+	void SetType(int type)
+	{
+		m_type = type;
+	}
+
+	int GetType()
+	{
+		return m_type;
+	}
+
 	bool FindEditingRuler(double mx, double my);
 
-	void SetPoint(Point *point)
+	void SetPoint(pPoint point)
 	{
 		m_point = point;
 	}
 	Point* GetPoint()
 	{
-		return m_point;
+		return m_point.get();
 	}
 
 	Point* GetEllipsePoint(int index);
+
+	void FinishRuler();
+	bool GetRulerFinished();
+
+	void AddRulerPoint(int mx, int my);
+	void AddPaintRulerPoint();
 
 private:
 	VRenderGLView *m_view;
 	Ruler *m_ruler;
 	RulerList *m_ruler_list;
+	int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
+				//4: protractor; 5: ellipse
 
 	//get point
-	Point* m_point;
+	pPoint m_point;
 	int m_pindex;//index of point in ruler
 
 private:

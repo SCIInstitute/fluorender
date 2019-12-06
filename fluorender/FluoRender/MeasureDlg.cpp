@@ -720,6 +720,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	0, "MeasureDlg"),
 	m_frame(parent),
 	m_view(0),
+	m_rhdl(0),
 	m_edited(false)
 {
 	// temporarily block events during constructor:
@@ -890,6 +891,12 @@ MeasureDlg::~MeasureDlg()
 void MeasureDlg::GetSettings(VRenderView* vrv)
 {
 	m_view = vrv;
+	if (!m_view)
+		return;
+	m_rhdl = m_view->GetRulerHandler();
+	if (!m_rhdl)
+		return;
+
 	UpdateList();
 	if (m_view && m_view->m_glview)
 	{
@@ -905,7 +912,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 		int int_mode = m_view->m_glview->GetIntMode();
 		if (int_mode == 5 || int_mode == 7)
 		{
-			int ruler_type = m_view->GetRulerType();
+			int ruler_type = m_rhdl->GetType();
 			if (ruler_type == 0)
 				m_toolbar1->ToggleTool(ID_RulerBtn, true);
 			else if (ruler_type == 1)
@@ -975,7 +982,7 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
 	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
@@ -988,7 +995,7 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_LocatorBtn))
 	{
 		m_view->SetIntMode(5);
-		m_view->SetRulerType(2);
+		m_rhdl->SetType(2);
 	}
 	else
 	{
@@ -1001,7 +1008,7 @@ void MeasureDlg::OnNewProbe(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
@@ -1014,7 +1021,7 @@ void MeasureDlg::OnNewProbe(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_ProbeBtn))
 	{
 		m_view->SetIntMode(5);
-		m_view->SetRulerType(3);
+		m_rhdl->SetType(3);
 	}
 	else
 	{
@@ -1027,7 +1034,7 @@ void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
@@ -1040,7 +1047,7 @@ void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_ProtractorBtn))
 	{
 		m_view->SetIntMode(5);
-		m_view->SetRulerType(4);
+		m_rhdl->SetType(4);
 	}
 	else
 	{
@@ -1053,7 +1060,7 @@ void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
@@ -1066,7 +1073,7 @@ void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_RulerBtn))
 	{
 		m_view->SetIntMode(5);
-		m_view->SetRulerType(0);
+		m_rhdl->SetType(0);
 	}
 	else
 	{
@@ -1089,12 +1096,12 @@ void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
 	{
 		m_view->SetIntMode(5);
-		m_view->SetRulerType(1);
+		m_rhdl->SetType(1);
 	}
 	else
 	{
 		m_view->SetIntMode(1);
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 	}
 }
 
@@ -1103,7 +1110,7 @@ void MeasureDlg::OnEllipse(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
@@ -1116,7 +1123,7 @@ void MeasureDlg::OnEllipse(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_EllipseBtn))
 	{
 		m_view->SetIntMode(5);
-		m_view->SetRulerType(5);
+		m_rhdl->SetType(5);
 	}
 	else
 	{
@@ -1169,7 +1176,7 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
@@ -1192,7 +1199,7 @@ void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 	if (!m_view) return;
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_view->FinishRuler();
+		m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);

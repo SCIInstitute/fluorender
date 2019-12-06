@@ -74,7 +74,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	mv.set(glm::value_ptr(mv_temp));
 	prj.set(glm::value_ptr(prj_temp));
 
-	Point *point = 0;
+	pPoint point;
 	int i, j;
 	Point ptemp;
 	for (i = 0; i < (int)m_ruler_list->size(); i++)
@@ -85,7 +85,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 
 		for (j = 0; j < ruler->GetNumPoint(); j++)
 		{
-			point = ruler->GetPoint(j);
+			point = ruler->GetPPoint(j);
 			if (!point) continue;
 			ptemp = *point;
 			ptemp = mv.transform(ptemp);
@@ -139,3 +139,147 @@ Point* RulerHandler::GetEllipsePoint(int index)
 
 	return 0;
 }
+
+void RulerHandler::FinishRuler()
+{
+	if (!m_ruler)
+		return;
+	if (m_ruler->GetRulerType() == 1)
+		m_ruler->SetFinished();
+}
+
+bool RulerHandler::GetRulerFinished()
+{
+	if (m_ruler)
+		return m_ruler->GetFinished();
+	else
+		return true;
+}
+
+void RulerHandler::AddRulerPoint(int mx, int my)
+{
+	if (!m_view)
+		return;
+
+	if (m_type == 1)
+	{
+		if (FindEditingRuler(mx, my))
+		{
+			if (m_ruler &&
+				m_ruler->GetDisp() &&
+				!m_ruler->GetFinished())
+			{
+				m_ruler->AddBranch(m_point);
+			}
+			return;
+		}
+	}
+	if (m_type == 3)
+	{
+		Point p1, p2;
+		Ruler* ruler = new Ruler();
+		ruler->SetRulerType(m_type);
+		m_view->GetPointVolumeBox2(p1, p2, mx, my);
+		ruler->AddPoint(p1);
+		ruler->AddPoint(p2);
+		ruler->SetTimeDep(m_view->m_ruler_time_dep);
+		ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler_list->push_back(ruler);
+		//store brush size in ruler
+		if (m_view->GetBrushSizeData())
+			ruler->SetBrushSize(m_view->GetBrushSize1());
+		else
+			ruler->SetBrushSize(m_view->GetBrushSize1()
+				/ m_view->Get121ScaleFactor());
+	}
+	else
+	{
+		Point p, ip;
+		if (m_view->m_point_volume_mode)
+		{
+			double t = m_view->GetPointVolume(p, ip, mx, my, m_view->m_cur_vol,
+				m_view->m_point_volume_mode, m_view->m_ruler_use_transf);
+			if (t <= 0.0)
+			{
+				t = m_view->GetPointPlane(p, mx, my);
+				if (t <= 0.0)
+					return;
+			}
+		}
+		else
+		{
+			double t = m_view->GetPointPlane(p, mx, my);
+			if (t <= 0.0)
+				return;
+		}
+
+		bool new_ruler = true;
+		if (m_ruler &&
+			m_ruler->GetDisp() &&
+			!m_ruler->GetFinished())
+		{
+			m_ruler->AddPoint(p);
+			new_ruler = false;
+			if (m_type == 5)
+			{
+				//finish
+				glm::mat4 mv_temp = m_view->GetDrawMat();
+				glm::vec4 axis(0, 0, -1, 0);
+				axis = glm::transpose(mv_temp) * axis;
+				m_ruler->FinishEllipse(Vector(axis[0], axis[1], axis[2]));
+			}
+		}
+		if (new_ruler)
+		{
+			m_ruler = new Ruler();
+			m_ruler->SetRulerType(m_type);
+			m_ruler->AddPoint(p);
+			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
+			m_ruler->SetTime(m_view->m_tseq_cur_num);
+			m_ruler_list->push_back(m_ruler);
+		}
+	}
+}
+
+void RulerHandler::AddPaintRulerPoint()
+{
+	if (!m_view)
+		return;
+
+	VolumeSelector* selector = m_view->GetVolumeSelector();
+	if (selector->ProcessSel(0.01))
+	{
+		wxString str;
+		Point center;
+		double size;
+		selector->GetCenter(center);
+		selector->GetSize(size);
+
+		bool new_ruler = true;
+		if (m_ruler &&
+			m_ruler->GetDisp() &&
+			!m_ruler->GetFinished())
+		{
+			m_ruler->AddPoint(center);
+			str = wxString::Format("\tv%d", m_ruler->GetNumPoint() - 1);
+			m_ruler->AddInfoNames(str);
+			str = wxString::Format("\t%.0f", size);
+			m_ruler->AddInfoValues(str);
+			new_ruler = false;
+		}
+		if (new_ruler)
+		{
+			m_ruler = new Ruler();
+			m_ruler->SetRulerType(m_type);
+			m_ruler->AddPoint(center);
+			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
+			m_ruler->SetTime(m_view->m_tseq_cur_num);
+			str = "v0";
+			m_ruler->AddInfoNames(str);
+			str = wxString::Format("%.0f", size);
+			m_ruler->AddInfoValues(str);
+			m_ruler_list->push_back(m_ruler);
+		}
+	}
+}
+

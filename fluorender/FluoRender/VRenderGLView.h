@@ -513,12 +513,6 @@ public:
 	void RefreshGL(int debug_code, bool erase = false, bool start_loop = true);
 
 	//rulers
-	int GetRulerType();
-	void SetRulerType(int type);
-	void FinishRuler();
-	bool GetRulerFinished();
-	void AddRulerPoint(int mx, int my);
-	void AddPaintRulerPoint();
 	void DrawRulerArc(Point & ppc, Point& pp0, Point& pp1,
 		Color &c, Transform& mv, Transform& p,
 		vector<float> &verts, unsigned int& num);
@@ -585,6 +579,13 @@ public:
 		m_cell_list = list;
 	}
 
+	//get mouse point in 3D
+	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
+	double GetPointVolume(Point &mp, Point &ip, double mx, double my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
+	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
+	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my);
+	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
+
 	//get view info for external ops
 	//get size, considering enlargement
 	wxSize GetGLSize();
@@ -608,6 +609,19 @@ public:
 		//center object
 		obj_mat = glm::translate(obj_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 		return obj_mat;
+	}
+	glm::mat4 GetDrawMat()
+	{
+		glm::mat4 drw_mat = m_mv_mat;
+		//translate object
+		drw_mat = glm::translate(drw_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + 180.0)), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + 180.0)), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		return drw_mat;
 	}
 
 public:
@@ -714,7 +728,6 @@ private:
 	//real data list
 	vector <TreeLayer*> m_layer_list;
 	//ruler list
-	int m_ruler_type;//0: 2point ruler; 1:multi-point ruler; 2:locator
 	RulerList m_ruler_list;
 	//grow point
 	Point m_grow_point;
@@ -1147,13 +1160,6 @@ private:
 	void PickMesh();
 	void PickVolume();
 	void SetCompSelection(VolumeData* vd, Point& p, int mode);//node: 0-exclusive; 1-add or remove
-
-	//get mouse point in 3D
-	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
-	double GetPointVolume(Point &mp, Point &ip, double mx, double my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
-	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
-	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd);
-	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
 
 	//brush sets
 	void ChangeBrushSetsIndex();

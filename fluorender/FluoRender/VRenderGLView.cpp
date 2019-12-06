@@ -138,8 +138,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
-	//ruler type
-	m_ruler_type(0),
 	//traces
 	m_trace_group(0),
 	//multivolume
@@ -4219,18 +4217,20 @@ void VRenderGLView::SetBrush(int mode)
 	SetFocus();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
+	int ruler_type = m_ruler_handler.GetType();
+
 	if (m_int_mode == 5 ||
 		m_int_mode == 7)
 	{
 		m_int_mode = 7;
-		if (m_ruler_type == 3)
+		if (ruler_type == 3)
 			m_selector.SetMode(8);
 		else
 			m_selector.SetMode(1);
 	}
 	else if (m_int_mode == 8)
 	{
-		if (m_ruler_type == 3)
+		if (ruler_type == 3)
 			m_selector.SetMode(8);
 		else
 			m_selector.SetMode(1);
@@ -11463,15 +11463,15 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 	return mint;
 }
 
-double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my, VolumeData* vd)
+double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my)
 {
-	if (!vd)
+	if (!m_cur_vol)
 		return -1.0;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
-	vector<Plane*> *planes = vd->GetVR()->get_planes();
+	vector<Plane*> *planes = m_cur_vol->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
@@ -11488,7 +11488,7 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
 	//center object
 	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-	Transform *tform = vd->GetTexture()->transform();
+	Transform *tform = m_cur_vol->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 	glm::mat4 mv_mat2 = glm::mat4(
@@ -11629,186 +11629,6 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 	mp = mv.transform(mp);
 
 	return (mp - mp1).length();
-}
-
-int VRenderGLView::GetRulerType()
-{
-	return m_ruler_type;
-}
-
-void VRenderGLView::SetRulerType(int type)
-{
-	m_ruler_type = type;
-}
-
-void VRenderGLView::FinishRuler()
-{
-	size_t size = m_ruler_list.size();
-	if (!size) return;
-	if (m_ruler_list[size - 1] &&
-		m_ruler_list[size - 1]->GetRulerType() == 1)
-		m_ruler_list[size - 1]->SetFinished();
-}
-
-bool VRenderGLView::GetRulerFinished()
-{
-	size_t size = m_ruler_list.size();
-	if (!size) return true;
-	if (m_ruler_list[size - 1])
-		return m_ruler_list[size - 1]->GetFinished();
-	else
-		return true;
-}
-
-void VRenderGLView::AddRulerPoint(int mx, int my)
-{
-	if (m_ruler_type == 1)
-	{
-		Point *p0 = 0;
-		Point *p1 = 0;
-		Point *p2 = 0;
-		Point *p3 = 0;
-		if (m_ruler_handler.FindEditingRuler(mx, my))
-		{
-			if (m_ruler_list.size())
-			{
-				Ruler* ruler = m_ruler_list[m_ruler_list.size() - 1];
-				if (ruler &&
-					ruler->GetDisp() &&
-					!ruler->GetFinished())
-				{
-					ruler->AddBranch(*p0);
-				}
-			}
-			return;
-		}
-	}
-	if (m_ruler_type == 3)
-	{
-		Point p1, p2;
-		Ruler* ruler = new Ruler();
-		ruler->SetRulerType(m_ruler_type);
-		GetPointVolumeBox2(p1, p2, mx, my, m_cur_vol);
-		ruler->AddPoint(p1);
-		ruler->AddPoint(p2);
-		ruler->SetTimeDep(m_ruler_time_dep);
-		ruler->SetTime(m_tseq_cur_num);
-		m_ruler_list.push_back(ruler);
-		//store brush size in ruler
-		if (m_brush_size_data)
-			ruler->SetBrushSize(m_brush_radius1);
-		else
-			ruler->SetBrushSize(m_brush_radius1 / Get121ScaleFactor());
-	}
-	else
-	{
-		Point p, ip;
-		if (m_point_volume_mode)
-		{
-			double t = GetPointVolume(p, ip, mx, my, m_cur_vol,
-				m_point_volume_mode, m_ruler_use_transf);
-			if (t <= 0.0)
-			{
-				t = GetPointPlane(p, mx, my);
-				if (t <= 0.0)
-					return;
-			}
-		}
-		else
-		{
-			double t = GetPointPlane(p, mx, my);
-			if (t <= 0.0)
-				return;
-		}
-
-		bool new_ruler = true;
-		if (m_ruler_list.size())
-		{
-			Ruler* ruler = m_ruler_list[m_ruler_list.size() - 1];
-			if (ruler &&
-				ruler->GetDisp() &&
-				!ruler->GetFinished())
-			{
-				ruler->AddPoint(p);
-				new_ruler = false;
-				if (m_ruler_type == 5)
-				{
-					//finish
-					glm::mat4 mv_temp;
-					//translate object
-					mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-					//rotate object
-					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty + 180.0)), glm::vec3(0.0, 1.0, 0.0));
-					mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz + 180.0)), glm::vec3(0.0, 0.0, 1.0));
-					//center object
-					mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-					glm::vec4 axis(0, 0, -1, 0);
-					axis = glm::transpose(mv_temp) * axis;
-					ruler->FinishEllipse(Vector(axis[0], axis[1], axis[2]));
-				}
-			}
-		}
-		if (new_ruler)
-		{
-			Ruler* ruler = new Ruler();
-			ruler->SetRulerType(m_ruler_type);
-			ruler->AddPoint(p);
-			ruler->SetTimeDep(m_ruler_time_dep);
-			ruler->SetTime(m_tseq_cur_num);
-			m_ruler_list.push_back(ruler);
-		}
-	}
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-		vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
-}
-
-void VRenderGLView::AddPaintRulerPoint()
-{
-	if (m_selector.ProcessSel(0.01))
-	{
-		wxString str;
-		Point center;
-		double size;
-		m_selector.GetCenter(center);
-		m_selector.GetSize(size);
-
-		bool new_ruler = true;
-		if (m_ruler_list.size())
-		{
-			Ruler* ruler = m_ruler_list[m_ruler_list.size() - 1];
-			if (ruler &&
-				ruler->GetDisp() &&
-				!ruler->GetFinished())
-			{
-				ruler->AddPoint(center);
-				str = wxString::Format("\tv%d", ruler->GetNumPoint() - 1);
-				ruler->AddInfoNames(str);
-				str = wxString::Format("\t%.0f", size);
-				ruler->AddInfoValues(str);
-				new_ruler = false;
-			}
-		}
-		if (new_ruler)
-		{
-			Ruler* ruler = new Ruler();
-			ruler->SetRulerType(m_ruler_type);
-			ruler->AddPoint(center);
-			ruler->SetTimeDep(m_ruler_time_dep);
-			ruler->SetTime(m_tseq_cur_num);
-			str = "v0";
-			ruler->AddInfoNames(str);
-			str = wxString::Format("%.0f", size);
-			ruler->AddInfoValues(str);
-			m_ruler_list.push_back(ruler);
-		}
-
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-			vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
-	}
 }
 
 void VRenderGLView::DrawRulerArc(
@@ -12974,9 +12794,6 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			m_ruler_handler.FindEditingRuler(
 				event.GetX(), event.GetY());
-			//Point *p0, *p1, *p2, *p3;
-			//GetEditingRulerPoint(event.GetX(), event.GetY(),
-			//	&p0, &p1, &p2, &p3);
 		}
 
 		Point *p0 = m_ruler_handler.GetPoint();
@@ -13072,7 +12889,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			!event.AltDown())
 		{
 			//add one point to a ruler
-			AddRulerPoint(event.GetX(), event.GetY());
+			m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY());
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			RefreshGL(27);
 			return;
 		}
@@ -13085,13 +12905,16 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
 			Segment();
-			if (m_ruler_type == 3)
-				AddRulerPoint(event.GetX(), event.GetY());
+			if (m_ruler_handler.GetType() == 3)
+				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY());
 			else
-				AddPaintRulerPoint();
+				m_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			return;
 		}
 	}
@@ -13111,19 +12934,19 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 5 &&
 			!event.AltDown())
 		{
-			if (GetRulerFinished())
+			if (m_ruler_handler.GetRulerFinished())
 			{
 				SetIntMode(1);
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			}
 			else
 			{
-				AddRulerPoint(event.GetX(), event.GetY());
-				FinishRuler();
+				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY());
+				m_ruler_handler.FinishRuler();
 			}
 			RefreshGL(29);
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			return;
 		}
 		//SetSortBricks();

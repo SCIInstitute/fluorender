@@ -836,6 +836,7 @@ public:
 	int GetNumBranch();
 	int GetNumPoint();
 	Point* GetPoint(int index);
+	pPoint GetPPoint(int index);
 	int GetNumBranchPoint(int nbranch);
 	Point* GetPoint(int nbranch, int index);
 	pPoint FindPoint(Point& point);
@@ -850,7 +851,7 @@ public:
 
 	bool AddPoint(Point &point);
 	void SetTransform(Transform *tform);
-	bool AddBranch(Point &point);
+	bool AddBranch(pPoint point);
 
 	void Clear();
 	void Reverse();
