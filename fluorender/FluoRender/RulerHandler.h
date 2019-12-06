@@ -57,9 +57,28 @@ public:
 		return m_ruler_list;
 	}
 
+	bool FindEditingRuler(double mx, double my);
+	Point* GetPoint()
+	{
+		return m_point;
+	}
+	Point* GetEllipsePoint(int index);
+
 private:
 	Ruler *m_ruler;
 	RulerList *m_ruler_list;
+
+	//get point
+	Point* m_point;
+	int m_pindex;//index of point in ruler
+	//view transform
+	Transform m_mdv;//model view
+	Transform m_prj;//projection
+	bool m_persp;//from render view
+	int m_nx, m_ny;//screen size
+
+private:
+	bool GetTransform();
 };
 
 #endif//_RulerHandler_H_
