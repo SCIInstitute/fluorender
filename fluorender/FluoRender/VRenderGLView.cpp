@@ -1242,7 +1242,7 @@ void VRenderGLView::DrawVolumes(int peel)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	Point *p0 = m_ruler_handler.GetPoint();
+	FL::RulerPoint *p0 = m_ruler_handler.GetPoint();
 
 	//draw
 	if (m_load_update ||
@@ -11731,7 +11731,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				if (np == 1)
 				{
 					//draw square
-					p1 = *(ruler->GetPoint(0));
+					p1 = ruler->GetPoint(0)->GetPoint();
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -11761,10 +11761,10 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				{
 					//draw ellipse
 					Point pps[4];
-					pps[0] = *(ruler->GetPoint(0));
-					pps[1] = *(ruler->GetPoint(1));
-					pps[2] = *(ruler->GetPoint(2));
-					pps[3] = *(ruler->GetPoint(3));
+					pps[0] = ruler->GetPoint(0)->GetPoint();
+					pps[1] = ruler->GetPoint(1)->GetPoint();
+					pps[2] = ruler->GetPoint(2)->GetPoint();
+					pps[3] = ruler->GetPoint(3)->GetPoint();
 					Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
@@ -11827,7 +11827,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				for (int bi = 0; bi < ruler->GetNumBranch(); ++bi)
 				for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
 				{
-					p2 = *ruler->GetPoint(bi, j);
+					p2 = ruler->GetPoint(bi, j)->GetPoint();
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -11878,7 +11878,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					num += 8;
 					if (j > 0)
 					{
-						p1 = *ruler->GetPoint(bi, j-1);
+						p1 = ruler->GetPoint(bi, j-1)->GetPoint();
 						p1 = mv.transform(p1);
 						p1 = p.transform(p1);
 						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -11898,7 +11898,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 			{
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
-					p2 = *(ruler->GetPoint(j));
+					p2 = ruler->GetPoint(j)->GetPoint();
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -11949,7 +11949,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					num += 8;
 					if (j > 0)
 					{
-						p1 = *(ruler->GetPoint(j - 1));
+						p1 = ruler->GetPoint(j - 1)->GetPoint();
 						p1 = mv.transform(p1);
 						p1 = p.transform(p1);
 						if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -11967,9 +11967,9 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				if (ruler->GetRulerType() == 4 &&
 					ruler->GetNumPoint() >= 3)
 				{
-					Point center = *(ruler->GetPoint(1));
-					Vector v1 = *(ruler->GetPoint(0)) - center;
-					Vector v2 = *(ruler->GetPoint(2)) - center;
+					Point center = ruler->GetPoint(1)->GetPoint();
+					Vector v1 = ruler->GetPoint(0)->GetPoint() - center;
+					Vector v2 = ruler->GetPoint(2)->GetPoint() - center;
 					double len = Min(v1.length(), v2.length());
 					if (len > w)
 					{
@@ -12073,7 +12073,7 @@ void VRenderGLView::DrawRulers()
 			else
 				c = text_color;
 			size_t j = ruler->GetNumPoint() - 1;
-			p2 = *(ruler->GetPoint(j));
+			p2 = ruler->GetPoint(j)->GetPoint();
 			p2 = mv.transform(p2);
 			p2 = p.transform(p2);
 			p2x = p2.x()*nx / 2.0;
@@ -12140,8 +12140,8 @@ int VRenderGLView::RulerProfile(int index)
 		if (ruler->GetNumPoint() < 1)
 			return 0;
 		Point p1, p2;
-		p1 = *(ruler->GetPoint(0));
-		p2 = *(ruler->GetPoint(1));
+		p1 = ruler->GetPoint(0)->GetPoint();
+		p2 = ruler->GetPoint(1)->GetPoint();
 		//object space
 		p1 = Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 		p2 = Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
@@ -12218,7 +12218,7 @@ int VRenderGLView::RulerProfile(int index)
 			profile->reserve(size_t(1));
 			profile->push_back(FL::ProfileBin());
 
-			p = *(ruler->GetPoint(0));
+			p = ruler->GetPoint(0)->GetPoint();
 			//object space
 			p = Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
 			intensity = 0.0;
@@ -12252,8 +12252,8 @@ int VRenderGLView::RulerProfile(int index)
 			int total_dist = 0;
 			for (unsigned int pn = 0; pn<ruler->GetNumPoint() - 1; ++pn)
 			{
-				p1 = *(ruler->GetPoint(pn));
-				p2 = *(ruler->GetPoint(pn + 1));
+				p1 = ruler->GetPoint(pn)->GetPoint();
+				p2 = ruler->GetPoint(pn + 1)->GetPoint();
 				//object space
 				p1 = Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 				p2 = Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
@@ -12796,7 +12796,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				event.GetX(), event.GetY());
 		}
 
-		Point *p0 = m_ruler_handler.GetPoint();
+		FL::RulerPoint *p0 = m_ruler_handler.GetPoint();
 
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
@@ -12961,7 +12961,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				double(old_mouse_Y - event.GetY())*
 				double(old_mouse_Y - event.GetY()))));
 
-		Point *p0 = m_ruler_handler.GetPoint();
+		FL::RulerPoint *p0 = m_ruler_handler.GetPoint();
 		bool hold_old = false;
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
@@ -13097,93 +13097,21 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 6 || m_int_mode == 9)
 		{
-			Point* p0 = m_ruler_handler.GetPoint();
-			if (event.LeftIsDown() &&
-				p0)
+			bool rval = false;
+			if (m_int_mode == 6)
+				rval = m_ruler_handler.EditPoint(
+					event.GetX(), event.GetY(), event.AltDown());
+			else if (m_int_mode == 9)
+				rval = m_ruler_handler.MoveRuler(
+					event.GetX(), event.GetY());
+			if (rval)
 			{
-				Point point, ip;
-				bool failed = false;
-				if (m_point_volume_mode)
+				RefreshGL(35);
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 				{
-					double t = GetPointVolume(point, ip,
-						event.GetX(), event.GetY(),
-						m_cur_vol, m_point_volume_mode,
-						m_ruler_use_transf);
-					if (t <= 0.0)
-						t = GetPointPlane(point,
-							event.GetX(), event.GetY(),
-							p0);
-					if (t <= 0.0)
-						failed = true;
-				}
-				else
-				{
-					double t = GetPointPlane(point,
-						event.GetX(), event.GetY(),
-						p0);
-					if (t <= 0.0)
-						failed = true;
-				}
-				if (!failed)
-				{
-					if (m_int_mode == 6)
-					{
-						p0->x(point.x());
-						p0->y(point.y());
-						p0->z(point.z());
-
-						Point *p1 = m_ruler_handler.GetEllipsePoint(1);
-						Point *p2 = m_ruler_handler.GetEllipsePoint(2);
-						Point *p3 = m_ruler_handler.GetEllipsePoint(3);
-						if (p1 && p2 && p3)
-						{
-							if (event.AltDown())
-							{
-								Point c = Point((*p2 + *p3) / 2.0);
-								Vector v0 = *p0 - c;
-								Vector v2 = *p2 - c;
-								Vector axis = Cross(v2, v0);
-								axis = Cross(axis, v2);
-								axis.normalize();
-								*p0 = Point(c + axis * v0.length());
-								*p1 = c + (c - *p0);
-							}
-							else
-							{
-								Point c = Point((*p0 + *p1 + *p2 + *p3) / 4.0);
-								Vector v0 = *p0 - c;
-								Vector v2 = *p2 - c;
-								Vector axis = Cross(v2, v0);
-								Vector a2 = Cross(v0, axis);
-								a2.normalize();
-								*p2 = Point(c + a2 * v2.length());
-								*p3 = Point(c - a2 * v2.length());
-								*p1 = c + (c - *p0);
-							}
-						}
-					}
-					else
-					{
-						FL::Ruler* sel_ruler = m_ruler_handler.GetRuler();
-						if (sel_ruler)
-						{
-							Vector displace = point - *p0;
-							for (int i = 0; i < sel_ruler->GetNumPoint(); ++i)
-							{
-								Point* p = sel_ruler->GetPoint(i);
-								p->x(p->x() + displace.x());
-								p->y(p->y() + displace.y());
-								p->z(p->z() + displace.z());
-							}
-						}
-					}
-					RefreshGL(35);
-					VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-					if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-					{
-						vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
-						vr_frame->GetMeasureDlg()->SetEdit();
-					}
+					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+					vr_frame->GetMeasureDlg()->SetEdit();
 				}
 			}
 		}

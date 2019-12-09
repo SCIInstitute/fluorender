@@ -77,7 +77,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	mv.set(glm::value_ptr(mv_temp));
 	prj.set(glm::value_ptr(prj_temp));
 
-	pPoint point;
+	pRulerPoint point;
 	int i, j;
 	Point ptemp;
 	for (i = 0; i < (int)m_ruler_list->size(); i++)
@@ -90,7 +90,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 		{
 			point = ruler->GetPPoint(j);
 			if (!point) continue;
-			ptemp = *point;
+			ptemp = point->GetPoint();
 			ptemp = mv.transform(ptemp);
 			ptemp = prj.transform(ptemp);
 			if ((persp && (ptemp.z() <= 0.0 || ptemp.z() >= 1.0)) ||
@@ -112,7 +112,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	return false;
 }
 
-Point* RulerHandler::GetEllipsePoint(int index)
+RulerPoint* RulerHandler::GetEllipsePoint(int index)
 {
 	if (!m_ruler ||
 		m_ruler->GetRulerType() != 5 ||
@@ -286,6 +286,106 @@ void RulerHandler::AddPaintRulerPoint()
 	}
 }
 
+bool RulerHandler::MoveRuler(int mx, int my)
+{
+	if (!m_point || !m_view || !m_ruler)
+		return false;
+
+	Point point, ip;
+	if (m_view->m_point_volume_mode)
+	{
+		double t = m_view->GetPointVolume(point, ip,
+			mx, my, m_view->m_cur_vol,
+			m_view->m_point_volume_mode,
+			m_view->m_ruler_use_transf);
+		if (t <= 0.0)
+			t = m_view->GetPointPlane(point,
+				mx, my, &m_point->GetPoint());
+		if (t <= 0.0)
+			return false;
+	}
+	else
+	{
+		double t = m_view->GetPointPlane(point,
+			mx, my, &m_point->GetPoint());
+		if (t <= 0.0)
+			return false;
+	}
+
+	Point p0 = m_point->GetPoint();
+	Vector displace = point - p0;
+	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
+	{
+		m_ruler->GetPoint(i)->DisplacePoint(displace);
+	}
+
+	return true;
+}
+
+bool RulerHandler::EditPoint(int mx, int my, bool alt)
+{
+	if (!m_point || !m_view || !m_ruler)
+		return false;
+
+	Point point, ip;
+	if (m_view->m_point_volume_mode)
+	{
+		double t = m_view->GetPointVolume(point, ip,
+			mx, my, m_view->m_cur_vol,
+			m_view->m_point_volume_mode,
+			m_view->m_ruler_use_transf);
+		if (t <= 0.0)
+			t = m_view->GetPointPlane(point,
+				mx, my, &m_point->GetPoint());
+		if (t <= 0.0)
+			return false;
+	}
+	else
+	{
+		double t = m_view->GetPointPlane(point,
+			mx, my, &m_point->GetPoint());
+		if (t <= 0.0)
+			return false;
+	}
+
+	m_point->SetPoint(point);
+
+	FL::RulerPoint *p0 = m_point.get();
+	FL::RulerPoint *p1 = GetEllipsePoint(1);
+	FL::RulerPoint *p2 = GetEllipsePoint(2);
+	FL::RulerPoint *p3 = GetEllipsePoint(3);
+	if (!p1 || !p2 || !p3)
+		return true;
+
+	if (alt)
+	{
+		Point c = Point((p2->GetPoint() + p3->GetPoint()) / 2.0);
+		Vector v0 = p0->GetPoint() - c;
+		Vector v2 = p2->GetPoint() - c;
+		Vector axis = Cross(v2, v0);
+		axis = Cross(axis, v2);
+		axis.normalize();
+		p0->SetPoint(Point(c + axis * v0.length()));
+		p1->SetPoint(c + (c - p0->GetPoint()));
+	}
+	else
+	{
+		Point c = Point((p0->GetPoint() +
+			p1->GetPoint() + p2->GetPoint() +
+			p3->GetPoint()) / 4.0);
+		Vector v0 = p0->GetPoint() - c;
+		Vector v2 = p2->GetPoint() - c;
+		Vector axis = Cross(v2, v0);
+		Vector a2 = Cross(v0, axis);
+		a2.normalize();
+		p2->SetPoint(Point(c + a2 * v2.length()));
+		p3->SetPoint(Point(c - a2 * v2.length()));
+		p1->SetPoint(c + (c - p0->GetPoint()));
+	}
+
+	return true;
+}
+
 void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 {
 	if (m_ruler_list && m_ruler_list->size())
@@ -315,10 +415,13 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 
 				for (size_t rpi = 0; rpi < ruler->GetNumBranchPoint(rbi); ++rpi)
 				{
-					Point* rp = ruler->GetPoint(rbi, rpi);
+					RulerPoint* rp = ruler->GetPoint(rbi, rpi);
 					if (!rp) continue;
 					fconfig.Write(wxString::Format("point%d", (int)rpi),
-						wxString::Format("%f %f %f", rp->x(), rp->y(), rp->z()));
+						wxString::Format("%f %f %f",
+						rp->GetPoint().x(),
+						rp->GetPoint().y(),
+						rp->GetPoint().z()));
 				}
 			}
 		}
@@ -408,7 +511,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 										Point point(x, y, z);
 										if (rbi > 0 && rpi == 0)
 										{
-											pPoint pp = ruler->FindPoint(point);
+											pRulerPoint pp = ruler->FindPoint(point);
 											ruler->AddBranch(pp);
 										}
 										else

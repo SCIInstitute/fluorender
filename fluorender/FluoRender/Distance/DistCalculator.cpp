@@ -103,7 +103,7 @@ void DistCalculator::BuildSpring()
 		if (i == 0)
 		{
 			SpringNode node;
-			node.p = *(m_ruler->GetPoint(i));
+			node.p = m_ruler->GetPoint(i)->GetPoint();
 			node.prevd = 0.0;
 			node.nextd = 0.0;
 			node.dist = 0.0;
@@ -114,7 +114,7 @@ void DistCalculator::BuildSpring()
 		{
 			SpringNode &node1 = m_spring.at(i);
 			SpringNode node2;
-			node2.p = *(m_ruler->GetPoint(i + 1));
+			node2.p = m_ruler->GetPoint(i + 1)->GetPoint();
 			dist = (node2.p - node1.p).length();
 			node1.nextd = dist;
 			node2.prevd = dist;
@@ -256,13 +256,10 @@ void DistCalculator::UpdateRuler()
 	if (m_ruler->GetNumPoint() != m_spring.size())
 		return;
 
-	Point* p;
 	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
 	{
-		p = m_ruler->GetPoint(i);
-		p->x(m_spring[i].p.x());
-		p->y(m_spring[i].p.y());
-		p->z(m_spring[i].p.z());
+		m_ruler->GetPoint(i)->SetPoint(
+			m_spring[i].p);
 	}
 }
 

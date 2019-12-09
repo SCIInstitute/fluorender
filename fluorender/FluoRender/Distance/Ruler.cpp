@@ -80,7 +80,7 @@ int Ruler::GetNumPoint()
 	return count;
 }
 
-Point *Ruler::GetPoint(int index)
+RulerPoint *Ruler::GetPoint(int index)
 {
 	if (index < 0)
 		return 0;
@@ -105,7 +105,7 @@ Point *Ruler::GetPoint(int index)
 	return 0;
 }
 
-pPoint Ruler::GetPPoint(int index)
+pRulerPoint Ruler::GetPPoint(int index)
 {
 	if (index < 0)
 		return 0;
@@ -138,7 +138,7 @@ int Ruler::GetNumBranchPoint(int nb)
 	return m_ruler.at(nb).size();
 }
 
-Point* Ruler::GetPoint(int nb, int index)
+RulerPoint* Ruler::GetPoint(int nb, int index)
 {
 	int branch_num = GetNumBranch();
 	if (nb < 0 || nb >= branch_num)
@@ -149,14 +149,14 @@ Point* Ruler::GetPoint(int nb, int index)
 	return branch[index].get();
 }
 
-pPoint Ruler::FindPoint(Point& point)
+pRulerPoint Ruler::FindPoint(Point& point)
 {
 	bool first = true;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			if (*m_ruler[i][j] == point)
+			if (m_ruler[i][j]->GetPoint() == point)
 			{
 				return m_ruler[i][j];
 			}
@@ -196,8 +196,8 @@ double Ruler::GetLength()
 	{
 		for (size_t i = 1; i < it->size(); ++i)
 		{
-			p1 = *(*it)[i - 1].get();
-			p2 = *(*it)[i].get();
+			p1 = (*it)[i - 1]->GetPoint();
+			p2 = (*it)[i]->GetPoint();
 			length += (p2 - p1).length();
 		}
 	}
@@ -215,8 +215,8 @@ double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 	{
 		for (size_t i = 1; i < it->size(); ++i)
 		{
-			p1 = *(*it)[i - 1].get();
-			p2 = *(*it)[i].get();
+			p1 = (*it)[i - 1]->GetPoint();
+			p2 = (*it)[i]->GetPoint();
 			p1 = Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 			p2 = Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
 			length += (p2 - p1).length();
@@ -238,7 +238,7 @@ double Ruler::GetAngle()
 	{
 		if (m_ruler[0].size() >= 2)
 		{
-			Vector v = *m_ruler[0][1].get() - *m_ruler[0][0].get();
+			Vector v = m_ruler[0][1]->GetPoint() - m_ruler[0][0]->GetPoint();
 			v.normalize();
 			angle = atan2(-v.y(), (v.x() > 0.0 ? 1.0 : -1.0)*sqrt(v.x()*v.x() + v.z()*v.z()));
 			angle = FLTYPE::r2d(angle);
@@ -250,9 +250,9 @@ double Ruler::GetAngle()
 		if (m_ruler[0].size() >= 3)
 		{
 			Vector v1, v2;
-			v1 = *m_ruler[0][0].get() - *m_ruler[0][1].get();
+			v1 = m_ruler[0][0]->GetPoint() - m_ruler[0][1]->GetPoint();
 			v1.normalize();
-			v2 = *m_ruler[0][2].get() - *m_ruler[0][1].get();
+			v2 = m_ruler[0][2]->GetPoint() - m_ruler[0][1]->GetPoint();
 			v2.normalize();
 			angle = acos(Dot(v1, v2));
 			angle = FLTYPE::r2d(angle);
@@ -269,7 +269,7 @@ void Ruler::Scale(double spcx, double spcy, double spcz)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			m_ruler[i][j]->scale(spcx, spcy, spcz);
+			m_ruler[i][j]->ScalePoint(spcx, spcy, spcz);
 		}
 		first = false;
 	}
@@ -280,7 +280,8 @@ bool Ruler::AddPoint(Point &point)
 	if (m_ruler.empty())
 	{
 		m_ruler.push_back(RulerBranch());
-		m_ruler.back().push_back(std::make_shared<Point>(point));
+		m_ruler.back().push_back(
+			std::make_shared<RulerPoint>(RulerPoint(point)));
 	}
 	else if (m_ruler_type == 2 &&
 		m_ruler.back().size() == 1)
@@ -293,7 +294,8 @@ bool Ruler::AddPoint(Point &point)
 		m_ruler.back().size() == 3)
 		return false;
 	else
-		m_ruler.back().push_back(std::make_shared<Point>(point));
+		m_ruler.back().push_back(
+			std::make_shared<RulerPoint>(RulerPoint(point)));
 
 	if (m_ruler_type == 2 &&
 		m_ruler.back().size() == 1)
@@ -313,7 +315,7 @@ void Ruler::SetTransform(Transform *tform)
 	m_tform = tform;
 }
 
-bool Ruler::AddBranch(pPoint point)
+bool Ruler::AddBranch(pRulerPoint point)
 {
 	if (!point ||
 		m_ruler.empty() ||
@@ -363,7 +365,7 @@ wxString Ruler::GetPosValues()
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
-			output += std::to_string(m_ruler[i][j]->x());
+			output += std::to_string(m_ruler[i][j]->GetPoint().x());
 			if (i == m_ruler.size() - 1)
 				output += "\n";
 			else
@@ -374,7 +376,7 @@ wxString Ruler::GetPosValues()
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
-			output += std::to_string(m_ruler[i][j]->y());
+			output += std::to_string(m_ruler[i][j]->GetPoint().y());
 			if (i == m_ruler.size() - 1)
 				output += "\n";
 			else
@@ -385,7 +387,7 @@ wxString Ruler::GetPosValues()
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
-			output += std::to_string(m_ruler[i][j]->z());
+			output += std::to_string(m_ruler[i][j]->GetPoint().z());
 			if (i == m_ruler.size() - 1)
 				output += "\n";
 			else
@@ -426,8 +428,8 @@ void Ruler::FinishEllipse(Vector view)
 		m_ruler.back().size() != 2)
 		return;
 
-	Point p0 = *m_ruler.back()[0].get();
-	Point p1 = *m_ruler.back()[1].get();
+	Point p0 = m_ruler.back()[0]->GetPoint();
+	Point p1 = m_ruler.back()[1]->GetPoint();
 	Vector p01 = p0 - p1;
 	Vector axis = Cross(p01, view);
 	axis.normalize();
@@ -463,7 +465,7 @@ Point Ruler::GetCenter()
 	{
 		for (size_t i = first ? 0 : 1; i < it->size(); ++i)
 		{
-			result += *(*it)[i].get();
+			result += (*it)[i]->GetPoint();
 			count++;
 		}
 		first = false;
