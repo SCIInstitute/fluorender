@@ -449,6 +449,12 @@ void Ruler::FinishEllipse(Vector view)
 	AddPoint(p2);
 	AddPoint(p3);
 
+	//nail
+	m_ruler.back()[0]->SetLocked();
+	m_ruler.back()[1]->SetLocked();
+	m_ruler.back()[2]->SetLocked();
+	m_ruler.back()[3]->SetLocked();
+
 	m_finished = true;
 }
 

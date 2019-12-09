@@ -11688,6 +11688,86 @@ void VRenderGLView::DrawRulerArc(
 	}
 }
 
+void VRenderGLView::DrawRulerPoint(vector<float> &verts, int type, float px, float py, float w, Color &c)
+{
+	float w2 = 1.41421356 * w;
+	switch (type)
+	{
+	case 0://square
+		verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		break;
+	case 1://hash
+		verts.push_back(px - w); verts.push_back(py - w / 2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w); verts.push_back(py - w / 2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w / 2); verts.push_back(py - w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w / 2); verts.push_back(py + w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w); verts.push_back(py + w / 2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w); verts.push_back(py + w / 2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w / 2); verts.push_back(py + w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w / 2); verts.push_back(py - w); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		break;
+	case 2://diamond
+		verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		break;
+	case 3://diamond hash
+		verts.push_back(px + w2 - w/2); verts.push_back(py - w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w/2); verts.push_back(py + w2 - w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w/2); verts.push_back(py + w2 - w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w2 + w/2); verts.push_back(py - w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w2 + w/2); verts.push_back(py + w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w/2); verts.push_back(py - w2 + w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px - w/2); verts.push_back(py - w2 + w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(px + w2 - w/2); verts.push_back(py + w/2); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		break;
+	}
+}
+
 unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 {
 	int nx = GetGLSize().x;
@@ -11710,6 +11790,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 
 	unsigned int num = 0;
 	Point p1, p2;
+	FL::RulerPoint *rp1, *rp2;
 	Color c;
 	Color text_color = GetTextColor();
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
@@ -11731,7 +11812,8 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				if (np == 1)
 				{
 					//draw square
-					p1 = ruler->GetPoint(0)->GetPoint();
+					rp1 = ruler->GetPoint(0);
+					p1 = rp1->GetPoint();
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((m_persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
@@ -11739,32 +11821,25 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 						continue;
 					px = (p1.x() + 1.0)*nx / 2.0;
 					py = (p1.y() + 1.0)*ny / 2.0;
-					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-					verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-					verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+					if (rp1->GetLocked())
+						DrawRulerPoint(verts, 1, px, py, w, c);
+					else
+						DrawRulerPoint(verts, 0, px, py, w, c);
 					num += 8;
 				}
 				else if (np == 4)
 				{
 					//draw ellipse
+					FL::RulerPoint* rps[4];
+					rps[0] = ruler->GetPoint(0);
+					rps[1] = ruler->GetPoint(1);
+					rps[2] = ruler->GetPoint(2);
+					rps[3] = ruler->GetPoint(3);
 					Point pps[4];
-					pps[0] = ruler->GetPoint(0)->GetPoint();
-					pps[1] = ruler->GetPoint(1)->GetPoint();
-					pps[2] = ruler->GetPoint(2)->GetPoint();
-					pps[3] = ruler->GetPoint(3)->GetPoint();
+					pps[0] = rps[0]->GetPoint();
+					pps[1] = rps[1]->GetPoint();
+					pps[2] = rps[2]->GetPoint();
+					pps[3] = rps[3]->GetPoint();
 					Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
@@ -11778,22 +11853,10 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 							continue;
 						px = (p1.x() + 1.0)*nx / 2.0;
 						py = (p1.y() + 1.0)*ny / 2.0;
-						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						if (rps[j]->GetLocked())
+							DrawRulerPoint(verts, 1, px, py, w, c);
+						else
+							DrawRulerPoint(verts, 0, px, py, w, c);
 						num += 8;
 					}
 					//draw center
@@ -11827,7 +11890,8 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 				for (int bi = 0; bi < ruler->GetNumBranch(); ++bi)
 				for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
 				{
-					p2 = ruler->GetPoint(bi, j)->GetPoint();
+					rp2 = ruler->GetPoint(bi, j);
+					p2 = rp2->GetPoint();
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -11837,43 +11901,17 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					py = (p2.y() + 1.0)*ny / 2.0;
 					if (bi == 0 && j == 0)
 					{
-						//starting point is diamond
-						float w2 = 1.41421356 * w;
-						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						if (rp2->GetLocked())
+							DrawRulerPoint(verts, 3, px, py, w, c);
+						else
+							DrawRulerPoint(verts, 2, px, py, w, c);
 					}
 					else
 					{
-						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						if (rp2->GetLocked())
+							DrawRulerPoint(verts, 1, px, py, w, c);
+						else
+							DrawRulerPoint(verts, 0, px, py, w, c);
 					}
 					num += 8;
 					if (j > 0)
@@ -11898,7 +11936,8 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 			{
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
-					p2 = ruler->GetPoint(j)->GetPoint();
+					rp2 = ruler->GetPoint(j);
+					p2 = rp2->GetPoint();
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((m_persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
@@ -11908,43 +11947,17 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 					py = (p2.y() + 1.0)*ny / 2.0;
 					if (ruler->GetNumPoint() > 1 && j == 0)
 					{
-						//starting point is diamond
-						float w2 = 1.41421356 * w;
-						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						if (rp2->GetLocked())
+							DrawRulerPoint(verts, 3, px, py, w, c);
+						else
+							DrawRulerPoint(verts, 2, px, py, w, c);
 					}
 					else
 					{
-						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						if (rp2->GetLocked())
+							DrawRulerPoint(verts, 1, px, py, w, c);
+						else
+							DrawRulerPoint(verts, 0, px, py, w, c);
 					}
 					num += 8;
 					if (j > 0)
@@ -12790,10 +12803,20 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.LeftDown())
 	{
 		if (m_int_mode == 6 ||
-			m_int_mode == 9)
+			m_int_mode == 9 ||
+			m_int_mode == 11)
 		{
 			m_ruler_handler.FindEditingRuler(
 				event.GetX(), event.GetY());
+			if (m_int_mode == 11)
+			{
+				FL::RulerPoint *p = m_ruler_handler.GetPoint();
+				if (p)
+				{
+					p->ToggleLocked();
+					RefreshGL(41);
+				}
+			}
 		}
 
 		FL::RulerPoint *p0 = m_ruler_handler.GetPoint();

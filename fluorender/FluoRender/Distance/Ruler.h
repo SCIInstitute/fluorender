@@ -56,18 +56,18 @@ namespace FL
 	{
 	public:
 		RulerPoint():
-			m_nailed(false)
+			m_locked(false)
 		{}
 		RulerPoint(Point& p):
 			m_p(p),
-			m_nailed(false)
+			m_locked(false)
 		{}
-		RulerPoint(bool nailed):
-			m_nailed(nailed)
+		RulerPoint(bool locked):
+			m_locked(locked)
 		{}
-		RulerPoint(Point& p, bool nailed):
+		RulerPoint(Point& p, bool locked):
 			m_p(p),
-			m_nailed(nailed)
+			m_locked(locked)
 		{}
 
 		void SetPoint(Point& p)
@@ -86,18 +86,23 @@ namespace FL
 		{
 			m_p += dp;
 		}
-		void SetNailed(bool nailed = true)
+		void SetLocked(bool locked = true)
 		{
-			m_nailed = nailed;
+			m_locked = locked;
 		}
-		bool GetNailed()
+		bool GetLocked()
 		{
-			return m_nailed;
+			return m_locked;
+		}
+		bool ToggleLocked()
+		{
+			m_locked = !m_locked;
+			return m_locked;
 		}
 
 	private:
 		Point m_p;
-		bool m_nailed;
+		bool m_locked;
 	};
 
 	class Ruler;
