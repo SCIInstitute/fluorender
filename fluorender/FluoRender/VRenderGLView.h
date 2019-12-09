@@ -514,6 +514,7 @@ public:
 	void RefreshGL(int debug_code, bool erase = false, bool start_loop = true);
 
 	//rulers
+	void DrawRulerPoint(vector<float> &verts, int type, float px, float py, float w, Color &c);
 	void DrawRulerArc(Point & ppc, Point& pp0, Point& pp1,
 		Color &c, Transform& mv, Transform& p,
 		vector<float> &verts, unsigned int& num);
@@ -768,6 +769,7 @@ private:
 					 //8-same as 4, but for paint ruler mode
 					 //9-move ruler
 					 //10-grow, click and hold to activate
+					 //11-lock ruler point for relaxing
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;

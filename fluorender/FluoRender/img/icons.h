@@ -292,6 +292,8 @@ public:
 	const static unsigned char move_png[952];
 	/* relax.png - 976 bytes */
 	const static unsigned char relax_png[976];
+	/* lock.png - 855 bytes */
+	const static unsigned char lock_png[855];
 
 	//movie play export icons
 	/* minus.png - 426 bytes */

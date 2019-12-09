@@ -122,6 +122,7 @@ public:
 		ID_RulerEditBtn,
 		ID_RulerFlipBtn,
 		ID_RulerAvgBtn,
+		ID_LockBtn,
 		ID_RelaxBtn,
 		ID_RelaxValueSpin,
 		ID_DeleteBtn,
@@ -186,6 +187,7 @@ private:
 	void OnRulerEdit(wxCommandEvent& event);
 	void OnRulerFlip(wxCommandEvent& event);
 	void OnRulerAvg(wxCommandEvent& event);
+	void OnLock(wxCommandEvent& event);
 	void OnRelax(wxCommandEvent& event);
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
 	void OnRelaxValueText(wxCommandEvent& event);

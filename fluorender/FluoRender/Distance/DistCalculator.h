@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_DistCalculator_h
 #define FL_DistCalculator_h
 
-#include "CompGraph.h"
-#include "DataManager.h"
+#include <Components/CompGraph.h>
+#include <Distance/Ruler.h>
 
 namespace FL
 {
@@ -85,10 +85,10 @@ namespace FL
 
 		struct SpringNode
 		{
-			Point p;
+			RulerPoint *p;
 			double prevd;
 			double nextd;
-			double dist;
+			double dist;//total distance
 		};
 		std::vector<SpringNode> m_spring;
 		std::vector<Point> m_cloud;
@@ -98,7 +98,6 @@ namespace FL
 		void BuildCloud();
 		double GetRestDist();
 		void UpdateSpringNode(int idx);
-		void UpdateRuler();
 		void SpringProject(Point &p0, Point &pp);
 	};
 }
