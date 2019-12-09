@@ -323,7 +323,103 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 	}
 }
 
-void RulerHandler::Read(wxFileConfig &fconfig)
+void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 {
-
+	wxString str;
+	int ival;
+	bool bval;
+	int rbi, rpi;
+	float x, y, z;
+	if (m_ruler_list)
+	{
+		m_ruler_list->clear();
+		int rnum = fconfig.Read("num", 0l);
+		for (int ri = 0; ri < rnum; ++ri)
+		{
+			if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d", vi, ri)))
+			{
+				fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
+				Ruler* ruler = new Ruler();
+				if (fconfig.Read("name", &str))
+					ruler->SetName(str);
+				if (fconfig.Read("type", &ival))
+					ruler->SetRulerType(ival);
+				if (fconfig.Read("display", &bval))
+					ruler->SetDisp(bval);
+				if (fconfig.Read("transient", &bval))
+					ruler->SetTimeDep(bval);
+				if (fconfig.Read("time", &ival))
+					ruler->SetTime(ival);
+				if (fconfig.Read("info_names", &str))
+					ruler->SetInfoNames(str);
+				if (fconfig.Read("info_values", &str))
+					ruler->SetInfoValues(str);
+				if (fconfig.Read("use_color", &bval))
+				{
+					if (bval)
+					{
+						if (fconfig.Read("color", &str))
+						{
+							float r, g, b;
+							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+							{
+								FLIVR::Color col(r, g, b);
+								ruler->SetColor(col);
+							}
+						}
+					}
+				}
+				int num = fconfig.Read("num", 0l);
+				//num could be points or branch
+				for (int ii = 0; ii < num; ++ii)
+				{
+					//if points
+					rbi = rpi = ii;
+					if (fconfig.Exists(wxString::Format(
+						"/views/%d/rulers/%d/points/%d", vi, ri, rpi)))
+					{
+						fconfig.SetPath(wxString::Format(
+							"/views/%d/rulers/%d/points/%d", vi, ri, rpi));
+						if (fconfig.Read("point", &str))
+						{
+							if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+							{
+								Point point(x, y, z);
+								ruler->AddPoint(point);
+							}
+						}
+					}
+					//if branch
+					else if (fconfig.Exists(wxString::Format(
+						"/views/%d/rulers/%d/branches/%d", vi, ri, rbi)))
+					{
+						fconfig.SetPath(wxString::Format(
+							"/views/%d/rulers/%d/branches/%d", vi, ri, rbi));
+						if (fconfig.Read("num", &ival))
+						{
+							for (rpi = 0; rpi < ival; ++rpi)
+							{
+								if (fconfig.Read(wxString::Format("point%d", rpi), &str))
+								{
+									if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+									{
+										Point point(x, y, z);
+										if (rbi > 0 && rpi == 0)
+										{
+											pPoint pp = ruler->FindPoint(point);
+											ruler->AddBranch(pp);
+										}
+										else
+											ruler->AddPoint(point);
+									}
+								}
+							}
+						}
+					}
+				}
+				ruler->SetFinished();
+				m_ruler_list->push_back(ruler);
+			}
+		}
+	}
 }

@@ -95,7 +95,7 @@ public:
 	void AddPaintRulerPoint();
 
 	void Save(wxFileConfig &fconfig, int vi);
-	void Read(wxFileConfig &fconfig);
+	void Read(wxFileConfig &fconfig, int vi);
 
 private:
 	VRenderGLView *m_view;
