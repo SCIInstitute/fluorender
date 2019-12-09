@@ -1396,9 +1396,9 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	vd->GetSpacings(spcx, spcy, spcz);
 
 	//get rulers
-	RulerList rulers;
+	FL::RulerList rulers;
 	trace_group->GetMappedRulers(rulers);
-	for (RulerListIter iter = rulers.begin();
+	for (FL::RulerListIter iter = rulers.begin();
 	iter != rulers.end(); ++iter)
 	{
 		(*iter)->Scale(spcx, spcy, spcz);

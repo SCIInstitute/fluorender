@@ -162,7 +162,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	if (vrv)
 		m_view = vrv;
 
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list) return;
 
 	DeleteAllItems();
@@ -172,7 +172,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	int num_points;
 	for (int i=0; i<(int)ruler_list->size(); i++)
 	{
-		Ruler* ruler = (*ruler_list)[i];
+		FL::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->GetTimeDep() &&
 			ruler->GetTime() != m_view->m_glview->m_tseq_cur_num)
@@ -255,12 +255,12 @@ void RulerListCtrl::DeleteSelection()
 	if (item != -1)
 	{
 		wxString name = GetItemText(item);
-		vector<Ruler*>* ruler_list = m_view->GetRulerList();
+		FL::RulerList* ruler_list = m_view->GetRulerList();
 		if (ruler_list)
 		{
 			for (int i=0; i<(int)ruler_list->size(); i++)
 			{
-				Ruler* ruler = (*ruler_list)[i];
+				FL::Ruler* ruler = (*ruler_list)[i];
 				if (ruler && ruler->GetName()==name)
 				{
 					ruler_list->erase(ruler_list->begin()+i);
@@ -277,7 +277,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 {
 	if (!m_view) return;
 
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (ruler_list)
 	{
 		if (cur_time)
@@ -285,7 +285,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 			int tseq = m_view->m_glview->m_tseq_cur_num;
 			for (int i=ruler_list->size()-1; i>=0; i--)
 			{
-				Ruler* ruler = (*ruler_list)[i];
+				FL::Ruler* ruler = (*ruler_list)[i];
 				if (ruler &&
 					((ruler->GetTimeDep() &&
 					ruler->GetTime() == tseq) ||
@@ -300,7 +300,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 		{
 			for (int i=ruler_list->size()-1; i>=0; i--)
 			{
-				Ruler* ruler = (*ruler_list)[i];
+				FL::Ruler* ruler = (*ruler_list)[i];
 				if (ruler)
 					delete ruler;
 			}
@@ -315,7 +315,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 void RulerListCtrl::Export(wxString filename)
 {
 	if (!m_view) return;
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (ruler_list)
 	{
 		wxFileOutputStream fos(filename);
@@ -327,7 +327,7 @@ void RulerListCtrl::Export(wxString filename)
 		wxString unit;
 		int num_points;
 		Point *p;
-		Ruler* ruler;
+		FL::Ruler* ruler;
 		switch (m_view->m_glview->m_sb_unit)
 		{
 		case 0:
@@ -395,7 +395,7 @@ void RulerListCtrl::Export(wxString filename)
 			}
 
 			//export profile
-			vector<ProfileBin>* profile = ruler->GetProfile();
+			vector<FL::ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
 				double sumd = 0.0;
@@ -452,7 +452,7 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
 			wxLIST_STATE_SELECTED);
 		if (item != -1)
 		{
-			Ruler* ruler = m_view->GetRuler(GetItemData(item));
+			FL::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 			if (ruler)
 			{
 				Point cp = ruler->GetCenter();
@@ -498,7 +498,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	m_editing_item = item;
 	if (!m_view)
 		return;
-	Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	FL::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 	if (!ruler || !ruler->GetDisp())
 		return;
 
@@ -560,7 +560,7 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 
 	wxString str = m_name_text->GetValue();
 
-	Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	FL::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetName(str);
 	SetText(m_editing_item, 0, str);
@@ -573,7 +573,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 		return;
 	if (m_editing_item == -1)
 		return;
-	Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	FL::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler || ruler->GetRulerType() != 2) return;
 
 	wxString str = m_center_text->GetValue();
@@ -632,7 +632,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 
 	wxColor c = event.GetColour();
 	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	FL::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetColor(color);
 	wxString str_color;
@@ -670,7 +670,7 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 		wxLIST_STATE_SELECTED);
 	if (!m_view)
 		return;
-	Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	FL::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 	if (!ruler) return;
 	ruler->ToggleDisp();
 	bool disp = ruler->GetDisp();
@@ -1138,7 +1138,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 
 	int count = 0;
 	std::vector<int> sel;
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1146,7 +1146,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 			int index = sel[i];
 			if (0 > index || ruler_list->size() <= index)
 				continue;
-			Ruler* r = (*ruler_list)[index];
+			FL::Ruler* r = (*ruler_list)[index];
 			if (r)
 				r->Reverse();
 			count++;
@@ -1156,7 +1156,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 	{
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			Ruler* r = (*ruler_list)[i];
+			FL::Ruler* r = (*ruler_list)[i];
 			if (r)
 				r->Reverse();
 			count++;
@@ -1225,7 +1225,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	Point avg;
 	int count = 0;
 	std::vector<int> sel;
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1233,7 +1233,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 			int index = sel[i];
 			if (0 > index || ruler_list->size() <= index)
 				continue;
-			Ruler* r = (*ruler_list)[index];
+			FL::Ruler* r = (*ruler_list)[index];
 			avg += r->GetCenter();
 			count++;
 		}
@@ -1242,7 +1242,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	{
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			Ruler* r = (*ruler_list)[i];
+			FL::Ruler* r = (*ruler_list)[i];
 			if (r->GetDisp())
 			{
 				avg += r->GetCenter();
@@ -1254,7 +1254,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	if (count)
 	{
 		avg /= double(count);
-		Ruler* ruler = new Ruler();
+		FL::Ruler* ruler = new FL::Ruler();
 		ruler->SetRulerType(2);
 		ruler->SetName("Average");
 		ruler->AddPoint(avg);
@@ -1280,7 +1280,7 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 		else
 		{
 			//export all
-			vector<Ruler*>* ruler_list = m_view->GetRulerList();
+			FL::RulerList* ruler_list = m_view->GetRulerList();
 			for (size_t i = 0; i < ruler_list->size(); ++i)
 			{
 				if ((*ruler_list)[i]->GetDisp())
@@ -1303,7 +1303,7 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 		}
 		else
 		{
-			vector<Ruler*>* ruler_list = m_view->GetRulerList();
+			FL::RulerList* ruler_list = m_view->GetRulerList();
 			for (size_t i = 0; i < ruler_list->size(); ++i)
 			{
 				if ((*ruler_list)[i]->GetDisp())
@@ -1331,12 +1331,12 @@ void MeasureDlg::Project(int idx)
 {
 	if (!m_view)
 		return;
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
 		return;
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
-	Ruler* ruler = ruler_list->at(idx);
+	FL::Ruler* ruler = ruler_list->at(idx);
 	FL::ComponentAnalyzer* analyzer =
 		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
 	FL::CompList* list = 0;
@@ -1389,12 +1389,12 @@ void MeasureDlg::Relax(int idx)
 {
 	if (!m_view)
 		return;
-	vector<Ruler*>* ruler_list = m_view->GetRulerList();
+	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
 		return;
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
-	Ruler* ruler = ruler_list->at(idx);
+	FL::Ruler* ruler = ruler_list->at(idx);
 	FL::ComponentAnalyzer* analyzer =
 		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
 	FL::CompList* list = 0;

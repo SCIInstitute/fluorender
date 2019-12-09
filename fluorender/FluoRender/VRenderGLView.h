@@ -35,7 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeSelector.h"
 #include "KernelExecutor.h"
 #include "Calculate/VolumeCalculator.h"
-#include "RulerHandler.h"
+#include <Distance/Ruler.h>
+#include <Distance/RulerHandler.h>
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/KernelProgram.h"
@@ -518,8 +519,8 @@ public:
 		vector<float> &verts, unsigned int& num);
 	unsigned int DrawRulersVerts(vector<float> &verts);
 	void DrawRulers();
-	RulerList* GetRulerList();
-	Ruler* GetRuler(unsigned int id);
+	FL::RulerList* GetRulerList();
+	FL::Ruler* GetRuler(unsigned int id);
 	int RulerProfile(int index);
 	int RulerDistance(int index);
 
@@ -728,7 +729,7 @@ private:
 	//real data list
 	vector <TreeLayer*> m_layer_list;
 	//ruler list
-	RulerList m_ruler_list;
+	FL::RulerList m_ruler_list;
 	//grow point
 	Point m_grow_point;
 	//traces
@@ -1033,7 +1034,7 @@ private:
 #endif
 
 	//handle rulers
-	RulerHandler m_ruler_handler;
+	FL::RulerHandler m_ruler_handler;
 
 private:
 #ifdef _WIN32

@@ -6773,11 +6773,11 @@ void VRenderGLView::RunRulerProfile(int index, wxFileConfig &fconfig)
 	{
 		//for each ruler
 		wxString str;
-		Ruler* ruler = m_ruler_list[i];
+		FL::Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 
-		vector<ProfileBin>* profile = ruler->GetProfile();
+		vector<FL::ProfileBin>* profile = ruler->GetProfile();
 		if (profile && profile->size())
 		{
 			double sumd = 0.0;
@@ -11714,7 +11714,7 @@ unsigned int VRenderGLView::DrawRulersVerts(vector<float> &verts)
 	Color text_color = GetTextColor();
 	for (size_t i = 0; i<m_ruler_list.size(); i++)
 	{
-		Ruler* ruler = m_ruler_list[i];
+		FL::Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		if (!ruler->GetTimeDep() ||
@@ -12061,7 +12061,7 @@ void VRenderGLView::DrawRulers()
 	p.set(glm::value_ptr(m_proj_mat));
 	for (size_t i = 0; i < m_ruler_list.size(); i++)
 	{
-		Ruler* ruler = m_ruler_list[i];
+		FL::Ruler* ruler = m_ruler_list[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		if (!ruler->GetTimeDep() ||
@@ -12086,12 +12086,12 @@ void VRenderGLView::DrawRulers()
 	}
 }
 
-RulerList* VRenderGLView::GetRulerList()
+FL::RulerList* VRenderGLView::GetRulerList()
 {
 	return &m_ruler_list;
 }
 
-Ruler* VRenderGLView::GetRuler(unsigned int id)
+FL::Ruler* VRenderGLView::GetRuler(unsigned int id)
 {
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
 	{
@@ -12108,7 +12108,7 @@ int VRenderGLView::RulerProfile(int index)
 		!m_cur_vol)
 		return 0;
 
-	Ruler* ruler = m_ruler_list[index];
+	FL::Ruler* ruler = m_ruler_list[index];
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
@@ -12155,12 +12155,12 @@ int VRenderGLView::RulerProfile(int index)
 		int bins = int(dist / 1 + 0.5);
 		if (bins <= 0) return 0;
 		double bin_dist = dist / bins;
-		vector<ProfileBin>* profile = ruler->GetProfile();
+		vector<FL::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
 		profile->reserve(size_t(bins));
 		for (unsigned int b = 0; b<bins; ++b)
-			profile->push_back(ProfileBin());
+			profile->push_back(FL::ProfileBin());
 
 		double brush_radius = ruler->GetBrushSize()+1.0;
 
@@ -12203,7 +12203,7 @@ int VRenderGLView::RulerProfile(int index)
 		//calculate length in object space
 		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
 		int bins = int(total_length);
-		vector<ProfileBin>* profile = ruler->GetProfile();
+		vector<FL::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
 
@@ -12216,7 +12216,7 @@ int VRenderGLView::RulerProfile(int index)
 		{
 			//allocate
 			profile->reserve(size_t(1));
-			profile->push_back(ProfileBin());
+			profile->push_back(FL::ProfileBin());
 
 			p = *(ruler->GetPoint(0));
 			//object space
@@ -12244,7 +12244,7 @@ int VRenderGLView::RulerProfile(int index)
 			//allocate
 			profile->reserve(size_t(bins));
 			for (unsigned int b = 0; b<bins; ++b)
-				profile->push_back(ProfileBin());
+				profile->push_back(FL::ProfileBin());
 
 			Point p1, p2;
 			Vector dir;
@@ -12302,7 +12302,7 @@ int VRenderGLView::RulerDistance(int index)
 		!m_cur_vol)
 		return 0;
 
-	Ruler* ruler = m_ruler_list[index];
+	FL::Ruler* ruler = m_ruler_list[index];
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
@@ -13164,7 +13164,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					}
 					else
 					{
-						Ruler* sel_ruler = m_ruler_handler.GetRuler();
+						FL::Ruler* sel_ruler = m_ruler_handler.GetRuler();
 						if (sel_ruler)
 						{
 							Vector displace = point - *p0;
