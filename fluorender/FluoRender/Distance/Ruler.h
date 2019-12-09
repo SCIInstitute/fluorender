@@ -48,8 +48,58 @@ namespace FL
 		double m_accum;
 	};
 
-	typedef std::shared_ptr<Point> pPoint;
-	typedef std::vector<pPoint> RulerBranch;
+	class RulerPoint;
+	typedef std::shared_ptr<RulerPoint> pRulerPoint;
+	typedef std::vector<pRulerPoint> RulerBranch;
+
+	class RulerPoint
+	{
+	public:
+		RulerPoint():
+			m_nailed(false)
+		{}
+		RulerPoint(Point& p):
+			m_p(p),
+			m_nailed(false)
+		{}
+		RulerPoint(bool nailed):
+			m_nailed(nailed)
+		{}
+		RulerPoint(Point& p, bool nailed):
+			m_p(p),
+			m_nailed(nailed)
+		{}
+
+		void SetPoint(Point& p)
+		{
+			m_p = p;
+		}
+		Point GetPoint()
+		{
+			return m_p;
+		}
+		void ScalePoint(double sx, double sy, double sz)
+		{
+			m_p.scale(sx, sy, sz);
+		}
+		void DisplacePoint(Vector& dp)
+		{
+			m_p += dp;
+		}
+		void SetNailed(bool nailed = true)
+		{
+			m_nailed = nailed;
+		}
+		bool GetNailed()
+		{
+			return m_nailed;
+		}
+
+	private:
+		Point m_p;
+		bool m_nailed;
+	};
+
 	class Ruler;
 	typedef std::vector<Ruler*> RulerList;
 	typedef std::vector<Ruler*>::iterator RulerListIter;
@@ -95,11 +145,11 @@ namespace FL
 		//data
 		int GetNumBranch();
 		int GetNumPoint();
-		Point* GetPoint(int index);
-		pPoint GetPPoint(int index);
+		RulerPoint* GetPoint(int index);
+		pRulerPoint GetPPoint(int index);
 		int GetNumBranchPoint(int nbranch);
-		Point* GetPoint(int nbranch, int index);
-		pPoint FindPoint(Point& point);
+		RulerPoint* GetPoint(int nbranch, int index);
+		pRulerPoint FindPoint(Point& point);
 		int GetRulerType();
 		void SetRulerType(int type);
 		bool GetFinished();
@@ -111,7 +161,7 @@ namespace FL
 
 		bool AddPoint(Point &point);
 		void SetTransform(Transform *tform);
-		bool AddBranch(pPoint point);
+		bool AddBranch(pRulerPoint point);
 
 		void Clear();
 		void Reverse();

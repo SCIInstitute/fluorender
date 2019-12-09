@@ -168,7 +168,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	DeleteAllItems();
 
 	wxString points;
-	Point *p;
+	Point p;
 	int num_points;
 	for (int i=0; i<(int)ruler_list->size(); i++)
 	{
@@ -197,14 +197,14 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		num_points = ruler->GetNumPoint();
 		if (num_points > 0)
 		{
-			p = ruler->GetPoint(0);
-			points += wxString::Format("(%.2f, %.2f, %.2f)", p->x(), p->y(), p->z());
+			p = ruler->GetPoint(0)->GetPoint();
+			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
 		}
 		if (num_points > 1)
 		{
-			p = ruler->GetPoint(num_points - 1);
+			p = ruler->GetPoint(num_points - 1)->GetPoint();
 			points += ", ";
-			points += wxString::Format("(%.2f, %.2f, %.2f)", p->x(), p->y(), p->z());
+			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
 		}
 		wxString color;
 		if (ruler->GetUseColor())
@@ -326,7 +326,7 @@ void RulerListCtrl::Export(wxString filename)
 		wxString str;
 		wxString unit;
 		int num_points;
-		Point *p;
+		Point p;
 		FL::Ruler* ruler;
 		switch (m_view->m_glview->m_sb_unit)
 		{
@@ -370,14 +370,14 @@ void RulerListCtrl::Export(wxString filename)
 			num_points = ruler->GetNumPoint();
 			if (num_points > 0)
 			{
-				p = ruler->GetPoint(0);
-				str += wxString::Format("%.2f\t%.2f\t%.2f", p->x(), p->y(), p->z());
+				p = ruler->GetPoint(0)->GetPoint();
+				str += wxString::Format("%.2f\t%.2f\t%.2f", p.x(), p.y(), p.z());
 			}
 			if (num_points > 1)
 			{
-				p = ruler->GetPoint(num_points - 1);
+				p = ruler->GetPoint(num_points - 1)->GetPoint();
 				str += "\t";
-				str += wxString::Format("%.2f\t%.2f\t%.2f", p->x(), p->y(), p->z());
+				str += wxString::Format("%.2f\t%.2f\t%.2f", p.x(), p.y(), p.z());
 			}
 			tos << str << "\t";
 			if (ruler->GetTimeDep())
@@ -610,12 +610,9 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 				return;
 		}
 	}
-	Point* pt = ruler->GetPoint(0);
-	if (!pt)
+	if (!ruler->GetPoint(0))
 		return;
-	pt->x(x);
-	pt->y(y);
-	pt->z(z);
+	ruler->GetPoint(0)->SetPoint(Point(x, y, z));
 	str = wxString::Format("(%.2f, %.2f, %.2f)",
 		x, y, z);
 	SetText(m_editing_item, 4, str);

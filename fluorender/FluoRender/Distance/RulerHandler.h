@@ -79,22 +79,24 @@ namespace FL
 
 		bool FindEditingRuler(double mx, double my);
 
-		void SetPoint(FL::pPoint point)
+		void SetPoint(FL::pRulerPoint point)
 		{
 			m_point = point;
 		}
-		Point* GetPoint()
+		RulerPoint* GetPoint()
 		{
 			return m_point.get();
 		}
 
-		Point* GetEllipsePoint(int index);
+		RulerPoint* GetEllipsePoint(int index);
 
 		void FinishRuler();
 		bool GetRulerFinished();
 
 		void AddRulerPoint(int mx, int my);
 		void AddPaintRulerPoint();
+		bool MoveRuler(int mx, int my);
+		bool EditPoint(int mx, int my, bool alt);
 
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
@@ -107,7 +109,7 @@ namespace FL
 					//4: protractor; 5: ellipse
 
 		//get point
-		FL::pPoint m_point;
+		FL::pRulerPoint m_point;
 		int m_pindex;//index of point in ruler
 
 	private:
