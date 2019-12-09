@@ -26,6 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <GL/glew.h>
+#ifndef _DATAMANAGER_H_
+#define _DATAMANAGER_H_
+
 #include "compatibility.h"
 #include <vector>
 #include <string.h>
@@ -53,9 +56,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/brkxml_reader.h"
 #include "Formats/imageJ_reader.h"
 #include "Tracking/TrackMap.h"
-
-#ifndef _DATAMANAGER_H_
-#define _DATAMANAGER_H_
+#include <Distance/Ruler.h>
 
 using namespace std;
 using namespace FLIVR;
@@ -796,187 +797,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class ProfileBin
-{
-public:
-	ProfileBin():
-	m_pixels(0), m_accum(0.0) {}
-	~ProfileBin() {}
-	int m_pixels;
-	double m_accum;
-};
-
-typedef std::shared_ptr<Point> pPoint;
-typedef std::vector<pPoint> RulerBranch;
-class Ruler;
-typedef std::vector<Ruler*> RulerList;
-typedef std::vector<Ruler*>::iterator RulerListIter;
-
-class Ruler : public TreeLayer
-{
-public:
-	Ruler();
-	virtual ~Ruler();
-
-	//reset counter
-	static void ResetID()
-	{
-		m_num = 0;
-	}
-	static void SetID(int id)
-	{
-		m_num = id;
-	}
-	static int GetID()
-	{
-		return m_num;
-	}
-
-	//data
-	int GetNumBranch();
-	int GetNumPoint();
-	Point* GetPoint(int index);
-	pPoint GetPPoint(int index);
-	int GetNumBranchPoint(int nbranch);
-	Point* GetPoint(int nbranch, int index);
-	pPoint FindPoint(Point& point);
-	int GetRulerType();
-	void SetRulerType(int type);
-	bool GetFinished();
-	void SetFinished();
-	double GetLength();
-	double GetLengthObject(double spcx, double spcy, double spcz);
-	double GetAngle();
-	void Scale(double spcx, double spcy, double spcz);
-
-	bool AddPoint(Point &point);
-	void SetTransform(Transform *tform);
-	bool AddBranch(pPoint point);
-
-	void Clear();
-	void Reverse();
-
-	//display functions
-	void SetDisp(bool disp)
-	{
-		m_disp = disp;
-	}
-	void ToggleDisp()
-	{
-		m_disp = !m_disp;
-	}
-	bool GetDisp()
-	{
-		return m_disp;
-	}
-
-	//time-dependent
-	void SetTimeDep(bool time_dep)
-	{
-		m_time_dep = time_dep;
-	}
-	bool GetTimeDep()
-	{
-		return m_time_dep;
-	}
-	void SetTime(int time)
-	{
-		m_time = time;
-	}
-	int GetTime()
-	{
-		return m_time;
-	}
-
-	//extra info
-	void AddInfoNames(wxString &str)
-	{
-		m_info_names += str;
-	}
-	void SetInfoNames(wxString &str)
-	{
-		m_info_names = str;
-	}
-	wxString &GetInfoNames()
-	{
-		return m_info_names;
-	}
-	void AddInfoValues(wxString &str)
-	{
-		m_info_values += str;
-	}
-	void SetInfoValues(wxString &str)
-	{
-		m_info_values = str;
-	}
-	wxString &GetInfoValues()
-	{
-		return m_info_values;
-	}
-	wxString GetDelInfoValues(wxString del=",");
-	wxString GetPosValues();
-	wxString GetPosNames();
-
-	//profile
-	void SetInfoProfile(wxString &str)
-	{
-		m_info_profile = str;
-	}
-	wxString &GetInfoProfile()
-	{
-		return m_info_profile;
-	}
-	vector<ProfileBin> *GetProfile()
-	{
-		return &m_profile;
-	}
-	void SaveProfile(wxString &filename);
-
-	//color
-	void SetColor(Color& color)
-	{ m_color = color; m_use_color = true;}
-	bool GetUseColor()
-	{ return m_use_color; }
-	Color &GetColor()
-	{ return m_color; }
-
-	//brush size
-	void SetBrushSize(double size)
-	{ m_brush_size = size; }
-	double GetBrushSize()
-	{ return m_brush_size; }
-
-	void FinishEllipse(Vector view);
-	Point GetCenter();
-
-private:
-	static int m_num;
-	int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
-						//4: protractor; 5: ellipse
-	bool m_finished;
-	vector<RulerBranch> m_ruler;
-	bool m_disp;
-	Transform *m_tform;
-	//a profile
-	wxString m_info_profile;
-	vector<ProfileBin> m_profile;
-	//color
-	bool m_use_color;
-	Color m_color;
-
-	//time-dependent
-	bool m_time_dep;
-	int m_time;
-
-	//extra info
-	wxString m_info_names;
-	wxString m_info_values;
-
-	//brush size if brush is used along with the ruler
-	double m_brush_size;
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class TraceGroup : public TreeLayer
 {
 public:
@@ -1050,7 +870,7 @@ public:
 	bool TrackStencils();
 
 	//rulers
-	bool GetMappedRulers(RulerList &rulers);
+	bool GetMappedRulers(FL::RulerList &rulers);
 
 	//i/o
 	bool Load(wxString &filename);
@@ -1092,9 +912,9 @@ private:
 	//rulers
 	bool GetMappedRulers(
 		FL::CellList &sel_list1, FL::CellList &sel_list2,
-		RulerList &rulers,
+		FL::RulerList &rulers,
 		size_t frame1, size_t frame2);
-	RulerListIter FindRulerFromList(unsigned int id, RulerList &list);
+	FL::RulerListIter FindRulerFromList(unsigned int id, FL::RulerList &list);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

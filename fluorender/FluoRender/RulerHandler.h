@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerHandler_H_
 #define _RulerHandler_H_
 
-#include "DataManager.h"
+#include <Distance/Ruler.h>
 
 class VRenderGLView;
 class wxFileConfig;
@@ -45,22 +45,22 @@ public:
 		m_view = view;
 	}
 
-	void SetRuler(Ruler* ruler)
+	void SetRuler(FL::Ruler* ruler)
 	{
 		m_ruler = ruler;
 	}
 
-	Ruler* GetRuler()
+	FL::Ruler* GetRuler()
 	{
 		return m_ruler;
 	}
 
-	void SetRulerList(RulerList* ruler_list)
+	void SetRulerList(FL::RulerList* ruler_list)
 	{
 		m_ruler_list = ruler_list;
 	}
 
-	RulerList* GetRulerList()
+	FL::RulerList* GetRulerList()
 	{
 		return m_ruler_list;
 	}
@@ -77,7 +77,7 @@ public:
 
 	bool FindEditingRuler(double mx, double my);
 
-	void SetPoint(pPoint point)
+	void SetPoint(FL::pPoint point)
 	{
 		m_point = point;
 	}
@@ -99,13 +99,13 @@ public:
 
 private:
 	VRenderGLView *m_view;
-	Ruler *m_ruler;
-	RulerList *m_ruler_list;
+	FL::Ruler *m_ruler;
+	FL::RulerList *m_ruler_list;
 	int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 				//4: protractor; 5: ellipse
 
 	//get point
-	pPoint m_point;
+	FL::pPoint m_point;
 	int m_pindex;//index of point in ruler
 
 private:
