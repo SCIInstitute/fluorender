@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <wx/fileconf.h>
 
+using namespace FL;
+
 RulerHandler::RulerHandler() :
 	m_view(0),
 	m_ruler(0),
@@ -75,12 +77,12 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	mv.set(glm::value_ptr(mv_temp));
 	prj.set(glm::value_ptr(prj_temp));
 
-	FL::pPoint point;
+	pPoint point;
 	int i, j;
 	Point ptemp;
 	for (i = 0; i < (int)m_ruler_list->size(); i++)
 	{
-		FL::Ruler* ruler = (*m_ruler_list)[i];
+		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 
@@ -178,7 +180,7 @@ void RulerHandler::AddRulerPoint(int mx, int my)
 	if (m_type == 3)
 	{
 		Point p1, p2;
-		FL::Ruler* ruler = new FL::Ruler();
+		Ruler* ruler = new Ruler();
 		ruler->SetRulerType(m_type);
 		m_view->GetPointVolumeBox2(p1, p2, mx, my);
 		ruler->AddPoint(p1);
@@ -232,7 +234,7 @@ void RulerHandler::AddRulerPoint(int mx, int my)
 		}
 		if (new_ruler)
 		{
-			m_ruler = new FL::Ruler();
+			m_ruler = new Ruler();
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(p);
 			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -270,7 +272,7 @@ void RulerHandler::AddPaintRulerPoint()
 		}
 		if (new_ruler)
 		{
-			m_ruler = new FL::Ruler();
+			m_ruler = new Ruler();
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(center);
 			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -291,7 +293,7 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 		fconfig.Write("num", static_cast<unsigned int>(m_ruler_list->size()));
 		for (size_t ri = 0; ri < m_ruler_list->size(); ++ri)
 		{
-			FL::Ruler* ruler = (*m_ruler_list)[ri];
+			Ruler* ruler = (*m_ruler_list)[ri];
 			if (!ruler) continue;
 			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
 			fconfig.Write("name", ruler->GetName());
@@ -339,7 +341,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 			if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d", vi, ri)))
 			{
 				fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
-				FL::Ruler* ruler = new FL::Ruler();
+				Ruler* ruler = new Ruler();
 				if (fconfig.Read("name", &str))
 					ruler->SetName(str);
 				if (fconfig.Read("type", &ival))
@@ -406,7 +408,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 										Point point(x, y, z);
 										if (rbi > 0 && rpi == 0)
 										{
-											FL::pPoint pp = ruler->FindPoint(point);
+											pPoint pp = ruler->FindPoint(point);
 											ruler->AddBranch(pp);
 										}
 										else

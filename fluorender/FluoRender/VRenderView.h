@@ -494,15 +494,15 @@ public:
 	}
 
 	//rulers
-	RulerList* GetRulerList()
+	FL::RulerList* GetRulerList()
 	{
 		if (m_glview) return m_glview->GetRulerList(); else return 0;
 	}
-	Ruler* GetRuler(unsigned int id)
+	FL::Ruler* GetRuler(unsigned int id)
 	{
 		if (m_glview) return m_glview->GetRuler(id); else return 0;
 	}
-	RulerHandler* GetRulerHandler()
+	FL::RulerHandler* GetRulerHandler()
 	{
 		if (m_glview) return &m_glview->m_ruler_handler; else return 0;
 	}

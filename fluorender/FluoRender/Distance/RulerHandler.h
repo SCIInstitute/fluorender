@@ -34,81 +34,84 @@ DEALINGS IN THE SOFTWARE.
 class VRenderGLView;
 class wxFileConfig;
 
-class RulerHandler
+namespace FL
 {
-public:
-	RulerHandler();
-	~RulerHandler();
-
-	void SetView(VRenderGLView* view)
+	class RulerHandler
 	{
-		m_view = view;
-	}
+	public:
+		RulerHandler();
+		~RulerHandler();
 
-	void SetRuler(FL::Ruler* ruler)
-	{
-		m_ruler = ruler;
-	}
+		void SetView(VRenderGLView* view)
+		{
+			m_view = view;
+		}
 
-	FL::Ruler* GetRuler()
-	{
-		return m_ruler;
-	}
+		void SetRuler(FL::Ruler* ruler)
+		{
+			m_ruler = ruler;
+		}
 
-	void SetRulerList(FL::RulerList* ruler_list)
-	{
-		m_ruler_list = ruler_list;
-	}
+		FL::Ruler* GetRuler()
+		{
+			return m_ruler;
+		}
 
-	FL::RulerList* GetRulerList()
-	{
-		return m_ruler_list;
-	}
+		void SetRulerList(FL::RulerList* ruler_list)
+		{
+			m_ruler_list = ruler_list;
+		}
 
-	void SetType(int type)
-	{
-		m_type = type;
-	}
+		FL::RulerList* GetRulerList()
+		{
+			return m_ruler_list;
+		}
 
-	int GetType()
-	{
-		return m_type;
-	}
+		void SetType(int type)
+		{
+			m_type = type;
+		}
 
-	bool FindEditingRuler(double mx, double my);
+		int GetType()
+		{
+			return m_type;
+		}
 
-	void SetPoint(FL::pPoint point)
-	{
-		m_point = point;
-	}
-	Point* GetPoint()
-	{
-		return m_point.get();
-	}
+		bool FindEditingRuler(double mx, double my);
 
-	Point* GetEllipsePoint(int index);
+		void SetPoint(FL::pPoint point)
+		{
+			m_point = point;
+		}
+		Point* GetPoint()
+		{
+			return m_point.get();
+		}
 
-	void FinishRuler();
-	bool GetRulerFinished();
+		Point* GetEllipsePoint(int index);
 
-	void AddRulerPoint(int mx, int my);
-	void AddPaintRulerPoint();
+		void FinishRuler();
+		bool GetRulerFinished();
 
-	void Save(wxFileConfig &fconfig, int vi);
-	void Read(wxFileConfig &fconfig, int vi);
+		void AddRulerPoint(int mx, int my);
+		void AddPaintRulerPoint();
 
-private:
-	VRenderGLView *m_view;
-	FL::Ruler *m_ruler;
-	FL::RulerList *m_ruler_list;
-	int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
-				//4: protractor; 5: ellipse
+		void Save(wxFileConfig &fconfig, int vi);
+		void Read(wxFileConfig &fconfig, int vi);
 
-	//get point
-	FL::pPoint m_point;
-	int m_pindex;//index of point in ruler
+	private:
+		VRenderGLView *m_view;
+		FL::Ruler *m_ruler;
+		FL::RulerList *m_ruler_list;
+		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
+					//4: protractor; 5: ellipse
 
-private:
-};
+		//get point
+		FL::pPoint m_point;
+		int m_pindex;//index of point in ruler
 
+	private:
+	};
+
+}
 #endif//_RulerHandler_H_
