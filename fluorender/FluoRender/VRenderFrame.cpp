@@ -4399,69 +4399,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 					vrv->SetW2d(dVal);
 
 				//rulers
-				if (vrv->GetRulerList())
+				if (vrv->GetRulerList() &&
+					fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
 				{
-					vrv->GetRulerList()->clear();
-					if (fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
-					{
-						fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-						int rnum = fconfig.Read("num", 0l);
-						for (int ri=0; ri<rnum; ++ri)
-						{
-							if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d", i, ri)))
-							{
-								fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", i, ri));
-								Ruler* ruler = new Ruler();
-								if (fconfig.Read("name", &str))
-									ruler->SetName(str);
-								if (fconfig.Read("type", &iVal))
-									ruler->SetRulerType(iVal);
-								if (fconfig.Read("display", &bVal))
-									ruler->SetDisp(bVal);
-								if (fconfig.Read("transient", &bVal))
-									ruler->SetTimeDep(bVal);
-								if (fconfig.Read("time", &iVal))
-									ruler->SetTime(iVal);
-								if (fconfig.Read("info_names", &str))
-									ruler->SetInfoNames(str);
-								if (fconfig.Read("info_values", &str))
-									ruler->SetInfoValues(str);
-								if (fconfig.Read("use_color", &bVal))
-								{
-									if (bVal)
-									{
-										if (fconfig.Read("color", &str))
-										{
-											float r, g, b;
-											if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
-											{
-												FLIVR::Color col(r,g,b);
-												ruler->SetColor(col);
-											}
-										}
-									}
-								}
-								int pnum = fconfig.Read("num", 0l);
-								for (int rpi=0; rpi<pnum; ++rpi)
-								{
-									if (fconfig.Exists(wxString::Format("/views/%d/rulers/%d/points/%d", i, ri, rpi)))
-									{
-										fconfig.SetPath(wxString::Format("/views/%d/rulers/%d/points/%d", i, ri, rpi));
-										if (fconfig.Read("point", &str))
-										{
-											float x, y, z;
-											if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z)){
-												Point point(x,y,z);
-												ruler->AddPoint(point);
-											}
-										}
-									}
-								}
-								ruler->SetFinished();
-								vrv->GetRulerList()->push_back(ruler);
-							}
-						}
-					}
+					fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
+					vrv->GetRulerHandler()->Read(fconfig, i);
 				}
 			}
 		}
