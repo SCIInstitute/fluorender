@@ -12802,31 +12802,31 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	//mouse button down operations
 	if (event.LeftDown())
 	{
+		bool found_rp = false;
 		if (m_int_mode == 6 ||
 			m_int_mode == 9 ||
 			m_int_mode == 11)
 		{
-			m_ruler_handler.FindEditingRuler(
+			found_rp = m_ruler_handler.FindEditingRuler(
 				event.GetX(), event.GetY());
-			if (m_int_mode == 11)
+		}
+		if (m_int_mode == 11 && found_rp)
+		{
+			FL::RulerPoint *p = m_ruler_handler.GetPoint();
+			if (p)
 			{
-				FL::RulerPoint *p = m_ruler_handler.GetPoint();
-				if (p)
-				{
-					p->ToggleLocked();
-					RefreshGL(41);
-				}
+				p->ToggleLocked();
+				RefreshGL(41);
 			}
 		}
 
-		FL::RulerPoint *p0 = m_ruler_handler.GetPoint();
-
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
-				event.AltDown()) ||
-				((m_int_mode == 6 ||
-				m_int_mode == 9) &&
-					p0 == 0))
+			event.AltDown()) ||
+			((m_int_mode == 6 ||
+			m_int_mode == 9 ||
+			m_int_mode == 11) &&
+			!found_rp))
 		{
 			old_mouse_X = event.GetX();
 			old_mouse_Y = event.GetY();
@@ -12919,7 +12919,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(27);
 			return;
 		}
-		else if (m_int_mode == 6 || m_int_mode == 9)
+		else if (m_int_mode == 6 ||
+			m_int_mode == 9 ||
+			m_int_mode ==11)
 		{
 			m_ruler_handler.SetPoint(0);
 		}
@@ -12988,10 +12990,11 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		bool hold_old = false;
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&
-				event.AltDown()) ||
-				((m_int_mode == 6 ||
-				m_int_mode == 9) &&
-					p0 == 0))
+			event.AltDown()) ||
+			((m_int_mode == 6 ||
+			m_int_mode == 9 ||
+			m_int_mode == 11) &&
+			!p0))
 		{
 			//disable picking
 			m_pick = false;
