@@ -1391,7 +1391,8 @@ void MeasureDlg::Project(int idx)
 		{
 			ofs << it->id << "\t";
 			ofs << it->proj.x() << "\t";
-			ofs << it->proj.y() << "\n";
+			ofs << it->proj.y() << "\t";
+			ofs << it->proj.z() << "\n";
 		}
 		ofs.close();
 	}
