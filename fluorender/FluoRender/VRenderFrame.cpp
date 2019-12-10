@@ -387,7 +387,6 @@ VRenderFrame::VRenderFrame(
 
 	//create render view
 	VRenderView *vrv = new VRenderView(this, this, wxID_ANY);
-	vrv->SetDropTarget(new DnDFile(this, vrv));
 	vrv->InitView();
 	m_vrv_list.push_back(vrv);
 
@@ -946,7 +945,6 @@ wxString VRenderFrame::CreateView(int row)
 
 	if (vrv)
 	{
-		vrv->SetDropTarget(new DnDFile(this, vrv));
 		m_vrv_list.push_back(vrv);
 		if (m_movie_view)
 			m_movie_view->AddView(vrv->GetName());
