@@ -220,7 +220,10 @@ void DistCalculator::UpdateSpringNode(int idx)
 		dir = prev.p->GetPoint() - pos;
 		dist = dir.length();
 		dir.normalize();
-		f2 += dir * (dist - node.prevd);
+		if (node.nextd == 0.0)
+			f2 += dir * (dist - node.prevd) * 0.2;
+		else
+			f2 += dir * (dist - node.prevd);
 	}
 	if (idx < sz - 1 && node.nextd > 0.0)
 	{
@@ -228,7 +231,10 @@ void DistCalculator::UpdateSpringNode(int idx)
 		dir = next.p->GetPoint() - pos;
 		dist = dir.length();
 		dir.normalize();
-		f2 += dir * (dist - node.nextd);
+		if (node.prevd == 0.0)
+			f2 += dir * (dist - node.nextd) * 0.2;
+		else
+			f2 += dir * (dist - node.nextd);
 	}
 	//angular
 	if (idx > 0 && idx < sz - 1 &&
@@ -256,7 +262,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	//f3.normalize();
 	//f3 *= norm;
 	force = m_f1 * f1 + m_f2 * f2;
-	node.p->SetPoint(pos + force);
+	node.p->DisplacePoint(force);
 }
 
 void DistCalculator::UpdateSpringDist()
