@@ -1369,7 +1369,8 @@ void MeasureDlg::Project(int idx)
 		comps.push_back(*(it->second));
 	std::sort(comps.begin(), comps.end(),
 		[](const FL::CompInfo &a, const FL::CompInfo &b) -> bool
-		{ return a.proj.x() < b.proj.x(); });
+		{ if (a.proj.z() != b.proj.z()) return a.proj.z() < b.proj.z();
+		else return a.proj.x() < b.proj.x(); });
 
 	//export
 	wxFileDialog *fopendlg = new wxFileDialog(
