@@ -217,6 +217,9 @@ public:
 	//ruler relax f1
 	double GetRulerRelaxF1() { return m_ruler_relax_f1; }
 	void SetRulerRelaxF1(double val) { m_ruler_relax_f1 = val; }
+	//ruler relax iter
+	int GetRulerRelaxIter() { return m_ruler_relax_iter; }
+	void SetRulerRelaxIter(int iter) { m_ruler_relax_iter = iter; }
 	//ruler exports df/f
 	bool GetRulerDF_F() { return m_ruler_df_f; }
 	void SetRulerDF_F(bool val) { m_ruler_df_f = val; }
@@ -343,6 +346,8 @@ private:
 	bool m_ruler_time_dep;
 	//ruler relax f1
 	double m_ruler_relax_f1;
+	//ruler relax iter
+	int m_ruler_relax_iter;
 	//ruler exports df/f
 	bool m_ruler_df_f;
 	//flip pvxml frame

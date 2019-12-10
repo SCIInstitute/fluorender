@@ -1409,19 +1409,24 @@ void MeasureDlg::Relax(int idx)
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
 	FL::Ruler* ruler = ruler_list->at(idx);
-	FL::ComponentAnalyzer* analyzer =
-		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
-	FL::CompList* list = 0;
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	FL::ComponentAnalyzer* analyzer = 0;
+	if (frame && frame->GetComponentDlg())
+		analyzer = frame->GetComponentDlg()->GetAnalyzer();
 	if (!analyzer)
 		return;
+	FL::CompList* list = 0;
 	list = analyzer->GetCompList();
-	//if (list->empty())
-	//	return;
+	if (list && list->empty())
+		list = 0;
+	int iter = 10;
+	if (frame && frame->GetSettingDlg())
+		iter = frame->GetSettingDlg()->GetRulerRelaxIter();
 
 	m_calculator.SetF1(m_relax_value_spin->GetValue());
 	m_calculator.SetCompList(list);
 	m_calculator.SetRuler(ruler);
-	m_calculator.CenterRuler(m_edited, 10);
+	m_calculator.CenterRuler(m_edited, iter);
 	m_edited = false;
 	m_view->RefreshGL();
 }

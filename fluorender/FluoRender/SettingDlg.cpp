@@ -817,6 +817,7 @@ void SettingDlg::GetSettings()
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
 	m_ruler_relax_f1 = 2.0;
+	m_ruler_relax_iter = 10;
 	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
@@ -1057,29 +1058,15 @@ void SettingDlg::GetSettings()
 		fconfig.SetPath("/point volume mode");
 		fconfig.Read("value", &m_point_volume_mode);
 	}
-	//ruler use transfer function
-	if (fconfig.Exists("/ruler use transf"))
+	//ruler settings
+	if (fconfig.Exists("/ruler"))
 	{
-		fconfig.SetPath("/ruler use transf");
-		fconfig.Read("value", &m_ruler_use_transf);
-	}
-	//ruler time dependent
-	if (fconfig.Exists("/ruler time dependent"))
-	{
-		fconfig.SetPath("/ruler time dependent");
-		fconfig.Read("value", &m_ruler_time_dep);
-	}
-	//ruler relax f1
-	if (fconfig.Exists("/ruler relax f1"))
-	{
-		fconfig.SetPath("/ruler relax f1");
-		fconfig.Read("value", &m_ruler_relax_f1);
-	}
-	//ruler exports df/f
-	if (fconfig.Exists("/ruler df_f"))
-	{
-		fconfig.SetPath("/ruler df_f");
-		fconfig.Read("value", &m_ruler_df_f);
+		fconfig.SetPath("/ruler");
+		fconfig.Read("use transf", &m_ruler_use_transf);
+		fconfig.Read("time dep", &m_ruler_time_dep);
+		fconfig.Read("relax f1", &m_ruler_relax_f1);
+		fconfig.Read("df_f", &m_ruler_df_f);
+		fconfig.Read("relax iter", &m_ruler_relax_iter);
 	}
 	//flags for pvxml flipping
 	if (fconfig.Exists("/pvxml flip"))
@@ -1409,21 +1396,13 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/point volume mode");
 	fconfig.Write("value", m_point_volume_mode);
 
-	//ruler use transfer function
-	fconfig.SetPath("/ruler use transf");
-	fconfig.Write("value", m_ruler_use_transf);
-
-	//ruler time dependent
-	fconfig.SetPath("/ruler time dependent");
-	fconfig.Write("value", m_ruler_time_dep);
-
-	//ruler relax f1
-	fconfig.SetPath("/ruler relax f1");
-	fconfig.Write("value", m_ruler_relax_f1);
-
-	//ruler exports df/f
-	fconfig.SetPath("/ruler df_f");
-	fconfig.Write("value", m_ruler_df_f);
+	//ruler settings
+	fconfig.SetPath("/ruler");
+	fconfig.Write("use transf", m_ruler_use_transf);
+	fconfig.Write("time dep", m_ruler_time_dep);
+	fconfig.Write("relax f1", m_ruler_relax_f1);
+	fconfig.Write("df_f", m_ruler_df_f);
+	fconfig.Write("relax iter", m_ruler_relax_iter);
 
 	//flags for flipping pvxml
 	fconfig.SetPath("/pvxml flip");
