@@ -56,9 +56,11 @@ set(HEADER_FILES
     CustomWidgets/fluoSliderStyle.hpp
     CustomWidgets/fluoSpinbox.hpp
     CustomWidgets/fluoSpinboxDouble.hpp
-    CustomWidgets/fluoTabWidget.hpp
     CustomWidgets/fluoToolButton.hpp
     Panels/Properties/propertiesPanel.hpp
+    Panels/Properties/volumePropertiesOptions.hpp
+    Panels/Properties/meshPropertiesOptions.hpp
+    Panels/Properties/volumePropertiesMisc.hpp
   )
   
 set(SOURCES
@@ -74,7 +76,9 @@ set(SOURCES
     renderCanvas.cpp
     testTriangle.cpp
     Panels/Properties/propertiesPanel.cpp
-    CustomWidgets/fluoTabWidget.cpp
+    Panels/Properties/volumePropertiesOptions.cpp
+    Panels/Properties/meshPropertiesOptions.cpp
+    Panels/Properties/volumePropertiesMisc.cpp
   )
   
 set(UI_FILES

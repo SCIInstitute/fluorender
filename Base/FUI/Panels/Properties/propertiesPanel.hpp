@@ -1,13 +1,10 @@
 #ifndef PROPERTIES_PANEL_HPP
 #define PROPERTIES_PANEL_HPP
 
-#include <QDockWidget>
 #include <QTabWidget>
 
-#include <CustomWidgets/fluoSlider.hpp>
-#include <CustomWidgets/fluoSpinbox.hpp>
-#include <CustomWidgets/fluoSpinboxDouble.hpp>
-#include <CustomWidgets/fluoTabWidget.hpp>
+#include "volumePropertiesOptions.hpp"
+#include "meshPropertiesOptions.hpp"
 
 /*
  *
@@ -25,18 +22,16 @@ class PropertiesPanel : public QWidget
 {
   Q_OBJECT
 
-  public:
-    PropertiesPanel(QWidget *parent = nullptr) : QWidget(parent)
-    {
-      QGridLayout* newLayout = new QGridLayout();
-      FluoTabWidget *tabWidget = new FluoTabWidget();
-      newLayout->addWidget(tabWidget);
-      this->setLayout(newLayout);
-    }
+  public slots:
+    void onVolumeLoaded(int renderviewID);
+    void onMeshLoaded(int renderviewID);
 
-    //FluoTabWidget *tabWidget = new FluoTabWidget();
+  public:
+    PropertiesPanel();
 
   private:
+    QTabWidget *tabWidget = new QTabWidget();
+    QGridLayout* myLayout = new QGridLayout();
 
 };
 

@@ -79,7 +79,15 @@
     <addaction name="actionSplit_All"/>
     <addaction name="actionOne_View"/>
    </widget>
+   <widget class="QMenu" name="menuLoad_Volume">
+    <property name="title">
+     <string>Load Project</string>
+    </property>
+    <addaction name="actionLoad_Volume"/>
+    <addaction name="actionLoad_Mesh"/>
+   </widget>
    <addaction name="menuSplit_Render_View"/>
+   <addaction name="menuLoad_Volume"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="minimumSize">
@@ -3998,7 +4006,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="PropertiesPanel" name="dockWidgetContents"/>
+   <widget class="PropertiesPanel" name="propertiesPanel"/>
   </widget>
   <action name="actionTestSplit">
    <property name="icon">
@@ -4113,6 +4121,16 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionLoad_Volume">
+   <property name="text">
+    <string>Load Volume</string>
+   </property>
+  </action>
+  <action name="actionLoad_Mesh">
+   <property name="text">
+    <string>Load Mesh</string>
    </property>
   </action>
  </widget>

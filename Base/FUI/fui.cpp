@@ -878,3 +878,13 @@ void FUI::on_actionOne_View_triggered()
     ui->splitter->addWidget(extractedWindow);
 
 }
+
+void FUI::on_actionLoad_Volume_triggered()
+{
+  ui->propertiesPanel->onVolumeLoaded(0);
+}
+
+void FUI::on_actionLoad_Mesh_triggered()
+{
+  ui->propertiesPanel->onMeshLoaded(0);
+}
