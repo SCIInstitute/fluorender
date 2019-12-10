@@ -58,15 +58,16 @@ void DistCalculator::CenterRuler(bool init, int iter)
 	for (int it = 0; it < iter; ++it)
 	for (int i = 0; i < m_spring.size(); ++i)
 		UpdateSpringNode(i);
-
-	//UpdateRuler();
 }
 
 void DistCalculator::Project()
 {
 	if (!m_comp_list)
 		return;
-	BuildSpring();
+	if (!m_init)
+		BuildSpring();
+	else
+		UpdateSpringDist();
 	if (m_spring.empty())
 		return;
 
@@ -97,30 +98,35 @@ void DistCalculator::BuildSpring()
 
 	//build a spring form the ruler
 	double dist;
-	int n = rn == 1 ? 1 : rn - 1;
-	for (int i = 0; i < n; ++i)
+	int bn = m_ruler->GetNumBranch();
+	for (int bi = 0; bi < bn; ++bi)
 	{
-		if (i == 0)
+		rn = m_ruler->GetNumBranchPoint(bi);
+		int n = rn == 1 ? 1 : rn - 1;
+		for (int i = 0; i < n; ++i)
 		{
-			SpringNode node;
-			node.p = m_ruler->GetPoint(i);
-			node.prevd = 0.0;
-			node.nextd = 0.0;
-			node.dist = 0.0;
-			m_spring.push_back(node);
-		}
-		
-		if (rn > 1)
-		{
-			SpringNode &node1 = m_spring.at(i);
-			SpringNode node2;
-			node2.p = m_ruler->GetPoint(i + 1);
-			dist = (node2.p->GetPoint() - node1.p->GetPoint()).length();
-			node1.nextd = dist;
-			node2.prevd = dist;
-			node2.nextd = 0.0;
-			node2.dist = node1.dist + dist;
-			m_spring.push_back(node2);
+			if (i == 0)
+			{
+				SpringNode node;
+				node.p = m_ruler->GetPoint(bi, i);
+				node.prevd = 0.0;
+				node.nextd = 0.0;
+				node.dist = 0.0;
+				m_spring.push_back(node);
+			}
+
+			if (rn > 1)
+			{
+				SpringNode &node1 = m_spring.back();
+				SpringNode node2;
+				node2.p = m_ruler->GetPoint(bi, i + 1);
+				dist = (node2.p->GetPoint() - node1.p->GetPoint()).length();
+				node1.nextd = dist;
+				node2.prevd = dist;
+				node2.nextd = 0.0;
+				node2.dist = node1.dist + dist;
+				m_spring.push_back(node2);
+			}
 		}
 	}
 }
@@ -208,7 +214,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 		f1 += dir / dist / dist;
 	}
 	//from neighbors
-	if (idx > 0)
+	if (idx > 0 && node.prevd > 0.0)
 	{
 		SpringNode& prev = m_spring.at(idx - 1);
 		dir = prev.p->GetPoint() - pos;
@@ -216,7 +222,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 		dir.normalize();
 		f2 += dir * (dist - node.prevd);
 	}
-	if (idx < sz - 1)
+	if (idx < sz - 1 && node.nextd > 0.0)
 	{
 		SpringNode& next = m_spring.at(idx + 1);
 		dir = next.p->GetPoint() - pos;
@@ -225,7 +231,8 @@ void DistCalculator::UpdateSpringNode(int idx)
 		f2 += dir * (dist - node.nextd);
 	}
 	//angular
-	if (idx > 0 && idx < sz - 1)
+	if (idx > 0 && idx < sz - 1 &&
+		node.prevd > 0.0 && node.nextd > 0.0)
 	{
 		SpringNode& prev = m_spring.at(idx - 1);
 		dir = prev.p->GetPoint() - pos;
@@ -250,6 +257,26 @@ void DistCalculator::UpdateSpringNode(int idx)
 	//f3 *= norm;
 	force = m_f1 * f1 + m_f2 * f2;
 	node.p->SetPoint(pos + force);
+}
+
+void DistCalculator::UpdateSpringDist()
+{
+	if (m_spring.empty())
+		return;
+
+	double dist;
+	Vector dir;
+	for (int i = 0; i < m_spring.size(); ++i)
+	{
+		SpringNode& node = m_spring.at(i);
+		if (node.prevd > 0.0)
+		{
+			SpringNode& prev = m_spring.at(i - 1);
+			dir = node.p->GetPoint() - prev.p->GetPoint();
+			dist = dir.length();
+			node.dist = prev.dist + dist;
+		}
+	}
 }
 
 void DistCalculator::SpringProject(Point &p0, Point &pp)
@@ -293,5 +320,5 @@ void DistCalculator::SpringProject(Point &p0, Point &pp)
 	double len = vp0.length();
 	double ppx = Dot(vp0, axis);
 	double ppy = sqrt(len * len - ppx * ppx);
-	pp = Point(ppx + m_spring[minidx].dist, ppy, 0.0);
+	pp = Point(ppx + m_spring[minidx].dist, ppy, minidx);
 }

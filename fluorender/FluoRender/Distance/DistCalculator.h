@@ -98,6 +98,7 @@ namespace FL
 		void BuildCloud();
 		double GetRestDist();
 		void UpdateSpringNode(int idx);
+		void UpdateSpringDist();
 		void SpringProject(Point &p0, Point &pp);
 	};
 }
