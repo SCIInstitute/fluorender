@@ -27,6 +27,7 @@ FUI::FUI(QWidget *parent) :
     const_cast<int&>(HALFRENDERVIEWSIZE) = ui->splitter->widget(MAINRENDERINDEX)->height()/2;
 
 
+    //ui->dockWidgetContents = propertiesPanel;
 }
 
 FUI::~FUI()

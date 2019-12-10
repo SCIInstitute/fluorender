@@ -2116,7 +2116,7 @@
              <enum>QTabWidget::Rounded</enum>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <property name="elideMode">
              <enum>Qt::ElideNone</enum>
@@ -3973,7 +3973,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="PropertiesWidget">
    <property name="minimumSize">
     <size>
      <width>84</width>
@@ -3998,33 +3998,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="geometry">
-      <rect>
-       <x>9</x>
-       <y>9</y>
-       <width>2125</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="baseSize">
-      <size>
-       <width>0</width>
-       <height>200</height>
-      </size>
-     </property>
-     <property name="title">
-      <string/>
-     </property>
-    </widget>
-   </widget>
+   <widget class="PropertiesPanel" name="dockWidgetContents"/>
   </widget>
   <action name="actionTestSplit">
    <property name="icon">
@@ -4143,6 +4117,14 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>PropertiesPanel</class>
+   <extends>QWidget</extends>
+   <header>Panels/Properties/propertiesPanel.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

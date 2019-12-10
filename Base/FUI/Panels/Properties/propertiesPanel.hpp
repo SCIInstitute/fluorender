@@ -7,6 +7,7 @@
 #include <CustomWidgets/fluoSlider.hpp>
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
+#include <CustomWidgets/fluoTabWidget.hpp>
 
 /*
  *
@@ -20,15 +21,23 @@
  * populated with either a volume or mesh properties.
  *
 */
-class PropertiesPanel : public QDockWidget
+class PropertiesPanel : public QWidget
 {
   Q_OBJECT
 
   public:
-    PropertiesPanel(QWidget *parent = nullptr) : QDockWidget(parent){}
+    PropertiesPanel(QWidget *parent = nullptr) : QWidget(parent)
+    {
+      QGridLayout* newLayout = new QGridLayout();
+      FluoTabWidget *tabWidget = new FluoTabWidget();
+      newLayout->addWidget(tabWidget);
+      this->setLayout(newLayout);
+    }
+
+    //FluoTabWidget *tabWidget = new FluoTabWidget();
 
   private:
-    QTabWidget *tabWidget = new QTabWidget();
+
 };
 
 #endif

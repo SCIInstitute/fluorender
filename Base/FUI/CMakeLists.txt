@@ -56,6 +56,8 @@ set(HEADER_FILES
     CustomWidgets/fluoSliderStyle.hpp
     CustomWidgets/fluoSpinbox.hpp
     CustomWidgets/fluoSpinboxDouble.hpp
+    CustomWidgets/fluoTabWidget.hpp
+    CustomWidgets/fluoToolButton.hpp
     Panels/Properties/propertiesPanel.hpp
   )
   
@@ -72,6 +74,7 @@ set(SOURCES
     renderCanvas.cpp
     testTriangle.cpp
     Panels/Properties/propertiesPanel.cpp
+    CustomWidgets/fluoTabWidget.cpp
   )
   
 set(UI_FILES
