@@ -5,34 +5,34 @@ FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FUI)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 
-    // This sets the central widget needed for the QDockWidgets
-    setCentralWidget(ui->centralWidget);
+  // This sets the central widget needed for the QDockWidgets
+  setCentralWidget(ui->centralWidget);
 
-    // This will set the Dock Widget sizes to the screen of the user
-    setDockWidgetSizes();
+  // This will set the Dock Widget sizes to the screen of the user
+  setDockWidgetSizes();
 
-    // This creates our main Render Viewer and adds it to the splitter.
-    auto baseRenderWindow = createNewRenderWindow(false);
-    ui->splitter->addWidget(baseRenderWindow);
-
-
-    // This opens the program in full screen and sets the allowed ares to dock.
-    QMainWindow::showMaximized();
-    QMainWindow::setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-    QMainWindow::setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-
-    // I cast the integer Half Renderview Size to a constant.
-    const_cast<int&>(HALFRENDERVIEWSIZE) = ui->splitter->widget(MAINRENDERINDEX)->height()/2;
+  // This creates our main Render Viewer and adds it to the splitter.
+  auto baseRenderWindow = createNewRenderWindow(false);
+  ui->splitter->addWidget(baseRenderWindow);
 
 
-    //ui->dockWidgetContents = propertiesPanel;
+  // This opens the program in full screen and sets the allowed ares to dock.
+  QMainWindow::showMaximized();
+  QMainWindow::setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+  QMainWindow::setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
+  // I cast the integer Half Renderview Size to a constant.
+  const_cast<int&>(HALFRENDERVIEWSIZE) = ui->splitter->widget(MAINRENDERINDEX)->height()/2;
+
+
+  //ui->dockWidgetContents = propertiesPanel;
 }
 
 FUI::~FUI()
 {
-    delete ui;
+  delete ui;
 }
 
 /*
@@ -41,21 +41,21 @@ FUI::~FUI()
  */
 void FUI::setDockWidgetSizes()
 {
-    int windowSize = this->window()->height();
-    int thirdHeight = (windowSize/3) - 100;
-    int modifiedHeight = thirdHeight + thirdHeight;
+  int windowSize = this->window()->height();
+  int thirdHeight = (windowSize/3) - 100;
+  int modifiedHeight = thirdHeight + thirdHeight;
 
-    ui->DatasetsWidget->setMinimumHeight(thirdHeight);
-    ui->WorkspaceWidget->setMinimumHeight(thirdHeight);
-    ui->RecordWidget->setMinimumHeight(thirdHeight);
-    ui->OutputAdjustmentsWidget->setMinimumHeight(thirdHeight);
-    ui->ClippingPanesWidget->setMinimumHeight(thirdHeight);
+  ui->DatasetsWidget->setMinimumHeight(thirdHeight);
+  ui->WorkspaceWidget->setMinimumHeight(thirdHeight);
+  ui->RecordWidget->setMinimumHeight(thirdHeight);
+  ui->OutputAdjustmentsWidget->setMinimumHeight(thirdHeight);
+  ui->ClippingPanesWidget->setMinimumHeight(thirdHeight);
 
-    ui->DatasetsWidget->setMaximumHeight(modifiedHeight);
-    ui->WorkspaceWidget->setMaximumHeight(modifiedHeight);
-    ui->RecordWidget->setMaximumHeight(modifiedHeight);
-    ui->OutputAdjustmentsWidget->setMaximumHeight(windowSize - 100);
-    ui->ClippingPanesWidget->setMaximumHeight(windowSize - 100);
+  ui->DatasetsWidget->setMaximumHeight(modifiedHeight);
+  ui->WorkspaceWidget->setMaximumHeight(modifiedHeight);
+  ui->RecordWidget->setMaximumHeight(modifiedHeight);
+  ui->OutputAdjustmentsWidget->setMaximumHeight(windowSize - 100);
+  ui->ClippingPanesWidget->setMaximumHeight(windowSize - 100);
 
 }
 
@@ -92,18 +92,18 @@ void FUI::deleteRenderviewID(const RenderView* view)
  */
 QFrame* FUI::createNewRenderWindow(bool hasFeatures)
 {
-    QGridLayout *baseLayout = new QGridLayout();
-    auto newBaseFrame = new QFrame();
-    auto newRenderView = new RenderView(hasFeatures);
+  QGridLayout *baseLayout = new QGridLayout();
+  auto newBaseFrame = new QFrame();
+  auto newRenderView = new RenderView(hasFeatures);
 
-    newBaseFrame->setFrameStyle(QFrame::StyledPanel);
-    newBaseFrame->setFrameShadow(QFrame::Sunken);
+  newBaseFrame->setFrameStyle(QFrame::StyledPanel);
+  newBaseFrame->setFrameShadow(QFrame::Sunken);
 
-    updateRenderviewID(newRenderView);
-    baseLayout->addWidget(newRenderView);
-    newBaseFrame->setLayout(baseLayout);
+  updateRenderviewID(newRenderView);
+  baseLayout->addWidget(newRenderView);
+  newBaseFrame->setLayout(baseLayout);
 
-    return newBaseFrame;
+  return newBaseFrame;
 
 }
 
@@ -118,17 +118,17 @@ QFrame* FUI::createNewRenderWindow(bool hasFeatures)
  */
 QFrame* FUI::extractWindow(QObject *toExtract)
 {
-    QGridLayout *baseLayout = new QGridLayout();
-    auto newBaseFrame = new QFrame();
-    RenderView *extracted = qobject_cast<RenderView*>(toExtract->children().at(1));
+  QGridLayout *baseLayout = new QGridLayout();
+  auto newBaseFrame = new QFrame();
+  RenderView *extracted = qobject_cast<RenderView*>(toExtract->children().at(1));
 
-    newBaseFrame->setFrameStyle(QFrame::StyledPanel);
-    newBaseFrame->setFrameShadow(QFrame::Sunken);
+  newBaseFrame->setFrameStyle(QFrame::StyledPanel);
+  newBaseFrame->setFrameShadow(QFrame::Sunken);
 
-    baseLayout->addWidget(extracted);
-    newBaseFrame->setLayout(baseLayout);
+  baseLayout->addWidget(extracted);
+  newBaseFrame->setLayout(baseLayout);
 
-    return newBaseFrame;
+  return newBaseFrame;
 
 }
 
@@ -144,17 +144,17 @@ QFrame* FUI::extractWindow(QObject *toExtract)
  */
 QSplitter* FUI::createNewSplitter(Qt::Orientation orientation)
 {
-    auto newSplitter = new QSplitter();
-    auto newTopWindow = createNewRenderWindow(true);
-    auto newBottomWindow = createNewRenderWindow(true);
+  auto newSplitter = new QSplitter();
+  auto newTopWindow = createNewRenderWindow(true);
+  auto newBottomWindow = createNewRenderWindow(true);
 
-    newSplitter->setOrientation(orientation);
-    newSplitter->addWidget(newTopWindow);
-    newSplitter->addWidget(newBottomWindow);
+  newSplitter->setOrientation(orientation);
+  newSplitter->addWidget(newTopWindow);
+  newSplitter->addWidget(newBottomWindow);
 
-    newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+  newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-    return newSplitter;
+  return newSplitter;
 }
 
 
@@ -172,15 +172,15 @@ QSplitter* FUI::createNewSplitter(Qt::Orientation orientation)
  */
 QSplitter* FUI::moveSplitter(Qt::Orientation orientation, int renderIndex)
 {
-    auto newSplitter = new QSplitter();
-    auto newWindow = createNewRenderWindow(true);
-    newSplitter->setOrientation(orientation);
-    newSplitter->addWidget(std::move(ui->splitter->widget(renderIndex)));
-    newSplitter->addWidget(newWindow);
+  auto newSplitter = new QSplitter();
+  auto newWindow = createNewRenderWindow(true);
+  newSplitter->setOrientation(orientation);
+  newSplitter->addWidget(std::move(ui->splitter->widget(renderIndex)));
+  newSplitter->addWidget(newWindow);
 
-    newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+  newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-    return newSplitter;
+  return newSplitter;
 }
 
 /*
@@ -197,17 +197,17 @@ QSplitter* FUI::moveSplitter(Qt::Orientation orientation, int renderIndex)
  */
 QSplitter* FUI::flipSplitter(Qt::Orientation orientation, int view1, int view2)
 {
-    auto newSplitter = new QSplitter();
+  auto newSplitter = new QSplitter();
 
-    newSplitter->setOrientation(orientation);
+  newSplitter->setOrientation(orientation);
 
-    auto toAdd = std::move(ui->splitter->widget(view1)->children().at(0));
-    newSplitter->addWidget(std::move(ui->splitter->widget(view2)));
-    newSplitter->addWidget(static_cast<QWidget*>(toAdd));
+  auto toAdd = std::move(ui->splitter->widget(view1)->children().at(0));
+  newSplitter->addWidget(std::move(ui->splitter->widget(view2)));
+  newSplitter->addWidget(static_cast<QWidget*>(toAdd));
 
-    newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+  newSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-    return newSplitter;
+  return newSplitter;
 }
 
 
@@ -229,17 +229,17 @@ QSplitter* FUI::flipSplitter(Qt::Orientation orientation, int view1, int view2)
  */
 void FUI::checkFlags(QAction* currentFlag)
 {
-    if(!flagControl.empty())
-    {
-        flagControl[false]->setEnabled(true);
-        currentFlag->setEnabled(false);
-        flagControl[false] = currentFlag;
-    }
-    else
-    {
-        currentFlag->setEnabled(false);
-        flagControl[false] = currentFlag;
-    }
+  if(!flagControl.empty())
+  {
+    flagControl[false]->setEnabled(true);
+    currentFlag->setEnabled(false);
+    flagControl[false] = currentFlag;
+  }
+  else
+  {
+    currentFlag->setEnabled(false);
+    flagControl[false] = currentFlag;
+  }
 }
 
 /*
@@ -272,66 +272,66 @@ void FUI::checkFlags(QAction* currentFlag)
 void FUI::on_actionSplit_HalfV_triggered()
 {
 
-    checkFlags(ui->actionSplit_HalfV);
+  checkFlags(ui->actionSplit_HalfV);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        ui->splitter->setOrientation(Qt::Horizontal);
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
-      QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
-      QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    ui->splitter->setOrientation(Qt::Horizontal);
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
 
-      RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-      deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-      ui->splitter->replaceWidget(M_RENDERIND_NEI,temp);
-      ui->splitter->setOrientation(Qt::Horizontal);
-      neighborWindowPanelCounter-=1;
+    ui->splitter->replaceWidget(M_RENDERIND_NEI,temp);
+    ui->splitter->setOrientation(Qt::Horizontal);
+    neighborWindowPanelCounter-=1;
 
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
-      QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
-      QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
+    QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
-      RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-      deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-      ui->splitter->replaceWidget(MAINRENDERINDEX,temp);
-      ui->splitter->setOrientation(Qt::Horizontal);
-      mainWindowPanelCounter-=1;
+    ui->splitter->replaceWidget(MAINRENDERINDEX,temp);
+    ui->splitter->setOrientation(Qt::Horizontal);
+    mainWindowPanelCounter-=1;
 
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *mainWindow = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
-        QFrame *extractedNeighbor = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *mainWindow = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    QFrame *extractedNeighbor = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
 
-        QFrame *toDelete1 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
-        QFrame *toDelete2 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+    QFrame *toDelete1 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+    QFrame *toDelete2 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
 
-        RenderView *view1 = qobject_cast<RenderView*>(toDelete1->children().at(1));
-        RenderView *view2 = qobject_cast<RenderView*>(toDelete2->children().at(1));
+    RenderView *view1 = qobject_cast<RenderView*>(toDelete1->children().at(1));
+    RenderView *view2 = qobject_cast<RenderView*>(toDelete2->children().at(1));
 
-        deleteRenderviewID(view1);
-        deleteRenderviewID(view2);
+    deleteRenderviewID(view1);
+    deleteRenderviewID(view2);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->replaceWidget(MAINRENDERINDEX,extractedNeighbor);
-        ui->splitter->replaceWidget(M_RENDERIND_NEI,mainWindow);
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->replaceWidget(MAINRENDERINDEX,extractedNeighbor);
+    ui->splitter->replaceWidget(M_RENDERIND_NEI,mainWindow);
 
-        mainWindowPanelCounter-=1;
-        neighborWindowPanelCounter-=1;
-    }
-    else
-    {
-        auto newRenderWindow = createNewRenderWindow(true);
-        ui->splitter->addWidget(newRenderWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=1;
-    }
+    mainWindowPanelCounter-=1;
+    neighborWindowPanelCounter-=1;
+  }
+  else
+  {
+    auto newRenderWindow = createNewRenderWindow(true);
+    ui->splitter->addWidget(newRenderWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=1;
+  }
 }
 
 
@@ -345,66 +345,66 @@ void FUI::on_actionSplit_HalfV_triggered()
 void FUI::on_actionSplit_HalfH_triggered()
 {
 
-    checkFlags(ui->actionSplit_HalfH);
+  checkFlags(ui->actionSplit_HalfH);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        ui->splitter->setOrientation(Qt::Vertical);
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
-        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    ui->splitter->setOrientation(Qt::Vertical);
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
 
-        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-        deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-        ui->splitter->replaceWidget(M_RENDERIND_NEI,temp);
-        ui->splitter->setOrientation(Qt::Vertical);
-        neighborWindowPanelCounter-=1;
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
-      QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
-      QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    ui->splitter->replaceWidget(M_RENDERIND_NEI,temp);
+    ui->splitter->setOrientation(Qt::Vertical);
+    neighborWindowPanelCounter-=1;
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
+    QFrame *temp = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
-      RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-      deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-      ui->splitter->replaceWidget(MAINRENDERINDEX,temp);
-      ui->splitter->setOrientation(Qt::Vertical);
-      mainWindowPanelCounter-=1;
+    ui->splitter->replaceWidget(MAINRENDERINDEX,temp);
+    ui->splitter->setOrientation(Qt::Vertical);
+    mainWindowPanelCounter-=1;
 
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *mainWindow = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
-        QFrame *extractedNeighbor = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *mainWindow = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    QFrame *extractedNeighbor = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
 
-        QFrame *toDelete1 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
-        QFrame *toDelete2 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+    QFrame *toDelete1 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+    QFrame *toDelete2 = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
 
-        RenderView *view1 = qobject_cast<RenderView*>(toDelete1->children().at(1));
-        RenderView *view2 = qobject_cast<RenderView*>(toDelete2->children().at(1));
+    RenderView *view1 = qobject_cast<RenderView*>(toDelete1->children().at(1));
+    RenderView *view2 = qobject_cast<RenderView*>(toDelete2->children().at(1));
 
-        deleteRenderviewID(view1);
-        deleteRenderviewID(view2);
+    deleteRenderviewID(view1);
+    deleteRenderviewID(view2);
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->replaceWidget(MAINRENDERINDEX,extractedNeighbor);
-        ui->splitter->replaceWidget(M_RENDERIND_NEI,mainWindow);
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->replaceWidget(MAINRENDERINDEX,extractedNeighbor);
+    ui->splitter->replaceWidget(M_RENDERIND_NEI,mainWindow);
 
-        mainWindowPanelCounter-=1;
-        neighborWindowPanelCounter-=1;
-    }
-    else
-    {
-        auto newRenderWindow = createNewRenderWindow(true);
-        ui->splitter->addWidget(newRenderWindow);
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=1;
-    }
+    mainWindowPanelCounter-=1;
+    neighborWindowPanelCounter-=1;
+  }
+  else
+  {
+    auto newRenderWindow = createNewRenderWindow(true);
+    ui->splitter->addWidget(newRenderWindow);
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=1;
+  }
 }
 
 
@@ -445,61 +445,61 @@ void FUI::on_actionSplit_HalfH_triggered()
 void FUI::on_actionSplit_Right_Half_triggered()
 {
 
-    checkFlags(ui->actionSplit_Right_Half);
+  checkFlags(ui->actionSplit_Right_Half);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        auto moveWindow = moveSplitter(Qt::Vertical, M_RENDERIND_NEI);
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    auto moveWindow = moveSplitter(Qt::Vertical, M_RENDERIND_NEI);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=1;
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
-        ui->splitter->setOrientation(Qt::Horizontal);
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
-        temp->setOrientation(Qt::Vertical);
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(moveWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=1;
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
+    ui->splitter->setOrientation(Qt::Horizontal);
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+    temp->setOrientation(Qt::Vertical);
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
 
-        auto flippedSplitter = flipSplitter(Qt::Vertical, MAINRENDERINDEX, M_RENDERIND_NEI);
-        auto extractMainWindow = extractWindow(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    auto flippedSplitter = flipSplitter(Qt::Vertical, MAINRENDERINDEX, M_RENDERIND_NEI);
+    auto extractMainWindow = extractWindow(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow);
-        ui->splitter->addWidget(flippedSplitter);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow);
+    ui->splitter->addWidget(flippedSplitter);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-        mainWindowPanelCounter-=1;
-        neighborWindowPanelCounter+=1;
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *extractMain = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
-        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    mainWindowPanelCounter-=1;
+    neighborWindowPanelCounter+=1;
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *extractMain = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
-        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-        deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-        temp->setOrientation(Qt::Vertical);
+    temp->setOrientation(Qt::Vertical);
 
-        ui->splitter->replaceWidget(MAINRENDERINDEX,extractMain);
-        ui->splitter->setOrientation(Qt::Horizontal);
-        mainWindowPanelCounter-=1;
-    }
-    else
-    {
-        auto newWindows = createNewSplitter(Qt::Vertical);
+    ui->splitter->replaceWidget(MAINRENDERINDEX,extractMain);
+    ui->splitter->setOrientation(Qt::Horizontal);
+    mainWindowPanelCounter-=1;
+  }
+  else
+  {
+    auto newWindows = createNewSplitter(Qt::Vertical);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(newWindows);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=2;
-    }
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(newWindows);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=2;
+  }
 
 }
 
@@ -514,61 +514,61 @@ void FUI::on_actionSplit_Right_Half_triggered()
 void FUI::on_actionSplit_Bottom_Half_triggered()
 {
 
-    checkFlags(ui->actionSplit_Bottom_Half);
+  checkFlags(ui->actionSplit_Bottom_Half);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        auto moveWindow = moveSplitter(Qt::Horizontal,M_RENDERIND_NEI);
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    auto moveWindow = moveSplitter(Qt::Horizontal,M_RENDERIND_NEI);
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(moveWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=1;
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->addWidget(moveWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=1;
 
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
-        ui->splitter->setOrientation(Qt::Vertical);
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
-        temp->setOrientation(Qt::Horizontal);
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
+    ui->splitter->setOrientation(Qt::Vertical);
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+    temp->setOrientation(Qt::Horizontal);
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
 
-        auto flippedSplitter = flipSplitter(Qt::Horizontal, MAINRENDERINDEX, M_RENDERIND_NEI);
-        auto extractMainWindow = extractWindow(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    auto flippedSplitter = flipSplitter(Qt::Horizontal, MAINRENDERINDEX, M_RENDERIND_NEI);
+    auto extractMainWindow = extractWindow(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(flippedSplitter);
-        ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter-=1;
-        neighborWindowPanelCounter+=1;
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *extractMain = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
-        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->addWidget(flippedSplitter);
+    ui->splitter->replaceWidget(MAINRENDERINDEX, extractMainWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter-=1;
+    neighborWindowPanelCounter+=1;
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *extractMain = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(MAINRENDERINDEX)->children().at(0));
 
-        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-        deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-        temp->setOrientation(Qt::Horizontal);
+    temp->setOrientation(Qt::Horizontal);
 
-        ui->splitter->replaceWidget(MAINRENDERINDEX,extractMain);
-        ui->splitter->setOrientation(Qt::Vertical);
-        mainWindowPanelCounter-=1;
-    }
-    else
-    {
-        auto newWindows = createNewSplitter(Qt::Horizontal);
+    ui->splitter->replaceWidget(MAINRENDERINDEX,extractMain);
+    ui->splitter->setOrientation(Qt::Vertical);
+    mainWindowPanelCounter-=1;
+  }
+  else
+  {
+    auto newWindows = createNewSplitter(Qt::Horizontal);
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(newWindows);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=2;
-    }
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->addWidget(newWindows);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=2;
+  }
 
 }
 
@@ -609,66 +609,66 @@ void FUI::on_actionSplit_Bottom_Half_triggered()
 void FUI::on_actionSplit_Left_Half_triggered()
 {
 
-    checkFlags(ui->actionSplit_Left_Half);
+  checkFlags(ui->actionSplit_Left_Half);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        // TODO: Rename this to something that describes this more accurately.
-        auto newRenderView = std::move(ui->splitter->widget(M_RENDERIND_NEI));
-        auto moveWindow = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    // TODO: Rename this to something that describes this more accurately.
+    auto newRenderView = std::move(ui->splitter->widget(M_RENDERIND_NEI));
+    auto moveWindow = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveWindow);
-        ui->splitter->addWidget(newRenderView);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(moveWindow);
+    ui->splitter->addWidget(newRenderView);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
 
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
-        auto flippedSplitter = flipSplitter(Qt::Vertical, M_RENDERIND_NEI, MAINRENDERINDEX);
-        auto extractNeighWindow = extractWindow(ui->splitter->widget(M_RENDERIND_NEI-1)->children().at(0));
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
+    auto flippedSplitter = flipSplitter(Qt::Vertical, M_RENDERIND_NEI, MAINRENDERINDEX);
+    auto extractNeighWindow = extractWindow(ui->splitter->widget(M_RENDERIND_NEI-1)->children().at(0));
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter);
-        ui->splitter->addWidget(extractNeighWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter);
+    ui->splitter->addWidget(extractNeighWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-        mainWindowPanelCounter+=1;
-        neighborWindowPanelCounter-=1;
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
-        ui->splitter->setOrientation(Qt::Horizontal);
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
-        temp->setOrientation(Qt::Vertical);
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *extractNeigh = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
-        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+    mainWindowPanelCounter+=1;
+    neighborWindowPanelCounter-=1;
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
+    ui->splitter->setOrientation(Qt::Horizontal);
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+    temp->setOrientation(Qt::Vertical);
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *extractNeigh = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
 
-        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-        deleteRenderviewID(view);
-        temp->setOrientation(Qt::Vertical);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
+    temp->setOrientation(Qt::Vertical);
 
-        ui->splitter->replaceWidget(M_RENDERIND_NEI,extractNeigh);
-        ui->splitter->setOrientation(Qt::Horizontal);
-        neighborWindowPanelCounter-=1;
-    }
-    else
-    {
-        auto moveRenderView = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
-        auto newRenderView = createNewRenderWindow(true);
+    ui->splitter->replaceWidget(M_RENDERIND_NEI,extractNeigh);
+    ui->splitter->setOrientation(Qt::Horizontal);
+    neighborWindowPanelCounter-=1;
+  }
+  else
+  {
+    auto moveRenderView = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
+    auto newRenderView = createNewRenderWindow(true);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveRenderView);
-        ui->splitter->addWidget(newRenderView);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
-        neighborWindowPanelCounter+=1;
-    }
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(moveRenderView);
+    ui->splitter->addWidget(newRenderView);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
+    neighborWindowPanelCounter+=1;
+  }
 }
 
 /*
@@ -681,67 +681,67 @@ void FUI::on_actionSplit_Left_Half_triggered()
 void FUI::on_actionSplit_Top_Half_triggered()
 {
 
-    checkFlags(ui->actionSplit_Top_Half);
+  checkFlags(ui->actionSplit_Top_Half);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        auto newRenderView = std::move(ui->splitter->widget(M_RENDERIND_NEI));
-        auto moveWindow = moveSplitter(Qt::Horizontal,MAINRENDERINDEX);
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    auto newRenderView = std::move(ui->splitter->widget(M_RENDERIND_NEI));
+    auto moveWindow = moveSplitter(Qt::Horizontal,MAINRENDERINDEX);
 
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(moveWindow);
-        ui->splitter->addWidget(newRenderView);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->addWidget(moveWindow);
+    ui->splitter->addWidget(newRenderView);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
 
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
-        auto flippedSplitter = flipSplitter(Qt::Horizontal, M_RENDERIND_NEI, MAINRENDERINDEX);
-        auto extractNeighWindow = extractWindow(ui->splitter->widget(M_RENDERIND_NEI-1)->children().at(0));
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
+    auto flippedSplitter = flipSplitter(Qt::Horizontal, M_RENDERIND_NEI, MAINRENDERINDEX);
+    auto extractNeighWindow = extractWindow(ui->splitter->widget(M_RENDERIND_NEI-1)->children().at(0));
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter);
-        ui->splitter->addWidget(extractNeighWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->replaceWidget(MAINRENDERINDEX,flippedSplitter);
+    ui->splitter->addWidget(extractNeighWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-        mainWindowPanelCounter+=1;
-        neighborWindowPanelCounter-=1;
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
-        ui->splitter->setOrientation(Qt::Vertical);
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
-        temp->setOrientation(Qt::Horizontal);
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
-    {
-        QFrame *extractNeigh = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
-        QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
+    mainWindowPanelCounter+=1;
+    neighborWindowPanelCounter-=1;
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
+    ui->splitter->setOrientation(Qt::Vertical);
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+    temp->setOrientation(Qt::Horizontal);
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 2)
+  {
+    QFrame *extractNeigh = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(1));
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+    QFrame *toDelete = static_cast<QFrame*>(ui->splitter->widget(M_RENDERIND_NEI)->children().at(0));
 
-        RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
-        deleteRenderviewID(view);
+    RenderView *view = qobject_cast<RenderView*>(toDelete->children().at(1));
+    deleteRenderviewID(view);
 
-        temp->setOrientation(Qt::Horizontal);
+    temp->setOrientation(Qt::Horizontal);
 
-        ui->splitter->replaceWidget(M_RENDERIND_NEI,extractNeigh);
-        ui->splitter->setOrientation(Qt::Vertical);
-        neighborWindowPanelCounter-=1;
-    }
-    else
-    {
-        auto moveRenderView = moveSplitter(Qt::Horizontal, MAINRENDERINDEX);
-        auto newRenderView = createNewRenderWindow(true);
+    ui->splitter->replaceWidget(M_RENDERIND_NEI,extractNeigh);
+    ui->splitter->setOrientation(Qt::Vertical);
+    neighborWindowPanelCounter-=1;
+  }
+  else
+  {
+    auto moveRenderView = moveSplitter(Qt::Horizontal, MAINRENDERINDEX);
+    auto newRenderView = createNewRenderWindow(true);
 
-        ui->splitter->setOrientation(Qt::Vertical);
-        ui->splitter->addWidget(moveRenderView);
-        ui->splitter->addWidget(newRenderView);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
-        neighborWindowPanelCounter+=1;
-    }
+    ui->splitter->setOrientation(Qt::Vertical);
+    ui->splitter->addWidget(moveRenderView);
+    ui->splitter->addWidget(newRenderView);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
+    neighborWindowPanelCounter+=1;
+  }
 
 }
 
@@ -777,63 +777,63 @@ void FUI::on_actionSplit_Top_Half_triggered()
  */
 void FUI::on_actionSplit_All_triggered()
 {
-    checkFlags(ui->actionSplit_All);
+  checkFlags(ui->actionSplit_All);
 
-    if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
-    {
-        auto moveMainRenderView = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
-        auto moveNeighRenderView = moveSplitter(Qt::Vertical, M_RENDERIND_NEI - 1); //
+  if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 1)
+  {
+    auto moveMainRenderView = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
+    auto moveNeighRenderView = moveSplitter(Qt::Vertical, M_RENDERIND_NEI - 1); //
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveMainRenderView);
-        ui->splitter->addWidget(moveNeighRenderView);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
-        neighborWindowPanelCounter+=1;
-    }
-    else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
-    {
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(moveMainRenderView);
+    ui->splitter->addWidget(moveNeighRenderView);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
+    neighborWindowPanelCounter+=1;
+  }
+  else if(mainWindowPanelCounter == 1 && neighborWindowPanelCounter == 2)
+  {
 
-        QSplitter *neighborSplitter = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
-        auto flippedSplitter = flipSplitter(Qt::Vertical, M_RENDERIND_NEI, MAINRENDERINDEX);
-        auto newWindow = createNewRenderWindow(true);
+    QSplitter *neighborSplitter = static_cast<QSplitter*>(ui->splitter->widget(M_RENDERIND_NEI));
+    auto flippedSplitter = flipSplitter(Qt::Vertical, M_RENDERIND_NEI, MAINRENDERINDEX);
+    auto newWindow = createNewRenderWindow(true);
 
-        neighborSplitter->addWidget(newWindow);
-        neighborSplitter->setOrientation(Qt::Vertical);
-        neighborSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborSplitter->addWidget(newWindow);
+    neighborSplitter->setOrientation(Qt::Vertical);
+    neighborSplitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
 
-        ui->splitter->addWidget(flippedSplitter);
-        ui->splitter->addWidget(std::move(ui->splitter->widget(MAINRENDERINDEX)));
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
+    ui->splitter->addWidget(flippedSplitter);
+    ui->splitter->addWidget(std::move(ui->splitter->widget(MAINRENDERINDEX)));
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
 
-    }
-    else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
-    {
+  }
+  else if(mainWindowPanelCounter == 2 && neighborWindowPanelCounter == 1)
+  {
 
-        auto moveNeighborWindow = moveSplitter(Qt::Vertical, M_RENDERIND_NEI);
-        QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
-        temp->setOrientation(Qt::Vertical);
+    auto moveNeighborWindow = moveSplitter(Qt::Vertical, M_RENDERIND_NEI);
+    QSplitter *temp = static_cast<QSplitter*>(ui->splitter->widget(MAINRENDERINDEX));
+    temp->setOrientation(Qt::Vertical);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveNeighborWindow);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        neighborWindowPanelCounter+=1;
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(moveNeighborWindow);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    neighborWindowPanelCounter+=1;
 
-    }
-    else
-    {
-        auto moveRenderView = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
-        auto newWindows = createNewSplitter(Qt::Vertical);
+  }
+  else
+  {
+    auto moveRenderView = moveSplitter(Qt::Vertical, MAINRENDERINDEX);
+    auto newWindows = createNewSplitter(Qt::Vertical);
 
-        ui->splitter->setOrientation(Qt::Horizontal);
-        ui->splitter->addWidget(moveRenderView);
-        ui->splitter->addWidget(newWindows);
-        ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
-        mainWindowPanelCounter+=1;
-        neighborWindowPanelCounter+=2;
-    }
+    ui->splitter->setOrientation(Qt::Horizontal);
+    ui->splitter->addWidget(moveRenderView);
+    ui->splitter->addWidget(newWindows);
+    ui->splitter->setSizes(QList<int>({HALFRENDERVIEWSIZE, HALFRENDERVIEWSIZE}));
+    mainWindowPanelCounter+=1;
+    neighborWindowPanelCounter+=2;
+  }
 
 }
 
@@ -853,29 +853,29 @@ void FUI::on_actionSplit_All_triggered()
  */
 void FUI::on_actionOne_View_triggered()
 {
-    checkFlags(ui->actionOne_View);
+  checkFlags(ui->actionOne_View);
 
-    for(int i = 1; i < renderviews.size();++i)
-      renderviews[i] = nullptr;
+  for(int i = 1; i < renderviews.size();++i)
+    renderviews[i] = nullptr;
 
-    QObject *mainRenderView;
+  QObject *mainRenderView;
 
-    if(mainWindowPanelCounter == 2)
-        mainRenderView = std::move(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
-    else
-        mainRenderView = std::move(ui->splitter->widget(MAINRENDERINDEX));
+  if(mainWindowPanelCounter == 2)
+    mainRenderView = std::move(ui->splitter->widget(MAINRENDERINDEX)->children().at(1));
+  else
+    mainRenderView = std::move(ui->splitter->widget(MAINRENDERINDEX));
 
-    auto extractedWindow = extractWindow(mainRenderView);
+  auto extractedWindow = extractWindow(mainRenderView);
 
-    qDeleteAll(ui->splitter->findChildren<RenderView*>());
-    qDeleteAll(ui->splitter->findChildren<QSplitter*>());
-    qDeleteAll(ui->splitter->findChildren<QFrame*>());
+  qDeleteAll(ui->splitter->findChildren<RenderView*>());
+  qDeleteAll(ui->splitter->findChildren<QSplitter*>());
+  qDeleteAll(ui->splitter->findChildren<QFrame*>());
 
-    mainWindowPanelCounter = 1;
-    neighborWindowPanelCounter = 0;
-    renderViewcounter = 1;
+  mainWindowPanelCounter = 1;
+  neighborWindowPanelCounter = 0;
+  renderViewcounter = 1;
 
-    ui->splitter->addWidget(extractedWindow);
+  ui->splitter->addWidget(extractedWindow);
 
 }
 
