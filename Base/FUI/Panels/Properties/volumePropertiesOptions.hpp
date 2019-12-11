@@ -16,6 +16,14 @@ class VolumePropertiesOptions : public QGridLayout
   public:
     VolumePropertiesOptions();
 
+
+  private:
+    void addRow0();
+    void addRow1();
+    void addRow2();
+    void addRow3();
+    void addRow4();
+
     FluoSlider* gammaSlider      = new FluoSlider(Qt::Horizontal,0,100);
     FluoSlider* extractBSlider   = new FluoSlider(Qt::Horizontal,0,50);
     FluoSlider* saturationSlider = new FluoSlider(Qt::Horizontal,0,255);
@@ -54,13 +62,6 @@ class VolumePropertiesOptions : public QGridLayout
     QLabel* sampleRateLabel       = new QLabel("Sample Rate: ");
     FluoToolButton* shadingLabel  = new FluoToolButton(" :Shading",false);
     FluoToolButton* colorMapLabel = new FluoToolButton("Color Map: ",false);
-
-  private:
-    void addRow0();
-    void addRow1();
-    void addRow2();
-    void addRow3();
-    void addRow4();
 };
 
 #endif

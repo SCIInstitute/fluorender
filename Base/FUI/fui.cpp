@@ -879,12 +879,12 @@ void FUI::on_actionOne_View_triggered()
 
 }
 
-void FUI::on_actionLoad_Volume_triggered()
+void FUI::on_actionLoad_Volume_0_triggered()
 {
   ui->propertiesPanel->onVolumeLoaded(0);
 }
 
-void FUI::on_actionLoad_Mesh_triggered()
+void FUI::on_actionLoad_Mesh_0_triggered()
 {
   ui->propertiesPanel->onMeshLoaded(0);
 }

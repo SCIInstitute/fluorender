@@ -17,6 +17,13 @@ class MeshPropertiesOptions : public QGridLayout
   public:
     MeshPropertiesOptions();
 
+
+  private:
+    void addRow0();
+    void addRow1();
+    void addRow2();
+    void addRow3();
+
     FluoSlider* transparencySlider = new FluoSlider(Qt::Horizontal,0,100);
     FluoSlider* shadowSlider       = new FluoSlider(Qt::Horizontal,0,100);
     FluoSlider* lightingSlider     = new FluoSlider(Qt::Horizontal,0,200);
@@ -35,12 +42,6 @@ class MeshPropertiesOptions : public QGridLayout
     QCheckBox* shadowCheckbox    = new QCheckBox();
     QCheckBox* lightingCheckbox  = new QCheckBox();
     QCheckBox* sizeLimitCheckbox = new QCheckBox();
-
-  private:
-    void addRow0();
-    void addRow1();
-    void addRow2();
-    void addRow3();
 };
 
 #endif
