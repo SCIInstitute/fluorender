@@ -217,6 +217,9 @@ public:
 	//ruler relax f1
 	double GetRulerRelaxF1() { return m_ruler_relax_f1; }
 	void SetRulerRelaxF1(double val) { m_ruler_relax_f1 = val; }
+	//ruler influence range
+	double GetRulerInfr() { return m_ruler_infr; }
+	void SetRulerInfr(double val) { m_ruler_infr = val; }
 	//ruler relax iter
 	int GetRulerRelaxIter() { return m_ruler_relax_iter; }
 	void SetRulerRelaxIter(int iter) { m_ruler_relax_iter = iter; }
@@ -346,6 +349,8 @@ private:
 	bool m_ruler_time_dep;
 	//ruler relax f1
 	double m_ruler_relax_f1;
+	//ruler influence range
+	double m_ruler_infr;
 	//ruler relax iter
 	int m_ruler_relax_iter;
 	//ruler exports df/f
