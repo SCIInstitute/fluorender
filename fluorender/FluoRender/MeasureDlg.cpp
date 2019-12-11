@@ -73,24 +73,27 @@ wxListCtrl(parent, id, pos, size, style)//,
 	itemCol.SetText("Color");
 	this->InsertColumn(1, itemCol);
 	SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Length");
+	itemCol.SetText("Branch");
 	this->InsertColumn(2, itemCol);
 	SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Angle/Pitch");
+	itemCol.SetText("Length");
 	this->InsertColumn(3, itemCol);
 	SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Center");
+	itemCol.SetText("Angle/Pitch");
 	this->InsertColumn(4, itemCol);
 	SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Time");
+	itemCol.SetText("Center");
 	this->InsertColumn(5, itemCol);
 	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Start/End Points (X, Y, Z)");
+	itemCol.SetText("Time");
 	this->InsertColumn(6, itemCol);
 	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Volumes");
+	itemCol.SetText("Start/End Points (X, Y, Z)");
 	this->InsertColumn(7, itemCol);
 	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
+	itemCol.SetText("Volumes");
+	this->InsertColumn(8, itemCol);
+	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(ruler_xpm);
@@ -122,7 +125,7 @@ RulerListCtrl::~RulerListCtrl()
 }
 
 void RulerListCtrl::Append(bool enable, unsigned int id, wxString name,
-	wxString &color, double length, wxString &unit,
+	wxString &color, int branches, double length, wxString &unit,
 	double angle, wxString &center, bool time_dep,
 	int time, wxString &extra, wxString &points)
 {
@@ -131,24 +134,27 @@ void RulerListCtrl::Append(bool enable, unsigned int id, wxString name,
 	//    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	SetItem(tmp, 1, color);
 	SetColumnWidth(1, wxLIST_AUTOSIZE);
-	wxString str = wxString::Format("%.2f", length) + unit;
+	wxString str = wxString::Format("%d", branches);
 	SetItem(tmp, 2, str);
 	SetColumnWidth(2, wxLIST_AUTOSIZE);
-	str = wxString::Format("%.1f", angle) + "Deg";
+	str = wxString::Format("%.2f", length) + unit;
 	SetItem(tmp, 3, str);
 	SetColumnWidth(3, wxLIST_AUTOSIZE);
-	SetItem(tmp, 4, center);
+	str = wxString::Format("%.1f", angle) + "Deg";
+	SetItem(tmp, 4, str);
 	SetColumnWidth(4, wxLIST_AUTOSIZE);
+	SetItem(tmp, 5, center);
+	SetColumnWidth(5, wxLIST_AUTOSIZE);
 	if (time_dep)
 		str = wxString::Format("%d", time);
 	else
 		str = "N/A";
-	SetItem(tmp, 5, str);
-	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
-	SetItem(tmp, 6, points);
-	SetColumnWidth(6, wxLIST_AUTOSIZE);
-	SetItem(tmp, 7, extra);
-	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
+	SetItem(tmp, 6, str);
+	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
+	SetItem(tmp, 7, points);
+	SetColumnWidth(7, wxLIST_AUTOSIZE);
+	SetItem(tmp, 8, extra);
+	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
 
 	if (!enable)
 		SetItemBackgroundColour(tmp, wxColour(200, 200, 200));
@@ -220,7 +226,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			cp.x(), cp.y(), cp.z());
 		wxString str = ruler->GetDelInfoValues(", ");
 		Append(ruler->GetDisp(), ruler->Id(), ruler->GetName(),
-			color, ruler->GetLength(), unit,
+			color, ruler->GetNumBranch(), ruler->GetLength(), unit,
 			ruler->GetAngle(), center, ruler->GetTimeDep(),
 			ruler->GetTime(), str, points);
 	}
@@ -342,7 +348,7 @@ void RulerListCtrl::Export(wxString filename)
 			break;
 		}
 
-		tos << "Name\tColor\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+		tos << "Name\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
 		double f = 0.0;
 		Color color;
@@ -361,6 +367,8 @@ void RulerListCtrl::Export(wxString filename)
 			}
 			else
 				str = "N/A";
+			tos << str << "\t";
+			str = wxString::Format("%d", ruler->GetNumBranch());
 			tos << str << "\t";
 			str = wxString::Format("%.2f", ruler->GetLength());
 			tos << str << "\t";
@@ -518,8 +526,8 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	if (ruler->GetRulerType() == 2)
 	{
 		//locator
-		GetSubItemRect(item, 4, rect);
-		str = GetText(item, 4);
+		GetSubItemRect(item, 5, rect);
+		str = GetText(item, 5);
 		m_center_text->SetPosition(rect.GetTopLeft());
 		m_center_text->SetSize(rect.GetSize());
 		m_center_text->SetValue(str);
@@ -615,8 +623,8 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	ruler->GetPoint(0)->SetPoint(Point(x, y, z));
 	str = wxString::Format("(%.2f, %.2f, %.2f)",
 		x, y, z);
-	SetText(m_editing_item, 4, str);
-	SetText(m_editing_item, 6, str);
+	SetText(m_editing_item, 5, str);
+	SetText(m_editing_item, 7, str);
 	m_view->RefreshGL();
 }
 
@@ -1400,6 +1408,16 @@ void MeasureDlg::Project(int idx)
 		delete fopendlg;
 }
 
+void MeasureDlg::Relax()
+{
+	std::vector<int> sel;
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+			Relax(sel[i]);
+	}
+}
+
 void MeasureDlg::Relax(int idx)
 {
 	if (!m_view)
@@ -1456,14 +1474,7 @@ void MeasureDlg::OnLock(wxCommandEvent& event)
 
 void MeasureDlg::OnRelax(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
-	{
-		for (size_t i = 0; i < sel.size(); ++i)
-			Relax(sel[i]);
-	}
+	Relax();
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)

@@ -60,7 +60,7 @@ public:
 	~RulerListCtrl();
 
 	void Append(bool enable, unsigned int id, wxString name,
-		wxString &color, double length, wxString &unit,
+		wxString &color, int branches, double length, wxString &unit,
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
 	void UpdateRulers(VRenderView* vrv=0);
@@ -148,6 +148,7 @@ public:
 	void UpdateList();
 
 	//processing
+	void Relax();
 	void Relax(int idx);
 	void Project(int idx);
 	void SetEdit() { m_edited = true; }

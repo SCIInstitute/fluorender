@@ -4940,6 +4940,19 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (!wxGetKeyState(wxKeyCode('\\')) &&
 			m_comp_exclude)
 			m_comp_exclude = false;
+		//ruler relax
+		if (wxGetKeyState(wxKeyCode('r')) &&
+			!m_ruler_relax)
+		{
+			if (frame && frame->GetMeasureDlg())
+				frame->GetMeasureDlg()->Relax();
+			m_ruler_relax = true;
+			refresh = true;
+			set_focus = true;
+		}
+		if (!wxGetKeyState(wxKeyCode('r')) &&
+			m_ruler_relax)
+			m_ruler_relax = false;
 
 		//forced refresh
 		if (wxGetKeyState(WXK_F5))

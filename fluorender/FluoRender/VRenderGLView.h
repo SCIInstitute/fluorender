@@ -972,6 +972,8 @@ private:
 	bool m_comp_include;
 	//comp exclude
 	bool m_comp_exclude;
+	//relax ruler
+	bool m_ruler_relax;
 
 	//predraw in streaming mode
 	bool m_pre_draw;
