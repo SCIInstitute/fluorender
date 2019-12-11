@@ -39,6 +39,7 @@ DistCalculator::DistCalculator() :
 	m_f1 = 1;
 	m_f2 = 2;
 	m_f3 = 3;
+	m_infr = 2.5;
 }
 
 DistCalculator::~DistCalculator()
@@ -182,6 +183,7 @@ double DistCalculator::GetRestDist()
 void DistCalculator::UpdateSpringNode(int idx)
 {
 	int sz = m_spring.size();
+	int cz = m_cloud.size();
 	if (idx < 0 || idx >= sz)
 		return;
 	SpringNode& node = m_spring.at(idx);
@@ -194,16 +196,17 @@ void DistCalculator::UpdateSpringNode(int idx)
 	Vector dir, dir2;
 	//from cloud
 	std::vector<double> lens;
-	for (int i = 0; i < m_cloud.size(); ++i)
+	for (int i = 0; i < cz; ++i)
 	{
 		dir = m_cloud[i] - pos;
 		lens.push_back(dir.length());
 	}
 	std::sort(lens.begin(), lens.end());
-	double scale = (idx == 0 || idx == sz - 1) ? 1.0 : 2.0;
-	int loc = int(scale * m_cloud.size() / sz + 1.0);
-	loc = std::min(loc, int(m_cloud.size() - 1));
-	for (int i = 0; i < m_cloud.size(); ++i)
+	double scale = (node.prevd == 0.0 ||
+		node.nextd == 0.0) ? 1.0 : m_infr;
+	int loc = int(scale * cz / sz + 1.0);
+	loc = std::min(loc, cz-1);
+	for (int i = 0; i < cz; ++i)
 	{
 		dir = m_cloud[i] - pos;
 		dist = dir.length();

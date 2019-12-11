@@ -1439,10 +1439,15 @@ void MeasureDlg::Relax(int idx)
 	if (list && list->empty())
 		list = 0;
 	int iter = 10;
+	double infr = 2.0;
 	if (frame && frame->GetSettingDlg())
+	{
 		iter = frame->GetSettingDlg()->GetRulerRelaxIter();
+		infr = frame->GetSettingDlg()->GetRulerInfr();
+	}
 
 	m_calculator.SetF1(m_relax_value_spin->GetValue());
+	m_calculator.SetInfr(infr);
 	m_calculator.SetCompList(list);
 	m_calculator.SetRuler(ruler);
 	m_calculator.CenterRuler(m_edited, iter);

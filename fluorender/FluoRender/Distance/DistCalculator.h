@@ -67,6 +67,10 @@ namespace FL
 		{
 			m_f1 = val;
 		}
+		void SetInfr(double val)
+		{
+			m_infr = val;
+		}
 
 		void CenterRuler(bool init, int iter=1);
 		void Project();
@@ -82,6 +86,7 @@ namespace FL
 		double m_f1;
 		double m_f2;
 		double m_f3;
+		double m_infr;//range of influence
 
 		struct SpringNode
 		{

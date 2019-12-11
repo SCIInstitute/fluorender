@@ -817,6 +817,7 @@ void SettingDlg::GetSettings()
 	m_ruler_use_transf = false;
 	m_ruler_time_dep = true;
 	m_ruler_relax_f1 = 2.0;
+	m_ruler_infr = 2.0;
 	m_ruler_relax_iter = 10;
 	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
@@ -1065,6 +1066,7 @@ void SettingDlg::GetSettings()
 		fconfig.Read("use transf", &m_ruler_use_transf);
 		fconfig.Read("time dep", &m_ruler_time_dep);
 		fconfig.Read("relax f1", &m_ruler_relax_f1);
+		fconfig.Read("infr", &m_ruler_infr);
 		fconfig.Read("df_f", &m_ruler_df_f);
 		fconfig.Read("relax iter", &m_ruler_relax_iter);
 	}
@@ -1401,6 +1403,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("use transf", m_ruler_use_transf);
 	fconfig.Write("time dep", m_ruler_time_dep);
 	fconfig.Write("relax f1", m_ruler_relax_f1);
+	fconfig.Write("infr", m_ruler_infr);
 	fconfig.Write("df_f", m_ruler_df_f);
 	fconfig.Write("relax iter", m_ruler_relax_iter);
 

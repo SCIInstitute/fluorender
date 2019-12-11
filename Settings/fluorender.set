@@ -47,7 +47,7 @@ value=0
 [save\ cmp]
 value=0
 [run\ script]
-value=0
+value=1
 file=
 [paint\ history]
 value=1
@@ -61,7 +61,7 @@ value=3
 stay\ top=1
 show\ cursor=1
 [last\ tool]
-value=0
+value=2
 [tracking]
 track_iter=3
 component_size=100
@@ -71,9 +71,9 @@ try_split=0
 contact_factor=0.6
 similarity=0.5
 [memory\ settings]
-mem\ swap=1
-graphics\ mem=6000
-large\ data\ size=500
+mem\ swap=0
+graphics\ mem=11000
+large\ data\ size=2000
 force\ brick\ size=256
 up\ time=200
 detail\ level\ offset=0
@@ -82,13 +82,14 @@ value=0
 [invalidate\ tex]
 value=0
 [point\ volume\ mode]
-value=1
+value=0
 [ruler]
 use\ transf=0
 time\ dep=1
 relax\ f1=2
+infr=5
 df_f=0
-relax\ iter=10
+relax\ iter=50
 [pvxml\ flip]
 x=0
 y=0
