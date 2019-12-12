@@ -105,6 +105,18 @@ RulerPoint *Ruler::GetPoint(int index)
 	return 0;
 }
 
+RulerPoint* Ruler::GetLastPoint()
+{
+	for (auto it = m_ruler.rbegin();
+		it != m_ruler.rend(); ++it)
+	{
+		if (it->size() < 2)
+			continue;
+		return it->back().get();
+	}
+	return 0;
+}
+
 pRulerPoint Ruler::GetPPoint(int index)
 {
 	if (index < 0)

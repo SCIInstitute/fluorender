@@ -151,6 +151,7 @@ namespace FL
 		int GetNumBranch();
 		int GetNumPoint();
 		RulerPoint* GetPoint(int index);
+		RulerPoint* GetLastPoint();
 		pRulerPoint GetPPoint(int index);
 		int GetNumBranchPoint(int nbranch);
 		RulerPoint* GetPoint(int nbranch, int index);
