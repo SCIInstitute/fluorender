@@ -4,7 +4,9 @@
 #include <QTabWidget>
 
 #include "volumePropertiesOptions.hpp"
+#include "volumePropertiesMisc.hpp"
 #include "meshPropertiesOptions.hpp"
+#include "meshPropertiesMaterials.hpp"
 
 /*
  *
@@ -30,8 +32,29 @@ class PropertiesPanel : public QWidget
     PropertiesPanel();
 
   private:
+
+    template<typename Property>
+    QFrame *genLeftFrame(Property* left)
+    {
+      QFrame *leftFrame = new QFrame();
+      leftFrame->setLayout(left);
+
+      return leftFrame;
+    }
+
+    template<typename Property>
+    QFrame *genRightFrame(Property* right)
+    {
+      QFrame *rightFrame = new QFrame();
+      rightFrame->setLayout(right);
+
+      return rightFrame;
+    }
+
+    QWidget *genMainWidget(QFrame *left, QFrame *right);
+
     QTabWidget *tabWidget = new QTabWidget();
-    QGridLayout* myLayout = new QGridLayout();
+    QGridLayout *myLayout = new QGridLayout();
 
 };
 

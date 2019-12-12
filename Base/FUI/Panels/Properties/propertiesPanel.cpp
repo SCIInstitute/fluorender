@@ -6,20 +6,38 @@ PropertiesPanel::PropertiesPanel()
   this->setLayout(myLayout);
 }
 
-void PropertiesPanel::onVolumeLoaded(int renderViewID)
+void PropertiesPanel::onVolumeLoaded(int renderviewID)
 {
-  QFrame* newFrame = new QFrame();
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions();
+  VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
 
-  newFrame->setLayout(newVolumePropOpt);
-  tabWidget->addTab(newFrame,"Renderview: " + QString::number(renderViewID));
+  QFrame *leftFrame = genLeftFrame(newVolumePropOpt);
+  QFrame *rightFrame = genRightFrame(newVolumePropsMisc);
+
+  QWidget *mainWidget = genMainWidget(leftFrame,rightFrame);
+  tabWidget->addTab(mainWidget,"Renderview: " + QString::number(renderviewID));
 }
 
 void PropertiesPanel::onMeshLoaded(int renderviewID)
 {
-    QFrame* newFrame = new QFrame();
-    MeshPropertiesOptions* newVolumePropOpt = new MeshPropertiesOptions();
+  MeshPropertiesMaterials *newMeshPropertiesMaterial = new MeshPropertiesMaterials();
+  MeshPropertiesOptions *newMeshProperties = new MeshPropertiesOptions();
 
-    newFrame->setLayout(newVolumePropOpt);
-    tabWidget->addTab(newFrame,"Renderview: " + QString::number(renderviewID));
+  QFrame *leftFrame = genLeftFrame(newMeshPropertiesMaterial);
+  QFrame *rightFrame = genRightFrame(newMeshProperties);
+
+  QWidget *mainWidget = genMainWidget(leftFrame,rightFrame);
+  tabWidget->addTab(mainWidget,"Renderview: " + QString::number(renderviewID));
+}
+
+QWidget* PropertiesPanel::genMainWidget(QFrame *left, QFrame *right)
+{
+  QGridLayout *newLayout = new QGridLayout();
+  QWidget *newWidget = new QWidget();
+
+  newLayout->addWidget(left,0,0);
+  newLayout->addWidget(right,0,1);
+  newWidget->setLayout(newLayout);
+
+  return newWidget;
 }
