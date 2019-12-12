@@ -3433,18 +3433,19 @@ void VRenderFrame::OpenProject(wxString& filename)
 		return;
 	wxFileConfig fconfig(is);
 	wxString ver_major, ver_minor;
-	long l_major, l_minor;
+	long l_major;
+	double d_minor;
 	l_major = 1;
 	if (fconfig.Read("ver_major", &ver_major) &&
 		fconfig.Read("ver_minor", &ver_minor))
 	{
 		ver_major.ToLong(&l_major);
-		ver_minor.ToLong(&l_minor);
+		ver_minor.ToDouble(&d_minor);
 
 		if (l_major>VERSION_MAJOR)
 			::wxMessageBox("The project file is saved by a newer version of FluoRender.\n" \
 			"Please check update and download the new version.");
-		else if (l_minor>VERSION_MINOR)
+		else if (d_minor>VERSION_MINOR)
 			::wxMessageBox("The project file is saved by a newer version of FluoRender.\n" \
 			"Please check update and download the new version.");
 	}
@@ -4313,7 +4314,12 @@ void VRenderFrame::OpenProject(wxString& filename)
 				if (fconfig.Read("obj_rot", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetObjRot(x, y, z);
+					{
+						if (l_major <= 2 && d_minor < 24.3)
+							vrv->SetObjRot(x, y+180.0, z+180.0);
+						else
+							vrv->SetObjRot(x, y, z);
+					}
 				}
 				//scale bar
 				bool disp;

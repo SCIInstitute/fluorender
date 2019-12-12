@@ -47,7 +47,11 @@ class RulerListCtrl : public wxListCtrl
 	{
 		ID_NameText = ID_MEASURE1,
 		ID_CenterText,
-		ID_ColorPicker
+		ID_ColorPicker,
+		ID_AlignX,
+		ID_AlignY,
+		ID_AlignZ,
+		ID_AlignReset
 	};
 
 public:
@@ -98,6 +102,9 @@ private:
 	void OnScroll(wxMouseEvent& event);
 	void OnTextFocus(wxCommandEvent& event);
 	void OnAct(wxListEvent &event);
+	void OnContextMenu(wxContextMenuEvent &event);
+	void OnAlign(wxCommandEvent &event);
+	void OnReset(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 protected: //Possible TODO
