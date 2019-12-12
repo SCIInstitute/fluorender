@@ -60,6 +60,7 @@ set(HEADER_FILES
     Panels/Properties/propertiesPanel.hpp
     Panels/Properties/volumePropertiesOptions.hpp
     Panels/Properties/meshPropertiesOptions.hpp
+    Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
   )
   
@@ -78,6 +79,7 @@ set(SOURCES
     Panels/Properties/propertiesPanel.cpp
     Panels/Properties/volumePropertiesOptions.cpp
     Panels/Properties/meshPropertiesOptions.cpp
+    Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
   )
   
