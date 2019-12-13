@@ -138,7 +138,15 @@ public:
 		ID_AccIntensityRd,
 		ID_UseTransferChk,
 		ID_TransientChk,
-		ID_DF_FChk
+		ID_DF_FChk,
+		//align
+		ID_AlignBtn,
+		ID_RotateSldr,
+		ID_RotateText,
+		ID_AlignX,
+		ID_AlignY,
+		ID_AlignZ,
+		ID_AlignReset,
 	};
 
 	MeasureDlg(wxWindow* frame,
@@ -175,6 +183,10 @@ private:
 	wxCheckBox *m_use_transfer_chk;
 	wxCheckBox *m_transient_chk;
 	wxCheckBox *m_df_f_chk;
+	//align
+	wxButton *m_align_btn;
+	wxSlider *m_rotate_sldr;
+	wxTextCtrl *m_rotate_text;
 
 	FL::DistCalculator m_calculator;
 	FL::RulerAlign m_aligner;
@@ -205,6 +217,12 @@ private:
 	void OnUseTransferCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);
 	void OnDF_FCheck(wxCommandEvent& event);
+	//align
+	void OnAlignBtn(wxCommandEvent& event);
+	void OnAlign(wxCommandEvent& event);
+	void OnAlignReset(wxCommandEvent& event);
+	void OnRotateChange(wxScrollEvent &event);
+	void OnRotateText(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

@@ -42,8 +42,9 @@ void RulerAlign::AlignRuler(int axis_type)
 	Ruler* ruler = m_ruler_list[0];
 	if (!ruler || ruler->GetNumPoint() < 2)
 		return;
+	m_axis_type = axis_type;
 	FLIVR::Vector axis;
-	switch (axis_type)
+	switch (m_axis_type)
 	{
 	case 0:
 		axis = FLIVR::Vector(1.0, 0.0, 0.0);
@@ -59,15 +60,44 @@ void RulerAlign::AlignRuler(int axis_type)
 	FLIVR::Vector rv = ruler->GetLastPoint()->GetPoint() -
 		ruler->GetPoint(0)->GetPoint();
 	rv.normalize();
-	FLIVR::Vector rotv = Cross(rv, axis);
+	m_axis = rv;
+	FLIVR::Vector rotv = Cross(m_axis, axis);
 	rotv.normalize();
-	double ang = Dot(rv, axis);
+	double ang = Dot(m_axis, axis);
 	ang = r2d(std::acos(ang));
 	FLIVR::Quaternion q(ang, rotv);
 	double qx, qy, qz;
 	q.ToEuler(qx, qy, qz);
-	//double rotx, roty, rotz;
-	//m_view->GetRotations(rotx, roty, rotz);
+	m_view->SetRotations(qx, -qy, -qz);
+	m_view->RefreshGL(50);
+}
+
+void RulerAlign::Rotate(double val)
+{
+	FLIVR::Vector axis;
+	switch (m_axis_type)
+	{
+	case 0:
+		axis = FLIVR::Vector(1.0, 0.0, 0.0);
+		break;
+	case 1:
+		axis = FLIVR::Vector(0.0, 1.0, 0.0);
+		break;
+	case 2:
+		axis = FLIVR::Vector(0.0, 0.0, 1.0);
+		break;
+	}
+
+	FLIVR::Vector rotv = Cross(m_axis, axis);
+	rotv.normalize();
+	double ang = Dot(m_axis, axis);
+	ang = r2d(std::acos(ang));
+	FLIVR::Quaternion q(ang, rotv);
+	//rotate
+	FLIVR::Quaternion rotq(val, m_axis);
+	FLIVR::Quaternion q2 = q * rotq;
+	double qx, qy, qz;
+	q2.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz);
 	m_view->RefreshGL(50);
 }

@@ -745,7 +745,14 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_CHECKBOX(ID_UseTransferChk, MeasureDlg::OnUseTransferCheck)
 	EVT_CHECKBOX(ID_TransientChk, MeasureDlg::OnTransientCheck)
 	EVT_CHECKBOX(ID_DF_FChk, MeasureDlg::OnDF_FCheck)
-	END_EVENT_TABLE()
+	EVT_BUTTON(ID_AlignBtn, MeasureDlg::OnAlignBtn)
+	EVT_MENU(ID_AlignX, MeasureDlg::OnAlign)
+	EVT_MENU(ID_AlignY, MeasureDlg::OnAlign)
+	EVT_MENU(ID_AlignZ, MeasureDlg::OnAlign)
+	EVT_MENU(ID_AlignReset, MeasureDlg::OnAlignReset)
+	EVT_COMMAND_SCROLL(ID_RotateSldr, MeasureDlg::OnRotateChange)
+	EVT_TEXT(ID_RotateText, MeasureDlg::OnRotateText)
+END_EVENT_TABLE()
 
 MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	: wxPanel(parent,wxID_ANY,
@@ -894,13 +901,25 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 
 	//notes
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "N.B."), wxHORIZONTAL);
-	wxStaticText* st = new wxStaticText(this, wxID_ANY,
-		"You can press and hold the Shift key to use the brush tool with\n" \
-		"any of the measurement tools. The measurement point is placed\n" \
-		"at the center of the selected structures automatically.");
+		new wxStaticBox(this, wxID_ANY, "Align in Render View"), wxVERTICAL);
+	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
+	m_align_btn = new wxButton(this, ID_AlignBtn, "Align with",
+		wxDefaultPosition, wxSize(65, 22));
+	wxStaticText *st = new wxStaticText(this, 0, "Rotate");
+	m_rotate_sldr = new wxSlider(this, ID_RotateSldr, 0, 0, 3600,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_rotate_text = new wxTextCtrl(this, ID_RotateText, "0",
+		wxDefaultPosition, wxSize(50, 20));
+	sizer_21->Add(5, 5);
+	sizer_21->Add(m_align_btn, 0, wxALIGN_CENTER);
+	sizer_21->Add(5, 5);
+	sizer_21->Add(st, 0, wxALIGN_CENTER);
+	sizer_21->Add(m_rotate_sldr, 1, wxEXPAND);
+	sizer_21->Add(m_rotate_text, 0, wxALIGN_CENTER);
+	//
 	sizer_2->Add(10, 10);
-	sizer_2->Add(st, 0, wxEXPAND);
+	sizer_2->Add(sizer_21, 0, wxEXPAND);
+	sizer_2->Add(10, 10);
 
 	//sizer
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -933,6 +952,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 	m_rhdl = m_view->GetRulerHandler();
 	if (!m_rhdl)
 		return;
+	m_aligner.SetView(m_view->m_glview);
 
 	UpdateList();
 	if (m_view && m_view->m_glview)
@@ -1622,4 +1642,75 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerDF_F(val);
+}
+
+void MeasureDlg::OnAlignBtn(wxCommandEvent& event)
+{
+	wxRect rect = m_align_btn->GetRect();
+	wxPoint point = (rect.GetBottomLeft() + rect.GetTopRight()) / 2;
+	wxMenu menu;
+	wxMenu* align_menu = new wxMenu;
+	align_menu->Append(ID_AlignX, "with X");
+	align_menu->Append(ID_AlignY, "with Y");
+	align_menu->Append(ID_AlignZ, "with Z");
+	menu.Append(wxID_ANY, "Align Render View", align_menu);
+	menu.Append(ID_AlignReset, "Reset");
+	PopupMenu(&menu, point.x, point.y);
+}
+
+void MeasureDlg::OnAlign(wxCommandEvent& event)
+{
+	std::vector<int> sel;
+	if (!m_rulerlist->GetCurrSelection(sel))
+		return;
+	if (!m_view)
+		return;
+	FL::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list)
+		return;
+	FL::Ruler* ruler = ruler_list->at(sel[0]);
+	m_aligner.SetRuler(ruler);
+	int axis_type = 0;
+	switch (event.GetId())
+	{
+	case ID_AlignX:
+		axis_type = 0;
+		break;
+	case ID_AlignY:
+		axis_type = 1;
+		break;
+	case ID_AlignZ:
+		axis_type = 2;
+		break;
+	}
+	m_aligner.AlignRuler(axis_type);
+}
+
+void MeasureDlg::OnAlignReset(wxCommandEvent& event)
+{
+	if (m_view)
+	{
+		m_view->SetRotations(0.0, 0.0, 0.0);
+		m_view->RefreshGL();
+	}
+}
+
+void MeasureDlg::OnRotateChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	double val = double(ival) / 10.0;
+	wxString str = wxString::Format("%.1f", val);
+	if (str != m_rotate_text->GetValue())
+		m_rotate_text->SetValue(str);
+}
+
+void MeasureDlg::OnRotateText(wxCommandEvent &event)
+{
+	wxString str = m_rotate_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	m_rotate_sldr->SetValue(int(val*10.0 + 0.5));
+
+	//rotate
+	m_aligner.Rotate(val);
 }

@@ -38,7 +38,9 @@ namespace FL
 	class RulerAlign
 	{
 	public:
-		RulerAlign() {};
+		RulerAlign():
+			m_view(0),
+			m_axis_type(0) {};
 		~RulerAlign() {};
 
 		void SetView(VRenderGLView* view)
@@ -68,10 +70,13 @@ namespace FL
 		}
 
 		void AlignRuler(int axis_type);//axis_type: 0-x; 1-y; 2-z
+		void Rotate(double val);
 
 	private:
 		VRenderGLView *m_view;
 		RulerList m_ruler_list;
+		int m_axis_type;
+		FLIVR::Vector m_axis;
 		FLIVR::Vector m_axis_x;
 		FLIVR::Vector m_axis_y;
 		FLIVR::Vector m_axis_z;
