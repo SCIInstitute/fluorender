@@ -25,95 +25,57 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
-#ifndef _RulerHandler_H_
-#define _RulerHandler_H_
+#ifndef FL_RulerAlign_h
+#define FL_RulerAlign_h
 
 #include <Distance/Ruler.h>
+#include <FLIVR/Vector.h>
 
 class VRenderGLView;
-class wxFileConfig;
 
 namespace FL
 {
-	class RulerHandler
+	class RulerAlign
 	{
 	public:
-		RulerHandler();
-		~RulerHandler();
+		RulerAlign() {};
+		~RulerAlign() {};
 
 		void SetView(VRenderGLView* view)
 		{
 			m_view = view;
 		}
 
-		void SetRuler(FL::Ruler* ruler)
+		void AddRuler(Ruler* ruler)
 		{
-			m_ruler = ruler;
+			m_ruler_list.push_back(ruler);
 		}
 
-		FL::Ruler* GetRuler()
+		void SetRulerList(RulerList* list)
 		{
-			return m_ruler;
+			m_ruler_list.assign(list->begin(), list->end());
 		}
 
-		void SetRulerList(FL::RulerList* ruler_list)
+		void Clear()
 		{
-			m_ruler_list = ruler_list;
+			m_ruler_list.clear();
 		}
 
-		FL::RulerList* GetRulerList()
+		void SetRuler(Ruler* ruler)
 		{
-			return m_ruler_list;
+			Clear();
+			AddRuler(ruler);
 		}
 
-		void SetType(int type)
-		{
-			m_type = type;
-		}
-
-		int GetType()
-		{
-			return m_type;
-		}
-
-		bool FindEditingRuler(double mx, double my);
-
-		void SetPoint(FL::pRulerPoint point)
-		{
-			m_point = point;
-		}
-		RulerPoint* GetPoint()
-		{
-			return m_point.get();
-		}
-
-		RulerPoint* GetEllipsePoint(int index);
-
-		void FinishRuler();
-		bool GetRulerFinished();
-
-		void AddRulerPoint(int mx, int my);
-		void AddPaintRulerPoint();
-		bool MoveRuler(int mx, int my);
-		bool EditPoint(int mx, int my, bool alt);
-
-		void Save(wxFileConfig &fconfig, int vi);
-		void Read(wxFileConfig &fconfig, int vi);
+		void AlignRuler(int axis_type);//axis_type: 0-x; 1-y; 2-z
 
 	private:
 		VRenderGLView *m_view;
-		Ruler *m_ruler;
-		RulerList *m_ruler_list;
-		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
-					//4: protractor; 5: ellipse
-
-		//get point
-		FL::pRulerPoint m_point;
-		int m_pindex;//index of point in ruler
-
-	private:
+		RulerList m_ruler_list;
+		FLIVR::Vector m_axis_x;
+		FLIVR::Vector m_axis_y;
+		FLIVR::Vector m_axis_z;
 	};
-
 }
-#endif//_RulerHandler_H_
+
+#endif//FL_RulerAlign_h

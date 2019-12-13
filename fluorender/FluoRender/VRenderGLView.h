@@ -810,7 +810,7 @@ private:
 	double m_ctrx, m_ctry, m_ctrz;
 	//saved camera center
 	double m_ctrx_saved, m_ctry_saved, m_ctrz_saved;
-	Quaternion m_q;
+	FLIVR::Quaternion m_q;
 	Vector m_up;
 	Vector m_head;
 
@@ -918,8 +918,8 @@ private:
 	bool m_brush_size_data;
 
 	//clipping plane rotations
-	Quaternion m_q_cl;
-	Quaternion m_q_cl_zero;
+	FLIVR::Quaternion m_q_cl;
+	FLIVR::Quaternion m_q_cl_zero;
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
 
 	//volume selector for segmentation

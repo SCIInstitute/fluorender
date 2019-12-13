@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/RulerHandler.h>
 #include "FLIVR/Color.h"
 #include <Distance/DistCalculator.h>
+#include <Distance/RulerAlign.h>
 
 #ifndef _MEASUREDLG_H_
 #define _MEASUREDLG_H_
@@ -48,10 +49,6 @@ class RulerListCtrl : public wxListCtrl
 		ID_NameText = ID_MEASURE1,
 		ID_CenterText,
 		ID_ColorPicker,
-		ID_AlignX,
-		ID_AlignY,
-		ID_AlignZ,
-		ID_AlignReset
 	};
 
 public:
@@ -103,8 +100,6 @@ private:
 	void OnTextFocus(wxCommandEvent& event);
 	void OnAct(wxListEvent &event);
 	void OnContextMenu(wxContextMenuEvent &event);
-	void OnAlign(wxCommandEvent &event);
-	void OnReset(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 protected: //Possible TODO
@@ -182,6 +177,7 @@ private:
 	wxCheckBox *m_df_f_chk;
 
 	FL::DistCalculator m_calculator;
+	FL::RulerAlign m_aligner;
 	bool m_edited;
 
 private:
