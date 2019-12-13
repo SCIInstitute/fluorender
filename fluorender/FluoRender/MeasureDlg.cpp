@@ -52,10 +52,6 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
 	EVT_LIST_ITEM_ACTIVATED(wxID_ANY, RulerListCtrl::OnAct)
 	EVT_CONTEXT_MENU(RulerListCtrl::OnContextMenu)
-	EVT_MENU(ID_AlignX, RulerListCtrl::OnAlign)
-	EVT_MENU(ID_AlignY, RulerListCtrl::OnAlign)
-	EVT_MENU(ID_AlignZ, RulerListCtrl::OnAlign)
-	EVT_MENU(ID_AlignReset, RulerListCtrl::OnReset)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -696,77 +692,29 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 
 void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
 {
-	if (GetSelectedItemCount() > 0)
-	{
-		wxPoint point = event.GetPosition();
-		// If from keyboard
-		if (point.x == -1 && point.y == -1)
-		{
-			wxSize size = GetSize();
-			point.x = size.x / 2;
-			point.y = size.y / 2;
-		}
-		else
-		{
-			point = ScreenToClient(point);
-		}
-		wxMenu menu;
-		wxMenu* align_menu = new wxMenu;
-		align_menu->Append(ID_AlignX, "with X");
-		align_menu->Append(ID_AlignY, "with Y");
-		align_menu->Append(ID_AlignZ, "with Z");
-		menu.Append(wxID_ANY, "Align Render View", align_menu);
-		menu.Append(ID_AlignReset, "Reset");
-		PopupMenu(&menu, point.x, point.y);
-	}
-}
-
-void RulerListCtrl::OnAlign(wxCommandEvent &event)
-{
-	if (!m_view)
-		return;
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_FOCUSED);
-	FL::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-	if (!ruler || ruler->GetNumPoint() < 2)
-		return;
-	Vector axis;
-	switch (event.GetId())
-	{
-	case ID_AlignX:
-		axis = Vector(1.0, 0.0, 0.0);
-		break;
-	case ID_AlignY:
-		axis = Vector(0.0, 1.0, 0.0);
-		break;
-	case ID_AlignZ:
-		axis = Vector(0.0, 0.0, 1.0);
-		break;
-	}
-	//ruler vector
-	Vector rv = ruler->GetLastPoint()->GetPoint() -
-		ruler->GetPoint(0)->GetPoint();
-	rv.normalize();
-	Vector rotv = Cross(rv, axis);
-	rotv.normalize();
-	double ang = Dot(rv, axis);
-	ang = r2d(std::acos(ang));
-	Quaternion q(ang, rotv);
-	double qx, qy, qz;
-	q.ToEuler(qx, qy, qz);
-	//double rotx, roty, rotz;
-	//m_view->GetRotations(rotx, roty, rotz);
-	m_view->SetRotations(qx, -qy, -qz);
-	m_view->RefreshGL();
-}
-
-void RulerListCtrl::OnReset(wxCommandEvent &event)
-{
-	if (!m_view)
-		return;
-	m_view->SetObjRot(0.0, 180.0, 180.0);
-	m_view->RefreshGL();
+	//if (GetSelectedItemCount() > 0)
+	//{
+	//	wxPoint point = event.GetPosition();
+	//	// If from keyboard
+	//	if (point.x == -1 && point.y == -1)
+	//	{
+	//		wxSize size = GetSize();
+	//		point.x = size.x / 2;
+	//		point.y = size.y / 2;
+	//	}
+	//	else
+	//	{
+	//		point = ScreenToClient(point);
+	//	}
+	//	wxMenu menu;
+	//	wxMenu* align_menu = new wxMenu;
+	//	align_menu->Append(ID_AlignX, "with X");
+	//	align_menu->Append(ID_AlignY, "with Y");
+	//	align_menu->Append(ID_AlignZ, "with Z");
+	//	menu.Append(wxID_ANY, "Align Render View", align_menu);
+	//	menu.Append(ID_AlignReset, "Reset");
+	//	PopupMenu(&menu, point.x, point.y);
+	//}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
