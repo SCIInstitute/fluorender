@@ -16,6 +16,8 @@
 
 #include "renderview.hpp"
 
+#include <Panels/Properties/propertiesPanel.hpp>
+
 namespace Ui {
 class FUI;
 }
@@ -28,6 +30,8 @@ public:
     explicit FUI(QWidget *parent = nullptr);
 
     ~FUI();
+
+    //PropertiesPanel* propertiesPanel = new PropertiesPanel();
 
 private slots:
     void on_actionSplit_HalfV_triggered();
@@ -45,6 +49,10 @@ private slots:
     void on_actionSplit_All_triggered();
 
     void on_actionOne_View_triggered();
+
+    void on_actionLoad_Volume_0_triggered();
+
+    void on_actionLoad_Mesh_0_triggered();
 
 private:
     Ui::FUI *ui;

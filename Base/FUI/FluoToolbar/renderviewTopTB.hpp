@@ -2,9 +2,12 @@
 #define RENDERVIEW_TOP_TOOLBAR_HPP
 
 #include "genToolbarObjects.hpp"
+
 #include <QPushButton>
 #include <QColorDialog>
 #include <QPalette>
+#include <QComboBox>
+
 #include <unordered_map>
 #include <vector>
 

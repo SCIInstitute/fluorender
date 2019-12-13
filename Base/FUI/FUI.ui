@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>2143</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSplit_Render_View">
@@ -79,7 +79,21 @@
     <addaction name="actionSplit_All"/>
     <addaction name="actionOne_View"/>
    </widget>
+   <widget class="QMenu" name="menuLoad_Project">
+    <property name="title">
+     <string>Load Project</string>
+    </property>
+    <widget class="QMenu" name="menuRenderview_1">
+     <property name="title">
+      <string>Renderview 0</string>
+     </property>
+     <addaction name="actionLoad_Volume_0"/>
+     <addaction name="actionLoad_Mesh_0"/>
+    </widget>
+    <addaction name="menuRenderview_1"/>
+   </widget>
    <addaction name="menuSplit_Render_View"/>
+   <addaction name="menuLoad_Project"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="minimumSize">
@@ -784,7 +798,7 @@
   <widget class="QDockWidget" name="WorkspaceWidget">
    <property name="minimumSize">
     <size>
-     <width>424</width>
+     <width>438</width>
      <height>300</height>
     </size>
    </property>
@@ -3973,7 +3987,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="PropertiesWidget">
    <property name="minimumSize">
     <size>
      <width>84</width>
@@ -3998,33 +4012,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="geometry">
-      <rect>
-       <x>9</x>
-       <y>9</y>
-       <width>2125</width>
-       <height>91</height>
-      </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="baseSize">
-      <size>
-       <width>0</width>
-       <height>200</height>
-      </size>
-     </property>
-     <property name="title">
-      <string/>
-     </property>
-    </widget>
-   </widget>
+   <widget class="PropertiesPanel" name="propertiesPanel"/>
   </widget>
   <action name="actionTestSplit">
    <property name="icon">
@@ -4141,8 +4129,46 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
     <string>Settings</string>
    </property>
   </action>
+  <action name="actionLoad_Volume">
+   <property name="text">
+    <string>Load Volume</string>
+   </property>
+  </action>
+  <action name="actionLoad_Mesh">
+   <property name="text">
+    <string>Load Mesh</string>
+   </property>
+  </action>
+  <action name="actionLoad_Volume_2">
+   <property name="text">
+    <string>Load Volume</string>
+   </property>
+  </action>
+  <action name="actionLoad_Mesh_2">
+   <property name="text">
+    <string>Load Mesh</string>
+   </property>
+  </action>
+  <action name="actionLoad_Volume_0">
+   <property name="text">
+    <string>Load Volume</string>
+   </property>
+  </action>
+  <action name="actionLoad_Mesh_0">
+   <property name="text">
+    <string>Load Mesh</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>PropertiesPanel</class>
+   <extends>QWidget</extends>
+   <header>Panels/Properties/propertiesPanel.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

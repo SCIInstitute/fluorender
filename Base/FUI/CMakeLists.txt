@@ -56,6 +56,12 @@ set(HEADER_FILES
     CustomWidgets/fluoSliderStyle.hpp
     CustomWidgets/fluoSpinbox.hpp
     CustomWidgets/fluoSpinboxDouble.hpp
+    CustomWidgets/fluoToolButton.hpp
+    Panels/Properties/propertiesPanel.hpp
+    Panels/Properties/volumePropertiesOptions.hpp
+    Panels/Properties/meshPropertiesOptions.hpp
+    Panels/Properties/meshPropertiesMaterials.hpp
+    Panels/Properties/volumePropertiesMisc.hpp
   )
   
 set(SOURCES
@@ -70,6 +76,11 @@ set(SOURCES
     FluoToolbar/renderviewRightTB.cpp
     renderCanvas.cpp
     testTriangle.cpp
+    Panels/Properties/propertiesPanel.cpp
+    Panels/Properties/volumePropertiesOptions.cpp
+    Panels/Properties/meshPropertiesOptions.cpp
+    Panels/Properties/meshPropertiesMaterials.cpp
+    Panels/Properties/volumePropertiesMisc.cpp
   )
   
 set(UI_FILES
@@ -87,6 +98,7 @@ include_directories(
 	  ${Qt5Widgets_INCLUDE_DIRS}
 	  ${Qt5OpenGL_INCLUDE_DIRS}
 	  ${Qt5Gui_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Panels
   )
 
 add_executable(FUI
