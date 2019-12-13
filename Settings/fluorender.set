@@ -61,7 +61,7 @@ value=3
 stay\ top=1
 show\ cursor=1
 [last\ tool]
-value=2
+value=1
 [tracking]
 track_iter=3
 component_size=100
@@ -82,7 +82,7 @@ value=0
 [invalidate\ tex]
 value=0
 [point\ volume\ mode]
-value=0
+value=1
 [ruler]
 use\ transf=0
 time\ dep=1
