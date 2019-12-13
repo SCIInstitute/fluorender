@@ -57,11 +57,15 @@ set(HEADER_FILES
     CustomWidgets/fluoSpinbox.hpp
     CustomWidgets/fluoSpinboxDouble.hpp
     CustomWidgets/fluoToolButton.hpp
+    CustomWidgets/fluoLine.hpp
+    CustomWidgets/fluoColoredLine.hpp
     Panels/Properties/propertiesPanel.hpp
     Panels/Properties/volumePropertiesOptions.hpp
     Panels/Properties/meshPropertiesOptions.hpp
     Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
+    Panels/Output_Adjustments/outputAdjust.hpp
+    Panels/Output_Adjustments/colorPanel.hpp
   )
   
 set(SOURCES
@@ -81,6 +85,8 @@ set(SOURCES
     Panels/Properties/meshPropertiesOptions.cpp
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
+    Panels/Output_Adjustments/outputAdjust.cpp
+    Panels/Output_Adjustments/colorPanel.cpp
   )
   
 set(UI_FILES
