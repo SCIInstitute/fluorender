@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QToolButton>
+#include <QFrame>
 
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
@@ -25,8 +26,14 @@ class VolumePropertiesMisc : public QGridLayout
     void addRow1();
     void addRow2();
     void addRow3();
+    void addRow4();
+    void addRow5();
 
+    QWidget* genToolWidget();
     QComboBox* genComboBox(const QStringList& list);
+    QFrame* genLine();
+    QGridLayout *populateToolLayout();
+
 
     QLabel *voxelSizeLabel   = new QLabel("Voxel Size: ");
     QLabel *xLabel           = new QLabel("X: ");
@@ -58,6 +65,20 @@ class VolumePropertiesMisc : public QGridLayout
 
     QToolButton *effectsToolButton = new QToolButton();
 
+    QToolButton *highTransparancyButton     = new QToolButton();
+    QToolButton *mIPButton                  = new QToolButton();
+    QToolButton *invertDataButton           = new QToolButton();
+    QToolButton *spatialInterpolationButton = new QToolButton();
+    QToolButton *renderingResultButton      = new QToolButton();
+    QToolButton *syncChannelButton          = new QToolButton();
+    QToolButton *depthModeButton            = new QToolButton();
+    QToolButton *nameLegendButton           = new QToolButton();
+    QToolButton *resetAllButton             = new QToolButton();
+    QToolButton *saveDefaultsButton         = new QToolButton();
+
+    QFrame *line = genLine();
+
+    QWidget *toolButtonWidget = genToolWidget();
 
     const QStringList EFFECTS1_LIST = {
       "Rainbow", "Hot","Cool",
@@ -74,6 +95,8 @@ class VolumePropertiesMisc : public QGridLayout
 
     QComboBox *effectsList1 = genComboBox(EFFECTS1_LIST);
     QComboBox *effectsList2 = genComboBox(EFFECTS2_LIST);
+
+
 };
 
 
