@@ -123,7 +123,7 @@ void RulerAlign::AlignPca()
 
 	FLIVR::Vector source0 = solver.GetAxis(0);
 	FLIVR::Vector source1 = solver.GetAxis(1);
-	//FLIVR::Vector source2 = solver.GetAxis(2);
+	FLIVR::Vector source2 = solver.GetAxis(2);
 
 	FLIVR::Vector target0(1, 0, 0);
 	FLIVR::Vector target1(0, 1, 0);
@@ -134,13 +134,22 @@ void RulerAlign::AlignPca()
 	double ang = Dot(source0, target0);
 	ang = r2d(std::acos(ang));
 	FLIVR::Quaternion q(ang, rotv);
+	//test
+	//FLIVR::Quaternion s0(source0.x(), source0.y(), source0.z(), 0.0);
+	//s0 = q * s0 * (-q);
 	//rotate source1
 	FLIVR::Quaternion s1(source1.x(), source1.y(), source1.z(), 0.0);
-	s1 = (-q) * s1 * q;
+	s1 = (-q) * s1 * (q);
 	FLIVR::Vector s1v(s1.x, s1.y, s1.z);
+	s1v.normalize();
 	//angle between s1v and target1
 	ang = Dot(s1v, target1);
 	ang = r2d(std::acos(ang));
+	//decide direction
+	FLIVR::Vector dir = Cross(s1v, target1);
+	double t0_dir = Dot(target0, dir);
+	//if (t0_dir < 0.0)
+	//	ang = -ang;
 	//rotate
 	FLIVR::Quaternion rotq(ang, source0);
 	FLIVR::Quaternion q2 = q * rotq;
