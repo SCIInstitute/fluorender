@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Quaternion.h>
 #include <FLIVR/Utils.h>
 #include <VRenderGLView.h>
+#include <Distance/Pca.h>
 
 using namespace FL;
 
@@ -95,6 +96,53 @@ void RulerAlign::Rotate(double val)
 	FLIVR::Quaternion q(ang, rotv);
 	//rotate
 	FLIVR::Quaternion rotq(val, m_axis);
+	FLIVR::Quaternion q2 = q * rotq;
+	double qx, qy, qz;
+	q2.ToEuler(qx, qy, qz);
+	m_view->SetRotations(qx, -qy, -qz);
+	m_view->RefreshGL(50);
+}
+
+void RulerAlign::AlignPca()
+{
+	Pca solver;
+	for (size_t i = 0; i < m_ruler_list.size(); ++i)
+	{
+		Ruler* ruler = m_ruler_list[i];
+		if (!ruler)
+			continue;
+		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
+		{
+			RulerPoint* point = ruler->GetPoint(j);
+			if (!point)
+				continue;
+			solver.AddPoint(point->GetPoint());
+		}
+	}
+	solver.Compute();
+
+	FLIVR::Vector source0 = solver.GetAxis(0);
+	FLIVR::Vector source1 = solver.GetAxis(1);
+	//FLIVR::Vector source2 = solver.GetAxis(2);
+
+	FLIVR::Vector target0(1, 0, 0);
+	FLIVR::Vector target1(0, 1, 0);
+
+	FLIVR::Vector rotv = Cross(source0, target0);
+	rotv.normalize();
+	//angle between source0 and target0
+	double ang = Dot(source0, target0);
+	ang = r2d(std::acos(ang));
+	FLIVR::Quaternion q(ang, rotv);
+	//rotate source1
+	FLIVR::Quaternion s1(source1.x(), source1.y(), source1.z(), 0.0);
+	s1 = (-q) * s1 * q;
+	FLIVR::Vector s1v(s1.x, s1.y, s1.z);
+	//angle between s1v and target1
+	ang = Dot(s1v, target1);
+	ang = r2d(std::acos(ang));
+	//rotate
+	FLIVR::Quaternion rotq(ang, source0);
 	FLIVR::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
 	q2.ToEuler(qx, qy, qz);

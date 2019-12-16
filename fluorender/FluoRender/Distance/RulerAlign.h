@@ -71,6 +71,7 @@ namespace FL
 
 		void AlignRuler(int axis_type);//axis_type: 0-x; 1-y; 2-z
 		void Rotate(double val);
+		void AlignPca();
 
 	private:
 		VRenderGLView *m_view;
