@@ -26,22 +26,62 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Distance/Pca.h>
+#include <Algorithm>
 
 using namespace FL;
 
-void Pca::GenerateMean()
+void Pca::Compute()
 {
-	int count = m_points.size();
-	FLIVR::Point sum;
-	for (size_t i = 0; i < count; ++i)
-		sum += m_points[i];
-	if (count > 0)
-		m_mean = sum / count;
-	else
-		m_mean = FLIVR::Point(0);
-}
-
-void Pca::GenerateCenteredMat()
-{
-
+	int N = m_points.size();
+	if (N < 3)
+		return;
+	FLIVR::Point mean;
+	//get point vector
+	Eigen::MatrixXd points(N, 3);
+	for (int i = 0; i < N; ++i)
+	{
+		points(i, 0) = m_points[i].x();
+		points(i, 1) = m_points[i].y();
+		points(i, 2) = m_points[i].z();
+		mean += m_points[i];
+	}
+	//mean value
+	mean /= N;
+	//centered matrix
+	for (int i = 0; i < N; ++i)
+	{
+		points(i, 0) -= mean.x();
+		points(i, 1) -= mean.y();
+		points(i, 2) -= mean.z();
+	}
+	//covariance matrix
+	Eigen::MatrixXd cov(N, N);
+	cov = points.transpose() * points;
+	//eigen
+	Eigen::EigenSolver<Eigen::MatrixXd> solver(cov);
+	Eigen::MatrixXd eigenVectors = solver.eigenvectors().real();
+	Eigen::VectorXd eigenValues = solver.eigenvalues().real();
+	//eigenVectors.normalize();
+	//output
+	std::vector<double> values(3);
+	values.push_back(eigenValues[0]);
+	values.push_back(eigenValues[1]);
+	values.push_back(eigenValues[2]);
+	//sort large to small
+	std::sort(values.begin(), values.end(), std::greater<double>());
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			if (values[i] == eigenValues(j))
+			{
+				m_values[i] = values[i];
+				m_axis[i] = FLIVR::Vector(
+					eigenVectors(j, 0),
+					eigenVectors(j, 1),
+					eigenVectors(j, 2));
+				break;
+			}
+		}
+	}
 }

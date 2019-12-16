@@ -749,6 +749,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_AlignX, MeasureDlg::OnAlign)
 	EVT_MENU(ID_AlignY, MeasureDlg::OnAlign)
 	EVT_MENU(ID_AlignZ, MeasureDlg::OnAlign)
+	EVT_MENU(ID_AlignPca, MeasureDlg::OnAlignPca)
 	EVT_MENU(ID_AlignReset, MeasureDlg::OnAlignReset)
 	EVT_COMMAND_SCROLL(ID_RotateSldr, MeasureDlg::OnRotateChange)
 	EVT_TEXT(ID_RotateText, MeasureDlg::OnRotateText)
@@ -1654,6 +1655,7 @@ void MeasureDlg::OnAlignBtn(wxCommandEvent& event)
 	align_menu->Append(ID_AlignY, "with Y");
 	align_menu->Append(ID_AlignZ, "with Z");
 	menu.Append(wxID_ANY, "Align Render View", align_menu);
+	menu.Append(ID_AlignPca, "Align PCA");
 	menu.Append(ID_AlignReset, "Reset");
 	PopupMenu(&menu, point.x, point.y);
 }
@@ -1684,6 +1686,23 @@ void MeasureDlg::OnAlign(wxCommandEvent& event)
 		break;
 	}
 	m_aligner.AlignRuler(axis_type);
+}
+
+void MeasureDlg::OnAlignPca(wxCommandEvent& event)
+{
+	FL::RulerList list;
+	std::vector<int> sel;
+	if (!m_rulerlist->GetCurrSelection(sel))
+		return;
+	if (!m_view)
+		return;
+	FL::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list)
+		return;
+	for (int i = 0; i < sel.size(); ++i)
+		list.push_back((*ruler_list)[sel[i]]);
+	m_aligner.SetRulerList(&list);
+	m_aligner.AlignPca();
 }
 
 void MeasureDlg::OnAlignReset(wxCommandEvent& event)

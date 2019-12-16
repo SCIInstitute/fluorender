@@ -146,6 +146,7 @@ public:
 		ID_AlignX,
 		ID_AlignY,
 		ID_AlignZ,
+		ID_AlignPca,
 		ID_AlignReset,
 	};
 
@@ -220,6 +221,7 @@ private:
 	//align
 	void OnAlignBtn(wxCommandEvent& event);
 	void OnAlign(wxCommandEvent& event);
+	void OnAlignPca(wxCommandEvent& event);
 	void OnAlignReset(wxCommandEvent& event);
 	void OnRotateChange(wxScrollEvent &event);
 	void OnRotateText(wxCommandEvent &event);

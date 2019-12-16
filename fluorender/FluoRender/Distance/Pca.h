@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Point.h>
 #include <FLIVR/Vector.h>
 #include <vector>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 namespace FL
 {
@@ -51,16 +53,23 @@ namespace FL
 			m_points.clear();
 		}
 
-	private:
-		std::vector<FLIVR::Point> m_points;
-		int m_count;
-		FLIVR::Point m_mean;
+		void Compute();
+
+		FLIVR::Vector GetAxis(int index)
+		{
+			if (index >= 0 && index <= 2)
+				return m_axis[index];
+			else
+				return FLIVR::Vector();
+		}
 
 	private:
-		void GenerateMean();
-		void GenerateCenteredMat();
-		void GenerateCovarMat();
-		void Decompose();
+		std::vector<FLIVR::Point> m_points;
+		FLIVR::Vector m_axis[3];
+		double m_values[3];
+
+	private:
+
 	};
 }
 #endif//FL_Pca_h
