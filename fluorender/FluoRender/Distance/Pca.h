@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Point.h>
 #include <FLIVR/Vector.h>
 #include <vector>
-#include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
 
 namespace FL
 {
