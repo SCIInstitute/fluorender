@@ -40,7 +40,8 @@ namespace FL
 	public:
 		RulerAlign():
 			m_view(0),
-			m_axis_type(0) {};
+			m_axis_type(0),
+			m_rotate_type(0) {};
 		~RulerAlign() {};
 
 		void SetView(VRenderGLView* view)
@@ -69,9 +70,9 @@ namespace FL
 			AddRuler(ruler);
 		}
 
-		void AlignRuler(int axis_type);//axis_type: 0-x; 1-y; 2-z
+		void AlignRuler(int axis_type, double val);//axis_type: 0-x; 1-y; 2-z
 		void Rotate(double val);
-		void AlignPca();
+		void AlignPca(double val);
 
 	private:
 		VRenderGLView *m_view;
@@ -81,6 +82,8 @@ namespace FL
 		FLIVR::Vector m_axis_x;
 		FLIVR::Vector m_axis_y;
 		FLIVR::Vector m_axis_z;
+		double m_ang;
+		int m_rotate_type;//0: single; 1:pca
 	};
 }
 
