@@ -234,7 +234,7 @@ add_library(TEEM_OBJ OBJECT
   ${airhdr} ${hesthdr} ${nrrdhdr} ${biffhdr})
 
 #eigen
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/Eigen)
+#include_directories(${FluoRender_SOURCE_DIR}/fluorender/Eigen)
 
 # glew
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/glew)
