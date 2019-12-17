@@ -2,42 +2,28 @@
 #define OUTPUT_ADJUSTMENTS_HPP
 
 #include <QWidget>
+#include <QGroupBox>
 
-#include "colorPanel.hpp"
-
+#include "outputLayout.hpp"
 
 class OutputAdjustments : public QWidget
 {
   Q_OBJECT
   
   public:
-    OutputAdjustments();
+    OutputAdjustments()
+    {
+      outputFrame->setLayout(outputLayout);
+      frameLayout->addWidget(outputFrame);
+      this->setLayout(frameLayout);
+    }
 
   private:
 
-    void setWidgetLayers();
+    QGroupBox *outputFrame = new QGroupBox();
+    QGridLayout *frameLayout = new QGridLayout();
+    OutputLayout *outputLayout = new OutputLayout();
 
-    void addRow0();
-    void addRow1();
-    void addRow2();
-    void addRow3();
-    void addRow4();
-
-    QGridLayout *outputLayout = new QGridLayout();
-
-    QLabel *gammaLabel = new QLabel("Gam.");
-    QLabel *luminLabel = new QLabel("Lum.");
-    QLabel *eqlLabel = new QLabel("Eql.");
-
-    QWidget *redWidget = new QWidget();
-    QWidget *greenWidget = new QWidget();
-    QWidget *blueWidget = new QWidget();
-
-    ColorPanel *redPanel = new ColorPanel("Red");
-    ColorPanel *greenPanel = new ColorPanel("Green");
-    ColorPanel *bluePanel = new ColorPanel("Blue");
-
-    QPushButton *setDefaultButton = new QPushButton();
 
 };
 

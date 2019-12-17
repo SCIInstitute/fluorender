@@ -65,7 +65,7 @@ set(HEADER_FILES
     Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
     Panels/Output_Adjustments/outputAdjust.hpp
-    Panels/Output_Adjustments/colorPanel.hpp
+    Panels/Output_Adjustments/outputLayout.hpp
   )
   
 set(SOURCES
@@ -85,8 +85,7 @@ set(SOURCES
     Panels/Properties/meshPropertiesOptions.cpp
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
-    Panels/Output_Adjustments/outputAdjust.cpp
-    Panels/Output_Adjustments/colorPanel.cpp
+    Panels/Output_Adjustments/outputLayout.cpp
   )
   
 set(UI_FILES
