@@ -134,12 +134,13 @@ void RulerAlign::AlignPca()
 	double ang = Dot(source0, target0);
 	ang = r2d(std::acos(ang));
 	FLIVR::Quaternion q(ang, rotv);
+	q.Normalize();
 	//test
 	//FLIVR::Quaternion s0(source0.x(), source0.y(), source0.z(), 0.0);
-	//s0 = q * s0 * (-q);
+	//s0 = (q) * s0 * (-q);
 	//rotate source1
 	FLIVR::Quaternion s1(source1.x(), source1.y(), source1.z(), 0.0);
-	s1 = (-q) * s1 * (q);
+	s1 = (q) * s1 * (-q);
 	FLIVR::Vector s1v(s1.x, s1.y, s1.z);
 	s1v.normalize();
 	//angle between s1v and target1
@@ -152,6 +153,7 @@ void RulerAlign::AlignPca()
 		ang = -ang;
 	//rotate
 	FLIVR::Quaternion rotq(ang, source0);
+	rotq.Normalize();
 	FLIVR::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
 	q2.ToEuler(qx, qy, qz);
