@@ -155,6 +155,6 @@ void RulerAlign::AlignPca()
 	FLIVR::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
 	q2.ToEuler(qx, qy, qz);
-	m_view->SetRotations(-qx, -qy, -qz);
+	m_view->SetRotations(qx, -qy, -qz);
 	m_view->RefreshGL(50);
 }
