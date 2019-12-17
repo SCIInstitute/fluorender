@@ -1685,7 +1685,10 @@ void MeasureDlg::OnAlign(wxCommandEvent& event)
 		axis_type = 2;
 		break;
 	}
-	m_aligner.AlignRuler(axis_type);
+	wxString str = m_rotate_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	m_aligner.AlignRuler(axis_type, val);
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
@@ -1702,7 +1705,10 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 	for (int i = 0; i < sel.size(); ++i)
 		list.push_back((*ruler_list)[sel[i]]);
 	m_aligner.SetRulerList(&list);
-	m_aligner.AlignPca();
+	wxString str = m_rotate_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	m_aligner.AlignPca(val);
 }
 
 void MeasureDlg::OnAlignReset(wxCommandEvent& event)
