@@ -148,13 +148,13 @@ void RulerAlign::AlignPca()
 	//decide direction
 	FLIVR::Vector dir = Cross(s1v, target1);
 	double t0_dir = Dot(target0, dir);
-	//if (t0_dir < 0.0)
-	//	ang = -ang;
+	if (t0_dir < 0.0)
+		ang = -ang;
 	//rotate
 	FLIVR::Quaternion rotq(ang, source0);
 	FLIVR::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
 	q2.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz);
+	m_view->SetRotations(-qx, -qy, -qz);
 	m_view->RefreshGL(50);
 }
