@@ -66,6 +66,8 @@ set(HEADER_FILES
     Panels/Properties/volumePropertiesMisc.hpp
     Panels/Output_Adjustments/outputAdjust.hpp
     Panels/Output_Adjustments/outputLayout.hpp
+    Panels/Clipping_Planes/clippingPlane.hpp
+    Panels/Clipping_Planes/clippingLayout.hpp
   )
   
 set(SOURCES

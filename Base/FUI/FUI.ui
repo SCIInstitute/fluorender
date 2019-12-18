@@ -3318,7 +3318,7 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_4">
+   <widget class="ClippingPlane" name="ClippingPanes">
     <layout class="QGridLayout" name="gridLayout_5">
      <item row="0" column="1">
       <widget class="QGroupBox" name="groupBox_5">
@@ -4172,6 +4172,12 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <class>OutputAdjustments</class>
    <extends>QWidget</extends>
    <header>Panels/Output_Adjustments/outputAdjust.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ClippingPlane</class>
+   <extends>QWidget</extends>
+   <header>Panels/Clipping_Planes/clippingPlane.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
