@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <FLIVR/Point.h>
 #include <FLIVR/Color.h>
+#include <FLIVR/Transform.h>
 #include <wx/string.h>
 
 using namespace FLIVR;

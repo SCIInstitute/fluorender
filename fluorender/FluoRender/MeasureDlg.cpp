@@ -621,7 +621,8 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	}
 	if (!ruler->GetPoint(0))
 		return;
-	ruler->GetPoint(0)->SetPoint(Point(x, y, z));
+    Point tmp = Point(x, y, z);
+	ruler->GetPoint(0)->SetPoint(tmp);
 	str = wxString::Format("(%.2f, %.2f, %.2f)",
 		x, y, z);
 	SetText(m_editing_item, 5, str);

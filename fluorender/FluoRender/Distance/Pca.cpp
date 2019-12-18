@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Pca.h>
 #include <utility.h>
 #include <Algorithm>
+#include <cmath>
 
 using namespace FL;
 
