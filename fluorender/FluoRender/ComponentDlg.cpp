@@ -145,6 +145,17 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
 	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
 	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
+	//align
+	EVT_BUTTON(ID_AlignBtn, ComponentDlg::OnAlignBtn)
+	EVT_COMMAND_SCROLL(ID_RotateSldr, ComponentDlg::OnRotateChange)
+	EVT_TEXT(ID_RotateText, ComponentDlg::OnRotateText)
+	EVT_MENU(ID_AlignXYZ, ComponentDlg::OnAlignPca)
+	EVT_MENU(ID_AlignYXZ, ComponentDlg::OnAlignPca)
+	EVT_MENU(ID_AlignZXY, ComponentDlg::OnAlignPca)
+	EVT_MENU(ID_AlignXZY, ComponentDlg::OnAlignPca)
+	EVT_MENU(ID_AlignYZX, ComponentDlg::OnAlignPca)
+	EVT_MENU(ID_AlignZYX, ComponentDlg::OnAlignPca)
+	EVT_MENU(ID_AlignReset, ComponentDlg::OnAlignReset)
 
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
@@ -911,12 +922,25 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 
 	//note
 	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "N.B."),
+		new wxStaticBox(page, wxID_ANY, "Align"),
 		wxVERTICAL);
-	st = new wxStaticText(page, 0,
-		"Enable 4D script in the settings to show component colors.");
+	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
+	m_align_btn = new wxButton(page, ID_AlignBtn, "Align with",
+		wxDefaultPosition, wxSize(65, 22));
+	st = new wxStaticText(page, 0, "Rotate");
+	m_rotate_sldr = new wxSlider(page, ID_RotateSldr, 0, 0, 3600,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_rotate_text = new wxTextCtrl(page, ID_RotateText, "0",
+		wxDefaultPosition, wxSize(50, 20));
+	sizer51->Add(5, 5);
+	sizer51->Add(m_align_btn, 0, wxALIGN_CENTER);
+	sizer51->Add(5, 5);
+	sizer51->Add(st, 0, wxALIGN_CENTER);
+	sizer51->Add(m_rotate_sldr, 1, wxEXPAND);
+	sizer51->Add(m_rotate_text, 0, wxALIGN_CENTER);
+	//
 	sizer5->Add(10, 10);
-	sizer5->Add(st, 0);
+	sizer5->Add(sizer51, 0, wxEXPAND);
 	sizer5->Add(10, 10);
 
 	//all
@@ -1273,6 +1297,13 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 
 	if (fopendlg)
 		delete fopendlg;
+}
+
+void ComponentDlg::SetView(VRenderView* vrv)
+{
+	m_view = vrv;
+	if (m_view)
+		m_aligner.SetView(m_view->m_glview);
 }
 
 //comp generate page
@@ -2712,6 +2743,103 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	}
 	if (fopendlg)
 		delete fopendlg;
+}
+
+void ComponentDlg::OnAlignBtn(wxCommandEvent& event)
+{
+	wxRect rect = m_align_btn->GetRect();
+	wxPoint point = (rect.GetBottomLeft() + rect.GetTopRight()) / 2;
+	wxMenu menu;
+	wxMenu* align_menu2 = new wxMenu;
+	align_menu2->Append(ID_AlignXYZ, "XYZ");
+	align_menu2->Append(ID_AlignYXZ, "YXZ");
+	align_menu2->Append(ID_AlignZXY, "ZXY");
+	align_menu2->Append(ID_AlignXZY, "XZY");
+	align_menu2->Append(ID_AlignYZX, "YZX");
+	align_menu2->Append(ID_AlignZYX, "ZYX");
+	menu.Append(wxID_ANY, "PCA", align_menu2);
+	menu.Append(ID_AlignReset, "Reset");
+	PopupMenu(&menu, point.x, point.y);
+}
+
+void ComponentDlg::OnAlignPca(wxCommandEvent& event)
+{
+	FL::CompList* list = m_comp_analyzer.GetCompList();
+	if (!list || list->size() < 3)
+		return;
+
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	FL::RulerList rulerlist;
+	FL::Ruler ruler;
+	ruler.SetRulerType(1);
+	FLIVR:Point pt;
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		pt = it->second->GetPos(sx, sy, sz);
+		ruler.AddPoint(pt);
+	}
+	ruler.SetFinished();
+
+	int axis_type = 0;
+	switch (event.GetId())
+	{
+	case ID_AlignXYZ:
+		axis_type = 0;
+		break;
+	case ID_AlignYXZ:
+		axis_type = 1;
+		break;
+	case ID_AlignZXY:
+		axis_type = 2;
+		break;
+	case ID_AlignXZY:
+		axis_type = 3;
+		break;
+	case ID_AlignYZX:
+		axis_type = 4;
+		break;
+	case ID_AlignZYX:
+		axis_type = 5;
+		break;
+	}
+	rulerlist.push_back(&ruler);
+	m_aligner.SetRulerList(&rulerlist);
+	wxString str = m_rotate_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	m_aligner.AlignPca(axis_type, val);
+}
+
+void ComponentDlg::OnAlignReset(wxCommandEvent& event)
+{
+	if (m_view)
+	{
+		m_view->SetRotations(0.0, 0.0, 0.0);
+		m_view->RefreshGL();
+	}
+}
+
+void ComponentDlg::OnRotateChange(wxScrollEvent &event)
+{
+	int ival = event.GetPosition();
+	double val = double(ival) / 10.0;
+	wxString str = wxString::Format("%.1f", val);
+	if (str != m_rotate_text->GetValue())
+		m_rotate_text->SetValue(str);
+}
+
+void ComponentDlg::OnRotateText(wxCommandEvent &event)
+{
+	wxString str = m_rotate_text->GetValue();
+	double val;
+	str.ToDouble(&val);
+	m_rotate_sldr->SetValue(int(val*10.0 + 0.5));
+
+	//rotate
+	m_aligner.Rotate(val);
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)

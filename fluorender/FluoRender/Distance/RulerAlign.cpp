@@ -80,23 +80,27 @@ void RulerAlign::AlignRuler(int axis_type, double val)
 void RulerAlign::Rotate(double val)
 {
 	FLIVR::Vector axis;
-	if (m_rotate_type == 0)
+	switch (m_axis_type)
 	{
-		switch (m_axis_type)
-		{
-		case 0:
-			axis = FLIVR::Vector(1.0, 0.0, 0.0);
-			break;
-		case 1:
-			axis = FLIVR::Vector(0.0, 1.0, 0.0);
-			break;
-		case 2:
-			axis = FLIVR::Vector(0.0, 0.0, 1.0);
-			break;
-		}
-	}
-	else
+	case 0:
 		axis = FLIVR::Vector(1.0, 0.0, 0.0);
+		break;
+	case 1:
+		axis = FLIVR::Vector(0.0, 1.0, 0.0);
+		break;
+	case 2:
+		axis = FLIVR::Vector(0.0, 0.0, 1.0);
+		break;
+	case 3://xzy
+		axis = FLIVR::Vector(-1, 0, 0);
+		break;
+	case 4://yzx
+		axis = FLIVR::Vector(0, -1, 0);
+		break;
+	case 5://zyx
+		axis = FLIVR::Vector(0, 0, -1);
+		break;
+	}
 
 	FLIVR::Vector rotv = Cross(m_axis, axis);
 	rotv.normalize();
@@ -118,7 +122,7 @@ void RulerAlign::Rotate(double val)
 	m_view->RefreshGL(50);
 }
 
-void RulerAlign::AlignPca(double val)
+void RulerAlign::AlignPca(int axis_type, double val)
 {
 	Pca solver;
 	FLIVR::Point p;
@@ -147,8 +151,36 @@ void RulerAlign::AlignPca(double val)
 	m_axis_y = source1;
 	m_axis_z = source2;
 
-	FLIVR::Vector target0(1, 0, 0);
-	FLIVR::Vector target1(0, 1, 0);
+	m_axis_type = axis_type;
+	FLIVR::Vector target0;
+	FLIVR::Vector target1;
+	switch (m_axis_type)
+	{
+	case 0://xyz
+		target0 = FLIVR::Vector(1, 0, 0);
+		target1 = FLIVR::Vector(0, 1, 0);
+		break;
+	case 1://yxz
+		target0 = FLIVR::Vector(0, 1, 0);
+		target1 = FLIVR::Vector(1, 0, 0);
+		break;
+	case 2://zxy
+		target0 = FLIVR::Vector(0, 0, 1);
+		target1 = FLIVR::Vector(1, 0, 0);
+		break;
+	case 3://xzy
+		target0 = FLIVR::Vector(-1, 0, 0);
+		target1 = FLIVR::Vector(0, 0, 1);
+		break;
+	case 4://yzx
+		target0 = FLIVR::Vector(0, -1, 0);
+		target1 = FLIVR::Vector(0, 0, 1);
+		break;
+	case 5://zyx
+		target0 = FLIVR::Vector(0, 0, -1);
+		target1 = FLIVR::Vector(0, 1, 0);
+		break;
+	}
 
 	FLIVR::Vector rotv = Cross(source0, target0);
 	rotv.normalize();

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "Components/CompGenerator.h"
 #include "Components/CompAnalyzer.h"
+#include <Distance/RulerAlign.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -155,6 +156,17 @@ public:
 		ID_DistNeighborSldr,
 		ID_DistNeighborText,
 		ID_DistOutputBtn,
+		//align
+		ID_AlignBtn,
+		ID_RotateSldr,
+		ID_RotateText,
+		ID_AlignXYZ,
+		ID_AlignYXZ,
+		ID_AlignZXY,
+		ID_AlignXZY,
+		ID_AlignYZX,
+		ID_AlignZYX,
+		ID_AlignReset,
 
 		//execute
 		ID_Notebook,
@@ -182,20 +194,8 @@ public:
 	void GetSettings();
 	void LoadSettings(wxString filename);
 	void SaveSettings(wxString filename);
-	void SetView(VRenderView* vrv) {
-		m_view = vrv;
-	}
-	VRenderView* GetView() {
-		return m_view;
-	}
-
-	//update progress
-	//void UpdateProgress()
-	//{
-	//	m_prog += m_prog_bit;
-	//	m_generate_prg->SetValue(int(m_prog));
-	//	wxGetApp().Yield();
-	//}
+	void SetView(VRenderView* vrv);
+	VRenderView* GetView() { return m_view; }
 
 	void GenerateComp(bool use_sel, bool command=true);
 	void Fixate(bool command = true);
@@ -301,6 +301,7 @@ private:
 	FL::CompCommand m_command;
 
 	FL::ComponentAnalyzer m_comp_analyzer;
+	FL::RulerAlign m_aligner;
 
 	//in and out cell lists for tracking
 	FL::CellList m_in_cells;
@@ -422,6 +423,10 @@ private:
 	wxSlider* m_dist_neighbor_sldr;
 	wxTextCtrl* m_dist_neighbor_text;
 	wxButton* m_dist_output_btn;
+	//align
+	wxButton *m_align_btn;
+	wxSlider *m_rotate_sldr;
+	wxTextCtrl *m_rotate_text;
 
 	//execute
 	wxCheckBox* m_use_sel_chk;
@@ -553,6 +558,12 @@ private:
 	void OnDistNeighborSldr(wxScrollEvent &event);
 	void OnDistNeighborText(wxCommandEvent &event);
 	void OnDistOutput(wxCommandEvent &event);
+	//align
+	void OnAlignBtn(wxCommandEvent& event);
+	void OnAlignPca(wxCommandEvent& event);
+	void OnAlignReset(wxCommandEvent& event);
+	void OnRotateChange(wxScrollEvent &event);
+	void OnRotateText(wxCommandEvent &event);
 
 	//execute
 	void EnableGenerate();
