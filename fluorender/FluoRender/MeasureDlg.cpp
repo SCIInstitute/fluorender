@@ -693,29 +693,6 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 
 void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
 {
-	//if (GetSelectedItemCount() > 0)
-	//{
-	//	wxPoint point = event.GetPosition();
-	//	// If from keyboard
-	//	if (point.x == -1 && point.y == -1)
-	//	{
-	//		wxSize size = GetSize();
-	//		point.x = size.x / 2;
-	//		point.y = size.y / 2;
-	//	}
-	//	else
-	//	{
-	//		point = ScreenToClient(point);
-	//	}
-	//	wxMenu menu;
-	//	wxMenu* align_menu = new wxMenu;
-	//	align_menu->Append(ID_AlignX, "with X");
-	//	align_menu->Append(ID_AlignY, "with Y");
-	//	align_menu->Append(ID_AlignZ, "with Z");
-	//	menu.Append(wxID_ANY, "Align Render View", align_menu);
-	//	menu.Append(ID_AlignReset, "Reset");
-	//	PopupMenu(&menu, point.x, point.y);
-	//}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -750,7 +727,12 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_AlignX, MeasureDlg::OnAlign)
 	EVT_MENU(ID_AlignY, MeasureDlg::OnAlign)
 	EVT_MENU(ID_AlignZ, MeasureDlg::OnAlign)
-	EVT_MENU(ID_AlignPca, MeasureDlg::OnAlignPca)
+	EVT_MENU(ID_AlignXYZ, MeasureDlg::OnAlignPca)
+	EVT_MENU(ID_AlignYXZ, MeasureDlg::OnAlignPca)
+	EVT_MENU(ID_AlignZXY, MeasureDlg::OnAlignPca)
+	EVT_MENU(ID_AlignXZY, MeasureDlg::OnAlignPca)
+	EVT_MENU(ID_AlignYZX, MeasureDlg::OnAlignPca)
+	EVT_MENU(ID_AlignZYX, MeasureDlg::OnAlignPca)
 	EVT_MENU(ID_AlignReset, MeasureDlg::OnAlignReset)
 	EVT_COMMAND_SCROLL(ID_RotateSldr, MeasureDlg::OnRotateChange)
 	EVT_TEXT(ID_RotateText, MeasureDlg::OnRotateText)
@@ -1651,12 +1633,19 @@ void MeasureDlg::OnAlignBtn(wxCommandEvent& event)
 	wxRect rect = m_align_btn->GetRect();
 	wxPoint point = (rect.GetBottomLeft() + rect.GetTopRight()) / 2;
 	wxMenu menu;
-	wxMenu* align_menu = new wxMenu;
-	align_menu->Append(ID_AlignX, "with X");
-	align_menu->Append(ID_AlignY, "with Y");
-	align_menu->Append(ID_AlignZ, "with Z");
-	menu.Append(wxID_ANY, "Align Render View", align_menu);
-	menu.Append(ID_AlignPca, "Align PCA");
+	wxMenu* align_menu1 = new wxMenu;
+	align_menu1->Append(ID_AlignX, "with X");
+	align_menu1->Append(ID_AlignY, "with Y");
+	align_menu1->Append(ID_AlignZ, "with Z");
+	menu.Append(wxID_ANY, "Align Render View", align_menu1);
+	wxMenu* align_menu2 = new wxMenu;
+	align_menu2->Append(ID_AlignXYZ, "XYZ");
+	align_menu2->Append(ID_AlignYXZ, "YXZ");
+	align_menu2->Append(ID_AlignZXY, "ZXY");
+	align_menu2->Append(ID_AlignXZY, "XZY");
+	align_menu2->Append(ID_AlignYZX, "YZX");
+	align_menu2->Append(ID_AlignZYX, "ZYX");
+	menu.Append(wxID_ANY, "PCA", align_menu2);
 	menu.Append(ID_AlignReset, "Reset");
 	PopupMenu(&menu, point.x, point.y);
 }
@@ -1673,6 +1662,7 @@ void MeasureDlg::OnAlign(wxCommandEvent& event)
 		return;
 	FL::Ruler* ruler = ruler_list->at(sel[0]);
 	m_aligner.SetRuler(ruler);
+
 	int axis_type = 0;
 	switch (event.GetId())
 	{
@@ -1706,10 +1696,33 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 	for (int i = 0; i < sel.size(); ++i)
 		list.push_back((*ruler_list)[sel[i]]);
 	m_aligner.SetRulerList(&list);
+
+	int axis_type = 0;
+	switch (event.GetId())
+	{
+	case ID_AlignXYZ:
+		axis_type = 0;
+		break;
+	case ID_AlignYXZ:
+		axis_type = 1;
+		break;
+	case ID_AlignZXY:
+		axis_type = 2;
+		break;
+	case ID_AlignXZY:
+		axis_type = 3;
+		break;
+	case ID_AlignYZX:
+		axis_type = 4;
+		break;
+	case ID_AlignZYX:
+		axis_type = 5;
+		break;
+	}
 	wxString str = m_rotate_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_aligner.AlignPca(val);
+	m_aligner.AlignPca(axis_type, val);
 }
 
 void MeasureDlg::OnAlignReset(wxCommandEvent& event)

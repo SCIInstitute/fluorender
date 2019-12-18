@@ -146,7 +146,12 @@ public:
 		ID_AlignX,
 		ID_AlignY,
 		ID_AlignZ,
-		ID_AlignPca,
+		ID_AlignXYZ,
+		ID_AlignYXZ,
+		ID_AlignZXY,
+		ID_AlignXZY,
+		ID_AlignYZX,
+		ID_AlignZYX,
 		ID_AlignReset,
 	};
 
