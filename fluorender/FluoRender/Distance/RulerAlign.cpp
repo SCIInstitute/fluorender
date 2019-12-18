@@ -121,6 +121,7 @@ void RulerAlign::Rotate(double val)
 void RulerAlign::AlignPca(double val)
 {
 	Pca solver;
+	FLIVR::Point p;
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
 	{
 		Ruler* ruler = m_ruler_list[i];
@@ -131,7 +132,8 @@ void RulerAlign::AlignPca(double val)
 			RulerPoint* point = ruler->GetPoint(j);
 			if (!point)
 				continue;
-			solver.AddPoint(point->GetPoint());
+			p = point->GetPoint();
+			solver.AddPoint(p);
 		}
 	}
 	solver.Compute();

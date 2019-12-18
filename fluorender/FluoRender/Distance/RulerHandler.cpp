@@ -291,7 +291,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	if (!m_point || !m_view || !m_ruler)
 		return false;
 
-	Point point, ip;
+	Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
 	{
 		double t = m_view->GetPointVolume(point, ip,
@@ -299,15 +299,19 @@ bool RulerHandler::MoveRuler(int mx, int my)
 			m_view->m_point_volume_mode,
 			m_view->m_ruler_use_transf);
 		if (t <= 0.0)
+		{
+			tmp = m_point->GetPoint();
 			t = m_view->GetPointPlane(point,
-				mx, my, &m_point->GetPoint());
+				mx, my, &tmp);
+		}
 		if (t <= 0.0)
 			return false;
 	}
 	else
 	{
+		tmp = m_point->GetPoint();
 		double t = m_view->GetPointPlane(point,
-			mx, my, &m_point->GetPoint());
+			mx, my, &tmp);
 		if (t <= 0.0)
 			return false;
 	}
@@ -327,7 +331,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	if (!m_point || !m_view || !m_ruler)
 		return false;
 
-	Point point, ip;
+	Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
 	{
 		double t = m_view->GetPointVolume(point, ip,
@@ -335,15 +339,19 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 			m_view->m_point_volume_mode,
 			m_view->m_ruler_use_transf);
 		if (t <= 0.0)
+		{
+			tmp = m_point->GetPoint();
 			t = m_view->GetPointPlane(point,
-				mx, my, &m_point->GetPoint());
+				mx, my, &tmp);
+		}
 		if (t <= 0.0)
 			return false;
 	}
 	else
 	{
+		tmp = m_point->GetPoint();
 		double t = m_view->GetPointPlane(point,
-			mx, my, &m_point->GetPoint());
+			mx, my, &tmp);
 		if (t <= 0.0)
 			return false;
 	}
@@ -365,8 +373,10 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 		Vector axis = Cross(v2, v0);
 		axis = Cross(axis, v2);
 		axis.normalize();
-		p0->SetPoint(Point(c + axis * v0.length()));
-		p1->SetPoint(c + (c - p0->GetPoint()));
+		tmp = Point(c + axis * v0.length());
+		p0->SetPoint(tmp);
+		tmp = c + (c - p0->GetPoint());
+		p1->SetPoint(tmp);
 	}
 	else
 	{
@@ -378,9 +388,12 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 		Vector axis = Cross(v2, v0);
 		Vector a2 = Cross(v0, axis);
 		a2.normalize();
-		p2->SetPoint(Point(c + a2 * v2.length()));
-		p3->SetPoint(Point(c - a2 * v2.length()));
-		p1->SetPoint(c + (c - p0->GetPoint()));
+		tmp = Point(c + a2 * v2.length());
+		p2->SetPoint(tmp);
+		tmp = Point(c - a2 * v2.length());
+		p3->SetPoint(tmp);
+		tmp = c + (c - p0->GetPoint());
+		p1->SetPoint(tmp);
 	}
 
 	return true;
