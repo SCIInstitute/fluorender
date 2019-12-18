@@ -92,8 +92,6 @@ class ClippingLayout : public QGridLayout
      this->addWidget(widget,row,0,1,MAXCOLSIZE+1,Qt::AlignVCenter);
    }
 
-   void addRow0();
-
 
    QToolButton *linkToolButton   = new QToolButton();
    QToolButton *alwaysToolButton = new QToolButton();

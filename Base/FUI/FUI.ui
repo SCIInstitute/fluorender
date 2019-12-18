@@ -600,7 +600,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_0">
+   <widget class="DatasetsPanel" name="Datasets">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="0" column="0">
       <widget class="QGroupBox" name="groupBox_2">
@@ -4178,6 +4178,12 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <class>ClippingPlane</class>
    <extends>QWidget</extends>
    <header>Panels/Clipping_Planes/clippingPlane.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DatasetsPanel</class>
+   <extends>QWidget</extends>
+   <header>Panels/Datasets/datasetsPanel.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

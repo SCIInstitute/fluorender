@@ -68,6 +68,10 @@ set(HEADER_FILES
     Panels/Output_Adjustments/outputLayout.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
     Panels/Clipping_Planes/clippingLayout.hpp
+    Panels/Datasets/datasetsLayout.hpp
+    Panels/Datasets/datasetsPanel.hpp
+    Panels/Workspace/workspaceLayout.hpp
+    Panels/Workspace/workspacePanel.hpp
   )
   
 set(SOURCES
