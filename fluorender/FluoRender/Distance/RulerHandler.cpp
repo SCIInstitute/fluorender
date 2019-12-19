@@ -431,10 +431,11 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 					RulerPoint* rp = ruler->GetPoint(rbi, rpi);
 					if (!rp) continue;
 					fconfig.Write(wxString::Format("point%d", (int)rpi),
-						wxString::Format("%f %f %f",
+						wxString::Format("%f %f %f %d",
 						rp->GetPoint().x(),
 						rp->GetPoint().y(),
-						rp->GetPoint().z()));
+						rp->GetPoint().z(),
+						rp->GetLocked()));
 				}
 			}
 		}
@@ -448,6 +449,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 	bool bval;
 	int rbi, rpi;
 	float x, y, z;
+	int l = 0;
 	if (m_ruler_list)
 	{
 		m_ruler_list->clear();
@@ -519,16 +521,21 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 							{
 								if (fconfig.Read(wxString::Format("point%d", rpi), &str))
 								{
-									if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+									if (SSCANF(str.c_str(), "%f%f%f%d", &x, &y, &z, &l))
 									{
 										Point point(x, y, z);
 										if (rbi > 0 && rpi == 0)
 										{
 											pRulerPoint pp = ruler->FindPoint(point);
+											pp->SetLocked(l);
 											ruler->AddBranch(pp);
 										}
 										else
+										{
 											ruler->AddPoint(point);
+											pRulerPoint pp = ruler->FindPoint(point);
+											pp->SetLocked(l);
+										}
 									}
 								}
 							}
