@@ -22,7 +22,7 @@ void BasicPage::setButtonGroup()
 
 void BasicPage::addRow0()
 {
-  gridLayout->addWidget(rotationCheckBox,0,0);
+  gridLayout->addWidget(rotationCheckBox,0,0,1,0);
 }
 
 void BasicPage::addRow1()

@@ -2,12 +2,7 @@
 
 VolumePropertiesMisc::VolumePropertiesMisc()
 {
-  addRow0();
-  addRow1();
-  addRow2();
-  addRow3();
-  addRow4();
-  addRow5();
+  constructLayout();
 }
 
 void VolumePropertiesMisc::addRow0()
@@ -61,6 +56,12 @@ void VolumePropertiesMisc::addRow5()
   this->addWidget(effectsToolButton,5,1);
   this->addWidget(effectsList1,5,2,1,3);
   this->addWidget(effectsList2,5,5,1,3);
+}
+
+void VolumePropertiesMisc::constructLayout()
+{
+  for(const auto &fn : rowFuncs)
+    fn();
 }
 
 QWidget* VolumePropertiesMisc::genToolWidget()

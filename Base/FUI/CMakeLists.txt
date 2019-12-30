@@ -74,11 +74,13 @@ set(HEADER_FILES
     Panels/Workspace/workspacePanel.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
     Panels/Clipping_Planes/clippingLayout.hpp
-    Panels/Clipping_Planes/Pages/basicPage.hpp
-    Panels/Clipping_Planes/Pages/advancedPage.hpp
-    Panels/Clipping_Planes/Pages/autoKeyPage.hpp
-    Panels/Clipping_Planes/Pages/croppingPage.hpp
-    Panels/Clipping_Planes/Pages/4DScriptPage.hpp
+    Panels/Record_Export/recordExport.hpp
+    Panels/Record_Export/recordExportLayout.hpp
+    Panels/Record_Export/Pages/basicPage.hpp
+    Panels/Record_Export/Pages/advancedPage.hpp
+    Panels/Record_Export/Pages/autoKeyPage.hpp
+    Panels/Record_Export/Pages/croppingPage.hpp
+    Panels/Record_Export/Pages/4DScriptPage.hpp
   )
   
 set(SOURCES
@@ -99,11 +101,13 @@ set(SOURCES
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
     Panels/Output_Adjustments/outputLayout.cpp
-    Panels/Clipping_Planes/Pages/basicPage.cpp
-    Panels/Clipping_Planes/Pages/advancedPage.cpp
-    Panels/Clipping_Planes/Pages/autoKeyPage.cpp
-    Panels/Clipping_Planes/Pages/croppingPage.cpp
-    Panels/Clipping_Planes/Pages/4DScriptPage.cpp
+    Panels/Record_Export/recordExport.cpp
+    Panels/Record_Export/recordExportLayout.cpp
+    Panels/Record_Export/Pages/basicPage.cpp
+    Panels/Record_Export/Pages/advancedPage.cpp
+    Panels/Record_Export/Pages/autoKeyPage.cpp
+    Panels/Record_Export/Pages/croppingPage.cpp
+    Panels/Record_Export/Pages/4DScriptPage.cpp
   )
   
 set(UI_FILES

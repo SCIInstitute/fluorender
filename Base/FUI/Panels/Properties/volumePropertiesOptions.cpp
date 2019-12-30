@@ -2,11 +2,7 @@
 
 VolumePropertiesOptions::VolumePropertiesOptions()
 {
-  addRow0();
-  addRow1();
-  addRow2();
-  addRow3();
-  addRow4();
+  constructLayout();
 }
 
 void VolumePropertiesOptions::addRow0()
@@ -63,4 +59,10 @@ void VolumePropertiesOptions::addRow4()
   this->addWidget(colorMap1Slider,4,7);
   this->addWidget(colorMap2Spinbox,4,8);
   this->addWidget(colorMap2Slider,4,9);
+}
+
+void VolumePropertiesOptions::constructLayout()
+{
+  for (const auto &fn : rowFuncs)
+    fn();
 }

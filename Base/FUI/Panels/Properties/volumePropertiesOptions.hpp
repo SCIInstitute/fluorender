@@ -9,6 +9,9 @@
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoToolButton.hpp>
 
+#include <vector>
+#include <functional>
+
 class VolumePropertiesOptions : public QGridLayout
 {
   Q_OBJECT
@@ -23,6 +26,8 @@ class VolumePropertiesOptions : public QGridLayout
     void addRow2();
     void addRow3();
     void addRow4();
+
+    void constructLayout();
 
     FluoSlider* gammaSlider      = new FluoSlider(Qt::Horizontal,0,100);
     FluoSlider* extractBSlider   = new FluoSlider(Qt::Horizontal,0,50);
@@ -62,6 +67,14 @@ class VolumePropertiesOptions : public QGridLayout
     QLabel* sampleRateLabel       = new QLabel("Sample Rate: ");
     FluoToolButton* shadingLabel  = new FluoToolButton(" :Shading",false);
     FluoToolButton* colorMapLabel = new FluoToolButton("Color Map: ",false);
+
+    const std::vector<std::function<void()>> rowFuncs = {
+      std::bind(&VolumePropertiesOptions::addRow0,this),
+      std::bind(&VolumePropertiesOptions::addRow1,this),
+      std::bind(&VolumePropertiesOptions::addRow2,this),
+      std::bind(&VolumePropertiesOptions::addRow3,this),
+      std::bind(&VolumePropertiesOptions::addRow4,this),
+    };
 };
 
 #endif

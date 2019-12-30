@@ -2,10 +2,7 @@
 
 MeshPropertiesOptions::MeshPropertiesOptions()
 {
-  addRow0();
-  addRow1();
-  addRow2();
-  addRow3();
+  constructLayout();
 }
 
 void MeshPropertiesOptions::addRow0()
@@ -37,4 +34,10 @@ void MeshPropertiesOptions::addRow3()
   this->addWidget(sizeLimitLabel,3,1);
   this->addWidget(sizeLimitSlider,3,2);
   this->addWidget(sizeLimitSpinbox,3,3);
+}
+
+void MeshPropertiesOptions::constructLayout()
+{
+  for(const auto &fn : rowFuncs)
+    fn();
 }
