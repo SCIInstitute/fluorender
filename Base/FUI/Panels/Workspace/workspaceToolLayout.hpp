@@ -2,10 +2,10 @@
 #define WORKSPACE_TOOL_LAYOUT_HPP
 
 #include <QGridLayout>
-#include <QToolButton>
 #include <QTreeView>
 
 #include <CustomWidgets/fluoLine.hpp>
+#include <CustomWidgets/fluoToolButton.hpp>
 
 class WorkspaceToolLayout : public QGridLayout
 {
@@ -45,16 +45,16 @@ class WorkspaceToolLayout : public QGridLayout
       addRow(row,t...);
     }
 
-    QToolButton *toggleToolbutton            = new QToolButton();
-    QToolButton *addVolumeToolbutton         = new QToolButton();
-    QToolButton *addMeshToolbutton           = new QToolButton();
-    QToolButton *deleteCurrentToolbutton     = new QToolButton();
-    QToolButton *highlightToolbutton         = new QToolButton();
-    QToolButton *diffuseHighlightToolbutton  = new QToolButton();
-    QToolButton *resetHighlightToolbutton    = new QToolButton();
-    QToolButton *eraseHighlightToolbutton    = new QToolButton();
-    QToolButton *extractHighlightToolbutton  = new QToolButton();
-    QToolButton *resetallHighlightToolbutton = new QToolButton();
+    FluoToolButton *toggleToolbutton            = new FluoToolButton(":/workspace-eye.svg");
+    FluoToolButton *addVolumeToolbutton         = new FluoToolButton(":/workspace-newVolume.svg");
+    FluoToolButton *addMeshToolbutton           = new FluoToolButton(":/workspace-newMesh.svg");
+    FluoToolButton *deleteCurrentToolbutton     = new FluoToolButton(":/workspace-deleteSelection.svg");
+    FluoToolButton *highlightToolbutton         = new FluoToolButton(":/workspace-highLight.svg");
+    FluoToolButton *diffuseHighlightToolbutton  = new FluoToolButton(":/workspace-diffuse.svg");
+    FluoToolButton *resetHighlightToolbutton    = new FluoToolButton(":/workspace-resetSelect.svg");
+    FluoToolButton *eraseHighlightToolbutton    = new FluoToolButton(":/workspace-eraseHighlight.svg");
+    FluoToolButton *extractHighlightToolbutton  = new FluoToolButton(":/workspace-extract.svg");
+    FluoToolButton *resetallHighlightToolbutton = new FluoToolButton(":/workspace-resetAll.svg");
 
     FluoLine *sepLine1 = new FluoLine(QFrame::VLine);
     FluoLine *sepLine2 = new FluoLine(QFrame::VLine);

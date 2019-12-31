@@ -11,6 +11,7 @@ CroppingPage::CroppingPage()
 void CroppingPage::addRow0()
 {
   gridLayout->addWidget(enableCroppingCheckbox,0,0,1,3);
+  gridLayout->addWidget(resetButton,0,4);
 }
 
 void CroppingPage::addRow1()

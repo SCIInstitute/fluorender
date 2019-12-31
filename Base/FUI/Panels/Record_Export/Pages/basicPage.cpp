@@ -6,6 +6,8 @@ BasicPage::BasicPage()
   setComboBox();
   constructLayout();
   this->setLayout(gridLayout);
+  this->resize(300,200);
+  this->setBaseSize(300,200);
 }
 
 void BasicPage::setComboBox()
@@ -72,4 +74,10 @@ void BasicPage::constructLayout()
 {
   for(const auto &fn : rowFuncs)
     fn();
+}
+
+QSize BasicPage::sizeHint() const
+{
+  QSize baseSize(300,200);
+  return baseSize;
 }

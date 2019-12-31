@@ -27,7 +27,7 @@ class CroppingPage : public QWidget
 
       QCheckBox *enableCroppingCheckbox = new QCheckBox("Enable Cropping: ");
 
-      QPushButton *resetButton = new QPushButton();
+      QPushButton *resetButton = new QPushButton("Reset");
 
       QLabel *centerLabel = new QLabel("Center");
       QLabel *xLabel      = new QLabel("X: ");

@@ -2,14 +2,15 @@
 #define RECORD_PLAY_LAYOUT
 
 #include <QGridLayout>
-#include <QToolButton>
-#include <QPushButton>
 #include <QComboBox>
+#include <QPushButton>
 #include <QLabel>
+#include <QIcon>
 
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoSlider.hpp>
+#include <CustomWidgets/fluoToolButton.hpp>
 
 class RecordPlayLayout : public QGridLayout
 {
@@ -30,15 +31,15 @@ class RecordPlayLayout : public QGridLayout
 
     QComboBox *captureCombobox = new QComboBox();
 
-    QToolButton *helpToolbutton = new QToolButton();
-    QToolButton *playToolbutton = new QToolButton();
-    QToolButton *backToolbutton = new QToolButton();
+    FluoToolButton *helpToolbutton = new FluoToolButton("?",false,false,false);
+    FluoToolButton *playToolbutton = new FluoToolButton(":/record-play.svg");
+    FluoToolButton *backToolbutton = new FluoToolButton(":/record-back.svg");
 
     FluoSlider *playBackSlider = new FluoSlider(Qt::Horizontal,0,500);
     FluoSpinbox *fpsSpinbox = new FluoSpinbox(30,144,false);
     FluoSpinboxDouble *secondsSpinbox = new FluoSpinboxDouble(0.0,5.0,false);
 
-    QPushButton *savePushbutton = new QPushButton();
+    QPushButton *savePushbutton = new QPushButton(QIcon(":/record-save.svg"), " Save...");
 
 };
 

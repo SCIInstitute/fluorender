@@ -5,8 +5,8 @@
 #include <QTableWidget>
 #include <QGridLayout>
 #include <QLabel>
-#include <QPushButton>
 #include <QStringList>
+#include <QPushButton>
 
 #include <vector>
 
@@ -31,7 +31,7 @@ class AutoKeyPage : public QWidget
 
     QTableWidget *table = new QTableWidget(3,2);
 
-    QPushButton *generatePushButton = new QPushButton();
+    QPushButton *generatePushButton = new QPushButton("Generate");
 
     const QStringList headers = {"Auto Key Type", " "};
 

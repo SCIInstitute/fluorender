@@ -62,11 +62,11 @@ class VolumePropertiesOptions : public QGridLayout
     QLabel* saturationsLabel      = new QLabel(" :Saturation");
     QLabel* thresholdLabel        = new QLabel("Threshold: ");
     QLabel* luminanceLabel        = new QLabel(" :Luminance");
-    FluoToolButton* shadowLabel   = new FluoToolButton("Shadow: ",false);
-    FluoToolButton* alphaLabel    = new FluoToolButton(" :Alpha",false);
+    FluoToolButton* shadowLabel   = new FluoToolButton("Shadow: ",true,true,false);
+    FluoToolButton* alphaLabel    = new FluoToolButton(" :Alpha",true,true,false);
     QLabel* sampleRateLabel       = new QLabel("Sample Rate: ");
-    FluoToolButton* shadingLabel  = new FluoToolButton(" :Shading",false);
-    FluoToolButton* colorMapLabel = new FluoToolButton("Color Map: ",false);
+    FluoToolButton* shadingLabel  = new FluoToolButton(" :Shading",true,true,false);
+    FluoToolButton* colorMapLabel = new FluoToolButton("Color Map: ",true,true,false);
 
     const std::vector<std::function<void()>> rowFuncs = {
       std::bind(&VolumePropertiesOptions::addRow0,this),

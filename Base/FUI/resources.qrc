@@ -52,5 +52,15 @@
   <file alias="datasets-saveMask.svg">Resources/Datasets-Images/save-mask.svg</file>
   <file alias="datasets-deleteDataset.svg">Resources/Datasets-Images/backspace-solid.svg</file>
   <file alias="datasets-deleteAll.svg">Resources/Datasets-Images/trash-solid.svg</file>
+  <file alias="record-minus.svg">Resources/Record-Export-Images/minus-solid.svg</file>
+  <file alias="record-plus.svg">Resources/Record-Export-Images/plus-solid.svg</file>
+  <file alias="record-play.svg">Resources/Record-Export-Images/play-solid.svg</file>
+  <file alias="record-save.svg">Resources/Record-Export-Images/save-solid.svg</file>
+  <file alias="record-back.svg">Resources/Record-Export-Images/step-backward-solid.svg</file>
+  <file alias="record-reset.svg">Resources/Record-Export-Images/undo-solid.svg</file>
+  <file alias="clipping-reset.svg">Resources/Clipping-Images/undo-solid.svg</file>
+  <file alias="clipping-unlink.svg">Resources/Clipping-Images/unlink-solid.svg</file>
+  <file alias="output-reset.svg">Resources/Output-Images/undo-solid.svg</file>
+  <file alias="output-unlink.svg">Resources/Output-Images/unlink-solid.svg</file>
 </qresource>
 </RCC>

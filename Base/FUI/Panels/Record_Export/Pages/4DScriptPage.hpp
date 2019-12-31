@@ -5,11 +5,12 @@
 #include <QCheckBox>
 #include <QLabel>
 #include <QPushButton>
-#include <QToolButton>
 #include <QTableWidget>
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QStringList>
+
+#include <CustomWidgets/fluoToolButton.hpp>
 
 #include <vector>
 #include <functional>
@@ -46,11 +47,11 @@ class FourDScriptPage : public QWidget
 
     QLabel *scriptLabel = new QLabel("Script File: ");
 
-    QPushButton *browseButton = new QPushButton();
+    QPushButton *browseButton = new QPushButton("Browse...");
 
     QLineEdit *fileLocTextbar = new QLineEdit();
 
-    QToolButton *deleteToolbutton = new QToolButton();
+    FluoToolButton *deleteToolbutton = new FluoToolButton("X",false,false,false);
 
     QTableWidget *table = new QTableWidget(14,1);
 

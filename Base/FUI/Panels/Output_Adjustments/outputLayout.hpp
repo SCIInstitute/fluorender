@@ -2,7 +2,6 @@
 #define OUTPUT_LAYOUT_HPP
 
 #include <QLabel>
-#include <QToolButton>
 #include <QPushButton>
 #include <QGridLayout>
 #include <QString>
@@ -12,6 +11,7 @@
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoColoredLine.hpp>
+#include <CustomWidgets/fluoToolButton.hpp>
 
 #include <cmath>
 
@@ -66,14 +66,14 @@ class OutputLayout : public QGridLayout
    FluoLine *blueSepLine    = new FluoLine(QFrame::VLine);
    FluoLine *setDefaultLine = new FluoLine(QFrame::HLine);
 
-   QToolButton *redChainButton   = new QToolButton();
-   QToolButton *greenChainButton = new QToolButton();
-   QToolButton *blueChainButton  = new QToolButton();
+   FluoToolButton *redChainButton   = new FluoToolButton(":/output-unlink.svg","",true,true,false);
+   FluoToolButton *greenChainButton = new FluoToolButton(":/output-unlink.svg","",true,true,false);
+   FluoToolButton *blueChainButton  = new FluoToolButton(":/output-unlink.svg","",true,true,false);
 
-   QPushButton *redResetButton   = new QPushButton();
-   QPushButton *greenResetButton = new QPushButton();
-   QPushButton *blueResetButton  = new QPushButton();
-   QPushButton *resetAllButton   = new QPushButton();
+   QPushButton *redResetButton   = new QPushButton(QIcon(":/output-reset.svg")," Reset");
+   QPushButton *greenResetButton = new QPushButton(QIcon(":/output-reset.svg")," Reset");
+   QPushButton *blueResetButton  = new QPushButton(QIcon(":/output-reset.svg")," Reset");
+   QPushButton *resetAllButton   = new QPushButton(QIcon(":/output-reset.svg")," Reset All");
 
    FluoColoredLine *redLine   = new FluoColoredLine(QFrame::HLine,"Red");
    FluoColoredLine *greenLine = new FluoColoredLine(QFrame::HLine,"Green");

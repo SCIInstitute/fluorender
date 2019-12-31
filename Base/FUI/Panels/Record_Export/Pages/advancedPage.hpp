@@ -6,8 +6,8 @@
 #include <QLabel>
 #include <QTableWidget>
 #include <QComboBox>
-#include <QPushButton>
 #include <QStringList>
+#include <QPushButton>
 
 #include <CustomWidgets/fluoSpinbox.hpp>
 
@@ -36,9 +36,9 @@ class AdvancedPage : public QWidget
     QTableWidget *table = new QTableWidget(1,5);
     QComboBox *dropDown = new QComboBox();
 
-    QPushButton *addButton       = new QPushButton();
-    QPushButton *deleteButton    = new QPushButton();
-    QPushButton *deleteAllButton = new QPushButton();
+    QPushButton *addButton       = new QPushButton("Add");
+    QPushButton *deleteButton    = new QPushButton("Delete");
+    QPushButton *deleteAllButton = new QPushButton("Delete All");
 
     FluoSpinbox *fpsSpinbox = new FluoSpinbox(30,144,false);
 

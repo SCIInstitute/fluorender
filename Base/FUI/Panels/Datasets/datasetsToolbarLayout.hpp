@@ -2,7 +2,7 @@
 #define DATASETS_TOOLBAR_LAYOUT_HPP
 
 #include <QGridLayout>
-#include <QToolButton>
+#include <CustomWidgets/fluoToolButton.hpp>
 
 class DatasetsToolbarLayout : public QGridLayout
 {
@@ -41,13 +41,13 @@ class DatasetsToolbarLayout : public QGridLayout
       addRow(row,t...);
     }
 
-    QToolButton *addToolbutton = new QToolButton();
-    QToolButton *renameToolbutton = new QToolButton();
-    QToolButton *saveToolbutton = new QToolButton();
-    QToolButton *bakeToolbutton = new QToolButton();
-    QToolButton *saveMaskToolbutton = new QToolButton();
-    QToolButton *deleteToolbutton = new QToolButton();
-    QToolButton *deleteAllToolbutton = new QToolButton();
+    FluoToolButton *addToolbutton = new FluoToolButton(":/datasets-addDataset.svg");
+    FluoToolButton *renameToolbutton = new FluoToolButton(":/datasets-renameDataset.svg");
+    FluoToolButton *saveToolbutton = new FluoToolButton(":/datasets-saveDataset.svg");
+    FluoToolButton *bakeToolbutton = new FluoToolButton(":/datasets-bake.svg");
+    FluoToolButton *saveMaskToolbutton = new FluoToolButton(":/datasets-saveMask.svg");
+    FluoToolButton *deleteToolbutton = new FluoToolButton(":/datasets-deleteDataset.svg");
+    FluoToolButton *deleteAllToolbutton = new FluoToolButton(":/datasets-deleteAll.svg");
 
 };
 

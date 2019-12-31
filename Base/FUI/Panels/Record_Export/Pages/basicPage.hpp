@@ -7,11 +7,11 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QRadioButton>
-#include <QPushButton>
 #include <QGridLayout>
 #include <QStringList>
 
 #include <CustomWidgets/fluoSpinbox.hpp>
+#include <CustomWidgets/fluoToolButton.hpp>
 
 #include <vector>
 #include <functional>
@@ -69,8 +69,8 @@ class BasicPage : public QWidget
 
     QComboBox *styleComboBox = new QComboBox();
 
-    QPushButton *minusPushbutton = new QPushButton();
-    QPushButton *plusPushbutton  = new QPushButton();
+    FluoToolButton *minusPushbutton = new FluoToolButton(":/record-minus.svg");
+    FluoToolButton *plusPushbutton  = new FluoToolButton(":/record-plus.svg");
 
     const std::vector<std::function<void()>> rowFuncs = {
       std::bind(&BasicPage::addRow0,this),
@@ -81,6 +81,8 @@ class BasicPage : public QWidget
       std::bind(&BasicPage::addRow5,this),
       std::bind(&BasicPage::addRow6,this)
     };
+
+    virtual QSize sizeHint() const;
 };
 
 #endif

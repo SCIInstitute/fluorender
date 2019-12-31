@@ -12,6 +12,7 @@
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoColoredLine.hpp>
+#include <CustomWidgets/fluoToolButton.hpp>
 
 #include <cmath>
 
@@ -96,9 +97,10 @@ class ClippingLayout : public QGridLayout
    QToolButton *linkToolButton   = new QToolButton();
    QToolButton *alwaysToolButton = new QToolButton();
    QToolButton *toggleToolButton = new QToolButton();
-   QToolButton *xChainToolbutton = new QToolButton();
-   QToolButton *yChainToolbutton = new QToolButton();
-   QToolButton *zChainToolbutton = new QToolButton();
+
+   FluoToolButton *xChainToolbutton = new FluoToolButton(":/clipping-unlink.svg","",true,true,false);
+   FluoToolButton *yChainToolbutton = new FluoToolButton(":/clipping-unlink.svg","",true,true,false);
+   FluoToolButton *zChainToolbutton = new FluoToolButton(":/clipping-unlink.svg","",true,true,false);
 
    FluoLine *lineSep1 = new FluoLine();
    FluoLine *lineSep2 = new FluoLine();
@@ -145,12 +147,12 @@ class ClippingLayout : public QGridLayout
    FluoSlider *y2Slider  = new FluoSlider(Qt::Vertical,-180,180);
    FluoSlider *z2Slider  = new FluoSlider(Qt::Vertical,-180,180);
 
-   QPushButton *yzButton = new QPushButton();
-   QPushButton *xzButton = new QPushButton();
-   QPushButton *xyButton = new QPushButton();
-   QPushButton *resetClipsButton = new QPushButton();
-   QPushButton *alignToViewButton = new QPushButton();
-   QPushButton *resetTo0Button = new QPushButton();
+   QPushButton *yzButton = new QPushButton("YZ");
+   QPushButton *xzButton = new QPushButton("XZ");
+   QPushButton *xyButton = new QPushButton("XY");
+   QPushButton *resetClipsButton = new QPushButton(QIcon(":/clipping-reset.svg")," Reset Clips");
+   QPushButton *alignToViewButton = new QPushButton("Align to View");
+   QPushButton *resetTo0Button = new QPushButton(QIcon(":/clipping-reset.svg")," Reset to 0");
 
    FluoSpinboxDouble *x2Spinbox = new FluoSpinboxDouble(-180,180,false);
    FluoSpinboxDouble *y2Spinbox = new FluoSpinboxDouble(-180,180,false);
