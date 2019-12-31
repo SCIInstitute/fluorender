@@ -32,118 +32,81 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-/*void Pca::Compute()
+void Pca::SetCovMat(std::vector<double> &cov)
 {
-	int N = m_points.size();
-	if (N < 3)
+	int size = cov.size();
+	if (size < 6)
 		return;
-	FLIVR::Point mean;
-	//get point vector
-	Eigen::MatrixXd points(N, 3);
-	for (int i = 0; i < N; ++i)
+	if (size > 9)
+		size = 9;
+	std::memcpy(m_cov, &cov[0], size * sizeof(double));
+	if (size < 9)
 	{
-		points(i, 0) = m_points[i].x();
-		points(i, 1) = m_points[i].y();
-		points(i, 2) = m_points[i].z();
-		mean += m_points[i];
+		m_cov[2][2] = m_cov[1][2];
+		m_cov[2][1] = m_cov[1][1];
+		m_cov[2][0] = m_cov[0][2];
+		m_cov[1][2] = m_cov[1][1];
+		m_cov[1][1] = m_cov[1][0];
+		m_cov[1][0] = m_cov[0][1];
 	}
-	//mean value
-	mean /= N;
-	//centered matrix
-	for (int i = 0; i < N; ++i)
+}
+
+void Pca::Compute(bool upd_cov)
+{
+	//compute m_cov
+	if (upd_cov)
 	{
-		points(i, 0) -= mean.x();
-		points(i, 1) -= mean.y();
-		points(i, 2) -= mean.z();
-	}
-	//covariance matrix
-	Eigen::MatrixXd cov(N, N);
-	cov = points.transpose() * points;
-	//eigen
-	Eigen::EigenSolver<Eigen::MatrixXd> solver(cov);
-	Eigen::MatrixXd eigenVectors = solver.eigenvectors().real();
-	Eigen::VectorXd eigenValues = solver.eigenvalues().real();
-	//eigenVectors.normalize();
-	//output
-	std::vector<double> values(3);
-	values.push_back(eigenValues[0]);
-	values.push_back(eigenValues[1]);
-	values.push_back(eigenValues[2]);
-	//sort large to small
-	std::sort(values.begin(), values.end(), std::greater<double>());
-	for (int i = 0; i < 3; ++i)
-	{
+		int N = m_points.size();
+		if (N < 2)
+			return;
+
+		std::vector<FLIVR::Point> points;
+		//mean
+		FLIVR::Point mean;
+		for (int i = 0; i < N; ++i)
+		{
+			points.push_back(m_points[i]);
+			mean += m_points[i];
+		}
+		mean /= N;
+		//centered matrix
+		for (int i = 0; i < N; ++i)
+			points[i] -= mean;
+
+		for (int i = 0; i < 3; ++i)
 		for (int j = 0; j < 3; ++j)
 		{
-			if (values[i] == eigenValues(j))
-			{
-				m_values[i] = values[i];
-				m_axis[i] = FLIVR::Vector(
-					eigenVectors(j, 0),
-					eigenVectors(j, 1),
-					eigenVectors(j, 2));
-				break;
-			}
+			for (int n = 0; n < N; ++n)
+				m_cov[i][j] += (points[n])(i) * (points[n])(j);
 		}
 	}
-}*/
 
-void Pca::Compute()
-{
-	int N = m_points.size();
-	if (N < 2)
-		return;
-
-	std::vector<FLIVR::Point> points;
-	//mean
-	FLIVR::Point mean;
-	for (int i = 0; i < N; ++i)
-	{
-		points.push_back(m_points[i]);
-		mean += m_points[i];
-	}
-	mean /= N;
-	//centered matrix
-	for (int i = 0; i < N; ++i)
-		points[i] -= mean;
-	//covariance matrix
-	double cov[3][3] = {
-		0, 0, 0,
-		0, 0, 0,
-		0, 0, 0 };
-
-	for (int i = 0; i < 3; ++i)
-	for (int j = 0; j < 3; ++j)
-	{
-		for (int n = 0; n < N; ++n)
-			cov[i][j] += (points[n])(i) * (points[n])(j);
-	}
 	//eigen
-	//simple method for real symmetric cov
+	//simple method for real symmetric m_cov
 	double eig[3] = { 0,0,0 };
 	double p1 =
-		cov[0][1] * cov[0][1] +
-		cov[0][2] * cov[0][2] +
-		cov[1][2] * cov[1][2];
+		m_cov[0][1] * m_cov[0][1] +
+		m_cov[0][2] * m_cov[0][2] +
+		m_cov[1][2] * m_cov[1][2];
 	if (fabs(p1) < EPS)
 	{
-		//cov is diagonal
-		eig[0] = cov[0][0];
-		eig[1] = cov[1][1];
-		eig[2] = cov[2][2];
+		//m_cov is diagonal
+		eig[0] = m_cov[0][0];
+		eig[1] = m_cov[1][1];
+		eig[2] = m_cov[2][2];
 	}
 	else
 	{
-		double q = (cov[0][0] + cov[1][1] + cov[2][2]) / 3.0;
+		double q = (m_cov[0][0] + m_cov[1][1] + m_cov[2][2]) / 3.0;
 		double p2 =
-			(cov[0][0] - q) * (cov[0][0] - q) +
-			(cov[1][1] - q) * (cov[1][1] - q) +
-			(cov[2][2] - q) * (cov[2][2] - q) + 2.0 * p1;
+			(m_cov[0][0] - q) * (m_cov[0][0] - q) +
+			(m_cov[1][1] - q) * (m_cov[1][1] - q) +
+			(m_cov[2][2] - q) * (m_cov[2][2] - q) + 2.0 * p1;
 		double p = std::sqrt(p2 / 6.0);
 		double matb[3][3] = {
-			1.0 / p * (cov[0][0] - q), 1.0 / p * cov[0][1], 1.0 / p * cov[0][2],
-			1.0 / p * cov[1][0], 1.0 / p * (cov[1][1] - q), 1.0 / p * cov[1][2],
-			1.0 / p * cov[2][0], 1.0 / p * cov[2][1], 1.0 / p * (cov[2][2] - q) };
+			1.0 / p * (m_cov[0][0] - q), 1.0 / p * m_cov[0][1], 1.0 / p * m_cov[0][2],
+			1.0 / p * m_cov[1][0], 1.0 / p * (m_cov[1][1] - q), 1.0 / p * m_cov[1][2],
+			1.0 / p * m_cov[2][0], 1.0 / p * m_cov[2][1], 1.0 / p * (m_cov[2][2] - q) };
 		double r =
 			matb[0][0] * (matb[1][1] * matb[2][2] - matb[1][2] * matb[2][1]) -
 			matb[0][1] * (matb[1][0] * matb[2][2] - matb[1][2] * matb[2][0]) +
@@ -166,17 +129,17 @@ void Pca::Compute()
 	std::sort(eig, eig + 3, std::greater<double>());
 	//eigenvectors
 	double mat1[3][3] = {
-		cov[0][0] - eig[0], cov[0][1], cov[0][2],
-		cov[1][0], cov[1][1] - eig[0], cov[1][2],
-		cov[2][0], cov[2][1], cov[2][2] - eig[0] };
+		m_cov[0][0] - eig[0], m_cov[0][1], m_cov[0][2],
+		m_cov[1][0], m_cov[1][1] - eig[0], m_cov[1][2],
+		m_cov[2][0], m_cov[2][1], m_cov[2][2] - eig[0] };
 	double mat2[3][3] = {
-		cov[0][0] - eig[1], cov[0][1], cov[0][2],
-		cov[1][0], cov[1][1] - eig[1], cov[1][2],
-		cov[2][0], cov[2][1], cov[2][2] - eig[1] };
+		m_cov[0][0] - eig[1], m_cov[0][1], m_cov[0][2],
+		m_cov[1][0], m_cov[1][1] - eig[1], m_cov[1][2],
+		m_cov[2][0], m_cov[2][1], m_cov[2][2] - eig[1] };
 	double mat3[3][3] = {
-		cov[0][0] - eig[2], cov[0][1], cov[0][2],
-		cov[1][0], cov[1][1] - eig[2], cov[1][2],
-		cov[2][0], cov[2][1], cov[2][2] - eig[2] };
+		m_cov[0][0] - eig[2], m_cov[0][1], m_cov[0][2],
+		m_cov[1][0], m_cov[1][1] - eig[2], m_cov[1][2],
+		m_cov[2][0], m_cov[2][1], m_cov[2][2] - eig[2] };
 	//ev1
 	double eigv1[3][3] = {
 		mat2[0][0] * mat3[0][0] + mat2[0][1] * mat3[1][0] + mat2[0][2] * mat3[2][0],
