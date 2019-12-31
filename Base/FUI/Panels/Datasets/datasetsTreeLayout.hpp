@@ -8,14 +8,14 @@ class DatasetsTreeLayout : public QGridLayout
 {
   Q_OBJECT
   
-	public:
-      DatasetsTreeLayout()
-      {
-        this->addWidget(tempTreeview);
-      }
+  public:
+    DatasetsTreeLayout()
+    {
+      this->addWidget(tempTreeview);
+    }
 
-	private:
-      QTreeView *tempTreeview = new QTreeView();
+  private:
+    QTreeView *tempTreeview = new QTreeView();
 
 };
 

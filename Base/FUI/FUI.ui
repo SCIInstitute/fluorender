@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>2143</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSplit_Render_View">
@@ -1256,7 +1256,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_1">
+   <widget class="WorkspacePanel" name="Workspace">
     <layout class="QGridLayout" name="gridLayout_37">
      <item row="0" column="0">
       <widget class="QGroupBox" name="groupBox">
@@ -4190,6 +4190,12 @@ qproperty-icon: url(&quot;:/unlink.svg&quot;);</string>
    <class>RecordExport</class>
    <extends>QWidget</extends>
    <header>Panels/Record_Export/recordExport.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WorkspacePanel</class>
+   <extends>QWidget</extends>
+   <header>Panels/Workspace/workspacePanel.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
