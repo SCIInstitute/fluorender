@@ -75,7 +75,8 @@ set(HEADER_FILES
     Panels/Clipping_Planes/clippingPlane.hpp
     Panels/Clipping_Planes/clippingLayout.hpp
     Panels/Record_Export/recordExport.hpp
-    Panels/Record_Export/recordExportLayout.hpp
+		Panels/Record_Export/recordTabLayout.hpp
+		Panels/Record_Export/recordPlayLayout.hpp
     Panels/Record_Export/Pages/basicPage.hpp
     Panels/Record_Export/Pages/advancedPage.hpp
     Panels/Record_Export/Pages/autoKeyPage.hpp
@@ -102,7 +103,8 @@ set(SOURCES
     Panels/Properties/volumePropertiesMisc.cpp
     Panels/Output_Adjustments/outputLayout.cpp
     Panels/Record_Export/recordExport.cpp
-    Panels/Record_Export/recordExportLayout.cpp
+		Panels/Record_Export/recordTabLayout.cpp
+		Panels/Record_Export/recordPlayLayout.cpp
     Panels/Record_Export/Pages/basicPage.cpp
     Panels/Record_Export/Pages/advancedPage.cpp
     Panels/Record_Export/Pages/autoKeyPage.cpp

@@ -22,7 +22,7 @@ void BasicPage::setButtonGroup()
 
 void BasicPage::addRow0()
 {
-  gridLayout->addWidget(rotationCheckBox,0,0,1,0);
+  gridLayout->addWidget(rotationCheckBox,0,0,1,2);
 }
 
 void BasicPage::addRow1()
@@ -36,7 +36,7 @@ void BasicPage::addRow2()
   gridLayout->addWidget(degreesSpinbox,2,1);
   gridLayout->addWidget(degreesLabel,2,2);
   gridLayout->addWidget(styleLabel,2,4);
-  gridLayout->addWidget(styleComboBox,2,5);
+  gridLayout->addWidget(styleComboBox,2,5,1,2);
 }
 
 void BasicPage::addRow3()
@@ -46,8 +46,8 @@ void BasicPage::addRow3()
 
 void BasicPage::addRow4()
 {
-  gridLayout->addWidget(timeBatchCheckBox,4,0);
-  gridLayout->addWidget(currentTimeLabel,4,5);
+  gridLayout->addWidget(timeBatchCheckBox,4,0,1,3);
+  gridLayout->addWidget(currentTimeLabel,4,5,1,2);
 }
 
 void BasicPage::addRow5()
@@ -63,7 +63,7 @@ void BasicPage::addRow5()
 
 void BasicPage::addRow6()
 {
-  gridLayout->addWidget(movieLenLabel,6,3);
+  gridLayout->addWidget(movieLenLabel,6,3,1,2);
   gridLayout->addWidget(secondsSpinbox,6,6);
   gridLayout->addWidget(secondsLabel,6,7);
 }

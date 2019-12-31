@@ -27,7 +27,7 @@ void AdvancedPage::addRow0()
 
 void AdvancedPage::addRow1()
 {
-  gridLayout->addWidget(table,1,0,0,5);
+  gridLayout->addWidget(table,1,0,1,6);
 }
 
 void AdvancedPage::addRow2()

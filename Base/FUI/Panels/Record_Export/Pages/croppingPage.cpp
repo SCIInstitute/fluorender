@@ -10,8 +10,7 @@ CroppingPage::CroppingPage()
 
 void CroppingPage::addRow0()
 {
-  gridLayout->addWidget(enableCroppingCheckbox,0,0,0,2);
-  gridLayout->addWidget(enableCroppingCheckbox,0,3);
+  gridLayout->addWidget(enableCroppingCheckbox,0,0,1,3);
 }
 
 void CroppingPage::addRow1()

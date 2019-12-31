@@ -24,7 +24,7 @@ void AutoKeyPage::addRow0()
 
 void AutoKeyPage::addRow1()
 {
-  gridLayout->addWidget(table,1,0,0,4);
+  gridLayout->addWidget(table,1,0,1,5);
 }
 
 void AutoKeyPage::addRow2()

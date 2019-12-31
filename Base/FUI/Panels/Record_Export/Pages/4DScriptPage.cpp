@@ -18,12 +18,12 @@ void FourDScriptPage::setTableContents()
 
 void FourDScriptPage::addRow0()
 {
-  gridLayout->addWidget(enableCheckbox,0,0,0,2);
+  gridLayout->addWidget(enableCheckbox,0,0,1,2);
 }
 
 void FourDScriptPage::addRow1()
 {
-  gridLayout->addWidget(enableDescLabel,1,0,0,2);
+  gridLayout->addWidget(enableDescLabel,1,0,1,2);
 }
 
 void FourDScriptPage::addRow2()
@@ -40,7 +40,7 @@ void FourDScriptPage::addRow3()
 
 void FourDScriptPage::addRow4()
 {
-  gridLayout->addWidget(table,4,0,0,2);
+  gridLayout->addWidget(table,4,0,1,3);
 }
 
 void FourDScriptPage::constructPage()

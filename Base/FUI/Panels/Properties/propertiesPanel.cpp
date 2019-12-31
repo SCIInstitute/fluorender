@@ -1,5 +1,5 @@
 #include "propertiesPanel.hpp"
-#include <iostream>
+
 PropertiesPanel::PropertiesPanel()
 {
   myLayout->addWidget(tabWidget);
