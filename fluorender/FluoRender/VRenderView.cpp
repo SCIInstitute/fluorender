@@ -80,6 +80,7 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_SPIN_UP(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinDown)
 	EVT_SPIN_DOWN(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinUp)
 	//bar bottom
+	EVT_TOOL(ID_ZeroRotBtn, VRenderView::OnZeroRot)
 	EVT_TOOL(ID_RotResetBtn, VRenderView::OnRotReset)
 	EVT_TEXT(ID_XRotText, VRenderView::OnValueEdit)
 	EVT_TEXT(ID_YRotText, VRenderView::OnValueEdit)
@@ -717,10 +718,13 @@ void VRenderView::CreateBar()
 	m_ortho_view_cmb->Append("NA");
 	m_ortho_view_cmb->Select(6);
 	m_lower_toolbar->AddControl(m_ortho_view_cmb);
-	bitmap = wxGetBitmapFromMemory(reset);
+	bitmap = wxGetBitmapFromMemory(zrot);
 #ifdef _DARWIN
 	m_lower_toolbar->SetToolBitmapSize(bitmap.GetSize());
 #endif
+	m_lower_toolbar->AddTool(ID_ZeroRotBtn, "Set Zeros",
+		bitmap, "Set current angles as zeros");
+	bitmap = wxGetBitmapFromMemory(reset);
 	m_lower_toolbar->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
 	m_lower_toolbar->Realize();
@@ -2109,6 +2113,17 @@ void VRenderView::OnValueEdit(wxCommandEvent& event)
 		}
 	}
 }*/
+
+void VRenderView::OnZeroRot(wxCommandEvent& event)
+{
+	if (m_glview)
+	{
+		double rotx, roty, rotz;
+		m_glview->GetRotations(rotx, roty, rotz);
+		m_glview->SetZeroRotations(rotx, roty, rotz);
+		OnRotReset(event);
+	}
+}
 
 void VRenderView::OnRotReset(wxCommandEvent &event)
 {

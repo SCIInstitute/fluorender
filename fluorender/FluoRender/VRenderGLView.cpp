@@ -10502,6 +10502,8 @@ void VRenderGLView::A2Q()
 
 	m_q.FromEuler(m_rotx, m_roty, m_rotz);
 
+	m_q = m_q * m_zq;
+
 	if (m_clip_mode)
 	{
 		if (m_clip_mode == 1)
@@ -13358,6 +13360,28 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 		if (!m_master_linked_view)
 			m_master_linked_view = this;
 	}
+}
+
+void VRenderGLView::SetZeroRotations(double rotx, double roty, double rotz)
+{
+	m_zrotx = rotx;
+	m_zroty = roty;
+	m_zrotz = rotz;
+
+	if (m_zroty > 360.0)
+		m_zroty -= 360.0;
+	if (m_zroty < 0.0)
+		m_zroty += 360.0;
+	if (m_zrotx > 360.0)
+		m_zrotx -= 360.0;
+	if (m_zrotx < 0.0)
+		m_zrotx += 360.0;
+	if (m_zrotz > 360.0)
+		m_zrotz -= 360.0;
+	if (m_zrotz < 0.0)
+		m_zrotz += 360.0;
+
+	m_zq.FromEuler(m_zrotx, m_zroty, m_zrotz);
 }
 
 void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
