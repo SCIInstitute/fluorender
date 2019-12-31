@@ -221,6 +221,7 @@ public:
 		rotz = m_rotz;
 	}
 	void SetRotations(double rotx, double roty, double rotz, bool ui_update = true);
+	void SetZeroRotations(double rotx, double roty, double rotz);
 	void GetCenters(double &ctrx, double &ctry, double &ctrz)
 	{
 		ctrx = m_ctrx; ctry = m_ctry; ctrz = m_ctrz;
@@ -806,11 +807,14 @@ private:
 	double m_rotx, m_roty, m_rotz;
 	//saved camera rotation
 	double m_rotx_saved, m_roty_saved, m_rotz_saved;
+	//zero camera rotation
+	double m_zrotx, m_zroty, m_zrotz;
 	//camera center
 	double m_ctrx, m_ctry, m_ctrz;
 	//saved camera center
 	double m_ctrx_saved, m_ctry_saved, m_ctrz_saved;
 	FLIVR::Quaternion m_q;
+	FLIVR::Quaternion m_zq;//zero rotation
 	Vector m_up;
 	Vector m_head;
 

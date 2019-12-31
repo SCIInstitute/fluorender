@@ -43,6 +43,7 @@ public:
 		ID_BgColorPicker,
 		ID_BgInvBtn,
 		ID_RotLinkChk,
+		ID_ZeroRotBtn,
 		ID_RotResetBtn,
 		ID_XRotText,
 		ID_YRotText,
@@ -690,6 +691,7 @@ private:
 	void OnScaleFactorSpinUp(wxSpinEvent& event);
 	void OnScaleFactorSpinDown(wxSpinEvent& event);
 	//bar bottom
+	void OnZeroRot(wxCommandEvent& event);
 	void OnRotReset(wxCommandEvent &event);
 	void OnValueEdit(wxCommandEvent& event);
 	void OnXRotScroll(wxScrollEvent &event);

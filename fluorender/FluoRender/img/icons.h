@@ -182,6 +182,8 @@ public:
 	const static unsigned char slider_type_pos_png[665];
 	/* slider_type_rot.png - 1085 bytes */
 	const static unsigned char slider_type_rot_png[1085];
+	/* zrot.png - 763 bytes */
+	const static unsigned char zrot_png[763];
 	/* zoom_view.png - 303 bytes */
 	const static unsigned char zoom_view_png[303];
 	/* zoom_data.png - 719 bytes */
