@@ -46,12 +46,17 @@ namespace FL
 		{
 			m_points.push_back(point);
 		}
+		void SetPoints(std::vector<FLIVR::Point> &points)
+		{
+			m_points.assign(points.begin(), points.end());
+		}
 		void ClearPoints()
 		{
 			m_points.clear();
 		}
+		void SetCovMat(std::vector<double> &cov);
 
-		void Compute();
+		void Compute(bool upd_cov=true);
 
 		FLIVR::Vector GetAxis(int index)
 		{
@@ -65,6 +70,7 @@ namespace FL
 		std::vector<FLIVR::Point> m_points;
 		FLIVR::Vector m_axis[3];
 		double m_values[3];
+		double m_cov[3][3];//covariance matrix
 
 	private:
 

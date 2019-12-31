@@ -38,10 +38,7 @@ void RulerAlign::AlignRuler(int axis_type, double val)
 {
 	if (!m_view)
 		return;
-	if (m_ruler_list.empty())
-		return;
-	Ruler* ruler = m_ruler_list[0];
-	if (!ruler || ruler->GetNumPoint() < 2)
+	if (m_point_list.size() < 2)
 		return;
 	m_axis_type = axis_type;
 	FLIVR::Vector axis;
@@ -58,8 +55,8 @@ void RulerAlign::AlignRuler(int axis_type, double val)
 		break;
 	}
 	//ruler vector
-	FLIVR::Vector rv = ruler->GetLastPoint()->GetPoint() -
-		ruler->GetPoint(0)->GetPoint();
+	FLIVR::Vector rv = m_point_list.back() -
+		m_point_list.front();
 	rv.normalize();
 	m_axis = rv;
 	FLIVR::Vector rotv = Cross(m_axis, axis);
@@ -125,21 +122,7 @@ void RulerAlign::Rotate(double val)
 void RulerAlign::AlignPca(int axis_type, double val)
 {
 	Pca solver;
-	FLIVR::Point p;
-	for (size_t i = 0; i < m_ruler_list.size(); ++i)
-	{
-		Ruler* ruler = m_ruler_list[i];
-		if (!ruler)
-			continue;
-		for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
-		{
-			RulerPoint* point = ruler->GetPoint(j);
-			if (!point)
-				continue;
-			p = point->GetPoint();
-			solver.AddPoint(p);
-		}
-	}
+	solver.SetPoints(m_point_list);
 	solver.Compute();
 
 	FLIVR::Vector source0 = solver.GetAxis(0);

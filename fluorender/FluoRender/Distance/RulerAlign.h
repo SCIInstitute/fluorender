@@ -51,17 +51,32 @@ namespace FL
 
 		void AddRuler(Ruler* ruler)
 		{
-			m_ruler_list.push_back(ruler);
+			FLIVR::Point p;
+			for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
+			{
+				RulerPoint* point = ruler->GetPoint(i);
+				if (!point)
+					continue;
+				p = point->GetPoint();
+				m_point_list.push_back(p);
+			}
 		}
 
 		void SetRulerList(RulerList* list)
 		{
-			m_ruler_list.assign(list->begin(), list->end());
+			Clear();
+			for (size_t i = 0; i < list->size(); ++i)
+			{
+				Ruler* ruler = (*list)[i];
+				if (!ruler)
+					continue;
+				AddRuler(ruler);
+			}
 		}
 
 		void Clear()
 		{
-			m_ruler_list.clear();
+			m_point_list.clear();
 		}
 
 		void SetRuler(Ruler* ruler)
@@ -76,7 +91,7 @@ namespace FL
 
 	private:
 		VRenderGLView *m_view;
-		RulerList m_ruler_list;
+		std::vector<FLIVR::Point> m_point_list;
 		int m_axis_type;
 		FLIVR::Vector m_axis;
 		FLIVR::Vector m_axis_x;
