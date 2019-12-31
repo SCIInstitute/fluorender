@@ -68,8 +68,9 @@ set(HEADER_FILES
     Panels/Output_Adjustments/outputLayout.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
     Panels/Clipping_Planes/clippingLayout.hpp
-    Panels/Datasets/datasetsLayout.hpp
     Panels/Datasets/datasetsPanel.hpp
+    Panels/Datasets/datasetsToolbarLayout.hpp
+    Panels/Datasets/datasetsTreeLayout.hpp
     Panels/Workspace/workspaceLayout.hpp
     Panels/Workspace/workspacePanel.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
@@ -102,6 +103,8 @@ set(SOURCES
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
     Panels/Output_Adjustments/outputLayout.cpp
+    Panels/Datasets/datasetsToolbarLayout.cpp
+    Panels/Datasets/datasetsTreeLayout.cpp
     Panels/Record_Export/recordExport.cpp
 		Panels/Record_Export/recordTabLayout.cpp
 		Panels/Record_Export/recordPlayLayout.cpp
