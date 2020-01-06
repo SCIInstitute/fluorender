@@ -85,9 +85,14 @@ namespace FL
 			AddRuler(ruler);
 		}
 
+		void SetCovMat(std::vector<double> &cov)
+		{
+			m_cov.assign(cov.begin(), cov.end());
+		}
+
 		void AlignRuler(int axis_type, double val);//axis_type: 0-x; 1-y; 2-z
 		void Rotate(double val);
-		void AlignPca(int axis_type, double val);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
+		void AlignPca(int axis_type, double val, bool cov=true);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
 
 	private:
 		VRenderGLView *m_view;
@@ -99,6 +104,7 @@ namespace FL
 		FLIVR::Vector m_axis_z;
 		double m_ang;
 		int m_rotate_type;//0: single; 1:pca
+		std::vector<double> m_cov;
 	};
 }
 
