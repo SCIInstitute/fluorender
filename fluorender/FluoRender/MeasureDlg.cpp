@@ -883,9 +883,9 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 
-	//notes
+	//alignment
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Align in Render View"), wxVERTICAL);
+		new wxStaticBox(this, wxID_ANY, "Alignment"), wxVERTICAL);
 	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_btn = new wxButton(this, ID_AlignBtn, "Align with",
 		wxDefaultPosition, wxSize(65, 22));

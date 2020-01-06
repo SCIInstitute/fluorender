@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
+#include <Distance/RulerAlign.h>
 
 class VRenderView;
 class VolumeData;
@@ -108,6 +109,14 @@ public:
 		//size relation
 		ID_BrushSizeDataRd,
 		ID_BrushSizeScreenRd,
+		//align
+		ID_AlignCenter,
+		ID_AlignXYZ,
+		ID_AlignYXZ,
+		ID_AlignZXY,
+		ID_AlignXZY,
+		ID_AlignYZX,
+		ID_AlignZYX,
 		//output
 		ID_UpdateBtn,
 		ID_AutoUpdateBtn,
@@ -147,6 +156,8 @@ private:
 	double m_dft_scl_translate;
 	//output
 	bool m_hold_history;
+
+	FL::RulerAlign m_aligner;
 
 	//paint tools
 	//toolbar
@@ -188,6 +199,14 @@ private:
 	//size relation
 	wxRadioButton* m_brush_size_data_rb;
 	wxRadioButton* m_brush_size_screen_rb;
+	//align
+	wxCheckBox* m_align_center;
+	wxButton* m_align_xyz;
+	wxButton* m_align_yxz;
+	wxButton* m_align_zxy;
+	wxButton* m_align_xzy;
+	wxButton* m_align_yzx;
+	wxButton* m_align_zyx;
 
 	//output
 	wxButton* m_update_btn;
@@ -249,6 +268,8 @@ private:
 	void OnBrushIterCheck(wxCommandEvent& event);
 	//brush size relation
 	void OnBrushSizeRelationCheck(wxCommandEvent& event);
+	//align
+	void OnAlignPca(wxCommandEvent& event);
 	//output
 	void OnUpdateBtn(wxCommandEvent& event);
 	void OnAutoUpdateBtn(wxCommandEvent& event);

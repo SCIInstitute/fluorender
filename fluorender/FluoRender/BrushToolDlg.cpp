@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
 #include <Calculate/Count.h>
+#include <Distance/Cov.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "Formats/png_resource.h"
@@ -92,6 +93,13 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//brush size relation
 	EVT_RADIOBUTTON(ID_BrushSizeDataRd, BrushToolDlg::OnBrushSizeRelationCheck)
 	EVT_RADIOBUTTON(ID_BrushSizeScreenRd, BrushToolDlg::OnBrushSizeRelationCheck)
+	//align
+	EVT_BUTTON(ID_AlignXYZ, BrushToolDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignYXZ, BrushToolDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignZXY, BrushToolDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignXZY, BrushToolDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignYZX, BrushToolDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignZYX, BrushToolDlg::OnAlignPca)
 	//output
 	EVT_BUTTON(ID_UpdateBtn, BrushToolDlg::OnUpdateBtn)
 	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, BrushToolDlg::OnAutoUpdateBtn)
@@ -369,11 +377,56 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer2->Add(sizer2_1, 0, wxEXPAND);
 	sizer2->Add(5, 5);
 
-	//output
+	//alignment
 	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Alignment"), wxVERTICAL);
+	wxBoxSizer* sizer31 = new wxBoxSizer(wxHORIZONTAL);
+	m_align_center = new wxCheckBox(this, ID_AlignCenter,
+		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer32 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Axes:",
+		wxDefaultPosition, wxDefaultSize);
+	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_yxz = new wxButton(this, ID_AlignYXZ, "YXZ",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_zxy = new wxButton(this, ID_AlignZXY, "ZXY",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_xzy = new wxButton(this, ID_AlignXZY, "XZY",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_yzx = new wxButton(this, ID_AlignYZX, "YZX",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
+		wxDefaultPosition, wxSize(65, 22));
+	sizer32->Add(5, 5);
+	sizer32->Add(st, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_align_xyz, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_align_yxz, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_align_zxy, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_align_xzy, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_align_yzx, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_align_zyx, 0, wxALIGN_CENTER);
+	sizer32->Add(5, 5);
+	//
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer31, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer32, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+
+	//output
+	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Output"),
 		wxVERTICAL);
-	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_update_btn = new wxButton(this, ID_UpdateBtn, "Get Sel. Size",
 		wxDefaultPosition, wxSize(75, -1));
 	m_auto_update_btn = new wxToggleButton(this, ID_AutoUpdateBtn,
@@ -382,12 +435,12 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		"Hold History", wxDefaultPosition, wxSize(85, 20), wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(this, ID_ClearHistBtn,
 		"Clear History", wxDefaultPosition, wxSize(75, -1));
-	sizer3_1->Add(m_update_btn, 0, wxALIGN_CENTER);
-	sizer3_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
-	sizer3_1->AddStretchSpacer(1);
-	sizer3_1->Add(m_history_chk, 0, wxALIGN_CENTER);
-	sizer3_1->Add(5, 5);
-	sizer3_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
+	sizer4_1->Add(m_update_btn, 0, wxALIGN_CENTER);
+	sizer4_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
+	sizer4_1->AddStretchSpacer(1);
+	sizer4_1->Add(m_history_chk, 0, wxALIGN_CENTER);
+	sizer4_1->Add(5, 5);
+	sizer4_1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
 	m_output_grid = new wxGrid(this, ID_OutputGrid);
 	m_output_grid->CreateGrid(0, 5);
@@ -397,11 +450,11 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_output_grid->SetColLabelValue(3, "Physical Size");
 	m_output_grid->SetColLabelValue(4, "Physical Size\n(Int. Weighted)");
 	m_output_grid->Fit();
-	sizer3->Add(5, 5);
-	sizer3->Add(sizer3_1, 0, wxEXPAND);
-	sizer3->Add(5, 5);
-	sizer3->Add(m_output_grid, 1, wxEXPAND);
-	sizer3->Add(5, 5);
+	sizer4->Add(5, 5);
+	sizer4->Add(sizer4_1, 0, wxEXPAND);
+	sizer4->Add(5, 5);
+	sizer4->Add(m_output_grid, 1, wxEXPAND);
+	sizer4->Add(5, 5);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -414,7 +467,9 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
-	sizer_v->Add(sizer3, 1, wxEXPAND);
+	sizer_v->Add(sizer3, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer4, 1, wxEXPAND);
 	sizer_v->Add(10, 10);
 
 	SetSizer(sizer_v);
@@ -441,6 +496,7 @@ void BrushToolDlg::GetSettings(VRenderView* vrv)
 	}
 
 	m_cur_view = vrv;
+	m_aligner.SetView(m_cur_view->m_glview);
 	double dval = 0.0;
 	int ival = 0;
 	bool bval = false;
@@ -1053,6 +1109,56 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 	{
 		if (m_cur_view)
 			m_cur_view->SetBrushSizeData(false);
+	}
+}
+
+//align
+void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
+{
+	int axis_type = 0;
+	switch (event.GetId())
+	{
+	case ID_AlignXYZ:
+		axis_type = 0;
+		break;
+	case ID_AlignYXZ:
+		axis_type = 1;
+		break;
+	case ID_AlignZXY:
+		axis_type = 2;
+		break;
+	case ID_AlignXZY:
+		axis_type = 3;
+		break;
+	case ID_AlignYZX:
+		axis_type = 4;
+		break;
+	case ID_AlignZYX:
+		axis_type = 5;
+		break;
+	}
+	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	if (vr_frame && m_cur_view)
+	{
+		VolumeData* vd = vr_frame->GetCurSelVol();
+		if (vd && vd->GetTexture())
+		{
+			FL::Cov cover(vd);
+			cover.Compute();
+			std::vector<double> cov = cover.GetCov();
+			FLIVR::Point center = cover.GetCenter();
+			m_aligner.SetCovMat(cov);
+			m_aligner.AlignPca(axis_type, 0, false);
+			if (m_align_center->GetValue())
+			{
+				double tx, ty, tz;
+				m_cur_view->GetObjCenters(tx, ty, tz);
+				m_cur_view->SetObjTrans(
+					tx - center.x(),
+					center.y() - ty,
+					center.z() - tz);
+			}
+		}
 	}
 }
 

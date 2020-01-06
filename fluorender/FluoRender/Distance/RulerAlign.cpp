@@ -119,11 +119,14 @@ void RulerAlign::Rotate(double val)
 	m_view->RefreshGL(50);
 }
 
-void RulerAlign::AlignPca(int axis_type, double val)
+void RulerAlign::AlignPca(int axis_type, double val, bool cov)
 {
 	Pca solver;
-	solver.SetPoints(m_point_list);
-	solver.Compute();
+	if (cov)
+		solver.SetPoints(m_point_list);
+	else
+		solver.SetCovMat(m_cov);
+	solver.Compute(cov);
 
 	FLIVR::Vector source0 = solver.GetAxis(0);
 	FLIVR::Vector source1 = solver.GetAxis(1);
