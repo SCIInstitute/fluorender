@@ -13362,26 +13362,27 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 	}
 }
 
-void VRenderGLView::SetZeroRotations(double rotx, double roty, double rotz)
+void VRenderGLView::SetZeroRotations()
 {
-	m_zrotx = rotx;
-	m_zroty = roty;
-	m_zrotz = rotz;
+	m_zq = m_q;
+}
 
-	if (m_zroty > 360.0)
-		m_zroty -= 360.0;
-	if (m_zroty < 0.0)
-		m_zroty += 360.0;
-	if (m_zrotx > 360.0)
-		m_zrotx -= 360.0;
-	if (m_zrotx < 0.0)
-		m_zrotx += 360.0;
-	if (m_zrotz > 360.0)
-		m_zrotz -= 360.0;
-	if (m_zrotz < 0.0)
-		m_zrotz += 360.0;
-
-	m_zq.FromEuler(m_zrotx, m_zroty, m_zrotz);
+void VRenderGLView::ResetZeroRotations(double &rotx, double &roty, double &rotz)
+{
+	m_zq = FLIVR::Quaternion();
+	m_q.ToEuler(rotx, roty, rotz);
+	if (roty > 360.0)
+		roty -= 360.0;
+	if (roty < 0.0)
+		roty += 360.0;
+	if (rotx > 360.0)
+		rotx -= 360.0;
+	if (rotx < 0.0)
+		rotx += 360.0;
+	if (rotz > 360.0)
+		rotz -= 360.0;
+	if (rotz < 0.0)
+		rotz += 360.0;
 }
 
 void VRenderGLView::GetFrame(int &x, int &y, int &w, int &h)
