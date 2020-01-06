@@ -2120,8 +2120,19 @@ void VRenderView::OnZeroRot(wxCommandEvent& event)
 	{
 		double rotx, roty, rotz;
 		m_glview->GetRotations(rotx, roty, rotz);
-		m_glview->SetZeroRotations(rotx, roty, rotz);
-		OnRotReset(event);
+		if (rotx == 0.0 &&
+			roty == 0.0 &&
+			rotz == 0.0)
+		{
+			//reset
+			m_glview->ResetZeroRotations(rotx, roty, rotz);
+			m_glview->SetRotations(rotx, roty, rotz, true);
+		}
+		else
+		{
+			m_glview->SetZeroRotations();
+			OnRotReset(event);
+		}
 	}
 }
 
