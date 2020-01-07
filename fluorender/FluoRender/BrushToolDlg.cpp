@@ -386,7 +386,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	sizer31->Add(5, 5);
 	sizer31->Add(m_align_center, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer32 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Axes:",
+	st = new wxStaticText(this, 0, "Tri Axes:",
 		wxDefaultPosition, wxDefaultSize);
 	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
 		wxDefaultPosition, wxSize(65, 22));
@@ -401,7 +401,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, wxSize(65, 22));
 	sizer32->Add(5, 5);
-	sizer32->Add(st, wxALIGN_CENTER);
+	sizer32->Add(st, 0, wxALIGN_CENTER);
 	sizer32->Add(5, 5);
 	sizer32->Add(m_align_xyz, 0, wxALIGN_CENTER);
 	sizer32->Add(5, 5);

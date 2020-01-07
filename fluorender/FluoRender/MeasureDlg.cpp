@@ -723,17 +723,19 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_CHECKBOX(ID_UseTransferChk, MeasureDlg::OnUseTransferCheck)
 	EVT_CHECKBOX(ID_TransientChk, MeasureDlg::OnTransientCheck)
 	EVT_CHECKBOX(ID_DF_FChk, MeasureDlg::OnDF_FCheck)
-	EVT_BUTTON(ID_AlignBtn, MeasureDlg::OnAlignBtn)
-	EVT_MENU(ID_AlignX, MeasureDlg::OnAlign)
-	EVT_MENU(ID_AlignY, MeasureDlg::OnAlign)
-	EVT_MENU(ID_AlignZ, MeasureDlg::OnAlign)
-	EVT_MENU(ID_AlignXYZ, MeasureDlg::OnAlignPca)
-	EVT_MENU(ID_AlignYXZ, MeasureDlg::OnAlignPca)
-	EVT_MENU(ID_AlignZXY, MeasureDlg::OnAlignPca)
-	EVT_MENU(ID_AlignXZY, MeasureDlg::OnAlignPca)
-	EVT_MENU(ID_AlignYZX, MeasureDlg::OnAlignPca)
-	EVT_MENU(ID_AlignZYX, MeasureDlg::OnAlignPca)
-	EVT_MENU(ID_AlignReset, MeasureDlg::OnAlignReset)
+	//align
+	EVT_BUTTON(ID_AlignX, MeasureDlg::OnAlignRuler)
+	EVT_BUTTON(ID_AlignY, MeasureDlg::OnAlignRuler)
+	EVT_BUTTON(ID_AlignZ, MeasureDlg::OnAlignRuler)
+	EVT_BUTTON(ID_AlignNX, MeasureDlg::OnAlignRuler)
+	EVT_BUTTON(ID_AlignNY, MeasureDlg::OnAlignRuler)
+	EVT_BUTTON(ID_AlignNZ, MeasureDlg::OnAlignRuler)
+	EVT_BUTTON(ID_AlignXYZ, MeasureDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignYXZ, MeasureDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignZXY, MeasureDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignXZY, MeasureDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignYZX, MeasureDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignZYX, MeasureDlg::OnAlignPca)
 END_EVENT_TABLE()
 
 MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
@@ -884,15 +886,65 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	//alignment
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Alignment"), wxVERTICAL);
-	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
-	m_align_btn = new wxButton(this, ID_AlignBtn, "Align with",
+	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	m_align_center = new wxCheckBox(this, ID_AlignCenter,
+		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	sizer21->Add(5, 5);
+	sizer21->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText* st = new wxStaticText(this, 0, "Mono Axis:",
 		wxDefaultPosition, wxSize(65, 22));
-	sizer_21->Add(5, 5);
-	sizer_21->Add(m_align_btn, 0, wxALIGN_CENTER);
+	m_align_x = new wxButton(this, ID_AlignX, "X",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_y = new wxButton(this, ID_AlignY, "Y",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_z = new wxButton(this, ID_AlignZ, "Z",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_nx = new wxButton(this, ID_AlignNX, "-X",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_ny = new wxButton(this, ID_AlignNY, "-Y",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_nz = new wxButton(this, ID_AlignNZ, "-Z",
+		wxDefaultPosition, wxSize(65, 22));
+	sizer22->Add(5, 5);
+	sizer22->Add(st, 0, wxALIGN_CENTER);
+	sizer22->Add(m_align_x, 0, wxALIGN_CENTER);
+	sizer22->Add(m_align_y, 0, wxALIGN_CENTER);
+	sizer22->Add(m_align_z, 0, wxALIGN_CENTER);
+	sizer22->Add(m_align_nx, 0, wxALIGN_CENTER);
+	sizer22->Add(m_align_ny, 0, wxALIGN_CENTER);
+	sizer22->Add(m_align_nz, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer23 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Tri Axes:",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_yxz = new wxButton(this, ID_AlignYXZ, "YXZ",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_zxy = new wxButton(this, ID_AlignZXY, "ZXY",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_xzy = new wxButton(this, ID_AlignXZY, "XZY",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_yzx = new wxButton(this, ID_AlignYZX, "YZX",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
+		wxDefaultPosition, wxSize(65, 22));
+	sizer23->Add(5, 5);
+	sizer23->Add(st, 0, wxALIGN_CENTER);
+	sizer23->Add(m_align_xyz, 0, wxALIGN_CENTER);
+	sizer23->Add(m_align_yxz, 0, wxALIGN_CENTER);
+	sizer23->Add(m_align_zxy, 0, wxALIGN_CENTER);
+	sizer23->Add(m_align_xzy, 0, wxALIGN_CENTER);
+	sizer23->Add(m_align_yzx, 0, wxALIGN_CENTER);
+	sizer23->Add(m_align_zyx, 0, wxALIGN_CENTER);
 	//
-	sizer_2->Add(10, 10);
-	sizer_2->Add(sizer_21, 0, wxEXPAND);
-	sizer_2->Add(10, 10);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer21, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer22, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer23, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
 
 	//sizer
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -1617,29 +1669,37 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 		frame->GetSettingDlg()->SetRulerDF_F(val);
 }
 
-void MeasureDlg::OnAlignBtn(wxCommandEvent& event)
+void MeasureDlg::AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list)
 {
-	wxRect rect = m_align_btn->GetRect();
-	wxPoint point = (rect.GetBottomLeft() + rect.GetTopRight()) / 2;
-	wxMenu menu;
-	wxMenu* align_menu1 = new wxMenu;
-	align_menu1->Append(ID_AlignX, "with X");
-	align_menu1->Append(ID_AlignY, "with Y");
-	align_menu1->Append(ID_AlignZ, "with Z");
-	menu.Append(wxID_ANY, "Align Render View", align_menu1);
-	wxMenu* align_menu2 = new wxMenu;
-	align_menu2->Append(ID_AlignXYZ, "XYZ");
-	align_menu2->Append(ID_AlignYXZ, "YXZ");
-	align_menu2->Append(ID_AlignZXY, "ZXY");
-	align_menu2->Append(ID_AlignXZY, "XZY");
-	align_menu2->Append(ID_AlignYZX, "YZX");
-	align_menu2->Append(ID_AlignZYX, "ZYX");
-	menu.Append(wxID_ANY, "PCA", align_menu2);
-	menu.Append(ID_AlignReset, "Reset");
-	PopupMenu(&menu, point.x, point.y);
+	FLIVR::Point center;
+	bool valid_center = false;
+	if (ruler)
+	{
+		center = ruler->GetCenter();
+		valid_center = true;
+	}
+	else if (ruler_list && !ruler_list->empty())
+	{
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			FL::Ruler* r = (*ruler_list)[i];
+			center += r->GetCenter();
+		}
+		center /= double(ruler_list->size());
+		valid_center = true;
+	}
+	if (valid_center)
+	{
+		double tx, ty, tz;
+		m_view->GetObjCenters(tx, ty, tz);
+		m_view->SetObjTrans(
+			tx - center.x(),
+			center.y() - ty,
+			center.z() - tz);
+	}
 }
 
-void MeasureDlg::OnAlign(wxCommandEvent& event)
+void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
 	std::vector<int> sel;
 	if (!m_rulerlist->GetCurrSelection(sel))
@@ -1664,8 +1724,19 @@ void MeasureDlg::OnAlign(wxCommandEvent& event)
 	case ID_AlignZ:
 		axis_type = 2;
 		break;
+	case ID_AlignNX:
+		axis_type = 3;
+		break;
+	case ID_AlignNY:
+		axis_type = 4;
+		break;
+	case ID_AlignNZ:
+		axis_type = 5;
+		break;
 	}
 	m_aligner.AlignRuler(axis_type);
+	if (m_align_center->GetValue())
+		AlignCenter(ruler, 0);
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
@@ -1706,13 +1777,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 		break;
 	}
 	m_aligner.AlignPca(axis_type);
+	if (m_align_center->GetValue())
+		AlignCenter(0, &list);
 }
 
-void MeasureDlg::OnAlignReset(wxCommandEvent& event)
-{
-	if (m_view)
-	{
-		m_view->SetRotations(0.0, 0.0, 0.0);
-		m_view->RefreshGL();
-	}
-}
