@@ -5448,9 +5448,10 @@ void VRenderGLView::SetParams(double t)
 	Quaternion q;
 	if (interpolator->GetQuaternion(keycode, t, q))
 	{
-		double rotx, roty, rotz;
-		q.ToEuler(rotx, roty, rotz);
-		SetRotations(rotx, roty, rotz, true);
+		//double rotx, roty, rotz;
+		//q.ToEuler(rotx, roty, rotz);
+		//SetRotations(rotx, roty, rotz, true);
+		m_q = q;
 	}
 	//intermixing mode
 	keycode.l2_name = "volmethod";
@@ -10389,6 +10390,92 @@ Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 	return q;
 }
 
+void VRenderGLView::UpdateClips()
+{
+	if (m_clip_mode == 1)
+		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
+
+	vector<Plane*> *planes = 0;
+	for (int i = 0; i < (int)m_vd_pop_list.size(); i++)
+	{
+		if (!m_vd_pop_list[i])
+			continue;
+
+		double spcx, spcy, spcz;
+		int resx, resy, resz;
+		m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
+		m_vd_pop_list[i]->GetResolution(resx, resy, resz);
+		Vector scale;
+		if (spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
+		{
+			scale = Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
+			scale.safe_normalize();
+		}
+		else
+			scale = Vector(1.0, 1.0, 1.0);
+
+		if (m_vd_pop_list[i]->GetVR())
+			planes = m_vd_pop_list[i]->GetVR()->get_planes();
+		if (planes && planes->size() == 6)
+		{
+			double x1, x2, y1, y2, z1, z2;
+			double abcd[4];
+
+			(*planes)[0]->get_copy(abcd);
+			x1 = fabs(abcd[3]);
+			(*planes)[1]->get_copy(abcd);
+			x2 = fabs(abcd[3]);
+			(*planes)[2]->get_copy(abcd);
+			y1 = fabs(abcd[3]);
+			(*planes)[3]->get_copy(abcd);
+			y2 = fabs(abcd[3]);
+			(*planes)[4]->get_copy(abcd);
+			z1 = fabs(abcd[3]);
+			(*planes)[5]->get_copy(abcd);
+			z2 = fabs(abcd[3]);
+
+			Vector trans1(-0.5, -0.5, -0.5);
+			Vector trans2(0.5, 0.5, 0.5);
+
+			(*planes)[0]->Restore();
+			(*planes)[0]->Translate(trans1);
+			(*planes)[0]->Rotate(m_q_cl);
+			(*planes)[0]->Scale(scale);
+			(*planes)[0]->Translate(trans2);
+
+			(*planes)[1]->Restore();
+			(*planes)[1]->Translate(trans1);
+			(*planes)[1]->Rotate(m_q_cl);
+			(*planes)[1]->Scale(scale);
+			(*planes)[1]->Translate(trans2);
+
+			(*planes)[2]->Restore();
+			(*planes)[2]->Translate(trans1);
+			(*planes)[2]->Rotate(m_q_cl);
+			(*planes)[2]->Scale(scale);
+			(*planes)[2]->Translate(trans2);
+
+			(*planes)[3]->Restore();
+			(*planes)[3]->Translate(trans1);
+			(*planes)[3]->Rotate(m_q_cl);
+			(*planes)[3]->Scale(scale);
+			(*planes)[3]->Translate(trans2);
+
+			(*planes)[4]->Restore();
+			(*planes)[4]->Translate(trans1);
+			(*planes)[4]->Rotate(m_q_cl);
+			(*planes)[4]->Scale(scale);
+			(*planes)[4]->Translate(trans2);
+
+			(*planes)[5]->Restore();
+			(*planes)[5]->Translate(trans1);
+			(*planes)[5]->Rotate(m_q_cl);
+			(*planes)[5]->Scale(scale);
+			(*planes)[5]->Translate(trans2);
+		}
+	}
+}
+
 void VRenderGLView::Q2A()
 {
 	//view changed, re-sort bricks
@@ -10396,103 +10483,21 @@ void VRenderGLView::Q2A()
 
 	m_q.ToEuler(m_rotx, m_roty, m_rotz);
 
-	if (m_roty>360.0)
+	if (m_roty > 360.0)
 		m_roty -= 360.0;
-	if (m_roty<0.0)
+	if (m_roty < 0.0)
 		m_roty += 360.0;
-	if (m_rotx>360.0)
+	if (m_rotx > 360.0)
 		m_rotx -= 360.0;
-	if (m_rotx<0.0)
+	if (m_rotx < 0.0)
 		m_rotx += 360.0;
-	if (m_rotz>360.0)
+	if (m_rotz > 360.0)
 		m_rotz -= 360.0;
-	if (m_rotz<0.0)
+	if (m_rotz < 0.0)
 		m_rotz += 360.0;
 
 	if (m_clip_mode)
-	{
-		if (m_clip_mode == 1)
-			m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
-
-		vector<Plane*> *planes = 0;
-		for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-		{
-			if (!m_vd_pop_list[i])
-				continue;
-
-			double spcx, spcy, spcz;
-			int resx, resy, resz;
-			m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
-			m_vd_pop_list[i]->GetResolution(resx, resy, resz);
-			Vector scale;
-			if (spcx>0.0 && spcy>0.0 && spcz>0.0)
-			{
-				scale = Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
-				scale.safe_normalize();
-			}
-			else
-				scale = Vector(1.0, 1.0, 1.0);
-
-			if (m_vd_pop_list[i]->GetVR())
-				planes = m_vd_pop_list[i]->GetVR()->get_planes();
-			if (planes && planes->size() == 6)
-			{
-				double x1, x2, y1, y2, z1, z2;
-				double abcd[4];
-				(*planes)[0]->get_copy(abcd);
-				x1 = fabs(abcd[3]);
-				(*planes)[1]->get_copy(abcd);
-				x2 = fabs(abcd[3]);
-				(*planes)[2]->get_copy(abcd);
-				y1 = fabs(abcd[3]);
-				(*planes)[3]->get_copy(abcd);
-				y2 = fabs(abcd[3]);
-				(*planes)[4]->get_copy(abcd);
-				z1 = fabs(abcd[3]);
-				(*planes)[5]->get_copy(abcd);
-				z2 = fabs(abcd[3]);
-
-				Vector trans1(-0.5, -0.5, -0.5);
-				Vector trans2(0.5, 0.5, 0.5);
-
-				(*planes)[0]->Restore();
-				(*planes)[0]->Translate(trans1);
-				(*planes)[0]->Rotate(m_q_cl);
-				(*planes)[0]->Scale(scale);
-				(*planes)[0]->Translate(trans2);
-
-				(*planes)[1]->Restore();
-				(*planes)[1]->Translate(trans1);
-				(*planes)[1]->Rotate(m_q_cl);
-				(*planes)[1]->Scale(scale);
-				(*planes)[1]->Translate(trans2);
-
-				(*planes)[2]->Restore();
-				(*planes)[2]->Translate(trans1);
-				(*planes)[2]->Rotate(m_q_cl);
-				(*planes)[2]->Scale(scale);
-				(*planes)[2]->Translate(trans2);
-
-				(*planes)[3]->Restore();
-				(*planes)[3]->Translate(trans1);
-				(*planes)[3]->Rotate(m_q_cl);
-				(*planes)[3]->Scale(scale);
-				(*planes)[3]->Translate(trans2);
-
-				(*planes)[4]->Restore();
-				(*planes)[4]->Translate(trans1);
-				(*planes)[4]->Rotate(m_q_cl);
-				(*planes)[4]->Scale(scale);
-				(*planes)[4]->Translate(trans2);
-
-				(*planes)[5]->Restore();
-				(*planes)[5]->Translate(trans1);
-				(*planes)[5]->Rotate(m_q_cl);
-				(*planes)[5]->Scale(scale);
-				(*planes)[5]->Translate(trans2);
-			}
-		}
-	}
+		UpdateClips();
 }
 
 void VRenderGLView::A2Q()
@@ -10505,90 +10510,7 @@ void VRenderGLView::A2Q()
 	m_q = m_q * m_zq;
 
 	if (m_clip_mode)
-	{
-		if (m_clip_mode == 1)
-			m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
-
-		for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-		{
-			if (!m_vd_pop_list[i])
-				continue;
-
-			vector<Plane*> *planes = 0;
-			double spcx, spcy, spcz;
-			int resx, resy, resz;
-			m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
-			m_vd_pop_list[i]->GetResolution(resx, resy, resz);
-			Vector scale;
-			if (spcx>0.0 && spcy>0.0 && spcz>0.0)
-			{
-				scale = Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
-				scale.safe_normalize();
-			}
-			else
-				scale = Vector(1.0, 1.0, 1.0);
-
-			if (m_vd_pop_list[i]->GetVR())
-				planes = m_vd_pop_list[i]->GetVR()->get_planes();
-			if (planes && planes->size() == 6)
-			{
-				double x1, x2, y1, y2, z1, z2;
-				double abcd[4];
-
-				(*planes)[0]->get_copy(abcd);
-				x1 = fabs(abcd[3]);
-				(*planes)[1]->get_copy(abcd);
-				x2 = fabs(abcd[3]);
-				(*planes)[2]->get_copy(abcd);
-				y1 = fabs(abcd[3]);
-				(*planes)[3]->get_copy(abcd);
-				y2 = fabs(abcd[3]);
-				(*planes)[4]->get_copy(abcd);
-				z1 = fabs(abcd[3]);
-				(*planes)[5]->get_copy(abcd);
-				z2 = fabs(abcd[3]);
-
-				Vector trans1(-0.5, -0.5, -0.5);
-				Vector trans2(0.5, 0.5, 0.5);
-
-				(*planes)[0]->Restore();
-				(*planes)[0]->Translate(trans1);
-				(*planes)[0]->Rotate(m_q_cl);
-				(*planes)[0]->Scale(scale);
-				(*planes)[0]->Translate(trans2);
-
-				(*planes)[1]->Restore();
-				(*planes)[1]->Translate(trans1);
-				(*planes)[1]->Rotate(m_q_cl);
-				(*planes)[1]->Scale(scale);
-				(*planes)[1]->Translate(trans2);
-
-				(*planes)[2]->Restore();
-				(*planes)[2]->Translate(trans1);
-				(*planes)[2]->Rotate(m_q_cl);
-				(*planes)[2]->Scale(scale);
-				(*planes)[2]->Translate(trans2);
-
-				(*planes)[3]->Restore();
-				(*planes)[3]->Translate(trans1);
-				(*planes)[3]->Rotate(m_q_cl);
-				(*planes)[3]->Scale(scale);
-				(*planes)[3]->Translate(trans2);
-
-				(*planes)[4]->Restore();
-				(*planes)[4]->Translate(trans1);
-				(*planes)[4]->Rotate(m_q_cl);
-				(*planes)[4]->Scale(scale);
-				(*planes)[4]->Translate(trans2);
-
-				(*planes)[5]->Restore();
-				(*planes)[5]->Translate(trans1);
-				(*planes)[5]->Rotate(m_q_cl);
-				(*planes)[5]->Scale(scale);
-				(*planes)[5]->Translate(trans2);
-			}
-		}
-	}
+		UpdateClips();
 }
 
 //sort bricks after view changes

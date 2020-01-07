@@ -214,6 +214,10 @@ public:
 		m_transx = transx; m_transy = transy; m_transz = transz;
 		m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
 	}
+	FLIVR::Quaternion GetRotations()
+	{
+		return m_q;
+	}
 	void GetRotations(double &rotx, double &roty, double &rotz)
 	{
 		rotx = m_rotx;
@@ -627,6 +631,8 @@ public:
 		drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 		return drw_mat;
 	}
+
+	void UpdateClips();
 
 public:
 	//set gl context

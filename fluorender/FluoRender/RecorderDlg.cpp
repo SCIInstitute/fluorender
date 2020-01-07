@@ -839,10 +839,10 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	double rotx, roty, rotz;
-	m_view->GetRotations(rotx, roty, rotz);
-	Quaternion q;
-	q.FromEuler(rotx, roty, rotz);
+	//double rotx, roty, rotz;
+	//m_view->GetRotations(rotx, roty, rotz);
+	Quaternion q = m_view->m_glview->GetRotations();
+	//q.FromEuler(rotx, roty, rotz);
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	interpolator->AddKey(flkeyQ);
 	//translation
