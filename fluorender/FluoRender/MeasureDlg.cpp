@@ -885,7 +885,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 
 	//alignment
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Alignment"), wxVERTICAL);
+		new wxStaticBox(this, wxID_ANY, "Align Render View to Ruler(s)"), wxVERTICAL);
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center = new wxCheckBox(this, ID_AlignCenter,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);

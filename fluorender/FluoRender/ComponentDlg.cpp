@@ -146,14 +146,12 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
 	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
 	//align
-	EVT_BUTTON(ID_AlignBtn, ComponentDlg::OnAlignBtn)
-	EVT_MENU(ID_AlignXYZ, ComponentDlg::OnAlignPca)
-	EVT_MENU(ID_AlignYXZ, ComponentDlg::OnAlignPca)
-	EVT_MENU(ID_AlignZXY, ComponentDlg::OnAlignPca)
-	EVT_MENU(ID_AlignXZY, ComponentDlg::OnAlignPca)
-	EVT_MENU(ID_AlignYZX, ComponentDlg::OnAlignPca)
-	EVT_MENU(ID_AlignZYX, ComponentDlg::OnAlignPca)
-	EVT_MENU(ID_AlignReset, ComponentDlg::OnAlignReset)
+	EVT_BUTTON(ID_AlignXYZ, ComponentDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignYXZ, ComponentDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignZXY, ComponentDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignXZY, ComponentDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignYZX, ComponentDlg::OnAlignPca)
+	EVT_BUTTON(ID_AlignZYX, ComponentDlg::OnAlignPca)
 
 	//execute
 	EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, ComponentDlg::OnNotebook)
@@ -918,19 +916,44 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer4->Add(sizer42, 0, wxEXPAND);
 	sizer4->Add(10, 10);
 
-	//note
+	//alignment
 	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Align"),
+		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
 		wxVERTICAL);
 	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
-	m_align_btn = new wxButton(page, ID_AlignBtn, "Align with",
-		wxDefaultPosition, wxSize(65, 22));
+	m_align_center = new wxCheckBox(page, ID_AlignCenter,
+		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	sizer51->Add(5, 5);
-	sizer51->Add(m_align_btn, 0, wxALIGN_CENTER);
+	sizer51->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer52 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Tri Axes:",
+		wxDefaultPosition, wxSize(50, 22));
+	m_align_xyz = new wxButton(page, ID_AlignXYZ, "XYZ",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_yxz = new wxButton(page, ID_AlignYXZ, "YXZ",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_zxy = new wxButton(page, ID_AlignZXY, "ZXY",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_xzy = new wxButton(page, ID_AlignXZY, "XZY",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_yzx = new wxButton(page, ID_AlignYZX, "YZX",
+		wxDefaultPosition, wxSize(65, 22));
+	m_align_zyx = new wxButton(page, ID_AlignZYX, "ZYX",
+		wxDefaultPosition, wxSize(65, 22));
+	sizer52->Add(5, 5);
+	sizer52->Add(st, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_xyz, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_yxz, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_zxy, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_xzy, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_yzx, 0, wxALIGN_CENTER);
+	sizer52->Add(m_align_zyx, 0, wxALIGN_CENTER);
 	//
-	sizer5->Add(10, 10);
+	sizer5->Add(5, 5);
 	sizer5->Add(sizer51, 0, wxEXPAND);
-	sizer5->Add(10, 10);
+	sizer5->Add(5, 5);
+	sizer5->Add(sizer52, 0, wxEXPAND);
+	sizer5->Add(5, 5);
 
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -2734,21 +2757,17 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-void ComponentDlg::OnAlignBtn(wxCommandEvent& event)
+void ComponentDlg::AlignCenter(FL::Ruler* ruler)
 {
-	wxRect rect = m_align_btn->GetRect();
-	wxPoint point = (rect.GetBottomLeft() + rect.GetTopRight()) / 2;
-	wxMenu menu;
-	wxMenu* align_menu2 = new wxMenu;
-	align_menu2->Append(ID_AlignXYZ, "XYZ");
-	align_menu2->Append(ID_AlignYXZ, "YXZ");
-	align_menu2->Append(ID_AlignZXY, "ZXY");
-	align_menu2->Append(ID_AlignXZY, "XZY");
-	align_menu2->Append(ID_AlignYZX, "YZX");
-	align_menu2->Append(ID_AlignZYX, "ZYX");
-	menu.Append(wxID_ANY, "PCA", align_menu2);
-	menu.Append(ID_AlignReset, "Reset");
-	PopupMenu(&menu, point.x, point.y);
+	if (!ruler)
+		return;
+	FLIVR::Point center = ruler->GetCenter();
+	double tx, ty, tz;
+	m_view->GetObjCenters(tx, ty, tz);
+	m_view->SetObjTrans(
+		tx - center.x(),
+		center.y() - ty,
+		center.z() - tz);
 }
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
@@ -2797,15 +2816,8 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	rulerlist.push_back(&ruler);
 	m_aligner.SetRulerList(&rulerlist);
 	m_aligner.AlignPca(axis_type);
-}
-
-void ComponentDlg::OnAlignReset(wxCommandEvent& event)
-{
-	if (m_view)
-	{
-		m_view->SetRotations(0.0, 0.0, 0.0);
-		m_view->RefreshGL();
-	}
+	if (m_align_center->GetValue())
+		AlignCenter(&ruler);
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
