@@ -140,17 +140,19 @@ public:
 		ID_TransientChk,
 		ID_DF_FChk,
 		//align
-		ID_AlignBtn,
+		ID_AlignCenter,
 		ID_AlignX,
 		ID_AlignY,
 		ID_AlignZ,
+		ID_AlignNX,
+		ID_AlignNY,
+		ID_AlignNZ,
 		ID_AlignXYZ,
 		ID_AlignYXZ,
 		ID_AlignZXY,
 		ID_AlignXZY,
 		ID_AlignYZX,
 		ID_AlignZYX,
-		ID_AlignReset,
 	};
 
 	MeasureDlg(wxWindow* frame,
@@ -188,13 +190,27 @@ private:
 	wxCheckBox *m_transient_chk;
 	wxCheckBox *m_df_f_chk;
 	//align
-	wxButton *m_align_btn;
+	wxCheckBox* m_align_center;
+	wxButton* m_align_x;
+	wxButton* m_align_y;
+	wxButton* m_align_z;
+	wxButton* m_align_nx;
+	wxButton* m_align_ny;
+	wxButton* m_align_nz;
+	wxButton* m_align_xyz;
+	wxButton* m_align_yxz;
+	wxButton* m_align_zxy;
+	wxButton* m_align_xzy;
+	wxButton* m_align_yzx;
+	wxButton* m_align_zyx;
 
 	FL::DistCalculator m_calculator;
 	FL::RulerAlign m_aligner;
 	bool m_edited;
 
 private:
+	void AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list);
+
 	void OnNewLocator(wxCommandEvent& event);
 	void OnNewProbe(wxCommandEvent& event);
 	void OnNewProtractor(wxCommandEvent& event);
@@ -220,10 +236,8 @@ private:
 	void OnTransientCheck(wxCommandEvent& event);
 	void OnDF_FCheck(wxCommandEvent& event);
 	//align
-	void OnAlignBtn(wxCommandEvent& event);
-	void OnAlign(wxCommandEvent& event);
+	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
-	void OnAlignReset(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
