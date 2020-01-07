@@ -1148,7 +1148,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 			std::vector<double> cov = cover.GetCov();
 			FLIVR::Point center = cover.GetCenter();
 			m_aligner.SetCovMat(cov);
-			m_aligner.AlignPca(axis_type, 0, false);
+			m_aligner.AlignPca(axis_type, false);
 			if (m_align_center->GetValue())
 			{
 				double tx, ty, tz;

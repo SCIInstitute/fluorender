@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-void RulerAlign::AlignRuler(int axis_type, double val)
+void RulerAlign::AlignRuler(int axis_type)
 {
 	if (!m_view)
 		return;
@@ -64,62 +64,13 @@ void RulerAlign::AlignRuler(int axis_type, double val)
 	double ang = Dot(m_axis, axis);
 	ang = r2d(std::acos(ang));
 	FLIVR::Quaternion q(ang, rotv);
-	//rotate
-	FLIVR::Quaternion rotq(val, m_axis);
-	FLIVR::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
-	q2.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz);
-	m_view->RefreshGL(50);
-	m_rotate_type = 0;
-}
-
-void RulerAlign::Rotate(double val)
-{
-	FLIVR::Vector axis;
-	switch (m_axis_type)
-	{
-	case 0:
-		axis = FLIVR::Vector(1.0, 0.0, 0.0);
-		break;
-	case 1:
-		axis = FLIVR::Vector(0.0, 1.0, 0.0);
-		break;
-	case 2:
-		axis = FLIVR::Vector(0.0, 0.0, 1.0);
-		break;
-	case 3://xzy
-		axis = FLIVR::Vector(-1, 0, 0);
-		break;
-	case 4://yzx
-		axis = FLIVR::Vector(0, -1, 0);
-		break;
-	case 5://zyx
-		axis = FLIVR::Vector(0, 0, -1);
-		break;
-	}
-
-	FLIVR::Vector rotv = Cross(m_axis, axis);
-	rotv.normalize();
-	double ang = Dot(m_axis, axis);
-	ang = r2d(std::acos(ang));
-	FLIVR::Quaternion q(ang, rotv);
-	q.Normalize();
-	//rotate
-	if (m_rotate_type == 0)
-		ang = val;
-	else
-		ang = m_ang + val;
-
-	FLIVR::Quaternion rotq(ang, m_axis);
-	FLIVR::Quaternion q2 = q * rotq;
-	double qx, qy, qz;
-	q2.ToEuler(qx, qy, qz);
+	q.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz);
 	m_view->RefreshGL(50);
 }
 
-void RulerAlign::AlignPca(int axis_type, double val, bool cov)
+void RulerAlign::AlignPca(int axis_type, bool cov)
 {
 	Pca solver;
 	if (cov)
@@ -188,9 +139,7 @@ void RulerAlign::AlignPca(int axis_type, double val, bool cov)
 	double t0_dir = Dot(target0, dir);
 	if (t0_dir < 0.0)
 		ang = -ang;
-	m_ang = ang;
 	//rotate
-	ang += val;
 	FLIVR::Quaternion rotq(ang, source0);
 	rotq.Normalize();
 	FLIVR::Quaternion q2 = q * rotq;
@@ -198,5 +147,4 @@ void RulerAlign::AlignPca(int axis_type, double val, bool cov)
 	q2.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz);
 	m_view->RefreshGL(50);
-	m_rotate_type = 1;
 }

@@ -147,8 +147,6 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
 	//align
 	EVT_BUTTON(ID_AlignBtn, ComponentDlg::OnAlignBtn)
-	EVT_COMMAND_SCROLL(ID_RotateSldr, ComponentDlg::OnRotateChange)
-	EVT_TEXT(ID_RotateText, ComponentDlg::OnRotateText)
 	EVT_MENU(ID_AlignXYZ, ComponentDlg::OnAlignPca)
 	EVT_MENU(ID_AlignYXZ, ComponentDlg::OnAlignPca)
 	EVT_MENU(ID_AlignZXY, ComponentDlg::OnAlignPca)
@@ -927,17 +925,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_btn = new wxButton(page, ID_AlignBtn, "Align with",
 		wxDefaultPosition, wxSize(65, 22));
-	st = new wxStaticText(page, 0, "Rotate");
-	m_rotate_sldr = new wxSlider(page, ID_RotateSldr, 0, 0, 3600,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_rotate_text = new wxTextCtrl(page, ID_RotateText, "0",
-		wxDefaultPosition, wxSize(50, 20));
 	sizer51->Add(5, 5);
 	sizer51->Add(m_align_btn, 0, wxALIGN_CENTER);
-	sizer51->Add(5, 5);
-	sizer51->Add(st, 0, wxALIGN_CENTER);
-	sizer51->Add(m_rotate_sldr, 1, wxEXPAND);
-	sizer51->Add(m_rotate_text, 0, wxALIGN_CENTER);
 	//
 	sizer5->Add(10, 10);
 	sizer5->Add(sizer51, 0, wxEXPAND);
@@ -2807,10 +2796,7 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	}
 	rulerlist.push_back(&ruler);
 	m_aligner.SetRulerList(&rulerlist);
-	wxString str = m_rotate_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_aligner.AlignPca(axis_type, val);
+	m_aligner.AlignPca(axis_type);
 }
 
 void ComponentDlg::OnAlignReset(wxCommandEvent& event)
@@ -2820,26 +2806,6 @@ void ComponentDlg::OnAlignReset(wxCommandEvent& event)
 		m_view->SetRotations(0.0, 0.0, 0.0);
 		m_view->RefreshGL();
 	}
-}
-
-void ComponentDlg::OnRotateChange(wxScrollEvent &event)
-{
-	int ival = event.GetPosition();
-	double val = double(ival) / 10.0;
-	wxString str = wxString::Format("%.1f", val);
-	if (str != m_rotate_text->GetValue())
-		m_rotate_text->SetValue(str);
-}
-
-void ComponentDlg::OnRotateText(wxCommandEvent &event)
-{
-	wxString str = m_rotate_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_rotate_sldr->SetValue(int(val*10.0 + 0.5));
-
-	//rotate
-	m_aligner.Rotate(val);
 }
 
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)

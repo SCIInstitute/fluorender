@@ -158,8 +158,6 @@ public:
 		ID_DistOutputBtn,
 		//align
 		ID_AlignBtn,
-		ID_RotateSldr,
-		ID_RotateText,
 		ID_AlignXYZ,
 		ID_AlignYXZ,
 		ID_AlignZXY,
@@ -425,8 +423,6 @@ private:
 	wxButton* m_dist_output_btn;
 	//align
 	wxButton *m_align_btn;
-	wxSlider *m_rotate_sldr;
-	wxTextCtrl *m_rotate_text;
 
 	//execute
 	wxCheckBox* m_use_sel_chk;
@@ -562,8 +558,6 @@ private:
 	void OnAlignBtn(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
 	void OnAlignReset(wxCommandEvent& event);
-	void OnRotateChange(wxScrollEvent &event);
-	void OnRotateText(wxCommandEvent &event);
 
 	//execute
 	void EnableGenerate();
