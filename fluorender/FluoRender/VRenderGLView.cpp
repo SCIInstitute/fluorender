@@ -10549,7 +10549,6 @@ void VRenderGLView::SetClipMode(int mode)
 			m_q.ToEuler(rx, ry, rz);
 			m_q_cl_zero.FromEuler(rx, -ry, -rz);
 		}
-		//m_q_cl_zero.FromEuler(m_rotx, -m_roty, -m_rotz);
 		m_q_cl = m_q_cl_zero;
 		m_q_cl.ToEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
 		if (m_rotx_cl > 180.0) m_rotx_cl -= 360.0;
