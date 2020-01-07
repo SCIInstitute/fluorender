@@ -53,6 +53,15 @@ void RulerAlign::AlignRuler(int axis_type)
 	case 2:
 		axis = FLIVR::Vector(0.0, 0.0, 1.0);
 		break;
+	case 3:
+		axis = FLIVR::Vector(-1.0, 0.0, 0.0);
+		break;
+	case 4:
+		axis = FLIVR::Vector(0.0, -1.0, 0.0);
+		break;
+	case 5:
+		axis = FLIVR::Vector(0.0, 0.0, -1.0);
+		break;
 	}
 	//ruler vector
 	FLIVR::Vector rv = m_point_list.back() -
@@ -65,6 +74,7 @@ void RulerAlign::AlignRuler(int axis_type)
 	ang = r2d(std::acos(ang));
 	FLIVR::Quaternion q(ang, rotv);
 	double qx, qy, qz;
+	m_view->ResetZeroRotations(qx, qy, qz);
 	q.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz);
 	m_view->RefreshGL(50);
@@ -144,6 +154,7 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	rotq.Normalize();
 	FLIVR::Quaternion q2 = q * rotq;
 	double qx, qy, qz;
+	m_view->ResetZeroRotations(qx, qy, qz);
 	q2.ToEuler(qx, qy, qz);
 	m_view->SetRotations(qx, -qy, -qz);
 	m_view->RefreshGL(50);
