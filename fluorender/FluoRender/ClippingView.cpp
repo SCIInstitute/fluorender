@@ -939,11 +939,7 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 			if (vrv)
 			{
 				vrv->m_glview->m_clip_mask = -1;
-
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
-
+				vrv->m_glview->UpdateClips();
 				vrv->RefreshGL();
 			}
 		}
@@ -1051,9 +1047,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 				else
 					vrv->m_glview->m_clip_mask = 1;
 
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
+				vrv->m_glview->UpdateClips();
 			}
 		}
 	}
@@ -1168,9 +1162,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 				else
 					vrv->m_glview->m_clip_mask = 2;
 
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
+				vrv->m_glview->UpdateClips();
 			}
 		}
 	}
@@ -1279,9 +1271,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 				else
 					vrv->m_glview->m_clip_mask = 4;
 
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
+				vrv->m_glview->UpdateClips();
 			}
 		}
 	}
@@ -1397,9 +1387,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 				else
 					vrv->m_glview->m_clip_mask = 8;
 
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
+				vrv->m_glview->UpdateClips();
 			}
 		}
 	}
@@ -1507,9 +1495,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 				else
 					vrv->m_glview->m_clip_mask = 16;
 
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
+				vrv->m_glview->UpdateClips();
 			}
 		}
 	}
@@ -1625,9 +1611,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 				else
 					vrv->m_glview->m_clip_mask = 32;
 
-				double rotx, roty, rotz;
-				vrv->GetRotations(rotx, roty, rotz);
-				vrv->SetRotations(rotx, roty, rotz);
+				vrv->m_glview->UpdateClips();
 			}
 		}
 	}
