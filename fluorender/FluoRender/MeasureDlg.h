@@ -141,8 +141,6 @@ public:
 		ID_DF_FChk,
 		//align
 		ID_AlignBtn,
-		ID_RotateSldr,
-		ID_RotateText,
 		ID_AlignX,
 		ID_AlignY,
 		ID_AlignZ,
@@ -191,8 +189,6 @@ private:
 	wxCheckBox *m_df_f_chk;
 	//align
 	wxButton *m_align_btn;
-	wxSlider *m_rotate_sldr;
-	wxTextCtrl *m_rotate_text;
 
 	FL::DistCalculator m_calculator;
 	FL::RulerAlign m_aligner;
@@ -228,8 +224,6 @@ private:
 	void OnAlign(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
 	void OnAlignReset(wxCommandEvent& event);
-	void OnRotateChange(wxScrollEvent &event);
-	void OnRotateText(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

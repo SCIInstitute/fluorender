@@ -734,8 +734,6 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_AlignYZX, MeasureDlg::OnAlignPca)
 	EVT_MENU(ID_AlignZYX, MeasureDlg::OnAlignPca)
 	EVT_MENU(ID_AlignReset, MeasureDlg::OnAlignReset)
-	EVT_COMMAND_SCROLL(ID_RotateSldr, MeasureDlg::OnRotateChange)
-	EVT_TEXT(ID_RotateText, MeasureDlg::OnRotateText)
 END_EVENT_TABLE()
 
 MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
@@ -889,17 +887,8 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_btn = new wxButton(this, ID_AlignBtn, "Align with",
 		wxDefaultPosition, wxSize(65, 22));
-	wxStaticText *st = new wxStaticText(this, 0, "Rotate");
-	m_rotate_sldr = new wxSlider(this, ID_RotateSldr, 0, 0, 3600,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_rotate_text = new wxTextCtrl(this, ID_RotateText, "0",
-		wxDefaultPosition, wxSize(50, 20));
 	sizer_21->Add(5, 5);
 	sizer_21->Add(m_align_btn, 0, wxALIGN_CENTER);
-	sizer_21->Add(5, 5);
-	sizer_21->Add(st, 0, wxALIGN_CENTER);
-	sizer_21->Add(m_rotate_sldr, 1, wxEXPAND);
-	sizer_21->Add(m_rotate_text, 0, wxALIGN_CENTER);
 	//
 	sizer_2->Add(10, 10);
 	sizer_2->Add(sizer_21, 0, wxEXPAND);
@@ -1676,10 +1665,7 @@ void MeasureDlg::OnAlign(wxCommandEvent& event)
 		axis_type = 2;
 		break;
 	}
-	wxString str = m_rotate_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_aligner.AlignRuler(axis_type, val);
+	m_aligner.AlignRuler(axis_type);
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
@@ -1719,10 +1705,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	wxString str = m_rotate_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_aligner.AlignPca(axis_type, val);
+	m_aligner.AlignPca(axis_type);
 }
 
 void MeasureDlg::OnAlignReset(wxCommandEvent& event)
@@ -1732,24 +1715,4 @@ void MeasureDlg::OnAlignReset(wxCommandEvent& event)
 		m_view->SetRotations(0.0, 0.0, 0.0);
 		m_view->RefreshGL();
 	}
-}
-
-void MeasureDlg::OnRotateChange(wxScrollEvent &event)
-{
-	int ival = event.GetPosition();
-	double val = double(ival) / 10.0;
-	wxString str = wxString::Format("%.1f", val);
-	if (str != m_rotate_text->GetValue())
-		m_rotate_text->SetValue(str);
-}
-
-void MeasureDlg::OnRotateText(wxCommandEvent &event)
-{
-	wxString str = m_rotate_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_rotate_sldr->SetValue(int(val*10.0 + 0.5));
-
-	//rotate
-	m_aligner.Rotate(val);
 }
