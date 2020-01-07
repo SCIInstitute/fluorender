@@ -157,14 +157,13 @@ public:
 		ID_DistNeighborText,
 		ID_DistOutputBtn,
 		//align
-		ID_AlignBtn,
+		ID_AlignCenter,
 		ID_AlignXYZ,
 		ID_AlignYXZ,
 		ID_AlignZXY,
 		ID_AlignXZY,
 		ID_AlignYZX,
 		ID_AlignZYX,
-		ID_AlignReset,
 
 		//execute
 		ID_Notebook,
@@ -422,7 +421,13 @@ private:
 	wxTextCtrl* m_dist_neighbor_text;
 	wxButton* m_dist_output_btn;
 	//align
-	wxButton *m_align_btn;
+	wxCheckBox* m_align_center;
+	wxButton* m_align_xyz;
+	wxButton* m_align_yxz;
+	wxButton* m_align_zxy;
+	wxButton* m_align_xzy;
+	wxButton* m_align_yzx;
+	wxButton* m_align_zyx;
 
 	//execute
 	wxCheckBox* m_use_sel_chk;
@@ -442,6 +447,7 @@ private:
 private:
 	void Cluster();
 	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
+	void AlignCenter(FL::Ruler* ruler);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);
@@ -555,9 +561,7 @@ private:
 	void OnDistNeighborText(wxCommandEvent &event);
 	void OnDistOutput(wxCommandEvent &event);
 	//align
-	void OnAlignBtn(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
-	void OnAlignReset(wxCommandEvent& event);
 
 	//execute
 	void EnableGenerate();

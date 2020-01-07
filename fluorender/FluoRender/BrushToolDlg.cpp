@@ -379,7 +379,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 
 	//alignment
 	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Alignment"), wxVERTICAL);
+		new wxStaticBox(this, wxID_ANY, "Align Render View to Selection"), wxVERTICAL);
 	wxBoxSizer* sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center = new wxCheckBox(this, ID_AlignCenter,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
