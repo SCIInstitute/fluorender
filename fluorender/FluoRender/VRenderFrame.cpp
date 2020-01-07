@@ -3190,6 +3190,9 @@ void VRenderFrame::SaveProject(wxString& filename)
 			vrv->GetRotations(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("rotation", str);
+			FLIVR::Quaternion q = vrv->m_glview->GetRotations();
+			str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
+			fconfig.Write("zero_quat", str);
 			vrv->GetCenters(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("center", str);
@@ -4197,7 +4200,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			//properties
 			if (fconfig.Exists(wxString::Format("/views/%d/properties", i)))
 			{
-				float x, y, z;
+				float x, y, z, w;
 				fconfig.SetPath(wxString::Format("/views/%d/properties", i));
 				bool draw;
 				if (fconfig.Read("drawall", &draw))
@@ -4268,6 +4271,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 						vrv->SetRotations(x, y, z);
+				}
+				if (fconfig.Read("zero_quat", &str))
+				{
+					if (SSCANF(str.c_str(), "%f%f%f%f", &x, &y, &z, &w))
+						vrv->m_glview->SetZeroQuat(x, y, z, w);
 				}
 				if (fconfig.Read("center", &str))
 				{

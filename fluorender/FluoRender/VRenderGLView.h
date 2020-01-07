@@ -218,6 +218,10 @@ public:
 	{
 		return m_q;
 	}
+	void SetZeroQuat(double x, double y, double z, double w)
+	{
+		m_q = FLIVR::Quaternion(x, y, z, w);
+	}
 	void GetRotations(double &rotx, double &roty, double &rotz)
 	{
 		rotx = m_rotx;
