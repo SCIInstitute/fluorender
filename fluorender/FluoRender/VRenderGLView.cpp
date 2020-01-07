@@ -5448,10 +5448,11 @@ void VRenderGLView::SetParams(double t)
 	Quaternion q;
 	if (interpolator->GetQuaternion(keycode, t, q))
 	{
-		//double rotx, roty, rotz;
-		//q.ToEuler(rotx, roty, rotz);
-		//SetRotations(rotx, roty, rotz, true);
 		m_q = q;
+		q *= -m_zq;
+		double rotx, roty, rotz;
+		q.ToEuler(rotx, roty, rotz);
+		SetRotations(rotx, roty, rotz, true);
 	}
 	//intermixing mode
 	keycode.l2_name = "volmethod";
