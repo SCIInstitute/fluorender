@@ -1144,19 +1144,21 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 		if (vd && vd->GetTexture())
 		{
 			FL::Cov cover(vd);
-			cover.Compute();
-			std::vector<double> cov = cover.GetCov();
-			FLIVR::Point center = cover.GetCenter();
-			m_aligner.SetCovMat(cov);
-			m_aligner.AlignPca(axis_type, false);
-			if (m_align_center->GetValue())
+			if (cover.Compute())
 			{
-				double tx, ty, tz;
-				m_cur_view->GetObjCenters(tx, ty, tz);
-				m_cur_view->SetObjTrans(
-					tx - center.x(),
-					center.y() - ty,
-					center.z() - tz);
+				std::vector<double> cov = cover.GetCov();
+				FLIVR::Point center = cover.GetCenter();
+				m_aligner.SetCovMat(cov);
+				m_aligner.AlignPca(axis_type, false);
+				if (m_align_center->GetValue())
+				{
+					double tx, ty, tz;
+					m_cur_view->GetObjCenters(tx, ty, tz);
+					m_cur_view->SetObjTrans(
+						tx - center.x(),
+						center.y() - ty,
+						center.z() - tz);
+				}
 			}
 		}
 	}

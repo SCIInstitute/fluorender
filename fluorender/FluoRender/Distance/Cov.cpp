@@ -200,18 +200,18 @@ long Cov::OptimizeGroupSize(long nt, long target)
 	return target;
 }
 
-void Cov::Compute()
+bool Cov::Compute()
 {
 	if (!CheckBricks())
-		return;
+		return false;
 	if (!m_vd->GetMask(false))
-		return;
+		return false;
 
 	//create program and kernels
 	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_cov);
 	if (!kernel_prog)
-		return;
+		return false;
 	int kernel_index0 = -1;
 	int kernel_index1 = -1;
 	string name0 = "kernel_0";
@@ -317,12 +317,12 @@ void Cov::Compute()
 		//release buffer
 		kernel_prog->releaseAll();
 	}
-	if (sum)
-	{
-		m_center[0] /= sum;
-		m_center[1] /= sum;
-		m_center[2] /= sum;
-	}
+
+	if (!sum)
+		return false;
+	m_center[0] /= sum;
+	m_center[1] /= sum;
+	m_center[2] /= sum;
 
 	//get cov
 	for (size_t i = 0; i < brick_num; ++i)
@@ -422,5 +422,7 @@ void Cov::Compute()
 	m_cov[3] *= spcy * spcy;
 	m_cov[4] *= spcy * spcz;
 	m_cov[5] *= spcz * spcz;
+
+	return true;
 }
 
