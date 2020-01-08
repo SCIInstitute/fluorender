@@ -10345,18 +10345,33 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	a = Vector(q_a2.x, q_a2.y, q_a2.z);
 	a.normalize();
 
-	q = Quaternion(phi, a);
-	q.Normalize();
-
 	if (m_rot_lock)
 	{
-		double rotx, roty, rotz;
-		q.ToEuler(rotx, roty, rotz);
-		rotx = int(rotx / 45.0)*45.0;
-		roty = int(roty / 45.0)*45.0;
-		rotz = int(rotz / 45.0)*45.0;
-		q.FromEuler(rotx, roty, rotz);
+		//snap to closest basis component
+		double maxv = std::max(std::fabs(a.x()),
+			std::max(std::fabs(a.y()), std::fabs(a.z())));
+		if (maxv == a.x())
+			a = Vector(1, 0, 0);
+		else if (maxv == -a.x())
+			a = Vector(-1, 0, 0);
+		else if (maxv == a.y())
+			a = Vector(0, 1, 0);
+		else if (maxv == -a.y())
+			a = Vector(0, -1, 0);
+		else if (maxv == a.z())
+			a = Vector(0, 0, 1);
+		else if (maxv == -a.z())
+			a = Vector(0, 0, -1);
+		Quaternion aq(a);
+		aq = (-m_zq) * aq * m_zq;
+		a = Vector(aq.x, aq.y, aq.z);
+		a.normalize();
+		//snap to 45 deg
+		phi = int(phi / 45.0) * 45.0;
 	}
+
+	q = Quaternion(phi, a);
+	q.Normalize();
 
 	return q;
 }
@@ -10481,8 +10496,8 @@ void VRenderGLView::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
-
-	m_q.ToEuler(m_rotx, m_roty, m_rotz);
+	Quaternion q = m_q * (-m_zq);
+	q.ToEuler(m_rotx, m_roty, m_rotz);
 
 	if (m_roty > 360.0)
 		m_roty -= 360.0;
@@ -10507,7 +10522,6 @@ void VRenderGLView::A2Q()
 	//SetSortBricks();
 
 	m_q.FromEuler(m_rotx, m_roty, m_rotz);
-
 	m_q = m_q * m_zq;
 
 	if (m_clip_mode)

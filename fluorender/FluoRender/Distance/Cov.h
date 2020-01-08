@@ -54,7 +54,7 @@ namespace FL
 			return m_use_mask;
 		}
 
-		void Compute();
+		bool Compute();
 
 		std::vector<double> GetCov()
 		{
