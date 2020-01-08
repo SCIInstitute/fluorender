@@ -2218,21 +2218,27 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 	wxString str;
 	if (m_rot_slider)
 	{
-		double rotx, roty, rotz;
+		double rotx, roty, rotz, deg;
 		m_glview->GetRotations(rotx, roty, rotz);
 		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK )
 			m_x_rotating = true;
 		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE  )
 			m_x_rotating = false;
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
-			str = wxString::Format("%.1f", lock?(rotx + 45):(rotx + 1));
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
+		{
+			deg = lock ? (rotx + 45) : (rotx + 1);
+			deg = deg > 360.0 ? deg - 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
 			if (str != m_x_rot_text->GetValue())
 			{
 				m_x_rot_text->SetValue(str);
 				m_skip_thumb = true;
 			}
-		} else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
-			str = wxString::Format("%.1f", lock?(rotx - 45):(rotx - 1));
+		} else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
+		{
+			deg = lock ? (rotx - 45) : (rotx - 1);
+			deg = deg < 0.0 ? deg + 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
 			if (str != m_x_rot_text->GetValue())
 			{
 				m_x_rot_text->SetValue(str);
@@ -2265,22 +2271,28 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 	wxString str;
 	if (m_rot_slider)
 	{
-		double rotx, roty, rotz;
+		double rotx, roty, rotz, deg;
 		m_glview->GetRotations(rotx, roty, rotz);
 		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
 			m_y_rotating = true;
 		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
 			m_y_rotating = false;
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
-			str = wxString::Format("%.1f", lock ? (roty + 45) : (roty + 1));
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
+		{
+			deg = lock ? (roty + 45) : (roty + 1);
+			deg = deg > 360.0 ? deg - 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
 			if (str != m_y_rot_text->GetValue())
 			{
 				m_y_rot_text->SetValue(str);
 				m_skip_thumb = true;
 			}
 		}
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
-			str = wxString::Format("%.1f", lock ? (roty - 45) : (roty - 1));
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
+		{
+			deg = lock ? (roty - 45) : (roty - 1);
+			deg = deg < 0.0 ? deg + 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
 			if (str != m_y_rot_text->GetValue())
 			{
 				m_y_rot_text->SetValue(str);
@@ -2313,22 +2325,28 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 	wxString str;
 	if (m_rot_slider)
 	{
-		double rotx, roty, rotz;
+		double rotx, roty, rotz, deg;
 		m_glview->GetRotations(rotx, roty, rotz);
 		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
 			m_z_rotating = true;
 		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
 			m_z_rotating = false;
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN) {
-			str = wxString::Format("%.1f", lock ? (rotz + 45) : (rotz + 1));
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
+		{
+			deg = lock ? (rotz + 45) : (rotz + 1);
+			deg = deg > 360.0 ? deg - 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
 			if (str != m_z_rot_text->GetValue())
 			{
 				m_z_rot_text->SetValue(str);
 				m_skip_thumb = true;
 			}
 		}
-		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP) {
-			str = wxString::Format("%.1f", lock ? (rotz - 45) : (rotz - 1));
+		else if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
+		{
+			deg = lock ? (rotz - 45) : (rotz - 1);
+			deg = deg < 0.0 ? deg + 360.0 : deg;
+			str = wxString::Format("%.1f", deg);
 			if (str != m_z_rot_text->GetValue())
 			{
 				m_z_rot_text->SetValue(str);
