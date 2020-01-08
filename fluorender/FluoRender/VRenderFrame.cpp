@@ -3190,7 +3190,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			vrv->GetRotations(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("rotation", str);
-			FLIVR::Quaternion q = vrv->m_glview->GetRotations();
+			FLIVR::Quaternion q = vrv->m_glview->GetZeroQuat();
 			str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
 			fconfig.Write("zero_quat", str);
 			vrv->GetCenters(x, y, z);
