@@ -214,13 +214,17 @@ public:
 		m_transx = transx; m_transy = transy; m_transz = transz;
 		m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
 	}
-	FLIVR::Quaternion GetRotations()
+	FLIVR::Quaternion GetZeroQuat()
 	{
-		return m_q;
+		return m_zq;
 	}
 	void SetZeroQuat(double x, double y, double z, double w)
 	{
-		m_q = FLIVR::Quaternion(x, y, z, w);
+		m_zq = FLIVR::Quaternion(x, y, z, w);
+	}
+	FLIVR::Quaternion GetRotations()
+	{
+		return m_q;
 	}
 	void GetRotations(double &rotx, double &roty, double &rotz)
 	{
