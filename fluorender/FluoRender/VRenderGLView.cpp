@@ -10350,18 +10350,12 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 		//snap to closest basis component
 		double maxv = std::max(std::fabs(a.x()),
 			std::max(std::fabs(a.y()), std::fabs(a.z())));
-		if (maxv == a.x())
-			a = Vector(1, 0, 0);
-		else if (maxv == -a.x())
-			a = Vector(-1, 0, 0);
-		else if (maxv == a.y())
-			a = Vector(0, 1, 0);
-		else if (maxv == -a.y())
-			a = Vector(0, -1, 0);
-		else if (maxv == a.z())
-			a = Vector(0, 0, 1);
-		else if (maxv == -a.z())
-			a = Vector(0, 0, -1);
+		if (std::fabs(maxv - std::fabs(a.x())) < EPS)
+			a = Vector(a.x() < 0?-1:1, 0, 0);
+		else if (std::fabs(maxv - std::fabs(a.y())) < EPS)
+			a = Vector(0, a.y() < 0?-1:1, 0);
+		else if (std::fabs(maxv - std::fabs(a.z())) < EPS)
+			a = Vector(0, 0, a.z() < 0?-1:1);
 		Quaternion aq(a);
 		aq = (-m_zq) * aq * m_zq;
 		a = Vector(aq.x, aq.y, aq.z);
