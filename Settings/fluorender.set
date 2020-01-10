@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=24.3
+ver_minor=25
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -71,11 +71,11 @@ try_split=0
 contact_factor=0.6
 similarity=0.5
 [memory\ settings]
-mem\ swap=0
-graphics\ mem=11000
+mem\ swap=1
+graphics\ mem=6000
 large\ data\ size=2000
 force\ brick\ size=256
-up\ time=200
+up\ time=100
 detail\ level\ offset=0
 [update\ order]
 value=0
