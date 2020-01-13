@@ -57,11 +57,33 @@ set(HEADER_FILES
     CustomWidgets/fluoSpinbox.hpp
     CustomWidgets/fluoSpinboxDouble.hpp
     CustomWidgets/fluoToolButton.hpp
+    CustomWidgets/fluoLine.hpp
+    CustomWidgets/fluoColoredLine.hpp
     Panels/Properties/propertiesPanel.hpp
     Panels/Properties/volumePropertiesOptions.hpp
     Panels/Properties/meshPropertiesOptions.hpp
     Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
+    Panels/Output_Adjustments/outputAdjust.hpp
+    Panels/Output_Adjustments/outputLayout.hpp
+    Panels/Clipping_Planes/clippingPlane.hpp
+    Panels/Clipping_Planes/clippingLayout.hpp
+    Panels/Datasets/datasetsPanel.hpp
+    Panels/Datasets/datasetsToolbarLayout.hpp
+    Panels/Datasets/datasetsTreeLayout.hpp
+    Panels/Workspace/workspaceTreeLayout.hpp
+    Panels/Workspace/workspaceToolLayout.hpp
+    Panels/Workspace/workspacePanel.hpp
+    Panels/Clipping_Planes/clippingPlane.hpp
+    Panels/Clipping_Planes/clippingLayout.hpp
+    Panels/Record_Export/recordExport.hpp
+		Panels/Record_Export/recordTabLayout.hpp
+		Panels/Record_Export/recordPlayLayout.hpp
+    Panels/Record_Export/Pages/basicPage.hpp
+    Panels/Record_Export/Pages/advancedPage.hpp
+    Panels/Record_Export/Pages/autoKeyPage.hpp
+    Panels/Record_Export/Pages/croppingPage.hpp
+    Panels/Record_Export/Pages/4DScriptPage.hpp
   )
   
 set(SOURCES
@@ -81,6 +103,19 @@ set(SOURCES
     Panels/Properties/meshPropertiesOptions.cpp
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
+    Panels/Output_Adjustments/outputLayout.cpp
+    Panels/Workspace/workspaceTreeLayout.cpp
+    Panels/Workspace/workspaceToolLayout.cpp
+    Panels/Datasets/datasetsToolbarLayout.cpp
+    Panels/Datasets/datasetsTreeLayout.cpp
+    Panels/Record_Export/recordExport.cpp
+		Panels/Record_Export/recordTabLayout.cpp
+		Panels/Record_Export/recordPlayLayout.cpp
+    Panels/Record_Export/Pages/basicPage.cpp
+    Panels/Record_Export/Pages/advancedPage.cpp
+    Panels/Record_Export/Pages/autoKeyPage.cpp
+    Panels/Record_Export/Pages/croppingPage.cpp
+    Panels/Record_Export/Pages/4DScriptPage.cpp
   )
   
 set(UI_FILES

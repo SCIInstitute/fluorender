@@ -10,6 +10,9 @@
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoToolButton.hpp>
 
+#include <vector>
+#include <functional>
+
 class MeshPropertiesOptions : public QGridLayout
 {
   Q_OBJECT
@@ -23,6 +26,8 @@ class MeshPropertiesOptions : public QGridLayout
     void addRow1();
     void addRow2();
     void addRow3();
+
+    void constructLayout();
 
     FluoSlider* transparencySlider = new FluoSlider(Qt::Horizontal,0,100);
     FluoSlider* shadowSlider       = new FluoSlider(Qt::Horizontal,0,100);
@@ -42,6 +47,13 @@ class MeshPropertiesOptions : public QGridLayout
     QCheckBox* shadowCheckbox    = new QCheckBox();
     QCheckBox* lightingCheckbox  = new QCheckBox();
     QCheckBox* sizeLimitCheckbox = new QCheckBox();
+
+    const std::vector<std::function<void()>> rowFuncs = {
+      std::bind(&MeshPropertiesOptions::addRow0,this),
+      std::bind(&MeshPropertiesOptions::addRow1,this),
+      std::bind(&MeshPropertiesOptions::addRow2,this),
+      std::bind(&MeshPropertiesOptions::addRow3,this),
+    };
 };
 
 #endif

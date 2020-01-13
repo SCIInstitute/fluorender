@@ -82,3 +82,9 @@ Java is required, so simply download the latest [Java JDK Release](https://www.o
 OpenCL and OpenGL should already be installed. However, it is possible that OpenGL will need to be manually installed via developer tools accompanied by your GPU. If the developer is given an error that OpenGL could not be found. Simply download the latest [OpenGL Drivers for NVIDIA](https://developer.nvidia.com/opengl-driver).
 
 Once all the required programs are install. Open up QT Creator and open the CMakeLists.txt file and build the program.
+
+Known issues with VS: 
+
+`cl is not a full path` this issue appears when CMake cannot find cl.exe that comes with Visual Studio installation. One possible solution is to add cl.exe to your path. Which can generally be found in your VS install folder, typically in Program Files(x86). The install version, VC, and then inside of the bin. An example: `C:\Program Files(x86)\Microsoft Visual Studio 14.0\VC\bin\cl.exe`.
+
+If that does not work try reinstalling Qt and see if it automatically picks up the compiler.  

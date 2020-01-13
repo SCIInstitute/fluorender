@@ -12,6 +12,9 @@
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 
+#include <vector>
+#include <functional>
+
 
 class VolumePropertiesMisc : public QGridLayout
 {
@@ -28,6 +31,8 @@ class VolumePropertiesMisc : public QGridLayout
     void addRow3();
     void addRow4();
     void addRow5();
+
+    void constructLayout();
 
     QWidget* genToolWidget();
     QComboBox* genComboBox(const QStringList& list);
@@ -96,7 +101,14 @@ class VolumePropertiesMisc : public QGridLayout
     QComboBox *effectsList1 = genComboBox(EFFECTS1_LIST);
     QComboBox *effectsList2 = genComboBox(EFFECTS2_LIST);
 
-
+    const std::vector<std::function<void()>> rowFuncs = {
+      std::bind(&VolumePropertiesMisc::addRow0,this),
+      std::bind(&VolumePropertiesMisc::addRow1,this),
+      std::bind(&VolumePropertiesMisc::addRow2,this),
+      std::bind(&VolumePropertiesMisc::addRow3,this),
+      std::bind(&VolumePropertiesMisc::addRow4,this),
+      std::bind(&VolumePropertiesMisc::addRow5,this),
+    };
 };
 
 

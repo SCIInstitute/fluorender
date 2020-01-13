@@ -28,6 +28,13 @@
 
 # I believe this sets where the superbuild folder will be build and set
 # does not seem to work sometimes
+
+#TODO: Edit the glew file to download from another repo like Teem. It seems that 
+#      sometimes glew will cause an error where it cannot link with glew.lib because
+#      it cannot be built. Commenting out two lines seems to do the trick.
+#      See this link: https://github.com/nigels-com/glew/issues/99
+#      Comment out lines 98 and 103.
+
 SET( Source_DEPENDENCIES )
 SET(ep_base "${CMAKE_BINARY_DIR}/Superbuild" CACHE INTERNAL "")
 
