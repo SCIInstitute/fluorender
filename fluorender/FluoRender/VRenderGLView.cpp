@@ -10329,17 +10329,18 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 		return q;
 	}
 
-	if (m_rot_lock)
-	{
-		if (abs(dx)<50 &&
-			abs(dy)<50)
-			return q;
-	}
-
 	a = Vector(-dy, dx, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
 
+	if (m_rot_lock && phi < 45.0)
+	{
+		/* Zero rotation */
+		return q;
+	}
+
+	Quaternion aq(a);
+	aq = (-m_q) * aq * m_q;
 	if (m_rot_lock)
 	{
 		//snap to closest basis component
@@ -10351,8 +10352,7 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 			a = Vector(0, a.y() < 0?-1:1, 0);
 		else if (std::fabs(maxv - std::fabs(a.z())) < EPS)
 			a = Vector(0, 0, a.z() < 0?-1:1);
-		Quaternion aq(a);
-		aq = (-m_q) * aq * m_q;
+		aq = Quaternion(a);
 		aq = (-m_zq) * aq * m_zq;
 		a = Vector(aq.x, aq.y, aq.z);
 		a.normalize();
@@ -10362,9 +10362,7 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	else
 	{
 		//rotate back to local
-		Quaternion aq(a);
-		Quaternion aq2 = (-m_q) * aq * m_q;
-		a = Vector(aq2.x, aq2.y, aq2.z);
+		a = Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 	}
 
