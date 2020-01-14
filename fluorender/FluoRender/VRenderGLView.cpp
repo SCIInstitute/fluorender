@@ -10339,11 +10339,6 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	a = Vector(-dy, dx, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
-	Quaternion q_a(a);
-	//rotate back to local
-	Quaternion q_a2 = (-m_q) * q_a * m_q;
-	a = Vector(q_a2.x, q_a2.y, q_a2.z);
-	a.normalize();
 
 	if (m_rot_lock)
 	{
@@ -10357,11 +10352,20 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 		else if (std::fabs(maxv - std::fabs(a.z())) < EPS)
 			a = Vector(0, 0, a.z() < 0?-1:1);
 		Quaternion aq(a);
+		aq = (-m_q) * aq * m_q;
 		aq = (-m_zq) * aq * m_zq;
 		a = Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 		//snap to 45 deg
 		phi = int(phi / 45.0) * 45.0;
+	}
+	else
+	{
+		//rotate back to local
+		Quaternion aq(a);
+		Quaternion aq2 = (-m_q) * aq * m_q;
+		a = Vector(aq2.x, aq2.y, aq2.z);
+		a.normalize();
 	}
 
 	q = Quaternion(phi, a);
