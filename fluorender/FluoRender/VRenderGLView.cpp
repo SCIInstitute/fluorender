@@ -10339,6 +10339,7 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 		return q;
 	}
 
+	//rotate back to local
 	Quaternion aq(a);
 	aq = (-m_q) * aq * m_q;
 	if (m_rot_lock)
@@ -10361,7 +10362,6 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	}
 	else
 	{
-		//rotate back to local
 		a = Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 	}
