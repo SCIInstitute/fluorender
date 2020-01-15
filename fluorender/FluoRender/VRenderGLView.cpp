@@ -10339,11 +10339,15 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 		return q;
 	}
 
-	//rotate back to local
-	Quaternion aq(a);
-	aq = (-m_q) * aq * m_q;
 	if (m_rot_lock)
 	{
+		Quaternion aq(a);
+		if (m_zq.AlmostEqual(Quaternion()))
+		{
+			aq = (-m_q) * aq * m_q;
+			a = Vector(aq.x, aq.y, aq.z);
+			a.normalize();
+		}
 		//snap to closest basis component
 		double maxv = std::max(std::fabs(a.x()),
 			std::max(std::fabs(a.y()), std::fabs(a.z())));
@@ -10362,6 +10366,9 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	}
 	else
 	{
+		//rotate back to local
+		Quaternion aq(a);
+		aq = (-m_q) * aq * m_q;
 		a = Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 	}
