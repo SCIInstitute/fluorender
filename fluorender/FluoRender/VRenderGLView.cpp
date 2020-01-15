@@ -852,14 +852,7 @@ void VRenderGLView::Draw()
 	if (m_draw_all)
 	{
 		glm::mat4 mv_temp = m_mv_mat;
-		//translate object
-		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		m_mv_mat = GetDrawMat();
 
 		if (m_use_fog)
 			CalcFogRange();
@@ -927,14 +920,7 @@ void VRenderGLView::DrawDP()
 	if (m_draw_all)
 	{
 		glm::mat4 mv_temp = m_mv_mat;
-		//translate object
-		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		m_mv_mat = GetDrawMat();
 
 		bool use_fog_save = m_use_fog;
 		if (m_use_fog)
@@ -2089,15 +2075,7 @@ void VRenderGLView::Segment()
 
 	glViewport(0, 0, vp[2], vp[3]);
 	HandleCamera();
-
-	//translate object
-	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-	m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-	m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-	//center object
-	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+	m_mv_mat = GetDrawMat();
 
 	Framebuffer* paint_buffer =
 		TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
@@ -4408,14 +4386,7 @@ void VRenderGLView::PickMesh()
 	HandleCamera();
 	//obj
 	glm::mat4 mv_temp = m_mv_mat;
-	//translate object
-	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-	m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-	m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-	//center object
-	m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+	m_mv_mat = GetDrawMat();
 
 	//set up fbo
 	m_cur_framebuffer = 0;
@@ -9311,6 +9282,8 @@ void VRenderGLView::DrawCamCtr()
 		len = m_distance*tan(d2r(m_aov / 2.0))*m_camctr_size / 10.0;
 	else
 		len = fabs(m_camctr_size);
+	if (m_pin_rot_center)
+		len /= 10.0;
 	va_jack->set_param(0, len);
 
 	glDisable(GL_DEPTH_TEST);
@@ -10344,7 +10317,7 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	aq = (-m_q) * aq * m_q;
 	if (m_rot_lock)
 	{
-		//rotate back to ortho
+		//rotate back to basis
 		aq = (m_zq)* aq * (-m_zq);
 		a = Vector(aq.x, aq.y, aq.z);
 		a.normalize();
@@ -10655,14 +10628,7 @@ void VRenderGLView::StartLoopUpdate()
 		//Transformation
 		HandleCamera(true);
 		glm::mat4 mv_temp = m_mv_mat;
-		//translate object
-		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		m_mv_mat = glm::rotate(m_mv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		m_mv_mat = glm::translate(m_mv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		m_mv_mat = GetDrawMat();
 
 		PopVolumeList();
 		int total_num = 0;
@@ -11115,16 +11081,7 @@ double VRenderGLView::GetPointVolume(Point& mp, Point &ip, double mx, double my,
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
-	glm::mat4 mv_temp;
-	//translate object
-	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-	//center object
-	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-
+	glm::mat4 mv_temp = GetInvtMat();
 	Transform mv;
 	Transform p;
 	mv.set(glm::value_ptr(mv_temp));
@@ -11328,7 +11285,7 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 
 	Transform mv;
 	Transform p;
-	glm::mat4 mv_temp = m_mv_mat;
+	glm::mat4 mv_temp;
 	Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
@@ -11339,14 +11296,7 @@ double VRenderGLView::GetPointVolumeBox(Point &mp, double mx, double my, VolumeD
 		HandleProjection(nx, ny);
 		//Transformation
 		HandleCamera();
-		//translate object
-		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		//center object
-		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		mv_temp = GetObjectMat();
 	}
 	else
 		mv_temp = m_mv_mat;
@@ -11437,15 +11387,7 @@ double VRenderGLView::GetPointVolumeBox2(Point &p1, Point &p2, double mx, double
 	HandleProjection(nx, ny);
 	//Transformation
 	HandleCamera();
-	glm::mat4 mv_temp;
-	//translate object
-	mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-	//rotate object
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-	mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-	//center object
-	mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+	glm::mat4 mv_temp = GetObjectMat();
 	Transform *tform = m_cur_vol->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
@@ -11544,14 +11486,7 @@ double VRenderGLView::GetPointPlane(Point &mp, double mx, double my, Point* plan
 		HandleProjection(nx, ny);
 		//Transformation
 		HandleCamera();
-		//translate object
-		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		//center object
-		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		mv_temp = GetObjectMat();
 	}
 	else
 		mv_temp = m_mv_mat;
@@ -13348,16 +13283,7 @@ void VRenderGLView::CalcFrame()
 		//Transformation
 		HandleCamera();
 
-		glm::mat4 mv_temp;
-		//translate object
-		mv_temp = glm::translate(m_mv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_roty )), glm::vec3(0.0, 1.0, 0.0));
-		mv_temp = glm::rotate(mv_temp, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		mv_temp = glm::translate(mv_temp, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-
+		glm::mat4 mv_temp = GetDrawMat();
 		Transform mv;
 		Transform pr;
 		mv.set(glm::value_ptr(mv_temp));

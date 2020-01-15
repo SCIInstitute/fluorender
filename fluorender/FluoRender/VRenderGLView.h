@@ -639,6 +639,19 @@ public:
 		drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 		return drw_mat;
 	}
+	glm::mat4 GetInvtMat()
+	{
+		glm::mat4 inv_mat = m_mv_mat;
+		//translate object
+		inv_mat = glm::translate(inv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		inv_mat = glm::translate(inv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		return inv_mat;
+	}
 
 	void UpdateClips();
 
