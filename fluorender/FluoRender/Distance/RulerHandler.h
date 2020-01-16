@@ -30,12 +30,15 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerHandler_H_
 
 #include <Distance/Ruler.h>
+#include <string>
 
 class VRenderGLView;
 class wxFileConfig;
+class VolumeData;
 
 namespace FL
 {
+	class ComponentAnalyzer;
 	class RulerHandler
 	{
 	public:
@@ -45,6 +48,16 @@ namespace FL
 		void SetView(VRenderGLView* view)
 		{
 			m_view = view;
+		}
+
+		void SetVolumeData(VolumeData* vd)
+		{
+			m_vd = vd;
+		}
+
+		void SetCompAnalyzer(ComponentAnalyzer* ca)
+		{
+			m_ca = ca;
 		}
 
 		void SetRuler(FL::Ruler* ruler)
@@ -101,8 +114,13 @@ namespace FL
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
 
+		int Profile(int index);
+		int Distance(int index, std::string filename);
+
 	private:
 		VRenderGLView *m_view;
+		VolumeData * m_vd;
+		ComponentAnalyzer* m_ca;
 		Ruler *m_ruler;
 		RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;

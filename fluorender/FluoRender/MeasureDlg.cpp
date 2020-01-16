@@ -1363,12 +1363,13 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
+		m_rhdl->SetVolumeData(m_view->m_glview->m_cur_vol);
 		std::vector<int> sel;
 		if (m_rulerlist->GetCurrSelection(sel))
 		{
 			//export selected
 			for (size_t i = 0; i < sel.size(); ++i)
-				m_view->RulerProfile(sel[i]);
+				m_rhdl->Profile(sel[i]);
 		}
 		else
 		{
@@ -1377,7 +1378,7 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 			for (size_t i = 0; i < ruler_list->size(); ++i)
 			{
 				if ((*ruler_list)[i]->GetDisp())
-					m_view->RulerProfile(i);
+					m_rhdl->Profile(i);
 			}
 		}
 	}
@@ -1385,25 +1386,55 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 
 void MeasureDlg::OnDistance(wxCommandEvent& event)
 {
-	if (m_view)
+	if (!m_view)
+		return;
+
+	FL::ComponentAnalyzer* analyzer =
+		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
+	if (!analyzer)
+		return;
+	m_rhdl->SetCompAnalyzer(analyzer);
+
+	std::string filename;
+	wxFileDialog *fopendlg = new wxFileDialog(
+		this, "Save Analysis Data", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg->ShowModal();
+	if (rval == wxID_OK)
 	{
-		std::vector<int> sel;
-		if (m_rulerlist->GetCurrSelection(sel))
+		wxString wxtr = fopendlg->GetPath();
+		filename = wxtr.ToStdString();
+		//remove suffix
+		filename = filename.substr(0, filename.find_last_of('.'));
+	}
+
+	std::vector<int> sel;
+	std::string fi;
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		//export selected
+		for (size_t i = 0; i < sel.size(); ++i)
 		{
-			//export selected
-			for (size_t i = 0; i < sel.size(); ++i)
-				m_view->RulerDistance(sel[i]);
+			fi = filename + std::to_string(i) + ".txt";
+			m_rhdl->Distance(sel[i], fi);
 		}
-		else
+	}
+	else
+	{
+		FL::RulerList* ruler_list = m_view->GetRulerList();
+		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			FL::RulerList* ruler_list = m_view->GetRulerList();
-			for (size_t i = 0; i < ruler_list->size(); ++i)
+			if ((*ruler_list)[i]->GetDisp())
 			{
-				if ((*ruler_list)[i]->GetDisp())
-					m_view->RulerDistance(i);
+				fi = filename + std::to_string(i) + ".txt";
+				m_rhdl->Distance(i, fi);
 			}
 		}
 	}
+
+	if (fopendlg)
+		delete fopendlg;
 }
 
 void MeasureDlg::OnProject(wxCommandEvent& event)

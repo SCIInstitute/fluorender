@@ -28,13 +28,19 @@ DEALINGS IN THE SOFTWARE.
 
 #include "RulerHandler.h"
 #include "VRenderGLView.h"
+#include <FLIVR/Texture.h>
+#include <DataManager.h>
+#include <Components/CompAnalyzer.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
 
 using namespace FL;
 
 RulerHandler::RulerHandler() :
 	m_view(0),
+	m_vd(0),
+	m_ca(0),
 	m_ruler(0),
 	m_ruler_list(0),
 	m_point(0),
@@ -548,3 +554,231 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 		}
 	}
 }
+
+int RulerHandler::Profile(int index)
+{
+	if (!m_view || !m_vd || !m_ruler_list)
+		return 0;
+	if (index < 0 ||
+		index >= m_ruler_list->size())
+		return 0;
+
+	FL::Ruler* ruler = (*m_ruler_list)[index];
+	if (ruler->GetNumPoint() < 1)
+		return 0;
+
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	int nx, ny, nz;
+	m_vd->GetResolution(nx, ny, nz);
+	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
+		nx <= 0 || ny <= 0 || nz <= 0)
+		return 0;
+	//get data
+	m_vd->GetVR()->return_mask();
+	FLIVR::Texture* tex = m_vd->GetTexture();
+	if (!tex) return 0;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data) return 0;
+	void* data = nrrd_data->data;
+	if (!data) return 0;
+	//mask
+	Nrrd* nrrd_mask = tex->get_nrrd(tex->nmask());
+	void* mask = 0;
+	if (nrrd_mask)
+		mask = nrrd_mask->data;
+	double scale = m_vd->GetScalarScale();
+
+	if (ruler->GetRulerType() == 3 && mask)
+	{
+		if (ruler->GetNumPoint() < 1)
+			return 0;
+		FLIVR::Point p1, p2;
+		p1 = ruler->GetPoint(0)->GetPoint();
+		p2 = ruler->GetPoint(1)->GetPoint();
+		//object space
+		p1 = FLIVR::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
+		p2 = FLIVR::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+		FLIVR::Vector dir = p2 - p1;
+		double dist = dir.length();
+		if (dist < EPS)
+			return 0;
+		dir.normalize();
+
+		//bin number
+		int bins = int(dist / 1 + 0.5);
+		if (bins <= 0) return 0;
+		double bin_dist = dist / bins;
+		std::vector<FL::ProfileBin>* profile = ruler->GetProfile();
+		if (!profile) return 0;
+		profile->clear();
+		profile->reserve(size_t(bins));
+		for (unsigned int b = 0; b < bins; ++b)
+			profile->push_back(FL::ProfileBin());
+
+		double brush_radius = ruler->GetBrushSize() + 1.0;
+
+		int i, j, k;
+		long long vol_index;
+		//go through data
+		for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+		for (k = 0; k < nz; ++k)
+		{
+			vol_index = (long long)nx*ny*k + nx * j + i;
+			unsigned char mask_value = ((unsigned char*)mask)[vol_index];
+			if (mask_value)
+			{
+				//find bin
+				FLIVR::Point p(i, j, k);
+				FLIVR::Vector pdir = p - p1;
+				double proj = Dot(pdir, dir);
+				int bin_num = int(proj / bin_dist);
+				if (bin_num < 0 || bin_num >= bins)
+					continue;
+				//make sure it's within the brush radius
+				FLIVR::Point p_ruler = p1 + proj * dir;
+				if ((p_ruler - p).length() > brush_radius)
+					continue;
+
+				double intensity = 0.0;
+				if (nrrd_data->type == nrrdTypeUChar)
+					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+				else if (nrrd_data->type == nrrdTypeUShort)
+					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+
+				(*profile)[bin_num].m_pixels++;
+				(*profile)[bin_num].m_accum += intensity;
+			}
+		}
+	}
+	else
+	{
+		//calculate length in object space
+		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
+		int bins = int(total_length);
+		std::vector<FL::ProfileBin>* profile = ruler->GetProfile();
+		if (!profile) return 0;
+		profile->clear();
+
+		//sample data through ruler
+		int i, j, k;
+		long long vol_index;
+		FLIVR::Point p;
+		double intensity;
+		if (bins == 0)
+		{
+			//allocate
+			profile->reserve(size_t(1));
+			profile->push_back(FL::ProfileBin());
+
+			p = ruler->GetPoint(0)->GetPoint();
+			//object space
+			p = FLIVR::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
+			intensity = 0.0;
+			i = int(p.x() + 0.5);
+			j = int(p.y() + 0.5);
+			k = int(p.z() + 0.5);
+			if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
+			{
+				if (i == nx) i = nx - 1;
+				if (j == ny) j = ny - 1;
+				if (k == nz) k = nz - 1;
+				vol_index = (long long)nx*ny*k + nx * j + i;
+				if (nrrd_data->type == nrrdTypeUChar)
+					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+				else if (nrrd_data->type == nrrdTypeUShort)
+					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+			}
+			(*profile)[0].m_pixels++;
+			(*profile)[0].m_accum += intensity;
+		}
+		else
+		{
+			//allocate
+			profile->reserve(size_t(bins));
+			for (unsigned int b = 0; b < bins; ++b)
+				profile->push_back(FL::ProfileBin());
+
+			FLIVR::Point p1, p2;
+			FLIVR::Vector dir;
+			double dist;
+			int total_dist = 0;
+			for (unsigned int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
+			{
+				p1 = ruler->GetPoint(pn)->GetPoint();
+				p2 = ruler->GetPoint(pn + 1)->GetPoint();
+				//object space
+				p1 = FLIVR::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
+				p2 = FLIVR::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+				dir = p2 - p1;
+				dist = dir.length();
+				dir.normalize();
+
+				for (unsigned int dn = 0; dn < (unsigned int)(dist + 0.5); ++dn)
+				{
+					p = p1 + dir * double(dn);
+					intensity = 0.0;
+					i = int(p.x() + 0.5);
+					j = int(p.y() + 0.5);
+					k = int(p.z() + 0.5);
+					if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
+					{
+						if (i == nx) i = nx - 1;
+						if (j == ny) j = ny - 1;
+						if (k == nz) k = nz - 1;
+						vol_index = (long long)nx*ny*k + nx * j + i;
+						if (nrrd_data->type == nrrdTypeUChar)
+							intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+						else if (nrrd_data->type == nrrdTypeUShort)
+							intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+					}
+					if (total_dist >= bins) break;
+					(*profile)[total_dist].m_pixels++;
+					(*profile)[total_dist].m_accum += intensity;
+					total_dist++;
+				}
+			}
+			if (total_dist < bins)
+				profile->erase(profile->begin() + total_dist, profile->begin() + bins - 1);
+		}
+	}
+	wxString str("Profile of volume ");
+	str = str + m_vd->GetName();
+	ruler->SetInfoProfile(str);
+	return 1;
+}
+
+int RulerHandler::Distance(int index, std::string filename)
+{
+	if (!m_view || !m_ruler_list || !m_ca)
+		return 0;
+	if (index < 0 ||
+		index >= m_ruler_list->size())
+		return 0;
+
+	FL::Ruler* ruler = (*m_ruler_list)[index];
+	if (ruler->GetNumPoint() < 1)
+		return 0;
+
+	Point p = ruler->GetCenter();
+
+	FL::CompList* list = m_ca->GetCompList();
+	if (list->empty())
+		return 0;
+
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		double dist = (p - it->second->GetPos(sx, sy, sz)).length();
+		it->second->dist = dist;
+	}
+
+	m_ca->OutputCompListFile(filename, 1);
+
+	return 1;
+}
+

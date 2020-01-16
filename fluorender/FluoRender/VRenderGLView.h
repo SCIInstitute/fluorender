@@ -534,8 +534,6 @@ public:
 	void DrawRulers();
 	FL::RulerList* GetRulerList();
 	FL::Ruler* GetRuler(unsigned int id);
-	int RulerProfile(int index);
-	int RulerDistance(int index);
 
 	//draw highlighted comps
 	void DrawCells();
