@@ -507,14 +507,6 @@ public:
 	{
 		if (m_glview) return &m_glview->m_ruler_handler; else return 0;
 	}
-	int RulerProfile(int index)
-	{
-		if (m_glview) return m_glview->RulerProfile(index); else return 0;
-	}
-	int RulerDistance(int index)
-	{
-		if (m_glview) return m_glview->RulerDistance(index); else return 0;
-	}
 
 	//traces
 	void CreateTraceGroup()
