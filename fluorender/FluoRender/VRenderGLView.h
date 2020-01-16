@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Calculate/VolumeCalculator.h"
 #include <Distance/Ruler.h>
 #include <Distance/RulerHandler.h>
+#include <Distance/RulerRenderer.h>
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/KernelProgram.h"
@@ -514,6 +515,8 @@ public:
 	FL::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
 	//get kernel executor
 	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
+	//text renderer
+	TextRenderer* GetTextRenderer() { return &m_text_renderer; }
 
 	//force draw
 	void ForceDraw();
@@ -528,11 +531,6 @@ public:
 	void RefreshGL(int debug_code, bool erase = false, bool start_loop = true);
 
 	//rulers
-	void DrawRulerPoint(vector<float> &verts, int type, float px, float py, float w, Color &c);
-	void DrawRulerArc(Point & ppc, Point& pp0, Point& pp1,
-		Color &c, Transform& mv, Transform& p,
-		vector<float> &verts, unsigned int& num);
-	unsigned int DrawRulersVerts(vector<float> &verts);
 	void DrawRulers();
 	FL::RulerList* GetRulerList();
 	FL::Ruler* GetRuler(unsigned int id);
@@ -1071,6 +1069,7 @@ private:
 
 	//handle rulers
 	FL::RulerHandler m_ruler_handler;
+	FL::RulerRenderer m_ruler_renderer;
 
 private:
 #ifdef _WIN32
