@@ -25,11 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VOLUMEPROPAGENT_H_
-#define _VOLUMEPROPAGENT_H_
+#ifndef VOLUME_PROP_AGENT_HPP
+#define VOLUME_PROP_AGENT_HPP
 
-#include <Fui/InterfaceAgent.h>
-#include <Scenegraph/VolumeData.h>
+#include <Panels/Base_Agent/InterfaceAgent.hpp>
+#include <VolumeData/VolumeData.hpp>
+
+#include <QString>
 
 namespace FUI
 {
@@ -40,15 +42,15 @@ namespace FUI
 	public:
 		VolumePropAgent(VolumePropPanel &panel);
 
-		virtual bool isSameKindAs(const FL::Object* obj) const
+        virtual bool isSameKindAs(const fluo::Object* obj) const
 		{
 			return dynamic_cast<const VolumePropAgent*>(obj) != NULL;
 		}
 
 		virtual const char* className() const { return "VolumePropAgent"; }
 
-		virtual void setObject(FL::VolumeData* vd);
-		virtual FL::VolumeData* getObject();
+        virtual void setObject(fluo::VolumeData* vd);
+        virtual fluo::VolumeData* getObject();
 
 		virtual void UpdateAllSettings();
 
@@ -58,8 +60,8 @@ namespace FUI
 		VolumePropPanel &panel_;
 
 		//update functions
-		void OnLuminanceChanged(FL::Event& event);
-		void OnColorChanged(FL::Event& event);
+        void OnLuminanceChanged(fluo::Event& event);
+        void OnColorChanged(fluo::Event& event);
 
 	private:
 	};

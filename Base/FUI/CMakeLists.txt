@@ -64,6 +64,7 @@ set(HEADER_FILES
     Panels/Properties/meshPropertiesOptions.hpp
     Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
+		Panels/Properties/Agent/volumePropAgent.hpp
     Panels/Output_Adjustments/outputAdjust.hpp
     Panels/Output_Adjustments/outputLayout.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
@@ -84,6 +85,8 @@ set(HEADER_FILES
     Panels/Record_Export/Pages/autoKeyPage.hpp
     Panels/Record_Export/Pages/croppingPage.hpp
     Panels/Record_Export/Pages/4DScriptPage.hpp
+		Panels/Base_Agent/AgentFactory.hpp
+		Panels/Base_Agent/InterfaceAgent.hpp
   )
   
 set(SOURCES
@@ -103,6 +106,7 @@ set(SOURCES
     Panels/Properties/meshPropertiesOptions.cpp
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
+		Panels/Properties/Agent/volumePropAgent.cpp
     Panels/Output_Adjustments/outputLayout.cpp
     Panels/Workspace/workspaceTreeLayout.cpp
     Panels/Workspace/workspaceToolLayout.cpp
@@ -116,6 +120,7 @@ set(SOURCES
     Panels/Record_Export/Pages/autoKeyPage.cpp
     Panels/Record_Export/Pages/croppingPage.cpp
     Panels/Record_Export/Pages/4DScriptPage.cpp
+		Panels/Base_Agent/AgentFactory.cpp
   )
   
 set(UI_FILES
@@ -134,6 +139,8 @@ include_directories(
 	  ${Qt5OpenGL_INCLUDE_DIRS}
 	  ${Qt5Gui_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/Panels
+		${FLObject_INCLUDES}
+		${SceneGraph_INCLUDES}
   )
 
 add_executable(FUI
@@ -145,9 +152,13 @@ add_executable(FUI
  
 # This works like target_link_libraries, however this is how CMake can take
 # care of this automatically.
-qt5_use_modules(FUI Core Gui Widgets OpenGL)  
+qt5_use_modules(FUI Core Gui Widgets OpenGL)
+
+add_dependencies(FUI FLObject SceneGraph)
 
 # links with OpenGL
 target_link_libraries(FUI
+    FLObject
+		SceneGraph
     ${OPENGL_LIBRARIES}
   )

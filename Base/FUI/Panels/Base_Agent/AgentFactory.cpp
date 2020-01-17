@@ -26,7 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Fui/AgentFactory.h>
+
+#include "AgentFactory.hpp"
+
+#include <Panels/Properties/Agent/volumePropAgent.hpp>
+/*
 #include <Fui/ListModel.h>
 #include <Fui/TreeModel.h>
 #include <Fui/TreePanel.h>
@@ -42,7 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/MeshPropPanel.h>
 #include <Fui/ColocalAgent.h>
 #include <Fui/ColocalDlg.h>
-
+*/
 using namespace FUI;
 
 AgentFactory::AgentFactory()
@@ -54,7 +58,7 @@ AgentFactory::~AgentFactory()
 {
 
 }
-
+/*
 ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
@@ -73,8 +77,8 @@ ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &wi
 			std::bind(&ListModel::OnItemRemoved,
 				list_model, std::placeholders::_1));
 		objects_.push_front(list_model);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, list_model);
 		notifyObservers(event);
 	}
@@ -105,15 +109,15 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 			std::bind(&TreeModel::OnItemRemoved,
 				tree_model, std::placeholders::_1));
 		objects_.push_front(tree_model);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, tree_model);
 		notifyObservers(event);
 	}
 
 	return tree_model;
 }
-
+*/
 VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
@@ -133,15 +137,15 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 			std::bind(&VolumePropAgent::OnColorChanged,
 				volume_prop_agent, std::placeholders::_1));
 		objects_.push_front(volume_prop_agent);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, volume_prop_agent);
 		notifyObservers(event);
 	}
 
 	return volume_prop_agent;
 }
-
+/*
 RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
@@ -167,8 +171,8 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 			std::bind(&RenderCanvasAgent::OnSceneChanged,
 				render_canvas_agent, std::placeholders::_1));
 		objects_.push_front(render_canvas_agent);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, render_canvas_agent);
 		notifyObservers(event);
 	}
@@ -216,8 +220,8 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 			std::bind(&OutAdjustAgent::OnEqualizeBChanged,
 				out_adjust_agent, std::placeholders::_1));
 		objects_.push_front(out_adjust_agent);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, out_adjust_agent);
 		notifyObservers(event);
 	}
@@ -283,8 +287,8 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
 				clip_plane_agent, std::placeholders::_1));
 		objects_.push_front(clip_plane_agent);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, clip_plane_agent);
 		notifyObservers(event);
 	}
@@ -305,8 +309,8 @@ MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWi
 	{
 		mesh_prop_agent->setName(name);
 		objects_.push_front(mesh_prop_agent);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, mesh_prop_agent);
 		notifyObservers(event);
 	}
@@ -327,11 +331,12 @@ ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWind
 	{
 		colocal_agent->setName(name);
 		objects_.push_front(colocal_agent);
-		FL::Event event;
-		event.init(FL::Event::EVENT_NODE_ADDED,
+        fluo::Event event;
+        event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, colocal_agent);
 		notifyObservers(event);
 	}
 
 	return colocal_agent;
 }
+*/

@@ -26,12 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Fui/VolumePropAgent.h>
+#include "volumePropAgent.hpp"
+
+/*
 #include <Fui/VolumePropPanel.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
-
+*/
 using namespace FUI;
 
 VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
@@ -41,19 +43,19 @@ VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
 
 }
 
-void VolumePropAgent::setObject(FL::VolumeData* obj)
+void VolumePropAgent::setObject(fluo::VolumeData* obj)
 {
 	InterfaceAgent::setObject(obj);
 }
 
-FL::VolumeData* VolumePropAgent::getObject()
+fluo::VolumeData* VolumePropAgent::getObject()
 {
-	return dynamic_cast<FL::VolumeData*>(InterfaceAgent::getObject());
+    return dynamic_cast<fluo::VolumeData*>(InterfaceAgent::getObject());
 }
 
 void VolumePropAgent::UpdateAllSettings()
 {
-	wxString str;
+    QString str;
 	double dval = 0.0;
 	int ival = 0;
 	bool bval = false;
@@ -76,14 +78,14 @@ void VolumePropAgent::UpdateAllSettings()
 		vald_fp->SetRange(0.0, 10.0);
 	getValue("gamma 3d", dval);
 	panel_.m_gamma_sldr->SetValue(int(dval*100.0 + 0.5));
-	str = wxString::Format("%.2f", dval);
+    str = QString::Format("%.2f", dval);
 	panel_.m_gamma_text->ChangeValue(str);
 	//boundary
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_boundary_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
 	getValue("extract boundary", dval);
 	panel_.m_boundary_sldr->SetValue(int(dval*2000.0 + 0.5));
-	str = wxString::Format("%.4f", dval);
+    str = QString::Format("%.4f", dval);
 	panel_.m_boundary_text->ChangeValue(str);
 	//contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_saturation_text->GetValidator()))
@@ -91,7 +93,7 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("saturation", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_saturation_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_saturation_sldr->SetValue(ival);
 	panel_.m_saturation_text->ChangeValue(str);
 	//left threshold
@@ -100,7 +102,7 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("low threshold", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_left_thresh_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_left_thresh_sldr->SetValue(ival);
 	panel_.m_left_thresh_text->ChangeValue(str);
 	//right threshold
@@ -109,7 +111,7 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("high threshold", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_right_thresh_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_right_thresh_sldr->SetValue(ival);
 	panel_.m_right_thresh_text->ChangeValue(str);
 	//luminance
@@ -118,23 +120,23 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("luminance", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_luminance_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_luminance_sldr->SetValue(ival);
 	panel_.m_luminance_text->ChangeValue(str);
 	//color
-	FLTYPE::Color c;
+    fluoTYPE::Color c;
 	getValue("color", c);
 	wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
 		(unsigned char)(c.g() * 255 + 0.5),
 		(unsigned char)(c.b() * 255 + 0.5));
-	panel_.m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+    panel_.m_color_text->ChangeValue(QString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	panel_.m_color_btn->SetColour(wxc);
 	getValue("sec color", c);
 	wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
 		(unsigned char)(c.g() * 255 + 0.5),
 		(unsigned char)(c.b() * 255 + 0.5));
-	panel_.m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+    panel_.m_color2_text->ChangeValue(QString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	panel_.m_color2_btn->SetColour(wxc);
 	//alpha
@@ -143,7 +145,7 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("alpha", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_alpha_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_alpha_sldr->SetValue(ival);
 	panel_.m_alpha_text->ChangeValue(str);
 	bool alpha_enable;
@@ -162,10 +164,10 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("mat spec", spec);
 	getValue("mat shine", shine);
 	panel_.m_low_shading_sldr->SetValue(amb*100.0);
-	str = wxString::Format("%.2f", amb);
+    str = QString::Format("%.2f", amb);
 	panel_.m_low_shading_text->ChangeValue(str);
 	panel_.m_hi_shading_sldr->SetValue(shine*10.0);
-	str = wxString::Format("%.2f", shine);
+    str = QString::Format("%.2f", shine);
 	panel_.m_hi_shading_text->ChangeValue(str);
 	bool shading_enable;
 	getValue("shading enable", shading_enable);
@@ -179,7 +181,7 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_shadow_tool->ToggleTool(VolumePropPanel::ID_ShadowChk, shadow_enable);
 	getValue("shadow int", dval);
 	panel_.m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
-	str = wxString::Format("%.2f", dval);
+    str = QString::Format("%.2f", dval);
 	panel_.m_shadow_text->ChangeValue(str);
 
 	//smaple rate
@@ -187,7 +189,7 @@ void VolumePropAgent::UpdateAllSettings()
 		vald_fp->SetRange(0.0, 100.0);
 	getValue("sample rate", dval);
 	panel_.m_sample_sldr->SetValue(dval*10.0);
-	str = wxString::Format("%.1f", dval);
+    str = QString::Format("%.1f", dval);
 	panel_.m_sample_text->ChangeValue(str);
 
 	//spacings
@@ -198,15 +200,15 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("spc z", spcz);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_space_x_text->GetValidator()))
 		vald_fp->SetMin(0.0);
-	str = wxString::Format("%.3f", spcx);
+    str = QString::Format("%.3f", spcx);
 	panel_.m_space_x_text->ChangeValue(str);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_space_y_text->GetValidator()))
 		vald_fp->SetMin(0.0);
-	str = wxString::Format("%.3f", spcy);
+    str = QString::Format("%.3f", spcy);
 	panel_.m_space_y_text->ChangeValue(str);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_space_z_text->GetValidator()))
 		vald_fp->SetMin(0.0);
-	str = wxString::Format("%.3f", spcz);
+    str = QString::Format("%.3f", spcz);
 	panel_.m_space_z_text->ChangeValue(str);
 
 	//legend
@@ -238,7 +240,7 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("colormap low", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_colormap_low_value_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_colormap_low_value_sldr->SetValue(ival);
 	panel_.m_colormap_low_value_text->ChangeValue(str);
 	//high
@@ -247,7 +249,7 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("colormap high", dval);
 	ival = int(dval*panel_.m_max_val + 0.5);
 	panel_.m_colormap_high_value_sldr->SetRange(0, int(panel_.m_max_val));
-	str = wxString::Format("%d", ival);
+    str = QString::Format("%d", ival);
 	panel_.m_colormap_high_value_sldr->SetValue(ival);
 	panel_.m_colormap_high_value_text->ChangeValue(str);
 	//colormap
@@ -326,25 +328,25 @@ void VolumePropAgent::UpdateAllSettings()
 	//panel_.Layout();
 }
 
-void VolumePropAgent::OnLuminanceChanged(FL::Event& event)
+void VolumePropAgent::OnLuminanceChanged(fluo::Event& event)
 {
 	double luminance;
 	getValue("luminance", luminance);
 	int ival = int(luminance*panel_.m_max_val + 0.5);
 	panel_.m_luminance_sldr->SetRange(0, int(panel_.m_max_val));
-	wxString str = wxString::Format("%d", ival);
+    QString str = QString::Format("%d", ival);
 	panel_.m_luminance_sldr->SetValue(ival);
 	panel_.m_luminance_text->ChangeValue(str);
 }
 
-void VolumePropAgent::OnColorChanged(FL::Event& event)
+void VolumePropAgent::OnColorChanged(fluo::Event& event)
 {
-	FLTYPE::Color color;
+    fluoTYPE::Color color;
 	getValue("color", color);
 	wxColor wxc((unsigned char)(color.r() * 255 + 0.5),
 		(unsigned char)(color.g() * 255 + 0.5),
 		(unsigned char)(color.b() * 255 + 0.5));
-	panel_.m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+    panel_.m_color_text->ChangeValue(QString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	panel_.m_color_btn->SetColour(wxc);
 }
