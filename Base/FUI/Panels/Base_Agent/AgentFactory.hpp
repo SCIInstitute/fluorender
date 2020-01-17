@@ -90,15 +90,19 @@ namespace FUI
 			return dynamic_cast<InterfaceAgent*>(ObjectFactory::findLast(name));
 		}
 
-		//each agent type has a function
+        //each agent type has a function
+        /*
 		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
-		TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
-		VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
+        TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
+        */
+        VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
+        /*
 		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
 		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
 		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
 		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
-		ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
+        ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
+        */
 
 	protected:
 		virtual ~AgentFactory();

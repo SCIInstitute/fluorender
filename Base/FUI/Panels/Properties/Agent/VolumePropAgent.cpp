@@ -228,8 +228,8 @@ void VolumePropAgent::UpdateAllSettings()
 	//sync group
 	//if (m_group)
 	//	m_sync_group = m_group->GetVolumeSyncProp();
-	bool sync = testSyncParentValue("gamma 3d");
-	panel_.m_options_toolbar->ToggleTool(VolumePropPanel::ID_SyncGroupChk, sync);
+    //bool sync = testSyncParentValue("gamma 3d");
+    //panel_.m_options_toolbar->ToggleTool(VolumePropPanel::ID_SyncGroupChk, sync);
 
 	//colormap
 	//double low, high;
