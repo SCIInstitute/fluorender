@@ -41,11 +41,11 @@ namespace FUI
 		{
 		}
 
-        virtual InterfaceAgent* clone(const fluo::CopyOp& copyop) const { return 0; }
+        virtual InterfaceAgent* clone(const fluo::CopyOp& copyop) const { return nullptr; }
 
         virtual bool isSameKindAs(const fluo::Object* obj) const
 		{
-			return dynamic_cast<const InterfaceAgent*>(obj) != NULL;
+            return dynamic_cast<const InterfaceAgent*>(obj) != nullptr;
 		}
 
 		virtual const char* className() const { return "InterfaceAgent"; }
@@ -61,7 +61,7 @@ namespace FUI
 
         virtual void setObject(fluo::Object* obj)
 		{
-            fluo::Object* old_obj = 0;
+            fluo::Object* old_obj = nullptr;
             if (getValue("asset", (fluo::Referenced**)&old_obj) &&
 				old_obj == obj)
 				return;
@@ -79,7 +79,7 @@ namespace FUI
 		}
         virtual fluo::Object* getObject()
 		{
-            fluo::Object* obj = 0;
+            fluo::Object* obj = nullptr;
             getValue("asset", (fluo::Referenced**)&obj);
 			return obj;
 		}
@@ -93,9 +93,9 @@ namespace FUI
 				if (node)
 					return node->getParent(0);
 			}
-			return 0;
+            return nullptr;
 		}
-
+/*
 		virtual bool testSyncParentValue(const std::string& name)
 		{
             fluo::Object* obj = getObject();
@@ -129,7 +129,7 @@ namespace FUI
 			}
 			return false;
 		}
-
+*/
 		virtual void syncParentValue(const std::string& name)
 		{
 			//get obj parent
@@ -210,7 +210,7 @@ namespace FUI
 			}
 		}
 
-		virtual void UpdateAllSettings() {};
+        virtual void UpdateAllSettings() {}
 
 	protected:
 	};

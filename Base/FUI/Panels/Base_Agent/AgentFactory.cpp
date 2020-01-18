@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "AgentFactory.hpp"
 
-#include <Panels/Properties/Agent/volumePropAgent.hpp>
 /*
 #include <Fui/ListModel.h>
 #include <Fui/TreeModel.h>
@@ -118,7 +117,7 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	return tree_model;
 }
 */
-VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
+VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, QWidget &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -126,7 +125,7 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 
 	//not found
 	VolumePropAgent* volume_prop_agent =
-			new VolumePropAgent(static_cast<VolumePropPanel&>(window));
+            new VolumePropAgent(static_cast<PropertiesPanel&>(window));
 	if (volume_prop_agent)
 	{
 		volume_prop_agent->setName(name);

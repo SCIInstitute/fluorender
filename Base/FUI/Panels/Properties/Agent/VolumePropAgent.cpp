@@ -36,9 +36,9 @@ DEALINGS IN THE SOFTWARE.
 */
 using namespace FUI;
 
-VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
+VolumePropAgent::VolumePropAgent(PropertiesPanel &panel) :
 	InterfaceAgent(),
-	panel_(panel)
+    panel(panel)
 {
 
 }
@@ -62,25 +62,31 @@ void VolumePropAgent::UpdateAllSettings()
 	long lval = 0;
 
 	//maximum value
-	double max_val;
+    double max_val;
 	getValue("max int", max_val);
 	max_val = std::max(255.0, max_val);
-	panel_.m_max_val = max_val;
+    panel.setPropOptionsMaxVal(max_val);
 
-	//set range
-	wxFloatingPointValidator<double>* vald_fp;
-	wxIntegerValidator<unsigned int>* vald_i;
+    //set range
+    //wxFloatingPointValidator<double>* vald_fp;
+    //wxIntegerValidator<unsigned int>* vald_i;
 
-	//volume properties
-	//transfer function
-	//gamma
-	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_gamma_text->GetValidator()))
-		vald_fp->SetRange(0.0, 10.0);
-	getValue("gamma 3d", dval);
-	panel_.m_gamma_sldr->SetValue(int(dval*100.0 + 0.5));
-    str = QString::Format("%.2f", dval);
-	panel_.m_gamma_text->ChangeValue(str);
-	//boundary
+    // volume properties
+    // transfer function
+    // gamma
+//	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_gamma_text->GetValidator()))
+    //	vald_fp->SetRange(0.0, 10.0);
+    //panel_.m_gamma_sldr->SetValue(int(dval*100.0 + 0.5));
+    //str = QString::Format("%.2f", dval);
+    //panel_.m_gamma_text->ChangeValue(str);
+
+    // gamma
+    getValue("gamma 3d", dval);
+    panel.setPropGammaSliderVal(int(dval*100.0 + 0.5));
+    panel.setPropGammaSpinboxVal(dval);
+
+    /*
+    //boundary
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_boundary_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
 	getValue("extract boundary", dval);
@@ -325,22 +331,26 @@ void VolumePropAgent::UpdateAllSettings()
 	else
 		panel_.DisableMip();
 
-	//panel_.Layout();
+    //panel_.Layout();
+    */
 }
 
 void VolumePropAgent::OnLuminanceChanged(fluo::Event& event)
 {
+    /*
 	double luminance;
 	getValue("luminance", luminance);
 	int ival = int(luminance*panel_.m_max_val + 0.5);
 	panel_.m_luminance_sldr->SetRange(0, int(panel_.m_max_val));
     QString str = QString::Format("%d", ival);
 	panel_.m_luminance_sldr->SetValue(ival);
-	panel_.m_luminance_text->ChangeValue(str);
+    panel_.m_luminance_text->ChangeValue(str);
+    */
 }
 
 void VolumePropAgent::OnColorChanged(fluo::Event& event)
 {
+    /*
     fluoTYPE::Color color;
 	getValue("color", color);
 	wxColor wxc((unsigned char)(color.r() * 255 + 0.5),
@@ -348,5 +358,6 @@ void VolumePropAgent::OnColorChanged(fluo::Event& event)
 		(unsigned char)(color.b() * 255 + 0.5));
     panel_.m_color_text->ChangeValue(QString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
-	panel_.m_color_btn->SetColour(wxc);
+    panel_.m_color_btn->SetColour(wxc);
+    */
 }

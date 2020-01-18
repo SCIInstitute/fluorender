@@ -26,6 +26,12 @@ class PropertiesPanel : public QWidget
   public:
     PropertiesPanel();
 
+    void setPropOptionsMaxVal(double newVal);
+    double getPropOptionsMaxVal() const;
+
+    void setPropGammaSliderVal(int newVal);
+    void setPropGammaSpinboxVal(double newVal);
+
   private:
 
     template<typename Property>

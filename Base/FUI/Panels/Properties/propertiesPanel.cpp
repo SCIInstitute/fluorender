@@ -1,9 +1,48 @@
 #include "propertiesPanel.hpp"
+#include <iostream>
 
 PropertiesPanel::PropertiesPanel()
 {
   myLayout->addWidget(tabWidget);
   this->setLayout(myLayout);
+}
+
+double PropertiesPanel::getPropOptionsMaxVal() const
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMainWidget = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMainWidget->findChild<VolumePropertiesOptions*>();
+
+  //Todo, throw an exception if it comes back null
+  return temp->getMaxVal();
+}
+
+void PropertiesPanel::setPropOptionsMaxVal(double newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  //Todo, throw an exception if it comes back null
+  temp->setMaxVal(newVal);
+}
+
+void PropertiesPanel::setPropGammaSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setGammaSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropGammaSpinboxVal(double newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setGammaSpinboxVal(newVal);
 }
 
 void PropertiesPanel::onVolumeLoaded(int renderviewID)

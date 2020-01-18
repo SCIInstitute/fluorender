@@ -140,7 +140,8 @@ include_directories(
 	  ${Qt5Gui_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/Panels
 		${FLObject_INCLUDES}
-		${SceneGraph_INCLUDES}
+    ${SceneGraph_INCLUDES}
+    ${Boost_INCLUDE_DIR}
   )
 
 add_executable(FUI
@@ -154,11 +155,12 @@ add_executable(FUI
 # care of this automatically.
 qt5_use_modules(FUI Core Gui Widgets OpenGL)
 
-add_dependencies(FUI FLObject SceneGraph)
+add_dependencies(FUI FLObject SceneGraph Boost_external_download)
 
 # links with OpenGL
 target_link_libraries(FUI
     FLObject
-		SceneGraph
+    SceneGraph
+    ${Boost_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )

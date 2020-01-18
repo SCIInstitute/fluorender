@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #define AGENT_FACTORY_HPP
 
 #include <ObjectFactory.hpp>
+#include <Panels/Properties/Agent/volumePropAgent.hpp>
+#include <Panels/Properties/propertiesPanel.hpp>
+
+#include <QWidget>
 
 #include "InterfaceAgent.hpp"
 
@@ -37,7 +41,6 @@ namespace FUI
 {
 	class ListModel;
 	class TreeModel;
-	class VolumePropAgent;
 	class RenderCanvasAgent;
 	class OutAdjustAgent;
 	class ClipPlaneAgent;
@@ -50,20 +53,20 @@ namespace FUI
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const AgentFactory*>(obj) != NULL;
+            return dynamic_cast<const AgentFactory*>(obj) != nullptr;
 		}
 
 		virtual const char* className() const { return "AgentFactory"; }
 
 		virtual void createDefault() {}//no default agent
 
-		virtual InterfaceAgent* getDefault() { return 0; }//no default agent
+        virtual InterfaceAgent* getDefault() { return nullptr; }//no default agent
 
-		virtual InterfaceAgent* build(InterfaceAgent* agent = 0) { return 0; }
+        virtual InterfaceAgent* build(InterfaceAgent* agent = nullptr) { return nullptr; }
 
-		virtual InterfaceAgent* clone(InterfaceAgent*) { return 0; }
+        virtual InterfaceAgent* clone(InterfaceAgent*) { return nullptr; }
 
-		virtual InterfaceAgent* clone(const unsigned int) { return 0; }
+        virtual InterfaceAgent* clone(const unsigned int) { return nullptr; }
 
 		inline virtual InterfaceAgent* get(size_t i)
 		{
@@ -95,7 +98,7 @@ namespace FUI
 		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
         TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
         */
-        VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
+        VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, QWidget &panel); //may need to be QWidget*
         /*
 		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
 		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);

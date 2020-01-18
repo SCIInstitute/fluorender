@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define VOLUME_PROP_AGENT_HPP
 
 #include <Panels/Base_Agent/InterfaceAgent.hpp>
+#include <Panels/Properties/propertiesPanel.hpp>
 #include <VolumeData/VolumeData.hpp>
 
 #include <QString>
@@ -36,15 +37,14 @@ DEALINGS IN THE SOFTWARE.
 namespace FUI
 {
 	class AgentFactory;
-	class VolumePropPanel;
 	class VolumePropAgent : public InterfaceAgent
 	{
 	public:
-		VolumePropAgent(VolumePropPanel &panel);
+        VolumePropAgent(PropertiesPanel &panel);
 
         virtual bool isSameKindAs(const fluo::Object* obj) const
 		{
-			return dynamic_cast<const VolumePropAgent*>(obj) != NULL;
+            return dynamic_cast<const VolumePropAgent*>(obj) != nullptr;
 		}
 
 		virtual const char* className() const { return "VolumePropAgent"; }
@@ -57,14 +57,14 @@ namespace FUI
 		friend class AgentFactory;
 
 	protected:
-		VolumePropPanel &panel_;
 
 		//update functions
         void OnLuminanceChanged(fluo::Event& event);
         void OnColorChanged(fluo::Event& event);
 
 	private:
-	};
+        PropertiesPanel &panel;
+    };
 }
 
 #endif//_VOLUMEPROPAGENT_H_

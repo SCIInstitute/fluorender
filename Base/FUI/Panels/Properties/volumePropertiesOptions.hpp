@@ -19,8 +19,17 @@ class VolumePropertiesOptions : public QGridLayout
   public:
     VolumePropertiesOptions();
 
+    void setMaxVal(double newVal) { maxVal = newVal; }
+    double getMaxVal() const { return maxVal; }
+
+    void setGammaSliderVal(int newVal) { gammaSlider->setValue(newVal); }
+    void setGammaSpinboxVal(double newVal) { gammaSpinbox->setValue(newVal); }
+
 
   private:
+
+    double maxVal = 255.0;
+
     void addRow0();
     void addRow1();
     void addRow2();
@@ -43,7 +52,7 @@ class VolumePropertiesOptions : public QGridLayout
     FluoSlider* colorMap1Slider  = new FluoSlider(Qt::Horizontal,0,255);
     FluoSlider* colorMap2Slider  = new FluoSlider(Qt::Horizontal,0,255);
 
-    FluoSpinboxDouble* gammaSpinbox      = new FluoSpinboxDouble(0.0,1.0,false);
+    FluoSpinboxDouble* gammaSpinbox      = new FluoSpinboxDouble(0.0,10.0,false);
     FluoSpinboxDouble* extractBSpinbox   = new FluoSpinboxDouble(0.0,0.5,false);
     FluoSpinbox* saturationSpinbox       = new FluoSpinbox(0,255,false);
     FluoSpinbox* threshold1Spinbox       = new FluoSpinbox(0,255,false);
