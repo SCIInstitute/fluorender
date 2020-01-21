@@ -82,18 +82,23 @@ void VolumePropAgent::UpdateAllSettings()
 
     // gamma
     getValue("gamma 3d", dval);
-    panel.setPropGammaSliderVal(int(dval*100.0 + 0.5));
+    panel.setPropGammaSliderVal(static_cast<int>(dval*100.0 + 0.5));
     panel.setPropGammaSpinboxVal(dval);
 
-    /*
     //boundary
-	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_boundary_text->GetValidator()))
-		vald_fp->SetRange(0.0, 1.0);
-	getValue("extract boundary", dval);
-	panel_.m_boundary_sldr->SetValue(int(dval*2000.0 + 0.5));
-    str = QString::Format("%.4f", dval);
-	panel_.m_boundary_text->ChangeValue(str);
-	//contrast
+    //if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_boundary_text->GetValidator()))
+//		vald_fp->SetRange(0.0, 1.0);
+
+    //panel.m_boundary_sldr->SetValue(int(dval*2000.0 + 0.5));
+    //str = QString::Format("%.4f", dval);
+    //panel_.m_boundary_text->ChangeValue(str);
+
+    getValue("extract boundary", dval);
+    panel.setPropExtBounSliderVal(static_cast<int>(dval*2000.0 + 0.5));
+    panel.setPropExtBounSpinboxVal(dval);
+
+    /*
+    //contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_saturation_text->GetValidator()))
 		vald_i->SetMin(0);
 	getValue("saturation", dval);
@@ -101,7 +106,16 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_saturation_sldr->SetRange(0, int(panel_.m_max_val));
     str = QString::Format("%d", ival);
 	panel_.m_saturation_sldr->SetValue(ival);
-	panel_.m_saturation_text->ChangeValue(str);
+    panel_.m_saturation_text->ChangeValue(str);
+
+    */
+
+    getValue("saturation", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    panel.setPropSatSliderVal(ival);
+    panel.setPropSatSpinboxVal(ival);
+
+    /*
 	//left threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_left_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
@@ -110,8 +124,18 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_left_thresh_sldr->SetRange(0, int(panel_.m_max_val));
     str = QString::Format("%d", ival);
 	panel_.m_left_thresh_sldr->SetValue(ival);
-	panel_.m_left_thresh_text->ChangeValue(str);
-	//right threshold
+    panel_.m_left_thresh_text->ChangeValue(str);
+    */
+
+    getValue("low threshold", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    panel.setPropLowThreshSliderVal(ival);
+    panel.setPropLowThreshSpinboxVal(ival);
+
+
+    /*
+
+    //right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_right_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
 	getValue("high threshold", dval);
@@ -119,7 +143,17 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_right_thresh_sldr->SetRange(0, int(panel_.m_max_val));
     str = QString::Format("%d", ival);
 	panel_.m_right_thresh_sldr->SetValue(ival);
-	panel_.m_right_thresh_text->ChangeValue(str);
+    panel_.m_right_thresh_text->ChangeValue(str);
+
+    */
+
+    getValue("high threshold", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    panel.setPropHighThreSliderVal(ival);
+    panel.setPropHighThreSpinboxVal(ival);
+
+
+    /*
 	//luminance
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_luminance_text->GetValidator()))
 		vald_i->SetMin(0);
@@ -128,8 +162,66 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_luminance_sldr->SetRange(0, int(panel_.m_max_val));
     str = QString::Format("%d", ival);
 	panel_.m_luminance_sldr->SetValue(ival);
-	panel_.m_luminance_text->ChangeValue(str);
-	//color
+    panel_.m_luminance_text->ChangeValue(str);
+    */
+
+    getValue("luminance", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    panel.setPropLuminSliderVal(ival);
+    panel.setPropLuminSpinboxVal(ival);
+
+    /*
+
+    //shadow
+    if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_shadow_text->GetValidator()))
+        vald_fp->SetRange(0.0, 1.0);
+    bool shadow_enable;
+    getValue("shadow enable", shadow_enable);
+    panel_.m_shadow_tool->ToggleTool(VolumePropPanel::ID_ShadowChk, shadow_enable);
+    getValue("shadow int", dval);
+    panel_.m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
+    str = QString::Format("%.2f", dval);
+    panel_.m_shadow_text->ChangeValue(str);
+
+    */
+
+    bool isShadowEnabled;
+    getValue("shadow enable", isShadowEnabled);
+    getValue("shadow int", dval);
+
+    panel.setPropShadowEnabled(isShadowEnabled);
+    panel.setPropShadowSliderVal(static_cast<int>(dval * 100.0 + 0.5));
+    panel.setPropShadowSpinboxVal(dval);
+
+    /*
+
+    //alpha
+    if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_alpha_text->GetValidator()))
+        vald_i->SetMin(0);
+    getValue("alpha", dval);
+    ival = int(dval*panel_.m_max_val + 0.5);
+    panel_.m_alpha_sldr->SetRange(0, int(panel_.m_max_val));
+    str = QString::Format("%d", ival);
+    panel_.m_alpha_sldr->SetValue(ival);
+    panel_.m_alpha_text->ChangeValue(str);
+    bool alpha_enable;
+    getValue("alpha enable", alpha_enable);
+    panel_.m_alpha_tool->ToggleTool(VolumePropPanel::ID_AlphaChk, alpha_enable);
+
+    */
+
+    bool isAlphaEnabled;
+    getValue("alpha enable", isAlphaEnabled);
+    getValue("alpha", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+
+    panel.setPropAlphaEnabled(isAlphaEnabled);
+    panel.setPropAlphaSliderVal(ival);
+    panel.setPropAlphaSpinboxVal(ival);
+
+    /*
+
+    //color
     fluoTYPE::Color c;
 	getValue("color", c);
 	wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
@@ -144,19 +236,8 @@ void VolumePropAgent::UpdateAllSettings()
 		(unsigned char)(c.b() * 255 + 0.5));
     panel_.m_color2_text->ChangeValue(QString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
-	panel_.m_color2_btn->SetColour(wxc);
-	//alpha
-	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_alpha_text->GetValidator()))
-		vald_i->SetMin(0);
-	getValue("alpha", dval);
-	ival = int(dval*panel_.m_max_val + 0.5);
-	panel_.m_alpha_sldr->SetRange(0, int(panel_.m_max_val));
-    str = QString::Format("%d", ival);
-	panel_.m_alpha_sldr->SetValue(ival);
-	panel_.m_alpha_text->ChangeValue(str);
-	bool alpha_enable;
-	getValue("alpha enable", alpha_enable);
-	panel_.m_alpha_tool->ToggleTool(VolumePropPanel::ID_AlphaChk, alpha_enable);
+    panel_.m_color2_btn->SetColour(wxc);
+
 
 	//shadings
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_low_shading_text->GetValidator()))
@@ -179,16 +260,6 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("shading enable", shading_enable);
 	panel_.m_shade_tool->ToggleTool(VolumePropPanel::ID_ShadingEnableChk, shading_enable);
 
-	//shadow
-	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_shadow_text->GetValidator()))
-		vald_fp->SetRange(0.0, 1.0);
-	bool shadow_enable;
-	getValue("shadow enable", shadow_enable);
-	panel_.m_shadow_tool->ToggleTool(VolumePropPanel::ID_ShadowChk, shadow_enable);
-	getValue("shadow int", dval);
-	panel_.m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
-    str = QString::Format("%.2f", dval);
-	panel_.m_shadow_text->ChangeValue(str);
 
 	//smaple rate
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_sample_text->GetValidator()))

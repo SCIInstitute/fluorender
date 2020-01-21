@@ -24,6 +24,24 @@ class VolumePropertiesOptions : public QGridLayout
 
     void setGammaSliderVal(int newVal) { gammaSlider->setValue(newVal); }
     void setGammaSpinboxVal(double newVal) { gammaSpinbox->setValue(newVal); }
+    void setExtBounSliderVal(int newVal) { extractBSlider->setValue(newVal); }
+    void setExtBounSpinBoxVal(double newVal) { extractBSpinbox->setValue(newVal); }
+    void setSatSliderVal(int newVal) { saturationSlider->setValue(newVal); }
+    void setSatSpinboxVal(int newVal) { saturationSpinbox->setValue(newVal); }
+    void setLowThreshSliderVal(int newVal) { threshold1Slider->setValue(newVal); }
+    void setLowThreshSpinboxVal(int newVal) { threshold1Spinbox->setValue(newVal); }
+    void setHighThreSliderVal(int newVal) { threshold2Slider->setValue(newVal); }
+    void setHighThreSpinboxVal(int newVal) { threshold2Spinbox->setValue(newVal); }
+    void setLuminSliderVal(int newVal) { luminanceSlider->setValue(newVal); }
+    void setLuminSpinboxVal(int newVal) { luminanceSpinbox->setValue(newVal); }
+
+    void setShadowEnabled(bool status) { shadowLabel->setEnabled(status); }
+    void setShadowSliderVal(int newVal) { shadowSlider->setValue(newVal); }
+    void setShadowSpinboxVal(double newVal) { shadowSpinbox->setValue(newVal); }
+
+    void setAlphaEnabled(bool status) { alphaLabel->setEnabled(status); }
+    void setAlphaSliderVal(int newVal) { alphaSlider->setValue(newVal); }
+    void setAlphaSpinboxVal(int newVal) { alphaSpinbox->setValue(newVal); }
 
 
   private:
@@ -53,7 +71,7 @@ class VolumePropertiesOptions : public QGridLayout
     FluoSlider* colorMap2Slider  = new FluoSlider(Qt::Horizontal,0,255);
 
     FluoSpinboxDouble* gammaSpinbox      = new FluoSpinboxDouble(0.0,10.0,false);
-    FluoSpinboxDouble* extractBSpinbox   = new FluoSpinboxDouble(0.0,0.5,false);
+    FluoSpinboxDouble* extractBSpinbox   = new FluoSpinboxDouble(0.0,1.0,false); //TODO: Set precision to 4 decimals
     FluoSpinbox* saturationSpinbox       = new FluoSpinbox(0,255,false);
     FluoSpinbox* threshold1Spinbox       = new FluoSpinbox(0,255,false);
     FluoSpinbox* threshold2Spinbox       = new FluoSpinbox(0,255,false);

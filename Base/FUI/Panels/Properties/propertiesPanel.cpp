@@ -45,6 +45,150 @@ void PropertiesPanel::setPropGammaSpinboxVal(double newVal)
   temp->setGammaSpinboxVal(newVal);
 }
 
+void PropertiesPanel::setPropExtBounSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setExtBounSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropExtBounSpinboxVal(double newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setExtBounSpinBoxVal(newVal);
+}
+
+void PropertiesPanel::setPropSatSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setSatSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropSatSpinboxVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setSatSpinboxVal(newVal);
+}
+
+void PropertiesPanel::setPropLowThreshSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setLowThreshSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropLowThreshSpinboxVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setLowThreshSpinboxVal(newVal);
+}
+
+void PropertiesPanel::setPropHighThreSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setHighThreSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropHighThreSpinboxVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setHighThreSpinboxVal(newVal);
+}
+
+void PropertiesPanel::setPropLuminSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setLuminSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropLuminSpinboxVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setLuminSpinboxVal(newVal);
+}
+
+void PropertiesPanel::setPropShadowSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setShadowSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropShadowSpinboxVal(double newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setShadowSpinboxVal(newVal);
+}
+
+void PropertiesPanel::setPropShadowEnabled(bool status)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setShadowEnabled(status);
+}
+
+void PropertiesPanel::setPropAlphaSliderVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setAlphaSliderVal(newVal);
+}
+
+void PropertiesPanel::setPropAlphaSpinboxVal(int newVal)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setAlphaSpinboxVal(newVal);
+}
+
+void PropertiesPanel::setPropAlphaEnabled(bool status)
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+  VolumePropertiesOptions* temp = tempMain->findChild<VolumePropertiesOptions*>();
+
+  temp->setAlphaEnabled(status);
+}
+
 void PropertiesPanel::onVolumeLoaded(int renderviewID)
 {
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions();

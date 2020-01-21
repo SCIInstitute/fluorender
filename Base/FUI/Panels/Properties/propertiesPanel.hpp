@@ -31,6 +31,24 @@ class PropertiesPanel : public QWidget
 
     void setPropGammaSliderVal(int newVal);
     void setPropGammaSpinboxVal(double newVal);
+    void setPropExtBounSliderVal(int newVal);
+    void setPropExtBounSpinboxVal(double newVal);
+    void setPropSatSliderVal(int newVal);
+    void setPropSatSpinboxVal(int newVal);
+    void setPropLowThreshSliderVal(int newVal);
+    void setPropLowThreshSpinboxVal(int newVal);
+    void setPropHighThreSliderVal(int newVal);
+    void setPropHighThreSpinboxVal(int newVal);
+    void setPropLuminSliderVal(int newVal);
+    void setPropLuminSpinboxVal(int newVal);
+
+    void setPropShadowSliderVal(int newVal);
+    void setPropShadowSpinboxVal(double newVal);
+    void setPropShadowEnabled(bool status);
+
+    void setPropAlphaSliderVal(int newVal);
+    void setPropAlphaSpinboxVal(int newVal);
+    void setPropAlphaEnabled(bool status);
 
   private:
 
