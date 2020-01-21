@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerHandler_H_
 
 #include <Distance/Ruler.h>
+#include <Calculate/VolumePoint.h>
 #include <string>
 
 class VRenderGLView;
@@ -48,11 +49,13 @@ namespace FL
 		void SetView(VRenderGLView* view)
 		{
 			m_view = view;
+			m_vp.SetView(view);
 		}
 
 		void SetVolumeData(VolumeData* vd)
 		{
 			m_vd = vd;
+			m_vp.SetVolumeData(vd);
 		}
 
 		void SetCompAnalyzer(ComponentAnalyzer* ca)
@@ -121,6 +124,7 @@ namespace FL
 		VRenderGLView *m_view;
 		VolumeData * m_vd;
 		ComponentAnalyzer* m_ca;
+		VolumePoint m_vp;
 		Ruler *m_ruler;
 		RulerList *m_ruler_list;
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;

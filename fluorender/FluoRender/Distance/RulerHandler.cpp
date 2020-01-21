@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 #include <DataManager.h>
 #include <Components/CompAnalyzer.h>
+#include <Calculate/VolumePoint.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
@@ -188,7 +189,7 @@ void RulerHandler::AddRulerPoint(int mx, int my)
 		Point p1, p2;
 		Ruler* ruler = new Ruler();
 		ruler->SetRulerType(m_type);
-		m_view->GetPointVolumeBox2(p1, p2, mx, my);
+		m_vp.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
 		ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -206,18 +207,20 @@ void RulerHandler::AddRulerPoint(int mx, int my)
 		Point p, ip;
 		if (m_view->m_point_volume_mode)
 		{
-			double t = m_view->GetPointVolume(p, ip, mx, my, m_view->m_cur_vol,
-				m_view->m_point_volume_mode, m_view->m_ruler_use_transf);
+			m_vp.SetVolumeData(m_view->m_cur_vol);
+			double t = m_vp.GetPointVolume(mx, my,
+				m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+				p, ip);
 			if (t <= 0.0)
 			{
-				t = m_view->GetPointPlane(p, mx, my);
+				t = m_vp.GetPointPlane(mx, my, 0, true, p);
 				if (t <= 0.0)
 					return;
 			}
 		}
 		else
 		{
-			double t = m_view->GetPointPlane(p, mx, my);
+			double t = m_vp.GetPointPlane(mx, my, 0, true, p);
 			if (t <= 0.0)
 				return;
 		}
@@ -300,15 +303,14 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
 	{
-		double t = m_view->GetPointVolume(point, ip,
-			mx, my, m_view->m_cur_vol,
-			m_view->m_point_volume_mode,
-			m_view->m_ruler_use_transf);
+		m_vp.SetVolumeData(m_view->m_cur_vol);
+		double t = m_vp.GetPointVolume(mx, my,
+			m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+			point, ip);
 		if (t <= 0.0)
 		{
 			tmp = m_point->GetPoint();
-			t = m_view->GetPointPlane(point,
-				mx, my, &tmp);
+			t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		}
 		if (t <= 0.0)
 			return false;
@@ -316,8 +318,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	else
 	{
 		tmp = m_point->GetPoint();
-		double t = m_view->GetPointPlane(point,
-			mx, my, &tmp);
+		double t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		if (t <= 0.0)
 			return false;
 	}
@@ -340,15 +341,14 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
 	{
-		double t = m_view->GetPointVolume(point, ip,
-			mx, my, m_view->m_cur_vol,
-			m_view->m_point_volume_mode,
-			m_view->m_ruler_use_transf);
+		m_vp.SetVolumeData(m_view->m_cur_vol);
+		double t = m_vp.GetPointVolume(mx, my,
+			m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+			point, ip);
 		if (t <= 0.0)
 		{
 			tmp = m_point->GetPoint();
-			t = m_view->GetPointPlane(point,
-				mx, my, &tmp);
+			t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		}
 		if (t <= 0.0)
 			return false;
@@ -356,8 +356,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	else
 	{
 		tmp = m_point->GetPoint();
-		double t = m_view->GetPointPlane(point,
-			mx, my, &tmp);
+		double t = m_vp.GetPointPlane(mx, my, &tmp, true, point);
 		if (t <= 0.0)
 			return false;
 	}
