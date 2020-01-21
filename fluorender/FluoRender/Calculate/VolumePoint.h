@@ -52,6 +52,7 @@ namespace FL
 			m_vd = vd;
 		}
 
+		//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
 		double GetPointVolume(
 			double mx, double my,//mouse coord on screen
 			int mode, bool use_transf, double thresh,//params

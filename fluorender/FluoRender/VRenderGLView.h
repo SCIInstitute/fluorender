@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/RulerRenderer.h>
+#include <Calculate/VolumePoint.h>
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/KernelProgram.h"
@@ -591,13 +592,6 @@ public:
 		m_cell_list = list;
 	}
 
-	//get mouse point in 3D
-	//mode: 0-maximum with original value; 1-maximum with transfered value; 2-accumulated with original value; 3-accumulated with transfered value
-	double GetPointVolume(Point &mp, Point &ip, double mx, double my, VolumeData* vd, int mode, bool use_transf, double thresh = 0.5);
-	double GetPointVolumeBox(Point &mp, double mx, double my, VolumeData* vd, bool calc_mats = true);
-	double GetPointVolumeBox2(Point &p1, Point &p2, double mx, double my);
-	double GetPointPlane(Point &mp, double mx, double my, Point *planep = 0, bool calc_mats = true);
-
 	//get view info for external ops
 	//get size, considering enlargement
 	wxSize GetGLSize();
@@ -1068,6 +1062,7 @@ private:
 	//handle rulers
 	FL::RulerHandler m_ruler_handler;
 	FL::RulerRenderer m_ruler_renderer;
+	FL::VolumePoint m_vp;
 
 private:
 #ifdef _WIN32
