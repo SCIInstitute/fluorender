@@ -212,8 +212,22 @@ int NRRDReader::LoadBatch(int index)
 
 Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 {
-	if (t<0 || t>=m_time_num)
-		return 0;
+	if (t < 0 || c < 0)
+	{
+		t = 0;
+		c = 0;
+	}
+	else if (t >= m_time_num || c >= m_chan_num)
+	{
+		if (m_time_num > 0)
+			t = m_time_num - 1;
+		else
+			return 0;
+		if (m_chan_num > 0)
+			c = m_chan_num - 1;
+		else
+			return 0;
+	}
 
 	wstring str_name = m_4d_seq[t].filename;
 	m_data_name = GET_NAME(str_name);

@@ -1152,9 +1152,22 @@ int TIFReader::LoadBatch(int index)
 
 Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 {
-	if (t < 0 || t >= m_time_num ||
-		c < 0 || c >= m_chan_num)
-		return 0;
+	if (t < 0 || c < 0)
+	{
+		t = 0;
+		c = 0;
+	}
+	else if (t >= m_time_num || c >= m_chan_num)
+	{
+		if (m_time_num > 0)
+			t = m_time_num - 1;
+		else
+			return 0;
+		if (m_chan_num > 0)
+			c = m_chan_num - 1;
+		else
+			return 0;
+	}
 
 	if (isHyperstack_ && m_max_value)
 		get_max = false;

@@ -2814,6 +2814,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("skip_brick", vd->GetSkipBrick());
 			//path
 			str = vd->GetPath();
+			bool new_chan = false;
 			if (str == "" || m_vrp_embed)
 			{
 				wxString new_folder;
@@ -2822,6 +2823,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				vd->Save(str, 0, false, VRenderFrame::GetCompression());
 				fconfig.Write("path", str);
+				new_chan = true;
 			}
 			else
 				fconfig.Write("path", str);
@@ -2839,7 +2841,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 				fconfig.Write("time_id", "");
 			}
 			fconfig.Write("cur_time", vd->GetCurTime());
-			fconfig.Write("cur_chan", m_vrp_embed?0:vd->GetCurChannel());
+			fconfig.Write("cur_chan", new_chan?0:vd->GetCurChannel());
 
 			//volume properties
 			fconfig.SetPath("properties");
