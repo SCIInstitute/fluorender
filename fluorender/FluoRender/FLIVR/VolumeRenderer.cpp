@@ -1508,15 +1508,15 @@ namespace FLIVR
 
 			//load the texture
 			GLuint tex_id = load_brick(b, GL_NEAREST);
-			if (bricks_a) vr_a->load_brick(b, GL_NEAREST, false, 1);
-			if (bricks_b) vr_b->load_brick(b, GL_NEAREST, false, 2);
-			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask(b, GL_NEAREST);
+			if (bricks_a) vr_a->load_brick((*bricks_a)[i], GL_NEAREST, false, 1);
+			if (bricks_b) vr_b->load_brick((*bricks_b)[i], GL_NEAREST, false, 2);
+			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask((*bricks_a)[i], GL_NEAREST);
 			if (type==8)
 			{
 				if (bricks_a)
-					vr_a->load_brick_mask(b, GL_NEAREST, false, 3);
+					vr_a->load_brick_mask((*bricks_a)[i], GL_NEAREST, false, 3);
 				if (bricks_b)
-					vr_b->load_brick_mask(b, GL_NEAREST, false, 4);
+					vr_b->load_brick_mask((*bricks_b)[i], GL_NEAREST, false, 4);
 			}
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
