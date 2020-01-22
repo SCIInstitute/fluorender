@@ -163,10 +163,10 @@ void ComponentGenerator::ShuffleID()
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -292,7 +292,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		int nz = b->nz();
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -467,10 +467,10 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -571,10 +571,10 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -828,10 +828,10 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1018,10 +1018,10 @@ void ComponentGenerator::DistDensityField(
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1335,10 +1335,10 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1481,7 +1481,7 @@ void ComponentGenerator::ClearBorders()
 		int nz = b->nz();
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1539,10 +1539,10 @@ void ComponentGenerator::FillBorders(float tol)
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1610,10 +1610,10 @@ void ComponentGenerator::OrderID_2D()
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1666,10 +1666,10 @@ void ComponentGenerator::ShuffleID_2D()
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -1735,10 +1735,10 @@ void ComponentGenerator::Grow3DSized(
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 
@@ -2084,10 +2084,10 @@ void ComponentGenerator::DistField(int max_dist, float th, int dsize, float ssca
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+			mid = m_vd->GetVR()->load_brick_mask(b);
 		void* val32 = 0;
 		GetLabel(brick_num, b, &val32);
 

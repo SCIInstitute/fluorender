@@ -720,13 +720,13 @@ void ChannelCompare::Product()
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
+		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
-			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
+			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -865,13 +865,13 @@ void ChannelCompare::MinValue()
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
+		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
-			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
+			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -1010,13 +1010,13 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
+		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(bricks1, i);
-			mid2 = m_vd2->GetVR()->load_brick_mask(bricks2, i);
+			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
+			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -1141,8 +1141,8 @@ void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(0, 0, bricks1, i);
-		GLint tid2 = m_vd2->GetVR()->load_brick(0, 0, bricks2, i);
+		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
+		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
 
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };

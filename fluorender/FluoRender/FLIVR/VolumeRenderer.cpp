@@ -893,12 +893,12 @@ namespace FLIVR
 				else
 					filter = GL_NEAREST;
 
-				if (!load_brick(0, 0, bricks, i, filter, compression_, mode))
+				if (!load_brick(b, filter, compression_, 0, mode))
 					continue;
 				if (mask_)
-					load_brick_mask(bricks, i, filter);
+					load_brick_mask(b, filter);
 				if (label_)
-					load_brick_label(bricks, i);
+					load_brick_label(b);
 				shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
 					mode_ == MODE_OVER ? 1.0 / rate : 1.0);
 
@@ -1151,17 +1151,15 @@ namespace FLIVR
 	//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 	void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff,
-		double scl_translate, double w2d, double bins, bool orthographic_p,
-		bool estimate)
+		double scl_translate, double w2d, double bins, bool copy_brick,
+		bool orthographic_p, bool estimate)
 	{
 		if (estimate && type==0)
 			est_thresh_ = 0.0;
 		bool use_2d = tex_2d_weight1_&&
 			tex_2d_weight2_;
 
-		Ray view_ray = compute_view();
-
-		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
+		vector<TextureBrick*> *bricks = tex_->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -1309,8 +1307,8 @@ namespace FLIVR
 
 			//load the texture
 			GLint tex_id = -1;
-			GLint vd_id = load_brick(0, 0, bricks, i, GL_NEAREST, compression_);
-			GLint mask_id = load_brick_mask(bricks, i, GL_NEAREST);
+			GLint vd_id = load_brick(b, GL_NEAREST, compression_);
+			GLint mask_id = load_brick_mask(b, GL_NEAREST);
 			switch (type)
 			{
 			case 0:
@@ -1332,6 +1330,9 @@ namespace FLIVR
 				fbo_mask->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
+
+			if (type == 1 && copy_brick)
+				copy_mask_border(0, 0);
 
 			//test cl
 			if (estimate && type == 0)
@@ -1373,6 +1374,12 @@ namespace FLIVR
 
 		//enable depth test
 		glEnable(GL_DEPTH_TEST);
+	}
+
+	//for multibrick, copy border to continue diffusion
+	void VolumeRenderer::copy_mask_border(GLint src_tx, int bi)
+	{
+
 	}
 
 	double VolumeRenderer::calc_hist_3d(GLuint data_id, GLuint mask_id,
@@ -1500,16 +1507,16 @@ namespace FLIVR
 			glViewport(0, 0, b->nx(), b->ny());
 
 			//load the texture
-			GLuint tex_id = load_brick(0, 0, bricks, i, GL_NEAREST);
-			if (bricks_a) vr_a->load_brick(1, 0, bricks_a, i, GL_NEAREST);
-			if (bricks_b) vr_b->load_brick(2, 0, bricks_b, i, GL_NEAREST);
-			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask(bricks_a, i, GL_NEAREST);
+			GLuint tex_id = load_brick(b, GL_NEAREST);
+			if (bricks_a) vr_a->load_brick(b, GL_NEAREST, false, 1);
+			if (bricks_b) vr_b->load_brick(b, GL_NEAREST, false, 2);
+			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask(b, GL_NEAREST);
 			if (type==8)
 			{
 				if (bricks_a)
-					vr_a->load_brick_mask(bricks_a, i, GL_NEAREST, false, 3);
+					vr_a->load_brick_mask(b, GL_NEAREST, false, 3);
 				if (bricks_b)
-					vr_b->load_brick_mask(bricks_b, i, GL_NEAREST, false, 4);
+					vr_b->load_brick_mask(b, GL_NEAREST, false, 4);
 			}
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
@@ -1555,8 +1562,9 @@ namespace FLIVR
 		int c = 0;
 		for (unsigned int i=0; i<bricks->size(); i++)
 		{
-			load_brick(0, c, bricks, i, GL_NEAREST);
-			int nb = (*bricks)[i]->nb(c);
+			TextureBrick* b = (*bricks)[i];
+			load_brick(b, GL_NEAREST);
+			int nb = b->nb(c);
 			GLenum format;
 			if (nb < 3)
 				format = GL_RED;
@@ -1564,14 +1572,14 @@ namespace FLIVR
 				format = GL_RGBA;
 
 			// download texture data
-			int sx = (*bricks)[i]->sx();
-			int sy = (*bricks)[i]->sy();
+			int sx = b->sx();
+			int sy = b->sy();
 			glPixelStorei(GL_PACK_ROW_LENGTH, sx);
 			glPixelStorei(GL_PACK_IMAGE_HEIGHT, sy);
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-			GLenum type = (*bricks)[i]->tex_type(c);
-			void* data = (*bricks)[i]->tex_data(c);
+			GLenum type = b->tex_type(c);
+			void* data = b->tex_data(c);
 			glGetTexImage(GL_TEXTURE_3D, 0, format,
 				type, data);
 
@@ -1604,21 +1612,22 @@ namespace FLIVR
 			(order==2)?(i>=0):(i<num);
 			i+=((order==2)?-1:1))
 		{
-			if ((*bricks)[i]->get_skip_mask())
+			TextureBrick* b = (*bricks)[i];
+			if (!b || b->get_skip_mask())
 				continue;
 
-			load_brick_mask(bricks, i);
+			load_brick_mask(b);
 			glActiveTexture(GL_TEXTURE0+c);
 
 			// download texture data
-			int sx = (*bricks)[i]->sx();
-			int sy = (*bricks)[i]->sy();
+			int sx = b->sx();
+			int sy = b->sy();
 			glPixelStorei(GL_PACK_ROW_LENGTH, sx);
 			glPixelStorei(GL_PACK_IMAGE_HEIGHT, sy);
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-			GLenum type = (*bricks)[i]->tex_type(c);
-			void* data = (*bricks)[i]->tex_data(c);
+			GLenum type = b->tex_type(c);
+			void* data = b->tex_data(c);
 			glGetTexImage(GL_TEXTURE_3D, 0, GL_RED,
 				type, data);
 
@@ -1646,16 +1655,17 @@ namespace FLIVR
 
 		for (unsigned int i=0; i<bricks->size(); i++)
 		{
-			load_brick_label(bricks, i);
+			TextureBrick *b = (*bricks)[i];
+			load_brick_label(b);
 			glActiveTexture(GL_TEXTURE0+c);
 
 			//download texture data
-			glPixelStorei(GL_PACK_ROW_LENGTH, (*bricks)[i]->sx());
-			glPixelStorei(GL_PACK_IMAGE_HEIGHT, (*bricks)[i]->sy());
+			glPixelStorei(GL_PACK_ROW_LENGTH, b->sx());
+			glPixelStorei(GL_PACK_IMAGE_HEIGHT, b->sy());
 			glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
 			glGetTexImage(GL_TEXTURE_3D, 0, GL_RED_INTEGER,
-				(*bricks)[i]->tex_type(c), (*bricks)[i]->tex_data(c));
+				b->tex_type(c), b->tex_data(c));
 
 			glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 			glPixelStorei(GL_PACK_IMAGE_HEIGHT, 0);

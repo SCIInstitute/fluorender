@@ -237,8 +237,8 @@ void CountVoxels::Count()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(0, 0, bricks, i);
-		GLint mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		GLint tid = m_vd->GetVR()->load_brick(b);
+		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
 		size_t ng;

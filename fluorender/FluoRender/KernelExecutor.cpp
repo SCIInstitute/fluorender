@@ -241,7 +241,7 @@ bool KernelExecutor::Execute()
 	{
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];
-		GLint data_id = vr->load_brick(0, 0, bricks, i);
+		GLint data_id = vr->load_brick(b);
 		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
 		if (kernel)
 		{

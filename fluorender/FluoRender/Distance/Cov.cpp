@@ -240,7 +240,7 @@ bool Cov::Compute()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
 		size_t ng;
@@ -332,7 +332,7 @@ bool Cov::Compute()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint mid = m_vd->GetVR()->load_brick_mask(bricks, i);
+		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
 		size_t ng;

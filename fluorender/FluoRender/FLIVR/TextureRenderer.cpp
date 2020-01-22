@@ -561,7 +561,7 @@ namespace FLIVR
 #define LOAD_TEXTURE \
 	if (ShaderProgram::no_tex_unpack_) \
 	{ \
-		if (bricks->size() > 1) \
+		if (tex_->get_brick_num() > 1) \
 		{ \
 			unsigned long long mem_size = (unsigned long long)nx* \
 				(unsigned long long)ny*(unsigned long long)nz*nb; \
@@ -592,14 +592,13 @@ namespace FLIVR
 		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, \
 			brick->tex_type(c), brick->tex_data(c));
 
-	GLint TextureRenderer::load_brick(int unit, int c,
-		vector<TextureBrick*> *bricks, int bindex,
-		GLint filter, bool compression, int mode)
+	GLint TextureRenderer::load_brick(TextureBrick* brick,
+		GLint filter, bool compression, int unit, int mode)
 	{
-		GLint result = -1;
-
 		if (clear_pool_) clear_tex_pool();
-		TextureBrick* brick = (*bricks)[bindex];
+
+		GLint result = -1;
+		int c = 0;
 		if (!tex_->isBrxml() &&
 			(!brick || !brick->tex_data(c)))
 			return 0;
@@ -905,11 +904,11 @@ namespace FLIVR
 	}
 
 	//search for or create the mask texture in the texture pool
-	GLint TextureRenderer::load_brick_mask(vector<TextureBrick*> *bricks, int bindex, GLint filter, bool compression, int unit)
+	GLint TextureRenderer::load_brick_mask(TextureBrick* brick, GLint filter, bool compression, int unit)
 	{
 		GLint result = -1;
-
-		TextureBrick* brick = (*bricks)[bindex];
+		if (!brick)
+			return result;
 		int c = brick->nmask();
 		if (c < 0)
 			return result;
@@ -1016,11 +1015,12 @@ namespace FLIVR
 	}
 
 	//search for or create the label texture in the texture pool
-	GLint TextureRenderer::load_brick_label(vector<TextureBrick*> *bricks, int bindex)
+	GLint TextureRenderer::load_brick_label(TextureBrick* brick)
 	{
 		GLint result = -1;
+		if (!brick)
+			return result;
 
-		TextureBrick* brick = (*bricks)[bindex];
 		int c = brick->nlabel();
 
 		glActiveTexture(GL_TEXTURE0 + c);
