@@ -31,14 +31,18 @@ class PropertiesPanel : public QWidget
 
     void setPropGammaSliderVal(int newVal);
     void setPropGammaSpinboxVal(double newVal);
+
     void setPropExtBounSliderVal(int newVal);
     void setPropExtBounSpinboxVal(double newVal);
+
     void setPropSatSliderVal(int newVal);
     void setPropSatSpinboxVal(int newVal);
+
     void setPropLowThreshSliderVal(int newVal);
     void setPropLowThreshSpinboxVal(int newVal);
     void setPropHighThreSliderVal(int newVal);
     void setPropHighThreSpinboxVal(int newVal);
+
     void setPropLuminSliderVal(int newVal);
     void setPropLuminSpinboxVal(int newVal);
 
@@ -49,6 +53,21 @@ class PropertiesPanel : public QWidget
     void setPropAlphaSliderVal(int newVal);
     void setPropAlphaSpinboxVal(int newVal);
     void setPropAlphaEnabled(bool status);
+
+    void setPropSampSliderVal(int newVal);
+    void setPropSampSpinboxVal(double newVal);
+
+    void setPropLShadSlidVal(int newVal);
+    void setPropLShadSpinVal(double newVal);
+    void setPropHShadSlidVal(int newVal);
+    void setPropHShadSpinVal(double newVal);
+    void setPropShaderEnabled(bool status);
+
+    void setPropLCMSlidVal(int newVal);
+    void setPropLCMSpinVal(int newVal);
+    void setPropHCMSlidVal(int newVal);
+    void setPropHCMSpinVal(int newVal);
+    void setPropCMEnabled(bool status);
 
   private:
 
@@ -74,6 +93,9 @@ class PropertiesPanel : public QWidget
 
     QTabWidget *tabWidget = new QTabWidget();
     QGridLayout *myLayout = new QGridLayout();
+
+    VolumePropertiesOptions* getPropertiesOptions();
+    VolumePropertiesMisc* getPropertiesMisc();
 
 };
 

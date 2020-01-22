@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData/VolumeData.hpp>
 
 #include <QString>
+#include <QColor>
 
 namespace FUI
 {

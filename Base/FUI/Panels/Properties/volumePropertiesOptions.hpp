@@ -24,14 +24,18 @@ class VolumePropertiesOptions : public QGridLayout
 
     void setGammaSliderVal(int newVal) { gammaSlider->setValue(newVal); }
     void setGammaSpinboxVal(double newVal) { gammaSpinbox->setValue(newVal); }
+
     void setExtBounSliderVal(int newVal) { extractBSlider->setValue(newVal); }
     void setExtBounSpinBoxVal(double newVal) { extractBSpinbox->setValue(newVal); }
+
     void setSatSliderVal(int newVal) { saturationSlider->setValue(newVal); }
     void setSatSpinboxVal(int newVal) { saturationSpinbox->setValue(newVal); }
+
     void setLowThreshSliderVal(int newVal) { threshold1Slider->setValue(newVal); }
     void setLowThreshSpinboxVal(int newVal) { threshold1Spinbox->setValue(newVal); }
     void setHighThreSliderVal(int newVal) { threshold2Slider->setValue(newVal); }
     void setHighThreSpinboxVal(int newVal) { threshold2Spinbox->setValue(newVal); }
+
     void setLuminSliderVal(int newVal) { luminanceSlider->setValue(newVal); }
     void setLuminSpinboxVal(int newVal) { luminanceSpinbox->setValue(newVal); }
 
@@ -42,6 +46,22 @@ class VolumePropertiesOptions : public QGridLayout
     void setAlphaEnabled(bool status) { alphaLabel->setEnabled(status); }
     void setAlphaSliderVal(int newVal) { alphaSlider->setValue(newVal); }
     void setAlphaSpinboxVal(int newVal) { alphaSpinbox->setValue(newVal); }
+
+    void setSampleSliderVal(int newVal) { sampleRateSlider->setValue(newVal); }
+    void setSampleSpinboxVal(double newVal) { sampleRateSpinbox->setValue(newVal); }
+
+    void setShaderEnabled(bool status) { shadingLabel->setEnabled(status); }
+    void setLowShadeSliderVal(int newVal) { shading1Slider->setValue(newVal); }
+    void setLowShadeSpinboxVal(double newVal) { shading1Spinbox->setValue(newVal); }
+    void setHighShadeSliderVal(int newVal) { shading2Slider->setValue(newVal); }
+    void setHighShadeSpinboxVal(double newVal) { shading2Spinbox->setValue(newVal); }
+
+    void setColorMapEnabled(bool status) { colorMapLabel->setEnabled(status); }
+    void setCMLowSliderVal(int newVal) { colorMap1Slider->setValue(newVal); }
+    void setCMLowSpinboxVal(int newVal) { colorMap1Spinbox->setValue(newVal); }
+    void setCMHighSliderVal(int newVal) { colorMap2Slider->setValue(newVal); }
+    void setCMHighSpinboxVal(int newVal) { colorMap2Spinbox->setValue(newVal); }
+
 
 
   private:

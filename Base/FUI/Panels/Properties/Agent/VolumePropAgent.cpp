@@ -221,23 +221,22 @@ void VolumePropAgent::UpdateAllSettings()
 
     /*
 
-    //color
-    fluoTYPE::Color c;
-	getValue("color", c);
-	wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
-		(unsigned char)(c.g() * 255 + 0.5),
-		(unsigned char)(c.b() * 255 + 0.5));
-    panel_.m_color_text->ChangeValue(QString::Format("%d , %d , %d",
-		wxc.Red(), wxc.Green(), wxc.Blue()));
-	panel_.m_color_btn->SetColour(wxc);
-	getValue("sec color", c);
-	wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
-		(unsigned char)(c.g() * 255 + 0.5),
-		(unsigned char)(c.b() * 255 + 0.5));
-    panel_.m_color2_text->ChangeValue(QString::Format("%d , %d , %d",
-		wxc.Red(), wxc.Green(), wxc.Blue()));
-    panel_.m_color2_btn->SetColour(wxc);
+    //smaple rate
+    if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_sample_text->GetValidator()))
+        vald_fp->SetRange(0.0, 100.0);
+    getValue("sample rate", dval);
+    panel_.m_sample_sldr->SetValue(dval*10.0);
+    str = QString::Format("%.1f", dval);
+    panel_.m_sample_text->ChangeValue(str);
 
+    */
+
+    getValue("sample rate", dval);
+    panel.setPropSampSliderVal(static_cast<int>(dval*10.0));
+    panel.setPropSampSpinboxVal(dval);
+
+
+    /*
 
 	//shadings
 	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_low_shading_text->GetValidator()))
@@ -260,14 +259,104 @@ void VolumePropAgent::UpdateAllSettings()
 	getValue("shading enable", shading_enable);
 	panel_.m_shade_tool->ToggleTool(VolumePropPanel::ID_ShadingEnableChk, shading_enable);
 
+    */
+    double amb = 0.0;
+    double diff = 0.0;
+    double spec = 0.0;
+    double shine = 0.0;
 
-	//smaple rate
-	if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_sample_text->GetValidator()))
-		vald_fp->SetRange(0.0, 100.0);
-	getValue("sample rate", dval);
-	panel_.m_sample_sldr->SetValue(dval*10.0);
-    str = QString::Format("%.1f", dval);
-	panel_.m_sample_text->ChangeValue(str);
+    bool isShadeEnabled;
+
+    getValue("mat amb", amb);
+    getValue("mat diff", diff);
+    getValue("mat spec", spec);
+    getValue("mat shine", shine);
+    getValue("shading enable", isShadeEnabled);
+
+    panel.setPropLShadSlidVal(static_cast<int>(amb*100.0));
+    panel.setPropLShadSpinVal(amb);
+    panel.setPropHShadSlidVal(static_cast<int>(shine*10.0));
+    panel.setPropHShadSpinVal(shine);
+    panel.setPropShaderEnabled(isShadeEnabled);
+    /*
+
+
+    //colormap
+    //double low, high;
+    //vd->GetColormapValues(low, high);
+    //low
+    if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_colormap_low_value_text->GetValidator()))
+        vald_i->SetMin(0);
+    getValue("colormap low", dval);
+    ival = int(dval*panel_.m_max_val + 0.5);
+    panel_.m_colormap_low_value_sldr->SetRange(0, int(panel_.m_max_val));
+    str = QString::Format("%d", ival);
+    panel_.m_colormap_low_value_sldr->SetValue(ival);
+    panel_.m_colormap_low_value_text->ChangeValue(str);
+    //high
+    if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_colormap_high_value_text->GetValidator()))
+        vald_i->SetMin(0);
+    getValue("colormap high", dval);
+    ival = int(dval*panel_.m_max_val + 0.5);
+    panel_.m_colormap_high_value_sldr->SetRange(0, int(panel_.m_max_val));
+    str = QString::Format("%d", ival);
+    panel_.m_colormap_high_value_sldr->SetValue(ival);
+    panel_.m_colormap_high_value_text->ChangeValue(str);
+    //colormap
+    getValue("colormap type", lval);
+    panel_.m_colormap_combo->SetSelection(lval);
+    getValue("colormap proj", lval);
+    panel_.m_colormap_combo2->SetSelection(lval);
+    //mode
+    getValue("colormap mode", lval);
+    bool colormap_enable = lval == 1;
+    panel_.m_colormap_tool->ToggleTool(VolumePropPanel::ID_ColormapEnableChk, colormap_enable);
+    */
+
+    getValue("colormap low", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    panel.setPropLCMSlidVal(ival);
+    panel.setPropLCMSpinVal(ival);
+
+    getValue("colormap high", dval);
+    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    panel.setPropHCMSlidVal(ival);
+    panel.setPropHCMSpinVal(ival);
+
+    /*
+
+    //color
+    fluoTYPE::Color c;
+    getValue("color", c);
+    wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
+        (unsigned char)(c.g() * 255 + 0.5),
+        (unsigned char)(c.b() * 255 + 0.5));
+    panel_.m_color_text->ChangeValue(QString::Format("%d , %d , %d",
+        wxc.Red(), wxc.Green(), wxc.Blue()));
+    panel_.m_color_btn->SetColour(wxc);
+    getValue("sec color", c);
+    wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
+        (unsigned char)(c.g() * 255 + 0.5),
+        (unsigned char)(c.b() * 255 + 0.5));
+    panel_.m_color2_text->ChangeValue(QString::Format("%d , %d , %d",
+        wxc.Red(), wxc.Green(), wxc.Blue()));
+    panel_.m_color2_btn->SetColour(wxc);
+
+    */
+    FLTYPE::Color c;
+    getValue("color", c);
+    QColor qColor(static_cast<int>(c.r() * 255 + 0.5),
+                  static_cast<int>(c.g() * 255 + 0.5),
+                  static_cast<int>(c.b() * 255 + 0.5));
+
+    getValue("sec color", c);
+    qColor = QColor(static_cast<int>(c.r() * 255 + 0.5),
+                  static_cast<int>(c.g() * 255 + 0.5),
+                  static_cast<int>(c.b() * 255 + 0.5));
+
+    // TODO: Find out where these are all changed.
+
+    /*
 
 	//spacings
 	double spcx, spcy, spcz;
@@ -308,36 +397,6 @@ void VolumePropAgent::UpdateAllSettings()
     //bool sync = testSyncParentValue("gamma 3d");
     //panel_.m_options_toolbar->ToggleTool(VolumePropPanel::ID_SyncGroupChk, sync);
 
-	//colormap
-	//double low, high;
-	//vd->GetColormapValues(low, high);
-	//low
-	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_colormap_low_value_text->GetValidator()))
-		vald_i->SetMin(0);
-	getValue("colormap low", dval);
-	ival = int(dval*panel_.m_max_val + 0.5);
-	panel_.m_colormap_low_value_sldr->SetRange(0, int(panel_.m_max_val));
-    str = QString::Format("%d", ival);
-	panel_.m_colormap_low_value_sldr->SetValue(ival);
-	panel_.m_colormap_low_value_text->ChangeValue(str);
-	//high
-	if ((vald_i = (wxIntegerValidator<unsigned int>*)panel_.m_colormap_high_value_text->GetValidator()))
-		vald_i->SetMin(0);
-	getValue("colormap high", dval);
-	ival = int(dval*panel_.m_max_val + 0.5);
-	panel_.m_colormap_high_value_sldr->SetRange(0, int(panel_.m_max_val));
-    str = QString::Format("%d", ival);
-	panel_.m_colormap_high_value_sldr->SetValue(ival);
-	panel_.m_colormap_high_value_text->ChangeValue(str);
-	//colormap
-	getValue("colormap type", lval);
-	panel_.m_colormap_combo->SetSelection(lval);
-	getValue("colormap proj", lval);
-	panel_.m_colormap_combo2->SetSelection(lval);
-	//mode
-	getValue("colormap mode", lval);
-	bool colormap_enable = lval == 1;
-	panel_.m_colormap_tool->ToggleTool(VolumePropPanel::ID_ColormapEnableChk, colormap_enable);
 
 	//inversion
 	getValue("invert", bval);
