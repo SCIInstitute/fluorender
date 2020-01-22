@@ -230,7 +230,7 @@ bool KernelExecutor::Execute()
 			vd->SetSyncR(m_vd->GetSyncR());
 			vd->SetSyncG(m_vd->GetSyncG());
 			vd->SetSyncB(m_vd->GetSyncB());
-			vd->SetCurChannel(m_vd->GetCurChannel());
+			//vd->SetCurChannel(m_vd->GetCurChannel());
 		}
 	}
 	else

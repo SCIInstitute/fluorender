@@ -4914,11 +4914,12 @@ void VRenderFrame::OpenProject(wxString& filename)
 	}
 	else
 		UpdateTree();
-	RefreshVRenderViews();
 
 	if (m_movie_view)
 		m_movie_view->SetView(0);
 	delete prg_diag;
+
+	RefreshVRenderViews(true, true);
 }
 
 void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
