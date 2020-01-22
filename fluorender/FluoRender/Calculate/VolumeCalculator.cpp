@@ -148,7 +148,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd->SetSpcFromFile(true);
-	vd->SetCurChannel(m_vd_a->GetCurChannel());
+	//vd->SetCurChannel(m_vd_a->GetCurChannel());
 	m_vd_r.push_back(vd);
 
 	wxString name = m_vd_a->GetName();
