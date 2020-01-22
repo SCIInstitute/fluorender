@@ -687,14 +687,15 @@ namespace FLIVR
 				if (!bs) break;
 				if (bi>=(int)bs->size()) break;
 
-				if ((*bs)[bi]->get_priority()>0)
+				TextureBrick* b = (*bs)[bi];
+				if (b->get_priority()>0)
 				{
 					if (TextureRenderer::mem_swap_ &&
 						TextureRenderer::start_update_loop_ &&
 						!TextureRenderer::done_update_loop_)
 					{
-						if (!(*bs)[bi]->drawn(0))
-							(*bs)[bi]->set_drawn(0, true);
+						if (!b->drawn(0))
+							b->set_drawn(0, true);
 					}
 					continue;
 				}
@@ -704,11 +705,11 @@ namespace FLIVR
 					filter = GL_LINEAR;
 				else
 					filter = GL_NEAREST;
-				vr_list_[tn]->load_brick(0, 0, bs, bi, filter, vr_list_[tn]->compression_);
+				vr_list_[tn]->load_brick(b, filter, vr_list_[tn]->compression_);
 				if (vr_list_[tn]->mask_)
-					vr_list_[tn]->load_brick_mask(bs, bi, filter);
+					vr_list_[tn]->load_brick_mask(b, filter);
 				if (vr_list_[tn]->label_)
-					vr_list_[tn]->load_brick_label(bs, bi);
+					vr_list_[tn]->load_brick_label(b);
 
 				idx_num = (size[i]-2)*3;
 				if (va_slices_)

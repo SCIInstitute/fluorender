@@ -380,11 +380,11 @@ namespace FLIVR
 		void check_swap_memory(TextureBrick* brick, int c);
 		//load texture bricks for drawing
 		//unit:assigned unit, c:channel
-		GLint load_brick(int unit, int c, vector<TextureBrick*> *b, int i, GLint filter=GL_LINEAR, bool compression=false, int mode=0);
+		GLint load_brick(TextureBrick* brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0);
 		//load the texture for volume mask into texture pool
-		GLint load_brick_mask(vector<TextureBrick*> *b, int i, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
+		GLint load_brick_mask(TextureBrick* brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
 		//load the texture for volume labeling into texture pool
-		GLint load_brick_label(vector<TextureBrick*> *b, int i);
+		GLint load_brick_label(TextureBrick* brick);
 		void release_texture(int unit, GLenum target);
 
 		//draw slices of the volume

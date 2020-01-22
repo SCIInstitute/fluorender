@@ -170,7 +170,7 @@ void Diffusion::Init(Point &ip, double ini_thresh)
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
 
@@ -296,7 +296,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(0, 0, bricks, i);
+		GLint did = m_vd->GetVR()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
 

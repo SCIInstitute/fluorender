@@ -168,8 +168,10 @@ namespace FLIVR
 		//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 		void draw_mask(int type, int paint_mode, int hr_mode,
 			double ini_thresh, double gm_falloff, double scl_falloff,
-			double scl_translate, double w2d, double bins, bool ortho,
-			bool estimate);
+			double scl_translate, double w2d, double bins, bool copy_brick,
+			bool ortho, bool estimate);
+		//for multibrick, copy border to continue diffusion
+		void copy_mask_border(GLint src_tx, int bi);
 
 		double calc_hist_3d(GLuint, GLuint, size_t, size_t, size_t);
 
