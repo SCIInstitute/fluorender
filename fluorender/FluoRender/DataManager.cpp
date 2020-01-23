@@ -1786,7 +1786,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		m_vr->draw_mask(type, paint_mode, hr_mode,
 			ini_thresh, gm_falloff,
 			scl_falloff, scl_translate,
-			w2d, bins, order>0,
+			w2d, bins, order,
 			ortho, estimate);
 		//if (GetAllBrickNum()>1 &&
 		//	(order == 1 || order == 2))
