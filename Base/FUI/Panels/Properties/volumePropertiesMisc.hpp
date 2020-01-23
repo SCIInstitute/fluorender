@@ -23,6 +23,7 @@ class VolumePropertiesMisc : public QGridLayout
   public:
     VolumePropertiesMisc();
 
+
   private:
 
     void addRow0();

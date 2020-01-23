@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QSlider>
 
+#include <type_traits>
+
 #include "fluoSliderStyle.hpp"
 
 class FluoSlider : public QSlider
@@ -17,7 +19,16 @@ class FluoSlider : public QSlider
         this->setOrientation(ori);
         this->setRange(floor,ceiling);
     }
-    void updateValue(int value) { this->setValue(value); }
+
+    template<typename T>
+    void updateValue(T value)
+    {
+      if(std::is_same_v<T,int>)
+        this->setValue(value);
+      else
+        this->setValue(static_cast<int>(value * 100.0 + 0.5));
+    }
+
     int get() const { return this->value(); }
 };
 

@@ -1,5 +1,4 @@
 #include "propertiesPanel.hpp"
-#include <iostream>
 
 PropertiesPanel::PropertiesPanel()
 {
@@ -29,98 +28,98 @@ void PropertiesPanel::setPropGammaSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setGammaSliderVal(newVal);
+  temp->setGammaValue(newVal);
 }
 
 void PropertiesPanel::setPropGammaSpinboxVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setGammaSpinboxVal(newVal);
+  temp->setGammaValue(newVal);
 }
 
 void PropertiesPanel::setPropExtBounSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setExtBounSliderVal(newVal);
+  temp->setExtBoundValue(newVal);
 }
 
 void PropertiesPanel::setPropExtBounSpinboxVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setExtBounSpinBoxVal(newVal);
+  temp->setExtBoundValue(newVal);
 }
 
 void PropertiesPanel::setPropSatSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setSatSliderVal(newVal);
+  temp->setSaturationVal(newVal);
 }
 
 void PropertiesPanel::setPropSatSpinboxVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setSatSpinboxVal(newVal);
+  temp->setSaturationVal(newVal);
 }
 
 void PropertiesPanel::setPropLowThreshSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setLowThreshSliderVal(newVal);
+  temp->setLowThreshValue(newVal);
 }
 
 void PropertiesPanel::setPropLowThreshSpinboxVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setLowThreshSpinboxVal(newVal);
+  temp->setLowThreshValue(newVal);
 }
 
 void PropertiesPanel::setPropHighThreSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setHighThreSliderVal(newVal);
+  temp->setHighThreshValue(newVal);
 }
 
 void PropertiesPanel::setPropHighThreSpinboxVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setHighThreSpinboxVal(newVal);
+  temp->setHighThreshValue(newVal);
 }
 
 void PropertiesPanel::setPropLuminSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setLuminSliderVal(newVal);
+  temp->setLuminanceVal(newVal);
 }
 
 void PropertiesPanel::setPropLuminSpinboxVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setLuminSpinboxVal(newVal);
+  temp->setLuminanceVal(newVal);
 }
 
 void PropertiesPanel::setPropShadowSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setShadowSliderVal(newVal);
+  temp->setShadowValue(newVal);
 }
 
 void PropertiesPanel::setPropShadowSpinboxVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setShadowSpinboxVal(newVal);
+  temp->setShadowValue(newVal);
 }
 
 void PropertiesPanel::setPropShadowEnabled(bool status)
@@ -134,14 +133,14 @@ void PropertiesPanel::setPropAlphaSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setAlphaSliderVal(newVal);
+  temp->setAlphaVal(newVal);
 }
 
 void PropertiesPanel::setPropAlphaSpinboxVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setAlphaSpinboxVal(newVal);
+  temp->setAlphaVal(newVal);
 }
 
 void PropertiesPanel::setPropAlphaEnabled(bool status)
@@ -155,42 +154,42 @@ void PropertiesPanel::setPropSampSliderVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setSampleSliderVal(newVal);
+  temp->setSampleValue(newVal);
 }
 
 void PropertiesPanel::setPropSampSpinboxVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setSampleSpinboxVal(newVal);
+  temp->setSampleValue(newVal);
 }
 
 void PropertiesPanel::setPropLShadSlidVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setLowShadeSliderVal(newVal);
+  temp->setLowShaderVal(newVal);
 }
 
 void PropertiesPanel::setPropLShadSpinVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setLowShadeSpinboxVal(newVal);
+  temp->setLowShaderVal(newVal);
 }
 
 void PropertiesPanel::setPropHShadSlidVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setHighShadeSliderVal(newVal);
+  temp->setHighShaderVal(newVal);
 }
 
 void PropertiesPanel::setPropHShadSpinVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setHighShadeSpinboxVal(newVal);
+  temp->setHighShaderVal(newVal);
 }
 
 void PropertiesPanel::setPropShaderEnabled(bool status)
@@ -204,28 +203,28 @@ void PropertiesPanel::setPropLCMSlidVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setCMLowSliderVal(newVal);
+  temp->setColorMapLowVal(newVal);
 }
 
 void PropertiesPanel::setPropLCMSpinVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setCMLowSpinboxVal(newVal);
+  temp->setColorMapLowVal(newVal);
 }
 
 void PropertiesPanel::setPropHCMSlidVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setCMHighSliderVal(newVal);
+  temp->setColorMapHighVal(newVal);
 }
 
 void PropertiesPanel::setPropHCMSpinVal(int newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
 
-  temp->setCMHighSpinboxVal(newVal);
+  temp->setColorMapHighVal(newVal);
 }
 
 void PropertiesPanel::setPropCMEnabled(bool status)

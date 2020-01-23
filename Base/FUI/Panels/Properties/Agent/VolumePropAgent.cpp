@@ -55,8 +55,7 @@ fluo::VolumeData* VolumePropAgent::getObject()
 
 void VolumePropAgent::UpdateAllSettings()
 {
-    QString str;
-	double dval = 0.0;
+    double dval = 0.0;
 	int ival = 0;
 	bool bval = false;
 	long lval = 0;

@@ -3,6 +3,34 @@
 VolumePropertiesOptions::VolumePropertiesOptions()
 {
   constructLayout();
+  //connect(object,SIGNAL,this,SLOT(function));
+
+  connect(gammaSlider,SIGNAL(sliderReleased()),this,SLOT(onGammaSliderChanged()));
+  connect(gammaSpinbox,SIGNAL(editingFinished()),this,SLOT(onGammaSpinboxChanged()));
+  connect(extractBSlider,SIGNAL(sliderReleased()),this,SLOT(onExtBoundSliderChanged()));
+  connect(extractBSpinbox,SIGNAL(editingFinished()),this,SLOT(onExtBoundSpinboxChanged()));
+  connect(saturationSlider,SIGNAL(sliderReleased()),this,SLOT(onSatSliderChanged()));
+  connect(saturationSpinbox,SIGNAL(editingFinished()),this,SLOT(onSatSpinboxChanged()));
+  connect(threshold1Slider,SIGNAL(sliderReleased()),this,SLOT(onLowThreshSliderChanged()));
+  connect(threshold1Spinbox,SIGNAL(editingFinished()),this,SLOT(onLowThreshSpinChanged()));
+  connect(threshold2Slider,SIGNAL(sliderReleased()),this,SLOT(onHighThreshSliderChanged()));
+  connect(threshold2Spinbox,SIGNAL(editingFinished()),this,SLOT(onHighThreshSpinChanged()));
+  connect(luminanceSlider,SIGNAL(sliderReleased()),this,SLOT(onLuminanceSliderChanged()));
+  connect(luminanceSpinbox,SIGNAL(editingFinished()),this,SLOT(onLuminanceSpinChanged()));
+  connect(shadowSlider,SIGNAL(sliderReleased()),this,SLOT(onShadowSliderChanged()));
+  connect(shadowSpinbox,SIGNAL(editingFinished()),this,SLOT(onShadowSpinChanged()));
+  connect(alphaSlider,SIGNAL(sliderReleased()),this,SLOT(onAlphaSliderChanged()));
+  connect(alphaSpinbox,SIGNAL(editingFinished()),this,SLOT(onAlphaSpinChanged()));
+  connect(sampleRateSlider,SIGNAL(sliderReleased()),this,SLOT(onSampleSliderChanged()));
+  connect(sampleRateSpinbox,SIGNAL(editingFinished()),this,SLOT(onSampleSpinChanged()));
+  connect(shading1Slider,SIGNAL(sliderReleased()),this,SLOT(onLShaderSliderChanged()));
+  connect(shading1Spinbox,SIGNAL(editingFinished()),this,SLOT(onLShaderSpinChanged()));
+  connect(shading2Slider,SIGNAL(sliderReleased()),this,SLOT(onHShaderSliderChanged()));
+  connect(shading2Spinbox,SIGNAL(editingFinished()),this,SLOT(onHShaderSpinChanged()));
+  connect(colorMap1Slider,SIGNAL(sliderReleased()),this,SLOT(onLCMSliderChanged()));
+  connect(colorMap1Spinbox,SIGNAL(editingFinished()),this,SLOT(onLCMSpinChanged()));
+  connect(colorMap2Slider,SIGNAL(sliderReleased()),this,SLOT(onHCMSliderChanged()));
+  connect(colorMap2Spinbox,SIGNAL(editingFinished()),this,SLOT(onHCMSpinChanged()));
 }
 
 void VolumePropertiesOptions::addRow0()

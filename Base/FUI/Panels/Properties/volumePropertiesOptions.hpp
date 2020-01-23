@@ -8,6 +8,7 @@
 #include <CustomWidgets/fluoSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoToolButton.hpp>
+#include <CustomWidgets/controller.hpp>
 
 #include <vector>
 #include <functional>
@@ -16,51 +17,84 @@ class VolumePropertiesOptions : public QGridLayout
 {
   Q_OBJECT
 
+  public slots:
+    void onGammaSliderChanged() { setGammaValue(gammaSlider->value()); }
+    void onGammaSpinboxChanged() { setGammaValue(gammaSpinbox->value()); }
+
+    void onExtBoundSliderChanged() { setExtBoundValue(extractBSlider->value()); }
+    void onExtBoundSpinboxChanged() { setExtBoundValue(extractBSpinbox->value()); }
+
+    void onSatSliderChanged() { setSaturationVal(saturationSlider->value()); }
+    void onSatSpinboxChanged() { setSaturationVal(saturationSpinbox->value()); }
+
+    void onLowThreshSliderChanged() { setLowThreshValue(threshold1Slider->value()); }
+    void onLowThreshSpinChanged() { setLowThreshValue(threshold1Spinbox->value()); }
+    void onHighThreshSliderChanged() { setHighThreshValue(threshold2Slider->value()); }
+    void onHighThreshSpinChanged() { setHighThreshValue(threshold2Spinbox->value()); }
+
+    void onLuminanceSliderChanged() { setLuminanceVal(luminanceSlider->value()); }
+    void onLuminanceSpinChanged() { setLuminanceVal(luminanceSpinbox->value()); }
+
+    void onShadowSliderChanged() { setShadowValue(shadowSlider->value()); }
+    void onShadowSpinChanged() { setShadowValue(shadowSpinbox->value()); }
+
+    void onAlphaSliderChanged() { setAlphaVal(alphaSlider->value()); }
+    void onAlphaSpinChanged() { setAlphaVal(alphaSpinbox->value()); }
+
+    void onSampleSliderChanged() { setSampleValue(sampleRateSlider->value()); }
+    void onSampleSpinChanged() { setSampleValue(sampleRateSpinbox->value()); }
+
+    void onLShaderSliderChanged() { setLowShaderVal(shading1Slider->value()); }
+    void onLShaderSpinChanged() { setLowShaderVal(shading1Spinbox->value()); }
+    void onHShaderSliderChanged() { setHighShaderVal(shading2Slider->value()); }
+    void onHShaderSpinChanged() { setHighShaderVal(shading2Spinbox->value()); }
+
+    void onLCMSliderChanged() { setColorMapLowVal(colorMap1Slider->value()); }
+    void onLCMSpinChanged() { setColorMapLowVal(colorMap1Spinbox->value()); }
+    void onHCMSliderChanged() { setColorMapHighVal(colorMap2Slider->value()); }
+    void onHCMSpinChanged() { setColorMapHighVal(colorMap2Slider->value()); }
+
   public:
     VolumePropertiesOptions();
 
     void setMaxVal(double newVal) { maxVal = newVal; }
     double getMaxVal() const { return maxVal; }
 
-    void setGammaSliderVal(int newVal) { gammaSlider->setValue(newVal); }
-    void setGammaSpinboxVal(double newVal) { gammaSpinbox->setValue(newVal); }
+    template<typename T>
+    void setGammaValue(T newVal) { gammaController->setValues(newVal); }
 
-    void setExtBounSliderVal(int newVal) { extractBSlider->setValue(newVal); }
-    void setExtBounSpinBoxVal(double newVal) { extractBSpinbox->setValue(newVal); }
+    template<typename T>
+    void setExtBoundValue(T newVal) { boundaryController->setValues(newVal); }
 
-    void setSatSliderVal(int newVal) { saturationSlider->setValue(newVal); }
-    void setSatSpinboxVal(int newVal) { saturationSpinbox->setValue(newVal); }
+    void setSaturationVal(int newVal) { saturationController->setValues(newVal); }
 
-    void setLowThreshSliderVal(int newVal) { threshold1Slider->setValue(newVal); }
-    void setLowThreshSpinboxVal(int newVal) { threshold1Spinbox->setValue(newVal); }
-    void setHighThreSliderVal(int newVal) { threshold2Slider->setValue(newVal); }
-    void setHighThreSpinboxVal(int newVal) { threshold2Spinbox->setValue(newVal); }
+    void setLowThreshValue(int newVal) { threshold1Controller->setValues(newVal); }
+    void setHighThreshValue(int newVal) { threshold2Controller->setValues(newVal); }
 
-    void setLuminSliderVal(int newVal) { luminanceSlider->setValue(newVal); }
-    void setLuminSpinboxVal(int newVal) { luminanceSpinbox->setValue(newVal); }
+    void setLuminanceVal(int newVal) { luminanceController->setValues(newVal); }
 
     void setShadowEnabled(bool status) { shadowLabel->setEnabled(status); }
-    void setShadowSliderVal(int newVal) { shadowSlider->setValue(newVal); }
-    void setShadowSpinboxVal(double newVal) { shadowSpinbox->setValue(newVal); }
+
+    template<typename T>
+    void setShadowValue(T newVal) { shadowController->setValues(newVal); }
 
     void setAlphaEnabled(bool status) { alphaLabel->setEnabled(status); }
-    void setAlphaSliderVal(int newVal) { alphaSlider->setValue(newVal); }
-    void setAlphaSpinboxVal(int newVal) { alphaSpinbox->setValue(newVal); }
+    void setAlphaVal(int newVal) { alphaController->setValues(newVal); }
 
-    void setSampleSliderVal(int newVal) { sampleRateSlider->setValue(newVal); }
-    void setSampleSpinboxVal(double newVal) { sampleRateSpinbox->setValue(newVal); }
+    template<typename T>
+    void setSampleValue(T newVal) { sampleRateController->setValues(newVal); }
 
     void setShaderEnabled(bool status) { shadingLabel->setEnabled(status); }
-    void setLowShadeSliderVal(int newVal) { shading1Slider->setValue(newVal); }
-    void setLowShadeSpinboxVal(double newVal) { shading1Spinbox->setValue(newVal); }
-    void setHighShadeSliderVal(int newVal) { shading2Slider->setValue(newVal); }
-    void setHighShadeSpinboxVal(double newVal) { shading2Spinbox->setValue(newVal); }
+
+    template<typename T>
+    void setLowShaderVal(T newVal) { shading1Controller->setValues(newVal); }
+
+    template<typename T>
+    void setHighShaderVal(T newVal) { shading2Controller->setValues(newVal); }
 
     void setColorMapEnabled(bool status) { colorMapLabel->setEnabled(status); }
-    void setCMLowSliderVal(int newVal) { colorMap1Slider->setValue(newVal); }
-    void setCMLowSpinboxVal(int newVal) { colorMap1Spinbox->setValue(newVal); }
-    void setCMHighSliderVal(int newVal) { colorMap2Slider->setValue(newVal); }
-    void setCMHighSpinboxVal(int newVal) { colorMap2Spinbox->setValue(newVal); }
+    void setColorMapLowVal(int newVal)  { colorMap1Controller->setValues(newVal); }
+    void setColorMapHighVal(int newVal) { colorMap2Controller->setValues(newVal); }
 
 
 
@@ -76,8 +110,8 @@ class VolumePropertiesOptions : public QGridLayout
 
     void constructLayout();
 
-    FluoSlider* gammaSlider      = new FluoSlider(Qt::Horizontal,0,100);
-    FluoSlider* extractBSlider   = new FluoSlider(Qt::Horizontal,0,50);
+    FluoSlider* gammaSlider      = new FluoSlider(Qt::Horizontal,0,1000);
+    FluoSlider* extractBSlider   = new FluoSlider(Qt::Horizontal,0,100);
     FluoSlider* saturationSlider = new FluoSlider(Qt::Horizontal,0,255);
     FluoSlider* threshold1Slider = new FluoSlider(Qt::Horizontal,0,255);
     FluoSlider* threshold2Slider = new FluoSlider(Qt::Horizontal,0,255);
@@ -122,6 +156,33 @@ class VolumePropertiesOptions : public QGridLayout
       std::bind(&VolumePropertiesOptions::addRow3,this),
       std::bind(&VolumePropertiesOptions::addRow4,this),
     };
+
+    Controller<FluoSlider,FluoSpinboxDouble> *gammaController =
+            new Controller<FluoSlider,FluoSpinboxDouble>(*gammaSlider,*gammaSpinbox);
+    Controller<FluoSlider,FluoSpinboxDouble> *boundaryController =
+            new Controller<FluoSlider,FluoSpinboxDouble>(*extractBSlider,*extractBSpinbox);
+    Controller<FluoSlider,FluoSpinbox> *saturationController =
+            new Controller<FluoSlider,FluoSpinbox>(*saturationSlider,*saturationSpinbox);
+    Controller<FluoSlider,FluoSpinbox> *threshold1Controller =
+            new Controller<FluoSlider,FluoSpinbox>(*threshold1Slider,*threshold1Spinbox);
+    Controller<FluoSlider,FluoSpinbox> *threshold2Controller =
+            new Controller<FluoSlider,FluoSpinbox>(*threshold2Slider,*threshold2Spinbox);
+    Controller<FluoSlider,FluoSpinbox> *luminanceController =
+            new Controller<FluoSlider,FluoSpinbox>(*luminanceSlider,*luminanceSpinbox);
+    Controller<FluoSlider,FluoSpinboxDouble> *shadowController =
+            new Controller<FluoSlider,FluoSpinboxDouble>(*shadowSlider,*shadowSpinbox);
+    Controller<FluoSlider,FluoSpinbox> *alphaController =
+            new Controller<FluoSlider,FluoSpinbox>(*alphaSlider,*alphaSpinbox);
+    Controller<FluoSlider,FluoSpinboxDouble> *sampleRateController =
+            new Controller<FluoSlider,FluoSpinboxDouble>(*sampleRateSlider,*sampleRateSpinbox);
+    Controller<FluoSlider,FluoSpinboxDouble> *shading1Controller =
+            new Controller<FluoSlider,FluoSpinboxDouble>(*shading1Slider,*shading1Spinbox);
+    Controller<FluoSlider,FluoSpinboxDouble> *shading2Controller =
+            new Controller<FluoSlider,FluoSpinboxDouble>(*shading2Slider,*shading2Spinbox);
+    Controller<FluoSlider,FluoSpinbox> *colorMap1Controller =
+            new Controller<FluoSlider,FluoSpinbox>(*colorMap1Slider,*colorMap1Spinbox);
+    Controller<FluoSlider,FluoSpinbox> *colorMap2Controller =
+            new Controller<FluoSlider,FluoSpinbox>(*colorMap2Slider,*colorMap2Spinbox);
 };
 
 #endif

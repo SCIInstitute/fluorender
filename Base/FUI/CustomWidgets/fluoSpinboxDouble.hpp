@@ -22,7 +22,14 @@ class FluoSpinboxDouble : public QDoubleSpinBox
         this->setButtonSymbols(QAbstractSpinBox::NoButtons);
     }
     
-    void updateValue(double value) { this->setValue(value); }
+    template<typename T>
+    void updateValue(T value)
+    {
+      if(std::is_same_v<T,double>)
+        this->setValue(value);
+      else
+        this->setValue(static_cast<double>(value / 100.0));
+    }
 
     double get() const { return this->value(); }
 

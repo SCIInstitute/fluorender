@@ -17,7 +17,14 @@ class FluoSpinbox : public QSpinBox
         this->setButtonSymbols(QAbstractSpinBox::NoButtons);
     }
     
-    void updateValue(int value) { this->setValue(value); }
+    template<typename T>
+    void updateValue(T value)
+    {
+      if(std::is_same_v<T,int>)
+        this->setValue(value);
+      else
+        this->setValue(static_cast<int>(value * 100.0 + 0.5));
+    }
 
     int get() const { return this->value(); }
 };
