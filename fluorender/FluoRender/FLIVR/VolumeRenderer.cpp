@@ -1310,7 +1310,7 @@ namespace FLIVR
 			//load the texture
 			GLint tex_id = -1;
 			GLint vd_id = load_brick(b, GL_NEAREST, compression_);
-			GLint mask_id = load_brick_mask(b, GL_NEAREST);
+			GLint mask_id = load_brick_mask(b);
 			switch (type)
 			{
 			case 0:
@@ -1396,8 +1396,7 @@ namespace FLIVR
 			nb = tex_->get_brick(nid);
 			if (nb)
 			{
-				nbnx = nb->nx(); nbny = nb->ny(); nbnz = nb->nz();
-				nbtex = load_brick_mask(nb, GL_NEAREST);
+				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
 					btex, GL_TEXTURE_3D, 0,
 					bnx - 1, 0, 0,
@@ -1406,7 +1405,31 @@ namespace FLIVR
 					1, bny, bnz);
 			}
 			//posy
+			nid = tex_->posyid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb)
+			{
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, bny - 1, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					bnx, 1, bnz);
+			}
 			//posz
+			nid = tex_->poszid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb)
+			{
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, 0, bnz - 1,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					bnx, bny, 1);
+			}
 		}
 		else
 		{
@@ -1415,8 +1438,8 @@ namespace FLIVR
 			nb = tex_->get_brick(nid);
 			if (nb)
 			{
-				nbnx = nb->nx(); nbny = nb->ny(); nbnz = nb->nz();
-				nbtex = load_brick_mask(nb, GL_NEAREST);
+				nbnx = nb->nx();
+				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
 					btex, GL_TEXTURE_3D, 0,
 					0, 0, 0,
@@ -1425,7 +1448,33 @@ namespace FLIVR
 					1, bny, bnz);
 			}
 			//negy
+			nid = tex_->negyid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb)
+			{
+				nbny = nb->ny();
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, nbny - 1, 0,
+					bnx, 1, bnz);
+			}
 			//negz
+			nid = tex_->negzid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb)
+			{
+				nbnz = nb->nz();
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, nbnz - 1,
+					bnx, bny, 1);
+			}
 		}
 	}
 
@@ -1557,7 +1606,7 @@ namespace FLIVR
 			GLuint tex_id = load_brick(b, GL_NEAREST);
 			if (bricks_a) vr_a->load_brick((*bricks_a)[i], GL_NEAREST, false, 1);
 			if (bricks_b) vr_b->load_brick((*bricks_b)[i], GL_NEAREST, false, 2);
-			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask((*bricks_a)[i], GL_NEAREST);
+			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask((*bricks_a)[i]);
 			if (type==8)
 			{
 				if (bricks_a)
