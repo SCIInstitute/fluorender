@@ -231,7 +231,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_select_group_chk = new wxCheckBox(this, ID_BrushSelectGroupChk, "Apply to Group:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_accurate_bricks_chk = new wxCheckBox(this, ID_AccurateBricksChk, "Accurate Bricks:",
+	m_accurate_bricks_chk = new wxCheckBox(this, ID_AccurateBricksChk, "Cross Bricks:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	sizer1_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
