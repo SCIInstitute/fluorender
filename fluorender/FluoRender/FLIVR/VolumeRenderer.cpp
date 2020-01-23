@@ -1151,7 +1151,7 @@ namespace FLIVR
 	//hr_mode (hidden removal): 0-none; 1-ortho; 2-persp
 	void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		double ini_thresh, double gm_falloff, double scl_falloff,
-		double scl_translate, double w2d, double bins, bool copy_brick,
+		double scl_translate, double w2d, double bins, int order,
 		bool orthographic_p, bool estimate)
 	{
 		if (estimate && type==0)
@@ -1274,7 +1274,9 @@ namespace FLIVR
 		float matrix[16];
 		int i;
 		unsigned int num = bricks->size();
-		for (i=0; i<num; ++i)
+		for (i = ((order == 2) ? (num - 1) : 0);
+			(order == 2) ? (i >= 0) : (i < num);
+			i += ((order == 2) ? -1 : 1))
 		{
 			TextureBrick* b = (*bricks)[i];
 			if (!test_against_view(b->bbox(), !orthographic_p))
@@ -1331,8 +1333,8 @@ namespace FLIVR
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
-			if (type == 1 && copy_brick)
-				copy_mask_border(0, 0);
+			if (type == 1 && order)
+				copy_mask_border(mask_id, b, order);
 
 			//test cl
 			if (estimate && type == 0)
@@ -1377,9 +1379,54 @@ namespace FLIVR
 	}
 
 	//for multibrick, copy border to continue diffusion
-	void VolumeRenderer::copy_mask_border(GLint src_tx, int bi)
+	void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 	{
-
+		if (!b || !btex || !order)
+			return;
+		TextureBrick* nb;//neighbor brick
+		unsigned int nid;//neighbor id
+		unsigned int bid = b->get_id();
+		GLint nbtex;//tex name of neighbor
+		int bnx, bny, bnz, nbnx, nbny, nbnz;
+		bnx = b->nx(); bny = b->ny(); bnz = b->nz();
+		if (order == 1)
+		{
+			//posx
+			nid = tex_->posxid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb)
+			{
+				nbnx = nb->nx(); nbny = nb->ny(); nbnz = nb->nz();
+				nbtex = load_brick_mask(nb, GL_NEAREST);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					bnx - 1, 0, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					1, bny, bnz);
+			}
+			//posy
+			//posz
+		}
+		else
+		{
+			//negx
+			nid = tex_->negxid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb)
+			{
+				nbnx = nb->nx(); nbny = nb->ny(); nbnz = nb->nz();
+				nbtex = load_brick_mask(nb, GL_NEAREST);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					nbnx - 1, 0, 0,
+					1, bny, bnz);
+			}
+			//negy
+			//negz
+		}
 	}
 
 	double VolumeRenderer::calc_hist_3d(GLuint data_id, GLuint mask_id,
