@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 
-namespace FUI
+namespace FluoUI
 {
 	class InterfaceAgent;
 }

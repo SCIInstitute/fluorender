@@ -29,19 +29,20 @@ DEALINGS IN THE SOFTWARE.
 #define VOLUME_PROP_AGENT_HPP
 
 #include <Panels/Base_Agent/InterfaceAgent.hpp>
-#include <Panels/Properties/propertiesPanel.hpp>
+#include <Panels/Properties/Messenger/propertyMessenger.hpp>
+
 #include <VolumeData/VolumeData.hpp>
 
 #include <QString>
 #include <QColor>
 
-namespace FUI
+namespace FluoUI
 {
-	class AgentFactory;
-	class VolumePropAgent : public InterfaceAgent
+    class AgentFactory;
+    class VolumePropAgent : public InterfaceAgent
 	{
 	public:
-        VolumePropAgent(PropertiesPanel &panel);
+        VolumePropAgent(PropertyMessenger &panel);
 
         virtual bool isSameKindAs(const fluo::Object* obj) const
 		{
@@ -55,7 +56,7 @@ namespace FUI
 
 		virtual void UpdateAllSettings();
 
-		friend class AgentFactory;
+        friend class AgentFactory;
 
 	protected:
 
@@ -64,7 +65,7 @@ namespace FUI
         void OnColorChanged(fluo::Event& event);
 
 	private:
-        PropertiesPanel &panel;
+        PropertyMessenger &parentPanel;
     };
 }
 

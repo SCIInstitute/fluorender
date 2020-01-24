@@ -5,6 +5,8 @@
 #include <QString>
 #include <QDoubleSpinBox>
 
+#include <any>
+
 // TODO: Fix this code so it will update the value based on input
 
 class FluoSpinboxDouble : public QDoubleSpinBox
@@ -21,7 +23,7 @@ class FluoSpinboxDouble : public QDoubleSpinBox
       if(!hasButtons)
         this->setButtonSymbols(QAbstractSpinBox::NoButtons);
     }
-    
+   /*
     template<typename T>
     void updateValue(T value)
     {
@@ -29,6 +31,19 @@ class FluoSpinboxDouble : public QDoubleSpinBox
         this->setValue(value);
       else
         this->setValue(static_cast<double>(value / 100.0));
+    }
+    */
+
+    void updateValue(std::any value)
+    {
+      try
+      {
+        this->setValue(std::any_cast<double>(value));
+      }
+      catch (const std::bad_any_cast &e)
+      {
+        this->setValue(static_cast<double>(std::any_cast<int>(value) / 100.0));
+      }
     }
 
     double get() const { return this->value(); }

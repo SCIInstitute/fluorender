@@ -17,9 +17,33 @@ class VolumePropertiesOptions : public QGridLayout
 {
   Q_OBJECT
 
+  signals:
+
+    void sendGammaValue(std::any value);
+
+    void sendExtBoundValue(std::any value);
+
+    void sendSaturationValue(int value);
+    void sendLowThreshValue(int value);
+    void sendHighThreshValue(int value);
+    void sendLuminanceValue(int value);
+
+    void sendShadowValue(std::any value);
+
+    void sendAlphaValue(int value);
+
+    void sendSampleValue(std::any value);
+
+    void sendLowShadeValue(std::any value);
+
+    void sendHighShadeValue(std::any value);
+
+    void sendColorMapLowValue(int value);
+    void sendColorMapHighValue(int value);
+
   public slots:
-    void onGammaSliderChanged() { setGammaValue(gammaSlider->value()); }
-    void onGammaSpinboxChanged() { setGammaValue(gammaSpinbox->value()); }
+    void onGammaSliderChanged() { sendGammaValue(gammaSlider->value()); }
+    void onGammaSpinboxChanged() { sendGammaValue(gammaSpinbox->value()); }
 
     void onExtBoundSliderChanged() { setExtBoundValue(extractBSlider->value()); }
     void onExtBoundSpinboxChanged() { setExtBoundValue(extractBSpinbox->value()); }
@@ -55,6 +79,7 @@ class VolumePropertiesOptions : public QGridLayout
     void onHCMSpinChanged() { setColorMapHighVal(colorMap2Slider->value()); }
 
   public:
+
     VolumePropertiesOptions();
 
     void setMaxVal(double newVal) { maxVal = newVal; }

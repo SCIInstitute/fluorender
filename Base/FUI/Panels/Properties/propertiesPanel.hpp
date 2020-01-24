@@ -8,6 +8,10 @@
 #include "meshPropertiesOptions.hpp"
 #include "meshPropertiesMaterials.hpp"
 
+#include <Panels/Properties/Messenger/propertyMessenger.hpp>
+
+#include <iostream>
+
 /*
  *
  * TODO: See if there is a way to inherit from a QMainWindow to use QDockWidgets
@@ -23,51 +27,88 @@ class PropertiesPanel : public QWidget
     void onVolumeLoaded(int renderviewID);
     void onMeshLoaded(int renderviewID);
 
+    void onGammaReceived(std::any value) { setPropGammaValue(value); }
+    /*
+    void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
+
+    void onSatReceived(int value) { setPropSatValue(value); }
+    void onLowThreshreceived(int value) { setPropLowThreshValue(value); }
+    */
   public:
     PropertiesPanel();
 
     void setPropOptionsMaxVal(double newVal);
     double getPropOptionsMaxVal() const;
 
-    void setPropGammaSliderVal(int newVal);
-    void setPropGammaSpinboxVal(double newVal);
+    template<typename T>
+    void setPropGammaValue(T newVal)
+    {
+      VolumePropertiesOptions* temp = getPropertiesOptions();
 
-    void setPropExtBounSliderVal(int newVal);
-    void setPropExtBounSpinboxVal(double newVal);
+      temp->setGammaValue(newVal);
+    }
 
-    void setPropSatSliderVal(int newVal);
-    void setPropSatSpinboxVal(int newVal);
+    template<typename T>
+    void setPropExtBoundValue(T newVal)
+    {
+      VolumePropertiesOptions* temp = getPropertiesOptions();
 
-    void setPropLowThreshSliderVal(int newVal);
-    void setPropLowThreshSpinboxVal(int newVal);
-    void setPropHighThreSliderVal(int newVal);
-    void setPropHighThreSpinboxVal(int newVal);
+      temp->setExtBoundValue(newVal);
+    }
 
-    void setPropLuminSliderVal(int newVal);
-    void setPropLuminSpinboxVal(int newVal);
+    void setPropSatValue(int newVal);
 
-    void setPropShadowSliderVal(int newVal);
-    void setPropShadowSpinboxVal(double newVal);
+    void setPropLowThreshValue(int newVal);
+
+    void setPropHighThreshValue(int newVal);
+
+    void setPropLuminValue(int newVal);
+
+    template<typename T>
+    void setPropShadowValue(T newVal)
+    {
+      VolumePropertiesOptions* temp = getPropertiesOptions();
+
+      temp->setShadowValue(newVal);
+    }
+
     void setPropShadowEnabled(bool status);
 
-    void setPropAlphaSliderVal(int newVal);
-    void setPropAlphaSpinboxVal(int newVal);
+    void setPropAlphaValue(int newVal);
     void setPropAlphaEnabled(bool status);
 
-    void setPropSampSliderVal(int newVal);
-    void setPropSampSpinboxVal(double newVal);
+    template<typename T>
+    void setPropSampleValue(T newVal)
+    {
+      VolumePropertiesOptions* temp = getPropertiesOptions();
 
-    void setPropLShadSlidVal(int newVal);
-    void setPropLShadSpinVal(double newVal);
-    void setPropHShadSlidVal(int newVal);
-    void setPropHShadSpinVal(double newVal);
+      temp->setSampleValue(newVal);
+    }
+
+    template<typename T>
+    void setPropLowShaderValue(T newVal)
+    {
+      VolumePropertiesOptions* temp = getPropertiesOptions();
+
+      temp->setLowShaderVal(newVal);
+    }
+
+    template<typename T>
+    void setPropHighShaderValue(T newVal)
+    {
+      VolumePropertiesOptions* temp = getPropertiesOptions();
+
+      temp->setHighShaderVal(newVal);
+    }
+
     void setPropShaderEnabled(bool status);
 
-    void setPropLCMSlidVal(int newVal);
-    void setPropLCMSpinVal(int newVal);
-    void setPropHCMSlidVal(int newVal);
-    void setPropHCMSpinVal(int newVal);
+    void setPropLowColorModeValue(int newVal);
+
+    void setPropHighColorModeValue(int newVal);
+
     void setPropCMEnabled(bool status);
+
 
   private:
 

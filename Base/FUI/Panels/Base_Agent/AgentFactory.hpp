@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "InterfaceAgent.hpp"
 
-namespace FUI
+namespace FluoUI
 {
 	class ListModel;
 	class TreeModel;

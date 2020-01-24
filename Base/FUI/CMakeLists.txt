@@ -65,6 +65,7 @@ set(HEADER_FILES
     Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
 		Panels/Properties/Agent/volumePropAgent.hpp
+    Panels/Properties/Messenger/propertyMessenger.hpp
     Panels/Output_Adjustments/outputAdjust.hpp
     Panels/Output_Adjustments/outputLayout.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
@@ -107,6 +108,7 @@ set(SOURCES
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
 		Panels/Properties/Agent/volumePropAgent.cpp
+    Panels/Properties/Messenger/propertyMessenger.cpp
     Panels/Output_Adjustments/outputLayout.cpp
     Panels/Workspace/workspaceTreeLayout.cpp
     Panels/Workspace/workspaceToolLayout.cpp

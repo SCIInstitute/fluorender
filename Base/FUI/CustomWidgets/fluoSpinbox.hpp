@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QSpinBox>
 
+#include <any>
+
 class FluoSpinbox : public QSpinBox
 {
   Q_OBJECT
@@ -16,16 +18,18 @@ class FluoSpinbox : public QSpinBox
       if(!hasButtons)
         this->setButtonSymbols(QAbstractSpinBox::NoButtons);
     }
-    
-    template<typename T>
-    void updateValue(T value)
-    {
-      if(std::is_same_v<T,int>)
-        this->setValue(value);
-      else
-        this->setValue(static_cast<int>(value * 100.0 + 0.5));
-    }
 
+    void updateValue(std::any value)
+    {
+      try
+      {
+        this->setValue(std::any_cast<int>(value));
+      }
+      catch (const std::bad_any_cast &e)
+      {
+        this->setValue(static_cast<int>(std::any_cast<double>(value) * 100.0 + 0.5));
+      }
+    }
     int get() const { return this->value(); }
 };
 

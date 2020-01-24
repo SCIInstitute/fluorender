@@ -34,11 +34,11 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <img/icons.h>
 */
-using namespace FUI;
+using namespace FluoUI;
 
-VolumePropAgent::VolumePropAgent(PropertiesPanel &panel) :
+VolumePropAgent::VolumePropAgent(PropertyMessenger &panel) :
 	InterfaceAgent(),
-    panel(panel)
+    parentPanel(panel)
 {
 
 }
@@ -64,7 +64,7 @@ void VolumePropAgent::UpdateAllSettings()
     double max_val;
 	getValue("max int", max_val);
 	max_val = std::max(255.0, max_val);
-    panel.setPropOptionsMaxVal(max_val);
+    parentPanel.setPropOptionsMaxVal(max_val);
 
     //set range
     //wxFloatingPointValidator<double>* vald_fp;
@@ -81,8 +81,7 @@ void VolumePropAgent::UpdateAllSettings()
 
     // gamma
     getValue("gamma 3d", dval);
-    panel.setPropGammaSliderVal(static_cast<int>(dval*100.0 + 0.5));
-    panel.setPropGammaSpinboxVal(dval);
+    parentPanel.setPropGammaValue(dval);
 
     //boundary
     //if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_boundary_text->GetValidator()))
@@ -93,8 +92,7 @@ void VolumePropAgent::UpdateAllSettings()
     //panel_.m_boundary_text->ChangeValue(str);
 
     getValue("extract boundary", dval);
-    panel.setPropExtBounSliderVal(static_cast<int>(dval*2000.0 + 0.5));
-    panel.setPropExtBounSpinboxVal(dval);
+    parentPanel.setPropExtBoundValue(dval);
 
     /*
     //contrast
@@ -110,9 +108,8 @@ void VolumePropAgent::UpdateAllSettings()
     */
 
     getValue("saturation", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
-    panel.setPropSatSliderVal(ival);
-    panel.setPropSatSpinboxVal(ival);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+    parentPanel.setPropSatValue(ival);
 
     /*
 	//left threshold
@@ -127,9 +124,8 @@ void VolumePropAgent::UpdateAllSettings()
     */
 
     getValue("low threshold", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
-    panel.setPropLowThreshSliderVal(ival);
-    panel.setPropLowThreshSpinboxVal(ival);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+    parentPanel.setPropLowThreshValue(ival);
 
 
     /*
@@ -147,9 +143,8 @@ void VolumePropAgent::UpdateAllSettings()
     */
 
     getValue("high threshold", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
-    panel.setPropHighThreSliderVal(ival);
-    panel.setPropHighThreSpinboxVal(ival);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+    parentPanel.setPropHighThreshValue(ival);
 
 
     /*
@@ -165,9 +160,8 @@ void VolumePropAgent::UpdateAllSettings()
     */
 
     getValue("luminance", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
-    panel.setPropLuminSliderVal(ival);
-    panel.setPropLuminSpinboxVal(ival);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+    parentPanel.setPropLuminValue(ival);
 
     /*
 
@@ -188,9 +182,8 @@ void VolumePropAgent::UpdateAllSettings()
     getValue("shadow enable", isShadowEnabled);
     getValue("shadow int", dval);
 
-    panel.setPropShadowEnabled(isShadowEnabled);
-    panel.setPropShadowSliderVal(static_cast<int>(dval * 100.0 + 0.5));
-    panel.setPropShadowSpinboxVal(dval);
+    parentPanel.setPropShadowEnabled(isShadowEnabled);
+    parentPanel.setPropShadowValue(dval);
 
     /*
 
@@ -212,11 +205,10 @@ void VolumePropAgent::UpdateAllSettings()
     bool isAlphaEnabled;
     getValue("alpha enable", isAlphaEnabled);
     getValue("alpha", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
 
-    panel.setPropAlphaEnabled(isAlphaEnabled);
-    panel.setPropAlphaSliderVal(ival);
-    panel.setPropAlphaSpinboxVal(ival);
+    parentPanel.setPropAlphaEnabled(isAlphaEnabled);
+    parentPanel.setPropAlphaValue(ival);
 
     /*
 
@@ -231,9 +223,7 @@ void VolumePropAgent::UpdateAllSettings()
     */
 
     getValue("sample rate", dval);
-    panel.setPropSampSliderVal(static_cast<int>(dval*10.0));
-    panel.setPropSampSpinboxVal(dval);
-
+    parentPanel.setPropSampleValue(dval);
 
     /*
 
@@ -272,11 +262,9 @@ void VolumePropAgent::UpdateAllSettings()
     getValue("mat shine", shine);
     getValue("shading enable", isShadeEnabled);
 
-    panel.setPropLShadSlidVal(static_cast<int>(amb*100.0));
-    panel.setPropLShadSpinVal(amb);
-    panel.setPropHShadSlidVal(static_cast<int>(shine*10.0));
-    panel.setPropHShadSpinVal(shine);
-    panel.setPropShaderEnabled(isShadeEnabled);
+    parentPanel.setPropLowShaderValue(amb);
+    parentPanel.setPropHighShaderValue(shine);
+    parentPanel.setPropShaderEnabled(isShadeEnabled);
     /*
 
 
@@ -313,14 +301,12 @@ void VolumePropAgent::UpdateAllSettings()
     */
 
     getValue("colormap low", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
-    panel.setPropLCMSlidVal(ival);
-    panel.setPropLCMSpinVal(ival);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+    parentPanel.setPropLowColorModeValue(ival);
 
     getValue("colormap high", dval);
-    ival = static_cast<int>(dval*panel.getPropOptionsMaxVal() + 0.5);
-    panel.setPropHCMSlidVal(ival);
-    panel.setPropHCMSpinVal(ival);
+    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+    parentPanel.setPropHighColorModeValue(ival);
 
     /*
 

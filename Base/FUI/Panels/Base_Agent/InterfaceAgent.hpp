@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Node.hpp>
 #include <ValueUpdateVisitor.hpp>
 
-namespace FUI
+namespace FluoUI
 {
     class InterfaceAgent : public fluo::Object
 	{

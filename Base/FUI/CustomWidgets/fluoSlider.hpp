@@ -5,6 +5,7 @@
 #include <QSlider>
 
 #include <type_traits>
+#include <any>
 
 #include "fluoSliderStyle.hpp"
 
@@ -13,6 +14,7 @@ class FluoSlider : public QSlider
   Q_OBJECT
 
   public:
+
     FluoSlider(Qt::Orientation ori, int floor, int ceiling)
     {
         this->setStyle(new MyStyle(this->style()));
@@ -20,13 +22,16 @@ class FluoSlider : public QSlider
         this->setRange(floor,ceiling);
     }
 
-    template<typename T>
-    void updateValue(T value)
+    void updateValue(std::any value)
     {
-      if(std::is_same_v<T,int>)
-        this->setValue(value);
-      else
-        this->setValue(static_cast<int>(value * 100.0 + 0.5));
+      try
+      {
+        this->setValue(std::any_cast<int>(value));
+      }
+      catch (const std::bad_any_cast &e)
+      {
+        this->setValue(static_cast<int>(std::any_cast<double>(value) * 100.0 + 0.5));
+      }
     }
 
     int get() const { return this->value(); }
