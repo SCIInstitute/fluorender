@@ -448,11 +448,6 @@ public:
 	{ if (m_glview) m_glview->SetAccurateBricks(value);}
 	bool GetAccurateBricks()
 	{ if (m_glview) return m_glview->GetAccurateBricks(); else return false;}
-	//select a and b
-	void SetSelectBoth(bool value)
-	{ if (m_glview) m_glview->SetSelectBoth(value); }
-	bool GetSelectBoth()
-	{ if (m_glview) return m_glview->GetSelectBoth(); else return false;}
 
 	//set clip mode
 	void SetClipMode(int mode)
