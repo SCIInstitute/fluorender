@@ -37,9 +37,6 @@ namespace FLIVR
 //type definitions
 #define SEG_SHDR_INITIALIZE	1	//initialize the segmentation fragment shader
 #define SEG_SHDR_DB_GROW	2	//diffusion based grow
-#define LBL_SHDR_INITIALIZE	3	//initialize the labeling fragment shader
-#define LBL_SHDR_MIF		4	//maximum intensity filtering
-#define FLT_SHDR_NR			5	//remove noise
 
 	class ShaderProgram;
 

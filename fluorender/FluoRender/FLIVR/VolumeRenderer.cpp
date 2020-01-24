@@ -1186,11 +1186,6 @@ namespace FLIVR
 				SEG_SHDR_DB_GROW, paint_mode, hr_mode,
 				use_2d, true, depth_peel_, true, hiqual_);
 			break;
-		case 2://noise removal
-			seg_shader = seg_shader_factory_.shader(
-				FLT_SHDR_NR, paint_mode, hr_mode,
-				false, false, depth_peel_, false, hiqual_);
-			break;
 		}
 
 		if (seg_shader)
