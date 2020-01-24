@@ -25,26 +25,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
-#include <wx/progdlg.h>
-#include <boost/unordered_map.hpp>
-
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
-//using namespace stdext;
+#include <FLIVR/Point.h>
 
+class VRenderGLView;
+class VolumeData;
 class VolumeSelector
 {
 public:
 	VolumeSelector();
 	~VolumeSelector();
 
-	void SetVolume(VolumeData *vd);
-	VolumeData* GetVolume();
-	void Set2DMask(GLuint mask);
-	void Set2DWeight(GLuint weight1, GLuint weight2);
-	void SetProjection(double* mvmat, double *prjmat);
+	void SetView(VRenderGLView* view) { m_view = view; }
+	void SetVolume(VolumeData *vd) { m_vd = vd; }
+	VolumeData* GetVolume() { return m_vd; }
+	void Set2DMask(unsigned int mask) { m_2d_mask = mask; }
+	void Set2DWeight(unsigned int weight1, unsigned int weight2)
+	{
+		m_2d_weight1 = weight1;
+		m_2d_weight2 = weight2;
+	}
+	void SetProjection(double* mvmat, double *prjmat)
+	{
+		memcpy(m_mvmat, mvmat, 16 * sizeof(double));
+		memcpy(m_prjmat, prjmat, 16 * sizeof(double));
+	}
 	void SetBrushIteration(int num) {m_iter_num = num;}
 	int GetBrushIteration() {return m_iter_num;}
 	//set/get brush properties
@@ -72,12 +79,6 @@ public:
 	//select group
 	void SetSelectGroup(bool value) {m_select_multi = value?1:0;}
 	bool GetSelectGroup() {return m_select_multi==1;}
-	//select both
-	void SetSelectBoth(bool value) {m_select_multi = value?2:0;}
-	bool GetSelectBoth() {return m_select_multi==2;}
-	//size map
-	void SetSizeMap(bool size_map) {m_size_map = size_map;}
-	bool GetSizeMap() {return m_size_map;}
 	//update order
 	void SetUpdateOrder(bool bval) { m_update_order = bval; }
 	bool GetUpdateOrder() { return m_update_order; }
@@ -89,24 +90,14 @@ public:
 	void SetPaintUse2d(bool use2d) {m_use2d = use2d;}
 	bool GetPaintUse2d() {return m_use2d;}
 
+	void Segment();
 	void Select(double radius);
-	int SetLabelBySize();
-	int CompIslandCount(double min_voxels, double max_voxels);
-	void CompExportMultiChann(bool select);
 	void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
 	VolumeData* GetResult(bool pop);
 	//process current selection
 	int ProcessSel(double thresh);
-	int GetCenter(Point& p);
+	int GetCenter(FLIVR::Point& p);
 	int GetSize(double& s);
-
-	//results
-	int GetCompNum() {return m_ca_comps;}
-	int GetVolumeNum() {return m_ca_volume;}
-
-	//annotations
-	void GenerateAnnotations(bool use_sel);
-	Annotations* GetAnnotations();
 
 	//estimate threshold
 	void SetEstimateThreshold(bool value)
@@ -114,14 +105,12 @@ public:
 	bool GetEstimateThreshold()
 	{return m_estimate_threshold;}
 
-	//Test functions
-	void Test();
-
 private:
+	VRenderGLView *m_view;
 	VolumeData *m_vd;	//volume data for segmentation
-	GLuint m_2d_mask;	//2d mask from painting
-	GLuint m_2d_weight1;//2d weight map (after tone mapping)
-	GLuint m_2d_weight2;//2d weight map	(before tone mapping)
+	unsigned int m_2d_mask;	//2d mask from painting
+	unsigned int m_2d_weight1;//2d weight map (after tone mapping)
+	unsigned int m_2d_weight2;//2d weight map	(before tone mapping)
 	double m_mvmat[16];	//modelview matrix
 	double m_prjmat[16];//projection matrix
 	int m_iter_num;		//iteration number for growing
@@ -130,7 +119,6 @@ private:
 						//image processing modes
 						//11-posterize
 	bool m_use2d;
-	bool m_size_map;
 
 	bool m_update_order;
 
@@ -139,56 +127,28 @@ private:
 	double m_gm_falloff;
 	double m_scl_falloff;
 	double m_scl_translate;
-	int m_select_multi;	//0-only current; 1-select group; 2-select a and b
+	int m_select_multi;	//0-only current; 1-select group;
 	bool m_use_brush_size2;
 	bool m_edge_detect;
 	bool m_hidden_removal;
 	bool m_ortho;
 	//w2d
 	double m_w2d;
-	//iteration for labeling
-	int m_iter_label;
-	//label thresh
-	double m_label_thresh;
-	double m_label_falloff;
-
-	//define structure
-	struct Component
-	{
-		unsigned int id;
-		unsigned int counter;
-		Vector acc_pos;
-		double acc_int;
-	};
-	boost::unordered_map <unsigned int, Component> m_comps;
-	double m_min_voxels, m_max_voxels;
 
 	//exported volumes
 	std::vector<VolumeData*> m_result_vols;
-	//annotations
-	Annotations* m_annotations;
-
-	//make progress
-	wxProgressDialog *m_prog_diag;
-	int m_progress;
-	int m_total_pr;
-
-	//results
-	int m_ca_comps;
-	int m_ca_volume;
 
 	//a random variable
 	int m_randv;
 
 	//process selection
 	bool m_ps;
-	Point m_ps_center;
+	FLIVR::Point m_ps_center;
 	double m_ps_size;
 
 	bool m_estimate_threshold;
 
 private:
-	bool SearchComponentList(unsigned int cval, Vector &pos, double intensity);
 	double HueCalculation(int mode, unsigned int label);
 };
 

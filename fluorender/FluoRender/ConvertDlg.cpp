@@ -26,10 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
+#include "Converters/VolumeMeshConv.h"
 #include "VRenderFrame.h"
 #include "DataManager.h"
+#include <wx/progdlg.h>
 #include <wx/valnum.h>
-#include "Converters/VolumeMeshConv.h"
 
 BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
 	//convert from volume to mesh

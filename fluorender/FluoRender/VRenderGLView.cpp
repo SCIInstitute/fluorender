@@ -367,6 +367,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ruler_renderer.SetView(this);
 	m_ruler_renderer.SetRulerList(&m_ruler_list);
 	m_vp.SetView(this);
+	m_selector.SetView(this);
 }
 
 #ifdef _WIN32
@@ -2053,148 +2054,10 @@ void VRenderGLView::DisplayStroke()
 	glEnable(GL_DEPTH_TEST);
 }
 
-//set 2d weights
-void VRenderGLView::Set2dWeights()
-{
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		"final");
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		"channel");
-	if (final_buffer && chann_buffer)
-		m_selector.Set2DWeight(
-			final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
-			chann_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-}
-
 //segment volumes in current view
 void VRenderGLView::Segment()
 {
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-
-	glViewport(0, 0, vp[2], vp[3]);
-	HandleCamera();
-	m_mv_mat = GetDrawMat();
-
-	Framebuffer* paint_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
-	if (paint_buffer)
-		m_selector.Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	Set2dWeights();
-	//orthographic
-	m_selector.SetOrthographic(!m_persp);
-
-	//modulate threshold with pressure
-	double ini_thresh_save, gm_falloff_save,
-		scl_falloff_save, scl_translate_save;
-	if (m_use_press && m_press_peak > 0.0)
-	{
-		//initial threshold
-		/*ini_thresh_save = m_selector.GetBrushIniThresh();
-		double ini_thresh = ini_thresh_save - m_press_peak + 0.5;
-		if (ini_thresh < 0.0) ini_thresh = 0.0;
-		m_selector.SetBrushIniThresh(ini_thresh);*/
-		//gradient magnitude falloff
-		gm_falloff_save = m_selector.GetBrushGmFalloff();
-		double gm_falloff = gm_falloff_save + m_press_peak * 0.5;
-		//if (gm_falloff < 0.0) gm_falloff = 0.0;
-		m_selector.SetBrushGmFalloff(gm_falloff);
-		//scalar falloff
-		/*scl_falloff_save = m_selector.GetBrushSclFalloff();
-		double scl_falloff = scl_falloff_save + (m_press_peak - 0.5) * 0.1;
-		if (scl_falloff < 0.0) scl_falloff = 0.0;
-		m_selector.SetBrushSclFalloff(scl_falloff);*/
-		//scalar translate
-		scl_translate_save = m_selector.GetBrushSclTranslate();
-		double scl_translate = scl_translate_save - m_press_peak + 0.5;
-		if (scl_translate < 0.0) scl_translate = 0.0;
-		m_selector.SetBrushSclTranslate(scl_translate);
-	}
-
-	if (m_selector.GetSelectGroup())
-	{
-		VolumeData* vd = m_selector.GetVolume();
-		DataGroup* group = 0;
-		if (vd)
-		{
-			vd->SetViewport(vp);
-			vd->SetClearColor(clear_color);
-			for (int i = 0; i<GetLayerNum(); i++)
-			{
-				TreeLayer* layer = GetLayer(i);
-				if (layer && layer->IsA() == 5)
-				{
-					DataGroup* tmp_group = (DataGroup*)layer;
-					for (int j = 0; j<tmp_group->GetVolumeNum(); j++)
-					{
-						VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
-						if (tmp_vd && tmp_vd == vd)
-						{
-							group = tmp_group;
-							break;
-						}
-					}
-				}
-				if (group)
-					break;
-			}
-			//select the group
-			if (group && group->GetVolumeNum()>1)
-			{
-				for (int i = 0; i<group->GetVolumeNum(); i++)
-				{
-					VolumeData* tmp_vd = group->GetVolumeData(i);
-					if (tmp_vd && tmp_vd->GetDisp())
-					{
-						tmp_vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-						tmp_vd->SetViewport(vp);
-						tmp_vd->SetClearColor(clear_color);
-						m_selector.SetVolume(tmp_vd);
-						m_selector.Select(m_brush_radius2 - m_brush_radius1);
-					}
-				}
-				m_selector.SetVolume(vd);
-			}
-			else
-				m_selector.Select(m_brush_radius2 - m_brush_radius1);
-		}
-	}
-	else if (m_selector.GetSelectBoth())
-	{
-		VolumeData* vd = m_calculator.GetVolumeA();
-		if (vd)
-		{
-			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->SetViewport(vp);
-			vd->SetClearColor(clear_color);
-			m_selector.SetVolume(vd);
-			m_selector.Select(m_brush_radius2 - m_brush_radius1);
-		}
-		vd = m_calculator.GetVolumeB();
-		if (vd)
-		{
-			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->SetViewport(vp);
-			vd->SetClearColor(clear_color);
-			m_selector.SetVolume(vd);
-			m_selector.Select(m_brush_radius2 - m_brush_radius1);
-		}
-	}
-	else
-		m_selector.Select(m_brush_radius2 - m_brush_radius1);
-
-	//restore
-	if (m_use_press && m_press_peak > 0.0)
-	{
-		//m_selector.SetBrushIniThresh(ini_thresh_save);
-		m_selector.SetBrushGmFalloff(gm_falloff_save);
-		//m_selector.SetBrushSclFalloff(scl_falloff_save);
-		m_selector.SetBrushSclTranslate(scl_translate_save);
-	}
+	m_selector.Segment();
 
 	bool count = false;
 	bool colocal = false;
@@ -2620,17 +2483,6 @@ void VRenderGLView::SetAccurateBricks(bool value)
 bool VRenderGLView::GetAccurateBricks()
 {
 	return m_selector.GetUpdateOrder();
-}
-
-//select both
-void VRenderGLView::SetSelectBoth(bool value)
-{
-	m_selector.SetSelectBoth(value);
-}
-
-bool VRenderGLView::GetSelectBoth()
-{
-	return m_selector.GetSelectBoth();
 }
 
 //calculations
@@ -7587,6 +7439,25 @@ DataGroup* VRenderGLView::GetGroup(int index)
 				return group;
 			}
 			count++;
+		}
+	}
+	return 0;
+}
+
+DataGroup* VRenderGLView::GetGroup(VolumeData* vd)
+{
+	for (int i = 0; i < GetLayerNum(); i++)
+	{
+		TreeLayer* layer = GetLayer(i);
+		if (layer && layer->IsA() == 5)
+		{
+			DataGroup* group = (DataGroup*)layer;
+			for (int j = 0; j < group->GetVolumeNum(); j++)
+			{
+				VolumeData* tmp_vd = group->GetVolumeData(j);
+				if (tmp_vd && tmp_vd == vd)
+					return group;
+			}
 		}
 	}
 	return 0;

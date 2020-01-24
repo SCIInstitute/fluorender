@@ -162,6 +162,7 @@ public:
 	Annotations* GetAnnotations(wxString &name);
 	DataGroup* GetGroup(wxString &name);
 	DataGroup* GetGroup(int index);
+	DataGroup* GetGroup(VolumeData* vd);
 	MeshGroup* GetMGroup(wxString str);
 	//add
 	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name = "");
@@ -440,8 +441,6 @@ public:
 	void Calculate(int type, wxString prev_group = "", bool add = true);
 	void CalculateSingle(int type, wxString prev_group, bool add);
 
-	//set 2d weights
-	void Set2dWeights();
 	//segment volumes in current view
 	void Segment();
 
@@ -452,6 +451,7 @@ public:
 	//use pressure
 	void SetBrushUsePres(bool pres);
 	bool GetBrushUsePres();
+	double GetBrushPressPeak() { return m_press_peak; }
 	//set brush size
 	void SetUseBrushSize2(bool val);
 	bool GetUseBrushSize2();
@@ -493,9 +493,6 @@ public:
 	//brick acuracy
 	void SetAccurateBricks(bool value);
 	bool GetAccurateBricks();
-	//select both
-	void SetSelectBoth(bool value);
-	bool GetSelectBoth();
 
 	//set clip mode
 	void SetClipMode(int mode);
