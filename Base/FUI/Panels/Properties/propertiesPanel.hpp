@@ -138,6 +138,7 @@ class PropertiesPanel : public QWidget
     VolumePropertiesOptions* getPropertiesOptions();
     VolumePropertiesMisc* getPropertiesMisc();
 
+    PropertyMessenger *messenger;
 };
 
 #endif

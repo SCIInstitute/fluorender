@@ -5,7 +5,7 @@ VolumePropertiesOptions::VolumePropertiesOptions()
   constructLayout();
   //connect(object,SIGNAL,this,SLOT(function));
 
-  connect(gammaSlider,SIGNAL(sliderReleased()),this,SLOT(onGammaSliderChanged()));
+  //connect(gammaSlider,SIGNAL(sliderReleased()),this,SLOT(onGammaSliderChanged()));
   connect(gammaSpinbox,SIGNAL(editingFinished()),this,SLOT(onGammaSpinboxChanged()));
   connect(extractBSlider,SIGNAL(sliderReleased()),this,SLOT(onExtBoundSliderChanged()));
   connect(extractBSpinbox,SIGNAL(editingFinished()),this,SLOT(onExtBoundSpinboxChanged()));
@@ -31,6 +31,21 @@ VolumePropertiesOptions::VolumePropertiesOptions()
   connect(colorMap1Spinbox,SIGNAL(editingFinished()),this,SLOT(onLCMSpinChanged()));
   connect(colorMap2Slider,SIGNAL(sliderReleased()),this,SLOT(onHCMSliderChanged()));
   connect(colorMap2Spinbox,SIGNAL(editingFinished()),this,SLOT(onHCMSpinChanged()));
+}
+
+void VolumePropertiesOptions::buildSliderConnections()
+{
+
+}
+
+void VolumePropertiesOptions::buildSpinboxConnections()
+{
+
+}
+
+void VolumePropertiesOptions::buildSpinboxDConnections()
+{
+
 }
 
 void VolumePropertiesOptions::addRow0()
