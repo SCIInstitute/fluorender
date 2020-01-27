@@ -908,7 +908,15 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 
 	//set gm falloff
 	if (m_selector)
+	{
 		m_selector->SetBrushGmFalloff(m_dft_gm_falloff);
+		if (m_view && m_selector->GetThUpdate())
+		{
+			m_selector->PopMask();
+			m_view->Segment();
+			m_view->RefreshGL();
+		}
+	}
 }
 
 //2d influence
@@ -930,7 +938,15 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 
 	//set 2d weight
 	if (m_selector)
+	{
 		m_selector->SetW2d(val);
+		if (m_view && m_selector->GetThUpdate())
+		{
+			m_selector->PopMask();
+			m_view->Segment();
+			m_view->RefreshGL();
+		}
+	}
 }
 
 //edge detect
@@ -951,7 +967,15 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 
 	//set edge detect
 	if (m_selector)
+	{
 		m_selector->SetEdgeDetect(edge_detect);
+		if (m_view && m_selector->GetThUpdate())
+		{
+			m_selector->PopMask();
+			m_view->Segment();
+			m_view->RefreshGL();
+		}
+	}
 }
 
 //hidden removal
@@ -971,7 +995,15 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 
 	//set select group
 	if (m_selector)
+	{
 		m_selector->SetSelectGroup(select_group);
+		if (m_view && m_selector->GetThUpdate())
+		{
+			m_selector->PopMask();
+			m_view->Segment();
+			m_view->RefreshGL();
+		}
+	}
 }
 
 //estimate threshold
@@ -989,7 +1021,6 @@ void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
 {
 	bool value = m_accurate_bricks_chk->GetValue();
 
-	//
 	if (m_selector)
 		m_selector->SetUpdateOrder(value);
 }
