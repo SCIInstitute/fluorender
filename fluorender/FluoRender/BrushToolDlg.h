@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
 #include <Distance/RulerAlign.h>
+#include <Selection/VolumeSelector.h>
 
 class VRenderView;
 class VolumeData;
@@ -147,7 +148,8 @@ private:
 	wxWindow* m_frame;
 
 	//current view
-	VRenderView *m_cur_view;
+	VRenderView *m_view;
+	FL::VolumeSelector *m_selector;
 
 	//max volume value
 	double m_max_value;

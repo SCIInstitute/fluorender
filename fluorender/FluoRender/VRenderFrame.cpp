@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/msk_writer.h"
 #include "Formats/msk_reader.h"
 #include "Converters/VolumeMeshConv.h"
+#include <Selection/VolumeSelector.h>
 #include "compatibility.h"
 #include <FLIVR/TextRenderer.h>
 #include <FLIVR/VertexArray.h>
@@ -3247,13 +3248,17 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("rotz_cl", rotz_cl);
 
 			//painting parameters
-			fconfig.Write("brush_use_pres", vrv->GetBrushUsePres());
-			fconfig.Write("brush_size_1", vrv->GetBrushSize1());
-			fconfig.Write("brush_size_2", vrv->GetBrushSize2());
-			fconfig.Write("brush_spacing", vrv->GetBrushSpacing());
-			fconfig.Write("brush_iteration", vrv->GetBrushIteration());
-			fconfig.Write("brush_translate", vrv->GetBrushSclTranslate());
-			fconfig.Write("w2d", vrv->GetW2d());
+			FL::VolumeSelector* selector = vrv->GetVolumeSelector();
+			if (selector)
+			{
+				fconfig.Write("brush_use_pres", selector->GetBrushUsePres());
+				fconfig.Write("brush_size_1", selector->GetBrushSize1());
+				fconfig.Write("brush_size_2", selector->GetBrushSize2());
+				fconfig.Write("brush_spacing", selector->GetBrushSpacing());
+				fconfig.Write("brush_iteration", selector->GetBrushIteration());
+				fconfig.Write("brush_translate", selector->GetBrushSclTranslate());
+				fconfig.Write("w2d", selector->GetW2d());
+			}
 
 			//rulers
 			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
@@ -4395,22 +4400,26 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 				//painting parameters
 				double dVal;
-				if (fconfig.Read("brush_use_pres", &bVal))
-					vrv->SetBrushUsePres(bVal);
-				double size1, size2;
-				if (fconfig.Read("brush_size_1", &size1) &&
-					fconfig.Read("brush_size_2", &size2))
-					vrv->SetBrushSize(size1, size2);
-				if (fconfig.Read("brush_spacing", &dVal))
-					vrv->SetBrushSpacing(dVal);
-				if (fconfig.Read("brush_iteration", &dVal))
-					vrv->SetBrushIteration(dVal);
-				if (fconfig.Read("brush_size_data", &bVal))
-					vrv->SetBrushSizeData(bVal);
-				if (fconfig.Read("brush_translate", &dVal))
-					vrv->SetBrushSclTranslate(dVal);
-				if (fconfig.Read("w2d", &dVal))
-					vrv->SetW2d(dVal);
+				FL::VolumeSelector* selector = vrv->GetVolumeSelector();
+				if (selector)
+				{
+					if (fconfig.Read("brush_use_pres", &bVal))
+						selector->SetBrushUsePres(bVal);
+					double size1, size2;
+					if (fconfig.Read("brush_size_1", &size1) &&
+						fconfig.Read("brush_size_2", &size2))
+						selector->SetBrushSize(size1, size2);
+					if (fconfig.Read("brush_spacing", &dVal))
+						selector->SetBrushSpacing(dVal);
+					if (fconfig.Read("brush_iteration", &dVal))
+						selector->SetBrushIteration(dVal);
+					if (fconfig.Read("brush_size_data", &bVal))
+						selector->SetBrushSizeData(bVal);
+					if (fconfig.Read("brush_translate", &dVal))
+						selector->SetBrushSclTranslate(dVal);
+					if (fconfig.Read("w2d", &dVal))
+						selector->SetW2d(dVal);
+				}
 
 				//rulers
 				if (vrv->GetRulerList() &&
