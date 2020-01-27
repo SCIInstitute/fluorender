@@ -2042,6 +2042,7 @@ void VRenderGLView::DisplayStroke()
 //segment volumes in current view
 void VRenderGLView::Segment()
 {
+	HandleCamera();
 	m_selector.Segment();
 
 	bool count = false;

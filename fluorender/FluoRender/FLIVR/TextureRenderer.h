@@ -302,7 +302,6 @@ namespace FLIVR
 		GLuint tex_2d_dmap_;
 
 		int blend_num_bits_;
-		static bool clear_pool_;
 
 #ifdef _DARWIN
 		static CGLContextObj gl_context_;

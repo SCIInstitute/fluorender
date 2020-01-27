@@ -785,31 +785,19 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 {
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
-	if (sel_vol && sel_vol->GetTexture())
-	{
-		sel_vol->GetTexture()->mask_undos_backward();
-		sel_vol->GetVR()->clear_tex_pool();
-	}
-	vr_frame->RefreshVRenderViews();
+	if (m_selector)
+		m_selector->UndoMask();
+	if (m_view)
+		m_view->RefreshGL();
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 {
-	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
-	if (sel_vol && sel_vol->GetTexture())
-	{
-		sel_vol->GetTexture()->mask_undos_forward();
-		sel_vol->GetVR()->clear_tex_pool();
-	}
-	vr_frame->RefreshVRenderViews();
+	if (m_selector)
+		m_selector->RedoMask();
+	if (m_view)
+		m_view->RefreshGL();
 	UpdateUndoRedo();
 }
 
@@ -889,7 +877,15 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 
 	//set translate
 	if (m_selector)
+	{
 		m_selector->SetBrushSclTranslate(m_dft_scl_translate);
+		if (m_view && m_selector->GetThUpdate())
+		{
+			m_selector->PopMask();
+			m_view->Segment();
+			m_view->RefreshGL();
+		}
+	}
 }
 
 //gm falloff
