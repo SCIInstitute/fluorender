@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Point.h>
 #include <vector>
 #include <algorithm>
+#include <glm/glm.hpp>
 
 class VRenderGLView;
 class VolumeData;
@@ -45,6 +46,10 @@ namespace FL
 		void SetView(VRenderGLView* view) { m_view = view; }
 		void SetVolume(VolumeData *vd) { m_vd = vd; }
 		VolumeData* GetVolume() { return m_vd; }
+		//modes
+		void SetMode(int mode) { m_mode = mode; }
+		int GetMode() { return m_mode; }
+		//
 		void Set2DMask(unsigned int mask) { m_2d_mask = mask; }
 		void Set2DWeight(unsigned int weight1, unsigned int weight2)
 		{
@@ -175,17 +180,18 @@ namespace FL
 		}
 		//brush sets
 		void ChangeBrushSetsIndex();
+		//set use 2d rendering results
+		void SetPaintUse2d(bool use2d) { m_use2d = use2d; }
+		bool GetPaintUse2d() { return m_use2d; }
+		//estimate threshold
+		void SetEstimateThreshold(bool value) { m_estimate_threshold = value; }
+		bool GetEstimateThreshold() { return m_estimate_threshold; }
+		//th udpate
+		bool GetThUpdate();
 
 		//load default;
 		void LoadBrushSettings();
 		void SaveBrushSettings();
-
-		//modes
-		void SetMode(int mode) { m_mode = mode; }
-		int GetMode() { return m_mode; }
-		//set use 2d rendering results
-		void SetPaintUse2d(bool use2d) { m_use2d = use2d; }
-		bool GetPaintUse2d() { return m_use2d; }
 
 		void Segment();
 		void Select(double radius);
@@ -196,15 +202,10 @@ namespace FL
 		int GetCenter(FLIVR::Point& p);
 		int GetSize(double& s);
 
-		//estimate threshold
-		void SetEstimateThreshold(bool value)
-		{
-			m_estimate_threshold = value;
-		}
-		bool GetEstimateThreshold()
-		{
-			return m_estimate_threshold;
-		}
+		//mask
+		void PopMask();
+		void UndoMask();
+		void RedoMask();
 
 	private:
 		VRenderGLView *m_view;
@@ -274,6 +275,9 @@ namespace FL
 		double m_ps_size;
 
 		bool m_estimate_threshold;
+
+		glm::mat4 m_mv_mat;
+		glm::mat4 m_prj_mat;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

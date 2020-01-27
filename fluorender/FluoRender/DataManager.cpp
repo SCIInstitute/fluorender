@@ -1788,13 +1788,6 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 			scl_falloff, scl_translate,
 			w2d, bins, order,
 			ortho, estimate);
-		//if (GetAllBrickNum()>1 &&
-		//	(order == 1 || order == 2))
-		//{
-		//	//invalidate mask
-		//	m_vr->return_mask(order);
-		//	m_vr->clear_tex_mask();
-		//}
 		if (estimate)
 			m_est_thresh = m_vr->get_estimated_thresh();
 	}

@@ -890,6 +890,25 @@ namespace FLIVR
 			(size_t)ny_, (size_t)nz_);
 	}
 
+	void Texture::pop_mask()
+	{
+		if (nmask_ <= -1 || mask_undo_num_ == 0)
+			return;
+		if (mask_undo_pointer_ <= 0 ||
+			mask_undo_pointer_ > mask_undos_.size() - 1)
+			return;
+
+		delete[](unsigned char*)(mask_undos_.back());
+		mask_undos_.pop_back();
+		mask_undo_pointer_--;
+
+		//update mask data
+		nrrdWrap_va(data_[nmask_],
+			mask_undos_[mask_undo_pointer_],
+			nrrdTypeUChar, 3, (size_t)nx_,
+			(size_t)ny_, (size_t)nz_);
+	}
+
 	void Texture:: mask_undos_backward()
 	{
 		if (nmask_<=-1 || mask_undo_num_==0)

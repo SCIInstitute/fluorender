@@ -86,7 +86,6 @@ namespace FLIVR
 #ifdef _DARWIN
 	CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
-	bool TextureRenderer::clear_pool_ = false;
 	FramebufferManager TextureRenderer::framebuffer_manager_;
 	VertexArrayManager TextureRenderer::vertex_array_manager_;
 
@@ -140,7 +139,6 @@ namespace FLIVR
 			return;
 
 		clear_brick_buf();
-		//clear_tex_pool();
 		clear_tex_current();
 
 		if (va_slices_)
@@ -155,7 +153,6 @@ namespace FLIVR
 		if (tex_ != tex)
 		{
 			// new texture, flag existing tex id's for deletion.
-			//clear_pool_ = true;
 			clear_tex_current();
 			tex->clear_undos();
 			tex_ = tex;
@@ -187,7 +184,6 @@ namespace FLIVR
 			}
 		}
 		tex_pool_.clear();
-		clear_pool_ = false;
 	}
 
 	void TextureRenderer::clear_tex_current()
@@ -216,7 +212,11 @@ namespace FLIVR
 
 	void TextureRenderer::clear_tex_mask()
 	{
-		TextureBrick* brick = 0;
+		if (!tex_)
+			return;
+		vector<TextureBrick*>* bricks = tex_->get_bricks();
+		TextureBrick *brick = 0;
+		TextureBrick *locbk = 0;
 		for (int i = tex_pool_.size() - 1; i >= 0; --i)
 		{
 			brick = tex_pool_[i].brick;
@@ -225,10 +225,15 @@ namespace FLIVR
 				brick->reset_skip_mask();
 				continue;
 			}
-			if (tex_pool_[i].comp == brick->nmask())
+			for (size_t j = 0; j < bricks->size(); ++j)
 			{
-				glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
-				tex_pool_.erase(tex_pool_.begin() + i);
+				locbk = (*bricks)[j];
+				if (brick == locbk &&
+					tex_pool_[i].comp == brick->nmask())
+				{
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
+					tex_pool_.erase(tex_pool_.begin() + i);
+				}
 			}
 		}
 	}
@@ -595,8 +600,6 @@ namespace FLIVR
 	GLint TextureRenderer::load_brick(TextureBrick* brick,
 		GLint filter, bool compression, int unit, int mode)
 	{
-		if (clear_pool_) clear_tex_pool();
-
 		GLint result = -1;
 		int c = 0;
 		if (!tex_->isBrxml() &&

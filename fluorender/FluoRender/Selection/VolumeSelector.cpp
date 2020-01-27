@@ -86,7 +86,9 @@ void VolumeSelector::Segment()
 	if (!m_view || !m_vd)
 		return;
 
-	glm::mat4 mv_mat = m_view->GetDrawMat();
+	//save view
+	m_mv_mat = m_view->GetDrawMat();
+	m_prj_mat = m_view->GetProjection();
 
 	FLIVR::Framebuffer* paint_buffer =
 		FLIVR::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
@@ -579,6 +581,20 @@ void VolumeSelector::ChangeBrushSetsIndex()
 	}
 }
 
+//th udpate
+bool VolumeSelector::GetThUpdate()
+{
+	if (!m_view)
+		return false;
+	glm::mat4 mv_mat = m_view->GetDrawMat();
+	glm::mat4 prj_mat = m_view->GetProjection();
+	//compare view
+	if (mv_mat == m_mv_mat && prj_mat == m_prj_mat)
+		return true;
+	else
+		return false;
+}
+
 //load settings
 void VolumeSelector::LoadBrushSettings()
 {
@@ -761,3 +777,29 @@ void VolumeSelector::SaveBrushSettings()
 	fconfig.Save(os);
 }
 
+void VolumeSelector::PopMask()
+{
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+
+	m_vd->GetTexture()->pop_mask();
+	m_vd->GetVR()->clear_tex_mask();
+}
+
+void VolumeSelector::UndoMask()
+{
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+
+	m_vd->GetTexture()->mask_undos_backward();
+	m_vd->GetVR()->clear_tex_mask();
+}
+
+void VolumeSelector::RedoMask()
+{
+	if (!m_vd || !m_vd->GetTexture())
+		return;
+
+	m_vd->GetTexture()->mask_undos_forward();
+	m_vd->GetVR()->clear_tex_mask();
+}

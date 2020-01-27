@@ -249,6 +249,7 @@ namespace FLIVR
 		bool get_redo();
 		void set_mask(void* mask_data);
 		void push_mask();
+		void pop_mask();
 		void mask_undos_forward();
 		void mask_undos_backward();
 		void clear_undos();
