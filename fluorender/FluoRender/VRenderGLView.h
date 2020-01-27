@@ -32,9 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "VolumeLoader.h"
 #include "utility.h"
-#include "VolumeSelector.h"
 #include "KernelExecutor.h"
 #include "Calculate/VolumeCalculator.h"
+#include <Selection/VolumeSelector.h>
 #include <Distance/Ruler.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/RulerRenderer.h>
@@ -445,54 +445,8 @@ public:
 	void Segment();
 
 	//brush properties
-	//load default;
-	void LoadBrushSettings();
-	void SaveBrushSettings();
-	//use pressure
-	void SetBrushUsePres(bool pres);
-	bool GetBrushUsePres();
-	double GetBrushPressPeak() { return m_press_peak; }
-	//set brush size
-	void SetUseBrushSize2(bool val);
-	bool GetUseBrushSize2();
-	void SetBrushSize(double size1, double size2);
-	double GetBrushSize1();
-	double GetBrushSize2();
-	//set brush spacing
-	void SetBrushSpacing(double spacing);
-	double GetBrushSpacing();
-	//set iteration number
-	void SetBrushIteration(int num);
-	int GetBrushIteration();
-	//set brush size relation
-	void SetBrushSizeData(bool val);
-	bool GetBrushSizeData();
-	//set translate
-	void SetBrushSclTranslate(double val);
-	double GetBrushSclTranslate();
-	//set gm falloff
-	void SetBrushGmFalloff(double val);
-	double GetBrushGmFalloff();
 	//change display
 	void ChangeBrushSize(int value);
-	//w2d
-	void SetW2d(double val);
-	double GetW2d();
-	//edge detect
-	void SetEdgeDetect(bool value);
-	bool GetEdgeDetect();
-	//hidden removal
-	void SetHiddenRemoval(bool value);
-	bool GetHiddenRemoval();
-	//select group
-	void SetSelectGroup(bool value);
-	bool GetSelectGroup();
-	//estimate threshold
-	void SetEstimateThresh(bool value);
-	bool GetEstimateThresh();
-	//brick acuracy
-	void SetAccurateBricks(bool value);
-	bool GetAccurateBricks();
 
 	//set clip mode
 	void SetClipMode(int mode);
@@ -508,7 +462,7 @@ public:
 	bool GetIntp();
 
 	//get volume selector
-	VolumeSelector* GetVolumeSelector() { return &m_selector; }
+	FL::VolumeSelector* GetVolumeSelector() { return &m_selector; }
 	//get volume calculator
 	FL::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
 	//get kernel executor
@@ -908,41 +862,13 @@ private:
 	//double m_value_7;
 	Color m_color_7;
 
-	//paint brush use pressure
-	bool m_use_press;
-	bool m_on_press;
-	double m_pressure;
-	double m_press_peak;
-	double m_press_nmax;
-	double m_press_tmax;
-	//air brush
-	double m_air_press;
-	//paint stroke radius
-	double m_brush_radius1;
-	double m_brush_radius2;
-	bool m_use_brush_radius2;
-	//radius settings for individual brush types
-	typedef struct
-	{
-		int type;//brush type
-		double radius1;//radius 1
-		double radius2;//radius 2
-		bool use_radius2;//use radius 2
-	} BrushRadiusSet;
-	vector<BrushRadiusSet> m_brush_radius_sets;
-	int m_brush_sets_index;
-	//paint stroke spacing
-	double m_brush_spacing;
-	//brush size relation
-	bool m_brush_size_data;
-
 	//clipping plane rotations
 	FLIVR::Quaternion m_q_cl;
 	FLIVR::Quaternion m_q_cl_zero;
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
 
 	//volume selector for segmentation
-	VolumeSelector m_selector;
+	FL::VolumeSelector m_selector;
 
 	//calculator
 	FL::VolumeCalculator m_calculator;
@@ -1186,9 +1112,6 @@ private:
 	void PickMesh();
 	void PickVolume();
 	void SetCompSelection(VolumeData* vd, Point& p, int mode);//node: 0-exclusive; 1-add or remove
-
-	//brush sets
-	void ChangeBrushSetsIndex();
 
 	//system call
 	void OnDraw(wxPaintEvent& event);

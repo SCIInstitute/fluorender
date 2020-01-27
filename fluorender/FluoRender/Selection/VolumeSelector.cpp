@@ -34,6 +34,9 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
 #include <wx/wx.h>
+#include <wx/stdpaths.h>
+
+using namespace FL;
 
 VolumeSelector::VolumeSelector() :
 	m_view(0),
@@ -50,14 +53,27 @@ VolumeSelector::VolumeSelector() :
 	m_scl_falloff(0.0),
 	m_scl_translate(0.0),
 	m_select_multi(0),
-	m_use_brush_size2(false),
 	m_edge_detect(false),
 	m_hidden_removal(false),
 	m_ortho(true),
 	m_w2d(0.0),
 	m_randv(113),
 	m_ps(false),
-	m_estimate_threshold(false)
+	m_estimate_threshold(false),
+	//paint brush presssure
+	m_use_press(true),
+	m_on_press(false),
+	//paint stroke radius
+	m_brush_radius1(10),
+	m_brush_radius2(30),
+	m_use_brush_radius2(true),
+	//paint stroke spacing
+	m_brush_spacing(0.1),
+	//brush size relation
+	m_brush_size_data(true),
+	m_pressure(0.0),
+	m_press_peak(0.0),
+	m_air_press(0.5)
 {
 }
 
@@ -91,20 +107,19 @@ void VolumeSelector::Segment()
 
 	//modulate threshold with pressure
 	double gm_falloff_save, scl_translate_save;
-	double press_peak = m_view->GetBrushPressPeak();
-	bool press = m_view->GetBrushUsePres() && press_peak > 0.0;
+	bool press = m_use_press && m_press_peak > 0.0;
 	if (press)
 	{
 		//gradient magnitude falloff
 		gm_falloff_save = m_gm_falloff;
-		m_gm_falloff = gm_falloff_save + press_peak * 0.5;
+		m_gm_falloff = gm_falloff_save + m_press_peak * 0.5;
 		//scalar translate
 		scl_translate_save = m_scl_translate;
-		m_scl_translate = scl_translate_save - press_peak + 0.5;
+		m_scl_translate = scl_translate_save - m_press_peak + 0.5;
 		if (m_scl_translate < 0.0) m_scl_translate = 0.0;
 	}
 
-	double r = m_view->GetBrushSize2() - m_view->GetBrushSize1();
+	double r = m_brush_radius2 - m_brush_radius1;
 	if (m_select_multi == 1)
 	{
 		DataGroup* group = m_view->GetGroup(m_vd);
@@ -157,7 +172,7 @@ void VolumeSelector::Select(double radius)
 	//result in 3d mask
 	//clear if the select mode
 	double ini_thresh, gm_falloff, scl_falloff;
-	if (m_use_brush_size2)
+	if (m_use_brush_radius2)
 	{
 		if (m_ini_thresh > 0.0)
 			ini_thresh = m_ini_thresh;
@@ -537,5 +552,212 @@ int VolumeSelector::GetSize(double &s)
 {
 	s = m_ps_size;
 	return m_ps;
+}
+
+//brush sets
+void VolumeSelector::ChangeBrushSetsIndex()
+{
+	if (m_mode == 1)
+		m_mode = 2;
+	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
+	{
+		BrushRadiusSet radius_set = m_brush_radius_sets[i];
+		if (radius_set.type == m_mode &&
+			m_brush_sets_index != i)
+		{
+			//save previous
+			m_brush_radius_sets[m_brush_sets_index].radius1 = m_brush_radius1;
+			m_brush_radius_sets[m_brush_sets_index].radius2 = m_brush_radius2;
+			m_brush_radius_sets[m_brush_sets_index].use_radius2 = m_use_brush_radius2;
+			//get new
+			m_brush_radius1 = radius_set.radius1;
+			m_brush_radius2 = radius_set.radius2;
+			m_use_brush_radius2 = radius_set.use_radius2;
+			m_brush_sets_index = i;
+			break;
+		}
+	}
+}
+
+//load settings
+void VolumeSelector::LoadBrushSettings()
+{
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_brush_settings.dft";
+	wxFileInputStream is(dft);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+
+	double val;
+	int ival;
+	bool bval;
+
+	//brush properties
+	if (fconfig.Read("brush_ini_thresh", &val))
+		m_ini_thresh = val;
+	if (fconfig.Read("brush_gm_falloff", &val))
+		m_gm_falloff = val;
+	if (fconfig.Read("brush_scl_falloff", &val))
+		m_scl_falloff = val;
+	if (fconfig.Read("brush_scl_translate", &val))
+		m_scl_translate = val;
+	//	m_calculator.SetThreshold(val);
+	//auto thresh
+	if (fconfig.Read("auto_thresh", &bval))
+		m_estimate_threshold = bval;
+	//edge detect
+	if (fconfig.Read("edge_detect", &bval))
+		m_edge_detect = bval;
+	//hidden removal
+	if (fconfig.Read("hidden_removal", &bval))
+		m_hidden_removal = bval;
+	//select group
+	if (fconfig.Read("select_group", &bval))
+		m_select_multi = bval ? 1 : 0;
+	//brick accuracy
+	if (fconfig.Read("accurate_bricks", &bval))
+		m_update_order = bval;
+	//2d influence
+	if (fconfig.Read("brush_2dinfl", &val))
+		m_w2d = val;
+	//size 1
+	if (fconfig.Read("brush_size1", &val) && val > 0.0)
+		m_brush_radius1 = val;
+	//size 2 link
+	if (fconfig.Read("use_brush_size2", &bval))
+		m_use_brush_radius2 = bval;
+	//size 2
+	if (fconfig.Read("brush_size2", &val) && val > 0.0)
+		m_brush_radius2 = val;
+	//radius settings for individual brush types
+	if (fconfig.Exists("/radius_settings"))
+	{
+		fconfig.SetPath("/radius_settings");
+		int brush_num = fconfig.Read("num", 0l);
+		if (m_brush_radius_sets.size() != brush_num)
+			m_brush_radius_sets.resize(brush_num);
+		wxString str;
+		for (int i = 0; i < brush_num; ++i)
+		{
+			str = wxString::Format("/radius_settings/%d", i);
+			if (!fconfig.Exists(str))
+				continue;
+			fconfig.SetPath(str);
+			//type
+			fconfig.Read("type", &(m_brush_radius_sets[i].type));
+			//radius 1
+			fconfig.Read("radius1", &(m_brush_radius_sets[i].radius1));
+			//radius 2
+			fconfig.Read("radius2", &(m_brush_radius_sets[i].radius2));
+			//use radius 2
+			fconfig.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
+		}
+		fconfig.SetPath("/");
+	}
+	if (m_brush_radius_sets.size() == 0)
+	{
+		BrushRadiusSet radius_set;
+		//select brush
+		radius_set.type = 2;
+		radius_set.radius1 = 10;
+		radius_set.radius2 = 30;
+		radius_set.use_radius2 = true;
+		m_brush_radius_sets.push_back(radius_set);
+		//erase
+		radius_set.type = 3;
+		m_brush_radius_sets.push_back(radius_set);
+		//diffuse brush
+		radius_set.type = 4;
+		m_brush_radius_sets.push_back(radius_set);
+		//solid brush
+		radius_set.type = 8;
+		radius_set.use_radius2 = false;
+		m_brush_radius_sets.push_back(radius_set);
+	}
+	m_brush_sets_index = 0;
+	//iterations
+	if (fconfig.Read("brush_iters", &ival))
+	{
+		switch (ival)
+		{
+		case 1:
+			m_iter_num = BRUSH_TOOL_ITER_WEAK;
+			break;
+		case 2:
+			m_iter_num = BRUSH_TOOL_ITER_NORMAL;
+			break;
+		case 3:
+			m_iter_num = BRUSH_TOOL_ITER_STRONG;
+			break;
+		}
+	}
+	//brush size relation
+	if (fconfig.Read("brush_size_data", &bval))
+		m_brush_size_data = bval;
+}
+
+void VolumeSelector::SaveBrushSettings()
+{
+	wxString app_name = "FluoRender " +
+		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
+	wxString vendor_name = "FluoRender";
+	wxString local_name = "default_brush_settings.dft";
+	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
+		wxCONFIG_USE_LOCAL_FILE);
+	wxString str;
+	//brush properties
+	fconfig.Write("brush_ini_thresh", m_ini_thresh);
+	fconfig.Write("brush_gm_falloff", m_gm_falloff);
+	fconfig.Write("brush_scl_falloff", m_scl_falloff);
+	fconfig.Write("brush_scl_translate", m_scl_translate);
+	//auto thresh
+	fconfig.Write("auto_thresh", m_estimate_threshold);
+	//edge detect
+	fconfig.Write("edge_detect", m_edge_detect);
+	//hidden removal
+	fconfig.Write("hidden_removal", m_hidden_removal);
+	//select group
+	fconfig.Write("select_group", m_select_multi == 1);
+	//brick acccuracy
+	fconfig.Write("accurate_bricks", m_update_order);
+	//2d influence
+	fconfig.Write("brush_2dinfl", m_w2d);
+	//size 1
+	fconfig.Write("brush_size1", m_brush_radius1);
+	//size2 link
+	fconfig.Write("use_brush_size2", m_use_brush_radius2);
+	//size 2
+	fconfig.Write("brush_size2", m_brush_radius2);
+	//radius settings for individual brush types
+	fconfig.SetPath("/radius_settings");
+	int brush_num = m_brush_radius_sets.size();
+	fconfig.Write("num", brush_num);
+	for (int i = 0; i < brush_num; ++i)
+	{
+		BrushRadiusSet radius_set = m_brush_radius_sets[i];
+		str = wxString::Format("/radius_settings/%d", i);
+		fconfig.SetPath(str);
+		//type
+		fconfig.Write("type", radius_set.type);
+		//radius 1
+		fconfig.Write("radius1", radius_set.radius1);
+		//radius 2
+		fconfig.Write("radius2", radius_set.radius2);
+		//use radius 2
+		fconfig.Write("use_radius2", radius_set.use_radius2);
+	}
+	fconfig.SetPath("/");
+	//iterations
+	fconfig.Write("brush_iters", m_iter_num);
+	//brush size relation
+	fconfig.Write("brush_size_data", m_brush_size_data);
+
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_brush_settings.dft";
+	wxFileOutputStream os(dft);
+	fconfig.Save(os);
 }
 

@@ -376,79 +376,6 @@ public:
 	void Calculate(int type, wxString prev_group="")
 	{if (m_glview) return m_glview->Calculate(type, prev_group);}
 
-	//brush properties
-	//use pressure
-	void SetBrushUsePres(bool pres)
-	{ if (m_glview) m_glview->SetBrushUsePres(pres); }
-	bool GetBrushUsePres()
-	{ if (m_glview) return m_glview->GetBrushUsePres(); else return false;}
-	//set brush size
-	void SetUseBrushSize2(bool val)
-	{ if (m_glview) m_glview->SetUseBrushSize2(val); }
-	bool GetUseBrushSize2()
-	{ if (m_glview) return m_glview->GetUseBrushSize2(); else return false; }
-	void SetBrushSize(double size1, double size2)
-	{ if (m_glview) m_glview->SetBrushSize(size1, size2); }
-	double GetBrushSize1()
-	{ if (m_glview) return m_glview->GetBrushSize1(); else return 0.0; }
-	double GetBrushSize2()
-	{ if (m_glview) return m_glview->GetBrushSize2(); else return 0.0; }
-	//set brush spacing
-	void SetBrushSpacing(double spacing)
-	{ if (m_glview) m_glview->SetBrushSpacing(spacing); }
-	double GetBrushSpacing()
-	{ if (m_glview) return m_glview->GetBrushSpacing(); else return 1.0; }
-	//set iteration number
-	void SetBrushIteration(int num)
-	{ if (m_glview) m_glview->SetBrushIteration(num); }
-	int GetBrushIteration()
-	{ if (m_glview) return m_glview->GetBrushIteration(); else return 0; }
-	//set brush size relation
-	void SetBrushSizeData(bool val)
-	{ if (m_glview) m_glview->SetBrushSizeData(val); }
-	bool GetBrushSizeData()
-	{ if (m_glview) return m_glview->GetBrushSizeData(); else return false; }
-	//scalar translate
-	void SetBrushSclTranslate(double val)
-	{ if (m_glview) m_glview->SetBrushSclTranslate(val); }
-	double GetBrushSclTranslate()
-	{ if (m_glview) return m_glview->GetBrushSclTranslate(); else return 0.0; }
-	//gm falloff
-	void SetBrushGmFalloff(double val)
-	{ if (m_glview) m_glview->SetBrushGmFalloff(val); }
-	double GetBrushGmFalloff()
-	{ if (m_glview) return m_glview->GetBrushGmFalloff(); else return 0.0; }
-	//w2d
-	void SetW2d(double val)
-	{ if (m_glview) m_glview->SetW2d(val); }
-	double GetW2d()
-	{ if (m_glview) return m_glview->GetW2d(); else return 0.0; }
-	//edge detect
-	void SetEdgeDetect(bool value)
-	{ if (m_glview) m_glview->SetEdgeDetect(value); }
-	bool GetEdgeDetect()
-	{ if (m_glview) return m_glview->GetEdgeDetect(); else return false;}
-	//hidden removal
-	void SetHiddenRemoval(bool value)
-	{ if (m_glview) m_glview->SetHiddenRemoval(value); }
-	bool GetHiddenRemoval()
-	{ if (m_glview) return m_glview->GetHiddenRemoval(); else return false;}
-	//select group
-	void SetSelectGroup(bool value)
-	{ if (m_glview) m_glview->SetSelectGroup(value); }
-	bool GetSelectGroup()
-	{ if (m_glview) return m_glview->GetSelectGroup(); else return false;}
-	//estimate threshold
-	void SetEstimateThresh(bool value)
-	{ if (m_glview) m_glview->SetEstimateThresh(value);}
-	bool GetEstimateThresh()
-	{ if (m_glview) return m_glview->GetEstimateThresh(); else return false;}
-	//brick acuracy
-	void SetAccurateBricks(bool value)
-	{ if (m_glview) m_glview->SetAccurateBricks(value);}
-	bool GetAccurateBricks()
-	{ if (m_glview) return m_glview->GetAccurateBricks(); else return false;}
-
 	//set clip mode
 	void SetClipMode(int mode)
 	{
@@ -474,7 +401,7 @@ public:
 	}
 
 	//get volume selector
-	VolumeSelector* GetVolumeSelector()
+	FL::VolumeSelector* GetVolumeSelector()
 	{
 		if (m_glview) return m_glview->GetVolumeSelector(); else return 0;
 	}

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <Components/CompAnalyzer.h>
 #include <Calculate/VolumePoint.h>
+#include <Selection/VolumeSelector.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
@@ -196,11 +197,15 @@ void RulerHandler::AddRulerPoint(int mx, int my)
 		ruler->SetTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(ruler);
 		//store brush size in ruler
-		if (m_view->GetBrushSizeData())
-			ruler->SetBrushSize(m_view->GetBrushSize1());
-		else
-			ruler->SetBrushSize(m_view->GetBrushSize1()
-				/ m_view->Get121ScaleFactor());
+		FL::VolumeSelector* selector = m_view->GetVolumeSelector();
+		if (selector)
+		{
+			if (selector->GetBrushSizeData())
+				ruler->SetBrushSize(selector->GetBrushSize1());
+			else
+				ruler->SetBrushSize(selector->GetBrushSize1()
+					/ m_view->Get121ScaleFactor());
+		}
 	}
 	else
 	{
@@ -258,7 +263,7 @@ void RulerHandler::AddPaintRulerPoint()
 	if (!m_view)
 		return;
 
-	VolumeSelector* selector = m_view->GetVolumeSelector();
+	FL::VolumeSelector* selector = m_view->GetVolumeSelector();
 	if (selector->ProcessSel(0.01))
 	{
 		wxString str;

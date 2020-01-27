@@ -253,22 +253,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_value_6(1.0),
 	m_color_6(Color(1.0, 0.0, 0.0)),
 	m_color_7(Color(1.0, 0.0, 0.0)),
-	//paint brush presssure
-	m_use_press(true),
-	m_on_press(false),
-	//paint stroke radius
-	m_brush_radius1(10),
-	m_brush_radius2(30),
-	m_use_brush_radius2(true),
-	//paint stroke spacing
-	m_brush_spacing(0.1),
-	//brush size relation
-	m_brush_size_data(true),
 	//clipping plane rotations
 	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
-	m_pressure(0.0),
-	m_press_peak(0.0),
-	m_air_press(0.5),
 	//selection
 	m_pick(false),
 	m_draw_mask(true),
@@ -329,7 +315,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_sb_num = "50";
 #ifdef _WIN32
 	//tablet initialization
-	if (m_use_press)
+	if (m_selector.GetBrushUsePres())
 	{
 		if (!m_hTab && LoadWintab() &&
 			gpWTInfoA(0, 0, NULL))
@@ -337,7 +323,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 			m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
 		}
 		else
-			m_use_press = false;
+			m_selector.SetBrushUsePres(false);
 	}
 
 	//check touch
@@ -353,7 +339,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_controller = new XboxController(1);
 #endif
 
-	LoadBrushSettings();
+	m_selector.LoadBrushSettings();
 
 	m_timer = new nv::Timer(10);
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -429,15 +415,15 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
 	if (wWTInfoRetVal == sizeof(AXIS))
-		m_press_nmax = TabletNPress.axMax;
+		m_selector.SetBrushPnMax(TabletNPress.axMax);
 	else
-		m_press_nmax = 1.0;
+		m_selector.SetBrushPnMax(1.0);
 
 	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
 	if (wWTInfoRetVal == sizeof(AXIS))
-		m_press_tmax = TabletTPress.axMax;
+		m_selector.SetBrushPtMax(TabletTPress.axMax);
 	else
-		m_press_tmax = 1.0;
+		m_selector.SetBrushPnMax(1.0);
 
 /*	m_lc.lcInOrgX = 0;
 	m_lc.lcInOrgY = 0;
@@ -507,7 +493,7 @@ VRenderGLView::~VRenderGLView()
 	m_timer->stop();
 	delete m_timer;
 
-	SaveBrushSettings();
+	m_selector.SaveBrushSettings();
 
 #ifdef _WIN32
 	//tablet
@@ -1782,7 +1768,7 @@ void VRenderGLView::SetPaintMode(int mode)
 {
 	m_selector.SetMode(mode);
 	m_brush_state = mode;
-	ChangeBrushSetsIndex();
+	m_selector.ChangeBrushSetsIndex();
 }
 
 int VRenderGLView::GetPaintMode()
@@ -1828,10 +1814,7 @@ void VRenderGLView::DrawCircles(double cx, double cy,
 //draw the brush shape
 void VRenderGLView::DrawBrush()
 {
-	double pressure = m_use_press && m_pressure > 0.0 ?
-		1.0 + (m_pressure - 0.5)*0.4 : 1.0;
-	pressure += m_air_press - 0.5;
-	pressure = max(pressure, 0.0);
+	double pressure = m_selector.GetNormPress();
 
 	wxPoint pos1(old_mouse_X, old_mouse_Y);
 	wxRect reg = GetClientRect();
@@ -1847,7 +1830,7 @@ void VRenderGLView::DrawBrush()
 		//set up the matrices
 		glm::mat4 proj_mat;
 		double cx, cy;
-		if (m_brush_size_data)
+		if (m_selector.GetBrushSizeData())
 		{
 			proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
 				float(m_ortho_top), float(m_ortho_bottom));
@@ -1868,17 +1851,20 @@ void VRenderGLView::DrawBrush()
 
 		Color text_color = GetTextColor();
 
+		double br1 = m_selector.GetBrushSize1();
+		double br2 = m_selector.GetBrushSize2();
+
 		if (mode == 1 ||
 			mode == 2)
-			DrawCircles(cx, cy, m_brush_radius1*pressure,
-				m_brush_radius2*pressure, text_color, proj_mat);
+			DrawCircles(cx, cy, br1*pressure,
+				br2*pressure, text_color, proj_mat);
 		else if (mode == 8)
-			DrawCircles(cx, cy, m_brush_radius1*pressure,
+			DrawCircles(cx, cy, br1*pressure,
 				-1.0, text_color, proj_mat);
 		else if (mode == 3 ||
 			mode == 4)
 			DrawCircles(cx, cy, -1.0,
-				m_brush_radius2*pressure, text_color, proj_mat);
+				br2*pressure, text_color, proj_mat);
 
 		float cx2 = pos1.x;
 		float cy2 = ny - pos1.y;
@@ -1914,10 +1900,7 @@ void VRenderGLView::PaintStroke()
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	double pressure = m_use_press && m_pressure > 0.0 ?
-		1.0 + (m_pressure - 0.5)*0.4 : 1.0;
-	pressure += m_air_press - 0.5;
-	pressure = max(pressure, 0.0);
+	double pressure = m_selector.GetNormPress();
 
 	//generate texture and buffer objects
 	//painting fbo
@@ -1951,10 +1934,14 @@ void VRenderGLView::PaintStroke()
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_MAX);
 
+		double radius1 = m_selector.GetBrushSize1();
+		double radius2 = m_selector.GetBrushSize2();
+		double bspc = m_selector.GetBrushSpacing();
+		bool bs_data = m_selector.GetBrushSizeData();
 		double px = double(old_mouse_X - prv_mouse_X);
 		double py = double(old_mouse_Y - prv_mouse_Y);
 		double dist = sqrt(px*px + py*py);
-		double step = m_brush_radius1*pressure*m_brush_spacing;
+		double step = radius1 * pressure * bspc;
 		int repeat = int(dist / step + 0.5);
 		double spx = (double)prv_mouse_X;
 		double spy = (double)prv_mouse_Y;
@@ -1965,7 +1952,7 @@ void VRenderGLView::PaintStroke()
 		}
 
 		//set the width and height
-		if (m_brush_size_data)
+		if (bs_data)
 			paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
 				m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
 		else
@@ -1973,13 +1960,11 @@ void VRenderGLView::PaintStroke()
 
 		double x, y;
 		double cx, cy;
-		double radius1 = m_brush_radius1;
-		double radius2 = m_brush_radius2;
 		for (int i = 0; i <= repeat; i++)
 		{
 			x = spx + i*px;
 			y = spy + i*py;
-			if (m_brush_size_data)
+			if (bs_data)
 			{
 				cx = x * (m_ortho_right - m_ortho_left) / nx;
 				cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
@@ -1992,7 +1977,7 @@ void VRenderGLView::PaintStroke()
 			switch (m_selector.GetMode())
 			{
 			case 3:
-				radius1 = m_brush_radius2;
+				radius1 = radius2;
 				break;
 			case 4:
 				radius1 = 0.0;
@@ -2088,401 +2073,13 @@ void VRenderGLView::Segment()
 	}
 }
 
-//brush properties
-//load settings
-void VRenderGLView::LoadBrushSettings()
-{
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	double val;
-	int ival;
-	bool bval;
-
-	//brush properties
-	if (fconfig.Read("brush_ini_thresh", &val))
-		m_selector.SetBrushIniThresh(val);
-	if (fconfig.Read("brush_gm_falloff", &val))
-		m_selector.SetBrushGmFalloff(val);
-	if (fconfig.Read("brush_scl_falloff", &val))
-		m_selector.SetBrushSclFalloff(val);
-	if (fconfig.Read("brush_scl_translate", &val))
-	{
-		m_selector.SetBrushSclTranslate(val);
-		m_calculator.SetThreshold(val);
-	}
-	//auto thresh
-	if (fconfig.Read("auto_thresh", &bval))
-		m_selector.SetEstimateThreshold(bval);
-	//edge detect
-	if (fconfig.Read("edge_detect", &bval))
-		m_selector.SetEdgeDetect(bval);
-	//hidden removal
-	if (fconfig.Read("hidden_removal", &bval))
-		m_selector.SetHiddenRemoval(bval);
-	//select group
-	if (fconfig.Read("select_group", &bval))
-		m_selector.SetSelectGroup(bval);
-	//brick accuracy
-	if (fconfig.Read("accurate_bricks", &bval))
-		m_selector.SetUpdateOrder(bval);
-	//2d influence
-	if (fconfig.Read("brush_2dinfl", &val))
-		m_selector.SetW2d(val);
-	//size 1
-	if (fconfig.Read("brush_size1", &val) && val>0.0)
-		m_brush_radius1 = val;
-	//size 2 link
-	if (fconfig.Read("use_brush_size2", &bval))
-	{
-		m_use_brush_radius2 = bval;
-		m_selector.SetUseBrushSize2(bval);
-	}
-	//size 2
-	if (fconfig.Read("brush_size2", &val) && val>0.0)
-		m_brush_radius2 = val;
-	//radius settings for individual brush types
-	if (fconfig.Exists("/radius_settings"))
-	{
-		fconfig.SetPath("/radius_settings");
-		int brush_num = fconfig.Read("num", 0l);
-		if (m_brush_radius_sets.size() != brush_num)
-			m_brush_radius_sets.resize(brush_num);
-		wxString str;
-		for (int i = 0; i < brush_num; ++i)
-		{
-			str = wxString::Format("/radius_settings/%d", i);
-			if (!fconfig.Exists(str))
-				continue;
-			fconfig.SetPath(str);
-			//type
-			fconfig.Read("type", &(m_brush_radius_sets[i].type));
-			//radius 1
-			fconfig.Read("radius1", &(m_brush_radius_sets[i].radius1));
-			//radius 2
-			fconfig.Read("radius2", &(m_brush_radius_sets[i].radius2));
-			//use radius 2
-			fconfig.Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
-		}
-		fconfig.SetPath("/");
-	}
-	if (m_brush_radius_sets.size() == 0)
-	{
-		BrushRadiusSet radius_set;
-		//select brush
-		radius_set.type = 2;
-		radius_set.radius1 = 10;
-		radius_set.radius2 = 30;
-		radius_set.use_radius2 = true;
-		m_brush_radius_sets.push_back(radius_set);
-		//erase
-		radius_set.type = 3;
-		m_brush_radius_sets.push_back(radius_set);
-		//diffuse brush
-		radius_set.type = 4;
-		m_brush_radius_sets.push_back(radius_set);
-		//solid brush
-		radius_set.type = 8;
-		radius_set.use_radius2 = false;
-		m_brush_radius_sets.push_back(radius_set);
-	}
-	m_brush_sets_index = 0;
-	//iterations
-	if (fconfig.Read("brush_iters", &ival))
-	{
-		switch (ival)
-		{
-		case 1:
-			m_selector.SetBrushIteration(BRUSH_TOOL_ITER_WEAK);
-			break;
-		case 2:
-			m_selector.SetBrushIteration(BRUSH_TOOL_ITER_NORMAL);
-			break;
-		case 3:
-			m_selector.SetBrushIteration(BRUSH_TOOL_ITER_STRONG);
-			break;
-		}
-	}
-	//brush size relation
-	if (fconfig.Read("brush_size_data", &bval))
-		m_brush_size_data = bval;
-}
-
-void VRenderGLView::SaveBrushSettings()
-{
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_brush_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	wxString str;
-	//brush properties
-	fconfig.Write("brush_ini_thresh",
-		m_selector.GetBrushIniThresh());
-	fconfig.Write("brush_gm_falloff",
-		m_selector.GetBrushGmFalloff());
-	fconfig.Write("brush_scl_falloff",
-		m_selector.GetBrushSclFalloff());
-	fconfig.Write("brush_scl_translate",
-		m_selector.GetBrushSclTranslate());
-	//auto thresh
-	fconfig.Write("auto_thresh",
-		m_selector.GetEstimateThreshold());
-	//edge detect
-	fconfig.Write("edge_detect",
-		m_selector.GetEdgeDetect());
-	//hidden removal
-	fconfig.Write("hidden_removal",
-		m_selector.GetHiddenRemoval());
-	//select group
-	fconfig.Write("select_group",
-		m_selector.GetSelectGroup());
-	//brick acccuracy
-	fconfig.Write("accurate_bricks",
-		m_selector.GetUpdateOrder());
-	//2d influence
-	fconfig.Write("brush_2dinfl",
-		m_selector.GetW2d());
-	//size 1
-	fconfig.Write("brush_size1", m_brush_radius1);
-	//size2 link
-	fconfig.Write("use_brush_size2", m_use_brush_radius2);
-	//size 2
-	fconfig.Write("brush_size2", m_brush_radius2);
-	//radius settings for individual brush types
-	fconfig.SetPath("/radius_settings");
-	int brush_num = m_brush_radius_sets.size();
-	fconfig.Write("num", brush_num);
-	for (int i = 0; i < brush_num; ++i)
-	{
-		BrushRadiusSet radius_set = m_brush_radius_sets[i];
-		str = wxString::Format("/radius_settings/%d", i);
-		fconfig.SetPath(str);
-		//type
-		fconfig.Write("type", radius_set.type);
-		//radius 1
-		fconfig.Write("radius1", radius_set.radius1);
-		//radius 2
-		fconfig.Write("radius2", radius_set.radius2);
-		//use radius 2
-		fconfig.Write("use_radius2", radius_set.use_radius2);
-	}
-	fconfig.SetPath("/");
-	//iterations
-	fconfig.Write("brush_iters",
-		m_selector.GetBrushIteration());
-	//brush size relation
-	fconfig.Write("brush_size_data", m_brush_size_data);
-
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
-}
-
-void VRenderGLView::SetBrushUsePres(bool pres)
-{
-	m_use_press = pres;
-}
-
-bool VRenderGLView::GetBrushUsePres()
-{
-	return m_use_press;
-}
-
-void VRenderGLView::SetUseBrushSize2(bool val)
-{
-	m_use_brush_radius2 = val;
-	m_selector.SetUseBrushSize2(val);
-	if (!val)
-		m_brush_radius2 = m_brush_radius1;
-}
-
-bool VRenderGLView::GetUseBrushSize2()
-{
-	return m_use_brush_radius2;
-}
-
-void VRenderGLView::SetBrushSize(double size1, double size2)
-{
-	if (size1 > 0.0)
-		m_brush_radius1 = size1;
-	if (size2 > 0.0)
-		m_brush_radius2 = size2;
-	if (!m_use_brush_radius2)
-		m_brush_radius2 = m_brush_radius1;
-}
-
-double VRenderGLView::GetBrushSize1()
-{
-	return m_brush_radius1;
-}
-
-double VRenderGLView::GetBrushSize2()
-{
-	return m_brush_radius2;
-}
-
-void VRenderGLView::SetBrushSpacing(double spacing)
-{
-	if (spacing > 0.0)
-		m_brush_spacing = spacing;
-}
-
-double VRenderGLView::GetBrushSpacing()
-{
-	return m_brush_spacing;
-}
-
-void VRenderGLView::SetBrushIteration(int num)
-{
-	m_selector.SetBrushIteration(num);
-}
-
-int VRenderGLView::GetBrushIteration()
-{
-	return m_selector.GetBrushIteration();
-}
-
-void VRenderGLView::SetBrushSizeData(bool val)
-{
-	m_brush_size_data = val;
-}
-
-bool VRenderGLView::GetBrushSizeData()
-{
-	return m_brush_size_data;
-}
-
-//brush translate
-void VRenderGLView::SetBrushSclTranslate(double val)
-{
-	m_selector.SetBrushSclTranslate(val);
-	m_calculator.SetThreshold(val);
-}
-
-double VRenderGLView::GetBrushSclTranslate()
-{
-	return m_selector.GetBrushSclTranslate();
-}
-
-//gm falloff
-void VRenderGLView::SetBrushGmFalloff(double val)
-{
-	m_selector.SetBrushGmFalloff(val);
-}
-
-double VRenderGLView::GetBrushGmFalloff()
-{
-	return m_selector.GetBrushGmFalloff();
-}
-
 //change brush display
 void VRenderGLView::ChangeBrushSize(int value)
 {
-	if (!value) return;
-
-	if (m_selector.GetMode() == 8 ||
-		!m_use_brush_radius2)
-	{
-		double delta = value * m_brush_radius1 / 1000.0;
-		m_brush_radius1 += delta;
-		m_brush_radius1 = max(m_brush_radius1, 1.0);
-		m_brush_radius2 = m_brush_radius1;
-	}
-	else
-	{
-		if (wxGetKeyState(WXK_CONTROL))
-		{
-			double delta = value * m_brush_radius1 / 1000.0;
-			m_brush_radius1 += delta;
-			m_brush_radius1 = max(m_brush_radius1, 1.0);
-			m_brush_radius2 = max(m_brush_radius2, m_brush_radius1);
-		}
-		else
-		{
-			double delta = value * m_brush_radius2 / 2000.0;
-			m_brush_radius2 += delta;
-			m_brush_radius2 = max(1.0, m_brush_radius2);
-			m_brush_radius1 = min(m_brush_radius2, m_brush_radius1);
-		}
-	}
-
+	m_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBrushToolDlg())
 		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
-}
-
-void VRenderGLView::SetW2d(double val)
-{
-	m_selector.SetW2d(val);
-}
-
-double VRenderGLView::GetW2d()
-{
-	return m_selector.GetW2d();
-}
-
-//edge detect
-void VRenderGLView::SetEdgeDetect(bool value)
-{
-	m_selector.SetEdgeDetect(value);
-}
-
-bool VRenderGLView::GetEdgeDetect()
-{
-	return m_selector.GetEdgeDetect();
-}
-
-//hidden removal
-void VRenderGLView::SetHiddenRemoval(bool value)
-{
-	m_selector.SetHiddenRemoval(value);
-}
-
-bool VRenderGLView::GetHiddenRemoval()
-{
-	return m_selector.GetHiddenRemoval();
-}
-
-//select group
-void VRenderGLView::SetSelectGroup(bool value)
-{
-	m_selector.SetSelectGroup(value);
-}
-
-bool VRenderGLView::GetSelectGroup()
-{
-	return m_selector.GetSelectGroup();
-}
-
-//estimate threshold
-void VRenderGLView::SetEstimateThresh(bool value)
-{
-	m_selector.SetEstimateThreshold(value);
-}
-
-bool VRenderGLView::GetEstimateThresh()
-{
-	return m_selector.GetEstimateThreshold();
-}
-
-//brick acuracy
-void VRenderGLView::SetAccurateBricks(bool value)
-{
-	m_selector.SetUpdateOrder(value);
-}
-
-bool VRenderGLView::GetAccurateBricks()
-{
-	return m_selector.GetUpdateOrder();
 }
 
 //calculations
@@ -4076,7 +3673,7 @@ void VRenderGLView::SetBrush(int mode)
 	}
 	m_paint_display = true;
 	m_draw_brush = true;
-	ChangeBrushSetsIndex();
+	m_selector.ChangeBrushSetsIndex();
 }
 
 void VRenderGLView::UpdateBrushState()
@@ -4183,32 +3780,6 @@ void VRenderGLView::UpdateBrushState()
 				m_prev_focus->SetFocus();
 				m_prev_focus = 0;
 			}
-		}
-	}
-}
-
-//brush sets
-void VRenderGLView::ChangeBrushSetsIndex()
-{
-	int mode = m_selector.GetMode();
-	if (mode == 1)
-		mode = 2;
-	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
-	{
-		BrushRadiusSet radius_set = m_brush_radius_sets[i];
-		if (radius_set.type == mode &&
-			m_brush_sets_index != i)
-		{
-			//save previous
-			m_brush_radius_sets[m_brush_sets_index].radius1 = m_brush_radius1;
-			m_brush_radius_sets[m_brush_sets_index].radius2 = m_brush_radius2;
-			m_brush_radius_sets[m_brush_sets_index].use_radius2 = m_use_brush_radius2;
-			//get new
-			m_brush_radius1 = radius_set.radius1;
-			m_brush_radius2 = radius_set.radius2;
-			m_use_brush_radius2 = radius_set.use_radius2;
-			m_brush_sets_index = i;
-			break;
 		}
 	}
 }
@@ -10035,7 +9606,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	Color text_color = GetTextColor();
 	if (TextureRenderer::get_mem_swap())
 	{
-		if (m_use_press)
+		if (m_selector.GetBrushUsePres())
 			str = wxString::Format(
 				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
 				m_interactive ? "Yes" : "No",
@@ -10043,7 +9614,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 				TextureRenderer::get_finished_bricks(),
 				TextureRenderer::get_quota_bricks(),
 				TextureRenderer::get_cor_up_time(),
-				m_pressure);
+				m_selector.GetPressure());
 		else
 			str = wxString::Format(
 				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
@@ -10068,9 +9639,9 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 	else
 	{
-		if (m_use_press)
+		if (m_selector.GetBrushUsePres())
 			str = wxString::Format("FPS: %.2f, Pressure: %.2f",
-				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0, m_pressure);
+				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0, m_selector.GetPressure());
 		else
 			str = wxString::Format("FPS: %.2f",
 				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0);
@@ -11252,22 +10823,13 @@ void VRenderGLView::GetTraces(bool update)
 #ifdef _WIN32
 WXLRESULT VRenderGLView::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-	if (m_use_press)
+	if (m_selector.GetBrushUsePres())
 	{
 		if (message == WT_PACKET)
 		{
 			PACKET pkt;
 			if (gpWTPacket((HCTX)lParam, wParam, &pkt))
-			{
-				//compute pressure, normalized to [0, 1]
-				if (m_press_nmax > 1.0)
-					m_pressure = pkt.pkNormalPressure / m_press_nmax;
-				if (m_pressure > m_press_peak)
-					m_press_peak = m_pressure;
-				//wheel of air brush
-				if (m_press_tmax > 1.0)
-					m_air_press = pkt.pkTangentPressure / m_press_tmax;
-			}
+				m_selector.SetPressure(pkt.pkNormalPressure, pkt.pkTangentPressure);
 		}
 	}
 
@@ -11447,7 +11009,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			prv_mouse_Y = old_mouse_Y;
 			m_paint_enable = true;
 			m_clear_paint = true;
-			m_press_peak = 0.0;
+			m_selector.SetBrushPressPeak(0.0);
 			RefreshGL(26);
 		}
 
