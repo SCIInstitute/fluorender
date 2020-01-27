@@ -584,7 +584,8 @@ void VolumeSelector::ChangeBrushSetsIndex()
 //th udpate
 bool VolumeSelector::GetThUpdate()
 {
-	if (!m_view)
+	if (!m_view || (m_mode != 1 &&
+		m_mode != 2 && m_mode != 4))
 		return false;
 	glm::mat4 mv_mat = m_view->GetDrawMat();
 	glm::mat4 prj_mat = m_view->GetProjection();
