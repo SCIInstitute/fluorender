@@ -60,7 +60,7 @@ const char* str_cl_paint_boxes = \
 "	if (v < 0.45)\n" \
 "		return;\n" \
 "	float x = (float)(i) * 2.0 / (float)(nx) - 1.0;\n" \
-"	float y = 1.0 - (flaot)(j) * 2.0 / (float)(ny);\n" \
+"	float y = 1.0 - (float)(j) * 2.0 / (float)(ny);\n" \
 "	float4 mp1 = (float4)(x, y, 0.0, 1.0);\n" \
 "	float4 mp2 = (float4)(x, y, 1.0, 1.0);\n" \
 "	mp1 = (float4)(dot(mp1, iprj0), dot(mp1, iprj1), dot(mp1, iprj2), dot(mp1, iprj3));\n" \
@@ -84,7 +84,7 @@ const char* str_cl_paint_boxes = \
 "		float tnn = max(tn.x, max(tn.y, tn.z));\n" \
 "		float tff = min(tf.x, min(tf.y, tf.z));\n" \
 "		if (tnn <= tff)\n" \
-"			atomic_inc(hists+ibb);\n" \
+"			atomic_inc(hits+ibb);\n" \
 "	}\n" \
 "}\n" \
 ;
@@ -118,16 +118,16 @@ void PaintBoxes::Compute()
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
 
-	size_t global_size[2] = { m_ptx, m_pty };
+	size_t global_size[2] = { (size_t)m_ptx, (size_t)m_pty };
 	size_t local_size[2] = { 1, 1 };
 
 	//set
 	kernel_prog->setKernelArgTex2D(kernel_index, 0,
 		CL_MEM_READ_ONLY, m_paint_tex);
-	kernel_prog->setKernelArgBuf(kernel_index, 1,
+	FLIVR::Argument arg_boxes = kernel_prog->setKernelArgBuf(kernel_index, 1,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 		sizeof(float)*num*6, boxes);
-	kernel_prog->setKernelArgBuf(kernel_index, 2,
+	FLIVR::Argument arg_hits = kernel_prog->setKernelArgBuf(kernel_index, 2,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 		sizeof(unsigned int)*num, hits);
 	kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -136,28 +136,52 @@ void PaintBoxes::Compute()
 		sizeof(unsigned int), (void*)(&m_pty));
 	kernel_prog->setKernelArgConst(kernel_index, 5,
 		sizeof(unsigned int), (void*)(&num));
-	cl_float4 iprj0 = { m_ipr.get_mat_val(0, 0), m_ipr.get_mat_val(0, 1), m_ipr.get_mat_val(0, 2), m_ipr.get_mat_val(0, 3) };
+	cl_float4 iprj0 = { float(m_ipr.get_mat_val(0, 0)),
+		float(m_ipr.get_mat_val(0, 1)),
+		float(m_ipr.get_mat_val(0, 2)),
+		float(m_ipr.get_mat_val(0, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 6,
 		sizeof(cl_float4), (void*)(&iprj0));
-	cl_float4 iprj1 = { m_ipr.get_mat_val(1, 0), m_ipr.get_mat_val(1, 1), m_ipr.get_mat_val(1, 2), m_ipr.get_mat_val(1, 3) };
+	cl_float4 iprj1 = { float(m_ipr.get_mat_val(1, 0)),
+		float(m_ipr.get_mat_val(1, 1)),
+		float(m_ipr.get_mat_val(1, 2)),
+		float(m_ipr.get_mat_val(1, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 7,
 		sizeof(cl_float4), (void*)(&iprj1));
-	cl_float4 iprj2 = { m_ipr.get_mat_val(2, 0), m_ipr.get_mat_val(2, 1), m_ipr.get_mat_val(2, 2), m_ipr.get_mat_val(2, 3) };
+	cl_float4 iprj2 = { float(m_ipr.get_mat_val(2, 0)),
+		float(m_ipr.get_mat_val(2, 1)),
+		float(m_ipr.get_mat_val(2, 2)),
+		float(m_ipr.get_mat_val(2, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 8,
 		sizeof(cl_float4), (void*)(&iprj2));
-	cl_float4 iprj3 = { m_ipr.get_mat_val(3, 0), m_ipr.get_mat_val(3, 1), m_ipr.get_mat_val(3, 2), m_ipr.get_mat_val(3, 3) };
+	cl_float4 iprj3 = { float(m_ipr.get_mat_val(3, 0)),
+		float(m_ipr.get_mat_val(3, 1)),
+		float(m_ipr.get_mat_val(3, 2)),
+		float(m_ipr.get_mat_val(3, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 9,
 		sizeof(cl_float4), (void*)(&iprj3));
-	cl_float4 imv0 = { m_imv.get_mat_val(0, 0), m_imv.get_mat_val(0, 1), m_imv.get_mat_val(0, 2), m_imv.get_mat_val(0, 3) };
+	cl_float4 imv0 = { float(m_imv.get_mat_val(0, 0)),
+		float(m_imv.get_mat_val(0, 1)),
+		float(m_imv.get_mat_val(0, 2)),
+		float(m_imv.get_mat_val(0, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 10,
 		sizeof(cl_float4), (void*)(&imv0));
-	cl_float4 imv1 = { m_imv.get_mat_val(1, 0), m_imv.get_mat_val(1, 1), m_imv.get_mat_val(1, 2), m_imv.get_mat_val(1, 3) };
+	cl_float4 imv1 = { float(m_imv.get_mat_val(1, 0)),
+		float(m_imv.get_mat_val(1, 1)),
+		float(m_imv.get_mat_val(1, 2)),
+		float(m_imv.get_mat_val(1, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 11,
 		sizeof(cl_float4), (void*)(&imv1));
-	cl_float4 imv2 = { m_imv.get_mat_val(2, 0), m_imv.get_mat_val(2, 1), m_imv.get_mat_val(2, 2), m_imv.get_mat_val(2, 3) };
+	cl_float4 imv2 = { float(m_imv.get_mat_val(2, 0)),
+		float(m_imv.get_mat_val(2, 1)),
+		float(m_imv.get_mat_val(2, 2)),
+		float(m_imv.get_mat_val(2, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 12,
 		sizeof(cl_float4), (void*)(&imv2));
-	cl_float4 imv3 = { m_imv.get_mat_val(3, 0), m_imv.get_mat_val(3, 1), m_imv.get_mat_val(3, 2), m_imv.get_mat_val(3, 3) };
+	cl_float4 imv3 = { float(m_imv.get_mat_val(3, 0)),
+		float(m_imv.get_mat_val(3, 1)),
+		float(m_imv.get_mat_val(3, 2)),
+		float(m_imv.get_mat_val(3, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 13,
 		sizeof(cl_float4), (void*)(&imv3));
 
@@ -175,6 +199,8 @@ void PaintBoxes::Compute()
 
 	//release buffer
 	kernel_prog->releaseAll();
+	//kernel_prog->releaseMemObject(arg_boxes);
+	//kernel_prog->releaseMemObject(arg_hits);
 	//free memory
 	delete[] boxes;
 	delete[] hits;
