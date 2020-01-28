@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 #include <DataManager.h>
 #include <Components/CompAnalyzer.h>
-#include <Calculate/VolumePoint.h>
+#include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerHandler_H_
 
 #include <Distance/Ruler.h>
-#include <Calculate/VolumePoint.h>
+#include <Selection/VolumePoint.h>
 #include <string>
 
 class VRenderGLView;
