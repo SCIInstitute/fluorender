@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/RulerRenderer.h>
-#include <Calculate/VolumePoint.h>
+#include <Selection/VolumePoint.h>
 #include "FLIVR/Color.h"
 #include "FLIVR/ShaderProgram.h"
 #include "FLIVR/KernelProgram.h"

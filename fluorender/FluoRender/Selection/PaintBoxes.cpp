@@ -25,75 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_PaintBoxes_h
-#define FL_PaintBoxes_h
 
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-#include <FLIVR/BBox.h>
-#include <FLIVR/Vector.h>
-#include <FLIVR/Transform.h>
+#include <Selection/PaintBoxes.h>
 
-using namespace std;
+using namespace FL;
 
-namespace FL
+void PaintBoxes::ComputeOrtho()
 {
-	class PaintBoxes
-	{
-	public:
-		PaintBoxes() : m_type(0), m_paint_tex(0) {}
-		~PaintBoxes() {}
-
-		void SetBoxes(vector<FLIVR::BBox> &boxes)
-		{
-			m_boxes = boxes;
-		}
-
-		void SetPaintTex(GLint pt)
-		{
-			m_paint_tex = pt;
-		}
-
-		void SetOrtho(FLIVR::Vector & dir)
-		{
-			m_type = 1;
-			m_dir = dir;
-		}
-
-		void SetPersp(FLIVR::Transform &mv, FLIVR::Transform &pr)
-		{
-			m_type = 2;
-			m_mv = mv;
-			m_pr = pr;
-		}
-
-		void Compute()
-		{
-			switch (m_type)
-			{
-			case 1:
-				ComputeOrtho();
-				break;
-			case 2:
-				ComputePersp();
-				break;
-			}
-		}
-
-	private:
-		int m_type;//1-ortho; 2-persp
-		vector<FLIVR::BBox> m_boxes;
-		GLint m_paint_tex;
-		//for ortho
-		FLIVR::Vector m_dir;
-		//for persp
-		FLIVR::Transform m_mv;//modelview
-		FLIVR::Transform m_pr;//projection
-
-	private:
-		void ComputeOrtho();
-		void ComputePersp();
-	};
 }
 
-#endif//FL_PaintBoxes_h
+void PaintBoxes::ComputePersp()
+{
+
+}
