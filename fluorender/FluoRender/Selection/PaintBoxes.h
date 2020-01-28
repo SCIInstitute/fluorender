@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/BBox.h>
 #include <FLIVR/Vector.h>
 #include <FLIVR/Transform.h>
+#include <FLIVR/TextureBrick.h>
 
 using namespace std;
 
@@ -41,58 +42,61 @@ namespace FL
 	class PaintBoxes
 	{
 	public:
-		PaintBoxes() : m_type(0), m_paint_tex(0) {}
+		PaintBoxes() : m_bricks(0), m_paint_tex(0),
+			m_ptx(0), m_pty(0), m_persp(false) {}
 		~PaintBoxes() {}
 
-		void SetBoxes(vector<FLIVR::BBox> &boxes)
+		void SetBricks(vector<FLIVR::TextureBrick*> *bricks)
 		{
-			m_boxes = boxes;
+			m_bricks = bricks;
+			for (int i = 0; i < bricks->size(); ++i)
+				(*bricks)[i]->set_paint_mask(false);
 		}
 
-		void SetPaintTex(int pt)
+		void SetPaintTex(int pt, int ptx, int pty)
 		{
 			m_paint_tex = pt;
+			m_ptx = ptx;
+			m_pty = pty;
 		}
 
-		void SetOrtho(FLIVR::Vector & dir)
+		void SetPersp(bool val)
 		{
-			m_type = 1;
-			m_dir = dir;
+			m_persp = val;
 		}
 
-		void SetPersp(FLIVR::Transform &mv, FLIVR::Transform &pr)
+		void SetMats(FLIVR::Transform &mv, FLIVR::Transform &pr)
 		{
-			m_type = 2;
 			m_mv = mv;
 			m_pr = pr;
+			mv.invert();
+			pr.invert();
+			m_imv = mv;
+			m_ipr = pr;
 		}
 
-		void Compute()
-		{
-			switch (m_type)
-			{
-			case 1:
-				ComputeOrtho();
-				break;
-			case 2:
-				ComputePersp();
-				break;
-			}
-		}
+		void Compute();
 
 	private:
-		int m_type;//1-ortho; 2-persp
-		vector<FLIVR::BBox> m_boxes;
+		vector<FLIVR::TextureBrick*> *m_bricks;
 		int m_paint_tex;//2d tex of paint strokes
-		//for ortho
-		FLIVR::Vector m_dir;
+		int m_ptx, m_pty;//tex size
 		//for persp
+		bool m_persp;
 		FLIVR::Transform m_mv;//modelview
 		FLIVR::Transform m_pr;//projection
+		FLIVR::Transform m_imv;//modelview invert
+		FLIVR::Transform m_ipr;//projection invert
+
+		struct BrickBox
+		{
+			FLIVR::BBox bbox;
+			FLIVR::TextureBrick* brick;
+		};
 
 	private:
-		void ComputeOrtho();
-		void ComputePersp();
+		bool GetBrickBoxes(vector<BrickBox> &bbs);
+		bool test_against_view(const FLIVR::BBox &bbox);
 	};
 }
 

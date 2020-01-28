@@ -36,6 +36,7 @@
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
+#include <Selection/PaintBoxes.h>
 #include "utility.h"
 #include "../compatibility.h"
 #include <fstream>
@@ -1266,15 +1267,27 @@ namespace FLIVR
 		//bind 2d weight map
 		if (use_2d) bind_2d_weight();
 
-		float matrix[16];
+		//set up paint mask flags
+		FL::PaintBoxes pb;
+		pb.SetBricks(bricks);
+		pb.SetPaintTex(tex_2d_mask_, vp_[2], vp_[3]);
+		pb.SetPersp(!orthographic_p);
+		Transform mv, pr;
+		mv.set(glm::value_ptr(m_mv_mat2));
+		pr.set(glm::value_ptr(m_proj_mat));
+		pb.SetMats(mv, pr);
+		pb.Compute();
+
 		int i;
+		float matrix[16];
 		unsigned int num = bricks->size();
 		for (i = ((order == 2) ? (num - 1) : 0);
 			(order == 2) ? (i >= 0) : (i < num);
 			i += ((order == 2) ? -1 : 1))
 		{
 			TextureBrick* b = (*bricks)[i];
-			if (!test_against_view(b->bbox(), !orthographic_p))
+			//if (!test_against_view(b->bbox(), !orthographic_p))
+			if (!b->get_paint_mask())
 			{
 				b->set_skip_mask(true);
 				continue;
@@ -1389,7 +1402,7 @@ namespace FLIVR
 			//posx
 			nid = tex_->posxid(bid);
 			nb = tex_->get_brick(nid);
-			if (nb)
+			if (nb && nb->get_paint_mask())
 			{
 				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
@@ -1402,7 +1415,7 @@ namespace FLIVR
 			//posy
 			nid = tex_->posyid(bid);
 			nb = tex_->get_brick(nid);
-			if (nb)
+			if (nb && nb->get_paint_mask())
 			{
 				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
@@ -1415,7 +1428,7 @@ namespace FLIVR
 			//posz
 			nid = tex_->poszid(bid);
 			nb = tex_->get_brick(nid);
-			if (nb)
+			if (nb && nb->get_paint_mask())
 			{
 				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
@@ -1431,7 +1444,7 @@ namespace FLIVR
 			//negx
 			nid = tex_->negxid(bid);
 			nb = tex_->get_brick(nid);
-			if (nb)
+			if (nb && nb->get_paint_mask())
 			{
 				nbnx = nb->nx();
 				nbtex = load_brick_mask(nb);
@@ -1445,7 +1458,7 @@ namespace FLIVR
 			//negy
 			nid = tex_->negyid(bid);
 			nb = tex_->get_brick(nid);
-			if (nb)
+			if (nb && nb->get_paint_mask())
 			{
 				nbny = nb->ny();
 				nbtex = load_brick_mask(nb);
@@ -1459,7 +1472,7 @@ namespace FLIVR
 			//negz
 			nid = tex_->negzid(bid);
 			nb = tex_->get_brick(nid);
-			if (nb)
+			if (nb && nb->get_paint_mask())
 			{
 				nbnz = nb->nz();
 				nbtex = load_brick_mask(nb);
