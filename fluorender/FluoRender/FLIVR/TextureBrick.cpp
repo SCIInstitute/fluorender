@@ -52,7 +52,8 @@ namespace FLIVR
 		: nx_(nx), ny_(ny), nz_(nz), nc_(nc), ox_(ox), oy_(oy), oz_(oz),
 		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), dbox_(dbox),
 		id_(id),
-		findex_(findex), offset_(offset), fsize_(fsize)
+		findex_(findex), offset_(offset), fsize_(fsize),
+		paint_mask_(true)
 	{
 		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
 		{

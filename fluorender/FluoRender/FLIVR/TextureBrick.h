@@ -226,6 +226,9 @@ namespace FLIVR {
 		void set_disp(bool disp) { disp_ = disp; }
 		bool get_disp() { return disp_; }
 
+		void set_paint_mask(bool val) { paint_mask_ = val; }
+		bool get_paint_mask() { return paint_mask_; }
+
 	private:
 		void compute_edge_rays(BBox &bbox);
 		void compute_edge_rays_tex(BBox &bbox);
@@ -271,6 +274,8 @@ namespace FLIVR {
 		unsigned int id_;
 		//skip mask updating
 		bool skip_mask_;
+		//use for paint mask volume
+		bool paint_mask_;
 
 		int findex_;
 		long long offset_;
