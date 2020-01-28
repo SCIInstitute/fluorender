@@ -36,7 +36,6 @@
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include <Selection/PaintBoxes.h>
 #include "utility.h"
 #include "../compatibility.h"
 #include <fstream>
@@ -1266,17 +1265,6 @@ namespace FLIVR
 		bind_2d_mask();
 		//bind 2d weight map
 		if (use_2d) bind_2d_weight();
-
-		//set up paint mask flags
-		FL::PaintBoxes pb;
-		pb.SetBricks(bricks);
-		pb.SetPaintTex(tex_2d_mask_, vp_[2], vp_[3]);
-		pb.SetPersp(!orthographic_p);
-		Transform mv, pr;
-		mv.set(glm::value_ptr(m_mv_mat2));
-		pr.set(glm::value_ptr(m_proj_mat));
-		pb.SetMats(mv, pr);
-		pb.Compute();
 
 		int i;
 		float matrix[16];

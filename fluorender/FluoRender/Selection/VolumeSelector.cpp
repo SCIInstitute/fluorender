@@ -33,8 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #include "utility.h"
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
+#include <Selection/PaintBoxes.h>
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace FL;
 
@@ -194,6 +196,27 @@ void VolumeSelector::Select(double radius)
 		gm_falloff = m_gm_falloff;
 	else
 		gm_falloff = 1.0;
+
+	//set up paint mask flags
+	FL::PaintBoxes pb;
+	std::vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	pb.SetBricks(bricks);
+	pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
+	pb.SetPersp(!m_view->GetPersp());
+	Transform mv, pr;
+	Transform *tform = m_vd->GetTexture()->transform();
+	double mvmat[16];
+	tform->get_trans(mvmat);
+	glm::mat4 mv_mat2 = glm::mat4(
+		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+	mv_mat2 = m_mv_mat * mv_mat2;
+	mv.set(glm::value_ptr(mv_mat2));
+	pr.set(glm::value_ptr(m_prj_mat));
+	pb.SetMats(mv, pr);
+	pb.Compute();
 
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
