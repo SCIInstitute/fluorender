@@ -198,13 +198,16 @@ void VolumeSelector::Select(double radius)
 		gm_falloff = 1.0;
 
 	//set up paint mask flags
-	FL::PaintBoxes pb;
 	std::vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	pb.SetBricks(bricks);
-	pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
-	pb.SetPersp(!m_view->GetPersp());
-	if (m_mode == 1 || m_mode == 2 || m_mode == 3 || m_mode == 4 || m_mode == 8)
+	if (bricks->size() > 1 &&
+		(m_mode == 1 || m_mode == 2 ||
+		m_mode == 3 || m_mode == 4 ||
+		m_mode == 8))
 	{
+		FL::PaintBoxes pb;
+		pb.SetBricks(bricks);
+		pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
+		pb.SetPersp(!m_view->GetPersp());
 		Transform *tform = m_vd->GetTexture()->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
