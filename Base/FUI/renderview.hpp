@@ -1,6 +1,7 @@
 #ifndef RENDERVIEW_HPP
 #define RENDERVIEW_HPP
 
+#include <GL/glew.h> // needed here to resolve error.
 #include <QMainWindow>
 #include <QWidget>
 #include <QDockWidget>
