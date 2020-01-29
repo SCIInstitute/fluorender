@@ -205,7 +205,6 @@ void VolumeSelector::Select(double radius)
 	pb.SetPersp(!m_view->GetPersp());
 	if (m_mode == 1 || m_mode == 2 || m_mode == 3 || m_mode == 4 || m_mode == 8)
 	{
-		Transform mv, pr;
 		Transform *tform = m_vd->GetTexture()->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
@@ -215,9 +214,12 @@ void VolumeSelector::Select(double radius)
 			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 		mv_mat2 = m_mv_mat * mv_mat2;
+		glm::mat4 cmat = m_prj_mat * mv_mat2;
+		Transform mv, pr, mat;
 		mv.set(glm::value_ptr(mv_mat2));
 		pr.set(glm::value_ptr(m_prj_mat));
-		pb.SetMats(mv, pr);
+		mat.set(glm::value_ptr(cmat));
+		pb.SetMats(mv, pr, mat);
 		pb.Compute();
 	}
 
