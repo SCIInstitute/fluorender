@@ -65,7 +65,7 @@ namespace FL
 			m_persp = val;
 		}
 
-		void SetMats(FLIVR::Transform &mv, FLIVR::Transform &pr)
+		void SetMats(FLIVR::Transform &mv, FLIVR::Transform &pr, FLIVR::Transform &mat)
 		{
 			m_mv = mv;
 			m_pr = pr;
@@ -73,6 +73,10 @@ namespace FL
 			pr.invert();
 			m_imv = mv;
 			m_ipr = pr;
+			//combined
+			m_mat = mat;
+			mat.invert();
+			m_imat = mat;
 		}
 
 		void Compute();
@@ -83,6 +87,8 @@ namespace FL
 		int m_ptx, m_pty;//tex size
 		//for persp
 		bool m_persp;
+		FLIVR::Transform m_mat;//combined mat
+		FLIVR::Transform m_imat;//combined invert
 		FLIVR::Transform m_mv;//modelview
 		FLIVR::Transform m_pr;//projection
 		FLIVR::Transform m_imv;//modelview invert

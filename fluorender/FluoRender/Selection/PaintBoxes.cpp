@@ -45,14 +45,10 @@ const char* str_cl_paint_boxes = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nbb,\n" \
-"	float4 iprj0,\n" \
-"	float4 iprj1,\n" \
-"	float4 iprj2,\n" \
-"	float4 iprj3,\n" \
-"	float4 imv0,\n" \
-"	float4 imv1,\n" \
-"	float4 imv2,\n" \
-"	float4 imv3)\n" \
+"	float4 imat0,\n" \
+"	float4 imat1,\n" \
+"	float4 imat2,\n" \
+"	float4 imat3)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
@@ -63,13 +59,9 @@ const char* str_cl_paint_boxes = \
 "	float y = (float)(j) * 2.0 / (float)(ny) - 1.0;\n" \
 "	float4 mp1 = (float4)(x, y, 0.0, 1.0);\n" \
 "	float4 mp2 = (float4)(x, y, 1.0, 1.0);\n" \
-"	mp1 = (float4)(dot(mp1, iprj0), dot(mp1, iprj1), dot(mp1, iprj2), dot(mp1, iprj3));\n" \
+"	mp1 = (float4)(dot(mp1, imat0), dot(mp1, imat1), dot(mp1, imat2), dot(mp1, imat3));\n" \
 "	mp1 /= mp1.w;\n" \
-"	mp2 = (float4)(dot(mp2, iprj0), dot(mp2, iprj1), dot(mp2, iprj2), dot(mp2, iprj3));\n" \
-"	mp2 /= mp2.w;\n" \
-"	mp1 = (float4)(dot(mp1, imv0), dot(mp1, imv1), dot(mp1, imv2), dot(mp1, imv3));\n" \
-"	mp1 /= mp1.w;\n" \
-"	mp2 = (float4)(dot(mp2, imv0), dot(mp2, imv1), dot(mp2, imv2), dot(mp2, imv3));\n" \
+"	mp2 = (float4)(dot(mp2, imat0), dot(mp2, imat1), dot(mp2, imat2), dot(mp2, imat3));\n" \
 "	mp2 /= mp2.w;\n" \
 "	float3 p0 = (float3)(mp1.x, mp1.y, mp1.z);\n" \
 "	float3 dir = (float3)(mp1.x - mp2.x, mp1.y - mp2.y, mp1.z - mp2.z);\n" \
@@ -136,54 +128,30 @@ void PaintBoxes::Compute()
 		sizeof(unsigned int), (void*)(&m_pty));
 	kernel_prog->setKernelArgConst(kernel_index, 5,
 		sizeof(unsigned int), (void*)(&num));
-	cl_float4 iprj0 = { float(m_ipr.get_mat_val(0, 0)),
-		float(m_ipr.get_mat_val(1, 0)),
-		float(m_ipr.get_mat_val(2, 0)),
-		float(m_ipr.get_mat_val(3, 0)) };
+	cl_float4 imat0 = { float(m_imat.get_mat_val(0, 0)),
+		float(m_imat.get_mat_val(1, 0)),
+		float(m_imat.get_mat_val(2, 0)),
+		float(m_imat.get_mat_val(3, 0)) };
 	kernel_prog->setKernelArgConst(kernel_index, 6,
-		sizeof(cl_float4), (void*)(&iprj0));
-	cl_float4 iprj1 = { float(m_ipr.get_mat_val(0, 1)),
-		float(m_ipr.get_mat_val(1, 1)),
-		float(m_ipr.get_mat_val(2, 1)),
-		float(m_ipr.get_mat_val(3, 1)) };
+		sizeof(cl_float4), (void*)(&imat0));
+	cl_float4 imat1 = { float(m_imat.get_mat_val(0, 1)),
+		float(m_imat.get_mat_val(1, 1)),
+		float(m_imat.get_mat_val(2, 1)),
+		float(m_imat.get_mat_val(3, 1)) };
 	kernel_prog->setKernelArgConst(kernel_index, 7,
-		sizeof(cl_float4), (void*)(&iprj1));
-	cl_float4 iprj2 = { float(m_ipr.get_mat_val(0, 2)),
-		float(m_ipr.get_mat_val(1, 2)),
-		float(m_ipr.get_mat_val(2, 2)),
-		float(m_ipr.get_mat_val(3, 2)) };
+		sizeof(cl_float4), (void*)(&imat1));
+	cl_float4 imat2 = { float(m_imat.get_mat_val(0, 2)),
+		float(m_imat.get_mat_val(1, 2)),
+		float(m_imat.get_mat_val(2, 2)),
+		float(m_imat.get_mat_val(3, 2)) };
 	kernel_prog->setKernelArgConst(kernel_index, 8,
-		sizeof(cl_float4), (void*)(&iprj2));
-	cl_float4 iprj3 = { float(m_ipr.get_mat_val(0, 3)),
-		float(m_ipr.get_mat_val(1, 3)),
-		float(m_ipr.get_mat_val(2, 3)),
-		float(m_ipr.get_mat_val(3, 3)) };
+		sizeof(cl_float4), (void*)(&imat2));
+	cl_float4 imat3 = { float(m_imat.get_mat_val(0, 3)),
+		float(m_imat.get_mat_val(1, 3)),
+		float(m_imat.get_mat_val(2, 3)),
+		float(m_imat.get_mat_val(3, 3)) };
 	kernel_prog->setKernelArgConst(kernel_index, 9,
-		sizeof(cl_float4), (void*)(&iprj3));
-	cl_float4 imv0 = { float(m_imv.get_mat_val(0, 0)),
-		float(m_imv.get_mat_val(1, 0)),
-		float(m_imv.get_mat_val(2, 0)),
-		float(m_imv.get_mat_val(3, 0)) };
-	kernel_prog->setKernelArgConst(kernel_index, 10,
-		sizeof(cl_float4), (void*)(&imv0));
-	cl_float4 imv1 = { float(m_imv.get_mat_val(0, 1)),
-		float(m_imv.get_mat_val(1, 1)),
-		float(m_imv.get_mat_val(2, 1)),
-		float(m_imv.get_mat_val(3, 1)) };
-	kernel_prog->setKernelArgConst(kernel_index, 11,
-		sizeof(cl_float4), (void*)(&imv1));
-	cl_float4 imv2 = { float(m_imv.get_mat_val(0, 2)),
-		float(m_imv.get_mat_val(1, 2)),
-		float(m_imv.get_mat_val(2, 2)),
-		float(m_imv.get_mat_val(3, 2)) };
-	kernel_prog->setKernelArgConst(kernel_index, 12,
-		sizeof(cl_float4), (void*)(&imv2));
-	cl_float4 imv3 = { float(m_imv.get_mat_val(0, 3)),
-		float(m_imv.get_mat_val(1, 3)),
-		float(m_imv.get_mat_val(2, 3)),
-		float(m_imv.get_mat_val(3, 3)) };
-	kernel_prog->setKernelArgConst(kernel_index, 13,
-		sizeof(cl_float4), (void*)(&imv3));
+		sizeof(cl_float4), (void*)(&imat3));
 
 	//execute
 	kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
