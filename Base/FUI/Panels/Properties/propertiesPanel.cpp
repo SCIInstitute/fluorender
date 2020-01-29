@@ -1,5 +1,7 @@
 #include "propertiesPanel.hpp"
 
+using namespace FluoUI;
+
 PropertiesPanel::PropertiesPanel()
 {
   myLayout->addWidget(tabWidget);

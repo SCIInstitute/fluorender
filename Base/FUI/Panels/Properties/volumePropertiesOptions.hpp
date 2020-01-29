@@ -192,7 +192,7 @@ class VolumePropertiesOptions : public QGridLayout
       std::bind(&VolumePropertiesOptions::addRow4,this),
     };
 
-    const std::vector<std::tuple<QObject*, sliderFunc, volumeFunc>> sliderConnections = {
+    const std::vector<std::tuple<FluoSlider*, sliderFunc, volumeFunc>> sliderConnections = {
       std::make_tuple(gammaSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onGammaSliderChanged),
       std::make_tuple(extractBSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onExtBoundSliderChanged),
       std::make_tuple(saturationSlider, &FluoSlider::sliderReleased,&VolumePropertiesOptions::onSatSliderChanged),
@@ -208,7 +208,7 @@ class VolumePropertiesOptions : public QGridLayout
       std::make_tuple(colorMap2Slider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onHCMSliderChanged)
     };
 
-    const std::vector<std::tuple<QObject*, spinFunc, volumeFunc>> spinConnections = {
+    const std::vector<std::tuple<FluoSpinbox*, spinFunc, volumeFunc>> spinConnections = {
       std::make_tuple(saturationSpinbox, &FluoSpinbox::editingFinished,&VolumePropertiesOptions::onSatSpinboxChanged),
       std::make_tuple(threshold1Spinbox, &FluoSpinbox::editingFinished, &VolumePropertiesOptions::onLowThreshSpinChanged),
       std::make_tuple(threshold2Spinbox, &FluoSpinbox::editingFinished, &VolumePropertiesOptions::onHighThreshSpinChanged),
@@ -218,7 +218,7 @@ class VolumePropertiesOptions : public QGridLayout
       std::make_tuple(colorMap2Spinbox, &FluoSpinbox::editingFinished, &VolumePropertiesOptions::onHCMSpinChanged)
     };
 
-    const std::vector<std::tuple<QObject*, dSpinFunc, volumeFunc>> dSpinConnections = {
+    const std::vector<std::tuple<FluoSpinboxDouble*, dSpinFunc, volumeFunc>> dSpinConnections = {
       std::make_tuple(gammaSpinbox, &FluoSpinboxDouble::editingFinished, &VolumePropertiesOptions::onGammaSpinboxChanged),
       std::make_tuple(extractBSpinbox, &FluoSpinboxDouble::editingFinished, &VolumePropertiesOptions::onExtBoundSpinboxChanged),
       std::make_tuple(shadowSpinbox, &FluoSpinboxDouble::editingFinished,&VolumePropertiesOptions::onShadowSpinChanged),

@@ -8,7 +8,7 @@
 #include "meshPropertiesOptions.hpp"
 #include "meshPropertiesMaterials.hpp"
 
-#include <Panels/Properties/Messenger/propertyMessenger.hpp>
+#include <Panels/Properties/Agent/volumePropAgent.hpp>
 
 #include <iostream>
 
@@ -19,6 +19,9 @@
  *       take them off the dock.
  *
 */
+
+namespace FluoUI {
+
 class PropertiesPanel : public QWidget
 {
   Q_OBJECT
@@ -138,7 +141,11 @@ class PropertiesPanel : public QWidget
     VolumePropertiesOptions* getPropertiesOptions();
     VolumePropertiesMisc* getPropertiesMisc();
 
-    PropertyMessenger *messenger;
+    FluoUI::VolumePropAgent* m_agent;
+
+    friend class FluoUI::VolumePropAgent;
+
 };
 
+}
 #endif
