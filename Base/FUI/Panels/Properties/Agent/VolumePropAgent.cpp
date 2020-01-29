@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <img/icons.h>
 */
-using namespace FluoUI;
 
 VolumePropAgent::VolumePropAgent(PropertiesPanel &panel) :
 	InterfaceAgent(),

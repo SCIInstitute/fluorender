@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "InterfaceAgent.hpp"
 
-namespace FluoUI
-{
 	class ListModel;
 	class TreeModel;
 	class RenderCanvasAgent;
@@ -110,6 +108,5 @@ namespace FluoUI
 	protected:
 		virtual ~AgentFactory();
 	};
-}
 
 #endif//_AGENTFACTORY_H_

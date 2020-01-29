@@ -46,7 +46,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Fui/ColocalAgent.h>
 #include <Fui/ColocalDlg.h>
 */
-using namespace FluoUI;
 
 AgentFactory::AgentFactory()
 {

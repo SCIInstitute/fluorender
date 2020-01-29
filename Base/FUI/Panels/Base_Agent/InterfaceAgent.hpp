@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Node.hpp>
 #include <ValueUpdateVisitor.hpp>
 
-namespace FluoUI
-{
     class InterfaceAgent : public fluo::Object
 	{
 	public:
@@ -214,6 +212,5 @@ namespace FluoUI
 
 	protected:
 	};
-}
 
 #endif//_INTERFACEAGENT_H_

@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <QString>
 #include <QColor>
 
-namespace FluoUI
-{
     class AgentFactory;
     class PropertiesPanel;
     class VolumePropAgent : public InterfaceAgent
@@ -78,6 +76,5 @@ namespace FluoUI
 	private:
         PropertiesPanel &parentPanel;
     };
-}
 
 #endif//_VOLUMEPROPAGENT_H_

@@ -20,7 +20,6 @@
  *
 */
 
-namespace FluoUI {
 
 class PropertiesPanel : public QWidget
 {
@@ -141,11 +140,10 @@ class PropertiesPanel : public QWidget
     VolumePropertiesOptions* getPropertiesOptions();
     VolumePropertiesMisc* getPropertiesMisc();
 
-    FluoUI::VolumePropAgent* m_agent;
+    VolumePropAgent* m_agent;
 
-    friend class FluoUI::VolumePropAgent;
+    friend class VolumePropAgent;
 
 };
 
-}
 #endif
