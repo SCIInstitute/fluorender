@@ -203,20 +203,23 @@ void VolumeSelector::Select(double radius)
 	pb.SetBricks(bricks);
 	pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
 	pb.SetPersp(!m_view->GetPersp());
-	Transform mv, pr;
-	Transform *tform = m_vd->GetTexture()->transform();
-	double mvmat[16];
-	tform->get_trans(mvmat);
-	glm::mat4 mv_mat2 = glm::mat4(
-		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	mv_mat2 = m_mv_mat * mv_mat2;
-	mv.set(glm::value_ptr(mv_mat2));
-	pr.set(glm::value_ptr(m_prj_mat));
-	pb.SetMats(mv, pr);
-	pb.Compute();
+	if (m_mode == 1 || m_mode == 2 || m_mode == 3 || m_mode == 4 || m_mode == 8)
+	{
+		Transform mv, pr;
+		Transform *tform = m_vd->GetTexture()->transform();
+		double mvmat[16];
+		tform->get_trans(mvmat);
+		glm::mat4 mv_mat2 = glm::mat4(
+			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+		mv_mat2 = m_mv_mat * mv_mat2;
+		mv.set(glm::value_ptr(mv_mat2));
+		pr.set(glm::value_ptr(m_prj_mat));
+		pb.SetMats(mv, pr);
+		pb.Compute();
+	}
 
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
