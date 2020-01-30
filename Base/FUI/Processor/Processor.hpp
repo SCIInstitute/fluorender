@@ -62,8 +62,8 @@ public:
 			auto find_it = inputs_.find(*it);
 			if (find_it == inputs_.end())
 				continue;
-			Value* value = obj.getValue(*it);
-			Value* new_value = 0;
+            Value* value = obj.getValuePointer(*it); //bandaid, need to see what I need to do.
+            Value* new_value = nullptr;
 			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
 				new_value = value->clone();
 			else

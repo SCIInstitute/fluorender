@@ -31,8 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Annotations/AnnotationFactory.hpp>
 #include <Mesh/MeshFactory.hpp>
 #include <Volume/VolumeFactory.hpp>
-#include <FUI/Panels/Base_Agent/AgentFactory.hpp>
-#include <ProcessorFactory.hpp>
+#include <Base_Agent/AgentFactory.hpp>
+#include <Processor/ProcessorFactory.hpp>
 
 //#include <Fui/AgentFactory.h> // Will have to figure this out
 //#include <Fui/IconList.h>     // Same here

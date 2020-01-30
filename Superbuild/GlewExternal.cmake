@@ -58,4 +58,10 @@ set(glew_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
 
 add_library(glew_external STATIC IMPORTED)
 
+set(glew_LIBRARIES
+  ${glew_LIBRARY_DIR}/${prefix}glew32${suffix}
+  ${glew_LIBRARY_DIR}/${prefix}libglew32${suffix}
+  CACHE INTERNAL ""
+)
+
 message(STATUS "glew_DIR: ${glew_LIBRARY_DIR}")

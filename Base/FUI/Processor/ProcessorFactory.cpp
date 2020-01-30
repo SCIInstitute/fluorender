@@ -25,41 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef RENDERER_HPP
-#define RENDERER_HPP
 
+#include "ProcessorFactory.hpp"
+#include <Renderer/ClipPlaneRenderer.hpp>
 
-#include <Processor.hpp>
+using namespace fluo;
 
-namespace FLR
+ProcessorFactory::ProcessorFactory()
 {
-class Renderer : public fluo::Processor
-{
-public:
-
-	Renderer();
-
-    Renderer(const Renderer& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
-
-    virtual Renderer* clone(const fluo::CopyOp& copyop) const { return new Renderer(*this, copyop); };
-
-	virtual bool isSameKindAs(const Renderer*) const {return true;}
-
-	virtual const char* className() const { return "Renderer"; }
-
-    virtual bool run(fluo::Event& event)
-    {
-        //TODO, if even it null create a new event
-		return render(event);
-	}
-
-    virtual bool render(fluo::Event& event) { return true; }
-
-protected:
-	~Renderer();
-
-	virtual void setupInputs();
-	virtual void setupOutputs();
-};
+	m_name = "processor factory";
+	default_object_name_ = "default processor";
 }
-#endif//FL_RENDERER
+
+ProcessorFactory::~ProcessorFactory()
+{
+
+}
+
+FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
+{
+	Processor* result = findFirst(name);
+	if (result)
+		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
+
+	//not found
+	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+	if (renderer)
+	{
+		renderer->setName(name);
+		objects_.push_front(renderer);
+	}
+	return renderer;
+}

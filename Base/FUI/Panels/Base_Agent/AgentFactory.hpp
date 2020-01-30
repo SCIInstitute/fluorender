@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define AGENT_FACTORY_HPP
 
 #include <ObjectFactory.hpp>
-#include <Panels/Properties/Agent/volumePropAgent.hpp>
-#include <Panels/Properties/propertiesPanel.hpp>
+#include <Properties/Agent/volumePropAgent.hpp>
+#include <Properties/propertiesPanel.hpp>
 
 #include <QWidget>
 

@@ -87,7 +87,15 @@ set(HEADER_FILES
     Panels/Record_Export/Pages/croppingPage.hpp
     Panels/Record_Export/Pages/4DScriptPage.hpp
 		Panels/Base_Agent/AgentFactory.hpp
-		Panels/Base_Agent/InterfaceAgent.hpp
+    Panels/Base_Agent/InterfaceAgent.hpp
+    Global/Global.hpp
+    Processor/Processor.hpp
+    Processor/ProcessorFactory.hpp
+    Processor/StreamProcessor.hpp
+    Renderer/Renderer.hpp
+    Renderer/Renderer2D.hpp
+    Renderer/Renderer3D.hpp
+    Renderer/ClipPlaneRenderer.hpp
   )
   
 set(SOURCES
@@ -123,6 +131,14 @@ set(SOURCES
     Panels/Record_Export/Pages/croppingPage.cpp
     Panels/Record_Export/Pages/4DScriptPage.cpp
 		Panels/Base_Agent/AgentFactory.cpp
+    Global/Global.cpp
+    Processor/Processor.cpp
+    Processor/ProcessorFactory.cpp
+    Processor/StreamProcessor.cpp
+    Renderer/Renderer.cpp
+    Renderer/Renderer2D.cpp
+    Renderer/Renderer3D.cpp
+    Renderer/ClipPlaneRenderer.cpp
   )
   
 set(UI_FILES
@@ -143,7 +159,10 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Panels
 		${FLObject_INCLUDES}
     ${SceneGraph_INCLUDES}
+    ${Object_INCLUDES}
+    ${FLIVR_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
+    ${glew_INCLUDE_DIR}
   )
 
 add_executable(FUI
@@ -153,19 +172,21 @@ add_executable(FUI
     ${RESOURCE_FILE}
   )
 
-set(FUI_INCLUDES ${HEADER_FILES} CACHE INTERNAL "")
-set(FUI_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
 # This works like target_link_libraries, however this is how CMake can take
 # care of this automatically.
 qt5_use_modules(FUI Core Gui Widgets OpenGL)
 
-add_dependencies(FUI FLObject SceneGraph Boost_external_download)
+target_include_directories(FUI PUBLIC Panels)
+
+add_dependencies(FUI FLObject SceneGraph FLIVR Boost_external_download glew_external_download)
 
 # links with OpenGL
 target_link_libraries(FUI
     FLObject
     SceneGraph
+    FLIVR
+    ${glew_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )

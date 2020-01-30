@@ -1,9 +1,11 @@
 #include "propertiesPanel.hpp"
+#include <Global/Global.hpp>
 
 PropertiesPanel::PropertiesPanel()
 {
   myLayout->addWidget(tabWidget);
   this->setLayout(myLayout);
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",*this);
 }
 
 double PropertiesPanel::getPropOptionsMaxVal() const

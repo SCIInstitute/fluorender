@@ -107,6 +107,4 @@ include_directories(${glew_INCLUDE_DIR})
 
 add_subdirectory(InternalDepends)
 add_subdirectory(Base)
-add_subdirectory(Processor)
-add_subdirectory(Renderer)
 #add_subdirectory(Tester)

@@ -284,6 +284,14 @@ namespace fluo
         return false;
     }
 
+    // this is a bandaid. Not sure what it does
+    template<typename T>
+    Value* getValuePointer(T &vt)
+    {
+      Value* newVal = new Value(vt);
+      return newVal;
+    }
+
     template<typename T, typename V>
     bool getValue(const T &name, V** value)
     {
