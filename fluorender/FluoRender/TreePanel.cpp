@@ -2755,18 +2755,18 @@ void TreePanel::BrushClear()
 	if (m_datatree)
 		m_datatree->BrushClear();
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv)
-			{
-				vrv->SetIntMode(4);
-			}
-		}
-	}
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (vr_frame)
+	//{
+	//	for (int i=0; i<vr_frame->GetViewNum(); i++)
+	//	{
+	//		VRenderView* vrv = vr_frame->GetView(i);
+	//		if (vrv)
+	//		{
+	//			vrv->SetIntMode(4);
+	//		}
+	//	}
+	//}
 }
 
 void TreePanel::BrushErase()
