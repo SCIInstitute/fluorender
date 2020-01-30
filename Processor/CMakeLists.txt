@@ -27,13 +27,41 @@
 # */
 
 
-# This simply adds subdirectories to call their CMakeLists.txt files
+project(Processor)
 
-project(Base)
-
+# this might not be needed
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_subdirectory(FLObject)
-add_subdirectory(SceneGraph)
-add_subdirectory(Global)
-add_subdirectory(FUI)
+# This probably can be combined. SceneGraph_INCLUDES is defined in SceneGraph since 
+# FLObject and SceneGraph depend on each other. Hopefully this will be fixed in the 
+# future
+include_directories(${FLObject_INCLUDES} ${Renderer_INCLUDES})
+
+# We manually set the Headers and Source files instead of Globbing them. This gives us
+# better control of what goes in the project and what does not. 
+set(HEADER_FILES Processor.hpp
+                 ProcessorFactory.hpp
+                 StreamProcessor.hpp)
+
+set(SOURCES Processor.cpp
+            ProcessorFactory.cpp
+            StreamProcessor.cpp)
+
+# FLObject includes and the library are cached internally since SceneGraph and 
+# others depend on this library.
+set(Processor_INCLUDES ${HEADER_FILES} CACHE INTERNAL "")
+set(Processor_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
+
+# We create FLObject as a static library
+add_library(Processor STATIC ${HEADER_FILES} ${SOURCES}) 
+
+# This library depends on Booost and Glew.
+add_dependencies(Processor FLObject)
+
+# We link with SceneGraph and Boost
+target_link_libraries(Processor FLObject Renderer)
+
+# I do not think this is needed.
+install(TARGETS Processor
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)

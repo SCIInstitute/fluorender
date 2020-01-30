@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>2143</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSplit_Render_View">
@@ -600,9 +600,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="DatasetsPanel" name="Datasets">
-    <layout class="QGridLayout" name="gridLayout_3"/>
-   </widget>
+   <widget class="DatasetsPanel" name="Datasets"/>
   </widget>
   <widget class="QDockWidget" name="WorkspaceWidget">
    <property name="minimumSize">
@@ -1065,9 +1063,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="WorkspacePanel" name="Workspace">
-    <layout class="QGridLayout" name="gridLayout_37"/>
-   </widget>
+   <widget class="WorkspacePanel" name="Workspace"/>
   </widget>
   <widget class="QDockWidget" name="RecordWidget">
    <property name="minimumSize">
@@ -1101,7 +1097,6 @@
       <height>320</height>
      </size>
     </property>
-    <layout class="QGridLayout" name="gridLayout_2"/>
    </widget>
   </widget>
   <widget class="QDockWidget" name="OutputAdjustmentsWidget">
@@ -1123,9 +1118,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="OutputAdjustments" name="outputAdjustments">
-    <layout class="QGridLayout" name="gridLayout_31"/>
-   </widget>
+   <widget class="OutputAdjustments" name="outputAdjustments"/>
   </widget>
   <widget class="QDockWidget" name="ClippingPanesWidget">
    <property name="minimumSize">
@@ -1149,9 +1142,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="ClippingPlane" name="ClippingPanes">
-    <layout class="QGridLayout" name="gridLayout_5"/>
-   </widget>
+   <widget class="ClippingPlane" name="ClippingPanes"/>
   </widget>
   <widget class="QDockWidget" name="PropertiesWidget">
    <property name="minimumSize">

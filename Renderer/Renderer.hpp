@@ -25,32 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_RENDERER
-#define FL_RENDERER 1
+#ifndef RENDERER_HPP
+#define RENDERER_HPP
 
-#include <Processor/Processor.h>
+
+#include <Processor.hpp>
+
 namespace FLR
 {
-class Renderer : public FL::Processor
+class Renderer : public fluo::Processor
 {
 public:
 
 	Renderer();
 
-	Renderer(const Renderer& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+    Renderer(const Renderer& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual Renderer* clone(const FL::CopyOp& copyop) const { return new Renderer(*this, copyop); };
+    virtual Renderer* clone(const fluo::CopyOp& copyop) const { return new Renderer(*this, copyop); };
 
 	virtual bool isSameKindAs(const Renderer*) const {return true;}
 
 	virtual const char* className() const { return "Renderer"; }
 
-	virtual bool run(FL::Event& event = FL::Event())
-	{
+    virtual bool run(fluo::Event& event)
+    {
+        //TODO, if even it null create a new event
 		return render(event);
 	}
 
-	virtual bool render(FL::Event& event) { return true; }
+    virtual bool render(fluo::Event& event) { return true; }
 
 protected:
 	~Renderer();

@@ -25,17 +25,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_PROCESSORFACTORY
-#define FL_PROCESSORFACTORY
+#ifndef PROCESSOR_FACTORY_HPP
+#define PROCESSOR_FACTORY_HPP
 
-#include <Flobject/ObjectFactory.h>
-#include <Processor/Processor.h>
+#include <ObjectFactory.hpp>
+#include "Processor.hpp"
 
 namespace FLR
 {
 	class ClipPlaneRenderer;
 }
-namespace FL
+namespace fluo
 {
 	class ProcessorFactory : public ObjectFactory
 	{
@@ -43,19 +43,19 @@ namespace FL
 		ProcessorFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
-		{ return dynamic_cast<const ProcessorFactory*>(obj) != NULL; }
+        { return dynamic_cast<const ProcessorFactory*>(obj) != nullptr; }
 
 		virtual const char* className() const { return "ProcessorFactory"; }
 
 		virtual void createDefault() {}
 
-		virtual Processor* getDefault() { return 0; }
+        virtual Processor* getDefault() { return nullptr; }
 
-		virtual Processor* build(Processor* processor = 0) { return 0; }
+        virtual Processor* build(Processor* processor = nullptr) { return nullptr; }
 
-		virtual Processor* clone(Processor*) { return 0; }
+        virtual Processor* clone(Processor*) { return nullptr; }
 
-		virtual Processor* clone(const unsigned int) { return 0; }
+        virtual Processor* clone(const unsigned int) { return nullptr; }
 
 		inline virtual Processor* get(size_t i)
 		{

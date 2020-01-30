@@ -25,11 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_PROCESSOR
-#define FL_PROCESSOR 1
+#ifndef PROCESSOR_HPP
+#define PROCESSOR_HPP
 
-#include <Flobject/Object.h>
-namespace FL
+#include <Object.hpp>
+
+namespace fluo
 {
 class Processor;
 typedef std::vector<Processor*> ProcessorList;
@@ -50,7 +51,7 @@ public:
 
 	virtual const char* className() const { return "Processor"; }
 
-	virtual bool run(Event& event = Event()) { return true; }
+    virtual bool run(Event& event) { return true; }
 
 	inline void copyInputValues(Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 	{

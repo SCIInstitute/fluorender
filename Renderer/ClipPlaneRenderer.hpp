@@ -25,10 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _CLIPPLANERENDERER_H_
-#define _CLIPPLANERENDERER_H_
+#ifndef CLIP_PLANE_RENDERER_HPP
+#define CLIP_PLANE_RENDERER_HPP
 
-#include <Renderer/Renderer3D.h>
+#include "Renderer3D.hpp"
+
 namespace FLR
 {
 class ClipPlaneRenderer : public Renderer3D
@@ -37,13 +38,13 @@ public:
 
 	ClipPlaneRenderer();
 
-	ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+    ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const ClipPlaneRenderer*) const {return true;}
 
 	virtual const char* className() const { return "ClipPlaneRenderer"; }
 
-	virtual bool render(FL::Event& event);
+    virtual bool render(fluo::Event& event);
 
 protected:
 	~ClipPlaneRenderer();

@@ -152,7 +152,10 @@ add_executable(FUI
 	  ${UI_FILES}
     ${RESOURCE_FILE}
   )
- 
+
+set(FUI_INCLUDES ${HEADER_FILES} CACHE INTERNAL "")
+set(FUI_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
+
 # This works like target_link_libraries, however this is how CMake can take
 # care of this automatically.
 qt5_use_modules(FUI Core Gui Widgets OpenGL)

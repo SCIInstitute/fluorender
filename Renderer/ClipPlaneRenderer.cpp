@@ -25,8 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Renderer/ClipPlaneRenderer.h>
-#include <Types/Plane.h>
+#include <Plane.hpp>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/ImgShader.h>
@@ -34,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+
+#include "ClipPlaneRenderer.hpp"
 
 using namespace FLR;
 
@@ -44,7 +45,7 @@ ClipPlaneRenderer::ClipPlaneRenderer():
 	setupOutputs();
 }
 
-ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const FL::CopyOp& copyop, bool copy_values):
+ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
 	Renderer3D(renderer, copyop, false)
 {
 	if (copy_values)
@@ -80,7 +81,7 @@ void ClipPlaneRenderer::setupOutputs()
 
 }
 
-bool ClipPlaneRenderer::render(FL::Event& event)
+bool ClipPlaneRenderer::render(fluo::Event& event)
 {
 	bool result = Renderer3D::render(event);
 

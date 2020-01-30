@@ -25,10 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_RENDERER3D
-#define FL_RENDERER3D 1
+#ifndef FL_RENDERER_3D_HPP
+#define FL_RENDERER_3D_HPP
 
-#include <Renderer/Renderer.h>
+#include "Renderer.hpp"
+
 namespace FLR
 {
 class Renderer3D : public Renderer
@@ -37,7 +38,7 @@ public:
 
 	Renderer3D();
 
-	Renderer3D(const Renderer3D& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+    Renderer3D(const Renderer3D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const Renderer3D*) const {return true;}
 

@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Processor/ProcessorFactory.h>
-#include <Renderer/ClipPlaneRenderer.h>
+#include "ProcessorFactory.hpp"
+#include <ClipPlaneRenderer.hpp>
 
-using namespace FL;
+using namespace fluo;
 
 ProcessorFactory::ProcessorFactory()
 {

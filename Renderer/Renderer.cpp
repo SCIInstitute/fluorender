@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Renderer/Renderer.h>
+#include "Renderer.hpp"
 
 using namespace FLR;
 
@@ -36,7 +36,7 @@ Renderer::Renderer():
 	setupOutputs();
 }
 
-Renderer::Renderer(const Renderer& renderer, const FL::CopyOp& copyop, bool copy_values):
+Renderer::Renderer(const Renderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
 	Processor(renderer, copyop, false)
 {
 	if (copy_values)

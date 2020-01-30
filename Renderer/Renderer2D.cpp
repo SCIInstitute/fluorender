@@ -25,7 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Renderer/Renderer2D.h>
+
+#include "Renderer2D.hpp"
 
 using namespace FLR;
 
@@ -36,7 +37,7 @@ Renderer2D::Renderer2D():
 	setupOutputs();
 }
 
-Renderer2D::Renderer2D(const Renderer2D& renderer, const FL::CopyOp& copyop, bool copy_values):
+Renderer2D::Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop, bool copy_values):
 	Renderer(renderer, copyop, false)
 {
 	if (copy_values)
@@ -56,7 +57,7 @@ void Renderer2D::setupOutputs()
 
 }
 
-bool Renderer2D::render(FL::Event& event)
+bool Renderer2D::render(fluo::Event& event)
 {
 	return true;
 }

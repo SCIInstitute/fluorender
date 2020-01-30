@@ -25,10 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_RENDERER2D
-#define FL_RENDERER2D 1
+#ifndef FL_RENDERER_2D_HPP
+#define FL_RENDERER_2D_HPP
 
-#include <Renderer/Renderer.h>
+#include "Renderer.hpp"
+
 namespace FLR
 {
 class Renderer2D : public Renderer
@@ -37,13 +38,13 @@ public:
 
 	Renderer2D();
 
-	Renderer2D(const Renderer2D& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+    Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const Renderer2D*) const {return true;}
 
 	virtual const char* className() const { return "Renderer2D"; }
 
-	virtual bool render(FL::Event& event);
+    virtual bool render(fluo::Event& event);
 
 protected:
 	~Renderer2D();

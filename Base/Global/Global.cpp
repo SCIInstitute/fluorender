@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Global.hpp>
+#include "Global.hpp"
 
 using namespace fluo;
 
@@ -37,7 +37,7 @@ Global::Global()
 	mesh_factory_ = ref_ptr<MeshFactory>(new MeshFactory());
 	annotation_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
 
-	agent_factory_ = ref_ptr<FUI::AgentFactory>(new FUI::AgentFactory());
+    agent_factory_ = ref_ptr<AgentFactory>(new AgentFactory());
 
 	processor_factory_ = ref_ptr<ProcessorFactory>(new ProcessorFactory());
 }

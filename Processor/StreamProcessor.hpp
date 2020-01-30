@@ -25,29 +25,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _STREAMPROCESSOR_H_
-#define _STREAMPROCESSOR_H_
+#ifndef STREAM_PROCESSOR_HPP
+#define STREAM_PROCESSOR_HPP
 
-#include <Processor/Processor.h>
+#include "Processor.hpp"
 
-namespace FL
+namespace fluo
 {
-	class StreamProcessor : public FL::Processor
+    class StreamProcessor : public Processor
 	{
 	public:
 
 		StreamProcessor();
 
-		StreamProcessor(const StreamProcessor& renderer, const FL::CopyOp& copyop = FL::CopyOp::SHALLOW_COPY, bool copy_values = true);
+        StreamProcessor(const StreamProcessor& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-		virtual StreamProcessor* clone(const FL::CopyOp& copyop) const { return new StreamProcessor(*this, copyop); };
+        virtual StreamProcessor* clone(const CopyOp& copyop) const { return new StreamProcessor(*this, copyop); };
 
 		virtual bool isSameKindAs(const StreamProcessor*) const { return true; }
 
 		virtual const char* className() const { return "StreamProcessor"; }
 
-		virtual bool run(FL::Event& event = FL::Event())
-		{
+        virtual bool run(fluo::Event& event)
+        {
+            // TODO: if even is null, create a new event
 			bool result = true;
 			for (auto it : processors_)
 				if (it)

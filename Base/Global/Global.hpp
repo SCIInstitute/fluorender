@@ -28,13 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
-#include <../SceneGraph/Factories/Volume/VolumeFactory.hpp>
-#include <../SceneGraph/Factories/Mesh/MeshFactory.hpp>
-#include <../SceneGraph/Factories/Annotations/AnnotationFactory.hpp>
+#include <Annotations/AnnotationFactory.hpp>
+#include <Mesh/MeshFactory.hpp>
+#include <Volume/VolumeFactory.hpp>
+#include <FUI/Panels/Base_Agent/AgentFactory.hpp>
+#include <ProcessorFactory.hpp>
 
 //#include <Fui/AgentFactory.h> // Will have to figure this out
 //#include <Fui/IconList.h>     // Same here
-#include <../../Processor/ProcessorFactory.hpp>
+//#include <../../Processor/ProcessorFactory.hpp>
 
 namespace fluo
 {
@@ -101,12 +103,12 @@ namespace fluo
 		AnnotationFactory& getAnnotationFactory()
 		{ return *annotation_factory_;}
 
-		FUI::AgentFactory& getAgentFactory()
+        AgentFactory& getAgentFactory()
 		{ return *agent_factory_; }
-
+/*
 		FUI::IconList& getIconList(bool shown)
 		{ return shown?shown_icon_list_:hidden_icon_list_; }
-
+*/
 		void addListObserver(Observer* obsrvr)
 		{
 			volume_factory_->addObserver(obsrvr);
@@ -128,14 +130,14 @@ namespace fluo
 		ref_ptr<AnnotationFactory> annotation_factory_;
 
 		//list of agent
-		ref_ptr<FUI::AgentFactory> agent_factory_;
+        ref_ptr<AgentFactory> agent_factory_;
 
 		//list of processors
 		ref_ptr<ProcessorFactory> processor_factory_;
 
 		//icon list
-		FUI::IconList shown_icon_list_;
-		FUI::IconList hidden_icon_list_;
+//		FUI::IconList shown_icon_list_;
+    //	FUI::IconList hidden_icon_list_;
 	};
 }
 
