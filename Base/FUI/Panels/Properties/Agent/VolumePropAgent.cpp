@@ -45,26 +45,26 @@ VolumePropAgent::VolumePropAgent(PropertiesPanel &panel) :
 
 void VolumePropAgent::setObject(fluo::VolumeData* obj)
 {
-	InterfaceAgent::setObject(obj);
+  InterfaceAgent::setObject(obj);
 }
 
 fluo::VolumeData* VolumePropAgent::getObject()
 {
-    return dynamic_cast<fluo::VolumeData*>(InterfaceAgent::getObject());
+  return dynamic_cast<fluo::VolumeData*>(InterfaceAgent::getObject());
 }
 
 void VolumePropAgent::UpdateAllSettings()
 {
-    double dval = 0.0;
-	int ival = 0;
-	bool bval = false;
-	long lval = 0;
+  double dval = 0.0;
+  int ival = 0;
+  bool bval = false;
+  long lval = 0;
 
 	//maximum value
-    double max_val;
-	getValue("max int", max_val);
-	max_val = std::max(255.0, max_val);
-    parentPanel.setPropOptionsMaxVal(max_val);
+  double max_val;
+  getValue("max int", max_val);
+  max_val = std::max(255.0, max_val);
+  parentPanel.setPropOptionsMaxVal(max_val);
 
     //set range
     //wxFloatingPointValidator<double>* vald_fp;
@@ -80,8 +80,8 @@ void VolumePropAgent::UpdateAllSettings()
     //panel_.m_gamma_text->ChangeValue(str);
 
     // gamma
-    getValue("gamma 3d", dval);
-    parentPanel.setPropGammaValue(dval);
+  getValue("gamma 3d", dval);
+  parentPanel.setPropGammaValue(dval);
 
     //boundary
     //if ((vald_fp = (wxFloatingPointValidator<double>*)panel_.m_boundary_text->GetValidator()))
@@ -91,8 +91,8 @@ void VolumePropAgent::UpdateAllSettings()
     //str = QString::Format("%.4f", dval);
     //panel_.m_boundary_text->ChangeValue(str);
 
-    getValue("extract boundary", dval);
-    parentPanel.setPropExtBoundValue(dval);
+  getValue("extract boundary", dval);
+  parentPanel.setPropExtBoundValue(dval);
 
     /*
     //contrast
@@ -107,9 +107,9 @@ void VolumePropAgent::UpdateAllSettings()
 
     */
 
-    getValue("saturation", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
-    parentPanel.setPropSatValue(ival);
+  getValue("saturation", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  parentPanel.setPropSatValue(ival);
 
     /*
 	//left threshold
@@ -123,9 +123,9 @@ void VolumePropAgent::UpdateAllSettings()
     panel_.m_left_thresh_text->ChangeValue(str);
     */
 
-    getValue("low threshold", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
-    parentPanel.setPropLowThreshValue(ival);
+  getValue("low threshold", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  parentPanel.setPropLowThreshValue(ival);
 
 
     /*
@@ -142,9 +142,9 @@ void VolumePropAgent::UpdateAllSettings()
 
     */
 
-    getValue("high threshold", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
-    parentPanel.setPropHighThreshValue(ival);
+  getValue("high threshold", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  parentPanel.setPropHighThreshValue(ival);
 
 
     /*
@@ -159,9 +159,9 @@ void VolumePropAgent::UpdateAllSettings()
     panel_.m_luminance_text->ChangeValue(str);
     */
 
-    getValue("luminance", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
-    parentPanel.setPropLuminValue(ival);
+  getValue("luminance", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  parentPanel.setPropLuminValue(ival);
 
     /*
 
@@ -178,12 +178,12 @@ void VolumePropAgent::UpdateAllSettings()
 
     */
 
-    bool isShadowEnabled;
-    getValue("shadow enable", isShadowEnabled);
-    getValue("shadow int", dval);
+  bool isShadowEnabled;
+  getValue("shadow enable", isShadowEnabled);
+  getValue("shadow int", dval);
 
-    parentPanel.setPropShadowEnabled(isShadowEnabled);
-    parentPanel.setPropShadowValue(dval);
+  parentPanel.setPropShadowEnabled(isShadowEnabled);
+  parentPanel.setPropShadowValue(dval);
 
     /*
 
@@ -202,13 +202,13 @@ void VolumePropAgent::UpdateAllSettings()
 
     */
 
-    bool isAlphaEnabled;
-    getValue("alpha enable", isAlphaEnabled);
-    getValue("alpha", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  bool isAlphaEnabled;
+  getValue("alpha enable", isAlphaEnabled);
+  getValue("alpha", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
 
-    parentPanel.setPropAlphaEnabled(isAlphaEnabled);
-    parentPanel.setPropAlphaValue(ival);
+  parentPanel.setPropAlphaEnabled(isAlphaEnabled);
+  parentPanel.setPropAlphaValue(ival);
 
     /*
 
@@ -222,8 +222,8 @@ void VolumePropAgent::UpdateAllSettings()
 
     */
 
-    getValue("sample rate", dval);
-    parentPanel.setPropSampleValue(dval);
+  getValue("sample rate", dval);
+  parentPanel.setPropSampleValue(dval);
 
     /*
 
@@ -249,22 +249,22 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_shade_tool->ToggleTool(VolumePropPanel::ID_ShadingEnableChk, shading_enable);
 
     */
-    double amb = 0.0;
-    double diff = 0.0;
-    double spec = 0.0;
-    double shine = 0.0;
+  double amb = 0.0;
+  double diff = 0.0;
+  double spec = 0.0;
+  double shine = 0.0;
 
-    bool isShadeEnabled;
+  bool isShadeEnabled;
 
-    getValue("mat amb", amb);
-    getValue("mat diff", diff);
-    getValue("mat spec", spec);
-    getValue("mat shine", shine);
-    getValue("shading enable", isShadeEnabled);
+  getValue("mat amb", amb);
+  getValue("mat diff", diff);
+  getValue("mat spec", spec);
+  getValue("mat shine", shine);
+  getValue("shading enable", isShadeEnabled);
 
-    parentPanel.setPropLowShaderValue(amb);
-    parentPanel.setPropHighShaderValue(shine);
-    parentPanel.setPropShaderEnabled(isShadeEnabled);
+  parentPanel.setPropLowShaderValue(amb);
+  parentPanel.setPropHighShaderValue(shine);
+  parentPanel.setPropShaderEnabled(isShadeEnabled);
     /*
 
 
@@ -300,13 +300,13 @@ void VolumePropAgent::UpdateAllSettings()
     panel_.m_colormap_tool->ToggleTool(VolumePropPanel::ID_ColormapEnableChk, colormap_enable);
     */
 
-    getValue("colormap low", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
-    parentPanel.setPropLowColorModeValue(ival);
+  getValue("colormap low", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  parentPanel.setPropLowColorModeValue(ival);
 
-    getValue("colormap high", dval);
-    ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
-    parentPanel.setPropHighColorModeValue(ival);
+  getValue("colormap high", dval);
+  ival = static_cast<int>(dval*parentPanel.getPropOptionsMaxVal() + 0.5);
+  parentPanel.setPropHighColorModeValue(ival);
 
     /*
 
@@ -328,16 +328,16 @@ void VolumePropAgent::UpdateAllSettings()
     panel_.m_color2_btn->SetColour(wxc);
 
     */
-    FLTYPE::Color c;
-    getValue("color", c);
-    QColor qColor(static_cast<int>(c.r() * 255 + 0.5),
-                  static_cast<int>(c.g() * 255 + 0.5),
-                  static_cast<int>(c.b() * 255 + 0.5));
+  FLTYPE::Color c;
+  getValue("color", c);
+  QColor qColor(static_cast<int>(c.r() * 255 + 0.5),
+                    static_cast<int>(c.g() * 255 + 0.5),
+                    static_cast<int>(c.b() * 255 + 0.5));
 
-    getValue("sec color", c);
-    qColor = QColor(static_cast<int>(c.r() * 255 + 0.5),
-                  static_cast<int>(c.g() * 255 + 0.5),
-                  static_cast<int>(c.b() * 255 + 0.5));
+  getValue("sec color", c);
+  qColor = QColor(static_cast<int>(c.r() * 255 + 0.5),
+                    static_cast<int>(c.g() * 255 + 0.5),
+                    static_cast<int>(c.b() * 255 + 0.5));
 
     // TODO: Find out where these are all changed.
 

@@ -32,185 +32,191 @@ DEALINGS IN THE SOFTWARE.
 #include <Node.hpp>
 #include <ValueUpdateVisitor.hpp>
 
-    class InterfaceAgent : public fluo::Object
-	{
-	public:
-		InterfaceAgent()
-		{
-		}
+class InterfaceAgent : public fluo::Object
+{
+  public:
+    InterfaceAgent(){}
 
-        virtual InterfaceAgent* clone(const fluo::CopyOp& copyop) const { return nullptr; }
+    virtual InterfaceAgent* clone(const fluo::CopyOp& copyop) const { return nullptr; }
 
-        virtual bool isSameKindAs(const fluo::Object* obj) const
-		{
-            return dynamic_cast<const InterfaceAgent*>(obj) != nullptr;
-		}
+    virtual bool isSameKindAs(const fluo::Object* obj) const
+    {
+      return dynamic_cast<const InterfaceAgent*>(obj) != nullptr;
+    }
 
-		virtual const char* className() const { return "InterfaceAgent"; }
+    virtual const char* className() const { return "InterfaceAgent"; }
 
-		//observer
-		virtual unsigned int getPriority() const { return 200; }
+    //observer
+    virtual unsigned int getPriority() const { return 200; }
 
-        virtual void processNotification(fluo::Event& event)
-		{
-            if (event.getNotifyFlags() & fluo::Event::NOTIFY_AGENT)
-                fluo::Object::processNotification(event);
-		}
+    virtual void processNotification(fluo::Event& event)
+    {
+      if (event.getNotifyFlags() & fluo::Event::NOTIFY_AGENT)
+        fluo::Object::processNotification(event);
+    }
 
-        virtual void setObject(fluo::Object* obj)
-		{
-            fluo::Object* old_obj = nullptr;
-            if (getValue("asset", (fluo::Referenced**)&old_obj) &&
-				old_obj == obj)
-				return;
+    virtual void setObject(fluo::Object* obj)
+    {
+      fluo::Object* old_obj = nullptr;
+      if (getValue("asset", (fluo::Referenced**)&old_obj) && old_obj == obj)
+        return;
 
-			if (old_obj)
-				old_obj->removeObserver(this);
-			clearValues();
-			addValue("asset", obj);
-			if (obj)
-			{
-				copyValues(*obj);//shallow copy to share values
-				UpdateAllSettings();
-				obj->addObserver(this);
-			}
-		}
-        virtual fluo::Object* getObject()
-		{
-            fluo::Object* obj = nullptr;
-            getValue("asset", (fluo::Referenced**)&obj);
-			return obj;
-		}
+      if (old_obj)
+        old_obj->removeObserver(this);
 
-        virtual fluo::Node* getObjParent()
-		{
-            fluo::Object* obj = getObject();
-			if (obj)
-			{
-                fluo::Node* node = dynamic_cast<fluo::Node*>(obj);
-				if (node)
-					return node->getParent(0);
-			}
-            return nullptr;
-		}
-/*
-		virtual bool testSyncParentValue(const std::string& name)
-		{
-            fluo::Object* obj = getObject();
-            fluo::Node* parent = getObjParent();
-			if (obj && parent)
-			{
-                fluo::Value* value1 = obj->getValue(name);
-                fluo::Value* value2 = parent->getValue(name);
-				return value1->hasObserver(value2) &&
-					value2->hasObserver(value1);
-			}
-			return false;
-		}
+      clearValues();
+      addValue("asset", obj);
 
-        virtual bool testSyncParentValues(const fluo::ValueCollection &names)
-		{
-            fluo::Object* obj = getObject();
-            fluo::Node* parent = getObjParent();
-			if (obj && parent)
-			{
-				for (auto it = names.begin();
-					it != names.end(); ++it)
-				{
-                    fluo::Value* value1 = obj->getValue(*it);
-                    fluo::Value* value2 = parent->getValue(*it);
-					if (!value1->hasObserver(value2) ||
-						!value2->hasObserver(value1))
-						return false;
-				}
-				return true;
-			}
-			return false;
-		}
-*/
-		virtual void syncParentValue(const std::string& name)
-		{
-			//get obj parent
-            fluo::Node* parent = getObjParent();
-			if (parent)
-			{
-                fluo::ValueUpdateVisitor update;
-                update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUE);
-				update.setValueName(name);
-				parent->accept(update);
-			}
-		}
+      if (obj)
+      {
+        copyValues(*obj);//shallow copy to share values
+        UpdateAllSettings();
+        obj->addObserver(this);
+      }
+    }
 
-		virtual void unsyncParentValue(const std::string& name)
-		{
-			//get obj parent
-            fluo::Node* parent = getObjParent();
-			if (parent)
-			{
-                fluo::ValueUpdateVisitor update;
-                update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUE);
-				update.setValueName(name);
-				parent->accept(update);
-			}
-		}
+    virtual fluo::Object* getObject()
+    {
+      fluo::Object* obj = nullptr;
+      getValue("asset", (fluo::Referenced**)&obj);
+      return obj;
+    }
 
-        virtual void syncParentValues(const fluo::ValueCollection &names)
-		{
-			//get obj parent
-            fluo::Node* parent = getObjParent();
-			if (parent)
-			{
-                fluo::ValueUpdateVisitor update;
-                update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUES);
-				update.setValueNames(names);
-				parent->accept(update);
-			}
-		}
+    virtual fluo::Node* getObjParent()
+    {
+      fluo::Object* obj = getObject();
+      if (obj)
+      {
+        fluo::Node* node = dynamic_cast<fluo::Node*>(obj);
 
-        virtual void unsyncParentValues(const fluo::ValueCollection &names)
-		{
-			//get obj parent
-            fluo::Node* parent = getObjParent();
-			if (parent)
-			{
-                fluo::ValueUpdateVisitor update;
-                update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUES);
-				update.setValueNames(names);
-				parent->accept(update);
-			}
-		}
+        if (node)
+          return node->getParent(0);
+      }
+      return nullptr;
+    }
 
-		virtual void propParentValue(const std::string& name)
-		{
-			//get obj parent
-            fluo::Node* parent = getObjParent();
-			if (parent)
-			{
-                fluo::ValueUpdateVisitor update;
-                update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
-				update.setValueName(name);
-				update.setObject(this);
-				parent->accept(update);
-			}
-		}
+    /*
+    virtual bool testSyncParentValue(const std::string& name)
+    {
+      fluo::Object* obj = getObject();
+      fluo::Node* parent = getObjParent();
 
-        virtual void propParentValues(const fluo::ValueCollection &names)
-		{
-			//get obj parent
-            fluo::Node* parent = getObjParent();
-			if (parent)
-			{
-                fluo::ValueUpdateVisitor update;
-                update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUES);
-				update.setValueNames(names);
-				update.setObject(this);
-				parent->accept(update);
-			}
-		}
+      if (obj && parent)
+      {
+        fluo::Value* value1 = obj->getValue(name);
+        fluo::Value* value2 = parent->getValue(name);
+        return value1->hasObserver(value2) && value2->hasObserver(value1);
+      }
+      return false;
+    }
 
-        virtual void UpdateAllSettings() {}
+    virtual bool testSyncParentValues(const fluo::ValueCollection &names)
+    {
+      fluo::Object* obj = getObject();
+      fluo::Node* parent = getObjParent();
 
-	protected:
-	};
+      if (obj && parent)
+      {
+        for (auto it = names.begin(); it != names.end(); ++it)
+        {
+          fluo::Value* value1 = obj->getValue(*it);
+          fluo::Value* value2 = parent->getValue(*it);
+
+          if (!value1->hasObserver(value2) || !value2->hasObserver(value1))
+            return false;
+        }
+        return true;
+      }
+      return false;
+    }
+    */
+
+    virtual void syncParentValue(const std::string& name)
+    {
+      //get obj parent
+      fluo::Node* parent = getObjParent();
+
+      if (parent)
+      {
+        fluo::ValueUpdateVisitor update;
+        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUE);
+        update.setValueName(name);
+        parent->accept(update);
+      }
+    }
+
+    virtual void unsyncParentValue(const std::string& name)
+    {
+      //get obj parent
+      fluo::Node* parent = getObjParent();
+
+      if (parent)
+      {
+        fluo::ValueUpdateVisitor update;
+        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUE);
+        update.setValueName(name);
+        parent->accept(update);
+      }
+    }
+
+    virtual void syncParentValues(const fluo::ValueCollection &names)
+    {
+      //get obj parent
+      fluo::Node* parent = getObjParent();
+
+      if (parent)
+      {
+        fluo::ValueUpdateVisitor update;
+        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUES);
+        update.setValueNames(names);
+        parent->accept(update);
+      }
+    }
+
+    virtual void unsyncParentValues(const fluo::ValueCollection &names)
+    {
+      //get obj parent
+      fluo::Node* parent = getObjParent();
+      if (parent)
+      {
+        fluo::ValueUpdateVisitor update;
+        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUES);
+        update.setValueNames(names);
+        parent->accept(update);
+      }
+    }
+
+    virtual void propParentValue(const std::string& name)
+    {
+      //get obj parent
+      fluo::Node* parent = getObjParent();
+
+      if (parent)
+      {
+        fluo::ValueUpdateVisitor update;
+        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
+        update.setValueName(name);
+        update.setObject(this);
+        parent->accept(update);
+      }
+    }
+
+    virtual void propParentValues(const fluo::ValueCollection &names)
+    {
+      //get obj parent
+      fluo::Node* parent = getObjParent();
+
+      if (parent)
+      {
+        fluo::ValueUpdateVisitor update;
+        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUES);
+        update.setValueNames(names);
+        update.setObject(this);
+        parent->accept(update);
+      }
+    }
+
+    virtual void UpdateAllSettings() {}
+};
 
 #endif//_INTERFACEAGENT_H_

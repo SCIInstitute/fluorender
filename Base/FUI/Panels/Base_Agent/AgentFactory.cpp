@@ -49,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
 
 AgentFactory::AgentFactory()
 {
-	m_name = "agent factory";
+  m_name = "agent factory";
 }
 
 AgentFactory::~AgentFactory()
@@ -116,35 +116,34 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	return tree_model;
 }
 */
-/*
 VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, QWidget &window)
 {
-	InterfaceAgent* result = findFirst(name);
-	if (result)
-		return dynamic_cast<VolumePropAgent*>(result);
+  InterfaceAgent* result = findFirst(name);
+  if (result)
+    return dynamic_cast<VolumePropAgent*>(result);
 
-	//not found
-    VolumePropAgent* volume_prop_agent =
-            new VolumePropAgent(static_cast<PropertiesPanel&>(window));
-	if (volume_prop_agent)
-	{
-		volume_prop_agent->setName(name);
-		volume_prop_agent->setValueChangedFunction("luminance",
+  //not found
+  VolumePropAgent* volume_prop_agent =
+          new VolumePropAgent(static_cast<PropertiesPanel&>(window));
+
+  if (volume_prop_agent)
+  {
+    volume_prop_agent->setName(name);
+    volume_prop_agent->setValueChangedFunction("luminance",
 			std::bind(&VolumePropAgent::OnLuminanceChanged,
 				volume_prop_agent, std::placeholders::_1));
-		volume_prop_agent->setValueChangedFunction("color",
+    volume_prop_agent->setValueChangedFunction("color",
 			std::bind(&VolumePropAgent::OnColorChanged,
 				volume_prop_agent, std::placeholders::_1));
-		objects_.push_front(volume_prop_agent);
-        fluo::Event event;
-        event.init(fluo::Event::EVENT_NODE_ADDED,
+    objects_.push_front(volume_prop_agent);
+    fluo::Event event;
+    event.init(fluo::Event::EVENT_NODE_ADDED,
 			this, volume_prop_agent);
-		notifyObservers(event);
-	}
+    notifyObservers(event);
+  }
 
-    return volume_prop_agent;
+  return volume_prop_agent;
 }
-*/
 /*
 RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
 {

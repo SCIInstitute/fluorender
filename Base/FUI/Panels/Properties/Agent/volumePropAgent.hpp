@@ -34,47 +34,47 @@ DEALINGS IN THE SOFTWARE.
 #include <QString>
 #include <QColor>
 
-    class AgentFactory;
-    class PropertiesPanel;
-    class VolumePropAgent : public InterfaceAgent
-	{
-	public:
-        VolumePropAgent(PropertiesPanel &panel);
+class AgentFactory;
+class PropertiesPanel;
+class VolumePropAgent : public InterfaceAgent
+{
+  public:
+    VolumePropAgent(PropertiesPanel &panel);
 /*
-        virtual bool isSameKindAs(const fluo::Object* obj) const
-		{
-            return dynamic_cast<const PropertiesPanel*>(obj) != nullptr;
-		}
+virtual bool isSameKindAs(const fluo::Object* obj) const
+{
+        return dynamic_cast<const PropertiesPanel*>(obj) != nullptr;
+}
 */
-		virtual const char* className() const { return "VolumePropAgent"; }
+    virtual const char* className() const { return "VolumePropAgent"; }
 
-        virtual void setObject(fluo::VolumeData* vd);
-        virtual fluo::VolumeData* getObject();
+    virtual void setObject(fluo::VolumeData* vd);
+    virtual fluo::VolumeData* getObject();
 
-        virtual void UpdateAllSettings();
-        void updateGammaSettings();
-        void updateBoundSettings();
-        void updateSaturSettings();
-        void updateLThreSettings();
-        void updateHThreSettings();
-        void updateLuminSettings();
-        void updateShadoSettings();
-        void updateAlphaSettings();
-        void updateSamplSettings();
-        void updateShadeSettings();
-        void updateLColMSettings();
-        void updateHColMSettings();
+    virtual void UpdateAllSettings();
+    void updateGammaSettings();
+    void updateBoundSettings();
+    void updateSaturSettings();
+    void updateLThreSettings();
+    void updateHThreSettings();
+    void updateLuminSettings();
+    void updateShadoSettings();
+    void updateAlphaSettings();
+    void updateSamplSettings();
+    void updateShadeSettings();
+    void updateLColMSettings();
+    void updateHColMSettings();
 
-        friend class AgentFactory;
+    friend class AgentFactory;
 
-	protected:
+  protected:
 
-		//update functions
-        void OnLuminanceChanged(fluo::Event& event);
-        void OnColorChanged(fluo::Event& event);
+    //update functions
+    void OnLuminanceChanged(fluo::Event& event);
+    void OnColorChanged(fluo::Event& event);
 
-	private:
-        PropertiesPanel &parentPanel;
-    };
+  private:
+    PropertiesPanel &parentPanel;
+};
 
-#endif//_VOLUMEPROPAGENT_H_
+#endif

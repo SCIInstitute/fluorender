@@ -37,76 +37,76 @@ DEALINGS IN THE SOFTWARE.
 
 #include "InterfaceAgent.hpp"
 
-	class ListModel;
-	class TreeModel;
-	class RenderCanvasAgent;
-	class OutAdjustAgent;
-	class ClipPlaneAgent;
-	class MeshPropAgent;
-	class ColocalAgent;
-    class AgentFactory : public fluo::ObjectFactory
-	{
-	public:
-		AgentFactory();
+class ListModel;
+class TreeModel;
+class RenderCanvasAgent;
+class OutAdjustAgent;
+class ClipPlaneAgent;
+class MeshPropAgent;
+class ColocalAgent;
+class AgentFactory : public fluo::ObjectFactory
+{
+  public:
+    AgentFactory();
 
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-            return dynamic_cast<const AgentFactory*>(obj) != nullptr;
-		}
+    virtual bool isSameKindAs(const Object* obj) const
+    {
+        return dynamic_cast<const AgentFactory*>(obj) != nullptr;
+    }
 
-		virtual const char* className() const { return "AgentFactory"; }
+    virtual const char* className() const { return "AgentFactory"; }
 
-		virtual void createDefault() {}//no default agent
+    virtual void createDefault() {}//no default agent
 
-        virtual InterfaceAgent* getDefault() { return nullptr; }//no default agent
+    virtual InterfaceAgent* getDefault() { return nullptr; }//no default agent
 
-        virtual InterfaceAgent* build(InterfaceAgent* agent = nullptr) { return nullptr; }
+    virtual InterfaceAgent* build(InterfaceAgent* agent = nullptr) { return nullptr; }
 
-        virtual InterfaceAgent* clone(InterfaceAgent*) { return nullptr; }
+    virtual InterfaceAgent* clone(InterfaceAgent*) { return nullptr; }
 
-        virtual InterfaceAgent* clone(const unsigned int) { return nullptr; }
+    virtual InterfaceAgent* clone(const unsigned int) { return nullptr; }
 
-		inline virtual InterfaceAgent* get(size_t i)
-		{
-			return dynamic_cast<InterfaceAgent*>(ObjectFactory::get(i));
-		}
+    inline virtual InterfaceAgent* get(size_t i)
+    {
+    return dynamic_cast<InterfaceAgent*>(ObjectFactory::get(i));
+    }
 
-		inline virtual const InterfaceAgent* get(size_t i) const
-		{
-			return dynamic_cast<InterfaceAgent*>(const_cast<Object*>(ObjectFactory::get(i)));
-		}
+    inline virtual const InterfaceAgent* get(size_t i) const
+    {
+    return dynamic_cast<InterfaceAgent*>(const_cast<Object*>(ObjectFactory::get(i)));
+    }
 
-		inline virtual InterfaceAgent* find(const unsigned int id)
-		{
-			return dynamic_cast<InterfaceAgent*>(ObjectFactory::find(id));
-		}
+    inline virtual InterfaceAgent* find(const unsigned int id)
+    {
+    return dynamic_cast<InterfaceAgent*>(ObjectFactory::find(id));
+    }
 
-		inline virtual InterfaceAgent* findFirst(const std::string &name)
-		{
-			return dynamic_cast<InterfaceAgent*>(ObjectFactory::findFirst(name));
-		}
+    inline virtual InterfaceAgent* findFirst(const std::string &name)
+    {
+    return dynamic_cast<InterfaceAgent*>(ObjectFactory::findFirst(name));
+    }
 
-		inline virtual InterfaceAgent* findLast(const std::string &name)
-		{
-			return dynamic_cast<InterfaceAgent*>(ObjectFactory::findLast(name));
-		}
+    inline virtual InterfaceAgent* findLast(const std::string &name)
+    {
+    return dynamic_cast<InterfaceAgent*>(ObjectFactory::findLast(name));
+    }
 
-        //each agent type has a function
-        /*
-		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
-        TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
-        */
-        //VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, QWidget &panel); //may need to be QWidget*
-        /*
-		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
-		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
-		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
-		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
-        ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
-        */
+    //each agent type has a function
+    /*
+    ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
+    TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
+    */
+    VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, QWidget &panel); //may need to be QWidget*
+    /*
+    RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
+    OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
+    ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
+    MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
+    ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
+    */
 
-	protected:
-		virtual ~AgentFactory();
-	};
+  protected:
+    virtual ~AgentFactory();
+};
 
 #endif//_AGENTFACTORY_H_
