@@ -58,16 +58,6 @@ namespace FLIVR
 	"	OutVertex  = InVertex;\n" \
 	"}\n" 
 
-#define SEG_UNIFORMS_LABEL_INT \
-	"//SEG_UNIFORMS_LABEL_INT\n" \
-	"uniform vec4 loc9;//(nx, ny, nz, 0)\n" \
-	"\n"
-
-#define SEG_UNIFORMS_LABEL_MIF \
-	"//SEG_UNIFORMS_LABEL_MIF\n" \
-	"uniform vec4 loc0;//(1/nx, 1/ny, 1/nz, 0)\n" \
-	"\n"
-
 #define SEG_UNIFORMS_WMAP_2D \
 	"//SEG_UNIFORMS_WMAP_2D\n" \
 	"uniform sampler2D tex4;//2d weight map (after tone mapping)\n" \
@@ -156,10 +146,17 @@ namespace FLIVR
 	"		discard;\n"\
 	"	float cmask2d = texture(tex6, s.xy).x;\n"\
 	"	if (cmask2d < 0.45)\n"\
-	"	{\n"\
 	"		discard;\n"\
-	"		return;\n"\
-	"	}\n"\
+	"\n"
+
+#define SEG_BODY_INIT_CULL_POINT \
+	"	//SEG_BODY_INIT_CULL_POINT\n" \
+	"	if (any(lessThan(s.xy, vec2(0.0, 0.0))) ||\n"\
+	"		any(greaterThan(s.xy, vec2(1.0, 1.0))))\n"\
+	"		discard;\n"\
+	"	float dist = length(s.xy*loc6.zw - loc6.xy);\n" \
+	"	if (dist > 1.0)\n" \
+	"		discard;\n"\
 	"\n"
 
 #define SEG_BODY_INIT_BLEND_HEAD \
@@ -195,7 +192,7 @@ namespace FLIVR
 #define SEG_BODY_INIT_BLEND_HR_ORTHO \
 	"	//SEG_BODY_INIT_BLEND_HR_ORTHO\n" \
 	"	if (c.x <= loc7.x)\n" \
-	"		discard;\n" \
+	"		discard;\n"\
 	"	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);\n" \
 	"	vec3 step = cv.xyz;\n" \
 	"	step = normalize(step);\n" \
@@ -216,7 +213,7 @@ namespace FLIVR
 	"		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);\n" \
 	"		cray = vol_trans_sin_color_l(v);\n" \
 	"		if (cray.x > th && flag)\n" \
-	"			discard;\n" \
+	"			discard;\n"\
 	"		if (cray.x <= th)\n" \
 	"			flag = true;\n" \
 	"	}\n" \
@@ -226,7 +223,7 @@ namespace FLIVR
 #define SEG_BODY_INIT_BLEND_HR_PERSP \
 	"	//SEG_BODY_INIT_BLEND_HR_PERSP\n" \
 	"	if (c.x <= loc7.x)\n" \
-	"		discard;\n" \
+	"		discard;\n"\
 	"	vec4 cv = matrix3 * vec4(0.0, 0.0, 0.0, 1.0);\n" \
 	"	cv = cv / cv.w;\n" \
 	"	vec3 step = cv.xyz - t.xyz;\n" \
@@ -258,11 +255,6 @@ namespace FLIVR
 	"	FragColor = vec4(1.0);\n" \
 	"\n"
 
-#define SEG_BODY_INIT_POSTER \
-	"	//SEG_BODY_INIT_POSTER\n" \
-	"	FragColor = vec4(ceil(c.x*loc8.y)/loc8.y);\n" \
-	"\n"
-
 #define SEG_BODY_DB_GROW_2D_COORD \
 	"	//SEG_BODY_DB_GROW_2D_COORD\n" \
 	"	vec4 s = matrix1 * matrix0 * matrix2 * t;\n"\
@@ -284,13 +276,13 @@ namespace FLIVR
 #define SEG_BODY_DB_GROW_STOP_FUNC \
 	"	//SEG_BODY_DB_GROW_STOP_FUNC\n" \
 	"	if (c.x == 0.0)\n" \
-	"		discard;\n" \
+	"		discard;\n"\
 	"	v.x = c.x>1.0?1.0:c.x;\n" \
 	"	float stop = \n" \
 	"		(loc7.y>=1.0?1.0:(v.y>sqrt(loc7.y)*2.12?0.0:exp(-v.y*v.y/loc7.y)))*\n" \
 	"		(v.x>loc7.w?1.0:(loc7.z>0.0?(v.x<loc7.w-sqrt(loc7.z)*2.12?0.0:exp(-(v.x-loc7.w)*(v.x-loc7.w)/loc7.z)):0.0));\n" \
 	"	if (stop == 0.0)\n" \
-	"		discard;\n" \
+	"		discard;\n"\
 	"\n"\
 
 #define SEG_BODY_DB_GROW_BLEND_APPEND \
@@ -317,7 +309,7 @@ namespace FLIVR
 	"		m = texture(tex0, max_nb).x + loc7.y;\n" \
 	"		mx = texture(tex0, t.stp).x;\n" \
 	"		if (m < mx || m - mx > 2.0*loc7.y)\n" \
-	"			discard;\n" \
+	"			discard;\n"\
 	"	}\n" \
 	"	FragColor += cc*stop;\n"\
 	"\n"
@@ -374,29 +366,25 @@ namespace FLIVR
 		z << VOL_INPUTS;
 
 		//uniforms
-		switch (type_)
-		{
-		case SEG_SHDR_INITIALIZE:
-		case SEG_SHDR_DB_GROW:
-			z << SEG_OUTPUTS;
-			z << VOL_UNIFORMS_COMMON;
-			z << VOL_UNIFORMS_SIN_COLOR;
-			z << VOL_UNIFORMS_MASK;
-			z << SEG_UNIFORMS_WMAP_2D;
-			z << SEG_UNIFORMS_MASK_2D;
-			z << SEG_UNIFORMS_MATRICES;
-			z << VOL_UNIFORMS_MATRICES;
-			z << SEG_UNIFORMS_PARAMS;
-			break;
-		}
+		z << SEG_OUTPUTS;
+		z << VOL_UNIFORMS_COMMON;
+		z << VOL_UNIFORMS_SIN_COLOR;
+		//for paint_mode==9, loc6 = (px, py, view_nx, view_ny)
+		z << VOL_UNIFORMS_MASK;
+		z << SEG_UNIFORMS_WMAP_2D;
+		z << SEG_UNIFORMS_MASK_2D;
+		z << SEG_UNIFORMS_MATRICES;
+		z << VOL_UNIFORMS_MATRICES;
+		z << SEG_UNIFORMS_PARAMS;
 
 		//uniforms for clipping
 		if (paint_mode_!=6 && clip_)
 			z << VOL_UNIFORMS_CLIP;
 
-		//functions
+		//for hidden removal
 		if (type_==SEG_SHDR_INITIALIZE &&
-			(paint_mode_==1 || paint_mode_==2) &&
+			(paint_mode_==1 || paint_mode_==2 ||
+			paint_mode_==9) &&
 			hr_mode_>0)
 		{
 			z << SEG_UNIFORM_MATRICES_INVERSE;
@@ -425,13 +413,15 @@ namespace FLIVR
 			{
 			case SEG_SHDR_INITIALIZE:
 				z << SEG_BODY_INIT_2D_COORD;
-				if (paint_mode_==1 ||
-					paint_mode_==2 ||
-					paint_mode_==4 ||
-					paint_mode_==8)
+				if (paint_mode_ == 1 ||
+					paint_mode_ == 2 ||
+					paint_mode_ == 4 ||
+					paint_mode_ == 8)
 					z << SEG_BODY_INIT_CULL;
-				else if (paint_mode_==3)
+				else if (paint_mode_ == 3)
 					z << SEG_BODY_INIT_CULL_ERASE;
+				else if (paint_mode_ == 9)
+					z << SEG_BODY_INIT_CULL_POINT;
 
 				if (paint_mode_ != 3)
 				{
@@ -449,7 +439,8 @@ namespace FLIVR
 				}
 
 				if (paint_mode_==1 ||
-					paint_mode_==2)
+					paint_mode_==2 ||
+					paint_mode_==9)
 				{
 					if (hr_mode_ == 0)
 						z << SEG_BODY_INIT_BLEND_APPEND;
@@ -468,12 +459,12 @@ namespace FLIVR
 					z << SEG_BODY_INIT_BLEND_ALL;
 				else if (paint_mode_==8)
 					z << SEG_BODY_INIT_BLEND_ALL;
-				else if (paint_mode_==11)
-					z << SEG_BODY_INIT_POSTER;
 				break;
 			case SEG_SHDR_DB_GROW:
 				z << SEG_BODY_DB_GROW_2D_COORD;
-				if (paint_mode_!=5)
+
+				if (paint_mode_!=5 &&
+					paint_mode_!=9)
 					z << SEG_BODY_DB_GROW_CULL;
 
 				if (paint_mode_ != 3)
@@ -496,7 +487,8 @@ namespace FLIVR
 				if (paint_mode_==1 ||
 					paint_mode_==2 ||
 					paint_mode_==4 ||
-					paint_mode_==5)
+					paint_mode_==5 ||
+					paint_mode_==9)
 					z << SEG_BODY_DB_GROW_BLEND_APPEND;
 				else if (paint_mode_==3)
 					z << SEG_BODY_DB_GROW_BLEND_ERASE;

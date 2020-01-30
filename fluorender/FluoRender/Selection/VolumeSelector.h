@@ -193,7 +193,7 @@ namespace FL
 		void LoadBrushSettings();
 		void SaveBrushSettings();
 
-		void Segment();
+		void Segment(int mx = 0, int my = 0);
 		void Select(double radius);
 		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
 		VolumeData* GetResult(bool pop);
@@ -217,9 +217,9 @@ namespace FL
 		double m_prjmat[16];//projection matrix
 		int m_iter_num;		//iteration number for growing
 		int m_mode;			//segmentation modes
-							//1-select; 2-append; 3-erase; 4-diffuse; 5-flood; 6-clear; 7-all; 8-solid;
-							//image processing modes
-							//11-posterize
+							//1-select; 2-append; 3-erase; 4-diffuse;
+							//5-flood; 6-clear; 7-all; 8-solid;
+							//9-grow from point
 		bool m_use2d;
 
 		bool m_update_order;

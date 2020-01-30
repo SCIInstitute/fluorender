@@ -701,8 +701,6 @@ private:
 	vector <TreeLayer*> m_layer_list;
 	//ruler list
 	FL::RulerList m_ruler_list;
-	//grow point
-	Point m_grow_point;
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
