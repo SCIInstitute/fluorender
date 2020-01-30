@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
-#include <Selection/Diffusion.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -1750,6 +1749,8 @@ void VRenderGLView::SetIntMode(int mode)
 		m_brush_state = 0;
 		m_draw_brush = false;
 	}
+	else if (m_int_mode == 10)
+		SetPaintMode(9);
 }
 
 //set use 2d rendering results
@@ -2042,20 +2043,26 @@ void VRenderGLView::DisplayStroke()
 //segment volumes in current view
 void VRenderGLView::Segment()
 {
+	int mode = m_selector.GetMode();
 	HandleCamera();
-	m_selector.Segment();
+	if (mode == 9)
+	{
+		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
+		m_selector.Segment(mouse_pos.x, mouse_pos.y);
+	}
+	else
+		m_selector.Segment();
 
 	bool count = false;
 	bool colocal = false;
-	unsigned int sum = 0;
-	float wsum = 0.0;
-	if (m_selector.GetMode() == 1 ||
-		m_selector.GetMode() == 2 ||
-		m_selector.GetMode() == 3 ||
-		m_selector.GetMode() == 4 ||
-		m_selector.GetMode() == 5 ||
-		m_selector.GetMode() == 7 ||
-		m_selector.GetMode() == 8)
+	if (mode == 1 ||
+		mode == 2 ||
+		mode == 3 ||
+		mode == 4 ||
+		mode == 5 ||
+		mode == 7 ||
+		mode == 8 ||
+		mode == 9)
 	{
 		if (m_paint_count)
 			count = true;
@@ -4373,18 +4380,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 		//grow
 		if (m_int_mode == 10 &&
-			wxGetMouseState().LeftIsDown() &&
-			m_grow_point.x() >= 0.0)
+			wxGetMouseState().LeftIsDown())
 		{
 			event.RequestMore();
-			FL::Diffusion diffs(m_cur_vol);
-			diffs.Grow(m_selector.GetBrushIteration() / 5,
-				m_selector.GetBrushSclTranslate(),
-				m_selector.GetEdgeDetect()?m_selector.GetBrushGmFalloff():1.0,
-				0.008,
-				m_selector.GetBrushSclTranslate());
-			m_cur_vol->GetVR()->clear_tex_current();
+			Segment();
 			refresh = true;
+			start_loop = true;
 			//update
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (vr_frame)
@@ -11016,25 +11017,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 		if (m_int_mode == 10)
 		{
-			Point point, ip;
-			int mode = 1;
-			if (m_cur_vol->GetMode() == 1) mode = 1;
-			m_vp.SetVolumeData(m_cur_vol);
-			double t = m_vp.GetPointVolume(event.GetX(), event.GetY(),
-				mode, true, 0.5, point, ip);
-			if (t > 0.0)
-			{
-				m_grow_point = ip;
-				FL::Diffusion diffs(m_cur_vol);
-				diffs.Init(m_grow_point,
-					m_selector.GetBrushIniThresh());
-				m_cur_vol->GetVR()->clear_tex_current();
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame && vr_frame->GetBrushToolDlg())
-					vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
-			}
-			else
-				m_grow_point = Point(-1);
+			Segment();
+			m_force_clear = true;
+			RefreshGL(27);
+			return;
 		}
 		return;
 	}

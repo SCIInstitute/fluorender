@@ -83,6 +83,12 @@ const char* str_cl_paint_boxes = \
 
 void PaintBoxes::Compute()
 {
+	if (m_view_only)
+	{
+		BrickViewInt();
+		return;
+	}
+
 	vector<BrickBox> bbs;
 	if (!GetBrickBoxes(bbs))
 		return;
@@ -190,6 +196,20 @@ bool PaintBoxes::GetBrickBoxes(vector<BrickBox> &bbs)
 		}
 	}
 	return !bbs.empty();
+}
+
+void PaintBoxes::BrickViewInt()
+{
+	if (!m_bricks)
+		return;
+
+	for (int i = 0; i < m_bricks->size(); ++i)
+	{
+		FLIVR::TextureBrick* b = (*m_bricks)[i];
+		FLIVR::BBox bbox = b->bbox();
+		if (test_against_view(bbox))
+			b->set_paint_mask(true);
+	}
 }
 
 bool PaintBoxes::test_against_view(const FLIVR::BBox &bbox)

@@ -169,6 +169,7 @@ namespace FLIVR
 	"\n"
 
 #define VOL_HEAD_CLIP_FUNC \
+	"	//VOL_HEAD_CLIP_FUNC\n" \
 	"	if (vol_clip_func(t))\n" \
 	"	{\n" \
 	"		discard;\n" \

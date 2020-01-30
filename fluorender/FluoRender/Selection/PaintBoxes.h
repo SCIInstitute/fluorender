@@ -43,7 +43,8 @@ namespace FL
 	{
 	public:
 		PaintBoxes() : m_bricks(0), m_paint_tex(0),
-			m_ptx(0), m_pty(0), m_persp(false) {}
+			m_ptx(0), m_pty(0), m_persp(false),
+			m_view_only(false) {}
 		~PaintBoxes() {}
 
 		void SetBricks(vector<FLIVR::TextureBrick*> *bricks)
@@ -64,6 +65,11 @@ namespace FL
 			m_paint_tex = pt;
 			m_ptx = ptx;
 			m_pty = pty;
+		}
+
+		void SetViewOnly(bool value)
+		{
+			m_view_only = value;
 		}
 
 		void SetPersp(bool val)
@@ -91,6 +97,7 @@ namespace FL
 		vector<FLIVR::TextureBrick*> *m_bricks;
 		int m_paint_tex;//2d tex of paint strokes
 		int m_ptx, m_pty;//tex size
+		bool m_view_only;//only test for view intersection
 		//for persp
 		bool m_persp;
 		FLIVR::Transform m_mat;//combined mat
@@ -108,6 +115,7 @@ namespace FL
 
 	private:
 		bool GetBrickBoxes(vector<BrickBox> &bbs);
+		void BrickViewInt();
 		bool test_against_view(const FLIVR::BBox &bbox);
 	};
 }

@@ -83,10 +83,17 @@ VolumeSelector::~VolumeSelector()
 {
 }
 
-void VolumeSelector::Segment()
+void VolumeSelector::Segment(int mx, int my)
 {
 	if (!m_view || !m_vd)
 		return;
+
+	//mouse position
+	if (m_mode == 9)
+	{
+		GLint mp[2] = { mx, my };
+		m_vd->GetVR()->set_mouse_position(mp);
+	}
 
 	//save view
 	m_mv_mat = m_view->GetDrawMat();
@@ -199,14 +206,13 @@ void VolumeSelector::Select(double radius)
 
 	//set up paint mask flags
 	std::vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	if (bricks->size() > 1 &&
-		(m_mode == 1 || m_mode == 2 ||
+	if (bricks->size() > 1 && (
+		m_mode == 1 || m_mode == 2 ||
 		m_mode == 3 || m_mode == 4 ||
-		m_mode == 8))
+		m_mode == 8 || m_mode == 9))
 	{
 		FL::PaintBoxes pb;
 		pb.SetBricks(bricks);
-		pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
 		pb.SetPersp(!m_view->GetPersp());
 		Transform *tform = m_vd->GetTexture()->transform();
 		double mvmat[16];
@@ -223,6 +229,10 @@ void VolumeSelector::Select(double radius)
 		pr.set(glm::value_ptr(m_prj_mat));
 		mat.set(glm::value_ptr(cmat));
 		pb.SetMats(mv, pr, mat);
+		if (m_mode == 9)
+			pb.SetViewOnly(true);
+		else
+			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
 		pb.Compute();
 	}
 
@@ -252,11 +262,16 @@ void VolumeSelector::Select(double radius)
 	if (m_mode==1 ||
 		m_mode==2 ||
 		m_mode==3 ||
-		m_mode==4)
+		m_mode==4 ||
+		m_mode==9)
 	{
 		//loop for growing
-		int iter = m_iter_num*(radius/200.0>1.0?radius/200.0:1.0);
-		int div = iter / 3;
+		int iter, div;
+		if (m_mode == 9)
+			iter = m_iter_num / 2;
+		else
+			iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
+		div = iter / 3;
 		div = div ? div : 1;
 		for (int i=0; i<iter; i++)
 			m_vd->DrawMask(1, m_mode, 0, ini_thresh,

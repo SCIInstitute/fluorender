@@ -54,6 +54,12 @@ namespace FLIVR
 			memcpy(vp_, vp, sizeof(GLint) * 4);
 		}
 
+		//mouse position in viewport
+		void set_mouse_position(GLint mp[2])
+		{
+			memcpy(mp_, mp, sizeof(GLint) * 2);
+		}
+
 		//set clear color
 		void set_clear_color(GLfloat clear_color[4])
 		{
@@ -228,6 +234,8 @@ namespace FLIVR
 	protected:
 		//viewport
 		GLint vp_[4];
+		//mouse position in viewport
+		GLint mp_[2];
 		//clear color
 		GLfloat clear_color_[4];
 
