@@ -3674,6 +3674,10 @@ void VRenderGLView::SetBrush(int mode)
 		else
 			m_selector.SetMode(1);
 	}
+	else if (m_int_mode == 10)
+	{
+		m_selector.SetMode(9);
+	}
 	else
 	{
 		m_int_mode = 2;
