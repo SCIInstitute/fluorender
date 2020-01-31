@@ -259,6 +259,13 @@ namespace FLIVR
 		//add one more texture component as the labeling volume
 		bool add_empty_label();
 
+		//enable mask paint for all
+		void enable_paint_mask()
+		{
+			for (size_t i = 0; i < bricks_->size(); ++i)
+				(*bricks_)[i]->set_paint_mask(true);
+		}
+
 		//get priority brick number
 		inline void set_use_priority(bool value) {use_priority_ = value;}
 		inline bool get_use_priority() {return use_priority_;}
