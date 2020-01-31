@@ -2820,6 +2820,12 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 		AlignCenter(&ruler);
 }
 
+void ComponentDlg::ClearOutputGrid()
+{
+	int row = m_output_grid->GetNumberRows();
+	m_output_grid->DeleteRows(0, row, true);
+}
+
 void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 {
 	EnableGenerate();
@@ -3796,7 +3802,7 @@ void ComponentDlg::IncludeComps()
 		//select cl
 		FL::ComponentSelector comp_selector(vd);
 		comp_selector.SelectList(cl);
-		m_output_grid->ClearGrid();
+		ClearOutputGrid();
 		string titles, values;
 		m_comp_analyzer.OutputFormHeader(titles);
 		m_comp_analyzer.OutputCompListStr(values, 0);
@@ -3851,7 +3857,7 @@ void ComponentDlg::ExcludeComps()
 			it != list->end(); ++it)
 			ids.push_back(it->second->id);
 		comp_selector.Delete(ids);
-		m_output_grid->ClearGrid();
+		ClearOutputGrid();
 		string titles, values;
 		m_comp_analyzer.OutputFormHeader(titles);
 		m_comp_analyzer.OutputCompListStr(values, 0);
