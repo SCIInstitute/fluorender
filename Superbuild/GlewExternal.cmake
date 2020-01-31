@@ -34,16 +34,32 @@ set(Glew_Hash "MD5=dff2939fd404d054c1036cc0409d19f1")
 
 # The source subdirectory must be set since glew has their cmake file burried
 # in their directory structure.
-ExternalProject_Add(glew_external_download
-  URL ${Glew_url}
-  URL_HASH ${Glew_Hash}
-  UPDATE_COMMAND ""
-  SOURCE_SUBDIR "build/cmake"
-  INSTALL_COMMAND ""
+if(${GeneratorName} STREQUAL "Ninja")
+  ExternalProject_Add(glew_external_download
+    URL ${Glew_url}
+    URL_HASH ${Glew_Hash}
+    UPDATE_COMMAND ""
+    SOURCE_SUBDIR "build/cmake"
+    INSTALL_COMMAND ""
+  BUILD_BYPRODUCTS
+    <BINARY_DIR>/lib/${prefix}glew32${suffix}
+    <BINARY_DIR>/lib/${prefix}libglew32${suffix}
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-)
+  )
+else()
+  ExternalProject_Add(glew_external_download
+    URL ${Glew_url}
+    URL_HASH ${Glew_Hash}
+    UPDATE_COMMAND ""
+    SOURCE_SUBDIR "build/cmake"
+    INSTALL_COMMAND ""
+    CMAKE_CACHE_ARGS
+      -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+      -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+  )
+endif()
 
 ExternalProject_Get_Property(glew_external_download BINARY_DIR)
 ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
