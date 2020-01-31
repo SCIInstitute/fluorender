@@ -235,6 +235,8 @@ void VolumeSelector::Select(double radius)
 			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
 		pb.Compute();
 	}
+	else
+		m_vd->GetTexture()->enable_paint_mask();
 
 	//there is some unknown problem of clearing the mask
 	if (m_mode == 1)
