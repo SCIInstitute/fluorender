@@ -607,12 +607,13 @@ int VolumeSelector::GetSize(double &s)
 //brush sets
 void VolumeSelector::ChangeBrushSetsIndex()
 {
-	if (m_mode == 1)
-		m_mode = 2;
+	int mode = m_mode;
+	if (mode == 1)
+		mode = 2;
 	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
 	{
 		BrushRadiusSet radius_set = m_brush_radius_sets[i];
-		if (radius_set.type == m_mode &&
+		if (radius_set.type == mode &&
 			m_brush_sets_index != i)
 		{
 			//save previous
