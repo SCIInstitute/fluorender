@@ -448,6 +448,7 @@ private:
 	void Cluster();
 	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 	void AlignCenter(FL::Ruler* ruler);
+	void ClearOutputGrid();
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);
