@@ -85,6 +85,7 @@ const char* str_cl_cov = \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
 "	float3 center,\n" \
+"	float3 orig,\n" \
 "	__global float* cov)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
@@ -98,16 +99,15 @@ const char* str_cl_cov = \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		float mval = read_imagef(mask, samp, ijk).x;\n" \
-"		float3 fijk = (float3)(ijk.x, ijk.y, ijk.z) - center;\n" \
-"		if (mval > 0.0)\n" \
-"		{\n" \
-"			xx += fijk.x * fijk.x;\n" \
-"			xy += fijk.x * fijk.y;\n" \
-"			xz += fijk.x * fijk.z;\n" \
-"			yy += fijk.y * fijk.y;\n" \
-"			yz += fijk.y * fijk.z;\n" \
-"			zz += fijk.z * fijk.z;\n" \
-"		}\n" \
+"		if (mval < 0.0001)\n" \
+"			continue;\n" \
+"		float3 fijk = (float3)(ijk.x, ijk.y, ijk.z) + orig - center;\n" \
+"		xx += fijk.x * fijk.x;\n" \
+"		xy += fijk.x * fijk.y;\n" \
+"		xz += fijk.x * fijk.z;\n" \
+"		yy += fijk.y * fijk.y;\n" \
+"		yz += fijk.y * fijk.z;\n" \
+"		zz += fijk.z * fijk.z;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(cov+index*6, xx);\n" \
@@ -305,13 +305,16 @@ bool Cov::Compute()
 		kernel_prog->readBuffer(sizeof(unsigned int)*(gsxyz), count, count);
 		kernel_prog->readBuffer(sizeof(float)*(gsxyz*3), csum, csum);
 
+		int ox, oy, oz, nc;
+		ox = b->ox(); oy = b->oy(); oz = b->oz();
 		//compute center
 		for (int i = 0; i < gsxyz; ++i)
 		{
-			sum += count[i];
-			m_center[0] += csum[i * 3];
-			m_center[1] += csum[i * 3 + 1];
-			m_center[2] += csum[i * 3 + 2];
+			nc = count[i];
+			sum += nc;
+			m_center[0] += csum[i * 3] + ox * nc;
+			m_center[1] += csum[i * 3 + 1] + oy * nc;
+			m_center[2] += csum[i * 3 + 2] + oz * nc;
 		}
 
 		//release buffer
@@ -386,7 +389,10 @@ bool Cov::Compute()
 			sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog->setKernelArgConst(kernel_index1, 6,
 			sizeof(cl_float3), (void*)(m_center));
-		kernel_prog->setKernelArgBuf(kernel_index1, 7,
+		float orig[3] = { float(b->ox()), float(b->oy()), float(b->oz()) };
+		kernel_prog->setKernelArgConst(kernel_index1, 7,
+			sizeof(cl_float3), (void*)(orig));
+		kernel_prog->setKernelArgBuf(kernel_index1, 8,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*(gsxyz * 6), (void*)(cov));
 
