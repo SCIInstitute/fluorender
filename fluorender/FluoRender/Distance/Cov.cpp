@@ -200,7 +200,7 @@ long Cov::OptimizeGroupSize(long nt, long target)
 	return target;
 }
 
-bool Cov::Compute()
+bool Cov::ComputeCenter()
 {
 	if (!CheckBricks())
 		return false;
@@ -212,26 +212,18 @@ bool Cov::Compute()
 		vol_kernel_factory_.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	int kernel_index0 = -1;
-	int kernel_index1 = -1;
-	string name0 = "kernel_0";
-	string name1 = "kernel_1";
+	int kernel_index = -1;
+	string name = "kernel_0";
 	if (kernel_prog->valid())
-	{
-		kernel_index0 = kernel_prog->findKernel(name0);
-		kernel_index1 = kernel_prog->findKernel(name1);
-	}
+		kernel_index = kernel_prog->findKernel(name);
 	else
-	{
-		kernel_index0 = kernel_prog->createKernel(name0);
-		kernel_index1 = kernel_prog->createKernel(name1);
-	}
+		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get center
-	std::memset(m_center, 0, sizeof(float)*3);
+	std::memset(m_center, 0, sizeof(float) * 3);
 	unsigned long long sum = 0;
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -244,7 +236,7 @@ bool Cov::Compute()
 
 		//compute workload
 		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index0, &ng);
+		kernel_prog->getWorkGroupSize(kernel_index, &ng);
 		//try to make gsxyz equal to ng
 		//ngx*ngy*ngz = nx*ny*nz/ng
 		//z
@@ -279,31 +271,31 @@ bool Cov::Compute()
 
 		//set
 		unsigned int* count = new unsigned int[gsxyz];
-		float *csum = new float[gsxyz*3];
-		kernel_prog->setKernelArgTex3D(kernel_index0, 0,
+		float *csum = new float[gsxyz * 3];
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgConst(kernel_index0, 1,
+		kernel_prog->setKernelArgConst(kernel_index, 1,
 			sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog->setKernelArgConst(kernel_index0, 2,
+		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&ngy));
-		kernel_prog->setKernelArgConst(kernel_index0, 3,
+		kernel_prog->setKernelArgConst(kernel_index, 3,
 			sizeof(unsigned int), (void*)(&ngz));
-		kernel_prog->setKernelArgConst(kernel_index0, 4,
+		kernel_prog->setKernelArgConst(kernel_index, 4,
 			sizeof(unsigned int), (void*)(&gsxy));
-		kernel_prog->setKernelArgConst(kernel_index0, 5,
+		kernel_prog->setKernelArgConst(kernel_index, 5,
 			sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgBuf(kernel_index0, 6,
+		kernel_prog->setKernelArgBuf(kernel_index, 6,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*(gsxyz), (void*)(count));
-		kernel_prog->setKernelArgBuf(kernel_index0, 7,
+		kernel_prog->setKernelArgBuf(kernel_index, 7,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz*3), (void*)(csum));
+			sizeof(float)*(gsxyz * 3), (void*)(csum));
 
 		//execute
-		kernel_prog->executeKernel(kernel_index0, 3, global_size, 0);
+		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned int)*(gsxyz), count, count);
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz*3), csum, csum);
+		kernel_prog->readBuffer(sizeof(float)*(gsxyz * 3), csum, csum);
 
 		int ox, oy, oz, nc;
 		ox = b->ox(); oy = b->oy(); oz = b->oz();
@@ -327,6 +319,37 @@ bool Cov::Compute()
 	m_center[1] /= sum;
 	m_center[2] /= sum;
 
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	m_center[0] *= spcx;
+	m_center[1] *= spcy;
+	m_center[2] *= spcz;
+
+	return true;
+}
+
+bool Cov::ComputeCov()
+{
+	if (!CheckBricks())
+		return false;
+	if (!m_vd->GetMask(false))
+		return false;
+
+	//create program and kernels
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_cov);
+	if (!kernel_prog)
+		return false;
+	int kernel_index = -1;
+	string name = "kernel_1";
+	if (kernel_prog->valid())
+		kernel_index = kernel_prog->findKernel(name);
+	else
+		kernel_index = kernel_prog->createKernel(name);
+
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+
 	//get cov
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -339,7 +362,7 @@ bool Cov::Compute()
 
 		//compute workload
 		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index0, &ng);
+		kernel_prog->getWorkGroupSize(kernel_index, &ng);
 		//try to make gsxyz equal to ng
 		//ngx*ngy*ngz = nx*ny*nz/ng
 		//z
@@ -375,29 +398,29 @@ bool Cov::Compute()
 		//set
 		unsigned int* count = new unsigned int[gsxyz];
 		float *cov = new float[gsxyz * 6];
-		kernel_prog->setKernelArgTex3D(kernel_index1, 0,
+		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgConst(kernel_index1, 1,
+		kernel_prog->setKernelArgConst(kernel_index, 1,
 			sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog->setKernelArgConst(kernel_index1, 2,
+		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&ngy));
-		kernel_prog->setKernelArgConst(kernel_index1, 3,
+		kernel_prog->setKernelArgConst(kernel_index, 3,
 			sizeof(unsigned int), (void*)(&ngz));
-		kernel_prog->setKernelArgConst(kernel_index1, 4,
+		kernel_prog->setKernelArgConst(kernel_index, 4,
 			sizeof(unsigned int), (void*)(&gsxy));
-		kernel_prog->setKernelArgConst(kernel_index1, 5,
+		kernel_prog->setKernelArgConst(kernel_index, 5,
 			sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgConst(kernel_index1, 6,
+		kernel_prog->setKernelArgConst(kernel_index, 6,
 			sizeof(cl_float3), (void*)(m_center));
 		float orig[3] = { float(b->ox()), float(b->oy()), float(b->oz()) };
-		kernel_prog->setKernelArgConst(kernel_index1, 7,
+		kernel_prog->setKernelArgConst(kernel_index, 7,
 			sizeof(cl_float3), (void*)(orig));
-		kernel_prog->setKernelArgBuf(kernel_index1, 8,
+		kernel_prog->setKernelArgBuf(kernel_index, 8,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*(gsxyz * 6), (void*)(cov));
 
 		//execute
-		kernel_prog->executeKernel(kernel_index1, 3, global_size, 0);
+		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);
 		//read back
 		kernel_prog->readBuffer(sizeof(float)*(gsxyz * 6), cov, cov);
 
@@ -419,9 +442,6 @@ bool Cov::Compute()
 	//set to correct spacings
 	double spcx, spcy, spcz;
 	m_vd->GetSpacings(spcx, spcy, spcz);
-	m_center[0] *= spcx;
-	m_center[1] *= spcy;
-	m_center[2] *= spcz;
 	m_cov[0] *= spcx * spcx;
 	m_cov[1] *= spcx * spcy;
 	m_cov[2] *= spcx * spcz;
@@ -430,5 +450,14 @@ bool Cov::Compute()
 	m_cov[5] *= spcz * spcz;
 
 	return true;
+}
+
+bool Cov::Compute(bool type)
+{
+	bool result = true;
+	result = result && ComputeCenter();
+	if (type == 0)
+		result = result && ComputeCov();
+	return result;
 }
 

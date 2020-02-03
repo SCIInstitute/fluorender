@@ -1175,7 +1175,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 		if (vd && vd->GetTexture())
 		{
 			FL::Cov cover(vd);
-			if (cover.Compute())
+			if (cover.Compute(0))
 			{
 				std::vector<double> cov = cover.GetCov();
 				FLIVR::Point center = cover.GetCenter();

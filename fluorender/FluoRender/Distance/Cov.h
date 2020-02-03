@@ -54,7 +54,7 @@ namespace FL
 			return m_use_mask;
 		}
 
-		bool Compute();
+		bool Compute(bool type);//type: 0-cov; 1-center only
 
 		std::vector<double> GetCov()
 		{
@@ -81,6 +81,8 @@ namespace FL
 		float m_cov[6];//covariance matrix {xx, xy, xz, yy, yz, zz}
 		float m_center[3];//center
 
+		bool ComputeCenter();
+		bool ComputeCov();
 		bool CheckBricks();
 		bool GetInfo(FLIVR::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz);
