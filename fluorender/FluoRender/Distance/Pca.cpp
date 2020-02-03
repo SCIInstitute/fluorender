@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <utility.h>
 #include <Algorithm>
 #include <cmath>
+#include <functional>
 
 using namespace FL;
 
