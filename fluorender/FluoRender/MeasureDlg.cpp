@@ -92,7 +92,7 @@ wxListCtrl(parent, id, pos, size, style)//,
 	itemCol.SetText("Start/End Points (X, Y, Z)");
 	this->InsertColumn(7, itemCol);
 	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Volumes");
+	itemCol.SetText("Voxels");
 	this->InsertColumn(8, itemCol);
 	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
 

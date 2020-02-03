@@ -60,7 +60,6 @@ VolumeSelector::VolumeSelector() :
 	m_ortho(true),
 	m_w2d(0.0),
 	m_randv(113),
-	m_ps(false),
 	m_estimate_threshold(false),
 	//paint brush presssure
 	m_use_press(true),
@@ -204,6 +203,17 @@ void VolumeSelector::Select(double radius)
 	else
 		gm_falloff = 1.0;
 
+	//clear paint mask flags
+	m_vd->GetTexture()->enable_paint_mask();
+	if (m_mode == 1)
+	{
+		//has to update twice
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
+	}
+	else if (m_mode == 6)
+		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
+
 	//set up paint mask flags
 	std::vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (bricks->size() > 1 && (
@@ -235,17 +245,6 @@ void VolumeSelector::Select(double radius)
 			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
 		pb.Compute();
 	}
-	else
-		m_vd->GetTexture()->enable_paint_mask();
-
-	//there is some unknown problem of clearing the mask
-	if (m_mode == 1)
-	{
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
-	}
-	else if (m_mode == 6)
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 
 	//initialization
 	int hr_mode = m_hidden_removal?(m_ortho?1:2):0;
@@ -515,93 +514,6 @@ VolumeData* VolumeSelector::GetResult(bool pop)
 			m_result_vols.pop_back();
 	}
 	return vd;
-}
-
-//process current selection
-int VolumeSelector::ProcessSel(double thresh)
-{
-	m_ps = false;
-
-	if (!m_vd ||
-		!m_vd->GetTexture() ||
-		m_vd->GetTexture()->nmask()==-1)
-		return 0;
-
-	m_vd->GetVR()->return_mask();
-
-	//get all the data from original volume
-	Texture* tex_mvd = m_vd->GetTexture();
-	if (!tex_mvd) return 0;
-	Nrrd* nrrd_mvd = tex_mvd->get_nrrd(0);
-	if (!nrrd_mvd) return 0;
-	Nrrd* nrrd_mvd_mask = tex_mvd->get_nrrd(tex_mvd->nmask());
-	if (!nrrd_mvd_mask) return 0;
-	void* data_mvd = nrrd_mvd->data;
-	unsigned char* data_mvd_mask = (unsigned char*)nrrd_mvd_mask->data;
-	if (!data_mvd || (!data_mvd_mask)) return 0;
-
-	//find center
-	int res_x, res_y, res_z;
-	double spc_x, spc_y, spc_z;
-	m_vd->GetResolution(res_x, res_y, res_z);
-	m_vd->GetSpacings(spc_x, spc_y, spc_z);
-
-	m_ps_size = 0.0;
-	double nw = 0.0;
-	double w;
-	Point sump(0.0, 0.0, 0.0);
-	double value;
-	int ii, jj, kk;
-	int index;
-	for (ii=0; ii<res_x; ii++)
-		for (jj=0; jj<res_y; jj++)
-			for (kk=0; kk<res_z; kk++)
-			{
-				index = res_x*res_y*kk + res_x*jj + ii;
-				if (nrrd_mvd->type == nrrdTypeUChar)
-					value = double(((unsigned char*)data_mvd)[index]) *
-					double(data_mvd_mask[index]) / 65025.0;
-				else if (nrrd_mvd->type == nrrdTypeUShort)
-					value = double(((unsigned short*)data_mvd)[index]) *
-					m_vd->GetScalarScale() *
-					double(data_mvd_mask[index]) / 16581375.0;
-				if (value > thresh)
-				{
-					w = value>0.5?1.0:-16.0*value*value*value + 12.0*value*value;
-					sump += Point(ii, jj, kk)*w;
-					nw += w;
-					m_ps_size += 1.0;
-				}
-			}
-
-			//clear data_mvd_mask
-			size_t set_num = res_x*res_y*res_z;
-			memset(data_mvd_mask, 0, set_num);
-
-			if (nw > 0.0)
-			{
-				m_ps_center = Point(sump.x()*spc_x, sump.y()*spc_y, sump.z()*spc_z) / nw +
-					Vector(0.5*spc_x, 0.5*spc_y, 0.5*spc_z);
-				m_ps_size *= spc_x*spc_y*spc_z;
-				m_ps = true;
-				return 1;
-			}
-			else
-				return 0;
-}
-
-//get center
-int VolumeSelector::GetCenter(FLIVR::Point& p)
-{
-	p = m_ps_center;
-	return m_ps;
-}
-
-//get volume
-int VolumeSelector::GetSize(double &s)
-{
-	s = m_ps_size;
-	return m_ps;
 }
 
 //brush sets

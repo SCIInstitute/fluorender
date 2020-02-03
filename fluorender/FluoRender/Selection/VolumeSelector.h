@@ -197,10 +197,6 @@ namespace FL
 		void Select(double radius);
 		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
 		VolumeData* GetResult(bool pop);
-		//process current selection
-		int ProcessSel(double thresh);
-		int GetCenter(FLIVR::Point& p);
-		int GetSize(double& s);
 
 		//mask
 		void PopMask();
@@ -268,11 +264,6 @@ namespace FL
 
 		//a random variable
 		int m_randv;
-
-		//process selection
-		bool m_ps;
-		FLIVR::Point m_ps_center;
-		double m_ps_size;
 
 		bool m_estimate_threshold;
 
