@@ -212,12 +212,8 @@ bool Cov::ComputeCenter()
 		vol_kernel_factory_.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	int kernel_index = -1;
 	string name = "kernel_0";
-	if (kernel_prog->valid())
-		kernel_index = kernel_prog->findKernel(name);
-	else
-		kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -319,12 +315,6 @@ bool Cov::ComputeCenter()
 	m_center[1] /= sum;
 	m_center[2] /= sum;
 
-	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
-	m_center[0] *= spcx;
-	m_center[1] *= spcy;
-	m_center[2] *= spcz;
-
 	return true;
 }
 
@@ -340,12 +330,8 @@ bool Cov::ComputeCov()
 		vol_kernel_factory_.kernel(str_cl_cov);
 	if (!kernel_prog)
 		return false;
-	int kernel_index = -1;
 	string name = "kernel_1";
-	if (kernel_prog->valid())
-		kernel_index = kernel_prog->findKernel(name);
-	else
-		kernel_index = kernel_prog->createKernel(name);
+	int kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -439,20 +425,10 @@ bool Cov::ComputeCov()
 		kernel_prog->releaseAll();
 	}
 
-	//set to correct spacings
-	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
-	m_cov[0] *= spcx * spcx;
-	m_cov[1] *= spcx * spcy;
-	m_cov[2] *= spcx * spcz;
-	m_cov[3] *= spcy * spcy;
-	m_cov[4] *= spcy * spcz;
-	m_cov[5] *= spcz * spcz;
-
 	return true;
 }
 
-bool Cov::Compute(bool type)
+bool Cov::Compute(int type)
 {
 	bool result = true;
 	result = result && ComputeCenter();
