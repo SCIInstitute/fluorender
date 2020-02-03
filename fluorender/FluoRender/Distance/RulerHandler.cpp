@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompAnalyzer.h>
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
+#include <Distance/Cov.h>
+#include <Calculate/Count.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
@@ -262,41 +264,46 @@ void RulerHandler::AddPaintRulerPoint()
 {
 	if (!m_view)
 		return;
-
 	FL::VolumeSelector* selector = m_view->GetVolumeSelector();
-	if (selector->ProcessSel(0.01))
-	{
-		wxString str;
-		Point center;
-		double size;
-		selector->GetCenter(center);
-		selector->GetSize(size);
+	if (!selector)
+		return;
+	VolumeData* vd = selector->GetVolume();
+	if (!vd)
+		return;
 
-		bool new_ruler = true;
-		if (m_ruler &&
-			m_ruler->GetDisp() &&
-			!m_ruler->GetFinished())
-		{
-			m_ruler->AddPoint(center);
-			str = wxString::Format("\tv%d", m_ruler->GetNumPoint() - 1);
-			m_ruler->AddInfoNames(str);
-			str = wxString::Format("\t%.0f", size);
-			m_ruler->AddInfoValues(str);
-			new_ruler = false;
-		}
-		if (new_ruler)
-		{
-			m_ruler = new Ruler();
-			m_ruler->SetRulerType(m_type);
-			m_ruler->AddPoint(center);
-			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-			m_ruler->SetTime(m_view->m_tseq_cur_num);
-			str = "v0";
-			m_ruler->AddInfoNames(str);
-			str = wxString::Format("%.0f", size);
-			m_ruler->AddInfoValues(str);
-			m_ruler_list->push_back(m_ruler);
-		}
+	FL::Cov cover(vd);
+	cover.Compute(1);
+	FL::CountVoxels counter(vd);
+	counter.Count();
+
+	Point center = cover.GetCenter();
+	double size = counter.GetSum();
+
+	wxString str;
+	bool new_ruler = true;
+	if (m_ruler &&
+		m_ruler->GetDisp() &&
+		!m_ruler->GetFinished())
+	{
+		m_ruler->AddPoint(center);
+		str = wxString::Format("\tv%d", m_ruler->GetNumPoint() - 1);
+		m_ruler->AddInfoNames(str);
+		str = wxString::Format("\t%.0f", size);
+		m_ruler->AddInfoValues(str);
+		new_ruler = false;
+	}
+	if (new_ruler)
+	{
+		m_ruler = new Ruler();
+		m_ruler->SetRulerType(m_type);
+		m_ruler->AddPoint(center);
+		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
+		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		str = "v0";
+		m_ruler->AddInfoNames(str);
+		str = wxString::Format("%.0f", size);
+		m_ruler->AddInfoValues(str);
+		m_ruler_list->push_back(m_ruler);
 	}
 }
 
