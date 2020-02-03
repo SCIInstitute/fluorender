@@ -28,6 +28,9 @@
 
 # This is an CMake configuration file for FluoRender
 
+# to build for Win7, disable xinput
+SET(USE_XINPUT ON)
+
 cmake_minimum_required(VERSION 2.8.8)
 
 # for MSVC builds
@@ -420,7 +423,7 @@ if(WIN32)
 endif()
 
 #XInput
-if(WIN32)
+if(WIN32 AND USE_XINPUT)
 	include_directories(${FluoRender_SOURCE_DIR}/fluorender/XInput)
 	file(GLOB xip_src fluorender/XInput/*.cpp)
 	file(GLOB xip_hdr fluorender/XInput/*.h)
@@ -579,11 +582,9 @@ elseif(WIN32)
     file(GLOB wac_hdr fluorender/Wacom/*.h)
     add_library(WACUTILS_OBJ OBJECT
       ${wac_src} ${wac_hdr})
+    if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
-      #$<TARGET_OBJECTS:TYPES_OBJ>
-      #$<TARGET_OBJECTS:FLOBJECT_OBJ>
-      #$<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -604,6 +605,29 @@ elseif(WIN32)
       $<TARGET_OBJECTS:WACUTILS_OBJ>
       $<TARGET_OBJECTS:XINPUT_OBJ>
       )
+    else()
+    add_executable(FluoRender WIN32
+      ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:FLIVR_OBJ>
+      $<TARGET_OBJECTS:ANIMATORS_OBJ>
+      $<TARGET_OBJECTS:NV_OBJ>
+      $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:VIDEO_OBJ>
+      $<TARGET_OBJECTS:TRACKING_OBJ>
+      $<TARGET_OBJECTS:COMPONENTS_OBJ>
+      $<TARGET_OBJECTS:SELECTION_OBJ>
+      $<TARGET_OBJECTS:SKELETON_OBJ>
+      $<TARGET_OBJECTS:CLUSTER_OBJ>
+      $<TARGET_OBJECTS:DISTANCE_OBJ>
+      $<TARGET_OBJECTS:CALCULATE_OBJ>
+      $<TARGET_OBJECTS:GLEW_OBJ>
+      $<TARGET_OBJECTS:POLE_OBJ>
+      $<TARGET_OBJECTS:TEEM_OBJ>
+      $<TARGET_OBJECTS:WACUTILS_OBJ>
+      )
+    endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
       #$<TARGET_OBJECTS:FLIVR_OBJ>

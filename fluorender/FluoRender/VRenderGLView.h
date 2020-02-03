@@ -75,7 +75,7 @@ DEALINGS IN THE SOFTWARE.
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
 #include <Wacom/Utils.h>
-#include <XInput/XboxController.h>
+//#include <XInput/XboxController.h>
 #endif
 
 #include <openvr.h>
@@ -977,7 +977,7 @@ private:
 	int m_vr_eye_idx;//0: left; 1: right
 #ifdef _WIN32
 	vr::IVRSystem *m_vr_system;
-	XboxController* m_controller;
+	//XboxController* m_controller;
 #endif
 
 	//handle rulers
