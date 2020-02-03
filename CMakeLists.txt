@@ -30,6 +30,9 @@
 
 # to build for Win7, disable xinput
 SET(USE_XINPUT ON)
+if (USE_XINPUT)
+  add_definitions(-DUSE_XINPUT=1)
+endif()
 
 cmake_minimum_required(VERSION 2.8.8)
 
