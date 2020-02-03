@@ -49,7 +49,7 @@ using namespace std;
 
 class ImageJReader : public BaseReader
 {
-public:
+  public:
 	ImageJReader();
 	~ImageJReader();
 
@@ -90,7 +90,7 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 	bool double_equals(double a, double b) { return std::abs(a - b) < DBL_EPSILON; }
 
-private:
+  private:
 	// ImageJ related variables.
 	JVMInitializer* m_pJVMInstance;
 	jclass m_imageJ_cls;
@@ -116,7 +116,7 @@ private:
 	//time sequence id
 	wstring m_time_id;	
 
-private:	
+  private:
 	// read from imageJ
 	Nrrd* ReadFromImageJ(int i, int c, bool get_max);
 };

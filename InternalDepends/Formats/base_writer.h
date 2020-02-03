@@ -34,13 +34,13 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 #ifdef STATIC_COMPILE
-	#define nrrdWrap nrrdWrap_va
-	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
+  #define nrrdWrap nrrdWrap_va
+  #define nrrdAxisInfoSet nrrdAxisInfoSet_va
 #endif
 
 class BaseWriter
 {
-public:
+  public:
 	//BaseWriter();
 	virtual ~BaseWriter() {};
 

@@ -36,7 +36,7 @@ using namespace std;
 
 class LBLReader : public BaseReader
 {
-public:
+  public:
 	LBLReader();
 	~LBLReader();
 

@@ -40,37 +40,37 @@ DEALINGS IN THE SOFTWARE.
 
 class SettingDlg;
 class JVMInitializer {
-	public:
-		static JVMInitializer* getInstance(std::vector<std::string> args = std::vector<std::string>());
-		static void destroyJVM();
+  public:
+    static JVMInitializer* getInstance(std::vector<std::string> args = std::vector<std::string>());
+    static void destroyJVM();
 
-#ifdef _WIN32
-		static HMODULE m_jvm_dll;
-#else
+  #ifdef _WIN32
+    static HMODULE m_jvm_dll;
+  #else
     static void* m_jvm_dll;
-#endif
-		static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
-		static JNIEnv *m_pEnv;                      // Pointer to native interface
-		static JavaVMInitArgs m_VMargs;
+  #endif
+    static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
+    static JNIEnv *m_pEnv;                      // Pointer to native interface
+    static JavaVMInitArgs m_VMargs;
     
-#ifdef _WIN32
-		static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
-#else
+  #ifdef _WIN32
+    static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
+  #else
     typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args) ;
     static CreateJavaVM_t* m_createJVM_Ptr;
-#endif
+  #endif
 
-	private:
-		static JVMInitializer* m_pJVMInstance;				
+  private:
+    static JVMInitializer* m_pJVMInstance;
 
-		JVMInitializer() {};
-		~JVMInitializer() {};
-		JVMInitializer(JVMInitializer const&);
-		JVMInitializer& operator=(JVMInitializer const&);
+    JVMInitializer() {};
+    ~JVMInitializer() {};
+    JVMInitializer(JVMInitializer const&);
+    JVMInitializer& operator=(JVMInitializer const&);
 
-		static char getPathSeparator();
-		bool static create_JVM(std::vector<std::string> args);
-		bool static m_with_fiji;
+    static char getPathSeparator();
+    bool static create_JVM(std::vector<std::string> args);
+    bool static m_with_fiji;
 };
 
 #endif //_JVMINITIALIZER_H_
