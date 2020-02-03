@@ -179,7 +179,9 @@ qt5_use_modules(FUI Core Gui Widgets OpenGL)
 
 target_include_directories(FUI PUBLIC Panels)
 
-add_dependencies(FUI FLObject SceneGraph FLIVR Boost_external_download glew_external_download)
+add_dependencies(FUI FLObject SceneGraph FLIVR Boost_external_download glew_external_download Teem_external_download)
+
+link_directories(FUI ${Teem_dir}/bin)
 
 # links with OpenGL
 target_link_libraries(FUI
@@ -187,6 +189,7 @@ target_link_libraries(FUI
     SceneGraph
     FLIVR
     ${glew_LIBRARIES}
+    ${teem_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )

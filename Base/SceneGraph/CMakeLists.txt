@@ -32,7 +32,13 @@ project(SceneGraph)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Includes all the dependency header files
-include_directories(${FLObject_INCLUDES} ${FLIVR_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS} ${glew_INCLUDE_DIR})
+include_directories(${FLObject_INCLUDES}
+                    ${FLIVR_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIR}
+                    ${OPENGL_INCLUDE_DIRS}
+                    ${glew_INCLUDE_DIR}
+                    ${Teem_INCLUDE_DIR}
+                    )
 
 # The headers and source files are manually set rather than Globbed in 
 # order to give us better control of what goes in the project.
@@ -94,8 +100,12 @@ target_include_directories(SceneGraph PUBLIC Annotations
     Utilities
     )
 
+link_directories(SceneGraph ${Teem_DIR}/bin)
+
+add_dependencies(SceneGraph Teem_external_download)
+
 # Links with FlObject, FLIVR, and Boost.
-target_link_libraries(SceneGraph FLObject FLIVR ${Boost_LIBRARIES})
+target_link_libraries(SceneGraph FLObject FLIVR ${Boost_LIBRARIES} ${teem_LIBRARIES})
 
 # may not be needed.
 install(TARGETS SceneGraph

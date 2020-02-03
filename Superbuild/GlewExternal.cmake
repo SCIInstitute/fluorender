@@ -64,7 +64,7 @@ endif()
 ExternalProject_Get_Property(glew_external_download BINARY_DIR)
 ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
 
-if(MSVC)
+if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
   SET(glew_LIBRARY_DIR "${BINARY_DIR}/lib;${BINARY_DIR}/lib/Debug;${BINARY_DIR}/lib/Release" CACHE INTERNAL "")
 else()
   SET(glew_LIBRARY_DIR ${BINARY_DIR}/lib CACHE INTERNAL "")

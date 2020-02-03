@@ -47,34 +47,63 @@ set(Master_Depends ${Zlib_LIBRARY_DIR} ${LibPNG_LIBRARY_DIR})
 # include directories to be passed into the external project.
 string(REPLACE ";" "|" Master_Root "${Master_Depends}")
 
-ExternalProject_Add(Teem_external_download
-  DEPENDS ${teem_DEPENDENCIES}
-  GIT_REPOSITORY ${teem_GIT_URL}
-  GIT_TAG ${teem_GIT_TAG}
-  PATCH_COMMAND ""
-  INSTALL_DIR ""
-  UPDATE_COMMAND ""
-  INSTALL_COMMAND ""
-  LIST_SEPARATOR |
-  CMAKE_ARGS ${Teem_external_download_CMAKE_ARGS} 
-    -DCMAKE_PREFIX_PATH=${Master_Root}
-  CMAKE_CACHE_ARGS
-    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-    -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
-    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-    -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-    -DZlib_DIR:PATH=${Zlib_DIR}
-    -DLibPNG_DIR:PATH=${LibPNG_DIR}
-    -DTeem_USE_NRRD_INTERNALS:BOOL=ON
-    -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
-    -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
-	  -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
-)
+if(${GeneratorName} STREQUAL "Ninja")
+  ExternalProject_Add(Teem_external_download
+    DEPENDS ${teem_DEPENDENCIES}
+    GIT_REPOSITORY ${teem_GIT_URL}
+    GIT_TAG ${teem_GIT_TAG}
+    PATCH_COMMAND ""
+    INSTALL_DIR ""
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS
+      <BINARY_DIR>/bin/${prefix}teem${suffix}
+    LIST_SEPARATOR |
+    CMAKE_ARGS ${Teem_external_download_CMAKE_ARGS}
+      -DCMAKE_PREFIX_PATH=${Master_Root}
+    CMAKE_CACHE_ARGS
+      -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+      -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+      -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+      -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+      -DZlib_DIR:PATH=${Zlib_DIR}
+      -DLibPNG_DIR:PATH=${LibPNG_DIR}
+      -DTeem_USE_NRRD_INTERNALS:BOOL=ON
+      -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
+      -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
+            -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
+  )
+else()
+  ExternalProject_Add(Teem_external_download
+    DEPENDS ${teem_DEPENDENCIES}
+    GIT_REPOSITORY ${teem_GIT_URL}
+    GIT_TAG ${teem_GIT_TAG}
+    PATCH_COMMAND ""
+    INSTALL_DIR ""
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND ""
+    LIST_SEPARATOR |
+    CMAKE_ARGS ${Teem_external_download_CMAKE_ARGS}
+      -DCMAKE_PREFIX_PATH=${Master_Root}
+    CMAKE_CACHE_ARGS
+      -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+      -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+      -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+      -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+      -DZlib_DIR:PATH=${Zlib_DIR}
+      -DLibPNG_DIR:PATH=${LibPNG_DIR}
+      -DTeem_USE_NRRD_INTERNALS:BOOL=ON
+      -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
+      -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
+            -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
+  )
+endif()
 
 ExternalProject_Get_Property(Teem_external_download BINARY_DIR)
 
-if(MSVC)
+if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
   SET(Teem_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
 else()
   SET(Teem_DIR ${BINARY_DIR} CACHE INTERNAL "")
@@ -83,5 +112,10 @@ endif()
 set(Teem_INCLUDE_DIR "${BINARY_DIR}/include" CACHE INTERNAL "")
 
 add_library(Teem_external STATIC IMPORTED)
+
+set(teem_LIBRARIES
+  ${Teem_DIR}/bin/${prefix}teem${suffix}
+  CACHE INTERNAL ""
+)
 
 MESSAGE(STATUS "Teem_DIR: ${Teem_DIR}")
