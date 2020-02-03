@@ -303,9 +303,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_use_openvr(false),
 	m_vr_eye_offset(6.0),
 	m_vr_eye_idx(0)
-#ifdef _WIN32
-	//,
-	//m_controller(0)
+#if defined(_WIN32) && defined(USE_XINPUT)
+	,
+	m_controller(0)
 #endif
 {
 	m_glRC = sharedContext;
@@ -335,7 +335,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 		m_enable_touch = false;
 
 	//xbox controller
-	//m_controller = new XboxController(1);
+#ifdef USE_XINPUT
+	m_controller = new XboxController(1);
+#endif
 #endif
 
 	m_selector.LoadBrushSettings();
@@ -4423,9 +4425,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	}
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(USE_XINPUT)
 	//xinput controller
-	/*if (m_controller->IsConnected())
+	if (m_controller->IsConnected())
 	{
 		XINPUT_STATE xstate = m_controller->GetState();
 		double dzone = 0.2;
@@ -4539,7 +4541,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_rot_center_dirty = true;
 			refresh = true;
 		}
-	}*/
+	}
 #endif
 
 	if (set_focus)
