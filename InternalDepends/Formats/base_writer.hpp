@@ -25,26 +25,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _NRRD_WRITER_H_
-#define _NRRD_WRITER_H_
+#ifndef BASE_WRITER_HPP
+#define BASE_WRITER_HPP
 
-#include "base_writer.h"
+#include <string>
+#include <teem/nrrd.h>
 
-class NRRDWriter : public BaseWriter
+using namespace std;
+
+#ifdef STATIC_COMPILE
+  #define nrrdWrap nrrdWrap_va
+  #define nrrdAxisInfoSet nrrdAxisInfoSet_va
+#endif
+
+class BaseWriter
 {
-public:
-	NRRDWriter();
-	~NRRDWriter();
+  public:
+	//BaseWriter();
+	virtual ~BaseWriter() {};
 
-	void SetData(Nrrd* data);
-	void SetSpacings(double spcx, double spcy, double spcz);
-	void SetCompression(bool value);
-	void Save(wstring filename, int mode);
-
-private:
-	Nrrd* m_data;
-	double m_spcx, m_spcy, m_spcz;
-	bool m_use_spacings;
+	virtual void SetData(Nrrd* data) = 0;
+	virtual void SetSpacings(double spcx, double spcy, double spcz) = 0;
+	virtual void SetCompression(bool value) = 0;
+	virtual void Save(wstring filename, int mode) = 0;
 };
 
-#endif//_NRRD_WRITER_H_
+#endif

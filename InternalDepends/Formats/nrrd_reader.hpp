@@ -25,35 +25,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _IMAGEJ_READER_H_
-#define _IMAGEJ_READER_H_
+#ifndef NRRD_READER_HPP
+#define NRRD_READER_HPP
 
-#include "base_reader.h"
-#include <cstdio>
+#include "base_reader.hpp"
+#include <stdio.h>
+//#include <windows.h>
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <algorithm>
-#include <stdint.h>
-#include <cmath>
-#include <string>
-
-#include "JVMInitializer.h"
 
 using namespace std;
 
-#define READER_IMAGEJ_TYPE	9
+#define READER_NRRD_TYPE	1
 
-//extern JVMInitializer m_jvmInstance;
-
-class ImageJReader : public BaseReader
+class NRRDReader : public BaseReader
 {
-  public:
-	ImageJReader();
-	~ImageJReader();
+public:
+	NRRDReader();
+	~NRRDReader();
 
-	int GetType() { return READER_IMAGEJ_TYPE; }
+	int GetType() { return READER_NRRD_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);
@@ -62,7 +52,6 @@ class ImageJReader : public BaseReader
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
-	
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
@@ -72,10 +61,10 @@ class ImageJReader : public BaseReader
 
 	wstring GetPathName() {return m_path_name;}
 	wstring GetDataName() {return m_data_name;}
-	int GetCurTime() {return m_cur_time;}
 	int GetTimeNum() {return m_time_num;}
+	int GetCurTime() {return m_cur_time;}
 	int GetChanNum() {return m_chan_num;}
-	double GetExcitationWavelength(int chan) {return m_excitation_wavelength[chan];}
+	double GetExcitationWavelength(int chan) {return 0.0;}
 	int GetSliceNum() {return m_slice_num;}
 	int GetXSize() {return m_x_size;}
 	int GetYSize() {return m_y_size;}
@@ -88,37 +77,36 @@ class ImageJReader : public BaseReader
 	bool GetBatch() {return m_batch;}
 	int GetBatchNum() {return (int)m_batch_list.size();}
 	int GetCurBatch() {return m_cur_batch;}
-	bool double_equals(double a, double b) { return std::abs(a - b) < DBL_EPSILON; }
 
-  private:
-	// ImageJ related variables.
-	JVMInitializer* m_pJVMInstance;
-	jclass m_imageJ_cls;
-	bool m_eight_bit;
+private:
+	wstring m_data_name;
 
-	wstring m_data_name;	
-
-	bool m_slice_seq;
-	int m_time_num;
+	//4d sequence
+	struct TimeDataInfo
+	{
+		int filenumber;
+		wstring filename;
+	};
+	vector<TimeDataInfo> m_4d_seq;
 	int m_cur_time;
+
+	int m_time_num;
 	int m_chan_num;
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;
-	int* m_excitation_wavelength;
 	bool m_valid_spc;
 	double m_xspc;
 	double m_yspc;
 	double m_zspc;
 	double m_max_value;
-	double m_scalar_scale;	
+	double m_scalar_scale;
 
 	//time sequence id
-	wstring m_time_id;	
+	wstring m_time_id;
 
-  private:
-	// read from imageJ
-	Nrrd* ReadFromImageJ(int i, int c, bool get_max);
+private:
+	static bool nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 };
 
-#endif//_IMAGEJ_READER_H_
+#endif

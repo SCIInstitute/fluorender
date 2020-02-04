@@ -25,31 +25,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _MSK_WRITER_H_
-#define _MSK_WRITER_H_
+#ifndef NRRD_WRITER_HPP
+#define NRRD_WRITER_HPP
 
-#include "base_writer.h"
+#include "base_writer.hpp"
 
-class MSKWriter : public BaseWriter
+class NRRDWriter : public BaseWriter
 {
 public:
-	MSKWriter();
-	~MSKWriter();
+	NRRDWriter();
+	~NRRDWriter();
 
 	void SetData(Nrrd* data);
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void SetCompression(bool value);
-	void Save(wstring filename, int mode);//mode: 0-normal mask; 1-label mask
-
-	void SetTC(int t, int c);
+	void Save(wstring filename, int mode);
 
 private:
 	Nrrd* m_data;
 	double m_spcx, m_spcy, m_spcz;
 	bool m_use_spacings;
-
-	int m_time;
-	int m_channel;
 };
 
-#endif//_MSK_WRITER_H_
+#endif

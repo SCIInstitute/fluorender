@@ -1,10 +1,10 @@
-#ifndef _BRKXML_READER_H_
-#define _BRKXML_READER_H_
+#ifndef BRKXML_READER_HPP
+#define BRKXML_READER_HPP
 
 #include <vector>
-#include "base_reader.h"
+#include "base_reader.hpp"
 #include <FLIVR/TextureBrick.h>
-#include "tinyxml2.h"
+#include "tinyxml2.hpp"
 
 using namespace std;
 
@@ -198,4 +198,4 @@ class BRKXMLReader : public BaseReader
 	void Clear();
 };
 
-#endif//_BRKXML_READER_H_
+#endif

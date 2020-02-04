@@ -25,22 +25,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _MSK_READER_H_
-#define _MSK_READER_H_
+#ifndef LBL_READER_HPP
+#define LBL_READER_HPP
 
-#include "base_reader.h"
+#include "base_reader.hpp"
 
 using namespace std;
 
-#define READER_MSK_TYPE	0
+#define READER_LBL_TYPE	0
 
-class MSKReader : public BaseReader
+class LBLReader : public BaseReader
 {
-public:
-	MSKReader();
-	~MSKReader();
+  public:
+	LBLReader();
+	~LBLReader();
 
-	int GetType() { return READER_MSK_TYPE; }
+	int GetType() { return READER_LBL_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);
@@ -76,4 +76,4 @@ public:
 	int GetCurBatch() {return 0;}
 };
 
-#endif//_MSK_READER_H_
+#endif

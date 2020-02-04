@@ -39,7 +39,7 @@ include_directories(FLIVR
           Utilities)
 
 add_subdirectory(FLIVR)
-#add_subdirectory(Formats)
+add_subdirectory(Formats)
 #add_subdirectory(NV)
 #add_subdirectory(Wacutils)
 #add_subdirectory(XInput)

@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "oif_reader.h"
-#include "../compatibility.h"
+#include "oif_reader.hpp"
+#include <Utilities/compatibility.h>
 #include <algorithm>
 
 OIFReader::OIFReader()

@@ -25,27 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _OIF_READER_H_
-#define _OIF_READER_H_
+#ifndef IMAGEJ_READER_HPP
+#define IMAGEJ_READER_HPP
 
-#include "base_reader.h"
-#include <stdio.h>
-//#include <windows.h>
+#include "base_reader.hpp"
+#include <cstdio>
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
+#include <algorithm>
+#include <stdint.h>
+#include <cmath>
+#include <string>
+
+#include "JVMInitializer.hpp"
 
 using namespace std;
 
-#define READER_OIF_TYPE	4
+#define READER_IMAGEJ_TYPE	9
 
-class OIFReader : public BaseReader
+//extern JVMInitializer m_jvmInstance;
+
+class ImageJReader : public BaseReader
 {
-public:
-	OIFReader();
-	~OIFReader();
+  public:
+	ImageJReader();
+	~ImageJReader();
 
-	int GetType() { return READER_OIF_TYPE; }
+	int GetType() { return READER_IMAGEJ_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);
@@ -54,6 +62,7 @@ public:
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
+	
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
@@ -63,10 +72,10 @@ public:
 
 	wstring GetPathName() {return m_path_name;}
 	wstring GetDataName() {return m_data_name;}
-	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
+	int GetTimeNum() {return m_time_num;}
 	int GetChanNum() {return m_chan_num;}
-	double GetExcitationWavelength(int chan);
+	double GetExcitationWavelength(int chan) {return m_excitation_wavelength[chan];}
 	int GetSliceNum() {return m_slice_num;}
 	int GetXSize() {return m_x_size;}
 	int GetYSize() {return m_y_size;}
@@ -79,68 +88,37 @@ public:
 	bool GetBatch() {return m_batch;}
 	int GetBatchNum() {return (int)m_batch_list.size();}
 	int GetCurBatch() {return m_cur_batch;}
+	bool double_equals(double a, double b) { return std::abs(a - b) < DBL_EPSILON; }
 
-private:
-	wstring m_data_name;
-	wstring m_subdir_name;
+  private:
+	// ImageJ related variables.
+	JVMInitializer* m_pJVMInstance;
+	jclass m_imageJ_cls;
+	bool m_eight_bit;
 
-	int m_type;	//0-time data in a single file; 1-time data in a file sequence
-	typedef vector<wstring> ChannelInfo;	//slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;//channels form dataset
-	struct TimeDataInfo
-	{
-		int filenumber;		//if type is 1, file number for time data
-		wstring filename;	//if type is 1, file name for current time data
-		wstring subdirname;	//subdirectory name
-		DatasetInfo dataset;//a list of the channels
-	};
-	vector<TimeDataInfo> m_oif_info;		//time data form the complete oif dataset
-	int m_oif_t;	//current time point in oib info for reading
+	wstring m_data_name;	
 
+	bool m_slice_seq;
 	int m_time_num;
 	int m_cur_time;
 	int m_chan_num;
-	struct WavelengthInfo
-	{
-		int chan_num;
-		double wavelength;
-	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;
+	int* m_excitation_wavelength;
 	bool m_valid_spc;
 	double m_xspc;
 	double m_yspc;
 	double m_zspc;
 	double m_max_value;
-	double m_scalar_scale;
-
-private:
-	static bool oif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
-	void ReadSingleOif();
-	void ReadSequenceOif();
-	void ReadTifSequence(wstring file_name, int t=0);
-	void ReadOif();
-	void ReadOifLine(wstring oneline);
-	void ReadTiff(char* pbyData, unsigned short *val, int z);
-
-	//axis count
-	int axis_num;
-	int cur_axis;
-	//channel count
-	int chan_num;
-	int cur_chan;
-	//axis info
-	wstring axis_code;
-	wstring pix_unit;
-	wstring max_size;
-	wstring start_pos;
-	wstring end_pos;
-	wstring light_type;
+	double m_scalar_scale;	
 
 	//time sequence id
-	wstring m_time_id;
+	wstring m_time_id;	
+
+  private:
+	// read from imageJ
+	Nrrd* ReadFromImageJ(int i, int c, bool get_max);
 };
 
-#endif//_OIF_READER_H_
+#endif

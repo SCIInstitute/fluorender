@@ -25,52 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef PNG_RESOURCE_HPP
+#define PNG_RESOURCE_HPP
 
-#include <jni.h>
-#include <iostream>
+#include <wx/wx.h>
 #include <Utilities/compatibility.h>
-//#include "VRenderFrame.h"
+#include "wx/mstream.h"
 
-#ifdef __linux__
-  #include <dlfcn.h>
+#define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(icons::name ## _png, sizeof(icons::name ## _png))
+
+inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
+{
+	  wxLogNull logNo;
+      wxMemoryInputStream is(data, length);
+         return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
+}
+
 #endif
-
-#ifndef _JVMINITIALIZER_H_
-#define _JVMINITIALIZER_H_
-
-class SettingDlg;
-class JVMInitializer {
-  public:
-    static JVMInitializer* getInstance(std::vector<std::string> args = std::vector<std::string>());
-    static void destroyJVM();
-
-  #ifdef _WIN32
-    static HMODULE m_jvm_dll;
-  #else
-    static void* m_jvm_dll;
-  #endif
-    static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
-    static JNIEnv *m_pEnv;                      // Pointer to native interface
-    static JavaVMInitArgs m_VMargs;
-    
-  #ifdef _WIN32
-    static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
-  #else
-    typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args) ;
-    static CreateJavaVM_t* m_createJVM_Ptr;
-  #endif
-
-  private:
-    static JVMInitializer* m_pJVMInstance;
-
-    JVMInitializer() {};
-    ~JVMInitializer() {};
-    JVMInitializer(JVMInitializer const&);
-    JVMInitializer& operator=(JVMInitializer const&);
-
-    static char getPathSeparator();
-    bool static create_JVM(std::vector<std::string> args);
-    bool static m_with_fiji;
-};
-
-#endif //_JVMINITIALIZER_H_

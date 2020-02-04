@@ -25,29 +25,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _BASE_WRITER_H_
-#define _BASE_WRITER_H_
+#ifndef TIF_WRITER_HPP
+#define TIF_WRITER_HPP
 
-#include <string>
-#include <teem/nrrd.h>
+#include "base_writer.hpp"
 
-using namespace std;
-
-#ifdef STATIC_COMPILE
-  #define nrrdWrap nrrdWrap_va
-  #define nrrdAxisInfoSet nrrdAxisInfoSet_va
-#endif
-
-class BaseWriter
+class TIFWriter : public BaseWriter
 {
-  public:
-	//BaseWriter();
-	virtual ~BaseWriter() {};
+public:
+	TIFWriter();
+	~TIFWriter();
 
-	virtual void SetData(Nrrd* data) = 0;
-	virtual void SetSpacings(double spcx, double spcy, double spcz) = 0;
-	virtual void SetCompression(bool value) = 0;
-	virtual void Save(wstring filename, int mode) = 0;
+	void SetData(Nrrd* data);
+	void SetSpacings(double spcx, double spcy, double spcz);
+	void SetCompression(bool value);
+	void Save(wstring filename, int mode);	//mode: 0-single file
+											//1-file sequence
+
+private:
+	Nrrd* m_data;
+	double m_spcx, m_spcy, m_spcz;
+	bool m_use_spacings;
+	bool m_compression;
+
+private:
+	void SaveSingleFile(wstring filename);
+	void SaveSequence(wstring filename);
 };
 
-#endif//_BASE_WRITER_H_
+#endif
