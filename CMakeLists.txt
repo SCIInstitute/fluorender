@@ -29,7 +29,7 @@
 # This is an CMake configuration file for FluoRender
 
 # to build for Win7, disable xinput
-SET(USE_XINPUT ON)
+SET(USE_XINPUT ON CACHE BOOL "Use Xinput on Windows")
 if (USE_XINPUT)
   add_definitions(-DUSE_XINPUT=1)
 endif()
