@@ -363,6 +363,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		z << VOL_INPUTS;
 
 		//uniforms

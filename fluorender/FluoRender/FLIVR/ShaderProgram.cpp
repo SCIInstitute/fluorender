@@ -48,6 +48,7 @@ namespace FLIVR
 	int ShaderProgram::v_major_ = 4;
 	int ShaderProgram::v_minor_ = 0;
 	string ShaderProgram::glsl_version_;
+	string ShaderProgram::glsl_unroll_;
 	bool ShaderProgram::no_tex_unpack_ = false;
 
 	ShaderProgram::ShaderProgram(const string& frag_shader) :
@@ -136,6 +137,7 @@ namespace FLIVR
 			else if (v_major_ == 2)
 				oss << "#version " << 1 << v_minor_ + 1 << 0 << "\n";
 			glsl_version_ = oss.str();
+			glsl_unroll_ = "#pragma optionNV (unroll all)\n";
 
 			supported_ = glTexImage3D;
 
