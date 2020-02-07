@@ -156,7 +156,9 @@ namespace FLIVR
 
 	bool VolCalShader::create()
 	{
-		string vs = ShaderProgram::glsl_version_ + CAL_VERTEX_CODE;
+		string vs = ShaderProgram::glsl_version_ +
+			ShaderProgram::glsl_unroll_ +
+			CAL_VERTEX_CODE;
 		string fs;
 		if (emit(fs)) return true;
 		program_ = new ShaderProgram(vs, fs);
@@ -168,6 +170,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		z << VOL_INPUTS;
 		z << CAL_OUTPUTS;
 

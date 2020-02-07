@@ -654,6 +654,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		switch (type_)
 		{
 		case IMG_SHDR_DRAW_GEOMETRY:
@@ -722,6 +723,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		switch (type_)
 		{
 		case IMG_SHDR_DRAW_GEOMETRY:
@@ -803,6 +805,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		switch (type_)
 		{
 		case IMG_SHDR_DRAW_THICK_LINES:

@@ -130,6 +130,7 @@ VolShader::VolShader(
 	{
 		ostringstream z;
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		if (fog_)
 			z << VTX_SHADER_CODE_FOG;
 		else
