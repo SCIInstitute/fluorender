@@ -59,6 +59,11 @@ namespace FLIVR
 		{
 			memcpy(mp_, mp, sizeof(GLint) * 2);
 		}
+		//mouse direction
+		void set_mouse_vec(Vector &mvec)
+		{
+			mvec_ = mvec;
+		}
 
 		//set clear color
 		void set_clear_color(GLfloat clear_color[4])
@@ -232,10 +237,10 @@ namespace FLIVR
 		friend class MultiVolumeRenderer;
 
 	protected:
-		//viewport
-		GLint vp_[4];
-		//mouse position in viewport
-		GLint mp_[2];
+		GLint vp_[4];//viewport
+		GLint mp_[2];//mouse position in viewport
+		Vector mvec_;//mouse direction vector for grow selection
+
 		//clear color
 		GLfloat clear_color_[4];
 

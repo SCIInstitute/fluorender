@@ -44,7 +44,8 @@ namespace FLIVR
 	{
 	public:
 		SegShader(int type, int paint_mode, int hr_mode,
-			bool use_2d, bool shading, int peel, bool clip, bool hiqual);
+			bool use_2d, bool shading, int peel,
+			bool clip, bool hiqual, bool use_dir);
 		~SegShader();
 
 		bool create();
@@ -57,9 +58,11 @@ namespace FLIVR
 		inline int peel() {return peel_;}
 		inline bool clip() {return clip_;}
 		inline bool hiqual() {return hiqual_;}
+		inline bool use_dir() { return use_dir_; }
 
 		inline bool match(int type, int paint_mode, int hr_mode,
-			bool use_2d, bool shading, int peel, bool clip, bool hiqual)
+			bool use_2d, bool shading, int peel,
+			bool clip, bool hiqual, bool use_dir)
 		{ 
 			return (type_ == type &&
 				paint_mode_ == paint_mode &&
@@ -68,7 +71,8 @@ namespace FLIVR
 				shading_ == shading &&
 				peel_ == peel &&
 				clip_ == clip &&
-				hiqual_ == hiqual);
+				hiqual_ == hiqual &&
+				use_dir_ == use_dir);
 		}
 
 		inline ShaderProgram* program() { return program_; }
@@ -84,6 +88,7 @@ namespace FLIVR
 		int peel_;
 		bool clip_;
 		bool hiqual_;
+		bool use_dir_;
 
 		ShaderProgram* program_;
 	};
@@ -95,8 +100,10 @@ namespace FLIVR
 		~SegShaderFactory();
 		void clear();
 
-		ShaderProgram* shader(int type, int paint_mode, int hr_mode,
-			bool use_2d, bool shading, int peel, bool clip, bool hiqual);
+		ShaderProgram* shader(
+			int type, int paint_mode, int hr_mode,
+			bool use_2d, bool shading, int peel,
+			bool clip, bool hiqual, bool use_dir);
 
 	protected:
 		std::vector<SegShader*> shader_;

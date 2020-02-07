@@ -92,11 +92,6 @@ namespace FLIVR
 	"uniform vec4 loc8;//(weight_2d, post_bins, 0, 0)\n" \
 	"\n"
 
-#define SEG_UNIFORMS_PARAM_MEASURE \
-	"//SEG_UNIFORMS_PARAM_MEASURE\n" \
-	"uniform vec4 loc9;//(value_var_foff, angle_var_foff, 0, 0)\n" \
-	"\n"
-
 #define SEG_TAIL \
 	"//SEG_TAIL\n" \
 	"}\n"
@@ -283,9 +278,9 @@ namespace FLIVR
 	"		(v.x>loc7.w?1.0:(loc7.z>0.0?(v.x<loc7.w-sqrt(loc7.z)*2.12?0.0:exp(-(v.x-loc7.w)*(v.x-loc7.w)/loc7.z)):0.0));\n" \
 	"	if (stop == 0.0)\n" \
 	"		discard;\n"\
-	"\n"\
+	"\n"
 
-#define SEG_BODY_DB_GROW_BLEND_APPEND \
+#define SEG_BODY_DB_GROW_BLEND_APPEND_HEAD \
 	"	//SEG_BODY_DB_GROW_BLEND_APPEND\n" \
 	"	FragColor = (1.0-stop) * cc;\n" \
 	"	vec3 nb;\n" \
@@ -295,7 +290,17 @@ namespace FLIVR
 	"	for (int i=-1; i<2; i++)\n"\
 	"	for (int j=-1; j<2; j++)\n"\
 	"	for (int k=-1; k<2; k++)\n"\
-	"	{\n"\
+	"	{\n"
+
+#define SEG_BODY_DB_GROW_BLEND_APPEND_DIR \
+	"		//SEG_BODY_DB_GROW_BLEND_APPEND_DIR\n" \
+	"		vec3 ndir = vec3(i, j, k);\n" \
+	"		ndir = normalize(ndir);\n" \
+	"		float ang = dot(ndir, loc9.xyz);\n" \
+	"		if (ang < 0.7) continue;\n"
+
+#define SEG_BODY_DB_GROW_BLEND_APPEND_BODY \
+	"		//SEG_BODY_DB_GROW_BLEND_APPEND_BODY\n" \
 	"		nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);\n"\
 	"		m = texture(tex2, nb).x;\n" \
 	"		if (m > cc.x)\n" \
@@ -332,7 +337,8 @@ namespace FLIVR
 	"\n"
 
 	SegShader::SegShader(int type, int paint_mode, int hr_mode,
-		bool use_2d, bool shading, int peel, bool clip, bool hiqual) :
+		bool use_2d, bool shading, int peel,
+		bool clip, bool hiqual, bool use_dir) :
 	type_(type),
 	paint_mode_(paint_mode),
 	hr_mode_(hr_mode),
@@ -341,6 +347,7 @@ namespace FLIVR
 	peel_(peel),
 	clip_(clip),
 	hiqual_(hiqual),
+	use_dir_(use_dir),
 	program_(0)
 	{}
 
@@ -487,12 +494,17 @@ namespace FLIVR
 					z << SEG_BODY_DB_GROW_STOP_FUNC;
 				}
 
-				if (paint_mode_==1 ||
-					paint_mode_==2 ||
-					paint_mode_==4 ||
-					paint_mode_==5 ||
-					paint_mode_==9)
-					z << SEG_BODY_DB_GROW_BLEND_APPEND;
+				if (paint_mode_ == 1 ||
+					paint_mode_ == 2 ||
+					paint_mode_ == 4 ||
+					paint_mode_ == 5 ||
+					paint_mode_ == 9)
+				{
+					z << SEG_BODY_DB_GROW_BLEND_APPEND_HEAD;
+					if (use_dir_)
+						z << SEG_BODY_DB_GROW_BLEND_APPEND_DIR;
+					z << SEG_BODY_DB_GROW_BLEND_APPEND_BODY;
+				}
 				else if (paint_mode_==3)
 					z << SEG_BODY_DB_GROW_BLEND_ERASE;
 				break;
@@ -524,24 +536,35 @@ namespace FLIVR
 		prev_shader_ = -1;
 	}
 
-	ShaderProgram* SegShaderFactory::shader(int type, int paint_mode, int hr_mode,
-		bool use_2d, bool shading, int peel, bool clip, bool hiqual)
+	ShaderProgram* SegShaderFactory::shader(
+		int type, int paint_mode, int hr_mode,
+		bool use_2d, bool shading, int peel,
+		bool clip, bool hiqual, bool use_dir)
 	{
 		if(prev_shader_ >= 0)
 		{
-			if(shader_[prev_shader_]->match(type, paint_mode, hr_mode, use_2d, shading, peel, clip, hiqual)) 
+			if(shader_[prev_shader_]->match(
+				type, paint_mode, hr_mode,
+				use_2d, shading, peel,
+				clip, hiqual, use_dir)) 
 				return shader_[prev_shader_]->program();
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{
-			if(shader_[i]->match(type, paint_mode, hr_mode, use_2d, shading, peel, clip, hiqual)) 
+			if(shader_[i]->match(
+				type, paint_mode, hr_mode,
+				use_2d, shading, peel,
+				clip, hiqual, use_dir)) 
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
 			}
 		}
 
-		SegShader* s = new SegShader(type, paint_mode, hr_mode, use_2d, shading, peel, clip, hiqual);
+		SegShader* s = new SegShader(
+			type, paint_mode, hr_mode,
+			use_2d, shading, peel,
+			clip, hiqual, use_dir);
 		if(s->create())
 		{
 			delete s;
