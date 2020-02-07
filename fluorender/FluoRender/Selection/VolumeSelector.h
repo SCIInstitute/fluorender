@@ -203,6 +203,13 @@ namespace FL
 		void UndoMask();
 		void RedoMask();
 
+		//mouse position
+		void ResetMousePos()
+		{
+			m_mx = m_my = m_mx0 = m_my0 = -1;
+		}
+		bool GetMouseVec(int mx, int my, FLIVR::Vector &mvec);
+
 	private:
 		VRenderGLView *m_view;
 		VolumeData *m_vd;	//volume data for segmentation
@@ -269,6 +276,9 @@ namespace FL
 
 		glm::mat4 m_mv_mat;
 		glm::mat4 m_prj_mat;
+
+		int m_mx, m_my, m_mx0, m_my0;
+		FLIVR::Vector m_mvec;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

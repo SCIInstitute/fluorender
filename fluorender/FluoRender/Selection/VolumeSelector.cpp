@@ -87,16 +87,22 @@ void VolumeSelector::Segment(int mx, int my)
 	if (!m_view || !m_vd)
 		return;
 
+	//save view
+	m_mv_mat = m_view->GetDrawMat();
+	m_prj_mat = m_view->GetProjection();
+
 	//mouse position
+	FLIVR::Vector mvec;//mouse vector in data space
+	bool valid_mvec = false;
 	if (m_mode == 9)
 	{
 		GLint mp[2] = { mx, my };
 		m_vd->GetVR()->set_mouse_position(mp);
+		valid_mvec = GetMouseVec(mx, my, mvec);
+		m_vd->GetVR()->set_mouse_vec(mvec);
 	}
-
-	//save view
-	m_mv_mat = m_view->GetDrawMat();
-	m_prj_mat = m_view->GetProjection();
+	else
+		m_vd->GetVR()->set_mouse_vec(FLIVR::Vector());
 
 	FLIVR::Framebuffer* paint_buffer =
 		FLIVR::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
@@ -764,4 +770,54 @@ void VolumeSelector::RedoMask()
 
 	m_vd->GetTexture()->mask_undos_forward();
 	m_vd->GetVR()->clear_tex_mask();
+}
+
+bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
+{
+	if (!m_view || !m_vd)
+		return false;
+	if (mx >= 0 && my >= 0 &&
+		mx == m_mx && my == m_my)
+	{
+		mvec = m_mvec;
+		return true;
+	}
+	m_mx0 = m_mx;
+	m_my0 = m_my;
+	m_mx = mx;
+	m_my = my;
+	if (m_mx < 0 || m_my < 0 ||
+		m_mx0 < 0 || m_my0 < 0)
+		return false;
+	
+	int nx = m_view->GetGLSize().x;
+	int ny = m_view->GetGLSize().y;
+	Transform *tform = m_vd->GetTexture()->transform();
+	double mvmat[16];
+	tform->get_trans(mvmat);
+	glm::mat4 mv_mat2 = glm::mat4(
+		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+	glm::mat4 mv_mat = m_view->GetModelView();
+	mv_mat = mv_mat * mv_mat2;
+	Transform mv, pr;
+	mv.set(glm::value_ptr(mv_mat));
+	pr.set(glm::value_ptr(m_prj_mat));
+	mv.invert();
+	pr.invert();
+	FLIVR::Vector v;
+	FLIVR::Point p0(1.0 - double(m_mx0)*2/nx, 1.0 - double(m_my0)*2/ny, 0);
+	FLIVR::Point p1(1.0 - double(m_mx)*2/nx, 1.0 - double(m_my)*2/ny, 0);
+	//transform
+	p0 = pr.transform(p0);
+	p0 = mv.transform(p0);
+	p1 = pr.transform(p1);
+	p1 = mv.transform(p1);
+	mvec = p1 - p0;
+	mvec.normalize();
+	m_mvec = mvec;
+
+	return true;
 }

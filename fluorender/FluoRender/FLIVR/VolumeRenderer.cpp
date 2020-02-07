@@ -1173,18 +1173,21 @@ namespace FLIVR
 		// Set up shaders
 		//seg shader
 		ShaderProgram* seg_shader = 0;
+		double mvec_len = mvec_.length();
 
 		switch (type)
 		{
 		case 0://initialize
 			seg_shader = seg_shader_factory_.shader(
 				SEG_SHDR_INITIALIZE, paint_mode, hr_mode,
-				use_2d, true, depth_peel_, true, hiqual_);
+				use_2d, true, depth_peel_,
+				true, hiqual_, false);
 			break;
 		case 1://diffusion-based growing
 			seg_shader = seg_shader_factory_.shader(
 				SEG_SHDR_DB_GROW, paint_mode, hr_mode,
-				use_2d, true, depth_peel_, true, hiqual_);
+				use_2d, true, depth_peel_,
+				true, hiqual_, mvec_len>0.5);
 			break;
 		}
 
@@ -1214,6 +1217,7 @@ namespace FLIVR
 		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		seg_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
 		seg_shader->setLocalParam(6, mp_[0], vp_[3]-mp_[1], vp_[2], vp_[3]);
+		seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
 
 		//setup depth peeling
 		//if (depth_peel_)

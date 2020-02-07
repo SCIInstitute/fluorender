@@ -137,7 +137,7 @@ namespace FLIVR
 			else if (v_major_ == 2)
 				oss << "#version " << 1 << v_minor_ + 1 << 0 << "\n";
 			glsl_version_ = oss.str();
-			glsl_unroll_ = "#pragma optionNV (unroll all)\n";
+			glsl_unroll_ = "#pragma unroll\n";
 
 			supported_ = glTexImage3D;
 

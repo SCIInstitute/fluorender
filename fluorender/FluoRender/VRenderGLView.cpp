@@ -4386,7 +4386,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 		//grow
 		if (m_int_mode == 10 &&
-			wxGetMouseState().LeftIsDown())
+			wxGetMouseState().LeftIsDown() &&
+			HasFocus())
 		{
 			event.RequestMore();
 			Segment();
@@ -11023,6 +11024,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 		if (m_int_mode == 10)
 		{
+			m_selector.ResetMousePos();
 			Segment();
 			m_force_clear = true;
 			RefreshGL(27);
