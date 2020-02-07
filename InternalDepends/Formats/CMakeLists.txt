@@ -4,6 +4,7 @@ include_directories(
   ${Teem_INCLUDE_DIRS}
   ${FLIVR_INCLUDE_DIR}
   ${Boost_INCLUDE_DIR}
+  ${Qt5Xml_INCLUDE_DIRS}
 )
 
 set(HEADER_FILES  base_reader.hpp
@@ -47,8 +48,10 @@ set(SOURCES  base_reader.cpp
 set(Formats_INCLUDE_DIR ${HEADER_FILES} CACHE INTERNAL "")
 set(Formats_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
+
 add_library(Formats STATIC ${HEADER_FILES} ${SOURCES})
 
 target_link_libraries(Formats FLIVR ${teem_LIBRARIES} ${Boost_LIBRARIES})
 
 add_dependencies(Formats FLIVR Teem_external_download Boost_external_download)
+qt5_use_modules(Formats Xml)

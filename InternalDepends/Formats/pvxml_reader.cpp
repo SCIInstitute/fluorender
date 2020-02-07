@@ -26,43 +26,53 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.hpp"
-#include <wx/xml/xml.h>
+
+
+#include <QtXml>
+#include <QFile>
 #include <Utilities/compatibility.h>
 #include <fstream>
 #include <iostream>
+#include <QString>
+
+#if defined (_WIN32) || defined(__linux__)
+  #include <filesystem>
+#else
+  #include <boost/filesystem.hpp>
+#endif
 
 PVXMLReader::PVXMLReader()
 {
-	m_force_stack = false;
+  m_force_stack = false;
 
-	m_resize_type = 0;
-	m_resample_type = 0;
-	m_alignment = 0;
+  m_resize_type = 0;
+  m_resample_type = 0;
+  m_alignment = 0;
 
-	m_time_num = 0;
-	m_cur_time = -1;
-	m_chan_num = 0;
-	m_group_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
+  m_time_num = 0;
+  m_cur_time = -1;
+  m_chan_num = 0;
+  m_group_num = 0;
+  m_slice_num = 0;
+  m_x_size = 0;
+  m_y_size = 0;
 
-	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+  m_valid_spc = false;
+  m_xspc = 0.0;
+  m_yspc = 0.0;
+  m_zspc = 0.0;
 
-	m_max_value = 0.0;
-	m_scalar_scale = 1.0;
+  m_max_value = 0.0;
+  m_scalar_scale = 1.0;
 
-	m_batch = false;
-	m_cur_batch = -1;
+  m_batch = false;
+  m_cur_batch = -1;
 
-	//falgs for flipping
-	m_user_flip_x = 0;
-	m_user_flip_y = 0;
-	m_flip_x = false;
-	m_flip_y = false;
+  //falgs for flipping
+  m_user_flip_x = 0;
+  m_user_flip_y = 0;
+  m_flip_x = false;
+  m_flip_y = false;
 }
 
 PVXMLReader::~PVXMLReader()
@@ -71,204 +81,208 @@ PVXMLReader::~PVXMLReader()
 
 void PVXMLReader::SetFile(string &file)
 {
-	if (!file.empty())
-	{
-		if (!m_path_name.empty())
-			m_path_name.clear();
-		m_path_name.assign(file.length(), L' ');
-		copy(file.begin(), file.end(), m_path_name.begin());
-		m_data_name = GET_NAME(m_path_name);
-	}
-	m_id_string = m_path_name;
+  if (!file.empty())
+  {
+    if (!m_path_name.empty())
+      m_path_name.clear();
+    m_path_name.assign(file.length(), L' ');
+    copy(file.begin(), file.end(), m_path_name.begin());
+    m_data_name = GET_NAME(m_path_name);
+  }
+  m_id_string = m_path_name;
 }
 
 void PVXMLReader::SetFile(wstring &file)
 {
-	m_path_name = file;
-	m_data_name = GET_NAME(m_path_name);
-	m_id_string = m_path_name;
+  m_path_name = file;
+  m_data_name = GET_NAME(m_path_name);
+  m_id_string = m_path_name;
 }
 
 int PVXMLReader::Preprocess()
 {
-	m_pvxml_info.clear();
-	m_slice_num = 0;
-	m_chan_num = 0;
-	m_group_num = 0;
-	m_max_value = 0.0;
-	m_seq_boxes.clear();
-	m_force_stack = false;
+  m_pvxml_info.clear();
+  m_slice_num = 0;
+  m_chan_num = 0;
+  m_group_num = 0;
+  m_max_value = 0.0;
+  m_seq_boxes.clear();
+  m_force_stack = false;
 
-	//separate path and name
-	wstring path, name;
-	if (!SEP_PATH_NAME(m_path_name, path, name))
-		return READER_OPEN_FAIL;
+  //separate path and name
+  wstring path, name;
+  if (!SEP_PATH_NAME(m_path_name, path, name))
+    return READER_OPEN_FAIL;
 
-	wxXmlDocument doc;
-	if (!doc.Load(m_path_name))
-		return READER_OPEN_FAIL;
+  QDomDocument doc;
+  QFile file(QString::fromStdWString(m_path_name));
+  //wxXmlDocument doc;
+  if (!doc.setContent(&file))
+    return READER_OPEN_FAIL;
 
-	wxXmlNode *root = doc.GetRoot();
+  QDomNode root = doc.firstChild();
+  QDomElement rot = doc.firstChildElement();
+  //wxXmlNode *root = doc.GetRoot();
 
-	if (!root || root->GetName() != "PVScan")
-		return READER_FORMAT_ERROR;
+  if (!root || root->GetName() != "PVScan")
+    return READER_FORMAT_ERROR;
 
-	wxXmlNode *child = root->GetChildren();
-	while (child)
-	{
-		if (child->GetName() == "SystemConfiguration")
-			ReadSystemConfig(child);
-		else if (child->GetName() == "PVStateShard")
-		{
-			UpdateStateShard(child);
-			m_state_shard_stack.push_back(m_current_state);
-		}
-		else if (child->GetName() == "Sequence")
-			ReadSequence(child);
-		child = child->GetNext();
-	}
+  wxXmlNode *child = root->GetChildren();
+  while (child)
+  {
+    if (child->GetName() == "SystemConfiguration")
+      ReadSystemConfig(child);
+    else if (child->GetName() == "PVStateShard")
+    {
+      UpdateStateShard(child);
+      m_state_shard_stack.push_back(m_current_state);
+    }
+    else if (child->GetName() == "Sequence")
+      ReadSequence(child);
+    child = child->GetNext();
+  }
 
-	m_time_num = int(m_pvxml_info.size());
-	m_cur_time = 0;
+  m_time_num = int(m_pvxml_info.size());
+  m_cur_time = 0;
 
-	if (m_time_num == 0) return READER_EMPTY_DATA;
+  if (m_time_num == 0) return READER_EMPTY_DATA;
 
-	int i, j, k, l;
-	double x_end, y_end, z_end;
-	wstring filename;
-	bool first = true;
-	m_sep_seq = false;
-	for (i=0; i<(int)m_pvxml_info.size(); i++)
-	{
-		TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
-		int chan_num = 0;
-		for (j=0; j<(int)time_data_info->size(); j++)
-		{
-			SequenceInfo* sequence_info = &((*time_data_info)[j]);
-			m_sep_seq = m_sep_seq || sequence_info->apart;
-			for (k=0; k<(int)sequence_info->frames.size(); k++)
-			{
-				FrameInfo *frame_info = &((sequence_info->frames)[k]);
-				x_end = frame_info->x_start + frame_info->x_size * m_xspc;
-				y_end = frame_info->y_start + frame_info->y_size * m_yspc;
-				z_end = frame_info->z_start + m_zspc;
+  int i, j, k, l;
+  double x_end, y_end, z_end;
+  wstring filename;
+  bool first = true;
+  m_sep_seq = false;
+  for (i=0; i<(int)m_pvxml_info.size(); i++)
+  {
+    TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
+    int chan_num = 0;
+    for (j=0; j<(int)time_data_info->size(); j++)
+    {
+      SequenceInfo* sequence_info = &((*time_data_info)[j]);
+      m_sep_seq = m_sep_seq || sequence_info->apart;
+      for (k=0; k<(int)sequence_info->frames.size(); k++)
+      {
+        FrameInfo *frame_info = &((sequence_info->frames)[k]);
+        x_end = frame_info->x_start + frame_info->x_size * m_xspc;
+        y_end = frame_info->y_start + frame_info->y_size * m_yspc;
+        z_end = frame_info->z_start + m_zspc;
 
-				if (k==0)
-					chan_num += frame_info->channels.size();
+        if (k==0)
+          chan_num += frame_info->channels.size();
 
-				if (first)
-				{
-					m_x_min = frame_info->x_start;
-					m_y_min = frame_info->y_start;
-					m_z_min = frame_info->z_start;
-					m_x_max = x_end;
-					m_y_max = y_end;
-					m_z_max = z_end;
-					first = false;
-				}
-				else
-				{
-					if (m_sep_seq)
-					{
-						double x_extend = frame_info->x_start - x_end;
-						double y_extend = frame_info->y_start - y_end;
-						double z_extend = frame_info->z_start - z_end;
-						m_x_max = x_extend>(m_x_max-m_x_min)?m_x_min+x_extend:m_x_max;
-						m_y_max = y_extend>(m_y_max-m_y_min)?m_y_min+y_extend:m_y_max;
-						m_z_max = z_extend>(m_z_max-m_z_min)?m_z_min+z_extend:m_z_max;
-					}
-					else
-					{
-						m_x_min = frame_info->x_start<m_x_min?frame_info->x_start:m_x_min;
-						m_y_min = frame_info->y_start<m_y_min?frame_info->y_start:m_y_min;
-						m_z_min = frame_info->z_start<m_z_min?frame_info->z_start:m_z_min;
-						m_x_max = x_end>m_x_max?x_end:m_x_max;
-						m_y_max = y_end>m_y_max?y_end:m_y_max;
-						m_z_max = z_end>m_z_max?z_end:m_z_max;
-					}
-				}
+        if (first)
+        {
+          m_x_min = frame_info->x_start;
+          m_y_min = frame_info->y_start;
+          m_z_min = frame_info->z_start;
+          m_x_max = x_end;
+          m_y_max = y_end;
+          m_z_max = z_end;
+          first = false;
+        }
+        else
+        {
+          if (m_sep_seq)
+          {
+            double x_extend = frame_info->x_start - x_end;
+            double y_extend = frame_info->y_start - y_end;
+            double z_extend = frame_info->z_start - z_end;
+            m_x_max = x_extend>(m_x_max-m_x_min)?m_x_min+x_extend:m_x_max;
+            m_y_max = y_extend>(m_y_max-m_y_min)?m_y_min+y_extend:m_y_max;
+            m_z_max = z_extend>(m_z_max-m_z_min)?m_z_min+z_extend:m_z_max;
+          }
+          else
+          {
+            m_x_min = frame_info->x_start<m_x_min?frame_info->x_start:m_x_min;
+            m_y_min = frame_info->y_start<m_y_min?frame_info->y_start:m_y_min;
+            m_z_min = frame_info->z_start<m_z_min?frame_info->z_start:m_z_min;
+            m_x_max = x_end>m_x_max?x_end:m_x_max;
+            m_y_max = y_end>m_y_max?y_end:m_y_max;
+            m_z_max = z_end>m_z_max?z_end:m_z_max;
+          }
+        }
 
-				//append path
-				for (l=0; l<(int)frame_info->channels.size(); l++)
-				{
-					filename = path + frame_info->channels[l].file_name;
-					frame_info->channels[l].file_name = filename;
-				}
-			}
-		}
+        //append path
+        for (l=0; l<(int)frame_info->channels.size(); l++)
+        {
+          filename = path + frame_info->channels[l].file_name;
+          frame_info->channels[l].file_name = filename;
+        }
+      }
+    }
 
-		//correct chan num
-		if (m_sep_seq)
-		{
-			m_group_num = chan_num>m_group_num?chan_num:m_group_num;
-		}
-	}
+    //correct chan num
+    if (m_sep_seq)
+    {
+      m_group_num = chan_num>m_group_num?chan_num:m_group_num;
+    }
+  }
 
-	//make sure not divide by zero
-	m_xspc = m_xspc==0.0?1.0:m_xspc;
-	m_yspc = m_yspc==0.0?1.0:m_yspc;
-	m_zspc = m_zspc==0.0?1.0:(m_zspc==FLT_MAX?1.0:m_zspc);
+  //make sure not divide by zero
+  m_xspc = m_xspc==0.0?1.0:m_xspc;
+  m_yspc = m_yspc==0.0?1.0:m_yspc;
+  m_zspc = m_zspc==0.0?1.0:(m_zspc==FLT_MAX?1.0:m_zspc);
 
-	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
-	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
-	if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
-	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
+  m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
+  m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
+  if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
+  m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
 
-	if (m_user_flip_y == 1 ||
-		m_user_flip_y == 0)
-		m_flip_y = false;
-	else if (m_user_flip_y == -1)
-		m_flip_y = true;
-	int y0;
-	bool firsty = true;
-	bool flipy = false;
-	for (i=0; i<(int)m_pvxml_info.size(); i++)
-	{
-		TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
-		for (j=0; j<(int)time_data_info->size(); j++)
-		{
-			SequenceInfo* sequence_info = &((*time_data_info)[j]);
-			for (k=0; k<(int)sequence_info->frames.size(); k++)
-			{
-				FrameInfo *frame_info = &((sequence_info->frames)[k]);
-				if (m_sep_seq)
-				{
-					frame_info->x = 0;
-					frame_info->y = 0;
-					frame_info->z = k;
-				}
-				else
-				{
-					frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
-					frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
-					if (m_force_stack)
-						frame_info->z = k;
-					else
-						frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
-				}
-				if (m_user_flip_y==0 && !flipy)
-				{
-					if (firsty)
-					{
-						y0 = frame_info->y;
-						firsty = false;
-					}
-					else
-					{
-						if (frame_info->y > y0+int(frame_info->y_size*0.1))
-						{
-							m_flip_y = true;
-							flipy = true;
-						}
-						else if (frame_info->y < y0-int(frame_info->y_size*0.1))
-							flipy = true;
-					}
-				}
-			}
-		}
-	}
+  if (m_user_flip_y == 1 ||
+  m_user_flip_y == 0)
+    m_flip_y = false;
+  else if (m_user_flip_y == -1)
+    m_flip_y = true;
+  int y0;
+  bool firsty = true;
+  bool flipy = false;
+  for (i=0; i<(int)m_pvxml_info.size(); i++)
+  {
+    TimeDataInfo* time_data_info = &(m_pvxml_info[i]);
+    for (j=0; j<(int)time_data_info->size(); j++)
+    {
+      SequenceInfo* sequence_info = &((*time_data_info)[j]);
+      for (k=0; k<(int)sequence_info->frames.size(); k++)
+      {
+        FrameInfo *frame_info = &((sequence_info->frames)[k]);
+        if (m_sep_seq)
+        {
+          frame_info->x = 0;
+          frame_info->y = 0;
+          frame_info->z = k;
+        }
+        else
+        {
+          frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
+          frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
+          if (m_force_stack)
+            frame_info->z = k;
+          else
+            frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
+        }
+        if (m_user_flip_y==0 && !flipy)
+        {
+          if (firsty)
+          {
+            y0 = frame_info->y;
+            firsty = false;
+          }
+          else
+          {
+            if (frame_info->y > y0+int(frame_info->y_size*0.1))
+            {
+              m_flip_y = true;
+              flipy = true;
+            }
+          else if (frame_info->y < y0-int(frame_info->y_size*0.1))
+            flipy = true;
+          }
+        }
+      }
+    }
+  }
 
-	return READER_OK;
+  return READER_OK;
 }
 
 void PVXMLReader::ReadSystemConfig(wxXmlNode* systemNode)

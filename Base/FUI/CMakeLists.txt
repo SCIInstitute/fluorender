@@ -175,7 +175,7 @@ add_executable(FUI
 
 # This works like target_link_libraries, however this is how CMake can take
 # care of this automatically.
-qt5_use_modules(FUI Core Gui Widgets OpenGL)
+qt5_use_modules(FUI Core Gui Widgets Xml OpenGL)
 
 target_include_directories(FUI PUBLIC Panels)
 
