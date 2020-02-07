@@ -193,6 +193,7 @@ VolShader::VolShader(
 		if (poly_)
 		{
 			z << ShaderProgram::glsl_version_;
+			z << ShaderProgram::glsl_unroll_;
 			z << FRG_SHADER_CODE_CORE_PROFILE;
 			//output
 			s = z.str();
@@ -201,6 +202,7 @@ VolShader::VolShader(
 
 		//version info
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 		z << VOL_INPUTS;
 		if (fog_)
 			z << VOL_INPUTS_FOG;
