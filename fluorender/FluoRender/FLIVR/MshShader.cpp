@@ -254,6 +254,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 
 		//inputs
 		z << MSH_VERTEX_INPUTS_V;
@@ -303,6 +304,7 @@ namespace FLIVR
 		ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
 
 		if (type_ == 0)
 		{
