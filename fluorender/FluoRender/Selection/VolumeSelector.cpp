@@ -48,6 +48,7 @@ VolumeSelector::VolumeSelector() :
 	m_2d_weight2(0),
 	m_iter_num(20),
 	m_mode(0),
+	m_init_mask(3),
 	m_use2d(false),
 	m_update_order(true),
 	m_ini_thresh(0.0),
@@ -255,38 +256,44 @@ void VolumeSelector::Select(double radius)
 	}
 
 	//initialization
-	int hr_mode = m_hidden_removal?(m_ortho?1:2):0;
-	if ((m_mode==1 || m_mode==2) && m_estimate_threshold)
+	if (m_init_mask & 1)
 	{
-		m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
-		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
-		ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
-		if (m_iter_num>BRUSH_TOOL_ITER_WEAK)
-			ini_thresh /= 2.0;
-		m_scl_translate = ini_thresh;
+		int hr_mode = m_hidden_removal ? (m_ortho ? 1 : 2) : 0;
+		if ((m_mode == 1 || m_mode == 2) && m_estimate_threshold)
+		{
+			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
+			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
+			ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
+			if (m_iter_num > BRUSH_TOOL_ITER_WEAK)
+				ini_thresh /= 2.0;
+			m_scl_translate = ini_thresh;
+		}
+		m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 	}
-	m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 
 	//grow the selection when paint mode is select, append, erase, or invert
-	if (m_mode==1 ||
-		m_mode==2 ||
-		m_mode==3 ||
-		m_mode==4 ||
-		m_mode==9)
+	if (m_init_mask & 2)
 	{
-		//loop for growing
-		int iter, div;
-		if (m_mode == 9)
-			iter = m_iter_num / 2;
-		else
-			iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
-		div = iter / 3;
-		div = div ? div : 1;
-		for (int i=0; i<iter; i++)
-			m_vd->DrawMask(1, m_mode, 0, ini_thresh,
-				gm_falloff, scl_falloff,
-				m_scl_translate, m_w2d, 0.0,
-				m_update_order?(i%div):0);
+		if (m_mode == 1 ||
+			m_mode == 2 ||
+			m_mode == 3 ||
+			m_mode == 4 ||
+			m_mode == 9)
+		{
+			//loop for growing
+			int iter, div;
+			if (m_mode == 9)
+				iter = m_iter_num / 2;
+			else
+				iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
+			div = iter / 3;
+			div = div ? div : 1;
+			for (int i = 0; i < iter; i++)
+				m_vd->DrawMask(1, m_mode, 0, ini_thresh,
+					gm_falloff, scl_falloff,
+					m_scl_translate, m_w2d, 0.0,
+					m_update_order ? (i%div) : 0);
+		}
 	}
 
 	if (m_mode == 6)
@@ -782,6 +789,7 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 		m_mx0 >=0 && m_my0 >=0 &&
 		mx == m_mx && my == m_my)
 	{
+		//user can set a direction then stay
 		mvec = m_mvec;
 		return true;
 	}
@@ -803,7 +811,7 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	glm::mat4 mv_mat = m_view->GetModelView();
+	glm::mat4 mv_mat = m_view->GetDrawMat();
 	mv_mat = mv_mat * mv_mat2;
 	Transform mv, pr;
 	mv.set(glm::value_ptr(mv_mat));
@@ -811,14 +819,14 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 	mv.invert();
 	pr.invert();
 	FLIVR::Vector v;
-	FLIVR::Point p0(1.0 - double(m_mx0)*2/nx, 1.0 - double(m_my0)*2/ny, 0);
-	FLIVR::Point p1(1.0 - double(m_mx)*2/nx, 1.0 - double(m_my)*2/ny, 0);
+	FLIVR::Point p0(double(m_mx0)*2/nx - 1.0, 1.0 - double(m_my0)*2/ny, 0);
+	FLIVR::Point p1(double(m_mx)*2/nx - 1.0, 1.0 - double(m_my)*2/ny, 0);
 	//transform
 	p0 = pr.transform(p0);
 	p0 = mv.transform(p0);
 	p1 = pr.transform(p1);
 	p1 = mv.transform(p1);
-	mvec = p1 - p0;
+	mvec = p0 - p1;
 	mvec.normalize();
 	m_mvec = mvec;
 

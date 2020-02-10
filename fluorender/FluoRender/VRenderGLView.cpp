@@ -4390,7 +4390,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			HasFocus())
 		{
 			event.RequestMore();
+			m_selector.SetInitMask(2);
 			Segment();
+			m_selector.SetInitMask(3);
 			refresh = true;
 			start_loop = true;
 			//update

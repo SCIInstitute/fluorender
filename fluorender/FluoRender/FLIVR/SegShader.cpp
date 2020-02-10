@@ -297,7 +297,7 @@ namespace FLIVR
 	"		vec3 ndir = vec3(i, j, k);\n" \
 	"		ndir = normalize(ndir);\n" \
 	"		float ang = dot(ndir, loc9.xyz);\n" \
-	"		if (ang < 0.7) continue;\n"
+	"		if (ang < 0.5) continue;\n"
 
 #define SEG_BODY_DB_GROW_BLEND_APPEND_BODY \
 	"		//SEG_BODY_DB_GROW_BLEND_APPEND_BODY\n" \
