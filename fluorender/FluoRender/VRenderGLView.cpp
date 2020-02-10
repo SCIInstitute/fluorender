@@ -11028,6 +11028,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			Segment();
 			m_force_clear = true;
 			RefreshGL(27);
+			SetFocus();
 			return;
 		}
 		return;
