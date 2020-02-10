@@ -49,6 +49,9 @@ namespace FL
 		//modes
 		void SetMode(int mode) { m_mode = mode; }
 		int GetMode() { return m_mode; }
+		//init mask
+		void SetInitMask(int val) { m_init_mask = val; }
+		int GetInitMask() { return m_init_mask; }
 		//
 		void Set2DMask(unsigned int mask) { m_2d_mask = mask; }
 		void Set2DWeight(unsigned int weight1, unsigned int weight2)
@@ -223,6 +226,7 @@ namespace FL
 							//1-select; 2-append; 3-erase; 4-diffuse;
 							//5-flood; 6-clear; 7-all; 8-solid;
 							//9-grow from point
+		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
 
 		bool m_update_order;
