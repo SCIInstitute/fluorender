@@ -99,6 +99,8 @@ void VolumeSelector::Segment(int mx, int my)
 		GLint mp[2] = { mx, my };
 		m_vd->GetVR()->set_mouse_position(mp);
 		valid_mvec = GetMouseVec(mx, my, mvec);
+		//DBGPRINT(L"m_mode:%d\tm_mx:%d\tm_my:%d\tm_mx0:%d\tm_my0:%d\tvalid:%d\n",
+		//	m_mode, m_mx, m_my, m_mx0, m_my0, valid_mvec);
 		m_vd->GetVR()->set_mouse_vec(mvec);
 	}
 	else
@@ -777,6 +779,7 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 	if (!m_view || !m_vd)
 		return false;
 	if (mx >= 0 && my >= 0 &&
+		m_mx0 >=0 && m_my0 >=0 &&
 		mx == m_mx && my == m_my)
 	{
 		mvec = m_mvec;
