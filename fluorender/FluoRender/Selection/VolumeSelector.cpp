@@ -283,7 +283,14 @@ void VolumeSelector::Select(double radius)
 			//loop for growing
 			int iter, div;
 			if (m_mode == 9)
-				iter = m_iter_num / 2;
+			{
+				if (m_iter_num <= BRUSH_TOOL_ITER_WEAK)
+					iter = m_iter_num / 4;
+				else if (m_iter_num <= BRUSH_TOOL_ITER_NORMAL)
+					iter = m_iter_num / 2;
+				else
+					iter = m_iter_num;
+			}
 			else
 				iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			div = iter / 3;
@@ -786,12 +793,15 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 	if (!m_view || !m_vd)
 		return false;
 	if (mx >= 0 && my >= 0 &&
-		m_mx0 >=0 && m_my0 >=0 &&
-		mx == m_mx && my == m_my)
+		m_mx0 >=0 && m_my0 >=0)
 	{
-		//user can set a direction then stay
-		mvec = m_mvec;
-		return true;
+		double dist = (m_mx - mx)*(m_mx - mx) + (m_my - my)*(m_my - my);
+		if (dist < 5000.0)
+		{
+			//user can set a direction then stay
+			mvec = m_mvec;
+			return true;
+		}
 	}
 	m_mx0 = m_mx;
 	m_my0 = m_my;

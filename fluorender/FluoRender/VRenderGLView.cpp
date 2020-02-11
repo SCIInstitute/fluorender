@@ -11027,7 +11027,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		if (m_int_mode == 10)
 		{
 			m_selector.ResetMousePos();
+			m_selector.SetInitMask(1);
 			Segment();
+			m_selector.SetInitMask(3);
 			m_force_clear = true;
 			RefreshGL(27);
 			SetFocus();
