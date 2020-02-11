@@ -47,10 +47,6 @@ struct GridData
 	double wsize;
 };
 
-#define BRUSH_TOOL_ITER_WEAK	10
-#define BRUSH_TOOL_ITER_NORMAL	30
-#define BRUSH_TOOL_ITER_STRONG	60
-
 class BrushToolDlg : public wxPanel
 {
 public:

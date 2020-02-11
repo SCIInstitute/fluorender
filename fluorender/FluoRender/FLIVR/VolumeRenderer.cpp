@@ -1333,7 +1333,7 @@ namespace FLIVR
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
-			if (type == 1 && order)
+			if (num > 1 && type == 1 && order)
 				copy_mask_border(mask_id, b, order);
 
 			//test cl
