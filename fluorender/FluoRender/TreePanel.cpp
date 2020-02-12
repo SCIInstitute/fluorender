@@ -1978,8 +1978,12 @@ void DataTreeCtrl::BrushCreate()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							vrv->SetVolumeA(vd);
-							vrv->Calculate(5, group_name);
+							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							if (calculator)
+							{
+								calculator->SetVolumeA(vd);
+								calculator->CalculateGroup(5, group_name);
+							}
 						}
 					}
 				}
@@ -1993,8 +1997,12 @@ void DataTreeCtrl::BrushCreate()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							vrv->SetVolumeA(vd);
-							vrv->Calculate(5);
+							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							if (calculator)
+							{
+								calculator->SetVolumeA(vd);
+								calculator->CalculateGroup(5);
+							}
 						}
 					}
 				}
@@ -2036,8 +2044,12 @@ void DataTreeCtrl::BrushCreateInv()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							vrv->SetVolumeA(vd);
-							vrv->Calculate(cal_type, group_name);
+							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							if (calculator)
+							{
+								calculator->SetVolumeA(vd);
+								calculator->CalculateGroup(cal_type, group_name);
+							}
 						}
 					}
 				}
@@ -2051,8 +2063,12 @@ void DataTreeCtrl::BrushCreateInv()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							vrv->SetVolumeA(vd);
-							vrv->Calculate(cal_type);
+							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							if (calculator)
+							{
+								calculator->SetVolumeA(vd);
+								calculator->CalculateGroup(cal_type);
+							}
 						}
 					}
 				}

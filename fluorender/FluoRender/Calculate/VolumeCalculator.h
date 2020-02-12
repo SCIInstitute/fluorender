@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMECALCULATOR_H_
 
 #include <vector>
+#include <wx/string.h>
 
 class VolumeData;
 class VRenderFrame;

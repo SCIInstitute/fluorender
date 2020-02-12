@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
+#include <Tracking/VolCache.h>
+#include <Tracking/CellList.h>
+#include <wx/string.h>
 #include <wx/fileconf.h>
 
 class VRenderFrame;
@@ -45,8 +48,6 @@ namespace FL
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
 		void SetVrv(VRenderView* vrv) { m_vrv = vrv; }
 		void SetView(VRenderGLView* view) { m_view = view; }
-		void SetVolume(VolumeData *vd) { m_vd = vd; }
-		VolumeData* GetVolume() { return m_vd; }
 
 		//run 4d script
 		//index: 0-pre-change; 1-post-change
@@ -56,7 +57,11 @@ namespace FL
 		VRenderFrame* m_frame;
 		VRenderView* m_vrv;
 		VRenderGLView *m_view;
-		VolumeData *m_vd;
+
+		//file path for script
+		wxString m_script_output;
+		//selected labels
+		CellList m_sel_labels;
 
 	private:
 		void RunNoiseReduction(int index, wxFileConfig &fconfig);
@@ -77,8 +82,8 @@ namespace FL
 
 		//read/delete volume cache
 		//for sparse tracking
-		void ReadVolCache(FL::VolCache& vol_cache);
-		void DelVolCache(FL::VolCache& vol_cache);
+		void ReadVolCache(VolCache& vol_cache);
+		void DelVolCache(VolCache& vol_cache);
 	};
 }
 #endif//_SCRIPTPROC_H_

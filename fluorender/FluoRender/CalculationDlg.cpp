@@ -201,12 +201,12 @@ void CalculationDlg::OnCalcSub(wxCommandEvent &event)
 		if (!m_cur_view)
 			m_cur_view = vr_frame->GetView(0);
 
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(1);
-		}
+		if (!m_cur_view) return;
+		FL::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		if (!calculator) return;
+		calculator->SetVolumeA(m_vol1);
+		calculator->SetVolumeB(m_vol2);
+		calculator->CalculateGroup(1);
 	}
 }
 
@@ -233,12 +233,12 @@ void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
 		if (!m_cur_view)
 			m_cur_view = vr_frame->GetView(0);
 
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(2);
-		}
+		if (!m_cur_view) return;
+		FL::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		if (!calculator) return;
+		calculator->SetVolumeA(m_vol1);
+		calculator->SetVolumeB(m_vol2);
+		calculator->CalculateGroup(2);
 	}
 }
 
@@ -265,12 +265,12 @@ void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
 		if (!m_cur_view)
 			m_cur_view = vr_frame->GetView(0);
 
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(3);
-		}
+		if (!m_cur_view) return;
+		FL::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		if (!calculator) return;
+		calculator->SetVolumeA(m_vol1);
+		calculator->SetVolumeB(m_vol2);
+		calculator->CalculateGroup(3);
 	}
 }
 
@@ -297,12 +297,12 @@ void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
 		if (!m_cur_view)
 			m_cur_view = vr_frame->GetView(0);
 
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_cur_view->SetVolumeB(m_vol2);
-			m_cur_view->Calculate(4);
-		}
+		if (!m_cur_view) return;
+		FL::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		if (!calculator) return;
+		calculator->SetVolumeA(m_vol1);
+		calculator->SetVolumeB(m_vol2);
+		calculator->CalculateGroup(4);
 	}
 }
 
@@ -330,14 +330,14 @@ void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 		if (!m_cur_view)
 			m_cur_view = vr_frame->GetView(0);
 
-		if (m_cur_view)
-		{
-			m_cur_view->SetVolumeA(m_vol1);
-			m_vol2 = 0;
-			m_cur_view->SetVolumeB(0);
-			m_calc_b_text->Clear();
-			m_cur_view->Calculate(9);
-		}
+		if (!m_cur_view) return;
+		FL::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		if (!calculator) return;
+		calculator->SetVolumeA(m_vol1);
+		m_vol2 = 0;
+		calculator->SetVolumeB(0);
+		m_calc_b_text->Clear();
+		calculator->CalculateGroup(9);
 	}
 }
 

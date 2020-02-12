@@ -33,8 +33,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeLoader.h"
 #include "utility.h"
 #include "KernelExecutor.h"
-#include "Calculate/VolumeCalculator.h"
+#include <Calculate/VolumeCalculator.h>
 #include <Selection/VolumeSelector.h>
+#include <Script/ScriptProc.h>
 #include <Distance/Ruler.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/RulerRenderer.h>
@@ -485,6 +486,7 @@ public:
 	void DrawRulers();
 	FL::RulerList* GetRulerList();
 	FL::Ruler* GetRuler(unsigned int id);
+	FL::RulerHandler* GetRulerHandler() { return &m_ruler_handler; }
 
 	//draw highlighted comps
 	void DrawCells();
@@ -873,6 +875,9 @@ private:
 	//kernel executor
 	KernelExecutor m_kernel_executor;
 
+	//scriptor
+	FL::ScriptProc m_scriptor;
+
 	//timer
 	nv::Timer *m_timer;
 
@@ -962,11 +967,6 @@ private:
 
 	//is full screen
 	bool m_full_screen;
-
-	//file path for script
-	wxString m_script_output;
-	//selected labels
-	FL::CellList m_sel_labels;
 
 	//enable vr
 	bool m_enable_vr;
@@ -1077,30 +1077,6 @@ private:
 	void PreDraw();
 	void PostDraw();
 	void ResetEnlarge();
-
-	//run 4d script
-	//index: 0-pre-change; 1-post-change
-	void Run4DScript(int index, wxString &scriptname);
-	void RunNoiseReduction(int index, wxFileConfig &fconfig);
-	void RunSelectionTracking(int index, wxFileConfig &fconfig);
-	void RunSparseTracking(int index, wxFileConfig &fconfig);
-	void RunRandomColors(int index, wxFileConfig &fconfig);
-	void RunFetchMask(int index, wxFileConfig &fconfig);
-	void RunSaveMask(int index, wxFileConfig &fconfig);
-	void RunSaveVolume(int index, wxFileConfig &fconfig);
-	void RunCalculate(int index, wxFileConfig &fconfig);
-	void RunOpenCL(int index, wxFileConfig &fconfig);
-	void RunCompAnalysis(int index, wxFileConfig &fconfig);
-	void RunGenerateComp(int index, wxFileConfig &fconfig);
-	void RunRulerProfile(int index, wxFileConfig &fconfig);
-	void RunAddCells(int index, wxFileConfig &fconfig);
-	void RunLinkCells(int index, wxFileConfig &fconfig);
-	void RunUnlinkCells(int index, wxFileConfig &fconfig);
-
-	//read/delete volume cache
-	//for sparse tracking
-	void ReadVolCache(FL::VolCache& vol_cache);
-	void DelVolCache(FL::VolCache& vol_cache);
 
 	//brush states update
 	void SetBrush(int mode);
