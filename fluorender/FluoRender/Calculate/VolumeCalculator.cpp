@@ -27,11 +27,17 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
 #include "DataManager.h"
+#include <VRenderFrame.h>
+#include <VRenderGLView.h>
+#include <Selection/VolumeSelector.h>
 #include <wx/progdlg.h>
 
 using namespace FL;
 
 VolumeCalculator::VolumeCalculator():
+	m_frame(0),
+	m_view(0),
+	m_selector(0),
 	m_vd_a(0),
 	m_vd_b(0),
 	m_type(0)
@@ -72,6 +78,159 @@ VolumeData* VolumeCalculator::GetResult(bool pop)
 			m_vd_r.pop_back();
 	}
 	return vd;
+}
+
+void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
+{
+	if (!m_view || !m_frame)
+		return;
+
+	Calculate(type);
+	VolumeData* vd = GetResult(add);
+	VolumeData* vd_a = GetVolumeA();
+	if (vd && vd_a)
+	{
+		//clipping planes
+		vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
+		if (planes && vd->GetVR())
+			vd->GetVR()->set_planes(planes);
+		//transfer function
+		vd->Set3DGamma(vd_a->Get3DGamma());
+		vd->SetBoundary(vd_a->GetBoundary());
+		vd->SetOffset(vd_a->GetOffset());
+		vd->SetLeftThresh(vd_a->GetLeftThresh());
+		vd->SetRightThresh(vd_a->GetRightThresh());
+		FLIVR::Color col = vd_a->GetColor();
+		vd->SetColor(col);
+		vd->SetAlpha(vd_a->GetAlpha());
+		//shading
+		vd->SetShading(vd_a->GetShading());
+		double amb, diff, spec, shine;
+		vd_a->GetMaterial(amb, diff, spec, shine);
+		vd->SetMaterial(amb, diff, spec, shine);
+		//shadow
+		vd->SetShadow(vd_a->GetShadow());
+		double shadow;
+		vd_a->GetShadowParams(shadow);
+		vd->SetShadowParams(shadow);
+		//sample rate
+		vd->SetSampleRate(vd_a->GetSampleRate());
+		//2d adjusts
+		col = vd_a->GetGamma();
+		vd->SetGamma(col);
+		col = vd_a->GetBrightness();
+		vd->SetBrightness(col);
+		col = vd_a->GetHdr();
+		vd->SetHdr(col);
+		vd->SetSyncR(vd_a->GetSyncR());
+		vd->SetSyncG(vd_a->GetSyncG());
+		vd->SetSyncB(vd_a->GetSyncB());
+		//max
+		vd->SetScalarScale(vd_a->GetScalarScale());
+		vd->SetGMScale(vd_a->GetGMScale());
+		vd->SetMaxValue(vd_a->GetMaxValue());
+
+		if (type == 1 ||
+			type == 2 ||
+			type == 3 ||
+			type == 4 ||
+			type == 5 ||
+			type == 6 ||
+			type == 8 ||
+			type == 9)
+		{
+				if (add)
+				{
+					m_frame->GetDataManager()->AddVolumeData(vd);
+					//vr_frame->GetDataManager()->SetVolumeDefault(vd);
+					m_view->AddVolumeData(vd, prev_group);
+
+					if (type == 5 ||
+						type == 6 ||
+						type == 9)
+					{
+						vd_a->SetDisp(false);
+					}
+					else if (type == 1 ||
+						type == 2 ||
+						type == 3 ||
+						type == 4)
+					{
+						vd_a->SetDisp(false);
+						VolumeData* vd_b = GetVolumeB();
+						if (vd_b)
+							vd_b->SetDisp(false);
+					}
+					m_frame->UpdateList();
+					m_frame->UpdateTree(vd->GetName());
+				}
+		}
+		else if (type == 7)
+		{
+			vd_a->Replace(vd);
+			delete vd;
+			m_frame->GetPropView()->SetVolumeData(vd_a);
+		}
+		m_view->RefreshGL(5);
+	}
+}
+
+void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
+{
+	if (type == 5 ||
+		type == 6 ||
+		type == 7)
+	{
+		vector<VolumeData*> vd_list;
+		if (m_selector && m_selector->GetSelectGroup())
+		{
+			VolumeData* vd = GetVolumeA();
+			DataGroup* group = 0;
+			if (vd)
+			{
+				for (int i = 0; i < m_view->GetLayerNum(); i++)
+				{
+					TreeLayer* layer = m_view->GetLayer(i);
+					if (layer && layer->IsA() == 5)
+					{
+						DataGroup* tmp_group = (DataGroup*)layer;
+						for (int j = 0; j < tmp_group->GetVolumeNum(); j++)
+						{
+							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+							if (tmp_vd && tmp_vd == vd)
+							{
+								group = tmp_group;
+								break;
+							}
+						}
+					}
+					if (group)
+						break;
+				}
+			}
+			if (group && group->GetVolumeNum() > 1)
+			{
+				for (int i = 0; i < group->GetVolumeNum(); i++)
+				{
+					VolumeData* tmp_vd = group->GetVolumeData(i);
+					if (tmp_vd && tmp_vd->GetDisp())
+						vd_list.push_back(tmp_vd);
+				}
+				for (size_t i = 0; i < vd_list.size(); ++i)
+				{
+					SetVolumeA(vd_list[i]);
+					CalculateSingle(type, prev_group, add);
+				}
+				SetVolumeA(vd);
+			}
+			else
+				CalculateSingle(type, prev_group, add);
+		}
+		else
+			CalculateSingle(type, prev_group, add);
+	}
+	else
+		CalculateSingle(type, prev_group, add);
 }
 
 void VolumeCalculator::Calculate(int type)

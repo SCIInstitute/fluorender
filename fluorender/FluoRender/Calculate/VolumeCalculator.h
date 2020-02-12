@@ -29,15 +29,22 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMECALCULATOR_H_
 
 #include <vector>
-class VolumeData;
 
+class VolumeData;
+class VRenderFrame;
+class VRenderGLView;
 namespace FL
 {
+	class VolumeSelector;
 	class VolumeCalculator
 	{
 	public:
 		VolumeCalculator();
 		~VolumeCalculator();
+
+		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
+		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetVolumeSelector(VolumeSelector* selector) { m_selector = selector; }
 
 		void SetVolumeA(VolumeData *vd);
 		void SetVolumeB(VolumeData *vd);
@@ -49,9 +56,15 @@ namespace FL
 		VolumeData* GetVolumeB();
 		VolumeData* GetResult(bool pop);
 
+		//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
+		void CalculateGroup(int type, wxString prev_group = "", bool add = true);
+		void CalculateSingle(int type, wxString prev_group, bool add);
 		void Calculate(int type);
 
 	private:
+		VRenderFrame* m_frame;
+		VRenderGLView* m_view;
+		VolumeSelector* m_selector;
 		std::vector<VolumeData*> m_vd_r;//result volume data (stack)
 
 		VolumeData *m_vd_a;	//volume data A
