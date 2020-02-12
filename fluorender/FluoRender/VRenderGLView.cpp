@@ -355,6 +355,9 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ruler_renderer.SetRulerList(&m_ruler_list);
 	m_vp.SetView(this);
 	m_selector.SetView(this);
+	m_calculator.SetFrame((VRenderFrame*)m_frame);
+	m_calculator.SetView(this);
+	m_calculator.SetVolumeSelector(&m_selector);
 }
 
 #ifdef _WIN32
@@ -2102,162 +2105,6 @@ void VRenderGLView::SetVolumeA(VolumeData* vd)
 void VRenderGLView::SetVolumeB(VolumeData* vd)
 {
 	m_calculator.SetVolumeB(vd);
-}
-
-void VRenderGLView::CalculateSingle(int type, wxString prev_group, bool add)
-{
-	m_calculator.Calculate(type);
-	VolumeData* vd = m_calculator.GetResult(add);
-	VolumeData* vd_a = m_calculator.GetVolumeA();
-	if (vd && vd_a)
-	{
-		//clipping planes
-		vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
-		if (planes && vd->GetVR())
-			vd->GetVR()->set_planes(planes);
-		//transfer function
-		vd->Set3DGamma(vd_a->Get3DGamma());
-		vd->SetBoundary(vd_a->GetBoundary());
-		vd->SetOffset(vd_a->GetOffset());
-		vd->SetLeftThresh(vd_a->GetLeftThresh());
-		vd->SetRightThresh(vd_a->GetRightThresh());
-		FLIVR::Color col = vd_a->GetColor();
-		vd->SetColor(col);
-		vd->SetAlpha(vd_a->GetAlpha());
-		//shading
-		vd->SetShading(vd_a->GetShading());
-		double amb, diff, spec, shine;
-		vd_a->GetMaterial(amb, diff, spec, shine);
-		vd->SetMaterial(amb, diff, spec, shine);
-		//shadow
-		vd->SetShadow(vd_a->GetShadow());
-		double shadow;
-		vd_a->GetShadowParams(shadow);
-		vd->SetShadowParams(shadow);
-		//sample rate
-		vd->SetSampleRate(vd_a->GetSampleRate());
-		//2d adjusts
-		col = vd_a->GetGamma();
-		vd->SetGamma(col);
-		col = vd_a->GetBrightness();
-		vd->SetBrightness(col);
-		col = vd_a->GetHdr();
-		vd->SetHdr(col);
-		vd->SetSyncR(vd_a->GetSyncR());
-		vd->SetSyncG(vd_a->GetSyncG());
-		vd->SetSyncB(vd_a->GetSyncB());
-		//max
-		vd->SetScalarScale(vd_a->GetScalarScale());
-		vd->SetGMScale(vd_a->GetGMScale());
-		vd->SetMaxValue(vd_a->GetMaxValue());
-
-		if (type == 1 ||
-			type == 2 ||
-			type == 3 ||
-			type == 4 ||
-			type == 5 ||
-			type == 6 ||
-			type == 8 ||
-			type == 9)
-		{
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame)
-			{
-				if (add)
-				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
-					//vr_frame->GetDataManager()->SetVolumeDefault(vd);
-					AddVolumeData(vd, prev_group);
-
-					if (type == 5 ||
-						type == 6 ||
-						type == 9)
-					{
-						vd_a->SetDisp(false);
-					}
-					else if (type == 1 ||
-						type == 2 ||
-						type == 3 ||
-						type == 4)
-					{
-						vd_a->SetDisp(false);
-						VolumeData* vd_b = m_calculator.GetVolumeB();
-						if (vd_b)
-							vd_b->SetDisp(false);
-					}
-					vr_frame->UpdateList();
-					vr_frame->UpdateTree(vd->GetName());
-				}
-			}
-		}
-		else if (type == 7)
-		{
-			vd_a->Replace(vd);
-			delete vd;
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame)
-				vr_frame->GetPropView()->SetVolumeData(vd_a);
-		}
-		RefreshGL(5);
-	}
-}
-
-void VRenderGLView::Calculate(int type, wxString prev_group, bool add)
-{
-	if (type == 5 ||
-		type == 6 ||
-		type == 7)
-	{
-		vector<VolumeData*> vd_list;
-		if (m_selector.GetSelectGroup())
-		{
-			VolumeData* vd = m_calculator.GetVolumeA();
-			DataGroup* group = 0;
-			if (vd)
-			{
-				for (int i = 0; i<GetLayerNum(); i++)
-				{
-					TreeLayer* layer = GetLayer(i);
-					if (layer && layer->IsA() == 5)
-					{
-						DataGroup* tmp_group = (DataGroup*)layer;
-						for (int j = 0; j<tmp_group->GetVolumeNum(); j++)
-						{
-							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
-							if (tmp_vd && tmp_vd == vd)
-							{
-								group = tmp_group;
-								break;
-							}
-						}
-					}
-					if (group)
-						break;
-				}
-			}
-			if (group && group->GetVolumeNum()>1)
-			{
-				for (int i = 0; i<group->GetVolumeNum(); i++)
-				{
-					VolumeData* tmp_vd = group->GetVolumeData(i);
-					if (tmp_vd && tmp_vd->GetDisp())
-						vd_list.push_back(tmp_vd);
-				}
-				for (size_t i = 0; i<vd_list.size(); ++i)
-				{
-					m_calculator.SetVolumeA(vd_list[i]);
-					CalculateSingle(type, prev_group, add);
-				}
-				m_calculator.SetVolumeA(vd);
-			}
-			else
-				CalculateSingle(type, prev_group, add);
-		}
-		else
-			CalculateSingle(type, prev_group, add);
-	}
-	else
-		CalculateSingle(type, prev_group, add);
 }
 
 //draw out the framebuffer after composition
@@ -5535,7 +5382,7 @@ void VRenderGLView::RunNoiseReduction(int index, wxFileConfig &fconfig)
 		if (vr_frame && vr_frame->GetNoiseCancellingDlg())
 			vr_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
 		//delete
-		Calculate(6, "", false);
+		m_calculator.CalculateGroup(6, "", false);
 	}
 }
 
@@ -5938,15 +5785,15 @@ void VRenderGLView::RunCalculate(int index, wxFileConfig &fconfig)
 	SetVolumeA(vol_a);
 	SetVolumeB(vol_b);
 	if (sOper == "subtract")
-		Calculate(1, "", false);
+		m_calculator.CalculateGroup(1, "", false);
 	else if (sOper == "add")
-		Calculate(2, "", false);
+		m_calculator.CalculateGroup(2, "", false);
 	else if (sOper == "divide")
-		Calculate(3, "", false);
+		m_calculator.CalculateGroup(3, "", false);
 	else if (sOper == "colocate")
-		Calculate(4, "", false);
+		m_calculator.CalculateGroup(4, "", false);
 	else if (sOper == "fill")
-		Calculate(9, "", false);
+		m_calculator.CalculateGroup(9, "", false);
 }
 
 void VRenderGLView::RunOpenCL(int index, wxFileConfig &fconfig)

@@ -318,6 +318,13 @@ file(GLOB sel_hdr fluorender/FluoRender/Selection/*.h)
 add_library(SELECTION_OBJ OBJECT
   ${sel_src} ${sel_hdr})
 
+# Script
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Script)
+file(GLOB scr_src fluorender/FluoRender/Script/*.cpp)
+file(GLOB scr_hdr fluorender/FluoRender/Script/*.h)
+add_library(SCRIPT_OBJ OBJECT
+  ${scr_src} ${scr_hdr})
+
 # Cluster
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Cluster)
 file(GLOB clstr_src fluorender/FluoRender/Cluster/*.cpp)
@@ -503,6 +510,7 @@ if(APPLE)
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
     $<TARGET_OBJECTS:SKELETON_OBJ>
+    $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
@@ -536,6 +544,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:TRACKING_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
+    $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SKELETON_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
@@ -599,6 +608,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:SKELETON_OBJ>
+      $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
@@ -622,6 +632,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
       $<TARGET_OBJECTS:SKELETON_OBJ>
+      $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>

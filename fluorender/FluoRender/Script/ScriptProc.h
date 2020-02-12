@@ -28,6 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
+#include <wx/fileconf.h>
+
+class VRenderFrame;
+class VRenderView;
 class VRenderGLView;
 class VolumeData;
 namespace FL
@@ -38,15 +42,43 @@ namespace FL
 		ScriptProc();
 		~ScriptProc();
 
+		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
+		void SetVrv(VRenderView* vrv) { m_vrv = vrv; }
 		void SetView(VRenderGLView* view) { m_view = view; }
 		void SetVolume(VolumeData *vd) { m_vd = vd; }
 		VolumeData* GetVolume() { return m_vd; }
 
+		//run 4d script
+		//index: 0-pre-change; 1-post-change
+		void Run4DScript(int index, wxString &scriptname);
+
 	private:
+		VRenderFrame* m_frame;
+		VRenderView* m_vrv;
 		VRenderGLView *m_view;
 		VolumeData *m_vd;
 
 	private:
+		void RunNoiseReduction(int index, wxFileConfig &fconfig);
+		void RunSelectionTracking(int index, wxFileConfig &fconfig);
+		void RunSparseTracking(int index, wxFileConfig &fconfig);
+		void RunRandomColors(int index, wxFileConfig &fconfig);
+		void RunFetchMask(int index, wxFileConfig &fconfig);
+		void RunSaveMask(int index, wxFileConfig &fconfig);
+		void RunSaveVolume(int index, wxFileConfig &fconfig);
+		void RunCalculate(int index, wxFileConfig &fconfig);
+		void RunOpenCL(int index, wxFileConfig &fconfig);
+		void RunCompAnalysis(int index, wxFileConfig &fconfig);
+		void RunGenerateComp(int index, wxFileConfig &fconfig);
+		void RunRulerProfile(int index, wxFileConfig &fconfig);
+		void RunAddCells(int index, wxFileConfig &fconfig);
+		void RunLinkCells(int index, wxFileConfig &fconfig);
+		void RunUnlinkCells(int index, wxFileConfig &fconfig);
+
+		//read/delete volume cache
+		//for sparse tracking
+		void ReadVolCache(FL::VolCache& vol_cache);
+		void DelVolCache(FL::VolCache& vol_cache);
 	};
 }
 #endif//_SCRIPTPROC_H_
