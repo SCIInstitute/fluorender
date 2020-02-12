@@ -373,8 +373,8 @@ public:
 	{if (m_glview) m_glview->SetVolumeA(vd);}
 	void SetVolumeB(VolumeData* vd)
 	{if (m_glview) m_glview->SetVolumeB(vd);}
-	void Calculate(int type, wxString prev_group="")
-	{if (m_glview) return m_glview->Calculate(type, prev_group);}
+	//void Calculate(int type, wxString prev_group="")
+	//{if (m_glview) return m_glview->Calculate(type, prev_group);}
 
 	//set clip mode
 	void SetClipMode(int mode)
