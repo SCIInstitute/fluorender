@@ -616,8 +616,8 @@ void ScriptProc::RunCalculate(int index, wxFileConfig &fconfig)
 		return;
 
 	//calculate
-	m_view->SetVolumeA(vol_a);
-	m_view->SetVolumeB(vol_b);
+	calculator->SetVolumeA(vol_a);
+	calculator->SetVolumeB(vol_b);
 	if (sOper == "subtract")
 		calculator->CalculateGroup(1, "", false);
 	else if (sOper == "add")

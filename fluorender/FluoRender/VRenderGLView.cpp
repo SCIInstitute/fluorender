@@ -224,7 +224,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_rot_axis(0),
 	m_movie_seq(0),
 	m_rewind(false),
-	m_fr_length(0),
 	m_stages(0),
 	m_4d_rewind(false),
 	//movie frame properties
@@ -4485,7 +4484,6 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 	m_rot_axis = rot_axis;
 	m_cap_file = cap_file;
 	m_rewind = rewind;
-	//m_fr_length = len;
 
 	m_movie_seq = 0;
 	switch (m_rot_axis)
@@ -4535,9 +4533,6 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
 			+ GETSLASH() + m_bat_folder + "_folder";
 		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 	}
-
-	//wxString s_fr_length = wxString ::Format("%d", end_frame);
-	//m_fr_length = (int)s_fr_length.length();
 }
 
 void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
@@ -4554,9 +4549,6 @@ void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end
 	VRenderFrame* vframe = (VRenderFrame*)m_frame;
 	if (vframe && vframe->GetSettingDlg())
 		m_run_script = vframe->GetSettingDlg()->GetRunScript();
-
-	//wxString s_fr_length = wxString ::Format("%d", end_frame);
-	//m_fr_length = (int)s_fr_length.length();
 }
 
 void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
@@ -4569,9 +4561,6 @@ void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end
 	m_capture = true;
 	m_movie_seq = begin_frame;
 	m_4d_rewind = rewind;
-
-	//wxString s_fr_length = wxString ::Format("%d", end_frame);
-	//m_fr_length = (int)s_fr_length.length();
 }
 
 void VRenderGLView::SetParams(double t)
@@ -4890,7 +4879,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	VolumeData* cur_vd_save = m_cur_vol;
 
 	//run pre-change script
-	if (run_script)
+	if (run_script && m_run_script)
 		m_scriptor.Run4DScript(0, m_script_file);
 
 	//change time frame
@@ -4905,7 +4894,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	}
 
 	//run post-change script
-	if (run_script)
+	if (run_script && m_run_script)
 		m_scriptor.Run4DScript(1, m_script_file);
 
 	//restore currently selected volume
