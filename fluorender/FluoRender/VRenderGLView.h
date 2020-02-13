@@ -827,7 +827,6 @@ private:
 	int m_rot_axis; //1-X; 2-Y; 3-Z;
 	int m_movie_seq;
 	bool m_rewind;
-	int m_fr_length;
 	int m_stages; //0-moving to start angle; 1-moving to end; 2-rewind
 	bool m_4d_rewind;
 
