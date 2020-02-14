@@ -1,20 +1,19 @@
-#define KX 3
-#define KY 3
-#define KZ 3
 #define TH 0.1
-bool check_loop(bool loop[])
+bool check_a(bool nbs[], bool ext[])
 {
-	int count = loop[0]?1:0;
-	int count_chg = 0;
-	for (int i=1; i<8; ++i)
-	{
-		count += loop[i]?1:0;
-		if (!loop[i-1] && loop[i])
-			count_chg++;
-	}
-	if (!loop[7] && loop[0])
-		count_chg++;
-	return count>2 && count<8 && count_chg==1;
+	if (nbs[14] && !nbs[0] && !nbs[3] && !nbs[6] && !nbs[9] && !nbs[12] && !nbs[15] && !nbs[18] && !nbs[21] && !nbs[24])
+		return true;
+	if (nbs[12] && ext[0] && !nbs[2] && !nbs[5] && !nbs[8] && !nbs[11] && !nbs[14] && !nbs[17] && !nbs[20] && !nbs[23] && !nbs[26])
+		return true;
+	if (nbs[4] && !nbs[18] && !nbs[19] && !nbs[20] && !nbs[21] && !nbs[22] && !nbs[23] && !nbs[24] && !nbs[25] && !nbs[26])
+		return true;
+	if (nbs[22] && ext[5] && !nbs[0] && !nbs[1] && !nbs[2] && !nbs[3] && !nbs[4] && !nbs[5] && !nbs[6] && !nbs[7] && !nbs[8])
+		return true;
+	if (nbs[16] && !nbs[0] && !nbs[1] && !nbs[2] && !nbs[9] && !nbs[10] && !nbs[11] && !nbs[18] && !nbs[19] && !nbs[20])
+		return true;
+	if (nbs[10] && ext[2] && !nbs[6] && !nbs[7] && !nbs[8] && !nbs[15] && !nbs[16] && !nbs[17] && !nbs[24] && !nbs[25] && !nbs[26])
+		return true;
+	return false;
 }
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
@@ -32,64 +31,49 @@ __kernel void kernel_main(
 	float value = read_imagef(data, samp, coord).x;
 	if (value < TH)
 		return;
-	bool nbs[KX*KY*KZ];
+	bool nbs[27];
+	bool ext[6];
 	int4 kc;
 	float dvalue;
 	int i, j, k;
 	int count = 0;
-	for (i=0; i<KX; ++i)
-	for (j=0; j<KY; ++j)
-	for (k=0; k<KZ; ++k)
+	for (k=0; k<3; ++k)
+	for (j=0; j<3; ++j)
+	for (i=0; i<3; ++i)
 	{
-		kc = (int4)(coord.x+(i-KX/2),
-				coord.y+(j-KY/2),
-				coord.z+(k-KZ/2), 1);
+		kc = (int4)(coord.x+(i-1),
+				coord.y+(j-1),
+				coord.z+(k-1), 1);
 		dvalue = read_imagef(data, samp, kc).x;
 		nbs[count] = dvalue>=TH?true:false;
 		count++;
 	}
+	//extended points
+	kc = (int4)(coord.x-2, coord.y, coord.z, 1);
+	dvalue = read_imagef(data, samp, kc).x;
+	ext[0] = dvalue>=TH?true:false;
+	kc = (int4)(coord.x+2, coord.y, coord.z, 1);
+	dvalue = read_imagef(data, samp, kc).x;
+	ext[1] = dvalue>=TH?true:false;
+	kc = (int4)(coord.x, coord.y-2, coord.z, 1);
+	dvalue = read_imagef(data, samp, kc).x;
+	ext[2] = dvalue>=TH?true:false;
+	kc = (int4)(coord.x, coord.y+2, coord.z, 1);
+	dvalue = read_imagef(data, samp, kc).x;
+	ext[3] = dvalue>=TH?true:false;
+	kc = (int4)(coord.x, coord.y, coord.z-2, 1);
+	dvalue = read_imagef(data, samp, kc).x;
+	ext[4] = dvalue>=TH?true:false;
+	kc = (int4)(coord.x, coord.y, coord.z+2, 1);
+	dvalue = read_imagef(data, samp, kc).x;
+	ext[5] = dvalue>=TH?true:false;
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	//check 5 loops
-	bool loop[8];
-	//first
-	loop[0] = nbs[1]; loop[1] = nbs[4]; loop[2] = nbs[7]; loop[3] = nbs[16];
-	loop[4] = nbs[25]; loop[5] = nbs[22]; loop[6] = nbs[19]; loop[7] = nbs[10];
-	if (!check_loop(loop))
+	//check 4 cases
+	if (check_a(nbs, ext))
 	{
-		result[index] = value*255.0;
+		result[index] = 0.0;
 		return;
 	}
-	//second
-	loop[0] = nbs[0]; loop[1] = nbs[3]; loop[2] = nbs[6]; loop[3] = nbs[16];
-	loop[4] = nbs[26]; loop[5] = nbs[23]; loop[6] = nbs[20]; loop[7] = nbs[10];
-	if (!check_loop(loop))
-	{
-		result[index] = value*255.0;
-		return;
-	}
-	//third
-	loop[0] = nbs[9]; loop[1] = nbs[12]; loop[2] = nbs[15]; loop[3] = nbs[16];
-	loop[4] = nbs[17]; loop[5] = nbs[14]; loop[6] = nbs[11]; loop[7] = nbs[10];
-	if (!check_loop(loop))
-	{
-		result[index] = value*255.0;
-		return;
-	}
-	//fourth
-	loop[0] = nbs[18]; loop[1] = nbs[21]; loop[2] = nbs[24]; loop[3] = nbs[16];
-	loop[4] = nbs[8]; loop[5] = nbs[5]; loop[6] = nbs[2]; loop[7] = nbs[10];
-	if (!check_loop(loop))
-	{
-		result[index] = value*255.0;
-		return;
-	}
-	//fifth
-	loop[0] = nbs[3]; loop[1] = nbs[4]; loop[2] = nbs[5]; loop[3] = nbs[14];
-	loop[4] = nbs[23]; loop[5] = nbs[22]; loop[6] = nbs[21]; loop[7] = nbs[12];
-	if (!check_loop(loop))
-	{
-		result[index] = value*255.0;
-		return;
-	}
-	result[index] = 0.0;
+
+	result[index] = value*255.0;
 }
