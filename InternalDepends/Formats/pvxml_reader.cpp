@@ -33,8 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Utilities/compatibility.h>
 #include <fstream>
 #include <iostream>
-#include <string_view>
-#include <QString>
+#include <charconv>
 
 #include <pugixml.hpp>
 
@@ -344,49 +343,57 @@ void PVXMLReader::ReadKey(const pugi::xml_node& keyNode)
     double dval;
 
     //THIS COULD BE VERY WRONG
-    std::string_view strKey = keyNode.child("key").text().get();
-    std::string_view strValue = keyNode.child("value").text().get();
+    std::string strKey = std::string(keyNode.child("key").text().get());
+    std::string strValue = std::string(keyNode.child("value").text().get());
     //wxString strKey = keyNode->GetAttribute("key");
     //wxString strValue = keyNode->GetAttribute("value");
 
 	if (strKey == "xYStageGridIndex")
 	{
-		strValue.ToLong(&ival);
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
 		m_current_state.grid_index = ival;
 	}
 	else if (strKey == "xYStageGridXIndex")
 	{
-		strValue.ToLong(&ival);
-		m_current_state.grid_index_x = ival;
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
+        m_current_state.grid_index_x = ival;
 	}
 	else if (strKey == "xYStageGridYIndex")
 	{
-		strValue.ToLong(&ival);
-		m_current_state.grid_index_y = ival;
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
+        m_current_state.grid_index_y = ival;
 	}
 	else if (strKey == "positionCurrent_XAxis")
 	{
-		strValue.ToDouble(&dval);
-		m_current_state.pos_x = dval;
+        //strValue.ToDouble(&dval);
+        dval = std::stod(strValue);
+        m_current_state.pos_x = dval;
 	}
 	else if (strKey == "positionCurrent_YAxis")
 	{
-		strValue.ToDouble(&dval);
-		m_current_state.pos_y = dval;
+        //strValue.ToDouble(&dval);
+        dval = std::stod(strValue);
+        m_current_state.pos_y = dval;
 	}
 	else if (strKey == "positionCurrent_ZAxis")
 	{
-		int pos = strValue.Find(',');
-		if (pos == wxNOT_FOUND)
+        //int pos = strValue.Find(',');
+        std::string::size_type pos = strValue.find(',');
+        if (pos == std::string::npos)
 		{
-			strValue.ToDouble(&dval);
+            //strValue.ToDouble(&dval);
+            dval = std::stod(strValue);
 			m_current_state.pos_z = dval;
 		}
 		else
 		{
 			m_current_state.pos_z = 0.0;
 			do
-			{
+            {
+                //TODO: What does Left and Right do?
 				strValue.Left(pos).ToDouble(&dval);
 				m_current_state.pos_z += dval;
 				strValue = strValue.Right(strValue.Length()-pos-1);
@@ -403,28 +410,33 @@ void PVXMLReader::ReadKey(const pugi::xml_node& keyNode)
 	}
 	else if (strKey == "zDevice")
 	{
-		strValue.ToLong(&ival);
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
 		m_current_state.z_device = ival;
 	}
 	else if (strKey == "pixelsPerLine")
 	{
-		strValue.ToLong(&ival);
-		m_current_state.ppl = ival;
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
+        m_current_state.ppl = ival;
 	}
 	else if (strKey == "linesPerFrame")
 	{
-		strValue.ToLong(&ival);
-		m_current_state.lpf = ival;
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
+        m_current_state.lpf = ival;
 	}
 	else if (strKey == "micronsPerPixel_XAxis")
 	{
-		strValue.ToDouble(&dval);
-		m_current_state.mpp_x = dval;
+        //strValue.ToDouble(&dval);
+        dval = std::stod(strValue);
+        m_current_state.mpp_x = dval;
 	}
 	else if (strKey == "micronsPerPixel_YAxis")
 	{
-		strValue.ToDouble(&dval);
-		m_current_state.mpp_y = dval;
+        //strValue.ToDouble(&dval);
+        dval = std::stod(strValue);
+        m_current_state.mpp_y = dval;
 	}
 	else if (strKey == "micronsPerPixel")
 	{
@@ -432,35 +444,41 @@ void PVXMLReader::ReadKey(const pugi::xml_node& keyNode)
 	}
 	else if (strKey == "bitDepth")
 	{
-		strValue.ToLong(&ival);
-		m_current_state.bit_depth = ival;
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
+        m_current_state.bit_depth = ival;
 	}
 	else if (strKey == "seqType")
 	{
-		strValue.ToLong(&ival);
-		m_current_state.seq_type = ival;
+        //strValue.ToLong(&ival);
+        ival = std::stoi(strValue);
+        m_current_state.seq_type = ival;
 	}
 }
 
-void PVXMLReader::ReadIndexedKey(const pugi::xml_node& keyNode, wxString &key)
+void PVXMLReader::ReadIndexedKey(const pugi::xml_node& keyNode, const std::string &key)
 {
 	double dval;
 
 	if (key == "positionCurrent")
-	{
-		wxXmlNode *child = keyNode->GetChildren();
-		while (child)
+    {
+        //wxXmlNode *child = keyNode->GetChildren();
+        for(const auto& child : keyNode.children())
+        //while (child)
 		{
-			wxString child_name = child->GetName();
+            std::string child_name = std::string(child.name());
 			if (child_name == "SubindexedValues")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				wxXmlNode *gchild = child->GetChildren();
-				while (gchild)
+                std::string strIndex = child->GetAttribute("index");
+                //wxXmlNode *gchild = child->GetChildren();
+                for(const auto& gchild : child.children())
+                //while (gchild)
 				{
-					wxString strSubIndex = gchild->GetAttribute("subindex");
-					wxString strValue = gchild->GetAttribute("value");
-					if (strSubIndex == "0")
+                    //wxString strSubIndex = gchild->GetAttribute("subindex");
+                    //wxString strValue = gchild->GetAttribute("value");
+                    std::string strSubIndex = gchild->GetAttribute("subindex");
+                    std::string strValue = gchild->GetAttribute("value");
+                    if (strSubIndex == "0")
 					{
 						if (strIndex == "XAxis")
 						{

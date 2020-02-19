@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define PVXML_READER_HPP
 
 #include <vector>
+#include <string>
 #include "base_reader.hpp"
 
 namespace pugi
@@ -219,7 +220,7 @@ private:
 	//0:auto; -1:flip; 1:no flip
 	int m_user_flip_x;
 	int m_user_flip_y;
-	//actual flags for flipping
+    //actual flags for flipping
 	bool m_flip_x;
 	bool m_flip_y;
 
@@ -229,10 +230,10 @@ private:
     void ReadSystemConfig(const pugi::xml_node &systemNode);
     void UpdateStateShard(const pugi::xml_node &stateNode);
     void ReadKey(const pugi::xml_node &keyNode);
-    void ReadIndexedKey(const pugi::xml_node &keyNode, wxString &key);
+    void ReadIndexedKey(const pugi::xml_node &keyNode, const std::string &key);
     void ReadSequence(const pugi::xml_node &seqNode);
     void ReadFrame(const pugi::xml_node &frameNode);
-	void ReadTiff(char* pbyData, unsigned short *val);
+    void ReadTiff(char* pbyData, unsigned short *val);
 };
 
 #endif
