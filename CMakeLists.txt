@@ -104,6 +104,7 @@ include_directories(${glm_INCLUDE_DIR})
 include_directories(${pole_INCLUDE_DIR})
 include_directories(${libtiff_INCLUDE_DIR})
 include_directories(${glew_INCLUDE_DIR})
+include_directories(${pugi_INCLUDE_DIR})
 
 add_subdirectory(InternalDepends)
 add_subdirectory(Base)

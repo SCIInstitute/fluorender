@@ -33,7 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Utilities/compatibility.h>
 #include <fstream>
 #include <iostream>
+#include <string_view>
 #include <QString>
+
+#include <pugixml.hpp>
 
 #if defined (_WIN32) || defined(__linux__)
   #include <filesystem>
@@ -114,20 +117,41 @@ int PVXMLReader::Preprocess()
   if (!SEP_PATH_NAME(m_path_name, path, name))
     return READER_OPEN_FAIL;
 
-  QDomDocument doc;
-  QFile file(QString::fromStdWString(m_path_name));
+  //QDomDocument doc;
   //wxXmlDocument doc;
-  if (!doc.setContent(&file))
+
+  //QFile file(QString::fromStdWString(m_path_name));
+  pugi::xml_document doc;
+  pugi::xml_parse_result result = doc.load_file(m_path_name.c_str());
+  if (!result)
     return READER_OPEN_FAIL;
 
-  QDomNode root = doc.firstChild();
-  QDomElement rot = doc.firstChildElement();
+  pugi::xml_node root = doc.first_child();
+
+  //QDomNode root = doc.firstChild();
+  //QDomElement rot = doc.firstChildElement();
   //wxXmlNode *root = doc.GetRoot();
 
-  if (!root || root->GetName() != "PVScan")
+  //if (!root || root.name() != "PVScan")
+  if (!root || strcmp(root.name(),"PVScan") == 0)
     return READER_FORMAT_ERROR;
 
-  wxXmlNode *child = root->GetChildren();
+  //wxXmlNode *child = root->GetChildren();
+  //pugi::xml_node child = root.children()
+
+  for(const auto& child : root.children())
+  {
+    if(strcmp(child.name(),"SystemConfiguration"))
+      ReadSystemConfig(child);
+    else if(strcmp(child.name(),"PVStateShard"))
+    {
+      UpdateStateShard(child);
+      m_state_shard_stack.push_back(m_current_state);
+    }
+    else if(strcmp(child.name(),"Sequence"))
+      ReadSequence(child);
+  }
+/*
   while (child)
   {
     if (child->GetName() == "SystemConfiguration")
@@ -141,7 +165,7 @@ int PVXMLReader::Preprocess()
       ReadSequence(child);
     child = child->GetNext();
   }
-
+*/
   m_time_num = int(m_pvxml_info.size());
   m_cur_time = 0;
 
@@ -285,14 +309,23 @@ int PVXMLReader::Preprocess()
   return READER_OK;
 }
 
-void PVXMLReader::ReadSystemConfig(wxXmlNode* systemNode)
+void PVXMLReader::ReadSystemConfig(const pugi::xml_node& systemNode)
 {
 }
 
-void PVXMLReader::UpdateStateShard(wxXmlNode *stateNode)
+void PVXMLReader::UpdateStateShard(const pugi::xml_node& stateNode)
 {
 	if (m_state_shard_stack.size())
-		m_current_state = m_state_shard_stack.back();
+        m_current_state = m_state_shard_stack.back();
+
+    for(const auto &child : stateNode.children())
+    {
+      std::string_view child_name = child.name();
+      if(child_name == "Key" || child_name == "PVStateValue")
+        ReadKey(child);
+    }
+
+    /*
 	wxXmlNode *child = stateNode->GetChildren();
 	while (child)
 	{
@@ -301,15 +334,20 @@ void PVXMLReader::UpdateStateShard(wxXmlNode *stateNode)
 			child_name == "PVStateValue")
 			ReadKey(child);
 		child = child->GetNext();
-	}
+    }
+    */
 }
 
-void PVXMLReader::ReadKey(wxXmlNode* keyNode)
+void PVXMLReader::ReadKey(const pugi::xml_node& keyNode)
 {
 	long ival;
-	double dval;
-	wxString strKey = keyNode->GetAttribute("key");
-	wxString strValue = keyNode->GetAttribute("value");
+    double dval;
+
+    //THIS COULD BE VERY WRONG
+    std::string_view strKey = keyNode.child("key").text().get();
+    std::string_view strValue = keyNode.child("value").text().get();
+    //wxString strKey = keyNode->GetAttribute("key");
+    //wxString strValue = keyNode->GetAttribute("value");
 
 	if (strKey == "xYStageGridIndex")
 	{
@@ -404,7 +442,7 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	}
 }
 
-void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
+void PVXMLReader::ReadIndexedKey(const pugi::xml_node& keyNode, wxString &key)
 {
 	double dval;
 
@@ -472,7 +510,7 @@ void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
 	}
 }
 
-void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
+void PVXMLReader::ReadSequence(const pugi::xml_node& seqNode)
 {
 	if (m_current_state.seq_type == 1)
 	{
@@ -530,7 +568,7 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	m_pvxml_info.back().back().grid_index = m_current_state.grid_index;
 }
 
-void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
+void PVXMLReader::ReadFrame(const pugi::xml_node& frameNode)
 {
 	wxString str;
 	long ival;

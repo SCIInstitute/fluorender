@@ -31,8 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include "base_reader.hpp"
 
-using namespace std;
-class wxXmlNode;
+namespace pugi
+{
+  class xml_node;
+}
+
 class wxString;
 
 #define READER_PVXML_TYPE	6
@@ -223,12 +226,12 @@ private:
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);
 	bool ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *val);
-	void ReadSystemConfig(wxXmlNode *systemNode);
-	void UpdateStateShard(wxXmlNode *stateNode);
-	void ReadKey(wxXmlNode *keyNode);
-	void ReadIndexedKey(wxXmlNode *keyNode, wxString &key);
-	void ReadSequence(wxXmlNode *seqNode);
-	void ReadFrame(wxXmlNode *frameNode);
+    void ReadSystemConfig(const pugi::xml_node &systemNode);
+    void UpdateStateShard(const pugi::xml_node &stateNode);
+    void ReadKey(const pugi::xml_node &keyNode);
+    void ReadIndexedKey(const pugi::xml_node &keyNode, wxString &key);
+    void ReadSequence(const pugi::xml_node &seqNode);
+    void ReadFrame(const pugi::xml_node &frameNode);
 	void ReadTiff(char* pbyData, unsigned short *val);
 };
 
