@@ -66,14 +66,18 @@ ExternalProject_Add(libtiff_external_download
 ExternalProject_Get_Property(libtiff_external_download BINARY_DIR)
 ExternalProject_Get_Property(libtiff_external_download SOURCE_DIR)
 
-if(MSVC)
+if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
   SET(libtiff_LIBRARY_DIR "${BINARY_DIR}/libtiff;${BINARY_DIR}/libtiff/Debug;${BINARY_DIR}/libtiff/Release" CACHE INTERNAL "")
 else()
-  SET(libtiff_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
+  SET(libtiff_LIBRARY_DIR ${BINARY_DIR}/libtiff CACHE INTERNAL "")
 endif()
 
 SET(libtiff_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
 
 add_library(libtiff_external STATIC IMPORTED)
+
+set(Libtiff_LIBRARIES
+  ${libtiff_LIBRARY_DIR}/${prefix}tiffd${suffix} CACHE INTERNAL ""
+)
 
 MESSAGE(STATUS "libtiff_DIR: ${libtiff_LIBRARY_DIR}")

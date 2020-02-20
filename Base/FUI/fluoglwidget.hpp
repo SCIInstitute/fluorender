@@ -1,6 +1,7 @@
 #ifndef FLUOGLWIDGET_HPP
 #define FLUOGLWIDGET_HPP
 
+#include <GL/glew.h>
 #include <QOpenGLWindow>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>

@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Formats/lbl_reader.hpp>
 #include <Formats/pvxml_reader.hpp>
 #include <Formats/brkxml_reader.hpp>
-#include <Formats/imageJ_reader.hpp>
+//#include <Formats/imageJ_reader.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 

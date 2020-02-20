@@ -163,6 +163,8 @@ include_directories(
     ${FLIVR_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${glew_INCLUDE_DIR}
+    ${Teem_INCLUDE_DIRS}
+    ${Formats_INCLUDE_DIR}
   )
 
 add_executable(FUI
@@ -179,15 +181,20 @@ qt5_use_modules(FUI Core Gui Widgets Xml OpenGL)
 
 target_include_directories(FUI PUBLIC Panels)
 
-add_dependencies(FUI FLObject SceneGraph FLIVR Boost_external_download glew_external_download Teem_external_download)
+add_dependencies(FUI FLObject SceneGraph
+                 FLIVR Boost_external_download
+                 glew_external_download
+                 Teem_external_download
+                 )
 
-link_directories(FUI ${Teem_dir}/bin)
+#link_directories(FUI ${Teem_dir}/bin)
 
 # links with OpenGL
 target_link_libraries(FUI
     FLObject
     SceneGraph
     FLIVR
+    Formats
     ${glew_LIBRARIES}
     ${teem_LIBRARIES}
     ${Boost_LIBRARIES}

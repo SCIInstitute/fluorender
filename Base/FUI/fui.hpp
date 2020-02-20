@@ -16,8 +16,6 @@
 
 #include "renderview.hpp"
 
-#include <Panels/Properties/propertiesPanel.hpp>
-
 namespace Ui {
 class FUI;
 }

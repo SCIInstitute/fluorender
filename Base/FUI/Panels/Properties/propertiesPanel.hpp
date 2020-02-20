@@ -8,7 +8,7 @@
 #include "meshPropertiesOptions.hpp"
 #include "meshPropertiesMaterials.hpp"
 
-#include <Panels/Properties/Agent/volumePropAgent.hpp>
+//#include <Panels/Properties/Agent/volumePropAgent.hpp>
 
 #include <iostream>
 
@@ -140,9 +140,9 @@ class PropertiesPanel : public QWidget
     VolumePropertiesOptions* getPropertiesOptions();
     VolumePropertiesMisc* getPropertiesMisc();
 
-    VolumePropAgent* m_agent;
+//    VolumePropAgent* m_agent;
 
-    friend class VolumePropAgent;
+//    friend class VolumePropAgent;
 
 };
 

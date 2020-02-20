@@ -6,13 +6,14 @@ include_directories(
   ${Boost_INCLUDE_DIR}
   ${Qt5Xml_INCLUDE_DIRS}
   ${pugi_INCLUDE_DIRS}
+  ${libtiff_INCLUDE_DIR}
 )
 
+                  #imageJ_reader.hpp
+                  #JVMInitializer.hpp
 set(HEADER_FILES  base_reader.hpp
                   base_writer.hpp
                   brkxml_reader.hpp
-                  imageJ_reader.hpp
-                  JVMInitializer.hpp
                   lbl_reader.hpp
                   lsm_reader.hpp
                   msk_reader.hpp
@@ -28,10 +29,10 @@ set(HEADER_FILES  base_reader.hpp
                   tinyxml2.hpp
 )
 
+             #imageJ_reader.cpp
+             #JVMInitializer.cpp
 set(SOURCES  base_reader.cpp
              brkxml_reader.cpp
-             imageJ_reader.cpp
-             JVMInitializer.cpp
              lbl_reader.cpp
              lsm_reader.cpp
              msk_reader.cpp
@@ -52,7 +53,7 @@ set(Formats_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
 add_library(Formats STATIC ${HEADER_FILES} ${SOURCES})
 
-target_link_libraries(Formats FLIVR ${teem_LIBRARIES} ${Boost_LIBRARIES} ${pugi_LIBRARIES})
+target_link_libraries(Formats FLIVR ${teem_LIBRARIES} ${Boost_LIBRARIES} ${pugi_LIBRARIES} ${Libtiff_LIBRARIES})
 
-add_dependencies(Formats FLIVR Teem_external_download Boost_external_download pugi_external_download)
+add_dependencies(Formats FLIVR Teem_external_download Boost_external_download pugi_external_download libtiff_external_download)
 qt5_use_modules(Formats Xml)
