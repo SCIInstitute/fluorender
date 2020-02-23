@@ -27,8 +27,8 @@ VOID _DBGPRINT(LPCWSTR kwszFunction, INT iLineNumber, LPCWSTR kwszDebugFormatStr
 #else//_WIN32
 
 #include <cstdarg>
-void DBGPRINT(...)
-{}
+void DBGPRINT(...);
+//{}
 
 #endif//_WIN32
 
