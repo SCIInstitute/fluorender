@@ -102,10 +102,8 @@ void VolumeSelector::Segment(int mx, int my)
 		valid_mvec = GetMouseVec(mx, my, mvec);
 		//DBGPRINT(L"m_mode:%d\tm_mx:%d\tm_my:%d\tm_mx0:%d\tm_my0:%d\tvalid:%d\n",
 		//	m_mode, m_mx, m_my, m_mx0, m_my0, valid_mvec);
-		m_vd->GetVR()->set_mouse_vec(mvec);
 	}
-	else
-		m_vd->GetVR()->set_mouse_vec(FLIVR::Vector());
+    m_vd->GetVR()->set_mouse_vec(mvec);
 
 	FLIVR::Framebuffer* paint_buffer =
 		FLIVR::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
