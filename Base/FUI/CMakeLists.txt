@@ -153,16 +153,16 @@ set(RESOURCE_FILE
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Qt5Core_INCLUDE_DIRS}
-	  ${Qt5Widgets_INCLUDE_DIRS}
-	  ${Qt5OpenGL_INCLUDE_DIRS}
-	  ${Qt5Gui_INCLUDE_DIRS}
+	${Qt5Widgets_INCLUDE_DIRS}
+	${Qt5OpenGL_INCLUDE_DIRS}
+	${Qt5Gui_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/Panels
-		${FLObject_INCLUDES}
+	${FLObject_INCLUDES}
     ${SceneGraph_INCLUDES}
     ${Object_INCLUDES}
     ${FLIVR_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
-    ${glew_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIR}
     ${Teem_INCLUDE_DIRS}
     ${Formats_INCLUDE_DIR}
   )
@@ -195,7 +195,7 @@ target_link_libraries(FUI
     SceneGraph
     FLIVR
     Formats
-    ${glew_LIBRARIES}
+    ${GLEW_LIBRARIES}
     ${teem_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENGL_LIBRARIES}

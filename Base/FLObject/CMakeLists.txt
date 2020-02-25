@@ -36,7 +36,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # FLObject and SceneGraph depend on each other. Hopefully this will be fixed in the 
 # future
 include_directories(${SceneGraph_INCLUDES})
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS} ${glew_INCLUDE_DIR} ${Teem_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIR} ${Teem_INCLUDE_DIR})
 
 # We manually set the Headers and Source files instead of Globbing them. This gives us
 # better control of what goes in the project and what does not. 
@@ -98,7 +98,7 @@ target_include_directories(FLObject PUBLIC Event
 add_dependencies(FLObject Boost_external_download glew_external_download Teem_external_download)
 
 # We link with SceneGraph and Boost
-target_link_libraries(FLObject SceneGraph ${teem_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(FLObject SceneGraph ${teem_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARIES})
 
 # I do not think this is needed.
 install(TARGETS FLObject

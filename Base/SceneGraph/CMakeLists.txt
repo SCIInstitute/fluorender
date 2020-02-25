@@ -36,7 +36,7 @@ include_directories(${FLObject_INCLUDES}
                     ${FLIVR_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIR}
                     ${OPENGL_INCLUDE_DIRS}
-                    ${glew_INCLUDE_DIR}
+                    ${GLEW_INCLUDE_DIR}
                     ${Teem_INCLUDE_DIR}
                     )
 
@@ -105,7 +105,7 @@ link_directories(SceneGraph ${Teem_DIR}/bin)
 add_dependencies(SceneGraph Teem_external_download)
 
 # Links with FlObject, FLIVR, and Boost.
-target_link_libraries(SceneGraph FLObject FLIVR ${Boost_LIBRARIES} ${teem_LIBRARIES})
+target_link_libraries(SceneGraph FLObject FLIVR ${Boost_LIBRARIES} ${teem_LIBRARIES} ${GLEW_LIBRARIES})
 
 # may not be needed.
 install(TARGETS SceneGraph
