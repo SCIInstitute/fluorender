@@ -170,6 +170,8 @@ set(wxWidgets_USE_STATIC ON)
 if(UNIX OR APPLE OR MINGW)
   find_package(TIFF REQUIRED)
   include_directories(${TIFF_INCLUDE_DIR})
+  find_package(PNG REQUIRED)
+  include_directories(${PNG_INCLUDE_DIR})
 else()
   include_directories(${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 endif()
@@ -700,6 +702,7 @@ if(UNIX OR APPLE OR MINGW)
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${TIFF_LIBRARIES}
+	${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES})
 #${JNI_LIBRARIES})   
 elseif(WIN32)
