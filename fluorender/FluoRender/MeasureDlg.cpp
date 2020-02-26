@@ -132,33 +132,37 @@ void RulerListCtrl::Append(bool enable, unsigned int id, wxString name,
 {
 	long tmp = InsertItem(GetItemCount(), name, 0);
 	SetItemData(tmp, long(id));
-	//    SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	SetItem(tmp, 1, color);
-	SetColumnWidth(1, wxLIST_AUTOSIZE);
 	wxString str = wxString::Format("%d", branches);
 	SetItem(tmp, 2, str);
-	SetColumnWidth(2, wxLIST_AUTOSIZE);
 	str = wxString::Format("%.2f", length) + unit;
 	SetItem(tmp, 3, str);
-	SetColumnWidth(3, wxLIST_AUTOSIZE);
 	str = wxString::Format("%.1f", angle) + "Deg";
 	SetItem(tmp, 4, str);
-	SetColumnWidth(4, wxLIST_AUTOSIZE);
 	SetItem(tmp, 5, center);
-	SetColumnWidth(5, wxLIST_AUTOSIZE);
 	if (time_dep)
 		str = wxString::Format("%d", time);
 	else
 		str = "N/A";
 	SetItem(tmp, 6, str);
-	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
 	SetItem(tmp, 7, points);
-	SetColumnWidth(7, wxLIST_AUTOSIZE);
 	SetItem(tmp, 8, extra);
-	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
 
 	if (!enable)
 		SetItemBackgroundColour(tmp, wxColour(200, 200, 200));
+}
+
+void RulerListCtrl::AdjustSize()
+{
+	//SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	SetColumnWidth(1, wxLIST_AUTOSIZE);
+	SetColumnWidth(2, wxLIST_AUTOSIZE);
+	SetColumnWidth(3, wxLIST_AUTOSIZE);
+	SetColumnWidth(4, wxLIST_AUTOSIZE);
+	SetColumnWidth(5, wxLIST_AUTOSIZE);
+	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
+	SetColumnWidth(7, wxLIST_AUTOSIZE);
+	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
@@ -171,6 +175,9 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 
 	FL::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list) return;
+
+	std::vector<int> sel;
+	GetCurrSelection(sel);
 
 	DeleteAllItems();
 
@@ -230,6 +237,16 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			color, ruler->GetNumBranch(), ruler->GetLength(), unit,
 			ruler->GetAngle(), center, ruler->GetTimeDep(),
 			ruler->GetTime(), str, points);
+	}
+
+	AdjustSize();
+
+	for (size_t i = 0; i < sel.size(); ++i)
+	{
+		int index = sel[i];
+		if (0 > index || ruler_list->size() <= index)
+			continue;
+		SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 
 	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
@@ -1556,6 +1573,7 @@ void MeasureDlg::Relax(int idx)
 	m_calculator.CenterRuler(m_edited, iter);
 	m_edited = false;
 	m_view->RefreshGL();
+	GetSettings(m_view);
 }
 
 void MeasureDlg::OnLock(wxCommandEvent& event)

@@ -64,6 +64,7 @@ public:
 		wxString &color, int branches, double length, wxString &unit,
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
+	void AdjustSize();
 	void UpdateRulers(VRenderView* vrv=0);
 
 	bool GetCurrSelection(std::vector<int> &sel);
