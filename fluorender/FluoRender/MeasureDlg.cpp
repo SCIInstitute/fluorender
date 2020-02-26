@@ -27,9 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MeasureDlg.h"
 #include "VRenderFrame.h"
-#include <sstream>
-#include <fstream>
-#include <iostream>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -37,6 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 #include "Formats/png_resource.h"
 #include "ruler.xpm"
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <iterator>
 
 //resources
 #include "img/icons.h"
@@ -272,29 +273,31 @@ bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)
 void RulerListCtrl::DeleteSelection()
 {
 	if (!m_view) return;
+	FL::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list) return;
 
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item != -1)
+	std::vector<int> sel;
+	GetCurrSelection(sel);
+
+	for (auto it = ruler_list->rbegin();
+		it != ruler_list->rend();)
 	{
-		wxString name = GetItemText(item);
-		FL::RulerList* ruler_list = m_view->GetRulerList();
-		if (ruler_list)
+		auto it2 = std::next(it).base();
+		int idx = it2 - ruler_list->begin();
+		if (std::find(sel.begin(),
+			sel.end(), idx) != sel.end())
 		{
-			for (int i=0; i<(int)ruler_list->size(); i++)
-			{
-				FL::Ruler* ruler = (*ruler_list)[i];
-				if (ruler && ruler->GetName()==name)
-				{
-					ruler_list->erase(ruler_list->begin()+i);
-					delete ruler;
-				}
-			}
-			UpdateRulers();
-			m_view->RefreshGL();
+			if (*it2)
+				delete *it2;
+			it2 = ruler_list->erase(it2);
+			it = std::reverse_iterator<FL::RulerList::iterator>(it2);
 		}
+		else
+			++it;
 	}
+
+	UpdateRulers();
+	m_view->RefreshGL();
 }
 
 void RulerListCtrl::DeleteAll(bool cur_time)
