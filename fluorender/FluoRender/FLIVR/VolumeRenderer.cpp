@@ -1389,49 +1389,7 @@ namespace FLIVR
 		GLint nbtex;//tex name of neighbor
 		int bnx, bny, bnz, nbnx, nbny, nbnz;
 		bnx = b->nx(); bny = b->ny(); bnz = b->nz();
-		if (order == 1)
-		{
-			//posx
-			nid = tex_->posxid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
-			{
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					bnx - 1, 0, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					1, bny, bnz);
-			}
-			//posy
-			nid = tex_->posyid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
-			{
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, bny - 1, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					bnx, 1, bnz);
-			}
-			//posz
-			nid = tex_->poszid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
-			{
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, 0, bnz - 1,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					bnx, bny, 1);
-			}
-		}
-		else
+		if (order == 2)
 		{
 			//negx
 			nid = tex_->negxid(bid);
@@ -1473,6 +1431,48 @@ namespace FLIVR
 					0, 0, 0,
 					nbtex, GL_TEXTURE_3D, 0,
 					0, 0, nbnz - 1,
+					bnx, bny, 1);
+			}
+		}
+		else
+		{
+			//posx
+			nid = tex_->posxid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb && nb->get_paint_mask())
+			{
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					bnx - 1, 0, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					1, bny, bnz);
+			}
+			//posy
+			nid = tex_->posyid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb && nb->get_paint_mask())
+			{
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, bny - 1, 0,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
+					bnx, 1, bnz);
+			}
+			//posz
+			nid = tex_->poszid(bid);
+			nb = tex_->get_brick(nid);
+			if (nb && nb->get_paint_mask())
+			{
+				nbtex = load_brick_mask(nb);
+				glCopyImageSubData(
+					btex, GL_TEXTURE_3D, 0,
+					0, 0, bnz - 1,
+					nbtex, GL_TEXTURE_3D, 0,
+					0, 0, 0,
 					bnx, bny, 1);
 			}
 		}
