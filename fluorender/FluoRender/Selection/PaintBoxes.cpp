@@ -83,6 +83,12 @@ const char* str_cl_paint_boxes = \
 
 void PaintBoxes::Compute()
 {
+	if (m_mouse_pos)
+	{
+		BrickRayInt();
+		return;
+	}
+
 	if (m_view_only)
 	{
 		BrickViewInt();
@@ -208,6 +214,33 @@ void PaintBoxes::BrickViewInt()
 		FLIVR::TextureBrick* b = (*m_bricks)[i];
 		FLIVR::BBox bbox = b->bbox();
 		if (test_against_view(bbox))
+			b->set_paint_mask(true);
+	}
+}
+
+void PaintBoxes::BrickRayInt()
+{
+	if (!m_bricks)
+		return;
+
+	//get ray
+	FLIVR::Point mp1(
+		(double)m_mx * 2 / m_ptx - 1,
+		1 - (double)m_my * 2 / m_pty, 0);
+	FLIVR::Point mp2 = mp1;
+	mp2.z(1);
+	mp1 = m_imat.transform(mp1);
+	mp2 = m_imat.transform(mp2);
+	FLIVR::Vector dir(mp1 - mp2);
+	dir.normalize();
+
+	//test ray-box
+	FLIVR::Point hit;
+	for (int i = 0; i < m_bricks->size(); ++i)
+	{
+		FLIVR::TextureBrick* b = (*m_bricks)[i];
+		FLIVR::BBox bbox = b->bbox();
+		if (bbox.intersect(mp1, dir, hit))
 			b->set_paint_mask(true);
 	}
 }

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>
+#include <Selection/MaskBorder.h>
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -103,7 +104,7 @@ void VolumeSelector::Segment(int mx, int my)
 		//DBGPRINT(L"m_mode:%d\tm_mx:%d\tm_my:%d\tm_mx0:%d\tm_my0:%d\tvalid:%d\n",
 		//	m_mode, m_mx, m_my, m_mx0, m_my0, valid_mvec);
 	}
-    m_vd->GetVR()->set_mouse_vec(mvec);
+	m_vd->GetVR()->set_mouse_vec(mvec);
 
 	FLIVR::Framebuffer* paint_buffer =
 		FLIVR::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
@@ -246,10 +247,9 @@ void VolumeSelector::Select(double radius)
 		pr.set(glm::value_ptr(m_prj_mat));
 		mat.set(glm::value_ptr(cmat));
 		pb.SetMats(mv, pr, mat);
+		pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
 		if (m_mode == 9)
-			pb.SetViewOnly(true);
-		else
-			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
+			pb.SetMousePos(m_mx, m_my);
 		pb.Compute();
 	}
 
@@ -293,11 +293,18 @@ void VolumeSelector::Select(double radius)
 				iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			div = iter / 3;
 			div = div ? div : 1;
+			int order;
+			FL::MaskBorder mb(m_vd);
 			for (int i = 0; i < iter; i++)
+			{
+				order = m_update_order ? (i%div) : 0;
 				m_vd->DrawMask(1, m_mode, 0, ini_thresh,
 					gm_falloff, scl_falloff,
 					m_scl_translate, m_w2d, 0.0,
-					m_update_order ? (i%div) : 0);
+					order);
+				if (m_mode == 9)
+					mb.Compute(order);
+			}
 		}
 	}
 
