@@ -9897,7 +9897,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			Segment();
 			m_selector.SetInitMask(3);
 			m_force_clear = true;
-			RefreshGL(27);
+			//RefreshGL(27);
 			SetFocus();
 			return;
 		}
@@ -10028,6 +10028,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			event.AltDown()) ||
 			((m_int_mode == 6 ||
 			m_int_mode == 9 ||
+			m_int_mode == 10 ||
 			m_int_mode == 11) &&
 			!p0))
 		{
@@ -10039,7 +10040,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				abs(old_mouse_X - event.GetX()) +
 				abs(old_mouse_Y - event.GetY())<200)
 			{
-				if (event.LeftIsDown() && !event.ControlDown())
+				if (event.LeftIsDown() && !event.ControlDown() && m_int_mode != 10)
 				{
 					Quaternion q_delta = Trackball(
 						event.GetX() - old_mouse_X, old_mouse_Y - event.GetY());
