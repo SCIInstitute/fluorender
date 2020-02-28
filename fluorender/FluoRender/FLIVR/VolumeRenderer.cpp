@@ -1393,87 +1393,105 @@ namespace FLIVR
 		{
 			//negx
 			nid = tex_->negxid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
+			if (nid != bid)
 			{
-				nbnx = nb->nx();
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					nbnx - 1, 0, 0,
-					1, bny, bnz);
+				nb = tex_->get_brick(nid);
+				if (nb && nb->get_paint_mask())
+				{
+					nbnx = nb->nx();
+					nbtex = load_brick_mask(nb);
+					glCopyImageSubData(
+						btex, GL_TEXTURE_3D, 0,
+						0, 0, 0,
+						nbtex, GL_TEXTURE_3D, 0,
+						nbnx - 1, 0, 0,
+						1, bny, bnz);
+				}
 			}
 			//negy
 			nid = tex_->negyid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
+			if (nid != bid)
 			{
-				nbny = nb->ny();
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, nbny - 1, 0,
-					bnx, 1, bnz);
+				nb = tex_->get_brick(nid);
+				if (nb && nb->get_paint_mask())
+				{
+					nbny = nb->ny();
+					nbtex = load_brick_mask(nb);
+					glCopyImageSubData(
+						btex, GL_TEXTURE_3D, 0,
+						0, 0, 0,
+						nbtex, GL_TEXTURE_3D, 0,
+						0, nbny - 1, 0,
+						bnx, 1, bnz);
+				}
 			}
 			//negz
 			nid = tex_->negzid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
+			if (nid != bid)
 			{
-				nbnz = nb->nz();
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, nbnz - 1,
-					bnx, bny, 1);
+				nb = tex_->get_brick(nid);
+				if (nb && nb->get_paint_mask())
+				{
+					nbnz = nb->nz();
+					nbtex = load_brick_mask(nb);
+					glCopyImageSubData(
+						btex, GL_TEXTURE_3D, 0,
+						0, 0, 0,
+						nbtex, GL_TEXTURE_3D, 0,
+						0, 0, nbnz - 1,
+						bnx, bny, 1);
+				}
 			}
 		}
 		else
 		{
 			//posx
 			nid = tex_->posxid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
+			if (nid != bid)
 			{
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					bnx - 1, 0, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					1, bny, bnz);
+				nb = tex_->get_brick(nid);
+				if (nb && nb->get_paint_mask())
+				{
+					nbtex = load_brick_mask(nb);
+					glCopyImageSubData(
+						btex, GL_TEXTURE_3D, 0,
+						bnx - 1, 0, 0,
+						nbtex, GL_TEXTURE_3D, 0,
+						0, 0, 0,
+						1, bny, bnz);
+				}
 			}
 			//posy
 			nid = tex_->posyid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
+			if (nid != bid)
 			{
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, bny - 1, 0,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					bnx, 1, bnz);
+				nb = tex_->get_brick(nid);
+				if (nb && nb->get_paint_mask())
+				{
+					nbtex = load_brick_mask(nb);
+					glCopyImageSubData(
+						btex, GL_TEXTURE_3D, 0,
+						0, bny - 1, 0,
+						nbtex, GL_TEXTURE_3D, 0,
+						0, 0, 0,
+						bnx, 1, bnz);
+				}
 			}
 			//posz
 			nid = tex_->poszid(bid);
-			nb = tex_->get_brick(nid);
-			if (nb && nb->get_paint_mask())
+			if (nid != bid)
 			{
-				nbtex = load_brick_mask(nb);
-				glCopyImageSubData(
-					btex, GL_TEXTURE_3D, 0,
-					0, 0, bnz - 1,
-					nbtex, GL_TEXTURE_3D, 0,
-					0, 0, 0,
-					bnx, bny, 1);
+				nb = tex_->get_brick(nid);
+				if (nb && nb->get_paint_mask())
+				{
+					nbtex = load_brick_mask(nb);
+					glCopyImageSubData(
+						btex, GL_TEXTURE_3D, 0,
+						0, 0, bnz - 1,
+						nbtex, GL_TEXTURE_3D, 0,
+						0, 0, 0,
+						bnx, bny, 1);
+				}
 			}
 		}
 	}
