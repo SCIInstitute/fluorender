@@ -382,6 +382,8 @@ namespace FLIVR
 	inline unsigned int Texture::negxid(unsigned int id)
 	{
 		int x = (id % (bnx_ * bny_)) % bnx_;
+		if (x == 0)
+			return id;
 		int y = (id % (bnx_ * bny_)) / bnx_;
 		int z = id / (bnx_ * bny_);
 		int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
@@ -393,8 +395,10 @@ namespace FLIVR
 
 	inline unsigned int Texture::negyid(unsigned int id)
 	{
-		int x = (id % (bnx_ * bny_)) % bnx_;
 		int y = (id % (bnx_ * bny_)) / bnx_;
+		if (y == 0)
+			return id;
+		int x = (id % (bnx_ * bny_)) % bnx_;
 		int z = id / (bnx_ * bny_);
 		int r = z * bnx_ * bny_ + (y - 1) * bnx_ + x;
 		if (r < 0 || r >= bnx_ * bny_ * bnz_)
@@ -405,9 +409,11 @@ namespace FLIVR
 
 	inline unsigned int Texture::negzid(unsigned int id)
 	{
+		int z = id / (bnx_ * bny_);
+		if (z == 0)
+			return id;
 		int x = (id % (bnx_ * bny_)) % bnx_;
 		int y = (id % (bnx_ * bny_)) / bnx_;
-		int z = id / (bnx_ * bny_);
 		int r = (z - 1) * bnx_ * bny_ + y * bnx_ + x;
 		if (r < 0 || r >= bnx_ * bny_ * bnz_)
 			return id;
@@ -418,6 +424,8 @@ namespace FLIVR
 	inline unsigned int Texture::posxid(unsigned int id)
 	{
 		int x = (id % (bnx_ * bny_)) % bnx_;
+		if (x == bnx_ - 1)
+			return id;
 		int y = (id % (bnx_ * bny_)) / bnx_;
 		int z = id / (bnx_ * bny_);
 		int r = z * bnx_ * bny_ + y * bnx_ + x + 1;
@@ -429,8 +437,10 @@ namespace FLIVR
 
 	inline unsigned int Texture::posyid(unsigned int id)
 	{
-		int x = (id % (bnx_ * bny_)) % bnx_;
 		int y = (id % (bnx_ * bny_)) / bnx_;
+		if (y == bny_ - 1)
+			return id;
+		int x = (id % (bnx_ * bny_)) % bnx_;
 		int z = id / (bnx_ * bny_);
 		int r = z * bnx_ * bny_ + (y + 1) * bnx_ + x;
 		if (r < 0 || r >= bnx_ * bny_ * bnz_)
@@ -441,9 +451,11 @@ namespace FLIVR
 
 	inline unsigned int Texture::poszid(unsigned int id)
 	{
+		int z = id / (bnx_ * bny_);
+		if (z == bnz_ - 1)
+			return id;
 		int x = (id % (bnx_ * bny_)) % bnx_;
 		int y = (id % (bnx_ * bny_)) / bnx_;
-		int z = id / (bnx_ * bny_);
 		int r = (z + 1) * bnx_ * bny_ + y * bnx_ + x;
 		if (r < 0 || r >= bnx_ * bny_ * bnz_)
 			return id;

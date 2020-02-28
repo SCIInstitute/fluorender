@@ -50,8 +50,12 @@ namespace FL
 		void SetBricks(vector<FLIVR::TextureBrick*> *bricks)
 		{
 			m_bricks = bricks;
-			for (int i = 0; i < bricks->size(); ++i)
-				(*bricks)[i]->set_paint_mask(false);
+		}
+
+		void ClearBricks()
+		{
+			for (int i = 0; i < m_bricks->size(); ++i)
+				(*m_bricks)[i]->set_paint_mask(false);
 		}
 
 		void EnableBricks()

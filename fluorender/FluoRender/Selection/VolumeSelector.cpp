@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <Debug.h>
 
 using namespace FL;
 
@@ -212,7 +213,10 @@ void VolumeSelector::Select(double radius)
 		gm_falloff = 1.0;
 
 	//clear paint mask flags
-	m_vd->GetTexture()->enable_paint_mask();
+	if (m_mode != 9 || m_init_mask & 1)
+		m_vd->GetTexture()->enable_paint_mask();
+
+	//clear selection
 	if (m_mode == 1)
 	{
 		//has to update twice
@@ -231,6 +235,8 @@ void VolumeSelector::Select(double radius)
 	{
 		FL::PaintBoxes pb;
 		pb.SetBricks(bricks);
+		if (m_mode != 9 || m_init_mask & 1)
+			pb.ClearBricks();
 		pb.SetPersp(!m_view->GetPersp());
 		Transform *tform = m_vd->GetTexture()->transform();
 		double mvmat[16];
@@ -279,11 +285,11 @@ void VolumeSelector::Select(double radius)
 			m_mode == 9)
 		{
 			//loop for growing
-			int iter, div;
+			int iter;
 			if (m_mode == 9)
 			{
 				if (m_iter_num <= BRUSH_TOOL_ITER_WEAK)
-					iter = m_iter_num / 4;
+					iter = m_iter_num / 3;
 				else if (m_iter_num <= BRUSH_TOOL_ITER_NORMAL)
 					iter = m_iter_num / 2;
 				else
@@ -291,19 +297,18 @@ void VolumeSelector::Select(double radius)
 			}
 			else
 				iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
-			div = iter / 3;
-			div = div ? div : 1;
+			int div = 3;
 			int order;
 			FL::MaskBorder mb(m_vd);
 			for (int i = 0; i < iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;
+				if (m_mode == 9)
+					mb.Compute(order);
 				m_vd->DrawMask(1, m_mode, 0, ini_thresh,
 					gm_falloff, scl_falloff,
 					m_scl_translate, m_w2d, 0.0,
 					order);
-				if (m_mode == 9)
-					mb.Compute(order);
 			}
 		}
 	}
