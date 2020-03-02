@@ -55,73 +55,6 @@ bool ComponentGenerator::CheckBricks()
 	return true;
 }
 
-void ComponentGenerator::GetLabel(size_t brick_num, TextureBrick* b, void** val32)
-{
-	if (!b)
-		return;
-
-	if (brick_num > 1)
-	{
-		int c = b->nlabel();
-		int nb = b->nb(c);
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
-		unsigned long long mem_size = (unsigned long long)nx*
-			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
-		unsigned char* temp = new unsigned char[mem_size];
-		unsigned char* tempp = temp;
-		unsigned char* tp = (unsigned char*)(b->tex_data(c));
-		unsigned char* tp2;
-		for (unsigned int k = 0; k < nz; ++k)
-		{
-			tp2 = tp;
-			for (unsigned int j = 0; j < ny; ++j)
-			{
-				memcpy(tempp, tp2, nx*nb);
-				tempp += nx * nb;
-				tp2 += b->sx()*nb;
-			}
-				tp += b->sx()*b->sy()*nb;
-		}
-		*val32 = (void*)temp;
-	}
-	else
-	{
-		Nrrd* nrrd_label = m_vd->GetLabel(false);
-		if (!nrrd_label)
-			return;
-		*val32 = (void*)(nrrd_label->data);
-	}
-}
-
-void ComponentGenerator::ReleaseLabel(void* val32, size_t brick_num, TextureBrick* b)
-{
-	if (!val32 || brick_num <= 1)
-		return;
-
-	unsigned char* tempp = (unsigned char*)val32;
-	int c = b->nlabel();
-	int nb = b->nb(c);
-	int nx = b->nx();
-	int ny = b->ny();
-	int nz = b->nz();
-	unsigned char* tp = (unsigned char*)(b->tex_data(c));
-	unsigned char* tp2;
-	for (unsigned int k = 0; k < nz; ++k)
-	{
-		tp2 = tp;
-		for (unsigned int j = 0; j < ny; ++j)
-		{
-			memcpy(tp2, tempp, nx*nb);
-			tempp += nx * nb;
-			tp2 += b->sx()*nb;
-		}
-		tp += b->sx()*b->sy()*nb;
-	}
-	delete[] val32;
-}
-
 void ComponentGenerator::ShuffleID()
 {
 	if (!CheckBricks())
@@ -167,8 +100,7 @@ void ComponentGenerator::ShuffleID()
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -189,11 +121,11 @@ void ComponentGenerator::ShuffleID()
 		}
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -236,11 +168,13 @@ void ComponentGenerator::ShuffleID()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		//kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
+		//ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -293,8 +227,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -328,12 +261,12 @@ void ComponentGenerator::SetIDBit(int psize)
 
 		//set
 		//kernel 0
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		Argument arg_szbuf = kernel_prog->setKernelArgBuf(kernel_index0, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, size_buffer);
-		Argument arg_label = kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index0, 3,
@@ -365,7 +298,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		if (m_use_mask)
 			kernel_prog->setKernelArgTex3D(kernel_index1, 5,
 				CL_MEM_READ_ONLY, mid);*/
-				//kernel 2
+		//kernel 2
 		arg_szbuf.kernel_index = kernel_index2;
 		arg_szbuf.index = 0;
 		kernel_prog->setKernelArgument(arg_szbuf);
@@ -431,11 +364,11 @@ void ComponentGenerator::SetIDBit(int psize)
 		//ofs.close();
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 		delete[] size_buffer;
 
 		m_sig_progress();
@@ -471,8 +404,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		//auto iter
 		int biter = iter;
@@ -487,11 +419,11 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		float grad_ff = diffuse ? falloff : 0.0f;
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index0, 0,
 			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index0, 3,
@@ -520,11 +452,11 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -575,8 +507,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		//divide
 		unsigned int gsx, gsy, gsz;//pixel number in group
@@ -717,12 +648,12 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		float grad_ff = diffuse ? falloff : 0.0f;
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		arg_img.kernel_index = kernel2_index0;
 		arg_img.index = 0;
 		kernel2_prog->setKernelArgument(arg_img);
-		kernel2_prog->setKernelArgBuf(kernel2_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		Argument arg_label = kernel2_prog->setKernelArgTex3DBuf(kernel2_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		arg_df.kernel_index = kernel2_index0;
 		arg_df.index = 2;
 		kernel2_prog->setKernelArgument(arg_df);
@@ -766,12 +697,12 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 			kernel2_prog->executeKernel(kernel2_index0, 3, global_size, local_size);
 
 		//read back
-		kernel2_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel2_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel2_prog->releaseAll();
 		kernel_prog->releaseAll(false);
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -832,8 +763,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -906,12 +836,12 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		float scl_ff = diffuse ? falloff : 0.0f;
 		float grad_ff = diffuse ? falloff : 0.0f;
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		arg_img.kernel_index = kernel_index0;
 		arg_img.index = 0;
 		kernel_prog->setKernelArgument(arg_img);
-		kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		arg_distf.kernel_index = kernel_index0;
 		arg_distf.index = 2;
 		kernel_prog->setKernelArgument(arg_distf);
@@ -945,12 +875,12 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 			kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
 		kernel_prog_dist->releaseAll(false);
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -1022,8 +952,7 @@ void ComponentGenerator::DistDensityField(
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1239,12 +1168,12 @@ void ComponentGenerator::DistDensityField(
 		float grad_ff = diffuse ? falloff : 0.0f;
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		arg_img.kernel_index = kernel_grow_index0;
 		arg_img.index = 0;
 		kernel_prog_grow->setKernelArgument(arg_img);
-		kernel_prog_grow->setKernelArgBuf(kernel_grow_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		Argument arg_label = kernel_prog_grow->setKernelArgTex3DBuf(kernel_grow_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		arg_densf.kernel_index = kernel_grow_index0;
 		arg_densf.index = 2;
 		kernel_prog_grow->setKernelArgument(arg_densf);
@@ -1288,13 +1217,13 @@ void ComponentGenerator::DistDensityField(
 			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
 
 		//read back
-		kernel_prog_grow->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog_grow->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog_grow->releaseAll();
 		kernel_prog_dist->releaseAll(false);
 		kernel_prog_dens->releaseAll(false);
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -1339,8 +1268,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1374,12 +1302,12 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 
 		//set
 		//kernel 0
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBuf(kernel_index0, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, size_buffer);
-		kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index0, 3,
@@ -1397,9 +1325,9 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgBuf(kernel_index1, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, size_buffer);
-		kernel_prog->setKernelArgBuf(kernel_index1, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		arg_label.kernel_index = kernel_index1;
+		arg_label.index = 1;
+		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(kernel_index1, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index1, 3,
@@ -1419,9 +1347,9 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgBuf(kernel_index2, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, size_buffer);
-		kernel_prog->setKernelArgBuf(kernel_index2, 2,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		arg_label.kernel_index = kernel_index2;
+		arg_label.index = 2;
+		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(kernel_index2, 3,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index2, 4,
@@ -1443,11 +1371,11 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		}
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 		delete[] size_buffer;
 
 		m_sig_progress();
@@ -1482,15 +1410,14 @@ void ComponentGenerator::ClearBorders()
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
-		kernel_prog->setKernelArgBuf(kernel_index, 0,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 0,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 1,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 2,
@@ -1503,12 +1430,13 @@ void ComponentGenerator::ClearBorders()
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, sizeof(unsigned int)*nx*ny*nz, 0);
-		ReleaseLabel(val32, brick_num, b);
+		kernel_prog->releaseAll();
 
 		m_sig_progress();
 	}
@@ -1543,18 +1471,17 @@ void ComponentGenerator::FillBorders(float tol)
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -1569,18 +1496,86 @@ void ComponentGenerator::FillBorders(float tol)
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
 }
 
 #ifdef _DEBUG
+void ComponentGenerator::GetLabel(size_t brick_num, TextureBrick* b, void** val32)
+{
+	if (!b)
+		return;
+
+	if (brick_num > 1)
+	{
+		int c = b->nlabel();
+		int nb = b->nb(c);
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		unsigned long long mem_size = (unsigned long long)nx*
+			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
+		unsigned char* temp = new unsigned char[mem_size];
+		unsigned char* tempp = temp;
+		unsigned char* tp = (unsigned char*)(b->tex_data(c));
+		unsigned char* tp2;
+		for (unsigned int k = 0; k < nz; ++k)
+		{
+			tp2 = tp;
+			for (unsigned int j = 0; j < ny; ++j)
+			{
+				memcpy(tempp, tp2, nx*nb);
+				tempp += nx * nb;
+				tp2 += b->sx()*nb;
+			}
+			tp += b->sx()*b->sy()*nb;
+		}
+		*val32 = (void*)temp;
+	}
+	else
+	{
+		Nrrd* nrrd_label = m_vd->GetLabel(false);
+		if (!nrrd_label)
+			return;
+		*val32 = (void*)(nrrd_label->data);
+	}
+}
+
+void ComponentGenerator::ReleaseLabel(void* val32, size_t brick_num, TextureBrick* b)
+{
+	if (!val32 || brick_num <= 1)
+		return;
+
+	unsigned char* tempp = (unsigned char*)val32;
+	int c = b->nlabel();
+	int nb = b->nb(c);
+	int nx = b->nx();
+	int ny = b->ny();
+	int nz = b->nz();
+	unsigned char* tp = (unsigned char*)(b->tex_data(c));
+	unsigned char* tp2;
+	for (unsigned int k = 0; k < nz; ++k)
+	{
+		tp2 = tp;
+		for (unsigned int j = 0; j < ny; ++j)
+		{
+			memcpy(tp2, tempp, nx*nb);
+			tempp += nx * nb;
+			tp2 += b->sx()*nb;
+		}
+		tp += b->sx()*b->sy()*nb;
+	}
+	delete[] val32;
+}
+
 void ComponentGenerator::OrderID_3D()
 {
 	if (!m_vd)
@@ -1614,18 +1609,17 @@ void ComponentGenerator::OrderID_2D()
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -1635,11 +1629,11 @@ void ComponentGenerator::OrderID_2D()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -1670,8 +1664,7 @@ void ComponentGenerator::ShuffleID_2D()
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1684,11 +1677,11 @@ void ComponentGenerator::ShuffleID_2D()
 		}
 
 		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, val32);
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -1700,11 +1693,11 @@ void ComponentGenerator::ShuffleID_2D()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}
@@ -1739,8 +1732,7 @@ void ComponentGenerator::Grow3DSized(
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		unsigned int* mask32 = new unsigned int[nx*ny*nz];
 		memset(mask32, 0, sizeof(unsigned int)*nx*ny*nz);
@@ -1769,12 +1761,12 @@ void ComponentGenerator::Grow3DSized(
 
 		//set
 		//kernel 0
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBuf(kernel_index0, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, (void*)(mask32));
-		kernel_prog->setKernelArgBuf(kernel_index0, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index0, 3,
@@ -1789,9 +1781,9 @@ void ComponentGenerator::Grow3DSized(
 		kernel_prog->setKernelArgBuf(kernel_index1, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, (void*)(mask32));
-		kernel_prog->setKernelArgBuf(kernel_index1, 1,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		arg_label.kernel_index = kernel_index1;
+		arg_label.index = 1;
+		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(kernel_index1, 2,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index1, 3,
@@ -1808,9 +1800,9 @@ void ComponentGenerator::Grow3DSized(
 		kernel_prog->setKernelArgBuf(kernel_index2, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*nx*ny*nz, (void*)(mask32));
-		kernel_prog->setKernelArgBuf(kernel_index2, 2,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*nx*ny*nz, (void*)(val32));
+		arg_label.kernel_index = kernel_index2;
+		arg_label.index = 2;
+		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(kernel_index2, 3,
 			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_index2, 4,
@@ -1844,11 +1836,11 @@ void ComponentGenerator::Grow3DSized(
 		}
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 		delete[] mask32;
 
 		m_sig_progress();
@@ -2088,8 +2080,6 @@ void ComponentGenerator::DistField(int max_dist, float th, int dsize, float ssca
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
-		void* val32 = 0;
-		GetLabel(brick_num, b, &val32);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -2153,7 +2143,6 @@ void ComponentGenerator::DistField(int max_dist, float th, int dsize, float ssca
 		//	bits == 8 ? (void*)(val8) : (void*)(val16));
 		//kernel_prog->releaseMemObject(arg_df);
 		kernel_prog->releaseAll();
-		ReleaseLabel(val32, brick_num, b);
 
 		m_sig_progress();
 	}

@@ -12,7 +12,7 @@ namespace FLIVR
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
 #ifdef _DARWIN
-    CGLContextObj KernelProgram::gl_context_ = 0;
+	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
 	source_(source), program_(0), queue_(0)
@@ -68,14 +68,14 @@ namespace FLIVR
 #if defined(_DARWIN) || defined(__linux__)
 		cl_context_properties properties[] =
 		{
-                #if defined(_DARWIN) 
+			#if defined(_DARWIN) 
 			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
 			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-                #elif defined(__linux__)
-                       // https://www.codeproject.com/Articles/685281/OpenGL-OpenCL-Interoperability-A-Case-Study-Using
-                       CL_GL_CONTEXT_KHR , (cl_context_properties) glXGetCurrentContext() ,
-                       CL_GLX_DISPLAY_KHR , (cl_context_properties) glXGetCurrentDisplay() ,
-                #endif
+			#elif defined(__linux__)
+			// https://www.codeproject.com/Articles/685281/OpenGL-OpenCL-Interoperability-A-Case-Study-Using
+			CL_GL_CONTEXT_KHR , (cl_context_properties)glXGetCurrentContext() ,
+			CL_GLX_DISPLAY_KHR , (cl_context_properties)glXGetCurrentDisplay() ,
+			#endif
 			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
 			0
 		};
@@ -643,6 +643,76 @@ namespace FLIVR
 		return setKernelArgTex3D(index, i, flag, texture);
 	}
 
+	//copy existing texure to buffer
+	Argument KernelProgram::setKernelArgTex3DBuf(
+		int index, int i, cl_mem_flags flag, GLuint texture,
+		size_t size, size_t *region)
+	{
+		Argument arg;
+		cl_int err;
+		cl_mem buft = 0, bufb = 0;
+		if (index < 0 || index >= kernels_.size())
+			return arg;
+
+		arg.kernel_index = index;
+		arg.index = i;
+		arg.size = size;
+		arg.texture = 0;
+		arg.orgn_addr = 0;
+
+		//create texture buffer
+		buft = clCreateFromGLTexture(context_, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texture, &err);
+		if (err != CL_SUCCESS)
+			return Argument();
+		unsigned int ai;
+		//find data buffer
+		if (matchArgBuf(arg, ai))
+		{
+			arg.buffer = arg_list_[ai].buffer;
+			clReleaseMemObject(arg_list_[ai].buffer);
+			arg.buffer = clCreateBuffer(context_, flag, size, 0, &err);
+			bufb = arg.buffer;
+			if (err != CL_SUCCESS)
+				return Argument();
+		}
+		else
+		{
+			bufb = clCreateBuffer(context_, flag, size, 0, &err);
+			if (err != CL_SUCCESS)
+				return Argument();
+			arg.buffer = bufb;
+			arg_list_.push_back(arg);
+		}
+
+		err = clEnqueueAcquireGLObjects(
+			queue_, 1, &(buft), 0, NULL, NULL);
+		if (err != CL_SUCCESS)
+			return Argument();
+		size_t sorigin[3] = { 0, 0, 0 };
+		err = clEnqueueCopyImageToBuffer(
+			queue_, buft, arg.buffer,
+			sorigin, region, 0, 0, NULL, NULL);
+		if (err != CL_SUCCESS)
+			return Argument();
+		err = clEnqueueReleaseGLObjects(
+			queue_, 1, &(buft), 0, NULL, NULL);
+		if (err != CL_SUCCESS)
+			return Argument();
+		clReleaseMemObject(buft);
+		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		if (err != CL_SUCCESS)
+			return Argument();
+		return arg;
+	}
+
+	Argument KernelProgram::setKernelArgTex3DBuf(
+		std::string &name, int i, cl_mem_flags flag, GLuint texture,
+		size_t size, size_t *region)
+	{
+		int index = findKernel(name);
+		return setKernelArgTex3DBuf(index, i, flag, texture, size, region);
+	}
+
 	Argument KernelProgram::setKernelArgImage(int index, int i, cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
 	{
 		Argument arg;
@@ -728,6 +798,36 @@ namespace FLIVR
 				return;
 			clFlush(queue_);
 			clFinish(queue_);
+		}
+	}
+
+	//copy buffer back to texture
+	void KernelProgram::copyBufTex3D(
+		Argument& arg, GLuint texture,
+		size_t size, size_t* region)
+	{
+		cl_int err;
+		unsigned int ai;
+		if (matchArgBuf(arg, ai))
+		{
+			cl_mem buft = clCreateFromGLTexture(context_, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texture, &err);
+			if (err != CL_SUCCESS)
+				return;
+			err = clEnqueueAcquireGLObjects(
+				queue_, 1, &(buft), 0, NULL, NULL);
+			if (err != CL_SUCCESS)
+				return;
+			size_t sorigin[3] = { 0, 0, 0 };
+			err = clEnqueueCopyBufferToImage(
+				queue_, arg.buffer, buft, 0,
+				sorigin, region, 0, NULL, NULL);
+			if (err != CL_SUCCESS)
+				return;
+			err = clEnqueueReleaseGLObjects(
+				queue_, 1, &(buft), 0, NULL, NULL);
+			if (err != CL_SUCCESS)
+				return;
+			clReleaseMemObject(buft);
 		}
 	}
 
