@@ -87,6 +87,8 @@ namespace FLIVR
 		Argument setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
 		Argument setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
 		Argument setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
+		Argument setKernelArgTex3DBuf(int, int, cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
+		Argument setKernelArgTex3DBuf(std::string &name, int, cl_mem_flags, GLuint, size_t, size_t*);
 		Argument setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 		Argument setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 
@@ -94,6 +96,7 @@ namespace FLIVR
 		void readBuffer(size_t size,
 			void* buf_data, void* data);
 		void readBuffer(Argument& arg, void* data);
+		void copyBufTex3D(Argument& arg, GLuint, size_t, size_t*);//copy buffer back to texture
 		void writeBuffer(size_t size,
 			void* buf_data, void* data);
 		void writeBuffer(Argument& arg, void* data);

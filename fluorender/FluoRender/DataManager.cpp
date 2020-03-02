@@ -1444,44 +1444,39 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	GetSpacings(spcx, spcy, spcz);
 
 	//save mask
-	if (m_tex->nmask() != -1)
+	data = GetMask(true);
+	if (!data)
+		return;
+	if (m_resize)
 	{
-		m_vr->return_mask();
-		data = m_tex->get_nrrd(m_tex->nmask());
+		FL::VolumeSampler sampler;
+		sampler.SetVolume(data);
+		sampler.SetSize(m_rnx, m_rny, m_rnz);
+		sampler.SetSpacings(spcx, spcy, spcz);
+		sampler.SetType(0);
+		//sampler.SetFilterSize(2, 2, 0);
+		sampler.Resize();
+		data = sampler.GetResult();
 		if (data)
 		{
-			if (m_resize)
-			{
-				FL::VolumeSampler sampler;
-				sampler.SetVolume(data);
-				sampler.SetSize(m_rnx, m_rny, m_rnz);
-				sampler.SetSpacings(spcx, spcy, spcz);
-				sampler.SetType(0);
-				//sampler.SetFilterSize(2, 2, 0);
-				sampler.Resize();
-				data = sampler.GetResult();
-				if (data)
-				{
-					spcx = data->axis[0].spacing;
-					spcy = data->axis[1].spacing;
-					spcz = data->axis[2].spacing;
-					delete_data = true;
-				}
-			}
-
-			MSKWriter msk_writer;
-			msk_writer.SetData(data);
-			msk_writer.SetSpacings(spcx, spcy, spcz);
-			wstring filename;
-			if (use_reader && m_reader)
-				filename = m_reader->GetCurMaskName(t, c);
-			else
-				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk";
-			msk_writer.Save(filename, 0);
-			if (delete_data)
-				nrrdNuke(data);
+			spcx = data->axis[0].spacing;
+			spcy = data->axis[1].spacing;
+			spcz = data->axis[2].spacing;
+			delete_data = true;
 		}
 	}
+
+	MSKWriter msk_writer;
+	msk_writer.SetData(data);
+	msk_writer.SetSpacings(spcx, spcy, spcz);
+	wstring filename;
+	if (use_reader && m_reader)
+		filename = m_reader->GetCurMaskName(t, c);
+	else
+		filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk";
+	msk_writer.Save(filename, 0);
+	if (delete_data)
+		nrrdNuke(data);
 }
 
 void VolumeData::SaveLabel(bool use_reader, int t, int c)
@@ -1495,41 +1490,38 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 	GetSpacings(spcx, spcy, spcz);
 
 	//save label
-	if (m_tex->nlabel() != -1)
+	data = GetLabel(true);
+	if (!data)
+		return;
+
+	if (m_resize)
 	{
-		data = m_tex->get_nrrd(m_tex->nlabel());
+		FL::VolumeSampler sampler;
+		sampler.SetVolume(data);
+		sampler.SetSize(m_rnx, m_rny, m_rnz);
+		sampler.SetSpacings(spcx, spcy, spcz);
+		sampler.Resize();
+		data = sampler.GetResult();
 		if (data)
 		{
-			if (m_resize)
-			{
-				FL::VolumeSampler sampler;
-				sampler.SetVolume(data);
-				sampler.SetSize(m_rnx, m_rny, m_rnz);
-				sampler.SetSpacings(spcx, spcy, spcz);
-				sampler.Resize();
-				data = sampler.GetResult();
-				if (data)
-				{
-					spcx = data->axis[0].spacing;
-					spcy = data->axis[1].spacing;
-					spcz = data->axis[2].spacing;
-					delete_data = true;
-				}
-			}
-
-			MSKWriter msk_writer;
-			msk_writer.SetData(data);
-			msk_writer.SetSpacings(spcx, spcy, spcz);
-			wstring filename;
-			if (use_reader && m_reader)
-				filename = m_reader->GetCurLabelName(t, c);
-			else
-				filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".lbl";
-			msk_writer.Save(filename, 1);
-			if (delete_data)
-				nrrdNuke(data);
+			spcx = data->axis[0].spacing;
+			spcy = data->axis[1].spacing;
+			spcz = data->axis[2].spacing;
+			delete_data = true;
 		}
 	}
+
+	MSKWriter msk_writer;
+	msk_writer.SetData(data);
+	msk_writer.SetSpacings(spcx, spcy, spcz);
+	wstring filename;
+	if (use_reader && m_reader)
+		filename = m_reader->GetCurLabelName(t, c);
+	else
+		filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".lbl";
+	msk_writer.Save(filename, 1);
+	if (delete_data)
+		nrrdNuke(data);
 }
 
 //bounding box

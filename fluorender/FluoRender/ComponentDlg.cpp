@@ -3190,7 +3190,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	//update
 	//if (cg.GetUseMask())
 	//	vd->GetMask(true);
-	vd->GetVR()->clear_tex_current();
+	//vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
 	//connection.disconnect();
