@@ -648,7 +648,7 @@ namespace FLIVR
 		int index, int i, cl_mem_flags flag, GLuint texture,
 		size_t size, size_t *region)
 	{
-		Argument arg;
+		Argument arg, argt;
 		cl_int err;
 		cl_mem buft = 0, bufb = 0;
 		if (index < 0 || index >= kernels_.size())
@@ -660,11 +660,22 @@ namespace FLIVR
 		arg.texture = 0;
 		arg.orgn_addr = 0;
 
-		//create texture buffer
-		buft = clCreateFromGLTexture(context_, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texture, &err);
-		if (err != CL_SUCCESS)
-			return Argument();
 		unsigned int ai;
+		//create texture buffer
+		argt.texture = texture;
+		if (matchArgTex(argt, ai))
+		{
+			argt.buffer = arg_list_[ai].buffer;
+			buft = argt.buffer;
+		}
+		else
+		{
+			buft = clCreateFromGLTexture(context_, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texture, &err);
+			if (err != CL_SUCCESS)
+				return Argument();
+			argt.buffer = buft;
+			arg_list_.push_back(argt);
+		}
 		//find data buffer
 		if (matchArgBuf(arg, ai))
 		{
@@ -698,7 +709,7 @@ namespace FLIVR
 			queue_, 1, &(buft), 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return Argument();
-		clReleaseMemObject(buft);
+		//clReleaseMemObject(buft);
 		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
@@ -807,12 +818,15 @@ namespace FLIVR
 		size_t size, size_t* region)
 	{
 		cl_int err;
-		unsigned int ai;
-		if (matchArgBuf(arg, ai))
+		Argument argt;
+		argt.texture = texture;
+		cl_mem buft = 0;
+		unsigned int ai1, ai2;
+		if (matchArgBuf(arg, ai1) &&
+			matchArgTex(argt, ai2))
 		{
-			cl_mem buft = clCreateFromGLTexture(context_, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texture, &err);
-			if (err != CL_SUCCESS)
-				return;
+			argt.buffer = arg_list_[ai2].buffer;
+			buft = argt.buffer;
 			err = clEnqueueAcquireGLObjects(
 				queue_, 1, &(buft), 0, NULL, NULL);
 			if (err != CL_SUCCESS)
@@ -827,7 +841,7 @@ namespace FLIVR
 				queue_, 1, &(buft), 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
-			clReleaseMemObject(buft);
+			//clReleaseMemObject(buft);
 		}
 	}
 
