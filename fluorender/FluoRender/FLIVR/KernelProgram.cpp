@@ -679,12 +679,7 @@ namespace FLIVR
 		//find data buffer
 		if (matchArgBuf(arg, ai))
 		{
-			arg.buffer = arg_list_[ai].buffer;
-			clReleaseMemObject(arg_list_[ai].buffer);
-			arg.buffer = clCreateBuffer(context_, flag, size, 0, &err);
 			bufb = arg.buffer;
-			if (err != CL_SUCCESS)
-				return Argument();
 		}
 		else
 		{
