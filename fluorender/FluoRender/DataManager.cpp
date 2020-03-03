@@ -2514,7 +2514,7 @@ void VolumeData::PopLabel()
 
 void VolumeData::LoadLabel2()
 {
-	if (m_label_save)
+	if (m_label_save && m_vr)
 	{
 		Nrrd* data = m_tex->get_nrrd(m_tex->nlabel());
 		if (!data || !data->data)
@@ -2523,6 +2523,7 @@ void VolumeData::LoadLabel2()
 		GetResolution(nx, ny, nz);
 		unsigned long long size = (unsigned long long)nx * ny * nz;
 		memcpy(data->data, m_label_save, size * sizeof(unsigned int));
+		m_vr->clear_tex_current();
 	}
 }
 
