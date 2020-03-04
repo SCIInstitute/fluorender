@@ -704,6 +704,8 @@ namespace FLIVR
 			queue_, 1, &(buft), 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return Argument();
+		clFlush(queue_);
+		clFinish(queue_);
 		//clReleaseMemObject(buft);
 		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
@@ -836,6 +838,8 @@ namespace FLIVR
 				queue_, 1, &(buft), 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
+			clFlush(queue_);
+			clFinish(queue_);
 			//clReleaseMemObject(buft);
 		}
 	}
