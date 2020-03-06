@@ -104,7 +104,7 @@ endif()
 ExternalProject_Get_Property(Teem_external_download BINARY_DIR)
 
 if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
-  SET(Teem_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
+  SET(Teem_DIR "${BINARY_DIR}/bin;${BINARY_DIR}/bin/Debug;${BINARY_DIR}/bin/Release" CACHE INTERNAL "")
 else()
   SET(Teem_DIR ${BINARY_DIR} CACHE INTERNAL "")
 endif()
@@ -113,9 +113,18 @@ set(Teem_INCLUDE_DIR "${BINARY_DIR}/include" CACHE INTERNAL "")
 
 add_library(Teem_external STATIC IMPORTED)
 
-set(teem_LIBRARIES
-  ${Teem_DIR}/bin/${prefix}teem${suffix}
-  CACHE INTERNAL ""
-)
+#this is a bandaid fix. Need to really fix this somehow. 
+if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
+  set(teem_LIBRARIES
+    #"${BINARY_DIR}/bin/${prefix}teem${suffix};${BINARY_DIR}/bin/Debug/${prefix}teem${suffix};${BINARY_DIR}/bin/Release/${prefix}teem${suffix}"
+	${BINARY_DIR}/bin/Debug/${prefix}teem${suffix}
+    CACHE INTERNAL ""
+  )
+else()
+  set(teem_LIBRARIES
+    ${Teem_DIR}/${prefix}teem${suffix}
+    CACHE INTERNAL ""
+  )
+endif()
 
 MESSAGE(STATUS "Teem_DIR: ${Teem_DIR}")

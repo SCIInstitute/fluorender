@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <functional>
 
-
-
 namespace FluoUI
 {
 	class InterfaceAgent;
@@ -304,8 +302,8 @@ namespace fluo
     template<typename T, typename V>
     bool getValue(const T &name, V &value)
     {
-      if(_value_set)
-        return _value_set->getValue(name,value);
+	  if (_value_set)
+		return _value_set->getValue(name, value);
       else
         return false;
     }

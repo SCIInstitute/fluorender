@@ -72,12 +72,13 @@ else()
   SET(libtiff_LIBRARY_DIR ${BINARY_DIR}/libtiff CACHE INTERNAL "")
 endif()
 
-SET(libtiff_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
+SET(TIFF_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
+SET(TIFF_LIBRARY ${libtiff_LIBRARY_DIR} CACHE INTERNAL "")
 
 add_library(libtiff_external STATIC IMPORTED)
 
-set(Libtiff_LIBRARIES
-  ${libtiff_LIBRARY_DIR}/${prefix}tiffd${suffix} CACHE INTERNAL ""
-)
+#set(Libtiff_LIBRARIES
+#  ${libtiff_LIBRARY_DIR}/${prefix}tiffd${suffix} CACHE INTERNAL ""
+#)
 
 MESSAGE(STATUS "libtiff_DIR: ${libtiff_LIBRARY_DIR}")

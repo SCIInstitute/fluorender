@@ -31,18 +31,18 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeData.hpp"
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/Plane.h>
-//#include <Formats/base_reader.hpp>
-//#include <Formats/oib_reader.hpp>
-//#include <Formats/nrrd_reader.hpp>
-//#include <Formats/tif_reader.hpp>
-//#include <Formats/nrrd_writer.hpp>
-//#include <Formats/tif_writer.hpp>
-//#include <Formats/msk_reader.hpp>
-//#include <Formats/msk_writer.hpp>
-//#include <Formats/lsm_reader.hpp>
-//#include <Formats/lbl_reader.hpp>
-//#include <Formats/pvxml_reader.hpp>
-//#include <Formats/brkxml_reader.hpp>
+#include <Formats/base_reader.hpp>
+#include <Formats/oib_reader.hpp>
+#include <Formats/nrrd_reader.hpp>
+#include <Formats/tif_reader.hpp>
+#include <Formats/nrrd_writer.hpp>
+#include <Formats/tif_writer.hpp>
+#include <Formats/msk_reader.hpp>
+#include <Formats/msk_writer.hpp>
+#include <Formats/lsm_reader.hpp>
+#include <Formats/lbl_reader.hpp>
+#include <Formats/pvxml_reader.hpp>
+#include <Formats/brkxml_reader.hpp>
 //#include <Formats/imageJ_reader.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -1080,7 +1080,7 @@ BaseReader* VolumeData::GetReader()
 }
 
 //load
-/*
+
 int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring &path)
 {
 	if (!data || data->dim != 3)
@@ -1198,7 +1198,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 
 	return 1;
 }
-*/
+
 int VolumeData::ReplaceData(Nrrd* data, bool del_tex)
 {
 	if (!data || data->dim != 3)
@@ -1283,7 +1283,7 @@ Nrrd* VolumeData::GetData(bool ret)
 
 	return 0;
 }
-/*
+
 void VolumeData::AddEmptyData(int bits,
 	int nx, int ny, int nz,
 	double spcx, double spcy, double spcz,
@@ -1328,7 +1328,7 @@ void VolumeData::AddEmptyData(int bits,
         nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 		setValue("bits", long(16));
     }
-    */
+    
     /*
     nrrdAxisInfoSet(nv, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet(nv, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
@@ -1336,7 +1336,7 @@ void VolumeData::AddEmptyData(int bits,
 	nrrdAxisInfoSet(nv, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
     these may be deprecated
     */
-/*
+
     nrrdAxisInfoSet_va(nv, nrrdAxisInfoSpacing, spcx, spcy, spcz);
     nrrdAxisInfoSet_va(nv, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
     nrrdAxisInfoSet_va(nv, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
@@ -1396,7 +1396,7 @@ void VolumeData::AddEmptyData(int bits,
 
     OnMipModeChanged(newEvent);
 }
-*/
+
 void VolumeData::LoadMask(Nrrd* mask)
 {
 	if (!mask || !m_tex || !m_vr)
@@ -1445,7 +1445,7 @@ Nrrd* VolumeData::GetMask(bool ret)
 
 	return 0;
 }
-/*
+
 void VolumeData::AddEmptyMask(int mode)
 {
 	if (!m_tex || !m_vr)
@@ -1473,7 +1473,7 @@ void VolumeData::AddEmptyMask(int mode)
 		}
 		double spcx, spcy, spcz;
         m_tex->get_spacings(spcx, spcy, spcz);
-        */
+        
         /*
 		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
 		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
@@ -1483,7 +1483,7 @@ void VolumeData::AddEmptyMask(int mode)
 
         these may be deprecated
         */
-/*
+
         nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
         nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
         nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
@@ -1510,7 +1510,7 @@ void VolumeData::AddEmptyMask(int mode)
 			memset((void*)val8, 0, mem_size * sizeof(uint8));
 	}
 }
-*/
+
 void VolumeData::LoadLabel(Nrrd* label)
 {
 	if (!label || !m_tex || !m_vr)
@@ -1646,7 +1646,7 @@ bool VolumeData::SearchLabel(unsigned int label)
 			return true;
 	return false;
 }
-/*
+
 double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
 {
 	void *data_data = 0;
@@ -1979,7 +1979,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
                 //nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz); may be deprecated
                 nrrdWrap_va(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
             }
-            */
+            
             /*
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
@@ -1988,7 +1988,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 
             these may be deprecated
             */
-/*
+
             nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
             nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
             nrrdAxisInfoSet_va(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
@@ -2003,7 +2003,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 
 		//consider doing processing outside of the VolumeData class
         //to reduce coupling
-        */
+        
 /*		bool resize;
 		getValue("resize", resize);
 		long resize_x, resize_y, resize_z;
@@ -2030,7 +2030,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 			if (delete_data)
 				nrrdNuke(temp);
 		}*/
-/*
+
 		writer->SetData(data);
 		writer->SetSpacings(spcx, spcy, spcz);
 		writer->SetCompression(compress);
@@ -2073,7 +2073,7 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 		{
 			//consider doing processing outside of the VolumeData class
             //to reduce coupling
-            */
+            
 /*			bool resize;
 			getValue("resize", resize);
 			long resize_x, resize_y, resize_z;
@@ -2098,7 +2098,7 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 					delete_data = true;
 				}
 			}*/
-/*
+
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
@@ -2141,7 +2141,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 		{
 			//consider doing processing outside of the VolumeData class
             //to reduce coupling
-            */
+            
 /*			bool resize;
 			getValue("resize", resize);
 			long resize_x, resize_y, resize_z;
@@ -2164,7 +2164,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 					delete_data = true;
 				}
 			}*/
-/*
+
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
@@ -2180,7 +2180,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 		}
 	}
 }
-*/
+
 //volumerenderer
 FLIVR::VolumeRenderer *VolumeData::GetRenderer()
 {

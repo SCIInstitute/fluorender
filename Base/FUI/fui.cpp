@@ -1,6 +1,8 @@
 #include "fui.hpp"
 #include "ui_FUI.h"
 
+
+
 FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FUI)
@@ -25,7 +27,6 @@ FUI::FUI(QWidget *parent) :
 
   // I cast the integer Half Renderview Size to a constant.
   const_cast<int&>(HALFRENDERVIEWSIZE) = ui->splitter->widget(MAINRENDERINDEX)->height()/2;
-
 
   //ui->dockWidgetContents = propertiesPanel;
 }

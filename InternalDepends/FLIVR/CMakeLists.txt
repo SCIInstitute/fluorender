@@ -71,7 +71,7 @@ set(SOURCES BBox.cpp
 set(FLIVR_INCLUDE_DIR ${HEADER_FILES} CACHE INTERNAL "")
 set(FLIVR_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
-link_directories(${FLObject_LIBRARY_DIR} ${glew_LIBRARY_DIR} ${Teem_dir}/bin)
+#link_directories(${FLObject_LIBRARY_DIR} ${glew_LIBRARY_DIR} ${Teem_dir}/bin)
 add_library(FLIVR STATIC ${HEADER_FILES} ${SOURCES}) 
 
 if(APPLE)

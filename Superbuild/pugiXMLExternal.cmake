@@ -61,8 +61,9 @@ SET(pugi_INCLUDE_DIR ${SOURCE_DIR}/src CACHE INTERNAL "")
 
 add_library(pugi_external STATIC IMPORTED)
 
+#this is a bandaid fix. Need to really fix this. 
 set(pugi_LIBRARIES
-  ${pugi_LIBRARY_DIR}/${prefix}pugixml${suffix} CACHE INTERNAL ""
+  ${BINARY_DIR}/Debug/${prefix}pugixml${suffix} CACHE INTERNAL ""
 )
 
 MESSAGE(STATUS "pugi_LIBRARY_DIR: ${pugi_LIBRARY_DIR}")

@@ -31,6 +31,7 @@ project(Fluorender)
 
 # Places the final runtime binary in a bin directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Set the standard to C++17 as std::apply and std::filesystem are used
 # The compilers are also cached internally so they may be passed in the superbuild
@@ -102,7 +103,7 @@ include_directories(${Teem_INCLUDE_DIR})
 include_directories(${FFmpeg_INCLUDE_DIR})
 include_directories(${glm_INCLUDE_DIR})
 include_directories(${pole_INCLUDE_DIR})
-include_directories(${libtiff_INCLUDE_DIR})
+include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${pugi_INCLUDE_DIR})
 

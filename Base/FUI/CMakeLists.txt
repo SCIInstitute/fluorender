@@ -37,6 +37,7 @@ project(FluorenderGUI)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # These are manually defined rather than Globbed to give us better control
 # of what goes in the project.
