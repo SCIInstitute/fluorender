@@ -94,6 +94,8 @@ namespace FL
 		//select group
 		void SetSelectGroup(bool value) { m_select_multi = value ? 1 : 0; }
 		bool GetSelectGroup() { return m_select_multi == 1; }
+		//iteration number
+		int GetIter() { return m_iter; }
 		//update order
 		void SetUpdateOrder(bool bval) { m_update_order = bval; }
 		bool GetUpdateOrder() { return m_update_order; }
@@ -233,6 +235,7 @@ namespace FL
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
 
+		int m_iter;
 		bool m_update_order;
 
 		//brush properties
