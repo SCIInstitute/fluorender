@@ -734,11 +734,13 @@ private:
 					 //4-one-time rendering update in painting mode
 					 //5-ruler mode
 					 //6-edit ruler
-					 //7-paint ruler mode
+					 //7-paint with locator
 					 //8-same as 4, but for paint ruler mode
 					 //9-move ruler
 					 //10-grow, click and hold to activate
 					 //11-lock ruler point for relaxing
+					 //12-grow with ruler
+					 //13-paint with multipoint ruler
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;

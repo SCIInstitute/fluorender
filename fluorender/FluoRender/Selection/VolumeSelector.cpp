@@ -76,7 +76,8 @@ VolumeSelector::VolumeSelector() :
 	m_brush_size_data(true),
 	m_pressure(0.0),
 	m_press_peak(0.0),
-	m_air_press(0.5)
+	m_air_press(0.5),
+	m_iter(0)
 {
 }
 
@@ -282,22 +283,21 @@ void VolumeSelector::Select(double radius)
 			m_mode == 9)
 		{
 			//loop for growing
-			int iter;
 			if (m_mode == 9)
 			{
 				if (m_iter_num <= BRUSH_TOOL_ITER_WEAK)
-					iter = m_iter_num / 3;
+					m_iter = m_iter_num / 3;
 				else if (m_iter_num <= BRUSH_TOOL_ITER_NORMAL)
-					iter = m_iter_num / 2;
+					m_iter = m_iter_num / 2;
 				else
-					iter = m_iter_num;
+					m_iter = m_iter_num;
 			}
 			else
-				iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
+				m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			int div = 3;
 			int order;
 			FL::MaskBorder mb(m_vd);
-			for (int i = 0; i < iter; i++)
+			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;
 				if (m_mode == 9)

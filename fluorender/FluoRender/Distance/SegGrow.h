@@ -40,12 +40,16 @@ namespace FL
 		SegGrow(VolumeData* vd);
 		~SegGrow();
 
-
-		void Init();//initialize label ids
+		void SetBranches(int val) { m_branches = val; }
+		void SetIter(int val) { m_iter = val; }
 		void Compute();
 
 	private:
 		VolumeData *m_vd;
+		int m_branches;//max number of branches to detect
+		int m_iter;//iterations
+
+		bool CheckBricks();
 	};
 }
 #endif//FL_SegGrow_h

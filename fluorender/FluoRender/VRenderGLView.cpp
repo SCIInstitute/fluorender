@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
+#include <Distance/SegGrow.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -1756,7 +1757,8 @@ void VRenderGLView::SetIntMode(int mode)
 		m_brush_state = 0;
 		m_draw_brush = false;
 	}
-	else if (m_int_mode == 10)
+	else if (m_int_mode == 10 ||
+		m_int_mode == 12)
 		SetPaintMode(9);
 }
 
@@ -4234,7 +4236,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		}
 
 		//grow
-		if (m_int_mode == 10 &&
+		if ((m_int_mode == 10 ||
+			m_int_mode == 12) &&
 			wxGetMouseState().LeftIsDown() &&
 			HasFocus())
 		{
@@ -4242,6 +4245,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_selector.SetInitMask(2);
 			Segment();
 			m_selector.SetInitMask(3);
+			if (m_int_mode == 12)
+			{
+				FL::SegGrow sg(m_cur_vol);
+				sg.SetIter(m_selector.GetIter()*3);
+				sg.Compute();
+			}
 			refresh = true;
 			start_loop = true;
 			//update
@@ -9890,12 +9899,15 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			RefreshGL(26);
 		}
 
-		if (m_int_mode == 10)
+		if (m_int_mode == 10 ||
+			m_int_mode == 12)
 		{
 			m_selector.ResetMousePos();
 			m_selector.SetInitMask(1);
 			Segment();
 			m_selector.SetInitMask(3);
+			if (m_int_mode == 12)
+				m_cur_vol->AddEmptyLabel(0, false);
 			m_force_clear = true;
 			//RefreshGL(27);
 			SetFocus();
@@ -10029,7 +10041,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			((m_int_mode == 6 ||
 			m_int_mode == 9 ||
 			m_int_mode == 10 ||
-			m_int_mode == 11) &&
+			m_int_mode == 11 ||
+			m_int_mode == 12) &&
 			!p0))
 		{
 			//disable picking
@@ -10040,7 +10053,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				abs(old_mouse_X - event.GetX()) +
 				abs(old_mouse_Y - event.GetY())<200)
 			{
-				if (event.LeftIsDown() && !event.ControlDown() && m_int_mode != 10)
+				if (event.LeftIsDown() &&
+					!event.ControlDown() &&
+					m_int_mode != 10 &&
+					m_int_mode != 12)
 				{
 					Quaternion q_delta = Trackball(
 						event.GetX() - old_mouse_X, old_mouse_Y - event.GetY());

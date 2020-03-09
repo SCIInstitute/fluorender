@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "SegGrow.h"
+#include <FLIVR/VolKernel.h>
 
 using namespace FL;
 
@@ -35,13 +36,31 @@ const char* str_cl_segrow = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
-"//initialize masked regions to ids (ordered)\n" \
-"__kernel void kernel_0(\n" \
+"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
+"{\n" \
+"	unsigned int res = val;\n" \
+"	int s = len - 1;\n" \
+"	for (val >>= 1; val; val >>= 1)\n" \
+"	{\n" \
+"		res <<= 1;\n" \
+"		res |= val & 1;\n" \
+"		s--;\n" \
+"	}\n" \
+"	res <<= s;\n" \
+"	res <<= 32-len;\n" \
+"	res >>= 32-len;\n" \
+"	return res;\n" \
+"}\n" \
+"\n" \
+"//initialize masked regions to ids (shuffle)\n" \
+"__kernel void kernel_1(\n" \
 "	__read_only image3d_t mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
+"	unsigned int nz,\n" \
+"	unsigned int lenx,\n" \
+"	unsigned int lenz)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
@@ -50,10 +69,23 @@ const char* str_cl_segrow = \
 "	if (value < 0.01)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	atomic_xchg(label+index, index + 1);\n" \
+"	if (label[index] > 0)\n" \
+"		return;\n" \
+"	unsigned int x, y, z, ii;\n" \
+"	x = reverse_bit(i, lenx);\n" \
+"	y = reverse_bit(j, lenx);\n" \
+"	z = reverse_bit(k, lenz);\n" \
+"	unsigned int res = 0;\n" \
+"	for (ii=0; ii<lenx; ++ii)\n" \
+"	{\n" \
+"		res |= (1<<ii & x)<<(ii);\n" \
+"		res |= (1<<ii & y)<<(ii+1);\n" \
+"	}\n" \
+"	res |= z<<lenx*2;\n" \
+"	atomic_xchg(label+index, res + 1);\n" \
 "}\n" \
 "//initialize new mask regions to ids (ordered)\n" \
-"__kernel void kernel_1(\n" \
+"__kernel void kernel_null(\n" \
 "	__read_only image3d_t mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -69,7 +101,7 @@ const char* str_cl_segrow = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	if (label[index] > 0)\n" \
 "		return;\n" \
-"	atomic_xchg(label+index, index + 1);\n" \
+"	atomic_xchg(label+index, nx*ny*nz - index);\n" \
 "}\n" \
 "//grow ids\n" \
 "__kernel void kernel_2(\n" \
@@ -111,8 +143,8 @@ const char* str_cl_segrow = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
-"	__global unsigned int* count,\n" \
 "	unsigned int maxc,\n" \
+"	__global unsigned int* count,\n" \
 "	__global unsigned int* ids)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
@@ -132,7 +164,7 @@ const char* str_cl_segrow = \
 "	if (!found && *count < maxc)\n" \
 "	{\n" \
 "		atomic_inc(count);\n" \
-"		atomic_xchg(ids+count-1, label_v);\n" \
+"		atomic_xchg(ids+(*count)-1, label_v);\n" \
 "	}\n" \
 "}\n" \
 "//find connectivity/center of new ids\n" \
@@ -142,7 +174,7 @@ const char* str_cl_segrow = \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
 "	unsigned int count,\n" \
-"	unsigned int* ids,\n" \
+"	__global unsigned int* ids,\n" \
 "	__global unsigned int* cids,\n" \
 "	__global unsigned int* sum,\n" \
 "	__global float* csum)\n" \
@@ -230,7 +262,7 @@ const char* str_cl_segrow = \
 "	}\n" \
 "}\n" \
 "//fix processed ids\n" \
-"__kernel void kernel_6(\n" \
+"__kernel void kernel_5(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -249,9 +281,10 @@ const char* str_cl_segrow = \
 
 
 SegGrow::SegGrow(VolumeData* vd):
-	m_vd(vd)
+	m_vd(vd),
+	m_branches(10),
+	m_iter(0)
 {
-
 }
 
 SegGrow::~SegGrow()
@@ -259,12 +292,189 @@ SegGrow::~SegGrow()
 
 }
 
-void SegGrow::Init()
+bool SegGrow::CheckBricks()
 {
-
+	if (!m_vd || !m_vd->GetTexture())
+		return false;
+	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	if (!bricks || bricks->size() == 0)
+		return false;
+	return true;
 }
 
 void SegGrow::Compute()
 {
+	if (!CheckBricks())
+		return;
 
+	//create program and kernels
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_segrow);
+	if (!kernel_prog)
+		return;
+	int kernel_1 = kernel_prog->createKernel("kernel_1");//init
+	int kernel_2 = kernel_prog->createKernel("kernel_2");//grow
+	int kernel_3 = kernel_prog->createKernel("kernel_3");//count
+	int kernel_4 = kernel_prog->createKernel("kernel_4");//get shape
+	int kernel_5 = kernel_prog->createKernel("kernel_5");//finalize
+
+	std::vector<unsigned int> ids(m_branches);
+	unsigned int* pids = ids.data();
+	std::vector<unsigned int> cids(m_branches);
+	unsigned int* pcids = cids.data();
+
+	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		TextureBrick* b = (*bricks)[i];
+		if (!b->get_paint_mask())
+			continue;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
+
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t local_size[3] = { 1, 1, 1 };
+		//bit length
+		unsigned int lenx = 0;
+		unsigned int r = Max(nx, ny);
+		while (r > 0)
+		{
+			r /= 2;
+			lenx++;
+		}
+		unsigned int lenz = 0;
+		r = nz;
+		while (r > 0)
+		{
+			r /= 2;
+			lenz++;
+		}
+
+		//set
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
+		unsigned int count, sum;
+		//kernel1
+		kernel_prog->setKernelArgTex3D(kernel_1, 0,
+			CL_MEM_READ_ONLY, mid);
+		Argument arg_label =
+			kernel_prog->setKernelArgTex3DBuf(kernel_1, 1,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog->setKernelArgConst(kernel_1, 2,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_1, 3,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_1, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_1, 5,
+			sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setKernelArgConst(kernel_1, 6,
+			sizeof(unsigned int), (void*)(&lenz));
+		//kernel2
+		arg_label.kernel_index = kernel_2;
+		arg_label.index = 0;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_2, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_2, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_2, 3,
+			sizeof(unsigned int), (void*)(&nz));
+		//kernel3
+		arg_label.kernel_index = kernel_3;
+		arg_label.index = 0;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_3, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_3, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_3, 3,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_3, 4,
+			sizeof(unsigned int), (void*)(&m_branches));
+		count = 0;
+		kernel_prog->setKernelArgBuf(kernel_3, 5,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int), (void*)(&count));
+		kernel_prog->setKernelArgBuf(kernel_3, 6,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*m_branches, (void*)(pids));
+		
+		//first pass
+		kernel_prog->executeKernel(kernel_1, 3, global_size, local_size);
+		for (int i = 0; i < m_iter; ++i)
+			kernel_prog->executeKernel(kernel_2, 3, global_size, local_size);
+/*		kernel_prog->executeKernel(kernel_3, 3, global_size, local_size);
+
+		//read back
+		kernel_prog->readBuffer(sizeof(unsigned int), &count, &count);
+		kernel_prog->readBuffer(sizeof(unsigned int)*m_branches, pids, pids);
+
+		if (!count)
+			continue;
+		if (count > m_branches)
+			count = m_branches;
+
+		//set
+		//kernel4
+		arg_label.kernel_index = kernel_4;
+		arg_label.index = 0;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_4, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_4, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_4, 3,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_4, 4,
+			sizeof(unsigned int), (void*)(&count));
+		kernel_prog->setKernelArgBuf(kernel_4, 5,
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*count, (void*)(pids));
+		kernel_prog->setKernelArgBuf(kernel_4, 6,
+			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*count, (void*)(pcids));
+		sum = 0;
+		kernel_prog->setKernelArgBuf(kernel_4, 7,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int), (void*)(&sum));
+		std::vector<float> csum(count * 3, 0.0f);
+		float* pcsum = csum.data();
+		kernel_prog->setKernelArgBuf(kernel_4, 8,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*count*3, (void*)(pcsum));
+
+		//execute
+		kernel_prog->executeKernel(kernel_4, 3, global_size, local_size);
+
+		//read back
+		kernel_prog->readBuffer(sizeof(unsigned int)*count, pcids, pcids);
+		kernel_prog->readBuffer(sizeof(unsigned int), &sum, &sum);
+		kernel_prog->readBuffer(sizeof(unsigned int)*count*3, pcsum, pcsum);
+*/
+		//finalize
+		//kernel5
+		arg_label.kernel_index = kernel_5;
+		arg_label.index = 0;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_5, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_5, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_5, 3,
+			sizeof(unsigned int), (void*)(&nz));
+
+		//execute
+		kernel_prog->executeKernel(kernel_5, 3, global_size, local_size);
+
+		//read back
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
+
+		//release buffer
+		kernel_prog->releaseAll();
+	}
 }
