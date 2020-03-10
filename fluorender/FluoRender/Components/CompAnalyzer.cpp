@@ -109,6 +109,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	m_comp_graph.clear();
 	m_analyzed = false;
 
+	m_vd->GetVR()->return_label();
 	if (sel)
 		m_vd->GetVR()->return_mask();
 
