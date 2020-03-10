@@ -188,98 +188,132 @@ const char* str_cl_segrow = \
 "	for (int c = 0; c < lcount; ++c)\n" \
 "		atomic_xchg(ids+index*maxc+c, lids[c]);\n" \
 "}\n" \
+"int __attribute((always_inline)) add_id(\n" \
+"unsigned int maxcid,\n" \
+"unsigned int ncid,\n" \
+"__local unsigned int* cids,\n" \
+"unsigned int m)\n" \
+"{\n" \
+"	bool found = false;\n" \
+"	for (int c = 0; c < ncid; ++c)\n" \
+"	if (cids[c] == m)\n" \
+"	{\n" \
+"		found = true;\n" \
+"		break;\n" \
+"	}\n" \
+"	if (found)\n" \
+"		return ncid;\n" \
+"	else if (ncid < maxcid)\n" \
+"		cids[ncid] = m;\n" \
+"		return ++ncid;\n" \
+"}\n"
 "//find connectivity/center of new ids\n" \
 "__kernel void kernel_4(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
+"	unsigned int nxy,\n" \
 "	unsigned int nz,\n" \
-"	unsigned int count,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	unsigned int nid,\n" \
+"	unsigned int maxcid,\n" \
 "	__global unsigned int* ids,\n" \
 "	__global unsigned int* cids,\n" \
 "	__global unsigned int* sum,\n" \
-"	__global float* csum)\n" \
+"	__global float* csum,\n" \
+"	__local unsigned int* lncid,\n" \
+"	__local unsigned int* lcids,\n" \
+"	__local unsigned int* lsum,\n" \
+"	__local float* lcsum)\n" \
 "{\n" \
-"	int3 coord = (int3)(get_global_id(0),\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
-"	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0 || label_v & 0x80000000)\n" \
-"		return;\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 ijk = (int3)(0, 0, 0);\n" \
+"	unsigned int index;\n" \
+"	unsigned int label_v;\n" \
+"	bool found;\n" \
 "	int c;\n" \
-"	bool found = false;\n" \
-"	for (int c = 0; c < count; ++c)\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		label_v = label[index];\n" \
+"		if (label_v == 0 || label_v & 0x80000000)\n" \
+"			continue;\n" \
+"		found = false;\n" \
+"		for (c = 0; c < nid; ++c)\n" \
 "		if (ids[c] == label_v)\n" \
 "		{\n" \
 "			found = true;\n" \
 "			break;\n" \
 "		}\n" \
-"	if (!found)\n" \
-"		return;\n" \
-"	atomic_inc(sum+c);\n" \
-"	atomic_xchg(csum+c*3, csum[c*3] + (float)(coord.x));\n" \
-"	atomic_xchg(csum+c*3+1, csum[c*3+1] + (float)(coord.y));\n" \
-"	atomic_xchg(csum+c*3+2, csum[c*3+2] + (float)(coord.z));\n" \
-"	unsigned int m;\n" \
-"	//-x\n" \
-"	if (coord.x > 0)\n" \
-"	{\n" \
-"		m = label[index - 1];\n" \
-"		if (m != label_v)\n" \
+"		if (!found)\n" \
+"			continue;\n" \
+"		lsum[c]++;\n" \
+"		lcsum[c*3] += (float)(ijk.x);\n" \
+"		lcsum[c*3+1] += (float)(ijk.y);\n" \
+"		lcsum[c*3+2] += (float)(ijk.z);\n" \
+"		unsigned int m;\n" \
+"		//-x\n" \
+"		if (ijk.x > 0)\n" \
 "		{\n" \
-"			cids[c] = m;\n" \
-"			return;\n" \
+"			m = label[index - 1];\n" \
+"			if (m && m != label_v)\n" \
+"				lncid[c] = add_id(maxcid, lncid[c], lcids+c*maxcid, m);\n" \
+"		}\n" \
+"		//+x\n" \
+"		if (ijk.x < nx-1)\n" \
+"		{\n" \
+"			m = label[index + 1];\n" \
+"			if (m && m != label_v)\n" \
+"				lncid[c] = add_id(maxcid, lncid[c], lcids+c*maxcid, m);\n" \
+"		}\n" \
+"		//-y\n" \
+"		if (ijk.y > 0)\n" \
+"		{\n" \
+"			m = label[index - nx];\n" \
+"			if (m && m != label_v)\n" \
+"				lncid[c] = add_id(maxcid, lncid[c], lcids+c*maxcid, m);\n" \
+"		}\n" \
+"		//+y\n" \
+"		if (ijk.y < ny-1)\n" \
+"		{\n" \
+"			m = label[index + nx];\n" \
+"			if (m && m != label_v)\n" \
+"				lncid[c] = add_id(maxcid, lncid[c], lcids+c*maxcid, m);\n" \
+"		}\n" \
+"		//-z\n" \
+"		if (ijk.z > 0)\n" \
+"		{\n" \
+"			m = label[index - nxy];\n" \
+"			if (m && m != label_v)\n" \
+"				lncid[c] = add_id(maxcid, lncid[c], lcids+c*maxcid, m);\n" \
+"		}\n" \
+"		//+z\n" \
+"		if (ijk.z < nz-1)\n" \
+"		{\n" \
+"			m = label[index + nxy];\n" \
+"			if (m && m != label_v)\n" \
+"				lncid[c] = add_id(maxcid, lncid[c], lcids+c*maxcid, m);\n" \
 "		}\n" \
 "	}\n" \
-"	//+x\n" \
-"	if (coord.x < nx-1)\n" \
+"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	for (c = 0; c < nid*maxcid; ++c)\n" \
+"		atomic_xchg(cids+index*nid*maxcid+c, lcids[c]);\n" \
+"	for (c = 0; c < nid; ++c)\n" \
+"		atomic_xchg(sum+index*nid+c, lsum[c]);\n" \
+"	for (c = 0; c < nid*3; ++c)\n" \
 "	{\n" \
-"		m = label[index + 1];\n" \
-"		if (m != label_v)\n" \
-"		{\n" \
-"			cids[c] = m;\n" \
-"			return;\n" \
-"		}\n" \
-"	}\n" \
-"	//-y\n" \
-"	if (coord.y > 0)\n" \
-"	{\n" \
-"		m = label[index - nx];\n" \
-"		if (m != label_v)\n" \
-"		{\n" \
-"			cids[c] = m;\n" \
-"			return;\n" \
-"		}\n" \
-"	}\n" \
-"	//+y\n" \
-"	if (coord.y < ny-1)\n" \
-"	{\n" \
-"		m = label[index + nx];\n" \
-"		if (m != label_v)\n" \
-"		{\n" \
-"			cids[c] = m;\n" \
-"			return;\n" \
-"		}\n" \
-"	}\n" \
-"	//-z\n" \
-"	if (coord.z > 0)\n" \
-"	{\n" \
-"		m = label[index - nx*ny];\n" \
-"		if (m != label_v)\n" \
-"		{\n" \
-"			cids[c] = m;\n" \
-"			return;\n" \
-"		}\n" \
-"	}\n" \
-"	//+z\n" \
-"	if (coord.z < nz-1)\n" \
-"	{\n" \
-"		m = label[index + nx*ny];\n" \
-"		if (m != label_v)\n" \
-"		{\n" \
-"			cids[c] = m;\n" \
-"			return;\n" \
-"		}\n" \
+"		atomic_xchg(csum+index*nid*3+c, lcsum[c]);\n" \
+"		atomic_xchg(csum+index*nid*3+c+1, lcsum[c+1]);\n" \
+"		atomic_xchg(csum+index*nid*3+c+2, lcsum[c+2]);\n" \
 "	}\n" \
 "}\n" \
 "//fix processed ids\n" \
@@ -517,43 +551,70 @@ void SegGrow::Compute()
 		unsigned int total = uniqids.size();
 		if (!total)
 			continue;
+		ids.clear();
+		for (auto it = uniqids.begin();
+			it != uniqids.end(); ++it)
+			ids.push_back(*it);
+		pids = ids.data();
 
 		//set
 		//kernel4
-/*		arg_label.kernel_index = kernel_4;
+		arg_label.kernel_index = kernel_4;
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_4, 1,
-			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_4, 2,
-			sizeof(unsigned int), (void*)(&ny));
+			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_4, 3,
-			sizeof(unsigned int), (void*)(&nz));
+			sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(kernel_4, 4,
-			sizeof(unsigned int), (void*)(&count));
-		kernel_prog->setKernelArgBuf(kernel_4, 5,
+			sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(kernel_4, 5,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_4, 6,
+			sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog->setKernelArgConst(kernel_4, 7,
+			sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog->setKernelArgConst(kernel_4, 8,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_4, 9,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_4, 10,
+			sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog->setKernelArgConst(kernel_4, 11,
+			sizeof(unsigned int), (void*)(&total));
+		unsigned int maxcid = 2;
+		kernel_prog->setKernelArgConst(kernel_4, 12,
+			sizeof(unsigned int), (void*)(&maxcid));
+		kernel_prog->setKernelArgBuf(kernel_4, 13,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*count, (void*)(pids));
-		kernel_prog->setKernelArgBuf(kernel_4, 6,
+			sizeof(unsigned int)*total, (void*)(pids));
+		std::vector<unsigned int> cids(maxcid*total*gsxyz, 0);
+		unsigned int *pcids = cids.data();
+		kernel_prog->setKernelArgBuf(kernel_4, 14,
 			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*count, (void*)(pcids));
-		sum = 0;
-		kernel_prog->setKernelArgBuf(kernel_4, 7,
+			sizeof(unsigned int)*maxcid*total*gsxyz, (void*)(pcids));
+		std::vector<unsigned int> sum(total*gsxyz, 0);
+		unsigned int *psum = sum.data();
+		kernel_prog->setKernelArgBuf(kernel_4, 15,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), (void*)(&sum));
-		std::vector<float> csum(count * 3, 0.0f);
+			sizeof(unsigned int)*total*gsxyz, (void*)(psum));
+		std::vector<float> csum(total*gsxyz*3, 0.0f);
 		float* pcsum = csum.data();
-		kernel_prog->setKernelArgBuf(kernel_4, 8,
+		kernel_prog->setKernelArgBuf(kernel_4, 16,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*count*3, (void*)(pcsum));
+			sizeof(float)*total*gsxyz*3, (void*)(pcsum));
+		kernel_prog->setKernelArgLocal(kernel_4, 17, sizeof(unsigned int)*total);
+		kernel_prog->setKernelArgLocal(kernel_4, 18, sizeof(unsigned int)*total*maxcid);
+		kernel_prog->setKernelArgLocal(kernel_4, 19, sizeof(unsigned int)*total);
+		kernel_prog->setKernelArgLocal(kernel_4, 20, sizeof(unsigned int)*total*3);
 
 		//execute
-		kernel_prog->executeKernel(kernel_4, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_4, 3, global_size2, local_size);
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*count, pcids, pcids);
-		kernel_prog->readBuffer(sizeof(unsigned int), &sum, &sum);
-		kernel_prog->readBuffer(sizeof(unsigned int)*count*3, pcsum, pcsum);*/
+		kernel_prog->readBuffer(sizeof(unsigned int)*maxcid*total*gsxyz, pcids, pcids);
+		kernel_prog->readBuffer(sizeof(unsigned int)*total*gsxyz, psum, psum);
+		kernel_prog->readBuffer(sizeof(float)*total*gsxyz*3, pcsum, pcsum);
 
 		//finalize
 		//kernel5
