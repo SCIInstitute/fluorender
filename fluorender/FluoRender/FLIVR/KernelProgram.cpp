@@ -330,7 +330,9 @@ namespace FLIVR
 		unsigned int i;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].size == 0 &&
+			if (arg_list_[i].kernel_index == index &&
+				arg_list_[i].size == 0 &&
+				arg_list_[i].texture &&
 				glIsTexture(arg_list_[i].texture))
 			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
@@ -344,7 +346,9 @@ namespace FLIVR
 			return false;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].size == 0 &&
+			if (arg_list_[i].kernel_index == index &&
+				arg_list_[i].size == 0 &&
+				arg_list_[i].texture &&
 				glIsTexture(arg_list_[i].texture))
 			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
@@ -760,6 +764,11 @@ namespace FLIVR
 	{
 		int index = findKernel(name);
 		return setKernelArgImage(index, i, flag, format, desc, data);
+	}
+
+	void KernelProgram::setKernelArgLocal(int index, int i, size_t size)
+	{
+		cl_int err = clSetKernelArg(kernels_[index].kernel, i, size, NULL);
 	}
 
 	void KernelProgram::readBuffer(size_t size,

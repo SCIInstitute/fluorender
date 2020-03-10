@@ -141,32 +141,52 @@ const char* str_cl_segrow = \
 "//count newly grown labels\n" \
 "__kernel void kernel_3(\n" \
 "	__global unsigned int* label,\n" \
+"	unsigned int nxy,\n" \
 "	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
 "	unsigned int maxc,\n" \
 "	__global unsigned int* count,\n" \
-"	__global unsigned int* ids)\n" \
+"	__global unsigned int* ids,\n" \
+"	__local unsigned int* lids)\n" \
 "{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0 || label_v & 0x80000000)\n" \
-"		return;\n" \
-"	bool found = false;\n" \
-"	for (int c = 0; c < *count; ++c)\n" \
-"		if (ids[c] == label_v)\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 ijk = (int3)(0, 0, 0);\n" \
+"	unsigned int lcount = 0;\n" \
+"	unsigned int index;\n" \
+"	unsigned int label_v;\n" \
+"	bool found;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		label_v = label[index];\n" \
+"		if (label_v == 0 || label_v & 0x80000000)\n" \
+"			continue;\n" \
+"		found = false;\n" \
+"		for (int c = 0; c < lcount; ++c)\n" \
+"		if (lids[c] == label_v)\n" \
 "		{\n" \
 "			found = true;\n" \
 "			break;\n" \
 "		}\n" \
-"	if (!found && *count < maxc)\n" \
-"	{\n" \
-"		atomic_inc(count);\n" \
-"		atomic_xchg(ids+(*count)-1, label_v);\n" \
+"		if (!found && lcount < maxc)\n" \
+"		{\n" \
+"			lids[lcount] = label_v;\n" \
+"			lcount++;\n" \
+"		}\n" \
 "	}\n" \
+"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(count+index, lcount);\n" \
+"	for (int c = 0; c < lcount; ++c)\n" \
+"		atomic_xchg(ids+index*maxc+c, lids[c]);\n" \
 "}\n" \
 "//find connectivity/center of new ids\n" \
 "__kernel void kernel_4(\n" \
@@ -303,6 +323,38 @@ bool SegGrow::CheckBricks()
 	return true;
 }
 
+long SegGrow::OptimizeGroupSize(long nt, long target)
+{
+	long loj, hij, res, maxj;
+	//z
+	if (nt > target)
+	{
+		loj = std::max(long(1), (target + 1) / 2);
+		hij = std::min(nt, target * 2);
+		res = 0; maxj = 0;
+		for (long j = loj; j < hij; ++j)
+		{
+			long rm = nt % j;
+			if (rm)
+			{
+				if (rm > res)
+				{
+					res = rm;
+					maxj = j;
+				}
+			}
+			else
+			{
+				return j;
+			}
+		}
+		if (maxj)
+			return maxj;
+	}
+
+	return target;
+}
+
 void SegGrow::Compute()
 {
 	if (!CheckBricks())
@@ -319,11 +371,6 @@ void SegGrow::Compute()
 	int kernel_4 = kernel_prog->createKernel("kernel_4");//get shape
 	int kernel_5 = kernel_prog->createKernel("kernel_5");//finalize
 
-	std::vector<unsigned int> ids(m_branches);
-	unsigned int* pids = ids.data();
-	std::vector<unsigned int> cids(m_branches);
-	unsigned int* pcids = cids.data();
-
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
@@ -337,7 +384,41 @@ void SegGrow::Compute()
 		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
+		//compute workload
+		size_t ng;
+		kernel_prog->getWorkGroupSize(kernel_3, &ng);
+		//try to make gsxyz equal to ng
+		//ngx*ngy*ngz = nx*ny*nz/ng
+		//z
+		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
+		//optimize
+		long ngz = OptimizeGroupSize(nz, targetz);
+		//xy
+		long targetx;
+		long targety;
+		if (ngz == 1)
+		{
+			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
+			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
+		}
+		else
+		{
+			targetx = std::ceil(double(nx) * targetz / nz);
+			targety = std::ceil(double(ny) * targetz / nz);
+		}
+		//optimize
+		long ngx = OptimizeGroupSize(nx, targetx);
+		long ngy = OptimizeGroupSize(ny, targety);
+
+		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
+		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
+		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
+		long gsxyz = gsx * gsy * gsz;
+		long gsxy = gsx * gsy;
+		long nxy = nx * ny;
+
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t global_size2[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
 		size_t local_size[3] = { 1, 1, 1 };
 		//bit length
 		unsigned int lenx = 0;
@@ -357,7 +438,6 @@ void SegGrow::Compute()
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		unsigned int count, sum;
 		//kernel1
 		kernel_prog->setKernelArgTex3D(kernel_1, 0,
 			CL_MEM_READ_ONLY, mid);
@@ -389,55 +469,58 @@ void SegGrow::Compute()
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(kernel_3, 1,
-			sizeof(unsigned int), (void*)(&nx));
+			sizeof(unsigned int), (void*)(&nxy));
 		kernel_prog->setKernelArgConst(kernel_3, 2,
-			sizeof(unsigned int), (void*)(&ny));
+			sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(kernel_3, 3,
-			sizeof(unsigned int), (void*)(&nz));
+			sizeof(unsigned int), (void*)(&ngx));
 		kernel_prog->setKernelArgConst(kernel_3, 4,
+			sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog->setKernelArgConst(kernel_3, 5,
+			sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog->setKernelArgConst(kernel_3, 6,
+			sizeof(unsigned int), (void*)(&gsxy));
+		kernel_prog->setKernelArgConst(kernel_3, 7,
+			sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog->setKernelArgConst(kernel_3, 8,
 			sizeof(unsigned int), (void*)(&m_branches));
-		count = 0;
-		kernel_prog->setKernelArgBuf(kernel_3, 5,
+		std::vector<unsigned int> count(gsxyz, 0);
+		unsigned int* pcount = count.data();
+		kernel_prog->setKernelArgBuf(kernel_3, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), (void*)(&count));
-		kernel_prog->setKernelArgBuf(kernel_3, 6,
+			sizeof(unsigned int)*gsxyz, (void*)(pcount));
+		std::vector<unsigned int> ids(m_branches*gsxyz, 0);
+		unsigned int* pids = ids.data();
+		kernel_prog->setKernelArgBuf(kernel_3, 10,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*m_branches, (void*)(pids));
+			sizeof(unsigned int)*m_branches*gsxyz, (void*)(pids));
+		kernel_prog->setKernelArgLocal(kernel_3, 11, sizeof(unsigned int)*m_branches);
 		
 		//first pass
 		kernel_prog->executeKernel(kernel_1, 3, global_size, local_size);
 		for (int i = 0; i < m_iter; ++i)
 			kernel_prog->executeKernel(kernel_2, 3, global_size, local_size);
-		kernel_prog->executeKernel(kernel_3, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_3, 3, global_size2, local_size);
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &count, &count);
-		kernel_prog->readBuffer(sizeof(unsigned int)*m_branches, pids, pids);
+		kernel_prog->readBuffer(sizeof(unsigned int)*gsxyz, pcount, pcount);
+		kernel_prog->readBuffer(sizeof(unsigned int)*m_branches*gsxyz, pids, pids);
 
-		if (count > m_branches)
-			count = m_branches;
-		//check
+		//get count and ids
 		std::set<unsigned int> uniqids;
-		for (int i = 0; i < count; ++i)
+		for (int i = 0; i < gsxyz; ++i)
 		{
-			if (ids[i])
-				uniqids.insert(ids[i]);
+			if (count[i])
+				for (int j = 0; j < count[i]; ++j)
+					uniqids.insert(ids[i*m_branches+j]);
 		}
-		count = uniqids.size();
-		if (!count)
+		unsigned int total = uniqids.size();
+		if (!total)
 			continue;
-		std::fill(ids.begin(), ids.end(), 0);
-		int ii = 0;
-		for (auto it = uniqids.begin();
-			it != uniqids.end(); ++it)
-		{
-			ids[ii] = *it;
-			++ii;
-		}
 
 		//set
 		//kernel4
-		arg_label.kernel_index = kernel_4;
+/*		arg_label.kernel_index = kernel_4;
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
 		kernel_prog->setKernelArgConst(kernel_4, 1,
@@ -470,7 +553,7 @@ void SegGrow::Compute()
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned int)*count, pcids, pcids);
 		kernel_prog->readBuffer(sizeof(unsigned int), &sum, &sum);
-		kernel_prog->readBuffer(sizeof(unsigned int)*count*3, pcsum, pcsum);
+		kernel_prog->readBuffer(sizeof(unsigned int)*count*3, pcsum, pcsum);*/
 
 		//finalize
 		//kernel5

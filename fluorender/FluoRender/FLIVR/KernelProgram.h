@@ -91,6 +91,7 @@ namespace FLIVR
 		Argument setKernelArgTex3DBuf(std::string &name, int, cl_mem_flags, GLuint, size_t, size_t*);
 		Argument setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
 		Argument setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		void setKernelArgLocal(int, int, size_t);
 
 		//read/write
 		void readBuffer(size_t size,

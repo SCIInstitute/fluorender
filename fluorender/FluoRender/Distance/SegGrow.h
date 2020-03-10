@@ -50,6 +50,7 @@ namespace FL
 		int m_iter;//iterations
 
 		bool CheckBricks();
+		long OptimizeGroupSize(long nt, long target);
 	};
 }
 #endif//FL_SegGrow_h
