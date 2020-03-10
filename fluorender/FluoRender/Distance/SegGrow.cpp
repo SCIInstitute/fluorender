@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "SegGrow.h"
 #include <FLIVR/VolKernel.h>
+#include <algorithm>
 
 using namespace FL;
 
@@ -195,10 +196,10 @@ const char* str_cl_segrow = \
 "		}\n" \
 "	if (!found)\n" \
 "		return;\n" \
-"	sum[c]++;\n" \
-"	csum[c*3] += (float)(coord.x);\n" \
-"	csum[c*3+1] += (float)(coord.y);\n" \
-"	csum[c*3+2] += (float)(coord.z);\n" \
+"	atomic_inc(sum+c);\n" \
+"	atomic_xchg(csum+c*3, csum[c*3] + (float)(coord.x));\n" \
+"	atomic_xchg(csum+c*3+1, csum[c*3+1] + (float)(coord.y));\n" \
+"	atomic_xchg(csum+c*3+2, csum[c*3+2] + (float)(coord.z));\n" \
 "	unsigned int m;\n" \
 "	//-x\n" \
 "	if (coord.x > 0)\n" \
@@ -325,9 +326,9 @@ void SegGrow::Compute()
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		TextureBrick* b = (*bricks)[i];
+		TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 		int nx = b->nx();
@@ -407,16 +408,32 @@ void SegGrow::Compute()
 		kernel_prog->executeKernel(kernel_1, 3, global_size, local_size);
 		for (int i = 0; i < m_iter; ++i)
 			kernel_prog->executeKernel(kernel_2, 3, global_size, local_size);
-/*		kernel_prog->executeKernel(kernel_3, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_3, 3, global_size, local_size);
 
 		//read back
 		kernel_prog->readBuffer(sizeof(unsigned int), &count, &count);
 		kernel_prog->readBuffer(sizeof(unsigned int)*m_branches, pids, pids);
 
-		if (!count)
-			continue;
 		if (count > m_branches)
 			count = m_branches;
+		//check
+		std::set<unsigned int> uniqids;
+		for (int i = 0; i < count; ++i)
+		{
+			if (ids[i])
+				uniqids.insert(ids[i]);
+		}
+		count = uniqids.size();
+		if (!count)
+			continue;
+		std::fill(ids.begin(), ids.end(), 0);
+		int ii = 0;
+		for (auto it = uniqids.begin();
+			it != uniqids.end(); ++it)
+		{
+			ids[ii] = *it;
+			++ii;
+		}
 
 		//set
 		//kernel4
@@ -445,7 +462,7 @@ void SegGrow::Compute()
 		float* pcsum = csum.data();
 		kernel_prog->setKernelArgBuf(kernel_4, 8,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*count*3, (void*)(pcsum));
+			sizeof(float)*count*3, (void*)(pcsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_4, 3, global_size, local_size);
@@ -454,7 +471,7 @@ void SegGrow::Compute()
 		kernel_prog->readBuffer(sizeof(unsigned int)*count, pcids, pcids);
 		kernel_prog->readBuffer(sizeof(unsigned int), &sum, &sum);
 		kernel_prog->readBuffer(sizeof(unsigned int)*count*3, pcsum, pcsum);
-*/
+
 		//finalize
 		//kernel5
 		arg_label.kernel_index = kernel_5;
