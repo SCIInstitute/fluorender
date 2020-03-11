@@ -169,6 +169,25 @@ bool RulerHandler::GetRulerFinished()
 		return true;
 }
 
+void RulerHandler::AddRulerPoint(FLIVR::Point &p)
+{
+	if (m_ruler &&
+		m_ruler->GetDisp() &&
+		!m_ruler->GetFinished())
+	{
+		m_ruler->AddPoint(p);
+	}
+	else
+	{
+		m_ruler = new Ruler();
+		m_ruler->SetRulerType(m_type);
+		m_ruler->AddPoint(p);
+		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
+		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler_list->push_back(m_ruler);
+	}
+}
+
 void RulerHandler::AddRulerPoint(int mx, int my)
 {
 	if (!m_view)

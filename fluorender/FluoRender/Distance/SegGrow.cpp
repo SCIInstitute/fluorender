@@ -26,9 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "SegGrow.h"
+#include <Distance/RulerHandler.h>
 #include <FLIVR/VolKernel.h>
 #include <algorithm>
-#include <Debug.h>
+#include <unordered_map>
 
 using namespace FL;
 
@@ -299,9 +300,9 @@ const char* str_cl_segrow = \
 "	{\n" \
 "		atomic_xchg(cids+index*nid+c, lcids[c]);\n" \
 "		atomic_xchg(sum+index*nid+c, lsum[c]);\n" \
-"		atomic_xchg(csum+(index*nid+c)*3, lcsum[c]);\n" \
-"		atomic_xchg(csum+(index*nid+c)*3+1, lcsum[c+1]);\n" \
-"		atomic_xchg(csum+(index*nid+c)*3+2, lcsum[c+2]);\n" \
+"		atomic_xchg(csum+(index*nid+c)*3, lcsum[c*3]);\n" \
+"		atomic_xchg(csum+(index*nid+c)*3+1, lcsum[c*3+1]);\n" \
+"		atomic_xchg(csum+(index*nid+c)*3+2, lcsum[c*3+2]);\n" \
 "	}\n" \
 "}\n" \
 "//fix processed ids\n" \
@@ -324,7 +325,6 @@ const char* str_cl_segrow = \
 "}\n" \
 ;
 
-
 SegGrow::SegGrow(VolumeData* vd):
 	m_vd(vd),
 	m_branches(10),
@@ -335,6 +335,11 @@ SegGrow::SegGrow(VolumeData* vd):
 SegGrow::~SegGrow()
 {
 
+}
+
+void SegGrow::SetRulerHandler(RulerHandler* handler)
+{
+	m_handler = handler;
 }
 
 bool SegGrow::CheckBricks()
@@ -349,8 +354,12 @@ bool SegGrow::CheckBricks()
 
 void SegGrow::Compute()
 {
+	if (!m_handler)
+		return;
 	if (!CheckBricks())
 		return;
+
+	m_list.clear();
 
 	//create program and kernels
 	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
@@ -548,23 +557,28 @@ void SegGrow::Compute()
 		kernel_prog->readBuffer(sizeof(float)*total*gsize.gsxyz*3, pcsum, pcsum);
 
 		//compute centers and connection
-		std::vector<unsigned int> sum_ids(total, 0);
-		std::vector<FLIVR::Point> ctr_ids(total);
-		for (int i = 0; i < gsize.gsxyz; ++i)
+		for (int j = 0; j < total; ++j)
 		{
-			for (int j = 0; j < total; ++j)
+			auto it = m_list.find(ids[j]);
+			if (it == m_list.end())
 			{
-				sum_ids[j] += sum[i*total + j];
-				ctr_ids[j] += FLIVR::Point(
-					csum[total * 3 * i + j],
-					csum[total * 3 * i + j + 1],
-					csum[total * 3 * i + j + 2]);
+				BranchPoint bp;
+				bp.id = ids[j];
+				bp.sum = 0;
+				bp.cid = 0;
+				auto ret = m_list.insert(
+					std::pair<unsigned int,
+					BranchPoint>(bp.id, bp));
+				it = ret.first;
 			}
-		}
-		for (int i = 0; i < total; ++i)
-		{
-			if (sum_ids[i])
-				ctr_ids[i] /= sum_ids[i];
+			for (int i = 0; i < gsize.gsxyz; ++i)
+			{
+				it->second.sum += sum[i*total + j];
+				it->second.ctr += FLIVR::Point(
+					csum[(total * i + j) * 3],
+					csum[(total * i + j) * 3 + 1],
+					csum[(total * i + j) * 3 + 2]);
+			}
 		}
 
 		//finalize
@@ -588,5 +602,18 @@ void SegGrow::Compute()
 
 		//release buffer
 		kernel_prog->releaseAll();
+	}
+
+	//add ruler points
+	double spcx, spcy, spcz;
+	m_vd->GetSpacings(spcx, spcy, spcz);
+	for (auto it = m_list.begin();
+		it != m_list.end(); ++it)
+	{
+		if (it->second.sum < 25)
+			continue;
+		it->second.ctr = it->second.ctr / it->second.sum;
+		it->second.ctr.scale(spcx, spcy, spcz);
+		m_handler->AddRulerPoint(it->second.ctr);
 	}
 }

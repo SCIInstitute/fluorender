@@ -30,10 +30,20 @@ DEALINGS IN THE SOFTWARE.
 
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
+#include <FLIVR/Point.h>
 
 class VolumeData;
 namespace FL
 {
+	class RulerHandler;
+	struct BranchPoint
+	{
+		unsigned int id;
+		unsigned int sum;
+		FLIVR::Point ctr;
+		unsigned int cid;//parent
+	};
+
 	class SegGrow
 	{
 	public:
@@ -42,12 +52,15 @@ namespace FL
 
 		void SetBranches(int val) { m_branches = val; }
 		void SetIter(int val) { m_iter = val; }
+		void SetRulerHandler(RulerHandler* handler);
 		void Compute();
 
 	private:
 		VolumeData *m_vd;
+		RulerHandler *m_handler;
 		int m_branches;//max number of branches to detect
 		int m_iter;//iterations
+		std::unordered_map<unsigned int, BranchPoint> m_list;
 
 		bool CheckBricks();
 	};
