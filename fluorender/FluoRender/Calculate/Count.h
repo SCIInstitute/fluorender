@@ -67,7 +67,6 @@ namespace FL
 		void* GetVolDataBrick(FLIVR::TextureBrick* b);
 		void* GetVolData(VolumeData* vd);
 		void ReleaseData(void* val, long bits);
-		long OptimizeGroupSize(long nt, long target);
 	};
 
 }

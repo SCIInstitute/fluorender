@@ -46,6 +46,18 @@ namespace FLIVR
 		void unprotect() { protect_ = false; }
 	};
 
+	typedef struct
+	{
+		unsigned int ngx;
+		unsigned int ngy;
+		unsigned int ngz;
+		unsigned int gsx;
+		unsigned int gsy;
+		unsigned int gsz;
+		unsigned int gsxyz;
+		unsigned int gsxy;
+	} GroupSize;
+
 	class KernelProgram
 	{
 	public:
@@ -124,6 +136,13 @@ namespace FLIVR
 
 		//info
 		std::string &getInfo();
+
+		//group division
+		bool get_group_size(int index,
+			unsigned int nx, unsigned int ny, unsigned int nz,
+			GroupSize &ksize);
+		unsigned int optimize_group_size_xy(unsigned int nt, unsigned int target);
+		unsigned int optimize_group_size_z(unsigned int nt, unsigned int target);
 
 		friend class VolKernel;
 #ifdef _DARWIN

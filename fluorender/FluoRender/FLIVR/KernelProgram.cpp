@@ -2,6 +2,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+#include <algorithm>
 
 namespace FLIVR
 {
@@ -1020,5 +1021,111 @@ namespace FLIVR
 	std::string& KernelProgram::getInfo()
 	{
 		return info_;
+	}
+
+	bool KernelProgram::get_group_size(int index,
+		unsigned int nx, unsigned int ny, unsigned int nz,
+		GroupSize &ksize)
+	{
+		size_t ng;
+		if (!getWorkGroupSize(index, &ng))
+			return false;
+
+		//try to make gsxyz equal to ng
+		//ngx*ngy*ngz = nx*ny*nz/ng
+		//z
+		unsigned int targetz = (unsigned int)(std::ceil(double(nz) /
+			std::pow(double(ng), 1 / 3.0)));
+		//optimize
+		ksize.ngz = optimize_group_size_z(nz, targetz);
+		//xy
+		unsigned int targetx;
+		unsigned int targety;
+		if (ksize.ngz == 1)
+		{
+			targetx = (unsigned int)(std::ceil(double(nx) /
+				std::sqrt(double(ng))));
+			targety = (unsigned int)(std::ceil(double(ny) /
+				std::sqrt(double(ng))));
+		}
+		else
+		{
+			targetx = (unsigned int)(std::ceil(double(nx) *
+				targetz / nz));
+			targety = (unsigned int)(std::ceil(double(ny) *
+				targetz / nz));
+		}
+		//optimize
+		ksize.ngx = optimize_group_size_xy(nx, targetx);
+		ksize.ngy = optimize_group_size_xy(ny, targety);
+
+		ksize.gsx = nx / ksize.ngx + (nx%ksize.ngx ? 1 : 0);
+		ksize.gsy = ny / ksize.ngy + (ny%ksize.ngy ? 1 : 0);
+		ksize.gsz = nz / ksize.ngz + (nz%ksize.ngz ? 1 : 0);
+		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
+		ksize.gsxy = ksize.gsx * ksize.gsy;
+
+	}
+
+	unsigned int KernelProgram::optimize_group_size_xy(unsigned int nt, unsigned int target)
+	{
+		unsigned int loj, hij, res, maxj;
+		if (nt > target)
+		{
+			loj = std::max((unsigned int)(1), (target + 1) / 2);
+			hij = std::min(nt, target * 2);
+			res = 0; maxj = 0;
+			for (int j = loj; j < hij; ++j)
+			{
+				unsigned int rm = nt % j;
+				if (rm)
+				{
+					if (rm > res)
+					{
+						res = rm;
+						maxj = j;
+					}
+				}
+				else
+				{
+					return j;
+				}
+			}
+			if (maxj)
+				return maxj;
+		}
+
+		return target;
+	}
+
+	unsigned int KernelProgram::optimize_group_size_z(unsigned int nt, unsigned int target)
+	{
+		unsigned int loj, hij, res, maxj;
+		if (nt > target)
+		{
+			loj = target;
+			hij = std::max(nt, target * 2);
+			res = 0; maxj = 0;
+			for (int j = loj; j < hij; ++j)
+			{
+				unsigned int rm = nt % j;
+				if (rm)
+				{
+					if (rm > res)
+					{
+						res = rm;
+						maxj = j;
+					}
+				}
+				else
+				{
+					return j;
+				}
+			}
+			if (maxj)
+				return maxj;
+		}
+
+		return target;
 	}
 }

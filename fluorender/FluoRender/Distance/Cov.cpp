@@ -168,38 +168,6 @@ void Cov::ReleaseData(void* val, long bits)
 	}
 }
 
-long Cov::OptimizeGroupSize(long nt, long target)
-{
-	long loj, hij, res, maxj;
-	//z
-	if (nt > target)
-	{
-		loj = std::max(long(1), (target + 1) / 2);
-		hij = std::min(nt, target * 2);
-		res = 0; maxj = 0;
-		for (long j = loj; j < hij; ++j)
-		{
-			long rm = nt % j;
-			if (rm)
-			{
-				if (rm > res)
-				{
-					res = rm;
-					maxj = j;
-				}
-			}
-			else
-			{
-				return j;
-			}
-		}
-		if (maxj)
-			return maxj;
-	}
-
-	return target;
-}
-
 bool Cov::ComputeCenter()
 {
 	if (!CheckBricks())
@@ -231,72 +199,45 @@ bool Cov::ComputeCenter()
 		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
-		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index, &ng);
-		//try to make gsxyz equal to ng
-		//ngx*ngy*ngz = nx*ny*nz/ng
-		//z
-		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
-		//optimize
-		long ngz = OptimizeGroupSize(nz, targetz);
-		//xy
-		long targetx;
-		long targety;
-		if (ngz == 1)
-		{
-			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
-			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
-		}
-		else
-		{
-			targetx = std::ceil(double(nx) * targetz / nz);
-			targety = std::ceil(double(ny) * targetz / nz);
-		}
-		//optimize
-		long ngx = OptimizeGroupSize(nx, targetx);
-		long ngy = OptimizeGroupSize(ny, targety);
-
-		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
-		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
-		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
-		long gsxyz = gsx * gsy * gsz;
-		long gsxy = gsx * gsy;
+		FLIVR::GroupSize gsize;
+		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+		size_t global_size[3] = {
+			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 		//set
-		unsigned int* count = new unsigned int[gsxyz];
-		float *csum = new float[gsxyz * 3];
+		unsigned int* count = new unsigned int[gsize.gsxyz];
+		float *csum = new float[gsize.gsxyz * 3];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, mid);
 		kernel_prog->setKernelArgConst(kernel_index, 1,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(unsigned int), (void*)(&gsize.ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(unsigned int), (void*)(&gsize.ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsx));
+			sizeof(unsigned int), (void*)(&gsize.gsx));
 		kernel_prog->setKernelArgBuf(kernel_index, 6,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*(gsxyz), (void*)(count));
+			sizeof(unsigned int)*(gsize.gsxyz), (void*)(count));
 		kernel_prog->setKernelArgBuf(kernel_index, 7,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz * 3), (void*)(csum));
+			sizeof(float)*(gsize.gsxyz * 3), (void*)(csum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*(gsxyz), count, count);
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz * 3), csum, csum);
+		kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), count, count);
+		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz * 3), csum, csum);
 
 		int ox, oy, oz, nc;
 		ox = b->ox(); oy = b->oy(); oz = b->oz();
 		//compute center
-		for (int i = 0; i < gsxyz; ++i)
+		for (int i = 0; i < gsize.gsxyz; ++i)
 		{
 			nc = count[i];
 			sum += nc;
@@ -347,55 +288,28 @@ bool Cov::ComputeCov()
 		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
-		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index, &ng);
-		//try to make gsxyz equal to ng
-		//ngx*ngy*ngz = nx*ny*nz/ng
-		//z
-		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
-		//optimize
-		long ngz = OptimizeGroupSize(nz, targetz);
-		//xy
-		long targetx;
-		long targety;
-		if (ngz == 1)
-		{
-			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
-			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
-		}
-		else
-		{
-			targetx = std::ceil(double(nx) * targetz / nz);
-			targety = std::ceil(double(ny) * targetz / nz);
-		}
-		//optimize
-		long ngx = OptimizeGroupSize(nx, targetx);
-		long ngy = OptimizeGroupSize(ny, targety);
-
-		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
-		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
-		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
-		long gsxyz = gsx * gsy * gsz;
-		long gsxy = gsx * gsy;
+		FLIVR::GroupSize gsize;
+		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+		size_t global_size[3] = {
+			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 		//set
-		unsigned int* count = new unsigned int[gsxyz];
-		float *cov = new float[gsxyz * 6];
+		unsigned int* count = new unsigned int[gsize.gsxyz];
+		float *cov = new float[gsize.gsxyz * 6];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, mid);
 		kernel_prog->setKernelArgConst(kernel_index, 1,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(unsigned int), (void*)(&gsize.ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(unsigned int), (void*)(&gsize.ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsx));
+			sizeof(unsigned int), (void*)(&gsize.gsx));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
 			sizeof(cl_float3), (void*)(m_center));
 		float orig[3] = { float(b->ox()), float(b->oy()), float(b->oz()) };
@@ -403,15 +317,15 @@ bool Cov::ComputeCov()
 			sizeof(cl_float3), (void*)(orig));
 		kernel_prog->setKernelArgBuf(kernel_index, 8,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz * 6), (void*)(cov));
+			sizeof(float)*(gsize.gsxyz * 6), (void*)(cov));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz * 6), cov, cov);
+		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz * 6), cov, cov);
 
 		//compute center
-		for (int i = 0; i < gsxyz; ++i)
+		for (int i = 0; i < gsize.gsxyz; ++i)
 		{
 			m_cov[0] += cov[i * 6];
 			m_cov[1] += cov[i * 6 + 1];
