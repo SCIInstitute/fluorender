@@ -103,6 +103,20 @@ void MaskBorder::Compute(int order)
 	if (!tex)
 		return;
 
+	unsigned int hits, idx, bn;
+	std::vector<FLIVR::TextureBrick*> *all_bricks = m_vd->GetTexture()->get_bricks();
+	bn = all_bricks->size();
+	if (bn < 2)
+		return;
+	//get bricks with paint mask flag
+	std::vector<FLIVR::TextureBrick*> bricks;
+	for (int i = 0; i < bn; ++i)
+	{
+		if ((*all_bricks)[i]->get_paint_mask())
+			bricks.push_back((*all_bricks)[i]);
+	}
+	bn = bricks.size();
+
 	//create program and kernels
 	KernelProgram* kernel_prog = VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_check_box_borders);
@@ -112,17 +126,6 @@ void MaskBorder::Compute(int order)
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	unsigned int hits, idx, bn;
-	std::vector<FLIVR::TextureBrick*> *all_bricks = m_vd->GetTexture()->get_bricks();
-	std::vector<FLIVR::TextureBrick*> bricks;
-	bn = all_bricks->size();
-	//get bricks with paint mask flag
-	for (int i = 0; i < bn; ++i)
-	{
-		if ((*all_bricks)[i]->get_paint_mask())
-			bricks.push_back((*all_bricks)[i]);
-	}
-	bn = bricks.size();
 	TextureBrick* nb;//neighbor brick
 	unsigned int nid;//neighbor id
 	unsigned int bid;
