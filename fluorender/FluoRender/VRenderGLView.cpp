@@ -4248,6 +4248,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (m_int_mode == 12)
 			{
 				FL::SegGrow sg(m_cur_vol);
+				sg.SetRulerHandler(&m_ruler_handler);
 				sg.SetIter(m_selector.GetIter()*3);
 				sg.Compute();
 			}
@@ -4261,6 +4262,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 					vr_frame->GetBrushToolDlg()->Update();
 				if (m_paint_colocalize && vr_frame->GetColocalizationDlg())
 					vr_frame->GetColocalizationDlg()->Colocalize();
+				if (m_int_mode == 12 && vr_frame->GetMeasureDlg())
+					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			}
 		}
 	}
