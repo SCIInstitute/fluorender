@@ -639,38 +639,6 @@ void ChannelCompare::ReleaseData(void* val, long bits)
 	}
 }
 
-long ChannelCompare::OptimizeGroupSize(long nt, long target)
-{
-	long loj, hij, res, maxj;
-	//z
-	if (nt > target)
-	{
-		loj = std::max(long(1), (target+1) / 2);
-		hij = std::min(nt, target * 2);
-		res = 0; maxj = 0;
-		for (long j = loj; j < hij; ++j)
-		{
-			long rm = nt % j;
-			if (rm)
-			{
-				if (rm > res)
-				{
-					res = rm;
-					maxj = j;
-				}
-			}
-			else
-			{
-				return j;
-			}
-		}
-		if (maxj)
-			return maxj;
-	}
-
-	return target;
-}
-
 void ChannelCompare::Product()
 {
 	m_result = 0.0;
@@ -732,43 +700,16 @@ void ChannelCompare::Product()
 		}
 
 		//compute workload
-		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index, &ng);
-		//try to make gsxyz equal to ng
-		//ngx*ngy*ngz = nx*ny*nz/ng
-		//z
-		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1/3.0));
-		//optimize
-		long ngz = OptimizeGroupSize(nz, targetz);
-		//xy
-		long targetx;
-		long targety;
-		if (ngz == 1)
-		{
-			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
-			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
-		}
-		else
-		{
-			targetx = std::ceil(double(nx) * targetz / nz);
-			targety = std::ceil(double(ny) * targetz / nz);
-		}
-		//optimize
-		long ngx = OptimizeGroupSize(nx, targetx);
-		long ngy = OptimizeGroupSize(ny, targety);
-
-		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
-		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
-		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
-		long gsxyz = gsx * gsy * gsz;
-		long gsxy = gsx * gsy;
+		FLIVR::GroupSize gsize;
+		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+		size_t global_size[3] = {
+			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 		//set
 		//unsigned int count = 0;
-		float *sum = new float[gsxyz];
+		float *sum = new float[gsize.gsxyz];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, tid1);
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
@@ -778,18 +719,18 @@ void ChannelCompare::Product()
 		kernel_prog->setKernelArgConst(kernel_index, 3,
 			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(unsigned int), (void*)(&gsize.ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(unsigned int), (void*)(&gsize.ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(unsigned int), (void*)(&gsx));
+			sizeof(unsigned int), (void*)(&gsize.gsx));
 		kernel_prog->setKernelArgBuf(kernel_index, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz), (void*)(sum));
+			sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setKernelArgTex3D(kernel_index, 10,
@@ -801,16 +742,13 @@ void ChannelCompare::Product()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
+		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		//kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
-		//kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
-		//kernel_prog->releaseMemObject(sizeof(float)*(gsxyz), sum);
 
 		//sum
-		for (int i=0; i< gsxyz; ++i)
+		for (int i=0; i< gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 	}
@@ -877,43 +815,16 @@ void ChannelCompare::MinValue()
 		}
 
 		//compute workload
-		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index, &ng);
-		//try to make gsxyz equal to ng
-		//ngx*ngy*ngz = nx*ny*nz/ng
-		//z
-		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
-		//optimize
-		long ngz = OptimizeGroupSize(nz, targetz);
-		//xy
-		long targetx;
-		long targety;
-		if (ngz == 1)
-		{
-			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
-			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
-		}
-		else
-		{
-			targetx = std::ceil(double(nx) * targetz / nz);
-			targety = std::ceil(double(ny) * targetz / nz);
-		}
-		//optimize
-		long ngx = OptimizeGroupSize(nx, targetx);
-		long ngy = OptimizeGroupSize(ny, targety);
-
-		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
-		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
-		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
-		long gsxyz = gsx * gsy * gsz;
-		long gsxy = gsx * gsy;
+		FLIVR::GroupSize gsize;
+		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+		size_t global_size[3] = {
+			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 		//set
 		//unsigned int count = 0;
-		float *sum = new float[gsxyz];
+		float *sum = new float[gsize.gsxyz];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, tid1);
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
@@ -923,18 +834,18 @@ void ChannelCompare::MinValue()
 		kernel_prog->setKernelArgConst(kernel_index, 3,
 			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(unsigned int), (void*)(&gsize.ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(unsigned int), (void*)(&gsize.ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(unsigned int), (void*)(&gsx));
+			sizeof(unsigned int), (void*)(&gsize.gsx));
 		kernel_prog->setKernelArgBuf(kernel_index, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz), (void*)(sum));
+			sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setKernelArgTex3D(kernel_index, 10,
@@ -946,16 +857,13 @@ void ChannelCompare::MinValue()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
+		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		//kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
-		//kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
-		//kernel_prog->releaseMemObject(sizeof(float)*(gsxyz), sum);
 
 		//sum
-		for (int i = 0; i < gsxyz; ++i)
+		for (int i = 0; i < gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 	}
@@ -1022,43 +930,16 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		}
 
 		//compute workload
-		size_t ng;
-		kernel_prog->getWorkGroupSize(kernel_index, &ng);
-		//try to make gsxyz equal to ng
-		//ngx*ngy*ngz = nx*ny*nz/ng
-		//z
-		long targetz = std::ceil(double(nz) / std::pow(double(ng), 1 / 3.0));
-		//optimize
-		long ngz = OptimizeGroupSize(nz, targetz);
-		//xy
-		long targetx;
-		long targety;
-		if (ngz == 1)
-		{
-			targetx = std::ceil(double(nx) / std::sqrt(double(ng)));
-			targety = std::ceil(double(ny) / std::sqrt(double(ng)));
-		}
-		else
-		{
-			targetx = std::ceil(double(nx) * targetz / nz);
-			targety = std::ceil(double(ny) * targetz / nz);
-		}
-		//optimize
-		long ngx = OptimizeGroupSize(nx, targetx);
-		long ngy = OptimizeGroupSize(ny, targety);
-
-		long gsx = nx / ngx + (nx%ngx ? 1 : 0);
-		long gsy = ny / ngy + (ny%ngy ? 1 : 0);
-		long gsz = nz / ngz + (nz%ngz ? 1 : 0);
-		long gsxyz = gsx * gsy * gsz;
-		long gsxy = gsx * gsy;
+		FLIVR::GroupSize gsize;
+		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(gsx), size_t(gsy), size_t(gsz) };
+		size_t global_size[3] = {
+			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 		//set
 		//unsigned int count = 0;
-		float *sum = new float[gsxyz];
+		float *sum = new float[gsize.gsxyz];
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, tid1);
 		kernel_prog->setKernelArgTex3D(kernel_index, 1,
@@ -1068,18 +949,18 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->setKernelArgConst(kernel_index, 3,
 			sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&ngx));
+			sizeof(unsigned int), (void*)(&gsize.ngx));
 		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&ngy));
+			sizeof(unsigned int), (void*)(&gsize.ngy));
 		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&ngz));
+			sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(unsigned int), (void*)(&gsxy));
+			sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(unsigned int), (void*)(&gsx));
+			sizeof(unsigned int), (void*)(&gsize.gsx));
 		kernel_prog->setKernelArgBuf(kernel_index, 9,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsxyz), (void*)(sum));
+			sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		cl_float4 th = {th1, th2, th3, th4};
 		kernel_prog->setKernelArgConst(kernel_index, 10,
 			sizeof(cl_float4), (void*)(&th));
@@ -1094,13 +975,13 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsxyz), sum, sum);
+		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
 
 		//release buffer
 		kernel_prog->releaseAll();
 
 		//sum
-		for (int i = 0; i < gsxyz; ++i)
+		for (int i = 0; i < gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
 	}
