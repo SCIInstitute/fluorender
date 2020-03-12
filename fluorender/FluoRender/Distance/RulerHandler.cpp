@@ -188,6 +188,24 @@ void RulerHandler::AddRulerPoint(FLIVR::Point &p)
 	}
 }
 
+void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, unsigned int cid)
+{
+	if (m_ruler &&
+		m_ruler->GetDisp() &&
+		m_ruler->GetRulerType() == 1 &&
+		!m_ruler->GetFinished())
+		m_ruler->AddPointAfterId(p, id, cid);
+	else
+	{
+		m_ruler = new Ruler();
+		m_ruler->SetRulerType(m_type);
+		m_ruler->AddPointAfterId(p, id, cid);
+		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
+		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler_list->push_back(m_ruler);
+	}
+}
+
 void RulerHandler::AddRulerPoint(int mx, int my)
 {
 	if (!m_view)

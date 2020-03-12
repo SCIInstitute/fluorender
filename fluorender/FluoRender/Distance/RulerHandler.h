@@ -110,6 +110,7 @@ namespace FL
 		bool GetRulerFinished();
 
 		void AddRulerPoint(FLIVR::Point &p);
+		void AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, unsigned int cid);
 		void AddRulerPoint(int mx, int my);
 		void AddPaintRulerPoint();
 		bool MoveRuler(int mx, int my);
