@@ -1277,6 +1277,8 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 	{
 		m_view->SetIntMode(12);
 		m_rhdl->SetType(1);
+		if (m_view->m_glview->GetRulerRenderer())
+			m_view->m_glview->GetRulerRenderer()->SetDrawText(false);
 		//reset label volume
 		if (m_view->m_glview->m_cur_vol)
 		{
@@ -1291,6 +1293,8 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 	else
 	{
 		m_view->SetIntMode(1);
+		if (m_view->m_glview->GetRulerRenderer())
+			m_view->m_glview->GetRulerRenderer()->SetDrawText(true);
 	}
 }
 

@@ -65,12 +65,18 @@ namespace FL
 			m_line_size = val;
 		}
 
+		void SetDrawText(bool val)
+		{
+			m_draw_text = val;
+		}
+
 		void Draw();
 
 	private:
 		VRenderGLView *m_view;
 		RulerList *m_ruler_list;
 		double m_line_size;
+		bool m_draw_text;
 
 	private:
 		unsigned int DrawVerts(std::vector<float> &verts);
@@ -78,7 +84,7 @@ namespace FL
 		void DrawArc(FLIVR::Point & ppc, FLIVR::Point& pp0, FLIVR::Point& pp1,
 			FLIVR::Color &c, FLIVR::Transform& mv, FLIVR::Transform& p,
 			std::vector<float> &verts, unsigned int& num);
-
+		void DrawText(int, int, int);
 	};
 
 }
