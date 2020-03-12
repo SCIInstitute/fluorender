@@ -39,6 +39,7 @@ using namespace FLIVR;
 
 namespace FL
 {
+	class Ruler;
 	class ProfileBin
 	{
 	public:
@@ -57,18 +58,32 @@ namespace FL
 	{
 	public:
 		RulerPoint():
-			m_locked(false)
+			m_locked(false),
+			m_id(0)
 		{}
 		RulerPoint(Point& p):
 			m_p(p),
-			m_locked(false)
+			m_locked(false),
+			m_id(0)
 		{}
 		RulerPoint(bool locked):
-			m_locked(locked)
+			m_locked(locked),
+			m_id(0)
 		{}
 		RulerPoint(Point& p, bool locked):
 			m_p(p),
-			m_locked(locked)
+			m_locked(locked),
+			m_id(0)
+		{}
+		RulerPoint(Point& p, unsigned int id):
+			m_p(p),
+			m_locked(false),
+			m_id(id)
+		{}
+		RulerPoint(Point& p, unsigned int id, bool locked):
+			m_p(p),
+			m_locked(locked),
+			m_id(id)
 		{}
 
 		void SetPoint(Point& p)
@@ -101,12 +116,14 @@ namespace FL
 			return m_locked;
 		}
 
+		friend class Ruler;
+
 	private:
 		Point m_p;
 		bool m_locked;
+		unsigned int m_id;//from comp
 	};
 
-	class Ruler;
 	typedef std::vector<Ruler*> RulerList;
 	typedef std::vector<Ruler*>::iterator RulerListIter;
 
@@ -167,6 +184,7 @@ namespace FL
 		void Scale(double spcx, double spcy, double spcz);
 
 		bool AddPoint(Point &point);
+		bool AddPointAfterId(Point &point, unsigned int id, unsigned int cid);
 		void SetTransform(Transform *tform);
 		bool AddBranch(pRulerPoint point);
 

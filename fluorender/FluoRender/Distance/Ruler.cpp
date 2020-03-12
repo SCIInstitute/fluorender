@@ -322,6 +322,59 @@ bool Ruler::AddPoint(Point &point)
 	return true;
 }
 
+bool Ruler::AddPointAfterId(
+	Point &point, unsigned int id, unsigned int cid)
+{
+	if (m_ruler_type != 1)
+		return false;
+	if (m_ruler.empty() || !cid)
+	{
+		m_ruler.push_back(RulerBranch());
+		m_ruler.back().push_back(
+			std::make_shared<RulerPoint>(RulerPoint(point, id)));
+		return true;
+	}
+
+	bool first = true;
+	bool found = false;
+	size_t ri, rj;
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+	{
+		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
+		{
+			if (m_ruler[i][j]->m_id == cid)
+			{
+				ri = i; rj = j;
+				found = true;
+				break;
+			}
+			first = false;
+		}
+		if (found)
+			break;
+	}
+
+	if (!found)
+	{
+		m_ruler.back().push_back(
+			std::make_shared<RulerPoint>(RulerPoint(point, id)));
+		return false;
+	}
+
+	if (rj == m_ruler[ri].size()-1)//last one
+		m_ruler[ri].push_back(
+			std::make_shared<RulerPoint>(RulerPoint(point, id)));
+	else
+	{
+		m_ruler.push_back(RulerBranch());
+		m_ruler.back().push_back(m_ruler[ri][rj]);
+		m_ruler.back().push_back(
+			std::make_shared<RulerPoint>(RulerPoint(point, id)));
+	}
+
+	return true;
+}
+
 void Ruler::SetTransform(Transform *tform)
 {
 	m_tform = tform;

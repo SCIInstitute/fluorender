@@ -229,10 +229,12 @@ namespace FLIVR
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i].comp == brick->nmask())
+					(tex_pool_[i].comp == brick->nmask() ||
+					tex_pool_[i].comp == brick->nlabel()))
 				{
 					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
 					tex_pool_.erase(tex_pool_.begin() + i);
+					break;
 				}
 			}
 		}

@@ -1276,7 +1276,17 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 	if (m_toolbar1->GetToolState(ID_GrowBtn))
 	{
 		m_view->SetIntMode(12);
-		//m_rhdl->SetType(5);
+		m_rhdl->SetType(1);
+		//reset label volume
+		if (m_view->m_glview->m_cur_vol)
+		{
+			m_view->m_glview->m_cur_vol->
+				GetVR()->clear_tex_mask();
+			m_view->m_glview->m_cur_vol->
+				AddEmptyMask(0, true);
+			m_view->m_glview->m_cur_vol->
+				AddEmptyLabel(0, true);
+		}
 	}
 	else
 	{
