@@ -487,6 +487,7 @@ public:
 	FL::RulerList* GetRulerList();
 	FL::Ruler* GetRuler(unsigned int id);
 	FL::RulerHandler* GetRulerHandler() { return &m_ruler_handler; }
+	FL::RulerRenderer* GetRulerRenderer() { return &m_ruler_renderer; }
 
 	//draw highlighted comps
 	void DrawCells();

@@ -4219,22 +4219,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_ruler_relax)
 			m_ruler_relax = false;
 
-		//forced refresh
-		if (wxGetKeyState(WXK_F5))
-		{
-			SetFocus();
-			m_clear_buffer = true;
-			m_updating = true;
-			if (frame && frame->GetStatusBar())
-				frame->GetStatusBar()->PushStatusText("Forced Refresh");
-			wxSizeEvent e;
-			OnResize(e);
-			RefreshGL(14);
-			if (frame && frame->GetStatusBar())
-				frame->GetStatusBar()->PopStatusText();
-			return;
-		}
-
 		//grow
 		if ((m_int_mode == 10 ||
 			m_int_mode == 12) &&
@@ -4265,6 +4249,22 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				if (m_int_mode == 12 && vr_frame->GetMeasureDlg())
 					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			}
+		}
+
+		//forced refresh
+		if (wxGetKeyState(WXK_F5))
+		{
+			SetFocus();
+			m_clear_buffer = true;
+			m_updating = true;
+			if (frame && frame->GetStatusBar())
+				frame->GetStatusBar()->PushStatusText("Forced Refresh");
+			wxSizeEvent e;
+			OnResize(e);
+			RefreshGL(14);
+			if (frame && frame->GetStatusBar())
+				frame->GetStatusBar()->PopStatusText();
+			return;
 		}
 	}
 

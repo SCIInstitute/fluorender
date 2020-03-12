@@ -41,7 +41,8 @@ using namespace FL;
 RulerRenderer::RulerRenderer() :
 	m_view(0),
 	m_ruler_list(0),
-	m_line_size(3)
+	m_line_size(3),
+	m_draw_text(true)
 {
 
 }
@@ -98,47 +99,8 @@ void RulerRenderer::Draw()
 		shader->release();
 
 	//draw text
-	float w = FLIVR::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
-	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
-	Color c;
-	Color text_color = m_view->GetTextColor();
-	Point p2;
-	float px, py, p2x, p2y;
-	FLIVR::Transform mv, p;
-	glm::mat4 mv_mat = m_view->GetModelView();
-	mv.set(glm::value_ptr(mv_mat));
-	glm::mat4 proj_mat = m_view->GetProjection();
-	p.set(glm::value_ptr(proj_mat));
-	FLIVR::TextRenderer* text_renderer = m_view->GetTextRenderer();
-	if (!text_renderer)
-		return;
-	for (size_t i = 0; i < m_ruler_list->size(); i++)
-	{
-		FL::Ruler* ruler = (*m_ruler_list)[i];
-		if (!ruler) continue;
-		if (!ruler->GetDisp()) continue;
-		if (!ruler->GetTimeDep() ||
-			(ruler->GetTimeDep() &&
-			ruler->GetTime() == tseq_cur_num))
-		{
-			if (ruler->GetUseColor())
-				c = ruler->GetColor();
-			else
-				c = text_color;
-			size_t j = ruler->GetNumPoint() - 1;
-			p2 = ruler->GetPoint(j)->GetPoint();
-			p2 = mv.transform(p2);
-			p2 = p.transform(p2);
-			p2x = p2.x()*nx / 2.0;
-			p2y = p2.y()*ny / 2.0;
-			text_renderer->RenderText(
-				ruler->GetName().ToStdWstring(),
-				c,
-				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
-		}
-	}
+	if (m_draw_text)
+		DrawText(tseq_cur_num, nx, ny);
 }
 
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
@@ -528,5 +490,50 @@ void RulerRenderer::DrawArc(FLIVR::Point & ppc, FLIVR::Point& pp0, FLIVR::Point&
 		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
 		num += 2;
 		p1 = p2;
+	}
+}
+
+void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
+{
+	float w = FLIVR::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float sx, sy;
+	sx = 2.0 / nx;
+	sy = 2.0 / ny;
+	Color c;
+	Color text_color = m_view->GetTextColor();
+	Point p2;
+	float px, py, p2x, p2y;
+	FLIVR::Transform mv, p;
+	glm::mat4 mv_mat = m_view->GetModelView();
+	mv.set(glm::value_ptr(mv_mat));
+	glm::mat4 proj_mat = m_view->GetProjection();
+	p.set(glm::value_ptr(proj_mat));
+	FLIVR::TextRenderer* text_renderer = m_view->GetTextRenderer();
+	if (!text_renderer)
+		return;
+	for (size_t i = 0; i < m_ruler_list->size(); i++)
+	{
+		FL::Ruler* ruler = (*m_ruler_list)[i];
+		if (!ruler) continue;
+		if (!ruler->GetDisp()) continue;
+		if (!ruler->GetTimeDep() ||
+			(ruler->GetTimeDep() &&
+				ruler->GetTime() == tseq_cur_num))
+		{
+			if (ruler->GetUseColor())
+				c = ruler->GetColor();
+			else
+				c = text_color;
+			size_t j = ruler->GetNumPoint() - 1;
+			p2 = ruler->GetPoint(j)->GetPoint();
+			p2 = mv.transform(p2);
+			p2 = p.transform(p2);
+			p2x = p2.x()*nx / 2.0;
+			p2y = p2.y()*ny / 2.0;
+			text_renderer->RenderText(
+				ruler->GetName().ToStdWstring(),
+				c,
+				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
+		}
 	}
 }
