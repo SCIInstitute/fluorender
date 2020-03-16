@@ -50,13 +50,20 @@ ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
 
 SET(GLEW_LIBRARY "${BINARY_DIR}/lib/Debug" CACHE INTERNAL "")
 set(GLEW_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
+set(GLEW_DLL_DIR ${BINARY_DIR}/bin/Debug CACHE INTERNAL "")
 
 add_library(glew_external STATIC IMPORTED)
 
-#set(glew_LIBRARIES
-#  ${glew_LIBRARY_DIR}/${prefix}glew32${suffix}
-#  ${glew_LIBRARY_DIR}/${prefix}libglew32${suffix}
-#  CACHE INTERNAL ""
+set(GLEW_LIBRARIES
+  ${GLEW_LIBRARY}/${prefix}glew32d${suffix}
+  ${GLEW_LIBRARY}/${prefix}libglew32d${suffix}
+  CACHE INTERNAL ""
+)
+
+#add_custom_command(POST_BUILD
+#  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#	"${BINARY_DIR}/bin/glew32.dll"
+#	$<TARGET_FILE_DIR:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug>
 #)
 
 message(STATUS "glew_DIR: ${GLEW_LIBRARY}")

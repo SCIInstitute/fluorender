@@ -51,14 +51,6 @@ include(ExternalProject)
 # This will need to be tested, however I believe the already built binaries for
 # Windows and OSX have x264 built into them. However there are not pre-built 
 # binaries for Linux so it must be manually built.
-if( APPLE )
-  ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/FFmpegExternal_Win_Apple.cmake FFmpeg_external)
-elseif( UNIX )
-  ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/x264_external.cmake x264_external)
-  ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/FFmpegExternal_Unix.cmake FFmpeg_external)
-else()
-  ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/FFmpegExternal_Win_Apple.cmake FFmpeg_external)
-endif()
 
 # This adds all of external projects to be added to the project
 #
@@ -67,6 +59,7 @@ endif()
 #       boost. However, this may break some dependencies down the line and 
 #       some of the projects that depends on Boost_external_download will
 #       need to be modified.
+ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/FFmpegExternal_Win_Apple.cmake FFmpeg_external)
 ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/ZlibExternal.cmake Zlib_external)
 ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/LibPNGExternal.cmake LibPNG_external)
 ADD_EXTERNAL(${CMAKE_CURRENT_LIST_DIR}/libtiffExternal.cmake LibPNG_external)

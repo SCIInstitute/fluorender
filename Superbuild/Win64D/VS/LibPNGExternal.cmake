@@ -37,7 +37,7 @@ SET(libpng_DEPENDENCIES "Zlib_external_download")
 
 
 # needs to be combined here or the cmake file will not find zlib
-set(Zlibincludes "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
+set(Zlibincludes "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR};${Zlib_CONF_H_FILE}")
 
 # This is some magic found on stackoverflow which allows the include directories
 # to be passed as list separators for the external project to find the directories.
@@ -75,7 +75,8 @@ ExternalProject_Add(LibPNG_external_download
 ExternalProject_Get_Property(LibPNG_external_download BINARY_DIR)
 ExternalProject_Get_Property(LibPNG_external_download SOURCE_DIR)
 
-SET(PNG_LIBRARY "${BINARY_DIR}/Debug" CACHE INTERNAL "")
+set(PNG_ROOT_DIR ${BINARY_DIR} CACHE INTERNAL "")
+SET(PNG_LIBRARY "${BINARY_DIR};${BINARY_DIR}/Debug" CACHE INTERNAL "")
 SET(PNG_INCLUDE_DIRS ${SOURCE_DIR} CACHE INTERNAL "")
 
 add_library(LibPNG_external STATIC IMPORTED)

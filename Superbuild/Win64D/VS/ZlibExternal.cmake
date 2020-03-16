@@ -56,8 +56,10 @@ ExternalProject_Add(Zlib_external_download
 ExternalProject_Get_Property(Zlib_external_download BINARY_DIR)
 ExternalProject_Get_Property(Zlib_external_download SOURCE_DIR)
 
-SET(Zlib_LIBRARY_DIR "${BINARY_DIR}/Debug" CACHE INTERNAL "")
+set(Zlib_ROOT_DIRECTORY ${BINARY_DIR} CACHE INTERNAL "")
+SET(Zlib_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug" CACHE INTERNAL "")
 SET(Zlib_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
+set(Zlib_CONF_H_FILE "${BINARY_DIR}/zconf.h" CACHE INTERNAL "")
 
 add_library(Zlib STATIC IMPORTED)
 
