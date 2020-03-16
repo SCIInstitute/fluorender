@@ -56,7 +56,7 @@ const char* str_cl_segrow = \
 "}\n" \
 "\n" \
 "//initialize masked regions to ids (shuffle)\n" \
-"__kernel void kernel_1(\n" \
+"__kernel void kernel_0(\n" \
 "	__read_only image3d_t mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -90,7 +90,7 @@ const char* str_cl_segrow = \
 "	atomic_xchg(label+index, res + 1);\n" \
 "}\n" \
 "//initialize new mask regions to ids (ordered)\n" \
-"__kernel void kernel_null(\n" \
+"__kernel void kernel_1(\n" \
 "	__read_only image3d_t mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -106,10 +106,160 @@ const char* str_cl_segrow = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	if (label[index] > 0)\n" \
 "		return;\n" \
-"	atomic_xchg(label+index, nx*ny*nz - index);\n" \
+"	atomic_xchg(label+index, index + 1);\n" \
 "}\n" \
 "//grow ids\n" \
-"__kernel void kernel_2(\n" \
+"__kernel void kernel_21(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx - 1, lb.y + ngy - 1, lb.z + ngz - 1);\n" \
+"	int3 ijk = (int3)(0, 0, 0);\n" \
+"	unsigned int index;\n" \
+"	unsigned int label_v;\n" \
+"	unsigned int m, label_m;\n" \
+"	for (ijk.z = ub.z; ijk.z >= lb.z; --ijk.z)\n" \
+"	for (ijk.y = ub.y; ijk.y >= lb.y; --ijk.y)\n" \
+"	for (ijk.x = ub.x; ijk.x >= lb.x; --ijk.x)\n" \
+"	{\n" \
+"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
+"			continue;\n" \
+"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		label_v = label[index];\n" \
+"		if (label_v == 0 || label_v & 0x80000000)\n" \
+"			continue;\n" \
+"		label_m = label_v;\n" \
+"		//-x\n" \
+"		if (ijk.x > 0)\n" \
+"		{\n" \
+"			m = label[index - 1];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"			label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//+x\n" \
+"		if (ijk.x < nx-1)\n" \
+"		{\n" \
+"			m = label[index + 1];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//-y\n" \
+"		if (ijk.y > 0)\n" \
+"		{\n" \
+"			m = label[index - nx];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//+y\n" \
+"		if (ijk.y < ny-1)\n" \
+"		{\n" \
+"			m = label[index + nx];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//-z\n" \
+"		if (ijk.z > 0)\n" \
+"		{\n" \
+"			m = label[index - nxy];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//+z\n" \
+"		if (ijk.z < nz-1)\n" \
+"		{\n" \
+"			m = label[index + nxy];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		if (label_m != label_v)\n" \
+"			label[index] = label_m;\n" \
+"	}\n" \
+"}\n" \
+"__kernel void kernel_22(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 ijk = (int3)(0, 0, 0);\n" \
+"	unsigned int index;\n" \
+"	unsigned int label_v;\n" \
+"	unsigned int m, label_m;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
+"			continue;\n" \
+"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		label_v = label[index];\n" \
+"		if (label_v == 0 || label_v & 0x80000000)\n" \
+"			continue;\n" \
+"		label_m = label_v;\n" \
+"		//-x\n" \
+"		if (ijk.x > 0)\n" \
+"		{\n" \
+"			m = label[index - 1];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"			label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//+x\n" \
+"		if (ijk.x < nx-1)\n" \
+"		{\n" \
+"			m = label[index + 1];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//-y\n" \
+"		if (ijk.y > 0)\n" \
+"		{\n" \
+"			m = label[index - nx];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//+y\n" \
+"		if (ijk.y < ny-1)\n" \
+"		{\n" \
+"			m = label[index + nx];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//-z\n" \
+"		if (ijk.z > 0)\n" \
+"		{\n" \
+"			m = label[index - nxy];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		//+z\n" \
+"		if (ijk.z < nz-1)\n" \
+"		{\n" \
+"			m = label[index + nxy];\n" \
+"			if (m  && !(m & 0x80000000))\n" \
+"				label_m = max(label_m, m);\n" \
+"		}\n" \
+"		if (label_m != label_v)\n" \
+"			label[index] = label_m;\n" \
+"	}\n" \
+"}\n" \
+"__kernel void kernel_02(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -378,7 +528,8 @@ void SegGrow::Compute()
 	if (!kernel_prog)
 		return;
 	int kernel_1 = kernel_prog->createKernel("kernel_1");//init
-	int kernel_2 = kernel_prog->createKernel("kernel_2");//grow
+	int kernel_21 = kernel_prog->createKernel("kernel_21");//grow
+	int kernel_22 = kernel_prog->createKernel("kernel_22");//grow
 	int kernel_3 = kernel_prog->createKernel("kernel_3");//count
 	int kernel_4 = kernel_prog->createKernel("kernel_4");//get shape
 	int kernel_5 = kernel_prog->createKernel("kernel_5");//finalize
@@ -399,27 +550,15 @@ void SegGrow::Compute()
 		//compute workload
 		FLIVR::GroupSize gsize;
 		kernel_prog->get_group_size(kernel_3, nx, ny, nz, gsize);
+		FLIVR::GroupSize gsize2;
+		kernel_prog->get_group_size2(kernel_21, nx, ny, nz, gsize2);
 		unsigned int nxy = nx * ny;
-
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t global_size2[3] = {
 			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
+		size_t global_size22[3] = {
+			size_t(gsize2.gsx), size_t(gsize2.gsy), size_t(gsize2.gsz) };
 		size_t local_size[3] = { 1, 1, 1 };
-		//bit length
-		unsigned int lenx = 0;
-		unsigned int r = Max(nx, ny);
-		while (r > 0)
-		{
-			r /= 2;
-			lenx++;
-		}
-		unsigned int lenz = 0;
-		r = nz;
-		while (r > 0)
-		{
-			r /= 2;
-			lenz++;
-		}
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
@@ -435,20 +574,41 @@ void SegGrow::Compute()
 			sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(kernel_1, 4,
 			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_1, 5,
-			sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(kernel_1, 6,
-			sizeof(unsigned int), (void*)(&lenz));
 		//kernel2
-		arg_label.kernel_index = kernel_2;
+		arg_label.kernel_index = kernel_21;
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_2, 1,
+		kernel_prog->setKernelArgConst(kernel_21, 1,
 			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_2, 2,
+		kernel_prog->setKernelArgConst(kernel_21, 2,
 			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_2, 3,
+		kernel_prog->setKernelArgConst(kernel_21, 3,
+			sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(kernel_21, 4,
 			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_21, 5,
+			sizeof(unsigned int), (void*)(&gsize2.ngx));
+		kernel_prog->setKernelArgConst(kernel_21, 6,
+			sizeof(unsigned int), (void*)(&gsize2.ngy));
+		kernel_prog->setKernelArgConst(kernel_21, 7,
+			sizeof(unsigned int), (void*)(&gsize2.ngz));
+		arg_label.kernel_index = kernel_22;
+		arg_label.index = 0;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_22, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_22, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_22, 3,
+			sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(kernel_22, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(kernel_22, 5,
+			sizeof(unsigned int), (void*)(&gsize2.ngx));
+		kernel_prog->setKernelArgConst(kernel_22, 6,
+			sizeof(unsigned int), (void*)(&gsize2.ngy));
+		kernel_prog->setKernelArgConst(kernel_22, 7,
+			sizeof(unsigned int), (void*)(&gsize2.ngz));
 		//kernel3
 		arg_label.kernel_index = kernel_3;
 		arg_label.index = 0;
@@ -487,8 +647,11 @@ void SegGrow::Compute()
 		
 		//first pass
 		kernel_prog->executeKernel(kernel_1, 3, global_size, local_size);
-		for (int i = 0; i < m_iter; ++i)
-			kernel_prog->executeKernel(kernel_2, 3, global_size, local_size);
+		for (int i = 0; i < 2; ++i)
+		{
+			kernel_prog->executeKernel(kernel_21, 3, global_size22, local_size);
+			kernel_prog->executeKernel(kernel_22, 3, global_size22, local_size);
+		}
 		kernel_prog->executeKernel(kernel_3, 3, global_size2, local_size);
 
 		//read back

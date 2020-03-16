@@ -141,6 +141,9 @@ namespace FLIVR
 		bool get_group_size(int index,
 			unsigned int nx, unsigned int ny, unsigned int nz,
 			GroupSize &ksize);
+		bool get_group_size2(int index,
+			unsigned int nx, unsigned int ny, unsigned int nz,
+			GroupSize &ksize);
 		unsigned int optimize_group_size_xy(unsigned int nt, unsigned int target);
 		unsigned int optimize_group_size_z(unsigned int nt, unsigned int target);
 
