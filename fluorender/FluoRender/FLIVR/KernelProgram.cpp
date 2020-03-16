@@ -1067,6 +1067,35 @@ namespace FLIVR
 
 	}
 
+	bool KernelProgram::get_group_size2(int index,
+		unsigned int nx, unsigned int ny, unsigned int nz,
+		GroupSize &ksize)
+	{
+		size_t ng;
+		if (!getWorkGroupSize(index, &ng))
+			return false;
+
+		//z
+		ksize.ngz = nz;
+		//xy
+		unsigned int targetx;
+		unsigned int targety;
+		targetx = (unsigned int)(std::ceil(double(nx) /
+			std::sqrt(double(ng))));
+		targety = (unsigned int)(std::ceil(double(ny) /
+			std::sqrt(double(ng))));
+		//optimize
+		ksize.ngx = optimize_group_size_xy(nx, targetx);
+		ksize.ngy = optimize_group_size_xy(ny, targety);
+
+		ksize.gsx = nx / ksize.ngx + (nx%ksize.ngx ? 1 : 0);
+		ksize.gsy = ny / ksize.ngy + (ny%ksize.ngy ? 1 : 0);
+		ksize.gsz = nz / ksize.ngz + (nz%ksize.ngz ? 1 : 0);
+		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
+		ksize.gsxy = ksize.gsx * ksize.gsy;
+
+	}
+
 	unsigned int KernelProgram::optimize_group_size_xy(unsigned int nt, unsigned int target)
 	{
 		unsigned int loj, hij, res, maxj;
