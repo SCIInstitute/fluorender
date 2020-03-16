@@ -60,10 +60,4 @@ set(GLEW_LIBRARIES
   CACHE INTERNAL ""
 )
 
-#add_custom_command(POST_BUILD
-#  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#	"${BINARY_DIR}/bin/glew32.dll"
-#	$<TARGET_FILE_DIR:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug>
-#)
-
 message(STATUS "glew_DIR: ${GLEW_LIBRARY}")

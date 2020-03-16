@@ -71,8 +71,8 @@ SET(TIFF_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNA
 
 add_library(libtiff_external STATIC IMPORTED)
 
-#set(Libtiff_LIBRARIES
-#  ${libtiff_LIBRARY_DIR}/${prefix}tiffd${suffix} CACHE INTERNAL ""
-#)
+set(Libtiff_LIBRARIES
+  ${TIFF_LIBRARY}/${prefix}tiff${suffix} CACHE INTERNAL ""
+)
 
 MESSAGE(STATUS "libtiff_DIR: ${TIFF_LIBRARY}")

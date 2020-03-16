@@ -50,13 +50,14 @@ ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
 
 SET(GLEW_LIBRARY "${BINARY_DIR}/lib/Release" CACHE INTERNAL "")
 set(GLEW_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
+set(GLEW_DLL_DIR "${BINARY_DIR}/bin/Release" CACHE INTERNAL "")
 
 add_library(glew_external STATIC IMPORTED)
 
-#set(glew_LIBRARIES
-#  ${glew_LIBRARY_DIR}/${prefix}glew32${suffix}
-#  ${glew_LIBRARY_DIR}/${prefix}libglew32${suffix}
-#  CACHE INTERNAL ""
-#)
+set(glew_LIBRARIES
+  ${GLEW_LIBRARY}/${prefix}glew32${suffix}
+  ${GLEW_LIBRARY}/${prefix}libglew32${suffix}
+  CACHE INTERNAL ""
+)
 
 message(STATUS "glew_DIR: ${GLEW_LIBRARY}")

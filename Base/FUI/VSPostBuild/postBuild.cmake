@@ -3,5 +3,5 @@
 if(Debug_Mode)
 	include(${CMAKE_CURRENT_LIST_DIR}/debugCopy.cmake)
 else()
-	include(releaseCopy.cmake)
+	include(${CMAKE_CURRENT_LIST_DIR}/releaseCopy.cmake)
 endif()
