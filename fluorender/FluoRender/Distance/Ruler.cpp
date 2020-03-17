@@ -327,7 +327,7 @@ bool Ruler::AddPointAfterId(
 {
 	if (m_ruler_type != 1)
 		return false;
-	if (m_ruler.empty() || !cid)
+	if (m_ruler.empty())
 	{
 		m_ruler.push_back(RulerBranch());
 		m_ruler.back().push_back(

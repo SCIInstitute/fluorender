@@ -39,58 +39,8 @@ const char* str_cl_segrow = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
-"unsigned int __attribute((always_inline)) reverse_bit(unsigned int val, unsigned int len)\n" \
-"{\n" \
-"	unsigned int res = val;\n" \
-"	int s = len - 1;\n" \
-"	for (val >>= 1; val; val >>= 1)\n" \
-"	{\n" \
-"		res <<= 1;\n" \
-"		res |= val & 1;\n" \
-"		s--;\n" \
-"	}\n" \
-"	res <<= s;\n" \
-"	res <<= 32-len;\n" \
-"	res >>= 32-len;\n" \
-"	return res;\n" \
-"}\n" \
-"\n" \
-"//initialize masked regions to ids (shuffle)\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int lenx,\n" \
-"	unsigned int lenz)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	if (i >= nx || j >= ny || k >= nz)\n" \
-"		return;\n" \
-"	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.01)\n" \
-"		return;\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	if (label[index] > 0)\n" \
-"		return;\n" \
-"	unsigned int x, y, z, ii;\n" \
-"	x = reverse_bit(i, lenx);\n" \
-"	y = reverse_bit(j, lenx);\n" \
-"	z = reverse_bit(k, lenz);\n" \
-"	unsigned int res = 0;\n" \
-"	for (ii=0; ii<lenx; ++ii)\n" \
-"	{\n" \
-"		res |= (1<<ii & x)<<(ii);\n" \
-"		res |= (1<<ii & y)<<(ii+1);\n" \
-"	}\n" \
-"	res |= z<<lenx*2;\n" \
-"	atomic_xchg(label+index, res + 1);\n" \
-"}\n" \
 "//initialize new mask regions to ids (ordered)\n" \
-"__kernel void kernel_1(\n" \
+"__kernel void kernel_0(\n" \
 "	__read_only image3d_t mask,\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
@@ -108,8 +58,8 @@ const char* str_cl_segrow = \
 "		return;\n" \
 "	atomic_xchg(label+index, index + 1);\n" \
 "}\n" \
-"//grow ids\n" \
-"__kernel void kernel_21(\n" \
+"//grow ids reverse\n" \
+"__kernel void kernel_1(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -184,7 +134,8 @@ const char* str_cl_segrow = \
 "			label[index] = label_m;\n" \
 "	}\n" \
 "}\n" \
-"__kernel void kernel_22(\n" \
+"//grow id ordered\n" \
+"__kernel void kernel_2(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -259,41 +210,6 @@ const char* str_cl_segrow = \
 "			label[index] = label_m;\n" \
 "	}\n" \
 "}\n" \
-"__kernel void kernel_02(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
-"{\n" \
-"	int3 coord = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	if (coord.x >= nx || coord.y >= ny || coord.z >= nz)\n" \
-"		return;\n" \
-"	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
-"	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0 || label_v & 0x80000000)\n" \
-"		return;\n" \
-"	int3 nb_coord;\n" \
-"	unsigned int nb_index;\n" \
-"	unsigned int m;\n" \
-"	for (int i=-1; i<2; ++i)\n" \
-"	for (int j=-1; j<2; ++j)\n" \
-"	for (int k=-1; k<2; ++k)\n" \
-"	{\n" \
-"		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
-"		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
-"			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
-"			nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
-"			continue;\n" \
-"		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
-"		m = label[nb_index];\n" \
-"		if (m & 0x80000000)\n" \
-"			continue;\n" \
-"		if (m > label_v)\n" \
-"			label_v = m;\n" \
-"	}\n" \
-"	atomic_xchg(label+index, label_v);\n" \
-"}\n" \
 "//count newly grown labels\n" \
 "__kernel void kernel_3(\n" \
 "	__global unsigned int* label,\n" \
@@ -351,8 +267,147 @@ const char* str_cl_segrow = \
 "	for (c = 0; c < lcount; ++c)\n" \
 "		atomic_xchg(ids+index*maxc+c, lids[c]);\n" \
 "}\n" \
-"//find connectivity/center of new ids\n" \
+"//find connected parts\n" \
 "__kernel void kernel_4(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	unsigned int nid,\n" \
+"	__global unsigned int* ids,\n" \
+"	__global unsigned int* cids,\n" \
+"	__local unsigned int* lcids)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 ijk = (int3)(0, 0, 0);\n" \
+"	unsigned int index;\n" \
+"	unsigned int label_v;\n" \
+"	unsigned int m;\n" \
+"	bool found;\n" \
+"	int c;\n" \
+"	for (c = 0; c < nid * 6; ++c)\n" \
+"		lcids[c] = 0;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
+"			continue;\n" \
+"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		label_v = label[index];\n" \
+"		if (label_v == 0 || label_v & 0x80000000)\n" \
+"			continue;\n" \
+"		found = false;\n" \
+"		for (c = 0; c < nid; ++c)\n" \
+"		if (ids[c] == label_v)\n" \
+"		{\n" \
+"			found = true;\n" \
+"			break;\n" \
+"		}\n" \
+"		if (!found)\n" \
+"			continue;\n" \
+"		//-x\n" \
+"		if (ijk.x > 0)\n" \
+"		{\n" \
+"			m = label[index - 1];\n" \
+"			if (m != label_v && !(m & 0x80000000))\n" \
+"				lcids[c*6] = m;\n" \
+"		}\n" \
+"		//+x\n" \
+"		if (ijk.x < nx-1)\n" \
+"		{\n" \
+"			m = label[index + 1];\n" \
+"			if (m != label_v && !(m & 0x80000000))\n" \
+"				lcids[c*6+1] = m;\n" \
+"		}\n" \
+"		//-y\n" \
+"		if (ijk.y > 0)\n" \
+"		{\n" \
+"			m = label[index - nx];\n" \
+"			if (m != label_v && !(m & 0x80000000))\n" \
+"				lcids[c*6+2] = m;\n" \
+"		}\n" \
+"		//+y\n" \
+"		if (ijk.y < ny-1)\n" \
+"		{\n" \
+"			m = label[index + nx];\n" \
+"			if (m != label_v && !(m & 0x80000000))\n" \
+"				lcids[c*6+3] = m;\n" \
+"		}\n" \
+"		//-z\n" \
+"		if (ijk.z > 0)\n" \
+"		{\n" \
+"			m = label[index - nxy];\n" \
+"			if (m != label_v && !(m & 0x80000000))\n" \
+"				lcids[c*6+4] = m;\n" \
+"		}\n" \
+"		//+z\n" \
+"		if (ijk.z < nz-1)\n" \
+"		{\n" \
+"			m = label[index + nxy];\n" \
+"			if (m != label_v && !(m & 0x80000000))\n" \
+"				lcids[c*6+5] = m;\n" \
+"		}\n" \
+"	}\n" \
+"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	for (c = 0; c < nid*6; ++c)\n" \
+"		atomic_xchg(cids+(index*nid)*6+c, lcids[c]);\n" \
+"}\n" \
+"//merge connected ids\n" \
+"__kernel void kernel_5(\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int nz,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int nid,\n" \
+"	__global unsigned int* mids)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int3 ijk = (int3)(0, 0, 0);\n" \
+"	unsigned int index;\n" \
+"	unsigned int label_v;\n" \
+"	bool found;\n" \
+"	int c;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
+"			continue;\n" \
+"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		label_v = label[index];\n" \
+"		if (label_v == 0 || label_v & 0x80000000)\n" \
+"			continue;\n" \
+"		found = false;\n" \
+"		for (c = 0; c < nid; ++c)\n" \
+"		if (mids[c*2] == label_v)\n" \
+"		{\n" \
+"			found = true;\n" \
+"			break;\n" \
+"		}\n" \
+"		if (!found)\n" \
+"			continue;\n" \
+"		label[index] = mids[c*2+1];\n" \
+"	}\n" \
+"}\n" \
+"//find connectivity/center of new ids\n" \
+"__kernel void kernel_6(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -379,6 +434,7 @@ const char* str_cl_segrow = \
 "	int3 ijk = (int3)(0, 0, 0);\n" \
 "	unsigned int index;\n" \
 "	unsigned int label_v;\n" \
+"	unsigned int m;\n" \
 "	bool found;\n" \
 "	int c;\n" \
 "	for (c = 0; c < nid; ++c)\n" \
@@ -412,47 +468,46 @@ const char* str_cl_segrow = \
 "		lcsum[c*3] += (float)(ijk.x);\n" \
 "		lcsum[c*3+1] += (float)(ijk.y);\n" \
 "		lcsum[c*3+2] += (float)(ijk.z);\n" \
-"		unsigned int m;\n" \
 "		//-x\n" \
 "		if (ijk.x > 0)\n" \
 "		{\n" \
 "			m = label[index - 1];\n" \
-"			if (m && m != label_v && m & 0x80000000)\n" \
+"			if (m != label_v && m & 0x80000000)\n" \
 "				lcids[c] = m;\n" \
 "		}\n" \
 "		//+x\n" \
 "		if (ijk.x < nx-1)\n" \
 "		{\n" \
 "			m = label[index + 1];\n" \
-"			if (m && m != label_v && m & 0x80000000)\n" \
+"			if (m != label_v && m & 0x80000000)\n" \
 "				lcids[c] = m;\n" \
 "		}\n" \
 "		//-y\n" \
 "		if (ijk.y > 0)\n" \
 "		{\n" \
 "			m = label[index - nx];\n" \
-"			if (m && m != label_v && m & 0x80000000)\n" \
+"			if (m != label_v && m & 0x80000000)\n" \
 "				lcids[c] = m;\n" \
 "		}\n" \
 "		//+y\n" \
 "		if (ijk.y < ny-1)\n" \
 "		{\n" \
 "			m = label[index + nx];\n" \
-"			if (m && m != label_v && m & 0x80000000)\n" \
+"			if (m != label_v && m & 0x80000000)\n" \
 "				lcids[c] = m;\n" \
 "		}\n" \
 "		//-z\n" \
 "		if (ijk.z > 0)\n" \
 "		{\n" \
 "			m = label[index - nxy];\n" \
-"			if (m && m != label_v && m & 0x80000000)\n" \
+"			if (m != label_v && m & 0x80000000)\n" \
 "				lcids[c] = m;\n" \
 "		}\n" \
 "		//+z\n" \
 "		if (ijk.z < nz-1)\n" \
 "		{\n" \
 "			m = label[index + nxy];\n" \
-"			if (m && m != label_v && m & 0x80000000)\n" \
+"			if (m != label_v && m & 0x80000000)\n" \
 "				lcids[c] = m;\n" \
 "		}\n" \
 "	}\n" \
@@ -467,7 +522,7 @@ const char* str_cl_segrow = \
 "	}\n" \
 "}\n" \
 "//fix processed ids\n" \
-"__kernel void kernel_5(\n" \
+"__kernel void kernel_7(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -527,12 +582,14 @@ void SegGrow::Compute()
 		vol_kernel_factory_.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
-	int kernel_1 = kernel_prog->createKernel("kernel_1");//init
-	int kernel_21 = kernel_prog->createKernel("kernel_21");//grow
-	int kernel_22 = kernel_prog->createKernel("kernel_22");//grow
+	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
+	int kernel_1 = kernel_prog->createKernel("kernel_1");//grow reverse
+	int kernel_2 = kernel_prog->createKernel("kernel_2");//grow ordered
 	int kernel_3 = kernel_prog->createKernel("kernel_3");//count
-	int kernel_4 = kernel_prog->createKernel("kernel_4");//get shape
-	int kernel_5 = kernel_prog->createKernel("kernel_5");//finalize
+	int kernel_4 = kernel_prog->createKernel("kernel_4");//find connected parts
+	int kernel_5 = kernel_prog->createKernel("kernel_5");//merge connected parts
+	int kernel_6 = kernel_prog->createKernel("kernel_6");//get shape
+	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
@@ -549,67 +606,64 @@ void SegGrow::Compute()
 
 		//compute workload
 		FLIVR::GroupSize gsize;
-		kernel_prog->get_group_size(kernel_3, nx, ny, nz, gsize);
-		FLIVR::GroupSize gsize2;
-		kernel_prog->get_group_size2(kernel_21, nx, ny, nz, gsize2);
+		kernel_prog->get_group_size2(kernel_3, nx, ny, nz, gsize);
 		unsigned int nxy = nx * ny;
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t global_size2[3] = {
 			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
-		size_t global_size22[3] = {
-			size_t(gsize2.gsx), size_t(gsize2.gsy), size_t(gsize2.gsz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		//kernel1
-		kernel_prog->setKernelArgTex3D(kernel_1, 0,
+		//kernel0: init ordered
+		kernel_prog->setKernelArgTex3D(kernel_0, 0,
 			CL_MEM_READ_ONLY, mid);
 		Argument arg_label =
-			kernel_prog->setKernelArgTex3DBuf(kernel_1, 1,
+			kernel_prog->setKernelArgTex3DBuf(kernel_0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
-		kernel_prog->setKernelArgConst(kernel_1, 2,
+		kernel_prog->setKernelArgConst(kernel_0, 2,
 			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_1, 3,
+		kernel_prog->setKernelArgConst(kernel_0, 3,
 			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_0, 4,
+			sizeof(unsigned int), (void*)(&nz));
+		//kernel1: grow reverse
+		arg_label.kernel_index = kernel_1;
+		arg_label.index = 0;
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(kernel_1, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_1, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_1, 3,
+			sizeof(unsigned int), (void*)(&nxy));
 		kernel_prog->setKernelArgConst(kernel_1, 4,
 			sizeof(unsigned int), (void*)(&nz));
-		//kernel2
-		arg_label.kernel_index = kernel_21;
+		kernel_prog->setKernelArgConst(kernel_1, 5,
+			sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(kernel_1, 6,
+			sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(kernel_1, 7,
+			sizeof(unsigned int), (void*)(&gsize.ngz));
+		//kernel2: grow ordered
+		arg_label.kernel_index = kernel_2;
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_21, 1,
+		kernel_prog->setKernelArgConst(kernel_2, 1,
 			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_21, 2,
+		kernel_prog->setKernelArgConst(kernel_2, 2,
 			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_21, 3,
+		kernel_prog->setKernelArgConst(kernel_2, 3,
 			sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(kernel_21, 4,
+		kernel_prog->setKernelArgConst(kernel_2, 4,
 			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_21, 5,
-			sizeof(unsigned int), (void*)(&gsize2.ngx));
-		kernel_prog->setKernelArgConst(kernel_21, 6,
-			sizeof(unsigned int), (void*)(&gsize2.ngy));
-		kernel_prog->setKernelArgConst(kernel_21, 7,
-			sizeof(unsigned int), (void*)(&gsize2.ngz));
-		arg_label.kernel_index = kernel_22;
-		arg_label.index = 0;
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_22, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_22, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_22, 3,
-			sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(kernel_22, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_22, 5,
-			sizeof(unsigned int), (void*)(&gsize2.ngx));
-		kernel_prog->setKernelArgConst(kernel_22, 6,
-			sizeof(unsigned int), (void*)(&gsize2.ngy));
-		kernel_prog->setKernelArgConst(kernel_22, 7,
-			sizeof(unsigned int), (void*)(&gsize2.ngz));
-		//kernel3
+		kernel_prog->setKernelArgConst(kernel_2, 5,
+			sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(kernel_2, 6,
+			sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(kernel_2, 7,
+			sizeof(unsigned int), (void*)(&gsize.ngz));
+		//kernel3: count ids
 		arg_label.kernel_index = kernel_3;
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
@@ -646,11 +700,11 @@ void SegGrow::Compute()
 		kernel_prog->setKernelArgLocal(kernel_3, 13, sizeof(unsigned int)*m_branches);
 		
 		//first pass
-		kernel_prog->executeKernel(kernel_1, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_0, 3, global_size, local_size);
 		for (int i = 0; i < 2; ++i)
 		{
-			kernel_prog->executeKernel(kernel_21, 3, global_size22, local_size);
-			kernel_prog->executeKernel(kernel_22, 3, global_size22, local_size);
+			kernel_prog->executeKernel(kernel_1, 3, global_size2, local_size);
+			kernel_prog->executeKernel(kernel_2, 3, global_size2, local_size);
 		}
 		kernel_prog->executeKernel(kernel_3, 3, global_size2, local_size);
 
@@ -675,8 +729,7 @@ void SegGrow::Compute()
 				ids.push_back(*it);
 			pids = ids.data();
 
-			//set
-			//kernel4
+			//kernel4: connect ids
 			arg_label.kernel_index = kernel_4;
 			arg_label.index = 0;
 			kernel_prog->setKernelArgument(arg_label);
@@ -703,27 +756,160 @@ void SegGrow::Compute()
 			kernel_prog->setKernelArgBuf(kernel_4, 11,
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 				sizeof(unsigned int)*total, (void*)(pids));
+			std::vector<unsigned int> dids(total*gsize.gsxyz*6, 0);
+			unsigned int *pdids = dids.data();
+			kernel_prog->setKernelArgBuf(kernel_4, 12,
+				CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+				sizeof(unsigned int)*total*gsize.gsxyz*6, (void*)(pdids));
+			kernel_prog->setKernelArgLocal(kernel_4, 13, sizeof(unsigned int)*total*6);
+
+			//execute
+			kernel_prog->executeKernel(kernel_4, 3, global_size2, local_size);
+
+			//read back
+			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz*6, pdids, pdids);
+
+			//merge ids
+			std::vector<std::set<unsigned int>> id_set;
+			for (int i = 0; i < total; ++i)
+			{
+				unsigned int id = ids[i];
+				bool found = false;
+				std::vector<std::set<unsigned int>>::iterator it;
+				for (it = id_set.begin();
+					it != id_set.end(); ++it)
+				{
+					auto it2 = it->find(id);
+					if (it2 != it->end())
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					id_set.push_back(std::set<unsigned int>{id});
+					it = id_set.end() - 1;
+				}
+
+				for (int j = 0; j < gsize.gsxyz; ++j)
+				{
+					for (int k = 0; k < 6; ++k)
+					{
+						id = pdids[(j * total + i)*6 + k];
+						if (!id)
+							continue;
+						it->insert(id);
+					}
+				}
+			}
+
+			//kernel5: merge connected ids
+			total = id_set.size();
+			ids.clear();
+			std::vector<unsigned int> merge_id;
+			for (auto it = id_set.begin();
+				it != id_set.end(); ++it)
+			{
+				if (it->size() < 2)
+				{
+					if (!it->empty())
+						ids.push_back(*it->begin());
+					continue;
+				}
+				unsigned int id = *(--it->end());
+				for (auto it2 = it->begin();
+					it2 != it->end(); ++it2)
+				{
+					if (*it2 != id)
+					{
+						merge_id.push_back(*it2);
+						merge_id.push_back(id);
+					}
+				}
+				ids.push_back(id);
+			}
+			pids = ids.data();
+			if (!merge_id.empty())
+			{
+				arg_label.kernel_index = kernel_5;
+				arg_label.index = 0;
+				kernel_prog->setKernelArgument(arg_label);
+				kernel_prog->setKernelArgConst(kernel_5, 1,
+					sizeof(unsigned int), (void*)(&nx));
+				kernel_prog->setKernelArgConst(kernel_5, 2,
+					sizeof(unsigned int), (void*)(&ny));
+				kernel_prog->setKernelArgConst(kernel_5, 3,
+					sizeof(unsigned int), (void*)(&nxy));
+				kernel_prog->setKernelArgConst(kernel_5, 4,
+					sizeof(unsigned int), (void*)(&nz));
+				kernel_prog->setKernelArgConst(kernel_5, 5,
+					sizeof(unsigned int), (void*)(&gsize.ngx));
+				kernel_prog->setKernelArgConst(kernel_5, 6,
+					sizeof(unsigned int), (void*)(&gsize.ngy));
+				kernel_prog->setKernelArgConst(kernel_5, 7,
+					sizeof(unsigned int), (void*)(&gsize.ngz));
+				unsigned int nmid = merge_id.size() / 2;
+				kernel_prog->setKernelArgConst(kernel_5, 8,
+					sizeof(unsigned int), (void*)(&nmid));
+				kernel_prog->setKernelArgBuf(kernel_5, 9,
+					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+					sizeof(unsigned int)*nmid*2, (void*)(merge_id.data()));
+
+				//execute
+				kernel_prog->executeKernel(kernel_5, 3, global_size2, local_size);
+
+			}
+
+			//set
+			//kernel6: get shape
+			arg_label.kernel_index = kernel_6;
+			arg_label.index = 0;
+			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgConst(kernel_6, 1,
+				sizeof(unsigned int), (void*)(&nx));
+			kernel_prog->setKernelArgConst(kernel_6, 2,
+				sizeof(unsigned int), (void*)(&ny));
+			kernel_prog->setKernelArgConst(kernel_6, 3,
+				sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setKernelArgConst(kernel_6, 4,
+				sizeof(unsigned int), (void*)(&nz));
+			kernel_prog->setKernelArgConst(kernel_6, 5,
+				sizeof(unsigned int), (void*)(&gsize.ngx));
+			kernel_prog->setKernelArgConst(kernel_6, 6,
+				sizeof(unsigned int), (void*)(&gsize.ngy));
+			kernel_prog->setKernelArgConst(kernel_6, 7,
+				sizeof(unsigned int), (void*)(&gsize.ngz));
+			kernel_prog->setKernelArgConst(kernel_6, 8,
+				sizeof(unsigned int), (void*)(&gsize.gsxy));
+			kernel_prog->setKernelArgConst(kernel_6, 9,
+				sizeof(unsigned int), (void*)(&gsize.gsx));
+			kernel_prog->setKernelArgConst(kernel_6, 10,
+				sizeof(unsigned int), (void*)(&total));
+			kernel_prog->setKernelArgBuf(kernel_6, 11,
+				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				sizeof(unsigned int)*total, (void*)(pids));
 			std::vector<unsigned int> cids(total*gsize.gsxyz, 0);
 			unsigned int *pcids = cids.data();
-			kernel_prog->setKernelArgBuf(kernel_4, 12,
+			kernel_prog->setKernelArgBuf(kernel_6, 12,
 				CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
 				sizeof(unsigned int)*total*gsize.gsxyz, (void*)(pcids));
 			std::vector<unsigned int> sum(total*gsize.gsxyz, 0);
 			unsigned int *psum = sum.data();
-			kernel_prog->setKernelArgBuf(kernel_4, 13,
+			kernel_prog->setKernelArgBuf(kernel_6, 13,
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 				sizeof(unsigned int)*total*gsize.gsxyz, (void*)(psum));
 			std::vector<float> csum(total*gsize.gsxyz * 3, 0.0f);
 			float* pcsum = csum.data();
-			kernel_prog->setKernelArgBuf(kernel_4, 14,
+			kernel_prog->setKernelArgBuf(kernel_6, 14,
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 				sizeof(float)*total*gsize.gsxyz * 3, (void*)(pcsum));
-			kernel_prog->setKernelArgLocal(kernel_4, 15, sizeof(unsigned int)*total);
-			kernel_prog->setKernelArgLocal(kernel_4, 16, sizeof(unsigned int)*total);
-			kernel_prog->setKernelArgLocal(kernel_4, 17, sizeof(float)*total * 3);
+			kernel_prog->setKernelArgLocal(kernel_6, 15, sizeof(unsigned int)*total);
+			kernel_prog->setKernelArgLocal(kernel_6, 16, sizeof(unsigned int)*total);
+			kernel_prog->setKernelArgLocal(kernel_6, 17, sizeof(float)*total * 3);
 
 			//execute
-			kernel_prog->executeKernel(kernel_4, 3, global_size2, local_size);
+			kernel_prog->executeKernel(kernel_6, 3, global_size2, local_size);
 
 			//read back
 			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz, pcids, pcids);
@@ -761,18 +947,18 @@ void SegGrow::Compute()
 
 		//finalize
 		//kernel5
-		arg_label.kernel_index = kernel_5;
+		arg_label.kernel_index = kernel_7;
 		arg_label.index = 0;
 		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_5, 1,
+		kernel_prog->setKernelArgConst(kernel_7, 1,
 			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_5, 2,
+		kernel_prog->setKernelArgConst(kernel_7, 2,
 			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_5, 3,
+		kernel_prog->setKernelArgConst(kernel_7, 3,
 			sizeof(unsigned int), (void*)(&nz));
 
 		//execute
-		kernel_prog->executeKernel(kernel_5, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_7, 3, global_size, local_size);
 
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
