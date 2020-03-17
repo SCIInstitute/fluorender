@@ -201,3 +201,7 @@ target_link_libraries(FUI
     ${Boost_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )
+
+if(MSVC_FOUND)
+	include(VSPostBuild/postBuild.cmake)
+endif()

@@ -41,6 +41,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(Compiler_C ${CMAKE_C_COMPILER} CACHE INTERNAL "")
 set(Compiler_CXX ${CMAKE_CXX_COMPILER} CACHE INTERNAL "")
 
+option(Debug_Mode "Debug on by default" ON)
+
 # Check if nasm is installed with Linux. Throw a fatal error if it is not found
 if(UNIX AND NOT APPLE)
   find_program(NASM_EXE NAMES nasm)
@@ -58,9 +60,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # Finds the compiler being used
-if(WIN32 OR APPLE)
-  include(getCompiler.cmake)
-endif()
+include(config.cmake)
 
 # This will determine the static library suffix's, may not be needed.
 include(setPreSuffix.cmake)
@@ -93,7 +93,7 @@ add_definitions(${Qt5Core_DEFINITIONS})
 add_definitions(${Qt5Gui_DEFINITIONS})
 
 # This will look for the Superbuild
-Include(${CMAKE_SOURCE_DIR}/Superbuild/Superbuild.cmake)
+Include(${Superbuild})
 
 # These are defined here because Superbuild.cmake defines their locations
 set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIR})
