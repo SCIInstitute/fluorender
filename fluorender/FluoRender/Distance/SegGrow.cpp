@@ -976,7 +976,7 @@ void SegGrow::Compute()
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{
-		if (it->second.sum < 25)
+		if (it->second.sum < 10)
 			continue;
 		it->second.ctr = it->second.ctr / it->second.sum;
 		it->second.ctr.scale(spcx, spcy, spcz);
