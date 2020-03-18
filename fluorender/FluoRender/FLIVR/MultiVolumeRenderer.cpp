@@ -166,14 +166,14 @@ namespace FLIVR
 		bool adaptive,
 		bool interactive_mode_p,
 		bool orthographic_p,
-		double zoom, bool intp)
+		bool intp)
 	{
-		draw_volume(adaptive, interactive_mode_p, orthographic_p, zoom, intp);
+		draw_volume(adaptive, interactive_mode_p, orthographic_p, intp);
 		if(draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
 
-	void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, double zoom, bool intp)
+	void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, bool intp)
 	{
 		if (get_vr_num()<=0 || !(vr_list_[0]))
 			return;
@@ -236,7 +236,7 @@ namespace FLIVR
 
 		if (noise_red_)
 		{
-			double sf = vr_list_[0]->CalcScaleFactor(w, h, res_.x(), res_.y(), zoom);
+			double sf = vr_list_[0]->CalcScaleFactor(w, h, res_.x(), res_.y());
 			if (fabs(sf-sfactor_)>0.05)
 				sfactor_ = sf;
 			else if (sf==1.0 && sfactor_!=1.0)
@@ -413,7 +413,7 @@ namespace FLIVR
 					img_shader->bind();
 				}
 				filter_size_min_ = vr_list_[0]->
-					CalcFilterSize(4, w, h, res_.x(), res_.y(), zoom, sfactor_);
+					CalcFilterSize(4, w, h, res_.x(), res_.y(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
 				vr_list_[0]->draw_view_quad();
 
@@ -457,7 +457,7 @@ namespace FLIVR
 			if (noise_red_ /*&& colormap_mode_!=2*/)
 			{
 				filter_size_shp_ = vr_list_[0]->
-					CalcFilterSize(3, w, h, res_.x(), res_.y(), zoom, sfactor_);
+					CalcFilterSize(3, w, h, res_.x(), res_.y(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
 			}
 

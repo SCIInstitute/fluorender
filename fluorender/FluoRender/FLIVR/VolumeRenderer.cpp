@@ -114,7 +114,8 @@ namespace FLIVR
 		filter_size_shp_(0.0),
 		inv_(false),
 		compression_(false),
-		alpha_power_(1.0)
+		alpha_power_(1.0),
+		zoom_(1.0)
 	{
 		//mode
 		mode_ = MODE_OVER;
@@ -412,7 +413,7 @@ namespace FLIVR
 
 	//calculating scaling factor, etc
 	//calculate scaling factor according to viewport and texture size
-	double VolumeRenderer::CalcScaleFactor(double w, double h, double tex_w, double tex_h, double zoom)
+	double VolumeRenderer::CalcScaleFactor(double w, double h, double tex_w, double tex_h)
 	{
 		double cs;
 		double vs;
@@ -429,7 +430,7 @@ namespace FLIVR
 		}
 		double p1 = 1.282e9/(cs*cs*cs)+1.522;
 		double p2 = -8.494e7/(cs*cs*cs)+0.496;
-		sf = cs*p1/(vs*zoom)+p2;
+		sf = cs*p1/(vs*zoom_)+p2;
 		sf = Clamp(sf, 0.6, 1.0);
 		return sf;
 	}
@@ -438,7 +439,7 @@ namespace FLIVR
 	//calculate filter sizes according to viewport and texture size
 	double VolumeRenderer::CalcFilterSize(int type,
 		double w, double h, double tex_w, double tex_h,
-		double zoom, double sf)
+		double sf)
 	{
 		//clamped texture size
 		double cs;
@@ -462,7 +463,7 @@ namespace FLIVR
 		case 1:	//min filter
 			{
 				double p = 0.29633+(-2.18448e-4)*cs;
-				size = (p*zoom+0.24512)*sf;
+				size = (p*zoom_+0.24512)*sf;
 				size = Clamp(size, 0.0, 2.0);
 			}
 			break;
@@ -471,17 +472,17 @@ namespace FLIVR
 				double p1 = 0.26051+(-1.90542e-4)*cs;
 				double p2 = -0.29188+(2.45276e-4)*cs;
 				p2 = min(p2, 0.0);
-				size = (p1*zoom+p2)*sf;
+				size = (p1*zoom_+p2)*sf;
 				size = Clamp(size, 0.0, 2.0);
 			}
 			break;
 		case 3:	//sharpening filter
 			{
 				//double p = 0.012221;
-				//size = p*zoom;
+				//size = p*zoom_;
 				//size = Clamp(size, 0.0, 0.25);
 				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
-				size = zoom / sf11 / 10.0;
+				size = zoom_ / sf11 / 10.0;
 				size = size<1.0?0.0:size;
 				size = Clamp(size, 0.0, 0.3);
 			}
@@ -489,7 +490,7 @@ namespace FLIVR
 		case 4:	//blur filter
 			{
 				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
-				size = zoom / sf11 / 2.0;
+				size = zoom_ / sf11 / 2.0;
 				size = size<1.0?0.5:size;
 				size = Clamp(size, 0.1, 1.0);
 			}
@@ -565,9 +566,9 @@ namespace FLIVR
 	}
 
 	void VolumeRenderer::draw(bool draw_wireframe_p, bool adaptive,
-		bool interactive_mode_p, bool orthographic_p, double zoom, int mode)
+		bool interactive_mode_p, bool orthographic_p, int mode)
 	{
-		draw_volume(adaptive, interactive_mode_p, orthographic_p, zoom, mode);
+		draw_volume(adaptive, interactive_mode_p, orthographic_p, mode);
 		if(draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
@@ -575,7 +576,6 @@ namespace FLIVR
 	void VolumeRenderer::draw_volume(bool adaptive,
 		bool interactive_mode_p,
 		bool orthographic_p,
-		double zoom,
 		int mode)
 	{
 		if (!tex_)
@@ -654,7 +654,7 @@ namespace FLIVR
 
 		if (noise_red_)
 		{
-			double sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny(), zoom);
+			double sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny());
 			if (fabs(sf-sfactor_)>0.05)
 				sfactor_ = sf;
 			else if (sf==1.0 && sfactor_!=1.0)
@@ -996,7 +996,7 @@ namespace FLIVR
 					}
 					img_shader->bind();
 				}
-				filter_size_min_ = CalcFilterSize(4, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
+				filter_size_min_ = CalcFilterSize(4, w, h, tex_->nx(), tex_->ny(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
 
 				draw_view_quad();
@@ -1031,7 +1031,7 @@ namespace FLIVR
 
 			if (noise_red_ && colormap_mode_!=2)
 			{
-				filter_size_shp_ = CalcFilterSize(3, w, h, tex_->nx(), tex_->ny(), zoom, sfactor_);
+				filter_size_shp_ = CalcFilterSize(3, w, h, tex_->nx(), tex_->ny(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
 			}
 
@@ -1226,7 +1226,7 @@ namespace FLIVR
 		//thresh1
 		seg_shader->setLocalParam(7, ini_thresh, gm_falloff, scl_falloff, scl_translate);
 		//w2d
-		seg_shader->setLocalParam(8, w2d, bins, 0.0, 0.0);
+		seg_shader->setLocalParam(8, w2d, bins, zoom_, 0.0);
 
 		//set clipping planes
 		double abcd[4];

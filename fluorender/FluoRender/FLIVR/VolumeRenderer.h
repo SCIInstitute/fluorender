@@ -64,6 +64,11 @@ namespace FLIVR
 		{
 			mvec_ = mvec;
 		}
+		//set scale/zoom factor for 2d
+		void set_zoom(GLfloat val)
+		{
+			zoom_ = val;
+		}
 
 		//set clear color
 		void set_clear_color(GLfloat clear_color[4])
@@ -165,13 +170,11 @@ namespace FLIVR
 			bool adaptive,
 			bool interactive_mode_p,
 			bool orthographic_p = false,
-			double zoom = 1.0, 
 			int mode = 0);
 		void draw_wireframe(bool orthographic_p = false);
 		void draw_volume(bool adaptive,
 			bool interactive_mode_p,
 			bool orthographic_p = false,
-			double zoom = 1.0, 
 			int mode = 0);
 		//type: 0-initial; 1-diffusion-based growing; 2-masked filtering
 		//paint_mode: 1-select; 2-append; 3-erase; 4-diffuse; 5-flood; 6-clear; 7-all;
@@ -240,6 +243,7 @@ namespace FLIVR
 		GLint vp_[4];//viewport
 		GLint mp_[2];//mouse position in viewport
 		Vector mvec_;//mouse direction vector for grow selection
+		GLfloat zoom_;//zoom ratio for 2d processings
 
 		//clear color
 		GLfloat clear_color_[4];
@@ -317,13 +321,13 @@ namespace FLIVR
 		double m_fog_end;
 
 		//calculating scaling factor, etc
-		double CalcScaleFactor(double w, double h, double tex_w, double tex_h, double zoom);
+		double CalcScaleFactor(double w, double h, double tex_w, double tex_h);
 		//calculate the filter sizes
 		double CalcFilterSize(int type, 
 			double w, double h, double tex_w, double tex_h, 
-			double zoom, double sf);	//type - 1:min filter
-										//		 2:max filter
-										//		 3:sharpening
+			double sf);	//type - 1:min filter
+						//		 2:max filter
+						//		 3:sharpening
 
 	};
 

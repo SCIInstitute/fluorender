@@ -752,8 +752,8 @@ private:
 						//3-erase
 						//4-diffuse
 						//8-solid
-
-						//resizing
+	bool m_grow_on;//flag for grow is currently on for idle events
+	//resizing
 	bool m_resize;
 	//brush tools
 	bool m_draw_brush;

@@ -89,7 +89,7 @@ namespace FLIVR
 #define SEG_UNIFORMS_PARAMS \
 	"//SEG_UNIFORMS_PARAMS\n" \
 	"uniform vec4 loc7;//(ini_thresh, gm_falloff, scl_falloff, scl_translate)\n" \
-	"uniform vec4 loc8;//(weight_2d, post_bins, 0, 0)\n" \
+	"uniform vec4 loc8;//(weight_2d, post_bins, zoom, 0)\n" \
 	"\n"
 
 #define SEG_TAIL \
@@ -150,7 +150,7 @@ namespace FLIVR
 	"		any(greaterThan(s.xy, vec2(1.0, 1.0))))\n"\
 	"		discard;\n"\
 	"	float dist = length(s.xy*loc6.zw - loc6.xy);\n" \
-	"	if (dist > 1.0)\n" \
+	"	if (dist > 1.0 * loc8.z)\n" \
 	"		discard;\n"\
 	"\n"
 
