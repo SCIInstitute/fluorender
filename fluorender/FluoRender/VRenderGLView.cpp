@@ -164,6 +164,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_clear_buffer(false),
 	m_adaptive(true),
 	m_brush_state(0),
+	m_grow_on(false),
 	//resizing
 	m_resize(false),
 	//brush tools
@@ -3259,7 +3260,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		m_mvr->set_viewport(vp);
 		m_mvr->set_clear_color(clear_color);
 		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_scale_factor, m_intp);
+		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
 
 		for (i = 0; i<list.size(); i++)
 		{
@@ -3452,7 +3453,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->set_viewport(vp);
 	m_mvr->set_clear_color(clear_color);
 	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_scale_factor, m_intp);
+	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
 
 	//draw shadows
 	DrawOLShadows(list);
@@ -4223,9 +4224,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if ((m_int_mode == 10 ||
 			m_int_mode == 12) &&
 			wxGetMouseState().LeftIsDown() &&
-			HasFocus())
+			m_grow_on)
 		{
-			event.RequestMore();
+			//event.RequestMore();
 			m_selector.SetInitMask(2);
 			Segment();
 			m_selector.SetInitMask(3);
@@ -9912,7 +9913,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (m_int_mode == 12)
 				m_cur_vol->AddEmptyLabel(0, false);
 			m_force_clear = true;
-			//RefreshGL(27);
+			m_grow_on = true;
 			SetFocus();
 			return;
 		}
@@ -9990,6 +9991,12 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			return;
+		}
+		else if (m_int_mode == 10 ||
+			m_int_mode == 12)
+		{
+			m_grow_on = false;
 			return;
 		}
 	}

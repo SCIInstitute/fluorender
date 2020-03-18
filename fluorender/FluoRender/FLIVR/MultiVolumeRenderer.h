@@ -83,10 +83,10 @@ namespace FLIVR
 			bool adaptive,
 			bool interactive_mode_p, 
 			bool orthographic_p,
-			double zoom, bool intp);
+			bool intp);
 
 		void draw_wireframe(bool orthographic_p);
-		void draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, double zoom, bool intp);
+		void draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, bool intp);
 
 		double num_slices_to_rate(int slices);
 

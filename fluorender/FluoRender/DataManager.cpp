@@ -1752,7 +1752,8 @@ void VolumeData::Draw(bool ortho, bool adaptive, bool interactive, double zoom)
 {
 	if (m_vr)
 	{
-		m_vr->draw(m_test_wiref, adaptive, interactive, ortho, zoom, m_stream_mode);
+		m_vr->set_zoom(zoom);
+		m_vr->draw(m_test_wiref, adaptive, interactive, ortho, m_stream_mode);
 	}
 	if (m_draw_bounds)
 		DrawBounds();

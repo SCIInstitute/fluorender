@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolKernel.h>
 #include <algorithm>
 #include <unordered_map>
+#include <Debug.h>
 
 using namespace FL;
 
