@@ -1260,8 +1260,7 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 {
 	if (!m_view) return;
 
-	//if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-	//	m_rhdl->FinishRuler();
+	m_rhdl->FinishRuler();
 
 	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
