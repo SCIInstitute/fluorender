@@ -18,7 +18,7 @@ ExternalProject_Add(x264_external_download
   INSTALL_DIR ""
   CONFIGURE_COMMAND <SOURCE_DIR>/configure
     --prefix=<BINARY_DIR>/x264_build
-    --enable-static
+    --enable-shared
     --disable-opencl 
     --disable-avs 
     --disable-cli 
@@ -36,6 +36,6 @@ set(x264_LIBRARY_DIR ${BINARY_DIR}/x264_build/lib CACHE INTERNAL "")
 set(x264_BINARY_DIR ${BINARY_DIR}/x264_build/bin CACHE INTERNAL "")
 set(x264_INCLUDE_DIR ${BINARY_DIR}/x264_build/include CACHE INTERNAL "")
 
-add_library(x264_external STATIC IMPORTED)
+add_library(x264_external SHARED IMPORTED)
 
 message(STATUS "x264_DIR: ${x264_LIBRARY_DIR}")

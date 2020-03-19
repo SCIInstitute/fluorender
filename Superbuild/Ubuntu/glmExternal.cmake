@@ -66,21 +66,16 @@ ExternalProject_Add(glm_external_download
   CMAKE_CACHE_ARGS 
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-    -DBUILD_SHARED_LIBS:BOOL=OFF
+    -DBUILD_SHARED_LIBS:BOOL=ON
     -DGLM_TEST_ENABLE_CXX_${flag}:BOOL=ON
 )
 
 ExternalProject_Get_Property(glm_external_download BINARY_DIR)
 ExternalProject_Get_Property(glm_external_download SOURCE_DIR)
 
-if(MSVC)
-  SET(glm_LIBRARY_DIR "${BINARY_DIR}/glm;${BINARY_DIR}/glm/Debug;${BINARY_DIR}/glm/Release" CACHE INTERNAL "")
-else()
-  SET(glm_LIBRARY_DIR ${BINARY_DIR}/glm CACHE INTERNAL "")
-endif()
-
+SET(glm_LIBRARY_DIR ${BINARY_DIR}/glm CACHE INTERNAL "")
 SET(glm_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
 
-add_library(glm_external STATIC IMPORTED)
+add_library(glm_external SHARED IMPORTED)
 
 MESSAGE(STATUS "glm_LIBRARY_DIR: ${glm_LIBRARY_DIR}")

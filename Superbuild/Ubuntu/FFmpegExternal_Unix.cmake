@@ -52,8 +52,8 @@ ExternalProject_Add(FFmpeg_external_download
   INSTALL_DIR ""
   CONFIGURE_COMMAND PKG_CONFIG_PATH=${PATH_DEPENDS} <SOURCE_DIR>/configure
     --prefix=<BINARY_DIR>/build
-    --enable-static
-    --extra-cflags=-I${x264_INCLUDE_DIR}\ --static
+    --enable-shared
+    --extra-cflags=-I${x264_INCLUDE_DIR}\ --shared
     --extra-ldflags=-L${x264_LIBRARY_DIR}
     --enable-gpl
     --enable-libx264
@@ -69,14 +69,14 @@ set(FFmpeg_INCLUDE_DIR ${BINARY_DIR}/build/include CACHE INTERNAL "")
 # We define the FFmpeg libraries here and cache them internally.
 add_library(FFmpeg_external SHARED IMPORTED)
 set(FFmpeg_LIBRARIES
-  ${FFmpeg_LIBRARY_DIR}/libavutil.a
-  ${FFmpeg_LIBRARY_DIR}/libavformat.a
-  ${FFmpeg_LIBRARY_DIR}/libavcodec.a
-  ${FFmpeg_LIBRARY_DIR}/libavdevice.a
-  ${FFmpeg_LIBRARY_DIR}/libavfilter.a
-  ${FFmpeg_LIBRARY_DIR}/libpostproc.a
-  ${FFmpeg_LIBRARY_DIR}/libswresample.a
-  ${FFmpeg_LIBRARY_DIR}/libswscale.a
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avutil${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avformat${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avcodec${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avdevice${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avfilter${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}postproc${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}swresample${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}swscale${suffix}
   CACHE INTERNAL "" 
 )
 

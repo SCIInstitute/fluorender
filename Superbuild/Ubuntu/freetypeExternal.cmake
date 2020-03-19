@@ -62,19 +62,15 @@ ExternalProject_Add(freetype_external_download
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
     -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
 	  -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
+    -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
 ExternalProject_Get_Property(freetype_external_download BINARY_DIR)
 ExternalProject_Get_Property(freetype_external_download SOURCE_DIR)
 
-if(MSVC)
-  SET(freetype_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
-else()
-  SET(freetype_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-endif()
-
+SET(freetype_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
 set(freetype_INCLUDE_DIR "${SOURCE_DIR}/include" CACHE INTERNAL "")
 
-add_library(freetype_external STATIC IMPORTED)
+add_library(freetype_external SHARED IMPORTED)
 
 MESSAGE(STATUS "freetype_DIR: ${freetype_LIBRARY_DIR}")

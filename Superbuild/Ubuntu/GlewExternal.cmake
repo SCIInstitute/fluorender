@@ -34,51 +34,31 @@ set(Glew_Hash "MD5=dff2939fd404d054c1036cc0409d19f1")
 
 # The source subdirectory must be set since glew has their cmake file burried
 # in their directory structure.
-if(${GeneratorName} STREQUAL "Ninja")
-  ExternalProject_Add(glew_external_download
-    URL ${Glew_url}
-    URL_HASH ${Glew_Hash}
-    UPDATE_COMMAND ""
-    SOURCE_SUBDIR "build/cmake"
-    INSTALL_COMMAND ""
-  BUILD_BYPRODUCTS
-    <BINARY_DIR>/lib/${prefix}glew32${suffix}
-    <BINARY_DIR>/lib/${prefix}libglew32${suffix}
+ExternalProject_Add(glew_external_download
+  URL ${Glew_url}
+  URL_HASH ${Glew_Hash}
+  UPDATE_COMMAND ""
+  SOURCE_SUBDIR "build/cmake"
+  INSTALL_COMMAND ""
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-  )
-else()
-  ExternalProject_Add(glew_external_download
-    URL ${Glew_url}
-    URL_HASH ${Glew_Hash}
-    UPDATE_COMMAND ""
-    SOURCE_SUBDIR "build/cmake"
-    INSTALL_COMMAND ""
-    CMAKE_CACHE_ARGS
-      -DCMAKE_C_COMPILER:PATH=${Compiler_C}
-      -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-  )
-endif()
+    -DBUILD_SHARED_LIBS:BOOL=ON
+)
 
 ExternalProject_Get_Property(glew_external_download BINARY_DIR)
 ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
 
-if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
-  SET(glew_LIBRARY_DIR "${BINARY_DIR}/lib;${BINARY_DIR}/lib/Debug;${BINARY_DIR}/lib/Release" CACHE INTERNAL "")
-else()
-  SET(glew_LIBRARY_DIR ${BINARY_DIR}/lib CACHE INTERNAL "")
-endif()
+SET(glew_LIBRARY_DIR ${BINARY_DIR}/lib CACHE INTERNAL "")
 
 set(GLEW_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
 set(GLEW_LIBRARY ${glew_LIBRARY_DIR} CACHE INTERNAL "")
 
-add_library(glew_external STATIC IMPORTED)
+add_library(glew_external SHARED IMPORTED)
 
-#set(glew_LIBRARIES
-#  ${glew_LIBRARY_DIR}/${prefix}glew32${suffix}
-#  ${glew_LIBRARY_DIR}/${prefix}libglew32${suffix}
-#  CACHE INTERNAL ""
-#)
+set(GLEW_LIBRARIES
+  ${GLEW_LIBRARY}/${prefix}GLEW${suffix}
+  CACHE INTERNAL ""
+)
 
 message(STATUS "glew_DIR: ${glew_LIBRARY_DIR}")
