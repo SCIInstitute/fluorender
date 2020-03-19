@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <memory>
 #include <vector>
+#include <set>
 #include <FLIVR/Point.h>
 #include <FLIVR/Color.h>
 #include <FLIVR/Transform.h>
@@ -184,7 +185,7 @@ namespace FL
 		void Scale(double spcx, double spcy, double spcz);
 
 		bool AddPoint(Point &point);
-		bool AddPointAfterId(Point &point, unsigned int id, unsigned int cid);
+		bool AddPointAfterId(Point &point, unsigned int id, std::set<unsigned int> &cid);
 		void SetTransform(Transform *tform);
 		bool AddBranch(pRulerPoint point);
 
