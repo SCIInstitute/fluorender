@@ -440,7 +440,9 @@ const char* str_cl_segrow = \
 "	int c;\n" \
 "	for (c = 0; c < nid; ++c)\n" \
 "	{\n" \
-"		lcids[c] = 0;\n" \
+"		lcids[c*3] = 0;\n" \
+"		lcids[c*3+1] = 0;\n" \
+"		lcids[c*3+2] = 0;\n" \
 "		lsum[c] = 0;\n" \
 "		lcsum[c*3] = 0.0;\n" \
 "		lcsum[c*3+1] = 0.0;\n" \
@@ -474,48 +476,74 @@ const char* str_cl_segrow = \
 "		{\n" \
 "			m = label[index - 1];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
-"				lcids[c] = m;\n" \
+"			{\n" \
+"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
+"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
+"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
+"			}\n" \
 "		}\n" \
 "		//+x\n" \
 "		if (ijk.x < nx-1)\n" \
 "		{\n" \
 "			m = label[index + 1];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
-"				lcids[c] = m;\n" \
+"			{\n" \
+"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
+"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
+"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
+"			}\n" \
 "		}\n" \
 "		//-y\n" \
 "		if (ijk.y > 0)\n" \
 "		{\n" \
 "			m = label[index - nx];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
-"				lcids[c] = m;\n" \
+"			{\n" \
+"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
+"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
+"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
+"			}\n" \
 "		}\n" \
 "		//+y\n" \
 "		if (ijk.y < ny-1)\n" \
 "		{\n" \
 "			m = label[index + nx];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
-"				lcids[c] = m;\n" \
+"			{\n" \
+"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
+"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
+"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
+"			}\n" \
 "		}\n" \
 "		//-z\n" \
 "		if (ijk.z > 0)\n" \
 "		{\n" \
 "			m = label[index - nxy];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
-"				lcids[c] = m;\n" \
+"			{\n" \
+"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
+"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
+"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
+"			}\n" \
 "		}\n" \
 "		//+z\n" \
 "		if (ijk.z < nz-1)\n" \
 "		{\n" \
 "			m = label[index + nxy];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
-"				lcids[c] = m;\n" \
+"			{\n" \
+"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
+"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
+"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
+"			}\n" \
 "		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	for (c = 0; c < nid; ++c)\n" \
 "	{\n" \
-"		atomic_xchg(cids+index*nid+c, lcids[c]);\n" \
+"		atomic_xchg(cids+(index*nid+c)*3, lcids[c*3]);\n" \
+"		atomic_xchg(cids+(index*nid+c)*3+1, lcids[c*3+1]);\n" \
+"		atomic_xchg(cids+(index*nid+c)*3+2, lcids[c*3+2]);\n" \
 "		atomic_xchg(sum+index*nid+c, lsum[c]);\n" \
 "		atomic_xchg(csum+(index*nid+c)*3, lcsum[c*3]);\n" \
 "		atomic_xchg(csum+(index*nid+c)*3+1, lcsum[c*3+1]);\n" \
@@ -890,11 +918,11 @@ void SegGrow::Compute()
 			kernel_prog->setKernelArgBuf(kernel_6, 11,
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 				sizeof(unsigned int)*total, (void*)(pids));
-			std::vector<unsigned int> cids(total*gsize.gsxyz, 0);
+			std::vector<unsigned int> cids(total*gsize.gsxyz*3, 0);
 			unsigned int *pcids = cids.data();
 			kernel_prog->setKernelArgBuf(kernel_6, 12,
 				CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*total*gsize.gsxyz, (void*)(pcids));
+				sizeof(unsigned int)*total*gsize.gsxyz*3, (void*)(pcids));
 			std::vector<unsigned int> sum(total*gsize.gsxyz, 0);
 			unsigned int *psum = sum.data();
 			kernel_prog->setKernelArgBuf(kernel_6, 13,
@@ -905,7 +933,7 @@ void SegGrow::Compute()
 			kernel_prog->setKernelArgBuf(kernel_6, 14,
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 				sizeof(float)*total*gsize.gsxyz * 3, (void*)(pcsum));
-			kernel_prog->setKernelArgLocal(kernel_6, 15, sizeof(unsigned int)*total);
+			kernel_prog->setKernelArgLocal(kernel_6, 15, sizeof(unsigned int)*total*3);
 			kernel_prog->setKernelArgLocal(kernel_6, 16, sizeof(unsigned int)*total);
 			kernel_prog->setKernelArgLocal(kernel_6, 17, sizeof(float)*total * 3);
 
@@ -913,12 +941,12 @@ void SegGrow::Compute()
 			kernel_prog->executeKernel(kernel_6, 3, global_size2, local_size);
 
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz, pcids, pcids);
+			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz*3, pcids, pcids);
 			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz, psum, psum);
 			kernel_prog->readBuffer(sizeof(float)*total*gsize.gsxyz * 3, pcsum, pcsum);
 
 			//compute centers and connection
-			unsigned int cid;
+			unsigned int cid0, cid1, cid2;
 			for (int j = 0; j < total; ++j)
 			{
 				auto it = m_list.find(ids[j]);
@@ -927,7 +955,6 @@ void SegGrow::Compute()
 					BranchPoint bp;
 					bp.id = ids[j];
 					bp.sum = 0;
-					bp.cid = 0;
 					auto ret = m_list.insert(
 						std::pair<unsigned int,
 						BranchPoint>(bp.id, bp));
@@ -940,8 +967,15 @@ void SegGrow::Compute()
 						csum[(total * i + j) * 3],
 						csum[(total * i + j) * 3 + 1],
 						csum[(total * i + j) * 3 + 2]);
-					cid = cids[i*total + j];
-					it->second.cid = cid ? cid : it->second.cid;
+					cid0 = cids[(i*total + j) * 3];
+					cid1 = cids[(i*total + j) * 3 + 1];
+					cid2 = cids[(i*total + j) * 3 + 2];
+					if (cid0)
+						it->second.cid.insert(cid0 & 0x7FFFFFFF);
+					if (cid1)
+						it->second.cid.insert(cid1 & 0x7FFFFFFF);
+					if (cid2)
+						it->second.cid.insert(cid2 & 0x7FFFFFFF);
 				}
 			}
 		}
@@ -972,7 +1006,6 @@ void SegGrow::Compute()
 	//add ruler points
 	double spcx, spcy, spcz;
 	m_vd->GetSpacings(spcx, spcy, spcz);
-	unsigned int cid;
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{
@@ -980,9 +1013,9 @@ void SegGrow::Compute()
 			continue;
 		it->second.ctr = it->second.ctr / it->second.sum;
 		it->second.ctr.scale(spcx, spcy, spcz);
-		cid = it->second.cid & 0x7FFFFFFF;
 		m_handler->AddRulerPointAfterId(
 			it->second.ctr,
-			it->second.id, cid);
+			it->second.id,
+			it->second.cid);
 	}
 }

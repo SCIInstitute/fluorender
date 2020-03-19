@@ -188,7 +188,7 @@ void RulerHandler::AddRulerPoint(FLIVR::Point &p)
 	}
 }
 
-void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, unsigned int cid)
+void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::set<unsigned int> &cid)
 {
 	if (m_ruler &&
 		m_ruler->GetDisp() &&

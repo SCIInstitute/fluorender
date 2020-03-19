@@ -323,7 +323,8 @@ bool Ruler::AddPoint(Point &point)
 }
 
 bool Ruler::AddPointAfterId(
-	Point &point, unsigned int id, unsigned int cid)
+	Point &point, unsigned int id,
+	std::set<unsigned int> &cid)
 {
 	if (m_ruler_type != 1)
 		return false;
@@ -342,7 +343,7 @@ bool Ruler::AddPointAfterId(
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			if (m_ruler[i][j]->m_id == cid)
+			if (cid.find(m_ruler[i][j]->m_id) != cid.end())
 			{
 				ri = i; rj = j;
 				found = true;
@@ -356,6 +357,7 @@ bool Ruler::AddPointAfterId(
 
 	if (!found)
 	{
+		m_ruler.push_back(RulerBranch());
 		m_ruler.back().push_back(
 			std::make_shared<RulerPoint>(RulerPoint(point, id)));
 		return false;
