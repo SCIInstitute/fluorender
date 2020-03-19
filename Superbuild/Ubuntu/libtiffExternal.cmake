@@ -40,11 +40,7 @@ SET(libpng_DEPENDENCIES "Zlib_external_download")
 set(Zlibincludes "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
 
 # This magic was found on stackoverflow to pass in multiple include directories.
-if(MSVC)
-  string(REPLACE ";" "|" Zlib_Root "${Zlib_LIBRARY_DIR}")
-else()
-  set(Zlib_Root ${Zlib_LIBRARY_DIR})
-endif()
+set(Zlib_Root ${Zlib_LIBRARY_DIR})
 
 
 ExternalProject_Add(libtiff_external_download
@@ -66,19 +62,14 @@ ExternalProject_Add(libtiff_external_download
 ExternalProject_Get_Property(libtiff_external_download BINARY_DIR)
 ExternalProject_Get_Property(libtiff_external_download SOURCE_DIR)
 
-if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
-  SET(libtiff_LIBRARY_DIR "${BINARY_DIR}/libtiff;${BINARY_DIR}/libtiff/Debug;${BINARY_DIR}/libtiff/Release" CACHE INTERNAL "")
-else()
-  SET(libtiff_LIBRARY_DIR ${BINARY_DIR}/libtiff CACHE INTERNAL "")
-endif()
-
+SET(libtiff_LIBRARY_DIR ${BINARY_DIR}/libtiff CACHE INTERNAL "")
 SET(TIFF_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
 SET(TIFF_LIBRARY ${libtiff_LIBRARY_DIR} CACHE INTERNAL "")
 
-add_library(libtiff_external STATIC IMPORTED)
+add_library(libtiff_external SHARED IMPORTED)
 
-#set(Libtiff_LIBRARIES
-#  ${libtiff_LIBRARY_DIR}/${prefix}tiffd${suffix} CACHE INTERNAL ""
-#)
+set(TIFF_LIBRARIES
+  ${TIFF_LIBRARY}/${prefix}tiff${suffix} CACHE INTERNAL ""
+)
 
 MESSAGE(STATUS "libtiff_DIR: ${libtiff_LIBRARY_DIR}")

@@ -41,11 +41,7 @@ set(Zlibincludes "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
 
 # This is some magic found on stackoverflow which allows the include directories
 # to be passed as list separators for the external project to find the directories.
-if(MSVC)
-  string(REPLACE ";" "|" Zlib_Root "${Zlib_LIBRARY_DIR}")
-else()
-  set(Zlib_Root ${Zlib_LIBRARY_DIR})
-endif()
+set(Zlib_Root ${Zlib_LIBRARY_DIR})
 
 # This was taken from CIBC Internal's libpng external project. It seems to do everything
 # that is needed but it is possible this will need to be modified.
@@ -65,24 +61,19 @@ ExternalProject_Add(LibPNG_external_download
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-    -DCMAKE_CXX_FLAGS:STATIC=${CMAKE_CXX_FLAGS}
-    -DCMAKE_C_FLAGS:STATIC=${CMAKE_C_FLAGS}
-    -DPNG_STATIC:BOOL=ON
+    -DPNG_SHARED:BOOL=ON
     -DDO_ZLIB_MANGLE:BOOL=${DO_ZLIB_MANGLE}
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
 )
+#    -DCMAKE_CXX_FLAGS:STATIC=${CMAKE_CXX_FLAGS}
+#    -DCMAKE_C_FLAGS:STATIC=${CMAKE_C_FLAGS}
 
 ExternalProject_Get_Property(LibPNG_external_download BINARY_DIR)
 ExternalProject_Get_Property(LibPNG_external_download SOURCE_DIR)
 
-if(MSVC)
-  SET(LibPNG_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
-else()
-  SET(LibPNG_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-endif()
-
+SET(LibPNG_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
 SET(LibPNG_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
 
-add_library(LibPNG_external STATIC IMPORTED)
+add_library(LibPNG_external SHARED IMPORTED)
 
 MESSAGE(STATUS "LibPNG_DIR: ${LibPNG_LIBRARY_DIR}")

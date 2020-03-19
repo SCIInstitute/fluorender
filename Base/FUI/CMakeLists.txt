@@ -188,8 +188,6 @@ add_dependencies(FUI FLObject SceneGraph
                  Teem_external_download
                  )
 
-#link_directories(FUI ${Teem_dir}/bin)
-
 # links with OpenGL
 target_link_libraries(FUI
     FLObject
@@ -201,6 +199,12 @@ target_link_libraries(FUI
     ${Boost_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )
+
+if(UNIX)
+  target_link_libraries(FUI 
+    stdc++fs
+  )
+endif()
 
 if(MSVC_FOUND)
 	include(VSPostBuild/postBuild.cmake)
