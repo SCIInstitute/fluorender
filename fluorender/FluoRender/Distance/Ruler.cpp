@@ -336,12 +336,11 @@ bool Ruler::AddPointAfterId(
 		return true;
 	}
 
-	bool first = true;
 	bool found = false;
 	size_t ri, rj;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 	{
-		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
+		for (size_t j = 0; j < m_ruler[i].size(); ++j)
 		{
 			if (cid.find(m_ruler[i][j]->m_id) != cid.end())
 			{
@@ -349,7 +348,6 @@ bool Ruler::AddPointAfterId(
 				found = true;
 				break;
 			}
-			first = false;
 		}
 		if (found)
 			break;
