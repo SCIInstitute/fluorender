@@ -109,7 +109,6 @@ namespace FL
 		bool CheckBricks();
 		bool GetInfo(FLIVR::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz);
-		void ReleaseData(void* val, long bits);
 	};
 
 }

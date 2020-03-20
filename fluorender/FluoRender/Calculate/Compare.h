@@ -72,7 +72,6 @@ namespace FL
 			long &nx, long &ny, long &nz);
 		void* GetVolDataBrick(FLIVR::TextureBrick* b);
 		void* GetVolData(VolumeData* vd);
-		void ReleaseData(void* val, long bits);
 	};
 
 }

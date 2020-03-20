@@ -161,20 +161,6 @@ void* CountVoxels::GetVolData(VolumeData* vd)
 	return nrrd_data->data;
 }
 
-void CountVoxels::ReleaseData(void* val, long bits)
-{
-	if (bits == 8)
-	{
-		unsigned char* temp = (unsigned char*)val;
-		delete[] temp;
-	}
-	else if (bits == 16)
-	{
-		unsigned short* temp = (unsigned short*)val;
-		delete[] temp;
-	}
-}
-
 void CountVoxels::Count()
 {
 	if (!CheckBricks())
