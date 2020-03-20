@@ -1,5 +1,7 @@
 #!/bin/bash
 
+version=$(lsb_release -sr)
+
 sudo apt update
 sudo apt install build-essential
 
@@ -23,7 +25,21 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /
 
 sudo apt install openjdk
 
-sudo apt install nasm
+case $version in
+16.04)
+  echo "Version 16.04 detected. Installing nasm by source."
+  wget http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.bz2
+  tar xjvf nasm-2.13.01.tar.bz2
+  cd nasm-2.13.01
+  ./autogen.sh
+  ./configure
+  make
+  sudo make install
+  ;;
+18.04)
+  echo "Version 18.04 detected. Installing nasm by apt-get."  
+  sudo apt install nasm
+esac
 
 sudo apt install mesa-common-dev
 sudo apt install libgl1-mesa-dev
