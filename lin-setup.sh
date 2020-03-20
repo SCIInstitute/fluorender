@@ -32,8 +32,8 @@ case $version in
   tar xjvf nasm-2.13.01.tar.bz2
   cd nasm-2.13.01
   ./autogen.sh
-  PATH="$HOME/bin:$PATH" ./configure --bindir="$HOME/bin"
-  PATH="$HOME/bin:$PATH" make
+  ./configure --prefix=/usr/
+  make
   sudo make install
   ;;
 18.04)
