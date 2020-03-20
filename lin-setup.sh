@@ -28,9 +28,9 @@ sudo apt install openjdk
 case $version in
 16.04)
   echo "Version 16.04 detected. Installing nasm by source."
-  wget http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.bz2
-  tar xjvf nasm-2.13.01.tar.bz2
-  cd nasm-2.13.01
+  wget https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.gz
+  tar xvzf nasm-2.14.02.tar.gz
+  cd nasm-2.14.02
   ./autogen.sh
   ./configure --prefix=/usr/
   make
