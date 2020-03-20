@@ -111,6 +111,7 @@ namespace FL
 
 		void AddRulerPoint(FLIVR::Point &p);
 		void AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::set<unsigned int> &cid);
+		bool GetMouseDist(int mx, int my, double dist);
 		void AddRulerPoint(int mx, int my, bool branch);
 		void AddPaintRulerPoint();
 		bool MoveRuler(int mx, int my);
@@ -132,6 +133,8 @@ namespace FL
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
 
+		//find moving distance
+		FLIVR::Point m_mouse;//mouse position
 		//get point
 		FL::pRulerPoint m_point;
 		int m_pindex;//index of point in ruler
