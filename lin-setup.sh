@@ -9,17 +9,17 @@ sudo apt install g++-8
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 
-sudo apt install libcurl4-openssl-dev
-wget https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0.tar.gz
-tar xvzf cmake-3.17.0.tar.gz
-cd cmake-3.17.0
-./bootstrap --system-curl
-make
-sudo make install
+#sudo apt install libcurl4-openssl-dev
+#wget https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0.tar.gz
+#tar xvzf cmake-3.17.0.tar.gz
+#cd cmake-3.17.0
+#./bootstrap --system-curl
+#make
+#sudo make install
 
-cd ..
-rm -rf cmake-3.17.0
-rm -rf cmake-3.17.0.tar.gz
+#cd ..
+#rm -rf cmake-3.17.0
+#rm -rf cmake-3.17.0.tar.gz
 
 sudo apt install openjdk
 
