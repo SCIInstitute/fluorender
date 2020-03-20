@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2020 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,48 +25,81 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_Count_h
-#define FL_Count_h
+#ifndef FL_Relax_h
+#define FL_Relax_h
 
-#include "DataManager.h"
+#include <Distance/Ruler.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <FLIVR/Point.h>
+#include <vector>
 
 using namespace std;
 
 class VolumeData;
 namespace FL
 {
-	class CountVoxels
+	class Relax
 	{
 	public:
-		CountVoxels(VolumeData* vd);
-		~CountVoxels();
+		Relax();
+		~Relax();
 
 		void SetUseMask(bool use_mask)
-		{ m_use_mask = use_mask; }
+		{
+			m_use_mask = use_mask;
+		}
 		bool GetUseMask()
-		{ return m_use_mask; }
+		{
+			return m_use_mask;
+		}
+		void SetVolume(VolumeData* vd)
+		{
+			m_vd = vd;
+		}
+		void SetRuler(Ruler* ruler)
+		{
+			if (ruler != m_ruler)
+			{
+				m_ruler = ruler;
+			}
+		}
+		Ruler* GetRuler()
+		{
+			return m_ruler;
+		}
+		void SetF1(double val)
+		{
+			m_f1 = val;
+		}
+		void SetInfr(double val)
+		{
+			m_infr = val;
+		}
 
-		void Count();
-		unsigned int GetSum()
-		{ return m_sum; }
-		float GetWeightedSum()
-		{ return m_wsum; }
+		bool Compute();
 
 	private:
-		VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
-		//result
-		unsigned int m_sum;
-		float m_wsum;
+		bool m_use_int;//use intensity values as weights
+		VolumeData *m_vd;
+		//Ruler
+		Ruler *m_ruler;
+		//spring properties
+		double m_rest;
+		double m_f1;
+		double m_f2;
+		double m_f3;
+		double m_infr;//range of influence
+		//spring
+		unsigned int m_snum;//total point number
+		std::vector<float> m_spoints;//x, y, z for each point
+		std::vector<unsigned int> m_slock;//lock for each point
+		std::vector<float> m_sdist;//prevd for each point
 
-		bool CheckBricks();
-		bool GetInfo(FLIVR::TextureBrick* b,
-			long &bits, long &nx, long &ny, long &nz);
-		void* GetVolDataBrick(FLIVR::TextureBrick* b);
-		void* GetVolData(VolumeData* vd);
+	private:
+		void BuildSpring();
 	};
 
 }
-#endif//FL_Count_h
+#endif//FL_Relax_h

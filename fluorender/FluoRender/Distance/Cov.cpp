@@ -154,20 +154,6 @@ bool Cov::GetInfo(
 	return true;
 }
 
-void Cov::ReleaseData(void* val, long bits)
-{
-	if (bits == 8)
-	{
-		unsigned char* temp = (unsigned char*)val;
-		delete[] temp;
-	}
-	else if (bits == 16)
-	{
-		unsigned short* temp = (unsigned short*)val;
-		delete[] temp;
-	}
-}
-
 bool Cov::ComputeCenter()
 {
 	if (!CheckBricks())
