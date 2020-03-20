@@ -50,4 +50,8 @@ sudo apt install ocl-icd-libopencl1
 sudo apt install ocl-icd-opencl-dev
 sudo apt install opencl-headers
 
-sudo apt install qt5-qmake qtbase5-dev libqt5opengl5-dev libqt5svg5-dev
+#sudo apt install qt5-qmake qtbase5-dev libqt5opengl5-dev libqt5svg5-dev
+
+wget http://download.qt.io/official_releases/qt/5.14/5.14.1/qt-opensource-linux-x64-5.14.1.run
+sudo chmod +x qt-opensource-linux-x64-5.14.1.run
+sudo ./qt-opensource-linux-x64-5.14.1.run
