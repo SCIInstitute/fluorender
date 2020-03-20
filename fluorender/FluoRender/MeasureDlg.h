@@ -122,6 +122,7 @@ public:
 		ID_RulerMPBtn,
 		ID_EllipseBtn,
 		ID_GrowBtn,
+		ID_PencilBtn,
 		ID_RulerMoveBtn,
 		ID_RulerEditBtn,
 		ID_RulerFlipBtn,
@@ -220,6 +221,7 @@ private:
 	void OnNewRulerMP(wxCommandEvent& event);
 	void OnEllipse(wxCommandEvent& event);
 	void OnGrow(wxCommandEvent& event);
+	void OnPencil(wxCommandEvent& event);
 	void OnRulerMove(wxCommandEvent& event);
 	void OnRulerEdit(wxCommandEvent& event);
 	void OnRulerFlip(wxCommandEvent& event);

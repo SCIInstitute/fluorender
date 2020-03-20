@@ -54,9 +54,9 @@ double VolumePoint::GetPointVolume(
 	if (!data && m_vd->GetAllBrickNum() < 1) return -1.0;
 
 	//projection
-	//m_view->HandleProjection(nx, ny);
+	m_view->HandleProjection(nx, ny);
 	//Transformation
-	//m_view->HandleCamera();
+	m_view->HandleCamera();
 	glm::mat4 mv_temp = m_view->GetInvtMat();
 	glm::mat4 prj_mat = m_view->GetProjection();
 	Transform mv;
@@ -471,9 +471,9 @@ double VolumePoint::GetPointPlane(
 	if (calc_mats)
 	{
 		//projection
-		//HandleProjection(nx, ny);
+		m_view->HandleProjection(nx, ny);
 		//Transformation
-		//HandleCamera();
+		m_view->HandleCamera();
 		mv_temp = m_view->GetObjectMat();
 	}
 	else

@@ -9914,9 +9914,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				m_cur_vol->AddEmptyLabel(0, false);
 			m_force_clear = true;
 			m_grow_on = true;
-			SetFocus();
-			return;
 		}
+
 		return;
 	}
 	if (event.RightDown())
@@ -9963,7 +9962,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			!event.AltDown())
 		{
 			//add one point to a ruler
-			m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY());
+			m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
@@ -9982,7 +9981,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_paint_enable = true;
 			Segment();
 			if (m_ruler_handler.GetType() == 3)
-				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY());
+				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 			else
 				m_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = 8;
@@ -10022,13 +10021,13 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			else
 			{
-				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY());
+				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 				m_ruler_handler.FinishRuler();
 			}
 			RefreshGL(29);
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 			return;
 		}
 		//SetSortBricks();
@@ -10202,6 +10201,24 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					vr_frame->GetMeasureDlg()->SetEdit();
 				}
 			}
+		}
+		else if (m_int_mode == 13)
+		{
+			double px = double(old_mouse_X - event.GetX());
+			double py = double(old_mouse_Y - event.GetY());
+			double dist = sqrt(px * px + py * py);
+			if (dist > 3)
+			{
+				//add one point to a ruler
+				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), false);
+				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				RefreshGL(27);
+			}
+			old_mouse_X = event.GetX();
+			old_mouse_Y = event.GetY();
+			hold_old = true;
 		}
 
 		//update mouse position
