@@ -57,7 +57,7 @@ sudo apt install opencl-headers
 sudo apt install xz-utils
 wget https://download.qt.io/archive/qt/5.14/5.14.1/single/qt-everywhere-src-5.14.1.tar.xz
 tar -xf qt-everywhere-src-5.14.1.tar.xz
-cd qt-everywhere-src-5-14-1
+cd qt-everywhere-src-5.14.1
 export QT5PREFIX=/opt/qt5
 
 sed -i 's/python /python3 /' qtdeclarative/qtdeclarative.pro \
