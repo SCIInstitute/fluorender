@@ -48,7 +48,8 @@ RulerHandler::RulerHandler() :
 	m_ruler(0),
 	m_ruler_list(0),
 	m_point(0),
-	m_pindex(-1)
+	m_pindex(-1),
+	m_mouse(FLIVR::Point(-1))
 {
 
 }
@@ -159,6 +160,7 @@ void RulerHandler::FinishRuler()
 		return;
 	if (m_ruler->GetRulerType() == 1)
 		m_ruler->SetFinished();
+	m_mouse = FLIVR::Point(-1);
 }
 
 bool RulerHandler::GetRulerFinished()
@@ -206,6 +208,14 @@ void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::s
 	}
 }
 
+bool RulerHandler::GetMouseDist(int mx, int my, double dist)
+{
+	if (m_mouse.x() < 0 || m_mouse.y() < 0)
+		return true;
+	FLIVR::Point p(mx, my, 0);
+	return (p - m_mouse).length() > dist;
+}
+
 void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 {
 	if (!m_view)
@@ -220,8 +230,9 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 				!m_ruler->GetFinished())
 			{
 				m_ruler->AddBranch(m_point);
+				m_mouse = FLIVR::Point(mx, my, 0);
+				return;
 			}
-			return;
 		}
 	}
 	if (m_type == 3)
@@ -295,6 +306,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 			m_ruler_list->push_back(m_ruler);
 		}
 	}
+
+	m_mouse = FLIVR::Point(mx, my, 0);
 }
 
 void RulerHandler::AddPaintRulerPoint()

@@ -10204,10 +10204,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 13)
 		{
-			double px = double(old_mouse_X - event.GetX());
-			double py = double(old_mouse_Y - event.GetY());
-			double dist = sqrt(px * px + py * py);
-			if (dist > 3)
+			if (m_ruler_handler.GetMouseDist(event.GetX(), event.GetY(), 35))
 			{
 				//add one point to a ruler
 				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), false);
@@ -10216,9 +10213,6 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
 				RefreshGL(27);
 			}
-			old_mouse_X = event.GetX();
-			old_mouse_Y = event.GetY();
-			hold_old = true;
 		}
 
 		//update mouse position
