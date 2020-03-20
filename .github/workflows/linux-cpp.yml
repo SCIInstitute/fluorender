@@ -18,4 +18,4 @@ jobs:
       run: sudo chmod +x lin-setup.sh && sudo ./lin-setup.sh
 
     - name: make
-      run: mkdir build && cd build && cmake ../ -DQt5_PATH=$(dpkg -L qtbase5-dev) && make -j4
+      run: mkdir build && cd build && cmake ../ -DQt5_PATH=$(dpkg -L qtbase5-dev) && make
