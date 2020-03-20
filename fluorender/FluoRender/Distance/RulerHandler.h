@@ -111,7 +111,7 @@ namespace FL
 
 		void AddRulerPoint(FLIVR::Point &p);
 		void AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::set<unsigned int> &cid);
-		void AddRulerPoint(int mx, int my);
+		void AddRulerPoint(int mx, int my, bool branch);
 		void AddPaintRulerPoint();
 		bool MoveRuler(int mx, int my);
 		bool EditPoint(int mx, int my, bool alt);

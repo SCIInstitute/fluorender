@@ -52,7 +52,7 @@ const char* str_cl_segrow = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.01)\n" \
+"	if (value == 0.0)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	if (label[index] > 0)\n" \

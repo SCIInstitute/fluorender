@@ -206,12 +206,12 @@ void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::s
 	}
 }
 
-void RulerHandler::AddRulerPoint(int mx, int my)
+void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 {
 	if (!m_view)
 		return;
 
-	if (m_type == 1)
+	if (m_type == 1 && branch)
 	{
 		if (FindEditingRuler(mx, my))
 		{

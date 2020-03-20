@@ -210,6 +210,9 @@ public:
 	void ToggleDraw();
 	bool GetDraw();
 
+	//handle camera
+	void HandleProjection(int nx, int ny, bool vr = false);
+	void HandleCamera(bool vr = false);
 	//camera operations
 	void GetTranslations(double &transx, double &transy, double &transz)
 	{
@@ -741,7 +744,7 @@ private:
 					 //10-grow, click and hold to activate
 					 //11-lock ruler point for relaxing
 					 //12-grow with ruler
-					 //13-paint with multipoint ruler
+					 //13-pencil with multipoint ruler
 	bool m_force_clear;
 	bool m_interactive;
 	bool m_clear_buffer;
@@ -1065,9 +1068,6 @@ private:
 	void PaintStroke();
 	void DisplayStroke();
 
-	//handle camera
-	void HandleProjection(int nx, int ny, bool vr = false);
-	void HandleCamera(bool vr = false);
 	Quaternion Trackball(double dx, double dy);
 	Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
