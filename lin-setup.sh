@@ -5,6 +5,8 @@ version=$(lsb_release -sr)
 sudo apt update
 sudo apt install build-essential
 
+sudo apt install libxkbcommon-x11-0
+
 sudo apt install gcc-8
 sudo apt install g++-8
 
