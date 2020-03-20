@@ -37,6 +37,7 @@ case $version in
   ./configure --prefix=/usr/
   make
   sudo make install
+	cd ..
   ;;
 18.04)
   echo "Version 18.04 detected. Installing nasm by apt-get."  
@@ -53,7 +54,26 @@ sudo apt install ocl-icd-opencl-dev
 sudo apt install opencl-headers
 
 #sudo apt install qt5-qmake qtbase5-dev libqt5opengl5-dev libqt5svg5-dev
+sudo apt install xz-utils
+wget https://download.qt.io/archive/qt/5.14/5.14.1/single/qt-everywhere-src-5.14.1.tar.xz
+tar -xf qt-everywhere-src-5.14.1.tar.xz
+cd qt-everywhere-src-5-14-1
+export QT5PREFIX=/opt/qt5
 
-wget http://download.qt.io/official_releases/qt/5.14/5.14.1/qt-opensource-linux-x64-5.14.1.run
-sudo chmod +x qt-opensource-linux-x64-5.14.1.run
-sudo ./qt-opensource-linux-x64-5.14.1.run
+sed -i 's/python /python3 /' qtdeclarative/qtdeclarative.pro \
+                             qtdeclarative/src/3rdparty/masm/masm.pri &&
+
+./configure -prefix $QT5PREFIX                        \
+            -sysconfdir /etc/xdg                      \
+            -confirm-license                          \
+            -opensource                               \
+            -dbus-linked                              \
+            -openssl-linked                           \
+            -system-harfbuzz                          \
+            -system-sqlite                            \
+            -nomake examples                          \
+            -no-rpath                                 \
+            -skip qtwebengine                         &&
+make
+
+sudo make install
