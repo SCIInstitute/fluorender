@@ -13,7 +13,7 @@ sudo apt install libcurl4-openssl-dev
 wget https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0.tar.gz
 tar xvzf cmake-3.17.0.tar.gz
 cd cmake-3.17.0
-./boostrap --system-curl
+./bootstrap --system-curl
 make
 sudo make install
 
