@@ -13,18 +13,6 @@ sudo apt install g++-8
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 
-#sudo apt install libcurl4-openssl-dev
-#wget https://github.com/Kitware/CMake/releases/download/v3.17.0/cmake-3.17.0.tar.gz
-#tar xvzf cmake-3.17.0.tar.gz
-#cd cmake-3.17.0
-#./bootstrap --system-curl
-#make
-#sudo make install
-
-#cd ..
-#rm -rf cmake-3.17.0
-#rm -rf cmake-3.17.0.tar.gz
-
 sudo apt install openjdk
 
 case $version in
@@ -48,6 +36,8 @@ sudo apt install mesa-common-dev
 sudo apt install libgl1-mesa-dev
 sudo apt install mesa-utils-extra
 sudo apt install libglapi-mesa
+sudo apt install libglu1-mesa-dev
+sudo apt install freeglut3-dev
 
 sudo apt install ocl-icd-libopencl1
 sudo apt install ocl-icd-opencl-dev
