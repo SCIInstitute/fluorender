@@ -17,5 +17,5 @@ jobs:
     - name: Prepare
       run: sudo chmod +x lin-setup.sh && sudo ./lin-setup.sh
 
-#    - name: make
-#      run: mkdir build && cd build && cmake ../ -DCMAKE_PREFIX_PATH=opt/Qt/5.14.1/gcc_64 && make -j4
+    - name: make
+      run: mkdir build && cd build && cmake ../ && make
