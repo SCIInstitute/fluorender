@@ -731,8 +731,6 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
 	EVT_MENU(ID_LockBtn, MeasureDlg::OnLock)
 	EVT_MENU(ID_RelaxBtn, MeasureDlg::OnRelax)
-	EVT_SPINCTRLDOUBLE(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueSpin)
-	EVT_TEXT(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueText)
 	EVT_MENU(ID_DeleteBtn, MeasureDlg::OnDelete)
 	EVT_MENU(ID_DeleteAllBtn, MeasureDlg::OnDeleteAll)
 	EVT_MENU(ID_ProfileBtn, MeasureDlg::OnProfile)
@@ -745,6 +743,10 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_CHECKBOX(ID_UseTransferChk, MeasureDlg::OnUseTransferCheck)
 	EVT_CHECKBOX(ID_TransientChk, MeasureDlg::OnTransientCheck)
 	EVT_CHECKBOX(ID_DF_FChk, MeasureDlg::OnDF_FCheck)
+	EVT_TOGGLEBUTTON(ID_AutoRelaxBtn, MeasureDlg::OnAutoRelax)
+	EVT_SPINCTRLDOUBLE(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueSpin)
+	EVT_TEXT(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueText)
+	EVT_COMBOBOX(ID_RelaxDataCmb, MeasureDlg::OnRelaxData)
 	//align
 	EVT_BUTTON(ID_AlignX, MeasureDlg::OnAlignRuler)
 	EVT_BUTTON(ID_AlignY, MeasureDlg::OnAlignRuler)
@@ -772,6 +774,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	wxStaticText* st;
 	//toolbar
 	m_toolbar1 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
@@ -838,12 +841,6 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	bitmap = wxGetBitmapFromMemory(relax);
 	m_toolbar2->AddTool(ID_RelaxBtn, "Relax", bitmap,
 		"Relax ruler by components");
-	m_relax_value_spin = new wxSpinCtrlDouble(
-		m_toolbar2, ID_RelaxValueSpin, "2",
-		wxDefaultPosition, wxSize(50, 23),
-		wxSP_ARROW_KEYS | wxSP_WRAP,
-		0, 100, 2, 0.1);
-	m_toolbar2->AddControl(m_relax_value_spin);
 	m_toolbar2->Realize();
 	//toolbar3
 	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -875,6 +872,8 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	wxBoxSizer *sizer_1 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Settings"), wxVERTICAL);
 	wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Z-Depth Comp.:",
+		wxDefaultPosition, wxSize(90, -1));
 	m_view_plane_rd = new wxRadioButton(this, ID_ViewPlaneRd, "View Plane",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_max_intensity_rd = new wxRadioButton(this, ID_MaxIntensityRd, "Maximum Intensity",
@@ -885,6 +884,8 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_max_intensity_rd->SetValue(true);
 	m_acc_intensity_rd->SetValue(false);
 	sizer_11->Add(10, 10);
+	sizer_11->Add(st, 0, wxALIGN_CENTER);
+	sizer_11->Add(10, 10);
 	sizer_11->Add(m_view_plane_rd, 0, wxALIGN_CENTER);
 	sizer_11->Add(10, 10);
 	sizer_11->Add(m_max_intensity_rd, 0, wxALIGN_CENTER);
@@ -892,22 +893,57 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizer_11->Add(m_acc_intensity_rd, 0, wxALIGN_CENTER);
 	//more options
 	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Properties:",
+		wxDefaultPosition, wxSize(90, -1));
 	m_transient_chk = new wxCheckBox(this, ID_TransientChk, "Transient",
-		wxDefaultPosition, wxDefaultSize);
-	m_df_f_chk = new wxCheckBox(this, ID_DF_FChk, L"Compute \u2206F/F for Probe Tool",
 		wxDefaultPosition, wxDefaultSize);
 	m_use_transfer_chk = new wxCheckBox(this, ID_UseTransferChk, "Use Volume Properties",
 		wxDefaultPosition, wxDefaultSize);
+	m_df_f_chk = new wxCheckBox(this, ID_DF_FChk, L"Compute \u2206F/F",
+		wxDefaultPosition, wxDefaultSize);
+	sizer_12->Add(10, 10);
+	sizer_12->Add(st, 0, wxALIGN_CENTER);
 	sizer_12->Add(10, 10);
 	sizer_12->Add(m_transient_chk, 0, wxALIGN_CENTER);
 	sizer_12->Add(10, 10);
-	sizer_12->Add(m_df_f_chk, 0, wxALIGN_CENTER);
-	sizer_12->Add(10, 10);
 	sizer_12->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
+	sizer_12->Add(10, 10);
+	sizer_12->Add(m_df_f_chk, 0, wxALIGN_CENTER);
+	//relax settings
+	wxBoxSizer* sizer_13 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Relax:",
+		wxDefaultPosition, wxSize(90, -1));
+	sizer_13->Add(10, 10);
+	sizer_13->Add(st, 0, wxALIGN_CENTER);
+	m_auto_relax_btn = new wxToggleButton(this, ID_AutoRelaxBtn,
+		"Auto Relax", wxDefaultPosition, wxSize(75, -1));
+	sizer_13->Add(10, 10);
+	sizer_13->Add(m_auto_relax_btn, 0, wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "Ex/In Ratio");
+	sizer_13->Add(10, 10);
+	sizer_13->Add(st, 0, wxALIGN_CENTER);
+	m_relax_value_spin = new wxSpinCtrlDouble(
+		this, ID_RelaxValueSpin, "2",
+		wxDefaultPosition, wxSize(50, 23),
+		wxSP_ARROW_KEYS | wxSP_WRAP,
+		0, 100, 2, 0.1);
+	sizer_13->Add(m_relax_value_spin, 0, wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "Compute on");
+	sizer_13->Add(10, 10);
+	sizer_13->Add(st, 0, wxALIGN_CENTER);
+	m_relax_data_cmb = new wxComboBox(this, ID_RelaxDataCmb, "",
+		wxDefaultPosition, wxSize(100, -1), 0, NULL, wxCB_READONLY);
+	m_relax_data_cmb->Append("Volume");
+	m_relax_data_cmb->Append("Selection");
+	m_relax_data_cmb->Append("Analyzed Comp.");
+	m_relax_data_cmb->Select(2);
+	sizer_13->Add(m_relax_data_cmb, 0, wxALIGN_CENTER);
 	//
 	sizer_1->Add(sizer_11, 0, wxEXPAND);
 	sizer_1->Add(10, 10);
 	sizer_1->Add(sizer_12, 0, wxEXPAND);
+	sizer_1->Add(10, 10);
+	sizer_1->Add(sizer_13, 0, wxEXPAND);
 
 	//list
 	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY,
@@ -922,7 +958,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizer21->Add(5, 5);
 	sizer21->Add(m_align_center, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText* st = new wxStaticText(this, 0, "Mono Axis:",
+	st = new wxStaticText(this, 0, "Mono Axis:",
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_x = new wxButton(this, ID_AlignX, "X",
 		wxDefaultPosition, wxSize(65, 22));
@@ -1083,6 +1119,10 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 			//relax
 			m_relax_value_spin->SetValue(
 				frame->GetSettingDlg()->GetRulerRelaxF1());
+			m_auto_relax_btn->SetValue(
+				frame->GetSettingDlg()->GetRulerAutoRelax());
+			m_relax_data_cmb->Select(
+				frame->GetSettingDlg()->GetRulerRelaxType());
 		}
 	}
 }
@@ -1669,17 +1709,20 @@ void MeasureDlg::Relax(int idx)
 		list = 0;
 	int iter = 10;
 	double infr = 2.0;
+	int type = 1;
 	if (frame && frame->GetSettingDlg())
 	{
 		iter = frame->GetSettingDlg()->GetRulerRelaxIter();
 		infr = frame->GetSettingDlg()->GetRulerInfr();
+		type = frame->GetSettingDlg()->GetRulerRelaxType();
 	}
 
 	m_calculator.SetF1(m_relax_value_spin->GetValue());
 	m_calculator.SetInfr(infr);
 	m_calculator.SetCompList(list);
 	m_calculator.SetRuler(ruler);
-	m_calculator.CenterRuler(m_edited, iter);
+	m_calculator.SetVolume(m_view->m_glview->m_cur_vol);
+	m_calculator.CenterRuler(type, m_edited, iter);
 	m_edited = false;
 	m_view->RefreshGL();
 	GetSettings(m_view);
@@ -1712,30 +1755,6 @@ void MeasureDlg::OnLock(wxCommandEvent& event)
 void MeasureDlg::OnRelax(wxCommandEvent& event)
 {
 	Relax();
-}
-
-void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
-{
-	double dval = m_relax_value_spin->GetValue();
-	m_calculator.SetF1(dval);
-	//relax
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerRelaxF1(dval);
-}
-
-void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
-{
-	wxString str = m_relax_value_spin->GetText()->GetValue();
-	double dval;
-	if (str.ToDouble(&dval))
-	{
-		m_calculator.SetF1(dval);
-		//relax
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
-		if (frame && frame->GetSettingDlg())
-			frame->GetSettingDlg()->SetRulerRelaxF1(dval);
-	}
 }
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)
@@ -1827,6 +1846,46 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerDF_F(val);
+}
+
+void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
+{
+	bool bval = m_auto_relax_btn->GetValue();
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		frame->GetSettingDlg()->SetRulerAutoRelax(bval);
+}
+
+void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
+{
+	double dval = m_relax_value_spin->GetValue();
+	m_calculator.SetF1(dval);
+	//relax
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+}
+
+void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
+{
+	wxString str = m_relax_value_spin->GetText()->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+	{
+		m_calculator.SetF1(dval);
+		//relax
+		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		if (frame && frame->GetSettingDlg())
+			frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	}
+}
+
+void MeasureDlg::OnRelaxData(wxCommandEvent& event)
+{
+	int ival = m_relax_data_cmb->GetSelection();
+	VRenderFrame* frame = (VRenderFrame*)m_frame;
+	if (frame && frame->GetSettingDlg())
+		frame->GetSettingDlg()->SetRulerRelaxType(ival+1);
 }
 
 void MeasureDlg::AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list)

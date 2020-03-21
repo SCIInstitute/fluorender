@@ -45,60 +45,56 @@ const char* str_cl_relax = \
 "	unsigned int gsx,\n" \
 "	unsigned int np,\n" \
 "	float3 scl,\n" \
+"	float rest,\n" \
 "	__global float* spp,\n" \
 "	__global unsigned int* slk,\n" \
 "	__global float* gdsp,\n" \
-"	__global float* gwsum,\n" \
-"	__local float* ldsp)\n" \
+"	__global float* gwsum)\n" \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int index;\n" \
 "	float w, dist;\n" \
-"	float wsum = 0.0;\n" \
+"	float wsum;\n" \
 "	float3 loc, pos, dir;\n" \
-"	float3 dsp = (float3)(0.0, 0.0, 0.0);\n" \
+"	float3 dsp;\n" \
 "	int c;\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	for (c = 0; c < np; ++c)\n" \
 "	{\n" \
 "		if (slk[c]) continue;\n" \
+"		dsp = (float3)(0.0, 0.0, 0.0);\n" \
+"		wsum = 0.0;\n" \
 "		pos = (float3)(spp[c*3], spp[c*3+1], spp[c*3+2]);\n" \
 "		for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "		for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "		for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "		{\n" \
 "			w = read_imagef(data, samp, ijk).x;\n" \
+"			if (w == 0.0) continue;\n" \
 "			loc = (float3)(ijk.x, ijk.y, ijk.z)*scl;\n" \
 "			dir = loc - pos;\n" \
 "			dist = length(dir);\n" \
+"			dist = max(rest, dist);\n" \
 "			dsp += dir * w / dist / dist;\n" \
 "			wsum += w;\n" \
 "		}\n" \
-"		ldsp[c*3] = dsp.x;\n" \
-"		ldsp[c*3+1] = dsp.y;\n" \
-"		ldsp[c*3+2] = dsp.z;\n" \
-"	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	for (c = 0; c < np; ++c)\n" \
-"	{\n" \
-"		atomic_xchg(gdsp+(index*np+c)*3, ldsp[c*3]);\n" \
-"		atomic_xchg(gdsp+(index*np+c)*3+1, ldsp[c*3+1]);\n" \
-"		atomic_xchg(gdsp+(index*np+c)*3+2, ldsp[c*3+2]);\n" \
-"		atomic_xchg(gwsum+index*np+c, wsum[c]);\n" \
+"		atomic_xchg(gdsp+(index*np+c)*3, dsp.x);\n" \
+"		atomic_xchg(gdsp+(index*np+c)*3+1, dsp.y);\n" \
+"		atomic_xchg(gdsp+(index*np+c)*3+2, dsp.z);\n" \
+"		atomic_xchg(gwsum+index*np+c, wsum);\n" \
 "	}\n" \
 "}\n" \
 ;
 
 Relax::Relax() :
-	m_ruler(0)
+	m_ruler(0),
+	m_vd(0),
+	m_snum(0),
+	m_use_mask(true)
 {
-	m_f1 = 1;
-	m_f2 = 2;
-	m_f3 = 3;
-	m_infr = 2.5;
 }
 
 Relax::~Relax()
@@ -115,8 +111,6 @@ void Relax::BuildSpring()
 
 	if (!m_spoints.empty())
 		m_spoints.clear();
-	if (!m_sdist.empty())
-		m_sdist.clear();
 	if (!m_slock.empty())
 		m_slock.clear();
 	m_snum = 0;
@@ -144,7 +138,6 @@ void Relax::BuildSpring()
 					m_spoints.push_back(float(pp.y()));
 					m_spoints.push_back(float(pp.z()));
 					m_slock.push_back(locked);
-					m_sdist.push_back(0.0f);//prevd
 					m_snum++;
 				}
 			}
@@ -165,7 +158,6 @@ void Relax::BuildSpring()
 					m_spoints.push_back(float(pp.y()));
 					m_spoints.push_back(float(pp.z()));
 					m_slock.push_back(locked);
-					m_sdist.push_back(dist);
 					m_snum++;
 				}
 			}
@@ -173,14 +165,37 @@ void Relax::BuildSpring()
 	}
 }
 
+FLIVR::Vector Relax::GetDisplacement(int idx)
+{
+	FLIVR::Vector v;
+	if (idx < 0 || idx >= m_snum)
+		return v;
+
+	double w = m_wsum[idx];
+	if (w > 0.0)
+	{
+		v = FLIVR::Vector(
+			m_dsp[idx * 3],
+			m_dsp[idx * 3 + 1],
+			m_dsp[idx * 3 + 2]);
+		v /= w;
+	}
+	return v;
+}
+
 bool Relax::Compute()
 {
-	if (!m_vd)
+	if (!m_vd || !m_ruler)
 		return false;
+
+	BuildSpring();
 
 	double dx, dy, dz;
 	m_vd->GetSpacings(dx, dy, dz);
 	cl_float3 scl = { (float)dx, (float)dy, (float)dz };
+
+	m_dsp.assign(m_snum * 3, 0.0);
+	m_wsum.assign(m_snum, 0.0);
 
 	//create program and kernels
 	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
@@ -228,23 +243,43 @@ bool Relax::Compute()
 			sizeof(unsigned int), (void*)(&m_snum));
 		kernel_prog->setKernelArgConst(kernel_0, 7,
 			sizeof(cl_float3), (void*)(&scl));
-		kernel_prog->setKernelArgBuf(kernel_0, 8,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*m_snum * 3, (void*)(m_spoints.data()));
+		kernel_prog->setKernelArgConst(kernel_0, 8,
+			sizeof(float), (void*)(&m_rest));
 		kernel_prog->setKernelArgBuf(kernel_0, 9,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*m_snum, (void*)(m_slock.data()));
-		std::vector<float> dsp(gsize.gsxyz * 3, 0.0);
-		float* pdsp = dsp.data();
+			sizeof(float)*m_snum * 3, (void*)(m_spoints.data()));
 		kernel_prog->setKernelArgBuf(kernel_0, 10,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*gsize.gsxyz * 3, (void*)(pdsp));
-		std::vector<float> wsum(gsize.gsxyz, 0.0);
-		float* pwsum = wsum.data();
+			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(unsigned int)*m_snum, (void*)(m_slock.data()));
+		std::vector<float> dsp(gsize.gsxyz * m_snum * 3, 0.0);
+		float* pdsp = dsp.data();
 		kernel_prog->setKernelArgBuf(kernel_0, 11,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*gsize.gsxyz, (void*)(pwsum));
-		kernel_prog->setKernelArgLocal(kernel_0, 12, sizeof(float)*m_snum*3);
+			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(float)*gsize.gsxyz * m_snum * 3, (void*)(pdsp));
+		std::vector<float> wsum(gsize.gsxyz * m_snum, 0.0);
+		float* pwsum = wsum.data();
+		kernel_prog->setKernelArgBuf(kernel_0, 12,
+			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(float)*gsize.gsxyz * m_snum, (void*)(pwsum));
+
+		//execute
+		kernel_prog->executeKernel(kernel_0, 3, global_size, local_size);
+
+		//read back
+		kernel_prog->readBuffer(sizeof(float)*gsize.gsxyz * m_snum * 3, pdsp, pdsp);
+		kernel_prog->readBuffer(sizeof(float)*gsize.gsxyz * m_snum, pwsum, pwsum);
+
+		//collect data
+		for (int j = 0; j < m_snum; ++j)
+		{
+			for (int i = 0; i < gsize.gsxyz; ++i)
+			{
+				m_dsp[j * 3] += dsp[(m_snum * i + j) * 3];
+				m_dsp[j * 3 + 1] += dsp[(m_snum * i + j) * 3 + 1];
+				m_dsp[j * 3 + 2] += dsp[(m_snum * i + j) * 3 + 2];
+				m_wsum[j] += wsum[i * m_snum + j];
+			}
+		}
 	}
 	
 	return true;

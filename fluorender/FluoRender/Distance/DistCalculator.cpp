@@ -26,13 +26,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DistCalculator.h"
+#include <DataManager.h>
 #include <limits>
 #include <algorithm>
 
 using namespace FL;
 
 DistCalculator::DistCalculator() :
+	m_type(0),
 	m_init(false),
+	m_vd(0),
 	m_comp_list(0),
 	m_ruler(0)
 {
@@ -46,19 +49,32 @@ DistCalculator::~DistCalculator()
 {
 }
 
-void DistCalculator::CenterRuler(bool init, int iter)
+void DistCalculator::CenterRuler(int type, bool init, int iter)
 {
+	m_type = type;
+	
+	if (m_type == 1)
+		m_relax.SetUseMask(false);
+	else if (m_type == 2)
+		m_relax.SetUseMask(true);
+
 	if (!m_init || init)
 	{
 		BuildSpring();
-		BuildCloud();
+		if (m_type == 3)
+			BuildCloud();
 		m_rest = GetRestDist();
+		m_relax.SetRestDist(m_rest);
 		m_init = true;
 	}
 
 	for (int it = 0; it < iter; ++it)
-	for (int i = 0; i < m_spring.size(); ++i)
-		UpdateSpringNode(i);
+	{
+		if (m_type == 1 || m_type == 2)
+			m_relax.Compute();
+		for (int i = 0; i < m_spring.size(); ++i)
+			UpdateSpringNode(i);
+	}
 }
 
 void DistCalculator::Project()
@@ -194,27 +210,35 @@ void DistCalculator::UpdateSpringNode(int idx)
 
 	double dist, ang;
 	Vector dir, dir2;
-	//from cloud
-	std::vector<double> lens;
-	for (int i = 0; i < cz; ++i)
+	if (m_type == 1 || m_type == 2)
 	{
-		dir = m_cloud[i] - pos;
-		lens.push_back(dir.length());
+		//from relax
+		f1 = m_relax.GetDisplacement(idx);
 	}
-	std::sort(lens.begin(), lens.end());
-	double scale = (node.prevd == 0.0 ||
-		node.nextd == 0.0) ? 1.0 : m_infr;
-	int loc = int(scale * cz / sz + 1.0);
-	loc = std::min(loc, cz-1);
-	for (int i = 0; i < cz; ++i)
+	else if (m_type == 3)
 	{
-		dir = m_cloud[i] - pos;
-		dist = dir.length();
-		if (dist > lens[loc])
-			continue;
-		dist = std::max(m_rest, dist);
-		dir.normalize();
-		f1 += dir / dist / dist;
+		//from cloud
+		std::vector<double> lens;
+		for (int i = 0; i < cz; ++i)
+		{
+			dir = m_cloud[i] - pos;
+			lens.push_back(dir.length());
+		}
+		std::sort(lens.begin(), lens.end());
+		double scale = (node.prevd == 0.0 ||
+			node.nextd == 0.0) ? 1.0 : m_infr;
+		int loc = int(scale * cz / sz + 1.0);
+		loc = std::min(loc, cz - 1);
+		for (int i = 0; i < cz; ++i)
+		{
+			dir = m_cloud[i] - pos;
+			dist = dir.length();
+			if (dist > lens[loc])
+				continue;
+			dist = std::max(m_rest, dist);
+			dir.normalize();
+			f1 += dir / dist / dist;
+		}
 	}
 	//from neighbors
 	if (idx > 0 && node.prevd > 0.0)

@@ -68,34 +68,27 @@ namespace FL
 		{
 			return m_ruler;
 		}
-		void SetF1(double val)
+		void SetRestDist(float d)
 		{
-			m_f1 = val;
-		}
-		void SetInfr(double val)
-		{
-			m_infr = val;
+			m_rest = d;
 		}
 
 		bool Compute();
 
+		FLIVR::Vector GetDisplacement(int idx);
+
 	private:
 		bool m_use_mask;//use mask instead of data
-		bool m_use_int;//use intensity values as weights
 		VolumeData *m_vd;
 		//Ruler
 		Ruler *m_ruler;
-		//spring properties
-		double m_rest;
-		double m_f1;
-		double m_f2;
-		double m_f3;
-		double m_infr;//range of influence
 		//spring
 		unsigned int m_snum;//total point number
+		float m_rest;//rest dist
 		std::vector<float> m_spoints;//x, y, z for each point
 		std::vector<unsigned int> m_slock;//lock for each point
-		std::vector<float> m_sdist;//prevd for each point
+		std::vector<float> m_dsp;//x, y, z for total displace of each point
+		std::vector<float> m_wsum;//total weight sum for each point
 
 	private:
 		void BuildSpring();
