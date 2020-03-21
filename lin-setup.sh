@@ -55,4 +55,4 @@ sudo apt install opencl-headers
 
 sudo apt install qt5-default
 
-ls /opt/Qt/
+ls /opt/
