@@ -53,24 +53,4 @@ sudo apt install ocl-icd-libopencl1
 sudo apt install ocl-icd-opencl-dev
 sudo apt install opencl-headers
 
-#sudo apt install qt5-qmake qtbase5-dev libqt5opengl5-dev libqt5svg5-dev
-sudo apt install xz-utils
-wget https://download.qt.io/archive/qt/5.14/5.14.1/single/qt-everywhere-src-5.14.1.tar.xz
-tar -xf qt-everywhere-src-5.14.1.tar.xz
-cd qt-everywhere-src-5.14.1
-export QT5PREFIX=/opt/qt5
-
-sed -i 's/python /python3 /' qtdeclarative/qtdeclarative.pro \
-                             qtdeclarative/src/3rdparty/masm/masm.pri &&
-
-./configure -prefix $QT5PREFIX                        \
-            -sysconfdir /etc/xdg                      \
-            -confirm-license                          \
-            -opensource                               \
-            -openssl-linked                           \
-            -nomake examples                          \
-            -no-rpath                                 \
-            -skip qtwebengine                         &&
-make
-
-sudo make install
+sudo apt install qt5-default
