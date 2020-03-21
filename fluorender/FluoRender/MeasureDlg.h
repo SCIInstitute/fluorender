@@ -32,8 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
-#include <Distance/RulerHandler.h>
+#include <wx/tglbtn.h>
 #include "FLIVR/Color.h"
+#include <Distance/RulerHandler.h>
 #include <Distance/DistCalculator.h>
 #include <Distance/RulerAlign.h>
 
@@ -129,7 +130,6 @@ public:
 		ID_RulerAvgBtn,
 		ID_LockBtn,
 		ID_RelaxBtn,
-		ID_RelaxValueSpin,
 		ID_DeleteBtn,
 		ID_DeleteAllBtn,
 		ID_ProfileBtn,
@@ -142,6 +142,9 @@ public:
 		ID_UseTransferChk,
 		ID_TransientChk,
 		ID_DF_FChk,
+		ID_AutoRelaxBtn,
+		ID_RelaxValueSpin,
+		ID_RelaxDataCmb,
 		//align
 		ID_AlignCenter,
 		ID_AlignX,
@@ -184,7 +187,6 @@ private:
 	wxToolBar *m_toolbar1;
 	wxToolBar *m_toolbar2;
 	wxToolBar *m_toolbar3;
-	wxSpinCtrlDouble* m_relax_value_spin;
 	//options
 	wxRadioButton *m_view_plane_rd;
 	wxRadioButton *m_max_intensity_rd;
@@ -192,6 +194,9 @@ private:
 	wxCheckBox *m_use_transfer_chk;
 	wxCheckBox *m_transient_chk;
 	wxCheckBox *m_df_f_chk;
+	wxToggleButton *m_auto_relax_btn;
+	wxSpinCtrlDouble* m_relax_value_spin;
+	wxComboBox *m_relax_data_cmb;
 	//align
 	wxCheckBox* m_align_center;
 	wxButton* m_align_x;
@@ -228,8 +233,6 @@ private:
 	void OnRulerAvg(wxCommandEvent& event);
 	void OnLock(wxCommandEvent& event);
 	void OnRelax(wxCommandEvent& event);
-	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
-	void OnRelaxValueText(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);
 	void OnProfile(wxCommandEvent& event);
@@ -240,6 +243,10 @@ private:
 	void OnUseTransferCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);
 	void OnDF_FCheck(wxCommandEvent& event);
+	void OnAutoRelax(wxCommandEvent& event);
+	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
+	void OnRelaxValueText(wxCommandEvent& event);
+	void OnRelaxData(wxCommandEvent& event);
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);

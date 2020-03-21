@@ -30,7 +30,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Components/CompGraph.h>
 #include <Distance/Ruler.h>
+#include <Distance/Relax.h>
 
+class VolumeData;
 namespace FL
 {
 	class DistCalculator
@@ -39,6 +41,19 @@ namespace FL
 		DistCalculator();
 		~DistCalculator();
 
+		void SetRuler(Ruler* ruler)
+		{
+			if (ruler != m_ruler)
+			{
+				m_ruler = ruler;
+				m_init = false;
+			}
+			m_relax.SetRuler(ruler);
+		}
+		Ruler* GetRuler()
+		{
+			return m_ruler;
+		}
 		void SetCompList(CompList* list)
 		{
 			if (list != m_comp_list)
@@ -51,18 +66,12 @@ namespace FL
 		{
 			return m_comp_list;
 		}
-		void SetRuler(Ruler* ruler)
+		void SetVolume(VolumeData* vd)
 		{
-			if (ruler != m_ruler)
-			{
-				m_ruler = ruler;
-				m_init = false;
-			}
+			m_vd = vd;
+			m_relax.SetVolume(vd);
 		}
-		Ruler* GetRuler()
-		{
-			return m_ruler;
-		}
+
 		void SetF1(double val)
 		{
 			m_f1 = val;
@@ -72,13 +81,16 @@ namespace FL
 			m_infr = val;
 		}
 
-		void CenterRuler(bool init, int iter=1);
+		void CenterRuler(int type, bool init, int iter=1);
 		void Project();
 
 	private:
+		int m_type;//0:no data; 1:volume; 2:mask; 3:comps
 		bool m_init;
 		//components
 		CompList *m_comp_list;
+		//volume
+		VolumeData *m_vd;
 		//Ruler
 		Ruler *m_ruler;
 		//spring properties
@@ -97,6 +109,9 @@ namespace FL
 		};
 		std::vector<SpringNode> m_spring;
 		std::vector<Point> m_cloud;
+
+		//volume relax
+		Relax m_relax;
 
 	private:
 		void BuildSpring();

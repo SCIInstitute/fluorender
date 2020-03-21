@@ -819,6 +819,8 @@ void SettingDlg::GetSettings()
 	m_ruler_relax_f1 = 2.0;
 	m_ruler_infr = 2.0;
 	m_ruler_relax_iter = 10;
+	m_ruler_auto_relax = false;
+	m_ruler_relax_type = 1;
 	m_ruler_df_f = false;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
@@ -1069,6 +1071,8 @@ void SettingDlg::GetSettings()
 		fconfig.Read("infr", &m_ruler_infr);
 		fconfig.Read("df_f", &m_ruler_df_f);
 		fconfig.Read("relax iter", &m_ruler_relax_iter);
+		fconfig.Read("auto relax", &m_ruler_auto_relax);
+		fconfig.Read("relax type", &m_ruler_relax_type);
 	}
 	//flags for pvxml flipping
 	if (fconfig.Exists("/pvxml flip"))
@@ -1406,6 +1410,8 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("infr", m_ruler_infr);
 	fconfig.Write("df_f", m_ruler_df_f);
 	fconfig.Write("relax iter", m_ruler_relax_iter);
+	fconfig.Write("auto relax", m_ruler_auto_relax);
+	fconfig.Write("relax type", m_ruler_relax_type);
 
 	//flags for flipping pvxml
 	fconfig.SetPath("/pvxml flip");
