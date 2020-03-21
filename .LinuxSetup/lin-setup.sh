@@ -59,5 +59,3 @@ sudo apt update
 sudo apt install qt512-meta-minimal
 sudo mkdir /etc/xdg/qtchooser
 sudo cp default.conf /etc/xdg/qtchooser
-
-qmake -v
