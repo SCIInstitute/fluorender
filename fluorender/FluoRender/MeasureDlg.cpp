@@ -1122,7 +1122,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 			m_auto_relax_btn->SetValue(
 				frame->GetSettingDlg()->GetRulerAutoRelax());
 			m_relax_data_cmb->Select(
-				frame->GetSettingDlg()->GetRulerRelaxType());
+				frame->GetSettingDlg()->GetRulerRelaxType()-1);
 		}
 	}
 }
