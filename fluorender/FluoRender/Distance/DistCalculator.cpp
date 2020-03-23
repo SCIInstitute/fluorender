@@ -57,6 +57,8 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 		m_relax.SetUseMask(false);
 	else if (m_type == 2)
 		m_relax.SetUseMask(true);
+	if (m_type != 3)
+		iter = std::max(1, iter / 10);
 
 	if (!m_init || init)
 	{
@@ -65,6 +67,7 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 			BuildCloud();
 		m_rest = GetRestDist();
 		m_relax.SetRestDist(m_rest);
+		m_relax.SetInflRange(m_rest*m_infr*5);
 		m_init = true;
 	}
 
@@ -279,16 +282,29 @@ void DistCalculator::UpdateSpringNode(int idx)
 		f3 += dir * ang;
 	}
 
+	double ff1, ff2, ff3;
+	if (m_type != 3)
+	{
+		ff1 = m_f1;
+		ff2 = m_f2;
+		ff3 = m_f3;
+	}
+	else
+	{
+		ff1 = m_f1;
+		ff2 = m_f2;
+		ff3 = m_f3;
+	}
 	double norm = (node.prevd + node.nextd) / 100.0;
 	norm = std::max(1 / 100.0, norm);
 	f1.normalize();
 	f1 *= norm;
-	f2 = m_f2 * f2 + m_f3 * f3;
+	f2 = ff2 * f2 + ff3 * f3;
 	f2.normalize();
 	f2 *= norm * 2.0;
 	//f3.normalize();
 	//f3 *= norm;
-	force = m_f1 * f1 + m_f2 * f2;
+	force = ff1 * f1 + ff2 * f2;
 	node.p->DisplacePoint(force);
 }
 

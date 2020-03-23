@@ -72,6 +72,10 @@ namespace FL
 		{
 			m_rest = d;
 		}
+		void SetInflRange(float val)
+		{
+			m_infr = val;
+		}
 
 		bool Compute();
 
@@ -85,6 +89,7 @@ namespace FL
 		//spring
 		unsigned int m_snum;//total point number
 		float m_rest;//rest dist
+		float m_infr;//influence range
 		std::vector<float> m_spoints;//x, y, z for each point
 		std::vector<unsigned int> m_slock;//lock for each point
 		std::vector<float> m_dsp;//x, y, z for total displace of each point
