@@ -16,14 +16,12 @@ jobs:
       run: .\.WinSetup\winSetup.ps1 ; mkdir build
     
     - name: Download_OpenCL_Headers
-      uses: actions/checkout@master
-      with:
-        repository: KhronosGroup/OpenCL-Headers
+      shell: powershell
+      run: git clone --branch v2020.03.13 https://github.com/KhronosGroup/OpenCL-Headers/
 
     - name: Download_OpenCL_Libraries
-      uses: actions/checkout@master
-      with:
-        repository: KhronosGroup/OpenCL-ICD-Loader
+      shell: powershell
+      run: git clone --branch v2020.03.13 https://github.com/KhronosGroup/OpenCL-ICD-Loader/
 
     - name: Install_OpenCL
       shell: powershell
