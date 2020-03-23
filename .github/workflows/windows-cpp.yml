@@ -16,12 +16,12 @@ jobs:
       run: .\.WinSetup\winSetup.ps1 ; mkdir build
     
     - name: Download_OpenCL_Headers
-      uses: actions/checkout@v1
+      uses: actions/checkout@master
       with:
         repository: KhronosGroup/OpenCL-Headers
 
     - name: Download_OpenCL_Libraries
-      uses: actions/checkout@v1
+      uses: actions/checkout@master
       with:
         repository: KhronosGroup/OpenCL-ICD-Loader
 
