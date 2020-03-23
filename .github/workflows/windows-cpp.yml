@@ -13,16 +13,12 @@ jobs:
 
     - name: Configure
       shell: powershell
-      run: .\.WinSetup\winSetup.ps1
+      run: .\.WinSetup\winSetup.ps1 ; mkdir build
 
     - name: Run_Cmake
+      working-directory: build
       shell: powershell
-      env:
-        CREATEDIR: mkdir build
-        CHANGE: cd build
-        CALL: cmake .. -G "Visual Studio 16 2019"
-      run: |
-        $CREATEDIR $CHANGE $CALL
+      run: cmake ..
 
     - name: Build
       shell: powershell
