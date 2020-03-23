@@ -3,7 +3,7 @@ name: windows-build
 on: [push,pull_request]
 
 jobs:
-  windows-build-headless:
+  windows-build:
     runs-on: windows-latest
 
     steps:
@@ -13,4 +13,8 @@ jobs:
 
     - name: Configure
       shell: powershell
-      run: .\.WinSetup\winSetup.ps1 
+      run: .\.WinSetup\winSetup.ps1 ; mkdir build ; cd build ; cmake .. -G"Visual Studio 16 2019"
+
+    - name: Build
+      shell: powershell
+      run: cmake --build 
