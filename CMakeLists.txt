@@ -66,8 +66,11 @@ include(config.cmake)
 include(setPreSuffix.cmake)
 
 # Required packages
+message("Looking for OpenGL")
 find_package(OpenGL REQUIRED)
+message("Found OpenGL, looking for OpenCL")
 find_package(OpenCL REQUIRED)
+message("Found, looking for Qt componenets")
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
