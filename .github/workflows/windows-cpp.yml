@@ -13,4 +13,4 @@ jobs:
 
     - name: Configure
       shell: powershell
-      run: .\.WinSetup\.winSetup.ps1 
+      run: .\.WinSetup\winSetup.ps1 
