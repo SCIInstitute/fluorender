@@ -6,11 +6,11 @@ jobs:
   windows-build-headless:
     runs-on: windows-latest
 
-		steps:
+    steps:
 
-		- name: Checkout
-		  uses: actions/checkout@v1
+    - name: Checkout
+    uses: actions/checkout@v1
 
-		- name: Configure
-			shell: powershell
-			run: cd .\.WinSetup\.winSetup.ps1 
+    - name: Configure
+      shell: powershell
+      run: cd .\.WinSetup\.winSetup.ps1 
