@@ -1,0 +1,16 @@
+name: windows-build
+
+on: [push,pull_request]
+
+jobs:
+  window-build-headless:
+	  runs-on: windows-latest
+
+		steps:
+
+		- name: Checkout
+		  uses: actions/checkout@v1
+
+		- name: Configure
+			shell: powershell
+			run: cd .\.WinSetup\.winSetup.ps1 
