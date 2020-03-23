@@ -6,7 +6,7 @@ choco install qtcreator
 mkdir OpenCL
 cd OpenCL
 Write-Host "Downloading the OpenCL Headers..."
-git clone https://github.com/KhronosGroup/OpenCL-Headers
+git
 Write-Host "Done, cloning into the Main OpenCL library."
 git clone --branch v2020.03.13 https://github.com/KhronosGroup/OpenCL-ICD-Loader
 Write-Host "Done, creating CL dir in Loader and moving files over..."
