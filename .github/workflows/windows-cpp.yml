@@ -27,7 +27,7 @@ jobs:
 
     - name: Install_OpenCL
       shell: powershell
-      run: pwd
+      run: ls
 
     - name: Run_Cmake
       working-directory: build
