@@ -46,6 +46,7 @@ const char* str_cl_relax = \
 "	unsigned int np,\n" \
 "	float3 scl,\n" \
 "	float rest,\n" \
+"	float infr,\n" \
 "	__global float* spp,\n" \
 "	__global unsigned int* slk,\n" \
 "	__global float* gdsp,\n" \
@@ -77,6 +78,7 @@ const char* str_cl_relax = \
 "			loc = (float3)(ijk.x, ijk.y, ijk.z)*scl;\n" \
 "			dir = loc - pos;\n" \
 "			dist = length(dir);\n" \
+"			if (dist > infr) continue;\n" \
 "			dist = max(rest, dist);\n" \
 "			dsp += dir * w / dist / dist;\n" \
 "			wsum += w;\n" \
@@ -93,7 +95,9 @@ Relax::Relax() :
 	m_ruler(0),
 	m_vd(0),
 	m_snum(0),
-	m_use_mask(true)
+	m_use_mask(true),
+	m_rest(0.0f),
+	m_infr(0.0f)
 {
 }
 
@@ -226,7 +230,6 @@ bool Relax::Compute()
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
-		//kernel0: init ordered
 		kernel_prog->setKernelArgTex3D(kernel_0, 0,
 			CL_MEM_READ_ONLY, tid);
 		kernel_prog->setKernelArgConst(kernel_0, 1,
@@ -245,20 +248,22 @@ bool Relax::Compute()
 			sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(kernel_0, 8,
 			sizeof(float), (void*)(&m_rest));
-		kernel_prog->setKernelArgBuf(kernel_0, 9,
+		kernel_prog->setKernelArgConst(kernel_0, 9,
+			sizeof(float), (void*)(&m_infr));
+		kernel_prog->setKernelArgBuf(kernel_0, 10,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*m_snum * 3, (void*)(m_spoints.data()));
-		kernel_prog->setKernelArgBuf(kernel_0, 10,
+		kernel_prog->setKernelArgBuf(kernel_0, 11,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*m_snum, (void*)(m_slock.data()));
 		std::vector<float> dsp(gsize.gsxyz * m_snum * 3, 0.0);
 		float* pdsp = dsp.data();
-		kernel_prog->setKernelArgBuf(kernel_0, 11,
+		kernel_prog->setKernelArgBuf(kernel_0, 12,
 			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*gsize.gsxyz * m_snum * 3, (void*)(pdsp));
 		std::vector<float> wsum(gsize.gsxyz * m_snum, 0.0);
 		float* pwsum = wsum.data();
-		kernel_prog->setKernelArgBuf(kernel_0, 12,
+		kernel_prog->setKernelArgBuf(kernel_0, 13,
 			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*gsize.gsxyz * m_snum, (void*)(pwsum));
 
