@@ -919,7 +919,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		"Auto Relax", wxDefaultPosition, wxSize(75, -1));
 	sizer_13->Add(10, 10);
 	sizer_13->Add(m_auto_relax_btn, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "Ex/In Ratio");
+	st = new wxStaticText(this, 0, "Ex/In Ratio ");
 	sizer_13->Add(10, 10);
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
 	m_relax_value_spin = new wxSpinCtrlDouble(
@@ -928,15 +928,16 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 100, 2, 0.1);
 	sizer_13->Add(m_relax_value_spin, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "Compute on");
+	st = new wxStaticText(this, 0, "Constraint ");
 	sizer_13->Add(10, 10);
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
 	m_relax_data_cmb = new wxComboBox(this, ID_RelaxDataCmb, "",
 		wxDefaultPosition, wxSize(100, -1), 0, NULL, wxCB_READONLY);
+	m_relax_data_cmb->Append("Free");
 	m_relax_data_cmb->Append("Volume");
 	m_relax_data_cmb->Append("Selection");
 	m_relax_data_cmb->Append("Analyzed Comp.");
-	m_relax_data_cmb->Select(2);
+	m_relax_data_cmb->Select(3);
 	sizer_13->Add(m_relax_data_cmb, 0, wxALIGN_CENTER);
 	//
 	sizer_1->Add(sizer_11, 0, wxEXPAND);
@@ -1122,7 +1123,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 			m_auto_relax_btn->SetValue(
 				frame->GetSettingDlg()->GetRulerAutoRelax());
 			m_relax_data_cmb->Select(
-				frame->GetSettingDlg()->GetRulerRelaxType()-1);
+				frame->GetSettingDlg()->GetRulerRelaxType());
 		}
 	}
 }
@@ -1885,7 +1886,7 @@ void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 	int ival = m_relax_data_cmb->GetSelection();
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerRelaxType(ival+1);
+		frame->GetSettingDlg()->SetRulerRelaxType(ival);
 }
 
 void MeasureDlg::AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list)
