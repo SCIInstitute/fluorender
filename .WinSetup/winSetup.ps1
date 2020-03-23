@@ -3,10 +3,11 @@ Write-Host "Setup for Windows"
 Write-Host "Installing Qt Creator..."
 choco install qtcreator
 
+set GIT_REDIRECT_STDERR=2>&1
 mkdir OpenCL
 cd OpenCL
 Write-Host "Downloading the OpenCL Headers..."
-git
+git clone --branch v2020.03.13 https://github.com/KhronosGroup/OpenCL-Headers
 Write-Host "Done, cloning into the Main OpenCL library."
 git clone --branch v2020.03.13 https://github.com/KhronosGroup/OpenCL-ICD-Loader
 Write-Host "Done, creating CL dir in Loader and moving files over..."
