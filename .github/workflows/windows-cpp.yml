@@ -27,7 +27,7 @@ jobs:
 
     - name: Install_OpenCL
       shell: powershell
-      run: pwd ; .\.WinSetup\winSetupPt2.ps1
+      run: pwd
 
     - name: Run_Cmake
       working-directory: build
