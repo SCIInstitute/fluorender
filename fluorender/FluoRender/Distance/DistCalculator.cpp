@@ -40,8 +40,8 @@ DistCalculator::DistCalculator() :
 	m_ruler(0)
 {
 	m_f1 = 1;
-	m_f2 = 0;
-	m_f3 = 0;
+	m_f2 = 2;
+	m_f3 = 3;
 	m_infr = 2.5;
 }
 
