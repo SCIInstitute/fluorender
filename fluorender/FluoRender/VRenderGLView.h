@@ -687,6 +687,8 @@ public:
 	bool m_paint_count;
 	//colocalize after paint
 	bool m_paint_colocalize;
+	//relax after ruler
+	bool m_ruler_autorelax;
 
 private:
 	bool m_drawing;

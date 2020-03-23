@@ -782,37 +782,37 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 #ifdef _DARWIN
 	m_toolbar1->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Loctr",
+	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locatr",
 		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking");
 	bitmap = wxGetBitmapFromMemory(drill);
 	m_toolbar1->AddCheckTool(ID_ProbeBtn, "Probe",
 		bitmap, wxNullBitmap,
 		"Add probes to the render view by clicking once");
-	bitmap = wxGetBitmapFromMemory(protractor);
-	m_toolbar1->AddCheckTool(ID_ProtractorBtn, "Protr",
-		bitmap, wxNullBitmap,
-		"Add protractors to measure angles by clicking at three points");
 	bitmap = wxGetBitmapFromMemory(two_point);
 	m_toolbar1->AddCheckTool(ID_RulerBtn, "2-pnt",
 		bitmap, wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points");
+	bitmap = wxGetBitmapFromMemory(protractor);
+	m_toolbar1->AddCheckTool(ID_ProtractorBtn, "Protr",
+		bitmap, wxNullBitmap,
+		"Add protractors to measure angles by clicking at three points");
+	bitmap = wxGetBitmapFromMemory(ellipse);
+	m_toolbar1->AddCheckTool(ID_EllipseBtn, "Ellips",
+		bitmap, wxNullBitmap,
+		"Add an ellipse to the render view by clicking at its points");
 	bitmap = wxGetBitmapFromMemory(multi_point);
 	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "M-pnt",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
-	bitmap = wxGetBitmapFromMemory(ellipse);
-	m_toolbar1->AddCheckTool(ID_EllipseBtn, "Ellps",
+	bitmap = wxGetBitmapFromMemory(pencil);
+	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencil",
 		bitmap, wxNullBitmap,
-		"Add an ellipse to the render view by clicking at its points");
+		"Draw ruler without clicking each point");
 	bitmap = wxGetBitmapFromMemory(grow);
 	m_toolbar1->AddCheckTool(ID_GrowBtn, "Grow",
 		bitmap, wxNullBitmap,
 		"Click and hold to create ruler automatically based on data");
-	bitmap = wxGetBitmapFromMemory(pencil);
-	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencl",
-		bitmap, wxNullBitmap,
-		"Draw ruler without clicking each point");
 	m_toolbar1->Realize();
 	//toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -919,15 +919,6 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		"Auto Relax", wxDefaultPosition, wxSize(75, -1));
 	sizer_13->Add(10, 10);
 	sizer_13->Add(m_auto_relax_btn, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "Ex/In Ratio ");
-	sizer_13->Add(10, 10);
-	sizer_13->Add(st, 0, wxALIGN_CENTER);
-	m_relax_value_spin = new wxSpinCtrlDouble(
-		this, ID_RelaxValueSpin, "2",
-		wxDefaultPosition, wxSize(50, 23),
-		wxSP_ARROW_KEYS | wxSP_WRAP,
-		0, 100, 2, 0.1);
-	sizer_13->Add(m_relax_value_spin, 0, wxALIGN_CENTER);
 	st = new wxStaticText(this, 0, "Constraint ");
 	sizer_13->Add(10, 10);
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
@@ -939,6 +930,15 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_relax_data_cmb->Append("Analyzed Comp.");
 	m_relax_data_cmb->Select(3);
 	sizer_13->Add(m_relax_data_cmb, 0, wxALIGN_CENTER);
+	st = new wxStaticText(this, 0, "Ex/In Ratio ");
+	sizer_13->Add(10, 10);
+	sizer_13->Add(st, 0, wxALIGN_CENTER);
+	m_relax_value_spin = new wxSpinCtrlDouble(
+		this, ID_RelaxValueSpin, "2",
+		wxDefaultPosition, wxSize(50, 23),
+		wxSP_ARROW_KEYS | wxSP_WRAP,
+		0, 100, 2, 0.1);
+	sizer_13->Add(m_relax_value_spin, 0, wxALIGN_CENTER);
 	//
 	sizer_1->Add(sizer_11, 0, wxEXPAND);
 	sizer_1->Add(10, 10);
@@ -1122,6 +1122,8 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 				frame->GetSettingDlg()->GetRulerRelaxF1());
 			m_auto_relax_btn->SetValue(
 				frame->GetSettingDlg()->GetRulerAutoRelax());
+			m_view->m_glview->m_ruler_autorelax =
+				frame->GetSettingDlg()->GetRulerAutoRelax();
 			m_relax_data_cmb->Select(
 				frame->GetSettingDlg()->GetRulerRelaxType());
 		}
@@ -1708,9 +1710,9 @@ void MeasureDlg::Relax(int idx)
 	list = analyzer->GetCompList();
 	if (list && list->empty())
 		list = 0;
-	int iter = 10;
 	double infr = 2.0;
 	int type = 1;
+	int iter = 10;
 	if (frame && frame->GetSettingDlg())
 	{
 		iter = frame->GetSettingDlg()->GetRulerRelaxIter();
@@ -1855,6 +1857,8 @@ void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerAutoRelax(bval);
+	if (m_view)
+		m_view->m_glview->m_ruler_autorelax = bval;
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)

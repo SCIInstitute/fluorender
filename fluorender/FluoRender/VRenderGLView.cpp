@@ -299,6 +299,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_refresh(false),
 	m_paint_count(false),
 	m_paint_colocalize(false),
+	m_ruler_autorelax(false),
 	//vr settings
 	m_enable_vr(false),
 	m_use_openvr(false),
@@ -9998,6 +9999,22 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_grow_on = false;
 			return;
 		}
+		else if (m_int_mode == 13)
+		{
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+			{
+				if (m_ruler_autorelax)
+				{
+					vr_frame->GetMeasureDlg()->SetEdit();
+					vr_frame->GetMeasureDlg()->Relax(
+						m_ruler_handler.GetRulerIndex());
+				}
+				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			}
+			RefreshGL(29);
+			return;
+		}
 	}
 	if (event.MiddleUp())
 	{
@@ -10024,10 +10041,18 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 				m_ruler_handler.FinishRuler();
 			}
-			RefreshGL(29);
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+			{
+				if (m_ruler_autorelax)
+				{
+					vr_frame->GetMeasureDlg()->SetEdit();
+					vr_frame->GetMeasureDlg()->Relax(
+						m_ruler_handler.GetRulerIndex());
+				}
 				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			}
+			RefreshGL(29);
 			return;
 		}
 		//SetSortBricks();
@@ -10207,7 +10232,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (m_ruler_handler.GetMouseDist(event.GetX(), event.GetY(), 35))
 			{
 				//add one point to a ruler
-				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), false);
+				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
 					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);

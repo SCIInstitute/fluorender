@@ -73,6 +73,16 @@ namespace FL
 			return m_ruler;
 		}
 
+		int GetRulerIndex()
+		{
+			if (!m_ruler)
+				return -1;
+			for (int i = 0; i < m_ruler_list->size(); ++i)
+				if ((*m_ruler_list)[i] == m_ruler)
+					return i;
+			return -1;
+		}
+
 		void SetRulerList(FL::RulerList* ruler_list)
 		{
 			m_ruler_list = ruler_list;
