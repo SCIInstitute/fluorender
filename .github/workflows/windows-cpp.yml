@@ -14,6 +14,18 @@ jobs:
     - name: Configure
       shell: powershell
       run: .\.WinSetup\winSetup.ps1 ; mkdir build
+    
+    - name: Download_OpenCL_Headers
+      working-directory: OpenCL
+      uses: actions/checkout@v2020.03.13
+      with:
+        repository: KhronosGroup/OpenCL-Headers
+
+    - name: Download_OpenCL_Libraries
+      working-directory: OpenCL
+      uses: actions/checkout@v2020.03.13
+      with:
+        repository: KhronosGroup/OpenCL-ICD-Loader
 
     - name: Run_Cmake
       working-directory: build
