@@ -4,7 +4,7 @@ on: [push,pull_request]
 
 jobs:
   windows-build-headless:
-	  runs-on: windows-latest
+    runs-on: windows-latest
 
 		steps:
 
