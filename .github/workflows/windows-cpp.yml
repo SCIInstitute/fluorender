@@ -3,7 +3,7 @@ name: windows-build
 on: [push,pull_request]
 
 jobs:
-  window-build-headless:
+  windows-build-headless:
 	  runs-on: windows-latest
 
 		steps:
