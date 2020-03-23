@@ -30,7 +30,7 @@ jobs:
     - name: Run_Cmake
       working-directory: build
       shell: powershell
-      run: cmake ..
+      run: cmake -DOpenCL_LIBRARY=..\OpenCL\lib\Release -DOpenCL_INCLUDE_DIR=..\OpenCL\OpenCL-ICD-Loader\inc ..
 
     - name: Build
       shell: powershell
