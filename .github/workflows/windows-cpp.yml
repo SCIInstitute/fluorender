@@ -32,6 +32,9 @@ jobs:
         arch: win64_msvc2017_64
         install-deps: true
 
+    - name: Print out Qt Dir
+      run: echo $env:Qt5_Dir
+
     - name: Run_Cmake
       working-directory: build
       shell: powershell
