@@ -24,9 +24,9 @@ jobs:
       run: .\.WinSetup\winSetup.ps1
 
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: ouuan/install-qt-action@ouuan
       with:
-        version: 5.12.7
+        version: 5.13.1
         target: desktop
         host: windows
         arch: win64_msvc2017_64
@@ -34,12 +34,12 @@ jobs:
 
     - name: Print out Qt Dir
       shell: powershell
-      run: echo $env:Qt5_Dir ; cd .. ; ls ; cd Qt ; ls ; cd 5.12.7 ; ls ; cd msvc2017_64 ; ls
+      run: echo $env:Qt5_Dir
 
     - name: Run_Cmake
       working-directory: build
       run: |
-        cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -DQt5_PATH:PATH="$env:Qt5_Dir"
+        cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -Ax64 -DQt5_PATH:PATH="$env:Qt5_Dir"
 
     - name: Build
       shell: cmd
