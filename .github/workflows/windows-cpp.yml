@@ -39,4 +39,4 @@ jobs:
 
     - name: Build
       shell: cmd
-      hun: cmake --build 
+      run: cmake --build 
