@@ -38,7 +38,8 @@ jobs:
 
     - name: Run_Cmake
       working-directory: build
-      run: cmake -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -DQt5_PATH:PATH="$env:Qt5_Dir" ..
+      run: |
+        cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -DQt5_PATH:PATH="$env:Qt5_Dir"
 
     - name: Build
       shell: cmd
