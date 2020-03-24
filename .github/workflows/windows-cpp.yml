@@ -39,4 +39,4 @@ jobs:
 
     - name: Build
       shell: powershell
-      run: cmake --build .. 
+      run: cmake --build .
