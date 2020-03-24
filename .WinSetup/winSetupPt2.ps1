@@ -15,3 +15,5 @@ cmake ..
 cmake --build . --config Release
 
 Write-Host "Done."
+
+ls ; cd .. ; ls ; cd .. ; ls
