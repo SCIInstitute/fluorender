@@ -23,7 +23,7 @@ jobs:
       shell: powershell
       run: .\.WinSetup\winSetup.ps1
 
-    - Install Qt
+    - name: Install Qt
       uses: ouuan/install-qt-action@ouuan
       with:
         version: 5.13.1
