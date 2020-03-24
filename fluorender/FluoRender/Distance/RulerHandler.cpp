@@ -221,6 +221,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	if (!m_view)
 		return;
 
+	int point_volume_mode = m_view->m_point_volume_mode;
+
 	if (m_type == 1 && branch)
 	{
 		if (FindEditingRuler(mx, my))
@@ -259,23 +261,38 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	}
 	else
 	{
-		Point p, ip;
-		if (m_view->m_point_volume_mode)
+		Point p, ip, planep;
+		Point* pplanep = 0;
+		if (m_type == 1)
+		{
+			if (m_ruler)
+			{
+				RulerPoint* pp = m_ruler->GetLastPoint();
+				if (pp)
+				{
+					planep = pp->GetPoint();
+					pplanep = &planep;
+				}
+			}
+			else
+				point_volume_mode = point_volume_mode ? point_volume_mode : 2;
+		}
+		if (point_volume_mode)
 		{
 			m_vp.SetVolumeData(m_view->m_cur_vol);
 			double t = m_vp.GetPointVolume(mx, my,
-				m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+				point_volume_mode, m_view->m_ruler_use_transf, 0.5,
 				p, ip);
 			if (t <= 0.0)
 			{
-				t = m_vp.GetPointPlane(mx, my, 0, true, p);
+				t = m_vp.GetPointPlane(mx, my, pplanep, true, p);
 				if (t <= 0.0)
 					return;
 			}
 		}
 		else
 		{
-			double t = m_vp.GetPointPlane(mx, my, 0, true, p);
+			double t = m_vp.GetPointPlane(mx, my, pplanep, true, p);
 			if (t <= 0.0)
 				return;
 		}

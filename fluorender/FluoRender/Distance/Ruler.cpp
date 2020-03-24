@@ -110,7 +110,7 @@ RulerPoint* Ruler::GetLastPoint()
 	for (auto it = m_ruler.rbegin();
 		it != m_ruler.rend(); ++it)
 	{
-		if (it->size() < 2)
+		if (it->empty())
 			continue;
 		return it->back().get();
 	}
