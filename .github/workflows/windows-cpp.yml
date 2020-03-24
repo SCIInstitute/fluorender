@@ -10,10 +10,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v1
-
-    - name: Configure
-      shell: powershell
-      run: .\.WinSetup\winSetup.ps1 ; mkdir build
     
     - name: Download_OpenCL_Headers
       shell: powershell
@@ -25,12 +21,21 @@ jobs:
 
     - name: Install_OpenCL
       shell: powershell
-      run: .\.WinSetup\winSetupPt2.ps1
+      run: .\.WinSetup\winSetup.ps1
+
+    - Install Qt
+      uses: ouuan/install-qt-action@ouuan
+      with:
+        version: 5.13.1
+        target: desktop
+        host: windows
+        arch: win64_msvc2017_64
+        install-deps:true
 
     - name: Run_Cmake
       working-directory: build
       shell: powershell
-      run: cmake -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" ..
+      run: cmake -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -DQt5_PATH:PATH="$env:Qt5_Dir" ..
 
     - name: Build
       shell: powershell
