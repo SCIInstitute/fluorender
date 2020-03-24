@@ -10,8 +10,8 @@ mkdir OpenCL-ICD-Loader/inc/CL
 
 mv OpenCL-Headers/CL/*.h OpenCL-ICD-Loader/inc/CL
 
-cd OpenCL-ICD-Loader ; mkdir lib ; cd lib
-cmake ..
+mkdir lib ; cd lib
+cmake ..\OpenCL-ICD_Loader
 cmake --build . --config Release
 
 Write-Host "Done."
