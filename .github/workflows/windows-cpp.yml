@@ -24,9 +24,9 @@ jobs:
       run: .\.WinSetup\winSetup.ps1
 
     - name: Install Qt
-      uses: ouuan/install-qt-action@ouuan
+      uses: jurplel/install-qt-action@master
       with:
-        version: 5.13.1
+        version: 5.12.7
         target: desktop
         host: windows
         arch: win64_msvc2017_64
