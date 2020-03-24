@@ -32,15 +32,11 @@ jobs:
         arch: win64_msvc2017_64
         install-deps: true
 
-    - name: Print out Qt Dir
-      shell: powershell
-      run: echo $env:Qt5_Dir
-
     - name: Run_Cmake
       working-directory: build
       run: |
         cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc"
 
     - name: Build
-      shell: cmd
-      run: cmake --build 
+      shell: powershell
+      run: cmake --build .. 
