@@ -161,6 +161,17 @@ RulerPoint* Ruler::GetPoint(int nb, int index)
 	return branch[index].get();
 }
 
+pRulerPoint Ruler::GetPPoint(int nb, int index)
+{
+	int branch_num = GetNumBranch();
+	if (nb < 0 || nb >= branch_num)
+		return 0;
+	RulerBranch &branch = m_ruler.at(nb);
+	if (index < 0 || index >= branch.size())
+		return 0;
+	return branch[index];
+}
+
 pRulerPoint Ruler::FindPoint(Point& point)
 {
 	bool first = true;
@@ -391,6 +402,31 @@ bool Ruler::AddBranch(pRulerPoint point)
 	m_ruler.push_back(RulerBranch());
 	m_ruler.back().push_back(point);
 	return true;
+}
+
+void Ruler::DeletePoint(pRulerPoint &point)
+{
+	if (!point)
+		return;
+
+	bool first = true;
+	for (auto it = m_ruler.begin();
+		it != m_ruler.end(); ++it)
+	{
+		for (auto it2 = it->begin();
+			it2 != it->end(); ++it2)
+		{
+			if (*it2 == point)
+			{
+				it->erase(it2);
+				if ((first && it->empty()) ||
+					(!first && it->size() < 2))
+					m_ruler.erase(it);
+				return;
+			}
+		}
+		first = false;
+	}
 }
 
 void Ruler::Clear()

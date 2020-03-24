@@ -727,6 +727,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_PencilBtn, MeasureDlg::OnPencil)
 	EVT_MENU(ID_RulerMoveBtn, MeasureDlg::OnRulerMove)
 	EVT_MENU(ID_RulerEditBtn, MeasureDlg::OnRulerEdit)
+	EVT_MENU(ID_RulerDelBtn, MeasureDlg::OnRulerDel)
 	EVT_MENU(ID_RulerFlipBtn, MeasureDlg::OnRulerFlip)
 	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
 	EVT_MENU(ID_LockBtn, MeasureDlg::OnLock)
@@ -827,12 +828,16 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	bitmap = wxGetBitmapFromMemory(ruler_edit);
 	m_toolbar2->AddCheckTool(ID_RulerEditBtn, "Edit",
 		bitmap, wxNullBitmap,
-		"Select and move ruler points");
+		"Select and move a ruler point");
+	bitmap = wxGetBitmapFromMemory(ruler_del);
+	m_toolbar2->AddCheckTool(ID_RulerDelBtn, "Delet",
+		bitmap, wxNullBitmap,
+		"Select and delete a ruler point");
 	bitmap = wxGetBitmapFromMemory(flip_ruler);
 	m_toolbar2->AddTool(ID_RulerFlipBtn, "Flip", bitmap,
 		"Reverse the order of ruler points");
 	bitmap = wxGetBitmapFromMemory(average);
-	m_toolbar2->AddTool(ID_RulerAvgBtn, "Average", bitmap,
+	m_toolbar2->AddTool(ID_RulerAvgBtn, "Averg", bitmap,
 		"Compute a center for selected rulers");
 	bitmap = wxGetBitmapFromMemory(lock);
 	m_toolbar2->AddCheckTool(ID_LockBtn, "Lock",
@@ -1058,6 +1063,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 		m_toolbar1->ToggleTool(ID_GrowBtn, false);
 		m_toolbar1->ToggleTool(ID_PencilBtn, false);
 		m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+		m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 		m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 		m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1088,6 +1094,8 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 			m_toolbar1->ToggleTool(ID_GrowBtn, true);
 		else if (int_mode == 13)
 			m_toolbar1->ToggleTool(ID_PencilBtn, true);
+		else if (int_mode == 14)
+			m_toolbar2->ToggleTool(ID_RulerDelBtn, true);
 
 		switch (m_view->m_glview->m_point_volume_mode)
 		{
@@ -1156,6 +1164,7 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1185,6 +1194,7 @@ void MeasureDlg::OnNewProbe(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1214,6 +1224,7 @@ void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1243,6 +1254,7 @@ void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1269,6 +1281,7 @@ void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1299,6 +1312,7 @@ void MeasureDlg::OnEllipse(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1327,6 +1341,7 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1369,6 +1384,7 @@ void MeasureDlg::OnPencil(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
@@ -1453,6 +1469,33 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
 	//m_edited = true;
 }
 
+void MeasureDlg::OnRulerDel(wxCommandEvent& event)
+{
+	if (!m_view) return;
+
+	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
+		m_rhdl->FinishRuler();
+
+	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
+	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
+	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
+	m_toolbar1->ToggleTool(ID_RulerBtn, false);
+	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
+	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
+	m_toolbar1->ToggleTool(ID_GrowBtn, false);
+	m_toolbar1->ToggleTool(ID_PencilBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
+	m_toolbar2->ToggleTool(ID_LockBtn, false);
+
+	if (m_toolbar2->GetToolState(ID_RulerDelBtn))
+		m_view->SetIntMode(14);
+	else
+		m_view->SetIntMode(1);
+
+	//m_edited = true;
+}
+
 void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 {
 	if (!m_view) return;
@@ -1469,6 +1512,7 @@ void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_RulerMoveBtn))
@@ -1747,6 +1791,7 @@ void MeasureDlg::OnLock(wxCommandEvent& event)
 	m_toolbar1->ToggleTool(ID_GrowBtn, false);
 	m_toolbar1->ToggleTool(ID_PencilBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
+	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_LockBtn))

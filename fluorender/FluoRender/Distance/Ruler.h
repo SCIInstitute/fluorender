@@ -174,6 +174,7 @@ namespace FL
 		pRulerPoint GetPPoint(int index);
 		int GetNumBranchPoint(int nbranch);
 		RulerPoint* GetPoint(int nbranch, int index);
+		pRulerPoint GetPPoint(int nbranch, int index);
 		pRulerPoint FindPoint(Point& point);
 		int GetRulerType();
 		void SetRulerType(int type);
@@ -188,6 +189,7 @@ namespace FL
 		bool AddPointAfterId(Point &point, unsigned int id, std::set<unsigned int> &cid);
 		void SetTransform(Transform *tform);
 		bool AddBranch(pRulerPoint point);
+		void DeletePoint(pRulerPoint &point);
 
 		void Clear();
 		void Reverse();

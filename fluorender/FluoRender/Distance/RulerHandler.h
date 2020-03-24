@@ -113,6 +113,7 @@ namespace FL
 		{
 			return m_point.get();
 		}
+		void DeletePoint();
 
 		RulerPoint* GetEllipsePoint(int index);
 
