@@ -35,7 +35,7 @@ jobs:
     - name: Run_Cmake
       working-directory: build
       run: |
-        cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIRS:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc" -DOpenCL_LIBRARIES:PATH="..\OpenCL\lib\Release\OpenCL.lib"
+        cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIRS:PATH="..\OpenCL\OpenCL-ICD-Loader\inc\CL" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc\CL" -DOpenCL_LIBRARIES:PATH="..\OpenCL\lib\Release\OpenCL.lib"
 
     - name: Build
       working-directory: build
