@@ -30,7 +30,7 @@ jobs:
         target: desktop
         host: windows
         arch: win64_msvc2017_64
-        install-deps:true
+        install-deps: true
 
     - name: Run_Cmake
       working-directory: build
