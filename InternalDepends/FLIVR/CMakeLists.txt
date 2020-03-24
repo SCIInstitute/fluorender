@@ -8,6 +8,8 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${Teem_INCLUDE_DIR})
 
+message("FLIVR OpenCL: ${OpenCL_INCLUDE_DIRS}")
+
 if(APPLE)
   include_directories(${Boost_INCLUDE_DIR})
 endif()
