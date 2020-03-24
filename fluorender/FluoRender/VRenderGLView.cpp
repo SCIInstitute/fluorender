@@ -9865,19 +9865,25 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		bool found_rp = false;
 		if (m_int_mode == 6 ||
 			m_int_mode == 9 ||
-			m_int_mode == 11)
+			m_int_mode == 11 ||
+			m_int_mode == 14)
 		{
 			found_rp = m_ruler_handler.FindEditingRuler(
 				event.GetX(), event.GetY());
 		}
-		if (m_int_mode == 11 && found_rp)
+		if (found_rp)
 		{
-			FL::RulerPoint *p = m_ruler_handler.GetPoint();
-			if (p)
+			if (m_int_mode == 11)
 			{
-				p->ToggleLocked();
-				RefreshGL(41);
+				FL::RulerPoint *p = m_ruler_handler.GetPoint();
+				if (p) p->ToggleLocked();
 			}
+			if (m_int_mode == 14)
+				m_ruler_handler.DeletePoint();
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			RefreshGL(41);
 		}
 
 		if (m_int_mode == 1 ||
@@ -9885,7 +9891,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			event.AltDown()) ||
 			((m_int_mode == 6 ||
 			m_int_mode == 9 ||
-			m_int_mode == 11) &&
+			m_int_mode == 11 ||
+			m_int_mode == 14) &&
 			!found_rp))
 		{
 			old_mouse_X = event.GetX();
@@ -10076,7 +10083,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 9 ||
 			m_int_mode == 10 ||
 			m_int_mode == 11 ||
-			m_int_mode == 12) &&
+			m_int_mode == 12 ||
+			m_int_mode == 13 ||
+			m_int_mode == 14) &&
 			!p0))
 		{
 			//disable picking

@@ -89,7 +89,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	prj.set(glm::value_ptr(prj_temp));
 
 	pRulerPoint point;
-	int i, j;
+	int i, j, k;
 	Point ptemp;
 	for (i = 0; i < (int)m_ruler_list->size(); i++)
 	{
@@ -97,9 +97,10 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 
-		for (j = 0; j < ruler->GetNumPoint(); j++)
+		for (j = 0; j < ruler->GetNumBranch(); j++)
+		for (k = 0; k < ruler->GetNumBranchPoint(j); ++k)
 		{
-			point = ruler->GetPPoint(j);
+			point = ruler->GetPPoint(j, k);
 			if (!point) continue;
 			ptemp = point->GetPoint();
 			ptemp = mv.transform(ptemp);
@@ -121,6 +122,30 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	}
 
 	return false;
+}
+
+void RulerHandler::DeletePoint()
+{
+	if (!m_ruler || !m_point)
+		return;
+
+	m_ruler->DeletePoint(m_point);
+	m_point = nullptr;
+	m_pindex = -1;
+	if (!m_ruler->GetNumPoint())
+	{
+		//delete ruler
+		for (int i = 0; i < (int)m_ruler_list->size(); i++)
+		{
+			Ruler* ruler = (*m_ruler_list)[i];
+			if (ruler == m_ruler)
+			{
+				m_ruler_list->erase(m_ruler_list->begin() + i);
+				m_ruler = 0;
+				return;
+			}
+		}
+	}
 }
 
 RulerPoint* RulerHandler::GetEllipsePoint(int index)
