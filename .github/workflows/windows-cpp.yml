@@ -38,5 +38,6 @@ jobs:
         cmake ..\ -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc"
 
     - name: Build
+      working-directory: build
       shell: powershell
       run: cmake --build .
