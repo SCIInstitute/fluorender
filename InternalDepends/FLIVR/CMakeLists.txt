@@ -1,12 +1,14 @@
 project(FLIVR)
 
-include_directories(${OpenCL_INCLUDE_DIRS})
+include_directories(${OpenCL_INCLUDE_DIR})
 include_directories(${FLObject_INCLUDES})
 include_directories(${freetype_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/Base/FLObject)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${Teem_INCLUDE_DIR})
+
+message("FLIVR OpenCL: ${OpenCL_INCLUDE_DIR}")
 
 if(APPLE)
   include_directories(${Boost_INCLUDE_DIR})
