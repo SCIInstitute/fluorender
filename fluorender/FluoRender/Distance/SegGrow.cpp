@@ -945,6 +945,8 @@ void SegGrow::Compute()
 			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz, psum, psum);
 			kernel_prog->readBuffer(sizeof(float)*total*gsize.gsxyz * 3, pcsum, pcsum);
 
+			int ox, oy, oz, nc;
+			ox = b->ox(); oy = b->oy(); oz = b->oz();
 			//compute centers and connection
 			unsigned int cid0, cid1, cid2;
 			for (int j = 0; j < total; ++j)
@@ -962,11 +964,12 @@ void SegGrow::Compute()
 				}
 				for (int i = 0; i < gsize.gsxyz; ++i)
 				{
-					it->second.sum += sum[i*total + j];
+					nc = sum[i*total + j];
+					it->second.sum += nc;
 					it->second.ctr += FLIVR::Point(
-						csum[(total * i + j) * 3],
-						csum[(total * i + j) * 3 + 1],
-						csum[(total * i + j) * 3 + 2]);
+						csum[(total * i + j) * 3] + ox * nc,
+						csum[(total * i + j) * 3 + 1] + oy * nc,
+						csum[(total * i + j) * 3 + 2] + oz * nc);
 					cid0 = cids[(i*total + j) * 3];
 					cid1 = cids[(i*total + j) * 3 + 1];
 					cid2 = cids[(i*total + j) * 3 + 2];
