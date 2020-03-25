@@ -21,7 +21,7 @@ jobs:
 
     - name: Install_OpenCL
       shell: powershell
-      run: .\.WinSetup\winSetup.ps1 ; mkdir build
+      run: mkdir build ; .\.WinSetup\winSetup.ps1
 
     - name: Install Qt
       uses: ouuan/install-qt-action@ouuan
@@ -32,16 +32,11 @@ jobs:
         arch: win64_msvc2017_64
         install-deps: true
 
-    - name: Print Current Dir
-      working-directory: build
-      run: pwd
-
     - name: Run_Cmake
       working-directory: build
       run: |
-        cmake .. -DOpenCL_LIBRARY:PATH="..\OpenCL\lib\Release" -DOpenCL_INCLUDE_DIR:PATH="..\OpenCL\OpenCL-ICD-Loader\inc"
+        cmake .. -DOpenCL_LIBRARY:PATH="../OpenCL/lib/Release" -DOpenCL_INCLUDE_DIR:PATH="../OpenCL/OpenCL-ICD-Loader/inc"
 
-#    - name: Build
-#      working-directory: build
-#      shell: powershell
-#      run: cmake --build .
+    - name: Build
+      working-directory: build
+      run: cmake --build .
