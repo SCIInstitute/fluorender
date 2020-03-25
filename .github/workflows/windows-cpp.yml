@@ -32,6 +32,10 @@ jobs:
         arch: win64_msvc2017_64
         install-deps: true
 
+    - name: Print Current Dir
+      working-directory: build
+      run: pwd
+
     - name: Run_Cmake
       working-directory: build
       run: |
