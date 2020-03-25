@@ -44,6 +44,7 @@ const char* str_cl_relax = \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
 "	unsigned int np,\n" \
+"	float3 org,\n" \
 "	float3 scl,\n" \
 "	float rest,\n" \
 "	float infr,\n" \
@@ -75,7 +76,7 @@ const char* str_cl_relax = \
 "		{\n" \
 "			w = read_imagef(data, samp, ijk).x;\n" \
 "			if (w == 0.0) continue;\n" \
-"			loc = (float3)(ijk.x, ijk.y, ijk.z)*scl;\n" \
+"			loc = (org + (float3)(ijk.x, ijk.y, ijk.z)) * scl;\n" \
 "			dir = loc - pos;\n" \
 "			dist = length(dir);\n" \
 "			if (dist > infr) continue;\n" \
@@ -216,6 +217,10 @@ bool Relax::Compute()
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
+		int ox = b->ox();
+		int oy = b->oy();
+		int oz = b->oz();
+		cl_float3 org = { (float)ox, (float)oy, (float)oz };
 		GLint tid;
 		if (m_use_mask)
 			tid = m_vd->GetVR()->load_brick_mask(b);
@@ -245,25 +250,27 @@ bool Relax::Compute()
 		kernel_prog->setKernelArgConst(kernel_0, 6,
 			sizeof(unsigned int), (void*)(&m_snum));
 		kernel_prog->setKernelArgConst(kernel_0, 7,
-			sizeof(cl_float3), (void*)(&scl));
+			sizeof(cl_float3), (void*)(&org));
 		kernel_prog->setKernelArgConst(kernel_0, 8,
-			sizeof(float), (void*)(&m_rest));
+			sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(kernel_0, 9,
+			sizeof(float), (void*)(&m_rest));
+		kernel_prog->setKernelArgConst(kernel_0, 10,
 			sizeof(float), (void*)(&m_infr));
-		kernel_prog->setKernelArgBuf(kernel_0, 10,
+		kernel_prog->setKernelArgBuf(kernel_0, 11,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*m_snum * 3, (void*)(m_spoints.data()));
-		kernel_prog->setKernelArgBuf(kernel_0, 11,
+		kernel_prog->setKernelArgBuf(kernel_0, 12,
 			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(unsigned int)*m_snum, (void*)(m_slock.data()));
 		std::vector<float> dsp(gsize.gsxyz * m_snum * 3, 0.0);
 		float* pdsp = dsp.data();
-		kernel_prog->setKernelArgBuf(kernel_0, 12,
+		kernel_prog->setKernelArgBuf(kernel_0, 13,
 			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*gsize.gsxyz * m_snum * 3, (void*)(pdsp));
 		std::vector<float> wsum(gsize.gsxyz * m_snum, 0.0);
 		float* pwsum = wsum.data();
-		kernel_prog->setKernelArgBuf(kernel_0, 13,
+		kernel_prog->setKernelArgBuf(kernel_0, 14,
 			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*gsize.gsxyz * m_snum, (void*)(pwsum));
 

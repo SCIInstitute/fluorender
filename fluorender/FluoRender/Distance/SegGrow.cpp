@@ -887,7 +887,6 @@ void SegGrow::Compute()
 
 				//execute
 				kernel_prog->executeKernel(kernel_5, 3, global_size2, local_size);
-
 			}
 
 			//set
