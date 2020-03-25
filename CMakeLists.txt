@@ -111,7 +111,6 @@ include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${pugi_INCLUDE_DIR})
 include_directories(${OpenCL_INCLUDE_DIR})
-include_directories(${OpenCL_INCLUDE_DIRS})
 
 add_subdirectory(InternalDepends)
 add_subdirectory(Base)
