@@ -7,12 +7,12 @@ mkdir lib ; mkdir include ; cd lib ; mkdir x64 ; cd .. ; cd include ; mkdir CL ;
 Write-Host "Done!"
 
 Write-Host "Moving Libraries..."
-mv TestCL/OpenCL/lib/Release/OpenCL.lib OpenCL/lib/x64
-mv TestCL/OpenCL/lib/Release/OpenCL.dll OpenCL/lib/x64
+mv Fluorender/OpenCL/lib/Release/OpenCL.lib OpenCL/lib/x64
+mv Fluorender/OpenCL/lib/Release/OpenCL.dll OpenCL/lib/x64
 Write-Host "Done!"
 
 Write-Host "Moving Include Files..."
-mv TestCL/OpenCL/OpenCL-ICD-Loader/inc/CL/*.h OpenCL/include/CL
+mv Fluorender/OpenCL/OpenCL-ICD-Loader/inc/CL/*.h OpenCL/include/CL
 Write-Host "Done!"
 
 cd OpenCL
