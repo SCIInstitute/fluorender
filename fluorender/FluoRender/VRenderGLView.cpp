@@ -10084,7 +10084,6 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 10 ||
 			m_int_mode == 11 ||
 			m_int_mode == 12 ||
-			m_int_mode == 13 ||
 			m_int_mode == 14) &&
 			!p0))
 		{
