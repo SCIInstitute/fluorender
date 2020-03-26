@@ -189,14 +189,14 @@ pRulerPoint Ruler::FindPoint(Point& point)
 	return nullptr;
 }
 
-pRulerPoint Ruler::FindNearestPoint(Point& point)
+pRulerPoint Ruler::FindNearestPoint(Point& point, size_t &ri, size_t &rj)
 {
 	bool first = true, found = false;
 	double dist, min_dist;
 	size_t mini, minj;
-	for (size_t i = 0; i < m_ruler.size(); ++i)
+	for (int i = m_ruler.size()-1; i >= 0; --i)
 	{
-		for (size_t j = 0; j < m_ruler[i].size(); ++j)
+		for (int j = m_ruler[i].size()-1; j >= 0; --j)
 		{
 			dist = (m_ruler[i][j]->GetPoint() - point).length2();
 			if (first || dist < min_dist)
@@ -210,7 +210,11 @@ pRulerPoint Ruler::FindNearestPoint(Point& point)
 		}
 	}
 	if (found)
+	{
+		ri = mini;
+		rj = minj;
 		return m_ruler[mini][minj];
+	}
 	return nullptr;
 }
 
@@ -374,9 +378,9 @@ bool Ruler::AddPointAfterId(
 
 	bool found = false;
 	size_t ri, rj;
-	for (size_t i = 0; i < m_ruler.size(); ++i)
+	for (int i = m_ruler.size()-1; i >= 0; --i)
 	{
-		for (size_t j = 0; j < m_ruler[i].size(); ++j)
+		for (int j = m_ruler[i].size()-1; j >= 0; --j)
 		{
 			if (cid.find(m_ruler[i][j]->m_id) != cid.end())
 			{
@@ -389,17 +393,15 @@ bool Ruler::AddPointAfterId(
 			break;
 	}
 
+	//search for nearest point
 	if (!found)
 	{
-		//search for earest point
-		pRulerPoint rp = FindNearestPoint(point);
-		m_ruler.push_back(RulerBranch());
-		if (rp)
-			m_ruler.back().push_back(rp);
-		m_ruler.back().push_back(
-			std::make_shared<RulerPoint>(RulerPoint(point, id)));
-		return false;
+		if (FindNearestPoint(point, ri, rj))
+			found = true;
 	}
+
+	if (!found)
+		return false;
 
 	if (rj == m_ruler[ri].size()-1)//last one
 		m_ruler[ri].push_back(
