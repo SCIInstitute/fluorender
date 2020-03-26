@@ -448,6 +448,11 @@ namespace FLIVR
 			arg_list_.push_back(arg);
 			ai = arg_list_.size() - 1;
 		}
+		else
+		{
+			arg_list_[ai].kernel_index = arg.kernel_index;
+			arg_list_[ai].index = arg.index;
+		}
 		cl_int err = clSetKernelArg(kernels_[arg.kernel_index].kernel,
 			arg.index, sizeof(cl_mem), &(arg.buffer));
 		return ai;
@@ -1065,6 +1070,7 @@ namespace FLIVR
 		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
 		ksize.gsxy = ksize.gsx * ksize.gsy;
 
+		return true;
 	}
 
 	bool KernelProgram::get_group_size2(int index,
@@ -1094,6 +1100,7 @@ namespace FLIVR
 		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
 		ksize.gsxy = ksize.gsx * ksize.gsy;
 
+		return true;
 	}
 
 	unsigned int KernelProgram::optimize_group_size_xy(unsigned int nt, unsigned int target)
