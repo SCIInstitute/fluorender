@@ -166,6 +166,7 @@ include_directories(
     ${GLEW_INCLUDE_DIR}
     ${Teem_INCLUDE_DIRS}
     ${Formats_INCLUDE_DIR}
+    ${OpenCL_INCLUDE_DIR}
   )
 
 add_executable(FUI

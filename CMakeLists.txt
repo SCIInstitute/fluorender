@@ -66,14 +66,19 @@ include(config.cmake)
 include(setPreSuffix.cmake)
 
 # Required packages
+message("Looking for OpenGL")
 find_package(OpenGL REQUIRED)
+message("Found OpenGL, looking for OpenCL")
 find_package(OpenCL REQUIRED)
+message("Found, looking for Qt components")
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
+message("Found, looking for Java Components")
 find_package(Java COMPONENTS Development REQUIRED)
 find_package(JNI REQUIRED)
+message("Found, configuring...")
 
 #headers
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -106,6 +111,7 @@ include_directories(${pole_INCLUDE_DIR})
 include_directories(${TIFF_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${pugi_INCLUDE_DIR})
+include_directories(${OpenCL_INCLUDE_DIR})
 
 add_subdirectory(InternalDepends)
 add_subdirectory(Base)
