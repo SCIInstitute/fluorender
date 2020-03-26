@@ -570,6 +570,46 @@ const char* str_cl_segrow = \
 "}\n" \
 ;
 
+const char* str_cl_sg_check_borders = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"//check yz plane (+-x)\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t l0,\n" \
+"	__read_only image3d_t l1,\n" \
+"	unsigned int x0,\n" \
+"	unsigned int x1,\n" \
+"	unsigned int nid,\n" \
+"	__global unsigned int* ids,\n" \
+"	__global unsigned int* cids)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int v0 = read_imagef(l0, samp, (int4)(x0, i, j, 1)).x;\n" \
+"	if (v0 == 0 || v0 & 0x80000000)\n" \
+"		return;\n" \
+"	unsigned int v1 = read_imagef(l1, samp, (int4)(x1, i, j, 1)).x;\n" \
+"	if (v1 == 0 || v1 & 0x80000000)\n" \
+"		return;\n" \
+"	bool found = false;\n" \
+"	int c;\n" \
+"	for (c = 0; c < nid; ++c)\n" \
+"	if (ids[c] == v0)\n" \
+"	{\n" \
+"		found = true;\n" \
+"		break;\n" \
+"	}\n" \
+"	if (!found)\n" \
+"		return;\n" \
+"	cids[c*3] = cids[c*3]?cids[c*3]:v1;\n" \
+"	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];\n" \
+"	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];\n" \
+"}\n" \
+;
+
 SegGrow::SegGrow(VolumeData* vd):
 	m_vd(vd),
 	m_branches(10),
@@ -620,6 +660,7 @@ void SegGrow::Compute()
 	int kernel_6 = kernel_prog->createKernel("kernel_6");//get shape
 	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
 
+	int bnum = 0;
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
@@ -1003,6 +1044,91 @@ void SegGrow::Compute()
 
 		//release buffer
 		kernel_prog->releaseAll();
+
+		bnum++;//brick number of processed
+	}
+
+	//connect bricks
+	unsigned int idnum = m_list.size();
+	while (bnum > 1 && idnum > 1)
+	{
+		FLIVR::Texture* tex = m_vd->GetTexture();
+		if (!tex)
+			break;
+		kernel_prog = FLIVR::VolumeRenderer::
+			vol_kernel_factory_.kernel(str_cl_sg_check_borders);
+		if (!kernel_prog)
+			break;
+		kernel_0 = kernel_prog->createKernel("kernel_0");//+-x
+
+		std::vector<unsigned int> ids;
+		for (auto it = m_list.begin();
+			it != m_list.end(); ++it)
+			ids.push_back(it->second.id);
+
+		for (size_t bi = 0; bi < brick_num; ++bi)
+		{
+			TextureBrick* b = (*bricks)[bi];
+			if (!b->get_paint_mask())
+				continue;
+			int nx = b->nx();
+			int ny = b->ny();
+			int nz = b->nz();
+			GLint lid = m_vd->GetVR()->load_brick_label(b);
+			GLint nlid;
+			unsigned bid, nid;
+			bid = b->get_id();
+			TextureBrick* nb;//neighbor brick
+
+			size_t global_size[2] = { 1, 1 };
+			size_t local_size[2] = { 1, 1 };
+
+			Argument arg_tex =
+				kernel_prog->setKernelArgTex3D(kernel_0, 0,
+					CL_MEM_READ_ONLY, lid);
+
+			//+x
+			nid = tex->posxid(bid);
+			nb = tex->get_brick(nid);
+			if (nb && nb->get_paint_mask())
+			{
+				nlid = m_vd->GetVR()->load_brick_label(nb);
+				//set
+				arg_tex.kernel_index = kernel_0;
+				arg_tex.index = 0;
+				kernel_prog->setKernelArgument(arg_tex);
+				kernel_prog->setKernelArgTex3D(kernel_0, 1,
+					CL_MEM_READ_ONLY, nlid);
+				unsigned int x0 = nx - 1;
+				unsigned int x1 = 0;
+				kernel_prog->setKernelArgConst(kernel_0, 2,
+					sizeof(unsigned int), (void*)(&x0));
+				kernel_prog->setKernelArgConst(kernel_0, 3,
+					sizeof(unsigned int), (void*)(&x1));
+				kernel_prog->setKernelArgConst(kernel_0, 4,
+					sizeof(unsigned int), (void*)(&idnum));
+				kernel_prog->setKernelArgBuf(kernel_0, 5,
+					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+					sizeof(unsigned int)*idnum, (void*)(ids.data()));
+				std::vector<unsigned int> cids(idnum * 3, 0);
+				unsigned int* pcids = cids.data();
+				kernel_prog->setKernelArgBuf(kernel_0, 6,
+					CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+					sizeof(unsigned int)*idnum*3, (void*)(pcids));
+
+				//execute
+				global_size[0] = ny; global_size[1] = nz;
+				kernel_prog->executeKernel(kernel_0, 2, global_size, local_size);
+				//read back
+				kernel_prog->readBuffer(sizeof(unsigned int)*idnum * 3, pcids, pcids);
+				
+				for (int i = 0; i < idnum; ++i)
+				{
+					unsigned int cid0 = cids[i * 3];
+				}
+			}
+		}
+		break;
 	}
 
 	//add ruler points
