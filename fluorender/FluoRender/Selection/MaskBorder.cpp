@@ -142,7 +142,8 @@ void MaskBorder::Compute(int order)
 		size_t local_size[2] = { 1, 1 };
 
 		//yz plane
-		kernel_prog->setKernelArgTex3D(kernel_index0, 0,
+		Argument arg_tex =
+			kernel_prog->setKernelArgTex3D(kernel_index0, 0,
 			CL_MEM_READ_ONLY, mid);
 		hits = 0;
 		kernel_prog->setKernelArgBuf(kernel_index0, 1,
@@ -165,8 +166,11 @@ void MaskBorder::Compute(int order)
 		}
 
 		//xz plane
-		kernel_prog->setKernelArgTex3D(kernel_index1, 0,
-			CL_MEM_READ_ONLY, mid);
+		arg_tex.kernel_index = kernel_index1;
+		arg_tex.index = 0;
+		kernel_prog->setKernelArgument(arg_tex);
+		//kernel_prog->setKernelArgTex3D(kernel_index1, 0,
+		//	CL_MEM_READ_ONLY, mid);
 		hits = 0;
 		kernel_prog->setKernelArgBuf(kernel_index1, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
@@ -188,8 +192,11 @@ void MaskBorder::Compute(int order)
 		}
 
 		//xy plane
-		kernel_prog->setKernelArgTex3D(kernel_index2, 0,
-			CL_MEM_READ_ONLY, mid);
+		arg_tex.kernel_index = kernel_index2;
+		arg_tex.index = 0;
+		kernel_prog->setKernelArgument(arg_tex);
+		//kernel_prog->setKernelArgTex3D(kernel_index2, 0,
+		//	CL_MEM_READ_ONLY, mid);
 		hits = 0;
 		kernel_prog->setKernelArgBuf(kernel_index2, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
