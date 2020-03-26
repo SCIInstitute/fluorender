@@ -176,7 +176,7 @@ namespace FL
 		RulerPoint* GetPoint(int nbranch, int index);
 		pRulerPoint GetPPoint(int nbranch, int index);
 		pRulerPoint FindPoint(Point& point);
-		pRulerPoint FindNearestPoint(Point& point);
+		pRulerPoint FindNearestPoint(Point& point, size_t &ri, size_t &rj);
 		int GetRulerType();
 		void SetRulerType(int type);
 		bool GetFinished();
