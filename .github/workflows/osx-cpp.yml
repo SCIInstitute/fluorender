@@ -1,0 +1,23 @@
+name: osx-build
+
+on: push
+
+jobs:
+  osx-build-gui:
+
+    runs-on: macOS-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Install Qt
+      run: brew install qt
+
+    - name: Configure
+      run: mkdir build
+
+    - name: Run CMake
+      working-directory: build
+      run: cmake .. -G "Xcode"
+
