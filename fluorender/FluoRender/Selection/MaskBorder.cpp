@@ -103,7 +103,7 @@ void MaskBorder::Compute(int order)
 	if (!tex)
 		return;
 
-	unsigned int hits, idx, bn;
+	unsigned int idx, bn;
 	std::vector<FLIVR::TextureBrick*> *all_bricks = m_vd->GetTexture()->get_bricks();
 	bn = all_bricks->size();
 	if (bn < 2)
@@ -145,10 +145,10 @@ void MaskBorder::Compute(int order)
 		Argument arg_tex =
 			kernel_prog->setKernelArgTex3D(kernel_index0, 0,
 			CL_MEM_READ_ONLY, mid);
-		hits = 0;
+		unsigned int hits_x = 0;
 		kernel_prog->setKernelArgBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), &hits);
+			sizeof(unsigned int), &hits_x);
 		idx = order == 1 ? nx - 1 : 0;
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&idx));
@@ -156,8 +156,8 @@ void MaskBorder::Compute(int order)
 		global_size[0] = ny; global_size[1] = nz;
 		kernel_prog->executeKernel(kernel_index0, 2, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &hits, &hits);
-		if (hits)
+		kernel_prog->readBuffer(sizeof(unsigned int), &hits_x, &hits_x);
+		if (hits_x)
 		{
 			nid = order == 2 ? tex->negxid(bid) : tex->posxid(bid);
 			nb = tex->get_brick(nid);
@@ -169,12 +169,10 @@ void MaskBorder::Compute(int order)
 		arg_tex.kernel_index = kernel_index1;
 		arg_tex.index = 0;
 		kernel_prog->setKernelArgument(arg_tex);
-		//kernel_prog->setKernelArgTex3D(kernel_index1, 0,
-		//	CL_MEM_READ_ONLY, mid);
-		hits = 0;
+		unsigned int hits_y = 0;
 		kernel_prog->setKernelArgBuf(kernel_index1, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), &hits);
+			sizeof(unsigned int), &hits_y);
 		idx = order == 1 ? ny - 1 : 0;
 		kernel_prog->setKernelArgConst(kernel_index1, 2,
 			sizeof(unsigned int), (void*)(&idx));
@@ -182,8 +180,8 @@ void MaskBorder::Compute(int order)
 		global_size[0] = nx; global_size[1] = nz;
 		kernel_prog->executeKernel(kernel_index1, 2, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &hits, &hits);
-		if (hits)
+		kernel_prog->readBuffer(sizeof(unsigned int), &hits_y, &hits_y);
+		if (hits_y)
 		{
 			nid = order == 2 ? tex->negyid(bid) : tex->posyid(bid);
 			nb = tex->get_brick(nid);
@@ -195,12 +193,10 @@ void MaskBorder::Compute(int order)
 		arg_tex.kernel_index = kernel_index2;
 		arg_tex.index = 0;
 		kernel_prog->setKernelArgument(arg_tex);
-		//kernel_prog->setKernelArgTex3D(kernel_index2, 0,
-		//	CL_MEM_READ_ONLY, mid);
-		hits = 0;
+		unsigned int hits_z = 0;
 		kernel_prog->setKernelArgBuf(kernel_index2, 1,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int), &hits);
+			sizeof(unsigned int), &hits_z);
 		idx = order == 1 ? nz - 1 : 0;
 		kernel_prog->setKernelArgConst(kernel_index2, 2,
 			sizeof(unsigned int), (void*)(&idx));
@@ -208,8 +204,8 @@ void MaskBorder::Compute(int order)
 		global_size[0] = nx; global_size[1] = ny;
 		kernel_prog->executeKernel(kernel_index2, 2, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &hits, &hits);
-		if (hits)
+		kernel_prog->readBuffer(sizeof(unsigned int), &hits_z, &hits_z);
+		if (hits_z)
 		{
 			nid = order == 2 ? tex->negzid(bid) : tex->poszid(bid);
 			nb = tex->get_brick(nid);
