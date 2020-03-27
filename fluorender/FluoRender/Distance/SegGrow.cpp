@@ -1089,7 +1089,10 @@ void SegGrow::Compute()
 
 			//+x
 			nid = tex->posxid(bid);
-			nb = tex->get_brick(nid);
+			if (nid != bid)
+				nb = tex->get_brick(nid);
+			else
+				nb = 0;
 			if (nb && nb->get_paint_mask())
 			{
 				nlid = m_vd->GetVR()->load_brick_label(nb);
