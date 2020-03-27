@@ -71,6 +71,16 @@ set(BOOST_ROOT ${CMAKE_BINARY_DIR}/Boost CACHE INTERNAL "")
 ExternalProject_Get_Property(Boost_external_download BINARY_DIR)
 SET(Boost_DIR ${BINARY_DIR} CACHE INTERNAL "")
 
-add_library(Boost_external STATIC IMPORTED)
+add_library(Boost_external SHARED IMPORTED)
+
+set(Boost_FILESYSTEM_LIBRARY 
+  ${Boost_LIBRARY_DIR}/${prefix}boost_filesystem${suffix} 
+  CACHE INTERNAL ""
+)
+
+set(Boost_SYSTEM_LIBRARY
+  ${Boost_LIBRARY_DIR}/${prefix}boost_system${suffix} 
+  CACHE INTERNAL ""
+)
 
 message(STATUS "Boost_DIR: ${BOOST_ROOT}")

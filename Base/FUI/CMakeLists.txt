@@ -207,6 +207,13 @@ if(UNIX AND NOT APPLE)
   )
 endif()
 
+if(APPLE)
+  target_link_libraries(FUI
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+  )
+endif()
+
 if(MSVC_FOUND)
 	include(VSPostBuild/postBuild.cmake)
 endif()
