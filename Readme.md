@@ -66,7 +66,7 @@ Download the latest [CMake Release](https://cmake.org/download/) and simply inst
 
 Java is required, so simply download the latest [Java JDK Release](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (The current release at the time this readme was created is Java SE 13). Simply accept the license and download the dmg image file and install it.
 
-OpenCL and OpenGL should be included. (This may not be true, a fresh clean install of an OS needs to be tested to see if this is true.)
+OpenCL and OpenGL by default are included with OSX (At least this is true on OSX 10.14). 
 
 Once all the required programs are install. Open up QT Creator and open the CMakeLists.txt file and build the program.
 

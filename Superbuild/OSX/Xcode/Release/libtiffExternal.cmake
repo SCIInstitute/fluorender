@@ -62,9 +62,8 @@ ExternalProject_Add(libtiff_external_download
 ExternalProject_Get_Property(libtiff_external_download BINARY_DIR)
 ExternalProject_Get_Property(libtiff_external_download SOURCE_DIR)
 
-SET(libtiff_LIBRARY_DIR ${BINARY_DIR}/libtiff CACHE INTERNAL "")
+SET(TIFF_LIBRARY "${BINARY_DIR}/libtiff/Release" CACHE INTERNAL "")
 SET(TIFF_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
-SET(TIFF_LIBRARY ${libtiff_LIBRARY_DIR} CACHE INTERNAL "")
 
 add_library(libtiff_external SHARED IMPORTED)
 

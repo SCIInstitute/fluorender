@@ -30,47 +30,19 @@
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
 # The latest release is downloaded from FFmpeg's website directly. 
-if( WIN32 )
-  set( FFmpeg_url "http://ffmpeg.zeranoe.com/builds/win64/dev/ffmpeg-4.2-win64-dev.zip")
-elseif( APPLE )
-  set( FFmpeg_url "https://ffmpeg.zeranoe.com/builds/macos64/dev/ffmpeg-4.2-macos64-dev.zip")
-endif()
+set( FFmpeg_url "https://ffmpeg.zeranoe.com/builds/macos64/dev/ffmpeg-4.2-macos64-dev.zip")
 
 # This is a little annoying, Ninja needs to know exactly where the libraries will be placed 
 # or it will not build. Oddly, this is the only file that needs this. 
-if(${GeneratorName} STREQUAL "Ninja")
-  ExternalProject_Add(FFmpeg_external_download
-    URL ${FFmpeg_url}
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    INSTALL_COMMAND ""
-    INSTALL_DIR ""
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-	BUILD_BYPRODUCTS
-	  <SOURCE_DIR>/lib/${prefix}avutil${suffix}
-      <SOURCE_DIR>/lib/${prefix}avformat${suffix}
-      <SOURCE_DIR>/lib/${prefix}avcodec${suffix}
-      <SOURCE_DIR>/lib/${prefix}avdevice${suffix}
-      <SOURCE_DIR>/lib/${prefix}avfilter${suffix}
-      <SOURCE_DIR>/lib/${prefix}postproc${suffix}
-      <SOURCE_DIR>/lib/${prefix}swresample${suffix}
-      <SOURCE_DIR>/lib/${prefix}swscale${suffix}
-	CMAKE_CACHE_ARGS
-      -DCMAKE_C_COMPILER:PATH=${Compiler}
-      -DCMAKE_CXX_COMPILER:PATH=${Compiler}
-  )
-else()
-  ExternalProject_Add(FFmpeg_external_download
-    URL ${FFmpeg_url}
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    INSTALL_COMMAND ""
-    INSTALL_DIR ""
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-  )
-endif()
+ExternalProject_Add(FFmpeg_external_download
+  URL ${FFmpeg_url}
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  INSTALL_COMMAND ""
+  INSTALL_DIR ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+)
 
 
 ExternalProject_Get_Property(FFmpeg_external_download SOURCE_DIR)

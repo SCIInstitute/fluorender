@@ -52,12 +52,12 @@ ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
 SET(glew_LIBRARY_DIR ${BINARY_DIR}/lib CACHE INTERNAL "")
 
 set(GLEW_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
-set(GLEW_LIBRARY ${glew_LIBRARY_DIR} CACHE INTERNAL "")
+set(GLEW_LIBRARY ${glew_LIBRARY_DIR}/Debug CACHE INTERNAL "")
 
-add_library(glew_external STATIC IMPORTED)
+add_library(glew_external SHARED IMPORTED)
 
 set(GLEW_LIBRARIES
-  ${glew_LIBRARY_DIR}/${prefix}GLEW${suffix}
+  ${GLEW_LIBRARY}/${prefix}GLEWd${suffix}
   CACHE INTERNAL ""
 )
 

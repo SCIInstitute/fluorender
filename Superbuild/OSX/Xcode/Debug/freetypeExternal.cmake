@@ -68,7 +68,7 @@ ExternalProject_Add(freetype_external_download
 ExternalProject_Get_Property(freetype_external_download BINARY_DIR)
 ExternalProject_Get_Property(freetype_external_download SOURCE_DIR)
 
-SET(freetype_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
+SET(freetype_LIBRARY_DIR ${BINARY_DIR}/Debug CACHE INTERNAL "")
 set(freetype_INCLUDE_DIR "${SOURCE_DIR}/include" CACHE INTERNAL "")
 
 add_library(freetype_external SHARED IMPORTED)

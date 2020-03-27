@@ -74,7 +74,7 @@ ExternalProject_Get_Property(LibPNG_external_download BINARY_DIR)
 ExternalProject_Get_Property(LibPNG_external_download SOURCE_DIR)
 
 set(PNG_ROOT_DIR ${BINARY_DIR} CACHE INTERNAL "")
-SET(PNG_LIBRARY ${BINARY_DIR} CACHE INTERNAL "")
+SET(PNG_LIBRARY "${BINARY_DIR};${BINARY_DIR}/Debug" CACHE INTERNAL "")
 SET(PNG_INCLUDE_DIRS ${SOURCE_DIR} CACHE INTERNAL "")
 
 add_library(LibPNG_external SHARED IMPORTED)

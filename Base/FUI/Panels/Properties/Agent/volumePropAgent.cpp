@@ -40,13 +40,7 @@ VolumePropAgent::VolumePropAgent(PropertiesPanel &panel) :
 	InterfaceAgent(),
     parentPanel(panel)
 {
-  double test = 3.22;
-  this->setValue("gamma 3d", test);
-  double ree = 0.0;
 
-  this->getValue("gamma 3d", ree);
-  parentPanel.setPropGammaValue(ree);
-  std::cout << ree << std::endl;
 }
 
 void VolumePropAgent::setObject(fluo::VolumeData* obj)

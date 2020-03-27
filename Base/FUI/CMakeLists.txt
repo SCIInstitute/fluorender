@@ -201,7 +201,7 @@ target_link_libraries(FUI
     ${OPENGL_LIBRARIES}
   )
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   target_link_libraries(FUI 
     stdc++fs
   )

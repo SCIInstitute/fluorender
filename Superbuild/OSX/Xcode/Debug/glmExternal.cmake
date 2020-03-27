@@ -73,7 +73,7 @@ ExternalProject_Add(glm_external_download
 ExternalProject_Get_Property(glm_external_download BINARY_DIR)
 ExternalProject_Get_Property(glm_external_download SOURCE_DIR)
 
-SET(glm_LIBRARY_DIR ${BINARY_DIR}/glm CACHE INTERNAL "")
+SET(glm_LIBRARY_DIR ${BINARY_DIR}/glm/Debug CACHE INTERNAL "")
 SET(glm_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
 
 add_library(glm_external SHARED IMPORTED)

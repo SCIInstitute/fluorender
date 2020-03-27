@@ -52,14 +52,14 @@ ExternalProject_Add(pugi_external_download
 ExternalProject_Get_Property(pugi_external_download BINARY_DIR)
 ExternalProject_Get_Property(pugi_external_download SOURCE_DIR)
 
-SET(pugi_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
+SET(pugi_LIBRARY_DIR ${BINARY_DIR}/Release CACHE INTERNAL "")
 SET(pugi_INCLUDE_DIR ${SOURCE_DIR}/src CACHE INTERNAL "")
 
 add_library(pugi_external SHARED IMPORTED)
 
 #this is a bandaid fix. Need to really fix this. 
 set(pugi_LIBRARIES
-  ${BINARY_DIR}/${prefix}pugixml${suffix} CACHE INTERNAL ""
+  ${pugi_LIBRARY_DIR}/${prefix}pugixml${suffix} CACHE INTERNAL ""
 )
 
 MESSAGE(STATUS "pugi_LIBRARY_DIR: ${pugi_LIBRARY_DIR}")

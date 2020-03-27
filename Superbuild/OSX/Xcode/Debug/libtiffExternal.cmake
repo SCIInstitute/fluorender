@@ -29,11 +29,11 @@
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
-# this is libpng's official github repo. The tag is the lastest release. 
+# this is libtiff's official github repo. The tag is the lastest release. 
 # This project depends on Zlib.
-SET(libpng_GIT_URL "https://gitlab.com/libtiff/libtiff.git")
-SET(libpng_GIT_TAG "v4.0.10")
-SET(libpng_DEPENDENCIES "Zlib_external_download")
+SET(libtiff_GIT_URL "https://gitlab.com/libtiff/libtiff.git")
+SET(libtiff_GIT_TAG "v4.0.10")
+SET(libtiff_DEPENDENCIES "Zlib_external_download")
 
 
 #needs to be combined here or the cmake file will not find zlib
@@ -44,9 +44,9 @@ set(Zlib_Root ${Zlib_LIBRARY_DIR})
 
 
 ExternalProject_Add(libtiff_external_download
-  DEPENDS ${libpng_DEPENDENCIES}
-  GIT_REPOSITORY ${libpng_GIT_URL}
-  GIT_TAG ${libpng_GIT_TAG}
+  DEPENDS ${libtiff_DEPENDENCIES}
+  GIT_REPOSITORY ${libtiff_GIT_URL}
+  GIT_TAG ${libtiff_GIT_TAG}
   PATCH_COMMAND ""
   UPDATE_COMMAND ""
   INSTALL_DIR ""
@@ -57,14 +57,14 @@ ExternalProject_Add(libtiff_external_download
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
+    -Dld-version-script:BOOL=OFF
 )
 
 ExternalProject_Get_Property(libtiff_external_download BINARY_DIR)
 ExternalProject_Get_Property(libtiff_external_download SOURCE_DIR)
 
-SET(libtiff_LIBRARY_DIR ${BINARY_DIR}/libtiff CACHE INTERNAL "")
+SET(TIFF_LIBRARY "${BINARY_DIR}/libtiff/Debug" CACHE INTERNAL "")
 SET(TIFF_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
-SET(TIFF_LIBRARY ${libtiff_LIBRARY_DIR} CACHE INTERNAL "")
 
 add_library(libtiff_external SHARED IMPORTED)
 
