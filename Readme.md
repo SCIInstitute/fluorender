@@ -62,13 +62,21 @@ Once all the required programs are install. Open up QT Creator and open the CMak
 Once they are installed, you can simply Open Qt Creator and open the CMakeLists.txt file and build the program.
 
 ### Requirements for OSX
-Download the latest [CMake Release](https://cmake.org/download/) and simply install the dmg image. 
+Download the latest [CMake Release](https://cmake.org/download/) and simply install the dmg image. The latest release will not add CMake to your path, so you will not be able to use cmake build commands in your terminal. To add to your path, you will need to run the following command in your terminal:  
 
-Java is required, so simply download the latest [Java JDK Release](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (The current release at the time this readme was created is Java SE 13). Simply accept the license and download the dmg image file and install it.
+`sudo /Applications/CMake.app/Contents/bin/cmake-gui --install` 
+
+This will link cmake to your path and you will be able to use CMake in your command line.  
+
+Java is required, so simply download the latest [Java JDK Release](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (The current release at the time this readme was created is Java SE 13). Simply accept the license and download the dmg image file and install it. Or you can simply `brew cast install java` in order to get OpenJDK installed. Either works.
 
 OpenCL and OpenGL by default are included with OSX (At least this is true on OSX 10.14). 
 
-Once all the required programs are install. Open up QT Creator and open the CMakeLists.txt file and build the program.
+Once all the required programs are install. Open up QT Creator and open the CMakeLists.txt file and build the program. Or simply run from your build directory:  
+
+`cmake <fluorender_location> -G "Xcode" -DCMAKE_PREFIX_PATH=<your Qt install folder, mine was /User/Sailanarmo/Qt/5.13.2/clang_64>"` 
+
+And finally run: `cmake --build .`
 
 ### Requirements for Windows
 Currently, MinGW is not supported since `std::codecvt_utf8_utf16` has been depricated in C++17. Unfortunately pole uses this function and as of right now, there is no fix for this. If there are any updates in the future there will be build instructions for MinGW.
