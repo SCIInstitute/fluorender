@@ -28,17 +28,17 @@
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
-# Raul Ramirez created a CMake file for pole. The original author of pole
+# Raul Ramirez created a CMake file for pugi. The original author of pugi
 # stated that they did not beleive this needed to be created into a library
-# and should only be compiled with the project. However for Fluorender, pole
-# is needed as a library. So Raul Ramirez created a CMake project for pole.
-set(pole_URL "https://github.com/Sailanarmo/pole.git")
-set(pole_TAG "origin/master")
+# and should only be compiled with the project. However for Fluorender, pugi
+# is needed as a library. So Raul Ramirez created a CMake project for pugi.
+set(pugi_URL "https://github.com/zeux/pugixml")
+set(pugi_TAG "v1.10")
 
 
-ExternalProject_Add(pole_external_download
-  GIT_REPOSITORY ${pole_URL}
-  GIT_TAG ${pole_TAG}
+ExternalProject_Add(pugi_external_download
+  GIT_REPOSITORY ${pugi_URL}
+  GIT_TAG ${pugi_TAG}
   PATCH_COMMAND ""
   UPDATE_COMMAND ""
   INSTALL_DIR ""
@@ -46,19 +46,20 @@ ExternalProject_Add(pole_external_download
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+    -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
-ExternalProject_Get_Property(pole_external_download BINARY_DIR)
-ExternalProject_Get_Property(pole_external_download SOURCE_DIR)
+ExternalProject_Get_Property(pugi_external_download BINARY_DIR)
+ExternalProject_Get_Property(pugi_external_download SOURCE_DIR)
 
-if(MSVC)
-  SET(pole_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
-else()
-  SET(pole_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-endif()
+SET(pugi_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
+SET(pugi_INCLUDE_DIR ${SOURCE_DIR}/src CACHE INTERNAL "")
 
-SET(pole_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
+add_library(pugi_external SHARED IMPORTED)
 
-add_library(pole_external STATIC IMPORTED)
+#this is a bandaid fix. Need to really fix this. 
+set(pugi_LIBRARIES
+  ${BINARY_DIR}/${prefix}pugixml${suffix} CACHE INTERNAL ""
+)
 
-MESSAGE(STATUS "pole_LIBRARY_DIR: ${pole_LIBRARY_DIR}")
+MESSAGE(STATUS "pugi_LIBRARY_DIR: ${pugi_LIBRARY_DIR}")
