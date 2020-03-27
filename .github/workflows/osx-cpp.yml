@@ -1,6 +1,6 @@
 name: osx-build
 
-on: push
+on: [push, pull_request] 
 
 jobs:
   osx-build-gui:
