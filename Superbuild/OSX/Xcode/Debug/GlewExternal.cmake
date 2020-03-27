@@ -26,51 +26,39 @@
 # DEALINGS IN THE SOFTWARE.
 # */
 
-
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
-# This is freetype's official github. The tag is the lastest release. This
-# also depends on zlib and libpng. 
-#
-# Master Depends simply combines zlib's and libpng's include directories so
-# the magical string replace can work when passing into the external project.
-set(freetype_URL "https://git.savannah.gnu.org/git/freetype/freetype2.git")
-SET(freetype_GIT_TAG "VER-2-10-1")
-SET(freetype_DEPENDENCIES "Zlib_external_download;LibPNG_external_download")
+# The latest glew is taken from sourceforge. 
+set(Glew_url "https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip/download")
+set(Glew_Hash "MD5=dff2939fd404d054c1036cc0409d19f1")
 
-set(zlibincludedir "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
-set(libpnginclude "${PNG_LIBRARY};${PNG_INCLUDE_DIRS}")
-set(Master_Depends ${Zlib_LIBRARY_DIR} ${PNG_LIBRARY})
-
-string(REPLACE ";" "|" Master_Root "${Master_Depends}")
-
-
-ExternalProject_Add(freetype_external_download
-  DEPENDS ${freetype_DEPENDENCIES}
-  GIT_REPOSITORY ${freetype_URL}
-  GIT_TAG ${freetype_GIT_TAG}
-  PATCH_COMMAND ""
-  INSTALL_DIR ""
+# The source subdirectory must be set since glew has their cmake file burried
+# in their directory structure.
+ExternalProject_Add(glew_external_download
+  URL ${Glew_url}
+  URL_HASH ${Glew_Hash}
   UPDATE_COMMAND ""
+  SOURCE_SUBDIR "build/cmake"
   INSTALL_COMMAND ""
-  LIST_SEPARATOR |
-  CMAKE_ARGS ${freetype_external_download_CMAKE_ARGS} 
-    -DCMAKE_PREFIX_PATH=${Master_Root}
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-    -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
-    -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
-	  -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
     -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
-ExternalProject_Get_Property(freetype_external_download BINARY_DIR)
-ExternalProject_Get_Property(freetype_external_download SOURCE_DIR)
+ExternalProject_Get_Property(glew_external_download BINARY_DIR)
+ExternalProject_Get_Property(glew_external_download SOURCE_DIR)
 
-SET(freetype_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-set(freetype_INCLUDE_DIR "${SOURCE_DIR}/include" CACHE INTERNAL "")
+SET(glew_LIBRARY_DIR ${BINARY_DIR}/lib CACHE INTERNAL "")
 
-add_library(freetype_external SHARED IMPORTED)
+set(GLEW_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
+set(GLEW_LIBRARY ${glew_LIBRARY_DIR}/Debug CACHE INTERNAL "")
 
-MESSAGE(STATUS "freetype_DIR: ${freetype_LIBRARY_DIR}")
+add_library(glew_external SHARED IMPORTED)
+
+set(GLEW_LIBRARIES
+  ${GLEW_LIBRARY}/${prefix}GLEWd${suffix}
+  CACHE INTERNAL ""
+)
+
+message(STATUS "glew_DIR: ${glew_LIBRARY_DIR}")

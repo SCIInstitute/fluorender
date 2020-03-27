@@ -77,7 +77,7 @@ set(FLIVR_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 add_library(FLIVR STATIC ${HEADER_FILES} ${SOURCES}) 
 
 if(APPLE)
-  target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
+  target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
   add_dependencies(FLIVR FLObject freetype_external_download glew_external_download Teem_external_download Boost_external_download)
 else()
   target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${teem_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})

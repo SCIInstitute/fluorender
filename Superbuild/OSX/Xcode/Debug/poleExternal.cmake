@@ -26,17 +26,34 @@
 # DEALINGS IN THE SOFTWARE.
 # */
 
-# This are defined for the library prefix's and suffix's. May not be used.
+SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
-if(WIN32)
-  if(MSVC)
-    set(prefix "" CACHE INTERNAL "")
-    set(suffix ".lib" CACHE INTERNAL "")
-  endif()
-elseif(APPLE)
-  set(prefix "lib" CACHE INTERNAL "")
-  set(suffix ".dylib" CACHE INTERNAL "")
-elseif(UNIX)
-  set(prefix "lib" CACHE INTERNAL "")
-  set(suffix ".so" CACHE INTERNAL "")
-endif()
+# Raul Ramirez created a CMake file for pole. The original author of pole
+# stated that they did not beleive this needed to be created into a library
+# and should only be compiled with the project. However for Fluorender, pole
+# is needed as a library. So Raul Ramirez created a CMake project for pole.
+set(pole_URL "https://github.com/Sailanarmo/pole.git")
+set(pole_TAG "origin/master")
+
+
+ExternalProject_Add(pole_external_download
+  GIT_REPOSITORY ${pole_URL}
+  GIT_TAG ${pole_TAG}
+  PATCH_COMMAND ""
+  UPDATE_COMMAND ""
+  INSTALL_DIR ""
+  INSTALL_COMMAND ""
+  CMAKE_CACHE_ARGS
+    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
+    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+)
+
+ExternalProject_Get_Property(pole_external_download BINARY_DIR)
+ExternalProject_Get_Property(pole_external_download SOURCE_DIR)
+
+SET(pole_LIBRARY_DIR ${BINARY_DIR}/Debug CACHE INTERNAL "")
+SET(pole_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
+
+add_library(pole_external SHARED IMPORTED)
+
+MESSAGE(STATUS "pole_LIBRARY_DIR: ${pole_LIBRARY_DIR}")

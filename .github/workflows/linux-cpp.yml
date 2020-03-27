@@ -1,6 +1,6 @@
 name: linux-build
 
-on: [push, pull_request]
+#on: [push, pull_request]
 
 jobs:
   linux-build-gui:

@@ -201,9 +201,16 @@ target_link_libraries(FUI
     ${OPENGL_LIBRARIES}
   )
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   target_link_libraries(FUI 
     stdc++fs
+  )
+endif()
+
+if(APPLE)
+  target_link_libraries(FUI
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
   )
 endif()
 

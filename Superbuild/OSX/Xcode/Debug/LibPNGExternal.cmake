@@ -41,7 +41,11 @@ set(Zlibincludes "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
 
 # This is some magic found on stackoverflow which allows the include directories
 # to be passed as list separators for the external project to find the directories.
-set(Zlib_Root ${Zlib_LIBRARY_DIR})
+if(MSVC)
+  string(REPLACE ";" "|" Zlib_Root "${Zlib_LIBRARY_DIR}")
+else()
+  set(Zlib_Root ${Zlib_LIBRARY_DIR})
+endif()
 
 # This was taken from CIBC Internal's libpng external project. It seems to do everything
 # that is needed but it is possible this will need to be modified.
@@ -65,14 +69,12 @@ ExternalProject_Add(LibPNG_external_download
     -DDO_ZLIB_MANGLE:BOOL=${DO_ZLIB_MANGLE}
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
 )
-#    -DCMAKE_CXX_FLAGS:STATIC=${CMAKE_CXX_FLAGS}
-#    -DCMAKE_C_FLAGS:STATIC=${CMAKE_C_FLAGS}
 
 ExternalProject_Get_Property(LibPNG_external_download BINARY_DIR)
 ExternalProject_Get_Property(LibPNG_external_download SOURCE_DIR)
 
 set(PNG_ROOT_DIR ${BINARY_DIR} CACHE INTERNAL "")
-SET(PNG_LIBRARY ${BINARY_DIR} CACHE INTERNAL "")
+SET(PNG_LIBRARY "${BINARY_DIR};${BINARY_DIR}/Debug" CACHE INTERNAL "")
 SET(PNG_INCLUDE_DIRS ${SOURCE_DIR} CACHE INTERNAL "")
 
 add_library(LibPNG_external SHARED IMPORTED)
