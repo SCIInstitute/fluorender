@@ -588,10 +588,10 @@ const char* str_cl_sg_check_borders = \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int v0 = read_imagef(l0, samp, (int4)(x0, i, j, 1)).x;\n" \
+"	unsigned int v0 = read_imageui(l0, samp, (int4)(x0, i, j, 1)).x;\n" \
 "	if (v0 == 0 || v0 & 0x80000000)\n" \
 "		return;\n" \
-"	unsigned int v1 = read_imagef(l1, samp, (int4)(x1, i, j, 1)).x;\n" \
+"	unsigned int v1 = read_imageui(l1, samp, (int4)(x1, i, j, 1)).x;\n" \
 "	if (v1 == 0 || v1 & 0x80000000)\n" \
 "		return;\n" \
 "	bool found = false;\n" \
@@ -658,7 +658,6 @@ void SegGrow::Compute()
 	int kernel_4 = kernel_prog->createKernel("kernel_4");//find connected parts
 	int kernel_5 = kernel_prog->createKernel("kernel_5");//merge connected parts
 	int kernel_6 = kernel_prog->createKernel("kernel_6");//get shape
-	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
 
 	int bnum = 0;
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -1023,21 +1022,6 @@ void SegGrow::Compute()
 			}
 		}
 
-		//finalize
-		//kernel5
-		arg_label.kernel_index = kernel_7;
-		arg_label.index = 0;
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_7, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_7, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_7, 3,
-			sizeof(unsigned int), (void*)(&nz));
-
-		//execute
-		kernel_prog->executeKernel(kernel_7, 3, global_size, local_size);
-
 		//read back
 		kernel_prog->copyBufTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
@@ -1125,13 +1109,56 @@ void SegGrow::Compute()
 				//read back
 				kernel_prog->readBuffer(sizeof(unsigned int)*idnum * 3, pcids, pcids);
 				
-				for (int i = 0; i < idnum; ++i)
+				for (int i = 0; i < idnum*3; ++i)
 				{
-					unsigned int cid0 = cids[i * 3];
+					unsigned int cid0 = cids[i];
+					cid0 = 0;
 				}
 			}
 		}
 		break;
+	}
+
+	//finalize bricks
+	kernel_prog = FLIVR::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_segrow);
+	if (!kernel_prog)
+		return;
+	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
+	for (size_t bi = 0; bi < brick_num; ++bi)
+	{
+		TextureBrick* b = (*bricks)[bi];
+		if (!b->get_paint_mask())
+			continue;
+		int nx = b->nx();
+		int ny = b->ny();
+		int nz = b->nz();
+		GLint lid = m_vd->GetVR()->load_brick_label(b);
+		//compute workload
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t local_size[3] = { 1, 1, 1 };
+		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
+
+		//finalize
+		Argument arg_label =
+			kernel_prog->setKernelArgTex3DBuf(kernel_7, 0,
+			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog->setKernelArgConst(kernel_7, 1,
+			sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(kernel_7, 2,
+			sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(kernel_7, 3,
+			sizeof(unsigned int), (void*)(&nz));
+
+		//execute
+		kernel_prog->executeKernel(kernel_7, 3, global_size, local_size);
+
+		//read back
+		kernel_prog->copyBufTex3D(arg_label, lid,
+			sizeof(unsigned int)*nx*ny*nz, region);
+
+		//release buffer
+		kernel_prog->releaseAll();
 	}
 
 	//add ruler points
