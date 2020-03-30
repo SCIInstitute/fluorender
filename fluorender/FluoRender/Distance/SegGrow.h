@@ -71,6 +71,12 @@ namespace FL
 			std::vector<unsigned int> &cids,
 			std::vector<std::set<unsigned int>> &merge_list);
 		void MergeIds(std::vector<std::set<unsigned int>> &merge_list);
+		void CheckBorders(int d0, int d1, int n0, int n1,
+			std::vector<unsigned int> &ids,
+			FLIVR::TextureBrick* nb,
+			FLIVR::KernelProgram *kernel_prog, int kernel, FLIVR::Argument &arg_tex,
+			std::vector<std::set<unsigned int>> &brick_pairs,
+			std::vector<std::set<unsigned int>> &merge_list);
 	};
 }
 #endif//FL_SegGrow_h

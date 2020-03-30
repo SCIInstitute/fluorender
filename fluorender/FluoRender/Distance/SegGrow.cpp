@@ -580,18 +580,82 @@ const char* str_cl_sg_check_borders = \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t l0,\n" \
 "	__read_only image3d_t l1,\n" \
-"	unsigned int x0,\n" \
-"	unsigned int x1,\n" \
+"	unsigned int d0,\n" \
+"	unsigned int d1,\n" \
 "	unsigned int nid,\n" \
 "	__global unsigned int* ids,\n" \
 "	__global unsigned int* cids)\n" \
 "{\n" \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int v0 = read_imageui(l0, samp, (int4)(x0, i, j, 1)).x;\n" \
+"	unsigned int v0 = read_imageui(l0, samp, (int4)(d0, i, j, 1)).x;\n" \
 "	if (v0 == 0 || v0 & 0x80000000)\n" \
 "		return;\n" \
-"	unsigned int v1 = read_imageui(l1, samp, (int4)(x1, i, j, 1)).x;\n" \
+"	unsigned int v1 = read_imageui(l1, samp, (int4)(d1, i, j, 1)).x;\n" \
+"	if (v1 == 0 || v1 & 0x80000000)\n" \
+"		return;\n" \
+"	bool found = false;\n" \
+"	int c;\n" \
+"	for (c = 0; c < nid; ++c)\n" \
+"	if (ids[c] == v0)\n" \
+"	{\n" \
+"		found = true;\n" \
+"		break;\n" \
+"	}\n" \
+"	if (!found)\n" \
+"		return;\n" \
+"	cids[c*3] = cids[c*3]?cids[c*3]:v1;\n" \
+"	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];\n" \
+"	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];\n" \
+"}\n" \
+"//check xz plane (+-y)\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t l0,\n" \
+"	__read_only image3d_t l1,\n" \
+"	unsigned int d0,\n" \
+"	unsigned int d1,\n" \
+"	unsigned int nid,\n" \
+"	__global unsigned int* ids,\n" \
+"	__global unsigned int* cids)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int v0 = read_imageui(l0, samp, (int4)(i, d0, j, 1)).x;\n" \
+"	if (v0 == 0 || v0 & 0x80000000)\n" \
+"		return;\n" \
+"	unsigned int v1 = read_imageui(l1, samp, (int4)(i, d1, j, 1)).x;\n" \
+"	if (v1 == 0 || v1 & 0x80000000)\n" \
+"		return;\n" \
+"	bool found = false;\n" \
+"	int c;\n" \
+"	for (c = 0; c < nid; ++c)\n" \
+"	if (ids[c] == v0)\n" \
+"	{\n" \
+"		found = true;\n" \
+"		break;\n" \
+"	}\n" \
+"	if (!found)\n" \
+"		return;\n" \
+"	cids[c*3] = cids[c*3]?cids[c*3]:v1;\n" \
+"	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];\n" \
+"	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];\n" \
+"}\n" \
+"//check xy plane (+-z)\n" \
+"__kernel void kernel_2(\n" \
+"	__read_only image3d_t l0,\n" \
+"	__read_only image3d_t l1,\n" \
+"	unsigned int d0,\n" \
+"	unsigned int d1,\n" \
+"	unsigned int nid,\n" \
+"	__global unsigned int* ids,\n" \
+"	__global unsigned int* cids)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int v0 = read_imageui(l0, samp, (int4)(i, j, d0, 1)).x;\n" \
+"	if (v0 == 0 || v0 & 0x80000000)\n" \
+"		return;\n" \
+"	unsigned int v1 = read_imageui(l1, samp, (int4)(i, j, d1, 1)).x;\n" \
 "	if (v1 == 0 || v1 & 0x80000000)\n" \
 "		return;\n" \
 "	bool found = false;\n" \
@@ -1048,7 +1112,9 @@ void SegGrow::Compute()
 			vol_kernel_factory_.kernel(str_cl_sg_check_borders);
 		if (!kernel_prog)
 			break;
-		kernel_0 = kernel_prog->createKernel("kernel_0");//+-x
+		kernel_0 = kernel_prog->createKernel("kernel_0");//x
+		kernel_1 = kernel_prog->createKernel("kernel_1");//x
+		kernel_2 = kernel_prog->createKernel("kernel_2");//x
 
 		std::vector<unsigned int> ids;
 		for (auto it = m_list.begin();
@@ -1064,18 +1130,14 @@ void SegGrow::Compute()
 			int ny = b->ny();
 			int nz = b->nz();
 			GLint lid = m_vd->GetVR()->load_brick_label(b);
-			GLint nlid;
-			unsigned bid, nid;
+			unsigned bid;
 			bid = b->get_id();
-			TextureBrick* nb;//neighbor brick
-
-			size_t global_size[2] = { 1, 1 };
-			size_t local_size[2] = { 1, 1 };
-
 			Argument arg_tex =
 				kernel_prog->setKernelArgTex3D(kernel_0, 0,
 					CL_MEM_READ_ONLY, lid);
 
+			TextureBrick* nb;
+			unsigned int nid;
 			//+x
 			nid = tex->posxid(bid);
 			if (nid != bid)
@@ -1085,39 +1147,69 @@ void SegGrow::Compute()
 			if (nb &&
 				nb->get_new_grown() &&
 				!CheckBrickPair(bid, nid, brick_pairs))
-			{
-				nlid = m_vd->GetVR()->load_brick_label(nb);
-				//set
-				arg_tex.kernel_index = kernel_0;
-				arg_tex.index = 0;
-				kernel_prog->setKernelArgument(arg_tex);
-				kernel_prog->setKernelArgTex3D(kernel_0, 1,
-					CL_MEM_READ_ONLY, nlid);
-				unsigned int x0 = nx - 1;
-				unsigned int x1 = 0;
-				kernel_prog->setKernelArgConst(kernel_0, 2,
-					sizeof(unsigned int), (void*)(&x0));
-				kernel_prog->setKernelArgConst(kernel_0, 3,
-					sizeof(unsigned int), (void*)(&x1));
-				kernel_prog->setKernelArgConst(kernel_0, 4,
-					sizeof(unsigned int), (void*)(&idnum));
-				kernel_prog->setKernelArgBuf(kernel_0, 5,
-					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-					sizeof(unsigned int)*idnum, (void*)(ids.data()));
-				std::vector<unsigned int> cids(idnum * 3, 0);
-				unsigned int* pcids = cids.data();
-				kernel_prog->setKernelArgBuf(kernel_0, 6,
-					CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-					sizeof(unsigned int)*idnum*3, (void*)(pcids));
-
-				//execute
-				global_size[0] = ny; global_size[1] = nz;
-				kernel_prog->executeKernel(kernel_0, 2, global_size, local_size);
-				//read back
-				kernel_prog->readBuffer(sizeof(unsigned int)*idnum * 3, pcids, pcids);
-				
-				CollectIds(ids, cids, merge_list);
-			}
+				CheckBorders(nx - 1, 0, ny, nz, ids, nb,
+				kernel_prog, kernel_0, arg_tex,
+				brick_pairs, merge_list);
+			//-x
+			nid = tex->negxid(bid);
+			if (nid != bid)
+				nb = tex->get_brick(nid);
+			else
+				nb = 0;
+			if (nb &&
+				nb->get_new_grown() &&
+				!CheckBrickPair(bid, nid, brick_pairs))
+				CheckBorders(0, nb->nx()-1, ny, nz, ids, nb,
+					kernel_prog, kernel_0, arg_tex,
+					brick_pairs, merge_list);
+			//+y
+			nid = tex->posyid(bid);
+			if (nid != bid)
+				nb = tex->get_brick(nid);
+			else
+				nb = 0;
+			if (nb &&
+				nb->get_new_grown() &&
+				!CheckBrickPair(bid, nid, brick_pairs))
+				CheckBorders(ny - 1, 0, nx, nz, ids, nb,
+					kernel_prog, kernel_1, arg_tex,
+					brick_pairs, merge_list);
+			//-y
+			nid = tex->negyid(bid);
+			if (nid != bid)
+				nb = tex->get_brick(nid);
+			else
+				nb = 0;
+			if (nb &&
+				nb->get_new_grown() &&
+				!CheckBrickPair(bid, nid, brick_pairs))
+				CheckBorders(0, nb->ny() - 1, nx, nz, ids, nb,
+					kernel_prog, kernel_1, arg_tex,
+					brick_pairs, merge_list);
+			//+z
+			nid = tex->poszid(bid);
+			if (nid != bid)
+				nb = tex->get_brick(nid);
+			else
+				nb = 0;
+			if (nb &&
+				nb->get_new_grown() &&
+				!CheckBrickPair(bid, nid, brick_pairs))
+				CheckBorders(nz - 1, 0, nx, ny, ids, nb,
+					kernel_prog, kernel_2, arg_tex,
+					brick_pairs, merge_list);
+			//-z
+			nid = tex->negzid(bid);
+			if (nid != bid)
+				nb = tex->get_brick(nid);
+			else
+				nb = 0;
+			if (nb &&
+				nb->get_new_grown() &&
+				!CheckBrickPair(bid, nid, brick_pairs))
+				CheckBorders(0, nb->nz() - 1, nx, ny, ids, nb,
+					kernel_prog, kernel_2, arg_tex,
+					brick_pairs, merge_list);
 		}
 
 		//release buffer
@@ -1282,4 +1374,49 @@ void SegGrow::MergeIds(std::vector<std::set<unsigned int>> &merge_list)
 		m_list.insert(
 			std::pair<unsigned int,
 			BranchPoint>(it->second.id, it->second));
+}
+
+void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
+	std::vector<unsigned int> &ids,
+	FLIVR::TextureBrick* nb,
+	FLIVR::KernelProgram *kernel_prog, int kernel, FLIVR::Argument &arg_tex,
+	std::vector<std::set<unsigned int>> &brick_pairs,
+	std::vector<std::set<unsigned int>> &merge_list)
+{
+	GLint nlid;
+	size_t global_size[2] = { 1, 1 };
+	size_t local_size[2] = { 1, 1 };
+
+	nlid = m_vd->GetVR()->load_brick_label(nb);
+	//set
+	arg_tex.kernel_index = kernel;
+	arg_tex.index = 0;
+	kernel_prog->setKernelArgument(arg_tex);
+	kernel_prog->setKernelArgTex3D(kernel, 1,
+		CL_MEM_READ_ONLY, nlid);
+	//unsigned int d0 = nx - 1;
+	//unsigned int d1 = 0;
+	kernel_prog->setKernelArgConst(kernel, 2,
+		sizeof(unsigned int), (void*)(&d0));
+	kernel_prog->setKernelArgConst(kernel, 3,
+		sizeof(unsigned int), (void*)(&d1));
+	unsigned int idnum = ids.size();
+	kernel_prog->setKernelArgConst(kernel, 4,
+		sizeof(unsigned int), (void*)(&idnum));
+	kernel_prog->setKernelArgBuf(kernel, 5,
+		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int)*idnum, (void*)(ids.data()));
+	std::vector<unsigned int> cids(idnum * 3, 0);
+	unsigned int* pcids = cids.data();
+	kernel_prog->setKernelArgBuf(kernel, 6,
+		CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+		sizeof(unsigned int)*idnum * 3, (void*)(pcids));
+
+	//execute
+	global_size[0] = n0; global_size[1] = n1;
+	kernel_prog->executeKernel(kernel, 2, global_size, local_size);
+	//read back
+	kernel_prog->readBuffer(sizeof(unsigned int)*idnum * 3, pcids, pcids);
+
+	CollectIds(ids, cids, merge_list);
 }
