@@ -667,6 +667,8 @@ void SegGrow::Compute()
 		TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
+		//clear new grown flag
+		b->set_new_grown(false);
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
@@ -792,6 +794,7 @@ void SegGrow::Compute()
 		unsigned int total = uniqids.size();
 		if (total)
 		{
+			b->set_new_grown(true);//new ids exist in brick, will be considered for merging
 			ids.clear();
 			for (auto it = uniqids.begin();
 				it != uniqids.end(); ++it)
@@ -1034,6 +1037,8 @@ void SegGrow::Compute()
 
 	//connect bricks
 	unsigned int idnum = m_list.size();
+	std::vector<std::set<unsigned int>> merge_list;//ids in different bricks to be merged
+	std::vector<std::set<unsigned int>> brick_pairs;//pairs processed don't need to process again
 	while (bnum > 1 && idnum > 1)
 	{
 		FLIVR::Texture* tex = m_vd->GetTexture();
@@ -1053,7 +1058,7 @@ void SegGrow::Compute()
 		for (size_t bi = 0; bi < brick_num; ++bi)
 		{
 			TextureBrick* b = (*bricks)[bi];
-			if (!b->get_paint_mask())
+			if (!b->get_new_grown())
 				continue;
 			int nx = b->nx();
 			int ny = b->ny();
@@ -1077,7 +1082,9 @@ void SegGrow::Compute()
 				nb = tex->get_brick(nid);
 			else
 				nb = 0;
-			if (nb && nb->get_paint_mask())
+			if (nb &&
+				nb->get_new_grown() &&
+				!CheckBrickPair(bid, nid, brick_pairs))
 			{
 				nlid = m_vd->GetVR()->load_brick_label(nb);
 				//set
@@ -1109,13 +1116,12 @@ void SegGrow::Compute()
 				//read back
 				kernel_prog->readBuffer(sizeof(unsigned int)*idnum * 3, pcids, pcids);
 				
-				for (int i = 0; i < idnum*3; ++i)
-				{
-					unsigned int cid0 = cids[i];
-					cid0 = 0;
-				}
+				CollectIds(ids, cids, merge_list);
 			}
 		}
+
+		//release buffer
+		kernel_prog->releaseAll();
 		break;
 	}
 
@@ -1161,6 +1167,8 @@ void SegGrow::Compute()
 		kernel_prog->releaseAll();
 	}
 
+	MergeIds(merge_list);
+
 	//add ruler points
 	double spcx, spcy, spcz;
 	m_vd->GetSpacings(spcx, spcy, spcz);
@@ -1174,6 +1182,104 @@ void SegGrow::Compute()
 		m_handler->AddRulerPointAfterId(
 			it->second.ctr,
 			it->second.id,
-			it->second.cid);
+			it->second.cid,
+			it->second.bid);
 	}
+}
+
+bool SegGrow::CheckBrickPair(unsigned int id1, unsigned int id2,
+	std::vector<std::set<unsigned int>> &pairs)
+{
+	std::set<unsigned int> pair{ id1, id2 };
+	if (std::find(pairs.begin(), pairs.end(), pair) ==
+		pairs.end())
+	{
+		//add pair
+		pairs.push_back(pair);
+		return false;
+	}
+	else
+		return true;
+}
+
+void SegGrow::CollectIds(std::vector<unsigned int> &ids,
+	std::vector<unsigned int> &cids,
+	std::vector<std::set<unsigned int>> &merge_list)
+{
+	for (size_t i = 0; i < cids.size(); ++i)
+	{
+		if (!cids[i])
+			continue;
+		unsigned int id0 = ids[i / 3];
+		unsigned int id1 = cids[i];
+		bool found = false;
+		for (size_t j = 0; j < merge_list.size(); ++j)
+		{
+			if (merge_list[j].find(id0) != merge_list[j].end() ||
+				merge_list[j].find(id1) != merge_list[j].end())
+			{
+				found = true;
+				merge_list[j].insert(id0);
+				merge_list[j].insert(id1);
+				break;
+			}
+		}
+		if (!found)
+		{
+			std::set<unsigned int> ids{ id0, id1 };
+			merge_list.push_back(ids);
+		}
+	}
+}
+
+void SegGrow::MergeIds(std::vector<std::set<unsigned int>> &merge_list)
+{
+	if (merge_list.empty())
+		return;
+
+	std::unordered_map<unsigned int, BranchPoint> list = m_list;
+	m_list.clear();
+	for (size_t i = 0; i < merge_list.size(); ++i)
+	{
+		if (merge_list[i].size() < 2)
+			continue;
+		BranchPoint bp;
+		bool first = true;
+		for (auto it = merge_list[i].begin();
+			it != merge_list[i].end(); ++it)
+		{
+			auto ibp = list.find(*it);
+			if (ibp != list.end())
+			{
+				if (first)
+				{
+					bp.id = ibp->second.id;
+					bp.sum = ibp->second.sum;
+					bp.ctr = ibp->second.ctr;
+					bp.cid = ibp->second.cid;
+					bp.bid.insert(bp.id);
+				}
+				else
+				{
+					bp.sum += ibp->second.sum;
+					bp.ctr += ibp->second.ctr;
+					for (auto sit = ibp->second.cid.begin();
+						sit != ibp->second.cid.end(); ++sit)
+						bp.cid.insert(*sit);
+					bp.bid.insert(ibp->second.id);
+				}
+				//remove from list
+				list.erase(ibp);
+			}
+			first = false;
+		}
+		m_list.insert(
+			std::pair<unsigned int,
+			BranchPoint>(bp.id, bp));
+	}
+	for (auto it = list.begin();
+		it != list.end(); ++it)
+		m_list.insert(
+			std::pair<unsigned int,
+			BranchPoint>(it->second.id, it->second));
 }

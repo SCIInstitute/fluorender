@@ -229,6 +229,9 @@ namespace FLIVR {
 		void set_paint_mask(bool val) { paint_mask_ = val; }
 		bool get_paint_mask() { return paint_mask_; }
 
+		void set_new_grown(bool val) { new_grown_ = val; }
+		bool get_new_grown() { return new_grown_; }
+
 	private:
 		void compute_edge_rays(BBox &bbox);
 		void compute_edge_rays_tex(BBox &bbox);
@@ -276,6 +279,8 @@ namespace FLIVR {
 		bool skip_mask_;
 		//use for paint mask volume
 		bool paint_mask_;
+		//new label for grow ruler merge
+		bool new_grown_;
 
 		int findex_;
 		long long offset_;

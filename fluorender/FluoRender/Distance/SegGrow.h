@@ -43,6 +43,7 @@ namespace FL
 		unsigned int sum;
 		FLIVR::Point ctr;
 		std::set<unsigned int> cid;//parent
+		std::set<unsigned int> bid;//ids from multiple bricks
 	};
 
 	class SegGrow
@@ -64,6 +65,12 @@ namespace FL
 		std::unordered_map<unsigned int, BranchPoint> m_list;
 
 		bool CheckBricks();
+		bool CheckBrickPair(unsigned int id1, unsigned int id2,
+			std::vector<std::set<unsigned int>> &pairs);
+		void CollectIds(std::vector<unsigned int> &ids,
+			std::vector<unsigned int> &cids,
+			std::vector<std::set<unsigned int>> &merge_list);
+		void MergeIds(std::vector<std::set<unsigned int>> &merge_list);
 	};
 }
 #endif//FL_SegGrow_h
