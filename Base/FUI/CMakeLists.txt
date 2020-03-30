@@ -166,6 +166,7 @@ include_directories(
     ${GLEW_INCLUDE_DIR}
     ${Teem_INCLUDE_DIRS}
     ${Formats_INCLUDE_DIR}
+    ${OpenCL_INCLUDE_DIR}
   )
 
 add_executable(FUI
@@ -200,9 +201,16 @@ target_link_libraries(FUI
     ${OPENGL_LIBRARIES}
   )
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   target_link_libraries(FUI 
     stdc++fs
+  )
+endif()
+
+if(APPLE)
+  target_link_libraries(FUI
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
   )
 endif()
 

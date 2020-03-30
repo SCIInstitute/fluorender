@@ -29,52 +29,59 @@
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
-# This is from the official libpng github account the git tag is the lastest
-# release. This depends on Zlib or it will not build. 
-SET(libpng_GIT_URL "https://github.com/glennrp/libpng.git")
-SET(libpng_GIT_TAG "v1.6.37")
-SET(libpng_DEPENDENCIES "Zlib_external_download")
+# This github URL is on Raul Ramirez's github, this could be moved internally
+# as the reasoning for this personalized github is unknown. It is possible that
+# Raul made some modifications to the original Cmake file. This will need to be
+# looked into. 
+#
+# This project depends on Zlib and LibPNG in order to compile.
+SET(teem_GIT_URL "https://github.com/Sailanarmo/teem.git")
+SET(teem_GIT_TAG "origin/master")
+SET(teem_DEPENDENCIES "Zlib_external_download;LibPNG_external_download")
 
+set(zlibincludedir "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
+set(libpnginclude "${PNG_LIBRARY};${PNG_INCLUDE_DIRS}")
+set(Master_Depends ${Zlib_LIBRARY_DIR} ${PNG_LIBRARY})
 
-# needs to be combined here or the cmake file will not find zlib
-set(Zlibincludes "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
+# This does some magic that was foudn on stackoverflow to allow multiple
+# include directories to be passed into the external project.
+string(REPLACE ";" "|" Master_Root "${Master_Depends}")
 
-# This is some magic found on stackoverflow which allows the include directories
-# to be passed as list separators for the external project to find the directories.
-set(Zlib_Root ${Zlib_LIBRARY_DIR})
-
-# This was taken from CIBC Internal's libpng external project. It seems to do everything
-# that is needed but it is possible this will need to be modified.
-ExternalProject_Add(LibPNG_external_download
-  DEPENDS ${libpng_DEPENDENCIES}
-  GIT_REPOSITORY ${libpng_GIT_URL} 
-  GIT_TAG ${libpng_GIT_TAG}
+ExternalProject_Add(Teem_external_download
+  DEPENDS ${teem_DEPENDENCIES}
+  GIT_REPOSITORY ${teem_GIT_URL}
+  GIT_TAG ${teem_GIT_TAG}
   PATCH_COMMAND ""
-  UPDATE_COMMAND ""
   INSTALL_DIR ""
+  UPDATE_COMMAND ""
   INSTALL_COMMAND ""
   LIST_SEPARATOR |
-  CMAKE_ARGS ${LibPNG_external_CMAKE_ARGS} -DCMAKE_PREFIX_PATH=${Zlib_Root}
+  CMAKE_ARGS ${Teem_external_download_CMAKE_ARGS}
+    -DCMAKE_PREFIX_PATH=${Master_Root}
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
     -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-    -DPNG_SHARED:BOOL=ON
-    -DDO_ZLIB_MANGLE:BOOL=${DO_ZLIB_MANGLE}
+    -DZlib_DIR:PATH=${Zlib_DIR}
+    -DLibPNG_DIR:PATH=${LibPNG_DIR}
+    -DTeem_USE_NRRD_INTERNALS:BOOL=ON
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
+    -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
+    -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
 )
-#    -DCMAKE_CXX_FLAGS:STATIC=${CMAKE_CXX_FLAGS}
-#    -DCMAKE_C_FLAGS:STATIC=${CMAKE_C_FLAGS}
 
-ExternalProject_Get_Property(LibPNG_external_download BINARY_DIR)
-ExternalProject_Get_Property(LibPNG_external_download SOURCE_DIR)
+ExternalProject_Get_Property(Teem_external_download BINARY_DIR)
 
-set(PNG_ROOT_DIR ${BINARY_DIR} CACHE INTERNAL "")
-SET(PNG_LIBRARY ${BINARY_DIR} CACHE INTERNAL "")
-SET(PNG_INCLUDE_DIRS ${SOURCE_DIR} CACHE INTERNAL "")
+SET(Teem_DIR ${BINARY_DIR}/bin/Release CACHE INTERNAL "")
+set(Teem_INCLUDE_DIR "${BINARY_DIR}/include" CACHE INTERNAL "")
 
-add_library(LibPNG_external SHARED IMPORTED)
+add_library(Teem_external SHARED IMPORTED)
 
-MESSAGE(STATUS "LibPNG_DIR: ${PNG_LIBRARY}")
+set(teem_LIBRARIES
+  ${Teem_DIR}/${prefix}teem${suffix}
+  CACHE INTERNAL ""
+)
+
+MESSAGE(STATUS "Teem_DIR: ${Teem_DIR}")

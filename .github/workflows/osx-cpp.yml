@@ -1,0 +1,26 @@
+name: osx-build
+
+on: [push, pull_request] 
+
+jobs:
+  osx-build-gui:
+
+    runs-on: macOS-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Install Qt
+      run: brew install qt
+
+    - name: Configure
+      run: mkdir build
+
+    - name: Run CMake
+      working-directory: build
+      run: cmake .. -G "Xcode" -DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt/5.14.1
+
+    - name: Build
+      working-directory: build
+      run: cmake --build .

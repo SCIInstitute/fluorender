@@ -46,24 +46,20 @@ ExternalProject_Add(pugi_external_download
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+    -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
 ExternalProject_Get_Property(pugi_external_download BINARY_DIR)
 ExternalProject_Get_Property(pugi_external_download SOURCE_DIR)
 
-if(MSVC AND (NOT ${GeneratorName} STREQUAL "Ninja"))
-  SET(pugi_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
-else()
-  SET(pugi_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-endif()
-
+SET(pugi_LIBRARY_DIR ${BINARY_DIR}/Release CACHE INTERNAL "")
 SET(pugi_INCLUDE_DIR ${SOURCE_DIR}/src CACHE INTERNAL "")
 
-add_library(pugi_external STATIC IMPORTED)
+add_library(pugi_external SHARED IMPORTED)
 
 #this is a bandaid fix. Need to really fix this. 
 set(pugi_LIBRARIES
-  ${BINARY_DIR}/Debug/${prefix}pugixml${suffix} CACHE INTERNAL ""
+  ${pugi_LIBRARY_DIR}/${prefix}pugixml${suffix} CACHE INTERNAL ""
 )
 
 MESSAGE(STATUS "pugi_LIBRARY_DIR: ${pugi_LIBRARY_DIR}")

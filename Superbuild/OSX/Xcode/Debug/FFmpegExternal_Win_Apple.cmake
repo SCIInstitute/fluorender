@@ -29,41 +29,39 @@
 
 SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
-# This is the official zlib github. The tag is the latest release of Zlib.
-SET(zlib_GIT_URL "https://github.com/madler/zlib.git")
-SET(zlib_GIT_TAG "v1.2.11")
+# The latest release is downloaded from FFmpeg's website directly. 
+set( FFmpeg_url "https://ffmpeg.zeranoe.com/builds/macos64/dev/ffmpeg-4.2-macos64-dev.zip")
 
-
-# This was taken from CIBC's Internal Repo. This seems to work just fine.
-ExternalProject_Add(Zlib_external_download
-  GIT_REPOSITORY ${zlib_GIT_URL} 
-  GIT_TAG ${zlib_GIT_TAG}
-  PATCH_COMMAND ""
+# This is a little annoying, Ninja needs to know exactly where the libraries will be placed 
+# or it will not build. Oddly, this is the only file that needs this. 
+ExternalProject_Add(FFmpeg_external_download
+  URL ${FFmpeg_url}
   UPDATE_COMMAND ""
-  INSTALL_DIR ""
+  PATCH_COMMAND ""
   INSTALL_COMMAND ""
-  CMAKE_CACHE_ARGS
-    -DCMAKE_C_COMPILER:PATH=${Compiler_C}
-    -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
-    -DCMAKE_VERBOSE_MAKEFILE:BOOL=${CMAKE_VERBOSE_MAKEFILE}
-    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-    -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
-    -DCMAKE_CXX_FLAGS:STATIC=${CMAKE_CXX_FLAGS}
-    -DCMAKE_C_FLAGS:STATIC=${CMAKE_C_FLAGS}
-    -DDO_ZLIB_MANGLE:BOOL=${DO_ZLIB_MANGLE}
+  INSTALL_DIR ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
 )
 
-ExternalProject_Get_Property(Zlib_external_download BINARY_DIR)
-ExternalProject_Get_Property(Zlib_external_download SOURCE_DIR)
 
-if(MSVC)
-  SET(Zlib_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
-else()
-  SET(Zlib_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-endif()
+ExternalProject_Get_Property(FFmpeg_external_download SOURCE_DIR)
 
-SET(Zlib_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
+set(FFmpeg_LIBRARY_DIR ${SOURCE_DIR}/lib CACHE INTERNAL "")
+set(FFmpeg_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
 
-add_library(Zlib STATIC IMPORTED)
+add_library(FFmpeg_external STATIC IMPORTED)
 
-MESSAGE(STATUS "Zlib_LIBRARY_DIR: ${Zlib_LIBRARY_DIR}")
+# The libraries are set manually and cached internally 
+set(FFmpeg_LIBRARIES
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avutil${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avformat${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avcodec${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avdevice${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}avfilter${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}postproc${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}swresample${suffix}
+  ${FFmpeg_LIBRARY_DIR}/${prefix}swscale${suffix}
+  CACHE INTERNAL "" 
+)
+message(STATUS "FFmpeg_DIR: ${FFmpeg_LIBRARY_DIR}")

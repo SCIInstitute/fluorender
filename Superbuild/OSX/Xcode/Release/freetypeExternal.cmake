@@ -39,8 +39,8 @@ SET(freetype_GIT_TAG "VER-2-10-1")
 SET(freetype_DEPENDENCIES "Zlib_external_download;LibPNG_external_download")
 
 set(zlibincludedir "${Zlib_LIBRARY_DIR};${Zlib_INCLUDE_DIR}")
-set(libpnginclude "${LibPNG_LIBRARY_DIR};${LibPNG_INCLUDE_DIR}")
-set(Master_Depends ${Zlib_LIBRARY_DIR} ${LibPNG_LIBRARY_DIR})
+set(libpnginclude "${PNG_LIBRARY};${PNG_INCLUDE_DIRS}")
+set(Master_Depends ${Zlib_LIBRARY_DIR} ${PNG_LIBRARY})
 
 string(REPLACE ";" "|" Master_Root "${Master_Depends}")
 
@@ -62,19 +62,15 @@ ExternalProject_Add(freetype_external_download
     -DZLIB_INCLUDE_DIR:PATH=${Zlibincludes}
     -DPNG_INCLUDE_DIR:PATH=${libpnginclude}
 	  -DPNG_PNG_INCLUDE_DIR:PATH=${libpnginclude}
+    -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
 ExternalProject_Get_Property(freetype_external_download BINARY_DIR)
 ExternalProject_Get_Property(freetype_external_download SOURCE_DIR)
 
-if(MSVC)
-  SET(freetype_LIBRARY_DIR "${BINARY_DIR};${BINARY_DIR}/Debug;${BINARY_DIR}/Release" CACHE INTERNAL "")
-else()
-  SET(freetype_LIBRARY_DIR ${BINARY_DIR} CACHE INTERNAL "")
-endif()
-
+SET(freetype_LIBRARY_DIR ${BINARY_DIR}/Release CACHE INTERNAL "")
 set(freetype_INCLUDE_DIR "${SOURCE_DIR}/include" CACHE INTERNAL "")
 
-add_library(freetype_external STATIC IMPORTED)
+add_library(freetype_external SHARED IMPORTED)
 
 MESSAGE(STATUS "freetype_DIR: ${freetype_LIBRARY_DIR}")
