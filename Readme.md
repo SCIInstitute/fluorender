@@ -8,7 +8,7 @@ If you use FluoRender in work that leads to published research, we humbly ask th
 
 **Author:** Yong Wan
 
-**Developer:** Brig Bagley
+**Developers:** Brig Bagley, Raul Ramirez
 
 ## Build from Source Instructions 
 
