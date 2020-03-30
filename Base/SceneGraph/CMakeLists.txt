@@ -39,6 +39,7 @@ include_directories(${FLObject_INCLUDES}
                     ${GLEW_INCLUDE_DIR}
                     ${Teem_INCLUDE_DIR}
 										${OpenCL_INCLUDE_DIR}
+                    ${glm_INCLUDE_DIR}
                     )
 
 # The headers and source files are manually set rather than Globbed in 
