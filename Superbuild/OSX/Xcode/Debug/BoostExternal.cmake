@@ -31,8 +31,8 @@ set( Boost_Bootstrap_Command )
 
 # This is where Boost is hosted, this can be updated to accomodate newer releases of Boost.
 # The bootstrap commands are set for each Operating system.
-set( Boost_url "https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz")
-set( Boost_Hash "SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f")
+set( Boost_url "https://github.com/boostorg/boost")
+set( Boost_Tag "boost-1.72.0")
 set( Boost_Bootstrap_Command ./bootstrap.sh )
 set( Boost_b2_Command ./b2 )
 
@@ -41,8 +41,8 @@ set( Boost_b2_Command ./b2 )
 # We pass the arguments that it must be built in source, with system, chrono, and filesystem
 # The prefix is then set in the Root directory 
 ExternalProject_Add(Boost_external_download
-  URL ${Boost_url}
-  URL_HASH ${Boost_Hash}
+  GIT_REPOSITORY ${Boost_url}
+  GIT_TAG ${Boost_Tag}
   BUILD_IN_SOURCE 1
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
