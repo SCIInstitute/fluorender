@@ -121,7 +121,7 @@ namespace FL
 		bool GetRulerFinished();
 
 		void AddRulerPoint(FLIVR::Point &p);
-		void AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::set<unsigned int> &cid);
+		void AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::set<unsigned int> &cid, std::set<unsigned int> &bid);
 		bool GetMouseDist(int mx, int my, double dist);
 		void AddRulerPoint(int mx, int my, bool branch);
 		void AddPaintRulerPoint();

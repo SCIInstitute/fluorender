@@ -215,18 +215,19 @@ void RulerHandler::AddRulerPoint(FLIVR::Point &p)
 	}
 }
 
-void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id, std::set<unsigned int> &cid)
+void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id,
+	std::set<unsigned int> &cid, std::set<unsigned int> &bid)
 {
 	if (m_ruler &&
 		m_ruler->GetDisp() &&
 		m_ruler->GetRulerType() == 1 &&
 		!m_ruler->GetFinished())
-		m_ruler->AddPointAfterId(p, id, cid);
+		m_ruler->AddPointAfterId(p, id, cid, bid);
 	else
 	{
 		m_ruler = new Ruler();
 		m_ruler->SetRulerType(m_type);
-		m_ruler->AddPointAfterId(p, id, cid);
+		m_ruler->AddPointAfterId(p, id, cid, bid);
 		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
 		m_ruler->SetTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);

@@ -81,6 +81,12 @@ namespace FL
 			m_locked(false),
 			m_id(id)
 		{}
+		RulerPoint(Point& p, unsigned int id, std::set<unsigned int> bid) :
+			m_p(p),
+			m_locked(false),
+			m_id(id),
+			m_bid(bid)
+		{}
 		RulerPoint(Point& p, unsigned int id, bool locked):
 			m_p(p),
 			m_locked(locked),
@@ -117,12 +123,26 @@ namespace FL
 			return m_locked;
 		}
 
+		void SetBid(std::set<unsigned int> &bid)
+		{
+			m_bid = bid;
+		}
+		bool MatchId(unsigned int id)
+		{
+			if (id == m_id)
+				return true;
+			if (m_bid.find(id) != m_bid.end())
+				return true;
+			return false;
+		}
+
 		friend class Ruler;
 
 	private:
 		Point m_p;
 		bool m_locked;
 		unsigned int m_id;//from comp
+		std::set<unsigned int> m_bid;//merged ids from multiple bricks
 	};
 
 	typedef std::vector<Ruler*> RulerList;
@@ -187,7 +207,8 @@ namespace FL
 		void Scale(double spcx, double spcy, double spcz);
 
 		bool AddPoint(Point &point);
-		bool AddPointAfterId(Point &point, unsigned int id, std::set<unsigned int> &cid);
+		bool AddPointAfterId(Point &point, unsigned int id,
+			std::set<unsigned int> &cid, std::set<unsigned int> &bid);
 		void SetTransform(Transform *tform);
 		bool AddBranch(pRulerPoint point);
 		void DeletePoint(pRulerPoint &point);

@@ -53,7 +53,7 @@ namespace FLIVR
 		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), dbox_(dbox),
 		id_(id),
 		findex_(findex), offset_(offset), fsize_(fsize),
-		paint_mask_(true)
+		paint_mask_(true), new_grown_(false)
 	{
 		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
 		{
