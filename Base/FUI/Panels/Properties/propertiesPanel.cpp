@@ -113,7 +113,7 @@ void PropertiesPanel::onVolumeLoaded(int renderviewID)
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions();
   VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
 
-  connect(newVolumePropOpt,&VolumePropertiesOptions::sendGammaValue,this,&PropertiesPanel::onGammaReceived);
+  makeVolumeConnections(newVolumePropOpt);
 
   QFrame *leftFrame = genLeftFrame(newVolumePropOpt);
   QFrame *rightFrame = genRightFrame(newVolumePropsMisc);
@@ -164,4 +164,22 @@ VolumePropertiesMisc* PropertiesPanel::getPropertiesMisc()
   VolumePropertiesMisc* temp = tempMain->findChild<VolumePropertiesMisc*>();
 
   return temp;
+}
+
+void PropertiesPanel::makeVolumeConnections(VolumePropertiesOptions* layout)
+{
+  createVolumeAnyConnections(layout);
+  createVolumeIntConnections(layout);
+}
+
+void PropertiesPanel::createVolumeAnyConnections(VolumePropertiesOptions* layout)
+{
+  for(auto && tup : volumeAnyConnections)
+    connect(layout,std::get<0>(tup),this,std::get<1>(tup));
+}
+
+void PropertiesPanel::createVolumeIntConnections(VolumePropertiesOptions* layout)
+{
+  for(auto && tup : volumeIntConnections)
+    connect(layout,std::get<0>(tup),this,std::get<1>(tup));
 }

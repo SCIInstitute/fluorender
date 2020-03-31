@@ -38,7 +38,14 @@ class PropertiesPanel : public QWidget
     void onShadBoolReceived(bool status) { setPropShadowEnabled(status); }
     void onAlphaReceived(int value) { setPropAlphaValue(value); }
     void onAlphaBoolReceived(bool status) { setPropAlphaEnabled(status); }
-    
+    void onSampleReceived(std::any value) { setPropSampleValue(value); }
+    void onLowShadReceived(std::any value) { setPropLowShaderValue(value); }
+    void onHighShadReceived(std::any value) { setPropHighShaderValue(value); }
+    void onShaderBoolReceived(bool status) { setPropShaderEnabled(status); }
+    void onLowColReceived(int value) { setPropLowColorModeValue(value); }
+    void onHighColReceived(int value) { setPropHighColorModeValue(value); }
+    void onCMBoolReceived(bool status) { setPropCMEnabled(status); }
+
     /*
     void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
 
@@ -123,6 +130,13 @@ class PropertiesPanel : public QWidget
 
   private:
 
+    typedef void(PropertiesPanel::*propAnyFunc)(std::any);
+    typedef void(PropertiesPanel::*propIntFunc)(int);
+    typedef void(PropertiesPanel::*propBoolFunc)(bool);
+    typedef void(VolumePropertiesOptions::*volAnyFunc)(std::any);
+    typedef void(VolumePropertiesOptions::*volIntFunc)(int);
+    typedef void(VolumePropertiesOptions::*volBoolFunc)(bool);
+
     template<typename Property>
     QFrame *genLeftFrame(Property* left)
     {
@@ -149,9 +163,40 @@ class PropertiesPanel : public QWidget
     VolumePropertiesOptions* getPropertiesOptions();
     VolumePropertiesMisc* getPropertiesMisc();
 
+    void makeVolumeConnections(VolumePropertiesOptions* layout);
+    void createVolumeAnyConnections(VolumePropertiesOptions* layout);
+    void createVolumeIntConnections(VolumePropertiesOptions* layout);
+
+    const std::vector<std::tuple<volAnyFunc, propAnyFunc>> volumeAnyConnections = {
+      std::make_tuple(&VolumePropertiesOptions::sendGammaValue,&PropertiesPanel::onGammaReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendExtBoundValue,&PropertiesPanel::onExtBoundReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendShadowValue,&PropertiesPanel::onShadReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendSampleValue,&PropertiesPanel::onSampleReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendLowShadeValue,&PropertiesPanel::onLowShadReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendHighShadeValue,&PropertiesPanel::onHighShadReceived)
+    };
+
+    const std::vector<std::tuple<volIntFunc, propIntFunc>> volumeIntConnections = {
+      std::make_tuple(&VolumePropertiesOptions::sendSaturationValue,&PropertiesPanel::onSaturReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendLowThreshValue,&PropertiesPanel::onLowThrReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendHighThreshValue,&PropertiesPanel::onHighThReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendLuminanceValue,&PropertiesPanel::onLuminReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendAlphaValue,&PropertiesPanel::onAlphaReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendColorMapLowValue,&PropertiesPanel::onLowColReceived),
+      std::make_tuple(&VolumePropertiesOptions::sendColorMapHighValue,&PropertiesPanel::onHighColReceived)
+    };
+
+/*
+    const std::vector<std::tuple<volBoolFunc, propBoolFunc>> volumeBoolConnections = {
+      std::make_tuple(&VolumePropertiesOptions::send)
+    };
+    void onShadBoolReceived(bool status) { setPropShadowEnabled(status); }
+    void onAlphaBoolReceived(bool status) { setPropAlphaEnabled(status); }
+    void onShaderBoolReceived(bool status) { setPropShaderEnabled(status); }
+*/
+
     VolumePropAgent* m_agent;
     friend class VolumePropAgent;
-
 };
 
 #endif
