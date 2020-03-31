@@ -3,6 +3,8 @@
 MeshPropertiesOptions::MeshPropertiesOptions()
 {
   constructLayout();
+  createSliderConnections();
+  createSpinboxConnections();
 }
 
 void MeshPropertiesOptions::addRow0()
@@ -40,4 +42,18 @@ void MeshPropertiesOptions::constructLayout()
 {
   for(const auto &fn : rowFuncs)
     fn();
+}
+
+void MeshPropertiesOptions::createSliderConnections()
+{
+  for(auto && tup : sliderConnections)
+    connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
+}
+
+void MeshPropertiesOptions::createSpinboxConnections()
+{
+  for(auto && tup : spinboxConnections)
+    connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
+
+  connect(sizeLimitSpinbox,&FluoSpinbox::editingFinished,this,&MeshPropertiesOptions::onSizeLimitSpinboxChanged);
 }

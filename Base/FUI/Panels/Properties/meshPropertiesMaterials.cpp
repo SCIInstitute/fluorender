@@ -5,6 +5,9 @@ MeshPropertiesMaterials::MeshPropertiesMaterials()
   addRow0();
   addRow1();
   addRow2();
+
+  connect(shininessSlider,&FluoSlider::sliderReleased,this,&MeshPropertiesMaterials::onShininessSliderChanged);
+  connect(shininessSpinBox,&FluoSpinbox::editingFinished,this,&MeshPropertiesMaterials::onShininessSpinboxChanged);
 }
 
 void MeshPropertiesMaterials::addRow0()

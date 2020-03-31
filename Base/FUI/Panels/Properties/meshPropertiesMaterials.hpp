@@ -8,12 +8,24 @@
 
 #include <CustomWidgets/fluoSlider.hpp>
 #include <CustomWidgets/fluoSpinbox.hpp>
+#include <CustomWidgets/controller.hpp>
 
 class MeshPropertiesMaterials : public QGridLayout
 {
   Q_OBJECT
+
+  signals:
+    void sendShininessValue(int value);
+
+  public slots:
+
+    void onShininessSliderChanged() { sendShininessValue(shininessSlider->value()); }
+    void onShininessSpinboxChanged() { sendShininessValue(shininessSpinBox->value()); }
+
   public:
     MeshPropertiesMaterials();
+
+    void setShininessValue(int newVal) { shininessController->setValues(newVal); }
 
   private:
 
@@ -32,11 +44,10 @@ class MeshPropertiesMaterials : public QGridLayout
     QLabel *shininessLabel     = new QLabel("Shininess: ");
     //TODO: create diffuse color: button with color in it.
     //      create specular color: button with black color in it
-    //      create shininess slider with range 0 - 128
-    //      create shininess spinbox with range 0 - 128
     //      create all the labels for them.
 
-
+    Controller<FluoSlider,FluoSpinbox> *shininessController =
+      new Controller<FluoSlider,FluoSpinbox>(*shininessSlider,*shininessSpinBox);
 };
 
 #endif

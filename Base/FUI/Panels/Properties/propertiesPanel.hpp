@@ -28,6 +28,7 @@ class PropertiesPanel : public QWidget
     void onVolumeLoaded(int renderviewID);
     void onMeshLoaded(int renderviewID);
 
+    // Volume Functions
     void onGammaReceived(std::any value) { setPropGammaValue(value); }
     void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
     void onSaturReceived(int value) { setPropSatValue(value); }
@@ -45,6 +46,13 @@ class PropertiesPanel : public QWidget
     void onLowColReceived(int value) { setPropLowColorModeValue(value); }
     void onHighColReceived(int value) { setPropHighColorModeValue(value); }
     void onCMBoolReceived(bool status) { setPropCMEnabled(status); }
+
+    // Mesh Functions
+    void onTransparencyReceived(std::any value) { setPropTransValue(value); }
+    void onShadMReceived(std::any value) { setPropShadowValueM(value); }
+    void onLightingReceived(std::any value) { setPropLightingValue(value); }
+    void onSizeLimitReceived(int value) { setPropSizeLimitValue(value); }
+    void onShininessReceived(int value) { setPropShininessValue(value); }
 
     /*
     void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
@@ -127,6 +135,32 @@ class PropertiesPanel : public QWidget
 
     void setPropCMEnabled(bool status);
 
+    // Mesh Functions
+    template<typename T>
+    void setPropTransValue(T newVal)
+    {
+      MeshPropertiesOptions* temp = getMeshPropertiesOptions();
+
+      temp->setTransparancyValue(newVal);
+    }
+
+    template<typename T>
+    void setPropShadowValueM(T newVal)
+    {
+      MeshPropertiesOptions* temp = getMeshPropertiesOptions();
+      temp->setShadowValue(newVal);
+    }
+
+    template<typename T>
+    void setPropLightingValue(T newVal)
+    {
+      MeshPropertiesOptions* temp = getMeshPropertiesOptions();
+      temp->setLightingValue(newVal);
+    }
+
+    void setPropSizeLimitValue(int newVal);
+    void setPropShininessValue(int newVal);
+
 
   private:
 
@@ -136,6 +170,7 @@ class PropertiesPanel : public QWidget
     typedef void(VolumePropertiesOptions::*volAnyFunc)(std::any);
     typedef void(VolumePropertiesOptions::*volIntFunc)(int);
     typedef void(VolumePropertiesOptions::*volBoolFunc)(bool);
+    typedef void(MeshPropertiesOptions::*meshAnyFunc)(std::any);
 
     template<typename Property>
     QFrame *genLeftFrame(Property* left)
@@ -163,9 +198,16 @@ class PropertiesPanel : public QWidget
     VolumePropertiesOptions* getPropertiesOptions();
     VolumePropertiesMisc* getPropertiesMisc();
 
+    MeshPropertiesOptions* getMeshPropertiesOptions();
+    MeshPropertiesMaterials* getMeshPropertiesMaterials();
+
     void makeVolumeConnections(VolumePropertiesOptions* layout);
     void createVolumeAnyConnections(VolumePropertiesOptions* layout);
     void createVolumeIntConnections(VolumePropertiesOptions* layout);
+
+    void makeMeshConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout);
+    void createMeshAnyConnections(MeshPropertiesOptions* opLayout);
+    void createMeshIntConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout);
 
     const std::vector<std::tuple<volAnyFunc, propAnyFunc>> volumeAnyConnections = {
       std::make_tuple(&VolumePropertiesOptions::sendGammaValue,&PropertiesPanel::onGammaReceived),
@@ -184,6 +226,12 @@ class PropertiesPanel : public QWidget
       std::make_tuple(&VolumePropertiesOptions::sendAlphaValue,&PropertiesPanel::onAlphaReceived),
       std::make_tuple(&VolumePropertiesOptions::sendColorMapLowValue,&PropertiesPanel::onLowColReceived),
       std::make_tuple(&VolumePropertiesOptions::sendColorMapHighValue,&PropertiesPanel::onHighColReceived)
+    };
+
+    const std::vector<std::tuple<meshAnyFunc, propAnyFunc>> meshAnyConnections = {
+      std::make_tuple(&MeshPropertiesOptions::sendTransparencyValue,&PropertiesPanel::onTransparencyReceived),
+      std::make_tuple(&MeshPropertiesOptions::sendShadowValue,&PropertiesPanel::onShadMReceived),
+      std::make_tuple(&MeshPropertiesOptions::sendLightingValue,&PropertiesPanel::onLightingReceived)
     };
 
 /*

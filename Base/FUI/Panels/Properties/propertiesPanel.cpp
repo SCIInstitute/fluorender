@@ -108,6 +108,19 @@ void PropertiesPanel::setPropCMEnabled(bool status)
   temp->setColorMapEnabled(status);
 }
 
+void PropertiesPanel::setPropSizeLimitValue(int newVal)
+{
+  MeshPropertiesOptions* temp = getMeshPropertiesOptions();
+  temp->setSizeLimitValue(newVal);
+}
+
+void PropertiesPanel::setPropShininessValue(int newVal)
+{
+  MeshPropertiesMaterials* temp = getMeshPropertiesMaterials();
+
+  temp->setShininessValue(newVal);
+}
+
 void PropertiesPanel::onVolumeLoaded(int renderviewID)
 {
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions();
@@ -127,6 +140,8 @@ void PropertiesPanel::onMeshLoaded(int renderviewID)
 {
   MeshPropertiesMaterials *newMeshPropertiesMaterial = new MeshPropertiesMaterials();
   MeshPropertiesOptions *newMeshProperties = new MeshPropertiesOptions();
+
+  makeMeshConnections(newMeshProperties,newMeshPropertiesMaterial);
 
   QFrame *leftFrame = genLeftFrame(newMeshPropertiesMaterial);
   QFrame *rightFrame = genRightFrame(newMeshProperties);
@@ -166,6 +181,26 @@ VolumePropertiesMisc* PropertiesPanel::getPropertiesMisc()
   return temp;
 }
 
+MeshPropertiesOptions* PropertiesPanel::getMeshPropertiesOptions()
+{ 
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+
+  MeshPropertiesOptions* temp = tempMain->findChild<MeshPropertiesOptions*>();
+
+  return temp;
+}
+
+MeshPropertiesMaterials* PropertiesPanel::getMeshPropertiesMaterials()
+{
+  const int CURRTAB = tabWidget->currentIndex();
+  QWidget* tempMain = tabWidget->widget(CURRTAB);
+
+  MeshPropertiesMaterials* temp = tempMain->findChild<MeshPropertiesMaterials*>();
+
+  return temp;
+}
+
 void PropertiesPanel::makeVolumeConnections(VolumePropertiesOptions* layout)
 {
   createVolumeAnyConnections(layout);
@@ -182,4 +217,22 @@ void PropertiesPanel::createVolumeIntConnections(VolumePropertiesOptions* layout
 {
   for(auto && tup : volumeIntConnections)
     connect(layout,std::get<0>(tup),this,std::get<1>(tup));
+}
+
+void PropertiesPanel::makeMeshConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout)
+{
+  createMeshAnyConnections(opLayout);
+  createMeshIntConnections(opLayout,maLayout);
+}
+
+void PropertiesPanel::createMeshAnyConnections(MeshPropertiesOptions* opLayout)
+{
+  for(auto && tup : meshAnyConnections)
+    connect(opLayout,std::get<0>(tup),this,std::get<1>(tup));
+}
+
+void PropertiesPanel::createMeshIntConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout)
+{
+  connect(opLayout,&MeshPropertiesOptions::sendSizeLimitValue,this,&PropertiesPanel::onSizeLimitReceived);
+  connect(maLayout,&MeshPropertiesMaterials::sendShininessValue,this,&PropertiesPanel::onShininessReceived);
 }

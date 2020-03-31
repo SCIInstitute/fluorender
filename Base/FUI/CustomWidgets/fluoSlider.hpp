@@ -30,6 +30,7 @@ class FluoSlider : public QSlider
       }
       catch (const std::bad_any_cast &e)
       {
+        (void)e;
         this->setValue(static_cast<int>(std::any_cast<double>(value) * 100.0 + 0.5));
       }
     }
