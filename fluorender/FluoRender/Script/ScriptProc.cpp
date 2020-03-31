@@ -182,8 +182,9 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
-	TraceGroup* tg = m_view->GetTraceGroup();
-	if (!tg) return;
+	if (!cur_vol)
+		UPDATE_TRACE_DLG_AND_RETURN;
+
 
 	int tseq_cur_num = m_view->m_tseq_cur_num;
 	int tseq_prv_num = m_view->m_tseq_prv_num;
@@ -192,9 +193,6 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
 	if (time_mode != index)
 		return;
-
-	if (!cur_vol)
-		UPDATE_TRACE_DLG_AND_RETURN;
 
 	if (time_mode == 0)
 	{
@@ -223,6 +221,9 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 	}
 	else if (time_mode == 1)
 	{
+		TraceGroup* tg = m_view->GetTraceGroup();
+		if (!tg) return;
+
 		//after updating volume
 		if (tg->GetTrackMap()->GetFrameNum())
 		{
