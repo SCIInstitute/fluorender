@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=25.1
+ver_minor=25.2
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -82,7 +82,7 @@ value=0
 [invalidate\ tex]
 value=0
 [point\ volume\ mode]
-value=1
+value=0
 [ruler]
 use\ transf=0
 time\ dep=1
@@ -90,6 +90,8 @@ relax\ f1=2
 infr=5
 df_f=0
 relax\ iter=50
+auto\ relax=0
+relax\ type=1
 [pvxml\ flip]
 x=0
 y=0
