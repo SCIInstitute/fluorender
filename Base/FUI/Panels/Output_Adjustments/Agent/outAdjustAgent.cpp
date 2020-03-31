@@ -61,25 +61,25 @@ void OutAdjustAgent::UpdateAllSettings()
 	//values
 	//bool result = getValue("gamma r", dval);
 	getValue("gamma r", dval);
-    parentPanel.setRedGammaValue(Gamma2UiS(dval));
+    parentPanel.setOutRedGammaValue(Gamma2UiS(dval));
 	getValue("gamma g", dval);
-    parentPanel.setGreenGammaValue(Gamma2UiS(dval));
+    parentPanel.setOutGreenGammaValue(Gamma2UiS(dval));
     getValue("gamma b", dval);
-    parentPanel.setBlueGammaValue(Gamma2UiS(dval));
+    parentPanel.setOutBlueGammaValue(Gamma2UiS(dval));
     
 	getValue("brightness r", dval);
-    parentPanel.setRedLuminValue(Brigt2UiS(dval));
+    parentPanel.setOutRedLuminValue(Brigt2UiS(dval));
 	getValue("brightness g", dval);
-    parentPanel.setGreenLuminValue(Brigt2UiS(dval));
+    parentPanel.setOutGreenLuminValue(Brigt2UiS(dval));
 	getValue("brightness b", dval);
-    parentPanel.setBlueLuminValue(Brigt2UiS(dval));
+    parentPanel.setOutBlueLuminValue(Brigt2UiS(dval));
 
 	getValue("equalize r", dval);
-    parentPanel.setRedEqlValue(Equal2UiS(dval));
+    parentPanel.setOutRedEqlValue(Equal2UiS(dval));
 	getValue("equalize g", dval);
-    parentPanel.setGreenEqlValue(Equal2UiS(dval));
+    parentPanel.setOutGreenEqlValue(Equal2UiS(dval));
 	getValue("equalize b", dval);
-    parentPanel.setBlueEqlValue(Equal2UiS(dval));
+    parentPanel.setOutBlueEqlValue(Equal2UiS(dval));
 /*
 	parentPanel.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
 	parentPanel.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
@@ -139,61 +139,61 @@ void OutAdjustAgent::OnGammaRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma r", dval);
-    parentPanel.setRedGammaValue(Gamma2UiS(dval));
+    parentPanel.setOutRedGammaValue(Gamma2UiS(dval));
 }
 
 void OutAdjustAgent::OnGammaGChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma g", dval);
-    parentPanel.setGreenGammaValue(Gamma2UiS(dval));
+    parentPanel.setOutGreenGammaValue(Gamma2UiS(dval));
 }
 
 void OutAdjustAgent::OnGammaBChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma b", dval);
-    parentPanel.setBlueGammaValue(Gamma2UiS(dval));
+    parentPanel.setOutBlueGammaValue(Gamma2UiS(dval));
 }
 
 void OutAdjustAgent::OnBrightnessRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("brightness r", dval);
-    parentPanel.setRedLuminValue(Brigt2UiS(dval));
+    parentPanel.setOutRedLuminValue(Brigt2UiS(dval));
 }
 
 void OutAdjustAgent::OnBrightnessGChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("brightness g", dval);
-    parentPanel.setGreenLuminValue(Brigt2UiS(dval));
+    parentPanel.setOutGreenLuminValue(Brigt2UiS(dval));
 }
 
 void OutAdjustAgent::OnBrightnessBChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("brightness b", dval);
-    parentPanel.setBlueLuminValue(Brigt2UiS(dval));
+    parentPanel.setOutBlueLuminValue(Brigt2UiS(dval));
 }
 
 void OutAdjustAgent::OnEqualizeRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("equalize r", dval);
-    parentPanel.setRedEqlValue(Equal2UiS(dval));
+    parentPanel.setOutRedEqlValue(Equal2UiS(dval));
 }
 
 void OutAdjustAgent::OnEqualizeGChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("equalize g", dval);
-    parentPanel.setGreenEqlValue(Equal2UiS(dval));
+    parentPanel.setOutGreenEqlValue(Equal2UiS(dval));
 }
 
 void OutAdjustAgent::OnEqualizeBChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("equalize b", dval);
-    parentPanel.setBlueEqlValue(Equal2UiS(dval));
+    parentPanel.setOutBlueEqlValue(Equal2UiS(dval));
 }

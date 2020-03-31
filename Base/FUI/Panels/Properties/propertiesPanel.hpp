@@ -29,6 +29,16 @@ class PropertiesPanel : public QWidget
     void onMeshLoaded(int renderviewID);
 
     void onGammaReceived(std::any value) { setPropGammaValue(value); }
+    void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
+    void onSaturReceived(int value) { setPropSatValue(value); }
+    void onLowThrReceived(int value) { setPropLowThreshValue(value); }
+    void onHighThReceived(int value) { setPropHighThreshValue(value); }
+    void onLuminReceived(int value) { setPropLuminValue(value); }
+    void onShadReceived(std::any value) { setPropShadowValue(value); }
+    void onShadBoolReceived(bool status) { setPropShadowEnabled(status); }
+    void onAlphaReceived(int value) { setPropAlphaValue(value); }
+    void onAlphaBoolReceived(bool status) { setPropAlphaEnabled(status); }
+    
     /*
     void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
 
