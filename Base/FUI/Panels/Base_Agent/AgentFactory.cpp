@@ -29,6 +29,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include "AgentFactory.hpp"
 
+#include <Properties/Agent/volumePropAgent.hpp>
+#include <Properties/propertiesPanel.hpp>
+#include <Output_Adjustments/Agent/outAdjustAgent.hpp>
+#include <Output_Adjustments/outputAdjust.hpp>
+
+
 /*
 #include <Fui/ListModel.h>
 #include <Fui/TreeModel.h>
@@ -178,8 +184,8 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 
 	return render_canvas_agent;
 }
-
-OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wxWindow &window)
+*/
+OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QWidget &panel)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -187,7 +193,7 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 
 	//not found
 	OutAdjustAgent* out_adjust_agent =
-		new OutAdjustAgent(static_cast<OutAdjustPanel&>(window));
+		new OutAdjustAgent(static_cast<OutputAdjustments&>(panel));
 	if (out_adjust_agent)
 	{
 		out_adjust_agent->setName(name);
@@ -227,7 +233,7 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 
 	return out_adjust_agent;
 }
-
+/*
 ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);

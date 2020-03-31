@@ -77,7 +77,7 @@ ExternalProject_Get_Property(Teem_external_download BINARY_DIR)
 SET(Teem_DIR "${BINARY_DIR}/bin/Debug" CACHE INTERNAL "")
 set(Teem_INCLUDE_DIR "${BINARY_DIR}/include" CACHE INTERNAL "")
 
-add_library(Teem_external STATIC IMPORTED)
+add_library(Teem_external SHARED IMPORTED)
 
 set(teem_LIBRARIES "${Teem_DIR}/${prefix}teem${suffix}" CACHE INTERNAL "")
 

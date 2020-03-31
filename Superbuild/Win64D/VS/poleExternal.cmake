@@ -54,6 +54,6 @@ ExternalProject_Get_Property(pole_external_download SOURCE_DIR)
 SET(pole_LIBRARY_DIR "${BINARY_DIR}/Debug" CACHE INTERNAL "")
 SET(pole_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
 
-add_library(pole_external STATIC IMPORTED)
+add_library(pole_external SHARED IMPORTED)
 
 MESSAGE(STATUS "pole_LIBRARY_DIR: ${pole_LIBRARY_DIR}")

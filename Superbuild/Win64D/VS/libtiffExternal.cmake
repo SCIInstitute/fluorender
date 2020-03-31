@@ -69,7 +69,7 @@ ExternalProject_Get_Property(libtiff_external_download SOURCE_DIR)
 SET(TIFF_LIBRARY "${BINARY_DIR}/libtiff/Debug" CACHE INTERNAL "")
 SET(TIFF_INCLUDE_DIR "${SOURCE_DIR}/libtiff;${BINARY_DIR}/libtiff" CACHE INTERNAL "")
 
-add_library(libtiff_external STATIC IMPORTED)
+add_library(libtiff_external SHARED IMPORTED)
 
 set(TIFF_LIBRARIES
   ${TIFF_LIBRARY}/${prefix}tiffd${suffix} CACHE INTERNAL ""

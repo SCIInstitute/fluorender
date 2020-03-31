@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define AGENT_FACTORY_HPP
 
 #include <ObjectFactory.hpp>
-#include <Properties/Agent/volumePropAgent.hpp>
-#include <Properties/propertiesPanel.hpp>
+//#include <Properties/Agent/volumePropAgent.hpp>
+//#include <Properties/propertiesPanel.hpp>
 
 #include <QWidget>
 
@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 class ListModel;
 class TreeModel;
 class RenderCanvasAgent;
+class VolumePropAgent;
 class OutAdjustAgent;
 class ClipPlaneAgent;
 class MeshPropAgent;
@@ -97,9 +98,9 @@ class AgentFactory : public fluo::ObjectFactory
     TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
     */
     VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, QWidget &panel); //may need to be QWidget*
+    //RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
+    OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, QWidget &panel);
     /*
-    RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
-    OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
     ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
     MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
     ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);

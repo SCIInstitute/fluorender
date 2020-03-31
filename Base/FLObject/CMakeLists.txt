@@ -104,3 +104,7 @@ target_link_libraries(FLObject SceneGraph ${teem_LIBRARIES} ${Boost_LIBRARIES} $
 install(TARGETS FLObject
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
+

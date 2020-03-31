@@ -43,6 +43,7 @@ ExternalProject_Add(glew_external_download
 	CMAKE_CACHE_ARGS
 		-DCMAKE_C_COMPILER:PATH=${Compiler_C}
 		-DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+		-DBUILD_SHARED_LIBS:BOOL=ON
 )
 
 ExternalProject_Get_Property(glew_external_download BINARY_DIR)
@@ -52,7 +53,7 @@ SET(GLEW_LIBRARY "${BINARY_DIR}/lib/Debug" CACHE INTERNAL "")
 set(GLEW_INCLUDE_DIR ${SOURCE_DIR}/include CACHE INTERNAL "")
 set(GLEW_DLL_DIR ${BINARY_DIR}/bin/Debug CACHE INTERNAL "")
 
-add_library(glew_external STATIC IMPORTED)
+add_library(glew_external SHARED IMPORTED)
 
 set(GLEW_LIBRARIES
   ${GLEW_LIBRARY}/${prefix}glew32d${suffix}

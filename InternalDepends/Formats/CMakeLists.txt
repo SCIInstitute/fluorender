@@ -57,3 +57,6 @@ target_link_libraries(Formats FLIVR ${teem_LIBRARIES} ${Boost_LIBRARIES} ${pugi_
 
 add_dependencies(Formats FLIVR Teem_external_download Boost_external_download pugi_external_download libtiff_external_download)
 qt5_use_modules(Formats Xml)
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})

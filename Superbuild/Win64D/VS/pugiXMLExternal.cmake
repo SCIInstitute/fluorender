@@ -46,6 +46,7 @@ ExternalProject_Add(pugi_external_download
   CMAKE_CACHE_ARGS
     -DCMAKE_C_COMPILER:PATH=${Compiler_C}
     -DCMAKE_CXX_COMPILER:PATH=${Compiler_CXX}
+    -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
 ExternalProject_Get_Property(pugi_external_download BINARY_DIR)
@@ -55,7 +56,7 @@ SET(pugi_LIBRARY_DIR "${BINARY_DIR}/Debug" CACHE INTERNAL "")
 
 SET(pugi_INCLUDE_DIR ${SOURCE_DIR}/src CACHE INTERNAL "")
 
-add_library(pugi_external STATIC IMPORTED)
+add_library(pugi_external SHARED IMPORTED)
 
 #this is a bandaid fix. Need to really fix this. 
 set(pugi_LIBRARIES

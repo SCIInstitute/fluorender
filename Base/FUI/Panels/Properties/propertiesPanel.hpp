@@ -10,7 +10,6 @@
 
 #include <Panels/Properties/Agent/volumePropAgent.hpp>
 
-#include <iostream>
 
 /*
  *

@@ -83,3 +83,6 @@ else()
   target_link_libraries(FLIVR FLObject ${OpenCL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${teem_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY})
   add_dependencies(FLIVR FLObject freetype_external_download glew_external_download Teem_external_download)
 endif()
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})

@@ -66,9 +66,9 @@ set(HEADER_FILES
     Panels/Properties/meshPropertiesMaterials.hpp
     Panels/Properties/volumePropertiesMisc.hpp
 		Panels/Properties/Agent/volumePropAgent.hpp
-    Panels/Properties/Messenger/propertyMessenger.hpp
     Panels/Output_Adjustments/outputAdjust.hpp
     Panels/Output_Adjustments/outputLayout.hpp
+    Panels/Output_Adjustments/Agent/outAdjustAgent.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
     Panels/Clipping_Planes/clippingLayout.hpp
     Panels/Datasets/datasetsPanel.hpp
@@ -117,8 +117,9 @@ set(SOURCES
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
 		Panels/Properties/Agent/volumePropAgent.cpp
-    Panels/Properties/Messenger/propertyMessenger.cpp
+    Panels/Output_Adjustments/outputAdjust.cpp
     Panels/Output_Adjustments/outputLayout.cpp
+    Panels/Output_Adjustments/Agent/outAdjustAgent.cpp
     Panels/Workspace/workspaceTreeLayout.cpp
     Panels/Workspace/workspaceToolLayout.cpp
     Panels/Datasets/datasetsToolbarLayout.cpp
@@ -217,3 +218,6 @@ endif()
 if(MSVC_FOUND)
 	include(VSPostBuild/postBuild.cmake)
 endif()
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})

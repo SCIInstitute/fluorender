@@ -1,0 +1,199 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+
+#include "outAdjustAgent.hpp"
+#include <Panels/Output_Adjustments/outputAdjust.hpp>
+
+/*
+#include <Fui/OutAdjustPanel.h>
+#include <wx/valnum.h>
+#include <png_resource.h>
+#include <img/icons.h>
+*/
+
+OutAdjustAgent::OutAdjustAgent(OutputAdjustments &panel) :
+	InterfaceAgent(),
+	parentPanel(panel)
+{
+
+}
+
+void OutAdjustAgent::setObject(fluo::Node* obj)
+{
+	InterfaceAgent::setObject(obj);
+}
+
+fluo::Node* OutAdjustAgent::getObject()
+{
+	return dynamic_cast<fluo::Node*>(InterfaceAgent::getObject());
+}
+
+void OutAdjustAgent::UpdateAllSettings()
+{
+	double dval = 0.0;
+	bool bval = false;
+
+	//values
+	//bool result = getValue("gamma r", dval);
+	getValue("gamma r", dval);
+    parentPanel.setRedGammaValue(Gamma2UiS(dval));
+	getValue("gamma g", dval);
+    parentPanel.setGreenGammaValue(Gamma2UiS(dval));
+    getValue("gamma b", dval);
+    parentPanel.setBlueGammaValue(Gamma2UiS(dval));
+    
+	getValue("brightness r", dval);
+    parentPanel.setRedLuminValue(Brigt2UiS(dval));
+	getValue("brightness g", dval);
+    parentPanel.setGreenLuminValue(Brigt2UiS(dval));
+	getValue("brightness b", dval);
+    parentPanel.setBlueLuminValue(Brigt2UiS(dval));
+
+	getValue("equalize r", dval);
+    parentPanel.setRedEqlValue(Equal2UiS(dval));
+	getValue("equalize g", dval);
+    parentPanel.setGreenEqlValue(Equal2UiS(dval));
+	getValue("equalize b", dval);
+    parentPanel.setBlueEqlValue(Equal2UiS(dval));
+/*
+	parentPanel.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
+	parentPanel.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	getValue("gamma g", dval);
+	parentPanel.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
+	parentPanel.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	getValue("gamma b", dval);
+	parentPanel.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
+	parentPanel.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	getValue("brightness r", dval);
+	parentPanel.m_r_brightness_sldr->SetValue(Brigt2UiS(dval));
+	parentPanel.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	getValue("brightness g", dval);
+	parentPanel.m_g_brightness_sldr->SetValue(Brigt2UiS(dval));
+	parentPanel.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	getValue("brightness b", dval);
+	parentPanel.m_b_brightness_sldr->SetValue(Brigt2UiS(dval));
+	parentPanel.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	getValue("equalize r", dval);
+	parentPanel.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
+	parentPanel.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	getValue("equalize g", dval);
+	parentPanel.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
+	parentPanel.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	getValue("equalize b", dval);
+	parentPanel.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
+	parentPanel.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+
+	//sync
+	//r
+	getValue("sync r", bval);
+	parentPanel.m_sync_r_chk->ToggleTool(OutAdjustPanel::ID_SyncRChk, bval);
+	parentPanel.m_sync_r_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncRChk,
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	//g
+	getValue("sync g", bval);
+	parentPanel.m_sync_g_chk->ToggleTool(OutAdjustPanel::ID_SyncGChk, bval);
+	parentPanel.m_sync_g_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncGChk,
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	//b
+	getValue("sync b", bval);
+	parentPanel.m_sync_b_chk->ToggleTool(OutAdjustPanel::ID_SyncBChk, bval);
+	parentPanel.m_sync_b_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncBChk,
+		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+
+	if (result)
+		parentPanel.EnableAll();
+	else
+		parentPanel.DisableAll();
+
+	//parentPanel.Layout();
+
+*/
+}
+
+void OutAdjustAgent::OnGammaRChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("gamma r", dval);
+    parentPanel.setRedGammaValue(Gamma2UiS(dval));
+}
+
+void OutAdjustAgent::OnGammaGChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("gamma g", dval);
+    parentPanel.setGreenGammaValue(Gamma2UiS(dval));
+}
+
+void OutAdjustAgent::OnGammaBChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("gamma b", dval);
+    parentPanel.setBlueGammaValue(Gamma2UiS(dval));
+}
+
+void OutAdjustAgent::OnBrightnessRChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("brightness r", dval);
+    parentPanel.setRedLuminValue(Brigt2UiS(dval));
+}
+
+void OutAdjustAgent::OnBrightnessGChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("brightness g", dval);
+    parentPanel.setGreenLuminValue(Brigt2UiS(dval));
+}
+
+void OutAdjustAgent::OnBrightnessBChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("brightness b", dval);
+    parentPanel.setBlueLuminValue(Brigt2UiS(dval));
+}
+
+void OutAdjustAgent::OnEqualizeRChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("equalize r", dval);
+    parentPanel.setRedEqlValue(Equal2UiS(dval));
+}
+
+void OutAdjustAgent::OnEqualizeGChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("equalize g", dval);
+    parentPanel.setGreenEqlValue(Equal2UiS(dval));
+}
+
+void OutAdjustAgent::OnEqualizeBChanged(fluo::Event& event)
+{
+	double dval = 0.0;
+	getValue("equalize b", dval);
+    parentPanel.setBlueEqlValue(Equal2UiS(dval));
+}
