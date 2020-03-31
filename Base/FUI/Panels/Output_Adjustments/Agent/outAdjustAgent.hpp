@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define OUT_ADJUST_AGENT_HPP
 
 #include <Panels/Base_Agent/AgentFactory.hpp>
-#include <node.hpp>
+#include <Node.hpp>
 
 class OutputAdjustments;
 class AgentFactory;

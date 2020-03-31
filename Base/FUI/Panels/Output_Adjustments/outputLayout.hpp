@@ -19,6 +19,8 @@
 #include <tuple>
 #include <functional>
 
+#include <iostream>
+
 class OutputLayout : public QGridLayout
 {
   Q_OBJECT

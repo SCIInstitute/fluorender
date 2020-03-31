@@ -71,6 +71,8 @@ class OutputAdjustments : public QWidget
 
     OutAdjustAgent* m_agent;
     friend class OutAdjustAgent;
+
+
     
 };
 
