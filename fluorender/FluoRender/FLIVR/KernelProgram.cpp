@@ -3,6 +3,7 @@
 #include <Windows.h>
 #endif
 #include <algorithm>
+#include <cmath>
 
 namespace FLIVR
 {
