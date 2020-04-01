@@ -161,6 +161,7 @@ VRenderFrame::VRenderFrame(
 	m_vd_copy(0),
 	m_copy_data(false)
 {
+    SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);
 
