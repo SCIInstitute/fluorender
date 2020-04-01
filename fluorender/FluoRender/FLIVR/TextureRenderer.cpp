@@ -65,7 +65,7 @@ namespace FLIVR
 	bool TextureRenderer::clear_chan_buffer_ = true;
 	bool TextureRenderer::save_final_buffer_ = true;
 #ifdef _DEBUG
-	bool TextureRenderer::debug_uptime_ = false;//change to max time
+	bool TextureRenderer::debug_uptime_ = true;//change to max time
 #else
 	bool TextureRenderer::debug_uptime_ = false;//change to max time
 #endif
@@ -184,6 +184,7 @@ namespace FLIVR
 			}
 		}
 		tex_pool_.clear();
+		available_mem_ = mem_limit_;
 	}
 
 	void TextureRenderer::clear_tex_current()
@@ -204,6 +205,11 @@ namespace FLIVR
 				{
 					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
 					tex_pool_.erase(tex_pool_.begin() + i);
+					available_mem_ +=
+						tex_pool_[i].nx *
+						tex_pool_[i].ny *
+						tex_pool_[i].nz *
+						tex_pool_[i].nb / 1.04e6;
 					break;
 				}
 			}
@@ -234,6 +240,11 @@ namespace FLIVR
 				{
 					glDeleteTextures(1, (GLuint*)&tex_pool_[i].id);
 					tex_pool_.erase(tex_pool_.begin() + i);
+					available_mem_ +=
+						tex_pool_[i].nx *
+						tex_pool_[i].ny *
+						tex_pool_[i].nz *
+						tex_pool_[i].nb / 1.04e6;
 					break;
 				}
 			}
