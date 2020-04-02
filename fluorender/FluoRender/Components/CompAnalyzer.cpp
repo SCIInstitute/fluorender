@@ -678,11 +678,11 @@ size_t ComponentAnalyzer::GetCompSize()
 
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
-	str = "";
+	str = "ID\t";
 	if (m_vd && m_vd->GetAllBrickNum() > 1)
-		str = "BRICK_ID\t";
+		str += "BRICK_ID\t";
 
-	str += "ID\tPosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist";
+	str += "PosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist";
 
 	if (m_colocal)
 	{
@@ -752,9 +752,9 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 			brick_ids.push_back(i->second->brick_id);
 		}
 
+		stream << ids.front() << "\t";
 		if (bn > 1)
 			stream << brick_ids.front() << "\t";
-		stream << ids.front() << "\t";
 		stream << i->second->pos.x()*sx << "\t";
 		stream << i->second->pos.y()*sy << "\t";
 		stream << i->second->pos.z()*sz << "\t";
