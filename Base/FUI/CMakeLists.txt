@@ -45,7 +45,6 @@ set(HEADER_FILES
     fluoglwidget.hpp
     fui.hpp
     renderview.hpp
-    controller.hpp
     FluoToolbar/genToolbarObjects.hpp
     FluoToolbar/renderviewBottomTB.hpp
     FluoToolbar/renderviewTopTB.hpp
@@ -60,6 +59,7 @@ set(HEADER_FILES
     CustomWidgets/fluoToolButton.hpp
     CustomWidgets/fluoLine.hpp
     CustomWidgets/fluoColoredLine.hpp
+		CustomWidgets/controller.hpp
     Panels/Properties/propertiesPanel.hpp
     Panels/Properties/volumePropertiesOptions.hpp
     Panels/Properties/meshPropertiesOptions.hpp
@@ -71,6 +71,7 @@ set(HEADER_FILES
     Panels/Output_Adjustments/Agent/outAdjustAgent.hpp
     Panels/Clipping_Planes/clippingPlane.hpp
     Panels/Clipping_Planes/clippingLayout.hpp
+    Panels/Clipping_Planes/Agent/clipPlaneAgent.hpp
     Panels/Datasets/datasetsPanel.hpp
     Panels/Datasets/datasetsToolbarLayout.hpp
     Panels/Datasets/datasetsTreeLayout.hpp
@@ -120,6 +121,9 @@ set(SOURCES
     Panels/Output_Adjustments/outputAdjust.cpp
     Panels/Output_Adjustments/outputLayout.cpp
     Panels/Output_Adjustments/Agent/outAdjustAgent.cpp
+    Panels/Clipping_Planes/clippingPlane.cpp
+    Panels/Clipping_Planes/clippingLayout.cpp
+    Panels/Clipping_Planes/Agent/clipPlaneAgent.cpp
     Panels/Workspace/workspaceTreeLayout.cpp
     Panels/Workspace/workspaceToolLayout.cpp
     Panels/Datasets/datasetsToolbarLayout.cpp

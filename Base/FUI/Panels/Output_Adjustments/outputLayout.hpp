@@ -19,8 +19,6 @@
 #include <tuple>
 #include <functional>
 
-#include <iostream>
-
 class OutputLayout : public QGridLayout
 {
   Q_OBJECT
@@ -121,6 +119,7 @@ class OutputLayout : public QGridLayout
       this->addWidget(widget,row,0,1,MAXCOLSIZE+1,Qt::AlignVCenter);
     }
 
+    void constructLayout();
     void buildSliderConnections();
     void buildSpinboxConnections();
     void buildSpinboxDConnections();
@@ -199,6 +198,27 @@ class OutputLayout : public QGridLayout
       std::make_tuple(redEqlSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onRedESpinChanged),
       std::make_tuple(greenEqlSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onGreenESpinChanged),
       std::make_tuple(blueEqlSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onBlueESpinChanged),
+    };
+
+    const std::vector<std::function<void()>> rowFuncs = {
+      std::bind(&OutputLayout::addRow<QLabel,QLabel,QLabel>,this,0,gammaLabel,luminanceLabel,equalLabel),
+      std::bind(&OutputLayout::addRow<QLabel,FluoLine,FluoToolButton>,this,1,redLabel,redSepLine,redChainButton),
+      std::bind(&OutputLayout::addSingle<FluoColoredLine>,this,2,redLine),
+      std::bind(&OutputLayout::addRow<FluoSlider,FluoSlider,FluoSlider>,this,3,redGammaSlider,redLuminSlider,redEqlSlider),
+      std::bind(&OutputLayout::addSingle<QPushButton>,this,4,redResetButton),
+      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoSpinbox,FluoSpinboxDouble>,this,5,redGammaSpinbox,redLuminSpinbox,redEqlSpinbox),
+      std::bind(&OutputLayout::addRow<QLabel,FluoLine,FluoToolButton>,this,6,greenLabel,greenSepLine,greenChainButton),
+      std::bind(&OutputLayout::addSingle<FluoColoredLine>,this,7,greenLine),
+      std::bind(&OutputLayout::addRow<FluoSlider,FluoSlider,FluoSlider>,this,8,greenGammaSlider,greenLuminSlider,greenEqlSlider),
+      std::bind(&OutputLayout::addSingle<QPushButton>,this,9,greenResetButton),
+      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoSpinbox,FluoSpinboxDouble>,this,10,greenGammaSpinbox,greenLuminSpinbox,greenEqlSpinbox),
+      std::bind(&OutputLayout::addRow<QLabel,FluoLine,FluoToolButton>,this,11,blueLabel,blueSepLine,blueChainButton),
+      std::bind(&OutputLayout::addSingle<FluoColoredLine>,this,12,blueLine),
+      std::bind(&OutputLayout::addRow<FluoSlider,FluoSlider,FluoSlider>,this,13,blueGammaSlider,blueLuminSlider,blueEqlSlider),
+      std::bind(&OutputLayout::addSingle<QPushButton>,this,14,blueResetButton),
+      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoSpinbox,FluoSpinboxDouble>,this,15,blueGammaSpinbox,blueLuminSpinbox,blueEqlSpinbox),
+      std::bind(&OutputLayout::addSingle<FluoLine>,this,16,setDefaultLine),
+      std::bind(&OutputLayout::addSingle<QPushButton>,this,17,resetAllButton)
     };
 
     Controller<FluoSlider, FluoSpinboxDouble> *redGammaController =

@@ -110,6 +110,7 @@ class VolumePropertiesMisc : public QGridLayout
       std::bind(&VolumePropertiesMisc::addRow4,this),
       std::bind(&VolumePropertiesMisc::addRow5,this),
     };
+
 };
 
 
