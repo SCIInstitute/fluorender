@@ -74,7 +74,7 @@ using namespace std;
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "/"
-#define HELP_MANUAL "http://www.sci.utah.edu/releases/fluorender_v"\
+#define HELP_MANUAL "https://github.com/SCIInstitute/fluorender/releases/download/v"\
 				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
@@ -83,7 +83,7 @@ using namespace std;
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Manual.pdf"
-#define HELP_TUTORIAL "http://www.sci.utah.edu/releases/fluorender_v"\
+#define HELP_TUTORIAL "https://github.com/SCIInstitute/fluorender/releases/download/v"\
 				   VERSION_MAJOR_TAG \
 				   "." \
 				   VERSION_MINOR_TAG \
