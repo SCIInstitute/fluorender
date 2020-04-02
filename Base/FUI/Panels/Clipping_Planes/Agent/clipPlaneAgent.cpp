@@ -40,9 +40,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include "clipPlaneAgent.hpp"
 
-ClipPlaneAgent::ClipPlaneAgent(ClipPlanePanel &panel) :
+ClipPlaneAgent::ClipPlaneAgent(ClippingPlane &panel) :
 	InterfaceAgent(),
-	panel_(panel)
+	parentPanel(panel)
 {
 
 }

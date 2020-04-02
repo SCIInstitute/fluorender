@@ -24,13 +24,80 @@ class ClippingLayout : public QGridLayout
 {
   Q_OBJECT
 
+  signals:
+    void sendSalmonValue(int value);
+    void sendMagentaValue(int value);
+    void sendGreenValue(int value);
+    void sendYellowValue(int value);
+    void sendPurpleValue(int value);
+    void sendTealValue(int value);
+
+    void sendClipValue(int value);
+    void sendSlabValue(int value);
+    void sendWidthValue(int value);
+
+    void sendRotXValue(std::any value);
+    void sendRotYValue(std::any value);
+    void sendRotZValue(std::any value);
+
+  public slots:
+    void onSalmonSliderChanged() { sendSalmonValue(x1SSlider->value()); }
+    void onMagentaSliderChanged() { sendMagentaValue(x1MSlider->value()); }
+    void onGreenSliderChanged() { sendGreenValue(y1GSlider->value()); }
+    void onYellowSliderChanged() { sendYellowValue(y1YSlider->value()); }
+    void onPurpleSliderChanged() { sendPurpleValue(z1PSlider->value()); }
+    void onTealSliderChanged() { sendTealValue(z1TSlider->value()); }
+
+    void onSalmonSpinboxChanged() { sendSalmonValue(x1SSpinbox->value()); }
+    void onMagentaSpinboxChanged() { sendMagentaValue(x1MSpinbox->value()); }
+    void onGreenSpinboxChanged() { sendGreenValue(y1GSpinbox->value()); }
+    void onYellowSpinboxChanged() { sendYellowValue(y1YSpinbox->value()); }
+    void onPurpleSpinboxChanged() { sendPurpleValue(z1PSpinbox->value()); }
+    void onTealSpinboxChanged() { sendTealValue(z1TSpinbox->value()); }
+
+    void onClipSpinboxChanged() { sendClipValue(setClipSpinbox->value()); }
+    void onSlabSpinboxChanged() { sendSlabValue(slabSpinbox->value()); }
+    void onWidthSpinboxChanged() { sendWidthValue(widthSpinbox->value()); }
+
+    void onRotXSliderChanged() { sendRotXValue(x2Slider->value()); }
+    void onRotYSliderChanged() { sendRotYValue(y2Slider->value()); }
+    void onRotZSliderChanged() { sendRotZValue(z2Slider->value()); }
+
+    void onRotXSpinboxChanged() { sendRotXValue(x2Spinbox->value()); }
+    void onRotYSpinboxChanged() { sendRotYValue(y2Spinbox->value()); }
+    void onRotZSpinboxChanged() { sendRotZValue(z2Spinbox->value()); }
+
   public:
     ClippingLayout();
 
+    void setSalmonValue(int newVal) { x1SalmonController->setValues(newVal); }
+    void setMagentaValue(int newVal) { x1MagentaController->setValues(newVal); }
+    void setGreenValue(int newVal) { y1GreenController->setValues(newVal); }
+    void setYellowValue(int newVal) { y1YellowController->setValues(newVal); }
+    void setPurpleValue(int newVal) { z1PurpleController->setValues(newVal); }
+    void setTealValue(int newVal) { z1TealController->setValues(newVal); }
+
+    void setClipValue(int newVal) { setClipSpinbox->setValue(newVal); }
+    void setSlabValue(int newVal) { slabSpinbox->setValue(newVal); }
+    void setWidthValue(int newVal) { widthSpinbox->setValue(newVal); }
+
+    template<typename T>
+    void setRotXValue(T newVal) { x2RotationController->setValues(newVal); }
+
+    template<typename T>
+    void setRotYValue(T newVal) { y2RotationController->setValues(newVal); }
+
+    template<typename T>
+    void setRotZValue(T newVal) { z2RotationController->setValues(newVal); }
+
   private:
 
-    const int MAXCOLSIZE = 8;
+    typedef void(ClippingLayout::*clipFunc)();
+    typedef void(FluoSlider::*sliderFunc)();
+    typedef void(FluoSpinbox::*spinFunc)();
+    typedef void(FluoSpinboxDouble::*dSpinFunc)();
 
+    const int MAXCOLSIZE = 8;
 
     template<typename T>
     void addToWidget(T* widget,int row,int size)
@@ -142,6 +209,39 @@ class ClippingLayout : public QGridLayout
 
     void row0();
     void constructLayout();
+    void buildSliderConnections();
+    void buildSpinboxConnections();
+    void buildSpinboxDConnections();
+
+    const std::vector<std::tuple<FluoSlider*, sliderFunc, clipFunc>> sliderConnections = {
+      std::make_tuple(x1SSlider, &FluoSlider::sliderReleased, &ClippingLayout::onSalmonSliderChanged),
+      std::make_tuple(x1MSlider, &FluoSlider::sliderReleased, &ClippingLayout::onMagentaSliderChanged),
+      std::make_tuple(y1GSlider, &FluoSlider::sliderReleased, &ClippingLayout::onGreenSliderChanged),
+      std::make_tuple(y1YSlider, &FluoSlider::sliderReleased, &ClippingLayout::onYellowSliderChanged),
+      std::make_tuple(z1PSlider, &FluoSlider::sliderReleased, &ClippingLayout::onPurpleSliderChanged),
+      std::make_tuple(z1TSlider, &FluoSlider::sliderReleased, &ClippingLayout::onTealSliderChanged),
+      std::make_tuple(x2Slider, &FluoSlider::sliderReleased, &ClippingLayout::onRotXSliderChanged),
+      std::make_tuple(y2Slider, &FluoSlider::sliderReleased, &ClippingLayout::onRotYSliderChanged),
+      std::make_tuple(z2Slider, &FluoSlider::sliderReleased, &ClippingLayout::onRotZSliderChanged)
+    };
+
+    const std::vector<std::tuple<FluoSpinbox*, spinFunc, clipFunc>> spinConnections = {
+      std::make_tuple(x1SSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onSalmonSpinboxChanged),
+      std::make_tuple(x1MSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onMagentaSpinboxChanged),
+      std::make_tuple(y1GSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onGreenSpinboxChanged),
+      std::make_tuple(y1YSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onYellowSpinboxChanged),
+      std::make_tuple(z1PSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onPurpleSpinboxChanged),
+      std::make_tuple(z1TSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onTealSpinboxChanged),
+      std::make_tuple(setClipSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onClipSpinboxChanged),
+      std::make_tuple(slabSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onSlabSpinboxChanged),
+      std::make_tuple(widthSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onWidthSpinboxChanged),
+    };
+
+    const std::vector<std::tuple<FluoSpinboxDouble*, dSpinFunc, clipFunc>> dSpinConnections = {
+      std::make_tuple(x2Spinbox, &FluoSpinboxDouble::editingFinished, &ClippingLayout::onRotXSpinboxChanged),
+      std::make_tuple(y2Spinbox, &FluoSpinboxDouble::editingFinished, &ClippingLayout::onRotYSpinboxChanged),
+      std::make_tuple(z2Spinbox, &FluoSpinboxDouble::editingFinished, &ClippingLayout::onRotZSpinboxChanged),
+    };
 
     const std::vector<std::function<void()>> rowFuncs = {
       std::bind(&ClippingLayout::row0,this),

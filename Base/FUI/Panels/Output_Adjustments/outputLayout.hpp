@@ -192,12 +192,12 @@ class OutputLayout : public QGridLayout
     };
 
     const std::vector<std::tuple<FluoSpinboxDouble*, dSpinFunc, outputFunc>> dSpinConnections = {
-      std::make_tuple(redGammaSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onRedGSpinChanged),
-      std::make_tuple(greenGammaSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onGreenGSpinChanged),
-      std::make_tuple(blueGammaSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onBlueGSpinChanged),
-      std::make_tuple(redEqlSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onRedESpinChanged),
-      std::make_tuple(greenEqlSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onGreenESpinChanged),
-      std::make_tuple(blueEqlSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onBlueESpinChanged),
+      std::make_tuple(redGammaSpinbox, &FluoSpinboxDouble::editingFinished,&OutputLayout::onRedGSpinChanged),
+      std::make_tuple(greenGammaSpinbox, &FluoSpinboxDouble::editingFinished,&OutputLayout::onGreenGSpinChanged),
+      std::make_tuple(blueGammaSpinbox, &FluoSpinboxDouble::editingFinished,&OutputLayout::onBlueGSpinChanged),
+      std::make_tuple(redEqlSpinbox, &FluoSpinboxDouble::editingFinished,&OutputLayout::onRedESpinChanged),
+      std::make_tuple(greenEqlSpinbox, &FluoSpinboxDouble::editingFinished,&OutputLayout::onGreenESpinChanged),
+      std::make_tuple(blueEqlSpinbox, &FluoSpinboxDouble::editingFinished,&OutputLayout::onBlueESpinChanged),
     };
 
     const std::vector<std::function<void()>> rowFuncs = {

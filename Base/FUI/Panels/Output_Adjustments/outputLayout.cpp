@@ -6,7 +6,6 @@ OutputLayout::OutputLayout()
   buildSliderConnections();
   buildSpinboxConnections();
   buildSpinboxDConnections();
-
 }
 
 void OutputLayout::constructLayout()
