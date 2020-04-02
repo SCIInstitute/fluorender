@@ -647,8 +647,8 @@ void VRenderView::CreateBar()
 	m_scale_mode_btn->AddCheckTool(
 		ID_ScaleModeBtn, "Switch zoom ratio mode",
 		bitmap, wxNullBitmap,
-		"Switch zoom ratio mode",
-		"Switch zoom ratio mode");
+		"View-based zoom ratio",
+		"View-based zoom ratio (Click to switch to data-based mode)");
 	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, true);
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
@@ -1223,11 +1223,23 @@ void VRenderView::SetScaleMode(bool mode, bool update)
 {
 	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, mode);
 	if (mode)
+	{
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_view));
+		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
+			"View-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
+			"View-based zoom ratio (Click to switch to data-based mode)");
+	}
 	else
+	{
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_data));
+		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
+			"Data-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
+			"Data-based zoom ratio (Click to switch to view-based mode)");
+	}
 	m_glview->m_scale_mode = mode;
 	if (update)
 		UpdateScaleFactor();
@@ -2026,11 +2038,23 @@ void VRenderView::OnScaleMode(wxCommandEvent& event)
 {
 	bool mode = m_scale_mode_btn->GetToolState(ID_ScaleModeBtn);
 	if (mode)
+	{
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_view));
+		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
+			"View-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
+			"View-based zoom ratio (Click to switch to data-based mode)");
+	}
 	else
+	{
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_data));
+		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
+			"Data-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
+			"Data-based zoom ratio (Click to switch to view-based mode)");
+	}
 	m_glview->m_scale_mode = mode;
 	UpdateScaleFactor(false);
 }
