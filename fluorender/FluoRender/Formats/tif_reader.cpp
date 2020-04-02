@@ -984,9 +984,12 @@ uint64_t TIFReader::TurnToPage(uint64_t page)
 			tiff_stream.seekg(current_offset_, tiff_stream.beg);
 			if (GetTiffField(kSubFileTypeTag) != 1) current_page_++;
 			current_offset_ = GetTiffNextPageOffset();
+			if (!current_offset_)
+			{
+				imagej_raw_ = true;
+				break;
+			}
 		}
-		if (!current_offset_)
-			imagej_raw_ = true;
 	}
 	if (current_page_ != page_save &&
 		!imagej_raw_)
