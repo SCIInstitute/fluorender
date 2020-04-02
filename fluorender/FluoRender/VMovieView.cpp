@@ -1502,8 +1502,9 @@ void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
 
 wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent) {
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 100));
+#ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-
+#endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 	wxBoxSizer *line1 = new wxBoxSizer(wxHORIZONTAL);
