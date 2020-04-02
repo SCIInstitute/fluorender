@@ -139,6 +139,9 @@ We recommend building FluoRender outside of the source tree. <br/>
     - You may need to right-click FluoRender project on the Solution Explorer to "Set as StartUp Project" for it to run. <br/>
     - If you are building on Windows 8 or later, you will need to set a Visual Studio Graphics Option. This enables the application to build in higher definition.<br/>
       <code>Project Properties -> Manifest Tool -> Input and Output -> Enable DPI Awareness -> Yes </code> <br/>
+    - On Mac OS, add this setting to info.plist:
+    <key>NSHighResolutionCapable</key>
+    <true/>
 
 Contact
 ========
