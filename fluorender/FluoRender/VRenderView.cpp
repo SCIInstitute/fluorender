@@ -1767,7 +1767,9 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 150));
-
+#ifdef _DARWIN
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 

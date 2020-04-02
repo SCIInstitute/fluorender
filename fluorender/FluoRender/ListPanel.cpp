@@ -503,7 +503,9 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
-
+#ifdef _DARWIN
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 

@@ -161,7 +161,9 @@ VRenderFrame::VRenderFrame(
 	m_vd_copy(0),
 	m_copy_data(false)
 {
-    SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#ifdef _DARWIN
+	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
 	//create this first to read the settings
 	m_setting_dlg = new SettingDlg(this, this);
 
@@ -1142,6 +1144,9 @@ void VRenderFrame::OnCh3Check(wxCommandEvent &event)
 wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(640, 110));
+#ifdef _DARWIN
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
 	wxStaticText* st;
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -1230,7 +1235,9 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(640, 110));
-
+#ifdef _DARWIN
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
@@ -2693,7 +2700,9 @@ void VRenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
 wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 90));
-
+#ifdef _DARWIN
+	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL );
 
