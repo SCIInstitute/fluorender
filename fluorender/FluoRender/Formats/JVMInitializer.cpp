@@ -135,7 +135,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
                     cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
                     while (cont)
                     {
-                        if (filename.Matches("jdk*")){
+                        if (filename.Matches("*jdk*")){
                             jvm_path = dir.GetNameWithSep() + filename + GETSLASH();
                         }
                         cont = dir.GetNext(&filename);
