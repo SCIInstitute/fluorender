@@ -132,7 +132,7 @@ namespace fluo
 			else
 				return 0;
 		}
-
+/*
 		RenderView* getRenderView()
 		{
 			if (!results_.empty())
@@ -140,7 +140,7 @@ namespace fluo
 			else
 				return 0;
 		}
-
+*/
 		void matchName(const std::string &name)
 		{ names_.push_back(name); }
 		void matchNames(const std::vector<std::string> &names)

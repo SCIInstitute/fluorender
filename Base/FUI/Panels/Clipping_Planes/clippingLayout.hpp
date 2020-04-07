@@ -40,6 +40,10 @@ class ClippingLayout : public QGridLayout
     void sendRotYValue(std::any value);
     void sendRotZValue(std::any value);
 
+    void sendXPlaneBoolean(bool status);
+    void sendYPlaneBoolean(bool status);
+    void sendZPlaneBoolean(bool status);
+
   public slots:
     void onSalmonSliderChanged() { sendSalmonValue(x1SSlider->value()); }
     void onMagentaSliderChanged() { sendMagentaValue(x1MSlider->value()); }
@@ -67,6 +71,10 @@ class ClippingLayout : public QGridLayout
     void onRotYSpinboxChanged() { sendRotYValue(y2Spinbox->value()); }
     void onRotZSpinboxChanged() { sendRotZValue(z2Spinbox->value()); }
 
+    void onXPlaneLockToggled() { sendXPlaneBoolean(xChainToolbutton->isChecked()); }
+    void onYPlaneLockToggled() { sendYPlaneBoolean(yChainToolbutton->isChecked()); }
+    void onZPlaneLockToggled() { sendZPlaneBoolean(zChainToolbutton->isChecked()); }
+
   public:
     ClippingLayout();
 
@@ -89,6 +97,10 @@ class ClippingLayout : public QGridLayout
 
     template<typename T>
     void setRotZValue(T newVal) { z2RotationController->setValues(newVal); }
+
+    const int getSalmonSliderMax() { return x1SSlider->maximum(); }
+    const int getGreenSliderMax() { return y1GSlider->maximum(); }
+    const int getPurpleSliderMax() { return z1PSlider->maximum(); }
 
   private:
 
