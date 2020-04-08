@@ -2,10 +2,18 @@
 
 ClippingLayout::ClippingLayout()
 {
+  flipSliders();
   constructLayout();
   buildSliderConnections();
   buildSpinboxConnections();
   buildSpinboxDConnections();
+}
+
+void ClippingLayout::flipSliders()
+{
+  x1SSlider->setInvertedAppearance(true);
+  y1GSlider->setInvertedAppearance(true);
+  z1PSlider->setInvertedAppearance(true);
 }
 
 void ClippingLayout::row0()

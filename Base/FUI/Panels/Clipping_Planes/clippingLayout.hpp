@@ -220,6 +220,7 @@ class ClippingLayout : public QGridLayout
     FluoSpinboxDouble *z2Spinbox = new FluoSpinboxDouble(-180,180,false);
 
     void row0();
+    void flipSliders(); // might make this default in the slider.
     void constructLayout();
     void buildSliderConnections();
     void buildSpinboxConnections();
