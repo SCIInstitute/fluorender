@@ -3036,7 +3036,7 @@ void ComponentDlg::Cluster()
 	{
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
-		vd->GetVR()->clear_tex_pool();
+		vd->GetVR()->clear_tex_label();
 		m_view->RefreshGL();
 	}
 
@@ -3179,6 +3179,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
+	vd->GetVR()->return_label();
+
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	wxString titles, values;
@@ -3188,12 +3190,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	SetOutput(titles, values);
 
 	//update
-	//if (cg.GetUseMask())
-	//	vd->GetMask(true);
-	//vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
-
-	//connection.disconnect();
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
@@ -3359,7 +3356,7 @@ void ComponentDlg::Analyze(bool sel)
 	if (m_consistent)
 	{
 		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_pool();
+		vd->GetVR()->clear_tex_label();
 		m_view->RefreshGL();
 	}
 

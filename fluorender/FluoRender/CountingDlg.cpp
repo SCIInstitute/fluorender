@@ -212,7 +212,6 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	FL::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
-	vd->GetVR()->clear_tex_pool();
 	m_view->RefreshGL();
 
 	FL::CompList *list = ca.GetCompList();

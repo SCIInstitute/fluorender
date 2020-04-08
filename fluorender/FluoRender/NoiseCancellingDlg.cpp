@@ -192,7 +192,6 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	comp_selector.SetAnalyzer(&ca);
 	comp_selector.CompFull();
 
-	vd->GetVR()->clear_tex_pool();
 	m_view->RefreshGL();
 }
 

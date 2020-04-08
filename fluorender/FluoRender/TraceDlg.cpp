@@ -2105,7 +2105,7 @@ void TraceDlg::CellNewID(bool append)
 	CellUpdate();
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+	vd->GetVR()->clear_tex_current();
 
 }
 
@@ -2175,7 +2175,7 @@ void TraceDlg::CellEraseID()
 		}
 
 		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_pool();
+		vd->GetVR()->clear_tex_current();
 		//save label mask to disk
 		vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 	}
@@ -2566,7 +2566,7 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 		}
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+	vd->GetVR()->clear_tex_current();
 	//save label mask to disk
 	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
@@ -2667,7 +2667,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 			data_label[index] = cell->Id();
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+	vd->GetVR()->clear_tex_current();
 	//save label mask to disk
 	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
@@ -2803,7 +2803,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_pool();
+	vd->GetVR()->clear_tex_current();
 	//m_view->RefreshGL();
 	//update view
 	//CellUpdate();
