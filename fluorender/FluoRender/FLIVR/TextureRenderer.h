@@ -169,6 +169,7 @@ namespace FLIVR
 		static void clear_tex_pool();
 		void clear_tex_current();
 		void clear_tex_mask();
+		void clear_tex_label();
 
 		//set the 2d texture mask for segmentation
 		void set_2d_mask(GLuint id);
