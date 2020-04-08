@@ -53,7 +53,7 @@ class MeshPropertiesOptions : public QGridLayout
   private:
 
     typedef void(MeshPropertiesOptions::*meshFunc)();
-    typedef void(FluoSlider::*sliderFunc)();
+    typedef void(FluoSlider::*sliderFunc)(int);
     typedef void(FluoSpinboxDouble::*dSpinFunc)();
 
     void addRow0();
@@ -92,10 +92,10 @@ class MeshPropertiesOptions : public QGridLayout
     };
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, meshFunc>> sliderConnections = {
-      std::make_tuple(transparencySlider,&FluoSlider::sliderReleased, &MeshPropertiesOptions::onTransparencySliderChanged),
-      std::make_tuple(shadowSlider,&FluoSlider::sliderReleased, &MeshPropertiesOptions::onShadowSliderChanged),
-      std::make_tuple(lightingSlider,&FluoSlider::sliderReleased, &MeshPropertiesOptions::onLightingSliderChanged),
-      std::make_tuple(sizeLimitSlider,&FluoSlider::sliderReleased, &MeshPropertiesOptions::onSizeLimitSliderChanged)
+      std::make_tuple(transparencySlider,&FluoSlider::valueChanged, &MeshPropertiesOptions::onTransparencySliderChanged),
+      std::make_tuple(shadowSlider,&FluoSlider::valueChanged, &MeshPropertiesOptions::onShadowSliderChanged),
+      std::make_tuple(lightingSlider,&FluoSlider::valueChanged, &MeshPropertiesOptions::onLightingSliderChanged),
+      std::make_tuple(sizeLimitSlider,&FluoSlider::valueChanged, &MeshPropertiesOptions::onSizeLimitSliderChanged)
     };
 
     const std::vector<std::tuple<FluoSpinboxDouble*, dSpinFunc, meshFunc>> spinboxConnections = {

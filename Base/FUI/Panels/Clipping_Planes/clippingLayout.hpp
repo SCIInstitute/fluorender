@@ -105,7 +105,7 @@ class ClippingLayout : public QGridLayout
   private:
 
     typedef void(ClippingLayout::*clipFunc)();
-    typedef void(FluoSlider::*sliderFunc)();
+    typedef void(FluoSlider::*sliderFunc)(int);
     typedef void(FluoSpinbox::*spinFunc)();
     typedef void(FluoSpinboxDouble::*dSpinFunc)();
 
@@ -226,15 +226,15 @@ class ClippingLayout : public QGridLayout
     void buildSpinboxDConnections();
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, clipFunc>> sliderConnections = {
-      std::make_tuple(x1SSlider, &FluoSlider::sliderReleased, &ClippingLayout::onSalmonSliderChanged),
-      std::make_tuple(x1MSlider, &FluoSlider::sliderReleased, &ClippingLayout::onMagentaSliderChanged),
-      std::make_tuple(y1GSlider, &FluoSlider::sliderReleased, &ClippingLayout::onGreenSliderChanged),
-      std::make_tuple(y1YSlider, &FluoSlider::sliderReleased, &ClippingLayout::onYellowSliderChanged),
-      std::make_tuple(z1PSlider, &FluoSlider::sliderReleased, &ClippingLayout::onPurpleSliderChanged),
-      std::make_tuple(z1TSlider, &FluoSlider::sliderReleased, &ClippingLayout::onTealSliderChanged),
-      std::make_tuple(x2Slider, &FluoSlider::sliderReleased, &ClippingLayout::onRotXSliderChanged),
-      std::make_tuple(y2Slider, &FluoSlider::sliderReleased, &ClippingLayout::onRotYSliderChanged),
-      std::make_tuple(z2Slider, &FluoSlider::sliderReleased, &ClippingLayout::onRotZSliderChanged)
+      std::make_tuple(x1SSlider, &FluoSlider::valueChanged, &ClippingLayout::onSalmonSliderChanged),
+      std::make_tuple(x1MSlider, &FluoSlider::valueChanged, &ClippingLayout::onMagentaSliderChanged),
+      std::make_tuple(y1GSlider, &FluoSlider::valueChanged, &ClippingLayout::onGreenSliderChanged),
+      std::make_tuple(y1YSlider, &FluoSlider::valueChanged, &ClippingLayout::onYellowSliderChanged),
+      std::make_tuple(z1PSlider, &FluoSlider::valueChanged, &ClippingLayout::onPurpleSliderChanged),
+      std::make_tuple(z1TSlider, &FluoSlider::valueChanged, &ClippingLayout::onTealSliderChanged),
+      std::make_tuple(x2Slider, &FluoSlider::valueChanged, &ClippingLayout::onRotXSliderChanged),
+      std::make_tuple(y2Slider, &FluoSlider::valueChanged, &ClippingLayout::onRotYSliderChanged),
+      std::make_tuple(z2Slider, &FluoSlider::valueChanged, &ClippingLayout::onRotZSliderChanged)
     };
 
     const std::vector<std::tuple<FluoSpinbox*, spinFunc, clipFunc>> spinConnections = {

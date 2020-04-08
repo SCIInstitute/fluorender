@@ -86,7 +86,7 @@ class OutputLayout : public QGridLayout
   private:
 
     typedef void(OutputLayout::*outputFunc)();
-    typedef void(FluoSlider::*sliderFunc)();
+    typedef void(FluoSlider::*sliderFunc)(int);
     typedef void(FluoSpinbox::*spinFunc)();
     typedef void(FluoSpinboxDouble::*dSpinFunc)();
 
@@ -174,15 +174,15 @@ class OutputLayout : public QGridLayout
     FluoSpinboxDouble *blueEqlSpinbox  = new FluoSpinboxDouble(0.0,1.0,false);
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, outputFunc>> sliderConnections = {
-      std::make_tuple(redGammaSlider, &FluoSlider::sliderReleased, &OutputLayout::onRedGSliderChanged),
-      std::make_tuple(greenGammaSlider, &FluoSlider::sliderReleased, &OutputLayout::onGreenGSliderChanged),
-      std::make_tuple(blueGammaSlider, &FluoSlider::sliderReleased, &OutputLayout::onBlueGSliderChanged),
-      std::make_tuple(redLuminSlider, &FluoSlider::sliderReleased, &OutputLayout::onRedLSliderChanged),
-      std::make_tuple(greenLuminSlider, &FluoSlider::sliderReleased, &OutputLayout::onGreenLSliderChanged),
-      std::make_tuple(blueLuminSlider, &FluoSlider::sliderReleased, &OutputLayout::onBlueLSliderChanged),
-      std::make_tuple(redEqlSlider, &FluoSlider::sliderReleased, &OutputLayout::onRedESliderChanged),
-      std::make_tuple(greenEqlSlider, &FluoSlider::sliderReleased, &OutputLayout::onGreenESliderChanged),
-      std::make_tuple(blueEqlSlider, &FluoSlider::sliderReleased, &OutputLayout::onBlueESliderChanged)
+      std::make_tuple(redGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onRedGSliderChanged),
+      std::make_tuple(greenGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onGreenGSliderChanged),
+      std::make_tuple(blueGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onBlueGSliderChanged),
+      std::make_tuple(redLuminSlider, &FluoSlider::valueChanged, &OutputLayout::onRedLSliderChanged),
+      std::make_tuple(greenLuminSlider, &FluoSlider::valueChanged, &OutputLayout::onGreenLSliderChanged),
+      std::make_tuple(blueLuminSlider, &FluoSlider::valueChanged, &OutputLayout::onBlueLSliderChanged),
+      std::make_tuple(redEqlSlider, &FluoSlider::valueChanged, &OutputLayout::onRedESliderChanged),
+      std::make_tuple(greenEqlSlider, &FluoSlider::valueChanged, &OutputLayout::onGreenESliderChanged),
+      std::make_tuple(blueEqlSlider, &FluoSlider::valueChanged, &OutputLayout::onBlueESliderChanged)
     };
 
     const std::vector<std::tuple<FluoSpinbox*, spinFunc, outputFunc>> spinConnections = {

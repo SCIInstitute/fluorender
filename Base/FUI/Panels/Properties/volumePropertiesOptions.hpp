@@ -127,7 +127,7 @@ class VolumePropertiesOptions : public QGridLayout
   private:
 
     typedef void(VolumePropertiesOptions::*volumeFunc)();
-    typedef void(FluoSlider::*sliderFunc)();
+    typedef void(FluoSlider::*sliderFunc)(int);
     typedef void(FluoSpinbox::*spinFunc)();
     typedef void(FluoSpinboxDouble::*dSpinFunc)();
 
@@ -193,19 +193,19 @@ class VolumePropertiesOptions : public QGridLayout
     };
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, volumeFunc>> sliderConnections = {
-      std::make_tuple(gammaSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onGammaSliderChanged),
-      std::make_tuple(extractBSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onExtBoundSliderChanged),
-      std::make_tuple(saturationSlider, &FluoSlider::sliderReleased,&VolumePropertiesOptions::onSatSliderChanged),
-      std::make_tuple(threshold1Slider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onLowThreshSliderChanged),
-      std::make_tuple(threshold2Slider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onHighThreshSliderChanged),
-      std::make_tuple(luminanceSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onLuminanceSliderChanged),
-      std::make_tuple(shadowSlider, &FluoSlider::sliderReleased,&VolumePropertiesOptions::onShadowSliderChanged),
-      std::make_tuple(alphaSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onAlphaSliderChanged),
-      std::make_tuple(sampleRateSlider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onSampleSliderChanged),
-      std::make_tuple(shading1Slider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onLShaderSliderChanged),
-      std::make_tuple(shading2Slider, &FluoSlider::sliderReleased,&VolumePropertiesOptions::onHShaderSliderChanged),
-      std::make_tuple(colorMap1Slider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onLCMSliderChanged),
-      std::make_tuple(colorMap2Slider, &FluoSlider::sliderReleased, &VolumePropertiesOptions::onHCMSliderChanged)
+      std::make_tuple(gammaSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onGammaSliderChanged),
+      std::make_tuple(extractBSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onExtBoundSliderChanged),
+      std::make_tuple(saturationSlider, &FluoSlider::valueChanged,&VolumePropertiesOptions::onSatSliderChanged),
+      std::make_tuple(threshold1Slider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onLowThreshSliderChanged),
+      std::make_tuple(threshold2Slider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onHighThreshSliderChanged),
+      std::make_tuple(luminanceSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onLuminanceSliderChanged),
+      std::make_tuple(shadowSlider, &FluoSlider::valueChanged,&VolumePropertiesOptions::onShadowSliderChanged),
+      std::make_tuple(alphaSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onAlphaSliderChanged),
+      std::make_tuple(sampleRateSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onSampleSliderChanged),
+      std::make_tuple(shading1Slider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onLShaderSliderChanged),
+      std::make_tuple(shading2Slider, &FluoSlider::valueChanged,&VolumePropertiesOptions::onHShaderSliderChanged),
+      std::make_tuple(colorMap1Slider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onLCMSliderChanged),
+      std::make_tuple(colorMap2Slider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onHCMSliderChanged)
     };
 
     const std::vector<std::tuple<FluoSpinbox*, spinFunc, volumeFunc>> spinConnections = {
