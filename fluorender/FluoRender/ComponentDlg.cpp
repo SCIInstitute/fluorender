@@ -3251,7 +3251,6 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
-	vd->GetVR()->clear_tex_current();
 	m_view->RefreshGL();
 
 	//connection.disconnect();
