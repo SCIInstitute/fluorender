@@ -150,7 +150,7 @@ namespace FLIVR
 	"		any(greaterThan(s.xy, vec2(1.0, 1.0))))\n"\
 	"		discard;\n"\
 	"	float dist = length(s.xy*loc6.zw - loc6.xy);\n" \
-	"	if (dist > 1.0 * loc8.z)\n" \
+	"	if (dist > loc8.w * 0.6)\n" \
 	"		discard;\n"\
 	"\n"
 

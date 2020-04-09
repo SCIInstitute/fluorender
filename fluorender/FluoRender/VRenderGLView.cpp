@@ -2530,7 +2530,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 	}
 
 	if (vd->GetShadow())
@@ -2745,7 +2745,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
 		if (color_mode == 0)
 			vd->SetColormapProj(saved_colormap_proj);
@@ -2963,7 +2963,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
 	vd->SetEnableAlpha(alpha);
@@ -3228,7 +3228,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor);
+		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
 		vd->RestoreMode();
 		vd->SetMaskMode(msk_mode);
@@ -9922,6 +9922,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				m_cur_vol->AddEmptyLabel(0, false);
 			m_force_clear = true;
 			m_grow_on = true;
+			RefreshGL(26);
 		}
 
 		return;

@@ -65,9 +65,10 @@ namespace FLIVR
 			mvec_ = mvec;
 		}
 		//set scale/zoom factor for 2d
-		void set_zoom(GLfloat val)
+		void set_zoom(GLfloat sf, GLfloat sf121)
 		{
-			zoom_ = val;
+			zoom_ = sf;
+			zoom_data_ = sf / sf121;
 		}
 
 		//set clear color
@@ -244,6 +245,7 @@ namespace FLIVR
 		GLint mp_[2];//mouse position in viewport
 		Vector mvec_;//mouse direction vector for grow selection
 		GLfloat zoom_;//zoom ratio for 2d processings
+		GLfloat zoom_data_;//for point grow
 
 		//clear color
 		GLfloat clear_color_[4];

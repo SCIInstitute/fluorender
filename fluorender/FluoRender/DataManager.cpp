@@ -1748,11 +1748,11 @@ void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 }
 
 //draw volume
-void VolumeData::Draw(bool ortho, bool adaptive, bool interactive, double zoom)
+void VolumeData::Draw(bool ortho, bool adaptive, bool interactive, double zoom, double sf121)
 {
 	if (m_vr)
 	{
-		m_vr->set_zoom(zoom);
+		m_vr->set_zoom(zoom, sf121);
 		m_vr->draw(m_test_wiref, adaptive, interactive, ortho, m_stream_mode);
 	}
 	if (m_draw_bounds)

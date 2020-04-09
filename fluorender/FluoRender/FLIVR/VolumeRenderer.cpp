@@ -115,7 +115,8 @@ namespace FLIVR
 		inv_(false),
 		compression_(false),
 		alpha_power_(1.0),
-		zoom_(1.0)
+		zoom_(1.0),
+		zoom_data_(1.0)
 	{
 		//mode
 		mode_ = MODE_OVER;
@@ -1226,7 +1227,7 @@ namespace FLIVR
 		//thresh1
 		seg_shader->setLocalParam(7, ini_thresh, gm_falloff, scl_falloff, scl_translate);
 		//w2d
-		seg_shader->setLocalParam(8, w2d, bins, zoom_, 0.0);
+		seg_shader->setLocalParam(8, w2d, bins, zoom_, zoom_data_);
 
 		//set clipping planes
 		double abcd[4];
