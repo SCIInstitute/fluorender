@@ -3179,8 +3179,6 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
-	vd->GetVR()->return_label();
-
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	wxString titles, values;

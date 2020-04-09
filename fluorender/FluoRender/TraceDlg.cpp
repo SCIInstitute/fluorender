@@ -2134,7 +2134,7 @@ void TraceDlg::CellEraseID()
 		return;
 
 	//get prev label
-	Nrrd* nrrd_label = vd->GetLabel(false);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
