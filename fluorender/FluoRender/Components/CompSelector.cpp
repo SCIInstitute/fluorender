@@ -77,7 +77,7 @@ void ComponentSelector::CompFull()
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	Nrrd* nrrd_label = m_vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -177,7 +177,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	Nrrd* nrrd_label = m_vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -424,7 +424,7 @@ void ComponentSelector::Delete()
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	Nrrd* nrrd_label = m_vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -461,7 +461,7 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	Nrrd* nrrd_label = m_vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -506,7 +506,7 @@ void ComponentSelector::SelectList(CellList& list)
 	if (!data_mask)
 		return;
 	//get current label
-	Nrrd* nrrd_label = m_vd->GetLabel(false);
+	Nrrd* nrrd_label = m_vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);

@@ -346,6 +346,8 @@ namespace FLIVR
 			local_size, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return false;
+		clFlush(queue_);
+		clFinish(queue_);
 		for (i=0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].kernel_index == index &&
@@ -358,8 +360,6 @@ namespace FLIVR
 					return false;
 			}
 		}
-		clFlush(queue_);
-		clFinish(queue_);
 		return true;
 	}
 
@@ -681,7 +681,7 @@ namespace FLIVR
 		}
 		else
 		{
-			buft = clCreateFromGLTexture(context_, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texture, &err);
+			buft = clCreateFromGLTexture(context_, CL_MEM_READ_WRITE, GL_TEXTURE_3D, 0, texture, &err);
 			if (err != CL_SUCCESS)
 				return Argument();
 			argt.buffer = buft;
@@ -711,13 +711,13 @@ namespace FLIVR
 			sorigin, region, 0, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return Argument();
+		clFlush(queue_);
+		clFinish(queue_);
 		err = clEnqueueReleaseGLObjects(
 			queue_, 1, &(buft), 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return Argument();
-		clFlush(queue_);
-		clFinish(queue_);
-		//clReleaseMemObject(buft);
+
 		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
@@ -850,12 +850,12 @@ namespace FLIVR
 				sorigin, region, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
+			clFlush(queue_);
+			clFinish(queue_);
 			err = clEnqueueReleaseGLObjects(
 				queue_, 1, &(buft), 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
-			clFlush(queue_);
-			clFinish(queue_);
 			//clReleaseMemObject(buft);
 		}
 	}

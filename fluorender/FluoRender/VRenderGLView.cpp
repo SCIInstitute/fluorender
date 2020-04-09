@@ -3801,7 +3801,7 @@ void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p, int mode)
 	if (!vd || !vd->GetTexture())
 		return;
 	//get label data
-	Nrrd* nrrd_label = vd->GetLabel(false);
+	Nrrd* nrrd_label = vd->GetLabel(true);
 	if (!nrrd_label)
 		return;
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -9665,7 +9665,7 @@ void VRenderGLView::GetTraces(bool update)
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd) return;
-	Nrrd* label_nrrd = m_cur_vol->GetLabel(false);
+	Nrrd* label_nrrd = m_cur_vol->GetLabel(true);
 	if (!label_nrrd) return;
 	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
 	if (!mask_data) return;
