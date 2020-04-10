@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Properties/propertiesPanel.hpp>
 #include <Output_Adjustments/Agent/outAdjustAgent.hpp>
 #include <Output_Adjustments/outputAdjust.hpp>
+#include <Clipping_Planes/Agent/clipPlaneAgent.hpp>
+#include <Clipping_Planes/clippingPlane.hpp>
 
 
 /*
@@ -233,8 +235,8 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QW
 
 	return out_adjust_agent;
 }
-/*
-ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wxWindow &window)
+
+ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, QWidget &panel)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -242,7 +244,7 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 
 	//not found
 	ClipPlaneAgent* clip_plane_agent =
-		new ClipPlaneAgent(static_cast<ClipPlanePanel&>(window));
+		new ClipPlaneAgent(static_cast<ClippingPlane&>(panel));
 	if (clip_plane_agent)
 	{
 		clip_plane_agent->setName(name);
@@ -301,6 +303,7 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 	return clip_plane_agent;
 }
 
+/*
 MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);

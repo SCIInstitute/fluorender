@@ -1,4 +1,5 @@
 #include "clippingPlane.hpp"
+#include <Global/Global.hpp>
 
 ClippingPlane::ClippingPlane()
 {
@@ -6,6 +7,8 @@ ClippingPlane::ClippingPlane()
   makeStdAnyConnections();
   makeIntConnections();
   makeBoolConnections();
+
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddClipPlaneAgent("ClipPlanePanel",*this);
 }
 
 void ClippingPlane::createLayout()

@@ -32,22 +32,19 @@ class OutputAdjustments : public QWidget
     template<typename T>
     void setOutRedGammaValue(T newVal)
     {
-      OutputLayout* temp = getOutputLayout();
-      temp->setRedGammaValue(newVal);
+      outputLayout->setRedGammaValue(newVal);
     }
 
     template<typename T>
     void setOutGreenGammaValue(T newVal)
     {
-      OutputLayout* temp = getOutputLayout();
-      temp->setGreenGammaValue(newVal);
+      outputLayout->setGreenGammaValue(newVal);
     }
 
     template<typename T>
     void setOutBlueGammaValue(T newVal)
     {
-      OutputLayout* temp = getOutputLayout();
-      temp->setBlueGammaValue(newVal);
+      outputLayout->setBlueGammaValue(newVal);
     }
 
     void setOutRedLuminValue(int newVal);
@@ -57,22 +54,19 @@ class OutputAdjustments : public QWidget
     template<typename T>
     void setOutRedEqlValue(T newVal)
     {
-      OutputLayout* temp = getOutputLayout();
-      temp->setRedEqlValue(newVal);
+      outputLayout->setRedEqlValue(newVal);
     }
 
     template<typename T>
     void setOutGreenEqlValue(T newVal)
     {
-      OutputLayout* temp = getOutputLayout();
-      temp->setGreenEqlValue(newVal);
+      outputLayout->setGreenEqlValue(newVal);
     }
 
     template<typename T>
     void setOutBlueEqlValue(T newVal)
     {
-      OutputLayout* temp = getOutputLayout();
-      temp->setBlueEqlValue(newVal);
+      outputLayout->setBlueEqlValue(newVal);
     }
 
   private:
@@ -85,8 +79,6 @@ class OutputAdjustments : public QWidget
     QGroupBox *outputFrame = new QGroupBox();
     QGridLayout *frameLayout = new QGridLayout();
     OutputLayout *outputLayout = new OutputLayout();
-
-    OutputLayout* getOutputLayout();
 
     void makeStdAnyConnections();
     void makeIntConnections();

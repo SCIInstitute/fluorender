@@ -15,26 +15,17 @@ OutputAdjustments::OutputAdjustments()
 
 void OutputAdjustments::setOutRedLuminValue(int newVal)
 {
-  OutputLayout* temp = getOutputLayout();
-  temp->setRedLuminValue(newVal);
+  outputLayout->setRedLuminValue(newVal);
 }
 
 void OutputAdjustments::setOutGreenLuminValue(int newVal)
 {
-  OutputLayout* temp = getOutputLayout();
-  temp->setGreenLuminValue(newVal);
+  outputLayout->setGreenLuminValue(newVal);
 }
 
 void OutputAdjustments::setOutBlueLuminValue(int newVal)
 {
-  OutputLayout* temp = getOutputLayout();
-  temp->setBlueLuminValue(newVal);
-}
-
-OutputLayout* OutputAdjustments::getOutputLayout()
-{
-  OutputLayout* temp = this->findChild<OutputLayout*>();
-  return temp;
+  outputLayout->setBlueLuminValue(newVal);
 }
 
 void OutputAdjustments::makeStdAnyConnections()
