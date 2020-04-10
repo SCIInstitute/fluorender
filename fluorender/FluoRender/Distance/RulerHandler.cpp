@@ -509,6 +509,85 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	return true;
 }
 
+void RulerHandler::Prune(int idx, int len)
+{
+	if (!m_ruler_list)
+		return;
+	if (idx < 0 || idx >= m_ruler_list->size())
+		return;
+	if (len <= 0)
+		return;
+	Ruler* ruler = (*m_ruler_list)[idx];
+	if (!ruler)
+		return;
+
+	ruler->Prune(len);
+}
+
+void RulerHandler::DeleteSelection(std::vector<int> &sel)
+{
+	if (!m_ruler_list)
+		return;
+
+	for (auto it = m_ruler_list->rbegin();
+		it != m_ruler_list->rend();)
+	{
+		auto it2 = std::next(it).base();
+		int idx = it2 - m_ruler_list->begin();
+		if (std::find(sel.begin(),
+			sel.end(), idx) != sel.end())
+		{
+			if (*it2)
+				delete *it2;
+			it2 = m_ruler_list->erase(it2);
+			it = std::reverse_iterator<FL::RulerList::iterator>(it2);
+		}
+		else
+			++it;
+	}
+
+	m_ruler = 0;
+	m_point = nullptr;
+	m_pindex = -1;
+}
+
+void RulerHandler::DeleteAll(bool cur_time)
+{
+	if (!m_ruler_list)
+		return;
+
+	if (cur_time)
+	{
+		int tseq = m_view->m_tseq_cur_num;
+		for (int i = m_ruler_list->size() - 1; i >= 0; i--)
+		{
+			FL::Ruler* ruler = (*m_ruler_list)[i];
+			if (ruler &&
+				((ruler->GetTimeDep() &&
+					ruler->GetTime() == tseq) ||
+					!ruler->GetTimeDep()))
+			{
+				m_ruler_list->erase(m_ruler_list->begin() + i);
+				delete ruler;
+			}
+		}
+	}
+	else
+	{
+		for (int i = m_ruler_list->size() - 1; i >= 0; i--)
+		{
+			FL::Ruler* ruler = (*m_ruler_list)[i];
+			if (ruler)
+				delete ruler;
+		}
+		m_ruler_list->clear();
+	}
+
+	m_ruler = 0;
+	m_point = nullptr;
+	m_pindex = -1;
+}
+
 void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 {
 	if (m_ruler_list && m_ruler_list->size())

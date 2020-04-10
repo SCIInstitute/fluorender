@@ -300,6 +300,8 @@ public:
 	const static unsigned char lock_png[855];
 	/* pencil.png - 558 bytes */
 	const static unsigned char pencil_png[558];
+	/* prune.png - 824 bytes */
+	const static unsigned char prune_png[824];
 
 	//movie play export icons
 	/* minus.png - 426 bytes */

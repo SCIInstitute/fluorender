@@ -127,6 +127,10 @@ namespace FL
 		void AddPaintRulerPoint();
 		bool MoveRuler(int mx, int my);
 		bool EditPoint(int mx, int my, bool alt);
+		void Prune(int idx, int len);
+
+		void DeleteSelection(std::vector<int> &sel);
+		void DeleteAll(bool cur_time);
 
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
