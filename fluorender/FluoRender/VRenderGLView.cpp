@@ -9922,7 +9922,6 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				m_cur_vol->AddEmptyLabel(0, false);
 			m_force_clear = true;
 			m_grow_on = true;
-			RefreshGL(26);
 		}
 
 		return;
