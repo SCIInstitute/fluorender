@@ -88,6 +88,7 @@ private:
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
 	bool m_ruler_df_f;
+	FL::RulerHandler *m_rhdl;
 
 private:
 	void EndEdit(bool update=true);
@@ -130,6 +131,7 @@ public:
 		ID_RulerFlipBtn,
 		ID_RulerAvgBtn,
 		ID_LockBtn,
+		ID_PruneBtn,
 		ID_RelaxBtn,
 		ID_DeleteBtn,
 		ID_DeleteAllBtn,
@@ -175,6 +177,8 @@ public:
 	void Relax(int idx);
 	void Project(int idx);
 	void SetEdit() { m_edited = true; }
+	void Prune(int len);//remove branches with length equal to or smaller than len
+	void Prune(int idx, int len);
 
 private:
 	wxWindow* m_frame;
@@ -234,6 +238,7 @@ private:
 	void OnRulerFlip(wxCommandEvent& event);
 	void OnRulerAvg(wxCommandEvent& event);
 	void OnLock(wxCommandEvent& event);
+	void OnPrune(wxCommandEvent& event);
 	void OnRelax(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnDeleteAll(wxCommandEvent& event);

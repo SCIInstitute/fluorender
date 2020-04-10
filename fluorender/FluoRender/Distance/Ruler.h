@@ -212,6 +212,7 @@ namespace FL
 		void SetTransform(Transform *tform);
 		bool AddBranch(pRulerPoint point);
 		void DeletePoint(pRulerPoint &point);
+		void Prune(int len);
 
 		void Clear();
 		void Reverse();

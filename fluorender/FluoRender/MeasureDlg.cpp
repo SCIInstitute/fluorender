@@ -272,71 +272,22 @@ bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)
 
 void RulerListCtrl::DeleteSelection()
 {
-	if (!m_view) return;
-	FL::RulerList* ruler_list = m_view->GetRulerList();
-	if (!ruler_list) return;
-
+	if (!m_rhdl)
+		return;
 	std::vector<int> sel;
 	GetCurrSelection(sel);
-
-	for (auto it = ruler_list->rbegin();
-		it != ruler_list->rend();)
-	{
-		auto it2 = std::next(it).base();
-		int idx = it2 - ruler_list->begin();
-		if (std::find(sel.begin(),
-			sel.end(), idx) != sel.end())
-		{
-			if (*it2)
-				delete *it2;
-			it2 = ruler_list->erase(it2);
-			it = std::reverse_iterator<FL::RulerList::iterator>(it2);
-		}
-		else
-			++it;
-	}
-
+	m_rhdl->DeleteSelection(sel);
 	UpdateRulers();
 	m_view->RefreshGL();
 }
 
 void RulerListCtrl::DeleteAll(bool cur_time)
 {
-	if (!m_view) return;
-
-	FL::RulerList* ruler_list = m_view->GetRulerList();
-	if (ruler_list)
-	{
-		if (cur_time)
-		{
-			int tseq = m_view->m_glview->m_tseq_cur_num;
-			for (int i=ruler_list->size()-1; i>=0; i--)
-			{
-				FL::Ruler* ruler = (*ruler_list)[i];
-				if (ruler &&
-					((ruler->GetTimeDep() &&
-					ruler->GetTime() == tseq) ||
-					!ruler->GetTimeDep()))
-				{
-					ruler_list->erase(ruler_list->begin()+i);
-					delete ruler;
-				}
-			}
-		}
-		else
-		{
-			for (int i=ruler_list->size()-1; i>=0; i--)
-			{
-				FL::Ruler* ruler = (*ruler_list)[i];
-				if (ruler)
-					delete ruler;
-			}
-			ruler_list->clear();
-		}
-
-		UpdateRulers();
-		m_view->RefreshGL();
-	}
+	if (!m_rhdl)
+		return;
+	m_rhdl->DeleteAll(cur_time);
+	UpdateRulers();
+	m_view->RefreshGL();
 }
 
 void RulerListCtrl::Export(wxString filename)
@@ -731,6 +682,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_MENU(ID_RulerFlipBtn, MeasureDlg::OnRulerFlip)
 	EVT_MENU(ID_RulerAvgBtn, MeasureDlg::OnRulerAvg)
 	EVT_MENU(ID_LockBtn, MeasureDlg::OnLock)
+	EVT_MENU(ID_PruneBtn, MeasureDlg::OnPrune)
 	EVT_MENU(ID_RelaxBtn, MeasureDlg::OnRelax)
 	EVT_MENU(ID_DeleteBtn, MeasureDlg::OnDelete)
 	EVT_MENU(ID_DeleteAllBtn, MeasureDlg::OnDeleteAll)
@@ -783,7 +735,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 #ifdef _DARWIN
 	m_toolbar1->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locatr",
+	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Loctr",
 		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking");
 	bitmap = wxGetBitmapFromMemory(drill);
@@ -791,7 +743,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		bitmap, wxNullBitmap,
 		"Add probes to the render view by clicking once");
 	bitmap = wxGetBitmapFromMemory(two_point);
-	m_toolbar1->AddCheckTool(ID_RulerBtn, "2-pnt",
+	m_toolbar1->AddCheckTool(ID_RulerBtn, "2pnt",
 		bitmap, wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points");
 	bitmap = wxGetBitmapFromMemory(protractor);
@@ -803,11 +755,11 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		bitmap, wxNullBitmap,
 		"Add an ellipse to the render view by clicking at its points");
 	bitmap = wxGetBitmapFromMemory(multi_point);
-	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "M-pnt",
+	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "Mpnt",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points");
 	bitmap = wxGetBitmapFromMemory(pencil);
-	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencil",
+	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencl",
 		bitmap, wxNullBitmap,
 		"Draw ruler without clicking each point");
 	bitmap = wxGetBitmapFromMemory(grow);
@@ -817,7 +769,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	m_toolbar1->Realize();
 	//toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL | wxTB_HORZ_LAYOUT);
+		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmapFromMemory(move);
 #ifdef _DARWIN
 	m_toolbar2->SetToolBitmapSize(bitmap.GetSize());
@@ -839,6 +791,9 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	bitmap = wxGetBitmapFromMemory(average);
 	m_toolbar2->AddTool(ID_RulerAvgBtn, "Averg", bitmap,
 		"Compute a center for selected rulers");
+	bitmap = wxGetBitmapFromMemory(prune);
+	m_toolbar2->AddTool(ID_PruneBtn, "Prune", bitmap,
+		"Remove very short branches from ruler");
 	bitmap = wxGetBitmapFromMemory(lock);
 	m_toolbar2->AddCheckTool(ID_LockBtn, "Lock",
 		bitmap, wxNullBitmap,
@@ -1049,6 +1004,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 	m_rhdl = m_view->GetRulerHandler();
 	if (!m_rhdl)
 		return;
+	m_rulerlist->m_rhdl = m_rhdl;
 	m_aligner.SetView(m_view->m_glview);
 
 	UpdateList();
@@ -1777,6 +1733,24 @@ void MeasureDlg::Relax(int idx)
 	GetSettings(m_view);
 }
 
+void MeasureDlg::Prune(int len)
+{
+	std::vector<int> sel;
+	if (m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+			Prune(sel[i], len);
+	}
+	if (m_view)
+		m_view->RefreshGL();
+	GetSettings(m_view);
+}
+
+void MeasureDlg::Prune(int idx, int len)
+{
+	m_rhdl->Prune(idx, len);
+}
+
 void MeasureDlg::OnLock(wxCommandEvent& event)
 {
 	if (!m_view) return;
@@ -1800,6 +1774,11 @@ void MeasureDlg::OnLock(wxCommandEvent& event)
 		m_view->SetIntMode(11);
 	else
 		m_view->SetIntMode(1);
+}
+
+void MeasureDlg::OnPrune(wxCommandEvent& event)
+{
+	Prune(1);
 }
 
 void MeasureDlg::OnRelax(wxCommandEvent& event)

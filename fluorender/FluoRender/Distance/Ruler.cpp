@@ -464,6 +464,50 @@ void Ruler::DeletePoint(pRulerPoint &point)
 	}
 }
 
+void Ruler::Prune(int len)
+{
+	int lastj;
+	bool found;
+	for (int i = m_ruler.size() - 1; i >= 0; --i)
+	{
+		//if the branch is shorter than len, remove it
+		if (m_ruler[i].size() <= len + 1)
+			m_ruler.erase(m_ruler.begin() + i);
+		else
+		{
+			found = false;
+			//find the starting point of the branch
+			pRulerPoint pp = m_ruler[i][0];
+			for (int ii = 0; ii < m_ruler.size(); ++ii)
+			{
+				for (int jj = 0; jj < m_ruler[ii].size(); ++jj)
+				{
+					if (m_ruler[ii][jj] == pp && ii != i)
+					{
+						//found
+						lastj = m_ruler[ii].size() - 1;
+						if (lastj - jj <= len)
+						{
+							//remove remainder
+							m_ruler[ii].resize(jj + 1);
+							//copy i branch to ii
+							m_ruler[ii].insert(m_ruler[ii].end(),
+								m_ruler[i].begin() + 1, m_ruler[i].end());
+							//delete branch i
+							m_ruler.erase(m_ruler.begin() + i);
+							//set flag and break
+							found = true;
+							break;
+						}
+					}
+				}
+				if (found)
+					break;
+			}
+		}
+	}
+}
+
 void Ruler::Clear()
 {
 	m_ruler.clear();
