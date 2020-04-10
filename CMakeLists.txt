@@ -77,9 +77,9 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=25.2)					# 
+add_definitions(-DVERSION_MINOR=25.3)					# 
 add_definitions(-DVERSION_MAJOR_TAG="2")				# 
-add_definitions(-DVERSION_MINOR_TAG="25.2")				# 
+add_definitions(-DVERSION_MINOR_TAG="25.3")				# 
 add_definitions(-DVERSION_COPYRIGHT="April 2020")		# Up to here!
 
 #windows
