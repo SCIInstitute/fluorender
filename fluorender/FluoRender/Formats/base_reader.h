@@ -49,6 +49,19 @@ using namespace std;
 #define READER_FP32_DATA	4
 #define READER_JAVA_ARRAY_SIZE_ERROR 5
 
+//define reader types
+#define READER_MSK_TYPE	0
+#define READER_LBL_TYPE	0
+#define READER_NRRD_TYPE	1
+#define READER_TIF_TYPE	2
+#define READER_OIB_TYPE	3
+#define READER_OIF_TYPE	4
+#define READER_LSM_TYPE	5
+#define READER_PVXML_TYPE	6
+#define READER_BRKXML_TYPE	7
+#define READER_CZI_TYPE	8
+#define READER_IMAGEJ_TYPE	9
+
 class BaseReader
 {
 public:

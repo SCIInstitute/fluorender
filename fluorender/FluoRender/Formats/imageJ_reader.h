@@ -43,8 +43,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-#define READER_IMAGEJ_TYPE	9
-
 //extern JVMInitializer m_jvmInstance;
 
 class ImageJReader : public BaseReader

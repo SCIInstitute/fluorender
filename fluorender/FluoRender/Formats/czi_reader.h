@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2020 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,23 +25,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _NRRD_READER_H_
-#define _NRRD_READER_H_
+#ifndef _CZI_READER_H_
+#define _CZI_READER_H_
 
 #include <base_reader.h>
-#include <stdio.h>
-//#include <windows.h>
 #include <vector>
 
 using namespace std;
 
-class NRRDReader : public BaseReader
+class CZIReader : public BaseReader
 {
 public:
-	NRRDReader();
-	~NRRDReader();
+	CZIReader();
+	~CZIReader();
 
-	int GetType() { return READER_NRRD_TYPE; }
+	int GetType() { return READER_CZI_TYPE; }
 
 	void SetFile(string &file);
 	void SetFile(wstring &file);
@@ -61,38 +59,41 @@ public:
 	wstring GetCurMaskName(int t, int c);
 	wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
-	int GetTimeNum() {return m_time_num;}
-	int GetCurTime() {return m_cur_time;}
-	int GetChanNum() {return m_chan_num;}
-	double GetExcitationWavelength(int chan) {return 0.0;}
-	int GetSliceNum() {return m_slice_num;}
-	int GetXSize() {return m_x_size;}
-	int GetYSize() {return m_y_size;}
-	bool IsSpcInfoValid() {return m_valid_spc;}
-	double GetXSpc() {return m_xspc;}
-	double GetYSpc() {return m_yspc;}
-	double GetZSpc() {return m_zspc;}
-	double GetMaxValue() {return m_max_value;}
-	double GetScalarScale() {return m_scalar_scale;}
-	bool GetBatch() {return m_batch;}
-	int GetBatchNum() {return (int)m_batch_list.size();}
-	int GetCurBatch() {return m_cur_batch;}
+	wstring GetPathName() { return m_path_name; }
+	wstring GetDataName() { return m_data_name; }
+	int GetTimeNum() { return m_time_num; }
+	int GetCurTime() { return m_cur_time; }
+	int GetChanNum() { return m_chan_num; }
+	double GetExcitationWavelength(int chan);
+	int GetSliceNum() { return m_slice_num; }
+	int GetXSize() { return m_x_size; }
+	int GetYSize() { return m_y_size; }
+	bool IsSpcInfoValid() { return m_valid_spc; }
+	double GetXSpc() { return m_xspc; }
+	double GetYSpc() { return m_yspc; }
+	double GetZSpc() { return m_zspc; }
+	double GetMaxValue() { return m_max_value; }
+	double GetScalarScale() { return m_scalar_scale; }
+	bool GetBatch() { return m_batch; }
+	int GetBatchNum() { return (int)m_batch_list.size(); }
+	int GetCurBatch() { return m_cur_batch; }
 
 private:
 	wstring m_data_name;
 
-	//4d sequence
-	struct TimeDataInfo
+/*	struct SliceInfo
 	{
-		int filenumber;
-		wstring filename;
+		unsigned int offset;	//offset value in lsm file
+		unsigned int offset_high;//if it is larger than 4GB, this is the high 32 bits of the 64-bit address
+		unsigned int size;		//size in lsm file
 	};
-	vector<TimeDataInfo> m_4d_seq;
-	int m_cur_time;
+	typedef vector<SliceInfo> ChannelInfo;		//all slices form a channel
+	typedef vector<ChannelInfo> DatasetInfo;	//channels form a dataset
+	vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
+*/
 
 	int m_time_num;
+	int m_cur_time;
 	int m_chan_num;
 	int m_slice_num;
 	int m_x_size;
@@ -104,11 +105,23 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 
-	//time sequence id
-	wstring m_time_id;
+	//lsm properties
+/*	int m_compression;		//1:no compression; 5:lzw compression
+	int m_predictor;		//shoud be 2 if above is 5
+	unsigned int m_version;	//lsm version
+	int m_datatype;			//0: varying; 1: 8-bit; 2: 12-bit; 5: 32-bit
+	bool m_l4gb;			//true: this is a larger-than-4-GB file
+*/
+	//wavelength info
+	struct WavelengthInfo
+	{
+		int chan_num;
+		double wavelength;
+	};
+	vector<WavelengthInfo> m_excitation_wavelength_list;
 
 private:
-	static bool nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
+
 };
 
-#endif//_NRRD_READER_H_
+#endif//_CZI_READER_H_

@@ -37,8 +37,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-#define READER_OIF_TYPE	4
-
 class OIFReader : public BaseReader
 {
 public:

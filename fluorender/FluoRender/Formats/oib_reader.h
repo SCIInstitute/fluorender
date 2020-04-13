@@ -36,8 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-#define READER_OIB_TYPE	3
-
 class OIBReader : public BaseReader
 {
    public:
