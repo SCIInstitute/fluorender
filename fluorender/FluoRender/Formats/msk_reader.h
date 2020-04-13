@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-#define READER_MSK_TYPE	0
-
 class MSKReader : public BaseReader
 {
 public:

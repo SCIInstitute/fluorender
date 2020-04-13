@@ -8,8 +8,6 @@
 
 using namespace std;
 
-#define READER_BRKXML_TYPE	7
-
 class BRKXMLReader : public BaseReader
 {
 public:

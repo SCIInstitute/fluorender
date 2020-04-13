@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-#define READER_LSM_TYPE	5
-
 class LSMReader : public BaseReader
 {
 public:
