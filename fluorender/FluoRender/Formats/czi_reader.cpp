@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.h"
 #include "../compatibility.h"
+#include <stdio.h>
 
 CZIReader::CZIReader()
 {
@@ -79,6 +80,34 @@ void CZIReader::SetFile(wstring &file)
 
 int CZIReader::Preprocess()
 {
+	FILE* pfile = 0;
+	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+		return READER_OPEN_FAIL;
+
+	unsigned int header_size = 32;
+	unsigned char id[16];
+	unsigned long long alloc_size;
+	unsigned long long used_size;
+	unsigned long long ioffset = 0;
+
+	while (!feof(pfile))
+	{
+		if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+			break;
+		//read segment
+		fread(id, 1, 16, pfile);
+		fread(&alloc_size, sizeof(unsigned long long), 1, pfile);
+		fread(&used_size, sizeof(unsigned long long), 1, pfile);
+
+		//next segment
+		ioffset += 32 + alloc_size;
+	}
+
+	fclose(pfile);
+
+	m_cur_time = 0;
+	m_data_name = GET_NAME(m_path_name);
+
 	return READER_OK;
 }
 

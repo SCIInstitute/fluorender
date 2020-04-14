@@ -1305,11 +1305,12 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.xml;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.xml;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
+		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
 		"Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia VVD files (*.vvd)|*.vvd",
@@ -1432,18 +1433,20 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_IMAGEJ, true); //The type of data doesnt matter.
 			else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
-			else if (suffix==".tif" || suffix==".tiff")
+			else if (suffix == ".tif" || suffix == ".tiff")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
 			else if (suffix == ".oib")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 			else if (suffix == ".oif")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_OIF, false);
-			else if (suffix==".lsm")
+			else if (suffix == ".lsm")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LSM, false);
-			else if (suffix==".xml")
+			else if (suffix == ".xml")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_PVXML, false);
 			else if (suffix == ".vvd")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
+			else if (suffix == ".czi")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_CZI, false);
 
 			if (ch_num > 1)
 			{
@@ -1555,7 +1558,8 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 			suffix == ".oif" ||
 			suffix == ".lsm" ||
 			suffix == ".xml" ||
-			suffix == ".vvd")
+			suffix == ".vvd" ||
+			suffix == ".czi")
 		{
 			LoadVolumes(files, with_imagej);
 		}
@@ -3554,7 +3558,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
 					else if (suffix == ".nrrd" || suffix == ".msk" || suffix == ".lbl")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
-					else if (suffix == ".tif"||suffix == ".tiff")
+					else if (suffix == ".tif" || suffix == ".tiff")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
 					else if (suffix == ".oib")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_OIB, false, cur_chan, cur_time);
@@ -3566,6 +3570,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_PVXML, false, cur_chan, cur_time);
 					else if (suffix == ".vvd")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
+					else if (suffix == ".czi")
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_CZI, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
