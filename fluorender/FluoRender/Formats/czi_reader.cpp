@@ -27,9 +27,27 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.h"
 #include "../compatibility.h"
+#include <wx/xml/xml.h>
+#include <wx/sstream.h>
 #include <stdio.h>
+#include <algorithm>
 
-CZIReader::CZIReader()
+std::vector<std::string> CZIReader::m_types{
+	"ZISRAWFILE",
+	"ZISRAWDIRECTORY",
+	"ZISRAWSUBBLOCK",
+	"ZISRAWMETADATA",
+	"ZISRAWATTACH",
+	"ZISRAWATTDIR",
+	"DELETED"};
+
+CZIReader::CZIReader():
+	m_header_read(false),
+	m_multi_file(false),
+	m_file_part(0),
+	m_dir_pos(0),
+	m_meta_pos(0),
+	m_att_dir(0)
 {
 	m_time_num = 0;
 	m_cur_time = -1;
@@ -84,23 +102,15 @@ int CZIReader::Preprocess()
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return READER_OPEN_FAIL;
 
-	unsigned int header_size = 32;
-	unsigned char id[16];
-	unsigned long long alloc_size;
-	unsigned long long used_size;
 	unsigned long long ioffset = 0;
-
+	//read header
 	while (!feof(pfile))
-	{
-		if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		if (ReadSegment(pfile, ioffset, SegFile))
 			break;
-		//read segment
-		fread(id, 1, 16, pfile);
-		fread(&alloc_size, sizeof(unsigned long long), 1, pfile);
-		fread(&used_size, sizeof(unsigned long long), 1, pfile);
-
-		//next segment
-		ioffset += 32 + alloc_size;
+	if (m_header_read)
+	{
+		if (m_meta_pos)
+			ReadSegment(pfile, m_meta_pos, SegMetadata);
 	}
 
 	fclose(pfile);
@@ -224,4 +234,135 @@ wstring CZIReader::GetCurLabelName(int t, int c)
 	woss << ".lbl";
 	wstring label_name = woss.str();
 	return label_name;
+}
+
+bool CZIReader::ReadSegment(FILE* pfile, unsigned long long &ioffset, SegType readtype)
+{
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return false;
+
+	char id[16];
+	unsigned long long alloc_size;
+	unsigned long long used_size;
+	bool result = true;
+	result &= fread(id, 1, 16, pfile) == 16;
+	result &= fread(&alloc_size, sizeof(unsigned long long), 1, pfile) == 1;
+	result &= fread(&used_size, sizeof(unsigned long long), 1, pfile) == 1;
+	if (!result)
+		return false;
+
+	std::string strid(id);
+	auto it = std::find(m_types.begin(), m_types.end(), id);
+	if (it == m_types.end())
+	{
+		ioffset += HDRSIZE + alloc_size;
+		return false;
+	}
+	SegType type = (SegType)(std::distance(m_types.begin(), it));
+	if (readtype != SegAll && type != readtype)
+	{
+		ioffset += HDRSIZE + alloc_size;
+		return false;
+	}
+	result = false;
+	switch (type)
+	{
+	case SegFile:
+		result = ReadFile(pfile);
+		break;
+	case SegDirectory:
+		result = ReadDirectory(pfile);
+		break;
+	case SegSubBlock:
+		result = ReadSubBlock(pfile);
+		break;
+	case SegMetadata:
+		result = ReadMetadata(pfile, ioffset);
+		break;
+	case SegAttach:
+		result = ReadAttach(pfile);
+		break;
+	case SegAttDir:
+		result = ReadAttDir(pfile);
+		break;
+	case SegDeleted:
+		result = ReadDeleted(pfile);
+		break;
+	}
+
+	ioffset += HDRSIZE + alloc_size;
+	return result;
+}
+
+bool CZIReader::ReadFile(FILE* pfile)
+{
+	bool result = true;
+	int ival;
+	result &= fread(&ival, sizeof(int), 1, pfile) == 1;//major
+	result &= fread(&ival, sizeof(int), 1, pfile) == 1;//minor
+	result &= fread(&ival, sizeof(int), 1, pfile) == 1;//reserved
+	result &= fread(&ival, sizeof(int), 1, pfile) == 1;//reserved
+	unsigned int guid[4];
+	result &= fread(guid, sizeof(unsigned int), 4, pfile) == 4;//master guid
+	result &= fread(guid, sizeof(unsigned int), 4, pfile) == 4;//unique guid
+	result &= fread(&m_file_part, sizeof(int), 1, pfile) == 1;//part number
+	result &= fread(&m_dir_pos, sizeof(unsigned long long), 1, pfile) == 1;//directory position
+	result &= fread(&m_meta_pos, sizeof(unsigned long long), 1, pfile) == 1;//metadata position
+	result &= fread(&ival, sizeof(int), 1, pfile);//update pending
+	result &= fread(&m_att_dir, sizeof(unsigned long long), 1, pfile) == 1;//attachment directory position
+	if (m_file_part == 0)
+	{
+		m_multi_file = false;
+	}
+	else
+	{
+		m_multi_file = true;
+	}
+	m_header_read = result;
+	return result;
+}
+
+bool CZIReader::ReadDirectory(FILE* pfile)
+{
+	return true;
+}
+
+bool CZIReader::ReadSubBlock(FILE* pfile)
+{
+	return true;
+}
+
+bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long &ioffset)
+{
+	bool result = true;
+	unsigned int xmlsize;
+	result &= fread(&xmlsize, sizeof(unsigned int), 1, pfile) == 1;//xml data size
+	ioffset += HDRSIZE + FIXSIZE;
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return false;
+	std::string xmlstr(xmlsize, 0);
+	result &= fread(&xmlstr[0], 1, xmlsize, pfile) == xmlsize;//xml info
+	if (!result)
+		return result;
+
+	wxXmlDocument doc;
+	wxStringInputStream wxss(xmlstr);
+	result &= doc.Load(wxss);
+
+	return result;
+}
+
+bool CZIReader::ReadAttach(FILE* pfile)
+{
+	return true;
+}
+
+bool CZIReader::ReadAttDir(FILE* pfile)
+{
+	return true;
+}
+
+bool CZIReader::ReadDeleted(FILE* pfile)
+{
+	return true;
 }

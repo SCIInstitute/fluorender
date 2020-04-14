@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <base_reader.h>
 #include <vector>
+#include <string>
+
+#define HDRSIZE	32//header size
+#define FIXSIZE	256//fixed part size
 
 using namespace std;
 
@@ -120,8 +124,36 @@ private:
 	};
 	vector<WavelengthInfo> m_excitation_wavelength_list;
 
-private:
+	typedef enum
+	{
+		SegFile = 0,
+		SegDirectory,
+		SegSubBlock,
+		SegMetadata,
+		SegAttach,
+		SegAttDir,
+		SegDeleted,
+		SegAll
+	} SegType;
 
+	static std::vector<std::string> m_types;
+	bool m_header_read;
+	bool m_multi_file;
+	unsigned int m_file_part;
+	unsigned long long m_dir_pos;//directory segment position
+	unsigned long long m_meta_pos;//metadata segment position
+	unsigned long long m_att_dir;//attachment directory position
+
+private:
+	//segment reader
+	bool ReadSegment(FILE* pfile, unsigned long long &ioffset, SegType type = SegAll);
+	bool ReadFile(FILE* pfile);
+	bool ReadDirectory(FILE* pfile);
+	bool ReadSubBlock(FILE* pfile);
+	bool ReadMetadata(FILE* pfile, unsigned long long &ioffset);
+	bool ReadAttach(FILE* pfile);
+	bool ReadAttDir(FILE* pfile);
+	bool ReadDeleted(FILE* pfile);
 };
 
 #endif//_CZI_READER_H_
