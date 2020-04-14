@@ -55,6 +55,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/pvxml_reader.h"
 #include "Formats/brkxml_reader.h"
 #include "Formats/imageJ_reader.h"
+#include "Formats/czi_reader.h"
 #include "Tracking/TrackMap.h"
 #include <Distance/Ruler.h>
 
@@ -65,6 +66,7 @@ using namespace FLIVR;
 #define DATA_MESH			2
 #define DATA_ANNOTATIONS	3
 
+#define LOAD_TYPE_IMAGEJ	0
 #define LOAD_TYPE_NRRD		1
 #define LOAD_TYPE_TIFF		2
 #define LOAD_TYPE_OIB		3
@@ -72,7 +74,7 @@ using namespace FLIVR;
 #define LOAD_TYPE_LSM		5
 #define LOAD_TYPE_PVXML		6
 #define LOAD_TYPE_BRKXML	7
-#define LOAD_TYPE_IMAGEJ    0
+#define LOAD_TYPE_CZI		8
 
 class TreeLayer
 {
