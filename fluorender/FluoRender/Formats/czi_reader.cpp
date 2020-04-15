@@ -111,6 +111,8 @@ int CZIReader::Preprocess()
 	{
 		if (m_meta_pos)
 			ReadSegment(pfile, m_meta_pos, SegMetadata);
+		if (m_dir_pos)
+			ReadSegment(pfile, m_dir_pos, SegDirectory);
 	}
 
 	fclose(pfile);
@@ -271,13 +273,13 @@ bool CZIReader::ReadSegment(FILE* pfile, unsigned long long &ioffset, SegType re
 		result = ReadFile(pfile);
 		break;
 	case SegDirectory:
-		result = ReadDirectory(pfile);
+		result = ReadDirectory(pfile, ioffset + HDRSIZE);
 		break;
 	case SegSubBlock:
-		result = ReadSubBlock(pfile);
+		result = ReadSubBlock(pfile, ioffset + HDRSIZE);
 		break;
 	case SegMetadata:
-		result = ReadMetadata(pfile, ioffset);
+		result = ReadMetadata(pfile, ioffset + HDRSIZE);
 		break;
 	case SegAttach:
 		result = ReadAttach(pfile);
@@ -308,7 +310,7 @@ bool CZIReader::ReadFile(FILE* pfile)
 	result &= fread(&m_file_part, sizeof(int), 1, pfile) == 1;//part number
 	result &= fread(&m_dir_pos, sizeof(unsigned long long), 1, pfile) == 1;//directory position
 	result &= fread(&m_meta_pos, sizeof(unsigned long long), 1, pfile) == 1;//metadata position
-	result &= fread(&ival, sizeof(int), 1, pfile);//update pending
+	result &= fread(&ival, sizeof(int), 1, pfile) == 1;//update pending
 	result &= fread(&m_att_dir, sizeof(unsigned long long), 1, pfile) == 1;//attachment directory position
 	if (m_file_part == 0)
 	{
@@ -322,22 +324,92 @@ bool CZIReader::ReadFile(FILE* pfile)
 	return result;
 }
 
-bool CZIReader::ReadDirectory(FILE* pfile)
+unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 {
-	return true;
+	bool result = true;
+	char schema_type[2];
+	result &= fread(schema_type, sizeof(char), 2, pfile) == 2;//schema type
+	unsigned int pixel_type;
+	result &= fread(&pixel_type, sizeof(unsigned int), 1, pfile) == 1;//pixel type
+	unsigned long long file_pos;
+	result &= fread(&file_pos, sizeof(unsigned long long), 1, pfile) == 1;//file position
+	unsigned int file_part;
+	result &= fread(&file_part, sizeof(unsigned int), 1, pfile) == 1;//file part
+	unsigned int compress;
+	result &= fread(&compress, sizeof(unsigned int), 1, pfile) == 1;//compression
+	char pyra_type;
+	result &= fread(&pyra_type, 1, 1, pfile) == 1;//pyramid type
+	char cval[5];
+	result &= fread(cval, 1, 5, pfile) == 5;//reserved
+	unsigned int dim_count;
+	result &= fread(&dim_count, sizeof(unsigned int), 1, pfile) == 1;//dimension count
+	for (int i = 0; i < dim_count; ++i)
+	{
+		char dim[4];
+		result &= fread(dim, 1, 4, pfile) == 4;//dimension
+		int start;
+		result &= fread(&start, sizeof(int), 1, pfile) == 1;//start position
+		unsigned int size;
+		result &= fread(&size, sizeof(unsigned int), 1, pfile) == 1;//size in units of pixels
+		float start_coord;
+		result &= fread(&start_coord, sizeof(float), 1, pfile) == 1;//start coordinate
+		unsigned int store_size;
+		result &= fread(&store_size, sizeof(unsigned int), 1, pfile) == 1;//stored size
+	}
+	if (result)
+		return 32 + dim_count * 20;
+	else
+		return 0;
 }
 
-bool CZIReader::ReadSubBlock(FILE* pfile)
+bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 {
-	return true;
+	bool result = true;
+	int entry_count;
+	result &= fread(&entry_count, sizeof(int), 1, pfile) == 1;//number of entries
+	ioffset += 128;
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return false;
+	//read entries
+	for (int i = 0; i < entry_count; ++i)
+		result &= ReadDirectoryEntry(pfile) > 0;
+	return result;
 }
 
-bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long &ioffset)
+bool CZIReader::ReadSubBlock(FILE* pfile, unsigned long long ioffset)
+{
+	bool result = true;
+	unsigned int meta_size;
+	result &= fread(&meta_size, sizeof(unsigned int), 1, pfile) == 1;//metadata size
+	unsigned int att_size;
+	result &= fread(&att_size, sizeof(unsigned int), 1, pfile) == 1;//attachment size
+	unsigned long long data_size;
+	result &= fread(&data_size, sizeof(unsigned long long), 1, pfile) == 1;//data size
+
+	//directory entry
+	unsigned int dir_pos = ReadDirectoryEntry(pfile);
+	dir_pos += 16;
+	if (dir_pos > FIXSIZE)
+		ioffset += dir_pos;
+	else
+		ioffset += FIXSIZE;
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return false;
+	//read metadata
+	std::string xmlstr(meta_size, 0);
+	result &= fread(&xmlstr[0], 1, meta_size, pfile) == meta_size;//xml info
+	//data
+	//attachment
+
+	return result;
+}
+
+bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 {
 	bool result = true;
 	unsigned int xmlsize;
 	result &= fread(&xmlsize, sizeof(unsigned int), 1, pfile) == 1;//xml data size
-	ioffset += HDRSIZE + FIXSIZE;
+	ioffset += FIXSIZE;
 	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 		return false;
 	std::string xmlstr(xmlsize, 0);

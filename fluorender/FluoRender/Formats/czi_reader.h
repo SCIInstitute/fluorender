@@ -148,9 +148,10 @@ private:
 	//segment reader
 	bool ReadSegment(FILE* pfile, unsigned long long &ioffset, SegType type = SegAll);
 	bool ReadFile(FILE* pfile);
-	bool ReadDirectory(FILE* pfile);
-	bool ReadSubBlock(FILE* pfile);
-	bool ReadMetadata(FILE* pfile, unsigned long long &ioffset);
+	unsigned int ReadDirectoryEntry(FILE* pfile);//return size
+	bool ReadDirectory(FILE* pfile, unsigned long long ioffset);
+	bool ReadSubBlock(FILE* pfile, unsigned long long ioffset);
+	bool ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	bool ReadAttach(FILE* pfile);
 	bool ReadAttDir(FILE* pfile);
 	bool ReadDeleted(FILE* pfile);
