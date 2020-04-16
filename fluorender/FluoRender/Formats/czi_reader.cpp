@@ -264,6 +264,8 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		}
 	}
 
+	m_scalar_scale = 65535.0 / m_max_value;
+
 	fclose(pfile);
 	m_cur_time = t;
 	return data;
@@ -657,6 +659,8 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	if (sbi->x_size == m_x_size &&
 		sbi->y_size == m_y_size)
 		bricks = false;
+	unsigned long long pxcount = (unsigned long long)sbi->x_size *
+		sbi->y_size * sbi->z_size;
 	if (bricks)
 	{
 		switch (m_datatype)
@@ -678,9 +682,26 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 			break;
 		case 2:
 			result &= fread((unsigned short*)val + pos, 1, data_size, pfile) == data_size;
+			if (result)
+			{
+				unsigned short minv = std::numeric_limits<unsigned short>::max();
+				unsigned short maxv = 0;
+				GetMinMax16((unsigned short*)val + pos, pxcount, minv, maxv);
+				m_max_value = maxv > m_max_value ? maxv : m_max_value;
+			}
 			break;
 		}
 	}
 
 	return result;
+}
+
+void CZIReader::GetMinMax16(unsigned short* val, unsigned long long px,
+	unsigned short &minv, unsigned short &maxv)
+{
+	for (unsigned long long i = 0; i < px; ++i)
+	{
+		minv = std::min(val[i], minv);
+		maxv = std::max(val[i], maxv);
+	}
 }
