@@ -234,6 +234,9 @@ private:
 	}
 	//read data
 	bool ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
+	//get min max
+	void GetMinMax16(unsigned short* val, unsigned long long px,
+		unsigned short &minv, unsigned short &maxv);
 };
 
 #endif//_CZI_READER_H_
