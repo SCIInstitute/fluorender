@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/xml/xml.h>
 #include <wx/sstream.h>
 #include <stdio.h>
-#include <algorithm>
+#include <set>
 
 std::vector<std::string> CZIReader::m_types{
 	"ZISRAWFILE",
@@ -208,6 +208,64 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return 0;
 
+	int i, j;
+
+	if (t >= 0 && t < m_time_num &&
+		c >= 0 && c < m_chan_num &&
+		m_slice_num > 0 &&
+		m_x_size > 0 &&
+		m_y_size > 0 &&
+		t < (int)m_czi_info.sequences.size() &&
+		c < (int)m_czi_info.sequences[t].channels.size())
+	{
+		//allocate memory for nrrd
+		switch (m_datatype)
+		{
+		case 1://8-bit
+		{
+			unsigned long long mem_size = (unsigned long long)m_x_size*
+				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
+			ChannelInfo *cinfo = GetChaninfo(t, c);
+			for (i = 0; i < (int)cinfo->chann.size(); i++)
+			{
+				SubBlockInfo* sbi = &(cinfo->chann[i]);
+				ReadSegSubBlock(pfile, sbi, val);
+			}
+			//create nrrd
+			data = nrrdNew();
+			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		}
+		break;
+		case 2://16-bit
+		{
+			unsigned long long mem_size = (unsigned long long)m_x_size*
+				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+			ChannelInfo *cinfo = GetChaninfo(t, c);
+			for (i = 0; i < (int)cinfo->chann.size(); i++)
+			{
+				SubBlockInfo* sbi = &(cinfo->chann[i]);
+				ReadSegSubBlock(pfile, sbi, val);
+			}
+			//create nrrd
+			data = nrrdNew();
+			nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		}
+		break;
+		}
+	}
+
+	fclose(pfile);
+	m_cur_time = t;
 	return data;
 }
 
@@ -326,6 +384,7 @@ bool CZIReader::ReadFile(FILE* pfile)
 
 unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 {
+	SubBlockInfo sbi;
 	bool result = true;
 	char schema_type[2];
 	result &= fread(schema_type, sizeof(char), 2, pfile) == 2;//schema type
@@ -341,6 +400,11 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 	result &= fread(&pyra_type, 1, 1, pfile) == 1;//pyramid type
 	char cval[5];
 	result &= fread(cval, 1, 5, pfile) == 5;//reserved
+	//set info
+	sbi.pxtype = pixel_type;
+	sbi.loc = file_pos;
+	sbi.compress = compress;
+
 	unsigned int dim_count;
 	result &= fread(&dim_count, sizeof(unsigned int), 1, pfile) == 1;//dimension count
 	for (int i = 0; i < dim_count; ++i)
@@ -355,9 +419,68 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 		result &= fread(&start_coord, sizeof(float), 1, pfile) == 1;//start coordinate
 		unsigned int store_size;
 		result &= fread(&store_size, sizeof(unsigned int), 1, pfile) == 1;//stored size
+
+		//set info
+		switch (dim[0])
+		{
+		case 'X':
+			sbi.x = start;
+			sbi.x_size = size;
+			sbi.x_start = start_coord;
+			m_czi_info.xsize(start, start + size);
+			break;
+		case 'Y':
+			sbi.y = start;
+			sbi.y_size = size;
+			sbi.y_start = start_coord;
+			m_czi_info.ysize(start, start + size);
+			break;
+		case 'Z':
+			sbi.z = start;
+			sbi.z_size = size;
+			sbi.z_start = start_coord;
+			m_czi_info.zsize(start, start + size);
+			break;
+		case 'C':
+			sbi.chan = start;
+			break;
+		case 'T':
+			sbi.time = start;
+			break;
+		}
+	}
+
+	unsigned int dirpos = 32 + dim_count * 20;
+	sbi.dirpos = dirpos;
+	//add info to list
+	SequenceInfo *seqinfo = GetSequinfo(sbi.time);
+	if (seqinfo)
+	{
+		ChannelInfo* chaninfo = GetChaninfo(seqinfo, sbi.chan);
+		if (chaninfo)
+		{
+			chaninfo->chann.push_back(sbi);
+		}
+		else
+		{
+			seqinfo->channels.push_back(ChannelInfo());
+			chaninfo = &(seqinfo->channels.back());
+			chaninfo->chan = sbi.chan;
+			chaninfo->chann.push_back(sbi);
+		}
+	}
+	else
+	{
+		m_czi_info.sequences.push_back(SequenceInfo());
+		seqinfo = &(m_czi_info.sequences.back());
+		seqinfo->time = sbi.time;
+		ChannelInfo chaninfo;
+		chaninfo.chan = sbi.chan;
+		chaninfo.chann.push_back(sbi);
+		seqinfo->channels.push_back(chaninfo);
 	}
 	if (result)
-		return 32 + dim_count * 20;
+		return dirpos;
 	else
 		return 0;
 }
@@ -370,9 +493,52 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 	ioffset += 128;
 	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 		return false;
+
+	//init info
+	m_czi_info.init();
+	m_time_num = 0;
+	m_chan_num = 0;
+	m_slice_num = 0;
+	m_x_size = 0;
+	m_y_size = 0;
+
 	//read entries
 	for (int i = 0; i < entry_count; ++i)
 		result &= ReadDirectoryEntry(pfile) > 0;
+
+	//get info
+	std::set<unsigned int> pixtypes;
+	std::set<int> channums;
+	std::set<int> timenums;
+	for (size_t i = 0; i < m_czi_info.sequences.size(); ++i)
+		for (size_t j = 0; j < m_czi_info.sequences[i].channels.size(); ++j)
+			for (size_t k = 0; k < m_czi_info.sequences[i].channels[j].chann.size(); ++k)
+			{
+				channums.insert(m_czi_info.sequences[i].channels[j].chann[k].chan);
+				timenums.insert(m_czi_info.sequences[i].channels[j].chann[k].time);
+				pixtypes.insert(m_czi_info.sequences[i].channels[j].chann[k].pxtype);
+			}
+	m_time_num = timenums.size();
+	m_chan_num = channums.size();
+	m_slice_num = m_czi_info.zmax - m_czi_info.zmin;
+	m_x_size = m_czi_info.xmax - m_czi_info.xmin;
+	m_y_size = m_czi_info.ymax - m_czi_info.ymin;
+	if (!pixtypes.empty())
+	{
+		m_datatype = *--pixtypes.end();
+		switch (m_datatype)
+		{
+		case 0:
+			m_datatype = 1;
+			break;
+		case 1:
+			m_datatype = 2;
+			break;
+		default:
+			result = false;
+		}
+	}
+
 	return result;
 }
 
@@ -437,4 +603,84 @@ bool CZIReader::ReadAttDir(FILE* pfile)
 bool CZIReader::ReadDeleted(FILE* pfile)
 {
 	return true;
+}
+
+bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
+{
+	unsigned long long ioffset = sbi->loc;
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return false;
+
+	char id[16];
+	unsigned long long alloc_size;
+	unsigned long long used_size;
+	bool result = true;
+	result &= fread(id, 1, 16, pfile) == 16;
+	result &= fread(&alloc_size, sizeof(unsigned long long), 1, pfile) == 1;
+	result &= fread(&used_size, sizeof(unsigned long long), 1, pfile) == 1;
+	if (!result)
+		return false;
+	std::string strid(id);
+	auto it = std::find(m_types.begin(), m_types.end(), id);
+	if (it == m_types.end())
+		return false;
+	SegType type = (SegType)(std::distance(m_types.begin(), it));
+	if (type != SegSubBlock)
+		return false;
+
+	ioffset += HDRSIZE;
+	unsigned int meta_size;
+	result &= fread(&meta_size, sizeof(unsigned int), 1, pfile) == 1;//metadata size
+	unsigned int att_size;
+	result &= fread(&att_size, sizeof(unsigned int), 1, pfile) == 1;//attachment size
+	unsigned long long data_size;
+	result &= fread(&data_size, sizeof(unsigned long long), 1, pfile) == 1;//data size
+	if (!result)
+		return false;
+
+	//directory entry
+	unsigned int dir_pos = sbi->dirpos;
+	dir_pos += 16;
+	if (dir_pos > FIXSIZE)
+		ioffset += dir_pos;
+	else
+		ioffset += FIXSIZE;
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return false;
+
+	//read metadata
+	std::string xmlstr(meta_size, 0);
+	result &= fread(&xmlstr[0], 1, meta_size, pfile) == meta_size;//xml info
+
+	//data
+	bool bricks = true;
+	if (sbi->x_size == m_x_size &&
+		sbi->y_size == m_y_size)
+		bricks = false;
+	if (bricks)
+	{
+		switch (m_datatype)
+		{
+		case 1:
+			break;
+		case 2:
+			break;
+		}
+	}
+	else
+	{
+		unsigned long long pos = (unsigned long long)m_x_size *
+			m_y_size * sbi->z;
+		switch (m_datatype)
+		{
+		case 1:
+			result &= fread((unsigned char*)val + pos, 1, data_size, pfile) == data_size;
+			break;
+		case 2:
+			result &= fread((unsigned short*)val + pos, 1, data_size, pfile) == data_size;
+			break;
+		}
+	}
+
+	return result;
 }

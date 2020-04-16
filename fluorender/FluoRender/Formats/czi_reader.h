@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <base_reader.h>
 #include <vector>
 #include <string>
+#include <limits>
+#include <algorithm>
 
 #define HDRSIZE	32//header size
 #define FIXSIZE	256//fixed part size
@@ -85,16 +87,71 @@ public:
 private:
 	wstring m_data_name;
 
-/*	struct SliceInfo
+	struct SubBlockInfo
 	{
-		unsigned int offset;	//offset value in lsm file
-		unsigned int offset_high;//if it is larger than 4GB, this is the high 32 bits of the 64-bit address
-		unsigned int size;		//size in lsm file
+		unsigned int dirpos;
+		int chan;//channel number
+		int time;//time number
+		//corner
+		int x;
+		int y;
+		int z;
+		//size
+		int x_size;
+		int y_size;
+		int z_size;
+		//position
+		double x_start;
+		double y_start;
+		double z_start;
+		//location in file
+		unsigned long long loc;
+		//store size
+		unsigned int size;
+		//compression
+		unsigned int compress;
+		//pixel type
+		unsigned int pxtype;
 	};
-	typedef vector<SliceInfo> ChannelInfo;		//all slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;	//channels form a dataset
-	vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
-*/
+	struct ChannelInfo
+	{
+		int chan;//channel number
+		std::vector<SubBlockInfo> chann;
+	};
+	struct SequenceInfo
+	{
+		int time;//time number
+		std::vector<ChannelInfo> channels;
+	};
+	struct CZIInfo
+	{
+		int xmin, ymin, zmin;
+		int xmax, ymax, zmax;
+		std::vector<SequenceInfo> sequences;
+
+		void init()
+		{
+			xmin = ymin = zmin = std::numeric_limits<int>::max();
+			xmax = ymax = zmax = std::numeric_limits<int>::min();
+			sequences.clear();
+		}
+		void xsize(int x0, int x1)
+		{
+			xmin = std::min(xmin, std::min(x0, x1));
+			xmax = std::max(xmax, std::max(x0, x1));
+		}
+		void ysize(int y0, int y1)
+		{
+			ymin = std::min(ymin, std::min(y0, y1));
+			ymax = std::max(ymax, std::max(y0, y1));
+		}
+		void zsize(int z0, int z1)
+		{
+			zmin = std::min(zmin, std::min(z0, z1));
+			zmax = std::max(zmax, std::max(z0, z1));
+		}
+	};
+	CZIInfo m_czi_info;
 
 	int m_time_num;
 	int m_cur_time;
@@ -108,14 +165,8 @@ private:
 	double m_zspc;
 	double m_max_value;
 	double m_scalar_scale;
+	unsigned int m_datatype;//pixel type of data: 0-na; 1-8bit; 2-16bit 4-32bit
 
-	//lsm properties
-/*	int m_compression;		//1:no compression; 5:lzw compression
-	int m_predictor;		//shoud be 2 if above is 5
-	unsigned int m_version;	//lsm version
-	int m_datatype;			//0: varying; 1: 8-bit; 2: 12-bit; 5: 32-bit
-	bool m_l4gb;			//true: this is a larger-than-4-GB file
-*/
 	//wavelength info
 	struct WavelengthInfo
 	{
@@ -155,6 +206,34 @@ private:
 	bool ReadAttach(FILE* pfile);
 	bool ReadAttDir(FILE* pfile);
 	bool ReadDeleted(FILE* pfile);
+	//read info
+	SequenceInfo* GetSequinfo(int time)
+	{
+		for (size_t i = 0; i < m_czi_info.sequences.size(); ++i)
+		{
+			if (m_czi_info.sequences[i].time == time)
+				return &(m_czi_info.sequences[i]);
+		}
+		return 0;
+	}
+	ChannelInfo* GetChaninfo(SequenceInfo* seqinfo, int chan)
+	{
+		if (!seqinfo)
+			return 0;
+		for (size_t i = 0; i < seqinfo->channels.size(); ++i)
+		{
+			if (seqinfo->channels[i].chan == chan)
+				return &(seqinfo->channels[i]);
+		}
+		return 0;
+	}
+	ChannelInfo* GetChaninfo(int time, int chan)
+	{
+		SequenceInfo* seqinfo = GetSequinfo(time);
+		return GetChaninfo(seqinfo, chan);
+	}
+	//read data
+	bool ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
 };
 
 #endif//_CZI_READER_H_
