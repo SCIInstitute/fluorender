@@ -659,22 +659,69 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	if (sbi->x_size == m_x_size &&
 		sbi->y_size == m_y_size)
 		bricks = false;
+	bool compress = sbi->compress == 2;//only supports lzw for now
 	unsigned long long pxcount = (unsigned long long)sbi->x_size *
 		sbi->y_size * sbi->z_size;
-	if (bricks)
+	unsigned short minv = std::numeric_limits<unsigned short>::max();
+	unsigned short maxv = 0;
+	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
+	unsigned long long pos = xysize * sbi->z + m_x_size * sbi->y + sbi->x;//consider it a brick
+
+	if (bricks || compress)
 	{
+		unsigned char* block = new (std::nothrow) unsigned char[data_size];
+		result &= fread(block, 1, data_size, pfile) == data_size;
 		switch (m_datatype)
 		{
 		case 1:
+		{
+			if (compress)
+			{
+				LZWDecode(block, (unsigned char*)val + pos, data_size);
+				for (int i = 0; i < sbi->z_size; ++i)
+				for (int j = 0; j < sbi->y_size; ++j)
+					DecodeAcc8((unsigned char*)val + pos + xysize * i + m_x_size * j,
+						sbi->x_size, 1);
+			}
+			else
+			{
+				for (int i = 0; i < sbi->z_size; ++i)
+				for (int j = 0; j < sbi->y_size; ++j)
+					memcpy((unsigned char*)val + pos + xysize * i + m_x_size * j,
+						block + i * sbi->x_size * sbi->y_size + j * sbi->y_size, sbi->x_size);
+			}
+		}
 			break;
 		case 2:
-			break;
+		{
+			if (compress)
+			{
+				LZWDecode(block, (unsigned char*)((unsigned short*)val + pos), data_size);
+				for (int i = 0; i < sbi->z_size; ++i)
+				for (int j = 0; j < sbi->y_size; ++j)
+					DecodeAcc16((unsigned char*)((unsigned short*)val + pos + xysize * i + m_x_size * j),
+						sbi->x_size, 1);
+			}
+			else
+			{
+				for (int i = 0; i < sbi->z_size; ++i)
+				for (int j = 0; j < sbi->y_size; ++j)
+					memcpy((unsigned short*)val + pos + xysize * i + m_x_size * j,
+						block + i * sbi->x_size * sbi->y_size + j * sbi->y_size, sbi->x_size);
+			}
+			//get min max
+			GetMinMax16B((unsigned short*)val + pos,
+				sbi->x_size, sbi->y_size, sbi->z_size,
+				m_x_size, m_y_size,
+				minv, maxv);
+			m_max_value = maxv > m_max_value ? maxv : m_max_value;
 		}
+		break;
+		}
+		delete[] block;
 	}
 	else
 	{
-		unsigned long long pos = (unsigned long long)m_x_size *
-			m_y_size * sbi->z;
 		switch (m_datatype)
 		{
 		case 1:
@@ -684,8 +731,6 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 			result &= fread((unsigned short*)val + pos, 1, data_size, pfile) == data_size;
 			if (result)
 			{
-				unsigned short minv = std::numeric_limits<unsigned short>::max();
-				unsigned short maxv = 0;
 				GetMinMax16((unsigned short*)val + pos, pxcount, minv, maxv);
 				m_max_value = maxv > m_max_value ? maxv : m_max_value;
 			}
@@ -703,5 +748,21 @@ void CZIReader::GetMinMax16(unsigned short* val, unsigned long long px,
 	{
 		minv = std::min(val[i], minv);
 		maxv = std::max(val[i], maxv);
+	}
+}
+
+void CZIReader::GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx, int sy,
+	unsigned short &minv, unsigned short &maxv)
+{
+	unsigned long long pos;
+	unsigned short* pv;
+	for (int i = 0; i < nz; ++i)
+	for (int j = 0; j < ny; ++j)
+	for (int k = 0; k < nx; ++k)
+	{
+		pos = (unsigned long long)sx * sy * i + sx * j + k;
+		pv = val + pos;
+		minv = std::min(*pv, minv);
+		maxv = std::max(*pv, maxv);
 	}
 }

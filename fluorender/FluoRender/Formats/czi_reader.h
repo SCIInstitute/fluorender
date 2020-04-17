@@ -237,6 +237,8 @@ private:
 	//get min max
 	void GetMinMax16(unsigned short* val, unsigned long long px,
 		unsigned short &minv, unsigned short &maxv);
+	void GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx, int sy,
+		unsigned short &minv, unsigned short &maxv);
 };
 
 #endif//_CZI_READER_H_
