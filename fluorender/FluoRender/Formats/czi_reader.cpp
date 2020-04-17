@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.h"
 #include "../compatibility.h"
-#include <wx/xml/xml.h>
 #include <wx/sstream.h>
 #include <stdio.h>
 #include <set>
@@ -588,7 +587,26 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	wxXmlDocument doc;
 	wxStringInputStream wxss(xmlstr);
 	result &= doc.Load(wxss);
+	wxXmlNode *root = doc.GetRoot();
+	if (!root || root->GetName() != "ImageDocument")
+		return false;
 
+	//get values
+	FindNodeRecursive(root);
+
+	if (m_xspc > 0.0 &&
+		m_xspc > 0.0 &&
+		m_xspc > 0.0)
+	{
+		m_valid_spc = true;
+	}
+	else
+	{
+		m_valid_spc = false;
+		m_xspc = 1.0;
+		m_yspc = 1.0;
+		m_zspc = 1.0;
+	}
 	return result;
 }
 
@@ -765,4 +783,52 @@ void CZIReader::GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx
 		minv = std::min(*pv, minv);
 		maxv = std::max(*pv, maxv);
 	}
+}
+
+void CZIReader::FindNodeRecursive(wxXmlNode* node)
+{
+	if (!node)
+		return;
+	wxString str;
+	double dval;
+	wxXmlNode *child = node->GetChildren();
+	while (child)
+	{
+		wxString name = child->GetName();
+		if (name == "ScalingX")
+		{
+			str = child->GetNodeContent();
+			if (str.ToDouble(&dval))
+				m_xspc = dval * 1e6;
+		}
+		else if (name == "ScalingY")
+		{
+			str = child->GetNodeContent();
+			if (str.ToDouble(&dval))
+				m_yspc = dval * 1e6;
+		}
+		else if (name == "ScalingZ")
+		{
+			str = child->GetNodeContent();
+			if (str.ToDouble(&dval))
+				m_zspc = dval * 1e6;
+		}
+		else if (name == "ExcitationWavelength")
+		{
+			str = child->GetNodeContent();
+			if (str.ToDouble(&dval))
+			{
+				WavelengthInfo winfo;
+				winfo.chan_num = m_excitation_wavelength_list.size();
+				winfo.wavelength = dval;
+				m_excitation_wavelength_list.push_back(winfo);
+			}
+		}
+		else
+		{
+			FindNodeRecursive(child);
+		}
+		child = child->GetNext();
+	}
+	return;
 }
