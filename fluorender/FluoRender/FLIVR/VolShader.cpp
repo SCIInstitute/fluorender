@@ -91,7 +91,7 @@ VolShader::VolShader(
 	bool poly, int channels,
 	bool shading, bool fog,
 	int peel, bool clip,
-	bool hiqual, int mask, bool mip,
+	bool grad, int mask, bool mip,
 	int color_mode, int colormap, int colormap_proj,
 	bool solid, int vertex_shader)
 	: poly_(poly),
@@ -100,7 +100,7 @@ VolShader::VolShader(
 	fog_(fog),
 	peel_(peel),
 	clip_(clip),
-	hiqual_(hiqual),
+	grad_(grad),
 	mask_(mask),
 	mip_(mip),
 	color_mode_(color_mode),
@@ -295,12 +295,7 @@ VolShader::VolShader(
 		{
 			//no gradient volume, need to calculate in real-time
 			z << VOL_DATA_VOLUME_LOOKUP;
-
-			if (hiqual_)
-				z << VOL_GRAD_COMPUTE_HI;
-			else
-				z << VOL_GRAD_COMPUTE_LO;
-
+			z << VOL_GRAD_COMPUTE;
 			z << VOL_BODY_SHADING;
 
 			if (channels_ == 1)
@@ -345,12 +340,13 @@ VolShader::VolShader(
 			if (channels_ == 1)
 			{
 				// Compute Gradient magnitude and use it.
-				if (hiqual_)
-					z << VOL_GRAD_COMPUTE_HI;
+				if (grad_)
+				{
+					z << VOL_GRAD_COMPUTE;
+					z << VOL_COMPUTED_GM_LOOKUP;
+				}
 				else
-					z << VOL_GRAD_COMPUTE_LO;
-
-				z << VOL_COMPUTED_GM_LOOKUP;
+					z << VOL_COMPUTED_GM_NOUSE;
 			}
 			else
 			{
@@ -483,7 +479,7 @@ VolShader::VolShader(
 		bool poly, int channels,
 		bool shading, bool fog,
 		int peel, bool clip,
-		bool hiqual, int mask, bool mip,
+		bool grad, int mask, bool mip,
 		int color_mode, int colormap, int colormap_proj,
 		bool solid, int vertex_shader)
 	{
@@ -493,7 +489,7 @@ VolShader::VolShader(
 				poly, channels,
 				shading, fog,
 				peel, clip,
-				hiqual, mask, mip,
+				grad, mask, mip,
 				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
 				return shader_[prev_shader_]->program();
@@ -504,7 +500,7 @@ VolShader::VolShader(
 				poly, channels,
 				shading, fog,
 				peel, clip,
-				hiqual, mask, mip,
+				grad, mask, mip,
 				color_mode, colormap, colormap_proj,
 				solid,vertex_shader))
 			{
@@ -516,7 +512,7 @@ VolShader::VolShader(
 		VolShader* s = new VolShader(poly, channels,
 			shading, fog,
 			peel, clip,
-			hiqual, mask, mip,
+			grad, mask, mip,
 			color_mode, colormap, colormap_proj,
 			solid, vertex_shader);
 		if(s->create())

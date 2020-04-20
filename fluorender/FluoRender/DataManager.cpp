@@ -455,7 +455,7 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 		plane = new Plane(Point(0.0, 0.0, 1.0), Vector(0.0, 0.0, -1.0));
 		planelist.push_back(plane);
 
-		m_vr = new VolumeRenderer(m_tex, planelist, true);
+		m_vr = new VolumeRenderer(m_tex, planelist);
 		m_vr->set_sampling_rate(m_sample_rate);
 		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 		m_vr->set_shading(true);
@@ -617,7 +617,7 @@ void VolumeData::AddEmptyData(int bits,
 	planelist.push_back(plane);
 
 	//create volume renderer
-	m_vr = new VolumeRenderer(m_tex, planelist, true);
+	m_vr = new VolumeRenderer(m_tex, planelist);
 	m_vr->set_sampling_rate(m_sample_rate);
 	m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 	m_vr->set_shading(true);

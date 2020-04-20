@@ -241,8 +241,8 @@ namespace FLIVR
 	"	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); \n" \
 	"\n"
 
-#define VOL_GRAD_COMPUTE_HI \
-	"	// VOL_GRAD_COMPUTE_HI\n" \
+#define VOL_GRAD_COMPUTE \
+	"	// VOL_GRAD_COMPUTE\n" \
 	"	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"	vec4 r, p; \n" \
 	"	v = vec4(v.x); \n" \
@@ -327,6 +327,11 @@ namespace FLIVR
 #define VOL_COMPUTED_GM_LOOKUP \
 	"	//VOL_COMPUTED_GM_LOOKUP\n" \
 	"	v.y = p.y;\n" \
+	"\n"
+
+#define VOL_COMPUTED_GM_NOUSE \
+	"	//VOL_COMPUTED_GM_NOUSE\n" \
+	"	v.y = 0.0;\n" \
 	"\n"
 
 #define VOL_COMPUTED_GM_INVALIDATE \
