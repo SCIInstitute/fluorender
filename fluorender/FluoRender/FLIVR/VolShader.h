@@ -41,7 +41,7 @@ namespace FLIVR
 		VolShader(bool poly, int channels,
 				bool shading, bool fog,
 				int peel, bool clip,
-				bool hiqual, int mask, bool mip,
+				bool grad, int mask, bool mip,
 				int color_mode, int colormap, int colormap_proj,
 				bool solid, int vertex_shader);
 		~VolShader();
@@ -54,7 +54,7 @@ namespace FLIVR
 		inline bool fog() { return fog_; }
 		inline int peel() { return peel_; }
 		inline bool clip() { return clip_; }
-		inline bool hiqual() {return hiqual_; }
+		inline bool grad() {return grad_; }
 		inline int mask() {return mask_;}
 		inline bool mip() { return mip_; }
 		inline int color_mode() {return color_mode_;}
@@ -65,7 +65,7 @@ namespace FLIVR
 		inline bool match(bool poly, int channels,
 						bool shading, bool fog,
 						int peel, bool clip,
-						bool hiqual, int mask, bool mip,
+						bool grad, int mask, bool mip,
 						int color_mode, int colormap, int colormap_proj,
 						bool solid, int vertex_shader)
 		{ 
@@ -75,7 +75,7 @@ namespace FLIVR
 				fog_ == fog && 
 				peel_ == peel &&
 				clip_ == clip &&
-				hiqual_ == hiqual &&
+				grad_ == grad &&
 				mask_ == mask &&
 				mip_ == mip &&
 				color_mode_ == color_mode &&
@@ -99,7 +99,7 @@ namespace FLIVR
 		bool fog_;
 		int peel_;
 		bool clip_;
-		bool hiqual_;
+		bool grad_;
 		int mask_;	//0-normal, 1-render with mask, 2-render with mask excluded
 					//3-random color with label, 4-random color with label+mask
 		bool mip_;
@@ -122,7 +122,7 @@ namespace FLIVR
 		ShaderProgram* shader(bool poly, int channels,
 								bool shading, bool fog,
 								int peel, bool clip,
-								bool hiqual, int mask, bool mip,
+								bool grad, int mask, bool mip,
 								int color_mode, int colormap, int colormap_proj,
 								bool solid, int vertex_type);
 		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask

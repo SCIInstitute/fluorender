@@ -57,8 +57,7 @@ namespace FLIVR
 	double VolumeRenderer::sw_ = 0.0;
 
 	VolumeRenderer::VolumeRenderer(Texture* tex,
-		const vector<Plane*> &planes,
-		bool hiqual)
+		const vector<Plane*> &planes)
 		:TextureRenderer(tex),
 		//scalar scaling factor
 		scalar_scale_(1.0),
@@ -100,8 +99,6 @@ namespace FLIVR
 		planes_(planes),
 		//depth peel
 		depth_peel_(0),
-		//hi quality
-		hiqual_(hiqual),
 		//segmentation
 		ml_mode_(0),
 		mask_(false),
@@ -165,8 +162,6 @@ namespace FLIVR
 		adaptive_(copy.adaptive_),
 		//depth peel
 		depth_peel_(copy.depth_peel_),
-		//hi quality
-		hiqual_(copy.hiqual_),
 		//segmentation
 		ml_mode_(copy.ml_mode_),
 		mask_(copy.mask_),
@@ -701,11 +696,14 @@ namespace FLIVR
 		// Set up shaders
 		ShaderProgram* shader = 0;
 		//create/bind
+		bool grad = gm_thresh_ > 0.0 ||
+			(colormap_mode_ &&
+			colormap_proj_>3);
 		shader = vol_shader_factory_.shader(
 			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
-			hiqual_, ml_mode_, mode_ == TextureRenderer::MODE_MIP,
+			grad, ml_mode_, mode_ == TextureRenderer::MODE_MIP,
 			colormap_mode_, colormap_, colormap_proj_,
 			solid_, 1);
 		if (shader)
@@ -1188,13 +1186,13 @@ namespace FLIVR
 			seg_shader = seg_shader_factory_.shader(
 				SEG_SHDR_INITIALIZE, paint_mode, hr_mode,
 				use_2d, true, depth_peel_,
-				true, hiqual_, false);
+				true, false);
 			break;
 		case 1://diffusion-based growing
 			seg_shader = seg_shader_factory_.shader(
 				SEG_SHDR_DB_GROW, paint_mode, hr_mode,
 				use_2d, true, depth_peel_,
-				true, hiqual_, mvec_len>0.5);
+				true, mvec_len>0.5);
 			break;
 		}
 

@@ -47,7 +47,6 @@ namespace FLIVR
 	MultiVolumeRenderer::MultiVolumeRenderer()
 		: mode_(TextureRenderer::MODE_OVER),
 		depth_peel_(0),
-		hiqual_(true),
 		blend_num_bits_(32),
 		blend_slices_(false),
 		cur_framebuffer_(0),
@@ -68,7 +67,6 @@ namespace FLIVR
 	MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
 		: mode_(copy.mode_),
 		depth_peel_(copy.depth_peel_),
-		hiqual_(copy.hiqual_),
 		blend_num_bits_(copy.blend_num_bits_),
 		blend_slices_(copy.blend_slices_),
 		noise_red_(false),
@@ -563,12 +561,15 @@ namespace FLIVR
 
 				// Set up shaders
 				ShaderProgram* shader = 0;
+				bool grad = vr_list_[tn]->gm_thresh_ > 0.0 ||
+					(vr_list_[tn]->colormap_mode_ &&
+						vr_list_[tn]->colormap_proj_);
 				shader = VolumeRenderer::vol_shader_factory_.shader(
 					false,
 					vr_list_[tn]->tex_->nc(),
 					vr_list_[tn]->shading_, use_fog,
 					vr_list_[tn]->depth_peel_, true,
-					vr_list_[tn]->hiqual_,
+					grad,
 					vr_list_[tn]->ml_mode_,
 					vr_list_[tn]->mode_ == TextureRenderer::MODE_MIP,
 					vr_list_[tn]->colormap_mode_,

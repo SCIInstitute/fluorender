@@ -338,7 +338,7 @@ namespace FLIVR
 
 	SegShader::SegShader(int type, int paint_mode, int hr_mode,
 		bool use_2d, bool shading, int peel,
-		bool clip, bool hiqual, bool use_dir) :
+		bool clip, bool use_dir) :
 	type_(type),
 	paint_mode_(paint_mode),
 	hr_mode_(hr_mode),
@@ -346,7 +346,6 @@ namespace FLIVR
 	shading_(shading),
 	peel_(peel),
 	clip_(clip),
-	hiqual_(hiqual),
 	use_dir_(use_dir),
 	program_(0)
 	{}
@@ -437,7 +436,7 @@ namespace FLIVR
 				{
 					z << VOL_HEAD_LIT;
 					z << VOL_DATA_VOLUME_LOOKUP;
-					z << VOL_GRAD_COMPUTE_HI;
+					z << VOL_GRAD_COMPUTE;
 					z << VOL_COMPUTED_GM_LOOKUP;
 					z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L;
 
@@ -481,7 +480,7 @@ namespace FLIVR
 				{
 					z << VOL_HEAD_LIT;
 					z << VOL_DATA_VOLUME_LOOKUP;
-					z << VOL_GRAD_COMPUTE_HI;
+					z << VOL_GRAD_COMPUTE;
 					z << VOL_COMPUTED_GM_LOOKUP;
 					z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L;
 
@@ -539,14 +538,14 @@ namespace FLIVR
 	ShaderProgram* SegShaderFactory::shader(
 		int type, int paint_mode, int hr_mode,
 		bool use_2d, bool shading, int peel,
-		bool clip, bool hiqual, bool use_dir)
+		bool clip, bool use_dir)
 	{
 		if(prev_shader_ >= 0)
 		{
 			if(shader_[prev_shader_]->match(
 				type, paint_mode, hr_mode,
 				use_2d, shading, peel,
-				clip, hiqual, use_dir)) 
+				clip, use_dir)) 
 				return shader_[prev_shader_]->program();
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
@@ -554,7 +553,7 @@ namespace FLIVR
 			if(shader_[i]->match(
 				type, paint_mode, hr_mode,
 				use_2d, shading, peel,
-				clip, hiqual, use_dir)) 
+				clip, use_dir)) 
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
@@ -564,7 +563,7 @@ namespace FLIVR
 		SegShader* s = new SegShader(
 			type, paint_mode, hr_mode,
 			use_2d, shading, peel,
-			clip, hiqual, use_dir);
+			clip, use_dir);
 		if(s->create())
 		{
 			delete s;

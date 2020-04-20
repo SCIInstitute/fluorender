@@ -43,8 +43,7 @@ namespace FLIVR
 	{
 	public:
 		VolumeRenderer(Texture* tex,
-			const vector<Plane*> &planes,
-			bool hiqual);
+			const vector<Plane*> &planes);
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
@@ -76,10 +75,6 @@ namespace FLIVR
 		{
 			memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4);
 		}
-
-		//quality and data type
-		//set by initialization
-		bool get_hiqual() {return hiqual_;}
 
 		//render mode
 		void set_mode(RenderMode mode);
@@ -284,8 +279,6 @@ namespace FLIVR
 		vector<Plane *> planes_;
 		//depth peel
 		int depth_peel_;
-		//hi quality
-		bool hiqual_;
 		//segmentation
 		int ml_mode_;	//0-normal, 1-render with mask, 2-render with mask excluded,
 						//3-random color with label, 4-random color with label+mask

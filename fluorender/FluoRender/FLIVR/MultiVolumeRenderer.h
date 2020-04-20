@@ -125,7 +125,6 @@ namespace FLIVR
 		//mode and quality control
 		TextureRenderer::RenderMode mode_;
 		int depth_peel_;
-		bool hiqual_;
 		int blend_num_bits_;
 		bool blend_slices_;
 
