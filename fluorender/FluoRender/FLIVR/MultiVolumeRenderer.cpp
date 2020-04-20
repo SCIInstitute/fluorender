@@ -234,28 +234,35 @@ namespace FLIVR
 		int w2 = w;
 		int h2 = h;
 
-		if (noise_red_)
+		double sf;
+		std::string bbufname;
+		if (imode_ && adaptive_)
 		{
-			double sf = vr_list_[0]->CalcScaleFactor(w, h, res_.x(), res_.y());
-			if (fabs(sf-sfactor_)>0.05)
-				sfactor_ = sf;
-			else if (sf==1.0 && sfactor_!=1.0)
-				sfactor_ = sf;
-
-			w2 = int(w*sfactor_+0.5);
-			h2 = int(h*sfactor_+0.5);
+			sf = Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.1, 1.0);
+			bbufname = "blend_int";
+		}
+		else if (noise_red_)
+		{
+			sf = vr_list_[0]->CalcScaleFactor(w, h, res_.x(), res_.y());
+			bbufname = "blend_nr";
 		}
 		else
 		{
-			if (sfactor_ != 1.0)
-				sfactor_ = 1.0;
+			sf = Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.5, 2.0);
+			bbufname = "blend_hi";
 		}
+		if (fabs(sf - sfactor_) > 0.05)
+			sfactor_ = sf;
+		else if (sf == 1.0 && sfactor_ != 1.0)
+			sfactor_ = sf;
+		w2 = int(w*sfactor_ + 0.5);
+		h2 = int(h*sfactor_ + 0.5);
 
 		Framebuffer* blend_buffer = 0;
 		if(blend_num_bits_ > 8)
 		{
 			blend_buffer = TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, w2, h2);
+				FB_Render_RGBA, w2, h2, bbufname);
 			if (!blend_buffer)
 				return;
 			blend_buffer->bind();

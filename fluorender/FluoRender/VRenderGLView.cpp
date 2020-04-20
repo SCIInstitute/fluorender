@@ -3382,6 +3382,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+	GLfloat zoom = m_scale_factor;
+	GLfloat sf121 = Get121ScaleFactor();
 
 	m_mvr->set_blend_slices(m_blend_slices);
 
@@ -3404,6 +3406,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 					vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				vr->set_zoom(zoom, sf121);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
