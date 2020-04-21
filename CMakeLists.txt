@@ -436,6 +436,14 @@ if(WIN32 AND USE_XINPUT)
 		${xip_src} ${xip_hdr})
 endif()
 
+#nikon
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/nd2/include)
+if(WIN32)
+	if(${ARCHITECTURE} MATCHES 64)
+		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.lib)
+	endif()
+endif()
+
 # other sources
 file(GLOB src fluorender/FluoRender/*.cpp)
 file(GLOB hdr fluorender/FluoRender/*.h)
@@ -703,6 +711,7 @@ elseif(WIN32)
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OpenVR_LIBRARIES}
+    ${ND2_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES})
   target_link_libraries(Tester
