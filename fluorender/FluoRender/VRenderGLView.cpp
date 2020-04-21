@@ -3918,6 +3918,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			obj_transy = p.y();
 			obj_transz = p.z();
 			double thresh = 10.0;
+			double spcx, spcy, spcz;
+			m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			thresh *= spcx;
 			if (sqrt((m_obj_transx - obj_transx)*(m_obj_transx - obj_transx) +
 				(m_obj_transy - obj_transy)*(m_obj_transy - obj_transy) +
 				(m_obj_transz - obj_transz)*(m_obj_transz - obj_transz)) > thresh)
