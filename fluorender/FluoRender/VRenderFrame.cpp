@@ -1305,12 +1305,13 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.xml;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.nd2;*.xml;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
+		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
 		"Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia VVD files (*.vvd)|*.vvd",
@@ -1447,6 +1448,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_BRKXML, false);
 			else if (suffix == ".czi")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_CZI, false);
+			else if (suffix == ".nd2")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_ND2, false);
 
 			if (ch_num > 1)
 			{
@@ -1559,7 +1562,8 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 			suffix == ".lsm" ||
 			suffix == ".xml" ||
 			suffix == ".vvd" ||
-			suffix == ".czi")
+			suffix == ".czi" ||
+			suffix == ".nd2")
 		{
 			LoadVolumes(files, with_imagej);
 		}
@@ -3572,6 +3576,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_BRKXML, false, cur_chan, cur_time);
 					else if (suffix == ".czi")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_CZI, false, cur_chan, cur_time);
+					else if (suffix == ".nd2")
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_ND2, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)

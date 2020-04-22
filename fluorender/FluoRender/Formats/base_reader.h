@@ -61,6 +61,7 @@ using namespace std;
 #define READER_BRKXML_TYPE	7
 #define READER_CZI_TYPE	8
 #define READER_IMAGEJ_TYPE	9
+#define READER_ND2_TYPE	10
 
 class BaseReader
 {

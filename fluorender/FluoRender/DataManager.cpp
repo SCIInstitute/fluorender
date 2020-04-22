@@ -4791,6 +4791,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 				reader = new BRKXMLReader();
 			else if (type == LOAD_TYPE_CZI)
 				reader = new CZIReader();
+			else if (type == LOAD_TYPE_ND2)
+				reader = new ND2Reader();
 		}
 		
 		

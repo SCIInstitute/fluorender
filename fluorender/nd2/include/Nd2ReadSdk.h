@@ -242,13 +242,13 @@ struct _LIMPICTURE
 typedef struct _LIMPICTURE LIMPICTURE; //!< Picture description and data pointer
 typedef void*  LIMFILEHANDLE;          //!< Opaque type representing an opened ND2 file
 
-#if defined(_WIN32) && defined(_DLL) && !defined(LX_STATIC_LINKING)
-#  define DLLEXPORT __declspec(dllexport)
-#  define DLLIMPORT __declspec(dllimport)
-#else
+//#if defined(_WIN32) && defined(_DLL) && !defined(LX_STATIC_LINKING)
+//#  define DLLEXPORT __declspec(dllexport)
+//#  define DLLIMPORT __declspec(dllimport)
+//#else
 #  define DLLEXPORT
 #  define DLLIMPORT
-#endif
+//#endif
 
 #if defined(__cplusplus)
 #  define EXTERN extern "C"
@@ -256,11 +256,11 @@ typedef void*  LIMFILEHANDLE;          //!< Opaque type representing an opened N
 #  define EXTERN extern
 #endif
 
-#if defined(GNR_ND2_SDK_EXPORTS)
+//#if defined(GNR_ND2_SDK_EXPORTS)
 #  define LIMFILEAPI EXTERN DLLEXPORT
-#else
-#  define LIMFILEAPI EXTERN DLLIMPORT
-#endif
+//#else
+//#  define LIMFILEAPI EXTERN DLLIMPORT
+//#endif
 
 /*!
 \brief Opens an ND2 file for reading. This is wchar_t version.
