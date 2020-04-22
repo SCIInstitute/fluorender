@@ -80,8 +80,10 @@ void ND2Reader::SetFile(wstring &file)
 
 int ND2Reader::Preprocess()
 {
+#ifndef _DEBUG
 	LIMFILEHANDLE h = Lim_FileOpenForRead(m_path_name.c_str());
 	Lim_FileClose(h);
+#endif
 	return READER_OK;
 }
 
