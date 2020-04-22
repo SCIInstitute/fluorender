@@ -81,7 +81,58 @@ void ND2Reader::SetFile(wstring &file)
 int ND2Reader::Preprocess()
 {
 #ifndef _DEBUG
-	LIMFILEHANDLE h = Lim_FileOpenForRead(m_path_name.c_str());
+	LIMCWSTR filename = m_path_name.c_str();
+	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
+	if (h == nullptr)
+	{
+		Lim_FileClose(h);
+		return READER_OPEN_FAIL;
+	}
+
+	LIMCHAR buffer[ND2_STR_SIZE];
+	std::string str;
+	m_nd2_info.init();
+	LIMSIZE coordsize = Lim_FileGetCoordSize(h);
+	LIMUINT fnum = Lim_FileGetSeqCount(h);
+	int ti = -1, zi = -1, xyi = -1;//indecis in coords
+	std::vector<LIMUINT> vec(coordsize);
+	if (coordsize > 0)
+	{
+		for (size_t i = 0; i < coordsize; ++i)
+		{
+			Lim_FileGetCoordInfo(h, (LIMUINT)i, buffer, ND2_STR_SIZE);
+			str = buffer;
+			if (str == "TimeLoop")
+				ti = i;
+			else if (str == "XYPosLoop")
+				xyi = i;
+			else if (str == "ZStackLoop")
+				zi = i;
+		}
+		for (unsigned int i = 0; i < fnum; ++i)
+		{
+			Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
+			FrameInfo frame;
+			frame.chan = 0;
+			frame.time = ti >= 0 ? vec[ti] : 0;
+			frame.slice = zi >= 0 ? vec[zi] : 0;
+			frame.seq = i;
+			AddFrameInfo(frame);
+		}
+	}
+	else
+	{
+		if (fnum)
+		{
+			//single frame
+			FrameInfo frame;
+			frame.chan = 0;
+			frame.time = 0;
+			frame.slice = 0;
+			frame.seq = 0;
+			AddFrameInfo(frame);
+		}
+	}
 	Lim_FileClose(h);
 #endif
 	return READER_OK;
@@ -196,4 +247,33 @@ wstring ND2Reader::GetCurLabelName(int t, int c)
 	woss << ".lbl";
 	wstring label_name = woss.str();
 	return label_name;
+}
+
+void ND2Reader::AddFrameInfo(FrameInfo &frame)
+{
+	int chan = frame.chan;
+	int time = frame.time;
+	int slice = frame.slice;
+
+	TimeInfo *timeinfo;
+	if (m_nd2_info.times.size() <= time)
+	{
+		m_nd2_info.times.resize(time + 1);
+		timeinfo = &(m_nd2_info.times.back());
+		timeinfo->time = time;
+	}
+	else
+		timeinfo = &(m_nd2_info.times[time]);
+
+	ChannelInfo *chaninfo;
+	if (timeinfo->channels.size() <= chan)
+	{
+		timeinfo->channels.resize(chan + 1);
+		chaninfo = &(timeinfo->channels.back());
+		chaninfo->chan = chan;
+	}
+	else
+		chaninfo = &(timeinfo->channels[chan]);
+
+	chaninfo->chann.push_back(frame);
 }

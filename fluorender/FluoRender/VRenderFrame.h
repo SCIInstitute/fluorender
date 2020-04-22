@@ -92,7 +92,7 @@ using namespace std;
 				   "." \
 				   VERSION_MINOR_TAG \
 				   "_Tutorials.pdf"
-#define YOUTUBE_URL "https://www.youtube.com/user/basisunus/playlists"
+#define YOUTUBE_URL "https://www.youtube.com/playlist?list=PLSBz7un7RyZhO51UWhmGiusaJebmaWPbc"
 #define TWITTER_URL "https://twitter.com/FluoRender"
 #define FACEBOOK_URL "https://www.facebook.com/fluorender"
 #define BATCH_INFO HELP_MANUAL

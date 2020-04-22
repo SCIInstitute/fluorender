@@ -31,8 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Nd2ReadSdk.h>
 #include <base_reader.h>
 #include <vector>
+#include <string>
+#include <limits>
 
 using namespace std;
+
+#define ND2_STR_SIZE	1024
 
 class ND2Reader : public BaseReader
 {
@@ -82,16 +86,37 @@ public:
 private:
 	wstring m_data_name;
 
-/*	struct SliceInfo
+	struct FrameInfo
 	{
-		unsigned int offset;	//offset value in lsm file
-		unsigned int offset_high;//if it is larger than 4GB, this is the high 32 bits of the 64-bit address
-		unsigned int size;		//size in lsm file
+		int chan;//channel number
+		int time;//time number
+		int slice;//z stack slice number
+		int seq;//sequence number
 	};
-	typedef vector<SliceInfo> ChannelInfo;		//all slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;	//channels form a dataset
-	vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
-*/
+	struct ChannelInfo
+	{
+		int chan;//channel number
+		std::vector<FrameInfo> chann;//single channel of z slices
+	};
+	struct TimeInfo
+	{
+		int time;//time number
+		std::vector<ChannelInfo> channels;//single time point of channels
+	};
+	struct ND2Info
+	{
+		int xmin, ymin, zmin;
+		int xmax, ymax, zmax;
+		std::vector<TimeInfo> times;
+
+		void init()
+		{
+			xmin = ymin = zmin = std::numeric_limits<int>::max();
+			xmax = ymax = zmax = std::numeric_limits<int>::min();
+			times.clear();
+		}
+	};
+	ND2Info m_nd2_info;
 
 	int m_time_num;
 	int m_cur_time;
@@ -106,13 +131,6 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 
-	//lsm properties
-	/*int m_compression;		//1:no compression; 5:lzw compression
-	int m_predictor;		//shoud be 2 if above is 5
-	unsigned int m_version;	//lsm version
-	int m_datatype;			//0: varying; 1: 8-bit; 2: 12-bit; 5: 32-bit
-	bool m_l4gb;			//true: this is a larger-than-4-GB file
-*/
 	//wavelength info
 	struct WavelengthInfo
 	{
@@ -122,8 +140,7 @@ private:
 	vector<WavelengthInfo> m_excitation_wavelength_list;
 
 private:
-	//void ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size);
-
+	void AddFrameInfo(FrameInfo &frame);
 };
 
 #endif//_ND2_READER_H_
