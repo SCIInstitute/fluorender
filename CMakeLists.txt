@@ -410,6 +410,14 @@ elseif(UNIX OR APPLE OR MINGW)
   include_directories(${OpenCL_INCLUDE_DIRS})
 endif()
 
+#nikon
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/nd2/include)
+if(WIN32)
+	if(${ARCHITECTURE} MATCHES 64)
+		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.lib)
+	endif()
+endif()
+
 # freetype
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/freetype/include)
 if(WIN32)
@@ -434,14 +442,6 @@ if(WIN32 AND USE_XINPUT)
 	file(GLOB xip_hdr fluorender/XInput/*.h)
 	add_library(XINPUT_OBJ OBJECT
 		${xip_src} ${xip_hdr})
-endif()
-
-#nikon
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/nd2/include)
-if(WIN32)
-	if(${ARCHITECTURE} MATCHES 64)
-		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.lib)
-	endif()
 endif()
 
 # other sources
@@ -711,9 +711,9 @@ elseif(WIN32)
     ${Boost_LIBRARIES}
     ${OpenCL_LIBRARIES}
     ${OpenVR_LIBRARIES}
-    ${ND2_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES})
+    ${wxWidgets_LIBRARIES}
+    ${ND2_LIBRARIES})
   target_link_libraries(Tester
     ${OPENGL_LIBRARIES}
     ${OpenCL_LIBRARIES}
