@@ -105,19 +105,12 @@ private:
 	};
 	struct ND2Info
 	{
-		int xmin, ymin, zmin;
-		int xmax, ymax, zmax;
 		std::vector<TimeInfo> times;
-
-		void init()
-		{
-			xmin = ymin = zmin = std::numeric_limits<int>::max();
-			xmax = ymax = zmax = std::numeric_limits<int>::min();
-			times.clear();
-		}
 	};
 	ND2Info m_nd2_info;
 
+	int m_bits;
+	int m_bits_used;
 	int m_time_num;
 	int m_cur_time;
 	int m_chan_num;
@@ -141,6 +134,17 @@ private:
 
 private:
 	void AddFrameInfo(FrameInfo &frame);
+	ChannelInfo* GetChaninfo(int t, int c)
+	{
+		if (t >= 0 && t < m_nd2_info.times.size())
+		{
+			TimeInfo* tinfo = &(m_nd2_info.times[t]);
+			if (tinfo->channels.size() > 0)
+				return &(tinfo->channels[0]);
+		}
+		return 0;
+	}
+	bool ReadChannel(LIMFILEHANDLE h, int t, int c, void* val);
 };
 
 #endif//_ND2_READER_H_
