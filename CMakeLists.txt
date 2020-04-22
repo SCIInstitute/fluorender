@@ -703,6 +703,18 @@ if(UNIX OR APPLE OR MINGW)
     ${ZLIB_LIBRARIES})
 #${JNI_LIBRARIES})   
 elseif(WIN32)
+	if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  target_link_libraries(FluoRender
+    secur32.lib
+    XInput.lib
+    ${FFMPEG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OpenCL_LIBRARIES}
+    ${OpenVR_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
+    ${wxWidgets_LIBRARIES})
+  else()
   target_link_libraries(FluoRender
     secur32.lib
     XInput.lib
@@ -714,6 +726,7 @@ elseif(WIN32)
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES})
+  endif()
   target_link_libraries(Tester
     ${OPENGL_LIBRARIES}
     ${OpenCL_LIBRARIES}
