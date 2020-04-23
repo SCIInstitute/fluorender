@@ -324,7 +324,7 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
 	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("YouTube..."));
+	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("Video Tutorials..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
 	m_tb_menu_update->Append(m);
 	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
@@ -351,7 +351,7 @@ VRenderFrame::VRenderFrame(
 		break;
 	case 1:
 		bitmap = wxGetBitmapFromMemory(icon_youtube);
-		str1 = "YouTube";
+		str1 = "Video Tutorials";
 		str2 = "FluoRender's YouTube channel & Tutorials";
 		str3 = "FluoRender's YouTube channel & Tutorials (requires Internet connection)";
 		item_id = ID_Youtube;
@@ -803,13 +803,13 @@ VRenderFrame::VRenderFrame(
 	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help, ID_Youtube, wxT("&YouTube"));
+	m = new wxMenuItem(m_top_help, ID_Youtube, wxT("&Video Tutorials"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Twitter, wxT("&Twitter"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Facebook, wxT("F&acebook"));
+	m = new wxMenuItem(m_top_help,ID_Facebook, wxT("&Facebook"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help,ID_Manual, wxT("&Online Manual"));
@@ -1312,9 +1312,9 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
 		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
-		"Prairie View XML (*.xml)|*.xml|"\
+		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
-		"Janelia VVD files (*.vvd)|*.vvd",
+		"Janelia Brick files (*.vvd)|*.vvd",
 		wxFD_OPEN|wxFD_MULTIPLE);
 	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
 
