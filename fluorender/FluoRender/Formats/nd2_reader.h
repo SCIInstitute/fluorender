@@ -144,6 +144,10 @@ private:
 		}
 		return 0;
 	}
+	void ReadSequences(LIMFILEHANDLE h);
+	void ReadAttributes(LIMFILEHANDLE h);
+	void ReadTextInfo(LIMFILEHANDLE h);
+	void ReadMetadata(LIMFILEHANDLE h);
 	bool ReadChannel(LIMFILEHANDLE h, int t, int c, void* val);
 };
 

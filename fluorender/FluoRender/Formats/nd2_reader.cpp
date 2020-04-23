@@ -90,82 +90,15 @@ int ND2Reader::Preprocess()
 	}
 
 	//get attributes
-	LIMSTR attstr = Lim_FileGetAttributes(h);
-	nlohmann::json j = nlohmann::json::parse(attstr);
-	Lim_FileFreeString(attstr);
-	std::string str;
-	for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
-	{
-		str = it.key();
-		if (str == "bitsPerComponentInMemory")
-			m_bits = it.value();
-		else if (str == "bitsPerComponentSignificant")
-			m_bits_used = it.value();
-		else if (str == "componentCount")
-			m_chan_num = it.value();
-		else if (str == "widthPx")
-			m_x_size = it.value();
-		else if (str == "heightPx")
-			m_y_size = it.value();
-	}
+	ReadAttributes(h);
+	//get wavelength info
+	ReadTextInfo(h);
+	//get xyz voxel sizes
+	ReadMetadata(h);
+	//read sequence info
+	ReadSequences(h);
 
-	if (m_bits > 8)
-	{
-		m_max_value = std::pow(2.0, double(m_bits_used));
-		m_scalar_scale = 65535.0 / m_max_value;
-	}
-
-	LIMCHAR buffer[ND2_STR_SIZE];
-	LIMSIZE coordsize = Lim_FileGetCoordSize(h);
-	LIMUINT fnum = Lim_FileGetSeqCount(h);
-	int ti = -1, zi = -1, xyi = -1;//indecis in coords
-	int maxz = 0;
-	std::vector<LIMUINT> vec(coordsize);
-	if (coordsize > 0)
-	{
-		for (size_t i = 0; i < coordsize; ++i)
-		{
-			Lim_FileGetCoordInfo(h, (LIMUINT)i, buffer, ND2_STR_SIZE);
-			str = buffer;
-			if (str == "TimeLoop" ||
-				str == "NETimeLoop")
-				ti = i;
-			else if (str == "XYPosLoop")
-				xyi = i;
-			else if (str == "ZStackLoop")
-				zi = i;
-		}
-		for (unsigned int i = 0; i < fnum; ++i)
-		{
-			Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
-			FrameInfo frame;
-			frame.chan = 0;
-			frame.time = ti >= 0 ? vec[ti] : 0;
-			frame.slice = zi >= 0 ? vec[zi] : 0;
-			frame.seq = i;
-			AddFrameInfo(frame);
-			maxz = frame.slice > maxz ? frame.slice : maxz;
-		}
-	}
-	else
-	{
-		if (fnum)
-		{
-			//single frame
-			FrameInfo frame;
-			frame.chan = 0;
-			frame.time = 0;
-			frame.slice = 0;
-			frame.seq = 0;
-			AddFrameInfo(frame);
-		}
-	}
 	Lim_FileClose(h);
-
-	m_time_num = m_nd2_info.times.size();
-	m_slice_num = maxz + 1;
-	m_cur_time = 0;
-	m_data_name = GET_NAME(m_path_name);
 
 	return READER_OK;
 }
@@ -394,4 +327,140 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 	}
 
 	return true;
+}
+
+void ND2Reader::ReadAttributes(LIMFILEHANDLE h)
+{
+	LIMSTR limstr = Lim_FileGetAttributes(h);
+	nlohmann::json j = nlohmann::json::parse(limstr);
+	Lim_FileFreeString(limstr);
+	std::string str;
+	for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
+	{
+		str = it.key();
+		if (str == "bitsPerComponentInMemory")
+			m_bits = it.value();
+		else if (str == "bitsPerComponentSignificant")
+			m_bits_used = it.value();
+		else if (str == "componentCount")
+			m_chan_num = it.value();
+		else if (str == "widthPx")
+			m_x_size = it.value();
+		else if (str == "heightPx")
+			m_y_size = it.value();
+	}
+	if (m_bits > 8)
+	{
+		m_max_value = std::pow(2.0, double(m_bits_used));
+		m_scalar_scale = 65535.0 / m_max_value;
+	}
+}
+
+void ND2Reader::ReadTextInfo(LIMFILEHANDLE h)
+{
+	LIMSTR limstr = Lim_FileGetTextinfo(h);
+	nlohmann::json j = nlohmann::json::parse(limstr);
+	Lim_FileFreeString(limstr);
+	std::string str, plane, exw;
+	for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it)
+	{
+		str = it.key();
+		if (str == "description")
+		{
+			str = it.value();
+			//search for wavelengths
+			size_t pos = 0, pos2 = 0, pt = 0;
+			do
+			{
+				pos = str.find("Plane #", pos);
+				if (pos == std::string::npos)
+					break;
+				pt = str.find(":", pos);
+				if (pt == std::string::npos)
+					break;
+				plane = str.substr(pos + 7, pt - pos - 7);//channel number
+				pos2 = str.find("Plane #", pos + 5);
+				if (pos2 == std::string::npos)
+					pos2 = str.length() - 1;
+				pos = str.find("; On", pos);
+				if (pos > pos2)
+				{
+					pos = pos2 - 1;
+					continue;
+				}
+				pos = str.rfind("ExW:", pos);
+				if (pos == std::string::npos)
+					break;
+				pt = str.find(";", pos);
+				if (pt == std::string::npos)
+					break;
+				exw = str.substr(pos + 4, pt - pos - 4);//wavelength value
+				WavelengthInfo winfo;
+				winfo.chan_num = std::stoi(plane);
+				winfo.wavelength = std::stod(exw);
+				m_excitation_wavelength_list.push_back(winfo);
+			} while (pos != std::string::npos);
+			break;
+		}
+	}
+}
+
+void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
+{
+
+}
+
+void ND2Reader::ReadSequences(LIMFILEHANDLE h)
+{
+	LIMCHAR buffer[ND2_STR_SIZE];
+	LIMSIZE coordsize = Lim_FileGetCoordSize(h);
+	LIMUINT fnum = Lim_FileGetSeqCount(h);
+	int ti = -1, zi = -1, xyi = -1;//indecis in coords
+	int maxz = 0;
+	std::vector<LIMUINT> vec(coordsize);
+	std::string str;
+	if (coordsize > 0)
+	{
+		for (size_t i = 0; i < coordsize; ++i)
+		{
+			Lim_FileGetCoordInfo(h, (LIMUINT)i, buffer, ND2_STR_SIZE);
+			str = buffer;
+			if (str == "TimeLoop" ||
+				str == "NETimeLoop")
+				ti = i;
+			else if (str == "XYPosLoop")
+				xyi = i;
+			else if (str == "ZStackLoop")
+				zi = i;
+		}
+		for (unsigned int i = 0; i < fnum; ++i)
+		{
+			Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
+			FrameInfo frame;
+			frame.chan = 0;
+			frame.time = ti >= 0 ? vec[ti] : 0;
+			frame.slice = zi >= 0 ? vec[zi] : 0;
+			frame.seq = i;
+			AddFrameInfo(frame);
+			maxz = frame.slice > maxz ? frame.slice : maxz;
+		}
+	}
+	else
+	{
+		if (fnum)
+		{
+			//single frame
+			FrameInfo frame;
+			frame.chan = 0;
+			frame.time = 0;
+			frame.slice = 0;
+			frame.seq = 0;
+			AddFrameInfo(frame);
+		}
+	}
+
+	m_time_num = m_nd2_info.times.size();
+	m_slice_num = maxz + 1;
+	m_cur_time = 0;
+	m_data_name = GET_NAME(m_path_name);
 }
