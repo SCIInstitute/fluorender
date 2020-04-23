@@ -81,7 +81,6 @@ void ND2Reader::SetFile(wstring &file)
 
 int ND2Reader::Preprocess()
 {
-#ifndef _DEBUG
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -128,7 +127,8 @@ int ND2Reader::Preprocess()
 		{
 			Lim_FileGetCoordInfo(h, (LIMUINT)i, buffer, ND2_STR_SIZE);
 			str = buffer;
-			if (str == "TimeLoop")
+			if (str == "TimeLoop" ||
+				str == "NETimeLoop")
 				ti = i;
 			else if (str == "XYPosLoop")
 				xyi = i;
@@ -166,7 +166,7 @@ int ND2Reader::Preprocess()
 	m_slice_num = maxz + 1;
 	m_cur_time = 0;
 	m_data_name = GET_NAME(m_path_name);
-#endif
+
 	return READER_OK;
 }
 
@@ -251,7 +251,7 @@ double ND2Reader::GetExcitationWavelength(int chan)
 Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
-#ifndef _DEBUG
+
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -303,7 +303,7 @@ Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 
 	Lim_FileClose(h);
 	m_cur_time = t;
-#endif
+
 	return data;
 }
 
