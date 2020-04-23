@@ -416,6 +416,8 @@ if(WIN32)
 	if(${ARCHITECTURE} MATCHES 64)
 		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.lib)
 	endif()
+elseif(APPLE)
+   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.a)
 endif()
 
 # freetype
@@ -699,22 +701,11 @@ if(UNIX OR APPLE OR MINGW)
     ${wxWidgets_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${TIFF_LIBRARIES}
-	${PNG_LIBRARIES}
-    ${ZLIB_LIBRARIES})
+    ${PNG_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${ND2_LIBRARIES})
 #${JNI_LIBRARIES})   
 elseif(WIN32)
-	if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-  target_link_libraries(FluoRender
-    secur32.lib
-    XInput.lib
-    ${FFMPEG_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${OpenVR_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${wxWidgets_LIBRARIES})
-  else()
   target_link_libraries(FluoRender
     secur32.lib
     XInput.lib
@@ -726,7 +717,6 @@ elseif(WIN32)
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES})
-  endif()
   target_link_libraries(Tester
     ${OPENGL_LIBRARIES}
     ${OpenCL_LIBRARIES}
