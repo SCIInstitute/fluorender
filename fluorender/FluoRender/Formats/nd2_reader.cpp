@@ -383,22 +383,25 @@ void ND2Reader::ReadTextInfo(LIMFILEHANDLE h)
 				if (pos2 == std::string::npos)
 					pos2 = str.length() - 1;
 				pos = str.find("; On", pos);
-				if (pos > pos2)
+				bool transmit = false;
+				if (pos > pos2 ||
+					pos == std::string::npos)
+					transmit = true;
+				if (!transmit)
 				{
-					pos = pos2 - 1;
-					continue;
+					pos = str.rfind("ExW:", pos);
+					if (pos == std::string::npos)
+						break;
+					pt = str.find(";", pos);
+					if (pt == std::string::npos)
+						break;
+					exw = str.substr(pos + 4, pt - pos - 4);//wavelength value
 				}
-				pos = str.rfind("ExW:", pos);
-				if (pos == std::string::npos)
-					break;
-				pt = str.find(";", pos);
-				if (pt == std::string::npos)
-					break;
-				exw = str.substr(pos + 4, pt - pos - 4);//wavelength value
 				WavelengthInfo winfo;
-				winfo.chan_num = std::stoi(plane);
-				winfo.wavelength = std::stod(exw);
+				winfo.chan_num = std::stoi(plane)-1;
+				winfo.wavelength = transmit ? -1 : std::stod(exw);
 				m_excitation_wavelength_list.push_back(winfo);
+				pos = pos2 - 1;
 			} while (pos != std::string::npos);
 			break;
 		}
@@ -407,7 +410,61 @@ void ND2Reader::ReadTextInfo(LIMFILEHANDLE h)
 
 void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
 {
-
+	LIMSTR limstr = Lim_FileGetMetadata(h);
+	nlohmann::json j = nlohmann::json::parse(limstr);
+	Lim_FileFreeString(limstr);
+	auto it = j.find("channels");
+	string str;
+	if (it != j.end())
+	{
+		str = it->dump();
+		size_t pos = str.find("axesCalibration");
+		if (pos == std::string::npos)
+			return;
+		pos = str.find("[", pos);
+		if (pos == std::string::npos)
+			return;
+		size_t pos2 = str.find("]", pos);
+		if (pos2 == std::string::npos)
+			return;
+		string x, y, z;
+		int count = 0;
+		bool flag = false;
+		for (size_t i = pos; i < pos2; ++i)
+		{
+			if (isdigit(str[i]) || str[i] == '.')
+			{
+				flag = true;
+				if (!count)
+					count++;
+				switch (count)
+				{
+				case 1:
+					x += str[i];
+					break;
+				case 2:
+					y += str[i];
+					break;
+				case 3:
+					z += str[i];
+					break;
+				}
+			}
+			else
+			{
+				if (flag)
+					count++;
+				flag = false;
+			}
+		}
+		if (count >= 3)
+		{
+			m_xspc = stod(x);
+			m_yspc = stod(y);
+			m_zspc = stod(z);
+			m_valid_spc = true;
+		}
+	}
 }
 
 void ND2Reader::ReadSequences(LIMFILEHANDLE h)
