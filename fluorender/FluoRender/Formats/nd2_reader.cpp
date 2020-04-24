@@ -505,6 +505,8 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 			frame.time = ti >= 0 ? vec[ti] : 0;
 			frame.slice = zi >= 0 ? vec[zi] : 0;
 			frame.seq = i;
+			frame.x = 0;
+			frame.y = 0;
 			AddFrameInfo(frame);
 			maxz = frame.slice > maxz ? frame.slice : maxz;
 		}
@@ -519,6 +521,13 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 			frame.time = 0;
 			frame.slice = 0;
 			frame.seq = 0;
+			frame.x = 0;
+			frame.y = 0;
+			frame.xsize = m_x_size;
+			frame.ysize = m_y_size;
+			frame.posx = 0.0;
+			frame.posy = 0.0;
+			frame.posz = 0.0;
 			AddFrameInfo(frame);
 		}
 	}

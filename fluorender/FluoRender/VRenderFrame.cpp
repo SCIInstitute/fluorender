@@ -1305,6 +1305,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
+#ifndef _DARWIN
 		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.nd2;*.xml;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
@@ -1315,6 +1316,17 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia Brick files (*.vvd)|*.vvd",
+#else
+		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.xml;*.nrrd;*.vvd|"\
+		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Olympus Image Binary Files (*.oib)|*.oib|"\
+		"Olympus Original Imaging Format (*.oif)|*.oif|"\
+		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
+		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
+		"Bruker/Prairie View XML (*.xml)|*.xml|"\
+		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
+		"Janelia Brick files (*.vvd)|*.vvd",
+#endif
 		wxFD_OPEN|wxFD_MULTIPLE);
 	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
 
@@ -1562,8 +1574,10 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 			suffix == ".lsm" ||
 			suffix == ".xml" ||
 			suffix == ".vvd" ||
-			suffix == ".czi" ||
-			suffix == ".nd2")
+#ifndef _DARWIN
+			suffix == ".nd2" ||
+#endif
+			suffix == ".czi")
 		{
 			LoadVolumes(files, with_imagej);
 		}
