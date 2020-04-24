@@ -677,7 +677,8 @@ const char* str_cl_sg_check_borders = \
 SegGrow::SegGrow(VolumeData* vd):
 	m_vd(vd),
 	m_branches(10),
-	m_iter(0)
+	m_iter(0),
+	m_sz_thresh(10)
 {
 }
 
@@ -1267,7 +1268,7 @@ void SegGrow::Compute()
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{
-		if (it->second.sum < 10)
+		if (it->second.sum < m_sz_thresh)
 			continue;
 		it->second.ctr = it->second.ctr / it->second.sum;
 		it->second.ctr.scale(spcx, spcy, spcz);

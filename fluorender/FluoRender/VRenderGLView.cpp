@@ -4233,6 +4233,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetMouseState().LeftIsDown() &&
 			m_grow_on)
 		{
+			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			int sz = 5;
+			if (vr_frame && vr_frame->GetSettingDlg())
+				sz = vr_frame->GetSettingDlg()->GetRulerSizeThresh();
 			//event.RequestMore();
 			m_selector.SetInitMask(2);
 			Segment();
@@ -4242,12 +4246,12 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				FL::SegGrow sg(m_cur_vol);
 				sg.SetRulerHandler(&m_ruler_handler);
 				sg.SetIter(m_selector.GetIter()*3);
+				sg.SetSizeThresh(sz);
 				sg.Compute();
 			}
 			refresh = true;
 			start_loop = true;
 			//update
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (vr_frame)
 			{
 				if (m_paint_count && vr_frame->GetBrushToolDlg())

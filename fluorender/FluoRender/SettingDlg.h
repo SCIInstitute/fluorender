@@ -232,6 +232,9 @@ public:
 	//ruler exports df/f
 	bool GetRulerDF_F() { return m_ruler_df_f; }
 	void SetRulerDF_F(bool val) { m_ruler_df_f = val; }
+	//ruler size thresh
+	int GetRulerSizeThresh() { return m_ruler_size_thresh; }
+	void SetRulerSizeThresh(int val) { m_ruler_size_thresh = val; }
 	//flags for pvxml flipping
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
@@ -361,6 +364,8 @@ private:
 	int m_ruler_relax_type;
 	//ruler exports df/f
 	bool m_ruler_df_f;
+	//grow ruler size thresh
+	int m_ruler_size_thresh;
 	//flip pvxml frame
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;

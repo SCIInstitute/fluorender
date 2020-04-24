@@ -1,5 +1,5 @@
 ver_major=2
-ver_minor=25.2
+ver_minor=26
 [gm\ calculation]
 mode=2
 [peeling\ layers]
@@ -92,6 +92,7 @@ df_f=0
 relax\ iter=50
 auto\ relax=0
 relax\ type=1
+size\ thresh=5
 [pvxml\ flip]
 x=0
 y=0

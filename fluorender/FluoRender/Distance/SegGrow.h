@@ -54,6 +54,7 @@ namespace FL
 
 		void SetBranches(int val) { m_branches = val; }
 		void SetIter(int val) { m_iter = val; }
+		void SetSizeThresh(int size) { m_sz_thresh = size; }
 		void SetRulerHandler(RulerHandler* handler);
 		void Compute();
 
@@ -62,6 +63,7 @@ namespace FL
 		RulerHandler *m_handler;
 		int m_branches;//max number of branches to detect
 		int m_iter;//iterations
+		int m_sz_thresh;//threshold for exclude small comps
 		std::unordered_map<unsigned int, BranchPoint> m_list;
 
 		bool CheckBricks();
