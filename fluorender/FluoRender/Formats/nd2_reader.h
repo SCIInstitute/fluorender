@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 #include <limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -88,10 +89,17 @@ private:
 
 	struct FrameInfo
 	{
+		int seq;//sequence number
 		int chan;//channel number
 		int time;//time number
 		int slice;//z stack slice number
-		int seq;//sequence number
+		int x;//x start number
+		int y;//y start number
+		int xsize;//x size
+		int ysize;//y size
+		double posx;
+		double posy;
+		double posz;
 	};
 	struct ChannelInfo
 	{
@@ -105,7 +113,20 @@ private:
 	};
 	struct ND2Info
 	{
+		double xmin, ymin, zmin;
 		std::vector<TimeInfo> times;
+
+		void init()
+		{
+			xmin = ymin = zmin = std::numeric_limits<double>::max();
+			times.clear();
+		}
+		void update(double x, double y, double z)
+		{
+			xmin = std::min(x, xmin);
+			ymin = std::min(y, ymin);
+			zmin = std::min(z, zmin);
+		}
 	};
 	ND2Info m_nd2_info;
 
@@ -148,6 +169,7 @@ private:
 	void ReadAttributes(LIMFILEHANDLE h);
 	void ReadTextInfo(LIMFILEHANDLE h);
 	void ReadMetadata(LIMFILEHANDLE h);
+	void GetFramePos(LIMSTR fmd, FrameInfo& frame);
 	bool ReadChannel(LIMFILEHANDLE h, int t, int c, void* val);
 };
 
