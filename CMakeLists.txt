@@ -417,7 +417,7 @@ if(WIN32)
 		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.lib)
 	endif()
 elseif(APPLE)
-   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.a)
+   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.dylib)
 endif()
 
 # freetype
