@@ -310,9 +310,11 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 	{
 		int seq = cinfo->chann[i].seq;
 		int z = cinfo->chann[i].slice;
+		int x = cinfo->chann[i].x;
+		int y = cinfo->chann[i].y;
 		LIMPICTURE pic = { 0 };
 		Lim_FileGetImageData(h, seq, &pic);
-		pos = xysize * z;//consider it a brick
+		pos = xysize * z + m_x_size * y + x;//consider it a brick
 		for (unsigned int j = 0; j < pic.uiHeight; ++j)
 		for (unsigned int k = 0; k < pic.uiWidth; ++k)
 		{
@@ -469,6 +471,8 @@ void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
 
 void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 {
+	m_nd2_info.init();
+
 	LIMCHAR buffer[ND2_STR_SIZE];
 	LIMSIZE coordsize = Lim_FileGetCoordSize(h);
 	LIMUINT fnum = Lim_FileGetSeqCount(h);
@@ -492,8 +496,11 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 		}
 		for (unsigned int i = 0; i < fnum; ++i)
 		{
-			Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
 			FrameInfo frame;
+			Lim_FileGetCoordsFromSeqIndex(h, i, vec.data(), vec.size());
+			LIMSTR fmd = Lim_FileGetFrameMetadata(h, i);
+			GetFramePos(fmd, frame);
+			Lim_FileFreeString(fmd);
 			frame.chan = 0;
 			frame.time = ti >= 0 ? vec[ti] : 0;
 			frame.slice = zi >= 0 ? vec[zi] : 0;
@@ -520,4 +527,120 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 	m_slice_num = maxz + 1;
 	m_cur_time = 0;
 	m_data_name = GET_NAME(m_path_name);
+
+	//get tiles
+	ChannelInfo* cinfo = GetChaninfo(0, 0);
+	if (cinfo && cinfo->chann.size() > m_slice_num &&
+		m_valid_spc)
+	{
+		for (int t = 0; t < m_time_num; ++t)
+		{
+			cinfo = GetChaninfo(t, 0);
+			if (!cinfo)
+				continue;
+			for (size_t i = 0; i < cinfo->chann.size(); ++i)
+			{
+				cinfo->chann[i].x = (cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc;
+				cinfo->chann[i].y = (cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc;
+				m_x_size = std::max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
+				m_y_size = std::max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
+			}
+		}
+	}
+}
+
+void ND2Reader::GetFramePos(LIMSTR fmd, FrameInfo& frame)
+{
+	std::string str(fmd);
+	size_t pos = str.find("stagePositionUm");
+	if (pos == std::string::npos)
+		return;
+	pos = str.find("[", pos);
+	if (pos == std::string::npos)
+		return;
+	size_t pos2 = str.find("]", pos);
+	if (pos2 == std::string::npos)
+		return;
+	std::string x, y, z;
+	int count = 0;
+	bool flag = false;
+	for (size_t i = pos; i < pos2; ++i)
+	{
+		if (isdigit(str[i]) || str[i] == '.')
+		{
+			flag = true;
+			if (!count)
+				count++;
+			switch (count)
+			{
+			case 1:
+				x += str[i];
+				break;
+			case 2:
+				y += str[i];
+				break;
+			case 3:
+				z += str[i];
+				break;
+			}
+		}
+		else
+		{
+			if (flag)
+				count++;
+			flag = false;
+		}
+	}
+	if (count >= 3)
+	{
+		frame.posx = stod(x);
+		frame.posy = stod(y);
+		frame.posz = stod(z);
+		m_nd2_info.update(frame.posx, frame.posy, frame.posz);
+	}
+	//get size
+	x = y = z = "";
+	pos = str.find("voxelCount");
+	if (pos == std::string::npos)
+		return;
+	pos = str.find("[", pos);
+	if (pos == std::string::npos)
+		return;
+	pos2 = str.find("]", pos);
+	if (pos2 == std::string::npos)
+		return;
+	count = 0;
+	flag = false;
+	for (size_t i = pos; i < pos2; ++i)
+	{
+		if (isdigit(str[i]))
+		{
+			flag = true;
+			if (!count)
+				count++;
+			switch (count)
+			{
+			case 1:
+				x += str[i];
+				break;
+			case 2:
+				y += str[i];
+				break;
+			case 3:
+				z += str[i];
+				break;
+			}
+		}
+		else
+		{
+			if (flag)
+				count++;
+			flag = false;
+		}
+	}
+	if (count >= 3)
+	{
+		frame.xsize = stoi(x);
+		frame.ysize = stoi(y);
+	}
 }
