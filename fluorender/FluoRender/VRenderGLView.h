@@ -667,7 +667,7 @@ public:
 	double m_scale_factor;
 	double m_scale_factor_saved;
 	//scale mode
-	bool m_scale_mode;
+	int m_scale_mode;//zoom ratio meaning: 0-view; 1-pixel; 2-data(pixel*xy spc)
 	//pin rotation center
 	bool m_auto_update_rot_center;
 	bool m_pin_rot_center;

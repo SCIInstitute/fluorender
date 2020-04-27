@@ -300,6 +300,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	m_center_x_spin = new wxSpinButton(page, ID_CenterXSpin,
 		wxDefaultPosition, wxSize(20, 20));
+	m_center_x_spin->SetRange(-0x8000, 0x7fff);
 	sizer_9->Add(5, 5, 0);
 	sizer_9->Add(st, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_x_text, 0, wxALIGN_CENTER);
@@ -310,6 +311,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	m_center_y_spin = new wxSpinButton(page, ID_CenterYSpin,
 		wxDefaultPosition, wxSize(20, 20));
+	m_center_y_spin->SetRange(-0x8000, 0x7fff);
 	sizer_9->Add(st, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_y_text, 0, wxALIGN_CENTER);
 	sizer_9->Add(m_center_y_spin, 0, wxALIGN_CENTER);
@@ -320,6 +322,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	m_width_spin = new wxSpinButton(page, ID_WidthSpin,
 		wxDefaultPosition, wxSize(20, 20));
+	m_width_spin->SetRange(-0x8000, 0x7fff);
 	sizer_10->Add(5, 5, 0);
 	sizer_10->Add(st, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_width_text, 0, wxALIGN_CENTER);
@@ -330,6 +333,7 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
 	m_height_spin = new wxSpinButton(page, ID_HeightSpin,
 		wxDefaultPosition, wxSize(20, 20));
+	m_height_spin->SetRange(-0x8000, 0x7fff);
 	sizer_10->Add(st, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_height_text, 0, wxALIGN_CENTER);
 	sizer_10->Add(m_height_spin, 0, wxALIGN_CENTER);
@@ -917,7 +921,9 @@ void VMovieView::OnFrameEditing(wxCommandEvent& event) {
 		vrv->RefreshGL();
 }
 
-void VMovieView::OnFrameSpinUp(wxSpinEvent& event) {
+void VMovieView::OnFrameSpinUp(wxSpinEvent& event)
+{
+	int ival = m_center_x_spin->GetMin();
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
 	switch (sender_id)
@@ -946,7 +952,8 @@ void VMovieView::OnFrameSpinUp(wxSpinEvent& event) {
 	}
 }
 
-void VMovieView::OnFrameSpinDown(wxSpinEvent& event) {
+void VMovieView::OnFrameSpinDown(wxSpinEvent& event)
+{
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
 	switch (sender_id)

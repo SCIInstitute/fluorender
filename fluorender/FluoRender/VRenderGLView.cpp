@@ -125,7 +125,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_scale_factor(1.0),
 	m_scale_factor_saved(1.0),
 	//scale mode
-	m_scale_mode(true),
+	m_scale_mode(0),
 	//mode in determining depth of volume
 	m_point_volume_mode(0),
 	//ruler use volume transfer function
@@ -5540,12 +5540,26 @@ double VRenderGLView::Get121ScaleFactor()
 
 void VRenderGLView::SetScale121()
 {
-	//SetCenter();
-
 	m_scale_factor = Get121ScaleFactor();
 	double value = 1.0;
-	if (m_scale_mode)
+	switch (m_scale_mode)
+	{
+	case 0:
 		value = m_scale_factor;
+		break;
+	case 1:
+		break;
+	case 2:
+		{
+			if (!m_cur_vol)
+				break;
+			double spcx, spcy, spcz;
+			m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			if (spcx > 0.0)
+				value /= spcx;
+		}
+		break;
+	}
 
 	wxString str = wxString::Format("%.0f", value*100.0);
 	m_vrv->m_scale_factor_sldr->SetValue(value * 100);
