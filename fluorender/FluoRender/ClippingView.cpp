@@ -385,6 +385,7 @@ m_link_z(false)
 		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
 	m_x_rot_spin = new wxSpinButton(this, ID_XRotSpin,
 		wxDefaultPosition, wxSize(30, 20), wxSP_VERTICAL);
+	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_rx->Add(5, 5, 0);
 	sizer_rx->Add(m_x_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rx->Add(st, 0, wxALIGN_CENTER, 0);
@@ -400,6 +401,7 @@ m_link_z(false)
 		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
 	m_y_rot_spin = new wxSpinButton(this, ID_YRotSpin,
 		wxDefaultPosition, wxSize(30, 20), wxSP_VERTICAL);
+	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_ry->Add(5, 5, 0);
 	sizer_ry->Add(m_y_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_ry->Add(st, 0, wxALIGN_CENTER, 0);
@@ -415,6 +417,7 @@ m_link_z(false)
 		wxDefaultPosition, wxSize(34, 20), 0, vald_fp1);
 	m_z_rot_spin = new wxSpinButton(this, ID_ZRotSpin,
 		wxDefaultPosition, wxSize(30, 20), wxSP_VERTICAL);
+	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
 	sizer_rz->Add(5, 5, 0);
 	sizer_rz->Add(m_z_rot_text, 0, wxALIGN_CENTER, 0);
 	sizer_rz->Add(st, 0, wxALIGN_CENTER, 0);

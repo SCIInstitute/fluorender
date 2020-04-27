@@ -120,7 +120,7 @@ wxPanel(parent, id, pos, size, style),
 	m_dft_z_rot(0.0),
 	m_dft_depth_atten_factor(0.0),
 	m_dft_scale_factor(1.0),
-	m_dft_scale_factor_mode(true)
+	m_dft_scale_factor_mode(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -638,18 +638,16 @@ void VRenderView::CreateBar()
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	m_scale_factor_spin = new wxSpinButton(this, ID_ScaleFactorSpin,
 		wxDefaultPosition, wxSize(40, 20));
+	m_scale_factor_spin->SetRange(-0x8000, 0x7fff);
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmapFromMemory(zoom_view);
 #ifdef _DARWIN
 	m_scale_mode_btn->SetToolBitmapSize(bitmap.GetSize());
 #endif
-	m_scale_mode_btn->AddCheckTool(
+	m_scale_mode_btn->AddTool(
 		ID_ScaleModeBtn, "Switch zoom ratio mode",
-		bitmap, wxNullBitmap,
-		"View-based zoom ratio",
-		"View-based zoom ratio (Click to switch to data-based mode)");
-	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, true);
+		bitmap, "View-based zoom ratio");
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
 	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
@@ -1172,8 +1170,24 @@ void VRenderView::SetRadius(double r)
 void VRenderView::UpdateScaleFactor(bool update_text)
 {
 	double scale = m_glview->m_scale_factor;
-	if (!m_glview->m_scale_mode)
+	switch (m_glview->m_scale_mode)
+	{
+	case 0:
+		break;
+	case 1:
 		scale /= m_glview->Get121ScaleFactor();
+		break;
+	case 2:
+		{
+			if (!m_glview->m_cur_vol)
+				break;
+			double spcx, spcy, spcz;
+			m_glview->m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			if (spcx > 0.0)
+				scale /= m_glview->Get121ScaleFactor() * spcx;
+		}
+		break;
+	}
 	int val = int(scale * 100 + 0.5);
 	m_scale_factor_sldr->SetValue(val);
 	wxString str = wxString::Format("%d", val);
@@ -1210,35 +1224,58 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 
 void VRenderView::SetScaleFactor(double s, bool update)
 {
-	if (m_glview->m_scale_mode)
+	switch (m_glview->m_scale_mode)
+	{
+	case 0:
 		m_glview->m_scale_factor = s;
-	else
+		break;
+	case 1:
 		m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor();
+		break;
+	case 2:
+		{
+			if (!m_glview->m_cur_vol)
+				break;
+			double spcx, spcy, spcz;
+			m_glview->m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			if (spcx > 0.0)
+				m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor() * spcx;
+		}
+		break;
+	}
 
 	if (update)
 		UpdateScaleFactor();
 }
 
-void VRenderView::SetScaleMode(bool mode, bool update)
+void VRenderView::SetScaleMode(int mode, bool update)
 {
-	m_scale_mode_btn->ToggleTool(ID_ScaleModeBtn, mode);
-	if (mode)
+	switch (mode)
 	{
+	case 0:
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_view));
 		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
 			"View-based zoom ratio");
 		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"View-based zoom ratio (Click to switch to data-based mode)");
-	}
-	else
-	{
+			"View-based zoom ratio (View entire data set at 100%)");
+		break;
+	case 1:
+		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
+			wxGetBitmapFromMemory(zoom_pixel));
+		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
+			"Pixel-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
+			"Pixel-based zoom ratio (View 1 data pixel to 1 screen pixel at 100%)");
+		break;
+	case 2:
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_data));
 		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
 			"Data-based zoom ratio");
 		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"Data-based zoom ratio (Click to switch to view-based mode)");
+			"Data-based zoom ratio (View with consistent scale bar sizes)");
+		break;
 	}
 	m_glview->m_scale_mode = mode;
 	if (update)
@@ -1969,8 +2006,24 @@ void VRenderView::OnPin(wxCommandEvent &event)
 	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
 	m_glview->SetPinRotCenter(pin);
 	double scale = m_glview->m_scale_factor;
-	if (!m_glview->m_scale_mode)
+	switch (m_glview->m_scale_mode)
+	{
+	case 0:
+		break;
+	case 1:
 		scale /= m_glview->Get121ScaleFactor();
+		break;
+	case 2:
+		{
+			if (!m_glview->m_cur_vol)
+				break;
+			double spcx, spcy, spcz;
+			m_glview->m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			if (spcx > 0.0)
+				scale /= m_glview->Get121ScaleFactor() * spcx;
+		}
+		break;
+	}
 	if (pin)
 	{
 		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
@@ -2014,7 +2067,7 @@ void VRenderView::OnScale121(wxCommandEvent &event)
 void VRenderView::OnScaleFactorChange(wxScrollEvent& event)
 {
 	int scale_factor = m_scale_factor_sldr->GetValue();
-	m_glview->m_scale_factor = scale_factor/100.0;
+	//m_glview->m_scale_factor = scale_factor/100.0;
 	wxString str = wxString::Format("%d", scale_factor);
 	if (str != m_scale_factor_text->GetValue())
 		m_scale_factor_text->SetValue(str);
@@ -2036,24 +2089,35 @@ void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
 
 void VRenderView::OnScaleMode(wxCommandEvent& event)
 {
-	bool mode = m_scale_mode_btn->GetToolState(ID_ScaleModeBtn);
-	if (mode)
+	int mode = m_glview->m_scale_mode;
+	mode += 1;
+	mode = mode > 2 ? 0 : mode;
+	switch (mode)
 	{
+	case 0:
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_view));
 		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
 			"View-based zoom ratio");
 		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"View-based zoom ratio (Click to switch to data-based mode)");
-	}
-	else
-	{
+			"View-based zoom ratio (View entire data set at 100%)");
+		break;
+	case 1:
+		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
+			wxGetBitmapFromMemory(zoom_pixel));
+		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
+			"Pixel-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
+			"Pixel-based zoom ratio (View 1 data pixel to 1 screen pixel at 100%)");
+		break;
+	case 2:
 		m_scale_mode_btn->SetToolNormalBitmap(ID_ScaleModeBtn,
 			wxGetBitmapFromMemory(zoom_data));
 		m_scale_mode_btn->SetToolShortHelp(ID_ScaleModeBtn,
 			"Data-based zoom ratio");
 		m_scale_mode_btn->SetToolLongHelp(ID_ScaleModeBtn,
-			"Data-based zoom ratio (Click to switch to view-based mode)");
+			"Data-based zoom ratio (View with consistent scale bar sizes)");
+		break;
 	}
 	m_glview->m_scale_mode = mode;
 	UpdateScaleFactor(false);
@@ -3023,10 +3087,10 @@ void VRenderView::LoadSettings()
 			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 				wxGetBitmapFromMemory(anchor_dark));
 	}
-	if (fconfig.Read("scale_factor_mode", &bVal))
+	if (fconfig.Read("scale_factor_mode", &iVal))
 	{
-		m_dft_scale_factor_mode = bVal;
-		SetScaleMode(bVal, false);
+		m_dft_scale_factor_mode = iVal;
+		SetScaleMode(iVal, false);
 	}
 	if (fconfig.Read("scale_factor", &dVal))
 	{

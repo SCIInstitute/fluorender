@@ -186,6 +186,8 @@ public:
 	const static unsigned char zrot_png[763];
 	/* zoom_view.png - 303 bytes */
 	const static unsigned char zoom_view_png[303];
+	/* pixel.png - 134 bytes */
+	const static unsigned char zoom_pixel_png[134];
 	/* zoom_data.png - 719 bytes */
 	const static unsigned char zoom_data_png[719];
 

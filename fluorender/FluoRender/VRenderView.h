@@ -163,7 +163,7 @@ public:
 	void SetRadius(double r);
 	void UpdateScaleFactor(bool update_text = true);
 	void SetScaleFactor(double s, bool update);
-	void SetScaleMode(bool mode, bool update);
+	void SetScaleMode(int mode, bool update);
 
 	//object operations
 	void GetObjCenters(double &ctrx, double &ctry, double &ctrz);
@@ -553,7 +553,7 @@ public:
 	double m_dft_z_rot;
 	double m_dft_depth_atten_factor;
 	double m_dft_scale_factor;
-	bool m_dft_scale_factor_mode;
+	int m_dft_scale_factor_mode;//0:view; 1:pixel; 2:data(pixel * xy spc)
 
 private:
 	//called when updated from bars
