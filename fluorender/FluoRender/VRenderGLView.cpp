@@ -5515,7 +5515,6 @@ double VRenderGLView::Get121ScaleFactor()
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	double aspect = (double)nx / (double)ny;
 
 	double spc_x = 1.0;
 	double spc_y = 1.0;
@@ -5527,13 +5526,9 @@ double VRenderGLView::Get121ScaleFactor()
 		vd = m_vd_pop_list[0];
 	if (vd)
 		vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
-	spc_x = spc_x<EPS ? 1.0 : spc_x;
 	spc_y = spc_y<EPS ? 1.0 : spc_y;
 
-	if (aspect > 1.0)
-		result = 2.0*m_radius / spc_y / double(ny);
-	else
-		result = 2.0*m_radius / spc_x / double(nx);
+	result = 2.0*m_radius / spc_y / double(ny);
 
 	return result;
 }
@@ -5551,12 +5546,16 @@ void VRenderGLView::SetScale121()
 		break;
 	case 2:
 		{
-			if (!m_cur_vol)
-				break;
-			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			if (spcx > 0.0)
-				value /= spcx;
+		VolumeData *vd = 0;
+		if (m_cur_vol)
+			vd = m_cur_vol;
+		else if (m_vd_pop_list.size())
+			vd = m_vd_pop_list[0];
+		double spcx, spcy, spcz;
+		if (vd)
+			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		if (spcx > 0.0)
+			value /= spcx;
 		}
 		break;
 	}
@@ -10647,11 +10646,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 				spy.push_back(spc_y);
 				spz.push_back(spc_z);
 
-				double sf;
-				if (aspect > 1.0)
-					sf = 2.0*m_radius*res_scale / spc_y / double(ny);
-				else
-					sf = 2.0*m_radius*res_scale / spc_x / double(nx);
+				double sf = 2.0*m_radius*res_scale / spc_y / double(ny);
 				sfs.push_back(sf);
 			}
 
