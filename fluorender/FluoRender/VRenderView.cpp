@@ -1179,11 +1179,15 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 		break;
 	case 2:
 		{
-			if (!m_glview->m_cur_vol)
-				break;
-			double spcx, spcy, spcz;
-			m_glview->m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			if (spcx > 0.0)
+		VolumeData *vd = 0;
+		if (m_glview->m_cur_vol)
+			vd = m_glview->m_cur_vol;
+		else if (m_glview->m_vd_pop_list.size())
+			vd = m_glview->m_vd_pop_list[0];
+		double spcx, spcy, spcz;
+		if (vd)
+			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		if (spcx > 0.0)
 				scale /= m_glview->Get121ScaleFactor() * spcx;
 		}
 		break;
@@ -1234,12 +1238,16 @@ void VRenderView::SetScaleFactor(double s, bool update)
 		break;
 	case 2:
 		{
-			if (!m_glview->m_cur_vol)
-				break;
-			double spcx, spcy, spcz;
-			m_glview->m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			if (spcx > 0.0)
-				m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor() * spcx;
+		VolumeData *vd = 0;
+		if (m_glview->m_cur_vol)
+			vd = m_glview->m_cur_vol;
+		else if (m_glview->m_vd_pop_list.size())
+			vd = m_glview->m_vd_pop_list[0];
+		double spcx, spcy, spcz;
+		if (vd)
+			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		if (spcx > 0.0)
+			m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor() * spcx;
 		}
 		break;
 	}
@@ -2015,12 +2023,16 @@ void VRenderView::OnPin(wxCommandEvent &event)
 		break;
 	case 2:
 		{
-			if (!m_glview->m_cur_vol)
-				break;
-			double spcx, spcy, spcz;
-			m_glview->m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			if (spcx > 0.0)
-				scale /= m_glview->Get121ScaleFactor() * spcx;
+		VolumeData *vd = 0;
+		if (m_glview->m_cur_vol)
+			vd = m_glview->m_cur_vol;
+		else if (m_glview->m_vd_pop_list.size())
+			vd = m_glview->m_vd_pop_list[0];
+		double spcx, spcy, spcz;
+		if (vd)
+			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		if (spcx > 0.0)
+			scale /= m_glview->Get121ScaleFactor() * spcx;
 		}
 		break;
 	}
