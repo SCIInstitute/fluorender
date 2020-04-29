@@ -4793,6 +4793,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 				reader = new CZIReader();
 			else if (type == LOAD_TYPE_ND2)
 				reader = new ND2Reader();
+			else if (type == LOAD_TYPE_LIF)
+				reader = new LIFReader();
 		}
 		
 		

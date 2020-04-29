@@ -1306,23 +1306,25 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
 #ifndef _DARWIN
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.nd2;*.xml;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.lif;*.nd2;*.xml;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
+		"Leica Image File Format (*.lif)|*.lif|"\
 		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
 		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia Brick files (*.vvd)|*.vvd",
 #else
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.xml;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.lif;*.xml;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
+		"Leica Image File Format (*.lif)|*.lif|"\
 		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia Brick files (*.vvd)|*.vvd",
@@ -1462,6 +1464,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_CZI, false);
 			else if (suffix == ".nd2")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_ND2, false);
+			else if (suffix == ".lif")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LIF, false);
 
 			if (ch_num > 1)
 			{
@@ -1577,7 +1581,8 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 #ifndef _DARWIN
 			suffix == ".nd2" ||
 #endif
-			suffix == ".czi")
+			suffix == ".czi" ||
+			suffix == ".lif")
 		{
 			LoadVolumes(files, with_imagej);
 		}
@@ -3592,6 +3597,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_CZI, false, cur_chan, cur_time);
 					else if (suffix == ".nd2")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_ND2, false, cur_chan, cur_time);
+					else if (suffix == ".lif")
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LIF, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
