@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/xml/xml.h>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -131,34 +132,43 @@ private:
 		double x_len;
 		double y_len;
 		double z_len;
+
+		SubBlockInfo():
+			loc(0), size(0), chan(0), time(0),
+			x(0), y(0), z(0), x_size(0), y_size(0), z_size(0),
+			x_start(0), y_start(0), z_start(0), x_len(0), y_len(0), z_len(0)
+		{}
+	};
+	struct TimeInfo
+	{
+		int time;//time number
+		std::vector<SubBlockInfo> blocks;
+	};
+	struct ChannelInfo
+	{
+		int chan;//channel number
 		//bits
 		int res;
 		//min max
 		double minv;
 		double maxv;
+		//loc from first channel
+		unsigned long long loc;
+		std::vector<TimeInfo> times;
 
-		SubBlockInfo():
-			loc(0), size(0), chan(0), time(0),
-			x(0), y(0), z(0), x_size(0), y_size(0), z_size(0),
-			x_start(0), y_start(0), z_start(0), x_len(0), y_len(0), z_len(0),
-			res(0), minv(0), maxv(0)
+		ChannelInfo():
+			chan(0), res(0), minv(0), maxv(0), loc(0)
 		{}
 	};
-	struct ChannelInfo
+	struct ImageInfo
 	{
-		int chan;//channel number
-		std::vector<SubBlockInfo> blocks;
-	};
-	struct TimeInfo
-	{
-		int time;//time number
+		std::wstring name;//image name for batch
+		std::wstring mbid;//memory block name
 		std::vector<ChannelInfo> channels;
 	};
 	struct LIFInfo
 	{
-		int xmin, ymin, zmin;
-		int xmax, ymax, zmax;
-		std::vector<TimeInfo> times;
+		std::unordered_map<std::wstring, ImageInfo> images;
 	};
 	LIFInfo m_lif_info;
 
@@ -170,111 +180,11 @@ private:
 	unsigned long long PreReadMemoryBlock(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
 	void ReadElement(wxXmlNode* node);
-	void ReadData(wxXmlNode* node);
-	SubBlockInfo* ReadImage(wxXmlNode* node)
-	{
-		if (!node)
-			return 0;
-		wxString str;
-		wxXmlNode* child = node->GetChildren();
-		if (!child || child->GetName() != "Image")
-			return 0;
-		SubBlockInfo sbi;
-		ReadSubBlockInfo(child, sbi);
-		return AddSubBlockInfo(sbi);
-	}
-	void ReadSubBlockInfo(wxXmlNode* node, SubBlockInfo &sbi)
-	{
-		if (!node)
-			return;
-		wxString str;
-		unsigned long ulval;
-		double dval;
-		wxXmlNode *child = node->GetChildren();
-		while (child)
-		{
-			str = child->GetName();
-			if (str == "ChannelDescription")
-			{
-				str = child->GetAttribute("Resolution");
-				if (str.ToULong(&ulval))
-					sbi.res = ulval;
-				str = child->GetAttribute("Min");
-				if (str.ToDouble(&dval))
-					sbi.minv = dval;
-				str = child->GetAttribute("Max");
-				if (str.ToDouble(&dval))
-					sbi.maxv = dval;
-			}
-			else if (str == "DimensionDescription")
-			{
-				unsigned long did;
-				str = child->GetAttribute("DimID");
-				if (str.ToULong(&did))
-				{
-					str = child->GetAttribute("Unit");
-					double sfactor = 1.0;
-					if (str == "m")
-						sfactor = 1e6;
-					switch (did)
-					{
-					case 1:
-						str = child->GetAttribute("NumberOfElements");
-						if (str.ToULong(&ulval))
-							sbi.x_size = ulval;
-						str = child->GetAttribute("Origin");
-						if (str.ToDouble(&dval))
-							sbi.x_start = dval * sfactor;
-						str = child->GetAttribute("Length");
-						if (str.ToDouble(&dval))
-							sbi.x_len = dval * sfactor;
-						break;
-					case 2:
-						str = child->GetAttribute("NumberOfElements");
-						if (str.ToULong(&ulval))
-							sbi.y_size = ulval;
-						str = child->GetAttribute("Origin");
-						if (str.ToDouble(&dval))
-							sbi.y_start = dval * sfactor;
-						str = child->GetAttribute("Length");
-						if (str.ToDouble(&dval))
-							sbi.y_len = dval * sfactor;
-						break;
-					case 3:
-						str = child->GetAttribute("NumberOfElements");
-						if (str.ToULong(&ulval))
-							sbi.z_size = ulval;
-						str = child->GetAttribute("Origin");
-						if (str.ToDouble(&dval))
-							sbi.z_start = dval * sfactor;
-						str = child->GetAttribute("Length");
-						if (str.ToDouble(&dval))
-							sbi.z_len = dval * sfactor;
-						break;
-					case 4:
-						break;
-					}
-				}
-			}
-			ReadSubBlockInfo(child, sbi);
-			child = child->GetNext();
-		}
-	}
-	SubBlockInfo* AddSubBlockInfo(SubBlockInfo &sbi)
-	{
-		if (m_lif_info.times.size() <= sbi.time)
-			m_lif_info.times.resize(sbi.time + 1);
-		TimeInfo* timeinfo = &(m_lif_info.times[sbi.time]);
-		if (!timeinfo)
-			return 0;
-		if (timeinfo->channels.size() <= sbi.chan)
-			timeinfo->channels.resize(sbi.chan + 1);
-		ChannelInfo* chaninfo = &(timeinfo->channels[sbi.chan]);
-		if (!chaninfo)
-			return 0;
-		chaninfo->blocks.push_back(sbi);
-		return &(chaninfo->blocks.back());
-	}
+	void ReadData(wxXmlNode* node, std::wstring &name);
+	ImageInfo* ReadImage(wxXmlNode* node, std::wstring &name);
+	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
+	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
+		double orig, double len, unsigned long long inc);
 	SubBlockInfo* FindSubBlockInfo(std::wstring &name)
 	{
 		for (size_t i = 0; i < m_lif_info.times.size(); ++i)

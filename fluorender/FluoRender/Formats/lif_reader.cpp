@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "lif_reader.h"
 #include "../compatibility.h"
 #include <wx/sstream.h>
+//#include <fstream>
 #include <stdio.h>
 
 LIFReader::LIFReader()
@@ -308,6 +309,14 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	if (!result)
 		return 0;
 
+	//test xml
+	//std::ofstream outfile;
+	//std::string outname = GET_PATH(m_path_name) + "metadata.xml";
+	//outfile.open(outname, std::ofstream::out);
+	//outfile << xmlstr;
+	//outfile.close();
+	//endof test
+
 	wxXmlDocument doc;
 	wxStringInputStream wxss(xmlstr);
 	result &= doc.Load(wxss);
@@ -398,26 +407,33 @@ void LIFReader::ReadElement(wxXmlNode* node)
 	{
 		str = child->GetName();
 		if (str == "Element")
-			ReadData(child);
+		{
+			str = child->GetAttribute("Visibility");
+			if (str != "0")
+			{
+				std::wstring name = child->GetAttribute("Name");
+				ReadData(child, name);
+			}
+		}
 		ReadElement(child);
 		child = child->GetNext();
 	}
 }
 
-void LIFReader::ReadData(wxXmlNode* node)
+void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
 {
 	if (!node)
 		return;
 	wxString str;
 	wxXmlNode *child = node->GetChildren();
-	SubBlockInfo* sbi = 0;
+	ImageInfo* imgi = 0;
 	unsigned long long sbsize = 0;
 	std::wstring sbname;
 	while (child)
 	{
 		str = child->GetName();
 		if (str == "Data")
-			sbi = ReadImage(child);
+			imgi = ReadImage(child, name);
 		else if (str == "Memory")
 		{
 			str = child->GetAttribute("Size");
@@ -426,13 +442,113 @@ void LIFReader::ReadData(wxXmlNode* node)
 		}
 		child = child->GetNext();
 	}
-	if (sbi && sbsize && sbname != "")
+	if (imgi && sbsize && sbname != "")
 	{
-		sbi->name = sbname;
-		if (sbi->res == 8)
-			m_datatype = 1;
-		else if (sbi->res > 8)
-			m_datatype = 2;
+		imgi->mbid = sbname;
+		//if (sbi->res == 8)
+		//	m_datatype = 1;
+		//else if (sbi->res > 8)
+		//	m_datatype = 2;
 	}
 }
 
+LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
+{
+	if (!node)
+		return 0;
+	wxString str;
+	wxXmlNode* child = node->GetChildren();
+	if (!child || child->GetName() != "Image")
+		return 0;
+	ImageInfo imgi;
+	imgi.name = name;
+	ReadSubBlockInfo(child, imgi);
+	//if (sbi.x_size && sbi.y_size && !sbi.z_size)
+	//	sbi.z_size = 1;
+	auto result = m_lif_info.images.insert(std::pair<std::wstring,
+		LIFReader::ImageInfo>(imgi.name, imgi));
+	if (result.second)
+		return &(result.first->second);
+	else
+		return 0;
+}
+
+void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
+{
+	if (!node)
+		return;
+	wxString str;
+	unsigned long ulv;
+	double dval;
+	unsigned long long ull;
+	wxXmlNode *child = node->GetChildren();
+	while (child)
+	{
+		str = child->GetName();
+		if (str == "ChannelDescription")
+		{
+			ChannelInfo cinfo;
+			cinfo.chan = imgi.channels.size();
+			str = child->GetAttribute("Resolution");
+			if (str.ToULong(&ulv))
+				cinfo.res = ulv;
+			str = child->GetAttribute("Min");
+			if (str.ToDouble(&dval))
+				cinfo.minv = dval;
+			str = child->GetAttribute("Max");
+			if (str.ToDouble(&dval))
+				cinfo.maxv = dval;
+			str = child->GetAttribute("BytesInc");
+			if (str.ToULongLong(&ull))
+				cinfo.loc = ull;
+			imgi.channels.push_back(cinfo);
+		}
+		else if (str == "DimensionDescription")
+		{
+			unsigned long did = 0, size = 0;
+			double orig = 0, len = 0, sfactor = 1;
+			unsigned long long inc = 0;
+			str = child->GetAttribute("DimID");
+			if (str.ToULong(&did))
+			{
+				str = child->GetAttribute("Unit");
+				if (str == "m")
+					sfactor = 1e6;
+				else if (str == "mm")
+					sfactor = 1e3;
+				str = child->GetAttribute("NumberOfElements");
+				if (str.ToULong(&ulv))
+					size = ulv;
+				str = child->GetAttribute("Origin");
+				if (str.ToDouble(&dval))
+					orig = dval * sfactor;
+				str = child->GetAttribute("Length");
+				if (str.ToDouble(&dval))
+					len = dval * sfactor;
+				str = child->GetAttribute("BytesInc");
+				if (str.ToULongLong(&ull))
+					inc = ull;
+				AddSubBlockInfo(imgi, did, size, orig, len, inc);
+			}
+		}
+		ReadSubBlockInfo(child, imgi);
+		child = child->GetNext();
+	}
+}
+
+void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
+	double orig, double len, unsigned long long inc)
+{
+	if (m_lif_info.times.size() <= sbi.time)
+		m_lif_info.times.resize(sbi.time + 1);
+	TimeInfo* timeinfo = &(m_lif_info.times[sbi.time]);
+	if (!timeinfo)
+		return 0;
+	if (timeinfo->channels.size() <= sbi.chan)
+		timeinfo->channels.resize(sbi.chan + 1);
+	ChannelInfo* chaninfo = &(timeinfo->channels[sbi.chan]);
+	if (!chaninfo)
+		return 0;
+	chaninfo->blocks.push_back(sbi);
+	return &(chaninfo->blocks.back());
+}
