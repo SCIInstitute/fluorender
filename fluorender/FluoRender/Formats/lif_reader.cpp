@@ -100,13 +100,10 @@ int LIFReader::Preprocess()
 
 	fclose(pfile);
 
+	FillLifInfo();
 	m_cur_time = 0;
 	m_data_name = GET_NAME(m_path_name);
-	m_time_num = m_lif_info.times.size();
-	m_chan_num = m_lif_info.times[0].channels.size();
-	m_slice_num = m_lif_info.times[0].channels[0].blocks[0].z_size;
-	m_x_size = m_lif_info.times[0].channels[0].blocks[0].x_size;
-	m_y_size = m_lif_info.times[0].channels[0].blocks[0].y_size;
+	LoadBatch(0);
 
 	return READER_OK;
 }
@@ -153,14 +150,6 @@ wstring LIFReader::GetTimeId()
 
 void LIFReader::SetBatch(bool batch)
 {
-	if (batch)
-	{
-		//read the directory info
-		FIND_FILES(m_path_name, L"*.lif", m_batch_list, m_cur_batch);
-		m_batch = true;
-	}
-	else
-		m_batch = false;
 }
 
 int LIFReader::LoadBatch(int index)
@@ -168,8 +157,30 @@ int LIFReader::LoadBatch(int index)
 	int result = -1;
 	if (index >= 0 && index < (int)m_batch_list.size())
 	{
-		m_path_name = m_batch_list[index];
-		Preprocess();
+		std::wstring name = m_batch_list[index];
+		//Preprocess();
+		ImageInfo* imgi = FindImageInfo(name);
+		if (imgi)
+		{
+			m_chan_num = imgi->channels.size();
+			ChannelInfo* cinfo = imgi->GetChannelInfo(0);
+			if (cinfo)
+			{
+				m_time_num = cinfo->times.size();
+				if (cinfo->res == 8)
+					m_datatype = 1;
+				else if (cinfo->res > 8)
+					m_datatype = 2;
+			}
+			TimeInfo* tinfo = imgi->GetTimeInfo(0, 0);
+			if (tinfo && tinfo->blocks.size() > 0)
+			{
+				m_slice_num = tinfo->blocks[0].z_size;
+				m_x_size = tinfo->blocks[0].x_size;
+				m_y_size = tinfo->blocks[0].y_size;
+			}
+		}
+
 		result = index;
 		m_cur_batch = result;
 	}
@@ -196,7 +207,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return 0;
 
-	if (t >= 0 && t < m_time_num &&
+/*	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
 		m_slice_num > 0 &&
 		m_x_size > 0 &&
@@ -247,7 +258,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 		break;
 		}
 	}
-
+*/
 	fclose(pfile);
 	m_cur_time = t;
 	return data;
@@ -376,12 +387,12 @@ unsigned long long LIFReader::PreReadMemoryBlock(FILE* pfile, unsigned long long
 	result &= fread(&namestr[0], sizeof(wchar_t), nsize, pfile) == nsize;
 	if (!result)
 		return 0;
-	SubBlockInfo* sbi = FindSubBlockInfo(namestr);
-	if (sbi)
+	ImageInfo* imgi = FindImageInfoMbid(namestr);
+	if (imgi)
 	{
-		sbi->loc = ioffset;
-		sbi->loc += LIFHSIZE + uisize;
-		sbi->size = memsize;
+		imgi->loc = ioffset;
+		imgi->loc += LIFHSIZE + uisize;
+		imgi->size = memsize;
 	}
 
 	return LIFHSIZE + uisize + memsize;
@@ -393,7 +404,7 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 		return false;
 	bool result = true;
-	result &= fread((unsigned char*)val, 1, sbi->size, pfile) == sbi->size;
+	//result &= fread((unsigned char*)val, 1, sbi->size, pfile) == sbi->size;
 	return result;
 }
 
@@ -445,10 +456,6 @@ void LIFReader::ReadData(wxXmlNode* node, std::wstring &name)
 	if (imgi && sbsize && sbname != "")
 	{
 		imgi->mbid = sbname;
-		//if (sbi->res == 8)
-		//	m_datatype = 1;
-		//else if (sbi->res > 8)
-		//	m_datatype = 2;
 	}
 }
 
@@ -463,12 +470,15 @@ LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
 	ImageInfo imgi;
 	imgi.name = name;
 	ReadSubBlockInfo(child, imgi);
-	//if (sbi.x_size && sbi.y_size && !sbi.z_size)
-	//	sbi.z_size = 1;
 	auto result = m_lif_info.images.insert(std::pair<std::wstring,
 		LIFReader::ImageInfo>(imgi.name, imgi));
 	if (result.second)
+	{
+		m_batch_list.push_back(imgi.name);
+		if (m_lif_info.images.size() > 1)
+			m_batch = true;
 		return &(result.first->second);
+	}
 	else
 		return 0;
 }
@@ -500,7 +510,7 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 				cinfo.maxv = dval;
 			str = child->GetAttribute("BytesInc");
 			if (str.ToULongLong(&ull))
-				cinfo.loc = ull;
+				cinfo.inc = ull;
 			imgi.channels.push_back(cinfo);
 		}
 		else if (str == "DimensionDescription")
@@ -539,16 +549,53 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 	double orig, double len, unsigned long long inc)
 {
-	if (m_lif_info.times.size() <= sbi.time)
-		m_lif_info.times.resize(sbi.time + 1);
-	TimeInfo* timeinfo = &(m_lif_info.times[sbi.time]);
-	if (!timeinfo)
-		return 0;
-	if (timeinfo->channels.size() <= sbi.chan)
-		timeinfo->channels.resize(sbi.chan + 1);
-	ChannelInfo* chaninfo = &(timeinfo->channels[sbi.chan]);
-	if (!chaninfo)
-		return 0;
-	chaninfo->blocks.push_back(sbi);
-	return &(chaninfo->blocks.back());
+	int time = 0;
+	int chan = 0;
+	ChannelInfo* cinfo = imgi.GetChannelInfo(chan);
+	if (dim == 4 && size > 1)
+		cinfo->times.resize(size);
+	else
+		cinfo->times.resize(1);
+	TimeInfo* tinfo = imgi.GetTimeInfo(chan, time);
+	if (!tinfo)
+		return;
+	SubBlockInfo *sbi = 0;
+	if (tinfo->blocks.empty())
+		tinfo->blocks.resize(1);
+	sbi = &(tinfo->blocks[0]);
+	sbi->chan = chan;
+	sbi->time = time;
+	switch (dim)
+	{
+	case 1:
+		sbi->x_size = size;
+		sbi->x_start = orig;
+		sbi->x_len = len;
+		sbi->x_inc = inc;
+		break;
+	case 2:
+		sbi->y_size = size;
+		sbi->y_start = orig;
+		sbi->y_len = len;
+		sbi->y_inc = inc;
+		break;
+	case 3:
+		sbi->z_size = size;
+		sbi->z_start = orig;
+		sbi->z_len = len;
+		sbi->z_inc = inc;
+		break;
+	case 4:
+		tinfo->inc = inc;
+		break;
+	}
+}
+
+void LIFReader::FillLifInfo()
+{
+	//if (sbi.x_size && sbi.y_size && !sbi.z_size)
+	//	sbi.z_size = 1;
+	for (auto it = m_lif_info.images.begin();
+		it != m_lif_info.images.end(); ++it)
+		it->second.FillInfo();
 }
