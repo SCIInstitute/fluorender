@@ -77,7 +77,8 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".nd2" ||
 #endif
 					 suffix == ".czi" ||
-					 suffix == ".lif")
+					 suffix == ".lif" ||
+					 suffix == ".lof")
 			{
 				vr_frame->LoadVolumes(filenames, false, (VRenderView*)m_view);
 			}

@@ -214,8 +214,8 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		m_slice_num > 0 &&
 		m_x_size > 0 &&
 		m_y_size > 0 &&
-		t < (int)m_czi_info.sequences.size() &&
-		c < (int)m_czi_info.sequences[t].channels.size())
+		t < (int)m_czi_info.times.size() &&
+		c < (int)m_czi_info.times[t].channels.size())
 	{
 		//allocate memory for nrrd
 		switch (m_datatype)
@@ -226,9 +226,9 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
 			ChannelInfo *cinfo = GetChaninfo(t, c);
-			for (i = 0; i < (int)cinfo->chann.size(); i++)
+			for (i = 0; i < (int)cinfo->blocks.size(); i++)
 			{
-				SubBlockInfo* sbi = &(cinfo->chann[i]);
+				SubBlockInfo* sbi = &(cinfo->blocks[i]);
 				ReadSegSubBlock(pfile, sbi, val);
 			}
 			//create nrrd
@@ -246,9 +246,9 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
 			ChannelInfo *cinfo = GetChaninfo(t, c);
-			for (i = 0; i < (int)cinfo->chann.size(); i++)
+			for (i = 0; i < (int)cinfo->blocks.size(); i++)
 			{
-				SubBlockInfo* sbi = &(cinfo->chann[i]);
+				SubBlockInfo* sbi = &(cinfo->blocks[i]);
 				ReadSegSubBlock(pfile, sbi, val);
 			}
 			//create nrrd
@@ -454,31 +454,31 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 	unsigned int dirpos = 32 + dim_count * 20;
 	sbi.dirpos = dirpos;
 	//add info to list
-	SequenceInfo *seqinfo = GetSequinfo(sbi.time);
-	if (seqinfo)
+	TimeInfo *timeinfo = GetTimeinfo(sbi.time);
+	if (timeinfo)
 	{
-		ChannelInfo* chaninfo = GetChaninfo(seqinfo, sbi.chan);
+		ChannelInfo* chaninfo = GetChaninfo(timeinfo, sbi.chan);
 		if (chaninfo)
 		{
-			chaninfo->chann.push_back(sbi);
+			chaninfo->blocks.push_back(sbi);
 		}
 		else
 		{
-			seqinfo->channels.push_back(ChannelInfo());
-			chaninfo = &(seqinfo->channels.back());
+			timeinfo->channels.push_back(ChannelInfo());
+			chaninfo = &(timeinfo->channels.back());
 			chaninfo->chan = sbi.chan;
-			chaninfo->chann.push_back(sbi);
+			chaninfo->blocks.push_back(sbi);
 		}
 	}
 	else
 	{
-		m_czi_info.sequences.push_back(SequenceInfo());
-		seqinfo = &(m_czi_info.sequences.back());
-		seqinfo->time = sbi.time;
+		m_czi_info.times.push_back(TimeInfo());
+		timeinfo = &(m_czi_info.times.back());
+		timeinfo->time = sbi.time;
 		ChannelInfo chaninfo;
 		chaninfo.chan = sbi.chan;
-		chaninfo.chann.push_back(sbi);
-		seqinfo->channels.push_back(chaninfo);
+		chaninfo.blocks.push_back(sbi);
+		timeinfo->channels.push_back(chaninfo);
 	}
 	if (result)
 		return dirpos;
@@ -511,13 +511,13 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 	std::set<unsigned int> pixtypes;
 	std::set<int> channums;
 	std::set<int> timenums;
-	for (size_t i = 0; i < m_czi_info.sequences.size(); ++i)
-		for (size_t j = 0; j < m_czi_info.sequences[i].channels.size(); ++j)
-			for (size_t k = 0; k < m_czi_info.sequences[i].channels[j].chann.size(); ++k)
+	for (size_t i = 0; i < m_czi_info.times.size(); ++i)
+		for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
+			for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
 			{
-				channums.insert(m_czi_info.sequences[i].channels[j].chann[k].chan);
-				timenums.insert(m_czi_info.sequences[i].channels[j].chann[k].time);
-				pixtypes.insert(m_czi_info.sequences[i].channels[j].chann[k].pxtype);
+				channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
+				timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
+				pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
 			}
 	m_time_num = timenums.size();
 	m_chan_num = channums.size();

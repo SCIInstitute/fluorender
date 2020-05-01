@@ -58,6 +58,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/czi_reader.h"
 #include "Formats/nd2_reader.h"
 #include "Formats/lif_reader.h"
+#include "Formats/lof_reader.h"
 #include "Tracking/TrackMap.h"
 #include <Distance/Ruler.h>
 
@@ -79,6 +80,7 @@ using namespace FLIVR;
 #define LOAD_TYPE_CZI		8
 #define LOAD_TYPE_ND2		9
 #define LOAD_TYPE_LIF		10
+#define LOAD_TYPE_LOF		11
 
 class TreeLayer
 {

@@ -117,9 +117,9 @@ private:
 	struct ChannelInfo
 	{
 		int chan;//channel number
-		std::vector<SubBlockInfo> chann;
+		std::vector<SubBlockInfo> blocks;
 	};
-	struct SequenceInfo
+	struct TimeInfo
 	{
 		int time;//time number
 		std::vector<ChannelInfo> channels;
@@ -128,13 +128,13 @@ private:
 	{
 		int xmin, ymin, zmin;
 		int xmax, ymax, zmax;
-		std::vector<SequenceInfo> sequences;
+		std::vector<TimeInfo> times;
 
 		void init()
 		{
 			xmin = ymin = zmin = std::numeric_limits<int>::max();
 			xmax = ymax = zmax = std::numeric_limits<int>::min();
-			sequences.clear();
+			times.clear();
 		}
 		void xsize(int x0, int x1)
 		{
@@ -208,16 +208,16 @@ private:
 	bool ReadAttDir(FILE* pfile);
 	bool ReadDeleted(FILE* pfile);
 	//read info
-	SequenceInfo* GetSequinfo(int time)
+	TimeInfo* GetTimeinfo(int time)
 	{
-		for (size_t i = 0; i < m_czi_info.sequences.size(); ++i)
+		for (size_t i = 0; i < m_czi_info.times.size(); ++i)
 		{
-			if (m_czi_info.sequences[i].time == time)
-				return &(m_czi_info.sequences[i]);
+			if (m_czi_info.times[i].time == time)
+				return &(m_czi_info.times[i]);
 		}
 		return 0;
 	}
-	ChannelInfo* GetChaninfo(SequenceInfo* seqinfo, int chan)
+	ChannelInfo* GetChaninfo(TimeInfo* seqinfo, int chan)
 	{
 		if (!seqinfo)
 			return 0;
@@ -230,7 +230,7 @@ private:
 	}
 	ChannelInfo* GetChaninfo(int time, int chan)
 	{
-		SequenceInfo* seqinfo = GetSequinfo(time);
+		TimeInfo* seqinfo = GetTimeinfo(time);
 		return GetChaninfo(seqinfo, chan);
 	}
 	//read data
