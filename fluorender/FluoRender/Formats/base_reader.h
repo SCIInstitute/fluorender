@@ -63,6 +63,7 @@ using namespace std;
 #define READER_IMAGEJ_TYPE	9
 #define READER_ND2_TYPE	10
 #define READER_LIF_TYPE	11
+#define READER_LOF_TYPE	11
 
 class BaseReader
 {

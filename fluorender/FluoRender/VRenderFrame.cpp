@@ -1306,26 +1306,28 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the volume data file", "", "",
 #ifndef _DARWIN
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.lif;*.nd2;*.xml;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Leica Image File Format - Whole Experiment (*.lif)|*.lif|"\
+		"Leica Image File Format - One Element (*.lof)|*.lof|"\
+		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
+		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
-		"Leica Image File Format (*.lif)|*.lif|"\
-		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
-		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia Brick files (*.vvd)|*.vvd",
 #else
-		"All Supported|*.tif;*.tiff;*.oib;*.oif;*.lsm;*.czi;*.lif;*.xml;*.nrrd;*.vvd|"\
+		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Leica Image File Format - Whole Experiment (*.lif)|*.lif|"\
+		"Leica Image File Format - One Element (*.lof)|*.lof|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
+		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
 		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
-		"Leica Image File Format (*.lif)|*.lif|"\
-		"Bruker/Prairie View XML (*.xml)|*.xml|"\
 		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
 		"Janelia Brick files (*.vvd)|*.vvd",
 #endif
@@ -1466,6 +1468,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_ND2, false);
 			else if (suffix == ".lif")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LIF, false);
+			else if (suffix == ".lof")
+				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
 
 			if (ch_num > 1)
 			{
@@ -1582,7 +1586,8 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 			suffix == ".nd2" ||
 #endif
 			suffix == ".czi" ||
-			suffix == ".lif")
+			suffix == ".lif" ||
+			suffix == ".lof")
 		{
 			LoadVolumes(files, with_imagej);
 		}
@@ -3599,6 +3604,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_ND2, false, cur_chan, cur_time);
 					else if (suffix == ".lif")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LIF, false, cur_chan, cur_time);
+					else if (suffix == ".lof")
+						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LOF, false, cur_chan, cur_time);
 				}
 				VolumeData* vd = 0;
 				if (loaded_num)
