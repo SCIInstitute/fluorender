@@ -112,11 +112,13 @@ private:
 
 	struct SubBlockInfo
 	{
-		std::wstring name;
-		unsigned long long loc;//position in file
-		unsigned long long size;//size to read
 		int chan;//channel number
 		int time;//time number
+		unsigned long long loc;//position in file
+		//inc for xyz
+		unsigned long long x_inc;
+		unsigned long long y_inc;
+		unsigned long long z_inc;
 		//corner
 		int x;
 		int y;
@@ -134,15 +136,34 @@ private:
 		double z_len;
 
 		SubBlockInfo():
-			loc(0), size(0), chan(0), time(0),
-			x(0), y(0), z(0), x_size(0), y_size(0), z_size(0),
-			x_start(0), y_start(0), z_start(0), x_len(0), y_len(0), z_len(0)
+			chan(0), time(0), loc(0),
+			x_inc(0), y_inc(0), z_inc(0),
+			x(0), y(0), z(0),
+			x_size(0), y_size(0), z_size(0),
+			x_start(0), y_start(0), z_start(0),
+			x_len(0), y_len(0), z_len(0)
 		{}
 	};
 	struct TimeInfo
 	{
+		int chan;//chan number
 		int time;//time number
+		unsigned long long inc;
+		unsigned long long loc;
 		std::vector<SubBlockInfo> blocks;
+
+		TimeInfo() :
+			chan(0), time(0), inc(0), loc(0)
+		{}
+		void FillInfo()
+		{
+			for (size_t i = 0; i < blocks.size(); ++i)
+			{
+				blocks[i].chan = chan;
+				blocks[i].time = time;
+				blocks[i].loc = loc + blocks[i].z_inc * i;
+			}
+		}
 	};
 	struct ChannelInfo
 	{
@@ -153,18 +174,57 @@ private:
 		double minv;
 		double maxv;
 		//loc from first channel
+		unsigned long long inc;
 		unsigned long long loc;
 		std::vector<TimeInfo> times;
 
 		ChannelInfo():
 			chan(0), res(0), minv(0), maxv(0), loc(0)
 		{}
+		unsigned long long FillInfo(unsigned long long pos)
+		{
+			loc = pos;
+			//populate blocks
+			for (size_t i = 1; i < times.size(); ++i)
+			{
+				times[i].chan = chan;
+				times[i].time = i;
+				times[i].loc = pos + inc * i;
+				times[i].blocks = times[0].blocks;
+			}
+			//correct block values
+			for (size_t i = 0; i < times.size(); ++i)
+				times[i].FillInfo();
+			return loc + inc;
+		}
 	};
 	struct ImageInfo
 	{
 		std::wstring name;//image name for batch
 		std::wstring mbid;//memory block name
+		unsigned long long loc;//location in file
+		unsigned long long size;//read size
 		std::vector<ChannelInfo> channels;
+
+		ChannelInfo* GetChannelInfo(int chan)
+		{
+			if (chan >= 0 && chan < channels.size())
+				return &(channels[chan]);
+			return 0;
+		}
+		TimeInfo* GetTimeInfo(int chan, int time)
+		{
+			ChannelInfo* cinfo = GetChannelInfo(chan);
+			if (cinfo && time >= 0 && time < cinfo->times.size())
+				return &(cinfo->times[time]);
+			return 0;
+		}
+		void FillInfo()
+		{
+			unsigned long long pos = loc;
+			for (size_t i = 0; i < channels.size(); ++i)
+				pos = channels[i].FillInfo(pos);
+		}
 	};
 	struct LIFInfo
 	{
@@ -185,43 +245,25 @@ private:
 	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
-	SubBlockInfo* FindSubBlockInfo(std::wstring &name)
+	ImageInfo* FindImageInfo(std::wstring &name)
 	{
-		for (size_t i = 0; i < m_lif_info.times.size(); ++i)
-		for (size_t j = 0; j < m_lif_info.times[i].channels.size(); ++j)
-		for (size_t k = 0; k < m_lif_info.times[i].channels[j].blocks.size(); ++k)
+		auto it = m_lif_info.images.find(name);
+		if (it != m_lif_info.images.end())
+			return &(it->second);
+		return 0;
+	}
+	ImageInfo* FindImageInfoMbid(std::wstring &mbid)
+	{
+		for (auto it = m_lif_info.images.begin();
+			it != m_lif_info.images.end(); ++it)
 		{
-			if (m_lif_info.times[i].channels[j].blocks[k].name == name)
-				return &(m_lif_info.times[i].channels[j].blocks[k]);
+			if (it->second.mbid == mbid)
+				return &(it->second);
 		}
 		return 0;
 	}
-	//read info
-	TimeInfo* GetTimeinfo(int time)
-	{
-		for (size_t i = 0; i < m_lif_info.times.size(); ++i)
-		{
-			if (m_lif_info.times[i].time == time)
-				return &(m_lif_info.times[i]);
-		}
-		return 0;
-	}
-	ChannelInfo* GetChaninfo(TimeInfo* seqinfo, int chan)
-	{
-		if (!seqinfo)
-			return 0;
-		for (size_t i = 0; i < seqinfo->channels.size(); ++i)
-		{
-			if (seqinfo->channels[i].chan == chan)
-				return &(seqinfo->channels[i]);
-		}
-		return 0;
-	}
-	ChannelInfo* GetChaninfo(int time, int chan)
-	{
-		TimeInfo* seqinfo = GetTimeinfo(time);
-		return GetChaninfo(seqinfo, chan);
-	}
+	void FillLifInfo();
+
 };
 
 #endif//_LIF_READER_H_
