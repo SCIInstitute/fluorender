@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/xml/xml.h>
 #include <vector>
 #include <string>
-#include <unordered_map>
 
 using namespace std;
 
@@ -162,6 +161,8 @@ private:
 				blocks[i].chan = chan;
 				blocks[i].time = time;
 				blocks[i].loc = loc + blocks[i].z_inc * i;
+				if (blocks[i].z_size == 0)
+					blocks[i].z_size = 1;
 			}
 		}
 	};
@@ -185,7 +186,7 @@ private:
 		{
 			loc = pos;
 			//populate blocks
-			for (size_t i = 1; i < times.size(); ++i)
+			for (size_t i = 0; i < times.size(); ++i)
 			{
 				times[i].chan = chan;
 				times[i].time = i;
@@ -223,12 +224,16 @@ private:
 		{
 			unsigned long long pos = loc;
 			for (size_t i = 0; i < channels.size(); ++i)
+			{
+				if (i > 0)
+					channels[i].times = channels[0].times;
 				pos = channels[i].FillInfo(pos);
+			}
 		}
 	};
 	struct LIFInfo
 	{
-		std::unordered_map<std::wstring, ImageInfo> images;
+		std::vector<ImageInfo> images;
 	};
 	LIFInfo m_lif_info;
 
@@ -245,25 +250,23 @@ private:
 	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
-	ImageInfo* FindImageInfo(std::wstring &name)
-	{
-		auto it = m_lif_info.images.find(name);
-		if (it != m_lif_info.images.end())
-			return &(it->second);
-		return 0;
-	}
 	ImageInfo* FindImageInfoMbid(std::wstring &mbid)
 	{
 		for (auto it = m_lif_info.images.begin();
 			it != m_lif_info.images.end(); ++it)
 		{
-			if (it->second.mbid == mbid)
-				return &(it->second);
+			if ((*it).mbid == mbid)
+				return &(*it);
 		}
 		return 0;
 	}
 	void FillLifInfo();
-
+	TimeInfo* GetTimeInfo(int c, int t)
+	{
+		if (m_cur_batch < 0 || m_cur_batch >= m_lif_info.images.size())
+			return 0;
+		return m_lif_info.images[m_cur_batch].GetTimeInfo(c, t);
+	}
 };
 
 #endif//_LIF_READER_H_
