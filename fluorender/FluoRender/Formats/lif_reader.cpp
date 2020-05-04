@@ -155,11 +155,10 @@ void LIFReader::SetBatch(bool batch)
 int LIFReader::LoadBatch(int index)
 {
 	int result = -1;
-	if (index >= 0 && index < (int)m_batch_list.size())
+	if (index >= 0 && index < (int)m_lif_info.images.size())
 	{
-		std::wstring name = m_batch_list[index];
 		//Preprocess();
-		ImageInfo* imgi = FindImageInfo(name);
+		ImageInfo* imgi = &(m_lif_info.images[index]);
 		if (imgi)
 		{
 			m_chan_num = imgi->channels.size();
@@ -207,12 +206,17 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
 		return 0;
 
-/*	if (t >= 0 && t < m_time_num &&
+	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
 		m_slice_num > 0 &&
 		m_x_size > 0 &&
 		m_y_size > 0)
 	{
+		TimeInfo *tinfo = GetTimeInfo(c, t);
+		if (!tinfo)
+		{
+			return 0;
+		}
 		//allocate memory for nrrd
 		switch (m_datatype)
 		{
@@ -221,10 +225,9 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
-			ChannelInfo *cinfo = GetChaninfo(t, c);
-			for (int i = 0; i < (int)cinfo->blocks.size(); i++)
+			for (int i = 0; i < (int)tinfo->blocks.size(); i++)
 			{
-				SubBlockInfo* sbi = &(cinfo->blocks[i]);
+				SubBlockInfo* sbi = &(tinfo->blocks[i]);
 				ReadMemoryBlock(pfile, sbi, val);
 			}
 			//create nrrd
@@ -241,10 +244,9 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
-			ChannelInfo *cinfo = GetChaninfo(t, c);
-			for (int i = 0; i < (int)cinfo->blocks.size(); i++)
+			for (int i = 0; i < (int)tinfo->blocks.size(); i++)
 			{
-				SubBlockInfo* sbi = &(cinfo->blocks[i]);
+				SubBlockInfo* sbi = &(tinfo->blocks[i]);
 				ReadMemoryBlock(pfile, sbi, val);
 			}
 			//create nrrd
@@ -258,7 +260,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 		break;
 		}
 	}
-*/
+
 	fclose(pfile);
 	m_cur_time = t;
 	return data;
@@ -401,10 +403,29 @@ unsigned long long LIFReader::PreReadMemoryBlock(FILE* pfile, unsigned long long
 bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 {
 	unsigned long long ioffset = sbi->loc;
-	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
-		return false;
 	bool result = true;
-	//result &= fread((unsigned char*)val, 1, sbi->size, pfile) == sbi->size;
+	if (m_chan_num == 1)
+	{
+		unsigned long long size = (unsigned long long)sbi->x_size
+			* sbi->y_size * sbi->z_size * m_datatype;
+		if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+			return false;
+		result &= fread((unsigned char*)val, 1, size, pfile) == size;
+	}
+	else
+	{
+		unsigned long long size = (unsigned long long)sbi->x_size
+			* sbi->y_size * m_datatype;
+		unsigned char* pos = (unsigned char*)val;
+		for (int i = 0; i < sbi->z_size; ++i)
+		{
+			ioffset += sbi->z_inc * i;
+			pos += size * i;
+			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+				return false;
+			result &= fread(pos, 1, size, pfile) == size;
+		}
+	}
 	return result;
 }
 
@@ -470,17 +491,10 @@ LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
 	ImageInfo imgi;
 	imgi.name = name;
 	ReadSubBlockInfo(child, imgi);
-	auto result = m_lif_info.images.insert(std::pair<std::wstring,
-		LIFReader::ImageInfo>(imgi.name, imgi));
-	if (result.second)
-	{
-		m_batch_list.push_back(imgi.name);
-		if (m_lif_info.images.size() > 1)
-			m_batch = true;
-		return &(result.first->second);
-	}
-	else
-		return 0;
+	m_lif_info.images.push_back(imgi);
+	if (m_lif_info.images.size() > 1)
+		m_batch = true;
+	return &(m_lif_info.images.back());
 }
 
 void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
@@ -597,5 +611,5 @@ void LIFReader::FillLifInfo()
 	//	sbi.z_size = 1;
 	for (auto it = m_lif_info.images.begin();
 		it != m_lif_info.images.end(); ++it)
-		it->second.FillInfo();
+		it->FillInfo();
 }
