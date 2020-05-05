@@ -182,21 +182,20 @@ private:
 		ChannelInfo():
 			chan(0), res(0), minv(0), maxv(0), loc(0)
 		{}
-		unsigned long long FillInfo(unsigned long long pos)
+		void FillInfo(unsigned long long pos)
 		{
-			loc = pos;
+			loc = pos + inc;
 			//populate blocks
 			for (size_t i = 0; i < times.size(); ++i)
 			{
 				times[i].chan = chan;
 				times[i].time = i;
-				times[i].loc = pos + inc * i;
+				times[i].loc = loc + times[i].inc * i;
 				times[i].blocks = times[0].blocks;
 			}
 			//correct block values
 			for (size_t i = 0; i < times.size(); ++i)
 				times[i].FillInfo();
-			return loc + inc;
 		}
 	};
 	struct ImageInfo
@@ -227,7 +226,7 @@ private:
 			{
 				if (i > 0)
 					channels[i].times = channels[0].times;
-				pos = channels[i].FillInfo(pos);
+				channels[i].FillInfo(pos);
 			}
 		}
 	};
