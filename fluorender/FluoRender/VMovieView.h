@@ -44,6 +44,7 @@ class VMovieView : public wxPanel
 	{
 		//time sequence
 		ID_SeqChk = ID_MOVIEW_VIEW,
+		ID_BatChk,//batch mutual exclusive with seq(4d)
 		ID_TimeStartText,
 		ID_TimeEndText,
 		ID_IncTimeBtn,
@@ -148,6 +149,7 @@ public:
 
 	//basic movie controls
 	wxCheckBox *m_seq_chk;
+	wxCheckBox *m_bat_chk;
 	wxTextCtrl *m_time_start_text;
 	wxTextCtrl *m_time_end_text;
 	wxButton *m_inc_time_btn;
@@ -207,6 +209,7 @@ private:
 	wxString filetype_;
 	int m_rot_int_type;//0-linear; 1-smooth
 	bool m_delayed_stop;
+	int m_seq_mode;//0:none; 1:4d; 2:bat
 
 private:
 	void GetSettings(int view=0);
@@ -274,6 +277,7 @@ private:
 
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
+	void OnBatchChecked(wxCommandEvent& event);
 	void OnRotateChecked(wxCommandEvent& event);
 
 	//rotation interpolation

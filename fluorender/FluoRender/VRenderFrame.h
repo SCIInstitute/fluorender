@@ -420,6 +420,8 @@ private:
 	static bool m_channSequence;
 	//digit order
 	static int m_digitOrder;
+	//series number
+	static int m_ser_num;
 	//compression
 	static bool m_compression;
 	//brick skipping
@@ -458,6 +460,7 @@ private:
 	void OnCh12Check(wxCommandEvent &event);
 	void OnCmbChange(wxCommandEvent &event);
 	void OnTxt1Change(wxCommandEvent &event);
+	void OnTxt2Change(wxCommandEvent &event);
 	void OnCh2Check(wxCommandEvent &event);
 	void OnCh3Check(wxCommandEvent &event);
 	void OnChEmbedCheck(wxCommandEvent &event);

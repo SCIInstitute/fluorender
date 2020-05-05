@@ -472,7 +472,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 {
 	if (!data || data->dim!=3)
 		return 0;
-
+	FLIVR::Texture* tex = 0;
 	if (del_tex)
 	{
 		Nrrd *nv = data;
@@ -481,8 +481,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		m_res_y = nv->axis[1].size;
 		m_res_z = nv->axis[2].size;
 
-		if (m_tex)
-			delete m_tex;
+		tex = m_tex;
 		m_tex = new Texture();
 		m_tex->set_use_priority(m_skip_brick);
 		m_tex->build(nv, gm, 0, m_max_value, 0, 0);
@@ -493,11 +492,10 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		m_tex->set_nrrd(data, 0);
 	}
 
-	//clear pool
 	if (m_vr)
 		m_vr->set_texture(m_tex);
-	else
-		return 0;
+	if (tex)
+		delete tex;
 
 	return 1;
 }
@@ -4495,7 +4493,8 @@ m_vol_exb(0.0),
 	m_vol_swi(0.0),
 	m_vol_test_wiref(false),
 	m_use_defaults(true),
-	m_override_vox(true)
+	m_override_vox(true),
+	m_ser_num(0)
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -4830,6 +4829,8 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		reader->SetAlignment(4);
 	}
 
+	if (m_ser_num > 0)
+		reader->LoadBatch(m_ser_num);
 	int chan = reader->GetChanNum();
 	for (i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
