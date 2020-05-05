@@ -60,6 +60,7 @@ public:
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
+	int LoadOffset(int offset);
 	Nrrd* Convert(int t, int c, bool get_max);
 	wstring GetCurDataName(int t, int c);
 	wstring GetCurMaskName(int t, int c);
@@ -81,7 +82,7 @@ public:
 	double GetMaxValue() { return m_max_value; }
 	double GetScalarScale() { return m_scalar_scale; }
 	bool GetBatch() { return m_batch; }
-	int GetBatchNum() { return (int)m_batch_list.size(); }
+	int GetBatchNum() { return (int)m_lif_info.images.size(); }
 	int GetCurBatch() { return m_cur_batch; }
 
 private:

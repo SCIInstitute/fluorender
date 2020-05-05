@@ -189,6 +189,11 @@ int LIFReader::LoadBatch(int index)
 	return result;
 }
 
+int LIFReader::LoadOffset(int offset)
+{
+	return LoadBatch(offset);
+}
+
 double LIFReader::GetExcitationWavelength(int chan)
 {
 	for (int i = 0; i < (int)m_excitation_wavelength_list.size(); i++)

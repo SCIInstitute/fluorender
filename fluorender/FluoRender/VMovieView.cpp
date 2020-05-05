@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)
 //time sequence
 EVT_CHECKBOX(ID_SeqChk, VMovieView::OnSequenceChecked)
+EVT_CHECKBOX(ID_BatChk, VMovieView::OnBatchChecked)
 EVT_BUTTON(ID_IncTimeBtn, VMovieView::OnUpFrame)
 EVT_BUTTON(ID_DecTimeBtn, VMovieView::OnDownFrame)
 EVT_TEXT(ID_CurrentTimeText, VMovieView::OnTimeText)
@@ -104,7 +105,9 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_seq_chk = new wxCheckBox(page, ID_SeqChk,
-		"Time Sequence / Batch");
+		"Time Seq.");
+	m_bat_chk = new wxCheckBox(page, ID_BatChk,
+		"Batch");
 	m_time_start_text = new wxTextCtrl(page, ID_TimeStartText, "1",
 		wxDefaultPosition, wxSize(35, -1));
 	m_time_end_text = new wxTextCtrl(page, ID_TimeEndText, "10",
@@ -113,6 +116,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 		wxDefaultPosition, wxSize(75, -1));
 	//sizer 1
 	sizer_1->Add(m_seq_chk, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_bat_chk, 0, wxALIGN_CENTER);
 	sizer_1->AddStretchSpacer();
 	st = new wxStaticText(page, wxID_ANY, "Current Time");
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
@@ -422,7 +426,8 @@ VMovieView::VMovieView(wxWindow* frame,
 	m_record(false),
 	m_current_page(0),
 	m_rot_int_type(0),
-	m_delayed_stop(false)
+	m_delayed_stop(false),
+	m_seq_mode(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -1002,13 +1007,15 @@ void VMovieView::OnHelpBtn(wxCommandEvent &event) {
 	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=58"));
 }
 
-void VMovieView::DisableTime() {
+void VMovieView::DisableTime()
+{
 	m_time_start_text->Disable();
 	m_time_end_text->Disable();
 	m_inc_time_btn->Disable();
 	m_dec_time_btn->Disable();
 	m_time_current_text->Disable();
 	m_seq_chk->SetValue(false);
+	m_bat_chk->SetValue(false);
 }
 
 void VMovieView::EnableTime()
@@ -1019,9 +1026,18 @@ void VMovieView::EnableTime()
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
 	int first, sec, tmp;
-	vrv->Get4DSeqFrames(first, sec, tmp);
-	if (sec - first == 0)
+	if (m_seq_mode == 1)
+	{
+		vrv->Get4DSeqFrames(first, sec, tmp);
+		m_seq_chk->SetValue(true);
+		m_bat_chk->SetValue(false);
+	}
+	else if (m_seq_mode == 2)
+	{
 		vrv->Get3DBatFrames(first, sec, tmp);
+		m_seq_chk->SetValue(false);
+		m_bat_chk->SetValue(true);
+	}
 	m_time_start_text->ChangeValue(wxString::Format("%d", first));
 	m_time_end_text->ChangeValue(wxString::Format("%d", sec));
 	m_time_start_text->Enable();
@@ -1029,7 +1045,6 @@ void VMovieView::EnableTime()
 	m_inc_time_btn->Enable();
 	m_dec_time_btn->Enable();
 	m_time_current_text->Enable();
-	m_seq_chk->SetValue(true);
 
 	wxString fps_str = m_fps_text->GetValue();
 	unsigned long fps;
@@ -1173,7 +1188,8 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 		m_progress_text->ChangeValue(str);
 }
 
-void VMovieView::SetRendering(double pcnt) {
+void VMovieView::SetRendering(double pcnt)
+{
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
@@ -1197,16 +1213,18 @@ void VMovieView::SetRendering(double pcnt) {
 	int time = end_time - start_time + 1;
 	time = int(start_time + time * pcnt + 0.5);
 
-	if (m_seq_chk->GetValue()) {
+	if (m_seq_mode == 1)
+	{
 		int first, sec, tmp;
 		vrv->Get4DSeqFrames(first, sec, tmp);
-		if (sec - first > 0) {
+		if (sec - first > 0)
 			vrv->Set4DSeqFrame(time, true);
-		}
-		else {
-			vrv->Set3DBatFrame(time);
-		}
 	}
+	else if (m_seq_mode == 2)
+	{
+		vrv->Set3DBatFrame(time);
+	}
+
 	if (m_rot_chk->GetValue()) {
 		double x, y, z, val;
 		vrv->GetRotations(x, y, z);
@@ -1263,11 +1281,32 @@ void VMovieView::OnRotIntCmb(wxCommandEvent& event)
 	m_rot_int_type = m_rot_int_cmb->GetCurrentSelection();
 }
 
-void VMovieView::OnSequenceChecked(wxCommandEvent& event) {
+void VMovieView::OnSequenceChecked(wxCommandEvent& event)
+{
 	if (m_seq_chk->GetValue())
+	{
+		m_seq_mode = 1;
 		EnableTime();
+	}
 	else
+	{
+		m_seq_mode = 0;
 		DisableTime();
+	}
+}
+
+void VMovieView::OnBatchChecked(wxCommandEvent& event)
+{
+	if (m_bat_chk->GetValue())
+	{
+		m_seq_mode = 2;
+		EnableTime();
+	}
+	else
+	{
+		m_seq_mode = 0;
+		DisableTime();
+	}
 }
 
 void VMovieView::SetProgress(double pcnt) {

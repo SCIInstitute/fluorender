@@ -111,6 +111,7 @@ END_EVENT_TABLE()
 bool VRenderFrame::m_sliceSequence = false;
 bool VRenderFrame::m_channSequence = false;
 int VRenderFrame::m_digitOrder = 0;
+int VRenderFrame::m_ser_num = 0;
 bool VRenderFrame::m_compression = false;
 bool VRenderFrame::m_skip_brick = false;
 wxString VRenderFrame::m_time_id = "_T";
@@ -1127,6 +1128,18 @@ void VRenderFrame::OnTxt1Change(wxCommandEvent &event)
 		m_time_id = txt1->GetValue();
 }
 
+void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
+{
+	wxTextCtrl* txt2 = (wxTextCtrl*)event.GetEventObject();
+	if (txt2)
+	{
+		wxString str = txt2->GetValue();
+		long lval;
+		if (str.ToLong(&lval))
+			m_ser_num = lval;
+	}
+}
+
 void VRenderFrame::OnCh2Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
@@ -1147,7 +1160,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
-	wxStaticText* st;
+	wxStaticText *st1, *st2;
 
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL );
@@ -1167,6 +1180,8 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	ch12->SetValue(m_channSequence);
 
 	//digit order
+	st1 = new wxStaticText(panel, 0,
+		"Digit order:");
 	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
 		"Order", wxDefaultPosition, wxSize(-1, 10), 0, NULL, wxCB_READONLY);
 	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
@@ -1178,16 +1193,26 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		combo->Append(combo_list[i]);
 	combo->SetSelection(m_digitOrder);
 
+	//series number
+	st2 = new wxStaticText(panel, 0,
+		"Serial:");
+	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
+		"", wxDefaultPosition, wxSize(50, 20));
+	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
+		wxCommandEventHandler(VRenderFrame::OnTxt2Change), NULL, panel);
+
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(panel, 0,
-		"Digit order:");
 	sizer1->Add(ch11);
 	sizer1->Add(10, 10);
 	sizer1->Add(ch12);
 	sizer1->Add(10, 10);
-	sizer1->Add(st);
+	sizer1->Add(st1);
 	sizer1->Add(5, 5);
 	sizer1->Add(combo, 0, wxALIGN_TOP);
+	sizer1->Add(10, 10);
+	sizer1->Add(st2);
+	sizer1->Add(5, 5);
+	sizer1->Add(txt2, 0, wxALIGN_CENTER);
 
 	//compression
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
@@ -1210,11 +1235,11 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
-	st = new wxStaticText(panel, 0,
+	st1 = new wxStaticText(panel, 0,
 		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
 	sizer2->Add(txt1);
 	sizer2->Add(10, 10);
-	sizer2->Add(st);
+	sizer2->Add(st1);
 
 	group1->Add(10, 10);
 	group1->Add(sizer1);
@@ -1428,6 +1453,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 		m_data_mgr.SetSliceSequence(m_sliceSequence);
 		m_data_mgr.SetChannSequence(m_channSequence);
 		m_data_mgr.SetDigitOrder(m_digitOrder);
+		m_data_mgr.SetSerNum(m_ser_num);
 		m_data_mgr.SetCompression(m_compression);
 		m_data_mgr.SetSkipBrick(m_skip_brick);
 		m_data_mgr.SetTimeId(m_time_id);

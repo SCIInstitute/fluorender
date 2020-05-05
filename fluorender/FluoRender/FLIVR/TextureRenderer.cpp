@@ -154,7 +154,8 @@ namespace FLIVR
 		{
 			// new texture, flag existing tex id's for deletion.
 			clear_tex_current();
-			tex->clear_undos();
+			if (tex)
+				tex->clear_undos();
 			tex_ = tex;
 		}
 	}

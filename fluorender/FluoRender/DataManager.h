@@ -1176,6 +1176,7 @@ public:
 	void SetSliceSequence(bool ss) {m_sliceSequence = ss;}
 	void SetChannSequence(bool cs) { m_channSequence = cs; }
 	void SetDigitOrder(int order) { m_digitOrder = order; }
+	void SetSerNum(int num) { m_ser_num = num; }
 	void SetCompression(bool compression) {m_compression = compression;}
 	void SetSkipBrick(bool skip) {m_skip_brick = skip;}
 	void SetTimeId(wxString str) {m_timeId = str;}
@@ -1301,6 +1302,8 @@ private:
 	bool m_channSequence;
 	//digit order
 	int m_digitOrder;//0:chann first; 1:slice first
+	//series number
+	int m_ser_num;
 	//compression
 	bool m_compression;
 	//skip brick
