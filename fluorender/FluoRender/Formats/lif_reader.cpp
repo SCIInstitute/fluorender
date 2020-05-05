@@ -404,7 +404,9 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 {
 	unsigned long long ioffset = sbi->loc;
 	bool result = true;
-	if (m_chan_num == 1)
+	unsigned long long slice_size = (unsigned long long)sbi->x_size
+		* sbi->y_size * m_datatype;
+	if (sbi->z_inc == slice_size)
 	{
 		unsigned long long size = (unsigned long long)sbi->x_size
 			* sbi->y_size * sbi->z_size * m_datatype;
@@ -414,16 +416,16 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	}
 	else
 	{
-		unsigned long long size = (unsigned long long)sbi->x_size
-			* sbi->y_size * m_datatype;
 		unsigned char* pos = (unsigned char*)val;
 		for (int i = 0; i < sbi->z_size; ++i)
 		{
-			ioffset += sbi->z_inc * i;
-			pos += size * i;
 			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 				return false;
-			result &= fread(pos, 1, size, pfile) == size;
+			result &= fread(pos, 1, slice_size, pfile) == slice_size;
+			if (!result)
+				return false;
+			ioffset += sbi->z_inc;
+			pos += slice_size;
 		}
 	}
 	return result;
