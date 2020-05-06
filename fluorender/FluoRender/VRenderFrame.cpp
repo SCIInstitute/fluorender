@@ -1333,8 +1333,8 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 #ifndef _DARWIN
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
-		"Leica Image File Format - Whole Experiment (*.lif)|*.lif|"\
-		"Leica Image File Format - One Element (*.lof)|*.lof|"\
+		"Leica Image File Format (*.lif)|*.lif|"\
+		"Leica Microsystems Object File Format (*.lof)|*.lof|"\
 		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
@@ -1346,8 +1346,8 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 #else
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
-		"Leica Image File Format - Whole Experiment (*.lif)|*.lif|"\
-		"Leica Image File Format - One Element (*.lof)|*.lof|"\
+		"Leica Image File Format (*.lif)|*.lif|"\
+		"Leica Microsystems Object File Format (*.lof)|*.lof|"\
 		"Olympus Image Binary Files (*.oib)|*.oib|"\
 		"Olympus Original Imaging Format (*.oif)|*.oif|"\
 		"Bruker/Prairie View XML (*.xml)|*.xml|"\

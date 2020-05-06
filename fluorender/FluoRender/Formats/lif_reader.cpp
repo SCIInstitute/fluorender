@@ -173,9 +173,30 @@ int LIFReader::LoadBatch(int index)
 			TimeInfo* tinfo = imgi->GetTimeInfo(0, 0);
 			if (tinfo && tinfo->blocks.size() > 0)
 			{
+				//pixel size
 				m_slice_num = tinfo->blocks[0].z_size;
 				m_x_size = tinfo->blocks[0].x_size;
 				m_y_size = tinfo->blocks[0].y_size;
+				//spacings
+				if (m_x_size)
+					m_xspc = tinfo->blocks[0].x_len / m_x_size;
+				if (m_y_size)
+					m_yspc = tinfo->blocks[0].y_len / m_y_size;
+				if (m_slice_num)
+					m_zspc = tinfo->blocks[0].z_len / m_slice_num;
+				if (m_xspc > 0.0 &&
+					m_xspc > 0.0 &&
+					m_xspc > 0.0)
+				{
+					m_valid_spc = true;
+				}
+				else
+				{
+					m_valid_spc = false;
+					m_xspc = 1.0;
+					m_yspc = 1.0;
+					m_zspc = 1.0;
+				}
 			}
 			if (m_datatype > 1)
 			{
@@ -426,11 +447,11 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	}
 	else
 	{
+		unsigned char* pos = (unsigned char*)val;
 		unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
 		if (sbi->y_inc == line_size)
 		{
 			//read slice by slice
-			unsigned char* pos = (unsigned char*)val;
 			for (int i = 0; i < sbi->z_size; ++i)
 			{
 				if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
@@ -444,24 +465,54 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		}
 		else
 		{
-			//read line by line
-			unsigned char* pos = (unsigned char*)val;
-			for (int i = 0; i < sbi->z_size; ++i)
+			if (sbi->y_inc < sbi->z_inc)
 			{
-				unsigned long long iof2 = ioffset;
-				unsigned char* pos2 = pos;
-				for (int j = 0; j < sbi->y_size; ++j)
+				//read line by line
+				//read y dir first
+				for (int i = 0; i < sbi->z_size; ++i)
 				{
-					if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
-						return false;
-					result &= fread(pos2, 1, line_size, pfile) == line_size;
-					if (!result)
-						return false;
-					iof2 += sbi->y_inc;
-					pos2 += line_size;
+					unsigned long long iof2 = ioffset;
+					unsigned char* pos2 = pos;
+					for (int j = 0; j < sbi->y_size; ++j)
+					{
+						if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+							return false;
+						result &= fread(pos2, 1, line_size, pfile) == line_size;
+						if (!result)
+							return false;
+						iof2 += sbi->y_inc;
+						pos2 += line_size;
+					}
+					ioffset += sbi->z_inc;
+					pos += slice_size;
 				}
-				ioffset += sbi->z_inc;
-				pos += slice_size;
+			}
+			else
+			{
+				//read pixel by pixel
+				//read z dir first
+				for (int i = 0; i < sbi->y_size; ++i)
+				{
+					unsigned long long iof2 = ioffset;
+					unsigned char* pos2 = pos;
+					for (int j = 0; j < sbi->x_size; ++j)
+					{
+						if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+							return false;
+						unsigned char* pos3 = pos2;
+						for (int k = 0; k < sbi->z_size; ++k)
+						{
+							result &= fread(pos3, 1, m_datatype, pfile) == m_datatype;
+							if (!result)
+								return false;
+							pos3 += slice_size;
+						}
+						iof2 += sbi->z_inc;
+						pos2 += m_datatype;
+					}
+					ioffset += sbi->y_inc;
+					pos += line_size;
+				}
 			}
 		}
 	}
