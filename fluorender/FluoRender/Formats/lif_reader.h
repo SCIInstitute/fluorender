@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/xml/xml.h>
 #include <vector>
 #include <string>
+#include <limits>
 
 using namespace std;
 
@@ -155,6 +156,50 @@ private:
 		TimeInfo() :
 			chan(0), time(0), inc(0), loc(0)
 		{}
+		void SetSubBlockInfo(unsigned int dim, unsigned int empty_dim,
+			unsigned int size, double orig, double len,
+			unsigned long long tinc)
+		{
+			SubBlockInfo *sbi = 0;
+			if (blocks.empty())
+				blocks.resize(1);
+			sbi = &(blocks[0]);
+
+			switch (dim)
+			{
+			case 1:
+				sbi->x_size = size;
+				sbi->x_start = orig;
+				sbi->x_len = len;
+				sbi->x_inc = tinc;
+				break;
+			case 2:
+				sbi->y_size = size;
+				sbi->y_start = orig;
+				sbi->y_len = len;
+				sbi->y_inc = tinc;
+				break;
+			case 3:
+				sbi->z_size = size;
+				sbi->z_start = orig;
+				sbi->z_len = len;
+				sbi->z_inc = tinc;
+				break;
+			case 4:
+				inc = tinc;
+				break;
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+				if (!empty_dim)
+					break;
+				SetSubBlockInfo(empty_dim, 0,
+					size, orig, len, tinc);
+				break;
+			}
+		}
 		void FillInfo()
 		{
 			for (size_t i = 0; i < blocks.size(); ++i)
@@ -162,6 +207,10 @@ private:
 				blocks[i].chan = chan;
 				blocks[i].time = time;
 				blocks[i].loc = loc + blocks[i].z_inc * i;
+				if (blocks[i].x_size == 0)
+					blocks[i].x_size = 1;
+				if (blocks[i].y_size == 0)
+					blocks[i].y_size = 1;
 				if (blocks[i].z_size == 0)
 					blocks[i].z_size = 1;
 			}
@@ -191,7 +240,7 @@ private:
 			{
 				times[i].chan = chan;
 				times[i].time = i;
-				times[i].loc = loc + times[i].inc * i;
+				times[i].loc = loc + times[0].inc * i;
 				times[i].blocks = times[0].blocks;
 			}
 			//correct block values
@@ -205,8 +254,15 @@ private:
 		std::wstring mbid;//memory block name
 		unsigned long long loc;//location in file
 		unsigned long long size;//read size
+		double minv;//min value
+		double maxv;//max value
 		std::vector<ChannelInfo> channels;
 
+		ImageInfo():
+			loc(0), size(0),
+			minv(std::numeric_limits<double>::max()),
+			maxv(0.0)
+		{}
 		ChannelInfo* GetChannelInfo(int chan)
 		{
 			if (chan >= 0 && chan < channels.size())
@@ -266,6 +322,18 @@ private:
 		if (m_cur_batch < 0 || m_cur_batch >= m_lif_info.images.size())
 			return 0;
 		return m_lif_info.images[m_cur_batch].GetTimeInfo(c, t);
+	}
+	unsigned int GetEmptyDim(ChannelInfo* cinfo, SubBlockInfo* sbi)
+	{
+		if (sbi->x_size == 0)
+			return 1;//x empty
+		else if (sbi->y_size == 0)
+			return 2;//y empty
+		else if (sbi->z_size == 0)
+			return 3;//z empty
+		else if (cinfo->times.size() == 1)
+			return 4;//t empty
+		return 0;//all full
 	}
 };
 
