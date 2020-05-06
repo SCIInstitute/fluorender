@@ -1020,6 +1020,8 @@ void VMovieView::DisableTime()
 
 void VMovieView::EnableTime()
 {
+	if (!m_seq_mode)
+		m_seq_mode = 1;
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;

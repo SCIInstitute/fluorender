@@ -157,7 +157,6 @@ int LIFReader::LoadBatch(int index)
 	int result = -1;
 	if (index >= 0 && index < (int)m_lif_info.images.size())
 	{
-		//Preprocess();
 		ImageInfo* imgi = &(m_lif_info.images[index]);
 		if (imgi)
 		{
@@ -177,6 +176,11 @@ int LIFReader::LoadBatch(int index)
 				m_slice_num = tinfo->blocks[0].z_size;
 				m_x_size = tinfo->blocks[0].x_size;
 				m_y_size = tinfo->blocks[0].y_size;
+			}
+			if (m_datatype > 1)
+			{
+				m_max_value = imgi->maxv;
+				m_scalar_scale = 65535.0 / m_max_value;
 			}
 		}
 
@@ -413,6 +417,7 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		* sbi->y_size * m_datatype;
 	if (sbi->z_inc == slice_size)
 	{
+		//read volume
 		unsigned long long size = (unsigned long long)sbi->x_size
 			* sbi->y_size * sbi->z_size * m_datatype;
 		if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
@@ -421,16 +426,43 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	}
 	else
 	{
-		unsigned char* pos = (unsigned char*)val;
-		for (int i = 0; i < sbi->z_size; ++i)
+		unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
+		if (sbi->y_inc == line_size)
 		{
-			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
-				return false;
-			result &= fread(pos, 1, slice_size, pfile) == slice_size;
-			if (!result)
-				return false;
-			ioffset += sbi->z_inc;
-			pos += slice_size;
+			//read slice by slice
+			unsigned char* pos = (unsigned char*)val;
+			for (int i = 0; i < sbi->z_size; ++i)
+			{
+				if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+					return false;
+				result &= fread(pos, 1, slice_size, pfile) == slice_size;
+				if (!result)
+					return false;
+				ioffset += sbi->z_inc;
+				pos += slice_size;
+			}
+		}
+		else
+		{
+			//read line by line
+			unsigned char* pos = (unsigned char*)val;
+			for (int i = 0; i < sbi->z_size; ++i)
+			{
+				unsigned long long iof2 = ioffset;
+				unsigned char* pos2 = pos;
+				for (int j = 0; j < sbi->y_size; ++j)
+				{
+					if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+						return false;
+					result &= fread(pos2, 1, line_size, pfile) == line_size;
+					if (!result)
+						return false;
+					iof2 += sbi->y_inc;
+					pos2 += line_size;
+				}
+				ioffset += sbi->z_inc;
+				pos += slice_size;
+			}
 		}
 	}
 	return result;
@@ -533,6 +565,8 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 			if (str.ToULongLong(&ull))
 				cinfo.inc = ull;
 			imgi.channels.push_back(cinfo);
+			imgi.minv = std::min(imgi.minv, cinfo.minv);
+			imgi.maxv = std::max(imgi.maxv, cinfo.maxv);
 		}
 		else if (str == "DimensionDescription")
 		{
@@ -575,7 +609,7 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 	ChannelInfo* cinfo = imgi.GetChannelInfo(chan);
 	if (dim == 4 && size > 1)
 		cinfo->times.resize(size);
-	else
+	else if (cinfo->times.empty())
 		cinfo->times.resize(1);
 	TimeInfo* tinfo = imgi.GetTimeInfo(chan, time);
 	if (!tinfo)
@@ -586,30 +620,9 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 	sbi = &(tinfo->blocks[0]);
 	sbi->chan = chan;
 	sbi->time = time;
-	switch (dim)
-	{
-	case 1:
-		sbi->x_size = size;
-		sbi->x_start = orig;
-		sbi->x_len = len;
-		sbi->x_inc = inc;
-		break;
-	case 2:
-		sbi->y_size = size;
-		sbi->y_start = orig;
-		sbi->y_len = len;
-		sbi->y_inc = inc;
-		break;
-	case 3:
-		sbi->z_size = size;
-		sbi->z_start = orig;
-		sbi->z_len = len;
-		sbi->z_inc = inc;
-		break;
-	case 4:
-		tinfo->inc = inc;
-		break;
-	}
+	unsigned int empty_dim = GetEmptyDim(cinfo, sbi);
+	tinfo->SetSubBlockInfo(dim, empty_dim,
+		size, orig, len, inc);
 }
 
 void LIFReader::FillLifInfo()
