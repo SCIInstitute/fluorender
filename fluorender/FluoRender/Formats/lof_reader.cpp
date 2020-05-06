@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include "../compatibility.h"
 #include <wx/sstream.h>
 #include <stdio.h>
+#include <algorithm>
+//#include <fstream>
 
 LOFReader::LOFReader()
 {
@@ -49,6 +51,9 @@ LOFReader::LOFReader()
 
 	m_batch = false;
 	m_cur_batch = -1;
+
+	m_ver_major = -1;
+	m_ver_minor = -1;
 }
 
 LOFReader::~LOFReader()
@@ -75,6 +80,68 @@ void LOFReader::SetFile(wstring &file)
 
 int LOFReader::Preprocess()
 {
+	FILE* pfile = 0;
+	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+		return READER_OPEN_FAIL;
+
+	unsigned long long ioffset = 0;
+	unsigned long long ull;
+	bool result = true;
+
+	//header
+	unsigned int tv0;
+	result &= fread(&tv0, sizeof(unsigned int), 1, pfile) == 1;
+	if (!result || tv0 != LOFTEST0)
+		return READER_FORMAT_ERROR;
+	unsigned int uisize;
+	result &= fread(&uisize, sizeof(unsigned int), 1, pfile) == 1;
+	if (!result || !uisize)
+		return READER_FORMAT_ERROR;
+	//type content
+	unsigned char tv1;
+	result &= fread(&tv1, 1, 1, pfile) == 1;
+	if (!result || tv1 != LOFTEXT1)
+		return READER_FORMAT_ERROR;
+	unsigned int namesize;
+	result &= fread(&namesize, sizeof(unsigned int), 1, pfile) == 1;
+	if (!result || !namesize)
+		return READER_FORMAT_ERROR;
+	std::wstring type_name(namesize, 0);
+	result &= fread(&type_name[0], sizeof(wchar_t), namesize, pfile) == namesize;
+	if (!result)
+		return READER_FORMAT_ERROR;
+	//major version
+	result &= fread(&tv1, 1, 1, pfile) == 1;
+	if (!result || tv1 != LOFTEXT1)
+		return READER_FORMAT_ERROR;
+	result &= fread(&m_ver_major, sizeof(int), 1, pfile) == 1;
+	if (!result)
+		return READER_FORMAT_ERROR;
+	//minor version
+	result &= fread(&tv1, 1, 1, pfile) == 1;
+	if (!result || tv1 != LOFTEXT1)
+		return READER_FORMAT_ERROR;
+	result &= fread(&m_ver_minor, sizeof(int), 1, pfile) == 1;
+	if (!result)
+		return READER_FORMAT_ERROR;
+	//memory size
+	result &= fread(&tv1, 1, 1, pfile) == 1;
+	if (!result || tv1 != LOFTEXT1)
+		return READER_FORMAT_ERROR;
+	unsigned long long ullsize;
+	result &= fread(&ullsize, sizeof(unsigned long long), 1, pfile) == 1;
+	if (!result)
+		return READER_FORMAT_ERROR;
+
+	//metadata
+	m_mem_loc = LOFHSIZE + uisize;
+	m_mem_size = ullsize;
+	ioffset = m_mem_loc  + ullsize;
+	ReadMetadata(pfile, ioffset);
+	FillLofInfo();
+
+	fclose(pfile);
+
 	return READER_OK;
 }
 
@@ -159,6 +226,67 @@ double LOFReader::GetExcitationWavelength(int chan)
 Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 {
 	Nrrd *data = 0;
+	FILE* pfile = 0;
+	if (!WFOPEN(&pfile, m_path_name.c_str(), L"rb"))
+		return 0;
+
+	if (t >= 0 && t < m_time_num &&
+		c >= 0 && c < m_chan_num &&
+		m_slice_num > 0 &&
+		m_x_size > 0 &&
+		m_y_size > 0)
+	{
+		TimeInfo *tinfo = m_lof_info.GetTimeInfo(c, t);
+		if (!tinfo)
+		{
+			return 0;
+		}
+		//allocate memory for nrrd
+		switch (m_datatype)
+		{
+		case 1://8-bit
+		{
+			unsigned long long mem_size = (unsigned long long)m_x_size*
+				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
+			for (int i = 0; i < (int)tinfo->blocks.size(); i++)
+			{
+				SubBlockInfo* sbi = &(tinfo->blocks[i]);
+				ReadMemoryBlock(pfile, sbi, val);
+			}
+			//create nrrd
+			data = nrrdNew();
+			nrrdWrap(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		}
+		break;
+		case 2://16-bit
+		{
+			unsigned long long mem_size = (unsigned long long)m_x_size*
+				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
+			for (int i = 0; i < (int)tinfo->blocks.size(); i++)
+			{
+				SubBlockInfo* sbi = &(tinfo->blocks[i]);
+				ReadMemoryBlock(pfile, sbi, val);
+			}
+			//create nrrd
+			data = nrrdNew();
+			nrrdWrap(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		}
+		break;
+		}
+	}
+
+	fclose(pfile);
+	m_cur_time = t;
 	return data;
 }
 
@@ -187,5 +315,293 @@ wstring LOFReader::GetCurLabelName(int t, int c)
 	woss << ".lbl";
 	wstring label_name = woss.str();
 	return label_name;
+}
+
+unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
+{
+	bool result = true;
+	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+		return 0;
+
+	unsigned int tv0;
+	result &= fread(&tv0, sizeof(unsigned int), 1, pfile) == 1;
+	if (!result || tv0 != LOFTEST0)
+		return 0;
+	unsigned int uisize;
+	result &= fread(&uisize, sizeof(unsigned int), 1, pfile) == 1;
+	if (!result || !uisize)
+		return 0;
+
+	//read xml
+	unsigned char tv1;
+	result &= fread(&tv1, 1, 1, pfile) == 1;
+	if (!result || tv1 != LOFTEXT1)
+		return 0;
+	unsigned int xmlsize;
+	result &= fread(&xmlsize, sizeof(unsigned int), 1, pfile) == 1;
+	if (!result || !xmlsize)
+		return 0;
+	std::wstring xmlstr(xmlsize, 0);
+	result &= fread(&xmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
+	if (!result)
+		return 0;
+
+	//test xml
+	//std::ofstream outfile;
+	//std::string outname = GET_PATH(m_path_name) + "metadata.xml";
+	//outfile.open(outname, std::ofstream::out);
+	//outfile << xmlstr;
+	//outfile.close();
+	//endof test
+
+	wxXmlDocument doc;
+	wxStringInputStream wxss(xmlstr);
+	result &= doc.Load(wxss);
+	wxXmlNode *root = doc.GetRoot();
+	ReadImage(root);
+
+	return LOFHSIZE + uisize;
+}
+
+void LOFReader::ReadImage(wxXmlNode* node)
+{
+	if (!node)
+		return;
+	wxString str;
+	wxXmlNode* child = node->GetChildren();
+	if (!child || child->GetName() != "Image")
+		return;
+	ReadSubBlockInfo(child);
+}
+
+void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
+{
+	if (!node)
+		return;
+	wxString str;
+	unsigned long ulv;
+	double dval;
+	unsigned long long ull;
+	wxXmlNode *child = node->GetChildren();
+	while (child)
+	{
+		str = child->GetName();
+		if (str == "ChannelDescription")
+		{
+			ChannelInfo cinfo;
+			cinfo.chan = m_lof_info.channels.size();
+			str = child->GetAttribute("Resolution");
+			if (str.ToULong(&ulv))
+				cinfo.res = ulv;
+			str = child->GetAttribute("Min");
+			if (str.ToDouble(&dval))
+				cinfo.minv = dval;
+			str = child->GetAttribute("Max");
+			if (str.ToDouble(&dval))
+				cinfo.maxv = dval;
+			str = child->GetAttribute("BytesInc");
+			if (str.ToULongLong(&ull))
+				cinfo.inc = ull;
+			m_lof_info.channels.push_back(cinfo);
+			m_lof_info.minv = std::min(m_lof_info.minv, cinfo.minv);
+			m_lof_info.maxv = std::max(m_lof_info.maxv, cinfo.maxv);
+		}
+		else if (str == "DimensionDescription")
+		{
+			unsigned long did = 0, size = 0;
+			double orig = 0, len = 0, sfactor = 1;
+			unsigned long long inc = 0;
+			str = child->GetAttribute("DimID");
+			if (str.ToULong(&did))
+			{
+				str = child->GetAttribute("Unit");
+				if (str == "m")
+					sfactor = 1e6;
+				else if (str == "mm")
+					sfactor = 1e3;
+				str = child->GetAttribute("NumberOfElements");
+				if (str.ToULong(&ulv))
+					size = ulv;
+				str = child->GetAttribute("Origin");
+				if (str.ToDouble(&dval))
+					orig = dval * sfactor;
+				str = child->GetAttribute("Length");
+				if (str.ToDouble(&dval))
+					len = dval * sfactor;
+				str = child->GetAttribute("BytesInc");
+				if (str.ToULongLong(&ull))
+					inc = ull;
+				AddSubBlockInfo(did, size, orig, len, inc);
+			}
+		}
+		ReadSubBlockInfo(child);
+		child = child->GetNext();
+	}
+}
+
+void LOFReader::AddSubBlockInfo(unsigned int dim, unsigned int size,
+	double orig, double len, unsigned long long inc)
+{
+	int time = 0;
+	int chan = 0;
+	ChannelInfo* cinfo = m_lof_info.GetChannelInfo(chan);
+	if (dim == 4 && size > 1)
+		cinfo->times.resize(size);
+	else if (cinfo->times.empty())
+		cinfo->times.resize(1);
+	TimeInfo* tinfo = m_lof_info.GetTimeInfo(chan, time);
+	if (!tinfo)
+		return;
+	SubBlockInfo *sbi = 0;
+	if (tinfo->blocks.empty())
+		tinfo->blocks.resize(1);
+	sbi = &(tinfo->blocks[0]);
+	sbi->chan = chan;
+	sbi->time = time;
+	unsigned int empty_dim = GetEmptyDim(cinfo, sbi);
+	tinfo->SetSubBlockInfo(dim, empty_dim,
+		size, orig, len, inc);
+}
+
+void LOFReader::FillLofInfo()
+{
+	m_lof_info.loc = m_mem_loc;
+	m_lof_info.size = m_mem_size;
+	m_lof_info.FillInfo();
+
+	m_cur_time = 0;
+	m_data_name = GET_NAME(m_path_name);
+	m_chan_num = m_lof_info.channels.size();
+	ChannelInfo* cinfo = m_lof_info.GetChannelInfo(0);
+	if (cinfo)
+	{
+		m_time_num = cinfo->times.size();
+		if (cinfo->res == 8)
+			m_datatype = 1;
+		else if (cinfo->res > 8)
+			m_datatype = 2;
+	}
+	TimeInfo* tinfo = m_lof_info.GetTimeInfo(0, 0);
+	if (tinfo && tinfo->blocks.size() > 0)
+	{
+		//pixel size
+		m_slice_num = tinfo->blocks[0].z_size;
+		m_x_size = tinfo->blocks[0].x_size;
+		m_y_size = tinfo->blocks[0].y_size;
+		//spacings
+		if (m_x_size)
+			m_xspc = tinfo->blocks[0].x_len / m_x_size;
+		if (m_y_size)
+			m_yspc = tinfo->blocks[0].y_len / m_y_size;
+		if (m_slice_num)
+			m_zspc = tinfo->blocks[0].z_len / m_slice_num;
+		if (m_xspc > 0.0 &&
+			m_xspc > 0.0 &&
+			m_xspc > 0.0)
+		{
+			m_valid_spc = true;
+		}
+		else
+		{
+			m_valid_spc = false;
+			m_xspc = 1.0;
+			m_yspc = 1.0;
+			m_zspc = 1.0;
+		}
+	}
+	if (m_datatype > 1)
+	{
+		m_max_value = m_lof_info.maxv;
+		m_scalar_scale = 65535.0 / m_max_value;
+	}
+}
+
+bool LOFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
+{
+	unsigned long long ioffset = sbi->loc;
+	bool result = true;
+	unsigned long long slice_size = (unsigned long long)sbi->x_size
+		* sbi->y_size * m_datatype;
+	if (sbi->z_inc == slice_size)
+	{
+		//read volume
+		unsigned long long size = (unsigned long long)sbi->x_size
+			* sbi->y_size * sbi->z_size * m_datatype;
+		if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+			return false;
+		result &= fread((unsigned char*)val, 1, size, pfile) == size;
+	}
+	else
+	{
+		unsigned char* pos = (unsigned char*)val;
+		unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
+		if (sbi->y_inc == line_size)
+		{
+			//read slice by slice
+			for (int i = 0; i < sbi->z_size; ++i)
+			{
+				if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+					return false;
+				result &= fread(pos, 1, slice_size, pfile) == slice_size;
+				if (!result)
+					return false;
+				ioffset += sbi->z_inc;
+				pos += slice_size;
+			}
+		}
+		else
+		{
+			if (sbi->y_inc < sbi->z_inc)
+			{
+				//read line by line
+				//read y dir first
+				for (int i = 0; i < sbi->z_size; ++i)
+				{
+					unsigned long long iof2 = ioffset;
+					unsigned char* pos2 = pos;
+					for (int j = 0; j < sbi->y_size; ++j)
+					{
+						if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+							return false;
+						result &= fread(pos2, 1, line_size, pfile) == line_size;
+						if (!result)
+							return false;
+						iof2 += sbi->y_inc;
+						pos2 += line_size;
+					}
+					ioffset += sbi->z_inc;
+					pos += slice_size;
+				}
+			}
+			else
+			{
+				//read pixel by pixel
+				//read z dir first
+				for (int i = 0; i < sbi->y_size; ++i)
+				{
+					unsigned long long iof2 = ioffset;
+					unsigned char* pos2 = pos;
+					for (int j = 0; j < sbi->x_size; ++j)
+					{
+						if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+							return false;
+						unsigned char* pos3 = pos2;
+						for (int k = 0; k < sbi->z_size; ++k)
+						{
+							result &= fread(pos3, 1, m_datatype, pfile) == m_datatype;
+							if (!result)
+								return false;
+							pos3 += slice_size;
+						}
+						iof2 += sbi->z_inc;
+						pos2 += m_datatype;
+					}
+					ioffset += sbi->y_inc;
+					pos += line_size;
+				}
+			}
+		}
+	}
+	return result;
 }
 

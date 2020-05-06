@@ -167,6 +167,8 @@ private:
 
 			switch (dim)
 			{
+			case 0:
+				break;
 			case 1:
 				sbi->x_size = size;
 				sbi->x_start = orig;
@@ -188,11 +190,7 @@ private:
 			case 4:
 				inc = tinc;
 				break;
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-			case 9:
+			default:
 				if (!empty_dim)
 					break;
 				SetSubBlockInfo(empty_dim, 0,
