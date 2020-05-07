@@ -430,7 +430,7 @@ unsigned long long LIFReader::PreReadMemoryBlock(FILE* pfile, unsigned long long
 	if (!result)
 		return 0;
 #else
-	std::string temp(nsize * 2, 0);
+	std::string temp(nsize * 2 + 2, 0);
 	result &= fread(&temp[0], 1, nsize * 2, pfile) == nsize * 2;
 	if (!result)
 		return 0;
