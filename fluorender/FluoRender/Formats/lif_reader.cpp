@@ -185,8 +185,8 @@ int LIFReader::LoadBatch(int index)
 				if (m_slice_num)
 					m_zspc = tinfo->blocks[0].z_len / m_slice_num;
 				if (m_xspc > 0.0 &&
-					m_xspc > 0.0 &&
-					m_xspc > 0.0)
+					m_yspc > 0.0 &&
+					m_zspc > 0.0)
 				{
 					m_valid_spc = true;
 				}
@@ -465,7 +465,8 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		}
 		else
 		{
-			if (sbi->y_inc < sbi->z_inc)
+			if (sbi->y_inc < sbi->z_inc ||
+				sbi->z_inc == 0)
 			{
 				//read line by line
 				//read y dir first
