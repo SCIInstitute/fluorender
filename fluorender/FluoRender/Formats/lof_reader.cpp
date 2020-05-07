@@ -529,86 +529,114 @@ bool LOFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 {
 	unsigned long long ioffset = sbi->loc;
 	bool result = true;
+	unsigned long long size = (unsigned long long)sbi->x_size
+		* sbi->y_size * sbi->z_size * m_datatype;
 	unsigned long long slice_size = (unsigned long long)sbi->x_size
 		* sbi->y_size * m_datatype;
-	if (sbi->z_size == 1 ||
-		sbi->z_inc == slice_size)
+	unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
+	if (sbi->z_size == 1)
 	{
-		//read volume
-		unsigned long long size = (unsigned long long)sbi->x_size
-			* sbi->y_size * sbi->z_size * m_datatype;
-		if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
-			return false;
-		result &= fread((unsigned char*)val, 1, size, pfile) == size;
-	}
-	else
-	{
-		unsigned char* pos = (unsigned char*)val;
-		unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
 		if (sbi->y_inc == line_size)
 		{
-			//read slice by slice
-			for (int i = 0; i < sbi->z_size; ++i)
-			{
-				if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
-					return false;
-				result &= fread(pos, 1, slice_size, pfile) == slice_size;
-				if (!result)
-					return false;
-				ioffset += sbi->z_inc;
-				pos += slice_size;
-			}
+			//read slice
+			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+				return false;
+			result &= fread((unsigned char*)val, 1, size, pfile) == size;
 		}
 		else
 		{
-			if (sbi->y_inc < sbi->z_inc ||
-				sbi->z_inc == 0)
+			//read line by line
+			//read y dir first
+			unsigned char* pos = (unsigned char*)val;
+			for (int i = 0; i < sbi->y_size; ++i)
 			{
-				//read line by line
-				//read y dir first
+				if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+					return false;
+				result &= fread(pos, 1, line_size, pfile) == line_size;
+				if (!result)
+					return false;
+				ioffset += sbi->y_inc;
+				pos += line_size;
+			}
+		}
+	}
+	else
+	{
+		if (sbi->z_inc == slice_size)
+		{
+			//read volume
+			if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+				return false;
+			result &= fread((unsigned char*)val, 1, size, pfile) == size;
+		}
+		else
+		{
+			unsigned char* pos = (unsigned char*)val;
+			if (sbi->y_inc == line_size)
+			{
+				//read slice by slice
 				for (int i = 0; i < sbi->z_size; ++i)
 				{
-					unsigned long long iof2 = ioffset;
-					unsigned char* pos2 = pos;
-					for (int j = 0; j < sbi->y_size; ++j)
-					{
-						if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
-							return false;
-						result &= fread(pos2, 1, line_size, pfile) == line_size;
-						if (!result)
-							return false;
-						iof2 += sbi->y_inc;
-						pos2 += line_size;
-					}
+					if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
+						return false;
+					result &= fread(pos, 1, slice_size, pfile) == slice_size;
+					if (!result)
+						return false;
 					ioffset += sbi->z_inc;
 					pos += slice_size;
 				}
 			}
 			else
 			{
-				//read pixel by pixel
-				//read z dir first
-				for (int i = 0; i < sbi->y_size; ++i)
+				if (sbi->y_inc < sbi->z_inc ||
+					sbi->z_inc == 0)
 				{
-					unsigned long long iof2 = ioffset;
-					unsigned char* pos2 = pos;
-					for (int j = 0; j < sbi->x_size; ++j)
+					//read line by line
+					//read y dir first
+					for (int i = 0; i < sbi->z_size; ++i)
 					{
-						if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
-							return false;
-						unsigned char* pos3 = pos2;
-						for (int k = 0; k < sbi->z_size; ++k)
+						unsigned long long iof2 = ioffset;
+						unsigned char* pos2 = pos;
+						for (int j = 0; j < sbi->y_size; ++j)
 						{
-							result &= fread(pos3, 1, m_datatype, pfile) == m_datatype;
+							if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+								return false;
+							result &= fread(pos2, 1, line_size, pfile) == line_size;
 							if (!result)
 								return false;
-							pos3 += slice_size;
+							iof2 += sbi->y_inc;
+							pos2 += line_size;
 						}
-						iof2 += sbi->z_inc;
-						pos2 += m_datatype;
+						ioffset += sbi->z_inc;
+						pos += slice_size;
 					}
-					ioffset += sbi->y_inc;
-					pos += line_size;
+				}
+				else
+				{
+					//read pixel by pixel
+					//read z dir first
+					for (int i = 0; i < sbi->y_size; ++i)
+					{
+						unsigned long long iof2 = ioffset;
+						unsigned char* pos2 = pos;
+						for (int j = 0; j < sbi->x_size; ++j)
+						{
+							if (FSEEK64(pfile, iof2, SEEK_SET) != 0)
+								return false;
+							unsigned char* pos3 = pos2;
+							for (int k = 0; k < sbi->z_size; ++k)
+							{
+								result &= fread(pos3, 1, m_datatype, pfile) == m_datatype;
+								if (!result)
+									return false;
+								pos3 += slice_size;
+							}
+							iof2 += sbi->z_inc;
+							pos2 += m_datatype;
+						}
+						ioffset += sbi->y_inc;
+						pos += line_size;
+					}
 				}
 			}
 		}
