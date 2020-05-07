@@ -194,7 +194,7 @@ private:
 				if (!empty_dim)
 					break;
 				SetSubBlockInfo(empty_dim, 0,
-					size, orig, len, tinc);
+					size, orig, 0.0, tinc);
 				break;
 			}
 		}

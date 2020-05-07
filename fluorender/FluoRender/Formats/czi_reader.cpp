@@ -595,8 +595,8 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	FindNodeRecursive(root);
 
 	if (m_xspc > 0.0 &&
-		m_xspc > 0.0 &&
-		m_xspc > 0.0)
+		m_yspc > 0.0 &&
+		m_zspc > 0.0)
 	{
 		m_valid_spc = true;
 	}
