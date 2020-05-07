@@ -563,7 +563,7 @@ bool CZIReader::ReadSubBlock(FILE* pfile, unsigned long long ioffset)
 	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 		return false;
 	//read metadata
-	std::string xmlstr(meta_size, 0);
+	std::string xmlstr(meta_size + 1, 0);
 	result &= fread(&xmlstr[0], 1, meta_size, pfile) == meta_size;//xml info
 	//data
 	//attachment
@@ -579,7 +579,7 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	ioffset += FIXSIZE;
 	if (FSEEK64(pfile, ioffset, SEEK_SET) != 0)
 		return false;
-	std::string xmlstr(xmlsize, 0);
+	std::string xmlstr(xmlsize + 1, 0);
 	result &= fread(&xmlstr[0], 1, xmlsize, pfile) == xmlsize;//xml info
 	if (!result)
 		return result;
@@ -669,7 +669,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		return false;
 
 	//read metadata
-	std::string xmlstr(meta_size, 0);
+	std::string xmlstr(meta_size + 1, 0);
 	result &= fread(&xmlstr[0], 1, meta_size, pfile) == meta_size;//xml info
 
 	//data

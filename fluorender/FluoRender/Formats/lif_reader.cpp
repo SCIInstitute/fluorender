@@ -348,12 +348,12 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	if (!result || !xmlsize)
 		return 0;
 #ifdef _WIN32
-	std::wstring xmlstr(xmlsize, 0);
+	std::wstring xmlstr(xmlsize + 1, 0);
 	result &= fread(&xmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
 	if (!result)
 		return 0;
 #else
-	std::string temp(xmlsize * 2, 0);
+	std::string temp(xmlsize * 2 + 2, 0);
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
 	if (!result)
 		return 0;
@@ -455,7 +455,8 @@ bool LIFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	bool result = true;
 	unsigned long long slice_size = (unsigned long long)sbi->x_size
 		* sbi->y_size * m_datatype;
-	if (sbi->z_inc == slice_size)
+	if (sbi->z_size == 1 ||
+		sbi->z_inc == slice_size)
 	{
 		//read volume
 		unsigned long long size = (unsigned long long)sbi->x_size

@@ -309,7 +309,7 @@ private:
 		for (auto it = m_lif_info.images.begin();
 			it != m_lif_info.images.end(); ++it)
 		{
-			if ((*it).mbid == mbid)
+			if ((*it).mbid.compare(mbid) == 0)
 				return &(*it);
 		}
 		return 0;
