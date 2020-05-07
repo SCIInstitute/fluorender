@@ -106,8 +106,8 @@ int LOFReader::Preprocess()
 	result &= fread(&namesize, sizeof(unsigned int), 1, pfile) == 1;
 	if (!result || !namesize)
 		return READER_FORMAT_ERROR;
-	std::wstring type_name(namesize, 0);
-	result &= fread(&type_name[0], sizeof(wchar_t), namesize, pfile) == namesize;
+	std::string type_name(namesize*2, 0);
+	result &= fread(&type_name[0], 1, namesize*2, pfile) == namesize*2;
 	if (!result)
 		return READER_FORMAT_ERROR;
 	//major version

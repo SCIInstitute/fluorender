@@ -424,10 +424,20 @@ unsigned long long LIFReader::PreReadMemoryBlock(FILE* pfile, unsigned long long
 		return 0;
 	unsigned int nsize;
 	result &= fread(&nsize, sizeof(unsigned int), 1, pfile) == 1;
+#ifdef _WIN32
 	std::wstring namestr(nsize, 0);
 	result &= fread(&namestr[0], sizeof(wchar_t), nsize, pfile) == nsize;
 	if (!result)
 		return 0;
+#else
+	std::string temp(nsize * 2, 0);
+	result &= fread(&temp[0], 1, nsize * 2, pfile) == nsize * 2;
+	if (!result)
+		return 0;
+	wxMBConvUTF16 conv;
+	wxString wxnamestr(temp.c_str(), conv);
+	std::wstring namestr = wxnamestr.ToStdWstring();
+#endif
 	ImageInfo* imgi = FindImageInfoMbid(namestr);
 	if (imgi)
 	{
