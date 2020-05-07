@@ -106,7 +106,7 @@ int LOFReader::Preprocess()
 	result &= fread(&namesize, sizeof(unsigned int), 1, pfile) == 1;
 	if (!result || !namesize)
 		return READER_FORMAT_ERROR;
-	std::string type_name(namesize*2, 0);
+	std::string type_name(namesize*2 + 2, 0);
 	result &= fread(&type_name[0], 1, namesize*2, pfile) == namesize*2;
 	if (!result)
 		return READER_FORMAT_ERROR;
@@ -342,12 +342,12 @@ unsigned long long LOFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	if (!result || !xmlsize)
 		return 0;
 #ifdef _WIN32
-	std::wstring xmlstr(xmlsize, 0);
+	std::wstring xmlstr(xmlsize + 1, 0);
 	result &= fread(&xmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
 	if (!result)
 		return 0;
 #else
-	std::string temp(xmlsize * 2, 0);
+	std::string temp(xmlsize * 2 + 2, 0);
 	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
 	if (!result)
 		return 0;
@@ -531,7 +531,8 @@ bool LOFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	bool result = true;
 	unsigned long long slice_size = (unsigned long long)sbi->x_size
 		* sbi->y_size * m_datatype;
-	if (sbi->z_inc == slice_size)
+	if (sbi->z_size == 1 ||
+		sbi->z_inc == slice_size)
 	{
 		//read volume
 		unsigned long long size = (unsigned long long)sbi->x_size
@@ -560,7 +561,8 @@ bool LOFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		}
 		else
 		{
-			if (sbi->y_inc < sbi->z_inc)
+			if (sbi->y_inc < sbi->z_inc ||
+				sbi->z_inc == 0)
 			{
 				//read line by line
 				//read y dir first
