@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "lif_reader.h"
 #include "../compatibility.h"
 #include <wx/sstream.h>
-//#include <fstream>
 #include <stdio.h>
+//#include <fstream>
 
 LIFReader::LIFReader()
 {
@@ -347,10 +347,19 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 	result &= fread(&xmlsize, sizeof(unsigned int), 1, pfile) == 1;
 	if (!result || !xmlsize)
 		return 0;
+#ifdef _WIN32
 	std::wstring xmlstr(xmlsize, 0);
 	result &= fread(&xmlstr[0], sizeof(wchar_t), xmlsize, pfile) == xmlsize;
 	if (!result)
 		return 0;
+#else
+	std::string temp(xmlsize * 2, 0);
+	result &= fread(&temp[0], 1, xmlsize * 2, pfile) == xmlsize * 2;
+	if (!result)
+		return 0;
+	wxMBConvUTF16 conv;
+	wxString xmlstr(temp.c_str(), conv);
+#endif
 
 	//test xml
 	//std::ofstream outfile;
