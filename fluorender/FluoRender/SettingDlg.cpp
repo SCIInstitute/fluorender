@@ -2414,14 +2414,16 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 	if (!sel.IsOk())
 		return;
 	int i = 0, j = 0;
-	wxTreeItemIdValue cookie;
+	wxTreeItemIdValue pfck;
 	wxTreeItemId root = m_device_tree->GetRootItem();
 	if (root.IsOk())
 	{
-		wxTreeItemId pfitem = m_device_tree->GetFirstChild(root, cookie);
+		wxTreeItemId pfitem = m_device_tree->GetFirstChild(root, pfck);
 		while (pfitem.IsOk())
 		{
-			wxTreeItemId dvitem = m_device_tree->GetFirstChild(pfitem, cookie);
+			j = 0;
+			wxTreeItemIdValue dvck;
+			wxTreeItemId dvitem = m_device_tree->GetFirstChild(pfitem, dvck);
 			while (dvitem.IsOk())
 			{
 				if (dvitem == sel)
@@ -2429,10 +2431,10 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 					SetCLPlatformID(i);
 					SetCLDeviceID(j);
 				}
-				dvitem = m_device_tree->GetNextChild(pfitem, cookie);
+				dvitem = m_device_tree->GetNextChild(pfitem, dvck);
 				j++;
 			}
-			pfitem = m_device_tree->GetNextChild(root, cookie);
+			pfitem = m_device_tree->GetNextChild(root, pfck);
 			i++;
 		}
 	}
