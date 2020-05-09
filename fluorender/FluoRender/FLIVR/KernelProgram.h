@@ -143,10 +143,12 @@ namespace FLIVR
 		static bool init();
 		static void clear();
 		static void set_platform_id(int id);
+		static int get_platform_id();
 		static void set_device_id(int id);
 		static int get_device_id();
 		static std::string& get_device_name();
 		static void release();
+		static std::vector<CLPlatform>* GetDeviceList();
 
 		//info
 		std::string &getInfo();
