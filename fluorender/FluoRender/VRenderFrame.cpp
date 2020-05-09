@@ -649,7 +649,6 @@ VRenderFrame::VRenderFrame(
 	m_aui_mgr.GetPane(m_help_dlg).Float();
 	m_aui_mgr.GetPane(m_help_dlg).Hide();
 
-
 	UpdateTree();
 
 	SetMinSize(wxSize(800,600));
@@ -5009,6 +5008,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 {
+	m_setting_dlg->UpdateDeviceTree();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();

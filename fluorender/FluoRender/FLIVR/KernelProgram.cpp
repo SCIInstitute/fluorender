@@ -29,10 +29,10 @@ namespace FLIVR
 
 	void KernelProgram::init_kernels_supported()
 	{
-		device_list_.clear();
 		if (init_)
 			return;
 
+		device_list_.clear();
 		cl_int err;
 		cl_uint platform_num;
 		cl_platform_id* platforms;
@@ -168,6 +168,11 @@ namespace FLIVR
 		platform_id_ = id;
 	}
 
+	int KernelProgram::get_platform_id()
+	{
+		return platform_id_;
+	}
+
 	void KernelProgram::set_device_id(int id)
 	{
 		device_id_ = id;
@@ -186,6 +191,11 @@ namespace FLIVR
 	void KernelProgram::release()
 	{
 		clReleaseContext(context_);
+	}
+
+	std::vector<CLPlatform>* KernelProgram::GetDeviceList()
+	{
+		return &device_list_;
 	}
 
 	//create a kernel in the program

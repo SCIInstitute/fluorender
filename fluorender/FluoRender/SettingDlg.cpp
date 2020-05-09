@@ -103,7 +103,8 @@ EVT_BUTTON(ID_JavaIJBrowseBtn, SettingDlg::onJavaIJBrowse)
 EVT_BUTTON(ID_JavaBioformatsBrowseBtn, SettingDlg::onJavaBioformatsBrowse)
 EVT_RADIOBUTTON(ID_RadioButtonImageJ, SettingDlg::onJavaRadioButtonImageJ)
 EVT_RADIOBUTTON(ID_RadioButtonFiji, SettingDlg::onJavaRadioButtonFiji)
-
+//device tree
+EVT_TREE_SEL_CHANGED(ID_DeviceTree, SettingDlg::OnSelChanged)
 //show
 EVT_SHOW(SettingDlg::OnShow)
 END_EVENT_TABLE()
@@ -632,6 +633,20 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	group3->Add(st, 0);
 	group3->Add(10, 5);
 
+	//cl devices
+	wxBoxSizer *group4 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "OpenCL Devices"), wxVERTICAL);
+	m_device_tree = new wxTreeCtrl(page, ID_DeviceTree,
+		wxDefaultPosition, wxDefaultSize,
+		wxTR_FULL_ROW_HIGHLIGHT);
+	st = new wxStaticText(page, 0,
+		"Select an OpenCL device that is also the rendering GPU.");
+	group4->Add(10, 5);
+	group4->Add(m_device_tree, 1, wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(st, 0);
+	group4->Add(10, 5);
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
@@ -639,6 +654,8 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group4, 1, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -649,9 +666,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
 	
-
-
-	//JVM settings.	
+	//JVM settings.
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
 	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -1269,6 +1284,39 @@ void SettingDlg::UpdateUI()
 		m_browse_bioformats_btn->Enable(false);
 		break;
 	}
+}
+
+void SettingDlg::UpdateDeviceTree()
+{
+	//cl device tree
+	std::vector<FLIVR::CLPlatform>* devices = FLIVR::KernelProgram::GetDeviceList();
+	int pid = FLIVR::KernelProgram::get_platform_id();
+	int did = FLIVR::KernelProgram::get_device_id();
+	wxTreeItemId root = m_device_tree->AddRoot("Computer");
+	std::string name;
+	if (devices)
+	{
+		for (int i = 0; i < devices->size(); ++i)
+		{
+			FLIVR::CLPlatform* platform = &((*devices)[i]);
+			name = platform->vendor;
+			name.back() = ' ';
+			name += platform->name;
+			wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
+			for (int j = 0; j < platform->devices.size(); ++j)
+			{
+				FLIVR::CLDevice* device = &(platform->devices[j]);
+				name = device->vendor;
+				name.back() = ' ';
+				name += device->name;
+				wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
+				if (i == pid && j == did)
+					m_device_tree->SelectItem(dvitem);
+			}
+		}
+	}
+	m_device_tree->ExpandAll();
+	m_device_tree->SetFocus();
 }
 
 void SettingDlg::SaveSettings()
@@ -2357,4 +2405,35 @@ void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
 	m_browse_jvm_btn->Enable(false);
 	m_browse_bioformats_btn->Enable(false);
 	m_ij_mode = 1;
+}
+
+//device tree
+void SettingDlg::OnSelChanged(wxTreeEvent& event)
+{
+	wxTreeItemId sel = m_device_tree->GetSelection();
+	if (!sel.IsOk())
+		return;
+	int i = 0, j = 0;
+	wxTreeItemIdValue cookie;
+	wxTreeItemId root = m_device_tree->GetRootItem();
+	if (root.IsOk())
+	{
+		wxTreeItemId pfitem = m_device_tree->GetFirstChild(root, cookie);
+		while (pfitem.IsOk())
+		{
+			wxTreeItemId dvitem = m_device_tree->GetFirstChild(pfitem, cookie);
+			while (dvitem.IsOk())
+			{
+				if (dvitem == sel)
+				{
+					SetCLPlatformID(i);
+					SetCLDeviceID(j);
+				}
+				dvitem = m_device_tree->GetNextChild(pfitem, cookie);
+				j++;
+			}
+			pfitem = m_device_tree->GetNextChild(root, cookie);
+			i++;
+		}
+	}
 }

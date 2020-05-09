@@ -25,10 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_
+
+#include <wx/wx.h>
+#include <wx/treectrl.h>
 
 #define TOOL_PAINT_BRUSH	1
 #define TOOL_MEASUREMENT	2
@@ -119,7 +120,9 @@ class SettingDlg : public wxPanel
 		ID_JavaIJBrowseBtn,
 		ID_JavaBioformatsBrowseBtn,
 		ID_RadioButtonImageJ,
-		ID_RadioButtonFiji
+		ID_RadioButtonFiji,
+		//device tree
+		ID_DeviceTree
 	};
 
 public:
@@ -129,6 +132,7 @@ public:
 
 	void GetSettings();
 	void UpdateUI();
+	void UpdateDeviceTree();
 	void SaveSettings();
 	void UpdateTextureSize();
 
@@ -484,6 +488,9 @@ private:
 	wxRadioButton* mp_radio_button_imagej;
 	wxRadioButton* mp_radio_button_fiji;
 
+	//device tree
+	wxTreeCtrl* m_device_tree;
+
 	//save
 	wxButton *m_save_btn;
 	//close
@@ -575,6 +582,8 @@ private:
 	void onJavaBioformatsBrowse(wxCommandEvent &event);
 	void onJavaRadioButtonImageJ(wxCommandEvent &event);
 	void onJavaRadioButtonFiji(wxCommandEvent &event);
+	//device tree
+	void OnSelChanged(wxTreeEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };
