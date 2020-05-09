@@ -58,6 +58,20 @@ namespace FLIVR
 		unsigned int gsxy;
 	} GroupSize;
 
+	struct CLDevice
+	{
+		cl_device_id id;
+		std::string vendor;
+		std::string name;
+	};
+	struct CLPlatform
+	{
+		cl_platform_id id;
+		std::string vendor;
+		std::string name;
+		std::vector<CLDevice> devices;
+	};
+
 	class KernelProgram
 	{
 	public:
@@ -176,6 +190,7 @@ namespace FLIVR
 		static int platform_id_;
 		static int device_id_;
 		static std::string device_name_;
+		static std::vector<CLPlatform> device_list_;
 	};
 }
 

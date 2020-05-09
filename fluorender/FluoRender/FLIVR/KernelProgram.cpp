@@ -13,6 +13,7 @@ namespace FLIVR
 	int KernelProgram::platform_id_ = 0;
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
+	std::vector<CLPlatform> KernelProgram::device_list_;
 #ifdef _DARWIN
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
@@ -28,6 +29,7 @@ namespace FLIVR
 
 	void KernelProgram::init_kernels_supported()
 	{
+		device_list_.clear();
 		if (init_)
 			return;
 
@@ -43,7 +45,65 @@ namespace FLIVR
 			return;
 		platforms = new cl_platform_id[platform_num];
 		err = clGetPlatformIDs(platform_num, platforms, NULL);
+		if (err != CL_SUCCESS)
+		{
+			delete[] platforms;
+			return;
+		}
 
+		//go through each platform
+		size_t info_size;
+		for (cl_uint i = 0; i < platform_num; ++i)
+		{
+			device_list_.push_back(CLPlatform());
+			CLPlatform* platform = &(device_list_.back());
+			//id
+			platform->id = platforms[i];
+			//get vendor name
+			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
+			platform->vendor.resize(info_size, 0);
+			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &(platform->vendor[0]), NULL);
+			//get platform name
+			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
+			platform->name.resize(info_size, 0);
+			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &(platform->name[0]), NULL);
+
+			cl_device_id *devices;
+			cl_uint device_num;
+			//get gpu devices
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
+			if (err != CL_SUCCESS || device_num == 0)
+				continue;
+			devices = new cl_device_id[device_num];
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices, NULL);
+			if (err != CL_SUCCESS)
+			{
+				delete[] devices;
+				continue;
+			}
+
+			//go through each device
+			for (cl_uint j = 0; j < device_num; ++j)
+			{
+				platform->devices.push_back(CLDevice());
+				CLDevice* device = &(platform->devices.back());
+				//id
+				device->id = devices[j];
+				//get vendor name
+				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
+				device->vendor.resize(info_size, 0);
+				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &(device->vendor[0]), NULL);
+				//get device name
+				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
+				device->name.resize(info_size, 0);
+				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &(device->name[0]), NULL);
+			}
+			delete[] devices;
+		}
+		delete[] platforms;
+
+		if (device_list_.empty())
+			return;
 #ifdef _WIN32
 		cl_context_properties properties[] =
 		{
@@ -52,22 +112,7 @@ namespace FLIVR
 			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
 			0
 		};
-
-		typedef CL_API_ENTRY cl_int(CL_API_CALL *P1)(
-			const cl_context_properties *properties,
-			cl_gl_context_info param_name,
-			size_t param_value_size,
-			void *param_value,
-			size_t *param_value_size_ret);
-		CL_API_ENTRY cl_int(CL_API_CALL *myclGetGLContextInfoKHR)(
-			const cl_context_properties *properties,
-			cl_gl_context_info param_name,
-			size_t param_value_size,
-			void *param_value,
-			size_t *param_value_size_ret) = NULL;
-		myclGetGLContextInfoKHR = (P1)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
-#endif
-#if defined(_DARWIN) || defined(__linux__)
+#else
 		cl_context_properties properties[] =
 		{
 			#if defined(_DARWIN) 
@@ -82,86 +127,29 @@ namespace FLIVR
 			0
 		};
 #endif
-
-		for (cl_uint i = 0; i<platform_num; ++i)
-		{
-			if (i != platform_id_)
-				continue;
-#ifdef _WIN32
-			cl_device_id device = 0;
-#endif
-			cl_device_id *devices;
-			cl_uint device_num;
-			//get gpu devices
-			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
-			if (err != CL_SUCCESS || device_num == 0)
-				continue;
-			devices = new cl_device_id[device_num];
-			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices, NULL);
-			if (err != CL_SUCCESS)
-			{
-				delete[] devices;
-				continue;
-			}
-#ifdef _WIN32
-			//get GL device
-			properties[5] = (cl_context_properties)(platforms[i]);
-			/*if (myclGetGLContextInfoKHR)
-			{
-				bool found = false;
-				err = myclGetGLContextInfoKHR(properties, CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
-					sizeof(cl_device_id), &device, NULL);
-				if (err != CL_SUCCESS || !device)
-				{
-					delete[] devices;
-					continue;
-				}
-				else
-				{
-					for (cl_uint j=0; j<device_num; ++j)
-					{
-						if (device == devices[j])
-						{
-							device_ = device;
-							found = true;
-							break;
-						}
-					}
-				}
-				delete[] devices;
-				if (!found)
-					continue;
-			}
-			else*/
-			{
-				if (device_id_ >= 0 && device_id_ < device_num)
-					device_ = devices[device_id_];
-				else
-					device_ = devices[0];
-				delete[] devices;
-			}
-#endif
-#if defined(_DARWIN) || defined(__linux__)
-			properties[3] = (cl_context_properties)(platforms[i]);
-			if (device_id_ >= 0 && device_id_ < device_num)
-				device_ = devices[device_id_];
-			else
-				device_ = devices[0];
-			delete[] devices;
-#endif
-
-			char buffer[10240];
-			clGetDeviceInfo(device_, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
-			device_name_ = std::string(buffer);
-
-			context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
-			if (err == CL_SUCCESS)
-				init_ = true;
-
-			delete[] platforms;
+		if (platform_id_ < 0 || platform_id_ >= device_list_.size())
+			platform_id_ = 0;
+		CLPlatform* platform = &(device_list_[platform_id_]);
+		if (!platform)
 			return;
-		}
-		delete[] platforms;
+#ifndef _WIN32
+		properties[3] = (cl_context_properties)(platform->id);
+#endif
+		CLDevice* device = 0;
+		if (device_id_ < 0 && device_id_ >= platform->devices.size())
+			device = &(platform->devices[0]);
+		else
+			device = &(platform->devices[device_id_]);
+		if (!device)
+			return;
+		device_ = device->id;
+		device_name_ = platform->name;
+		device_name_.back() = ' ';
+		device_name_ += device->name;
+
+		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+		if (err == CL_SUCCESS)
+			init_ = true;
 	}
 
 	bool KernelProgram::init()
