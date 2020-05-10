@@ -519,7 +519,7 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 
 	//wavelength to color
 	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Default Colors for Excitation Wavelengths (nm) (for OIB/OIF/LSM files)"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Default Colors for Excitation Wavelengths (nm) (for raw microscopy formats)"), wxVERTICAL);
 	//combo box line
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_wav_color1_cmb = new wxComboBox(page, ID_WavColor1Cmb, "",
@@ -1302,15 +1302,15 @@ void SettingDlg::UpdateDeviceTree()
 		{
 			FLIVR::CLPlatform* platform = &((*devices)[i]);
 			name = platform->vendor;
-			name.back() = ' ';
-			name += platform->name;
+			name.back() = ';';
+			name += " " + platform->name;
 			wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
 			for (int j = 0; j < platform->devices.size(); ++j)
 			{
 				FLIVR::CLDevice* device = &(platform->devices[j]);
 				name = device->vendor;
-				name.back() = ' ';
-				name += device->name;
+				name.back() = ';';
+				name += " " + device->name;
 				wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
 				if (i == pid && j == did)
 					m_device_tree->SelectItem(dvitem);

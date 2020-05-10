@@ -146,8 +146,8 @@ namespace FLIVR
 			return;
 		device_ = device->id;
 		device_name_ = platform->name;
-		device_name_.back() = ' ';
-		device_name_ += device->name;
+		device_name_.back() = ';';
+		device_name_ += " " + device->name;
 
 		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
 		if (err == CL_SUCCESS)
