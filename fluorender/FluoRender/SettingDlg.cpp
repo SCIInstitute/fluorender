@@ -640,7 +640,8 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize,
 		wxTR_FULL_ROW_HIGHLIGHT);
 	st = new wxStaticText(page, 0,
-		"Select an OpenCL device that is also the rendering GPU.");
+		"Select an OpenCL device that is also the rendering GPU.\n"\
+		"Restart FluoRender after changing OpenCL devices.");
 	group4->Add(10, 5);
 	group4->Add(m_device_tree, 1, wxEXPAND);
 	group4->Add(10, 5);
@@ -1288,6 +1289,7 @@ void SettingDlg::UpdateUI()
 
 void SettingDlg::UpdateDeviceTree()
 {
+	m_device_tree->DeleteAllItems();
 	//cl device tree
 	std::vector<FLIVR::CLPlatform>* devices = FLIVR::KernelProgram::GetDeviceList();
 	int pid = FLIVR::KernelProgram::get_platform_id();
