@@ -138,7 +138,7 @@ namespace FLIVR
 		properties[3] = (cl_context_properties)(platform->id);
 #endif
 		CLDevice* device = 0;
-		if (device_id_ < 0 && device_id_ >= platform->devices.size())
+		if (device_id_ < 0 || device_id_ >= platform->devices.size())
 			device = &(platform->devices[0]);
 		else
 			device = &(platform->devices[device_id_]);
