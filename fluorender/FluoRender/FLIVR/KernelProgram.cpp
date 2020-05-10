@@ -132,7 +132,9 @@ namespace FLIVR
 		CLPlatform* platform = &(device_list_[platform_id_]);
 		if (!platform)
 			return;
-#ifndef _WIN32
+#ifdef _WIN32
+		properties[5] = (cl_context_properties)(platform->id);
+#else
 		properties[3] = (cl_context_properties)(platform->id);
 #endif
 		CLDevice* device = 0;
