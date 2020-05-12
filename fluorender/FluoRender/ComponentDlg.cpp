@@ -142,6 +142,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_OutputSnBtn, ComponentDlg::OnOutputAnnotation)
 	//distance
 	EVT_CHECKBOX(ID_DistNeighborCheck, ComponentDlg::OnDistNeighborCheck)
+	EVT_CHECKBOX(ID_DistAllChanCheck, ComponentDlg::OnDistAllChanCheck)
 	EVT_COMMAND_SCROLL(ID_DistNeighborSldr, ComponentDlg::OnDistNeighborSldr)
 	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
 	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
@@ -893,12 +894,17 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Filter Nearest Neighbors",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_dist_all_chan_check = new wxCheckBox(page, ID_DistAllChanCheck, "All Channel Results",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
 		wxDefaultPosition, wxDefaultSize);
 	sizer41->Add(5, 5);
 	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
 	sizer41->Add(5, 5);
+	sizer41->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
+	sizer41->AddStretchSpacer(1);
 	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
 	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -1069,6 +1075,7 @@ void ComponentDlg::Update()
 	m_dist_neighbor_check->SetValue(m_use_dist_neighbor);
 	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
 	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
+	m_dist_all_chan_check->SetValue(m_use_dist_allchan);
 
 	//generate
 	EnableGenerate();
@@ -1126,6 +1133,7 @@ void ComponentDlg::GetSettings()
 	//distance
 	m_use_dist_neighbor = false;
 	m_dist_neighbor = 1;
+	m_use_dist_allchan = false;
 
 	//update
 	m_auto_update = false;
@@ -2662,6 +2670,11 @@ void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
 	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
 }
 
+void ComponentDlg::OnDistAllChanCheck(wxCommandEvent &event)
+{
+	m_use_dist_allchan = m_dist_all_chan_check->GetValue();
+}
+
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
 {
 	int val = event.GetPosition();
@@ -2678,19 +2691,40 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
 	m_dist_neighbor_sldr->SetValue(m_dist_neighbor);
 }
 
+int ComponentDlg::GetDistMatSize()
+{
+	int gsize = m_comp_analyzer.GetCompGroupSize();
+	if (m_use_dist_allchan && gsize > 1)
+	{
+		int matsize = 0;
+		for (int i = 0; i < gsize; ++i)
+		{
+			FL::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
+			if (!compgroup)
+				continue;
+			matsize += compgroup->comps.size();
+		}
+		return matsize;
+	}
+	else
+	{
+		FL::CompList* list = m_comp_analyzer.GetCompList();
+		if (!list)
+			return 0;
+		return list->size();
+	}
+}
+
 void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 {
-	FL::CompList* list = m_comp_analyzer.GetCompList();
-	if (!list || list->empty())
+	int num = GetDistMatSize();
+	if (num <= 0)
 		return;
-
-	double sx = list->sx;
-	double sy = list->sy;
-	double sz = list->sz;
-
-	int num = list->size();
 	//result
 	std::vector<std::vector<double>> rm;//result matrix
+	std::vector<std::string> nl;//name list
+	nl.reserve(num);
+	std::string str;
 	rm.reserve(num);
 	for (size_t i = 0; i < num; ++i)
 	{
@@ -2699,23 +2733,57 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		for (size_t j = 0; j < num; ++j)
 			rm[i].push_back(0);
 	}
+
 	//compute
-	size_t x = 0, y = 0;
-	double dist = 0;
-	for (auto it1 = list->begin();
-		it1 != list->end(); ++it1)
+	double sx, sy, sz;
+	int gsize = m_comp_analyzer.GetCompGroupSize();
+	std::vector<FLIVR::Point> pos;
+	pos.reserve(num);
+	if (m_use_dist_allchan && gsize > 1)
 	{
-		y = x;
-		for (auto it2 = it1;
-			it2 != list->end(); ++it2)
+		for (int i = 0; i < gsize; ++i)
 		{
-			dist = (it1->second->GetPos(sx, sy, sz) -
-				it2->second->GetPos(sx, sy, sz)).length();
-			rm[x][y] = dist;
-			rm[y][x] = dist;
-			y++;
+			FL::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
+			if (!compgroup)
+				continue;
+			FL::CompList* list = &(compgroup->comps);
+			sx = list->sx;
+			sy = list->sy;
+			sz = list->sz;
+			for (auto it = list->begin();
+				it != list->end(); ++it)
+			{
+				pos.push_back(it->second->GetPos(sx, sy, sz));
+				str = std::to_string(i);
+				str += ":";
+				str += std::to_string(it->second->id);
+				nl.push_back(str);
+			}
 		}
-		x++;
+	}
+	else
+	{
+		FL::CompList* list = m_comp_analyzer.GetCompList();
+		sx = list->sx;
+		sy = list->sy;
+		sz = list->sz;
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+		{
+			pos.push_back(it->second->GetPos(sx, sy, sz));
+			str = std::to_string(it->second->id);
+			nl.push_back(str);
+		}
+	}
+	double dist = 0;
+	for (int i = 0; i < num; ++i)
+	{
+		for (int j = i; j < num; ++j)
+		{
+			dist = (pos[i] - pos[j]).length();
+			rm[i][j] = dist;
+			rm[j][i] = dist;
+		}
 	}
 
 	bool bdist = m_use_dist_neighbor &&
@@ -2742,6 +2810,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		outfile.open(str, std::ofstream::out);
 		for (size_t i = 0; i < num; ++i)
 		{
+			outfile << nl[i] << "\t";
 			size_t dnum = bdist ? (m_dist_neighbor+1) : num;
 			for (size_t j = bdist?1:0; j < dnum; ++j)
 			{

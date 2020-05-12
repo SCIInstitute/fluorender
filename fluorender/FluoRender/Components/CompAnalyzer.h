@@ -41,6 +41,17 @@ namespace FL
 {
 #define SIZE_LIMIT 10
 
+	struct CompGroup
+	{
+		VolumeData* vd;//associated volume
+		bool dirty;
+		CompList comps;
+		CompGraph graph;//links comps in multibrick volume
+
+		CompGroup() :
+			vd(0), dirty(true)
+		{}
+	};
 	class ComponentAnalyzer
 	{
 	public:
@@ -51,10 +62,10 @@ namespace FL
 		{ return m_analyzed; }
 		void SetVolume(VolumeData* vd)
 		{
+			if (!vd)
+				return;
 			CompGroup* compgroup = FindCompGroup(vd);
-			if (compgroup)
-				compgroup->dirty = true;
-			else
+			if (!compgroup)
 				compgroup = AddCompGroup(vd);
 			m_compgroup = compgroup;
 		}
@@ -89,6 +100,16 @@ namespace FL
 				return &(m_compgroup->graph);
 			return 0;
 		}
+		int GetCompGroupSize()
+		{
+			return m_comp_groups.size();
+		}
+		CompGroup* GetCompGroup(int i)
+		{
+			if (i >= 0 && i < m_comp_groups.size())
+				return &(m_comp_groups[i]);
+			return 0;
+		}
 
 		void Analyze(bool sel, bool consistent, bool colocal=false);
 		void MatchBricks(bool sel);
@@ -116,17 +137,6 @@ namespace FL
 		bool m_colocal;
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 
-		struct CompGroup
-		{
-			VolumeData* vd;//associated volume
-			bool dirty;
-			CompList comps;
-			CompGraph graph;//links comps in multibrick volume
-
-			CompGroup():
-				vd(0), dirty(true)
-			{}
-		};
 		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
 		CompGroup* m_compgroup;//current group
 
@@ -172,6 +182,8 @@ namespace FL
 		}
 		CompGroup* AddCompGroup(VolumeData* vd)
 		{
+			if (!vd)
+				return 0;
 			m_comp_groups.push_back(CompGroup());
 			CompGroup *compgroup = &(m_comp_groups.back());
 			compgroup->vd = vd;

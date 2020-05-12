@@ -153,6 +153,7 @@ public:
 		ID_OutputSnBtn,
 		//Distance
 		ID_DistNeighborCheck,
+		ID_DistAllChanCheck,
 		ID_DistNeighborSldr,
 		ID_DistNeighborText,
 		ID_DistOutputBtn,
@@ -286,6 +287,7 @@ private:
 	//distance
 	bool m_use_dist_neighbor;
 	int m_dist_neighbor;
+	bool m_use_dist_allchan;
 
 	//output
 	int m_output_type;//1-multi; 2-rgb;
@@ -417,6 +419,7 @@ private:
 	wxButton* m_output_sn_btn;
 	//distance
 	wxCheckBox* m_dist_neighbor_check;
+	wxCheckBox* m_dist_all_chan_check;
 	wxSlider* m_dist_neighbor_sldr;
 	wxTextCtrl* m_dist_neighbor_text;
 	wxButton* m_dist_output_btn;
@@ -449,6 +452,7 @@ private:
 	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 	void AlignCenter(FL::Ruler* ruler);
 	void ClearOutputGrid();
+	int GetDistMatSize();
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);
@@ -558,6 +562,7 @@ private:
 	void OnOutputAnnotation(wxCommandEvent &event);
 	//distance
 	void OnDistNeighborCheck(wxCommandEvent &event);
+	void OnDistAllChanCheck(wxCommandEvent &event);
 	void OnDistNeighborSldr(wxScrollEvent &event);
 	void OnDistNeighborText(wxCommandEvent &event);
 	void OnDistOutput(wxCommandEvent &event);
