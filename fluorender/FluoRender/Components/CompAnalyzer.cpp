@@ -37,10 +37,9 @@ using namespace FL;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_analyzed(false),
-	m_vd(vd),
-	m_colocal(false),
-	m_comp_list_dirty(true)
+	m_colocal(false)
 {
+	m_compgroup = AddCompGroup(vd);
 }
 
 ComponentAnalyzer::~ComponentAnalyzer()
@@ -90,28 +89,35 @@ int ComponentAnalyzer::GetColocalization(
 
 void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 {
-	if (!m_vd || !m_vd->GetTexture())
+	if (!m_compgroup)
 		return;
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd || !vd->GetTexture())
+		return;
+	double sx, sy, sz;
+	vd->GetSpacings(sx, sy, sz);
+	vector<TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return;
-
 	size_t bn = bricks->size();
+
+	//comp list
+	CompList &comps = m_compgroup->comps;
 	//clear list and start calculating
-	m_comp_list.clear();
-	m_comp_list.min = std::numeric_limits<unsigned int>::max();
-	m_comp_list.max = 0;
-	double sx, sy, sz;
-	m_vd->GetSpacings(sx, sy, sz);
-	m_comp_list.sx = sx;
-	m_comp_list.sy = sy;
-	m_comp_list.sz = sz;
-	m_comp_graph.clear();
+	comps.clear();
+	comps.min = std::numeric_limits<unsigned int>::max();
+	comps.max = 0;
+	comps.sx = sx;
+	comps.sy = sy;
+	comps.sz = sz;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
+	graph.clear();
 	m_analyzed = false;
 
-	m_vd->GetVR()->return_label();
+	vd->GetVR()->return_label();
 	if (sel)
-		m_vd->GetVR()->return_mask();
+		vd->GetVR()->return_mask();
 
 	int bits;
 	for (size_t bi = 0; bi < bn; ++bi)
@@ -200,17 +206,17 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		else
 		{
 			// get data if there is only one brick
-			m_vd->GetResolution(nx, ny, nz);
-			Nrrd* nrrd_data = m_vd->GetVolume(false);
+			vd->GetResolution(nx, ny, nz);
+			Nrrd* nrrd_data = vd->GetVolume(false);
 			if (nrrd_data)
 			{
 				bits = nrrd_data->type;
 				data_data = nrrd_data->data;
 			}
-			Nrrd* nrrd_mask = m_vd->GetMask(false);
+			Nrrd* nrrd_mask = vd->GetMask(false);
 			if (nrrd_mask)
 				data_mask = (unsigned char*)(nrrd_mask->data);
-			Nrrd* nrrd_label = m_vd->GetLabel(false);
+			Nrrd* nrrd_label = vd->GetLabel(false);
 			if (nrrd_label)
 				data_label = (unsigned int*)(nrrd_label->data);
 			if (!data_data || (sel && !data_mask) || !data_label)
@@ -342,13 +348,13 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			iter->second->mean *= scale;
 			iter->second->min *= scale;
 			iter->second->max *= scale;
-			m_comp_list.min = iter->second->sumi <
-				m_comp_list.min ? iter->second->sumi :
-				m_comp_list.min;
-			m_comp_list.max = iter->second->sumi >
-				m_comp_list.max ? iter->second->sumi :
-				m_comp_list.max;
-			m_comp_list.insert(std::pair<unsigned long long, pCompInfo>
+			comps.min = iter->second->sumi <
+				comps.min ? iter->second->sumi :
+				comps.min;
+			comps.max = iter->second->sumi >
+				comps.max ? iter->second->sumi :
+				comps.max;
+			comps.insert(std::pair<unsigned long long, pCompInfo>
 				(GetKey(iter->second->id, iter->second->brick_id), iter->second));
 		}
 
@@ -367,7 +373,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	if (consistent)
 		MakeColorConsistent();
 
-	m_comp_list_dirty = false;
+	m_compgroup->dirty = false;
 	m_colocal = colocal && m_vd_list.size();
 	if (!sel)
 		m_analyzed = true;
@@ -375,16 +381,22 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 
 void ComponentAnalyzer::MatchBricks(bool sel)
 {
-	if (!m_vd || !m_vd->GetTexture())
+	if (!m_compgroup)
 		return;
-	Texture* tex = m_vd->GetTexture();
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd || !vd->GetTexture())
+		return;
+	Texture* tex = vd->GetTexture();
 	vector<TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() <= 1)
 		return;
-
-	size_t bn = bricks->size();
+	//comp list
+	CompList &comps = m_compgroup->comps;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
 
 	int bits;
+	size_t bn = bricks->size();
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		void* data_data = 0;
@@ -439,10 +451,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (b1 == b2) continue;
 			//if l1 and l2 are different and already in the comp list
 			//connect them
-			auto i1 = m_comp_list.find(GetKey(l1, b1));
-			auto i2 = m_comp_list.find(GetKey(l2, b2));
-			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-				m_comp_graph.LinkComps(i1->second, i2->second);
+			auto i1 = comps.find(GetKey(l1, b1));
+			auto i2 = comps.find(GetKey(l2, b2));
+			if (i1 != comps.end() && i2 != comps.end())
+				graph.LinkComps(i1->second, i2->second);
 		}
 		//(x, ny-1, z)
 		for (unsigned int k = 0; k < nz-1; ++k)
@@ -460,10 +472,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (b1 == b2) continue;
 			//if l1 and l2 are different and already in the comp list
 			//connect them
-			auto i1 = m_comp_list.find(GetKey(l1, b1));
-			auto i2 = m_comp_list.find(GetKey(l2, b2));
-			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-				m_comp_graph.LinkComps(i1->second, i2->second);
+			auto i1 = comps.find(GetKey(l1, b1));
+			auto i2 = comps.find(GetKey(l2, b2));
+			if (i1 != comps.end() && i2 != comps.end())
+				graph.LinkComps(i1->second, i2->second);
 		}
 		//(nx-1, y, z)
 		for (unsigned int k = 0; k < nz-1; ++k)
@@ -481,10 +493,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			if (b1 == b2) continue;
 			//if l1 and l2 are different and already in the comp list
 			//connect them
-			auto i1 = m_comp_list.find(GetKey(l1, b1));
-			auto i2 = m_comp_list.find(GetKey(l2, b2));
-			if (i1 != m_comp_list.end() && i2 != m_comp_list.end())
-				m_comp_graph.LinkComps(i1->second, i2->second);
+			auto i1 = comps.find(GetKey(l1, b1));
+			auto i2 = comps.find(GetKey(l2, b2));
+			if (i1 != comps.end() && i2 != comps.end())
+				graph.LinkComps(i1->second, i2->second);
 		}
 
 		if (data_data) delete[] (unsigned char*)data_data;
@@ -508,17 +520,21 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 	FLIVR::Point pos;
 	std::vector<unsigned int> cosumi;
 	std::vector<double> cosumd;
+	//comp list
+	CompList &comps = m_compgroup->comps;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
 
-	m_comp_graph.ClearVisited();
+	graph.ClearVisited();
 	std::pair<CompVertexIter, CompVertexIter> vertices =
-		boost::vertices(m_comp_graph);
+		boost::vertices(graph);
 	for (auto iter = vertices.first; iter != vertices.second; ++iter)
 	{
-		if (m_comp_graph[*iter].visited)
+		if (graph[*iter].visited)
 			continue;
 		CompList list;
-		pCompInfo info = m_comp_graph[*iter].compinfo.lock();
-		if (m_comp_graph.GetLinkedComps(info, list, SIZE_LIMIT))
+		pCompInfo info = graph[*iter].compinfo.lock();
+		if (graph.GetLinkedComps(info, list, SIZE_LIMIT))
 		{
 			sumi = 0;
 			sumd = 0.0;
@@ -567,8 +583,8 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 			}
 
 			//update in comp list
-			if (sumi > m_comp_list.max)
-				m_comp_list.max = sumi;
+			if (sumi > comps.max)
+				comps.max = sumi;
 
 			//update each
 			for (auto li = list.begin();
@@ -595,21 +611,28 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 
 void ComponentAnalyzer::MakeColorConsistent()
 {
-	if (!m_vd || !m_vd->GetTexture())
+	if (!m_compgroup)
 		return;
-	Texture* tex = m_vd->GetTexture();
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd || !vd->GetTexture())
+		return;
+	Texture* tex = vd->GetTexture();
 	vector<TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() <= 1)
 		return;
+	//comp list
+	CompList &comps = m_compgroup->comps;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
 
-	m_comp_graph.ClearVisited();
-	for (auto i = m_comp_list.begin();
-		i != m_comp_list.end(); ++i)
+	graph.ClearVisited();
+	for (auto i = comps.begin();
+		i != comps.end(); ++i)
 	{
-		if (m_comp_graph.Visited(i->second))
+		if (graph.Visited(i->second))
 			continue;
 		CompList list;
-		if (m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
+		if (graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 		{
 			//make color consistent
 			//get the id of the first item in the list
@@ -627,7 +650,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 					ReplaceId(base_id, iter->second);
 					//insert one with consistent key
 					if (link_id != iter->second->id)
-						m_comp_list.insert(std::pair<unsigned long long, pCompInfo>
+						comps.insert(std::pair<unsigned long long, pCompInfo>
 						(GetKey(iter->second->id, iter->second->brick_id), iter->second));
 				}
 			}
@@ -635,11 +658,11 @@ void ComponentAnalyzer::MakeColorConsistent()
 	}
 
 	//remove comps with inconsistent keys
-	for (auto i = m_comp_list.begin();
-		i != m_comp_list.end();)
+	for (auto i = comps.begin();
+		i != comps.end();)
 	{
 		if (i->first != GetKey(i->second->id, i->second->brick_id))
-			i = m_comp_list.erase(i);
+			i = comps.erase(i);
 		else
 			++i;
 	}
@@ -649,26 +672,35 @@ void ComponentAnalyzer::MakeColorConsistent()
 
 size_t ComponentAnalyzer::GetListSize()
 {
-	return m_comp_list.size();
+	if (!m_compgroup)
+		return 0;
+	return m_compgroup->comps.size();
 }
 
 size_t ComponentAnalyzer::GetCompSize()
 {
-	size_t list_size = m_comp_list.size();
-	size_t graph_size = boost::num_vertices(m_comp_graph);
+	if (!m_compgroup)
+		return 0;
+	//comp list
+	CompList &comps = m_compgroup->comps;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
+
+	size_t list_size = comps.size();
+	size_t graph_size = boost::num_vertices(graph);
 	size_t cc_size = 0;
 	if (graph_size)
 	{
-		m_comp_graph.ClearVisited();
+		graph.ClearVisited();
 		std::pair<CompVertexIter, CompVertexIter> vertices =
-			boost::vertices(m_comp_graph);
+			boost::vertices(graph);
 		for (auto iter = vertices.first; iter != vertices.second; ++iter)
 		{
-			if (m_comp_graph[*iter].visited)
+			if (graph[*iter].visited)
 				continue;
 			CompList list;
-			pCompInfo info = m_comp_graph[*iter].compinfo.lock();
-			m_comp_graph.GetLinkedComps(info, list, SIZE_LIMIT);
+			pCompInfo info = graph[*iter].compinfo.lock();
+			graph.GetLinkedComps(info, list, SIZE_LIMIT);
 			cc_size++;
 		}
 	}
@@ -678,8 +710,14 @@ size_t ComponentAnalyzer::GetCompSize()
 
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
+	if (!m_compgroup)
+		return;
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd)
+		return;
+
 	str = "ID\t";
-	if (m_vd && m_vd->GetAllBrickNum() > 1)
+	if (vd && vd->GetAllBrickNum() > 1)
 		str += "BRICK_ID\t";
 
 	str += "PosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist";
@@ -694,7 +732,17 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 
 void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header)
 {
-	int bn = m_vd->GetAllBrickNum();
+	if (!m_compgroup)
+		return;
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd)
+		return;
+	//comp list
+	CompList &comps = m_compgroup->comps;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
+
+	int bn = vd->GetAllBrickNum();
 
 	if (verbose == 1)
 	{
@@ -707,19 +755,19 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << header;
 	}
 
-	double sx = m_comp_list.sx;
-	double sy = m_comp_list.sy;
-	double sz = m_comp_list.sz;
+	double sx = comps.sx;
+	double sy = comps.sy;
+	double sz = comps.sz;
 	double size_scale = sx * sy * sz;
-	double scale = m_vd->GetScalarScale();
+	double scale = vd->GetScalarScale();
 
-	m_comp_graph.ClearVisited();
-	for (auto i = m_comp_list.begin();
-		i != m_comp_list.end(); ++i)
+	graph.ClearVisited();
+	for (auto i = comps.begin();
+		i != comps.end(); ++i)
 	{
 		if (comp_header != "")
 		{
-			if (i == m_comp_list.begin())
+			if (i == comps.begin())
 				stream << comp_header << "\t";
 			else
 				stream << "\t";
@@ -731,11 +779,11 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 
 		if (bn > 1)
 		{
-			if (m_comp_graph.Visited(i->second))
+			if (graph.Visited(i->second))
 				continue;
 
 			CompList list;
-			if (m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
+			if (graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 			{
 				for (auto iter = list.begin();
 					iter != list.end(); ++iter)
@@ -926,10 +974,13 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 
 bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int type)
 {
-	if (!m_vd)
+	if (!m_compgroup)
+		return false;
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd)
 		return false;
 
-	Texture* tex = m_vd->GetTexture();
+	Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -942,30 +993,35 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 	else if (bits == nrrdTypeUShort)
 		scale = 65535.0;
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 
-	if (m_comp_list.empty() ||
-		m_comp_list_dirty)
+	//comp list
+	CompList &comps = m_compgroup->comps;
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
+
+	if (comps.empty() ||
+		m_compgroup->dirty)
 		Analyze(true, consistent);
 
 	std::string sinfo;
 	ostringstream oss;
 	std::string str;
 
-	int bn = m_vd->GetAllBrickNum();
-	m_comp_graph.ClearVisited();
+	int bn = vd->GetAllBrickNum();
+	graph.ClearVisited();
 	int count = 1;
-	for (auto i = m_comp_list.begin();
-		i != m_comp_list.end(); ++i)
+	for (auto i = comps.begin();
+		i != comps.end(); ++i)
 	{
 		if (bn > 1)
 		{
-			if (m_comp_graph.Visited(i->second))
+			if (graph.Visited(i->second))
 				continue;
 			CompList list;
-			m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT);
+			graph.GetLinkedComps(i->second, list, SIZE_LIMIT);
 		}
 
 		oss.str("");
@@ -992,14 +1048,19 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 
 bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int color_type, bool consistent)
 {
-	if (!m_vd)
+	if (!m_compgroup)
 		return false;
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd)
+		return false;
+	//comp list
+	CompList &comps = m_compgroup->comps;
 
-	if (m_comp_list.empty() ||
-		m_comp_list_dirty)
+	if (comps.empty() ||
+		m_compgroup->dirty)
 		Analyze(true, consistent);
 
-	Texture* tex = m_vd->GetTexture();
+	Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -1021,12 +1082,12 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	if (!data_label)
 		return false;
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	double amb, diff, spec, shine;
-	m_vd->GetMaterial(amb, diff, spec, shine);
-	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+	vd->GetMaterial(amb, diff, spec, shine);
+	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	unsigned int count = 1;
 	unsigned long long for_size = (unsigned long long)nx *
@@ -1034,29 +1095,32 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	unsigned long long index;
 	unsigned int value_label;
 
-	int bn = m_vd->GetAllBrickNum();
-	m_comp_graph.ClearVisited();
-	for (auto i = m_comp_list.begin();
-		i != m_comp_list.end(); ++i)
+	int bn = vd->GetAllBrickNum();
+
+	//graph for linking multiple bricks
+	CompGraph &graph = m_compgroup->graph;
+	graph.ClearVisited();
+	for (auto i = comps.begin();
+		i != comps.end(); ++i)
 	{
 		if (bn > 1)
 		{
-			if (m_comp_graph.Visited(i->second))
+			if (graph.Visited(i->second))
 				continue;
 		}
 
-		VolumeData* vd = new VolumeData();
-		vd->AddEmptyData(bits,
+		VolumeData* vdn = new VolumeData();
+		vdn->AddEmptyData(bits,
 			nx, ny, nz,
 			spcx, spcy, spcz,
 			brick_size);
-		vd->SetSpcFromFile(true);
-		vd->SetName(m_vd->GetName() +
+		vdn->SetSpcFromFile(true);
+		vdn->SetName(vd->GetName() +
 			wxString::Format("_COMP%d_SIZE%d", count++, i->second->sumi));
 
 		//populate the volume
 		//the actual data
-		Texture* tex_vd = vd->GetTexture();
+		Texture* tex_vd = vdn->GetTexture();
 		if (!tex_vd) continue;
 		Nrrd* nrrd_vd = tex_vd->get_nrrd(0);
 		if (!nrrd_vd) continue;
@@ -1066,7 +1130,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		if (bn > 1)
 		{
 			CompList list;
-			if (!m_comp_graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
+			if (!graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 			{
 				list.insert(std::pair<unsigned long long, pCompInfo>
 					(GetKey(i->second->id, i->second->brick_id), i->second));
@@ -1156,40 +1220,45 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 
 		//settings
 		FLIVR::Color c;
-		if (GetColor(i->second->id, i->second->brick_id, m_vd, color_type, c))
+		if (GetColor(i->second->id, i->second->brick_id, vd, color_type, c))
 		{
-			vd->SetColor(c);
-			vd->SetEnableAlpha(m_vd->GetEnableAlpha());
-			vd->SetShading(m_vd->GetShading());
-			vd->SetShadow(false);
+			vdn->SetColor(c);
+			vdn->SetEnableAlpha(vd->GetEnableAlpha());
+			vdn->SetShading(vd->GetShading());
+			vdn->SetShadow(false);
 			//other settings
-			vd->Set3DGamma(m_vd->Get3DGamma());
-			vd->SetBoundary(m_vd->GetBoundary());
-			vd->SetOffset(m_vd->GetOffset());
-			vd->SetLeftThresh(m_vd->GetLeftThresh());
-			vd->SetRightThresh(m_vd->GetRightThresh());
-			vd->SetAlpha(m_vd->GetAlpha());
-			vd->SetSampleRate(m_vd->GetSampleRate());
-			vd->SetMaterial(amb, diff, spec, shine);
+			vdn->Set3DGamma(vd->Get3DGamma());
+			vdn->SetBoundary(vd->GetBoundary());
+			vdn->SetOffset(vd->GetOffset());
+			vdn->SetLeftThresh(vd->GetLeftThresh());
+			vdn->SetRightThresh(vd->GetRightThresh());
+			vdn->SetAlpha(vd->GetAlpha());
+			vdn->SetSampleRate(vd->GetSampleRate());
+			vdn->SetMaterial(amb, diff, spec, shine);
 
-			channs.push_back(vd);
+			channs.push_back(vdn);
 		}
 		else
-			delete vd;
+			delete vdn;
 	}
 	return true;
 }
 
 bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent)
 {
-	if (!m_vd)
+	if (!m_compgroup)
 		return false;
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd)
+		return false;
+	//comp list
+	CompList &comps = m_compgroup->comps;
 
-	if (m_comp_list.empty() ||
-		m_comp_list_dirty)
+	if (comps.empty() ||
+		m_compgroup->dirty)
 		Analyze(true, consistent);
 
-	Texture* tex = m_vd->GetTexture();
+	Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -1211,12 +1280,12 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	if (!data_label)
 		return false;
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	vd->GetResolution(nx, ny, nz);
 	double amb, diff, spec, shine;
-	m_vd->GetMaterial(amb, diff, spec, shine);
-	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+	vd->GetMaterial(amb, diff, spec, shine);
+	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume
 	VolumeData* vd_r = new VolumeData();
@@ -1225,7 +1294,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		spcx, spcy, spcz,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_vd->GetName() +
+	vd_r->SetName(vd->GetName() +
 		wxString::Format("_CH_R"));
 	//green volume
 	VolumeData* vd_g = new VolumeData();
@@ -1234,7 +1303,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		spcx, spcy, spcz,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_vd->GetName() +
+	vd_g->SetName(vd->GetName() +
 		wxString::Format("_CH_G"));
 	//blue volume
 	VolumeData* vd_b = new VolumeData();
@@ -1243,7 +1312,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		spcx, spcy, spcz,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_vd->GetName() +
+	vd_b->SetName(vd->GetName() +
 		wxString::Format("_CH_B"));
 
 	//get new data
@@ -1274,11 +1343,11 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	unsigned long long index;
 	unsigned int value_label;
 	Color color;
-	double max_value = m_vd->GetMaxValue();
+	double max_value = vd->GetMaxValue();
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
-		if (GetColor(value_label, tex->get_brick_id(index), m_vd, color_type, color))
+		if (GetColor(value_label, tex->get_brick_id(index), vd, color_type, color))
 		{
 			//assign colors
 			double value;//0-255
@@ -1299,11 +1368,11 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
 
-	bool bval = m_vd->GetEnableAlpha();
+	bool bval = vd->GetEnableAlpha();
 	vd_r->SetEnableAlpha(bval);
 	vd_g->SetEnableAlpha(bval);
 	vd_b->SetEnableAlpha(bval);
-	bval = m_vd->GetShading();
+	bval = vd->GetShading();
 	vd_r->SetShading(bval);
 	vd_g->SetShading(bval);
 	vd_b->SetShading(bval);
@@ -1311,31 +1380,31 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	vd_g->SetShadow(false);
 	vd_b->SetShadow(false);
 	//other settings
-	double dval = m_vd->Get3DGamma();
+	double dval = vd->Get3DGamma();
 	vd_r->Set3DGamma(dval);
 	vd_g->Set3DGamma(dval);
 	vd_b->Set3DGamma(dval);
-	dval = m_vd->GetBoundary();
+	dval = vd->GetBoundary();
 	vd_r->SetBoundary(dval);
 	vd_g->SetBoundary(dval);
 	vd_b->SetBoundary(dval);
-	dval = m_vd->GetOffset();
+	dval = vd->GetOffset();
 	vd_r->SetOffset(dval);
 	vd_g->SetOffset(dval);
 	vd_b->SetOffset(dval);
-	dval = m_vd->GetLeftThresh();
+	dval = vd->GetLeftThresh();
 	vd_r->SetLeftThresh(dval);
 	vd_g->SetLeftThresh(dval);
 	vd_b->SetLeftThresh(dval);
-	dval = m_vd->GetRightThresh();
+	dval = vd->GetRightThresh();
 	vd_r->SetRightThresh(dval);
 	vd_g->SetRightThresh(dval);
 	vd_b->SetRightThresh(dval);
-	dval = m_vd->GetAlpha();
+	dval = vd->GetAlpha();
 	vd_r->SetAlpha(dval);
 	vd_g->SetAlpha(dval);
 	vd_b->SetAlpha(dval);
-	dval = m_vd->GetSampleRate();
+	dval = vd->GetSampleRate();
 	vd_r->SetSampleRate(dval);
 	vd_g->SetSampleRate(dval);
 	vd_b->SetSampleRate(dval);
@@ -1357,6 +1426,8 @@ bool ComponentAnalyzer::GetColor(
 {
 	if (!id)
 		return false;
+	//comp list
+	CompList &comps = m_compgroup->comps;
 
 	switch (color_type)
 	{
@@ -1375,24 +1446,24 @@ bool ComponentAnalyzer::GetColor(
 				int bn = vd->GetAllBrickNum();
 				for (unsigned int i=0; i<bn; ++i)
 				{
-					iter = m_comp_list.find(GetKey(id, i));
-					if (iter != m_comp_list.end())
+					iter = comps.find(GetKey(id, i));
+					if (iter != comps.end())
 						break;
 				}
 			}
 			else
 			{
-				iter = m_comp_list.find(GetKey(id, brick_id));
+				iter = comps.find(GetKey(id, brick_id));
 			}
-			if (iter == m_comp_list.end())
+			if (iter == comps.end())
 				return false;
 			size = iter->second->sumi;
 			double value;
-			if (m_comp_list.min == m_comp_list.max)
+			if (comps.min == comps.max)
 				value = 1.0;
 			else
-				value = double(size - m_comp_list.min) /
-				double(m_comp_list.max - m_comp_list.min);
+				value = double(size - comps.min) /
+				double(comps.max - comps.min);
 			color = vd->GetColorFromColormap(value);
 			return true;
 		}
@@ -1404,9 +1475,12 @@ bool ComponentAnalyzer::GetColor(
 //replace id to make color consistent
 void ComponentAnalyzer::ReplaceId(unsigned int base_id, pCompInfo &info)
 {
-	if (!m_vd || !m_vd->GetTexture())
+	if (!m_compgroup)
 		return;
-	Texture* tex = m_vd->GetTexture();
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd || !vd->GetTexture())
+		return;
+	Texture* tex = vd->GetTexture();
 
 	unsigned int brick_id = info->brick_id;
 	unsigned int rep_id = info->id;

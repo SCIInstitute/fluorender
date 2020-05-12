@@ -51,11 +51,19 @@ namespace FL
 		{ return m_analyzed; }
 		void SetVolume(VolumeData* vd)
 		{
-			m_comp_list_dirty = m_vd != vd;
-			m_vd = vd;
+			CompGroup* compgroup = FindCompGroup(vd);
+			if (compgroup)
+				compgroup->dirty = true;
+			else
+				compgroup = AddCompGroup(vd);
+			m_compgroup = compgroup;
 		}
 		VolumeData* GetVolume()
-		{ return m_vd; }
+		{
+			if (m_compgroup)
+				return m_compgroup->vd;
+			return 0;
+		}
 
 		void SetCoVolumes(std::vector<VolumeData*> &list)
 		{
@@ -71,11 +79,15 @@ namespace FL
 		}
 		CompList* GetCompList()
 		{
-			return &m_comp_list;
+			if (m_compgroup)
+				return &(m_compgroup->comps);
+			return 0;
 		}
 		CompGraph* GetCompGraph()
 		{
-			return &m_comp_graph;
+			if (m_compgroup)
+				return &(m_compgroup->graph);
+			return 0;
 		}
 
 		void Analyze(bool sel, bool consistent, bool colocal=false);
@@ -101,16 +113,22 @@ namespace FL
 
 	private:
 		bool m_analyzed;//if used
-		VolumeData* m_vd;//main volume
 		bool m_colocal;
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 
-		//output components
-		CompList m_comp_list;
-		bool m_comp_list_dirty;
+		struct CompGroup
+		{
+			VolumeData* vd;//associated volume
+			bool dirty;
+			CompList comps;
+			CompGraph graph;//links comps in multibrick volume
 
-		//comp graph
-		CompGraph m_comp_graph;
+			CompGroup():
+				vd(0), dirty(true)
+			{}
+		};
+		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
+		CompGroup* m_compgroup;//current group
 
 	private:
 		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
@@ -141,6 +159,24 @@ namespace FL
 			int nx, int ny, int nz,
 			FLIVR::TextureBrick* b,
 			unsigned int* data);
+
+		//comp groups
+		CompGroup* FindCompGroup(VolumeData* vd)
+		{
+			for (size_t i = 0; i < m_comp_groups.size(); ++i)
+			{
+				if (m_comp_groups[i].vd == vd)
+					return &(m_comp_groups[i]);
+			}
+			return 0;
+		}
+		CompGroup* AddCompGroup(VolumeData* vd)
+		{
+			m_comp_groups.push_back(CompGroup());
+			CompGroup *compgroup = &(m_comp_groups.back());
+			compgroup->vd = vd;
+			return compgroup;
+		}
 	};
 }
 #endif//FL_CompAnalyzer_h
