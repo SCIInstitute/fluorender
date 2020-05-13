@@ -2720,12 +2720,17 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	int num = GetDistMatSize();
 	if (num <= 0)
 		return;
+	int gsize = m_comp_analyzer.GetCompGroupSize();
+
 	//result
+	std::string str;
 	std::vector<std::vector<double>> rm;//result matrix
 	std::vector<std::string> nl;//name list
-	nl.reserve(num);
-	std::string str;
+	std::vector<int> gn;//group number
 	rm.reserve(num);
+	nl.reserve(num);
+	if (gsize > 1)
+		gn.reserve(num);
 	for (size_t i = 0; i < num; ++i)
 	{
 		rm.push_back(std::vector<double>());
@@ -2736,7 +2741,6 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 
 	//compute
 	double sx, sy, sz;
-	int gsize = m_comp_analyzer.GetCompGroupSize();
 	std::vector<FLIVR::Point> pos;
 	pos.reserve(num);
 	if (m_use_dist_allchan && gsize > 1)
@@ -2758,6 +2762,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 				str += ":";
 				str += std::to_string(it->second->id);
 				nl.push_back(str);
+				gn.push_back(i);
 			}
 		}
 	}
@@ -2789,11 +2794,65 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	bool bdist = m_use_dist_neighbor &&
 		m_dist_neighbor > 0 &&
 		m_dist_neighbor < num-1;
-	if (bdist)
+
+	std::vector<double> in_group;//distances with in a group
+	std::vector<double> out_group;//distance between groups
+	in_group.reserve(num*num / 2);
+	out_group.reserve(num*num / 2);
+	if (gsize > 1)
 	{
-		for (size_t i = 0; i < num; ++i)
+		if (bdist)
 		{
-			std::sort(rm[i].begin(), rm[i].end());
+			//sort with indices
+			std::vector<std::vector<int>> im;//index matrix
+			im.reserve(num);
+			for (size_t i = 0; i < num; ++i)
+			{
+				im.push_back(std::vector<int>());
+				im[i].reserve(num);
+				for (size_t j = 0; j < num; ++j)
+					im[i].push_back(j);
+			}
+			//copy rm
+			std::vector<std::vector<double>> rm2 = rm;
+			for (size_t i = 0; i < num; ++i)
+			{
+				std::sort(im[i].begin(), im[i].end(),
+					[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
+			}
+			//fill rm
+			for (size_t i = 0; i < num; ++i)
+			{
+				for (size_t j = 0; j < num; ++j)
+				{
+					rm[i][j] = rm2[i][im[i][j]];
+					if (gn[i] == gn[im[i][j]])
+						in_group.push_back(rm[i][j]);
+					else
+						out_group.push_back(rm[i][j]);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < num; ++i)
+			for (int j = i + 1; j < num; ++j)
+			{
+				if (gn[i] == gn[j])
+					in_group.push_back(rm[i][j]);
+				else
+					out_group.push_back(rm[i][j]);
+			}
+		}
+	}
+	else
+	{
+		if (bdist)
+		{
+			for (size_t i = 0; i < num; ++i)
+			{
+				std::sort(rm[i].begin(), rm[i].end());
+			}
 		}
 	}
 
@@ -2808,6 +2867,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		string str = filename.ToStdString();
 		std::ofstream outfile;
 		outfile.open(str, std::ofstream::out);
+		//output result matrix
 		for (size_t i = 0; i < num; ++i)
 		{
 			outfile << nl[i] << "\t";
@@ -2816,6 +2876,26 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 			{
 				outfile << rm[i][j];
 				if (j < dnum - 1)
+					outfile << "\t";
+			}
+			outfile << "\n";
+		}
+		//output in_group and out_group distances
+		if (gsize > 1)
+		{
+			outfile << "\nIn group Distances\t";
+			for (size_t i = 0; i < in_group.size(); ++i)
+			{
+				outfile << in_group[i];
+				if (i < in_group.size() - 1)
+					outfile << "\t";
+			}
+			outfile << "\n";
+			outfile << "Out group Distances\t";
+			for (size_t i = 0; i < out_group.size(); ++i)
+			{
+				outfile << out_group[i];
+				if (i < out_group.size() - 1)
 					outfile << "\t";
 			}
 			outfile << "\n";
