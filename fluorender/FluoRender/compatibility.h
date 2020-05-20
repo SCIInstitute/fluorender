@@ -140,7 +140,9 @@ inline std::string ws2s(const std::wstring& utf16) {
 	return converter.to_bytes(utf16);
 }
 
-inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
+inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
+{
+	fname = L"\x5c\x5c\x3f\x5c" + fname;
 	return TIFFOpenW(fname.c_str(), opt);
 }
 
