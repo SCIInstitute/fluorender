@@ -3259,7 +3259,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 
 	FL::ComponentGenerator cg(vd);
 	//boost::signals2::connection connection =
-	//	cg.m_sig_progress.connect(boost::bind(
+	//	cg.m_sig_progress.connect(std::bind(
 	//		&ComponentDlg::UpdateProgress, this));
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
@@ -3393,7 +3393,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 
 	FL::ComponentGenerator cg(vd);
 	//boost::signals2::connection connection =
-	//	cg.m_sig_progress.connect(boost::bind(
+	//	cg.m_sig_progress.connect(std::bind(
 	//		&ComponentDlg::UpdateProgress, this));
 
 	cg.SetUseMask(use_sel);
@@ -3492,7 +3492,7 @@ void ComponentDlg::Analyze(bool sel)
 	m_prog = 0.0f;
 
 	//boost::signals2::connection connection =
-	//	m_comp_analyzer.m_sig_progress.connect(boost::bind(
+	//	m_comp_analyzer.m_sig_progress.connect(std::bind(
 	//	&ComponentDlg::UpdateProgress, this));
 
 	m_comp_analyzer.SetVolume(vd);

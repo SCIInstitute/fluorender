@@ -1437,8 +1437,8 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::ReadVolCache, this, _1),
-		boost::bind(&TraceDlg::DelVolCache, this, _1));
+		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(2);
 
 	(*m_stat_text) << wxString::Format("Frame %d\n", 0);
@@ -2096,8 +2096,8 @@ void TraceDlg::CellNewID(bool append)
 		FL::TrackMapProcessor tm_processor(track_map);
 		//register file reading and deleteing functions
 		tm_processor.RegisterCacheQueueFuncs(
-			boost::bind(&TraceDlg::ReadVolCache, this, _1),
-			boost::bind(&TraceDlg::DelVolCache, this, _1));
+			std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+			std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 		tm_processor.SetVolCacheSize(4);
 		//add
 		tm_processor.AddCellDup(cell, m_cur_time);
@@ -2281,8 +2281,8 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 	FL::TrackMapProcessor tm_processor(track_map);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::ReadVolCache, this, _1),
-		boost::bind(&TraceDlg::DelVolCache, this, _1));
+		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
 	FL::CellList in = vr_frame->GetComponentDlg()->GetInCells();
 	FL::CellList out = vr_frame->GetComponentDlg()->GetOutCells();
@@ -2797,8 +2797,8 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::ReadVolCache, this, _1),
-		boost::bind(&TraceDlg::DelVolCache, this, _1));
+		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
 	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
@@ -2831,8 +2831,8 @@ void TraceDlg::LinkAddedCells(FL::CellList &list)
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::ReadVolCache, this, _1),
-		boost::bind(&TraceDlg::DelVolCache, this, _1));
+		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
@@ -3272,8 +3272,8 @@ void TraceDlg::GenMap()
 	tm_processor.SetSimilarThresh(m_similarity);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::ReadVolCache, this, _1),
-		boost::bind(&TraceDlg::DelVolCache, this, _1));
+		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(4);
 	//merge/split
 	tm_processor.SetMerge(m_try_merge);
@@ -3401,8 +3401,8 @@ void TraceDlg::RefineMap(int t)
 	tm_processor.SetSimilarThresh(m_similarity);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&TraceDlg::ReadVolCache, this, _1),
-		boost::bind(&TraceDlg::DelVolCache, this, _1));
+		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(4);
 	//merge/split
 	tm_processor.SetMerge(m_try_merge);
