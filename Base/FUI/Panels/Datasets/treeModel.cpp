@@ -77,7 +77,8 @@ QString TreeModel::GetColumnType(unsigned int col) const
 	switch (col)
 	{
 	case 0:
-		return Qt::DisplayRole;
+        return "something"; //not sure what this is supposed to return to be honest.
+		//return Qt::DisplayRole;
 	case 1:
 		return "string";// DataViewColorRenderer::GetDefaultType();
 	}
