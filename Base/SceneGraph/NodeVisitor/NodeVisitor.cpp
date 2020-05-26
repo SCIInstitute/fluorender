@@ -65,5 +65,5 @@ void NodeVisitor::apply(Node& node)
 
 void NodeVisitor::apply(Group& node)
 {
-	apply(static_cast<Group&>(node));
+	apply(static_cast<Node&>(node));
 }

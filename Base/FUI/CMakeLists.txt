@@ -75,6 +75,8 @@ set(HEADER_FILES
     Panels/Datasets/datasetsPanel.hpp
     Panels/Datasets/datasetsToolbarLayout.hpp
     Panels/Datasets/datasetsTreeLayout.hpp
+		Panels/Datasets/treeModel.hpp
+		Panels/Datasets/selUpdater.hpp
     Panels/Workspace/workspaceTreeLayout.hpp
     Panels/Workspace/workspaceToolLayout.hpp
     Panels/Workspace/workspacePanel.hpp
@@ -128,6 +130,7 @@ set(SOURCES
     Panels/Workspace/workspaceToolLayout.cpp
     Panels/Datasets/datasetsToolbarLayout.cpp
     Panels/Datasets/datasetsTreeLayout.cpp
+		Panels/Datasets/treeModel.cpp
     Panels/Record_Export/recordExport.cpp
 		Panels/Record_Export/recordTabLayout.cpp
 		Panels/Record_Export/recordPlayLayout.cpp
