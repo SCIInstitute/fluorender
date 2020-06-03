@@ -78,7 +78,20 @@ namespace fluo
 		inline bool removeAllChildren() { return removeChildren(0, getNumChildren()); }
 		virtual bool removeChildren(size_t pos, size_t num);
 		virtual bool replaceChild(Node* orig_child, Node* new_child);
-		inline size_t getNumChildren() const { return m_children.size(); }
+		inline size_t getNumChildren() const 
+		{ 
+          std::cout << "I am in here, checking vector." << std::endl;
+          if(m_children.empty())
+		  {
+		    std::cout << "I am empty" << std::endl;
+			return 0;
+		  }
+           else
+		   {
+             std::cout << "I am not empty." << std::endl;
+			 return m_children.size(); 
+		   }
+		}
 		virtual bool setChild(size_t i, Node* node);
 		inline Node* getChild(size_t i) { return m_children[i].get(); }
 		inline const Node* getChild(size_t i) const { return m_children[i].get(); }

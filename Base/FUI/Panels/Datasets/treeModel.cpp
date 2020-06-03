@@ -41,7 +41,10 @@ TreeModel::TreeModel(DatasetsPanel &panel):
 	InterfaceAgent(),
 	panel_(panel)
 {
-
+  rootItem = new fluo::Node();
+  rootItem->setName("Test Name");
+  insertRow(0,createIndex(0,0,rootItem));
+  //createIndex(0,0,rootItem);
 }
 
 int TreeModel::Compare(const QModelIndex &item1, const QModelIndex &item2,
@@ -281,13 +284,13 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
   fluo::Node *node = static_cast<fluo::Node*>(index.internalPointer());
 }
 
-QModelIndex TreeMode::parent(const QModelIndex &index) const
+QModelIndex TreeModel::parent(const QModelIndex &index) const
 {
   if(!index.isValid())
     return QModelIndex();
 
   fluo::Node *childItem = static_cast<fluo::Node*>(index.internalPointer());
-  fluo::Node *parentItem = childItem->getParent();
+  fluo::Node *parentItem = childItem->getParent(parentItem->getId());
 
   if(parentItem == rootItem)
     return QModelIndex();
@@ -313,5 +316,32 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
   if(child)
     return createIndex(row,column,child);
  
-  return QModelInde();
+  return QModelIndex();
+}
+
+int TreeModel::rowCount(const QModelIndex &parent) const
+{
+  fluo::Node *parentItem = new fluo::Node();
+
+  if(parent.column() > 0)
+    return 0;
+
+  if(!parent.isValid())
+    parentItem = rootItem;
+  else
+    parentItem = static_cast<fluo::Node*>(parent.internalPointer());
+
+  fluo::Group *group = parentItem->asGroup();
+
+  return group->getNumChildren(); //this creates a bug
+}
+
+int TreeModel::columnCount(const QModelIndex &parent) const
+{
+  if(parent.isValid())
+  {
+    fluo::Group *group = static_cast<fluo::Node*>(parent.internalPointer())->asGroup();
+	return group->getNumParents();
+  }
+  return rootItem->getNumParents();
 }

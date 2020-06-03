@@ -21,6 +21,8 @@ class DatasetsPanel : public QWidget
   public:
     DatasetsPanel()
     {
+      treeModel = new TreeModel(*this);
+      treeLayout->setModel(treeModel);
       topFrame->setLayout(toolLayout);
       botFrame->setLayout(treeLayout);
       frameLayout->addWidget(topFrame,0,0);
@@ -29,8 +31,6 @@ class DatasetsPanel : public QWidget
       datasetsFrame->setLayout(frameLayout);
       widgetLayout->addWidget(datasetsFrame);
       this->setLayout(widgetLayout);
-
-      treeModel = new TreeModel(*this);
     }
 
   private:
