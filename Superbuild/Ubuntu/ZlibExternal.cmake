@@ -33,7 +33,6 @@ SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 SET(zlib_GIT_URL "https://github.com/madler/zlib.git")
 SET(zlib_GIT_TAG "v1.2.11")
 
-
 # This was taken from CIBC's Internal Repo. This seems to work just fine.
 ExternalProject_Add(Zlib_external_download
   GIT_REPOSITORY ${zlib_GIT_URL} 

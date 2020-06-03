@@ -10,6 +10,10 @@
 
 #include <CustomWidgets/fluoLine.hpp>
 
+
+
+#include "treeModel.hpp"
+
 class DatasetsPanel : public QWidget
 {
   Q_OBJECT
@@ -25,6 +29,8 @@ class DatasetsPanel : public QWidget
       datasetsFrame->setLayout(frameLayout);
       widgetLayout->addWidget(datasetsFrame);
       this->setLayout(widgetLayout);
+
+      treeModel = new TreeModel(*this);
     }
 
   private:
@@ -40,6 +46,8 @@ class DatasetsPanel : public QWidget
     QGridLayout *frameLayout = new QGridLayout();
 
     FluoLine *sepLine = new FluoLine();
+
+    TreeModel *treeModel; 
 };
 
 #endif

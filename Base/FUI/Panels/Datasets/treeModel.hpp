@@ -12,18 +12,18 @@
 #include <vector>
 
 class AgentFactory;
-class TreePanel;
+class DatasetsPanel;
 
 class TreeModel : public QAbstractItemModel, public InterfaceAgent
 {
   public:
-    TreeModel(TreePanel &panel);
+    TreeModel(DatasetsPanel &panel);
 
 		int Compare(const QModelIndex &item1, const QModelIndex &item2,
 			unsigned int column, bool ascending) const; 
 
 		unsigned int GetColumnCount() const;
-
+      
 
 		QString GetColumnType(unsigned int col) const;
 
@@ -63,15 +63,24 @@ class TreeModel : public QAbstractItemModel, public InterfaceAgent
 		//operations
 		void MoveNode(const std::string &source, fluo::Node* target);
 		void UpdateSelections(fluo::NodeSet &nodes);
+	  
+	  QModelIndex parent(const QModelIndex &index) const override;
+	  QVariant data(const QModelIndex &index,int role) const override;
+	  QModelIndex index(int row, int column, 
+	                    const QModelIndex &parent = QModelIndex()) const override;
+      int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
 	private:
 		friend class AgentFactory;
-		TreePanel &panel_;
+		DatasetsPanel &panel_;
 
 		void OnSelectionChanged(fluo::Event& event);
 		void OnItemAdded(fluo::Event& event);
 		void OnItemRemoved(fluo::Event& event);
 		void OnDisplayChanged(fluo::Event& event);
+
+		fluo::Node *rootItem;
 };
 
 

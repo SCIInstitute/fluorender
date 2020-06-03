@@ -29,13 +29,15 @@ DEALINGS IN THE SOFTWARE.
 //#include <Fui/TreePanel.h>
 //#include <Fui/DataViewColorRenderer.h>
 
+#include <Panels/Datasets/datasetsPanel.hpp>
+
 #include "selUpdater.hpp"
 #include "treeModel.hpp"
 
 #include <Global/Global.hpp>
 #include <SearchVisitor.hpp>
 
-TreeModel::TreeModel(TreePanel &panel):
+TreeModel::TreeModel(DatasetsPanel &panel):
 	InterfaceAgent(),
 	panel_(panel)
 {
@@ -267,3 +269,49 @@ void TreeModel::OnDisplayChanged(fluo::Event& event)
 	}
 	//panel_.m_tree_ctrl->Refresh();
 } 
+
+QVariant TreeModel::data(const QModelIndex &index, int role) const
+{
+  if(!index.isValid())
+    return QVariant();
+
+  if(role != Qt::DisplayRole)
+    return QVariant();
+
+  fluo::Node *node = static_cast<fluo::Node*>(index.internalPointer());
+}
+
+QModelIndex TreeMode::parent(const QModelIndex &index) const
+{
+  if(!index.isValid())
+    return QModelIndex();
+
+  fluo::Node *childItem = static_cast<fluo::Node*>(index.internalPointer());
+  fluo::Node *parentItem = childItem->getParent();
+
+  if(parentItem == rootItem)
+    return QModelIndex();
+
+  return createIndex(0,0,parentItem);
+}
+
+QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const
+{
+  if(!hasIndex(row,column,parent))
+    return QModelIndex();
+
+  fluo::Node *parentItem;
+
+  if(!parent.isValid())
+    parentItem = rootItem;
+  else
+    parentItem = static_cast<fluo::Node*>(parent.internalPointer());
+
+  fluo::Group *group = parentItem->asGroup();
+  fluo::Node *child = group->getChild(row);
+
+  if(child)
+    return createIndex(row,column,child);
+ 
+  return QModelInde();
+}

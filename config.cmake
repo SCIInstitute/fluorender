@@ -4,6 +4,8 @@ message(STATUS "Determining which build system to use: ")
 
 include(getCompiler.cmake)
 
+message("Found: " ${GeneratorName}) 
+
 if(MSVC_FOUND)
 	message("Found Visual Studio! Determining Debug or Release mode...")
   if(Debug_Mode)

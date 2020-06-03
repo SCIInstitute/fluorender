@@ -3,6 +3,7 @@
 
 #include <QGridLayout>
 #include <QTreeView>
+#include <QAbstractItemModel>
 
 class DatasetsTreeLayout : public QGridLayout
 {
@@ -14,8 +15,15 @@ class DatasetsTreeLayout : public QGridLayout
       this->addWidget(tempTreeview);
     }
 
+    void setModel(QAbstractItemModel *model)
+    {
+      tempTreeview->setModel(model);
+    }
+
+
   private:
     QTreeView *tempTreeview = new QTreeView();
+    
 
 };
 
