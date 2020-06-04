@@ -203,6 +203,11 @@ int LIFReader::LoadBatch(int index)
 				m_max_value = imgi->maxv;
 				m_scalar_scale = 65535.0 / m_max_value;
 			}
+			else
+			{
+				m_max_value = 255.0;
+				m_scalar_scale = 1.0;
+			}
 		}
 
 		result = index;

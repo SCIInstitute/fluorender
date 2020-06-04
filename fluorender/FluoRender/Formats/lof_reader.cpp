@@ -523,6 +523,11 @@ void LOFReader::FillLofInfo()
 		m_max_value = m_lof_info.maxv;
 		m_scalar_scale = 65535.0 / m_max_value;
 	}
+	else
+	{
+		m_max_value = 255.0;
+		m_scalar_scale = 1.0;
+	}
 }
 
 bool LOFReader::ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
