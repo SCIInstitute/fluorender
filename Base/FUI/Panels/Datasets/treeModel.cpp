@@ -333,7 +333,13 @@ int TreeModel::rowCount(const QModelIndex &parent) const
 
   fluo::Group *group = parentItem->asGroup();
 
-  return group->getNumChildren(); //this creates a bug
+  if(group == nullptr)
+  {
+    std::cout << "I am null, this is bad." << std::endl;
+	return 0;
+  }
+  else
+    return group->getNumChildren(); //this creates a bug
 }
 
 int TreeModel::columnCount(const QModelIndex &parent) const
