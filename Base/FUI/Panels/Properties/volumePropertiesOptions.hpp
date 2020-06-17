@@ -9,6 +9,9 @@
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoToolButton.hpp>
 #include <CustomWidgets/controller.hpp>
+#include <CustomWidgets/agentWrapper.hpp>
+
+#include <Panels/Properties/Agent/volumePropAgent.hpp>
 
 #include <vector>
 #include <tuple>
@@ -20,24 +23,30 @@ class VolumePropertiesOptions : public QGridLayout
 
   signals:
 
-    void sendGammaValue(std::any value);
+    void sendGammaValue(int value);
+    void sendGammaValue(double value);
 
-    void sendExtBoundValue(std::any value);
+    void sendExtBoundValue(int value);
+    void sendExtBoundValue(double value);
 
     void sendSaturationValue(int value);
     void sendLowThreshValue(int value);
     void sendHighThreshValue(int value);
     void sendLuminanceValue(int value);
 
-    void sendShadowValue(std::any value);
+    void sendShadowValue(int value);
+    void sendShadowValue(double value);
 
     void sendAlphaValue(int value);
 
-    void sendSampleValue(std::any value);
+    void sendSampleValue(int value);
+    void sendSampleValue(double value);
 
-    void sendLowShadeValue(std::any value);
+    void sendLowShadeValue(int value);
+    void sendLowShadeValue(double value);
 
-    void sendHighShadeValue(std::any value);
+    void sendHighShadeValue(int value);
+    void sendHighShadeValue(double value);
 
     void sendColorMapLowValue(int value);
     void sendColorMapHighValue(int value);
@@ -81,7 +90,7 @@ class VolumePropertiesOptions : public QGridLayout
 
   public:
 
-    VolumePropertiesOptions();
+    VolumePropertiesOptions(VolumePropAgent *agent);
 
     void setMaxVal(double newVal) { maxVal = newVal; }
     double getMaxVal() const { return maxVal; }
@@ -125,6 +134,9 @@ class VolumePropertiesOptions : public QGridLayout
 
 
   private:
+
+    VolumePropAgent *m_agent;
+    friend class VolumePropAgent;
 
     typedef void(VolumePropertiesOptions::*volumeFunc)();
     typedef void(FluoSlider::*sliderFunc)(int);
@@ -184,6 +196,21 @@ class VolumePropertiesOptions : public QGridLayout
     FluoToolButton* shadingLabel  = new FluoToolButton(" :Shading",true,true,false);
     FluoToolButton* colorMapLabel = new FluoToolButton("Color Map: ",true,true,false);
 
+    AgentWrapper<VolumePropAgent> *gammaWrapper = new AgentWrapper("gamma 3d", m_agent);
+    AgentWrapper<VolumePropAgent> *extractWrapper = new AgentWrapper("extract boundary", m_agent);
+    AgentWrapper<VolumePropAgent> *saturationWrapper = new AgentWrapper("saturation", m_agent);
+    AgentWrapper<VolumePropAgent> *threshhold1Wrapper = new AgentWrapper("low threshold", m_agent);
+    AgentWrapper<VolumePropAgent> *threshhold2Wrapper = new AgentWrapper("high threshold", m_agent);
+    AgentWrapper<VolumePropAgent> *luminanceWrapper = new AgentWrapper("luminance", m_agent);
+    AgentWrapper<VolumePropAgent> *shadowWrapper = new AgentWrapper("shadow int", m_agent);
+    AgentWrapper<VolumePropAgent> *alphaWrapper = new AgentWrapper("alpha", m_agent);
+    AgentWrapper<VolumePropAgent> *sampleWrapper = new AgentWrapper("sample rate", m_agent);
+    AgentWrapper<VolumePropAgent> *shading1Wrapper = new AgentWrapper("mat amb", m_agent);
+    AgentWrapper<VolumePropAgent> *shading2Wrapper = new AgentWrapper("mat shine", m_agent);
+    AgentWrapper<VolumePropAgent> *colorMap1Wrapper = new AgentWrapper("colormap low", m_agent);
+    AgentWrapper<VolumePropAgent> *colorMap2Wrapper = new AgentWrapper("colormap high", m_agent);
+
+
     const std::vector<std::function<void()>> rowFuncs = {
       std::bind(&VolumePropertiesOptions::addRow0,this),
       std::bind(&VolumePropertiesOptions::addRow1,this),
@@ -227,32 +254,32 @@ class VolumePropertiesOptions : public QGridLayout
       std::make_tuple(shading2Spinbox, &FluoSpinboxDouble::editingFinished,&VolumePropertiesOptions::onHShaderSpinChanged)
     };
 
-    Controller<FluoSlider,FluoSpinboxDouble> *gammaController =
-            new Controller<FluoSlider,FluoSpinboxDouble>(*gammaSlider,*gammaSpinbox);
-    Controller<FluoSlider,FluoSpinboxDouble> *boundaryController =
-            new Controller<FluoSlider,FluoSpinboxDouble>(*extractBSlider,*extractBSpinbox);
-    Controller<FluoSlider,FluoSpinbox> *saturationController =
-            new Controller<FluoSlider,FluoSpinbox>(*saturationSlider,*saturationSpinbox);
-    Controller<FluoSlider,FluoSpinbox> *threshold1Controller =
-            new Controller<FluoSlider,FluoSpinbox>(*threshold1Slider,*threshold1Spinbox);
-    Controller<FluoSlider,FluoSpinbox> *threshold2Controller =
-            new Controller<FluoSlider,FluoSpinbox>(*threshold2Slider,*threshold2Spinbox);
-    Controller<FluoSlider,FluoSpinbox> *luminanceController =
-            new Controller<FluoSlider,FluoSpinbox>(*luminanceSlider,*luminanceSpinbox);
-    Controller<FluoSlider,FluoSpinboxDouble> *shadowController =
-            new Controller<FluoSlider,FluoSpinboxDouble>(*shadowSlider,*shadowSpinbox);
-    Controller<FluoSlider,FluoSpinbox> *alphaController =
-            new Controller<FluoSlider,FluoSpinbox>(*alphaSlider,*alphaSpinbox);
-    Controller<FluoSlider,FluoSpinboxDouble> *sampleRateController =
-            new Controller<FluoSlider,FluoSpinboxDouble>(*sampleRateSlider,*sampleRateSpinbox);
-    Controller<FluoSlider,FluoSpinboxDouble> *shading1Controller =
-            new Controller<FluoSlider,FluoSpinboxDouble>(*shading1Slider,*shading1Spinbox);
-    Controller<FluoSlider,FluoSpinboxDouble> *shading2Controller =
-            new Controller<FluoSlider,FluoSpinboxDouble>(*shading2Slider,*shading2Spinbox);
-    Controller<FluoSlider,FluoSpinbox> *colorMap1Controller =
-            new Controller<FluoSlider,FluoSpinbox>(*colorMap1Slider,*colorMap1Spinbox);
-    Controller<FluoSlider,FluoSpinbox> *colorMap2Controller =
-            new Controller<FluoSlider,FluoSpinbox>(*colorMap2Slider,*colorMap2Spinbox);
+    Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *gammaController =
+            new Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>>(*gammaSlider,*gammaSpinbox,*gammaWrapper);
+    Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *boundaryController =
+            new Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>>(*extractBSlider,*extractBSpinbox,*extractWrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *saturationController =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*saturationSlider,*saturationSpinbox,*saturationWrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *threshold1Controller =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*threshold1Slider,*threshold1Spinbox,*threshhold1Wrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *threshold2Controller =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*threshold2Slider,*threshold2Spinbox,*threshhold2Wrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *luminanceController =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*luminanceSlider,*luminanceSpinbox,*luminanceWrapper);
+    Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *shadowController =
+            new Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>>(*shadowSlider,*shadowSpinbox,*shadowWrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *alphaController =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*alphaSlider,*alphaSpinbox,*alphaWrapper);
+    Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *sampleRateController =
+            new Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>>(*sampleRateSlider,*sampleRateSpinbox,*sampleWrapper);
+    Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *shading1Controller =
+            new Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>>(*shading1Slider,*shading1Spinbox,*shading1Wrapper);
+    Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *shading2Controller =
+            new Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>>(*shading2Slider,*shading2Spinbox,*shading2Wrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *colorMap1Controller =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*colorMap1Slider,*colorMap1Spinbox,*colorMap1Wrapper);
+    Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>> *colorMap2Controller =
+            new Controller<FluoSlider,FluoSpinbox,AgentWrapper<VolumePropAgent>>(*colorMap2Slider,*colorMap2Spinbox,*colorMap2Wrapper);
 };
 
 #endif

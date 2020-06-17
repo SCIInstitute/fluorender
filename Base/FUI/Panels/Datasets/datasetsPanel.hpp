@@ -22,7 +22,8 @@ class DatasetsPanel : public QWidget
     DatasetsPanel()
     {
       treeModel = new TreeModel(*this);
-      treeLayout->setModel(treeModel);
+      treeLayout = new DatasetsTreeLayout(treeModel);
+      //treeLayout->setModel(treeModel);
       topFrame->setLayout(toolLayout);
       botFrame->setLayout(treeLayout);
       frameLayout->addWidget(topFrame,0,0);
@@ -40,7 +41,7 @@ class DatasetsPanel : public QWidget
     QFrame *botFrame = new QFrame();
 
     DatasetsToolbarLayout *toolLayout = new DatasetsToolbarLayout();
-    DatasetsTreeLayout *treeLayout = new DatasetsTreeLayout();
+    DatasetsTreeLayout *treeLayout;
 
     QGridLayout *widgetLayout = new QGridLayout();
     QGridLayout *frameLayout = new QGridLayout();

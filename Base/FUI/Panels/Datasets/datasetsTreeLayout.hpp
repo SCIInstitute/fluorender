@@ -10,8 +10,9 @@ class DatasetsTreeLayout : public QGridLayout
   Q_OBJECT
   
   public:
-    DatasetsTreeLayout()
+    DatasetsTreeLayout(QAbstractItemModel* model)
     {
+      setModel(model);
       this->addWidget(tempTreeview);
     }
 

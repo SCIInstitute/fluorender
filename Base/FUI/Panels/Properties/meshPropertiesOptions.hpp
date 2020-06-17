@@ -21,9 +21,12 @@ class MeshPropertiesOptions : public QGridLayout
 
   signals:
 
-    void sendTransparencyValue(std::any value);
-    void sendShadowValue(std::any value);
-    void sendLightingValue(std::any value);
+    void sendTransparencyValue(int value);
+    void sendTransparencyValue(double value);
+    void sendShadowValue(int value);
+    void sendShadowValue(double value);
+    void sendLightingValue(int value);
+    void sendLightingValue(double value);
     void sendSizeLimitValue(int value);
 
   public slots:

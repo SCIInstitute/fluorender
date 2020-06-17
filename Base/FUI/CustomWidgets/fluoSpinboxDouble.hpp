@@ -33,18 +33,14 @@ class FluoSpinboxDouble : public QDoubleSpinBox
         this->setValue(static_cast<double>(value / 100.0));
     }
     */
-
-    void updateValue(std::any value)
+    void updateValue(int value)
     {
-      try
-      {
-        this->setValue(std::any_cast<double>(value));
-      }
-      catch (const std::bad_any_cast &e)
-      {
-        (void)e;
-        this->setValue(static_cast<double>(std::any_cast<int>(value) / 100.0));
-      }
+      this->setValue(static_cast<double>(value/100.0));
+    }
+
+    void updateValue(double value)
+    {
+      this->setValue(value);
     }
 
     double get() const { return this->value(); }

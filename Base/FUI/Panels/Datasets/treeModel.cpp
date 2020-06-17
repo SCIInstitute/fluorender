@@ -43,176 +43,12 @@ TreeModel::TreeModel(DatasetsPanel &panel):
 {
   rootItem = new fluo::Node();
   rootItem->setName("Test Name");
-  insertRow(0,createIndex(0,0,rootItem));
-  //createIndex(0,0,rootItem);
-}
+  int row = rowCount(QModelIndex());
+  insertRow(row);
+  setData(createIndex(row,0), QVariant::fromValue<QString>("Ples"),Qt::EditRole);
+  //createIndex(0,0,rootItem);a
 
-int TreeModel::Compare(const QModelIndex &item1, const QModelIndex &item2,
-	unsigned int column, bool ascending) const
-{
-	//return wxDataViewModel::Compare(item1, item2, column, ascending);
-	QVariant var1, var2;
-	GetValue(var1, item1, column);
-	GetValue(var2, item2, column);
-	QString str1;
-    QString str2;
-
-	switch (column)
-	{
-	case 0:
-	{
-		str1 = var1.toString();
-		str2 = var2.toString();
-	}
-	break;
-	default:
-		str1 = var1.toString();
-		str2 = var2.toString();
-	}
-	return ascending ? str1.compare(str2,Qt::CaseInsensitive) : str2.compare(str1,Qt::CaseInsensitive);
-}
-
-unsigned int TreeModel::GetColumnCount() const
-{
-	return 2;
-}
-
-QString TreeModel::GetColumnType(unsigned int col) const
-{
-	switch (col)
-	{
-	case 0:
-        return "something"; //not sure what this is supposed to return to be honest.
-		//return Qt::DisplayRole;
-	case 1:
-		return "string";// DataViewColorRenderer::GetDefaultType();
-	}
-	return "string";
-}
-
-void TreeModel::GetValue(QVariant &variant,
-	const QModelIndex &item, unsigned int col) const
-{
-	if (!item.isValid())
-		return;
-	fluo::Node* node = (fluo::Node*)item.internalId(); //this or internalPointer?
-	if (!node)
-		return;
-	bool display = true;
-	node->getValue("display", display);
-	switch (col)
-	{
-	case 0:
-        variant = QString(node->getName());
-        /*
-		variant << wxDataViewIconText(
-			QString(node->getName()),
-			fluo::Global::instance().getIconList(display).
-			get(node->className()));
-         
-         the original constructor took a string and an icon. However we will need 
-         to figure out a better way to call an icon since Qt handles them better.
-        */
-		break;
-	case 1:
-	{
-		FLTYPE::Color color;
-		if (node->getValue("color", color))
-		{
-			//wxColor wxc((unsigned char)(color.r() * 255 + 0.5),
-			//	(unsigned char)(color.g() * 255 + 0.5),
-			//	(unsigned char)(color.b() * 255 + 0.5));
-			std::ostringstream oss;
-			oss << color;
-			variant = QString::fromStdString(oss.str());
-		}
-	}
-		break;
-	}
-}
-
-bool TreeModel::SetValue(const QVariant &variant,
-	const QModelIndex &item, unsigned int col)
-{
-	if (!item.isValid())
-		return false;
-	fluo::Node* node = (fluo::Node*)item.internalId();
-	if (!node)
-		return false;
-	switch (col)
-	{
-	case 0:
-		{
-		  node->setName(variant.toString().toStdString()); // might need to specify std::string
-		}
-		return true;
-	case 1:
-		return false;
-	}
-	return false;
-}
-
-bool TreeModel::IsEnabled(const QModelIndex &item,
-	unsigned int col) const
-{
-	return true;
-}
-
-bool TreeModel::IsContainer(const QModelIndex &item) const
-{
-	//return false;
-	if (!item.isValid())
-	  return false; //previously was QModelIndex();
-	fluo::Node *node = (fluo::Node*)item.internalId();
-	return node->asGroup();
-}
-
-bool TreeModel::HasContainerColumns(const QModelIndex & item) const
-{
-	if (!item.isValid())
-	  return false; //previously was QModelIndex();
-	fluo::Referenced *refd = (fluo::Referenced*)item.internalId();
-	if (refd->className() == std::string("Root"))
-		return false;
-	else
-		return true;
-}
-
-QModelIndex TreeModel::GetParent(const QModelIndex &item) const
-{
-	if (!item.isValid())
-		return QModelIndex();
-	fluo::Node *node = (fluo::Node*)item.internalId();
-	if (node->getNumParents())
-		return createIndex(item.row(),item.column(),node->getParent(0)); //return QModelIndex((void*)node->getParent(0));
-	else
-		return QModelIndex();
-}
-
-unsigned int TreeModel::GetChildren(const QModelIndex &parent,
-	std::vector<QModelIndex> &array) const
-{
-	fluo::Node *node = (fluo::Node*)parent.internalId();
-	if (!node)
-	{
-		fluo::Node* root = const_cast<TreeModel*>(this)->getObject();
-		array.push_back(createIndex(0,0,root));
-		return 1;
-	}
-
-	fluo::Group* group = node->asGroup();
-	if (!group)
-		return 0;
-
-	unsigned int size = group->getNumChildren();
-	for (size_t i = 0; i < group->getNumChildren(); ++i)
-	{
-		fluo::Node* child = group->getChild(i);
-		array.push_back(createIndex(0,i,child)); //this is most definitely going to create a bug. Need to figure out
-                                                 //how to safely do this. I'm assuming a vector is a bad choice. 
-	}
-
-	return size;
+  std::cout << rowCount() << std::endl;
 }
 
 //operations
@@ -290,7 +126,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const
     return QModelIndex();
 
   fluo::Node *childItem = static_cast<fluo::Node*>(index.internalPointer());
-  fluo::Node *parentItem = childItem->getParent(parentItem->getId());
+  fluo::Node *parentItem = childItem->getParent(parentItem->getId()); //this will be a bug
 
   if(parentItem == rootItem)
     return QModelIndex();

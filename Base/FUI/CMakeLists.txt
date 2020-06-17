@@ -60,6 +60,7 @@ set(HEADER_FILES
     CustomWidgets/fluoLine.hpp
     CustomWidgets/fluoColoredLine.hpp
 		CustomWidgets/controller.hpp
+		CustomWidgets/agentWrapper.hpp
     Panels/Properties/propertiesPanel.hpp
     Panels/Properties/volumePropertiesOptions.hpp
     Panels/Properties/meshPropertiesOptions.hpp

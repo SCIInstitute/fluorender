@@ -293,6 +293,7 @@ public:
 	/** All the set value functions */
 	bool setValue(ValueTuple& vt, Event& event);
 	//generic types
+    /*
 	bool setValue(const std::string &name, Referenced* value, Event& event);
 	bool setValue(const std::string &name, bool value, Event& event);
 	bool setValue(const std::string &name, char value, Event& event);
@@ -320,6 +321,19 @@ public:
 	bool setValue(const std::string &name, const FLTYPE::Transform &value, Event& event);
 	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, Event& event);
 	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, Event& event);
+    */
+    template<typename T>
+	bool setValue(const std::string& name, T value, Event& event)
+	{
+	  Value *val = findValue(name);
+	  if (val)
+	  {
+	    (dynamic_cast<TemplateValue<T>*>(val))->setValue(value,event);
+        return true;
+	  }
+      else
+        return false;
+	}
 
 	//toggle value for bool, result in value
 	bool toggleValue(const std::string &name, bool &value, Event& event);

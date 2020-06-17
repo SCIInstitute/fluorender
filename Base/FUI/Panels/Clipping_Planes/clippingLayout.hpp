@@ -36,9 +36,12 @@ class ClippingLayout : public QGridLayout
     void sendSlabValue(int value);
     void sendWidthValue(int value);
 
-    void sendRotXValue(std::any value);
-    void sendRotYValue(std::any value);
-    void sendRotZValue(std::any value);
+    void sendRotXValue(int value);
+    void sendRotXValue(double value);
+    void sendRotYValue(int value);
+    void sendRotYValue(double value);
+    void sendRotZValue(int value);
+    void sendRotZValue(double value);
 
     void sendXPlaneBoolean(bool status);
     void sendYPlaneBoolean(bool status);

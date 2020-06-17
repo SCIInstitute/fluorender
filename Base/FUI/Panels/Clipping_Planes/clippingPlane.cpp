@@ -4,8 +4,8 @@
 ClippingPlane::ClippingPlane()
 {
   createLayout();
-  makeStdAnyConnections();
   makeIntConnections();
+  makeDblConnections();
   makeBoolConnections();
 
   m_agent = fluo::Global::instance().getAgentFactory().getOrAddClipPlaneAgent("ClipPlanePanel",*this);
@@ -93,9 +93,9 @@ const int ClippingPlane::getClipPurpleMaxVal()
   return clippingLayout->getPurpleSliderMax();
 }
 
-void ClippingPlane::makeStdAnyConnections()
+void ClippingPlane::makeDblConnections()
 {
-  for(auto &&tup : stdAnyConnections)
+  for(auto &&tup : dblConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
 

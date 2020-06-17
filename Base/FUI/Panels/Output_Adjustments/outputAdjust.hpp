@@ -14,17 +14,23 @@ class OutputAdjustments : public QWidget
 
   public slots:
 
-    void onRedGammaReceived(std::any value) { setOutRedGammaValue(value); }
-    void onGreenGammaReceived(std::any value) { setOutGreenGammaValue(value); }
-    void onBlueGammaReceived(std::any value) { setOutBlueGammaValue(value); }
+    void onRedGammaReceived(int value) { setOutRedGammaValue(value); }
+    void onRedGammaReceived(double value) { setOutRedGammaValue(value); }
+    void onGreenGammaReceived(int value) { setOutGreenGammaValue(value); }
+    void onGreenGammaReceived(double value) { setOutGreenGammaValue(value); }
+    void onBlueGammaReceived(int value) { setOutBlueGammaValue(value); }
+    void onBlueGammaReceived(double value) { setOutBlueGammaValue(value); }
     
     void onRedLuminReceived(int value) { setOutRedLuminValue(value); }
     void onGreenLuminReceived(int value) { setOutGreenLuminValue(value); }
     void onBlueLuminReceived(int value) { setOutBlueLuminValue(value); }
   
-    void onRedEqlReceived(std::any value) { setOutRedEqlValue(value); }
-    void onGreenEqlReceived(std::any value) { setOutGreenEqlValue(value); }
-    void onBlueEqlReceived(std::any value) { setOutBlueEqlValue(value); }
+    void onRedEqlReceived(int value) { setOutRedEqlValue(value); }
+    void onRedEqlReceived(double value) { setOutRedEqlValue(value); }
+    void onGreenEqlReceived(int value) { setOutGreenEqlValue(value); }
+    void onGreenEqlReceived(double value) { setOutGreenEqlValue(value); }
+    void onBlueEqlReceived(int value) { setOutBlueEqlValue(value); }
+    void onBlueEqlReceived(double value) { setOutBlueEqlValue(value); }
 
   public:
     OutputAdjustments();
@@ -70,36 +76,55 @@ class OutputAdjustments : public QWidget
     }
 
   private:
+    OutAdjustAgent* m_agent;
+    friend class OutAdjustAgent;
 
-    typedef void(OutputAdjustments::*outputAnyFunc)(std::any);
     typedef void(OutputAdjustments::*outputIntFunc)(int);
-    typedef void(OutputLayout::*layoutAnyFunc)(std::any);
+    typedef void(OutputAdjustments::*outputDblFunc)(double);
     typedef void(OutputLayout::*layoutIntFunc)(int);
+    typedef void(OutputLayout::*layoutDblFunc)(double);
 
     QGroupBox *outputFrame = new QGroupBox();
     QGridLayout *frameLayout = new QGridLayout();
     OutputLayout *outputLayout = new OutputLayout();
 
-    void makeStdAnyConnections();
     void makeIntConnections();
+    void makeDblConnections();
 
-    const std::vector<std::tuple<OutputLayout*, layoutAnyFunc, outputAnyFunc>> stdAnyConnections = {
-      std::make_tuple(outputLayout,&OutputLayout::sendRedGammaValue,&OutputAdjustments::onRedGammaReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendGreenGammaValue,&OutputAdjustments::onGreenGammaReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendBlueGammaValue,&OutputAdjustments::onBlueGammaReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendRedEqlValue,&OutputAdjustments::onRedEqlReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendGreenEqlValue,&OutputAdjustments::onGreenEqlReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendBlueEqlValue,&OutputAdjustments::onBlueEqlReceived)
+    const std::vector<std::tuple<OutputLayout*, layoutDblFunc, outputDblFunc>> dblConnections = {
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendRedGammaValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onRedGammaReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendGreenGammaValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onGreenGammaReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendBlueGammaValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onBlueGammaReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendRedEqlValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onRedEqlReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendGreenEqlValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onGreenEqlReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendBlueEqlValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onBlueEqlReceived))
     };
 
     const std::vector<std::tuple<OutputLayout*, layoutIntFunc, outputIntFunc>> intConnections = {
       std::make_tuple(outputLayout,&OutputLayout::sendRedLuminValue,&OutputAdjustments::onRedLuminReceived),
       std::make_tuple(outputLayout,&OutputLayout::sendGreenLuminValue,&OutputAdjustments::onGreenLuminReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendBlueLuminValue,&OutputAdjustments::onBlueLuminReceived)
+      std::make_tuple(outputLayout,&OutputLayout::sendBlueLuminValue,&OutputAdjustments::onBlueLuminReceived),
+      
+      std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendRedGammaValue),
+                      static_cast<outputIntFunc>(&OutputAdjustments::onRedGammaReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendGreenGammaValue),
+                      static_cast<outputIntFunc>(&OutputAdjustments::onGreenGammaReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendBlueGammaValue),
+                      static_cast<outputIntFunc>(&OutputAdjustments::onBlueGammaReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendRedEqlValue),
+                      static_cast<outputIntFunc>(&OutputAdjustments::onRedEqlReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendGreenEqlValue),
+                      static_cast<outputIntFunc>(&OutputAdjustments::onGreenEqlReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendBlueEqlValue),
+                      static_cast<outputIntFunc>(&OutputAdjustments::onBlueEqlReceived))
     };
 
-    OutAdjustAgent* m_agent;
-    friend class OutAdjustAgent;
 };
 
 #endif

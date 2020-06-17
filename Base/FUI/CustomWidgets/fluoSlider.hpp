@@ -22,17 +22,14 @@ class FluoSlider : public QSlider
         this->setRange(floor,ceiling);
     }
 
-    void updateValue(std::any value)
+    void updateValue(int value)
     {
-      try
-      {
-        this->setValue(std::any_cast<int>(value));
-      }
-      catch (const std::bad_any_cast &e)
-      {
-        (void)e; //casted away so warning would go away. 
-        this->setValue(static_cast<int>(std::any_cast<double>(value) * 100.0 + 0.5));
-      }
+      this->setValue(value);
+    }
+
+    void updateValue(double value)
+    {
+      this->setValue(static_cast<int>(value * 100.0 + 0.5));
     }
 
     int get() const { return this->value(); }

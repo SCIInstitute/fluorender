@@ -1,6 +1,6 @@
 #include "volumePropertiesOptions.hpp"
 
-VolumePropertiesOptions::VolumePropertiesOptions()
+VolumePropertiesOptions::VolumePropertiesOptions(VolumePropAgent *agent) : m_agent(agent)
 {
   constructLayout();
   buildSliderConnections();

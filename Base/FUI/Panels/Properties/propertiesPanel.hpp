@@ -29,28 +29,37 @@ class PropertiesPanel : public QWidget
     void onMeshLoaded(int renderviewID);
 
     // Volume Functions
-    void onGammaReceived(std::any value) { setPropGammaValue(value); }
-    void onExtBoundReceived(std::any value) { setPropExtBoundValue(value); }
+    void onGammaReceived(int value) { setPropGammaValue(value); }
+    void onGammaReceived(double value) { setPropGammaValue(value); }
+    void onExtBoundReceived(int value) { setPropExtBoundValue(value); }
+    void onExtBoundReceived(double value) { setPropExtBoundValue(value); }
     void onSaturReceived(int value) { setPropSatValue(value); }
     void onLowThrReceived(int value) { setPropLowThreshValue(value); }
     void onHighThReceived(int value) { setPropHighThreshValue(value); }
     void onLuminReceived(int value) { setPropLuminValue(value); }
-    void onShadReceived(std::any value) { setPropShadowValue(value); }
+    void onShadReceived(int value) { setPropShadowValue(value); }
+    void onShadReceived(double value) { setPropShadowValue(value); }
     void onShadBoolReceived(bool status) { setPropShadowEnabled(status); }
     void onAlphaReceived(int value) { setPropAlphaValue(value); }
     void onAlphaBoolReceived(bool status) { setPropAlphaEnabled(status); }
-    void onSampleReceived(std::any value) { setPropSampleValue(value); }
-    void onLowShadReceived(std::any value) { setPropLowShaderValue(value); }
-    void onHighShadReceived(std::any value) { setPropHighShaderValue(value); }
+    void onSampleReceived(int value) { setPropSampleValue(value); }
+    void onSampleReceived(double value) { setPropSampleValue(value); }
+    void onLowShadReceived(int value) { setPropLowShaderValue(value); }
+    void onLowShadReceived(double value) { setPropLowShaderValue(value); }
+    void onHighShadReceived(int value) { setPropHighShaderValue(value); }
+    void onHighShadReceived(double value) { setPropHighShaderValue(value); }
     void onShaderBoolReceived(bool status) { setPropShaderEnabled(status); }
     void onLowColReceived(int value) { setPropLowColorModeValue(value); }
     void onHighColReceived(int value) { setPropHighColorModeValue(value); }
     void onCMBoolReceived(bool status) { setPropCMEnabled(status); }
 
     // Mesh Functions
-    void onTransparencyReceived(std::any value) { setPropTransValue(value); }
-    void onShadMReceived(std::any value) { setPropShadowValueM(value); }
-    void onLightingReceived(std::any value) { setPropLightingValue(value); }
+    void onTransparencyReceived(int value) { setPropTransValue(value); }
+    void onTransparencyReceived(double value) { setPropTransValue(value); }
+    void onShadMReceived(int value) { setPropShadowValueM(value); }
+    void onShadMReceived(double value) { setPropShadowValueM(value); }
+    void onLightingReceived(int value) { setPropLightingValue(value); }
+    void onLightingReceived(double value) { setPropLightingValue(value); }
     void onSizeLimitReceived(int value) { setPropSizeLimitValue(value); }
     void onShininessReceived(int value) { setPropShininessValue(value); }
 
@@ -164,13 +173,15 @@ class PropertiesPanel : public QWidget
 
   private:
 
-    typedef void(PropertiesPanel::*propAnyFunc)(std::any);
     typedef void(PropertiesPanel::*propIntFunc)(int);
+    typedef void(PropertiesPanel::*propDblFunc)(double);
     typedef void(PropertiesPanel::*propBoolFunc)(bool);
-    typedef void(VolumePropertiesOptions::*volAnyFunc)(std::any);
     typedef void(VolumePropertiesOptions::*volIntFunc)(int);
+    typedef void(VolumePropertiesOptions::*volDblFunc)(double);
     typedef void(VolumePropertiesOptions::*volBoolFunc)(bool);
-    typedef void(MeshPropertiesOptions::*meshAnyFunc)(std::any);
+    typedef void(MeshPropertiesOptions::*meshIntFunc)(int);
+    typedef void(MeshPropertiesOptions::*meshDblFunc)(double);
+
 
     template<typename Property>
     QFrame *genLeftFrame(Property* left)
@@ -202,20 +213,26 @@ class PropertiesPanel : public QWidget
     MeshPropertiesMaterials* getMeshPropertiesMaterials();
 
     void makeVolumeConnections(VolumePropertiesOptions* layout);
-    void createVolumeAnyConnections(VolumePropertiesOptions* layout);
     void createVolumeIntConnections(VolumePropertiesOptions* layout);
+    void createVolumeDblConnections(VolumePropertiesOptions* layout);
 
     void makeMeshConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout);
-    void createMeshAnyConnections(MeshPropertiesOptions* opLayout);
     void createMeshIntConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout);
+    void createMeshDblConnections(MeshPropertiesOptions* opLayout);
 
-    const std::vector<std::tuple<volAnyFunc, propAnyFunc>> volumeAnyConnections = {
-      std::make_tuple(&VolumePropertiesOptions::sendGammaValue,&PropertiesPanel::onGammaReceived),
-      std::make_tuple(&VolumePropertiesOptions::sendExtBoundValue,&PropertiesPanel::onExtBoundReceived),
-      std::make_tuple(&VolumePropertiesOptions::sendShadowValue,&PropertiesPanel::onShadReceived),
-      std::make_tuple(&VolumePropertiesOptions::sendSampleValue,&PropertiesPanel::onSampleReceived),
-      std::make_tuple(&VolumePropertiesOptions::sendLowShadeValue,&PropertiesPanel::onLowShadReceived),
-      std::make_tuple(&VolumePropertiesOptions::sendHighShadeValue,&PropertiesPanel::onHighShadReceived)
+    const std::vector<std::tuple<volDblFunc, propDblFunc>> volumeDblConnections = {
+      std::make_tuple(static_cast<volDblFunc>(&VolumePropertiesOptions::sendGammaValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onGammaReceived)),
+      std::make_tuple(static_cast<volDblFunc>(&VolumePropertiesOptions::sendExtBoundValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onExtBoundReceived)),
+      std::make_tuple(static_cast<volDblFunc>(&VolumePropertiesOptions::sendShadowValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onShadReceived)),
+      std::make_tuple(static_cast<volDblFunc>(&VolumePropertiesOptions::sendSampleValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onSampleReceived)),
+      std::make_tuple(static_cast<volDblFunc>(&VolumePropertiesOptions::sendLowShadeValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onLowShadReceived)),
+      std::make_tuple(static_cast<volDblFunc>(&VolumePropertiesOptions::sendHighShadeValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onHighShadReceived))
     };
 
     const std::vector<std::tuple<volIntFunc, propIntFunc>> volumeIntConnections = {
@@ -225,13 +242,38 @@ class PropertiesPanel : public QWidget
       std::make_tuple(&VolumePropertiesOptions::sendLuminanceValue,&PropertiesPanel::onLuminReceived),
       std::make_tuple(&VolumePropertiesOptions::sendAlphaValue,&PropertiesPanel::onAlphaReceived),
       std::make_tuple(&VolumePropertiesOptions::sendColorMapLowValue,&PropertiesPanel::onLowColReceived),
-      std::make_tuple(&VolumePropertiesOptions::sendColorMapHighValue,&PropertiesPanel::onHighColReceived)
+      std::make_tuple(&VolumePropertiesOptions::sendColorMapHighValue,&PropertiesPanel::onHighColReceived),
+      
+      std::make_tuple(static_cast<volIntFunc>(&VolumePropertiesOptions::sendGammaValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onGammaReceived)),
+      std::make_tuple(static_cast<volIntFunc>(&VolumePropertiesOptions::sendExtBoundValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onExtBoundReceived)),
+      std::make_tuple(static_cast<volIntFunc>(&VolumePropertiesOptions::sendShadowValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onShadReceived)),
+      std::make_tuple(static_cast<volIntFunc>(&VolumePropertiesOptions::sendSampleValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onSampleReceived)),
+      std::make_tuple(static_cast<volIntFunc>(&VolumePropertiesOptions::sendLowShadeValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onLowShadReceived)),
+      std::make_tuple(static_cast<volIntFunc>(&VolumePropertiesOptions::sendHighShadeValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onHighShadReceived))
     };
 
-    const std::vector<std::tuple<meshAnyFunc, propAnyFunc>> meshAnyConnections = {
-      std::make_tuple(&MeshPropertiesOptions::sendTransparencyValue,&PropertiesPanel::onTransparencyReceived),
-      std::make_tuple(&MeshPropertiesOptions::sendShadowValue,&PropertiesPanel::onShadMReceived),
-      std::make_tuple(&MeshPropertiesOptions::sendLightingValue,&PropertiesPanel::onLightingReceived)
+    const std::vector<std::tuple<meshIntFunc, propIntFunc>> meshIntConnections = {
+      std::make_tuple(static_cast<meshIntFunc>(&MeshPropertiesOptions::sendTransparencyValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onTransparencyReceived)),
+      std::make_tuple(static_cast<meshIntFunc>(&MeshPropertiesOptions::sendShadowValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onShadMReceived)),
+      std::make_tuple(static_cast<meshIntFunc>(&MeshPropertiesOptions::sendLightingValue),
+                      static_cast<propIntFunc>(&PropertiesPanel::onLightingReceived))
+    };
+    
+    const std::vector<std::tuple<meshDblFunc, propDblFunc>> meshDblConnections = {
+      std::make_tuple(static_cast<meshDblFunc>(&MeshPropertiesOptions::sendTransparencyValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onTransparencyReceived)),
+      std::make_tuple(static_cast<meshDblFunc>(&MeshPropertiesOptions::sendShadowValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onShadMReceived)),
+      std::make_tuple(static_cast<meshDblFunc>(&MeshPropertiesOptions::sendLightingValue),
+                      static_cast<propDblFunc>(&PropertiesPanel::onLightingReceived))
     };
 
 /*

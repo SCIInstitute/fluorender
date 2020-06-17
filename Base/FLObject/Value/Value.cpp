@@ -893,7 +893,7 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 	}
 	return false;
 }
-
+/*
 bool ValueSet::setValue(const std::string &name, Referenced* value, Event& event)
 {
 	Value* val = findValue(name);
@@ -1210,6 +1210,9 @@ bool ValueSet::setValue(const std::string &name, const FLTYPE::GLint4 &value, Ev
 	else
 		return false;
 }
+
+*/
+
 
 //toggle
 bool ValueSet::toggleValue(const std::string &name, bool &value, Event& event)

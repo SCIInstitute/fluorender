@@ -23,9 +23,12 @@ class ClippingPlane : public QWidget
     void onSlabValueReceived(int value) { setClipSlabValue(value); }
     void onWidthValueReceived(int value) { setClipWidthValue(value); }
 
-    void onRotXValueReceived(std::any value) { setClipXRotValue(value); }
-    void onRotYValueReceived(std::any value) { setClipYRotValue(value); }
-    void onRotZValueReceived(std::any value) { setClipZRotValue(value); }
+    void onRotXValueReceived(int value) { setClipXRotValue(value); }
+    void onRotXValueReceived(double value) { setClipXRotValue(value); }
+    void onRotYValueReceived(int value) { setClipYRotValue(value); }
+    void onRotYValueReceived(double value) { setClipYRotValue(value); }
+    void onRotZValueReceived(int value) { setClipZRotValue(value); }
+    void onRotZValueReceived(double value) { setClipZRotValue(value); }
     
     void onLockXStatusReceived(bool status) { setXPlaneLockStatus(status); }
     void onLockYStatusReceived(bool status) { setYPlaneLockStatus(status); }
@@ -72,11 +75,11 @@ class ClippingPlane : public QWidget
 
   private:
 
-    typedef void(ClippingPlane::*clipAnyFunc)(std::any);
     typedef void(ClippingPlane::*clipIntFunc)(int);
+    typedef void(ClippingPlane::*clipDblFunc)(double);
     typedef void(ClippingPlane::*clipBoolFunc)(bool);
-    typedef void(ClippingLayout::*layoutAnyFunc)(std::any);
     typedef void(ClippingLayout::*layoutIntFunc)(int);
+    typedef void(ClippingLayout::*layoutDblFunc)(double);
     typedef void(ClippingLayout::*layoutBoolFunc)(bool);
 
     QGroupBox *outputFrame = new QGroupBox();
@@ -84,14 +87,17 @@ class ClippingPlane : public QWidget
     ClippingLayout *clippingLayout = new ClippingLayout();
 
     void createLayout();
-    void makeStdAnyConnections();
     void makeIntConnections();
+    void makeDblConnections();
     void makeBoolConnections();
 
-    const std::vector<std::tuple<ClippingLayout*, layoutAnyFunc, clipAnyFunc>> stdAnyConnections = {
-      std::make_tuple(clippingLayout,&ClippingLayout::sendRotXValue,&ClippingPlane::onRotXValueReceived),
-      std::make_tuple(clippingLayout,&ClippingLayout::sendRotYValue,&ClippingPlane::onRotYValueReceived),
-      std::make_tuple(clippingLayout,&ClippingLayout::sendRotZValue,&ClippingPlane::onRotZValueReceived)
+    const std::vector<std::tuple<ClippingLayout*, layoutDblFunc, clipDblFunc>> dblConnections = {
+      std::make_tuple(clippingLayout,static_cast<layoutDblFunc>(&ClippingLayout::sendRotXValue),
+                      static_cast<clipDblFunc>(&ClippingPlane::onRotXValueReceived)),
+      std::make_tuple(clippingLayout,static_cast<layoutDblFunc>(&ClippingLayout::sendRotYValue),
+                      static_cast<clipDblFunc>(&ClippingPlane::onRotYValueReceived)),
+      std::make_tuple(clippingLayout,static_cast<layoutDblFunc>(&ClippingLayout::sendRotZValue),
+                      static_cast<clipDblFunc>(&ClippingPlane::onRotZValueReceived))
     };
     
     const std::vector<std::tuple<ClippingLayout*, layoutBoolFunc, clipBoolFunc>> boolConnections = {
@@ -109,7 +115,13 @@ class ClippingPlane : public QWidget
       std::make_tuple(clippingLayout,&ClippingLayout::sendTealValue,&ClippingPlane::onTealValueReceived),
       std::make_tuple(clippingLayout,&ClippingLayout::sendClipValue,&ClippingPlane::onClipValueReceived),
       std::make_tuple(clippingLayout,&ClippingLayout::sendSlabValue,&ClippingPlane::onSlabValueReceived),
-      std::make_tuple(clippingLayout,&ClippingLayout::sendWidthValue,&ClippingPlane::onWidthValueReceived)
+      std::make_tuple(clippingLayout,&ClippingLayout::sendWidthValue,&ClippingPlane::onWidthValueReceived),
+      std::make_tuple(clippingLayout,static_cast<layoutIntFunc>(&ClippingLayout::sendRotXValue),
+                      static_cast<clipIntFunc>(&ClippingPlane::onRotXValueReceived)),
+      std::make_tuple(clippingLayout,static_cast<layoutIntFunc>(&ClippingLayout::sendRotYValue),
+                      static_cast<clipIntFunc>(&ClippingPlane::onRotYValueReceived)),
+      std::make_tuple(clippingLayout,static_cast<layoutIntFunc>(&ClippingLayout::sendRotZValue),
+                      static_cast<clipIntFunc>(&ClippingPlane::onRotZValueReceived))
     };
     
     ClipPlaneAgent* m_agent;

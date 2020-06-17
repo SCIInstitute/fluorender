@@ -123,7 +123,8 @@ void PropertiesPanel::setPropShininessValue(int newVal)
 
 void PropertiesPanel::onVolumeLoaded(int renderviewID)
 {
-  VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions();
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",*this);
+  VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions(m_agent);
   VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
 
   makeVolumeConnections(newVolumePropOpt);
@@ -133,7 +134,6 @@ void PropertiesPanel::onVolumeLoaded(int renderviewID)
 
   QWidget *mainWidget = genMainWidget(leftFrame,rightFrame);
   tabWidget->addTab(mainWidget,"Renderview: " + QString::number(renderviewID));
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",*this);
 }
 
 void PropertiesPanel::onMeshLoaded(int renderviewID)
@@ -203,14 +203,8 @@ MeshPropertiesMaterials* PropertiesPanel::getMeshPropertiesMaterials()
 
 void PropertiesPanel::makeVolumeConnections(VolumePropertiesOptions* layout)
 {
-  createVolumeAnyConnections(layout);
   createVolumeIntConnections(layout);
-}
-
-void PropertiesPanel::createVolumeAnyConnections(VolumePropertiesOptions* layout)
-{
-  for(auto && tup : volumeAnyConnections)
-    connect(layout,std::get<0>(tup),this,std::get<1>(tup));
+  createVolumeDblConnections(layout);
 }
 
 void PropertiesPanel::createVolumeIntConnections(VolumePropertiesOptions* layout)
@@ -219,20 +213,29 @@ void PropertiesPanel::createVolumeIntConnections(VolumePropertiesOptions* layout
     connect(layout,std::get<0>(tup),this,std::get<1>(tup));
 }
 
-void PropertiesPanel::makeMeshConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout)
+void PropertiesPanel::createVolumeDblConnections(VolumePropertiesOptions* layout)
 {
-  createMeshAnyConnections(opLayout);
-  createMeshIntConnections(opLayout,maLayout);
+  for(auto && tup : volumeDblConnections)
+    connect(layout,std::get<0>(tup),this,std::get<1>(tup));
 }
 
-void PropertiesPanel::createMeshAnyConnections(MeshPropertiesOptions* opLayout)
+void PropertiesPanel::makeMeshConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout)
 {
-  for(auto && tup : meshAnyConnections)
-    connect(opLayout,std::get<0>(tup),this,std::get<1>(tup));
+  createMeshIntConnections(opLayout,maLayout);
+  createMeshDblConnections(opLayout);
 }
 
 void PropertiesPanel::createMeshIntConnections(MeshPropertiesOptions* opLayout, MeshPropertiesMaterials* maLayout)
 {
   connect(opLayout,&MeshPropertiesOptions::sendSizeLimitValue,this,&PropertiesPanel::onSizeLimitReceived);
   connect(maLayout,&MeshPropertiesMaterials::sendShininessValue,this,&PropertiesPanel::onShininessReceived);
+  
+  for(auto && tup : meshIntConnections)
+    connect(opLayout,std::get<0>(tup),this,std::get<1>(tup));
+}
+
+void PropertiesPanel::createMeshDblConnections(MeshPropertiesOptions* opLayout)
+{
+  for(auto && tup : meshDblConnections)
+    connect(opLayout,std::get<0>(tup),this,std::get<1>(tup));
 }
