@@ -186,15 +186,15 @@ class OutputLayout : public QGridLayout
     FluoSpinboxDouble *greenEqlSpinbox = new FluoSpinboxDouble(0.0,1.0,false);
     FluoSpinboxDouble *blueEqlSpinbox  = new FluoSpinboxDouble(0.0,1.0,false);
 
-    AgentWrapper<OutAdjustAgent> *redGammaWrapper = new AgentWrapper("gamma r", m_agent);
-    AgentWrapper<OutAdjustAgent> *greenGammaWrapper = new AgentWrapper("gamma g", m_agent);
-    AgentWrapper<OutAdjustAgent> *blueGammaWrapper = new AgentWrapper("gamma b", m_agent);
-    AgentWrapper<OutAdjustAgent> *redLuminWrapper = new AgentWrapper("brightness r", m_agent);
-    AgentWrapper<OutAdjustAgent> *greenLuminWrapper = new AgentWrapper("brightness g", m_agent);
-    AgentWrapper<OutAdjustAgent> *blueLuminWrapper = new AgentWrapper("brightness b", m_agent);
-    AgentWrapper<OutAdjustAgent> *redEqlWrapper = new AgentWrapper("equalize r", m_agent);
-    AgentWrapper<OutAdjustAgent> *greenEqlWrapper = new AgentWrapper("equalize g", m_agent);
-    AgentWrapper<OutAdjustAgent> *blueEqlWrapper = new AgentWrapper("equalize b", m_agent);
+    AgentWrapper<OutAdjustAgent> *redGammaWrapper = new AgentWrapper<OutAdjustAgent>("gamma r", m_agent);
+    AgentWrapper<OutAdjustAgent> *greenGammaWrapper = new AgentWrapper<OutAdjustAgent>("gamma g", m_agent);
+    AgentWrapper<OutAdjustAgent> *blueGammaWrapper = new AgentWrapper<OutAdjustAgent>("gamma b", m_agent);
+    AgentWrapper<OutAdjustAgent> *redLuminWrapper = new AgentWrapper<OutAdjustAgent>("brightness r", m_agent);
+    AgentWrapper<OutAdjustAgent> *greenLuminWrapper = new AgentWrapper<OutAdjustAgent>("brightness g", m_agent);
+    AgentWrapper<OutAdjustAgent> *blueLuminWrapper = new AgentWrapper<OutAdjustAgent>("brightness b", m_agent);
+    AgentWrapper<OutAdjustAgent> *redEqlWrapper = new AgentWrapper<OutAdjustAgent>("equalize r", m_agent);
+    AgentWrapper<OutAdjustAgent> *greenEqlWrapper = new AgentWrapper<OutAdjustAgent>("equalize g", m_agent);
+    AgentWrapper<OutAdjustAgent> *blueEqlWrapper = new AgentWrapper<OutAdjustAgent>("equalize b", m_agent);
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, outputFunc>> sliderConnections = {
       std::make_tuple(redGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onRedGSliderChanged),

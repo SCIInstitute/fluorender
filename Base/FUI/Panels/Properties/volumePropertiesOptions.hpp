@@ -156,6 +156,7 @@ class VolumePropertiesOptions : public QGridLayout
     void buildSliderConnections();
     void buildSpinboxConnections();
     void buildSpinboxDConnections();
+    void initializeWrappers();
 
     FluoSlider* gammaSlider      = new FluoSlider(Qt::Horizontal,0,1000);
     FluoSlider* extractBSlider   = new FluoSlider(Qt::Horizontal,0,100);
@@ -196,19 +197,20 @@ class VolumePropertiesOptions : public QGridLayout
     FluoToolButton* shadingLabel  = new FluoToolButton(" :Shading",true,true,false);
     FluoToolButton* colorMapLabel = new FluoToolButton("Color Map: ",true,true,false);
 
-    AgentWrapper<VolumePropAgent> *gammaWrapper = new AgentWrapper("gamma 3d", m_agent);
-    AgentWrapper<VolumePropAgent> *extractWrapper = new AgentWrapper("extract boundary", m_agent);
-    AgentWrapper<VolumePropAgent> *saturationWrapper = new AgentWrapper("saturation", m_agent);
-    AgentWrapper<VolumePropAgent> *threshhold1Wrapper = new AgentWrapper("low threshold", m_agent);
-    AgentWrapper<VolumePropAgent> *threshhold2Wrapper = new AgentWrapper("high threshold", m_agent);
-    AgentWrapper<VolumePropAgent> *luminanceWrapper = new AgentWrapper("luminance", m_agent);
-    AgentWrapper<VolumePropAgent> *shadowWrapper = new AgentWrapper("shadow int", m_agent);
-    AgentWrapper<VolumePropAgent> *alphaWrapper = new AgentWrapper("alpha", m_agent);
-    AgentWrapper<VolumePropAgent> *sampleWrapper = new AgentWrapper("sample rate", m_agent);
-    AgentWrapper<VolumePropAgent> *shading1Wrapper = new AgentWrapper("mat amb", m_agent);
-    AgentWrapper<VolumePropAgent> *shading2Wrapper = new AgentWrapper("mat shine", m_agent);
-    AgentWrapper<VolumePropAgent> *colorMap1Wrapper = new AgentWrapper("colormap low", m_agent);
-    AgentWrapper<VolumePropAgent> *colorMap2Wrapper = new AgentWrapper("colormap high", m_agent);
+    AgentWrapper<VolumePropAgent> *gammaWrapper = new AgentWrapper<VolumePropAgent>("gamma 3d", m_agent);
+    AgentWrapper<VolumePropAgent> *extractWrapper = new AgentWrapper<VolumePropAgent>("extract boundary", m_agent);
+    AgentWrapper<VolumePropAgent> *saturationWrapper = new AgentWrapper<VolumePropAgent>("saturation", m_agent);
+    AgentWrapper<VolumePropAgent> *threshhold1Wrapper = new AgentWrapper<VolumePropAgent>("low threshold", m_agent);
+    AgentWrapper<VolumePropAgent> *threshhold2Wrapper = new AgentWrapper<VolumePropAgent>("high threshold", m_agent);
+    AgentWrapper<VolumePropAgent> *luminanceWrapper = new AgentWrapper<VolumePropAgent>("luminance", m_agent);
+    AgentWrapper<VolumePropAgent> *shadowWrapper = new AgentWrapper<VolumePropAgent>("shadow int", m_agent);
+    AgentWrapper<VolumePropAgent> *alphaWrapper = new AgentWrapper<VolumePropAgent>("alpha", m_agent);
+    AgentWrapper<VolumePropAgent> *sampleWrapper = new AgentWrapper<VolumePropAgent>("sample rate", m_agent);
+    AgentWrapper<VolumePropAgent> *shading1Wrapper = new AgentWrapper<VolumePropAgent>("mat amb", m_agent);
+    AgentWrapper<VolumePropAgent> *shading2Wrapper = new AgentWrapper<VolumePropAgent>("mat shine", m_agent);
+    AgentWrapper<VolumePropAgent> *colorMap1Wrapper = new AgentWrapper<VolumePropAgent>("colormap low", m_agent);
+    AgentWrapper<VolumePropAgent> *colorMap2Wrapper = new AgentWrapper<VolumePropAgent>("colormap high", m_agent);
+
 
 
     const std::vector<std::function<void()>> rowFuncs = {

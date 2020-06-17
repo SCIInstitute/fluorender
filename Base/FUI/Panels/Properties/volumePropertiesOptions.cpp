@@ -89,3 +89,8 @@ void VolumePropertiesOptions::buildSpinboxDConnections()
   for(auto && tup : dSpinConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
+
+void VolumePropertiesOptions::initializeWrappers()
+{
+
+}
