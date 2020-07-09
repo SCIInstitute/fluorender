@@ -1,7 +1,7 @@
 #include "fui.hpp"
 #include "ui_FUI.h"
 
-
+#include "readers.hpp"
 
 FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
@@ -882,6 +882,8 @@ void FUI::on_actionOne_View_triggered()
 
 void FUI::on_actionLoad_Volume_0_triggered()
 {
+  Readers tempReader(".tiff");
+  auto reader = tempReader.returnReader();
   ui->propertiesPanel->onVolumeLoaded(0);
 }
 

@@ -56,4 +56,7 @@ SET(pole_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "")
 
 add_library(pole_external SHARED IMPORTED)
 
+set(pole_LIBRARIES
+  ${pole_LIBRARY_DIR}/${prefix}Poledump${suffix} CACHE INTERNAL ""
+)
 MESSAGE(STATUS "pole_LIBRARY_DIR: ${pole_LIBRARY_DIR}")

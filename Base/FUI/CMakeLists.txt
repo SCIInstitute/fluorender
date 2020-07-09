@@ -45,6 +45,7 @@ set(HEADER_FILES
     fluoglwidget.hpp
     fui.hpp
     renderview.hpp
+    readers.hpp
     FluoToolbar/genToolbarObjects.hpp
     FluoToolbar/renderviewBottomTB.hpp
     FluoToolbar/renderviewTopTB.hpp

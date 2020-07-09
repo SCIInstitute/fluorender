@@ -7,6 +7,7 @@ include_directories(
   ${Qt5Xml_INCLUDE_DIRS}
   ${pugi_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR}
+  ${pole_INCLUDE_DIR}
 )
 
                   #imageJ_reader.hpp
@@ -53,9 +54,9 @@ set(Formats_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 
 add_library(Formats STATIC ${HEADER_FILES} ${SOURCES})
 
-target_link_libraries(Formats FLIVR ${teem_LIBRARIES} ${Boost_LIBRARIES} ${pugi_LIBRARIES} ${TIFF_LIBRARIES})
+target_link_libraries(Formats FLIVR ${teem_LIBRARIES} ${Boost_LIBRARIES} ${pugi_LIBRARIES} ${TIFF_LIBRARIES} ${pole_LIBRARIES})
 
-add_dependencies(Formats FLIVR Teem_external_download Boost_external_download pugi_external_download libtiff_external_download)
+add_dependencies(Formats FLIVR Teem_external_download Boost_external_download pugi_external_download libtiff_external_download pole_external_download)
 qt5_use_modules(Formats Xml)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
