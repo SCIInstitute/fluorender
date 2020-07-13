@@ -3,6 +3,9 @@
 
 #include "readers.hpp"
 
+#include <QFile>
+#include <QFileDialog>
+
 FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FUI)
@@ -882,10 +885,14 @@ void FUI::on_actionOne_View_triggered()
 
 void FUI::on_actionLoad_Volume_0_triggered()
 {
+  //TODO: Create a separate function for this.
+  QString filename = QFileDialog::getOpenFileName(this,
+    tr("Open File"), "",
+    tr("Open Tiff (*.tiff *.tif);; Open NRRD(*.nrrd);; Open Other(*.oib *.oif *.lsm)")
+  );
+
   Readers tempReader(".tiff");
-  tempReader.checkReader();
   auto reader = tempReader.returnReader();
-  tempReader.checkReader();
   ui->propertiesPanel->onVolumeLoaded(0);
 }
 
