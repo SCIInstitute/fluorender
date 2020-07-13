@@ -18,8 +18,8 @@
 //#include <Formats/msk_reader.hpp>
 //#include <Formats/lbl_reader.hpp>
 
-// A Simple class to create a reader and hopefully move
-// the ownership to whoever requests it. 
+// Creates a reader from a map of readers and passes that reader to the 
+// function requesting the memory. 
 class Readers
 {
   public:
@@ -30,15 +30,26 @@ class Readers
 
     auto returnReader() { return std::move(reader); }
 
+    // for debugging purposes.
+    void checkReader()  
+    { 
+      if(reader == nullptr) 
+        std::cout << "The memory has been passed on." << std::endl; 
+      else
+        std::cout << "The memory still belongs to this class." << std::endl;
+    }
+
   private:
-    BaseReader* reader;
-    const std::map<QString,std::function<BaseReader*()>> readers = {
-      {".tiff", [](){ return new TIFReader();}},
-      {".tif",  [](){ return new TIFReader();}},
-      {".nrrd", [](){ return new NRRDReader();}},
-      {".oib",  [](){ return new OIBReader();}},
-      {".oif",  [](){ return new OIFReader();}},
-      {".lsm",  [](){ return new LSMReader();}}
+    std::unique_ptr<BaseReader> reader;
+
+    // Ensures that only 1 class gets created in memory instead of all classes.
+    const std::map<QString,std::function<std::unique_ptr<BaseReader>()>> readers = {
+      {".tiff", [](){ return std::make_unique<TIFReader>();}},
+      {".tif",  [](){ return std::make_unique<TIFReader>();}},
+      {".nrrd", [](){ return std::make_unique<NRRDReader>();}},
+      {".oib",  [](){ return std::make_unique<OIBReader>();}},
+      {".oif",  [](){ return std::make_unique<OIFReader>();}},
+      {".lsm",  [](){ return std::make_unique<LSMReader>();}}
     };
 };
 

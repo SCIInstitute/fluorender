@@ -883,7 +883,9 @@ void FUI::on_actionOne_View_triggered()
 void FUI::on_actionLoad_Volume_0_triggered()
 {
   Readers tempReader(".tiff");
+  tempReader.checkReader();
   auto reader = tempReader.returnReader();
+  tempReader.checkReader();
   ui->propertiesPanel->onVolumeLoaded(0);
 }
 
