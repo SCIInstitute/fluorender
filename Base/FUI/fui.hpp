@@ -29,8 +29,6 @@ public:
 
     ~FUI();
 
-    //PropertiesPanel* propertiesPanel = new PropertiesPanel();
-
 private slots:
     void on_actionSplit_HalfV_triggered();
 
@@ -66,7 +64,10 @@ private:
 
     void updateRenderviewID(RenderView* view);
     void deleteRenderviewID(const RenderView* view);
+    QString getFilename();
+    QString getSuffix(QString &filename);
 
+    auto getReader(const QString &suffix);
 
     // These are the indices of the left and right child of the main Splitter
     const int MAINRENDERINDEX = 0;

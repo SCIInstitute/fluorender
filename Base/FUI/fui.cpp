@@ -5,6 +5,8 @@
 
 #include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <iostream>
 
 FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
@@ -883,17 +885,36 @@ void FUI::on_actionOne_View_triggered()
 
 }
 
-void FUI::on_actionLoad_Volume_0_triggered()
+QString FUI::getFilename()
 {
-  //TODO: Create a separate function for this.
-  QString filename = QFileDialog::getOpenFileName(this,
+  return QFileDialog::getOpenFileName(this,
     tr("Open File"), "",
     tr("Open Tiff (*.tiff *.tif);; Open NRRD(*.nrrd);; Open Other(*.oib *.oif *.lsm)")
   );
+}
 
-  Readers tempReader(".tiff");
-  auto reader = tempReader.returnReader();
-  ui->propertiesPanel->onVolumeLoaded(0);
+QString FUI::getSuffix(QString& filename)
+{
+  QFileInfo info(filename);
+  return info.suffix();
+}
+
+auto FUI::getReader(const QString& suffix)
+{
+  Readers tempReader(suffix);
+  return tempReader.returnReader();
+}
+
+void FUI::on_actionLoad_Volume_0_triggered()
+{
+  QString filename = getFilename();
+  QString suffix = getSuffix(filename);
+
+  if(!suffix.isEmpty())
+  { 
+    auto reader = getReader(suffix);
+    ui->propertiesPanel->onVolumeLoaded(0);
+  }
 }
 
 void FUI::on_actionLoad_Mesh_0_triggered()

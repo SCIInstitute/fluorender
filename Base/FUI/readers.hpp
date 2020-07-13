@@ -44,12 +44,12 @@ class Readers
 
     // Ensures that only 1 class gets created in memory instead of all classes.
     const std::map<QString,std::function<std::unique_ptr<BaseReader>()>> readers = {
-      {".tiff", [](){ return std::make_unique<TIFReader>();}},
-      {".tif",  [](){ return std::make_unique<TIFReader>();}},
-      {".nrrd", [](){ return std::make_unique<NRRDReader>();}},
-      {".oib",  [](){ return std::make_unique<OIBReader>();}},
-      {".oif",  [](){ return std::make_unique<OIFReader>();}},
-      {".lsm",  [](){ return std::make_unique<LSMReader>();}}
+      {"tiff", [](){ return std::make_unique<TIFReader>();}},
+      {"tif",  [](){ return std::make_unique<TIFReader>();}},
+      {"nrrd", [](){ return std::make_unique<NRRDReader>();}},
+      {"oib",  [](){ return std::make_unique<OIBReader>();}},
+      {"oif",  [](){ return std::make_unique<OIFReader>();}},
+      {"lsm",  [](){ return std::make_unique<LSMReader>();}}
     };
 };
 
