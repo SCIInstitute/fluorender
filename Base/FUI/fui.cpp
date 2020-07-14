@@ -2,6 +2,7 @@
 #include "ui_FUI.h"
 
 #include "readers.hpp"
+#include <Global/Global.hpp>
 
 #include <QFile>
 #include <QFileDialog>
@@ -913,6 +914,18 @@ void FUI::on_actionLoad_Volume_0_triggered()
   if(!suffix.isEmpty())
   { 
     auto reader = getReader(suffix);
+    fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
+    reader->SetFile(filename.toStdWString());
+    reader->Preprocess();
+
+    Nrrd* nrrdStructure = reader->Convert(true);
+
+    if(nrrdStructure == nullptr)
+      std::cout << "Well here is your problem." << std::endl;
+
+    QString name = QString::fromStdWString(reader->GetDataName());
+    if(vd->LoadData(nrrdStructure, name.toStdString(), filename.toStdWString()))
+      vd->SetReader(reader.get());
     ui->propertiesPanel->onVolumeLoaded(0);
   }
 }
