@@ -915,7 +915,8 @@ void FUI::on_actionLoad_Volume_0_triggered()
   { 
     auto reader = getReader(suffix);
     fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
-    reader->SetFile(filename.toStdWString());
+    std::wstring fileSetter = filename.toStdWString();
+    reader->SetFile(fileSetter);
     reader->Preprocess();
 
     Nrrd* nrrdStructure = reader->Convert(true);
