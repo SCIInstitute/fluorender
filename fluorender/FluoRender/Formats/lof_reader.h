@@ -228,6 +228,8 @@ private:
 		unsigned long long inc;
 		unsigned long long loc;
 		std::vector<TimeInfo> times;
+		//lut name
+		std::string lut;
 
 		ChannelInfo() :
 			chan(0), res(0), minv(0), maxv(0), loc(0)

@@ -111,6 +111,8 @@ gl_profile_mask=1
 [max\ texture\ size]
 use_max_texture_size=0
 max_texture_size=2048
+[no\ tex\ pack]
+no_tex_pack=0
 [cl\ device]
 platform_id=0
 device_id=0

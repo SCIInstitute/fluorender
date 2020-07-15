@@ -194,6 +194,11 @@ namespace FLIVR
 		return non_2_textures_;
 	}
 
+	void ShaderProgram::set_no_tex_upack(bool val)
+	{
+		no_tex_unpack_ = val;
+	}
+
 	bool ShaderProgram::create()
 	{
 		if (shaders_supported())

@@ -867,6 +867,7 @@ void SettingDlg::GetSettings()
 	m_similarity = 0.5;
 	m_use_max_texture_size = false;
 	m_max_texture_size = 2048;
+	m_no_tex_pack = false;
 	m_plane_mode = 0;
 	m_ij_mode = 0;
 
@@ -1138,6 +1139,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("use_max_texture_size", &m_use_max_texture_size);
 		fconfig.Read("max_texture_size", &m_max_texture_size);
 	}
+	//no tex pack
+	if (fconfig.Exists("/no tex pack"))
+	{
+		fconfig.SetPath("/no tex pack");
+		fconfig.Read("no_tex_pack", &m_no_tex_pack);
+	}
 	//cl device
 	if (fconfig.Exists("/cl device"))
 	{
@@ -1229,6 +1236,8 @@ void SettingDlg::UpdateUI()
 				max_texture_size()));
 		m_max_texture_size_text->Disable();
 	}
+	//no tex pack
+	ShaderProgram::set_no_tex_upack(m_no_tex_pack);
 	//font
 	wxString str = m_font_file.BeforeLast('.');
 	int font_sel = m_font_cmb->FindString(str);
@@ -1491,6 +1500,10 @@ void SettingDlg::SaveSettings()
 	fconfig.SetPath("/max texture size");
 	fconfig.Write("use_max_texture_size", m_use_max_texture_size);
 	fconfig.Write("max_texture_size", m_max_texture_size);
+
+	//no tex pack
+	fconfig.SetPath("/no tex pack");
+	fconfig.Write("no_tex_pack", m_no_tex_pack);
 
 	//cl device
 	fconfig.SetPath("/cl device");

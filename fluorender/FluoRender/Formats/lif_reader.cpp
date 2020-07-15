@@ -628,13 +628,33 @@ LIFReader::ImageInfo* LIFReader::ReadImage(wxXmlNode* node, std::wstring &name)
 {
 	if (!node)
 		return 0;
-	wxString str;
+	std::string str;
 	wxXmlNode* child = node->GetChildren();
 	if (!child || child->GetName() != "Image")
 		return 0;
 	ImageInfo imgi;
 	imgi.name = name;
 	ReadSubBlockInfo(child, imgi);
+	for (size_t i = 0; i < imgi.channels.size(); ++i)
+	{
+		str = imgi.channels[i].lut;
+		if (!str.empty())
+		{
+			WavelengthInfo winfo;
+			winfo.chan_num = i;
+			if (str == "Red")
+				winfo.wavelength = 550.0;
+			else if (str == "Green")
+				winfo.wavelength = 450.0;
+			else if (str == "Blue")
+				winfo.wavelength = 400.0;
+			else if (str == "Cyan")
+				winfo.wavelength = 650.0;
+			else
+				winfo.wavelength = 800.0;
+			m_excitation_wavelength_list.push_back(winfo);
+		}
+	}
 	m_lif_info.images.push_back(imgi);
 	if (m_lif_info.images.size() > 1)
 		m_batch = true;
@@ -669,6 +689,7 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 			str = child->GetAttribute("BytesInc");
 			if (str.ToULongLong(&ull))
 				cinfo.inc = ull;
+			cinfo.lut = child->GetAttribute("LUTName");
 			imgi.channels.push_back(cinfo);
 			imgi.minv = std::min(imgi.minv, cinfo.minv);
 			imgi.maxv = std::max(imgi.maxv, cinfo.maxv);

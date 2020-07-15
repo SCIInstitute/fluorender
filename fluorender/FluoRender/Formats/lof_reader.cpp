@@ -376,11 +376,31 @@ void LOFReader::ReadImage(wxXmlNode* node)
 {
 	if (!node)
 		return;
-	wxString str;
+	std::string str;
 	wxXmlNode* child = node->GetChildren();
 	if (!child || child->GetName() != "Image")
 		return;
 	ReadSubBlockInfo(child);
+	for (size_t i = 0; i < m_lof_info.channels.size(); ++i)
+	{
+		str = m_lof_info.channels[i].lut;
+		if (!str.empty())
+		{
+			WavelengthInfo winfo;
+			winfo.chan_num = i;
+			if (str == "Red")
+				winfo.wavelength = 550.0;
+			else if (str == "Green")
+				winfo.wavelength = 450.0;
+			else if (str == "Blue")
+				winfo.wavelength = 400.0;
+			else if (str == "Cyan")
+				winfo.wavelength = 650.0;
+			else
+				winfo.wavelength = 800.0;
+			m_excitation_wavelength_list.push_back(winfo);
+		}
+	}
 }
 
 void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
@@ -411,6 +431,7 @@ void LOFReader::ReadSubBlockInfo(wxXmlNode* node)
 			str = child->GetAttribute("BytesInc");
 			if (str.ToULongLong(&ull))
 				cinfo.inc = ull;
+			cinfo.lut = child->GetAttribute("LUTName");
 			m_lof_info.channels.push_back(cinfo);
 			m_lof_info.minv = std::min(m_lof_info.minv, cinfo.minv);
 			m_lof_info.maxv = std::max(m_lof_info.maxv, cinfo.maxv);

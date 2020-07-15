@@ -291,6 +291,8 @@ public:
 	void SetMaxTextureSize(int size) { m_max_texture_size = size; }
 	int GetMaxTextureSize() { return m_max_texture_size; }
 	int GetPlaneMode() { return m_plane_mode; }
+	//no tex pack
+	void SetNoTexPack(bool val) { m_no_tex_pack = val; }
 	
 	//Getting the java paths.
 	wxString getJVMPath();
@@ -410,6 +412,8 @@ private:
 	double m_pin_threshold;
 	//clipping plane display mode
 	int m_plane_mode;
+	//no tex pack
+	bool m_no_tex_pack;
 
 	// java settings strings.
 	wxString m_jvm_path;
