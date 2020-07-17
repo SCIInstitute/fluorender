@@ -914,8 +914,15 @@ void FUI::on_actionLoad_Volume_0_triggered()
   if(!suffix.isEmpty())
   { 
     auto reader = getReader(suffix);
+    const std::string defaultFilename = "default filename";
+    const std::string location = ".Settings/Defaults/volume_data.dtfx";
+    std::wstring fileSetter = filename.toStdWString();
+    fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
     fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
-    reader->SetFile(filename.toStdWString());
+
+    if(vd == nullptr)
+      std::cout << "Bad things." << std::endl;
+    reader->SetFile(fileSetter);
     reader->Preprocess();
 
     Nrrd* nrrdStructure = reader->Convert(true);

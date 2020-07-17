@@ -91,6 +91,9 @@ namespace fluo
 		virtual ~VolumeFactory();
 
 		void OnSetDefault(Event& event);
+
+    private:
+      const std::string current = "current";
 	};
 
 }

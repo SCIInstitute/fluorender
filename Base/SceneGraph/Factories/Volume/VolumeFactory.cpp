@@ -36,7 +36,9 @@ VolumeFactory::VolumeFactory()
 	m_name = "volume factory";
 	default_object_name_ = "default volume";
 
-	addValue("current", (VolumeData*)(0));//current volume data
+    VolumeData* currentVD = new VolumeData();
+
+	addValue(current, currentVD);//current volume data
 
 	setValueChangedFunction(
 		default_setting_filename_value_name_,
@@ -344,7 +346,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	new_vd->setName(name);
 
 	objects_.push_front(new_vd);
-	setValue("current", new_vd);
+	setValue(current, new_vd);
 
 	setEventHandler(new_vd);
 
