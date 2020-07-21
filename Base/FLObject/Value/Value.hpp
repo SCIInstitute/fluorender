@@ -111,7 +111,6 @@ public:
 	std::string getName() { return _name; }
 	std::string getType() { return _type; }
 	bool isReferenced() { return _etype == vt_pReferenced; }
-
 	inline bool operator == (const Value& v) const;
 	inline bool operator != (const Value& v) const;
 
@@ -356,20 +355,20 @@ public:
         }
 
     }
-
-
+    
     template <typename V>
     bool getValue(const std::string &name, V &value)
     {
         Value* val = findValue(name);
+
         if(val)
         {
-            value = (dynamic_cast<TemplateValue<V>*>(val))->getValue();
-            return true;
+          value = (dynamic_cast<TemplateValue<V>*>(val))->getValue();
+          return true;
         }
         else
         {
-            return false;
+          return false;
         }
 
     }

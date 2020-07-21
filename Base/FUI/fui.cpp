@@ -906,6 +906,7 @@ auto FUI::getReader(const QString& suffix)
   return tempReader.returnReader();
 }
 
+// TODO: Restructure this function so it is more readable.
 void FUI::on_actionLoad_Volume_0_triggered()
 {
   QString filename = getFilename();
@@ -915,7 +916,7 @@ void FUI::on_actionLoad_Volume_0_triggered()
   { 
     auto reader = getReader(suffix);
     const std::string defaultFilename = "default filename";
-    const std::string location = ".Settings/Defaults/volume_data.dtfx";
+    const std::string location = QDir::currentPath().toStdString() + "/.Settings/Defaults/volume_data.dtfx";
     std::wstring fileSetter = filename.toStdWString();
     fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
     fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
@@ -939,5 +940,7 @@ void FUI::on_actionLoad_Volume_0_triggered()
 
 void FUI::on_actionLoad_Mesh_0_triggered()
 {
+  QString debugString = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Open dtfx (*.dtfx)"));
+  std::cout << debugString.toStdString() << std::endl;
   ui->propertiesPanel->onMeshLoaded(0);
 }

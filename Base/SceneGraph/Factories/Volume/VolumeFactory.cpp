@@ -346,8 +346,10 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	new_vd->setName(name);
 
 	objects_.push_front(new_vd);
-	setValue(current, new_vd);
 
+    Referenced* temp = new_vd; //needed so the correct function is called.
+
+	setValue(current, temp);
 	setEventHandler(new_vd);
 
 	//notify observers
@@ -362,6 +364,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 VolumeData* VolumeFactory::clone(const unsigned int id)
 {
 	Object* object = find(id);
+    std::cout << object->getId() << " " << object->getName() << std::endl;
 	if (object)
 	{
 		VolumeData* vd = dynamic_cast<VolumeData*>(object);

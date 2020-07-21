@@ -227,6 +227,7 @@ namespace fluo
       return false;
     }
 
+/* possibly not needed. Further testing required.
     template<typename T, typename R, typename E>
     bool setValue(const T &name, R *value, E &event)
     {
@@ -248,7 +249,7 @@ namespace fluo
       }
       return false;
     }
-
+*/
     template<typename T, typename V, typename E>
     bool setValue(const T &name, const V &value, E &event)
     {
@@ -271,7 +272,26 @@ namespace fluo
       return false;
     }
 
-
+    bool setValue(const std::string& name, Referenced* value, Event& event)
+    {
+		Referenced* old_value;
+		if (getValue(name, &old_value) && value != old_value)
+		{
+			bool result = false;
+			if (_value_set)
+			{
+				if (!event.sender)
+					event.init(Event::EVENT_VALUE_CHANGING,
+						this, getValuePointer(name), true);
+				else
+					event.push(this);
+				result = _value_set->setValue(name, value, event);
+				event.pop();
+			}
+			return result;
+		}
+		return false;
+	}
 
     template<typename T>
     bool getValue(T &vt)
@@ -309,8 +329,7 @@ namespace fluo
     }
 
     //get value the class
-    template<typename T>
-    Value* getValuePointer(const T &name)
+    Value* getValuePointer(const std::string &name)
     {
         if (_value_set)
             return _value_set->findValue(name);
