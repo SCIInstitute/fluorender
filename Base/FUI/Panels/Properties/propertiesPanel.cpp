@@ -1,5 +1,5 @@
 #include "propertiesPanel.hpp"
-#include <Global/Global.hpp>a
+#include <Global/Global.hpp>
 
 
 #include <iostream>
