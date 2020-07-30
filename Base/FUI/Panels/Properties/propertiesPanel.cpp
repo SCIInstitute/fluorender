@@ -1,5 +1,6 @@
 #include "propertiesPanel.hpp"
-#include <Global/Global.hpp>
+#include <Global/Global.hpp>a
+
 
 #include <iostream>
 
@@ -22,9 +23,10 @@ double PropertiesPanel::getPropOptionsMaxVal() const
 void PropertiesPanel::setPropOptionsMaxVal(double newVal)
 {
   VolumePropertiesOptions* temp = getPropertiesOptions();
-
+  
   //Todo, throw an exception if it comes back null
-  temp->setMaxVal(newVal);
+  if(temp)
+    temp->setMaxVal(newVal);
 }
 
 void PropertiesPanel::setPropSatValue(int newVal)
@@ -118,10 +120,10 @@ void PropertiesPanel::setPropShininessValue(int newVal)
   temp->setShininessValue(newVal);
 }
 
-void PropertiesPanel::onVolumeLoaded(int renderviewID)
+void PropertiesPanel::onVolumeLoaded(int renderviewID, fluo::VolumeData *vd)
 {
   m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
-  VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions(m_agent);
+  VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions(m_agent,vd);
   VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
 
   makeVolumeConnections(newVolumePropOpt);
@@ -131,6 +133,7 @@ void PropertiesPanel::onVolumeLoaded(int renderviewID)
 
   QWidget *mainWidget = genMainWidget(leftFrame,rightFrame);
   tabWidget->addTab(mainWidget,"Renderview: " + QString::number(renderviewID));
+  m_agent->UpdateAllSettings();
 }
 
 void PropertiesPanel::onMeshLoaded(int renderviewID)

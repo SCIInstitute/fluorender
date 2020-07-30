@@ -90,7 +90,7 @@ class VolumePropertiesOptions : public QGridLayout
 
   public:
 
-    VolumePropertiesOptions(VolumePropAgent *agent);
+    VolumePropertiesOptions(VolumePropAgent *agent, fluo::VolumeData *vd);
 
     void setMaxVal(double newVal) { maxVal = newVal; }
     double getMaxVal() const { return maxVal; }

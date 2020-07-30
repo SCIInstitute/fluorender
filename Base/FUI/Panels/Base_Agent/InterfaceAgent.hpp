@@ -70,7 +70,7 @@ class InterfaceAgent : public fluo::Object
       if (obj)
       {
         copyValues(*obj);//shallow copy to share values
-        UpdateAllSettings();
+        //UpdateAllSettings();
         obj->addObserver(this);
       }
     }

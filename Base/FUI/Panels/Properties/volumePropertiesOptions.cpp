@@ -1,11 +1,13 @@
 #include "volumePropertiesOptions.hpp"
 
-VolumePropertiesOptions::VolumePropertiesOptions(VolumePropAgent *agent) : m_agent(agent)
+VolumePropertiesOptions::VolumePropertiesOptions(VolumePropAgent *agent,fluo::VolumeData *vd) : m_agent(agent)
 {
   constructLayout();
   buildSliderConnections();
   buildSpinboxConnections();
   buildSpinboxDConnections();
+  m_agent->setObject(vd);
+  //m_agent->UpdateAllSettings();
 }
 
 void VolumePropertiesOptions::addRow0()

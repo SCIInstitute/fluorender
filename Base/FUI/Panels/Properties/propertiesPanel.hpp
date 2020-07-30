@@ -8,6 +8,7 @@
 #include "meshPropertiesOptions.hpp"
 #include "meshPropertiesMaterials.hpp"
 
+#include <VolumeData/VolumeData.hpp>
 #include <Panels/Properties/Agent/volumePropAgent.hpp>
 
 
@@ -25,7 +26,7 @@ class PropertiesPanel : public QWidget
   Q_OBJECT
 
   public slots:
-    void onVolumeLoaded(int renderviewID);
+    void onVolumeLoaded(int renderviewID, fluo::VolumeData *vd);
     void onMeshLoaded(int renderviewID);
 
     // Volume Functions

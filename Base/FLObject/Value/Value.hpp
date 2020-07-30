@@ -327,7 +327,7 @@ public:
 	  Value *val = findValue(name);
 	  if (val)
 	  {
-	    (dynamic_cast<TemplateValue<T>*>(val))->setValue(value,event);
+	    (reinterpret_cast<TemplateValue<T>*>(val))->setValue(value,event);
         return true;
 	  }
       else
@@ -363,7 +363,7 @@ public:
 
         if(val)
         {
-          value = (dynamic_cast<TemplateValue<V>*>(val))->getValue();
+          value = (reinterpret_cast<TemplateValue<V>*>(val))->getValue();
           return true;
         }
         else
@@ -504,8 +504,8 @@ inline bool Value::operator == (const Value& v) const
 			return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
 		else
-			return fabs(dynamic_cast<const TemplateValue<double>*>(this)->getValue() -
-				dynamic_cast<const TemplateValue<double>*>(&v)->getValue()) < FLTYPE::Epsld();
+			return fabs(reinterpret_cast<const TemplateValue<double>*>(this)->getValue() -
+				reinterpret_cast<const TemplateValue<double>*>(&v)->getValue()) < FLTYPE::Epsld();
 	case vt_string:
 		return dynamic_cast<const TemplateValue<std::string>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();

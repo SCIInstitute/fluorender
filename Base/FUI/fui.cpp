@@ -929,7 +929,7 @@ void FUI::on_actionLoad_Volume_0_triggered()
     QString name = QString::fromStdWString(reader->GetDataName());
     if(vd->LoadData(nrrdStructure, name.toStdString(), filename.toStdWString()))
       vd->SetReader(reader.get());
-    ui->propertiesPanel->onVolumeLoaded(0);
+    ui->propertiesPanel->onVolumeLoaded(0,vd);
   }
 }
 
