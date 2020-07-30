@@ -124,7 +124,7 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	return tree_model;
 }
 */
-VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, QWidget &window)
+VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, QWidget *window)
 {
   InterfaceAgent* result = findFirst(name);
   if (result)
@@ -132,7 +132,7 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 
   //not found
   VolumePropAgent* volume_prop_agent =
-          new VolumePropAgent(static_cast<PropertiesPanel&>(window));
+          new VolumePropAgent(static_cast<PropertiesPanel*>(window));
 
   if (volume_prop_agent)
   {
@@ -152,6 +152,7 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 
   return volume_prop_agent;
 }
+
 /*
 RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
 {

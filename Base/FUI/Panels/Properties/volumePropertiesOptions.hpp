@@ -136,7 +136,7 @@ class VolumePropertiesOptions : public QGridLayout
   private:
 
     VolumePropAgent *m_agent;
-    friend class VolumePropAgent;
+    //friend class VolumePropAgent;
 
     typedef void(VolumePropertiesOptions::*volumeFunc)();
     typedef void(FluoSlider::*sliderFunc)(int);
@@ -211,16 +211,6 @@ class VolumePropertiesOptions : public QGridLayout
     AgentWrapper<VolumePropAgent> *colorMap1Wrapper = new AgentWrapper<VolumePropAgent>("colormap low", m_agent);
     AgentWrapper<VolumePropAgent> *colorMap2Wrapper = new AgentWrapper<VolumePropAgent>("colormap high", m_agent);
 
-
-
-    const std::vector<std::function<void()>> rowFuncs = {
-      std::bind(&VolumePropertiesOptions::addRow0,this),
-      std::bind(&VolumePropertiesOptions::addRow1,this),
-      std::bind(&VolumePropertiesOptions::addRow2,this),
-      std::bind(&VolumePropertiesOptions::addRow3,this),
-      std::bind(&VolumePropertiesOptions::addRow4,this),
-    };
-
     const std::vector<std::tuple<FluoSlider*, sliderFunc, volumeFunc>> sliderConnections = {
       std::make_tuple(gammaSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onGammaSliderChanged),
       std::make_tuple(extractBSlider, &FluoSlider::valueChanged, &VolumePropertiesOptions::onExtBoundSliderChanged),
@@ -254,6 +244,14 @@ class VolumePropertiesOptions : public QGridLayout
       std::make_tuple(sampleRateSpinbox, &FluoSpinboxDouble::editingFinished, &VolumePropertiesOptions::onSampleSpinChanged),
       std::make_tuple(shading1Spinbox, &FluoSpinboxDouble::editingFinished, &VolumePropertiesOptions::onLShaderSpinChanged),
       std::make_tuple(shading2Spinbox, &FluoSpinboxDouble::editingFinished,&VolumePropertiesOptions::onHShaderSpinChanged)
+    };
+
+    const std::vector<std::function<void()>> rowFuncs = {
+      std::bind(&VolumePropertiesOptions::addRow0,this),
+      std::bind(&VolumePropertiesOptions::addRow1,this),
+      std::bind(&VolumePropertiesOptions::addRow2,this),
+      std::bind(&VolumePropertiesOptions::addRow3,this),
+      std::bind(&VolumePropertiesOptions::addRow4,this),
     };
 
     Controller<FluoSlider,FluoSpinboxDouble,AgentWrapper<VolumePropAgent>> *gammaController =

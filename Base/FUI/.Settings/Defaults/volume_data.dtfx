@@ -4,7 +4,7 @@
 	<Value name="invert" type="bool" value="0"/>
 	<Value name="colormap enable" type="bool" value="0"/>
 	<Value name="saturation" type="double" value="1"/>
-	<Value name="gamma 3d" type="double" value="0.7"/>
+	<Value name="gamma 3d" type="double" value="2.7"/>
 	<Value name="extract boundary" type="double" value="0"/>
 	<Value name="low threshold" type="double" value="0"/>
 	<Value name="high threshold" type="double" value="1"/>

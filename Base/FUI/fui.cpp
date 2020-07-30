@@ -7,12 +7,14 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QResource>
 #include <iostream>
 
 FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FUI)
 {
+  fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
   ui->setupUi(this);
 
   // This sets the central widget needed for the QDockWidgets
@@ -915,21 +917,14 @@ void FUI::on_actionLoad_Volume_0_triggered()
   if(!suffix.isEmpty())
   { 
     auto reader = getReader(suffix);
-    const std::string defaultFilename = "default filename";
-    const std::string location = QDir::currentPath().toStdString() + "/.Settings/Defaults/volume_data.dtfx";
+ 
     std::wstring fileSetter = filename.toStdWString();
-    fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
     fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
 
-    if(vd == nullptr)
-      std::cout << "Bad things." << std::endl;
     reader->SetFile(fileSetter);
     reader->Preprocess();
 
     Nrrd* nrrdStructure = reader->Convert(true);
-
-    if(nrrdStructure == nullptr)
-      std::cout << "Well here is your problem." << std::endl;
 
     QString name = QString::fromStdWString(reader->GetDataName());
     if(vd->LoadData(nrrdStructure, name.toStdString(), filename.toStdWString()))
@@ -940,7 +935,5 @@ void FUI::on_actionLoad_Volume_0_triggered()
 
 void FUI::on_actionLoad_Mesh_0_triggered()
 {
-  QString debugString = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Open dtfx (*.dtfx)"));
-  std::cout << debugString.toStdString() << std::endl;
   ui->propertiesPanel->onMeshLoaded(0);
 }

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "renderview.hpp"
+#include "fluoConfig.hpp"
 
 namespace Ui {
 class FUI;
@@ -82,6 +83,9 @@ private:
 
     // This is how I currently label my render views, this will change in the future.
     int renderViewcounter = 0;
+
+    const std::string defaultFilename = "default filename";
+    const std::string location = VOLUME_SETTINGS;
 
     // This is my hash table, where the key is a boolean and the value is a QAction.
     std::unordered_map<bool,QAction*> flagControl;

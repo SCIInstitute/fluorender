@@ -39,7 +39,7 @@ class PropertiesPanel;
 class VolumePropAgent : public InterfaceAgent
 {
   public:
-    VolumePropAgent(PropertiesPanel &panel);
+    VolumePropAgent(PropertiesPanel *panel);
 /*
 virtual bool isSameKindAs(const fluo::Object* obj) const
 {
@@ -74,7 +74,7 @@ virtual bool isSameKindAs(const fluo::Object* obj) const
     void OnColorChanged(fluo::Event& event);
 
   private:
-    PropertiesPanel &parentPanel;
+    PropertiesPanel *parentPanel;
 };
 
 #endif

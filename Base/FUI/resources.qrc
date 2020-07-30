@@ -62,5 +62,6 @@
   <file alias="clipping-unlink.svg">Resources/Clipping-Images/unlink-solid.svg</file>
   <file alias="output-reset.svg">Resources/Output-Images/undo-solid.svg</file>
   <file alias="output-unlink.svg">Resources/Output-Images/unlink-solid.svg</file>
+  <file alias="volumeSettings.dtfx">.Settings/Defaults/volume_data.dtfx</file>
 </qresource>
 </RCC>

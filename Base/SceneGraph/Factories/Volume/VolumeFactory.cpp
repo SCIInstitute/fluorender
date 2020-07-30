@@ -350,6 +350,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
     Referenced* temp = new_vd; //needed so the correct function is called.
 
 	setValue(current, temp);
+    new_vd = dynamic_cast<VolumeData*>(temp);
 	setEventHandler(new_vd);
 
 	//notify observers

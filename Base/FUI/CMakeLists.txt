@@ -39,11 +39,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(VOLUME_SETTINGS "${CMAKE_CURRENT_SOURCE_DIR}/.Settings/Defaults/volume_data.dtfx")
+configure_file(fluoConfig.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/fluoConfig.hpp @ONLY)
+
 # These are manually defined rather than Globbed to give us better control
 # of what goes in the project.
 set(HEADER_FILES 
     fluoglwidget.hpp
     fui.hpp
+    fluoConfig.hpp
     renderview.hpp
     readers.hpp
     FluoToolbar/genToolbarObjects.hpp

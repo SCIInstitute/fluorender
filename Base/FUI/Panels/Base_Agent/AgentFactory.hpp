@@ -97,7 +97,7 @@ class AgentFactory : public fluo::ObjectFactory
     ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
     TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
     */
-    VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, QWidget &panel); //may need to be QWidget*
+    VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, QWidget *panel); //may need to be QWidget*
     //RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
     OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, QWidget &panel);
     ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, QWidget &panel);

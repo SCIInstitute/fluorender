@@ -7,9 +7,6 @@ PropertiesPanel::PropertiesPanel()
 {
   myLayout->addWidget(tabWidget);
   this->setLayout(myLayout);
-  //m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",*this);
-
-  //TODO: Look into if this causese memory issues in Windows.
 }
 
 double PropertiesPanel::getPropOptionsMaxVal() const
@@ -123,7 +120,7 @@ void PropertiesPanel::setPropShininessValue(int newVal)
 
 void PropertiesPanel::onVolumeLoaded(int renderviewID)
 {
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",*this);
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions(m_agent);
   VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
 
@@ -148,7 +145,7 @@ void PropertiesPanel::onMeshLoaded(int renderviewID)
 
   QWidget *mainWidget = genMainWidget(leftFrame,rightFrame);
   tabWidget->addTab(mainWidget,"Renderview: " + QString::number(renderviewID));
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",*this);
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
 }
 
 QWidget* PropertiesPanel::genMainWidget(QFrame *left, QFrame *right)
