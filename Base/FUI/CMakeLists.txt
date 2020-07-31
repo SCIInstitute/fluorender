@@ -125,7 +125,7 @@ set(SOURCES
     Panels/Properties/meshPropertiesOptions.cpp
     Panels/Properties/meshPropertiesMaterials.cpp
     Panels/Properties/volumePropertiesMisc.cpp
-		Panels/Properties/Agent/volumePropAgent.cpp
+	Panels/Properties/Agent/volumePropAgent.cpp
     Panels/Output_Adjustments/outputAdjust.cpp
     Panels/Output_Adjustments/outputLayout.cpp
     Panels/Output_Adjustments/Agent/outAdjustAgent.cpp

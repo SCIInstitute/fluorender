@@ -476,3 +476,4 @@ void VolumePropAgent::OnColorChanged(fluo::Event& event)
     panel_.m_color_btn->SetColour(wxc);
     */
 }
+
