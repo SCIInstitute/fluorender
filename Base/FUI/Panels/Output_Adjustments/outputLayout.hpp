@@ -69,6 +69,7 @@ class OutputLayout : public QGridLayout
 
   public:
     OutputLayout();
+    void disableLayout();
 
     template<typename T>
     void setRedGammaValue(T newVal) { redGammaController->setValues(newVal); }

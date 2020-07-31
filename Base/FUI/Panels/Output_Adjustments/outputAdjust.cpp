@@ -9,7 +9,7 @@ OutputAdjustments::OutputAdjustments()
 
   makeIntConnections();
   makeDblConnections();
-
+  outputLayout->disableLayout();
   m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",*this);
 }
 

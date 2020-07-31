@@ -31,3 +31,15 @@ void OutputLayout::buildSpinboxDConnections()
   for(auto && tup: dSpinConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
+
+void OutputLayout::disableLayout()
+{
+  for(auto && tup : sliderConnections)
+    std::get<0>(tup)->setEnabled(false);
+  
+  for(auto && tup : spinConnections)
+    std::get<0>(tup)->setEnabled(false);
+  
+  for(auto && tup : dSpinConnections)
+    std::get<0>(tup)->setEnabled(false);
+}
