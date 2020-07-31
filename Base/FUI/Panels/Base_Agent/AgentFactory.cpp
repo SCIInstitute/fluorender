@@ -188,7 +188,7 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	return render_canvas_agent;
 }
 */
-OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QWidget &panel)
+OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QWidget *panel)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -196,7 +196,7 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QW
 
 	//not found
 	OutAdjustAgent* out_adjust_agent =
-		new OutAdjustAgent(static_cast<OutputAdjustments&>(panel));
+		new OutAdjustAgent(static_cast<OutputAdjustments*>(panel));
 	if (out_adjust_agent)
 	{
 		out_adjust_agent->setName(name);

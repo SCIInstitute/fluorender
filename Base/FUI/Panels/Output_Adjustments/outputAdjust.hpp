@@ -35,6 +35,8 @@ class OutputAdjustments : public QWidget
   public:
     OutputAdjustments();
 
+    void setVolumeData(fluo::VolumeData *vd);
+
     template<typename T>
     void setOutRedGammaValue(T newVal)
     {

@@ -29,24 +29,25 @@ DEALINGS IN THE SOFTWARE.
 #define OUT_ADJUST_AGENT_HPP
 
 #include <Panels/Base_Agent/AgentFactory.hpp>
-#include <Node.hpp>
+#include <VolumeData/VolumeData.hpp>
 
 class OutputAdjustments;
 class AgentFactory;
 class OutAdjustAgent : public InterfaceAgent
 {
   public:
-    OutAdjustAgent(OutputAdjustments &panel);
+    OutAdjustAgent(OutputAdjustments *panel);
 
+/*
     virtual bool isSameKindAs(const fluo::Object* obj) const
     {
       return dynamic_cast<const OutAdjustAgent*>(obj) != NULL;
     }
-
+*/
     virtual const char* className() const { return "OutAdjustAgent"; }
   
-    virtual void setObject(fluo::Node* vd);
-    virtual fluo::Node* getObject();
+    virtual void setObject(fluo::VolumeData* vd);
+    virtual fluo::VolumeData* getObject();
   
     virtual void UpdateAllSettings();
   
@@ -66,7 +67,7 @@ class OutAdjustAgent : public InterfaceAgent
     void OnEqualizeBChanged(fluo::Event& event);
 
   private:
-    OutputAdjustments &parentPanel;
+    OutputAdjustments *parentPanel;
 
     const int Gamma2UiS(double v) { return static_cast<int>(100.0/v+0.5); }
     const int Brigt2UiS(double v) { return static_cast<int>((v - 1.0) * 256.0 + 0.5); }

@@ -930,6 +930,7 @@ void FUI::on_actionLoad_Volume_0_triggered()
     if(vd->LoadData(nrrdStructure, name.toStdString(), filename.toStdWString()))
       vd->SetReader(reader.get());
     ui->propertiesPanel->onVolumeLoaded(0,vd);
+    ui->outputAdjustments->setVolumeData(vd);
   }
 }
 

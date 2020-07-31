@@ -10,7 +10,6 @@ OutputAdjustments::OutputAdjustments()
   makeIntConnections();
   makeDblConnections();
   outputLayout->disableLayout();
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",*this);
 }
 
 void OutputAdjustments::setOutRedLuminValue(int newVal)
@@ -38,4 +37,12 @@ void OutputAdjustments::makeDblConnections()
 {
   for(auto && tup : dblConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
+}
+
+void OutputAdjustments::setVolumeData(fluo::VolumeData* vd)
+{
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",this);
+  outputLayout->setAgent(m_agent,vd);
+  outputLayout->enableLayout();
+  //m_agent->UpdateAllSettings();
 }

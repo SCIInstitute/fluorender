@@ -148,7 +148,7 @@ void PropertiesPanel::onMeshLoaded(int renderviewID)
 
   QWidget *mainWidget = genMainWidget(leftFrame,rightFrame);
   tabWidget->addTab(mainWidget,"Renderview: " + QString::number(renderviewID));
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
+  //m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
 }
 
 QWidget* PropertiesPanel::genMainWidget(QFrame *left, QFrame *right)

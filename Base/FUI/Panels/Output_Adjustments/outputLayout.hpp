@@ -69,6 +69,7 @@ class OutputLayout : public QGridLayout
 
   public:
     OutputLayout();
+    void enableLayout();
     void disableLayout();
 
     template<typename T>
@@ -93,11 +94,11 @@ class OutputLayout : public QGridLayout
     template<typename T>
     void setBlueEqlValue(T newVal) { blueEqlController->setValues(newVal); }
 
-    void setAgent(OutAdjustAgent *agent) { m_agent = agent; }
+    void setAgent(OutAdjustAgent *agent, fluo::VolumeData *vd) { m_agent = agent; m_agent->setObject(vd);}
 
   private:
 
-    OutAdjustAgent *m_agent;
+    OutAdjustAgent *m_agent = nullptr;
 
     typedef void(OutputLayout::*outputFunc)();
     typedef void(FluoSlider::*sliderFunc)(int);
@@ -163,7 +164,7 @@ class OutputLayout : public QGridLayout
     FluoColoredLine *greenLine = new FluoColoredLine(QFrame::HLine,"Green");
     FluoColoredLine *blueLine  = new FluoColoredLine(QFrame::HLine,"Blue");
 
-    FluoSlider *redGammaSlider   = new FluoSlider(Qt::Vertical,10,400);
+    FluoSlider *redGammaSlider   = new FluoSlider(Qt::Vertical,0,400);
     FluoSlider *greenGammaSlider = new FluoSlider(Qt::Vertical,10,400);
     FluoSlider *blueGammaSlider  = new FluoSlider(Qt::Vertical,10,400);
 
