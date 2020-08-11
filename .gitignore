@@ -7,3 +7,4 @@ build64
 *.swp
 ~*
 *.svn
+fluorender/ffmpeg/lib/Linux
