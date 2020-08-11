@@ -269,9 +269,29 @@ elseif(APPLE)
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
   file(GLOB FFMPEG_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/OSX/*.a)
 else()
-  find_package(FFMPEG REQUIRED)
   #string(REPLACE "/usr/include/" "" FFMPEG_INCLUDE_DIR "${FFMPEG_INCLUDE_DIR}")
-  include_directories(${FFMPEG_INCLUDE_DIR})
+  include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
+  if(NOT FFMPEG_BUILT)
+    message(STATUS "I AM IN HERE.")
+    add_custom_command(
+      OUTPUT ${FluoRender_SOURCE_DIR}/falseDoc.txt
+      COMMAND bash ${FluoRender_SOURCE_DIR}/buildFFmpeg.sh
+      )
+    add_custom_target(buildffmpeg ALL
+      DEPENDS falseDoc.txt
+    )
+  endif()
+  set(FF_BINARY_DIR ${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Linux)
+  set(FFMPEG_LIBRARIES
+    ${FF_BINARY_DIR}/libavutil.a
+    ${FF_BINARY_DIR}/libavformat.a
+    ${FF_BINARY_DIR}/libavcodec.a
+    ${FF_BINARY_DIR}/libavdevice.a
+    ${FF_BINARY_DIR}/libavfilter.a
+    ${FF_BINARY_DIR}/libpostproc.a
+    ${FF_BINARY_DIR}/libswresample.a
+    ${FF_BINARY_DIR}/libswscale.a
+  )
 endif()
 
 # FluoRender
@@ -362,6 +382,13 @@ file(GLOB sg_src fluorender/FluoRender/Scenegraph/*.cpp)
 file(GLOB sg_hdr fluorender/FluoRender/Scenegraph/*.h)
 add_library(SCENEGRAPH_OBJ OBJECT
   ${sg_src} ${sg_hdr})
+if(UNIX AND NOT APPLE)
+#This forces ffmpeg to be built before building fluorender itself.
+  if(NOT FFMPEG_BUILT)
+    add_dependencies(SCENEGRAPH_OBJ buildffmpeg)
+    set(FFMPEG_BUILT TRUE CACHE BOOL "Has it downloaded?" FORCE)
+  endif()
+endif()
 
 # Types
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Types)
@@ -556,6 +583,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
+  #add_dependencies(FluoRender buildffmpeg)
 elseif(WIN32)
   # Windows
   if(NOT OPEN_GL_HEADER_LOC)
@@ -686,6 +714,7 @@ if(APPLE)
     FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES})
   message(STATUS "${FREETYPE_LIBRARIES}")
 elseif(UNIX OR MINGW)
+  set(CMAKE_CXX_STANDARD_LIBRARIES "-ldl -lz -llzma -lm -L${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/lib/Linux/ -lavformat -lavcodec -lswscale -lswresample -lavutil -lpthread")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 endif()
 
@@ -724,7 +753,6 @@ elseif(WIN32)
     ${FREETYPE_LIBRARIES})
     #${wxWidgets_LIBRARIES})
 endif()
-
 
 
 # copy Java code dir to the binary directory

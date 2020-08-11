@@ -33,8 +33,8 @@ namespace detail
 		return std::string(text);
 	}
 
-	static const char* True = "true";
-	static const char* False = "false";
+	static const char* IsTrue = "true";
+	static const char* IsFalse = "false";
 }//namespace detail
 
 	////////////////////////////////
@@ -70,8 +70,8 @@ namespace detail
 	)
 	{
 		return detail::format("bvec2(%s, %s)",
-			v.x ? detail::True : detail::False,
-			v.y ? detail::True : detail::False);
+			v.x ? detail::IsTrue : detail::IsFalse,
+			v.y ? detail::IsTrue : detail::IsFalse);
 	}
 
 	template <precision P>
@@ -81,9 +81,9 @@ namespace detail
 	)
 	{
 		return detail::format("bvec3(%s, %s, %s)",
-			v.x ? detail::True : detail::False,
-			v.y ? detail::True : detail::False,
-			v.z ? detail::True : detail::False);
+			v.x ? detail::IsTrue : detail::IsFalse,
+			v.y ? detail::IsTrue : detail::IsFalse,
+			v.z ? detail::IsTrue : detail::IsFalse);
 	}
 
 	template <precision P>
@@ -93,10 +93,10 @@ namespace detail
 	)
 	{
 		return detail::format("bvec4(%s, %s, %s, %s)",
-			v.x ? detail::True : detail::False,
-			v.y ? detail::True : detail::False,
-			v.z ? detail::True : detail::False,
-			v.w ? detail::True : detail::False);
+			v.x ? detail::IsTrue : detail::IsFalse,
+			v.y ? detail::IsTrue : detail::IsFalse,
+			v.z ? detail::IsTrue : detail::IsFalse,
+			v.w ? detail::IsTrue : detail::IsFalse);
 	}
 
 	////////////////////////////////

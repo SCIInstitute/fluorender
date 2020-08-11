@@ -1899,7 +1899,9 @@ void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 {
-	wxString str = m_relax_value_spin->GetText()->GetValue();
+  double spinValue = m_relax_value_spin->GetValue();
+  wxString str;
+	str << spinValue;
 	double dval;
 	if (str.ToDouble(&dval))
 	{

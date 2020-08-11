@@ -1345,7 +1345,9 @@ void TraceDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
 
 void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
 {
-	wxString str = m_map_similar_spin->GetText()->GetValue();
+  double value = m_map_similar_spin->GetValue();
+	wxString str;
+  str << value;
 	double dval;
 	if (str.ToDouble(&dval))
 	{
@@ -1368,7 +1370,9 @@ void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 
 void TraceDlg::OnMapContactText(wxCommandEvent& event)
 {
-	wxString str = m_map_contact_spin->GetText()->GetValue();
+  double value = m_map_contact_spin->GetValue();
+	wxString str;
+  str << value;
 	double dval;
 	if (str.ToDouble(&dval))
 	{

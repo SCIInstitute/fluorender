@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Point.h>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 #include <glm/glm.hpp>
 
 #define BRUSH_TOOL_ITER_WEAK	10

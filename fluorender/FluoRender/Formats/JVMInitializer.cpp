@@ -54,7 +54,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 		jvm_path = args[0]; //inp_settingDlg->getJVMPath();
 		ij_path = args[1]; //inp_settingDlg->getIJPath();
 		bioformats_path = args[2]; //inp_settingDlg->getBioformatsPath();
-        std::string name = ij_path;
+    std::string name = ij_path.ToStdString();
         // For Mac: ij_path is going to be ij.app or fiji.app.
         
 #ifdef _WIN32
@@ -200,7 +200,8 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
-	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
+	string imageJPath = "-Djava.class.path=" + exePath.ToStdString(); 
+  imageJPath.append(GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator());
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
     

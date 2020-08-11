@@ -62,6 +62,7 @@ namespace FLIVR
 		{
 			loc_ui[i] = -1;
 			loc_vec4[i] = -1;
+
 			loc_mat4[i] = -1;
 		}
 	}
@@ -76,6 +77,7 @@ namespace FLIVR
 		for (int i=0; i<MAX_SHADER_UNIFORMS; ++i)
 		{
 			loc_ui[i] = -1;
+
 			loc_vec4[i] = -1;
 			loc_mat4[i] = -1;
 		}
@@ -146,7 +148,7 @@ namespace FLIVR
 			glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &texSize);
 			max_texture_size_ = texSize;
 
-#ifdef _WIN32
+#if defined _WIN32 || defined __unix__
 			const GLubyte* strRenderer=0;
 			if ((strRenderer=glGetString(GL_RENDERER)))
 			{

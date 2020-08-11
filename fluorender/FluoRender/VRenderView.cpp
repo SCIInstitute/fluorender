@@ -161,7 +161,7 @@ wxPanel(parent, id, pos, size, style),
 	}
 
 	wxGLAttributes attriblist;
-#ifdef _WIN32
+#if defined _WIN32
 	if (red_bit >= 16 || green_bit >= 16 || blue_bit >= 16)
 	{
 		attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
@@ -202,6 +202,48 @@ wxPanel(parent, id, pos, size, style),
 		attriblist.SampleBuffers(1);
 		attriblist.Samplers(samples);
 	}
+#elif defined __unix__
+	if (red_bit >= 16 || green_bit >= 16 || blue_bit >= 16)
+	{
+	//	attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
+		attriblist.AddAttribute(GL_TRUE);
+	//	attriblist.AddAttribute(WGL_ACCELERATION_ARB);
+	//	attriblist.AddAttribute(WGL_FULL_ACCELERATION_ARB);
+		if (api_type == 2)
+		{
+	//		attriblist.AddAttribute(WGL_FLOAT_COMPONENTS_NV);
+			attriblist.AddAttribute(GL_TRUE);
+		}
+		else
+		{
+	//		attriblist.AddAttribute(WGL_PIXEL_TYPE_ARB);
+	//		attriblist.AddAttribute(WGL_TYPE_RGBA_FLOAT_ARB);
+			//attriblist.AddAttribute(WGL_TYPE_RGBA_ARB);
+		}
+	//	attriblist.AddAttribute(WGL_COLOR_BITS_ARB);
+		attriblist.AddAttribute(red_bit+green_bit+blue_bit+alpha_bit);
+	//	attriblist.AddAttribute(WGL_RED_BITS_ARB);
+		attriblist.AddAttribute(red_bit);
+	//	attriblist.AddAttribute(WGL_GREEN_BITS_ARB);
+		attriblist.AddAttribute(green_bit);
+	//	attriblist.AddAttribute(WGL_BLUE_BITS_ARB);
+		attriblist.AddAttribute(blue_bit);
+	//	attriblist.AddAttribute(WGL_ALPHA_BITS_ARB);
+		attriblist.AddAttribute(alpha_bit);
+	//	attriblist.AddAttribute(WGL_DEPTH_BITS_ARB);
+		attriblist.AddAttribute(depth_bit);
+	//	attriblist.AddAttribute(WGL_STENCIL_BITS_ARB);
+		attriblist.AddAttribute(8);
+	}
+	else
+	{
+		attriblist.PlatformDefaults();
+		attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
+		attriblist.Depth(depth_bit);
+		attriblist.SampleBuffers(1);
+		attriblist.Samplers(samples);
+	}
+
 #else
 	attriblist.PlatformDefaults();
 	attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);

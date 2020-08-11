@@ -738,7 +738,7 @@ void ScriptProc::RunCompAnalysis(int index, wxFileConfig &fconfig)
 		FL::ComponentAnalyzer comp_analyzer(*i);
 		comp_analyzer.Analyze(selected, consistent);
 		string result_str;
-		string comp_header = wxString::Format("%d", tseq_cur_num);
+		string comp_header = wxString::Format("%d", tseq_cur_num).ToStdString();
 		comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
 
 		//save append
