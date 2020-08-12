@@ -165,7 +165,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   set(wxWidgets_CONFIGURATION mswud)
 endif()
-find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc REQUIRED)
 include(${wxWidgets_USE_FILE})
 set(wxWidgets_USE_STATIC ON)
 if(UNIX OR APPLE OR MINGW)
@@ -443,6 +443,16 @@ include_directories(${FluoRender_SOURCE_DIR}/fluorender/nd2/include)
 if(WIN32)
 	if(${ARCHITECTURE} MATCHES 64)
 		file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.lib)
+	endif()
+elseif(UNIX AND NOT APPLE)
+	if(${ARCHITECTURE} MATCHES 64)
+		set(ND2_LIBRARIES 
+      ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/Linux/libnd2readsdk.a
+      ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/Linux/liblimfile.a
+      ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/Linux/libtiff.a
+      ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/Linux/libtiffxx.a
+      ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/Linux/libz.a
+    )
 	endif()
 elseif(APPLE)
    file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/*.dylib)
