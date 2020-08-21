@@ -142,7 +142,7 @@ wxPanel(parent, id, pos, size, style),
 	int depth_bit = 24;
 	int samples = 0;
 	int gl_major_ver = 4;
-	int gl_minor_ver = 4;
+	int gl_minor_ver = 6;
 	int gl_profile_mask = 1;
 	int api_type = 0;
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -203,6 +203,7 @@ wxPanel(parent, id, pos, size, style),
 		attriblist.Samplers(samples);
 	}
 #elif defined __unix__
+  /*
 	if (red_bit >= 16 || green_bit >= 16 || blue_bit >= 16)
 	{
 	//	attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
@@ -235,14 +236,15 @@ wxPanel(parent, id, pos, size, style),
 	//	attriblist.AddAttribute(WGL_STENCIL_BITS_ARB);
 		attriblist.AddAttribute(8);
 	}
-	else
-	{
+    */
+	//else
+	//{
 		attriblist.PlatformDefaults();
-		attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
-		attriblist.Depth(depth_bit);
-		attriblist.SampleBuffers(1);
-		attriblist.Samplers(samples);
-	}
+		//attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
+		//attriblist.Depth(depth_bit);
+		//attriblist.SampleBuffers(1);
+		//attriblist.Samplers(samples);
+	//}
 
 #else
 	attriblist.PlatformDefaults();
@@ -263,10 +265,12 @@ wxPanel(parent, id, pos, size, style),
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
+  std::cout << "Do I crash here?" << std::endl;
 	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
+    /*
 		switch (gl_profile_mask)
 		{
 		case 1:
@@ -282,15 +286,22 @@ wxPanel(parent, id, pos, size, style),
 			Robust().
 			ResetIsolation().
 			EndList();
+    */
+    //contextAttrs.CoreProfile().MajorVersion(4).MinorVersion(6).EndList()
+    contextAttrs.PlatformDefaults().CoreProfile().OGLVersion(4,6).EndList();
+    //contextAttrs.PlatformDefaults().EndList();
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
+    std::cout << "Or here?" << std::endl;
 		if (!sharedContext->IsOK())
 		{
+      std::cout << "Did I fail inside here?" << std::endl;
 			contextAttrs.Reset();
 			contextAttrs.PlatformDefaults().EndList();
 			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
 		}
 		if (!sharedContext->IsOK())
 		{
+      std::cout << "Or Did I fail inside here?" << std::endl;
 			wxMessageBox("FluoRender needs an OpenGL 3.3 capable driver.\n" \
 				"Please update your graphics card driver or upgrade your graphics card.\n",
 				"Graphics card error", wxOK | wxICON_ERROR, this);

@@ -4502,10 +4502,11 @@ m_vol_exb(0.0),
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
-	wxFileConfig fconfig(is);
+	//wxFileConfig fconfig(is);
 
 	double val;
 	int ival;
+  /*
 	if (fconfig.Read("extract_boundary", &val))
 		m_vol_exb = val;
 	if (fconfig.Read("gamma", &val))
@@ -4569,7 +4570,7 @@ m_vol_exb(0.0),
 		m_vol_shw = bval;
 	if (fconfig.Read("shadow_intensity", &val))
 		m_vol_swi = val;
-
+*/
 	//wavelength to color table
 	m_vol_wav[0] = Color(1.0, 1.0, 1.0);
 	m_vol_wav[1] = Color(1.0, 1.0, 1.0);
