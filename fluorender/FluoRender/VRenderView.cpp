@@ -1823,7 +1823,7 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 
 wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 150));
+	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -1898,15 +1898,15 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	group1->Add(sizer_1);
 	group1->Add(10, 10);
 	group1->Add(sizer_2);
-	group1->Add(10, 10);
 	if (VRenderFrame::GetSaveProject() &&
 		ch_embed)
 	{
-		group1->Add(ch_embed);
 		group1->Add(10, 10);
+		group1->Add(ch_embed);
 	}
+	group1->Add(10, 20);
 
-	panel->SetSizer(group1);
+	panel->SetSizerAndFit(group1);
 	panel->Layout();
 
 	return panel;

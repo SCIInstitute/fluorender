@@ -1155,7 +1155,7 @@ void VRenderFrame::OnCh3Check(wxCommandEvent &event)
 
 wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(640, 110));
+	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -1196,7 +1196,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	st2 = new wxStaticText(panel, 0,
 		"Serial:");
 	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
-		"", wxDefaultPosition, wxSize(50, 20));
+		"", wxDefaultPosition, wxDefaultSize);
 	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderFrame::OnTxt2Change), NULL, panel);
 
@@ -1230,12 +1230,12 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	//time sequence identifier
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
-		"", wxDefaultPosition, wxSize(80, 20));
+		"", wxDefaultPosition, wxDefaultSize);
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
 	st1 = new wxStaticText(panel, 0,
-		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
+		"Time sequence identifier (digits after the identifier in filenames are used as time index)\n");
 	sizer2->Add(txt1);
 	sizer2->Add(10, 10);
 	sizer2->Add(st1);
@@ -1258,7 +1258,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 
 wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(640, 110));
+	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -1309,7 +1309,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	group1->Add(ch2);
 	group1->Add(10, 10);
 	group1->Add(ch3);
-	//group1->Add(10, 10);
+	group1->Add(10, 10);
 	//group1->Add(sizer1);
 	//group1->Add(10, 10);
 
@@ -2756,7 +2756,7 @@ void VRenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
 
 wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(600, 90));
+	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -2785,7 +2785,7 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	group1->Add(ch_cmp);
 	group1->Add(10, 10);
 
-	panel->SetSizer(group1);
+	panel->SetSizerAndFit(group1);
 	panel->Layout();
 
 	return panel;

@@ -512,6 +512,10 @@ public:
 	void GetTraces(bool update = false);
 
 	//enlarge output image
+	static void SetKeepEnlarge(bool value)
+	{
+		m_keep_enlarge = value;
+	}
 	static void SetEnlarge(bool value)
 	{
 		m_enlarge = value;
@@ -524,6 +528,14 @@ public:
 			m_tsize = TextRenderer::text_texture_manager_.GetSize();
 			TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
 		}
+	}
+	static bool GetEnlarge()
+	{
+		return m_enlarge;
+	}
+	static double GetEnlargeScale()
+	{
+		return m_enlarge_scale;
 	}
 
 	//stereo/vr
@@ -943,6 +955,7 @@ private:
 	static unsigned int m_tsize;
 
 	//enlargement
+	static bool m_keep_enlarge;
 	static bool m_enlarge;
 	static double m_enlarge_scale;
 

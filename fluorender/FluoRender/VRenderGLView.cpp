@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
+bool VRenderGLView::m_keep_enlarge = false;
 bool VRenderGLView::m_enlarge = false;
 double VRenderGLView::m_enlarge_scale = 1.0;
 unsigned int VRenderGLView::m_tsize = 14.0;
@@ -5268,6 +5269,8 @@ void VRenderGLView::ResetEnlarge()
 	if (TextureRenderer::get_mem_swap() &&
 		TextureRenderer::get_start_update_loop() &&
 		!TextureRenderer::get_done_update_loop())
+		return;
+	if (m_keep_enlarge)
 		return;
 	m_enlarge = false;
 	TextRenderer::text_texture_manager_.SetSize(m_tsize);

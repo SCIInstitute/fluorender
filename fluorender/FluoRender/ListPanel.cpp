@@ -502,7 +502,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 {
 	wxIntegerValidator<unsigned int> vald_int;
 
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
+	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -550,9 +550,9 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	group1->Add(sizer1);
 	group1->Add(10, 10);
 	group1->Add(sizer2);
-	group1->Add(10, 10);
+	group1->Add(10, 20);
 
-	panel->SetSizer(group1);
+	panel->SetSizerAndFit(group1);
 	panel->Layout();
 
 	return panel;

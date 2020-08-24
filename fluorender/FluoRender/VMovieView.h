@@ -250,6 +250,9 @@ private:
 
 	//help
 	void OnHelpBtn(wxCommandEvent& event);
+	void OnChEnlargeCheck(wxCommandEvent &event);
+	void OnSlEnlargeScroll(wxScrollEvent &event);
+	void OnTxEnlargeText(wxCommandEvent &event);
 	void OnMovieQuality(wxCommandEvent &event);
 	void OnCh1Check(wxCommandEvent &event);
 	void OnCh2Check(wxCommandEvent &event);

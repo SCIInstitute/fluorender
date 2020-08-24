@@ -1054,7 +1054,7 @@ void RecorderDlg::OnCh1Check(wxCommandEvent &event)
 
 wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 {
-	wxPanel* panel = new wxPanel(parent, 0, wxDefaultPosition, wxSize(400, 90));
+	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -1072,9 +1072,9 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 	//group
 	group1->Add(10, 10);
 	group1->Add(ch1);
-	group1->Add(10, 10);
+	group1->Add(10, 20);
 
-	panel->SetSizer(group1);
+	panel->SetSizerAndFit(group1);
 	panel->Layout();
 
 	return panel;
