@@ -53,6 +53,22 @@ ENDIF()
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+if(UNIX AND NOT APPLE)
+  find_program(NASM_EXE NAMES nasm)
+
+  if(NOT NASM_EXE)
+    MESSAGE(FATAL_ERROR "
+      nasm was not found on your system and is required to install FFmpeg. Please install with:
+
+      - sudo apt update
+      - sudo apt install nasm
+
+      then run CMake again.
+    ")
+  endif()
+endif()
+
+
 if(UNIX OR APPLE OR MINGW)
   set(ARCHITECTURE 64)
 elseif(WIN32)
@@ -272,7 +288,6 @@ else()
   #string(REPLACE "/usr/include/" "" FFMPEG_INCLUDE_DIR "${FFMPEG_INCLUDE_DIR}")
   include_directories(${FluoRender_SOURCE_DIR}/fluorender/ffmpeg/include)
   if(NOT FFMPEG_BUILT)
-    message(STATUS "I AM IN HERE.")
     add_custom_command(
       OUTPUT ${FluoRender_SOURCE_DIR}/falseDoc.txt
       COMMAND bash ${FluoRender_SOURCE_DIR}/buildFFmpeg.sh
