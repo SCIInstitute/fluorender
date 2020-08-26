@@ -120,7 +120,8 @@ m_view(0)
 	m_kernel_edit_stc = new wxStyledTextCtrl(
 		this, ID_KernelEditStc,
 		wxDefaultPosition, wxDefaultSize);
-	wxFont font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+	//wxFont font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+	wxFont font(wxFontInfo(10));
 	m_kernel_edit_stc->StyleSetFont(wxSTC_STYLE_DEFAULT, font);
 	m_kernel_edit_stc->StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
 	m_kernel_edit_stc->StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);

@@ -522,7 +522,8 @@ wxPanel(parent, id, pos, size,style, name),
 #ifdef _WIN32
 	wxFont font(28, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 #else
-	wxFont font(14, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	//wxFont font(14, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	wxFont font(wxFontInfo(14));
 #endif
 	m_colormap_inv_btn->SetFont(font);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",

@@ -295,8 +295,8 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 	//tm_processor.SetContactThresh(contact_factor);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&ScriptProc::ReadVolCache, this, _1),
-		boost::bind(&ScriptProc::DelVolCache, this, _1));
+		boost::bind(&ScriptProc::ReadVolCache, this, boost::placeholders::_1),
+		boost::bind(&ScriptProc::DelVolCache, this, boost::placeholders::_1));
 
 	tm_processor.TrackStencils(tseq_prv_num, tseq_cur_num);
 

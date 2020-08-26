@@ -1750,24 +1750,28 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	//right
 	wxStaticText *txt = new wxStaticText(d,wxID_ANY,FLUORENDER_TITLE,
 		wxDefaultPosition,wxSize(-1,-1));
-	wxFont font = wxFont(15,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	//wxFont font = wxFont(15,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	wxFont font = wxFont(wxFontInfo(15));
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,"Version: " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR)),
 		wxDefaultPosition,wxSize(50,-1));
-	font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	//font = wxFont(12,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	font = wxFont(wxFontInfo(12));
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	txt = new wxStaticText(d,wxID_ANY,wxString("Copyright (c) ") + VERSION_COPYRIGHT,
 		wxDefaultPosition,wxSize(-1,-1));
-	font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	//font = wxFont(11,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	font = wxFont(wxFontInfo(11));
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	right->Add(3,5,0);
 	txt = new wxStaticText(d,wxID_ANY,VERSION_AUTHORS,
 		wxDefaultPosition,wxSize(300,-1));
-	font = wxFont(7,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	//font = wxFont(7,wxFONTFAMILY_ROMAN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL );
+	font = wxFont(wxFontInfo(7));
 	txt->SetFont(font);
 	right->Add(txt,0,wxEXPAND);
 	wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d,wxID_ANY,"Contact Info",

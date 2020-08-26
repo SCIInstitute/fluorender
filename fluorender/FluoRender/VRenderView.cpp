@@ -265,7 +265,6 @@ wxPanel(parent, id, pos, size, style),
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
-  std::cout << "Do I crash here?" << std::endl;
 	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
 	if (!sharedContext)
 	{
@@ -291,17 +290,14 @@ wxPanel(parent, id, pos, size, style),
     contextAttrs.PlatformDefaults().CoreProfile().OGLVersion(4,6).EndList();
     //contextAttrs.PlatformDefaults().EndList();
 		sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
-    std::cout << "Or here?" << std::endl;
 		if (!sharedContext->IsOK())
 		{
-      std::cout << "Did I fail inside here?" << std::endl;
 			contextAttrs.Reset();
 			contextAttrs.PlatformDefaults().EndList();
 			sharedContext = new wxGLContext(m_glview, NULL, &contextAttrs);
 		}
 		if (!sharedContext->IsOK())
 		{
-      std::cout << "Or Did I fail inside here?" << std::endl;
 			wxMessageBox("FluoRender needs an OpenGL 3.3 capable driver.\n" \
 				"Please update your graphics card driver or upgrade your graphics card.\n",
 				"Graphics card error", wxOK | wxICON_ERROR, this);
@@ -319,8 +315,9 @@ wxPanel(parent, id, pos, size, style),
 		}
 		if (sharedContext)
 		{
+      // There is definitely an issue in here for some reason
 			//sharedContext->SetCurrent(*m_glview);
-			m_glview->SetCurrent(*sharedContext);
+			//m_glview->SetCurrent(*sharedContext);
 			m_glview->m_glRC = sharedContext;
 			m_glview->m_set_gl = true;
 		}
@@ -535,7 +532,8 @@ void VRenderView::CreateBar()
 #ifdef _WIN32
 	wxFont font(34, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 #else
-	wxFont font(17, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	//wxFont font(17, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL);
+	wxFont font(wxFontInfo(17));
 #endif
 	m_bg_inv_btn->SetFont(font);
 	m_options_toolbar->AddControl(m_bg_color_picker);
