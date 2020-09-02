@@ -139,7 +139,7 @@ void OutAdjustAgent::OnGammaRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma r", dval);
-    parentPanel->setOutRedGammaValue(Gamma2UiS(dval));
+    //parentPanel->setOutRedGammaValue(Gamma2UiS(dval));
 }
 
 void OutAdjustAgent::OnGammaGChanged(fluo::Event& event)

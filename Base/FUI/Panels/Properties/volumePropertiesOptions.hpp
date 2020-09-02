@@ -101,7 +101,7 @@ class VolumePropertiesOptions : public QGridLayout
     template<typename T>
     void setExtBoundValue(T newVal) { boundaryController->setValues(newVal); }
 
-    void setSaturationVal(int newVal) { saturationController->setValues(newVal); }
+    void setSaturationVal(int newVal) { saturationController->setValues(newVal); double a; m_agent->getValue("gamma 3d",a); std::cout << a << std::endl;}
 
     void setLowThreshValue(int newVal) { threshold1Controller->setValues(newVal); }
     void setHighThreshValue(int newVal) { threshold2Controller->setValues(newVal); }

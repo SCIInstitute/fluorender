@@ -40,19 +40,20 @@ class OutputAdjustments : public QWidget
     template<typename T>
     void setOutRedGammaValue(T newVal)
     {
-      outputLayout->setRedGammaValue(newVal);
+      OutputLayout* temp = this->findChild<OutputLayout*>();
+      temp->setRedGammaValue(newVal);
     }
 
     template<typename T>
     void setOutGreenGammaValue(T newVal)
     {
-      outputLayout->setGreenGammaValue(newVal);
+      this->outputLayout->setGreenGammaValue(newVal);
     }
 
     template<typename T>
     void setOutBlueGammaValue(T newVal)
     {
-      outputLayout->setBlueGammaValue(newVal);
+      this->outputLayout->setBlueGammaValue(newVal);
     }
 
     void setOutRedLuminValue(int newVal);
@@ -62,19 +63,19 @@ class OutputAdjustments : public QWidget
     template<typename T>
     void setOutRedEqlValue(T newVal)
     {
-      outputLayout->setRedEqlValue(newVal);
+      this->outputLayout->setRedEqlValue(newVal);
     }
 
     template<typename T>
     void setOutGreenEqlValue(T newVal)
     {
-      outputLayout->setGreenEqlValue(newVal);
+      this->outputLayout->setGreenEqlValue(newVal);
     }
 
     template<typename T>
     void setOutBlueEqlValue(T newVal)
     {
-      outputLayout->setBlueEqlValue(newVal);
+      this->outputLayout->setBlueEqlValue(newVal);
     }
 
   private:

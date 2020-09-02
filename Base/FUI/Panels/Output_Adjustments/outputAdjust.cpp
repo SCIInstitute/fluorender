@@ -9,22 +9,22 @@ OutputAdjustments::OutputAdjustments()
 
   makeIntConnections();
   makeDblConnections();
-  outputLayout->disableLayout();
+  this->outputLayout->disableLayout();
 }
 
 void OutputAdjustments::setOutRedLuminValue(int newVal)
 {
-  outputLayout->setRedLuminValue(newVal);
+  this->outputLayout->setRedLuminValue(newVal);
 }
 
 void OutputAdjustments::setOutGreenLuminValue(int newVal)
 {
-  outputLayout->setGreenLuminValue(newVal);
+  this->outputLayout->setGreenLuminValue(newVal);
 }
 
 void OutputAdjustments::setOutBlueLuminValue(int newVal)
 {
-  outputLayout->setBlueLuminValue(newVal);
+  this->outputLayout->setBlueLuminValue(newVal);
 }
 
 void OutputAdjustments::makeIntConnections()
@@ -42,7 +42,9 @@ void OutputAdjustments::makeDblConnections()
 void OutputAdjustments::setVolumeData(fluo::VolumeData* vd)
 {
   m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",this);
-  outputLayout->setAgent(m_agent,vd);
-  outputLayout->enableLayout();
-  //m_agent->UpdateAllSettings();
+  this->outputLayout->setAgent(m_agent,vd);
+  this->outputLayout->buildWrappers();
+  this->outputLayout->buildControllers();
+  this->outputLayout->enableLayout();
+  m_agent->UpdateAllSettings();
 }

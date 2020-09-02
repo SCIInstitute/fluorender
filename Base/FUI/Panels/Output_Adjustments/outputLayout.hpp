@@ -95,6 +95,8 @@ class OutputLayout : public QGridLayout
     void setBlueEqlValue(T newVal) { blueEqlController->setValues(newVal); }
 
     void setAgent(OutAdjustAgent *agent, fluo::VolumeData *vd) { m_agent = agent; m_agent->setObject(vd);}
+    void buildWrappers();
+    void buildControllers();
 
   private:
 
@@ -188,15 +190,15 @@ class OutputLayout : public QGridLayout
     FluoSpinboxDouble *greenEqlSpinbox = new FluoSpinboxDouble(0.0,1.0,false);
     FluoSpinboxDouble *blueEqlSpinbox  = new FluoSpinboxDouble(0.0,1.0,false);
 
-    AgentWrapper<OutAdjustAgent> *redGammaWrapper = new AgentWrapper<OutAdjustAgent>("gamma r", m_agent);
-    AgentWrapper<OutAdjustAgent> *greenGammaWrapper = new AgentWrapper<OutAdjustAgent>("gamma g", m_agent);
-    AgentWrapper<OutAdjustAgent> *blueGammaWrapper = new AgentWrapper<OutAdjustAgent>("gamma b", m_agent);
-    AgentWrapper<OutAdjustAgent> *redLuminWrapper = new AgentWrapper<OutAdjustAgent>("brightness r", m_agent);
-    AgentWrapper<OutAdjustAgent> *greenLuminWrapper = new AgentWrapper<OutAdjustAgent>("brightness g", m_agent);
-    AgentWrapper<OutAdjustAgent> *blueLuminWrapper = new AgentWrapper<OutAdjustAgent>("brightness b", m_agent);
-    AgentWrapper<OutAdjustAgent> *redEqlWrapper = new AgentWrapper<OutAdjustAgent>("equalize r", m_agent);
-    AgentWrapper<OutAdjustAgent> *greenEqlWrapper = new AgentWrapper<OutAdjustAgent>("equalize g", m_agent);
-    AgentWrapper<OutAdjustAgent> *blueEqlWrapper = new AgentWrapper<OutAdjustAgent>("equalize b", m_agent);
+    AgentWrapper<OutAdjustAgent> *redGammaWrapper;
+    AgentWrapper<OutAdjustAgent> *greenGammaWrapper;
+    AgentWrapper<OutAdjustAgent> *blueGammaWrapper;
+    AgentWrapper<OutAdjustAgent> *redLuminWrapper;
+    AgentWrapper<OutAdjustAgent> *greenLuminWrapper;
+    AgentWrapper<OutAdjustAgent> *blueLuminWrapper;
+    AgentWrapper<OutAdjustAgent> *redEqlWrapper;
+    AgentWrapper<OutAdjustAgent> *greenEqlWrapper;
+    AgentWrapper<OutAdjustAgent> *blueEqlWrapper;
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, outputFunc>> sliderConnections = {
       std::make_tuple(redGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onRedGSliderChanged),
@@ -246,24 +248,15 @@ class OutputLayout : public QGridLayout
       std::bind(&OutputLayout::addSingle<QPushButton>,this,17,resetAllButton)
     };
 
-    Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *redGammaController =
-      new Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*redGammaSlider, *redGammaSpinbox, *redGammaWrapper);
-    Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *greenGammaController =
-        new Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*greenGammaSlider, *greenGammaSpinbox, *greenGammaWrapper);
-    Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *blueGammaController =
-        new Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*blueGammaSlider, *blueGammaSpinbox, *blueGammaWrapper);
-    Controller<FluoSlider, FluoSpinbox, AgentWrapper<OutAdjustAgent>> *redLuminController =
-        new Controller<FluoSlider, FluoSpinbox, AgentWrapper<OutAdjustAgent>>(*redLuminSlider, *redLuminSpinbox, *redLuminWrapper);
-    Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>> *greenLuminController =
-       new Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>>(*greenLuminSlider, *greenLuminSpinbox, *greenLuminWrapper);
-    Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>> *blueLuminController = 
-      new Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>>(*blueLuminSlider,*blueLuminSpinbox, *blueLuminWrapper);
-    Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *redEqlController =
-      new Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*redEqlSlider,*redEqlSpinbox,*redEqlWrapper);
-    Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *greenEqlController = 
-      new Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*greenEqlSlider,*greenEqlSpinbox,*greenEqlWrapper);
-    Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *blueEqlController = 
-      new Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*blueEqlSlider,*blueEqlSpinbox,*blueEqlWrapper);
+    Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *redGammaController;
+    Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *greenGammaController;
+    Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *blueGammaController;
+    Controller<FluoSlider, FluoSpinbox, AgentWrapper<OutAdjustAgent>> *redLuminController;
+    Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>> *greenLuminController;
+    Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>> *blueLuminController; 
+    Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *redEqlController;
+    Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *greenEqlController;
+    Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *blueEqlController;
 };
 
 #endif 
