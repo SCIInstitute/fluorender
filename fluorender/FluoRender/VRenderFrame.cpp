@@ -4375,7 +4375,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					vrv->m_glview->SetInitDist(initdist);
 				else
 					vrv->m_glview->SetInitDist(radius/tan(d2r(vrv->GetAov()/2.0)));
-				bool scale_mode;
+				int scale_mode;
 				if (fconfig.Read("scale_mode", &scale_mode))
 					vrv->SetScaleMode(scale_mode, false);
 				double scale;
