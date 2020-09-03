@@ -19,6 +19,7 @@
 #include <vector>
 #include <tuple>
 #include <functional>
+#include <iostream>
 
 #include <Panels/Output_Adjustments/Agent/outAdjustAgent.hpp>
 
@@ -46,7 +47,7 @@ class OutputLayout : public QGridLayout
     void sendBlueEqlValue(double value);
 
   public slots:
-    void onRedGSliderChanged() { sendRedGammaValue(redGammaSlider->value()); }
+    void onRedGSliderChanged() { std::cout << "Sliderval: " << redGammaSlider->value() << std::endl;sendRedGammaValue(redGammaSlider->value()); }
     void onGreenGSliderChanged() { sendGreenGammaValue(greenGammaSlider->value()); }
     void onBlueGSliderChanged() { sendBlueGammaValue(blueGammaSlider->value()); }
     void onRedGSpinChanged() { sendRedGammaValue(redGammaSpinbox->value()); }
@@ -166,7 +167,7 @@ class OutputLayout : public QGridLayout
     FluoColoredLine *greenLine = new FluoColoredLine(QFrame::HLine,"Green");
     FluoColoredLine *blueLine  = new FluoColoredLine(QFrame::HLine,"Blue");
 
-    FluoSlider *redGammaSlider   = new FluoSlider(Qt::Vertical,0,400);
+    FluoSlider *redGammaSlider   = new FluoSlider(Qt::Vertical,10,400);
     FluoSlider *greenGammaSlider = new FluoSlider(Qt::Vertical,10,400);
     FluoSlider *blueGammaSlider  = new FluoSlider(Qt::Vertical,10,400);
 

@@ -61,7 +61,7 @@ void OutAdjustAgent::UpdateAllSettings()
 	//values
 	//bool result = getValue("gamma r", dval);
 	getValue("gamma r", dval);
-    parentPanel->setOutRedGammaValue(Gamma2UiS(dval));
+    parentPanel->setOutRedGammaValue(dval);
 	getValue("gamma g", dval);
     parentPanel->setOutGreenGammaValue(Gamma2UiS(dval));
     getValue("gamma b", dval);
@@ -139,7 +139,8 @@ void OutAdjustAgent::OnGammaRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma r", dval);
-    //parentPanel->setOutRedGammaValue(Gamma2UiS(dval));
+  std::cout << dval << std::endl;
+    parentPanel->setOutRedGammaValue(dval);
 }
 
 void OutAdjustAgent::OnGammaGChanged(fluo::Event& event)
