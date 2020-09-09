@@ -47,9 +47,9 @@ class OutputLayout : public QGridLayout
     void sendBlueEqlValue(double value);
 
   public slots:
-    void onRedGSliderChanged() { std::cout << "Sliderval: " << redGammaSlider->value() << std::endl;sendRedGammaValue(redGammaSlider->value()); }
-    void onGreenGSliderChanged() { sendGreenGammaValue(greenGammaSlider->value()); }
-    void onBlueGSliderChanged() { sendBlueGammaValue(blueGammaSlider->value()); }
+    void onRedGSliderChanged() { sendRedGammaValue(static_cast<double>(redGammaSlider->value()/100.0)); }
+    void onGreenGSliderChanged() { sendGreenGammaValue(static_cast<double>(greenGammaSlider->value()/100.0)); }
+    void onBlueGSliderChanged() { sendBlueGammaValue(static_cast<double>(blueGammaSlider->value()/100.0)); }
     void onRedGSpinChanged() { sendRedGammaValue(redGammaSpinbox->value()); }
     void onGreenGSpinChanged() { sendGreenGammaValue(greenGammaSpinbox->value()); }
     void onBlueGSpinChanged() { sendBlueGammaValue(blueGammaSpinbox->value()); }
@@ -61,9 +61,9 @@ class OutputLayout : public QGridLayout
     void onGreenLSpinChanged() { sendGreenLuminValue(greenLuminSpinbox->value()); }
     void onBlueLSpinChanged() { sendBlueLuminValue(blueLuminSpinbox->value()); }
 
-    void onRedESliderChanged() { sendRedEqlValue(redEqlSlider->value()); }
-    void onGreenESliderChanged() { sendGreenEqlValue(greenEqlSlider->value()); }
-    void onBlueESliderChanged() { sendBlueEqlValue(blueEqlSlider->value()); }
+    void onRedESliderChanged() { sendRedEqlValue(static_cast<double>(redEqlSlider->value()/100.0)); }
+    void onGreenESliderChanged() { sendGreenEqlValue(static_cast<double>(greenEqlSlider->value()/100.0)); }
+    void onBlueESliderChanged() { sendBlueEqlValue(static_cast<double>(blueEqlSlider->value()/100.0)); }
     void onRedESpinChanged() { sendRedEqlValue(redEqlSpinbox->value()); }
     void onGreenESpinChanged() { sendGreenEqlValue(greenEqlSpinbox->value()); }
     void onBlueESpinChanged() { sendBlueEqlValue(blueEqlSpinbox->value()); }

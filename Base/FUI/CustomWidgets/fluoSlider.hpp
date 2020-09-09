@@ -5,7 +5,6 @@
 #include <QSlider>
 
 #include <type_traits>
-#include <any>
 
 #include "fluoSliderStyle.hpp"
 

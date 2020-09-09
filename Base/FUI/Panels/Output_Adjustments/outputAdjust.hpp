@@ -47,7 +47,9 @@ class OutputAdjustments : public QWidget
     template<typename T>
     void setOutGreenGammaValue(T newVal)
     {
-      this->outputLayout->setGreenGammaValue(newVal);
+      OutputLayout* temp = this->findChild<OutputLayout*>();
+      temp->setGreenGammaValue(newVal);
+      //this->outputLayout->setGreenGammaValue(newVal);
     }
 
     template<typename T>

@@ -147,54 +147,54 @@ void OutAdjustAgent::OnGammaGChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma g", dval);
-    parentPanel->setOutGreenGammaValue(Gamma2UiS(dval));
+    parentPanel->setOutGreenGammaValue(dval);
 }
 
 void OutAdjustAgent::OnGammaBChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma b", dval);
-    parentPanel->setOutBlueGammaValue(Gamma2UiS(dval));
+    parentPanel->setOutBlueGammaValue(dval);
 }
 
 void OutAdjustAgent::OnBrightnessRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("brightness r", dval);
-    parentPanel->setOutRedLuminValue(Brigt2UiS(dval));
+    parentPanel->setOutRedLuminValue(dval);
 }
 
 void OutAdjustAgent::OnBrightnessGChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("brightness g", dval);
-    parentPanel->setOutGreenLuminValue(Brigt2UiS(dval));
+    parentPanel->setOutGreenLuminValue(dval);
 }
 
 void OutAdjustAgent::OnBrightnessBChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("brightness b", dval);
-    parentPanel->setOutBlueLuminValue(Brigt2UiS(dval));
+    parentPanel->setOutBlueLuminValue(dval);
 }
 
 void OutAdjustAgent::OnEqualizeRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("equalize r", dval);
-    parentPanel->setOutRedEqlValue(Equal2UiS(dval));
+    parentPanel->setOutRedEqlValue(dval);
 }
 
 void OutAdjustAgent::OnEqualizeGChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("equalize g", dval);
-    parentPanel->setOutGreenEqlValue(Equal2UiS(dval));
+    parentPanel->setOutGreenEqlValue(dval);
 }
 
 void OutAdjustAgent::OnEqualizeBChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("equalize b", dval);
-    parentPanel->setOutBlueEqlValue(Equal2UiS(dval));
+    parentPanel->setOutBlueEqlValue(dval);
 }
