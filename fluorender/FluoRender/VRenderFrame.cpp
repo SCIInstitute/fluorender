@@ -1182,7 +1182,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	st1 = new wxStaticText(panel, 0,
 		"Digit order:");
 	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
-		"Order", wxDefaultPosition, wxSize(-1, 10), 0, NULL, wxCB_READONLY);
+		"Order", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
 		wxCommandEventHandler(VRenderFrame::OnCmbChange), NULL, panel);
 	std::vector<std::string> combo_list;
