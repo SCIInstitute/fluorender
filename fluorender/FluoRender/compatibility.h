@@ -500,41 +500,35 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 }
 
 inline void FIND_FILES(std::wstring m_path_name,
-	std::wstring search_ext,
+	std::wstring search_mask,
 	std::vector<std::wstring> &m_batch_list,
-	int &m_cur_batch, std::wstring regex = L"") {
-	std::wstring search_path = m_path_name.substr(0, m_path_name.find_last_of(L'/')) + L'/';
-	std::wstring regex_min;
-	if (regex.find(search_path) != std::string::npos)
-		regex_min = regex.substr(search_path.length(), regex.length() - search_path.length());
-	else
-		regex_min = regex;
-	DIR* dir;
+	int &m_cur_batch)
+{
+	std::wstring search_path = m_path_name.substr(0,
+		m_path_name.find_last_of(L'/')) + L'/';
+	if (std::string::npos == search_mask.find(m_path_name))
+		search_mask = m_path_name + search_mask;
+	std::string sspath = ws2s(search_path.c_str());
+	DIR* dir = opendir(sspath.c_str());
+	if (!dir)
+		return;
+	int cnt = 0;
+	m_batch_list.clear();
 	struct dirent *ent;
-	if ((dir = opendir(ws2s(search_path).c_str())) != NULL) {
-		int cnt = 0;
-		m_batch_list.clear();
-		while ((ent = readdir(dir)) != NULL) {
-			std::string file(ent->d_name);
+	while (ent = readdir(dir) != NULL)
+	{
+		std::string file(ent->d_name);
+		if (file[0] != '.')
+		{
 			std::wstring wfile = s2ws(file);
-			//check if it contains the string.
-			if (ent->d_name[0] != '.' &&
-				wfile.find(search_ext) != std::string::npos &&
-				wfile.find(regex_min) != std::string::npos) {
-				std::string ss = ent->d_name;
-				std::wstring f = s2ws(ss);
-				std::wstring name;
-				if (f.find(search_path) == std::string::npos)
-					name = search_path + f;
-				else
-					name = f;
-				m_batch_list.push_back(name);
-				if (name == m_path_name)
-					m_cur_batch = cnt;
-				cnt++;
-			}
+			std::wstring name = search_path + wfile;
+			m_batch_list.push_back(name);
+			if (name == m_path_name)
+				m_cur_batch = cnt;
+			cnt++;
 		}
 	}
+	closedir(dir);
 }
 
 inline FILE* WFOPEN(FILE ** fp, const wchar_t* filename, const wchar_t* mode) {
