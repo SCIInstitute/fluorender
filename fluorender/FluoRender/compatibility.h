@@ -538,7 +538,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 	int cnt = 0;
 	m_batch_list.clear();
 	struct dirent *ent;
-	while (ent = readdir(dir) != NULL)
+	while ((ent = readdir(dir)) != NULL)
 	{
 		std::string file(ent->d_name);
 		std::wstring wfile = s2ws(file);
