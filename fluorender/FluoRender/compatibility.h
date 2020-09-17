@@ -312,6 +312,31 @@ inline void FIND_FILES(std::wstring m_path_name,
 
 inline wchar_t GETSLASH() { return L'/'; }
 
+bool wstrmat(wchar *first, wchar * second)
+{
+	// If we reach at the end of both strings, we are done 
+	if (*first == L'\0' && *second == L'\0')
+		return true;
+
+	// Make sure that the characters after '*' are present 
+	// in second string. This function assumes that the first 
+	// string will not contain two consecutive '*' 
+	if (*first == L'*' && *(first + 1) != L'\0' && *second == L'\0')
+		return false;
+
+	// If the first string contains '?', or current characters 
+	// of both strings match 
+	if (*first == L'?' || *first == *second)
+		return wstrmat(first + 1, second + 1);
+
+	// If there is *, then there are two possibilities 
+	// a) We consider current character of second string 
+	// b) We ignore current character of second string. 
+	if (*first == L'*')
+		return wstrmat(first + 1, second) || wstrmat(first, second + 1);
+	return false;
+}
+
 inline std::wstring GET_SUFFIX(std::wstring &pathname)
 {
 	int64_t pos = pathname.find_last_of(L'.');
@@ -506,8 +531,6 @@ inline void FIND_FILES(std::wstring m_path_name,
 {
 	std::wstring search_path = m_path_name.substr(0,
 		m_path_name.find_last_of(L'/')) + L'/';
-	if (std::string::npos == search_mask.find(m_path_name))
-		search_mask = m_path_name + search_mask;
 	std::string sspath = ws2s(search_path.c_str());
 	DIR* dir = opendir(sspath.c_str());
 	if (!dir)
@@ -518,9 +541,10 @@ inline void FIND_FILES(std::wstring m_path_name,
 	while (ent = readdir(dir) != NULL)
 	{
 		std::string file(ent->d_name);
-		if (file[0] != '.')
+		std::wstring wfile = s2ws(file);
+		if (file[0] != '.' &&
+			wstrmat(search_mask.c_str(), wfile.c_str()))
 		{
-			std::wstring wfile = s2ws(file);
 			std::wstring name = search_path + wfile;
 			m_batch_list.push_back(name);
 			if (name == m_path_name)
