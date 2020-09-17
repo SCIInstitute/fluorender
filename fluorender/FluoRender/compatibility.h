@@ -295,7 +295,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 #else // MAC OSX or LINUX
 
 #include <string>
-#include <cstring> 
+#include <cstring>
 #include <locale>
 #include <unistd.h>
 #include <dirent.h>
@@ -312,29 +312,34 @@ inline void FIND_FILES(std::wstring m_path_name,
 
 inline wchar_t GETSLASH() { return L'/'; }
 
-bool wstrmat(wchar *first, wchar * second)
+inline bool str_mat(std::wstring &s1, size_t p1, std::wstring &s2, size_t p2)
 {
-	// If we reach at the end of both strings, we are done 
-	if (*first == L'\0' && *second == L'\0')
+	// If we reach at the end of both strings, we are done
+	if (s1[p1] == L'\0' && s2[p2] == L'\0')
 		return true;
 
 	// Make sure that the characters after '*' are present 
 	// in second string. This function assumes that the first 
 	// string will not contain two consecutive '*' 
-	if (*first == L'*' && *(first + 1) != L'\0' && *second == L'\0')
+	if (s1[p1] == L'*' && s1[p1+1] != L'\0' && s2[p2] == L'\0')
 		return false;
 
 	// If the first string contains '?', or current characters 
 	// of both strings match 
-	if (*first == L'?' || *first == *second)
-		return wstrmat(first + 1, second + 1);
+	if (s1[p1] == L'?' || s1[p1] == s2[p2])
+		return str_mat(s1, p1 + 1, s2, p2 + 1);
 
 	// If there is *, then there are two possibilities 
 	// a) We consider current character of second string 
 	// b) We ignore current character of second string. 
-	if (*first == L'*')
-		return wstrmat(first + 1, second) || wstrmat(first, second + 1);
+	if (s1[p1] == L'*')
+		return str_mat(s1, p1 + 1, s2, p2) || str_mat(s1, p1, s2, p2 + 1);
 	return false;
+}
+
+inline bool STR_MATCH(std::wstring &pattern, std::wstring &search)
+{
+	return str_mat(pattern, 0, search, 0);
 }
 
 inline std::wstring GET_SUFFIX(std::wstring &pathname)
@@ -543,7 +548,7 @@ inline void FIND_FILES(std::wstring m_path_name,
 		std::string file(ent->d_name);
 		std::wstring wfile = s2ws(file);
 		if (file[0] != '.' &&
-			wstrmat(search_mask.c_str(), wfile.c_str()))
+			STR_MATCH(search_mask, wfile))
 		{
 			std::wstring name = search_path + wfile;
 			m_batch_list.push_back(name);
