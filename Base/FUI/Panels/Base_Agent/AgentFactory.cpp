@@ -137,12 +137,48 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
   if (volume_prop_agent)
   {
     volume_prop_agent->setName(name);
-    volume_prop_agent->setValueChangedFunction("luminance",
-			std::bind(&VolumePropAgent::OnLuminanceChanged,
-				volume_prop_agent, std::placeholders::_1));
     volume_prop_agent->setValueChangedFunction("color",
-			std::bind(&VolumePropAgent::OnColorChanged,
+			std::bind(&VolumePropAgent::onColorChanged,
 				volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("gamma 3d",
+	        std::bind(&VolumePropAgent::onGammaChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("extract boundary",
+	        std::bind(&VolumePropAgent::onBoundChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("saturation",
+	        std::bind(&VolumePropAgent::onSaturChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("low threshold",
+	        std::bind(&VolumePropAgent::onLThreChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("high threshold",
+	        std::bind(&VolumePropAgent::onHThreChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("luminance",
+	        std::bind(&VolumePropAgent::onLuminanceChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("shadow int",
+	        std::bind(&VolumePropAgent::onShadoChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("alpha",
+	        std::bind(&VolumePropAgent::onAlphaChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("sample rate",
+	        std::bind(&VolumePropAgent::onSamplChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("mat amb",
+	        std::bind(&VolumePropAgent::onShadLChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("mat shine",
+	        std::bind(&VolumePropAgent::onShadHChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("colormap low",
+	        std::bind(&VolumePropAgent::onLColMChanged,
+			    volume_prop_agent, std::placeholders::_1));
+    volume_prop_agent->setValueChangedFunction("colormap high",
+	        std::bind(&VolumePropAgent::onHColMChanged,
+			    volume_prop_agent, std::placeholders::_1));
     objects_.push_front(volume_prop_agent);
     fluo::Event event;
     event.init(fluo::Event::EVENT_NODE_ADDED,

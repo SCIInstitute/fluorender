@@ -63,23 +63,23 @@ void OutAdjustAgent::UpdateAllSettings()
 	getValue("gamma r", dval);
     parentPanel->setOutRedGammaValue(dval);
 	getValue("gamma g", dval);
-    parentPanel->setOutGreenGammaValue(Gamma2UiS(dval));
+    parentPanel->setOutGreenGammaValue(dval);
     getValue("gamma b", dval);
-    parentPanel->setOutBlueGammaValue(Gamma2UiS(dval));
+    parentPanel->setOutBlueGammaValue(dval);
     
 	getValue("brightness r", dval);
-    parentPanel->setOutRedLuminValue(Brigt2UiS(dval));
+    parentPanel->setOutRedLuminValue(dval);
 	getValue("brightness g", dval);
-    parentPanel->setOutGreenLuminValue(Brigt2UiS(dval));
+    parentPanel->setOutGreenLuminValue(dval);
 	getValue("brightness b", dval);
-    parentPanel->setOutBlueLuminValue(Brigt2UiS(dval));
+    parentPanel->setOutBlueLuminValue(dval);
 
 	getValue("equalize r", dval);
-    parentPanel->setOutRedEqlValue(Equal2UiS(dval));
+    parentPanel->setOutRedEqlValue(dval);
 	getValue("equalize g", dval);
-    parentPanel->setOutGreenEqlValue(Equal2UiS(dval));
+    parentPanel->setOutGreenEqlValue(dval);
 	getValue("equalize b", dval);
-    parentPanel->setOutBlueEqlValue(Equal2UiS(dval));
+    parentPanel->setOutBlueEqlValue(dval);
 /*
 	parentPanel->m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
 	parentPanel->m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
@@ -139,7 +139,6 @@ void OutAdjustAgent::OnGammaRChanged(fluo::Event& event)
 {
 	double dval = 0.0;
 	getValue("gamma r", dval);
-  std::cout << dval << std::endl;
     parentPanel->setOutRedGammaValue(dval);
 }
 

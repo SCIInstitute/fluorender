@@ -14,8 +14,12 @@
 #include <algorithm>
 #include <vector>
 
+#include <Global/Global.hpp>
+
 #include "renderview.hpp"
 #include "fluoConfig.hpp"
+#include "readers.hpp"
+
 
 namespace Ui {
 class FUI;
@@ -69,6 +73,17 @@ private:
     QString getSuffix(QString &filename);
 
     auto getReader(const QString &suffix);
+
+    template<typename Reader>
+    void processReader(const QString &filename, std::unique_ptr<Reader> &reader)
+    {
+      std::wstring fileSetter = filename.toStdWString();
+      reader->SetFile(fileSetter);
+      reader->Preprocess();
+    }
+
+    void setVDReader(QString &filename, Nrrd* nrrdStructure, std::unique_ptr<BaseReader> &reader, fluo::VolumeData* vd);
+    void setVolumePanels(fluo::VolumeData* vd);
 
     // These are the indices of the left and right child of the main Splitter
     const int MAINRENDERINDEX = 0;

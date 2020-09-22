@@ -52,10 +52,10 @@ class VolumePropertiesOptions : public QGridLayout
     void sendColorMapHighValue(int value);
 
   public slots:
-    void onGammaSliderChanged() { sendGammaValue(gammaSlider->value()); }
+    void onGammaSliderChanged() { sendGammaValue(static_cast<double>(gammaSlider->value()/100.0)); }
     void onGammaSpinboxChanged() { sendGammaValue(gammaSpinbox->value()); }
 
-    void onExtBoundSliderChanged() { sendExtBoundValue(extractBSlider->value()); }
+    void onExtBoundSliderChanged() { sendExtBoundValue(static_cast<double>(extractBSlider->value()/100.0)); }
     void onExtBoundSpinboxChanged() { sendExtBoundValue(extractBSpinbox->value()); }
 
     void onSatSliderChanged() { sendSaturationValue(saturationSlider->value()); }
@@ -69,18 +69,18 @@ class VolumePropertiesOptions : public QGridLayout
     void onLuminanceSliderChanged() { sendLuminanceValue(luminanceSlider->value()); }
     void onLuminanceSpinChanged() { sendLuminanceValue(luminanceSpinbox->value()); }
 
-    void onShadowSliderChanged() { sendShadowValue(shadowSlider->value()); }
+    void onShadowSliderChanged() { sendShadowValue(static_cast<double>(shadowSlider->value()/100.0)); }
     void onShadowSpinChanged() { sendShadowValue(shadowSpinbox->value()); }
 
     void onAlphaSliderChanged() { sendAlphaValue(alphaSlider->value()); }
     void onAlphaSpinChanged() { sendAlphaValue(alphaSpinbox->value()); }
 
-    void onSampleSliderChanged() { sendSampleValue(sampleRateSlider->value()); }
+    void onSampleSliderChanged() { sendSampleValue(static_cast<double>(sampleRateSlider->value()/100.0)); }
     void onSampleSpinChanged() { sendSampleValue(sampleRateSpinbox->value()); }
 
-    void onLShaderSliderChanged() { sendLowShadeValue(shading1Slider->value()); }
+    void onLShaderSliderChanged() { sendLowShadeValue(static_cast<double>(shading1Slider->value()/100.0)); }
     void onLShaderSpinChanged() { sendLowShadeValue(shading1Spinbox->value()); }
-    void onHShaderSliderChanged() { sendHighShadeValue(shading2Slider->value()); }
+    void onHShaderSliderChanged() { sendHighShadeValue(static_cast<double>(shading2Slider->value()/100.0)); }
     void onHShaderSpinChanged() { sendHighShadeValue(shading2Spinbox->value()); }
 
     void onLCMSliderChanged() { sendColorMapLowValue(colorMap1Slider->value()); }

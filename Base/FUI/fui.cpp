@@ -1,9 +1,6 @@
 #include "fui.hpp"
 #include "ui_FUI.h"
 
-#include "readers.hpp"
-#include <Global/Global.hpp>
-
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -908,6 +905,19 @@ auto FUI::getReader(const QString& suffix)
   return tempReader.returnReader();
 }
 
+void FUI::setVDReader(QString &filename, Nrrd* nrrdStructure, std::unique_ptr<BaseReader> &reader,fluo::VolumeData* vd)
+{
+  QString name = QString::fromStdWString(reader->GetDataName());
+  if(vd->LoadData(nrrdStructure, name.toStdString(), filename.toStdWString()))
+    vd->SetReader(reader.get());
+}
+
+void FUI::setVolumePanels(fluo::VolumeData* vd)
+{
+  ui->propertiesPanel->onVolumeLoaded(0,vd);
+  ui->outputAdjustments->setVolumeData(vd);
+}
+
 // TODO: Restructure this function so it is more readable.
 void FUI::on_actionLoad_Volume_0_triggered()
 {
@@ -918,19 +928,13 @@ void FUI::on_actionLoad_Volume_0_triggered()
   { 
     auto reader = getReader(suffix);
  
-    std::wstring fileSetter = filename.toStdWString();
     fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
-
-    reader->SetFile(fileSetter);
-    reader->Preprocess();
+    processReader(filename,reader);
 
     Nrrd* nrrdStructure = reader->Convert(true);
+    setVDReader(filename,nrrdStructure,reader,vd);
 
-    QString name = QString::fromStdWString(reader->GetDataName());
-    if(vd->LoadData(nrrdStructure, name.toStdString(), filename.toStdWString()))
-      vd->SetReader(reader.get());
-    ui->propertiesPanel->onVolumeLoaded(0,vd);
-    ui->outputAdjustments->setVolumeData(vd);
+    setVolumePanels(vd);
   }
 }
 

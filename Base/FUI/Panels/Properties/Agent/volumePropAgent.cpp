@@ -450,7 +450,7 @@ void VolumePropAgent::UpdateAllSettings()
     */
 }
 
-void VolumePropAgent::OnLuminanceChanged(fluo::Event& event)
+void VolumePropAgent::onLuminanceChanged(fluo::Event& event)
 {
     /*
 	double luminance;
@@ -463,7 +463,7 @@ void VolumePropAgent::OnLuminanceChanged(fluo::Event& event)
     */
 }
 
-void VolumePropAgent::OnColorChanged(fluo::Event& event)
+void VolumePropAgent::onColorChanged(fluo::Event& event)
 {
     /*
     fluoTYPE::Color color;
@@ -477,3 +477,97 @@ void VolumePropAgent::OnColorChanged(fluo::Event& event)
     */
 }
 
+void VolumePropAgent::onGammaChanged(fluo::Event& event)
+{
+  double dval = 0.0;
+  getValue("gamma 3d", dval);
+  parentPanel->setPropGammaValue(dval);
+}
+
+void VolumePropAgent::onBoundChanged(fluo::Event& event)
+{
+  double dval = 0.0;
+  getValue("extract boundary", dval);
+  parentPanel->setPropExtBoundValue(dval);
+}
+
+void VolumePropAgent::onSaturChanged(fluo::Event& event)
+{
+  int val = 0;
+  getValue("saturation", val);
+  parentPanel->setPropSatValue(val);
+}
+
+void VolumePropAgent::onLThreChanged(fluo::Event& event)
+{
+  int val = 0;
+  getValue("low threshold", val);
+  parentPanel->setPropLowThreshValue(val);
+
+}
+
+void VolumePropAgent::onHThreChanged(fluo::Event& event)
+{
+  int val = 0;
+  getValue("high threshold", val);
+  parentPanel->setPropHighThreshValue(val);
+
+}
+
+void VolumePropAgent::onLuminChanged(fluo::Event& event)
+{
+  int val = 0;
+  getValue("luminance", val);
+  parentPanel->setPropLuminValue(val);
+
+}
+
+void VolumePropAgent::onShadoChanged(fluo::Event& event)
+{
+  double dval = 0.0;
+  getValue("shadow int", dval);
+  parentPanel->setPropShadowValue(dval);
+}
+
+void VolumePropAgent::onAlphaChanged(fluo::Event& event)
+{
+  int val = 0.0;
+  getValue("alpha", val);
+  parentPanel->setPropAlphaValue(val);
+}
+
+void VolumePropAgent::onSamplChanged(fluo::Event& event)
+{
+  double dval = 0.0;
+  getValue("sample rate", dval);
+  parentPanel->setPropSampleValue(dval);
+}
+
+void VolumePropAgent::onShadLChanged(fluo::Event& event)
+{
+  double amb = 0.0;
+  getValue("mat amb", amb);
+  parentPanel->setPropLowShaderValue(amb);
+}
+
+void VolumePropAgent::onShadHChanged(fluo::Event& event)
+{
+  double shine = 0.0;
+  getValue("mat shine", shine);
+  parentPanel->setPropHighShaderValue(shine);
+}
+
+void VolumePropAgent::onLColMChanged(fluo::Event& event)
+{
+  int val = 0;
+  getValue("colormap low", val);
+  parentPanel->setPropLowColorModeValue(val);
+
+}
+
+void VolumePropAgent::onHColMChanged(fluo::Event& event)
+{
+  int val = 0;
+  getValue("colormap high", val);
+  parentPanel->setPropHighColorModeValue(val);
+}

@@ -70,8 +70,21 @@ virtual bool isSameKindAs(const fluo::Object* obj) const
   protected:
 
     //update functions
-    void OnLuminanceChanged(fluo::Event& event);
-    void OnColorChanged(fluo::Event& event);
+    void onLuminanceChanged(fluo::Event& event);
+    void onColorChanged(fluo::Event& event);
+    void onGammaChanged(fluo::Event& event);
+    void onBoundChanged(fluo::Event& event);
+    void onSaturChanged(fluo::Event& event);
+    void onLThreChanged(fluo::Event& event);
+    void onHThreChanged(fluo::Event& event);
+    void onLuminChanged(fluo::Event& event);
+    void onShadoChanged(fluo::Event& event);
+    void onAlphaChanged(fluo::Event& event);
+    void onSamplChanged(fluo::Event& event);
+    void onShadLChanged(fluo::Event& event);
+    void onShadHChanged(fluo::Event& event);
+    void onLColMChanged(fluo::Event& event);
+    void onHColMChanged(fluo::Event& event);
 
   private:
     PropertiesPanel *parentPanel;
