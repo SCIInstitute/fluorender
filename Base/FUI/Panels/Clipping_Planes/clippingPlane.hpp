@@ -68,6 +68,7 @@ class ClippingPlane : public QWidget
     void setXPlaneLockStatus(bool status);
     void setYPlaneLockStatus(bool status);
     void setZPlaneLockStatus(bool status);
+    void setVolumeData(fluo::VolumeData* vd);
 
     const int getClipSalmonMaxVal();
     const int getClipGreenMaxVal();

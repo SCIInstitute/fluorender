@@ -916,6 +916,7 @@ void FUI::setVolumePanels(fluo::VolumeData* vd)
 {
   ui->propertiesPanel->onVolumeLoaded(0,vd);
   ui->outputAdjustments->setVolumeData(vd);
+  ui->ClippingPanes->setVolumeData(vd);
 }
 
 // TODO: Restructure this function so it is more readable.

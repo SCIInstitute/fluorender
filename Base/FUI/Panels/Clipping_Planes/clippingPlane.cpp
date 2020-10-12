@@ -7,8 +7,7 @@ ClippingPlane::ClippingPlane()
   makeIntConnections();
   makeDblConnections();
   makeBoolConnections();
-
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddClipPlaneAgent("ClipPlanePanel",*this);
+  clippingLayout->disableLayout();
 }
 
 void ClippingPlane::createLayout()
@@ -109,4 +108,12 @@ void ClippingPlane::makeIntConnections()
 {
   for(auto &&tup : intConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
+}
+
+void ClippingPlane::setVolumeData(fluo::VolumeData* vd)
+{
+  m_agent = fluo::Global::instance().getAgentFactory().getOrAddClipPlaneAgent("ClipPlanePanel",*this);
+  clippingLayout->setAgent(m_agent,vd);
+  clippingLayout->build();
+  clippingLayout->enableLayout();
 }

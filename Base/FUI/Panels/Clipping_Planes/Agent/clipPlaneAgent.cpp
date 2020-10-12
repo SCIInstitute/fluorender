@@ -47,14 +47,14 @@ ClipPlaneAgent::ClipPlaneAgent(ClippingPlane &panel) :
 
 }
 
-void ClipPlaneAgent::setObject(fluo::Node* obj)
+void ClipPlaneAgent::setObject(fluo::VolumeData* obj)
 {
   InterfaceAgent::setObject(obj);
 }
 
-fluo::Node* ClipPlaneAgent::getObject()
+fluo::VolumeData* ClipPlaneAgent::getObject()
 {
-  return dynamic_cast<fluo::Node*>(InterfaceAgent::getObject());
+  return dynamic_cast<fluo::VolumeData*>(InterfaceAgent::getObject());
 }
 
 void ClipPlaneAgent::UpdateAllSettings()

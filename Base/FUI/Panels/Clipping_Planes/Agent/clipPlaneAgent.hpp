@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define CLIP_PLANE_AGENT_HPP
 
 #include <Panels/Base_Agent/AgentFactory.hpp>
-#include <Node.hpp>
+#include <VolumeData/VolumeData.hpp>
 
 class AgentFactory;
 class ClippingPlane;
@@ -45,8 +45,8 @@ class ClipPlaneAgent : public InterfaceAgent
 
 	virtual const char* className() const { return "ClipPlaneAgent"; }
 
-	virtual void setObject(fluo::Node* vd);
-	virtual fluo::Node* getObject();
+	virtual void setObject(fluo::VolumeData* vd);
+	virtual fluo::VolumeData* getObject();
 
 	virtual void UpdateAllSettings();
 
