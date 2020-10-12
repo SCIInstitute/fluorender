@@ -158,11 +158,12 @@ void ClippingLayout::setSalmonValue(int newVal)
 {
   if (xChainToolbutton->isChecked())
   {
+    const int distance = x1MagentaController->getValue() - x1SalmonController->getValue();
     x1SalmonController->setValues(newVal);
-    x1MagentaController->setValues(x1MSlider->value()+newVal);
+    x1MagentaController->setValues(x1SalmonController->getValue()+distance);
   }
   else
-    if(x1SSlider->value() <= x1MSlider->value())
+    if(x1SalmonController->getValue() <= x1MagentaController->getValue())
       x1SalmonController->setValues(newVal);
 }
 
@@ -170,11 +171,12 @@ void ClippingLayout::setMagentaValue(int newVal)
 {
   if (xChainToolbutton->isChecked())
   {
+    const int distance = x1MagentaController->getValue() - x1SalmonController->getValue();
     x1MagentaController->setValues(newVal);
-    x1SalmonController->setValues(newVal - x1SSlider->value());
+    x1SalmonController->setValues(x1MagentaController->getValue()-distance);
   }
   else
-    if(x1MSlider->value() >= x1SSlider->value())
+    if(x1MagentaController->getValue() >= x1SalmonController->getValue())//needs to be fixed
       x1MagentaController->setValues(newVal);
 
 }
@@ -183,12 +185,13 @@ void ClippingLayout::setGreenValue(int newVal)
 {
   if (yChainToolbutton->isChecked())
   {
+    const int distance = y1YellowController->getValue() - y1GreenController->getValue();
     y1GreenController->setValues(newVal);
-    y1YellowController->setValues(y1YSlider->value() + newVal);
+    y1YellowController->setValues(y1GreenController->getValue()+distance);
   }
   else
   {
-    if(y1GSlider->value() <= y1YSlider->value())
+    if(y1GSlider->value() <= y1YSlider->value())//needs to be fixed
       y1GreenController->setValues(newVal);
   }
 }
@@ -197,8 +200,9 @@ void ClippingLayout::setYellowValue(int newVal)
 {
   if (yChainToolbutton->isChecked())
   {
+    const int distance = y1YellowController->getValue() - y1GreenController->getValue();
     y1YellowController->setValues(newVal);
-    y1GreenController->setValues(newVal - y1GSlider->value());
+    y1GreenController->setValues(y1YellowController->getValue() - distance);
   }
   else
   {
@@ -212,8 +216,9 @@ void ClippingLayout::setPurpleValue(int newVal)
 {
   if (zChainToolbutton->isChecked())
   {
+    const int distance = z1TealController->getValue() - z1PurpleController->getValue();
     z1PurpleController->setValues(newVal);
-    z1TealController->setValues(z1TSlider->value() + newVal);
+    z1TealController->setValues(z1PurpleController->getValue() + distance);
   }
   else
   {
@@ -226,8 +231,9 @@ void ClippingLayout::setTealValue(int newVal)
 {
   if (zChainToolbutton->isChecked())
   {
+    const int distance = z1TealController->getValue() - z1PurpleController->getValue();
     z1TealController->setValues(newVal);
-    z1PurpleController->setValues(newVal - z1PSlider->value());
+    z1PurpleController->setValues(z1TealController->getValue() - distance);
   }
   else
   {

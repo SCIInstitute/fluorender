@@ -28,6 +28,7 @@ class Controller
     template<typename T>
     void setValues(T value)
     {
+      controllerValue = value;
       std::apply([&](auto&...x) { (x.updateValue(value),...);}, objects);
     }
 
@@ -35,6 +36,8 @@ class Controller
     {
       std::apply([&](auto&...x) { (values.push_back(x.get()),...);}, objects);
     }
+
+    int getValue() const { return controllerValue; }
 
     std::tuple<Classes&...> getObjects() const
     {
@@ -48,6 +51,7 @@ class Controller
 
   private:
     std::tuple<Classes&...> objects;
+    int controllerValue = 0;
 };
 
 template<typename...ClassesL, typename...ClassesR>

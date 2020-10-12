@@ -197,9 +197,9 @@ class ClippingLayout : public QGridLayout
 
     FluoSpinbox *x1SSpinbox     = new FluoSpinbox(0,640,false);
     FluoSpinbox *x1MSpinbox     = new FluoSpinbox(0,640,false);
-    FluoSpinbox *y1GSpinbox     = new FluoSpinbox(0,88,false);
+    FluoSpinbox *y1GSpinbox     = new FluoSpinbox(0,640,false);
     FluoSpinbox *y1YSpinbox     = new FluoSpinbox(0,640,false);
-    FluoSpinbox *z1PSpinbox     = new FluoSpinbox(0,640,false);
+    FluoSpinbox *z1PSpinbox     = new FluoSpinbox(0,88,false);
     FluoSpinbox *z1TSpinbox     = new FluoSpinbox(0,88,false);
     FluoSpinbox *setClipSpinbox = new FluoSpinbox(0,640,false);
     FluoSpinbox *slabSpinbox    = new FluoSpinbox(0,640,false);
