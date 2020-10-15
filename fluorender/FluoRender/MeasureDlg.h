@@ -61,7 +61,8 @@ public:
 		long style=wxLC_REPORT|wxLC_SINGLE_SEL);
 	~RulerListCtrl();
 
-	void Append(bool enable, unsigned int id, wxString name,
+	void Append(bool enable, unsigned int id,
+		wxString name, unsigned int group, int count,
 		wxString &color, int branches, double length, wxString &unit,
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
@@ -148,6 +149,10 @@ public:
 		ID_AutoRelaxBtn,
 		ID_RelaxValueSpin,
 		ID_RelaxDataCmb,
+		//ruler list
+		ID_NewGroup,
+		ID_SetGroup,
+		ID_GroupText,
 		//align
 		ID_AlignCenter,
 		ID_AlignX,
@@ -187,6 +192,9 @@ private:
 	FL::RulerHandler *m_rhdl;
 
 	//list ctrl
+	wxButton* m_new_group;
+	wxButton* m_set_group;
+	wxTextCtrl* m_group_text;
 	RulerListCtrl *m_rulerlist;
 	//tool bar
 	wxToolBar *m_toolbar1;
@@ -254,6 +262,9 @@ private:
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
 	void OnRelaxValueText(wxCommandEvent& event);
 	void OnRelaxData(wxCommandEvent& event);
+	//ruler list
+	void OnNewGroup(wxCommandEvent& event);
+	void OnSetGroup(wxCommandEvent& event);
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);

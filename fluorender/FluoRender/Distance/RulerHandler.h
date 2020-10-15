@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Selection/VolumePoint.h>
 #include <string>
+#include <algorithm>
 
 class VRenderGLView;
 class wxFileConfig;
@@ -45,6 +46,22 @@ namespace FL
 	public:
 		RulerHandler();
 		~RulerHandler();
+
+		//handle group
+		void NewGroup()
+		{
+			if (m_ruler_list)
+			{
+				std::vector<unsigned int> groups;
+				int num = m_ruler_list->GetGroupNum(groups);
+				if (num)
+				{
+					auto it = std::max_element(groups.begin(), groups.end());
+					if (it != groups.end())
+						m_group = *it + 1;
+				}
+			}
+		}
 
 		void SetView(VRenderGLView* view)
 		{
@@ -139,6 +156,7 @@ namespace FL
 		int Distance(int index, std::string filename);
 
 	private:
+		unsigned int m_group;
 		VRenderGLView *m_view;
 		VolumeData * m_vd;
 		ComponentAnalyzer* m_ca;

@@ -145,9 +145,7 @@ namespace FL
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks
 	};
 
-	typedef std::vector<Ruler*> RulerList;
-	typedef std::vector<Ruler*>::iterator RulerListIter;
-
+	class RulerList;
 	class Ruler
 	{
 	public:
@@ -184,6 +182,14 @@ namespace FL
 		void Id(unsigned int id)
 		{
 			m_id = id;
+		}
+		unsigned int Group()
+		{
+			return m_group;
+		}
+		void Group(unsigned int group)
+		{
+			m_group = group;
 		}
 
 		//data
@@ -324,6 +330,7 @@ namespace FL
 		static int m_num;
 		wxString m_name;
 		unsigned int m_id;
+		unsigned int m_group;//group number
 		int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 							//4: protractor; 5: ellipse
 		bool m_finished;
@@ -349,5 +356,21 @@ namespace FL
 		double m_brush_size;
 	};
 
+	class RulerList : public std::vector<Ruler*>
+	{
+	public:
+		int GetGroupNum(std::vector<unsigned int> &groups)
+		{
+			for (auto iter = this->begin();
+				iter != this->end(); ++iter)
+			{
+				unsigned int group = (*iter)->Group();
+				if (std::find(groups.begin(), groups.end(), group) == groups.end())
+					groups.push_back(group);
+			}
+			return groups.size();
+		}
+	};
+	typedef RulerList::iterator RulerListIter;
 }
 #endif//FL_Ruler_h

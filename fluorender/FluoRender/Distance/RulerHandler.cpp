@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace FL;
 
 RulerHandler::RulerHandler() :
+	m_group(0),
 	m_view(0),
 	m_vd(0),
 	m_ca(0),
@@ -207,6 +208,7 @@ void RulerHandler::AddRulerPoint(FLIVR::Point &p)
 	else
 	{
 		m_ruler = new Ruler();
+		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(p);
 		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -226,6 +228,7 @@ void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id,
 	else
 	{
 		m_ruler = new Ruler();
+		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPointAfterId(p, id, cid, bid);
 		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -267,7 +270,9 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	{
 		Point p1, p2;
 		Ruler* ruler = new Ruler();
+		ruler->Group(m_group);
 		ruler->SetRulerType(m_type);
+		m_vp.SetVolumeData(m_view->m_cur_vol);
 		m_vp.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
@@ -342,6 +347,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		if (new_ruler)
 		{
 			m_ruler = new Ruler();
+			m_ruler->Group(m_group);
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(p);
 			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -388,6 +394,7 @@ void RulerHandler::AddPaintRulerPoint()
 	if (new_ruler)
 	{
 		m_ruler = new Ruler();
+		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(center);
 		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
@@ -599,6 +606,7 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			if (!ruler) continue;
 			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
 			fconfig.Write("name", ruler->GetName());
+			fconfig.Write("group", ruler->Group());
 			fconfig.Write("type", ruler->GetRulerType());
 			fconfig.Write("display", ruler->GetDisp());
 			fconfig.Write("transient", ruler->GetTimeDep());
@@ -651,6 +659,8 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 				Ruler* ruler = new Ruler();
 				if (fconfig.Read("name", &str))
 					ruler->SetName(str);
+				if (fconfig.Read("group", &ival))
+					ruler->Group(ival);
 				if (fconfig.Read("type", &ival))
 					ruler->SetRulerType(ival);
 				if (fconfig.Read("display", &bval))

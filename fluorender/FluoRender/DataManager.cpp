@@ -3723,7 +3723,7 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 	}
 
 	//clear ruler id??
-	for (FL::RulerListIter iter = rulers.begin();
+	for (auto iter = rulers.begin();
 	iter != rulers.end(); ++iter)
 		(*iter)->Id(0);
 
@@ -3924,7 +3924,7 @@ bool TraceGroup::GetMappedRulers(
 
 FL::RulerListIter TraceGroup::FindRulerFromList(unsigned int id, FL::RulerList &list)
 {
-	FL::RulerListIter iter = list.begin();
+	auto iter = list.begin();
 	while (iter != list.end())
 	{
 		if ((*iter)->Id() == id)

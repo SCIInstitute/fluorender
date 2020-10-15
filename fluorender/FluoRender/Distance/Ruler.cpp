@@ -37,6 +37,7 @@ int Ruler::m_num = 0;
 Ruler::Ruler()
 {
 	m_id = m_num;
+	m_group = 0;
 	m_num++;
 	m_name = wxString::Format("Ruler %d", m_num);
 	m_disp = true;

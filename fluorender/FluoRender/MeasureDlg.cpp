@@ -72,30 +72,36 @@ wxListCtrl(parent, id, pos, size, style)//,
 	itemCol.SetText("Name");
 	this->InsertColumn(0, itemCol);
 	SetColumnWidth(0, 100);
-	itemCol.SetText("Color");
+	itemCol.SetText("Group");
 	this->InsertColumn(1, itemCol);
-	SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Branch");
+	SetColumnWidth(1, 30);
+	itemCol.SetText("Count");
 	this->InsertColumn(2, itemCol);
-	SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Length");
+	SetColumnWidth(2, 30);
+	itemCol.SetText("Color");
 	this->InsertColumn(3, itemCol);
 	SetColumnWidth(3, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Angle/Pitch");
+	itemCol.SetText("Branch");
 	this->InsertColumn(4, itemCol);
 	SetColumnWidth(4, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Center");
+	itemCol.SetText("Length");
 	this->InsertColumn(5, itemCol);
 	SetColumnWidth(5, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Time");
+	itemCol.SetText("Angle/Pitch");
 	this->InsertColumn(6, itemCol);
 	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Start/End Points (X, Y, Z)");
+	itemCol.SetText("Center");
 	this->InsertColumn(7, itemCol);
 	SetColumnWidth(7, wxLIST_AUTOSIZE_USEHEADER);
-	itemCol.SetText("Voxels");
+	itemCol.SetText("Time");
 	this->InsertColumn(8, itemCol);
 	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
+	itemCol.SetText("Start/End Points (X, Y, Z)");
+	this->InsertColumn(9, itemCol);
+	SetColumnWidth(9, wxLIST_AUTOSIZE_USEHEADER);
+	itemCol.SetText("Voxels");
+	this->InsertColumn(10, itemCol);
+	SetColumnWidth(10, wxLIST_AUTOSIZE_USEHEADER);
 
 	m_images = new wxImageList(16, 16, true);
 	wxIcon icon = wxIcon(ruler_xpm);
@@ -126,28 +132,33 @@ RulerListCtrl::~RulerListCtrl()
 {
 }
 
-void RulerListCtrl::Append(bool enable, unsigned int id, wxString name,
+void RulerListCtrl::Append(bool enable, unsigned int id,
+	wxString name, unsigned int group, int count,
 	wxString &color, int branches, double length, wxString &unit,
 	double angle, wxString &center, bool time_dep,
 	int time, wxString &extra, wxString &points)
 {
 	long tmp = InsertItem(GetItemCount(), name, 0);
 	SetItemData(tmp, long(id));
-	SetItem(tmp, 1, color);
-	wxString str = wxString::Format("%d", branches);
+	wxString str = wxString::Format("%d", group);
+	SetItem(tmp, 1, str);
+	str = wxString::Format("%d", count);
 	SetItem(tmp, 2, str);
-	str = wxString::Format("%.2f", length) + unit;
-	SetItem(tmp, 3, str);
-	str = wxString::Format("%.1f", angle) + "Deg";
+	SetItem(tmp, 3, color);
+	str = wxString::Format("%d", branches);
 	SetItem(tmp, 4, str);
-	SetItem(tmp, 5, center);
+	str = wxString::Format("%.2f", length) + unit;
+	SetItem(tmp, 5, str);
+	str = wxString::Format("%.1f", angle) + "Deg";
+	SetItem(tmp, 6, str);
+	SetItem(tmp, 7, center);
 	if (time_dep)
 		str = wxString::Format("%d", time);
 	else
 		str = "N/A";
-	SetItem(tmp, 6, str);
-	SetItem(tmp, 7, points);
-	SetItem(tmp, 8, extra);
+	SetItem(tmp, 8, str);
+	SetItem(tmp, 9, points);
+	SetItem(tmp, 10, extra);
 
 	if (!enable)
 		SetItemBackgroundColour(tmp, wxColour(200, 200, 200));
@@ -161,9 +172,11 @@ void RulerListCtrl::AdjustSize()
 	SetColumnWidth(3, wxLIST_AUTOSIZE);
 	SetColumnWidth(4, wxLIST_AUTOSIZE);
 	SetColumnWidth(5, wxLIST_AUTOSIZE);
-	SetColumnWidth(6, wxLIST_AUTOSIZE_USEHEADER);
+	SetColumnWidth(6, wxLIST_AUTOSIZE);
 	SetColumnWidth(7, wxLIST_AUTOSIZE);
 	SetColumnWidth(8, wxLIST_AUTOSIZE_USEHEADER);
+	SetColumnWidth(9, wxLIST_AUTOSIZE);
+	SetColumnWidth(10, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 void RulerListCtrl::UpdateRulers(VRenderView* vrv)
@@ -179,6 +192,10 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 
 	std::vector<int> sel;
 	GetCurrSelection(sel);
+
+	std::vector<unsigned int> groups;
+	int group_num = ruler_list->GetGroupNum(groups);
+	std::vector<int> group_count(group_num, 0);
 
 	DeleteAllItems();
 
@@ -221,6 +238,14 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 			points += ", ";
 			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
 		}
+		unsigned int group = ruler->Group();
+		int count = 0;
+		auto iter = std::find(groups.begin(), groups.end(), group);
+		if (iter != groups.end())
+		{
+			int index = std::distance(groups.begin(), iter);
+			count = ++group_count[index];
+		}
 		wxString color;
 		if (ruler->GetUseColor())
 			color = wxString::Format("RGB(%d, %d, %d)",
@@ -234,7 +259,8 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
 		wxString str = ruler->GetDelInfoValues(", ");
-		Append(ruler->GetDisp(), ruler->Id(), ruler->GetName(),
+		Append(ruler->GetDisp(), ruler->Id(),
+			ruler->GetName(), group, count,
 			color, ruler->GetNumBranch(), ruler->GetLength(), unit,
 			ruler->GetAngle(), center, ruler->GetTimeDep(),
 			ruler->GetTime(), str, points);
@@ -320,7 +346,7 @@ void RulerListCtrl::Export(wxString filename)
 			break;
 		}
 
-		tos << "Name\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+		tos << "Name\tGroup\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
 		double f = 0.0;
 		Color color;
@@ -331,6 +357,7 @@ void RulerListCtrl::Export(wxString filename)
 			if (!ruler) continue;
 
 			tos << ruler->GetName() << "\t";
+			tos << ruler->Group() << "\t";
 			if (ruler->GetUseColor())
 			{
 				color = ruler->GetColor();
@@ -492,14 +519,14 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	m_name_text->SetValue(str);
 	m_name_text->Show();
 	//add color picker
-	GetSubItemRect(item, 1, rect);
+	GetSubItemRect(item, 3, rect);
 	m_color_picker->SetPosition(rect.GetTopLeft());
 	m_color_picker->SetSize(rect.GetSize());
 	if (ruler->GetRulerType() == 2)
 	{
 		//locator
-		GetSubItemRect(item, 5, rect);
-		str = GetText(item, 5);
+		GetSubItemRect(item, 7, rect);
+		str = GetText(item, 7);
 		m_center_text->SetPosition(rect.GetTopLeft());
 		m_center_text->SetSize(rect.GetSize());
 		m_center_text->SetValue(str);
@@ -592,12 +619,12 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	}
 	if (!ruler->GetPoint(0))
 		return;
-    Point tmp = Point(x, y, z);
+	Point tmp = Point(x, y, z);
 	ruler->GetPoint(0)->SetPoint(tmp);
 	str = wxString::Format("(%.2f, %.2f, %.2f)",
 		x, y, z);
-	SetText(m_editing_item, 5, str);
 	SetText(m_editing_item, 7, str);
+	SetText(m_editing_item, 9, str);
 	m_view->RefreshGL();
 }
 
@@ -618,7 +645,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		int(color.r()*255),
 		int(color.g()*255),
 		int(color.b()*255));
-	SetText(m_editing_item, 1, str_color);
+	SetText(m_editing_item, 3, str_color);
 	m_view->RefreshGL();
 }
 
@@ -700,6 +727,9 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_SPINCTRLDOUBLE(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueSpin)
 	EVT_TEXT(ID_RelaxValueSpin, MeasureDlg::OnRelaxValueText)
 	EVT_COMBOBOX(ID_RelaxDataCmb, MeasureDlg::OnRelaxData)
+	//ruler list
+	EVT_BUTTON(ID_NewGroup, MeasureDlg::OnNewGroup)
+	EVT_BUTTON(ID_SetGroup, MeasureDlg::OnSetGroup)
 	//align
 	EVT_BUTTON(ID_AlignX, MeasureDlg::OnAlignRuler)
 	EVT_BUTTON(ID_AlignY, MeasureDlg::OnAlignRuler)
@@ -726,6 +756,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	wxIntegerValidator<unsigned int> vald_int;
 
 	wxStaticText* st;
 	//toolbar
@@ -907,18 +938,34 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizer_1->Add(sizer_13, 0, wxEXPAND);
 
 	//list
+	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
+		new wxStaticBox(this, wxID_ANY, "Ruler List"), wxVERTICAL);
+	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	m_new_group = new wxButton(this, ID_NewGroup, "New Group",
+		wxDefaultPosition, wxSize(65, 22));
+	m_set_group = new wxButton(this, ID_SetGroup, "Set Group",
+		wxDefaultPosition, wxSize(65, 22));
+	m_group_text = new wxTextCtrl(this, ID_GroupText, "0",
+		wxDefaultPosition, wxSize(40, 22), 0, vald_int);
+	sizer21->Add(5, 5);
+	sizer21->Add(m_new_group, 0, wxALIGN_CENTER);
+	sizer21->Add(m_set_group, 0, wxALIGN_CENTER);
+	sizer21->Add(m_group_text, 0, wxALIGN_CENTER);
 	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+	sizer_2->Add(sizer21, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(m_rulerlist, 1, wxEXPAND);
 
 	//alignment
-	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
 		new wxStaticBox(this, wxID_ANY, "Align Render View to Ruler(s)"), wxVERTICAL);
-	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center = new wxCheckBox(this, ID_AlignCenter,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer21->Add(5, 5);
-	sizer21->Add(m_align_center, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Mono Axis:",
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_x = new wxButton(this, ID_AlignX, "X",
@@ -933,15 +980,15 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_nz = new wxButton(this, ID_AlignNZ, "-Z",
 		wxDefaultPosition, wxSize(65, 22));
-	sizer22->Add(5, 5);
-	sizer22->Add(st, 0, wxALIGN_CENTER);
-	sizer22->Add(m_align_x, 0, wxALIGN_CENTER);
-	sizer22->Add(m_align_y, 0, wxALIGN_CENTER);
-	sizer22->Add(m_align_z, 0, wxALIGN_CENTER);
-	sizer22->Add(m_align_nx, 0, wxALIGN_CENTER);
-	sizer22->Add(m_align_ny, 0, wxALIGN_CENTER);
-	sizer22->Add(m_align_nz, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer23 = new wxBoxSizer(wxHORIZONTAL);
+	sizer32->Add(5, 5);
+	sizer32->Add(st, 0, wxALIGN_CENTER);
+	sizer32->Add(m_align_x, 0, wxALIGN_CENTER);
+	sizer32->Add(m_align_y, 0, wxALIGN_CENTER);
+	sizer32->Add(m_align_z, 0, wxALIGN_CENTER);
+	sizer32->Add(m_align_nx, 0, wxALIGN_CENTER);
+	sizer32->Add(m_align_ny, 0, wxALIGN_CENTER);
+	sizer32->Add(m_align_nz, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer33 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Tri Axes:",
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
@@ -956,22 +1003,22 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, wxSize(65, 22));
-	sizer23->Add(5, 5);
-	sizer23->Add(st, 0, wxALIGN_CENTER);
-	sizer23->Add(m_align_xyz, 0, wxALIGN_CENTER);
-	sizer23->Add(m_align_yxz, 0, wxALIGN_CENTER);
-	sizer23->Add(m_align_zxy, 0, wxALIGN_CENTER);
-	sizer23->Add(m_align_xzy, 0, wxALIGN_CENTER);
-	sizer23->Add(m_align_yzx, 0, wxALIGN_CENTER);
-	sizer23->Add(m_align_zyx, 0, wxALIGN_CENTER);
+	sizer33->Add(5, 5);
+	sizer33->Add(st, 0, wxALIGN_CENTER);
+	sizer33->Add(m_align_xyz, 0, wxALIGN_CENTER);
+	sizer33->Add(m_align_yxz, 0, wxALIGN_CENTER);
+	sizer33->Add(m_align_zxy, 0, wxALIGN_CENTER);
+	sizer33->Add(m_align_xzy, 0, wxALIGN_CENTER);
+	sizer33->Add(m_align_yzx, 0, wxALIGN_CENTER);
+	sizer33->Add(m_align_zyx, 0, wxALIGN_CENTER);
 	//
-	sizer_2->Add(5, 5);
-	sizer_2->Add(sizer21, 0, wxEXPAND);
-	sizer_2->Add(5, 5);
-	sizer_2->Add(sizer22, 0, wxEXPAND);
-	sizer_2->Add(5, 5);
-	sizer_2->Add(sizer23, 0, wxEXPAND);
-	sizer_2->Add(5, 5);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(sizer31, 0, wxEXPAND);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(sizer32, 0, wxEXPAND);
+	sizer_3->Add(5, 5);
+	sizer_3->Add(sizer33, 0, wxEXPAND);
+	sizer_3->Add(5, 5);
 
 	//sizer
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -984,9 +1031,9 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(m_rulerlist, 1, wxEXPAND);
+	sizerV->Add(sizer_2, 1, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 0, wxEXPAND);
+	sizerV->Add(sizer_3, 0, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();
@@ -1917,6 +1964,18 @@ void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetSettingDlg())
 		frame->GetSettingDlg()->SetRulerRelaxType(ival);
+}
+
+//ruler list
+void MeasureDlg::OnNewGroup(wxCommandEvent& event)
+{
+	if (m_rhdl)
+		m_rhdl->NewGroup();
+}
+
+void MeasureDlg::OnSetGroup(wxCommandEvent& event)
+{
+
 }
 
 void MeasureDlg::AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list)
