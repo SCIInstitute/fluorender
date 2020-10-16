@@ -116,7 +116,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 			{
 				m_ruler = ruler;
 				m_point = point;
-				m_pindex = j;
+				m_pindex = k;
 				return true;
 			}
 		}
