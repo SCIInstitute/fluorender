@@ -33,53 +33,46 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace FL;
 
-void Pca::SetCovMat(std::vector<double> &cov)
-{
-	int size = cov.size();
-	if (size < 6)
-		return;
-	if (size > 9)
-		size = 9;
-	std::memcpy(m_cov, &cov[0], size * sizeof(double));
-	if (size < 9)
-	{
-		m_cov[2][2] = m_cov[1][2];
-		m_cov[2][1] = m_cov[1][1];
-		m_cov[2][0] = m_cov[0][2];
-		m_cov[1][2] = m_cov[1][1];
-		m_cov[1][1] = m_cov[1][0];
-		m_cov[1][0] = m_cov[0][1];
-	}
-}
-
-void Pca::Compute(bool upd_cov)
+void Pca::Compute()
 {
 	//compute m_cov
-	if (upd_cov)
+	if (m_mode == 0)
 	{
-		int N = m_points.size();
-		if (N < 2)
+		if (m_num < 2)
+			return;
+		FLIVR::Point m(m_mean);
+		m /= m_num;
+		m_cov[0][0] += -2.0*m(0)*m_mean(0) + m(0)*m(0);
+		m_cov[0][1] += -m(0)*m_mean(1) - m(1)*m_mean(0) + m(0)*m(1);
+		m_cov[0][2] += -m(0)*m_mean(2) - m(2)*m_mean(0) + m(0)*m(2);
+		m_cov[1][1] += -2.0*m(1)*m_mean(1) + m(1)*m(1);
+		m_cov[1][2] += -m(1)*m_mean(2) - m(2)*m_mean(1) + m(1)*m(2);
+		m_cov[2][2] += -2.0*m(2)*m_mean(2) + m(2)*m(2);
+		m_cov[1][0] = m_cov[0][1];
+		m_cov[2][0] = m_cov[0][2];
+		m_cov[2][1] = m_cov[1][2];
+		m_mean = m;
+	}
+	else if (m_mode == 2)
+	{
+		m_num = m_points.size();
+		if (m_num < 2)
 			return;
 
-		std::vector<FLIVR::Point> points;
 		//mean
-		FLIVR::Point mean;
-		for (int i = 0; i < N; ++i)
-		{
-			points.push_back(m_points[i]);
-			mean += m_points[i];
-		}
-		mean /= N;
+		for (int i = 0; i < m_num; ++i)
+			m_mean += m_points[i];
+		m_mean /= m_num;
 		//centered matrix
-		for (int i = 0; i < N; ++i)
-			points[i] -= mean;
+		for (int i = 0; i < m_num; ++i)
+			m_points[i] -= m_mean;
 
 		for (int i = 0; i < 3; ++i)
 		for (int j = 0; j < 3; ++j)
 		{
 			m_cov[i][j] = 0;
-			for (int n = 0; n < N; ++n)
-				m_cov[i][j] += (points[n])(i) * (points[n])(j);
+			for (int n = 0; n < m_num; ++n)
+				m_cov[i][j] += (m_points[n])(i) * (m_points[n])(j);
 		}
 	}
 

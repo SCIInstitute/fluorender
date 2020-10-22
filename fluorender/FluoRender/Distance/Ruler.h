@@ -370,6 +370,28 @@ namespace FL
 			}
 			return groups.size();
 		}
+
+		int GetGroupNumAndCount(std::vector<unsigned int> &groups,
+			std::vector<int> &counts)
+		{
+			for (auto iter = this->begin();
+				iter != this->end(); ++iter)
+			{
+				unsigned int group = (*iter)->Group();
+				auto ir = std::find(groups.begin(), groups.end(), group);
+				if (ir == groups.end())
+				{
+					groups.push_back(group);
+					counts.push_back(1);
+				}
+				else
+				{
+					int index = std::distance(groups.begin(), ir);
+					counts[index]++;
+				}
+			}
+			return groups.size();
+		}
 	};
 	typedef RulerList::iterator RulerListIter;
 }

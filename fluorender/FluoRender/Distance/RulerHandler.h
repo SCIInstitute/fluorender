@@ -62,6 +62,10 @@ namespace FL
 				}
 			}
 		}
+		void SetGroup(unsigned int group)
+		{
+			m_group = group;
+		}
 
 		void SetView(VRenderGLView* view)
 		{

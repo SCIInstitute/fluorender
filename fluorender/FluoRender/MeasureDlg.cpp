@@ -346,7 +346,37 @@ void RulerListCtrl::Export(wxString filename)
 			break;
 		}
 
-		tos << "Name\tGroup\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+		int ruler_num = ruler_list->size();
+		std::vector<unsigned int> groups;
+		std::vector<int> counts;
+		int group_num = ruler_list->GetGroupNumAndCount(groups, counts);
+		std::vector<int> group_count(group_num, 0);
+
+		if (ruler_num > 1)
+			tos << "Ruler Count:\t" << ruler_num << "\n";
+		if (group_num > 1)
+		{
+			//group count
+			tos << "Group Count:\t" << group_num << "\n";
+			for (int i = 0; i < group_num; ++i)
+			{
+				tos << "Group " << groups[i];
+				if (i < group_num - 1)
+					tos << "\t";
+				else
+					tos << "\n";
+			}
+			for (int i = 0; i < group_num; ++i)
+			{
+				tos << counts[i];
+				if (i < group_num - 1)
+					tos << "\t";
+				else
+					tos << "\n";
+			}
+		}
+
+		tos << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
 		double f = 0.0;
 		Color color;
@@ -357,7 +387,20 @@ void RulerListCtrl::Export(wxString filename)
 			if (!ruler) continue;
 
 			tos << ruler->GetName() << "\t";
-			tos << ruler->Group() << "\t";
+
+			//group and count
+			unsigned int group = ruler->Group();
+			tos << group << "\t";
+			int count = 0;
+			auto iter = std::find(groups.begin(), groups.end(), group);
+			if (iter != groups.end())
+			{
+				int index = std::distance(groups.begin(), iter);
+				count = ++group_count[index];
+			}
+			tos << count << "\t";
+
+			//color
 			if (ruler->GetUseColor())
 			{
 				color = ruler->GetColor();
@@ -367,31 +410,42 @@ void RulerListCtrl::Export(wxString filename)
 			else
 				str = "N/A";
 			tos << str << "\t";
+
+			//branch count
 			str = wxString::Format("%d", ruler->GetNumBranch());
 			tos << str << "\t";
+			//length
 			str = wxString::Format("%.2f", ruler->GetLength());
 			tos << str << "\t";
+			//angle
 			str = wxString::Format("%.1f", ruler->GetAngle());
 			tos << str << "\t";
+
 			str = "";
+			//start and end points
 			num_points = ruler->GetNumPoint();
 			if (num_points > 0)
 			{
 				p = ruler->GetPoint(0)->GetPoint();
-				str += wxString::Format("%.2f\t%.2f\t%.2f", p.x(), p.y(), p.z());
+				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
 			}
 			if (num_points > 1)
 			{
 				p = ruler->GetPoint(num_points - 1)->GetPoint();
-				str += "\t";
-				str += wxString::Format("%.2f\t%.2f\t%.2f", p.x(), p.y(), p.z());
+				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
 			}
-			tos << str << "\t";
+			else
+				str += "\t\t\t";
+			tos << str;
+			
+			//time
 			if (ruler->GetTimeDep())
 				str = wxString::Format("%d", ruler->GetTime());
 			else
 				str = "N/A";
 			tos << str << "\t";
+
+			//info values v1 v2
 			tos << ruler->GetInfoValues() << "\n";
 
 			//export points
@@ -1975,7 +2029,11 @@ void MeasureDlg::OnNewGroup(wxCommandEvent& event)
 
 void MeasureDlg::OnSetGroup(wxCommandEvent& event)
 {
-
+	if (!m_rhdl)
+		return;
+	unsigned long ival;
+	if (m_group_text->GetValue().ToULong(&ival))
+		m_rhdl->SetGroup(ival);
 }
 
 void MeasureDlg::AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list)

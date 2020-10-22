@@ -37,26 +37,63 @@ namespace FL
 	class Pca
 	{
 	public:
-		Pca()
-		{}
+		Pca(int mode = 0):
+			m_mode(mode)
+		{
+			ClearPoints();
+		}
 		~Pca()
 		{}
 
 		void AddPoint(FLIVR::Point &point)
 		{
-			m_points.push_back(point);
+			if (m_mode == 0)
+			{
+				m_mean = FLIVR::Point(m_mean + point);
+				m_cov[0][0] += point(0) * point(0);
+				m_cov[0][1] += point(0) * point(1);
+				m_cov[0][2] += point(0) * point(2);
+				m_cov[1][1] += point(1) * point(1);
+				m_cov[1][2] += point(1) * point(2);
+				m_cov[2][2] += point(2) * point(2);
+				m_num++;
+			}
+			else if (m_mode == 2)
+				m_points.push_back(point);
 		}
 		void SetPoints(std::vector<FLIVR::Point> &points)
 		{
 			m_points.assign(points.begin(), points.end());
+			m_mode = 2;
 		}
+		void SetCovMat(std::vector<double> &cov)
+		{
+			int size = cov.size();
+			if (size < 6)
+				return;
+			if (size > 9)
+				size = 9;
+			std::memcpy(m_cov, &cov[0], size * sizeof(double));
+			if (size < 9)
+			{
+				m_cov[2][2] = m_cov[1][2];
+				m_cov[2][1] = m_cov[1][1];
+				m_cov[2][0] = m_cov[0][2];
+				m_cov[1][2] = m_cov[1][1];
+				m_cov[1][1] = m_cov[1][0];
+				m_cov[1][0] = m_cov[0][1];
+			}
+			m_mode = 1;
+		}
+
 		void ClearPoints()
 		{
+			m_num = 0;
+			m_mean = FLIVR::Point();
+			memset(m_cov, 0, sizeof(double) * 9);
 			m_points.clear();
 		}
-		void SetCovMat(std::vector<double> &cov);
-
-		void Compute(bool upd_cov=true);
+		void Compute();
 
 		FLIVR::Vector GetAxis(int index)
 		{
@@ -67,9 +104,12 @@ namespace FL
 		}
 
 	private:
+		int m_mode;//0-incremental cov; 1-external cov; 2-store points
 		std::vector<FLIVR::Point> m_points;
 		FLIVR::Vector m_axis[3];
 		double m_values[3];
+		int m_num;
+		FLIVR::Point m_mean;
 		double m_cov[3][3];//covariance matrix
 
 	private:

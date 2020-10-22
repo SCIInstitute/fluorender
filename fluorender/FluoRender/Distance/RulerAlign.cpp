@@ -87,7 +87,7 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 		solver.SetPoints(m_point_list);
 	else
 		solver.SetCovMat(m_cov);
-	solver.Compute(cov);
+	solver.Compute();
 
 	FLIVR::Vector source0 = solver.GetAxis(0);
 	FLIVR::Vector source1 = solver.GetAxis(1);
