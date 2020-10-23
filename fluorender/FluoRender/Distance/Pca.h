@@ -102,6 +102,10 @@ namespace FL
 			else
 				return FLIVR::Vector();
 		}
+		FLIVR::Vector GetLengths()
+		{
+			return FLIVR::Vector(m_values[0], m_values[1], m_values[2]);
+		}
 
 	private:
 		int m_mode;//0-incremental cov; 1-external cov; 2-store points

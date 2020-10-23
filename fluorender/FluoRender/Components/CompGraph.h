@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Point.h>
 #include <FLIVR/Color.h>
 #include <FLIVR/BBox.h>
+#include <Distance/Pca.h>
 
 namespace FL
 {
@@ -117,6 +118,7 @@ namespace FL
 		FLIVR::Point proj;//projected point
 		std::vector<unsigned int> cosumi;
 		std::vector<double> cosumd;
+		Pca pca;
 		CompVert v;
 
 		CompInfo()

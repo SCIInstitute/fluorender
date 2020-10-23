@@ -42,12 +42,12 @@ void Pca::Compute()
 			return;
 		FLIVR::Point m(m_mean);
 		m /= m_num;
-		m_cov[0][0] += -2.0*m(0)*m_mean(0) + m(0)*m(0);
-		m_cov[0][1] += -m(0)*m_mean(1) - m(1)*m_mean(0) + m(0)*m(1);
-		m_cov[0][2] += -m(0)*m_mean(2) - m(2)*m_mean(0) + m(0)*m(2);
-		m_cov[1][1] += -2.0*m(1)*m_mean(1) + m(1)*m(1);
-		m_cov[1][2] += -m(1)*m_mean(2) - m(2)*m_mean(1) + m(1)*m(2);
-		m_cov[2][2] += -2.0*m(2)*m_mean(2) + m(2)*m(2);
+		m_cov[0][0] += -2.0*m(0)*m_mean(0) + m(0)*m(0)*m_num;
+		m_cov[0][1] += -m(0)*m_mean(1) - m(1)*m_mean(0) + m(0)*m(1)*m_num;
+		m_cov[0][2] += -m(0)*m_mean(2) - m(2)*m_mean(0) + m(0)*m(2)*m_num;
+		m_cov[1][1] += -2.0*m(1)*m_mean(1) + m(1)*m(1)*m_num;
+		m_cov[1][2] += -m(1)*m_mean(2) - m(2)*m_mean(1) + m(1)*m(2)*m_num;
+		m_cov[2][2] += -2.0*m(2)*m_mean(2) + m(2)*m(2)*m_num;
 		m_cov[1][0] = m_cov[0][1];
 		m_cov[2][0] = m_cov[0][2];
 		m_cov[2][1] = m_cov[1][2];
