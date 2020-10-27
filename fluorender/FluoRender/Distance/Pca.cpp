@@ -74,6 +74,9 @@ void Pca::Compute()
 			for (int n = 0; n < m_num; ++n)
 				m_cov[i][j] += (m_points[n])(i) * (m_points[n])(j);
 		}
+		//bpoint
+		for (auto &i : m_points)
+			m_bpoint.extend(i);
 	}
 
 	//eigen
@@ -157,9 +160,6 @@ void Pca::Compute()
 		mat1[2][0] * mat3[0][1] + mat1[2][1] * mat3[1][1] + mat1[2][2] * mat3[2][1],
 		mat1[2][0] * mat3[0][2] + mat1[2][1] * mat3[1][2] + mat1[2][2] * mat3[2][2] };
 	//extract
-	m_values[0] = eig[0];
-	m_values[1] = eig[1];
-	m_values[2] = eig[2];
 	int col = 0;
 	do
 	{
@@ -174,4 +174,14 @@ void Pca::Compute()
 	} while (m_axis[1].normalize() <= EPS);
 	m_axis[2] = Cross(m_axis[0], m_axis[1]);
 	m_axis[2].normalize();
+	//get extend for values
+	FLIVR::Vector xmin = m_bpoint.get(0) - m_mean;
+	FLIVR::Vector xmax = m_bpoint.get(1) - m_mean;
+	FLIVR::Vector ymin = m_bpoint.get(2) - m_mean;
+	FLIVR::Vector ymax = m_bpoint.get(3) - m_mean;
+	FLIVR::Vector zmin = m_bpoint.get(4) - m_mean;
+	FLIVR::Vector zmax = m_bpoint.get(5) - m_mean;
+	m_values[0] = std::fabs(FLIVR::Dot(xmax, m_axis[0]) - FLIVR::Dot(xmin, m_axis[0]));
+	m_values[1] = std::fabs(FLIVR::Dot(ymax, m_axis[1]) - FLIVR::Dot(ymin, m_axis[1]));
+	m_values[2] = std::fabs(FLIVR::Dot(zmax, m_axis[2]) - FLIVR::Dot(zmin, m_axis[2]));
 }

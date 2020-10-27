@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <FLIVR/Point.h>
 #include <FLIVR/Vector.h>
+#include <FLIVR/BPoint.h>
 #include <vector>
 
 namespace FL
@@ -60,6 +61,7 @@ namespace FL
 			}
 			else if (m_mode == 2)
 				m_points.push_back(point);
+			m_bpoint.extend(point);
 		}
 		void SetPoints(std::vector<FLIVR::Point> &points)
 		{
@@ -109,6 +111,7 @@ namespace FL
 
 	private:
 		int m_mode;//0-incremental cov; 1-external cov; 2-store points
+		FLIVR::BPoint m_bpoint;
 		std::vector<FLIVR::Point> m_points;
 		FLIVR::Vector m_axis[3];
 		double m_values[3];
