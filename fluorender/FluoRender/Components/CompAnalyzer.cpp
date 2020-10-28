@@ -300,7 +300,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				FLIVR::Point point(i + b->ox(), j + b->oy(), k + b->oz());
 				info->pos = point;
 				info->box.extend(point);
-				info->pca.AddPoint(point);
+				info->pca.AddPointScale(point, sx, sy, sz);
 				if (colocal)
 				{
 					info->cosumi = sumi;
@@ -315,7 +315,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				iter->second->box.extend(point);
 				iter->second->pos = FLIVR::Point((iter->second->pos * iter->second->sumi +
 					point) / (iter->second->sumi + 1));
-				iter->second->pca.AddPoint(point);
+				iter->second->pca.AddPointScale(point, sx, sy, sz);
 				//
 				iter->second->sumi++;
 				iter->second->sumd += value;
@@ -724,7 +724,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (vd && vd->GetAllBrickNum() > 1)
 		str += "BRICK_ID\t";
 
-	str += "PosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist\tPca";
+	str += "PosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist\tShape";
 
 	if (m_colocal)
 	{

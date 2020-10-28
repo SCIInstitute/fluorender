@@ -63,6 +63,12 @@ namespace FL
 				m_points.push_back(point);
 			m_bpoint.extend(point);
 		}
+		void AddPointScale(FLIVR::Point &point, double sx, double sy, double sz)
+		{
+			FLIVR::Point sp(point);
+			sp.scale(sx, sy, sz);
+			AddPoint(sp);
+		}
 		void SetPoints(std::vector<FLIVR::Point> &points)
 		{
 			m_points.assign(points.begin(), points.end());
