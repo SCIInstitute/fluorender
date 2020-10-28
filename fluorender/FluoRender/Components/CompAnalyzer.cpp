@@ -724,7 +724,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (vd && vd->GetAllBrickNum() > 1)
 		str += "BRICK_ID\t";
 
-	str += "PosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist\tShape";
+	str += "PosX\tPosY\tPosZ\tSumN\tSumI\tPhysN\tPhysI\tSurfN\tSurfI\tMean\tSigma\tMin\tMax\tDist\tPcaL";
 
 	if (m_colocal)
 	{
@@ -826,7 +826,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << i->second->min << "\t";
 		stream << i->second->max << "\t";
 		stream << i->second->dist << "\t";
-		stream << lens;
+		stream << lens.x();
 		if (m_colocal)
 		{
 			stream << "\t";

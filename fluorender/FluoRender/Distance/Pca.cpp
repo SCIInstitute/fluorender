@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Distance/Pca.h>
+#include <FLIVR/Transform.h>
 #include <utility.h>
 #include <Algorithm>
 #include <cmath>
@@ -175,13 +176,31 @@ void Pca::Compute()
 	m_axis[2] = Cross(m_axis[0], m_axis[1]);
 	m_axis[2].normalize();
 	//get extend for values
-	FLIVR::Vector xmin = m_bpoint.get(0) - m_mean;
-	FLIVR::Vector xmax = m_bpoint.get(1) - m_mean;
-	FLIVR::Vector ymin = m_bpoint.get(2) - m_mean;
-	FLIVR::Vector ymax = m_bpoint.get(3) - m_mean;
-	FLIVR::Vector zmin = m_bpoint.get(4) - m_mean;
-	FLIVR::Vector zmax = m_bpoint.get(5) - m_mean;
-	m_values[0] = std::fabs(FLIVR::Dot(xmax, m_axis[0]) - FLIVR::Dot(xmin, m_axis[0]));
-	m_values[1] = std::fabs(FLIVR::Dot(ymax, m_axis[1]) - FLIVR::Dot(ymin, m_axis[1]));
-	m_values[2] = std::fabs(FLIVR::Dot(zmax, m_axis[2]) - FLIVR::Dot(zmin, m_axis[2]));
+	FLIVR::Transform tf(FLIVR::Point(),
+		m_axis[0], m_axis[1], m_axis[2]);
+	FLIVR::Point pts[6];
+	for (int i = 0; i < 6; ++i)
+		pts[i] = tf.transform(m_bpoint.get(i));
+	double xmin, xmax, ymin, ymax, zmin, zmax;
+	for (int i = 0; i < 6; ++i)
+	{
+		if (i == 0)
+		{
+			xmin = xmax = pts[i].x();
+			ymin = ymax = pts[i].y();
+			zmin = zmax = pts[i].z();
+		}
+		else
+		{
+			xmin = std::min(xmin, pts[i].x());
+			xmax = std::max(xmax, pts[i].x());
+			ymin = std::min(ymin, pts[i].y());
+			ymax = std::max(ymax, pts[i].y());
+			zmin = std::min(zmin, pts[i].z());
+			zmax = std::max(zmax, pts[i].z());
+		}
+	}
+	m_values[0] = xmax - xmin;
+	m_values[1] = ymax - ymin;
+	m_values[2] = zmax - zmin;
 }
