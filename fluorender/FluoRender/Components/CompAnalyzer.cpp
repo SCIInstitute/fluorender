@@ -137,17 +137,21 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			nx = b->nx()-1;
 			ny = b->ny()-1;
 			nz = b->nz()-1;
-			if (!nx || !ny || !nz) continue;
+			int cnt = (nx ? 1 : 0) + (ny ? 1 : 0) + (nz ? 1 : 0);
+			if (cnt < 2) continue;
 
 			//size
-			unsigned long long mem_size = (unsigned long long)nx*
-				(unsigned long long)ny*(unsigned long long)nz*nb;
+			unsigned long long mem_size;
+			mem_size = nz ? ((unsigned long long)nx*
+				(unsigned long long)ny*(unsigned long long)nz*nb) :
+				((unsigned long long)nx*(unsigned long long)ny*nb);
 			//data
 			unsigned char* temp = new unsigned char[mem_size];
 			unsigned char* tempp = temp;
 			unsigned char* tp = (unsigned char*)(b->tex_data(0));
 			unsigned char* tp2;
-			for (unsigned int k = 0; k < nz; ++k)
+			unsigned int kn = nz ? nz : 1;
+			for (unsigned int k = 0; k < kn; ++k)
 			{
 				tp2 = tp;
 				for (unsigned int j = 0; j < ny; ++j)
@@ -164,12 +168,13 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			{
 				c = b->nmask();
 				nb = b->nb(c);
-				mem_size = (unsigned long long)nx*
-					(unsigned long long)ny*(unsigned long long)nz*nb;
+				mem_size = nz ? ((unsigned long long)nx*
+					(unsigned long long)ny*(unsigned long long)nz*nb) :
+					((unsigned long long)nx*(unsigned long long)ny*nb);
 				temp = new unsigned char[mem_size];
 				tempp = temp;
 				tp = (unsigned char*)(b->tex_data(c));
-				for (unsigned int k = 0; k < nz; ++k)
+				for (unsigned int k = 0; k < kn; ++k)
 				{
 					tp2 = tp;
 					for (unsigned int j = 0; j < ny; ++j)
@@ -185,12 +190,13 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			//label
 			c = b->nlabel();
 			nb = b->nb(c);
-			mem_size = (unsigned long long)nx*
-				(unsigned long long)ny*(unsigned long long)nz*nb;
+			mem_size = nz ? ((unsigned long long)nx*
+				(unsigned long long)ny*(unsigned long long)nz*nb) :
+				((unsigned long long)nx*(unsigned long long)ny*nb);
 			temp = new unsigned char[mem_size];
 			tempp = temp;
 			tp = (unsigned char*)(b->tex_data(c));
-			for (unsigned int k = 0; k < nz; ++k)
+			for (unsigned int k = 0; k < kn; ++k)
 			{
 				tp2 = tp;
 				for (unsigned int j = 0; j < ny; ++j)
@@ -231,8 +237,9 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		double ext;
 		int i, j, k;
 		//m_vd->GetResolution(nx, ny, nz);
-		unsigned long long for_size = (unsigned long long)nx *
-			(unsigned long long)ny * (unsigned long long)nz;
+		unsigned long long for_size = nz ? ((unsigned long long)nx *
+			(unsigned long long)ny * (unsigned long long)nz) :
+			((unsigned long long)nx * (unsigned long long)ny);
 		unsigned long long index;
 		CompListBrick comp_list_brick;
 		CompListBrickIter iter;
@@ -268,7 +275,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			j = index % (nx*ny);
 			i = j % nx;
 			j = j / nx;
-			ext = GetExt(data_label, index, id, nx, ny, nz, i, j, k);
+			ext = GetExt(data_label, index, id, nx?nx:1, ny?ny:1, nz?nz:1, i, j, k);
+			//ext = 0.0;
 
 			//colocalization
 			std::vector<unsigned int> sumi;
@@ -440,67 +448,76 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		//check 3 positive faces
 		unsigned int l1, l2, index, b1, b2;
 		//(x, y, nz-1)
-		for (unsigned int j = 0; j < ny-1; ++j)
-		for (unsigned int i = 0; i < nx-1; ++i)
+		if (nz > 1)
 		{
-			index = nx*ny*(nz - 1) + j*nx + i;
-			l1 = data_label[index];
-			if (!l1) continue;
-			index -= nx*ny;
-			l2 = data_label[index];
-			if (!l2) continue;
-			//get brick ids
-			b2 = b->get_id();
-			b1 = tex->poszid(b2);
-			if (b1 == b2) continue;
-			//if l1 and l2 are different and already in the comp list
-			//connect them
-			auto i1 = comps.find(GetKey(l1, b1));
-			auto i2 = comps.find(GetKey(l2, b2));
-			if (i1 != comps.end() && i2 != comps.end())
-				graph.LinkComps(i1->second, i2->second);
+			for (unsigned int j = 0; j < ny - 1; ++j)
+			for (unsigned int i = 0; i < nx - 1; ++i)
+			{
+				index = nx * ny*(nz - 1) + j * nx + i;
+				l1 = data_label[index];
+				if (!l1) continue;
+				index -= nx * ny;
+				l2 = data_label[index];
+				if (!l2) continue;
+				//get brick ids
+				b2 = b->get_id();
+				b1 = tex->poszid(b2);
+				if (b1 == b2) continue;
+				//if l1 and l2 are different and already in the comp list
+				//connect them
+				auto i1 = comps.find(GetKey(l1, b1));
+				auto i2 = comps.find(GetKey(l2, b2));
+				if (i1 != comps.end() && i2 != comps.end())
+					graph.LinkComps(i1->second, i2->second);
+			}
 		}
 		//(x, ny-1, z)
-		for (unsigned int k = 0; k < nz-1; ++k)
-		for (unsigned int i = 0; i < nx-1; ++i)
+		if (ny > 1)
 		{
-			index = nx*ny*k + nx*(ny-1) + i;
-			l1 = data_label[index];
-			if (!l1) continue;
-			index -= nx;
-			l2 = data_label[index];
-			if (!l2) continue;
-			//get brick ids
-			b2 = b->get_id();
-			b1 = tex->posyid(b2);
-			if (b1 == b2) continue;
-			//if l1 and l2 are different and already in the comp list
-			//connect them
-			auto i1 = comps.find(GetKey(l1, b1));
-			auto i2 = comps.find(GetKey(l2, b2));
-			if (i1 != comps.end() && i2 != comps.end())
-				graph.LinkComps(i1->second, i2->second);
+			for (unsigned int k = 0; k < nz - 1; ++k)
+			for (unsigned int i = 0; i < nx - 1; ++i)
+			{
+				index = nx * ny*k + nx * (ny - 1) + i;
+				l1 = data_label[index];
+				if (!l1) continue;
+				index -= nx;
+				l2 = data_label[index];
+				if (!l2) continue;
+				//get brick ids
+				b2 = b->get_id();
+				b1 = tex->posyid(b2);
+				if (b1 == b2) continue;
+				//if l1 and l2 are different and already in the comp list
+				//connect them
+				auto i1 = comps.find(GetKey(l1, b1));
+				auto i2 = comps.find(GetKey(l2, b2));
+				if (i1 != comps.end() && i2 != comps.end())
+					graph.LinkComps(i1->second, i2->second);
+			}
 		}
 		//(nx-1, y, z)
-		for (unsigned int k = 0; k < nz-1; ++k)
-		for (unsigned int j = 0; j < ny-1; ++j)
+		if (nx > 1)
 		{
-			index = nx*ny*k + nx*j + nx-1;
-			l1 = data_label[index];
-			if (!l1) continue;
-			index -= 1;
-			l2 = data_label[index];
-			if (!l2) continue;
-			//get brick ids
-			b2 = b->get_id();
-			b1 = tex->posxid(b2);
-			if (b1 == b2) continue;
-			//if l1 and l2 are different and already in the comp list
-			//connect them
-			auto i1 = comps.find(GetKey(l1, b1));
-			auto i2 = comps.find(GetKey(l2, b2));
-			if (i1 != comps.end() && i2 != comps.end())
-				graph.LinkComps(i1->second, i2->second);
+			for (unsigned int k = 0; k < nz - 1; ++k)
+			for (unsigned int j = 0; j < ny - 1; ++j)
+			{
+				index = nx * ny*k + nx * j + nx - 1;
+				l1 = data_label[index];
+				if (!l1) continue;
+				index -= 1;
+				l2 = data_label[index];
+				if (!l2) continue;
+				//get brick ids
+				b2 = b->get_id();
+				b1 = tex->posxid(b2);
+				if (b1 == b2) continue;
+				//if l1 and l2 are different and already in the comp list
+				//connect them
+				auto i1 = comps.find(GetKey(l1, b1));
+				auto i2 = comps.find(GetKey(l2, b2));
+				if (i1 != comps.end() && i2 != comps.end())
+					graph.LinkComps(i1->second, i2->second);
+			}
 		}
 
 		if (data_data) delete[] (unsigned char*)data_data;

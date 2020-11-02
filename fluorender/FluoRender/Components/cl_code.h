@@ -1625,7 +1625,7 @@ const char* str_cl_fill_borders_3d = \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	if (i == 0)\n" \
+"	if (nx > 1 && i == 0)\n" \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
@@ -1636,7 +1636,7 @@ const char* str_cl_fill_borders_3d = \
 "			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
-"	if (j == 0)\n" \
+"	if (ny > 1 && j == 0)\n" \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
@@ -1647,7 +1647,7 @@ const char* str_cl_fill_borders_3d = \
 "			atomic_xchg(label+index, label[nb_index]);\n" \
 "		}\n" \
 "	}\n" \
-"	if (k == 0)\n" \
+"	if (nz > 1 && k == 0)\n" \
 "	{\n" \
 "		float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "		float nb_value = read_imagef(data, samp, (int4)(i, j, k+1, 1)).x;\n" \
@@ -1674,7 +1674,7 @@ const char* str_cl_fill_borders_3d = \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (mask_value < 1e-6)\n" \
 "		return;\n" \
-"	if (i == 0)\n" \
+"	if (nx > 1 && i == 0)\n" \
 "	{\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i+1, j, k, 1)).x;\n" \
 "		if (mask_value > 1e-6)\n" \
@@ -1689,7 +1689,7 @@ const char* str_cl_fill_borders_3d = \
 "			}\n" \
 "		}\n" \
 "	}\n" \
-"	if (j == 0)\n" \
+"	if (ny > 1 && j == 0)\n" \
 "	{\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i, j+1, k, 1)).x;\n" \
 "		if (mask_value > 1e-6)\n" \
@@ -1704,7 +1704,7 @@ const char* str_cl_fill_borders_3d = \
 "			}\n" \
 "		}\n" \
 "	}\n" \
-"	if (k == 0)\n" \
+"	if (nz > 1 && k == 0)\n" \
 "	{\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i, j, k+1, 1)).x;\n" \
 "		if (mask_value > 1e-6)\n" \
