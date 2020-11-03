@@ -472,9 +472,10 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			}
 		}
 		//(x, ny-1, z)
+		int kz = nz > 1 ? nz - 1 : 1;
 		if (ny > 1)
 		{
-			for (unsigned int k = 0; k < nz - 1; ++k)
+			for (unsigned int k = 0; k < kz; ++k)
 			for (unsigned int i = 0; i < nx - 1; ++i)
 			{
 				index = nx * ny*k + nx * (ny - 1) + i;
@@ -498,7 +499,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		//(nx-1, y, z)
 		if (nx > 1)
 		{
-			for (unsigned int k = 0; k < nz - 1; ++k)
+			for (unsigned int k = 0; k < kz; ++k)
 			for (unsigned int j = 0; j < ny - 1; ++j)
 			{
 				index = nx * ny*k + nx * j + nx - 1;
