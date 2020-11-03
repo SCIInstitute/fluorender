@@ -92,6 +92,8 @@ void ComponentGenerator::ShuffleID()
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -220,6 +222,8 @@ void ComponentGenerator::SetIDBit(int psize)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -396,6 +400,8 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -499,6 +505,8 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -755,6 +763,8 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -944,6 +954,8 @@ void ComponentGenerator::DistDensityField(
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -1260,6 +1272,8 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -1403,6 +1417,8 @@ void ComponentGenerator::ClearBorders()
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -1463,6 +1479,8 @@ void ComponentGenerator::FillBorders(float tol)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
+		if (m_use_mask && !b->get_paint_mask())
+			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
