@@ -1529,7 +1529,8 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, pCompInfo &info)
 	unsigned int *tp, *tp2;
 	unsigned int lv;
 	tp = data_label;
-	for (unsigned int k = 0; k < nz - 1; ++k)
+	unsigned int kz = nz > 1 ? nz - 1 : 1;
+	for (unsigned int k = 0; k < kz; ++k)
 	{
 		tp2 = tp;
 		for (unsigned int j = 0; j < ny - 1; ++j)
@@ -1557,14 +1558,14 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 {
 	unsigned int result = 0;
 	unsigned int iid = id;
-
+	unsigned int kz = nz > 1 ? nz - 1 : 1;
 	unsigned int *tp, *tp2;
 	unsigned int lv;
 	do
 	{
 		bool found = false;
 		tp = data;
-		for (unsigned int k = 0; k < nz - 1; ++k)
+		for (unsigned int k = 0; k < kz; ++k)
 		{
 			tp2 = tp;
 			for (unsigned int j = 0; j < ny - 1; ++j)
