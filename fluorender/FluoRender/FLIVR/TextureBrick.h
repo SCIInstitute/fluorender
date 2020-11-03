@@ -191,6 +191,8 @@ namespace FLIVR {
 		{ return b1->d_ > b2->d_; }
 		static bool sort_dsc(const TextureBrick* b1, const TextureBrick* b2)
 		{ return b2->d_ > b1->d_; }
+		static bool sort_id(const TextureBrick* b1, const TextureBrick* b2)
+		{ return b1->id_ < b2->id_; }
 
 		//current index
 		inline void set_ind(size_t ind) {ind_ = ind;}

@@ -399,7 +399,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	if (!vd || !vd->GetTexture())
 		return;
 	Texture* tex = vd->GetTexture();
-	vector<TextureBrick*> *bricks = tex->get_bricks();
+	vector<TextureBrick*> *bricks = tex->get_bricks_id();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list

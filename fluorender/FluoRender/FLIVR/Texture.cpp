@@ -308,6 +308,13 @@ namespace FLIVR
 		return bricks_;
 	}
 
+	//get bricks sorted by id
+	vector<TextureBrick*>* Texture::get_bricks_id()
+	{
+		std::sort((*bricks_).begin(), (*bricks_).end(), TextureBrick::sort_id);
+		return bricks_;
+	}
+
 	vector<TextureBrick*>* Texture::get_quota_bricks()
 	{
 		return &quota_bricks_;

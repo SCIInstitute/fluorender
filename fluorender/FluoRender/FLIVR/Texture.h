@@ -146,6 +146,8 @@ namespace FLIVR
 		bool get_sort_bricks() {return sort_bricks_;}
 		// load the bricks independent of the view
 		vector<TextureBrick*>* get_bricks();
+		//get bricks sorted by id
+		vector<TextureBrick*>* get_bricks_id();
 		int get_brick_num() {return int((*bricks_).size());}
 		//quota bricks
 		vector<TextureBrick*>* get_quota_bricks();

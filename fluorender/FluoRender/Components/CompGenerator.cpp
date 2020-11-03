@@ -1459,7 +1459,7 @@ void ComponentGenerator::FillBorders(float tol)
 		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks_id();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		TextureBrick* b = (*bricks)[i];

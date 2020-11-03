@@ -1764,7 +1764,7 @@ namespace FLIVR
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*> *bricks = tex_->get_bricks();
+		vector<TextureBrick*> *bricks = tex_->get_bricks_id();
 		if (!bricks || bricks->size() == 0)
 			return;
 
