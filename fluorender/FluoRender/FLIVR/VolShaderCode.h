@@ -601,6 +601,30 @@ namespace FLIVR
 	"	c.xyz *= loc1.y>0.0?shd:1.0;\n" \
 	"\n"
 
+#define VOL_COLOR_OUTPUT_LABEL \
+	"	//VOL_COLOR_OUTPUT_LABEL\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
+	"	FragColor = sel*l.w;\n" \
+	"\n"
+
+#define VOL_COLOR_OUTPUT_LABEL_MASK \
+	"	//VOL_COLOR_OUTPUT_LABEL_MASK\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
+	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
+	"\n"
+
+#define VOL_COLOR_OUTPUT_LABEL_MASK_SOLID \
+	"	//VOL_COLOR_OUTPUT_LABEL_MASK_SOLID\n" \
+	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
+	"		(n.w+n.z);\n" \
+	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
+	"	FragColor = vec4(sel.xyz, 1.0);\n" \
+	"\n"
+
 #define VOL_FOG_BODY \
 	"	//VOL_FOG_BODY\n" \
 	"	v.x = (fp.z-fp.w)/(fp.z-fp.y);\n" \
@@ -701,11 +725,6 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	//VOL_COLOR_OUTPUT\n" \
-	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
-	"		(n.w+n.z);\n" \
-	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
-	"	FragColor = sel*l.w;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_LABEL_MASK \
@@ -742,11 +761,6 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	//VOL_COLOR_OUTPUT\n" \
-	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
-	"		(n.w+n.z);\n" \
-	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
-	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
 	"\n"
 #else
 #define VOL_RASTER_BLEND_LABEL \
@@ -777,11 +791,6 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 1.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	//VOL_COLOR_OUTPUT\n" \
-	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
-	"		(n.w+n.z);\n" \
-	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
-	"	FragColor = sel*l.w;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_LABEL_MASK \
@@ -818,11 +827,6 @@ namespace FLIVR
 	"		else\n" \
 	"			sel = vec4(1.0, 0.0, p2, 1.0);\n" \
 	"	}\n" \
-	"	//VOL_COLOR_OUTPUT\n" \
-	"	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :\n" \
-	"		(n.w+n.z);\n" \
-	"	sel.xyz *= loc1.y>0.0?shad:1.0;\n" \
-	"	FragColor = sel*alpha*tf_alp*l.w;\n" \
 	"\n"
 #endif
 }//namespace FLIVR

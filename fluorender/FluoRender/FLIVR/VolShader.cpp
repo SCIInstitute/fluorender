@@ -441,9 +441,14 @@ VolShader::VolShader(
 				break;
 			case 3:
 				z << VOL_RASTER_BLEND_LABEL;
+				z << VOL_COLOR_OUTPUT_LABEL;
 				break;
 			case 4:
 				z << VOL_RASTER_BLEND_LABEL_MASK;
+				if (solid_)
+					z << VOL_COLOR_OUTPUT_LABEL_MASK_SOLID;
+				else
+					z << VOL_COLOR_OUTPUT_LABEL_MASK;
 				break;
 			}
 		}
