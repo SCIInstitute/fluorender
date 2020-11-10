@@ -2836,7 +2836,7 @@ void TraceDlg::LinkAddedCells(FL::CellList &list)
 	tm_processor.SetVolCacheSize(3);
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
-	RefineMap(m_cur_time);
+	RefineMap(m_cur_time, false);
 }
 
 void TraceDlg::SaveOutputResult(wxString &filename)
@@ -3354,7 +3354,7 @@ void TraceDlg::GenMap()
 	//CellUpdate();
 }
 
-void TraceDlg::RefineMap(int t)
+void TraceDlg::RefineMap(int t, bool erase_v)
 {
 	if (!m_view)
 		return;
@@ -3419,8 +3419,8 @@ void TraceDlg::RefineMap(int t)
 		for (int i = start_frame - 1; i <= end_frame; ++i)
 		{
 			//further process
-			tm_processor.ProcessFrames(i, i + 1);
-			tm_processor.ProcessFrames(i + 1, i);
+			tm_processor.ProcessFrames(i, i + 1, erase_v);
+			tm_processor.ProcessFrames(i + 1, i, erase_v);
 			(*m_stat_text) << wxString::Format("Time point %d processed.\n", i + 1);
 			wxGetApp().Yield();
 		}

@@ -201,7 +201,7 @@ public:
 
 	//automatic tracking
 	void GenMap();
-	void RefineMap(int t=-1);
+	void RefineMap(int t=-1, bool erase_v=true);
 
 	//track map file
 	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved

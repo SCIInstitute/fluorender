@@ -65,7 +65,7 @@ value=1
 [tracking]
 track_iter=3
 component_size=100
-consistent_color=1
+consistent_color=0
 try_merge=0
 try_split=0
 contact_factor=0.6

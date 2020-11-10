@@ -831,7 +831,7 @@ bool TrackMapProcessor::ResolveGraph(size_t frame1, size_t frame2)
 	return true;
 }
 
-bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
+bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2, bool erase_v)
 {
 	if (frame1 >= m_map->m_frame_num ||
 		frame2 >= m_map->m_frame_num ||
@@ -859,7 +859,7 @@ bool TrackMapProcessor::ProcessFrames(size_t frame1, size_t frame2)
 		//see if it is removed
 		////debug
 		//pVertex vert = iter->second;
-		if (iter->second->GetRemovedFromGraph())
+		if (erase_v && iter->second->GetRemovedFromGraph())
 			iter = vertex_list.erase(iter);
 		else
 			++iter;

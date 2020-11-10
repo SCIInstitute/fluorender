@@ -91,7 +91,7 @@ namespace FL
 		//group cells
 		bool ResolveGraph(size_t frame1, size_t frame2);
 		//find the maximum overlapping and set link flags on inter graph
-		bool ProcessFrames(size_t frame1, size_t frame2);
+		bool ProcessFrames(size_t frame1, size_t frame2, bool erase_v=true);
 
 		//make id consistent
 		bool MakeConsistent(size_t frame);//combine cells within vertex
