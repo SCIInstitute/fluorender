@@ -6,7 +6,7 @@ ClippingLayout::ClippingLayout()
   constructLayout();
   buildSliderConnections();
   buildSpinboxConnections();
-  buildSpinboxDConnections();
+  //buildSpinboxDConnections();
   buildButtonConnections();
 }
 
@@ -45,11 +45,13 @@ void ClippingLayout::buildSpinboxConnections()
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
 
+/*
 void ClippingLayout::buildSpinboxDConnections()
 {
   for(auto && tup : dSpinConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
+*/
 
 void ClippingLayout::buildButtonConnections()
 {
@@ -71,10 +73,10 @@ void ClippingLayout::disableLayout()
   
   for(auto && tup : spinConnections)
     std::get<0>(tup)->setEnabled(false);
-  
+ /*
   for(auto && tup : dSpinConnections)
     std::get<0>(tup)->setEnabled(false);
-
+*/
   disableButtons();
 }
 
@@ -85,10 +87,10 @@ void ClippingLayout::enableLayout()
   
   for(auto && tup : spinConnections)
     std::get<0>(tup)->setEnabled(true);
-  
+ /*
   for(auto && tup : dSpinConnections)
     std::get<0>(tup)->setEnabled(true);
-
+*/
   enableButtons();
 }
 
@@ -149,9 +151,12 @@ void ClippingLayout::buildControllers()
   y1YellowController = new ControllerInt(*y1YSpinbox,*y1YSlider,*yellowWrapper);
   z1PurpleController = new ControllerInt(*z1PSpinbox,*z1PSlider,*purpleWrapper);
   z1TealController = new ControllerInt(*z1TSpinbox,*z1TSlider,*tealWrapper);
-  x2RotationController = new ControllerDbl(*x2Spinbox,*x2Slider,*clipRotXWrapper);
-  y2RotationController = new ControllerDbl(*y2Spinbox,*y2Slider,*clipRotYWrapper);
-  z2RotationController = new ControllerDbl(*z2Spinbox,*z2Slider,*clipRotZWrapper);
+  //x2RotationController = new ControllerDbl(*x2Spinbox,*x2Slider,*clipRotXWrapper);
+  //y2RotationController = new ControllerDbl(*y2Spinbox,*y2Slider,*clipRotYWrapper);
+  //z2RotationController = new ControllerDbl(*z2Spinbox,*z2Slider,*clipRotZWrapper);
+  x2RotationController = new ControllerInt(*x2Spinbox,*x2Slider,*clipRotXWrapper);
+  y2RotationController = new ControllerInt(*y2Spinbox,*y2Slider,*clipRotYWrapper);
+  z2RotationController = new ControllerInt(*z2Spinbox,*z2Slider,*clipRotZWrapper);
 }
 
 void ClippingLayout::buildTuples()

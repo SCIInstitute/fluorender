@@ -24,11 +24,11 @@ class ClippingPlane : public QWidget
     void onWidthValueReceived(int value) { setClipWidthValue(value); }
 
     void onRotXValueReceived(int value) { setClipXRotValue(value); }
-    void onRotXValueReceived(double value) { setClipXRotValue(value); }
+    //void onRotXValueReceived(double value) { setClipXRotValue(value); }
     void onRotYValueReceived(int value) { setClipYRotValue(value); }
-    void onRotYValueReceived(double value) { setClipYRotValue(value); }
+    //void onRotYValueReceived(double value) { setClipYRotValue(value); }
     void onRotZValueReceived(int value) { setClipZRotValue(value); }
-    void onRotZValueReceived(double value) { setClipZRotValue(value); }
+    //void onRotZValueReceived(double value) { setClipZRotValue(value); }
     
     void onLockXStatusReceived(bool status) { setXPlaneLockStatus(status); }
     void onLockYStatusReceived(bool status) { setYPlaneLockStatus(status); }
@@ -47,20 +47,20 @@ class ClippingPlane : public QWidget
     void setClipSlabValue(int value);
     void setClipWidthValue(int value);
 
-    template<typename T>
-    void setClipXRotValue(T value)
+    //template<typename T>
+    void setClipXRotValue(int value)
     {
       clippingLayout->setRotXValue(value);
     }
 
-    template<typename T>
-    void setClipYRotValue(T value)
+    //template<typename T>
+    void setClipYRotValue(int value)
     {
       clippingLayout->setRotYValue(value);
     }
 
-    template<typename T>
-    void setClipZRotValue(T value)
+    //template<typename T>
+    void setClipZRotValue(int value)
     {
       clippingLayout->setRotZValue(value);
     }
@@ -89,9 +89,10 @@ class ClippingPlane : public QWidget
 
     void createLayout();
     void makeIntConnections();
-    void makeDblConnections();
+    //void makeDblConnections();
     void makeBoolConnections();
 
+/*
     const std::vector<std::tuple<ClippingLayout*, layoutDblFunc, clipDblFunc>> dblConnections = {
       std::make_tuple(clippingLayout,static_cast<layoutDblFunc>(&ClippingLayout::sendRotXValue),
                       static_cast<clipDblFunc>(&ClippingPlane::onRotXValueReceived)),
@@ -100,7 +101,7 @@ class ClippingPlane : public QWidget
       std::make_tuple(clippingLayout,static_cast<layoutDblFunc>(&ClippingLayout::sendRotZValue),
                       static_cast<clipDblFunc>(&ClippingPlane::onRotZValueReceived))
     };
-    
+*/    
     const std::vector<std::tuple<ClippingLayout*, layoutBoolFunc, clipBoolFunc>> boolConnections = {
       std::make_tuple(clippingLayout,&ClippingLayout::sendXPlaneBoolean,&ClippingPlane::onLockXStatusReceived),
       std::make_tuple(clippingLayout,&ClippingLayout::sendYPlaneBoolean,&ClippingPlane::onLockYStatusReceived),

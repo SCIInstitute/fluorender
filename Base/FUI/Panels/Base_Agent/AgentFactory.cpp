@@ -285,7 +285,6 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, QW
 	if (clip_plane_agent)
 	{
 		clip_plane_agent->setName(name);
-/*
 		clip_plane_agent->setValueChangedFunction("clip x1",
 			std::bind(&ClipPlaneAgent::OnClipXChanged,
 				clip_plane_agent, std::placeholders::_1));
@@ -331,7 +330,6 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, QW
 		clip_plane_agent->setValueChangedFunction("clip rot z",
 			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
 				clip_plane_agent, std::placeholders::_1));
-*/
 		objects_.push_front(clip_plane_agent);
         fluo::Event event;
         event.init(fluo::Event::EVENT_NODE_ADDED,

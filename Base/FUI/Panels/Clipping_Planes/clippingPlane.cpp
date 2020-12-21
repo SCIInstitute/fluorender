@@ -5,7 +5,7 @@ ClippingPlane::ClippingPlane()
 {
   createLayout();
   makeIntConnections();
-  makeDblConnections();
+  //makeDblConnections();
   makeBoolConnections();
   clippingLayout->disableLayout();
 }
@@ -92,12 +92,13 @@ const int ClippingPlane::getClipPurpleMaxVal()
   return clippingLayout->getPurpleSliderMax();
 }
 
+/*
 void ClippingPlane::makeDblConnections()
 {
   for(auto &&tup : dblConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
-
+*/
 void ClippingPlane::makeBoolConnections()
 {
   for(auto &&tup : boolConnections)
@@ -116,4 +117,5 @@ void ClippingPlane::setVolumeData(fluo::VolumeData* vd)
   clippingLayout->setAgent(m_agent,vd);
   clippingLayout->build();
   clippingLayout->enableLayout();
+  m_agent->UpdateAllSettings();
 }

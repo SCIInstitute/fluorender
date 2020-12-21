@@ -23,6 +23,12 @@
 
 #include <Panels/Clipping_Planes/Agent/clipPlaneAgent.hpp>
 
+/*
+ I encountered a bug possibly within my own code that does not allow me to use a spinbox double
+ for the rotation sliders. So I am not sure if this is going to cause any issues in the future.
+ I have left them commented out in case I need to go back to them in the future. 
+*/
+
 class ClippingLayout : public QGridLayout
 {
   Q_OBJECT
@@ -40,11 +46,11 @@ class ClippingLayout : public QGridLayout
     void sendWidthValue(int value);
 
     void sendRotXValue(int value);
-    void sendRotXValue(double value);
+//    void sendRotXValue(double value);
     void sendRotYValue(int value);
-    void sendRotYValue(double value);
+ //   void sendRotYValue(double value);
     void sendRotZValue(int value);
-    void sendRotZValue(double value);
+  //  void sendRotZValue(double value);
 
     void sendXPlaneBoolean(bool status);
     void sendYPlaneBoolean(bool status);
@@ -68,10 +74,14 @@ class ClippingLayout : public QGridLayout
     void onClipSpinboxChanged() { sendClipValue(setClipSpinbox->value()); }
     void onSlabSpinboxChanged() { sendSlabValue(slabSpinbox->value()); }
     void onWidthSpinboxChanged() { sendWidthValue(widthSpinbox->value()); }
-
+/*
     void onRotXSliderChanged() { sendRotXValue(static_cast<double>(x2Slider->value())); }
     void onRotYSliderChanged() { sendRotYValue(static_cast<double>(y2Slider->value()/100.0)); }
     void onRotZSliderChanged() { sendRotZValue(static_cast<double>(z2Slider->value()/100.0)); }
+*/
+    void onRotXSliderChanged() { sendRotXValue(x2Slider->value()); }
+    void onRotYSliderChanged() { sendRotYValue(y2Slider->value()); }
+    void onRotZSliderChanged() { sendRotZValue(z2Slider->value()); }
 
     void onRotXSpinboxChanged() { sendRotXValue(x2Spinbox->value()); }
     void onRotYSpinboxChanged() { sendRotYValue(y2Spinbox->value()); }
@@ -99,14 +109,14 @@ class ClippingLayout : public QGridLayout
     void setSlabValue(int newVal) { slabSpinbox->setValue(newVal); }
     void setWidthValue(int newVal) { widthSpinbox->setValue(newVal); }
 
-    template<typename T>
-    void setRotXValue(T newVal) { x2RotationController->setValues(newVal); }
+    //template<typename T>
+    void setRotXValue(int newVal) { x2RotationController->setValues(newVal); }
 
-    template<typename T>
-    void setRotYValue(T newVal) { y2RotationController->setValues(newVal); }
+    //template<typename T>
+    void setRotYValue(int newVal) { y2RotationController->setValues(newVal); }
 
-    template<typename T>
-    void setRotZValue(T newVal) { z2RotationController->setValues(newVal); }
+    //template<typename T>
+    void setRotZValue(int newVal) { z2RotationController->setValues(newVal); }
 
     const int getSalmonSliderMax() { return x1SSlider->maximum(); }
     const int getGreenSliderMax() { return y1GSlider->maximum(); }
@@ -240,9 +250,12 @@ class ClippingLayout : public QGridLayout
     QPushButton *alignToViewButton = new QPushButton("Align to View");
     QPushButton *resetTo0Button = new QPushButton(QIcon(":/clipping-reset.svg")," Reset to 0");
 
-    FluoSpinboxDouble *x2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
-    FluoSpinboxDouble *y2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
-    FluoSpinboxDouble *z2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
+    //FluoSpinboxDouble *x2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
+    //FluoSpinboxDouble *y2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
+    //FluoSpinboxDouble *z2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
+    FluoSpinbox *x2Spinbox = new FluoSpinbox(-180,180,false);
+    FluoSpinbox *y2Spinbox = new FluoSpinbox(-180,180,false);
+    FluoSpinbox *z2Spinbox = new FluoSpinbox(-180,180,false);
 
     AgentWrapper<ClipPlaneAgent> *salmonWrapper;
     AgentWrapper<ClipPlaneAgent> *magentaWrapper;
@@ -264,7 +277,7 @@ class ClippingLayout : public QGridLayout
     void constructLayout();
     void buildSliderConnections();
     void buildSpinboxConnections();
-    void buildSpinboxDConnections();
+    //void buildSpinboxDConnections();
     void buildButtonConnections();
     void buildWrappers();
     void buildControllers();
@@ -299,14 +312,17 @@ class ClippingLayout : public QGridLayout
       std::make_tuple(setClipSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onClipSpinboxChanged),
       std::make_tuple(slabSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onSlabSpinboxChanged),
       std::make_tuple(widthSpinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onWidthSpinboxChanged),
+      std::make_tuple(x2Spinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onRotXSpinboxChanged),
+      std::make_tuple(y2Spinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onRotYSpinboxChanged),
+      std::make_tuple(z2Spinbox, &FluoSpinbox::editingFinished, &ClippingLayout::onRotZSpinboxChanged),
     };
-
+/*
     const std::vector<std::tuple<FluoSpinboxDouble*, dSpinFunc, clipFunc>> dSpinConnections = {
       std::make_tuple(x2Spinbox, &FluoSpinboxDouble::editingFinished, &ClippingLayout::onRotXSpinboxChanged),
       std::make_tuple(y2Spinbox, &FluoSpinboxDouble::editingFinished, &ClippingLayout::onRotYSpinboxChanged),
       std::make_tuple(z2Spinbox, &FluoSpinboxDouble::editingFinished, &ClippingLayout::onRotZSpinboxChanged),
     };
-
+*/
     const std::vector<std::function<void()>> rowFuncs = {
       std::bind(&ClippingLayout::row0,this),
       std::bind(&ClippingLayout::addSingle<FluoLine>,this,1,lineSep1),
@@ -328,7 +344,7 @@ class ClippingLayout : public QGridLayout
       std::bind(&ClippingLayout::addSingle<QPushButton>,this,16,alignToViewButton),
       std::bind(&ClippingLayout::addSingle<QPushButton>,this,17,resetTo0Button),
       std::bind(&ClippingLayout::addThreeToRowShift<QLabel>,this,18,x2Label,y2Label,z2Label),
-      std::bind(&ClippingLayout::addThreeToRow<FluoSpinboxDouble>,this,19,z2Spinbox,y2Spinbox,x2Spinbox),
+      std::bind(&ClippingLayout::addThreeToRow<FluoSpinbox>,this,19,z2Spinbox,y2Spinbox,x2Spinbox),
       std::bind(&ClippingLayout::addThreeToRowShift<FluoSlider>,this,20,z2Slider,y2Slider,x2Slider)
     };
 
@@ -338,10 +354,14 @@ class ClippingLayout : public QGridLayout
     ControllerInt *x1MagentaController; 
     ControllerInt *y1YellowController; 
     ControllerInt *z1TealController; 
+    ControllerInt *x2RotationController; 
+    ControllerInt *y2RotationController;  
+    ControllerInt *z2RotationController; 
+/*
     ControllerDbl *x2RotationController; 
     ControllerDbl *y2RotationController;  
     ControllerDbl *z2RotationController; 
-
+*/
     ColorTup salmonMagentaTup;
     ColorTup greenYellowTup;
     ColorTup purpleTealTup;
