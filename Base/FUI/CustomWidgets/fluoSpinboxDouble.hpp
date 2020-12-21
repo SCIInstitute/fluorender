@@ -5,8 +5,6 @@
 #include <QString>
 #include <QDoubleSpinBox>
 
-#include <any>
-
 // TODO: Fix this code so it will update the value based on input
 
 class FluoSpinboxDouble : public QDoubleSpinBox

@@ -754,9 +754,9 @@ void ClipPlaneAgent::OnClipLinkZChanged(fluo::Event& event)
 
 void ClipPlaneAgent::OnClipRotXChanged(fluo::Event& event)
 {
-  double dval = 0.0;
-  getValue("clip rot x", dval);
-  parentPanel.setClipXRotValue(dval);
+  //double dval = 0.0;
+  //getValue("clip rot x", dval);
+  //parentPanel.setClipXRotValue(dval);
 }
 
 void ClipPlaneAgent::OnClipRotYChanged(fluo::Event& event)

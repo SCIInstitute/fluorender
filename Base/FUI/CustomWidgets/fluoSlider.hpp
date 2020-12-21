@@ -16,6 +16,8 @@ class FluoSlider : public QSlider
 
     FluoSlider(Qt::Orientation ori, int floor, int ceiling)
     {
+        connect(this, SIGNAL(valueChanged(int)),this,SLOT(restrictLowerBoundMove(int)));
+        connect(this, SIGNAL(valueChanged(int)),this,SLOT(restrictUpperBoundMove(int)));
         this->setStyle(new MyStyle(this->style()));
         this->setOrientation(ori);
         this->setRange(floor,ceiling);
@@ -32,6 +34,41 @@ class FluoSlider : public QSlider
     }
 
     int get() const { return this->value(); }
+
+    void setLowerBoundValue(int value)
+    {
+      lowerBoundRestriction = value; 
+    }
+
+    void setUpperBoundValue(int value)
+    {
+      upperBoundRestriction = value;
+    }
+
+    void resetDefaults()
+    {
+      lowerBoundRestriction = DEFAULT_LOWER;
+      upperBoundRestriction = DEFAULT_UPPER;
+    }
+
+  private slots:
+    void restrictLowerBoundMove(int index)
+    {
+      if(index < lowerBoundRestriction)
+        this->setSliderPosition(lowerBoundRestriction);
+    }
+   
+    void restrictUpperBoundMove(int index)
+    {
+      if(index > upperBoundRestriction)
+        this->setSliderPosition(upperBoundRestriction);
+    }
+  
+  private:
+    const int DEFAULT_LOWER = -200000;
+    const int DEFAULT_UPPER =  200000;
+    int lowerBoundRestriction = DEFAULT_LOWER;
+    int upperBoundRestriction = DEFAULT_UPPER;
 };
 
 #endif

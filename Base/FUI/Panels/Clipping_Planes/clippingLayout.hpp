@@ -69,9 +69,9 @@ class ClippingLayout : public QGridLayout
     void onSlabSpinboxChanged() { sendSlabValue(slabSpinbox->value()); }
     void onWidthSpinboxChanged() { sendWidthValue(widthSpinbox->value()); }
 
-    void onRotXSliderChanged() { sendRotXValue(x2Slider->value()); }
-    void onRotYSliderChanged() { sendRotYValue(y2Slider->value()); }
-    void onRotZSliderChanged() { sendRotZValue(z2Slider->value()); }
+    void onRotXSliderChanged() { sendRotXValue(static_cast<double>(x2Slider->value())); }
+    void onRotYSliderChanged() { sendRotYValue(static_cast<double>(y2Slider->value()/100.0)); }
+    void onRotZSliderChanged() { sendRotZValue(static_cast<double>(z2Slider->value()/100.0)); }
 
     void onRotXSpinboxChanged() { sendRotXValue(x2Spinbox->value()); }
     void onRotYSpinboxChanged() { sendRotYValue(y2Spinbox->value()); }
@@ -80,6 +80,10 @@ class ClippingLayout : public QGridLayout
     void onXPlaneLockToggled() { sendXPlaneBoolean(xChainToolbutton->isChecked()); }
     void onYPlaneLockToggled() { sendYPlaneBoolean(yChainToolbutton->isChecked()); }
     void onZPlaneLockToggled() { sendZPlaneBoolean(zChainToolbutton->isChecked()); }
+
+    void onYZButtonPushed();
+    void onXZButtonPushed();
+    void onXYButtonPushed();
 
   public:
     ClippingLayout();
@@ -116,6 +120,10 @@ class ClippingLayout : public QGridLayout
   private:
 
     ClipPlaneAgent *m_agent = nullptr;
+    
+    typedef Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> ControllerInt;
+    typedef Controller<FluoSpinboxDouble,FluoSlider,AgentWrapper<ClipPlaneAgent>> ControllerDbl;
+    typedef std::tuple<ControllerInt*,ControllerInt*,FluoSlider*> ColorTup;
 
     typedef void(ClippingLayout::*clipFunc)();
     typedef void(FluoSlider::*sliderFunc)(int);
@@ -232,9 +240,9 @@ class ClippingLayout : public QGridLayout
     QPushButton *alignToViewButton = new QPushButton("Align to View");
     QPushButton *resetTo0Button = new QPushButton(QIcon(":/clipping-reset.svg")," Reset to 0");
 
-    FluoSpinboxDouble *x2Spinbox = new FluoSpinboxDouble(-180,180,false);
-    FluoSpinboxDouble *y2Spinbox = new FluoSpinboxDouble(-180,180,false);
-    FluoSpinboxDouble *z2Spinbox = new FluoSpinboxDouble(-180,180,false);
+    FluoSpinboxDouble *x2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
+    FluoSpinboxDouble *y2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
+    FluoSpinboxDouble *z2Spinbox = new FluoSpinboxDouble(-180.0,180.0,false);
 
     AgentWrapper<ClipPlaneAgent> *salmonWrapper;
     AgentWrapper<ClipPlaneAgent> *magentaWrapper;
@@ -249,18 +257,24 @@ class ClippingLayout : public QGridLayout
     AgentWrapper<ClipPlaneAgent> *clipRotYWrapper;
     AgentWrapper<ClipPlaneAgent> *clipRotZWrapper;
 
+    std::vector<FluoToolButton*> ToolButtons = { xChainToolbutton, yChainToolbutton, zChainToolbutton };
+
     void row0();
     void flipSliders(); // might make this default in the slider.
     void constructLayout();
     void buildSliderConnections();
     void buildSpinboxConnections();
     void buildSpinboxDConnections();
+    void buildButtonConnections();
     void buildWrappers();
     void buildControllers();
+    void buildTuples();
     void disableButtons();
     void enableButtons();
 
-    std::tuple<int,int> sliderGap(FluoSlider* s1, FluoSlider* s2, int size);
+    std::tuple<int,int> sliderGap(int halfVal, int size);
+    void resetValues(ColorTup c1, ColorTup c2);
+    void disableToolChains();
     
 
     const std::vector<std::tuple<FluoSlider*, sliderFunc, clipFunc>> sliderConnections = {
@@ -318,15 +332,19 @@ class ClippingLayout : public QGridLayout
       std::bind(&ClippingLayout::addThreeToRowShift<FluoSlider>,this,20,z2Slider,y2Slider,x2Slider)
     };
 
-    Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> *x1SalmonController;
-    Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> *y1GreenController; 
-    Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> *z1PurpleController;  
-    Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> *x1MagentaController; 
-    Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> *y1YellowController; 
-    Controller<FluoSpinbox,FluoSlider,AgentWrapper<ClipPlaneAgent>> *z1TealController; 
-    Controller<FluoSpinboxDouble,FluoSlider,AgentWrapper<ClipPlaneAgent>> *x2RotationController; 
-    Controller<FluoSpinboxDouble,FluoSlider,AgentWrapper<ClipPlaneAgent>> *y2RotationController;  
-    Controller<FluoSpinboxDouble,FluoSlider,AgentWrapper<ClipPlaneAgent>> *z2RotationController; 
+    ControllerInt *x1SalmonController;
+    ControllerInt *y1GreenController; 
+    ControllerInt *z1PurpleController;  
+    ControllerInt *x1MagentaController; 
+    ControllerInt *y1YellowController; 
+    ControllerInt *z1TealController; 
+    ControllerDbl *x2RotationController; 
+    ControllerDbl *y2RotationController;  
+    ControllerDbl *z2RotationController; 
+
+    ColorTup salmonMagentaTup;
+    ColorTup greenYellowTup;
+    ColorTup purpleTealTup;
 };
 
 #endif

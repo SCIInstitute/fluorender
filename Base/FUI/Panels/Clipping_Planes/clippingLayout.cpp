@@ -7,6 +7,7 @@ ClippingLayout::ClippingLayout()
   buildSliderConnections();
   buildSpinboxConnections();
   buildSpinboxDConnections();
+  buildButtonConnections();
 }
 
 void ClippingLayout::flipSliders()
@@ -50,12 +51,17 @@ void ClippingLayout::buildSpinboxDConnections()
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
 
+void ClippingLayout::buildButtonConnections()
+{
+  connect(yzButton,&QPushButton::released,this,&ClippingLayout::onYZButtonPushed);
+  connect(xzButton,&QPushButton::released,this,&ClippingLayout::onXZButtonPushed);
+  connect(xyButton,&QPushButton::released,this,&ClippingLayout::onXYButtonPushed);
+}
+
 void ClippingLayout::setAgent(ClipPlaneAgent* agent, fluo::VolumeData* vd)
 {
   m_agent = agent;
   m_agent->setObject(vd);
-  buildWrappers();
-  buildControllers();
 }
 
 void ClippingLayout::disableLayout()
@@ -116,6 +122,7 @@ void ClippingLayout::build()
 {
   buildWrappers();
   buildControllers();
+  buildTuples();
 }
 
 void ClippingLayout::buildWrappers()
@@ -126,8 +133,6 @@ void ClippingLayout::buildWrappers()
   yellowWrapper = new AgentWrapper<ClipPlaneAgent>("clip y2", m_agent);
   purpleWrapper = new AgentWrapper<ClipPlaneAgent>("clip z1", m_agent);
   tealWrapper = new AgentWrapper<ClipPlaneAgent>("clip z2", m_agent);
-  // need to create agents for the distance. However I don't think I have the proper
-  // logic set up for the XY, YZ, XZ spin box.
   clipLinkXWrapper = new AgentWrapper<ClipPlaneAgent>("clip dist x", m_agent);
   clipLinkYWrapper = new AgentWrapper<ClipPlaneAgent>("clip dist y", m_agent);
   clipLinkZWrapper = new AgentWrapper<ClipPlaneAgent>("clip dist z", m_agent);
@@ -138,20 +143,76 @@ void ClippingLayout::buildWrappers()
 
 void ClippingLayout::buildControllers()
 {
-  x1SalmonController = new Controller<FluoSpinbox, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*x1SSpinbox,*x1SSlider,*salmonWrapper);
-  x1MagentaController = new Controller<FluoSpinbox, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*x1MSpinbox,*x1MSlider,*magentaWrapper);
-  y1GreenController = new Controller<FluoSpinbox, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*y1GSpinbox,*y1GSlider,*greenWrapper);
-  y1YellowController = new Controller<FluoSpinbox, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*y1YSpinbox,*y1YSlider,*yellowWrapper);
-  z1PurpleController = new Controller<FluoSpinbox, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*z1PSpinbox,*z1PSlider,*purpleWrapper);
-  z1TealController = new Controller<FluoSpinbox, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*z1TSpinbox,*z1TSlider,*tealWrapper);
-  x2RotationController = new Controller<FluoSpinboxDouble, FluoSlider, AgentWrapper<ClipPlaneAgent>>(*x2Spinbox,*x2Slider,*clipRotXWrapper);
+  x1SalmonController = new ControllerInt(*x1SSpinbox,*x1SSlider,*salmonWrapper);
+  x1MagentaController = new ControllerInt(*x1MSpinbox,*x1MSlider,*magentaWrapper);
+  y1GreenController = new ControllerInt(*y1GSpinbox,*y1GSlider,*greenWrapper);
+  y1YellowController = new ControllerInt(*y1YSpinbox,*y1YSlider,*yellowWrapper);
+  z1PurpleController = new ControllerInt(*z1PSpinbox,*z1PSlider,*purpleWrapper);
+  z1TealController = new ControllerInt(*z1TSpinbox,*z1TSlider,*tealWrapper);
+  x2RotationController = new ControllerDbl(*x2Spinbox,*x2Slider,*clipRotXWrapper);
+  y2RotationController = new ControllerDbl(*y2Spinbox,*y2Slider,*clipRotYWrapper);
+  z2RotationController = new ControllerDbl(*z2Spinbox,*z2Slider,*clipRotZWrapper);
 }
 
-std::tuple<int,int> ClippingLayout::sliderGap(FluoSlider* s1, FluoSlider *s2, int size)
+void ClippingLayout::buildTuples()
 {
-  const int gapValue = setClipSpinbox->value();
+  salmonMagentaTup = std::make_tuple(x1SalmonController,x1MagentaController,x1MSlider);
+  greenYellowTup   = std::make_tuple(y1GreenController,y1YellowController,y1YSlider);
+  purpleTealTup    = std::make_tuple(z1PurpleController,z1TealController,z1TSlider);
+}
 
-  return std::make_tuple(HALFXY - size/2, HALFXY + size/2);
+std::tuple<int,int> ClippingLayout::sliderGap(int halfVal, int size)
+{
+  return std::make_tuple(halfVal - size/2, halfVal + size/2);
+}
+
+/*
+* This function sets the mins and max of each controller that isn't the value affected.
+*/
+void ClippingLayout::resetValues(ColorTup c1, ColorTup c2)
+{
+  std::get<0>(c1)->setValues(0);
+  std::get<1>(c1)->setValues(std::get<2>(c1)->maximum());
+  std::get<0>(c2)->setValues(0);
+  std::get<1>(c2)->setValues(std::get<2>(c2)->maximum());
+}
+
+void ClippingLayout::disableToolChains()
+{
+  for(const auto &toolButton : ToolButtons)
+    toolButton->setChecked(false);
+}
+
+// I disable the toolbuttons before. It's kind of a nasty trick that I am not sure 
+// how it will affect performance. 
+void ClippingLayout::onYZButtonPushed()
+{
+  disableToolChains();
+  auto[lSliderVal,rSliderVal] = sliderGap(HALFXY,setClipSpinbox->value());
+  setSalmonValue(lSliderVal);
+  setMagentaValue(rSliderVal);
+  resetValues(greenYellowTup,purpleTealTup);
+  xChainToolbutton->setChecked(true);
+}
+
+void ClippingLayout::onXZButtonPushed()
+{
+  disableToolChains();
+  auto[lSliderVal,rSliderVal] = sliderGap(HALFXY,slabSpinbox->value());
+  setGreenValue(lSliderVal);
+  setYellowValue(rSliderVal);
+  resetValues(salmonMagentaTup,purpleTealTup);
+  yChainToolbutton->setChecked(true);
+}
+
+void ClippingLayout::onXYButtonPushed()
+{
+  disableToolChains();
+  auto[lSliderVal,rSliderVal] = sliderGap(HALFZ,widthSpinbox->value());
+  setPurpleValue(lSliderVal);
+  setTealValue(rSliderVal);
+  resetValues(salmonMagentaTup,greenYellowTup);
+  zChainToolbutton->setChecked(true);
 }
 
 void ClippingLayout::setSalmonValue(int newVal)
@@ -159,12 +220,15 @@ void ClippingLayout::setSalmonValue(int newVal)
   if (xChainToolbutton->isChecked())
   {
     const int distance = x1MagentaController->getValue() - x1SalmonController->getValue();
+    x1SSlider->setUpperBoundValue(x1SSlider->maximum()-distance);
     x1SalmonController->setValues(newVal);
     x1MagentaController->setValues(x1SalmonController->getValue()+distance);
   }
   else
-    if(x1SalmonController->getValue() <= x1MagentaController->getValue())
-      x1SalmonController->setValues(newVal);
+  { 
+    x1SSlider->setUpperBoundValue(x1MagentaController->getValue());
+    x1SalmonController->setValues(newVal);
+  }
 }
 
 void ClippingLayout::setMagentaValue(int newVal)
@@ -172,13 +236,15 @@ void ClippingLayout::setMagentaValue(int newVal)
   if (xChainToolbutton->isChecked())
   {
     const int distance = x1MagentaController->getValue() - x1SalmonController->getValue();
+    x1MSlider->setLowerBoundValue(distance);
     x1MagentaController->setValues(newVal);
     x1SalmonController->setValues(x1MagentaController->getValue()-distance);
   }
   else
-    if(x1MagentaController->getValue() >= x1SalmonController->getValue())//needs to be fixed
-      x1MagentaController->setValues(newVal);
-
+  { 
+    x1MSlider->setLowerBoundValue(x1SalmonController->getValue());
+    x1MagentaController->setValues(newVal);
+  }
 }
 
 void ClippingLayout::setGreenValue(int newVal)
@@ -186,13 +252,14 @@ void ClippingLayout::setGreenValue(int newVal)
   if (yChainToolbutton->isChecked())
   {
     const int distance = y1YellowController->getValue() - y1GreenController->getValue();
+    y1GSlider->setUpperBoundValue(y1GSlider->maximum()-distance);
     y1GreenController->setValues(newVal);
     y1YellowController->setValues(y1GreenController->getValue()+distance);
   }
   else
   {
-    if(y1GSlider->value() <= y1YSlider->value())//needs to be fixed
-      y1GreenController->setValues(newVal);
+    y1GSlider->setUpperBoundValue(y1YellowController->getValue());
+    y1GreenController->setValues(newVal);
   }
 }
 
@@ -201,13 +268,14 @@ void ClippingLayout::setYellowValue(int newVal)
   if (yChainToolbutton->isChecked())
   {
     const int distance = y1YellowController->getValue() - y1GreenController->getValue();
+    y1YSlider->setLowerBoundValue(distance);
     y1YellowController->setValues(newVal);
     y1GreenController->setValues(y1YellowController->getValue() - distance);
   }
   else
   {
-    if(y1YSlider->value() >= y1GSlider->value())
-      y1YellowController->setValues(newVal);
+    y1YSlider->setLowerBoundValue(y1GreenController->getValue());
+    y1YellowController->setValues(newVal);
   }
 
 }
@@ -217,13 +285,14 @@ void ClippingLayout::setPurpleValue(int newVal)
   if (zChainToolbutton->isChecked())
   {
     const int distance = z1TealController->getValue() - z1PurpleController->getValue();
+    z1PSlider->setUpperBoundValue(z1PSlider->maximum()-distance);
     z1PurpleController->setValues(newVal);
     z1TealController->setValues(z1PurpleController->getValue() + distance);
   }
   else
   {
-    if(z1PSlider->value() <= z1TSlider->value())
-      z1PurpleController->setValues(newVal);
+    z1PSlider->setUpperBoundValue(z1TealController->getValue());
+    z1PurpleController->setValues(newVal);
   }
 }
 
@@ -232,12 +301,13 @@ void ClippingLayout::setTealValue(int newVal)
   if (zChainToolbutton->isChecked())
   {
     const int distance = z1TealController->getValue() - z1PurpleController->getValue();
+    z1TSlider->setLowerBoundValue(distance);
     z1TealController->setValues(newVal);
     z1PurpleController->setValues(z1TealController->getValue() - distance);
   }
   else
   {
-    if(z1TSlider->value() >= z1PSlider->value())
-      z1TealController->setValues(newVal);
+    z1TSlider->setLowerBoundValue(z1PurpleController->getValue());
+    z1TealController->setValues(newVal);
   }
 }
