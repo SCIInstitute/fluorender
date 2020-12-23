@@ -300,7 +300,10 @@ void VolumeSelector::Select(double radius)
 			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;
-				if (m_mode == 9)
+				if (m_mode == 1 ||
+					m_mode == 2 ||
+					m_mode == 4 ||
+					m_mode == 9)
 					mb.Compute(order);
 				m_vd->DrawMask(1, m_mode, 0, ini_thresh,
 					gm_falloff, scl_falloff,

@@ -131,6 +131,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		int nb = 1;
 		if (bn > 1)
 		{
+			if (sel && !b->get_paint_mask())
+				continue;
 			// get brick if ther are more than one brick
 			nb = b->nb(0);
 			bits = nb==1? nrrdTypeUChar: nrrdTypeUShort;

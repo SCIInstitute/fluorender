@@ -83,40 +83,52 @@ void ComponentSelector::CompFull()
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
+	std::vector<TextureBrick*> *bricks = tex->get_bricks();
+	if (!bricks || bricks->size() == 0)
+		return;
+	size_t bn = bricks->size();
 
 	//get selected IDs
 	int i, j, k;
 	int nx, ny, nz;
 	unsigned long long index;
-	m_vd->GetResolution(nx, ny, nz);
 	unsigned int label_value;
 	unsigned int brick_id;
 	CompList sel_labels;
 	CompListIter label_iter;
-	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
+	m_vd->GetResolution(nx, ny, nz);
+
+	for (size_t bi = 0; bi < bn; ++bi)
 	{
-		index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)k +
-			(unsigned long long)nx*(unsigned long long)j + (unsigned long long)i;
-		if (data_mask[index] &&
-			data_label[index])
+		TextureBrick* b = (*bricks)[bi];
+		if (!b->get_paint_mask())
+			continue;
+
+		brick_id = b->get_id();
+		for (i = 0; i < b->nx(); ++i)
+		for (j = 0; j < b->ny(); ++j)
+		for (k = 0; k < b->nz(); ++k)
 		{
-			label_value = data_label[index];
-			brick_id = tex->get_brick_id(index);
-			label_iter = sel_labels.find(GetKey(label_value, brick_id));
-			if (label_iter == sel_labels.end())
+			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)(k + b->oz()) +
+				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			if (data_mask[index] &&
+				data_label[index])
 			{
-				CompInfo* info = new CompInfo;
-				info->id = label_value;
-				info->brick_id = brick_id;
-				if (!m_analyzer || !m_analyzer->GetAnalyzed())
-					info->sumi = 1;
-				sel_labels.insert(std::pair<unsigned long long, pCompInfo>
-					(GetKey(label_value, brick_id), pCompInfo(info)));
+				label_value = data_label[index];
+				label_iter = sel_labels.find(GetKey(label_value, brick_id));
+				if (label_iter == sel_labels.end())
+				{
+					CompInfo* info = new CompInfo;
+					info->id = label_value;
+					info->brick_id = brick_id;
+					if (!m_analyzer || !m_analyzer->GetAnalyzed())
+						info->sumi = 1;
+					sel_labels.insert(std::pair<unsigned long long, pCompInfo>
+						(GetKey(label_value, brick_id), pCompInfo(info)));
+				}
+				else if (!m_analyzer || !m_analyzer->GetAnalyzed())
+					label_iter->second->sumi++;
 			}
-			else if (!m_analyzer || !m_analyzer->GetAnalyzed())
-				label_iter->second->sumi++;
 		}
 	}
 
@@ -125,31 +137,39 @@ void ComponentSelector::CompFull()
 
 	//reselect
 	unsigned int size;
-	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
+	for (size_t bi = 0; bi < bn; ++bi)
 	{
-		index = nx*ny*k + nx*j + i;
-		if (data_label[index])
+		TextureBrick* b = (*bricks)[bi];
+		if (!b->get_paint_mask())
+			continue;
+
+		brick_id = b->get_id();
+		for (i = 0; i < b->nx(); ++i)
+		for (j = 0; j < b->ny(); ++j)
+		for (k = 0; k < b->nz(); ++k)
 		{
-			label_value = data_label[index];
-			brick_id = tex->get_brick_id(index);
-			label_iter = comp_list->find(GetKey(label_value, brick_id));
-			if (label_iter != comp_list->end())
+			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)(k + b->oz()) +
+				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			if (data_label[index])
 			{
-				if (m_use_min || m_use_max)
+				label_value = data_label[index];
+				label_iter = comp_list->find(GetKey(label_value, brick_id));
+				if (label_iter != comp_list->end())
 				{
-					size = label_iter->second->sumi;
-					if (CompareSize(size))
-						data_mask[index] = 255;
+					if (m_use_min || m_use_max)
+					{
+						size = label_iter->second->sumi;
+						if (CompareSize(size))
+							data_mask[index] = 255;
+						else
+							data_mask[index] = 0;
+					}
 					else
-						data_mask[index] = 0;
+						data_mask[index] = 255;
 				}
 				else
-					data_mask[index] = 255;
+					data_mask[index] = 0;
 			}
-			else
-				data_mask[index] = 0;
 		}
 	}
 	//invalidate label mask in gpu

@@ -670,6 +670,12 @@ void ChannelCompare::Product()
 	{
 		FLIVR::TextureBrick* b1 = (*bricks1)[i];
 		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		if (m_use_mask)
+		{
+			if (!b1->get_paint_mask() ||
+				!b2->get_paint_mask())
+				continue;
+		}
 		long nx, ny, nz, bits1, bits2;
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
@@ -785,6 +791,12 @@ void ChannelCompare::MinValue()
 	{
 		FLIVR::TextureBrick* b1 = (*bricks1)[i];
 		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		if (m_use_mask)
+		{
+			if (!b1->get_paint_mask() ||
+				!b2->get_paint_mask())
+				continue;
+		}
 		long nx, ny, nz, bits1, bits2;
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
@@ -900,6 +912,12 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	{
 		FLIVR::TextureBrick* b1 = (*bricks1)[i];
 		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		if (m_use_mask)
+		{
+			if (!b1->get_paint_mask() ||
+				!b2->get_paint_mask())
+				continue;
+		}
 		long nx, ny, nz, bits1, bits2;
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
@@ -1004,6 +1022,12 @@ void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 	{
 		FLIVR::TextureBrick* b1 = (*bricks1)[i];
 		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		if (m_use_mask)
+		{
+			if (!b1->get_paint_mask() ||
+				!b2->get_paint_mask())
+				continue;
+		}
 		long nx, ny, nz, bits1, bits2;
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
