@@ -221,7 +221,7 @@ public:
 	void PasteData();
 
 	//select comps
-	bool GetCellList(FL::CellList &cl);
+	bool GetCellList(FL::CellList &cl, bool links=false);
 	void GetCompSelection();
 	void SetCompSelection(std::set<unsigned int>& ids, int mode);
 	void IncludeComps();
@@ -453,6 +453,14 @@ private:
 	void AlignCenter(FL::Ruler* ruler);
 	void ClearOutputGrid();
 	int GetDistMatSize();
+	void CompToCellList(FL::CellList &cl,
+		FL::CompList::iterator &it,
+		unsigned int id, unsigned int bid,
+		double sx, double sy, double sz, bool links=false);
+	void AddSelArrayInt(std::vector<unsigned int> &ids,
+		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
+	void AddSelCoordArray(std::vector<unsigned int> &ids,
+		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

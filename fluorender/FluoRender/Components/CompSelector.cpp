@@ -512,9 +512,11 @@ void ComponentSelector::SelectList(CellList& list)
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
+	Texture* tex = m_vd->GetTexture();
+	if (!tex)
+		return;
+	if (Texture::mask_undo_num_ > 0)
+		tex->push_mask();
 
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (!nrrd_mask)
@@ -532,21 +534,48 @@ void ComponentSelector::SelectList(CellList& list)
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
+	std::vector<TextureBrick*> *bricks = tex->get_bricks();
+	if (!bricks || bricks->size() == 0)
+		return;
+	size_t bn = bricks->size();
 
 	//select append
+	unsigned int brick_id;
+	unsigned long long index;
+	unsigned long long key;
+	int i, j, k;
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-	for (index = 0;
-		index < for_size; ++index)
+	for (size_t bi = 0; bi < bn; ++bi)
 	{
-		if (list.find(data_label[index]) != list.end())
-			data_mask[index] = 255;
-		else
-			data_mask[index] = 0;
+		TextureBrick* b = (*bricks)[bi];
+		brick_id = b->get_id();
+		for (i = 0; i < b->nx(); ++i)
+		for (j = 0; j < b->ny(); ++j)
+		for (k = 0; k < b->nz(); ++k)
+		{
+			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)(k + b->oz()) +
+				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			key = brick_id;
+			key = (key << 32) | data_label[index];
+			if (list.find(key) != list.end())
+				data_mask[index] = 255;
+			else
+				data_mask[index] = 0;
+		}
 	}
+
+	//unsigned long long for_size = (unsigned long long)nx *
+	//	(unsigned long long)ny * (unsigned long long)nz;
+	//unsigned long long index;
+	//for (index = 0;
+	//	index < for_size; ++index)
+	//{
+	//	if (list.find(data_label[index]) != list.end())
+	//		data_mask[index] = 255;
+	//	else
+	//		data_mask[index] = 0;
+	//}
 
 	//invalidate label mask in gpu
 	m_vd->GetVR()->clear_tex_mask();

@@ -3760,16 +3760,17 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-bool ComponentDlg::GetCellList(FL::CellList &cl)
+bool ComponentDlg::GetCellList(FL::CellList &cl, bool links)
 {
 	FL::CompList* list = m_comp_analyzer.GetCompList();
 	if (!list || list->empty())
 		return false;
 
-	wxString str;
-	unsigned long ulval;
 	bool sel_all = false;
 	std::vector<unsigned int> ids;
+	std::vector<unsigned int> bids;
+	int bn = m_comp_analyzer.GetBrickNum();
+
 	//selected cells are retrieved using different functions
 	wxArrayInt seli = m_output_grid->GetSelectedCols();
 	if (seli.GetCount() > 0)
@@ -3777,95 +3778,133 @@ bool ComponentDlg::GetCellList(FL::CellList &cl)
 	if (!sel_all)
 	{
 		seli = m_output_grid->GetSelectedRows();
-		for (size_t i = 0; i < seli.GetCount(); ++i)
-		{
-			str = m_output_grid->GetCellValue(seli[i], 0);
-			str.ToULong(&ulval);
-			if (ulval)
-				ids.push_back(ulval);
-		}
+		AddSelArrayInt(ids, bids, seli, bn > 1);
 		wxGridCellCoordsArray sela =
 			m_output_grid->GetSelectionBlockBottomRight();
-		for (size_t i = 0; i < sela.GetCount(); ++i)
-		{
-			str = m_output_grid->GetCellValue(sela[i].GetRow(), 0);
-			str.ToULong(&ulval);
-			if (ulval)
-				ids.push_back(ulval);
-		}
+		AddSelCoordArray(ids, bids, sela, bn > 1);
 		sela = m_output_grid->GetSelectionBlockTopLeft();
-		for (size_t i = 0; i < sela.GetCount(); ++i)
-		{
-			str = m_output_grid->GetCellValue(sela[i].GetRow(), 0);
-			str.ToULong(&ulval);
-			if (ulval)
-				ids.push_back(ulval);
-		}
+		AddSelCoordArray(ids, bids, sela, bn > 1);
 		sela = m_output_grid->GetSelectedCells();
-		for (size_t i = 0; i < sela.GetCount(); ++i)
-		{
-			str = m_output_grid->GetCellValue(sela[i].GetRow(), 0);
-			str.ToULong(&ulval);
-			if (ulval)
-				ids.push_back(ulval);
-		}
+		AddSelCoordArray(ids, bids, sela, bn > 1);
 	}
 
-	Point p1, p2;
-	BBox bb;
 	double sx = list->sx;
 	double sy = list->sy;
 	double sz = list->sz;
 	if (sel_all)
 	{
 		for (auto it = list->begin(); it != list->end(); ++it)
-		{
-			FL::pCell cell(new FL::Cell(it->second->id));
-			cell->SetSizeUi(it->second->sumi);
-			cell->SetSizeF(it->second->sumd);
-			p1 = it->second->pos;
-			p1.scale(sx, sy, sz);
-			cell->SetCenter(p1);
-			bb = it->second->box;
-			p1 = bb.min();
-			p2 = bb.max();
-			p1.scale(sx, sy, sz);
-			p2.scale(sx, sy, sz);
-			bb = BBox(p1, p2);
-			cell->SetBox(bb);
-			cl.insert(pair<unsigned int, FL::pCell>
-				(it->second->id, cell));
-		}
+			CompToCellList(cl, it, it->second->id, it->second->brick_id, sx, sy, sz, links);
 	}
 	else
 	{
-		for (auto id : ids)
+		for (size_t i = 0; i < ids.size(); ++i)
 		{
-			auto it = list->find(id);
-			if (it != list->end())
+			unsigned long long key = ids[i];
+			unsigned int bid = 0;
+			if (bn > 1)
 			{
-				FL::pCell cell(new FL::Cell(id));
-				cell->SetSizeUi(it->second->sumi);
-				cell->SetSizeF(it->second->sumd);
-				p1 = it->second->pos;
-				p1.scale(sx, sy, sz);
-				cell->SetCenter(p1);
-				bb = it->second->box;
-				p1 = bb.min();
-				p2 = bb.max();
-				p1.scale(sx, sy, sz);
-				p2.scale(sx, sy, sz);
-				bb = BBox(p1, p2);
-				cell->SetBox(bb);
-				cl.insert(pair<unsigned int, FL::pCell>
-					(id, cell));
+				key = bids[i];
+				key = (key << 32) | ids[i];
+				bid = bids[i];
 			}
+			auto it = list->find(key);
+			if (it != list->end())
+				CompToCellList(cl, it, ids[i], bid, sx, sy, sz, links);
 		}
 	}
 
 	if (cl.empty())
 		return false;
 	return true;
+}
+
+void ComponentDlg::AddSelArrayInt(std::vector<unsigned int> &ids,
+	std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks)
+{
+	wxString str;
+	unsigned long ulval;
+	for (size_t i = 0; i < sel.GetCount(); ++i)
+	{
+		str = m_output_grid->GetCellValue(sel[i], 0);
+		if (str.ToULong(&ulval))
+			ids.push_back(ulval);
+		if (bricks)
+		{
+			str = m_output_grid->GetCellValue(sel[i], 1);
+			if (str.ToULong(&ulval))
+				bids.push_back(ulval);
+		}
+	}
+}
+
+void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
+	std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks)
+{
+	wxString str;
+	unsigned long ulval;
+	for (size_t i = 0; i < sel.GetCount(); ++i)
+	{
+		str = m_output_grid->GetCellValue(sel[i].GetRow(), 0);
+		if (str.ToULong(&ulval))
+			ids.push_back(ulval);
+		if (bricks)
+		{
+			str = m_output_grid->GetCellValue(sel[i].GetRow(), 1);
+			if (str.ToULong(&ulval))
+				bids.push_back(ulval);
+		}
+	}
+}
+
+void ComponentDlg::CompToCellList(FL::CellList &cl,
+	FL::CompList::iterator &it,
+	unsigned int id, unsigned int bid,
+	double sx, double sy, double sz, bool links)
+{
+	Point p1, p2;
+	BBox bb;
+	FL::pCell cell(new FL::Cell(id));
+	cell->SetBrickId(bid);
+	cell->SetSizeUi(it->second->sumi);
+	cell->SetSizeF(it->second->sumd);
+	p1 = it->second->pos;
+	p1.scale(sx, sy, sz);
+	cell->SetCenter(p1);
+	bb = it->second->box;
+	p1 = bb.min();
+	p2 = bb.max();
+	p1.scale(sx, sy, sz);
+	p2.scale(sx, sy, sz);
+	bb = BBox(p1, p2);
+	cell->SetBox(bb);
+	unsigned long long key = bid;
+	key = (key << 32) | id;
+	cl.insert(pair<unsigned long long, FL::pCell>
+		(key, cell));
+
+	if (links)
+	{
+		FL::CompGraph* graph = m_comp_analyzer.GetCompGraph();
+		FL::CompList list;
+		if (graph->GetLinkedComps(it->second, list, SIZE_LIMIT))
+		{
+			for (auto it2 = list.begin();
+				it2 != list.end(); ++it2)
+			{
+				FL::pCell cell2(new FL::Cell(it2->second->id));
+				cell2->SetBrickId(it2->second->brick_id);
+				cell2->SetSizeUi(cell->GetSizeUi());
+				cell2->SetSizeF(cell->GetSizeF());
+				cell2->SetCenter(cell->GetCenter());
+				cell2->SetBox(cell->GetBox());
+				key = cell2->BrickId();
+				key = (key << 32) | cell2->Id();
+				cl.insert(pair<unsigned long long, FL::pCell>
+					(key, cell2));
+			}
+		}
+	}
 }
 
 void ComponentDlg::GetCompSelection()
@@ -3939,7 +3978,7 @@ void ComponentDlg::IncludeComps()
 		return;
 
 	FL::CellList cl;
-	if (GetCellList(cl))
+	if (GetCellList(cl, true))
 	{
 		//clear complist
 		FL::CompList *list = m_comp_analyzer.GetCompList();
