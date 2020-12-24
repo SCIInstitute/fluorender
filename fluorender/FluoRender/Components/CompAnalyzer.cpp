@@ -547,6 +547,7 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 	FLIVR::Point pos;
 	std::vector<unsigned int> cosumi;
 	std::vector<double> cosumd;
+	FLIVR::BBox bb;
 	//comp list
 	CompList &comps = m_compgroup->comps;
 	//graph for linking multiple bricks
@@ -571,6 +572,7 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 			var = 0.0;
 			min = std::numeric_limits<double>::max();
 			max = 0.0;
+			bb.reset();
 			if (colocal)
 			{
 				cosumi.resize(m_vd_list.size(), 0);
@@ -590,6 +592,11 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 				//pos
 				pos = FLIVR::Point((pos * sumi + li->second->pos * li->second->sumi) /
 					(sumi + li->second->sumi));
+				//box
+				if (li == list.begin())
+					bb = li->second->box;
+				else
+					bb.extend(li->second->box);
 				mean = temp;
 				//others
 				sumi += li->second->sumi;
@@ -626,6 +633,7 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 				li->second->min = min;
 				li->second->max = max;
 				li->second->pos = pos;
+				li->second->box = bb;
 				if (colocal)
 				{
 					li->second->cosumi = cosumi;
