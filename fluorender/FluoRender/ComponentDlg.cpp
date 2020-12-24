@@ -3886,6 +3886,7 @@ void ComponentDlg::CompToCellList(FL::CellList &cl,
 	if (links)
 	{
 		FL::CompGraph* graph = m_comp_analyzer.GetCompGraph();
+		graph->ClearVisited();
 		FL::CompList list;
 		if (graph->GetLinkedComps(it->second, list, SIZE_LIMIT))
 		{
