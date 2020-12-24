@@ -110,6 +110,10 @@ namespace FL
 				return &(m_comp_groups[i]);
 			return 0;
 		}
+		int GetBrickNum()
+		{
+			return m_bn;
+		}
 
 		void Analyze(bool sel, bool consistent, bool colocal=false);
 		void MatchBricks(bool sel);
@@ -134,6 +138,7 @@ namespace FL
 
 	private:
 		bool m_analyzed;//if used
+		int m_bn;
 		bool m_colocal;
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 

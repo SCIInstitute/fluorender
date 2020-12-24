@@ -37,7 +37,8 @@ using namespace FL;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_analyzed(false),
-	m_colocal(false)
+	m_colocal(false),
+	m_bn(0)
 {
 	m_compgroup = AddCompGroup(vd);
 }
@@ -413,14 +414,16 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	size_t bn = bricks->size();
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
+		//get one brick
+		TextureBrick* b = (*bricks)[bi];
+		if (sel && !b->get_paint_mask())
+			continue;
 		void* data_data = 0;
 		unsigned char* data_mask = 0;
 		unsigned int* data_label = 0;
 		int nx, ny, nz;
 		int c = 0;
 		int nb = 1;
-		//get one brick
-		TextureBrick* b = (*bricks)[bi];
 		nb = b->nb(0);
 		nx = b->nx();
 		ny = b->ny();
@@ -766,7 +769,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	//graph for linking multiple bricks
 	CompGraph &graph = m_compgroup->graph;
 
-	int bn = vd->GetAllBrickNum();
+	m_bn = vd->GetAllBrickNum();
 
 	if (verbose == 1)
 	{
@@ -802,7 +805,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		std::list<unsigned int> brick_ids;
 		bool added = false;
 
-		if (bn > 1)
+		if (m_bn > 1)
 		{
 			if (graph.Visited(i->second))
 				continue;
@@ -830,7 +833,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		lens = i->second->pca.GetLengths();
 
 		stream << ids.front() << "\t";
-		if (bn > 1)
+		if (m_bn > 1)
 			stream << brick_ids.front() << "\t";
 		stream << i->second->pos.x()*sx << "\t";
 		stream << i->second->pos.y()*sy << "\t";
