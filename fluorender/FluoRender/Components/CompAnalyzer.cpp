@@ -678,7 +678,8 @@ void ComponentAnalyzer::MakeColorConsistent()
 				iter != list.end(); ++iter)
 			{
 				unsigned int link_id = iter->second->id;
-				if ((link_id - base_id) % 253)
+				unsigned int diff = base_id > link_id ? base_id - link_id : link_id - base_id;
+				if (diff % 253)
 				{
 					//color is different
 					//generate new_id
