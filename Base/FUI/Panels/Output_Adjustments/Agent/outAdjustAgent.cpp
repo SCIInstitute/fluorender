@@ -158,9 +158,10 @@ void OutAdjustAgent::OnGammaBChanged(fluo::Event& event)
 
 void OutAdjustAgent::OnBrightnessRChanged(fluo::Event& event)
 {
-	double dval = 0.0;
-	getValue("brightness r", dval);
-    parentPanel->setOutRedLuminValue(dval);
+  double dval = 0.0;
+  getValue("brightness r", dval);
+  parentPanel->setOutRedLuminValue(dval);
+
 }
 
 void OutAdjustAgent::OnBrightnessGChanged(fluo::Event& event)

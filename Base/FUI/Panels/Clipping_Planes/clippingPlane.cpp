@@ -64,17 +64,17 @@ void ClippingPlane::setClipWidthValue(int newVal)
 
 void ClippingPlane::setXPlaneLockStatus(bool status)
 {
-  clippingLayout->sendXPlaneBoolean(status);
+  clippingLayout->setXPlaneBool(status);
 }
 
 void ClippingPlane::setYPlaneLockStatus(bool status)
 {
-  clippingLayout->sendXPlaneBoolean(status);
+  clippingLayout->setYPlaneBool(status);
 }
 
 void ClippingPlane::setZPlaneLockStatus(bool status)
 {
-  clippingLayout->sendXPlaneBoolean(status);
+  clippingLayout->setZPlaneBool(status);
 }
 
 const int ClippingPlane::getClipSalmonMaxVal()

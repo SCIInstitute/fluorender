@@ -12,17 +12,17 @@ OutputAdjustments::OutputAdjustments()
   this->outputLayout->disableLayout();
 }
 
-void OutputAdjustments::setOutRedLuminValue(int newVal)
+void OutputAdjustments::setOutRedLuminValue(double newVal)
 {
   this->outputLayout->setRedLuminValue(newVal);
 }
 
-void OutputAdjustments::setOutGreenLuminValue(int newVal)
+void OutputAdjustments::setOutGreenLuminValue(double newVal)
 {
   this->outputLayout->setGreenLuminValue(newVal);
 }
 
-void OutputAdjustments::setOutBlueLuminValue(int newVal)
+void OutputAdjustments::setOutBlueLuminValue(double newVal)
 {
   this->outputLayout->setBlueLuminValue(newVal);
 }

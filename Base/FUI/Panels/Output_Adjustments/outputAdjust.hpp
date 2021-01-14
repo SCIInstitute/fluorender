@@ -21,9 +21,9 @@ class OutputAdjustments : public QWidget
     void onBlueGammaReceived(int value) { setOutBlueGammaValue(value); }
     void onBlueGammaReceived(double value) { setOutBlueGammaValue(value); }
     
-    void onRedLuminReceived(int value) { setOutRedLuminValue(value); }
-    void onGreenLuminReceived(int value) { setOutGreenLuminValue(value); }
-    void onBlueLuminReceived(int value) { setOutBlueLuminValue(value); }
+    void onRedLuminReceived(double value) { setOutRedLuminValue(value); }
+    void onGreenLuminReceived(double value) { setOutGreenLuminValue(value); }
+    void onBlueLuminReceived(double value) { setOutBlueLuminValue(value); }
   
     void onRedEqlReceived(int value) { setOutRedEqlValue(value); }
     void onRedEqlReceived(double value) { setOutRedEqlValue(value); }
@@ -58,9 +58,9 @@ class OutputAdjustments : public QWidget
       this->outputLayout->setBlueGammaValue(newVal);
     }
 
-    void setOutRedLuminValue(int newVal);
-    void setOutGreenLuminValue(int newVal);
-    void setOutBlueLuminValue(int newVal);
+    void setOutRedLuminValue(double newVal);
+    void setOutGreenLuminValue(double newVal);
+    void setOutBlueLuminValue(double newVal);
 
     template<typename T>
     void setOutRedEqlValue(T newVal)
@@ -108,13 +108,16 @@ class OutputAdjustments : public QWidget
       std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendGreenEqlValue),
                       static_cast<outputDblFunc>(&OutputAdjustments::onGreenEqlReceived)),
       std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendBlueEqlValue),
-                      static_cast<outputDblFunc>(&OutputAdjustments::onBlueEqlReceived))
+                      static_cast<outputDblFunc>(&OutputAdjustments::onBlueEqlReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendRedLuminValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onRedLuminReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendGreenLuminValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onGreenLuminReceived)),
+      std::make_tuple(outputLayout,static_cast<layoutDblFunc>(&OutputLayout::sendBlueLuminValue),
+                      static_cast<outputDblFunc>(&OutputAdjustments::onBlueLuminReceived))
     };
 
     const std::vector<std::tuple<OutputLayout*, layoutIntFunc, outputIntFunc>> intConnections = {
-      std::make_tuple(outputLayout,&OutputLayout::sendRedLuminValue,&OutputAdjustments::onRedLuminReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendGreenLuminValue,&OutputAdjustments::onGreenLuminReceived),
-      std::make_tuple(outputLayout,&OutputLayout::sendBlueLuminValue,&OutputAdjustments::onBlueLuminReceived),
       
       std::make_tuple(outputLayout,static_cast<layoutIntFunc>(&OutputLayout::sendRedGammaValue),
                       static_cast<outputIntFunc>(&OutputAdjustments::onRedGammaReceived)),

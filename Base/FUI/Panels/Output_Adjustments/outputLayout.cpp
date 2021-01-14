@@ -18,11 +18,14 @@ void OutputLayout::buildSliderConnections()
 {
   for(auto && tup: sliderConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
+
+  for(auto && tup: luminSliderConnections)
+    connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
 
 void OutputLayout::buildSpinboxConnections()
 {
-  for(auto && tup: spinConnections)
+  for(auto && tup: luminSpinConnections)
     connect(std::get<0>(tup),std::get<1>(tup),this,std::get<2>(tup));
 }
 
@@ -36,8 +39,11 @@ void OutputLayout::enableLayout()
 {
   for(auto && tup : sliderConnections)
     std::get<0>(tup)->setEnabled(true);
+
+  for(auto && tup : luminSliderConnections)
+    std::get<0>(tup)->setEnabled(true);
   
-  for(auto && tup : spinConnections)
+  for(auto && tup : luminSpinConnections)
     std::get<0>(tup)->setEnabled(true);
   
   for(auto && tup : dSpinConnections)
@@ -49,7 +55,10 @@ void OutputLayout::disableLayout()
   for(auto && tup : sliderConnections)
     std::get<0>(tup)->setEnabled(false);
   
-  for(auto && tup : spinConnections)
+  for(auto && tup : luminSliderConnections)
+    std::get<0>(tup)->setEnabled(false);
+  
+  for(auto && tup : luminSpinConnections)
     std::get<0>(tup)->setEnabled(false);
   
   for(auto && tup : dSpinConnections)
@@ -74,9 +83,9 @@ void OutputLayout::buildControllers()
     redGammaController = new Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*redGammaSlider, *redGammaSpinbox, *redGammaWrapper);
     greenGammaController = new Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*greenGammaSlider, *greenGammaSpinbox, *greenGammaWrapper);
     blueGammaController =  new Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*blueGammaSlider, *blueGammaSpinbox, *blueGammaWrapper);
-    redLuminController = new Controller<FluoSlider, FluoSpinbox, AgentWrapper<OutAdjustAgent>>(*redLuminSlider, *redLuminSpinbox, *redLuminWrapper);
-    greenLuminController = new Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>>(*greenLuminSlider, *greenLuminSpinbox, *greenLuminWrapper);
-    blueLuminController = new Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>>(*blueLuminSlider,*blueLuminSpinbox, *blueLuminWrapper);
+    redLuminController = new Controller<FluoLuminSlider, FluoLuminSpinbox, AgentWrapper<OutAdjustAgent>>(*redLuminSlider, *redLuminSpinbox, *redLuminWrapper);
+    greenLuminController = new Controller<FluoLuminSlider,FluoLuminSpinbox, AgentWrapper<OutAdjustAgent>>(*greenLuminSlider, *greenLuminSpinbox, *greenLuminWrapper);
+    blueLuminController = new Controller<FluoLuminSlider,FluoLuminSpinbox, AgentWrapper<OutAdjustAgent>>(*blueLuminSlider,*blueLuminSpinbox, *blueLuminWrapper);
     redEqlController = new Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*redEqlSlider,*redEqlSpinbox,*redEqlWrapper);
     greenEqlController = new Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*greenEqlSlider,*greenEqlSpinbox,*greenEqlWrapper);
     blueEqlController = new Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>>(*blueEqlSlider,*blueEqlSpinbox,*blueEqlWrapper);

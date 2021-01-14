@@ -8,7 +8,9 @@
 
 #include <CustomWidgets/fluoLine.hpp>
 #include <CustomWidgets/fluoSlider.hpp>
+#include <CustomWidgets/fluoLuminSlider.hpp>
 #include <CustomWidgets/fluoSpinbox.hpp>
+#include <CustomWidgets/fluoLuminSpinbox.hpp>
 #include <CustomWidgets/fluoSpinboxDouble.hpp>
 #include <CustomWidgets/fluoColoredLine.hpp>
 #include <CustomWidgets/fluoToolButton.hpp>
@@ -35,9 +37,9 @@ class OutputLayout : public QGridLayout
     void sendBlueGammaValue(int value);
     void sendBlueGammaValue(double value);
 
-    void sendRedLuminValue(int value);
-    void sendGreenLuminValue(int value);
-    void sendBlueLuminValue(int value);
+    void sendRedLuminValue(double value);
+    void sendGreenLuminValue(double value);
+    void sendBlueLuminValue(double value);
     
     void sendRedEqlValue(int value);
     void sendRedEqlValue(double value);
@@ -54,12 +56,14 @@ class OutputLayout : public QGridLayout
     void onGreenGSpinChanged() { sendGreenGammaValue(greenGammaSpinbox->value()); }
     void onBlueGSpinChanged() { sendBlueGammaValue(blueGammaSpinbox->value()); }
 
-    void onRedLSliderChanged() { sendRedLuminValue(redLuminSlider->value()); }
-    void onGreenLSliderChanged() { sendGreenLuminValue(greenLuminSlider->value()); }
-    void onBlueLSliderChanged() { sendBlueLuminValue(blueLuminSlider->value()); }
-    void onRedLSpinChanged() { sendRedLuminValue(redLuminSpinbox->value()); }
-    void onGreenLSpinChanged() { sendGreenLuminValue(greenLuminSpinbox->value()); }
-    void onBlueLSpinChanged() { sendBlueLuminValue(blueLuminSpinbox->value()); }
+    void onRedLSliderChanged() { sendRedLuminValue(redLuminSlider->getValueAsDouble()); }
+    void onGreenLSliderChanged() { sendGreenLuminValue(greenLuminSlider->getValueAsDouble()); }
+    void onBlueLSliderChanged() { sendBlueLuminValue(blueLuminSlider->getValueAsDouble()); }
+
+
+    void onRedLSpinChanged() { sendRedLuminValue(redLuminSpinbox->getRawDouble()); }
+    void onGreenLSpinChanged() { sendGreenLuminValue(greenLuminSpinbox->getRawDouble()); }
+    void onBlueLSpinChanged() { sendBlueLuminValue(blueLuminSpinbox->getRawDouble()); }
 
     void onRedESliderChanged() { sendRedEqlValue(static_cast<double>(redEqlSlider->value()/100.0)); }
     void onGreenESliderChanged() { sendGreenEqlValue(static_cast<double>(greenEqlSlider->value()/100.0)); }
@@ -82,9 +86,9 @@ class OutputLayout : public QGridLayout
     template<typename T>
     void setBlueGammaValue(T newVal) { blueGammaController->setValues(newVal); }
 
-    void setRedLuminValue(int newVal) { redLuminController->setValues(newVal); }
-    void setGreenLuminValue(int newVal) { greenLuminController->setValues(newVal); }
-    void setBlueLuminValue(int newVal) { blueLuminController->setValues(newVal); }
+    void setRedLuminValue(double newVal) { redLuminController->setValues(newVal); }
+    void setGreenLuminValue(double newVal) { greenLuminController->setValues(newVal); }
+    void setBlueLuminValue(double newVal) { blueLuminController->setValues(newVal); }
 
     template<typename T>
     void setRedEqlValue(T newVal) { redEqlController->setValues(newVal); }
@@ -106,6 +110,8 @@ class OutputLayout : public QGridLayout
     typedef void(OutputLayout::*outputFunc)();
     typedef void(FluoSlider::*sliderFunc)(int);
     typedef void(FluoSpinbox::*spinFunc)();
+    typedef void(FluoLuminSlider::*luminSliderFunc)(int);
+    typedef void(FluoLuminSpinbox::*luminSpinFunc)();
     typedef void(FluoSpinboxDouble::*dSpinFunc)();
 
     const int MAXCOLSIZE = 2;
@@ -171,9 +177,9 @@ class OutputLayout : public QGridLayout
     FluoSlider *greenGammaSlider = new FluoSlider(Qt::Vertical,10,400);
     FluoSlider *blueGammaSlider  = new FluoSlider(Qt::Vertical,10,400);
 
-    FluoSlider *redLuminSlider   = new FluoSlider(Qt::Vertical,-256,256);
-    FluoSlider *greenLuminSlider = new FluoSlider(Qt::Vertical,-256,256);
-    FluoSlider *blueLuminSlider  = new FluoSlider(Qt::Vertical,-256,256);
+    FluoLuminSlider *redLuminSlider   = new FluoLuminSlider(Qt::Vertical,0,200);
+    FluoLuminSlider *greenLuminSlider = new FluoLuminSlider(Qt::Vertical,0,200);
+    FluoLuminSlider *blueLuminSlider  = new FluoLuminSlider(Qt::Vertical,0,200);
 
     FluoSlider *redEqlSlider   = new FluoSlider(Qt::Vertical,0,100);
     FluoSlider *greenEqlSlider = new FluoSlider(Qt::Vertical,0,100);
@@ -183,9 +189,9 @@ class OutputLayout : public QGridLayout
     FluoSpinboxDouble *greenGammaSpinbox = new FluoSpinboxDouble(0.10,4.0,false);
     FluoSpinboxDouble *blueGammaSpinbox  = new FluoSpinboxDouble(0.10,4.0,false);
 
-    FluoSpinbox *redLuminSpinbox   = new FluoSpinbox(-256,256,false);
-    FluoSpinbox *greenLuminSpinbox = new FluoSpinbox(-256,256,false);
-    FluoSpinbox *blueLuminSpinbox  = new FluoSpinbox(-256,256,false);
+    FluoLuminSpinbox *redLuminSpinbox   = new FluoLuminSpinbox(-256,256,false);
+    FluoLuminSpinbox *greenLuminSpinbox = new FluoLuminSpinbox(-256,256,false);
+    FluoLuminSpinbox *blueLuminSpinbox  = new FluoLuminSpinbox(-256,256,false);
 
     FluoSpinboxDouble *redEqlSpinbox   = new FluoSpinboxDouble(0.0,1.0,false);
     FluoSpinboxDouble *greenEqlSpinbox = new FluoSpinboxDouble(0.0,1.0,false);
@@ -205,18 +211,21 @@ class OutputLayout : public QGridLayout
       std::make_tuple(redGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onRedGSliderChanged),
       std::make_tuple(greenGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onGreenGSliderChanged),
       std::make_tuple(blueGammaSlider, &FluoSlider::valueChanged, &OutputLayout::onBlueGSliderChanged),
-      std::make_tuple(redLuminSlider, &FluoSlider::valueChanged, &OutputLayout::onRedLSliderChanged),
-      std::make_tuple(greenLuminSlider, &FluoSlider::valueChanged, &OutputLayout::onGreenLSliderChanged),
-      std::make_tuple(blueLuminSlider, &FluoSlider::valueChanged, &OutputLayout::onBlueLSliderChanged),
       std::make_tuple(redEqlSlider, &FluoSlider::valueChanged, &OutputLayout::onRedESliderChanged),
       std::make_tuple(greenEqlSlider, &FluoSlider::valueChanged, &OutputLayout::onGreenESliderChanged),
       std::make_tuple(blueEqlSlider, &FluoSlider::valueChanged, &OutputLayout::onBlueESliderChanged)
     };
 
-    const std::vector<std::tuple<FluoSpinbox*, spinFunc, outputFunc>> spinConnections = {
-      std::make_tuple(redLuminSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onRedLSpinChanged),
-      std::make_tuple(greenLuminSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onGreenLSpinChanged),
-      std::make_tuple(blueLuminSpinbox, &FluoSpinbox::editingFinished,&OutputLayout::onBlueLSpinChanged),
+    const std::vector<std::tuple<FluoLuminSlider*, luminSliderFunc, outputFunc>> luminSliderConnections = {
+      std::make_tuple(redLuminSlider, &FluoLuminSlider::valueChanged, &OutputLayout::onRedLSliderChanged),
+      std::make_tuple(greenLuminSlider, &FluoLuminSlider::valueChanged, &OutputLayout::onGreenLSliderChanged),
+      std::make_tuple(blueLuminSlider, &FluoLuminSlider::valueChanged, &OutputLayout::onBlueLSliderChanged),
+    };
+
+    const std::vector<std::tuple<FluoLuminSpinbox*, luminSpinFunc, outputFunc>> luminSpinConnections = {
+      std::make_tuple(redLuminSpinbox, &FluoLuminSpinbox::editingFinished,&OutputLayout::onRedLSpinChanged),
+      std::make_tuple(greenLuminSpinbox, &FluoLuminSpinbox::editingFinished,&OutputLayout::onGreenLSpinChanged),
+      std::make_tuple(blueLuminSpinbox, &FluoLuminSpinbox::editingFinished,&OutputLayout::onBlueLSpinChanged),
     };
 
     const std::vector<std::tuple<FluoSpinboxDouble*, dSpinFunc, outputFunc>> dSpinConnections = {
@@ -232,19 +241,19 @@ class OutputLayout : public QGridLayout
       std::bind(&OutputLayout::addRow<QLabel,QLabel,QLabel>,this,0,gammaLabel,luminanceLabel,equalLabel),
       std::bind(&OutputLayout::addRow<QLabel,FluoLine,FluoToolButton>,this,1,redLabel,redSepLine,redChainButton),
       std::bind(&OutputLayout::addSingle<FluoColoredLine>,this,2,redLine),
-      std::bind(&OutputLayout::addRow<FluoSlider,FluoSlider,FluoSlider>,this,3,redGammaSlider,redLuminSlider,redEqlSlider),
+      std::bind(&OutputLayout::addRow<FluoSlider,FluoLuminSlider,FluoSlider>,this,3,redGammaSlider,redLuminSlider,redEqlSlider),
       std::bind(&OutputLayout::addSingle<QPushButton>,this,4,redResetButton),
-      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoSpinbox,FluoSpinboxDouble>,this,5,redGammaSpinbox,redLuminSpinbox,redEqlSpinbox),
+      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoLuminSpinbox,FluoSpinboxDouble>,this,5,redGammaSpinbox,redLuminSpinbox,redEqlSpinbox),
       std::bind(&OutputLayout::addRow<QLabel,FluoLine,FluoToolButton>,this,6,greenLabel,greenSepLine,greenChainButton),
       std::bind(&OutputLayout::addSingle<FluoColoredLine>,this,7,greenLine),
-      std::bind(&OutputLayout::addRow<FluoSlider,FluoSlider,FluoSlider>,this,8,greenGammaSlider,greenLuminSlider,greenEqlSlider),
+      std::bind(&OutputLayout::addRow<FluoSlider,FluoLuminSlider,FluoSlider>,this,8,greenGammaSlider,greenLuminSlider,greenEqlSlider),
       std::bind(&OutputLayout::addSingle<QPushButton>,this,9,greenResetButton),
-      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoSpinbox,FluoSpinboxDouble>,this,10,greenGammaSpinbox,greenLuminSpinbox,greenEqlSpinbox),
+      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoLuminSpinbox,FluoSpinboxDouble>,this,10,greenGammaSpinbox,greenLuminSpinbox,greenEqlSpinbox),
       std::bind(&OutputLayout::addRow<QLabel,FluoLine,FluoToolButton>,this,11,blueLabel,blueSepLine,blueChainButton),
       std::bind(&OutputLayout::addSingle<FluoColoredLine>,this,12,blueLine),
-      std::bind(&OutputLayout::addRow<FluoSlider,FluoSlider,FluoSlider>,this,13,blueGammaSlider,blueLuminSlider,blueEqlSlider),
+      std::bind(&OutputLayout::addRow<FluoSlider,FluoLuminSlider,FluoSlider>,this,13,blueGammaSlider,blueLuminSlider,blueEqlSlider),
       std::bind(&OutputLayout::addSingle<QPushButton>,this,14,blueResetButton),
-      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoSpinbox,FluoSpinboxDouble>,this,15,blueGammaSpinbox,blueLuminSpinbox,blueEqlSpinbox),
+      std::bind(&OutputLayout::addRow<FluoSpinboxDouble,FluoLuminSpinbox,FluoSpinboxDouble>,this,15,blueGammaSpinbox,blueLuminSpinbox,blueEqlSpinbox),
       std::bind(&OutputLayout::addSingle<FluoLine>,this,16,setDefaultLine),
       std::bind(&OutputLayout::addSingle<QPushButton>,this,17,resetAllButton)
     };
@@ -252,9 +261,9 @@ class OutputLayout : public QGridLayout
     Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *redGammaController;
     Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *greenGammaController;
     Controller<FluoSlider, FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *blueGammaController;
-    Controller<FluoSlider, FluoSpinbox, AgentWrapper<OutAdjustAgent>> *redLuminController;
-    Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>> *greenLuminController;
-    Controller<FluoSlider,FluoSpinbox, AgentWrapper<OutAdjustAgent>> *blueLuminController; 
+    Controller<FluoLuminSlider, FluoLuminSpinbox, AgentWrapper<OutAdjustAgent>> *redLuminController;
+    Controller<FluoLuminSlider,FluoLuminSpinbox, AgentWrapper<OutAdjustAgent>> *greenLuminController;
+    Controller<FluoLuminSlider,FluoLuminSpinbox, AgentWrapper<OutAdjustAgent>> *blueLuminController; 
     Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *redEqlController;
     Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *greenEqlController;
     Controller<FluoSlider,FluoSpinboxDouble, AgentWrapper<OutAdjustAgent>> *blueEqlController;

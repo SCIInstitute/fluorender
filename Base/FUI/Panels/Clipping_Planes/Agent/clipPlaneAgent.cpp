@@ -757,6 +757,7 @@ void ClipPlaneAgent::OnClipRotXChanged(fluo::Event& event)
 {
   double dval = 0.0;
   getValue("clip rot x", dval);
+  std::cout << "rotx value: " << dval << std::endl;
   parentPanel.setClipXRotValue(dval);
 }
 

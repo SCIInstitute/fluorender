@@ -118,6 +118,10 @@ class ClippingLayout : public QGridLayout
     //template<typename T>
     void setRotZValue(int newVal) { z2RotationController->setValues(newVal); }
 
+    void setXPlaneBool(bool status) { xChainToolbutton->setChecked(status); }
+    void setYPlaneBool(bool status) { yChainToolbutton->setChecked(status); }
+    void setZPlaneBool(bool status) { zChainToolbutton->setChecked(status); }
+
     const int getSalmonSliderMax() { return x1SSlider->maximum(); }
     const int getGreenSliderMax() { return y1GSlider->maximum(); }
     const int getPurpleSliderMax() { return z1PSlider->maximum(); }

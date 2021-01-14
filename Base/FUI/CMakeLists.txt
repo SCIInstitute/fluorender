@@ -58,8 +58,10 @@ set(HEADER_FILES
     renderCanvas.hpp
     testTriangle.hpp
     CustomWidgets/fluoSlider.hpp
+    CustomWidgets/fluoLuminSlider.hpp
     CustomWidgets/fluoSliderStyle.hpp
     CustomWidgets/fluoSpinbox.hpp
+    CustomWidgets/fluoLuminSpinbox.hpp
     CustomWidgets/fluoSpinboxDouble.hpp
     CustomWidgets/fluoToolButton.hpp
     CustomWidgets/fluoLine.hpp
