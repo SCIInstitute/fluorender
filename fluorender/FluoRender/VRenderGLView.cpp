@@ -9697,8 +9697,8 @@ void VRenderGLView::GetTraces(bool update)
 	if (!mask_data) return;
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!label_data) return;
-	FL::CellList sel_labels;
-	FL::CellListIter label_iter;
+	FL::CelpList sel_labels;
+	FL::CelpListIter label_iter;
 	for (ii = 0; ii<nx; ii++)
 	for (jj = 0; jj<ny; jj++)
 	for (kk = 0; kk<nz; kk++)
@@ -9710,9 +9710,9 @@ void VRenderGLView::GetTraces(bool update)
 			label_iter = sel_labels.find(label_value);
 			if (label_iter == sel_labels.end())
 			{
-				FL::pCell cell(new FL::Cell(label_value));
+				FL::Celp cell(new FL::Cell(label_value));
 				cell->Inc(ii, jj, kk, 1.0f);
-				sel_labels.insert(pair<unsigned int, FL::pCell>
+				sel_labels.insert(pair<unsigned int, FL::Celp>
 					(label_value, cell));
 			}
 			else

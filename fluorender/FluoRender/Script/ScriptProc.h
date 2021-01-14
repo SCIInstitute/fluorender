@@ -61,7 +61,7 @@ namespace FL
 		//file path for script
 		wxString m_script_output;
 		//selected labels
-		CellList m_sel_labels;
+		CelpList m_sel_labels;
 
 	private:
 		void RunNoiseReduction(int index, wxFileConfig &fconfig);

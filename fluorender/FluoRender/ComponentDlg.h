@@ -210,9 +210,9 @@ public:
 	void PlayCmd(bool use_sel, double tfactor);
 
 	//in and out cell lists
-	FL::CellList &GetInCells()
+	FL::CelpList &GetInCells()
 	{ return m_in_cells; }
-	FL::CellList &GetOutCells()
+	FL::CelpList &GetOutCells()
 	{ return m_out_cells; }
 
 	//output
@@ -221,7 +221,7 @@ public:
 	void PasteData();
 
 	//select comps
-	bool GetCellList(FL::CellList &cl, bool links=false);
+	bool GetCellList(FL::CelpList &cl, bool links=false);
 	void GetCompSelection();
 	void SetCompSelection(std::set<unsigned int>& ids, int mode);
 	void IncludeComps();
@@ -303,8 +303,8 @@ private:
 	FL::RulerAlign m_aligner;
 
 	//in and out cell lists for tracking
-	FL::CellList m_in_cells;
-	FL::CellList m_out_cells;
+	FL::CelpList m_in_cells;
+	FL::CelpList m_out_cells;
 
 	//output
 	bool m_hold_history;
@@ -453,7 +453,7 @@ private:
 	void AlignCenter(FL::Ruler* ruler);
 	void ClearOutputGrid();
 	int GetDistMatSize();
-	void CompToCellList(FL::CellList &cl,
+	void CompToCellList(FL::CelpList &cl,
 		FL::CompList::iterator &it,
 		unsigned int id, unsigned int bid,
 		double sx, double sy, double sz, bool links=false);

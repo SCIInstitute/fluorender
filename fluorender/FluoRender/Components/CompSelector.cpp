@@ -507,7 +507,7 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 	m_vd->GetVR()->clear_tex_mask();
 }
 
-void ComponentSelector::SelectList(CellList& list)
+void ComponentSelector::SelectList(CelpList& list)
 {
 	if (!m_vd)
 		return;

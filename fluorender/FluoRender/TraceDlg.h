@@ -72,7 +72,7 @@ private:
 	int m_type;//0-current; 1-previous
 
 private:
-	static bool sort_cells(const FL::pCell c1, const FL::pCell c2)
+	static bool sort_cells(const FL::Celp c1, const FL::Celp c2)
 	{
 		unsigned int vid1 = c1->GetVertexId();
 		unsigned int vid2 = c2->GetVertexId();
@@ -194,7 +194,7 @@ public:
 	//uncertain filtering
 	void UncertainFilter(bool input = false);
 	//link for external call
-	void LinkAddedCells(FL::CellList &list);
+	void LinkAddedCells(FL::CelpList &list);
 
 	//measurement
 	void SaveOutputResult(wxString &filename);
@@ -333,7 +333,7 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
-	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList &list);
+	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CelpList &list);
 	wxWindow* CreateMapPage(wxWindow *parent);
 	wxWindow* CreateSelectPage(wxWindow *parent);
 	wxWindow* CreateLinkPage(wxWindow *parent);

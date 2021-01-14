@@ -72,7 +72,7 @@ namespace FL
 		void Clear(bool invalidate=true);
 		void Delete();
 		void Delete(std::vector<unsigned int> &ids);
-		void SelectList(CellList& list);
+		void SelectList(CelpList& list);
 
 	private:
 		VolumeData* m_vd;

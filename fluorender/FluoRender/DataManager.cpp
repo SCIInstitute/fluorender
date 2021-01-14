@@ -3597,10 +3597,10 @@ void TraceGroup::ClearCellList()
 //m_id_map: ids of current time point that are linked to previous
 //m_cur_time: current time value
 //time values are check with frame ids in the frame list
-void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
+void TraceGroup::UpdateCellList(FL::CelpList &cur_sel_list)
 {
 	ClearCellList();
-	FL::CellListIter cell_iter;
+	FL::CelpListIter cell_iter;
 
 	//why does not the time change?
 	//because I just want to find out the current selection
@@ -3613,7 +3613,7 @@ void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
 		{
 			if (cell_iter->second->GetSizeUi() >
 				(unsigned int)m_cell_size)
-				m_cell_list.insert(pair<unsigned int, FL::pCell>
+				m_cell_list.insert(pair<unsigned int, FL::Celp>
 					(cell_iter->second->Id(), cell_iter->second));
 		}
 		return;
@@ -3630,7 +3630,7 @@ void TraceGroup::UpdateCellList(FL::CellList &cur_sel_list)
 	TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
 }
 
-FL::CellList &TraceGroup::GetCellList()
+FL::CelpList &TraceGroup::GetCellList()
 {
 	return m_cell_list;
 }
@@ -3641,13 +3641,13 @@ bool TraceGroup::FindCell(unsigned int id)
 }
 
 //modifications
-bool TraceGroup::AddCell(FL::pCell &cell, size_t frame)
+bool TraceGroup::AddCell(FL::Celp &cell, size_t frame)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
 	return tm_processor.AddCellDup(cell, frame);
 }
 
-bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,
+bool TraceGroup::LinkCells(FL::CelpList &list1, FL::CelpList &list2,
 	size_t frame1, size_t frame2, bool exclusive)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
@@ -3655,27 +3655,27 @@ bool TraceGroup::LinkCells(FL::CellList &list1, FL::CellList &list2,
 		frame1, frame2, exclusive);
 }
 
-bool TraceGroup::IsolateCells(FL::CellList &list, size_t frame)
+bool TraceGroup::IsolateCells(FL::CelpList &list, size_t frame)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
 	return tm_processor.IsolateCells(list, frame);
 }
 
-bool TraceGroup::UnlinkCells(FL::CellList &list1, FL::CellList &list2,
+bool TraceGroup::UnlinkCells(FL::CelpList &list1, FL::CelpList &list2,
 	size_t frame1, size_t frame2)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
 	return tm_processor.UnlinkCells(list1, list2, frame1, frame2);
 }
 
-bool TraceGroup::CombineCells(FL::pCell &cell, FL::CellList &list,
+bool TraceGroup::CombineCells(FL::Celp &cell, FL::CelpList &list,
 	size_t frame)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
 	return tm_processor.CombineCells(cell, list, frame);
 }
 
-bool TraceGroup::DivideCells(FL::CellList &list, size_t frame)
+bool TraceGroup::DivideCells(FL::CelpList &list, size_t frame)
 {
 	FL::TrackMapProcessor tm_processor(m_track_map);
 	return tm_processor.DivideCells(list, frame);
@@ -3705,7 +3705,7 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 		(m_cur_time >= m_ghost_num ?
 			m_ghost_num : m_cur_time) : 0;
 
-	FL::CellList temp_sel_list1, temp_sel_list2;
+	FL::CelpList temp_sel_list1, temp_sel_list2;
 
 	if (m_draw_lead)
 	{
@@ -3746,7 +3746,7 @@ bool TraceGroup::GetMappedRulers(FL::RulerList &rulers)
 }
 
 unsigned int TraceGroup::GetMappedEdges(
-	FL::CellList & sel_list1, FL::CellList & sel_list2,
+	FL::CelpList & sel_list1, FL::CelpList & sel_list2,
 	std::vector<float>& verts,
 	size_t frame1, size_t frame2,
 	int shuffle)
@@ -3759,12 +3759,12 @@ unsigned int TraceGroup::GetMappedEdges(
 		frame1 == frame2)
 		return result;
 
-	FL::CellList &cell_list1 = m_track_map->GetCellList(frame1);
+	FL::CelpList &cell_list1 = m_track_map->GetCellList(frame1);
 	FL::InterGraph &inter_graph = m_track_map->GetInterGraph(
 		frame1 > frame2 ? frame2 : frame1);
-	FL::CellListIter sel_iter, cell_iter;
+	FL::CelpListIter sel_iter, cell_iter;
 	FL::pVertex vertex1, vertex2;
-	FL::pCell cell;
+	FL::Celp cell;
 	FL::InterVert v1, v2;
 	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
 	FL::InterAdjIter inter_iter;
@@ -3809,7 +3809,7 @@ unsigned int TraceGroup::GetMappedEdges(
 				cell = pwcell_iter->lock();
 				if (!cell)
 					continue;
-				sel_list2.insert(std::pair<unsigned int, FL::pCell>
+				sel_list2.insert(std::pair<unsigned int, FL::Celp>
 					(cell->Id(), cell));
 				//save to verts
 				c = Color(cell->Id(), shuffle);
@@ -3834,7 +3834,7 @@ unsigned int TraceGroup::GetMappedEdges(
 }
 
 bool TraceGroup::GetMappedRulers(
-	FL::CellList& sel_list1, FL::CellList &sel_list2,
+	FL::CelpList& sel_list1, FL::CelpList &sel_list2,
 	FL::RulerList& rulers,
 	size_t frame1, size_t frame2)
 {
@@ -3844,12 +3844,12 @@ bool TraceGroup::GetMappedRulers(
 		frame1 == frame2)
 		return false;
 
-	FL::CellList &cell_list1 = m_track_map->GetCellList(frame1);
+	FL::CelpList &cell_list1 = m_track_map->GetCellList(frame1);
 	FL::InterGraph &inter_graph = m_track_map->GetInterGraph(
 		frame1 > frame2 ? frame2 : frame1);
-	FL::CellListIter sel_iter, cell_iter;
+	FL::CelpListIter sel_iter, cell_iter;
 	FL::pVertex vertex1, vertex2;
-	FL::pCell cell;
+	FL::Celp cell;
 	FL::InterVert v1, v2;
 	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
 	FL::InterAdjIter inter_iter;
@@ -3895,7 +3895,7 @@ bool TraceGroup::GetMappedRulers(
 				cell = pwcell_iter->lock();
 				if (!cell)
 					continue;
-				sel_list2.insert(std::pair<unsigned int, FL::pCell>
+				sel_list2.insert(std::pair<unsigned int, FL::Celp>
 					(cell->Id(), cell));
 				//save to rulers
 				ruler_iter = FindRulerFromList(vertex1->Id(), rulers);
@@ -3972,7 +3972,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts, int shuffle)
 	verts.reserve((ghost_lead + ghost_tail) *
 		m_cell_list.size() * 3 * 6 * 3);//1.5 branches each
 
-	FL::CellList temp_sel_list1, temp_sel_list2;
+	FL::CelpList temp_sel_list1, temp_sel_list2;
 
 	if (m_draw_lead)
 	{

@@ -167,7 +167,7 @@ namespace FL
 		virtual bool Execute() = 0;
 		virtual float GetProb() = 0;
 
-		CellList& GetCellList()
+		CelpList& GetCellList()
 		{ return m_out_cells; }
 
 	protected:
@@ -178,7 +178,7 @@ namespace FL
 		bool m_use_init_cluster;
 		EmVec m_spc;//spacings
 		//output cells
-		CellList m_out_cells;
+		CelpList m_out_cells;
 	};
 }
 #endif//FL_ClusterMethod_h

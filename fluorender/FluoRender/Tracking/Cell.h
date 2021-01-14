@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
+#include <Distance/Pca.h>
 
 namespace FL
 {
@@ -43,8 +44,8 @@ namespace FL
 	typedef boost::shared_ptr<Vertex> pVertex;
 	typedef boost::weak_ptr<Vertex> pwVertex;
 	class Cell;
-	typedef boost::shared_ptr<Cell> pCell;
-	typedef boost::weak_ptr<Cell> pwCell;
+	typedef boost::shared_ptr<Cell> Celp;
+	typedef boost::weak_ptr<Cell> Celw;
 
 	struct IntraEdgeData
 	{
@@ -59,7 +60,7 @@ namespace FL
 	struct IntraCellData
 	{
 		unsigned int id;
-		pwCell cell;
+		Celw cell;
 	};
 
 	typedef boost::adjacency_list<boost::listS,
@@ -75,62 +76,129 @@ namespace FL
 	public:
 		Cell(unsigned int id) :
 			m_id(id), m_brick_id(0),
-			m_size_ui(0), m_size_f(0.0f),
-			m_external_ui(0), m_external_f(0.0f),
+			m_use_d(true), m_size_ui(0), m_size_d(0),
+			m_ext_ui(0), m_ext_d(0),
+			m_mean(0), m_int2(0), m_std(0),
+			m_min(0), m_max(0),
+			m_distp(0),
 			m_count0(0), m_count1(0),
+			m_intra_vert(IntraGraph::null_vertex())
+		{}
+		Cell(unsigned int id, unsigned int brick_id) :
+			m_id(id), m_brick_id(brick_id),
+			m_use_d(true), m_size_ui(0), m_size_d(0),
+			m_ext_ui(0), m_ext_d(0),
+			m_mean(0), m_int2(0), m_std(0),
+			m_min(0), m_max(0),
+			m_distp(0),
+			m_count0(0), m_count1(0),
+			m_intra_vert(IntraGraph::null_vertex())
+		{}
+		Cell(unsigned int id, unsigned int brick_id,
+			unsigned int size_ui, double size_d,
+			unsigned int ext_ui, double ext_d,
+			unsigned int count0, unsigned int count1,
+			FLIVR::Point &center, FLIVR::BBox &box):
+			m_id(id), m_brick_id(brick_id),
+			m_use_d(true), m_size_ui(size_ui), m_size_d(size_d),
+			m_ext_ui(ext_ui), m_ext_d(ext_d),
+			m_mean(0), m_int2(0), m_std(0),
+			m_min(0), m_max(0),
+			m_distp(0),
+			m_count0(count0), m_count1(count1),
+			m_center(center), m_box(box),
 			m_intra_vert(IntraGraph::null_vertex())
 		{}
 		~Cell() {}
 
+		void SetEId(unsigned long long eid)
+		{
+			m_id = eid << 32 >> 32;
+			m_brick_id = eid >> 32;
+		}
 		unsigned int Id();
 		unsigned int BrickId();
-		unsigned long long GetKey();
+		unsigned long long GetEId();
 		IntraVert GetIntraVert();
 		void SetIntraVert(IntraVert intra_vert);
-		void Set(pCell &cell);
-		void Inc(size_t i, size_t j, size_t k, float value);
-		void Inc(pCell &cell);
+		void Set(Celp &celp);
+		void Inc(size_t i, size_t j, size_t k, double value);
+		void Inc(Celp &celp);
 		void Inc();
-		void IncExternal(float value);
+		void IncExt(double value);
 		void AddVertex(pVertex &vertex);
 		pwVertex GetVertex();
 		unsigned int GetVertexId();
 
 		//get
+		//size
+		double GetSize();
+		unsigned int GetSizeUi();
+		double GetSizeD();
+		double GetExt();
+		unsigned int GetExtUi();
+		double GetExtD();
+		//distribution
+		double GetMean();
+		double GetStd();
+		double GetMin();
+		double GetMax();
+		//distance
+		double GetDistp();
+		//coords
 		FLIVR::Point &GetCenter();
 		FLIVR::BBox &GetBox();
-		unsigned int GetSizeUi();
-		float GetSizeF();
-		unsigned int GetExternalUi();
-		float GetExternalF();
-		//set
-		void SetBrickId(unsigned int id);
-		void SetCenter(const FLIVR::Point &center);
-		void SetBox(const FLIVR::BBox &box);
-		void SetSizeUi(unsigned int size_ui);
-		void SetSizeF(float size_f);
-		void SetExternalUi(unsigned int external_ui);
-		void SetExternalF(float external_f);
+		FLIVR::Point &GetProjp();
+		//colocalization
+		unsigned int GetCoSizeUi(size_t i);
+		double GetCoSizeD(size_t i);
 		//count
 		unsigned int GetCount0();
 		unsigned int GetCount1();
+
+		//set
+		void SetBrickId(unsigned int id);
+		void SetUseD(bool val);
+		void SetSizeUi(unsigned int size);
+		void SetSizeD(double size);
+		void SetExtUi(unsigned int size);
+		void SetExtD(double size);
 		void SetCount0(unsigned int val);
 		void SetCount1(unsigned int val);
+		void SetCenter(const FLIVR::Point &center);
+		void SetBox(const FLIVR::BBox &box);
 
 	private:
 		unsigned int m_id;
 		unsigned int m_brick_id;
+		//size
+		bool m_use_d;
+		unsigned int m_size_ui;
+		double m_size_d;
+		//external size
+		unsigned int m_ext_ui;
+		float m_ext_d;
+		//distribution
+		double m_mean;
+		double m_int2;//intensity squared
+		double m_std;//standard deviation
+		double m_min;
+		double m_max;
+		//distance
+		double m_distp;//distance to a point
+		//coords
 		FLIVR::Point m_center;
 		FLIVR::BBox m_box;
-		//size
-		unsigned int m_size_ui;
-		float m_size_f;
-		//external size
-		unsigned int m_external_ui;
-		float m_external_f;
-		//count
+		FLIVR::Point m_prjp;//projected point
+		//colocalization
+		std::vector<unsigned int> m_size_ui_list;
+		std::vector<double> m_size_d_list;
+		//shape
+		Pca m_pca;
+		//uncertainty
 		unsigned int m_count0;
 		unsigned int m_count1;
+		//vertex (parent group of cells)
 		IntraVert m_intra_vert;
 		pwVertex m_vertex;//parent
 	};
@@ -145,7 +213,7 @@ namespace FL
 		return m_brick_id;
 	}
 
-	inline unsigned long long Cell::GetKey()
+	inline unsigned long long Cell::GetEId()
 	{
 		unsigned long long temp = m_brick_id;
 		return (temp << 32) | m_id;
@@ -161,34 +229,34 @@ namespace FL
 		m_intra_vert = intra_vert;
 	}
 
-	inline void Cell::Set(pCell &cell)
+	inline void Cell::Set(Celp &celp)
 	{
-		m_center = cell->GetCenter();
-		m_size_ui = cell->GetSizeUi();
-		m_size_f = cell->GetSizeF();
-		m_box = cell->GetBox();
+		m_center = celp->GetCenter();
+		m_size_ui = celp->GetSizeUi();
+		m_size_d = celp->GetSizeD();
+		m_box = celp->GetBox();
 	}
 
-	inline void Cell::Inc(size_t i, size_t j, size_t k, float value)
+	inline void Cell::Inc(size_t i, size_t j, size_t k, double value)
 	{
 		m_center = FLIVR::Point(
 			(m_center*m_size_ui + FLIVR::Point(double(i),
 			double(j), double(k))) / (m_size_ui + 1));
 		m_size_ui++;
-		m_size_f += value;
+		m_size_d += value;
 		FLIVR::Point p(i, j, k);
 		m_box.extend(p);
 	}
 
-	inline void Cell::Inc(pCell &cell)
+	inline void Cell::Inc(Celp &celp)
 	{
 		m_center = FLIVR::Point(
-			(m_center * m_size_ui + cell->GetCenter() *
-			cell->GetSizeUi()) / (m_size_ui +
-			cell->GetSizeUi()));
-		m_size_ui += cell->GetSizeUi();
-		m_size_f += cell->GetSizeF();
-		m_box.extend(cell->GetBox());
+			(m_center * m_size_ui + celp->GetCenter() *
+			celp->GetSizeUi()) / (m_size_ui +
+			celp->GetSizeUi()));
+		m_size_ui += celp->GetSizeUi();
+		m_size_d += celp->GetSizeD();
+		m_box.extend(celp->GetBox());
 	}
 
 	inline void Cell::Inc()
@@ -196,10 +264,10 @@ namespace FL
 		m_size_ui++;
 	}
 
-	inline void Cell::IncExternal(float value)
+	inline void Cell::IncExt(double value)
 	{
-		m_external_ui++;
-		m_external_f += value;
+		m_ext_ui++;
+		m_ext_d += value;
 	}
 
 	inline void Cell::AddVertex(pVertex &vertex)
@@ -212,6 +280,67 @@ namespace FL
 		return m_vertex;
 	}
 
+	inline double Cell::GetSize()
+	{
+		if (m_use_d)
+			return GetSizeD();
+		else
+			return GetSizeUi();
+	}
+
+	inline unsigned int Cell::GetSizeUi()
+	{
+		return m_size_ui;
+	}
+
+	inline double Cell::GetSizeD()
+	{
+		return m_size_d;
+	}
+
+	inline double Cell::GetExt()
+	{
+		if (m_use_d)
+			return GetExtD();
+		else
+			return GetExtUi();
+	}
+
+	inline unsigned int Cell::GetExtUi()
+	{
+		return m_ext_ui;
+	}
+
+	inline double Cell::GetExtD()
+	{
+		return m_ext_d;
+	}
+
+	inline double Cell::GetMean()
+	{
+		return m_mean;
+	}
+
+	inline double Cell::GetStd()
+	{
+		return m_std;
+	}
+
+	inline double Cell::GetMin()
+	{
+		return m_min;
+	}
+
+	inline double Cell::GetMax()
+	{
+		return m_max;
+	}
+
+	inline double Cell::GetDistp()
+	{
+		return m_distp;
+	}
+
 	inline FLIVR::Point &Cell::GetCenter()
 	{
 		return m_center;
@@ -222,24 +351,34 @@ namespace FL
 		return m_box;
 	}
 
-	inline unsigned int Cell::GetSizeUi()
+	inline FLIVR::Point &Cell::GetProjp()
 	{
-		return m_size_ui;
+		return m_prjp;
 	}
 
-	inline float Cell::GetSizeF()
+	inline unsigned int Cell::GetCoSizeUi(size_t i)
 	{
-		return m_size_f;
+		if (i < m_size_ui_list.size())
+			return m_size_ui_list[i];
+		return 0;
 	}
 
-	inline unsigned int Cell::GetExternalUi()
+	inline double Cell::GetCoSizeD(size_t i)
 	{
-		return m_external_ui;
+		if (i < m_size_d_list.size())
+			return m_size_d_list[i];
+		return 0;
 	}
 
-	inline float Cell::GetExternalF()
+	//count
+	inline unsigned int Cell::GetCount0()
 	{
-		return m_external_f;
+		return m_count0;
+	}
+
+	inline unsigned int Cell::GetCount1()
+	{
+		return m_count1;
 	}
 
 	inline void Cell::SetBrickId(unsigned int id)
@@ -257,35 +396,29 @@ namespace FL
 		m_box = box;
 	}
 
-	inline void Cell::SetSizeUi(unsigned int size_ui)
+	inline void Cell::SetUseD(bool val)
 	{
-		m_size_ui = size_ui;
+		m_use_d = val;
 	}
 
-	inline void Cell::SetSizeF(float size_f)
+	inline void Cell::SetSizeUi(unsigned int size)
 	{
-		m_size_f = size_f;
+		m_size_ui = size;
 	}
 
-	inline void Cell::SetExternalUi(unsigned int external_ui)
+	inline void Cell::SetSizeD(double size)
 	{
-		m_external_ui = external_ui;
+		m_size_d = size;
 	}
 
-	inline void Cell::SetExternalF(float external_f)
+	inline void Cell::SetExtUi(unsigned int size)
 	{
-		m_external_f = external_f;
+		m_ext_ui = size;
 	}
 
-	//count
-	inline unsigned int Cell::GetCount0()
+	inline void Cell::SetExtD(double size)
 	{
-		return m_count0;
-	}
-
-	inline unsigned int Cell::GetCount1()
-	{
-		return m_count1;
+		m_ext_d = size;
 	}
 
 	inline void Cell::SetCount0(unsigned int val)

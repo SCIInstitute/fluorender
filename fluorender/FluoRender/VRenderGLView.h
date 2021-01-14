@@ -555,7 +555,7 @@ public:
 		void** image);
 
 	//set cell list
-	void SetCellList(FL::CellList &list)
+	void SetCellList(FL::CelpList &list)
 	{
 		m_cell_list = list;
 	}
@@ -725,7 +725,7 @@ private:
 	//multivolume
 	MultiVolumeRenderer* m_mvr;
 	//highlighted comps
-	FL::CellList m_cell_list;
+	FL::CelpList m_cell_list;
 	//fisrt volume data in the depth groups
 	//VolumeData* m_first_depth_vd;
 	//initializaion

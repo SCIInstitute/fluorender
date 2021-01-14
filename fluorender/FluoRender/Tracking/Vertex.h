@@ -82,7 +82,7 @@ namespace FL
 	typedef boost::graph_traits<InterGraph>::adjacency_iterator InterAdjIter;
 	typedef boost::graph_traits<InterGraph>::edge_iterator InterEdgeIter;
 
-	typedef std::vector<pwCell> CellBin;
+	typedef std::vector<Celw> CellBin;
 	typedef CellBin::iterator CellBinIter;
 
 	typedef std::unordered_map<unsigned int, unsigned int> CellIDMap;
@@ -119,10 +119,10 @@ namespace FL
 
 		//cells
 		size_t GetCellNum();
-		pCell GetCell(size_t idx);
-		int FindCell(pCell &cell);
-		void AddCell(pCell &cell, bool inc=false);
-		void RemoveCell(pCell &cell);
+		Celp GetCell(size_t idx);
+		int FindCell(Celp &celp);
+		void AddCell(Celp &celp, bool inc=false);
+		void RemoveCell(Celp &celp);
 		CellBinIter GetCellsBegin();
 		CellBinIter GetCellsEnd();
 
@@ -235,12 +235,12 @@ namespace FL
 		for (CellBinIter iter = m_cells.begin();
 		iter != m_cells.end(); ++iter)
 		{
-			pCell cell = iter->lock();
-			if (!cell)
+			Celp celp = iter->lock();
+			if (!celp)
 				continue;
-			m_center += cell->GetCenter();
-			m_size_ui += cell->GetSizeUi();
-			m_size_f += cell->GetSizeF();
+			m_center += celp->GetCenter();
+			m_size_ui += celp->GetSizeUi();
+			m_size_f += celp->GetSizeD();
 		}
 		m_center /= m_cells.size();
 	}
@@ -250,7 +250,7 @@ namespace FL
 		return m_cells.size();
 	}
 
-	inline pCell Vertex::GetCell(size_t idx)
+	inline Celp Vertex::GetCell(size_t idx)
 	{
 		if (idx >= m_cells.size())
 			return nullptr;
@@ -258,39 +258,39 @@ namespace FL
 			return m_cells[idx].lock();
 	}
 
-	inline int Vertex::FindCell(pCell &cell)
+	inline int Vertex::FindCell(Celp &celp)
 	{
 		for (size_t i = 0; i < m_cells.size(); ++i)
 		{
-			pCell c = m_cells[i].lock();
-			if (c && c->Id() == cell->Id())
+			Celp celp0 = m_cells[i].lock();
+			if (celp0 && celp0->Id() == celp->Id())
 				return i;
 		}
 		return -1;
 	}
 
-	inline void Vertex::AddCell(pCell &cell, bool inc)
+	inline void Vertex::AddCell(Celp &celp, bool inc)
 	{
-		if (FindCell(cell) >= 0)
+		if (FindCell(celp) >= 0)
 			return;
 
 		if (inc)
 		{
-			m_size_ui += cell->GetSizeUi();
-			m_size_f += cell->GetSizeF();
+			m_size_ui += celp->GetSizeUi();
+			m_size_f += celp->GetSizeD();
 		}
-		m_cells.push_back(pwCell(cell));
+		m_cells.push_back(Celw(celp));
 
 		m_split = false;
 	}
 
-	inline void Vertex::RemoveCell(pCell &cell)
+	inline void Vertex::RemoveCell(Celp &celp)
 	{
 		for (CellBinIter iter = m_cells.begin();
 			iter != m_cells.end(); ++iter)
 		{
-			pCell c = iter->lock();
-			if (c && c->Id() == cell->Id())
+			Celp celp0 = iter->lock();
+			if (celp0 && celp0->Id() == celp->Id())
 			{
 				m_cells.erase(iter);
 				m_split = false;
@@ -330,8 +330,8 @@ namespace FL
 		for (CellBinIter iter = m_cells.begin();
 			iter != m_cells.end(); ++iter)
 		{
-			pCell c = iter->lock();
-			box.extend(c->GetBox());
+			Celp celp = iter->lock();
+			box.extend(celp->GetBox());
 		}
 		return box;
 	}

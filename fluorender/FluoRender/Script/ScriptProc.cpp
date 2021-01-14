@@ -209,13 +209,13 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 		{
 			if (it->second->sumi > slimit)
 			{
-				FL::pCell cell(new FL::Cell(it->second->id));
-				cell->SetSizeUi(it->second->sumi);
-				cell->SetSizeF(it->second->sumd);
-				cell->SetCenter(it->second->pos);
-				cell->SetBox(it->second->box);
-				m_sel_labels.insert(pair<unsigned int, FL::pCell>
-					(it->second->id, cell));
+				FL::Celp celp(new FL::Cell(it->second->id));
+				celp->SetSizeUi(it->second->sumi);
+				celp->SetSizeD(it->second->sumd);
+				celp->SetCenter(it->second->pos);
+				celp->SetBox(it->second->box);
+				m_sel_labels.insert(pair<unsigned int, FL::Celp>
+					(it->second->id, celp));
 			}
 		}
 	}

@@ -3184,8 +3184,8 @@ void ComponentDlg::Cluster()
 			{
 				FL::Cell* cell = new FL::Cell(label_value);
 				cell->Inc(i, j, k, data_value);
-				m_in_cells.insert(std::pair<unsigned int, FL::pCell>
-					(label_value, FL::pCell(cell)));
+				m_in_cells.insert(std::pair<unsigned int, FL::Celp>
+					(label_value, FL::Celp(cell)));
 			}
 		}
 	}
@@ -3760,7 +3760,7 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-bool ComponentDlg::GetCellList(FL::CellList &cl, bool links)
+bool ComponentDlg::GetCellList(FL::CelpList &cl, bool links)
 {
 	FL::CompList* list = m_comp_analyzer.GetCompList();
 	if (!list || list->empty())
@@ -3857,17 +3857,17 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 	}
 }
 
-void ComponentDlg::CompToCellList(FL::CellList &cl,
+void ComponentDlg::CompToCellList(FL::CelpList &cl,
 	FL::CompList::iterator &it,
 	unsigned int id, unsigned int bid,
 	double sx, double sy, double sz, bool links)
 {
 	Point p1, p2;
 	BBox bb;
-	FL::pCell cell(new FL::Cell(id));
+	FL::Celp cell(new FL::Cell(id));
 	cell->SetBrickId(bid);
 	cell->SetSizeUi(it->second->sumi);
-	cell->SetSizeF(it->second->sumd);
+	cell->SetSizeD(it->second->sumd);
 	p1 = it->second->pos;
 	p1.scale(sx, sy, sz);
 	cell->SetCenter(p1);
@@ -3880,7 +3880,7 @@ void ComponentDlg::CompToCellList(FL::CellList &cl,
 	cell->SetBox(bb);
 	unsigned long long key = bid;
 	key = (key << 32) | id;
-	cl.insert(pair<unsigned long long, FL::pCell>
+	cl.insert(pair<unsigned long long, FL::Celp>
 		(key, cell));
 
 	if (links)
@@ -3893,15 +3893,15 @@ void ComponentDlg::CompToCellList(FL::CellList &cl,
 			for (auto it2 = list.begin();
 				it2 != list.end(); ++it2)
 			{
-				FL::pCell cell2(new FL::Cell(it2->second->id));
+				FL::Celp cell2(new FL::Cell(it2->second->id));
 				cell2->SetBrickId(it2->second->brick_id);
 				cell2->SetSizeUi(cell->GetSizeUi());
-				cell2->SetSizeF(cell->GetSizeF());
+				cell2->SetSizeD(cell->GetSizeD());
 				cell2->SetCenter(cell->GetCenter());
 				cell2->SetBox(cell->GetBox());
 				key = cell2->BrickId();
 				key = (key << 32) | cell2->Id();
-				cl.insert(pair<unsigned long long, FL::pCell>
+				cl.insert(pair<unsigned long long, FL::Celp>
 					(key, cell2));
 			}
 		}
@@ -3912,7 +3912,7 @@ void ComponentDlg::GetCompSelection()
 {
 	if (m_view && m_view->m_glview)
 	{
-		FL::CellList cl;
+		FL::CelpList cl;
 		GetCellList(cl);
 		m_view->m_glview->SetCellList(cl);
 		m_view->RefreshGL(false);
@@ -3978,7 +3978,7 @@ void ComponentDlg::IncludeComps()
 	if (!vd)
 		return;
 
-	FL::CellList cl;
+	FL::CelpList cl;
 	if (GetCellList(cl, true))
 	{
 		//clear complist
@@ -4030,7 +4030,7 @@ void ComponentDlg::ExcludeComps()
 	if (!vd)
 		return;
 
-	FL::CellList cl;
+	FL::CelpList cl;
 	if (GetCellList(cl))
 	{
 		//clear complist

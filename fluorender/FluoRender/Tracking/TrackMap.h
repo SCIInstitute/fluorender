@@ -106,8 +106,8 @@ namespace FL
 		bool ResetVertexIDs();
 
 		//get
-		pCell GetCell(size_t frame, unsigned int id);
-		pVertex GetVertex(pCell &cell);
+		Celp GetCell(size_t frame, unsigned int id);
+		pVertex GetVertex(Celp &celp);
 		unsigned int GetUniCellID(size_t frame, unsigned int id);
 		unsigned int GetNewCellID(size_t frame, unsigned int id, bool inc=false);
 		unsigned int GetTrackedID(size_t frame1, size_t frame2, unsigned int id);
@@ -116,31 +116,31 @@ namespace FL
 		//bool GetMappedID(unsigned int id_in, unsigned int& id_out,
 		//	size_t frame);
 		//get mapped cells
-		bool GetMappedCells(CellList &sel_list1, CellList &sel_list2,
+		bool GetMappedCells(CelpList &sel_list1, CelpList &sel_list2,
 			size_t frame1, size_t frame2);
 
 		//modifications
-		bool LinkCells(CellList &list1, CellList &list2,
+		bool LinkCells(CelpList &list1, CelpList &list2,
 			size_t frame1, size_t frame2, bool exclusive);
-		bool LinkCells(pCell &cell1, pCell &cell2,
+		bool LinkCells(Celp &celp1, Celp &celp2,
 			size_t frame1, size_t frame2, bool exclusive);
-		bool IsolateCells(CellList &list, size_t frame);
-		bool UnlinkCells(CellList &list1, CellList &list2,
+		bool IsolateCells(CelpList &list, size_t frame);
+		bool UnlinkCells(CelpList &list1, CelpList &list2,
 			size_t frame1, size_t frame2);
 		//
-		bool AddCellDup(pCell & cell, size_t frame);
-		bool AddCell(pCell &cell, size_t frame, CellListIter &iter);
-		bool AddCells(CellList &list, size_t frame);
-		bool RemoveCells(CellList &list, size_t frame);
-		bool LinkAddedCells(CellList &list, size_t frame1, size_t frame2);
-		bool CombineCells(pCell &cell, CellList &list, size_t frame);
-		bool DivideCells(CellList &list, size_t frame);
-		bool SegmentCells(CellList &list, size_t frame, int clnum = 2);
+		bool AddCellDup(Celp & celp, size_t frame);
+		bool AddCell(Celp &celp, size_t frame, CelpListIter &iter);
+		bool AddCells(CelpList &list, size_t frame);
+		bool RemoveCells(CelpList &list, size_t frame);
+		bool LinkAddedCells(CelpList &list, size_t frame1, size_t frame2);
+		bool CombineCells(Celp &celp, CelpList &list, size_t frame);
+		bool DivideCells(CelpList &list, size_t frame);
+		bool SegmentCells(CelpList &list, size_t frame, int clnum = 2);
 		bool ReplaceCellID(unsigned int old_id,
 			unsigned int new_id, size_t frame);
 
 		//relink cells after segmentation
-		void RelinkCells(CellList &in, CellList& out, size_t frame);
+		void RelinkCells(CelpList &in, CelpList& out, size_t frame);
 
 		//information
 		void GetLinkLists(size_t frame,
@@ -148,12 +148,12 @@ namespace FL
 			FL::VertexList &out_orphan_list,
 			FL::VertexList &in_multi_list,
 			FL::VertexList &out_multi_list);
-		void GetCellsByUncertainty(CellList &list_in, CellList &list_out,
+		void GetCellsByUncertainty(CelpList &list_in, CelpList &list_out,
 			size_t frame);
-		void GetCellUncertainty(CellList &list, size_t frame);
+		void GetCellUncertainty(CelpList &list, size_t frame);
 		void GetUncertainHist(UncertainHist &hist1, UncertainHist &hist2, size_t frame);
 		void GetUncertainHist(UncertainHist &hist, VertexList &vertex_list, InterGraph &graph);
-		void GetPaths(CellList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
+		void GetPaths(CelpList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
 
 		//tracking by matching user input
 		bool TrackStencils(size_t frame1, size_t frame2);
@@ -185,15 +185,15 @@ namespace FL
 
 	private:
 		//modification
-		bool CheckCellContact(pCell &cell, void *data, void *label,
+		bool CheckCellContact(Celp &celp, void *data, void *label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddContact(IntraGraph& graph,
-			pCell &cell1, pCell &cell2,
+			Celp &celp1, Celp &celp2,
 			float contact_value);
-		bool CheckCellDist(pCell &cell, void *label,
+		bool CheckCellDist(Celp &celp, void *label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddNeighbor(IntraGraph& graph,
-			pCell &cell1, pCell &cell2,
+			Celp &celp1, Celp &celp2,
 			float dist_v, float dist_s);
 		bool LinkVertices(InterGraph& graph,
 			pVertex &vertex1, pVertex &vertex2,
@@ -211,16 +211,16 @@ namespace FL
 		bool RemoveVertex(InterGraph& graph, pVertex &vertex);
 		
 		//determine if cells on intragraph can be merged
-		typedef bool(TrackMapProcessor::*f_merge_cell)(IntraEdge&, pCell&, pCell&, IntraGraph&);
-		bool GroupCells(std::vector<pwCell> &cells, std::vector<CellBin> &cell_bins,
+		typedef bool(TrackMapProcessor::*f_merge_cell)(IntraEdge&, Celp&, Celp&, IntraGraph&);
+		bool GroupCells(std::vector<Celw> &celws, std::vector<CellBin> &cell_bins,
 			IntraGraph &intra_graph, f_merge_cell merge_cell);
-		bool EqualCells(pwCell &cell1, pwCell &cell2);
-		bool FindCellBin(CellBin &bin, pwCell &cell);
+		bool EqualCells(Celw &celw1, Celw &celw2);
+		bool FindCellBin(CellBin &bin, Celw &celw);
 		bool AddCellBin(std::vector<CellBin> &bins,
-			pwCell &cell);
+			Celw &celw);
 		bool AddCellBin(std::vector<CellBin> &bins,
-			pwCell &cell1, pwCell &cell2);
-		bool GreaterThanCellBin(pCell &cell1, CellBin &bin, pwCell &cell2);
+			Celw &celw1, Celw &celw2);
+		bool GreaterThanCellBin(Celp &celp1, CellBin &bin, Celw &celw2);
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 
 		//replaces all previous match/unmatch funcs
@@ -282,9 +282,9 @@ namespace FL
 		//check if the vertex can split
 		bool SplitVertex(InterGraph &graph, pVertex &vertex,
 			std::vector<InterEdge> &edges);
-		bool ClusterCellsMerge(CellList &list, size_t frame);
-		bool ClusterCellsSplit(CellList &list, size_t frame,
-			size_t clnum, CellList &listout);
+		bool ClusterCellsMerge(CelpList &list, size_t frame);
+		bool ClusterCellsSplit(CelpList &list, size_t frame,
+			size_t clnum, CelpList &listout);
 
 		//helper functions
 		bool get_alter_path(InterGraph &graph, pVertex &vertex,
@@ -292,7 +292,7 @@ namespace FL
 		float get_path_max(InterGraph &graph, PathList &paths,
 			size_t curl, InterVert v0);
 		bool unlink_alt_path(InterGraph &graph, PathList &paths);
-		bool merge_cell_size(IntraEdge &edge, pCell &cell1, pCell &cell2, IntraGraph& graph);
+		bool merge_cell_size(IntraEdge &edge, Celp &celp1, Celp &celp2, IntraGraph& graph);
 		static bool comp_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		static bool comp_edge_count(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
 		bool similar_edge_size(InterEdge &edge1, InterEdge &edge2, InterGraph& graph);
@@ -320,19 +320,21 @@ namespace FL
 		void WriteTag(std::ofstream& ofs, const unsigned char tag);
 		void WriteUint(std::ofstream& ofs, const unsigned int value);
 		void WriteFloat(std::ofstream& ofs, const float value);
+		void WriteDouble(std::ofstream& ofs, const double value);
 		void WritePoint(std::ofstream& ofs, const FLIVR::Point &point);
-		void WriteCell(std::ofstream& ofs, const pCell &cell);
+		void WriteCell(std::ofstream& ofs, const Celp &celp);
 		void WriteVertex(std::ofstream& ofs, const pVertex &vertex);
 		//import
 		bool ReadBool(std::ifstream& ifs);
 		unsigned char ReadTag(std::ifstream& ifs);
 		unsigned int ReadUint(std::ifstream& ifs);
 		float ReadFloat(std::ifstream& ifs);
+		double ReadDouble(std::ifstream& ifs);
 		FLIVR::Point ReadPoint(std::ifstream& ifs);
-		pCell ReadCell(std::ifstream& ifs, CellList& cell_list);
-		void ReadVertex(std::ifstream& ifs, VertexList& vertex_list, CellList& cell_list);
+		Celp ReadCell(std::ifstream& ifs, CelpList& list);
+		void ReadVertex(std::ifstream& ifs, VertexList& vertex_list, CelpList& list);
 		bool AddIntraEdge(IntraGraph& graph,
-			pCell &cell1, pCell &cell2,
+			Celp &celp1, Celp &celp2,
 			unsigned int size_ui, float size_f,
 			float dist_v, float dist_s);
 		bool AddInterEdge(InterGraph& graph,
@@ -421,6 +423,11 @@ namespace FL
 		ofs.write(reinterpret_cast<const char*>(&value), sizeof(float));
 	}
 
+	inline void TrackMapProcessor::WriteDouble(std::ofstream& ofs, const double value)
+	{
+		ofs.write(reinterpret_cast<const char*>(&value), sizeof(double));
+	}
+
 	inline void TrackMapProcessor::WritePoint(std::ofstream& ofs, const FLIVR::Point &point)
 	{
 		double x = point.x();
@@ -431,20 +438,20 @@ namespace FL
 		ofs.write(reinterpret_cast<const char*>(&x), sizeof(double));
 	}
 
-	inline void TrackMapProcessor::WriteCell(std::ofstream& ofs, const pCell &cell)
+	inline void TrackMapProcessor::WriteCell(std::ofstream& ofs, const Celp &celp)
 	{
 		WriteTag(ofs, TAG_CELL);
-		WriteUint(ofs, cell->Id());
+		WriteUint(ofs, celp->Id());
 		WriteTag(ofs, TAG_VER221);
-		WriteUint(ofs, cell->BrickId());
-		WriteUint(ofs, cell->GetSizeUi());
-		WriteFloat(ofs, cell->GetSizeF());
-		WriteUint(ofs, cell->GetExternalUi());
-		WriteFloat(ofs, cell->GetExternalF());
-		WritePoint(ofs, cell->GetCenter());
+		WriteUint(ofs, celp->BrickId());
+		WriteUint(ofs, celp->GetSizeUi());
+		WriteDouble(ofs, celp->GetSizeD());
+		WriteUint(ofs, celp->GetExtUi());
+		WriteDouble(ofs, celp->GetExtD());
+		WritePoint(ofs, celp->GetCenter());
 		WriteTag(ofs, TAG_VER220);
-		WritePoint(ofs, cell->GetBox().min());
-		WritePoint(ofs, cell->GetBox().max());
+		WritePoint(ofs, celp->GetBox().min());
+		WritePoint(ofs, celp->GetBox().max());
 	}
 
 	inline bool TrackMapProcessor::ReadBool(std::ifstream& ifs)
@@ -475,6 +482,13 @@ namespace FL
 		return value;
 	}
 
+	inline double TrackMapProcessor::ReadDouble(std::ifstream& ifs)
+	{
+		double value;
+		ifs.read(reinterpret_cast<char*>(&value), sizeof(double));
+		return value;
+	}
+
 	inline FLIVR::Point TrackMapProcessor::ReadPoint(std::ifstream& ifs)
 	{
 		double x, y, z;
@@ -484,28 +498,28 @@ namespace FL
 		return FLIVR::Point(x, y, z);
 	}
 
-	inline pCell TrackMapProcessor::ReadCell(std::ifstream& ifs, CellList& cell_list)
+	inline Celp TrackMapProcessor::ReadCell(std::ifstream& ifs, CelpList& list)
 	{
-		pCell cell;
+		Celp celp;
 		if (ReadTag(ifs) != TAG_CELL)
-			return cell;
+			return celp;
 		unsigned int id = ReadUint(ifs);
-		if (cell_list.find(id) != cell_list.end())
-			return cell;
-		cell = pCell(new Cell(id));
+		if (list.find(id) != list.end())
+			return celp;
+		celp = Celp(new Cell(id));
 		if (ReadTag(ifs) == TAG_VER221)
 		{
 			unsigned int brick_id = ReadUint(ifs);
-			cell->SetBrickId(brick_id);
+			celp->SetBrickId(brick_id);
 		}
 		else
 			ifs.unget();
-		cell->SetSizeUi(ReadUint(ifs));
-		cell->SetSizeF(ReadFloat(ifs));
-		cell->SetExternalUi(ReadUint(ifs));
-		cell->SetExternalF(ReadFloat(ifs));
+		celp->SetSizeUi(ReadUint(ifs));
+		celp->SetSizeD(ReadDouble(ifs));
+		celp->SetExtUi(ReadUint(ifs));
+		celp->SetExtD(ReadDouble(ifs));
 		FLIVR::Point p = ReadPoint(ifs);
-		cell->SetCenter(p);
+		celp->SetCenter(p);
 		FLIVR::BBox box;
 		FLIVR::Point p1;
 		if (ReadTag(ifs) == TAG_VER220)
@@ -513,13 +527,13 @@ namespace FL
 			p = ReadPoint(ifs);
 			p1 = ReadPoint(ifs);
 			box = FLIVR::BBox(p, p1);
-			cell->SetBox(box);
+			celp->SetBox(box);
 		}
 		else
 			ifs.unget();
-		cell_list.insert(std::pair<unsigned int, pCell>
-			(id, cell));
-		return cell;
+		list.insert(std::pair<unsigned int, Celp>
+			(id, celp));
+		return celp;
 	}
 
 	//random
@@ -547,7 +561,7 @@ namespace FL
 		~TrackMap();
 
 		size_t GetFrameNum();
-		CellList &GetCellList(size_t frame);
+		CelpList &GetCellList(size_t frame);
 		VertexList &GetVertexList(size_t frame);
 		IntraGraph &GetIntraGraph(size_t frame);
 		InterGraph &GetInterGraph(size_t frame);
@@ -568,7 +582,7 @@ namespace FL
 		float m_spc_z;
 
 		//lists
-		std::deque<CellList> m_cells_list;
+		std::deque<CelpList> m_celp_list;
 		std::deque<VertexList> m_vertices_list;
 		std::deque<IntraGraph> m_intra_graph_list;
 		std::deque<InterGraph> m_inter_graph_list;
@@ -581,9 +595,9 @@ namespace FL
 		return m_frame_num;
 	}
 
-	inline CellList &TrackMap::GetCellList(size_t frame)
+	inline CelpList &TrackMap::GetCellList(size_t frame)
 	{
-		return m_cells_list.at(frame);
+		return m_celp_list.at(frame);
 	}
 
 	inline VertexList &TrackMap::GetVertexList(size_t frame)
@@ -606,7 +620,7 @@ namespace FL
 		size_t sframe = m_frame_num;
 		for (size_t i = sframe; i <= frame; ++i)
 		{
-			m_cells_list.push_back(CellList());
+			m_celp_list.push_back(CelpList());
 			m_vertices_list.push_back(VertexList());
 			m_intra_graph_list.push_back(IntraGraph());
 			if (m_inter_graph_list.size() < frame)
@@ -621,7 +635,7 @@ namespace FL
 
 	inline void TrackMap::Clear()
 	{
-		m_cells_list.clear();
+		m_celp_list.clear();
 		m_vertices_list.clear();
 		m_intra_graph_list.clear();
 		m_inter_graph_list.clear();
@@ -633,39 +647,39 @@ namespace FL
 	}
 
 	//get
-	inline pCell TrackMapProcessor::GetCell(size_t frame, unsigned int id)
+	inline Celp TrackMapProcessor::GetCell(size_t frame, unsigned int id)
 	{
 		if (frame >= m_map->m_frame_num)
 			return nullptr;
 
-		CellList &clist = m_map->m_cells_list.at(frame);
-		CellListIter citer = clist.find(id);
-		if (citer == clist.end())
+		CelpList &list = m_map->m_celp_list.at(frame);
+		auto it = list.find(id);
+		if (it == list.end())
 			return nullptr;
 		else
-			return citer->second;
+			return it->second;
 	}
 
-	inline pVertex TrackMapProcessor::GetVertex(pCell &cell)
+	inline pVertex TrackMapProcessor::GetVertex(Celp &celp)
 	{
-		if (!cell)
+		if (!celp)
 			return nullptr;
 
-		pwVertex pvert = cell->GetVertex();
+		pwVertex pvert = celp->GetVertex();
 		return pvert.lock();
 	}
 
 	inline unsigned int TrackMapProcessor::GetUniCellID(size_t frame, unsigned int id)
 	{
 		unsigned int rid = 0;
-		pCell cell = GetCell(frame, id);
-		if (!cell)
+		Celp celp = GetCell(frame, id);
+		if (!celp)
 			return rid;
-		pVertex vert = GetVertex(cell);
+		pVertex vert = GetVertex(celp);
 		if (!vert ||
-			vert->FindCell(cell) < 0)
+			vert->FindCell(celp) < 0)
 			return rid;
-		pCell cell0 = vert->GetCell(0);
+		Celp cell0 = vert->GetCell(0);
 		rid = cell0->Id();
 		return rid;
 	}
@@ -675,10 +689,10 @@ namespace FL
 	{
 		bool wrap = false;
 		//cell list
-		CellList &clist = m_map->m_cells_list.at(frame);
+		CelpList &list = m_map->m_celp_list.at(frame);
 		unsigned int newid = id+(inc?253:0);
 		newid = newid < id ? (wrap = true, (id % 253)) : newid;
-		while (clist.find(newid) != clist.end())
+		while (list.find(newid) != list.end())
 		{
 			newid += 253;
 			if (newid < newid - 253)

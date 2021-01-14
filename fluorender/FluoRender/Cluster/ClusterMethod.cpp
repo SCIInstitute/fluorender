@@ -93,8 +93,8 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 		m_id_list.push_back(id2);
 
 		if (out_cells)
-			m_out_cells.insert(std::pair<unsigned int, pCell>
-				(id2, pCell(cell)));
+			m_out_cells.insert(std::pair<unsigned int, Celp>
+				(id2, Celp(cell)));
 	}
 }
 

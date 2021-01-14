@@ -858,20 +858,20 @@ public:
 
 	//for selective drawing
 	void ClearCellList();
-	void UpdateCellList(FL::CellList &cur_sel_list);
-	FL::CellList &GetCellList();
+	void UpdateCellList(FL::CelpList &cur_sel_list);
+	FL::CelpList &GetCellList();
 	bool FindCell(unsigned int id);
 
 	//modifications
-	bool AddCell(FL::pCell &cell, size_t frame);
-	bool LinkCells(FL::CellList &list1, FL::CellList &list2,
+	bool AddCell(FL::Celp &cell, size_t frame);
+	bool LinkCells(FL::CelpList &list1, FL::CelpList &list2,
 		size_t frame1, size_t frame2, bool exclusive);
-	bool IsolateCells(FL::CellList &list, size_t frame);
-	bool UnlinkCells(FL::CellList &list1, FL::CellList &list2,
+	bool IsolateCells(FL::CelpList &list, size_t frame);
+	bool UnlinkCells(FL::CelpList &list1, FL::CelpList &list2,
 		size_t frame1, size_t frame2);
-	bool CombineCells(FL::pCell &cell, FL::CellList &list,
+	bool CombineCells(FL::Celp &cell, FL::CelpList &list,
 		size_t frame);
-	bool DivideCells(FL::CellList &list, size_t frame);
+	bool DivideCells(FL::CelpList &list, size_t frame);
 	bool ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame);
 
 	//sparse tracking
@@ -909,17 +909,17 @@ private:
 	int m_uncertain_low;
 
 	FL::pTrackMap m_track_map;
-	FL::CellList m_cell_list;
+	FL::CelpList m_cell_list;
 
 	//edges (in a vector of drawable)
 	unsigned int GetMappedEdges(
-		FL::CellList &sel_list1, FL::CellList &sel_list2,
+		FL::CelpList &sel_list1, FL::CelpList &sel_list2,
 		std::vector<float> &verts,
 		size_t frame1, size_t frame2,
 		int shuffle=0);
 	//rulers
 	bool GetMappedRulers(
-		FL::CellList &sel_list1, FL::CellList &sel_list2,
+		FL::CelpList &sel_list1, FL::CelpList &sel_list2,
 		FL::RulerList &rulers,
 		size_t frame1, size_t frame2);
 	FL::RulerListIter FindRulerFromList(unsigned int id, FL::RulerList &list);

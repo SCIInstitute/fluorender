@@ -126,9 +126,9 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 
 	DeleteAllItems();
 
-	FL::CellList sel_cells = traces->GetCellList();
-	std::vector<FL::pCell> cells;
-	for (FL::CellListIter siter = sel_cells.begin();
+	FL::CelpList sel_cells = traces->GetCellList();
+	std::vector<FL::Celp> cells;
+	for (auto siter = sel_cells.begin();
 	siter != sel_cells.end(); ++siter)
 		cells.push_back(siter->second);
 
@@ -1169,7 +1169,7 @@ void TraceDlg::UncertainFilter(bool input)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
-	FL::CellList list_in, list_out;
+	FL::CelpList list_in, list_out;
 
 	//fill inlist
 	if (input)
@@ -1511,7 +1511,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
-	FL::CellList list_in;
+	FL::CelpList list_in;
 	//fill inlist
 	long item = -1;
 	while (true)
@@ -1583,7 +1583,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 		tm_processor.GetCellUncertainty(list_in, m_cur_time);
 		//header
 		(*m_stat_text) << "ID\t" << "In\t" << "Out\n";
-		for (FL::CellListIter iter = list_in.begin();
+		for (auto iter = list_in.begin();
 			iter != list_in.end(); ++iter)
 		{
 			wxString sid = wxString::Format("%u", iter->second->Id());
@@ -1604,7 +1604,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
-	FL::CellList list_in;
+	FL::CelpList list_in;
 	//fill inlist
 	long item = -1;
 	while (true)
@@ -1927,7 +1927,7 @@ void TraceDlg::CellFull()
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
-void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList &list)
+void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CelpList &list)
 {
 	wxString str;
 	unsigned long id;
@@ -1945,12 +1945,12 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CellList 
 	str = trace_list_ctrl->GetText(item, 5);
 	str.ToDouble(&z);
 
-	FL::pCell cell(new FL::Cell(id));
+	FL::Celp cell(new FL::Cell(id));
 	cell->SetSizeUi(size);
-	cell->SetSizeF(float(size));
+	cell->SetSizeD(size);
 	FLIVR::Point p(x, y, z);
 	cell->SetCenter(p);
-	list.insert(pair<unsigned int, FL::pCell>
+	list.insert(pair<unsigned int, FL::Celp>
 		(id, cell));
 }
 
@@ -2068,9 +2068,9 @@ void TraceDlg::CellNewID(bool append)
 
 	//update label volume, set mask region to the new ID
 	int i, j, k;
-	FL::pCell cell;
+	FL::Celp cell;
 	if (new_id)
-		cell = FL::pCell(new FL::Cell(new_id));
+		cell = FL::Celp(new FL::Cell(new_id));
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
 	for (k = 0; k < nz; ++k)
@@ -2198,9 +2198,9 @@ void TraceDlg::CellLink(bool exclusive)
 	//get selections
 	long item;
 	//current T
-	FL::CellList list_cur;
+	FL::CelpList list_cur;
 	//previous T
-	FL::CellList list_prv;
+	FL::CelpList list_prv;
 	//current list
 	item = -1;
 	while (true)
@@ -2284,8 +2284,8 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
-	FL::CellList in = vr_frame->GetComponentDlg()->GetInCells();
-	FL::CellList out = vr_frame->GetComponentDlg()->GetOutCells();
+	FL::CelpList in = vr_frame->GetComponentDlg()->GetInCells();
+	FL::CelpList out = vr_frame->GetComponentDlg()->GetOutCells();
 	tm_processor.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();
@@ -2308,7 +2308,7 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 	//get selections
 	long item;
 	//current T
-	FL::CellList list_cur;
+	FL::CelpList list_cur;
 
 	//current list
 	item = -1;
@@ -2357,9 +2357,9 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 	//get selections
 	long item;
 	//current T
-	FL::CellList list_cur;
+	FL::CelpList list_cur;
 	//previous T
-	FL::CellList list_prv;
+	FL::CelpList list_prv;
 	//current list
 	item = -1;
 	while (true)
@@ -2478,8 +2478,8 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
 
 	//current T
-	FL::CellList list_cur;
-	FL::CellListIter cell_iter;
+	FL::CelpList list_cur;
+	FL::CelpListIter cell_iter;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2584,7 +2584,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 		return;
 
 	//current T
-	FL::CellList list_cur;
+	FL::CelpList list_cur;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2614,8 +2614,8 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 		return;
 
 	//find the largest cell in the list
-	FL::pCell cell;
-	FL::CellListIter cell_iter;
+	FL::Celp cell;
+	FL::CelpListIter cell_iter;
 	for (cell_iter = list_cur.begin();
 	cell_iter != list_cur.end(); ++cell_iter)
 	{
@@ -2690,7 +2690,7 @@ void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 		return;
 
 	//current T
-	FL::CellList list_cur;
+	FL::CelpList list_cur;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2747,7 +2747,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	//current T
-	FL::CellList list_cur;
+	FL::CelpList list_cur;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2810,7 +2810,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	RefineMap(m_cur_time);
 }
 
-void TraceDlg::LinkAddedCells(FL::CellList &list)
+void TraceDlg::LinkAddedCells(FL::CelpList &list)
 {
 	if (!m_view)
 		return;
