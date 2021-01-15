@@ -35,8 +35,8 @@ DEALINGS IN THE SOFTWARE.
 
 namespace FL
 {
-	typedef boost::unordered_map<unsigned int, pVertex> VertexList;
-	typedef boost::unordered_map<unsigned int, pVertex>::iterator VertexListIter;
+	typedef boost::unordered_map<unsigned int, Verp> VertexList;
+	typedef boost::unordered_map<unsigned int, Verp>::iterator VertexListIter;
 
 	struct PathVert
 	{
@@ -235,7 +235,7 @@ namespace FL
 	inline std::ostream& operator<<(std::ostream& os, Path& p)
 	{
 		InterGraph graph = p.get_graph();
-		pVertex vertex;
+		Verp vertex;
 		for (auto iter = p.begin();
 			iter != p.end(); ++iter)
 		{

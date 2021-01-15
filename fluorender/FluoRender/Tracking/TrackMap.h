@@ -107,7 +107,7 @@ namespace FL
 
 		//get
 		Celp GetCell(size_t frame, unsigned int id);
-		pVertex GetVertex(Celp &celp);
+		Verp GetVertex(Celp &celp);
 		unsigned int GetUniCellID(size_t frame, unsigned int id);
 		unsigned int GetNewCellID(size_t frame, unsigned int id, bool inc=false);
 		unsigned int GetTrackedID(size_t frame1, size_t frame2, unsigned int id);
@@ -196,19 +196,19 @@ namespace FL
 			Celp &celp1, Celp &celp2,
 			float dist_v, float dist_s);
 		bool LinkVertices(InterGraph& graph,
-			pVertex &vertex1, pVertex &vertex2,
+			Verp &vertex1, Verp &vertex2,
 			size_t f1, size_t f2,
 			float overlap_value);
 		bool IsolateVertex(InterGraph& graph,
-			pVertex &vertex);
+			Verp &vertex);
 		bool ForceVertices(InterGraph& graph,
-			pVertex &vertex1, pVertex &vertex2,
+			Verp &vertex1, Verp &vertex2,
 			size_t f1, size_t f2);
 		bool UnlinkVertices(InterGraph& graph,
-			pVertex &vertex1, pVertex &vertex2);
+			Verp &vertex1, Verp &vertex2);
 		bool MergeCells(VertexList& vertex_list, CellBin &bin, size_t frame);
-		bool RelinkInterGraph(pVertex &vertex, pVertex &vertex0, size_t frame, InterGraph &graph, bool reset);
-		bool RemoveVertex(InterGraph& graph, pVertex &vertex);
+		bool RelinkInterGraph(Verp &vertex, Verp &vertex0, size_t frame, InterGraph &graph, bool reset);
+		bool RemoveVertex(InterGraph& graph, Verp &vertex);
 		
 		//determine if cells on intragraph can be merged
 		typedef bool(TrackMapProcessor::*f_merge_cell)(IntraEdge&, Celp&, Celp&, IntraGraph&);
@@ -224,70 +224,70 @@ namespace FL
 		size_t GetBinsCellCount(std::vector<CellBin> &bins);
 
 		//replaces all previous match/unmatch funcs
-		bool ProcessVertex(pVertex &vertex, InterGraph &graph,
+		bool ProcessVertex(Verp &vertex, InterGraph &graph,
 			unsigned int seg_count_min);
 		//vertex matching routines
 		//find out current valence of a vertex
-		bool GetValence(pVertex &vertex, InterGraph &graph,
+		bool GetValence(Verp &vertex, InterGraph &graph,
 			size_t &valence);
 		//edges include linked and unlinked
-		bool GetValence(pVertex &vertex, InterGraph &graph,
+		bool GetValence(Verp &vertex, InterGraph &graph,
 			size_t &valence, std::vector<InterEdge> &edges);
 		//edges include linked only
-		bool GetValence(pVertex &vertex, InterGraph &graph,
+		bool GetValence(Verp &vertex, InterGraph &graph,
 			size_t &valence, std::vector<InterEdge> &all_edges,
 			std::vector<InterEdge> &linked_edges);
 		//get uncertain edges for segmentation
-		bool GetUncertainEdges(pVertex &vertex, InterGraph &graph,
+		bool GetUncertainEdges(Verp &vertex, InterGraph &graph,
 			unsigned int min_count,
 			std::vector<InterEdge> &uncertain_edges);
 		//detailed match functions
 		//link edge of the max overlap
-		bool LinkEdgeSize(InterGraph &graph, pVertex &vertex,
+		bool LinkEdgeSize(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges, bool calc_sim);
 		//search for neighboring orphans for linking
-		bool LinkOrphans(InterGraph& graph, pVertex &vertex);
+		bool LinkOrphans(InterGraph& graph, Verp &vertex);
 		//unlink edge by size similarity
-		bool UnlinkEdgeSize(InterGraph &graph, pVertex &vertex,
+		bool UnlinkEdgeSize(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges, bool calc_sim);
 		//unlink edge by count
-		bool UnlinkEdgeCount(InterGraph &graph, pVertex &vertex,
+		bool UnlinkEdgeCount(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges);
 		//unlink last edge
-		bool UnlinkEdgeLast(InterGraph &graph, pVertex &vertex,
+		bool UnlinkEdgeLast(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges);
 		//unlink edge by extended alternating path
-		bool UnlinkAlterPath(InterGraph &graph, pVertex &vertex,
+		bool UnlinkAlterPath(InterGraph &graph, Verp &vertex,
 			bool calc_sim);
 		//fix multi-link by segmentation
-		bool UnlinkSegment(InterGraph &graph, pVertex &vertex,
+		bool UnlinkSegment(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &linked_edges, bool calc_sim,
 			bool segment, unsigned int seg_count_min);
-		bool GetAlterPath(InterGraph &graph, pVertex &vertex,
+		bool GetAlterPath(InterGraph &graph, Verp &vertex,
 			PathList &paths);
-		bool UnlinkAlterPathMaxMatch(InterGraph &graph, pVertex &vertex,
+		bool UnlinkAlterPathMaxMatch(InterGraph &graph, Verp &vertex,
 			PathList &paths, bool calc_sim);
-		bool UnlinkAlterPathSize(InterGraph &graph, pVertex &vertex,
+		bool UnlinkAlterPathSize(InterGraph &graph, Verp &vertex,
 			PathList &paths);
-		bool UnlinkAlterPathConn(InterGraph &graph, pVertex &vertex,
+		bool UnlinkAlterPathConn(InterGraph &graph, Verp &vertex,
 			PathList &paths);
-		bool UnlinkAlterPathCount(InterGraph &graph, pVertex &vertex,
+		bool UnlinkAlterPathCount(InterGraph &graph, Verp &vertex,
 			PathList &paths);
 		//check if any out vertex can be combined
-		bool MergeEdges(InterGraph &graph, pVertex &vertex,
+		bool MergeEdges(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges);
 		//unlink edge by vertex size, use after merge fails
-		bool UnlinkVertexSize(InterGraph &graph, pVertex &vertex,
+		bool UnlinkVertexSize(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges);
 		//check if the vertex can split
-		bool SplitVertex(InterGraph &graph, pVertex &vertex,
+		bool SplitVertex(InterGraph &graph, Verp &vertex,
 			std::vector<InterEdge> &edges);
 		bool ClusterCellsMerge(CelpList &list, size_t frame);
 		bool ClusterCellsSplit(CelpList &list, size_t frame,
 			size_t clnum, CelpList &listout);
 
 		//helper functions
-		bool get_alter_path(InterGraph &graph, pVertex &vertex,
+		bool get_alter_path(InterGraph &graph, Verp &vertex,
 			Path &alt_path, VertVisitList &visited, int curl);
 		float get_path_max(InterGraph &graph, PathList &paths,
 			size_t curl, InterVert v0);
@@ -303,7 +303,7 @@ namespace FL
 		static bool comp_path_count(Path &path1, Path &path2);
 		static bool comp_path_count_rev(Path &path1, Path &path2);
 		bool similar_path_count(Path &path1, Path &path2);
-		bool similar_vertex_size(pVertex& v1, pVertex& v2);
+		bool similar_vertex_size(Verp& v1, Verp& v2);
 
 		void link_edge(InterEdge edge, InterGraph &graph, unsigned int value = 1);
 		void unlink_edge(InterEdge edge, InterGraph &graph, unsigned int value = 0);
@@ -323,7 +323,7 @@ namespace FL
 		void WriteDouble(std::ofstream& ofs, const double value);
 		void WritePoint(std::ofstream& ofs, const FLIVR::Point &point);
 		void WriteCell(std::ofstream& ofs, const Celp &celp);
-		void WriteVertex(std::ofstream& ofs, const pVertex &vertex);
+		void WriteVertex(std::ofstream& ofs, const Verp &vertex);
 		//import
 		bool ReadBool(std::ifstream& ifs);
 		unsigned char ReadTag(std::ifstream& ifs);
@@ -338,7 +338,7 @@ namespace FL
 			unsigned int size_ui, float size_f,
 			float dist_v, float dist_s);
 		bool AddInterEdge(InterGraph& graph,
-			pVertex &vertex1, pVertex &vertex2,
+			Verp &vertex1, Verp &vertex2,
 			size_t f1, size_t f2,
 			unsigned int size_ui, float size_f,
 			float dist, unsigned int link,
@@ -660,12 +660,12 @@ namespace FL
 			return it->second;
 	}
 
-	inline pVertex TrackMapProcessor::GetVertex(Celp &celp)
+	inline Verp TrackMapProcessor::GetVertex(Celp &celp)
 	{
 		if (!celp)
 			return nullptr;
 
-		pwVertex pvert = celp->GetVertex();
+		Verw pvert = celp->GetVertex();
 		return pvert.lock();
 	}
 
@@ -675,7 +675,7 @@ namespace FL
 		Celp celp = GetCell(frame, id);
 		if (!celp)
 			return rid;
-		pVertex vert = GetVertex(celp);
+		Verp vert = GetVertex(celp);
 		if (!vert ||
 			vert->FindCell(celp) < 0)
 			return rid;

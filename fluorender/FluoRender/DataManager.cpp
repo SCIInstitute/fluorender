@@ -3763,7 +3763,7 @@ unsigned int TraceGroup::GetMappedEdges(
 	FL::InterGraph &inter_graph = m_track_map->GetInterGraph(
 		frame1 > frame2 ? frame2 : frame1);
 	FL::CelpListIter sel_iter, cell_iter;
-	FL::pVertex vertex1, vertex2;
+	FL::Verp vertex1, vertex2;
 	FL::Celp cell;
 	FL::InterVert v1, v2;
 	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
@@ -3848,7 +3848,7 @@ bool TraceGroup::GetMappedRulers(
 	FL::InterGraph &inter_graph = m_track_map->GetInterGraph(
 		frame1 > frame2 ? frame2 : frame1);
 	FL::CelpListIter sel_iter, cell_iter;
-	FL::pVertex vertex1, vertex2;
+	FL::Verp vertex1, vertex2;
 	FL::Celp cell;
 	FL::InterVert v1, v2;
 	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;

@@ -41,8 +41,8 @@ DEALINGS IN THE SOFTWARE.
 namespace FL
 {
 	class Vertex;
-	typedef boost::shared_ptr<Vertex> pVertex;
-	typedef boost::weak_ptr<Vertex> pwVertex;
+	typedef boost::shared_ptr<Vertex> Verp;
+	typedef boost::weak_ptr<Vertex> Verw;
 	class Cell;
 	typedef boost::shared_ptr<Cell> Celp;
 	typedef boost::weak_ptr<Cell> Celw;
@@ -126,8 +126,8 @@ namespace FL
 		void Inc(Celp &celp);
 		void Inc();
 		void IncExt(double value);
-		void AddVertex(pVertex &vertex);
-		pwVertex GetVertex();
+		void AddVertex(Verp &vertex);
+		Verw GetVertex();
 		unsigned int GetVertexId();
 
 		//get
@@ -200,7 +200,7 @@ namespace FL
 		unsigned int m_count1;
 		//vertex (parent group of cells)
 		IntraVert m_intra_vert;
-		pwVertex m_vertex;//parent
+		Verw m_vertex;//parent
 	};
 
 	inline unsigned int Cell::Id()
@@ -270,12 +270,12 @@ namespace FL
 		m_ext_d += value;
 	}
 
-	inline void Cell::AddVertex(pVertex &vertex)
+	inline void Cell::AddVertex(Verp &vertex)
 	{
 		m_vertex = vertex;
 	}
 
-	inline pwVertex Cell::GetVertex()
+	inline Verw Cell::GetVertex()
 	{
 		return m_vertex;
 	}

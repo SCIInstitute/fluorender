@@ -61,7 +61,7 @@ namespace FL
 		unsigned int frame;
 		//count for changes
 		unsigned int count;
-		pwVertex vertex;
+		Verw vertex;
 		//for matching
 		bool max_valid;
 		float max_value;
@@ -140,7 +140,7 @@ namespace FL
 
 	inline unsigned int Cell::GetVertexId()
 	{
-		pVertex vertex = m_vertex.lock();
+		Verp vertex = m_vertex.lock();
 		if (vertex)
 			return vertex->Id();
 		else
