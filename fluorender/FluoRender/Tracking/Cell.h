@@ -31,12 +31,12 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Point.h>
 #include <FLIVR/BBox.h>
 #include <FLIVR/Color.h>
+#include <Distance/Pca.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
-#include <Distance/Pca.h>
 
 namespace FL
 {
@@ -47,29 +47,40 @@ namespace FL
 	typedef boost::shared_ptr<Cell> Celp;
 	typedef boost::weak_ptr<Cell> Celw;
 
-	struct IntraEdgeData
+	struct CelEdgeNode
 	{
 		//contact size
 		unsigned int size_ui;//voxel count
-		float size_f;//voxel count weighted by intensity
+		double size_d;//voxel count weighted by intensity
 		//distance
-		float dist_v;//distance calculated from voxel grid
-		float dist_s;//distance calculated from xyz spatial coordinates
+		double dist_v;//distance calculated from voxel grid
+		double dist_s;//distance calculated from xyz spatial coordinates
 	};
 
-	struct IntraCellData
+	struct CelNode
 	{
 		unsigned int id;
+		unsigned int brick_id;
+		bool visited;
 		Celw cell;
 	};
 
-	typedef boost::adjacency_list<boost::listS,
+	//typedef boost::adjacency_list<boost::listS,
+	//	boost::listS, boost::undirectedS,
+	//	CelNode, CelEdgeNode> CellGraph;
+	class CellGraph : public boost::adjacency_list<boost::listS,
 		boost::listS, boost::undirectedS,
-		IntraCellData, IntraEdgeData> IntraGraph;
-	typedef IntraGraph::vertex_descriptor IntraVert;
-	typedef IntraGraph::edge_descriptor IntraEdge;
-	typedef boost::graph_traits<IntraGraph>::adjacency_iterator IntraAdjIter;
-	typedef boost::graph_traits<IntraGraph>::edge_iterator IntraEdgeIter;
+		CelNode, CelEdgeNode>
+	{
+	public:
+		bool Visited(Celp &celp);
+		void ClearVisited();
+	};
+	typedef CellGraph::vertex_descriptor CelVrtx;
+	typedef CellGraph::edge_descriptor CelEdge;
+	typedef boost::graph_traits<CellGraph>::vertex_iterator CelVrtIter;
+	typedef boost::graph_traits<CellGraph>::adjacency_iterator CelAdjIter;
+	typedef boost::graph_traits<CellGraph>::edge_iterator CelEdgeIter;
 
 	class Cell
 	{
@@ -82,7 +93,7 @@ namespace FL
 			m_min(0), m_max(0),
 			m_distp(0),
 			m_count0(0), m_count1(0),
-			m_intra_vert(IntraGraph::null_vertex())
+			m_intra_vert(CellGraph::null_vertex())
 		{}
 		Cell(unsigned int id, unsigned int brick_id) :
 			m_id(id), m_brick_id(brick_id),
@@ -92,7 +103,7 @@ namespace FL
 			m_min(0), m_max(0),
 			m_distp(0),
 			m_count0(0), m_count1(0),
-			m_intra_vert(IntraGraph::null_vertex())
+			m_intra_vert(CellGraph::null_vertex())
 		{}
 		Cell(unsigned int id, unsigned int brick_id,
 			unsigned int size_ui, double size_d,
@@ -107,7 +118,7 @@ namespace FL
 			m_distp(0),
 			m_count0(count0), m_count1(count1),
 			m_center(center), m_box(box),
-			m_intra_vert(IntraGraph::null_vertex())
+			m_intra_vert(CellGraph::null_vertex())
 		{}
 		~Cell() {}
 
@@ -119,8 +130,9 @@ namespace FL
 		unsigned int Id();
 		unsigned int BrickId();
 		unsigned long long GetEId();
-		IntraVert GetIntraVert();
-		void SetIntraVert(IntraVert intra_vert);
+		static unsigned long long GetKey(unsigned int id, unsigned int bid);
+		CelVrtx GetIntraVert();
+		void SetIntraVert(CelVrtx intra_vert);
 		void Set(Celp &celp);
 		void Inc(size_t i, size_t j, size_t k, double value);
 		void Inc(Celp &celp);
@@ -199,8 +211,10 @@ namespace FL
 		unsigned int m_count0;
 		unsigned int m_count1;
 		//vertex (parent group of cells)
-		IntraVert m_intra_vert;
+		CelVrtx m_intra_vert;
 		Verw m_vertex;//parent
+
+		friend class CellGraph;
 	};
 
 	inline unsigned int Cell::Id()
@@ -219,12 +233,12 @@ namespace FL
 		return (temp << 32) | m_id;
 	}
 
-	inline IntraVert Cell::GetIntraVert()
+	inline CelVrtx Cell::GetIntraVert()
 	{
 		return m_intra_vert;
 	}
 
-	inline void Cell::SetIntraVert(IntraVert intra_vert)
+	inline void Cell::SetIntraVert(CelVrtx intra_vert)
 	{
 		m_intra_vert = intra_vert;
 	}
@@ -431,6 +445,21 @@ namespace FL
 		m_count1 = val;
 	}
 
+	inline bool CellGraph::Visited(Celp &celp)
+	{
+		if (celp->m_intra_vert != CellGraph::null_vertex())
+			return (*this)[celp->m_intra_vert].visited;
+		else
+			return false;
+	}
+
+	inline void CellGraph::ClearVisited()
+	{
+		std::pair<CelVrtIter, CelVrtIter> verts =
+			boost::vertices(*this);
+		for (auto iter = verts.first; iter != verts.second; ++iter)
+			(*this)[*iter].visited = false;
+	}
 }//namespace FL
 
 #endif//FL_Cell_h

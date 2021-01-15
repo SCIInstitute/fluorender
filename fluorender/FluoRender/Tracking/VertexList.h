@@ -40,14 +40,14 @@ namespace FL
 
 	struct PathVert
 	{
-		InterVert vert;
+		Vrtx vert;
 		bool edge_valid;
 		float edge_value;
 		float max_value;
 		unsigned int link;
 	};
 
-	typedef std::set<InterVert> VertVisitList;
+	typedef std::set<Vrtx> VertVisitList;
 	typedef std::deque<PathVert>::iterator PathIter;
 	class Path
 	{
@@ -152,7 +152,7 @@ namespace FL
 				break;
 			if (counter % 2 == odd)
 			{
-				std::pair<InterEdge, bool> edge =
+				std::pair<Edge, bool> edge =
 					boost::edge(iter->vert, i1->vert, m_graph);
 				if (edge.second)
 					result += m_graph[edge.first].count;
@@ -179,7 +179,7 @@ namespace FL
 			PathIter i1 = iter + 1;
 			if (i1 == m_path.end())
 				break;
-			std::pair<InterEdge, bool> edge =
+			std::pair<Edge, bool> edge =
 				boost::edge(iter->vert, i1->vert, m_graph);
 			if (edge.second)
 			{
@@ -212,7 +212,7 @@ namespace FL
 		if (i1 == m_path.end())
 			return false;
 
-		std::pair<InterEdge, bool> edge =
+		std::pair<Edge, bool> edge =
 			boost::edge(iter->vert, i1->vert, m_graph);
 		if (edge.second)
 		{
@@ -245,20 +245,20 @@ namespace FL
 			{
 				os << "(Vertex: ";
 				os << vertex->Id() << ", ";
-				os << vertex->GetSizeF() << ", ";
+				os << vertex->GetSizeD() << ", ";
 				os << graph[iter->vert].count << ") ";
 			}
 			//output edge
 			PathIter i1 = iter + 1;
 			if (i1 != p.end())
 			{
-				std::pair<InterEdge, bool> edge =
+				std::pair<Edge, bool> edge =
 					boost::edge(iter->vert, i1->vert, graph);
 				if (edge.second)
 				{
 					os << "(Edge: ";
-					os << graph[edge.first].size_f << ", ";
-					os << graph[edge.first].dist_f << ", ";
+					os << graph[edge.first].size_d << ", ";
+					os << graph[edge.first].dist << ", ";
 					os << graph[edge.first].link << ", ";
 					os << graph[edge.first].count << ") ";
 				}

@@ -3765,12 +3765,12 @@ unsigned int TraceGroup::GetMappedEdges(
 	FL::CelpListIter sel_iter, cell_iter;
 	FL::Verp vertex1, vertex2;
 	FL::Celp cell;
-	FL::InterVert v1, v2;
-	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
-	FL::InterAdjIter inter_iter;
+	FL::Vrtx v1, v2;
+	std::pair<FL::AdjIter, FL::AdjIter> adj_verts;
+	FL::AdjIter inter_iter;
 	FL::CellBinIter pwcell_iter;
 	FLIVR::Color c;
-	std::pair<FL::InterEdge, bool> inter_edge;
+	std::pair<FL::Edge, bool> inter_edge;
 
 	for (sel_iter = sel_list1.begin();
 		sel_iter != sel_list1.end();
@@ -3850,12 +3850,12 @@ bool TraceGroup::GetMappedRulers(
 	FL::CelpListIter sel_iter, cell_iter;
 	FL::Verp vertex1, vertex2;
 	FL::Celp cell;
-	FL::InterVert v1, v2;
-	std::pair<FL::InterAdjIter, FL::InterAdjIter> adj_verts;
-	FL::InterAdjIter inter_iter;
+	FL::Vrtx v1, v2;
+	std::pair<FL::AdjIter, FL::AdjIter> adj_verts;
+	FL::AdjIter inter_iter;
 	FL::CellBinIter pwcell_iter;
 	FLIVR::Color c;
-	std::pair<FL::InterEdge, bool> inter_edge;
+	std::pair<FL::Edge, bool> inter_edge;
 	FL::RulerListIter ruler_iter;
 
 	for (sel_iter = sel_list1.begin();

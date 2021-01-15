@@ -30,6 +30,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Cell.h"
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/adjacency_iterator.hpp>
 
 namespace FL
 {
@@ -45,17 +50,17 @@ namespace FL
 	typedef std::map<unsigned int, UncertainBin> UncertainHist;
 	typedef std::map<unsigned int, UncertainBin>::iterator UncertainHistIter;
 
-	struct InterEdgeData
+	struct EdgeNode
 	{
 		unsigned int size_ui;
-		float size_f;
-		float dist_f;
+		double size_d;
+		double dist;
 		unsigned int link;//0: not linked; 1: linked; 2: force linked; 3: force unlinked
 		//count for changes
 		unsigned int count;
 	};
 
-	struct InterVertexData
+	struct VertNode
 	{
 		unsigned int id;
 		unsigned int frame;
@@ -70,17 +75,17 @@ namespace FL
 	class InterGraph :
 		public boost::adjacency_list<boost::listS,
 		boost::listS, boost::undirectedS,
-		InterVertexData, InterEdgeData>
+		VertNode, EdgeNode>
 	{
 	public:
 		size_t index;
 		size_t counter;
 		UncertainBin major_bin[2];
 	};
-	typedef InterGraph::vertex_descriptor InterVert;
-	typedef InterGraph::edge_descriptor InterEdge;
-	typedef boost::graph_traits<InterGraph>::adjacency_iterator InterAdjIter;
-	typedef boost::graph_traits<InterGraph>::edge_iterator InterEdgeIter;
+	typedef InterGraph::vertex_descriptor Vrtx;
+	typedef InterGraph::edge_descriptor Edge;
+	typedef boost::graph_traits<InterGraph>::adjacency_iterator AdjIter;
+	typedef boost::graph_traits<InterGraph>::edge_iterator EdgeIter;
 
 	typedef std::vector<Celw> CellBin;
 	typedef CellBin::iterator CellBinIter;
@@ -93,27 +98,27 @@ namespace FL
 	public:
 		Vertex(unsigned int id) :
 			m_id(id), m_size_ui(0),
-			m_size_f(0.0f), m_split(false)
+			m_size_d(0), m_split(false)
 		{}
 		~Vertex() {};
 
 		unsigned int Id();
 		void Id(unsigned int);
-		InterVert GetInterVert(InterGraph& graph);
-		void SetInterVert(InterGraph& graph, InterVert inter_vert);
+		Vrtx GetInterVert(InterGraph& graph);
+		void SetInterVert(InterGraph& graph, Vrtx inter_vert);
 		bool GetRemovedFromGraph();
 		size_t GetFrame(InterGraph& graph);
 		void SetSplit(bool split = true);
 		bool GetSplit();
 
 		void SetCenter(FLIVR::Point &center);
-		void SetSizeUi(unsigned int size_ui);
-		void SetSizeF(float size_f);
+		void SetSizeUi(unsigned int size);
+		void SetSizeD(double size);
 		void Update();
 
 		FLIVR::Point &GetCenter();
 		unsigned int GetSizeUi();
-		float GetSizeF();
+		double GetSizeD();
 		//bbox computed from cells
 		FLIVR::BBox GetBox();
 
@@ -130,9 +135,9 @@ namespace FL
 		unsigned int m_id;
 		FLIVR::Point m_center;
 		unsigned int m_size_ui;
-		float m_size_f;
-		typedef boost::unordered_map<unsigned int, InterVert> InterVertList;
-		typedef boost::unordered_map<unsigned int, InterVert>::iterator InterVertListIter;
+		double m_size_d;
+		typedef boost::unordered_map<unsigned int, Vrtx> InterVertList;
+		typedef boost::unordered_map<unsigned int, Vrtx>::iterator InterVertListIter;
 		InterVertList m_inter_verts;
 		CellBin m_cells;//children
 		bool m_split;//true if em has been run already
@@ -157,7 +162,7 @@ namespace FL
 		m_id = id;
 	}
 
-	inline InterVert Vertex::GetInterVert(InterGraph& graph)
+	inline Vrtx Vertex::GetInterVert(InterGraph& graph)
 	{
 		unsigned int key = graph.index;
 		InterVertListIter iter = m_inter_verts.find(key);
@@ -168,7 +173,7 @@ namespace FL
 	}
 
 	inline void Vertex::SetInterVert(InterGraph& graph,
-		InterVert inter_vert)
+		Vrtx inter_vert)
 	{
 		unsigned int key = graph.index;
 		InterVertListIter iter = m_inter_verts.find(key);
@@ -176,7 +181,7 @@ namespace FL
 			iter->second = inter_vert;
 		else
 			m_inter_verts.insert(
-				std::pair<unsigned int, InterVert>(key, inter_vert));
+				std::pair<unsigned int, Vrtx>(key, inter_vert));
 	}
 
 	inline bool Vertex::GetRemovedFromGraph()
@@ -213,21 +218,21 @@ namespace FL
 		m_center = center;
 	}
 
-	inline void Vertex::SetSizeUi(unsigned int size_ui)
+	inline void Vertex::SetSizeUi(unsigned int size)
 	{
-		m_size_ui = size_ui;
+		m_size_ui = size;
 	}
 
-	inline void Vertex::SetSizeF(float size_f)
+	inline void Vertex::SetSizeD(double size)
 	{
-		m_size_f = size_f;
+		m_size_d = size;
 	}
 
 	inline void Vertex::Update()
 	{
 		m_center = FLIVR::Point();
 		m_size_ui = 0;
-		m_size_f = 0.0f;
+		m_size_d = 0;
 
 		if (m_cells.size() == 0)
 			return;
@@ -240,7 +245,7 @@ namespace FL
 				continue;
 			m_center += celp->GetCenter();
 			m_size_ui += celp->GetSizeUi();
-			m_size_f += celp->GetSizeD();
+			m_size_d += celp->GetSizeD();
 		}
 		m_center /= m_cells.size();
 	}
@@ -277,7 +282,7 @@ namespace FL
 		if (inc)
 		{
 			m_size_ui += celp->GetSizeUi();
-			m_size_f += celp->GetSizeD();
+			m_size_d += celp->GetSizeD();
 		}
 		m_cells.push_back(Celw(celp));
 
@@ -319,9 +324,9 @@ namespace FL
 		return m_size_ui;
 	}
 
-	inline float Vertex::GetSizeF()
+	inline double Vertex::GetSizeD()
 	{
-		return m_size_f;
+		return m_size_d;
 	}
 
 	inline FLIVR::BBox Vertex::GetBox()

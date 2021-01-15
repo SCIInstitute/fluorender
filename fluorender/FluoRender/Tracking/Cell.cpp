@@ -25,25 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_CellList_h
-#define FL_CellList_h
-
 #include "Cell.h"
-#include <boost/unordered_map.hpp>
 
-namespace FL
+using namespace FL;
+
+unsigned long long Cell::GetKey(unsigned int id, unsigned int bid)
 {
-	//typedef boost::unordered_map<unsigned long long, Celp> CelpList;
-	class CelpList : public std::unordered_map<unsigned long long, Celp>
-	{
-	public:
-		unsigned int min;
-		unsigned int max;
-		double sx;
-		double sy;
-		double sz;
-	};
-	typedef CelpList::iterator CelpListIter;
-}//namespace FL
-
-#endif//FL_CellList_h
+	unsigned long long temp = bid;
+	return (temp << 32) | id;
+}
