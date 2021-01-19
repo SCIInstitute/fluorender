@@ -47,6 +47,17 @@ namespace FL
 	typedef boost::shared_ptr<Cell> Celp;
 	typedef boost::weak_ptr<Cell> Celw;
 
+	class CelpList : public std::unordered_map<unsigned long long, Celp>
+	{
+	public:
+		unsigned int min;
+		unsigned int max;
+		double sx;
+		double sy;
+		double sz;
+	};
+	typedef CelpList::iterator CelpListIter;
+
 	struct CelEdgeNode
 	{
 		//contact size
@@ -75,6 +86,9 @@ namespace FL
 	public:
 		bool Visited(Celp &celp);
 		void ClearVisited();
+		void LinkComps(Celp &celp1, Celp &cell2);
+		bool GetLinkedComps(Celp& celp, CelpList& list, unsigned int size_limit = 0);
+		bool GetLinkedComps(CelpList& list_in, CelpList& list, unsigned int size_limit = 0);
 	};
 	typedef CellGraph::vertex_descriptor CelVrtx;
 	typedef CellGraph::edge_descriptor CelEdge;
@@ -93,7 +107,7 @@ namespace FL
 			m_min(0), m_max(0),
 			m_distp(0),
 			m_count0(0), m_count1(0),
-			m_intra_vert(CellGraph::null_vertex())
+			m_celvrtx(CellGraph::null_vertex())
 		{}
 		Cell(unsigned int id, unsigned int brick_id) :
 			m_id(id), m_brick_id(brick_id),
@@ -103,7 +117,7 @@ namespace FL
 			m_min(0), m_max(0),
 			m_distp(0),
 			m_count0(0), m_count1(0),
-			m_intra_vert(CellGraph::null_vertex())
+			m_celvrtx(CellGraph::null_vertex())
 		{}
 		Cell(unsigned int id, unsigned int brick_id,
 			unsigned int size_ui, double size_d,
@@ -118,7 +132,7 @@ namespace FL
 			m_distp(0),
 			m_count0(count0), m_count1(count1),
 			m_center(center), m_box(box),
-			m_intra_vert(CellGraph::null_vertex())
+			m_celvrtx(CellGraph::null_vertex())
 		{}
 		~Cell() {}
 
@@ -131,8 +145,8 @@ namespace FL
 		unsigned int BrickId();
 		unsigned long long GetEId();
 		static unsigned long long GetKey(unsigned int id, unsigned int bid);
-		CelVrtx GetIntraVert();
-		void SetIntraVert(CelVrtx intra_vert);
+		CelVrtx GetCelVrtx();
+		void SetCelVrtx(CelVrtx intra_vert);
 		void Set(Celp &celp);
 		void Inc(size_t i, size_t j, size_t k, double value);
 		void Inc(Celp &celp);
@@ -159,6 +173,7 @@ namespace FL
 		double GetDistp();
 		//coords
 		FLIVR::Point &GetCenter();
+		FLIVR::Point GetCenter(double sx, double sy, double sz);
 		FLIVR::BBox &GetBox();
 		FLIVR::Point &GetProjp();
 		//colocalization
@@ -211,7 +226,7 @@ namespace FL
 		unsigned int m_count0;
 		unsigned int m_count1;
 		//vertex (parent group of cells)
-		CelVrtx m_intra_vert;
+		CelVrtx m_celvrtx;
 		Verw m_vertex;//parent
 
 		friend class CellGraph;
@@ -233,14 +248,14 @@ namespace FL
 		return (temp << 32) | m_id;
 	}
 
-	inline CelVrtx Cell::GetIntraVert()
+	inline CelVrtx Cell::GetCelVrtx()
 	{
-		return m_intra_vert;
+		return m_celvrtx;
 	}
 
-	inline void Cell::SetIntraVert(CelVrtx intra_vert)
+	inline void Cell::SetCelVrtx(CelVrtx intra_vert)
 	{
-		m_intra_vert = intra_vert;
+		m_celvrtx = intra_vert;
 	}
 
 	inline void Cell::Set(Celp &celp)
@@ -360,6 +375,11 @@ namespace FL
 		return m_center;
 	}
 
+	inline FLIVR::Point Cell::GetCenter(double sx, double sy, double sz)
+	{
+		return FLIVR::Point(m_center.x()*sx, m_center.y()*sy, m_center.z()*sz);
+	}
+
 	inline FLIVR::BBox &Cell::GetBox()
 	{
 		return m_box;
@@ -447,8 +467,8 @@ namespace FL
 
 	inline bool CellGraph::Visited(Celp &celp)
 	{
-		if (celp->m_intra_vert != CellGraph::null_vertex())
-			return (*this)[celp->m_intra_vert].visited;
+		if (celp->m_celvrtx != CellGraph::null_vertex())
+			return (*this)[celp->m_celvrtx].visited;
 		else
 			return false;
 	}
@@ -459,6 +479,102 @@ namespace FL
 			boost::vertices(*this);
 		for (auto iter = verts.first; iter != verts.second; ++iter)
 			(*this)[*iter].visited = false;
+	}
+
+	inline void CellGraph::LinkComps(Celp &celp1, Celp &celp2)
+	{
+		CelVrtx v1 = celp1->m_celvrtx;
+		CelVrtx v2 = celp2->m_celvrtx;
+		if (v1 == CellGraph::null_vertex())
+		{
+			v1 = boost::add_vertex(*this);
+			celp1->m_celvrtx = v1;
+			(*this)[v1].id = celp1->m_id;
+			(*this)[v1].brick_id = celp1->m_brick_id;
+			(*this)[v1].cell = celp1;
+		}
+		if (v2 == CellGraph::null_vertex())
+		{
+			v2 = boost::add_vertex(*this);
+			celp2->m_celvrtx = v2;
+			(*this)[v2].id = celp2->m_id;
+			(*this)[v2].brick_id = celp2->m_brick_id;
+			(*this)[v2].cell = celp2;
+		}
+
+		std::pair<CelEdge, bool> edge = boost::edge(v1, v2, *this);
+		if (!edge.second)
+		{
+			edge = boost::add_edge(v1, v2, *this);
+			(*this)[edge.first].size_ui = 1;
+		}
+		else
+		{
+			(*this)[edge.first].size_ui++;
+		}
+	}
+
+	inline bool CellGraph::GetLinkedComps(Celp& celp, CelpList& list, unsigned int size_limit)
+	{
+		if (!celp)
+			return false;
+
+		auto v1 = celp->m_celvrtx;
+
+		if (v1 == CellGraph::null_vertex())
+			return false;
+
+		if ((*this)[v1].visited)
+			return false;
+		else
+		{
+			list.insert(std::pair<unsigned long long, Celp>
+				(celp->GetEId(), celp));
+			(*this)[v1].visited = true;
+		}
+
+		std::pair<CelAdjIter, CelAdjIter> adj_verts =
+			boost::adjacent_vertices(v1, *this);
+		for (auto iter = adj_verts.first; iter != adj_verts.second; ++iter)
+		{
+			auto v2 = *iter;
+			//check connecting size
+			std::pair<CelEdge, bool> edge = boost::edge(v1, v2, *this);
+			if (edge.second)
+			{
+				if ((*this)[edge.first].size_ui < size_limit)
+					continue;
+			}
+			//
+			unsigned int id = (*this)[v2].id;
+			unsigned int brick_id = (*this)[v2].brick_id;
+			auto l1 = list.find(Cell::GetKey(id, brick_id));
+			if (l1 == list.end())
+			{
+				Celp info = (*this)[v2].cell.lock();
+				GetLinkedComps(info, list, size_limit);
+			}
+		}
+
+		return true;
+	}
+
+	inline bool CellGraph::GetLinkedComps(CelpList& list_in, CelpList& list, unsigned int size_limit)
+	{
+		ClearVisited();
+
+		for (auto comp_iter = list_in.begin();
+			comp_iter != list_in.end(); ++comp_iter)
+		{
+			auto comp = comp_iter->second;
+			if (!GetLinkedComps(comp, list, size_limit))
+			{
+				list.insert(std::pair<unsigned long long, Celp>
+					(comp_iter->first, comp));
+			}
+		}
+
+		return !list.empty();
 	}
 }//namespace FL
 

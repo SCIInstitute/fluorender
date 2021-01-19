@@ -1735,25 +1735,25 @@ void MeasureDlg::Project(int idx)
 	FL::Ruler* ruler = ruler_list->at(idx);
 	FL::ComponentAnalyzer* analyzer =
 		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
-	FL::CompList* list = 0;
+	FL::CelpList* list = 0;
 	if (!analyzer)
 		return;
-	list = analyzer->GetCompList();
+	list = analyzer->GetCelpList();
 	if (list->empty())
 		return;
 
-	m_calculator.SetCompList(list);
+	m_calculator.SetCelpList(list);
 	m_calculator.SetRuler(ruler);
 	m_calculator.Project();
 
-	std::vector<FL::CompInfo> comps;
+	std::vector<FL::Celp> comps;
 	for (auto it = list->begin();
 		it != list->end(); ++it)
-		comps.push_back(*(it->second));
+		comps.push_back(it->second);
 	std::sort(comps.begin(), comps.end(),
-		[](const FL::CompInfo &a, const FL::CompInfo &b) -> bool
-		{ if (a.proj.z() != b.proj.z()) return a.proj.z() < b.proj.z();
-		else return a.proj.x() < b.proj.x(); });
+		[](const FL::Celp &a, const FL::Celp &b) -> bool
+		{ if (a->proj.z() != b->proj.z()) return a->proj.z() < b->proj.z();
+		else return a->proj.x() < b->proj.x(); });
 
 	//export
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -1772,7 +1772,7 @@ void MeasureDlg::Project(int idx)
 		for (auto it = comps.begin();
 			it != comps.end(); ++it)
 		{
-			ofs << it->id << "\t";
+			ofs << it->Id() << "\t";
 			ofs << it->proj.x() << "\t";
 			ofs << it->proj.y() << "\t";
 			ofs << it->proj.z() << "\n";
@@ -1809,8 +1809,8 @@ void MeasureDlg::Relax(int idx)
 		analyzer = frame->GetComponentDlg()->GetAnalyzer();
 	if (!analyzer)
 		return;
-	FL::CompList* list = 0;
-	list = analyzer->GetCompList();
+	FL::CelpList* list = 0;
+	list = analyzer->GetCelpList();
 	if (list && list->empty())
 		list = 0;
 	double infr = 2.0;
@@ -1825,7 +1825,7 @@ void MeasureDlg::Relax(int idx)
 
 	m_calculator.SetF1(m_relax_value_spin->GetValue());
 	m_calculator.SetInfr(infr);
-	m_calculator.SetCompList(list);
+	m_calculator.SetCelpList(list);
 	m_calculator.SetRuler(ruler);
 	m_calculator.SetVolume(m_view->m_glview->m_cur_vol);
 	m_calculator.CenterRuler(type, m_edited, iter);

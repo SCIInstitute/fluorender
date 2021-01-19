@@ -2702,13 +2702,13 @@ int ComponentDlg::GetDistMatSize()
 			FL::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
-			matsize += compgroup->comps.size();
+			matsize += compgroup->celps.size();
 		}
 		return matsize;
 	}
 	else
 	{
-		FL::CompList* list = m_comp_analyzer.GetCompList();
+		FL::CelpList* list = m_comp_analyzer.GetCelpList();
 		if (!list)
 			return 0;
 		return list->size();
@@ -2750,17 +2750,17 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 			FL::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
-			FL::CompList* list = &(compgroup->comps);
+			FL::CelpList* list = &(compgroup->celps);
 			sx = list->sx;
 			sy = list->sy;
 			sz = list->sz;
 			for (auto it = list->begin();
 				it != list->end(); ++it)
 			{
-				pos.push_back(it->second->GetPos(sx, sy, sz));
+				pos.push_back(it->second->GetCenter(sx, sy, sz));
 				str = std::to_string(i+1);
 				str += ":";
-				str += std::to_string(it->second->id);
+				str += std::to_string(it->second->Id());
 				nl.push_back(str);
 				gn.push_back(i);
 			}
@@ -2768,15 +2768,15 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	}
 	else
 	{
-		FL::CompList* list = m_comp_analyzer.GetCompList();
+		FL::CelpList* list = m_comp_analyzer.GetCelpList();
 		sx = list->sx;
 		sy = list->sy;
 		sz = list->sz;
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 		{
-			pos.push_back(it->second->GetPos(sx, sy, sz));
-			str = std::to_string(it->second->id);
+			pos.push_back(it->second->GetCenter(sx, sy, sz));
+			str = std::to_string(it->second->Id());
 			nl.push_back(str);
 		}
 	}
@@ -2930,7 +2930,7 @@ void ComponentDlg::AlignCenter(FL::Ruler* ruler)
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
-	FL::CompList* list = m_comp_analyzer.GetCompList();
+	FL::CelpList* list = m_comp_analyzer.GetCelpList();
 	if (!list || list->size() < 3)
 		return;
 
@@ -2944,7 +2944,7 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
-		pt = it->second->GetPos(sx, sy, sz);
+		pt = it->second->GetCenter(sx, sy, sz);
 		ruler.AddPoint(pt);
 	}
 	ruler.SetFinished();
@@ -3762,7 +3762,7 @@ void ComponentDlg::PasteData()
 
 bool ComponentDlg::GetCellList(FL::CelpList &cl, bool links)
 {
-	FL::CompList* list = m_comp_analyzer.GetCompList();
+	FL::CelpList* list = m_comp_analyzer.GetCelpList();
 	if (!list || list->empty())
 		return false;
 
@@ -3794,7 +3794,7 @@ bool ComponentDlg::GetCellList(FL::CelpList &cl, bool links)
 	if (sel_all)
 	{
 		for (auto it = list->begin(); it != list->end(); ++it)
-			CompToCellList(cl, it, it->second->id, it->second->brick_id, sx, sy, sz, links);
+			FindCelps(cl, it, links);
 	}
 	else
 	{
@@ -3810,7 +3810,7 @@ bool ComponentDlg::GetCellList(FL::CelpList &cl, bool links)
 			}
 			auto it = list->find(key);
 			if (it != list->end())
-				CompToCellList(cl, it, ids[i], bid, sx, sy, sz, links);
+				FindCelps(cl, it, links);
 		}
 	}
 
@@ -3857,52 +3857,24 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 	}
 }
 
-void ComponentDlg::CompToCellList(FL::CelpList &cl,
-	FL::CompList::iterator &it,
-	unsigned int id, unsigned int bid,
-	double sx, double sy, double sz, bool links)
+void ComponentDlg::FindCelps(FL::CelpList &list,
+	FL::CelpListIter &it, bool links)
 {
-	Point p1, p2;
-	BBox bb;
-	FL::Celp cell(new FL::Cell(id));
-	cell->SetBrickId(bid);
-	cell->SetSizeUi(it->second->sumi);
-	cell->SetSizeD(it->second->sumd);
-	p1 = it->second->pos;
-	p1.scale(sx, sy, sz);
-	cell->SetCenter(p1);
-	bb = it->second->box;
-	p1 = bb.min();
-	p2 = bb.max();
-	p1.scale(sx, sy, sz);
-	p2.scale(sx, sy, sz);
-	bb = BBox(p1, p2);
-	cell->SetBox(bb);
-	unsigned long long key = bid;
-	key = (key << 32) | id;
-	cl.insert(pair<unsigned long long, FL::Celp>
-		(key, cell));
+	list.insert(pair<unsigned long long, FL::Celp>
+		(it->second->GetEId(), it->second));
 
 	if (links)
 	{
-		FL::CompGraph* graph = m_comp_analyzer.GetCompGraph();
+		FL::CellGraph* graph = m_comp_analyzer.GetCellGraph();
 		graph->ClearVisited();
-		FL::CompList list;
-		if (graph->GetLinkedComps(it->second, list, SIZE_LIMIT))
+		FL::CelpList links;
+		if (graph->GetLinkedComps(it->second, links, SIZE_LIMIT))
 		{
-			for (auto it2 = list.begin();
-				it2 != list.end(); ++it2)
+			for (auto it2 = links.begin();
+				it2 != links.end(); ++it2)
 			{
-				FL::Celp cell2(new FL::Cell(it2->second->id));
-				cell2->SetBrickId(it2->second->brick_id);
-				cell2->SetSizeUi(cell->GetSizeUi());
-				cell2->SetSizeD(cell->GetSizeD());
-				cell2->SetCenter(cell->GetCenter());
-				cell2->SetBox(cell->GetBox());
-				key = cell2->BrickId();
-				key = (key << 32) | cell2->Id();
-				cl.insert(pair<unsigned long long, FL::Celp>
-					(key, cell2));
+				list.insert(pair<unsigned long long, FL::Celp>
+					(it2->second->GetEId(), it2->second));
 			}
 		}
 	}
@@ -3982,11 +3954,11 @@ void ComponentDlg::IncludeComps()
 	if (GetCellList(cl, true))
 	{
 		//clear complist
-		FL::CompList *list = m_comp_analyzer.GetCompList();
+		FL::CelpList *list = m_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
-			if (cl.find(it->second->id) == cl.end())
+			if (cl.find(it->second->Id()) == cl.end())
 				it = list->erase(it);
 			else
 				++it;
@@ -4034,11 +4006,11 @@ void ComponentDlg::ExcludeComps()
 	if (GetCellList(cl))
 	{
 		//clear complist
-		FL::CompList *list = m_comp_analyzer.GetCompList();
+		FL::CelpList *list = m_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
-			if (cl.find(it->second->id) != cl.end())
+			if (cl.find(it->second->Id()) != cl.end())
 				it = list->erase(it);
 			else
 				++it;
@@ -4047,7 +4019,7 @@ void ComponentDlg::ExcludeComps()
 		std::vector<unsigned int> ids;
 		for (auto it = list->begin();
 			it != list->end(); ++it)
-			ids.push_back(it->second->id);
+			ids.push_back(it->second->Id());
 		comp_selector.Delete(ids);
 		ClearOutputGrid();
 		string titles, values;

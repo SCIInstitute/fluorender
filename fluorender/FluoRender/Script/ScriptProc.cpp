@@ -202,20 +202,20 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 		//before updating volume
 		FL::ComponentAnalyzer comp_analyzer(cur_vol);
 		comp_analyzer.Analyze(true, true);
-		FL::CompList* list = comp_analyzer.GetCompList();
+		FL::CelpList* list = comp_analyzer.GetCelpList();
 		m_sel_labels.clear();
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 		{
 			if (it->second->sumi > slimit)
 			{
-				FL::Celp celp(new FL::Cell(it->second->id));
+				FL::Celp celp(new FL::Cell(it->second->Id()));
 				celp->SetSizeUi(it->second->sumi);
 				celp->SetSizeD(it->second->sumd);
 				celp->SetCenter(it->second->pos);
 				celp->SetBox(it->second->box);
 				m_sel_labels.insert(pair<unsigned int, FL::Celp>
-					(it->second->id, celp));
+					(it->second->Id(), celp));
 			}
 		}
 	}

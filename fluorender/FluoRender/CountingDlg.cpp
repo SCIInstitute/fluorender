@@ -214,7 +214,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 	ca.Analyze(select, true, false);
 	m_view->RefreshGL();
 
-	FL::CompList *list = ca.GetCompList();
+	FL::CelpList *list = ca.GetCelpList();
 	if (!list || list->empty())
 		return;
 

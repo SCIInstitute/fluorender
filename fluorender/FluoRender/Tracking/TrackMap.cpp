@@ -349,21 +349,21 @@ bool TrackMapProcessor::CheckCellDist(
 bool TrackMapProcessor::AddContact(CellGraph& graph,
 	Celp &celp1, Celp &celp2, float contact_value)
 {
-	CelVrtx v1 = celp1->GetIntraVert();
-	CelVrtx v2 = celp2->GetIntraVert();
+	CelVrtx v1 = celp1->GetCelVrtx();
+	CelVrtx v2 = celp2->GetCelVrtx();
 	if (v1 == CellGraph::null_vertex())
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = celp1->Id();
 		graph[v1].cell = celp1;
-		celp1->SetIntraVert(v1);
+		celp1->SetCelVrtx(v1);
 	}
 	if (v2 == CellGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = celp2->Id();
 		graph[v2].cell = celp2;
-		celp2->SetIntraVert(v2);
+		celp2->SetCelVrtx(v2);
 	}
 
 	std::pair<CelEdge, bool> e = boost::edge(v1, v2, graph);
@@ -390,21 +390,21 @@ bool TrackMapProcessor::AddNeighbor(CellGraph& graph,
 	Celp &celp1, Celp &celp2,
 	float dist_v, float dist_s)
 {
-	CelVrtx v1 = celp1->GetIntraVert();
-	CelVrtx v2 = celp2->GetIntraVert();
+	CelVrtx v1 = celp1->GetCelVrtx();
+	CelVrtx v2 = celp2->GetCelVrtx();
 	if (v1 == CellGraph::null_vertex())
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = celp1->Id();
 		graph[v1].cell = celp1;
-		celp1->SetIntraVert(v1);
+		celp1->SetCelVrtx(v1);
 	}
 	if (v2 == CellGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = celp2->Id();
 		graph[v2].cell = celp2;
-		celp2->SetIntraVert(v2);
+		celp2->SetCelVrtx(v2);
 	}
 
 	std::pair<CelEdge, bool> e = boost::edge(v1, v2, graph);
@@ -2151,7 +2151,7 @@ bool TrackMapProcessor::GroupCells(std::vector<Celw> &cells,
 		if (!celp2)
 			continue;
 		added = false;
-		c2 = celp2->GetIntraVert();
+		c2 = celp2->GetCelVrtx();
 		if (c2 == CellGraph::null_vertex())
 		{
 			AddCellBin(cell_bins, *pwcell_iter);
@@ -2905,21 +2905,21 @@ bool TrackMapProcessor::AddIntraEdge(CellGraph& graph,
 	unsigned int size_ui, double size_d,
 	double dist_v, double dist_s)
 {
-	CelVrtx v1 = celp1->GetIntraVert();
-	CelVrtx v2 = celp2->GetIntraVert();
+	CelVrtx v1 = celp1->GetCelVrtx();
+	CelVrtx v2 = celp2->GetCelVrtx();
 	if (v1 == CellGraph::null_vertex())
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = celp1->Id();
 		graph[v1].cell = celp1;
-		celp1->SetIntraVert(v1);
+		celp1->SetCelVrtx(v1);
 	}
 	if (v2 == CellGraph::null_vertex())
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = celp2->Id();
 		graph[v2].cell = celp2;
-		celp2->SetIntraVert(v2);
+		celp2->SetCelVrtx(v2);
 	}
 
 	std::pair<CelEdge, bool> e = boost::edge(v1, v2, graph);
@@ -4021,7 +4021,7 @@ bool TrackMapProcessor::ReplaceCellID(
 	new_celp->SetSizeD(old_celp->GetSizeD());
 	new_celp->SetExtUi(old_celp->GetExtUi());
 	new_celp->SetExtD(old_celp->GetExtD());
-	new_celp->SetIntraVert(old_celp->GetIntraVert());
+	new_celp->SetCelVrtx(old_celp->GetCelVrtx());
 	cell_list.erase(iter);
 	cell_list.insert(std::pair<unsigned int, Celp>
 		(new_id, new_celp));
@@ -4037,7 +4037,7 @@ bool TrackMapProcessor::ReplaceCellID(
 
 	//intra graph
 	CellGraph &graph = m_map->m_intra_graph_list.at(frame);
-	CelVrtx intra_vert = new_celp->GetIntraVert();
+	CelVrtx intra_vert = new_celp->GetCelVrtx();
 	if (intra_vert != CellGraph::null_vertex())
 	{
 		graph[intra_vert].cell = new_celp;

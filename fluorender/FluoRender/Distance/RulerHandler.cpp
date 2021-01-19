@@ -956,7 +956,7 @@ int RulerHandler::Distance(int index, std::string filename)
 
 	Point p = ruler->GetCenter();
 
-	FL::CompList* list = m_ca->GetCompList();
+	FL::CelpList* list = m_ca->GetCelpList();
 	if (list->empty())
 		return 0;
 
@@ -966,7 +966,7 @@ int RulerHandler::Distance(int index, std::string filename)
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
-		double dist = (p - it->second->GetPos(sx, sy, sz)).length();
+		double dist = (p - it->second->GetCenter(sx, sy, sz)).length();
 		it->second->dist = dist;
 	}
 

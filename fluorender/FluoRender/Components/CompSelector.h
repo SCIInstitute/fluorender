@@ -29,8 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompSelector_h
 
 #include <vector>
-#include <CellList.h>
-#include <CompGraph.h>
+#include <Cell.h>
 
 class VolumeData;
 namespace FL
@@ -86,13 +85,8 @@ namespace FL
 		unsigned int m_max_num;
 
 	private:
-		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
-		{
-			unsigned long long temp = brick_id;
-			return (temp << 32) | id;
-		}
 		bool CompareSize(unsigned int size);
-		CompList* GetListFromAnalyzer(CompList &list_in, CompList &list_out);
+		CelpList* GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
 	};
 
 	inline bool ComponentSelector::CompareSize(

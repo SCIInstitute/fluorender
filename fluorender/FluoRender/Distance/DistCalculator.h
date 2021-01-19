@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_DistCalculator_h
 #define FL_DistCalculator_h
 
-#include <Components/CompGraph.h>
+#include <Tracking/Cell.h>
 #include <Distance/Ruler.h>
 #include <Distance/Relax.h>
 
@@ -54,17 +54,17 @@ namespace FL
 		{
 			return m_ruler;
 		}
-		void SetCompList(CompList* list)
+		void SetCelpList(CelpList* list)
 		{
-			if (list != m_comp_list)
+			if (list != m_celps)
 			{
-				m_comp_list = list;
+				m_celps = list;
 				m_init = false;
 			}
 		}
-		CompList* GetCompList()
+		CelpList* GetCelpList()
 		{
-			return m_comp_list;
+			return m_celps;
 		}
 		void SetVolume(VolumeData* vd)
 		{
@@ -88,7 +88,7 @@ namespace FL
 		int m_type;//0:no data; 1:volume; 2:mask; 3:comps
 		bool m_init;
 		//components
-		CompList *m_comp_list;
+		CelpList *m_celps;
 		//volume
 		VolumeData *m_vd;
 		//Ruler

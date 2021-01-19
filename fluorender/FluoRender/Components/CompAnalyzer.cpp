@@ -103,7 +103,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	size_t bn = bricks->size();
 
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//clear list and start calculating
 	comps.clear();
 	comps.min = std::numeric_limits<unsigned int>::max();
@@ -112,7 +112,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	comps.sy = sy;
 	comps.sz = sz;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 	graph.clear();
 	m_analyzed = false;
 
@@ -244,8 +244,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			(unsigned long long)ny * (unsigned long long)nz) :
 			((unsigned long long)nx * (unsigned long long)ny);
 		unsigned long long index;
-		CompListBrick comp_list_brick;
-		CompListBrickIter iter;
+		CelpList comp_list_brick;
+		CelpListIter iter;
 		for (index = 0; index < for_size; ++index)
 		{
 			value = 0.0;
@@ -291,10 +291,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			if (iter == comp_list_brick.end())
 			{
 				//not found
-				CompInfo* info = new CompInfo;
-				info->id = id;
-				info->alt_id = 0;//unused
-				info->brick_id = brick_id;
+				Cell* info = new Cell(id, brick_id);
 				info->sumi = 1;
 				info->sumd = value;
 				info->ext_sumi = ext;
@@ -317,8 +314,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 					info->cosumi = sumi;
 					info->cosumd = sumd;
 				}
-				comp_list_brick.insert(pair<unsigned int, pCompInfo>
-					(id, pCompInfo(info)));
+				comp_list_brick.insert(pair<unsigned int, Celp>
+					(id, Celp(info)));
 			}
 			else
 			{
@@ -369,8 +366,8 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			comps.max = iter->second->sumi >
 				comps.max ? iter->second->sumi :
 				comps.max;
-			comps.insert(std::pair<unsigned long long, pCompInfo>
-				(GetKey(iter->second->id, iter->second->brick_id), iter->second));
+			comps.insert(std::pair<unsigned long long, Celp>
+				(iter->second->GetEId(), iter->second));
 		}
 
 		if (bn > 1)
@@ -406,9 +403,9 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 
 	int bits;
 	size_t bn = bricks->size();
@@ -470,8 +467,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				if (b1 == b2) continue;
 				//if l1 and l2 are different and already in the comp list
 				//connect them
-				auto i1 = comps.find(GetKey(l1, b1));
-				auto i2 = comps.find(GetKey(l2, b2));
+				auto i1 = comps.find(Cell::GetKey(l1, b1));
+				auto i2 = comps.find(Cell::GetKey(l2, b2));
 				if (i1 != comps.end() && i2 != comps.end())
 					graph.LinkComps(i1->second, i2->second);
 			}
@@ -495,8 +492,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				if (b1 == b2) continue;
 				//if l1 and l2 are different and already in the comp list
 				//connect them
-				auto i1 = comps.find(GetKey(l1, b1));
-				auto i2 = comps.find(GetKey(l2, b2));
+				auto i1 = comps.find(Cell::GetKey(l1, b1));
+				auto i2 = comps.find(Cell::GetKey(l2, b2));
 				if (i1 != comps.end() && i2 != comps.end())
 					graph.LinkComps(i1->second, i2->second);
 			}
@@ -519,8 +516,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				if (b1 == b2) continue;
 				//if l1 and l2 are different and already in the comp list
 				//connect them
-				auto i1 = comps.find(GetKey(l1, b1));
-				auto i2 = comps.find(GetKey(l2, b2));
+				auto i1 = comps.find(Cell::GetKey(l1, b1));
+				auto i2 = comps.find(Cell::GetKey(l2, b2));
 				if (i1 != comps.end() && i2 != comps.end())
 					graph.LinkComps(i1->second, i2->second);
 			}
@@ -549,19 +546,19 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 	std::vector<double> cosumd;
 	FLIVR::BBox bb;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 
 	graph.ClearVisited();
-	std::pair<CompVertexIter, CompVertexIter> vertices =
+	std::pair<CelVrtIter, CelVrtIter> vertices =
 		boost::vertices(graph);
 	for (auto iter = vertices.first; iter != vertices.second; ++iter)
 	{
 		if (graph[*iter].visited)
 			continue;
-		CompList list;
-		pCompInfo info = graph[*iter].compinfo.lock();
+		CelpList list;
+		Celp info = graph[*iter].cell.lock();
 		if (graph.GetLinkedComps(info, list, SIZE_LIMIT))
 		{
 			sumi = 0;
@@ -656,9 +653,9 @@ void ComponentAnalyzer::MakeColorConsistent()
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 
 	graph.ClearVisited();
 	for (auto i = comps.begin();
@@ -666,7 +663,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 	{
 		if (graph.Visited(i->second))
 			continue;
-		CompList list;
+		CelpList list;
 		if (graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 		{
 			//make color consistent
@@ -686,8 +683,8 @@ void ComponentAnalyzer::MakeColorConsistent()
 					ReplaceId(base_id, iter->second);
 					//insert one with consistent key
 					if (link_id != iter->second->id)
-						comps.insert(std::pair<unsigned long long, pCompInfo>
-						(GetKey(iter->second->id, iter->second->brick_id), iter->second));
+						comps.insert(std::pair<unsigned long long, Celp>
+						(iter->second->GetEId(), iter->second));
 				}
 			}
 		}
@@ -697,7 +694,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 	for (auto i = comps.begin();
 		i != comps.end();)
 	{
-		if (i->first != GetKey(i->second->id, i->second->brick_id))
+		if (i->first != i->second->GetEId())
 			i = comps.erase(i);
 		else
 			++i;
@@ -710,7 +707,7 @@ size_t ComponentAnalyzer::GetListSize()
 {
 	if (!m_compgroup)
 		return 0;
-	return m_compgroup->comps.size();
+	return m_compgroup->celps.size();
 }
 
 size_t ComponentAnalyzer::GetCompSize()
@@ -718,9 +715,9 @@ size_t ComponentAnalyzer::GetCompSize()
 	if (!m_compgroup)
 		return 0;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 
 	size_t list_size = comps.size();
 	size_t graph_size = boost::num_vertices(graph);
@@ -728,14 +725,14 @@ size_t ComponentAnalyzer::GetCompSize()
 	if (graph_size)
 	{
 		graph.ClearVisited();
-		std::pair<CompVertexIter, CompVertexIter> vertices =
+		std::pair<CelVrtIter, CelVrtIter> vertices =
 			boost::vertices(graph);
 		for (auto iter = vertices.first; iter != vertices.second; ++iter)
 		{
 			if (graph[*iter].visited)
 				continue;
-			CompList list;
-			pCompInfo info = graph[*iter].compinfo.lock();
+			CelpList list;
+			Celp info = graph[*iter].cell.lock();
 			graph.GetLinkedComps(info, list, SIZE_LIMIT);
 			cc_size++;
 		}
@@ -774,9 +771,9 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	if (!vd)
 		return;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 
 	m_bn = vd->GetAllBrickNum();
 
@@ -819,22 +816,22 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 			if (graph.Visited(i->second))
 				continue;
 
-			CompList list;
+			CelpList list;
 			if (graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 			{
 				for (auto iter = list.begin();
 					iter != list.end(); ++iter)
 				{
-					ids.push_back(iter->second->id);
-					brick_ids.push_back(iter->second->brick_id);
+					ids.push_back(iter->second->Id());
+					brick_ids.push_back(iter->second->BrickId());
 				}
 				added = true;
 			}
 		}
 		if (!added)
 		{
-			ids.push_back(i->second->id);
-			brick_ids.push_back(i->second->brick_id);
+			ids.push_back(i->second->Id());
+			brick_ids.push_back(i->second->BrickId());
 		}
 
 		//pca
@@ -1040,9 +1037,9 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 	vd->GetResolution(nx, ny, nz);
 
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
@@ -1062,7 +1059,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 		{
 			if (graph.Visited(i->second))
 				continue;
-			CompList list;
+			CelpList list;
 			graph.GetLinkedComps(i->second, list, SIZE_LIMIT);
 		}
 
@@ -1096,7 +1093,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	if (!vd)
 		return false;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
@@ -1171,11 +1168,11 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 
 		if (bn > 1)
 		{
-			CompList list;
+			CelpList list;
 			if (!graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
 			{
-				list.insert(std::pair<unsigned long long, pCompInfo>
-					(GetKey(i->second->id, i->second->brick_id), i->second));
+				list.insert(std::pair<unsigned long long, Celp>
+					(i->second->GetEId(), i->second));
 			}
 			//for comps in list
 			for (auto iter = list.begin();
@@ -1294,7 +1291,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	if (!vd)
 		return false;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
@@ -1469,7 +1466,7 @@ bool ComponentAnalyzer::GetColor(
 	if (!id)
 		return false;
 	//comp list
-	CompList &comps = m_compgroup->comps;
+	CelpList &comps = m_compgroup->celps;
 
 	switch (color_type)
 	{
@@ -1488,14 +1485,14 @@ bool ComponentAnalyzer::GetColor(
 				int bn = vd->GetAllBrickNum();
 				for (unsigned int i=0; i<bn; ++i)
 				{
-					iter = comps.find(GetKey(id, i));
+					iter = comps.find(Cell::GetKey(id, i));
 					if (iter != comps.end())
 						break;
 				}
 			}
 			else
 			{
-				iter = comps.find(GetKey(id, brick_id));
+				iter = comps.find(Cell::GetKey(id, brick_id));
 			}
 			if (iter == comps.end())
 				return false;
@@ -1515,7 +1512,7 @@ bool ComponentAnalyzer::GetColor(
 }
 
 //replace id to make color consistent
-void ComponentAnalyzer::ReplaceId(unsigned int base_id, pCompInfo &info)
+void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 {
 	if (!m_compgroup)
 		return;

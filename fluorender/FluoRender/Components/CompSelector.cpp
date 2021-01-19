@@ -94,8 +94,8 @@ void ComponentSelector::CompFull()
 	unsigned long long index;
 	unsigned int label_value;
 	unsigned int brick_id;
-	CompList sel_labels;
-	CompListIter label_iter;
+	CelpList sel_labels;
+	CelpListIter label_iter;
 	m_vd->GetResolution(nx, ny, nz);
 
 	for (size_t bi = 0; bi < bn; ++bi)
@@ -115,16 +115,14 @@ void ComponentSelector::CompFull()
 				data_label[index])
 			{
 				label_value = data_label[index];
-				label_iter = sel_labels.find(GetKey(label_value, brick_id));
+				label_iter = sel_labels.find(Cell::GetKey(label_value, brick_id));
 				if (label_iter == sel_labels.end())
 				{
-					CompInfo* info = new CompInfo;
-					info->id = label_value;
-					info->brick_id = brick_id;
+					Cell* info = new Cell(label_value, brick_id);
 					if (!m_analyzer || !m_analyzer->GetAnalyzed())
-						info->sumi = 1;
-					sel_labels.insert(std::pair<unsigned long long, pCompInfo>
-						(GetKey(label_value, brick_id), pCompInfo(info)));
+						info->m_sumi = 1;
+					sel_labels.insert(std::pair<unsigned long long, Celp>
+						(info->GetEId(), Celp(info)));
 				}
 				else if (!m_analyzer || !m_analyzer->GetAnalyzed())
 					label_iter->second->sumi++;
@@ -132,8 +130,8 @@ void ComponentSelector::CompFull()
 		}
 	}
 
-	CompList list_out;
-	CompList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
+	CelpList list_out;
+	CelpList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
 
 	//reselect
 	unsigned int size;
@@ -153,7 +151,7 @@ void ComponentSelector::CompFull()
 			if (data_label[index])
 			{
 				label_value = data_label[index];
-				label_iter = comp_list->find(GetKey(label_value, brick_id));
+				label_iter = comp_list->find(Cell::GetKey(label_value, brick_id));
 				if (label_iter != comp_list->end())
 				{
 					if (m_use_min || m_use_max)
@@ -212,14 +210,14 @@ void ComponentSelector::Select(bool all, bool rmask)
 	unsigned long long index;
 	unsigned int label_value;
 	unsigned int brick_id;
-	CompListIter label_iter;
+	CelpListIter label_iter;
 	unsigned int size;
 	if (all)
 	{
-		CompList sel_labels;
-		CompList* comp_list = 0;
+		CelpList sel_labels;
+		CelpList* comp_list = 0;
 		if (m_analyzer && m_analyzer->GetAnalyzed())
-			comp_list = m_analyzer->GetCompList();
+			comp_list = m_analyzer->GetCelpList();
 		else
 		{
 			for (index = 0; index < for_size; ++index)
@@ -228,15 +226,13 @@ void ComponentSelector::Select(bool all, bool rmask)
 				{
 					label_value = data_label[index];
 					brick_id = tex->get_brick_id(index);
-					label_iter = sel_labels.find(GetKey(label_value, brick_id));
+					label_iter = sel_labels.find(Cell::GetKey(label_value, brick_id));
 					if (label_iter == sel_labels.end())
 					{
-						CompInfo* info = new CompInfo;
-						info->id = label_value;
-						info->brick_id = brick_id;
-						info->sumi = 1;
-						sel_labels.insert(std::pair<unsigned long long, pCompInfo>
-							(GetKey(label_value, brick_id), pCompInfo(info)));
+						Cell* info = new Cell(label_value, brick_id);
+						info->m_sumi = 1;
+						sel_labels.insert(std::pair<unsigned long long, Celp>
+							(info->GetEId(), Celp(info)));
 					}
 					else
 						label_iter->second->sumi++;
@@ -252,7 +248,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 			{
 				label_value = data_label[index];
 				brick_id = tex->get_brick_id(index);
-				label_iter = comp_list->find(GetKey(label_value, brick_id));
+				label_iter = comp_list->find(Cell::GetKey(label_value, brick_id));
 				if (label_iter != comp_list->end())
 				{
 					if (m_use_min || m_use_max)
@@ -280,15 +276,15 @@ void ComponentSelector::Select(bool all, bool rmask)
 		if (m_analyzer)
 		{
 			simple_select = false;
-			CompList* analyzer_list = m_analyzer->GetCompList();
-			auto iter = analyzer_list->find(GetKey(m_id, m_brick_id));
+			CelpList* analyzer_list = m_analyzer->GetCelpList();
+			auto iter = analyzer_list->find(Cell::GetKey(m_id, m_brick_id));
 			if (iter == analyzer_list->end())
 				simple_select = true;
 			else
 			{
-				m_analyzer->GetCompGraph()->ClearVisited();
-				CompList comp_list;
-				if (m_analyzer->GetCompGraph()->
+				m_analyzer->GetCellGraph()->ClearVisited();
+				CelpList comp_list;
+				if (m_analyzer->GetCellGraph()->
 					GetLinkedComps(iter->second, comp_list))
 				{
 					for (index = 0; index < for_size; ++index)
@@ -297,7 +293,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 						{
 							label_value = data_label[index];
 							brick_id = tex->get_brick_id(index);
-							label_iter = comp_list.find(GetKey(label_value, brick_id));
+							label_iter = comp_list.find(Cell::GetKey(label_value, brick_id));
 							if (label_iter != comp_list.end())
 							{
 								if (m_use_min || m_use_max)
@@ -581,12 +577,12 @@ void ComponentSelector::SelectList(CelpList& list)
 	m_vd->GetVR()->clear_tex_mask();
 }
 
-inline CompList* ComponentSelector::GetListFromAnalyzer(CompList &list_in, CompList &list_out)
+inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)
 {
 	if (m_analyzer && m_analyzer->GetAnalyzed())
 	{
 		//assign graph node identifier for sel_labels
-		CompList* analyzer_list = m_analyzer->GetCompList();
+		CelpList* analyzer_list = m_analyzer->GetCelpList();
 		for (auto iter = list_in.begin(); iter != list_in.end(); )
 		{
 			auto iter2 = analyzer_list->find(iter->first);
@@ -596,11 +592,11 @@ inline CompList* ComponentSelector::GetListFromAnalyzer(CompList &list_in, CompL
 				iter = list_in.erase(iter);
 				continue;
 			}
-			iter->second->v = iter2->second->v;
+			iter->second->SetCelVrtx(iter2->second->GetCelVrtx());
 			iter->second->sumi = iter2->second->sumi;
 			++iter;
 		}
-		if (m_analyzer->GetCompGraph()->
+		if (m_analyzer->GetCellGraph()->
 			GetLinkedComps(list_in, list_out))
 			return &list_out;
 		else

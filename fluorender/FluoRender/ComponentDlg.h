@@ -453,14 +453,12 @@ private:
 	void AlignCenter(FL::Ruler* ruler);
 	void ClearOutputGrid();
 	int GetDistMatSize();
-	void CompToCellList(FL::CelpList &cl,
-		FL::CompList::iterator &it,
-		unsigned int id, unsigned int bid,
-		double sx, double sy, double sz, bool links=false);
 	void AddSelArrayInt(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
+	void FindCelps(FL::CelpList &list,
+		FL::CelpListIter &it, bool links = false);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

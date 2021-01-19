@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_TrackMap_h
 #define FL_TrackMap_h
 
-#include "CellList.h"
+#include "Cell.h"
 #include "VertexList.h"
 #include "VolCache.h"
 #include <fstream>

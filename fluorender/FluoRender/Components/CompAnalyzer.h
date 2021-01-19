@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <boost/signals2.hpp>
-#include "CompGraph.h"
+#include <Tracking/Cell.h>
 #include "DataManager.h"
 
 class VolumeData;
@@ -45,8 +45,8 @@ namespace FL
 	{
 		VolumeData* vd;//associated volume
 		bool dirty;
-		CompList comps;
-		CompGraph graph;//links comps in multibrick volume
+		CelpList celps;
+		CellGraph graph;//links comps in multibrick volume
 
 		CompGroup() :
 			vd(0), dirty(true)
@@ -88,13 +88,13 @@ namespace FL
 		{
 			m_vd_list.clear();
 		}
-		CompList* GetCompList()
+		CelpList* GetCelpList()
 		{
 			if (m_compgroup)
-				return &(m_compgroup->comps);
+				return &(m_compgroup->celps);
 			return 0;
 		}
-		CompGraph* GetCompGraph()
+		CellGraph* GetCellGraph()
 		{
 			if (m_compgroup)
 				return &(m_compgroup->graph);
@@ -146,11 +146,6 @@ namespace FL
 		CompGroup* m_compgroup;//current group
 
 	private:
-		unsigned long long GetKey(unsigned int id, unsigned int brick_id)
-		{
-			unsigned long long temp = brick_id;
-			return (temp << 32) | id;
-		}
 		unsigned int GetExt(unsigned int* data_label,
 			unsigned long long index,
 			unsigned int id,
@@ -168,7 +163,7 @@ namespace FL
 			std::vector<double> &sumd);
 
 		//replace id to make color consistent
-		void ReplaceId(unsigned int base_id, pCompInfo &info);
+		void ReplaceId(unsigned int base_id, Celp &info);
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
 			int nx, int ny, int nz,

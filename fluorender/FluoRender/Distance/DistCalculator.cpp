@@ -36,7 +36,7 @@ DistCalculator::DistCalculator() :
 	m_type(0),
 	m_init(false),
 	m_vd(0),
-	m_comp_list(0),
+	m_celps(0),
 	m_ruler(0)
 {
 	m_f1 = 1;
@@ -82,7 +82,7 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 
 void DistCalculator::Project()
 {
-	if (!m_comp_list)
+	if (!m_celps)
 		return;
 	if (!m_init)
 		BuildSpring();
@@ -91,13 +91,13 @@ void DistCalculator::Project()
 	if (m_spring.empty())
 		return;
 
-	double sx = m_comp_list->sx;
-	double sy = m_comp_list->sy;
-	double sz = m_comp_list->sz;
+	double sx = m_celps->sx;
+	double sy = m_celps->sy;
+	double sz = m_celps->sz;
 
 	Point p0, pp;
-	for (auto it = m_comp_list->begin();
-		it != m_comp_list->end(); ++it)
+	for (auto it = m_celps->begin();
+		it != m_celps->end(); ++it)
 	{
 		p0 = it->second->GetPos(sx, sy, sz);
 		SpringProject(p0, pp);
@@ -153,20 +153,20 @@ void DistCalculator::BuildSpring()
 
 void DistCalculator::BuildCloud()
 {
-	if (!m_comp_list)
+	if (!m_celps)
 		return;
-	if (m_comp_list->empty())
+	if (m_celps->empty())
 		return;
 	if (!m_cloud.empty())
 		m_cloud.clear();
 
-	double sx = m_comp_list->sx;
-	double sy = m_comp_list->sy;
-	double sz = m_comp_list->sz;
+	double sx = m_celps->sx;
+	double sy = m_celps->sy;
+	double sz = m_celps->sz;
 
 	Point p;
-	for (auto it = m_comp_list->begin();
-		it != m_comp_list->end(); ++it)
+	for (auto it = m_celps->begin();
+		it != m_celps->end(); ++it)
 	{
 		p = it->second->GetPos(sx, sy, sz);
 		m_cloud.push_back(p);

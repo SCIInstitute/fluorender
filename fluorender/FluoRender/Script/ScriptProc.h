@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _SCRIPTPROC_H_
 
 #include <Tracking/VolCache.h>
-#include <Tracking/CellList.h>
+#include <Tracking/Cell.h>
 #include <wx/string.h>
 #include <wx/fileconf.h>
 
