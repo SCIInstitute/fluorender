@@ -234,6 +234,8 @@ namespace FLIVR
 
 		//! Scale the bounding box by s, centered around o
 		void scale(double s, const Vector &o);
+		//scale around origin
+		void scale(double sx, double sy, double sz);
 
 		inline Point min() const
 		{ return cmin_; }

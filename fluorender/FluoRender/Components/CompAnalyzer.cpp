@@ -291,58 +291,32 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			if (iter == comp_list_brick.end())
 			{
 				//not found
-				Cell* info = new Cell(id, brick_id);
-				info->sumi = 1;
-				info->sumd = value;
-				info->ext_sumi = ext;
-				info->ext_sumd = value * ext;
-				info->mean = 0.0;
-				info->var = 0.0;
-				info->m2 = 0.0;
-				delta = value - info->mean;
-				info->mean += delta / info->sumi;
-				info->m2 += delta * (value - info->mean);
-				info->min = value;
-				info->max = value;
-				info->dist = 0.0;
-				FLIVR::Point point(i + b->ox(), j + b->oy(), k + b->oz());
-				info->pos = point;
-				info->box.extend(point);
-				info->pca.AddPointScale(point, sx, sy, sz);
+				Cell* info = 0;
 				if (colocal)
-				{
-					info->cosumi = sumi;
-					info->cosumd = sumd;
-				}
+					info = new Cell(id, brick_id,
+						1, value, ext,
+						i + b->ox(), j + b->oy(), k + b->oz(),
+						sx, sy, sz,
+						sumi, sumd);
+				else
+					info = new Cell(id, brick_id,
+						1, value, ext,
+						i+b->ox(), j+b->oy(), k+b->oz(),
+						sx, sy, sz);
 				comp_list_brick.insert(pair<unsigned int, Celp>
 					(id, Celp(info)));
 			}
 			else
 			{
-				FLIVR::Point point(i + b->ox(), j + b->oy(), k + b->oz());
-				iter->second->box.extend(point);
-				iter->second->pos = FLIVR::Point((iter->second->pos * iter->second->sumi +
-					point) / (iter->second->sumi + 1));
-				iter->second->pca.AddPointScale(point, sx, sy, sz);
-				//
-				iter->second->sumi++;
-				iter->second->sumd += value;
-				iter->second->ext_sumi += ext;
-				iter->second->ext_sumd += value * ext;
-				//
-				delta = value - iter->second->mean;
-				iter->second->mean += delta / iter->second->sumi;
-				iter->second->m2 += delta * (value - iter->second->mean);
-				iter->second->min = value < iter->second->min ? value : iter->second->min;
-				iter->second->max = value > iter->second->max ? value : iter->second->max;
-				//
 				if (colocal)
-				{
-					for (size_t i = 0; i < iter->second->cosumi.size(); ++i)
-						iter->second->cosumi[i] += sumi[i];
-					for (size_t i = 0; i < iter->second->cosumd.size(); ++i)
-						iter->second->cosumd[i] += sumd[i];
-				}
+					iter->second->Inc(1, value, ext,
+						i + b->ox(), j + b->oy(), k + b->oz(),
+						sx, sy, sz,
+						sumi, sumd);
+				else
+					iter->second->Inc(1, value, ext,
+						i + b->ox(), j + b->oy(), k + b->oz(),
+						sx, sy, sz);
 			}
 		}
 
@@ -354,17 +328,18 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 				size_limit = SIZE_LIMIT;
 			else
 				size_limit = 2;
-			if (iter->second->sumi < size_limit)
+			if (iter->second->GetSize() < size_limit)
 				continue;
-			iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
-			iter->second->mean *= scale;
-			iter->second->min *= scale;
-			iter->second->max *= scale;
-			comps.min = iter->second->sumi <
-				comps.min ? iter->second->sumi :
+			//iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
+			//iter->second->mean *= scale;
+			//iter->second->min *= scale;
+			//iter->second->max *= scale;
+			//iter->second->Calc();
+			comps.min = iter->second->GetSizeD() <
+				comps.min ? iter->second->GetSizeD() :
 				comps.min;
-			comps.max = iter->second->sumi >
-				comps.max ? iter->second->sumi :
+			comps.max = iter->second->GetSizeD() >
+				comps.max ? iter->second->GetSizeD() :
 				comps.max;
 			comps.insert(std::pair<unsigned long long, Celp>
 				(iter->second->GetEId(), iter->second));
@@ -533,18 +508,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 
 void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 {
-	unsigned int sumi;
-	double sumd;
-	unsigned int ext_sumi;
-	double ext_sumd;
-	double mean;
-	double var;
-	double min;
-	double max;
-	FLIVR::Point pos;
-	std::vector<unsigned int> cosumi;
-	std::vector<double> cosumd;
-	FLIVR::BBox bb;
+	Cell temp(0, 0);//temporary cell for accumulation
 	//comp list
 	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
@@ -561,82 +525,17 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 		Celp info = graph[*iter].cell.lock();
 		if (graph.GetLinkedComps(info, list, SIZE_LIMIT))
 		{
-			sumi = 0;
-			sumd = 0.0;
-			ext_sumi = 0;
-			ext_sumd = 0.0;
-			mean = 0.0;
-			var = 0.0;
-			min = std::numeric_limits<double>::max();
-			max = 0.0;
-			bb.reset();
-			if (colocal)
-			{
-				cosumi.resize(m_vd_list.size(), 0);
-				cosumd.resize(m_vd_list.size(), 0.0);
-			}
-
 			for (auto li = list.begin();
 				li != list.end(); ++li)
-			{
-				//mean
-				double temp = (mean * sumi + li->second->mean * li->second->sumi) /
-					(sumi + li->second->sumi);
-				//var
-				var = ((var + mean * mean) * sumi +
-					(li->second->var + li->second->mean * li->second->mean) * li->second->sumi) /
-					(sumi + li->second->sumi) - temp * temp;
-				//pos
-				pos = FLIVR::Point((pos * sumi + li->second->pos * li->second->sumi) /
-					(sumi + li->second->sumi));
-				//box
-				if (li == list.begin())
-					bb = li->second->box;
-				else
-					bb.extend(li->second->box);
-				mean = temp;
-				//others
-				sumi += li->second->sumi;
-				sumd += li->second->sumd;
-				ext_sumi += li->second->ext_sumi;
-				ext_sumd += li->second->ext_sumd;
-				min = li->second->min < min ? li->second->min : min;
-				max = li->second->max > max ? li->second->max : max;
-				//colocalization
-				if (colocal)
-				{
-					for (size_t i = 0; i<m_vd_list.size(); ++i)
-					{
-						cosumi[i] += li->second->cosumi[i];
-						cosumd[i] += li->second->cosumd[i];
-					}
-				}
-			}
+				temp.Inc(li->second);
 
 			//update in comp list
-			if (sumi > comps.max)
-				comps.max = sumi;
+			comps.max = std::max(temp.GetSizeUi(), comps.max);
 
 			//update each
 			for (auto li = list.begin();
 				li != list.end(); ++li)
-			{
-				li->second->sumi = sumi;
-				li->second->sumd = sumd;
-				li->second->ext_sumi = ext_sumi;
-				li->second->ext_sumd = ext_sumd;
-				li->second->mean = mean;
-				li->second->var = var;
-				li->second->min = min;
-				li->second->max = max;
-				li->second->pos = pos;
-				li->second->box = bb;
-				if (colocal)
-				{
-					li->second->cosumi = cosumi;
-					li->second->cosumd = cosumd;
-				}
-			}
+				li->second->Copy(temp);
 		}
 	}
 }

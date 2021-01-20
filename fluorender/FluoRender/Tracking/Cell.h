@@ -52,6 +52,7 @@ namespace FL
 	public:
 		unsigned int min;
 		unsigned int max;
+		//spatial scale
 		double sx;
 		double sy;
 		double sz;
@@ -103,7 +104,7 @@ namespace FL
 			m_id(id), m_brick_id(0),
 			m_use_d(true), m_size_ui(0), m_size_d(0),
 			m_ext_ui(0), m_ext_d(0),
-			m_mean(0), m_int2(0), m_std(0),
+			m_calc(false), m_mean(0), m_int2(0), m_std(0),
 			m_min(0), m_max(0),
 			m_distp(0),
 			m_count0(0), m_count1(0),
@@ -113,27 +114,49 @@ namespace FL
 			m_id(id), m_brick_id(brick_id),
 			m_use_d(true), m_size_ui(0), m_size_d(0),
 			m_ext_ui(0), m_ext_d(0),
-			m_mean(0), m_int2(0), m_std(0),
+			m_calc(false), m_mean(0), m_int2(0), m_std(0),
 			m_min(0), m_max(0),
 			m_distp(0),
 			m_count0(0), m_count1(0),
 			m_celvrtx(CellGraph::null_vertex())
 		{}
 		Cell(unsigned int id, unsigned int brick_id,
-			unsigned int size_ui, double size_d,
-			unsigned int ext_ui, double ext_d,
-			unsigned int count0, unsigned int count1,
-			FLIVR::Point &center, FLIVR::BBox &box):
+			unsigned int size_ui, double size_d, unsigned int ext_ui,
+			double x, double y, double z,
+			double sx, double sy, double sz) :
 			m_id(id), m_brick_id(brick_id),
 			m_use_d(true), m_size_ui(size_ui), m_size_d(size_d),
-			m_ext_ui(ext_ui), m_ext_d(ext_d),
-			m_mean(0), m_int2(0), m_std(0),
-			m_min(0), m_max(0),
+			m_ext_ui(ext_ui), m_ext_d(size_d * ext_ui),
+			m_calc(false), m_mean(0), m_int2(size_d * size_d), m_std(0),
+			m_min(size_d), m_max(size_d),
 			m_distp(0),
-			m_count0(count0), m_count1(count1),
-			m_center(center), m_box(box),
+			m_count0(0), m_count1(0),
 			m_celvrtx(CellGraph::null_vertex())
-		{}
+		{
+			m_center = FLIVR::Point(x, y, z);
+			m_box.extend(m_center);
+			m_pca.AddPointScale(m_center, sx, sy, sz);
+		}
+		Cell(unsigned int id, unsigned int brick_id,
+			unsigned int size_ui, double size_d, unsigned int ext_ui,
+			double x, double y, double z,
+			double sx, double sy, double sz,
+			std::vector<unsigned int> &sumi, std::vector<double> &sumd) :
+			m_id(id), m_brick_id(brick_id),
+			m_use_d(true), m_size_ui(size_ui), m_size_d(size_d),
+			m_ext_ui(ext_ui), m_ext_d(size_d * ext_ui),
+			m_calc(false), m_mean(0), m_int2(size_d * size_d), m_std(0),
+			m_min(size_d), m_max(size_d),
+			m_distp(0),
+			m_count0(0), m_count1(0),
+			m_celvrtx(CellGraph::null_vertex())
+		{
+			m_center = FLIVR::Point(x, y, z);
+			m_box.extend(m_center);
+			m_pca.AddPointScale(m_center, sx, sy, sz);
+			m_size_ui_list = sumi;
+			m_size_d_list = sumd;
+		}
 		~Cell() {}
 
 		void SetEId(unsigned long long eid)
@@ -152,6 +175,14 @@ namespace FL
 		void Inc(Celp &celp);
 		void Inc();
 		void IncExt(double value);
+		void Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
+			double x, double y, double z,
+			double sx, double sy, double sz);
+		void Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
+			double x, double y, double z,
+			double sx, double sy, double sz,
+			std::vector<unsigned int> &sumi, std::vector<double> &sumd);
+		void Calc();//calculate mean etc
 		void AddVertex(Verp &vertex);
 		Verw GetVertex();
 		unsigned int GetVertexId();
@@ -165,17 +196,19 @@ namespace FL
 		unsigned int GetExtUi();
 		double GetExtD();
 		//distribution
-		double GetMean();
-		double GetStd();
-		double GetMin();
-		double GetMax();
+		double GetMean(double si=1);
+		double GetStd(double si=1);
+		double GetMin(double si=1);
+		double GetMax(double si=1);
 		//distance
 		double GetDistp();
 		//coords
 		FLIVR::Point &GetCenter();
 		FLIVR::Point GetCenter(double sx, double sy, double sz);
 		FLIVR::BBox &GetBox();
+		FLIVR::BBox GetBox(double sx, double sy, double sz);
 		FLIVR::Point &GetProjp();
+		FLIVR::Point GetProjp(double sx, double sy, double sz);
 		//colocalization
 		unsigned int GetCoSizeUi(size_t i);
 		double GetCoSizeD(size_t i);
@@ -184,6 +217,7 @@ namespace FL
 		unsigned int GetCount1();
 
 		//set
+		void Copy(Cell &cell, bool copy_id = false);
 		void SetBrickId(unsigned int id);
 		void SetUseD(bool val);
 		void SetSizeUi(unsigned int size);
@@ -206,6 +240,7 @@ namespace FL
 		unsigned int m_ext_ui;
 		float m_ext_d;
 		//distribution
+		bool m_calc;//if mean etc are calculated
 		double m_mean;
 		double m_int2;//intensity squared
 		double m_std;//standard deviation
@@ -268,35 +303,115 @@ namespace FL
 
 	inline void Cell::Inc(size_t i, size_t j, size_t k, double value)
 	{
-		m_center = FLIVR::Point(
-			(m_center*m_size_ui + FLIVR::Point(double(i),
-			double(j), double(k))) / (m_size_ui + 1));
 		m_size_ui++;
 		m_size_d += value;
+
+		m_int2 += value * value;
+		m_min = std::min(m_min, value);
+		m_max = std::max(m_max, value);
+
 		FLIVR::Point p(i, j, k);
+		m_center += p;
 		m_box.extend(p);
+
+		m_calc = false;
 	}
 
 	inline void Cell::Inc(Celp &celp)
 	{
-		m_center = FLIVR::Point(
-			(m_center * m_size_ui + celp->GetCenter() *
-			celp->GetSizeUi()) / (m_size_ui +
-			celp->GetSizeUi()));
-		m_size_ui += celp->GetSizeUi();
-		m_size_d += celp->GetSizeD();
-		m_box.extend(celp->GetBox());
+		m_size_ui += celp->m_size_ui;
+		m_size_d += celp->m_size_d;
+		m_ext_ui += celp->m_ext_ui;
+		m_ext_d += celp->m_ext_d;
+
+		m_int2 += celp->m_int2;
+		m_min = std::min(m_min, celp->m_min);
+		m_max = std::max(m_max, celp->m_max);
+
+		m_center += celp->m_center;
+		m_box.extend(celp->m_box);
+		m_pca.AddPoints(celp->m_pca.GetPoints());
+
+		m_size_ui_list.insert(m_size_ui_list.end(),
+			celp->m_size_ui_list.begin(), celp->m_size_ui_list.end());
+		m_size_d_list.insert(m_size_d_list.end(),
+			celp->m_size_d_list.begin(), celp->m_size_d_list.end());
+
+		m_calc = false;
 	}
 
 	inline void Cell::Inc()
 	{
 		m_size_ui++;
+		m_calc = false;
 	}
 
 	inline void Cell::IncExt(double value)
 	{
 		m_ext_ui++;
 		m_ext_d += value;
+		m_calc = false;
+	}
+
+	inline void Cell::Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
+		double x, double y, double z,
+		double sx, double sy, double sz)
+	{
+		m_size_ui += size_ui;
+		m_size_d += size_d;
+		m_ext_ui += ext_ui;
+		m_ext_d += ext_ui * size_d;
+
+		m_int2 += size_d * size_d;
+		m_min = std::min(m_min, size_d);
+		m_max = std::max(m_max, size_d);
+
+		FLIVR::Point p(x, y, z);
+		m_center += p;
+		m_box.extend(p);
+		m_pca.AddPointScale(p, sx, sy, sz);
+
+		m_calc = false;
+	}
+
+	inline void Cell::Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
+		double x, double y, double z,
+		double sx, double sy, double sz,
+		std::vector<unsigned int> &sumi, std::vector<double> &sumd)
+	{
+		m_size_ui += size_ui;
+		m_size_d += size_d;
+		m_ext_ui += ext_ui;
+		m_ext_d += ext_ui * size_d;
+
+		m_int2 += size_d * size_d;
+		m_min = std::min(m_min, size_d);
+		m_max = std::max(m_max, size_d);
+
+		FLIVR::Point p(x, y, z);
+		m_center += p;
+		m_box.extend(p);
+		m_pca.AddPointScale(p, sx, sy, sz);
+
+		for (size_t i = 0; i < m_size_ui_list.size(); ++i)
+			m_size_ui_list[i] += sumi[i];
+		for (size_t i = 0; i < m_size_d_list.size(); ++i)
+			m_size_d_list[i] += sumd[i];
+
+		m_calc = false;
+	}
+
+	inline void Cell::Calc()
+	{
+		if (m_calc)
+			return;
+
+		m_mean = m_size_d / m_size_ui;
+		m_std = std::sqrt((m_int2 + m_size_ui * m_mean * m_mean -
+			2 * m_mean * m_size_d)/(m_size_ui-1));
+		m_center /= m_size_ui;
+
+		m_calc = true;
 	}
 
 	inline void Cell::AddVertex(Verp &vertex)
@@ -345,24 +460,30 @@ namespace FL
 		return m_ext_d;
 	}
 
-	inline double Cell::GetMean()
+	inline double Cell::GetMean(double si)
 	{
-		return m_mean;
+		if (!m_calc)
+			Calc();
+
+		return m_mean * si;
 	}
 
-	inline double Cell::GetStd()
+	inline double Cell::GetStd(double si)
 	{
-		return m_std;
+		if (!m_calc)
+			Calc();
+
+		return m_std * si;
 	}
 
-	inline double Cell::GetMin()
+	inline double Cell::GetMin(double si)
 	{
-		return m_min;
+		return m_min * si;
 	}
 
-	inline double Cell::GetMax()
+	inline double Cell::GetMax(double si)
 	{
-		return m_max;
+		return m_max * si;
 	}
 
 	inline double Cell::GetDistp()
@@ -372,11 +493,17 @@ namespace FL
 
 	inline FLIVR::Point &Cell::GetCenter()
 	{
+		if (!m_calc)
+			Calc();
+
 		return m_center;
 	}
 
 	inline FLIVR::Point Cell::GetCenter(double sx, double sy, double sz)
 	{
+		if (!m_calc)
+			Calc();
+
 		return FLIVR::Point(m_center.x()*sx, m_center.y()*sy, m_center.z()*sz);
 	}
 
@@ -385,9 +512,21 @@ namespace FL
 		return m_box;
 	}
 
+	inline FLIVR::BBox Cell::GetBox(double sx, double sy, double sz)
+	{
+		FLIVR::BBox box(m_box);
+		box.scale(sx, sy, sz);
+		return box;
+	}
+
 	inline FLIVR::Point &Cell::GetProjp()
 	{
 		return m_prjp;
+	}
+
+	inline FLIVR::Point Cell::GetProjp(double sx, double sy, double sz)
+	{
+		return FLIVR::Point(m_prjp.x()*sx, m_prjp.y()*sy, m_prjp.z()*sz);
 	}
 
 	inline unsigned int Cell::GetCoSizeUi(size_t i)
@@ -413,6 +552,29 @@ namespace FL
 	inline unsigned int Cell::GetCount1()
 	{
 		return m_count1;
+	}
+
+	inline void Cell::Copy(Cell &cell, bool copy_id)
+	{
+		if (copy_id)
+		{
+			m_id = cell.m_id;
+			m_brick_id = cell.m_brick_id;
+		}
+
+		m_size_ui = cell.m_size_ui;
+		m_size_d = cell.m_size_d;
+		m_ext_ui = cell.m_ext_ui;
+		m_ext_d = cell.m_ext_d;
+
+		m_calc = cell.m_calc;
+		m_int2 = cell.m_int2;
+		m_min = cell.m_min;
+		m_max = cell.m_max;
+
+		m_center = cell.m_center;
+		m_box = cell.m_box;
+		m_pca.AddPoints(cell.m_pca.GetPoints());
 	}
 
 	inline void Cell::SetBrickId(unsigned int id)

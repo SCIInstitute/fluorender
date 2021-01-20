@@ -74,6 +74,14 @@ namespace FL
 			m_points.assign(points.begin(), points.end());
 			m_mode = 2;
 		}
+		std::vector<FLIVR::Point> &GetPoints()
+		{
+			return m_points;
+		}
+		void AddPoints(std::vector<FLIVR::Point> &points)
+		{
+			m_points.insert(m_points.end(), points.begin(), points.end());
+		}
 		void SetCovMat(std::vector<double> &cov)
 		{
 			int size = cov.size();

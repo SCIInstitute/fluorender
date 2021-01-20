@@ -60,6 +60,12 @@ void BBox::scale(double s, const Vector&o)
 	cmax_+=o;
 }
 
+void BBox::scale(double sx, double sy, double sz)
+{
+	cmin_.scale(sx, sy, sz);
+	cmax_.scale(sx, sy, sz);
+}
+
 bool BBox::overlaps(const BBox & bb) const
 {
 	if( bb.cmin_.x() > cmax_.x() || bb.cmax_.x() < cmin_.x())
