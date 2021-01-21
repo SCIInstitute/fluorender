@@ -3766,6 +3766,12 @@ bool ComponentDlg::GetCellList(FL::CelpList &cl, bool links)
 	if (!list || list->empty())
 		return false;
 
+	cl.min = list->min;
+	cl.max = list->max;
+	cl.sx = list->sx;
+	cl.sy = list->sy;
+	cl.sz = list->sz;
+
 	bool sel_all = false;
 	std::vector<unsigned int> ids;
 	std::vector<unsigned int> bids;

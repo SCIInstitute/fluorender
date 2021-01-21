@@ -56,6 +56,11 @@ namespace FL
 		double sx;
 		double sy;
 		double sz;
+
+		CelpList():
+			min(0), max(0),
+			sx(1), sy(1), sz(1)
+		{}
 	};
 	typedef CelpList::iterator CelpListIter;
 
@@ -417,7 +422,7 @@ namespace FL
 
 		m_mean = m_size_d / m_size_ui;
 		m_std = std::sqrt((m_int2 + m_size_ui * m_mean * m_mean -
-			2 * m_mean * m_size_d)/(m_size_ui-1));
+			2 * m_mean * m_size_d) / m_size_ui);
 		m_center = m_pos / m_size_ui;
 
 		m_calc = true;

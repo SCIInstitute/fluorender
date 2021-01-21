@@ -427,9 +427,9 @@ public:
 		{
 		case 8:
 		default:
-			return m_scalar_scale * 255;
+			return 255;
 		case 16:
-			return m_scalar_scale * 65535;
+			return 65535;
 		}
 	}
 	double GetScalarScale() {return m_scalar_scale;}

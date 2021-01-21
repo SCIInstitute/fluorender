@@ -9515,10 +9515,14 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	unsigned int num = 0;
 	Point p1, p2, p3, p4;
 	Color c = GetTextColor();
+	double sx, sy, sz;
+	sx = m_cell_list.sx;
+	sy = m_cell_list.sy;
+	sz = m_cell_list.sz;
 	for (auto it = m_cell_list.begin();
 		it != m_cell_list.end(); ++it)
 	{
-		BBox box = it->second->GetBox();
+		BBox box = it->second->GetBox(sx, sy, sz);
 		GetCellPoints(box, p1, p2, p3, p4, mv, p);
 
 		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
