@@ -691,7 +691,8 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	double sy = comps.sy;
 	double sz = comps.sz;
 	double size_scale = sx * sy * sz;
-	double scale = vd->GetScalarScale();
+	double maxscale = vd->GetMaxScale();
+	double scalarscale = vd->GetScalarScale();
 	FLIVR::Vector lens;
 
 	graph.ClearVisited();
@@ -745,15 +746,15 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << center.y() << "\t";
 		stream << center.z() << "\t";
 		stream << i->second->GetSizeUi() << "\t";
-		stream << i->second->GetSizeD(scale) << "\t";
+		stream << i->second->GetSizeD(scalarscale) << "\t";
 		stream << size_scale * i->second->GetSizeUi() << "\t";
-		stream << i->second->GetSizeD(size_scale * scale) << "\t";
+		stream << i->second->GetSizeD(size_scale * scalarscale) << "\t";
 		stream << i->second->GetExtUi() << "\t";
-		stream << i->second->GetExtD(scale) << "\t";
-		stream << i->second->GetMean(scale) << "\t";
-		stream << i->second->GetStd(scale) << "\t";
-		stream << i->second->GetMin(scale) << "\t";
-		stream << i->second->GetMax(scale) << "\t";
+		stream << i->second->GetExtD(scalarscale) << "\t";
+		stream << i->second->GetMean(maxscale) << "\t";
+		stream << i->second->GetStd(maxscale) << "\t";
+		stream << i->second->GetMin(maxscale) << "\t";
+		stream << i->second->GetMax(maxscale) << "\t";
 		stream << i->second->GetDistp() << "\t";
 		stream << lens.x();
 		if (m_colocal)

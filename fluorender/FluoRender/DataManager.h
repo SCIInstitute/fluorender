@@ -420,6 +420,18 @@ public:
 	int GetBlendMode();
 
 	//scalar value info
+	double GetMaxScale()
+	{
+		int bits = GetBits();
+		switch (bits)
+		{
+		case 8:
+		default:
+			return m_scalar_scale * 255;
+		case 16:
+			return m_scalar_scale * 65535;
+		}
+	}
 	double GetScalarScale() {return m_scalar_scale;}
 	void SetScalarScale(double val) {m_scalar_scale = val; if (m_vr) m_vr->set_scalar_scale(val);}
 	double GetGMScale() {return m_gm_scale;}
