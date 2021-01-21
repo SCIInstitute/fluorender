@@ -967,7 +967,7 @@ int RulerHandler::Distance(int index, std::string filename)
 		it != list->end(); ++it)
 	{
 		double dist = (p - it->second->GetCenter(sx, sy, sz)).length();
-		it->second->dist = dist;
+		it->second->SetDistp(dist);
 	}
 
 	m_ca->OutputCompListFile(filename, 1);

@@ -99,9 +99,9 @@ void DistCalculator::Project()
 	for (auto it = m_celps->begin();
 		it != m_celps->end(); ++it)
 	{
-		p0 = it->second->GetPos(sx, sy, sz);
+		p0 = it->second->GetCenter(sx, sy, sz);
 		SpringProject(p0, pp);
-		it->second->proj = pp;
+		it->second->SetProjp(pp);
 	}
 }
 
@@ -168,7 +168,7 @@ void DistCalculator::BuildCloud()
 	for (auto it = m_celps->begin();
 		it != m_celps->end(); ++it)
 	{
-		p = it->second->GetPos(sx, sy, sz);
+		p = it->second->GetCenter(sx, sy, sz);
 		m_cloud.push_back(p);
 	}
 }

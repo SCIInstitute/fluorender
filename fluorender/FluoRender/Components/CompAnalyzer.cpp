@@ -568,12 +568,12 @@ void ComponentAnalyzer::MakeColorConsistent()
 			//make color consistent
 			//get the id of the first item in the list
 			//which is also the base color
-			unsigned int base_id = list.begin()->second->id;
+			unsigned int base_id = list.begin()->second->Id();
 			//for other items
 			for (auto iter = std::next(list.begin());
 				iter != list.end(); ++iter)
 			{
-				unsigned int link_id = iter->second->id;
+				unsigned int link_id = iter->second->Id();
 				unsigned int diff = base_id > link_id ? base_id - link_id : link_id - base_id;
 				if (diff % 253)
 				{
@@ -581,7 +581,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 					//generate new_id
 					ReplaceId(base_id, iter->second);
 					//insert one with consistent key
-					if (link_id != iter->second->id)
+					if (link_id != iter->second->Id())
 						comps.insert(std::pair<unsigned long long, Celp>
 						(iter->second->GetEId(), iter->second));
 				}
@@ -734,34 +734,33 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		}
 
 		//pca
-		i->second->pca.Compute();
-		lens = i->second->pca.GetLengths();
+		i->second->GetPca().Compute();
+		lens = i->second->GetPca().GetLengths();
 
 		stream << ids.front() << "\t";
 		if (m_bn > 1)
 			stream << brick_ids.front() << "\t";
-		stream << i->second->pos.x()*sx << "\t";
-		stream << i->second->pos.y()*sy << "\t";
-		stream << i->second->pos.z()*sz << "\t";
-		stream << i->second->sumi << "\t";
-		stream << i->second->sumd * scale << "\t";
-		stream << size_scale * i->second->sumi << "\t";
-		stream << size_scale * i->second->sumd * scale << "\t";
-		stream << i->second->ext_sumi << "\t";
-		stream << i->second->ext_sumd * scale << "\t";
-		stream << i->second->mean << "\t";
-		stream << i->second->var << "\t";
-		stream << i->second->min << "\t";
-		stream << i->second->max << "\t";
-		stream << i->second->dist << "\t";
+		FLIVR::Point center = i->second->GetCenter(sx, sy, sz);
+		stream << center.x() << "\t";
+		stream << center.y() << "\t";
+		stream << center.z() << "\t";
+		stream << i->second->GetSizeUi() << "\t";
+		stream << i->second->GetSizeD(scale) << "\t";
+		stream << size_scale * i->second->GetSizeUi() << "\t";
+		stream << i->second->GetSizeD(size_scale * scale) << "\t";
+		stream << i->second->GetExtUi() << "\t";
+		stream << i->second->GetExtD(scale) << "\t";
+		stream << i->second->GetMean(scale) << "\t";
+		stream << i->second->GetStd(scale) << "\t";
+		stream << i->second->GetMin(scale) << "\t";
+		stream << i->second->GetMax(scale) << "\t";
+		stream << i->second->GetDistp() << "\t";
 		stream << lens.x();
 		if (m_colocal)
 		{
 			stream << "\t";
 			for (size_t ii = 0; ii<m_vd_list.size(); ++ii)
-			{
-				stream << i->second->cosumi[ii] << "\t" << i->second->cosumd[ii] << "\t";
-			}
+				stream << i->second->GetCoSizeUi(ii) << "\t" << i->second->GetCoSizeD(ii) << "\t";
 		}
 		stream << "\n";
 	}
@@ -963,22 +962,20 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 		}
 
 		oss.str("");
-		oss << i->second->sumi << "\t";
-		oss << double(i->second->sumi)*spcx*spcy*spcz << "\t";
-		oss << i->second->mean;
+		oss << i->second->GetSizeUi() << "\t";
+		oss << double(i->second->GetSizeUi())*spcx*spcy*spcz << "\t";
+		oss << i->second->GetMean(scale);
 		sinfo = oss.str();
 		switch (type)
 		{
 		case 0://id
-			str = std::to_string(i->second->id);
+			str = std::to_string(i->second->Id());
 			break;
 		case 1://sn
 			str = std::to_string(count);
 		}
-		ann.AddText(str,
-			FLIVR::Point(i->second->pos.x()/nx,
-			i->second->pos.y()/ny, i->second->pos.z()/nz),
-			sinfo);
+		FLIVR::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
+		ann.AddText(str, p, sinfo);
 		++count;
 	}
 	return true;
@@ -1036,7 +1033,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	int bn = vd->GetAllBrickNum();
 
 	//graph for linking multiple bricks
-	CompGraph &graph = m_compgroup->graph;
+	CellGraph &graph = m_compgroup->graph;
 	graph.ClearVisited();
 	for (auto i = comps.begin();
 		i != comps.end(); ++i)
@@ -1054,7 +1051,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			brick_size);
 		vdn->SetSpcFromFile(true);
 		vdn->SetName(vd->GetName() +
-			wxString::Format("_COMP%d_SIZE%d", count++, i->second->sumi));
+			wxString::Format("_COMP%d_SIZE%d", count++, i->second->GetSizeUi()));
 
 		//populate the volume
 		//the actual data
@@ -1077,8 +1074,8 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			for (auto iter = list.begin();
 				iter != list.end(); ++iter)
 			{
-				TextureBrick* b_orig = tex->get_brick(iter->second->brick_id);
-				TextureBrick* b_new = tex_vd->get_brick(iter->second->brick_id);
+				TextureBrick* b_orig = tex->get_brick(iter->second->BrickId());
+				TextureBrick* b_new = tex_vd->get_brick(iter->second->BrickId());
 				int nx2 = b_orig->nx();
 				int ny2 = b_orig->ny();
 				int nz2 = b_orig->nz();
@@ -1104,9 +1101,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 						for (unsigned int i = 0; i < nx2 - 1; ++i)
 						{
 							lv = tp2[i];
-							if (lv == (iter->second->alt_id?
-								iter->second->alt_id:
-								iter->second->id))
+							if (lv == iter->second->Id())
 							{
 								//assign values
 								if (bits == 8)
@@ -1146,7 +1141,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			for (index = 0; index < for_size; ++index)
 			{
 				value_label = data_label[index];
-				if (value_label == i->second->id)
+				if (value_label == i->second->Id())
 				{
 					if (bits == 8)
 						((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
@@ -1158,7 +1153,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 
 		//settings
 		FLIVR::Color c;
-		if (GetColor(i->second->id, i->second->brick_id, vd, color_type, c))
+		if (GetColor(i->second->Id(), i->second->BrickId(), vd, color_type, c))
 		{
 			vdn->SetColor(c);
 			vdn->SetEnableAlpha(vd->GetEnableAlpha());
@@ -1377,7 +1372,7 @@ bool ComponentAnalyzer::GetColor(
 		if (vd)
 		{
 			unsigned int size = 0;
-			CompListIter iter;
+			CelpListIter iter;
 			//search in comp list
 			if (brick_id < 0)
 			{
@@ -1395,7 +1390,7 @@ bool ComponentAnalyzer::GetColor(
 			}
 			if (iter == comps.end())
 				return false;
-			size = iter->second->sumi;
+			size = iter->second->GetSizeUi();
 			double value;
 			if (comps.min == comps.max)
 				value = 1.0;
@@ -1420,8 +1415,8 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 		return;
 	Texture* tex = vd->GetTexture();
 
-	unsigned int brick_id = info->brick_id;
-	unsigned int rep_id = info->id;
+	unsigned int brick_id = info->BrickId();
+	unsigned int rep_id = info->Id();
 	unsigned int new_id = base_id;
 
 	//get brick label data
@@ -1456,8 +1451,8 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 		tp += b->sx()*b->sy();
 	}
 
-	info->alt_id = new_id;
-	info->id = new_id;
+	//info->alt_id = new_id;
+	info->SetId(new_id);
 }
 
 unsigned int ComponentAnalyzer::GetNonconflictId(

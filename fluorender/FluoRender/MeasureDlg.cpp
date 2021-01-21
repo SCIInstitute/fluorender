@@ -1752,8 +1752,12 @@ void MeasureDlg::Project(int idx)
 		comps.push_back(it->second);
 	std::sort(comps.begin(), comps.end(),
 		[](const FL::Celp &a, const FL::Celp &b) -> bool
-		{ if (a->proj.z() != b->proj.z()) return a->proj.z() < b->proj.z();
-		else return a->proj.x() < b->proj.x(); });
+		{
+		FLIVR::Point pa = a->GetProjp();
+		FLIVR::Point pb = b->GetProjp();
+		if (pa.z() != pb.z()) return pa.z() < pb.z();
+		else return pa.x() < pb.x();
+		});
 
 	//export
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -1772,10 +1776,11 @@ void MeasureDlg::Project(int idx)
 		for (auto it = comps.begin();
 			it != comps.end(); ++it)
 		{
-			ofs << it->Id() << "\t";
-			ofs << it->proj.x() << "\t";
-			ofs << it->proj.y() << "\t";
-			ofs << it->proj.z() << "\n";
+			ofs << (*it)->Id() << "\t";
+			FLIVR::Point p = (*it)->GetProjp();
+			ofs << p.x() << "\t";
+			ofs << p.y() << "\t";
+			ofs << p.z() << "\n";
 		}
 		ofs.close();
 	}

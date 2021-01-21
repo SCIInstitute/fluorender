@@ -120,12 +120,12 @@ void ComponentSelector::CompFull()
 				{
 					Cell* info = new Cell(label_value, brick_id);
 					if (!m_analyzer || !m_analyzer->GetAnalyzed())
-						info->m_sumi = 1;
+						info->SetSizeUi(1);
 					sel_labels.insert(std::pair<unsigned long long, Celp>
 						(info->GetEId(), Celp(info)));
 				}
 				else if (!m_analyzer || !m_analyzer->GetAnalyzed())
-					label_iter->second->sumi++;
+					label_iter->second->Inc();
 			}
 		}
 	}
@@ -156,7 +156,7 @@ void ComponentSelector::CompFull()
 				{
 					if (m_use_min || m_use_max)
 					{
-						size = label_iter->second->sumi;
+						size = label_iter->second->GetSizeUi();
 						if (CompareSize(size))
 							data_mask[index] = 255;
 						else
@@ -230,12 +230,12 @@ void ComponentSelector::Select(bool all, bool rmask)
 					if (label_iter == sel_labels.end())
 					{
 						Cell* info = new Cell(label_value, brick_id);
-						info->m_sumi = 1;
+						info->SetSizeUi(1);
 						sel_labels.insert(std::pair<unsigned long long, Celp>
 							(info->GetEId(), Celp(info)));
 					}
 					else
-						label_iter->second->sumi++;
+						label_iter->second->Inc();
 				}
 			}
 			comp_list = &sel_labels;
@@ -253,7 +253,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 				{
 					if (m_use_min || m_use_max)
 					{
-						size = label_iter->second->sumi;
+						size = label_iter->second->GetSizeUi();
 						if (CompareSize(size))
 							data_mask[index] = 255;
 						else
@@ -298,7 +298,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 							{
 								if (m_use_min || m_use_max)
 								{
-									size = label_iter->second->sumi;
+									size = label_iter->second->GetSizeUi();
 									if (CompareSize(size))
 										data_mask[index] = 255;
 									else
@@ -593,7 +593,7 @@ inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpL
 				continue;
 			}
 			iter->second->SetCelVrtx(iter2->second->GetCelVrtx());
-			iter->second->sumi = iter2->second->sumi;
+			iter->second->SetSizeUi(iter2->second->GetSizeUi());
 			++iter;
 		}
 		if (m_analyzer->GetCellGraph()->

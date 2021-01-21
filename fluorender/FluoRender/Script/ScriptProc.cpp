@@ -207,13 +207,14 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 		{
-			if (it->second->sumi > slimit)
+			if (it->second->GetSize() > slimit)
 			{
 				FL::Celp celp(new FL::Cell(it->second->Id()));
-				celp->SetSizeUi(it->second->sumi);
-				celp->SetSizeD(it->second->sumd);
-				celp->SetCenter(it->second->pos);
-				celp->SetBox(it->second->box);
+				celp->Copy(it->second, true);
+				//celp->SetSizeUi(it->second->sumi);
+				//celp->SetSizeD(it->second->sumd);
+				//celp->SetCenter(it->second->pos);
+				//celp->SetBox(it->second->box);
 				m_sel_labels.insert(pair<unsigned int, FL::Celp>
 					(it->second->Id(), celp));
 			}

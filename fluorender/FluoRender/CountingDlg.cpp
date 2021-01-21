@@ -230,7 +230,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
-		unsigned int sumi = it->second->sumi;
+		unsigned int sumi = it->second->GetSizeUi();
 		if (sumi > min_voxels &&
 			(ignore_max ||
 			(!ignore_max && sumi < max_voxels)))
