@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerRenderer_H_
 
 #include <Distance/Ruler.h>
-#include <FLIVR/Color.h>
-#include <FLIVR/Point.h>
-#include <FLIVR/Transform.h>
+#include <Types/Color.h>
+#include <Types/Point.h>
+#include <Types/Transform.h>
 #include <vector>
 
 class VRenderGLView;
@@ -81,8 +81,8 @@ namespace FL
 	private:
 		unsigned int DrawVerts(std::vector<float> &verts);
 		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, FLIVR::Color &c);
-		void DrawArc(FLIVR::Point & ppc, FLIVR::Point& pp0, FLIVR::Point& pp1,
-			FLIVR::Color &c, FLIVR::Transform& mv, FLIVR::Transform& p,
+		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
+			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
 			std::vector<float> &verts, unsigned int& num);
 		void DrawText(int, int, int);
 	};

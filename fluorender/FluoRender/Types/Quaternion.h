@@ -35,7 +35,7 @@
 
 #pragma warning (disable : 4521 4522)
 
-namespace FLTYPE
+namespace fluo
 {
 
 class Quaternion

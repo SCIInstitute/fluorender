@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Ruler.h"
-#include <FLIVR/Quaternion.h>
+#include <Types/Quaternion.h>
 #include <Types/Utils.h>
 
 using namespace FL;
@@ -173,7 +173,7 @@ pRulerPoint Ruler::GetPPoint(int nb, int index)
 	return branch[index];
 }
 
-pRulerPoint Ruler::FindPoint(Point& point)
+pRulerPoint Ruler::FindPoint(fluo::Point& point)
 {
 	bool first = true;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
@@ -190,7 +190,7 @@ pRulerPoint Ruler::FindPoint(Point& point)
 	return nullptr;
 }
 
-pRulerPoint Ruler::FindNearestPoint(Point& point, size_t &ri, size_t &rj)
+pRulerPoint Ruler::FindNearestPoint(fluo::Point& point, size_t &ri, size_t &rj)
 {
 	bool first = true, found = false;
 	double dist, min_dist;
@@ -242,7 +242,7 @@ void Ruler::SetFinished()
 double Ruler::GetLength()
 {
 	double length = 0.0;
-	Point p1, p2;
+	fluo::Point p1, p2;
 
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
@@ -261,7 +261,7 @@ double Ruler::GetLength()
 double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 {
 	double length = 0.0;
-	Point p1, p2;
+	fluo::Point p1, p2;
 
 	for (auto it = m_ruler.begin();
 		it != m_ruler.end(); ++it)
@@ -270,8 +270,8 @@ double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 		{
 			p1 = (*it)[i - 1]->GetPoint();
 			p2 = (*it)[i]->GetPoint();
-			p1 = Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
-			p2 = Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+			p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
+			p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
 			length += (p2 - p1).length();
 		}
 	}
@@ -291,10 +291,10 @@ double Ruler::GetAngle()
 	{
 		if (m_ruler[0].size() >= 2)
 		{
-			Vector v = m_ruler[0][1]->GetPoint() - m_ruler[0][0]->GetPoint();
+			fluo::Vector v = m_ruler[0][1]->GetPoint() - m_ruler[0][0]->GetPoint();
 			v.normalize();
 			angle = atan2(-v.y(), (v.x() > 0.0 ? 1.0 : -1.0)*sqrt(v.x()*v.x() + v.z()*v.z()));
-			angle = FLTYPE::r2d(angle);
+			angle = fluo::r2d(angle);
 			angle = angle < 0.0 ? angle + 180.0 : angle;
 		}
 	}
@@ -302,13 +302,13 @@ double Ruler::GetAngle()
 	{
 		if (m_ruler[0].size() >= 3)
 		{
-			Vector v1, v2;
+			fluo::Vector v1, v2;
 			v1 = m_ruler[0][0]->GetPoint() - m_ruler[0][1]->GetPoint();
 			v1.normalize();
 			v2 = m_ruler[0][2]->GetPoint() - m_ruler[0][1]->GetPoint();
 			v2.normalize();
 			angle = acos(Dot(v1, v2));
-			angle = FLTYPE::r2d(angle);
+			angle = fluo::r2d(angle);
 		}
 	}
 
@@ -328,7 +328,7 @@ void Ruler::Scale(double spcx, double spcy, double spcz)
 	}
 }
 
-bool Ruler::AddPoint(Point &point)
+bool Ruler::AddPoint(fluo::Point &point)
 {
 	if (m_ruler.empty())
 	{
@@ -364,7 +364,7 @@ bool Ruler::AddPoint(Point &point)
 }
 
 bool Ruler::AddPointAfterId(
-	Point &point, unsigned int id,
+	fluo::Point &point, unsigned int id,
 	std::set<unsigned int> &cid,
 	std::set<unsigned int> &bid)
 {
@@ -422,7 +422,7 @@ bool Ruler::AddPointAfterId(
 	return true;
 }
 
-void Ruler::SetTransform(Transform *tform)
+void Ruler::SetTransform(fluo::Transform *tform)
 {
 	m_tform = tform;
 }
@@ -602,31 +602,31 @@ void Ruler::SaveProfile(wxString &filename)
 {
 }
 
-void Ruler::FinishEllipse(Vector view)
+void Ruler::FinishEllipse(fluo::Vector view)
 {
 	if (m_ruler_type != 5 ||
 		m_ruler.empty() ||
 		m_ruler.back().size() != 2)
 		return;
 
-	Point p0 = m_ruler.back()[0]->GetPoint();
-	Point p1 = m_ruler.back()[1]->GetPoint();
-	Vector p01 = p0 - p1;
-	Vector axis = Cross(p01, view);
+	fluo::Point p0 = m_ruler.back()[0]->GetPoint();
+	fluo::Point p1 = m_ruler.back()[1]->GetPoint();
+	fluo::Vector p01 = p0 - p1;
+	fluo::Vector axis = Cross(p01, view);
 	axis.normalize();
 	axis = Cross(p01, axis);
 	axis.normalize();
-	Point p2, p3, pc;
-	pc = Point((p0 + p1) / 2.0);
-	Vector halfd = p0 - pc;
-	Quaternion q0(halfd);
-	Quaternion q(90.0, axis);
+	fluo::Point p2, p3, pc;
+	pc = fluo::Point((p0 + p1) / 2.0);
+	fluo::Vector halfd = p0 - pc;
+	fluo::Quaternion q0(halfd);
+	fluo::Quaternion q(90.0, axis);
 	q.Normalize();
-	Quaternion q2 = (-q) * q0 * q;
-	p2 = Point(q2.x, q2.y, q2.z);
+	fluo::Quaternion q2 = (-q) * q0 * q;
+	p2 = fluo::Point(q2.x, q2.y, q2.z);
 	p3 = -p2;
-	p2 = Point(pc + p2);
-	p3 = Point(pc + p3);
+	p2 = fluo::Point(pc + p2);
+	p3 = fluo::Point(pc + p3);
 	AddPoint(p2);
 	AddPoint(p3);
 
@@ -639,9 +639,9 @@ void Ruler::FinishEllipse(Vector view)
 	m_finished = true;
 }
 
-Point Ruler::GetCenter()
+fluo::Point Ruler::GetCenter()
 {
-	Point result;
+	fluo::Point result;
 	if (m_ruler.empty() ||
 		m_ruler.back().empty())
 		return result;

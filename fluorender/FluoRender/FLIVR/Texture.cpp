@@ -29,7 +29,7 @@
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/Texture.h>
 #include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Utils.h>
+#include <Types/Utils.h>
 #include <algorithm>
 #include <inttypes.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -129,25 +129,25 @@ namespace FLIVR
 	}
 
 	vector<TextureBrick*>* Texture::get_sorted_bricks(
-		Ray& view, bool is_orthographic)
+		fluo::Ray& view, bool is_orthographic)
 	{
 		if (sort_bricks_)
 		{
 			for (unsigned int i = 0; i < (*bricks_).size(); i++)
 			{
-				Point minp((*bricks_)[i]->bbox().min());
-				Point maxp((*bricks_)[i]->bbox().max());
-				Vector diag((*bricks_)[i]->bbox().diagonal());
+				fluo::Point minp((*bricks_)[i]->bbox().min());
+				fluo::Point maxp((*bricks_)[i]->bbox().max());
+				fluo::Vector diag((*bricks_)[i]->bbox().diagonal());
 				minp += diag / 1000.;
 				maxp -= diag / 1000.;
-				Point corner[8];
+				fluo::Point corner[8];
 				corner[0] = minp;
-				corner[1] = Point(minp.x(), minp.y(), maxp.z());
-				corner[2] = Point(minp.x(), maxp.y(), minp.z());
-				corner[3] = Point(minp.x(), maxp.y(), maxp.z());
-				corner[4] = Point(maxp.x(), minp.y(), minp.z());
-				corner[5] = Point(maxp.x(), minp.y(), maxp.z());
-				corner[6] = Point(maxp.x(), maxp.y(), minp.z());
+				corner[1] = fluo::Point(minp.x(), minp.y(), maxp.z());
+				corner[2] = fluo::Point(minp.x(), maxp.y(), minp.z());
+				corner[3] = fluo::Point(minp.x(), maxp.y(), maxp.z());
+				corner[4] = fluo::Point(maxp.x(), minp.y(), minp.z());
+				corner[5] = fluo::Point(maxp.x(), minp.y(), maxp.z());
+				corner[6] = fluo::Point(maxp.x(), maxp.y(), minp.z());
 				corner[7] = maxp;
 				double d = 0.0;
 				for (unsigned int c = 0; c < 8; c++)
@@ -178,8 +178,8 @@ namespace FLIVR
 	}
 
 	vector<TextureBrick*>* Texture::get_closest_bricks(
-		Point& center, int quota, bool skip,
-		Ray& view, bool is_orthographic)
+		fluo::Point& center, int quota, bool skip,
+		fluo::Ray& view, bool is_orthographic)
 	{
 		if (sort_bricks_)
 		{
@@ -191,7 +191,7 @@ namespace FLIVR
 			{
 				for (i=0; i<(*bricks_).size(); i++)
 				{
-					Point brick_center = (*bricks_)[i]->bbox().center();
+					fluo::Point brick_center = (*bricks_)[i]->bbox().center();
 					double d = (brick_center - center).length();
 					(*bricks_)[i]->set_d(d);
 				}
@@ -215,19 +215,19 @@ namespace FLIVR
 
 			for (i = 0; i < quota_bricks_.size(); i++)
 			{
-				Point minp(quota_bricks_[i]->bbox().min());
-				Point maxp(quota_bricks_[i]->bbox().max());
-				Vector diag(quota_bricks_[i]->bbox().diagonal());
+				fluo::Point minp(quota_bricks_[i]->bbox().min());
+				fluo::Point maxp(quota_bricks_[i]->bbox().max());
+				fluo::Vector diag(quota_bricks_[i]->bbox().diagonal());
 				minp += diag / 1000.;
 				maxp -= diag / 1000.;
-				Point corner[8];
+				fluo::Point corner[8];
 				corner[0] = minp;
-				corner[1] = Point(minp.x(), minp.y(), maxp.z());
-				corner[2] = Point(minp.x(), maxp.y(), minp.z());
-				corner[3] = Point(minp.x(), maxp.y(), maxp.z());
-				corner[4] = Point(maxp.x(), minp.y(), minp.z());
-				corner[5] = Point(maxp.x(), minp.y(), maxp.z());
-				corner[6] = Point(maxp.x(), maxp.y(), minp.z());
+				corner[1] = fluo::Point(minp.x(), minp.y(), maxp.z());
+				corner[2] = fluo::Point(minp.x(), maxp.y(), minp.z());
+				corner[3] = fluo::Point(minp.x(), maxp.y(), maxp.z());
+				corner[4] = fluo::Point(maxp.x(), minp.y(), minp.z());
+				corner[5] = fluo::Point(maxp.x(), minp.y(), maxp.z());
+				corner[6] = fluo::Point(maxp.x(), maxp.y(), minp.z());
 				corner[7] = maxp;
 				double d = 0.0;
 				for (unsigned int c = 0; c < 8; c++)
@@ -268,12 +268,12 @@ namespace FLIVR
 		pr_.set_trans(prmat_);
 	}
 	
-	bool Texture::test_against_view(const BBox &bbox, bool persp)
+	bool Texture::test_against_view(const fluo::BBox &bbox, bool persp)
 	{
 		if (persp)
 		{
-			const Point p0_cam(0.0, 0.0, 0.0);
-			Point p0, p0_obj;
+			const fluo::Point p0_cam(0.0, 0.0, 0.0);
+			fluo::Point p0, p0_obj;
 			pr_.unproject(p0_cam, p0);
 			mv_.unproject(p0, p0_obj);
 			if (bbox.inside(p0_obj))
@@ -288,10 +288,10 @@ namespace FLIVR
 		bool underz = true;
 		for (int i = 0; i < 8; i++)
 		{
-			const Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
+			const fluo::Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
 				(i & 2) ? bbox.min().y() : bbox.max().y(),
 				(i & 4) ? bbox.min().z() : bbox.max().z());
-			const Point p = pr_.project(mv_.project(pold));
+			const fluo::Point p = pr_.project(mv_.project(pold));
 			overx = overx && (p.x() > 1.0);
 			overy = overy && (p.y() > 1.0);
 			overz = overz && (p.z() > 1.0);
@@ -327,10 +327,10 @@ namespace FLIVR
 			spcx_ = x;
 			spcy_ = y;
 			spcz_ = z;
-			Transform tform;
+			fluo::Transform tform;
 			tform.load_identity();
-			Point nmax(nx_*x, ny_*y, nz_*z);
-			tform.pre_scale(Vector(nmax));
+			fluo::Point nmax(nx_*x, ny_*y, nz_*z);
+			tform.pre_scale(fluo::Vector(nmax));
 			set_transform(tform);
 		}
 		else
@@ -338,10 +338,10 @@ namespace FLIVR
 			s_spcx_ = x / b_spcx_;
 			s_spcy_ = y / b_spcy_;
 			s_spcz_ = z / b_spcz_;
-			Transform tform;
+			fluo::Transform tform;
 			tform.load_identity();
-			Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
-			tform.pre_scale(Vector(nmax));
+			fluo::Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
+			tform.pre_scale(fluo::Vector(nmax));
 			set_transform(tform);
 		}
 	}
@@ -372,9 +372,9 @@ namespace FLIVR
 			numb[0] = 0;
 		numb[1] = gm_nrrd ? 1 : 0;
 
-		BBox bb(Point(0,0,0), Point(1,1,1)); 
+		fluo::BBox bb(fluo::Point(0,0,0), fluo::Point(1,1,1));
 
-		Transform tform;
+		fluo::Transform tform;
 		tform.load_identity();
 
 		size_t dim = nv_nrrd->dim;
@@ -431,7 +431,7 @@ namespace FLIVR
 			}
 		}
 
-		BBox tempb;
+		fluo::BBox tempb;
 		tempb.extend(transform_.project(bbox_.min()));
 		tempb.extend(transform_.project(bbox_.max()));
 		spcx_ = (tempb.max().x() - tempb.min().x()) / double(nx_);
@@ -481,18 +481,18 @@ namespace FLIVR
 
 		if (force_pow2)
 		{
-			if (Pow2(sz_x) > (unsigned)sz_x) 
-				bsize[0] = Min(int(Pow2(sz_x))/2, max_texture_size);
-			if (Pow2(sz_y) > (unsigned)sz_y) 
-				bsize[1] = Min(int(Pow2(sz_x))/2, max_texture_size);
-			if (Pow2(sz_z) > (unsigned)sz_z) 
-				bsize[2] = Min(int(Pow2(sz_x))/2, max_texture_size);
+			if (fluo::Pow2(sz_x) > (unsigned)sz_x)
+				bsize[0] = fluo::Min(int(fluo::Pow2(sz_x))/2, max_texture_size);
+			if (fluo::Pow2(sz_y) > (unsigned)sz_y)
+				bsize[1] = fluo::Min(int(fluo::Pow2(sz_x))/2, max_texture_size);
+			if (fluo::Pow2(sz_z) > (unsigned)sz_z)
+				bsize[2] = fluo::Min(int(fluo::Pow2(sz_x))/2, max_texture_size);
 		}
 		else
 		{
-			bsize[0] = Min(int(Pow2(sz_x)), max_texture_size);
-			bsize[1] = Min(int(Pow2(sz_y)), max_texture_size);
-			bsize[2] = Min(int(Pow2(sz_z)), max_texture_size);
+			bsize[0] = fluo::Min(int(fluo::Pow2(sz_x)), max_texture_size);
+			bsize[1] = fluo::Min(int(fluo::Pow2(sz_y)), max_texture_size);
+			bsize[2] = fluo::Min(int(fluo::Pow2(sz_z)), max_texture_size);
 		}
 
 		bszx_ = bsize[0]; bszy_ = bsize[1]; bszz_ = bsize[2];
@@ -516,18 +516,18 @@ namespace FLIVR
 				for (i = 0; i < sz_x; i += bsize[0])
 				{
 					if (i) i--;
-					mx = Min(bsize[0], sz_x - i);
-					my = Min(bsize[1], sz_y - j);
-					mz = Min(bsize[2], sz_z - k);
+					mx = fluo::Min(bsize[0], sz_x - i);
+					my = fluo::Min(bsize[1], sz_y - j);
+					mz = fluo::Min(bsize[2], sz_z - k);
 
 					mx2 = mx;
 					my2 = my;
 					mz2 = mz;
 					if (force_pow2)
 					{
-						mx2 = Pow2(mx);
-						my2 = Pow2(my);
-						mz2 = Pow2(mz);
+						mx2 = fluo::Pow2(mx);
+						my2 = fluo::Pow2(my);
+						mz2 = fluo::Pow2(mz);
 					}
 
 					// Compute Texture Box.
@@ -547,22 +547,22 @@ namespace FLIVR
 					if (mz < bsize[2]) tz1 = 1.0;
 					if (sz_z - k == bsize[2]) tz1 = 1.0;
 
-					BBox tbox(Point(tx0, ty0, tz0), Point(tx1, ty1, tz1));
+					fluo::BBox tbox(fluo::Point(tx0, ty0, tz0), fluo::Point(tx1, ty1, tz1));
 
 					// Compute BBox.
-					bx1 = Min((i + bsize[0] - 0.5) / (double)sz_x, 1.0);
+					bx1 = fluo::Min((i + bsize[0] - 0.5) / (double)sz_x, 1.0);
 					if (sz_x - i == bsize[0]) bx1 = 1.0;
 
-					by1 = Min((j + bsize[1] - 0.5) / (double)sz_y, 1.0);
+					by1 = fluo::Min((j + bsize[1] - 0.5) / (double)sz_y, 1.0);
 					if (sz_y - j == bsize[1]) by1 = 1.0;
 
-					bz1 = Min((k + bsize[2] - 0.5) / (double)sz_z, 1.0);
+					bz1 = fluo::Min((k + bsize[2] - 0.5) / (double)sz_z, 1.0);
 					if (sz_z - k == bsize[2]) bz1 = 1.0;
 
-					BBox bbox(Point(i==0?0:(i+0.5) / (double)sz_x,
+					fluo::BBox bbox(fluo::Point(i==0?0:(i+0.5) / (double)sz_x,
 						j==0?0:(j+0.5) / (double)sz_y,
 						k==0?0:(k+0.5) / (double)sz_z),
-						Point(bx1, by1, bz1));
+						fluo::Point(bx1, by1, bz1));
 
 					ox = i - (mx2 - mx);
 					oy = j - (my2 - my);
@@ -574,7 +574,7 @@ namespace FLIVR
 					dy1 = (double)(oy + my2) / sz_y;
 					dz1 = (double)(oz + mz2) / sz_z;
 
-					BBox dbox(Point(dx0, dy0, dz0), Point(dx1, dy1, dz1));
+					fluo::BBox dbox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 					TextureBrick *b = new TextureBrick(0, 0, mx2, my2, mz2, numc, numb,
 						ox, oy, oz, mx2, my2, mz2, bbox, tbox, dbox, bricks.size());
 					bricks.push_back(b);
@@ -704,10 +704,10 @@ namespace FLIVR
 		spcx_ = pyramid_[lv].data->axis[offset + 0].spacing;
 		spcy_ = pyramid_[lv].data->axis[offset + 1].spacing;
 		spcz_ = pyramid_[lv].data->axis[offset + 2].spacing;
-		Transform tform;
+		fluo::Transform tform;
 		tform.load_identity();
-		Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
-		tform.pre_scale(Vector(nmax));
+		fluo::Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
+		tform.pre_scale(fluo::Vector(nmax));
 		set_transform(tform);
 		//additional information
 		nx_ = pyramid_[lv].szx;

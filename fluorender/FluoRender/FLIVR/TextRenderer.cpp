@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/ImgShader.h>
 #include <FLIVR/VertexArray.h>
 #include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Color.h>
 
 namespace FLIVR
 {
@@ -178,7 +177,7 @@ namespace FLIVR
 	{
 	}
 
-	void TextRenderer::RenderText(const std::wstring& text, Color &color,
+	void TextRenderer::RenderText(const std::wstring& text, fluo::Color &color,
 		float x, float y, float sx, float sy)
 	{
 		glDisable(GL_DEPTH_TEST);

@@ -33,7 +33,7 @@
 #include <Types/Vector.h>
 #include <Types/Point.h>
 
-namespace FLTYPE
+namespace fluo
 {
 	class Mat3
 	{
@@ -347,6 +347,6 @@ namespace FLTYPE
 					v1[1] * v2[0], v1[1] * v2[1], v1[1] * v2[2],
 					v1[2] * v2[0], v1[2] * v2[1], v1[2] * v2[2]);
 	}
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif //ifndef _FLMATRIX_H_

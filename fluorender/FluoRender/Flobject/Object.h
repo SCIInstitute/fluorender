@@ -87,16 +87,16 @@ public:
 	bool addValue(const std::string &name, const std::string &value);
 	bool addValue(const std::string &name, const std::wstring &value);
 	//FluoRender's special types
-	bool addValue(const std::string &name, const FLTYPE::Point &value);
-	bool addValue(const std::string &name, const FLTYPE::Vector &value);
-	bool addValue(const std::string &name, const FLTYPE::BBox &value);
-	bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
-	bool addValue(const std::string &name, const FLTYPE::Color &value);
-	bool addValue(const std::string &name, const FLTYPE::Plane &value);
-	bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
-	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
-	bool addValue(const std::string &name, const FLTYPE::Ray &value);
-	bool addValue(const std::string &name, const FLTYPE::Transform &value);
+	bool addValue(const std::string &name, const fluo::Point &value);
+	bool addValue(const std::string &name, const fluo::Vector &value);
+	bool addValue(const std::string &name, const fluo::BBox &value);
+	bool addValue(const std::string &name, const fluo::HSVColor &value);
+	bool addValue(const std::string &name, const fluo::Color &value);
+	bool addValue(const std::string &name, const fluo::Plane &value);
+	bool addValue(const std::string &name, const fluo::PlaneSet &value);
+	bool addValue(const std::string &name, const fluo::Quaternion &value);
+	bool addValue(const std::string &name, const fluo::Ray &value);
+	bool addValue(const std::string &name, const fluo::Transform &value);
 
 	/** All the set value functions */
 	bool setValue(ValueTuple& vt, bool notify = true);
@@ -116,16 +116,16 @@ public:
 	bool setValue(const std::string &name, const std::string &value, bool notify = true);
 	bool setValue(const std::string &name, const std::wstring &value, bool notify = true);
 	//FluoRender's special types
-	bool setValue(const std::string &name, const FLTYPE::Point &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Vector &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::BBox &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Color &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Plane &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Ray &value, bool notify = true);
-	bool setValue(const std::string &name, const FLTYPE::Transform &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Point &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Vector &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::BBox &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::HSVColor &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Color &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Plane &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::PlaneSet &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Quaternion &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Ray &value, bool notify = true);
+	bool setValue(const std::string &name, const fluo::Transform &value, bool notify = true);
 
 	//toggle value for bool
 	bool toggleValue(const std::string &name, bool &value, bool notify = true);
@@ -148,16 +148,16 @@ public:
 	bool getValue(const std::string &name, std::string &value);
 	bool getValue(const std::string &name, std::wstring &value);
 	//FluoRender's special types
-	bool getValue(const std::string &name, FLTYPE::Point &value);
-	bool getValue(const std::string &name, FLTYPE::Vector &value);
-	bool getValue(const std::string &name, FLTYPE::BBox &value);
-	bool getValue(const std::string &name, FLTYPE::HSVColor &value);
-	bool getValue(const std::string &name, FLTYPE::Color &value);
-	bool getValue(const std::string &name, FLTYPE::Plane &value);
-	bool getValue(const std::string &name, FLTYPE::PlaneSet &value);
-	bool getValue(const std::string &name, FLTYPE::Quaternion &value);
-	bool getValue(const std::string &name, FLTYPE::Ray &value);
-	bool getValue(const std::string &name, FLTYPE::Transform &value);
+	bool getValue(const std::string &name, fluo::Point &value);
+	bool getValue(const std::string &name, fluo::Vector &value);
+	bool getValue(const std::string &name, fluo::BBox &value);
+	bool getValue(const std::string &name, fluo::HSVColor &value);
+	bool getValue(const std::string &name, fluo::Color &value);
+	bool getValue(const std::string &name, fluo::Plane &value);
+	bool getValue(const std::string &name, fluo::PlaneSet &value);
+	bool getValue(const std::string &name, fluo::Quaternion &value);
+	bool getValue(const std::string &name, fluo::Ray &value);
+	bool getValue(const std::string &name, fluo::Transform &value);
 
 	//get value the class
 	Value* getValue(const std::string &name)

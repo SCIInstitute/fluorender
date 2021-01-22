@@ -29,12 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUME_MESH_CONV_H_
 
 #include <vector>
-#include "../FLIVR/glm.h"
-#include "../FLIVR/Vector.h"
-#include "nrrd.h"
+#include <FLIVR/glm.h>
+#include <Types/Vector.h>
+#include <nrrd.h>
 
 using namespace std;
-using namespace FLIVR;
 
 //convert volume data to mesh
 class VolumeMeshConv

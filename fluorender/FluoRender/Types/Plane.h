@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Vector.h>
 #include <vector>
 
-namespace FLTYPE
+namespace fluo
 {
 
 	class Point;
@@ -150,6 +150,6 @@ namespace FLTYPE
 		}
 	};
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif

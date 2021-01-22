@@ -73,7 +73,7 @@ namespace FLIVR
 	}
 
 	//clipping planes
-	void MeshRenderer::set_planes(vector<Plane*> *p)
+	void MeshRenderer::set_planes(vector<fluo::Plane*> *p)
 	{
 		int i;
 		if (!planes_.empty())
@@ -88,12 +88,12 @@ namespace FLIVR
 
 		for (i=0; i<(int)p->size(); i++)
 		{
-			Plane *plane = new Plane(*(*p)[i]);
+			fluo::Plane *plane = new fluo::Plane(*(*p)[i]);
 			planes_.push_back(plane);
 		}
 	}
 
-	vector<Plane*>* MeshRenderer::get_planes()
+	vector<fluo::Plane*>* MeshRenderer::get_planes()
 	{
 		return &planes_;
 	}

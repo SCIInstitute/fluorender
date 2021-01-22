@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
-#include "FLIVR/Color.h"
+#include <Types/Color.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/DistCalculator.h>
 #include <Distance/RulerAlign.h>

@@ -33,9 +33,9 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string.h>
 #include <tiffio.h>
-#include "FLIVR/BBox.h"
-#include "FLIVR/Color.h"
-#include "FLIVR/Point.h"
+#include <Types/BBox.h>
+#include <Types/Color.h>
+#include <Types/Point.h>
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
 #include <FLIVR/VertexArray.h>

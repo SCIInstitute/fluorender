@@ -35,10 +35,9 @@ DEALINGS IN THE SOFTWARE.
 #include "FlKeyQuaternion.h"
 #include "FlKeyBoolean.h"
 #include "FlKeyInt.h"
-#include "../FLIVR/Quaternion.h"
+#include <Types/Quaternion.h>
 
 using namespace std;
-using namespace FLIVR;
 
 typedef struct
 {

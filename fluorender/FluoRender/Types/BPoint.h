@@ -26,13 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef FLIVR_BPoint_h
-#define FLIVR_BPoint_h
+#ifndef _FLBPoint_h_
+#define _FLBPoint_h_
 
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 #include <ostream>
 
-namespace FLIVR
+namespace fluo
 {
 	class Vector;
 
@@ -176,6 +176,6 @@ namespace FLIVR
 		bool is_valid_;
 	};
 
-} // End namespace FLIVR
+} // End namespace fluo
 
 #endif

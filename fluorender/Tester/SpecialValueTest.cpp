@@ -7,14 +7,14 @@ using namespace FL;
 void SpecialValueTest()
 {
 	ref_ptr<VolumeData> vd(new VolumeData());
-	FLTYPE::Vector spacing(1.0, 1.0, 3.0);
+	fluo::Vector spacing(1.0, 1.0, 3.0);
 	vd->addValue("spacing", spacing);
-	FLTYPE::Vector spacing2;
+	fluo::Vector spacing2;
 	vd->getValue("spacing", spacing2);
 	ASSERT_EQ(spacing, spacing2);
-	FLTYPE::Point point;
+	fluo::Point point;
 	vd->addValue("position", point);
-	FLTYPE::Point point2;
+	fluo::Point point2;
 	vd->getValue("position", point2);
 	ASSERT_EQ(point, point2);
 
@@ -33,9 +33,9 @@ void SpecialValueTest()
 	vd->getValue("position", point2);
 	ASSERT_EQ(point, point2);
 
-	FLTYPE::PlaneSet ps(6);
+	fluo::PlaneSet ps(6);
 	vd->addValue("clipping_planes", ps);
-	FLTYPE::PlaneSet ps2;
+	fluo::PlaneSet ps2;
 	vd->getValue("clipping_planes", ps2);
 	ASSERT_EQ(ps, ps2);
 }

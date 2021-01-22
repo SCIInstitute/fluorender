@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Pca_h
 #define FL_Pca_h
 
-#include <FLIVR/Point.h>
-#include <FLIVR/Vector.h>
-#include <FLIVR/BPoint.h>
+#include <Types/Point.h>
+#include <Types/Vector.h>
+#include <Types/BPoint.h>
 #include <vector>
 
 namespace FL

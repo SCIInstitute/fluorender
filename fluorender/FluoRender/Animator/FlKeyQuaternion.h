@@ -29,9 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _FLKEY_QUATERNION_H_
 
 #include "FlKey.h"
-#include "../FLIVR/Quaternion.h"
-
-using namespace FLIVR;
+#include <Types/Quaternion.h>
 
 class FlKeyQuaternion : public FlKey
 {
@@ -45,7 +43,7 @@ public:
 		m_code.l2 = 0;
 		m_code.l2_name = "";
 	}
-	FlKeyQuaternion(FlKeyCode keycode, Quaternion &qval)
+	FlKeyQuaternion(FlKeyCode keycode, fluo::Quaternion &qval)
 	{
 		m_code = keycode;
 		m_qval = qval;
@@ -53,11 +51,11 @@ public:
 	~FlKeyQuaternion() {}
 
 	int GetType() {return FLKEY_TYPE_QUATER;}
-	void SetValue(Quaternion &qval) {m_qval = qval;}
-	Quaternion GetValue() {return m_qval;}
+	void SetValue(fluo::Quaternion &qval) {m_qval = qval;}
+	fluo::Quaternion GetValue() {return m_qval;}
 
 private:
-	Quaternion m_qval;
+	fluo::Quaternion m_qval;
 };
 
 #endif//_FLKEY_QUATERNION_H_

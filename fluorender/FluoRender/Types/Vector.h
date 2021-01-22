@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <assert.h>
 #include <algorithm>
 
-namespace FLTYPE
+namespace fluo
 {
 	using std::string;
 
@@ -186,13 +186,13 @@ namespace FLTYPE
 
 	}; // end class Vector
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 
 // This cannot be above due to circular dependencies
 #include <Types/Point.h>
 
-namespace FLTYPE
+namespace fluo
 {
 	inline Vector::Vector(const Point& p)
 		: x_(p.x_), y_(p.y_), z_(p.z_)
@@ -499,7 +499,7 @@ namespace FLTYPE
 			std::max(v1.z(), v2.z()));
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 
 #endif//_FLVECTOR_H_

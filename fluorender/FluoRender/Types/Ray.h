@@ -32,7 +32,7 @@
 #include <Types/Point.h>
 #include <Types/Vector.h>
 
-namespace FLTYPE
+namespace fluo
 {
 
 	class Ray
@@ -93,5 +93,5 @@ namespace FLTYPE
 	};
 
 
-} // End namespace FLTYPE
+} // End namespace fluo
 #endif

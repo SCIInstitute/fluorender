@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TEXTRENDERER_H_
 #define _TEXTRENDERER_H_
 
+#include <Types/Color.h>
 #include <GL/glew.h>
 #include <string>
 #include <map>
@@ -121,14 +122,13 @@ namespace FLIVR
 			return m_size;
 	}
 
-	class Color;
 	class TextRenderer
 	{
 	public:
 		TextRenderer();
 		~TextRenderer();
 
-		void RenderText(const std::wstring& text, Color &color,
+		void RenderText(const std::wstring& text, fluo::Color &color,
 			float x, float y, float sx, float sy);
 		float RenderTextLen(std::wstring& text);
 

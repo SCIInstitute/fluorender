@@ -30,16 +30,14 @@
 #define SLIVR_Texture_h
 
 #include <vector>
-#include <FLIVR/Transform.h>
+#include <Types/Transform.h>
 #include "TextureBrick.h"
-#include <FLIVR/Utils.h>
+#include <Types/Utils.h>
 #include <glm/glm.hpp>
 
 namespace FLIVR
 {
 	using namespace std;
-
-	class Transform;
 
 	class Texture 
 	{
@@ -55,7 +53,7 @@ namespace FLIVR
 			double gmn, double gmx,
 			vector<FLIVR::TextureBrick*>* brks = NULL);
 
-		inline Vector res() { return Vector(nx_, ny_, nz_); }
+		inline fluo::Vector res() { return fluo::Vector(nx_, ny_, nz_); }
 		inline int nx() { return nx_; }
 		inline int ny() { return ny_; }
 		inline int nz() { return nz_; }
@@ -110,7 +108,7 @@ namespace FLIVR
 			void get_bounds(double &xmin, double &ymin, double &zmin,
 			double &xmax, double &ymax, double &zmax) const 
 		{
-			BBox b;
+			fluo::BBox b;
 			get_bounds(b);
 			xmin = b.min().x();
 			ymin = b.min().y();
@@ -122,24 +120,24 @@ namespace FLIVR
 		}
 
 		inline 
-			void get_bounds(BBox &b) const 
+			void get_bounds(fluo::BBox &b) const
 		{
 			b.extend(transform_.project(bbox_.min()));
 			b.extend(transform_.project(bbox_.max()));
 		}
 
-		inline BBox *bbox() { return &bbox_; }
-		inline void set_bbox(BBox bbox) { bbox_ = bbox; }
-		inline Transform *transform() { return &transform_; }
-		inline void set_transform(Transform tform) { transform_ = tform; }
+		inline fluo::BBox *bbox() { return &bbox_; }
+		inline void set_bbox(fluo::BBox bbox) { bbox_ = bbox; }
+		inline fluo::Transform *transform() { return &transform_; }
+		inline void set_transform(fluo::Transform tform) { transform_ = tform; }
 
 		// get sorted bricks
 		vector<TextureBrick*>* get_sorted_bricks(
-			Ray& view, bool is_orthographic = false);
+			fluo::Ray& view, bool is_orthographic = false);
 		//get closest bricks
 		vector<TextureBrick*>* get_closest_bricks(
-			Point& center, int quota, bool skip,
-			Ray& view, bool is_orthographic = false);
+			fluo::Point& center, int quota, bool skip,
+			fluo::Ray& view, bool is_orthographic = false);
 		//set sort bricks
 		void set_sort_bricks() {sort_bricks_ = true;}
 		void reset_sort_bricks() {sort_bricks_ = false;}
@@ -156,7 +154,7 @@ namespace FLIVR
 		// PROJECTION matrices to determine if it is within the viewport.
 		// Returns true if it is visible.
 		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat);
-		bool test_against_view(const BBox &bbox, bool persp = false);
+		bool test_against_view(const fluo::BBox &bbox, bool persp = false);
 
 		inline int nlevels(){ return int((*bricks_).size()); }
 
@@ -199,7 +197,7 @@ namespace FLIVR
 			b_spcx_ = x;
 			b_spcy_ = y;
 			b_spcz_ = z;
-			Transform tform;
+			fluo::Transform tform;
 			tform.load_identity();
 			int nx, ny, nz;
 			if (brkxml_)
@@ -214,8 +212,8 @@ namespace FLIVR
 				ny = ny_;
 				nz = nz_;
 			}
-			Point nmax(nx*x, ny*y, nz*z);
-			tform.pre_scale(Vector(nmax));
+			fluo::Point nmax(nx*x, ny*y, nz*z);
+			tform.pre_scale(fluo::Vector(nmax));
 			set_transform(tform);
 		}
 
@@ -328,13 +326,13 @@ namespace FLIVR
 		//! bytes per texel for each component.
 		int											nb_[TEXTURE_MAX_COMPONENTS];
 		//! data tform
-		Transform									transform_; 
+		fluo::Transform								transform_;
 		double										vmin_;
 		double										vmax_;
 		double										gmin_;
 		double										gmax_;
 		//! data bbox
-		BBox										bbox_; 
+		fluo::BBox									bbox_;
 		//! spacings
 		double										spcx_;
 		double										spcy_;
@@ -377,8 +375,8 @@ namespace FLIVR
 		vector<TextureBrick*> default_vec_;
 
 		//for view testing
-		Transform mv_;
-		Transform pr_;
+		fluo::Transform mv_;
+		fluo::Transform pr_;
 	};
 
 	inline unsigned int Texture::negxid(unsigned int id)

@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include <iostream>
 
-namespace FLTYPE
+namespace fluo
 {
 	class Color;
 	class HSVColor
@@ -235,6 +235,6 @@ namespace FLTYPE
 
 	};
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif//_FLCOLOR_H_

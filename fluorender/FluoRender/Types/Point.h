@@ -34,7 +34,7 @@
 #include <iostream>
 #include <algorithm>
 
-namespace FLTYPE {
+namespace fluo {
 	using std::string;
 
 	class Vector;
@@ -145,12 +145,12 @@ namespace FLTYPE {
 		return p + v;
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 // This cannot be above due to circular dependencies
 #include <Types/Vector.h>
 
-namespace FLTYPE
+namespace fluo
 {
 	inline Point::Point(const Vector& v)
 		: x_(v.x_), y_(v.y_), z_(v.z_)
@@ -411,6 +411,6 @@ namespace FLTYPE
 		return p1.x_*p2.x_ + p1.y_*p2.y_ + p1.z_*p2.z_;
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif//_FLPOINT_H_

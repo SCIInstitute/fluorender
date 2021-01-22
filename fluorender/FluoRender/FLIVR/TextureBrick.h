@@ -30,9 +30,9 @@
 #define SLIVR_TextureBrick_h
 
 #include "GL/glew.h"
-#include <FLIVR/Ray.h>
-#include <FLIVR/BBox.h>
-#include <FLIVR/Plane.h>
+#include <Types/Ray.h>
+#include <Types/BBox.h>
+#include <Types/Plane.h>
 #include <wx/thread.h>
 #include <vector>
 #include <nrrd.h>

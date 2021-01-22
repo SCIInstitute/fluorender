@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-#include <FLIVR/BBox.h>
-#include <FLIVR/Vector.h>
-#include <FLIVR/Transform.h>
+#include <Types/BBox.h>
+#include <Types/Vector.h>
+#include <Types/Transform.h>
 #include <FLIVR/TextureBrick.h>
 
 using namespace std;
@@ -90,7 +90,7 @@ namespace FL
 			m_persp = val;
 		}
 
-		void SetMats(FLIVR::Transform &mv, FLIVR::Transform &pr, FLIVR::Transform &mat)
+		void SetMats(fluo::Transform &mv, fluo::Transform &pr, fluo::Transform &mat)
 		{
 			m_mv = mv;
 			m_pr = pr;
@@ -115,16 +115,16 @@ namespace FL
 		int m_mx, m_my;//mouse click position
 		//for persp
 		bool m_persp;
-		FLIVR::Transform m_mat;//combined mat
-		FLIVR::Transform m_imat;//combined invert
-		FLIVR::Transform m_mv;//modelview
-		FLIVR::Transform m_pr;//projection
-		FLIVR::Transform m_imv;//modelview invert
-		FLIVR::Transform m_ipr;//projection invert
+		fluo::Transform m_mat;//combined mat
+		fluo::Transform m_imat;//combined invert
+		fluo::Transform m_mv;//modelview
+		fluo::Transform m_pr;//projection
+		fluo::Transform m_imv;//modelview invert
+		fluo::Transform m_ipr;//projection invert
 
 		struct BrickBox
 		{
-			FLIVR::BBox bbox;
+			fluo::BBox bbox;
 			FLIVR::TextureBrick* brick;
 		};
 
@@ -132,7 +132,7 @@ namespace FL
 		bool GetBrickBoxes(vector<BrickBox> &bbs);
 		void BrickViewInt();
 		void BrickRayInt();
-		bool test_against_view(const FLIVR::BBox &bbox);
+		bool test_against_view(const fluo::BBox &bbox);
 	};
 }
 

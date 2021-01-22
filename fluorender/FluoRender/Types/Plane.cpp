@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Quaternion.h>
 #include <iostream>
 
-namespace FLTYPE
+namespace fluo
 {
 	Plane::Plane()
 		: n_(Vector(0,0,1)), d_(0)
@@ -369,5 +369,5 @@ namespace FLTYPE
 		return planes_[index];
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 

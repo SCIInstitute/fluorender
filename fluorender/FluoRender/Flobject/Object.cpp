@@ -191,52 +191,52 @@ bool Object::addValue(const std::string &name, const std::wstring &value)
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Point &value)
+bool Object::addValue(const std::string &name, const fluo::Point &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Vector &value)
+bool Object::addValue(const std::string &name, const fluo::Vector &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::BBox &value)
+bool Object::addValue(const std::string &name, const fluo::BBox &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::HSVColor &value)
+bool Object::addValue(const std::string &name, const fluo::HSVColor &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Color &value)
+bool Object::addValue(const std::string &name, const fluo::Color &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Plane &value)
+bool Object::addValue(const std::string &name, const fluo::Plane &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::PlaneSet &value)
+bool Object::addValue(const std::string &name, const fluo::PlaneSet &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Quaternion &value)
+bool Object::addValue(const std::string &name, const fluo::Quaternion &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Ray &value)
+bool Object::addValue(const std::string &name, const fluo::Ray &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
 
-bool Object::addValue(const std::string &name, const FLTYPE::Transform &value)
+bool Object::addValue(const std::string &name, const fluo::Transform &value)
 {
 	OBJECT_ADD_VALUE_BODY;
 }
@@ -376,63 +376,63 @@ bool Object::setValue(const std::string &name, const std::wstring &value, bool n
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Point &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Point &value, bool notify)
 {
-	FLTYPE::Point old_value;
+	fluo::Point old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Vector &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Vector &value, bool notify)
 {
-	FLTYPE::Vector old_value;
+	fluo::Vector old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::BBox &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::BBox &value, bool notify)
 {
-	FLTYPE::BBox old_value;
+	fluo::BBox old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::HSVColor &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::HSVColor &value, bool notify)
 {
-	FLTYPE::HSVColor old_value;
+	fluo::HSVColor old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Color &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Color &value, bool notify)
 {
-	FLTYPE::Color old_value;
+	fluo::Color old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Plane &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Plane &value, bool notify)
 {
-	FLTYPE::Plane old_value;
+	fluo::Plane old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::PlaneSet &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::PlaneSet &value, bool notify)
 {
-	FLTYPE::PlaneSet old_value;
+	fluo::PlaneSet old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Quaternion &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Quaternion &value, bool notify)
 {
-	FLTYPE::Quaternion old_value;
+	fluo::Quaternion old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Ray &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Ray &value, bool notify)
 {
-	FLTYPE::Ray old_value;
+	fluo::Ray old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
-bool Object::setValue(const std::string &name, const FLTYPE::Transform &value, bool notify)
+bool Object::setValue(const std::string &name, const fluo::Transform &value, bool notify)
 {
-	FLTYPE::Transform old_value;
+	fluo::Transform old_value;
 	OBJECT_SET_VALUE_BODY;
 }
 
@@ -534,52 +534,52 @@ bool Object::getValue(const std::string &name, std::wstring &value)
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Point &value)
+bool Object::getValue(const std::string &name, fluo::Point &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Vector &value)
+bool Object::getValue(const std::string &name, fluo::Vector &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::BBox &value)
+bool Object::getValue(const std::string &name, fluo::BBox &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::HSVColor &value)
+bool Object::getValue(const std::string &name, fluo::HSVColor &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Color &value)
+bool Object::getValue(const std::string &name, fluo::Color &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Plane &value)
+bool Object::getValue(const std::string &name, fluo::Plane &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::PlaneSet &value)
+bool Object::getValue(const std::string &name, fluo::PlaneSet &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Quaternion &value)
+bool Object::getValue(const std::string &name, fluo::Quaternion &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Ray &value)
+bool Object::getValue(const std::string &name, fluo::Ray &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }
 
-bool Object::getValue(const std::string &name, FLTYPE::Transform &value)
+bool Object::getValue(const std::string &name, fluo::Transform &value)
 {
 	OBJECT_GET_VALUE_BODY;
 }

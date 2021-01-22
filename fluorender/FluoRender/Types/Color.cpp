@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 #include <Types/Utils.h>
 
-namespace FLTYPE
+namespace fluo
 {
 	Color::Color()
 		: r_(0), g_(0), b_(0)
@@ -251,4 +251,4 @@ namespace FLTYPE
 			return 0;
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo

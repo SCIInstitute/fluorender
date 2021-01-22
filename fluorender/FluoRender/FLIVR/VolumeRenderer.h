@@ -29,8 +29,8 @@
 #ifndef SLIVR_VolumeRenderer_h
 #define SLIVR_VolumeRenderer_h
 
-#include <FLIVR/Color.h>
-#include <FLIVR/Plane.h>
+#include <Types/Color.h>
+#include <Types/Plane.h>
 #include "Texture.h"
 #include "TextureRenderer.h"
 #include "ImgShader.h"

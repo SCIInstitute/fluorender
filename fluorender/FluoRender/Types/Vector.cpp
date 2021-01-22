@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 using std::istream;
 using std::ostream;
 
-using namespace FLTYPE;
+using namespace fluo;
 
 string Vector::get_string() const
 {

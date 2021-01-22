@@ -11,8 +11,8 @@ coordinate generation (spheremap and planar projections) + more.
 
 */
 
-#include "GL/glew.h"
-#include <FLIVR/Color.h>
+#include <GL/glew.h>
+#include <Types/Color.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,8 +20,6 @@ coordinate generation (spheremap and planar projections) + more.
 #include <assert.h>
 #include "glm.h"
 #include "compatibility.h"
-
-using namespace FLIVR;
 
 #define T(x) (model->triangles[(x)])
 #define L(x) (model->lines[(x)])

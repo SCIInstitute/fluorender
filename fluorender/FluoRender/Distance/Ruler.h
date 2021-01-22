@@ -31,12 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <vector>
 #include <set>
-#include <FLIVR/Point.h>
-#include <FLIVR/Color.h>
-#include <FLIVR/Transform.h>
+#include <Types/Point.h>
+#include <Types/Color.h>
+#include <Types/Transform.h>
 #include <wx/string.h>
-
-using namespace FLIVR;
 
 namespace FL
 {
@@ -62,7 +60,7 @@ namespace FL
 			m_locked(false),
 			m_id(0)
 		{}
-		RulerPoint(Point& p):
+		RulerPoint(fluo::Point& p):
 			m_p(p),
 			m_locked(false),
 			m_id(0)
@@ -71,33 +69,33 @@ namespace FL
 			m_locked(locked),
 			m_id(0)
 		{}
-		RulerPoint(Point& p, bool locked):
+		RulerPoint(fluo::Point& p, bool locked):
 			m_p(p),
 			m_locked(locked),
 			m_id(0)
 		{}
-		RulerPoint(Point& p, unsigned int id):
+		RulerPoint(fluo::Point& p, unsigned int id):
 			m_p(p),
 			m_locked(false),
 			m_id(id)
 		{}
-		RulerPoint(Point& p, unsigned int id, std::set<unsigned int> bid) :
+		RulerPoint(fluo::Point& p, unsigned int id, std::set<unsigned int> bid) :
 			m_p(p),
 			m_locked(false),
 			m_id(id),
 			m_bid(bid)
 		{}
-		RulerPoint(Point& p, unsigned int id, bool locked):
+		RulerPoint(fluo::Point& p, unsigned int id, bool locked):
 			m_p(p),
 			m_locked(locked),
 			m_id(id)
 		{}
 
-		void SetPoint(Point& p)
+		void SetPoint(fluo::Point& p)
 		{
 			m_p = p;
 		}
-		Point GetPoint()
+		fluo::Point GetPoint()
 		{
 			return m_p;
 		}
@@ -105,7 +103,7 @@ namespace FL
 		{
 			m_p.scale(sx, sy, sz);
 		}
-		void DisplacePoint(Vector& dp)
+		void DisplacePoint(fluo::Vector& dp)
 		{
 			m_p += dp;
 		}
@@ -139,7 +137,7 @@ namespace FL
 		friend class Ruler;
 
 	private:
-		Point m_p;
+		fluo::Point m_p;
 		bool m_locked;
 		unsigned int m_id;//from comp
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks
@@ -201,8 +199,8 @@ namespace FL
 		int GetNumBranchPoint(int nbranch);
 		RulerPoint* GetPoint(int nbranch, int index);
 		pRulerPoint GetPPoint(int nbranch, int index);
-		pRulerPoint FindPoint(Point& point);
-		pRulerPoint FindNearestPoint(Point& point, size_t &ri, size_t &rj);
+		pRulerPoint FindPoint(fluo::Point& point);
+		pRulerPoint FindNearestPoint(fluo::Point& point, size_t &ri, size_t &rj);
 		int GetRulerType();
 		void SetRulerType(int type);
 		bool GetFinished();
@@ -212,10 +210,10 @@ namespace FL
 		double GetAngle();
 		void Scale(double spcx, double spcy, double spcz);
 
-		bool AddPoint(Point &point);
-		bool AddPointAfterId(Point &point, unsigned int id,
+		bool AddPoint(fluo::Point &point);
+		bool AddPointAfterId(fluo::Point &point, unsigned int id,
 			std::set<unsigned int> &cid, std::set<unsigned int> &bid);
-		void SetTransform(Transform *tform);
+		void SetTransform(fluo::Transform *tform);
 		bool AddBranch(pRulerPoint point);
 		void DeletePoint(pRulerPoint &point);
 		void Prune(int len);
@@ -300,7 +298,7 @@ namespace FL
 		void SaveProfile(wxString &filename);
 
 		//color
-		void SetColor(Color& color)
+		void SetColor(fluo::Color& color)
 		{
 			m_color = color; m_use_color = true;
 		}
@@ -308,7 +306,7 @@ namespace FL
 		{
 			return m_use_color;
 		}
-		Color &GetColor()
+		fluo::Color &GetColor()
 		{
 			return m_color;
 		}
@@ -323,8 +321,8 @@ namespace FL
 			return m_brush_size;
 		}
 
-		void FinishEllipse(Vector view);
-		Point GetCenter();
+		void FinishEllipse(fluo::Vector view);
+		fluo::Point GetCenter();
 
 	private:
 		static int m_num;
@@ -336,13 +334,13 @@ namespace FL
 		bool m_finished;
 		std::vector<RulerBranch> m_ruler;
 		bool m_disp;
-		Transform *m_tform;
+		fluo::Transform *m_tform;
 		//a profile
 		wxString m_info_profile;
 		std::vector<ProfileBin> m_profile;
 		//color
 		bool m_use_color;
-		Color m_color;
+		fluo::Color m_color;
 
 		//time-dependent
 		bool m_time_dep;

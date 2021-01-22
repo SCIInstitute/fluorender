@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ostream>
 #include <algorithm>
 
-namespace FLTYPE
+namespace fluo
 {
 	class Vector;
 
@@ -83,8 +83,8 @@ namespace FLTYPE
 		{
 			if(is_valid_)
 			{
-				cmin_=FLTYPE::Min(p, cmin_);
-				cmax_=FLTYPE::Max(p, cmax_);
+				cmin_=fluo::Min(p, cmin_);
+				cmax_=fluo::Max(p, cmax_);
 			} 
 			else 
 			{
@@ -136,8 +136,8 @@ namespace FLTYPE
 			Vector r(radius,radius,radius);
 			if(is_valid_)
 			{
-				cmin_=FLTYPE::Min(p-r, cmin_);
-				cmax_=FLTYPE::Max(p+r, cmax_);
+				cmin_=fluo::Min(p-r, cmin_);
+				cmax_=fluo::Max(p+r, cmax_);
 			} 
 			else 
 			{
@@ -177,8 +177,8 @@ namespace FLTYPE
 		{
 			if (is_valid_)
 			{
-				cmin_ = FLTYPE::Max(cmin_, box.Min());
-				cmax_ = FLTYPE::Min(cmax_, box.Max());
+				cmin_ = fluo::Max(cmin_, box.Min());
+				cmax_ = fluo::Min(cmax_, box.Max());
 				if (!(cmin_ <= cmax_))
 					is_valid_ = false;
 			}
@@ -198,14 +198,14 @@ namespace FLTYPE
 		{
 			assert(is_valid_);
 			Vector diagonal(cmax_-cmin_);
-			return FLTYPE::Max(diagonal.x(), diagonal.y(), diagonal.z());
+			return fluo::Max(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		inline double shortest_edge() const
 		{
 			assert(is_valid_);
 			Vector diagonal(cmax_-cmin_);
-			return FLTYPE::Min(diagonal.x(), diagonal.y(), diagonal.z());
+			return fluo::Min(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		//! Move the bounding box 
@@ -217,11 +217,13 @@ namespace FLTYPE
 
 		//! Scale the bounding box by s, centered around o
 		void scale(double s, const Vector &o);
+		//scale around origin
+		void scale(double sx, double sy, double sz);
 
-		inline Point Min() const
+		inline Point min() const
 		{ return cmin_; }
 
-		inline Point Max() const
+		inline Point max() const
 		{ return cmax_; }
 
 		inline Vector diagonal() const
@@ -312,6 +314,6 @@ namespace FLTYPE
 			return false;
 		return true;
 	}
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif//_FLBBOX_H_

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_VolumePoint_h_
 #define FL_VolumePoint_h_
 
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 
 class VRenderGLView;
 class VolumeData;

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 #include <vector>
 #include <algorithm>
 #include <glm/glm.hpp>

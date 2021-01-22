@@ -30,8 +30,8 @@
 #define SLIVR_MultiVolumeRenderer_h
 
 #include "GL/glew.h"
-#include <FLIVR/BBox.h>
-#include <FLIVR/Plane.h>
+#include <Types/BBox.h>
+#include <Types/Plane.h>
 #include "Texture.h"
 #include "VolumeRenderer.h"
 #include <vector>

@@ -33,7 +33,7 @@
 #include <iostream>
 #include <cmath>
 
-namespace FLTYPE
+namespace fluo
 {
 //---------------------------------------------------------------------------
 // Sorting functions
@@ -276,7 +276,7 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
     *returnCos = std::cos(theta);
 }
 
-} // namespace FLTYPE
+} // namespace fluo
 
 #endif//_FLTYPEUTILS_H_
 

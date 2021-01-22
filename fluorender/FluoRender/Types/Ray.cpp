@@ -29,7 +29,7 @@
 #include <Types/Ray.h>
 #include <Types/Utils.h>
 
-namespace FLTYPE
+namespace fluo
 {
 	Ray::Ray(const Point& o, const Vector& d)
 		: o_(o), d_(d)
@@ -96,5 +96,5 @@ namespace FLTYPE
 		d_.normalize();
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 

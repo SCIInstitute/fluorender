@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_RulerAlign_h
 
 #include <Distance/Ruler.h>
-#include <FLIVR/Vector.h>
+#include <Types/Vector.h>
 
 class VRenderGLView;
 
@@ -50,7 +50,7 @@ namespace FL
 
 		void AddRuler(Ruler* ruler)
 		{
-			FLIVR::Point p;
+			fluo::Point p;
 			for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
 			{
 				RulerPoint* point = ruler->GetPoint(i);
@@ -94,12 +94,12 @@ namespace FL
 
 	private:
 		VRenderGLView *m_view;
-		std::vector<FLIVR::Point> m_point_list;
+		std::vector<fluo::Point> m_point_list;
 		int m_axis_type;
-		FLIVR::Vector m_axis;
-		FLIVR::Vector m_axis_x;
-		FLIVR::Vector m_axis_y;
-		FLIVR::Vector m_axis_z;
+		fluo::Vector m_axis;
+		fluo::Vector m_axis_x;
+		fluo::Vector m_axis_y;
+		fluo::Vector m_axis_z;
 		std::vector<double> m_cov;
 	};
 }

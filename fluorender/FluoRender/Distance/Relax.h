@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 #include <vector>
 
 using namespace std;
@@ -79,7 +79,7 @@ namespace FL
 
 		bool Compute();
 
-		FLIVR::Vector GetDisplacement(int idx);
+		fluo::Vector GetDisplacement(int idx);
 
 	private:
 		bool m_use_mask;//use mask instead of data
