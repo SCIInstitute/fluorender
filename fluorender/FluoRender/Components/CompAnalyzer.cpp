@@ -508,7 +508,6 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 
 void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 {
-	Cell temp(0, 0);//temporary cell for accumulation
 	//comp list
 	CelpList &comps = m_compgroup->celps;
 	//graph for linking multiple bricks
@@ -525,6 +524,7 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 		Celp info = graph[*iter].cell.lock();
 		if (graph.GetLinkedComps(info, list, SIZE_LIMIT))
 		{
+			Cell temp(0, 0);//temporary cell for accumulation
 			for (auto li = list.begin();
 				li != list.end(); ++li)
 				temp.Inc(li->second);
