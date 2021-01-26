@@ -1950,7 +1950,7 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, fls::CelpList
 	cell->SetSizeD(size);
 	fluo::Point p(x, y, z);
 	cell->SetCenter(p);
-	list.insert(pair<unsigned int, fls::Celp>
+	list.insert(std::pair<unsigned int, fls::Celp>
 		(id, cell));
 }
 
@@ -2527,8 +2527,8 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 		return;
 
 	//replace ID
-	boost::unordered_map<unsigned int, unsigned int> list_rep;
-	boost::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
+	std::unordered_map<unsigned int, unsigned int> list_rep;
+	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
 	unsigned int old_id, new_id;
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);

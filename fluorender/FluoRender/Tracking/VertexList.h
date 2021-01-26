@@ -29,14 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #define FL_VertexList_h
 
 #include "Vertex.h"
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <deque>
 #include <iostream>
 
 namespace fls
 {
-	typedef boost::unordered_map<unsigned int, Verp> VertexList;
-	typedef boost::unordered_map<unsigned int, Verp>::iterator VertexListIter;
+	typedef std::unordered_map<unsigned int, Verp> VertexList;
+	typedef std::unordered_map<unsigned int, Verp>::iterator VertexListIter;
 
 	struct PathVert
 	{

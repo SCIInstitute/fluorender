@@ -32,8 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <Types/Color.h>
 #include <Distance/Pca.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
@@ -41,11 +40,11 @@ DEALINGS IN THE SOFTWARE.
 namespace fls
 {
 	class Vertex;
-	typedef boost::shared_ptr<Vertex> Verp;
-	typedef boost::weak_ptr<Vertex> Verw;
+	typedef std::shared_ptr<Vertex> Verp;
+	typedef std::weak_ptr<Vertex> Verw;
 	class Cell;
-	typedef boost::shared_ptr<Cell> Celp;
-	typedef boost::weak_ptr<Cell> Celw;
+	typedef std::shared_ptr<Cell> Celp;
+	typedef std::weak_ptr<Cell> Celw;
 
 	class CelpList : public std::unordered_map<unsigned long long, Celp>
 	{

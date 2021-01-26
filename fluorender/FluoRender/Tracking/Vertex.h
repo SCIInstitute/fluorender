@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Cell.h"
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
@@ -136,8 +134,8 @@ namespace fls
 		fluo::Point m_center;
 		unsigned int m_size_ui;
 		double m_size_d;
-		typedef boost::unordered_map<unsigned int, Vrtx> InterVertList;
-		typedef boost::unordered_map<unsigned int, Vrtx>::iterator InterVertListIter;
+		typedef std::unordered_map<unsigned int, Vrtx> InterVertList;
+		typedef std::unordered_map<unsigned int, Vrtx>::iterator InterVertListIter;
 		InterVertList m_inter_verts;
 		CellBin m_cells;//children
 		bool m_split;//true if em has been run already

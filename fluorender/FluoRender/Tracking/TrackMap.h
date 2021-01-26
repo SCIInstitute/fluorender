@@ -32,11 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include "VertexList.h"
 #include "VolCache.h"
 #include <fstream>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/signals2.hpp>
+#include <memory>
 #include <deque>
 #include <map>
+#include <boost/signals2.hpp>
 
 namespace fls
 {
@@ -54,8 +53,8 @@ namespace fls
 #define TAG_VER221		10	//new values added in v2.21
 
 	class TrackMap;
-	typedef boost::shared_ptr<TrackMap> pTrackMap;
-	typedef boost::weak_ptr<TrackMap> pwTrackMap;
+	typedef std::shared_ptr<TrackMap> pTrackMap;
+	typedef std::weak_ptr<TrackMap> pwTrackMap;
 	class TrackMapProcessor
 	{
 	public:

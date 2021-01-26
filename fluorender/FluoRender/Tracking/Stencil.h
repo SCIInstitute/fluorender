@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Stencil_h
 
 #include <Types/BBox.h>
-#include "boost/unordered_map.hpp"
+#include <unordered_map>
 
 namespace fls
 {
@@ -71,8 +71,8 @@ namespace fls
 		fluo::BBox box;
 	};
 
-	typedef boost::unordered_map<unsigned int, Stencil> StencilList;
-	typedef boost::unordered_map<unsigned int, Stencil>::iterator StencilListIter;
+	typedef std::unordered_map<unsigned int, Stencil> StencilList;
+	typedef std::unordered_map<unsigned int, Stencil>::iterator StencilListIter;
 
 	//functions
 	inline float operator*(const Stencil& s1, const Stencil& s2)
