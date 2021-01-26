@@ -1104,7 +1104,7 @@ private:
 	void Pick();
 	void PickMesh();
 	void PickVolume();
-	void SetCompSelection(VolumeData* vd, fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
+	void SetCompSelection(fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
 
 	//system call
 	void OnDraw(wxPaintEvent& event);

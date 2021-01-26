@@ -3897,13 +3897,16 @@ void ComponentDlg::GetCompSelection()
 	}
 }
 
-void ComponentDlg::SetCompSelection(std::set<unsigned int>& ids, int mode)
+void ComponentDlg::SetCompSelection(std::set<unsigned long long>& ids, int mode)
 {
 	if (ids.empty())
 		return;
 
+	int bn = m_comp_analyzer.GetBrickNum();
+
 	wxString str;
-	unsigned long ulval;
+	unsigned long ulv;
+	unsigned long long ull;
 	bool flag = mode==1;
 	int lasti = -1;
 	wxArrayInt sel = m_output_grid->GetSelectedRows();
@@ -3913,9 +3916,18 @@ void ComponentDlg::SetCompSelection(std::set<unsigned int>& ids, int mode)
 	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
 	{
 		str = m_output_grid->GetCellValue(i, 0);
-		if (!str.ToULong(&ulval))
+		if (!str.ToULong(&ulv))
 			continue;
-		if (ids.find(ulval) != ids.end())
+		if (bn > 1)
+		{
+			str = m_output_grid->GetCellValue(i, 1);
+			if (!str.ToULongLong(&ull))
+				continue;
+			ull = (ull << 32) | ulv;
+		}
+		else
+			ull = ulv;
+		if (ids.find(ull) != ids.end())
 		{
 			if (!flag)
 			{

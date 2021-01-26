@@ -640,6 +640,72 @@ size_t ComponentAnalyzer::GetCompSize()
 	return list_size - graph_size + cc_size;
 }
 
+void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long long> &ids)
+{
+	if (!m_compgroup)
+		return;
+	VolumeData* vd = m_compgroup->vd;
+	if (!vd || ! vd->GetTexture())
+		return;
+
+	//get label data
+	Nrrd* nrrd_label = vd->GetLabel(true);
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	int ix = (int)(p.x() + 0.5);
+	int iy = (int)(p.y() + 0.5);
+	int iz = (int)(p.z() + 0.5);
+	if (ix < 0 || ix >= nx ||
+		iy < 0 || iy >= ny ||
+		iz < 0 || iz >= nz)
+		return;
+	unsigned long long index = (unsigned long long)nx * ny * iz +
+		(unsigned long long)nx * iy + ix;
+	unsigned int id = data_label[index];
+	if (!id)
+		return;
+	int bn = vd->GetBrickNum();
+
+	unsigned long long ull;
+	if (bn > 1)
+	{
+		unsigned int brick_id = vd->GetTexture()->get_brick_id(index);
+		ull = Cell::GetKey(id, brick_id);
+	}
+	else
+		ull = id;
+	ids.insert(ull);
+
+	//id, brick_id
+	CellGraph &graph = m_compgroup->graph;
+	size_t graph_size = boost::num_vertices(graph);
+	if (graph_size)
+	{
+		graph.ClearVisited();
+		std::pair<CelVrtIter, CelVrtIter> vertices =
+			boost::vertices(graph);
+		for (auto iter = vertices.first; iter != vertices.second; ++iter)
+		{
+			if (graph[*iter].visited)
+				continue;
+			CelpList list;
+			Celp info = graph[*iter].cell.lock();
+			if (ids.find(info->GetEId()) != ids.end())
+			{
+				graph.GetLinkedComps(info, list, SIZE_LIMIT);
+				for (auto it2 = list.begin();
+					it2 != list.end(); ++it2)
+					ids.insert(it2->second->GetEId());
+			}
+		}
+	}
+}
+
 void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
 	if (!m_compgroup)

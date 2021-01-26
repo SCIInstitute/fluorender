@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <vector>
+#include <set>
 #include <boost/signals2.hpp>
 #include <Tracking/Cell.h>
 #include "DataManager.h"
@@ -122,6 +123,8 @@ namespace fls
 
 		size_t GetCompSize();
 		size_t GetListSize();
+		void GetCompsPoint(fluo::Point& p, std::set<unsigned long long> &ids);
+
 		void OutputFormHeader(std::string &str);
 		//print out results
 		//verbose: 0-clean output; 1-extra info

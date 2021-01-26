@@ -3797,42 +3797,18 @@ void VRenderGLView::PickVolume()
 			frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
 		}
 		//update label selection
-		SetCompSelection(picked_vd, ip, kmode);
+		SetCompSelection(ip, kmode);
 	}
 }
 
-void VRenderGLView::SetCompSelection(VolumeData* vd, fluo::Point& p, int mode)
+void VRenderGLView::SetCompSelection(fluo::Point& p, int mode)
 {
-	if (!vd || !vd->GetTexture())
-		return;
-	//get label data
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	int ix = (int)(p.x() + 0.5);
-	int iy = (int)(p.y() + 0.5);
-	int iz = (int)(p.z() + 0.5);
-	if (ix < 0 || ix >= nx ||
-		iy < 0 || iy >= ny ||
-		iz < 0 || iz >= nz)
-		return;
-	unsigned long long index = (unsigned long long)nx * ny * iz +
-		(unsigned long long)nx * iy + ix;
-	unsigned int id = data_label[index];
-	if (!id)
-		return;
-
 	//update selection
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (frame && frame->GetComponentDlg())
 	{
-		std::set<unsigned int> ids;
-		ids.insert(id);
+		std::set<unsigned long long> ids;
+		frame->GetComponentDlg()->GetAnalyzer()->GetCompsPoint(p, ids);
 		frame->GetComponentDlg()->SetCompSelection(ids, mode);
 	}
 }

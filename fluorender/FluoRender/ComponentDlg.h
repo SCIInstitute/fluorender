@@ -223,7 +223,7 @@ public:
 	//select comps
 	bool GetCellList(fls::CelpList &cl, bool links=false);
 	void GetCompSelection();
-	void SetCompSelection(std::set<unsigned int>& ids, int mode);
+	void SetCompSelection(std::set<unsigned long long>& ids, int mode);
 	void IncludeComps();
 	void ExcludeComps();
 
