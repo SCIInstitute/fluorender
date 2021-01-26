@@ -145,7 +145,7 @@ private:
 
 	//current view
 	VRenderView *m_view;
-	FL::VolumeSelector *m_selector;
+	fls::VolumeSelector *m_selector;
 
 	//max volume value
 	double m_max_value;
@@ -155,7 +155,7 @@ private:
 	//output
 	bool m_hold_history;
 
-	FL::RulerAlign m_aligner;
+	fls::RulerAlign m_aligner;
 
 	//paint tools
 	//toolbar

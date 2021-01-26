@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
 
-namespace FL
+namespace fls
 {
 	struct UncertainBin
 	{
@@ -346,6 +346,6 @@ namespace FL
 		return box;
 	}
 
-}//namespace FL
+}//namespace fls
 
 #endif//FL_Vertex_h

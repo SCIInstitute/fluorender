@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Group.h>
 #include <Scenegraph/NodeVisitor.h>
 
-using namespace FL;
+using namespace fls;
 
 Group::Group()
 {

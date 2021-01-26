@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <string>
 
-namespace FL
+namespace fls
 {
 class Observer
 {

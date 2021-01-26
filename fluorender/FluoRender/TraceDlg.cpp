@@ -126,8 +126,8 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 
 	DeleteAllItems();
 
-	FL::CelpList sel_cells = traces->GetCellList();
-	std::vector<FL::Celp> cells;
+	fls::CelpList sel_cells = traces->GetCellList();
+	std::vector<fls::Celp> cells;
 	for (auto siter = sel_cells.begin();
 	siter != sel_cells.end(); ++siter)
 		cells.push_back(siter->second);
@@ -1169,7 +1169,7 @@ void TraceDlg::UncertainFilter(bool input)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
-	FL::CelpList list_in, list_out;
+	fls::CelpList list_in, list_out;
 
 	//fill inlist
 	if (input)
@@ -1201,8 +1201,8 @@ void TraceDlg::UncertainFilter(bool input)
 			return;
 	}
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
 	str.ToLong(&ival);
@@ -1210,7 +1210,7 @@ void TraceDlg::UncertainFilter(bool input)
 	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	comp_selector.SelectList(list_out);
 
 	//update view
@@ -1396,7 +1396,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	vd->GetSpacings(spcx, spcy, spcz);
 
 	//get rulers
-	FL::RulerList rulers;
+	fls::RulerList rulers;
 	trace_group->GetMappedRulers(rulers);
 	for (auto iter = rulers.begin();
 	iter != rulers.end(); ++iter)
@@ -1426,8 +1426,8 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	m_stat_text->SetValue("Generating consistent IDs in");
 	wxGetApp().Yield();
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
@@ -1461,7 +1461,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 	if (!m_view)
 		return;
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentAnalyzer comp_analyzer(vd);
+	fls::ComponentAnalyzer comp_analyzer(vd);
 	comp_analyzer.Analyze(true, true);
 	string str;
 	comp_analyzer.OutputCompListStr(str, 1);
@@ -1484,10 +1484,10 @@ void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
 			wxString::Format("Time point number: %d\n", int(frames)));
 
 	(*m_stat_text) << "Time\tIn Orphan\tOut Orphan\tIn Multi\tOut Multi\n";
-	FL::VertexList in_orphan_list;
-	FL::VertexList out_orphan_list;
-	FL::VertexList in_multi_list;
-	FL::VertexList out_multi_list;
+	fls::VertexList in_orphan_list;
+	fls::VertexList out_orphan_list;
+	fls::VertexList in_multi_list;
+	fls::VertexList out_multi_list;
 	for (size_t fi = 0; fi < frames; ++fi)
 	{
 		trace_group->GetLinkLists(fi,
@@ -1511,7 +1511,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
-	FL::CelpList list_in;
+	fls::CelpList list_in;
 	//fill inlist
 	long item = -1;
 	while (true)
@@ -1539,11 +1539,11 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 
 	m_stat_text->SetValue("");
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	if (list_in.empty())
 	{
-		FL::UncertainHist hist1, hist2;
+		fls::UncertainHist hist1, hist2;
 		tm_processor.GetUncertainHist(hist1, hist2, m_cur_time);
 		//header
 		(*m_stat_text) << "In\n";
@@ -1604,7 +1604,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
 		return;
-	FL::CelpList list_in;
+	fls::CelpList list_in;
 	//fill inlist
 	long item = -1;
 	while (true)
@@ -1632,8 +1632,8 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 
 	m_stat_text->SetValue("");
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	if (list_in.empty())
 		return;
 
@@ -1643,7 +1643,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	if (m_cur_time > 0)
 	{
 		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time - 1 << ":\n";
-		FL::PathList paths_prv;
+		fls::PathList paths_prv;
 		tm_processor.GetPaths(list_in, paths_prv, m_cur_time, m_cur_time - 1);
 		for (size_t i = 0; i < paths_prv.size(); ++i)
 			os << paths_prv[i];
@@ -1651,7 +1651,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	if (m_cur_time < track_map->GetFrameNum() - 1)
 	{
 		(*m_stat_text) << "Paths of T" << m_cur_time << " to T" << m_cur_time + 1 << ":\n";
-		FL::PathList paths_nxt;
+		fls::PathList paths_nxt;
 		tm_processor.GetPaths(list_in, paths_nxt, m_cur_time, m_cur_time + 1);
 		for (size_t i = 0; i < paths_nxt.size(); ++i)
 			os << paths_nxt[i];
@@ -1706,7 +1706,7 @@ void TraceDlg::CompDelete()
 
 	//get current vd
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	if (ids.size() == 1)
 	{
 		comp_selector.SetId(ids[0]);
@@ -1731,7 +1731,7 @@ void TraceDlg::CompClear()
 
 	//get current vd
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
 	//update view
@@ -1833,7 +1833,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 		unsigned int id = (unsigned int)ival;
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		FL::ComponentSelector comp_selector(vd);
+		fls::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
 		comp_selector.Select(get_all);
@@ -1868,7 +1868,7 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 		unsigned int id = ival;
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		FL::ComponentSelector comp_selector(vd);
+		fls::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
 		comp_selector.Exclusive();
@@ -1915,7 +1915,7 @@ void TraceDlg::CellFull()
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	comp_selector.SetMinNum(true, slimit);
 	comp_selector.CompFull();
 	//update view
@@ -1927,7 +1927,7 @@ void TraceDlg::CellFull()
 		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
-void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CelpList &list)
+void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, fls::CelpList &list)
 {
 	wxString str;
 	unsigned long id;
@@ -1945,12 +1945,12 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CelpList 
 	str = trace_list_ctrl->GetText(item, 5);
 	str.ToDouble(&z);
 
-	FL::Celp cell(new FL::Cell(id));
+	fls::Celp cell(new fls::Cell(id));
 	cell->SetSizeUi(size);
 	cell->SetSizeD(size);
 	fluo::Point p(x, y, z);
 	cell->SetCenter(p);
-	list.insert(pair<unsigned int, FL::Celp>
+	list.insert(pair<unsigned int, fls::Celp>
 		(id, cell));
 }
 
@@ -2068,9 +2068,9 @@ void TraceDlg::CellNewID(bool append)
 
 	//update label volume, set mask region to the new ID
 	int i, j, k;
-	FL::Celp cell;
+	fls::Celp cell;
 	if (new_id)
-		cell = FL::Celp(new FL::Cell(new_id));
+		cell = fls::Celp(new fls::Cell(new_id));
 	for (i = 0; i < nx; ++i)
 	for (j = 0; j < ny; ++j)
 	for (k = 0; k < nz; ++k)
@@ -2092,8 +2092,8 @@ void TraceDlg::CellNewID(bool append)
 	if (new_id)
 	{
 		//trace_group->AddCell(cell, m_cur_time);
-		FL::pTrackMap track_map = trace_group->GetTrackMap();
-		FL::TrackMapProcessor tm_processor(track_map);
+		fls::pTrackMap track_map = trace_group->GetTrackMap();
+		fls::TrackMapProcessor tm_processor(track_map);
 		//register file reading and deleteing functions
 		tm_processor.RegisterCacheQueueFuncs(
 			std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
@@ -2198,9 +2198,9 @@ void TraceDlg::CellLink(bool exclusive)
 	//get selections
 	long item;
 	//current T
-	FL::CelpList list_cur;
+	fls::CelpList list_cur;
 	//previous T
-	FL::CelpList list_prv;
+	fls::CelpList list_prv;
 	//current list
 	item = -1;
 	while (true)
@@ -2277,15 +2277,15 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 	if (!trace_group)
 		return;
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
-	FL::CelpList in = vr_frame->GetComponentDlg()->GetInCells();
-	FL::CelpList out = vr_frame->GetComponentDlg()->GetOutCells();
+	fls::CelpList in = vr_frame->GetComponentDlg()->GetInCells();
+	fls::CelpList out = vr_frame->GetComponentDlg()->GetOutCells();
 	tm_processor.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();
@@ -2308,7 +2308,7 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 	//get selections
 	long item;
 	//current T
-	FL::CelpList list_cur;
+	fls::CelpList list_cur;
 
 	//current list
 	item = -1;
@@ -2357,9 +2357,9 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 	//get selections
 	long item;
 	//current T
-	FL::CelpList list_cur;
+	fls::CelpList list_cur;
 	//previous T
-	FL::CelpList list_prv;
+	fls::CelpList list_prv;
 	//current list
 	item = -1;
 	while (true)
@@ -2478,8 +2478,8 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
 
 	//current T
-	FL::CelpList list_cur;
-	FL::CelpListIter cell_iter;
+	fls::CelpList list_cur;
+	fls::CelpListIter cell_iter;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2584,7 +2584,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 		return;
 
 	//current T
-	FL::CelpList list_cur;
+	fls::CelpList list_cur;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2614,8 +2614,8 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 		return;
 
 	//find the largest cell in the list
-	FL::Celp cell;
-	FL::CelpListIter cell_iter;
+	fls::Celp cell;
+	fls::CelpListIter cell_iter;
 	for (cell_iter = list_cur.begin();
 	cell_iter != list_cur.end(); ++cell_iter)
 	{
@@ -2690,7 +2690,7 @@ void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 		return;
 
 	//current T
-	FL::CelpList list_cur;
+	fls::CelpList list_cur;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2747,7 +2747,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	//current T
-	FL::CelpList list_cur;
+	fls::CelpList list_cur;
 	//fill current list
 	long item = -1;
 	while (true)
@@ -2790,8 +2790,8 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	if (!trace_group)
 		return;
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
@@ -2810,7 +2810,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	RefineMap(m_cur_time);
 }
 
-void TraceDlg::LinkAddedCells(FL::CelpList &list)
+void TraceDlg::LinkAddedCells(fls::CelpList &list)
 {
 	if (!m_view)
 		return;
@@ -2824,8 +2824,8 @@ void TraceDlg::LinkAddedCells(FL::CelpList &list)
 	if (!trace_group)
 		return;
 
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(vd->GetBits());
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
@@ -3128,7 +3128,7 @@ void TraceDlg::Test2(int type)
 }
 
 //read/delete volume cache
-void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
+void TraceDlg::ReadVolCache(fls::VolCache& vol_cache)
 {
 	//get volume, readers
 	if (!m_view || !m_view->m_glview)
@@ -3178,7 +3178,7 @@ void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
 	}
 }
 
-void TraceDlg::DelVolCache(FL::VolCache& vol_cache)
+void TraceDlg::DelVolCache(fls::VolCache& vol_cache)
 {
 	if (!m_view || !m_view->m_glview)
 		return;
@@ -3257,8 +3257,8 @@ void TraceDlg::GenMap()
 	int frames = reader->GetTimeNum();
 
 	//get and set parameters
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
@@ -3375,7 +3375,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 
 	//start progress
 	bool clear_counters = false;
-	FL::pTrackMap track_map = trace_group->GetTrackMap();
+	fls::pTrackMap track_map = trace_group->GetTrackMap();
 	int start_frame, end_frame;
 	if (t < 0)
 	{
@@ -3387,7 +3387,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		start_frame = end_frame = t;
 
 	//get and set parameters
-	FL::TrackMapProcessor tm_processor(track_map);
+	fls::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;

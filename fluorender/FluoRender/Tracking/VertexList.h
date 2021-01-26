@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <iostream>
 
-namespace FL
+namespace fls
 {
 	typedef boost::unordered_map<unsigned int, Verp> VertexList;
 	typedef boost::unordered_map<unsigned int, Verp>::iterator VertexListIter;
@@ -268,6 +268,6 @@ namespace FL
 		return os;
 	}
 
-}//namespace FL
+}//namespace fls
 
 #endif//FL_VertexList_h

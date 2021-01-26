@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Cell.h>
 
 class VolumeData;
-namespace FL
+namespace fls
 {
 	class ComponentAnalyzer;
 	class ComponentSelector

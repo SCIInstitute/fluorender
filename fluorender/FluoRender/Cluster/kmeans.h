@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "ClusterMethod.h"
 
-namespace FL
+namespace fls
 {
 	class ClusterKmeans : public ClusterMethod
 	{

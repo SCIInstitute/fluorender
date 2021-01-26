@@ -37,7 +37,7 @@ class VRenderFrame;
 class VRenderView;
 class VRenderGLView;
 class VolumeData;
-namespace FL
+namespace fls
 {
 	class ScriptProc
 	{

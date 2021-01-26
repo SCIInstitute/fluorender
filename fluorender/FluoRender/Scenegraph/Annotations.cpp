@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Annotations.h>
 #include <Scenegraph/VolumeData.h>
 
-using namespace FL;
+using namespace fls;
 
 Annotations::Annotations()
 {

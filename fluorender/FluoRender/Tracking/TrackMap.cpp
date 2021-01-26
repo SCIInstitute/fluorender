@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <boost/qvm/vec_access.hpp>
 
-using namespace FL;
+using namespace fls;
 
 TrackMap::TrackMap() :
 	m_counter(0),
@@ -3964,7 +3964,7 @@ bool TrackMapProcessor::SegmentCells(
 
 	//int clnum = 0;
 	//GetCellUncertainty(list, frame);
-	//for (FL::CellListIter iter = list.begin();
+	//for (fls::CellListIter iter = list.begin();
 	//	iter != list.end(); ++iter)
 	//{
 	//	int size1 = iter->second->GetSizeUi();
@@ -4049,10 +4049,10 @@ bool TrackMapProcessor::ReplaceCellID(
 
 void TrackMapProcessor::GetLinkLists(
 	size_t frame,
-	FL::VertexList &in_orphan_list,
-	FL::VertexList &out_orphan_list,
-	FL::VertexList &in_multi_list,
-	FL::VertexList &out_multi_list)
+	fls::VertexList &in_orphan_list,
+	fls::VertexList &out_orphan_list,
+	fls::VertexList &in_multi_list,
+	fls::VertexList &out_multi_list)
 {
 	if (frame >= m_map->m_frame_num)
 		return;

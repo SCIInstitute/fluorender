@@ -837,7 +837,7 @@ public:
 		return m_num;
 	}
 
-	FL::pTrackMap GetTrackMap()
+	fls::pTrackMap GetTrackMap()
 	{
 		return m_track_map;
 	}
@@ -863,34 +863,34 @@ public:
 
 	//get information
 	void GetLinkLists(size_t frame,
-		FL::VertexList &in_orphan_list,
-		FL::VertexList &out_orphan_list,
-		FL::VertexList &in_multi_list,
-		FL::VertexList &out_multi_list);
+		fls::VertexList &in_orphan_list,
+		fls::VertexList &out_orphan_list,
+		fls::VertexList &in_multi_list,
+		fls::VertexList &out_multi_list);
 
 	//for selective drawing
 	void ClearCellList();
-	void UpdateCellList(FL::CelpList &cur_sel_list);
-	FL::CelpList &GetCellList();
+	void UpdateCellList(fls::CelpList &cur_sel_list);
+	fls::CelpList &GetCellList();
 	bool FindCell(unsigned int id);
 
 	//modifications
-	bool AddCell(FL::Celp &cell, size_t frame);
-	bool LinkCells(FL::CelpList &list1, FL::CelpList &list2,
+	bool AddCell(fls::Celp &cell, size_t frame);
+	bool LinkCells(fls::CelpList &list1, fls::CelpList &list2,
 		size_t frame1, size_t frame2, bool exclusive);
-	bool IsolateCells(FL::CelpList &list, size_t frame);
-	bool UnlinkCells(FL::CelpList &list1, FL::CelpList &list2,
+	bool IsolateCells(fls::CelpList &list, size_t frame);
+	bool UnlinkCells(fls::CelpList &list1, fls::CelpList &list2,
 		size_t frame1, size_t frame2);
-	bool CombineCells(FL::Celp &cell, FL::CelpList &list,
+	bool CombineCells(fls::Celp &cell, fls::CelpList &list,
 		size_t frame);
-	bool DivideCells(FL::CelpList &list, size_t frame);
+	bool DivideCells(fls::CelpList &list, size_t frame);
 	bool ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame);
 
 	//sparse tracking
 	bool TrackStencils();
 
 	//rulers
-	bool GetMappedRulers(FL::RulerList &rulers);
+	bool GetMappedRulers(fls::RulerList &rulers);
 
 	//i/o
 	bool Load(wxString &filename);
@@ -920,21 +920,21 @@ private:
 	int m_cell_size;
 	int m_uncertain_low;
 
-	FL::pTrackMap m_track_map;
-	FL::CelpList m_cell_list;
+	fls::pTrackMap m_track_map;
+	fls::CelpList m_cell_list;
 
 	//edges (in a vector of drawable)
 	unsigned int GetMappedEdges(
-		FL::CelpList &sel_list1, FL::CelpList &sel_list2,
+		fls::CelpList &sel_list1, fls::CelpList &sel_list2,
 		std::vector<float> &verts,
 		size_t frame1, size_t frame2,
 		int shuffle=0);
 	//rulers
 	bool GetMappedRulers(
-		FL::CelpList &sel_list1, FL::CelpList &sel_list2,
-		FL::RulerList &rulers,
+		fls::CelpList &sel_list1, fls::CelpList &sel_list2,
+		fls::RulerList &rulers,
 		size_t frame1, size_t frame2);
-	FL::RulerListIter FindRulerFromList(unsigned int id, FL::RulerList &list);
+	fls::RulerListIter FindRulerFromList(unsigned int id, fls::RulerList &list);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

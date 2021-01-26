@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <set>
 
-namespace FL
+namespace fls
 {
 class Observer;
 class ObserverSet;

@@ -1771,7 +1771,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 {
 	if (!m_command.empty())
 	{
-		FL::CompCmdParams &params = m_command.back();
+		fls::CompCmdParams &params = m_command.back();
 		if (!params.empty())
 		{
 			if ((params[0] == "generate" ||
@@ -1785,7 +1785,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 		}
 	}
 	//add
-	FL::CompCmdParams params;
+	fls::CompCmdParams params;
 	if (type == "generate")
 	{
 		params.push_back("generate");
@@ -1965,7 +1965,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
 	while (fconfig.Exists(cmd_str))
 	{
-		FL::CompCmdParams params;
+		fls::CompCmdParams params;
 		fconfig.SetPath(cmd_str);
 		str = fconfig.Read("type", "");
 		if (str == "generate" ||
@@ -2323,7 +2323,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	{
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		FL::ComponentSelector comp_selector(vd);
+		fls::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetBrickId(brick_id);
 
@@ -2373,7 +2373,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(id);
 	comp_selector.SetBrickId(brick_id);
 
@@ -2412,7 +2412,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 
 	//get current vd
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
 	m_view->RefreshGL();
@@ -2440,7 +2440,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 
 	//get current vd
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	FL::ComponentSelector comp_selector(vd);
+	fls::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
 	m_view->RefreshGL();
@@ -2699,7 +2699,7 @@ int ComponentDlg::GetDistMatSize()
 		int matsize = 0;
 		for (int i = 0; i < gsize; ++i)
 		{
-			FL::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
+			fls::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
 			matsize += compgroup->celps.size();
@@ -2708,7 +2708,7 @@ int ComponentDlg::GetDistMatSize()
 	}
 	else
 	{
-		FL::CelpList* list = m_comp_analyzer.GetCelpList();
+		fls::CelpList* list = m_comp_analyzer.GetCelpList();
 		if (!list)
 			return 0;
 		return list->size();
@@ -2747,10 +2747,10 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	{
 		for (int i = 0; i < gsize; ++i)
 		{
-			FL::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
+			fls::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
-			FL::CelpList* list = &(compgroup->celps);
+			fls::CelpList* list = &(compgroup->celps);
 			sx = list->sx;
 			sy = list->sy;
 			sz = list->sz;
@@ -2768,7 +2768,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	}
 	else
 	{
-		FL::CelpList* list = m_comp_analyzer.GetCelpList();
+		fls::CelpList* list = m_comp_analyzer.GetCelpList();
 		sx = list->sx;
 		sy = list->sy;
 		sz = list->sz;
@@ -2915,7 +2915,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-void ComponentDlg::AlignCenter(FL::Ruler* ruler)
+void ComponentDlg::AlignCenter(fls::Ruler* ruler)
 {
 	if (!ruler)
 		return;
@@ -2930,15 +2930,15 @@ void ComponentDlg::AlignCenter(FL::Ruler* ruler)
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
-	FL::CelpList* list = m_comp_analyzer.GetCelpList();
+	fls::CelpList* list = m_comp_analyzer.GetCelpList();
 	if (!list || list->size() < 3)
 		return;
 
 	double sx = list->sx;
 	double sy = list->sy;
 	double sz = list->sz;
-	FL::RulerList rulerlist;
-	FL::Ruler ruler;
+	fls::RulerList rulerlist;
+	fls::Ruler ruler;
 	ruler.SetRulerType(1);
 	fluo::Point pt;
 	for (auto it = list->begin();
@@ -3059,11 +3059,11 @@ void ComponentDlg::Cluster()
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
 
-	FL::ClusterMethod* method = 0;
+	fls::ClusterMethod* method = 0;
 	//switch method
 	if (m_cluster_method_exmax)
 	{
-		FL::ClusterExmax* method_exmax = new FL::ClusterExmax();
+		fls::ClusterExmax* method_exmax = new fls::ClusterExmax();
 		method_exmax->SetClnum(m_cluster_clnum);
 		method_exmax->SetMaxiter(m_cluster_maxiter);
 		method_exmax->SetProbTol(m_cluster_tol);
@@ -3071,14 +3071,14 @@ void ComponentDlg::Cluster()
 	}
 	else if (m_cluster_method_dbscan)
 	{
-		FL::ClusterDbscan* method_dbscan = new FL::ClusterDbscan();
+		fls::ClusterDbscan* method_dbscan = new fls::ClusterDbscan();
 		method_dbscan->SetSize(m_cluster_size);
 		method_dbscan->SetEps(m_cluster_eps);
 		method = method_dbscan;
 	}
 	else if (m_cluster_method_kmeans)
 	{
-		FL::ClusterKmeans* method_kmeans = new FL::ClusterKmeans();
+		fls::ClusterKmeans* method_kmeans = new fls::ClusterKmeans();
 		method_kmeans->SetClnum(m_cluster_clnum);
 		method_kmeans->SetMaxiter(m_cluster_maxiter);
 		method = method_kmeans;
@@ -3151,7 +3151,7 @@ void ComponentDlg::Cluster()
 				data_value = ((unsigned char*)data_data)[index] / 255.0f;
 			else if (bits == 16)
 				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
-			FL::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+			fls::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 			label_value = data_label[index];
 			int cid = -1;
 			if (use_init_cluster)
@@ -3182,10 +3182,10 @@ void ComponentDlg::Cluster()
 			}
 			else
 			{
-				FL::Cell* cell = new FL::Cell(label_value);
+				fls::Cell* cell = new fls::Cell(label_value);
 				cell->Inc(i, j, k, data_value);
-				m_in_cells.insert(std::pair<unsigned int, FL::Celp>
-					(label_value, FL::Celp(cell)));
+				m_in_cells.insert(std::pair<unsigned int, fls::Celp>
+					(label_value, fls::Celp(cell)));
 			}
 		}
 	}
@@ -3257,7 +3257,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	int bn = vd->GetAllBrickNum();
 	double scale = vd->GetScalarScale();
 
-	FL::ComponentGenerator cg(vd);
+	fls::ComponentGenerator cg(vd);
 	//boost::signals2::connection connection =
 	//	cg.m_sig_progress.connect(std::bind(
 	//		&ComponentDlg::UpdateProgress, this));
@@ -3391,7 +3391,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 
-	FL::ComponentGenerator cg(vd);
+	fls::ComponentGenerator cg(vd);
 	//boost::signals2::connection connection =
 	//	cg.m_sig_progress.connect(std::bind(
 	//		&ComponentDlg::UpdateProgress, this));
@@ -3434,7 +3434,7 @@ void ComponentDlg::SelectFullComp()
 			return;
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		FL::ComponentSelector comp_selector(vd);
+		fls::ComponentSelector comp_selector(vd);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
 		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
@@ -3760,9 +3760,9 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-bool ComponentDlg::GetCellList(FL::CelpList &cl, bool links)
+bool ComponentDlg::GetCellList(fls::CelpList &cl, bool links)
 {
-	FL::CelpList* list = m_comp_analyzer.GetCelpList();
+	fls::CelpList* list = m_comp_analyzer.GetCelpList();
 	if (!list || list->empty())
 		return false;
 
@@ -3863,23 +3863,23 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 	}
 }
 
-void ComponentDlg::FindCelps(FL::CelpList &list,
-	FL::CelpListIter &it, bool links)
+void ComponentDlg::FindCelps(fls::CelpList &list,
+	fls::CelpListIter &it, bool links)
 {
-	list.insert(pair<unsigned long long, FL::Celp>
+	list.insert(pair<unsigned long long, fls::Celp>
 		(it->second->GetEId(), it->second));
 
 	if (links)
 	{
-		FL::CellGraph* graph = m_comp_analyzer.GetCellGraph();
+		fls::CellGraph* graph = m_comp_analyzer.GetCellGraph();
 		graph->ClearVisited();
-		FL::CelpList links;
+		fls::CelpList links;
 		if (graph->GetLinkedComps(it->second, links, SIZE_LIMIT))
 		{
 			for (auto it2 = links.begin();
 				it2 != links.end(); ++it2)
 			{
-				list.insert(pair<unsigned long long, FL::Celp>
+				list.insert(pair<unsigned long long, fls::Celp>
 					(it2->second->GetEId(), it2->second));
 			}
 		}
@@ -3890,7 +3890,7 @@ void ComponentDlg::GetCompSelection()
 {
 	if (m_view && m_view->m_glview)
 	{
-		FL::CelpList cl;
+		fls::CelpList cl;
 		GetCellList(cl);
 		m_view->m_glview->SetCellList(cl);
 		m_view->RefreshGL(false);
@@ -3956,11 +3956,11 @@ void ComponentDlg::IncludeComps()
 	if (!vd)
 		return;
 
-	FL::CelpList cl;
+	fls::CelpList cl;
 	if (GetCellList(cl, true))
 	{
 		//clear complist
-		FL::CelpList *list = m_comp_analyzer.GetCelpList();
+		fls::CelpList *list = m_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
@@ -3970,7 +3970,7 @@ void ComponentDlg::IncludeComps()
 				++it;
 		}
 		//select cl
-		FL::ComponentSelector comp_selector(vd);
+		fls::ComponentSelector comp_selector(vd);
 		comp_selector.SelectList(cl);
 		ClearOutputGrid();
 		string titles, values;
@@ -4008,11 +4008,11 @@ void ComponentDlg::ExcludeComps()
 	if (!vd)
 		return;
 
-	FL::CelpList cl;
+	fls::CelpList cl;
 	if (GetCellList(cl))
 	{
 		//clear complist
-		FL::CelpList *list = m_comp_analyzer.GetCelpList();
+		fls::CelpList *list = m_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
@@ -4021,7 +4021,7 @@ void ComponentDlg::ExcludeComps()
 			else
 				++it;
 		}
-		FL::ComponentSelector comp_selector(vd);
+		fls::ComponentSelector comp_selector(vd);
 		std::vector<unsigned int> ids;
 		for (auto it = list->begin();
 			it != list->end(); ++it)

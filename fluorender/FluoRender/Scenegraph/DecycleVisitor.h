@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/NodeVisitor.h>
 #include <Scenegraph/Group.h>
 
-namespace FL
+namespace fls
 {
 	class DecycleVisitor : public NodeVisitor
 	{
@@ -42,17 +42,17 @@ namespace FL
 			parent_(0),
 			child_(0)
 		{
-			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
-		virtual void apply(FL::Node& node)
+		virtual void apply(fls::Node& node)
 		{
 			if (!found_)
 				decycle();
 			traverse(node);
 		}
 
-		virtual void apply(FL::Group& group)
+		virtual void apply(fls::Group& group)
 		{
 			if (!found_)
 				decycle();

@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderGLView;
 
-namespace FL
+namespace fls
 {
 	class RulerAlign
 	{

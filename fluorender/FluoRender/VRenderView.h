@@ -401,12 +401,12 @@ public:
 	}
 
 	//get volume selector
-	FL::VolumeSelector* GetVolumeSelector()
+	fls::VolumeSelector* GetVolumeSelector()
 	{
 		if (m_glview) return m_glview->GetVolumeSelector(); else return 0;
 	}
 	//get volume calculator
-	FL::VolumeCalculator* GetVolumeCalculator()
+	fls::VolumeCalculator* GetVolumeCalculator()
 	{
 		if (m_glview) return m_glview->GetVolumeCalculator(); else return 0;
 	}
@@ -417,15 +417,15 @@ public:
 	}
 
 	//rulers
-	FL::RulerList* GetRulerList()
+	fls::RulerList* GetRulerList()
 	{
 		if (m_glview) return m_glview->GetRulerList(); else return 0;
 	}
-	FL::Ruler* GetRuler(unsigned int id)
+	fls::Ruler* GetRuler(unsigned int id)
 	{
 		if (m_glview) return m_glview->GetRuler(id); else return 0;
 	}
-	FL::RulerHandler* GetRulerHandler()
+	fls::RulerHandler* GetRulerHandler()
 	{
 		if (m_glview) return &m_glview->m_ruler_handler; else return 0;
 	}

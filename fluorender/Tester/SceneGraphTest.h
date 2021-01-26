@@ -7,7 +7,7 @@
 #include <string>
 
 using namespace std;
-using namespace FL;
+using namespace fls;
 
 class VolumeDataTest : public VolumeData
 {

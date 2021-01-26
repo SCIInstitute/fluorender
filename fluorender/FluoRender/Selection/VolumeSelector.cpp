@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace FL;
+using namespace fls;
 
 VolumeSelector::VolumeSelector() :
 	m_view(0),
@@ -231,7 +231,7 @@ void VolumeSelector::Select(double radius)
 		m_mode == 3 || m_mode == 4 ||
 		m_mode == 8 || m_mode == 9))
 	{
-		FL::PaintBoxes pb;
+		fls::PaintBoxes pb;
 		pb.SetBricks(bricks);
 		if (m_mode != 9 || m_init_mask & 1)
 			pb.ClearBricks();
@@ -296,7 +296,7 @@ void VolumeSelector::Select(double radius)
 				m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			int div = 3;
 			int order;
-			FL::MaskBorder mb(m_vd);
+			fls::MaskBorder mb(m_vd);
 			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;

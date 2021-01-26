@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <boost/signals2.hpp>
 
-namespace FL
+namespace fls
 {
 	struct VolCache
 	{
@@ -215,6 +215,6 @@ namespace FL
 		}
 	}
 
-}//namespace FL
+}//namespace fls
 
 #endif//FL_VolCache_h

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolumeRenderer.h>
 #include <Types/Point.h>
 
-using namespace FL;
+using namespace fls;
 
 const char* str_cl_paint_boxes = \
 "const sampler_t samp =\n" \

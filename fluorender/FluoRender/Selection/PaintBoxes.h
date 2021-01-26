@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-namespace FL
+namespace fls
 {
 	class PaintBoxes
 	{

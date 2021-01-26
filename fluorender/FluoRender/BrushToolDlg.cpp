@@ -1174,7 +1174,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 		VolumeData* vd = vr_frame->GetCurSelVol();
 		if (vd && vd->GetTexture())
 		{
-			FL::Cov cover(vd);
+			fls::Cov cover(vd);
 			if (cover.Compute(0))
 			{
 				std::vector<double> cov = cover.GetCov();
@@ -1207,7 +1207,7 @@ void BrushToolDlg::Update()
 	if (!sel_vol)
 		return;
 
-	FL::CountVoxels counter(sel_vol);
+	fls::CountVoxels counter(sel_vol);
 	counter.SetUseMask(true);
 	counter.Count();
 	data.voxel_sum = counter.GetSum();

@@ -1978,7 +1978,7 @@ void DataTreeCtrl::BrushCreate()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							fls::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
 							if (calculator)
 							{
 								calculator->SetVolumeA(vd);
@@ -1997,7 +1997,7 @@ void DataTreeCtrl::BrushCreate()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							fls::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
 							if (calculator)
 							{
 								calculator->SetVolumeA(vd);
@@ -2044,7 +2044,7 @@ void DataTreeCtrl::BrushCreateInv()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							fls::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
 							if (calculator)
 							{
 								calculator->SetVolumeA(vd);
@@ -2063,7 +2063,7 @@ void DataTreeCtrl::BrushCreateInv()
 						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
-							FL::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+							fls::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
 							if (calculator)
 							{
 								calculator->SetVolumeA(vd);

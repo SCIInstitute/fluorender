@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #endif
 
-namespace FL
+namespace fls
 {
 	class Group;
 	class Layer;

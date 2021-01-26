@@ -7,7 +7,7 @@
 #include <Scenegraph/InfoVisitor.h>
 
 using namespace std;
-using namespace FL;
+using namespace fls;
 
 void GroupTest()
 {

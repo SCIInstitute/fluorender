@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumeSelector.h>
 #include <wx/progdlg.h>
 
-using namespace FL;
+using namespace fls;
 
 VolumeCalculator::VolumeCalculator():
 	m_frame(0),

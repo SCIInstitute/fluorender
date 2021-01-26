@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Flobject/Observer.h>
 
-using namespace FL;
+using namespace fls;
 
 Observer::Observer()
 {

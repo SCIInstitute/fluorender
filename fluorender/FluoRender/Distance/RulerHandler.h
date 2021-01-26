@@ -38,7 +38,7 @@ class VRenderGLView;
 class wxFileConfig;
 class VolumeData;
 
-namespace FL
+namespace fls
 {
 	class ComponentAnalyzer;
 	class RulerHandler
@@ -84,12 +84,12 @@ namespace FL
 			m_ca = ca;
 		}
 
-		void SetRuler(FL::Ruler* ruler)
+		void SetRuler(fls::Ruler* ruler)
 		{
 			m_ruler = ruler;
 		}
 
-		FL::Ruler* GetRuler()
+		fls::Ruler* GetRuler()
 		{
 			return m_ruler;
 		}
@@ -104,12 +104,12 @@ namespace FL
 			return -1;
 		}
 
-		void SetRulerList(FL::RulerList* ruler_list)
+		void SetRulerList(fls::RulerList* ruler_list)
 		{
 			m_ruler_list = ruler_list;
 		}
 
-		FL::RulerList* GetRulerList()
+		fls::RulerList* GetRulerList()
 		{
 			return m_ruler_list;
 		}
@@ -126,7 +126,7 @@ namespace FL
 
 		bool FindEditingRuler(double mx, double my);
 
-		void SetPoint(FL::pRulerPoint point)
+		void SetPoint(fls::pRulerPoint point)
 		{
 			m_point = point;
 		}
@@ -173,7 +173,7 @@ namespace FL
 		//find moving distance
 		fluo::Point m_mouse;//mouse position
 		//get point
-		FL::pRulerPoint m_point;
+		fls::pRulerPoint m_point;
 		int m_pindex;//index of point in ruler
 
 	private:

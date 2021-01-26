@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Quaternion.h>
 #include <Types/Utils.h>
 
-using namespace FL;
+using namespace fls;
 
 int Ruler::m_num = 0;
 

@@ -3315,7 +3315,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("rotz_cl", rotz_cl);
 
 			//painting parameters
-			FL::VolumeSelector* selector = vrv->GetVolumeSelector();
+			fls::VolumeSelector* selector = vrv->GetVolumeSelector();
 			if (selector)
 			{
 				fconfig.Write("brush_use_pres", selector->GetBrushUsePres());
@@ -4475,7 +4475,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 				//painting parameters
 				double dVal;
-				FL::VolumeSelector* selector = vrv->GetVolumeSelector();
+				fls::VolumeSelector* selector = vrv->GetVolumeSelector();
 				if (selector)
 				{
 					if (fconfig.Read("brush_use_pres", &bVal))

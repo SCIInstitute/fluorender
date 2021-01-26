@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class VRenderGLView;
 class VolumeData;
 
-namespace FL
+namespace fls
 {
 	class VolumePoint
 	{

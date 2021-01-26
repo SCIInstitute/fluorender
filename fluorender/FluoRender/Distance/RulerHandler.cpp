@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
 
-using namespace FL;
+using namespace fls;
 
 RulerHandler::RulerHandler() :
 	m_group(0),
@@ -280,7 +280,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		ruler->SetTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(ruler);
 		//store brush size in ruler
-		FL::VolumeSelector* selector = m_view->GetVolumeSelector();
+		fls::VolumeSelector* selector = m_view->GetVolumeSelector();
 		if (selector)
 		{
 			if (selector->GetBrushSizeData())
@@ -363,16 +363,16 @@ void RulerHandler::AddPaintRulerPoint()
 {
 	if (!m_view)
 		return;
-	FL::VolumeSelector* selector = m_view->GetVolumeSelector();
+	fls::VolumeSelector* selector = m_view->GetVolumeSelector();
 	if (!selector)
 		return;
 	VolumeData* vd = selector->GetVolume();
 	if (!vd)
 		return;
 
-	FL::Cov cover(vd);
+	fls::Cov cover(vd);
 	cover.Compute(1);
-	FL::CountVoxels counter(vd);
+	fls::CountVoxels counter(vd);
 	counter.Count();
 
 	fluo::Point center = cover.GetCenter();
@@ -475,10 +475,10 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 
 	m_point->SetPoint(point);
 
-	FL::RulerPoint *p0 = m_point.get();
-	FL::RulerPoint *p1 = GetEllipsePoint(1);
-	FL::RulerPoint *p2 = GetEllipsePoint(2);
-	FL::RulerPoint *p3 = GetEllipsePoint(3);
+	fls::RulerPoint *p0 = m_point.get();
+	fls::RulerPoint *p1 = GetEllipsePoint(1);
+	fls::RulerPoint *p2 = GetEllipsePoint(2);
+	fls::RulerPoint *p3 = GetEllipsePoint(3);
 	if (!p1 || !p2 || !p3)
 		return true;
 
@@ -547,7 +547,7 @@ void RulerHandler::DeleteSelection(std::vector<int> &sel)
 			if (*it2)
 				delete *it2;
 			it2 = m_ruler_list->erase(it2);
-			it = std::reverse_iterator<FL::RulerList::iterator>(it2);
+			it = std::reverse_iterator<fls::RulerList::iterator>(it2);
 		}
 		else
 			++it;
@@ -568,7 +568,7 @@ void RulerHandler::DeleteAll(bool cur_time)
 		int tseq = m_view->m_tseq_cur_num;
 		for (int i = m_ruler_list->size() - 1; i >= 0; i--)
 		{
-			FL::Ruler* ruler = (*m_ruler_list)[i];
+			fls::Ruler* ruler = (*m_ruler_list)[i];
 			if (ruler &&
 				((ruler->GetTimeDep() &&
 					ruler->GetTime() == tseq) ||
@@ -583,7 +583,7 @@ void RulerHandler::DeleteAll(bool cur_time)
 	{
 		for (int i = m_ruler_list->size() - 1; i >= 0; i--)
 		{
-			FL::Ruler* ruler = (*m_ruler_list)[i];
+			fls::Ruler* ruler = (*m_ruler_list)[i];
 			if (ruler)
 				delete ruler;
 		}
@@ -756,7 +756,7 @@ int RulerHandler::Profile(int index)
 		index >= m_ruler_list->size())
 		return 0;
 
-	FL::Ruler* ruler = (*m_ruler_list)[index];
+	fls::Ruler* ruler = (*m_ruler_list)[index];
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
@@ -802,12 +802,12 @@ int RulerHandler::Profile(int index)
 		int bins = int(dist / 1 + 0.5);
 		if (bins <= 0) return 0;
 		double bin_dist = dist / bins;
-		std::vector<FL::ProfileBin>* profile = ruler->GetProfile();
+		std::vector<fls::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
 		profile->reserve(size_t(bins));
 		for (unsigned int b = 0; b < bins; ++b)
-			profile->push_back(FL::ProfileBin());
+			profile->push_back(fls::ProfileBin());
 
 		double brush_radius = ruler->GetBrushSize() + 1.0;
 
@@ -850,7 +850,7 @@ int RulerHandler::Profile(int index)
 		//calculate length in object space
 		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
 		int bins = int(total_length);
-		std::vector<FL::ProfileBin>* profile = ruler->GetProfile();
+		std::vector<fls::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
 
@@ -863,7 +863,7 @@ int RulerHandler::Profile(int index)
 		{
 			//allocate
 			profile->reserve(size_t(1));
-			profile->push_back(FL::ProfileBin());
+			profile->push_back(fls::ProfileBin());
 
 			p = ruler->GetPoint(0)->GetPoint();
 			//object space
@@ -891,7 +891,7 @@ int RulerHandler::Profile(int index)
 			//allocate
 			profile->reserve(size_t(bins));
 			for (unsigned int b = 0; b < bins; ++b)
-				profile->push_back(FL::ProfileBin());
+				profile->push_back(fls::ProfileBin());
 
 			fluo::Point p1, p2;
 			fluo::Vector dir;
@@ -950,13 +950,13 @@ int RulerHandler::Distance(int index, std::string filename)
 		index >= m_ruler_list->size())
 		return 0;
 
-	FL::Ruler* ruler = (*m_ruler_list)[index];
+	fls::Ruler* ruler = (*m_ruler_list)[index];
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
 	fluo::Point p = ruler->GetCenter();
 
-	FL::CelpList* list = m_ca->GetCelpList();
+	fls::CelpList* list = m_ca->GetCelpList();
 	if (list->empty())
 		return 0;
 

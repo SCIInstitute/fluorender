@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 #include <algorithm>
 
-using namespace FL;
+using namespace fls;
 
 const char* str_cl_chann_threshold = \
 "const sampler_t samp =\n" \

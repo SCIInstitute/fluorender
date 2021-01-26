@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <map>
 
-namespace FL
+namespace fls
 {
 //tags
 #define TAG_CELL		1
@@ -144,10 +144,10 @@ namespace FL
 
 		//information
 		void GetLinkLists(size_t frame,
-			FL::VertexList &in_orphan_list,
-			FL::VertexList &out_orphan_list,
-			FL::VertexList &in_multi_list,
-			FL::VertexList &out_multi_list);
+			fls::VertexList &in_orphan_list,
+			fls::VertexList &out_orphan_list,
+			fls::VertexList &in_multi_list,
+			fls::VertexList &out_multi_list);
 		void GetCellsByUncertainty(CelpList &list_in, CelpList &list_out,
 			size_t frame);
 		void GetCellUncertainty(CelpList &list, size_t frame);
@@ -709,6 +709,6 @@ namespace FL
 		return newid;
 	}
 
-}//namespace FL
+}//namespace fls
 
 #endif//FL_TrackMap_h

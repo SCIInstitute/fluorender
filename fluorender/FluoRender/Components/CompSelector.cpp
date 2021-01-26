@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CompAnalyzer.h"
 #include "DataManager.h"
 
-using namespace FL;
+using namespace fls;
 
 ComponentSelector::ComponentSelector(VolumeData* vd)
 	: m_vd(vd),

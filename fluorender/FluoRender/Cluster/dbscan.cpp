@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "dbscan.h"
 #include <algorithm>
 
-using namespace FL;
+using namespace fls;
 
 ClusterDbscan::ClusterDbscan():
 	ClusterMethod(),

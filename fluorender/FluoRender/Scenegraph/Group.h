@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/Node.h>
 
-namespace FL
+namespace fls
 {
 	class Group : public Node
 	{

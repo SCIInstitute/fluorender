@@ -202,7 +202,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	bool select = m_ca_select_only_chk->GetValue();
 
-	FL::ComponentGenerator cg(vd);
+	fls::ComponentGenerator cg(vd);
 	cg.SetUseMask(select);
 	vd->AddEmptyMask(1, !cg.GetUseMask());
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
@@ -210,11 +210,11 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 	double scale = vd->GetScalarScale();
 	cg.Grow(false, -1, 0.0, 0.0, scale);
 
-	FL::ComponentAnalyzer ca(vd);
+	fls::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
 	m_view->RefreshGL();
 
-	FL::CelpList *list = ca.GetCelpList();
+	fls::CelpList *list = ca.GetCelpList();
 	if (!list || list->empty())
 		return;
 

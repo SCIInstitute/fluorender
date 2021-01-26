@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/NodeVisitor.h>
 #include <Scenegraph/Group.h>
 
-using namespace FL;
+using namespace fls;
 
 NodeVisitor::NodeVisitor(TraversalMode tm) :
 	Referenced()

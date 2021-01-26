@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 class Annotations;
 
-namespace FL
+namespace fls
 {
 #define SIZE_LIMIT 10
 

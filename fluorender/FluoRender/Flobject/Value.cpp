@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <sstream>
 
-using namespace FL;
+using namespace fls;
 
 Value::~Value()
 {

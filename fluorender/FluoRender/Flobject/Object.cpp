@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Flobject/Object.h>
 
-using namespace FL;
+using namespace fls;
 
 Object::Object():
 	Referenced(),

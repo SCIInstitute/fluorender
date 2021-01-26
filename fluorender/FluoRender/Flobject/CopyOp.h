@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 
-namespace FL
+namespace fls
 {
 	class Referenced;
 	class Object;

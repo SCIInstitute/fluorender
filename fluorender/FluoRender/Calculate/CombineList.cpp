@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CombineList.h"
 #include "DataManager.h"
 
-using namespace FL;
+using namespace fls;
 
 void CombineList::SetName(wxString &name)
 {

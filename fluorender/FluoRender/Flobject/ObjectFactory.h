@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-namespace FL
+namespace fls
 {
 	class ObjectFactory : public Object
 	{

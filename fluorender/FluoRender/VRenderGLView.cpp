@@ -1229,7 +1229,7 @@ void VRenderGLView::DrawVolumes(int peel)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	FL::RulerPoint *p0 = m_ruler_handler.GetPoint();
+	fls::RulerPoint *p0 = m_ruler_handler.GetPoint();
 
 	//draw
 	if (m_load_update ||
@@ -4245,7 +4245,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 			{
-				FL::SegGrow sg(m_cur_vol);
+				fls::SegGrow sg(m_cur_vol);
 				sg.SetRulerHandler(&m_ruler_handler);
 				sg.SetIter(m_selector.GetIter()*3);
 				sg.SetSizeThresh(sz);
@@ -9438,12 +9438,12 @@ void VRenderGLView::DrawRulers()
 	m_ruler_renderer.Draw();
 }
 
-FL::RulerList* VRenderGLView::GetRulerList()
+fls::RulerList* VRenderGLView::GetRulerList()
 {
 	return &m_ruler_list;
 }
 
-FL::Ruler* VRenderGLView::GetRuler(unsigned int id)
+fls::Ruler* VRenderGLView::GetRuler(unsigned int id)
 {
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
 	{
@@ -9702,8 +9702,8 @@ void VRenderGLView::GetTraces(bool update)
 	if (!mask_data) return;
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!label_data) return;
-	FL::CelpList sel_labels;
-	FL::CelpListIter label_iter;
+	fls::CelpList sel_labels;
+	fls::CelpListIter label_iter;
 	for (ii = 0; ii<nx; ii++)
 	for (jj = 0; jj<ny; jj++)
 	for (kk = 0; kk<nz; kk++)
@@ -9715,9 +9715,9 @@ void VRenderGLView::GetTraces(bool update)
 			label_iter = sel_labels.find(label_value);
 			if (label_iter == sel_labels.end())
 			{
-				FL::Celp cell(new FL::Cell(label_value));
+				fls::Celp cell(new fls::Cell(label_value));
 				cell->Inc(ii, jj, kk, 1.0f);
-				sel_labels.insert(pair<unsigned int, FL::Celp>
+				sel_labels.insert(pair<unsigned int, fls::Celp>
 					(label_value, cell));
 			}
 			else
@@ -9906,7 +9906,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			if (m_int_mode == 11)
 			{
-				FL::RulerPoint *p = m_ruler_handler.GetPoint();
+				fls::RulerPoint *p = m_ruler_handler.GetPoint();
 				if (p) p->ToggleLocked();
 			}
 			if (m_int_mode == 14)
@@ -10105,7 +10105,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				double(old_mouse_Y - event.GetY())*
 				double(old_mouse_Y - event.GetY()))));
 
-		FL::RulerPoint *p0 = m_ruler_handler.GetPoint();
+		fls::RulerPoint *p0 = m_ruler_handler.GetPoint();
 		bool hold_old = false;
 		if (m_int_mode == 1 ||
 			(m_int_mode == 5 &&

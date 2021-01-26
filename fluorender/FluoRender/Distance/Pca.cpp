@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <functional>
 
-using namespace FL;
+using namespace fls;
 
 void Pca::Compute()
 {

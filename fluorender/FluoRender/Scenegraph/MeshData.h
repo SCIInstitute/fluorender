@@ -37,7 +37,7 @@ namespace flvr
 {
 	class MeshRenderer;
 }
-namespace FL
+namespace fls
 {
 	class MeshData : public Node
 	{

@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/Node.h>
 #include <algorithm>
 
-namespace FL
+namespace fls
 {
 	const unsigned int UNINITIALIZED_FRAME_NUMBER = 0xffffffff;
 

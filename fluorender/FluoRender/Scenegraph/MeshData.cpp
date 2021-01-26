@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 //#include <FLIVR/glm.h>
 //#include <FLIVR/MeshRenderer.h>
 
-using namespace FL;
+using namespace fls;
 
 MeshData::MeshData() //:
 	//m_data(0),

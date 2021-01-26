@@ -4,7 +4,7 @@
 #include <Flobject/Object.h>
 
 using namespace std;
-using namespace FL;
+using namespace fls;
 
 void ObjectTest()
 {

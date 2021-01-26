@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #endif
 
-using namespace FL;
+using namespace fls;
 
 const char* str_cl_diffusion = \
 "const sampler_t samp =\n" \

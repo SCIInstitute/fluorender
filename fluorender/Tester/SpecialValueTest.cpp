@@ -2,7 +2,7 @@
 #include "asserts.h"
 #include "Scenegraph/VolumeData.h"
 
-using namespace FL;
+using namespace fls;
 
 void SpecialValueTest()
 {

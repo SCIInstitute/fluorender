@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/Group.h>
 
-namespace FL
+namespace fls
 {
 	class VolumeGroup : public Group
 	{

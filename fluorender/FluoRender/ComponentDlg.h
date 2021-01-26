@@ -200,7 +200,7 @@ public:
 	void Clean(bool use_sel, bool command = true);
 	void SelectFullComp();
 
-	FL::ComponentAnalyzer* GetAnalyzer()
+	fls::ComponentAnalyzer* GetAnalyzer()
 	{
 		return &m_comp_analyzer;
 	}
@@ -210,9 +210,9 @@ public:
 	void PlayCmd(bool use_sel, double tfactor);
 
 	//in and out cell lists
-	FL::CelpList &GetInCells()
+	fls::CelpList &GetInCells()
 	{ return m_in_cells; }
-	FL::CelpList &GetOutCells()
+	fls::CelpList &GetOutCells()
 	{ return m_out_cells; }
 
 	//output
@@ -221,7 +221,7 @@ public:
 	void PasteData();
 
 	//select comps
-	bool GetCellList(FL::CelpList &cl, bool links=false);
+	bool GetCellList(fls::CelpList &cl, bool links=false);
 	void GetCompSelection();
 	void SetCompSelection(std::set<unsigned int>& ids, int mode);
 	void IncludeComps();
@@ -297,14 +297,14 @@ private:
 
 	//record
 	bool m_record_cmd;
-	FL::CompCommand m_command;
+	fls::CompCommand m_command;
 
-	FL::ComponentAnalyzer m_comp_analyzer;
-	FL::RulerAlign m_aligner;
+	fls::ComponentAnalyzer m_comp_analyzer;
+	fls::RulerAlign m_aligner;
 
 	//in and out cell lists for tracking
-	FL::CelpList m_in_cells;
-	FL::CelpList m_out_cells;
+	fls::CelpList m_in_cells;
+	fls::CelpList m_out_cells;
 
 	//output
 	bool m_hold_history;
@@ -450,15 +450,15 @@ private:
 private:
 	void Cluster();
 	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
-	void AlignCenter(FL::Ruler* ruler);
+	void AlignCenter(fls::Ruler* ruler);
 	void ClearOutputGrid();
 	int GetDistMatSize();
 	void AddSelArrayInt(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
-	void FindCelps(FL::CelpList &list,
-		FL::CelpListIter &it, bool links = false);
+	void FindCelps(fls::CelpList &list,
+		fls::CelpListIter &it, bool links = false);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/NodeVisitor.h>
 #include <algorithm>
 
-using namespace FL;
+using namespace fls;
 
 Node::Node() :
 	Object(),

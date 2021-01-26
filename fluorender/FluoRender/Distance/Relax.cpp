@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Relax.h"
 #include <DataManager.h>
 
-using namespace FL;
+using namespace fls;
 
 const char* str_cl_relax = \
 "const sampler_t samp =\n" \

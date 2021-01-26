@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderGLView;
 
-namespace FL
+namespace fls
 {
 	class RulerRenderer
 	{
@@ -50,12 +50,12 @@ namespace FL
 			m_view = view;
 		}
 
-		void SetRulerList(FL::RulerList* ruler_list)
+		void SetRulerList(fls::RulerList* ruler_list)
 		{
 			m_ruler_list = ruler_list;
 		}
 
-		FL::RulerList* GetRulerList()
+		fls::RulerList* GetRulerList()
 		{
 			return m_ruler_list;
 		}

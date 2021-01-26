@@ -88,7 +88,7 @@ private:
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
 	bool m_ruler_df_f;
-	FL::RulerHandler *m_rhdl;
+	fls::RulerHandler *m_rhdl;
 
 private:
 	void EndEdit(bool update=true);
@@ -188,7 +188,7 @@ private:
 	wxWindow* m_frame;
 	//current view
 	VRenderView* m_view;
-	FL::RulerHandler *m_rhdl;
+	fls::RulerHandler *m_rhdl;
 
 	//list ctrl
 	wxButton* m_new_group;
@@ -224,12 +224,12 @@ private:
 	wxButton* m_align_yzx;
 	wxButton* m_align_zyx;
 
-	FL::DistCalculator m_calculator;
-	FL::RulerAlign m_aligner;
+	fls::DistCalculator m_calculator;
+	fls::RulerAlign m_aligner;
 	bool m_edited;
 
 private:
-	void AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list);
+	void AlignCenter(fls::Ruler* ruler, fls::RulerList* ruler_list);
 
 	void OnNewLocator(wxCommandEvent& event);
 	void OnNewProbe(wxCommandEvent& event);

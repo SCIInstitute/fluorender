@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <Tracking/Cell.h>
 
-namespace FL
+namespace fls
 {
 	typedef boost::qvm::vec<double, 3> EmVec;
 	typedef boost::qvm::mat<double, 3, 3> EmMat;

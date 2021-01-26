@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/TextureRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace FL;
+using namespace fls;
 
 RulerRenderer::RulerRenderer() :
 	m_view(0),
@@ -131,12 +131,12 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 
 	unsigned int num = 0;
 	fluo::Point p1, p2;
-	FL::RulerPoint *rp1, *rp2;
+	fls::RulerPoint *rp1, *rp2;
 	fluo::Color c;
 	fluo::Color text_color = m_view->GetTextColor();
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
-		FL::Ruler* ruler = (*m_ruler_list)[i];
+		fls::Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		if (!ruler->GetTimeDep() ||
@@ -171,7 +171,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				else if (np == 4)
 				{
 					//draw ellipse
-					FL::RulerPoint* rps[4];
+					fls::RulerPoint* rps[4];
 					rps[0] = ruler->GetPoint(0);
 					rps[1] = ruler->GetPoint(1);
 					rps[2] = ruler->GetPoint(2);
@@ -513,7 +513,7 @@ void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 		return;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
-		FL::Ruler* ruler = (*m_ruler_list)[i];
+		fls::Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		if (!ruler->GetTimeDep() ||
