@@ -1178,7 +1178,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 			if (cover.Compute(0))
 			{
 				std::vector<double> cov = cover.GetCov();
-				FLIVR::Point center = cover.GetCenter();
+				fluo::Point center = cover.GetCenter();
 				m_aligner.SetCovMat(cov);
 				m_aligner.AlignPca(axis_type, false);
 				if (m_align_center->GetValue())

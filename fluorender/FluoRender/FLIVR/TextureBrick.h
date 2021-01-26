@@ -108,13 +108,13 @@ namespace FLIVR {
 		// Creator of the brick owns the nrrd memory.
 		TextureBrick(Nrrd* n0, Nrrd* n1,
 			int nx, int ny, int nz, int nc, int* nb, int ox, int oy, int oz,
-			int mx, int my, int mz, const BBox& bbox, const BBox& tbox, const BBox& dbox,
+			int mx, int my, int mz, const fluo::BBox& bbox, const fluo::BBox& tbox, const fluo::BBox& dbox,
 			unsigned int id, int findex = 0, long long offset = 0LL, long long fsize = 0LL);
 		virtual ~TextureBrick();
 
-		inline BBox &bbox() { return bbox_; }
-		inline BBox &tbox() { return tbox_; }
-		inline BBox &dbox() { return dbox_; }
+		inline fluo::BBox &bbox() { return bbox_; }
+		inline fluo::BBox &tbox() { return tbox_; }
+		inline fluo::BBox &dbox() { return dbox_; }
 
 		inline int nx() { return nx_; }
 		inline int ny() { return ny_; }
@@ -177,9 +177,9 @@ namespace FLIVR {
 		virtual void* tex_data(int c);
 		virtual void* tex_data_brk(int c, const FileLocInfo* finfo);
 
-		void compute_polygons(Ray& view, double tmin, double tmax, double dt,
+		void compute_polygons(fluo::Ray& view, double tmin, double tmax, double dt,
 			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
-		void compute_polygons(Ray& view, double dt,
+		void compute_polygons(fluo::Ray& view, double dt,
 			vector<float>& vertex, vector<uint32_t>& index,
 			vector<uint32_t>& size, bool bricks=false);
 		
@@ -235,17 +235,17 @@ namespace FLIVR {
 		bool get_new_grown() { return new_grown_; }
 
 	private:
-		void compute_edge_rays(BBox &bbox);
-		void compute_edge_rays_tex(BBox &bbox);
+		void compute_edge_rays(fluo::BBox &bbox);
+		void compute_edge_rays_tex(fluo::BBox &bbox);
 		size_t tex_type_size(GLenum t);
 		GLenum tex_type_aux(Nrrd* n);
 
 		bool raw_brick_reader(char* data, size_t size, const FileLocInfo* finfo);
 
 		//! bbox edges
-		Ray edge_[12]; 
+		fluo::Ray edge_[12];
 		//! tbox edges
-		Ray tex_edge_[12]; 
+		fluo::Ray tex_edge_[12];
 		Nrrd* data_[TEXTURE_MAX_COMPONENTS];
 		//! axis sizes (pow2)
 		int nx_, ny_, nz_; 
@@ -264,8 +264,8 @@ namespace FLIVR {
 		//! data axis sizes (not necessarily pow2)
 		int mx_, my_, mz_; 
 		//! bounding box and texcoord box
-		BBox bbox_, tbox_, dbox_;
-		Vector view_vector_;
+		fluo::BBox bbox_, tbox_, dbox_;
+		fluo::Vector view_vector_;
 		//a value used for sorting
 		//usually distance
 		double d_;

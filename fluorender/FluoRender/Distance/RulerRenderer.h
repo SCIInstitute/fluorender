@@ -80,7 +80,7 @@ namespace FL
 
 	private:
 		unsigned int DrawVerts(std::vector<float> &verts);
-		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, FLIVR::Color &c);
+		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c);
 		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
 			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
 			std::vector<float> &verts, unsigned int& num);

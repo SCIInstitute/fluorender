@@ -110,6 +110,20 @@ namespace fluo
 			}
 		}
 
+		inline void extend_mul(double val)
+		{
+			if (is_valid_)
+			{
+				Vector d = (cmax_ - cmin_) * val / 2.0;
+				cmin_.x(cmin_.x() - d.x());
+				cmin_.y(cmin_.y() - d.y());
+				cmin_.z(cmin_.z() - d.z());
+				cmax_.x(cmax_.x() + d.x());
+				cmax_.y(cmax_.y() + d.y());
+				cmax_.z(cmax_.z() + d.z());
+			}
+		}
+
 		//extend by a ratio for all axes
 		inline void extend(double px, double py, double pz)
 		{
@@ -220,10 +234,10 @@ namespace fluo
 		//scale around origin
 		void scale(double sx, double sy, double sz);
 
-		inline Point min() const
+		inline Point Min() const
 		{ return cmin_; }
 
-		inline Point max() const
+		inline Point Max() const
 		{ return cmax_; }
 
 		inline Vector diagonal() const

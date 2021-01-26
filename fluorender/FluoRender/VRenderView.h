@@ -107,7 +107,7 @@ public:
 	VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
-	MultiVolumeRenderer* GetMultiVolumeData();
+	FLIVR::MultiVolumeRenderer* GetMultiVolumeData();
 	VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
@@ -186,9 +186,9 @@ public:
 	void SetFarClip(double fc);
 
 	//background color
-	Color GetBackgroundColor();
-	Color GetTextColor();
-	void SetBackgroundColor(Color &color);
+	fluo::Color GetBackgroundColor();
+	fluo::Color GetTextColor();
+	void SetBackgroundColor(fluo::Color &color);
 	void SetGradBg(bool val);
 
 	//rot center anchor thresh

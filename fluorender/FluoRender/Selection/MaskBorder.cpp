@@ -87,7 +87,7 @@ bool MaskBorder::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -118,7 +118,7 @@ void MaskBorder::Compute(int order)
 	bn = bricks.size();
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_check_box_borders);
 	if (!kernel_prog)
 		return;
@@ -126,12 +126,12 @@ void MaskBorder::Compute(int order)
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	TextureBrick* nb;//neighbor brick
+	FLIVR::TextureBrick* nb;//neighbor brick
 	unsigned int nid;//neighbor id
 	unsigned int bid;
 	for (int i = 0; i < bn; ++i)
 	{
-		TextureBrick* b = bricks[i];
+		FLIVR::TextureBrick* b = bricks[i];
 		bid = b->get_id();
 		int nx = b->nx();
 		int ny = b->ny();
@@ -142,7 +142,7 @@ void MaskBorder::Compute(int order)
 		size_t local_size[2] = { 1, 1 };
 
 		//yz plane
-		Argument arg_tex =
+		FLIVR::Argument arg_tex =
 			kernel_prog->setKernelArgTex3D(kernel_index0, 0,
 			CL_MEM_READ_ONLY, mid);
 		unsigned int hits_x = 0;

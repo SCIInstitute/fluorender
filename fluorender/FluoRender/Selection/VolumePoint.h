@@ -56,18 +56,18 @@ namespace FL
 		double GetPointVolume(
 			double mx, double my,//mouse coord on screen
 			int mode, bool use_transf, double thresh,//params
-			FLIVR::Point &mp, FLIVR::Point &ip);
+			fluo::Point &mp, fluo::Point &ip);
 		double GetPointVolumeBox(
 			double mx, double my,//mouse coord on screen
 			bool calc_mats,
-			FLIVR::Point &mp);
+			fluo::Point &mp);
 		double GetPointVolumeBox2(
 			double mx, double my,//mouse coord on screen
-			FLIVR::Point &p1, FLIVR::Point &p2);
+			fluo::Point &p1, fluo::Point &p2);
 		double GetPointPlane(
 			double mx, double my,//mouse coord on screen
-			FLIVR::Point* planep, bool calc_mats,
-			FLIVR::Point &mp);
+			fluo::Point* planep, bool calc_mats,
+			fluo::Point &mp);
 
 	private:
 		VRenderGLView* m_view;

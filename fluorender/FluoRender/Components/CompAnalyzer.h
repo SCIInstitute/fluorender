@@ -154,7 +154,7 @@ namespace FL
 
 		bool GetColor(unsigned int id, int brick_id,
 			VolumeData* vd, int color_type,
-			FLIVR::Color &color);
+			fluo::Color &color);
 		int GetColocalization(size_t bid,
 			unsigned int bi,
 			unsigned int bj,

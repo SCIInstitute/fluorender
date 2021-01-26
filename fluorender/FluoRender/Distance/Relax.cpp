@@ -123,7 +123,7 @@ void Relax::BuildSpring()
 	//build a spring form the ruler
 	double dist;
 	RulerPoint *p;
-	FLIVR::Point pp, pp1;
+	fluo::Point pp, pp1;
 	bool locked;
 	int bn = m_ruler->GetNumBranch();
 	for (int bi = 0; bi < bn; ++bi)
@@ -154,7 +154,7 @@ void Relax::BuildSpring()
 				{
 					pp = p->GetPoint();
 					locked = p->GetLocked();
-					pp1 = FLIVR::Point(
+					pp1 = fluo::Point(
 						m_spoints.end()[-3],
 						m_spoints.end()[-2],
 						m_spoints.end()[-1]);
@@ -170,16 +170,16 @@ void Relax::BuildSpring()
 	}
 }
 
-FLIVR::Vector Relax::GetDisplacement(int idx)
+fluo::Vector Relax::GetDisplacement(int idx)
 {
-	FLIVR::Vector v;
+	fluo::Vector v;
 	if (idx < 0 || idx >= m_snum)
 		return v;
 
 	double w = m_wsum[idx];
 	if (w > 0.0)
 	{
-		v = FLIVR::Vector(
+		v = fluo::Vector(
 			m_dsp[idx * 3],
 			m_dsp[idx * 3 + 1],
 			m_dsp[idx * 3 + 2]);
@@ -213,7 +213,7 @@ bool Relax::Compute()
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();

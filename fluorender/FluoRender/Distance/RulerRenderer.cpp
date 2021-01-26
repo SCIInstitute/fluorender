@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include "RulerRenderer.h"
 #include "VRenderGLView.h"
-#include <FLIVR/Vector.h>
-#include <FLIVR/Quaternion.h>
+#include <Types/Vector.h>
+#include <Types/Quaternion.h>
 #include <FLIVR/TextRenderer.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/VertexArray.h>
@@ -87,7 +87,7 @@ void RulerRenderer::Draw()
 		unsigned int num = DrawVerts(verts);
 		if (num)
 		{
-			va_rulers->buffer_data(VABuf_Coord,
+			va_rulers->buffer_data(FLIVR::VABuf_Coord,
 				sizeof(float)*verts.size(),
 				&verts[0], GL_STREAM_DRAW);
 			va_rulers->set_param(0, num);
@@ -115,7 +115,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	float w = FLIVR::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
-	FLIVR::Transform mv, p;
+	fluo::Transform mv, p;
 	glm::mat4 mv_mat = m_view->GetModelView();
 	mv.set(glm::value_ptr(mv_mat));
 	glm::mat4 proj_mat = m_view->GetProjection();
@@ -130,10 +130,10 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	verts.reserve(vert_num * 10 * 3 * 2);
 
 	unsigned int num = 0;
-	FLIVR::Point p1, p2;
+	fluo::Point p1, p2;
 	FL::RulerPoint *rp1, *rp2;
-	FLIVR::Color c;
-	FLIVR::Color text_color = m_view->GetTextColor();
+	fluo::Color c;
+	fluo::Color text_color = m_view->GetTextColor();
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
 		FL::Ruler* ruler = (*m_ruler_list)[i];
@@ -176,12 +176,12 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					rps[1] = ruler->GetPoint(1);
 					rps[2] = ruler->GetPoint(2);
 					rps[3] = ruler->GetPoint(3);
-					Point pps[4];
+					fluo::Point pps[4];
 					pps[0] = rps[0]->GetPoint();
 					pps[1] = rps[1]->GetPoint();
 					pps[2] = rps[2]->GetPoint();
 					pps[3] = rps[3]->GetPoint();
-					Point ppc = ruler->GetCenter();
+					fluo::Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
 					rb = (pps[2] - pps[3]).length() / 2.0;
@@ -321,10 +321,10 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				if (ruler->GetRulerType() == 4 &&
 					ruler->GetNumPoint() >= 3)
 				{
-					Point center = ruler->GetPoint(1)->GetPoint();
-					Vector v1 = ruler->GetPoint(0)->GetPoint() - center;
-					Vector v2 = ruler->GetPoint(2)->GetPoint() - center;
-					double len = Min(v1.length(), v2.length());
+					fluo::Point center = ruler->GetPoint(1)->GetPoint();
+					fluo::Vector v1 = ruler->GetPoint(0)->GetPoint() - center;
+					fluo::Vector v2 = ruler->GetPoint(2)->GetPoint() - center;
+					double len = std::min(v1.length(), v2.length());
 					if (len > w)
 					{
 						v1.normalize();
@@ -353,7 +353,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	return num;
 }
 
-void RulerRenderer::DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, FLIVR::Color &c)
+void RulerRenderer::DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c)
 {
 	float w2 = 1.41421356 * w;
 	switch (type)
@@ -433,8 +433,8 @@ void RulerRenderer::DrawPoint(std::vector<float> &verts, int type, float px, flo
 	}
 }
 
-void RulerRenderer::DrawArc(FLIVR::Point & ppc, FLIVR::Point& pp0, FLIVR::Point& pp1,
-	FLIVR::Color &c, FLIVR::Transform& mv, FLIVR::Transform& p,
+void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
+	fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
 	std::vector<float> &verts, unsigned int& num)
 {
 	if (!m_view)
@@ -444,29 +444,29 @@ void RulerRenderer::DrawArc(FLIVR::Point & ppc, FLIVR::Point& pp0, FLIVR::Point&
 	int nx = m_view->GetGLSize().x;
 	int ny = m_view->GetGLSize().y;
 	float px, py;
-	FLIVR::Point p1, p2;
+	fluo::Point p1, p2;
 	int sec = 20;
 	//arc 02
-	FLIVR::Vector v0 = pp0 - ppc;
+	fluo::Vector v0 = pp0 - ppc;
 	double lv0 = v0.length();
-	FLIVR::Vector v1 = pp1 - ppc;
+	fluo::Vector v1 = pp1 - ppc;
 	double lv1 = v1.length();
-	FLIVR::Vector axis = Cross(v0, v1);
+	fluo::Vector axis = Cross(v0, v1);
 	axis.normalize();
-	FLIVR::Quaternion q0(v0);
+	fluo::Quaternion q0(v0);
 	p1 = pp0;
 	for (int i = 1; i <= sec; ++i)
 	{
 		double theta = 90.0 * i / sec;
 		double rth = d2r(theta);
-		FLIVR::Quaternion q(theta, axis);
+		fluo::Quaternion q(theta, axis);
 		q.Normalize();
-		FLIVR::Quaternion q2 = (-q) * q0 * q;
-		FLIVR::Vector vp2 = FLIVR::Vector(q2.x, q2.y, q2.z);
+		fluo::Quaternion q2 = (-q) * q0 * q;
+		fluo::Vector vp2(q2.x, q2.y, q2.z);
 		vp2.normalize();
 		vp2 *= lv0 * lv1 / (sqrt(lv1*lv1*cos(rth)*cos(rth) + lv0 * lv0*sin(rth)*sin(rth)));
-		p2 = FLIVR::Point(vp2);
-		p2 = ppc + FLIVR::Vector(p2);
+		p2 = fluo::Point(vp2);
+		p2 = ppc + fluo::Vector(p2);
 		if (i == 1)
 		{
 			p1 = mv.transform(p1);
@@ -499,11 +499,11 @@ void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
-	Color c;
-	Color text_color = m_view->GetTextColor();
-	Point p2;
+	fluo::Color c;
+	fluo::Color text_color = m_view->GetTextColor();
+	fluo::Point p2;
 	float px, py, p2x, p2y;
-	FLIVR::Transform mv, p;
+	fluo::Transform mv, p;
 	glm::mat4 mv_mat = m_view->GetModelView();
 	mv.set(glm::value_ptr(mv_mat));
 	glm::mat4 proj_mat = m_view->GetProjection();

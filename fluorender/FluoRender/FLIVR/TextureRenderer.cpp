@@ -29,14 +29,14 @@
 #include <GL/glew.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Color.h>
-#include <FLIVR/Utils.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/VolShader.h>
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
+#include <Types/Color.h>
+#include <Types/Utils.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include "compatibility.h"
@@ -77,7 +77,7 @@ namespace FLIVR
 	int TextureRenderer::finished_bricks_ = 0;
 	BrickQueue TextureRenderer::brick_queue_(5);
 	int TextureRenderer::quota_bricks_ = 0;
-	Point TextureRenderer::quota_center_;
+	fluo::Point TextureRenderer::quota_center_;
 	int TextureRenderer::update_order_ = 0;
 	bool TextureRenderer::load_on_main_thread_ = false;
 	vector<TextureRenderer::LoadedBrick> TextureRenderer::loadedbrks;
@@ -395,7 +395,7 @@ namespace FLIVR
 				sum_x2 += x * x;
 			}
 			double beta = (sum_xy / n - sum_x*sum_y / n / n) / (sum_x2 / n - sum_x*sum_x / n / n);
-			result = Max(sum_y / n - beta*sum_x / n + beta*n, 1.0);
+			result = std::max(sum_y / n - beta*sum_x / n + beta*n, 1.0);
 		}
 		else if (mode == 3)
 		{
@@ -441,9 +441,9 @@ namespace FLIVR
 		return int(result);
 	}
 
-	Ray TextureRenderer::compute_view()
+	fluo::Ray TextureRenderer::compute_view()
 	{
-		Transform *field_trans = tex_->transform();
+		fluo::Transform *field_trans = tex_->transform();
 		double mvmat[16] =
 		{ m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
 		 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
@@ -451,17 +451,17 @@ namespace FLIVR
 		 m_mv_mat[3][0], m_mv_mat[3][1], m_mv_mat[3][2], m_mv_mat[3][3] };
 
 		// index space view direction
-		Vector v = field_trans->project(Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
+		fluo::Vector v = field_trans->project(fluo::Vector(-mvmat[2], -mvmat[6], -mvmat[10]));
 		v.safe_normalize();
-		Transform mv;
+		fluo::Transform mv;
 		mv.set_trans(mvmat);
-		Point p = field_trans->unproject(mv.unproject(Point(0, 0, 0)));
-		return Ray(p, v);
+		fluo::Point p = field_trans->unproject(mv.unproject(fluo::Point(0, 0, 0)));
+		return fluo::Ray(p, v);
 	}
 
-	Ray TextureRenderer::compute_snapview(double snap)
+	fluo::Ray TextureRenderer::compute_snapview(double snap)
 	{
-		Transform *field_trans = tex_->transform();
+		fluo::Transform *field_trans = tex_->transform();
 		double mvmat[16] =
 		{ m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
 		 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
@@ -469,7 +469,7 @@ namespace FLIVR
 		 m_mv_mat[3][0], m_mv_mat[3][1], m_mv_mat[3][2], m_mv_mat[3][3] };
 
 		//snap
-		Vector vd;
+		fluo::Vector vd;
 		if (snap > 0.0 && snap < 0.5)
 		{
 			double vdx = -mvmat[2];
@@ -488,28 +488,28 @@ namespace FLIVR
 			else if (vdy_abs < snap) vdy = (vdy_abs - snap + 0.1)*snap*10.0*vdy / vdy_abs;
 			if (vdz_abs < snap - 0.1) vdz = 0.0;
 			else if (vdz_abs < snap) vdz = (vdz_abs - snap + 0.1)*snap*10.0*vdz / vdz_abs;
-			vd = Vector(vdx, vdy, vdz);
+			vd = fluo::Vector(vdx, vdy, vdz);
 			vd.safe_normalize();
 		}
 		else
-			vd = Vector(-mvmat[2], -mvmat[6], -mvmat[10]);
+			vd = fluo::Vector(-mvmat[2], -mvmat[6], -mvmat[10]);
 
 		// index space view direction
-		Vector v = field_trans->project(vd);
+		fluo::Vector v = field_trans->project(vd);
 		v.safe_normalize();
-		Transform mv;
+		fluo::Transform mv;
 		mv.set_trans(mvmat);
-		Point p = field_trans->unproject(mv.unproject(Point(0, 0, 0)));
-		return Ray(p, v);
+		fluo::Point p = field_trans->unproject(mv.unproject(fluo::Point(0, 0, 0)));
+		return fluo::Ray(p, v);
 	}
 
-	double TextureRenderer::compute_rate_scale(Vector v)
+	double TextureRenderer::compute_rate_scale(fluo::Vector v)
 	{
 		//Transform *field_trans = tex_->transform();
 		double spcx, spcy, spcz;
 		tex_->get_spacings(spcx, spcy, spcz);
-		double z_factor = spcz / Max(spcx, spcy);
-		Vector n(double(tex_->nx()) / double(tex_->nz()),
+		double z_factor = spcz / std::max(spcx, spcy);
+		fluo::Vector n(double(tex_->nx()) / double(tex_->nz()),
 			double(tex_->ny()) / double(tex_->nz()),
 			z_factor > 1.0&&z_factor < 100.0 ? sqrt(z_factor) : 1.0);
 
@@ -567,20 +567,20 @@ namespace FLIVR
 
 	}
 
-	bool TextureRenderer::test_against_view(const BBox &bbox, bool persp)
+	bool TextureRenderer::test_against_view(const fluo::BBox &bbox, bool persp)
 	{
 		memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16 * sizeof(float));
 		memcpy(prmat_, glm::value_ptr(m_proj_mat), 16 * sizeof(float));
 
-		Transform mv;
-		Transform pr;
+		fluo::Transform mv;
+		fluo::Transform pr;
 		mv.set_trans(mvmat_);
 		pr.set_trans(prmat_);
 
 		if (persp)
 		{
-			const Point p0_cam(0.0, 0.0, 0.0);
-			Point p0, p0_obj;
+			const fluo::Point p0_cam(0.0, 0.0, 0.0);
+			fluo::Point p0, p0_obj;
 			pr.unproject(p0_cam, p0);
 			mv.unproject(p0, p0_obj);
 			if (bbox.inside(p0_obj))
@@ -595,10 +595,11 @@ namespace FLIVR
 		bool underz = true;
 		for (int i = 0; i < 8; i++)
 		{
-			const Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
-				(i & 2) ? bbox.min().y() : bbox.max().y(),
-				(i & 4) ? bbox.min().z() : bbox.max().z());
-			const Point p = pr.project(mv.project(pold));
+			const fluo::Point pold(
+				(i & 1) ? bbox.Min().x() : bbox.Max().x(),
+				(i & 2) ? bbox.Min().y() : bbox.Max().y(),
+				(i & 4) ? bbox.Min().z() : bbox.Max().z());
+			const fluo::Point p = pr.project(mv.project(pold));
 			overx = overx && (p.x() > 1.0);
 			overy = overy && (p.y() > 1.0);
 			overz = overz && (p.z() > 1.0);

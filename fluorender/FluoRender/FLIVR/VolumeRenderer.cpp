@@ -44,11 +44,6 @@
 
 namespace FLIVR
 {
-#ifdef _WIN32
-#undef min
-#undef max
-#endif
-
 	VolShaderFactory TextureRenderer::vol_shader_factory_;
 	SegShaderFactory TextureRenderer::seg_shader_factory_;
 	VolCalShaderFactory TextureRenderer::cal_shader_factory_;
@@ -57,7 +52,7 @@ namespace FLIVR
 	double VolumeRenderer::sw_ = 0.0;
 
 	VolumeRenderer::VolumeRenderer(Texture* tex,
-		const vector<Plane*> &planes)
+		const vector<fluo::Plane*> &planes)
 		:TextureRenderer(tex),
 		//scalar scaling factor
 		scalar_scale_(1.0),
@@ -69,8 +64,8 @@ namespace FLIVR
 		offset_(1.0),
 		lo_thresh_(0.0),
 		hi_thresh_(1.0),
-		color_(Color(1.0, 1.0, 1.0)),
-		mask_color_(Color(0.0, 1.0, 0.0)),
+		color_(fluo::Color(1.0, 1.0, 1.0)),
+		mask_color_(fluo::Color(0.0, 1.0, 0.0)),
 		mask_color_set_(false),
 		mask_thresh_(0.0),
 		alpha_(1.0),
@@ -181,7 +176,7 @@ namespace FLIVR
 		//clipping planes
 		for (int i=0; i<(int)copy.planes_.size(); i++)
 		{
-			Plane* plane = new Plane(*copy.planes_[i]);
+			fluo::Plane* plane = new fluo::Plane(*copy.planes_[i]);
 			planes_.push_back(plane);
 		}
 		//done loop
@@ -273,40 +268,40 @@ namespace FLIVR
 		return hi_thresh_;
 	}
 
-	void VolumeRenderer::set_color(Color color)
+	void VolumeRenderer::set_color(fluo::Color color)
 	{
 		color_ = color;
 
 		if (!mask_color_set_)
 		{
 			//generate opposite color for mask
-			HSVColor hsv_color(color_);
+			fluo::HSVColor hsv_color(color_);
 			double h, s, v;
 			if (hsv_color.sat() < 0.2)
-				mask_color_ = Color(0.0, 1.0, 0.0);	//if low saturation, set to green
+				mask_color_ = fluo::Color(0.0, 1.0, 0.0);	//if low saturation, set to green
 			else
 			{
 				double h0 = hsv_color.hue();
 				h = h0<30.0?h0-180.0:h0<90.0?h0+120.0:h0<210.0?h0-120.0:h0-180.0;
 				s = 1.0;
 				v = 1.0;
-				mask_color_ = Color(HSVColor(h<0.0?h+360.0:h, s, v));
+				mask_color_ = fluo::Color(fluo::HSVColor(h<0.0?h+360.0:h, s, v));
 			}
 		}
 	}
 
-	Color VolumeRenderer::get_color()
+	fluo::Color VolumeRenderer::get_color()
 	{
 		return color_;
 	}
 
-	void VolumeRenderer::set_mask_color(Color color, bool set)
+	void VolumeRenderer::set_mask_color(fluo::Color color, bool set)
 	{
 		mask_color_ = color;
 		mask_color_set_ = set;
 	}
 
-	Color VolumeRenderer::get_mask_color()
+	fluo::Color VolumeRenderer::get_mask_color()
 	{
 		return mask_color_;
 	}
@@ -345,8 +340,8 @@ namespace FLIVR
 
 	double VolumeRenderer::num_slices_to_rate(int num_slices)
 	{
-		const Vector diag = tex_->bbox()->diagonal();
-		const Vector cell_diag(diag.x()/tex_->nx(),
+		const fluo::Vector diag = tex_->bbox()->diagonal();
+		const fluo::Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
 		const double dt = diag.length() / num_slices;
@@ -377,7 +372,7 @@ namespace FLIVR
 	}
 
 	//clipping planes
-	void VolumeRenderer::set_planes(vector<Plane*> *p)
+	void VolumeRenderer::set_planes(vector<fluo::Plane*> *p)
 	{
 		int i;
 		if (!planes_.empty())
@@ -392,12 +387,12 @@ namespace FLIVR
 
 		for (i=0; i<(int)p->size(); i++)
 		{
-			Plane *plane = new Plane(*(*p)[i]);
+			fluo::Plane *plane = new fluo::Plane(*(*p)[i]);
 			planes_.push_back(plane);
 		}
 	}
 
-	vector<Plane*>* VolumeRenderer::get_planes()
+	vector<fluo::Plane*>* VolumeRenderer::get_planes()
 	{
 		return &planes_;
 	}
@@ -416,18 +411,18 @@ namespace FLIVR
 		double sf = 1.0;
 		if (w > h)
 		{
-			cs = Clamp(tex_h, 500.0, 2000.0);
+			cs = fluo::Clamp(tex_h, 500.0, 2000.0);
 			vs = h;
 		}
 		else
 		{
-			cs = Clamp(tex_w, 500.0, 2000.0);
+			cs = fluo::Clamp(tex_w, 500.0, 2000.0);
 			vs = w;
 		}
 		double p1 = 1.282e9/(cs*cs*cs)+1.522;
 		double p2 = -8.494e7/(cs*cs*cs)+0.496;
 		sf = cs*p1/(vs*zoom_)+p2;
-		sf = Clamp(sf, 0.6, 2.0);
+		sf = fluo::Clamp(sf, 0.6, 2.0);
 		return sf;
 	}
 
@@ -445,12 +440,12 @@ namespace FLIVR
 		double size = 0.0;
 		if (w > h)
 		{
-			cs = Clamp(tex_h, 500.0, 1200.0);
+			cs = fluo::Clamp(tex_h, 500.0, 1200.0);
 			vs = h;
 		}
 		else
 		{
-			cs = Clamp(tex_w, 500.0, 1200.0);
+			cs = fluo::Clamp(tex_w, 500.0, 1200.0);
 			vs = w;
 		}
 
@@ -460,16 +455,16 @@ namespace FLIVR
 			{
 				double p = 0.29633+(-2.18448e-4)*cs;
 				size = (p*zoom_+0.24512)*sf;
-				size = Clamp(size, 0.0, 2.0);
+				size = fluo::Clamp(size, 0.0, 2.0);
 			}
 			break;
 		case 2:	//max filter
 			{
 				double p1 = 0.26051+(-1.90542e-4)*cs;
 				double p2 = -0.29188+(2.45276e-4)*cs;
-				p2 = min(p2, 0.0);
+				p2 = std::min(p2, 0.0);
 				size = (p1*zoom_+p2)*sf;
-				size = Clamp(size, 0.0, 2.0);
+				size = fluo::Clamp(size, 0.0, 2.0);
 			}
 			break;
 		case 3:	//sharpening filter
@@ -477,18 +472,18 @@ namespace FLIVR
 				//double p = 0.012221;
 				//size = p*zoom_;
 				//size = Clamp(size, 0.0, 0.25);
-				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
+				double sf11 = std::sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
 				size = zoom_ / sf11 / 10.0;
 				size = size<1.0?0.0:size;
-				size = Clamp(size, 0.0, 0.3);
+				size = fluo::Clamp(size, 0.0, 0.3);
 			}
 			break;
 		case 4:	//blur filter
 			{
-				double sf11 = sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
+				double sf11 = std::sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
 				size = zoom_ / sf11 / 2.0;
 				size = size<1.0?0.5:size;
-				size = Clamp(size, 0.1, 1.0);
+				size = fluo::Clamp(size, 0.1, 1.0);
 			}
 		}
 
@@ -577,8 +572,8 @@ namespace FLIVR
 		if (!tex_)
 			return;
 
-		Ray view_ray = compute_view();
-		Ray snapview = compute_snapview(0.4);
+		fluo::Ray view_ray = compute_view();
+		fluo::Ray snapview = compute_snapview(0.4);
 
 		vector<TextureBrick*> *bricks = 0;
 		tex_->set_matrices(m_mv_mat2, m_proj_mat);
@@ -596,8 +591,8 @@ namespace FLIVR
 
 		// Set sampling rate based on interaction
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
-		Vector diag = tex_->bbox()->diagonal();
-		Vector cell_diag(
+		fluo::Vector diag = tex_->bbox()->diagonal();
+		fluo::Vector cell_diag(
 			diag.x() / tex_->nx(),
 			diag.y() / tex_->ny(),
 			diag.z() / tex_->nz());
@@ -651,7 +646,7 @@ namespace FLIVR
 		std::string bbufname;
 		if (imode_ && adaptive_)
 		{
-			sf = Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
 			bbufname = "blend_int";
 		}
 		else if (noise_red_)
@@ -661,7 +656,7 @@ namespace FLIVR
 		}
 		else
 		{
-			sf = Clamp(double(1.0 / zoom_data_), 0.5, 2.0);
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 2.0);
 			bbufname = "blend_hi";
 		}
 		if (fabs(sf - sfactor_) > 0.05)
@@ -716,7 +711,7 @@ namespace FLIVR
 		//set uniforms
 		//set up shading
 		//set the light
-		Vector light = view_ray.direction();
+		fluo::Vector light = view_ray.direction();
 		light.safe_normalize();
 		shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
 		if (shading_)
@@ -787,7 +782,7 @@ namespace FLIVR
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		Transform *tform = tex_->transform();
+		fluo::Transform *tform = tex_->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_mat2 = glm::mat4(
@@ -848,23 +843,23 @@ namespace FLIVR
 				mode_==TextureRenderer::MODE_MIP) &&
 				colormap_proj_)
 			{
-				BBox bbox = b->dbox();
+				fluo::BBox bbox = b->dbox();
 				float matrix[16];
-				matrix[0] = float(bbox.max().x()-bbox.min().x());
+				matrix[0] = float(bbox.Max().x()-bbox.Min().x());
 				matrix[1] = 0.0f;
 				matrix[2] = 0.0f;
 				matrix[3] = 0.0f;
 				matrix[4] = 0.0f;
-				matrix[5] = float(bbox.max().y()-bbox.min().y());
+				matrix[5] = float(bbox.Max().y()-bbox.Min().y());
 				matrix[6] = 0.0f;
 				matrix[7] = 0.0f;
 				matrix[8] = 0.0f;
 				matrix[9] = 0.0f;
-				matrix[10] = float(bbox.max().z()-bbox.min().z());
+				matrix[10] = float(bbox.Max().z()-bbox.Min().z());
 				matrix[11] = 0.0f;
-				matrix[12] = float(bbox.min().x());
-				matrix[13] = float(bbox.min().y());
-				matrix[14] = float(bbox.min().z());
+				matrix[12] = float(bbox.Min().x());
+				matrix[13] = float(bbox.Min().y());
+				matrix[14] = float(bbox.Min().z());
 				matrix[15] = 1.0f;
 				shader->setLocalParamMatrix(5, matrix);
 			}
@@ -909,22 +904,22 @@ namespace FLIVR
 
 				//for brick transformation
 				float matrix[16];
-				BBox bbox = b->dbox();
-				matrix[0] = float(bbox.max().x() - bbox.min().x());
+				fluo::BBox bbox = b->dbox();
+				matrix[0] = float(bbox.Max().x() - bbox.Min().x());
 				matrix[1] = 0.0f;
 				matrix[2] = 0.0f;
 				matrix[3] = 0.0f;
 				matrix[4] = 0.0f;
-				matrix[5] = float(bbox.max().y() - bbox.min().y());
+				matrix[5] = float(bbox.Max().y() - bbox.Min().y());
 				matrix[6] = 0.0f;
 				matrix[7] = 0.0f;
 				matrix[8] = 0.0f;
 				matrix[9] = 0.0f;
-				matrix[10] = float(bbox.max().z() - bbox.min().z());
+				matrix[10] = float(bbox.Max().z() - bbox.Min().z());
 				matrix[11] = 0.0f;
-				matrix[12] = float(bbox.min().x());
-				matrix[13] = float(bbox.min().y());
-				matrix[14] = float(bbox.min().z());
+				matrix[12] = float(bbox.Min().x());
+				matrix[13] = float(bbox.Min().y());
+				matrix[14] = float(bbox.Min().z());
 				matrix[15] = 1.0f;
 				shader->setLocalParamMatrix(2, matrix);
 
@@ -1062,15 +1057,15 @@ namespace FLIVR
 
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	{
-		Ray view_ray = compute_view();
-		Ray snapview = compute_snapview(0.4);
+		fluo::Ray view_ray = compute_view();
+		fluo::Ray snapview = compute_snapview(0.4);
 
 		glEnable(GL_DEPTH_TEST);
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
-		Vector diag = tex_->bbox()->diagonal();
-		Vector cell_diag(diag.x()/tex_->nx(),
+		fluo::Vector diag = tex_->bbox()->diagonal();
+		fluo::Vector cell_diag(diag.x()/tex_->nx(),
 			diag.y()/tex_->ny(),
 			diag.z()/tex_->nz());
 		double dt;
@@ -1113,7 +1108,7 @@ namespace FLIVR
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		Transform *tform = tex_->transform();
+		fluo::Transform *tform = tex_->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_mat2 = glm::mat4(
@@ -1205,7 +1200,7 @@ namespace FLIVR
 
 		//set uniforms
 		//set up shading
-		Vector light = compute_view().direction();
+		fluo::Vector light = compute_view().direction();
 		light.safe_normalize();
 		seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
 		if (shading_)
@@ -1251,7 +1246,7 @@ namespace FLIVR
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		Transform *tform = tex_->transform();
+		fluo::Transform *tform = tex_->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_mat2 = glm::mat4(
@@ -1290,22 +1285,22 @@ namespace FLIVR
 				continue;
 			}
 
-			BBox bbox = b->bbox();
-			matrix[0] = float(bbox.max().x()-bbox.min().x());
+			fluo::BBox bbox = b->bbox();
+			matrix[0] = float(bbox.Max().x()-bbox.Min().x());
 			matrix[1] = 0.0f;
 			matrix[2] = 0.0f;
 			matrix[3] = 0.0f;
 			matrix[4] = 0.0f;
-			matrix[5] = float(bbox.max().y()-bbox.min().y());
+			matrix[5] = float(bbox.Max().y()-bbox.Min().y());
 			matrix[6] = 0.0f;
 			matrix[7] = 0.0f;
 			matrix[8] = 0.0f;
 			matrix[9] = 0.0f;
-			matrix[10] = float(bbox.max().z()-bbox.min().z());
+			matrix[10] = float(bbox.Max().z()-bbox.Min().z());
 			matrix[11] = 0.0f;
-			matrix[12] = float(bbox.min().x());
-			matrix[13] = float(bbox.min().y());
-			matrix[14] = float(bbox.min().z());
+			matrix[12] = float(bbox.Min().x());
+			matrix[13] = float(bbox.Min().y());
+			matrix[14] = float(bbox.Min().z());
 			matrix[15] = 1.0f;
 			seg_shader->setLocalParamMatrix(2, matrix);
 
@@ -1345,7 +1340,7 @@ namespace FLIVR
 			if (estimate && type == 0)
 			{
 				double temp = calc_hist_3d(vd_id, mask_id, b->nx(), b->ny(), b->nz());
-				est_thresh_ = max(est_thresh_, temp);
+				est_thresh_ = std::max(est_thresh_, temp);
 			}
 
 		}
@@ -1554,7 +1549,7 @@ namespace FLIVR
 	void VolumeRenderer::calculate(int type, FLIVR::VolumeRenderer *vr_a, FLIVR::VolumeRenderer *vr_b)
 	{
 		//sync sorting
-		Ray view_ray(Point(0.802,0.267,0.534), Vector(0.802,0.267,0.534));
+		fluo::Ray view_ray(fluo::Point(0.802,0.267,0.534), fluo::Vector(0.802,0.267,0.534));
 		tex_->set_sort_bricks();
 		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray);
 		if (!bricks || bricks->size() == 0)

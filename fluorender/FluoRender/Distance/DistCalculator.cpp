@@ -95,7 +95,7 @@ void DistCalculator::Project()
 	double sy = m_celps->sy;
 	double sz = m_celps->sz;
 
-	Point p0, pp;
+	fluo::Point p0, pp;
 	for (auto it = m_celps->begin();
 		it != m_celps->end(); ++it)
 	{
@@ -164,7 +164,7 @@ void DistCalculator::BuildCloud()
 	double sy = m_celps->sy;
 	double sz = m_celps->sz;
 
-	Point p;
+	fluo::Point p;
 	for (auto it = m_celps->begin();
 		it != m_celps->end(); ++it)
 	{
@@ -183,7 +183,7 @@ double DistCalculator::GetRestDist()
 	double len;
 	double sumd = 0.0;
 	double mind = std::numeric_limits<double>::max();
-	Point p1, p2;
+	fluo::Point p1, p2;
 	for (int i = 0; i < size - 1; ++i)
 	for (int j = i + 1; j < size - 1; ++j)
 	{
@@ -208,11 +208,11 @@ void DistCalculator::UpdateSpringNode(int idx)
 	SpringNode& node = m_spring.at(idx);
 	if (node.p->GetLocked())
 		return;
-	Point pos = node.p->GetPoint();
-	Vector force, f1, f2, f3;
+	fluo::Point pos = node.p->GetPoint();
+	fluo::Vector force, f1, f2, f3;
 
 	double dist, ang;
-	Vector dir, dir2;
+	fluo::Vector dir, dir2;
 	if (m_type == 1 || m_type == 2)
 	{
 		//from relax
@@ -314,7 +314,7 @@ void DistCalculator::UpdateSpringDist()
 		return;
 
 	double dist;
-	Vector dir;
+	fluo::Vector dir;
 	for (int i = 0; i < m_spring.size(); ++i)
 	{
 		SpringNode& node = m_spring.at(i);
@@ -328,14 +328,14 @@ void DistCalculator::UpdateSpringDist()
 	}
 }
 
-void DistCalculator::SpringProject(Point &p0, Point &pp)
+void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 {
 	if (m_spring.empty())
 		return;
 	int sz = m_spring.size();
 	if (sz < 2)
 	{
-		pp = Point(p0 - m_spring[0].p->GetPoint());
+		pp = fluo::Point(p0 - m_spring[0].p->GetPoint());
 		return;
 	}
 
@@ -343,12 +343,12 @@ void DistCalculator::SpringProject(Point &p0, Point &pp)
 	int minidx = -1;
 	double dist;
 	double mind = std::numeric_limits<double>::max();
-	Point mp;
+	fluo::Point mp;
 	for (int i = 0; i < sz - 1; ++i)
 	{
 		SpringNode &node1 = m_spring.at(i);
 		SpringNode &node2 = m_spring.at(i + 1);
-		mp = Point((node1.p->GetPoint() + node2.p->GetPoint()) / 2.0);
+		mp = fluo::Point((node1.p->GetPoint() + node2.p->GetPoint()) / 2.0);
 		dist = (mp - p0).length2();
 		if (dist < mind)
 		{
@@ -361,13 +361,13 @@ void DistCalculator::SpringProject(Point &p0, Point &pp)
 		return;
 
 	//project
-	Point p1 = m_spring[minidx].p->GetPoint();
-	Point p2 = m_spring[minidx + 1].p->GetPoint();
-	Vector axis = p2 - p1;
+	fluo::Point p1 = m_spring[minidx].p->GetPoint();
+	fluo::Point p2 = m_spring[minidx + 1].p->GetPoint();
+	fluo::Vector axis = p2 - p1;
 	axis.normalize();
-	Vector vp0 = p0 - p1;
+	fluo::Vector vp0 = p0 - p1;
 	double len = vp0.length();
-	double ppx = Dot(vp0, axis);
-	double ppy = sqrt(len * len - ppx * ppx);
-	pp = Point(ppx + m_spring[minidx].dist, ppy, minidx);
+	double ppx = fluo::Dot(vp0, axis);
+	double ppy = std::sqrt(len * len - ppx * ppx);
+	pp = fluo::Point(ppx + m_spring[minidx].dist, ppy, minidx);
 }

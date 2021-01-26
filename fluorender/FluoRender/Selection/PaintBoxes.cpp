@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Selection/PaintBoxes.h>
 #include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 
 using namespace FL;
 
@@ -106,12 +106,12 @@ void PaintBoxes::Compute()
 	for (int i = 0; i < num; ++i)
 	{
 		BrickBox bb = bbs[i];
-		boxes[i * 6 + 0] = bb.bbox.min().x();
-		boxes[i * 6 + 1] = bb.bbox.min().y();
-		boxes[i * 6 + 2] = bb.bbox.min().z();
-		boxes[i * 6 + 3] = bb.bbox.max().x();
-		boxes[i * 6 + 4] = bb.bbox.max().y();
-		boxes[i * 6 + 5] = bb.bbox.max().z();
+		boxes[i * 6 + 0] = bb.bbox.Min().x();
+		boxes[i * 6 + 1] = bb.bbox.Min().y();
+		boxes[i * 6 + 2] = bb.bbox.Min().z();
+		boxes[i * 6 + 3] = bb.bbox.Max().x();
+		boxes[i * 6 + 4] = bb.bbox.Max().y();
+		boxes[i * 6 + 5] = bb.bbox.Max().z();
 		hits[i] = 0;
 	}
 
@@ -192,7 +192,7 @@ bool PaintBoxes::GetBrickBoxes(vector<BrickBox> &bbs)
 	for (int i = 0; i < m_bricks->size(); ++i)
 	{
 		FLIVR::TextureBrick* b = (*m_bricks)[i];
-		FLIVR::BBox bbox = b->bbox();
+		fluo::BBox bbox = b->bbox();
 		if (test_against_view(bbox))
 		{
 			BrickBox brick_box;
@@ -212,7 +212,7 @@ void PaintBoxes::BrickViewInt()
 	for (int i = 0; i < m_bricks->size(); ++i)
 	{
 		FLIVR::TextureBrick* b = (*m_bricks)[i];
-		FLIVR::BBox bbox = b->bbox();
+		fluo::BBox bbox = b->bbox();
 		if (test_against_view(bbox))
 			b->set_paint_mask(true);
 	}
@@ -224,33 +224,33 @@ void PaintBoxes::BrickRayInt()
 		return;
 
 	//get ray
-	FLIVR::Point mp1(
+	fluo::Point mp1(
 		(double)m_mx * 2 / m_ptx - 1,
 		1 - (double)m_my * 2 / m_pty, 0);
-	FLIVR::Point mp2 = mp1;
+	fluo::Point mp2 = mp1;
 	mp2.z(1);
 	mp1 = m_imat.transform(mp1);
 	mp2 = m_imat.transform(mp2);
-	FLIVR::Vector dir(mp1 - mp2);
+	fluo::Vector dir(mp1 - mp2);
 	dir.normalize();
 
 	//test ray-box
-	FLIVR::Point hit;
+	fluo::Point hit;
 	for (int i = 0; i < m_bricks->size(); ++i)
 	{
 		FLIVR::TextureBrick* b = (*m_bricks)[i];
-		FLIVR::BBox bbox = b->bbox();
+		fluo::BBox bbox = b->bbox();
 		if (bbox.intersect(mp1, dir, hit))
 			b->set_paint_mask(true);
 	}
 }
 
-bool PaintBoxes::test_against_view(const FLIVR::BBox &bbox)
+bool PaintBoxes::test_against_view(const fluo::BBox &bbox)
 {
 	if (m_persp)
 	{
-		const FLIVR::Point p0_cam(0.0, 0.0, 0.0);
-		FLIVR::Point p0, p0_obj;
+		const fluo::Point p0_cam(0.0, 0.0, 0.0);
+		fluo::Point p0, p0_obj;
 		m_pr.unproject(p0_cam, p0);
 		m_mv.unproject(p0, p0_obj);
 		if (bbox.inside(p0_obj))
@@ -265,10 +265,11 @@ bool PaintBoxes::test_against_view(const FLIVR::BBox &bbox)
 	bool underz = true;
 	for (int i = 0; i < 8; i++)
 	{
-		const FLIVR::Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
-			(i & 2) ? bbox.min().y() : bbox.max().y(),
-			(i & 4) ? bbox.min().z() : bbox.max().z());
-		const FLIVR::Point p = m_pr.project(m_mv.project(pold));
+		const fluo::Point pold(
+			(i & 1) ? bbox.Min().x() : bbox.Max().x(),
+			(i & 2) ? bbox.Min().y() : bbox.Max().y(),
+			(i & 4) ? bbox.Min().z() : bbox.Max().z());
+		const fluo::Point p = m_pr.project(m_mv.project(pold));
 		overx = overx && (p.x() > 1.0);
 		overy = overy && (p.y() > 1.0);
 		overz = overz && (p.z() > 1.0);

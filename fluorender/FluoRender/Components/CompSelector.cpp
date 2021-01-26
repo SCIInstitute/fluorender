@@ -63,10 +63,10 @@ void ComponentSelector::CompFull()
 {
 	if (!m_vd)
 		return;
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
-	if (Texture::mask_undo_num_>0)
+	if (FLIVR::Texture::mask_undo_num_>0)
 		tex->push_mask();
 
 	//get current mask
@@ -83,7 +83,7 @@ void ComponentSelector::CompFull()
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
-	std::vector<TextureBrick*> *bricks = tex->get_bricks();
+	std::vector<FLIVR::TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return;
 	size_t bn = bricks->size();
@@ -100,7 +100,7 @@ void ComponentSelector::CompFull()
 
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 
@@ -137,7 +137,7 @@ void ComponentSelector::CompFull()
 	unsigned int size;
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 
@@ -179,10 +179,10 @@ void ComponentSelector::Select(bool all, bool rmask)
 	//get current mask
 	if (!m_vd)
 		return;
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
-	if (Texture::mask_undo_num_>0)
+	if (FLIVR::Texture::mask_undo_num_>0)
 		tex->push_mask();
 
 	Nrrd* nrrd_mask = m_vd->GetMask(rmask);
@@ -376,7 +376,7 @@ void ComponentSelector::All()
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -406,7 +406,7 @@ void ComponentSelector::Clear(bool invalidate)
 	if (!m_vd)
 		return;
 
-	if (Texture::mask_undo_num_>0 &&
+	if (FLIVR::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -508,10 +508,10 @@ void ComponentSelector::SelectList(CelpList& list)
 	if (!m_vd)
 		return;
 
-	Texture* tex = m_vd->GetTexture();
+	FLIVR::Texture* tex = m_vd->GetTexture();
 	if (!tex)
 		return;
-	if (Texture::mask_undo_num_ > 0)
+	if (FLIVR::Texture::mask_undo_num_ > 0)
 		tex->push_mask();
 
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
@@ -530,7 +530,7 @@ void ComponentSelector::SelectList(CelpList& list)
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
-	std::vector<TextureBrick*> *bricks = tex->get_bricks();
+	std::vector<FLIVR::TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return;
 	size_t bn = bricks->size();
@@ -544,7 +544,7 @@ void ComponentSelector::SelectList(CelpList& list)
 	m_vd->GetResolution(nx, ny, nz);
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		brick_id = b->get_id();
 		for (i = 0; i < b->nx(); ++i)
 		for (j = 0; j < b->ny(); ++j)

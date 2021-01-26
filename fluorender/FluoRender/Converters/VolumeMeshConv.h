@@ -65,7 +65,7 @@ public:
 private:
 	typedef struct
 	{
-		Vector p[3];
+		fluo::Vector p[3];
 	} MCTriangle;
 	Nrrd* m_volume;
 	Nrrd* m_mask;
@@ -94,7 +94,7 @@ private:
 	double GetValue(int x, int y, int z);
 	double GetMaxNeighbor(double neighbors[3][3][3],
 		int xx, int yy, int zz);
-	Vector Intersect(double verts[8], int v1, int v2,
+	fluo::Vector Intersect(double verts[8], int v1, int v2,
 		int x, int y, int z);
 };
 

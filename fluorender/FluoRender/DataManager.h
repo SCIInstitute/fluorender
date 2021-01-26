@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <Types/Color.h>
 #include <Types/Point.h>
+#include <Types/Transform.h>
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
 #include <FLIVR/VertexArray.h>
@@ -63,7 +64,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 
 using namespace std;
-using namespace FLIVR;
 
 #define DATA_VOLUME			1
 #define DATA_MESH			2
@@ -111,19 +111,19 @@ public:
 
 	//layer adjustment
 	//gamma
-	const Color GetGamma()
+	const fluo::Color GetGamma()
 	{return m_gamma;}
-	void SetGamma(Color gamma)
+	void SetGamma(fluo::Color gamma)
 	{m_gamma = gamma;}
 	//brightness
-	const Color GetBrightness()
+	const fluo::Color GetBrightness()
 	{return m_brightness;}
-	void SetBrightness(Color brightness)
+	void SetBrightness(fluo::Color brightness)
 	{m_brightness = brightness;}
 	//hdr settings
-	const Color GetHdr()
+	const fluo::Color GetHdr()
 	{return m_hdr;}
-	void SetHdr(Color hdr)
+	void SetHdr(fluo::Color hdr)
 	{m_hdr = hdr;}
 	//sync values
 	bool GetSyncR()
@@ -160,9 +160,9 @@ protected:
 	unsigned int m_id;
 
 	//layer adjustment
-	Color m_gamma;
-	Color m_brightness;
-	Color m_hdr;
+	fluo::Color m_gamma;
+	fluo::Color m_brightness;
+	fluo::Color m_hdr;
 	bool m_sync_r;
 	bool m_sync_g;
 	bool m_sync_b;
@@ -242,22 +242,22 @@ public:
 	bool SearchLabel(unsigned int label);
 
 	//save
-	double GetOriginalValue(int i, int j, int k, TextureBrick* b = 0);
-	double GetTransferedValue(int i, int j, int k, TextureBrick* b=0);
+	double GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
+	double GetTransferedValue(int i, int j, int k, FLIVR::TextureBrick* b=0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
-	VolumeRenderer *GetVR();
+	FLIVR::VolumeRenderer *GetVR();
 	//texture
-	Texture* GetTexture();
+	FLIVR::Texture* GetTexture();
 	void SetTexture();
 
 	//bounding box
-	BBox GetBounds();
-	BBox GetClippedBounds();
+	fluo::BBox GetBounds();
+	fluo::BBox GetClippedBounds();
 	//path
 	void SetPath(wxString path);
 	wxString GetPath();
@@ -303,13 +303,13 @@ public:
 	double GetLeftThresh();
 	void SetRightThresh(double dVal);
 	double GetRightThresh();
-	void SetColor(Color &color, bool update_hsv=true);
-	Color GetColor();
-	void SetMaskColor(Color &color, bool set=true);
-	Color GetMaskColor();
+	void SetColor(fluo::Color &color, bool update_hsv=true);
+	fluo::Color GetColor();
+	void SetMaskColor(fluo::Color &color, bool set=true);
+	fluo::Color GetMaskColor();
 	bool GetMaskColorSet();
 	void ResetMaskColorSet();
-	Color SetLuminance(double dVal);
+	fluo::Color SetLuminance(double dVal);
 	double GetLuminance();
 	void SetAlpha(double alpha);
 	double GetAlpha();
@@ -351,7 +351,7 @@ public:
 	void SetColormapProj(int value);
 	int GetColormap();
 	int GetColormapProj();
-	Color GetColorFromColormap(double value);
+	fluo::Color GetColorFromColormap(double value);
 
 	//shuffle
 	void SetShuffle(int val);
@@ -478,9 +478,9 @@ private:
 	VolumeData* m_dup_data;//duplicated from
 
 	wxString m_tex_path;
-	BBox m_bounds;
-	VolumeRenderer *m_vr;
-	Texture *m_tex;
+	fluo::BBox m_bounds;
+	FLIVR::VolumeRenderer *m_vr;
+	FLIVR::Texture *m_tex;
 	//save label
 	void* m_label_save;
 
@@ -507,8 +507,8 @@ private:
 	double m_offset;
 	double m_lo_thresh;
 	double m_hi_thresh;
-	Color m_color;
-	HSVColor m_hsv;
+	fluo::Color m_color;
+	fluo::HSVColor m_hsv;
 	double m_alpha;
 	double m_sample_rate;
 	double m_mat_amb;
@@ -613,7 +613,7 @@ public:
 	void SetViewport(GLint vp[4]);
 
 	wxString GetPath();
-	BBox GetBounds();
+	fluo::BBox GetBounds();
 	GLMmodel* GetMesh();
 	void SetDisp(bool disp);
 	void ToggleDisp();
@@ -628,7 +628,7 @@ public:
 	void Save(wxString &filename);
 
 	//MR
-	MeshRenderer* GetMR();
+	FLIVR::MeshRenderer* GetMR();
 
 	//draw
 	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
@@ -641,11 +641,11 @@ public:
 	bool GetLighting();
 	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
 	bool GetFog();
-	void SetMaterial(Color& amb, Color& diff, Color& spec, 
+	void SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
 		double shine = 30.0, double alpha = 1.0);
-	void SetColor(Color &color, int type);
+	void SetColor(fluo::Color &color, int type);
 	void SetFloat(double &value, int type);
-	void GetMaterial(Color& amb, Color& diff, Color& spec,
+	void GetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
 		double& shine, double& alpha);
 	bool IsTransp();
 	//shadow
@@ -678,9 +678,9 @@ private:
 	//wxString m_name;
 	wxString m_data_path;
 	GLMmodel* m_data;
-	MeshRenderer *m_mr;
-	BBox m_bounds;
-	Point m_center;
+	FLIVR::MeshRenderer *m_mr;
+	fluo::BBox m_bounds;
+	fluo::Point m_center;
 
 	bool m_disp;
 	bool m_draw_bounds;
@@ -688,9 +688,9 @@ private:
 	//lighting
 	bool m_light;
 	bool m_fog;
-	Color m_mat_amb;
-	Color m_mat_diff;
-	Color m_mat_spec;
+	fluo::Color m_mat_amb;
+	fluo::Color m_mat_diff;
+	fluo::Color m_mat_spec;
 	double m_mat_shine;
 	double m_mat_alpha;
 	//shadow
@@ -713,20 +713,20 @@ class AText
 {
 public:
 	AText();
-	AText(const string &str, const Point &pos);
+	AText(const string &str, const fluo::Point &pos);
 	~AText();
 
 	string GetText();
-	Point GetPos();
+	fluo::Point GetPos();
 	void SetText(string str);
-	void SetPos(Point pos);
+	void SetPos(fluo::Point pos);
 	void SetInfo(string str);
 
 	friend class Annotations;
 
 private:
 	string m_txt;
-	Point m_pos;
+	fluo::Point m_pos;
 	string m_info;
 };
 
@@ -753,11 +753,11 @@ public:
 
 	int GetTextNum();
 	string GetTextText(int index);
-	Point GetTextPos(int index);
-	Point GetTextTransformedPos(int index);
+	fluo::Point GetTextPos(int index);
+	fluo::Point GetTextTransformedPos(int index);
 	string GetTextInfo(int index);
-	void AddText(std::string str, Point pos, std::string info);
-	void SetTransform(Transform *tform);
+	void AddText(std::string str, fluo::Point pos, std::string info);
+	void SetTransform(fluo::Transform *tform);
 	void SetVolume(VolumeData* vd);
 	VolumeData* GetVolume();
 
@@ -792,12 +792,12 @@ public:
 	wxString GetInfoMeaning();
 	void SetInfoMeaning(wxString &str);
 
-	bool InsideClippingPlanes(Point &pos);
+	bool InsideClippingPlanes(fluo::Point &pos);
 
 private:
 	static int m_num;
 	vector<AText*> m_alist;
-	Transform *m_tform;
+	fluo::Transform *m_tform;
 	VolumeData* m_vd;
 
 	bool m_disp;
@@ -848,11 +848,11 @@ public:
 	void SetPrvTime(int time);
 	int GetPrvTime();
 	//ghost num
-	void SetGhostNum(int num) {m_ghost_num = num; TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);}
+	void SetGhostNum(int num) {m_ghost_num = num; FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);}
 	int GetGhostNum() {return m_ghost_num;}
-	void SetDrawTail(bool draw) {m_draw_tail = draw; TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);}
+	void SetDrawTail(bool draw) {m_draw_tail = draw; FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);}
 	bool GetDrawTail() {return m_draw_tail;}
-	void SetDrawLead(bool draw) {m_draw_lead = draw; TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);}
+	void SetDrawLead(bool draw) {m_draw_lead = draw; FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);}
 	bool GetDrawLead() {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}
@@ -1013,11 +1013,11 @@ public:
 	int GetBlendMode();
 
 	//set gamma to all
-	void SetGammaAll(Color &gamma);
+	void SetGammaAll(fluo::Color &gamma);
 	//set brightness to all
-	void SetBrightnessAll(Color &brightness);
+	void SetBrightnessAll(fluo::Color &brightness);
 	//set hdr to all
-	void SetHdrAll(Color &hdr);
+	void SetHdrAll(fluo::Color &hdr);
 	//set sync to all
 	void SetSyncRAll(bool sync_r);
 	void SetSyncGAll(bool sync_g);
@@ -1248,8 +1248,8 @@ public:
 
 	//wavelength to color
 	void SetWavelengthColor(int c1, int c2, int c3, int c4);
-	Color GetWavelengthColor(double wavelength);
-	Color GetColor(int);
+	fluo::Color GetWavelengthColor(double wavelength);
+	fluo::Color GetColor(int);
 
 	//override voxel size
 	void SetOverrideVox(bool val)
@@ -1298,7 +1298,7 @@ public:
 	bool m_vol_test_wiref;		//wireframe mode
 
 	//wavelength to color table
-	Color m_vol_wav[4];
+	fluo::Color m_vol_wav[4];
 
 private:
 	vector <VolumeData*> m_vd_list;

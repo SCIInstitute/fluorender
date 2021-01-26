@@ -40,15 +40,15 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/RulerHandler.h>
 #include <Distance/RulerRenderer.h>
 #include <Selection/VolumePoint.h>
-#include "FLIVR/Color.h"
-#include "FLIVR/ShaderProgram.h"
-#include "FLIVR/KernelProgram.h"
-#include "FLIVR/BBox.h"
-#include "FLIVR/MultiVolumeRenderer.h"
-#include "FLIVR/Quaternion.h"
-#include "FLIVR/ImgShader.h"
-#include "FLIVR/VolKernel.h"
+#include <FLIVR/ShaderProgram.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/MultiVolumeRenderer.h>
+#include <FLIVR/ImgShader.h>
+#include <FLIVR/VolKernel.h>
 #include <FLIVR/TextRenderer.h>
+#include <Types/Color.h>
+#include <Types/BBox.h>
+#include <Types/Quaternion.h>
 #include "compatibility.h"
 
 #include <wx/wx.h>
@@ -159,7 +159,7 @@ public:
 	VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
-	MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
+	FLIVR::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
@@ -223,15 +223,15 @@ public:
 		m_transx = transx; m_transy = transy; m_transz = transz;
 		m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
 	}
-	FLIVR::Quaternion GetZeroQuat()
+	fluo::Quaternion GetZeroQuat()
 	{
 		return m_zq;
 	}
 	void SetZeroQuat(double x, double y, double z, double w)
 	{
-		m_zq = FLIVR::Quaternion(x, y, z, w);
+		m_zq = fluo::Quaternion(x, y, z, w);
 	}
-	FLIVR::Quaternion GetRotations()
+	fluo::Quaternion GetRotations()
 	{
 		return m_q;
 	}
@@ -336,9 +336,9 @@ public:
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
 	//background color
-	Color GetBackgroundColor();
-	Color GetTextColor();
-	void SetBackgroundColor(Color &color);
+	fluo::Color GetBackgroundColor();
+	fluo::Color GetTextColor();
+	void SetBackgroundColor(fluo::Color &color);
 	void SetGradBg(bool val);
 
 	//disply modes
@@ -404,14 +404,14 @@ public:
 	void SetSBText(wxString text) { m_sb_text = text; }
 
 	//gamma settings
-	Color GetGamma() { return m_gamma; }
-	void SetGamma(Color gamma) { m_gamma = gamma; }
+	fluo::Color GetGamma() { return m_gamma; }
+	void SetGamma(fluo::Color gamma) { m_gamma = gamma; }
 	//brightness adjustment
-	Color GetBrightness() { return m_brightness; }
-	void SetBrightness(Color brightness) { m_brightness = brightness; }
+	fluo::Color GetBrightness() { return m_brightness; }
+	void SetBrightness(fluo::Color brightness) { m_brightness = brightness; }
 	//hdr settings
-	Color GetHdr() { return m_hdr; }
-	void SetHdr(Color hdr) { m_hdr = hdr; }
+	fluo::Color GetHdr() { return m_hdr; }
+	void SetHdr(fluo::Color hdr) { m_hdr = hdr; }
 	//sync values
 	bool GetSyncR() { return m_sync_r; }
 	void SetSyncR(bool sync_r) { m_sync_r = sync_r; }
@@ -471,7 +471,7 @@ public:
 	//get kernel executor
 	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 	//text renderer
-	TextRenderer* GetTextRenderer() { return &m_text_renderer; }
+	FLIVR::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
 
 	//force draw
 	void ForceDraw();
@@ -495,9 +495,9 @@ public:
 	//draw highlighted comps
 	void DrawCells();
 	unsigned int DrawCellVerts(vector<float>& verts);
-	void GetCellPoints(BBox& box,
-		Point& p1, Point& p2, Point& p3, Point& p4,
-		Transform& mv, Transform& p);
+	void GetCellPoints(fluo::BBox& box,
+		fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
+		fluo::Transform& mv, fluo::Transform& p);
 
 	//public mouse
 	void OnMouse(wxMouseEvent& event);
@@ -525,8 +525,8 @@ public:
 		m_enlarge_scale = value;
 		if (m_enlarge)
 		{
-			m_tsize = TextRenderer::text_texture_manager_.GetSize();
-			TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
+			m_tsize = FLIVR::TextRenderer::text_texture_manager_.GetSize();
+			FLIVR::TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
 		}
 	}
 	static bool GetEnlarge()
@@ -685,7 +685,7 @@ public:
 	bool m_pin_rot_center;
 	bool m_rot_center_dirty;
 	double m_pin_pick_thresh;//ray casting threshold value
-	Point m_pin_ctr;
+	fluo::Point m_pin_ctr;
 	//mode in determining depth of volume
 	int m_point_volume_mode;  //0: use view plane; 1: use max value; 2: use accumulated value
 							  //ruler use volume transfer function
@@ -723,7 +723,7 @@ private:
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
-	MultiVolumeRenderer* m_mvr;
+	FLIVR::MultiVolumeRenderer* m_mvr;
 	//highlighted comps
 	FL::CelpList m_cell_list;
 	//fisrt volume data in the depth groups
@@ -732,8 +732,8 @@ private:
 	bool m_initialized;
 	bool m_init_view;
 	//bg color
-	Color m_bg_color;
-	Color m_bg_color_inv;
+	fluo::Color m_bg_color;
+	fluo::Color m_bg_color_inv;
 	bool m_grad_bg;
 	//frustrum
 	double m_aov;
@@ -802,10 +802,10 @@ private:
 	double m_ctrx, m_ctry, m_ctrz;
 	//saved camera center
 	double m_ctrx_saved, m_ctry_saved, m_ctrz_saved;
-	FLIVR::Quaternion m_q;
-	FLIVR::Quaternion m_zq;//zero rotation
-	Vector m_up;
-	Vector m_head;
+	fluo::Quaternion m_q;
+	fluo::Quaternion m_zq;//zero rotation
+	fluo::Vector m_up;
+	fluo::Vector m_head;
 
 	//object center
 	double m_obj_ctrx, m_obj_ctry, m_obj_ctrz;
@@ -819,7 +819,7 @@ private:
 	bool m_rot_lock;
 
 	//object bounding box
-	BBox m_bounds;
+	fluo::BBox m_bounds;
 	double m_radius;
 
 	//mouse position
@@ -858,32 +858,32 @@ private:
 	int m_frame_h;
 
 	//post image processing
-	Color m_gamma;
-	Color m_brightness;
-	Color m_hdr;
+	fluo::Color m_gamma;
+	fluo::Color m_brightness;
+	fluo::Color m_hdr;
 	bool m_sync_r;
 	bool m_sync_g;
 	bool m_sync_b;
 
 	//volume color map
 	//double m_value_1;
-	Color m_color_1;
+	fluo::Color m_color_1;
 	double m_value_2;
-	Color m_color_2;
+	fluo::Color m_color_2;
 	double m_value_3;
-	Color m_color_3;
+	fluo::Color m_color_3;
 	double m_value_4;
-	Color m_color_4;
+	fluo::Color m_color_4;
 	double m_value_5;
-	Color m_color_5;
+	fluo::Color m_color_5;
 	double m_value_6;
-	Color m_color_6;
+	fluo::Color m_color_6;
 	//double m_value_7;
-	Color m_color_7;
+	fluo::Color m_color_7;
 
 	//clipping plane rotations
-	FLIVR::Quaternion m_q_cl;
-	FLIVR::Quaternion m_q_cl_zero;
+	fluo::Quaternion m_q_cl;
+	fluo::Quaternion m_q_cl_zero;
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
 
 	//volume selector for segmentation
@@ -1020,11 +1020,11 @@ private:
 	void DrawScaleBar();
 	void DrawLegend();
 	void DrawName(double x, double y, int nx, int ny,
-		wxString name, Color color,
+		wxString name, fluo::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
 	void DrawClippingPlanes(bool border, int face_winding);
-	void SetColormapColors(int colormap, Color &c, double inv);
+	void SetColormapColors(int colormap, fluo::Color &c, double inv);
 	void DrawColormap();
 	void DrawGradBg();
 	void DrawInfo(int nx, int ny);
@@ -1078,14 +1078,14 @@ private:
 	void DrawCircles(
 		double cx, double cy,
 		double r1, double r2,
-		Color &color,
+		fluo::Color &color,
 		glm::mat4 &matrix);
 	void DrawBrush();
 	void PaintStroke();
 	void DisplayStroke();
 
-	Quaternion Trackball(double dx, double dy);
-	Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
+	fluo::Quaternion Trackball(double dx, double dy);
+	fluo::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
 	void A2Q();
 	//sort bricks after the view has been changed
@@ -1104,7 +1104,7 @@ private:
 	void Pick();
 	void PickMesh();
 	void PickVolume();
-	void SetCompSelection(VolumeData* vd, Point& p, int mode);//node: 0-exclusive; 1-add or remove
+	void SetCompSelection(VolumeData* vd, fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
 
 	//system call
 	void OnDraw(wxPaintEvent& event);

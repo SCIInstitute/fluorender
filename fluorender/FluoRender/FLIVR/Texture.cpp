@@ -135,8 +135,8 @@ namespace FLIVR
 		{
 			for (unsigned int i = 0; i < (*bricks_).size(); i++)
 			{
-				fluo::Point minp((*bricks_)[i]->bbox().min());
-				fluo::Point maxp((*bricks_)[i]->bbox().max());
+				fluo::Point minp((*bricks_)[i]->bbox().Min());
+				fluo::Point maxp((*bricks_)[i]->bbox().Max());
 				fluo::Vector diag((*bricks_)[i]->bbox().diagonal());
 				minp += diag / 1000.;
 				maxp -= diag / 1000.;
@@ -215,8 +215,8 @@ namespace FLIVR
 
 			for (i = 0; i < quota_bricks_.size(); i++)
 			{
-				fluo::Point minp(quota_bricks_[i]->bbox().min());
-				fluo::Point maxp(quota_bricks_[i]->bbox().max());
+				fluo::Point minp(quota_bricks_[i]->bbox().Min());
+				fluo::Point maxp(quota_bricks_[i]->bbox().Max());
 				fluo::Vector diag(quota_bricks_[i]->bbox().diagonal());
 				minp += diag / 1000.;
 				maxp -= diag / 1000.;
@@ -288,9 +288,10 @@ namespace FLIVR
 		bool underz = true;
 		for (int i = 0; i < 8; i++)
 		{
-			const fluo::Point pold((i & 1) ? bbox.min().x() : bbox.max().x(),
-				(i & 2) ? bbox.min().y() : bbox.max().y(),
-				(i & 4) ? bbox.min().z() : bbox.max().z());
+			const fluo::Point pold(
+				(i & 1) ? bbox.Min().x() : bbox.Max().x(),
+				(i & 2) ? bbox.Min().y() : bbox.Max().y(),
+				(i & 4) ? bbox.Min().z() : bbox.Max().z());
 			const fluo::Point p = pr_.project(mv_.project(pold));
 			overx = overx && (p.x() > 1.0);
 			overy = overy && (p.y() > 1.0);
@@ -391,8 +392,8 @@ namespace FLIVR
 			//when all of them equal to old values, the result should be the same as an old one.  
 			if (size[0] != nx() || size[1] != ny() || size[2] != nz() ||
 				numc != nc() || numb[0] != nb(0) ||
-				bb.min() != bbox()->min() ||
-				bb.max() != bbox()->max() ||
+				bb.Min() != bbox()->Min() ||
+				bb.Max() != bbox()->Max() ||
 				vmn != vmin() ||
 				vmx != vmax() ||
 				gmn != gmin() ||
@@ -432,11 +433,11 @@ namespace FLIVR
 		}
 
 		fluo::BBox tempb;
-		tempb.extend(transform_.project(bbox_.min()));
-		tempb.extend(transform_.project(bbox_.max()));
-		spcx_ = (tempb.max().x() - tempb.min().x()) / double(nx_);
-		spcy_ = (tempb.max().y() - tempb.min().y()) / double(ny_);
-		spcz_ = (tempb.max().z() - tempb.min().z()) / double(nz_);
+		tempb.extend(transform_.project(bbox_.Min()));
+		tempb.extend(transform_.project(bbox_.Max()));
+		spcx_ = (tempb.Max().x() - tempb.Min().x()) / double(nx_);
+		spcy_ = (tempb.Max().y() - tempb.Min().y()) / double(ny_);
+		spcz_ = (tempb.Max().z() - tempb.Min().z()) / double(nz_);
 
 		set_nrrd(nv_nrrd, 0);
 		set_nrrd(gm_nrrd, 1);

@@ -30,7 +30,7 @@
 #include <math.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
-#include <FLIVR/Utils.h>
+#include <Types/Utils.h>
 #include <utility>
 #include <iostream>
 #include <fstream>
@@ -46,7 +46,7 @@ namespace FLIVR
 		int nx, int ny, int nz, int nc, int* nb,
 		int ox, int oy, int oz,
 		int mx, int my, int mz,
-		const BBox& bbox, const BBox& tbox, const BBox& dbox,
+		const fluo::BBox& bbox, const fluo::BBox& tbox, const fluo::BBox& dbox,
 		unsigned int id,
 		int findex, long long offset, long long fsize)
 		: nx_(nx), ny_(ny), nz_(nz), nc_(nc), ox_(ox), oy_(oy), oz_(oz),
@@ -143,88 +143,88 @@ namespace FLIVR
  z
 	 */
 
-	void TextureBrick::compute_edge_rays(BBox &bbox)
+	void TextureBrick::compute_edge_rays(fluo::BBox &bbox)
 	{
 		// set up vertices
-		Point corner[8];
-		corner[0] = bbox.min();
-		corner[1] = Point(bbox.min().x(), bbox.min().y(), bbox.max().z());
-		corner[2] = Point(bbox.min().x(), bbox.max().y(), bbox.min().z());
-		corner[3] = Point(bbox.min().x(), bbox.max().y(), bbox.max().z());
-		corner[4] = Point(bbox.max().x(), bbox.min().y(), bbox.min().z());
-		corner[5] = Point(bbox.max().x(), bbox.min().y(), bbox.max().z());
-		corner[6] = Point(bbox.max().x(), bbox.max().y(), bbox.min().z());
-		corner[7] = bbox.max();
+		fluo::Point corner[8];
+		corner[0] = bbox.Min();
+		corner[1] = fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z());
+		corner[2] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z());
+		corner[3] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z());
+		corner[4] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z());
+		corner[5] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z());
+		corner[6] = fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z());
+		corner[7] = bbox.Max();
 
 		// set up edges
-		edge_[0] = Ray(corner[0], corner[2] - corner[0]);
-		edge_[1] = Ray(corner[2], corner[6] - corner[2]);
-		edge_[2] = Ray(corner[4], corner[6] - corner[4]);
-		edge_[3] = Ray(corner[0], corner[4] - corner[0]);
-		edge_[4] = Ray(corner[1], corner[3] - corner[1]);
-		edge_[5] = Ray(corner[3], corner[7] - corner[3]);
-		edge_[6] = Ray(corner[5], corner[7] - corner[5]);
-		edge_[7] = Ray(corner[1], corner[5] - corner[1]);
-		edge_[8] = Ray(corner[0], corner[1] - corner[0]);
-		edge_[9] = Ray(corner[2], corner[3] - corner[2]);
-		edge_[10] = Ray(corner[6], corner[7] - corner[6]);
-		edge_[11] = Ray(corner[4], corner[5] - corner[4]);
+		edge_[0] = fluo::Ray(corner[0], corner[2] - corner[0]);
+		edge_[1] = fluo::Ray(corner[2], corner[6] - corner[2]);
+		edge_[2] = fluo::Ray(corner[4], corner[6] - corner[4]);
+		edge_[3] = fluo::Ray(corner[0], corner[4] - corner[0]);
+		edge_[4] = fluo::Ray(corner[1], corner[3] - corner[1]);
+		edge_[5] = fluo::Ray(corner[3], corner[7] - corner[3]);
+		edge_[6] = fluo::Ray(corner[5], corner[7] - corner[5]);
+		edge_[7] = fluo::Ray(corner[1], corner[5] - corner[1]);
+		edge_[8] = fluo::Ray(corner[0], corner[1] - corner[0]);
+		edge_[9] = fluo::Ray(corner[2], corner[3] - corner[2]);
+		edge_[10] = fluo::Ray(corner[6], corner[7] - corner[6]);
+		edge_[11] = fluo::Ray(corner[4], corner[5] - corner[4]);
 	}
 
-	void TextureBrick::compute_edge_rays_tex(BBox &bbox)
+	void TextureBrick::compute_edge_rays_tex(fluo::BBox &bbox)
 	{
 		// set up vertices
-		Point corner[8];
-		corner[0] = bbox.min();
-		corner[1] = Point(bbox.min().x(), bbox.min().y(), bbox.max().z());
-		corner[2] = Point(bbox.min().x(), bbox.max().y(), bbox.min().z());
-		corner[3] = Point(bbox.min().x(), bbox.max().y(), bbox.max().z());
-		corner[4] = Point(bbox.max().x(), bbox.min().y(), bbox.min().z());
-		corner[5] = Point(bbox.max().x(), bbox.min().y(), bbox.max().z());
-		corner[6] = Point(bbox.max().x(), bbox.max().y(), bbox.min().z());
-		corner[7] = bbox.max();
+		fluo::Point corner[8];
+		corner[0] = bbox.Min();
+		corner[1] = fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z());
+		corner[2] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z());
+		corner[3] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z());
+		corner[4] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z());
+		corner[5] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z());
+		corner[6] = fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z());
+		corner[7] = bbox.Max();
 
 		// set up edges
-		tex_edge_[0] = Ray(corner[0], corner[2] - corner[0]);
-		tex_edge_[1] = Ray(corner[2], corner[6] - corner[2]);
-		tex_edge_[2] = Ray(corner[4], corner[6] - corner[4]);
-		tex_edge_[3] = Ray(corner[0], corner[4] - corner[0]);
-		tex_edge_[4] = Ray(corner[1], corner[3] - corner[1]);
-		tex_edge_[5] = Ray(corner[3], corner[7] - corner[3]);
-		tex_edge_[6] = Ray(corner[5], corner[7] - corner[5]);
-		tex_edge_[7] = Ray(corner[1], corner[5] - corner[1]);
-		tex_edge_[8] = Ray(corner[0], corner[1] - corner[0]);
-		tex_edge_[9] = Ray(corner[2], corner[3] - corner[2]);
-		tex_edge_[10] = Ray(corner[6], corner[7] - corner[6]);
-		tex_edge_[11] = Ray(corner[4], corner[5] - corner[4]);
+		tex_edge_[0] = fluo::Ray(corner[0], corner[2] - corner[0]);
+		tex_edge_[1] = fluo::Ray(corner[2], corner[6] - corner[2]);
+		tex_edge_[2] = fluo::Ray(corner[4], corner[6] - corner[4]);
+		tex_edge_[3] = fluo::Ray(corner[0], corner[4] - corner[0]);
+		tex_edge_[4] = fluo::Ray(corner[1], corner[3] - corner[1]);
+		tex_edge_[5] = fluo::Ray(corner[3], corner[7] - corner[3]);
+		tex_edge_[6] = fluo::Ray(corner[5], corner[7] - corner[5]);
+		tex_edge_[7] = fluo::Ray(corner[1], corner[5] - corner[1]);
+		tex_edge_[8] = fluo::Ray(corner[0], corner[1] - corner[0]);
+		tex_edge_[9] = fluo::Ray(corner[2], corner[3] - corner[2]);
+		tex_edge_[10] = fluo::Ray(corner[6], corner[7] - corner[6]);
+		tex_edge_[11] = fluo::Ray(corner[4], corner[5] - corner[4]);
 	}
 
 	// compute polygon of edge plane intersections
-	void TextureBrick::compute_polygons(Ray& view, double dt,
+	void TextureBrick::compute_polygons(fluo::Ray& view, double dt,
 		vector<float>& vertex, vector<uint32_t>& index,
 		vector<uint32_t>& size, bool bricks)
 	{
 		if (dt <= 0.0)
 			return;
 
-		Point corner[8];
-		corner[0] = bbox_.min();
-		corner[1] = Point(bbox_.min().x(), bbox_.min().y(), bbox_.max().z());
-		corner[2] = Point(bbox_.min().x(), bbox_.max().y(), bbox_.min().z());
-		corner[3] = Point(bbox_.min().x(), bbox_.max().y(), bbox_.max().z());
-		corner[4] = Point(bbox_.max().x(), bbox_.min().y(), bbox_.min().z());
-		corner[5] = Point(bbox_.max().x(), bbox_.min().y(), bbox_.max().z());
-		corner[6] = Point(bbox_.max().x(), bbox_.max().y(), bbox_.min().z());
-		corner[7] = bbox_.max();
+		fluo::Point corner[8];
+		corner[0] = bbox_.Min();
+		corner[1] = fluo::Point(bbox_.Min().x(), bbox_.Min().y(), bbox_.Max().z());
+		corner[2] = fluo::Point(bbox_.Min().x(), bbox_.Max().y(), bbox_.Min().z());
+		corner[3] = fluo::Point(bbox_.Min().x(), bbox_.Max().y(), bbox_.Max().z());
+		corner[4] = fluo::Point(bbox_.Max().x(), bbox_.Min().y(), bbox_.Min().z());
+		corner[5] = fluo::Point(bbox_.Max().x(), bbox_.Min().y(), bbox_.Max().z());
+		corner[6] = fluo::Point(bbox_.Max().x(), bbox_.Max().y(), bbox_.Min().z());
+		corner[7] = bbox_.Max();
 
-		double tmin = Dot(corner[0] - view.origin(), view.direction());
+		double tmin = fluo::Dot(corner[0] - view.origin(), view.direction());
 		double tmax = tmin;
 		uint32_t maxi = 0;
 		double t;
 		for (uint32_t i = 1; i < 8; i++)
 		{
-			t = Dot(corner[i] - view.origin(), view.direction());
-			tmin = Min(t, tmin);
+			t = fluo::Dot(corner[i] - view.origin(), view.direction());
+			tmin = std::min(t, tmin);
 			if (t > tmax) { maxi = i; tmax = t; }
 		}
 
@@ -248,7 +248,7 @@ namespace FLIVR
 	//
 	// The representation returned is not efficient, but it appears a
 	// typical rendering only contains about 1k triangles.
-	void TextureBrick::compute_polygons(Ray& view,
+	void TextureBrick::compute_polygons(fluo::Ray& view,
 		double tmin, double tmax, double dt,
 		vector<float>& vertex, vector<uint32_t>& index,
 		vector<uint32_t>& size)
@@ -256,16 +256,16 @@ namespace FLIVR
 		if (dt <= 0.0)
 			return;
 
-		Vector vv[12], tt[12]; // temp storage for vertices and texcoords
+		fluo::Vector vv[12], tt[12]; // temp storage for vertices and texcoords
 
 		uint32_t degree = 0;
 
 		// find up and right vectors
-		Vector vdir = view.direction();
+		fluo::Vector vdir = view.direction();
 		view_vector_ = vdir;
-		Vector up;
-		Vector right;
-		switch (MinIndex(fabs(vdir.x()),
+		fluo::Vector up;
+		fluo::Vector right;
+		switch (fluo::MinIndex(fabs(vdir.x()),
 			fabs(vdir.y()),
 			fabs(vdir.z())))
 		{
@@ -294,17 +294,17 @@ namespace FLIVR
 			{
 				double u;
 
-				FLIVR::Vector vec = -view.direction();
-				FLIVR::Point pnt = view.parameter(t);
+				fluo::Vector vec = -view.direction();
+				fluo::Point pnt = view.parameter(t);
 				bool intersects = edge_[j].planeIntersectParameter
 					(vec, pnt, u);
 				if (intersects && u >= 0.0 && u <= 1.0)
 				{
-					Point p;
+					fluo::Point p;
 					p = edge_[j].parameter(u);
-					vv[degree] = (Vector)p;
+					vv[degree] = (fluo::Vector)p;
 					p = tex_edge_[j].parameter(u);
-					tt[degree] = (Vector)p;
+					tt[degree] = (fluo::Vector)p;
 					degree++;
 				}
 			}
@@ -314,7 +314,7 @@ namespace FLIVR
 			uint32_t idx[6];
 			if (sorted) {
 				// compute centroids
-				Vector vc(0.0, 0.0, 0.0), tc(0.0, 0.0, 0.0);
+				fluo::Vector vc(0.0, 0.0, 0.0), tc(0.0, 0.0, 0.0);
 				for (int j = 0; j < degree; j++)
 				{
 					vc += vv[j]; tc += tt[j];
@@ -335,7 +335,7 @@ namespace FLIVR
 					// init idx
 					idx[i] = i;
 				}
-				Sort(pa, idx, degree);
+				fluo::Sort(pa, idx, degree);
 			}
 			// save all of the indices
 			for (uint32_t j = 1; j < degree - 1; j++) {

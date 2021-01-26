@@ -188,7 +188,7 @@ public:
 	void LoadSettings();
 
 	//get defaults
-	void GetDefaults(Color &gamma, Color &brightness, Color &hdr,
+	void GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
 		bool &snyc_r, bool &sync_g, bool &sync_b);
 
 	//change settings externally
@@ -226,9 +226,9 @@ private:
 
 	//default values
 	bool m_use_dft_settings;
-	Color m_dft_gamma;
-	Color m_dft_brightness;
-	Color m_dft_hdr;
+	fluo::Color m_dft_gamma;
+	fluo::Color m_dft_brightness;
+	fluo::Color m_dft_hdr;
 	bool m_dft_sync_r;
 	bool m_dft_sync_g;
 	bool m_dft_sync_b;

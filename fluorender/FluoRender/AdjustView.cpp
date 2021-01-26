@@ -84,9 +84,9 @@ m_sync_r(false),
 m_sync_g(false),
 m_sync_b(false),
 m_use_dft_settings(false),
-m_dft_gamma(Color(1.0, 1.0, 1.0)),
-m_dft_brightness(Color(0.0, 0.0, 0.0)),
-m_dft_hdr(Color(0.0, 0.0, 0.0)),
+m_dft_gamma(fluo::Color(1.0, 1.0, 1.0)),
+m_dft_brightness(fluo::Color(0.0, 0.0, 0.0)),
+m_dft_hdr(fluo::Color(0.0, 0.0, 0.0)),
 m_dft_sync_r(false),
 m_dft_sync_g(false),
 m_dft_sync_b(false)
@@ -561,7 +561,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 
 	if (m_glview && m_type==1)
 	{
-		Color gamma = m_glview->GetGamma();
+		fluo::Color gamma = m_glview->GetGamma();
 		GammaUI2(val, gamma[0]);
 		if (m_sync_r)
 		{
@@ -580,7 +580,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGamma();
 		GammaUI2(val, gamma[0]);
 		if (m_sync_r)
 		{
@@ -629,7 +629,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 
 	if (m_glview && m_type==1)
 	{
-		Color gamma = m_glview->GetGamma();
+		fluo::Color gamma = m_glview->GetGamma();
 		GammaUI2(val, gamma[1]);
 		if (m_sync_g)
 		{
@@ -648,7 +648,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGamma();
 		GammaUI2(val, gamma[1]);
 		if (m_sync_g)
 		{
@@ -697,7 +697,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 
 	if (m_glview && m_type==1)
 	{
-		Color gamma = m_glview->GetGamma();
+		fluo::Color gamma = m_glview->GetGamma();
 		GammaUI2(val, gamma[2]);
 		if (m_sync_b)
 		{
@@ -716,7 +716,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGamma();
 		GammaUI2(val, gamma[2]);
 		if (m_sync_b)
 		{
@@ -766,7 +766,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 
 	if (m_glview && m_type==1)
 	{
-		Color brightness = m_glview->GetBrightness();
+		fluo::Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(val, brightness[0]);
 		if (m_sync_r)
 		{
@@ -785,7 +785,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color brightness = layer->GetBrightness();
+		fluo::Color brightness = layer->GetBrightness();
 		BrightnessUI2(val, brightness[0]);
 		if (m_sync_r)
 		{
@@ -834,7 +834,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 
 	if (m_glview && m_type==1)
 	{
-		Color brightness = m_glview->GetBrightness();
+		fluo::Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(val, brightness[1]);
 		if (m_sync_g)
 		{
@@ -853,7 +853,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color brightness = layer->GetBrightness();
+		fluo::Color brightness = layer->GetBrightness();
 		BrightnessUI2(val, brightness[1]);
 		if (m_sync_g)
 		{
@@ -902,7 +902,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 
 	if (m_glview && m_type==1)
 	{
-		Color brightness = m_glview->GetBrightness();
+		fluo::Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(val, brightness[2]);
 		if (m_sync_b)
 		{
@@ -921,7 +921,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color brightness = layer->GetBrightness();
+		fluo::Color brightness = layer->GetBrightness();
 		BrightnessUI2(val, brightness[2]);
 		if (m_sync_b)
 		{
@@ -970,7 +970,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 
 	if (m_glview && m_type==1)
 	{
-		Color hdr = m_glview->GetHdr();
+		fluo::Color hdr = m_glview->GetHdr();
 		HdrUI2(val, hdr[0]);
 		if (m_sync_r)
 		{
@@ -989,7 +989,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color hdr = layer->GetHdr();
+		fluo::Color hdr = layer->GetHdr();
 		HdrUI2(val, hdr[0]);
 		if (m_sync_r)
 		{
@@ -1038,7 +1038,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 
 	if (m_glview && m_type==1)
 	{
-		Color hdr = m_glview->GetHdr();
+		fluo::Color hdr = m_glview->GetHdr();
 		HdrUI2(val, hdr[1]);
 		if (m_sync_g)
 		{
@@ -1057,7 +1057,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color hdr = layer->GetHdr();
+		fluo::Color hdr = layer->GetHdr();
 		HdrUI2(val, hdr[1]);
 		if (m_sync_g)
 		{
@@ -1106,7 +1106,7 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 
 	if (m_glview && m_type==1)
 	{
-		Color hdr = m_glview->GetHdr();
+		fluo::Color hdr = m_glview->GetHdr();
 		HdrUI2(val, hdr[2]);
 		if (m_sync_b)
 		{
@@ -1125,7 +1125,7 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color hdr = layer->GetHdr();
+		fluo::Color hdr = layer->GetHdr();
 		HdrUI2(val, hdr[2]);
 		if (m_sync_b)
 		{
@@ -1270,12 +1270,12 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	str.ToDouble(&dft_b_hdr);
 	fconfig.Write("b_hdr_text", dft_b_hdr);
 
-	m_dft_gamma = Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
-	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
-	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
+	m_dft_gamma = fluo::Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
+	m_dft_brightness = fluo::Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
+	m_dft_hdr = fluo::Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_2d_adjustment_settings.dft";
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_2d_adjustment_settings.dft";
 	wxFileOutputStream os(dft);
 	fconfig.Save(os);
 }
@@ -1283,12 +1283,12 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 void AdjustView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-    expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_2d_adjustment_settings.dft";
-    
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/default_2d_adjustment_settings.dft";
+
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
-        return;
+		return;
 	wxFileConfig fconfig(is);
 
 	wxString sVal;
@@ -1333,15 +1333,15 @@ void AdjustView::LoadSettings()
 	if (fconfig.Read("b_hdr_text", &sVal))
 		sVal.ToDouble(&dft_b_hdr);
 
-	m_dft_gamma = Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
-	m_dft_brightness = Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
-	m_dft_hdr = Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
+	m_dft_gamma = fluo::Color(dft_r_gamma, dft_g_gamma, dft_b_gamma);
+	m_dft_brightness = fluo::Color(dft_r_brightness, dft_g_brightness, dft_b_brightness);
+	m_dft_hdr = fluo::Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 
 	m_use_dft_settings = true;
 
 }
 
-void AdjustView::GetDefaults(Color &gamma, Color &brightness, Color &hdr,
+void AdjustView::GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
 							 bool &sync_r, bool &sync_g, bool &sync_b)
 {
 	GammaUI2(m_dft_gamma.r(), gamma[0]);
@@ -1455,7 +1455,7 @@ void AdjustView::UpdateSync()
 				}
 				else
 				{
-					Color c = vd->GetColor();
+					fluo::Color c = vd->GetColor();
 					bool r, g, b;
 					r = g = b = false;
 					cnt = 0;
@@ -1532,7 +1532,7 @@ void AdjustView::UpdateSync()
 				}
 				else
 				{
-					Color c = vd->GetColor();
+					fluo::Color c = vd->GetColor();
 					bool r, g, b;
 					r = g = b = false;
 					cnt = 0;
@@ -1619,7 +1619,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color gamma = m_glview->GetGamma();
+		fluo::Color gamma = m_glview->GetGamma();
 		GammaUI2(dft_value, gamma[0]);
 		if (m_sync_r)
 		{
@@ -1638,7 +1638,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGamma();
 		GammaUI2(dft_value, gamma[0]);
 		if (m_sync_r)
 		{
@@ -1677,7 +1677,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color brightness = m_glview->GetBrightness();
+		fluo::Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(dft_value, brightness[0]);
 		if (m_sync_r)
 		{
@@ -1691,7 +1691,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (layer)
 	{
-		Color brightness = layer->GetBrightness();
+		fluo::Color brightness = layer->GetBrightness();
 		BrightnessUI2(dft_value, brightness[0]);
 		if (m_sync_r)
 		{
@@ -1730,7 +1730,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color hdr = m_glview->GetHdr();
+		fluo::Color hdr = m_glview->GetHdr();
 		hdr[0] = dft_value;
 		if (m_sync_r)
 		{
@@ -1744,7 +1744,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (layer)
 	{
-		Color hdr = layer->GetHdr();
+		fluo::Color hdr = layer->GetHdr();
 		hdr[0] = dft_value;
 		if (m_sync_r)
 		{
@@ -1788,7 +1788,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color gamma = m_glview->GetGamma();
+		fluo::Color gamma = m_glview->GetGamma();
 		GammaUI2(dft_value, gamma[1]);
 		if (m_sync_g)
 		{
@@ -1807,7 +1807,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGamma();
 		GammaUI2(dft_value, gamma[1]);
 		if (m_sync_g)
 		{
@@ -1846,7 +1846,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color brightness = m_glview->GetBrightness();
+		fluo::Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(dft_value, brightness[1]);
 		if (m_sync_g)
 		{
@@ -1860,7 +1860,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (layer)
 	{
-		Color brightness = layer->GetBrightness();
+		fluo::Color brightness = layer->GetBrightness();
 		BrightnessUI2(dft_value, brightness[1]);
 		if (m_sync_g)
 		{
@@ -1899,7 +1899,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color hdr = m_glview->GetHdr();
+		fluo::Color hdr = m_glview->GetHdr();
 		hdr[1] = dft_value;
 		if (m_sync_g)
 		{
@@ -1913,7 +1913,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (layer)
 	{
-		Color hdr = layer->GetHdr();
+		fluo::Color hdr = layer->GetHdr();
 		hdr[1] = dft_value;
 		if (m_sync_g)
 		{
@@ -1957,7 +1957,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color gamma = m_glview->GetGamma();
+		fluo::Color gamma = m_glview->GetGamma();
 		GammaUI2(dft_value, gamma[2]);
 		if (m_sync_b)
 		{
@@ -1976,7 +1976,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 		layer = (TreeLayer*)m_group;
 	if (layer)
 	{
-		Color gamma = layer->GetGamma();
+		fluo::Color gamma = layer->GetGamma();
 		GammaUI2(dft_value, gamma[2]);
 		if (m_sync_b)
 		{
@@ -2015,7 +2015,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color brightness = m_glview->GetBrightness();
+		fluo::Color brightness = m_glview->GetBrightness();
 		BrightnessUI2(dft_value, brightness[2]);
 		if (m_sync_b)
 		{
@@ -2029,7 +2029,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (layer)
 	{
-		Color brightness = layer->GetBrightness();
+		fluo::Color brightness = layer->GetBrightness();
 		BrightnessUI2(dft_value, brightness[2]);
 		if (m_sync_b)
 		{
@@ -2068,7 +2068,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_glview)
 	{
-		Color hdr = m_glview->GetHdr();
+		fluo::Color hdr = m_glview->GetHdr();
 		hdr[2] = dft_value;
 		if (m_sync_b)
 		{
@@ -2082,7 +2082,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (layer)
 	{
-		Color hdr = layer->GetHdr();
+		fluo::Color hdr = layer->GetHdr();
 		hdr[2] = dft_value;
 		if (m_sync_b)
 		{

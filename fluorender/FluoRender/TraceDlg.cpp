@@ -140,17 +140,17 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	wxString gtype;
 	unsigned int id;
 	unsigned int vid;
-	Color c;
+	fluo::Color c;
 	wxColor wxc;
 	int size;
-	Point center;
+	fluo::Point center;
 	bool prev, next;
 
 	for (size_t i = 0; i < cells.size(); ++i)
 	{
 		id = cells[i]->Id();
 		vid = cells[i]->GetVertexId();
-		c = Color(id, shuffle);
+		c = fluo::Color(id, shuffle);
 		wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
 		size = (int)(cells[i]->GetSizeUi());
 		center = cells[i]->GetCenter();
@@ -992,7 +992,7 @@ void TraceDlg::UpdateList()
 					item_y = m_trace_list_curr->GetText(item, 4);
 					item_z = m_trace_list_curr->GetText(item, 5);
 					item_id.ToULong(&id);
-					Color c(id, shuffle);
+					fluo::Color c(id, shuffle);
 					wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
 					item_size.ToLong(&size);
 					item_x.ToDouble(&x);
@@ -1948,7 +1948,7 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, FL::CelpList 
 	FL::Celp cell(new FL::Cell(id));
 	cell->SetSizeUi(size);
 	cell->SetSizeD(size);
-	FLIVR::Point p(x, y, z);
+	fluo::Point p(x, y, z);
 	cell->SetCenter(p);
 	list.insert(pair<unsigned int, FL::Celp>
 		(id, cell));
@@ -2435,7 +2435,7 @@ void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 			color = wxColor(24, 167, 181);
 		else
 		{
-			Color c(id, shuffle);
+			fluo::Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
 		m_cell_new_id_text->SetBackgroundColour(color);

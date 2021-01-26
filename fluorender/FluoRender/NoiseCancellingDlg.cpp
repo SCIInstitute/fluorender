@@ -268,7 +268,7 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 		sel_vol = vr_frame->GetCurSelVol();
 	if (enhance && sel_vol)
 	{
-		Color mask_color = sel_vol->GetMaskColor();
+		fluo::Color mask_color = sel_vol->GetMaskColor();
 		double hdr_r = 0.0;
 		double hdr_g = 0.0;
 		double hdr_b = 0.0;
@@ -278,7 +278,7 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 			hdr_g = 0.4;
 		if (mask_color.b() > 0.0)
 			hdr_b = 0.4;
-		Color hdr_color = Color(hdr_r, hdr_g, hdr_b);
+		fluo::Color hdr_color(hdr_r, hdr_g, hdr_b);
 		m_hdr = sel_vol->GetHdr();
 		sel_vol->SetHdr(hdr_color);
 	}

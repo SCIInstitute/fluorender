@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 #include <vector>
 
 using namespace std;
@@ -77,7 +77,7 @@ namespace FL
 			return cov;
 		}
 
-		FLIVR::Point GetCenter()
+		fluo::Point GetCenter()
 		{
 			if (m_vd)
 			{
@@ -89,7 +89,7 @@ namespace FL
 				m_center[2] *= spcz;
 			}
 
-			FLIVR::Point center;
+			fluo::Point center;
 			center.x(m_center[0]);
 			center.y(m_center[1]);
 			center.z(m_center[2]);

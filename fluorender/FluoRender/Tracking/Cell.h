@@ -138,7 +138,7 @@ namespace FL
 			m_count0(0), m_count1(0),
 			m_celvrtx(CellGraph::null_vertex())
 		{
-			m_center = FLIVR::Point(x, y, z);
+			m_center = fluo::Point(x, y, z);
 			m_box.extend(m_center);
 			m_pca.AddPointScale(m_center, sx, sy, sz);
 		}
@@ -156,7 +156,7 @@ namespace FL
 			m_count0(0), m_count1(0),
 			m_celvrtx(CellGraph::null_vertex())
 		{
-			m_center = FLIVR::Point(x, y, z);
+			m_center = fluo::Point(x, y, z);
 			m_box.extend(m_center);
 			m_pca.AddPointScale(m_center, sx, sy, sz);
 			m_size_ui_list = sumi;
@@ -213,11 +213,11 @@ namespace FL
 		//distance
 		double GetDistp();
 		//coords
-		FLIVR::Point &GetCenter();
-		FLIVR::Point GetCenter(double sx, double sy, double sz);
-		FLIVR::BBox &GetBox();
-		FLIVR::BBox GetBox(double sx, double sy, double sz);
-		FLIVR::Point &GetProjp();
+		fluo::Point &GetCenter();
+		fluo::Point GetCenter(double sx, double sy, double sz);
+		fluo::BBox &GetBox();
+		fluo::BBox GetBox(double sx, double sy, double sz);
+		fluo::Point &GetProjp();
 		//FLIVR::Point GetProjp(double sx, double sy, double sz);
 		//colocalization
 		unsigned int GetCoSizeUi(size_t i);
@@ -237,9 +237,9 @@ namespace FL
 		void SetExtD(double size);
 		void SetCount0(unsigned int val);
 		void SetCount1(unsigned int val);
-		void SetCenter(const FLIVR::Point &center);
-		void SetBox(const FLIVR::BBox &box);
-		void SetProjp(FLIVR::Point &p);
+		void SetCenter(const fluo::Point &center);
+		void SetBox(const fluo::BBox &box);
+		void SetProjp(fluo::Point &p);
 		void SetDistp(double dist);
 
 	private:
@@ -262,10 +262,10 @@ namespace FL
 		//distance
 		double m_distp;//distance to a point
 		//coords
-		FLIVR::Point m_center;
-		FLIVR::Point m_pos;//point position accumulation
-		FLIVR::BBox m_box;
-		FLIVR::Point m_prjp;//projected point
+		fluo::Point m_center;
+		fluo::Point m_pos;//point position accumulation
+		fluo::BBox m_box;
+		fluo::Point m_prjp;//projected point
 		//colocalization
 		std::vector<unsigned int> m_size_ui_list;
 		std::vector<double> m_size_d_list;
@@ -324,7 +324,7 @@ namespace FL
 		m_min = std::min(m_min, value);
 		m_max = std::max(m_max, value);
 
-		FLIVR::Point p(i, j, k);
+		fluo::Point p(i, j, k);
 		m_pos += p;
 		m_box.extend(p);
 
@@ -380,7 +380,7 @@ namespace FL
 		m_min = std::min(m_min, size_d);
 		m_max = std::max(m_max, size_d);
 
-		FLIVR::Point p(x, y, z);
+		fluo::Point p(x, y, z);
 		m_pos += p;
 		m_box.extend(p);
 		m_pca.AddPointScale(p, sx, sy, sz);
@@ -402,7 +402,7 @@ namespace FL
 		m_min = std::min(m_min, size_d);
 		m_max = std::max(m_max, size_d);
 
-		FLIVR::Point p(x, y, z);
+		fluo::Point p(x, y, z);
 		m_pos += p;
 		m_box.extend(p);
 		m_pca.AddPointScale(p, sx, sy, sz);
@@ -505,7 +505,7 @@ namespace FL
 		return m_distp;
 	}
 
-	inline FLIVR::Point &Cell::GetCenter()
+	inline fluo::Point &Cell::GetCenter()
 	{
 		if (!m_calc)
 			Calc();
@@ -513,27 +513,27 @@ namespace FL
 		return m_center;
 	}
 
-	inline FLIVR::Point Cell::GetCenter(double sx, double sy, double sz)
+	inline fluo::Point Cell::GetCenter(double sx, double sy, double sz)
 	{
 		if (!m_calc)
 			Calc();
 
-		return FLIVR::Point(m_center.x()*sx, m_center.y()*sy, m_center.z()*sz);
+		return fluo::Point(m_center.x()*sx, m_center.y()*sy, m_center.z()*sz);
 	}
 
-	inline FLIVR::BBox &Cell::GetBox()
+	inline fluo::BBox &Cell::GetBox()
 	{
 		return m_box;
 	}
 
-	inline FLIVR::BBox Cell::GetBox(double sx, double sy, double sz)
+	inline fluo::BBox Cell::GetBox(double sx, double sy, double sz)
 	{
-		FLIVR::BBox box(m_box);
+		fluo::BBox box(m_box);
 		box.scale(sx, sy, sz);
 		return box;
 	}
 
-	inline FLIVR::Point &Cell::GetProjp()
+	inline fluo::Point &Cell::GetProjp()
 	{
 		return m_prjp;
 	}
@@ -616,17 +616,17 @@ namespace FL
 		m_brick_id = id;
 	}
 
-	inline void Cell::SetCenter(const FLIVR::Point &center)
+	inline void Cell::SetCenter(const fluo::Point &center)
 	{
 		m_center = center;
 	}
 
-	inline void Cell::SetBox(const FLIVR::BBox &box)
+	inline void Cell::SetBox(const fluo::BBox &box)
 	{
 		m_box = box;
 	}
 
-	inline void Cell::SetProjp(FLIVR::Point &p)
+	inline void Cell::SetProjp(fluo::Point &p)
 	{
 		m_prjp = p;
 	}

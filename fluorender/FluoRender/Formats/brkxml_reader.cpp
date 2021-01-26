@@ -1104,7 +1104,7 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 //	}
 	
 	if(bsize[0] > max_texture_size || bsize[1] > max_texture_size || bsize[2] > max_texture_size) return;
-	if(force_pow2 && (FLIVR::Pow2(bsize[0]) > bsize[0] || FLIVR::Pow2(bsize[1]) > bsize[1] || FLIVR::Pow2(bsize[2]) > bsize[2])) return;
+	if(force_pow2 && (fluo::Pow2(bsize[0]) > bsize[0] || fluo::Pow2(bsize[1]) > bsize[1] || fluo::Pow2(bsize[2]) > bsize[2])) return;
 	
 	if(!tbrks.empty())
 	{
@@ -1118,8 +1118,8 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 	vector<BrickInfo *>::iterator bite = m_pyramid[lev].bricks.begin();
 	while (bite != m_pyramid[lev].bricks.end())
 	{
-		FLIVR::BBox tbox(FLIVR::Point((*bite)->tx0, (*bite)->ty0, (*bite)->tz0), FLIVR::Point((*bite)->tx1, (*bite)->ty1, (*bite)->tz1));
-		FLIVR::BBox bbox(FLIVR::Point((*bite)->bx0, (*bite)->by0, (*bite)->bz0), FLIVR::Point((*bite)->bx1, (*bite)->by1, (*bite)->bz1));
+		fluo::BBox tbox(fluo::Point((*bite)->tx0, (*bite)->ty0, (*bite)->tz0), fluo::Point((*bite)->tx1, (*bite)->ty1, (*bite)->tz1));
+		fluo::BBox bbox(fluo::Point((*bite)->bx0, (*bite)->by0, (*bite)->bz0), fluo::Point((*bite)->bx1, (*bite)->by1, (*bite)->bz1));
 
 		double dx0, dy0, dz0, dx1, dy1, dz1;
 		dx0 = (double)((*bite)->x_start) / m_pyramid[lev].imageW;
@@ -1129,7 +1129,7 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 		dy1 = (double)((*bite)->y_start + (*bite)->y_size) / m_pyramid[lev].imageH;
 		dz1 = (double)((*bite)->z_start + (*bite)->z_size) / m_pyramid[lev].imageD;
 
-		FLIVR::BBox dbox = FLIVR::BBox(FLIVR::Point(dx0, dy0, dz0), FLIVR::Point(dx1, dy1, dz1));
+		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
 		//numc? gm_nrrd?
 		FLIVR::TextureBrick *b = new FLIVR::TextureBrick(

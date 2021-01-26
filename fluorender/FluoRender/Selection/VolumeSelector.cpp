@@ -95,7 +95,7 @@ void VolumeSelector::Segment(int mx, int my)
 	m_prj_mat = m_view->GetProjection();
 
 	//mouse position
-	FLIVR::Vector mvec;//mouse vector in data space
+	fluo::Vector mvec;//mouse vector in data space
 	bool valid_mvec = false;
 	if (m_mode == 9)
 	{
@@ -236,7 +236,7 @@ void VolumeSelector::Select(double radius)
 		if (m_mode != 9 || m_init_mask & 1)
 			pb.ClearBricks();
 		pb.SetPersp(!m_view->GetPersp());
-		Transform *tform = m_vd->GetTexture()->transform();
+		fluo::Transform *tform = m_vd->GetTexture()->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		glm::mat4 mv_mat2 = glm::mat4(
@@ -246,7 +246,7 @@ void VolumeSelector::Select(double radius)
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 		mv_mat2 = m_mv_mat * mv_mat2;
 		glm::mat4 cmat = m_prj_mat * mv_mat2;
-		Transform mv, pr, mat;
+		fluo::Transform mv, pr, mat;
 		mv.set(glm::value_ptr(mv_mat2));
 		pr.set(glm::value_ptr(m_prj_mat));
 		mat.set(glm::value_ptr(cmat));
@@ -463,13 +463,13 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 					value = double(((unsigned short*)data_mvd)[idx]) *
 					m_vd->GetScalarScale() / 65535.0;
 			}
-			Color color;
+			fluo::Color color;
 			if (hmode == 0)
-				color = Color(value_label, m_vd->GetShuffle());
+				color = fluo::Color(value_label, m_vd->GetShuffle());
 			else
 			{
 				double hue = HueCalculation(hmode, value_label);
-				color = Color(HSVColor(hue, 1.0, 1.0));
+				color = fluo::Color(fluo::HSVColor(hue, 1.0, 1.0));
 			}
 			//color
 			value = value>1.0?1.0:value;
@@ -479,9 +479,9 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		}
 	}
 
-	FLIVR::Color red    = Color(1.0,0.0,0.0);
-	FLIVR::Color green  = Color(0.0,1.0,0.0);
-	FLIVR::Color blue   = Color(0.0,0.0,1.0);
+	fluo::Color red(  1.0,0.0,0.0);
+	fluo::Color green(0.0,1.0,0.0);
+	fluo::Color blue( 0.0,0.0,1.0);
 	vd_r->SetColor(red);
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
@@ -798,7 +798,7 @@ void VolumeSelector::RedoMask()
 	m_vd->GetVR()->clear_tex_mask();
 }
 
-bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
+bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 {
 	if (!m_view || !m_vd)
 		return false;
@@ -823,7 +823,7 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 	
 	int nx = m_view->GetGLSize().x;
 	int ny = m_view->GetGLSize().y;
-	Transform *tform = m_vd->GetTexture()->transform();
+	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 	glm::mat4 mv_mat2 = glm::mat4(
@@ -833,14 +833,14 @@ bool VolumeSelector::GetMouseVec(int mx, int my, FLIVR::Vector &mvec)
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	glm::mat4 mv_mat = m_view->GetDrawMat();
 	mv_mat = mv_mat * mv_mat2;
-	Transform mv, pr;
+	fluo::Transform mv, pr;
 	mv.set(glm::value_ptr(mv_mat));
 	pr.set(glm::value_ptr(m_prj_mat));
 	mv.invert();
 	pr.invert();
-	FLIVR::Vector v;
-	FLIVR::Point p0(double(m_mx0)*2/nx - 1.0, 1.0 - double(m_my0)*2/ny, 0);
-	FLIVR::Point p1(double(m_mx)*2/nx - 1.0, 1.0 - double(m_my)*2/ny, 0);
+	fluo::Vector v;
+	fluo::Point p0(double(m_mx0)*2/nx - 1.0, 1.0 - double(m_my0)*2/ny, 0);
+	fluo::Point p1(double(m_mx)*2/nx - 1.0, 1.0 - double(m_my)*2/ny, 0);
 	//transform
 	p0 = pr.transform(p0);
 	p0 = mv.transform(p0);

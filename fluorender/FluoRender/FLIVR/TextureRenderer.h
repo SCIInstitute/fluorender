@@ -182,7 +182,7 @@ namespace FLIVR
 		// Tests the bounding box against the current MODELVIEW and
 		// PROJECTION matrices to determine if it is within the viewport.
 		// Returns true if it is visible.
-		bool test_against_view(const BBox &bbox, bool persp=false);
+		bool test_against_view(const fluo::BBox &bbox, bool persp=false);
 
 		//memory swap
 		static void set_mem_swap(bool val) {mem_swap_ = val;}
@@ -250,8 +250,8 @@ namespace FLIVR
 		void set_quota_bricks_chan(int quota) {quota_bricks_chan_ = quota;}
 		int get_quota_bricks_chan() {return quota_bricks_chan_;}
 		//quota center
-		static void set_qutoa_center(Point &point) {quota_center_ = point;}
-		static Point& get_quota_center() { return quota_center_; }
+		static void set_qutoa_center(fluo::Point &point) {quota_center_ = point;}
+		static fluo::Point& get_quota_center() { return quota_center_; }
 		//update order
 		static void set_update_order(int val) {update_order_ = val;}
 		static int get_update_order() {return update_order_;}
@@ -342,7 +342,7 @@ namespace FLIVR
 		static int quota_bricks_;
 		int quota_bricks_chan_;//for current channel
 		//center point of the quota
-		static Point quota_center_;
+		static fluo::Point quota_center_;
 		//update order
 		static int update_order_;
 		//threading
@@ -370,9 +370,9 @@ namespace FLIVR
 		VertexArray* va_wirefm_;
 
 		//compute view
-		Ray compute_view();
-		Ray compute_snapview(double snap);
-		double compute_rate_scale(Vector v);
+		fluo::Ray compute_view();
+		fluo::Ray compute_snapview(double snap);
+		double compute_rate_scale(fluo::Vector v);
 
 		//brick distance sort
 		static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);

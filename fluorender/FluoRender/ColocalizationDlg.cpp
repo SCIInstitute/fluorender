@@ -192,7 +192,7 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 		++k;
 	} while (cur_line.IsEmpty() == false);
 
-	Color c;
+	fluo::Color c;
 	double val;
 	wxColor color;
 	VolumeData* vd = 0;

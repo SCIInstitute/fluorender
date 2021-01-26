@@ -470,7 +470,7 @@ bool Interpolator::GetInt(FlKeyCode keycode, double t, int &ival)
 	return false;
 }
 
-bool Interpolator::GetQuaternion(FlKeyCode keycode, double t, Quaternion &qval)
+bool Interpolator::GetQuaternion(FlKeyCode keycode, double t, fluo::Quaternion &qval)
 {
 	int g1 = -1;
 	int g2 = -1;
@@ -493,7 +493,7 @@ bool Interpolator::GetQuaternion(FlKeyCode keycode, double t, Quaternion &qval)
 
 	if (g1==-1 && g2==-1)
 	{
-		qval = Quaternion(0, 0, 0, 1);
+		qval = fluo::Quaternion(0, 0, 0, 1);
 		return false;
 	}
 
@@ -516,7 +516,7 @@ bool Interpolator::GetQuaternion(FlKeyCode keycode, double t, Quaternion &qval)
 	if (g1>-1 && g2>-1)
 		return LinearQuaternion(keycode, m_key_list[g1], m_key_list[g2], t, qval);
 
-	qval = Quaternion(0, 0, 0, 1);
+	qval = fluo::Quaternion(0, 0, 0, 1);
 	return false;
 }
 
@@ -578,18 +578,18 @@ bool Interpolator::GetInt(FlKeyCode keycode, int index, int &ival)
 	return true;
 }
 
-bool Interpolator::GetQuaternion(FlKeyCode keycode, int index, Quaternion &qval)
+bool Interpolator::GetQuaternion(FlKeyCode keycode, int index, fluo::Quaternion &qval)
 {
 	if (index < 0 || index >= m_key_list.size())
 	{
-		qval = Quaternion(0, 0, 0, 1);
+		qval = fluo::Quaternion(0, 0, 0, 1);
 		return false;
 	}
 
 	FlKey *key = SearchKey(keycode, m_key_list[index]);
 	if (!key)
 	{
-		qval = Quaternion(0, 0, 0, 1);
+		qval = fluo::Quaternion(0, 0, 0, 1);
 		return false;
 	}
 
@@ -644,9 +644,9 @@ bool Interpolator::LinearDouble(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g
 	return true;
 }
 
-bool Interpolator::StepQuaternion(FlKeyCode keycode, FlKeyGroup* g, Quaternion &qval)
+bool Interpolator::StepQuaternion(FlKeyCode keycode, FlKeyGroup* g, fluo::Quaternion &qval)
 {
-	qval = Quaternion(0, 0, 0, 1);
+	qval = fluo::Quaternion(0, 0, 0, 1);
 	if (!g) return false;
 	FlKey *key = SearchKey(keycode, g);
 	if (!key) return false;
@@ -656,9 +656,9 @@ bool Interpolator::StepQuaternion(FlKeyCode keycode, FlKeyGroup* g, Quaternion &
 	return true;
 }
 
-bool Interpolator::LinearQuaternion(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, Quaternion &qval)
+bool Interpolator::LinearQuaternion(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, fluo::Quaternion &qval)
 {
-	qval = Quaternion(0, 0, 0, 1);
+	qval = fluo::Quaternion(0, 0, 0, 1);
 	if (!g1 || !g2) return false;
 	FlKey *key1 = SearchKey(keycode, g1);
 	FlKey *key2 = SearchKey(keycode, g2);
@@ -667,7 +667,7 @@ bool Interpolator::LinearQuaternion(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGrou
 		key2->GetType()!=FLKEY_TYPE_QUATER)
 		return false;
 	double t1, t2;
-	Quaternion q1, q2;
+	fluo::Quaternion q1, q2;
 	q1 = ((FlKeyQuaternion*)key1)->GetValue();
 	q2 = ((FlKeyQuaternion*)key2)->GetValue();
 	t1 = g1->t;

@@ -179,7 +179,7 @@ wxThread::ExitCode VolumeLoaderThread::Entry()
 
 			char *ptr = NULL;
 			size_t readsize;
-			TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo, this);
+			FLIVR::TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo, this);
 			if (!ptr) continue;
 
 			if (b.finfo->type == BRICK_FILE_TYPE_RAW)
@@ -394,7 +394,7 @@ void VolumeLoader::CleanupLoadedBrick()
 
 	for (int i = 0; i < m_queues.size(); i++)
 	{
-		TextureBrick *b = m_queues[i].brick;
+		FLIVR::TextureBrick *b = m_queues[i].brick;
 		if (!m_queues[i].brick->isLoaded())
 			required += (size_t)b->nx()*(size_t)b->ny()*(size_t)b->nz()*(size_t)b->nb(0);
 	}
@@ -457,7 +457,7 @@ void VolumeLoader::CleanupLoadedBrick()
 	{
 		for (int i = m_queues.size() - 1; i >= 0; i--)
 		{
-			TextureBrick *b = m_queues[i].brick;
+			FLIVR::TextureBrick *b = m_queues[i].brick;
 			if (b->isLoaded() && m_loaded.find(b) != m_loaded.end())
 			{
 				bool skip = false;

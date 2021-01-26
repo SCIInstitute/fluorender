@@ -131,13 +131,13 @@ bool KernelExecutor::Execute()
 		m_message = "No volume selected. Select a volume first.\n";
 		return false;
 	}
-	VolumeRenderer* vr = m_vd->GetVR();
+	FLIVR::VolumeRenderer* vr = m_vd->GetVR();
 	if (!vr)
 	{
 		m_message = "Volume corrupted.\n";
 		return false;
 	}
-	Texture* tex =m_vd->GetTexture();
+	FLIVR::Texture* tex =m_vd->GetTexture();
 	if (!tex)
 	{
 		m_message = "Volume corrupted.\n";
@@ -149,9 +149,9 @@ bool KernelExecutor::Execute()
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
-	Ray view_ray(Point(0.802, 0.267, 0.534), Vector(0.802, 0.267, 0.534));
+	fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
 	tex->set_sort_bricks();
-	vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
+	vector<FLIVR::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 	{
 		m_message = "Volume empty.\n";
@@ -160,8 +160,8 @@ bool KernelExecutor::Execute()
 
 	m_message = "";
 	//execute for each brick
-	TextureBrick *b, *b_r;
-	vector<TextureBrick*> *bricks_r;
+	FLIVR::TextureBrick *b, *b_r;
+	vector<FLIVR::TextureBrick*> *bricks_r;
 	void *result;
 
 	if (m_duplicate)
@@ -178,7 +178,7 @@ bool KernelExecutor::Execute()
 		vd->SetSpcFromFile(true);
 		wxString name = m_vd->GetName();
 		vd->SetName(name + "_CL");
-		Texture* tex_r = vd->GetTexture();
+		FLIVR::Texture* tex_r = vd->GetTexture();
 		if (!tex_r)
 			return false;
 		Nrrd* nrrd_r = tex_r->get_nrrd(0);
@@ -196,7 +196,7 @@ bool KernelExecutor::Execute()
 		if (m_vd)
 		{
 			//clipping planes
-			vector<Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
+			vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
 			if (planes && vd->GetVR())
 				vd->GetVR()->set_planes(planes);
 			//transfer function
@@ -205,7 +205,7 @@ bool KernelExecutor::Execute()
 			vd->SetOffset(m_vd->GetOffset());
 			vd->SetLeftThresh(m_vd->GetLeftThresh());
 			vd->SetRightThresh(m_vd->GetRightThresh());
-			FLIVR::Color col = m_vd->GetColor();
+			fluo::Color col = m_vd->GetColor();
 			vd->SetColor(col);
 			vd->SetAlpha(m_vd->GetAlpha());
 			//shading
@@ -242,7 +242,7 @@ bool KernelExecutor::Execute()
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
-		KernelProgram* kernel = VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
+		FLIVR::KernelProgram* kernel = FLIVR::VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";
@@ -301,7 +301,7 @@ bool KernelExecutor::Execute()
 	return true;
 }
 
-bool KernelExecutor::ExecuteKernel(KernelProgram* kernel,
+bool KernelExecutor::ExecuteKernel(FLIVR::KernelProgram* kernel,
 	GLuint data_id, void* result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z)

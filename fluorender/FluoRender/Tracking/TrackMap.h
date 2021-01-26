@@ -321,7 +321,7 @@ namespace FL
 		void WriteUint(std::ofstream& ofs, const unsigned int value);
 		void WriteFloat(std::ofstream& ofs, const float value);
 		void WriteDouble(std::ofstream& ofs, const double value);
-		void WritePoint(std::ofstream& ofs, const FLIVR::Point &point);
+		void WritePoint(std::ofstream& ofs, const fluo::Point &point);
 		void WriteCell(std::ofstream& ofs, const Celp &celp);
 		void WriteVertex(std::ofstream& ofs, const Verp &vertex);
 		//import
@@ -330,7 +330,7 @@ namespace FL
 		unsigned int ReadUint(std::ifstream& ifs);
 		float ReadFloat(std::ifstream& ifs);
 		double ReadDouble(std::ifstream& ifs);
-		FLIVR::Point ReadPoint(std::ifstream& ifs);
+		fluo::Point ReadPoint(std::ifstream& ifs);
 		Celp ReadCell(std::ifstream& ifs, CelpList& list);
 		void ReadVertex(std::ifstream& ifs, VertexList& vertex_list, CelpList& list);
 		bool AddIntraEdge(CellGraph& graph,
@@ -428,7 +428,7 @@ namespace FL
 		ofs.write(reinterpret_cast<const char*>(&value), sizeof(double));
 	}
 
-	inline void TrackMapProcessor::WritePoint(std::ofstream& ofs, const FLIVR::Point &point)
+	inline void TrackMapProcessor::WritePoint(std::ofstream& ofs, const fluo::Point &point)
 	{
 		double x = point.x();
 		ofs.write(reinterpret_cast<const char*>(&x), sizeof(double));
@@ -450,8 +450,8 @@ namespace FL
 		WriteDouble(ofs, celp->GetExtD());
 		WritePoint(ofs, celp->GetCenter());
 		WriteTag(ofs, TAG_VER220);
-		WritePoint(ofs, celp->GetBox().min());
-		WritePoint(ofs, celp->GetBox().max());
+		WritePoint(ofs, celp->GetBox().Min());
+		WritePoint(ofs, celp->GetBox().Max());
 	}
 
 	inline bool TrackMapProcessor::ReadBool(std::ifstream& ifs)
@@ -489,13 +489,13 @@ namespace FL
 		return value;
 	}
 
-	inline FLIVR::Point TrackMapProcessor::ReadPoint(std::ifstream& ifs)
+	inline fluo::Point TrackMapProcessor::ReadPoint(std::ifstream& ifs)
 	{
 		double x, y, z;
 		ifs.read(reinterpret_cast<char*>(&x), sizeof(double));
 		ifs.read(reinterpret_cast<char*>(&y), sizeof(double));
 		ifs.read(reinterpret_cast<char*>(&z), sizeof(double));
-		return FLIVR::Point(x, y, z);
+		return fluo::Point(x, y, z);
 	}
 
 	inline Celp TrackMapProcessor::ReadCell(std::ifstream& ifs, CelpList& list)
@@ -518,15 +518,15 @@ namespace FL
 		celp->SetSizeD(ReadDouble(ifs));
 		celp->SetExtUi(ReadUint(ifs));
 		celp->SetExtD(ReadDouble(ifs));
-		FLIVR::Point p = ReadPoint(ifs);
+		fluo::Point p = ReadPoint(ifs);
 		celp->SetCenter(p);
-		FLIVR::BBox box;
-		FLIVR::Point p1;
+		fluo::BBox box;
+		fluo::Point p1;
 		if (ReadTag(ifs) == TAG_VER220)
 		{
 			p = ReadPoint(ifs);
 			p1 = ReadPoint(ifs);
-			box = FLIVR::BBox(p, p1);
+			box = fluo::BBox(p, p1);
 			celp->SetBox(box);
 		}
 		else

@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeMeshConv.h"
 #include "MCTable.h"
-#include "../FLIVR/Utils.h"
+#include <Types/Utils.h>
 #include "../compatibility.h"
 
 double VolumeMeshConv::m_sw = 0.0;
@@ -214,7 +214,7 @@ void VolumeMeshConv::Convert()
 			continue;
 
 		//get intersection vertices on edge
-		Vector intverts[12];
+		fluo::Vector intverts[12];
 		if(edgeTable[cubeindex] & 1) intverts[0] = Intersect(verts, 0, 1, i, j, k);
 		if(edgeTable[cubeindex] & 2) intverts[1] = Intersect(verts, 1, 2, i, j, k);
 		if(edgeTable[cubeindex] & 4) intverts[2] = Intersect(verts, 2, 3, i, j, k);
@@ -330,9 +330,9 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 					(value > m_hi_thresh ?
 					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
 				value *= (m_gm_thresh > 0.0 ?
-					Clamp(gm / m_gm_thresh, 0.0,
+					fluo::Clamp(gm / m_gm_thresh, 0.0,
 					1.0 + m_gm_thresh*10.0) : 1.0);
-				value = pow(Clamp(value/m_offset,
+				value = pow(fluo::Clamp(value/m_offset,
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 					gamma>1.0?0.9999:1.0), gamma);
 			}
@@ -372,9 +372,9 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 					(value > m_hi_thresh ?
 					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
 				value *= (m_gm_thresh > 0.0 ?
-					Clamp(gm / m_gm_thresh, 0.0,
+					fluo::Clamp(gm / m_gm_thresh, 0.0,
 						1.0 + m_gm_thresh*10.0) : 1.0);
-				value = pow(Clamp(value/m_offset,
+				value = pow(fluo::Clamp(value/m_offset,
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
 					gamma>1.0?0.9999:1.0), gamma);
 			}
@@ -403,25 +403,25 @@ double VolumeMeshConv::GetMaxNeighbor(double neighbors[3][3][3],
 	double v7 = neighbors[xx][yy+1][zz+1];
 	double v8 = neighbors[xx+1][yy+1][zz+1];
 
-	return Max(v1, Max(v2, Max(v3, Max(v4, Max(v5, Max(v6, Max(v7, v8)))))));
+	return std::max(v1, std::max(v2, std::max(v3, std::max(v4, std::max(v5, std::max(v6, std::max(v7, v8)))))));
 }
 
-Vector VolumeMeshConv::Intersect(double verts[8], int v1, int v2,
+fluo::Vector VolumeMeshConv::Intersect(double verts[8], int v1, int v2,
 	int x, int y, int z)
 {
 	double val1 = verts[v1];
 	double val2 = verts[v2];
-	Vector p1 = Vector(cubeTable[v1][0], cubeTable[v1][1], cubeTable[v1][2]);
-	Vector p2 = Vector(cubeTable[v2][0], cubeTable[v2][1], cubeTable[v2][2]);
+	fluo::Vector p1(cubeTable[v1][0], cubeTable[v1][1], cubeTable[v1][2]);
+	fluo::Vector p2(cubeTable[v2][0], cubeTable[v2][1], cubeTable[v2][2]);
 
-	Vector p;
+	fluo::Vector p;
 	if (val1 != val2)
 		p = p1 + (p2 - p1) * (m_iso - val1) / (val2 - val1);
 	else
 		p = p1;
 
-	p = Vector(x*m_spcx, y*m_spcy, z*m_spcz) +
-		Vector(p.x()*m_spcx*m_downsample, p.y()*m_spcy*m_downsample, p.z()*m_spcz*m_downsample_z);
+	p = fluo::Vector(x*m_spcx, y*m_spcy, z*m_spcz) +
+		fluo::Vector(p.x()*m_spcx*m_downsample, p.y()*m_spcy*m_downsample, p.z()*m_spcz*m_downsample_z);
 
 	return p;
 }

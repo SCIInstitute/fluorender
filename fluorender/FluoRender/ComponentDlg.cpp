@@ -2233,11 +2233,11 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 			color = wxColor(24, 167, 181);
 		else
 		{
-			Color c;
+			fluo::Color c;
 			if (m_view && m_view->m_glview->m_cur_vol)
 			{
 				VolumeData* vd = m_view->m_glview->m_cur_vol;
-				c = Color(id, vd->GetShuffle());
+				c = fluo::Color(id, vd->GetShuffle());
 			}
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
@@ -2558,7 +2558,7 @@ void ComponentDlg::OutputMulti(int color_type)
 				//group->SetSyncRAll(true);
 				//group->SetSyncGAll(true);
 				//group->SetSyncBAll(true);
-				FLIVR::Color col = vd->GetGamma();
+				fluo::Color col = vd->GetGamma();
 				group->SetGammaAll(col);
 				col = vd->GetBrightness();
 				group->SetBrightnessAll(col);
@@ -2605,7 +2605,7 @@ void ComponentDlg::OutputRgb(int color_type)
 				//group->SetSyncRAll(true);
 				//group->SetSyncGAll(true);
 				//group->SetSyncBAll(true);
-				FLIVR::Color col = vd->GetGamma();
+				fluo::Color col = vd->GetGamma();
 				group->SetGammaAll(col);
 				col = vd->GetBrightness();
 				group->SetBrightnessAll(col);
@@ -2741,7 +2741,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 
 	//compute
 	double sx, sy, sz;
-	std::vector<FLIVR::Point> pos;
+	std::vector<fluo::Point> pos;
 	pos.reserve(num);
 	if (m_use_dist_allchan && gsize > 1)
 	{
@@ -2919,7 +2919,7 @@ void ComponentDlg::AlignCenter(FL::Ruler* ruler)
 {
 	if (!ruler)
 		return;
-	FLIVR::Point center = ruler->GetCenter();
+	fluo::Point center = ruler->GetCenter();
 	double tx, ty, tz;
 	m_view->GetObjCenters(tx, ty, tz);
 	m_view->SetObjTrans(
@@ -2940,7 +2940,7 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 	FL::RulerList rulerlist;
 	FL::Ruler ruler;
 	ruler.SetRulerType(1);
-	FLIVR:Point pt;
+	fluo::Point pt;
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
@@ -3565,7 +3565,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 		++k;
 	} while (cur_line.IsEmpty() == false);
 
-	Color c;
+	fluo::Color c;
 	VolumeData* vd = 0;
 	if (m_view && m_view->m_glview->m_cur_vol)
 		vd = m_view->m_glview->m_cur_vol;
@@ -3591,7 +3591,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 			{
 				if (cur_field.ToULong(&lval))
 				{
-					c = Color(lval, vd->GetShuffle());
+					c = fluo::Color(lval, vd->GetShuffle());
 					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 					m_output_grid->SetCellBackgroundColour(i, k, color);
 				}

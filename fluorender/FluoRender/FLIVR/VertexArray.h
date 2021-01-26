@@ -111,8 +111,8 @@ namespace FLIVR
 		//set parameters to generate vertices
 		void set_param(unsigned int, double);
 		void set_param(std::vector<std::pair<unsigned int, double>>& params);
-		void set_param(BBox &box);//for bounding box
-		void set_param(std::vector<Point> &pp);//for clipping planes
+		void set_param(fluo::BBox &box);//for bounding box
+		void set_param(std::vector<fluo::Point> &pp);//for clipping planes
 		void set_param(std::vector<float> &vts);//for floats
 		inline bool get_dirty();//dirty array needs new data and update
 
@@ -171,7 +171,7 @@ namespace FLIVR
 		std::vector<GLuint> attrib_pointer_list_;
 		//parameters
 		std::map<unsigned int, double> param_list_;//generic
-		BBox bbox_;//for bounding box
+		fluo::BBox bbox_;//for bounding box
 		std::vector<float> float_list_;//for clipping planes
 
 		friend class VertexArrayManager;

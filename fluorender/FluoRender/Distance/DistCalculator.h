@@ -108,7 +108,7 @@ namespace FL
 			double dist;//total distance
 		};
 		std::vector<SpringNode> m_spring;
-		std::vector<Point> m_cloud;
+		std::vector<fluo::Point> m_cloud;
 
 		//volume relax
 		Relax m_relax;
@@ -119,7 +119,7 @@ namespace FL
 		double GetRestDist();
 		void UpdateSpringNode(int idx);
 		void UpdateSpringDist();
-		void SpringProject(Point &p0, Point &pp);
+		void SpringProject(fluo::Point &p0, fluo::Point &pp);
 	};
 }
 #endif//FL_CompAnalyzer_h

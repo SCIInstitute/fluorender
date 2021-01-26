@@ -192,7 +192,7 @@ void MPropView::GetSettings()
 		return;
 
 	wxString str;
-	Color amb, diff, spec;
+	fluo::Color amb, diff, spec;
 	double shine, alpha;
 	m_md->GetMaterial(amb, diff, spec, shine, alpha);
 
@@ -272,11 +272,11 @@ void MPropView::OnLightingCheck(wxCommandEvent& event)
 void MPropView::OnDiffChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_md)
 	{
 		m_md->SetColor(color, MESH_COLOR_DIFF);
-        Color amb = color * 0.3;
+		fluo::Color amb = color * 0.3;
 		m_md->SetColor(amb, MESH_COLOR_AMB);
 		RefreshVRenderViews(true);
 	}
@@ -285,7 +285,7 @@ void MPropView::OnDiffChange(wxColourPickerEvent& event)
 void MPropView::OnSpecChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_md)
 	{
 		m_md->SetColor(color, MESH_COLOR_SPEC);

@@ -324,13 +324,13 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 					int chan_num = view->GetAny();
 					view_empty = chan_num > 0 ? false : view_empty;
-					Color color(1.0, 1.0, 1.0);
+					fluo::Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
-						color = Color(1.0, 0.0, 0.0);
+						color = fluo::Color(1.0, 0.0, 0.0);
 					else if (chan_num == 1)
-						color = Color(0.0, 1.0, 0.0);
+						color = fluo::Color(0.0, 1.0, 0.0);
 					else if (chan_num == 2)
-						color = Color(0.0, 0.0, 1.0);
+						color = fluo::Color(0.0, 0.0, 1.0);
 
 					if (chan_num >= 0 && chan_num < 3)
 						vd_add->SetColor(color);

@@ -57,7 +57,7 @@ private:
 	wxString m_code;
 	wxString m_message;
 
-	bool ExecuteKernel(KernelProgram* kernel,
+	bool ExecuteKernel(FLIVR::KernelProgram* kernel,
 		GLuint data_id, void* result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z);

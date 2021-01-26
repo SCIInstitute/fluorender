@@ -189,13 +189,13 @@ bool Diffusion::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
 }
 
-void Diffusion::GetMask(size_t brick_num, TextureBrick* b, void** val)
+void Diffusion::GetMask(size_t brick_num, FLIVR::TextureBrick* b, void** val)
 {
 	if (!b)
 		return;
@@ -235,7 +235,7 @@ void Diffusion::GetMask(size_t brick_num, TextureBrick* b, void** val)
 	}
 }
 
-void Diffusion::ReleaseMask(void* val, size_t brick_num, TextureBrick* b)
+void Diffusion::ReleaseMask(void* val, size_t brick_num, FLIVR::TextureBrick* b)
 {
 	if (!val || brick_num <= 1)
 		return;
@@ -262,7 +262,7 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, TextureBrick* b)
 	delete[] val;
 }
 
-void Diffusion::Init(Point &ip, double ini_thresh)
+void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 {
 	//debug
 #ifdef _DEBUG
@@ -276,12 +276,12 @@ void Diffusion::Init(Point &ip, double ini_thresh)
 	//add empty mask if there is no mask
 	//then, push the mask for undos
 	m_vd->AddEmptyMask(0, false);
-	if (Texture::mask_undo_num_ > 0 &&
+	if (FLIVR::Texture::mask_undo_num_ > 0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_diffusion);
 	if (!kernel_prog)
 		return;
@@ -291,7 +291,7 @@ void Diffusion::Init(Point &ip, double ini_thresh)
 	cl_float4 p[6];
 	if (m_vd && m_vd->GetVR())
 	{
-		vector<Plane*> *planes = m_vd->GetVR()->get_planes();
+		vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -307,7 +307,7 @@ void Diffusion::Init(Point &ip, double ini_thresh)
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		TextureBrick* b = (*bricks)[i];
+		FLIVR::TextureBrick* b = (*bricks)[i];
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -344,15 +344,15 @@ void Diffusion::Init(Point &ip, double ini_thresh)
 		kernel_prog->setKernelArgConst(kernel_index, 10,
 			sizeof(cl_float4), (void*)(p + 5));
 		//brick matrix
-		BBox bbx = b->dbox();
+		fluo::BBox bbx = b->dbox();
 		cl_float3 scl = {
-			float(bbx.max().x() - bbx.min().x()),
-			float(bbx.max().y() - bbx.min().y()),
-			float(bbx.max().z() - bbx.min().z()) };
+			float(bbx.Max().x() - bbx.Min().x()),
+			float(bbx.Max().y() - bbx.Min().y()),
+			float(bbx.Max().z() - bbx.Min().z()) };
 		cl_float3 trl = {
-			float(bbx.min().x()),
-			float(bbx.min().y()),
-			float(bbx.min().z()) };
+			float(bbx.Min().x()),
+			float(bbx.Min().y()),
+			float(bbx.Min().z()) };
 		kernel_prog->setKernelArgConst(kernel_index, 11,
 			sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(kernel_index, 12,
@@ -393,7 +393,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		return;
 
 	//create program and kernels
-	KernelProgram* kernel_prog = VolumeRenderer::
+	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_diffusion);
 	if (!kernel_prog)
 		return;
@@ -406,8 +406,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		offset, sw;
 	if (m_vd && m_vd->GetVR())
 	{
-		VolumeRenderer* vr = m_vd->GetVR();
-		vector<Plane*> *planes = vr->get_planes();
+		FLIVR::VolumeRenderer* vr = m_vd->GetVR();
+		vector<fluo::Plane*> *planes = vr->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -433,7 +433,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		TextureBrick* b = (*bricks)[i];
+		FLIVR::TextureBrick* b = (*bricks)[i];
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -470,15 +470,15 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		kernel_prog->setKernelArgConst(kernel_index, 10,
 			sizeof(cl_float4), (void*)(p + 5));
 		//brick matrix
-		BBox bbx = b->dbox();
+		fluo::BBox bbx = b->dbox();
 		cl_float3 scl = {
-			float(bbx.max().x() - bbx.min().x()),
-			float(bbx.max().y() - bbx.min().y()),
-			float(bbx.max().z() - bbx.min().z()) };
+			float(bbx.Max().x() - bbx.Min().x()),
+			float(bbx.Max().y() - bbx.Min().y()),
+			float(bbx.Max().z() - bbx.Min().z()) };
 		cl_float3 trl = {
-			float(bbx.min().x()),
-			float(bbx.min().y()),
-			float(bbx.min().z()) };
+			float(bbx.Min().x()),
+			float(bbx.Min().y()),
+			float(bbx.Min().z()) };
 		kernel_prog->setKernelArgConst(kernel_index, 11,
 			sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setKernelArgConst(kernel_index, 12,

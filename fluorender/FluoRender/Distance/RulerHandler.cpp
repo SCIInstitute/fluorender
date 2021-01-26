@@ -50,7 +50,7 @@ RulerHandler::RulerHandler() :
 	m_ruler_list(0),
 	m_point(0),
 	m_pindex(-1),
-	m_mouse(FLIVR::Point(-1))
+	m_mouse(fluo::Point(-1))
 {
 
 }
@@ -84,14 +84,14 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	//get transform
 	glm::mat4 mv_temp = m_view->GetObjectMat();
 	glm::mat4 prj_temp = m_view->GetProjection();
-	Transform mv;
-	Transform prj;
+	fluo::Transform mv;
+	fluo::Transform prj;
 	mv.set(glm::value_ptr(mv_temp));
 	prj.set(glm::value_ptr(prj_temp));
 
 	pRulerPoint point;
 	int i, j, k;
-	Point ptemp;
+	fluo::Point ptemp;
 	for (i = 0; i < (int)m_ruler_list->size(); i++)
 	{
 		Ruler* ruler = (*m_ruler_list)[i];
@@ -186,7 +186,7 @@ void RulerHandler::FinishRuler()
 		return;
 	if (m_ruler->GetRulerType() == 1)
 		m_ruler->SetFinished();
-	m_mouse = FLIVR::Point(-1);
+	m_mouse = fluo::Point(-1);
 }
 
 bool RulerHandler::GetRulerFinished()
@@ -197,7 +197,7 @@ bool RulerHandler::GetRulerFinished()
 		return true;
 }
 
-void RulerHandler::AddRulerPoint(FLIVR::Point &p)
+void RulerHandler::AddRulerPoint(fluo::Point &p)
 {
 	if (m_ruler &&
 		m_ruler->GetDisp() &&
@@ -217,7 +217,7 @@ void RulerHandler::AddRulerPoint(FLIVR::Point &p)
 	}
 }
 
-void RulerHandler::AddRulerPointAfterId(FLIVR::Point &p, unsigned int id,
+void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 	std::set<unsigned int> &cid, std::set<unsigned int> &bid)
 {
 	if (m_ruler &&
@@ -241,7 +241,7 @@ bool RulerHandler::GetMouseDist(int mx, int my, double dist)
 {
 	if (m_mouse.x() < 0 || m_mouse.y() < 0)
 		return true;
-	FLIVR::Point p(mx, my, 0);
+	fluo::Point p(mx, my, 0);
 	return (p - m_mouse).length() > dist;
 }
 
@@ -261,14 +261,14 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 				!m_ruler->GetFinished())
 			{
 				m_ruler->AddBranch(m_point);
-				m_mouse = FLIVR::Point(mx, my, 0);
+				m_mouse = fluo::Point(mx, my, 0);
 				return;
 			}
 		}
 	}
 	if (m_type == 3)
 	{
-		Point p1, p2;
+		fluo::Point p1, p2;
 		Ruler* ruler = new Ruler();
 		ruler->Group(m_group);
 		ruler->SetRulerType(m_type);
@@ -292,8 +292,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	}
 	else
 	{
-		Point p, ip, planep;
-		Point* pplanep = 0;
+		fluo::Point p, ip, planep;
+		fluo::Point* pplanep = 0;
 		if (m_type == 1)
 		{
 			if (m_ruler)
@@ -341,7 +341,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 				glm::mat4 mv_temp = m_view->GetDrawMat();
 				glm::vec4 axis(0, 0, -1, 0);
 				axis = glm::transpose(mv_temp) * axis;
-				m_ruler->FinishEllipse(Vector(axis[0], axis[1], axis[2]));
+				m_ruler->FinishEllipse(fluo::Vector(axis[0], axis[1], axis[2]));
 			}
 		}
 		if (new_ruler)
@@ -356,7 +356,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		}
 	}
 
-	m_mouse = FLIVR::Point(mx, my, 0);
+	m_mouse = fluo::Point(mx, my, 0);
 }
 
 void RulerHandler::AddPaintRulerPoint()
@@ -375,7 +375,7 @@ void RulerHandler::AddPaintRulerPoint()
 	FL::CountVoxels counter(vd);
 	counter.Count();
 
-	Point center = cover.GetCenter();
+	fluo::Point center = cover.GetCenter();
 	double size = counter.GetSum();
 
 	wxString str;
@@ -412,7 +412,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	if (!m_point || !m_view || !m_ruler)
 		return false;
 
-	Point point, ip, tmp;
+	fluo::Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
 	{
 		m_vp.SetVolumeData(m_view->m_cur_vol);
@@ -435,8 +435,8 @@ bool RulerHandler::MoveRuler(int mx, int my)
 			return false;
 	}
 
-	Point p0 = m_point->GetPoint();
-	Vector displace = point - p0;
+	fluo::Point p0 = m_point->GetPoint();
+	fluo::Vector displace = point - p0;
 	for (int i = 0; i < m_ruler->GetNumPoint(); ++i)
 	{
 		m_ruler->GetPoint(i)->DisplacePoint(displace);
@@ -450,7 +450,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	if (!m_point || !m_view || !m_ruler)
 		return false;
 
-	Point point, ip, tmp;
+	fluo::Point point, ip, tmp;
 	if (m_view->m_point_volume_mode)
 	{
 		m_vp.SetVolumeData(m_view->m_cur_vol);
@@ -484,30 +484,30 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 
 	if (alt)
 	{
-		Point c = Point((p2->GetPoint() + p3->GetPoint()) / 2.0);
-		Vector v0 = p0->GetPoint() - c;
-		Vector v2 = p2->GetPoint() - c;
-		Vector axis = Cross(v2, v0);
+		fluo::Point c((p2->GetPoint() + p3->GetPoint()) / 2.0);
+		fluo::Vector v0 = p0->GetPoint() - c;
+		fluo::Vector v2 = p2->GetPoint() - c;
+		fluo::Vector axis = Cross(v2, v0);
 		axis = Cross(axis, v2);
 		axis.normalize();
-		tmp = Point(c + axis * v0.length());
+		tmp = fluo::Point(c + axis * v0.length());
 		p0->SetPoint(tmp);
 		tmp = c + (c - p0->GetPoint());
 		p1->SetPoint(tmp);
 	}
 	else
 	{
-		Point c = Point((p0->GetPoint() +
+		fluo::Point c((p0->GetPoint() +
 			p1->GetPoint() + p2->GetPoint() +
 			p3->GetPoint()) / 4.0);
-		Vector v0 = p0->GetPoint() - c;
-		Vector v2 = p2->GetPoint() - c;
-		Vector axis = Cross(v2, v0);
-		Vector a2 = Cross(v0, axis);
+		fluo::Vector v0 = p0->GetPoint() - c;
+		fluo::Vector v2 = p2->GetPoint() - c;
+		fluo::Vector axis = Cross(v2, v0);
+		fluo::Vector a2 = Cross(v0, axis);
 		a2.normalize();
-		tmp = Point(c + a2 * v2.length());
+		tmp = fluo::Point(c + a2 * v2.length());
 		p2->SetPoint(tmp);
-		tmp = Point(c - a2 * v2.length());
+		tmp = fluo::Point(c - a2 * v2.length());
 		p3->SetPoint(tmp);
 		tmp = c + (c - p0->GetPoint());
 		p1->SetPoint(tmp);
@@ -682,7 +682,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
 							{
-								FLIVR::Color col(r, g, b);
+								fluo::Color col(r, g, b);
 								ruler->SetColor(col);
 							}
 						}
@@ -703,7 +703,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 						{
 							if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 							{
-								Point point(x, y, z);
+								fluo::Point point(x, y, z);
 								ruler->AddPoint(point);
 							}
 						}
@@ -722,7 +722,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 								{
 									if (SSCANF(str.c_str(), "%f%f%f%d", &x, &y, &z, &l))
 									{
-										Point point(x, y, z);
+										fluo::Point point(x, y, z);
 										if (rbi > 0 && rpi == 0)
 										{
 											pRulerPoint pp = ruler->FindPoint(point);
@@ -786,13 +786,13 @@ int RulerHandler::Profile(int index)
 	{
 		if (ruler->GetNumPoint() < 1)
 			return 0;
-		FLIVR::Point p1, p2;
+		fluo::Point p1, p2;
 		p1 = ruler->GetPoint(0)->GetPoint();
 		p2 = ruler->GetPoint(1)->GetPoint();
 		//object space
-		p1 = FLIVR::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
-		p2 = FLIVR::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
-		FLIVR::Vector dir = p2 - p1;
+		p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
+		p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+		fluo::Vector dir = p2 - p1;
 		double dist = dir.length();
 		if (dist < EPS)
 			return 0;
@@ -823,14 +823,14 @@ int RulerHandler::Profile(int index)
 			if (mask_value)
 			{
 				//find bin
-				FLIVR::Point p(i, j, k);
-				FLIVR::Vector pdir = p - p1;
-				double proj = Dot(pdir, dir);
+				fluo::Point p(i, j, k);
+				fluo::Vector pdir = p - p1;
+				double proj = fluo::Dot(pdir, dir);
 				int bin_num = int(proj / bin_dist);
 				if (bin_num < 0 || bin_num >= bins)
 					continue;
 				//make sure it's within the brush radius
-				FLIVR::Point p_ruler = p1 + proj * dir;
+				fluo::Point p_ruler = p1 + proj * dir;
 				if ((p_ruler - p).length() > brush_radius)
 					continue;
 
@@ -857,7 +857,7 @@ int RulerHandler::Profile(int index)
 		//sample data through ruler
 		int i, j, k;
 		long long vol_index;
-		FLIVR::Point p;
+		fluo::Point p;
 		double intensity;
 		if (bins == 0)
 		{
@@ -867,7 +867,7 @@ int RulerHandler::Profile(int index)
 
 			p = ruler->GetPoint(0)->GetPoint();
 			//object space
-			p = FLIVR::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
+			p = fluo::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
 			intensity = 0.0;
 			i = int(p.x() + 0.5);
 			j = int(p.y() + 0.5);
@@ -893,8 +893,8 @@ int RulerHandler::Profile(int index)
 			for (unsigned int b = 0; b < bins; ++b)
 				profile->push_back(FL::ProfileBin());
 
-			FLIVR::Point p1, p2;
-			FLIVR::Vector dir;
+			fluo::Point p1, p2;
+			fluo::Vector dir;
 			double dist;
 			int total_dist = 0;
 			for (unsigned int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
@@ -902,8 +902,8 @@ int RulerHandler::Profile(int index)
 				p1 = ruler->GetPoint(pn)->GetPoint();
 				p2 = ruler->GetPoint(pn + 1)->GetPoint();
 				//object space
-				p1 = FLIVR::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
-				p2 = FLIVR::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+				p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
+				p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
 				dir = p2 - p1;
 				dist = dir.length();
 				dir.normalize();
@@ -954,7 +954,7 @@ int RulerHandler::Distance(int index, std::string filename)
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
-	Point p = ruler->GetCenter();
+	fluo::Point p = ruler->GetCenter();
 
 	FL::CelpList* list = m_ca->GetCelpList();
 	if (list->empty())

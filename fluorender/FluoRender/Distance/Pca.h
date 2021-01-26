@@ -46,11 +46,11 @@ namespace FL
 		~Pca()
 		{}
 
-		void AddPoint(FLIVR::Point &point)
+		void AddPoint(fluo::Point &point)
 		{
 			if (m_mode == 0)
 			{
-				m_mean = FLIVR::Point(m_mean + point);
+				m_mean = fluo::Point(m_mean + point);
 				m_cov[0][0] += point(0) * point(0);
 				m_cov[0][1] += point(0) * point(1);
 				m_cov[0][2] += point(0) * point(2);
@@ -63,22 +63,22 @@ namespace FL
 				m_points.push_back(point);
 			m_bpoint.extend(point);
 		}
-		void AddPointScale(FLIVR::Point &point, double sx, double sy, double sz)
+		void AddPointScale(fluo::Point &point, double sx, double sy, double sz)
 		{
-			FLIVR::Point sp(point);
+			fluo::Point sp(point);
 			sp.scale(sx, sy, sz);
 			AddPoint(sp);
 		}
-		void SetPoints(std::vector<FLIVR::Point> &points)
+		void SetPoints(std::vector<fluo::Point> &points)
 		{
 			m_points.assign(points.begin(), points.end());
 			m_mode = 2;
 		}
-		std::vector<FLIVR::Point> &GetPoints()
+		std::vector<fluo::Point> &GetPoints()
 		{
 			return m_points;
 		}
-		void AddPoints(std::vector<FLIVR::Point> &points)
+		void AddPoints(std::vector<fluo::Point> &points)
 		{
 			m_points.insert(m_points.end(), points.begin(), points.end());
 		}
@@ -105,32 +105,32 @@ namespace FL
 		void ClearPoints()
 		{
 			m_num = 0;
-			m_mean = FLIVR::Point();
+			m_mean = fluo::Point();
 			memset(m_cov, 0, sizeof(double) * 9);
 			m_points.clear();
 		}
 		void Compute();
 
-		FLIVR::Vector GetAxis(int index)
+		fluo::Vector GetAxis(int index)
 		{
 			if (index >= 0 && index <= 2)
 				return m_axis[index];
 			else
-				return FLIVR::Vector();
+				return fluo::Vector();
 		}
-		FLIVR::Vector GetLengths()
+		fluo::Vector GetLengths()
 		{
-			return FLIVR::Vector(m_values[0], m_values[1], m_values[2]);
+			return fluo::Vector(m_values[0], m_values[1], m_values[2]);
 		}
 
 	private:
 		int m_mode;//0-incremental cov; 1-external cov; 2-store points
-		FLIVR::BPoint m_bpoint;
-		std::vector<FLIVR::Point> m_points;
-		FLIVR::Vector m_axis[3];
+		fluo::BPoint m_bpoint;
+		std::vector<fluo::Point> m_points;
+		fluo::Vector m_axis[3];
 		double m_values[3];
 		int m_num;
-		FLIVR::Point m_mean;
+		fluo::Point m_mean;
 		double m_cov[3][3];//covariance matrix
 
 	private:

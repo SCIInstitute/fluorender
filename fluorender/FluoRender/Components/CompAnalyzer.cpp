@@ -65,14 +65,14 @@ int ComponentAnalyzer::GetColocalization(
 			sumd.push_back(0.0);
 			continue;
 		}
-		Texture* tex = m_vd_list[i]->GetTexture();
+		FLIVR::Texture* tex = m_vd_list[i]->GetTexture();
 		if (!tex)
 		{
 			sumi.push_back(0);
 			sumd.push_back(0.0);
 			continue;
 		}
-		TextureBrick* b = tex->get_brick(bid);
+		FLIVR::TextureBrick* b = tex->get_brick(bid);
 		if (!b)
 		{
 			sumi.push_back(0);
@@ -97,7 +97,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		return;
 	double sx, sy, sz;
 	vd->GetSpacings(sx, sy, sz);
-	vector<TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return;
 	size_t bn = bricks->size();
@@ -127,7 +127,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		unsigned char* data_mask = 0;
 		unsigned int* data_label = 0;
 		int nx, ny, nz;
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		int c = 0;
 		int nb = 1;
 		if (bn > 1)
@@ -373,8 +373,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
-	Texture* tex = vd->GetTexture();
-	vector<TextureBrick*> *bricks = tex->get_bricks_id();
+	FLIVR::Texture* tex = vd->GetTexture();
+	vector<FLIVR::TextureBrick*> *bricks = tex->get_bricks_id();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
@@ -387,7 +387,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		//get one brick
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		if (sel && !b->get_paint_mask())
 			continue;
 		void* data_data = 0;
@@ -547,8 +547,8 @@ void ComponentAnalyzer::MakeColorConsistent()
 	VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
-	Texture* tex = vd->GetTexture();
-	vector<TextureBrick*> *bricks = tex->get_bricks();
+	FLIVR::Texture* tex = vd->GetTexture();
+	vector<FLIVR::TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
@@ -693,7 +693,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	double size_scale = sx * sy * sz;
 	double maxscale = vd->GetMaxScale();
 	double scalarscale = vd->GetScalarScale();
-	FLIVR::Vector lens;
+	fluo::Vector lens;
 
 	graph.ClearVisited();
 	for (auto i = comps.begin();
@@ -741,7 +741,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << ids.front() << "\t";
 		if (m_bn > 1)
 			stream << brick_ids.front() << "\t";
-		FLIVR::Point center = i->second->GetCenter(sx, sy, sz);
+		fluo::Point center = i->second->GetCenter(sx, sy, sz);
 		stream << center.x() << "\t";
 		stream << center.y() << "\t";
 		stream << center.z() << "\t";
@@ -918,7 +918,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 	if (!vd)
 		return false;
 
-	Texture* tex = vd->GetTexture();
+	FLIVR::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -975,7 +975,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 		case 1://sn
 			str = std::to_string(count);
 		}
-		FLIVR::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
+		fluo::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
 		ann.AddText(str, p, sinfo);
 		++count;
 	}
@@ -996,7 +996,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		m_compgroup->dirty)
 		Analyze(true, consistent);
 
-	Texture* tex = vd->GetTexture();
+	FLIVR::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -1056,7 +1056,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 
 		//populate the volume
 		//the actual data
-		Texture* tex_vd = vdn->GetTexture();
+		FLIVR::Texture* tex_vd = vdn->GetTexture();
 		if (!tex_vd) continue;
 		Nrrd* nrrd_vd = tex_vd->get_nrrd(0);
 		if (!nrrd_vd) continue;
@@ -1075,8 +1075,8 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 			for (auto iter = list.begin();
 				iter != list.end(); ++iter)
 			{
-				TextureBrick* b_orig = tex->get_brick(iter->second->BrickId());
-				TextureBrick* b_new = tex_vd->get_brick(iter->second->BrickId());
+				FLIVR::TextureBrick* b_orig = tex->get_brick(iter->second->BrickId());
+				FLIVR::TextureBrick* b_new = tex_vd->get_brick(iter->second->BrickId());
 				int nx2 = b_orig->nx();
 				int ny2 = b_orig->ny();
 				int nz2 = b_orig->nz();
@@ -1153,7 +1153,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		}
 
 		//settings
-		FLIVR::Color c;
+		fluo::Color c;
 		if (GetColor(i->second->Id(), i->second->BrickId(), vd, color_type, c))
 		{
 			vdn->SetColor(c);
@@ -1192,7 +1192,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		m_compgroup->dirty)
 		Analyze(true, consistent);
 
-	Texture* tex = vd->GetTexture();
+	FLIVR::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -1251,21 +1251,21 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 
 	//get new data
 	//red volume
-	Texture* tex_vd_r = vd_r->GetTexture();
+	FLIVR::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return false;
 	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
 	if (!nrrd_vd_r) return false;
 	void* data_vd_r = nrrd_vd_r->data;
 	if (!data_vd_r) return false;
 	//green volume
-	Texture* tex_vd_g = vd_g->GetTexture();
+	FLIVR::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return false;
 	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
 	if (!nrrd_vd_g) return false;
 	void* data_vd_g = nrrd_vd_g->data;
 	if (!data_vd_g) return false;
 	//blue volume
-	Texture* tex_vd_b = vd_b->GetTexture();
+	FLIVR::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return false;
 	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
 	if (!nrrd_vd_b) return false;
@@ -1276,7 +1276,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
 	unsigned int value_label;
-	Color color;
+	fluo::Color color;
 	double max_value = vd->GetMaxValue();
 	for (index = 0; index < for_size; ++index)
 	{
@@ -1295,9 +1295,9 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 		}
 	}
 
-	FLIVR::Color red = Color(1.0, 0.0, 0.0);
-	FLIVR::Color green = Color(0.0, 1.0, 0.0);
-	FLIVR::Color blue = Color(0.0, 0.0, 1.0);
+	fluo::Color red(1.0, 0.0, 0.0);
+	fluo::Color green(0.0, 1.0, 0.0);
+	fluo::Color blue(0.0, 0.0, 1.0);
 	vd_r->SetColor(red);
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
@@ -1356,7 +1356,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 bool ComponentAnalyzer::GetColor(
 	unsigned int id, int brick_id,
 	VolumeData* vd, int color_type,
-	FLIVR::Color &color)
+	fluo::Color &color)
 {
 	if (!id)
 		return false;
@@ -1367,7 +1367,7 @@ bool ComponentAnalyzer::GetColor(
 	{
 	case 1:
 	default:
-		color = FLIVR::Color(id, vd->GetShuffle());
+		color = fluo::Color(id, vd->GetShuffle());
 		return true;
 	case 2:
 		if (vd)
@@ -1414,14 +1414,14 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 	VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
-	Texture* tex = vd->GetTexture();
+	FLIVR::Texture* tex = vd->GetTexture();
 
 	unsigned int brick_id = info->BrickId();
 	unsigned int rep_id = info->Id();
 	unsigned int new_id = base_id;
 
 	//get brick label data
-	TextureBrick* b = tex->get_brick(brick_id);
+	FLIVR::TextureBrick* b = tex->get_brick(brick_id);
 	int nx = b->nx();
 	int ny = b->ny();
 	int nz = b->nz();
@@ -1459,7 +1459,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 unsigned int ComponentAnalyzer::GetNonconflictId(
 	unsigned int id,
 	int nx, int ny, int nz,
-	TextureBrick* b,
+	FLIVR::TextureBrick* b,
 	unsigned int* data)
 {
 	unsigned int result = 0;

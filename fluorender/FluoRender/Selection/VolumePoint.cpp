@@ -37,7 +37,7 @@ using namespace FL;
 double VolumePoint::GetPointVolume(
 	double mx, double my,//mouse coord on screen
 	int mode, bool use_transf, double thresh,//params
-	FLIVR::Point &mp, FLIVR::Point &ip)
+	fluo::Point &mp, fluo::Point &ip)
 {
 	if (!m_view || !m_vd)
 		return -1.0;
@@ -59,8 +59,8 @@ double VolumePoint::GetPointVolume(
 	m_view->HandleCamera();
 	glm::mat4 mv_temp = m_view->GetInvtMat();
 	glm::mat4 prj_mat = m_view->GetProjection();
-	Transform mv;
-	Transform p;
+	fluo::Transform mv;
+	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(prj_mat));
 
@@ -70,10 +70,10 @@ double VolumePoint::GetPointVolume(
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
-	Point mp1(x, y, 0.0);
+	fluo::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
 	mp1 = mv.transform(mp1);
-	Point mp2(x, y, 1.0);
+	fluo::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
 
@@ -82,20 +82,20 @@ double VolumePoint::GetPointVolume(
 	int yy = -1;
 	int zz = -1;
 	int tmp_xx, tmp_yy, tmp_zz;
-	Point nmp;
+	fluo::Point nmp;
 	double spcx, spcy, spcz;
 	m_vd->GetSpacings(spcx, spcy, spcz);
 	int resx, resy, resz;
 	m_vd->GetResolution(resx, resy, resz, m_vd->GetLevel());
 	//volume bounding box
-	BBox bbox = m_vd->GetBounds();
-	Vector vv = mp2 - mp1;
+	fluo::BBox bbox = m_vd->GetBounds();
+	fluo::Vector vv = mp2 - mp1;
 	vv.normalize();
-	Point hit;
+	fluo::Point hit;
 	double max_int = 0.0;
 	double alpha = 0.0;
 	double value = 0.0;
-	vector<Plane*> *planes = 0;
+	vector<fluo::Plane*> *planes = 0;
 	double mspc = 1.0;
 	if (m_vd->GetSampleRate() > 0.0)
 		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / m_vd->GetSampleRate();
@@ -105,7 +105,7 @@ double VolumePoint::GetPointVolume(
 	if (bbox.intersect(mp1, vv, hit))
 	{
 		int brick_id = -1;
-		TextureBrick* hit_brick = 0;
+		FLIVR::TextureBrick* hit_brick = 0;
 		unsigned long long vindex;
 		int data_nx, data_ny, data_nz;
 		if (m_vd->isBrxml())
@@ -139,9 +139,9 @@ double VolumePoint::GetPointVolume(
 				zz<0 || zz>resz)
 				break;
 			//normalize
-			nmp.x(hit.x() / bbox.max().x());
-			nmp.y(hit.y() / bbox.max().y());
-			nmp.z(hit.z() / bbox.max().z());
+			nmp.x(hit.x() / bbox.Max().x());
+			nmp.y(hit.y() / bbox.Max().y());
+			nmp.z(hit.z() / bbox.Max().z());
 			bool inside = true;
 			if (planes)
 			{
@@ -198,7 +198,7 @@ double VolumePoint::GetPointVolume(
 					if (value > max_int)
 					{
 						//mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
-						ip = Point(xx, yy, zz);
+						ip = fluo::Point(xx, yy, zz);
 						max_int = value;
 						counter++;
 					}
@@ -208,10 +208,10 @@ double VolumePoint::GetPointVolume(
 					//accumulate
 					if (value > 0.0)
 					{
-						alpha = 1.0 - pow(Clamp(1.0 - value, 0.0, 1.0), m_vd->GetSampleRate());
+						alpha = 1.0 - pow(fluo::Clamp(1.0 - value, 0.0, 1.0), m_vd->GetSampleRate());
 						max_int += alpha * (1.0 - max_int);
 						//mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
-						ip = Point(xx, yy, zz);
+						ip = fluo::Point(xx, yy, zz);
 						counter++;
 					}
 					if (max_int > thresh || max_int >= 1.0)
@@ -227,7 +227,7 @@ double VolumePoint::GetPointVolume(
 	if (counter == 0)
 		return -1.0;
 
-	mp = ip + Vector(0.5);
+	mp = ip + fluo::Vector(0.5);
 	mp.scale(spcx, spcy, spcz);
 
 	if (mode == 1)
@@ -251,7 +251,7 @@ double VolumePoint::GetPointVolume(
 double VolumePoint::GetPointVolumeBox(
 	double mx, double my,//mouse coord on screen
 	bool calc_mats,
-	FLIVR::Point &mp)
+	fluo::Point &mp)
 {
 	if (!m_view || !m_vd)
 		return -1.0;
@@ -260,14 +260,14 @@ double VolumePoint::GetPointVolumeBox(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	vector<Plane*> *planes = m_vd->GetVR()->get_planes();
+	vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
-	Transform mv;
-	Transform p;
+	fluo::Transform mv;
+	fluo::Transform p;
 	glm::mat4 mv_temp;
-	Transform *tform = m_vd->GetTexture()->transform();
+	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 
@@ -298,27 +298,27 @@ double VolumePoint::GetPointVolumeBox(
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
-	Point mp1(x, y, 0.0);
+	fluo::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
 	mp1 = mv.transform(mp1);
-	Point mp2(x, y, 1.0);
+	fluo::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
-	Vector ray_d = mp1 - mp2;
+	fluo::Vector ray_d = mp1 - mp2;
 	ray_d.normalize();
-	Ray ray(mp1, ray_d);
+	fluo::Ray ray(mp1, ray_d);
 	double mint = -1.0;
 	double t;
 	//for each plane, calculate the intersection point
-	Plane* plane = 0;
-	Point pp;//a point on plane
+	fluo::Plane* plane = 0;
+	fluo::Point pp;//a point on plane
 	int i, j;
 	bool pp_out;
 	for (i = 0; i < 6; i++)
 	{
 		plane = (*planes)[i];
-		FLIVR::Vector vec = plane->normal();
-		FLIVR::Point pnt = plane->get_point();
+		fluo::Vector vec = plane->normal();
+		fluo::Point pnt = plane->get_point();
 		if (ray.planeIntersectParameter(vec, pnt, t))
 		{
 			pp = ray.parameter(t);
@@ -354,7 +354,7 @@ double VolumePoint::GetPointVolumeBox(
 
 double VolumePoint::GetPointVolumeBox2(
 	double mx, double my,//mouse coord on screen
-	FLIVR::Point &p1, FLIVR::Point &p2)
+	fluo::Point &p1, fluo::Point &p2)
 {
 	if (!m_view || !m_vd)
 		return -1.0;
@@ -363,7 +363,7 @@ double VolumePoint::GetPointVolumeBox2(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	vector<Plane*> *planes = m_vd->GetVR()->get_planes();
+	vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
@@ -372,7 +372,7 @@ double VolumePoint::GetPointVolumeBox2(
 	//Transformation
 	//HandleCamera();
 	glm::mat4 mv_temp = m_view->GetObjectMat();
-	Transform *tform = m_vd->GetTexture()->transform();
+	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 	glm::mat4 mv_mat2 = glm::mat4(
@@ -382,8 +382,8 @@ double VolumePoint::GetPointVolumeBox2(
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	mv_temp = mv_temp * mv_mat2;
 	glm::mat4 prj_mat = m_view->GetProjection();
-	Transform mv;
-	Transform p;
+	fluo::Transform mv;
+	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(prj_mat));
 
@@ -393,28 +393,28 @@ double VolumePoint::GetPointVolumeBox2(
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to object space
-	Point mp1(x, y, 0.0);
+	fluo::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
 	mp1 = mv.transform(mp1);
-	Point mp2(x, y, 1.0);
+	fluo::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
 	mp2 = mv.transform(mp2);
-	Vector ray_d = mp1 - mp2;
+	fluo::Vector ray_d = mp1 - mp2;
 	ray_d.normalize();
-	Ray ray(mp1, ray_d);
+	fluo::Ray ray(mp1, ray_d);
 	double mint = -1.0;
 	double maxt = std::numeric_limits<double>::max();
 	double t;
 	//for each plane, calculate the intersection point
-	Plane* plane = 0;
-	Point pp;//a point on plane
+	fluo::Plane* plane = 0;
+	fluo::Point pp;//a point on plane
 	int i, j;
 	bool pp_out;
 	for (i = 0; i < 6; i++)
 	{
 		plane = (*planes)[i];
-		FLIVR::Vector vec = plane->normal();
-		FLIVR::Point pnt = plane->get_point();
+		fluo::Vector vec = plane->normal();
+		fluo::Point pnt = plane->get_point();
 		if (ray.planeIntersectParameter(vec, pnt, t))
 		{
 			pp = ray.parameter(t);
@@ -456,8 +456,8 @@ double VolumePoint::GetPointVolumeBox2(
 
 double VolumePoint::GetPointPlane(
 	double mx, double my,//mouse coord on screen
-	FLIVR::Point* planep, bool calc_mats,
-	FLIVR::Point &mp)
+	fluo::Point* planep, bool calc_mats,
+	fluo::Point &mp)
 {
 	if (!m_view)
 		return -1.0;
@@ -480,13 +480,13 @@ double VolumePoint::GetPointPlane(
 		mv_temp = m_view->GetModelView();//m_mv_mat;
 
 	glm::mat4 prj_mat = m_view->GetProjection();
-	Transform mv;
-	Transform p;
+	fluo::Transform mv;
+	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(prj_mat));
 
-	Vector n(0.0, 0.0, 1.0);
-	Point center(0.0, 0.0, -m_view->GetCenterEyeDist());
+	fluo::Vector n(0.0, 0.0, 1.0);
+	fluo::Point center(0.0, 0.0, -m_view->GetCenterEyeDist());
 	if (planep)
 	{
 		center = *planep;
@@ -498,12 +498,12 @@ double VolumePoint::GetPointPlane(
 	p.invert();
 	mv.invert();
 	//transform mp1 and mp2 to eye space
-	Point mp1(x, y, 0.0);
+	fluo::Point mp1(x, y, 0.0);
 	mp1 = p.transform(mp1);
-	Point mp2(x, y, 1.0);
+	fluo::Point mp2(x, y, 1.0);
 	mp2 = p.transform(mp2);
-	FLIVR::Vector vec = mp2 - mp1;
-	Ray ray(mp1, vec);
+	fluo::Vector vec = mp2 - mp1;
+	fluo::Ray ray(mp1, vec);
 	double t = 0.0;
 	if (ray.planeIntersectParameter(n, center, t))
 		mp = ray.parameter(t);

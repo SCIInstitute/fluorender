@@ -91,7 +91,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 	if (vd && vd_a)
 	{
 		//clipping planes
-		vector<Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
+		vector<fluo::Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
 		if (planes && vd->GetVR())
 			vd->GetVR()->set_planes(planes);
 		//transfer function
@@ -100,7 +100,7 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 		vd->SetOffset(vd_a->GetOffset());
 		vd->SetLeftThresh(vd_a->GetLeftThresh());
 		vd->SetRightThresh(vd_a->GetRightThresh());
-		FLIVR::Color col = vd_a->GetColor();
+		fluo::Color col = vd_a->GetColor();
 		vd->SetColor(col);
 		vd->SetAlpha(vd_a->GetAlpha());
 		//shading
@@ -349,12 +349,12 @@ void VolumeCalculator::CreateVolumeResult2()
 	int res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
 
-	res_x = max(res_x_a, res_x_b);
-	res_y = max(res_y_a, res_y_b);
-	res_z = max(res_z_a, res_z_b);
-	spc_x = max(spc_x_a, spc_x_b);
-	spc_y = max(spc_y_a, spc_y_b);
-	spc_z = max(spc_z_a, spc_z_b);
+	res_x = std::max(res_x_a, res_x_b);
+	res_y = std::max(res_y_a, res_y_b);
+	res_z = std::max(res_z_a, res_z_b);
+	spc_x = std::max(spc_x_a, spc_x_b);
+	spc_y = std::max(spc_y_a, spc_y_b);
+	spc_z = std::max(spc_z_a, spc_z_b);
 
 	VolumeData* vd = new VolumeData();
 	vd->AddEmptyData(bits,
@@ -435,7 +435,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	int total_prg = nx * 2;
 
 	int i, j, k;
-	BBox bbox;
+	fluo::BBox bbox;
 	//first pass: finding BBox
 	for (i = 0; i < nx; i++)
 	{
@@ -450,7 +450,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*m_vd_a->GetScalarScale() / 257.0);
 			if (value_a > thresh * 255)
 			{
-				bbox.extend(Point(i, j, k));
+				bbox.extend(fluo::Point(i, j, k));
 				((unsigned char*)data_r)[index] = 255;
 			}
 		}
@@ -461,16 +461,16 @@ void VolumeCalculator::FillHoles(double thresh)
 		}
 	}
 
-	double dx = (bbox.max() - bbox.min()).x() / 2.0;
-	double dy = (bbox.max() - bbox.min()).y() / 2.0;
-	double dz = (bbox.max() - bbox.min()).z();
+	double dx = (bbox.Max() - bbox.Min()).x() / 2.0;
+	double dy = (bbox.Max() - bbox.Min()).y() / 2.0;
+	double dz = (bbox.Max() - bbox.Min()).z();
 
 	//second pass: fill holes
 	bool found_n, found_p;
-	for (i = int(bbox.min().x()); i <= int(bbox.max().x()); i++)
+	for (i = int(bbox.Min().x()); i <= int(bbox.Max().x()); i++)
 	{
-		for (j = int(bbox.min().y()); j <= int(bbox.max().y()); j++)
-		for (k = int(bbox.min().z()); k <= int(bbox.max().z()); k++)
+		for (j = int(bbox.Min().y()); j <= int(bbox.Max().y()); j++)
+		for (k = int(bbox.Min().z()); k <= int(bbox.Max().z()); k++)
 		{
 			int index = nx*ny*k + nx*j + i;
 			unsigned char value_r = ((unsigned char*)data_r)[index];
@@ -481,7 +481,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				//search -X
 				int s_n_x = i;
 				found_n = false;
-				while (s_n_x >= int(bbox.min().x()) &&
+				while (s_n_x >= int(bbox.Min().x()) &&
 					s_n_x >= int(i - dx))
 				{
 					si = nx*ny*k + nx*j + s_n_x;
@@ -495,7 +495,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				//search +X
 				int s_p_x = i;
 				found_p = false;
-				while (s_p_x <= int(bbox.max().x()) &&
+				while (s_p_x <= int(bbox.Max().x()) &&
 					s_p_x <= int(i + dx))
 				{
 					si = nx*ny*k + nx*j + s_p_x;
@@ -515,7 +515,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				//search -Y
 				int s_n_y = j;
 				found_n = false;
-				while (s_n_y >= int(bbox.min().y()) &&
+				while (s_n_y >= int(bbox.Min().y()) &&
 					s_n_y >= int(j - dy))
 				{
 					si = nx*ny*k + nx*s_n_y + i;
@@ -529,7 +529,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				//search +Y
 				int s_p_y = j;
 				found_p = false;
-				while (s_p_y <= int(bbox.max().y()) &&
+				while (s_p_y <= int(bbox.Max().y()) &&
 					s_p_y <= int(j + dy))
 				{
 					si = nx*ny*k + nx*s_p_y + i;
@@ -549,7 +549,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				//search -Z
 				int s_n_z = k;
 				found_n = false;
-				while (s_n_z >= int(bbox.min().z()) &&
+				while (s_n_z >= int(bbox.Min().z()) &&
 					s_n_z >= int(k - dz))
 				{
 					si = nx*ny*s_n_z + nx*j + i;
@@ -563,7 +563,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				//search +Z
 				int s_p_z = k;
 				found_p = false;
-				while (s_p_z <= int(bbox.max().z()) &&
+				while (s_p_z <= int(bbox.Max().z()) &&
 					s_p_z <= int(k + dz))
 				{
 					si = nx*ny*s_p_z + nx*j + i;

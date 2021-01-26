@@ -43,7 +43,7 @@ namespace FL
 		Diffusion(VolumeData* vd);
 		~Diffusion();
 
-		void Init(Point& ip, double ini_thresh);
+		void Init(fluo::Point& ip, double ini_thresh);
 		void Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate);
 
 	private:
@@ -51,8 +51,8 @@ namespace FL
 
 	private:
 		bool CheckBricks();
-		void GetMask(size_t brick_num, TextureBrick* b, void** val);
-		void ReleaseMask(void* val, size_t brick_num, TextureBrick* b);
+		void GetMask(size_t brick_num, FLIVR::TextureBrick* b, void** val);
+		void ReleaseMask(void* val, size_t brick_num, FLIVR::TextureBrick* b);
 	};
 
 }

@@ -139,9 +139,9 @@ namespace FLIVR
 		double filter_size_shp_;
 
 		//bounding box of all volumes
-		BBox bbox_;
+		fluo::BBox bbox_;
 		//total resolution
-		Vector res_;
+		fluo::Vector res_;
 
 		//sample rate etc
 		bool imode_;
@@ -151,7 +151,7 @@ namespace FLIVR
 		int num_slices_;
 
 		//light position
-		Vector light_pos_;
+		fluo::Vector light_pos_;
 
 		//soft threshold
 		static double sw_;
@@ -163,7 +163,7 @@ namespace FLIVR
 			vector<float>& vertex,
 			vector<uint32_t>& index,
 			vector<uint32_t>& size,
-			Ray &view_ray,
+			fluo::Ray &view_ray,
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
 			int quota_bricks_chan,
@@ -171,7 +171,7 @@ namespace FLIVR
 
 		//find out combined bricks in interactive mode
 		vector<TextureBrick*> *get_combined_bricks(
-			Point& center, Ray& view, bool is_orthographic = false);
+			fluo::Point& center, fluo::Ray& view, bool is_orthographic = false);
 	};
 
 } // End namespace FLIVR

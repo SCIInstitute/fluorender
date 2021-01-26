@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Stencil_h
 #define FL_Stencil_h
 
-#include <FLIVR/BBox.h>
+#include <Types/BBox.h>
 #include "boost/unordered_map.hpp"
 
 namespace FL
@@ -44,7 +44,7 @@ namespace FL
 				return false;
 			if (!nx || !ny || !nz)
 				return false;
-			if (box.min() == box.max())
+			if (box.Min() == box.Max())
 				return false;
 			return true;
 		}
@@ -57,7 +57,7 @@ namespace FL
 		}
 		void extend(size_t i, size_t j, size_t k)
 		{
-			box.extend(FLIVR::Point(i, j, k));
+			box.extend(fluo::Point(i, j, k));
 		}
 
 		//pointer to the entire data
@@ -68,7 +68,7 @@ namespace FL
 		size_t nz;
 		size_t bits;
 		float scale;
-		FLIVR::BBox box;
+		fluo::BBox box;
 	};
 
 	typedef boost::unordered_map<unsigned int, Stencil> StencilList;
@@ -81,16 +81,16 @@ namespace FL
 
 		//sum of products in the overlap region
 		//with two stencils aligned at center
-		size_t minx = size_t(s1.box.min().x() + 0.5);
-		size_t maxx = size_t(s1.box.max().x() + 0.5);
-		size_t miny = size_t(s1.box.min().y() + 0.5);
-		size_t maxy = size_t(s1.box.max().y() + 0.5);
-		size_t minz = size_t(s1.box.min().z() + 0.5);
-		size_t maxz = size_t(s1.box.max().z() + 0.5);
+		size_t minx = size_t(s1.box.Min().x() + 0.5);
+		size_t maxx = size_t(s1.box.Max().x() + 0.5);
+		size_t miny = size_t(s1.box.Min().y() + 0.5);
+		size_t maxy = size_t(s1.box.Max().y() + 0.5);
+		size_t minz = size_t(s1.box.Min().z() + 0.5);
+		size_t maxz = size_t(s1.box.Max().z() + 0.5);
 		//s2
-		size_t minx2 = size_t(s2.box.min().x() + 0.5);
-		size_t miny2 = size_t(s2.box.min().y() + 0.5);
-		size_t minz2 = size_t(s2.box.min().z() + 0.5);
+		size_t minx2 = size_t(s2.box.Min().x() + 0.5);
+		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
+		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
 		float v1, v2, d;
 		size_t index;
@@ -127,21 +127,21 @@ namespace FL
 
 		//sum of products in the overlap region
 		//with two stencils aligned at center
-		size_t minx = size_t(s1.box.min().x() + 0.5);
-		size_t maxx = size_t(s1.box.max().x() + 0.5);
-		size_t miny = size_t(s1.box.min().y() + 0.5);
-		size_t maxy = size_t(s1.box.max().y() + 0.5);
-		size_t minz = size_t(s1.box.min().z() + 0.5);
-		size_t maxz = size_t(s1.box.max().z() + 0.5);
+		size_t minx = size_t(s1.box.Min().x() + 0.5);
+		size_t maxx = size_t(s1.box.Max().x() + 0.5);
+		size_t miny = size_t(s1.box.Min().y() + 0.5);
+		size_t maxy = size_t(s1.box.Max().y() + 0.5);
+		size_t minz = size_t(s1.box.Min().z() + 0.5);
+		size_t maxz = size_t(s1.box.Max().z() + 0.5);
 		//s2
-		size_t minx2 = size_t(s2.box.min().x() + 0.5);
-		size_t miny2 = size_t(s2.box.min().y() + 0.5);
-		size_t minz2 = size_t(s2.box.min().z() + 0.5);
+		size_t minx2 = size_t(s2.box.Min().x() + 0.5);
+		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
+		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
 		float v1;
 		float v1max = 0;
 		float v2max = 0;
-		FLIVR::Point p1max, p2max;
+		fluo::Point p1max, p2max;
 		size_t index;
 		size_t i, i2, j, j2, k, k2;
 		for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
@@ -167,7 +167,7 @@ namespace FL
 			if (v1 > v1max)
 			{
 				v1max = v1;
-				p1max = FLIVR::Point(i, j, k);
+				p1max = fluo::Point(i, j, k);
 			}
 			//if (v2 > v2max)
 			//{
@@ -188,21 +188,21 @@ namespace FL
 	}
 
 	inline bool match_stencils(const Stencil& s1,
-		Stencil& s2, const FLIVR::Vector &ext,
-		FLIVR::Point &center, float &prob)
+		Stencil& s2, const fluo::Vector &ext,
+		fluo::Point &center, float &prob)
 	{
 		//std::ofstream file;
 		//file.open("E:/Data/Holly/test/test.txt");
 
-		FLIVR::BBox range = s1.box;
+		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
-		range.clamp(FLIVR::BBox(FLIVR::Point(0, 0, 0),
-			FLIVR::Point(s2.nx, s2.ny, s2.nz)));
-		FLIVR::Vector vmax = range.max() - s1.box.size();
+		range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
+			fluo::Point(s2.nx, s2.ny, s2.nz)));
+		fluo::Vector vmax = range.Max() - s1.box.size();
 
-		size_t minx = size_t(range.min().x() + 0.5);
-		size_t miny = size_t(range.min().y() + 0.5);
-		size_t minz = size_t(range.min().z() + 0.5);
+		size_t minx = size_t(range.Min().x() + 0.5);
+		size_t miny = size_t(range.Min().y() + 0.5);
+		size_t minz = size_t(range.Min().z() + 0.5);
 		size_t maxx = size_t(vmax.x() + 0.5);
 		size_t maxy = size_t(vmax.y() + 0.5);
 		size_t maxz = size_t(vmax.z() + 0.5);
@@ -212,16 +212,16 @@ namespace FL
 		float p;
 		float minp = total;
 		float sump = 0;
-		FLIVR::Point s2min(minx, miny, minz);
-		s2.box = FLIVR::BBox(s2min, s2min);
-		FLIVR::BBox s2temp = s2.box;
+		fluo::Point s2min(minx, miny, minz);
+		s2.box = fluo::BBox(s2min, s2min);
+		fluo::BBox s2temp = s2.box;
 		size_t i, j, k, ti, tj, tk;
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
 		{
 			s2.box = s2temp;
-			s2.box.translate(FLIVR::Vector(ti, tj, tk));
+			s2.box.translate(fluo::Vector(ti, tj, tk));
 			p = s1 * s2;
 			//p = similar(s1, s2);
 
@@ -235,14 +235,14 @@ namespace FL
 			if (p < minp)
 			{
 				minp = p;
-				center = s2.box.min();
+				center = s2.box.Min();
 			}
 		}
 		prob = minp * total / sump;
 		//center += s1.box.size() / 2;
 		//center is actually the corner
-		s2.box = FLIVR::BBox(center,
-			FLIVR::Point(center + s1.box.size()));
+		s2.box = fluo::BBox(center,
+			fluo::Point(center + s1.box.size()));
 		s2.id = s1.id;
 
 		//file.close();
@@ -252,16 +252,16 @@ namespace FL
 	inline void label_stencil(const Stencil& s1,
 		const Stencil& s2, void* label1, void* label2)
 	{
-		size_t minx = size_t(s1.box.min().x() + 0.5);
-		size_t maxx = size_t(s1.box.max().x() + 0.5);
-		size_t miny = size_t(s1.box.min().y() + 0.5);
-		size_t maxy = size_t(s1.box.max().y() + 0.5);
-		size_t minz = size_t(s1.box.min().z() + 0.5);
-		size_t maxz = size_t(s1.box.max().z() + 0.5);
+		size_t minx = size_t(s1.box.Min().x() + 0.5);
+		size_t maxx = size_t(s1.box.Max().x() + 0.5);
+		size_t miny = size_t(s1.box.Min().y() + 0.5);
+		size_t maxy = size_t(s1.box.Max().y() + 0.5);
+		size_t minz = size_t(s1.box.Min().z() + 0.5);
+		size_t maxz = size_t(s1.box.Max().z() + 0.5);
 		//s2
-		size_t minx2 = size_t(s2.box.min().x() + 0.5);
-		size_t miny2 = size_t(s2.box.min().y() + 0.5);
-		size_t minz2 = size_t(s2.box.min().z() + 0.5);
+		size_t minx2 = size_t(s2.box.Min().x() + 0.5);
+		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
+		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
 		unsigned int l;
 		size_t index;

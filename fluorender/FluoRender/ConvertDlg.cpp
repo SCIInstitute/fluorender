@@ -289,7 +289,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	if (mesh)
 	{
 		if (m_cnv_vol_mesh_weld_chk->GetValue())
-			glmWeld(mesh, Min(spcx, Min(spcy, spcz)*0.001));
+			glmWeld(mesh, 0.001 * fluo::Min(spcx, spcy, spcz));
 		float area;
 		float scale[3] = {1.0f, 1.0f, 1.0f};
 		glmArea(mesh, scale, &area);

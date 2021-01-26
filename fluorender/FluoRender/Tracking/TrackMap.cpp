@@ -540,8 +540,8 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 		e = boost::add_edge(v1, v2, graph);
 		graph[e.first].size_ui = 1;
 		graph[e.first].size_d = overlap_value;
-		FLIVR::Point p1 = vertex1->GetCenter();
-		FLIVR::Point p2 = vertex2->GetCenter();
+		fluo::Point p1 = vertex1->GetCenter();
+		fluo::Point p2 = vertex2->GetCenter();
 		graph[e.first].dist = float((p1 - p2).length());
 		graph[e.first].link = 1;
 		graph[e.first].count = 1;
@@ -560,11 +560,11 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, Verp &vertex)
 	if (!vertex)
 		return false;
 
-	FLIVR::Point pos = vertex->GetCenter();
+	fluo::Point pos = vertex->GetCenter();
 
 	Verp vertex1;
 	size_t valence1;
-	FLIVR::Point pos1;
+	fluo::Point pos1;
 	double d_min = -1;
 	double d;
 	Verp v1_min;
@@ -604,8 +604,8 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, Verp &vertex)
 	if (!similar_vertex_size(vertex, v1_min))
 		return false;
 	//should be very close
-	FLIVR::BBox box = vertex->GetBox();
-	FLIVR::BBox box1 = v1_min->GetBox();
+	fluo::BBox box = vertex->GetBox();
+	fluo::BBox box1 = v1_min->GetBox();
 	box.extend_mul(1.0);
 	box1.extend_mul(1.0);
 	if (!box.intersect(box1))
@@ -722,8 +722,8 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 			vertex1->GetSizeUi(), vertex2->GetSizeUi());
 		graph[edge.first].size_d = std::max(
 			vertex1->GetSizeD(), vertex2->GetSizeD());
-		FLIVR::Point p1 = vertex1->GetCenter();
-		FLIVR::Point p2 = vertex2->GetCenter();
+		fluo::Point p1 = vertex1->GetCenter();
+		fluo::Point p2 = vertex2->GetCenter();
 		graph[edge.first].dist = float((p1 - p2).length());
 		graph[edge.first].link = 2;
 		//reset
@@ -2882,7 +2882,7 @@ void TrackMapProcessor::ReadVertex(std::ifstream& ifs,
 	vertex = Verp(new Vertex(id));
 	vertex->SetSizeUi(ReadUint(ifs));
 	vertex->SetSizeD(ReadDouble(ifs));
-	FLIVR::Point p = ReadPoint(ifs);
+	fluo::Point p = ReadPoint(ifs);
 	vertex->SetCenter(p);
 
 	//cell number
@@ -3500,12 +3500,12 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 		Celp celp = cliter->second;
 		unsigned int cid = celp->Id();
 
-		minx = size_t(celp->GetBox().min().x() + 0.5);
-		miny = size_t(celp->GetBox().min().y() + 0.5);
-		minz = size_t(celp->GetBox().min().z() + 0.5);
-		maxx = size_t(celp->GetBox().max().x() + 0.5);
-		maxy = size_t(celp->GetBox().max().y() + 0.5);
-		maxz = size_t(celp->GetBox().max().z() + 0.5);
+		minx = size_t(celp->GetBox().Min().x() + 0.5);
+		miny = size_t(celp->GetBox().Min().y() + 0.5);
+		minz = size_t(celp->GetBox().Min().z() + 0.5);
+		maxx = size_t(celp->GetBox().Max().x() + 0.5);
+		maxy = size_t(celp->GetBox().Max().y() + 0.5);
+		maxz = size_t(celp->GetBox().Max().z() + 0.5);
 		for (i = minx; i <= maxx; ++i)
 		for (j = miny; j <= maxy; ++j)
 		for (k = minz; k <= maxz; ++k)
@@ -3749,12 +3749,12 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 		unsigned int cid = celp->Id();
 		if (!id) id = cid;
 
-		minx = size_t(celp->GetBox().min().x() + 0.5);
-		miny = size_t(celp->GetBox().min().y() + 0.5);
-		minz = size_t(celp->GetBox().min().z() + 0.5);
-		maxx = size_t(celp->GetBox().max().x() + 0.5);
-		maxy = size_t(celp->GetBox().max().y() + 0.5);
-		maxz = size_t(celp->GetBox().max().z() + 0.5);
+		minx = size_t(celp->GetBox().Min().x() + 0.5);
+		miny = size_t(celp->GetBox().Min().y() + 0.5);
+		minz = size_t(celp->GetBox().Min().z() + 0.5);
+		maxx = size_t(celp->GetBox().Max().x() + 0.5);
+		maxy = size_t(celp->GetBox().Max().y() + 0.5);
+		maxz = size_t(celp->GetBox().Max().z() + 0.5);
 		for (i = minx; i <= maxx; ++i)
 		for (j = miny; j <= maxy; ++j)
 		for (k = minz; k <= maxz; ++k)
@@ -3824,12 +3824,12 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 		unsigned int cid = celp->Id();
 		if (!id) id = cid;
 
-		minx = size_t(celp->GetBox().min().x() + 0.5);
-		miny = size_t(celp->GetBox().min().y() + 0.5);
-		minz = size_t(celp->GetBox().min().z() + 0.5);
-		maxx = size_t(celp->GetBox().max().x() + 0.5);
-		maxy = size_t(celp->GetBox().max().y() + 0.5);
-		maxz = size_t(celp->GetBox().max().z() + 0.5);
+		minx = size_t(celp->GetBox().Min().x() + 0.5);
+		miny = size_t(celp->GetBox().Min().y() + 0.5);
+		minz = size_t(celp->GetBox().Min().z() + 0.5);
+		maxx = size_t(celp->GetBox().Max().x() + 0.5);
+		maxy = size_t(celp->GetBox().Max().y() + 0.5);
+		maxz = size_t(celp->GetBox().Max().z() + 0.5);
 		for (i = minx; i <= maxx; ++i)
 		for (j = miny; j <= maxy; ++j)
 		for (k = minz; k <= maxz; ++k)
@@ -4542,15 +4542,15 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 			stencil.nz = nz;
 			stencil.bits = m_map->m_data_bits;
 			stencil.scale = m_map->m_scale;
-			stencil.box.extend(FLIVR::Point(i, j, k));
+			stencil.box.extend(fluo::Point(i, j, k));
 			stencil_list.insert(std::pair<unsigned int, Stencil>
 				(label_value, stencil));
 		}
 	}
 
 	//find matching stencil in frame2
-	FLIVR::Point center;
-	FLIVR::Vector ext(1.5, 1.5, 0.5);
+	fluo::Point center;
+	fluo::Vector ext(1.5, 1.5, 0.5);
 	float prob;
 	Stencil s1, s2;
 	s2.data = data2;

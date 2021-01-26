@@ -1008,13 +1008,13 @@ wxString VRenderFrame::CreateView(int row)
 					if (vd_add)
 					{
 						int chan_num = vrv->GetAny();
-						Color color(1.0, 1.0, 1.0);
+						fluo::Color color(1.0, 1.0, 1.0);
 						if (chan_num == 0)
-							color = Color(1.0, 0.0, 0.0);
+							color = fluo::Color(1.0, 0.0, 0.0);
 						else if (chan_num == 1)
-							color = Color(0.0, 1.0, 0.0);
+							color = fluo::Color(0.0, 1.0, 0.0);
 						else if (chan_num == 2)
-							color = Color(0.0, 0.0, 1.0);
+							color = fluo::Color(0.0, 0.0, 1.0);
 
 						if (chan_num >= 0 && chan_num < 3)
 							vd_add->SetColor(color);
@@ -1534,13 +1534,13 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 				if (vd)
 				{
 					int chan_num = vrv->GetDispVolumeNum();
-					Color color(1.0, 1.0, 1.0);
+					fluo::Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
-						color = Color(1.0, 0.0, 0.0);
+						color = fluo::Color(1.0, 0.0, 0.0);
 					else if (chan_num == 1)
-						color = Color(0.0, 1.0, 0.0);
+						color = fluo::Color(0.0, 1.0, 0.0);
 					else if (chan_num == 2)
-						color = Color(0.0, 0.0, 1.0);
+						color = fluo::Color(0.0, 0.0, 1.0);
 
 					if (chan_num >=0 && chan_num <3)
 						vd->SetColor(color);
@@ -1924,7 +1924,7 @@ void VRenderFrame::UpdateTreeColors()
 					VolumeData* vd = (VolumeData*)layer;
 					if (!vd)
 						break;
-					Color c = vd->GetColor();
+					fluo::Color c = vd->GetColor();
 					wxColor wxc(
 						(unsigned char)(c.r()*255),
 						(unsigned char)(c.g()*255),
@@ -1938,7 +1938,7 @@ void VRenderFrame::UpdateTreeColors()
 					MeshData* md = (MeshData*)layer;
 					if (!md)
 						break;
-					Color amb, diff, spec;
+					fluo::Color amb, diff, spec;
 					double shine, alpha;
 					md->GetMaterial(amb, diff, spec, shine, alpha);
 					wxColor wxc(
@@ -1969,7 +1969,7 @@ void VRenderFrame::UpdateTreeColors()
 						VolumeData* vd = group->GetVolumeData(k);
 						if (!vd)
 							break;
-						Color c = vd->GetColor();
+						fluo::Color c = vd->GetColor();
 						wxColor wxc(
 							(unsigned char)(c.r()*255),
 							(unsigned char)(c.g()*255),
@@ -1989,7 +1989,7 @@ void VRenderFrame::UpdateTreeColors()
 						MeshData* md = group->GetMeshData(k);
 						if (!md)
 							break;
-						Color amb, diff, spec;
+						fluo::Color amb, diff, spec;
 						double shine, alpha;
 						md->GetMaterial(amb, diff, spec, shine, alpha);
 						wxColor wxc(
@@ -2055,7 +2055,7 @@ void VRenderFrame::UpdateTree(wxString name)
 						break;
 					//append icon for volume
 					m_tree_panel->AppendIcon();
-					Color c = vd->GetColor();
+					fluo::Color c = vd->GetColor();
 					wxColor wxc(
 						(unsigned char)(c.r()*255),
 						(unsigned char)(c.g()*255),
@@ -2084,7 +2084,7 @@ void VRenderFrame::UpdateTree(wxString name)
 						break;
 					//append icon for mesh
 					m_tree_panel->AppendIcon();
-					Color amb, diff, spec;
+					fluo::Color amb, diff, spec;
 					double shine, alpha;
 					md->GetMaterial(amb, diff, spec, shine, alpha);
 					wxColor wxc(
@@ -2131,7 +2131,7 @@ void VRenderFrame::UpdateTree(wxString name)
 							continue;
 						//add icon
 						m_tree_panel->AppendIcon();
-						Color c = vd->GetColor();
+						fluo::Color c = vd->GetColor();
 						wxColor wxc(
 							(unsigned char)(c.r()*255),
 							(unsigned char)(c.g()*255),
@@ -2172,7 +2172,7 @@ void VRenderFrame::UpdateTree(wxString name)
 							continue;
 						//add icon
 						m_tree_panel->AppendIcon();
-						Color amb, diff, spec;
+						fluo::Color amb, diff, spec;
 						double shine, alpha;
 						md->GetMaterial(amb, diff, spec, shine, alpha);
 						wxColor wxc(
@@ -2921,7 +2921,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("contrast", vd->GetOffset());
 			fconfig.Write("left_thresh", vd->GetLeftThresh());
 			fconfig.Write("right_thresh", vd->GetRightThresh());
-			Color color = vd->GetColor();
+			fluo::Color color = vd->GetColor();
 			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
 			fconfig.Write("color", str);
 			double hue, sat, val;
@@ -2962,12 +2962,12 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("scl", str);
 
 			//planes
-			vector<Plane*> *planes = 0;
+			vector<fluo::Plane*> *planes = 0;
 			if (vd->GetVR())
 				planes = vd->GetVR()->get_planes();
 			if (planes && planes->size() == 6)
 			{
-				Plane* plane = 0;
+				fluo::Plane* plane = 0;
 				double abcd[4];
 
 				//x1
@@ -3076,7 +3076,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			//lighting
 			fconfig.Write("lighting", md->GetLighting());
 			//material
-			Color amb, diff, spec;
+			fluo::Color amb, diff, spec;
 			double shine, alpha;
 			md->GetMaterial(amb, diff, spec, shine, alpha);
 			str = wxString::Format("%f %f %f", amb.r(), amb.g(), amb.b());
@@ -3239,7 +3239,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("aov", vrv->GetAov());
 			fconfig.Write("nearclip", vrv->GetNearClip());
 			fconfig.Write("farclip", vrv->GetFarClip());
-			Color bkcolor;
+			fluo::Color bkcolor;
 			bkcolor = vrv->GetBackgroundColor();
 			str = wxString::Format("%f %f %f", bkcolor.r(), bkcolor.g(), bkcolor.b());
 			fconfig.Write("backgroundcolor", str);
@@ -3260,7 +3260,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			vrv->GetRotations(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("rotation", str);
-			FLIVR::Quaternion q = vrv->m_glview->GetZeroQuat();
+			fluo::Quaternion q = vrv->m_glview->GetZeroQuat();
 			str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
 			fconfig.Write("zero_quat", str);
 			vrv->GetCenters(x, y, z);
@@ -3459,7 +3459,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 						break;
 					case FLKEY_TYPE_QUATER:
 						{
-							Quaternion qval = ((FlKeyQuaternion*)key)->GetValue();
+							fluo::Quaternion qval = ((FlKeyQuaternion*)key)->GetValue();
 							str = wxString::Format("%lf %lf %lf %lf",
 								qval.x, qval.y, qval.z, qval.w);
 							fconfig.Write("val", str);
@@ -3670,7 +3670,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 							{
 								float red, green, blue;
 								if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
-									FLIVR::Color col(red,green,blue);
+									fluo::Color col(red,green,blue);
 									vd->SetColor(col);
 								}
 							}
@@ -3696,7 +3696,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float red, green, blue;
 							if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
-								FLIVR::Color col(red,green,blue);
+								fluo::Color col(red,green,blue);
 								vd->SetColor(col);
 							}
 						}
@@ -3710,7 +3710,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float red, green, blue;
 							if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
-								FLIVR::Color col(red,green,blue);
+								fluo::Color col(red,green,blue);
 								if (fconfig.Read("mask_color_set", &bval))
 									vd->SetMaskColor(col, bval);
 								else
@@ -3773,7 +3773,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								vd->SetScalings(sclx, scly, sclz);
 						}
 
-						vector<Plane*> *planes = 0;
+						vector<fluo::Plane*> *planes = 0;
 						if (vd->GetVR())
 							planes = vd->GetVR()->get_planes();
 						int iresx, iresy, iresz;
@@ -3785,51 +3785,51 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 							//x1
 							if (fconfig.Read("x1_vali", &val))
-								(*planes)[0]->ChangePlane(Point(abs(val/iresx), 0.0, 0.0),
-								Vector(1.0, 0.0, 0.0));
+								(*planes)[0]->ChangePlane(fluo::Point(abs(val/iresx), 0.0, 0.0),
+									fluo::Vector(1.0, 0.0, 0.0));
 							else if (fconfig.Read("x1_val", &val))
-								(*planes)[0]->ChangePlane(Point(abs(val), 0.0, 0.0),
-								Vector(1.0, 0.0, 0.0));
+								(*planes)[0]->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
+									fluo::Vector(1.0, 0.0, 0.0));
 
 							//x2
 							if (fconfig.Read("x2_vali", &val))
-								(*planes)[1]->ChangePlane(Point(abs(val/iresx), 0.0, 0.0),
-								Vector(-1.0, 0.0, 0.0));
+								(*planes)[1]->ChangePlane(fluo::Point(abs(val/iresx), 0.0, 0.0),
+									fluo::Vector(-1.0, 0.0, 0.0));
 							else if (fconfig.Read("x2_val", &val))
-								(*planes)[1]->ChangePlane(Point(abs(val), 0.0, 0.0),
-								Vector(-1.0, 0.0, 0.0));
+								(*planes)[1]->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
+									fluo::Vector(-1.0, 0.0, 0.0));
 
 							//y1
 							if (fconfig.Read("y1_vali", &val))
-								(*planes)[2]->ChangePlane(Point(0.0, abs(val/iresy), 0.0),
-								Vector(0.0, 1.0, 0.0));
+								(*planes)[2]->ChangePlane(fluo::Point(0.0, abs(val/iresy), 0.0),
+									fluo::Vector(0.0, 1.0, 0.0));
 							else if (fconfig.Read("y1_val", &val))
-								(*planes)[2]->ChangePlane(Point(0.0, abs(val), 0.0),
-								Vector(0.0, 1.0, 0.0));
+								(*planes)[2]->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
+									fluo::Vector(0.0, 1.0, 0.0));
 
 							//y2
 							if (fconfig.Read("y2_vali", &val))
-								(*planes)[3]->ChangePlane(Point(0.0, abs(val/iresy), 0.0),
-								Vector(0.0, -1.0, 0.0));
+								(*planes)[3]->ChangePlane(fluo::Point(0.0, abs(val/iresy), 0.0),
+									fluo::Vector(0.0, -1.0, 0.0));
 							else if (fconfig.Read("y2_val", &val))
-								(*planes)[3]->ChangePlane(Point(0.0, abs(val), 0.0),
-								Vector(0.0, -1.0, 0.0));
+								(*planes)[3]->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
+									fluo::Vector(0.0, -1.0, 0.0));
 
 							//z1
 							if (fconfig.Read("z1_vali", &val))
-								(*planes)[4]->ChangePlane(Point(0.0, 0.0, abs(val/iresz)),
-								Vector(0.0, 0.0, 1.0));
+								(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, abs(val/iresz)),
+									fluo::Vector(0.0, 0.0, 1.0));
 							else if (fconfig.Read("z1_val", &val))
-								(*planes)[4]->ChangePlane(Point(0.0, 0.0, abs(val)),
-								Vector(0.0, 0.0, 1.0));
+								(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
+									fluo::Vector(0.0, 0.0, 1.0));
 
 							//z2
 							if (fconfig.Read("z2_vali", &val))
-								(*planes)[5]->ChangePlane(Point(0.0, 0.0, abs(val/iresz)),
-								Vector(0.0, 0.0, -1.0));
+								(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, abs(val/iresz)),
+									fluo::Vector(0.0, 0.0, -1.0));
 							else if (fconfig.Read("z2_val", &val))
-								(*planes)[5]->ChangePlane(Point(0.0, 0.0, abs(val)),
-								Vector(0.0, 0.0, -1.0));
+								(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
+									fluo::Vector(0.0, 0.0, -1.0));
 						}
 
 						//2d adjustment settings
@@ -3837,7 +3837,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								FLIVR::Color col(r,g,b);
+								fluo::Color col(r,g,b);
 								vd->SetGamma(col);
 							}
 						}
@@ -3845,7 +3845,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								FLIVR::Color col(r,g,b);
+								fluo::Color col(r,g,b);
 								vd->SetBrightness(col);
 							}
 						}
@@ -3853,7 +3853,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								FLIVR::Color col(r,g,b);
+								fluo::Color col(r,g,b);
 								vd->SetHdr(col);
 							}
 						}
@@ -3965,13 +3965,13 @@ void VRenderFrame::OpenProject(wxString& filename)
 						float r=0.0f, g=0.0f, b=0.0f;
 						if (fconfig.Read("ambient", &str))
 							SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
-						Color amb(r, g, b);
+						fluo::Color amb(r, g, b);
 						if (fconfig.Read("diffuse", &str))
 							SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
-						Color diff(r, g, b);
+						fluo::Color diff(r, g, b);
 						if (fconfig.Read("specular", &str))
 							SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
-						Color spec(r, g, b);
+						fluo::Color spec(r, g, b);
 						fconfig.Read("shininess", &shine, 30.0);
 						fconfig.Read("alpha", &alpha, 0.5);
 						md->SetMaterial(amb, diff, spec, shine, alpha);
@@ -3980,7 +3980,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								FLIVR::Color col(r,g,b);
+								fluo::Color col(r,g,b);
 								md->SetGamma(col);
 							}
 						}
@@ -3988,7 +3988,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								FLIVR::Color col(r,g,b);
+								fluo::Color col(r,g,b);
 								md->SetBrightness(col);
 							}
 						}
@@ -3996,7 +3996,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 						{
 							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								FLIVR::Color col(r,g,b);
+								fluo::Color col(r,g,b);
 								md->SetHdr(col);
 							}
 						}
@@ -4187,7 +4187,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 											{
 												float r, g, b;
 												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-													FLIVR::Color col(r,g,b);
+													fluo::Color col(r,g,b);
 													group->SetGamma(col);
 												}
 											}
@@ -4195,7 +4195,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 											{
 												float r, g, b;
 												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-													FLIVR::Color col(r,g,b);
+													fluo::Color col(r,g,b);
 													group->SetBrightness(col);
 												}
 											}
@@ -4203,7 +4203,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 											{
 												float r, g, b;
 												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-													FLIVR::Color col(r,g,b);
+													fluo::Color col(r,g,b);
 													group->SetHdr(col);
 												}
 											}
@@ -4311,7 +4311,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						FLIVR::Color col(r,g,b);
+						fluo::Color col(r,g,b);
 						vrv->SetBackgroundColor(col);
 					}
 				}
@@ -4433,7 +4433,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						FLIVR::Color col(r,g,b);
+						fluo::Color col(r,g,b);
 						vrv->m_glview->SetGamma(col);
 					}
 				}
@@ -4441,7 +4441,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						FLIVR::Color col(r,g,b);
+						fluo::Color col(r,g,b);
 						vrv->m_glview->SetBrightness(col);
 					}
 				}
@@ -4449,7 +4449,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						FLIVR::Color col(r,g,b);
+						fluo::Color col(r,g,b);
 						vrv->m_glview->SetHdr(col);
 					}
 				}
@@ -4941,7 +4941,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 											if (SSCANF(sVal.c_str(), "%lf%lf%lf%lf",
 												&x, &y, &z, &w))
 											{
-												Quaternion qval = Quaternion(x, y, z, w);
+												fluo::Quaternion qval = fluo::Quaternion(x, y, z, w);
 												FlKeyQuaternion* key = new FlKeyQuaternion(code, qval);
 												key_group->keys.push_back(key);
 											}

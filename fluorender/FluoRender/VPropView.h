@@ -36,11 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/slider.h>
 #include <wx/tglbtn.h>
 
-#include "FLIVR/Color.h"
-#include "FLIVR/VolumeRenderer.h"
-#include "FLIVR/BBox.h"
-#include "FLIVR/Point.h"
-#include "FLIVR/MultiVolumeRenderer.h"
+#include <FLIVR/MultiVolumeRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <Types/Color.h>
+#include <Types/BBox.h>
+#include <Types/Point.h>
 
 
 using namespace std;

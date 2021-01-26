@@ -1371,15 +1371,15 @@ void VRenderView::SetFarClip(double fc)
 }
 
 //background color
-Color VRenderView::GetBackgroundColor()
+fluo::Color VRenderView::GetBackgroundColor()
 {
 	if (m_glview)
 		return m_glview->GetBackgroundColor();
 	else
-		return Color(0, 0, 0);
+		return fluo::Color(0, 0, 0);
 }
 
-void VRenderView::SetBackgroundColor(Color &color)
+void VRenderView::SetBackgroundColor(fluo::Color &color)
 {
 	if (m_glview)
 		m_glview->SetBackgroundColor(color);
@@ -2566,15 +2566,15 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	SetBackgroundColor(color);
 	RefreshGL();
 }
 
 void VRenderView::OnBgInvBtn(wxCommandEvent& event)
 {
-	Color c = GetBackgroundColor();
-	c = Color(1.0, 1.0, 1.0) - c;
+	fluo::Color c = GetBackgroundColor();
+	c = fluo::Color(1.0, 1.0, 1.0) - c;
 	SetBackgroundColor(c);
 	RefreshGL();
 }
@@ -2994,7 +2994,7 @@ void VRenderView::LoadSettings()
 		SSCANF(str.c_str(), "%d%d%d", &r, &g, &b);
 		wxColor cVal(r, g, b);
 		m_bg_color_picker->SetColour(cVal);
-		Color c(r/255.0, g/255.0, b/255.0);
+		fluo::Color c(r/255.0, g/255.0, b/255.0);
 		SetBackgroundColor(c);
 	}
 	if (fconfig.Read("cam_ctr_chk", &bVal))

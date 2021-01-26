@@ -200,7 +200,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	DeleteAllItems();
 
 	wxString points;
-	Point p;
+	fluo::Point p;
 	int num_points;
 	for (int i=0; i<(int)ruler_list->size(); i++)
 	{
@@ -255,7 +255,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		else
 			color = "N/A";
 		wxString center;
-		Point cp = ruler->GetCenter();
+		fluo::Point cp = ruler->GetCenter();
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
 		wxString str = ruler->GetDelInfoValues(", ");
@@ -330,7 +330,7 @@ void RulerListCtrl::Export(wxString filename)
 		wxString str;
 		wxString unit;
 		int num_points;
-		Point p;
+		fluo::Point p;
 		FL::Ruler* ruler;
 		switch (m_view->m_glview->m_sb_unit)
 		{
@@ -379,7 +379,7 @@ void RulerListCtrl::Export(wxString filename)
 		tos << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
 		double f = 0.0;
-		Color color;
+		fluo::Color color;
 		for (size_t i=0; i<ruler_list->size(); i++)
 		{
 			//for each ruler
@@ -516,7 +516,7 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
 			FL::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 			if (ruler)
 			{
-				Point cp = ruler->GetCenter();
+				fluo::Point cp = ruler->GetCenter();
 				wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
 					cp.x(), cp.y(), cp.z());
 				if (wxTheClipboard->Open())
@@ -588,7 +588,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	}
 	if (ruler->GetUseColor())
 	{
-		Color color = ruler->GetColor();
+		fluo::Color color = ruler->GetColor();
 		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
 		m_color_picker->SetColour(c);
 	}
@@ -673,7 +673,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	}
 	if (!ruler->GetPoint(0))
 		return;
-	Point tmp = Point(x, y, z);
+	fluo::Point tmp(x, y, z);
 	ruler->GetPoint(0)->SetPoint(tmp);
 	str = wxString::Format("(%.2f, %.2f, %.2f)",
 		x, y, z);
@@ -690,7 +690,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		return;
 
 	wxColor c = event.GetColour();
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	FL::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetColor(color);
@@ -1587,7 +1587,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	if (!m_view)
 		return;
 
-	Point avg;
+	fluo::Point avg;
 	int count = 0;
 	std::vector<int> sel;
 	FL::RulerList* ruler_list = m_view->GetRulerList();
@@ -1753,8 +1753,8 @@ void MeasureDlg::Project(int idx)
 	std::sort(comps.begin(), comps.end(),
 		[](const FL::Celp &a, const FL::Celp &b) -> bool
 		{
-		FLIVR::Point pa = a->GetProjp();
-		FLIVR::Point pb = b->GetProjp();
+		fluo::Point pa = a->GetProjp();
+		fluo::Point pb = b->GetProjp();
 		if (pa.z() != pb.z()) return pa.z() < pb.z();
 		else return pa.x() < pb.x();
 		});
@@ -1777,7 +1777,7 @@ void MeasureDlg::Project(int idx)
 			it != comps.end(); ++it)
 		{
 			ofs << (*it)->Id() << "\t";
-			FLIVR::Point p = (*it)->GetProjp();
+			fluo::Point p = (*it)->GetProjp();
 			ofs << p.x() << "\t";
 			ofs << p.y() << "\t";
 			ofs << p.z() << "\n";
@@ -2043,7 +2043,7 @@ void MeasureDlg::OnSetGroup(wxCommandEvent& event)
 
 void MeasureDlg::AlignCenter(FL::Ruler* ruler, FL::RulerList* ruler_list)
 {
-	FLIVR::Point center;
+	fluo::Point center;
 	bool valid_center = false;
 	if (ruler)
 	{

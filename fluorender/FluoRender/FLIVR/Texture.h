@@ -110,20 +110,20 @@ namespace FLIVR
 		{
 			fluo::BBox b;
 			get_bounds(b);
-			xmin = b.min().x();
-			ymin = b.min().y();
-			zmin = b.min().z();
+			xmin = b.Min().x();
+			ymin = b.Min().y();
+			zmin = b.Min().z();
 
-			xmax = b.max().x();
-			ymax = b.max().y();
-			zmax = b.max().z();
+			xmax = b.Max().x();
+			ymax = b.Max().y();
+			zmax = b.Max().z();
 		}
 
 		inline 
 			void get_bounds(fluo::BBox &b) const
 		{
-			b.extend(transform_.project(bbox_.min()));
-			b.extend(transform_.project(bbox_.max()));
+			b.extend(transform_.project(bbox_.Min()));
+			b.extend(transform_.project(bbox_.Max()));
 		}
 
 		inline fluo::BBox *bbox() { return &bbox_; }

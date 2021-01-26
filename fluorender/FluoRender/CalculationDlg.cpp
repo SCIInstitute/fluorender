@@ -405,7 +405,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		}
 		if (group && volume)
 		{
-			FLIVR::Color col = volume->GetGamma();
+			fluo::Color col = volume->GetGamma();
 			group->SetGammaAll(col);
 			col = volume->GetBrightness();
 			group->SetBrightnessAll(col);

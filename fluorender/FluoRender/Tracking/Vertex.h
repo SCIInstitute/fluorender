@@ -111,16 +111,16 @@ namespace FL
 		void SetSplit(bool split = true);
 		bool GetSplit();
 
-		void SetCenter(FLIVR::Point &center);
+		void SetCenter(fluo::Point &center);
 		void SetSizeUi(unsigned int size);
 		void SetSizeD(double size);
 		void Update();
 
-		FLIVR::Point &GetCenter();
+		fluo::Point &GetCenter();
 		unsigned int GetSizeUi();
 		double GetSizeD();
 		//bbox computed from cells
-		FLIVR::BBox GetBox();
+		fluo::BBox GetBox();
 
 		//cells
 		size_t GetCellNum();
@@ -133,7 +133,7 @@ namespace FL
 
 	private:
 		unsigned int m_id;
-		FLIVR::Point m_center;
+		fluo::Point m_center;
 		unsigned int m_size_ui;
 		double m_size_d;
 		typedef boost::unordered_map<unsigned int, Vrtx> InterVertList;
@@ -218,7 +218,7 @@ namespace FL
 		m_split = split;
 	}
 
-	inline void Vertex::SetCenter(FLIVR::Point &center)
+	inline void Vertex::SetCenter(fluo::Point &center)
 	{
 		m_center = center;
 	}
@@ -235,7 +235,7 @@ namespace FL
 
 	inline void Vertex::Update()
 	{
-		m_center = FLIVR::Point();
+		m_center = fluo::Point();
 		m_size_ui = 0;
 		m_size_d = 0;
 
@@ -319,7 +319,7 @@ namespace FL
 		return m_cells.end();
 	}
 
-	inline FLIVR::Point &Vertex::GetCenter()
+	inline fluo::Point &Vertex::GetCenter()
 	{
 		return m_center;
 	}
@@ -334,9 +334,9 @@ namespace FL
 		return m_size_d;
 	}
 
-	inline FLIVR::BBox Vertex::GetBox()
+	inline fluo::BBox Vertex::GetBox()
 	{
-		FLIVR::BBox box;
+		fluo::BBox box;
 		for (CellBinIter iter = m_cells.begin();
 			iter != m_cells.end(); ++iter)
 		{

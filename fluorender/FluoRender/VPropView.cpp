@@ -598,7 +598,7 @@ void VPropView::GetSettings()
 
 	//maximum value
 	m_max_val = m_vd->GetMaxValue();
-	m_max_val = Max(255.0, m_max_val);
+	m_max_val = std::max(255.0, m_max_val);
 
 	//set range
 	wxFloatingPointValidator<double>* vald_fp;
@@ -657,7 +657,7 @@ void VPropView::GetSettings()
 	m_luminance_sldr->SetValue(ival);
 	m_luminance_text->ChangeValue(str);
 	//color
-	Color c = m_vd->GetColor();
+	fluo::Color c = m_vd->GetColor();
 	wxColor wxc((unsigned char)(c.r()*255+0.5),
 		(unsigned char)(c.g()*255+0.5),
 		(unsigned char)(c.b()*255+0.5));
@@ -1192,7 +1192,7 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 
 	if (m_vd)
 	{
-		Color color = m_vd->GetColor();
+		fluo::Color color = m_vd->GetColor();
 		wxColor wxc((unsigned char)(color.r()*255),
 			(unsigned char)(color.g()*255),
 			(unsigned char)(color.b()*255));
@@ -1673,7 +1673,7 @@ void VPropView::OnColormapCombo2(wxCommandEvent &event)
 //6
 void VPropView::OnColorChange(wxColor c)
 {
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
 	{
 		if (m_lumi_change)
@@ -1716,7 +1716,7 @@ void VPropView::OnColorChange(wxColor c)
 
 void VPropView::OnColor2Change(wxColor c)
 {
-	Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
+	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
 	{
 		m_vd->SetMaskColor(color);
@@ -1846,7 +1846,7 @@ int VPropView::GetColorString(wxString& str, wxColor& wxc)
 				}
 			}
 		}
-		wxc = wxColor(Clamp(r,0,255), Clamp(g,0,255), Clamp(b,0,255));
+		wxc = wxColor(fluo::Clamp(r,0,255), fluo::Clamp(g,0,255), fluo::Clamp(b,0,255));
 	}
 	return filled;
 }
@@ -2665,8 +2665,8 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_luminance_sldr->SetValue(ival);
 	double h, s, v;
 	m_vd->GetHSV(h, s, v);
-	HSVColor hsv(h, s, dval);
-	Color color(hsv);
+	fluo::HSVColor hsv(h, s, dval);
+	fluo::Color color(hsv);
 	m_vd->ResetMaskColorSet();
 	m_vd->SetColor(color);
 	wxColor wxc((unsigned char)(color.r()*255),

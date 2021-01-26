@@ -775,12 +775,12 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
 		interpolator->AddKey(flkeyB);
 		//clipping planes
-		vector<Plane*> * planes = vd->GetVR()->get_planes();
+		vector<fluo::Plane*> * planes = vd->GetVR()->get_planes();
 		if (!planes)
 			continue;
 		if (planes->size() != 6)
 			continue;
-		Plane* plane = 0;
+		fluo::Plane* plane = 0;
 		double abcd[4];
 		//x1
 		plane = (*planes)[0];
@@ -841,7 +841,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	keycode.l2_name = "rotation";
 	//double rotx, roty, rotz;
 	//m_view->GetRotations(rotx, roty, rotz);
-	Quaternion q = m_view->m_glview->GetRotations();
+	fluo::Quaternion q = m_view->m_glview->GetRotations();
 	//q.FromEuler(rotx, roty, rotz);
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	interpolator->AddKey(flkeyQ);

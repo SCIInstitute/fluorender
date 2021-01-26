@@ -235,25 +235,25 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_frame_w(-1),
 	m_frame_h(-1),
 	//post image processing
-	m_gamma(Color(1.0, 1.0, 1.0)),
-	m_brightness(Color(1.135, 1.135, 1.135)),
+	m_gamma(fluo::Color(1.0, 1.0, 1.0)),
+	m_brightness(fluo::Color(1.135, 1.135, 1.135)),
 	m_hdr(0.0, 0.0, 0.0),
 	m_sync_r(false),
 	m_sync_g(false),
 	m_sync_b(false),
 	//volume color map
-	m_color_1(Color(0.0, 0.0, 1.0)),
+	m_color_1(fluo::Color(0.0, 0.0, 1.0)),
 	m_value_2(0.0),
-	m_color_2(Color(0.0, 0.0, 1.0)),
+	m_color_2(fluo::Color(0.0, 0.0, 1.0)),
 	m_value_3(0.25),
-	m_color_3(Color(0.0, 1.0, 1.0)),
+	m_color_3(fluo::Color(0.0, 1.0, 1.0)),
 	m_value_4(0.5),
-	m_color_4(Color(0.0, 1.0, 0.0)),
+	m_color_4(fluo::Color(0.0, 1.0, 0.0)),
 	m_value_5(0.75),
-	m_color_5(Color(1.0, 1.0, 0.0)),
+	m_color_5(fluo::Color(1.0, 1.0, 0.0)),
 	m_value_6(1.0),
-	m_color_6(Color(1.0, 0.0, 0.0)),
-	m_color_7(Color(1.0, 0.0, 0.0)),
+	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
+	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
 	//clipping plane rotations
 	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
 	//selection
@@ -707,7 +707,7 @@ void VRenderGLView::HandleProjection(int nx, int ny, bool vr)
 
 void VRenderGLView::HandleCamera(bool vr)
 {
-	Vector pos(m_transx, m_transy, m_transz);
+	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
 	if (m_free)
 		pos *= 0.1;
@@ -763,7 +763,7 @@ double VRenderGLView::CalcZ(double z)
 
 void VRenderGLView::CalcFogRange()
 {
-	BBox bbox;
+	fluo::BBox bbox;
 	bool use_box = false;
 	if (m_cur_vol)
 	{
@@ -784,24 +784,24 @@ void VRenderGLView::CalcFogRange()
 
 	if (use_box)
 	{
-		Transform mv;
+		fluo::Transform mv;
 		mv.set(glm::value_ptr(m_mv_mat));
 
 		double minz, maxz;
 		minz = numeric_limits<double>::max();
 		maxz = -numeric_limits<double>::max();
 
-		vector<Point> points;
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
+		vector<fluo::Point> points;
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
 
-		Point p;
+		fluo::Point p;
 		for (size_t i = 0; i<points.size(); ++i)
 		{
 			p = mv.transform(points[i]);
@@ -1298,12 +1298,12 @@ void VRenderGLView::DrawVolumes(int peel)
 					quota_bricks = 1;
 				else
 				{
-					adj_bricks = Max(1, int(double(last_bricks) *
+					adj_bricks = std::max(1, int(double(last_bricks) *
 						double(up_time) / double(consumed_time)));
 					quota_bricks = TextureRenderer::
 						get_est_bricks(0, adj_bricks);
 				}
-				quota_bricks = Min(total_bricks, quota_bricks);
+				quota_bricks = std::min(total_bricks, quota_bricks);
 				TextureRenderer::set_quota_bricks(quota_bricks);
 				TextureRenderer::push_quota_brick(quota_bricks);
 				////test
@@ -1333,7 +1333,7 @@ void VRenderGLView::DrawVolumes(int peel)
 						vd = *cur_iter;
 						quota_vd_list.push_back(vd);
 						int count_bricks = vd->GetBrickNum();
-						quota_bricks_chan = Min(count_bricks, quota_bricks);
+						quota_bricks_chan = std::min(count_bricks, quota_bricks);
 						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
 						int count = 0;
 						while (count_bricks < quota_bricks &&
@@ -1373,7 +1373,7 @@ void VRenderGLView::DrawVolumes(int peel)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
 				m_vp.SetVolumeData(vd);
-				Point p;
+				fluo::Point p;
 				if (m_vp.GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
 					(vd && m_vp.GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
 				{
@@ -1383,7 +1383,7 @@ void VRenderGLView::DrawVolumes(int peel)
 					vd->GetResolution(resx, resy, resz);
 					vd->GetScalings(sclx, scly, sclz);
 					vd->GetSpacings(spcx, spcy, spcz);
-					p = Point(p.x() / (resx*sclx*spcx),
+					p = fluo::Point(p.x() / (resx*sclx*spcx),
 						p.y() / (resy*scly*spcy),
 						p.z() / (resz*sclz*spcz));
 					TextureRenderer::set_qutoa_center(p);
@@ -1533,12 +1533,12 @@ void VRenderGLView::DrawAnnotations()
 	sy = 2.0 / ny;
 	float px, py;
 
-	Transform mv;
-	Transform p;
+	fluo::Transform mv;
+	fluo::Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
 
-	Color text_color = GetTextColor();
+	fluo::Color text_color = GetTextColor();
 
 	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
@@ -1551,7 +1551,7 @@ void VRenderGLView::DrawAnnotations()
 			if (ann->GetDisp())
 			{
 				string str;
-				Point pos;
+				fluo::Point pos;
 				wstring wstr;
 				for (int j = 0; j<ann->GetTextNum(); ++j)
 				{
@@ -1790,7 +1790,7 @@ int VRenderGLView::GetPaintMode()
 }
 
 void VRenderGLView::DrawCircles(double cx, double cy,
-	double r1, double r2, Color &color, glm::mat4 &matrix)
+	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
 	ShaderProgram* shader =
 		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
@@ -1862,7 +1862,7 @@ void VRenderGLView::DrawBrush()
 
 		int mode = m_selector.GetMode();
 
-		Color text_color = GetTextColor();
+		fluo::Color text_color = GetTextColor();
 
 		double br1 = m_selector.GetBrushSize1();
 		double br2 = m_selector.GetBrushSize2();
@@ -2604,11 +2604,11 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	Color gamma = vd->GetGamma();
-	Color brightness = vd->GetBrightness();
+	fluo::Color gamma = vd->GetGamma();
+	fluo::Color brightness = vd->GetBrightness();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	Color hdr = vd->GetHdr();
+	fluo::Color hdr = vd->GetHdr();
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
@@ -2794,7 +2794,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			vd->GetColormapValues(lo, hi);
 			img_shader->setLocalParam(
 				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
-			Color c = vd->GetColor();
+			fluo::Color c = vd->GetColor();
 			img_shader->setLocalParam(
 				6, c.r(), c.g(), c.b(), vd->GetColormapInv());
 			img_shader->setLocalParam(
@@ -2900,11 +2900,11 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	Color gamma = vd->GetGamma();
-	Color brightness = vd->GetBrightness();
+	fluo::Color gamma = vd->GetGamma();
+	fluo::Color brightness = vd->GetBrightness();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	Color hdr = vd->GetHdr();
+	fluo::Color hdr = vd->GetHdr();
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
@@ -3111,7 +3111,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 			img_shader->create();
 		img_shader->bind();
 	}
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, max(m_scale_factor, 1.0), 0.0);
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
 	img_shader->setLocalParam(1, darkness, 0.0, 0.0, 0.0);
 	glActiveTexture(GL_TEXTURE1);
 	if (peel_buffer)
@@ -3347,7 +3347,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 				img_shader->create();
 			img_shader->bind();
 		}
-		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, max(m_scale_factor, 1.0), 0.0);
+		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
 		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
 		glActiveTexture(GL_TEXTURE1);
 		if (chann_buffer)
@@ -3420,7 +3420,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->set_depth_peel(peel);
 
 	// Set up transform
-	Transform *tform = m_vd_pop_list[0]->GetTexture()->transform();
+	fluo::Transform *tform = m_vd_pop_list[0]->GetTexture()->transform();
 	float mvmat[16];
 	tform->get_trans(mvmat);
 	glm::mat4 mv_mat2 = glm::mat4(
@@ -3493,7 +3493,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		}
 		img_shader->bind();
 	}
-	Color gamma, brightness, hdr;
+	fluo::Color gamma, brightness, hdr;
 	VolumeData* vd = list[0];
 	gamma = vd->GetGamma();
 	brightness = vd->GetBrightness();
@@ -3746,7 +3746,7 @@ void VRenderGLView::PickVolume()
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
 	double min_dist = -1.0;
-	Point p, ip;
+	fluo::Point p, ip;
 	VolumeData* vd = 0;
 	VolumeData* picked_vd = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -3800,7 +3800,7 @@ void VRenderGLView::PickVolume()
 	}
 }
 
-void VRenderGLView::SetCompSelection(VolumeData* vd, Point& p, int mode)
+void VRenderGLView::SetCompSelection(VolumeData* vd, fluo::Point& p, int mode)
 {
 	if (!vd || !vd->GetTexture())
 		return;
@@ -3896,7 +3896,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	if (m_pin_rot_center && m_rot_center_dirty &&
 		m_cur_vol && !m_free)
 	{
-		Point p, ip;
+		fluo::Point p, ip;
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
 		int mode = 2;
@@ -3912,7 +3912,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_pin_ctr = p;
 			double obj_transx, obj_transy, obj_transz;
-			p = Point(m_obj_ctrx - p.x(),
+			p = fluo::Point(m_obj_ctrx - p.x(),
 				p.y() - m_obj_ctry,
 				p.z() - m_obj_ctrz);
 			obj_transx = p.x();
@@ -3966,10 +3966,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_move_left = true;
 
-			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			Vector side = Cross(m_up, m_head);
-			Vector trans = -(side*(int(0.8*(m_ortho_right - m_ortho_left))));
+			fluo::Vector side = fluo::Cross(m_up, m_head);
+			fluo::Vector trans = -(side*(int(0.8*(m_ortho_right - m_ortho_left))));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -3988,10 +3988,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_move_right = true;
 
-			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			Vector side = Cross(m_up, m_head);
-			Vector trans = side*(int(0.8*(m_ortho_right - m_ortho_left)));
+			fluo::Vector side = fluo::Cross(m_up, m_head);
+			fluo::Vector trans = side*(int(0.8*(m_ortho_right - m_ortho_left)));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4010,9 +4010,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_move_up = true;
 
-			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			Vector trans = -m_up*(int(0.8*(m_ortho_top - m_ortho_bottom)));
+			fluo::Vector trans = -m_up*(int(0.8*(m_ortho_top - m_ortho_bottom)));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4031,9 +4031,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_move_down = true;
 
-			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			Vector trans = m_up*(int(0.8*(m_ortho_top - m_ortho_bottom)));
+			fluo::Vector trans = m_up*(int(0.8*(m_ortho_top - m_ortho_bottom)));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4285,17 +4285,17 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	//update ortho rotation
 	if (!m_vrv->m_ortho_view_cmb->HasFocus())
 	{
-		if (m_q.AlmostEqual(Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+		if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(0);
-		else if (m_q.AlmostEqual(Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+		else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(1);
-		else if (m_q.AlmostEqual(Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+		else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(2);
-		else if (m_q.AlmostEqual(Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+		else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 			m_vrv->m_ortho_view_cmb->Select(3);
-		else if (m_q.AlmostEqual(Quaternion(0, 0, 0, 1)))
+		else if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
 			m_vrv->m_ortho_view_cmb->Select(4);
-		else if (m_q.AlmostEqual(Quaternion(0, -1, 0, 0)))
+		else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
 			m_vrv->m_ortho_view_cmb->Select(5);
 		else
 			m_vrv->m_ortho_view_cmb->Select(6);
@@ -4330,10 +4330,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//horizontal move
 		if (leftx != 0.0)
 		{
-			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			Vector side = Cross(m_up, m_head);
-			Vector trans = side * (leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
+			fluo::Vector side = fluo::Cross(m_up, m_head);
+			fluo::Vector trans = side * (leftx*sclr*(m_ortho_right - m_ortho_left) / double(nx));
 			m_obj_transx += trans.x();
 			m_obj_transy += trans.y();
 			m_obj_transz += trans.z();
@@ -4349,9 +4349,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			m_vrv->UpdateScaleFactor(false);
 			if (m_free)
 			{
-				Vector pos(m_transx, m_transy, m_transz);
+				fluo::Vector pos(m_transx, m_transy, m_transz);
 				pos.normalize();
-				Vector ctr(m_ctrx, m_ctry, m_ctrz);
+				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 				ctr -= delta * pos * 1000;
 				m_ctrx = ctr.x();
 				m_ctry = ctr.y();
@@ -4363,17 +4363,17 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//rotate
 		if (rghtx != 0.0 || rghty != 0.0)
 		{
-			Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
+			fluo::Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
 			m_q *= q_delta;
 			m_q.Normalize();
-			Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-			Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+			fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+			fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
 			m_transx = cam_pos2.x;
 			m_transy = cam_pos2.y;
 			m_transz = cam_pos2.z;
-			Quaternion up(0.0, 1.0, 0.0, 0.0);
-			Quaternion up2 = (-m_q) * up * m_q;
-			m_up = Vector(up2.x, up2.y, up2.z);
+			fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+			fluo::Quaternion up2 = (-m_q) * up * m_q;
+			m_up = fluo::Vector(up2.x, up2.y, up2.z);
 			m_q.ToEuler(m_rotx, m_roty, m_rotz);
 			if (m_roty > 360.0)
 				m_roty -= 360.0;
@@ -4405,10 +4405,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//pan
 		if (px != 0 || py != 0)
 		{
-			m_head = Vector(-m_transx, -m_transy, -m_transz);
+			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 			m_head.normalize();
-			Vector side = Cross(m_up, m_head);
-			Vector trans =
+			fluo::Vector side = fluo::Cross(m_up, m_head);
+			fluo::Vector trans =
 				side * (double(px)*(m_ortho_right - m_ortho_left) / double(nx)) +
 				m_up * (double(py)*(m_ortho_top - m_ortho_bottom) / double(ny));
 			m_obj_transx += trans.x();
@@ -4619,53 +4619,53 @@ void VRenderGLView::SetParams(double t)
 			vd->SetDisp(bval);
 
 		//clipping planes
-		vector<Plane*> *planes = vd->GetVR()->get_planes();
+		vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
 		if (!planes) continue;
 		if (planes->size() != 6) continue;
-		Plane *plane = 0;
+		fluo::Plane *plane = 0;
 		double val = 0;
 		//x1
 		plane = (*planes)[0];
 		keycode.l2 = 0;
 		keycode.l2_name = "x1_val";
 		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(Point(abs(val), 0.0, 0.0),
-				Vector(1.0, 0.0, 0.0));
+			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
+				fluo::Vector(1.0, 0.0, 0.0));
 		//x2
 		plane = (*planes)[1];
 		keycode.l2 = 0;
 		keycode.l2_name = "x2_val";
 		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(Point(abs(val), 0.0, 0.0),
-				Vector(-1.0, 0.0, 0.0));
+			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
+				fluo::Vector(-1.0, 0.0, 0.0));
 		//y1
 		plane = (*planes)[2];
 		keycode.l2 = 0;
 		keycode.l2_name = "y1_val";
 		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(Point(0.0, abs(val), 0.0),
-				Vector(0.0, 1.0, 0.0));
+			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
+				fluo::Vector(0.0, 1.0, 0.0));
 		//y2
 		plane = (*planes)[3];
 		keycode.l2 = 0;
 		keycode.l2_name = "y2_val";
 		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(Point(0.0, abs(val), 0.0),
-				Vector(0.0, -1.0, 0.0));
+			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
+				fluo::Vector(0.0, -1.0, 0.0));
 		//z1
 		plane = (*planes)[4];
 		keycode.l2 = 0;
 		keycode.l2_name = "z1_val";
 		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(Point(0.0, 0.0, abs(val)),
-				Vector(0.0, 0.0, 1.0));
+			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
+				fluo::Vector(0.0, 0.0, 1.0));
 		//z2
 		plane = (*planes)[5];
 		keycode.l2 = 0;
 		keycode.l2_name = "z2_val";
 		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(Point(0.0, 0.0, abs(val)),
-				Vector(0.0, 0.0, -1.0));
+			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
+				fluo::Vector(0.0, 0.0, -1.0));
 		//t
 		double frame;
 		keycode.l2 = 0;
@@ -4719,7 +4719,7 @@ void VRenderGLView::SetParams(double t)
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	Quaternion q;
+	fluo::Quaternion q;
 	if (interpolator->GetQuaternion(keycode, t, q))
 	{
 		m_q = q;
@@ -5482,25 +5482,25 @@ void VRenderGLView::SetCenter()
 
 	if (vd)
 	{
-		BBox bbox = vd->GetBounds();
+		fluo::BBox bbox = vd->GetBounds();
 		VolumeRenderer *vr = vd->GetVR();
 		if (!vr) return;
-		vector<Plane*> *planes = vr->get_planes();
+		vector<fluo::Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6) return;
 		double x1, x2, y1, y2, z1, z2;
 		double abcd[4];
 		(*planes)[0]->get_copy(abcd);
-		x1 = fabs(abcd[3])*bbox.max().x();
+		x1 = fabs(abcd[3])*bbox.Max().x();
 		(*planes)[1]->get_copy(abcd);
-		x2 = fabs(abcd[3])*bbox.max().x();
+		x2 = fabs(abcd[3])*bbox.Max().x();
 		(*planes)[2]->get_copy(abcd);
-		y1 = fabs(abcd[3])*bbox.max().y();
+		y1 = fabs(abcd[3])*bbox.Max().y();
 		(*planes)[3]->get_copy(abcd);
-		y2 = fabs(abcd[3])*bbox.max().y();
+		y2 = fabs(abcd[3])*bbox.Max().y();
 		(*planes)[4]->get_copy(abcd);
-		z1 = fabs(abcd[3])*bbox.max().z();
+		z1 = fabs(abcd[3])*bbox.Max().z();
 		(*planes)[5]->get_copy(abcd);
-		z2 = fabs(abcd[3])*bbox.max().z();
+		z2 = fabs(abcd[3])*bbox.Max().z();
 
 		m_obj_ctrx = (x1 + x2) / 2.0;
 		m_obj_ctry = (y1 + y2) / 2.0;
@@ -5622,10 +5622,10 @@ void VRenderGLView::SetFree(bool free)
 	if (free)
 	{
 		m_persp = true;
-		Vector pos(m_transx, m_transy, m_transz);
-		Vector d = pos;
+		fluo::Vector pos(m_transx, m_transy, m_transz);
+		fluo::Vector d = pos;
 		d.normalize();
-		Vector ctr;
+		fluo::Vector ctr;
 		ctr = pos - 0.1*d;
 		m_ctrx = ctr.x();
 		m_ctry = ctr.y();
@@ -6043,11 +6043,11 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	if (group && vd)
 	{
-		Color gamma = group->GetGamma();
+		fluo::Color gamma = group->GetGamma();
 		vd->SetGamma(gamma);
-		Color brightness = group->GetBrightness();
+		fluo::Color brightness = group->GetBrightness();
 		vd->SetBrightness(brightness);
-		Color hdr = group->GetHdr();
+		fluo::Color hdr = group->GetHdr();
 		vd->SetHdr(hdr);
 		bool sync_r = group->GetSyncR();
 		vd->SetSyncR(sync_r);
@@ -6766,11 +6766,11 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 	}
 
 	//set the 2d adjustment settings of the volume the same as the group
-	Color gamma = group->GetGamma();
+	fluo::Color gamma = group->GetGamma();
 	src_vd->SetGamma(gamma);
-	Color brightness = group->GetBrightness();
+	fluo::Color brightness = group->GetBrightness();
 	src_vd->SetBrightness(brightness);
-	Color hdr = group->GetHdr();
+	fluo::Color hdr = group->GetHdr();
 	src_vd->SetHdr(hdr);
 	bool sync_r = group->GetSyncR();
 	src_vd->SetSyncR(sync_r);
@@ -6826,11 +6826,11 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 	//src_group->ResetSync();
 
 	//set the 2d adjustment settings of the volume the same as the group
-	Color gamma = dst_group->GetGamma();
+	fluo::Color gamma = dst_group->GetGamma();
 	src_vd->SetGamma(gamma);
-	Color brightness = dst_group->GetBrightness();
+	fluo::Color brightness = dst_group->GetBrightness();
 	src_vd->SetBrightness(brightness);
-	Color hdr = dst_group->GetHdr();
+	fluo::Color hdr = dst_group->GetHdr();
 	src_vd->SetHdr(hdr);
 	bool sync_r = dst_group->GetSyncR();
 	src_vd->SetSyncR(sync_r);
@@ -7071,7 +7071,7 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		AdjustView* adjust_view = vr_frame->GetAdjustView();
 		if (adjust_view && group)
 		{
-			Color gamma, brightness, hdr;
+			fluo::Color gamma, brightness, hdr;
 			bool sync_r, sync_g, sync_b;
 			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
 			group->SetGamma(gamma);
@@ -7117,7 +7117,7 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 		AdjustView* adjust_view = vr_frame->GetAdjustView();
 		if (adjust_view)
 		{
-			Color gamma, brightness, hdr;
+			fluo::Color gamma, brightness, hdr;
 			bool sync_r, sync_g, sync_b;
 			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
 			group->SetGamma(gamma);
@@ -7209,7 +7209,7 @@ void VRenderGLView::InitView(unsigned int type)
 
 		if (m_bounds.valid())
 		{
-			Vector diag = m_bounds.diagonal();
+			fluo::Vector diag = m_bounds.diagonal();
 			m_radius = sqrt(diag.x()*diag.x() + diag.y()*diag.y()) / 2.0;
 			if (m_radius<0.1)
 				m_radius = 348.0;
@@ -7222,9 +7222,9 @@ void VRenderGLView::InitView(unsigned int type)
 	{
 		if (m_bounds.valid())
 		{
-			m_obj_ctrx = (m_bounds.min().x() + m_bounds.max().x()) / 2.0;
-			m_obj_ctry = (m_bounds.min().y() + m_bounds.max().y()) / 2.0;
-			m_obj_ctrz = (m_bounds.min().z() + m_bounds.max().z()) / 2.0;
+			m_obj_ctrx = (m_bounds.Min().x() + m_bounds.Max().x()) / 2.0;
+			m_obj_ctry = (m_bounds.Min().y() + m_bounds.Max().y()) / 2.0;
+			m_obj_ctrz = (m_bounds.Min().z() + m_bounds.Max().z()) / 2.0;
 		}
 	}
 
@@ -7250,7 +7250,7 @@ void VRenderGLView::InitView(unsigned int type)
 	{
 		if (!m_vrv->m_use_dft_settings)
 		{
-			m_q = Quaternion(0, 0, 0, 1);
+			m_q = fluo::Quaternion(0, 0, 0, 1);
 			m_q.ToEuler(m_rotx, m_roty, m_rotz);
 		}
 	}
@@ -7362,22 +7362,22 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		if (!vr)
 			continue;
 
-		vector<Plane*> *planes = vr->get_planes();
+		vector<fluo::Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6)
 			continue;
 
 		//calculating planes
 		//get six planes
-		Plane* px1 = (*planes)[0];
-		Plane* px2 = (*planes)[1];
-		Plane* py1 = (*planes)[2];
-		Plane* py2 = (*planes)[3];
-		Plane* pz1 = (*planes)[4];
-		Plane* pz2 = (*planes)[5];
+		fluo::Plane* px1 = (*planes)[0];
+		fluo::Plane* px2 = (*planes)[1];
+		fluo::Plane* py1 = (*planes)[2];
+		fluo::Plane* py2 = (*planes)[3];
+		fluo::Plane* pz1 = (*planes)[4];
+		fluo::Plane* pz2 = (*planes)[5];
 
 		//calculate 4 lines
-		Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
-		Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
+		fluo::Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
+		fluo::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
 		//x1z1
 		if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
 			continue;
@@ -7392,7 +7392,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			continue;
 
 		//calculate 8 points
-		Point pp[8];
+		fluo::Point pp[8];
 		//p0 = l_x1z1 * py1
 		if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
 			continue;
@@ -7420,7 +7420,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 
 		//draw the six planes out of the eight points
 		//get color
-		Color color(1.0, 1.0, 1.0);
+		fluo::Color color(1.0, 1.0, 1.0);
 		double plane_trans = 0.0;
 		if (face_winding == BACK_FACE &&
 			(m_clip_mask == 3 ||
@@ -7455,7 +7455,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//transform
 		if (!vd->GetTexture())
 			continue;
-		Transform *tform = vd->GetTexture()->transform();
+		fluo::Transform *tform = vd->GetTexture()->transform();
 		if (!tform)
 			continue;
 		double mvmat[16];
@@ -7477,7 +7477,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			TextureRenderer::vertex_array_manager_.vertex_array(VA_Clip_Planes);
 		if (!va_clipp)
 			return;
-		std::vector<Point> clip_points(pp, pp+8);
+		std::vector<fluo::Point> clip_points(pp, pp+8);
 		va_clipp->set_param(clip_points);
 		va_clipp->draw_begin();
 		//draw
@@ -7612,7 +7612,7 @@ void VRenderGLView::DrawGrid()
 			shader->create();
 		shader->bind();
 	}
-	Color text_color = GetTextColor();
+	fluo::Color text_color = GetTextColor();
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
@@ -7738,7 +7738,7 @@ void VRenderGLView::DrawScaleBar()
 	wstring wsb_text = m_sb_text.ToStdWstring();
 	double textlen =
 		m_text_renderer.RenderTextLen(wsb_text);
-	Color text_color = GetTextColor();
+	fluo::Color text_color = GetTextColor();
 
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
@@ -7935,10 +7935,10 @@ void VRenderGLView::DrawLegend()
 				xpos = 0.0;
 				cur_line++;
 			}
-			Color amb, diff, spec;
+			fluo::Color amb, diff, spec;
 			double shine, alpha;
 			m_md_pop_list[i]->GetMaterial(amb, diff, spec, shine, alpha);
-			Color c(diff.r(), diff.g(), diff.b());
+			fluo::Color c(diff.r(), diff.g(), diff.b());
 			bool highlighted = false;
 			if (vr_frame->GetCurSelType() == 3 &&
 				vr_frame->GetCurSelMesh() &&
@@ -7954,7 +7954,7 @@ void VRenderGLView::DrawLegend()
 
 void VRenderGLView::DrawName(
 	double x, double y, int nx, int ny,
-	wxString name, Color color,
+	wxString name, fluo::Color color,
 	double font_height,
 	bool highlighted)
 {
@@ -7989,7 +7989,7 @@ void VRenderGLView::DrawName(
 	params.push_back(std::pair<unsigned int, double>(3, ny - y + 0.8*font_height));
 	va_legend_squares->set_param(params);
 	va_legend_squares->draw_begin();
-	Color text_color = GetTextColor();
+	fluo::Color text_color = GetTextColor();
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	va_legend_squares->draw_legend_square(0);
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
@@ -8025,37 +8025,37 @@ void VRenderGLView::DrawGradBg()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	Color color1, color2;
-	HSVColor hsv_color1(m_bg_color);
+	fluo::Color color1, color2;
+	fluo::HSVColor hsv_color1(m_bg_color);
 	if (hsv_color1.val() > 0.5)
 	{
 		if (hsv_color1.sat() > 0.3)
 		{
-			color1 = Color(HSVColor(hsv_color1.hue(),
+			color1 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 				hsv_color1.sat() * 0.1,
-				Min(hsv_color1.val() + 0.3, 1.0)));
-			color2 = Color(HSVColor(hsv_color1.hue(),
+				std::min(hsv_color1.val() + 0.3, 1.0)));
+			color2 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 				hsv_color1.sat() * 0.3,
-				Min(hsv_color1.val() + 0.1, 1.0)));
+				std::min(hsv_color1.val() + 0.1, 1.0)));
 		}
 		else
 		{
-			color1 = Color(HSVColor(hsv_color1.hue(),
+			color1 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 				hsv_color1.sat() * 0.1,
-				Max(hsv_color1.val() - 0.5, 0.0)));
-			color2 = Color(HSVColor(hsv_color1.hue(),
+				std::max(hsv_color1.val() - 0.5, 0.0)));
+			color2 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 				hsv_color1.sat() * 0.3,
-				Max(hsv_color1.val() - 0.3, 0.0)));
+				std::max(hsv_color1.val() - 0.3, 0.0)));
 		}
 	}
 	else
 	{
-		color1 = Color(HSVColor(hsv_color1.hue(),
+		color1 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 			hsv_color1.sat() * 0.1,
-			Min(hsv_color1.val() + 0.7, 1.0)));
-		color2 = Color(HSVColor(hsv_color1.hue(),
+			std::min(hsv_color1.val() + 0.7, 1.0)));
+		color2 = fluo::Color(fluo::HSVColor(hsv_color1.hue(),
 			hsv_color1.sat() * 0.3,
-			Min(hsv_color1.val() + 0.5, 1.0)));
+			std::min(hsv_color1.val() + 0.5, 1.0)));
 	}
 
 	vector<float> vertex;
@@ -8101,128 +8101,128 @@ void VRenderGLView::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::SetColormapColors(int colormap, Color &c, double inv)
+void VRenderGLView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 {
 	switch (colormap)
 	{
 	case 0://rainbow
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(0.0, 0.0, 1.0);
-			m_color_2 = Color(0.0, 0.0, 1.0);
-			m_color_3 = Color(0.0, 1.0, 1.0);
-			m_color_4 = Color(0.0, 1.0, 0.0);
-			m_color_5 = Color(1.0, 1.0, 0.0);
-			m_color_6 = Color(1.0, 0.0, 0.0);
-			m_color_7 = Color(1.0, 0.0, 0.0);
+			m_color_1 = fluo::Color(0.0, 0.0, 1.0);
+			m_color_2 = fluo::Color(0.0, 0.0, 1.0);
+			m_color_3 = fluo::Color(0.0, 1.0, 1.0);
+			m_color_4 = fluo::Color(0.0, 1.0, 0.0);
+			m_color_5 = fluo::Color(1.0, 1.0, 0.0);
+			m_color_6 = fluo::Color(1.0, 0.0, 0.0);
+			m_color_7 = fluo::Color(1.0, 0.0, 0.0);
 		}
 		else
 		{
-			m_color_1 = Color(1.0, 0.0, 0.0);
-			m_color_2 = Color(1.0, 0.0, 0.0);
-			m_color_3 = Color(1.0, 1.0, 0.0);
-			m_color_4 = Color(0.0, 1.0, 0.0);
-			m_color_5 = Color(0.0, 1.0, 1.0);
-			m_color_6 = Color(0.0, 0.0, 1.0);
-			m_color_7 = Color(0.0, 0.0, 1.0);
+			m_color_1 = fluo::Color(1.0, 0.0, 0.0);
+			m_color_2 = fluo::Color(1.0, 0.0, 0.0);
+			m_color_3 = fluo::Color(1.0, 1.0, 0.0);
+			m_color_4 = fluo::Color(0.0, 1.0, 0.0);
+			m_color_5 = fluo::Color(0.0, 1.0, 1.0);
+			m_color_6 = fluo::Color(0.0, 0.0, 1.0);
+			m_color_7 = fluo::Color(0.0, 0.0, 1.0);
 		}
 		break;
 	case 1://hot
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(0.0, 0.0, 0.0);
-			m_color_2 = Color(0.0, 0.0, 0.0);
-			m_color_3 = Color(0.5, 0.0, 0.0);
-			m_color_4 = Color(1.0, 0.0, 0.0);
-			m_color_5 = Color(1.0, 1.0, 0.0);
-			m_color_6 = Color(1.0, 1.0, 1.0);
-			m_color_7 = Color(1.0, 1.0, 1.0);
+			m_color_1 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_2 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_3 = fluo::Color(0.5, 0.0, 0.0);
+			m_color_4 = fluo::Color(1.0, 0.0, 0.0);
+			m_color_5 = fluo::Color(1.0, 1.0, 0.0);
+			m_color_6 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_7 = fluo::Color(1.0, 1.0, 1.0);
 		}
 		else
 		{
-			m_color_1 = Color(1.0, 1.0, 1.0);
-			m_color_2 = Color(1.0, 1.0, 1.0);
-			m_color_3 = Color(1.0, 1.0, 0.0);
-			m_color_4 = Color(1.0, 0.0, 0.0);
-			m_color_5 = Color(0.5, 0.0, 0.0);
-			m_color_6 = Color(0.0, 0.0, 0.0);
-			m_color_7 = Color(0.0, 0.0, 0.0);
+			m_color_1 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_2 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_3 = fluo::Color(1.0, 1.0, 0.0);
+			m_color_4 = fluo::Color(1.0, 0.0, 0.0);
+			m_color_5 = fluo::Color(0.5, 0.0, 0.0);
+			m_color_6 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_7 = fluo::Color(0.0, 0.0, 0.0);
 		}
 		break;
 	case 2://cool
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(0.0, 1.0, 1.0);
-			m_color_2 = Color(0.0, 1.0, 1.0);
-			m_color_3 = Color(0.25, 0.75, 1.0);
-			m_color_4 = Color(0.5, 0.5, 1.0);
-			m_color_5 = Color(0.75, 0.25, 1.0);
-			m_color_6 = Color(1.0, 0.0, 1.0);
-			m_color_7 = Color(1.0, 0.0, 1.0);
+			m_color_1 = fluo::Color(0.0, 1.0, 1.0);
+			m_color_2 = fluo::Color(0.0, 1.0, 1.0);
+			m_color_3 = fluo::Color(0.25, 0.75, 1.0);
+			m_color_4 = fluo::Color(0.5, 0.5, 1.0);
+			m_color_5 = fluo::Color(0.75, 0.25, 1.0);
+			m_color_6 = fluo::Color(1.0, 0.0, 1.0);
+			m_color_7 = fluo::Color(1.0, 0.0, 1.0);
 		}
 		else
 		{
-			m_color_1 = Color(1.0, 0.0, 1.0);
-			m_color_2 = Color(1.0, 0.0, 1.0);
-			m_color_3 = Color(0.75, 0.25, 1.0);
-			m_color_4 = Color(0.5, 0.5, 1.0);
-			m_color_5 = Color(0.25, 0.75, 1.0);
-			m_color_6 = Color(0.0, 1.0, 1.0);
-			m_color_7 = Color(0.0, 1.0, 1.0);
+			m_color_1 = fluo::Color(1.0, 0.0, 1.0);
+			m_color_2 = fluo::Color(1.0, 0.0, 1.0);
+			m_color_3 = fluo::Color(0.75, 0.25, 1.0);
+			m_color_4 = fluo::Color(0.5, 0.5, 1.0);
+			m_color_5 = fluo::Color(0.25, 0.75, 1.0);
+			m_color_6 = fluo::Color(0.0, 1.0, 1.0);
+			m_color_7 = fluo::Color(0.0, 1.0, 1.0);
 		}
 		break;
 	case 3://diverging
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(0.25, 0.3, 0.75);
-			m_color_2 = Color(0.25, 0.3, 0.75);
-			m_color_3 = Color(0.475, 0.5, 0.725);
-			m_color_4 = Color(0.7, 0.7, 0.7);
-			m_color_5 = Color(0.7, 0.35, 0.425);
-			m_color_6 = Color(0.7, 0.0, 0.15);
-			m_color_7 = Color(0.7, 0.0, 0.15);
+			m_color_1 = fluo::Color(0.25, 0.3, 0.75);
+			m_color_2 = fluo::Color(0.25, 0.3, 0.75);
+			m_color_3 = fluo::Color(0.475, 0.5, 0.725);
+			m_color_4 = fluo::Color(0.7, 0.7, 0.7);
+			m_color_5 = fluo::Color(0.7, 0.35, 0.425);
+			m_color_6 = fluo::Color(0.7, 0.0, 0.15);
+			m_color_7 = fluo::Color(0.7, 0.0, 0.15);
 		}
 		else
 		{
-			m_color_1 = Color(0.7, 0.0, 0.15);
-			m_color_2 = Color(0.7, 0.0, 0.15);
-			m_color_3 = Color(0.7, 0.35, 0.425);
-			m_color_4 = Color(0.7, 0.7, 0.7);
-			m_color_5 = Color(0.475, 0.5, 0.725);
-			m_color_6 = Color(0.25, 0.3, 0.75);
-			m_color_7 = Color(0.25, 0.3, 0.75);
+			m_color_1 = fluo::Color(0.7, 0.0, 0.15);
+			m_color_2 = fluo::Color(0.7, 0.0, 0.15);
+			m_color_3 = fluo::Color(0.7, 0.35, 0.425);
+			m_color_4 = fluo::Color(0.7, 0.7, 0.7);
+			m_color_5 = fluo::Color(0.475, 0.5, 0.725);
+			m_color_6 = fluo::Color(0.25, 0.3, 0.75);
+			m_color_7 = fluo::Color(0.25, 0.3, 0.75);
 		}
 		break;
 	case 4://monochrome
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(0.0, 0.0, 0.0);
-			m_color_2 = Color(0.0, 0.0, 0.0);
-			m_color_3 = Color(0.25, 0.25, 0.25);
-			m_color_4 = Color(0.5, 0.5, 0.5);
-			m_color_5 = Color(0.75, 0.75, 0.75);
-			m_color_6 = Color(1.0, 1.0, 1.0);
-			m_color_7 = Color(1.0, 1.0, 1.0);
+			m_color_1 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_2 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_3 = fluo::Color(0.25, 0.25, 0.25);
+			m_color_4 = fluo::Color(0.5, 0.5, 0.5);
+			m_color_5 = fluo::Color(0.75, 0.75, 0.75);
+			m_color_6 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_7 = fluo::Color(1.0, 1.0, 1.0);
 		}
 		else
 		{
-			m_color_1 = Color(1.0, 1.0, 1.0);
-			m_color_2 = Color(1.0, 1.0, 1.0);
-			m_color_3 = Color(0.75, 0.75, 0.75);
-			m_color_4 = Color(0.5, 0.5, 0.5);
-			m_color_5 = Color(0.25, 0.25, 0.25);
-			m_color_6 = Color(0.0, 0.0, 0.0);
-			m_color_7 = Color(0.0, 0.0, 0.0);
+			m_color_1 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_2 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_3 = fluo::Color(0.75, 0.75, 0.75);
+			m_color_4 = fluo::Color(0.5, 0.5, 0.5);
+			m_color_5 = fluo::Color(0.25, 0.25, 0.25);
+			m_color_6 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_7 = fluo::Color(0.0, 0.0, 0.0);
 		}
 		break;
 	case 5://high-key
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(1.0, 1.0, 1.0);
-			m_color_2 = Color(1.0, 1.0, 1.0);
-			m_color_3 = c * 0.25 + Color(1.0, 1.0, 1.0)*0.75;
-			m_color_4 = (c + Color(1.0, 1.0, 1.0))*0.5;
-			m_color_5 = c * 0.75 + Color(1.0, 1.0, 1.0)*0.25;
+			m_color_1 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_2 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_3 = c * 0.25 + fluo::Color(1.0, 1.0, 1.0)*0.75;
+			m_color_4 = (c + fluo::Color(1.0, 1.0, 1.0))*0.5;
+			m_color_5 = c * 0.75 + fluo::Color(1.0, 1.0, 1.0)*0.25;
 			m_color_6 = c;
 			m_color_7 = c;
 		}
@@ -8230,11 +8230,11 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c, double inv)
 		{
 			m_color_1 = c;
 			m_color_2 = c;
-			m_color_3 = c * 0.75 + Color(1.0, 1.0, 1.0)*0.25;
-			m_color_4 = (c + Color(1.0, 1.0, 1.0))*0.5;
-			m_color_5 = c * 0.25 + Color(1.0, 1.0, 1.0)*0.75;
-			m_color_6 = Color(1.0, 1.0, 1.0);
-			m_color_7 = Color(1.0, 1.0, 1.0);
+			m_color_3 = c * 0.75 + fluo::Color(1.0, 1.0, 1.0)*0.25;
+			m_color_4 = (c + fluo::Color(1.0, 1.0, 1.0))*0.5;
+			m_color_5 = c * 0.25 + fluo::Color(1.0, 1.0, 1.0)*0.75;
+			m_color_6 = fluo::Color(1.0, 1.0, 1.0);
+			m_color_7 = fluo::Color(1.0, 1.0, 1.0);
 		}
 		break;
 	case 6://low-key
@@ -8262,11 +8262,11 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c, double inv)
 	case 7://high transparency
 		if (inv > 0.0)
 		{
-			m_color_1 = Color(0.0, 0.0, 0.0);
-			m_color_2 = Color(0.0, 0.0, 0.0);
-			m_color_3 = c * 0.25 + Color(0.0, 0.0, 0.0) * 0.75;
-			m_color_4 = c * 0.5 + Color(0.0, 0.0, 0.0) * 0.5;
-			m_color_5 = c * 0.75 + Color(0.0, 0.0, 0.0) * 0.25;
+			m_color_1 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_2 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_3 = c * 0.25 + fluo::Color(0.0, 0.0, 0.0) * 0.75;
+			m_color_4 = c * 0.5 + fluo::Color(0.0, 0.0, 0.0) * 0.5;
+			m_color_5 = c * 0.75 + fluo::Color(0.0, 0.0, 0.0) * 0.25;
 			m_color_6 = c;
 			m_color_7 = c;
 		}
@@ -8274,11 +8274,11 @@ void VRenderGLView::SetColormapColors(int colormap, Color &c, double inv)
 		{
 			m_color_1 = c;
 			m_color_2 = c;
-			m_color_3 = c * 0.75 + Color(0.0, 0.0, 0.0) * 0.25;
-			m_color_4 = c * 0.5 + Color(0.0, 0.0, 0.0) * 0.5;
-			m_color_5 = c * 0.25 + Color(0.0, 0.0, 0.0) * 0.75;
-			m_color_6 = Color(0.0, 0.0, 0.0);
-			m_color_7 = Color(0.0, 0.0, 0.0);
+			m_color_3 = c * 0.75 + fluo::Color(0.0, 0.0, 0.0) * 0.25;
+			m_color_4 = c * 0.5 + fluo::Color(0.0, 0.0, 0.0) * 0.5;
+			m_color_5 = c * 0.25 + fluo::Color(0.0, 0.0, 0.0) * 0.75;
+			m_color_6 = fluo::Color(0.0, 0.0, 0.0);
+			m_color_7 = fluo::Color(0.0, 0.0, 0.0);
 		}
 		break;
 	}
@@ -8301,7 +8301,7 @@ void VRenderGLView::DrawColormap()
 		m_value_5 = (m_value_4 + high) / 2.0;
 		max_val = m_cur_vol->GetMaxValue();
 		enable_alpha = m_cur_vol->GetEnableAlpha();
-		Color vd_color = m_cur_vol->GetColor();
+		fluo::Color vd_color = m_cur_vol->GetColor();
 		SetColormapColors(m_cur_vol->GetColormap(),
 			vd_color, m_cur_vol->GetColormapInv());
 	}
@@ -8360,7 +8360,7 @@ void VRenderGLView::DrawColormap()
 		wxString str;
 		wstring wstr;
 
-		Color text_color = GetTextColor();
+		fluo::Color text_color = GetTextColor();
 
 		//value 1
 		px = 0.052*m_frame_w + m_frame_x - nx / 2.0;
@@ -8437,7 +8437,7 @@ void VRenderGLView::DrawColormap()
 		wxString str;
 		wstring wstr;
 
-		Color text_color = GetTextColor();
+		fluo::Color text_color = GetTextColor();
 
 		//value 1
 		px = 0.052*nx - nx / 2.0;
@@ -8520,7 +8520,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 
 	double fps_ = 1.0 / m_timer->average();
 	wxString str;
-	Color text_color = GetTextColor();
+	fluo::Color text_color = GetTextColor();
 	if (TextureRenderer::get_mem_swap())
 	{
 		if (m_selector.GetBrushUsePres())
@@ -8575,7 +8575,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		(m_draw_info & INFO_Y) &&
 		(m_draw_info & INFO_Z))
 	{
-		Point p;
+		fluo::Point p;
 		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
 		m_vp.SetVolumeData(m_cur_vol);
 		if ((m_vp.GetPointVolumeBox(mouse_pos.x, mouse_pos.y, true, p )>0.0) ||
@@ -8599,8 +8599,8 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			m_cur_vol->GetResolution(resx, resy, resz);
 			double spcx, spcy, spcz;
 			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			vector<Plane*> *planes = m_cur_vol->GetVR()->get_planes();
-			Plane* plane = (*planes)[4];
+			vector<fluo::Plane*> *planes = m_cur_vol->GetVR()->get_planes();
+			fluo::Plane* plane = (*planes)[4];
 			double abcd[4];
 			plane->get_copy(abcd);
 			int val = fabs(abcd[3] * resz) + 0.499;
@@ -8656,10 +8656,10 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	}
 }
 
-Quaternion VRenderGLView::Trackball(double dx, double dy)
+fluo::Quaternion VRenderGLView::Trackball(double dx, double dy)
 {
-	Quaternion q;
-	Vector a; /* Axis of rotation */
+	fluo::Quaternion q;
+	fluo::Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
 	if (dx == 0.0 && dy == 0.0)
@@ -8668,7 +8668,7 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 		return q;
 	}
 
-	a = Vector(-dy, dx, 0.0);
+	a = fluo::Vector(-dy, dx, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
 
@@ -8679,47 +8679,47 @@ Quaternion VRenderGLView::Trackball(double dx, double dy)
 	}
 
 	//rotate back to local
-	Quaternion aq(a);
+	fluo::Quaternion aq(a);
 	aq = (-m_q) * aq * m_q;
 	if (m_rot_lock)
 	{
 		//rotate back to basis
 		aq = (m_zq)* aq * (-m_zq);
-		a = Vector(aq.x, aq.y, aq.z);
+		a = fluo::Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 		//snap to closest basis component
 		double maxv = std::max(std::fabs(a.x()),
 			std::max(std::fabs(a.y()), std::fabs(a.z())));
 		if (std::fabs(maxv - std::fabs(a.x())) < EPS)
-			a = Vector(a.x() < 0?-1:1, 0, 0);
+			a = fluo::Vector(a.x() < 0?-1:1, 0, 0);
 		else if (std::fabs(maxv - std::fabs(a.y())) < EPS)
-			a = Vector(0, a.y() < 0?-1:1, 0);
+			a = fluo::Vector(0, a.y() < 0?-1:1, 0);
 		else if (std::fabs(maxv - std::fabs(a.z())) < EPS)
-			a = Vector(0, 0, a.z() < 0?-1:1);
-		aq = Quaternion(a);
+			a = fluo::Vector(0, 0, a.z() < 0?-1:1);
+		aq = fluo::Quaternion(a);
 		//rotate again to restore
 		aq = (-m_zq) * aq * m_zq;
-		a = Vector(aq.x, aq.y, aq.z);
+		a = fluo::Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 		//snap to 45 deg
 		phi = int(phi / 45.0) * 45.0;
 	}
 	else
 	{
-		a = Vector(aq.x, aq.y, aq.z);
+		a = fluo::Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 	}
 
-	q = Quaternion(phi, a);
+	q = fluo::Quaternion(phi, a);
 	q.Normalize();
 
 	return q;
 }
 
-Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
+fluo::Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 {
-	Quaternion q;
-	Vector a; /* Axis of rotation */
+	fluo::Quaternion q;
+	fluo::Vector a; /* Axis of rotation */
 	double phi;  /* how much to rotate about axis */
 
 	if (p1x == p2x && p1y == p2y)
@@ -8728,19 +8728,19 @@ Quaternion VRenderGLView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 		return q;
 	}
 
-	a = Vector(p2y - p1y, p2x - p1x, 0.0);
+	a = fluo::Vector(p2y - p1y, p2x - p1x, 0.0);
 	phi = a.length() / 3.0;
 	a.normalize();
-	Quaternion q_a(a);
+	fluo::Quaternion q_a(a);
 	//rotate back to local
-	Quaternion q2;
+	fluo::Quaternion q2;
 	q2.FromEuler(-m_rotx, m_roty, m_rotz);
 	q_a = (q2)* q_a * (-q2);
 	q_a = (m_q_cl)* q_a * (-m_q_cl);
-	a = Vector(q_a.x, q_a.y, q_a.z);
+	a = fluo::Vector(q_a.x, q_a.y, q_a.z);
 	a.normalize();
 
-	q = Quaternion(phi, a);
+	q = fluo::Quaternion(phi, a);
 	q.Normalize();
 
 	return q;
@@ -8751,7 +8751,7 @@ void VRenderGLView::UpdateClips()
 	if (m_clip_mode == 1)
 		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
 
-	vector<Plane*> *planes = 0;
+	vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i < (int)m_vd_pop_list.size(); i++)
 	{
 		if (!m_vd_pop_list[i])
@@ -8761,14 +8761,14 @@ void VRenderGLView::UpdateClips()
 		int resx, resy, resz;
 		m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
 		m_vd_pop_list[i]->GetResolution(resx, resy, resz);
-		Vector scale;
+		fluo::Vector scale;
 		if (spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
 		{
-			scale = Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
+			scale = fluo::Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
 			scale.safe_normalize();
 		}
 		else
-			scale = Vector(1.0, 1.0, 1.0);
+			scale = fluo::Vector(1.0, 1.0, 1.0);
 
 		if (m_vd_pop_list[i]->GetVR())
 			planes = m_vd_pop_list[i]->GetVR()->get_planes();
@@ -8790,8 +8790,8 @@ void VRenderGLView::UpdateClips()
 			(*planes)[5]->get_copy(abcd);
 			z2 = fabs(abcd[3]);
 
-			Vector trans1(-0.5, -0.5, -0.5);
-			Vector trans2(0.5, 0.5, 0.5);
+			fluo::Vector trans1(-0.5, -0.5, -0.5);
+			fluo::Vector trans2(0.5, 0.5, 0.5);
 
 			(*planes)[0]->Restore();
 			(*planes)[0]->Translate(trans1);
@@ -8836,7 +8836,7 @@ void VRenderGLView::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
-	Quaternion q = m_q * (-m_zq);
+	fluo::Quaternion q = m_q * (-m_zq);
 	q.ToEuler(m_rotx, m_roty, m_rotz);
 
 	if (m_roty > 360.0)
@@ -8915,7 +8915,7 @@ void VRenderGLView::SetClipMode(int mode)
 
 void VRenderGLView::RestorePlanes()
 {
-	vector<Plane*> *planes = 0;
+	vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		if (!m_vd_pop_list[i])
@@ -9013,7 +9013,7 @@ void VRenderGLView::StartLoopUpdate()
 				Texture* tex = vd->GetTexture();
 				if (tex)
 				{
-					Transform *tform = tex->transform();
+					fluo::Transform *tform = tex->transform();
 					double mvmat[16];
 					tform->get_trans(mvmat);
 					vd->GetVR()->m_mv_mat2 = glm::mat4(
@@ -9023,7 +9023,7 @@ void VRenderGLView::StartLoopUpdate()
 						mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
 
-					Ray view_ray = vd->GetVR()->compute_view();
+					fluo::Ray view_ray = vd->GetVR()->compute_view();
 					vector<TextureBrick*> *bricks = 0;
 					bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size() == 0)
@@ -9084,7 +9084,7 @@ void VRenderGLView::StartLoopUpdate()
 			{
 				VolumeData* vd = list[i];
 				Texture* tex = vd->GetTexture();
-				Ray view_ray = vd->GetVR()->compute_view();
+				fluo::Ray view_ray = vd->GetVR()->compute_view();
 				vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetMode() == 1 ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShading());
@@ -9137,7 +9137,7 @@ void VRenderGLView::StartLoopUpdate()
 					TextureRenderer::set_update_order(0);
 					for (i = 0; i < list.size(); i++)
 					{
-						Ray view_ray = list[i]->GetVR()->compute_view();
+						fluo::Ray view_ray = list[i]->GetVR()->compute_view();
 						list[i]->GetTexture()->set_sort_bricks();
 						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 						list[i]->GetTexture()->set_sort_bricks();
@@ -9168,7 +9168,7 @@ void VRenderGLView::StartLoopUpdate()
 						Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
-						Ray view_ray = vd->GetVR()->compute_view();
+						fluo::Ray view_ray = vd->GetVR()->compute_view();
 						vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
@@ -9208,7 +9208,7 @@ void VRenderGLView::StartLoopUpdate()
 							{
 								int order = TextureRenderer::get_update_order();
 								TextureRenderer::set_update_order(0);
-								Ray view_ray = vd->GetVR()->compute_view();
+								fluo::Ray view_ray = vd->GetVR()->compute_view();
 								tex->set_sort_bricks();
 								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 								tex->set_sort_bricks();
@@ -9234,7 +9234,7 @@ void VRenderGLView::StartLoopUpdate()
 						Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
-						Ray view_ray = vd->GetVR()->compute_view();
+						fluo::Ray view_ray = vd->GetVR()->compute_view();
 						vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
@@ -9252,7 +9252,7 @@ void VRenderGLView::StartLoopUpdate()
 						{
 							VolumeData* vd = list[k];
 							Texture* tex = vd->GetTexture();
-							Ray view_ray = vd->GetVR()->compute_view();
+							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShading());
@@ -9308,7 +9308,7 @@ void VRenderGLView::StartLoopUpdate()
 								TextureRenderer::set_update_order(0);
 								for (k = 0; k < list.size(); k++)
 								{
-									Ray view_ray = list[k]->GetVR()->compute_view();
+									fluo::Ray view_ray = list[k]->GetVR()->compute_view();
 									list[i]->GetTexture()->set_sort_bricks();
 									list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									list[i]->GetTexture()->set_sort_bricks();
@@ -9327,7 +9327,7 @@ void VRenderGLView::StartLoopUpdate()
 						{
 							VolumeData* vd = list[j];
 							Texture* tex = vd->GetTexture();
-							Ray view_ray = vd->GetVR()->compute_view();
+							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShading());
@@ -9365,7 +9365,7 @@ void VRenderGLView::StartLoopUpdate()
 								{
 									int order = TextureRenderer::get_update_order();
 									TextureRenderer::set_update_order(0);
-									Ray view_ray = vd->GetVR()->compute_view();
+									fluo::Ray view_ray = vd->GetVR()->compute_view();
 									tex->set_sort_bricks();
 									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									tex->set_sort_bricks();
@@ -9503,8 +9503,8 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
-	Transform mv;
-	Transform p;
+	fluo::Transform mv;
+	fluo::Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
 
@@ -9513,8 +9513,8 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	verts.reserve(vert_num * 8 * 3 * 2);
 
 	unsigned int num = 0;
-	Point p1, p2, p3, p4;
-	Color c = GetTextColor();
+	fluo::Point p1, p2, p3, p4;
+	fluo::Color c = GetTextColor();
 	double sx, sy, sz;
 	sx = m_cell_list.sx;
 	sy = m_cell_list.sy;
@@ -9522,7 +9522,7 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	for (auto it = m_cell_list.begin();
 		it != m_cell_list.end(); ++it)
 	{
-		BBox box = it->second->GetBox(sx, sy, sz);
+		fluo::BBox box = it->second->GetBox(sx, sy, sz);
 		GetCellPoints(box, p1, p2, p3, p4, mv, p);
 
 		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
@@ -9547,19 +9547,19 @@ unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 	return num;
 }
 
-void VRenderGLView::GetCellPoints(BBox& box,
-	Point& p1, Point& p2, Point& p3, Point& p4,
-	Transform& mv, Transform& p)
+void VRenderGLView::GetCellPoints(fluo::BBox& box,
+	fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
+	fluo::Transform& mv, fluo::Transform& p)
 {
 	//get 6 points of the jack of bbox
-	Point pp[6];
-	Point c = box.center();
-	pp[0] = Point(box.min().x(), c.y(), c.z());
-	pp[1] = Point(box.max().x(), c.y(), c.z());
-	pp[2] = Point(c.x(), box.min().y(), c.z());
-	pp[3] = Point(c.x(), box.max().y(), c.z());
-	pp[4] = Point(c.x(), c.y(), box.min().z());
-	pp[5] = Point(c.x(), c.y(), box.max().z());
+	fluo::Point pp[6];
+	fluo::Point c = box.center();
+	pp[0] = fluo::Point(box.Min().x(), c.y(), c.z());
+	pp[1] = fluo::Point(box.Max().x(), c.y(), c.z());
+	pp[2] = fluo::Point(c.x(), box.Min().y(), c.z());
+	pp[3] = fluo::Point(c.x(), box.Max().y(), c.z());
+	pp[4] = fluo::Point(c.x(), c.y(), box.Min().z());
+	pp[5] = fluo::Point(c.x(), c.y(), box.Max().z());
 
 	double minx = std::numeric_limits<double>::max();
 	double maxx = -std::numeric_limits<double>::max();
@@ -9579,10 +9579,10 @@ void VRenderGLView::GetCellPoints(BBox& box,
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
 
-	p1 = Point((minx+1)*nx/2, (miny+1)*ny/2, 0.0);
-	p2 = Point((maxx+1)*nx/2, (miny+1)*ny/2, 0.0);
-	p3 = Point((maxx+1)*nx/2, (maxy+1)*ny/2, 0.0);
-	p4 = Point((minx+1)*nx/2, (maxy+1)*ny/2, 0.0);
+	p1 = fluo::Point((minx+1)*nx/2, (miny+1)*ny/2, 0.0);
+	p2 = fluo::Point((maxx+1)*nx/2, (miny+1)*ny/2, 0.0);
+	p3 = fluo::Point((maxx+1)*nx/2, (maxy+1)*ny/2, 0.0);
+	p4 = fluo::Point((minx+1)*nx/2, (maxy+1)*ny/2, 0.0);
 }
 
 //traces
@@ -10130,21 +10130,21 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_int_mode != 10 &&
 					m_int_mode != 12)
 				{
-					Quaternion q_delta = Trackball(
+					fluo::Quaternion q_delta = Trackball(
 						event.GetX() - old_mouse_X, old_mouse_Y - event.GetY());
 					if (m_rot_lock && q_delta.IsIdentity())
 						hold_old = true;
 					m_q *= q_delta;
 					m_q.Normalize();
-					Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-					Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+					fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+					fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
 					m_transx = cam_pos2.x;
 					m_transy = cam_pos2.y;
 					m_transz = cam_pos2.z;
 
-					Quaternion up(0.0, 1.0, 0.0, 0.0);
-					Quaternion up2 = (-m_q) * up * m_q;
-					m_up = Vector(up2.x, up2.y, up2.z);
+					fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+					fluo::Quaternion up2 = (-m_q) * up * m_q;
+					m_up = fluo::Vector(up2.x, up2.y, up2.z);
 
 					Q2A();
 
@@ -10174,10 +10174,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					long dx = event.GetX() - old_mouse_X;
 					long dy = event.GetY() - old_mouse_Y;
 
-					m_head = Vector(-m_transx, -m_transy, -m_transz);
+					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 					m_head.normalize();
-					Vector side = Cross(m_up, m_head);
-					Vector trans = -(
+					fluo::Vector side = Cross(m_up, m_head);
+					fluo::Vector trans = -(
 						side*(double(dx)*(m_ortho_right - m_ortho_left) / double(nx)) +
 						m_up*(double(dy)*(m_ortho_top - m_ortho_bottom) / double(ny)));
 					m_obj_transx += trans.x();
@@ -10207,9 +10207,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 					if (m_free)
 					{
-						Vector pos(m_transx, m_transy, m_transz);
+						fluo::Vector pos(m_transx, m_transy, m_transz);
 						pos.normalize();
-						Vector ctr(m_ctrx, m_ctry, m_ctrz);
+						fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 						ctr -= delta*pos * 1000;
 						m_ctrx = ctr.x();
 						m_ctry = ctr.y();
@@ -10237,7 +10237,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				if (event.LeftIsDown())
 				{
-					Quaternion q_delta = TrackballClip(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
+					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(m_rotx, m_roty, m_rotz);
@@ -10370,12 +10370,12 @@ bool VRenderGLView::GetDraw()
 	return m_draw_all;
 }
 
-Color VRenderGLView::GetBackgroundColor()
+fluo::Color VRenderGLView::GetBackgroundColor()
 {
 	return m_bg_color;
 }
 
-Color VRenderGLView::GetTextColor()
+fluo::Color VRenderGLView::GetTextColor()
 {
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	if (!frame || !frame->GetSettingDlg())
@@ -10395,25 +10395,25 @@ Color VRenderGLView::GetTextColor()
 	return m_bg_color_inv;
 }
 
-void VRenderGLView::SetBackgroundColor(Color &color)
+void VRenderGLView::SetBackgroundColor(fluo::Color &color)
 {
 	m_bg_color = color;
-	HSVColor bg_color(m_bg_color);
+	fluo::HSVColor bg_color(m_bg_color);
 	double hue, sat, val;
 	if (bg_color.val()>0.7 && bg_color.sat()>0.7)
 	{
 		hue = bg_color.hue() + 180.0;
 		sat = 1.0;
 		val = 1.0;
-		m_bg_color_inv = Color(HSVColor(hue, sat, val));
+		m_bg_color_inv = fluo::Color(fluo::HSVColor(hue, sat, val));
 	}
 	else if (bg_color.val()>0.7)
 	{
-		m_bg_color_inv = Color(0.0, 0.0, 0.0);
+		m_bg_color_inv = fluo::Color(0.0, 0.0, 0.0);
 	}
 	else
 	{
-		m_bg_color_inv = Color(1.0, 1.0, 1.0);
+		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
 }
 
@@ -10443,15 +10443,15 @@ void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_
 
 	A2Q();
 
-	Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-	Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
 	m_transx = cam_pos2.x;
 	m_transy = cam_pos2.y;
 	m_transz = cam_pos2.z;
 
-	Quaternion up(0.0, 1.0, 0.0, 0.0);
-	Quaternion up2 = (-m_q) * up * m_q;
-	m_up = Vector(up2.x, up2.y, up2.z);
+	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+	fluo::Quaternion up2 = (-m_q) * up * m_q;
+	m_up = fluo::Vector(up2.x, up2.y, up2.z);
 
 	if (ui_update)
 	{
@@ -10489,7 +10489,7 @@ void VRenderGLView::SetZeroRotations()
 
 void VRenderGLView::ResetZeroRotations(double &rotx, double &roty, double &rotz)
 {
-	m_zq = FLIVR::Quaternion();
+	m_zq = fluo::Quaternion();
 	m_q.ToEuler(rotx, roty, rotz);
 	if (roty > 360.0)
 		roty -= 360.0;
@@ -10527,8 +10527,8 @@ void VRenderGLView::CalcFrame()
 		HandleCamera();
 
 		glm::mat4 mv_temp = GetDrawMat();
-		Transform mv;
-		Transform pr;
+		fluo::Transform mv;
+		fluo::Transform pr;
 		mv.set(glm::value_ptr(mv_temp));
 		pr.set(glm::value_ptr(m_proj_mat));
 
@@ -10537,18 +10537,18 @@ void VRenderGLView::CalcFrame()
 		maxx = -1.0;
 		miny = 1.0;
 		maxy = -1.0;
-		vector<Point> points;
-		BBox bbox = m_cur_vol->GetBounds();
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.min().x(), bbox.max().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.min().y(), bbox.max().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.min().z()));
-		points.push_back(Point(bbox.max().x(), bbox.max().y(), bbox.max().z()));
+		vector<fluo::Point> points;
+		fluo::BBox bbox = m_cur_vol->GetBounds();
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
 
-		Point p;
+		fluo::Point p;
 		for (unsigned int i = 0; i<points.size(); ++i)
 		{
 			p = mv.transform(points[i]);
@@ -10559,10 +10559,10 @@ void VRenderGLView::CalcFrame()
 			maxy = p.y()>maxy ? p.y() : maxy;
 		}
 
-		minx = Clamp(minx, -1.0, 1.0);
-		maxx = Clamp(maxx, -1.0, 1.0);
-		miny = Clamp(miny, -1.0, 1.0);
-		maxy = Clamp(maxy, -1.0, 1.0);
+		minx = fluo::Clamp(minx, -1.0, 1.0);
+		maxx = fluo::Clamp(maxx, -1.0, 1.0);
+		miny = fluo::Clamp(miny, -1.0, 1.0);
+		maxy = fluo::Clamp(maxy, -1.0, 1.0);
 
 		m_frame_x = int((minx + 1.0)*w / 2.0 + 1.0);
 		m_frame_y = int((miny + 1.0)*h / 2.0 + 1.0);

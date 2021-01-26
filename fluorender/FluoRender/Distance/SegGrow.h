@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
-#include <FLIVR/Point.h>
+#include <Types/Point.h>
 #include <set>
 
 class VolumeData;
@@ -41,7 +41,7 @@ namespace FL
 	{
 		unsigned int id;
 		unsigned int sum;
-		FLIVR::Point ctr;
+		fluo::Point ctr;
 		std::set<unsigned int> cid;//parent
 		std::set<unsigned int> bid;//ids from multiple bricks
 	};

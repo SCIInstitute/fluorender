@@ -37,11 +37,6 @@
 
 namespace FLIVR
 {
-#ifdef _WIN32
-#undef min
-#undef max
-#endif
-
 	double MultiVolumeRenderer::sw_ = 0.0;
 
 	MultiVolumeRenderer::MultiVolumeRenderer()
@@ -151,7 +146,7 @@ namespace FLIVR
 	{
 		vr_list_.clear();
 		bbox_.reset();
-		res_ = Vector(0.0);
+		res_ = fluo::Vector(0.0);
 	}
 
 	int MultiVolumeRenderer::get_vr_num()
@@ -176,16 +171,16 @@ namespace FLIVR
 		if (get_vr_num()<=0 || !(vr_list_[0]))
 			return;
 
-		Ray view_ray = vr_list_[0]->compute_view();
-		Ray snapview = vr_list_[0]->compute_snapview(0.4);
+		fluo::Ray view_ray = vr_list_[0]->compute_view();
+		fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
 		set_adaptive(adaptive);
 		set_interactive_mode(interactive_mode_p);
 
 		// Set sampling rate based on interaction.
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
-		Vector diag = bbox_.diagonal();
-		Vector cell_diag(diag.x()/res_.x(),
+		fluo::Vector diag = bbox_.diagonal();
+		fluo::Vector cell_diag(diag.x()/res_.x(),
 			diag.y()/res_.y(),
 			diag.z()/res_.z());
 		double dt;
@@ -236,7 +231,7 @@ namespace FLIVR
 		std::string bbufname;
 		if (imode_ && adaptive_)
 		{
-			sf = Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.1, 1.0);
+			sf = fluo::Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.1, 1.0);
 			bbufname = "blend_int";
 		}
 		else if (noise_red_)
@@ -246,7 +241,7 @@ namespace FLIVR
 		}
 		else
 		{
-			sf = Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.5, 2.0);
+			sf = fluo::Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.5, 2.0);
 			bbufname = "blend_hi";
 		}
 		if (fabs(sf - sfactor_) > 0.05)
@@ -281,7 +276,7 @@ namespace FLIVR
 
 		int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
 		vector<TextureBrick*> *bs = 0;
-		FLIVR::Point pt = TextureRenderer::quota_center_;
+		fluo::Point pt = TextureRenderer::quota_center_;
 		if (TextureRenderer::mem_swap_ &&
 			TextureRenderer::interactive_)
 			//bs = vr_list_[0]->tex_->get_closest_bricks(
@@ -488,7 +483,7 @@ namespace FLIVR
 		vector<float>& vertex,
 		vector<uint32_t>& index,
 		vector<uint32_t>& size,
-		Ray &view_ray,
+		fluo::Ray &view_ray,
 		int bi, bool orthographic_p,
 		int w, int h, bool intp,
 		int quota_bricks_chan,
@@ -604,22 +599,22 @@ namespace FLIVR
 
 				//for brick transformation
 				float matrix[16];
-				BBox bbox = b->dbox();
-				matrix[0] = float(bbox.max().x() - bbox.min().x());
+				fluo::BBox bbox = b->dbox();
+				matrix[0] = float(bbox.Max().x() - bbox.Min().x());
 				matrix[1] = 0.0f;
 				matrix[2] = 0.0f;
 				matrix[3] = 0.0f;
 				matrix[4] = 0.0f;
-				matrix[5] = float(bbox.max().y() - bbox.min().y());
+				matrix[5] = float(bbox.Max().y() - bbox.Min().y());
 				matrix[6] = 0.0f;
 				matrix[7] = 0.0f;
 				matrix[8] = 0.0f;
 				matrix[9] = 0.0f;
-				matrix[10] = float(bbox.max().z() - bbox.min().z());
+				matrix[10] = float(bbox.Max().z() - bbox.Min().z());
 				matrix[11] = 0.0f;
-				matrix[12] = float(bbox.min().x());
-				matrix[13] = float(bbox.min().y());
-				matrix[14] = float(bbox.min().z());
+				matrix[12] = float(bbox.Min().x());
+				matrix[13] = float(bbox.Min().y());
+				matrix[14] = float(bbox.Min().z());
 				matrix[15] = 1.0f;
 				shader->setLocalParamMatrix(2, matrix);
 
@@ -780,7 +775,7 @@ namespace FLIVR
 	}
 
 	vector<TextureBrick*> *MultiVolumeRenderer::get_combined_bricks(
-		Point& center, Ray& view, bool is_orthographic)
+		fluo::Point& center, fluo::Ray& view, bool is_orthographic)
 	{
 		if (!vr_list_.size())
 			return 0;
@@ -792,7 +787,7 @@ namespace FLIVR
 		vector<TextureBrick*>* bs;
 		vector<TextureBrick*>* bs0;
 		vector<TextureBrick*>* result;
-		Point brick_center;
+		fluo::Point brick_center;
 		double d;
 
 		for (i=0; i<vr_list_.size(); i++)
@@ -855,19 +850,19 @@ namespace FLIVR
 		//reorder result
 		for (i = 0; i < result->size(); i++)
 		{
-			Point minp((*result)[i]->bbox().min());
-			Point maxp((*result)[i]->bbox().max());
-			Vector diag((*result)[i]->bbox().diagonal());
+			fluo::Point minp((*result)[i]->bbox().Min());
+			fluo::Point maxp((*result)[i]->bbox().Max());
+			fluo::Vector diag((*result)[i]->bbox().diagonal());
 			minp += diag / 1000.;
 			maxp -= diag / 1000.;
-			Point corner[8];
+			fluo::Point corner[8];
 			corner[0] = minp;
-			corner[1] = Point(minp.x(), minp.y(), maxp.z());
-			corner[2] = Point(minp.x(), maxp.y(), minp.z());
-			corner[3] = Point(minp.x(), maxp.y(), maxp.z());
-			corner[4] = Point(maxp.x(), minp.y(), minp.z());
-			corner[5] = Point(maxp.x(), minp.y(), maxp.z());
-			corner[6] = Point(maxp.x(), maxp.y(), minp.z());
+			corner[1] = fluo::Point(minp.x(), minp.y(), maxp.z());
+			corner[2] = fluo::Point(minp.x(), maxp.y(), minp.z());
+			corner[3] = fluo::Point(minp.x(), maxp.y(), maxp.z());
+			corner[4] = fluo::Point(maxp.x(), minp.y(), minp.z());
+			corner[5] = fluo::Point(maxp.x(), minp.y(), maxp.z());
+			corner[6] = fluo::Point(maxp.x(), maxp.y(), minp.z());
 			corner[7] = maxp;
 			double d = 0.0;
 			for (unsigned int c = 0; c < 8; c++)
@@ -916,13 +911,13 @@ namespace FLIVR
 		if (get_vr_num()<=0)
 			return;
 
-		Ray view_ray = vr_list_[0]->compute_view();
-		Ray snapview = vr_list_[0]->compute_snapview(0.4);
+		fluo::Ray view_ray = vr_list_[0]->compute_view();
+		fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
 		// Set sampling rate based on interaction.
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
-		Vector diag = bbox_.diagonal();
-		Vector cell_diag(diag.x()/res_.x(),
+		fluo::Vector diag = bbox_.diagonal();
+		fluo::Vector cell_diag(diag.x()/res_.x(),
 			diag.y()/res_.y(),
 			diag.z()/res_.z());
 		double dt;
@@ -999,8 +994,8 @@ namespace FLIVR
 	{
 		if (!bbox_.valid())
 			return 1.0;
-		Vector diag = bbox_.diagonal();
-		Vector cell_diag(diag.x()/*/tex_->nx()*/,
+		fluo::Vector diag = bbox_.diagonal();
+		fluo::Vector cell_diag(diag.x()/*/tex_->nx()*/,
 			diag.y()/*/tex_->ny()*/,
 			diag.z()/*/tex_->nz()*/);
 		double dt = diag.length() / num_slices;

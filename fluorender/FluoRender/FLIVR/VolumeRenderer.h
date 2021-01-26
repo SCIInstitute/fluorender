@@ -43,7 +43,7 @@ namespace FLIVR
 	{
 	public:
 		VolumeRenderer(Texture* tex,
-			const vector<Plane*> &planes);
+			const vector<fluo::Plane*> &planes);
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
@@ -59,7 +59,7 @@ namespace FLIVR
 			memcpy(mp_, mp, sizeof(GLint) * 2);
 		}
 		//mouse direction
-		void set_mouse_vec(Vector &mvec)
+		void set_mouse_vec(fluo::Vector &mvec)
 		{
 			mvec_ = mvec;
 		}
@@ -93,10 +93,10 @@ namespace FLIVR
 		double get_lo_thresh();
 		void set_hi_thresh(double thresh);
 		double get_hi_thresh();
-		void set_color(Color color);
-		Color get_color();
-		void set_mask_color(Color color, bool set=true);
-		Color get_mask_color();
+		void set_color(fluo::Color color);
+		fluo::Color get_color();
+		void set_mask_color(fluo::Color color, bool set=true);
+		fluo::Color get_mask_color();
 		bool get_mask_color_set() {return mask_color_set_; }
 		void reset_mask_color_set() {mask_color_set_ = false;}
 		void set_mask_thresh(double thresh);
@@ -149,8 +149,8 @@ namespace FLIVR
 		void set_adaptive(bool b);
 
 		//clipping planes
-		void set_planes(vector<Plane*> *p);
-		vector<Plane*> *get_planes();
+		void set_planes(vector<fluo::Plane*> *p);
+		vector<fluo::Plane*> *get_planes();
 
 		//interpolation
 		bool get_interpolate();
@@ -238,7 +238,7 @@ namespace FLIVR
 	protected:
 		GLint vp_[4];//viewport
 		GLint mp_[2];//mouse position in viewport
-		Vector mvec_;//mouse direction vector for grow selection
+		fluo::Vector mvec_;//mouse direction vector for grow selection
 		GLfloat zoom_;//zoom ratio for 2d processings
 		GLfloat zoom_data_;//for point grow
 
@@ -253,8 +253,8 @@ namespace FLIVR
 		double offset_;
 		double lo_thresh_;
 		double hi_thresh_;
-		Color color_;
-		Color mask_color_;
+		fluo::Color color_;
+		fluo::Color mask_color_;
 		double alpha_power_;
 		bool mask_color_set_;
 		double mask_thresh_;
@@ -276,7 +276,7 @@ namespace FLIVR
 		//adaptive
 		bool adaptive_;
 		//planes
-		vector<Plane *> planes_;
+		vector<fluo::Plane *> planes_;
 		//depth peel
 		int depth_peel_;
 		//segmentation

@@ -217,7 +217,7 @@ namespace FL
 		{
 			m_mx = m_my = m_mx0 = m_my0 = -1;
 		}
-		bool GetMouseVec(int mx, int my, FLIVR::Vector &mvec);
+		bool GetMouseVec(int mx, int my, fluo::Vector &mvec);
 
 	private:
 		VRenderGLView *m_view;
@@ -289,7 +289,7 @@ namespace FL
 		glm::mat4 m_prj_mat;
 
 		int m_mx, m_my, m_mx0, m_my0;
-		FLIVR::Vector m_mvec;
+		fluo::Vector m_mvec;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

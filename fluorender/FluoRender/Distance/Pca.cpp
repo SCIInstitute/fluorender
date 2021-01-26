@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Distance/Pca.h>
-#include <FLIVR/Transform.h>
+#include <Types/Transform.h>
 #include <utility.h>
 #include <Algorithm>
 #include <cmath>
@@ -41,7 +41,7 @@ void Pca::Compute()
 	{
 		if (m_num < 2)
 			return;
-		FLIVR::Point m(m_mean);
+		fluo::Point m(m_mean);
 		m /= m_num;
 		m_cov[0][0] += -2.0*m(0)*m_mean(0) + m(0)*m(0)*m_num;
 		m_cov[0][1] += -m(0)*m_mean(1) - m(1)*m_mean(0) + m(0)*m(1)*m_num;
@@ -164,21 +164,21 @@ void Pca::Compute()
 	int col = 0;
 	do
 	{
-		m_axis[0] = FLIVR::Vector(eigv1[0][col], eigv1[1][col], eigv1[2][col]);
+		m_axis[0] = fluo::Vector(eigv1[0][col], eigv1[1][col], eigv1[2][col]);
 		col++;
 	} while (m_axis[0].normalize() <= EPS);
 	col = 0;
 	do
 	{
-		m_axis[1] = FLIVR::Vector(eigv2[0][col], eigv2[1][col], eigv2[2][col]);
+		m_axis[1] = fluo::Vector(eigv2[0][col], eigv2[1][col], eigv2[2][col]);
 		col++;
 	} while (m_axis[1].normalize() <= EPS);
 	m_axis[2] = Cross(m_axis[0], m_axis[1]);
 	m_axis[2].normalize();
 	//get extend for values
-	FLIVR::Transform tf(FLIVR::Point(),
+	fluo::Transform tf(fluo::Point(),
 		m_axis[0], m_axis[1], m_axis[2]);
-	FLIVR::Point pts[6];
+	fluo::Point pts[6];
 	for (int i = 0; i < 6; ++i)
 		pts[i] = tf.transform(m_bpoint.get(i));
 	double xmin, xmax, ymin, ymax, zmin, zmax;

@@ -696,7 +696,7 @@ bool SegGrow::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -729,7 +729,7 @@ void SegGrow::Compute()
 	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 		//clear new grown flag
@@ -754,7 +754,7 @@ void SegGrow::Compute()
 		//kernel0: init ordered
 		kernel_prog->setKernelArgTex3D(kernel_0, 0,
 			CL_MEM_READ_ONLY, mid);
-		Argument arg_label =
+		FLIVR::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(kernel_0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_0, 2,
@@ -1073,7 +1073,7 @@ void SegGrow::Compute()
 				{
 					nc = sum[i*total + j];
 					it->second.sum += nc;
-					it->second.ctr += FLIVR::Point(
+					it->second.ctr += fluo::Point(
 						csum[(total * i + j) * 3] + ox * nc,
 						csum[(total * i + j) * 3 + 1] + oy * nc,
 						csum[(total * i + j) * 3 + 2] + oz * nc);
@@ -1124,7 +1124,7 @@ void SegGrow::Compute()
 
 		for (size_t bi = 0; bi < brick_num; ++bi)
 		{
-			TextureBrick* b = (*bricks)[bi];
+			FLIVR::TextureBrick* b = (*bricks)[bi];
 			if (!b->get_new_grown())
 				continue;
 			int nx = b->nx();
@@ -1133,11 +1133,11 @@ void SegGrow::Compute()
 			GLint lid = m_vd->GetVR()->load_brick_label(b);
 			unsigned bid;
 			bid = b->get_id();
-			Argument arg_tex =
+			FLIVR::Argument arg_tex =
 				kernel_prog->setKernelArgTex3D(kernel_0, 0,
 					CL_MEM_READ_ONLY, lid);
 
-			TextureBrick* nb;
+			FLIVR::TextureBrick* nb;
 			unsigned int nid;
 			//+x
 			nid = tex->posxid(bid);
@@ -1226,7 +1226,7 @@ void SegGrow::Compute()
 	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		TextureBrick* b = (*bricks)[bi];
+		FLIVR::TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 		int nx = b->nx();
@@ -1239,7 +1239,7 @@ void SegGrow::Compute()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 
 		//finalize
-		Argument arg_label =
+		FLIVR::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(kernel_7, 0,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_7, 1,

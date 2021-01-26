@@ -85,21 +85,21 @@ int CombineList::Execute()
 
 	//get new data
 	//red volume
-	Texture* tex_vd_r = vd_r->GetTexture();
+	FLIVR::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return 0;
 	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
 	if (!nrrd_vd_r) return 0;
 	void* data_vd_r = nrrd_vd_r->data;
 	if (!data_vd_r) return 0;
 	//green volume
-	Texture* tex_vd_g = vd_g->GetTexture();
+	FLIVR::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return 0;
 	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
 	if (!nrrd_vd_g) return 0;
 	void* data_vd_g = nrrd_vd_g->data;
 	if (!data_vd_g) return 0;
 	//blue volume
-	Texture* tex_vd_b = vd_b->GetTexture();
+	FLIVR::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return 0;
 	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
 	if (!nrrd_vd_b) return 0;
@@ -117,7 +117,7 @@ int CombineList::Execute()
 		(*iter)->GetResolution(nx, ny, nz);
 		if (!(nx == m_resx && ny == m_resy && nz == m_resz))
 			continue;
-		FLIVR::Color color = (*iter)->GetColor();
+		fluo::Color color = (*iter)->GetColor();
 		Nrrd* nrrd_iter = (*iter)->GetVolume(false);
 		if (!nrrd_iter)
 			continue;
@@ -154,9 +154,9 @@ int CombineList::Execute()
 		if (!vd) vd = *iter;
 	}
 
-	FLIVR::Color red = Color(1.0, 0.0, 0.0);
-	FLIVR::Color green = Color(0.0, 1.0, 0.0);
-	FLIVR::Color blue = Color(0.0, 0.0, 1.0);
+	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
+	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);
+	fluo::Color blue = fluo::Color(0.0, 0.0, 1.0);
 	vd_r->SetColor(red);
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
