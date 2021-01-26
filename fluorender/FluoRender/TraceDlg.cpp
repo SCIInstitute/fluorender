@@ -1683,7 +1683,7 @@ void TraceDlg::CompDelete()
 	long item = -1;
 	wxString str;
 	unsigned long ival;
-	vector<unsigned int> ids;
+	vector<unsigned long long> ids;
 	for (;;)
 	{
 		item = m_trace_list_curr->GetNextItem(item,

@@ -463,7 +463,7 @@ void ComponentSelector::Delete()
 	m_vd->GetVR()->clear_tex_mask();
 }
 
-void ComponentSelector::Delete(std::vector<unsigned int> &ids)
+void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 {
 	bool clear_all = ids.empty();
 
@@ -489,15 +489,27 @@ void ComponentSelector::Delete(std::vector<unsigned int> &ids)
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long key;
+	int bn = m_vd->GetBrickNum();
 	for (index = 0; index < for_size; ++index)
 	{
 		if (clear_all)
 			data_mask[index] = 0;
-		else if (find(ids.begin(), ids.end(), data_label[index])
-			!= ids.end())
-			data_mask[index] = 255;
 		else
-			data_mask[index] = 0;
+		{
+			if (bn > 1)
+				key = fls::Cell::GetKey(
+					data_label[index],
+					m_vd->GetTexture()->
+					get_brick_id(index));
+			else
+				key = data_label[index];
+			if (find(ids.begin(), ids.end(), key)
+				!= ids.end())
+				data_mask[index] = 255;
+			else
+				data_mask[index] = 0;
+		}
 	}
 	//invalidate label mask in gpu
 	m_vd->GetVR()->clear_tex_mask();

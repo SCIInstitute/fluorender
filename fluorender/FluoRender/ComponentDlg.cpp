@@ -3976,7 +3976,7 @@ void ComponentDlg::IncludeComps()
 		for (auto it = list->begin();
 			it != list->end();)
 		{
-			if (cl.find(it->second->Id()) == cl.end())
+			if (cl.find(it->second->GetEId()) == cl.end())
 				it = list->erase(it);
 			else
 				++it;
@@ -4021,23 +4021,23 @@ void ComponentDlg::ExcludeComps()
 		return;
 
 	fls::CelpList cl;
-	if (GetCellList(cl))
+	if (GetCellList(cl, true))
 	{
 		//clear complist
 		fls::CelpList *list = m_comp_analyzer.GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
-			if (cl.find(it->second->Id()) != cl.end())
+			if (cl.find(it->second->GetEId()) != cl.end())
 				it = list->erase(it);
 			else
 				++it;
 		}
 		fls::ComponentSelector comp_selector(vd);
-		std::vector<unsigned int> ids;
+		std::vector<unsigned long long> ids;
 		for (auto it = list->begin();
 			it != list->end(); ++it)
-			ids.push_back(it->second->Id());
+			ids.push_back(it->second->GetEId());
 		comp_selector.Delete(ids);
 		ClearOutputGrid();
 		string titles, values;

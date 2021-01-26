@@ -695,7 +695,8 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 				continue;
 			CelpList list;
 			Celp info = graph[*iter].cell.lock();
-			if (ids.find(info->GetEId()) != ids.end())
+			if (info &&
+				ids.find(info->GetEId()) != ids.end())
 			{
 				graph.GetLinkedComps(info, list, SIZE_LIMIT);
 				for (auto it2 = list.begin();

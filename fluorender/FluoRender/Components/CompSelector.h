@@ -70,7 +70,7 @@ namespace fls
 		void Exclusive();
 		void Clear(bool invalidate=true);
 		void Delete();
-		void Delete(std::vector<unsigned int> &ids);
+		void Delete(std::vector<unsigned long long> &ids);
 		void SelectList(CelpList& list);
 
 	private:
