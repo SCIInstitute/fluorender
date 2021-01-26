@@ -159,7 +159,7 @@ public:
 	VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
-	FLIVR::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
+	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
@@ -471,7 +471,7 @@ public:
 	//get kernel executor
 	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 	//text renderer
-	FLIVR::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
+	flvr::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
 
 	//force draw
 	void ForceDraw();
@@ -525,8 +525,8 @@ public:
 		m_enlarge_scale = value;
 		if (m_enlarge)
 		{
-			m_tsize = FLIVR::TextRenderer::text_texture_manager_.GetSize();
-			FLIVR::TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
+			m_tsize = flvr::TextRenderer::text_texture_manager_.GetSize();
+			flvr::TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
 		}
 	}
 	static bool GetEnlarge()
@@ -723,7 +723,7 @@ private:
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
-	FLIVR::MultiVolumeRenderer* m_mvr;
+	flvr::MultiVolumeRenderer* m_mvr;
 	//highlighted comps
 	FL::CelpList m_cell_list;
 	//fisrt volume data in the depth groups
@@ -951,7 +951,7 @@ private:
 	glm::mat4 m_tex_mat;
 
 	//text renderer
-	FLIVR::TextRenderer m_text_renderer;
+	flvr::TextRenderer m_text_renderer;
 	static unsigned int m_tsize;
 
 	//enlargement

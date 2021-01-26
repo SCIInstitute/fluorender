@@ -107,7 +107,7 @@ namespace FL
 		bool ComputeCenter();
 		bool ComputeCov();
 		bool CheckBricks();
-		bool GetInfo(FLIVR::TextureBrick* b,
+		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz);
 	};
 

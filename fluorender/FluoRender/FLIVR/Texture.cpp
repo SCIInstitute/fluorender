@@ -36,7 +36,7 @@
 
 using namespace std;
 
-namespace FLIVR
+namespace flvr
 {
 	size_t Texture::mask_undo_num_ = 0;
 	Texture::Texture():
@@ -350,7 +350,7 @@ namespace FLIVR
 	bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
 		double vmn, double vmx,
 		double gmn, double gmx,
-		vector<FLIVR::TextureBrick*>* brks)
+		vector<flvr::TextureBrick*>* brks)
 	{
 		size_t axis_size[4];
 		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoSize, axis_size);
@@ -953,4 +953,4 @@ namespace FLIVR
 			(size_t)ny_, (size_t)nz_);
 	}
 
-} // namespace FLIVR
+} // namespace flvr

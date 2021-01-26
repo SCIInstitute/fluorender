@@ -85,21 +85,21 @@ int CombineList::Execute()
 
 	//get new data
 	//red volume
-	FLIVR::Texture* tex_vd_r = vd_r->GetTexture();
+	flvr::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return 0;
 	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
 	if (!nrrd_vd_r) return 0;
 	void* data_vd_r = nrrd_vd_r->data;
 	if (!data_vd_r) return 0;
 	//green volume
-	FLIVR::Texture* tex_vd_g = vd_g->GetTexture();
+	flvr::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return 0;
 	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
 	if (!nrrd_vd_g) return 0;
 	void* data_vd_g = nrrd_vd_g->data;
 	if (!data_vd_g) return 0;
 	//blue volume
-	FLIVR::Texture* tex_vd_b = vd_b->GetTexture();
+	flvr::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return 0;
 	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
 	if (!nrrd_vd_b) return 0;

@@ -67,8 +67,8 @@ void RulerRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	FLIVR::ShaderProgram* shader =
-		FLIVR::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -79,15 +79,15 @@ void RulerRenderer::Draw()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 	shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
 
-	FLIVR::VertexArray* va_rulers =
-		FLIVR::TextureRenderer::vertex_array_manager_.vertex_array(FLIVR::VA_Rulers);
+	flvr::VertexArray* va_rulers =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Rulers);
 	if (va_rulers)
 	{
 		std::vector<float> verts;
 		unsigned int num = DrawVerts(verts);
 		if (num)
 		{
-			va_rulers->buffer_data(FLIVR::VABuf_Coord,
+			va_rulers->buffer_data(flvr::VABuf_Coord,
 				sizeof(float)*verts.size(),
 				&verts[0], GL_STREAM_DRAW);
 			va_rulers->set_param(0, num);
@@ -112,7 +112,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	bool persp = m_view->GetPersp();
 	int nx = m_view->GetGLSize().x;
 	int ny = m_view->GetGLSize().y;
-	float w = FLIVR::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
 	fluo::Transform mv, p;
@@ -495,7 +495,7 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 
 void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 {
-	float w = FLIVR::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float sx, sy;
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
@@ -508,7 +508,7 @@ void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 	mv.set(glm::value_ptr(mv_mat));
 	glm::mat4 proj_mat = m_view->GetProjection();
 	p.set(glm::value_ptr(proj_mat));
-	FLIVR::TextRenderer* text_renderer = m_view->GetTextRenderer();
+	flvr::TextRenderer* text_renderer = m_view->GetTextRenderer();
 	if (!text_renderer)
 		return;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)

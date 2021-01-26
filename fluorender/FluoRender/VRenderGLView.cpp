@@ -597,15 +597,15 @@ void VRenderGLView::Init()
 	if (!m_initialized)
 	{
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		ShaderProgram::init_shaders_supported();
+		flvr::ShaderProgram::init_shaders_supported();
 		if (vr_frame && vr_frame->GetSettingDlg())
 		{
-			KernelProgram::set_platform_id(vr_frame->
+			flvr::KernelProgram::set_platform_id(vr_frame->
 				GetSettingDlg()->GetCLPlatformID());
-			KernelProgram::set_device_id(vr_frame->
+			flvr::KernelProgram::set_device_id(vr_frame->
 				GetSettingDlg()->GetCLDeviceID());
 		}
-		KernelProgram::init_kernels_supported();
+		flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
 		if (ctx != TextureRenderer::gl_context_)
@@ -629,7 +629,7 @@ void VRenderGLView::Init()
 void VRenderGLView::Clear()
 {
 	m_loader.RemoveAllLoadedBrick();
-	TextureRenderer::clear_tex_pool();
+	flvr::TextureRenderer::clear_tex_pool();
 
 	//delete groups
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -899,7 +899,7 @@ void VRenderGLView::DrawDP()
 	int nx, ny;
 	GetRenderSize(nx, ny);
 	string name;
-	Framebuffer* peel_buffer = 0;
+	flvr::Framebuffer* peel_buffer = 0;
 
 	//clear
 	//	glDrawBuffer(GL_BACK);
@@ -943,8 +943,8 @@ void VRenderGLView::DrawDP()
 		{
 			name = "peel buffer" + std::to_string(i);
 			peel_buffer =
-				TextureRenderer::framebuffer_manager_.framebuffer(
-					FB_Depth_Float, nx, ny, name);
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+					flvr::FB_Depth_Float, nx, ny, name);
 			if (peel_buffer)
 			{
 				peel_buffer->bind();
@@ -963,7 +963,7 @@ void VRenderGLView::DrawDP()
 				glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(i-1);
 				peel_buffer =
-					TextureRenderer::framebuffer_manager_.framebuffer(name);
+					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 				if (peel_buffer)
 					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 				glActiveTexture(GL_TEXTURE0);
@@ -989,7 +989,7 @@ void VRenderGLView::DrawDP()
 				glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(0);
 				peel_buffer =
-					TextureRenderer::framebuffer_manager_.framebuffer(name);
+					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 				if (peel_buffer)
 					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 				glActiveTexture(GL_TEXTURE0);
@@ -1006,7 +1006,7 @@ void VRenderGLView::DrawDP()
 					glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
-						TextureRenderer::framebuffer_manager_.framebuffer(name);
+						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
@@ -1016,13 +1016,13 @@ void VRenderGLView::DrawDP()
 					glActiveTexture(GL_TEXTURE14);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
-						TextureRenderer::framebuffer_manager_.framebuffer(name);
+						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(1);
 					peel_buffer =
-						TextureRenderer::framebuffer_manager_.framebuffer(name);
+						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 					glActiveTexture(GL_TEXTURE0);
@@ -1034,13 +1034,13 @@ void VRenderGLView::DrawDP()
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-2);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(i-1);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
@@ -1050,13 +1050,13 @@ void VRenderGLView::DrawDP()
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(0);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(1);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
@@ -1066,19 +1066,19 @@ void VRenderGLView::DrawDP()
 						glActiveTexture(GL_TEXTURE13);
 						name = "peel buffer" + std::to_string(i-2);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-1);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(i);
 						peel_buffer =
-							TextureRenderer::framebuffer_manager_.framebuffer(name);
+							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 						glActiveTexture(GL_TEXTURE0);
@@ -1218,10 +1218,10 @@ void VRenderGLView::DrawMeshes(int peel)
 void VRenderGLView::DrawVolumes(int peel)
 {
 	int finished_bricks = 0;
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
-		finished_bricks = TextureRenderer::get_finished_bricks();
-		TextureRenderer::reset_finished_bricks();
+		finished_bricks = flvr::TextureRenderer::get_finished_bricks();
+		flvr::TextureRenderer::reset_finished_bricks();
 	}
 
 	PrepFinalBuffer();
@@ -1274,24 +1274,24 @@ void VRenderGLView::DrawVolumes(int peel)
 		PopVolumeList();
 
 		vector<VolumeData*> quota_vd_list;
-		if (TextureRenderer::get_mem_swap())
+		if (flvr::TextureRenderer::get_mem_swap())
 		{
 			//set start time for the texture renderer
-			TextureRenderer::set_st_time(GET_TICK_COUNT());
+			flvr::TextureRenderer::set_st_time(GET_TICK_COUNT());
 
-			TextureRenderer::set_interactive(m_interactive);
+			flvr::TextureRenderer::set_interactive(m_interactive);
 			//if in interactive mode, do interactive bricking also
 			if (m_interactive)
 			{
 				//calculate quota
-				int total_bricks = TextureRenderer::get_total_brick_num();
+				int total_bricks = flvr::TextureRenderer::get_total_brick_num();
 				int quota_bricks = 1;// total_bricks / 2;
 				int fin_bricks = finished_bricks;
-				int last_bricks = TextureRenderer::
+				int last_bricks = flvr::TextureRenderer::
 					get_est_bricks(3);
 				int adj_bricks = 0;
-				unsigned long up_time = TextureRenderer::get_cor_up_time();
-				unsigned long consumed_time = TextureRenderer::get_consumed_time();
+				unsigned long up_time = flvr::TextureRenderer::get_cor_up_time();
+				unsigned long consumed_time = flvr::TextureRenderer::get_consumed_time();
 				if (consumed_time == 0)
 					quota_bricks = total_bricks;
 				else if (consumed_time / up_time > total_bricks)
@@ -1300,12 +1300,12 @@ void VRenderGLView::DrawVolumes(int peel)
 				{
 					adj_bricks = std::max(1, int(double(last_bricks) *
 						double(up_time) / double(consumed_time)));
-					quota_bricks = TextureRenderer::
+					quota_bricks = flvr::TextureRenderer::
 						get_est_bricks(0, adj_bricks);
 				}
 				quota_bricks = std::min(total_bricks, quota_bricks);
-				TextureRenderer::set_quota_bricks(quota_bricks);
-				TextureRenderer::push_quota_brick(quota_bricks);
+				flvr::TextureRenderer::set_quota_bricks(quota_bricks);
+				flvr::TextureRenderer::push_quota_brick(quota_bricks);
 				////test
 				//std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
 				//std::string str;
@@ -1386,18 +1386,18 @@ void VRenderGLView::DrawVolumes(int peel)
 					p = fluo::Point(p.x() / (resx*sclx*spcx),
 						p.y() / (resy*scly*spcy),
 						p.z() / (resz*sclz*spcz));
-					TextureRenderer::set_qutoa_center(p);
+					flvr::TextureRenderer::set_qutoa_center(p);
 				}
 				else
-					TextureRenderer::set_interactive(false);
+					flvr::TextureRenderer::set_interactive(false);
 			}
 		}
 
 		//handle intermixing modes
 		if (m_vol_method == VOL_METHOD_MULTI)
 		{
-			if (TextureRenderer::get_mem_swap() &&
-				TextureRenderer::get_interactive() &&
+			if (flvr::TextureRenderer::get_mem_swap() &&
+				flvr::TextureRenderer::get_interactive() &&
 				quota_vd_list.size() > 0)
 				DrawVolumesMulti(quota_vd_list, peel);
 			else
@@ -1421,8 +1421,8 @@ void VRenderGLView::DrawVolumes(int peel)
 					VolumeData* vd = (VolumeData*)m_layer_list[i];
 					if (vd && vd->GetDisp())
 					{
-						if (TextureRenderer::get_mem_swap() &&
-							TextureRenderer::get_interactive() &&
+						if (flvr::TextureRenderer::get_mem_swap() &&
+							flvr::TextureRenderer::get_interactive() &&
 							quota_vd_list.size() > 0)
 						{
 							if (find(quota_vd_list.begin(),
@@ -1453,8 +1453,8 @@ void VRenderGLView::DrawVolumes(int peel)
 						VolumeData* vd = group->GetVolumeData(j);
 						if (vd && vd->GetDisp())
 						{
-							if (TextureRenderer::get_mem_swap() &&
-								TextureRenderer::get_interactive() &&
+							if (flvr::TextureRenderer::get_mem_swap() &&
+								flvr::TextureRenderer::get_interactive() &&
 								quota_vd_list.size() > 0)
 							{
 								if (find(quota_vd_list.begin(),
@@ -1489,12 +1489,12 @@ void VRenderGLView::DrawVolumes(int peel)
 	//final composition
 	DrawFinalBuffer();
 
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
-		TextureRenderer::set_consumed_time(GET_TICK_COUNT() - TextureRenderer::get_st_time());
-		if (TextureRenderer::get_start_update_loop() &&
-			TextureRenderer::get_done_update_loop())
-			TextureRenderer::reset_update_loop();
+		flvr::TextureRenderer::set_consumed_time(GET_TICK_COUNT() - flvr::TextureRenderer::get_st_time());
+		if (flvr::TextureRenderer::get_start_update_loop() &&
+			flvr::TextureRenderer::get_done_update_loop())
+			flvr::TextureRenderer::reset_update_loop();
 	}
 
 	if (m_interactive)
@@ -1737,7 +1737,7 @@ void VRenderGLView::RandomizeColor()
 void VRenderGLView::ClearVolList()
 {
 	m_loader.RemoveAllLoadedBrick();
-	TextureRenderer::clear_tex_pool();
+	flvr::TextureRenderer::clear_tex_pool();
 	m_vd_pop_list.clear();
 }
 
@@ -1792,8 +1792,8 @@ int VRenderGLView::GetPaintMode()
 void VRenderGLView::DrawCircles(double cx, double cy,
 	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -1807,8 +1807,8 @@ void VRenderGLView::DrawCircles(double cx, double cy,
 			glm::mat4(), glm::vec3(cx, cy, 0.0));
 	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
-	VertexArray* va_circles =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Brush_Circles);
+	flvr::VertexArray* va_circles =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Brush_Circles);
 	if (va_circles)
 	{
 		//set parameters
@@ -1917,9 +1917,9 @@ void VRenderGLView::PaintStroke()
 
 	//generate texture and buffer objects
 	//painting fbo
-	Framebuffer* paint_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, "paint brush");
+	flvr::Framebuffer* paint_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "paint brush");
 	if (!paint_buffer)
 		return;
 	paint_buffer->bind();
@@ -1934,8 +1934,8 @@ void VRenderGLView::PaintStroke()
 	else
 	{
 		//paint shader
-		ShaderProgram* paint_shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
+		flvr::ShaderProgram* paint_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
 		if (paint_shader)
 		{
 			if (!paint_shader->valid())
@@ -2024,8 +2024,8 @@ void VRenderGLView::PaintStroke()
 void VRenderGLView::DisplayStroke()
 {
 	//painting texture
-	Framebuffer* paint_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	flvr::Framebuffer* paint_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (!paint_buffer)
 		return;
 
@@ -2036,8 +2036,8 @@ void VRenderGLView::DisplayStroke()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
-	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2124,17 +2124,17 @@ void VRenderGLView::PrepFinalBuffer()
 	glActiveTexture(GL_TEXTURE0);
 	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for final
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, "final");
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "final");
 	if (final_buffer)
 		final_buffer->protect();
 }
 
 void VRenderGLView::ClearFinalBuffer()
 {
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -2153,8 +2153,8 @@ void VRenderGLView::DrawFinalBuffer()
 
 	//draw the final buffer to the windows buffer
 	glActiveTexture(GL_TEXTURE0);
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("final");
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
 	if (final_buffer)
 		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	glEnable(GL_BLEND);
@@ -2163,8 +2163,8 @@ void VRenderGLView::DrawFinalBuffer()
 	glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
-	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2236,9 +2236,9 @@ void VRenderGLView::PrepVRBuffer()
 	else
 		vr_buf_name = "vr left";
 
-	Framebuffer* vr_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_UChar_RGBA, nx, ny, vr_buf_name);
+	flvr::Framebuffer* vr_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_UChar_RGBA, nx, ny, vr_buf_name);
 	if (vr_buffer)
 		vr_buffer->protect();
 }
@@ -2252,8 +2252,8 @@ void VRenderGLView::BindRenderBuffer()
 			vr_buf_name = "vr right";
 		else
 			vr_buf_name = "vr left";
-		Framebuffer* vr_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::Framebuffer* vr_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 				vr_buf_name);
 		if (vr_buffer)
 			vr_buffer->bind();
@@ -2283,8 +2283,8 @@ void VRenderGLView::DrawVRBuffer()
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
-	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2292,13 +2292,13 @@ void VRenderGLView::DrawVRBuffer()
 		img_shader->bind();
 	}
 	//left eye
-	Framebuffer* buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 			"vr left");
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	VertexArray* quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Left_Square);
+	flvr::VertexArray* quad_va =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Left_Square);
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
@@ -2314,12 +2314,12 @@ void VRenderGLView::DrawVRBuffer()
 	}
 	//right eye
 	buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 			"vr right");
 	if (buffer)
 		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Right_Square);
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Right_Square);
 	if (quad_va)
 		quad_va->draw();
 	//openvr left eye
@@ -2372,9 +2372,9 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, "channel");
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::FB_Render_RGBA, nx, ny, "channel");
 	if (chann_buffer)
 		chann_buffer->protect();
 
@@ -2437,16 +2437,16 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
-	ShaderProgram* img_shader = 0;
+	flvr::ShaderProgram* img_shader = 0;
 
 	bool do_over = true;
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		unsigned int rn_time = GET_TICK_COUNT();
-		if (rn_time - TextureRenderer::get_st_time() >
-			TextureRenderer::get_up_time())
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
 			return;
 		if (mask)
 		{
@@ -2460,21 +2460,21 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		}
 	}
 
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	if (do_over)
 	{
 		//before rendering this channel, save final buffer to temp buffer
-		if (TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_start_update_loop() &&
-			TextureRenderer::get_save_final_buffer())
+		if (flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_start_update_loop() &&
+			flvr::TextureRenderer::get_save_final_buffer())
 		{
-			TextureRenderer::reset_save_final_buffer();
+			flvr::TextureRenderer::reset_save_final_buffer();
 
 			//bind temporary framebuffer for comp in stream mode
-			Framebuffer* temp_buffer =
-				TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, nx, ny, "temporary");
+			flvr::Framebuffer* temp_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+					flvr::FB_Render_RGBA, nx, ny, "temporary");
 			if (temp_buffer)
 			{
 				temp_buffer->bind();
@@ -2483,15 +2483,15 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			Framebuffer* final_buffer =
-				TextureRenderer::framebuffer_manager_.framebuffer("final");
+			flvr::Framebuffer* final_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
 			if (final_buffer)
 				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -2511,13 +2511,13 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 			m_cur_framebuffer = chann_buffer->id();
 		}
 
-		if (!TextureRenderer::get_mem_swap() ||
-			(TextureRenderer::get_mem_swap() &&
-				TextureRenderer::get_clear_chan_buffer()))
+		if (!flvr::TextureRenderer::get_mem_swap() ||
+			(flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
 		{
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
-			TextureRenderer::reset_clear_chan_buffer();
+			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
 		if (vd->GetVR())
@@ -2542,21 +2542,21 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 
 	//bind fbo for final composition
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
 
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
 		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		Framebuffer* temp_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer(
-				"temporary");
+		flvr::Framebuffer* temp_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"temporary");
 		if (temp_buffer)
 		{
 			//temp buffer becomes unused after texture is bound
@@ -2568,7 +2568,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -2597,7 +2597,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	//2d adjustment
 	img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2618,10 +2618,10 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		img_shader->release();
 
 	//if vd is duplicated
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_done_current_chan())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_done_current_chan())
 	{
-		vector<TextureBrick*> *bricks =
+		vector<flvr::TextureBrick*> *bricks =
 			vd->GetTexture()->get_bricks();
 		for (int i = 0; i < bricks->size(); i++)
 			(*bricks)[i]->set_drawn(false);
@@ -2636,13 +2636,13 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
 	bool do_mip = true;
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		unsigned int rn_time = GET_TICK_COUNT();
-		if (rn_time - TextureRenderer::get_st_time() >
-			TextureRenderer::get_up_time())
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
 			return;
 		if (vd->GetVR()->get_done_loop(1))
 			do_mip = false;
@@ -2652,24 +2652,24 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	bool shadow = vd->GetShadow();
 	int color_mode = vd->GetColormapMode();
 	bool enable_alpha = vd->GetEnableAlpha();
-	ShaderProgram* img_shader = 0;
+	flvr::ShaderProgram* img_shader = 0;
 
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("channel");
-	Framebuffer* overlay_buffer = 0;
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	flvr::Framebuffer* overlay_buffer = 0;
 	if (do_mip)
 	{
 		//before rendering this channel, save final buffer to temp buffer
-		if (TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_start_update_loop() &&
-			TextureRenderer::get_save_final_buffer())
+		if (flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_start_update_loop() &&
+			flvr::TextureRenderer::get_save_final_buffer())
 		{
-			TextureRenderer::reset_save_final_buffer();
+			flvr::TextureRenderer::reset_save_final_buffer();
 
 			//bind temporary framebuffer for comp in stream mode
-			Framebuffer* temp_buffer =
-				TextureRenderer::framebuffer_manager_.framebuffer(
-				FB_Render_RGBA, nx, ny, "temporary");
+			flvr::Framebuffer* temp_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				flvr::FB_Render_RGBA, nx, ny, "temporary");
 			if (temp_buffer)
 			{
 				temp_buffer->bind();
@@ -2678,15 +2678,15 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glActiveTexture(GL_TEXTURE0);
-			Framebuffer* final_buffer =
-				TextureRenderer::framebuffer_manager_.framebuffer("final");
+			flvr::Framebuffer* final_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
 			if (final_buffer)
 				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			glDisable(GL_BLEND);
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -2702,8 +2702,8 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 		//bind the fbo
 		overlay_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_Render_RGBA, nx, ny);
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				flvr::FB_Render_RGBA, nx, ny);
 		if (overlay_buffer)
 		{
 			overlay_buffer->bind();
@@ -2711,13 +2711,13 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 			m_cur_framebuffer = overlay_buffer->id();
 		}
 
-		if (!TextureRenderer::get_mem_swap() ||
-			(TextureRenderer::get_mem_swap() &&
-				TextureRenderer::get_clear_chan_buffer()))
+		if (!flvr::TextureRenderer::get_mem_swap() ||
+			(flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
 		{
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
-			TextureRenderer::reset_clear_chan_buffer();
+			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
 		if (vd->GetVR())
@@ -2777,10 +2777,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		{
 			//2d adjustment
 			if (vd->GetColormapProj())
-				img_shader = TextureRenderer::img_shader_factory_.shader(
+				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
 					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
 			else
-				img_shader = TextureRenderer::img_shader_factory_.shader(
+				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
 					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
 			if (img_shader)
 			{
@@ -2804,7 +2804,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		else
 		{
 			img_shader =
-				TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		}
 
 		if (img_shader)
@@ -2838,20 +2838,20 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	}
 
 	//bind fbo for final composition
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
 
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
 		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		Framebuffer* temp_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::Framebuffer* temp_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 				"temporary");
 		if (temp_buffer)
 		{
@@ -2864,7 +2864,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -2893,7 +2893,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	//2d adjustment
 	img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -2917,10 +2917,10 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	vd->SetColormapMode(color_mode);
 
 	//if vd is duplicated
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_done_current_chan())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_done_current_chan())
 	{
-		vector<TextureBrick*> *bricks =
+		vector<flvr::TextureBrick*> *bricks =
 			vd->GetTexture()->get_bricks();
 		for (int i = 0; i < bricks->size(); i++)
 			(*bricks)[i]->set_drawn(false);
@@ -2932,22 +2932,22 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		unsigned int rn_time = GET_TICK_COUNT();
-		if (rn_time - TextureRenderer::get_st_time() >
-			TextureRenderer::get_up_time())
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
 			return;
 		if (vd->GetVR()->get_done_loop(2))
 			return;
 	}
 
 	//shading pass
-	Framebuffer* overlay_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny);
+	flvr::Framebuffer* overlay_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
 		overlay_buffer->bind();
@@ -2970,8 +2970,8 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	vd->SetEnableAlpha(alpha);
 
 	//bind fbo for final composition
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	if (chann_buffer)
 		chann_buffer->bind();
 	glActiveTexture(GL_TEXTURE0);
@@ -2986,8 +2986,8 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 	//glBlendEquation(GL_MIN);
 	glDisable(GL_DEPTH_TEST);
 
-	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3046,9 +3046,9 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//shadow pass
 	//bind the fbo
-	Framebuffer* overlay_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny);
+	flvr::Framebuffer* overlay_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
 		overlay_buffer->bind();
@@ -3058,16 +3058,16 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
 	string name = "peel buffer" + std::to_string(0);
-	Framebuffer* peel_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(name);
+	flvr::Framebuffer* peel_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
 	if (peel_buffer)
 		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
-	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3104,7 +3104,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3117,8 +3117,8 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 	if (peel_buffer)
 		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
 	glActiveTexture(GL_TEXTURE2);
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer("final");
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
 	if (final_buffer)
 		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	//2d adjustment
@@ -3170,22 +3170,22 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	if (!has_shadow)
 		return;
 
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		unsigned int rn_time = GET_TICK_COUNT();
-		if (rn_time - TextureRenderer::get_st_time() >
-			TextureRenderer::get_up_time())
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
 			return;
 		if (list.size() == 1 && list[0]->GetShadow())
 			if (list[0]->GetVR()->get_done_loop(3))
 				return;
 	}
 
-	Framebuffer* overlay_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny);
+	flvr::Framebuffer* overlay_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny);
 	if (overlay_buffer)
 	{
 		overlay_buffer->bind();
@@ -3193,13 +3193,13 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		m_cur_framebuffer = overlay_buffer->id();
 	}
 
-	if (!TextureRenderer::get_mem_swap() ||
-		(TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_clear_chan_buffer()))
+	if (!flvr::TextureRenderer::get_mem_swap() ||
+		(flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		TextureRenderer::reset_clear_chan_buffer();
+		flvr::TextureRenderer::reset_clear_chan_buffer();
 	}
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
@@ -3248,7 +3248,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			vd->SetColormapMode(2);
 			if (overlay_buffer)
 				vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-			VolumeRenderer* vr = list[i]->GetVR();
+			flvr::VolumeRenderer* vr = list[i]->GetVR();
 			if (vr)
 			{
 				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -3275,15 +3275,15 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	}
 
 	//
-	if (!TextureRenderer::get_mem_swap() ||
-		(TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_clear_chan_buffer()))
+	if (!flvr::TextureRenderer::get_mem_swap() ||
+		(flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
 		//shadow pass
 		//bind the fbo
-		Framebuffer* temp_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_Render_RGBA, nx, ny);
+		flvr::Framebuffer* temp_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				flvr::FB_Render_RGBA, nx, ny);
 		if (temp_buffer)
 		{
 			temp_buffer->bind();
@@ -3302,8 +3302,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		glDisable(GL_DEPTH_TEST);
 
 		//2d adjustment
-		ShaderProgram* img_shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+		flvr::ShaderProgram* img_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3324,8 +3324,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 			img_shader->release();
 
 		//bind fbo for final composition
-		Framebuffer* chann_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		flvr::Framebuffer* chann_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
 		if (chann_buffer)
 			chann_buffer->bind();
 		glActiveTexture(GL_TEXTURE0);
@@ -3340,7 +3340,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		//2d adjustment
 		img_shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -3375,7 +3375,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		return;
 
 	if (!m_mvr)
-		m_mvr = new MultiVolumeRenderer();
+		m_mvr = new flvr::MultiVolumeRenderer();
 	if (!m_mvr)
 		return;
 
@@ -3395,7 +3395,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		VolumeData* vd = list[i];
 		if (vd && vd->GetDisp())
 		{
-			VolumeRenderer* vr = vd->GetVR();
+			flvr::VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
 				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -3435,9 +3435,9 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-		FB_Render_RGBA, nx, ny, "channel");
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "channel");
 	//bind the fbo
 	if (chann_buffer)
 	{
@@ -3445,13 +3445,14 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		chann_buffer->bind();
 		m_cur_framebuffer = chann_buffer->id();
 	}
-	if (!TextureRenderer::get_mem_swap() ||
-		(TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_clear_chan_buffer()))
+	if (!flvr::TextureRenderer::get_mem_swap() ||
+		(flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		TextureRenderer::reset_clear_chan_buffer();
+		flvr::
+			TextureRenderer::reset_clear_chan_buffer();
 	}
 
 	//draw multiple volumes at the same time
@@ -3464,8 +3465,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	DrawOLShadows(list);
 
 	//bind fbo for final composition
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
@@ -3483,8 +3484,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
-	ShaderProgram* img_shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
 	if (img_shader)
 	{
 		if (!img_shader->valid())
@@ -3688,9 +3689,9 @@ void VRenderGLView::PickMesh()
 	//set up fbo
 	m_cur_framebuffer = 0;
 	//bind
-	Framebuffer* pick_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
-			FB_Pick_Int32_Float, nx, ny);
+	flvr::Framebuffer* pick_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Pick_Int32_Float, nx, ny);
 	if (pick_buffer)
 		pick_buffer->bind();
 
@@ -3847,11 +3848,11 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
 
 	//check memory swap status
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		if (TextureRenderer::active_view_ == m_vrv->m_id)
+		if (flvr::TextureRenderer::active_view_ == m_vrv->m_id)
 		{
 			refresh = true;
 			start_loop = false;
@@ -3864,8 +3865,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		m_test_speed)
 	{
 		refresh = true;
-		if (TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_done_update_loop())
+		if (flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
 	}
 
@@ -3887,8 +3888,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		frame->SetTitle(title);
 
 		refresh = true;
-		if (TextureRenderer::get_mem_swap() &&
-			TextureRenderer::get_done_update_loop())
+		if (flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_done_update_loop())
 			m_pre_draw = true;
 	}
 
@@ -4833,7 +4834,7 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 
 		if (vd->GetCurTime() != frame)
 		{
-			Texture *tex = vd->GetTexture();
+			flvr::Texture *tex = vd->GetTexture();
 			if (tex && tex->isBrxml())
 			{
 				BRKXMLReader *br = (BRKXMLReader *)reader;
@@ -4985,7 +4986,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 		VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
-			Texture *tex = vd->GetTexture();
+			flvr::Texture *tex = vd->GetTexture();
 			BaseReader* reader = vd->GetReader();
 			if (tex && tex->isBrxml())
 			{
@@ -5097,7 +5098,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 void VRenderGLView::PreDraw()
 {
 	//skip if not done with loop
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
 		if (m_pre_draw)
 			m_pre_draw = false;
@@ -5140,8 +5141,8 @@ void VRenderGLView::ReadPixels(
 	if (m_enlarge || fp32)
 	{
 		glActiveTexture(GL_TEXTURE0);
-		Framebuffer* final_buffer =
-			TextureRenderer::framebuffer_manager_.framebuffer(
+		flvr::Framebuffer* final_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 				"final");
 		if (final_buffer)
 		{
@@ -5154,8 +5155,8 @@ void VRenderGLView::ReadPixels(
 		glDisable(GL_DEPTH_TEST);
 
 		//2d adjustment
-		ShaderProgram* img_shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		flvr::ShaderProgram* img_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -5194,9 +5195,9 @@ void VRenderGLView::ReadPixels(
 void VRenderGLView::PostDraw()
 {
 	//skip if not done with loop
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 		return;
 
 	//output animations
@@ -5266,14 +5267,14 @@ void VRenderGLView::PostDraw()
 void VRenderGLView::ResetEnlarge()
 {
 	//skip if not done with loop
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 		return;
 	if (m_keep_enlarge)
 		return;
 	m_enlarge = false;
-	TextRenderer::text_texture_manager_.SetSize(m_tsize);
+	flvr::TextRenderer::text_texture_manager_.SetSize(m_tsize);
 	RefreshGL(19);
 }
 
@@ -5394,7 +5395,7 @@ void VRenderGLView::ForceDraw()
 		m_int_mode = 7;
 
 
-	if (TextureRenderer::get_invalidate_tex())
+	if (flvr::TextureRenderer::get_invalidate_tex())
 	{
 //#ifdef _WIN32
 //		for (int i = 0; i < m_dp_tex_list.size(); ++i)
@@ -5483,7 +5484,7 @@ void VRenderGLView::SetCenter()
 	if (vd)
 	{
 		fluo::BBox bbox = vd->GetBounds();
-		VolumeRenderer *vr = vd->GetVR();
+		flvr::VolumeRenderer *vr = vd->GetVR();
 		if (!vr) return;
 		vector<fluo::Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6) return;
@@ -7264,8 +7265,8 @@ void VRenderGLView::DrawBounds()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7276,8 +7277,8 @@ void VRenderGLView::DrawBounds()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	VertexArray* va_cube =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Bound_Cube);
+	flvr::VertexArray* va_cube =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Bound_Cube);
 	if (va_cube)
 	{
 		va_cube->set_param(m_bounds);
@@ -7340,8 +7341,8 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	else if (face_winding == CULL_OFF)
 		glDisable(GL_CULL_FACE);
 
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7358,7 +7359,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		if (vd != m_cur_vol)
 			continue;
 
-		VolumeRenderer *vr = vd->GetVR();
+		flvr::VolumeRenderer *vr = vd->GetVR();
 		if (!vr)
 			continue;
 
@@ -7473,8 +7474,8 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		glm::mat4 matrix = m_proj_mat * mv_mat;
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-		VertexArray* va_clipp =
-			TextureRenderer::vertex_array_manager_.vertex_array(VA_Clip_Planes);
+		flvr::VertexArray* va_clipp =
+			flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Clip_Planes);
 		if (!va_clipp)
 			return;
 		std::vector<fluo::Point> clip_points(pp, pp+8);
@@ -7604,8 +7605,8 @@ void VRenderGLView::DrawGrid()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7617,8 +7618,8 @@ void VRenderGLView::DrawGrid()
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	VertexArray* va_grid =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Grid);
+	flvr::VertexArray* va_grid =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Grid);
 	if (va_grid)
 	{
 		//set parameters
@@ -7638,8 +7639,8 @@ void VRenderGLView::DrawGrid()
 
 void VRenderGLView::DrawCamCtr()
 {
-	VertexArray* va_jack =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Cam_Jack);
+	flvr::VertexArray* va_jack =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Cam_Jack);
 	if (!va_jack)
 		return;
 	double len;
@@ -7653,8 +7654,8 @@ void VRenderGLView::DrawCamCtr()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7686,14 +7687,14 @@ void VRenderGLView::DrawFrame()
 	GetRenderSize(nx, ny);
 	glm::mat4 proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
 
-	VertexArray* va_frame =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Crop_Frame);
+	flvr::VertexArray* va_frame =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Crop_Frame);
 	if (!va_frame)
 		return;
 
 	glDisable(GL_DEPTH_TEST);
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7719,8 +7720,8 @@ void VRenderGLView::DrawFrame()
 
 void VRenderGLView::DrawScaleBar()
 {
-	VertexArray* va_scale_bar =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Scale_Bar);
+	flvr::VertexArray* va_scale_bar =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Scale_Bar);
 	if (!va_scale_bar)
 		return;
 
@@ -7797,8 +7798,8 @@ void VRenderGLView::DrawScaleBar()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -7823,7 +7824,7 @@ void VRenderGLView::DrawLegend()
 		return;
 
 	double font_height =
-		TextRenderer::text_texture_manager_.GetSize() + 3.0;
+		flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7958,8 +7959,8 @@ void VRenderGLView::DrawName(
 	double font_height,
 	bool highlighted)
 {
-	VertexArray* va_legend_squares =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Legend_Squares);
+	flvr::VertexArray* va_legend_squares =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Legend_Squares);
 	if (!va_legend_squares)
 		return;
 
@@ -7972,8 +7973,8 @@ void VRenderGLView::DrawName(
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8077,8 +8078,8 @@ void VRenderGLView::DrawGradBg()
 	vertex.push_back(1.0); vertex.push_back(1.0); vertex.push_back(0.0);
 	vertex.push_back(m_bg_color.r()); vertex.push_back(m_bg_color.g()); vertex.push_back(m_bg_color.b());
 
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR3);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8087,8 +8088,8 @@ void VRenderGLView::DrawGradBg()
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	VertexArray* va_bkg =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Grad_Bkg);
+	flvr::VertexArray* va_bkg =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Grad_Bkg);
 	if (va_bkg)
 	{
 		va_bkg->set_param(vertex);
@@ -8485,8 +8486,8 @@ void VRenderGLView::DrawColormap()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -8495,8 +8496,8 @@ void VRenderGLView::DrawColormap()
 	}
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
-	VertexArray* va_colormap =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Color_Map);
+	flvr::VertexArray* va_colormap =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Color_Map);
 	if (va_colormap)
 	{
 		va_colormap->set_param(vertex);
@@ -8515,43 +8516,43 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	float px, py;
-	float gapw = TextRenderer::text_texture_manager_.GetSize();
+	float gapw = flvr::TextRenderer::text_texture_manager_.GetSize();
 	float gaph = gapw * 2;
 
 	double fps_ = 1.0 / m_timer->average();
 	wxString str;
 	fluo::Color text_color = GetTextColor();
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
 		if (m_selector.GetBrushUsePres())
 			str = wxString::Format(
 				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu, Pressure: %.2f",
 				m_interactive ? "Yes" : "No",
 				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0,
-				TextureRenderer::get_finished_bricks(),
-				TextureRenderer::get_quota_bricks(),
-				TextureRenderer::get_cor_up_time(),
+				flvr::TextureRenderer::get_finished_bricks(),
+				flvr::TextureRenderer::get_quota_bricks(),
+				flvr::TextureRenderer::get_cor_up_time(),
 				m_selector.GetPressure());
 		else
 			str = wxString::Format(
 				"Int: %s, FPS: %.2f, Bricks: %d, Quota: %d, Time: %lu",
 				m_interactive ? "Yes" : "No",
 				fps_ >= 0.0&&fps_<300.0 ? fps_ : 0.0,
-				TextureRenderer::get_finished_bricks(),
-				TextureRenderer::get_quota_bricks(),
-				TextureRenderer::get_cor_up_time());
+				flvr::TextureRenderer::get_finished_bricks(),
+				flvr::TextureRenderer::get_quota_bricks(),
+				flvr::TextureRenderer::get_cor_up_time());
 		////budget_test
 		//if (m_interactive)
 		//  tos <<
-		//  TextureRenderer::get_quota_bricks()
+		//  flvr::TextureRenderer::get_quota_bricks()
 		//  << "\t" <<
-		//  TextureRenderer::get_finished_bricks()
+		//  flvr::TextureRenderer::get_finished_bricks()
 		//  << "\t" <<
-		//  TextureRenderer::get_queue_last()
+		//  flvr::TextureRenderer::get_queue_last()
 		//  << "\t" <<
-		//  int(TextureRenderer::get_finished_bricks()*
-		//    TextureRenderer::get_up_time()/
-		//    TextureRenderer::get_consumed_time())
+		//  int(flvr::TextureRenderer::get_finished_bricks()*
+		//    flvr::TextureRenderer::get_up_time()/
+		//    flvr::TextureRenderer::get_consumed_time())
 		//  << "\n";
 	}
 	else
@@ -8979,13 +8980,13 @@ void VRenderGLView::StartLoopUpdate()
 		vr_frame->GetSettingDlg() &&
 		vr_frame->GetSettingDlg()->GetRunScript();
 
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
-		if (TextureRenderer::active_view_ > 0 &&
-			TextureRenderer::active_view_ != m_vrv->m_id)
+		if (flvr::TextureRenderer::active_view_ > 0 &&
+			flvr::TextureRenderer::active_view_ != m_vrv->m_id)
 			return;
 		else
-			TextureRenderer::active_view_ = m_vrv->m_id;
+			flvr::TextureRenderer::active_view_ = m_vrv->m_id;
 
 		int nx, ny;
 		GetRenderSize(nx, ny);
@@ -9010,7 +9011,7 @@ void VRenderGLView::StartLoopUpdate()
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 
 				num_chan = 0;
-				Texture* tex = vd->GetTexture();
+				flvr::Texture* tex = vd->GetTexture();
 				if (tex)
 				{
 					fluo::Transform *tform = tex->transform();
@@ -9024,7 +9025,7 @@ void VRenderGLView::StartLoopUpdate()
 					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
 
 					fluo::Ray view_ray = vd->GetVR()->compute_view();
-					vector<TextureBrick*> *bricks = 0;
+					vector<flvr::TextureBrick*> *bricks = 0;
 					bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size() == 0)
 						continue;
@@ -9069,10 +9070,10 @@ void VRenderGLView::StartLoopUpdate()
 				VolumeData* vd = m_vd_pop_list[i];
 				if (!vd || !vd->GetDisp() || !vd->isBrxml())
 					continue;
-				Texture* tex = vd->GetTexture();
+				flvr::Texture* tex = vd->GetTexture();
 				if (!tex)
 					continue;
-				vector<TextureBrick*> *bricks = tex->get_bricks();
+				vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
 				if (!bricks || bricks->size() == 0)
 					continue;
 				list.push_back(vd);
@@ -9083,16 +9084,16 @@ void VRenderGLView::StartLoopUpdate()
 			for (i = 0; i < list.size(); i++)
 			{
 				VolumeData* vd = list[i];
-				Texture* tex = vd->GetTexture();
+				flvr::Texture* tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
-				vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+				vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetMode() == 1 ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShading());
 				bool shadow = vd->GetShadow();
 				for (j = 0; j < bricks->size(); j++)
 				{
 					VolumeLoaderData d;
-					TextureBrick* b = (*bricks)[j];
+					flvr::TextureBrick* b = (*bricks)[j];
 					if (b->get_disp())
 					{
 						d.brick = b;
@@ -9116,25 +9117,25 @@ void VRenderGLView::StartLoopUpdate()
 					}
 				}
 			}
-			if (TextureRenderer::get_update_order() == 1)
+			if (flvr::TextureRenderer::get_update_order() == 1)
 				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_dsc);
-			else if (TextureRenderer::get_update_order() == 0)
+			else if (flvr::TextureRenderer::get_update_order() == 0)
 				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_asc);
 
 			if (!tmp_shade.empty())
 			{
-				if (TextureRenderer::get_update_order() == 1)
+				if (flvr::TextureRenderer::get_update_order() == 1)
 					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
-				else if (TextureRenderer::get_update_order() == 0)
+				else if (flvr::TextureRenderer::get_update_order() == 0)
 					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
 				queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 			}
 			if (!tmp_shadow.empty())
 			{
-				if (TextureRenderer::get_update_order() == 1)
+				if (flvr::TextureRenderer::get_update_order() == 1)
 				{
-					int order = TextureRenderer::get_update_order();
-					TextureRenderer::set_update_order(0);
+					int order = flvr::TextureRenderer::get_update_order();
+					flvr::TextureRenderer::set_update_order(0);
 					for (i = 0; i < list.size(); i++)
 					{
 						fluo::Ray view_ray = list[i]->GetVR()->compute_view();
@@ -9142,10 +9143,10 @@ void VRenderGLView::StartLoopUpdate()
 						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 						list[i]->GetTexture()->set_sort_bricks();
 					}
-					TextureRenderer::set_update_order(order);
+					flvr::TextureRenderer::set_update_order(order);
 					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 				}
-				else if (TextureRenderer::get_update_order() == 0)
+				else if (flvr::TextureRenderer::get_update_order() == 0)
 					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 				queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 			}
@@ -9165,11 +9166,11 @@ void VRenderGLView::StartLoopUpdate()
 					vector<VolumeLoaderData> tmp_shadow;
 					if (vd && vd->GetDisp() && vd->isBrxml())
 					{
-						Texture* tex = vd->GetTexture();
+						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
-						vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
 						int mode = vd->GetMode() == 1 ? 1 : 0;
@@ -9178,7 +9179,7 @@ void VRenderGLView::StartLoopUpdate()
 						for (j = 0; j<bricks->size(); j++)
 						{
 							VolumeLoaderData d;
-							TextureBrick* b = (*bricks)[j];
+							flvr::TextureBrick* b = (*bricks)[j];
 							if (b->get_disp())
 							{
 								d.brick = b;
@@ -9204,15 +9205,15 @@ void VRenderGLView::StartLoopUpdate()
 						if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 						if (!tmp_shadow.empty())
 						{
-							if (TextureRenderer::get_update_order() == 1)
+							if (flvr::TextureRenderer::get_update_order() == 1)
 							{
-								int order = TextureRenderer::get_update_order();
-								TextureRenderer::set_update_order(0);
+								int order = flvr::TextureRenderer::get_update_order();
+								flvr::TextureRenderer::set_update_order(0);
 								fluo::Ray view_ray = vd->GetVR()->compute_view();
 								tex->set_sort_bricks();
 								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 								tex->set_sort_bricks();
-								TextureRenderer::set_update_order(order);
+								flvr::TextureRenderer::set_update_order(order);
 								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 							}
 							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
@@ -9231,11 +9232,11 @@ void VRenderGLView::StartLoopUpdate()
 						VolumeData* vd = group->GetVolumeData(j);
 						if (!vd || !vd->GetDisp() || !vd->isBrxml())
 							continue;
-						Texture* tex = vd->GetTexture();
+						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
-						vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
 						list.push_back(vd);
@@ -9251,16 +9252,16 @@ void VRenderGLView::StartLoopUpdate()
 						for (k = 0; k < list.size(); k++)
 						{
 							VolumeData* vd = list[k];
-							Texture* tex = vd->GetTexture();
+							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
-							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShading());
 							bool shadow = vd->GetShadow();
 							for (j = 0; j < bricks->size(); j++)
 							{
 								VolumeLoaderData d;
-								TextureBrick* b = (*bricks)[j];
+								flvr::TextureBrick* b = (*bricks)[j];
 								if (b->get_disp())
 								{
 									d.brick = b;
@@ -9286,26 +9287,26 @@ void VRenderGLView::StartLoopUpdate()
 						}
 						if (!tmp_q.empty())
 						{
-							if (TextureRenderer::get_update_order() == 1)
+							if (flvr::TextureRenderer::get_update_order() == 1)
 								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_dsc);
-							else if (TextureRenderer::get_update_order() == 0)
+							else if (flvr::TextureRenderer::get_update_order() == 0)
 								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_asc);
 							queues.insert(queues.end(), tmp_q.begin(), tmp_q.end());
 						}
 						if (!tmp_shade.empty())
 						{
-							if (TextureRenderer::get_update_order() == 1)
+							if (flvr::TextureRenderer::get_update_order() == 1)
 								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
-							else if (TextureRenderer::get_update_order() == 0)
+							else if (flvr::TextureRenderer::get_update_order() == 0)
 								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
 							queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 						}
 						if (!tmp_shadow.empty())
 						{
-							if (TextureRenderer::get_update_order() == 1)
+							if (flvr::TextureRenderer::get_update_order() == 1)
 							{
-								int order = TextureRenderer::get_update_order();
-								TextureRenderer::set_update_order(0);
+								int order = flvr::TextureRenderer::get_update_order();
+								flvr::TextureRenderer::set_update_order(0);
 								for (k = 0; k < list.size(); k++)
 								{
 									fluo::Ray view_ray = list[k]->GetVR()->compute_view();
@@ -9313,10 +9314,10 @@ void VRenderGLView::StartLoopUpdate()
 									list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									list[i]->GetTexture()->set_sort_bricks();
 								}
-								TextureRenderer::set_update_order(order);
+								flvr::TextureRenderer::set_update_order(order);
 								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 							}
-							else if (TextureRenderer::get_update_order() == 0)
+							else if (flvr::TextureRenderer::get_update_order() == 0)
 								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 						}
@@ -9326,16 +9327,16 @@ void VRenderGLView::StartLoopUpdate()
 						for (j = 0; j < list.size(); j++)
 						{
 							VolumeData* vd = list[j];
-							Texture* tex = vd->GetTexture();
+							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
-							vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShading());
 							bool shadow = vd->GetShadow();
 							for (k = 0; k<bricks->size(); k++)
 							{
 								VolumeLoaderData d;
-								TextureBrick* b = (*bricks)[k];
+								flvr::TextureBrick* b = (*bricks)[k];
 								if (b->get_disp())
 								{
 									d.brick = b;
@@ -9361,15 +9362,15 @@ void VRenderGLView::StartLoopUpdate()
 							if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 							if (!tmp_shadow.empty())
 							{
-								if (TextureRenderer::get_update_order() == 1)
+								if (flvr::TextureRenderer::get_update_order() == 1)
 								{
-									int order = TextureRenderer::get_update_order();
-									TextureRenderer::set_update_order(0);
+									int order = flvr::TextureRenderer::get_update_order();
+									flvr::TextureRenderer::set_update_order(0);
 									fluo::Ray view_ray = vd->GetVR()->compute_view();
 									tex->set_sort_bricks();
 									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									tex->set_sort_bricks();
-									TextureRenderer::set_update_order(order);
+									flvr::TextureRenderer::set_update_order(order);
 									std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
 								}
 								queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
@@ -9386,19 +9387,19 @@ void VRenderGLView::StartLoopUpdate()
 		if (queues.size() > 0 /*&& !m_interactive*/)
 		{
 			m_loader.Set(queues);
-			m_loader.SetMemoryLimitByte((long long)TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
-			TextureRenderer::set_load_on_main_thread(false);
+			m_loader.SetMemoryLimitByte((long long)flvr::TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
+			flvr::TextureRenderer::set_load_on_main_thread(false);
 			m_loader.Run();
 		}
 
 		if (total_num > 0)
 		{
-			TextureRenderer::set_update_loop();
+			flvr::TextureRenderer::set_update_loop();
 			if (m_draw_type == 1)
-				TextureRenderer::set_total_brick_num(total_num);
+				flvr::TextureRenderer::set_total_brick_num(total_num);
 			else if (m_draw_type == 2)
-				TextureRenderer::set_total_brick_num(total_num*(m_peeling_layers+1));
-			TextureRenderer::reset_done_current_chan();
+				flvr::TextureRenderer::set_total_brick_num(total_num*(m_peeling_layers+1));
+			flvr::TextureRenderer::reset_done_current_chan();
 		}
 	}
 }
@@ -9406,9 +9407,9 @@ void VRenderGLView::StartLoopUpdate()
 //halt loop update
 void VRenderGLView::HaltLoopUpdate()
 {
-	if (TextureRenderer::get_mem_swap())
+	if (flvr::TextureRenderer::get_mem_swap())
 	{
-		TextureRenderer::reset_update_loop();
+		flvr::TextureRenderer::reset_update_loop();
 	}
 }
 
@@ -9465,8 +9466,8 @@ void VRenderGLView::DrawCells()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	ShaderProgram* shader =
-		TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
 	if (shader)
 	{
 		if (!shader->valid())
@@ -9478,15 +9479,15 @@ void VRenderGLView::DrawCells()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 	shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
-	VertexArray* va_rulers =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Rulers);
+	flvr::VertexArray* va_rulers =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Rulers);
 	if (va_rulers)
 	{
 		vector<float> verts;
 		unsigned int num = DrawCellVerts(verts);
 		if (num)
 		{
-			va_rulers->buffer_data(VABuf_Coord,
+			va_rulers->buffer_data(flvr::VABuf_Coord,
 				sizeof(float)*verts.size(),
 				&verts[0], GL_STREAM_DRAW);
 			va_rulers->set_param(0, num);
@@ -9500,7 +9501,7 @@ void VRenderGLView::DrawCells()
 
 unsigned int VRenderGLView::DrawCellVerts(vector<float>& verts)
 {
-	float w = TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
 	fluo::Transform mv;
@@ -9643,8 +9644,8 @@ void VRenderGLView::DrawTraces()
 			glm::vec3(float(spcx), float(spcy), float(spcz)));
 		matrix = m_proj_mat*matrix;
 
-		ShaderProgram* shader =
-			TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+		flvr::ShaderProgram* shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -9654,8 +9655,8 @@ void VRenderGLView::DrawTraces()
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 		shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
 
-		VertexArray* va_traces =
-			TextureRenderer::vertex_array_manager_.vertex_array(VA_Traces);
+		flvr::VertexArray* va_traces =
+			flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Traces);
 		if (va_traces)
 		{
 			if (va_traces->get_dirty())
@@ -9664,7 +9665,7 @@ void VRenderGLView::DrawTraces()
 				unsigned int num = m_trace_group->Draw(verts, m_cur_vol->GetShuffle());
 				if (num)
 				{
-					va_traces->buffer_data(VABuf_Coord,
+					va_traces->buffer_data(flvr::VABuf_Coord,
 						sizeof(float)*verts.size(),
 						&verts[0], GL_STREAM_DRAW);
 					va_traces->set_param(0, num);
@@ -10098,7 +10099,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	//mouse dragging
 	if (event.Dragging())
 	{
-		TextureRenderer::set_cor_up_time(
+		flvr::TextureRenderer::set_cor_up_time(
 			int(sqrt(double(old_mouse_X - event.GetX())*
 				double(old_mouse_X - event.GetX()) +
 				double(old_mouse_Y - event.GetY())*
@@ -10591,8 +10592,8 @@ void VRenderGLView::CalcFrame()
 
 void VRenderGLView::DrawViewQuad()
 {
-	VertexArray* quad_va =
-		TextureRenderer::vertex_array_manager_.vertex_array(VA_Norm_Square);
+	flvr::VertexArray* quad_va =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Norm_Square);
 	if (quad_va)
 		quad_va->draw();
 }
@@ -10609,7 +10610,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 		ny = int(ny * m_enlarge_scale);
 	}
 
-	Texture *vtex = vd->GetTexture();
+	flvr::Texture *vtex = vd->GetTexture();
 	if (vtex && vtex->isBrxml())
 	{
 		int prev_lv = vd->GetLevel();
@@ -10676,7 +10677,7 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 		}
 		if (prev_lv != new_lv)
 		{
-			vector<TextureBrick*> *bricks = vtex->get_bricks();
+			vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
 			if (bricks)
 			{
 				for (int i = 0; i < bricks->size(); i++)

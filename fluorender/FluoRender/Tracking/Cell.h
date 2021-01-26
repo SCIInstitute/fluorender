@@ -218,7 +218,7 @@ namespace FL
 		fluo::BBox &GetBox();
 		fluo::BBox GetBox(double sx, double sy, double sz);
 		fluo::Point &GetProjp();
-		//FLIVR::Point GetProjp(double sx, double sy, double sz);
+		//flvr::Point GetProjp(double sx, double sy, double sz);
 		//colocalization
 		unsigned int GetCoSizeUi(size_t i);
 		double GetCoSizeD(size_t i);

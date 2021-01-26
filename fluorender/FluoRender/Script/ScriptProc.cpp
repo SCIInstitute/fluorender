@@ -232,7 +232,7 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 			tg->SetCurTime(tseq_cur_num);
 			tg->SetPrvTime(tseq_prv_num);
 			tg->UpdateCellList(m_sel_labels);
-			TextureRenderer::vertex_array_manager_.set_dirty(VA_Traces);
+			flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
 		}
 
 		Nrrd* mask_nrrd = cur_vol->GetMask(false);

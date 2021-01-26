@@ -42,7 +42,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace FLIVR
+namespace flvr
 {
 	VolShaderFactory TextureRenderer::vol_shader_factory_;
 	SegShaderFactory TextureRenderer::seg_shader_factory_;
@@ -1546,7 +1546,7 @@ namespace FLIVR
 	}
 
 	//calculation
-	void VolumeRenderer::calculate(int type, FLIVR::VolumeRenderer *vr_a, FLIVR::VolumeRenderer *vr_b)
+	void VolumeRenderer::calculate(int type, VolumeRenderer *vr_a, VolumeRenderer *vr_b)
 	{
 		//sync sorting
 		fluo::Ray view_ray(fluo::Point(0.802,0.267,0.534), fluo::Vector(0.802,0.267,0.534));
@@ -1790,4 +1790,4 @@ namespace FLIVR
 		release_texture(c, GL_TEXTURE_3D);
 	}
 
-} // namespace FLIVR
+} // namespace flvr

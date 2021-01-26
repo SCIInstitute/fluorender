@@ -47,7 +47,7 @@ namespace FL
 			m_view_only(false), m_mouse_pos(false) {}
 		~PaintBoxes() {}
 
-		void SetBricks(vector<FLIVR::TextureBrick*> *bricks)
+		void SetBricks(vector<flvr::TextureBrick*> *bricks)
 		{
 			m_bricks = bricks;
 		}
@@ -107,7 +107,7 @@ namespace FL
 		void Compute();
 
 	private:
-		vector<FLIVR::TextureBrick*> *m_bricks;
+		vector<flvr::TextureBrick*> *m_bricks;
 		int m_paint_tex;//2d tex of paint strokes
 		int m_ptx, m_pty;//tex size
 		bool m_view_only;//only test for view intersection
@@ -125,7 +125,7 @@ namespace FL
 		struct BrickBox
 		{
 			fluo::BBox bbox;
-			FLIVR::TextureBrick* brick;
+			flvr::TextureBrick* brick;
 		};
 
 	private:

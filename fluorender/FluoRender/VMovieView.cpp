@@ -715,9 +715,9 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 		return;
 	}
 
-	if (TextureRenderer::get_mem_swap() &&
-		TextureRenderer::get_start_update_loop() &&
-		!TextureRenderer::get_done_update_loop())
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		wxString str = m_views_cmb->GetValue();
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -765,7 +765,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 		return;
 	}
 	m_running = true;
-	FLIVR::TextureRenderer::maximize_uptime_ = true;
+	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	int slider_pos = m_progress_sldr->GetValue();
 	long fps;
@@ -850,7 +850,7 @@ void VMovieView::OnStop(wxCommandEvent& event)
 	m_running = false;
 	m_record = false;
 	encoder_.close();
-	FLIVR::TextureRenderer::maximize_uptime_ = false;
+	flvr::TextureRenderer::maximize_uptime_ = false;
 }
 
 void VMovieView::OnRewind(wxCommandEvent& event) {

@@ -37,7 +37,7 @@ using std::string;
 using std::vector;
 using std::ostringstream;
 
-namespace FLIVR
+namespace flvr
 {
 #define CORE_PROFILE_VTX_SHADER 1
 
@@ -530,4 +530,4 @@ VolShader::VolShader(
 		return s->program();
 	}
 
-} // end namespace FLIVR
+} // end namespace flvr

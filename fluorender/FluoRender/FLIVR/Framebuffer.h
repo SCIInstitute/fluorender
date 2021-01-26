@@ -34,7 +34,7 @@
 #include <algorithm>
 #endif
 
-namespace FLIVR
+namespace flvr
 {
 	enum FBTexType
 	{

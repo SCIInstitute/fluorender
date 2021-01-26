@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-namespace FLIVR
+namespace flvr
 {
 	#define CAL_SUBSTRACTION	1	//initialize the segmentation fragment shader
 	#define CAL_ADDITION		2	//diffusion based grow
@@ -84,6 +84,6 @@ namespace FLIVR
 		int prev_shader_;
 	};
 
-} // end namespace FLIVR
+} // end namespace flvr
 
 #endif // VolCalShader_h

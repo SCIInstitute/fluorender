@@ -75,8 +75,8 @@ namespace FL
 		void MergeIds(std::vector<std::set<unsigned int>> &merge_list);
 		void CheckBorders(int d0, int d1, int n0, int n1,
 			std::vector<unsigned int> &ids,
-			FLIVR::TextureBrick* nb,
-			FLIVR::KernelProgram *kernel_prog, int kernel, FLIVR::Argument &arg_tex,
+			flvr::TextureBrick* nb,
+			flvr::KernelProgram *kernel_prog, int kernel, flvr::Argument &arg_tex,
 			std::vector<std::set<unsigned int>> &brick_pairs,
 			std::vector<std::set<unsigned int>> &merge_list);
 	};

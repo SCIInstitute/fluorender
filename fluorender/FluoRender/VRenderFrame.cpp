@@ -446,8 +446,8 @@ VRenderFrame::VRenderFrame(
 	else
 		font_file = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + "FreeSans.ttf";
-	TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
-	TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
+	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
+	flvr::TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
 	if (m_setting_dlg->GetTestMode(1))
@@ -480,8 +480,8 @@ VRenderFrame::VRenderFrame(
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
 	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
 	m_data_mgr.SetPvxmlFlipY(m_setting_dlg->GetPvxmlFlipY());
-	VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
-	MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
+	flvr::VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
+	flvr::MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
 	TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());
 	VolumeMeshConv::SetSoftThreshold(m_setting_dlg->GetSoftThreshold());
 
@@ -888,28 +888,28 @@ VRenderFrame::VRenderFrame(
 
 	wxMemorySize free_mem_size = wxGetFreeMemory();
 	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
-	if (mainmem_buf_size > TextureRenderer::get_mainmem_buf_size())
-		TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
+	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
+		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 }
 
 VRenderFrame::~VRenderFrame()
 {
 	//release?
-	TextureRenderer::vol_kernel_factory_.clear();
-	TextureRenderer::framebuffer_manager_.clear();
-	TextureRenderer::vertex_array_manager_.clear();
-	TextureRenderer::vol_shader_factory_.clear();
-	TextureRenderer::seg_shader_factory_.clear();
-	TextureRenderer::cal_shader_factory_.clear();
-	TextureRenderer::img_shader_factory_.clear();
-	TextRenderer::text_texture_manager_.clear();
+	flvr::TextureRenderer::vol_kernel_factory_.clear();
+	flvr::TextureRenderer::framebuffer_manager_.clear();
+	flvr::TextureRenderer::vertex_array_manager_.clear();
+	flvr::TextureRenderer::vol_shader_factory_.clear();
+	flvr::TextureRenderer::seg_shader_factory_.clear();
+	flvr::TextureRenderer::cal_shader_factory_.clear();
+	flvr::TextureRenderer::img_shader_factory_.clear();
+	flvr::TextRenderer::text_texture_manager_.clear();
 	for (int i=0; i<(int)m_vrv_list.size(); i++)
 	{
 		VRenderView* vrv = m_vrv_list[i];
 		if (vrv) vrv->Clear();
 	}
 	m_aui_mgr.UnInit();
-	KernelProgram::release();
+	flvr::KernelProgram::release();
 }
 
 void VRenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))
@@ -5224,7 +5224,7 @@ void VRenderFrame::ShowCalculationDlg()
 void VRenderFrame::SetTextureUndos()
 {
 	if (m_setting_dlg)
-		Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
+		flvr::Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
 }
 
 void VRenderFrame::SetTextureRendererSettings()
@@ -5232,7 +5232,7 @@ void VRenderFrame::SetTextureRendererSettings()
 	if (!m_setting_dlg)
 		return;
 
-	TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
+	flvr::TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
 	bool use_mem_limit = false;
 	GLenum error = glGetError();
 	GLint mem_info[4] = {0, 0, 0, 0};
@@ -5247,16 +5247,16 @@ void VRenderFrame::SetTextureRendererSettings()
 	}
 	if (m_setting_dlg->GetGraphicsMem() > mem_info[0]/1024.0)
 		use_mem_limit = true;
-	TextureRenderer::set_use_mem_limit(use_mem_limit);
-	TextureRenderer::set_mem_limit(use_mem_limit?
+	flvr::TextureRenderer::set_use_mem_limit(use_mem_limit);
+	flvr::TextureRenderer::set_mem_limit(use_mem_limit?
 		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-	TextureRenderer::set_available_mem(use_mem_limit?
+	flvr::TextureRenderer::set_available_mem(use_mem_limit?
 		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-	TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
-	TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
-	TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
-	TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
-	TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
+	flvr::TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
+	flvr::TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
+	flvr::TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
+	flvr::TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
+	flvr::TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
 }
 
 void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))

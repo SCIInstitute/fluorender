@@ -696,7 +696,7 @@ bool SegGrow::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -712,7 +712,7 @@ void SegGrow::Compute()
 	m_list.clear();
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
@@ -726,10 +726,10 @@ void SegGrow::Compute()
 
 	int bnum = 0;
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[bi];
+		flvr::TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 		//clear new grown flag
@@ -741,7 +741,7 @@ void SegGrow::Compute()
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
 		//compute workload
-		FLIVR::GroupSize gsize;
+		flvr::GroupSize gsize;
 		kernel_prog->get_group_size2(kernel_3, nx, ny, nz, gsize);
 		unsigned int nxy = nx * ny;
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
@@ -754,7 +754,7 @@ void SegGrow::Compute()
 		//kernel0: init ordered
 		kernel_prog->setKernelArgTex3D(kernel_0, 0,
 			CL_MEM_READ_ONLY, mid);
-		FLIVR::Argument arg_label =
+		flvr::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(kernel_0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_0, 2,
@@ -1106,10 +1106,10 @@ void SegGrow::Compute()
 	std::vector<std::set<unsigned int>> brick_pairs;//pairs processed don't need to process again
 	while (bnum > 1 && idnum > 1)
 	{
-		FLIVR::Texture* tex = m_vd->GetTexture();
+		flvr::Texture* tex = m_vd->GetTexture();
 		if (!tex)
 			break;
-		kernel_prog = FLIVR::VolumeRenderer::
+		kernel_prog = flvr::VolumeRenderer::
 			vol_kernel_factory_.kernel(str_cl_sg_check_borders);
 		if (!kernel_prog)
 			break;
@@ -1124,7 +1124,7 @@ void SegGrow::Compute()
 
 		for (size_t bi = 0; bi < brick_num; ++bi)
 		{
-			FLIVR::TextureBrick* b = (*bricks)[bi];
+			flvr::TextureBrick* b = (*bricks)[bi];
 			if (!b->get_new_grown())
 				continue;
 			int nx = b->nx();
@@ -1133,11 +1133,11 @@ void SegGrow::Compute()
 			GLint lid = m_vd->GetVR()->load_brick_label(b);
 			unsigned bid;
 			bid = b->get_id();
-			FLIVR::Argument arg_tex =
+			flvr::Argument arg_tex =
 				kernel_prog->setKernelArgTex3D(kernel_0, 0,
 					CL_MEM_READ_ONLY, lid);
 
-			FLIVR::TextureBrick* nb;
+			flvr::TextureBrick* nb;
 			unsigned int nid;
 			//+x
 			nid = tex->posxid(bid);
@@ -1219,14 +1219,14 @@ void SegGrow::Compute()
 	}
 
 	//finalize bricks
-	kernel_prog = FLIVR::VolumeRenderer::
+	kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
 	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[bi];
+		flvr::TextureBrick* b = (*bricks)[bi];
 		if (!b->get_paint_mask())
 			continue;
 		int nx = b->nx();
@@ -1239,7 +1239,7 @@ void SegGrow::Compute()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 
 		//finalize
-		FLIVR::Argument arg_label =
+		flvr::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(kernel_7, 0,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_7, 1,
@@ -1379,8 +1379,8 @@ void SegGrow::MergeIds(std::vector<std::set<unsigned int>> &merge_list)
 
 void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	std::vector<unsigned int> &ids,
-	FLIVR::TextureBrick* nb,
-	FLIVR::KernelProgram *kernel_prog, int kernel, FLIVR::Argument &arg_tex,
+	flvr::TextureBrick* nb,
+	flvr::KernelProgram *kernel_prog, int kernel, flvr::Argument &arg_tex,
 	std::vector<std::set<unsigned int>> &brick_pairs,
 	std::vector<std::set<unsigned int>> &merge_list)
 {

@@ -167,7 +167,7 @@ namespace FL
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
 			int nx, int ny, int nz,
-			FLIVR::TextureBrick* b,
+			flvr::TextureBrick* b,
 			unsigned int* data);
 
 		//comp groups

@@ -402,7 +402,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	if (!vd)
 		return;
 
-	Texture* tex_a = m_vd_a->GetTexture();
+	flvr::Texture* tex_a = m_vd_a->GetTexture();
 	if (!tex_a)
 		return;
 	Nrrd* nrrd_a = tex_a->get_nrrd(0);
@@ -412,7 +412,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	if (!data_a)
 		return;
 
-	Texture* tex_r = vd->GetTexture();
+	flvr::Texture* tex_r = vd->GetTexture();
 	if (!tex_r)
 		return;
 	Nrrd* nrrd_r = tex_r->get_nrrd(0);

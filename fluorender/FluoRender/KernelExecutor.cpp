@@ -131,13 +131,13 @@ bool KernelExecutor::Execute()
 		m_message = "No volume selected. Select a volume first.\n";
 		return false;
 	}
-	FLIVR::VolumeRenderer* vr = m_vd->GetVR();
+	flvr::VolumeRenderer* vr = m_vd->GetVR();
 	if (!vr)
 	{
 		m_message = "Volume corrupted.\n";
 		return false;
 	}
-	FLIVR::Texture* tex =m_vd->GetTexture();
+	flvr::Texture* tex =m_vd->GetTexture();
 	if (!tex)
 	{
 		m_message = "Volume corrupted.\n";
@@ -151,7 +151,7 @@ bool KernelExecutor::Execute()
 	//get bricks
 	fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
 	tex->set_sort_bricks();
-	vector<FLIVR::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
+	vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 	{
 		m_message = "Volume empty.\n";
@@ -160,8 +160,8 @@ bool KernelExecutor::Execute()
 
 	m_message = "";
 	//execute for each brick
-	FLIVR::TextureBrick *b, *b_r;
-	vector<FLIVR::TextureBrick*> *bricks_r;
+	flvr::TextureBrick *b, *b_r;
+	vector<flvr::TextureBrick*> *bricks_r;
 	void *result;
 
 	if (m_duplicate)
@@ -178,7 +178,7 @@ bool KernelExecutor::Execute()
 		vd->SetSpcFromFile(true);
 		wxString name = m_vd->GetName();
 		vd->SetName(name + "_CL");
-		FLIVR::Texture* tex_r = vd->GetTexture();
+		flvr::Texture* tex_r = vd->GetTexture();
 		if (!tex_r)
 			return false;
 		Nrrd* nrrd_r = tex_r->get_nrrd(0);
@@ -242,7 +242,7 @@ bool KernelExecutor::Execute()
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
-		FLIVR::KernelProgram* kernel = FLIVR::VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
+		flvr::KernelProgram* kernel = flvr::VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";
@@ -301,7 +301,7 @@ bool KernelExecutor::Execute()
 	return true;
 }
 
-bool KernelExecutor::ExecuteKernel(FLIVR::KernelProgram* kernel,
+bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	GLuint data_id, void* result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z)

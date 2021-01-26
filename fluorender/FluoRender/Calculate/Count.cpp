@@ -101,7 +101,7 @@ bool CountVoxels::CheckBricks()
 }
 
 bool CountVoxels::GetInfo(
-	FLIVR::TextureBrick* b,
+	flvr::TextureBrick* b,
 	long &bits, long &nx, long &ny, long &nz)
 {
 	bits = b->nb(0)*8;
@@ -111,7 +111,7 @@ bool CountVoxels::GetInfo(
 	return true;
 }
 
-void* CountVoxels::GetVolDataBrick(FLIVR::TextureBrick* b)
+void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
 {
 	if (!b)
 		return 0;
@@ -169,7 +169,7 @@ void CountVoxels::Count()
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_count_voxels);
 	if (!kernel_prog)
 		return;
@@ -181,12 +181,12 @@ void CountVoxels::Count()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	m_sum = 0; m_wsum = 0.0;
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz, bits;
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
@@ -195,7 +195,7 @@ void CountVoxels::Count()
 		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
-		FLIVR::GroupSize gsize;
+		flvr::GroupSize gsize;
 		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };

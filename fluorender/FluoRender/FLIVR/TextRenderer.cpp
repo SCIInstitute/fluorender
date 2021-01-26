@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VertexArray.h>
 #include <FLIVR/TextureRenderer.h>
 
-namespace FLIVR
+namespace flvr
 {
 	TextTexture::TextTexture(wchar_t p) :
 		id_(0), p_(p), valid_(false)

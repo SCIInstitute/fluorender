@@ -55,7 +55,7 @@ namespace FL
 		void Product();
 		void MinValue();
 		void Threshold(float th1, float th2, float th3, float th4);
-		void Average(float weight, FLIVR::Argument& avg);
+		void Average(float weight, flvr::Argument& avg);
 		double Result()
 		{ return m_result; }
 
@@ -67,10 +67,10 @@ namespace FL
 		double m_result;
 
 		bool CheckBricks();
-		bool GetInfo(FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,
+		bool GetInfo(flvr::TextureBrick* b1, flvr::TextureBrick* b2,
 			long &bits, long &bits2,
 			long &nx, long &ny, long &nz);
-		void* GetVolDataBrick(FLIVR::TextureBrick* b);
+		void* GetVolDataBrick(flvr::TextureBrick* b);
 		void* GetVolData(VolumeData* vd);
 	};
 

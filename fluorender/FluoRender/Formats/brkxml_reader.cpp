@@ -1,6 +1,6 @@
 #include "brkxml_reader.h"
-#include "FLIVR/TextureRenderer.h"
-#include "FLIVR/ShaderProgram.h"
+#include <FLIVR/TextureRenderer.h>
+#include <FLIVR/ShaderProgram.h>
 #include <Types/Utils.h>
 #include "../compatibility.h"
 #include <fstream>
@@ -83,13 +83,13 @@ void BRKXMLReader::Clear()
 						if(!m_pyramid[i].filename[j][k].empty()){
 							for(int m = 0; m < m_pyramid[i].filename[j][k].size(); m++)
 								SafeDelete(m_pyramid[i].filename[j][k][m]);
-							vector<FLIVR::FileLocInfo *>().swap(m_pyramid[i].filename[j][k]);
+							vector<flvr::FileLocInfo *>().swap(m_pyramid[i].filename[j][k]);
 						}
 					}
-					vector<vector<FLIVR::FileLocInfo *>>().swap(m_pyramid[i].filename[j]);
+					vector<vector<flvr::FileLocInfo *>>().swap(m_pyramid[i].filename[j]);
 				}
 			}
-			vector<vector<vector<FLIVR::FileLocInfo *>>>().swap(m_pyramid[i].filename);
+			vector<vector<vector<flvr::FileLocInfo *>>>().swap(m_pyramid[i].filename);
 		}
 	}
 	vector<LevelInfo>().swap(m_pyramid);
@@ -443,7 +443,7 @@ void BRKXMLReader::Readbox(tinyxml2::XMLElement* boxNode, double &x0, double &y0
     z1 = STOD(boxNode->Attribute("z1"));
 }
 
-void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<FLIVR::FileLocInfo *>>> &filename)
+void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<flvr::FileLocInfo *>>> &filename)
 {
 	string str;
 	int frame, channel, id;
@@ -469,7 +469,7 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vect
 					filename[frame][channel].resize(id + 1, NULL);
 
 				if (!filename[frame][channel][id])
-						filename[frame][channel][id] = new FLIVR::FileLocInfo();
+						filename[frame][channel][id] = new flvr::FileLocInfo();
 
 				if (child->Attribute("filename")) //this option will be deprecated
 					str = child->Attribute("filename");
@@ -947,7 +947,7 @@ wstring BRKXMLReader::GetCurLabelName(int t, int c)
 	wstring label_name = woss.str();
 	return label_name;
 }
-FLIVR::FileLocInfo* BRKXMLReader::GetBrickFilePath(int fr, int ch, int id, int lv)
+flvr::FileLocInfo* BRKXMLReader::GetBrickFilePath(int fr, int ch, int id, int lv)
 {
 	int level = lv;
 	int frame = fr;
@@ -1066,7 +1066,7 @@ void BRKXMLReader::OutputInfo()
 	ofs.close();
 }
 
-void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
+void BRKXMLReader::build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv)
 {
 	int lev;
 
@@ -1081,12 +1081,12 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 	bsize[2] = m_pyramid[lev].brick_baseD;
 
 	bool force_pow2 = false;
-	if (FLIVR::ShaderProgram::init())
-		force_pow2 = !FLIVR::ShaderProgram::texture_non_power_of_two();
+	if (flvr::ShaderProgram::init())
+		force_pow2 = !flvr::ShaderProgram::texture_non_power_of_two();
 
 	int max_texture_size = 2048;
-	if (FLIVR::ShaderProgram::init())
-		max_texture_size = FLIVR::ShaderProgram::max_texture_size();
+	if (flvr::ShaderProgram::init())
+		max_texture_size = flvr::ShaderProgram::max_texture_size();
 
 	int numb[1];
 	if (m_pyramid[lev].bit_depth == 8 || m_pyramid[lev].bit_depth == 16 || m_pyramid[lev].bit_depth == 32)
@@ -1095,12 +1095,12 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 		numb[0] = 0;
 	
 	//further determine the max texture size
-//	if (FLIVR::TextureRenderer::get_mem_swap())
+//	if (flvr::TextureRenderer::get_mem_swap())
 //	{
 //		double data_size = double(m_pyramid[lev].imageW)*double(m_pyramid[lev].imageH)*double(m_pyramid[lev].imageD)*double(numb[0])/1.04e6;
-//		if (data_size > FLIVR::TextureRenderer::get_mem_limit() ||
-//			data_size > FLIVR::TextureRenderer::get_large_data_size())
-//			max_texture_size = FLIVR::TextureRenderer::get_force_brick_size();
+//		if (data_size > flvr::TextureRenderer::get_mem_limit() ||
+//			data_size > flvr::TextureRenderer::get_large_data_size())
+//			max_texture_size = flvr::TextureRenderer::get_force_brick_size();
 //	}
 	
 	if(bsize[0] > max_texture_size || bsize[1] > max_texture_size || bsize[2] > max_texture_size) return;
@@ -1132,7 +1132,7 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
 		//numc? gm_nrrd?
-		FLIVR::TextureBrick *b = new FLIVR::TextureBrick(
+		flvr::TextureBrick *b = new flvr::TextureBrick(
 			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb, 
 			(*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
 			(*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox,
@@ -1145,7 +1145,7 @@ void BRKXMLReader::build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv)
 	return;
 }
 
-void BRKXMLReader::build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<vector<vector<vector<FLIVR::FileLocInfo *>>>> &filenames, int t, int c)
+void BRKXMLReader::build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<vector<vector<vector<flvr::FileLocInfo *>>>> &filenames, int t, int c)
 {
 	if (!pyramid.empty())
 	{
@@ -1155,7 +1155,7 @@ void BRKXMLReader::build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<v
 			for (int j = 0; j < pyramid[i].bricks.size(); j++)
 				if (pyramid[i].bricks[j]) delete pyramid[i].bricks[j];
 		}
-		vector<FLIVR::Pyramid_Level>().swap(pyramid);
+		vector<flvr::Pyramid_Level>().swap(pyramid);
 	}
 
 	if(!filenames.empty())
@@ -1165,7 +1165,7 @@ void BRKXMLReader::build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<v
 				for (int k = 0; k < filenames[i][j].size(); k++)
 					for (int n = 0; n < filenames[i][j][k].size(); n++)
 					if (filenames[i][j][k][n]) delete filenames[i][j][k][n];
-		vector<vector<vector<vector<FLIVR::FileLocInfo *>>>>().swap(filenames);
+		vector<vector<vector<vector<flvr::FileLocInfo *>>>>().swap(filenames);
 	}
 
 	pyramid.resize(m_pyramid.size());
@@ -1206,7 +1206,7 @@ void BRKXMLReader::build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<v
 				filenames[i][j][k].resize(m_pyramid[i].filename[j][k].size());
 				for (int n = 0; n < filenames[i][j][k].size(); n++)
 				{
-					filenames[i][j][k][n] = new FLIVR::FileLocInfo(*m_pyramid[i].filename[j][k][n]);
+					filenames[i][j][k][n] = new flvr::FileLocInfo(*m_pyramid[i].filename[j][k][n]);
 				}
 			}
 		}

@@ -850,7 +850,7 @@ TreeLayer* VRenderView::GetLayer(int index)
 		return 0;
 }
 
-MultiVolumeRenderer* VRenderView::GetMultiVolumeData()
+flvr::MultiVolumeRenderer* VRenderView::GetMultiVolumeData()
 {
 	if (m_glview)
 		return m_glview->GetMultiVolumeData();
@@ -1699,7 +1699,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	if (layer && layer->IsA() == 5)
 	{
 	DataGroup* group = (DataGroup*)layer;
-	FLIVR::Color col = m_glview->GetGamma();
+	flvr::Color col = m_glview->GetGamma();
 	group->SetGammaAll(col);
 	col = m_glview->GetBrightness();
 	group->SetBrightnessAll(col);

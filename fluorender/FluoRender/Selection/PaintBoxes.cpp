@@ -116,7 +116,7 @@ void PaintBoxes::Compute()
 	}
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_paint_boxes);
 	if (!kernel_prog)
 		return;
@@ -128,10 +128,10 @@ void PaintBoxes::Compute()
 	//set
 	kernel_prog->setKernelArgTex2D(kernel_index, 0,
 		CL_MEM_READ_ONLY, m_paint_tex);
-	FLIVR::Argument arg_boxes = kernel_prog->setKernelArgBuf(kernel_index, 1,
+	flvr::Argument arg_boxes = kernel_prog->setKernelArgBuf(kernel_index, 1,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 		sizeof(float)*num*6, boxes);
-	FLIVR::Argument arg_hits = kernel_prog->setKernelArgBuf(kernel_index, 2,
+	flvr::Argument arg_hits = kernel_prog->setKernelArgBuf(kernel_index, 2,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 		sizeof(unsigned int)*num, hits);
 	kernel_prog->setKernelArgConst(kernel_index, 3,
@@ -191,7 +191,7 @@ bool PaintBoxes::GetBrickBoxes(vector<BrickBox> &bbs)
 
 	for (int i = 0; i < m_bricks->size(); ++i)
 	{
-		FLIVR::TextureBrick* b = (*m_bricks)[i];
+		flvr::TextureBrick* b = (*m_bricks)[i];
 		fluo::BBox bbox = b->bbox();
 		if (test_against_view(bbox))
 		{
@@ -211,7 +211,7 @@ void PaintBoxes::BrickViewInt()
 
 	for (int i = 0; i < m_bricks->size(); ++i)
 	{
-		FLIVR::TextureBrick* b = (*m_bricks)[i];
+		flvr::TextureBrick* b = (*m_bricks)[i];
 		fluo::BBox bbox = b->bbox();
 		if (test_against_view(bbox))
 			b->set_paint_mask(true);
@@ -238,7 +238,7 @@ void PaintBoxes::BrickRayInt()
 	fluo::Point hit;
 	for (int i = 0; i < m_bricks->size(); ++i)
 	{
-		FLIVR::TextureBrick* b = (*m_bricks)[i];
+		flvr::TextureBrick* b = (*m_bricks)[i];
 		fluo::BBox bbox = b->bbox();
 		if (bbox.intersect(mp1, dir, hit))
 			b->set_paint_mask(true);

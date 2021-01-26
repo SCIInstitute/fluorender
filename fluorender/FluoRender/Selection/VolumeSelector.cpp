@@ -105,15 +105,15 @@ void VolumeSelector::Segment(int mx, int my)
 	}
 	m_vd->GetVR()->set_mouse_vec(mvec);
 
-	FLIVR::Framebuffer* paint_buffer =
-		FLIVR::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	flvr::Framebuffer* paint_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
 	if (paint_buffer)
 		Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	Framebuffer* final_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 			"final");
-	Framebuffer* chann_buffer =
-		TextureRenderer::framebuffer_manager_.framebuffer(
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
 			"channel");
 	if (final_buffer && chann_buffer)
 		Set2DWeight(
@@ -181,7 +181,7 @@ void VolumeSelector::Select(double radius)
 	else
 		m_vd->Set2DWeight(0, 0);
 
-	if (Texture::mask_undo_num_>0 &&
+	if (flvr::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
@@ -225,7 +225,7 @@ void VolumeSelector::Select(double radius)
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 
 	//set up paint mask flags
-	std::vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (bricks->size() > 1 && (
 		m_mode == 1 || m_mode == 2 ||
 		m_mode == 3 || m_mode == 4 ||
@@ -316,7 +316,7 @@ void VolumeSelector::Select(double radius)
 	if (m_mode == 6)
 		m_vd->SetUseMaskThreshold(false);
 
-	if (Texture::mask_undo_num_>0 &&
+	if (flvr::Texture::mask_undo_num_>0 &&
 		m_vd->GetVR())
 		m_vd->GetVR()->return_mask();
 }
@@ -352,7 +352,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		m_vd->GetVR()->return_mask();
 
 	//get all the data from original volume
-	Texture* tex_mvd = m_vd->GetTexture();
+	flvr::Texture* tex_mvd = m_vd->GetTexture();
 	if (!tex_mvd) return;
 	Nrrd* nrrd_mvd = tex_mvd->get_nrrd(0);
 	if (!nrrd_mvd) return;
@@ -413,21 +413,21 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 
 	//get new data
 	//red volume
-	Texture* tex_vd_r = vd_r->GetTexture();
+	flvr::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return;
 	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
 	if (!nrrd_vd_r) return;
 	unsigned char* data_vd_r = (unsigned char*)nrrd_vd_r->data;
 	if (!data_vd_r) return;
 	//green volume
-	Texture* tex_vd_g = vd_g->GetTexture();
+	flvr::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return;
 	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
 	if (!nrrd_vd_g) return;
 	unsigned char* data_vd_g = (unsigned char*)nrrd_vd_g->data;
 	if (!data_vd_g) return;
 	//blue volume
-	Texture* tex_vd_b = vd_b->GetTexture();
+	flvr::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return;
 	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
 	if (!nrrd_vd_b) return;

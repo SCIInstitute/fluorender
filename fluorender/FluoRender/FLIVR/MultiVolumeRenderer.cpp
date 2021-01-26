@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace FLIVR
+namespace flvr
 {
 	double MultiVolumeRenderer::sw_ = 0.0;
 
@@ -1004,4 +1004,4 @@ namespace FLIVR
 		return rate;
 	}
 
-} // namespace FLIVR
+} // namespace flvr

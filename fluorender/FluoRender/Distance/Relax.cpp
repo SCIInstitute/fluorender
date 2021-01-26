@@ -203,17 +203,17 @@ bool Relax::Compute()
 	m_wsum.assign(m_snum, 0.0);
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_relax);
 	if (!kernel_prog)
 		return false;
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[bi];
+		flvr::TextureBrick* b = (*bricks)[bi];
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
@@ -228,7 +228,7 @@ bool Relax::Compute()
 			tid = m_vd->GetVR()->load_brick(b);
 
 		//compute workload
-		FLIVR::GroupSize gsize;
+		flvr::GroupSize gsize;
 		kernel_prog->get_group_size(kernel_0, nx, ny, nz, gsize);
 		size_t global_size[3] = {
 			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };

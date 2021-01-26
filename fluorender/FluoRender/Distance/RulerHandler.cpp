@@ -769,7 +769,7 @@ int RulerHandler::Profile(int index)
 		return 0;
 	//get data
 	m_vd->GetVR()->return_mask();
-	FLIVR::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = m_vd->GetTexture();
 	if (!tex) return 0;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
 	if (!nrrd_data) return 0;

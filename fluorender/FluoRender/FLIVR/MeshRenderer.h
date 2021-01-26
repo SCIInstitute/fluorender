@@ -39,7 +39,7 @@
 
 using namespace std;
 
-namespace FLIVR
+namespace flvr
 {
 	class MshShaderFactory;
 	class VertexArray;
@@ -124,6 +124,6 @@ namespace FLIVR
 		static MshShaderFactory msh_shader_factory_;
 	};
 
-} // End namespace FLIVR
+} // End namespace flvr
 
 #endif 

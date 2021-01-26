@@ -37,7 +37,7 @@ using std::string;
 using std::vector;
 using std::ostringstream;
 
-namespace FLIVR
+namespace flvr
 {
 #define MSH_VERTEX_INPUTS_V \
 	"//MSH_VERTEX_INPUTS_V\n" \
@@ -424,5 +424,5 @@ namespace FLIVR
 		return s->program();
 	}
 
-} // end namespace FLIVR
+} // end namespace flvr
 

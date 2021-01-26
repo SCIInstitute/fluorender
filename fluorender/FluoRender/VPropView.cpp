@@ -39,8 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolShaderCode.h>
 #include <limits>
 
-using namespace FLIVR;
-
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	//1
 	EVT_COMMAND_SCROLL(ID_GammaSldr, VPropView::OnGammaChange)

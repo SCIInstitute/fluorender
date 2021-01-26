@@ -1224,7 +1224,7 @@ void SettingDlg::UpdateUI()
 	m_max_texture_size_chk->SetValue(m_use_max_texture_size);
 	if (m_use_max_texture_size)
 	{
-		ShaderProgram::set_max_texture_size(m_max_texture_size);
+		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
 		m_max_texture_size_text->SetValue(
 			wxString::Format("%d", m_max_texture_size));
 		m_max_texture_size_text->Enable();
@@ -1232,12 +1232,12 @@ void SettingDlg::UpdateUI()
 	else
 	{
 		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", ShaderProgram::
+			wxString::Format("%d", flvr::ShaderProgram::
 				max_texture_size()));
 		m_max_texture_size_text->Disable();
 	}
 	//no tex pack
-	ShaderProgram::set_no_tex_upack(m_no_tex_pack);
+	flvr::ShaderProgram::set_no_tex_upack(m_no_tex_pack);
 	//font
 	wxString str = m_font_file.BeforeLast('.');
 	int font_sel = m_font_cmb->FindString(str);
@@ -1300,23 +1300,23 @@ void SettingDlg::UpdateDeviceTree()
 {
 	m_device_tree->DeleteAllItems();
 	//cl device tree
-	std::vector<FLIVR::CLPlatform>* devices = FLIVR::KernelProgram::GetDeviceList();
-	int pid = FLIVR::KernelProgram::get_platform_id();
-	int did = FLIVR::KernelProgram::get_device_id();
+	std::vector<flvr::CLPlatform>* devices = flvr::KernelProgram::GetDeviceList();
+	int pid = flvr::KernelProgram::get_platform_id();
+	int did = flvr::KernelProgram::get_device_id();
 	wxTreeItemId root = m_device_tree->AddRoot("Computer");
 	std::string name;
 	if (devices)
 	{
 		for (int i = 0; i < devices->size(); ++i)
 		{
-			FLIVR::CLPlatform* platform = &((*devices)[i]);
+			flvr::CLPlatform* platform = &((*devices)[i]);
 			name = platform->vendor;
 			name.back() = ';';
 			name += " " + platform->name;
 			wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
 			for (int j = 0; j < platform->devices.size(); ++j)
 			{
-				FLIVR::CLDevice* device = &(platform->devices[j]);
+				flvr::CLDevice* device = &(platform->devices[j]);
 				name = device->vendor;
 				name.back() = ';';
 				name += " " + device->name;
@@ -1536,11 +1536,11 @@ void SettingDlg::UpdateTextureSize()
 	if (!m_use_max_texture_size)
 	{
 		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", ShaderProgram::
+			wxString::Format("%d", flvr::ShaderProgram::
 				max_texture_size()));
 	}
 	else
-		ShaderProgram::set_max_texture_size(m_max_texture_size);
+		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
 }
 
 bool SettingDlg::GetTestMode(int type)
@@ -2040,14 +2040,14 @@ void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 	m_use_max_texture_size = m_max_texture_size_chk->GetValue();
 	if (m_use_max_texture_size)
 	{
-		ShaderProgram::set_max_texture_size(m_max_texture_size);
+		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
 		m_max_texture_size_text->SetValue(
 			wxString::Format("%d", m_max_texture_size));
 		m_max_texture_size_text->Enable();
 	}
 	else
 	{
-		ShaderProgram::reset_max_texture_size();
+		flvr::ShaderProgram::reset_max_texture_size();
 		m_max_texture_size_text->Disable();
 	}
 }
@@ -2061,7 +2061,7 @@ void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
 		if (str.ToLong(&size))
 		{
 			m_max_texture_size = size;
-			ShaderProgram::set_max_texture_size(size);
+			flvr::ShaderProgram::set_max_texture_size(size);
 		}
 	}
 }
@@ -2200,8 +2200,8 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
-			TextRenderer::text_texture_manager_.SetSize(m_text_size);
+			flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
+			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
 			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{
 				VRenderView* vrv = (*vr_frame->GetViewList())[i];
@@ -2223,7 +2223,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		if (vr_frame)
 		{
-			TextRenderer::text_texture_manager_.SetSize(m_text_size);
+			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
 			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
 			{
 				VRenderView* vrv = (*vr_frame->GetViewList())[i];

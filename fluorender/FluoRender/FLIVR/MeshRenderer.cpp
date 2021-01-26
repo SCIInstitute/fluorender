@@ -36,7 +36,7 @@
 
 using namespace std;
 
-namespace FLIVR
+namespace flvr
 {
 	MshShaderFactory MeshRenderer::msh_shader_factory_;
 
@@ -369,4 +369,4 @@ namespace FLIVR
 			shader->release();
 	}
 
-} // namespace FLIVR
+} // namespace flvr

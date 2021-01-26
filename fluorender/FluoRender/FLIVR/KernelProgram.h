@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-namespace FLIVR
+namespace flvr
 {
 	class VolKernel;
 	//argument

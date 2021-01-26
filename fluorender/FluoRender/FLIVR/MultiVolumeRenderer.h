@@ -38,7 +38,7 @@
 
 using namespace std;
 
-namespace FLIVR
+namespace flvr
 {
 	class Framebuffer;
 	class VertexArray;
@@ -174,6 +174,6 @@ namespace FLIVR
 			fluo::Point& center, fluo::Ray& view, bool is_orthographic = false);
 	};
 
-} // End namespace FLIVR
+} // End namespace flvr
 
 #endif 

@@ -3026,7 +3026,7 @@ void ComponentDlg::Cluster()
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	if (!vd)
 		return;
-	Texture* tex = vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_data = tex->get_nrrd(0);

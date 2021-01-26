@@ -35,7 +35,7 @@
 #include "TextureRenderer.h"
 #include "ImgShader.h"
 
-namespace FLIVR
+namespace flvr
 {
 	class MultiVolumeRenderer;
 
@@ -326,6 +326,6 @@ namespace FLIVR
 
 	};
 
-} // End namespace FLIVR
+} // End namespace flvr
 
 #endif 

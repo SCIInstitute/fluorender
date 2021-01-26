@@ -189,13 +189,13 @@ bool Diffusion::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
 }
 
-void Diffusion::GetMask(size_t brick_num, FLIVR::TextureBrick* b, void** val)
+void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 {
 	if (!b)
 		return;
@@ -235,7 +235,7 @@ void Diffusion::GetMask(size_t brick_num, FLIVR::TextureBrick* b, void** val)
 	}
 }
 
-void Diffusion::ReleaseMask(void* val, size_t brick_num, FLIVR::TextureBrick* b)
+void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 {
 	if (!val || brick_num <= 1)
 		return;
@@ -276,12 +276,12 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	//add empty mask if there is no mask
 	//then, push the mask for undos
 	m_vd->AddEmptyMask(0, false);
-	if (FLIVR::Texture::mask_undo_num_ > 0 &&
+	if (flvr::Texture::mask_undo_num_ > 0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_diffusion);
 	if (!kernel_prog)
 		return;
@@ -304,10 +304,10 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -393,7 +393,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_diffusion);
 	if (!kernel_prog)
 		return;
@@ -406,7 +406,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		offset, sw;
 	if (m_vd && m_vd->GetVR())
 	{
-		FLIVR::VolumeRenderer* vr = m_vd->GetVR();
+		flvr::VolumeRenderer* vr = m_vd->GetVR();
 		vector<fluo::Plane*> *planes = vr->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
@@ -430,10 +430,10 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();

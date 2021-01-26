@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-namespace FLIVR
+namespace flvr
 {
 #define DEFAULT_FRAGMENT_CODE \
 	"void main() {\n" \
@@ -829,4 +829,4 @@ namespace FLIVR
 	"	}\n" \
 	"\n"
 #endif
-}//namespace FLIVR
+}//namespace flvr

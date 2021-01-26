@@ -38,7 +38,7 @@
 using std::string;
 using std::ostringstream;
 
-namespace FLIVR
+namespace flvr
 {
 
 	bool ShaderProgram::init_ = false;
@@ -430,4 +430,4 @@ namespace FLIVR
 		}
 	}
 
-} // end namespace FLIVR
+} // end namespace flvr

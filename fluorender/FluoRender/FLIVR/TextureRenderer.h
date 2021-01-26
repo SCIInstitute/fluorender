@@ -41,7 +41,7 @@
 #include <OpenGL/CGLCurrent.h>
 #endif
 
-namespace FLIVR
+namespace flvr
 {
 	//a simple fixed-length fifo sequence
 	class BrickQueue
@@ -407,6 +407,6 @@ namespace FLIVR
 		void rearrangeLoadedBrkVec();
 		void clear_brick_buf();
 	};
-} // end namespace FLIVR
+} // end namespace flvr
 
 #endif // TextureRenderer_h

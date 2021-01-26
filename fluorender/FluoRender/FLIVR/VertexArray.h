@@ -35,7 +35,7 @@
 #include <Types/BBox.h>
 #include <Types/Point.h>
 
-namespace FLIVR
+namespace flvr
 {
 	enum VABufferType
 	{

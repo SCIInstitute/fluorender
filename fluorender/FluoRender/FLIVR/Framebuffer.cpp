@@ -29,7 +29,7 @@
 #include "GL/glew.h"
 #include "Framebuffer.h"
 
-namespace FLIVR
+namespace flvr
 {
 	FramebufferTexture::FramebufferTexture(FBTexType type, int nx, int ny):
 		id_(0), type_(type), nx_(nx), ny_(ny), valid_(false)

@@ -107,7 +107,7 @@ public:
 	VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
-	FLIVR::MultiVolumeRenderer* GetMultiVolumeData();
+	flvr::MultiVolumeRenderer* GetMultiVolumeData();
 	VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);

@@ -44,7 +44,7 @@
 
 using namespace std;
 
-namespace FLIVR
+namespace flvr
 {
 	bool TextureRenderer::mem_swap_ = false;
 	int TextureRenderer::active_view_ = -1;
@@ -1439,7 +1439,7 @@ namespace FLIVR
 		tex_->setLevel(cur_lv);
 	}
 
-} // namespace FLIVR
+} // namespace flvr
 
 
 

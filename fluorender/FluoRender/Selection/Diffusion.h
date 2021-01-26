@@ -51,8 +51,8 @@ namespace FL
 
 	private:
 		bool CheckBricks();
-		void GetMask(size_t brick_num, FLIVR::TextureBrick* b, void** val);
-		void ReleaseMask(void* val, size_t brick_num, FLIVR::TextureBrick* b);
+		void GetMask(size_t brick_num, flvr::TextureBrick* b, void** val);
+		void ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b);
 	};
 
 }

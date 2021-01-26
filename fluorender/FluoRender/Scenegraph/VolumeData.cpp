@@ -44,7 +44,7 @@ VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):
 	Node(data, copyop)
 {
 	//volume renderer and texture
-//	m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
+//	m_vr = new flvr::VolumeRenderer(*data.m_vr);
 //	m_tex = data.m_tex;
 }
 

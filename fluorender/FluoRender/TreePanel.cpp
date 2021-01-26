@@ -2138,7 +2138,7 @@ void DataTreeCtrl::PasteMask(int op)
 			return;
 
 		//undo/redo
-		if (Texture::mask_undo_num_ > 0 &&
+		if (flvr::Texture::mask_undo_num_ > 0 &&
 			vd->GetTexture())
 			vd->GetTexture()->push_mask();
 		if (vr_frame->m_copy_data)

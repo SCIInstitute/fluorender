@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/Node.h>
 
-namespace FLIVR
+namespace flvr
 {
 class VolumeRenderer;
 class Texture;
@@ -64,8 +64,8 @@ namespace FL
 		virtual ~VolumeData();
 
 	private:
-		//FLIVR::VolumeRenderer *m_vr;
-		//FLIVR::Texture *m_tex;
+		//flvr::VolumeRenderer *m_vr;
+		//flvr::Texture *m_tex;
 		//BaseReader *m_reader;
 	};
 }

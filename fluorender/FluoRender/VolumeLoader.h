@@ -37,8 +37,8 @@ class VolumeLoader;
 
 struct VolumeLoaderData
 {
-	FLIVR::FileLocInfo *finfo;
-	FLIVR::TextureBrick *brick;
+	flvr::FileLocInfo *finfo;
+	flvr::TextureBrick *brick;
 	VolumeData *vd;
 	unsigned long long datasize;
 	int mode;
@@ -48,8 +48,8 @@ struct VolumeDecompressorData
 {
 	char *in_data;
 	size_t in_size;
-	FLIVR::TextureBrick *b;
-	FLIVR::FileLocInfo *finfo;
+	flvr::TextureBrick *b;
+	flvr::FileLocInfo *finfo;
 	VolumeData *vd;
 	unsigned long long datasize;
 	int mode;
@@ -109,7 +109,7 @@ protected:
 	vector<VolumeLoaderData> m_queued;
 	vector<VolumeDecompressorData> m_decomp_queues;
 	vector<VolumeDecompressorThread *> m_decomp_threads;
-	unordered_map<FLIVR::TextureBrick*, VolumeLoaderData> m_loaded;
+	unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
 	int m_running_decomp_th;
 	int m_max_decomp_th;
 	bool m_valid;

@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <map>
 
-namespace FLIVR {
+namespace flvr {
 
 	using std::vector;
 
@@ -336,6 +336,6 @@ namespace FLIVR {
 		int bny;
 		int bnz;
 	};
-} // namespace FLIVR
+} // namespace flvr
 
 #endif // Volume_TextureBrick_h

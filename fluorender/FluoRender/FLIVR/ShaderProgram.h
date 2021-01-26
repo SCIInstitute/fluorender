@@ -36,7 +36,7 @@
 #include <string>
 
 
-namespace FLIVR
+namespace flvr
 {
 	class ShaderProgram
 	{
@@ -101,6 +101,6 @@ namespace FLIVR
 		static int v_major_;
 		static int v_minor_;
 	};
-} // end namespace FLIVR
+} // end namespace flvr
 
 #endif // ShaderProgram_h

@@ -64,7 +64,7 @@ public:
 	wstring GetExMetadataURL() {return m_ex_metadata_url;}
 	void SetInfo();
 
-	FLIVR::FileLocInfo* GetBrickFilePath(int fr, int ch, int id, int lv = -1);
+	flvr::FileLocInfo* GetBrickFilePath(int fr, int ch, int id, int lv = -1);
 	wstring GetBrickFileName(int fr, int ch, int id, int lv = -1);
 	int GetFileType(int lv = -1);
 
@@ -72,8 +72,8 @@ public:
 	void SetLevel(int lv);
 	int GetCopyableLevel() {return m_copy_lv;}
 
-	void build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv = -1);
-	void build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<vector<vector<vector<FLIVR::FileLocInfo *>>>> &filenames, int t, int c);
+	void build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv = -1);
+	void build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<vector<vector<vector<flvr::FileLocInfo *>>>> &filenames, int t, int c);
 	void OutputInfo();
 
 	void GetLandmark(int index, wstring &name, double &x, double &y, double &z, double &spcx, double &spcy, double &spcz);
@@ -130,7 +130,7 @@ private:
 		int brick_baseD;
 		int bit_depth;
 		int file_type;
-		vector<vector<vector<FLIVR::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
+		vector<vector<vector<flvr::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
 		vector<BrickInfo *> bricks;
 	};
 	vector<LevelInfo> m_pyramid;
@@ -192,7 +192,7 @@ private:
 	ImageInfo ReadImageInfo(tinyxml2::XMLElement *seqNode);
 	void ReadBrick(tinyxml2::XMLElement *brickNode, BrickInfo &binfo);
 	void ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo);
-	void ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<FLIVR::FileLocInfo *>>> &filename);
+	void ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<flvr::FileLocInfo *>>> &filename);
 	void ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<BrickInfo *> &brks);
 	void Readbox(tinyxml2::XMLElement *boxNode, double &x0, double &y0, double &z0, double &x1, double &y1, double &z1);
 	void ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInfo> &pylamid);

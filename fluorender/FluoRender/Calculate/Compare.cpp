@@ -557,7 +557,7 @@ bool ChannelCompare::CheckBricks()
 }
 
 bool ChannelCompare::GetInfo(
-	FLIVR::TextureBrick* b1, FLIVR::TextureBrick* b2,
+	flvr::TextureBrick* b1, flvr::TextureBrick* b2,
 	long &bits1, long &bits2,
 	long &nx, long &ny, long &nz)
 {
@@ -575,7 +575,7 @@ bool ChannelCompare::GetInfo(
 	return true;
 }
 
-void* ChannelCompare::GetVolDataBrick(FLIVR::TextureBrick* b)
+void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 {
 	if (!b)
 		return 0;
@@ -633,7 +633,7 @@ void ChannelCompare::Product()
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_chann_dotprod);
 	if (!kernel_prog)
 		return;
@@ -661,15 +661,15 @@ void ChannelCompare::Product()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b1 = (*bricks1)[i];
-		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		flvr::TextureBrick* b1 = (*bricks1)[i];
+		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
 			if (!b1->get_paint_mask() ||
@@ -692,7 +692,7 @@ void ChannelCompare::Product()
 		}
 
 		//compute workload
-		FLIVR::GroupSize gsize;
+		flvr::GroupSize gsize;
 		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
@@ -754,7 +754,7 @@ void ChannelCompare::MinValue()
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_chann_minvalue);
 	if (!kernel_prog)
 		return;
@@ -782,15 +782,15 @@ void ChannelCompare::MinValue()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b1 = (*bricks1)[i];
-		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		flvr::TextureBrick* b1 = (*bricks1)[i];
+		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
 			if (!b1->get_paint_mask() ||
@@ -813,7 +813,7 @@ void ChannelCompare::MinValue()
 		}
 
 		//compute workload
-		FLIVR::GroupSize gsize;
+		flvr::GroupSize gsize;
 		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
@@ -875,7 +875,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_chann_threshold);
 	if (!kernel_prog)
 		return;
@@ -903,15 +903,15 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b1 = (*bricks1)[i];
-		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		flvr::TextureBrick* b1 = (*bricks1)[i];
+		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
 			if (!b1->get_paint_mask() ||
@@ -934,7 +934,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		}
 
 		//compute workload
-		FLIVR::GroupSize gsize;
+		flvr::GroupSize gsize;
 		kernel_prog->get_group_size(kernel_index, nx, ny, nz, gsize);
 
 		size_t local_size[3] = { 1, 1, 1 };
@@ -991,7 +991,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	}
 }
 
-void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
+void ChannelCompare::Average(float weight, flvr::Argument& avg)
 {
 	m_result = 0.0;
 
@@ -999,7 +999,7 @@ void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_chann_sum);
 	if (!kernel_prog)
 		return;
@@ -1013,15 +1013,15 @@ void ChannelCompare::Average(float weight, FLIVR::Argument& avg)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	vector<FLIVR::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b1 = (*bricks1)[i];
-		FLIVR::TextureBrick* b2 = (*bricks2)[i];
+		flvr::TextureBrick* b1 = (*bricks1)[i];
+		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
 			if (!b1->get_paint_mask() ||

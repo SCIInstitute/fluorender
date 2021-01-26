@@ -37,8 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 #include <Types/Point.h>
 #include <Types/Transform.h>
-#include "FLIVR/MeshRenderer.h"
-#include "FLIVR/VolumeRenderer.h"
+#include <FLIVR/MeshRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/VertexArray.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -242,17 +242,17 @@ public:
 	bool SearchLabel(unsigned int label);
 
 	//save
-	double GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
-	double GetTransferedValue(int i, int j, int k, FLIVR::TextureBrick* b=0);
+	double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
+	double GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b=0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void Save(wxString &filename, int mode=0, bool bake=false, bool compress=false);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
-	FLIVR::VolumeRenderer *GetVR();
+	flvr::VolumeRenderer *GetVR();
 	//texture
-	FLIVR::Texture* GetTexture();
+	flvr::Texture* GetTexture();
 	void SetTexture();
 
 	//bounding box
@@ -479,8 +479,8 @@ private:
 
 	wxString m_tex_path;
 	fluo::BBox m_bounds;
-	FLIVR::VolumeRenderer *m_vr;
-	FLIVR::Texture *m_tex;
+	flvr::VolumeRenderer *m_vr;
+	flvr::Texture *m_tex;
 	//save label
 	void* m_label_save;
 
@@ -628,7 +628,7 @@ public:
 	void Save(wxString &filename);
 
 	//MR
-	FLIVR::MeshRenderer* GetMR();
+	flvr::MeshRenderer* GetMR();
 
 	//draw
 	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
@@ -678,7 +678,7 @@ private:
 	//wxString m_name;
 	wxString m_data_path;
 	GLMmodel* m_data;
-	FLIVR::MeshRenderer *m_mr;
+	flvr::MeshRenderer *m_mr;
 	fluo::BBox m_bounds;
 	fluo::Point m_center;
 
@@ -848,11 +848,11 @@ public:
 	void SetPrvTime(int time);
 	int GetPrvTime();
 	//ghost num
-	void SetGhostNum(int num) {m_ghost_num = num; FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);}
+	void SetGhostNum(int num) {m_ghost_num = num; flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);}
 	int GetGhostNum() {return m_ghost_num;}
-	void SetDrawTail(bool draw) {m_draw_tail = draw; FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);}
+	void SetDrawTail(bool draw) {m_draw_tail = draw; flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);}
 	bool GetDrawTail() {return m_draw_tail;}
-	void SetDrawLead(bool draw) {m_draw_lead = draw; FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);}
+	void SetDrawLead(bool draw) {m_draw_lead = draw; flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);}
 	bool GetDrawLead() {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}

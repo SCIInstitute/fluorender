@@ -196,7 +196,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_bounds = copy.m_bounds;
 
 	//volume renderer and texture
-	m_vr = new FLIVR::VolumeRenderer(*copy.m_vr);
+	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
 	m_tex = copy.m_tex;
 
 	//current channel index
@@ -398,13 +398,13 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 	bounds.extend(pmax);
 	m_bounds = bounds;
 
-	m_tex = new FLIVR::Texture();
+	m_tex = new flvr::Texture();
 	m_tex->set_use_priority(m_skip_brick);
 	if (m_reader && m_reader->GetType()==READER_BRKXML_TYPE)
 	{
 		BRKXMLReader *breader = (BRKXMLReader*)m_reader;
-		vector<FLIVR::Pyramid_Level> pyramid;
-		vector<vector<vector<vector<FLIVR::FileLocInfo *>>>> fnames;
+		vector<flvr::Pyramid_Level> pyramid;
+		vector<vector<vector<vector<flvr::FileLocInfo *>>>> fnames;
 		int ftype = BRICK_FILE_TYPE_NONE;
 
 		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
@@ -450,7 +450,7 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
 		planelist.push_back(plane);
 
-		m_vr = new FLIVR::VolumeRenderer(m_tex, planelist);
+		m_vr = new flvr::VolumeRenderer(m_tex, planelist);
 		m_vr->set_sampling_rate(m_sample_rate);
 		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 		m_vr->set_shading(true);
@@ -467,7 +467,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 {
 	if (!data || data->dim!=3)
 		return 0;
-	FLIVR::Texture* tex = 0;
+	flvr::Texture* tex = 0;
 	if (del_tex)
 	{
 		Nrrd *nv = data;
@@ -477,7 +477,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		m_res_z = nv->axis[2].size;
 
 		tex = m_tex;
-		m_tex = new FLIVR::Texture();
+		m_tex = new flvr::Texture();
 		m_tex->set_use_priority(m_skip_brick);
 		m_tex->build(nv, gm, 0, m_max_value, 0, 0);
 	}
@@ -584,7 +584,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_bounds = bounds;
 
 	//create texture
-	m_tex = new FLIVR::Texture();
+	m_tex = new flvr::Texture();
 	m_tex->set_use_priority(false);
 	m_tex->set_brick_size(brick_size);
 	m_tex->build(nv, 0, 0, 256, 0, 0);
@@ -610,7 +610,7 @@ void VolumeData::AddEmptyData(int bits,
 	planelist.push_back(plane);
 
 	//create volume renderer
-	m_vr = new FLIVR::VolumeRenderer(m_tex, planelist);
+	m_vr = new flvr::VolumeRenderer(m_tex, planelist);
 	m_vr->set_sampling_rate(m_sample_rate);
 	m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 	m_vr->set_shading(true);
@@ -1057,7 +1057,7 @@ Nrrd* VolumeData::GetLabel(bool ret)
 	return 0;
 }
 
-double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
+double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	int bits = 8;
@@ -1066,7 +1066,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
 	if (isBrxml())
 	{
 		if (!b || !b->isLoaded()) return 0.0;
-		FLIVR::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
 		data_data = b->tex_data_brk(0, finfo);
 		if (!data_data) return 0.0;
 		bits = b->nb(0) * 8;
@@ -1109,7 +1109,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
 	return 0.0;
 }
 
-double VolumeData::GetTransferedValue(int i, int j, int k, FLIVR::TextureBrick* b)
+double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	int bits = 8;
@@ -1118,7 +1118,7 @@ double VolumeData::GetTransferedValue(int i, int j, int k, FLIVR::TextureBrick* 
 	if (isBrxml())
 	{
 		if (!b || !b->isLoaded()) return 0.0;
-		FLIVR::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
 		data_data = b->tex_data_brk(0, finfo);
 		if (!data_data) return 0.0;
 		bits = b->nb(0) * 8;
@@ -1597,7 +1597,7 @@ void VolumeData::SetMode(int mode)
 	switch (mode)
 	{
 	case 0://normal
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 
 		m_vr->set_color(m_color);
 		m_vr->set_alpha(m_alpha);
@@ -1608,7 +1608,7 @@ void VolumeData::SetMode(int mode)
 		m_vr->set_offset(m_offset);
 		break;
 	case 1://MIP
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		{
 			double h, s, v;
 			GetHSV(h, s, v);
@@ -1624,7 +1624,7 @@ void VolumeData::SetMode(int mode)
 		m_vr->set_offset(m_offset);
 		break;
 	case 2://white shading
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		m_vr->set_colormap_mode(0);
 
 		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
@@ -1636,7 +1636,7 @@ void VolumeData::SetMode(int mode)
 		m_vr->set_offset(m_offset);
 		break;
 	case 3://white mip
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		m_vr->set_colormap_mode(0);
 
 		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
@@ -1717,13 +1717,13 @@ bool VolumeData::GetNR()
 }
 
 //volumerenderer
-FLIVR::VolumeRenderer *VolumeData::GetVR()
+flvr::VolumeRenderer *VolumeData::GetVR()
 {
 	return m_vr;
 }
 
 //texture
-FLIVR::Texture* VolumeData::GetTexture()
+flvr::Texture* VolumeData::GetTexture()
 {
 	return m_tex;
 }
@@ -2641,7 +2641,7 @@ int MeshData::Load(GLMmodel* mesh)
 
 	if (m_mr)
 		delete m_mr;
-	m_mr = new FLIVR::MeshRenderer(m_data);
+	m_mr = new flvr::MeshRenderer(m_data);
 
 	return 1;
 }
@@ -2723,7 +2723,7 @@ int MeshData::Load(wxString &filename)
 
 	if (m_mr)
 		delete m_mr;
-	m_mr = new FLIVR::MeshRenderer(m_data);
+	m_mr = new flvr::MeshRenderer(m_data);
 
 	return 1;
 }
@@ -2743,7 +2743,7 @@ void MeshData::Save(wxString& filename)
 }
 
 //MR
-FLIVR::MeshRenderer* MeshData::GetMR()
+flvr::MeshRenderer* MeshData::GetMR()
 {
 	return m_mr;
 }
@@ -3545,7 +3545,7 @@ TraceGroup::~TraceGroup()
 void TraceGroup::SetCurTime(int time)
 {
 	m_cur_time = time;
-	FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
 }
 
 int TraceGroup::GetCurTime()
@@ -3589,7 +3589,7 @@ void TraceGroup::GetLinkLists(size_t frame,
 void TraceGroup::ClearCellList()
 {
 	m_cell_list.clear();
-	FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
 }
 
 //cur_sel_list: ids from previous time point
@@ -3627,7 +3627,7 @@ void TraceGroup::UpdateCellList(FL::CelpList &cur_sel_list)
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
 
-	FLIVR::TextureRenderer::vertex_array_manager_.set_dirty(FLIVR::VA_Traces);
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
 }
 
 FL::CelpList &TraceGroup::GetCellList()

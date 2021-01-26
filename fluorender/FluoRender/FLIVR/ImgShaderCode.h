@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-namespace FLIVR
+namespace flvr
 {
 #define IMG_SHDR_CODE_DRAW_THICK_LINES \
 	"uniform vec4 loc0; //(vp0, vp1, thickness, 0.0)\n" \
@@ -82,4 +82,4 @@ namespace FLIVR
 	"}\n"
 
 
-}//namespace FLIVR
+}//namespace flvr

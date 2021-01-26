@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-namespace FLIVR
+namespace flvr
 {
 #define IMG_SHADER_TEXTURE_LOOKUP			0
 #define IMG_SHDR_BRIGHTNESS_CONTRAST		1
@@ -111,6 +111,6 @@ namespace FLIVR
 		int prev_shader_;
 	};
 
-} // end namespace FLIVR
+} // end namespace flvr
 
 #endif // ImgShader_h

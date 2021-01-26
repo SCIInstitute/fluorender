@@ -35,7 +35,7 @@
 #include <Types/Utils.h>
 #include <glm/glm.hpp>
 
-namespace FLIVR
+namespace flvr
 {
 	using namespace std;
 
@@ -51,7 +51,7 @@ namespace FLIVR
 		bool build(Nrrd* val, Nrrd* grad,
 			double vmn, double vmx,
 			double gmn, double gmx,
-			vector<FLIVR::TextureBrick*>* brks = NULL);
+			vector<flvr::TextureBrick*>* brks = NULL);
 
 		inline fluo::Vector res() { return fluo::Vector(nx_, ny_, nz_); }
 		inline int nx() { return nx_; }
@@ -103,7 +103,7 @@ namespace FLIVR
 			}
 		}
 
-		//! Interface that does not expose FLIVR::BBox.
+		//! Interface that does not expose flvr::BBox.
 		inline 
 			void get_bounds(double &xmin, double &ymin, double &zmin,
 			double &xmax, double &ymax, double &zmax) const 
@@ -487,6 +487,6 @@ namespace FLIVR
 		return 0;
 	}
 
-} // namespace FLIVR
+} // namespace flvr
 
 #endif // Volume_Texture_h

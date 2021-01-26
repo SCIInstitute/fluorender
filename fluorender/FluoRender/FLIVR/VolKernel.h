@@ -5,7 +5,7 @@
 #include <vector>
 
 
-namespace FLIVR
+namespace flvr
 {
 #define KERNEL_STRING	0
 #define KERNEL_HIST_3D	1

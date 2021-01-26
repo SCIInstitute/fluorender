@@ -276,7 +276,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 
-	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
 }
 
 bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)

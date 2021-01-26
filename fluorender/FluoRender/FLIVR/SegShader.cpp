@@ -37,7 +37,7 @@ using std::string;
 using std::vector;
 using std::ostringstream;
 
-namespace FLIVR
+namespace flvr
 {
 #define SEG_OUTPUTS \
 	"//SEG_OUTPUTS\n" \
@@ -574,5 +574,5 @@ namespace FLIVR
 		return s->program();
 	}
 
-} // end namespace FLIVR
+} // end namespace flvr
 

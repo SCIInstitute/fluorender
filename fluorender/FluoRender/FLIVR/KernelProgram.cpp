@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace FLIVR
+namespace flvr
 {
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;

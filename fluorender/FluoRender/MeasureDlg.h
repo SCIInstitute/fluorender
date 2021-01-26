@@ -39,7 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/RulerAlign.h>
 
 using namespace std;
-using namespace FLIVR;
 
 class VRenderView;
 

@@ -49,7 +49,7 @@ bool ComponentGenerator::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -61,7 +61,7 @@ void ComponentGenerator::ShuffleID()
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_shuffle_id_3d);
 	if (!kernel_prog)
 		return;
@@ -88,10 +88,10 @@ void ComponentGenerator::ShuffleID()
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -126,7 +126,7 @@ void ComponentGenerator::ShuffleID()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, did);
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));
@@ -194,7 +194,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_set_bit_3d);
 	if (!kernel_prog)
 		return;
@@ -218,10 +218,10 @@ void ComponentGenerator::SetIDBit(int psize)
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -266,10 +266,10 @@ void ComponentGenerator::SetIDBit(int psize)
 		//set
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		FLIVR::Argument arg_szbuf = kernel_prog->setKernelArgBuf(kernel_index0, 0,
+		flvr::Argument arg_szbuf = kernel_prog->setKernelArgBuf(kernel_index0, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, size_buffer);
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
@@ -385,7 +385,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_brainbow_3d);
 	if (!kernel_prog)
 		return;
@@ -396,10 +396,10 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -428,7 +428,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index0, 0,
 			CL_MEM_READ_ONLY, did);
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
@@ -481,7 +481,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_field_3d);
 	if (!kernel_prog)
 		return;
@@ -490,7 +490,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	FLIVR::KernelProgram* kernel2_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel2_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
 	if (!kernel2_prog)
 		return;
@@ -501,10 +501,10 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel2_index0 = kernel2_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -532,9 +532,9 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		dnz = gsz * ngz;
 		//set
 		//kernel 0
-		FLIVR::Argument arg_img = kernel_prog->setKernelArgTex3D(kernel_index0, 0,
+		flvr::Argument arg_img = kernel_prog->setKernelArgTex3D(kernel_index0, 0,
 			CL_MEM_READ_ONLY, did);
-		FLIVR::Argument arg_df = kernel_prog->setKernelArgBuf(
+		flvr::Argument arg_df = kernel_prog->setKernelArgBuf(
 			kernel_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		int dnxy = dnx * dny;
@@ -550,10 +550,10 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		arg_df.kernel_index = kernel_index1;
 		arg_df.index = 0;
 		kernel_prog->setKernelArgument(arg_df);
-		FLIVR::Argument arg_gavg = kernel_prog->setKernelArgBuf(
+		flvr::Argument arg_gavg = kernel_prog->setKernelArgBuf(
 			kernel_index1, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
-		FLIVR::Argument arg_gvar = kernel_prog->setKernelArgBuf(
+		flvr::Argument arg_gvar = kernel_prog->setKernelArgBuf(
 			kernel_index1, 2, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
 		kernel_prog->setKernelArgConst(kernel_index1, 3,
@@ -617,7 +617,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//delete[] val;
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
-		FLIVR::Argument arg_avg = kernel_prog->setKernelArgBuf(
+		flvr::Argument arg_avg = kernel_prog->setKernelArgBuf(
 			kernel_index2, 0, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		arg_gavg.kernel_index = kernel_index2;
@@ -625,7 +625,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel_prog->setKernelArgument(arg_gavg);
 		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 		//compute var
-		FLIVR::Argument arg_var = kernel_prog->setKernelArgBuf(
+		flvr::Argument arg_var = kernel_prog->setKernelArgBuf(
 			kernel_index2, 0, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		arg_gvar.kernel_index = kernel_index2;
@@ -660,7 +660,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		arg_img.kernel_index = kernel2_index0;
 		arg_img.index = 0;
 		kernel2_prog->setKernelArgument(arg_img);
-		FLIVR::Argument arg_label = kernel2_prog->setKernelArgTex3DBuf(kernel2_index0, 1,
+		flvr::Argument arg_label = kernel2_prog->setKernelArgTex3DBuf(kernel2_index0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		arg_df.kernel_index = kernel2_index0;
 		arg_df.index = 2;
@@ -731,7 +731,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 
 	//create program and kernels
 	//prog dist
-	FLIVR::KernelProgram* kernel_prog_dist = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
@@ -748,7 +748,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	}
 
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_dist_grow_3d);
 	if (!kernel_prog)
 		return;
@@ -759,10 +759,10 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -782,9 +782,9 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		unsigned char ini = 1;
 		//set
 		//kernel 0
-		FLIVR::Argument arg_img = kernel_prog_dist->setKernelArgTex3D(
+		flvr::Argument arg_img = kernel_prog_dist->setKernelArgTex3D(
 			kernel_dist_index0, 0, CL_MEM_READ_ONLY, did);
-		FLIVR::Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
+		flvr::Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
 			kernel_dist_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 2,
@@ -850,7 +850,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		arg_img.kernel_index = kernel_index0;
 		arg_img.index = 0;
 		kernel_prog->setKernelArgument(arg_img);
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		arg_distf.kernel_index = kernel_index0;
 		arg_distf.index = 2;
@@ -912,7 +912,7 @@ void ComponentGenerator::DistDensityField(
 
 	//create program and kernels
 	//prog dist
-	FLIVR::KernelProgram* kernel_prog_dist = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog_dist = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_dist_field_2d);
 	if (!kernel_prog_dist)
 		return;
@@ -929,7 +929,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	}
 	//prog density
-	FLIVR::KernelProgram* kernel_prog_dens = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog_dens = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_distdens_field_3d);
 	if (!kernel_prog_dens)
 		return;
@@ -938,7 +938,7 @@ void ComponentGenerator::DistDensityField(
 	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
 	//prog grow
-	FLIVR::KernelProgram* kernel_prog_grow = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog_grow = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
 	if (!kernel_prog_grow)
 		return;
@@ -950,10 +950,10 @@ void ComponentGenerator::DistDensityField(
 
 	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -973,9 +973,9 @@ void ComponentGenerator::DistDensityField(
 		unsigned char ini = 1;
 		//set
 		//kernel 0
-		FLIVR::Argument arg_img = kernel_prog_dist->setKernelArgTex3D(
+		flvr::Argument arg_img = kernel_prog_dist->setKernelArgTex3D(
 			kernel_dist_index0, 0, CL_MEM_READ_ONLY, did);
-		FLIVR::Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
+		flvr::Argument arg_distf = kernel_prog_dist->setKernelArgBuf(
 			kernel_dist_index0, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
 		kernel_prog_dist->setKernelArgConst(kernel_dist_index0, 2,
@@ -1053,7 +1053,7 @@ void ComponentGenerator::DistDensityField(
 		arg_distf.kernel_index = kernel_dens_index0;
 		arg_distf.index = 1;
 		kernel_prog_dens->setKernelArgument(arg_distf);
-		FLIVR::Argument arg_densf = kernel_prog_dens->setKernelArgBuf(
+		flvr::Argument arg_densf = kernel_prog_dens->setKernelArgBuf(
 			kernel_dens_index0, 2, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		int nxy = nx * ny;
@@ -1076,10 +1076,10 @@ void ComponentGenerator::DistDensityField(
 		arg_densf.kernel_index = kernel_dens_index1;
 		arg_densf.index = 0;
 		kernel_prog_dens->setKernelArgument(arg_densf);
-		FLIVR::Argument arg_gavg = kernel_prog_dens->setKernelArgBuf(
+		flvr::Argument arg_gavg = kernel_prog_dens->setKernelArgBuf(
 			kernel_dens_index1, 1, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
-		FLIVR::Argument arg_gvar = kernel_prog_dens->setKernelArgBuf(
+		flvr::Argument arg_gvar = kernel_prog_dens->setKernelArgBuf(
 			kernel_dens_index1, 2, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
 		kernel_prog_dens->setKernelArgConst(kernel_dens_index1, 3,
@@ -1140,7 +1140,7 @@ void ComponentGenerator::DistDensityField(
 		//delete[] val;
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
-		FLIVR::Argument arg_avg = kernel_prog_dens->setKernelArgBuf(
+		flvr::Argument arg_avg = kernel_prog_dens->setKernelArgBuf(
 			kernel_dens_index2, 0, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		arg_gavg.kernel_index = kernel_dens_index2;
@@ -1148,7 +1148,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		//compute var
-		FLIVR::Argument arg_var = kernel_prog_dens->setKernelArgBuf(
+		flvr::Argument arg_var = kernel_prog_dens->setKernelArgBuf(
 			kernel_dens_index2, 0, CL_MEM_READ_WRITE |
 			CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		arg_gvar.kernel_index = kernel_dens_index2;
@@ -1184,7 +1184,7 @@ void ComponentGenerator::DistDensityField(
 		arg_img.kernel_index = kernel_grow_index0;
 		arg_img.index = 0;
 		kernel_prog_grow->setKernelArgument(arg_img);
-		FLIVR::Argument arg_label = kernel_prog_grow->setKernelArgTex3DBuf(kernel_grow_index0, 1,
+		flvr::Argument arg_label = kernel_prog_grow->setKernelArgTex3DBuf(kernel_grow_index0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		arg_densf.kernel_index = kernel_grow_index0;
 		arg_densf.index = 2;
@@ -1247,7 +1247,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_cleanup_3d);
 	if (!kernel_prog)
 		return;
@@ -1268,10 +1268,10 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -1320,7 +1320,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgBuf(kernel_index0, 0,
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			label_size, size_buffer);
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index0, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index0, 2,
 			sizeof(unsigned int), (void*)(&nx));
@@ -1402,7 +1402,7 @@ void ComponentGenerator::ClearBorders()
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_clear_borders_3d);
 	if (!kernel_prog)
 		return;
@@ -1413,10 +1413,10 @@ void ComponentGenerator::ClearBorders()
 		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -1432,7 +1432,7 @@ void ComponentGenerator::ClearBorders()
 		size_t local_size[3] = { 1, 1, 1 };
 
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 0,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 0,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 1,
 			sizeof(unsigned int), (void*)(&nx));
@@ -1464,7 +1464,7 @@ void ComponentGenerator::FillBorders(float tol)
 		return;
 
 	//create program and kernels
-	FLIVR::KernelProgram* kernel_prog = FLIVR::VolumeRenderer::
+	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_fill_borders_3d);
 	if (!kernel_prog)
 		return;
@@ -1475,10 +1475,10 @@ void ComponentGenerator::FillBorders(float tol)
 		kernel_index = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<FLIVR::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks_id();
+	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks_id();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		FLIVR::TextureBrick* b = (*bricks)[i];
+		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->get_paint_mask())
 			continue;
 		int bits = b->nb(0) * 8;
@@ -1498,7 +1498,7 @@ void ComponentGenerator::FillBorders(float tol)
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgTex3D(kernel_index, 0,
 			CL_MEM_READ_ONLY, did);
-		FLIVR::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
+		flvr::Argument arg_label = kernel_prog->setKernelArgTex3DBuf(kernel_index, 1,
 			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(kernel_index, 2,
 			sizeof(unsigned int), (void*)(&nx));

@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-namespace FLIVR
+namespace flvr
 {
 //type definitions
 #define SEG_SHDR_INITIALIZE	1	//initialize the segmentation fragment shader
@@ -107,6 +107,6 @@ namespace FLIVR
 		int prev_shader_;
 	};
 
-} // end namespace FLIVR
+} // end namespace flvr
 
 #endif // SegShader_h

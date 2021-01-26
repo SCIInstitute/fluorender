@@ -1408,7 +1408,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetMeasureDlg())
 		vr_frame->GetMeasureDlg()->GetSettings(m_view);
-	TextureRenderer::vertex_array_manager_.set_dirty(VA_Rulers);
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
 }
 
 void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
@@ -1983,7 +1983,7 @@ void TraceDlg::CellNewID(bool append)
 		return;
 
 	//get current label
-	Texture* tex = vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -2516,7 +2516,7 @@ void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -2642,7 +2642,7 @@ void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 	if (!data_mask)
 		return;
 	//get current label
-	Texture* tex = vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -2782,7 +2782,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz);
-	Texture* tex = vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 
@@ -2870,7 +2870,7 @@ void TraceDlg::Test1()
 	if (!data_mask)
 		return;
 	//get label
-	Texture* tex = vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
@@ -3146,7 +3146,7 @@ void TraceDlg::ReadVolCache(FL::VolCache& vol_cache)
 
 	if (frame == m_view->m_glview->m_tseq_cur_num)
 	{
-		Texture* tex = vd->GetTexture();
+		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
 			return;
 

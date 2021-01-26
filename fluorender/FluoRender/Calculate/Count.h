@@ -62,9 +62,9 @@ namespace FL
 		float m_wsum;
 
 		bool CheckBricks();
-		bool GetInfo(FLIVR::TextureBrick* b,
+		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz);
-		void* GetVolDataBrick(FLIVR::TextureBrick* b);
+		void* GetVolDataBrick(flvr::TextureBrick* b);
 		void* GetVolData(VolumeData* vd);
 	};
 

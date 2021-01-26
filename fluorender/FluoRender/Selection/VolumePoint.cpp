@@ -46,7 +46,7 @@ double VolumePoint::GetPointVolume(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	FLIVR::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = m_vd->GetTexture();
 	if (!tex) return -1.0;
 	Nrrd* nrrd = tex->get_nrrd(0);
 	if (!nrrd) return -1.0;
@@ -105,7 +105,7 @@ double VolumePoint::GetPointVolume(
 	if (bbox.intersect(mp1, vv, hit))
 	{
 		int brick_id = -1;
-		FLIVR::TextureBrick* hit_brick = 0;
+		flvr::TextureBrick* hit_brick = 0;
 		unsigned long long vindex;
 		int data_nx, data_ny, data_nz;
 		if (m_vd->isBrxml())

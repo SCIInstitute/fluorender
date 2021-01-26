@@ -8,7 +8,7 @@ using std::string;
 using std::vector;
 using std::ostringstream;
 
-namespace FLIVR
+namespace flvr
 {
 #define KERNEL_TEST_CODE \
 	"__kernel void add_numbers(__global float4* data, \n" \

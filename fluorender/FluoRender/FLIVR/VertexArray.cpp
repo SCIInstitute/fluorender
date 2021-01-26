@@ -29,7 +29,7 @@
 #include "VertexArray.h"
 #include "utility.h"
 
-namespace FLIVR
+namespace flvr
 {
 	VertexBuffer::VertexBuffer(VABufferType type) :
 		id_(0), type_(type), valid_(false)

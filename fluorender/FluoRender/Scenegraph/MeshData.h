@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 struct _GLMmodel;
 typedef _GLMmodel GLMmodel;
-namespace FLIVR
+namespace flvr
 {
 	class MeshRenderer;
 }
@@ -65,7 +65,7 @@ namespace FL
 
 	private:
 		//GLMmodel* m_data;
-		//FLIVR::MeshRenderer* m_mr;
+		//flvr::MeshRenderer* m_mr;
 	};
 }
 

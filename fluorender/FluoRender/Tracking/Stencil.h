@@ -172,7 +172,7 @@ namespace FL
 			//if (v2 > v2max)
 			//{
 			//	v2max = v2;
-			//	p2max = FLIVR::Point(i2, j2, k2);
+			//	p2max = flvr::Point(i2, j2, k2);
 			//}
 		}
 		i2 = minx2 + (maxx - minx) / 2;

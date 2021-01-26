@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-namespace FLIVR
+namespace flvr
 {
 	class ShaderProgram;
 
@@ -133,6 +133,6 @@ namespace FLIVR
 		int prev_shader_;
 	};
 
-} // end namespace FLIVR
+} // end namespace flvr
 
 #endif // VolShader_h

@@ -38,7 +38,7 @@
 
 using namespace std;
 
-namespace FLIVR
+namespace flvr
 {
 	map<wstring, wstring> TextureBrick::cache_table_ = map<wstring, wstring>();
 
@@ -689,4 +689,4 @@ namespace FLIVR
 		return true;
 	}
 
-} // end namespace FLIVR
+} // end namespace flvr
