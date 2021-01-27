@@ -27,10 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
-#include "Components/CompSelector.h"
-#include "Cluster/dbscan.h"
-#include "Cluster/kmeans.h"
-#include "Cluster/exmax.h"
+#include <Components/CompSelector.h>
+#include <Cluster/dbscan.h>
+#include <Cluster/kmeans.h>
+#include <Cluster/exmax.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -2719,6 +2719,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	if (num <= 0)
 		return;
 	int gsize = m_comp_analyzer.GetCompGroupSize();
+	int bn = m_comp_analyzer.GetBrickNum();
 
 	//result
 	std::string str;
@@ -2741,6 +2742,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	double sx, sy, sz;
 	std::vector<fluo::Point> pos;
 	pos.reserve(num);
+	int num2 = 0;//actual number
 	if (m_use_dist_allchan && gsize > 1)
 	{
 		for (int i = 0; i < gsize; ++i)
@@ -2748,40 +2750,67 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 			fls::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
 			if (!compgroup)
 				continue;
+
+			fls::CellGraph &graph = compgroup->graph;
 			fls::CelpList* list = &(compgroup->celps);
 			sx = list->sx;
 			sy = list->sy;
 			sz = list->sz;
+			if (bn > 1)
+				graph.ClearVisited();
+
 			for (auto it = list->begin();
 				it != list->end(); ++it)
 			{
+				if (bn > 1)
+				{
+					if (graph.Visited(it->second))
+						continue;
+					fls::CelpList links;
+					graph.GetLinkedComps(it->second, links, SIZE_LIMIT);
+				}
+
 				pos.push_back(it->second->GetCenter(sx, sy, sz));
-				str = std::to_string(i+1);
+				str = std::to_string(i + 1);
 				str += ":";
 				str += std::to_string(it->second->Id());
 				nl.push_back(str);
 				gn.push_back(i);
+				num2++;
 			}
 		}
 	}
 	else
 	{
+		fls::CellGraph &graph = m_comp_analyzer.GetCompGroup(0)->graph;
 		fls::CelpList* list = m_comp_analyzer.GetCelpList();
 		sx = list->sx;
 		sy = list->sy;
 		sz = list->sz;
+		if (bn > 1)
+			graph.ClearVisited();
+
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 		{
+			if (bn > 1)
+			{
+				if (graph.Visited(it->second))
+					continue;
+				fls::CelpList links;
+				graph.GetLinkedComps(it->second, links, SIZE_LIMIT);
+			}
+
 			pos.push_back(it->second->GetCenter(sx, sy, sz));
 			str = std::to_string(it->second->Id());
 			nl.push_back(str);
+			num2++;
 		}
 	}
 	double dist = 0;
-	for (int i = 0; i < num; ++i)
+	for (int i = 0; i < num2; ++i)
 	{
-		for (int j = i; j < num; ++j)
+		for (int j = i; j < num2; ++j)
 		{
 			dist = (pos[i] - pos[j]).length();
 			rm[i][j] = dist;
@@ -2791,35 +2820,35 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 
 	bool bdist = m_use_dist_neighbor &&
 		m_dist_neighbor > 0 &&
-		m_dist_neighbor < num-1;
+		m_dist_neighbor < num2-1;
 
 	std::vector<double> in_group;//distances with in a group
 	std::vector<double> out_group;//distance between groups
-	in_group.reserve(num*num / 2);
-	out_group.reserve(num*num / 2);
+	in_group.reserve(num2*num2 / 2);
+	out_group.reserve(num2*num2 / 2);
 	std::vector<std::vector<int>> im;//index matrix
 	if (bdist)
 	{
 		//sort with indices
-		im.reserve(num);
-		for (size_t i = 0; i < num; ++i)
+		im.reserve(num2);
+		for (size_t i = 0; i < num2; ++i)
 		{
 			im.push_back(std::vector<int>());
-			im[i].reserve(num);
-			for (size_t j = 0; j < num; ++j)
+			im[i].reserve(num2);
+			for (size_t j = 0; j < num2; ++j)
 				im[i].push_back(j);
 		}
 		//copy rm
 		std::vector<std::vector<double>> rm2 = rm;
 		//sort
-		for (size_t i = 0; i < num; ++i)
+		for (size_t i = 0; i < num2; ++i)
 		{
 			std::sort(im[i].begin(), im[i].end(),
 				[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
 		}
 		//fill rm
-		for (size_t i = 0; i < num; ++i)
-			for (size_t j = 0; j < num; ++j)
+		for (size_t i = 0; i < num2; ++i)
+			for (size_t j = 0; j < num2; ++j)
 			{
 				rm[i][j] = rm2[i][im[i][j]];
 				if (gsize > 1 && j > 0 &&
@@ -2836,8 +2865,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	{
 		if (gsize > 1)
 		{
-			for (int i = 0; i < num; ++i)
-				for (int j = i + 1; j < num; ++j)
+			for (int i = 0; i < num2; ++i)
+				for (int j = i + 1; j < num2; ++j)
 				{
 					if (gn[i] == gn[j])
 						in_group.push_back(rm[i][j]);
@@ -2859,8 +2888,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		std::ofstream outfile;
 		outfile.open(str, std::ofstream::out);
 		//output result matrix
-		size_t dnum = bdist ? (m_dist_neighbor+1) : num;
-		for (size_t i = 0; i < num; ++i)
+		size_t dnum = bdist ? (m_dist_neighbor+1) : num2;
+		for (size_t i = 0; i < num2; ++i)
 		{
 			outfile << nl[i] << "\t";
 			for (size_t j = bdist?1:0; j < dnum; ++j)
@@ -2875,7 +2904,7 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 		if (bdist)
 		{
 			outfile << "\n";
-			for (size_t i = 0; i < num; ++i)
+			for (size_t i = 0; i < num2; ++i)
 			{
 				outfile << nl[i] << "\t";
 				for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
