@@ -36,7 +36,6 @@ ComponentSelector::ComponentSelector(VolumeData* vd)
 	m_analyzer(0),
 	m_sel_all(false),
 	m_id(0),
-	m_brick_id(-1),
 	m_use_min(false),
 	m_use_max(false),
 	m_min_num(0),
@@ -202,6 +201,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (!data_label)
 		return;
 
+	int bn = m_vd->GetBrickNum();
 	//select append
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -277,7 +277,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 		{
 			simple_select = false;
 			CelpList* analyzer_list = m_analyzer->GetCelpList();
-			auto iter = analyzer_list->find(Cell::GetKey(m_id, m_brick_id));
+			auto iter = analyzer_list->find(m_id);
 			if (iter == analyzer_list->end())
 				simple_select = true;
 			else
@@ -318,13 +318,13 @@ void ComponentSelector::Select(bool all, bool rmask)
 		if (simple_select)
 		{
 			unsigned long long acc_size = 0;
-			if (m_brick_id >= 0)
+			if (bn > 1)
 			{
 				for (index = 0; index < for_size; ++index)
 				{
 					brick_id = tex->get_brick_id(index);
 					if (data_label[index] == m_id &&
-						brick_id == m_brick_id)
+						brick_id == (m_id >> 32))
 						acc_size++;
 				}
 				if (((m_use_min || m_use_max) &&
@@ -335,7 +335,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 					{
 						brick_id = tex->get_brick_id(index);
 						if (data_label[index] == m_id &&
-							brick_id == m_brick_id)
+							brick_id == (m_id >> 32))
 							data_mask[index] = 255;
 					}
 				}

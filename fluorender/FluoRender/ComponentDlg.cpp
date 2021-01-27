@@ -2324,8 +2324,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		//get current mask
 		VolumeData* vd = m_view->m_glview->m_cur_vol;
 		fls::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(id);
-		comp_selector.SetBrickId(brick_id);
+		comp_selector.SetId(fls::Cell::GetKey(id, brick_id));
 
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
@@ -2374,8 +2373,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	//get current mask
 	VolumeData* vd = m_view->m_glview->m_cur_vol;
 	fls::ComponentSelector comp_selector(vd);
-	comp_selector.SetId(id);
-	comp_selector.SetBrickId(brick_id);
+	comp_selector.SetId(fls::Cell::GetKey(id, brick_id));
 
 	//cell size filter
 	bool use = m_analysis_min_check->GetValue();

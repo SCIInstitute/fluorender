@@ -51,14 +51,10 @@ namespace fls
 		{ m_sel_all = value; }
 		bool GetSelAll()
 		{ return m_sel_all; }
-		void SetId(unsigned int id)
+		void SetId(unsigned long long id)
 		{ m_id = id; }
-		unsigned int GetId()
+		unsigned long long GetId()
 		{ return m_id; }
-		void SetBrickId(int id)
-		{ m_brick_id = id; }
-		int GetBrickId()
-		{ return m_brick_id; }
 		void SetMinNum(bool use, unsigned int num)
 		{ m_use_min = use; m_min_num = num; }
 		void SetMaxNum(bool use, unsigned int num)
@@ -77,8 +73,7 @@ namespace fls
 		VolumeData* m_vd;
 		ComponentAnalyzer* m_analyzer;
 		bool m_sel_all;
-		unsigned int m_id;
-		int m_brick_id;//<0: not used
+		unsigned long long m_id;
 		bool m_use_min;
 		bool m_use_max;
 		unsigned int m_min_num;
