@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _TRACEDLG_H_
+#define _TRACEDLG_H_
+
 #include "Main.h"
 #include "DataManager.h"
 #include <wx/wx.h>
@@ -34,9 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include "teem/Nrrd/nrrd.h"
 #include <vector>
-
-#ifndef _TRACEDLG_H_
-#define _TRACEDLG_H_
 
 using namespace std;
 

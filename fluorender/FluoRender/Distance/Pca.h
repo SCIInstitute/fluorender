@@ -95,10 +95,6 @@ namespace fls
 		{
 			return m_points;
 		}
-		void AddPoints(std::vector<fluo::Point> &points)
-		{
-			m_points.insert(m_points.end(), points.begin(), points.end());
-		}
 		void SetCovMat(std::vector<double> &cov)
 		{
 			int size = cov.size();

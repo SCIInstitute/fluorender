@@ -142,6 +142,8 @@ public:
 		ID_CompClearBtn,
 		ID_ShuffleBtn,
 		//options
+		ID_ConSizeSldr,
+		ID_ConSizeText,
 		ID_ConsistentCheck,
 		ID_ColocalCheck,
 		//output
@@ -408,6 +410,8 @@ private:
 	wxCheckBox* m_analysis_max_check;
 	wxSpinCtrl* m_analysis_max_spin;
 	//options
+	wxSlider* m_con_size_sldr;
+	wxTextCtrl* m_con_size_text;
 	wxCheckBox* m_consistent_check;
 	wxCheckBox* m_colocal_check;
 	//output
@@ -558,6 +562,8 @@ private:
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
 	void OnShuffle(wxCommandEvent &event);
+	void OnConSizeSldr(wxScrollEvent &event);
+	void OnConSizeText(wxCommandEvent &event);
 	void OnConsistentCheck(wxCommandEvent &event);
 	void OnColocalCheck(wxCommandEvent &event);
 	//output

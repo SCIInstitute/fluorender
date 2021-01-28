@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "TraceDlg.h"
 #include "VRenderFrame.h"
 #include "VRenderView.h"
-#include "Components/CompSelector.h"
-#include "Components/CompAnalyzer.h"
+#include <Components/CompSelector.h>
+#include <Components/CompAnalyzer.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>

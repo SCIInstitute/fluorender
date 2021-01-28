@@ -39,7 +39,7 @@ ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_analyzed(false),
 	m_colocal(false),
 	m_bn(0),
-	m_slimit(1)
+	m_slimit(5)
 {
 	m_compgroup = AddCompGroup(vd);
 }
