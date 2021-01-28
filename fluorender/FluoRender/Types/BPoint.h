@@ -135,6 +135,29 @@ namespace fluo
 			}
 		}
 
+		inline void extend(const BPoint& bp)
+		{
+			if (is_valid_)
+			{
+				extend(bp.xmin_);
+				extend(bp.xmax_);
+				extend(bp.ymin_);
+				extend(bp.ymax_);
+				extend(bp.zmin_);
+				extend(bp.zmax_);
+			}
+			else
+			{
+				xmin_ = bp.xmin_;
+				xmax_ = bp.xmax_;
+				ymin_ = bp.ymin_;
+				ymax_ = bp.ymax_;
+				zmin_ = bp.zmin_;
+				zmax_ = bp.zmax_;
+				is_valid_ = bp.is_valid_;
+			}
+		}
+
 		//x, y, z size
 		inline Point size() const
 		{

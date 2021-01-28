@@ -46,6 +46,23 @@ namespace fls
 		~Pca()
 		{}
 
+		void Add(Pca &pca)
+		{
+			if (m_mode == 0)
+			{
+				m_mean += pca.m_mean;
+				m_cov[0][0] += pca.m_cov[0][0];
+				m_cov[0][1] += pca.m_cov[0][1];
+				m_cov[0][2] += pca.m_cov[0][2];
+				m_cov[1][1] += pca.m_cov[1][1];
+				m_cov[1][2] += pca.m_cov[1][2];
+				m_cov[2][2] += pca.m_cov[2][2];
+				m_num += pca.m_num;
+			}
+			else if (m_mode == 2)
+				m_points.insert(m_points.end(), pca.m_points.begin(), pca.m_points.end());
+			m_bpoint.extend(pca.m_bpoint);
+		}
 		void AddPoint(fluo::Point &point)
 		{
 			if (m_mode == 0)

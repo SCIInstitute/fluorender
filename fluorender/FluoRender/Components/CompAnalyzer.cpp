@@ -38,7 +38,8 @@ using namespace fls;
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_analyzed(false),
 	m_colocal(false),
-	m_bn(0)
+	m_bn(0),
+	m_slimit(1)
 {
 	m_compgroup = AddCompGroup(vd);
 }
@@ -303,7 +304,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 						1, value, ext,
 						i+b->ox(), j+b->oy(), k+b->oz(),
 						sx, sy, sz);
-				comp_list_brick.insert(pair<unsigned int, Celp>
+				comp_list_brick.insert(std::pair<unsigned int, Celp>
 					(id, Celp(info)));
 			}
 			else
@@ -325,7 +326,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			iter != comp_list_brick.end(); ++iter)
 		{
 			if (bn > 1)
-				size_limit = SIZE_LIMIT;
+				size_limit = m_slimit;
 			else
 				size_limit = 2;
 			if (iter->second->GetSize() < size_limit)
@@ -522,7 +523,7 @@ void ComponentAnalyzer::UpdateMaxCompSize(bool colocal)
 			continue;
 		CelpList list;
 		Celp info = graph[*iter].cell.lock();
-		if (graph.GetLinkedComps(info, list, SIZE_LIMIT))
+		if (graph.GetLinkedComps(info, list, m_slimit))
 		{
 			Cell temp(0, 0);//temporary cell for accumulation
 			for (auto li = list.begin();
@@ -563,7 +564,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 		if (graph.Visited(i->second))
 			continue;
 		CelpList list;
-		if (graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
+		if (graph.GetLinkedComps(i->second, list, m_slimit))
 		{
 			//make color consistent
 			//get the id of the first item in the list
@@ -632,7 +633,7 @@ size_t ComponentAnalyzer::GetCompSize()
 				continue;
 			CelpList list;
 			Celp info = graph[*iter].cell.lock();
-			graph.GetLinkedComps(info, list, SIZE_LIMIT);
+			graph.GetLinkedComps(info, list, m_slimit);
 			cc_size++;
 		}
 	}
@@ -698,7 +699,7 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 			if (info &&
 				ids.find(info->GetEId()) != ids.end())
 			{
-				graph.GetLinkedComps(info, list, SIZE_LIMIT);
+				graph.GetLinkedComps(info, list, m_slimit);
 				for (auto it2 = list.begin();
 					it2 != list.end(); ++it2)
 					ids.insert(it2->second->GetEId());
@@ -784,7 +785,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 				continue;
 
 			CelpList list;
-			if (graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
+			if (graph.GetLinkedComps(i->second, list, m_slimit))
 			{
 				for (auto iter = list.begin();
 					iter != list.end(); ++iter)
@@ -843,7 +844,7 @@ void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, std::st
 
 void ComponentAnalyzer::OutputCompListFile(std::string &filename, int verbose, std::string comp_header)
 {
-	ofstream ofs;
+	std::ofstream ofs;
 	ofs.open(filename, std::ofstream::out);
 	OutputCompListStream(ofs, verbose, comp_header);
 	ofs.close();
@@ -1026,7 +1027,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 			if (graph.Visited(i->second))
 				continue;
 			CelpList list;
-			graph.GetLinkedComps(i->second, list, SIZE_LIMIT);
+			graph.GetLinkedComps(i->second, list, m_slimit);
 		}
 
 		oss.str("");
@@ -1133,7 +1134,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		if (bn > 1)
 		{
 			CelpList list;
-			if (!graph.GetLinkedComps(i->second, list, SIZE_LIMIT))
+			if (!graph.GetLinkedComps(i->second, list, m_slimit))
 			{
 				list.insert(std::pair<unsigned long long, Celp>
 					(i->second->GetEId(), i->second));

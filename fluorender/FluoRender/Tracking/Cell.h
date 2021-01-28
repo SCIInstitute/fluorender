@@ -92,8 +92,8 @@ namespace fls
 		bool Visited(Celp &celp);
 		void ClearVisited();
 		void LinkComps(Celp &celp1, Celp &cell2);
-		bool GetLinkedComps(Celp& celp, CelpList& list, unsigned int size_limit = 0);
-		bool GetLinkedComps(CelpList& list_in, CelpList& list, unsigned int size_limit = 0);
+		bool GetLinkedComps(Celp& celp, CelpList& list, unsigned int size_limit = 5);
+		bool GetLinkedComps(CelpList& list_in, CelpList& list, unsigned int size_limit = 5);
 	};
 	typedef CellGraph::vertex_descriptor CelVrtx;
 	typedef CellGraph::edge_descriptor CelEdge;
@@ -343,7 +343,7 @@ namespace fls
 
 		m_pos += celp->m_pos;
 		m_box.extend(celp->m_box);
-		m_pca.AddPoints(celp->m_pca.GetPoints());
+		m_pca.Add(celp->m_pca);
 
 		m_size_ui_list.insert(m_size_ui_list.end(),
 			celp->m_size_ui_list.begin(), celp->m_size_ui_list.end());
@@ -583,7 +583,7 @@ namespace fls
 		m_pos = cell.m_pos;
 		m_center = cell.m_center;
 		m_box = cell.m_box;
-		m_pca.AddPoints(cell.m_pca.GetPoints());
+		m_pca.Add(cell.m_pca);
 	}
 
 	inline void Cell::Copy(Celp &celp, bool copy_id)
@@ -607,7 +607,7 @@ namespace fls
 		m_pos = celp->m_pos;
 		m_center = celp->m_center;
 		m_box = celp->m_box;
-		m_pca.AddPoints(celp->m_pca.GetPoints());
+		m_pca.Add(celp->m_pca);
 	}
 
 	inline void Cell::SetBrickId(unsigned int id)

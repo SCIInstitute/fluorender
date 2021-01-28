@@ -2767,7 +2767,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 					if (graph.Visited(it->second))
 						continue;
 					fls::CelpList links;
-					graph.GetLinkedComps(it->second, links, SIZE_LIMIT);
+					graph.GetLinkedComps(it->second, links,
+						m_comp_analyzer.GetSizeLimit());
 				}
 
 				pos.push_back(it->second->GetCenter(sx, sy, sz));
@@ -2798,7 +2799,8 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 				if (graph.Visited(it->second))
 					continue;
 				fls::CelpList links;
-				graph.GetLinkedComps(it->second, links, SIZE_LIMIT);
+				graph.GetLinkedComps(it->second, links,
+					m_comp_analyzer.GetSizeLimit());
 			}
 
 			pos.push_back(it->second->GetCenter(sx, sy, sz));
@@ -3901,7 +3903,8 @@ void ComponentDlg::FindCelps(fls::CelpList &list,
 		fls::CellGraph* graph = m_comp_analyzer.GetCellGraph();
 		graph->ClearVisited();
 		fls::CelpList links;
-		if (graph->GetLinkedComps(it->second, links, SIZE_LIMIT))
+		if (graph->GetLinkedComps(it->second, links,
+			m_comp_analyzer.GetSizeLimit()))
 		{
 			for (auto it2 = links.begin();
 				it2 != links.end(); ++it2)

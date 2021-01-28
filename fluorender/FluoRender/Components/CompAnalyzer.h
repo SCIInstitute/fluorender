@@ -40,8 +40,6 @@ class Annotations;
 
 namespace fls
 {
-#define SIZE_LIMIT 10
-
 	struct CompGroup
 	{
 		VolumeData* vd;//associated volume
@@ -59,6 +57,10 @@ namespace fls
 		ComponentAnalyzer(VolumeData* vd=0);
 		~ComponentAnalyzer();
 
+		unsigned int GetSizeLimit()
+		{ return m_slimit; }
+		void SetSizeLimit(unsigned int size)
+		{ m_slimit = size; }
 		bool GetAnalyzed()
 		{ return m_analyzed; }
 		void SetVolume(VolumeData* vd)
@@ -143,6 +145,7 @@ namespace fls
 		bool m_analyzed;//if used
 		int m_bn;
 		bool m_colocal;
+		unsigned int m_slimit;//size limit for connecting components
 		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 
 		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
