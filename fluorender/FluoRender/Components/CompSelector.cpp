@@ -170,7 +170,7 @@ void ComponentSelector::CompFull()
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetVR()->clear_tex_mask(false);
 }
 
 void ComponentSelector::Select(bool all, bool rmask)

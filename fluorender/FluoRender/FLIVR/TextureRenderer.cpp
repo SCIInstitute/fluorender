@@ -217,7 +217,7 @@ namespace flvr
 		}
 	}
 
-	void TextureRenderer::clear_tex_mask()
+	void TextureRenderer::clear_tex_mask(bool skip)
 	{
 		if (!tex_)
 			return;
@@ -227,7 +227,7 @@ namespace flvr
 		for (int i = tex_pool_.size() - 1; i >= 0; --i)
 		{
 			brick = tex_pool_[i].brick;
-			if (brick->get_skip_mask())
+			if (skip && brick->get_skip_mask())
 			{
 				brick->reset_skip_mask();
 				continue;

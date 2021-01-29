@@ -168,7 +168,7 @@ namespace flvr
 		//clear the opengl textures from the texture pool
 		static void clear_tex_pool();
 		void clear_tex_current();
-		void clear_tex_mask();
+		void clear_tex_mask(bool skip=true);
 		void clear_tex_label();
 
 		//set the 2d texture mask for segmentation
