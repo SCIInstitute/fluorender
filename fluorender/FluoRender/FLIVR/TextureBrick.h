@@ -98,6 +98,7 @@ namespace flvr {
 		std::wstring cache_filename;
 	};
 
+	class Texture;
 	class TextureBrick
 	{
 	public:
@@ -230,6 +231,7 @@ namespace flvr {
 
 		void set_paint_mask(bool val) { paint_mask_ = val; }
 		bool get_paint_mask() { return paint_mask_; }
+		bool get_paint_mask_neighbor(Texture* tex);
 
 		void set_new_grown(bool val) { new_grown_ = val; }
 		bool get_new_grown() { return new_grown_; }

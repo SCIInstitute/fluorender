@@ -30,8 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Main.h"
 #include "DataManager.h"
-#include "Components/CompGenerator.h"
-#include "Components/CompAnalyzer.h"
+#include <Components/CompGenerator.h>
+#include <Components/CompAnalyzer.h>
 #include <Distance/RulerAlign.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>

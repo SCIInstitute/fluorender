@@ -268,8 +268,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	sizerB->Add(10, 10);
 	panel_bot->SetSizer(sizerB);
 
-	splittermain->SetSashGravity(0.9);
-	splittermain->SplitHorizontally(panel_top, panel_bot, 160);
+	splittermain->SetSashGravity(0.0);
+	splittermain->SplitHorizontally(panel_top, panel_bot, 500);
 
 	SetSizer(mainsizer);
 	panel_top->Layout();
@@ -798,26 +798,26 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer11->Add(m_analysis_max_spin, 0, wxALIGN_CENTER);
 	//buttons
 	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Select",
-		wxDefaultPosition, wxSize(65, 23));
-	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "All",
-		wxDefaultPosition, wxSize(65, 23));
-	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "FullCompt",
-		wxDefaultPosition, wxSize(80, 23));
-	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Replace",
-		wxDefaultPosition, wxSize(65, 23));
+	m_comp_append_btn = new wxButton(page, ID_CompAppendBtn, "Append",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_exclusive_btn = new wxButton(page, ID_CompExclusiveBtn, "Exclusive",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_all_btn = new wxButton(page, ID_CompAllBtn, "AllVox",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_full_btn = new wxButton(page, ID_CompFullBtn, "Fulfill",
+		wxDefaultPosition, wxDefaultSize);
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
-		wxDefaultPosition, wxSize(65, 23));
+		wxDefaultPosition, wxDefaultSize);
 	m_shuffle_btn = new wxButton(page, ID_ShuffleBtn, "Shuffle",
-		wxDefaultPosition, wxSize(65, 23));
-	sizer12->AddStretchSpacer();
+		wxDefaultPosition, wxDefaultSize);
+	sizer11->Add(5, 5);
 	sizer12->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
+	sizer11->Add(5, 5);
+	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
 	sizer12->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
-	sizer12->AddStretchSpacer();
 	//
 	sizer1->Add(10, 10);
 	sizer1->Add(sizer11, 0, wxEXPAND);
@@ -3296,7 +3296,7 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 			}
 		}
 	}
-	brick_id = -1;
+	brick_id = 0;
 	return true;
 }
 

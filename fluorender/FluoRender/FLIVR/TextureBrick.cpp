@@ -27,6 +27,7 @@
 //
 
 #include "../compatibility.h"
+#include "Texture.h"
 #include <math.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
@@ -687,6 +688,63 @@ namespace flvr
 		readsize = zsize;
 
 		return true;
+	}
+
+	bool TextureBrick::get_paint_mask_neighbor(Texture* tex)
+	{
+		if (paint_mask_) return true;
+		//check neighbors
+		unsigned int nid;
+		TextureBrick* nb;
+		nid = tex->negxid(id_);
+		//negx
+		if (nid != id_)
+		{
+			nb = tex->get_brick(nid);
+			if (nb && nb->paint_mask_)
+				return true;
+		}
+		//negy
+		nid = tex->negyid(id_);
+		if (nid != id_)
+		{
+			nb = tex->get_brick(nid);
+			if (nb && nb->paint_mask_)
+				return true;
+		}
+		//negz
+		nid = tex->negzid(id_);
+		if (nid != id_)
+		{
+			nb = tex->get_brick(nid);
+			if (nb && nb->paint_mask_)
+				return true;
+		}
+		//posx
+		nid = tex->posxid(id_);
+		if (nid != id_)
+		{
+			nb = tex->get_brick(nid);
+			if (nb && nb->paint_mask_)
+				return true;
+		}
+		//posy
+		nid = tex->posyid(id_);
+		if (nid != id_)
+		{
+			nb = tex->get_brick(nid);
+			if (nb && nb->paint_mask_)
+				return true;
+		}
+		//posz
+		nid = tex->poszid(id_);
+		if (nid != id_)
+		{
+			nb = tex->get_brick(nid);
+			if (nb && nb->paint_mask_)
+				return true;
+		}
+		return false;
 	}
 
 } // end namespace flvr

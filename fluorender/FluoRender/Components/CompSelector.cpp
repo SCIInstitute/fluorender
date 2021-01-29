@@ -137,8 +137,8 @@ void ComponentSelector::CompFull()
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->get_paint_mask())
-			continue;
+		//if (!b->get_paint_mask_neighbor(tex))
+		//	continue;
 
 		brick_id = b->get_id();
 		for (i = 0; i < b->nx(); ++i)
@@ -609,7 +609,8 @@ inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpL
 			++iter;
 		}
 		if (m_analyzer->GetCellGraph()->
-			GetLinkedComps(list_in, list_out))
+			GetLinkedComps(list_in, list_out,
+				m_analyzer->GetSizeLimit()))
 			return &list_out;
 		else
 			return &list_in;
