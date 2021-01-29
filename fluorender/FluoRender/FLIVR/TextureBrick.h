@@ -205,14 +205,6 @@ namespace flvr {
 		//get value
 		double get_data(unsigned int i, unsigned int j, unsigned int k);
 
-		//get skip mask
-		bool get_skip_mask()
-		{ return skip_mask_; }
-		void set_skip_mask(bool value)
-		{ skip_mask_ = value; }
-		void reset_skip_mask()
-		{ skip_mask_ = false; }
-
 		void freeBrkData();
 		bool read_brick(char* data, size_t size, const FileLocInfo* finfo);
 		bool isLoaded() { return brkdata_ ? true : false; };
@@ -229,9 +221,15 @@ namespace flvr {
 		void set_disp(bool disp) { disp_ = disp; }
 		bool get_disp() { return disp_; }
 
-		void set_paint_mask(bool val) { paint_mask_ = val; }
-		bool get_paint_mask() { return paint_mask_; }
-		bool get_paint_mask_neighbor(Texture* tex);
+		//mask validity after painting
+		void valid_mask(bool val=true) { mask_valid_ = val; }
+		void invalid_mask() { mask_valid_ = false; }
+		bool is_mask_valid() { return mask_valid_; }
+		bool is_nbmask_valid(Texture* tex);//check 6 neighbors
+		//activate/deactivate mask painting
+		void act_mask(bool val = true) { mask_act_ = val; }
+		void deact_mask() { mask_act_ = false; }
+		bool is_mask_act() { return mask_act_; }
 
 		void set_new_grown(bool val) { new_grown_ = val; }
 		bool get_new_grown() { return new_grown_; }
@@ -279,10 +277,10 @@ namespace flvr {
 		size_t ind_;
 		//id for analysis
 		unsigned int id_;
-		//skip mask updating
-		bool skip_mask_;
-		//use for paint mask volume
-		bool paint_mask_;
+		//mask validity after painting
+		bool mask_valid_;
+		//mask is active (being painted)
+		bool mask_act_;
 		//new label for grow ruler merge
 		bool new_grown_;
 

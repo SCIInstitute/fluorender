@@ -260,10 +260,28 @@ namespace flvr
 		bool add_empty_label();
 
 		//enable mask paint for all
-		void enable_paint_mask()
+		void deact_all_mask()
 		{
 			for (size_t i = 0; i < bricks_->size(); ++i)
-				(*bricks_)[i]->set_paint_mask(true);
+				(*bricks_)[i]->deact_mask();
+		}
+		//activate all masks
+		void act_all_mask()
+		{
+			for (size_t i = 0; i < bricks_->size(); ++i)
+				(*bricks_)[i]->act_mask();
+		}
+		//invalidate all masks
+		void invalid_all_mask()
+		{
+			for (size_t i = 0; i < bricks_->size(); ++i)
+				(*bricks_)[i]->invalid_mask();
+		}
+		//validate all masks
+		void valid_all_mask()
+		{
+			for (size_t i = 0; i < bricks_->size(); ++i)
+				(*bricks_)[i]->valid_mask();
 		}
 
 		//get priority brick number

@@ -92,7 +92,7 @@ void ComponentGenerator::ShuffleID()
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -222,7 +222,7 @@ void ComponentGenerator::SetIDBit(int psize)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -400,7 +400,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -505,7 +505,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -763,7 +763,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -954,7 +954,7 @@ void ComponentGenerator::DistDensityField(
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -1272,7 +1272,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -1417,7 +1417,7 @@ void ComponentGenerator::ClearBorders()
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
@@ -1479,7 +1479,7 @@ void ComponentGenerator::FillBorders(float tol)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->get_paint_mask())
+		if (m_use_mask && !b->is_mask_valid())
 			continue;
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();

@@ -1279,9 +1279,13 @@ namespace flvr
 		{
 			TextureBrick* b = (*bricks)[i];
 			//if (!test_against_view(b->bbox(), !orthographic_p))
-			if (!b->get_paint_mask())
+			if (paint_mode == 5 ||
+				paint_mode == 6 ||
+				paint_mode == 7)
 			{
-				b->set_skip_mask(true);
+			}
+			else if (!b->is_mask_act())
+			{
 				continue;
 			}
 
@@ -1396,7 +1400,7 @@ namespace flvr
 			if (nid != bid)
 			{
 				nb = tex_->get_brick(nid);
-				if (nb && nb->get_paint_mask())
+				if (nb && nb->is_mask_act())
 				{
 					nbnx = nb->nx();
 					nbtex = load_brick_mask(nb);
@@ -1413,7 +1417,7 @@ namespace flvr
 			if (nid != bid)
 			{
 				nb = tex_->get_brick(nid);
-				if (nb && nb->get_paint_mask())
+				if (nb && nb->is_mask_act())
 				{
 					nbny = nb->ny();
 					nbtex = load_brick_mask(nb);
@@ -1430,7 +1434,7 @@ namespace flvr
 			if (nid != bid)
 			{
 				nb = tex_->get_brick(nid);
-				if (nb && nb->get_paint_mask())
+				if (nb && nb->is_mask_act())
 				{
 					nbnz = nb->nz();
 					nbtex = load_brick_mask(nb);
@@ -1450,7 +1454,7 @@ namespace flvr
 			if (nid != bid)
 			{
 				nb = tex_->get_brick(nid);
-				if (nb && nb->get_paint_mask())
+				if (nb && nb->is_mask_act())
 				{
 					nbtex = load_brick_mask(nb);
 					glCopyImageSubData(
@@ -1466,7 +1470,7 @@ namespace flvr
 			if (nid != bid)
 			{
 				nb = tex_->get_brick(nid);
-				if (nb && nb->get_paint_mask())
+				if (nb && nb->is_mask_act())
 				{
 					nbtex = load_brick_mask(nb);
 					glCopyImageSubData(
@@ -1482,7 +1486,7 @@ namespace flvr
 			if (nid != bid)
 			{
 				nb = tex_->get_brick(nid);
-				if (nb && nb->get_paint_mask())
+				if (nb && nb->is_mask_act())
 				{
 					nbtex = load_brick_mask(nb);
 					glCopyImageSubData(
@@ -1727,7 +1731,7 @@ namespace flvr
 			i+=((order==2)?-1:1))
 		{
 			TextureBrick* b = (*bricks)[i];
-			if (!b || b->get_skip_mask())
+			if (!b || !b->is_mask_valid())
 				continue;
 
 			load_brick_mask(b);

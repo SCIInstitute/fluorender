@@ -211,8 +211,7 @@ void VolumeSelector::Select(double radius)
 		gm_falloff = 1.0;
 
 	//clear paint mask flags
-	if (m_mode != 9 || m_init_mask & 1)
-		m_vd->GetTexture()->enable_paint_mask();
+	m_vd->GetTexture()->deact_all_mask();
 
 	//clear selection
 	if (m_mode == 1)
@@ -226,35 +225,37 @@ void VolumeSelector::Select(double radius)
 
 	//set up paint mask flags
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	if (bricks->size() > 1 && (
-		m_mode == 1 || m_mode == 2 ||
+	if (m_mode == 1 || m_mode == 2 ||
 		m_mode == 3 || m_mode == 4 ||
-		m_mode == 8 || m_mode == 9))
+		m_mode == 8 || m_mode == 9)
 	{
-		fls::PaintBoxes pb;
-		pb.SetBricks(bricks);
-		if (m_mode != 9 || m_init_mask & 1)
-			pb.ClearBricks();
-		pb.SetPersp(!m_view->GetPersp());
-		fluo::Transform *tform = m_vd->GetTexture()->transform();
-		double mvmat[16];
-		tform->get_trans(mvmat);
-		glm::mat4 mv_mat2 = glm::mat4(
-			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		mv_mat2 = m_mv_mat * mv_mat2;
-		glm::mat4 cmat = m_prj_mat * mv_mat2;
-		fluo::Transform mv, pr, mat;
-		mv.set(glm::value_ptr(mv_mat2));
-		pr.set(glm::value_ptr(m_prj_mat));
-		mat.set(glm::value_ptr(cmat));
-		pb.SetMats(mv, pr, mat);
-		pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
-		if (m_mode == 9)
-			pb.SetMousePos(m_mx, m_my);
-		pb.Compute();
+		if (bricks->size() > 1)
+		{
+			fls::PaintBoxes pb;
+			pb.SetBricks(bricks);
+			pb.SetPersp(!m_view->GetPersp());
+			fluo::Transform *tform = m_vd->GetTexture()->transform();
+			double mvmat[16];
+			tform->get_trans(mvmat);
+			glm::mat4 mv_mat2 = glm::mat4(
+				mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+				mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+				mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+				mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+			mv_mat2 = m_mv_mat * mv_mat2;
+			glm::mat4 cmat = m_prj_mat * mv_mat2;
+			fluo::Transform mv, pr, mat;
+			mv.set(glm::value_ptr(mv_mat2));
+			pr.set(glm::value_ptr(m_prj_mat));
+			mat.set(glm::value_ptr(cmat));
+			pb.SetMats(mv, pr, mat);
+			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
+			if (m_mode == 9)
+				pb.SetMousePos(m_mx, m_my);
+			pb.Compute();
+		}
+		else
+			m_vd->GetTexture()->act_all_mask();
 	}
 
 	//initialization
@@ -313,12 +314,15 @@ void VolumeSelector::Select(double radius)
 		}
 	}
 
-	if (m_mode == 6)
-		m_vd->SetUseMaskThreshold(false);
-
 	if (flvr::Texture::mask_undo_num_>0 &&
 		m_vd->GetVR())
 		m_vd->GetVR()->return_mask();
+
+	if (m_mode == 6)
+	{
+		m_vd->SetUseMaskThreshold(false);
+		m_vd->GetTexture()->invalid_all_mask();
+	}
 }
 
 double VolumeSelector::HueCalculation(int mode, unsigned int label)

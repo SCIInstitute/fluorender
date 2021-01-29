@@ -54,7 +54,8 @@ namespace flvr
 		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), dbox_(dbox),
 		id_(id),
 		findex_(findex), offset_(offset), fsize_(fsize),
-		paint_mask_(true), new_grown_(false)
+		mask_valid_(false), mask_act_(false),
+		new_grown_(false)
 	{
 		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
 		{
@@ -91,9 +92,6 @@ namespace flvr
 
 		//priority
 		priority_ = 0;
-
-		//skip mask updating
-		skip_mask_ = false;
 
 		//brkxml
 		brkdata_ = NULL;
@@ -690,9 +688,9 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::get_paint_mask_neighbor(Texture* tex)
+	bool TextureBrick::is_nbmask_valid(Texture* tex)
 	{
-		if (paint_mask_) return true;
+		if (mask_valid_) return true;
 		//check neighbors
 		unsigned int nid;
 		TextureBrick* nb;
@@ -701,7 +699,7 @@ namespace flvr
 		if (nid != id_)
 		{
 			nb = tex->get_brick(nid);
-			if (nb && nb->paint_mask_)
+			if (nb && nb->mask_valid_)
 				return true;
 		}
 		//negy
@@ -709,7 +707,7 @@ namespace flvr
 		if (nid != id_)
 		{
 			nb = tex->get_brick(nid);
-			if (nb && nb->paint_mask_)
+			if (nb && nb->mask_valid_)
 				return true;
 		}
 		//negz
@@ -717,7 +715,7 @@ namespace flvr
 		if (nid != id_)
 		{
 			nb = tex->get_brick(nid);
-			if (nb && nb->paint_mask_)
+			if (nb && nb->mask_valid_)
 				return true;
 		}
 		//posx
@@ -725,7 +723,7 @@ namespace flvr
 		if (nid != id_)
 		{
 			nb = tex->get_brick(nid);
-			if (nb && nb->paint_mask_)
+			if (nb && nb->mask_valid_)
 				return true;
 		}
 		//posy
@@ -733,7 +731,7 @@ namespace flvr
 		if (nid != id_)
 		{
 			nb = tex->get_brick(nid);
-			if (nb && nb->paint_mask_)
+			if (nb && nb->mask_valid_)
 				return true;
 		}
 		//posz
@@ -741,7 +739,7 @@ namespace flvr
 		if (nid != id_)
 		{
 			nb = tex->get_brick(nid);
-			if (nb && nb->paint_mask_)
+			if (nb && nb->mask_valid_)
 				return true;
 		}
 		return false;

@@ -100,7 +100,7 @@ void ComponentSelector::CompFull()
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->get_paint_mask())
+		if (!b->is_mask_valid())
 			continue;
 
 		brick_id = b->get_id();

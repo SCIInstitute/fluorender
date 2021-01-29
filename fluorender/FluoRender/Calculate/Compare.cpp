@@ -672,8 +672,8 @@ void ChannelCompare::Product()
 		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
-			if (!b1->get_paint_mask() ||
-				!b2->get_paint_mask())
+			if (!b1->is_mask_valid() ||
+				!b2->is_mask_valid())
 				continue;
 		}
 		long nx, ny, nz, bits1, bits2;
@@ -793,8 +793,8 @@ void ChannelCompare::MinValue()
 		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
-			if (!b1->get_paint_mask() ||
-				!b2->get_paint_mask())
+			if (!b1->is_mask_valid() ||
+				!b2->is_mask_valid())
 				continue;
 		}
 		long nx, ny, nz, bits1, bits2;
@@ -914,8 +914,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
-			if (!b1->get_paint_mask() ||
-				!b2->get_paint_mask())
+			if (!b1->is_mask_valid() ||
+				!b2->is_mask_valid())
 				continue;
 		}
 		long nx, ny, nz, bits1, bits2;
@@ -1024,8 +1024,8 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
 		{
-			if (!b1->get_paint_mask() ||
-				!b2->get_paint_mask())
+			if (!b1->is_mask_valid() ||
+				!b2->is_mask_valid())
 				continue;
 		}
 		long nx, ny, nz, bits1, bits2;

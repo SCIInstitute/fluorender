@@ -133,7 +133,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		int nb = 1;
 		if (bn > 1)
 		{
-			if (sel && !b->get_paint_mask())
+			if (sel && !b->is_mask_valid())
 				continue;
 			// get brick if ther are more than one brick
 			nb = b->nb(0);
@@ -389,7 +389,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	{
 		//get one brick
 		flvr::TextureBrick* b = (*bricks)[bi];
-		if (sel && !b->get_paint_mask())
+		if (sel && !b->is_mask_valid())
 			continue;
 		void* data_data = 0;
 		unsigned char* data_mask = 0;

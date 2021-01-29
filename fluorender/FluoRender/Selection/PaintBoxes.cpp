@@ -174,7 +174,10 @@ void PaintBoxes::Compute()
 	for (int i = 0; i < num; ++i)
 	{
 		if (hits[i])
-			bbs[i].brick->set_paint_mask(true);
+		{
+			bbs[i].brick->act_mask();
+			bbs[i].brick->valid_mask();
+		}
 	}
 
 	//release buffer
@@ -214,7 +217,10 @@ void PaintBoxes::BrickViewInt()
 		flvr::TextureBrick* b = (*m_bricks)[i];
 		fluo::BBox bbox = b->bbox();
 		if (test_against_view(bbox))
-			b->set_paint_mask(true);
+		{
+			b->act_mask();
+			b->valid_mask();
+		}
 	}
 }
 
@@ -241,7 +247,10 @@ void PaintBoxes::BrickRayInt()
 		flvr::TextureBrick* b = (*m_bricks)[i];
 		fluo::BBox bbox = b->bbox();
 		if (bbox.intersect(mp1, dir, hit))
-			b->set_paint_mask(true);
+		{
+			b->act_mask();
+			b->valid_mask();
+		}
 	}
 }
 

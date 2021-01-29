@@ -730,7 +730,7 @@ void SegGrow::Compute()
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->get_paint_mask())
+		if (!b->is_mask_act())
 			continue;
 		//clear new grown flag
 		b->set_new_grown(false);
@@ -1227,7 +1227,7 @@ void SegGrow::Compute()
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->get_paint_mask())
+		if (!b->is_mask_act())
 			continue;
 		int nx = b->nx();
 		int ny = b->ny();

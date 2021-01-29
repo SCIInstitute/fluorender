@@ -112,7 +112,7 @@ void MaskBorder::Compute(int order)
 	std::vector<flvr::TextureBrick*> bricks;
 	for (int i = 0; i < bn; ++i)
 	{
-		if ((*all_bricks)[i]->get_paint_mask())
+		if ((*all_bricks)[i]->is_mask_act())
 			bricks.push_back((*all_bricks)[i]);
 	}
 	bn = bricks.size();
@@ -162,7 +162,10 @@ void MaskBorder::Compute(int order)
 			nid = order == 2 ? tex->negxid(bid) : tex->posxid(bid);
 			nb = tex->get_brick(nid);
 			if (nb)
-				nb->set_paint_mask(true);
+			{
+				nb->valid_mask();
+				nb->act_mask();
+			}
 		}
 
 		//xz plane
@@ -186,7 +189,10 @@ void MaskBorder::Compute(int order)
 			nid = order == 2 ? tex->negyid(bid) : tex->posyid(bid);
 			nb = tex->get_brick(nid);
 			if (nb)
-				nb->set_paint_mask(true);
+			{
+				nb->valid_mask();
+				nb->act_mask();
+			}
 		}
 
 		//xy plane
@@ -210,7 +216,10 @@ void MaskBorder::Compute(int order)
 			nid = order == 2 ? tex->negzid(bid) : tex->poszid(bid);
 			nb = tex->get_brick(nid);
 			if (nb)
-				nb->set_paint_mask(true);
+			{
+				nb->valid_mask();
+				nb->act_mask();
+			}
 		}
 
 		//release buffer
