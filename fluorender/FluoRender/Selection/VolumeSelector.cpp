@@ -255,7 +255,10 @@ void VolumeSelector::Select(double radius)
 			pb.Compute();
 		}
 		else
+		{
 			m_vd->GetTexture()->act_all_mask();
+			m_vd->GetTexture()->valid_all_mask();
+		}
 	}
 
 	//initialization

@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <Cell.h>
 
+namespace flvr
+{
+	class Texture;
+}
 class VolumeData;
 namespace fls
 {
@@ -82,6 +86,8 @@ namespace fls
 	private:
 		bool CompareSize(unsigned int size);
 		CelpList* GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
+		void SelectMask(unsigned char* mask,
+			unsigned long long idx, unsigned char v, flvr::Texture* tex);
 	};
 
 	inline bool ComponentSelector::CompareSize(
@@ -111,6 +117,5 @@ namespace fls
 		else
 			return false;
 	}
-
 }
 #endif//FL_CompSelector_h

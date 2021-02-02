@@ -92,8 +92,14 @@ void ComponentGenerator::ShuffleID()
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
-			continue;
+		if (m_use_mask)
+		{
+			if (!b->is_mask_valid())
+				continue;
+		}
+		else
+			b->valid_mask();
+
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();
@@ -222,8 +228,14 @@ void ComponentGenerator::SetIDBit(int psize)
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_mask && !b->is_mask_valid())
-			continue;
+		if (m_use_mask)
+		{
+			if (!b->is_mask_valid())
+				continue;
+		}
+		else
+			b->valid_mask();
+
 		int bits = b->nb(0) * 8;
 		int nx = b->nx();
 		int ny = b->ny();

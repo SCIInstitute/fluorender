@@ -60,6 +60,17 @@ namespace fls
 			min(0), max(0),
 			sx(1), sy(1), sz(1)
 		{}
+
+		bool FindBrick(unsigned int id)
+		{
+			for (auto it = begin();
+				it != end(); ++it)
+			{
+				if (id == (it->first >> 32))
+					return true;
+			}
+			return false;
+		}
 	};
 	typedef CelpList::iterator CelpListIter;
 
