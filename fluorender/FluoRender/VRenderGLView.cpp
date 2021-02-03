@@ -608,8 +608,8 @@ void VRenderGLView::Init()
 		flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
-		if (ctx != TextureRenderer::gl_context_)
-			TextureRenderer::gl_context_ = ctx;
+        if (ctx != flvr::TextureRenderer::gl_context_)
+            flvr::TextureRenderer::gl_context_ = ctx;
 #endif
 		if (vr_frame)
 		{
