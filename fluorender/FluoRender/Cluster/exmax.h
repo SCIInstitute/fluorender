@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "ClusterMethod.h"
 
-namespace fls
+namespace flrd
 {
 	class ClusterExmax : public ClusterMethod
 	{

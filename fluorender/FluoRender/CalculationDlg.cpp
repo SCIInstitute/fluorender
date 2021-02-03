@@ -202,7 +202,7 @@ void CalculationDlg::OnCalcSub(wxCommandEvent &event)
 			m_cur_view = vr_frame->GetView(0);
 
 		if (!m_cur_view) return;
-		fls::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
 		if (!calculator) return;
 		calculator->SetVolumeA(m_vol1);
 		calculator->SetVolumeB(m_vol2);
@@ -234,7 +234,7 @@ void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
 			m_cur_view = vr_frame->GetView(0);
 
 		if (!m_cur_view) return;
-		fls::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
 		if (!calculator) return;
 		calculator->SetVolumeA(m_vol1);
 		calculator->SetVolumeB(m_vol2);
@@ -266,7 +266,7 @@ void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
 			m_cur_view = vr_frame->GetView(0);
 
 		if (!m_cur_view) return;
-		fls::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
 		if (!calculator) return;
 		calculator->SetVolumeA(m_vol1);
 		calculator->SetVolumeB(m_vol2);
@@ -298,7 +298,7 @@ void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
 			m_cur_view = vr_frame->GetView(0);
 
 		if (!m_cur_view) return;
-		fls::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
 		if (!calculator) return;
 		calculator->SetVolumeA(m_vol1);
 		calculator->SetVolumeB(m_vol2);
@@ -331,7 +331,7 @@ void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 			m_cur_view = vr_frame->GetView(0);
 
 		if (!m_cur_view) return;
-		fls::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
+		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
 		if (!calculator) return;
 		calculator->SetVolumeA(m_vol1);
 		m_vol2 = 0;
@@ -348,7 +348,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 	if (!m_group)
 		return;
 
-	fls::CombineList Op;
+	flrd::CombineList Op;
 	wxString name = m_group->GetName() + "_combined";
 	Op.SetName(name);
 	std::list<VolumeData*> channs;

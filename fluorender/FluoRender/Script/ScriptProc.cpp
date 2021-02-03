@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
 
-using namespace fls;
+using namespace flrd;
 
 ScriptProc::ScriptProc() :
 	m_frame(0),
@@ -200,22 +200,22 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 		int slimit;
 		fconfig.Read("size_limit", &slimit, 0);
 		//before updating volume
-		fls::ComponentAnalyzer comp_analyzer(cur_vol);
+		flrd::ComponentAnalyzer comp_analyzer(cur_vol);
 		comp_analyzer.Analyze(true, true);
-		fls::CelpList* list = comp_analyzer.GetCelpList();
+		flrd::CelpList* list = comp_analyzer.GetCelpList();
 		m_sel_labels.clear();
 		for (auto it = list->begin();
 			it != list->end(); ++it)
 		{
 			if (it->second->GetSize() > slimit)
 			{
-				fls::Celp celp(new fls::Cell(it->second->Id()));
+				flrd::Celp celp(new flrd::Cell(it->second->Id()));
 				celp->Copy(it->second, true);
 				//celp->SetSizeUi(it->second->sumi);
 				//celp->SetSizeD(it->second->sumd);
 				//celp->SetCenter(it->second->pos);
 				//celp->SetBox(it->second->box);
-				m_sel_labels.insert(pair<unsigned int, fls::Celp>
+				m_sel_labels.insert(pair<unsigned int, flrd::Celp>
 					(it->second->Id(), celp));
 			}
 		}
@@ -282,8 +282,8 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 	int tseq_cur_num = m_view->m_tseq_cur_num;
 	int tseq_prv_num = m_view->m_tseq_prv_num;
 
-	fls::pTrackMap track_map = tg->GetTrackMap();
-	fls::TrackMapProcessor tm_processor(track_map);
+	flrd::pTrackMap track_map = tg->GetTrackMap();
+	flrd::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
 	double spcx, spcy, spcz;
@@ -736,7 +736,7 @@ void ScriptProc::RunCompAnalysis(int index, wxFileConfig &fconfig)
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		fls::ComponentAnalyzer comp_analyzer(*i);
+		flrd::ComponentAnalyzer comp_analyzer(*i);
 		comp_analyzer.Analyze(selected, consistent);
 		string result_str;
 		string comp_header = wxString::Format("%d", tseq_cur_num);
@@ -905,11 +905,11 @@ void ScriptProc::RunRulerProfile(int index, wxFileConfig &fconfig)
 	{
 		//for each ruler
 		wxString str;
-		fls::Ruler* ruler = (*ruler_list)[i];
+		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 
-		vector<fls::ProfileBin>* profile = ruler->GetProfile();
+		vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 		if (profile && profile->size())
 		{
 			double sumd = 0.0;
@@ -973,8 +973,8 @@ void ScriptProc::RunAddCells(int index, wxFileConfig &fconfig)
 	if (time_mode != index)
 		return;
 
-	fls::pTrackMap track_map = tg->GetTrackMap();
-	fls::TrackMapProcessor tm_processor(track_map);
+	flrd::pTrackMap track_map = tg->GetTrackMap();
+	flrd::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(cur_vol->GetBits());
 	tm_processor.SetScale(cur_vol->GetScalarScale());
 	int resx, resy, resz;
@@ -1012,8 +1012,8 @@ void ScriptProc::RunUnlinkCells(int index, wxFileConfig &fconfig)
 	if (time_mode != index)
 		return;
 
-	fls::pTrackMap track_map = tg->GetTrackMap();
-	fls::TrackMapProcessor tm_processor(track_map);
+	flrd::pTrackMap track_map = tg->GetTrackMap();
+	flrd::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(cur_vol->GetBits());
 	tm_processor.SetScale(cur_vol->GetScalarScale());
 	int resx, resy, resz;
@@ -1023,7 +1023,7 @@ void ScriptProc::RunUnlinkCells(int index, wxFileConfig &fconfig)
 }
 
 //read/delete volume cache
-void ScriptProc::ReadVolCache(fls::VolCache& vol_cache)
+void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
@@ -1066,7 +1066,7 @@ void ScriptProc::ReadVolCache(fls::VolCache& vol_cache)
 		vol_cache.valid = true;
 }
 
-void ScriptProc::DelVolCache(fls::VolCache& vol_cache)
+void ScriptProc::DelVolCache(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers

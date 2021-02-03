@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Object.h>
 #include <Scenegraph/Node.h>
 
-using namespace fls;
+using namespace flrd;
 
 Referenced* CopyOp::operator() (const Referenced* ref) const
 {

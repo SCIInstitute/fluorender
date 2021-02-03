@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/qvm/mat_access.hpp>
 #include <boost/qvm/vec_access.hpp>
 
-using namespace fls;
+using namespace flrd;
 
 ClusterExmax::ClusterExmax() :
 	m_clnum(2),

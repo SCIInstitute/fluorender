@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ClusterMethod.h"
 #include <boost/qvm/vec_access.hpp>
 
-using namespace fls;
+using namespace flrd;
 
 void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 {

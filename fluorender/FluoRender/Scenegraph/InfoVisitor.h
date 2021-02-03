@@ -34,14 +34,14 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <string>
 
-namespace fls
+namespace flrd
 {
-	class InfoVisitor : public fls::NodeVisitor
+	class InfoVisitor : public flrd::NodeVisitor
 	{
 	public:
 		InfoVisitor() : level_(0)
 		{
-			setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
 		std::string spaces()
@@ -49,7 +49,7 @@ namespace fls
 			return std::string(level_ * 2, ' ');
 		}
 
-		virtual void apply(fls::Node& node)
+		virtual void apply(flrd::Node& node)
 		{
 			std::cout << spaces() << node.className() <<
 				"-" << node.getName() << "\t" << &node << std::endl;
@@ -61,7 +61,7 @@ namespace fls
 			level_--;
 		}
 
-		virtual void apply(fls::Group& group)
+		virtual void apply(flrd::Group& group)
 		{
 			std::cout << spaces() << group.className() <<
 				"-" << group.getName() << "\t" << &group << std::endl;
@@ -77,7 +77,7 @@ namespace fls
 	protected:
 		unsigned int level_;
 
-		void printValues(fls::Object* object)
+		void printValues(flrd::Object* object)
 		{
 			if (!object)
 				return;

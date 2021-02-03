@@ -372,7 +372,7 @@ void ColocalizationDlg::Colocalize()
 					!vd2->GetDisp())
 					continue;
 
-				fls::ChannelCompare compare(vd1, vd2);
+				flrd::ChannelCompare compare(vd1, vd2);
 				compare.SetUseMask(m_use_mask);
 				compare.SetIntWeighted(m_int_weighted);
 				switch (m_method)
@@ -414,7 +414,7 @@ void ColocalizationDlg::Colocalize()
 				!vd2->GetDisp())
 				continue;
 
-			fls::ChannelCompare compare(vd1, vd2);
+			flrd::ChannelCompare compare(vd1, vd2);
 			compare.SetUseMask(m_use_mask);
 			compare.SetIntWeighted(m_int_weighted);
 			//get threshold values

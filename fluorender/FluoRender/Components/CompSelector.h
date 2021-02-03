@@ -36,7 +36,7 @@ namespace flvr
 	class Texture;
 }
 class VolumeData;
-namespace fls
+namespace flrd
 {
 	class ComponentAnalyzer;
 	class ComponentSelector

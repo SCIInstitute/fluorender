@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
-namespace fls
+namespace flrd
 {
 	class AText
 	{

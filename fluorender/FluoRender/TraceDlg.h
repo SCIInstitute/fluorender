@@ -72,7 +72,7 @@ private:
 	int m_type;//0-current; 1-previous
 
 private:
-	static bool sort_cells(const fls::Celp c1, const fls::Celp c2)
+	static bool sort_cells(const flrd::Celp c1, const flrd::Celp c2)
 	{
 		unsigned int vid1 = c1->GetVertexId();
 		unsigned int vid2 = c2->GetVertexId();
@@ -194,7 +194,7 @@ public:
 	//uncertain filtering
 	void UncertainFilter(bool input = false);
 	//link for external call
-	void LinkAddedCells(fls::CelpList &list);
+	void LinkAddedCells(flrd::CelpList &list);
 
 	//measurement
 	void SaveOutputResult(wxString &filename);
@@ -333,7 +333,7 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
-	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, fls::CelpList &list);
+	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list);
 	wxWindow* CreateMapPage(wxWindow *parent);
 	wxWindow* CreateSelectPage(wxWindow *parent);
 	wxWindow* CreateLinkPage(wxWindow *parent);
@@ -347,8 +347,8 @@ private:
 	void Test2(int type);
 
 	//read/delete volume cache from file
-	void ReadVolCache(fls::VolCache& vol_cache);
-	void DelVolCache(fls::VolCache& vol_cache);
+	void ReadVolCache(flrd::VolCache& vol_cache);
+	void DelVolCache(flrd::VolCache& vol_cache);
 
 private:
 	//map page

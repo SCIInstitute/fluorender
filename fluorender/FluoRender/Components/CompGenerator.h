@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VolumeData;
-namespace fls
+namespace flrd
 {
 	typedef std::vector<std::string> CompCmdParams;
 	//comand types: generate, clean, fixate

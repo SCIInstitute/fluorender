@@ -47,7 +47,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Transform.h>
 #include <Types/Vector.h>
 
-namespace fls
+namespace flrd
 {
 //name, type, value
 typedef std::tuple<std::string, std::string, std::string> ValueTuple;
@@ -511,7 +511,7 @@ inline bool Value::sync(Value* value)
 	return true;
 }
 
-inline std::ostream& fls::operator<<(std::ostream& os, const Value& v)
+inline std::ostream& flrd::operator<<(std::ostream& os, const Value& v)
 {
 	if (v._type == "Referenced*")
 		os << dynamic_cast<const TemplateValue<Referenced*>*>(&v)->getValue();

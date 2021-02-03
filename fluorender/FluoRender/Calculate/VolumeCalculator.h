@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 class VRenderFrame;
 class VRenderGLView;
-namespace fls
+namespace flrd
 {
 	class VolumeSelector;
 	class VolumeCalculator

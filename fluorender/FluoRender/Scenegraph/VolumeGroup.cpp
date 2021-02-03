@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/VolumeGroup.h>
 
-using namespace fls;
+using namespace flrd;
 
 VolumeGroup::VolumeGroup()
 {

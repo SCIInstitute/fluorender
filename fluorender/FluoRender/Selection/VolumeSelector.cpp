@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace fls;
+using namespace flrd;
 
 VolumeSelector::VolumeSelector() :
 	m_view(0),
@@ -231,7 +231,7 @@ void VolumeSelector::Select(double radius)
 	{
 		if (bricks->size() > 1)
 		{
-			fls::PaintBoxes pb;
+			flrd::PaintBoxes pb;
 			pb.SetBricks(bricks);
 			pb.SetPersp(!m_view->GetPersp());
 			fluo::Transform *tform = m_vd->GetTexture()->transform();
@@ -300,7 +300,7 @@ void VolumeSelector::Select(double radius)
 				m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			int div = 3;
 			int order;
-			fls::MaskBorder mb(m_vd);
+			flrd::MaskBorder mb(m_vd);
 			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;

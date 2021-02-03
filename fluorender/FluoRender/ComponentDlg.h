@@ -202,7 +202,7 @@ public:
 	void Clean(bool use_sel, bool command = true);
 	void SelectFullComp();
 
-	fls::ComponentAnalyzer* GetAnalyzer()
+	flrd::ComponentAnalyzer* GetAnalyzer()
 	{
 		return &m_comp_analyzer;
 	}
@@ -212,9 +212,9 @@ public:
 	void PlayCmd(bool use_sel, double tfactor);
 
 	//in and out cell lists
-	fls::CelpList &GetInCells()
+	flrd::CelpList &GetInCells()
 	{ return m_in_cells; }
-	fls::CelpList &GetOutCells()
+	flrd::CelpList &GetOutCells()
 	{ return m_out_cells; }
 
 	//output
@@ -223,7 +223,7 @@ public:
 	void PasteData();
 
 	//select comps
-	bool GetCellList(fls::CelpList &cl, bool links=false);
+	bool GetCellList(flrd::CelpList &cl, bool links=false);
 	void GetCompSelection();
 	void SetCompSelection(std::set<unsigned long long>& ids, int mode);
 	void IncludeComps();
@@ -299,14 +299,14 @@ private:
 
 	//record
 	bool m_record_cmd;
-	fls::CompCommand m_command;
+	flrd::CompCommand m_command;
 
-	fls::ComponentAnalyzer m_comp_analyzer;
-	fls::RulerAlign m_aligner;
+	flrd::ComponentAnalyzer m_comp_analyzer;
+	flrd::RulerAlign m_aligner;
 
 	//in and out cell lists for tracking
-	fls::CelpList m_in_cells;
-	fls::CelpList m_out_cells;
+	flrd::CelpList m_in_cells;
+	flrd::CelpList m_out_cells;
 
 	//output
 	bool m_hold_history;
@@ -454,15 +454,15 @@ private:
 private:
 	void Cluster();
 	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
-	void AlignCenter(fls::Ruler* ruler);
+	void AlignCenter(flrd::Ruler* ruler);
 	void ClearOutputGrid();
 	int GetDistMatSize();
 	void AddSelArrayInt(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
-	void FindCelps(fls::CelpList &list,
-		fls::CelpListIter &it, bool links = false);
+	void FindCelps(flrd::CelpList &list,
+		flrd::CelpListIter &it, bool links = false);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

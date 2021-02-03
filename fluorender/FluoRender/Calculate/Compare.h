@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VolumeData;
-namespace fls
+namespace flrd
 {
 	class ChannelCompare
 	{

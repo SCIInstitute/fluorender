@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "kmeans.h"
 #include <algorithm>
 
-using namespace fls;
+using namespace flrd;
 
 ClusterKmeans::ClusterKmeans() :
 	m_clnum(2),

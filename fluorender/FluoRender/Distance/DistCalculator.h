@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Relax.h>
 
 class VolumeData;
-namespace fls
+namespace flrd
 {
 	class DistCalculator
 	{

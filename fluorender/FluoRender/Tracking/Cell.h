@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
 
-namespace fls
+namespace flrd
 {
 	class Vertex;
 	typedef std::shared_ptr<Vertex> Verp;
@@ -798,6 +798,6 @@ namespace fls
 
 		return !list.empty();
 	}
-}//namespace fls
+}//namespace flrd
 
 #endif//FL_Cell_h

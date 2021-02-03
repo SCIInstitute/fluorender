@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderGLView.h>
 #include <Distance/Pca.h>
 
-using namespace fls;
+using namespace flrd;
 
 void RulerAlign::AlignRuler(int axis_type)
 {

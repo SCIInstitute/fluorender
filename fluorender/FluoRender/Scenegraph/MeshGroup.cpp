@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/MeshGroup.h>
 
-using namespace fls;
+using namespace flrd;
 
 MeshGroup::MeshGroup()
 {

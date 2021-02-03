@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/filtered_graph.hpp>
 
-using namespace fls;
+using namespace flrd;
 
 ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
 	: m_analyzed(false),

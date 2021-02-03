@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VolumeData;
 
-namespace fls
+namespace flrd
 {
 	class CombineList
 	{

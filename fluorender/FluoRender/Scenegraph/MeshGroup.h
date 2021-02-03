@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Scenegraph/Group.h>
 
-namespace fls
+namespace flrd
 {
 	class MeshGroup : public Group
 	{

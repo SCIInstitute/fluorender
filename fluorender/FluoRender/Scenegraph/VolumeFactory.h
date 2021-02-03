@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/ObjectFactory.h>
 #include <Scenegraph/VolumeData.h>
 
-namespace fls
+namespace flrd
 {
 	class VolumeFactory : public ObjectFactory
 	{

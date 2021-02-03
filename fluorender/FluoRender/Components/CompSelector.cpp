@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <set>
 
-using namespace fls;
+using namespace flrd;
 
 ComponentSelector::ComponentSelector(VolumeData* vd)
 	: m_vd(vd),
@@ -510,7 +510,7 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		else
 		{
 			if (bn > 1)
-				key = fls::Cell::GetKey(
+				key = flrd::Cell::GetKey(
 					data_label[index],
 					m_vd->GetTexture()->
 					get_brick_id(index));

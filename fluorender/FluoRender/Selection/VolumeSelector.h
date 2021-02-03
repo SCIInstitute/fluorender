@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderGLView;
 class VolumeData;
-namespace fls
+namespace flrd
 {
 	class VolumeSelector
 	{

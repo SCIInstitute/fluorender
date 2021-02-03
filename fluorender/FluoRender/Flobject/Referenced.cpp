@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Observer.h>
 #include <algorithm>
 
-using namespace fls;
+using namespace flrd;
 
 Referenced::Referenced():
   _observerSet(0),

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Transform.h>
 #include <wx/string.h>
 
-namespace fls
+namespace flrd
 {
 	class Ruler;
 	class ProfileBin

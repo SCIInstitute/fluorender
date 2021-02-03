@@ -187,7 +187,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	if (vrv)
 		m_view = vrv;
 
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list) return;
 
 	std::vector<int> sel;
@@ -204,7 +204,7 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 	int num_points;
 	for (int i=0; i<(int)ruler_list->size(); i++)
 	{
-		fls::Ruler* ruler = (*ruler_list)[i];
+		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->GetTimeDep() &&
 			ruler->GetTime() != m_view->m_glview->m_tseq_cur_num)
@@ -319,7 +319,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 void RulerListCtrl::Export(wxString filename)
 {
 	if (!m_view) return;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (ruler_list)
 	{
 		wxFileOutputStream fos(filename);
@@ -331,7 +331,7 @@ void RulerListCtrl::Export(wxString filename)
 		wxString unit;
 		int num_points;
 		fluo::Point p;
-		fls::Ruler* ruler;
+		flrd::Ruler* ruler;
 		switch (m_view->m_glview->m_sb_unit)
 		{
 		case 0:
@@ -456,7 +456,7 @@ void RulerListCtrl::Export(wxString filename)
 			}
 
 			//export profile
-			vector<fls::ProfileBin>* profile = ruler->GetProfile();
+			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
 				double sumd = 0.0;
@@ -513,7 +513,7 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
 			wxLIST_STATE_SELECTED);
 		if (item != -1)
 		{
-			fls::Ruler* ruler = m_view->GetRuler(GetItemData(item));
+			flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 			if (ruler)
 			{
 				fluo::Point cp = ruler->GetCenter();
@@ -559,7 +559,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 	m_editing_item = item;
 	if (!m_view)
 		return;
-	fls::Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 	if (!ruler || !ruler->GetDisp())
 		return;
 
@@ -621,7 +621,7 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 
 	wxString str = m_name_text->GetValue();
 
-	fls::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetName(str);
 	SetText(m_editing_item, 0, str);
@@ -634,7 +634,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 		return;
 	if (m_editing_item == -1)
 		return;
-	fls::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler || ruler->GetRulerType() != 2) return;
 
 	wxString str = m_center_text->GetValue();
@@ -691,7 +691,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	fls::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
+	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
 	if (!ruler) return;
 	ruler->SetColor(color);
 	wxString str_color;
@@ -728,7 +728,7 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 		wxLIST_STATE_SELECTED);
 	if (!m_view)
 		return;
-	fls::Ruler* ruler = m_view->GetRuler(GetItemData(item));
+	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
 	if (!ruler) return;
 	ruler->ToggleDisp();
 	bool disp = ruler->GetDisp();
@@ -1469,7 +1469,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 
 	int count = 0;
 	std::vector<int> sel;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1477,7 +1477,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 			int index = sel[i];
 			if (0 > index || ruler_list->size() <= index)
 				continue;
-			fls::Ruler* r = (*ruler_list)[index];
+			flrd::Ruler* r = (*ruler_list)[index];
 			if (r)
 				r->Reverse();
 			count++;
@@ -1487,7 +1487,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 	{
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			fls::Ruler* r = (*ruler_list)[i];
+			flrd::Ruler* r = (*ruler_list)[i];
 			if (r)
 				r->Reverse();
 			count++;
@@ -1590,7 +1590,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	fluo::Point avg;
 	int count = 0;
 	std::vector<int> sel;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
@@ -1598,7 +1598,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 			int index = sel[i];
 			if (0 > index || ruler_list->size() <= index)
 				continue;
-			fls::Ruler* r = (*ruler_list)[index];
+			flrd::Ruler* r = (*ruler_list)[index];
 			avg += r->GetCenter();
 			count++;
 		}
@@ -1607,7 +1607,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	{
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			fls::Ruler* r = (*ruler_list)[i];
+			flrd::Ruler* r = (*ruler_list)[i];
 			if (r->GetDisp())
 			{
 				avg += r->GetCenter();
@@ -1619,7 +1619,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 	if (count)
 	{
 		avg /= double(count);
-		fls::Ruler* ruler = new fls::Ruler();
+		flrd::Ruler* ruler = new flrd::Ruler();
 		ruler->SetRulerType(2);
 		ruler->SetName("Average");
 		ruler->AddPoint(avg);
@@ -1646,7 +1646,7 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 		else
 		{
 			//export all
-			fls::RulerList* ruler_list = m_view->GetRulerList();
+			flrd::RulerList* ruler_list = m_view->GetRulerList();
 			for (size_t i = 0; i < ruler_list->size(); ++i)
 			{
 				if ((*ruler_list)[i]->GetDisp())
@@ -1661,7 +1661,7 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 	if (!m_view)
 		return;
 
-	fls::ComponentAnalyzer* analyzer =
+	flrd::ComponentAnalyzer* analyzer =
 		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
 	if (!analyzer)
 		return;
@@ -1694,7 +1694,7 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 	}
 	else
 	{
-		fls::RulerList* ruler_list = m_view->GetRulerList();
+		flrd::RulerList* ruler_list = m_view->GetRulerList();
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
 			if ((*ruler_list)[i]->GetDisp())
@@ -1727,15 +1727,15 @@ void MeasureDlg::Project(int idx)
 {
 	if (!m_view)
 		return;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
 		return;
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
-	fls::Ruler* ruler = ruler_list->at(idx);
-	fls::ComponentAnalyzer* analyzer =
+	flrd::Ruler* ruler = ruler_list->at(idx);
+	flrd::ComponentAnalyzer* analyzer =
 		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
-	fls::CelpList* list = 0;
+	flrd::CelpList* list = 0;
 	if (!analyzer)
 		return;
 	list = analyzer->GetCelpList();
@@ -1746,12 +1746,12 @@ void MeasureDlg::Project(int idx)
 	m_calculator.SetRuler(ruler);
 	m_calculator.Project();
 
-	std::vector<fls::Celp> comps;
+	std::vector<flrd::Celp> comps;
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 		comps.push_back(it->second);
 	std::sort(comps.begin(), comps.end(),
-		[](const fls::Celp &a, const fls::Celp &b) -> bool
+		[](const flrd::Celp &a, const flrd::Celp &b) -> bool
 		{
 		fluo::Point pa = a->GetProjp();
 		fluo::Point pb = b->GetProjp();
@@ -1802,19 +1802,19 @@ void MeasureDlg::Relax(int idx)
 {
 	if (!m_view)
 		return;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
 		return;
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
-	fls::Ruler* ruler = ruler_list->at(idx);
+	flrd::Ruler* ruler = ruler_list->at(idx);
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	fls::ComponentAnalyzer* analyzer = 0;
+	flrd::ComponentAnalyzer* analyzer = 0;
 	if (frame && frame->GetComponentDlg())
 		analyzer = frame->GetComponentDlg()->GetAnalyzer();
 	if (!analyzer)
 		return;
-	fls::CelpList* list = 0;
+	flrd::CelpList* list = 0;
 	list = analyzer->GetCelpList();
 	if (list && list->empty())
 		list = 0;
@@ -2041,7 +2041,7 @@ void MeasureDlg::OnSetGroup(wxCommandEvent& event)
 		m_rhdl->SetGroup(ival);
 }
 
-void MeasureDlg::AlignCenter(fls::Ruler* ruler, fls::RulerList* ruler_list)
+void MeasureDlg::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
 {
 	fluo::Point center;
 	bool valid_center = false;
@@ -2054,7 +2054,7 @@ void MeasureDlg::AlignCenter(fls::Ruler* ruler, fls::RulerList* ruler_list)
 	{
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			fls::Ruler* r = (*ruler_list)[i];
+			flrd::Ruler* r = (*ruler_list)[i];
 			center += r->GetCenter();
 		}
 		center /= double(ruler_list->size());
@@ -2078,10 +2078,10 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 		return;
 	if (!m_view)
 		return;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
 		return;
-	fls::Ruler* ruler = ruler_list->at(sel[0]);
+	flrd::Ruler* ruler = ruler_list->at(sel[0]);
 	m_aligner.SetRuler(ruler);
 
 	int axis_type = 0;
@@ -2113,13 +2113,13 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 {
-	fls::RulerList list;
+	flrd::RulerList list;
 	std::vector<int> sel;
 	if (!m_rulerlist->GetCurrSelection(sel))
 		return;
 	if (!m_view)
 		return;
-	fls::RulerList* ruler_list = m_view->GetRulerList();
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
 		return;
 	for (int i = 0; i < sel.size(); ++i)

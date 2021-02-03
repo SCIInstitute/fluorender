@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/NodeVisitor.h>
 #include <Scenegraph/Group.h>
 
-namespace fls
+namespace flrd
 {
 	enum ValueUpdateVisitType
 	{
@@ -51,19 +51,19 @@ namespace fls
 	{
 	public:
 		ValueUpdateVisitor() : type_(SYNC_VALUE), object_(0)
-		{ setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type) : type_(type), object_(0)
-		{ setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
 		ValueUpdateVisitor(Object* obj) : type_(SYNC_VALUE), object_(obj)
-		{ setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type, Object* obj) : type_(type), object_(obj)
-		{ setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
 
 		virtual void reset()
 		{
 			type_ = SYNC_VALUE;
 			object_ = 0;
-			setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
 		void setType(const ValueUpdateVisitType type)
@@ -88,7 +88,7 @@ namespace fls
 			value_names_.insert(value_names_.end(), names.begin(), names.end());
 		}
 
-		virtual void apply(fls::Node& node)
+		virtual void apply(flrd::Node& node)
 		{
 			switch (type_)
 			{
@@ -113,7 +113,7 @@ namespace fls
 			traverse(node);
 		}
 
-		virtual void apply(fls::Group& group)
+		virtual void apply(flrd::Group& group)
 		{
 			switch (type_)
 			{
@@ -150,7 +150,7 @@ namespace fls
 		std::vector<std::string> value_names_;
 		Object* object_;
 
-		void syncValues(fls::Group& group)
+		void syncValues(flrd::Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{
@@ -163,7 +163,7 @@ namespace fls
 			}
 		}
 
-		void syncAllValues(fls::Group& group)
+		void syncAllValues(flrd::Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{
@@ -176,7 +176,7 @@ namespace fls
 			}
 		}
 
-		void unsyncValues(fls::Group& group)
+		void unsyncValues(flrd::Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{
@@ -189,7 +189,7 @@ namespace fls
 			}
 		}
 
-		void unsyncAllValues(fls::Group& group)
+		void unsyncAllValues(flrd::Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{

@@ -37,7 +37,7 @@ class VolumeRenderer;
 class Texture;
 }
 class BaseReader;
-namespace fls
+namespace flrd
 {
 	class VolumeData : public Node
 	{

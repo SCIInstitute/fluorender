@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_REF_PTR
 #define FL_REF_PTR 1
 
-namespace fls
+namespace flrd
 {
 /** Smart pointer for handling referenced counted objects.*/
 template<class T>

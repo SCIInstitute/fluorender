@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace fls;
+using namespace flrd;
 
 double VolumePoint::GetPointVolume(
 	double mx, double my,//mouse coord on screen

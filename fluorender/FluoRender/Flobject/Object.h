@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
-namespace fls
+namespace flrd
 {
 typedef std::stack<ref_ptr<ValueSet> > ValueSetStack;
 class Object;

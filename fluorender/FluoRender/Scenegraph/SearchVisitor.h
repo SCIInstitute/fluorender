@@ -40,23 +40,23 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
-namespace fls
+namespace flrd
 {
-	class SearchVisitor : public fls::NodeVisitor
+	class SearchVisitor : public flrd::NodeVisitor
 	{
 	public:
 
 		SearchVisitor()
 		{
-			setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
-		virtual void apply(fls::Node& node)
+		virtual void apply(flrd::Node& node)
 		{
 			traverse(node);
 		}
 
-		virtual void apply(fls::Group& group)
+		virtual void apply(flrd::Group& group)
 		{
 			traverse(group);
 		}

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <algorithm>
 
-using namespace fls;
+using namespace flrd;
 
 DistCalculator::DistCalculator() :
 	m_type(0),

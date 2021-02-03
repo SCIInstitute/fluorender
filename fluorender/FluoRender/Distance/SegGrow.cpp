@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <unordered_map>
 #include <Debug.h>
 
-using namespace fls;
+using namespace flrd;
 
 const char* str_cl_segrow = \
 "const sampler_t samp =\n" \

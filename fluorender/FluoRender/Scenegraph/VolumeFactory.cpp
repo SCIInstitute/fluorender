@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/VolumeFactory.h>
 #include <Types/Color.h>
 
-using namespace fls;
+using namespace flrd;
 
 VolumeFactory::VolumeFactory()
 {

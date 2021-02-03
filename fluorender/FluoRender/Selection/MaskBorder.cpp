@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "MaskBorder.h"
 
-using namespace fls;
+using namespace flrd;
 
 const char* str_cl_check_box_borders = \
 "const sampler_t samp =\n" \

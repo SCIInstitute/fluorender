@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 class Annotations;
 
-namespace fls
+namespace flrd
 {
 	struct CompGroup
 	{

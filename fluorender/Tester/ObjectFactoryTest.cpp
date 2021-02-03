@@ -7,7 +7,7 @@
 #include <Scenegraph/InfoVisitor.h>
 
 using namespace std;
-using namespace fls;
+using namespace flrd;
 
 void FactoryTest()
 {

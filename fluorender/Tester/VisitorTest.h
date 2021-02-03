@@ -4,13 +4,13 @@
 #include <iostream>
 #include <string>
 
-class InfoVisitor : public fls::NodeVisitor
+class InfoVisitor : public flrd::NodeVisitor
 {
 public:
 	InfoVisitor() : level_(0)
 	{
-		//setTraversalMode(fls::NodeVisitor::TRAVERSE_ALL_CHILDREN);
-		setTraversalMode(fls::NodeVisitor::TRAVERSE_PARENTS);
+		//setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		setTraversalMode(flrd::NodeVisitor::TRAVERSE_PARENTS);
 	}
 
 	std::string spaces()
@@ -18,7 +18,7 @@ public:
 		return std::string(level_ * 2, ' ');
 	}
 
-	virtual void apply(fls::Node& node)
+	virtual void apply(flrd::Node& node)
 	{
 		std::cout << spaces() << node.className() << "\t" << &node << std::endl;
 		std::cout << spaces() << "  Values: ";
@@ -35,7 +35,7 @@ public:
 		level_--;
 	}
 
-	virtual void apply(fls::Group& group)
+	virtual void apply(flrd::Group& group)
 	{
 		std::cout << spaces() << group.className() << std::endl;
 		std::cout << spaces() << "  Values: ";

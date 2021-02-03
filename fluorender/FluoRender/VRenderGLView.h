@@ -465,9 +465,9 @@ public:
 	bool GetIntp();
 
 	//get volume selector
-	fls::VolumeSelector* GetVolumeSelector() { return &m_selector; }
+	flrd::VolumeSelector* GetVolumeSelector() { return &m_selector; }
 	//get volume calculator
-	fls::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
+	flrd::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
 	//get kernel executor
 	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 	//text renderer
@@ -487,10 +487,10 @@ public:
 
 	//rulers
 	void DrawRulers();
-	fls::RulerList* GetRulerList();
-	fls::Ruler* GetRuler(unsigned int id);
-	fls::RulerHandler* GetRulerHandler() { return &m_ruler_handler; }
-	fls::RulerRenderer* GetRulerRenderer() { return &m_ruler_renderer; }
+	flrd::RulerList* GetRulerList();
+	flrd::Ruler* GetRuler(unsigned int id);
+	flrd::RulerHandler* GetRulerHandler() { return &m_ruler_handler; }
+	flrd::RulerRenderer* GetRulerRenderer() { return &m_ruler_renderer; }
 
 	//draw highlighted comps
 	void DrawCells();
@@ -555,7 +555,7 @@ public:
 		void** image);
 
 	//set cell list
-	void SetCellList(fls::CelpList &list)
+	void SetCellList(flrd::CelpList &list)
 	{
 		m_cell_list = list;
 	}
@@ -719,13 +719,13 @@ private:
 	//real data list
 	vector <TreeLayer*> m_layer_list;
 	//ruler list
-	fls::RulerList m_ruler_list;
+	flrd::RulerList m_ruler_list;
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
 	flvr::MultiVolumeRenderer* m_mvr;
 	//highlighted comps
-	fls::CelpList m_cell_list;
+	flrd::CelpList m_cell_list;
 	//fisrt volume data in the depth groups
 	//VolumeData* m_first_depth_vd;
 	//initializaion
@@ -887,16 +887,16 @@ private:
 	double m_rotx_cl, m_roty_cl, m_rotz_cl;
 
 	//volume selector for segmentation
-	fls::VolumeSelector m_selector;
+	flrd::VolumeSelector m_selector;
 
 	//calculator
-	fls::VolumeCalculator m_calculator;
+	flrd::VolumeCalculator m_calculator;
 
 	//kernel executor
 	KernelExecutor m_kernel_executor;
 
 	//scriptor
-	fls::ScriptProc m_scriptor;
+	flrd::ScriptProc m_scriptor;
 
 	//timer
 	nv::Timer *m_timer;
@@ -1003,9 +1003,9 @@ private:
 #endif
 
 	//handle rulers
-	fls::RulerHandler m_ruler_handler;
-	fls::RulerRenderer m_ruler_renderer;
-	fls::VolumePoint m_vp;
+	flrd::RulerHandler m_ruler_handler;
+	flrd::RulerRenderer m_ruler_renderer;
+	flrd::VolumePoint m_vp;
 
 private:
 #ifdef _WIN32

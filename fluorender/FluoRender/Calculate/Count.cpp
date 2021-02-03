@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/Texture.h>
 #include <algorithm>
 
-using namespace fls;
+using namespace flrd;
 
 const char* str_cl_count_voxels = \
 "const sampler_t samp =\n" \

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Scenegraph/VolumeData.h>
 //#include <FLIVR/VolumeRenderer.h>
 
-using namespace fls;
+using namespace flrd;
 
 VolumeData::VolumeData()//:
 //	m_vr(0),

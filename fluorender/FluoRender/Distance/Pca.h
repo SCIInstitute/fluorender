@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BPoint.h>
 #include <vector>
 
-namespace fls
+namespace flrd
 {
 	class Pca
 	{

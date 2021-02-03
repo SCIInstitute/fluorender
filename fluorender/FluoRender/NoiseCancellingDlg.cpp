@@ -174,7 +174,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	if (!vd)
 		return;
 
-	fls::ComponentGenerator cg(vd);
+	flrd::ComponentGenerator cg(vd);
 	cg.SetUseMask(select);
 	vd->AddEmptyMask(1, !cg.GetUseMask());
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
@@ -182,10 +182,10 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	double scale = vd->GetScalarScale();
 	cg.Grow(false, -1, thresh, 0.0, scale);
 
-	fls::ComponentAnalyzer ca(vd);
+	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
 
-	fls::ComponentSelector comp_selector(vd);
+	flrd::ComponentSelector comp_selector(vd);
 	//cell size filter
 	comp_selector.SetMinNum(false, 0);
 	comp_selector.SetMaxNum(true, size);

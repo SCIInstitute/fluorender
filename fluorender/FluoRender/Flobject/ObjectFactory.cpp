@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Flobject/ObjectFactory.h>
 
-using namespace fls;
+using namespace flrd;
 
 unsigned int ObjectFactory::global_id_ = 0;
 

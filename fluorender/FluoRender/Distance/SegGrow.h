@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 
 class VolumeData;
-namespace fls
+namespace flrd
 {
 	class RulerHandler;
 	struct BranchPoint

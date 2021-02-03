@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <unordered_map>
 
-namespace fls
+namespace flrd
 {
 	struct Stencil
 	{
@@ -285,6 +285,6 @@ namespace fls
 		}
 	}
 
-}//namespace fls
+}//namespace flrd
 
 #endif//FL_Stencil_h

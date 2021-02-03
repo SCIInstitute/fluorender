@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeSampler.h"
 #include <stdexcept>
 
-using namespace fls;
+using namespace flrd;
 
 VolumeSampler::VolumeSampler() :
 	m_vd_r(0),

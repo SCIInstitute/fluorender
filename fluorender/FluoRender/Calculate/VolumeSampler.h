@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #define nrrdAxisInfoSet nrrdAxisInfoSet_va
 #endif
 
-namespace fls
+namespace flrd
 {
 	class VolumeSampler
 	{

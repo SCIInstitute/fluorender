@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #endif
 
-using namespace fls;
+using namespace flrd;
 
 ComponentGenerator::ComponentGenerator(VolumeData* vd)
 	: m_vd(vd),
