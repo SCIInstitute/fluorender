@@ -121,8 +121,8 @@ bool KernelExecutor::Execute()
 
 #ifdef _DARWIN
 	CGLContextObj ctx = CGLGetCurrentContext();
-	if (ctx != KernelProgram::gl_context_)
-		CGLSetCurrentContext(KernelProgram::gl_context_);
+	if (ctx != flvr::KernelProgram::gl_context_)
+		CGLSetCurrentContext(flvr::KernelProgram::gl_context_);
 #endif
 
 	//get volume currently selected
