@@ -205,6 +205,18 @@ void ComponentSelector::Select(bool all, bool rmask)
 		return;
 
 	int bn = m_vd->GetBrickNum();
+	unsigned int idsel, bidsel;
+	if (bn > 1)
+	{
+		idsel = m_id << 32 >> 32;
+		bidsel = m_id >> 32;
+	}
+	else
+	{
+		idsel = m_id;
+		bidsel = 0;
+	}
+
 	//select append
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -212,8 +224,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
 	unsigned int label_value;
-	unsigned int brick_id;
 	CelpListIter label_iter;
+	unsigned int bid;
 	unsigned int size;
 	if (all)
 	{
@@ -228,11 +240,11 @@ void ComponentSelector::Select(bool all, bool rmask)
 				if (data_label[index])
 				{
 					label_value = data_label[index];
-					brick_id = tex->get_brick_id(index);
-					label_iter = sel_labels.find(Cell::GetKey(label_value, brick_id));
+					bid = tex->get_brick_id(index);
+					label_iter = sel_labels.find(Cell::GetKey(label_value, bid));
 					if (label_iter == sel_labels.end())
 					{
-						Cell* info = new Cell(label_value, brick_id);
+						Cell* info = new Cell(label_value, bid);
 						info->SetSizeUi(1);
 						sel_labels.insert(std::pair<unsigned long long, Celp>
 							(info->GetEId(), Celp(info)));
@@ -250,8 +262,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 			if (data_label[index])
 			{
 				label_value = data_label[index];
-				brick_id = tex->get_brick_id(index);
-				label_iter = comp_list->find(Cell::GetKey(label_value, brick_id));
+				bid = tex->get_brick_id(index);
+				label_iter = comp_list->find(Cell::GetKey(label_value, bid));
 				if (label_iter != comp_list->end())
 				{
 					if (m_use_min || m_use_max)
@@ -296,8 +308,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 						if (data_label[index])
 						{
 							label_value = data_label[index];
-							brick_id = tex->get_brick_id(index);
-							label_iter = comp_list.find(Cell::GetKey(label_value, brick_id));
+							bid = tex->get_brick_id(index);
+							label_iter = comp_list.find(Cell::GetKey(label_value, bid));
 							if (label_iter != comp_list.end())
 							{
 								if (m_use_min || m_use_max)
@@ -326,9 +338,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 			{
 				for (index = 0; index < for_size; ++index)
 				{
-					brick_id = tex->get_brick_id(index);
-					if (data_label[index] == m_id &&
-						brick_id == (m_id >> 32))
+					bid = tex->get_brick_id(index);
+					if (data_label[index] == idsel &&
+						bid == bidsel)
 						acc_size++;
 				}
 				if (((m_use_min || m_use_max) &&
@@ -337,9 +349,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 				{
 					for (index = 0; index < for_size; ++index)
 					{
-						brick_id = tex->get_brick_id(index);
-						if (data_label[index] == m_id &&
-							brick_id == (m_id >> 32))
+						bid = tex->get_brick_id(index);
+						if (data_label[index] == idsel &&
+							bid == bidsel)
 							SelectMask(data_mask, index, 255, tex);
 					}
 				}
@@ -348,7 +360,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 			{
 				for (index = 0; index < for_size; ++index)
 				{
-					if (data_label[index] == m_id)
+					if (data_label[index] == idsel)
 						acc_size++;
 				}
 				if (((m_use_min || m_use_max) &&
@@ -357,7 +369,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 				{
 					for (index = 0; index < for_size; ++index)
 					{
-						if (data_label[index] == m_id)
+						if (data_label[index] == idsel)
 							SelectMask(data_mask, index, 255, tex);
 					}
 				}
