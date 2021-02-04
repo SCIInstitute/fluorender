@@ -3848,13 +3848,13 @@ bool ComponentDlg::GetCellList(flrd::CelpList &cl, bool links)
 	{
 		seli = m_output_grid->GetSelectedRows();
 		AddSelArrayInt(ids, bids, seli, bn > 1);
-		wxGridCellCoordsArray sela =
-			m_output_grid->GetSelectionBlockBottomRight();
-		AddSelCoordArray(ids, bids, sela, bn > 1);
-		sela = m_output_grid->GetSelectionBlockTopLeft();
-		AddSelCoordArray(ids, bids, sela, bn > 1);
-		sela = m_output_grid->GetSelectedCells();
-		AddSelCoordArray(ids, bids, sela, bn > 1);
+		//wxGridCellCoordsArray sela =
+		//	m_output_grid->GetSelectionBlockBottomRight();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+		//sela = m_output_grid->GetSelectionBlockTopLeft();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+		//sela = m_output_grid->GetSelectedCells();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
 	}
 
 	double sx = list->sx;
