@@ -31,9 +31,9 @@ SET_PROPERTY(DIRECTORY PROPERTY "EP_BASE" ${ep_base})
 
 # The latest release is downloaded from FFmpeg's website directly. 
 if( WIN32 )
-  set( FFmpeg_url "http://ffmpeg.zeranoe.com/builds/win64/dev/ffmpeg-4.2-win64-dev.zip")
+  set( FFmpeg_url "https://github.com/vot/ffbinaries-prebuilt/releases/download/v4.2/ffmpeg-4.2-win-64.zip")
 elseif( APPLE )
-  set( FFmpeg_url "https://ffmpeg.zeranoe.com/builds/macos64/dev/ffmpeg-4.2-macos64-dev.zip")
+  set( FFmpeg_url "https://github.com/vot/ffbinaries-prebuilt/releases/download/v4.2/ffmpeg-4.2-osx-64.zip")
 endif()
 
 # This is a little annoying, Ninja needs to know exactly where the libraries will be placed 
