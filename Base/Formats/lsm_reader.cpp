@@ -25,9 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include "lsm_reader.h"
+#include "../compatibility.h"
 #include <stdio.h>
-#include <Utilities/compatibility.h>
-#include "lsm_reader.hpp"
 
 LSMReader::LSMReader()
 {
@@ -621,6 +621,26 @@ bool LSMReader::GetSliceSeq()
 	return false;
 }
 
+void LSMReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool LSMReader::GetChannSeq()
+{
+	return false;
+}
+
+void LSMReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int LSMReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void LSMReader::SetTimeId(wstring &id)
 {
 	//do nothing
@@ -636,7 +656,7 @@ void LSMReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		FIND_FILES(m_path_name, L".lsm", m_batch_list, m_cur_batch);
+		FIND_FILES(m_path_name, L"*.lsm", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

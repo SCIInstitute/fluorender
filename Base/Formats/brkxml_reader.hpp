@@ -1,18 +1,16 @@
-#ifndef BRKXML_READER_HPP
-#define BRKXML_READER_HPP
+#ifndef _BRKXML_READER_H_
+#define _BRKXML_READER_H_
 
 #include <vector>
-#include "base_reader.hpp"
+#include <base_reader.h>
 #include <FLIVR/TextureBrick.h>
-#include "tinyxml2.hpp"
+#include <tinyxml2.h>
 
 using namespace std;
 
-#define READER_BRKXML_TYPE	7
-
 class BRKXMLReader : public BaseReader
 {
-  public:
+public:
 	BRKXMLReader();
 	~BRKXMLReader();
 
@@ -24,6 +22,10 @@ class BRKXMLReader : public BaseReader
 	void SetDir(wstring &dir);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeSeq(bool ss);
 	bool GetTimeSeq();
 	void SetTimeId(wstring &id);
@@ -62,7 +64,7 @@ class BRKXMLReader : public BaseReader
 	wstring GetExMetadataURL() {return m_ex_metadata_url;}
 	void SetInfo();
 
-	FLIVR::FileLocInfo* GetBrickFilePath(int fr, int ch, int id, int lv = -1);
+	flvr::FileLocInfo* GetBrickFilePath(int fr, int ch, int id, int lv = -1);
 	wstring GetBrickFileName(int fr, int ch, int id, int lv = -1);
 	int GetFileType(int lv = -1);
 
@@ -70,8 +72,8 @@ class BRKXMLReader : public BaseReader
 	void SetLevel(int lv);
 	int GetCopyableLevel() {return m_copy_lv;}
 
-	void build_bricks(vector<FLIVR::TextureBrick*> &tbrks, int lv = -1);
-	void build_pyramid(vector<FLIVR::Pyramid_Level> &pyramid, vector<vector<vector<vector<FLIVR::FileLocInfo *>>>> &filenames, int t, int c);
+	void build_bricks(vector<flvr::TextureBrick*> &tbrks, int lv = -1);
+	void build_pyramid(vector<flvr::Pyramid_Level> &pyramid, vector<vector<vector<vector<flvr::FileLocInfo *>>>> &filenames, int t, int c);
 	void OutputInfo();
 
 	void GetLandmark(int index, wstring &name, double &x, double &y, double &z, double &spcx, double &spcy, double &spcz);
@@ -86,7 +88,7 @@ class BRKXMLReader : public BaseReader
 	tinyxml2::XMLDocument *GetVVDXMLDoc() {return &m_doc;}
 	tinyxml2::XMLDocument *GetMetadataXMLDoc() {return &m_md_doc;}
 
-  private:
+private:
 	wstring m_path_name;
 	wstring m_data_name;
 	wstring m_dir_name;
@@ -97,49 +99,49 @@ class BRKXMLReader : public BaseReader
 
 	struct BrickInfo
 	{
-      //index
-      int id;
-      //size
-      int x_size;
-      int y_size;
-      int z_size;
-      //start position
-      int x_start;
-      int y_start;
-      int z_start;
-      //offset to brick
-      long long offset;
-      long long fsize;
-      //tbox
-      double tx0, ty0, tz0, tx1, ty1, tz1;
-      //bbox
-      double bx0, by0, bz0, bx1, by1, bz1;
+		//index
+		int id;
+		//size
+		int x_size;
+		int y_size;
+		int z_size;
+		//start position
+		int x_start;
+		int y_start;
+		int z_start;
+		//offset to brick
+		long long offset;
+		long long fsize;
+		//tbox
+		double tx0, ty0, tz0, tx1, ty1, tz1;
+		//bbox
+		double bx0, by0, bz0, bx1, by1, bz1;
 	};
 	struct LevelInfo
 	{
-      int imageW;
-      int imageH;
-      int imageD;
-      double xspc;
-      double yspc;
-      double zspc;
-      int brick_baseW;
-      int brick_baseH;
-      int brick_baseD;
-      int bit_depth;
-      int file_type;
-      vector<vector<vector<FLIVR::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
-      vector<BrickInfo *> bricks;
+		int imageW;
+		int imageH;
+		int imageD;
+		double xspc;
+		double yspc;
+		double zspc;
+		int brick_baseW;
+		int brick_baseH;
+		int brick_baseD;
+		int bit_depth;
+		int file_type;
+		vector<vector<vector<flvr::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
+		vector<BrickInfo *> bricks;
 	};
 	vector<LevelInfo> m_pyramid;
 
 	
 	struct ImageInfo
 	{
-      int nChannel;
-      int nFrame;
-      int nLevel;
-      int copyableLv;
+		int nChannel;
+		int nFrame;
+		int nLevel;
+		int copyableLv;
 	};
 	ImageInfo m_imageinfo;
 
@@ -179,18 +181,18 @@ class BRKXMLReader : public BaseReader
 
 	struct Landmark
 	{
-      wstring name;
-      double x, y, z;
-      double spcx, spcy, spcz;
+		wstring name;
+		double x, y, z;
+		double spcx, spcy, spcz;
 	};
 	vector<Landmark> m_landmarks;
 	wstring m_metadata_id;
 
-  private:
+private:
 	ImageInfo ReadImageInfo(tinyxml2::XMLElement *seqNode);
 	void ReadBrick(tinyxml2::XMLElement *brickNode, BrickInfo &binfo);
 	void ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo);
-	void ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<FLIVR::FileLocInfo *>>> &filename);
+	void ReadFilenames(tinyxml2::XMLElement* fileRootNode, vector<vector<vector<flvr::FileLocInfo *>>> &filename);
 	void ReadPackedBricks(tinyxml2::XMLElement* packNode, vector<BrickInfo *> &brks);
 	void Readbox(tinyxml2::XMLElement *boxNode, double &x0, double &y0, double &z0, double &x1, double &y1, double &z1);
 	void ReadPyramid(tinyxml2::XMLElement *lvRootNode, vector<LevelInfo> &pylamid);
@@ -198,4 +200,4 @@ class BRKXMLReader : public BaseReader
 	void Clear();
 };
 
-#endif
+#endif//_BRKXML_READER_H_

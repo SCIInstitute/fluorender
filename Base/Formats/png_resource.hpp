@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PNG_RESOURCE_HPP
-#define PNG_RESOURCE_HPP
+#ifndef PNG_RESOURCE_H
+#define PNG_RESOURCE_H
 
 #include <wx/wx.h>
-#include <Utilities/compatibility.h>
+#include "../compatibility.h"
 #include "wx/mstream.h"
 
 #define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(icons::name ## _png, sizeof(icons::name ## _png))
@@ -41,4 +41,4 @@ inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
          return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
 }
 
-#endif
+#endif//PNG_RESOURCE_H

@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "oib_reader.hpp"
-#include <Utilities/compatibility.h>
+#include "oib_reader.h"
+#include "../compatibility.h"
 #include <algorithm>
 
 OIBReader::OIBReader()
@@ -205,6 +205,26 @@ bool OIBReader::GetSliceSeq()
 	return false;
 }
 
+void OIBReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool OIBReader::GetChannSeq()
+{
+	return false;
+}
+
+void OIBReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int OIBReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void OIBReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;
@@ -221,7 +241,7 @@ void OIBReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES(search_path, L".oib", m_batch_list, m_cur_batch);
+		FIND_FILES(search_path, L"*.oib", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

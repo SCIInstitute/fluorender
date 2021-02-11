@@ -25,18 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef LBL_READER_HPP
-#define LBL_READER_HPP
+#ifndef _LBL_READER_H_
+#define _LBL_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 
 using namespace std;
 
-#define READER_LBL_TYPE	0
-
 class LBLReader : public BaseReader
 {
-  public:
+public:
 	LBLReader();
 	~LBLReader();
 
@@ -46,6 +44,10 @@ class LBLReader : public BaseReader
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -76,4 +78,4 @@ class LBLReader : public BaseReader
 	int GetCurBatch() {return 0;}
 };
 
-#endif
+#endif//_LBL_READER_H_

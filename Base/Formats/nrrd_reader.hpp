@@ -25,17 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef NRRD_READER_HPP
-#define NRRD_READER_HPP
+#ifndef _NRRD_READER_H_
+#define _NRRD_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 #include <stdio.h>
 //#include <windows.h>
 #include <vector>
 
 using namespace std;
-
-#define READER_NRRD_TYPE	1
 
 class NRRDReader : public BaseReader
 {
@@ -49,6 +47,10 @@ public:
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -109,4 +111,4 @@ private:
 	static bool nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 };
 
-#endif
+#endif//_NRRD_READER_H_

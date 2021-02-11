@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef OIF_READER_HPP
-#define OIF_READER_HPP
+#ifndef _OIF_READER_H_
+#define _OIF_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 #include <stdio.h>
 //#include <windows.h>
 #include <vector>
@@ -36,8 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 
 using namespace std;
-
-#define READER_OIF_TYPE	4
 
 class OIFReader : public BaseReader
 {
@@ -51,6 +49,10 @@ public:
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -143,4 +145,4 @@ private:
 	wstring m_time_id;
 };
 
-#endif
+#endif//_OIF_READER_H_

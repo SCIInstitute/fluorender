@@ -25,21 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PVXML_READER_HPP
-#define PVXML_READER_HPP
+#ifndef _PVXML_READER_H_
+#define _PVXML_READER_H_
 
 #include <vector>
-#include <string>
-#include "base_reader.hpp"
+#include <base_reader.h>
 
-namespace pugi
-{
-  class xml_node;
-}
-
+using namespace std;
+class wxXmlNode;
 class wxString;
-
-#define READER_PVXML_TYPE	6
 
 class PVXMLReader : public BaseReader
 {
@@ -53,6 +47,10 @@ public:
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -220,20 +218,20 @@ private:
 	//0:auto; -1:flip; 1:no flip
 	int m_user_flip_x;
 	int m_user_flip_y;
-    //actual flags for flipping
+	//actual flags for flipping
 	bool m_flip_x;
 	bool m_flip_y;
 
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);
 	bool ConvertN(int c, TimeDataInfo* time_data_info, unsigned short *val);
-    void ReadSystemConfig(const pugi::xml_node &systemNode);
-    void UpdateStateShard(const pugi::xml_node &stateNode);
-    void ReadKey(const pugi::xml_node &keyNode);
-    void ReadIndexedKey(const pugi::xml_node &keyNode, const std::string &key);
-    void ReadSequence(const pugi::xml_node &seqNode);
-    void ReadFrame(const pugi::xml_node &frameNode);
-    void ReadTiff(char* pbyData, unsigned short *val);
+	void ReadSystemConfig(wxXmlNode *systemNode);
+	void UpdateStateShard(wxXmlNode *stateNode);
+	void ReadKey(wxXmlNode *keyNode);
+	void ReadIndexedKey(wxXmlNode *keyNode, wxString &key);
+	void ReadSequence(wxXmlNode *seqNode);
+	void ReadFrame(wxXmlNode *frameNode);
+	void ReadTiff(char* pbyData, unsigned short *val);
 };
 
-#endif
+#endif//_PVXML_READER_H_

@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef TIF_READER_HPP
-#define TIF_READER_HPP
+#ifndef _TIF_READER_H_
+#define _TIF_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 #include <cstdio>
 #include <vector>
 #include <fstream>
@@ -37,10 +37,10 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <stdint.h>
 #include <string>
+#include <deque>
+#include <set>
 
 using namespace std;
-
-#define READER_TIF_TYPE	2
 
 class TIFReader : public BaseReader
 {
@@ -54,6 +54,10 @@ public:
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -200,7 +204,22 @@ private:
 	};
 	vector<TimeDataInfo> m_4d_seq;
 
+	struct NamePattern
+	{
+		size_t start;
+		size_t end;
+		size_t len;//0:indefinite
+		int type;//0:string; 1:digits
+		int use;//0:z sections; 1:channels; 2:time
+		wstring str;//content
+	};
+	deque<NamePattern> m_name_patterns;
+	set<int> m_slice_count;
+	set<int> m_chann_count;//counting total numbers in preprocessing
+
 	bool m_slice_seq;
+	bool m_chann_seq;
+	int m_digit_order;
 	int m_time_num;
 	int m_cur_time;
 	int m_chan_num;
@@ -378,6 +397,12 @@ private:
 	//read tiff
 	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
 
+	//name pattern
+	void AnalyzeNamePattern(std::wstring &path_name);
+	void AddPatternR(wchar_t c, size_t pos);//add backwards
+	std::wstring GetSearchString(int mode);
+	int GetPatternNumber(std::wstring &path_name, int mode, bool count=false);
+
 	//invalidate page info
 	bool TagInInfo(uint16_t tag);
 	void SetPageInfo(uint16_t tag, uint64_t answer);
@@ -505,4 +530,4 @@ inline double TIFReader::GetTiffYResolution()
 		return 0.0;
 }
 
-#endif
+#endif//_TIF_READER_H_

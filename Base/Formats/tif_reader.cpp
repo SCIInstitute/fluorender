@@ -25,8 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "tif_reader.hpp"
-#include <Utilities/compatibility.h>
+#include "tif_reader.h"
+#include <boost/filesystem.hpp>
+#include "../compatibility.h"
 
 TIFReader::TIFReader()
 {
@@ -35,6 +36,8 @@ TIFReader::TIFReader()
 	m_alignment = 0;
 
 	m_slice_seq = false;
+	m_chann_seq = false;
+	m_digit_order = 0;
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
@@ -265,6 +268,7 @@ int TIFReader::Preprocess()
 		//it is not an ImageJ hyperstack, do the usual processing
 		//build 4d sequence
 		//search time sequence files
+		AnalyzeNamePattern(m_path_name);
 		std::vector<std::wstring> list;
 		if (!FIND_FILES_4D(m_path_name, m_time_id, list, m_cur_time))
 		{
@@ -306,51 +310,47 @@ int TIFReader::Preprocess()
 		if (m_4d_seq.size() > 0)
 			std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
 
+		m_slice_count.clear();
+		m_chann_count.clear();
 		//build 3d slice sequence
 		for (int t = 0; t < (int)m_4d_seq.size(); t++)
 		{
 			wstring slice_str = m_4d_seq[t].slices[0].slice;
 
-			if (m_slice_seq)
+			if (m_slice_seq || m_chann_seq)
 			{
-				//extract common string in name
-				size_t pos2 = slice_str.find_last_of(L'.');
-				size_t begin2 = 0;
-				int64_t end2 = -1;
-				for (i = int(pos2) - 1; i >= 0; i--)
+				//search slice sequence
+				std::vector<std::wstring> list;
+				std::wstring search_mask;
+				if (m_slice_seq && !m_chann_seq)
+					search_mask = GetSearchString(0);
+				else if (m_chann_seq && !m_slice_seq)
+					search_mask = GetSearchString(1);
+				else if (m_chann_seq && m_slice_seq)
+					search_mask = GetSearchString(-1);
+				FIND_FILES(path, search_mask, list, m_cur_time);
+				m_4d_seq[t].type = 1;
+				m_4d_seq[t].slices.clear();
+				for (size_t f = 0; f < list.size(); f++)
 				{
-					if (iswdigit(slice_str[i]) && end2 == -1)
-						end2 = i;
-					if (!iswdigit(slice_str[i]) && end2 != -1)
+					SliceInfo slice;
+					slice.slice = list.at(f);
+					if (m_slice_seq && !m_chann_seq)
+						slice.slicenumber = GetPatternNumber(list.at(f), 0, true);
+					else if (m_chann_seq && !m_slice_seq)
+						slice.slicenumber = GetPatternNumber(list.at(f), 1, true);
+					else if (m_chann_seq && m_slice_seq)
 					{
-						begin2 = i;
-						break;
+						short sn = short(GetPatternNumber(list.at(f), 0, true));//slice number
+						short cn = short(GetPatternNumber(list.at(f), 1, true));//channel number
+						slice.slicenumber = (int(cn) << 16) | int(sn);
 					}
+					m_4d_seq[t].slices.push_back(slice);
 				}
-				if (end2 != -1)
-				{
-					//search slice sequence
-					std::vector<std::wstring> list;
-					std::wstring search_ext = slice_str.substr(end2 + 1);
-					std::wstring regex = slice_str.substr(0, begin2 + 1);
-					FIND_FILES(path, search_ext, list, m_cur_time, regex);
-					m_4d_seq[t].type = 1;
-					m_4d_seq[t].slices.clear();
-					for (size_t f = 0; f < list.size(); f++) {
-						size_t start_idx = begin2 + 1;
-						size_t end_idx = list.at(f).find(search_ext);
-						size_t size = end_idx - start_idx;
-						std::wstring fileno = list.at(f).substr(start_idx, size);
-						SliceInfo slice;
-						slice.slice = list.at(f);
-						slice.slicenumber = WSTOI(fileno);
-						m_4d_seq[t].slices.push_back(slice);
-					}
-					if (m_4d_seq[t].slices.size() > 0)
-						std::sort(m_4d_seq[t].slices.begin(),
-							m_4d_seq[t].slices.end(),
-							TIFReader::tif_slice_sort);
-				}
+				if (m_4d_seq[t].slices.size() > 0)
+					std::sort(m_4d_seq[t].slices.begin(),
+						m_4d_seq[t].slices.end(),
+						TIFReader::tif_slice_sort);
 			}
 			else
 			{
@@ -376,10 +376,16 @@ int TIFReader::Preprocess()
 				m_chan_num = GetTiffField(kSamplesPerPixelTag);
 				if (m_chan_num == 0 &&
 					GetTiffField(kImageWidthTag) > 0 &&
-					GetTiffField(kImageLengthTag) > 0) {
+					GetTiffField(kImageLengthTag) > 0)
+				{
 					m_chan_num = 1;
 				}
 				CloseTiff();
+				//channels could be stored in slices
+				if (m_chann_seq)
+				{
+					m_chan_num *= m_chann_count.size();
+				}
 			}
 			else m_chan_num = 0;
 		}
@@ -978,9 +984,12 @@ uint64_t TIFReader::TurnToPage(uint64_t page)
 			tiff_stream.seekg(current_offset_, tiff_stream.beg);
 			if (GetTiffField(kSubFileTypeTag) != 1) current_page_++;
 			current_offset_ = GetTiffNextPageOffset();
+			if (!current_offset_)
+			{
+				imagej_raw_ = true;
+				break;
+			}
 		}
-		if (!current_offset_)
-			imagej_raw_ = true;
 	}
 	if (current_page_ != page_save &&
 		!imagej_raw_)
@@ -1020,6 +1029,26 @@ bool TIFReader::GetSliceSeq()
 	return m_slice_seq;
 }
 
+void TIFReader::SetChannSeq(bool cs)
+{
+	m_chann_seq = cs;
+}
+
+bool TIFReader::GetChannSeq()
+{
+	return m_chann_seq;
+}
+
+void TIFReader::SetDigitOrder(int order)
+{
+	m_digit_order = order;
+}
+
+int TIFReader::GetDigitOrder()
+{
+	return m_digit_order;
+}
+
 void TIFReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;
@@ -1036,7 +1065,7 @@ void TIFReader::SetBatch(bool batch)
 	{
 		//separate path and name
 		wstring search_path = GET_PATH(m_path_name);
-		wstring suffix = GET_SUFFIX(m_path_name);
+		wstring suffix = L"*" + GET_SUFFIX(m_path_name);
 		FIND_FILES(search_path, suffix, m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
@@ -1126,9 +1155,22 @@ int TIFReader::LoadBatch(int index)
 
 Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 {
-	if (t < 0 || t >= m_time_num ||
-		c < 0 || c >= m_chan_num)
-		return 0;
+	if (t < 0 || c < 0)
+	{
+		t = 0;
+		c = 0;
+	}
+	else if (t >= m_time_num || c >= m_chan_num)
+	{
+		if (m_time_num > 0)
+			t = m_time_num - 1;
+		else
+			return 0;
+		if (m_chan_num > 0)
+			c = m_chan_num - 1;
+		else
+			return 0;
+	}
 
 	if (isHyperstack_ && m_max_value)
 		get_max = false;
@@ -1422,8 +1464,7 @@ void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
 Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	int c, bool get_max)
 {
-	uint64_t numPages = static_cast<uint64_t>(filelist.size());
-	if (numPages <= 0)
+	if (filelist.empty())
 		return 0;
 	wstring filename;
 	if (isHyperstack_ && !isHsTimeSeq_)
@@ -1431,7 +1472,30 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	else
 		filename = filelist[0].slice;
 	OpenTiff(filename.c_str());
-	bool sequence = numPages > 1;
+
+	uint64_t numPages;
+	bool sequence = false;
+	if (m_chann_seq)
+	{
+		numPages = m_slice_count.size();
+		if (!numPages && !m_chann_count.empty())
+		{
+			numPages = GetNumTiffPages();
+			sequence = m_chann_count.size() > 1;
+		}
+		else
+			sequence = numPages > 1;
+	}
+	else
+	{
+		numPages = static_cast<uint64_t>(filelist.size());
+		sequence = numPages > 1;
+	}
+	if (!numPages)
+	{
+		CloseTiff();
+		return 0;
+	}
 	if (!sequence)
 	{
 		if (get_max && !isHyperstack_ && !imagej_raw_possible_)
@@ -1580,11 +1644,31 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	}
 	else
 	{
-		for (uint64_t pageindex = 0; pageindex < numPages; pageindex++)
+		uint64_t val_pageindex = 0;
+		uint64_t for_size;
+		if (sequence)
+			for_size = filelist.size();
+		else
+			for_size = numPages;
+		for (uint64_t pageindex = 0; pageindex < for_size; ++pageindex)
 		{
 			if (sequence)
 			{
 				filename = filelist[pageindex].slice;
+				if (m_chann_seq)
+				{
+					int cn = GetPatternNumber(filename, 1);
+					int cindex = 0;
+					for (auto it = m_chann_count.begin();
+						it != m_chann_count.end(); ++it)
+					{
+						if (*it == cn)
+							break;
+						cindex++;
+					}
+					if (cindex != c)
+						continue;
+				}
 				OpenTiff(filename);
 				InvalidatePageInfo();
 			}
@@ -1617,13 +1701,13 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					uint64_t indexinpage;
 					if (samples > 1)
 					{
-						GetTiffTile(sequence ? 0 : pageindex, tile, buf, tile_size, tile_h);
+						GetTiffTile(sequence ? 0 : val_pageindex, tile, buf, tile_size, tile_h);
 						int num_pixels = tile_size / samples / (eight_bit ? 1 : 2);
 						uint64_t tx, ty;//tile coord
 						tx = tile % x_tile_num;
 						ty = tile / x_tile_num;
 						indexinpage = width * ty * tile_h + tx * tile_w;
-						valindex = pageindex * pagepixels + indexinpage;
+						valindex = val_pageindex * pagepixels + indexinpage;
 						for (int i = 0; i<num_pixels; i++)
 						{
 							if (tx == x_tile_num - 1)
@@ -1659,12 +1743,12 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					}
 					else
 					{
-						GetTiffTile(sequence ? 0 : pageindex, tile, buf, tile_size, tile_h);
+						GetTiffTile(sequence ? 0 : val_pageindex, tile, buf, tile_size, tile_h);
 						uint64_t tx, ty;//tile coord
 						tx = tile % x_tile_num;
 						ty = tile / x_tile_num;
 						indexinpage = width * ty * tile_h + tx * tile_w;
-						valindex = pageindex * pagepixels + indexinpage;
+						valindex = val_pageindex * pagepixels + indexinpage;
 						//copy tile
 						for (int i = 0; i < tile_h; ++i)
 						{
@@ -1712,10 +1796,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					int indexinpage;
 					if (samples > 1)
 					{
-						GetTiffStrip(sequence ? 0 : pageindex, strip, buf, strip_size);
+						GetTiffStrip(sequence ? 0 : val_pageindex, strip, buf, strip_size);
 						int num_pixels = strip_size / samples / (eight_bit ? 1 : 2);
 						indexinpage = strip*num_pixels;
-						valindex = pageindex*pagepixels + indexinpage;
+						valindex = val_pageindex *pagepixels + indexinpage;
 						for (int i = 0; i<num_pixels; i++)
 						{
 							if (indexinpage++ >= pagepixels) break;
@@ -1733,7 +1817,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 					}
 					else
 					{
-						valindex = pageindex*pagepixels +
+						valindex = val_pageindex *pagepixels +
 							strip*strip_size / (eight_bit ? 1 : 2);
 						uint64_t strip_size_used = strip_size;
 						if (valindex + strip_size / (eight_bit ? 1 : 2) >= total_size)
@@ -1741,16 +1825,19 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 						if (strip_size_used > 0)
 						{
 							if (eight_bit)
-								GetTiffStrip(sequence ? 0 : pageindex, strip,
+								GetTiffStrip(sequence ? 0 : val_pageindex, strip,
 									(uint8_t*)val + valindex, strip_size_used);
 							else
-								GetTiffStrip(sequence ? 0 : pageindex, strip,
+								GetTiffStrip(sequence ? 0 : val_pageindex, strip,
 									(uint16_t*)val + valindex, strip_size_used);
 						}
 					}
 				}
 			}
 			if (sequence) CloseTiff();
+			val_pageindex++;
+			if (val_pageindex >= numPages)
+				break;
 			//if (!imagej_raw_)
 			//	InvalidatePageInfo();
 		}
@@ -1797,3 +1884,182 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	return nrrdout;
 }
 
+void TIFReader::AnalyzeNamePattern(std::wstring &path_name)
+{
+	m_name_patterns.clear();
+
+	boost::filesystem::path p(path_name);
+	std::wstring path = p.stem().wstring();
+	std::wstring name = p.filename().wstring();
+	if (name.empty())
+		return;
+
+	size_t end_pos = name.find_last_of(L'.');
+	bool suf = true;
+	if (end_pos == std::wstring::npos)
+	{
+		end_pos = name.length();
+		suf = false;
+	}
+	for (int i = int(end_pos) - 1; i >= 0; --i)
+		AddPatternR(name[i], i);
+	//add suffix
+	if (suf)
+	{
+		NamePattern np;
+		np.start = end_pos;
+		np.end = name.length() - 1;
+		np.len = np.end - np.start + 1;
+		np.type = 0;
+		np.use = -1;
+		np.str = name.substr(np.start);
+		m_name_patterns.push_back(np);
+	}
+	//find time id
+	size_t tid_pos = name.find(m_time_id);
+	if (tid_pos != std::wstring::npos)
+	{
+		size_t tid_start = tid_pos + m_time_id.length();
+		for (auto it = m_name_patterns.begin();
+			it != m_name_patterns.end(); ++it)
+		{
+			if (it->type == 1 &&
+				it->start == tid_start)
+			{
+				it->use = 2;
+				break;
+			}
+		}
+	}
+	//find z and chann
+	int counter = 0;
+	for (auto it = m_name_patterns.rbegin();
+		it != m_name_patterns.rend(); ++it)
+	{
+		if (counter == 2)
+			break;
+		if (it->type == 1 &&
+			it->use != 2)
+		{
+			if (counter == 0)
+			{
+				if (m_digit_order == 0)
+					it->use = 0;
+				else
+					it->use = 1;
+			}
+			else if (counter == 1)
+			{
+				if (m_digit_order == 0)
+					it->use = 1;
+				else
+					it->use = 0;
+			}
+			counter++;
+		}
+	}
+}
+
+void TIFReader::AddPatternR(wchar_t c, size_t pos)
+{
+	int type = iswdigit(c) ? 1 : 0;
+
+	if (m_name_patterns.empty())
+	{
+		NamePattern np;
+		np.start = pos;
+		np.end = pos;
+		np.len = 1;
+		np.type = type;
+		np.use = -1;
+		np.str = c;
+		m_name_patterns.push_front(np);
+	}
+	else
+	{
+		NamePattern &np0 = m_name_patterns.front();
+		if (np0.type == type)
+		{
+			np0.start = pos;
+			np0.len = np0.end - np0.start + 1;
+			np0.str.insert(0, 1, c);
+		}
+		else
+		{
+			NamePattern np;
+			np.start = pos;
+			np.end = pos;
+			np.len = 1;
+			np.type = type;
+			np.use = -1;
+			np.str = c;
+			m_name_patterns.push_front(np);
+		}
+	}
+}
+
+std::wstring TIFReader::GetSearchString(int mode)
+{
+	std::wstring str;
+	for (auto it = m_name_patterns.begin();
+		it != m_name_patterns.end(); ++it)
+	{
+		if (it->type == 1 &&
+			((mode < 0 && it->use >=0) ||
+			(mode >=0 && it->use == mode)))
+			str += L"*";
+		else
+			str += it->str;
+	}
+	return str;
+}
+
+int TIFReader::GetPatternNumber(std::wstring &path_name, int mode, bool count)
+{
+	boost::filesystem::path p(path_name);
+	std::wstring name = p.filename().wstring();
+
+	int number = 0;
+	std::wstring str;
+	size_t pos = std::wstring::npos;
+	//slice/channel number
+	for (auto it = m_name_patterns.begin();
+		it != m_name_patterns.end(); ++it)
+	{
+		if (it->type == 1 && it->use == mode)
+		{
+			pos = it->start;
+			//auto pit = std::prev(it);
+			//if (pit != m_name_patterns.end())
+			//	str = pit->str;
+			break;
+		}
+	}
+	//need better pattern matching when seq number length is indefinite
+	//size_t pos2 = std::wstring::npos;
+	//if (!str.empty())
+	//	pos2 = name.find(str);
+	//if (pos2 == std::wstring::npos)
+	//	pos2 = 0;
+	//else
+	//	pos2 += str.length();
+	//str.clear();
+	for (size_t i = pos; i < name.size(); ++i)
+	{
+		if (iswdigit(name[i]))
+			str += name[i];
+		else
+			break;
+	}
+	number = WSTOI(str);
+
+	if (count)
+	{
+		if (mode == 0)
+			m_slice_count.insert(number);
+		else if (mode == 1)
+			m_chann_count.insert(number);
+	}
+
+	return number;
+}

@@ -25,22 +25,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef BASE_WRITER_HPP
-#define BASE_WRITER_HPP
+#ifndef _BASE_WRITER_H_
+#define _BASE_WRITER_H_
 
 #include <string>
-#include <teem/nrrd.h>
+#include <nrrd.h>
 
 using namespace std;
 
-//#ifdef STATIC_COMPILE
-  #define nrrdWrap nrrdWrap_va
-  #define nrrdAxisInfoSet nrrdAxisInfoSet_va
-//#endif
+#ifdef STATIC_COMPILE
+	#define nrrdWrap nrrdWrap_va
+	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
+#endif
 
 class BaseWriter
 {
-  public:
+public:
 	//BaseWriter();
 	virtual ~BaseWriter() {};
 
@@ -50,4 +50,4 @@ class BaseWriter
 	virtual void Save(wstring filename, int mode) = 0;
 };
 
-#endif
+#endif//_BASE_WRITER_H_

@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "msk_reader.hpp"
-#include <Utilities/compatibility.h>
+#include "msk_reader.h"
+#include "../compatibility.h"
 #include <sstream>
 #include <inttypes.h>
 
@@ -67,6 +67,26 @@ void MSKReader::SetSliceSeq(bool ss)
 bool MSKReader::GetSliceSeq()
 {
 	return false;
+}
+
+void MSKReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool MSKReader::GetChannSeq()
+{
+	return false;
+}
+
+void MSKReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int MSKReader::GetDigitOrder()
+{
+	return 0;
 }
 
 void MSKReader::SetTimeId(wstring &id)

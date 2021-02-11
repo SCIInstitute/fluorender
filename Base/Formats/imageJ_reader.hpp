@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef IMAGEJ_READER_HPP
-#define IMAGEJ_READER_HPP
+#ifndef _IMAGEJ_READER_H_
+#define _IMAGEJ_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 #include <cstdio>
 #include <vector>
 #include <fstream>
@@ -39,17 +39,15 @@ DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <string>
 
-#include "JVMInitializer.hpp"
+#include "JVMInitializer.h"
 
 using namespace std;
-
-#define READER_IMAGEJ_TYPE	9
 
 //extern JVMInitializer m_jvmInstance;
 
 class ImageJReader : public BaseReader
 {
-  public:
+public:
 	ImageJReader();
 	~ImageJReader();
 
@@ -59,6 +57,10 @@ class ImageJReader : public BaseReader
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -90,7 +92,7 @@ class ImageJReader : public BaseReader
 	int GetCurBatch() {return m_cur_batch;}
 	bool double_equals(double a, double b) { return std::abs(a - b) < DBL_EPSILON; }
 
-  private:
+private:
 	// ImageJ related variables.
 	JVMInitializer* m_pJVMInstance;
 	jclass m_imageJ_cls;
@@ -116,9 +118,9 @@ class ImageJReader : public BaseReader
 	//time sequence id
 	wstring m_time_id;	
 
-  private:
+private:	
 	// read from imageJ
 	Nrrd* ReadFromImageJ(int i, int c, bool get_max);
 };
 
-#endif
+#endif//_IMAGEJ_READER_H_

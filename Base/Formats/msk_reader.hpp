@@ -25,55 +25,57 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef MSK_READER_HPP
-#define MSK_READER_HPP
+#ifndef _MSK_READER_H_
+#define _MSK_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 
 using namespace std;
 
-#define READER_MSK_TYPE	0
-
 class MSKReader : public BaseReader
 {
-  public:
-	  MSKReader();
-	  ~MSKReader();
+public:
+	MSKReader();
+	~MSKReader();
 
-	  int GetType() { return READER_MSK_TYPE; }
+	int GetType() { return READER_MSK_TYPE; }
 
-	  void SetFile(string &file);
-	  void SetFile(wstring &file);
-	  void SetSliceSeq(bool ss);
-	  bool GetSliceSeq();
-	  void SetTimeId(wstring &id);
-	  wstring GetTimeId();
-	  int Preprocess();
-	  void SetBatch(bool batch);
-	  int LoadBatch(int index);
-	  Nrrd* Convert(int t, int c, bool get_max);
-	  wstring GetCurDataName(int t, int c);
-	  wstring GetCurMaskName(int t, int c);
-	  wstring GetCurLabelName(int t, int c);
+	void SetFile(string &file);
+	void SetFile(wstring &file);
+	void SetSliceSeq(bool ss);
+	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
+	void SetTimeId(wstring &id);
+	wstring GetTimeId();
+	int Preprocess();
+	void SetBatch(bool batch);
+	int LoadBatch(int index);
+	Nrrd* Convert(int t, int c, bool get_max);
+	wstring GetCurDataName(int t, int c);
+	wstring GetCurMaskName(int t, int c);
+	wstring GetCurLabelName(int t, int c);
 
-	  wstring GetPathName() {return m_path_name;}
-	  wstring GetDataName() {return L"";}
-	  int GetTimeNum() {return 0;}
-	  int GetCurTime() {return 0;}
-	  int GetChanNum() {return 0;}
-	  double GetExcitationWavelength(int chan) {return 0.0;}
-	  int GetSliceNum() {return 0;}
-	  int GetXSize() {return 0;}
-	  int GetYSize() {return 0;}
-	  bool IsSpcInfoValid() {return false;}
-	  double GetXSpc() {return 0.0;}
-	  double GetYSpc() {return 0.0;}
-	  double GetZSpc() {return 0.0;}
-	  double GetMaxValue() {return 0.0;}
-	  double GetScalarScale() {return 0.0;}
-	  bool GetBatch() {return false;}
-	  int GetBatchNum() {return 0;}
-	  int GetCurBatch() {return 0;}
+	wstring GetPathName() {return m_path_name;}
+	wstring GetDataName() {return L"";}
+	int GetTimeNum() {return 0;}
+	int GetCurTime() {return 0;}
+	int GetChanNum() {return 0;}
+	double GetExcitationWavelength(int chan) {return 0.0;}
+	int GetSliceNum() {return 0;}
+	int GetXSize() {return 0;}
+	int GetYSize() {return 0;}
+	bool IsSpcInfoValid() {return false;}
+	double GetXSpc() {return 0.0;}
+	double GetYSpc() {return 0.0;}
+	double GetZSpc() {return 0.0;}
+	double GetMaxValue() {return 0.0;}
+	double GetScalarScale() {return 0.0;}
+	bool GetBatch() {return false;}
+	int GetBatchNum() {return 0;}
+	int GetCurBatch() {return 0;}
 };
 
-#endif
+#endif//_MSK_READER_H_

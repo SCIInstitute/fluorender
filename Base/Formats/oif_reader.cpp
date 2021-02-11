@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "oif_reader.hpp"
-#include <Utilities/compatibility.h>
+#include "oif_reader.h"
+#include "../compatibility.h"
 #include <algorithm>
 
 OIFReader::OIFReader()
@@ -154,7 +154,7 @@ void OIFReader::ReadSingleOif()
 	m_subdir_name = m_path_name + L".files" + GETSLASH();
 	std::vector<std::wstring> list;
 	int tmp;
-	FIND_FILES(m_subdir_name, L".tif", list, tmp);
+	FIND_FILES(m_subdir_name, L"*.tif", list, tmp);
 	//read file sequence
 	for (size_t f = 0; f < list.size(); f++)
 		ReadTifSequence(list.at(f));
@@ -172,7 +172,7 @@ void OIFReader::ReadSequenceOif()
 
 		m_subdir_name = path_name + L".files" + GETSLASH();
 		std::vector<std::wstring> list;
-		FIND_FILES(m_subdir_name, L".tif", list, m_oif_t);
+		FIND_FILES(m_subdir_name, L"*.tif", list, m_oif_t);
 		//read file sequence
 		for (size_t f = 0; f < list.size(); f++)
 			ReadTifSequence(list.at(f), i);
@@ -187,6 +187,26 @@ void OIFReader::SetSliceSeq(bool ss)
 bool OIFReader::GetSliceSeq()
 {
 	return false;
+}
+
+void OIFReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool OIFReader::GetChannSeq()
+{
+	return false;
+}
+
+void OIFReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int OIFReader::GetDigitOrder()
+{
+	return 0;
 }
 
 void OIFReader::SetTimeId(wstring &id)
@@ -205,7 +225,7 @@ void OIFReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES(search_path, L".oif", m_batch_list, m_cur_batch);
+		FIND_FILES(search_path, L"*.oif", m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

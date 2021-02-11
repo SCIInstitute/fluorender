@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef TIF_WRITER_HPP
-#define TIF_WRITER_HPP
+#ifndef _TIF_WRITER_H_
+#define _TIF_WRITER_H_
 
-#include "base_writer.hpp"
+#include <base_writer.h>
 
 class TIFWriter : public BaseWriter
 {
@@ -53,4 +53,4 @@ private:
 	void SaveSequence(wstring filename);
 };
 
-#endif
+#endif//_TIF_WRITER_H_

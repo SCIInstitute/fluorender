@@ -25,19 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef OIB_READER_HPP
-#define OIB_READER_HPP
+#ifndef _OIB_READER_H_
+#define _OIB_READER_H_
 
 #include <stdio.h>
-#include <Utilities/compatibility.h>
+#include "../compatibility.h"
 #include <vector>
-#include <pole.h>
-#include "base_reader.hpp"
-
+#include "pole/pole.h"
+#include "base_reader.h"
 
 using namespace std;
-
-#define READER_OIB_TYPE	3
 
 class OIBReader : public BaseReader
 {
@@ -51,7 +48,11 @@ class OIBReader : public BaseReader
       void SetFile(wstring &file);
       void SetSliceSeq(bool ss);
       bool GetSliceSeq();
-      void SetTimeId(wstring &id);
+	  void SetChannSeq(bool cs);
+	  bool GetChannSeq();
+	  void SetDigitOrder(int order);
+	  int GetDigitOrder();
+	  void SetTimeId(wstring &id);
       wstring GetTimeId();
       int Preprocess();
       void SetBatch(bool batch);
@@ -136,4 +137,4 @@ class OIBReader : public BaseReader
 	void ReadTiff(unsigned char* pbyData, unsigned short *val, int z);
 };
 
-#endif
+#endif//_OIB_READER_H_

@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef MSK_WRITER_HPP
-#define MSK_WRITER_HPP
+#ifndef _MSK_WRITER_H_
+#define _MSK_WRITER_H_
 
-#include "base_writer.hpp"
+#include <base_writer.h>
 
 class MSKWriter : public BaseWriter
 {
@@ -52,4 +52,4 @@ private:
 	int m_channel;
 };
 
-#endif
+#endif//_MSK_WRITER_H_

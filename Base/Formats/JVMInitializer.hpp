@@ -26,50 +26,51 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef JVMINITIALIZER_HPP
-#define JVMINITIALIZER_HPP
-
 #include <jni.h>
 #include <iostream>
-#include <Utilities/compatibility.h>
+#include "../compatibility.h"
 //#include "VRenderFrame.h"
 
 #ifdef __linux__
   #include <dlfcn.h>
 #endif
+
+#ifndef _JVMINITIALIZER_H_
+#define _JVMINITIALIZER_H_
+
 class SettingDlg;
 class JVMInitializer {
-  public:
-    static JVMInitializer* getInstance(std::vector<std::string> args = std::vector<std::string>());
-    static void destroyJVM();
+	public:
+		static JVMInitializer* getInstance(std::vector<std::string> args = std::vector<std::string>());
+		static void destroyJVM();
 
-  #ifdef _WIN32
-    static HMODULE m_jvm_dll;
-  #else
+#ifdef _WIN32
+		static HMODULE m_jvm_dll;
+#else
     static void* m_jvm_dll;
-  #endif
-    static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
-    static JNIEnv *m_pEnv;                      // Pointer to native interface
-    static JavaVMInitArgs m_VMargs;
+#endif
+		static JavaVM *m_pJvm;                      // Pointer to the JVM (Java Virtual Machine)
+		static JNIEnv *m_pEnv;                      // Pointer to native interface
+		static JavaVMInitArgs m_VMargs;
     
-  #ifdef _WIN32
-    static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
-  #else
+#ifdef _WIN32
+		static decltype(&JNI_CreateJavaVM) m_createJVM_Ptr;
+#else
     typedef jint (JNICALL CreateJavaVM_t)(JavaVM **pvm, void **env, void *args) ;
     static CreateJavaVM_t* m_createJVM_Ptr;
-  #endif
+#endif
 
-  private:
-    static JVMInitializer* m_pJVMInstance;
+	private:
+		static JVMInitializer* m_pJVMInstance;				
 
-    JVMInitializer() {};
-    ~JVMInitializer() {};
-    JVMInitializer(JVMInitializer const&);
-    JVMInitializer& operator=(JVMInitializer const&);
+		JVMInitializer() {};
+		~JVMInitializer() {};
+		JVMInitializer(JVMInitializer const&);
+		JVMInitializer& operator=(JVMInitializer const&);
 
-    static char getPathSeparator();
-    bool static create_JVM(std::vector<std::string> args);
-    bool static m_with_fiji;
+		static char getPathSeparator();
+		bool static create_JVM(std::vector<std::string> args);
+		bool static m_with_fiji;
 };
 
-#endif
+#endif //_JVMINITIALIZER_H_

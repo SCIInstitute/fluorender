@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "nrrd_reader.hpp"
-#include <Utilities/compatibility.h>
+#include "nrrd_reader.h"
+#include "../compatibility.h"
 #include <algorithm>
 #include <sstream>
 
@@ -151,6 +151,26 @@ bool NRRDReader::GetSliceSeq()
 	return false;
 }
 
+void NRRDReader::SetChannSeq(bool cs)
+{
+	//do nothing
+}
+
+bool NRRDReader::GetChannSeq()
+{
+	return false;
+}
+
+void NRRDReader::SetDigitOrder(int order)
+{
+	//do nothing
+}
+
+int NRRDReader::GetDigitOrder()
+{
+	return 0;
+}
+
 void NRRDReader::SetTimeId(wstring &id)
 {
 	m_time_id = id;
@@ -167,7 +187,7 @@ void NRRDReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES(search_path,L".nrrd",m_batch_list,m_cur_batch,L"");
+		FIND_FILES(search_path,L"*.nrrd",m_batch_list,m_cur_batch);
 		m_batch = true;
 	}
 	else
@@ -192,10 +212,22 @@ int NRRDReader::LoadBatch(int index)
 
 Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 {
-	if (t<0 || t>=m_time_num)
-		return 0;
-
-	int i;
+	if (t < 0 || c < 0)
+	{
+		t = 0;
+		c = 0;
+	}
+	else if (t >= m_time_num || c >= m_chan_num)
+	{
+		if (m_time_num > 0)
+			t = m_time_num - 1;
+		else
+			return 0;
+		if (m_chan_num > 0)
+			c = m_chan_num - 1;
+		else
+			return 0;
+	}
 
 	wstring str_name = m_4d_seq[t].filename;
 	m_data_name = GET_NAME(str_name);
@@ -236,9 +268,14 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		m_yspc = 1.0;
 		m_zspc = 1.0;
 	}
-	int data_size = m_slice_num * m_x_size * m_y_size;
+
+	unsigned long long data_size = (unsigned long long)(m_slice_num) * m_x_size * m_y_size;
+	unsigned long long nsize = data_size;
 	if (output->type == nrrdTypeUShort || output->type == nrrdTypeShort)
 		data_size *= 2;
+	else if (output->type == nrrdTypeInt ||
+		output->type == nrrdTypeUInt)
+		data_size *= 4;
 	output->data = new unsigned char[data_size];
 
 	if (nrrdRead(output, nrrd_file, NULL))
@@ -247,30 +284,71 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		fclose(nrrd_file);
 		return 0;
 	}
+
+	m_max_value = 0.0;
 	// turn signed into unsigned
-	if (output->type == nrrdTypeChar) {
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
-			char val = ((char*)output->data)[i];
+	if (output->type == nrrdTypeChar)
+	{
+		for (unsigned long long idx=0; idx < nsize; ++idx)
+		{
+			char val = ((char*)output->data)[idx];
 			unsigned char n = val + 128;
-			((unsigned char*)output->data)[i] = n;
+			((unsigned char*)output->data)[idx] = n;
 		}
 		output->type = nrrdTypeUChar;
 	}
-	m_max_value = 0.0;
 	// turn signed into unsigned
-	unsigned short min_value = 32768, n;
-	if (output->type == nrrdTypeShort || output->type == nrrdTypeUShort) {
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
-			if (output->type == nrrdTypeShort) {
-				short val = ((short*)output->data)[i];
-				n = val + 32768;
-				((unsigned short*)output->data)[i] = n;
-				min_value = (n < min_value)?n:min_value;
-			} else {
-				n =  ((unsigned short*)output->data)[i];
-			}
+	unsigned short min_value, n;
+	if (output->type == nrrdTypeShort)
+	{
+		min_value = 32768;
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		{
+			short val = ((short*)output->data)[idx];
+			n = val + 32768;
+			((unsigned short*)output->data)[idx] = n;
+			min_value = (n < min_value) ? n : min_value;
+			if (get_max)
+				m_max_value = (n > m_max_value) ? n : m_max_value;
+		}
+		output->type = nrrdTypeUShort;
+	}
+	else if (output->type == nrrdTypeUShort)
+	{
+		min_value = 0;
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		{
+			n =  ((unsigned short*)output->data)[idx];
 			if (get_max)
 				m_max_value = (n > m_max_value)?n:m_max_value;
+		}
+	}
+	//compress int
+	if (output->type == nrrdTypeInt)
+	{
+		min_value = 32768;
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		{
+			int val = ((int*)output->data)[idx];
+			val += 0x80000000;
+			n = (unsigned short)(val >> 8);
+			((unsigned short*)output->data)[idx] = n;
+			min_value = (n < min_value) ? n : min_value;
+			if (get_max)
+				m_max_value = (n > m_max_value) ? n : m_max_value;
+		}
+		output->type = nrrdTypeUShort;
+	}
+	else if (output->type == nrrdTypeUInt)
+	{
+		min_value = 0;
+		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		{
+			int val = ((unsigned int*)output->data)[idx];
+			n = (unsigned short)(val >> 8);
+			((unsigned short*)output->data)[idx] = n;
+			if (get_max)
+				m_max_value = (n > m_max_value) ? n : m_max_value;
 		}
 		output->type = nrrdTypeUShort;
 	}
@@ -283,11 +361,11 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 	}
 	else if (output->type == nrrdTypeUShort)
 	{
-		m_max_value -= min_value;
 		//16 bit
-		for (i=0; i<m_slice_num*m_x_size*m_y_size; i++) {
-			((unsigned short*)output->data)[i] =
-				((unsigned short*)output->data)[i] - min_value;
+		m_max_value -= min_value;
+		for (unsigned long long idx=0; idx < nsize; ++idx) {
+			((unsigned short*)output->data)[idx] =
+				((unsigned short*)output->data)[idx] - min_value;
 		}
 		if (m_max_value > 0.0)
 			m_scalar_scale = 65535.0 / m_max_value;

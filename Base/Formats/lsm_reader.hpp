@@ -25,15 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef LSM_READER_HPP
-#define LSM_READER_HPP
+#ifndef _LSM_READER_H_
+#define _LSM_READER_H_
 
-#include "base_reader.hpp"
+#include <base_reader.h>
 #include <vector>
 
 using namespace std;
-
-#define READER_LSM_TYPE	5
 
 class LSMReader : public BaseReader
 {
@@ -47,6 +45,10 @@ public:
 	void SetFile(wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
 	void SetTimeId(wstring &id);
 	wstring GetTimeId();
 	int Preprocess();
@@ -123,4 +125,4 @@ private:
 
 };
 
-#endif
+#endif//_LSM_READER_H_
