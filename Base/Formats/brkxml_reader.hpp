@@ -1,8 +1,8 @@
-#ifndef _BRKXML_READER_H_
-#define _BRKXML_READER_H_
+#ifndef BRKXML_READER_HPP
+#define BRKXML_READER_HPP
 
 #include <vector>
-#include <base_reader.h>
+#include <base_reader.hpp>
 #include <FLIVR/TextureBrick.h>
 #include <tinyxml2.h>
 

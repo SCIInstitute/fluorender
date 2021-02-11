@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _CZI_READER_H_
-#define _CZI_READER_H_
+#ifndef CZI_READER_HPP
+#define CZI_READER_HPP
 
 #include <base_reader.h>
 #include <wx/xml/xml.h>
@@ -244,4 +244,4 @@ private:
 	void FindNodeRecursive(wxXmlNode* node);
 };
 
-#endif//_CZI_READER_H_
+#endif//CZI_READER_HPP

@@ -49,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
  * OF THIS SOFTWARE.
  */
 
-#include "base_reader.h"
+#include "base_reader.hpp"
 
 int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 {

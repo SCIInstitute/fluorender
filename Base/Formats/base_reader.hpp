@@ -25,20 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _BASE_READER_H_
-#define _BASE_READER_H_
+#ifndef BASE_READER_HPP
+#define BASE_READER_HPP
 
 #include <string>
-#include <nrrd.h>
+#include <teem/nrrd.h>
 #include <vector>
 #include <sstream>
 
 using namespace std;
 
-#ifdef STATIC_COMPILE
+//#ifdef STATIC_COMPILE
 	#define nrrdWrap nrrdWrap_va
 	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
-#endif
+//#endif
 
 //error codes
 //return to notify caller if fail
@@ -324,4 +324,4 @@ protected:
 	int get_number(string &str, int64_t pos);
 };
 
-#endif//_BASE_READER_H_
+#endif//BASE_READER_HPP

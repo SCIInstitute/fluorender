@@ -15,10 +15,16 @@ include_directories(
 set(HEADER_FILES  base_reader.hpp
                   base_writer.hpp
                   brkxml_reader.hpp
+                  czi_reader.hpp
+                  imageJ_reader.hpp
+                  JVMInitializer.hpp
                   lbl_reader.hpp
+                  lif_reader.hpp
+                  lof_reader.hpp
                   lsm_reader.hpp
                   msk_reader.hpp
                   msk_writer.hpp
+                  nd2_reader.hpp
                   nrrd_reader.hpp
                   nrrd_writer.hpp
                   oib_reader.hpp
@@ -34,10 +40,16 @@ set(HEADER_FILES  base_reader.hpp
              #JVMInitializer.cpp
 set(SOURCES  base_reader.cpp
              brkxml_reader.cpp
+             czi_reader.cpp
+             imageJ_reader.cpp
+             JVMInitializer.cpp
              lbl_reader.cpp
+             lif_reader.cpp
+             lof_reader.cpp
              lsm_reader.cpp
              msk_reader.cpp
              msk_writer.cpp
+             nd2_reader.cpp
              nrrd_reader.cpp
              nrrd_writer.cpp
              oib_reader.cpp
