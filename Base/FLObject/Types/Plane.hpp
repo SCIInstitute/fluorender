@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Vector.hpp>
 #include <vector>
 
-namespace FLTYPE
+namespace fluo
 {
 	//clipping plane mask
 	enum ClipPlaneMask
@@ -90,7 +90,6 @@ namespace FLTYPE
 		{ return d_copy_; }
 		inline Vector n_copy() const
 		{ return n_copy_; }
-
 
 		Plane& operator=(const Plane&);
 		double eval_point(const Point &p) const;
@@ -195,6 +194,6 @@ namespace FLTYPE
 		}
 	};
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif

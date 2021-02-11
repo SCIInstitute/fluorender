@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.hpp>
 #include <Utils.hpp>
 
-namespace FLTYPE
+namespace fluo
 {
 	Color::Color()
 		: r_(0), g_(0), b_(0)
@@ -139,8 +139,28 @@ namespace FLTYPE
 		}
 	}
 
-	HSVColor::HSVColor():
-		hue_(0), sat_(0), val_(0)
+	Color::Color(unsigned int id, int shuffle)
+	{
+		unsigned int cv = id % 253;
+		cv = (cv << shuffle) & 0xff | (cv >> (8 - shuffle)) & 0xff;
+		double hue = double(cv) / 45.0;
+		double p2 = 1.0 - hue + std::floor(hue);
+		double p3 = hue - std::floor(hue);
+		if (hue < 1.0)
+			*this = Color(1.0, p3, 0.0);
+		else if (hue < 2.0)
+			*this = Color(p2, 1.0, 0.0);
+		else if (hue < 3.0)
+			*this = Color(0.0, 1.0, p3);
+		else if (hue < 4.0)
+			*this = Color(0.0, p2, 1.0);
+		else if (hue < 5.0)
+			*this = Color(p3, 0.0, 1.0);
+		else
+			*this = Color(1.0, 0.0, p2);
+	}
+
+	HSVColor::HSVColor()
 	{
 	}
 
@@ -200,4 +220,56 @@ namespace FLTYPE
 		return HSVColor(hue_+c.hue_, sat_+c.sat_, val_+c.val_);
 	}
 
-} // End namespace FLTYPE
+	/***************************************************
+	***************************************************/
+
+	CharColor::CharColor ()
+	{
+		red = green = blue = 0;
+	}
+
+	CharColor::CharColor ( char a, char b, char c )
+	{
+		red = a;
+		green = b;
+		blue = c;
+	}
+
+	CharColor::CharColor ( Color& c )
+	{
+		red   = (char)(c.r()*255);
+		green = (char)(c.g()*255);
+		blue  = (char)(c.b()*255);
+	}
+
+
+	CharColor
+		CharColor::operator= ( const Color& c )
+	{
+		red = (char)(c.r()*255);
+		green = (char)(c.g()*255);
+		blue = (char)(c.b()*255);
+
+		return *this;
+	}
+
+	CharColor
+		CharColor::operator= ( const CharColor& c )
+	{
+		red = c.red;
+		green = c.green;
+		blue = c.blue;
+		return *this;
+	}
+
+	int
+		CharColor::operator!= ( const CharColor& c ) const
+	{
+		if ( ( red == c.r() ) && ( green == c.g() ) &&
+			( blue == c.b() ) )
+			return 1;
+		else
+			return 0;
+	}
+
+} // End namespace fluo

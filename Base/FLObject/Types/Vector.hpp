@@ -32,12 +32,11 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <iosfwd>
 #include <math.h>
+#include <iostream>
 #include <assert.h>
 #include <algorithm>
-#include <iostream>
-#include <vector>
 
-namespace FLTYPE
+namespace fluo
 {
 	using std::string;
 
@@ -187,13 +186,13 @@ namespace FLTYPE
 
 	}; // end class Vector
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 
 // This cannot be above due to circular dependencies
 #include <Point.hpp>
 
-namespace FLTYPE
+namespace fluo
 {
 	inline Vector::Vector(const Point& p)
 		: x_(p.x_), y_(p.y_), z_(p.z_)
@@ -488,22 +487,19 @@ namespace FLTYPE
 
 	inline Vector Min(const Vector &v1, const Vector &v2)
 	{
-
-
-        return Vector((std::min)(v1.x(), v2.x()),
-            (std::min)(v1.y(), v2.y()),
-            (std::min)(v1.z(), v2.z()));
-
+		return Vector(std::min(v1.x(), v2.x()),
+			std::min(v1.y(), v2.y()),
+			std::min(v1.z(), v2.z()));
 	}
 
 	inline Vector Max(const Vector &v1, const Vector &v2)
 	{
-        return Vector((std::max)(v1.x(), v2.x()),
-            (std::max)(v1.y(), v2.y()),
-            (std::max)(v1.z(), v2.z()));
+		return Vector(std::max(v1.x(), v2.x()),
+			std::max(v1.y(), v2.y()),
+			std::max(v1.z(), v2.z()));
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 
 #endif//_FLVECTOR_H_

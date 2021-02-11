@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Quaternion.hpp>
 #include <iostream>
 
-namespace FLTYPE
+namespace fluo
 {
 	Plane::Plane()
 		: n_(Vector(0,0,1)), d_(0)
@@ -426,5 +426,5 @@ namespace FLTYPE
 		for (auto &it : planes_)
 			it.Restore();
 	}
-} // End namespace FLTYPE
+} // End namespace fluo
 

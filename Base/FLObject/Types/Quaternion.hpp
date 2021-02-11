@@ -31,11 +31,11 @@
 
 #include <Vector.hpp>
 #include <Utils.hpp>
-#include <math.h> // consider using cmath?
+#include <cmath>
 
 #pragma warning (disable : 4521 4522)
 
-namespace FLTYPE
+namespace fluo
 {
 
 class Quaternion
@@ -54,8 +54,8 @@ public:
 	Quaternion(double d, Vector& axis)
 	{
 		double h_angle = d * Pi() / 360.0;
-		double sin_a = sin(h_angle);
-		w = cos(h_angle);
+		double sin_a = std::sin(h_angle);
+		w = std::cos(h_angle);
 		x = sin_a * axis.x();
 		y = sin_a * axis.y();
 		z = sin_a * axis.z();
@@ -178,14 +178,14 @@ public:
 
 	bool AlmostEqual(const Quaternion& q)const
 	{
-		return (fabs(x - q.x) < Epsld() &&
-			fabs(y - q.y) < Epsld() &&
-			fabs(z - q.z) < Epsld() &&
-			fabs(w - q.w) < Epsld()) ||
-			(fabs(x + q.x) < Epsld() &&
-			fabs(y + q.y) < Epsld() &&
-			fabs(z + q.z) < Epsld() &&
-			fabs(w + q.w) < Epsld());
+		return (std::abs(x - q.x) < Epsld() &&
+			std::abs(y - q.y) < Epsld() &&
+			std::abs(z - q.z) < Epsld() &&
+			std::abs(w - q.w) < Epsld()) ||
+			(std::abs(x + q.x) < Epsld() &&
+			std::abs(y + q.y) < Epsld() &&
+			std::abs(z + q.z) < Epsld() &&
+			std::abs(w + q.w) < Epsld());
 	}
 
 	bool IsIdentity()
@@ -195,7 +195,7 @@ public:
 
 	double Length()
 	{
-		return sqrt(w*w + Vector(x, y, z).length2());
+		return std::sqrt(w*w + Vector(x, y, z).length2());
 	}
 
 	Quaternion Invert()
@@ -231,13 +231,13 @@ public:
 		double sp = -2.0 * (y*z - w*x);
 
 		// Check for Gimbel lock, giving slight tolerance for numerical imprecision
-		if (fabs(sp) > 0.9999)
+		if (std::abs(sp) > 0.9999)
 		{
 			// Looking straight up or down
 			rx = PiHalf() * sp;
 
 			// Compute heading, slam bank to zero
-			ry = atan2(-x*z + w*y, 0.5 - y*y - z*z);
+			ry = std::atan2(-x*z + w*y, 0.5 - y*y - z*z);
 			rz = 0.0;
 
 		}
@@ -246,9 +246,9 @@ public:
 			// Compute angles.  We don't have to use the "safe" asin
 			// function because we already checked for range errors when
 			// checking for Gimbel lock
-			rx	= asin(sp);
-			ry	= atan2(x*z + w*y, 0.5 - x*x - y*y);
-			rz	= atan2(x*y + w*z, 0.5 - x*x - z*z);
+			rx	= std::asin(sp);
+			ry	= std::atan2(x*z + w*y, 0.5 - x*x - y*y);
+			rz	= std::atan2(x*y + w*z, 0.5 - x*x - z*z);
 		}
 
 		rx = r2d(rx);
@@ -266,7 +266,7 @@ public:
 		if (len_sq == 0.0) return -1;
 		if (len_sq != 1.0)
 		{
-			double scale = ( 1.0 / sqrt( len_sq ) );
+			double scale = ( 1.0 / std::sqrt( len_sq ) );
 			x *= scale;
 			y *= scale;
 			z *= scale;
@@ -315,10 +315,10 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 	{
 		if (1.0-cos_theta > Epsld())
 		{
-			theta = acos(cos_theta);
-			r_sin_theta = 1.0 / sin(theta);
-			w1 = sin((1.0-t)*theta) * r_sin_theta;
-			w2 = sin(t*theta) * r_sin_theta;
+			theta = std::acos(cos_theta);
+			r_sin_theta = 1.0 / std::sin(theta);
+			w1 = std::sin((1.0-t)*theta) * r_sin_theta;
+			w2 = std::sin(t*theta) * r_sin_theta;
 		}
 		else
 		{
@@ -330,10 +330,10 @@ inline Quaternion Slerp(Quaternion& a, Quaternion& b, double t)
 	{
 		if (1.0+cos_theta > Epsld())
 		{
-			theta = acos(-cos_theta);
-			r_sin_theta = 1.0 / sin(theta);
-			w1 = sin((t-1.0)*theta) * r_sin_theta;
-			w2 = sin(t*theta) * r_sin_theta;
+			theta = std::acos(-cos_theta);
+			r_sin_theta = 1.0 / std::sin(theta);
+			w1 = std::sin((t-1.0)*theta) * r_sin_theta;
+			w2 = std::sin(t*theta) * r_sin_theta;
 		}
 		else
 		{

@@ -32,7 +32,7 @@
 #include <string>
 #include <iostream>
 
-namespace FLTYPE
+namespace fluo
 {
 	class Vector;
 	class Point;
@@ -157,6 +157,6 @@ namespace FLTYPE
 	Point operator*(Transform &t, const Point &d);
 	Vector operator*(Transform &t, const Vector &d);
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif

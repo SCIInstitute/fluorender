@@ -50,16 +50,18 @@ set(HEADER_FILES Event/Event.hpp
                  ReferencePtr/ref_ptr.hpp
                  Value/Value.hpp
                  Types/BBox.hpp
+                 Types/BPoint.hpp
                  Types/Color.hpp
-                 Types/GLfloat4.hpp
-                 Types/GLint4.hpp
+                 Types/Matrix.hpp
                  Types/Plane.hpp
                  Types/Point.hpp
                  Types/Quaternion.hpp
                  Types/Ray.hpp
                  Types/Transform.hpp
                  Types/Utils.hpp
-                 Types/Vector.hpp)
+                 Types/Vector.hpp
+                 Types/Vector4f.hpp
+                 Types/Vector4i.hpp)
 
 set(SOURCES Event/Event.cpp
             Object/CopyOp.cpp

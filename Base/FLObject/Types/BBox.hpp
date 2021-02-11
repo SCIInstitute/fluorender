@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ostream>
 #include <algorithm>
 
-namespace FLTYPE
+namespace fluo
 {
 	class Vector;
 
@@ -83,8 +83,8 @@ namespace FLTYPE
 		{
 			if(is_valid_)
 			{
-				cmin_=FLTYPE::Min(p, cmin_);
-				cmax_=FLTYPE::Max(p, cmax_);
+				cmin_=fluo::Min(p, cmin_);
+				cmax_=fluo::Max(p, cmax_);
 			} 
 			else 
 			{
@@ -107,6 +107,20 @@ namespace FLTYPE
 				cmax_.x(cmax_.x()+val);
 				cmax_.y(cmax_.y()+val);
 				cmax_.z(cmax_.z()+val);
+			}
+		}
+
+		inline void extend_mul(double val)
+		{
+			if (is_valid_)
+			{
+				Vector d = (cmax_ - cmin_) * val / 2.0;
+				cmin_.x(cmin_.x() - d.x());
+				cmin_.y(cmin_.y() - d.y());
+				cmin_.z(cmin_.z() - d.z());
+				cmax_.x(cmax_.x() + d.x());
+				cmax_.y(cmax_.y() + d.y());
+				cmax_.z(cmax_.z() + d.z());
 			}
 		}
 
@@ -136,8 +150,8 @@ namespace FLTYPE
 			Vector r(radius,radius,radius);
 			if(is_valid_)
 			{
-				cmin_=FLTYPE::Min(p-r, cmin_);
-				cmax_=FLTYPE::Max(p+r, cmax_);
+				cmin_=fluo::Min(p-r, cmin_);
+				cmax_=fluo::Max(p+r, cmax_);
 			} 
 			else 
 			{
@@ -177,8 +191,8 @@ namespace FLTYPE
 		{
 			if (is_valid_)
 			{
-				cmin_ = FLTYPE::Max(cmin_, box.Min());
-				cmax_ = FLTYPE::Min(cmax_, box.Max());
+				cmin_ = fluo::Max(cmin_, box.Min());
+				cmax_ = fluo::Min(cmax_, box.Max());
 				if (!(cmin_ <= cmax_))
 					is_valid_ = false;
 			}
@@ -198,14 +212,14 @@ namespace FLTYPE
 		{
 			assert(is_valid_);
 			Vector diagonal(cmax_-cmin_);
-			return FLTYPE::Max(diagonal.x(), diagonal.y(), diagonal.z());
+			return fluo::Max(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		inline double shortest_edge() const
 		{
 			assert(is_valid_);
 			Vector diagonal(cmax_-cmin_);
-			return FLTYPE::Min(diagonal.x(), diagonal.y(), diagonal.z());
+			return fluo::Min(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		//! Move the bounding box 
@@ -217,6 +231,8 @@ namespace FLTYPE
 
 		//! Scale the bounding box by s, centered around o
 		void scale(double s, const Vector &o);
+		//scale around origin
+		void scale(double sx, double sy, double sz);
 
 		inline Point Min() const
 		{ return cmin_; }
@@ -312,6 +328,6 @@ namespace FLTYPE
 			return false;
 		return true;
 	}
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif//_FLBBOX_H_

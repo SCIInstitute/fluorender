@@ -31,10 +31,10 @@
 
 #include <string>
 #include <iosfwd>
-#include <algorithm>
 #include <iostream>
+#include <algorithm>
 
-namespace FLTYPE {
+namespace fluo {
 	using std::string;
 
 	class Vector;
@@ -145,12 +145,12 @@ namespace FLTYPE {
 		return p + v;
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 // This cannot be above due to circular dependencies
 #include <Vector.hpp>
 
-namespace FLTYPE
+namespace fluo
 {
 	inline Point::Point(const Vector& v)
 		: x_(v.x_), y_(v.y_), z_(v.z_)
@@ -387,17 +387,17 @@ namespace FLTYPE
 
 	inline Point Min(const Point& p1, const Point& p2)
 	{
-        double x = (std::min)(p1.x_, p2.x_);
-        double y = (std::min)(p1.y_, p2.y_);
-        double z = (std::min)(p1.z_, p2.z_);
+		double x = std::min(p1.x_, p2.x_);
+		double y = std::min(p1.y_, p2.y_);
+		double z = std::min(p1.z_, p2.z_);
 		return Point(x, y, z);
 	}
 
 	inline Point Max(const Point& p1, const Point& p2)
 	{
-        double x = (std::max)(p1.x_, p2.x_);
-        double y = (std::max)(p1.y_, p2.y_);
-        double z = (std::max)(p1.z_, p2.z_);
+		double x = std::max(p1.x_, p2.x_);
+		double y = std::max(p1.y_, p2.y_);
+		double z = std::max(p1.z_, p2.z_);
 		return Point(x, y, z);
 	}
 
@@ -411,6 +411,6 @@ namespace FLTYPE
 		return p1.x_*p2.x_ + p1.y_*p2.y_ + p1.z_*p2.z_;
 	}
 
-} // End namespace FLTYPE
+} // End namespace fluo
 
 #endif//_FLPOINT_H_

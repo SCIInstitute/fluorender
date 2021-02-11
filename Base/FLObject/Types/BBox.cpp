@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <assert.h>
 #include <math.h>
 
-using namespace FLTYPE;
+using namespace fluo;
 using namespace std;
 
 void BBox::extend_disk(const Point& cen, const Vector& normal, double r)
@@ -57,6 +57,12 @@ void BBox::scale(double s, const Vector&o)
 	cmax_*=s;
 	cmin_+=o;
 	cmax_+=o;
+}
+
+void BBox::scale(double sx, double sy, double sz)
+{
+	cmin_.scale(sx, sy, sz);
+	cmax_.scale(sx, sy, sz);
 }
 
 bool BBox::overlaps(const BBox & bb) const
@@ -88,8 +94,8 @@ bool BBox::intersect(const Point& origin, const Vector& dir,
 {
 	Vector t1 = (cmin_ - origin) / dir;
 	Vector t2 = (cmax_ - origin) / dir;
-	Vector tn = FLTYPE::Min(t1, t2);
-	Vector tf = FLTYPE::Max(t1, t2);
+	Vector tn = fluo::Min(t1, t2);
+	Vector tf = fluo::Max(t1, t2);
 	double tnear = tn.maxComponent();
 	double tfar = tf.minComponent();
 	if(tnear <= tfar)

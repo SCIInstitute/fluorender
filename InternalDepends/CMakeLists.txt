@@ -30,16 +30,13 @@ project(External)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories(FLIVR
-          Formats
+include_directories(
           Glew
           NV
           Wacutils
           XInput
           Utilities)
 
-add_subdirectory(FLIVR)
-add_subdirectory(Formats)
 #add_subdirectory(NV)
 #add_subdirectory(Wacutils)
 #add_subdirectory(XInput)

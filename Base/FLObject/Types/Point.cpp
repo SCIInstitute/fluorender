@@ -35,7 +35,7 @@ using std::endl;
 using std::istream;
 using std::ostream;
 
-using namespace FLTYPE;
+using namespace fluo;
 
 string Point::get_string() const
 {
@@ -59,7 +59,7 @@ Point::Point(double x, double y, double z, double w)
 	}
 }
 
-namespace FLTYPE
+namespace fluo
 {
 	Point AffineCombination(const Point& p1, double w1,
 		const Point& p2, double w2)

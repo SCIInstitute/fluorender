@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include <iostream>
 
-namespace FLTYPE
+namespace fluo
 {
 	class Color;
 	class HSVColor
@@ -112,6 +112,7 @@ namespace FLTYPE
 		Color(const Color&);
 		Color& operator=(const Color&);
 		Color(const HSVColor&);
+		Color(unsigned int id, int shuffle = 0);
 		~Color();
 
 		Color operator*(const Color&) const;
@@ -191,6 +192,54 @@ namespace FLTYPE
 		friend class HSVColor;
 	};
 
-} // End namespace FLTYPE
+	class Colorub
+	{ // unsigned byte color
+		unsigned char data[3]; // data...
+	public:
+		Colorub() {};
+		Colorub(Color& c)
+		{
+			data[0] = (unsigned char)(c.r()*255);
+			data[1] = (unsigned char)(c.g()*255);
+			data[2] = (unsigned char)(c.b()*255);
+		}; // converts them...
 
-#endif//_FLCOLOR_H_
+		unsigned char* ptr() { return &data[0]; }; // grab pointer
+
+		inline unsigned char r() const { return data[0]; };
+		inline unsigned char g() const { return data[1]; };
+		inline unsigned char b() const { return data[2]; };
+
+		// should be enough for now - this is less bandwidth...
+	};
+
+	/*********************************************************
+	This structure holds a simple RGB color in char format.
+	*********************************************************/
+
+	class CharColor
+	{
+	public:
+		char red;
+		char green;
+		char blue;
+		// char alpha;
+
+		CharColor ();
+		CharColor ( char a, char b, char c );
+		CharColor ( Color& c );
+
+		inline double r() const {return red;}
+		inline double g() const {return green;}
+		inline double b() const {return blue;}
+
+		CharColor operator= ( const Color& );
+		CharColor operator= ( const CharColor& );
+
+		int operator!= ( const CharColor& ) const;
+
+	};
+
+} // End namespace fluo
+
+#endif//FLCOLOR_HPP

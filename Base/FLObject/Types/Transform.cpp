@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cstring>
 #include <iostream>
 
-using namespace FLTYPE;
+using namespace fluo;
 using namespace std;
 
 Transform::Transform()
@@ -942,7 +942,7 @@ Transform& Transform::operator=(const Transform& copy)
 	return *this;
 }
 
-namespace FLTYPE
+namespace fluo
 {
 Point operator*(Transform &t, const Point &d)
 {
