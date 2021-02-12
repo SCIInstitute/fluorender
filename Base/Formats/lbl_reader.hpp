@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LBL_READER_H_
-#define _LBL_READER_H_
+#ifndef LBL_READER_HPP
+#define LBL_READER_HPP
 
-#include <base_reader.h>
+#include "base_reader.hpp"
 
 using namespace std;
 
@@ -78,4 +78,4 @@ public:
 	int GetCurBatch() {return 0;}
 };
 
-#endif//_LBL_READER_H_
+#endif//LBL_READER_HPP

@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _NRRD_READER_H_
-#define _NRRD_READER_H_
+#ifndef NRRD_READER_HPP
+#define NRRD_READER_HPP
 
-#include <base_reader.h>
+#include "base_reader.hpp"
 #include <stdio.h>
 //#include <windows.h>
 #include <vector>
@@ -111,4 +111,4 @@ private:
 	static bool nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 };
 
-#endif//_NRRD_READER_H_
+#endif//NRRD_READER_HPP

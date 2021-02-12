@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TIF_READER_H_
-#define _TIF_READER_H_
+#ifndef TIF_READER_HPP
+#define TIF_READER_HPP
 
-#include <base_reader.h>
+#include "base_reader.hpp"
 #include <cstdio>
 #include <vector>
 #include <fstream>
@@ -530,4 +530,4 @@ inline double TIFReader::GetTiffYResolution()
 		return 0.0;
 }
 
-#endif//_TIF_READER_H_
+#endif//TIF_READER_HPP

@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LIF_READER_H_
-#define _LIF_READER_H_
+#ifndef LIF_READER_HPP
+#define LIF_READER_HPP
 
-#include <base_reader.h>
+#include <base_reader.hpp>
 #include <wx/xml/xml.h>
 #include <vector>
 #include <string>
@@ -337,4 +337,4 @@ private:
 	}
 };
 
-#endif//_LIF_READER_H_
+#endif//LIF_READER_HPP

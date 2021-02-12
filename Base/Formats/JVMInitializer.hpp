@@ -26,18 +26,17 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef JVMINITIALIZER_HPP
+#define JVMINITIALIZER_HPP
+
 #include <jni.h>
 #include <iostream>
-#include "../compatibility.h"
+#include <Utilities/compatibility.h>
 //#include "VRenderFrame.h"
 
 #ifdef __linux__
   #include <dlfcn.h>
 #endif
-
-#ifndef _JVMINITIALIZER_H_
-#define _JVMINITIALIZER_H_
-
 class SettingDlg;
 class JVMInitializer {
 	public:
@@ -73,4 +72,4 @@ class JVMInitializer {
 		bool static m_with_fiji;
 };
 
-#endif //_JVMINITIALIZER_H_
+#endif //JVMINITIALIZER_HPP

@@ -25,14 +25,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _PVXML_READER_H_
-#define _PVXML_READER_H_
+#ifndef PVXML_READER_HPP
+#define PVXML_READER_HPP
 
 #include <vector>
-#include <base_reader.h>
+#include <string>
+#include "base_reader.hpp"
 
-using namespace std;
-class wxXmlNode;
+namespace pugi
+{
+  class xml_node;
+}
+
 class wxString;
 
 class PVXMLReader : public BaseReader
@@ -234,4 +238,4 @@ private:
 	void ReadTiff(char* pbyData, unsigned short *val);
 };
 
-#endif//_PVXML_READER_H_
+#endif//PVXML_READER_HPP

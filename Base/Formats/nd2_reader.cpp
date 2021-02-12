@@ -25,9 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "nd2_reader.h"
+#include "nd2_reader.hpp"
 #include <json.hpp>
-#include "../compatibility.h"
+#include <Utilities/compatibility.h>
 #include <stdio.h>
 
 ND2Reader::ND2Reader()

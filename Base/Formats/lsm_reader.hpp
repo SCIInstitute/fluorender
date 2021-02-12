@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LSM_READER_H_
-#define _LSM_READER_H_
+#ifndef LSM_READER_HPP
+#define LSM_READER_HPP
 
-#include <base_reader.h>
+#include "base_reader.hpp"
 #include <vector>
 
 using namespace std;
@@ -125,4 +125,4 @@ private:
 
 };
 
-#endif//_LSM_READER_H_
+#endif//LSM_READER_HPP

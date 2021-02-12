@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _IMAGEJ_READER_H_
-#define _IMAGEJ_READER_H_
+#ifndef IMAGEJ_READER_HPP
+#define IMAGEJ_READER_HPP
 
-#include <base_reader.h>
+#include "base_reader.hpp"
 #include <cstdio>
 #include <vector>
 #include <fstream>
@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cmath>
 #include <string>
 
-#include "JVMInitializer.h"
+#include "JVMInitializer.hpp"
 
 using namespace std;
 
@@ -123,4 +123,4 @@ private:
 	Nrrd* ReadFromImageJ(int i, int c, bool get_max);
 };
 
-#endif//_IMAGEJ_READER_H_
+#endif//IMAGEJ_READER_HPP

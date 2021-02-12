@@ -25,11 +25,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ND2_READER_H_
-#define _ND2_READER_H_
+#ifndef ND2_READER_HPP
+#define ND2_READER_HPP
 
 #include <Nd2ReadSdk.h>
-#include <base_reader.h>
+#include <base_reader.hpp>
 #include <vector>
 #include <string>
 #include <limits>
@@ -173,4 +173,4 @@ private:
 	bool ReadChannel(LIMFILEHANDLE h, int t, int c, void* val);
 };
 
-#endif//_ND2_READER_H_
+#endif//ND2_READER_HPP

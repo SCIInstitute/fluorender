@@ -1,4 +1,4 @@
-#include "JVMInitializer.h"
+#include "JVMInitializer.hpp"
 #include "SettingDlg.h"
 #include <wx/stdpaths.h>
 #include <wx/dir.h>

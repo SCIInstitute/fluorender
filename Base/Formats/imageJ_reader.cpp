@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "imageJ_reader.h"
-#include "../compatibility.h"
+#include "imageJ_reader.hpp"
+#include <Utilities/compatibility.h>
 #include <wx/stdpaths.h>
 
 ImageJReader::ImageJReader()

@@ -4,7 +4,7 @@
 #include <vector>
 #include <base_reader.hpp>
 #include <FLIVR/TextureBrick.h>
-#include <tinyxml2.h>
+#include <tinyxml2.hpp>
 
 using namespace std;
 
@@ -200,4 +200,4 @@ private:
 	void Clear();
 };
 
-#endif//_BRKXML_READER_H_
+#endif//BRKXML_READER_HPP

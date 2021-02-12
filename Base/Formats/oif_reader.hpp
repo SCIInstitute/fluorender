@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _OIF_READER_H_
-#define _OIF_READER_H_
+#ifndef OIF_READER_HPP
+#define OIF_READER_HPP
 
-#include <base_reader.h>
+#include "base_reader.hpp"
 #include <stdio.h>
 //#include <windows.h>
 #include <vector>
@@ -145,4 +145,4 @@ private:
 	wstring m_time_id;
 };
 
-#endif//_OIF_READER_H_
+#endif//OIF_READER_HPP

@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _NRRD_WRITER_H_
-#define _NRRD_WRITER_H_
+#ifndef NRRD_WRITER_HPP
+#define NRRD_WRITER_HPP
 
-#include <base_writer.h>
+#include "base_writer.hpp"
 
 class NRRDWriter : public BaseWriter
 {
@@ -47,4 +47,4 @@ private:
 	bool m_use_spacings;
 };
 
-#endif//_NRRD_WRITER_H_
+#endif//NRRD_WRITER_HPP

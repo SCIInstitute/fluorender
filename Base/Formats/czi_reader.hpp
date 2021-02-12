@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef CZI_READER_HPP
 #define CZI_READER_HPP
 
-#include <base_reader.h>
+#include <base_reader.hpp>
 #include <wx/xml/xml.h>
 #include <vector>
 #include <string>
