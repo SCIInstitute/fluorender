@@ -35,7 +35,9 @@ include_directories(
           NV
           Wacutils
           XInput
-          Utilities)
+          Utilities
+          nd2
+          TinyXML)
 
 #add_subdirectory(NV)
 #add_subdirectory(Wacutils)
