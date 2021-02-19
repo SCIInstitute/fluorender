@@ -241,7 +241,7 @@ private:
 	void GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx, int sy,
 		unsigned short &minv, unsigned short &maxv);
 	//search metadata
-	void FindNodeRecursive(wxXmlNode* node);
+	void FindNodeRecursive(tinyxml2::XMLElement* node);
 };
 
 #endif//CZI_READER_HPP

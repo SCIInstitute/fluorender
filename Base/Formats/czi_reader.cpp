@@ -27,8 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "czi_reader.hpp"
 #include <Utilities/compatibility.h>
-//#include <wx/sstream.h>
-#include <stdio.h>
+#include <Utils.hpp>
 #include <set>
 
 std::vector<std::string> CZIReader::m_types{
@@ -584,11 +583,10 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	if (!result)
 		return result;
 
-	wxXmlDocument doc;
-	wxStringInputStream wxss(xmlstr);
-	result &= doc.Load(wxss);
-	wxXmlNode *root = doc.GetRoot();
-	if (!root || root->GetName() != "ImageDocument")
+	tinyxml2::XMLDocument doc;
+	doc.Parse(xmlstr.c_str());
+	tinyxml2::XMLElement *root = doc.RootElement();
+	if (!root || strcmp(root->Name(), "ImageDocument"))
 		return false;
 
 	//get values
@@ -785,38 +783,38 @@ void CZIReader::GetMinMax16B(unsigned short* val, int nx, int ny, int nz, int sx
 	}
 }
 
-void CZIReader::FindNodeRecursive(wxXmlNode* node)
+void CZIReader::FindNodeRecursive(tinyxml2::XMLElement* node)
 {
 	if (!node)
 		return;
-	wxString str;
+	std::string str;
 	double dval;
-	wxXmlNode *child = node->GetChildren();
+	tinyxml2::XMLElement *child = node->FirstChildElement();
 	while (child)
 	{
-		wxString name = child->GetName();
+		std::string name(child->Name());
 		if (name == "ScalingX")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 				m_xspc = dval * 1e6;
 		}
 		else if (name == "ScalingY")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 				m_yspc = dval * 1e6;
 		}
 		else if (name == "ScalingZ")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 				m_zspc = dval * 1e6;
 		}
 		else if (name == "ExcitationWavelength")
 		{
-			str = child->GetNodeContent();
-			if (str.ToDouble(&dval))
+			str = child->GetText();
+			if (fluo::Str2Double(str, dval))
 			{
 				WavelengthInfo winfo;
 				winfo.chan_num = m_excitation_wavelength_list.size();
@@ -828,7 +826,7 @@ void CZIReader::FindNodeRecursive(wxXmlNode* node)
 		{
 			FindNodeRecursive(child);
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	return;
 }

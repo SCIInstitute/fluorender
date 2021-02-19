@@ -30,6 +30,7 @@
 #define FLTYPEUTILS_HPP
 
 #include <vector>
+#include <string>
 #include <iostream>
 #include <cmath>
 
@@ -279,6 +280,19 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
 
     *returnSin = std::sin(theta);
     *returnCos = std::cos(theta);
+}
+
+inline bool Str2Double(const std::string &str, double &dval)
+{
+	try
+	{
+		dval = std::stod(str);
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
 }
 
 } // namespace fluo
