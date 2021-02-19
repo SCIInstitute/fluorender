@@ -250,8 +250,8 @@ private:
 	};
 	struct ImageInfo
 	{
-		std::wstring name;//image name for batch
-		std::wstring mbid;//memory block name
+		std::string name;//image name for batch
+		std::string mbid;//memory block name
 		unsigned long long loc;//location in file
 		unsigned long long size;//read size
 		double minv;//min value
@@ -300,13 +300,13 @@ private:
 	unsigned long long ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	unsigned long long PreReadMemoryBlock(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	void ReadElement(wxXmlNode* node);
-	void ReadData(wxXmlNode* node, std::wstring &name);
-	ImageInfo* ReadImage(wxXmlNode* node, std::wstring &name);
-	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
+	void ReadElement(tinyxml2::XMLElement* node);
+	void ReadData(tinyxml2::XMLElement* node, std::string &name);
+	ImageInfo* ReadImage(tinyxml2::XMLElement* node, std::string &name);
+	void ReadSubBlockInfo(tinyxml2::XMLElement* node, ImageInfo &imgi);
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
-	ImageInfo* FindImageInfoMbid(std::wstring &mbid)
+	ImageInfo* FindImageInfoMbid(std::string &mbid)
 	{
 		for (auto it = m_lif_info.images.begin();
 			it != m_lif_info.images.end(); ++it)

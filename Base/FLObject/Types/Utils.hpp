@@ -282,7 +282,7 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
     *returnCos = std::cos(theta);
 }
 
-inline bool Str2Double(const std::string &str, double &dval)
+inline bool Str2Double(const std::string &str, double &dval, double dft=0)
 {
 	try
 	{
@@ -291,10 +291,52 @@ inline bool Str2Double(const std::string &str, double &dval)
 	}
 	catch (...)
 	{
+		dval = dft;
 		return false;
 	}
 }
 
+inline bool Str2Int(const std::string &str, int &ival, int dft=0)
+{
+	try
+	{
+		ival = std::stoi(str);
+		return true;
+	}
+	catch (...)
+	{
+		ival = dft;
+		return false;
+	}
+}
+
+inline bool Str2Ul(const std::string &str, unsigned long &ival, unsigned long dft = 0)
+{
+	try
+	{
+		ival = std::stoul(str);
+		return true;
+	}
+	catch (...)
+	{
+		ival = dft;
+		return false;
+	}
+}
+
+inline bool Str2Ull(const std::string &str, unsigned long long &ival, unsigned long long dft = 0)
+{
+	try
+	{
+		ival = std::stoull(str);
+		return true;
+	}
+	catch (...)
+	{
+		ival = dft;
+		return false;
+	}
+}
 } // namespace fluo
 
 #endif//FLTYPEUTILS_HPP

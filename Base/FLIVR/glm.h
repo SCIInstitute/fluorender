@@ -256,7 +256,7 @@ GLMmodel* glmReadOBJ(const char* filename, bool* no_fail = 0);
 *            GLM_TEXTURE -  write texture coords
 *            GLM_FLAT and GLM_SMOOTH should not both be specified.
 */
-GLvoid glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
+GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode);
 
 /* glmWeld: eliminate (weld) vectors that are within an epsilon of
 * each other.

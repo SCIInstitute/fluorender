@@ -298,8 +298,8 @@ private:
 private:
 	unsigned long long ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
-	void ReadImage(wxXmlNode* node);
-	void ReadSubBlockInfo(wxXmlNode* node);
+	void ReadImage(tinyxml2::XMLElement* node);
+	void ReadSubBlockInfo(tinyxml2::XMLElement* node);
 	void AddSubBlockInfo(unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
 	void FillLofInfo();

@@ -316,7 +316,7 @@ found:
 *
 * NOTE: the return value should be free'd.
 */
-static char* glmDirName(char* path)
+static char* glmDirName(const char* path)
 {
 	char* dir;
 	char s[256];
@@ -548,7 +548,7 @@ static GLboolean glmReadMTL(GLMmodel* model, char* name)
 * modelpath  - pathname of the model being written
 * mtllibname - name of the material library to be written
 */
-static GLvoid glmWriteMTL(GLMmodel* model, char* modelpath, char* mtllibname)
+static GLvoid glmWriteMTL(GLMmodel* model, const char* modelpath, char* mtllibname)
 {
 	FILE* file;
 	char* dir;
@@ -1822,7 +1822,7 @@ GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 *             GLM_COLOR and GLM_MATERIAL should not both be specified.
 *             GLM_FLAT and GLM_SMOOTH should not both be specified.
 */
-GLvoid glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
+GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 {
 	GLuint i;
 	FILE* file;

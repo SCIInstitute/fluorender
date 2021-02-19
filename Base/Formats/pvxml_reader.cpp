@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.hpp"
+#include <Utils.hpp>
 #include <Utilities/compatibility.h>
 #include <fstream>
 #include <iostream>
@@ -280,55 +281,55 @@ void PVXMLReader::UpdateStateShard(tinyxml2::XMLElement *stateNode)
 {
 	if (m_state_shard_stack.size())
 		m_current_state = m_state_shard_stack.back();
-	tinyxml2::XMLElement *child = stateNode->GetChildren();
+	tinyxml2::XMLElement *child = stateNode->FirstChildElement();
 	while (child)
 	{
-		wxString child_name = child->GetName();
+		std::string child_name = child->Name();
 		if (child_name == "Key" ||
 			child_name == "PVStateValue")
 			ReadKey(child);
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 }
 
 void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 {
-	long ival;
+	int ival;
 	double dval;
-	wxString strKey = keyNode->GetAttribute("key");
-	wxString strValue = keyNode->GetAttribute("value");
+	std::string strKey = keyNode->Attribute("key");
+	std::string strValue = keyNode->Attribute("value");
 
 	if (strKey == "xYStageGridIndex")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.grid_index = ival;
 	}
 	else if (strKey == "xYStageGridXIndex")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.grid_index_x = ival;
 	}
 	else if (strKey == "xYStageGridYIndex")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.grid_index_y = ival;
 	}
 	else if (strKey == "positionCurrent_XAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.pos_x = dval;
 	}
 	else if (strKey == "positionCurrent_YAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.pos_y = dval;
 	}
 	else if (strKey == "positionCurrent_ZAxis")
 	{
-		int pos = strValue.Find(',');
-		if (pos == wxNOT_FOUND)
+		size_t pos = strValue.find(',');
+		if (pos == std::string::npos)
 		{
-			strValue.ToDouble(&dval);
+			fluo::Str2Double(strValue, dval);
 			m_current_state.pos_z = dval;
 		}
 		else
@@ -336,13 +337,13 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 			m_current_state.pos_z = 0.0;
 			do
 			{
-				strValue.Left(pos).ToDouble(&dval);
+				fluo::Str2Double(strValue.substr(0, pos), dval);
 				m_current_state.pos_z += dval;
-				strValue = strValue.Right(strValue.Length()-pos-1);
-				pos = strValue.Find(',');
-			} while (pos != wxNOT_FOUND);
-			if (strValue.Length() &&
-				strValue.ToDouble(&dval))
+				strValue = strValue.substr(pos + 1);
+				pos = strValue.find(',');
+			} while (pos != std::string::npos);
+			if (!strValue.empty() &&
+				fluo::Str2Double(strValue, dval))
 				m_current_state.pos_z += dval;
 		}
 	}
@@ -352,27 +353,27 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 	}
 	else if (strKey == "zDevice")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.z_device = ival;
 	}
 	else if (strKey == "pixelsPerLine")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.ppl = ival;
 	}
 	else if (strKey == "linesPerFrame")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.lpf = ival;
 	}
 	else if (strKey == "micronsPerPixel_XAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.mpp_x = dval;
 	}
 	else if (strKey == "micronsPerPixel_YAxis")
 	{
-		strValue.ToDouble(&dval);
+		fluo::Str2Double(strValue, dval);
 		m_current_state.mpp_y = dval;
 	}
 	else if (strKey == "micronsPerPixel")
@@ -381,12 +382,12 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 	}
 	else if (strKey == "bitDepth")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.bit_depth = ival;
 	}
 	else if (strKey == "seqType")
 	{
-		strValue.ToLong(&ival);
+		fluo::Str2Int(strValue, ival);
 		m_current_state.seq_type = ival;
 	}
 }
@@ -397,64 +398,64 @@ void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, std::string &key
 
 	if (key == "positionCurrent")
 	{
-		tinyxml2::XMLElement *child = keyNode->GetChildren();
+		tinyxml2::XMLElement *child = keyNode->FirstChildElement();
 		while (child)
 		{
-			wxString child_name = child->GetName();
+			std::string child_name = child->Name();
 			if (child_name == "SubindexedValues")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				tinyxml2::XMLElement *gchild = child->GetChildren();
+				std::string strIndex = child->Attribute("index");
+				tinyxml2::XMLElement *gchild = child->FirstChildElement();
 				while (gchild)
 				{
-					wxString strSubIndex = gchild->GetAttribute("subindex");
-					wxString strValue = gchild->GetAttribute("value");
+					std::string strSubIndex = gchild->Attribute("subindex");
+					std::string strValue = gchild->Attribute("value");
 					if (strSubIndex == "0")
 					{
 						if (strIndex == "XAxis")
 						{
-							strValue.ToDouble(&dval);
+							fluo::Str2Double(strValue, dval);
 							m_current_state.pos_x = dval;
 						}
 						else if (strIndex == "YAxis")
 						{
-							strValue.ToDouble(&dval);
+							fluo::Str2Double(strValue, dval);
 							m_current_state.pos_y = dval;
 						}
 						else if (strIndex == "ZAxis")
 						{
-							strValue.ToDouble(&dval);
+							fluo::Str2Double(strValue, dval);
 							m_current_state.pos_z = dval;
 						}
 					}
-					gchild = gchild->GetNext();
+					gchild = gchild->NextSiblingElement();
 				}
 			}
-			child = child->GetNext();
+			child = child->NextSiblingElement();
 		}
 	}
 	else if (key == "micronsPerPixel")
 	{
-		tinyxml2::XMLElement *child = keyNode->GetChildren();
+		tinyxml2::XMLElement *child = keyNode->FirstChildElement();
 		while (child)
 		{
-			wxString child_name = child->GetName();
+			std::string child_name = child->Name();
 			if (child_name == "IndexedValue")
 			{
-				wxString strIndex = child->GetAttribute("index");
-				wxString strValue = child->GetAttribute("value");
+				std::string strIndex = child->Attribute("index");
+				std::string strValue = child->Attribute("value");
 				if (strIndex == "XAxis")
 				{
-					strValue.ToDouble(&dval);
+					fluo::Str2Double(strValue, dval);
 					m_current_state.mpp_x = dval;
 				}
 				else if (strIndex == "YAxis")
 				{
-					strValue.ToDouble(&dval);
+					fluo::Str2Double(strValue, dval);
 					m_current_state.mpp_y = dval;
 				}
 			}
-			child = child->GetNext();
+			child = child->NextSiblingElement();
 		}
 	}
 }
@@ -477,22 +478,23 @@ void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 	}
 	m_seq_zspc = FLT_MAX;
 	m_seq_zpos = 0.0;
-	tinyxml2::XMLElement *child = seqNode->GetChildren();
+	tinyxml2::XMLElement *child = seqNode->FirstChildElement();
 	int stack_push_count = 0;
 	while (child)
 	{
-		if (child->GetName() == "PVStateShard")
+		std::string child_name = child->Name();
+		if (child_name == "PVStateShard")
 		{
 			UpdateStateShard(child);
 			m_state_shard_stack.push_back(m_current_state);
 			stack_push_count++;
 		}
-		else if (child->GetName() == "Frame")
+		else if (child_name == "Frame")
 		{
 			ReadFrame(child);
 			m_seq_slice_num++;
 		}
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 	//pop all stacked states
 	for (int i=0; i<stack_push_count; i++)
@@ -519,27 +521,28 @@ void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 
 void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 {
-	wxString str;
-	long ival;
+	std::string str;
+	int ival;
 	FrameInfo frame_info;
 
-	tinyxml2::XMLElement *child = frameNode->GetChildren();
+	tinyxml2::XMLElement *child = frameNode->FirstChildElement();
 	while (child)
 	{
-		if (child->GetName() == "File")
+		std::string child_name = child->Name();
+		if (child_name == "File")
 		{
-			wxString filename = child->GetAttribute(
+			std::string filename = child->Attribute(
 				"filename");
 			ChannelInfo channel_info;
-			channel_info.file_name = filename.ToStdWstring();
+			channel_info.file_name = s2ws(filename);
 			frame_info.channels.push_back(channel_info);
 			int size = frame_info.channels.size();
 			m_chan_num = size>m_chan_num?size:m_chan_num;
 		}
-		else if (child->GetName() == "PVStateShard")
+		else if (child_name == "PVStateShard")
 			UpdateStateShard(child);
 
-		child = child->GetNext();
+		child = child->NextSiblingElement();
 	}
 
 	frame_info.x_size = m_current_state.ppl;

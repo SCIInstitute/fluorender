@@ -88,7 +88,7 @@ namespace fluo
 
 	inline Vector4i::Vector4i()
 	{
-		v_[0] = 0.0f; v_[1] = 0.0f; v_[2] = 0.0f; v_[3] = 0.0f;
+		v_[0] = 0; v_[1] = 0; v_[2] = 0; v_[3] = 0;
 	}
 
 	inline Vector4i::Vector4i(GLint init)
