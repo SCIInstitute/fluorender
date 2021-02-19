@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef CZI_READER_HPP
 #define CZI_READER_HPP
 
-#include <base_reader.hpp>
-#include <wx/xml/xml.h>
+#include "base_reader.hpp"
+#include <TinyXML/tinyxml2.hpp>
 #include <vector>
 #include <string>
 #include <limits>

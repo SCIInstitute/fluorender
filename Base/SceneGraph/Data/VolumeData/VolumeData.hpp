@@ -34,8 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <vector>
 
-
-namespace FLIVR
+namespace flvr
 {
 class VolumeRenderer;
 class Texture;
@@ -112,17 +111,17 @@ namespace fluo
 		bool SearchLabel(unsigned int label);
 
 		//save
-        double GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
-        double GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
+        double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
+        double GetTransferValue(int i, int j, int k, flvr::TextureBrick* b = 0);
         void SaveData(std::wstring &filename, int mode = 0, bool bake = false, bool compress = false);
         void SaveMask(bool use_reader, long t, long c);
         void SaveLabel(bool use_reader, long t, long c);
 
 		//volume renderer
-		FLIVR::VolumeRenderer* GetRenderer();
+		flvr::VolumeRenderer* GetRenderer();
 
 		//texture
-		FLIVR::Texture* GetTexture();
+		flvr::Texture* GetTexture();
 		void SetTexture();
 
 		//draw
@@ -148,7 +147,7 @@ namespace fluo
 		void Calculate(int type, VolumeData* vd_a, VolumeData* vd_b);
 
 		//color map
-		FLTYPE::Color GetColorFromColormap(double value);
+		fluo::Color GetColorFromColormap(double value);
 
 		friend class VolumeFactory;
 
@@ -156,8 +155,8 @@ namespace fluo
 		virtual ~VolumeData();
 
 	private:
-		FLIVR::VolumeRenderer *m_vr;
-		FLIVR::Texture *m_tex;
+		flvr::VolumeRenderer *m_vr;
+		flvr::Texture *m_tex;
 		BaseReader *m_reader;
 
 		std::vector<VD_Landmark> m_landmarks;

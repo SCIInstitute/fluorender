@@ -27,7 +27,7 @@
 //  
 
 #include "VertexArray.h"
-#include "utility.h"
+#include <Types/Utils.hpp>
 
 namespace flvr
 {
@@ -326,7 +326,7 @@ namespace flvr
 		{
 			for (size_t i = 0; i<secs; ++i)
 			{
-				deg = i * 2 * PI / secs;
+				deg = i * 2 * fluo::Pi() / secs;
 				vertex.push_back(r1*sin(deg));
 				vertex.push_back(r1*cos(deg));
 				vertex.push_back(0.0f);
@@ -337,7 +337,7 @@ namespace flvr
 			//second circle
 			for (size_t i = 0; i<secs; ++i)
 			{
-				deg = i * 2 * PI / secs;
+				deg = i * 2 * fluo::Pi() / secs;
 				vertex.push_back(r2*sin(deg));
 				vertex.push_back(r2*cos(deg));
 				vertex.push_back(0.0f);

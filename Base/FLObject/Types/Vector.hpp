@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FLVECTOR_HPP
 #define FLVECTOR_HPP
 
+#include "Utils.hpp"
 #include <string>
 #include <iosfwd>
 #include <math.h>
@@ -487,16 +488,16 @@ namespace fluo
 
 	inline Vector Min(const Vector &v1, const Vector &v2)
 	{
-		return Vector(std::min(v1.x(), v2.x()),
-			std::min(v1.y(), v2.y()),
-			std::min(v1.z(), v2.z()));
+		return Vector(Min(v1.x(), v2.x()),
+			Min(v1.y(), v2.y()),
+			Min(v1.z(), v2.z()));
 	}
 
 	inline Vector Max(const Vector &v1, const Vector &v2)
 	{
-		return Vector(std::max(v1.x(), v2.x()),
-			std::max(v1.y(), v2.y()),
-			std::max(v1.z(), v2.z()));
+		return Vector(Max(v1.x(), v2.x()),
+			Max(v1.y(), v2.y()),
+			Max(v1.z(), v2.z()));
 	}
 
 } // End namespace fluo

@@ -26,7 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "nd2_reader.hpp"
-#include <json.hpp>
+#include <nd2/include/json.hpp>
+#include <Utils.hpp>
 #include <Utilities/compatibility.h>
 #include <stdio.h>
 
@@ -551,8 +552,8 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 			{
 				cinfo->chann[i].x = (cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc;
 				cinfo->chann[i].y = (cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc;
-				m_x_size = std::max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
-				m_y_size = std::max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
+				m_x_size = fluo::Max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
+				m_y_size = fluo::Max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
 			}
 		}
 	}

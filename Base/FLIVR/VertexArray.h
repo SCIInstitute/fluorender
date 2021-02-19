@@ -32,8 +32,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <Types/BBox.h>
-#include <Types/Point.h>
+#include <BBox.hpp>
+#include <Point.hpp>
 
 namespace flvr
 {

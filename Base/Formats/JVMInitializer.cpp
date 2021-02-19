@@ -1,7 +1,7 @@
 #include "JVMInitializer.hpp"
-#include "SettingDlg.h"
-#include <wx/stdpaths.h>
-#include <wx/dir.h>
+//#include "SettingDlg.h"
+//#include <wx/stdpaths.h>
+//#include <wx/dir.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 

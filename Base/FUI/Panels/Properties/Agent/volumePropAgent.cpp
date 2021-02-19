@@ -328,7 +328,7 @@ void VolumePropAgent::UpdateAllSettings()
     panel_.m_color2_btn->SetColour(wxc);
 
     */
-  FLTYPE::Color c;
+  fluo::Color c;
   getValue("color", c);
   QColor qColor(static_cast<int>(c.r() * 255 + 0.5),
                     static_cast<int>(c.g() * 255 + 0.5),

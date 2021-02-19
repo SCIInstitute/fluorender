@@ -29,11 +29,12 @@
 #ifndef SLIVR_Texture_h
 #define SLIVR_Texture_h
 
-#include <vector>
-#include <Types/Transform.h>
 #include "TextureBrick.h"
-#include <Types/Utils.h>
+#include <BBox.hpp>
+#include <Transform.hpp>
+#include <Utils.hpp>
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace flvr
 {

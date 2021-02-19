@@ -39,20 +39,20 @@ namespace fluo
 	{
 	public:
 		AText() {}
-		AText(const std::string &str, const FLTYPE::Point &pos) { m_txt = str; m_pos = pos; }
+		AText(const std::string &str, const fluo::Point &pos) { m_txt = str; m_pos = pos; }
 		~AText() {}
 
 		std::string GetText() { return m_txt; };
-		FLTYPE::Point GetPos() { return m_pos; };
+		fluo::Point GetPos() { return m_pos; };
 		void SetText(std::string str) { m_txt = str; }
-		void SetPos(FLTYPE::Point pos) { m_pos = pos; }
+		void SetPos(fluo::Point pos) { m_pos = pos; }
 		void SetInfo(std::string str) { m_info = str; }
 
 		friend class Annotations;
 
 	private:
 		std::string m_txt;
-		FLTYPE::Point m_pos;
+		fluo::Point m_pos;
 		std::string m_info;
 	};
 

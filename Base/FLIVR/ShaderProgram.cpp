@@ -27,8 +27,8 @@
 //  
 
 #include "ShaderProgram.h"
-#include <Types/Utils.h>
-#include "../compatibility.h"
+#include <Types/Utils.hpp>
+#include <Utilities/compatibility.h>
 #include <ctime>
 #include <cstdio>
 #include <sstream>

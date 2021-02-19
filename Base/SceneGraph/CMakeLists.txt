@@ -38,7 +38,7 @@ include_directories(${FLObject_INCLUDES}
                     ${OPENGL_INCLUDE_DIRS}
                     ${GLEW_INCLUDE_DIR}
                     ${Teem_INCLUDE_DIR}
-										${OpenCL_INCLUDE_DIR}
+					${OpenCL_INCLUDE_DIR}
                     ${glm_INCLUDE_DIR}
                     )
 

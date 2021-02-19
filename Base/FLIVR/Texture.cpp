@@ -29,7 +29,8 @@
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/Texture.h>
 #include <FLIVR/TextureRenderer.h>
-#include <Types/Utils.h>
+#include <Types/Utils.hpp>
+#include <Types/Ray.hpp>
 #include <algorithm>
 #include <inttypes.h>
 #include <glm/gtc/type_ptr.hpp>

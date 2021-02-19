@@ -36,8 +36,8 @@
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include "utility.h"
-#include "../compatibility.h"
+#include <Types/Utils.hpp>
+#include <utilities/compatibility.h>
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
@@ -462,7 +462,7 @@ namespace flvr
 			{
 				double p1 = 0.26051+(-1.90542e-4)*cs;
 				double p2 = -0.29188+(2.45276e-4)*cs;
-				p2 = std::min(p2, 0.0);
+				p2 = fluo::Min(p2, 0.0);
 				size = (p1*zoom_+p2)*sf;
 				size = fluo::Clamp(size, 0.0, 2.0);
 			}
@@ -1344,7 +1344,7 @@ namespace flvr
 			if (estimate && type == 0)
 			{
 				double temp = calc_hist_3d(vd_id, mask_id, b->nx(), b->ny(), b->nz());
-				est_thresh_ = std::max(est_thresh_, temp);
+				est_thresh_ = fluo::Max(est_thresh_, temp);
 			}
 
 		}

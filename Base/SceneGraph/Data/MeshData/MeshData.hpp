@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 struct _GLMmodel;
 typedef _GLMmodel GLMmodel;
-namespace FLIVR
+namespace flvr
 {
 	class MeshRenderer;
 }
@@ -72,7 +72,7 @@ namespace fluo
 		void SaveData(std::string &filename);
 
 		//mesh renderer
-		FLIVR::MeshRenderer* GetRenderer();
+		flvr::MeshRenderer* GetRenderer();
 
 		//draw
 		void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
@@ -87,7 +87,7 @@ namespace fluo
 
 	private:
 		GLMmodel* m_data;
-		FLIVR::MeshRenderer* m_mr;
+		flvr::MeshRenderer* m_mr;
 
 	private:
 		void Initialize();

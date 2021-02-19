@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "lif_reader.hpp"
 #include <Utilities/compatibility.h>
-#include <wx/sstream.h>
+//#include <wx/sstream.h>
 #include <stdio.h>
 //#include <fstream>
 

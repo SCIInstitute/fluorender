@@ -29,11 +29,13 @@
 #ifndef TextureRenderer_h
 #define TextureRenderer_h
 
-#include <nrrd.h>
+#include <teem/nrrd.h>
 #include "TextureBrick.h"
 #include "Texture.h"
-#include <stdint.h>
+#include <Point.hpp>
+#include <Ray.hpp>
 #include <glm/glm.hpp>
+#include <stdint.h>
 #ifdef _DARWIN
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_gl.h>
@@ -250,7 +252,7 @@ namespace flvr
 		void set_quota_bricks_chan(int quota) {quota_bricks_chan_ = quota;}
 		int get_quota_bricks_chan() {return quota_bricks_chan_;}
 		//quota center
-		static void set_qutoa_center(fluo::Point &point) {quota_center_ = point;}
+		static void set_qutoa_center(fluo::Point &point) { quota_center_ = point; }
 		static fluo::Point& get_quota_center() { return quota_center_; }
 		//update order
 		static void set_update_order(int val) {update_order_ = val;}

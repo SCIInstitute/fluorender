@@ -29,11 +29,11 @@
 #ifndef SLIVR_VolumeRenderer_h
 #define SLIVR_VolumeRenderer_h
 
-#include <Types/Color.h>
-#include <Types/Plane.h>
 #include "Texture.h"
 #include "TextureRenderer.h"
 #include "ImgShader.h"
+#include <Color.hpp>
+#include <Plane.hpp>
 
 namespace flvr
 {

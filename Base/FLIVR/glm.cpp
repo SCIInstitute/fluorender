@@ -12,14 +12,14 @@ coordinate generation (spheremap and planar projections) + more.
 */
 
 #include <GL/glew.h>
-#include <Types/Color.h>
+#include <Types/Color.hpp>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "glm.h"
-#include "compatibility.h"
+#include <Utilities/compatibility.h>
 
 #define T(x) (model->triangles[(x)])
 #define L(x) (model->lines[(x)])

@@ -1,7 +1,8 @@
 #include "KernelProgram.h"
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #endif
+#include <Types/Utils.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -1109,8 +1110,8 @@ namespace flvr
 		unsigned int loj, hij, res, maxj;
 		if (nt > target)
 		{
-			loj = std::max((unsigned int)(1), (target + 1) / 2);
-			hij = std::min(nt, target * 2);
+			loj = fluo::Max((unsigned int)(1), (target + 1) / 2);
+			hij = fluo::Min(nt, target * 2);
 			res = 0; maxj = 0;
 			for (int j = loj; j < hij; ++j)
 			{
@@ -1141,7 +1142,7 @@ namespace flvr
 		if (nt > target)
 		{
 			loj = target;
-			hij = std::max(nt, target * 2);
+			hij = fluo::Max(nt, target * 2);
 			res = 0; maxj = 0;
 			for (int j = loj; j < hij; ++j)
 			{

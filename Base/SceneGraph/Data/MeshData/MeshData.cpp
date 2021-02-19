@@ -46,7 +46,7 @@ MeshData::MeshData(const MeshData& data, const CopyOp& copyop, bool copy_values)
 	m_mr(0)
 {
 	if (data.m_mr)
-		m_mr = new FLIVR::MeshRenderer(*data.m_mr);
+		m_mr = new flvr::MeshRenderer(*data.m_mr);
 	m_data = data.m_data;
 	if (copy_values)
 		copyValues(data, copyop);
@@ -73,7 +73,7 @@ void MeshData::OnViewportChanged(Event& event)
 	if (!m_mr)
 		return;
 
-	FLTYPE::GLint4 vp;
+	fluo::Vector4i vp;
 	getValue("viewport", vp);
 	m_mr->set_viewport(vp.get());
 }
@@ -107,7 +107,7 @@ void MeshData::OnMaterialChanged(Event& event)
 	if (!m_data)
 		return;
 
-	FLTYPE::Color amb, diff, spec;
+	fluo::Color amb, diff, spec;
 	double shine, alpha;
 	getValue("mat amb", amb);
 	getValue("color", diff);
@@ -141,25 +141,25 @@ void MeshData::OnMaterialChanged(Event& event)
 
 void MeshData::OnBoundsChanged(Event& event)
 {
-	FLTYPE::BBox bounds;
+	fluo::BBox bounds;
 	getValue("bounds", bounds);
 
 	//res
-	FLTYPE::Vector diag = bounds.diagonal();
+	fluo::Vector diag = bounds.diagonal();
 	setValue("res x", long(diag.x()+0.5), event);
 	setValue("res y", long(diag.y()+0.5), event);
 	setValue("res z", long(diag.z()+0.5), event);
 
 	//transformed bounds
-	FLTYPE::Point p[8];
-	p[0] = FLTYPE::Point(bounds.Min().x(), bounds.Min().y(), bounds.Min().z());
-	p[1] = FLTYPE::Point(bounds.Min().x(), bounds.Min().y(), bounds.Max().z());
-	p[2] = FLTYPE::Point(bounds.Min().x(), bounds.Max().y(), bounds.Min().z());
-	p[3] = FLTYPE::Point(bounds.Min().x(), bounds.Max().y(), bounds.Max().z());
-	p[4] = FLTYPE::Point(bounds.Max().x(), bounds.Min().y(), bounds.Min().z());
-	p[5] = FLTYPE::Point(bounds.Max().x(), bounds.Min().y(), bounds.Max().z());
-	p[6] = FLTYPE::Point(bounds.Max().x(), bounds.Max().y(), bounds.Min().z());
-	p[7] = FLTYPE::Point(bounds.Max().x(), bounds.Max().y(), bounds.Max().z());
+	fluo::Point p[8];
+	p[0] = fluo::Point(bounds.Min().x(), bounds.Min().y(), bounds.Min().z());
+	p[1] = fluo::Point(bounds.Min().x(), bounds.Min().y(), bounds.Max().z());
+	p[2] = fluo::Point(bounds.Min().x(), bounds.Max().y(), bounds.Min().z());
+	p[3] = fluo::Point(bounds.Min().x(), bounds.Max().y(), bounds.Max().z());
+	p[4] = fluo::Point(bounds.Max().x(), bounds.Min().y(), bounds.Min().z());
+	p[5] = fluo::Point(bounds.Max().x(), bounds.Min().y(), bounds.Max().z());
+	p[6] = fluo::Point(bounds.Max().x(), bounds.Max().y(), bounds.Min().z());
+	p[7] = fluo::Point(bounds.Max().x(), bounds.Max().y(), bounds.Max().z());
 
 	double trans_x, trans_y, trans_z;
 	double rot_x, rot_y, rot_z;
@@ -175,22 +175,22 @@ void MeshData::OnBoundsChanged(Event& event)
 	getValue("scale z", scale_z);
 
 	double s, c;
-	FLTYPE::Point temp;
+	fluo::Point temp;
 	for (int i = 0; i<8; i++)
 	{
-		p[i] = FLTYPE::Point(p[i].x()*scale_x, p[i].y()*scale_y, p[i].z()*scale_z);
-		s = sin(FLTYPE::d2r(rot_z));
-		c = cos(FLTYPE::d2r(rot_z));
-		temp = FLTYPE::Point(c*p[i].x() - s*p[i].y(), s*p[i].x() + c*p[i].y(), p[i].z());
+		p[i] = fluo::Point(p[i].x()*scale_x, p[i].y()*scale_y, p[i].z()*scale_z);
+		s = sin(fluo::d2r(rot_z));
+		c = cos(fluo::d2r(rot_z));
+		temp = fluo::Point(c*p[i].x() - s*p[i].y(), s*p[i].x() + c*p[i].y(), p[i].z());
 		p[i] = temp;
-		s = sin(FLTYPE::d2r(rot_y));
-		c = cos(FLTYPE::d2r(rot_y));
-		temp = FLTYPE::Point(c*p[i].x() + s*p[i].z(), p[i].y(), -s*p[i].x() + c*p[i].z());
+		s = sin(fluo::d2r(rot_y));
+		c = cos(fluo::d2r(rot_y));
+		temp = fluo::Point(c*p[i].x() + s*p[i].z(), p[i].y(), -s*p[i].x() + c*p[i].z());
 		p[i] = temp;
-		s = sin(FLTYPE::d2r(rot_x));
-		c = cos(FLTYPE::d2r(rot_x));
-		temp = FLTYPE::Point(p[i].x(), c*p[i].y() - s*p[i].z(), s*p[i].y() + c*p[i].z());
-		p[i] = FLTYPE::Point(temp.x() + trans_x, temp.y() + trans_y, temp.z() + trans_z);
+		s = sin(fluo::d2r(rot_x));
+		c = cos(fluo::d2r(rot_x));
+		temp = fluo::Point(p[i].x(), c*p[i].y() - s*p[i].z(), s*p[i].y() + c*p[i].z());
+		p[i] = fluo::Point(temp.x() + trans_x, temp.y() + trans_y, temp.z() + trans_z);
 		bounds.extend(p[i]);
 	}
 	setValue("bounds tf", bounds, event);
@@ -199,9 +199,9 @@ void MeshData::OnBoundsChanged(Event& event)
 void MeshData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
-	FLTYPE::Color color(FLTYPE::HSVColor(hue, 1.0, 1.0));
+	fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 	setValue("color", color, event);
-	FLTYPE::Color amb = color * 0.3;
+	fluo::Color amb = color * 0.3;
 	setValue("mat amb", amb, event);
 }
 
@@ -253,20 +253,20 @@ int MeshData::LoadData(GLMmodel* mesh)
 	//bounds
 	GLfloat fbounds[6];
 	glmBoundingBox(m_data, fbounds);
-	FLTYPE::BBox bounds;
-	FLTYPE::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
-	FLTYPE::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
+	fluo::BBox bounds;
+	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
+	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
 	bounds.extend(pmin);
 	bounds.extend(pmax);
 	setValue("bounds", bounds);
-	FLTYPE::Point center((bounds.Min().x() + bounds.Max().x())*0.5,
+	fluo::Point center((bounds.Min().x() + bounds.Max().x())*0.5,
 		(bounds.Min().y() + bounds.Max().y())*0.5,
 		(bounds.Min().z() + bounds.Max().z())*0.5);
 	setValue("center", center);
 
 	if (m_mr)
 		delete m_mr;
-	m_mr = new FLIVR::MeshRenderer(m_data);
+	m_mr = new flvr::MeshRenderer(m_data);
 
 	Initialize();
 
@@ -287,7 +287,7 @@ void MeshData::SaveData(std::string& filename)
 	glmWriteOBJ(m_data, filename.c_str(), GLM_SMOOTH);
 }
 
-FLIVR::MeshRenderer* MeshData::GetRenderer()
+flvr::MeshRenderer* MeshData::GetRenderer()
 {
 	return m_mr;
 }
@@ -297,7 +297,7 @@ void MeshData::SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
 	if (m_mr)
 	{
 		glm::mat4 mv_temp;
-		FLTYPE::Point center;
+		fluo::Point center;
 		getValue("center", center);
 		double trans_x, trans_y, trans_z;
 		getValue("trans x", trans_x);

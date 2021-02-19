@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TEXTRENDERER_H_
 #define _TEXTRENDERER_H_
 
-#include <Types/Color.h>
 #include <GL/glew.h>
+#include <Types/Color.hpp>
 #include <string>
 #include <map>
 #include <ft2build.h>

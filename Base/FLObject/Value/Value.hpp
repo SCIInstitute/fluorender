@@ -50,8 +50,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Ray.hpp>
 #include <Transform.hpp>
 #include <Vector.hpp>
-#include <GLfloat4.hpp>
-#include <GLint4.hpp>
+#include <Vector4f.hpp>
+#include <Vector4i.hpp>
 
 namespace fluo
 {
@@ -92,8 +92,8 @@ public:
 		vt_Quaternion,
 		vt_Ray,
 		vt_Transform,
-		vt_GLfloat4,
-		vt_GLint4,
+		vt_Vector4f,
+		vt_Vector4i,
 	};
 	Value(std::string name = "", std::string type = "") :
 		Referenced(), _name(name), _type(type) {}
@@ -165,8 +165,8 @@ protected:
 			{"Quaternion", vt_Quaternion},
 			{"Ray", vt_Ray},
 			{"Transform", vt_Transform},
-			{"GLfloat4", vt_GLfloat4},
-			{"GLint4", vt_GLint4}
+			{"Vector4f", vt_Vector4f},
+			{"Vector4i", vt_Vector4i}
 		};
 		return mval;
 	}
@@ -276,18 +276,18 @@ public:
 	bool addValue(const std::string &name, const std::string &value);
 	bool addValue(const std::string &name, const std::wstring &value);
 	//add FluoRender's special types here
-	bool addValue(const std::string &name, const FLTYPE::Point &value);
-	bool addValue(const std::string &name, const FLTYPE::Vector &value);
-	bool addValue(const std::string &name, const FLTYPE::BBox &value);
-	bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
-	bool addValue(const std::string &name, const FLTYPE::Color &value);
-	bool addValue(const std::string &name, const FLTYPE::Plane &value);
-	bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
-	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
-	bool addValue(const std::string &name, const FLTYPE::Ray &value);
-	bool addValue(const std::string &name, const FLTYPE::Transform &value);
-	bool addValue(const std::string &name, const FLTYPE::GLfloat4 &value);
-	bool addValue(const std::string &name, const FLTYPE::GLint4 &value);
+	bool addValue(const std::string &name, const fluo::Point &value);
+	bool addValue(const std::string &name, const fluo::Vector &value);
+	bool addValue(const std::string &name, const fluo::BBox &value);
+	bool addValue(const std::string &name, const fluo::HSVColor &value);
+	bool addValue(const std::string &name, const fluo::Color &value);
+	bool addValue(const std::string &name, const fluo::Plane &value);
+	bool addValue(const std::string &name, const fluo::PlaneSet &value);
+	bool addValue(const std::string &name, const fluo::Quaternion &value);
+	bool addValue(const std::string &name, const fluo::Ray &value);
+	bool addValue(const std::string &name, const fluo::Transform &value);
+	bool addValue(const std::string &name, const fluo::Vector4f &value);
+	bool addValue(const std::string &name, const fluo::Vector4i &value);
 
 	/** All the set value functions */
 	bool setValue(ValueTuple& vt, Event& event);
@@ -308,18 +308,18 @@ public:
 	bool setValue(const std::string &name, const std::string &value, Event& event);
 	bool setValue(const std::string &name, const std::wstring &value, Event& event);
 	//add FluoRender's special types here
-	bool setValue(const std::string &name, const FLTYPE::Point &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::Vector &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::BBox &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::HSVColor &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::Color &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::Plane &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::Quaternion &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::Ray &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::Transform &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, Event& event);
-	bool setValue(const std::string &name, const FLTYPE::GLint4 &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Point &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Vector &value, Event& event);
+	bool setValue(const std::string &name, const fluo::BBox &value, Event& event);
+	bool setValue(const std::string &name, const fluo::HSVColor &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Color &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Plane &value, Event& event);
+	bool setValue(const std::string &name, const fluo::PlaneSet &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Quaternion &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Ray &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Transform &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Vector4f &value, Event& event);
+	bool setValue(const std::string &name, const fluo::Vector4i &value, Event& event);
     */
     template<typename T>
 	bool setValue(const std::string& name, T value, Event& event)
@@ -388,18 +388,18 @@ public:
 	bool getValue(const std::string &name, std::string &value);
 	bool getValue(const std::string &name, std::wstring &value);
 	//FluoRender's special value types
-	bool getValue(const std::string &name, FLTYPE::Point &value);
-	bool getValue(const std::string &name, FLTYPE::Vector &value);
-	bool getValue(const std::string &name, FLTYPE::BBox &value);
-	bool getValue(const std::string &name, FLTYPE::HSVColor &value);
-	bool getValue(const std::string &name, FLTYPE::Color &value);
-	bool getValue(const std::string &name, FLTYPE::Plane &value);
-	bool getValue(const std::string &name, FLTYPE::PlaneSet &value);
-	bool getValue(const std::string &name, FLTYPE::Quaternion &value);
-	bool getValue(const std::string &name, FLTYPE::Ray &value);
-	bool getValue(const std::string &name, FLTYPE::Transform &value);
-	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
-	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
+	bool getValue(const std::string &name, fluo::Point &value);
+	bool getValue(const std::string &name, fluo::Vector &value);
+	bool getValue(const std::string &name, fluo::BBox &value);
+	bool getValue(const std::string &name, fluo::HSVColor &value);
+	bool getValue(const std::string &name, fluo::Color &value);
+	bool getValue(const std::string &name, fluo::Plane &value);
+	bool getValue(const std::string &name, fluo::PlaneSet &value);
+	bool getValue(const std::string &name, fluo::Quaternion &value);
+	bool getValue(const std::string &name, fluo::Ray &value);
+	bool getValue(const std::string &name, fluo::Transform &value);
+	bool getValue(const std::string &name, fluo::Vector4f &value);
+	bool getValue(const std::string &name, fluo::Vector4i &value);
     */
 
 	Values& getValues() {return _values;}
@@ -498,14 +498,14 @@ inline bool Value::operator == (const Value& v) const
 				dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
 		else
 			return fabs(dynamic_cast<const TemplateValue<float>*>(this)->getValue() -
-				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < FLTYPE::Epslf();
+				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < fluo::Epslf();
 	case vt_double:
 		if (precise())
 			return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
 		else
 			return fabs(reinterpret_cast<const TemplateValue<double>*>(this)->getValue() -
-				reinterpret_cast<const TemplateValue<double>*>(&v)->getValue()) < FLTYPE::Epsld();
+				reinterpret_cast<const TemplateValue<double>*>(&v)->getValue()) < fluo::Epsld();
 	case vt_string:
 		return dynamic_cast<const TemplateValue<std::string>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();
@@ -513,41 +513,41 @@ inline bool Value::operator == (const Value& v) const
 		return dynamic_cast<const TemplateValue<std::wstring>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::wstring>*>(&v)->getValue();
 	case vt_Point:
-		return dynamic_cast<const TemplateValue<FLTYPE::Point>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Point>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Point>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Point>*>(&v)->getValue();
 	case vt_Vector:
-		return dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Vector>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Vector>*>(&v)->getValue();
 	case vt_BBox:
-		return dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::BBox>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::BBox>*>(&v)->getValue();
 	case vt_HSVColor:
-		return dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::HSVColor>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::HSVColor>*>(&v)->getValue();
 	case vt_Color:
-		return dynamic_cast<const TemplateValue<FLTYPE::Color>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Color>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Color>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Color>*>(&v)->getValue();
 	case vt_Plane:
-		return dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Plane>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Plane>*>(&v)->getValue();
 	case vt_PlaneSet:
-		return dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::PlaneSet>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::PlaneSet>*>(&v)->getValue();
 	case vt_Quaternion:
-		return dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Quaternion>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Quaternion>*>(&v)->getValue();
 	case vt_Ray:
-		return dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Ray>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Ray>*>(&v)->getValue();
 	case vt_Transform:
-		return dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
-	case vt_GLfloat4:
-		return dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(&v)->getValue();
-	case vt_GLint4:
-		return dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(this)->getValue() ==
-			dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(&v)->getValue();
+		return dynamic_cast<const TemplateValue<fluo::Transform>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Transform>*>(&v)->getValue();
+	case vt_Vector4f:
+		return dynamic_cast<const TemplateValue<fluo::Vector4f>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Vector4f>*>(&v)->getValue();
+	case vt_Vector4i:
+		return dynamic_cast<const TemplateValue<fluo::Vector4i>*>(this)->getValue() ==
+			dynamic_cast<const TemplateValue<fluo::Vector4i>*>(&v)->getValue();
 	default:
 		return false;
 	}
@@ -630,52 +630,52 @@ inline bool Value::sync(Event& event)
 			dynamic_cast<TemplateValue<std::wstring>*>(value)->getValue(), event);
 		break;
 	case vt_Point:
-		dynamic_cast<TemplateValue<FLTYPE::Point>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Point>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Point>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Point>*>(value)->getValue(), event);
 		break;
 	case vt_Vector:
-		dynamic_cast<TemplateValue<FLTYPE::Vector>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Vector>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Vector>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Vector>*>(value)->getValue(), event);
 		break;
 	case vt_BBox:
-		dynamic_cast<TemplateValue<FLTYPE::BBox>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::BBox>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::BBox>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::BBox>*>(value)->getValue(), event);
 		break;
 	case vt_HSVColor:
-		dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::HSVColor>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::HSVColor>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::HSVColor>*>(value)->getValue(), event);
 		break;
 	case vt_Color:
-		dynamic_cast<TemplateValue<FLTYPE::Color>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Color>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Color>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Color>*>(value)->getValue(), event);
 		break;
 	case vt_Plane:
-		dynamic_cast<TemplateValue<FLTYPE::Plane>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Plane>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Plane>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Plane>*>(value)->getValue(), event);
 		break;
 	case vt_PlaneSet:
-		dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::PlaneSet>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::PlaneSet>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::PlaneSet>*>(value)->getValue(), event);
 		break;
 	case vt_Quaternion:
-		dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Quaternion>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Quaternion>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Quaternion>*>(value)->getValue(), event);
 		break;
 	case vt_Ray:
-		dynamic_cast<TemplateValue<FLTYPE::Ray>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Ray>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Ray>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Ray>*>(value)->getValue(), event);
 		break;
 	case vt_Transform:
-		dynamic_cast<TemplateValue<FLTYPE::Transform>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::Transform>*>(value)->getValue(), event);
+		dynamic_cast<TemplateValue<fluo::Transform>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Transform>*>(value)->getValue(), event);
 		break;
-	case vt_GLfloat4:
-		dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::GLfloat4>*>(value)->getValue(), event);
+	case vt_Vector4f:
+		dynamic_cast<TemplateValue<fluo::Vector4f>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Vector4f>*>(value)->getValue(), event);
 		break;
-	case vt_GLint4:
-		dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(this)->setValue(
-			dynamic_cast<TemplateValue<FLTYPE::GLint4>*>(value)->getValue(), event);
+	case vt_Vector4i:
+		dynamic_cast<TemplateValue<fluo::Vector4i>*>(this)->setValue(
+			dynamic_cast<TemplateValue<fluo::Vector4i>*>(value)->getValue(), event);
 		break;
 	default:
 		return false;
@@ -740,40 +740,40 @@ inline std::ostream& operator<<(std::ostream& os, const Value& v)
 		}
 		break;
 	case Value::vt_Point:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Point>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Point>*>(&v)->getValue();
 		break;
 	case Value::vt_Vector:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Vector>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Vector>*>(&v)->getValue();
 		break;
 	case Value::vt_BBox:
-		os << dynamic_cast<const TemplateValue<FLTYPE::BBox>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::BBox>*>(&v)->getValue();
 		break;
 	case Value::vt_HSVColor:
-		os << dynamic_cast<const TemplateValue<FLTYPE::HSVColor>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::HSVColor>*>(&v)->getValue();
 		break;
 	case Value::vt_Color:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Color>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Color>*>(&v)->getValue();
 		break;
 	case Value::vt_Plane:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Plane>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Plane>*>(&v)->getValue();
 		break;
 	case Value::vt_PlaneSet:
-		os << dynamic_cast<const TemplateValue<FLTYPE::PlaneSet>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::PlaneSet>*>(&v)->getValue();
 		break;
 	case Value::vt_Quaternion:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Quaternion>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Quaternion>*>(&v)->getValue();
 		break;
 	case Value::vt_Ray:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Ray>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Ray>*>(&v)->getValue();
 		break;
 	case Value::vt_Transform:
-		os << dynamic_cast<const TemplateValue<FLTYPE::Transform>*>(&v)->getValue();
+		os << dynamic_cast<const TemplateValue<fluo::Transform>*>(&v)->getValue();
 		break;
-	case Value::vt_GLfloat4:
-		os << dynamic_cast<const TemplateValue<FLTYPE::GLfloat4>*>(&v)->getValue();
+	case Value::vt_Vector4f:
+		os << dynamic_cast<const TemplateValue<fluo::Vector4f>*>(&v)->getValue();
 		break;
-	case Value::vt_GLint4:
-		os << dynamic_cast<const TemplateValue<FLTYPE::GLint4>*>(&v)->getValue();
+	case Value::vt_Vector4i:
+		os << dynamic_cast<const TemplateValue<fluo::Vector4i>*>(&v)->getValue();
 		break;
 	}
 	return os;

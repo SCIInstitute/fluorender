@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "imageJ_reader.hpp"
 #include <Utilities/compatibility.h>
-#include <wx/stdpaths.h>
+//#include <wx/stdpaths.h>
 
 ImageJReader::ImageJReader()
 {

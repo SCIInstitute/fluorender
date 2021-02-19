@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef ND2_READER_HPP
 #define ND2_READER_HPP
 
-#include <Nd2ReadSdk.h>
-#include <base_reader.hpp>
+#include "base_reader.hpp"
+#include <nd2/include/Nd2ReadSdk.h>
 #include <vector>
 #include <string>
 #include <limits>

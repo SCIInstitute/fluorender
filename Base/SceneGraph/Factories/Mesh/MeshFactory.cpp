@@ -58,12 +58,12 @@ void MeshFactory::createDefault()
 
 		//add default values here
 		md->addValue("data path", std::wstring());//path to obj file
-		md->addValue("bounds", FLTYPE::BBox());//bounding box
-		md->addValue("bounds tf", FLTYPE::BBox());//bounding box after transformation
-		md->addValue("center", FLTYPE::Point());
+		md->addValue("bounds", fluo::BBox());//bounding box
+		md->addValue("bounds tf", fluo::BBox());//bounding box after transformation
+		md->addValue("center", fluo::Point());
 
 		//resolution for clipping planes
-		md->addValue("clip planes", FLTYPE::PlaneSet(6));
+		md->addValue("clip planes", fluo::PlaneSet(6));
 		md->addValue("res x", long(0));
 		md->addValue("res y", long(0));
 		md->addValue("res z", long(0));
@@ -81,9 +81,9 @@ void MeshFactory::createDefault()
 		md->addValue("da int", double(0.5));
 		md->addValue("da start", double(0));
 		md->addValue("da end", double(1));
-		md->addValue("mat amb", FLTYPE::Color());
-		md->addValue("color", FLTYPE::Color());
-		md->addValue("mat spec", FLTYPE::Color());
+		md->addValue("mat amb", fluo::Color());
+		md->addValue("color", fluo::Color());
+		md->addValue("mat spec", fluo::Color());
 		md->addValue("mat shine", double(0));
 		md->addValue("alpha", double(1));
 		md->addValue("randomize color", bool(false));
@@ -111,7 +111,7 @@ void MeshFactory::createDefault()
 		md->addValue("legend", bool(true));
 
 		//viewport
-		md->addValue("viewport", FLTYPE::GLint4());
+		md->addValue("viewport", fluo::Vector4i());
 
 		//selected on the ui
 		md->addValue("selected", bool(false));

@@ -26,16 +26,17 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include "../compatibility.h"
 #include "Texture.h"
-#include <math.h>
+#include <Utilities/compatibility.h>
+#include <Types/Plane.hpp>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
-#include <Types/Utils.h>
+#include <Types/Utils.hpp>
+#include <math.h>
 #include <utility>
 #include <iostream>
 #include <fstream>
-#include <wx/filefn.h>
+//#include <wx/filefn.h>
 
 using namespace std;
 
@@ -223,7 +224,7 @@ namespace flvr
 		for (uint32_t i = 1; i < 8; i++)
 		{
 			t = fluo::Dot(corner[i] - view.origin(), view.direction());
-			tmin = std::min(t, tmin);
+			tmin = fluo::Min(t, tmin);
 			if (t > tmax) { maxi = i; tmax = t; }
 		}
 

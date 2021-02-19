@@ -81,27 +81,27 @@ void ClipPlaneAgent::UpdateAllSettings()
 /* This will be updated later on as I add more buttons
   switch (render_mode)
   {
-  case FLTYPE::PRMNormal:
+  case fluo::PRMNormal:
   	parentPanel.m_toolbar->SetToolNormalBitmap(parentPanel.ID_PlaneModesBtn,
   		wxGetBitmapFromMemory(clip_normal));
   	break;
-  case FLTYPE::PRMFrame:
+  case fluo::PRMFrame:
   	parentPanel.m_toolbar->SetToolNormalBitmap(parentPanel.ID_PlaneModesBtn,
   		wxGetBitmapFromMemory(clip_frame));
   	break;
-  case FLTYPE::PRMLowTrans:
+  case fluo::PRMLowTrans:
   	parentPanel.m_toolbar->SetToolNormalBitmap(parentPanel.ID_PlaneModesBtn,
   		wxGetBitmapFromMemory(clip_low));
   	break;
-  case FLTYPE::PRMLowTransBack:
+  case fluo::PRMLowTransBack:
   	parentPanel.m_toolbar->SetToolNormalBitmap(parentPanel.ID_PlaneModesBtn,
   		wxGetBitmapFromMemory(clip_low_back));
   	break;
-  case FLTYPE::PRMNormalBack:
+  case fluo::PRMNormalBack:
   	parentPanel.m_toolbar->SetToolNormalBitmap(parentPanel.ID_PlaneModesBtn,
   		wxGetBitmapFromMemory(clip_normal_back));
   	break;
-  case FLTYPE::PRMNone:
+  case fluo::PRMNone:
   	parentPanel.m_toolbar->SetToolNormalBitmap(parentPanel.ID_PlaneModesBtn,
   		wxGetBitmapFromMemory(clip_none));
   	break;
@@ -356,7 +356,7 @@ void ClipPlaneAgent::alignRenderViewRot()
 	double rot_x, rot_y, rot_z;
 	agent->getView().GetRotations(rot_x, rot_y, rot_z);
 	//convert
-	FLTYPE::Quaternion q_cl;
+	fluo::Quaternion q_cl;
 	q_cl.FromEuler(rot_x, -rot_y, -rot_z);
 	q_cl.ToEuler(rot_x, rot_y, rot_z);
 	if (rot_x > 180.0) rot_x -= 360.0;

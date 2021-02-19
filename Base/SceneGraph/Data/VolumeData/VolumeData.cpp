@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VolumeData.hpp"
 #include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/Plane.h>
+#include <Plane.hpp>
 #include <Formats/base_reader.hpp>
 #include <Formats/oib_reader.hpp>
 #include <Formats/nrrd_reader.hpp>
@@ -64,9 +64,9 @@ VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop, bool copy_v
 {
 	//volume renderer and texture
 	//if (data.m_vr)
-	//	m_vr = new FLIVR::VolumeRenderer(*data.m_vr);
+	//	m_vr = new flvr::VolumeRenderer(*data.m_vr);
 	//else
-	//	m_vr = new FLIVR::VolumeRenderer();
+	//	m_vr = new flvr::VolumeRenderer();
 	//m_tex = data.m_tex;
 	if (copy_values)
 		copyValues(data, copyop);
@@ -144,10 +144,10 @@ void VolumeData::OnMipModeChanged(Event& event)
 	switch (mode)
 	{
 	case 0://normal
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		break;
 	case 1://MIP
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		break;
 	}
 }
@@ -164,7 +164,7 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 	{
 	case 0://restore
 	{
-		FLTYPE::Color color;
+		fluo::Color color;
 		getValue("color", color);
 		m_vr->set_color(color);
 		double alpha;
@@ -182,9 +182,9 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 		long mip_mode;
 		getValue("mip mode", mip_mode);
 		if (mip_mode == 1)
-			m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+			m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		else
-			m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+			m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		bool alpha_enable;
 		getValue("alpha enable", alpha_enable);
 		m_vr->set_solid(!alpha_enable);
@@ -192,7 +192,7 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 	break;
 	case 1://for shadow
 	{
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		m_vr->set_shading(false);
 		m_vr->set_solid(false);
 		m_vr->set_colormap_mode(2);
@@ -201,12 +201,12 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 	break;
 	case 2://for shading
 	{
-		m_vr->set_mode(FLIVR::TextureRenderer::MODE_OVER);
+		m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		m_vr->set_shading(true);
 		m_vr->set_solid(false);
 		m_vr->set_alpha(1.0);
 		m_vr->set_colormap_mode(0);
-		m_vr->set_color(FLIVR::Color(1.0));
+		m_vr->set_color(fluo::Color(1.0));
 	}
 	break;
 	case 3://white mip
@@ -215,9 +215,9 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 		getValue("colormap enable", colormap_enable);
 		if (colormap_enable)
 		{
-			m_vr->set_mode(FLIVR::TextureRenderer::MODE_MIP);
+			m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 			m_vr->set_colormap_mode(0);
-			m_vr->set_color(FLIVR::Color(1.0));
+			m_vr->set_color(fluo::Color(1.0));
 			//m_vr->set_alpha(1.0);
 			m_vr->set_solid(true);
 		}
@@ -230,7 +230,7 @@ void VolumeData::OnViewportChanged(Event& event)
 	if (!m_vr)
 		return;
 
-	FLTYPE::GLint4 vp;
+	fluo::Vector4i vp;
 	getValue("viewport", vp);
 
 	m_vr->set_viewport(vp.get());
@@ -241,7 +241,7 @@ void VolumeData::OnClearColorChanged(Event& event)
 	if (!m_vr)
 		return;
 
-	FLTYPE::GLfloat4 clear_color;
+	fluo::Vector4f clear_color;
 	getValue("clear color", clear_color);
 	m_vr->set_clear_color(clear_color.get());
 }
@@ -360,10 +360,10 @@ void VolumeData::OnColorChanged(Event& event)
 {
 	if (!m_vr)
 		return;
-	FLTYPE::Color color;
+	fluo::Color color;
 	getValue("color", color);
 	m_vr->set_color(color);
-	FLTYPE::HSVColor hsv(color);
+	fluo::HSVColor hsv(color);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
 	setValue("hsv", hsv, event);
 	event.setNotifyFlags(Event::NOTIFY_SELF | Event::NOTIFY_AGENT);
@@ -375,7 +375,7 @@ void VolumeData::OnSecColorChanged(Event& event)
 	if (!m_vr)
 		return;
 
-	FLTYPE::Color sec_color;
+	fluo::Color sec_color;
 	getValue("sec color", sec_color);
 	m_vr->set_mask_color(sec_color);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
@@ -400,10 +400,10 @@ void VolumeData::OnLuminanceChanged(Event& event)
 
 	double luminance;
 	getValue("luminance", luminance);
-	FLTYPE::HSVColor hsv;
+	fluo::HSVColor hsv;
 	getValue("hsv", hsv);
 	hsv.val(luminance);
-	FLTYPE::Color color(hsv);
+	fluo::Color color(hsv);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
 	setValue("color", color, event);
 	m_vr->set_color(color);
@@ -514,7 +514,7 @@ void VolumeData::OnColormapModeChanged(Event& event)
 
 	long colormap_mode;
 	getValue("colormap mode", colormap_mode);
-	FLTYPE::Color color;
+	fluo::Color color;
 	getValue("color", color);
 	m_vr->set_colormap_mode(colormap_mode);
 	m_vr->set_color(color);
@@ -559,13 +559,10 @@ void VolumeData::OnSpacingChanged(Event& event)
 	getValue("spc y", spc_y);
 	getValue("spc z", spc_z);
 	m_tex->set_spacings(spc_x, spc_y, spc_z);
-	FLIVR::BBox bbox;
+	fluo::BBox bbox;
 	m_tex->get_bounds(bbox);
-    FLTYPE::Point box_min(bbox.getMin().x(), bbox.getMin().y(), bbox.getMin().z());
-    FLTYPE::Point box_max(bbox.getMax().x(), bbox.getMax().y(), bbox.getMax().z());
-	FLTYPE::BBox bounds(box_min, box_max);
 	event.setNotifyFlags(Event::NOTIFY_PARENT | Event::NOTIFY_AGENT);
-	setValue("bounds", bounds, event);
+	setValue("bounds", bbox, event);
 
 	//m_tex->get_base_spacings(spc_x, spc_y, spc_z);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
@@ -574,14 +571,10 @@ void VolumeData::OnSpacingChanged(Event& event)
 	setValue("base spc z", spc_z, event);
 
 	//tex transform
-	FLIVR::Transform *temp = m_tex->transform();
-	FLTYPE::Transform tform;
-	double tformarray[16];
-	temp->get(tformarray);
-	tform.set(tformarray);
+	fluo::Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    setValue("tex transform", tform, texTransform);
+    setValue("tex transform", *temp, texTransform);
 }
 
 void VolumeData::OnBaseSpacingChanged(Event& event)
@@ -603,14 +596,10 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	setValue("spc z", spc_z, event);
 
 	//tex transform
-	FLIVR::Transform *temp = m_tex->transform();
-	FLTYPE::Transform tform;
-	double tformarray[16];
-	temp->get(tformarray);
-	tform.set(tformarray);
+	fluo::Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    setValue("tex transform", tform, texTransform);
+    setValue("tex transform", *temp, texTransform);
 }
 
 void VolumeData::OnSpacingScaleChanged(Event& event)
@@ -635,23 +624,16 @@ void VolumeData::OnLevelChanged(Event& event)
 	long level;
 	getValue("level", level);
 	m_tex->setLevel(level);
-	FLIVR::BBox bbox;
+	fluo::BBox bbox;
 	m_tex->get_bounds(bbox);
-    FLTYPE::Point box_min(bbox.getMin().x(), bbox.getMin().y(), bbox.getMin().z());
-    FLTYPE::Point box_max(bbox.getMax().x(), bbox.getMax().y(), bbox.getMax().z());
-	FLTYPE::BBox bounds(box_min, box_max);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("bounds", bounds, event);
+	setValue("bounds", bbox, event);
 
 	//tex transform
-	FLIVR::Transform *temp = m_tex->transform();
-	FLTYPE::Transform tform;
-	double tformarray[16];
-	temp->get(tformarray);
-	tform.set(tformarray);
+	fluo::Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    setValue("tex transform", tform, texTransform);
+    setValue("tex transform", *temp, texTransform);
 }
 
 void VolumeData::OnDisplayChanged(Event& event)
@@ -699,14 +681,14 @@ void VolumeData::OnClipPlanesChanged(Event& event)
 	if (!m_vr)
 		return;
 
-	FLTYPE::PlaneSet planeset;
+	fluo::PlaneSet planeset;
 	getValue("clip planes", planeset);
 
 	//this needs to be made consistent in the future
-	std::vector<FLIVR::Plane*> planelist(0);
+	std::vector<fluo::Plane*> planelist(0);
 	for (int i = 0; i < planeset.GetSize(); ++i)
 	{
-		FLIVR::Plane* plane = new FLIVR::Plane(planeset.Get(i));
+		fluo::Plane* plane = new fluo::Plane(planeset.Get(i));
 		planelist.push_back(plane);
 	}
 	m_vr->set_planes(&planelist);
@@ -1026,31 +1008,31 @@ void VolumeData::UpdateClippingPlanes(Event& event)
 	getValue("res y", res_y);
 	getValue("res z", res_z);
 
-	FLTYPE::Quaternion cl_quat;
+	fluo::Quaternion cl_quat;
 	cl_quat.FromEuler(clip_rot_x, clip_rot_y, clip_rot_z);
-	FLTYPE::Vector scale;
+	fluo::Vector scale;
 	if (spc_x > 0.0 && spc_y > 0.0 && spc_z > 0.0)
 	{
-		scale = FLTYPE::Vector(
+		scale = fluo::Vector(
 			1.0 / res_x / spc_x,
 			1.0 / res_y / spc_y,
 			1.0 / res_z / spc_z);
 		scale.safe_normalize();
 	}
 	else
-		scale = FLTYPE::Vector(1.0);
+		scale = fluo::Vector(1.0);
 
-	FLTYPE::PlaneSet planes(6);
+	fluo::PlaneSet planes(6);
 	//clip first
-	planes[0].ChangePlane(FLTYPE::Point(clip_x1, 0, 0), FLTYPE::Vector(1, 0, 0));
-	planes[1].ChangePlane(FLTYPE::Point(clip_x2, 0, 0), FLTYPE::Vector(-1, 0, 0));
-	planes[2].ChangePlane(FLTYPE::Point(0, clip_y1, 0), FLTYPE::Vector(0, 1, 0));
-	planes[3].ChangePlane(FLTYPE::Point(0, clip_y2, 0), FLTYPE::Vector(0, -1, 0));
-	planes[4].ChangePlane(FLTYPE::Point(0, 0, clip_z1), FLTYPE::Vector(0, 0, 1));
-	planes[5].ChangePlane(FLTYPE::Point(0, 0, clip_z2), FLTYPE::Vector(0, 0, -1));
+	planes[0].ChangePlane(fluo::Point(clip_x1, 0, 0), fluo::Vector(1, 0, 0));
+	planes[1].ChangePlane(fluo::Point(clip_x2, 0, 0), fluo::Vector(-1, 0, 0));
+	planes[2].ChangePlane(fluo::Point(0, clip_y1, 0), fluo::Vector(0, 1, 0));
+	planes[3].ChangePlane(fluo::Point(0, clip_y2, 0), fluo::Vector(0, -1, 0));
+	planes[4].ChangePlane(fluo::Point(0, 0, clip_z1), fluo::Vector(0, 0, 1));
+	planes[5].ChangePlane(fluo::Point(0, 0, clip_z2), fluo::Vector(0, 0, -1));
 	//then rotate
-	FLTYPE::Vector trans1(-0.5);
-	FLTYPE::Vector trans2(0.5);
+	fluo::Vector trans1(-0.5);
+	fluo::Vector trans2(0.5);
 	planes.Translate(trans1);
 	planes.Rotate(cl_quat);
 	planes.Scale(scale);
@@ -1063,7 +1045,7 @@ void VolumeData::UpdateClippingPlanes(Event& event)
 void VolumeData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
-	FLTYPE::Color color(FLTYPE::HSVColor(hue, 1.0, 1.0));
+	fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 	setValue("color", color, event);
 }
 
@@ -1097,7 +1079,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 
 	Nrrd *nv = data;
 
-	m_tex = new FLIVR::Texture();
+	m_tex = new flvr::Texture();
 	//bool skip_brick;
 	//getValue("skip brick", skip_brick);
 	//m_tex->set_use_priority(skip_brick);
@@ -1105,8 +1087,8 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 	if (m_reader && m_reader->GetType() == READER_BRKXML_TYPE)
 	{
 		BRKXMLReader *breader = (BRKXMLReader*)m_reader;
-		vector<FLIVR::Pyramid_Level> pyramid;
-		vector<vector<vector<vector<FLIVR::FileLocInfo *>>>> fnames;
+		vector<flvr::Pyramid_Level> pyramid;
+		vector<vector<vector<vector<flvr::FileLocInfo *>>>> fnames;
 		int ftype = BRICK_FILE_TYPE_NONE;
 
 		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
@@ -1134,20 +1116,20 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		if (m_vr)
 			delete m_vr;
 
-		FLTYPE::PlaneSet planeset;
+		fluo::PlaneSet planeset;
 		getValue("clip planes", planeset);
 		//this needs to be made consistent in the future
-		vector<FLIVR::Plane*> planelist(0);
+		vector<fluo::Plane*> planelist(0);
 		for (int i = 0; i < planeset.GetSize(); ++i)
 		{
-			FLIVR::Plane* plane = new FLIVR::Plane(planeset.Get(i));
+			fluo::Plane* plane = new fluo::Plane(planeset.Get(i));
 			planelist.push_back(plane);
 		}
 
-		m_vr = new FLIVR::VolumeRenderer(m_tex, planelist, true);
-		FLTYPE::BBox bounds;
-        FLTYPE::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
-        FLTYPE::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
+		m_vr = new flvr::VolumeRenderer(m_tex, planelist, true);
+		fluo::BBox bounds;
+        fluo::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
+        fluo::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
 		bounds.extend(pmin);
 		bounds.extend(pmax);
 		setValue("bounds", bounds);
@@ -1213,7 +1195,7 @@ int VolumeData::ReplaceData(Nrrd* data, bool del_tex)
 
 		if (m_tex)
 			delete m_tex;
-		m_tex = new FLIVR::Texture();
+		m_tex = new flvr::Texture();
 		bool skip_brick;
 		getValue("skip brick", skip_brick);
 		m_tex->set_use_priority(skip_brick);
@@ -1348,15 +1330,15 @@ void VolumeData::AddEmptyData(int bits,
 	setValue("res z", long(nv->axis[2].size));
 
 	//bounding box
-	FLTYPE::BBox bounds;
-    FLTYPE::Point pmax(nv->axis[0].max, nv->axis[1].max, nv->axis[2].max);
-    FLTYPE::Point pmin(nv->axis[0].min, nv->axis[1].min, nv->axis[2].min);
+	fluo::BBox bounds;
+    fluo::Point pmax(nv->axis[0].max, nv->axis[1].max, nv->axis[2].max);
+    fluo::Point pmin(nv->axis[0].min, nv->axis[1].min, nv->axis[2].min);
 	bounds.extend(pmin);
 	bounds.extend(pmax);
 	setValue("bounds", bounds);
 
 	//create texture
-	m_tex = new FLIVR::Texture();
+	m_tex = new flvr::Texture();
 	m_tex->set_use_priority(false);
 	m_tex->set_brick_size(brick_size);
 	m_tex->build(nv, 0, 0, 256, 0, 0);
@@ -1364,17 +1346,17 @@ void VolumeData::AddEmptyData(int bits,
 
 	//clipping planes
 	//this needs to be made consistent in the future
-	FLTYPE::PlaneSet planeset;
+	fluo::PlaneSet planeset;
 	getValue("clip planes", planeset);
-	vector<FLIVR::Plane*> planelist(0);
+	vector<fluo::Plane*> planelist(0);
 	for (int i = 0; i < planeset.GetSize(); ++i)
 	{
-		FLIVR::Plane* plane = new FLIVR::Plane(planeset.Get(0));
+		fluo::Plane* plane = new fluo::Plane(planeset.Get(0));
 		planelist.push_back(plane);
 	}
 
 	//create volume renderer
-	m_vr = new FLIVR::VolumeRenderer(m_tex, planelist, true);
+	m_vr = new flvr::VolumeRenderer(m_tex, planelist, true);
 	double sample_rate;
 	getValue("sample rate", sample_rate);
 	m_vr->set_sampling_rate(sample_rate);
@@ -1647,7 +1629,7 @@ bool VolumeData::SearchLabel(unsigned int label)
 	return false;
 }
 
-double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
+double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	long bits;
@@ -1661,7 +1643,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
 	if (multires)
 	{
 		if (!b || !b->isLoaded()) return 0.0;
-		FLIVR::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
 		data_data = b->tex_data_brk(0, finfo);
 		if (!data_data) return 0.0;
 		//bits = b->nb(0) * 8;
@@ -1704,7 +1686,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b)
 	return 0.0;
 }
 
-double VolumeData::GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b)
+double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	long bits;
@@ -1716,7 +1698,7 @@ double VolumeData::GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b)
 	if (multires)
 	{
 		if (!b || !b->isLoaded()) return 0.0;
-		FLIVR::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
 		data_data = b->tex_data_brk(0, finfo);
 		if (!data_data) return 0.0;
 		//bits = b->nb(0) * 8;
@@ -1790,9 +1772,9 @@ double VolumeData::GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b)
 				(soft_thresh - new_value + hi_thresh) / soft_thresh : 1.0))
 				*new_value;
 			new_value *= (extract_boundary > 0.0 ?
-				FLTYPE::Clamp(gm / extract_boundary, 0.0,
+				fluo::Clamp(gm / extract_boundary, 0.0,
 					1.0 + extract_boundary*10.0) : 1.0);
-			new_value = pow(FLTYPE::Clamp(new_value / saturation,
+			new_value = pow(fluo::Clamp(new_value / saturation,
 				gamma<1.0 ? -(gamma - 1.0)*0.00001 : 0.0,
 				gamma>1.0 ? 0.9999 : 1.0), gamma);
 			new_value *= alpha;
@@ -1835,9 +1817,9 @@ double VolumeData::GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b)
 				(soft_thresh - new_value + hi_thresh) / soft_thresh : 1.0))
 				*new_value;
 			new_value *= (extract_boundary > 0.0 ?
-				FLTYPE::Clamp(gm / extract_boundary, 0.0,
+				fluo::Clamp(gm / extract_boundary, 0.0,
 					1.0 + extract_boundary*10.0) : 1.0);
-			new_value = pow(FLTYPE::Clamp(new_value / saturation,
+			new_value = pow(fluo::Clamp(new_value / saturation,
 				gamma<1.0 ? -(gamma - 1.0)*0.00001 : 0.0,
 				gamma>1.0 ? 0.9999 : 1.0), gamma);
 			new_value *= alpha;
@@ -1895,7 +1877,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 
 			//clipping planes
 			//vector<Plane*> *planes = m_vr->get_planes();
-			FLTYPE::PlaneSet planeset;
+			fluo::PlaneSet planeset;
 			getValue("clip planes", planeset);
 
 			Nrrd* baked_data = nrrdNew();
@@ -1918,7 +1900,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 						{
 							int index = nx*ny*k + nx*j + i;
 							bool clipped = false;
-							FLTYPE::Point p(double(i) / double(nx),
+							fluo::Point p(double(i) / double(nx),
 								double(j) / double(ny),
 								double(k) / double(nz));
 							for (int pi = 0; pi < planeset.GetSize(); ++pi)
@@ -1958,7 +1940,7 @@ void VolumeData::SaveData(std::wstring &filename, int mode, bool bake, bool comp
 						{
 							int index = nx*ny*k + nx*j + i;
 							bool clipped = false;
-							FLTYPE::Point p(double(i) / double(nx),
+							fluo::Point p(double(i) / double(nx),
 								double(j) / double(ny),
 								double(k) / double(nz));
 							for (int pi = 0; pi < 6; ++pi)
@@ -2182,13 +2164,13 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 }
 
 //volumerenderer
-FLIVR::VolumeRenderer *VolumeData::GetRenderer()
+flvr::VolumeRenderer *VolumeData::GetRenderer()
 {
 	return m_vr;
 }
 
 //texture
-FLIVR::Texture* VolumeData::GetTexture()
+flvr::Texture* VolumeData::GetTexture()
 {
 	return m_tex;
 }
@@ -2287,9 +2269,9 @@ void VolumeData::Calculate(int type, VolumeData *vd_a, VolumeData *vd_b)
 	}
 }
 
-FLTYPE::Color VolumeData::GetColorFromColormap(double value)
+fluo::Color VolumeData::GetColorFromColormap(double value)
 {
-	FLTYPE::Color color;
+	fluo::Color color;
 	long type;
 	getValue("colormap type", type);
 	double low, high;
@@ -2301,39 +2283,39 @@ FLTYPE::Color VolumeData::GetColorFromColormap(double value)
 	{
 	case 0:
 	default:
-		color.r(FLTYPE::Clamp(4.0*v - 2.0, 0.0, 1.0));
-		color.g(FLTYPE::Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
-		color.b(FLTYPE::Clamp(-4.0*v + 2.0, 0.0, 1.0));
+		color.r(fluo::Clamp(4.0*v - 2.0, 0.0, 1.0));
+		color.g(fluo::Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
+		color.b(fluo::Clamp(-4.0*v + 2.0, 0.0, 1.0));
 		break;
 	case 1:
-		color.r(FLTYPE::Clamp(-4.0*v + 2.0, 0.0, 1.0));
-		color.g(FLTYPE::Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
-		color.b(FLTYPE::Clamp(4.0*v - 2.0, 0.0, 1.0));
+		color.r(fluo::Clamp(-4.0*v + 2.0, 0.0, 1.0));
+		color.g(fluo::Clamp(v<0.5 ? 4.0*v : -4.0*v + 4.0, 0.0, 1.0));
+		color.b(fluo::Clamp(4.0*v - 2.0, 0.0, 1.0));
 		break;
 	case 2:
-		color.r(FLTYPE::Clamp(2.0*v, 0.0, 1.0));
-		color.g(FLTYPE::Clamp(4.0*v - 2.0, 0.0, 1.0));
-		color.b(FLTYPE::Clamp(4.0*v - 3.0, 0.0, 1.0));
+		color.r(fluo::Clamp(2.0*v, 0.0, 1.0));
+		color.g(fluo::Clamp(4.0*v - 2.0, 0.0, 1.0));
+		color.b(fluo::Clamp(4.0*v - 3.0, 0.0, 1.0));
 		break;
 	case 3:
-		color.r(FLTYPE::Clamp(v, 0.0, 1.0));
-		color.g(FLTYPE::Clamp(1.0 - v, 0.0, 1.0));
+		color.r(fluo::Clamp(v, 0.0, 1.0));
+		color.g(fluo::Clamp(1.0 - v, 0.0, 1.0));
 		color.b(1.0);
 		break;
 	case 4:
-		color.r(FLTYPE::Clamp(v<0.5 ? v*0.9 + 0.25 : 0.7, 0.0, 1.0));
-		color.g(FLTYPE::Clamp(v<0.5 ? v*0.8 + 0.3 : (1.0 - v)*1.4, 0.0, 1.0));
-		color.b(FLTYPE::Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
+		color.r(fluo::Clamp(v<0.5 ? v*0.9 + 0.25 : 0.7, 0.0, 1.0));
+		color.g(fluo::Clamp(v<0.5 ? v*0.8 + 0.3 : (1.0 - v)*1.4, 0.0, 1.0));
+		color.b(fluo::Clamp(v<0.5 ? v*(-0.1) + 0.75 : (1.0 - v)*1.1 + 0.15, 0.0, 1.0));
 		break;
 	case 5:
-		color.r(FLTYPE::Clamp(v, 0.0, 1.0));
-		color.g(FLTYPE::Clamp(v, 0.0, 1.0));
-		color.b(FLTYPE::Clamp(v, 0.0, 1.0));
+		color.r(fluo::Clamp(v, 0.0, 1.0));
+		color.g(fluo::Clamp(v, 0.0, 1.0));
+		color.b(fluo::Clamp(v, 0.0, 1.0));
 		break;
 	case 6:
-		color.r(1.0 - FLTYPE::Clamp(v, 0.0, 1.0));
-		color.g(1.0 - FLTYPE::Clamp(v, 0.0, 1.0));
-		color.b(1.0 - FLTYPE::Clamp(v, 0.0, 1.0));
+		color.r(1.0 - fluo::Clamp(v, 0.0, 1.0));
+		color.g(1.0 - fluo::Clamp(v, 0.0, 1.0));
+		color.b(1.0 - fluo::Clamp(v, 0.0, 1.0));
 		break;
 	}
 	return color;
@@ -2375,8 +2357,7 @@ void VolumeData::SetShuffledID(unsigned int* val)
 	unsigned int x, y, z;
 	unsigned int res;
 	unsigned int len = 0;
-    //unsigned int r = FLTYPE::Max(resx, FLTYPE::Max(resy, resz));
-    unsigned int r = (std::max)(resx, (std::max)(resy,resz)); // is there a reason not to do this?
+    unsigned int r = fluo::Max(resx, fluo::Max(resy, resz));
 	while (r > 0)
 	{
 		r /= 2;
@@ -2386,9 +2367,9 @@ void VolumeData::SetShuffledID(unsigned int* val)
 	for (int j = 0; j<resy; j++)
 	for (int k = 0; k<resz; k++)
 	{
-		x = FLTYPE::reverse_bit(i, len);
-		y = FLTYPE::reverse_bit(j, len);
-		z = FLTYPE::reverse_bit(k, len);
+		x = fluo::reverse_bit(i, len);
+		y = fluo::reverse_bit(j, len);
+		z = fluo::reverse_bit(k, len);
 		res = 0;
 		for (unsigned int ii = 0; ii<len; ii++)
 		{

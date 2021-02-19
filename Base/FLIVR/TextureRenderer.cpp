@@ -35,12 +35,12 @@
 #include <FLIVR/VolCalShader.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include <Types/Color.h>
-#include <Types/Utils.h>
+#include <Types/Color.hpp>
+#include <Types/Utils.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
-#include "compatibility.h"
-#include <wx/utils.h>
+#include <utilities/compatibility.h>
+//#include <wx/utils.h>
 
 using namespace std;
 

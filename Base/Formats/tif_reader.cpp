@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "tif_reader.hpp"
 #include <Utilities/compatibility.h>
+#include <boost/filesystem/path.hpp>
 
 TIFReader::TIFReader()
 {

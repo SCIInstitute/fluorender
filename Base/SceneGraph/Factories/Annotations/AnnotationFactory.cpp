@@ -51,7 +51,7 @@ void AnnotationFactory::createDefault()
 
 		//add default values here
 		ad->addValue("volume", (Referenced*)0);
-		ad->addValue("transform", FLTYPE::Transform());
+		ad->addValue("transform", fluo::Transform());
 		ad->addValue("display", bool(true));
 		ad->addValue("memo", std::string());
 		ad->addValue("memo ro", bool(true));//memo is read only

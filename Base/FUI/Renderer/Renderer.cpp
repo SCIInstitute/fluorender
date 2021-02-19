@@ -49,8 +49,8 @@ Renderer::~Renderer()
 
 void Renderer::setupInputs()
 {
-	addValue("model view matrix", FLTYPE::Transform());
-	addValue("projection matrix", FLTYPE::Transform());
+	addValue("model view matrix", fluo::Transform());
+	addValue("projection matrix", fluo::Transform());
 	inputs_.insert("model view matrix");
 	inputs_.insert("projection matrix");
 }

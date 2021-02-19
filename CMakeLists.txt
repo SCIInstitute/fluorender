@@ -96,6 +96,7 @@ add_definitions(${Qt5Widgets_DEFINITIONS})
 add_definitions(${Qt5OpenGL_DEFINITIONS})
 add_definitions(${Qt5Core_DEFINITIONS})
 add_definitions(${Qt5Gui_DEFINITIONS})
+add_definitions(-DNOMINMAX)
 
 # This will look for the Superbuild
 Include(${Superbuild})

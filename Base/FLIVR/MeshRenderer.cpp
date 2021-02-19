@@ -27,8 +27,8 @@
 //  
 
 #include "MeshRenderer.h"
-#include <VertexArray.h>
-#include <TextureRenderer.h>
+#include "TextureRenderer.h"
+#include "VertexArray.h"
 #include <iostream>
 #include <vector>
 #include <glm/gtc/type_ptr.hpp>

@@ -356,18 +356,18 @@ namespace fluo
 	bool addValue(const std::string &name, const std::string &value);
 	bool addValue(const std::string &name, const std::wstring &value);
 	//FluoRender's special types
-	bool addValue(const std::string &name, const FLTYPE::Point &value);
-	bool addValue(const std::string &name, const FLTYPE::Vector &value);
-	bool addValue(const std::string &name, const FLTYPE::BBox &value);
-	bool addValue(const std::string &name, const FLTYPE::HSVColor &value);
-	bool addValue(const std::string &name, const FLTYPE::Color &value);
-	bool addValue(const std::string &name, const FLTYPE::Plane &value);
-	bool addValue(const std::string &name, const FLTYPE::PlaneSet &value);
-	bool addValue(const std::string &name, const FLTYPE::Quaternion &value);
-	bool addValue(const std::string &name, const FLTYPE::Ray &value);
-	bool addValue(const std::string &name, const FLTYPE::Transform &value);
-	bool addValue(const std::string &name, const FLTYPE::GLfloat4 &value);
-	bool addValue(const std::string &name, const FLTYPE::GLint4 &value);
+	bool addValue(const std::string &name, const fluo::Point &value);
+	bool addValue(const std::string &name, const fluo::Vector &value);
+	bool addValue(const std::string &name, const fluo::BBox &value);
+	bool addValue(const std::string &name, const fluo::HSVColor &value);
+	bool addValue(const std::string &name, const fluo::Color &value);
+	bool addValue(const std::string &name, const fluo::Plane &value);
+	bool addValue(const std::string &name, const fluo::PlaneSet &value);
+	bool addValue(const std::string &name, const fluo::Quaternion &value);
+	bool addValue(const std::string &name, const fluo::Ray &value);
+	bool addValue(const std::string &name, const fluo::Transform &value);
+	bool addValue(const std::string &name, const fluo::Vector4f &value);
+	bool addValue(const std::string &name, const fluo::Vector4i &value);
 */
 	/** All the set value functions */
     /*
@@ -388,18 +388,18 @@ namespace fluo
     bool setValue(const std::string &name, const std::string &value, Event& event);
     bool setValue(const std::string &name, const std::wstring &value, Event& event);
 	//FluoRender's special types
-    bool setValue(const std::string &name, const FLTYPE::Point &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::Vector &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::BBox &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::HSVColor &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::Color &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::Plane &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::PlaneSet &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::Quaternion &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::Ray &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::Transform &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::GLfloat4 &value, Event& event);
-    bool setValue(const std::string &name, const FLTYPE::GLint4 &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Point &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Vector &value, Event& event);
+    bool setValue(const std::string &name, const fluo::BBox &value, Event& event);
+    bool setValue(const std::string &name, const fluo::HSVColor &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Color &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Plane &value, Event& event);
+    bool setValue(const std::string &name, const fluo::PlaneSet &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Quaternion &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Ray &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Transform &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Vector4f &value, Event& event);
+    bool setValue(const std::string &name, const fluo::Vector4i &value, Event& event);
 */
 	//toggle value for bool
     bool toggleValue(const std::string &name, bool &value)
@@ -428,18 +428,18 @@ namespace fluo
 	bool getValue(const std::string &name, std::string &value);
 	bool getValue(const std::string &name, std::wstring &value);
 	//FluoRender's special types
-	bool getValue(const std::string &name, FLTYPE::Point &value);
-	bool getValue(const std::string &name, FLTYPE::Vector &value);
-	bool getValue(const std::string &name, FLTYPE::BBox &value);
-	bool getValue(const std::string &name, FLTYPE::HSVColor &value);
-	bool getValue(const std::string &name, FLTYPE::Color &value);
-	bool getValue(const std::string &name, FLTYPE::Plane &value);
-	bool getValue(const std::string &name, FLTYPE::PlaneSet &value);
-	bool getValue(const std::string &name, FLTYPE::Quaternion &value);
-	bool getValue(const std::string &name, FLTYPE::Ray &value);
-	bool getValue(const std::string &name, FLTYPE::Transform &value);
-	bool getValue(const std::string &name, FLTYPE::GLfloat4 &value);
-	bool getValue(const std::string &name, FLTYPE::GLint4 &value);
+	bool getValue(const std::string &name, fluo::Point &value);
+	bool getValue(const std::string &name, fluo::Vector &value);
+	bool getValue(const std::string &name, fluo::BBox &value);
+	bool getValue(const std::string &name, fluo::HSVColor &value);
+	bool getValue(const std::string &name, fluo::Color &value);
+	bool getValue(const std::string &name, fluo::Plane &value);
+	bool getValue(const std::string &name, fluo::PlaneSet &value);
+	bool getValue(const std::string &name, fluo::Quaternion &value);
+	bool getValue(const std::string &name, fluo::Ray &value);
+	bool getValue(const std::string &name, fluo::Transform &value);
+	bool getValue(const std::string &name, fluo::Vector4f &value);
+	bool getValue(const std::string &name, fluo::Vector4i &value);
     */
 
 	//sync value only sets a state but doesn't change values when called
