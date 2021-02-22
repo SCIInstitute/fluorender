@@ -877,7 +877,7 @@ namespace flvr
 									rn_time = GET_TICK_COUNT();
 									elapsed = rn_time - st_time_;
 									t = up_time_ - elapsed;
-									if (t > 0) wxMilliSleep(t);
+									if (t > 0) SLEEP(t);
 								} while (elapsed <= up_time_);
 
 								if (brick->isLoaded())

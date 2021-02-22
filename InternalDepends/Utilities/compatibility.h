@@ -60,14 +60,19 @@ DEALINGS IN THE SOFTWARE.
 #include <direct.h>
 #include <codecvt>
 #include <QString>
+#include <io.h>
+#include <chrono>
+#include <thread>
 
 #define GETCURRENTDIR _getcwd
 
 #define FSEEK64     _fseeki64
 #define SSCANF    sscanf
 
-inline wchar_t GETSLASH() { return L'\\'; }
-inline wchar_t GETSLASHALT() { return L'/'; }
+inline char SLASH() { return '\\'; }
+inline char SLASH2() { return '/'; }
+inline wchar_t WSLASH() { return L'\\'; }
+inline wchar_t WSLASH2() { return L'/'; }
 
 inline std::wstring GET_SUFFIX(std::wstring &pathname)
 {
@@ -80,8 +85,8 @@ inline std::wstring GET_SUFFIX(std::wstring &pathname)
 
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
-	int64_t pos1 = pathname.find_last_of(GETSLASH());
-	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	int64_t pos1 = pathname.find_last_of(WSLASH());
+	int64_t pos2 = pathname.find_last_of(WSLASH2());
 	if (pos1 != std::wstring::npos &&
 		pos2 != std::wstring::npos)
 		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
@@ -95,8 +100,8 @@ inline std::wstring GET_NAME(std::wstring &pathname)
 
 inline std::wstring GET_PATH(std::wstring &pathname)
 {
-	int64_t pos1 = pathname.find_last_of(GETSLASH());
-	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	int64_t pos1 = pathname.find_last_of(WSLASH());
+	int64_t pos2 = pathname.find_last_of(WSLASH2());
 	if (pos1 != std::wstring::npos &&
 		pos2 != std::wstring::npos)
 		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
@@ -110,8 +115,8 @@ inline std::wstring GET_PATH(std::wstring &pathname)
 
 inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
 {
-	int64_t pos1 = pathname.find_last_of(GETSLASH());
-	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
+	int64_t pos1 = pathname.find_last_of(WSLASH());
+	int64_t pos2 = pathname.find_last_of(WSLASH2());
 	if (pos1 != std::wstring::npos &&
 		pos2 != std::wstring::npos)
 	{
@@ -297,6 +302,55 @@ inline void FIND_FILES(std::wstring m_path_name,
 	FindClose(hFind);
 }
 
+inline bool FILE_EXIST(const std::wstring &filename)
+{
+	return (_waccess(filename.c_str(), 0) != -1);
+}
+
+inline bool FILE_EXIST(const std::string &filename)
+{
+	return (_access(filename.c_str(), 0) != -1);
+}
+
+inline void SLEEP(int milliseconds)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
+template <typename TChar, typename TStringGetterFunc>
+std::basic_string<TChar> GetStringFromWindowsApi(TStringGetterFunc stringGetter, int initialSize = 0)
+{
+	if (initialSize <= 0)
+	{
+		initialSize = MAX_PATH;
+	}
+
+	std::basic_string<TChar> result(initialSize, 0);
+	for (;;)
+	{
+		auto length = stringGetter(&result[0], result.length());
+		if (length == 0)
+		{
+			return std::basic_string<TChar>();
+		}
+
+		if (length < result.length() - 1)
+		{
+			result.resize(length);
+			result.shrink_to_fit();
+			return result;
+		}
+
+		result.resize(result.length() * 2);
+	}
+}
+
+inline std::string GetExePath()
+{
+	return GetStringFromWindowsApi<char>([](char* buffer, int size)
+	{ return GetModuleFileName(NULL, buffer, size); });
+}
+
 #else // MAC OSX or LINUX
 
 #include <string>
@@ -315,7 +369,8 @@ inline void FIND_FILES(std::wstring m_path_name,
 
 #define FSEEK64     fseek
 
-inline wchar_t GETSLASH() { return L'/'; }
+inline char SLASH() { return '/'; }
+inline wchar_t WSLASH() { return L'/'; }
 
 inline std::wstring GET_SUFFIX(std::wstring &pathname)
 {
@@ -328,7 +383,7 @@ inline std::wstring GET_SUFFIX(std::wstring &pathname)
 
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
-	int64_t pos = pathname.find_last_of(GETSLASH());
+	int64_t pos = pathname.find_last_of(WSLASH());
 	if (pos != std::wstring::npos)
 		return pathname.substr(pos + 1);
 	else
@@ -337,7 +392,7 @@ inline std::wstring GET_NAME(std::wstring &pathname)
 
 inline std::wstring GET_PATH(std::wstring &pathname)
 {
-	int64_t pos = pathname.find_last_of(GETSLASH());
+	int64_t pos = pathname.find_last_of(WSLASH());
 	if (pos != std::wstring::npos)
 		return pathname.substr(0, pos + 1);
 	else
@@ -346,7 +401,7 @@ inline std::wstring GET_PATH(std::wstring &pathname)
 
 inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
 {
-	int64_t pos = pathname.find_last_of(GETSLASH());
+	int64_t pos = pathname.find_last_of(WSLASH());
 	if (pos != std::wstring::npos)
 	{
 		path = pathname.substr(0, pos + 1);

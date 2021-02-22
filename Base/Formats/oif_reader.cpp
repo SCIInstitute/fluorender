@@ -151,7 +151,7 @@ bool OIFReader::oif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 
 void OIFReader::ReadSingleOif()
 {
-	m_subdir_name = m_path_name + L".files" + GETSLASH();
+	m_subdir_name = m_path_name + L".files" + WSLASH();
 	std::vector<std::wstring> list;
 	int tmp;
 	FIND_FILES(m_subdir_name, L"*.tif", list, tmp);
@@ -165,12 +165,12 @@ void OIFReader::ReadSequenceOif()
 	for (int i = 0; i < (int)m_oif_info.size(); i++)
 	{
 		wstring path_name = m_oif_info[i].filename;
-		m_oif_info[i].subdirname = path_name + L".files" + GETSLASH();
+		m_oif_info[i].subdirname = path_name + L".files" + WSLASH();
 
 		if (path_name == m_path_name)
 			m_cur_time = i;
 
-		m_subdir_name = path_name + L".files" + GETSLASH();
+		m_subdir_name = path_name + L".files" + WSLASH();
 		std::vector<std::wstring> list;
 		FIND_FILES(m_subdir_name, L"*.tif", list, m_oif_t);
 		//read file sequence

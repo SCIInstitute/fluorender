@@ -1126,7 +1126,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 			planelist.push_back(plane);
 		}
 
-		m_vr = new flvr::VolumeRenderer(m_tex, planelist, true);
+		m_vr = new flvr::VolumeRenderer(m_tex, planelist);
 		fluo::BBox bounds;
         fluo::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
         fluo::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
@@ -1356,7 +1356,7 @@ void VolumeData::AddEmptyData(int bits,
 	}
 
 	//create volume renderer
-	m_vr = new flvr::VolumeRenderer(m_tex, planelist, true);
+	m_vr = new flvr::VolumeRenderer(m_tex, planelist);
 	double sample_rate;
 	getValue("sample rate", sample_rate);
 	m_vr->set_sampling_rate(sample_rate);
@@ -2205,7 +2205,7 @@ void VolumeData::Draw(bool ortho, bool adaptive,
 
 	if (m_vr)
 	{
-		m_vr->draw(test_wire, adaptive, interactive, ortho, zoom, stream_mode);
+		m_vr->draw(test_wire, adaptive, interactive, ortho, stream_mode);
 	}
 	if (draw_bounds)
 		DrawBounds();
@@ -2230,7 +2230,10 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 
 		m_vr->set_2d_mask(mask_id);
 		m_vr->set_2d_weight(weight1, weight2);
-		m_vr->draw_mask(type, paint_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, scl_translate, w2d, bins, ortho, estimate);
+		m_vr->draw_mask(type, paint_mode, hr_mode,
+			ini_thresh, gm_falloff, scl_falloff,
+			scl_translate, w2d, bins, order,
+			ortho, estimate);
 		if (brick_num > 1 &&
 			(order == 1 || order == 2))
 		{
@@ -2250,8 +2253,8 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 
 void VolumeData::DrawLabel(int type, int mode, double thresh, double gm_falloff)
 {
-	if (m_vr)
-		m_vr->draw_label(type, mode, thresh, gm_falloff);
+/*	if (m_vr)
+		m_vr->draw_label(type, mode, thresh, gm_falloff);*/
 }
 
 //calculation
@@ -2349,7 +2352,7 @@ void VolumeData::SetReverseID(unsigned int* val)
 
 void VolumeData::SetShuffledID(unsigned int* val)
 {
-	long resx, resy, resz;
+/*	long resx, resy, resz;
 	getValue("res x", resx);
 	getValue("res y", resy);
 	getValue("res z", resz);
@@ -2379,6 +2382,6 @@ void VolumeData::SetShuffledID(unsigned int* val)
 		}
 		unsigned int index = resx*resy*k + resx*j + i;
 		val[index] = resx*resy*resz - res;
-	}
+	}*/
 }
 

@@ -326,12 +326,12 @@ static char* glmDirName(const char* path)
 
 	i = (int)strlen(dir);
 #ifdef _WIN32
-	while (dir[i+1]!=GETSLASH() &&
-		   dir[i+1]!=GETSLASHALT() && i>0)
+	while (dir[i+1]!=WSLASH() &&
+		   dir[i+1]!=WSLASH2() && i>0)
 		i--;
 #endif
 #ifdef _DARWIN
-	while (dir[i + 1] != GETSLASH() && i>0)
+	while (dir[i + 1] != WSLASH() && i>0)
 		i--;
 #endif
 

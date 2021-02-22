@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #define JVMINITIALIZER_HPP
 
 #include <jni.h>
-#include <iostream>
 #include <Utilities/compatibility.h>
-//#include "VRenderFrame.h"
+#include <iostream>
+#include <regex>
 
 #ifdef __linux__
   #include <dlfcn.h>
@@ -70,6 +70,20 @@ class JVMInitializer {
 		static char getPathSeparator();
 		bool static create_JVM(std::vector<std::string> args);
 		bool static m_with_fiji;
+
+		static std::vector<std::regex> jstr1;
+		static std::vector<std::regex> jstr2;
+		static std::vector<std::regex> jstr3;
+
+		static bool match_jstr(const std::string &s, const std::vector<std::regex> &j)
+		{
+			for (auto i : j)
+			{
+				if (std::regex_match(s, i))
+					return true;
+			}
+			return false;
+		}
 };
 
 #endif //JVMINITIALIZER_HPP

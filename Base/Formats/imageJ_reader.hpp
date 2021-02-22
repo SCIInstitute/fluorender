@@ -48,7 +48,7 @@ using namespace std;
 class ImageJReader : public BaseReader
 {
 public:
-	ImageJReader();
+	ImageJReader(wstring &exepath);
 	~ImageJReader();
 
 	int GetType() { return READER_IMAGEJ_TYPE; }

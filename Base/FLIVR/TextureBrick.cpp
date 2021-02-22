@@ -561,7 +561,7 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, wxThread *th)
+	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, std::thread *th)
 	{
 		readsize = -1;
 
@@ -570,8 +570,7 @@ namespace flvr
 		if (finfo->isurl)
 		{
 			bool found_cache = false;
-			wxString wxcfname = finfo->cache_filename;
-			if (finfo->cached && wxFileExists(wxcfname))
+			if (finfo->cached && FILE_EXIST(finfo->cache_filename))
 				found_cache = true;
 			else
 			{
@@ -580,8 +579,7 @@ namespace flvr
 				auto itr = cache_table_.find(fcname);
 				if (itr != cache_table_.end())
 				{
-					wxcfname = itr->second;
-					if (wxFileExists(wxcfname))
+					if (FILE_EXIST(itr->second))
 						found_cache = true;
 				}
 
@@ -614,7 +612,7 @@ namespace flvr
 				curl_easy_setopt(s_curl_, CURLOPT_NOPROGRESS, 0L);
 
 				wxString expath = wxStandardPaths::Get().GetExecutablePath();
-				expath = expath.BeforeLast(GETSLASH(), NULL);
+				expath = expath.BeforeLast(WSLASH(), NULL);
 #ifdef _WIN32
 				wxString dft = expath + "\\vvd_cache";
 				wxString dft2 = wxStandardPaths::Get().GetUserDataDir() + "\\vvd_cache";

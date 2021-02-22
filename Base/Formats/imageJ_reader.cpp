@@ -27,9 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "imageJ_reader.hpp"
 #include <Utilities/compatibility.h>
-//#include <wx/stdpaths.h>
 
-ImageJReader::ImageJReader()
+ImageJReader::ImageJReader(wstring &exepath)
 {
 	m_pJVMInstance = 0;
 	m_imageJ_cls = 0;
@@ -62,9 +61,7 @@ ImageJReader::ImageJReader()
 	m_time_id = L"_T";
 	
 	//Geting absolute path to class file.
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	string imageJPath = exePath + GETSLASH() + "Java_Code" + GETSLASH() + "ImageJ_Reader";
+	//wstring imageJPath = exepath + WSLASH() + L"Java_Code" + WSLASH() + L"ImageJ_Reader";
 
 	//Java code to get the number of depth images.
 	m_pJVMInstance = JVMInitializer::getInstance();

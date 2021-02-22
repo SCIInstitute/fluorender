@@ -25,6 +25,16 @@ JVMInitializer::CreateJavaVM_t* JVMInitializer::m_createJVM_Ptr = nullptr;
 
 decltype(&JNIEnv::FindClass) m_FindClass_Ptr = nullptr;
 
+//filenames to match
+std::vector<std::regex> JVMInitializer::jstr1
+{
+	std::regex("(formats-)(.*)(\.jar)"),
+	std::regex("(turbojpeg-)(.*)(\.jar)"),
+	std::regex("(ome-xml)(.*)(\.jar)"),
+	std::regex("(ome-codecs)(.*)(\.jar)"),
+	std::regex("(ome-common)(.*)(\.jar)")
+};
+
 
 JVMInitializer* JVMInitializer::getInstance(std::vector<std::string> args){
 	if (m_pJVMInstance == nullptr){
@@ -42,10 +52,188 @@ char JVMInitializer::getPathSeparator(){
 #endif
 }
 
-bool JVMInitializer::create_JVM(std::vector<std::string> args){
-	wxString jvm_path;
-	wxString ij_path;
-	wxString bioformats_path;
+#ifdef _WIN32
+bool JVMInitializer::create_JVM(std::vector<std::string> args)
+{
+	if (args.empty())
+		return false;
+
+	std::string jvm_path(args[0]);//inp_settingDlg->getJVMPath();
+	std::string ij_path(args[1]);//inp_settingDlg->getIJPath();
+	std::string bioformats_path(args[2]);//inp_settingDlg->getBioformatsPath();
+	std::string jvm_ij_path = "";
+	std::string jvm_bioformats_path = "";
+	std::string name = ij_path;
+
+	if (FILE *file = fopen((name + SLASH() + "ij.jar").c_str(), "r"))
+	{
+		std::cout << "Inside here.";
+		m_with_fiji = false;
+		jvm_ij_path = name + SLASH() + "ij.jar";
+		jvm_bioformats_path = bioformats_path;
+		fclose(file);
+	}
+	else
+	{
+		std::string filename;
+		name = ij_path + SLASH() + "jars" + SLASH() + "bio-formats";
+		WIN32_FIND_DATA FindFileData;
+		HANDLE hFind = FindFirstFile(name.c_str(), &FindFileData);
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			m_with_fiji = true;
+			bool cont = true;
+			while (cont)
+			{
+				filename = FindFileData.cFileName;
+				if (match_jstr(filename, jstr1))
+				{
+					if (jvm_bioformats_path == "")
+						jvm_bioformats_path = name + SLASH() + filename;
+					else
+						jvm_bioformats_path += getPathSeparator() + name + SLASH() + filename;
+				}
+				cont = FindNextFile(hFind, &FindFileData);
+			}
+		}
+		else
+		{
+			m_with_fiji = false;
+			return false;
+		}
+		FindClose(hFind);
+
+		name = ij_path + SLASH() + "jars";
+		hFind = FindFirstFile(name.c_str(), &FindFileData);
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			bool cont = true;
+			while (cont)
+			{
+				filename = FindFileData.cFileName;
+				if (match_jstr(filename, jstr2))
+				{
+					if (jvm_bioformats_path == "")
+						jvm_bioformats_path = name + SLASH() + filename;
+					else
+						jvm_bioformats_path += getPathSeparator() + name + SLASH() + filename;
+				}
+				else if (std::regex_match(filename, std::regex("(ij-)(.*)(\.jar)")))
+					jvm_ij_path = name + SLASH() + filename;
+				cont = FindNextFile(hFind, &FindFileData);
+			}
+		}
+		FindClose(hFind);
+
+		name = ij_path + SLASH() + "plugins";
+		hFind = FindFirstFile(name.c_str(), &FindFileData);
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			bool cont = true;
+			while (cont)
+			{
+				filename = FindFileData.cFileName;
+				if (std::regex_match(filename, std::regex("(bio-formats_plugins-)(.*)(\.jar)")))
+					jvm_bioformats_path += getPathSeparator() + name + SLASH() + filename;
+				cont = FindNextFile(hFind, &FindFileData);
+			}
+		}
+		else
+		{
+			m_with_fiji = false;
+			return false;
+		}
+		FindClose(hFind);
+
+		//Checking for jvm path.
+		if (jvm_path.empty())
+		{
+			jvm_path = ij_path + SLASH() + "java" + SLASH() + "win64";
+			hFind = FindFirstFile(name.c_str(), &FindFileData);
+			if (hFind != INVALID_HANDLE_VALUE)
+			{
+				bool cont = true;
+				while (cont)
+				{
+					filename = FindFileData.cFileName;
+					if (std::regex_match(filename, std::regex("(.*)(jdk)(.*)")))
+					{
+						jvm_path = jvm_path + SLASH() + filename + SLASH();
+					}
+					cont = FindNextFile(hFind, &FindFileData);
+				}
+				jvm_path = jvm_path + "jre" + SLASH() + "bin" + SLASH() + "server" + SLASH() + "jvm.dll";
+			}
+		}
+	}
+
+	// The jvm lib is inside the fiji.app. So we actually need only the first path.
+
+	//Loading JVM library and methods.
+	m_jvm_dll = LoadLibrary(jvm_path.c_str());
+
+	if (m_jvm_dll == nullptr)
+	{
+		std::cout << "Error while opening jvm library." << std::endl;
+		return false;
+	}
+
+	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(m_jvm_dll, "JNI_CreateJavaVM");
+	if (m_createJVM_Ptr == nullptr)
+	{
+		std::cout << "Error while getting JNI_CreateJavaVM funciton address." << std::endl;
+		return false;
+	}
+
+	std::cout << "\n";
+	std::cout << jvm_path << "JVM\n";
+	std::cout << jvm_ij_path << "IJ\n";
+	std::cout << jvm_bioformats_path << "BIO\n";
+	std::cout << "\n";
+
+	JavaVMOption* options = new JavaVMOption[1];
+
+	//Geting absolute path to class file.
+	//wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	//exePath = wxPathOnly(exePath);
+	std::string exePath = GetExePath();
+	std::string imageJPath = "-Djava.class.path=" + exePath + SLASH() + "Java_Code" + SLASH() + getPathSeparator();
+	imageJPath.append(jvm_ij_path + getPathSeparator());
+	imageJPath.append(jvm_bioformats_path);
+
+	std::cout << imageJPath << std::endl;
+
+	options[0].optionString = const_cast<char*>(imageJPath.c_str());
+
+	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
+	m_VMargs.nOptions = 1;                          // number of options
+	m_VMargs.options = options;
+	m_VMargs.ignoreUnrecognized = false;     // invalid options make the JVM init fail
+
+	try {
+		jint rc = m_createJVM_Ptr(&m_pJvm, (void**)&m_pEnv, &m_VMargs);
+		delete[] options;
+		if (rc != JNI_OK) {
+			std::cout << "Error while calling JNI_CreteJavaVM." << std::endl;
+			return false;
+		}
+	}
+	catch (...) {
+		std::cout << "Excption while creating jvm. Nothing to worry about!";
+	}
+	std::cout << "JVM created successfully." << std::endl;
+	jint ver = m_pEnv->GetVersion();
+	std::cout << ((ver >> 16) & 0x0f) << "." << (ver & 0x0f) << std::endl;
+	std::cout.flush();
+	return true;
+}
+#else
+#endif
+/*bool JVMInitializer::create_JVM(std::vector<std::string> args)
+{
+	std::string jvm_path;
+	std::string ij_path;
+	std::string bioformats_path;
 	std::string jvm_ij_path = "";
 	std::string jvm_bioformats_path = "";
 
@@ -59,17 +247,17 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
         
 #ifdef _WIN32
 #else
-        name = name + GETSLASH() + "Contents" + GETSLASH() + "Java";
+        name = name + WSLASH() + "Contents" + WSLASH() + "Java";
 #endif
-		if(FILE *file = fopen((name + GETSLASH() +"ij.jar").c_str(), "r")) {
+		if(FILE *file = fopen((name + SLASH() +"ij.jar").c_str(), "r")) {
             std::cout << "Inside here.";
 			m_with_fiji = false;
-			jvm_ij_path = name + GETSLASH() +"ij.jar";
+			jvm_ij_path = name + SLASH() +"ij.jar";
 			jvm_bioformats_path = bioformats_path;
 			fclose(file);
 		}
 		else {
-			name = ij_path + GETSLASH() + std::string("jars") + GETSLASH() + std::string("bio-formats");
+			name = ij_path + SLASH() + "jars" + SLASH() + "bio-formats";
 			wxDir dir(name);
 			if (!dir.IsOpened()) {
 				m_with_fiji = false;
@@ -91,7 +279,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 					cont = dir.GetNext(&filename);
 				}
 
-				dir.Open(ij_path + GETSLASH() + std::string("jars"));
+				dir.Open(ij_path + WSLASH() + std::string("jars"));
 				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
 				while (cont) {
 					if (filename.Matches("commons-collections-*.jar") || filename.Matches("commons-lang-*.jar") ||
@@ -116,7 +304,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 					cont = dir.GetNext(&filename);
 				}
 
-				dir.Open(ij_path + GETSLASH() + std::string("plugins"));
+				dir.Open(ij_path + WSLASH() + std::string("plugins"));
 				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
 				while (cont)
 				{
@@ -127,23 +315,23 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
                 //Checking for jvm path.
                 if(wxIsEmpty(jvm_path)){
 #ifdef _DARWIN
-                    jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "macosx";
+                    jvm_path = ij_path + WSLASH() + "java" + WSLASH() + "macosx";
 #else
-					jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "win64";
+					jvm_path = ij_path + WSLASH() + "java" + WSLASH() + "win64";
 #endif
                     dir.Open(jvm_path);
                     cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
                     while (cont)
                     {
                         if (filename.Matches("*jdk*")){
-                            jvm_path = dir.GetNameWithSep() + filename + GETSLASH();
+                            jvm_path = dir.GetNameWithSep() + filename + WSLASH();
                         }
                         cont = dir.GetNext(&filename);
                     }
 #ifdef _DARWIN
-                    jvm_path = jvm_path + "jre" + GETSLASH() + "Contents" + GETSLASH() + "HOME" + GETSLASH() + "lib" + GETSLASH() + "server" + GETSLASH() + "libjvm.dylib";
+                    jvm_path = jvm_path + "jre" + WSLASH() + "Contents" + WSLASH() + "HOME" + WSLASH() + "lib" + WSLASH() + "server" + WSLASH() + "libjvm.dylib";
 #else
-					jvm_path = jvm_path + "jre" + GETSLASH() + "bin" + GETSLASH() + "server" + GETSLASH() + "jvm.dll";
+					jvm_path = jvm_path + "jre" + WSLASH() + "bin" + WSLASH() + "server" + WSLASH() + "jvm.dll";
 #endif
                 }
 			}
@@ -200,7 +388,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
-	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
+	string imageJPath = "-Djava.class.path=" + exePath + WSLASH() + "Java_Code" + WSLASH() + getPathSeparator();
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
     
@@ -229,7 +417,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
     cout << ((ver>>16)&0x0f) << "."<<(ver&0x0f) << endl;
     std::cout.flush();
 	return true;
-}
+}*/
 
 void JVMInitializer::destroyJVM() {
 	if (m_pJvm)
