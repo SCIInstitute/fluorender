@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "tif_reader.hpp"
 #include <Utilities/compatibility.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 TIFReader::TIFReader()
 {
@@ -1888,7 +1888,7 @@ void TIFReader::AnalyzeNamePattern(std::wstring &path_name)
 {
 	m_name_patterns.clear();
 
-	boost::filesystem::path p(path_name);
+	std::filesystem::path p(path_name);
 	std::wstring path = p.stem().wstring();
 	std::wstring name = p.filename().wstring();
 	if (name.empty())
@@ -2016,7 +2016,7 @@ std::wstring TIFReader::GetSearchString(int mode)
 
 int TIFReader::GetPatternNumber(std::wstring &path_name, int mode, bool count)
 {
-	boost::filesystem::path p(path_name);
+	std::filesystem::path p(path_name);
 	std::wstring name = p.filename().wstring();
 
 	int number = 0;
