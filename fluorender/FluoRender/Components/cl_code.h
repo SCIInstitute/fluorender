@@ -1416,7 +1416,11 @@ const char* str_cl_cleanup_3d = \
 "	for (int nj=-1; nj<2; ++nj)\n" \
 "	for (int nk=-1; nk<2; ++nk)\n" \
 "	{\n" \
-"		if ((k==0 && nk==-1) ||\n" \
+"		if ((i==0 && ni==-1) ||\n" \
+"			(i==nx-1 && ni==1) ||\n" \
+"			(j==0 && nj==-1) ||\n" \
+"			(j==ny-1 && nj==1) ||\n" \
+"			(k==0 && nk==-1) ||\n" \
 "			(k==nz-1 && nk==1))\n" \
 "			continue;\n" \
 "		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
@@ -1540,7 +1544,11 @@ const char* str_cl_cleanup_3d = \
 "	for (int nj=-1; nj<2; ++nj)\n" \
 "	for (int nk=-1; nk<2; ++nk)\n" \
 "	{\n" \
-"		if ((k==0 && nk==-1) ||\n" \
+"		if ((i==0 && ni==-1) ||\n" \
+"			(i==nx-1 && ni==1) ||\n" \
+"			(j==0 && nj==-1) ||\n" \
+"			(j==ny-1 && nj==1) ||\n" \
+"			(k==0 && nk==-1) ||\n" \
 "			(k==nz-1 && nk==1))\n" \
 "			continue;\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
