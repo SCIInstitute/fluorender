@@ -484,7 +484,7 @@ const char* str_cl_brainbow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_v)\n" \
+"		if (!(m & 0x80000000) && m > label_v)\n" \
 "			label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
@@ -543,7 +543,7 @@ const char* str_cl_brainbow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_v)\n" \
+"		if (!(m & 0x80000000) && m > label_v)\n" \
 "			label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
@@ -753,7 +753,7 @@ const char* str_cl_density_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_v)\n" \
+"		if (!(m & 0x80000000) && m > label_v)\n" \
 "			label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
@@ -828,7 +828,7 @@ const char* str_cl_density_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_v)\n" \
+"		if (!(m & 0x80000000) && m > label_v)\n" \
 "			label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
@@ -1101,7 +1101,7 @@ const char* str_cl_dist_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_v)\n" \
+"		if (!(m & 0x80000000) && m > label_v)\n" \
 "			label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
@@ -1164,7 +1164,7 @@ const char* str_cl_dist_grow_3d = \
 "			continue;\n" \
 "		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
 "		m = label[nb_index];\n" \
-"		if (m > label_v)\n" \
+"		if (!(m & 0x80000000) && m > label_v)\n" \
 "			label_v = m;\n" \
 "	}\n" \
 "	atomic_xchg(label+index, label_v);\n" \
