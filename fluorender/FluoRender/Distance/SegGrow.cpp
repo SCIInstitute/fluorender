@@ -752,88 +752,53 @@ void SegGrow::Compute()
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		//kernel0: init ordered
-		kernel_prog->setKernelArgTex3D(kernel_0, 0,
-			CL_MEM_READ_ONLY, mid);
+		kernel_prog->setKernelArgBegin(kernel_0);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		flvr::Argument arg_label =
-			kernel_prog->setKernelArgTex3DBuf(kernel_0, 1,
-			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
-		kernel_prog->setKernelArgConst(kernel_0, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_0, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_0, 4,
-			sizeof(unsigned int), (void*)(&nz));
+			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		//kernel1: grow reverse
-		arg_label.kernel_index = kernel_1;
-		arg_label.index = 0;
+		kernel_prog->setKernelArgBegin(kernel_1);
 		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_1, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_1, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_1, 3,
-			sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(kernel_1, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_1, 5,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_1, 6,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_1, 7,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		//kernel2: grow ordered
-		arg_label.kernel_index = kernel_2;
-		arg_label.index = 0;
+		kernel_prog->setKernelArgBegin(kernel_2);
 		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_2, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_2, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_2, 3,
-			sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(kernel_2, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_2, 5,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_2, 6,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_2, 7,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		//kernel3: count ids
-		arg_label.kernel_index = kernel_3;
-		arg_label.index = 0;
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(kernel_3, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_3, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_3, 3,
-			sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(kernel_3, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_3, 5,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_3, 6,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_3, 7,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_3, 8,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_3, 9,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgConst(kernel_3, 10,
-			sizeof(unsigned int), (void*)(&m_branches));
 		std::vector<unsigned int> count(gsize.gsxyz, 0);
 		unsigned int* pcount = count.data();
-		kernel_prog->setKernelArgBuf(kernel_3, 11,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*gsize.gsxyz, (void*)(pcount));
 		std::vector<unsigned int> ids(m_branches*gsize.gsxyz, 0);
 		unsigned int* pids = ids.data();
-		kernel_prog->setKernelArgBuf(kernel_3, 12,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*m_branches*gsize.gsxyz, (void*)(pids));
-		kernel_prog->setKernelArgLocal(kernel_3, 13, sizeof(unsigned int)*m_branches);
+		kernel_prog->setKernelArgBegin(kernel_3);
+		kernel_prog->setKernelArgument(arg_label);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_branches));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*gsize.gsxyz, (void*)(pcount));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*m_branches*gsize.gsxyz, (void*)(pids));
+		kernel_prog->setKernelArgLocal(sizeof(unsigned int)*m_branches);
 		
 		//first pass
 		kernel_prog->executeKernel(kernel_0, 3, global_size, local_size);
@@ -867,38 +832,23 @@ void SegGrow::Compute()
 			pids = ids.data();
 
 			//kernel4: connect ids
-			arg_label.kernel_index = kernel_4;
-			arg_label.index = 0;
-			kernel_prog->setKernelArgument(arg_label);
-			kernel_prog->setKernelArgConst(kernel_4, 1,
-				sizeof(unsigned int), (void*)(&nx));
-			kernel_prog->setKernelArgConst(kernel_4, 2,
-				sizeof(unsigned int), (void*)(&ny));
-			kernel_prog->setKernelArgConst(kernel_4, 3,
-				sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(kernel_4, 4,
-				sizeof(unsigned int), (void*)(&nz));
-			kernel_prog->setKernelArgConst(kernel_4, 5,
-				sizeof(unsigned int), (void*)(&gsize.ngx));
-			kernel_prog->setKernelArgConst(kernel_4, 6,
-				sizeof(unsigned int), (void*)(&gsize.ngy));
-			kernel_prog->setKernelArgConst(kernel_4, 7,
-				sizeof(unsigned int), (void*)(&gsize.ngz));
-			kernel_prog->setKernelArgConst(kernel_4, 8,
-				sizeof(unsigned int), (void*)(&gsize.gsxy));
-			kernel_prog->setKernelArgConst(kernel_4, 9,
-				sizeof(unsigned int), (void*)(&gsize.gsx));
-			kernel_prog->setKernelArgConst(kernel_4, 10,
-				sizeof(unsigned int), (void*)(&total));
-			kernel_prog->setKernelArgBuf(kernel_4, 11,
-				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*total, (void*)(pids));
 			std::vector<unsigned int> dids(total*gsize.gsxyz*6, 0);
 			unsigned int *pdids = dids.data();
-			kernel_prog->setKernelArgBuf(kernel_4, 12,
-				CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*total*gsize.gsxyz*6, (void*)(pdids));
-			kernel_prog->setKernelArgLocal(kernel_4, 13, sizeof(unsigned int)*total*6);
+			kernel_prog->setKernelArgBegin(kernel_4);
+			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&total));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total, (void*)(pids));
+			kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz*6, (void*)(pdids));
+			kernel_prog->setKernelArgLocal(sizeof(unsigned int)*total*6);
 
 			//execute
 			kernel_prog->executeKernel(kernel_4, 3, global_size2, local_size);
@@ -969,29 +919,18 @@ void SegGrow::Compute()
 			pids = ids.data();
 			if (!merge_id.empty())
 			{
-				arg_label.kernel_index = kernel_5;
-				arg_label.index = 0;
-				kernel_prog->setKernelArgument(arg_label);
-				kernel_prog->setKernelArgConst(kernel_5, 1,
-					sizeof(unsigned int), (void*)(&nx));
-				kernel_prog->setKernelArgConst(kernel_5, 2,
-					sizeof(unsigned int), (void*)(&ny));
-				kernel_prog->setKernelArgConst(kernel_5, 3,
-					sizeof(unsigned int), (void*)(&nxy));
-				kernel_prog->setKernelArgConst(kernel_5, 4,
-					sizeof(unsigned int), (void*)(&nz));
-				kernel_prog->setKernelArgConst(kernel_5, 5,
-					sizeof(unsigned int), (void*)(&gsize.ngx));
-				kernel_prog->setKernelArgConst(kernel_5, 6,
-					sizeof(unsigned int), (void*)(&gsize.ngy));
-				kernel_prog->setKernelArgConst(kernel_5, 7,
-					sizeof(unsigned int), (void*)(&gsize.ngz));
 				unsigned int nmid = merge_id.size() / 2;
-				kernel_prog->setKernelArgConst(kernel_5, 8,
-					sizeof(unsigned int), (void*)(&nmid));
-				kernel_prog->setKernelArgBuf(kernel_5, 9,
-					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-					sizeof(unsigned int)*nmid*2, (void*)(merge_id.data()));
+				kernel_prog->setKernelArgBegin(kernel_5);
+				kernel_prog->setKernelArgument(arg_label);
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+				kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nmid));
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*nmid*2, (void*)(merge_id.data()));
 
 				//execute
 				kernel_prog->executeKernel(kernel_5, 3, global_size2, local_size);
@@ -999,50 +938,31 @@ void SegGrow::Compute()
 
 			//set
 			//kernel6: get shape
-			arg_label.kernel_index = kernel_6;
-			arg_label.index = 0;
-			kernel_prog->setKernelArgument(arg_label);
-			kernel_prog->setKernelArgConst(kernel_6, 1,
-				sizeof(unsigned int), (void*)(&nx));
-			kernel_prog->setKernelArgConst(kernel_6, 2,
-				sizeof(unsigned int), (void*)(&ny));
-			kernel_prog->setKernelArgConst(kernel_6, 3,
-				sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(kernel_6, 4,
-				sizeof(unsigned int), (void*)(&nz));
-			kernel_prog->setKernelArgConst(kernel_6, 5,
-				sizeof(unsigned int), (void*)(&gsize.ngx));
-			kernel_prog->setKernelArgConst(kernel_6, 6,
-				sizeof(unsigned int), (void*)(&gsize.ngy));
-			kernel_prog->setKernelArgConst(kernel_6, 7,
-				sizeof(unsigned int), (void*)(&gsize.ngz));
-			kernel_prog->setKernelArgConst(kernel_6, 8,
-				sizeof(unsigned int), (void*)(&gsize.gsxy));
-			kernel_prog->setKernelArgConst(kernel_6, 9,
-				sizeof(unsigned int), (void*)(&gsize.gsx));
-			kernel_prog->setKernelArgConst(kernel_6, 10,
-				sizeof(unsigned int), (void*)(&total));
-			kernel_prog->setKernelArgBuf(kernel_6, 11,
-				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*total, (void*)(pids));
 			std::vector<unsigned int> cids(total*gsize.gsxyz*3, 0);
 			unsigned int *pcids = cids.data();
-			kernel_prog->setKernelArgBuf(kernel_6, 12,
-				CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*total*gsize.gsxyz*3, (void*)(pcids));
 			std::vector<unsigned int> sum(total*gsize.gsxyz, 0);
 			unsigned int *psum = sum.data();
-			kernel_prog->setKernelArgBuf(kernel_6, 13,
-				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*total*gsize.gsxyz, (void*)(psum));
 			std::vector<float> csum(total*gsize.gsxyz * 3, 0.0f);
 			float* pcsum = csum.data();
-			kernel_prog->setKernelArgBuf(kernel_6, 14,
-				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-				sizeof(float)*total*gsize.gsxyz * 3, (void*)(pcsum));
-			kernel_prog->setKernelArgLocal(kernel_6, 15, sizeof(unsigned int)*total*3);
-			kernel_prog->setKernelArgLocal(kernel_6, 16, sizeof(unsigned int)*total);
-			kernel_prog->setKernelArgLocal(kernel_6, 17, sizeof(float)*total * 3);
+			kernel_prog->setKernelArgBegin(kernel_6);
+			kernel_prog->setKernelArgument(arg_label);
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&total));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total, (void*)(pids));
+			kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz*3, (void*)(pcids));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz, (void*)(psum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*total*gsize.gsxyz * 3, (void*)(pcsum));
+			kernel_prog->setKernelArgLocal(sizeof(unsigned int)*total*3);
+			kernel_prog->setKernelArgLocal(sizeof(unsigned int)*total);
+			kernel_prog->setKernelArgLocal(sizeof(float)*total * 3);
 
 			//execute
 			kernel_prog->executeKernel(kernel_6, 3, global_size2, local_size);
@@ -1133,9 +1053,9 @@ void SegGrow::Compute()
 			GLint lid = m_vd->GetVR()->load_brick_label(b);
 			unsigned bid;
 			bid = b->get_id();
+			kernel_prog->setKernelArgBegin(kernel_0);
 			flvr::Argument arg_tex =
-				kernel_prog->setKernelArgTex3D(kernel_0, 0,
-					CL_MEM_READ_ONLY, lid);
+				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, lid);
 
 			flvr::TextureBrick* nb;
 			unsigned int nid;
@@ -1239,15 +1159,12 @@ void SegGrow::Compute()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 
 		//finalize
+		kernel_prog->setKernelArgBegin(kernel_7);
 		flvr::Argument arg_label =
-			kernel_prog->setKernelArgTex3DBuf(kernel_7, 0,
-			CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
-		kernel_prog->setKernelArgConst(kernel_7, 1,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_7, 2,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_7, 3,
-			sizeof(unsigned int), (void*)(&nz));
+			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 
 		//execute
 		kernel_prog->executeKernel(kernel_7, 3, global_size, local_size);
@@ -1390,28 +1307,19 @@ void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 
 	nlid = m_vd->GetVR()->load_brick_label(nb);
 	//set
-	arg_tex.kernel_index = kernel;
-	arg_tex.index = 0;
-	kernel_prog->setKernelArgument(arg_tex);
-	kernel_prog->setKernelArgTex3D(kernel, 1,
-		CL_MEM_READ_ONLY, nlid);
 	//unsigned int d0 = nx - 1;
 	//unsigned int d1 = 0;
-	kernel_prog->setKernelArgConst(kernel, 2,
-		sizeof(unsigned int), (void*)(&d0));
-	kernel_prog->setKernelArgConst(kernel, 3,
-		sizeof(unsigned int), (void*)(&d1));
 	unsigned int idnum = ids.size();
-	kernel_prog->setKernelArgConst(kernel, 4,
-		sizeof(unsigned int), (void*)(&idnum));
-	kernel_prog->setKernelArgBuf(kernel, 5,
-		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-		sizeof(unsigned int)*idnum, (void*)(ids.data()));
 	std::vector<unsigned int> cids(idnum * 3, 0);
 	unsigned int* pcids = cids.data();
-	kernel_prog->setKernelArgBuf(kernel, 6,
-		CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-		sizeof(unsigned int)*idnum * 3, (void*)(pcids));
+	kernel_prog->setKernelArgBegin(kernel);
+	kernel_prog->setKernelArgument(arg_tex);
+	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, nlid);
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&d0));
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&d1));
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idnum));
+	kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*idnum, (void*)(ids.data()));
+	kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*idnum * 3, (void*)(pcids));
 
 	//execute
 	global_size[0] = n0; global_size[1] = n1;

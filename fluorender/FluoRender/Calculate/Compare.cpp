@@ -702,33 +702,21 @@ void ChannelCompare::Product()
 		//set
 		//unsigned int count = 0;
 		float *sum = new float[gsize.gsxyz];
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, tid1);
-		kernel_prog->setKernelArgTex3D(kernel_index, 1,
-			CL_MEM_READ_ONLY, tid2);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(float), (void*)(&ss1));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(float), (void*)(&ss2));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 9,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsize.gsxyz), (void*)(sum));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss1));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss2));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
-			kernel_prog->setKernelArgTex3D(kernel_index, 10,
-				CL_MEM_READ_ONLY, mid1);
-			kernel_prog->setKernelArgTex3D(kernel_index, 11,
-				CL_MEM_READ_ONLY, mid2);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid2);
 		}
 
 		//execute
@@ -823,33 +811,21 @@ void ChannelCompare::MinValue()
 		//set
 		//unsigned int count = 0;
 		float *sum = new float[gsize.gsxyz];
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, tid1);
-		kernel_prog->setKernelArgTex3D(kernel_index, 1,
-			CL_MEM_READ_ONLY, tid2);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(float), (void*)(&ss1));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(float), (void*)(&ss2));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 9,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsize.gsxyz), (void*)(sum));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss1));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss2));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
-			kernel_prog->setKernelArgTex3D(kernel_index, 10,
-				CL_MEM_READ_ONLY, mid1);
-			kernel_prog->setKernelArgTex3D(kernel_index, 11,
-				CL_MEM_READ_ONLY, mid2);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid2);
 		}
 
 		//execute
@@ -944,36 +920,23 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		//set
 		//unsigned int count = 0;
 		float *sum = new float[gsize.gsxyz];
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, tid1);
-		kernel_prog->setKernelArgTex3D(kernel_index, 1,
-			CL_MEM_READ_ONLY, tid2);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(float), (void*)(&ss1));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(float), (void*)(&ss2));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 9,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		cl_float4 th = {th1, th2, th3, th4};
-		kernel_prog->setKernelArgConst(kernel_index, 10,
-			sizeof(cl_float4), (void*)(&th));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss1));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss2));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&th));
 		if (m_use_mask)
 		{
-			kernel_prog->setKernelArgTex3D(kernel_index, 11,
-				CL_MEM_READ_ONLY, mid1);
-			kernel_prog->setKernelArgTex3D(kernel_index, 12,
-				CL_MEM_READ_ONLY, mid2);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid2);
 		}
 
 		//execute
@@ -1042,27 +1005,19 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		//unsigned int count = 0;
 		float* sum = 0;
 		unsigned int nxyz = nx * ny * nz;
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, tid1);
-		kernel_prog->setKernelArgTex3D(kernel_index, 1,
-			CL_MEM_READ_ONLY, tid2);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(float), (void*)(&ss1));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(float), (void*)(&ss2));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid1);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid2);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss1));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss2));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		if (!avg.buffer)
 		{
 			sum = new float[nxyz];
 			std::memset(sum, 0, sizeof sum);
-			kernel_prog->setKernelArgBuf(kernel_index, 7,
-				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-				sizeof(float)*(nxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(nxyz), (void*)(sum));
 		}
 		else
 		{

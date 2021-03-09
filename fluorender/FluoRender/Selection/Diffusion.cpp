@@ -320,29 +320,6 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned char)*nx*ny*nz, val);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(cl_float4), (void*)(p));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(cl_float4), (void*)(p + 1));
-		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(cl_float4), (void*)(p + 2));
-		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(cl_float4), (void*)(p + 3));
-		kernel_prog->setKernelArgConst(kernel_index, 9,
-			sizeof(cl_float4), (void*)(p + 4));
-		kernel_prog->setKernelArgConst(kernel_index, 10,
-			sizeof(cl_float4), (void*)(p + 5));
 		//brick matrix
 		fluo::BBox bbx = b->dbox();
 		cl_float3 scl = {
@@ -353,19 +330,26 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z()) };
-		kernel_prog->setKernelArgConst(kernel_index, 11,
-			sizeof(cl_float3), (void*)(&scl));
-		kernel_prog->setKernelArgConst(kernel_index, 12,
-			sizeof(cl_float3), (void*)(&trl));
 		cl_float3 ipp = { float(ip.x()), float(ip.y()), float(ip.z()) };
-		kernel_prog->setKernelArgConst(kernel_index, 13,
-			sizeof(cl_float3), (void*)(&ipp));
 		float thresh = float(ini_thresh);
-		kernel_prog->setKernelArgConst(kernel_index, 14,
-			sizeof(float), (void*)(&thresh));
 		unsigned char init_val = 255;
-		kernel_prog->setKernelArgConst(kernel_index, 15,
-			sizeof(unsigned char), (void*)(&init_val));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 1));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 2));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 3));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 4));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 5));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&ipp));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&thresh));
+		kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&init_val));
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
@@ -446,29 +430,6 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(kernel_index, 1,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned char)*nx*ny*nz, val);
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(cl_float4), (void*)(p));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(cl_float4), (void*)(p + 1));
-		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(cl_float4), (void*)(p + 2));
-		kernel_prog->setKernelArgConst(kernel_index, 8,
-			sizeof(cl_float4), (void*)(p + 3));
-		kernel_prog->setKernelArgConst(kernel_index, 9,
-			sizeof(cl_float4), (void*)(p + 4));
-		kernel_prog->setKernelArgConst(kernel_index, 10,
-			sizeof(cl_float4), (void*)(p + 5));
 		//brick matrix
 		fluo::BBox bbx = b->dbox();
 		cl_float3 scl = {
@@ -479,19 +440,26 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z()) };
-		kernel_prog->setKernelArgConst(kernel_index, 11,
-			sizeof(cl_float3), (void*)(&scl));
-		kernel_prog->setKernelArgConst(kernel_index, 12,
-			sizeof(cl_float3), (void*)(&trl));
 		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, 1.0, lo_thresh, hi_thresh };
-		kernel_prog->setKernelArgConst(kernel_index, 13,
-			sizeof(cl_float4), (void*)(&loc2));
 		cl_float4 loc3 = { 1.0f / gamma3d, gm_thresh, offset, sw };
-		kernel_prog->setKernelArgConst(kernel_index, 14,
-			sizeof(cl_float4), (void*)(&loc3));
 		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
-		kernel_prog->setKernelArgConst(kernel_index, 15,
-			sizeof(cl_float4), (void*)(&loc7));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 1));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 2));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 3));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 4));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 5));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc2));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc3));
+		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc7));
 		//execute
 		for (int i = 0; i<iter; ++i)
 			kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);

@@ -126,44 +126,35 @@ void PaintBoxes::Compute()
 	size_t local_size[2] = { 1, 1 };
 
 	//set
-	kernel_prog->setKernelArgTex2D(kernel_index, 0,
-		CL_MEM_READ_ONLY, m_paint_tex);
-	flvr::Argument arg_boxes = kernel_prog->setKernelArgBuf(kernel_index, 1,
-		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-		sizeof(float)*num*6, boxes);
-	flvr::Argument arg_hits = kernel_prog->setKernelArgBuf(kernel_index, 2,
-		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-		sizeof(unsigned int)*num, hits);
-	kernel_prog->setKernelArgConst(kernel_index, 3,
-		sizeof(unsigned int), (void*)(&m_ptx));
-	kernel_prog->setKernelArgConst(kernel_index, 4,
-		sizeof(unsigned int), (void*)(&m_pty));
-	kernel_prog->setKernelArgConst(kernel_index, 5,
-		sizeof(unsigned int), (void*)(&num));
 	cl_float4 imat0 = { float(m_imat.get_mat_val(0, 0)),
 		float(m_imat.get_mat_val(1, 0)),
 		float(m_imat.get_mat_val(2, 0)),
 		float(m_imat.get_mat_val(3, 0)) };
-	kernel_prog->setKernelArgConst(kernel_index, 6,
-		sizeof(cl_float4), (void*)(&imat0));
 	cl_float4 imat1 = { float(m_imat.get_mat_val(0, 1)),
 		float(m_imat.get_mat_val(1, 1)),
 		float(m_imat.get_mat_val(2, 1)),
 		float(m_imat.get_mat_val(3, 1)) };
-	kernel_prog->setKernelArgConst(kernel_index, 7,
-		sizeof(cl_float4), (void*)(&imat1));
 	cl_float4 imat2 = { float(m_imat.get_mat_val(0, 2)),
 		float(m_imat.get_mat_val(1, 2)),
 		float(m_imat.get_mat_val(2, 2)),
 		float(m_imat.get_mat_val(3, 2)) };
-	kernel_prog->setKernelArgConst(kernel_index, 8,
-		sizeof(cl_float4), (void*)(&imat2));
 	cl_float4 imat3 = { float(m_imat.get_mat_val(0, 3)),
 		float(m_imat.get_mat_val(1, 3)),
 		float(m_imat.get_mat_val(2, 3)),
 		float(m_imat.get_mat_val(3, 3)) };
-	kernel_prog->setKernelArgConst(kernel_index, 9,
-		sizeof(cl_float4), (void*)(&imat3));
+	kernel_prog->setKernelArgBegin(kernel_index);
+	kernel_prog->setKernelArgTex2D(CL_MEM_READ_ONLY, m_paint_tex);
+	flvr::Argument arg_boxes =
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*num*6, boxes);
+	flvr::Argument arg_hits =
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*num, hits);
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_ptx));
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_pty));
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&num));
+	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat0));
+	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat1));
+	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat2));
+	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat3));
 
 	//execute
 	kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);

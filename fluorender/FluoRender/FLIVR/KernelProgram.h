@@ -102,22 +102,19 @@ namespace flvr
 		bool matchArgTex(Argument&, unsigned int&);//use texture id to match
 		bool matchArgAddr(Argument&, unsigned int&);//use data address to match
 		//set argument
+		void setKernelArgBegin(int kernel_idx, int arg_idx = 0)
+		{
+			kernel_idx_ = kernel_idx; arg_idx_ = arg_idx;
+		}
 		int setKernelArgument(Argument&);
-		void setKernelArgConst(int, int, size_t, void*);
-		void setKernelArgConst(std::string &name, int, size_t, void*);
-		Argument setKernelArgBuf(int, int, cl_mem_flags, size_t, void*);
-		Argument setKernelArgBuf(std::string &name, int, cl_mem_flags, size_t, void*);
-		Argument setKernelArgBufWrite(int, int, cl_mem_flags, size_t, void*);
-		Argument setKernelArgBufWrite(std::string &name, int, cl_mem_flags, size_t, void*);
-		Argument setKernelArgTex2D(int, int, cl_mem_flags, GLuint);
-		Argument setKernelArgTex2D(std::string &name, int, cl_mem_flags, GLuint);
-		Argument setKernelArgTex3D(int, int, cl_mem_flags, GLuint);
-		Argument setKernelArgTex3D(std::string &name, int, cl_mem_flags, GLuint);
-		Argument setKernelArgTex3DBuf(int, int, cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
-		Argument setKernelArgTex3DBuf(std::string &name, int, cl_mem_flags, GLuint, size_t, size_t*);
-		Argument setKernelArgImage(int, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
-		Argument setKernelArgImage(std::string &name, int, cl_mem_flags, cl_image_format, cl_image_desc, void*);
-		void setKernelArgLocal(int, int, size_t);
+		void setKernelArgConst(size_t, void*);
+		Argument setKernelArgBuf(cl_mem_flags, size_t, void*);
+		Argument setKernelArgBufWrite(cl_mem_flags, size_t, void*);
+		Argument setKernelArgTex2D(cl_mem_flags, GLuint);
+		Argument setKernelArgTex3D(cl_mem_flags, GLuint);
+		Argument setKernelArgTex3DBuf(cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
+		Argument setKernelArgImage(cl_mem_flags, cl_image_format, cl_image_desc, void*);
+		void setKernelArgLocal(size_t);
 
 		//read/write
 		void readBuffer(size_t size,
@@ -182,6 +179,9 @@ namespace flvr
 		std::vector<Kernel> kernels_;
 
 		std::string info_;
+
+		int kernel_idx_;
+		int arg_idx_;
 
 		//memory object to release
 		std::vector<Argument> arg_list_;

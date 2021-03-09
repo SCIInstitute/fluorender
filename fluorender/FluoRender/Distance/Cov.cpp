@@ -195,24 +195,15 @@ bool Cov::ComputeCenter()
 		//set
 		unsigned int* count = new unsigned int[gsize.gsxyz];
 		float *csum = new float[gsize.gsxyz * 3];
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgConst(kernel_index, 1,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(kernel_index, 6,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*(gsize.gsxyz), (void*)(count));
-		kernel_prog->setKernelArgBuf(kernel_index, 7,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsize.gsxyz * 3), (void*)(csum));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(count));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz * 3), (void*)(csum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);
@@ -284,26 +275,17 @@ bool Cov::ComputeCov()
 		//set
 		unsigned int* count = new unsigned int[gsize.gsxyz];
 		float *cov = new float[gsize.gsxyz * 6];
-		kernel_prog->setKernelArgTex3D(kernel_index, 0,
-			CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgConst(kernel_index, 1,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_index, 2,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_index, 3,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_index, 4,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_index, 5,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgConst(kernel_index, 6,
-			sizeof(cl_float3), (void*)(m_center));
 		float orig[3] = { float(b->ox()), float(b->oy()), float(b->oz()) };
-		kernel_prog->setKernelArgConst(kernel_index, 7,
-			sizeof(cl_float3), (void*)(orig));
-		kernel_prog->setKernelArgBuf(kernel_index, 8,
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*(gsize.gsxyz * 6), (void*)(cov));
+		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(m_center));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(orig));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz * 6), (void*)(cov));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);

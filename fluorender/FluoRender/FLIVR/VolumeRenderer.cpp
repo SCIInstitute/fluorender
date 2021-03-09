@@ -1509,8 +1509,9 @@ namespace flvr
 		if (kernel)
 		{
 			kernel_index = kernel->createKernel("hist_3d");
-			kernel->setKernelArgTex3D(kernel_index, 0, CL_MEM_READ_ONLY, data_id);
-			kernel->setKernelArgTex3D(kernel_index, 1, CL_MEM_READ_ONLY, mask_id);
+			kernel->setKernelArgBegin(kernel_index);
+			kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
+			kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, mask_id);
 			unsigned int hist_size = 64;
 			if (tex_ && tex_->get_nrrd(0))
 			{
@@ -1521,8 +1522,8 @@ namespace flvr
 			}
 			float* hist = new float[hist_size];
 			memset(hist, 0, hist_size*sizeof(float));
-			kernel->setKernelArgBuf(kernel_index, 2, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
-			kernel->setKernelArgConst(kernel_index, 3, sizeof(unsigned int), (void*)(&hist_size));
+			kernel->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
+			kernel->setKernelArgConst(sizeof(unsigned int), (void*)(&hist_size));
 			size_t global_size[3] = {brick_x, brick_y, brick_z};
 			size_t local_size[3] = {1, 1, 1};
 			kernel->executeKernel(kernel_index, 3, global_size, local_size);

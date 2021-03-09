@@ -235,44 +235,26 @@ bool Relax::Compute()
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
-		kernel_prog->setKernelArgTex3D(kernel_0, 0,
-			CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgConst(kernel_0, 1,
-			sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(kernel_0, 2,
-			sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(kernel_0, 3,
-			sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(kernel_0, 4,
-			sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(kernel_0, 5,
-			sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgConst(kernel_0, 6,
-			sizeof(unsigned int), (void*)(&m_snum));
-		kernel_prog->setKernelArgConst(kernel_0, 7,
-			sizeof(cl_float3), (void*)(&org));
-		kernel_prog->setKernelArgConst(kernel_0, 8,
-			sizeof(cl_float3), (void*)(&scl));
-		kernel_prog->setKernelArgConst(kernel_0, 9,
-			sizeof(float), (void*)(&m_rest));
-		kernel_prog->setKernelArgConst(kernel_0, 10,
-			sizeof(float), (void*)(&m_infr));
-		kernel_prog->setKernelArgBuf(kernel_0, 11,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*m_snum * 3, (void*)(m_spoints.data()));
-		kernel_prog->setKernelArgBuf(kernel_0, 12,
-			CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(unsigned int)*m_snum, (void*)(m_slock.data()));
 		std::vector<float> dsp(gsize.gsxyz * m_snum * 3, 0.0);
 		float* pdsp = dsp.data();
-		kernel_prog->setKernelArgBuf(kernel_0, 13,
-			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*gsize.gsxyz * m_snum * 3, (void*)(pdsp));
 		std::vector<float> wsum(gsize.gsxyz * m_snum, 0.0);
 		float* pwsum = wsum.data();
-		kernel_prog->setKernelArgBuf(kernel_0, 14,
-			CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(float)*gsize.gsxyz * m_snum, (void*)(pwsum));
+		kernel_prog->setKernelArgBegin(kernel_0);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_snum));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&org));
+		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&m_rest));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&m_infr));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*m_snum * 3, (void*)(m_spoints.data()));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*m_snum, (void*)(m_slock.data()));
+		kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*gsize.gsxyz * m_snum * 3, (void*)(pdsp));
+		kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*gsize.gsxyz * m_snum, (void*)(pwsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_0, 3, global_size, local_size);

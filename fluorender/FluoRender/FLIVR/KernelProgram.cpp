@@ -18,7 +18,8 @@ namespace flvr
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
-	source_(source), program_(0), queue_(0)
+	source_(source), program_(0), queue_(0),
+	kernel_idx_(-1), arg_idx_(-1)
 	{
 	}
 
@@ -443,6 +444,9 @@ namespace flvr
 
 	int KernelProgram::setKernelArgument(Argument& arg)
 	{
+		arg.kernel_index = kernel_idx_;
+		arg.index = arg_idx_++;
+
 		unsigned int ai = -1;
 		if (!matchArgBuf(arg, ai))
 		{
@@ -459,35 +463,29 @@ namespace flvr
 		return ai;
 	}
 
-	void KernelProgram::setKernelArgConst(int index, int i, size_t size, void* data)
+	void KernelProgram::setKernelArgConst(size_t size, void* data)
 	{
 		cl_int err;
 
 		if (!data)
 			return;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return;
 
-		err = clSetKernelArg(kernels_[index].kernel, i, size, data);
+		err = clSetKernelArg(kernels_[kernel_idx_].kernel, arg_idx_++, size, data);
 		if (err != CL_SUCCESS)
 			return;
 	}
 
-	void KernelProgram::setKernelArgConst(std::string &name, int i, size_t size, void* data)
-	{
-		int index = findKernel(name);
-		return setKernelArgConst(index, i, size, data);
-	}
-
-	Argument KernelProgram::setKernelArgBuf(int index, int i, cl_mem_flags flag, size_t size, void* data)
+	Argument KernelProgram::setKernelArgBuf(cl_mem_flags flag, size_t size, void* data)
 	{
 		Argument arg;
 		cl_int err;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = index;
-		arg.index = i;
+		arg.kernel_index = kernel_idx_;
+		arg.index = arg_idx_++;
 		arg.size = size;
 		arg.texture = 0;
 		arg.orgn_addr = data;
@@ -509,31 +507,27 @@ namespace flvr
 			arg_list_.push_back(arg);
 		}
 
-		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		err = clSetKernelArg(
+			kernels_[arg.kernel_index].kernel,
+			arg.index, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 
 		return arg;
 	}
 
-	Argument KernelProgram::setKernelArgBuf(std::string &name, int i, cl_mem_flags flag, size_t size, void* data)
-	{
-		int index = findKernel(name);
-		return setKernelArgBuf(index, i, flag, size, data);
-	}
-
-	Argument KernelProgram::setKernelArgBufWrite(int index, int i, cl_mem_flags flag, size_t size, void* data)
+	Argument KernelProgram::setKernelArgBufWrite(cl_mem_flags flag, size_t size, void* data)
 	{
 		Argument arg;
 		cl_int err;
 		cl_mem buffer = 0;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
 		if (data)
 		{
-			arg.kernel_index = index;
-			arg.index = i;
+			arg.kernel_index = kernel_idx_;
+			arg.index = arg_idx_++;
 			arg.size = size;
 			arg.texture = 0;
 			arg.orgn_addr = data;
@@ -557,33 +551,31 @@ namespace flvr
 				arg_list_.push_back(arg);
 			}
 
-			err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+			err = clSetKernelArg(
+				kernels_[arg.kernel_index].kernel,
+				arg.index, sizeof(cl_mem), &(arg.buffer));
 			if (err != CL_SUCCESS)
 				return Argument();
 		}
 		else
 		{
-			err = clSetKernelArg(kernels_[index].kernel, i, size, NULL);
+			err = clSetKernelArg(
+				kernels_[kernel_idx_].kernel,
+				arg_idx_++, size, NULL);
 		}
 		return arg;
 	}
 
-	Argument KernelProgram::setKernelArgBufWrite(std::string &name, int i, cl_mem_flags flag, size_t size, void* data)
-	{
-		int index = findKernel(name);
-		return setKernelArgBufWrite(index, i, flag, size, data);
-	}
-
-	Argument KernelProgram::setKernelArgTex2D(int index, int i, cl_mem_flags flag, GLuint texture)
+	Argument KernelProgram::setKernelArgTex2D(cl_mem_flags flag, GLuint texture)
 	{
 		Argument arg;
 		cl_int err;
 		cl_mem buffer = 0;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = index;
-		arg.index = i;
+		arg.kernel_index = kernel_idx_;
+		arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = texture;
 		arg.orgn_addr = 0;
@@ -602,28 +594,24 @@ namespace flvr
 			arg.buffer = buffer;
 			arg_list_.push_back(arg);
 		}
-		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		err = clSetKernelArg(
+			kernels_[arg.kernel_index].kernel,
+			arg.index, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
 	}
 
-	Argument KernelProgram::setKernelArgTex2D(std::string &name, int i, cl_mem_flags flag, GLuint texture)
-	{
-		int index = findKernel(name);
-		return setKernelArgTex2D(index, i, flag, texture);
-	}
-
-	Argument KernelProgram::setKernelArgTex3D(int index, int i, cl_mem_flags flag, GLuint texture)
+	Argument KernelProgram::setKernelArgTex3D(cl_mem_flags flag, GLuint texture)
 	{
 		Argument arg;
 		cl_int err;
 		cl_mem buffer = 0;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = index;
-		arg.index = i;
+		arg.kernel_index = kernel_idx_;
+		arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = texture;
 		arg.orgn_addr = 0;
@@ -642,31 +630,27 @@ namespace flvr
 			arg.buffer = buffer;
 			arg_list_.push_back(arg);
 		}
-		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		err = clSetKernelArg(
+			kernels_[arg.kernel_index].kernel,
+			arg.index, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
 	}
 
-	Argument KernelProgram::setKernelArgTex3D(std::string &name, int i, cl_mem_flags flag, GLuint texture)
-	{
-		int index = findKernel(name);
-		return setKernelArgTex3D(index, i, flag, texture);
-	}
-
 	//copy existing texure to buffer
 	Argument KernelProgram::setKernelArgTex3DBuf(
-		int index, int i, cl_mem_flags flag, GLuint texture,
+		cl_mem_flags flag, GLuint texture,
 		size_t size, size_t *region)
 	{
 		Argument arg, argt;
 		cl_int err;
 		cl_mem buft = 0, bufb = 0;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = index;
-		arg.index = i;
+		arg.kernel_index = kernel_idx_;
+		arg.index = arg_idx_++;
 		arg.size = size;
 		arg.texture = 0;
 		arg.orgn_addr = 0;
@@ -718,30 +702,24 @@ namespace flvr
 		if (err != CL_SUCCESS)
 			return Argument();
 
-		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		err = clSetKernelArg(
+			kernels_[arg.kernel_index].kernel,
+			arg.index, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
 	}
 
-	Argument KernelProgram::setKernelArgTex3DBuf(
-		std::string &name, int i, cl_mem_flags flag, GLuint texture,
-		size_t size, size_t *region)
-	{
-		int index = findKernel(name);
-		return setKernelArgTex3DBuf(index, i, flag, texture, size, region);
-	}
-
-	Argument KernelProgram::setKernelArgImage(int index, int i, cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
+	Argument KernelProgram::setKernelArgImage(cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
 	{
 		Argument arg;
 		cl_int err;
 		cl_mem buffer = 0;
-		if (index < 0 || index >= kernels_.size())
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = index;
-		arg.index = i;
+		arg.kernel_index = kernel_idx_;
+		arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = 0;
 		arg.orgn_addr = data;
@@ -761,21 +739,19 @@ namespace flvr
 			arg.buffer = buffer;
 			arg_list_.push_back(arg);
 		}
-		err = clSetKernelArg(kernels_[index].kernel, i, sizeof(cl_mem), &(arg.buffer));
+		err = clSetKernelArg(
+			kernels_[arg.kernel_index].kernel,
+			arg.index, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
 	}
 
-	Argument KernelProgram::setKernelArgImage(std::string &name, int i, cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
+	void KernelProgram::setKernelArgLocal(size_t size)
 	{
-		int index = findKernel(name);
-		return setKernelArgImage(index, i, flag, format, desc, data);
-	}
-
-	void KernelProgram::setKernelArgLocal(int index, int i, size_t size)
-	{
-		cl_int err = clSetKernelArg(kernels_[index].kernel, i, size, NULL);
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, size, NULL);
 	}
 
 	void KernelProgram::readBuffer(size_t size,
