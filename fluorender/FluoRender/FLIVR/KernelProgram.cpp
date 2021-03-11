@@ -453,6 +453,8 @@ namespace flvr
 
 		cl_int err = clSetKernelArg(kernels_[kernel_idx_].kernel,
 			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
+		if (err != CL_SUCCESS)
+			return -1;
 		return ai;
 	}
 

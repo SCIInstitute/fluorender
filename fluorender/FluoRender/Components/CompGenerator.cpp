@@ -500,7 +500,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		//kernel 2
-		kernel_prog->setKernelArgBegin(kernel_index2);
+		kernel_prog->setKernelArgBegin(kernel_index2, 2);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
@@ -518,7 +518,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog->readBuffer(arg_df, val);
-		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//delete[] val;
 		//ofs.close();
@@ -528,11 +528,11 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[ngx*ngy*ngz];
 		//kernel_prog->readBuffer(arg_gavg, val);
-		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
+		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//kernel_prog->readBuffer(arg_gvar, val);
-		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
+		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//delete[] val;
@@ -553,11 +553,11 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog->readBuffer(arg_avg, val);
-		//ofs.open("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
+		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//kernel_prog->readBuffer(arg_var, val);
-		//ofs.open("E:/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
+		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//delete[] val;
