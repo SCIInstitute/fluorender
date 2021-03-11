@@ -333,7 +333,7 @@ namespace flvr
 		unsigned int i;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].kernel_index == index &&
+			if (arg_list_[i].find_kernel(index) &&
 				arg_list_[i].size == 0 &&
 				arg_list_[i].texture &&
 				glIsTexture(arg_list_[i].texture))
@@ -347,11 +347,9 @@ namespace flvr
 			local_size, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return false;
-		clFlush(queue_);
-		clFinish(queue_);
 		for (i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].kernel_index == index &&
+			if (arg_list_[i].find_kernel(index) &&
 				arg_list_[i].size == 0 &&
 				arg_list_[i].texture &&
 				glIsTexture(arg_list_[i].texture))
@@ -361,6 +359,8 @@ namespace flvr
 					return false;
 			}
 		}
+		clFlush(queue_);
+		clFinish(queue_);
 		return true;
 	}
 
@@ -403,9 +403,7 @@ namespace flvr
 	{
 		for (unsigned int i=0; i<arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].kernel_index == arg.kernel_index &&
-				arg_list_[i].index == arg.index &&
-				arg_list_[i].size == arg.size &&
+			if (arg_list_[i].size == arg.size &&
 				arg_list_[i].texture == arg.texture)
 			{
 				arg_index = i;
@@ -444,8 +442,7 @@ namespace flvr
 
 	int KernelProgram::setKernelArgument(Argument& arg)
 	{
-		arg.kernel_index = kernel_idx_;
-		arg.index = arg_idx_++;
+		arg.kernel(kernel_idx_);
 
 		unsigned int ai = -1;
 		if (!matchArgBuf(arg, ai))
@@ -453,13 +450,9 @@ namespace flvr
 			arg_list_.push_back(arg);
 			ai = arg_list_.size() - 1;
 		}
-		else
-		{
-			arg_list_[ai].kernel_index = arg.kernel_index;
-			arg_list_[ai].index = arg.index;
-		}
-		cl_int err = clSetKernelArg(kernels_[arg.kernel_index].kernel,
-			arg.index, sizeof(cl_mem), &(arg.buffer));
+
+		cl_int err = clSetKernelArg(kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 		return ai;
 	}
 
@@ -484,8 +477,7 @@ namespace flvr
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = kernel_idx_;
-		arg.index = arg_idx_++;
+		arg.kernel(kernel_idx_);
 		arg.size = size;
 		arg.texture = 0;
 		arg.orgn_addr = data;
@@ -496,7 +488,10 @@ namespace flvr
 		{
 			found = matchArgAddr(arg, ai);
 			if (found)
+			{
 				arg.buffer = arg_list_[ai].buffer;
+				arg_list_[ai].kernel(kernel_idx_);
+			}
 		}
 
 		if (!found)
@@ -508,8 +503,8 @@ namespace flvr
 		}
 
 		err = clSetKernelArg(
-			kernels_[arg.kernel_index].kernel,
-			arg.index, sizeof(cl_mem), &(arg.buffer));
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 
@@ -526,8 +521,7 @@ namespace flvr
 
 		if (data)
 		{
-			arg.kernel_index = kernel_idx_;
-			arg.index = arg_idx_++;
+			arg.kernel(kernel_idx_);
 			arg.size = size;
 			arg.texture = 0;
 			arg.orgn_addr = data;
@@ -539,6 +533,7 @@ namespace flvr
 				clReleaseMemObject(arg_list_[ai].buffer);
 				arg.buffer = clCreateBuffer(context_, flag, size, data, &err);
 				buffer = arg.buffer;
+				arg_list_[ai].kernel(kernel_idx_);
 				if (err != CL_SUCCESS)
 					return Argument();
 			}
@@ -552,8 +547,8 @@ namespace flvr
 			}
 
 			err = clSetKernelArg(
-				kernels_[arg.kernel_index].kernel,
-				arg.index, sizeof(cl_mem), &(arg.buffer));
+				kernels_[kernel_idx_].kernel,
+				arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 			if (err != CL_SUCCESS)
 				return Argument();
 		}
@@ -574,8 +569,8 @@ namespace flvr
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = kernel_idx_;
-		arg.index = arg_idx_++;
+		arg.kernel(kernel_idx_);
+		//arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = texture;
 		arg.orgn_addr = 0;
@@ -585,6 +580,7 @@ namespace flvr
 		{
 			arg.buffer = arg_list_[ai].buffer;
 			buffer = arg.buffer;
+			arg_list_[ai].kernel(kernel_idx_);
 		}
 		else
 		{
@@ -595,8 +591,8 @@ namespace flvr
 			arg_list_.push_back(arg);
 		}
 		err = clSetKernelArg(
-			kernels_[arg.kernel_index].kernel,
-			arg.index, sizeof(cl_mem), &(arg.buffer));
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
@@ -610,8 +606,7 @@ namespace flvr
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = kernel_idx_;
-		arg.index = arg_idx_++;
+		arg.kernel(kernel_idx_);
 		arg.size = 0;
 		arg.texture = texture;
 		arg.orgn_addr = 0;
@@ -621,6 +616,7 @@ namespace flvr
 		{
 			arg.buffer = arg_list_[ai].buffer;
 			buffer = arg.buffer;
+			arg_list_[ai].kernel(kernel_idx_);
 		}
 		else
 		{
@@ -631,8 +627,8 @@ namespace flvr
 			arg_list_.push_back(arg);
 		}
 		err = clSetKernelArg(
-			kernels_[arg.kernel_index].kernel,
-			arg.index, sizeof(cl_mem), &(arg.buffer));
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
@@ -649,8 +645,8 @@ namespace flvr
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = kernel_idx_;
-		arg.index = arg_idx_++;
+		arg.kernel(kernel_idx_);
+		//arg.index = arg_idx_++;
 		arg.size = size;
 		arg.texture = 0;
 		arg.orgn_addr = 0;
@@ -662,6 +658,7 @@ namespace flvr
 		{
 			argt.buffer = arg_list_[ai].buffer;
 			buft = argt.buffer;
+			arg_list_[ai].kernel(kernel_idx_);
 		}
 		else
 		{
@@ -675,6 +672,7 @@ namespace flvr
 		if (matchArgBuf(arg, ai))
 		{
 			bufb = arg.buffer;
+			arg_list_[ai].kernel(kernel_idx_);
 		}
 		else
 		{
@@ -695,18 +693,19 @@ namespace flvr
 			sorigin, region, 0, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return Argument();
-		clFlush(queue_);
-		clFinish(queue_);
 		err = clEnqueueReleaseGLObjects(
 			queue_, 1, &(buft), 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			return Argument();
 
 		err = clSetKernelArg(
-			kernels_[arg.kernel_index].kernel,
-			arg.index, sizeof(cl_mem), &(arg.buffer));
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
+
+		clFlush(queue_);
+		clFinish(queue_);
 		return arg;
 	}
 
@@ -718,8 +717,8 @@ namespace flvr
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return arg;
 
-		arg.kernel_index = kernel_idx_;
-		arg.index = arg_idx_++;
+		arg.kernel(kernel_idx_);
+		//arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = 0;
 		arg.orgn_addr = data;
@@ -729,6 +728,7 @@ namespace flvr
 		{
 			arg.buffer = arg_list_[ai].buffer;
 			buffer = arg.buffer;
+			arg_list_[ai].kernel(kernel_idx_);
 		}
 		else
 		{
@@ -740,8 +740,8 @@ namespace flvr
 			arg_list_.push_back(arg);
 		}
 		err = clSetKernelArg(
-			kernels_[arg.kernel_index].kernel,
-			arg.index, sizeof(cl_mem), &(arg.buffer));
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
 		if (err != CL_SUCCESS)
 			return Argument();
 		return arg;
@@ -762,8 +762,6 @@ namespace flvr
 		if (buf_data)
 		{
 			Argument arg;
-			arg.kernel_index = 0;
-			arg.index = 0;
 			arg.size = size;
 			arg.texture = 0;
 			arg.orgn_addr = buf_data;
@@ -826,12 +824,12 @@ namespace flvr
 				sorigin, region, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
-			clFlush(queue_);
-			clFinish(queue_);
 			err = clEnqueueReleaseGLObjects(
 				queue_, 1, &(buft), 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
+			clFlush(queue_);
+			clFinish(queue_);
 			//clReleaseMemObject(buft);
 		}
 	}
@@ -844,8 +842,6 @@ namespace flvr
 		if (buf_data)
 		{
 			Argument arg;
-			arg.kernel_index = 0;
-			arg.index = 0;
 			arg.size = size;
 			arg.texture = 0;
 			arg.orgn_addr = buf_data;
@@ -892,8 +888,6 @@ namespace flvr
 		if (img_data)
 		{
 			Argument arg;
-			arg.kernel_index = 0;
-			arg.index = 0;
 			arg.size = 0;
 			arg.texture = 0;
 			arg.orgn_addr = img_data;
@@ -959,8 +953,6 @@ namespace flvr
 		int index, size_t size, GLuint texture)
 	{
 		Argument arg;
-		arg.kernel_index = kernel_index;
-		arg.index = index;
 		arg.size = size;
 		arg.texture = texture;
 		unsigned int ai;
@@ -986,8 +978,6 @@ namespace flvr
 	void KernelProgram::releaseMemObject(size_t size, void* orgn_addr)
 	{
 		Argument arg;
-		arg.kernel_index = 0;
-		arg.index = 0;
 		arg.size = size;
 		arg.texture = 0;
 		arg.orgn_addr = orgn_addr;

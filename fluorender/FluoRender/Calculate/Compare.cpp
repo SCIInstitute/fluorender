@@ -1021,8 +1021,7 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		}
 		else
 		{
-			avg.kernel_index = kernel_index;
-			avg.index = 7;
+			avg.kernel(kernel_index);
 			kernel_prog->setKernelArgument(avg);
 		}
 

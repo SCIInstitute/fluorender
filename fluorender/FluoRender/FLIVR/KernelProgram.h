@@ -18,6 +18,7 @@
 #endif
 #include <string>
 #include <vector>
+#include <set>
 
 namespace flvr
 {
@@ -26,8 +27,9 @@ namespace flvr
 	struct Argument
 	{
 		bool protect_;
-		int kernel_index;
-		cl_uint index;
+		//int kernel_index;
+		//cl_uint index;
+		std::set<cl_uint> kidx;//kernels that use it
 		size_t size;
 		GLuint texture;
 		cl_mem buffer;
@@ -35,8 +37,6 @@ namespace flvr
 
 		Argument() :
 			protect_(false),
-			kernel_index(0),
-			index(0),
 			size(0),
 			texture(0),
 			buffer(0),
@@ -44,6 +44,8 @@ namespace flvr
 
 		void protect() { protect_ = true; }
 		void unprotect() { protect_ = false; }
+		void kernel(cl_uint idx) { kidx.insert(idx); }
+		bool find_kernel(cl_uint idx) { return kidx.find(idx) != kidx.end(); }
 	};
 
 	typedef struct
