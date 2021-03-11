@@ -700,7 +700,10 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
 		if (m_use_mask)
+		{
+			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
 			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
@@ -860,7 +863,10 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
 		if (m_use_mask)
+		{
+			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
 			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
 		unsigned char nn, re;
@@ -927,7 +933,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		//kernel 2
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
+		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2, 2);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
