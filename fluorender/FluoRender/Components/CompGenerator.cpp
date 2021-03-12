@@ -91,6 +91,8 @@ void ComponentGenerator::ShuffleID()
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask)
 		{
@@ -170,7 +172,7 @@ void ComponentGenerator::ShuffleID()
 		kernel_prog->releaseAll();
 		//ReleaseLabel(val32, brick_num, b);
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -213,6 +215,8 @@ void ComponentGenerator::SetIDBit(int psize)
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask)
 		{
@@ -328,7 +332,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->releaseAll();
 		delete[] size_buffer;
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -352,6 +356,8 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -406,7 +412,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 		//release buffer
 		kernel_prog->releaseAll();
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -446,6 +452,8 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -608,7 +616,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel2_prog->releaseAll();
 		kernel_prog->releaseAll(false);
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -658,6 +666,8 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -761,7 +771,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog->releaseAll();
 		kernel_prog_dist->releaseAll(false);
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -822,6 +832,8 @@ void ComponentGenerator::DistDensityField(
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -1040,7 +1052,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dist->releaseAll(false);
 		kernel_prog_dens->releaseAll(false);
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -1074,6 +1086,8 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -1170,7 +1184,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->releaseAll();
 		delete[] size_buffer;
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -1194,6 +1208,8 @@ void ComponentGenerator::ClearBorders()
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -1229,7 +1245,7 @@ void ComponentGenerator::ClearBorders()
 		//release buffer
 		kernel_prog->releaseAll();
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -1253,6 +1269,8 @@ void ComponentGenerator::FillBorders(float tol)
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks_id();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_mask && !b->is_mask_valid())
 			continue;
@@ -1292,6 +1310,6 @@ void ComponentGenerator::FillBorders(float tol)
 		//release buffer
 		kernel_prog->releaseAll();
 
-		m_sig_progress();
+		postwork(__FUNCTION__);
 	}
 }

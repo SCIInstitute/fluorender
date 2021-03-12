@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
+#include <chrono>
 
 class VRenderView;
 class VolumeData;
@@ -308,6 +309,11 @@ private:
 	flrd::CelpList m_in_cells;
 	flrd::CelpList m_out_cells;
 
+	//speed test
+	bool m_test_speed;
+	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
+	wxString m_titles, m_values;
+
 	//output
 	bool m_hold_history;
 
@@ -463,6 +469,10 @@ private:
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
 	void FindCelps(flrd::CelpList &list,
 		flrd::CelpListIter &it, bool links = false);
+
+	//speed test
+	void StartTimer(std::string str);
+	void StopTimer(std::string str);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

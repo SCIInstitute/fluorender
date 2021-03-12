@@ -83,7 +83,8 @@ namespace flrd
 		void DistField(int iter, float th, int dsize, float sscale);
 
 		//update progress
-		boost::signals2::signal<void ()> m_sig_progress;
+		boost::signals2::signal<void(std::string)> prework;
+		boost::signals2::signal<void(std::string)> postwork;
 
 	private:
 		VolumeData *m_vd;

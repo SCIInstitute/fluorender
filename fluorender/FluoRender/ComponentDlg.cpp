@@ -40,9 +40,6 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 #include <set>
 #include <fstream>
-#include <boost/chrono.hpp>
-
-using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
@@ -184,7 +181,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		0, "ComponentDlg"),
 	m_frame(parent),
 	m_view(0),
-	m_hold_history(false)
+	m_hold_history(false),
+	m_test_speed(true)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -3321,10 +3319,16 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	double scale = vd->GetScalarScale();
 
 	flrd::ComponentGenerator cg(vd);
-	//boost::signals2::connection connection =
-	//	cg.m_sig_progress.connect(std::bind(
-	//		&ComponentDlg::UpdateProgress, this));
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	boost::signals2::connection preconn =
+		cg.prework.connect(std::bind(
+			&ComponentDlg::StartTimer, this, std::placeholders::_1));
+	boost::signals2::connection postconn =
+		cg.postwork.connect(std::bind(
+			&ComponentDlg::StopTimer, this, std::placeholders::_1));
+	m_titles.Clear();
+	m_values.Clear();
+	m_tps.clear();
+	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
 	cg.SetUseMask(use_sel);
 
@@ -3400,13 +3404,23 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	wxString titles, values;
-	titles = "OpenCL time\n";
-	values = wxString::Format("%.4f", time_span.count());
-	values += " sec.\n";
-	SetOutput(titles, values);
+	m_tps.push_back(std::chrono::high_resolution_clock::now());
+	std::chrono::duration<double> time_span =
+		std::chrono::duration_cast<std::chrono::duration<double>>(
+			m_tps.back() - m_tps.front());
+	if (m_test_speed)
+	{
+		m_titles += "Function\t";
+		m_titles += "Time\n";
+		m_values += "Total\t";
+	}
+	else
+	{
+		m_titles += "Total time\n";
+	}
+	m_values += wxString::Format("%.4f", time_span.count());
+	m_values += " sec.\n";
+	SetOutput(m_titles, m_values);
 
 	//update
 	m_view->RefreshGL();
@@ -3947,6 +3961,30 @@ void ComponentDlg::FindCelps(flrd::CelpList &list,
 					(it2->second->GetEId(), it2->second));
 			}
 		}
+	}
+}
+
+void ComponentDlg::StartTimer(std::string str)
+{
+	if (m_test_speed)
+	{
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+	}
+}
+
+void ComponentDlg::StopTimer(std::string str)
+{
+	if (m_test_speed)
+	{
+		auto t0 = m_tps.back();
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+		std::chrono::duration<double> time_span =
+			std::chrono::duration_cast<std::chrono::duration<double>>(
+				m_tps.back() - t0);
+
+		m_values += str + "\t";
+		m_values += wxString::Format("%.4f", time_span.count());
+		m_values += " sec.\n";
 	}
 }
 
