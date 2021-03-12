@@ -2086,8 +2086,8 @@ void VRenderGLView::Segment()
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame)
 	{
-		if (count && vr_frame->GetBrushToolDlg())
-			vr_frame->GetBrushToolDlg()->Update();
+		if (vr_frame->GetBrushToolDlg())
+			vr_frame->GetBrushToolDlg()->Update(count?0:1);
 		if (colocal && vr_frame->GetColocalizationDlg())
 			vr_frame->GetColocalizationDlg()->Colocalize();
 	}
@@ -4233,7 +4233,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			if (vr_frame)
 			{
 				if (m_paint_count && vr_frame->GetBrushToolDlg())
-					vr_frame->GetBrushToolDlg()->Update();
+					vr_frame->GetBrushToolDlg()->Update(0);
 				if (m_paint_colocalize && vr_frame->GetColocalizationDlg())
 					vr_frame->GetColocalizationDlg()->Colocalize();
 				if (m_int_mode == 12 && vr_frame->GetMeasureDlg())

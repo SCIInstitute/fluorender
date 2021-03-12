@@ -77,7 +77,8 @@ VolumeSelector::VolumeSelector() :
 	m_pressure(0.0),
 	m_press_peak(0.0),
 	m_air_press(0.5),
-	m_iter(0)
+	m_iter(0),
+	m_speed_test(true)
 {
 }
 
@@ -89,6 +90,9 @@ void VolumeSelector::Segment(int mx, int my)
 {
 	if (!m_view || !m_vd)
 		return;
+
+	if (m_speed_test)
+		m_t1 = std::chrono::high_resolution_clock::now();
 
 	//save view
 	m_mv_mat = m_view->GetDrawMat();
@@ -165,6 +169,15 @@ void VolumeSelector::Segment(int mx, int my)
 	{
 		m_gm_falloff = gm_falloff_save;
 		m_scl_translate = scl_translate_save;
+	}
+
+	if (m_speed_test)
+	{
+		m_t2 = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_span =
+			std::chrono::duration_cast<std::chrono::duration<double>>(
+				m_t2 - m_t1);
+		m_span_sec = time_span.count();
 	}
 }
 

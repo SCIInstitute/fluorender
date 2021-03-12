@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <algorithm>
 #include <glm/glm.hpp>
+#include <chrono>
 
 #define BRUSH_TOOL_ITER_WEAK	10
 #define BRUSH_TOOL_ITER_NORMAL	30
@@ -219,6 +220,10 @@ namespace flrd
 		}
 		bool GetMouseVec(int mx, int my, fluo::Vector &mvec);
 
+		//speed test
+		bool m_speed_test;
+		double GetSpanSec() { return m_span_sec; }
+
 	private:
 		VRenderGLView *m_view;
 		VolumeData *m_vd;	//volume data for segmentation
@@ -290,6 +295,9 @@ namespace flrd
 
 		int m_mx, m_my, m_mx0, m_my0;
 		fluo::Vector m_mvec;
+
+		std::chrono::high_resolution_clock::time_point m_t1, m_t2;
+		double m_span_sec;
 
 	private:
 		double HueCalculation(int mode, unsigned int label);

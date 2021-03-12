@@ -1196,7 +1196,20 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 }
 
 //update
-void BrushToolDlg::Update()
+void BrushToolDlg::Update(int mode)
+{
+	switch (mode)
+	{
+	case 0:
+	default:
+		UpdateSize();
+		break;
+	case 1:
+		UpdateSpeed();
+	}
+}
+
+void BrushToolDlg::UpdateSize()
 {
 	GridData data;
 	VolumeData* sel_vol = 0;
@@ -1248,6 +1261,17 @@ void BrushToolDlg::Update()
 	SetOutput(data, unit);
 }
 
+void BrushToolDlg::UpdateSpeed()
+{
+	if (!m_selector || !m_selector->m_speed_test)
+		return;
+	GridData data;
+	data.size = m_selector->GetSpanSec();
+	data.wsize = data.size;
+	wxString unit = "Sec.";
+	SetOutput(data, unit);
+}
+
 //output
 void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 {
@@ -1273,7 +1297,7 @@ void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	Update();
+	Update(0);
 }
 
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)

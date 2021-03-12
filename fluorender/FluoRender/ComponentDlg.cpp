@@ -2361,7 +2361,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 			if (vr_frame->GetBrushToolDlg())
 			{
 				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update();
+					vr_frame->GetBrushToolDlg()->Update(0);
 				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			if (vr_frame->GetColocalizationDlg() &&
@@ -2410,7 +2410,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 		if (vr_frame->GetBrushToolDlg())
 		{
 			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update();
+				vr_frame->GetBrushToolDlg()->Update(0);
 			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
 		if (vr_frame->GetColocalizationDlg() &&
@@ -2438,7 +2438,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		if (vr_frame->GetBrushToolDlg())
 		{
 			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update();
+				vr_frame->GetBrushToolDlg()->Update(0);
 			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
 		if (vr_frame->GetColocalizationDlg() &&
@@ -3537,7 +3537,7 @@ void ComponentDlg::SelectFullComp()
 		if (vr_frame->GetBrushToolDlg())
 		{
 			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update();
+				vr_frame->GetBrushToolDlg()->Update(0);
 			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
 		if (vr_frame->GetColocalizationDlg() &&
@@ -4104,7 +4104,7 @@ void ComponentDlg::IncludeComps()
 			if (vr_frame->GetBrushToolDlg())
 			{
 				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update();
+					vr_frame->GetBrushToolDlg()->Update(0);
 				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			if (vr_frame->GetColocalizationDlg() &&
@@ -4159,7 +4159,7 @@ void ComponentDlg::ExcludeComps()
 			if (vr_frame->GetBrushToolDlg())
 			{
 				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update();
+					vr_frame->GetBrushToolDlg()->Update(0);
 				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			if (vr_frame->GetColocalizationDlg() &&

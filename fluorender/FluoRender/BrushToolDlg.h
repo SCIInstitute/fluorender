@@ -135,7 +135,9 @@ public:
 	void UpdateMaskTb();
 
 	//output
-	void Update();
+	void Update(int mode);//mode: 0-size; 1-speed
+	void UpdateSize();
+	void UpdateSpeed();
 	void SetOutput(const GridData &data, const wxString &unit);
 	void CopyData();
 	void PasteData();
