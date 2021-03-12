@@ -182,7 +182,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 	m_frame(parent),
 	m_view(0),
 	m_hold_history(false),
-	m_test_speed(true)
+	m_test_speed(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

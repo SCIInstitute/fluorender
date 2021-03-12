@@ -78,7 +78,7 @@ VolumeSelector::VolumeSelector() :
 	m_press_peak(0.0),
 	m_air_press(0.5),
 	m_iter(0),
-	m_test_speed(true)
+	m_test_speed(false)
 {
 }
 
