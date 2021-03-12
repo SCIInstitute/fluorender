@@ -1263,7 +1263,7 @@ void BrushToolDlg::UpdateSize()
 
 void BrushToolDlg::UpdateSpeed()
 {
-	if (!m_selector || !m_selector->m_speed_test)
+	if (!m_selector || !m_selector->m_test_speed)
 		return;
 	GridData data;
 	data.size = m_selector->GetSpanSec();

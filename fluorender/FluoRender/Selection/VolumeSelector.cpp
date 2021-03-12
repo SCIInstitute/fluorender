@@ -78,7 +78,7 @@ VolumeSelector::VolumeSelector() :
 	m_press_peak(0.0),
 	m_air_press(0.5),
 	m_iter(0),
-	m_speed_test(true)
+	m_test_speed(true)
 {
 }
 
@@ -91,7 +91,7 @@ void VolumeSelector::Segment(int mx, int my)
 	if (!m_view || !m_vd)
 		return;
 
-	if (m_speed_test)
+	if (m_test_speed)
 		m_t1 = std::chrono::high_resolution_clock::now();
 
 	//save view
@@ -171,7 +171,7 @@ void VolumeSelector::Segment(int mx, int my)
 		m_scl_translate = scl_translate_save;
 	}
 
-	if (m_speed_test)
+	if (m_test_speed)
 	{
 		m_t2 = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_span =

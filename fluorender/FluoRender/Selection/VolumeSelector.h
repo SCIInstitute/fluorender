@@ -221,7 +221,7 @@ namespace flrd
 		bool GetMouseVec(int mx, int my, fluo::Vector &mvec);
 
 		//speed test
-		bool m_speed_test;
+		bool m_test_speed;
 		double GetSpanSec() { return m_span_sec; }
 
 	private:

@@ -59,7 +59,8 @@ wxDefaultPosition, wxSize(500, 500),
 m_frame(parent),
 m_view(0),
 m_group(0),
-m_hold_history(false)
+m_hold_history(false),
+m_test_speed(true)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -355,6 +356,10 @@ void ColocalizationDlg::Colocalize()
 			rm[i].push_back(0);
 	}
 
+	m_titles.Clear();
+	m_values.Clear();
+	m_tps.clear();
+
 	//fill the matrix
 	if (m_method == 0 || m_method == 1 ||
 		(m_method == 2 && !m_int_weighted))
@@ -375,6 +380,12 @@ void ColocalizationDlg::Colocalize()
 				flrd::ChannelCompare compare(vd1, vd2);
 				compare.SetUseMask(m_use_mask);
 				compare.SetIntWeighted(m_int_weighted);
+				boost::signals2::connection preconn =
+					compare.prework.connect(std::bind(
+						&ColocalizationDlg::StartTimer, this, std::placeholders::_1));
+				boost::signals2::connection postconn =
+					compare.postwork.connect(std::bind(
+						&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
 				switch (m_method)
 				{
 				case 0://dot product
@@ -417,6 +428,12 @@ void ColocalizationDlg::Colocalize()
 			flrd::ChannelCompare compare(vd1, vd2);
 			compare.SetUseMask(m_use_mask);
 			compare.SetIntWeighted(m_int_weighted);
+			boost::signals2::connection preconn =
+				compare.prework.connect(std::bind(
+					&ColocalizationDlg::StartTimer, this, std::placeholders::_1));
+			boost::signals2::connection postconn =
+				compare.postwork.connect(std::bind(
+					&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
 			//get threshold values
 			float th1, th2, th3, th4;
 			th1 = (float)(vd1->GetLeftThresh());
@@ -428,70 +445,100 @@ void ColocalizationDlg::Colocalize()
 		}
 	}
 
-	wxString titles;
-	wxString name;
-	double v;
-	ResetMinMax();
-	for (size_t i = 0; i < num; ++i)
+	if (m_test_speed)
 	{
-		if (m_get_ratio)
-			titles += wxString::Format("%d (%%)", int(i + 1));
-		else
-			titles += wxString::Format("%d", int(i + 1));
-		VolumeData* vd = m_group->GetVolumeData(i);
-		if (vd)
-			name = vd->GetName();
-		else
-			name = "";
-		titles += ": " + name;
-		if (i < num - 1)
-			titles += "\t";
-		else
-			titles += "\n";
+		m_titles += "Function\t";
+		m_titles += "Time\n";
 	}
-	wxString values;
-	for (int it1 = 0; it1 < num; ++it1)
-	for (int it2 = 0; it2 < num; ++it2)
+	else
 	{
-		if (m_get_ratio)
+		wxString name;
+		double v;
+		ResetMinMax();
+		for (size_t i = 0; i < num; ++i)
 		{
-			if (rm[it2][it2])
-			{
-				v = rm[it1][it2] * 100.0 / rm[it1][it1];
-				SetMinMax(v);
-				values += wxString::Format("%f", v);
-			}
+			if (m_get_ratio)
+				m_titles += wxString::Format("%d (%%)", int(i + 1));
 			else
-			{
-				SetMinMax(0.0);
-				values += "0";
-			}
+				m_titles += wxString::Format("%d", int(i + 1));
+			VolumeData* vd = m_group->GetVolumeData(i);
+			if (vd)
+				name = vd->GetName();
+			else
+				name = "";
+			m_titles += ": " + name;
+			if (i < num - 1)
+				m_titles += "\t";
+			else
+				m_titles += "\n";
 		}
-		else
-		{
-			if (m_physical_size)
+		for (int it1 = 0; it1 < num; ++it1)
+			for (int it2 = 0; it2 < num; ++it2)
 			{
-				v = rm[it1][it2] * spc;
-				SetMinMax(v);
-				values += wxString::Format("%f", v);
-				values += unit;
-			}
-			else
-			{
-				v = rm[it1][it2];
-				SetMinMax(v);
-				if (m_int_weighted)
-					values += wxString::Format("%f", v);
+				if (m_get_ratio)
+				{
+					if (rm[it2][it2])
+					{
+						v = rm[it1][it2] * 100.0 / rm[it1][it1];
+						SetMinMax(v);
+						m_values += wxString::Format("%f", v);
+					}
+					else
+					{
+						SetMinMax(0.0);
+						m_values += "0";
+					}
+				}
 				else
-					values += wxString::Format("%.0f", v);
+				{
+					if (m_physical_size)
+					{
+						v = rm[it1][it2] * spc;
+						SetMinMax(v);
+						m_values += wxString::Format("%f", v);
+						m_values += unit;
+					}
+					else
+					{
+						v = rm[it1][it2];
+						SetMinMax(v);
+						if (m_int_weighted)
+							m_values += wxString::Format("%f", v);
+						else
+							m_values += wxString::Format("%.0f", v);
+					}
+				}
+				if (it2 < num - 1)
+					m_values += "\t";
+				else
+					m_values += "\n";
 			}
-		}
-		if (it2 < num - 1)
-			values += "\t";
-		else
-			values += "\n";
 	}
-	SetOutput(titles, values);
+	SetOutput(m_titles, m_values);
+}
+
+void ColocalizationDlg::StartTimer(std::string str)
+{
+	if (m_test_speed)
+	{
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+	}
+}
+
+void ColocalizationDlg::StopTimer(std::string str)
+{
+	if (m_test_speed)
+	{
+		auto t0 = m_tps.back();
+		m_tps.push_back(std::chrono::high_resolution_clock::now());
+		std::chrono::duration<double> time_span =
+			std::chrono::duration_cast<std::chrono::duration<double>>(
+				m_tps.back() - t0);
+
+		m_values += str + "\t";
+		m_values += wxString::Format("%.4f", time_span.count());
+		m_values += " sec.\n";
+	}
 }
 
 void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent &event)

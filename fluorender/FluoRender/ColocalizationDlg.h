@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 #include <limits>
+#include <chrono>
 
 class DataGroup;
 class VRenderView;
@@ -118,6 +119,11 @@ private:
 	double m_cm_min;
 	double m_cm_max;
 
+	//speed test
+	bool m_test_speed;
+	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
+	wxString m_titles, m_values;
+
 	//interface
 	//colocalization
 	wxButton *m_colocalize_btn;
@@ -150,6 +156,10 @@ private:
 		m_cm_min = std::min(v, m_cm_min);
 		m_cm_max = std::max(v, m_cm_max);
 	}
+	//speed test
+	void StartTimer(std::string str);
+	void StopTimer(std::string str);
+
 	//calculate
 	void OnColocalizenBtn(wxCommandEvent &event);
 	void OnUseSelChk(wxCommandEvent &event);

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <boost/signals2.hpp>
 
 using namespace std;
 
@@ -58,6 +59,10 @@ namespace flrd
 		void Average(float weight, flvr::Argument& avg);
 		double Result()
 		{ return m_result; }
+
+		//update progress
+		boost::signals2::signal<void(std::string)> prework;
+		boost::signals2::signal<void(std::string)> postwork;
 
 	private:
 		VolumeData *m_vd1, *m_vd2;

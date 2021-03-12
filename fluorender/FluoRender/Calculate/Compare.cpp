@@ -886,6 +886,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b1 = (*bricks1)[i];
 		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
@@ -951,6 +953,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		for (int i = 0; i < gsize.gsxyz; ++i)
 			m_result += sum[i];
 		delete[] sum;
+
+		postwork(__FUNCTION__);
 	}
 }
 
@@ -983,6 +987,8 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
+		prework("");
+
 		flvr::TextureBrick* b1 = (*bricks1)[i];
 		flvr::TextureBrick* b2 = (*bricks2)[i];
 		if (m_use_mask)
@@ -1031,5 +1037,7 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		//release buffer
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
 		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
+
+		postwork(__FUNCTION__);
 	}
 }
