@@ -10,8 +10,6 @@ include_directories(
   ${pole_INCLUDE_DIR}
 )
 
-                  #imageJ_reader.hpp
-                  #JVMInitializer.hpp
 set(HEADER_FILES  base_reader.hpp
                   base_writer.hpp
                   brkxml_reader.hpp
@@ -33,10 +31,9 @@ set(HEADER_FILES  base_reader.hpp
                   pvxml_reader.hpp
                   tif_reader.hpp
                   tif_writer.hpp
+                  tinyxml2.hpp
 )
 
-             #imageJ_reader.cpp
-             #JVMInitializer.cpp
 set(SOURCES  base_reader.cpp
              brkxml_reader.cpp
              czi_reader.cpp
@@ -56,6 +53,7 @@ set(SOURCES  base_reader.cpp
              pvxml_reader.cpp
              tif_reader.cpp
              tif_writer.cpp
+             tinyxml2.cpp
 )
 
 set(Formats_INCLUDE_DIR ${HEADER_FILES} CACHE INTERNAL "")

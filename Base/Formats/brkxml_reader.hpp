@@ -4,7 +4,7 @@
 #include <vector>
 #include "base_reader.hpp"
 #include <FLIVR/TextureBrick.h>
-#include <TinyXML/tinyxml2.hpp>
+#include "tinyxml2.hpp"
 
 using namespace std;
 

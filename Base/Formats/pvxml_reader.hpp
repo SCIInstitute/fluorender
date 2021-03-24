@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 #include "base_reader.hpp"
-#include <TinyXML/tinyxml2.hpp>
+#include "tinyxml2.hpp"
 
 class PVXMLReader : public BaseReader
 {

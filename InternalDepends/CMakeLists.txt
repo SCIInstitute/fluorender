@@ -37,7 +37,7 @@ include_directories(
           XInput
           Utilities
           nd2
-          TinyXML)
+)
 
 #add_subdirectory(NV)
 #add_subdirectory(Wacutils)

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define LIF_READER_HPP
 
 #include "base_reader.hpp"
-#include <TinyXML/tinyxml2.hpp>
+#include "tinyxml2.hpp"
 #include <vector>
 #include <string>
 #include <limits>
