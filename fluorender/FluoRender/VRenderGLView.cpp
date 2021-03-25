@@ -6452,8 +6452,8 @@ void VRenderGLView::RunSparseTracking(wxFileConfig &fconfig)
 	//tm_processor.SetContactThresh(contact_factor);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
-		boost::bind(&VRenderGLView::ReadVolCache, this, _1),
-		boost::bind(&VRenderGLView::DelVolCache, this, _1));
+		std::bind(&VRenderGLView::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&VRenderGLView::DelVolCache, this, std::placeholders::_1));
 
 	tm_processor.TrackStencils(m_tseq_prv_num, m_tseq_cur_num);
 
