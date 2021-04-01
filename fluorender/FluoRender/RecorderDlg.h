@@ -117,7 +117,8 @@ class RecorderDlg : public wxPanel
          ID_InsKeyBtn,
          ID_DelAllBtn,
          ID_AutoKeyCmb,
-         ID_AutoKeyBtn
+         ID_AutoKeyBtn,
+		 ID_CamLockChk
       };
 
       RecorderDlg(wxWindow* frame,
@@ -174,6 +175,8 @@ class RecorderDlg : public wxPanel
       wxButton *m_del_key_btn;
       //delete all keys
       wxButton *m_del_all_btn;
+	  //lock cam center object
+	  wxCheckBox *m_cam_lock_chk;
 
    private:
       //insert/append key
@@ -190,6 +193,7 @@ class RecorderDlg : public wxPanel
       void OnDelAll(wxCommandEvent &event);
       void OnPreview(wxCommandEvent &event);
       void OnReset(wxCommandEvent &event);
+	  void OnCamLockChk(wxCommandEvent &event);
       void OnPlay(wxCommandEvent &event);
       void OnStop(wxCommandEvent &event);
 

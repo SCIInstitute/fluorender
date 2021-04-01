@@ -200,6 +200,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	//object rotation
 	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
 	m_rot_lock(false),
+	//lock cam center
+	m_lock_cam_object(false),
 	//object bounding box
 	m_radius(348.0),
 	//mouse position
@@ -725,9 +727,6 @@ void VRenderGLView::HandleCamera(bool vr)
 	{
 		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
 		eye += center;
-		//m_mv_mat = glm::lookAt(glm::vec3(m_transx + m_ctrx, m_transy + m_ctry, m_transz + m_ctrz),
-		//	glm::vec3(m_ctrx, m_ctry, m_ctrz),
-		//	glm::vec3(m_up.x(), m_up.y(), m_up.z()));
 	}
 
 	if (vr && m_enable_vr)
@@ -741,6 +740,30 @@ void VRenderGLView::HandleCamera(bool vr)
 	else
 	{
 		m_mv_mat = glm::lookAt(eye, center, up);
+	}
+
+	if (m_lock_cam_object)
+	{
+		//rotate first
+		glm::vec3 v1(0, 0, -1);//initial cam direction
+		glm::mat4 mv_mat = GetDrawMat();
+		glm::vec4 lock_ctr(m_lock_center.x(), m_lock_center.y(), m_lock_center.z(), 1);
+		lock_ctr = mv_mat * lock_ctr;
+		glm::vec3 v2(lock_ctr);
+		v2 = glm::normalize(v2);
+		float c = glm::dot(v1, v2);
+		if (std::abs(std::abs(c) - 1) < fluo::Epsilon())
+			return;
+		glm::vec3 v = glm::cross(v1, v2);
+		glm::mat3 vx(
+			0, -v.z, v.y,
+			v.z, 0, -v.x,
+			-v.y, v.x, 0);
+		glm::mat3 vx2 = vx * vx;
+		glm::mat3 rot3(1);
+		rot3 += vx + vx2 / (1 + c);
+		glm::mat4 rot4(rot3);
+		m_mv_mat = rot4 * glm::lookAt(eye, center, up);
 	}
 }
 

@@ -523,11 +523,12 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_InsKeyBtn, RecorderDlg::OnInsKey)
 	EVT_BUTTON(ID_DelKeyBtn, RecorderDlg::OnDelKey)
 	EVT_BUTTON(ID_DelAllBtn, RecorderDlg::OnDelAll)
+	EVT_CHECKBOX(ID_CamLockChk, RecorderDlg::OnCamLockChk)
 END_EVENT_TABLE()
 
 RecorderDlg::RecorderDlg(wxWindow* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
-wxPoint(500, 150), wxSize(450, 600),
+wxPoint(500, 150), wxSize(450, 650),
 0, "RecorderDlg"),
 m_frame(frame),
 m_view(0)
@@ -594,6 +595,16 @@ m_view(0)
 	group3->Add(5, 5);
 	group3->Add(m_del_all_btn, 0, wxALIGN_CENTER);
 
+	//lock cam center object
+	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, wxID_ANY, "Lock View to Object:",
+		wxDefaultPosition, wxDefaultSize);
+	m_cam_lock_chk = new wxCheckBox(this, ID_CamLockChk,
+		"Lock");
+	group4->Add(st, 0, wxALIGN_CENTER);
+	group4->Add(5, 5);
+	group4->Add(m_cam_lock_chk, 0, wxALIGN_CENTER);
+
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	//sizerV->Add(10, 5);
@@ -602,6 +613,8 @@ m_view(0)
 	sizerV->Add(group2, 1, wxEXPAND);
 	sizerV->Add(10, 5);
 	sizerV->Add(group3, 0, wxEXPAND);
+	sizerV->Add(5, 5);
+	sizerV->Add(group4, 0, wxEXPAND);
 	sizerV->Add(5, 5);
 
 	SetSizer(sizerV);
@@ -1111,6 +1124,14 @@ void RecorderDlg::OnReset(wxCommandEvent &event)
 		m_view->m_glview->SetParams(0);
 		m_view->RefreshGL();
 	}
+}
+
+void RecorderDlg::OnCamLockChk(wxCommandEvent &event)
+{
+	if (!m_view)
+		return;
+	bool bval = m_cam_lock_chk->GetValue();
+	m_view->m_glview->SetLockCamObject(bval);
 }
 
 void RecorderDlg::OnPlay(wxCommandEvent &event)

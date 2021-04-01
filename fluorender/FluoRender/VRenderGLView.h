@@ -323,6 +323,12 @@ public:
 	{
 		return m_rot_lock;
 	}
+	//lock cam center
+	void SetLockCamObject(bool bval) { m_lock_cam_object = bval; }
+	bool GetLockCamObject() { return m_lock_cam_object; }
+	void SetLockCenter(fluo::Point& center) { m_lock_center = center; }
+	fluo::Point GetLockCenter() { return m_lock_center; }
+
 	//camera properties
 	bool GetPersp() { return m_persp; }
 	void SetPersp(bool persp = true);
@@ -817,6 +823,10 @@ private:
 	double m_obj_rotx, m_obj_roty, m_obj_rotz;
 	//rotation lock
 	bool m_rot_lock;
+
+	//lock on object
+	bool m_lock_cam_object;
+	fluo::Point m_lock_center;
 
 	//object bounding box
 	fluo::BBox m_bounds;
