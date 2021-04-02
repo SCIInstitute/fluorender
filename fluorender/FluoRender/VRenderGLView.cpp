@@ -10702,3 +10702,27 @@ wxString VRenderGLView::GetOGLVersion() {
 	return m_GLversion;
 }
 
+void VRenderGLView::SetLockCenter(int type)
+{
+	switch (type)
+	{
+	case 1:
+	default:
+		SetLockCenterVol();
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	}
+}
+
+void VRenderGLView::SetLockCenterVol()
+{
+	if (!m_cur_vol)
+		return;
+	fluo::BBox box = m_cur_vol->GetClippedBounds();
+	m_lock_center = box.center();
+}

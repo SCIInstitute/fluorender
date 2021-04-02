@@ -524,6 +524,8 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_DelKeyBtn, RecorderDlg::OnDelKey)
 	EVT_BUTTON(ID_DelAllBtn, RecorderDlg::OnDelAll)
 	EVT_CHECKBOX(ID_CamLockChk, RecorderDlg::OnCamLockChk)
+	EVT_COMBOBOX(ID_CamLockCmb, RecorderDlg::OnCamLockCmb)
+	EVT_BUTTON(ID_CamLockBtn, RecorderDlg::OnCamLockBtn)
 END_EVENT_TABLE()
 
 RecorderDlg::RecorderDlg(wxWindow* frame, wxWindow* parent)
@@ -607,6 +609,7 @@ m_cam_lock_type(0)
 	m_cam_lock_cmb->Append("Click view");
 	m_cam_lock_cmb->Append("Ruler");
 	m_cam_lock_cmb->Append("Selection");
+	m_cam_lock_cmb->Select(0);
 	m_cam_lock_btn = new wxButton(this, ID_CamLockBtn, "Apply");
 	group4->Add(5, 5);
 	group4->Add(m_cam_lock_chk, 0, wxALIGN_CENTER);
@@ -1104,7 +1107,22 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 	return panel;
 }
 
-void RecorderDlg::OnPreview(wxCommandEvent &event)
+void RecorderDlg::OnCamLockChk(wxCommandEvent &event)
+{
+	m_cam_lock = m_cam_lock_chk->GetValue();
+}
+
+void RecorderDlg::OnCamLockCmb(wxCommandEvent &event)
+{
+	m_cam_lock_type = m_cam_lock_cmb->GetSelection() + 1;
+}
+
+void RecorderDlg::OnCamLockBtn(wxCommandEvent &event)
+{
+	m_view->m_glview->SetLockCenter(m_cam_lock_type);
+}
+
+/*void RecorderDlg::OnPreview(wxCommandEvent &event)
 {
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame)
@@ -1135,11 +1153,6 @@ void RecorderDlg::OnReset(wxCommandEvent &event)
 		m_view->m_glview->SetParams(0);
 		m_view->RefreshGL();
 	}
-}
-
-void RecorderDlg::OnCamLockChk(wxCommandEvent &event)
-{
-	m_cam_lock = m_cam_lock_chk->GetValue();
 }
 
 void RecorderDlg::OnPlay(wxCommandEvent &event)
@@ -1200,4 +1213,4 @@ void RecorderDlg::OnStop(wxCommandEvent &event)
 			return;
 	}
 	m_view->StopMovie();
-}
+}*/

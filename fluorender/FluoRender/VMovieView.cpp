@@ -1206,10 +1206,9 @@ void VMovieView::SetRendering(double pcnt)
 	if (m_current_page == 1)
 	{
 		Interpolator *interpolator = vr_frame->GetInterpolator();
-		bool cam_lock = m_advanced_movie->GetCamLock();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
-			if (cam_lock && m_timer.IsRunning())
+			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
 				vrv->m_glview->SetLockCamObject(true);
 			int end_frame = int(interpolator->GetLastT());
 			vrv->SetParams(pcnt * end_frame);

@@ -326,8 +326,8 @@ public:
 	//lock cam center
 	void SetLockCamObject(bool bval) { m_lock_cam_object = bval; }
 	bool GetLockCamObject() { return m_lock_cam_object; }
-	void SetLockCenter(fluo::Point& center) { m_lock_center = center; }
-	fluo::Point GetLockCenter() { return m_lock_center; }
+	void SetLockCenter(int type);
+	void SetLockCenterVol();
 
 	//camera properties
 	bool GetPersp() { return m_persp; }

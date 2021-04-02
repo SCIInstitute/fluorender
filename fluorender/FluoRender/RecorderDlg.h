@@ -133,22 +133,22 @@ class RecorderDlg : public wxPanel
       void UpdateList()
       { m_keylist->Update(); }
       void SetSelection(int index);
-	  void Save() { 
-		wxCommandEvent e;
-		OnPlay(e); 
-	  }
-	  void Rewind() { 
-		wxCommandEvent e;
-		OnReset(e); 
-	  }
-	  void Stop() { 
-		wxCommandEvent e;
-		OnStop(e); 
-	  }
-	  void Play() { 
-		wxCommandEvent e;
-		OnPreview(e); 
-	  }
+	 // void Save() { 
+		//wxCommandEvent e;
+		//OnPlay(e); 
+	 // }
+	 // void Rewind() { 
+		//wxCommandEvent e;
+		//OnReset(e); 
+	 // }
+	 // void Stop() { 
+		//wxCommandEvent e;
+		//OnStop(e); 
+	 // }
+	 // void Play() { 
+		//wxCommandEvent e;
+		//OnPreview(e); 
+	 // }
 
       void AutoKeyChanComb(int comb);
 
@@ -201,11 +201,13 @@ private:
       void OnInsKey(wxCommandEvent &event);
       void OnDelKey(wxCommandEvent &event);
       void OnDelAll(wxCommandEvent &event);
-      void OnPreview(wxCommandEvent &event);
-      void OnReset(wxCommandEvent &event);
 	  void OnCamLockChk(wxCommandEvent &event);
-      void OnPlay(wxCommandEvent &event);
-      void OnStop(wxCommandEvent &event);
+	  void OnCamLockCmb(wxCommandEvent &event);
+	  void OnCamLockBtn(wxCommandEvent &event);
+      //void OnPreview(wxCommandEvent &event);
+      //void OnReset(wxCommandEvent &event);
+      //void OnPlay(wxCommandEvent &event);
+      //void OnStop(wxCommandEvent &event);
 
       DECLARE_EVENT_TABLE()
 };
