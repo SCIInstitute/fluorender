@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
 #include <Distance/SegGrow.h>
+#include <Distance/Cov.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -202,6 +203,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_rot_lock(false),
 	//lock cam center
 	m_lock_cam_object(false),
+	m_pick_lock_center(false),
 	//object bounding box
 	m_radius(348.0),
 	//mouse position
@@ -3770,7 +3772,7 @@ void VRenderGLView::PickVolume()
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
 	double min_dist = -1.0;
-	fluo::Point p, ip;
+	fluo::Point p, ip, pp;
 	VolumeData* vd = 0;
 	VolumeData* picked_vd = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -3788,6 +3790,7 @@ void VRenderGLView::PickVolume()
 			{
 				min_dist = dist;
 				picked_vd = vd;
+				pp = p;
 			}
 			else
 			{
@@ -3797,6 +3800,7 @@ void VRenderGLView::PickVolume()
 					{
 						min_dist = dist;
 						picked_vd = vd;
+						pp = p;
 					}
 				}
 				else
@@ -3805,6 +3809,7 @@ void VRenderGLView::PickVolume()
 					{
 						min_dist = dist;
 						picked_vd = vd;
+						pp = p;
 					}
 				}
 			}
@@ -3821,6 +3826,9 @@ void VRenderGLView::PickVolume()
 		}
 		//update label selection
 		SetCompSelection(ip, kmode);
+
+		if (m_pick_lock_center)
+			m_lock_center = pp;
 	}
 }
 
@@ -9444,12 +9452,16 @@ flrd::RulerList* VRenderGLView::GetRulerList()
 
 flrd::Ruler* VRenderGLView::GetRuler(unsigned int id)
 {
+	m_cur_ruler = 0;
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
 	{
 		if (m_ruler_list[i] && m_ruler_list[i]->Id() == id)
-			return m_ruler_list[i];
+		{
+			m_cur_ruler = m_ruler_list[i];
+			break;
+		}
 	}
-	return 0;
+	return m_cur_ruler;
 }
 
 //draw highlighted comps
@@ -9978,6 +9990,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (m_pick)
 			{
 				Pick();
+				m_pick_lock_center = false;
 				return;
 			}
 			else
@@ -10711,10 +10724,13 @@ void VRenderGLView::SetLockCenter(int type)
 		SetLockCenterVol();
 		break;
 	case 2:
+		m_pick_lock_center = true;
 		break;
 	case 3:
+		SetLockCenterRuler();
 		break;
 	case 4:
+		SetLockCenterSel();
 		break;
 	}
 }
@@ -10725,4 +10741,20 @@ void VRenderGLView::SetLockCenterVol()
 		return;
 	fluo::BBox box = m_cur_vol->GetClippedBounds();
 	m_lock_center = box.center();
+}
+
+void VRenderGLView::SetLockCenterRuler()
+{
+	if (!m_cur_ruler)
+		return;
+	m_lock_center = m_cur_ruler->GetCenter();
+}
+
+void VRenderGLView::SetLockCenterSel()
+{
+	if (!m_cur_vol)
+		return;
+	flrd::Cov cover(m_cur_vol);
+	cover.Compute(1);
+	m_lock_center = cover.GetCenter();
 }

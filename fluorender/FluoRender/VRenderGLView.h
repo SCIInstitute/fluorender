@@ -328,6 +328,8 @@ public:
 	bool GetLockCamObject() { return m_lock_cam_object; }
 	void SetLockCenter(int type);
 	void SetLockCenterVol();
+	void SetLockCenterRuler();
+	void SetLockCenterSel();
 
 	//camera properties
 	bool GetPersp() { return m_persp; }
@@ -726,6 +728,7 @@ private:
 	vector <TreeLayer*> m_layer_list;
 	//ruler list
 	flrd::RulerList m_ruler_list;
+	flrd::Ruler *m_cur_ruler;
 	//traces
 	TraceGroup* m_trace_group;
 	//multivolume
@@ -827,6 +830,7 @@ private:
 	//lock on object
 	bool m_lock_cam_object;
 	fluo::Point m_lock_center;
+	bool m_pick_lock_center;
 
 	//object bounding box
 	fluo::BBox m_bounds;

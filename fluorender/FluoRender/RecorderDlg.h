@@ -156,7 +156,7 @@ class RecorderDlg : public wxPanel
 
 private:
 	bool m_cam_lock;
-	int m_cam_lock_type;//0-not used;
+	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
    private:
       wxWindow* m_frame;
