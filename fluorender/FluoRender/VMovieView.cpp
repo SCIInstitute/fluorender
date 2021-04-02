@@ -853,7 +853,8 @@ void VMovieView::OnStop(wxCommandEvent& event)
 	flvr::TextureRenderer::maximize_uptime_ = false;
 }
 
-void VMovieView::OnRewind(wxCommandEvent& event) {
+void VMovieView::OnRewind(wxCommandEvent& event)
+{
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (!vr_frame) return;
@@ -1200,12 +1201,16 @@ void VMovieView::SetRendering(double pcnt)
 	if (!vr_frame) return;
 	VRenderView* vrv = vr_frame->GetView(str);
 	if (!vrv) return;
+	vrv->m_glview->SetLockCamObject(false);
 	//advanced options
 	if (m_current_page == 1)
 	{
 		Interpolator *interpolator = vr_frame->GetInterpolator();
+		bool cam_lock = m_advanced_movie->GetCamLock();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
+			if (cam_lock && m_timer.IsRunning())
+				vrv->m_glview->SetLockCamObject(true);
 			int end_frame = int(interpolator->GetLastT());
 			vrv->SetParams(pcnt * end_frame);
 			vrv->RefreshGL();

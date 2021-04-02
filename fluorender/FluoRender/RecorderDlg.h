@@ -118,7 +118,9 @@ class RecorderDlg : public wxPanel
          ID_DelAllBtn,
          ID_AutoKeyCmb,
          ID_AutoKeyBtn,
-		 ID_CamLockChk
+		 ID_CamLockChk,
+		 ID_CamLockCmb,
+		 ID_CamLockBtn
       };
 
       RecorderDlg(wxWindow* frame,
@@ -150,6 +152,12 @@ class RecorderDlg : public wxPanel
 
       void AutoKeyChanComb(int comb);
 
+	  bool GetCamLock() { return m_cam_lock; }
+
+private:
+	bool m_cam_lock;
+	int m_cam_lock_type;//0-not used;
+
    private:
       wxWindow* m_frame;
       //current view
@@ -177,6 +185,8 @@ class RecorderDlg : public wxPanel
       wxButton *m_del_all_btn;
 	  //lock cam center object
 	  wxCheckBox *m_cam_lock_chk;
+	  wxComboBox *m_cam_lock_cmb;
+	  wxButton *m_cam_lock_btn;
 
    private:
       //insert/append key

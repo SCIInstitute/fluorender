@@ -531,7 +531,9 @@ RecorderDlg::RecorderDlg(wxWindow* frame, wxWindow* parent)
 wxPoint(500, 150), wxSize(450, 650),
 0, "RecorderDlg"),
 m_frame(frame),
-m_view(0)
+m_view(0),
+m_cam_lock(false),
+m_cam_lock_type(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -597,13 +599,22 @@ m_view(0)
 
 	//lock cam center object
 	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, wxID_ANY, "Lock View to Object:",
-		wxDefaultPosition, wxDefaultSize);
 	m_cam_lock_chk = new wxCheckBox(this, ID_CamLockChk,
-		"Lock");
-	group4->Add(st, 0, wxALIGN_CENTER);
+		"Lock View Taget:");
+	m_cam_lock_cmb = new wxComboBox(this, ID_CamLockCmb, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_cam_lock_cmb->Append("Image center");
+	m_cam_lock_cmb->Append("Click view");
+	m_cam_lock_cmb->Append("Ruler");
+	m_cam_lock_cmb->Append("Selection");
+	m_cam_lock_btn = new wxButton(this, ID_CamLockBtn, "Apply");
 	group4->Add(5, 5);
 	group4->Add(m_cam_lock_chk, 0, wxALIGN_CENTER);
+	group4->AddStretchSpacer(1);
+	group4->Add(m_cam_lock_cmb, 0, wxALIGN_CENTER);
+	group4->Add(5, 5);
+	group4->Add(m_cam_lock_btn, 0, wxALIGN_CENTER);
+	group4->Add(5, 5);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -1128,10 +1139,7 @@ void RecorderDlg::OnReset(wxCommandEvent &event)
 
 void RecorderDlg::OnCamLockChk(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-	bool bval = m_cam_lock_chk->GetValue();
-	m_view->m_glview->SetLockCamObject(bval);
+	m_cam_lock = m_cam_lock_chk->GetValue();
 }
 
 void RecorderDlg::OnPlay(wxCommandEvent &event)
