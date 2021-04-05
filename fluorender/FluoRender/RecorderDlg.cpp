@@ -602,7 +602,7 @@ m_cam_lock_type(0)
 	//lock cam center object
 	wxBoxSizer *group4 = new wxBoxSizer(wxHORIZONTAL);
 	m_cam_lock_chk = new wxCheckBox(this, ID_CamLockChk,
-		"Lock View Taget:");
+		"Lock View Target:");
 	m_cam_lock_cmb = new wxComboBox(this, ID_CamLockCmb, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_cam_lock_cmb->Append("Image center");
