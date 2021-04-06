@@ -108,6 +108,7 @@ set(HEADER_FILES
     Renderer/Renderer2D.hpp
     Renderer/Renderer3D.hpp
     Renderer/ClipPlaneRenderer.hpp
+    Renderer/ViewRenderer.hpp
   )
   
 set(SOURCES
@@ -156,6 +157,7 @@ set(SOURCES
     Renderer/Renderer2D.cpp
     Renderer/Renderer3D.cpp
     Renderer/ClipPlaneRenderer.cpp
+    Renderer/ViewRenderer.cpp
   )
   
 set(UI_FILES
