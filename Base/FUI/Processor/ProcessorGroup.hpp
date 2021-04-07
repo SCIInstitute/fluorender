@@ -25,28 +25,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef PROCESSORGROUP_HPP
+#define PROCESSORGROUP_HPP
 
-#include "Processor.hpp"
+#include <Group.hpp>
 
-using namespace fluo;
-
-Processor::Processor():
-	Node()
+namespace fluo
 {
-	setupInputs();
-	setupOutputs();
-}
-
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Node(processor, copyop, false)
+class ProcessorGroup : public Group
 {
-	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
-}
+public:
 
-Processor::~Processor()
-{
-}
+	ProcessorGroup();
 
+	ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual ProcessorGroup* clone(const CopyOp& copyop) const { return new ProcessorGroup(*this, copyop); };
+
+	virtual bool isSameKindAs(const ProcessorGroup*) const {return true;}
+
+	virtual const char* className() const { return "ProcessorGroup"; }
+
+
+protected:
+	~ProcessorGroup();
+
+protected:
+
+};
+}
+#endif//PROCESSORGROUP_HPP

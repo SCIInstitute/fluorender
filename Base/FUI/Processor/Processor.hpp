@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef PROCESSOR_HPP
 #define PROCESSOR_HPP
 
-#include <Object.hpp>
+#include <Node.hpp>
 
 namespace fluo
 {
@@ -37,7 +37,7 @@ typedef std::vector<Processor*> ProcessorList;
 
 class ProcessorFactory;
 
-class Processor : public Object
+class Processor : public Node
 {
 public:
 

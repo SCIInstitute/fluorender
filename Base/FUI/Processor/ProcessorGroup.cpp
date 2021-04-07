@@ -26,27 +26,21 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Processor.hpp"
+#include "ProcessorGroup.hpp"
 
 using namespace fluo;
 
-Processor::Processor():
-	Node()
+ProcessorGroup::ProcessorGroup():
+	Group()
 {
-	setupInputs();
-	setupOutputs();
 }
 
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Node(processor, copyop, false)
+ProcessorGroup::ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop, bool copy_values):
+	Group(group, copyop, false)
 {
-	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
 }
 
-Processor::~Processor()
+ProcessorGroup::~ProcessorGroup()
 {
 }
 

@@ -102,6 +102,7 @@ set(HEADER_FILES
     Panels/Base_Agent/InterfaceAgent.hpp
     Global/Global.hpp
     Processor/Processor.hpp
+    Processor/ProcessorGroup.hpp
     Processor/ProcessorFactory.hpp
     Processor/StreamProcessor.hpp
     Renderer/Renderer.hpp
@@ -151,6 +152,7 @@ set(SOURCES
 		Panels/Base_Agent/AgentFactory.cpp
     Global/Global.cpp
     Processor/Processor.cpp
+    Processor/ProcessorGroup.cpp
     Processor/ProcessorFactory.cpp
     Processor/StreamProcessor.cpp
     Renderer/Renderer.cpp
