@@ -26,22 +26,34 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include "ProcessorVisitor.hpp"
 #include "ProcessorGroup.hpp"
+#include "Processor.hpp"
 
 using namespace fluo;
 
-ProcessorGroup::ProcessorGroup():
-	Group(),
-	condition_func_(nullptr)
+void ProcessorVisitor::apply(Node& node)
 {
+	Processor* prc = dynamic_cast<Processor*>(&node);
+	if (prc)
+	{
+		Event event;
+		prc->run(event);
+	}
+	traverse(node);
 }
 
-ProcessorGroup::ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop, bool copy_values):
-	Group(group, copyop, false)
+void ProcessorVisitor::apply(Group& group)
 {
-}
-
-ProcessorGroup::~ProcessorGroup()
-{
+	ProcessorGroup* prcgroup = dynamic_cast<ProcessorGroup*>(&group);
+	if (prcgroup)
+	{
+		bool condition = prcgroup->condition();
+		if (condition)
+			setTraversalMask(PBT_TRUE);
+		else
+			setTraversalMask(PBT_FALSE);
+	}
+	traverse(group);
 }
 

@@ -26,22 +26,34 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ProcessorGroup.hpp"
+//the draw volume visitor simply copies code from the old renderglview
+//a new render pipeline should replace this
+#ifndef PROCESSORVISITOR_HPP
+#define PROCESSORVISITOR_HPP
 
-using namespace fluo;
+#include <NodeVisitor.hpp>
 
-ProcessorGroup::ProcessorGroup():
-	Group(),
-	condition_func_(nullptr)
+namespace fluo
 {
-}
+	enum ProcessorBranchType
+	{
+		PBT_TRUE = (1u << 0),
+		PBT_FALSE = (1u << 1),
+		PBT_DONTCARE = 0xffffffff
+	};
+	class ProcessorVisitor : public NodeVisitor
+	{
+	public:
+		ProcessorVisitor() : NodeVisitor()
+		{
+			setTraversalMode(fluo::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+		}
 
-ProcessorGroup::ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop, bool copy_values):
-	Group(group, copyop, false)
-{
-}
+		virtual void apply(fluo::Node& node);
 
-ProcessorGroup::~ProcessorGroup()
-{
-}
+		virtual void apply(fluo::Group& group);
 
+	private:
+	};
+}
+#endif//PROCESSORVISITOR_HPP

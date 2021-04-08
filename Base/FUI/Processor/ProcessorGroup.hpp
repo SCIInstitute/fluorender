@@ -30,28 +30,42 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Group.hpp>
 
+
 namespace fluo
 {
-class ProcessorGroup : public Group
-{
-public:
+	typedef std::function<bool()> conditionFunctionType;
+	class ProcessorGroup : public Group
+	{
+	public:
 
-	ProcessorGroup();
+		ProcessorGroup();
 
-	ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+		ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual ProcessorGroup* clone(const CopyOp& copyop) const { return new ProcessorGroup(*this, copyop); };
+		virtual ProcessorGroup* clone(const CopyOp& copyop) const { return new ProcessorGroup(*this, copyop); };
 
-	virtual bool isSameKindAs(const ProcessorGroup*) const {return true;}
+		virtual bool isSameKindAs(const ProcessorGroup*) const {return true;}
 
-	virtual const char* className() const { return "ProcessorGroup"; }
+		virtual const char* className() const { return "ProcessorGroup"; }
 
+		//manage conditions to implement a decision tree
+		virtual void setConditionFunction(conditionFunctionType func)
+		{
+			condition_func_ = func;
+		}
+		virtual bool condition()
+		{
+			if (condition_func_)
+				return condition_func_();
+			else
+				return false;
+		};
 
-protected:
-	~ProcessorGroup();
+	protected:
+		~ProcessorGroup();
 
-protected:
-
-};
+	protected:
+		conditionFunctionType condition_func_;
+	};
 }
 #endif//PROCESSORGROUP_HPP
