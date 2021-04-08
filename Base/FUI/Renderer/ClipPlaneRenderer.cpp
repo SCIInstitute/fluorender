@@ -43,6 +43,9 @@ ClipPlaneRenderer::ClipPlaneRenderer():
 {
 	setupInputs();
 	setupOutputs();
+	setProcessFunction(
+		std::bind(&ClipPlaneRenderer::render,
+			this, std::placeholders::_1));
 }
 
 ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
@@ -50,6 +53,9 @@ ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const fl
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
+	setProcessFunction(
+		std::bind(&ClipPlaneRenderer::render,
+			this, std::placeholders::_1));
 }
 
 ClipPlaneRenderer::~ClipPlaneRenderer()
@@ -83,8 +89,7 @@ void ClipPlaneRenderer::setupOutputs()
 
 bool ClipPlaneRenderer::render(fluo::Event& event)
 {
-	bool result = Renderer3D::render(event);
-
+	bool result = true;
 	bool display = false;
 	getValue("clip display", display);
 	bool hold = false;

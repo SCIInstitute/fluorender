@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData/MeshData.hpp>
 #include <Mesh/MeshGroup.hpp>
 #include <Annotations.hpp>
-#include <RenderView.hpp>
+#include <View.hpp>
 
 #include <iostream>
 #include <string>
@@ -132,15 +132,15 @@ namespace fluo
 			else
 				return 0;
 		}
-/*
-		RenderView* getRenderView()
+
+		View* getView()
 		{
 			if (!results_.empty())
-				return dynamic_cast<RenderView*>(results_[0]);
+				return dynamic_cast<View*>(results_[0]);
 			else
 				return 0;
 		}
-*/
+
 		void matchName(const std::string &name)
 		{ names_.push_back(name); }
 		void matchNames(const std::vector<std::string> &names)

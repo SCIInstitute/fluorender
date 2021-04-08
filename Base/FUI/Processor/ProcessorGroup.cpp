@@ -37,7 +37,8 @@ ProcessorGroup::ProcessorGroup():
 }
 
 ProcessorGroup::ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop, bool copy_values):
-	Group(group, copyop, false)
+	Group(group, copyop, false),
+	condition_func_(nullptr)
 {
 }
 

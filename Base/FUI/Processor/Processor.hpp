@@ -37,6 +37,8 @@ typedef std::vector<Processor*> ProcessorList;
 
 class ProcessorFactory;
 
+typedef std::function<bool(Event&)> processFunctionType;
+
 class Processor : public Node
 {
 public:
@@ -51,7 +53,28 @@ public:
 
 	virtual const char* className() const { return "Processor"; }
 
-    virtual bool run(Event& event) { return true; }
+	virtual bool run(Event& event)
+	{
+		bool bval = true;
+		if (before_run_function_)
+		{
+			before_run_function_(event);
+		}
+		if (process_func_)
+		{
+			bval = process_func_(event);
+		}
+		if (after_run_function_)
+		{
+			after_run_function_(event);
+		}
+		return bval;
+	}
+
+	virtual void setProcessFunction(processFunctionType func)
+	{
+		process_func_ = func;
+	}
 
 	inline void copyInputValues(Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
 	{
@@ -82,9 +105,11 @@ protected:
 protected:
 	ValueCollection inputs_;
 	ValueCollection outputs_;
+	processFunctionType process_func_;
 
 	virtual void setupInputs() {}
 	virtual void setupOutputs() {}
+
 };
 }
 #endif//FL_PROCESSOR

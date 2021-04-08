@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Group.hpp>
 
-
 namespace fluo
 {
 	typedef std::function<bool()> conditionFunctionType;

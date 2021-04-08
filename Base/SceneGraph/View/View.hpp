@@ -26,37 +26,37 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef RENDERVIEW_HPP
-#define RENDERVIEW_HPP
+#ifndef VIEW_HPP
+#define VIEW_HPP
 
 #include <Group.hpp>
 
 namespace fluo
 {
-	class RenderView : public Group
+	class View : public Group
 	{
 	public:
-		RenderView();
-		RenderView(const RenderView& view, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+		View();
+		View(const View& view, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
-			return new RenderView(*this, copyop);
+			return new View(*this, copyop);
 		}
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const RenderView*>(obj) != NULL;
+			return dynamic_cast<const View*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "RenderView"; }
+		virtual const char* className() const { return "View"; }
 
-		virtual RenderView* asRenderView() { return this; }
-		virtual const RenderView* asRenderView() const { return this; }
+		virtual View* asRenderView() { return this; }
+		virtual const View* asRenderView() const { return this; }
 
 	protected:
-		virtual ~RenderView();
+		virtual ~View();
 	};
 }
 
-#endif//_RENDERVIEW_H_
+#endif//VIEW_HPP

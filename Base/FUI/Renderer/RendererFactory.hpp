@@ -25,66 +25,66 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PROCESSOR_FACTORY_HPP
-#define PROCESSOR_FACTORY_HPP
+#ifndef RENDERER_FACTORY_HPP
+#define RENDERER_FACTORY_HPP
 
-#include <ObjectFactory.hpp>
-#include "Processor.hpp"
+#include <Processor/ProcessorFactory.hpp>
+#include "Renderer.hpp"
 
-namespace fluo
+namespace FLR
 {
-	class ProcessorFactory : public ObjectFactory
+	class RendererFactory : public fluo::ProcessorFactory
 	{
 	public:
-		ProcessorFactory();
+		RendererFactory();
 
-		virtual bool isSameKindAs(const Object* obj) const
-        { return dynamic_cast<const ProcessorFactory*>(obj) != nullptr; }
+		virtual bool isSameKindAs(const fluo::Object* obj) const
+        { return dynamic_cast<const RendererFactory*>(obj) != nullptr; }
 
-		virtual const char* className() const { return "ProcessorFactory"; }
+		virtual const char* className() const { return "RendererFactory"; }
 
 		virtual void createDefault() {}
 
-        virtual Processor* getDefault() { return nullptr; }
+        virtual Renderer* getDefault() { return nullptr; }
 
-        virtual Processor* build(Processor* processor = nullptr) { return nullptr; }
+        virtual Renderer* build(Renderer* renderer = nullptr) { return nullptr; }
 
-        virtual Processor* clone(Processor*) { return nullptr; }
+        virtual Renderer* clone(Renderer*) { return nullptr; }
 
-        virtual Processor* clone(const unsigned int) { return nullptr; }
+        virtual Renderer* clone(const unsigned int) { return nullptr; }
 
-		inline virtual Processor* get(size_t i)
+		inline virtual Renderer* get(size_t i)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::get(i));
+			return dynamic_cast<Renderer*>(fluo::ObjectFactory::get(i));
 		}
 
-		inline virtual const Processor* get(size_t i) const
+		inline virtual const Renderer* get(size_t i) const
 		{
-			return dynamic_cast<Processor*>(const_cast<Object*>(ObjectFactory::get(i)));
+			return dynamic_cast<Renderer*>(const_cast<fluo::Object*>(fluo::ObjectFactory::get(i)));
 		}
 
-		inline virtual Processor* find(const unsigned int id)
+		inline virtual Renderer* find(const unsigned int id)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::find(id));
+			return dynamic_cast<Renderer*>(fluo::ObjectFactory::find(id));
 		}
 
-		inline virtual Processor* findFirst(const std::string &name)
+		inline virtual Renderer* findFirst(const std::string &name)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::findFirst(name));
+			return dynamic_cast<Renderer*>(fluo::ObjectFactory::findFirst(name));
 		}
 
-		inline virtual Processor* findLast(const std::string &name)
+		inline virtual Renderer* findLast(const std::string &name)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::findLast(name));
+			return dynamic_cast<Renderer*>(fluo::ObjectFactory::findLast(name));
 		}
 
 		//FLR::ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
 
 	protected:
-		virtual ~ProcessorFactory();
+		virtual ~RendererFactory();
 
 	};
 
 }
 
-#endif//FL_PROCESSORFACTORY
+#endif//RENDERER_FACTORY_HPP

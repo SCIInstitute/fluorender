@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ProcessorFactory.hpp"
-#include <Renderer/ClipPlaneRenderer.hpp>
 
 using namespace fluo;
 
@@ -42,18 +41,18 @@ ProcessorFactory::~ProcessorFactory()
 
 }
 
-FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
-{
-	Processor* result = findFirst(name);
-	if (result)
-		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
-
-	//not found
-	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
-	if (renderer)
-	{
-		renderer->setName(name);
-		objects_.push_front(renderer);
-	}
-	return renderer;
-}
+//FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
+//{
+//	Processor* result = findFirst(name);
+//	if (result)
+//		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
+//
+//	//not found
+//	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+//	if (renderer)
+//	{
+//		renderer->setName(name);
+//		objects_.push_front(renderer);
+//	}
+//	return renderer;
+//}

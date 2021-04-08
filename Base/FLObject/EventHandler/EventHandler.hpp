@@ -49,7 +49,10 @@ namespace fluo
             node_added_function_(nullptr),
             node_removed_function_(nullptr),
             default_value_changing_function_(nullptr),
-            default_value_changed_function_(nullptr) {}
+            default_value_changed_function_(nullptr),
+			before_run_function_(nullptr),
+			after_run_function_(nullptr)
+		{}
 
 		virtual const char* className() const { return "EventHandler"; }
 
@@ -81,6 +84,16 @@ namespace fluo
 		void setNodeRemovedFunction(eventFunctionType func)
 		{
 			node_removed_function_ = func;
+		}
+
+		void setBeforeRunFunction(eventFunctionType func)
+		{
+			before_run_function_ = func;
+		}
+
+		void setAfterRunFunction(eventFunctionType func)
+		{
+			after_run_function_ = func;
 		}
 
         void onValueChanging(const std::string &name, Event& event) const
@@ -151,8 +164,12 @@ namespace fluo
 		std::unordered_map<std::string, eventFunctionType> value_changed_functions_;
 		eventFunctionType default_value_changing_function_;
 		eventFunctionType default_value_changed_function_;
+		//for scenegraph change
 		eventFunctionType node_added_function_;
 		eventFunctionType node_removed_function_;
+		//for processor
+		eventFunctionType before_run_function_;
+		eventFunctionType after_run_function_;
 	};
 }
 #endif

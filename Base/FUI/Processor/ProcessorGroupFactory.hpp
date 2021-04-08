@@ -25,66 +25,64 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PROCESSOR_FACTORY_HPP
-#define PROCESSOR_FACTORY_HPP
+#ifndef PROCESSORGROUP_FACTORY_HPP
+#define PROCESSORGROUP_FACTORY_HPP
 
 #include <ObjectFactory.hpp>
-#include "Processor.hpp"
+#include "ProcessorGroup.hpp"
 
 namespace fluo
 {
-	class ProcessorFactory : public ObjectFactory
+	class ProcessorGroupFactory : public ObjectFactory
 	{
 	public:
-		ProcessorFactory();
+		ProcessorGroupFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
-        { return dynamic_cast<const ProcessorFactory*>(obj) != nullptr; }
+        { return dynamic_cast<const ProcessorGroupFactory*>(obj) != nullptr; }
 
-		virtual const char* className() const { return "ProcessorFactory"; }
+		virtual const char* className() const { return "ProcessorGroupFactory"; }
 
 		virtual void createDefault() {}
 
-        virtual Processor* getDefault() { return nullptr; }
+        virtual ProcessorGroup* getDefault() { return nullptr; }
 
-        virtual Processor* build(Processor* processor = nullptr) { return nullptr; }
+        virtual ProcessorGroup* build(ProcessorGroup* group = nullptr) { return nullptr; }
 
-        virtual Processor* clone(Processor*) { return nullptr; }
+        virtual ProcessorGroup* clone(ProcessorGroup*) { return nullptr; }
 
-        virtual Processor* clone(const unsigned int) { return nullptr; }
+        virtual ProcessorGroup* clone(const unsigned int) { return nullptr; }
 
-		inline virtual Processor* get(size_t i)
+		inline virtual ProcessorGroup* get(size_t i)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::get(i));
+			return dynamic_cast<ProcessorGroup*>(ObjectFactory::get(i));
 		}
 
-		inline virtual const Processor* get(size_t i) const
+		inline virtual const ProcessorGroup* get(size_t i) const
 		{
-			return dynamic_cast<Processor*>(const_cast<Object*>(ObjectFactory::get(i)));
+			return dynamic_cast<ProcessorGroup*>(const_cast<Object*>(ObjectFactory::get(i)));
 		}
 
-		inline virtual Processor* find(const unsigned int id)
+		inline virtual ProcessorGroup* find(const unsigned int id)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::find(id));
+			return dynamic_cast<ProcessorGroup*>(ObjectFactory::find(id));
 		}
 
-		inline virtual Processor* findFirst(const std::string &name)
+		inline virtual ProcessorGroup* findFirst(const std::string &name)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::findFirst(name));
+			return dynamic_cast<ProcessorGroup*>(ObjectFactory::findFirst(name));
 		}
 
-		inline virtual Processor* findLast(const std::string &name)
+		inline virtual ProcessorGroup* findLast(const std::string &name)
 		{
-			return dynamic_cast<Processor*>(ObjectFactory::findLast(name));
+			return dynamic_cast<ProcessorGroup*>(ObjectFactory::findLast(name));
 		}
-
-		//FLR::ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
 
 	protected:
-		virtual ~ProcessorFactory();
+		virtual ~ProcessorGroupFactory();
 
 	};
 
 }
 
-#endif//FL_PROCESSORFACTORY
+#endif//PROCESSORGROUP_FACTORY_HPP

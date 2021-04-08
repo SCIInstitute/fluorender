@@ -106,11 +106,14 @@ set(HEADER_FILES
 	Processor/ProcessorFactory.hpp
 	Processor/StreamProcessor.hpp
 	Processor/ProcessorVisitor.hpp
+	Processor/ProcessorGroupFactory.hpp
 	Renderer/Renderer.hpp
 	Renderer/Renderer2D.hpp
 	Renderer/Renderer3D.hpp
 	Renderer/ClipPlaneRenderer.hpp
 	Renderer/ViewRenderer.hpp
+	Renderer/RendererFactory.hpp
+	Renderer/RendererGroupFactory.hpp
   )
   
 set(SOURCES
@@ -157,11 +160,14 @@ set(SOURCES
 	Processor/ProcessorFactory.cpp
 	Processor/StreamProcessor.cpp
 	Processor/ProcessorVisitor.cpp
+	Processor/ProcessorGroupFactory.cpp
 	Renderer/Renderer.cpp
 	Renderer/Renderer2D.cpp
 	Renderer/Renderer3D.cpp
 	Renderer/ClipPlaneRenderer.cpp
 	Renderer/ViewRenderer.cpp
+	Renderer/RendererFactory.cpp
+	Renderer/RendererGroupFactory.cpp
   )
   
 set(UI_FILES

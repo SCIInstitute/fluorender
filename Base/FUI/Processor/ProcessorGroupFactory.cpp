@@ -26,26 +26,33 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "RenderView.hpp"
-#include <Root.hpp>
+#include "ProcessorGroupFactory.hpp"
 
 using namespace fluo;
 
-RenderView::RenderView()
+ProcessorGroupFactory::ProcessorGroupFactory()
 {
-	addValue("sort value", std::string("name"));
-	addValue("sort method", long(SortNone));
-	addValue("selected", bool(false));
+	m_name = "processor group factory";
+	default_object_name_ = "default processor group";
 }
 
-RenderView::RenderView(const RenderView& view, const CopyOp& copyop) :
-	Group(view, copyop)
+ProcessorGroupFactory::~ProcessorGroupFactory()
 {
 
 }
 
-RenderView::~RenderView()
-{
-
-}
-
+//FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
+//{
+//	Processor* result = findFirst(name);
+//	if (result)
+//		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
+//
+//	//not found
+//	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+//	if (renderer)
+//	{
+//		renderer->setName(name);
+//		objects_.push_front(renderer);
+//	}
+//	return renderer;
+//}

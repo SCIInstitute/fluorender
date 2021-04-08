@@ -26,33 +26,25 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Renderer2D.hpp"
+#include "View.hpp"
+#include <Root.hpp>
 
-using namespace FLR;
+using namespace fluo;
 
-Renderer2D::Renderer2D():
-	Renderer()
+View::View()
 {
-	setupInputs();
-	setupOutputs();
+	addValue("sort value", std::string("name"));
+	addValue("sort method", long(SortNone));
+	addValue("selected", bool(false));
 }
 
-Renderer2D::Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer(renderer, copyop, false)
+View::View(const View& view, const CopyOp& copyop) :
+	Group(view, copyop)
 {
-	if (copy_values)
-		copyValues(renderer, copyop);
+
 }
 
-Renderer2D::~Renderer2D()
-{
-}
-
-void Renderer2D::setupInputs()
-{
-}
-
-void Renderer2D::setupOutputs()
+View::~View()
 {
 
 }

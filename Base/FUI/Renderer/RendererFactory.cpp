@@ -26,34 +26,33 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Renderer2D.hpp"
+#include "RendererFactory.hpp"
 
 using namespace FLR;
 
-Renderer2D::Renderer2D():
-	Renderer()
+RendererFactory::RendererFactory()
 {
-	setupInputs();
-	setupOutputs();
+	m_name = "renderer factory";
+	default_object_name_ = "default renderer";
 }
 
-Renderer2D::Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer(renderer, copyop, false)
-{
-	if (copy_values)
-		copyValues(renderer, copyop);
-}
-
-Renderer2D::~Renderer2D()
-{
-}
-
-void Renderer2D::setupInputs()
-{
-}
-
-void Renderer2D::setupOutputs()
+RendererFactory::~RendererFactory()
 {
 
 }
 
+//FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
+//{
+//	Processor* result = findFirst(name);
+//	if (result)
+//		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
+//
+//	//not found
+//	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+//	if (renderer)
+//	{
+//		renderer->setName(name);
+//		objects_.push_front(renderer);
+//	}
+//	return renderer;
+//}

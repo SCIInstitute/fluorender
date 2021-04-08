@@ -47,14 +47,6 @@ public:
 
 	virtual const char* className() const { return "Renderer"; }
 
-    virtual bool run(fluo::Event& event)
-    {
-        //TODO, if even it null create a new event
-		return render(event);
-	}
-
-    virtual bool render(fluo::Event& event) { return true; }
-
 protected:
 	~Renderer();
 

@@ -56,7 +56,7 @@ set(HEADER_FILES Annotations/Annotations.hpp
                  Groups/Volume/VolumeGroup.hpp
                  Node/Node.hpp
                  NodeVisitor/NodeVisitor.hpp
-                 RenderView/RenderView.hpp
+                 View/View.hpp
                  Root/Root.hpp
                  Utilities/DecycleVisitor.hpp
                  Utilities/InfoVisitor.hpp
@@ -77,7 +77,7 @@ set(SOURCES Annotations/Annotations.cpp
             Groups/Volume/VolumeGroup.cpp
             Node/Node.cpp
             NodeVisitor/NodeVisitor.cpp
-            RenderView/RenderView.cpp
+            View/View.cpp
             Root/Root.cpp)
 
 
@@ -97,7 +97,7 @@ target_include_directories(SceneGraph PUBLIC Annotations
     Groups
     Node
     NodeVisitor
-    RenderView
+    View
     Root
     Utilities
     )

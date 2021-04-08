@@ -57,10 +57,3 @@ void ViewRenderer::setupOutputs()
 
 }
 
-bool ViewRenderer::render(fluo::Event& event)
-{
-	bool result = Renderer2D::render(event);
-
-
-	return result;
-}

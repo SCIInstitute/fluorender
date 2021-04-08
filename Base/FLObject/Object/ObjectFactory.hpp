@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_OBJECTFACTORY_HPP
 #define FL_OBJECTFACTORY_HPP
 
-#include <Object.hpp>
+#include <Node.hpp>
 #include <deque>
 #include <string>
 #include <iostream>
@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class ObjectFactory : public Object
+	class ObjectFactory : public Node
 	{
 	public:
 		ObjectFactory();

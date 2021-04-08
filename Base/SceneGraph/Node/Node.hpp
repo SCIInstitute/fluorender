@@ -48,7 +48,7 @@ namespace fluo
 	class Annotations;
 	class Node;
 	class NodeVisitor;
-	class RenderView;
+	class View;
 	class Root;
 
 	typedef std::vector<Node*> ParentList;
@@ -88,8 +88,8 @@ namespace fluo
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
 		virtual Annotations* asAnnotations() { return 0; }
 		virtual const Annotations* asAnnotations() const { return 0; }
-		virtual RenderView* asRenderView() { return 0; }
-		virtual const RenderView* asRenderView() const { return 0; }
+		virtual View* asView() { return 0; }
+		virtual const View* asView() const { return 0; }
 		virtual Root* asRoot() { return 0; }
 		virtual const Root* asRoot() const { return 0; }
 

@@ -44,8 +44,6 @@ public:
 
 	virtual const char* className() const { return "Renderer2D"; }
 
-    virtual bool render(fluo::Event& event);
-
 protected:
 	~Renderer2D();
 

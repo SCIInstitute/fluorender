@@ -33,6 +33,7 @@ using namespace fluo;
 unsigned int ObjectFactory::global_id_ = 0;
 
 ObjectFactory::ObjectFactory() :
+	Node(),
 	local_id_(0)
 {
 	m_name = "object factory";
