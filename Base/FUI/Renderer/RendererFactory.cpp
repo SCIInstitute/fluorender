@@ -27,13 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RendererFactory.hpp"
+#include <FUI/Global/Names.hpp>
 
 using namespace fluo;
 
 RendererFactory::RendererFactory()
 {
-	m_name = "renderer factory";
-	default_object_name_ = "default renderer";
+	m_name = FL_NAME_RENDERER_FACTORY;
+	default_object_name_ = FL_NAME_DEFAULT_RENDERER;
 }
 
 RendererFactory::~RendererFactory()

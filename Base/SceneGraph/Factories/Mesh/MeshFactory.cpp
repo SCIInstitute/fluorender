@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "MeshFactory.hpp"
 #include <Mesh/MeshGroup.hpp>
+#include <FUI/Global/Names.hpp>
 
 #include <iostream>
 
@@ -35,8 +36,8 @@ using namespace fluo;
 
 MeshFactory::MeshFactory()
 {
-	m_name = "mesh factory";
-	default_object_name_ = "default mesh";
+	m_name = FL_NAME_MESH_FACTORY;
+	default_object_name_ = FL_NAME_DEFAULT_MESH;
 
 	addValue("current", (MeshData*)(0));//current mesh data (for processing etc)
 }

@@ -28,13 +28,14 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VolumeFactory.hpp"
 #include <Volume/VolumeGroup.hpp>
+#include <FUI/Global/Names.hpp>
 
 using namespace fluo;
 
 VolumeFactory::VolumeFactory()
 {
-	m_name = "volume factory";
-	default_object_name_ = "default volume";
+	m_name = FL_NAME_VOLUME_FACTORY;
+	default_object_name_ = FL_NAME_DEFAULT_VOLUME;
 
     VolumeData* currentVD = new VolumeData();
 

@@ -101,6 +101,7 @@ set(HEADER_FILES
 	Panels/Base_Agent/AgentFactory.hpp
 	Panels/Base_Agent/InterfaceAgent.hpp
 	Global/Global.hpp
+	Global/Names.hpp
 	Processor/Processor.hpp
 	Processor/ProcessorGroup.hpp
 	Processor/ProcessorFactory.hpp

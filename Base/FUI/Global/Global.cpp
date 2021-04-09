@@ -27,17 +27,33 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Global.hpp"
+#include "Names.hpp"
+#include <Annotations/AnnotationFactory.hpp>
+#include <Mesh/MeshFactory.hpp>
+#include <Volume/VolumeFactory.hpp>
+#include <Base_Agent/AgentFactory.hpp>
+#include <Renderer/RendererFactory.hpp>
+#include <Renderer/RendererGroupFactory.hpp>
 
 using namespace fluo;
 
 Global Global::instance_;
 Global::Global()
 {
-	volume_factory_ = ref_ptr<VolumeFactory>(new VolumeFactory());
-	mesh_factory_ = ref_ptr<MeshFactory>(new MeshFactory());
-	annotation_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
+	origin_ = ref_ptr<Group>(new Group());
+	origin_->setName(FL_NAME_ORIGIN);
+	BuildFactories();
+}
 
-    agent_factory_ = ref_ptr<AgentFactory>(new AgentFactory());
-
-	processor_factory_ = ref_ptr<ProcessorFactory>(new ProcessorFactory());
+void Global::BuildFactories()
+{
+	Group* factory_group = new Group();
+	factory_group->setName(FL_NAME_FACOTRY_GROUP);
+	origin_->addChild(factory_group);
+	BUILD_AND_ADD(VolumeFactory, factory_group);
+	BUILD_AND_ADD(MeshFactory, factory_group);
+	BUILD_AND_ADD(AnnotationFactory, factory_group);
+	BUILD_AND_ADD(AgentFactory, factory_group);
+	BUILD_AND_ADD(RendererFactory, factory_group);
+	BUILD_AND_ADD(RendererGroupFactory, factory_group);
 }

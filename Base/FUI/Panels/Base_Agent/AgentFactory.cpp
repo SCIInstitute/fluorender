@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 #include "AgentFactory.hpp"
-
+#include <FUI/Global/Names.hpp>
 #include <Properties/Agent/volumePropAgent.hpp>
 #include <Properties/propertiesPanel.hpp>
 #include <Output_Adjustments/Agent/outAdjustAgent.hpp>
@@ -57,7 +57,7 @@ DEALINGS IN THE SOFTWARE.
 
 AgentFactory::AgentFactory()
 {
-  m_name = "agent factory";
+  m_name = FL_NAME_AGENT_FACTORY;
 }
 
 AgentFactory::~AgentFactory()

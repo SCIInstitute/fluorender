@@ -27,13 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "AnnotationFactory.hpp"
+#include <FUI/Global/Names.hpp>
 
 using namespace fluo;
 
 AnnotationFactory::AnnotationFactory()
 {
-	m_name = "annotation factory";
-	default_object_name_ = "default annotations";
+	m_name = FL_NAME_ANNOTATION_FACTORY;
+	default_object_name_ = FL_NAME_DEFAULT_ANNOTATION;
 }
 
 AnnotationFactory::~AnnotationFactory()

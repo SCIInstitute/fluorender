@@ -28,15 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
-#include <Annotations/AnnotationFactory.hpp>
-#include <Mesh/MeshFactory.hpp>
-#include <Volume/VolumeFactory.hpp>
-#include <Base_Agent/AgentFactory.hpp>
-#include <Processor/ProcessorFactory.hpp>
-
-//#include <Fui/AgentFactory.h> // Will have to figure this out
-//#include <Fui/IconList.h>     // Same here
-//#include <../../Processor/ProcessorFactory.hpp>
+#include <Group.hpp>
 
 namespace fluo
 {
@@ -46,7 +38,7 @@ namespace fluo
 	public:
 		static Global& instance() { return instance_; }
 
-		inline size_t getNum()
+/*		inline size_t getNum()
 		{
 			size_t volume_num = volume_factory_->getNum();
 			size_t mesh_num = mesh_factory_->getNum();
@@ -105,10 +97,10 @@ namespace fluo
 
         AgentFactory& getAgentFactory()
 		{ return *agent_factory_; }
-/*
+
 		FUI::IconList& getIconList(bool shown)
 		{ return shown?shown_icon_list_:hidden_icon_list_; }
-*/
+
 		void addListObserver(Observer* obsrvr)
 		{
 			volume_factory_->addObserver(obsrvr);
@@ -118,26 +110,20 @@ namespace fluo
 
 		ProcessorFactory& getProcessorFactory()
 		{ return *processor_factory_; }
-
+*/
 	private:
 		Global();
 
 		static Global instance_;
 
-		//objects in these will be shown in the list panel
-		ref_ptr<VolumeFactory> volume_factory_;
-		ref_ptr<MeshFactory> mesh_factory_;
-		ref_ptr<AnnotationFactory> annotation_factory_;
+		ref_ptr<Group> origin_;//the root of everything else
 
-		//list of agent
-        ref_ptr<AgentFactory> agent_factory_;
+	private:
+#define BUILD_AND_ADD(cls, par) \
+	{cls* obj = new cls();\
+	par->addChild(obj);}
 
-		//list of processors
-		ref_ptr<ProcessorFactory> processor_factory_;
-
-		//icon list
-//		FUI::IconList shown_icon_list_;
-    //	FUI::IconList hidden_icon_list_;
+		void BuildFactories();
 	};
 }
 
