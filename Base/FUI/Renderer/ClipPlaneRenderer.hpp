@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Renderer3D.hpp"
 
-namespace FLR
+namespace fluo
 {
 class ClipPlaneRenderer : public Renderer3D
 {

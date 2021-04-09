@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Renderer3D.hpp"
 
-using namespace FLR;
+using namespace fluo;
 
 Renderer3D::Renderer3D():
 	Renderer()

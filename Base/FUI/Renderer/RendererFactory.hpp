@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Processor/ProcessorFactory.hpp>
 #include "Renderer.hpp"
 
-namespace FLR
+namespace fluo
 {
 	class RendererFactory : public fluo::ProcessorFactory
 	{
@@ -78,7 +78,7 @@ namespace FLR
 			return dynamic_cast<Renderer*>(fluo::ObjectFactory::findLast(name));
 		}
 
-		//FLR::ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
+		//ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
 
 	protected:
 		virtual ~RendererFactory();

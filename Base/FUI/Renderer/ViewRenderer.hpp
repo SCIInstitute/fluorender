@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef VIEW_RENDERER_HPP
 #define VIEW_RENDERER_HPP
 
-#include "Renderer2D.hpp"
+#include "RendererGroup.hpp"
 
-namespace FLR
+namespace fluo
 {
-class ViewRenderer : public Renderer2D
+class ViewRenderer : public RendererGroup
 {
 public:
 
@@ -47,8 +47,6 @@ public:
 protected:
 	~ViewRenderer();
 
-	virtual void setupInputs();
-	virtual void setupOutputs();
 };
 }
 #endif//VIEW_RENDERER_HPP

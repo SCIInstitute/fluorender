@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Renderer.hpp"
 
-namespace FLR
+namespace fluo
 {
 class Renderer2D : public Renderer
 {

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "ClipPlaneRenderer.hpp"
 
-using namespace FLR;
+using namespace fluo;
 
 ClipPlaneRenderer::ClipPlaneRenderer():
 	Renderer3D()

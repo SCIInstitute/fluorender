@@ -28,17 +28,15 @@ DEALINGS IN THE SOFTWARE.
 
 #include "ViewRenderer.hpp"
 
-using namespace FLR;
+using namespace fluo;
 
 ViewRenderer::ViewRenderer():
-	Renderer2D()
+	RendererGroup()
 {
-	setupInputs();
-	setupOutputs();
 }
 
 ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+	RendererGroup(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
@@ -46,14 +44,5 @@ ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const fluo::CopyOp& cop
 
 ViewRenderer::~ViewRenderer()
 {
-}
-
-void ViewRenderer::setupInputs()
-{
-}
-
-void ViewRenderer::setupOutputs()
-{
-
 }
 

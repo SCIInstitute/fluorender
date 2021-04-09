@@ -29,57 +29,57 @@ DEALINGS IN THE SOFTWARE.
 #define RENDERGROUP_FACTORY_HPP
 
 #include <Processor/ProcessorGroupFactory.hpp>
-#include "RenderGroup.hpp"
+#include "RendererGroup.hpp"
 
-namespace FLR
+namespace fluo
 {
-	class RenderGroupFactory : public fluo::ProcessorGroupFactory
+	class RendererGroupFactory : public ProcessorGroupFactory
 	{
 	public:
-		ProcessorGroupFactory();
+		RendererGroupFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
-        { return dynamic_cast<const ProcessorGroupFactory*>(obj) != nullptr; }
+        { return dynamic_cast<const RendererGroupFactory*>(obj) != nullptr; }
 
-		virtual const char* className() const { return "ProcessorGroupFactory"; }
+		virtual const char* className() const { return "RendererGroupFactory"; }
 
 		virtual void createDefault() {}
 
-        virtual ProcessorGroup* getDefault() { return nullptr; }
+        virtual RendererGroup* getDefault() { return nullptr; }
 
-        virtual ProcessorGroup* build(ProcessorGroup* group = nullptr) { return nullptr; }
+        virtual RendererGroup* build(RendererGroup* group = nullptr) { return nullptr; }
 
-        virtual ProcessorGroup* clone(ProcessorGroup*) { return nullptr; }
+        virtual RendererGroup* clone(RendererGroup*) { return nullptr; }
 
-        virtual ProcessorGroup* clone(const unsigned int) { return nullptr; }
+        virtual RendererGroup* clone(const unsigned int) { return nullptr; }
 
-		inline virtual ProcessorGroup* get(size_t i)
+		inline virtual RendererGroup* get(size_t i)
 		{
-			return dynamic_cast<ProcessorGroup*>(ObjectFactory::get(i));
+			return dynamic_cast<RendererGroup*>(ObjectFactory::get(i));
 		}
 
-		inline virtual const ProcessorGroup* get(size_t i) const
+		inline virtual const RendererGroup* get(size_t i) const
 		{
-			return dynamic_cast<ProcessorGroup*>(const_cast<Object*>(ObjectFactory::get(i)));
+			return dynamic_cast<RendererGroup*>(const_cast<Object*>(ObjectFactory::get(i)));
 		}
 
-		inline virtual ProcessorGroup* find(const unsigned int id)
+		inline virtual RendererGroup* find(const unsigned int id)
 		{
-			return dynamic_cast<ProcessorGroup*>(ObjectFactory::find(id));
+			return dynamic_cast<RendererGroup*>(ObjectFactory::find(id));
 		}
 
-		inline virtual ProcessorGroup* findFirst(const std::string &name)
+		inline virtual RendererGroup* findFirst(const std::string &name)
 		{
-			return dynamic_cast<ProcessorGroup*>(ObjectFactory::findFirst(name));
+			return dynamic_cast<RendererGroup*>(ObjectFactory::findFirst(name));
 		}
 
-		inline virtual ProcessorGroup* findLast(const std::string &name)
+		inline virtual RendererGroup* findLast(const std::string &name)
 		{
-			return dynamic_cast<ProcessorGroup*>(ObjectFactory::findLast(name));
+			return dynamic_cast<RendererGroup*>(ObjectFactory::findLast(name));
 		}
 
 	protected:
-		virtual ~ProcessorGroupFactory();
+		virtual ~RendererGroupFactory();
 
 	};
 

@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Renderer.hpp"
 
-using namespace FLR;
+using namespace fluo;
 
 Renderer::Renderer():
 	Processor()

@@ -114,6 +114,7 @@ set(HEADER_FILES
 	Renderer/ViewRenderer.hpp
 	Renderer/RendererFactory.hpp
 	Renderer/RendererGroupFactory.hpp
+	Renderer/RendererGroup.hpp
   )
   
 set(SOURCES
@@ -168,6 +169,7 @@ set(SOURCES
 	Renderer/ViewRenderer.cpp
 	Renderer/RendererFactory.cpp
 	Renderer/RendererGroupFactory.cpp
+	Renderer/RendererGroup.cpp
   )
   
 set(UI_FILES

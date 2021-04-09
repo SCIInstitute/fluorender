@@ -25,30 +25,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_RENDERER_3D_HPP
-#define FL_RENDERER_3D_HPP
+#ifndef RENDERERGROUP_HPP
+#define RENDERERGROUP_HPP
 
-#include "Renderer.hpp"
+#include <Processor/ProcessorGroup.hpp>
 
 namespace fluo
 {
-class Renderer3D : public Renderer
-{
-public:
+	class RendererGroup : public ProcessorGroup
+	{
+	public:
 
-	Renderer3D();
+		RendererGroup();
 
-    Renderer3D(const Renderer3D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+		RendererGroup(const RendererGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual bool isSameKindAs(const Renderer3D*) const {return true;}
+		virtual RendererGroup* clone(const CopyOp& copyop) const { return new RendererGroup(*this, copyop); };
 
-	virtual const char* className() const { return "Renderer3D"; }
+		virtual bool isSameKindAs(const RendererGroup*) const {return true;}
 
-protected:
-	~Renderer3D();
+		virtual const char* className() const { return "RendererGroup"; }
 
-	virtual void setupInputs();
-	virtual void setupOutputs();
-};
+	protected:
+		~RendererGroup();
+
+	protected:
+	};
 }
-#endif//FL_RENDERER3D
+#endif//RENDERERGROUP_HPP

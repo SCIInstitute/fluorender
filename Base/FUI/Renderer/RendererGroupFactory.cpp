@@ -26,29 +26,29 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ProcessorGroupFactory.hpp"
+#include "RendererGroupFactory.hpp"
 
 using namespace fluo;
 
-ProcessorGroupFactory::ProcessorGroupFactory()
+RendererGroupFactory::RendererGroupFactory()
 {
-	m_name = "processor group factory";
-	default_object_name_ = "default processor group";
+	m_name = "renderer group factory";
+	default_object_name_ = "default renderer group";
 }
 
-ProcessorGroupFactory::~ProcessorGroupFactory()
+RendererGroupFactory::~RendererGroupFactory()
 {
 
 }
 
-//FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
+//ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
 //{
 //	Processor* result = findFirst(name);
 //	if (result)
-//		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
+//		return dynamic_cast<ClipPlaneRenderer*>(result);
 //
 //	//not found
-//	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
+//	ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
 //	if (renderer)
 //	{
 //		renderer->setName(name);

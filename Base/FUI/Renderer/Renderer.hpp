@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Processor/Processor.hpp>
 
-namespace FLR
+namespace fluo
 {
 class Renderer : public fluo::Processor
 {

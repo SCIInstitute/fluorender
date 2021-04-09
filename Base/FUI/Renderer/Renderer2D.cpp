@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Renderer2D.hpp"
 
-using namespace FLR;
+using namespace fluo;
 
 Renderer2D::Renderer2D():
 	Renderer()
