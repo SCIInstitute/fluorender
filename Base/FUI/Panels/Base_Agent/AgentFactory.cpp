@@ -57,7 +57,7 @@ DEALINGS IN THE SOFTWARE.
 
 AgentFactory::AgentFactory()
 {
-  m_name = FL_NAME_AGENT_FACTORY;
+  m_name = flstrAgentFactory;
 }
 
 AgentFactory::~AgentFactory()

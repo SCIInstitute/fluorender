@@ -36,8 +36,8 @@ using namespace fluo;
 
 MeshFactory::MeshFactory()
 {
-	m_name = FL_NAME_MESH_FACTORY;
-	default_object_name_ = FL_NAME_DEFAULT_MESH;
+	m_name = flstrMeshFactory;
+	default_object_name_ = flstrDefaultMesh;
 
 	addValue("current", (MeshData*)(0));//current mesh data (for processing etc)
 }

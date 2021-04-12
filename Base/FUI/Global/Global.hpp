@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_HPP
 
 #include <Group.hpp>
+#include <string>
 
 namespace fluo
 {
@@ -37,6 +38,9 @@ namespace fluo
 	{
 	public:
 		static Global& instance() { return instance_; }
+
+		Object* get(const std::string &name);
+
 
 /*		inline size_t getNum()
 		{

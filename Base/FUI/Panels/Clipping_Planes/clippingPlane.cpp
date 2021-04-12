@@ -1,5 +1,7 @@
 #include "clippingPlane.hpp"
 #include <Global/Global.hpp>
+#include <Base_Agent/AgentFactory.hpp>
+#include <Global/Names.hpp>
 
 ClippingPlane::ClippingPlane()
 {
@@ -113,7 +115,10 @@ void ClippingPlane::makeIntConnections()
 
 void ClippingPlane::setVolumeData(fluo::VolumeData* vd)
 {
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddClipPlaneAgent("ClipPlanePanel",*this);
+	fluo::Object* obj = fluo::Global::instance().get(flstrAgentFactory);
+	if (!obj)
+		return;
+  m_agent = dynamic_cast<AgentFactory*>(obj)->getOrAddClipPlaneAgent("ClipPlanePanel",*this);
   clippingLayout->setAgent(m_agent,vd);
   clippingLayout->build();
   clippingLayout->enableLayout();

@@ -34,8 +34,8 @@ using namespace fluo;
 
 VolumeFactory::VolumeFactory()
 {
-	m_name = FL_NAME_VOLUME_FACTORY;
-	default_object_name_ = FL_NAME_DEFAULT_VOLUME;
+	m_name = flstrVolumeFactory;
+	default_object_name_ = flstrDefaultVolume;
 
     VolumeData* currentVD = new VolumeData();
 

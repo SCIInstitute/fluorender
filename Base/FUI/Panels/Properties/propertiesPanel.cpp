@@ -1,6 +1,7 @@
 #include "propertiesPanel.hpp"
 #include <Global/Global.hpp>
-
+#include <Base_Agent/AgentFactory.hpp>
+#include <Global/Names.hpp>
 
 #include <iostream>
 
@@ -122,7 +123,11 @@ void PropertiesPanel::setPropShininessValue(int newVal)
 
 void PropertiesPanel::onVolumeLoaded(int renderviewID, fluo::VolumeData *vd)
 {
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
+	fluo::Object* obj = fluo::Global::instance().get(flstrAgentFactory);
+	if (!obj)
+		return;
+	m_agent = dynamic_cast<AgentFactory*>(obj)->getOrAddVolumePropAgent("VolumePropPanel", this);
+	//m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions(m_agent,vd);
   VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
 

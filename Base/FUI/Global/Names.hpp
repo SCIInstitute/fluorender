@@ -28,18 +28,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef NAMES_HPP
 #define NAMES_HPP
 
-#define FL_NAME_ORIGIN "origin"
-#define FL_NAME_FACOTRY_GROUP "factory group"
-#define FL_NAME_VOLUME_FACTORY "volume factory"
-#define FL_NAME_DEFAULT_VOLUME "default volume"
-#define FL_NAME_MESH_FACTORY "mesh factory"
-#define FL_NAME_DEFAULT_MESH "default mesh"
-#define FL_NAME_ANNOTATION_FACTORY "annotation factory"
-#define FL_NAME_DEFAULT_ANNOTATION "default annotations"
-#define FL_NAME_AGENT_FACTORY "agent factory"
-#define FL_NAME_RENDERER_FACTORY "renderer factory"
-#define FL_NAME_DEFAULT_RENDERER "default renderer"
-#define FL_NAME_RENDERER_GROUP_FACTORY "renderer group factory"
-#define FL_NAME_DEFAULT_RENDERER_GROUP "default renderer group"
+#include <string>
+
+const std::string flstrOrigin = "origin";
+const std::string flstrFactoryGroup = "factory group";
+const std::string flstrVolumeFactory = "volume factory";
+const std::string flstrDefaultVolume = "default volume";
+const std::string flstrMeshFactory = "mesh factory";
+const std::string flstrDefaultMesh = "default mesh";
+const std::string flstrAnnotationFactory = "annotation factory";
+const std::string flstrDefaultAnnotations = "default annotations";
+const std::string flstrAgentFactory = "agent factory";
+const std::string flstrRendererFactory = "renderer factory";
+const std::string flstrDefaultRenderer = "default renderer";
+const std::string flstrRendererGroupFactory = "renderer group factory";
+const std::string flstrDefaultRendererGroup = "default renderer group";
 
 #endif//NAMES_HPP

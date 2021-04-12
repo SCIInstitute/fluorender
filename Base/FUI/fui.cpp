@@ -1,5 +1,7 @@
 #include "fui.hpp"
 #include "ui_FUI.h"
+#include <Global/Names.hpp>
+#include <SceneGraph/Factories/Volume/VolumeFactory.hpp>
 
 #include <QFile>
 #include <QFileDialog>
@@ -11,7 +13,13 @@ FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FUI)
 {
-  fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
+	fluo::Object* obj = fluo::Global::instance().get(flstrVolumeFactory);
+	if (!obj)
+		return;
+	fluo::VolumeFactory* factory = dynamic_cast<fluo::VolumeFactory*>(obj);
+	if (factory)
+		factory->setValue(defaultFilename, location);
+	//fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
   ui->setupUi(this);
 
   // This sets the central widget needed for the QDockWidgets
@@ -929,7 +937,13 @@ void FUI::on_actionLoad_Volume_0_triggered()
   { 
     auto reader = getReader(suffix);
  
-    fluo::VolumeData* vd = fluo::Global::instance().getVolumeFactory().build();
+	fluo::Object* obj = fluo::Global::instance().get(flstrVolumeFactory);
+	if (!obj)
+		return;
+	fluo::VolumeFactory* factory = dynamic_cast<fluo::VolumeFactory*>(obj);
+	if (!factory)
+		return;
+	fluo::VolumeData* vd = factory->build();
     processReader(filename,reader);
 
     Nrrd* nrrdStructure = reader->Convert(true);

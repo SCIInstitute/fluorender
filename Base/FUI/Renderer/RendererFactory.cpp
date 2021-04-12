@@ -33,8 +33,8 @@ using namespace fluo;
 
 RendererFactory::RendererFactory()
 {
-	m_name = FL_NAME_RENDERER_FACTORY;
-	default_object_name_ = FL_NAME_DEFAULT_RENDERER;
+	m_name = flstrRendererFactory;
+	default_object_name_ = flstrDefaultRenderer;
 }
 
 RendererFactory::~RendererFactory()

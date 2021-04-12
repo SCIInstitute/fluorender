@@ -33,8 +33,8 @@ using namespace fluo;
 
 RendererGroupFactory::RendererGroupFactory()
 {
-	m_name = FL_NAME_RENDERER_GROUP_FACTORY;
-	default_object_name_ = FL_NAME_DEFAULT_RENDERER_GROUP;
+	m_name = flstrRendererGroupFactory;
+	default_object_name_ = flstrDefaultRendererGroup;
 }
 
 RendererGroupFactory::~RendererGroupFactory()

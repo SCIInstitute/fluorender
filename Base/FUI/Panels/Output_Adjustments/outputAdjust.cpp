@@ -1,5 +1,7 @@
 #include "outputAdjust.hpp"
 #include <Global/Global.hpp>
+#include <Base_Agent/AgentFactory.hpp>
+#include <Global/Names.hpp>
 
 OutputAdjustments::OutputAdjustments()
 {
@@ -41,7 +43,11 @@ void OutputAdjustments::makeDblConnections()
 
 void OutputAdjustments::setVolumeData(fluo::VolumeData* vd)
 {
-  m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",this);
+	fluo::Object* obj = fluo::Global::instance().get(flstrAgentFactory);
+	if (!obj)
+		return;
+	m_agent = dynamic_cast<AgentFactory*>(obj)->getOrAddOutAdjustAgent("OutAdjustPanel", this);
+	//m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",this);
   this->outputLayout->setAgent(m_agent,vd);
   this->outputLayout->buildWrappers();
   this->outputLayout->buildControllers();

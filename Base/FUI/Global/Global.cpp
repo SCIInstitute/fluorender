@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Base_Agent/AgentFactory.hpp>
 #include <Renderer/RendererFactory.hpp>
 #include <Renderer/RendererGroupFactory.hpp>
+#include <SearchVisitor.hpp>
 
 using namespace fluo;
 
@@ -41,14 +42,14 @@ Global Global::instance_;
 Global::Global()
 {
 	origin_ = ref_ptr<Group>(new Group());
-	origin_->setName(FL_NAME_ORIGIN);
+	origin_->setName(flstrOrigin);
 	BuildFactories();
 }
 
 void Global::BuildFactories()
 {
 	Group* factory_group = new Group();
-	factory_group->setName(FL_NAME_FACOTRY_GROUP);
+	factory_group->setName(flstrFactoryGroup);
 	origin_->addChild(factory_group);
 	BUILD_AND_ADD(VolumeFactory, factory_group);
 	BUILD_AND_ADD(MeshFactory, factory_group);
@@ -56,4 +57,16 @@ void Global::BuildFactories()
 	BUILD_AND_ADD(AgentFactory, factory_group);
 	BUILD_AND_ADD(RendererFactory, factory_group);
 	BUILD_AND_ADD(RendererGroupFactory, factory_group);
+}
+
+Object* Global::get(const std::string &name)
+{
+	SearchVisitor visitor;
+	visitor.matchName(name);
+	origin_->accept(visitor);
+	ObjectList* list = visitor.getResult();
+	if (list->empty())
+		return 0;
+	else
+		return (*list)[0];
 }

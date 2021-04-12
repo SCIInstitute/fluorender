@@ -33,8 +33,8 @@ using namespace fluo;
 
 AnnotationFactory::AnnotationFactory()
 {
-	m_name = FL_NAME_ANNOTATION_FACTORY;
-	default_object_name_ = FL_NAME_DEFAULT_ANNOTATION;
+	m_name = flstrAnnotationFactory;
+	default_object_name_ = flstrDefaultAnnotations;
 }
 
 AnnotationFactory::~AnnotationFactory()
