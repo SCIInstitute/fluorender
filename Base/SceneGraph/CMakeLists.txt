@@ -33,86 +33,88 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Includes all the dependency header files
 include_directories(${FLObject_INCLUDES}
-                    ${FLIVR_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIR}
-                    ${OPENGL_INCLUDE_DIRS}
-                    ${GLEW_INCLUDE_DIR}
-                    ${Teem_INCLUDE_DIR}
+					${FLIVR_INCLUDE_DIRS}
+					${Boost_INCLUDE_DIR}
+					${OPENGL_INCLUDE_DIRS}
+					${GLEW_INCLUDE_DIR}
+					${Teem_INCLUDE_DIR}
 					${OpenCL_INCLUDE_DIR}
-                    ${glm_INCLUDE_DIR}
-                    )
+					${glm_INCLUDE_DIR}
+					)
 
 # The headers and source files are manually set rather than Globbed in 
 # order to give us better control of what goes in the project.
 set(HEADER_FILES Annotations/Annotations.hpp
-                 Data/MeshData/MeshData.hpp
-                 Data/VolumeData/VolumeData.hpp
-                 DrawVolumeVisitor/DrawVolumeVisitor.hpp
-                 Factories/Annotations/AnnotationFactory.hpp
-                 Factories/Mesh/MeshFactory.hpp
-                 Factories/Volume/VolumeFactory.hpp
-                 Groups/Group.hpp
-                 Groups/Mesh/MeshGroup.hpp
-                 Groups/Volume/VolumeGroup.hpp
-                 Node/Node.hpp
-                 NodeVisitor/NodeVisitor.hpp
-                 View/View.hpp
-                 Root/Root.hpp
-	Global/Global.hpp
-	Global/Names.hpp
-	Processor/Processor.hpp
-	Processor/ProcessorGroup.hpp
-	Processor/ProcessorFactory.hpp
-	Processor/StreamProcessor.hpp
-	Processor/ProcessorVisitor.hpp
-	Processor/ProcessorGroupFactory.hpp
-	Renderer/Renderer.hpp
-	Renderer/Renderer2D.hpp
-	Renderer/Renderer3D.hpp
-	Renderer/ClipPlaneRenderer.hpp
-	Renderer/ViewRenderer.hpp
-	Renderer/RendererFactory.hpp
-	Renderer/RendererGroupFactory.hpp
-	Renderer/RendererGroup.hpp
-                 Utilities/DecycleVisitor.hpp
-                 Utilities/InfoVisitor.hpp
-                 Utilities/Layer.hpp
-                 Utilities/PopVolumeVisitor.hpp
-                 Utilities/SearchVisitor.hpp
-                 Utilities/ValueUpdateVisitor.hpp
-	Agent/InterfaceAgent.hpp
+				Data/MeshData/MeshData.hpp
+				Data/VolumeData/VolumeData.hpp
+				DrawVolumeVisitor/DrawVolumeVisitor.hpp
+				Factories/Annotations/AnnotationFactory.hpp
+				Factories/Mesh/MeshFactory.hpp
+				Factories/Volume/VolumeFactory.hpp
+				Groups/Group.hpp
+				Groups/Mesh/MeshGroup.hpp
+				Groups/Volume/VolumeGroup.hpp
+				Node/Node.hpp
+				NodeVisitor/NodeVisitor.hpp
+				View/View.hpp
+				Root/Root.hpp
+				Global/Global.hpp
+				Global/Names.hpp
+				Processor/Processor.hpp
+				Processor/ProcessorGroup.hpp
+				Processor/ProcessorFactory.hpp
+				Processor/StreamProcessor.hpp
+				Processor/ProcessorVisitor.hpp
+				Processor/ProcessorGroupFactory.hpp
+				Renderer/Renderer.hpp
+				Renderer/Renderer2D.hpp
+				Renderer/Renderer3D.hpp
+				Renderer/ClipPlaneRenderer.hpp
+				Renderer/ViewRenderer.hpp
+				Renderer/ViewDraw.hpp
+				Renderer/RendererFactory.hpp
+				Renderer/RendererGroupFactory.hpp
+				Renderer/RendererGroup.hpp
+				Utilities/DecycleVisitor.hpp
+				Utilities/InfoVisitor.hpp
+				Utilities/Layer.hpp
+				Utilities/PopVolumeVisitor.hpp
+				Utilities/SearchVisitor.hpp
+				Utilities/ValueUpdateVisitor.hpp
+				Agent/InterfaceAgent.hpp
 	)
 
 set(SOURCES Annotations/Annotations.cpp
-            Data/MeshData/MeshData.cpp
-            Data/VolumeData/VolumeData.cpp
-            DrawVolumeVisitor/DrawVolumeVisitor.cpp
-            Factories/Annotations/AnnotationFactory.cpp
-            Factories/Mesh/MeshFactory.cpp
-            Factories/Volume/VolumeFactory.cpp
-            Groups/Group.cpp
-            Groups/Mesh/MeshGroup.cpp
-            Groups/Volume/VolumeGroup.cpp
-            Node/Node.cpp
-            NodeVisitor/NodeVisitor.cpp
-            View/View.cpp
-            Root/Root.cpp
-	Global/Global.cpp
-	Processor/Processor.cpp
-	Processor/ProcessorGroup.cpp
-	Processor/ProcessorFactory.cpp
-	Processor/StreamProcessor.cpp
-	Processor/ProcessorVisitor.cpp
-	Processor/ProcessorGroupFactory.cpp
-	Renderer/Renderer.cpp
-	Renderer/Renderer2D.cpp
-	Renderer/Renderer3D.cpp
-	Renderer/ClipPlaneRenderer.cpp
-	Renderer/ViewRenderer.cpp
-	Renderer/RendererFactory.cpp
-	Renderer/RendererGroupFactory.cpp
-	Renderer/RendererGroup.cpp
-            )
+			Data/MeshData/MeshData.cpp
+			Data/VolumeData/VolumeData.cpp
+			DrawVolumeVisitor/DrawVolumeVisitor.cpp
+			Factories/Annotations/AnnotationFactory.cpp
+			Factories/Mesh/MeshFactory.cpp
+			Factories/Volume/VolumeFactory.cpp
+			Groups/Group.cpp
+			Groups/Mesh/MeshGroup.cpp
+			Groups/Volume/VolumeGroup.cpp
+			Node/Node.cpp
+			NodeVisitor/NodeVisitor.cpp
+			View/View.cpp
+			Root/Root.cpp
+			Global/Global.cpp
+			Processor/Processor.cpp
+			Processor/ProcessorGroup.cpp
+			Processor/ProcessorFactory.cpp
+			Processor/StreamProcessor.cpp
+			Processor/ProcessorVisitor.cpp
+			Processor/ProcessorGroupFactory.cpp
+			Renderer/Renderer.cpp
+			Renderer/Renderer2D.cpp
+			Renderer/Renderer3D.cpp
+			Renderer/ClipPlaneRenderer.cpp
+			Renderer/ViewRenderer.cpp
+			Renderer/ViewDraw.cpp
+			Renderer/RendererFactory.cpp
+			Renderer/RendererGroupFactory.cpp
+			Renderer/RendererGroup.cpp
+			)
 
 
 # The headers and library locations are cached interally to be used when
@@ -126,19 +128,19 @@ add_library(SceneGraph STATIC ${HEADER_FILES} ${SOURCES})
 # This library's include directories when this library is used.
 target_include_directories(SceneGraph PUBLIC Annotations
 	Agent
-    Data
-    DrawVolumeVisitor
-    Factories
-    Groups
-    Node
-    NodeVisitor
-    View
-    Root
-    Utilities
-    Global
-    Processor
-    Renderer
-    )
+	Data
+	DrawVolumeVisitor
+	Factories
+	Groups
+	Node
+	NodeVisitor
+	View
+	Root
+	Utilities
+	Global
+	Processor
+	Renderer
+	)
 
 link_directories(SceneGraph ${Teem_DIR}/bin)
 
@@ -149,8 +151,8 @@ target_link_libraries(SceneGraph FLObject FLIVR ${Boost_LIBRARIES} ${teem_LIBRAR
 
 # may not be needed.
 install(TARGETS SceneGraph
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
