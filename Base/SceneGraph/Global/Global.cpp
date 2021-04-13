@@ -31,9 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Annotations/AnnotationFactory.hpp>
 #include <Mesh/MeshFactory.hpp>
 #include <Volume/VolumeFactory.hpp>
-#include <Base_Agent/AgentFactory.hpp>
-#include <Renderer/RendererFactory.hpp>
-#include <Renderer/RendererGroupFactory.hpp>
+#include <FUI/Panels/AgentFactory.hpp>
+#include <RendererFactory.hpp>
+#include <RendererGroupFactory.hpp>
 #include <SearchVisitor.hpp>
 
 using namespace fluo;

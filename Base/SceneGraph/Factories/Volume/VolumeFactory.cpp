@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VolumeFactory.hpp"
 #include <Volume/VolumeGroup.hpp>
-#include <FUI/Global/Names.hpp>
+#include <Names.hpp>
 
 using namespace fluo;
 

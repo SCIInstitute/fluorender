@@ -5,7 +5,7 @@
 #include <QModelIndex>
 #include <QString>
 #include <QVariant>
-#include <Panels/Base_Agent/InterfaceAgent.hpp>
+#include <InterfaceAgent.hpp>
 #include <Node.hpp>
 #include <NodeVisitor.hpp>
 

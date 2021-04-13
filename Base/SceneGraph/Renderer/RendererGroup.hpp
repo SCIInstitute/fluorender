@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef RENDERERGROUP_HPP
 #define RENDERERGROUP_HPP
 
-#include <Processor/ProcessorGroup.hpp>
+#include <ProcessorGroup.hpp>
 
 namespace fluo
 {

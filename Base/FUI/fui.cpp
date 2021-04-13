@@ -1,6 +1,6 @@
 #include "fui.hpp"
 #include "ui_FUI.h"
-#include <Global/Names.hpp>
+#include <Names.hpp>
 #include <SceneGraph/Factories/Volume/VolumeFactory.hpp>
 
 #include <QFile>

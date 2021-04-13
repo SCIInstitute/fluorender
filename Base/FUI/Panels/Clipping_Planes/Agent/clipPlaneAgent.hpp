@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef CLIP_PLANE_AGENT_HPP
 #define CLIP_PLANE_AGENT_HPP
 
-#include <Panels/Base_Agent/AgentFactory.hpp>
+#include <AgentFactory.hpp>
 #include <VolumeData/VolumeData.hpp>
 
 class AgentFactory;

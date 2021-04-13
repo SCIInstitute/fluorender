@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "MeshFactory.hpp"
 #include <Mesh/MeshGroup.hpp>
-#include <FUI/Global/Names.hpp>
+#include <Names.hpp>
 
 #include <iostream>
 

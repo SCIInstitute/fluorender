@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef VOLUME_PROP_AGENT_HPP
 #define VOLUME_PROP_AGENT_HPP
 
-#include <Panels/Base_Agent/InterfaceAgent.hpp>
+#include <InterfaceAgent.hpp>
 #include <VolumeData/VolumeData.hpp>
 
 #include <QString>

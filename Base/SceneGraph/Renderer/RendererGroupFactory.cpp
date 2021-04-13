@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RendererGroupFactory.hpp"
-#include <FUI/Global/Names.hpp>
+#include <Names.hpp>
 
 using namespace fluo;
 

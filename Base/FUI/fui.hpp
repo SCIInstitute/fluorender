@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <Global/Global.hpp>
+#include <Global.hpp>
 
 #include "renderview.hpp"
 #include "fluoConfig.hpp"

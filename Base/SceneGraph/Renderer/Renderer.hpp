@@ -29,19 +29,19 @@ DEALINGS IN THE SOFTWARE.
 #define RENDERER_HPP
 
 
-#include <Processor/Processor.hpp>
+#include <Processor.hpp>
 
 namespace fluo
 {
-class Renderer : public fluo::Processor
+class Renderer : public Processor
 {
 public:
 
 	Renderer();
 
-    Renderer(const Renderer& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+    Renderer(const Renderer& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-    virtual Renderer* clone(const fluo::CopyOp& copyop) const { return new Renderer(*this, copyop); };
+    virtual Renderer* clone(const CopyOp& copyop) const { return new Renderer(*this, copyop); };
 
 	virtual bool isSameKindAs(const Renderer*) const {return true;}
 

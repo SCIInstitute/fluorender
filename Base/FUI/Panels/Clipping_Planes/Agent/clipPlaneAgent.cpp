@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Panels/Clipping_Planes/clippingPlane.hpp>
 #include <SearchVisitor.hpp>
-#include <Global/Global.hpp>
+#include <Global.hpp>
 
 //#include <Fui/RenderCanvasAgent.h> Will need to figure out how these work
 //#include <VRenderGLView.h>

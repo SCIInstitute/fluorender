@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include "selUpdater.hpp"
 #include "treeModel.hpp"
 
-#include <Global/Global.hpp>
+#include <Global.hpp>
 #include <SearchVisitor.hpp>
 
 TreeModel::TreeModel(DatasetsPanel &panel):

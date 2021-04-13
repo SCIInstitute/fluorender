@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 
 #include "AgentFactory.hpp"
-#include <FUI/Global/Names.hpp>
-#include <Properties/Agent/volumePropAgent.hpp>
+#include <Names.hpp>
+#include <Panels/Properties/Agent/volumePropAgent.hpp>
 #include <Properties/propertiesPanel.hpp>
 #include <Output_Adjustments/Agent/outAdjustAgent.hpp>
 #include <Output_Adjustments/outputAdjust.hpp>

@@ -28,17 +28,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef RENDERER_FACTORY_HPP
 #define RENDERER_FACTORY_HPP
 
-#include <Processor/ProcessorFactory.hpp>
+#include <ProcessorFactory.hpp>
 #include "Renderer.hpp"
 
 namespace fluo
 {
-	class RendererFactory : public fluo::ProcessorFactory
+	class RendererFactory : public ProcessorFactory
 	{
 	public:
 		RendererFactory();
 
-		virtual bool isSameKindAs(const fluo::Object* obj) const
+		virtual bool isSameKindAs(const Object* obj) const
         { return dynamic_cast<const RendererFactory*>(obj) != nullptr; }
 
 		virtual const char* className() const { return "RendererFactory"; }
@@ -55,27 +55,27 @@ namespace fluo
 
 		inline virtual Renderer* get(size_t i)
 		{
-			return dynamic_cast<Renderer*>(fluo::ObjectFactory::get(i));
+			return dynamic_cast<Renderer*>(ObjectFactory::get(i));
 		}
 
 		inline virtual const Renderer* get(size_t i) const
 		{
-			return dynamic_cast<Renderer*>(const_cast<fluo::Object*>(fluo::ObjectFactory::get(i)));
+			return dynamic_cast<Renderer*>(const_cast<Object*>(ObjectFactory::get(i)));
 		}
 
 		inline virtual Renderer* find(const unsigned int id)
 		{
-			return dynamic_cast<Renderer*>(fluo::ObjectFactory::find(id));
+			return dynamic_cast<Renderer*>(ObjectFactory::find(id));
 		}
 
 		inline virtual Renderer* findFirst(const std::string &name)
 		{
-			return dynamic_cast<Renderer*>(fluo::ObjectFactory::findFirst(name));
+			return dynamic_cast<Renderer*>(ObjectFactory::findFirst(name));
 		}
 
 		inline virtual Renderer* findLast(const std::string &name)
 		{
-			return dynamic_cast<Renderer*>(fluo::ObjectFactory::findLast(name));
+			return dynamic_cast<Renderer*>(ObjectFactory::findLast(name));
 		}
 
 		//ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);

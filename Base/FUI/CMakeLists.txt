@@ -68,6 +68,7 @@ set(HEADER_FILES
 	CustomWidgets/fluoColoredLine.hpp
 	CustomWidgets/controller.hpp
 	CustomWidgets/agentWrapper.hpp
+	Panels/AgentFactory.hpp
 	Panels/Properties/propertiesPanel.hpp
 	Panels/Properties/volumePropertiesOptions.hpp
 	Panels/Properties/meshPropertiesOptions.hpp
@@ -98,24 +99,6 @@ set(HEADER_FILES
 	Panels/Record_Export/Pages/autoKeyPage.hpp
 	Panels/Record_Export/Pages/croppingPage.hpp
 	Panels/Record_Export/Pages/4DScriptPage.hpp
-	Panels/Base_Agent/AgentFactory.hpp
-	Panels/Base_Agent/InterfaceAgent.hpp
-	Global/Global.hpp
-	Global/Names.hpp
-	Processor/Processor.hpp
-	Processor/ProcessorGroup.hpp
-	Processor/ProcessorFactory.hpp
-	Processor/StreamProcessor.hpp
-	Processor/ProcessorVisitor.hpp
-	Processor/ProcessorGroupFactory.hpp
-	Renderer/Renderer.hpp
-	Renderer/Renderer2D.hpp
-	Renderer/Renderer3D.hpp
-	Renderer/ClipPlaneRenderer.hpp
-	Renderer/ViewRenderer.hpp
-	Renderer/RendererFactory.hpp
-	Renderer/RendererGroupFactory.hpp
-	Renderer/RendererGroup.hpp
   )
   
 set(SOURCES
@@ -130,6 +113,7 @@ set(SOURCES
 	FluoToolbar/renderviewRightTB.cpp
 	renderCanvas.cpp
 	testTriangle.cpp
+	Panels/AgentFactory.cpp
 	Panels/Properties/propertiesPanel.cpp
 	Panels/Properties/volumePropertiesOptions.cpp
 	Panels/Properties/meshPropertiesOptions.cpp
@@ -155,22 +139,6 @@ set(SOURCES
 	Panels/Record_Export/Pages/autoKeyPage.cpp
 	Panels/Record_Export/Pages/croppingPage.cpp
 	Panels/Record_Export/Pages/4DScriptPage.cpp
-	Panels/Base_Agent/AgentFactory.cpp
-	Global/Global.cpp
-	Processor/Processor.cpp
-	Processor/ProcessorGroup.cpp
-	Processor/ProcessorFactory.cpp
-	Processor/StreamProcessor.cpp
-	Processor/ProcessorVisitor.cpp
-	Processor/ProcessorGroupFactory.cpp
-	Renderer/Renderer.cpp
-	Renderer/Renderer2D.cpp
-	Renderer/Renderer3D.cpp
-	Renderer/ClipPlaneRenderer.cpp
-	Renderer/ViewRenderer.cpp
-	Renderer/RendererFactory.cpp
-	Renderer/RendererGroupFactory.cpp
-	Renderer/RendererGroup.cpp
   )
   
 set(UI_FILES

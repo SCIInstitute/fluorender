@@ -1,7 +1,7 @@
 #include "outputAdjust.hpp"
-#include <Global/Global.hpp>
-#include <Base_Agent/AgentFactory.hpp>
-#include <Global/Names.hpp>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <Names.hpp>
 
 OutputAdjustments::OutputAdjustments()
 {
