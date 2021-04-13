@@ -115,10 +115,10 @@ void ClippingPlane::makeIntConnections()
 
 void ClippingPlane::setVolumeData(fluo::VolumeData* vd)
 {
-	fluo::Object* obj = fluo::Global::instance().get(flstrAgentFactory);
-	if (!obj)
+	AgentFactory* factory = fluo::Global::instance().getAgentFactory();
+	if (!factory)
 		return;
-  m_agent = dynamic_cast<AgentFactory*>(obj)->getOrAddClipPlaneAgent("ClipPlanePanel",*this);
+  m_agent = factory->getOrAddClipPlaneAgent("ClipPlanePanel",*this);
   clippingLayout->setAgent(m_agent,vd);
   clippingLayout->build();
   clippingLayout->enableLayout();

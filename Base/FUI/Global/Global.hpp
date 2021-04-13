@@ -31,8 +31,14 @@ DEALINGS IN THE SOFTWARE.
 #include <Group.hpp>
 #include <string>
 
+class AgentFactory;
 namespace fluo
 {
+	class VolumeFactory;
+	class MeshFactory;
+	class AnnotationFactory;
+	class RendererFactory;
+	class RendererGroupFactory;
 	//automatically creates the factories and provide global access
 	class Global
 	{
@@ -40,7 +46,12 @@ namespace fluo
 		static Global& instance() { return instance_; }
 
 		Object* get(const std::string &name);
-
+		VolumeFactory* getVolumeFactory();
+		MeshFactory* getMeshFactory();
+		AnnotationFactory* getAnnotationFactory();
+		AgentFactory* getAgentFactory();
+		RendererFactory* getRendererFactory();
+		RendererGroupFactory* getRendererGroupFactory();
 
 /*		inline size_t getNum()
 		{

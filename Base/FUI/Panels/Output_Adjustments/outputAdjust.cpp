@@ -43,10 +43,10 @@ void OutputAdjustments::makeDblConnections()
 
 void OutputAdjustments::setVolumeData(fluo::VolumeData* vd)
 {
-	fluo::Object* obj = fluo::Global::instance().get(flstrAgentFactory);
-	if (!obj)
+	AgentFactory* factory = fluo::Global::instance().getAgentFactory();
+	if (!factory)
 		return;
-	m_agent = dynamic_cast<AgentFactory*>(obj)->getOrAddOutAdjustAgent("OutAdjustPanel", this);
+	m_agent = factory->getOrAddOutAdjustAgent("OutAdjustPanel", this);
 	//m_agent = fluo::Global::instance().getAgentFactory().getOrAddOutAdjustAgent("OutAdjustPanel",this);
   this->outputLayout->setAgent(m_agent,vd);
   this->outputLayout->buildWrappers();

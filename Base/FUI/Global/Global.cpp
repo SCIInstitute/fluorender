@@ -70,3 +70,51 @@ Object* Global::get(const std::string &name)
 	else
 		return (*list)[0];
 }
+
+VolumeFactory* Global::getVolumeFactory()
+{
+	Object* obj = get(flstrVolumeFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<VolumeFactory*>(obj);
+}
+
+MeshFactory* Global::getMeshFactory()
+{
+	Object* obj = get(flstrMeshFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<MeshFactory*>(obj);
+}
+
+AnnotationFactory* Global::getAnnotationFactory()
+{
+	Object* obj = get(flstrAnnotationFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AnnotationFactory*>(obj);
+}
+
+AgentFactory* Global::getAgentFactory()
+{
+	Object* obj = get(flstrAgentFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AgentFactory*>(obj);
+}
+
+RendererFactory* Global::getRendererFactory()
+{
+	Object* obj = get(flstrRendererFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<RendererFactory*>(obj);
+}
+
+RendererGroupFactory* Global::getRendererGroupFactory()
+{
+	Object* obj = get(flstrRendererGroupFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<RendererGroupFactory*>(obj);
+}

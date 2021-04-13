@@ -13,12 +13,10 @@ FUI::FUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FUI)
 {
-	fluo::Object* obj = fluo::Global::instance().get(flstrVolumeFactory);
-	if (!obj)
+	fluo::VolumeFactory* factory = fluo::Global::instance().getVolumeFactory();
+	if (!factory)
 		return;
-	fluo::VolumeFactory* factory = dynamic_cast<fluo::VolumeFactory*>(obj);
-	if (factory)
-		factory->setValue(defaultFilename, location);
+	factory->setValue(defaultFilename, location);
 	//fluo::Global::instance().getVolumeFactory().setValue(defaultFilename, location);
   ui->setupUi(this);
 
@@ -937,10 +935,7 @@ void FUI::on_actionLoad_Volume_0_triggered()
   { 
     auto reader = getReader(suffix);
  
-	fluo::Object* obj = fluo::Global::instance().get(flstrVolumeFactory);
-	if (!obj)
-		return;
-	fluo::VolumeFactory* factory = dynamic_cast<fluo::VolumeFactory*>(obj);
+	fluo::VolumeFactory* factory = fluo::Global::instance().getVolumeFactory();
 	if (!factory)
 		return;
 	fluo::VolumeData* vd = factory->build();

@@ -123,10 +123,10 @@ void PropertiesPanel::setPropShininessValue(int newVal)
 
 void PropertiesPanel::onVolumeLoaded(int renderviewID, fluo::VolumeData *vd)
 {
-	fluo::Object* obj = fluo::Global::instance().get(flstrAgentFactory);
-	if (!obj)
+	AgentFactory* factory = fluo::Global::instance().getAgentFactory();
+	if (!factory)
 		return;
-	m_agent = dynamic_cast<AgentFactory*>(obj)->getOrAddVolumePropAgent("VolumePropPanel", this);
+	m_agent = factory->getOrAddVolumePropAgent("VolumePropPanel", this);
 	//m_agent = fluo::Global::instance().getAgentFactory().getOrAddVolumePropAgent("VolumePropPanel",this);
   VolumePropertiesOptions* newVolumePropOpt = new VolumePropertiesOptions(m_agent,vd);
   VolumePropertiesMisc *newVolumePropsMisc = new VolumePropertiesMisc();
