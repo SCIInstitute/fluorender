@@ -38,7 +38,7 @@ public:
 
 	Renderer2D();
 
-    Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const Renderer2D*) const {return true;}
 
@@ -49,6 +49,9 @@ protected:
 
 	virtual void setupInputs();
 	virtual void setupOutputs();
+
+	virtual void preDraw(Event &event);
+	virtual void postDraw(Event &event);
 };
 }
 #endif//FL_RENDERER2D
