@@ -33,6 +33,8 @@ using namespace fluo;
 ViewRenderer::ViewRenderer():
 	Renderer2D()
 {
+	setConditionFunction(std::bind(&ViewRenderer::drawType,
+		this));
 }
 
 ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
@@ -46,3 +48,16 @@ ViewRenderer::~ViewRenderer()
 {
 }
 
+ProcessorBranchType ViewRenderer::drawType()
+{
+	int draw_type;
+	getValue("draw type", draw_type);
+	switch (draw_type)
+	{
+	case 1://draw volumes only
+		return PBT_01;
+	case 2://draw volumes and meshes with depth peeling
+		return PBT_02;
+	}
+	return PBT_01;
+}

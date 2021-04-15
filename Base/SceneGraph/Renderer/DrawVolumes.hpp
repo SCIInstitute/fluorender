@@ -25,48 +25,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PROCESSOR_HPP
-#define PROCESSOR_HPP
+#ifndef DRAW_VOLUMES_HPP
+#define DRAW_VOLUMES_HPP
 
-#include <Group.hpp>
-#include "ProcessorNode.hpp"
-#include "ProcessorVisitor.hpp"
+#include "Renderer2D.hpp"
 
 namespace fluo
 {
-	typedef std::function<ProcessorBranchType()> conditionFunctionType;
-	class Processor : public Group
-	{
-	public:
+class DrawVolumes : public Renderer2D
+{
+public:
 
-		Processor();
+	DrawVolumes();
 
-		Processor(const Processor& prc, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawVolumes(const DrawVolumes& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-		virtual Processor* clone(const CopyOp& copyop) const { return new Processor(*this, copyop); };
+	virtual bool isSameKindAs(const DrawVolumes*) const {return true;}
 
-		virtual bool isSameKindAs(const Processor*) const {return true;}
+	virtual const char* className() const { return "DrawVolumes"; }
 
-		virtual const char* className() const { return "Processor"; }
+	//condition function
+	//ProcessorBranchType drawType();
 
-		//manage conditions to implement a decision tree
-		virtual void setConditionFunction(conditionFunctionType func)
-		{
-			condition_func_ = func;
-		}
-		virtual ProcessorBranchType condition()
-		{
-			if (condition_func_)
-				return condition_func_();
-			else
-				return PBT_DONTCARE;
-		};
+	virtual void preDraw(Event &event);
 
-	protected:
-		~Processor();
+protected:
+	~DrawVolumes();
 
-	protected:
-		conditionFunctionType condition_func_;
-	};
+};
 }
-#endif//PROCESSOR_HPP
+#endif//DRAW_VOLUMES_HPP

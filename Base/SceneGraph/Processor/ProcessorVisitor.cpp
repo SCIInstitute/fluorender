@@ -56,11 +56,8 @@ void ProcessorVisitor::apply(Group& group)
 	Processor* prc = dynamic_cast<Processor*>(&group);
 	if (prc)
 	{
-		bool condition = prc->condition();
-		if (condition)
-			setTraversalMask(PBT_TRUE);
-		else
-			setTraversalMask(PBT_FALSE);
+		ProcessorBranchType condition = prc->condition();
+		setTraversalMask((unsigned int)condition);
 	}
 
 	Event event;

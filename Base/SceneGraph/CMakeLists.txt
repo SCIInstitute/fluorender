@@ -68,9 +68,10 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Renderer/Renderer2D.hpp
 				Renderer/Renderer3D.hpp
 				Renderer/ClipPlaneRenderer.hpp
-				Renderer/ViewRenderer.hpp
 				Renderer/Renderer2DFactory.hpp
 				Renderer/Renderer3DFactory.hpp
+				Renderer/ViewRenderer.hpp
+				Renderer/DrawVolumes.hpp
 				Utilities/DecycleVisitor.hpp
 				Utilities/InfoVisitor.hpp
 				Utilities/Layer.hpp
@@ -103,9 +104,10 @@ set(SOURCES Annotations/Annotations.cpp
 			Renderer/Renderer2D.cpp
 			Renderer/Renderer3D.cpp
 			Renderer/ClipPlaneRenderer.cpp
-			Renderer/ViewRenderer.cpp
 			Renderer/Renderer2DFactory.cpp
 			Renderer/Renderer3DFactory.cpp
+			Renderer/ViewRenderer.cpp
+			Renderer/DrawVolumes.cpp
 			)
 
 

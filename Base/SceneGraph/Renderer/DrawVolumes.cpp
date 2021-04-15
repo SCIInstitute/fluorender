@@ -25,48 +25,44 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef PROCESSOR_HPP
-#define PROCESSOR_HPP
 
-#include <Group.hpp>
-#include "ProcessorNode.hpp"
-#include "ProcessorVisitor.hpp"
+#include "DrawVolumes.hpp"
+#include <Color.hpp>
 
-namespace fluo
+using namespace fluo;
+
+DrawVolumes::DrawVolumes():
+	Renderer2D()
 {
-	typedef std::function<ProcessorBranchType()> conditionFunctionType;
-	class Processor : public Group
-	{
-	public:
-
-		Processor();
-
-		Processor(const Processor& prc, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
-
-		virtual Processor* clone(const CopyOp& copyop) const { return new Processor(*this, copyop); };
-
-		virtual bool isSameKindAs(const Processor*) const {return true;}
-
-		virtual const char* className() const { return "Processor"; }
-
-		//manage conditions to implement a decision tree
-		virtual void setConditionFunction(conditionFunctionType func)
-		{
-			condition_func_ = func;
-		}
-		virtual ProcessorBranchType condition()
-		{
-			if (condition_func_)
-				return condition_func_();
-			else
-				return PBT_DONTCARE;
-		};
-
-	protected:
-		~Processor();
-
-	protected:
-		conditionFunctionType condition_func_;
-	};
+	//setConditionFunction(std::bind(&ViewRenderer::drawType,
+	//	this));
 }
-#endif//PROCESSOR_HPP
+
+DrawVolumes::DrawVolumes(const DrawVolumes& renderer, const fluo::CopyOp& copyop, bool copy_values):
+	Renderer2D(renderer, copyop, false)
+{
+	if (copy_values)
+		copyValues(renderer, copyop);
+}
+
+DrawVolumes::~DrawVolumes()
+{
+}
+
+//ProcessorBranchType DrawVolumes::drawType()
+//{
+//}
+
+void DrawVolumes::preDraw(Event &event)
+{
+	Color bg_color;
+	getValue("bg color", bg_color);
+	int nx, ny;
+	getValue("nx", nx);
+	getValue("ny", ny);
+	// clear color and depth buffers
+	glClearDepth(1.0);
+	glClearColor(bg_color.r(), bg_color.g(), bg_color.b(), 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, (GLint)nx, (GLint)ny);
+}

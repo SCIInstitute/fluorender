@@ -44,6 +44,9 @@ public:
 
 	virtual const char* className() const { return "ViewRenderer"; }
 
+	//condition function
+	ProcessorBranchType drawType();
+
 protected:
 	~ViewRenderer();
 
