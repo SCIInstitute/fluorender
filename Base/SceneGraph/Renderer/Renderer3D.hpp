@@ -28,17 +28,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_RENDERER_3D_HPP
 #define FL_RENDERER_3D_HPP
 
-#include "Renderer.hpp"
+#include <ProcessorNode.hpp>
 
 namespace fluo
 {
-class Renderer3D : public Renderer
+class Renderer3D : public ProcessorNode
 {
 public:
 
 	Renderer3D();
 
-    Renderer3D(const Renderer3D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	Renderer3D(const Renderer3D& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const Renderer3D*) const {return true;}
 

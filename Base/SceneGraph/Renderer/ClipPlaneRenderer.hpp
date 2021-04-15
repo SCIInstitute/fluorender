@@ -44,7 +44,7 @@ public:
 
 	virtual const char* className() const { return "ClipPlaneRenderer"; }
 
-    bool render(fluo::Event& event);
+    void render(fluo::Event& event);
 
 protected:
 	~ClipPlaneRenderer();

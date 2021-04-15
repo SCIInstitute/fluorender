@@ -26,34 +26,35 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "RendererGroupFactory.hpp"
+#include "Renderer3DFactory.hpp"
+#include "ClipPlaneRenderer.hpp"
 #include <Names.hpp>
 
 using namespace fluo;
 
-RendererGroupFactory::RendererGroupFactory()
+Renderer3DFactory::Renderer3DFactory()
 {
-	m_name = flstrRendererGroupFactory;
-	default_object_name_ = flstrDefaultRendererGroup;
+	m_name = flstrRenderer3DFactory;
+	default_object_name_ = flstrDefaultRenderer3D;
 }
 
-RendererGroupFactory::~RendererGroupFactory()
+Renderer3DFactory::~Renderer3DFactory()
 {
 
 }
 
-//ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
-//{
-//	Processor* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<ClipPlaneRenderer*>(result);
-//
-//	//not found
-//	ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
-//	if (renderer)
-//	{
-//		renderer->setName(name);
-//		objects_.push_front(renderer);
-//	}
-//	return renderer;
-//}
+ClipPlaneRenderer* Renderer3DFactory::getOrAddClipPlaneRenderer(const std::string &name)
+{
+	Renderer3D* result = findFirst(name);
+	if (result)
+		return dynamic_cast<ClipPlaneRenderer*>(result);
+
+	//not found
+	ClipPlaneRenderer* renderer = new ClipPlaneRenderer();
+	if (renderer)
+	{
+		renderer->setName(name);
+		objects_.push_front(renderer);
+	}
+	return renderer;
+}

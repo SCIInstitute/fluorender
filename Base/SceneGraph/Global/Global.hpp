@@ -37,8 +37,8 @@ namespace fluo
 	class VolumeFactory;
 	class MeshFactory;
 	class AnnotationFactory;
-	class RendererFactory;
-	class RendererGroupFactory;
+	class Renderer2DFactory;
+	class Renderer3DFactory;
 	//automatically creates the factories and provide global access
 	class Global
 	{
@@ -50,8 +50,8 @@ namespace fluo
 		MeshFactory* getMeshFactory();
 		AnnotationFactory* getAnnotationFactory();
 		AgentFactory* getAgentFactory();
-		RendererFactory* getRendererFactory();
-		RendererGroupFactory* getRendererGroupFactory();
+		Renderer2DFactory* getRenderer2DFactory();
+		Renderer3DFactory* getRenderer3DFactory();
 
 /*		inline size_t getNum()
 		{

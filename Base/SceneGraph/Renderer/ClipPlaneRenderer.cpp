@@ -25,6 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include "ClipPlaneRenderer.hpp"
 #include <Plane.hpp>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/TextureRenderer.h>
@@ -33,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-
-#include "ClipPlaneRenderer.hpp"
 
 using namespace fluo;
 
@@ -87,15 +86,14 @@ void ClipPlaneRenderer::setupOutputs()
 
 }
 
-bool ClipPlaneRenderer::render(fluo::Event& event)
+void ClipPlaneRenderer::render(fluo::Event& event)
 {
-	bool result = true;
 	bool display = false;
 	getValue("clip display", display);
 	bool hold = false;
 	getValue("clip hold", hold);
 	if (!display && !hold)
-		return false;
+		return;
 
 	bool border;
 	getValue("border", border);
@@ -104,7 +102,7 @@ bool ClipPlaneRenderer::render(fluo::Event& event)
 	long render_mode = fluo::PRMNone;
 	getValue("clip render mode", render_mode);
 	if (render_mode == fluo::PRMNone)
-		return false;
+		return;
 
 	long clip_mask;
 	getValue("clip mask", clip_mask);
@@ -124,7 +122,7 @@ bool ClipPlaneRenderer::render(fluo::Event& event)
 		glCullFace(GL_BACK);
 
 	if (!border && render_mode == fluo::PRMFrame)
-		return false;
+		return;
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -156,7 +154,7 @@ bool ClipPlaneRenderer::render(fluo::Event& event)
 	fluo::PlaneSet planes;
 	getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
-		return false;
+		return;
 
 	//calculating planes
 	//get six planes
@@ -172,43 +170,43 @@ bool ClipPlaneRenderer::render(fluo::Event& event)
 	fluo::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
 	//x1z1
 	if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
-		return false;
+		return;
 	//x1z2
 	if (!px1->Intersect(*pz2, lp_x1z2, lv_x1z2))
-		return false;
+		return;
 	//x2z1
 	if (!px2->Intersect(*pz1, lp_x2z1, lv_x2z1))
-		return false;
+		return;
 	//x2z2
 	if (!px2->Intersect(*pz2, lp_x2z2, lv_x2z2))
-		return false;
+		return;
 
 	//calculate 8 points
 	fluo::Point pp[8];
 	//p0 = l_x1z1 * py1
 	if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
-		return false;
+		return;
 	//p1 = l_x1z2 * py1
 	if (!py1->Intersect(lp_x1z2, lv_x1z2, pp[1]))
-		return false;
+		return;
 	//p2 = l_x2z1 *py1
 	if (!py1->Intersect(lp_x2z1, lv_x2z1, pp[2]))
-		return false;
+		return;
 	//p3 = l_x2z2 * py1
 	if (!py1->Intersect(lp_x2z2, lv_x2z2, pp[3]))
-		return false;
+		return;
 	//p4 = l_x1z1 * py2
 	if (!py2->Intersect(lp_x1z1, lv_x1z1, pp[4]))
-		return false;
+		return;
 	//p5 = l_x1z2 * py2
 	if (!py2->Intersect(lp_x1z2, lv_x1z2, pp[5]))
-		return false;
+		return;
 	//p6 = l_x2z1 * py2
 	if (!py2->Intersect(lp_x2z1, lv_x2z1, pp[6]))
-		return false;
+		return;
 	//p7 = l_x2z2 * py2
 	if (!py2->Intersect(lp_x2z2, lv_x2z2, pp[7]))
-		return false;
+		return;
 
 	//draw the six planes out of the eight points
 	//get color
@@ -264,7 +262,7 @@ bool ClipPlaneRenderer::render(fluo::Event& event)
 	flvr::VertexArray* va_clipp =
 		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Clip_Planes);
 	if (!va_clipp)
-		return false;
+		return;
 	std::vector<fluo::Point> clip_points(pp, pp+8);
 	va_clipp->set_param(clip_points);
 	va_clipp->draw_begin();
@@ -385,5 +383,4 @@ bool ClipPlaneRenderer::render(fluo::Event& event)
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 
-	return result;
 }

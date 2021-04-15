@@ -25,66 +25,64 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef RENDERER_FACTORY_HPP
-#define RENDERER_FACTORY_HPP
+#ifndef RENDERER2D_FACTORY_HPP
+#define RENDERER2D_FACTORY_HPP
 
 #include <ProcessorFactory.hpp>
-#include "Renderer.hpp"
+#include "Renderer2D.hpp"
 
 namespace fluo
 {
-	class RendererFactory : public ProcessorFactory
+	class Renderer2DFactory : public ProcessorFactory
 	{
 	public:
-		RendererFactory();
+		Renderer2DFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
-        { return dynamic_cast<const RendererFactory*>(obj) != nullptr; }
+        { return dynamic_cast<const Renderer2DFactory*>(obj) != nullptr; }
 
-		virtual const char* className() const { return "RendererFactory"; }
+		virtual const char* className() const { return "Renderer2DFactory"; }
 
 		virtual void createDefault() {}
 
-        virtual Renderer* getDefault() { return nullptr; }
+        virtual Renderer2D* getDefault() { return nullptr; }
 
-        virtual Renderer* build(Renderer* renderer = nullptr) { return nullptr; }
+        virtual Renderer2D* build(Renderer2D* renderer = nullptr) { return nullptr; }
 
-        virtual Renderer* clone(Renderer*) { return nullptr; }
+        virtual Renderer2D* clone(Renderer2D*) { return nullptr; }
 
-        virtual Renderer* clone(const unsigned int) { return nullptr; }
+        virtual Renderer2D* clone(const unsigned int) { return nullptr; }
 
-		inline virtual Renderer* get(size_t i)
+		inline virtual Renderer2D* get(size_t i)
 		{
-			return dynamic_cast<Renderer*>(ObjectFactory::get(i));
+			return dynamic_cast<Renderer2D*>(ObjectFactory::get(i));
 		}
 
-		inline virtual const Renderer* get(size_t i) const
+		inline virtual const Renderer2D* get(size_t i) const
 		{
-			return dynamic_cast<Renderer*>(const_cast<Object*>(ObjectFactory::get(i)));
+			return dynamic_cast<Renderer2D*>(const_cast<Object*>(ObjectFactory::get(i)));
 		}
 
-		inline virtual Renderer* find(const unsigned int id)
+		inline virtual Renderer2D* find(const unsigned int id)
 		{
-			return dynamic_cast<Renderer*>(ObjectFactory::find(id));
+			return dynamic_cast<Renderer2D*>(ObjectFactory::find(id));
 		}
 
-		inline virtual Renderer* findFirst(const std::string &name)
+		inline virtual Renderer2D* findFirst(const std::string &name)
 		{
-			return dynamic_cast<Renderer*>(ObjectFactory::findFirst(name));
+			return dynamic_cast<Renderer2D*>(ObjectFactory::findFirst(name));
 		}
 
-		inline virtual Renderer* findLast(const std::string &name)
+		inline virtual Renderer2D* findLast(const std::string &name)
 		{
-			return dynamic_cast<Renderer*>(ObjectFactory::findLast(name));
+			return dynamic_cast<Renderer2D*>(ObjectFactory::findLast(name));
 		}
-
-		//ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
 
 	protected:
-		virtual ~RendererFactory();
+		virtual ~Renderer2DFactory();
 
 	};
 
 }
 
-#endif//RENDERER_FACTORY_HPP
+#endif//RENDERER2D_FACTORY_HPP

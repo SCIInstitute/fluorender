@@ -26,23 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ViewDraw.hpp"
+#include "Renderer2DFactory.hpp"
+#include <Names.hpp>
 
 using namespace fluo;
 
-ViewDraw::ViewDraw():
-	Renderer2D()
+Renderer2DFactory::Renderer2DFactory()
 {
+	m_name = flstrRenderer2DFactory;
+	default_object_name_ = flstrDefaultRenderer2D;
 }
 
-ViewDraw::ViewDraw(const ViewDraw& draw, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer2D(draw, copyop, false)
+Renderer2DFactory::~Renderer2DFactory()
 {
-	if (copy_values)
-		copyValues(draw, copyop);
-}
 
-ViewDraw::~ViewDraw()
-{
 }
-

@@ -32,8 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Mesh/MeshFactory.hpp>
 #include <Volume/VolumeFactory.hpp>
 #include <FUI/Panels/AgentFactory.hpp>
-#include <RendererFactory.hpp>
-#include <RendererGroupFactory.hpp>
+#include <Renderer2DFactory.hpp>
+#include <Renderer3DFactory.hpp>
 #include <SearchVisitor.hpp>
 
 using namespace fluo;
@@ -55,8 +55,8 @@ void Global::BuildFactories()
 	BUILD_AND_ADD(MeshFactory, factory_group);
 	BUILD_AND_ADD(AnnotationFactory, factory_group);
 	BUILD_AND_ADD(AgentFactory, factory_group);
-	BUILD_AND_ADD(RendererFactory, factory_group);
-	BUILD_AND_ADD(RendererGroupFactory, factory_group);
+	BUILD_AND_ADD(Renderer2DFactory, factory_group);
+	BUILD_AND_ADD(Renderer3DFactory, factory_group);
 }
 
 Object* Global::get(const std::string &name)
@@ -103,18 +103,18 @@ AgentFactory* Global::getAgentFactory()
 	return dynamic_cast<AgentFactory*>(obj);
 }
 
-RendererFactory* Global::getRendererFactory()
+Renderer2DFactory* Global::getRenderer2DFactory()
 {
-	Object* obj = get(flstrRendererFactory);
+	Object* obj = get(flstrRenderer2DFactory);
 	if (!obj)
 		return 0;
-	return dynamic_cast<RendererFactory*>(obj);
+	return dynamic_cast<Renderer2DFactory*>(obj);
 }
 
-RendererGroupFactory* Global::getRendererGroupFactory()
+Renderer3DFactory* Global::getRenderer3DFactory()
 {
-	Object* obj = get(flstrRendererGroupFactory);
+	Object* obj = get(flstrRenderer3DFactory);
 	if (!obj)
 		return 0;
-	return dynamic_cast<RendererGroupFactory*>(obj);
+	return dynamic_cast<Renderer3DFactory*>(obj);
 }

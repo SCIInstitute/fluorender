@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_RENDERER_2D_HPP
 #define FL_RENDERER_2D_HPP
 
-#include "Renderer.hpp"
+#include <Processor.hpp>
 
 namespace fluo
 {
-class Renderer2D : public Renderer
+class Renderer2D : public Processor
 {
 public:
 

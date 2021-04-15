@@ -31,12 +31,12 @@ DEALINGS IN THE SOFTWARE.
 using namespace fluo;
 
 ViewRenderer::ViewRenderer():
-	RendererGroup()
+	Renderer2D()
 {
 }
 
 ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	RendererGroup(renderer, copyop, false)
+	Renderer2D(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);

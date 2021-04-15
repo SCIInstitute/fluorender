@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace fluo;
 
 Renderer2D::Renderer2D():
-	Renderer()
+	Processor()
 {
 	setupInputs();
 	setupOutputs();
@@ -44,7 +44,7 @@ Renderer2D::Renderer2D():
 }
 
 Renderer2D::Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer(renderer, copyop, false)
+	Processor(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);

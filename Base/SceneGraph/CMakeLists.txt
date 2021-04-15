@@ -65,15 +65,12 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Processor/ProcessorNodeFactory.hpp
 				Processor/ProcessorVisitor.hpp
 				Processor/ProcessorFactory.hpp
-				Renderer/Renderer.hpp
 				Renderer/Renderer2D.hpp
 				Renderer/Renderer3D.hpp
 				Renderer/ClipPlaneRenderer.hpp
 				Renderer/ViewRenderer.hpp
-				Renderer/ViewDraw.hpp
-				Renderer/RendererFactory.hpp
-				Renderer/RendererGroupFactory.hpp
-				Renderer/RendererGroup.hpp
+				Renderer/Renderer2DFactory.hpp
+				Renderer/Renderer3DFactory.hpp
 				Utilities/DecycleVisitor.hpp
 				Utilities/InfoVisitor.hpp
 				Utilities/Layer.hpp
@@ -103,15 +100,12 @@ set(SOURCES Annotations/Annotations.cpp
 			Processor/ProcessorNodeFactory.cpp
 			Processor/ProcessorVisitor.cpp
 			Processor/ProcessorFactory.cpp
-			Renderer/Renderer.cpp
 			Renderer/Renderer2D.cpp
 			Renderer/Renderer3D.cpp
 			Renderer/ClipPlaneRenderer.cpp
 			Renderer/ViewRenderer.cpp
-			Renderer/ViewDraw.cpp
-			Renderer/RendererFactory.cpp
-			Renderer/RendererGroupFactory.cpp
-			Renderer/RendererGroup.cpp
+			Renderer/Renderer2DFactory.cpp
+			Renderer/Renderer3DFactory.cpp
 			)
 
 

@@ -557,6 +557,8 @@ namespace fluo
 
 	ref_ptr<ValueSet> _value_set;
 
+	//inputs and outputs are just value names for ui display
+	//value names in the collections are to be shown in ui
 	ValueCollection inputs_;
 	ValueCollection outputs_;
 

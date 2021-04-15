@@ -30,14 +30,14 @@ DEALINGS IN THE SOFTWARE.
 using namespace fluo;
 
 Renderer3D::Renderer3D():
-	Renderer()
+	ProcessorNode()
 {
 	setupInputs();
 	setupOutputs();
 }
 
 Renderer3D::Renderer3D(const Renderer3D& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer(renderer, copyop, false)
+	ProcessorNode(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
