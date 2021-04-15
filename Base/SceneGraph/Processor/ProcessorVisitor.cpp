@@ -35,19 +35,18 @@ using namespace fluo;
 void ProcessorVisitor::apply(Node& node)
 {
 	ProcessorNode* pn = dynamic_cast<ProcessorNode*>(&node);
-	Event event;
 	if (pn)
 	{
 		if (pn->before_run_function_)
-			pn->before_run_function_(event);
+			pn->before_run_function_(event_);
 		if (pn->process_func_)
-			pn->process_func_(event);
+			pn->process_func_(event_);
 	}
 	traverse(node);
 	if (pn)
 	{
 		if (pn->after_run_function_)
-			pn->after_run_function_(event);
+			pn->after_run_function_(event_);
 	}
 }
 

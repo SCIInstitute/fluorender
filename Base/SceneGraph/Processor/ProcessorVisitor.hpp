@@ -74,7 +74,9 @@ namespace fluo
 	class ProcessorVisitor : public NodeVisitor
 	{
 	public:
-		ProcessorVisitor() : NodeVisitor()
+		ProcessorVisitor(Event& event) :
+			NodeVisitor(),
+			event_(event)
 		{
 			setTraversalMode(fluo::NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
@@ -84,6 +86,7 @@ namespace fluo
 		virtual void apply(fluo::Group& group);
 
 	private:
+		Event event_;
 	};
 }
 #endif//PROCESSORVISITOR_HPP
