@@ -26,23 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ProcessorGroup.hpp"
+#include "ProcessorNodeFactory.hpp"
+#include <Names.hpp>
 
 using namespace fluo;
 
-ProcessorGroup::ProcessorGroup():
-	Group(),
-	condition_func_(nullptr)
+ProcessorNodeFactory::ProcessorNodeFactory()
 {
+	m_name = flstrProcessorNodeFactory;
+	default_object_name_ = flstrDefaultProcessorNode;
 }
 
-ProcessorGroup::ProcessorGroup(const ProcessorGroup& group, const CopyOp& copyop, bool copy_values):
-	Group(group, copyop, false),
-	condition_func_(nullptr)
+ProcessorNodeFactory::~ProcessorNodeFactory()
 {
-}
 
-ProcessorGroup::~ProcessorGroup()
-{
 }
-

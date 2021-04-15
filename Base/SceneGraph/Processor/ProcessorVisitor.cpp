@@ -27,33 +27,55 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ProcessorVisitor.hpp"
-#include "ProcessorGroup.hpp"
+#include "ProcessorNode.hpp"
 #include "Processor.hpp"
 
 using namespace fluo;
 
 void ProcessorVisitor::apply(Node& node)
 {
-	Processor* prc = dynamic_cast<Processor*>(&node);
-	if (prc)
+	ProcessorNode* pn = dynamic_cast<ProcessorNode*>(&node);
+	Event event;
+	if (pn)
 	{
-		Event event;
-		prc->run(event);
+		if (pn->before_run_function_)
+			pn->before_run_function_(event);
+		if (pn->process_func_)
+			pn->process_func_(event);
 	}
 	traverse(node);
+	if (pn)
+	{
+		if (pn->after_run_function_)
+			pn->after_run_function_(event);
+	}
 }
 
 void ProcessorVisitor::apply(Group& group)
 {
-	ProcessorGroup* prcgroup = dynamic_cast<ProcessorGroup*>(&group);
-	if (prcgroup)
+	Processor* prc = dynamic_cast<Processor*>(&group);
+	if (prc)
 	{
-		bool condition = prcgroup->condition();
+		bool condition = prc->condition();
 		if (condition)
 			setTraversalMask(PBT_TRUE);
 		else
 			setTraversalMask(PBT_FALSE);
 	}
+
+	Event event;
+	if (prc)
+	{
+		if (prc->before_run_function_)
+			prc->before_run_function_(event);
+		if (prc->process_func_)
+			prc->process_func_(event);
+	}
 	traverse(group);
+	if (prc)
+	{
+		if (prc->after_run_function_)
+			prc->after_run_function_(event);
+	}
 }
 

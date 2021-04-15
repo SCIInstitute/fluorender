@@ -28,88 +28,44 @@ DEALINGS IN THE SOFTWARE.
 #ifndef PROCESSOR_HPP
 #define PROCESSOR_HPP
 
-#include <Node.hpp>
+#include <Group.hpp>
+#include "ProcessorNode.hpp"
 
 namespace fluo
 {
-class Processor;
-typedef std::vector<Processor*> ProcessorList;
-
-class ProcessorFactory;
-
-typedef std::function<bool(Event&)> processFunctionType;
-
-class Processor : public Node
-{
-public:
-
-	Processor();
-
-	Processor(const Processor& processor, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
-
-	virtual Processor* clone(const CopyOp& copyop) const { return new Processor(*this, copyop); };
-
-	virtual bool isSameKindAs(const Processor*) const {return true;}
-
-	virtual const char* className() const { return "Processor"; }
-
-	virtual bool run(Event& event)
+	typedef std::function<bool()> conditionFunctionType;
+	class Processor : public Group
 	{
-		bool bval = true;
-		if (before_run_function_)
-		{
-			before_run_function_(event);
-		}
-		if (process_func_)
-		{
-			bval = process_func_(event);
-		}
-		if (after_run_function_)
-		{
-			after_run_function_(event);
-		}
-		return bval;
-	}
+	public:
 
-	virtual void setProcessFunction(processFunctionType func)
-	{
-		process_func_ = func;
-	}
+		Processor();
 
-	inline void copyInputValues(Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
-	{
-		ValueCollection names = obj.getValueNames();
-		for (auto it = names.begin();
-			it != names.end(); ++it)
+		Processor(const Processor& prc, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+		virtual Processor* clone(const CopyOp& copyop) const { return new Processor(*this, copyop); };
+
+		virtual bool isSameKindAs(const Processor*) const {return true;}
+
+		virtual const char* className() const { return "Processor"; }
+
+		//manage conditions to implement a decision tree
+		virtual void setConditionFunction(conditionFunctionType func)
 		{
-			auto find_it = inputs_.find(*it);
-			if (find_it == inputs_.end())
-				continue;
-            Value* value = obj.getValuePointer(*it); //bandaid, need to see what I need to do.
-            Value* new_value = nullptr;
-			if (copyop.getCopyFlags() & CopyOp::DEEP_COPY_VALUES)
-				new_value = value->clone();
+			condition_func_ = func;
+		}
+		virtual bool condition()
+		{
+			if (condition_func_)
+				return condition_func_();
 			else
-				new_value = value;
-			replaceValue(new_value);
-		}
-	}
+				return false;
+		};
 
-	inline void copyOutputValues(Object& obj, const CopyOp& copyop = CopyOp::SHALLOW_COPY)
-	{
-	}
+	protected:
+		~Processor();
 
-protected:
-	~Processor();
-
-protected:
-	ValueCollection inputs_;
-	ValueCollection outputs_;
-	processFunctionType process_func_;
-
-	virtual void setupInputs() {}
-	virtual void setupOutputs() {}
-
-};
+	protected:
+		conditionFunctionType condition_func_;
+	};
 }
-#endif//FL_PROCESSOR
+#endif//PROCESSOR_HPP

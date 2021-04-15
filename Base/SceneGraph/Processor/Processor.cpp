@@ -31,22 +31,17 @@ DEALINGS IN THE SOFTWARE.
 using namespace fluo;
 
 Processor::Processor():
-	Node(),
-	process_func_(nullptr)
+	Group(),
+	condition_func_(nullptr)
 {
 	setupInputs();
 	setupOutputs();
 }
 
-Processor::Processor(const Processor& processor, const CopyOp& copyop, bool copy_values):
-	Node(processor, copyop, false),
-	process_func_(nullptr)
-
+Processor::Processor(const Processor& prc, const CopyOp& copyop, bool copy_values):
+	Group(prc, copyop, false),
+	condition_func_(nullptr)
 {
-	if (copy_values)
-		copyValues(processor, copyop);
-	inputs_ = processor.inputs_;
-	outputs_ = processor.outputs_;
 }
 
 Processor::~Processor()

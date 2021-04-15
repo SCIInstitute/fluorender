@@ -47,7 +47,7 @@ namespace fluo
 
         virtual Processor* getDefault() { return nullptr; }
 
-        virtual Processor* build(Processor* processor = nullptr) { return nullptr; }
+        virtual Processor* build(Processor* group = nullptr) { return nullptr; }
 
         virtual Processor* clone(Processor*) { return nullptr; }
 
@@ -78,8 +78,6 @@ namespace fluo
 			return dynamic_cast<Processor*>(ObjectFactory::findLast(name));
 		}
 
-		//FLR::ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
-
 	protected:
 		virtual ~ProcessorFactory();
 
@@ -87,4 +85,4 @@ namespace fluo
 
 }
 
-#endif//FL_PROCESSORFACTORY
+#endif//PROCESSOR_FACTORY_HPP

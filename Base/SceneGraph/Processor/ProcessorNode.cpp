@@ -26,33 +26,28 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ProcessorGroupFactory.hpp"
+#include "ProcessorNode.hpp"
 
 using namespace fluo;
 
-ProcessorGroupFactory::ProcessorGroupFactory()
+ProcessorNode::ProcessorNode():
+	Node()
 {
-	m_name = "processor group factory";
-	default_object_name_ = "default processor group";
+	setupInputs();
+	setupOutputs();
 }
 
-ProcessorGroupFactory::~ProcessorGroupFactory()
-{
+ProcessorNode::ProcessorNode(const ProcessorNode& pn, const CopyOp& copyop, bool copy_values):
+	Node(pn, copyop, false)
 
+{
+	if (copy_values)
+		copyValues(pn, copyop);
+	inputs_ = pn.inputs_;
+	outputs_ = pn.outputs_;
 }
 
-//FLR::ClipPlaneRenderer* ProcessorFactory::getOrAddClipPlaneRenderer(const std::string &name)
-//{
-//	Processor* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<FLR::ClipPlaneRenderer*>(result);
-//
-//	//not found
-//	FLR::ClipPlaneRenderer* renderer = new FLR::ClipPlaneRenderer();
-//	if (renderer)
-//	{
-//		renderer->setName(name);
-//		objects_.push_front(renderer);
-//	}
-//	return renderer;
-//}
+ProcessorNode::~ProcessorNode()
+{
+}
+

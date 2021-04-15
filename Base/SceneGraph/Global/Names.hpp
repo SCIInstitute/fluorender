@@ -43,5 +43,9 @@ const std::string flstrRendererFactory = "renderer factory";
 const std::string flstrDefaultRenderer = "default renderer";
 const std::string flstrRendererGroupFactory = "renderer group factory";
 const std::string flstrDefaultRendererGroup = "default renderer group";
+const std::string flstrProcessorNodeFactory = "processor node factory";
+const std::string flstrDefaultProcessorNode = "default processor node";
+const std::string flstrProcessorFactory = "processor factory";
+const std::string flstrDefaultProcessor = "default processor";
 
 #endif//NAMES_HPP

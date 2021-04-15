@@ -60,12 +60,11 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Root/Root.hpp
 				Global/Global.hpp
 				Global/Names.hpp
+				Processor/ProcessorNode.hpp
 				Processor/Processor.hpp
-				Processor/ProcessorGroup.hpp
-				Processor/ProcessorFactory.hpp
-				Processor/StreamProcessor.hpp
+				Processor/ProcessorNodeFactory.hpp
 				Processor/ProcessorVisitor.hpp
-				Processor/ProcessorGroupFactory.hpp
+				Processor/ProcessorFactory.hpp
 				Renderer/Renderer.hpp
 				Renderer/Renderer2D.hpp
 				Renderer/Renderer3D.hpp
@@ -99,12 +98,11 @@ set(SOURCES Annotations/Annotations.cpp
 			View/View.cpp
 			Root/Root.cpp
 			Global/Global.cpp
+			Processor/ProcessorNode.cpp
 			Processor/Processor.cpp
-			Processor/ProcessorGroup.cpp
-			Processor/ProcessorFactory.cpp
-			Processor/StreamProcessor.cpp
+			Processor/ProcessorNodeFactory.cpp
 			Processor/ProcessorVisitor.cpp
-			Processor/ProcessorGroupFactory.cpp
+			Processor/ProcessorFactory.cpp
 			Renderer/Renderer.cpp
 			Renderer/Renderer2D.cpp
 			Renderer/Renderer3D.cpp
