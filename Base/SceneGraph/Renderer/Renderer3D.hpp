@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_RENDERER_3D_HPP
 
 #include <ProcessorNode.hpp>
+#include <glm/glm.hpp>
 
 namespace fluo
 {
@@ -49,6 +50,12 @@ protected:
 
 	virtual void setupInputs();
 	virtual void setupOutputs();
+
+	void handleProjection();
+	void handleCamera();
+	glm::mat4 getObjectMat();
+	glm::mat4 getDrawMat();
+	glm::mat4 getInvtMat();
 };
 }
 #endif//FL_RENDERER3D

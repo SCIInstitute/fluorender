@@ -25,35 +25,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef DRAW_VOLUMES_HPP
-#define DRAW_VOLUMES_HPP
 
-#include "Renderer2D.hpp"
+#include "DrawVolumesPeel.hpp"
+#include <Color.hpp>
 
-namespace fluo
+using namespace fluo;
+
+DrawVolumesPeel::DrawVolumesPeel():
+	DrawVolumes()
 {
-class DrawVolumes : public Renderer2D
-{
-public:
-
-	DrawVolumes();
-
-	DrawVolumes(const DrawVolumes& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
-
-	virtual bool isSameKindAs(const DrawVolumes*) const {return true;}
-
-	virtual const char* className() const { return "DrawVolumes"; }
-
-	//condition function
-	//ProcessorBranchType drawType();
-
-	virtual void preDraw(Event &event);
-	virtual void postDraw(Event &event);
-
-protected:
-	~DrawVolumes();
-
-	void clearDraw();
-};
+	//setConditionFunction(std::bind(&ViewRenderer::drawType,
+	//	this));
 }
-#endif//DRAW_VOLUMES_HPP
+
+DrawVolumesPeel::DrawVolumesPeel(const DrawVolumesPeel& renderer, const fluo::CopyOp& copyop, bool copy_values):
+	DrawVolumes(renderer, copyop, false)
+{
+	if (copy_values)
+		copyValues(renderer, copyop);
+}
+
+DrawVolumesPeel::~DrawVolumesPeel()
+{
+}
+
+//ProcessorBranchType DrawVolumes::drawType()
+//{
+//}
+
+void DrawVolumesPeel::preDraw(Event &event)
+{
+	clearDraw();
+}
+
+void DrawVolumesPeel::postDraw(Event &event)
+{
+
+}
+

@@ -25,24 +25,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef DRAW_VOLUMES_HPP
-#define DRAW_VOLUMES_HPP
+#ifndef DRAW_VOLUMES_PEEL_HPP
+#define DRAW_VOLUMES_PEEL_HPP
 
-#include "Renderer2D.hpp"
+#include "DrawVolumes.hpp"
 
 namespace fluo
 {
-class DrawVolumes : public Renderer2D
+class DrawVolumesPeel : public DrawVolumes
 {
 public:
 
-	DrawVolumes();
+	DrawVolumesPeel();
 
-	DrawVolumes(const DrawVolumes& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawVolumesPeel(const DrawVolumesPeel& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual bool isSameKindAs(const DrawVolumes*) const {return true;}
+	virtual bool isSameKindAs(const DrawVolumesPeel*) const {return true;}
 
-	virtual const char* className() const { return "DrawVolumes"; }
+	virtual const char* className() const { return "DrawVolumesPeel"; }
 
 	//condition function
 	//ProcessorBranchType drawType();
@@ -51,9 +51,8 @@ public:
 	virtual void postDraw(Event &event);
 
 protected:
-	~DrawVolumes();
+	~DrawVolumesPeel();
 
-	void clearDraw();
 };
 }
-#endif//DRAW_VOLUMES_HPP
+#endif//DRAW_VOLUMES_PEEL_HPP

@@ -55,6 +55,16 @@ DrawVolumes::~DrawVolumes()
 
 void DrawVolumes::preDraw(Event &event)
 {
+	clearDraw();
+}
+
+void DrawVolumes::postDraw(Event &event)
+{
+
+}
+
+void DrawVolumes::clearDraw()
+{
 	Color bg_color;
 	getValue("bg color", bg_color);
 	int nx, ny;

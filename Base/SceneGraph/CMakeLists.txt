@@ -72,6 +72,7 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Renderer/Renderer3DFactory.hpp
 				Renderer/ViewRenderer.hpp
 				Renderer/DrawVolumes.hpp
+				Renderer/DrawVolumesPeel.hpp
 				Utilities/DecycleVisitor.hpp
 				Utilities/InfoVisitor.hpp
 				Utilities/Layer.hpp
@@ -108,6 +109,7 @@ set(SOURCES Annotations/Annotations.cpp
 			Renderer/Renderer3DFactory.cpp
 			Renderer/ViewRenderer.cpp
 			Renderer/DrawVolumes.cpp
+			Renderer/DrawVolumesPeel.cpp
 			)
 
 
