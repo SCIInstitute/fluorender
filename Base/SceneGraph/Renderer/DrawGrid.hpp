@@ -25,35 +25,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef DRAW_VOLUMES_HPP
-#define DRAW_VOLUMES_HPP
+#ifndef FL_DRAW_GRID_HPP
+#define FL_DRAW_GRID_HPP
 
-#include "Renderer2D.hpp"
+#include <Renderer3D.hpp>
 
 namespace fluo
 {
-class DrawVolumes : public Renderer2D
+class DrawGrid : public Renderer3D
 {
 public:
 
-	DrawVolumes();
+	DrawGrid();
 
-	DrawVolumes(const DrawVolumes& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawGrid(const DrawGrid& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual bool isSameKindAs(const DrawVolumes*) const {return true;}
+	virtual bool isSameKindAs(const DrawGrid*) const {return true;}
 
-	virtual const char* className() const { return "DrawVolumes"; }
+	virtual const char* className() const { return "DrawGrid"; }
 
-	//condition function
-	//ProcessorBranchType drawType();
-
-	virtual void preDraw(Event &event);
-	virtual void postDraw(Event &event);
+	void drawGrid();
 
 protected:
-	~DrawVolumes();
+	~DrawGrid();
 
-	void clearDraw();
 };
 }
-#endif//DRAW_VOLUMES_HPP
+#endif//FL_DRAW_GRID_HPP

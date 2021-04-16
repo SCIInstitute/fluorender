@@ -26,26 +26,26 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "DrawVolumes.hpp"
+#include "DrawPeel.hpp"
 #include <Color.hpp>
 
 using namespace fluo;
 
-DrawVolumes::DrawVolumes():
-	Renderer2D()
+DrawPeel::DrawPeel():
+	DrawSimple()
 {
 	//setConditionFunction(std::bind(&ViewRenderer::drawType,
 	//	this));
 }
 
-DrawVolumes::DrawVolumes(const DrawVolumes& renderer, const fluo::CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+DrawPeel::DrawPeel(const DrawPeel& renderer, const fluo::CopyOp& copyop, bool copy_values):
+	DrawSimple(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
 }
 
-DrawVolumes::~DrawVolumes()
+DrawPeel::~DrawPeel()
 {
 }
 
@@ -53,26 +53,13 @@ DrawVolumes::~DrawVolumes()
 //{
 //}
 
-void DrawVolumes::preDraw(Event &event)
+void DrawPeel::preDraw(Event &event)
 {
 	clearDraw();
 }
 
-void DrawVolumes::postDraw(Event &event)
+void DrawPeel::postDraw(Event &event)
 {
 
 }
 
-void DrawVolumes::clearDraw()
-{
-	Color bg_color;
-	getValue("bg color", bg_color);
-	int nx, ny;
-	getValue("nx", nx);
-	getValue("ny", ny);
-	// clear color and depth buffers
-	glClearDepth(1.0);
-	glClearColor(bg_color.r(), bg_color.g(), bg_color.b(), 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, (GLint)nx, (GLint)ny);
-}

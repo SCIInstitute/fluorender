@@ -65,14 +65,6 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Processor/ProcessorNodeFactory.hpp
 				Processor/ProcessorVisitor.hpp
 				Processor/ProcessorFactory.hpp
-				Renderer/Renderer2D.hpp
-				Renderer/Renderer3D.hpp
-				Renderer/ClipPlaneRenderer.hpp
-				Renderer/Renderer2DFactory.hpp
-				Renderer/Renderer3DFactory.hpp
-				Renderer/ViewRenderer.hpp
-				Renderer/DrawVolumes.hpp
-				Renderer/DrawVolumesPeel.hpp
 				Utilities/DecycleVisitor.hpp
 				Utilities/InfoVisitor.hpp
 				Utilities/Layer.hpp
@@ -80,6 +72,16 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Utilities/SearchVisitor.hpp
 				Utilities/ValueUpdateVisitor.hpp
 				Agent/InterfaceAgent.hpp
+				Renderer/Renderer2D.hpp
+				Renderer/Renderer3D.hpp
+				Renderer/ClipPlaneRenderer.hpp
+				Renderer/Renderer2DFactory.hpp
+				Renderer/Renderer3DFactory.hpp
+				Renderer/ViewRenderer.hpp
+				Renderer/DrawSimple.hpp
+				Renderer/DrawPeel.hpp
+				Renderer/DrawBackground.hpp
+				Renderer/DrawGrid.hpp
 	)
 
 set(SOURCES Annotations/Annotations.cpp
@@ -108,9 +110,11 @@ set(SOURCES Annotations/Annotations.cpp
 			Renderer/Renderer2DFactory.cpp
 			Renderer/Renderer3DFactory.cpp
 			Renderer/ViewRenderer.cpp
-			Renderer/DrawVolumes.cpp
-			Renderer/DrawVolumesPeel.cpp
-			)
+			Renderer/DrawSimple.cpp
+			Renderer/DrawPeel.cpp
+			Renderer/DrawBackground.cpp
+			Renderer/DrawGrid.cpp
+	)
 
 
 # The headers and library locations are cached interally to be used when
