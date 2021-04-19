@@ -47,7 +47,6 @@ include_directories(${FLObject_INCLUDES}
 set(HEADER_FILES Annotations/Annotations.hpp
 				Data/MeshData/MeshData.hpp
 				Data/VolumeData/VolumeData.hpp
-				DrawVolumeVisitor/DrawVolumeVisitor.hpp
 				Factories/Annotations/AnnotationFactory.hpp
 				Factories/Mesh/MeshFactory.hpp
 				Factories/Volume/VolumeFactory.hpp
@@ -88,12 +87,12 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Renderer/DrawRuler.hpp
 				Renderer/DrawCell.hpp
 				Renderer/DrawTrack.hpp
+				Renderer/DrawVolumeVisitor.hpp
 	)
 
 set(SOURCES Annotations/Annotations.cpp
 			Data/MeshData/MeshData.cpp
 			Data/VolumeData/VolumeData.cpp
-			DrawVolumeVisitor/DrawVolumeVisitor.cpp
 			Factories/Annotations/AnnotationFactory.cpp
 			Factories/Mesh/MeshFactory.cpp
 			Factories/Volume/VolumeFactory.cpp
@@ -126,6 +125,7 @@ set(SOURCES Annotations/Annotations.cpp
 			Renderer/DrawRuler.cpp
 			Renderer/DrawCell.cpp
 			Renderer/DrawTrack.cpp
+			Renderer/DrawVolumeVisitor.cpp
 	)
 
 
