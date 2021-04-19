@@ -38,7 +38,7 @@ DrawSimple::DrawSimple():
 	//	this));
 }
 
-DrawSimple::DrawSimple(const DrawSimple& renderer, const fluo::CopyOp& copyop, bool copy_values):
+DrawSimple::DrawSimple(const DrawSimple& renderer, const CopyOp& copyop, bool copy_values):
 	Renderer2D(renderer, copyop, false)
 {
 	if (copy_values)

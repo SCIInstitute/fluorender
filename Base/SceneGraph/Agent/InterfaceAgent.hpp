@@ -32,14 +32,16 @@ DEALINGS IN THE SOFTWARE.
 #include <Node.hpp>
 #include <ValueUpdateVisitor.hpp>
 
-class InterfaceAgent : public fluo::Object
+namespace fluo
+{
+class InterfaceAgent : public Object
 {
   public:
     InterfaceAgent(){}
 
-    virtual InterfaceAgent* clone(const fluo::CopyOp& copyop) const { return nullptr; }
+    virtual InterfaceAgent* clone(const CopyOp& copyop) const { return nullptr; }
 
-    virtual bool isSameKindAs(const fluo::Object* obj) const
+    virtual bool isSameKindAs(const Object* obj) const
     {
       return dynamic_cast<const InterfaceAgent*>(obj) != nullptr;
     }
@@ -49,16 +51,16 @@ class InterfaceAgent : public fluo::Object
     //observer
     virtual unsigned int getPriority() const { return 200; }
 
-    virtual void processNotification(fluo::Event& event)
+    virtual void processNotification(Event& event)
     {
-      if (event.getNotifyFlags() & fluo::Event::NOTIFY_AGENT)
-        fluo::Object::processNotification(event);
+      if (event.getNotifyFlags() & Event::NOTIFY_AGENT)
+        Object::processNotification(event);
     }
 
-    virtual void setObject(fluo::Object* obj)
+    virtual void setObject(Object* obj)
     {
-      fluo::Object* old_obj = nullptr;
-      if (getValue("asset", (fluo::Referenced**)&old_obj) && old_obj == obj)
+      Object* old_obj = nullptr;
+      if (getValue("asset", (Referenced**)&old_obj) && old_obj == obj)
         return;
 
       if (old_obj)
@@ -75,19 +77,19 @@ class InterfaceAgent : public fluo::Object
       }
     }
 
-    virtual fluo::Object* getObject()
+    virtual Object* getObject()
     {
-      fluo::Object* obj = nullptr;
-      getValue("asset", (fluo::Referenced**)&obj);
+      Object* obj = nullptr;
+      getValue("asset", (Referenced**)&obj);
       return obj;
     }
 
-    virtual fluo::Node* getObjParent()
+    virtual Node* getObjParent()
     {
-      fluo::Object* obj = getObject();
+      Object* obj = getObject();
       if (obj)
       {
-        fluo::Node* node = dynamic_cast<fluo::Node*>(obj);
+        Node* node = dynamic_cast<Node*>(obj);
 
         if (node)
           return node->getParent(0);
@@ -98,29 +100,29 @@ class InterfaceAgent : public fluo::Object
     /*
     virtual bool testSyncParentValue(const std::string& name)
     {
-      fluo::Object* obj = getObject();
-      fluo::Node* parent = getObjParent();
+      Object* obj = getObject();
+      Node* parent = getObjParent();
 
       if (obj && parent)
       {
-        fluo::Value* value1 = obj->getValue(name);
-        fluo::Value* value2 = parent->getValue(name);
+        Value* value1 = obj->getValue(name);
+        Value* value2 = parent->getValue(name);
         return value1->hasObserver(value2) && value2->hasObserver(value1);
       }
       return false;
     }
 
-    virtual bool testSyncParentValues(const fluo::ValueCollection &names)
+    virtual bool testSyncParentValues(const ValueCollection &names)
     {
-      fluo::Object* obj = getObject();
-      fluo::Node* parent = getObjParent();
+      Object* obj = getObject();
+      Node* parent = getObjParent();
 
       if (obj && parent)
       {
         for (auto it = names.begin(); it != names.end(); ++it)
         {
-          fluo::Value* value1 = obj->getValue(*it);
-          fluo::Value* value2 = parent->getValue(*it);
+          Value* value1 = obj->getValue(*it);
+          Value* value2 = parent->getValue(*it);
 
           if (!value1->hasObserver(value2) || !value2->hasObserver(value1))
             return false;
@@ -134,12 +136,12 @@ class InterfaceAgent : public fluo::Object
     virtual void syncParentValue(const std::string& name)
     {
       //get obj parent
-      fluo::Node* parent = getObjParent();
+      Node* parent = getObjParent();
 
       if (parent)
       {
-        fluo::ValueUpdateVisitor update;
-        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUE);
+        ValueUpdateVisitor update;
+        update.setType(ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUE);
         update.setValueName(name);
         parent->accept(update);
       }
@@ -148,39 +150,39 @@ class InterfaceAgent : public fluo::Object
     virtual void unsyncParentValue(const std::string& name)
     {
       //get obj parent
-      fluo::Node* parent = getObjParent();
+      Node* parent = getObjParent();
 
       if (parent)
       {
-        fluo::ValueUpdateVisitor update;
-        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUE);
+        ValueUpdateVisitor update;
+        update.setType(ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUE);
         update.setValueName(name);
         parent->accept(update);
       }
     }
 
-    virtual void syncParentValues(const fluo::ValueCollection &names)
+    virtual void syncParentValues(const ValueCollection &names)
     {
       //get obj parent
-      fluo::Node* parent = getObjParent();
+      Node* parent = getObjParent();
 
       if (parent)
       {
-        fluo::ValueUpdateVisitor update;
-        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUES);
+        ValueUpdateVisitor update;
+        update.setType(ValueUpdateVisitor::ValueUpdateVisitType::SYNC_VALUES);
         update.setValueNames(names);
         parent->accept(update);
       }
     }
 
-    virtual void unsyncParentValues(const fluo::ValueCollection &names)
+    virtual void unsyncParentValues(const ValueCollection &names)
     {
       //get obj parent
-      fluo::Node* parent = getObjParent();
+      Node* parent = getObjParent();
       if (parent)
       {
-        fluo::ValueUpdateVisitor update;
-        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUES);
+        ValueUpdateVisitor update;
+        update.setType(ValueUpdateVisitor::ValueUpdateVisitType::UNSYNC_VALUES);
         update.setValueNames(names);
         parent->accept(update);
       }
@@ -189,27 +191,27 @@ class InterfaceAgent : public fluo::Object
     virtual void propParentValue(const std::string& name)
     {
       //get obj parent
-      fluo::Node* parent = getObjParent();
+      Node* parent = getObjParent();
 
       if (parent)
       {
-        fluo::ValueUpdateVisitor update;
-        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
+        ValueUpdateVisitor update;
+        update.setType(ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUE);
         update.setValueName(name);
         update.setObject(this);
         parent->accept(update);
       }
     }
 
-    virtual void propParentValues(const fluo::ValueCollection &names)
+    virtual void propParentValues(const ValueCollection &names)
     {
       //get obj parent
-      fluo::Node* parent = getObjParent();
+      Node* parent = getObjParent();
 
       if (parent)
       {
-        fluo::ValueUpdateVisitor update;
-        update.setType(fluo::ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUES);
+        ValueUpdateVisitor update;
+        update.setType(ValueUpdateVisitor::ValueUpdateVisitType::PROP_VALUES);
         update.setValueNames(names);
         update.setObject(this);
         parent->accept(update);
@@ -218,5 +220,6 @@ class InterfaceAgent : public fluo::Object
 
     virtual void UpdateAllSettings() {}
 };
+}
 
 #endif//_INTERFACEAGENT_H_

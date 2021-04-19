@@ -38,7 +38,7 @@ DrawPeel::DrawPeel():
 	//	this));
 }
 
-DrawPeel::DrawPeel(const DrawPeel& renderer, const fluo::CopyOp& copyop, bool copy_values):
+DrawPeel::DrawPeel(const DrawPeel& renderer, const CopyOp& copyop, bool copy_values):
 	DrawSimple(renderer, copyop, false)
 {
 	if (copy_values)

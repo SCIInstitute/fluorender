@@ -25,39 +25,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
-#include "ViewRenderer.hpp"
+#include "DrawBound.hpp"
 
 using namespace fluo;
 
-ViewRenderer::ViewRenderer():
-	Renderer2D()
+DrawBound::DrawBound():
+	Renderer3D()
 {
-	setConditionFunction(std::bind(&ViewRenderer::drawType,
-		this));
+	//setupInputs();
+	//setupOutputs();
 }
 
-ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+DrawBound::DrawBound(const DrawBound& renderer, const CopyOp& copyop, bool copy_values):
+	Renderer3D(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
 }
 
-ViewRenderer::~ViewRenderer()
+DrawBound::~DrawBound()
 {
 }
 
-ProcessorBranchType ViewRenderer::drawType()
+void DrawBound::render()
 {
-	int draw_type;
-	getValue("draw type", draw_type);
-	switch (draw_type)
-	{
-	case 1://draw volumes only
-		return PBT_01;
-	case 2://draw volumes and meshes with depth peeling
-		return PBT_02;
-	}
-	return PBT_01;
 }

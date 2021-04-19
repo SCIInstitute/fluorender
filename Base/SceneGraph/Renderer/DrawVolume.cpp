@@ -26,38 +26,29 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "ViewRenderer.hpp"
+#include "DrawVolume.hpp"
 
 using namespace fluo;
 
-ViewRenderer::ViewRenderer():
+DrawVolume::DrawVolume():
 	Renderer2D()
 {
-	setConditionFunction(std::bind(&ViewRenderer::drawType,
-		this));
+	//setConditionFunction(std::bind(&ViewRenderer::drawType,
+	//	this));
 }
 
-ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const CopyOp& copyop, bool copy_values):
+DrawVolume::DrawVolume(const DrawVolume& renderer, const CopyOp& copyop, bool copy_values):
 	Renderer2D(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
 }
 
-ViewRenderer::~ViewRenderer()
+DrawVolume::~DrawVolume()
 {
 }
 
-ProcessorBranchType ViewRenderer::drawType()
-{
-	int draw_type;
-	getValue("draw type", draw_type);
-	switch (draw_type)
-	{
-	case 1://draw volumes only
-		return PBT_01;
-	case 2://draw volumes and meshes with depth peeling
-		return PBT_02;
-	}
-	return PBT_01;
-}
+//ProcessorBranchType DrawSimple::drawType()
+//{
+//}
+

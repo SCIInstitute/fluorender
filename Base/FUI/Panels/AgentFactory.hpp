@@ -59,37 +59,37 @@ class AgentFactory : public fluo::ObjectFactory
 
     virtual void createDefault() {}//no default agent
 
-    virtual InterfaceAgent* getDefault() { return nullptr; }//no default agent
+    virtual fluo::InterfaceAgent* getDefault() { return nullptr; }//no default agent
 
-    virtual InterfaceAgent* build(InterfaceAgent* agent = nullptr) { return nullptr; }
+    virtual fluo::InterfaceAgent* build(fluo::InterfaceAgent* agent = nullptr) { return nullptr; }
 
-    virtual InterfaceAgent* clone(InterfaceAgent*) { return nullptr; }
+    virtual fluo::InterfaceAgent* clone(fluo::InterfaceAgent*) { return nullptr; }
 
-    virtual InterfaceAgent* clone(const unsigned int) { return nullptr; }
+    virtual fluo::InterfaceAgent* clone(const unsigned int) { return nullptr; }
 
-    inline virtual InterfaceAgent* get(size_t i)
+    inline virtual fluo::InterfaceAgent* get(size_t i)
     {
-    return dynamic_cast<InterfaceAgent*>(ObjectFactory::get(i));
+    return dynamic_cast<fluo::InterfaceAgent*>(ObjectFactory::get(i));
     }
 
-    inline virtual const InterfaceAgent* get(size_t i) const
+    inline virtual const fluo::InterfaceAgent* get(size_t i) const
     {
-    return dynamic_cast<InterfaceAgent*>(const_cast<Object*>(ObjectFactory::get(i)));
+    return dynamic_cast<fluo::InterfaceAgent*>(const_cast<Object*>(ObjectFactory::get(i)));
     }
 
-    inline virtual InterfaceAgent* find(const unsigned int id)
+    inline virtual fluo::InterfaceAgent* find(const unsigned int id)
     {
-    return dynamic_cast<InterfaceAgent*>(ObjectFactory::find(id));
+    return dynamic_cast<fluo::InterfaceAgent*>(ObjectFactory::find(id));
     }
 
-    inline virtual InterfaceAgent* findFirst(const std::string &name)
+    inline virtual fluo::InterfaceAgent* findFirst(const std::string &name)
     {
-    return dynamic_cast<InterfaceAgent*>(ObjectFactory::findFirst(name));
+    return dynamic_cast<fluo::InterfaceAgent*>(ObjectFactory::findFirst(name));
     }
 
-    inline virtual InterfaceAgent* findLast(const std::string &name)
+    inline virtual fluo::InterfaceAgent* findLast(const std::string &name)
     {
-    return dynamic_cast<InterfaceAgent*>(ObjectFactory::findLast(name));
+    return dynamic_cast<fluo::InterfaceAgent*>(ObjectFactory::findLast(name));
     }
 
     //each agent type has a function

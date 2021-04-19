@@ -38,13 +38,13 @@ public:
 
 	ClipPlaneRenderer();
 
-    ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+    ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const ClipPlaneRenderer*) const {return true;}
 
 	virtual const char* className() const { return "ClipPlaneRenderer"; }
 
-    void render(fluo::Event& event);
+    virtual void render(Event& event);
 
 protected:
 	~ClipPlaneRenderer();

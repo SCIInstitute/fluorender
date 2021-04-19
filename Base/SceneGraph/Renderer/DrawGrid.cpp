@@ -37,8 +37,8 @@ using namespace fluo;
 DrawGrid::DrawGrid():
 	Renderer3D()
 {
-	setupInputs();
-	setupOutputs();
+	//setupInputs();
+	//setupOutputs();
 }
 
 DrawGrid::DrawGrid(const DrawGrid& renderer, const CopyOp& copyop, bool copy_values):
@@ -52,7 +52,7 @@ DrawGrid::~DrawGrid()
 {
 }
 
-void DrawGrid::drawGrid()
+void DrawGrid::render()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);

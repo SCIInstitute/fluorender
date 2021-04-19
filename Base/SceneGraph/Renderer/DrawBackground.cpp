@@ -61,7 +61,7 @@ DrawBackground::~DrawBackground()
 //{
 //}
 
-void DrawBackground::drawGradBkg()
+void DrawBackground::draw()
 {
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 

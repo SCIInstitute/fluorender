@@ -75,10 +75,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("sync g", bool(false));
 		vd->addValue("sync b", bool(false));
 
-		vd->addValue("bounds", fluo::BBox());
+		vd->addValue("bounds", BBox());
 		//clipping planes
-		vd->addValue("clip planes", fluo::PlaneSet(6));
-		vd->addValue("clip bounds", fluo::BBox());
+		vd->addValue("clip planes", PlaneSet(6));
+		vd->addValue("clip bounds", BBox());
 		//save clip values individually
 		//actual clipping planes are calculated after either
 		//clip values or rotations are changed
@@ -104,7 +104,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip display", bool(false));
 		vd->addValue("clip hold", bool(false));
 		vd->addValue("clip mask", long(-1));
-		vd->addValue("clip render mode", long(fluo::PRMNormal));
+		vd->addValue("clip render mode", long(PRMNormal));
 
 		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
@@ -147,10 +147,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("shadow int", double(1));
 		vd->addValue("sample rate", double(1));//sample rate
 		//color
-		vd->addValue("color", fluo::Color(1.0));
-		vd->addValue("hsv", fluo::HSVColor(fluo::Color(1.0)));
+		vd->addValue("color", Color(1.0));
+		vd->addValue("hsv", HSVColor(Color(1.0)));
 		vd->addValue("luminance", double(1.0));
-		vd->addValue("sec color", fluo::Color(1.0));//secondary color
+		vd->addValue("sec color", Color(1.0));//secondary color
 		vd->addValue("sec color set", bool(false));
 		vd->addValue("randomize color", bool(false));//set to change color
 
@@ -230,8 +230,8 @@ void VolumeFactory::createDefault()
 		vd->addValue("estimate thresh", double(0));
 
 		//parameters not in original class but passed to renderer
-		vd->addValue("viewport", fluo::Vector4i());//viewport
-		vd->addValue("clear color", fluo::Vector4f());//clear color
+		vd->addValue("viewport", Vector4i());//viewport
+		vd->addValue("clear color", Vector4f());//clear color
 		vd->addValue("cur framebuffer", (unsigned long)(0));//current framebuffer
 
 		//multires level
@@ -240,7 +240,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("level num", long(1));
 
 		//tex transform
-		vd->addValue("tex transform", fluo::Transform());
+		vd->addValue("tex transform", Transform());
 
 		//selected on the ui
 		vd->addValue("selected", bool(false));

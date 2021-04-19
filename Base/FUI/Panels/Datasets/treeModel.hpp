@@ -14,7 +14,7 @@
 class AgentFactory;
 class DatasetsPanel;
 
-class TreeModel : public QAbstractItemModel, public InterfaceAgent
+class TreeModel : public QAbstractItemModel, public fluo::InterfaceAgent
 {
   public:
     TreeModel(DatasetsPanel &panel);

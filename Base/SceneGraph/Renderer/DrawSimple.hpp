@@ -38,7 +38,7 @@ public:
 
 	DrawSimple();
 
-	DrawSimple(const DrawSimple& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawSimple(const DrawSimple& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const DrawSimple*) const {return true;}
 

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,39 +25,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef FL_DRAW_BOUND_HPP
+#define FL_DRAW_BOUND_HPP
 
-#include "ViewRenderer.hpp"
+#include <Renderer3D.hpp>
 
-using namespace fluo;
-
-ViewRenderer::ViewRenderer():
-	Renderer2D()
+namespace fluo
 {
-	setConditionFunction(std::bind(&ViewRenderer::drawType,
-		this));
-}
-
-ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+class DrawBound : public Renderer3D
 {
-	if (copy_values)
-		copyValues(renderer, copyop);
-}
+public:
 
-ViewRenderer::~ViewRenderer()
-{
-}
+	DrawBound();
 
-ProcessorBranchType ViewRenderer::drawType()
-{
-	int draw_type;
-	getValue("draw type", draw_type);
-	switch (draw_type)
-	{
-	case 1://draw volumes only
-		return PBT_01;
-	case 2://draw volumes and meshes with depth peeling
-		return PBT_02;
-	}
-	return PBT_01;
+	DrawBound(const DrawBound& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual bool isSameKindAs(const DrawBound*) const {return true;}
+
+	virtual const char* className() const { return "DrawBound"; }
+
+	virtual void render();
+
+protected:
+	~DrawBound();
+
+};
 }
+#endif//FL_DRAW_BOUND_HPP

@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 class OutputAdjustments;
 class AgentFactory;
-class OutAdjustAgent : public InterfaceAgent
+class OutAdjustAgent : public fluo::InterfaceAgent
 {
   public:
     OutAdjustAgent(OutputAdjustments *panel);

@@ -36,9 +36,12 @@ Renderer3D::Renderer3D():
 {
 	setupInputs();
 	setupOutputs();
+	setProcessFunction(
+		std::bind(&Renderer3D::render,
+			this, std::placeholders::_1));
 }
 
-Renderer3D::Renderer3D(const Renderer3D& renderer, const fluo::CopyOp& copyop, bool copy_values):
+Renderer3D::Renderer3D(const Renderer3D& renderer, const CopyOp& copyop, bool copy_values):
 	ProcessorNode(renderer, copyop, false)
 {
 	if (copy_values)
@@ -70,7 +73,7 @@ void Renderer3D::handleProjection()
 	getValue("distance", distance);
 	if (!free)
 	{
-		distance = radius / std::tan(fluo::d2r(aov / 2.0)) / scale_factor;
+		distance = radius / std::tan(d2r(aov / 2.0)) / scale_factor;
 		setValue("distance", distance);
 	}
 
@@ -123,7 +126,7 @@ void Renderer3D::handleCamera()
 {
 	Vector trans;
 	getValue("trans", trans);
-	//fluo::Vector pos(m_transx, m_transy, m_transz);
+	//Vector pos(m_transx, m_transy, m_transz);
 	trans.normalize();
 	bool free;
 	getValue("free", free);

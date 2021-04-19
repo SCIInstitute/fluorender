@@ -38,7 +38,7 @@ public:
 
 	DrawPeel();
 
-	DrawPeel(const DrawPeel& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawPeel(const DrawPeel& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const DrawPeel*) const {return true;}
 

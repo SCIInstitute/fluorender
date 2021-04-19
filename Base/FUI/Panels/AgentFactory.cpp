@@ -126,7 +126,7 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 */
 VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, QWidget *window)
 {
-  InterfaceAgent* result = findFirst(name);
+	fluo::InterfaceAgent* result = findFirst(name);
   if (result)
     return dynamic_cast<VolumePropAgent*>(result);
 
@@ -226,7 +226,7 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 */
 OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QWidget *panel)
 {
-	InterfaceAgent* result = findFirst(name);
+	fluo::InterfaceAgent* result = findFirst(name);
 	if (result)
 		return dynamic_cast<OutAdjustAgent*>(result);
 
@@ -275,7 +275,7 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, QW
 
 ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, QWidget &panel)
 {
-	InterfaceAgent* result = findFirst(name);
+	fluo::InterfaceAgent* result = findFirst(name);
 	if (result)
 		return dynamic_cast<ClipPlaneAgent*>(result);
 

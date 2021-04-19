@@ -25,39 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef DRAW_VOLUME_HPP
+#define DRAW_VOLUME_HPP
 
-#include "ViewRenderer.hpp"
+#include "Renderer2D.hpp"
 
-using namespace fluo;
-
-ViewRenderer::ViewRenderer():
-	Renderer2D()
+namespace fluo
 {
-	setConditionFunction(std::bind(&ViewRenderer::drawType,
-		this));
-}
-
-ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+class DrawVolume : public Renderer2D
 {
-	if (copy_values)
-		copyValues(renderer, copyop);
-}
+public:
 
-ViewRenderer::~ViewRenderer()
-{
-}
+	DrawVolume();
 
-ProcessorBranchType ViewRenderer::drawType()
-{
-	int draw_type;
-	getValue("draw type", draw_type);
-	switch (draw_type)
-	{
-	case 1://draw volumes only
-		return PBT_01;
-	case 2://draw volumes and meshes with depth peeling
-		return PBT_02;
-	}
-	return PBT_01;
+	DrawVolume(const DrawVolume& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual bool isSameKindAs(const DrawVolume*) const {return true;}
+
+	virtual const char* className() const { return "DrawVolume"; }
+
+	//condition function
+	//ProcessorBranchType drawType();
+
+protected:
+	~DrawVolume();
+
+	virtual void preDraw(Event &event) {};
+	virtual void postDraw(Event &event) {};
+
+	//virtual void draw();
+};
 }
+#endif//DRAW_VOLUME_HPP

@@ -45,6 +45,8 @@ public:
 
 	virtual const char* className() const { return "Renderer3D"; }
 
+	virtual void render(Event& event) {};
+
 protected:
 	~Renderer3D();
 

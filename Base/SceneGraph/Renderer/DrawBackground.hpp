@@ -38,7 +38,7 @@ public:
 
 	DrawBackground();
 
-	DrawBackground(const DrawBackground& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawBackground(const DrawBackground& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const DrawBackground*) const {return true;}
 
@@ -47,14 +47,13 @@ public:
 	//condition function
 	//ProcessorBranchType drawType();
 
-	virtual void preDraw(Event &event) {};
-	virtual void postDraw(Event &event) {};
-
-	void drawGradBkg();
-
 protected:
 	~DrawBackground();
 
+	virtual void preDraw(Event &event) {};
+	virtual void postDraw(Event &event) {};
+
+	virtual void draw();
 };
 }
 #endif//DRAW_BACKGOUND_HPP

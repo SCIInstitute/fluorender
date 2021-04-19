@@ -47,7 +47,7 @@ ClipPlaneRenderer::ClipPlaneRenderer():
 			this, std::placeholders::_1));
 }
 
-ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const fluo::CopyOp& copyop, bool copy_values):
+ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const CopyOp& copyop, bool copy_values):
 	Renderer3D(renderer, copyop, false)
 {
 	if (copy_values)
@@ -86,7 +86,7 @@ void ClipPlaneRenderer::setupOutputs()
 
 }
 
-void ClipPlaneRenderer::render(fluo::Event& event)
+void ClipPlaneRenderer::render(Event& event)
 {
 	bool display = false;
 	getValue("clip display", display);
@@ -99,46 +99,46 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	getValue("border", border);
 	long face_winding;
 	getValue("face winding", face_winding);
-	long render_mode = fluo::PRMNone;
+	long render_mode = PRMNone;
 	getValue("clip render mode", render_mode);
-	if (render_mode == fluo::PRMNone)
+	if (render_mode == PRMNone)
 		return;
 
 	long clip_mask;
 	getValue("clip mask", clip_mask);
 
-	bool draw_plane = render_mode != fluo::PRMFrame;
-	if ((render_mode == fluo::PRMLowTransBack ||
-		render_mode == fluo::PRMNormalBack) &&
+	bool draw_plane = render_mode != PRMFrame;
+	if ((render_mode == PRMLowTransBack ||
+		render_mode == PRMNormalBack) &&
 		clip_mask == -1)
 	{
 		glCullFace(GL_FRONT);
-		if (face_winding == fluo::CPWBackFace)
-			face_winding = fluo::CPWFrontFace;
+		if (face_winding == CPWBackFace)
+			face_winding = CPWFrontFace;
 		else
 			draw_plane = false;
 	}
 	else
 		glCullFace(GL_BACK);
 
-	if (!border && render_mode == fluo::PRMFrame)
+	if (!border && render_mode == PRMFrame)
 		return;
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	if (face_winding == fluo::CPWFrontFace)
+	if (face_winding == CPWFrontFace)
 	{
 		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CCW);
 	}
-	else if (face_winding == fluo::CPWBackFace)
+	else if (face_winding == CPWBackFace)
 	{
 		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CW);
 	}
-	else if (face_winding == fluo::CPWOff)
+	else if (face_winding == CPWOff)
 		glDisable(GL_CULL_FACE);
 
 	flvr::ShaderProgram* shader =
@@ -150,24 +150,24 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 		shader->bind();
 	}
 
-	//vector<fluo::Plane*> *planes = vr->get_planes();
-	fluo::PlaneSet planes;
+	//vector<Plane*> *planes = vr->get_planes();
+	PlaneSet planes;
 	getValue("clip planes", planes);
 	if (planes.GetSize() != 6)
 		return;
 
 	//calculating planes
 	//get six planes
-	fluo::Plane* px1 = &(planes[0]);
-	fluo::Plane* px2 = &(planes[1]);
-	fluo::Plane* py1 = &(planes[2]);
-	fluo::Plane* py2 = &(planes[3]);
-	fluo::Plane* pz1 = &(planes[4]);
-	fluo::Plane* pz2 = &(planes[5]);
+	Plane* px1 = &(planes[0]);
+	Plane* px2 = &(planes[1]);
+	Plane* py1 = &(planes[2]);
+	Plane* py2 = &(planes[3]);
+	Plane* pz1 = &(planes[4]);
+	Plane* pz2 = &(planes[5]);
 
 	//calculate 4 lines
-	fluo::Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
-	fluo::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
+	Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
+	Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
 	//x1z1
 	if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
 		return;
@@ -182,7 +182,7 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 		return;
 
 	//calculate 8 points
-	fluo::Point pp[8];
+	Point pp[8];
 	//p0 = l_x1z1 * py1
 	if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
 		return;
@@ -210,12 +210,12 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 
 	//draw the six planes out of the eight points
 	//get color
-	fluo::Color color(1.0, 1.0, 1.0);
-	if (render_mode == fluo::PRMNormal ||
-		render_mode == fluo::PRMNormalBack)
+	Color color(1.0, 1.0, 1.0);
+	if (render_mode == PRMNormal ||
+		render_mode == PRMNormalBack)
 		getValue("color", color);
 	double plane_trans = 0.0;
-	if (face_winding == fluo::CPWBackFace &&
+	if (face_winding == CPWBackFace &&
 		(clip_mask == 3 ||
 		clip_mask == 12 ||
 		clip_mask == 48 ||
@@ -227,15 +227,15 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 		clip_mask == 32 ||
 		clip_mask == 64)
 		)
-		plane_trans = render_mode == fluo::PRMLowTrans ||
-			render_mode == fluo::PRMLowTransBack ? 0.1 : 0.3;
+		plane_trans = render_mode == PRMLowTrans ||
+			render_mode == PRMLowTransBack ? 0.1 : 0.3;
 
-	if (face_winding == fluo::CPWFrontFace)
-		plane_trans = render_mode == fluo::PRMLowTrans ||
-		render_mode == fluo::PRMLowTransBack ? 0.1 : 0.3;
+	if (face_winding == CPWFrontFace)
+		plane_trans = render_mode == PRMLowTrans ||
+		render_mode == PRMLowTransBack ? 0.1 : 0.3;
 
 	float matrix[16];
-	fluo::Transform tform;
+	Transform tform;
 	//model view
 	getValue("model view matrix", tform);
 	tform.get(matrix);
@@ -263,7 +263,7 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Clip_Planes);
 	if (!va_clipp)
 		return;
-	std::vector<fluo::Point> clip_points(pp, pp+8);
+	std::vector<Point> clip_points(pp, pp+8);
 	va_clipp->set_param(clip_points);
 	va_clipp->draw_begin();
 	//draw
@@ -272,8 +272,8 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	{
 		if (draw_plane)
 		{
-			if (render_mode == fluo::PRMNormal ||
-				render_mode == fluo::PRMNormalBack)
+			if (render_mode == PRMNormal ||
+				render_mode == PRMNormalBack)
 				shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
 			else
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -290,8 +290,8 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	{
 		if (draw_plane)
 		{
-			if (render_mode == fluo::PRMNormal ||
-				render_mode == fluo::PRMNormalBack)
+			if (render_mode == PRMNormal ||
+				render_mode == PRMNormalBack)
 				shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
 			else
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -308,8 +308,8 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	{
 		if (draw_plane)
 		{
-			if (render_mode == fluo::PRMNormal ||
-				render_mode == fluo::PRMNormalBack)
+			if (render_mode == PRMNormal ||
+				render_mode == PRMNormalBack)
 				shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
 			else
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -326,8 +326,8 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	{
 		if (draw_plane)
 		{
-			if (render_mode == fluo::PRMNormal ||
-				render_mode == fluo::PRMNormalBack)
+			if (render_mode == PRMNormal ||
+				render_mode == PRMNormalBack)
 				shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
 			else
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -344,8 +344,8 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	{
 		if (draw_plane)
 		{
-			if (render_mode == fluo::PRMNormal ||
-				render_mode == fluo::PRMNormalBack)
+			if (render_mode == PRMNormal ||
+				render_mode == PRMNormalBack)
 				shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
 			else
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
@@ -362,8 +362,8 @@ void ClipPlaneRenderer::render(fluo::Event& event)
 	{
 		if (draw_plane)
 		{
-			if (render_mode == fluo::PRMNormal ||
-				render_mode == fluo::PRMNormalBack)
+			if (render_mode == PRMNormal ||
+				render_mode == PRMNormalBack)
 				shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
 			else
 				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);

@@ -38,13 +38,13 @@ public:
 
 	DrawGrid();
 
-	DrawGrid(const DrawGrid& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawGrid(const DrawGrid& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 	virtual bool isSameKindAs(const DrawGrid*) const {return true;}
 
 	virtual const char* className() const { return "DrawGrid"; }
 
-	void drawGrid();
+	virtual void render();
 
 protected:
 	~DrawGrid();

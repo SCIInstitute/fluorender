@@ -37,13 +37,18 @@ Renderer2D::Renderer2D():
 {
 	setupInputs();
 	setupOutputs();
-	setBeforeRunFunction(std::bind(&Renderer2D::preDraw,
+	setBeforeRunFunction(
+		std::bind(&Renderer2D::preDraw,
 		this, std::placeholders::_1));
-	setAfterRunFunction(std::bind(&Renderer2D::postDraw,
+	setAfterRunFunction(
+		std::bind(&Renderer2D::postDraw,
 		this, std::placeholders::_1));
+	setProcessFunction(
+		std::bind(&Renderer2D::draw,
+			this, std::placeholders::_1));
 }
 
-Renderer2D::Renderer2D(const Renderer2D& renderer, const fluo::CopyOp& copyop, bool copy_values):
+Renderer2D::Renderer2D(const Renderer2D& renderer, const CopyOp& copyop, bool copy_values):
 	Processor(renderer, copyop, false)
 {
 	if (copy_values)

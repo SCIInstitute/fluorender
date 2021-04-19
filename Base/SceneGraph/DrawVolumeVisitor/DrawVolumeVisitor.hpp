@@ -53,7 +53,7 @@ namespace fluo
 		};
 		DrawVolumeVisitor() : NodeVisitor(), m_quota_list(0), m_sort_method(0)
 		{
-            setTraversalMode(fluo::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+            setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
 		virtual void reset()
@@ -63,9 +63,9 @@ namespace fluo
 			m_sort_method = 0;
 		}
 
-        virtual void apply(fluo::Node& node);
+        virtual void apply(Node& node);
 
-        virtual void apply(fluo::Group& group);
+        virtual void apply(Group& group);
 
 		void setBlendMode(long mode)
 		{

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 
 class AgentFactory;
 class PropertiesPanel;
-class VolumePropAgent : public InterfaceAgent
+class VolumePropAgent : public fluo::InterfaceAgent
 {
   public:
     VolumePropAgent(PropertiesPanel *panel);

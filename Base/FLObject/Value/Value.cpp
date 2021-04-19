@@ -69,29 +69,29 @@ Value* Value::clone()
 	case vt_wstring:
 		return (dynamic_cast<TemplateValue<std::wstring>*>(this))->clone();
 	case vt_Point:
-		return (dynamic_cast<TemplateValue<fluo::Point>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Point>*>(this))->clone();
 	case vt_Vector:
-		return (dynamic_cast<TemplateValue<fluo::Vector>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Vector>*>(this))->clone();
 	case vt_BBox:
-		return (dynamic_cast<TemplateValue<fluo::BBox>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<BBox>*>(this))->clone();
 	case vt_HSVColor:
-		return (dynamic_cast<TemplateValue<fluo::HSVColor>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<HSVColor>*>(this))->clone();
 	case vt_Color:
-		return (dynamic_cast<TemplateValue<fluo::Color>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Color>*>(this))->clone();
 	case vt_Plane:
-		return (dynamic_cast<TemplateValue<fluo::Plane>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Plane>*>(this))->clone();
 	case vt_PlaneSet:
-		return (dynamic_cast<TemplateValue<fluo::PlaneSet>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<PlaneSet>*>(this))->clone();
 	case vt_Quaternion:
-		return (dynamic_cast<TemplateValue<fluo::Quaternion>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Quaternion>*>(this))->clone();
 	case vt_Ray:
-		return (dynamic_cast<TemplateValue<fluo::Ray>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Ray>*>(this))->clone();
 	case vt_Transform:
-		return (dynamic_cast<TemplateValue<fluo::Transform>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Transform>*>(this))->clone();
 	case vt_Vector4f:
-		return (dynamic_cast<TemplateValue<fluo::Vector4f>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Vector4f>*>(this))->clone();
 	case vt_Vector4i:
-		return (dynamic_cast<TemplateValue<fluo::Vector4i>*>(this))->clone();
+		return (dynamic_cast<TemplateValue<Vector4i>*>(this))->clone();
 	default:
         return nullptr;
 	}
@@ -306,73 +306,73 @@ bool ValueSet::addValue(ValueTuple& vt)
 		}
 	case Value::vt_Point:
 		{
-			fluo::Point v;
+			Point v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Vector:
 		{
-			fluo::Vector v;
+			Vector v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_BBox:
 		{
-			fluo::BBox v;
+			BBox v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_HSVColor:
 		{
-			fluo::HSVColor v;
+			HSVColor v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Color:
 		{
-			fluo::Color v;
+			Color v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Plane:
 		{
-			fluo::Plane v;
+			Plane v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_PlaneSet:
 		{
-			fluo::PlaneSet v;
+			PlaneSet v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Quaternion:
 		{
-			fluo::Quaternion v;
+			Quaternion v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Ray:
 		{
-			fluo::Ray v;
+			Ray v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Transform:
 		{
-			fluo::Transform v;
+			Transform v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Vector4f:
 		{
-			fluo::Vector4f v;
+			Vector4f v;
 			iss >> v;
 			return addValue(name, v);
 		}
 	case Value::vt_Vector4i:
 		{
-			fluo::Vector4i v;
+			Vector4i v;
 			iss >> v;
 			return addValue(name, v);
 		}
@@ -564,11 +564,11 @@ bool ValueSet::addValue(const std::string &name, const std::wstring &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Point &value)
+bool ValueSet::addValue(const std::string &name, const Point &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Point>* val = new TemplateValue<fluo::Point>(
+		TemplateValue<Point>* val = new TemplateValue<Point>(
 			name, "Point", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -577,11 +577,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Point &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Vector &value)
+bool ValueSet::addValue(const std::string &name, const Vector &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Vector>* val = new TemplateValue<fluo::Vector>(
+		TemplateValue<Vector>* val = new TemplateValue<Vector>(
 			name, "Vector", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -590,11 +590,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Vector &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::BBox &value)
+bool ValueSet::addValue(const std::string &name, const BBox &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::BBox>* val = new TemplateValue<fluo::BBox>(
+		TemplateValue<BBox>* val = new TemplateValue<BBox>(
 			name, "BBox", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -603,11 +603,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::BBox &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::HSVColor &value)
+bool ValueSet::addValue(const std::string &name, const HSVColor &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::HSVColor>* val = new TemplateValue<fluo::HSVColor>(
+		TemplateValue<HSVColor>* val = new TemplateValue<HSVColor>(
 			name, "HSVColor", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -616,11 +616,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::HSVColor &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Color &value)
+bool ValueSet::addValue(const std::string &name, const Color &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Color>* val = new TemplateValue<fluo::Color>(
+		TemplateValue<Color>* val = new TemplateValue<Color>(
 			name, "Color", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -629,11 +629,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Color &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Plane &value)
+bool ValueSet::addValue(const std::string &name, const Plane &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Plane>* val = new TemplateValue<fluo::Plane>(
+		TemplateValue<Plane>* val = new TemplateValue<Plane>(
 			name, "Plane", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -642,11 +642,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Plane &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::PlaneSet &value)
+bool ValueSet::addValue(const std::string &name, const PlaneSet &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::PlaneSet>* val = new TemplateValue<fluo::PlaneSet>(
+		TemplateValue<PlaneSet>* val = new TemplateValue<PlaneSet>(
 			name, "PlaneSet", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -655,11 +655,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::PlaneSet &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Quaternion &value)
+bool ValueSet::addValue(const std::string &name, const Quaternion &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Quaternion>* val = new TemplateValue<fluo::Quaternion>(
+		TemplateValue<Quaternion>* val = new TemplateValue<Quaternion>(
 			name, "Quaternion", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -668,11 +668,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Quaternion &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Ray &value)
+bool ValueSet::addValue(const std::string &name, const Ray &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Ray>* val = new TemplateValue<fluo::Ray>(
+		TemplateValue<Ray>* val = new TemplateValue<Ray>(
 			name, "Ray", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -681,11 +681,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Ray &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Transform &value)
+bool ValueSet::addValue(const std::string &name, const Transform &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Transform>* val = new TemplateValue<fluo::Transform>(
+		TemplateValue<Transform>* val = new TemplateValue<Transform>(
 			name, "Transform", value);
 
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
@@ -695,11 +695,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Transform &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Vector4f &value)
+bool ValueSet::addValue(const std::string &name, const Vector4f &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Vector4f>* val = new TemplateValue<fluo::Vector4f>(
+		TemplateValue<Vector4f>* val = new TemplateValue<Vector4f>(
 			name, "Vector4f", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -708,11 +708,11 @@ bool ValueSet::addValue(const std::string &name, const fluo::Vector4f &value)
 		return false;
 }
 
-bool ValueSet::addValue(const std::string &name, const fluo::Vector4i &value)
+bool ValueSet::addValue(const std::string &name, const Vector4i &value)
 {
 	if (!findValue(name))
 	{
-		TemplateValue<fluo::Vector4i>* val = new TemplateValue<fluo::Vector4i>(
+		TemplateValue<Vector4i>* val = new TemplateValue<Vector4i>(
 			name, "Vector4i", value);
 		_values.insert(std::pair<std::string, ref_ptr<Value>>(name, val));
 		return true;
@@ -820,73 +820,73 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 		}
 	case Value::vt_Point:
 		{
-			fluo::Point v;
+			Point v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Vector:
 		{
-			fluo::Vector v;
+			Vector v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_BBox:
 		{
-			fluo::BBox v;
+			BBox v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_HSVColor:
 		{
-			fluo::HSVColor v;
+			HSVColor v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Color:
 		{
-			fluo::Color v;
+			Color v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Plane:
 		{
-			fluo::Plane v;
+			Plane v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_PlaneSet:
 		{
-			fluo::PlaneSet v;
+			PlaneSet v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Quaternion:
 		{
-			fluo::Quaternion v;
+			Quaternion v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Ray:
 		{
-			fluo::Ray v;
+			Ray v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Transform:
 		{
-			fluo::Transform v;
+			Transform v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Vector4f:
 		{
-			fluo::Vector4f v;
+			Vector4f v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
 	case Value::vt_Vector4i:
 		{
-			fluo::Vector4i v;
+			Vector4i v;
 			iss >> v;
 			return setValue(name, v, event);
 		}
@@ -1067,144 +1067,144 @@ bool ValueSet::setValue(const std::string &name, const std::wstring &value, Even
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Point &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Point &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Point)
 	{
-		(dynamic_cast<TemplateValue<fluo::Point>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Point>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Vector &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Vector &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Vector)
 	{
-		(dynamic_cast<TemplateValue<fluo::Vector>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Vector>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::BBox &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const BBox &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_BBox)
 	{
-		(dynamic_cast<TemplateValue<fluo::BBox>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<BBox>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::HSVColor &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const HSVColor &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_HSVColor)
 	{
-		(dynamic_cast<TemplateValue<fluo::HSVColor>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<HSVColor>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Color &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Color &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Color)
 	{
-		(dynamic_cast<TemplateValue<fluo::Color>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Color>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Plane &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Plane &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Plane)
 	{
-		(dynamic_cast<TemplateValue<fluo::Plane>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Plane>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::PlaneSet &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const PlaneSet &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_PlaneSet)
 	{
-		(dynamic_cast<TemplateValue<fluo::PlaneSet>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<PlaneSet>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Quaternion &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Quaternion &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Quaternion)
 	{
-		(dynamic_cast<TemplateValue<fluo::Quaternion>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Quaternion>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Ray &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Ray &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Ray)
 	{
-		(dynamic_cast<TemplateValue<fluo::Ray>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Ray>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Transform &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Transform &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Transform)
 	{
-		(dynamic_cast<TemplateValue<fluo::Transform>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Transform>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Vector4f &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Vector4f &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Vector4f)
 	{
-		(dynamic_cast<TemplateValue<fluo::Vector4f>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Vector4f>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::setValue(const std::string &name, const fluo::Vector4i &value, Event& event)
+bool ValueSet::setValue(const std::string &name, const Vector4i &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Vector4i)
 	{
-		(dynamic_cast<TemplateValue<fluo::Vector4i>*>(val))->setValue(value, event);
+		(dynamic_cast<TemplateValue<Vector4i>*>(val))->setValue(value, event);
 		return true;
 	}
 	else
@@ -1404,7 +1404,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Point:
 			{
 				std::get<1>(vt) = type;
-				fluo::Point v;
+				Point v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1415,7 +1415,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Vector:
 			{
 				std::get<1>(vt) = type;
-				fluo::Vector v;
+				Vector v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1426,7 +1426,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_BBox:
 			{
 				std::get<1>(vt) = type;
-				fluo::BBox v;
+				BBox v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1437,7 +1437,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_HSVColor:
 			{
 				std::get<1>(vt) = type;
-				fluo::HSVColor v;
+				HSVColor v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1448,7 +1448,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Color:
 			{
 				std::get<1>(vt) = type;
-				fluo::Color v;
+				Color v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1459,7 +1459,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Plane:
 			{
 				std::get<1>(vt) = type;
-				fluo::Plane v;
+				Plane v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1470,7 +1470,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_PlaneSet:
 			{
 				std::get<1>(vt) = type;
-				fluo::PlaneSet v;
+				PlaneSet v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1481,7 +1481,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Quaternion:
 			{
 				std::get<1>(vt) = type;
-				fluo::Quaternion v;
+				Quaternion v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1492,7 +1492,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Ray:
 			{
 				std::get<1>(vt) = type;
-				fluo::Ray v;
+				Ray v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1503,7 +1503,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Transform:
 			{
 				std::get<1>(vt) = type;
-				fluo::Transform v;
+				Transform v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1514,7 +1514,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Vector4f:
 			{
 				std::get<1>(vt) = type;
-				fluo::Vector4f v;
+				Vector4f v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1525,7 +1525,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 		case Value::vt_Vector4i:
 			{
 				std::get<1>(vt) = type;
-				fluo::Vector4i v;
+				Vector4i v;
 				if (getValue(name, v))
 				{
 					oss << v;
@@ -1707,144 +1707,144 @@ bool ValueSet::getValue(const std::string &name, std::wstring &value)
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Point &value)
+bool ValueSet::getValue(const std::string &name, Point &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Point)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Point>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Point>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Vector &value)
+bool ValueSet::getValue(const std::string &name, Vector &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Vector)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Vector>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Vector>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::BBox &value)
+bool ValueSet::getValue(const std::string &name, BBox &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_BBox)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::BBox>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<BBox>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::HSVColor &value)
+bool ValueSet::getValue(const std::string &name, HSVColor &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_HSVColor)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::HSVColor>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<HSVColor>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Color &value)
+bool ValueSet::getValue(const std::string &name, Color &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Color)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Color>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Color>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Plane &value)
+bool ValueSet::getValue(const std::string &name, Plane &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Plane)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Plane>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Plane>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::PlaneSet &value)
+bool ValueSet::getValue(const std::string &name, PlaneSet &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_PlaneSet)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::PlaneSet>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<PlaneSet>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Quaternion &value)
+bool ValueSet::getValue(const std::string &name, Quaternion &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Quaternion)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Quaternion>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Quaternion>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Ray &value)
+bool ValueSet::getValue(const std::string &name, Ray &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Ray)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Ray>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Ray>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Transform &value)
+bool ValueSet::getValue(const std::string &name, Transform &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Transform)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Transform>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Transform>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Vector4f &value)
+bool ValueSet::getValue(const std::string &name, Vector4f &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Vector4f)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Vector4f>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Vector4f>*>(val))->getValue();
 		return true;
 	}
 	else
 		return false;
 }
 
-bool ValueSet::getValue(const std::string &name, fluo::Vector4i &value)
+bool ValueSet::getValue(const std::string &name, Vector4i &value)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_Vector4i)
 	{
-		value = (dynamic_cast<TemplateValue<fluo::Vector4i>*>(val))->getValue();
+		value = (dynamic_cast<TemplateValue<Vector4i>*>(val))->getValue();
 		return true;
 	}
 	else

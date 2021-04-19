@@ -78,12 +78,12 @@ namespace fluo
 			NodeVisitor(),
 			event_(event)
 		{
-			setTraversalMode(fluo::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN);
 		}
 
-		virtual void apply(fluo::Node& node);
+		virtual void apply(Node& node);
 
-		virtual void apply(fluo::Group& group);
+		virtual void apply(Group& group);
 
 	private:
 		Event event_;

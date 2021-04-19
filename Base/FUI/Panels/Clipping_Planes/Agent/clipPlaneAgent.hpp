@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 class AgentFactory;
 class ClippingPlane;
-class ClipPlaneAgent : public InterfaceAgent
+class ClipPlaneAgent : public fluo::InterfaceAgent
 {
   public:
 	ClipPlaneAgent(ClippingPlane &panel);
