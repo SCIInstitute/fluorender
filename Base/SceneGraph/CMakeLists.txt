@@ -84,6 +84,10 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Renderer/DrawGrid.hpp
 				Renderer/DrawVolume.hpp
 				Renderer/DrawBound.hpp
+				Renderer/DrawAnnotation.hpp
+				Renderer/DrawRuler.hpp
+				Renderer/DrawCell.hpp
+				Renderer/DrawTrack.hpp
 	)
 
 set(SOURCES Annotations/Annotations.cpp
@@ -118,6 +122,10 @@ set(SOURCES Annotations/Annotations.cpp
 			Renderer/DrawGrid.cpp
 			Renderer/DrawVolume.cpp
 			Renderer/DrawBound.cpp
+			Renderer/DrawAnnotation.cpp
+			Renderer/DrawRuler.cpp
+			Renderer/DrawCell.cpp
+			Renderer/DrawTrack.cpp
 	)
 
 
