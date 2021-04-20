@@ -73,10 +73,10 @@ void Renderer2D::setupOutputs()
 
 void Renderer2D::preDraw(Event &event)
 {
-	int nx, ny;
+	long nx, ny;
 	getValue("nx", nx);
 	getValue("ny", ny);
-	int fb_type;
+	long fb_type;
 	getValue("fb type", fb_type);
 	std::string fb_name;
 	getValue("fb name", fb_name);
@@ -86,7 +86,7 @@ void Renderer2D::preDraw(Event &event)
 	if (!fb)
 		return;
 	fb->bind();
-	bool fb_protect;
+	bool fb_protect = false;
 	getValue("fb protect", fb_protect);
 	if (fb_protect)
 		fb->protect();

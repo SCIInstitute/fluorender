@@ -50,7 +50,7 @@ ViewRenderer::~ViewRenderer()
 
 ProcessorBranchType ViewRenderer::drawType()
 {
-	int draw_type;
+	long draw_type;
 	getValue("draw type", draw_type);
 	switch (draw_type)
 	{

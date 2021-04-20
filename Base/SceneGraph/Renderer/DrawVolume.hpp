@@ -45,13 +45,13 @@ public:
 	virtual const char* className() const { return "DrawVolume"; }
 
 	//condition function
-	//ProcessorBranchType drawType();
+	ProcessorBranchType drawType();
 
 protected:
 	~DrawVolume();
 
-	virtual void preDraw(Event &event) {};
-	virtual void postDraw(Event &event) {};
+	//virtual void preDraw(Event &event) {};
+	//virtual void postDraw(Event &event) {};
 
 	//virtual void draw();
 };

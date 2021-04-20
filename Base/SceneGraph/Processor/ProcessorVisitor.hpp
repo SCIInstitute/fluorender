@@ -37,6 +37,7 @@ namespace fluo
 {
 	enum ProcessorBranchType
 	{
+		PBT_STOP = 0,
 		PBT_01 = (1u << 0),
 		PBT_02 = (1u << 1),
 		PBT_03 = (1u << 2),

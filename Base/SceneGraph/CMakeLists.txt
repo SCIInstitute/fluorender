@@ -44,7 +44,8 @@ include_directories(${FLObject_INCLUDES}
 
 # The headers and source files are manually set rather than Globbed in 
 # order to give us better control of what goes in the project.
-set(HEADER_FILES Annotations/Annotations.hpp
+set(HEADER_FILES
+				Annotations/Annotations.hpp
 				Data/MeshData/MeshData.hpp
 				Data/VolumeData/VolumeData.hpp
 				Factories/Annotations/AnnotationFactory.hpp
@@ -71,6 +72,7 @@ set(HEADER_FILES Annotations/Annotations.hpp
 				Utilities/SearchVisitor.hpp
 				Utilities/ValueUpdateVisitor.hpp
 				Agent/InterfaceAgent.hpp
+				Renderer/render_defs.hpp
 				Renderer/Renderer2D.hpp
 				Renderer/Renderer3D.hpp
 				Renderer/ClipPlaneRenderer.hpp

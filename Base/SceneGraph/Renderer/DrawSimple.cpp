@@ -67,7 +67,7 @@ void DrawSimple::clearDraw()
 {
 	Color bg_color;
 	getValue("bg color", bg_color);
-	int nx, ny;
+	long nx, ny;
 	getValue("nx", nx);
 	getValue("ny", ny);
 	// clear color and depth buffers

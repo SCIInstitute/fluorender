@@ -25,46 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef RENDER_DEFS_HPP
+#define RENDER_DEFS_HPP
 
-#include "DrawVolume.hpp"
-#include <View.hpp>
-
-using namespace fluo;
-
-DrawVolume::DrawVolume():
-	Renderer2D()
+namespace fluo
 {
-	setConditionFunction(std::bind(&DrawVolume::drawType,
-		this));
-}
-
-DrawVolume::DrawVolume(const DrawVolume& renderer, const CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
-{
-	if (copy_values)
-		copyValues(renderer, copyop);
-}
-
-DrawVolume::~DrawVolume()
-{
-}
-
-ProcessorBranchType DrawVolume::drawType()
-{
-	View* view;
-	getValue("view", (Referenced**)&view);
-	if (!view)
-		return PBT_STOP;
-	long blend_mode;
-	view->getValue("blend mode", blend_mode);
-	switch (blend_mode)
+	enum RenderBlendMode
 	{
-	case RBM_LAYERED:
-	case RBM_COMPOSITE:
-		return PBT_01;
-	case RBM_DEPTH:
-		return PBT_02;
-	}
-	return PBT_01;
+		RBM_LAYERED = 0,
+		RBM_COMPOSITE,
+		RBM_DEPTH
+	};
 }
-
+#endif//RENDER_DEFS_HPP

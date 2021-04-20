@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_RENDERER_2D_HPP
 
 #include <Processor.hpp>
+#include <render_defs.hpp>
 
 namespace fluo
 {

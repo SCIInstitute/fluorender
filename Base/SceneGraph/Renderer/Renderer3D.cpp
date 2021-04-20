@@ -77,7 +77,7 @@ void Renderer3D::handleProjection()
 		setValue("distance", distance);
 	}
 
-	int nx, ny;
+	long nx, ny;
 	getValue("nx", nx);
 	getValue("ny", ny);
 	double aspect = (double)nx / (double)ny;
@@ -160,7 +160,7 @@ void Renderer3D::handleCamera()
 	glm::mat4 mv_mat;
 	if (use_vr)
 	{
-		int vr_eye_idx;
+		long vr_eye_idx;
 		double vr_eye_offset;
 		getValue("vr eye idx", vr_eye_idx);
 		getValue("vr eye offset", vr_eye_offset);
