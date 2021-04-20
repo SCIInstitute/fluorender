@@ -53,6 +53,8 @@ protected:
 	virtual void preDraw(Event &event);
 	virtual void postDraw(Event &event);
 	virtual void draw(Event &event) {};
+
+	void drawBuffer();
 };
 }
 #endif//FL_RENDERER2D

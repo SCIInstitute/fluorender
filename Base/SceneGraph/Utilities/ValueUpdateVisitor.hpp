@@ -51,19 +51,19 @@ namespace fluo
 		};
 
 		ValueUpdateVisitor() : type_(SYNC_VALUE), object_(0)
-        { setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type) : type_(type), object_(0)
-        { setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 		ValueUpdateVisitor(Object* obj) : type_(SYNC_VALUE), object_(obj)
-        { setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type, Object* obj) : type_(type), object_(obj)
-        { setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 
 		virtual void reset()
 		{
 			type_ = SYNC_VALUE;
 			object_ = 0;
-            setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN);
+            setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		void setType(const ValueUpdateVisitType type)

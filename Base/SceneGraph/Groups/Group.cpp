@@ -59,11 +59,20 @@ Group::~Group()
 	}
 }
 
-void Group::traverse(NodeVisitor& nv)
+void Group::traverse(NodeVisitor& nv, bool reverse)
 {
-	for (auto it = m_children.begin();
-		it != m_children.end(); ++it)
-		(*it)->accept(nv);
+	if (reverse)
+	{
+		for (auto it = m_children.rbegin();
+			it != m_children.rend(); ++it)
+			(*it)->accept(nv);
+	}
+	else
+	{
+		for (auto it = m_children.begin();
+			it != m_children.end(); ++it)
+			(*it)->accept(nv);
+	}
 }
 
 bool Group::addChild(Node* child)

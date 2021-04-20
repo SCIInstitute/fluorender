@@ -43,17 +43,17 @@ namespace fluo
 			parent_(0),
 			child_(0)
 		{
-			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
-		virtual void apply(FL::Node& node)
+		virtual void apply(Node& node)
 		{
 			if (!found_)
 				decycle();
 			traverse(node);
 		}
 
-		virtual void apply(FL::Group& group)
+		virtual void apply(Group& group)
 		{
 			if (!found_)
 				decycle();

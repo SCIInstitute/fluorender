@@ -45,8 +45,8 @@ namespace fluo
 		{
 			TRAVERSE_NONE,
 			TRAVERSE_PARENTS,
-			TRAVERSE_ALL_CHILDREN,
-			TRAVERSE_ACTIVE_CHILDREN,
+			TRAVERSE_CHILDREN,
+			TRAVERSE_CHILDREN_REV,
 		};
 
 		enum VisitorType
@@ -97,7 +97,13 @@ namespace fluo
 					return;
 			}
 			if (m_traversal_mode == TRAVERSE_PARENTS) node.ascend(*this);
-			else if (m_traversal_mode != TRAVERSE_NONE) node.traverse(*this);
+			else if (m_traversal_mode != TRAVERSE_NONE)
+			{
+				if (m_traversal_mode == TRAVERSE_CHILDREN)
+					node.traverse(*this);
+				else if (m_traversal_mode == TRAVERSE_CHILDREN_REV)
+					node.traverse(*this, true);
+			}
 		}
 		inline void pushOntoNodePath(Node* node)
 		{

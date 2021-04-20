@@ -50,7 +50,7 @@ namespace fluo
 
 		SearchVisitor()
 		{
-            setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN);
+            setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
         virtual void apply(Node& node)

@@ -42,7 +42,7 @@ namespace fluo
 	public:
 		InfoVisitor() : level_(0)
 		{
-			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		std::string spaces()

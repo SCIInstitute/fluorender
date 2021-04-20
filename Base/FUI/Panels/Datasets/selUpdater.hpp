@@ -10,7 +10,7 @@ class SelUpdater : public fluo::NodeVisitor
   public:
     SelUpdater(fluo::NodeSet &nodes) : NodeVisitor(), nodes_(nodes)
     {
-      setTraversalMode(fluo::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+      setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
     }
 
 

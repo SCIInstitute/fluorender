@@ -54,7 +54,7 @@ namespace fluo
 		virtual Group* asGroup() { return this; }
 		virtual const Group* asGroup() const { return this; }
 
-		virtual void traverse(NodeVisitor& nv);
+		virtual void traverse(NodeVisitor& nv, bool reverse=false);
 
 		/* children
 		*/

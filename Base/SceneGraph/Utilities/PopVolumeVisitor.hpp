@@ -41,7 +41,7 @@ namespace fluo
 	public:
 		PopVolumeVisitor() : NodeVisitor()
 		{
-            setTraversalMode(NodeVisitor::TRAVERSE_ALL_CHILDREN);
+            setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		virtual void reset()

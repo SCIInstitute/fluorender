@@ -95,7 +95,7 @@ namespace fluo
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);
-		virtual void traverse(NodeVisitor& nv) {}
+		virtual void traverse(NodeVisitor& nv, bool reverse=false) {}
 
 		//as observer
         virtual void processNotification(Event& event);
