@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define CLIP_PLANE_AGENT_HPP
 
 #include <AgentFactory.hpp>
-#include <VolumeData/VolumeData.hpp>
+#include <VolumeData.hpp>
 
 class AgentFactory;
 class ClippingPlane;

@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumeGroup.hpp"
-#include <VolumeData/VolumeData.hpp>
+#include <VolumeData.hpp>
 
 using namespace fluo;
 

@@ -45,33 +45,33 @@ include_directories(${FLObject_INCLUDES}
 # The headers and source files are manually set rather than Globbed in 
 # order to give us better control of what goes in the project.
 set(HEADER_FILES
-				Annotations/Annotations.hpp
-				Data/MeshData/MeshData.hpp
-				Data/VolumeData/VolumeData.hpp
-				Factories/Annotations/AnnotationFactory.hpp
-				Factories/Mesh/MeshFactory.hpp
-				Factories/Volume/VolumeFactory.hpp
-				Groups/Group.hpp
-				Groups/Mesh/MeshGroup.hpp
-				Groups/Volume/VolumeGroup.hpp
-				Node/Node.hpp
-				NodeVisitor/NodeVisitor.hpp
-				View/View.hpp
-				Root/Root.hpp
+				Agent/InterfaceAgent.hpp
+				Data/Annotations.hpp
+				Data/MeshData.hpp
+				Data/VolumeData.hpp
+				Data/AnnotationFactory.hpp
+				Data/MeshFactory.hpp
+				Data/VolumeFactory.hpp
+				Data/MeshGroup.hpp
+				Data/VolumeGroup.hpp
+				Data/View.hpp
+				Data/Root.hpp
+				Data/Layer.hpp
 				Global/Global.hpp
 				Global/Names.hpp
+				Node/Node.hpp
+				Node/Group.hpp
+				Node/NodeVisitor.hpp
+				Node/DecycleVisitor.hpp
+				Node/InfoVisitor.hpp
+				Node/PopVolumeVisitor.hpp
+				Node/SearchVisitor.hpp
+				Node/ValueUpdateVisitor.hpp
 				Processor/ProcessorNode.hpp
 				Processor/Processor.hpp
 				Processor/ProcessorNodeFactory.hpp
 				Processor/ProcessorVisitor.hpp
 				Processor/ProcessorFactory.hpp
-				Utilities/DecycleVisitor.hpp
-				Utilities/InfoVisitor.hpp
-				Utilities/Layer.hpp
-				Utilities/PopVolumeVisitor.hpp
-				Utilities/SearchVisitor.hpp
-				Utilities/ValueUpdateVisitor.hpp
-				Agent/InterfaceAgent.hpp
 				Renderer/render_defs.hpp
 				Renderer/Renderer2D.hpp
 				Renderer/Renderer3D.hpp
@@ -90,21 +90,22 @@ set(HEADER_FILES
 				Renderer/DrawCell.hpp
 				Renderer/DrawTrack.hpp
 				Renderer/DrawVolumeVisitor.hpp
+				Renderer/DrawMesh.hpp
 	)
 
-set(SOURCES Annotations/Annotations.cpp
-			Data/MeshData/MeshData.cpp
-			Data/VolumeData/VolumeData.cpp
-			Factories/Annotations/AnnotationFactory.cpp
-			Factories/Mesh/MeshFactory.cpp
-			Factories/Volume/VolumeFactory.cpp
-			Groups/Group.cpp
-			Groups/Mesh/MeshGroup.cpp
-			Groups/Volume/VolumeGroup.cpp
+set(SOURCES Data/Annotations.cpp
+			Data/MeshData.cpp
+			Data/VolumeData.cpp
+			Data/AnnotationFactory.cpp
+			Data/MeshFactory.cpp
+			Data/VolumeFactory.cpp
+			Data/MeshGroup.cpp
+			Data/VolumeGroup.cpp
+			Data/View.cpp
+			Data/Root.cpp
 			Node/Node.cpp
-			NodeVisitor/NodeVisitor.cpp
-			View/View.cpp
-			Root/Root.cpp
+			Node/Group.cpp
+			Node/NodeVisitor.cpp
 			Global/Global.cpp
 			Processor/ProcessorNode.cpp
 			Processor/Processor.cpp
@@ -128,6 +129,7 @@ set(SOURCES Annotations/Annotations.cpp
 			Renderer/DrawCell.cpp
 			Renderer/DrawTrack.cpp
 			Renderer/DrawVolumeVisitor.cpp
+			Renderer/DrawMesh.cpp
 	)
 
 
@@ -143,17 +145,11 @@ add_library(SceneGraph STATIC ${HEADER_FILES} ${SOURCES})
 target_include_directories(SceneGraph PUBLIC Annotations
 	Agent
 	Data
-	DrawVolumeVisitor
-	Factories
-	Groups
-	Node
-	NodeVisitor
-	View
-	Root
-	Utilities
 	Global
+	Node
 	Processor
 	Renderer
+	Utilities
 	)
 
 link_directories(SceneGraph ${Teem_DIR}/bin)

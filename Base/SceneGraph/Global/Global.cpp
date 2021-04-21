@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Global.hpp"
 #include "Names.hpp"
-#include <Annotations/AnnotationFactory.hpp>
-#include <Mesh/MeshFactory.hpp>
-#include <Volume/VolumeFactory.hpp>
+#include <AnnotationFactory.hpp>
+#include <MeshFactory.hpp>
+#include <VolumeFactory.hpp>
 #include <FUI/Panels/AgentFactory.hpp>
 #include <Renderer2DFactory.hpp>
 #include <Renderer3DFactory.hpp>

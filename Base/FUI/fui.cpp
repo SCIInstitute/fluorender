@@ -1,7 +1,7 @@
 #include "fui.hpp"
 #include "ui_FUI.h"
 #include <Names.hpp>
-#include <SceneGraph/Factories/Volume/VolumeFactory.hpp>
+#include <VolumeFactory.hpp>
 
 #include <QFile>
 #include <QFileDialog>

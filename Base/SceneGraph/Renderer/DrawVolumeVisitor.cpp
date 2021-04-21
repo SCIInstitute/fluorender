@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include "DrawVolumeVisitor.hpp"
 #include <Group.hpp>
-#include <VolumeData/VolumeData.hpp>
-#include <Volume/VolumeGroup.hpp>
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <cctype>
 
 using namespace fluo;

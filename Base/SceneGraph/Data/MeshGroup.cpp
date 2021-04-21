@@ -26,22 +26,45 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Annotations.hpp"
-#include <VolumeData/VolumeData.hpp>
+#include "MeshGroup.hpp"
+#include <MeshData.hpp>
+
 using namespace fluo;
 
-Annotations::Annotations()
+MeshGroup::MeshGroup()
 {
+
 }
 
-Annotations::Annotations(const Annotations& data, const CopyOp& copyop, bool copy_values) :
-	Node(data, copyop, false)
+MeshGroup::MeshGroup(const MeshGroup& group, const CopyOp& copyop) :
+	Group(group, copyop)
 {
-	if (copy_values)
-		copyValues(data, copyop);
+
 }
 
-Annotations::~Annotations()
+MeshGroup::MeshGroup(const MeshData& md, const CopyOp& copyop) :
+	Group()
 {
+	copyValues(md, copyop);
+}
+
+MeshGroup::~MeshGroup()
+{
+
+}
+
+void MeshGroup::OnRandomizeColor(Event& event)
+{
+	//maybe there is a better solution?
+	Node* node = dynamic_cast<Node*>(event.penultimate());
+	if (node && containsNode(node))
+		return;
+
+	for (auto it = m_children.begin();
+		it != m_children.end(); ++it)
+	{
+		bool bval;
+		(*it)->toggleValue("randomize color", bval, event);
+	}
 }
 

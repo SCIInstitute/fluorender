@@ -26,45 +26,50 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "MeshGroup.hpp"
-#include <MeshData/MeshData.hpp>
+#include "DrawMesh.hpp"
+#include <MeshGroup.hpp>
+#include <MeshData.hpp>
 
 using namespace fluo;
 
-MeshGroup::MeshGroup()
+DrawMesh::DrawMesh():
+	Renderer2D()
 {
-
 }
 
-MeshGroup::MeshGroup(const MeshGroup& group, const CopyOp& copyop) :
-	Group(group, copyop)
+DrawMesh::DrawMesh(const DrawMesh& renderer, const CopyOp& copyop, bool copy_values):
+	Renderer2D(renderer, copyop, false)
 {
-
+	if (copy_values)
+		copyValues(renderer, copyop);
 }
 
-MeshGroup::MeshGroup(const MeshData& md, const CopyOp& copyop) :
-	Group()
+DrawMesh::~DrawMesh()
 {
-	copyValues(md, copyop);
 }
 
-MeshGroup::~MeshGroup()
+void DrawMesh::draw(Event &event)
 {
-
-}
-
-void MeshGroup::OnRandomizeColor(Event& event)
-{
-	//maybe there is a better solution?
-	Node* node = dynamic_cast<Node*>(event.penultimate());
-	if (node && containsNode(node))
+	MeshGroup* group;
+	getValue("mesh group", (Referenced**)&group);
+	if (!group)
 		return;
-
-	for (auto it = m_children.begin();
-		it != m_children.end(); ++it)
+	for (size_t i = 0; i < group->getNumChildren(); ++i)
 	{
-		bool bval;
-		(*it)->toggleValue("randomize color", bval, event);
+		MeshData* data = dynamic_cast<MeshData*>(group->getChild(i));
+		if (data)
+		{
+			bool disp;
+			data->getValue("disp", disp);
+			if (disp)
+			{
+				glm::mat4 mv_mat;
+				glm::mat4 prj_mat;
+				data->SetMatrices(mv_mat, prj_mat);
+				bool peel;
+				getValue("peel", peel);
+				data->Draw(peel);
+			}
+		}
 	}
 }
-

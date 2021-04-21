@@ -8,7 +8,7 @@
 #include "meshPropertiesOptions.hpp"
 #include "meshPropertiesMaterials.hpp"
 
-#include <VolumeData/VolumeData.hpp>
+#include <VolumeData.hpp>
 #include <Panels/Properties/Agent/volumePropAgent.hpp>
 
 

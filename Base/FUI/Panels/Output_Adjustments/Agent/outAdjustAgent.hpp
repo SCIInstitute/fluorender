@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define OUT_ADJUST_AGENT_HPP
 
 #include <AgentFactory.hpp>
-#include <VolumeData/VolumeData.hpp>
+#include <VolumeData.hpp>
 
 class OutputAdjustments;
 class AgentFactory;

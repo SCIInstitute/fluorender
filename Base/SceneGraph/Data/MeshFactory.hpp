@@ -25,77 +25,73 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VOLUMEFACTORY_H_
-#define _VOLUMEFACTORY_H_
+#ifndef MESHFACTORY_HPP
+#define MESHFACTORY_HPP
 
 #include <ObjectFactory.hpp>
-#include <VolumeData/VolumeData.hpp>
+#include <MeshData.hpp>
 
 namespace fluo
 {
-	class VolumeFactory : public ObjectFactory
+	class MeshFactory : public ObjectFactory
 	{
 	public:
-		VolumeFactory();
+		MeshFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
-		{ return dynamic_cast<const VolumeFactory*>(obj) != NULL; }
+		{
+			return dynamic_cast<const MeshFactory*>(obj) != NULL;
+		}
 
-		virtual const char* className() const { return "VolumeFactory"; }
+		virtual const char* className() const { return "MeshFactory"; }
 
 		virtual void createDefault();
 
-		virtual void setEventHandler(VolumeData* vd);
+		virtual void setEventHandler(MeshData* md);
 
-		virtual VolumeData* getDefault()
+		virtual MeshData* getDefault()
 		{
-			return dynamic_cast<VolumeData*>(ObjectFactory::getDefault());
+			return dynamic_cast<MeshData*>(ObjectFactory::getDefault());
 		}
 
-		virtual VolumeData* build(VolumeData* vd = 0);
+		virtual MeshData* build(MeshData* md = 0);
 
-		virtual VolumeData* clone(VolumeData*);
+		virtual MeshData* clone(MeshData*);
 
-		virtual VolumeData* clone(const unsigned int);
+		virtual MeshData* clone(const unsigned int);
 
-		inline virtual VolumeData* get(size_t i)
+		inline virtual MeshData* get(size_t i)
 		{
-			return dynamic_cast<VolumeData*>(ObjectFactory::get(i));
+			return dynamic_cast<MeshData*>(ObjectFactory::get(i));
 		}
 
-		inline virtual const VolumeData* get(size_t i) const
+		inline virtual const MeshData* get(size_t i) const
 		{
-			return dynamic_cast<VolumeData*>(const_cast<Object*>(ObjectFactory::get(i)));
+			return dynamic_cast<MeshData*>(const_cast<Object*>(ObjectFactory::get(i)));
 		}
 
-		inline virtual VolumeData* find(const unsigned int id)
+		inline virtual MeshData* find(const unsigned int id)
 		{
-			return dynamic_cast<VolumeData*>(ObjectFactory::find(id));
+			return dynamic_cast<MeshData*>(ObjectFactory::find(id));
 		}
 
-		inline virtual VolumeData* findFirst(const std::string &name)
+		inline virtual MeshData* findFirst(const std::string &name)
 		{
-			return dynamic_cast<VolumeData*>(ObjectFactory::findFirst(name));
+			return dynamic_cast<MeshData*>(ObjectFactory::findFirst(name));
 		}
 
-		inline virtual VolumeData* findLast(const std::string &name)
+		inline virtual MeshData* findLast(const std::string &name)
 		{
-			return dynamic_cast<VolumeData*>(ObjectFactory::findLast(name));
+			return dynamic_cast<MeshData*>(ObjectFactory::findLast(name));
 		}
 
 		//also builds volume group, whose typical use is to sync properties for volumes
 		//the volume group copies properties from the given volume
-		VolumeGroup* buildGroup(VolumeData* vd = 0);
+		MeshGroup* buildGroup(MeshData* md = 0);
 
 	protected:
-		virtual ~VolumeFactory();
-
-		void OnSetDefault(Event& event);
-
-    private:
-      const std::string current = "current";
+		virtual ~MeshFactory();
 	};
-
 }
 
-#endif//_VOLUMEFACTORY_H_
+#endif//_MESHFACTORY_H_

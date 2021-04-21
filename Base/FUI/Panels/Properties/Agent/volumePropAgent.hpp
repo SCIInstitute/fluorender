@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define VOLUME_PROP_AGENT_HPP
 
 #include <InterfaceAgent.hpp>
-#include <VolumeData/VolumeData.hpp>
+#include <VolumeData.hpp>
 
 #include <QString>
 #include <QColor>

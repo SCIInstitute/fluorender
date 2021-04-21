@@ -31,10 +31,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <NodeVisitor.hpp>
 #include <Group.hpp>
-#include <VolumeData/VolumeData.hpp>
-#include <Volume/VolumeGroup.hpp>
-#include <MeshData/MeshData.hpp>
-#include <Mesh/MeshGroup.hpp>
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
+#include <MeshData.hpp>
+#include <MeshGroup.hpp>
 #include <Annotations.hpp>
 #include <View.hpp>
 
