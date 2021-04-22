@@ -43,7 +43,7 @@ Renderer3DFactory::~Renderer3DFactory()
 
 }
 
-DrawClipplane* Renderer3DFactory::getOrAddDrawClipplane(const std::string &name)
+DrawClipplane* Renderer3DFactory::getDrawClipplane(const std::string &name)
 {
 	Renderer3D* result = findFirst(name);
 	if (result)

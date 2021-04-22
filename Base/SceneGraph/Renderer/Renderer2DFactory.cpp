@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Renderer2DFactory.hpp"
 #include <Names.hpp>
+#include <DrawView.hpp>
+#include <View.cpp>
 
 using namespace fluo;
 
@@ -40,4 +42,20 @@ Renderer2DFactory::Renderer2DFactory()
 Renderer2DFactory::~Renderer2DFactory()
 {
 
+}
+
+DrawView* Renderer2DFactory::getDrawView(const std::string &name)
+{
+	Renderer2D* result = findFirst(name);
+	if (result)
+		return dynamic_cast<DrawView*>(result);
+
+	//make new
+	DrawView* renderer = new DrawView();
+	if (renderer)
+	{
+		renderer->setName(name);
+		objects_.push_front(renderer);
+	}
+	return renderer;
 }

@@ -79,7 +79,7 @@ namespace fluo
 			return dynamic_cast<Renderer3D*>(ObjectFactory::findLast(name));
 		}
 
-		DrawClipplane* getOrAddDrawClipplane(const std::string &name);
+		DrawClipplane* getDrawClipplane(const std::string &name);
 
 	protected:
 		virtual ~Renderer3DFactory();

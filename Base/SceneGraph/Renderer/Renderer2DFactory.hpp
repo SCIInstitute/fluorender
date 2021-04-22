@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
+	class DrawView;
 	class Renderer2DFactory : public ProcessorFactory
 	{
 	public:
@@ -77,6 +78,8 @@ namespace fluo
 		{
 			return dynamic_cast<Renderer2D*>(ObjectFactory::findLast(name));
 		}
+
+		DrawView* getDrawView(const std::string &name);
 
 	protected:
 		virtual ~Renderer2DFactory();

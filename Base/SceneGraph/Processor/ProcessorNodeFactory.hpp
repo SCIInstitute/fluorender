@@ -78,8 +78,6 @@ namespace fluo
 			return dynamic_cast<ProcessorNode*>(ObjectFactory::findLast(name));
 		}
 
-		//FLR::ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
-
 	protected:
 		virtual ~ProcessorNodeFactory();
 
