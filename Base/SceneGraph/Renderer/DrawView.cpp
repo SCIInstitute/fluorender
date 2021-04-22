@@ -72,3 +72,27 @@ ProcessorBranchType DrawView::drawType()
 		result |= (unsigned int)PBT_08;
 	return ProcessorBranchType(result);
 }
+
+void DrawView::preDraw(Event &event)
+{
+	clearDraw();
+}
+
+void DrawView::postDraw(Event &event)
+{
+
+}
+
+void DrawView::clearDraw()
+{
+	Color bg_color;
+	getValue("bg color", bg_color);
+	long nx, ny;
+	getValue("nx", nx);
+	getValue("ny", ny);
+	// clear color and depth buffers
+	glClearDepth(1.0);
+	glClearColor(bg_color.r(), bg_color.g(), bg_color.b(), 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, (GLint)nx, (GLint)ny);
+}

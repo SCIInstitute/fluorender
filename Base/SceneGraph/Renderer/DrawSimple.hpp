@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
+	//root of all drawing functions for volume and mesh
+	//built by factory
 class DrawSimple : public Renderer2D
 {
 public:
@@ -47,13 +49,9 @@ public:
 	//condition function
 	//ProcessorBranchType drawType();
 
-	virtual void preDraw(Event &event);
-	virtual void postDraw(Event &event);
-
 protected:
 	~DrawSimple();
 
-	void clearDraw();
 };
 }
 #endif//DRAW_SIMPLE_HPP

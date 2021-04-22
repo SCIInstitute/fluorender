@@ -25,36 +25,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef DRAW_VIEW_HPP
-#define DRAW_VIEW_HPP
+#ifndef DRAW_VOLUME_DEPTH_HPP
+#define DRAW_VOLUME_DEPTH_HPP
 
-#include "Renderer2D.hpp"
+#include "Renderer3D.hpp"
+#include <FLIVR/MultiVolumeRenderer.h>
 
 namespace fluo
 {
-	//root of the renderers
-class DrawView : public Renderer2D
+class DrawVolumeDepth : public Renderer3D
 {
 public:
 
-	DrawView();
+	DrawVolumeDepth();
 
-	DrawView(const DrawView& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawVolumeDepth(const DrawVolumeDepth& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual bool isSameKindAs(const DrawView*) const {return true;}
+	virtual bool isSameKindAs(const DrawVolumeDepth*) const {return true;}
 
-	virtual const char* className() const { return "DrawView"; }
+	virtual const char* className() const { return "DrawVolumeDepth"; }
 
-	//condition function
-	ProcessorBranchType drawType();
-
-	virtual void preDraw(Event &event);
-	virtual void postDraw(Event &event);
+	virtual void render(Event& event);
 
 protected:
-	~DrawView();
+	~DrawVolumeDepth();
 
-	void clearDraw();
+	//virtual void preDraw(Event &event) {};
+	//virtual void postDraw(Event &event) {};
+
+	//virtual void draw();
+	flvr::MultiVolumeRenderer renderer_;
 };
 }
-#endif//DRAW_VIEW_HPP
+#endif//DRAW_VOLUME_DEPTH_HPP

@@ -88,9 +88,10 @@ set(HEADER_FILES
 				Renderer/DrawTrack.hpp
 				Renderer/DrawSimple.hpp
 				Renderer/DrawPeel.hpp
+				Renderer/DrawMesh.hpp
 				Renderer/DrawVolume.hpp
 				Renderer/DrawVolumeVisitor.hpp
-				Renderer/DrawMesh.hpp
+				Renderer/DrawVolumeDepth.hpp
 	)
 
 set(SOURCES Data/Annotations.cpp
@@ -127,9 +128,10 @@ set(SOURCES Data/Annotations.cpp
 			Renderer/DrawTrack.cpp
 			Renderer/DrawSimple.cpp
 			Renderer/DrawPeel.cpp
+			Renderer/DrawMesh.cpp
 			Renderer/DrawVolume.cpp
 			Renderer/DrawVolumeVisitor.cpp
-			Renderer/DrawMesh.cpp
+			Renderer/DrawVolumeDepth.cpp
 	)
 
 

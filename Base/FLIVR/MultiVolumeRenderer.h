@@ -32,8 +32,8 @@
 #include <GL/glew.h>
 #include "Texture.h"
 #include "VolumeRenderer.h"
-#include <Types/BBox.hpp>
-#include <Types/Plane.hpp>
+#include <BBox.hpp>
+#include <Plane.hpp>
 #include <vector>
 
 using namespace std;

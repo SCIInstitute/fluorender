@@ -53,26 +53,3 @@ DrawSimple::~DrawSimple()
 //{
 //}
 
-void DrawSimple::preDraw(Event &event)
-{
-	clearDraw();
-}
-
-void DrawSimple::postDraw(Event &event)
-{
-
-}
-
-void DrawSimple::clearDraw()
-{
-	Color bg_color;
-	getValue("bg color", bg_color);
-	long nx, ny;
-	getValue("nx", nx);
-	getValue("ny", ny);
-	// clear color and depth buffers
-	glClearDepth(1.0);
-	glClearColor(bg_color.r(), bg_color.g(), bg_color.b(), 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, (GLint)nx, (GLint)ny);
-}

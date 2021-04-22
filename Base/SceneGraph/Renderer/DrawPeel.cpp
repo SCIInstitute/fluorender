@@ -55,7 +55,7 @@ DrawPeel::~DrawPeel()
 
 void DrawPeel::preDraw(Event &event)
 {
-	clearDraw();
+	//clearDraw();
 }
 
 void DrawPeel::postDraw(Event &event)
