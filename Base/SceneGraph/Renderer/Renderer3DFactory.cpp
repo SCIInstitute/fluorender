@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Renderer3DFactory.hpp"
-#include "ClipPlaneRenderer.hpp"
+#include "DrawClipplane.hpp"
 #include <Names.hpp>
 
 using namespace fluo;
@@ -43,14 +43,14 @@ Renderer3DFactory::~Renderer3DFactory()
 
 }
 
-ClipPlaneRenderer* Renderer3DFactory::getOrAddClipPlaneRenderer(const std::string &name)
+DrawClipplane* Renderer3DFactory::getOrAddDrawClipplane(const std::string &name)
 {
 	Renderer3D* result = findFirst(name);
 	if (result)
-		return dynamic_cast<ClipPlaneRenderer*>(result);
+		return dynamic_cast<DrawClipplane*>(result);
 
 	//not found
-	ClipPlaneRenderer* renderer = new ClipPlaneRenderer();
+	DrawClipplane* renderer = new DrawClipplane();
 	if (renderer)
 	{
 		renderer->setName(name);

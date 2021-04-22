@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ClipPlaneRenderer.hpp"
+#include "DrawClipplane.hpp"
 #include <Plane.hpp>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/TextureRenderer.h>
@@ -37,31 +37,31 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-ClipPlaneRenderer::ClipPlaneRenderer():
+DrawClipplane::DrawClipplane():
 	Renderer3D()
 {
 	setupInputs();
 	setupOutputs();
 	setProcessFunction(
-		std::bind(&ClipPlaneRenderer::render,
+		std::bind(&DrawClipplane::render,
 			this, std::placeholders::_1));
 }
 
-ClipPlaneRenderer::ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const CopyOp& copyop, bool copy_values):
+DrawClipplane::DrawClipplane(const DrawClipplane& renderer, const CopyOp& copyop, bool copy_values):
 	Renderer3D(renderer, copyop, false)
 {
 	if (copy_values)
 		copyValues(renderer, copyop);
 	setProcessFunction(
-		std::bind(&ClipPlaneRenderer::render,
+		std::bind(&DrawClipplane::render,
 			this, std::placeholders::_1));
 }
 
-ClipPlaneRenderer::~ClipPlaneRenderer()
+DrawClipplane::~DrawClipplane()
 {
 }
 
-void ClipPlaneRenderer::setupInputs()
+void DrawClipplane::setupInputs()
 {
 	//direct inputs
 	addValue("border", bool(true));
@@ -81,12 +81,12 @@ void ClipPlaneRenderer::setupInputs()
 	inputs_.insert("tex transform");
 }
 
-void ClipPlaneRenderer::setupOutputs()
+void DrawClipplane::setupOutputs()
 {
 
 }
 
-void ClipPlaneRenderer::render(Event& event)
+void DrawClipplane::render(Event& event)
 {
 	bool display = false;
 	getValue("clip display", display);

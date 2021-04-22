@@ -25,31 +25,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef VIEW_RENDERER_HPP
-#define VIEW_RENDERER_HPP
+#ifndef DRAW_CLIPPLANE_HPP
+#define DRAW_CLIPPLANE_HPP
 
-#include "Renderer2D.hpp"
+#include "Renderer3D.hpp"
 
 namespace fluo
 {
-class ViewRenderer : public Renderer2D
+class DrawClipplane : public Renderer3D
 {
 public:
 
-	ViewRenderer();
+	DrawClipplane();
 
-	ViewRenderer(const ViewRenderer& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+	DrawClipplane(const DrawClipplane& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	virtual bool isSameKindAs(const ViewRenderer*) const {return true;}
+	virtual bool isSameKindAs(const DrawClipplane*) const {return true;}
 
-	virtual const char* className() const { return "ViewRenderer"; }
+	virtual const char* className() const { return "DrawClipplane"; }
 
-	//condition function
-	ProcessorBranchType drawType();
+    virtual void render(Event& event);
 
 protected:
-	~ViewRenderer();
+	~DrawClipplane();
 
+	virtual void setupInputs();
+	virtual void setupOutputs();
 };
 }
-#endif//VIEW_RENDERER_HPP
+#endif//DRAW_CLIPPLANE_HPP

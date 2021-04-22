@@ -25,39 +25,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef DRAW_VIEW_HPP
+#define DRAW_VIEW_HPP
 
-#include "ViewRenderer.hpp"
+#include "Renderer2D.hpp"
 
-using namespace fluo;
-
-ViewRenderer::ViewRenderer():
-	Renderer2D()
+namespace fluo
 {
-	setConditionFunction(std::bind(&ViewRenderer::drawType,
-		this));
-}
-
-ViewRenderer::ViewRenderer(const ViewRenderer& renderer, const CopyOp& copyop, bool copy_values):
-	Renderer2D(renderer, copyop, false)
+	//root of the renderers
+class DrawView : public Renderer2D
 {
-	if (copy_values)
-		copyValues(renderer, copyop);
-}
+public:
 
-ViewRenderer::~ViewRenderer()
-{
-}
+	DrawView();
 
-ProcessorBranchType ViewRenderer::drawType()
-{
-	long draw_type;
-	getValue("draw type", draw_type);
-	switch (draw_type)
-	{
-	case 1://draw volumes only
-		return PBT_01;
-	case 2://draw volumes and meshes with depth peeling
-		return PBT_02;
-	}
-	return PBT_01;
+	DrawView(const DrawView& renderer, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
+
+	virtual bool isSameKindAs(const DrawView*) const {return true;}
+
+	virtual const char* className() const { return "DrawView"; }
+
+	//condition function
+	ProcessorBranchType drawType();
+
+protected:
+	~DrawView();
+
+};
 }
+#endif//DRAW_VIEW_HPP

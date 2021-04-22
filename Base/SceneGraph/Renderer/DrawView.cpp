@@ -25,32 +25,50 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef CLIP_PLANE_RENDERER_HPP
-#define CLIP_PLANE_RENDERER_HPP
 
-#include "Renderer3D.hpp"
+#include "DrawView.hpp"
 
-namespace fluo
+using namespace fluo;
+
+DrawView::DrawView():
+	Renderer2D()
 {
-class ClipPlaneRenderer : public Renderer3D
-{
-public:
-
-	ClipPlaneRenderer();
-
-    ClipPlaneRenderer(const ClipPlaneRenderer& renderer, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
-
-	virtual bool isSameKindAs(const ClipPlaneRenderer*) const {return true;}
-
-	virtual const char* className() const { return "ClipPlaneRenderer"; }
-
-    virtual void render(Event& event);
-
-protected:
-	~ClipPlaneRenderer();
-
-	virtual void setupInputs();
-	virtual void setupOutputs();
-};
+	setConditionFunction(std::bind(&DrawView::drawType,
+		this));
 }
-#endif//_CLIPPLANERENDERER_H_
+
+DrawView::DrawView(const DrawView& renderer, const CopyOp& copyop, bool copy_values):
+	Renderer2D(renderer, copyop, false)
+{
+	if (copy_values)
+		copyValues(renderer, copyop);
+	setConditionFunction(std::bind(&DrawView::drawType,
+		this));
+}
+
+DrawView::~DrawView()
+{
+}
+
+ProcessorBranchType DrawView::drawType()
+{
+	unsigned int result = PBT_STOP;
+	bool bval;
+	if (getValue("draw background", bval) && bval)
+		result |= (unsigned int)PBT_01;
+	if (getValue("draw grid", bval) && bval)
+		result |= (unsigned int)PBT_02;
+	if (getValue("draw bound", bval) && bval)
+		result |= (unsigned int)PBT_03;
+	if (getValue("draw clipplane", bval) && bval)
+		result |= (unsigned int)PBT_04;
+	if (getValue("draw ruler", bval) && bval)
+		result |= (unsigned int)PBT_05;
+	if (getValue("draw track", bval) && bval)
+		result |= (unsigned int)PBT_06;
+	if (getValue("draw annotation", bval) && bval)
+		result |= (unsigned int)PBT_07;
+	if (getValue("draw cell", bval) && bval)
+		result |= (unsigned int)PBT_08;
+	return ProcessorBranchType(result);
+}

@@ -75,20 +75,20 @@ set(HEADER_FILES
 				Renderer/render_defs.hpp
 				Renderer/Renderer2D.hpp
 				Renderer/Renderer3D.hpp
-				Renderer/ClipPlaneRenderer.hpp
 				Renderer/Renderer2DFactory.hpp
 				Renderer/Renderer3DFactory.hpp
-				Renderer/ViewRenderer.hpp
+				Renderer/DrawView.hpp
+				Renderer/DrawAnnotation.hpp
+				Renderer/DrawBackground.hpp
+				Renderer/DrawBound.hpp
+				Renderer/DrawCell.hpp
+				Renderer/DrawClipplane.hpp
+				Renderer/DrawGrid.hpp
+				Renderer/DrawRuler.hpp
+				Renderer/DrawTrack.hpp
 				Renderer/DrawSimple.hpp
 				Renderer/DrawPeel.hpp
-				Renderer/DrawBackground.hpp
-				Renderer/DrawGrid.hpp
 				Renderer/DrawVolume.hpp
-				Renderer/DrawBound.hpp
-				Renderer/DrawAnnotation.hpp
-				Renderer/DrawRuler.hpp
-				Renderer/DrawCell.hpp
-				Renderer/DrawTrack.hpp
 				Renderer/DrawVolumeVisitor.hpp
 				Renderer/DrawMesh.hpp
 	)
@@ -114,20 +114,20 @@ set(SOURCES Data/Annotations.cpp
 			Processor/ProcessorFactory.cpp
 			Renderer/Renderer2D.cpp
 			Renderer/Renderer3D.cpp
-			Renderer/ClipPlaneRenderer.cpp
 			Renderer/Renderer2DFactory.cpp
 			Renderer/Renderer3DFactory.cpp
-			Renderer/ViewRenderer.cpp
+			Renderer/DrawView.cpp
+			Renderer/DrawAnnotation.cpp
+			Renderer/DrawBackground.cpp
+			Renderer/DrawBound.cpp
+			Renderer/DrawCell.cpp
+			Renderer/DrawClipplane.cpp
+			Renderer/DrawGrid.cpp
+			Renderer/DrawRuler.cpp
+			Renderer/DrawTrack.cpp
 			Renderer/DrawSimple.cpp
 			Renderer/DrawPeel.cpp
-			Renderer/DrawBackground.cpp
-			Renderer/DrawGrid.cpp
 			Renderer/DrawVolume.cpp
-			Renderer/DrawBound.cpp
-			Renderer/DrawAnnotation.cpp
-			Renderer/DrawRuler.cpp
-			Renderer/DrawCell.cpp
-			Renderer/DrawTrack.cpp
 			Renderer/DrawVolumeVisitor.cpp
 			Renderer/DrawMesh.cpp
 	)

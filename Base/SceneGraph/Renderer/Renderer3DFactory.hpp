@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class ClipPlaneRenderer;
+	class DrawClipplane;
 	class Renderer3DFactory : public ProcessorNodeFactory
 	{
 	public:
@@ -79,7 +79,7 @@ namespace fluo
 			return dynamic_cast<Renderer3D*>(ObjectFactory::findLast(name));
 		}
 
-		ClipPlaneRenderer* getOrAddClipPlaneRenderer(const std::string &name);
+		DrawClipplane* getOrAddDrawClipplane(const std::string &name);
 
 	protected:
 		virtual ~Renderer3DFactory();
