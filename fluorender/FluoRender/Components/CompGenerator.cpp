@@ -164,13 +164,11 @@ void ComponentGenerator::ShuffleID()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		//kernel_prog->readBuffer(sizeof(unsigned int)*nx*ny*nz, val32, val32);
 		kernel_prog->copyBufTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
 		kernel_prog->releaseAll();
-		//ReleaseLabel(val32, brick_num, b);
 
 		postwork(__FUNCTION__);
 	}
@@ -278,8 +276,9 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
+		flvr::Argument arg_mask;
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 2
 		kernel_prog->setKernelArgBegin(kernel_index2);
 		kernel_prog->setKernelArgument(arg_szbuf);
@@ -290,7 +289,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setKernelArgument(arg_mask);
 		//kernel 3
 		kernel_prog->setKernelArgBegin(kernel_index3);
 		kernel_prog->setKernelArgument(arg_szbuf);
@@ -300,7 +299,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&psize));
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
@@ -700,8 +699,9 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+		flvr::Argument arg_mask;
 		if (m_use_mask)
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
 		kernel_prog_dist->setKernelArgument(arg_distf);
@@ -712,7 +712,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		if (m_use_mask)
 		{
 			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog_dist->setKernelArgument(arg_mask);
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
@@ -757,7 +757,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
 		for (int j = 0; j < iter; ++j)
@@ -865,8 +865,9 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+		flvr::Argument arg_mask;
 		if (m_use_mask)
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
 		kernel_prog_dist->setKernelArgument(arg_distf);
@@ -877,7 +878,7 @@ void ComponentGenerator::DistDensityField(
 		if (m_use_mask)
 		{
 			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog_dist->setKernelArgument(arg_mask);
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
@@ -1143,8 +1144,9 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
+		flvr::Argument arg_mask;
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
 		kernel_prog->setKernelArgBegin(kernel_index1);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, label_size, size_buffer);
@@ -1155,7 +1157,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setKernelArgument(arg_mask);
 		//kernel 2
 		kernel_prog->setKernelArgBegin(kernel_index2);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
@@ -1166,7 +1168,7 @@ void ComponentGenerator::Cleanup(int iter, unsigned int size_lm)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&size_lm));
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setKernelArgument(arg_mask);
 
 		//execute
 		for (int j = 0; j < iter; ++j)

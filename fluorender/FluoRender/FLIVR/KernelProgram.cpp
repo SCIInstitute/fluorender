@@ -932,13 +932,16 @@ namespace flvr
 	//release mem obj
 	void KernelProgram::releaseAll(bool del_mem)
 	{
-		for (auto it = arg_list_.begin();
-			it != arg_list_.end();)
+		cl_int err;
+		if (del_mem)
 		{
-			if (del_mem)
-				clReleaseMemObject(it->buffer);
-			it = arg_list_.erase(it);
+			for (auto it = arg_list_.begin();
+				it != arg_list_.end(); ++it)
+			{
+				err = clReleaseMemObject(it->buffer);
+			}
 		}
+		arg_list_.clear();
 	}
 
 	void KernelProgram::releaseMemObject(Argument& arg)
