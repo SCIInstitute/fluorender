@@ -111,10 +111,26 @@ private:
 	};
 	vector<WavelengthInfo> m_excitation_wavelength_list;
 
+	struct TileScanInfo
+	{
+		int fieldx;
+		int fieldy;
+		int fieldz;
+		double posx;
+		double posy;
+		double posz;
+
+		TileScanInfo():
+			fieldx(0), fieldy(0), fieldz(0),
+			posx(0), posy(0), posz(0)
+		{}
+	};
+	typedef vector<TileScanInfo> TileList;
 	struct SubBlockInfo
 	{
 		int chan;//channel number
 		int time;//time number
+		unsigned long long inc;//inc for block
 		unsigned long long loc;//position in file
 		//inc for xyz
 		unsigned long long x_inc;
@@ -137,7 +153,8 @@ private:
 		double z_len;
 
 		SubBlockInfo():
-			chan(0), time(0), loc(0),
+			chan(0), time(0),
+			inc(0), loc(0),
 			x_inc(0), y_inc(0), z_inc(0),
 			x(0), y(0), z(0),
 			x_size(0), y_size(0), z_size(0),
@@ -190,6 +207,9 @@ private:
 			case 4:
 				inc = tinc;
 				break;
+			case 10:
+				sbi->inc = tinc;
+				break;
 			default:
 				if (!empty_dim)
 					break;
@@ -204,7 +224,13 @@ private:
 			{
 				blocks[i].chan = chan;
 				blocks[i].time = time;
-				blocks[i].loc = loc + blocks[i].z_inc * i;
+				if (blocks[i].z_inc)
+					blocks[i].loc = loc + blocks[i].z_inc * i;
+				else if (blocks[0].inc)
+				{
+					blocks[i].inc = blocks[0].inc;
+					blocks[i].loc = loc + blocks[0].inc * i;
+				}
 				if (blocks[i].x_size == 0)
 					blocks[i].x_size = 1;
 				if (blocks[i].y_size == 0)
@@ -257,6 +283,7 @@ private:
 		double minv;//min value
 		double maxv;//max value
 		std::vector<ChannelInfo> channels;
+		TileList tile_list;
 
 		ImageInfo():
 			loc(0), size(0),
@@ -306,6 +333,8 @@ private:
 	void ReadSubBlockInfo(wxXmlNode* node, ImageInfo &imgi);
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
+	bool ReadTileScanInfo(wxXmlNode* node, TileList& list);
+
 	ImageInfo* FindImageInfoMbid(std::wstring &mbid)
 	{
 		for (auto it = m_lif_info.images.begin();

@@ -722,6 +722,11 @@ void LIFReader::ReadSubBlockInfo(wxXmlNode* node, LIFReader::ImageInfo &imgi)
 				AddSubBlockInfo(imgi, did, size, orig, len, inc);
 			}
 		}
+		else if (str == "Attachment")
+		{
+			ReadTileScanInfo(child, imgi.tile_list);
+		}
+
 		ReadSubBlockInfo(child, imgi);
 		child = child->GetNext();
 	}
@@ -741,7 +746,9 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 	if (!tinfo)
 		return;
 	SubBlockInfo *sbi = 0;
-	if (tinfo->blocks.empty())
+	if (dim == 10 && size > 1)
+		tinfo->blocks.resize(size);
+	else if (tinfo->blocks.empty())
 		tinfo->blocks.resize(1);
 	sbi = &(tinfo->blocks[0]);
 	sbi->chan = chan;
@@ -749,6 +756,54 @@ void LIFReader::AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int 
 	unsigned int empty_dim = GetEmptyDim(cinfo, sbi);
 	tinfo->SetSubBlockInfo(dim, empty_dim,
 		size, orig, len, inc);
+}
+
+bool LIFReader::ReadTileScanInfo(wxXmlNode* node, TileList& list)
+{
+	if (!node)
+		return false;
+	wxString str;
+	str = node->GetName();
+	if (str != "Attachment")
+		return false;
+	str = node->GetAttribute("Name");
+	if (str != "TileScanInfo")
+		return false;
+	long lval;
+	double dval;
+	list.clear();
+	wxXmlNode* child = node->GetChildren();
+	while (child)
+	{
+		str = child->GetName();
+		if (str == "Tile")
+		{
+			TileScanInfo info;
+			str = child->GetAttribute("FieldX");
+			if (str.ToLong(&lval))
+				info.fieldx = lval;
+			str = child->GetAttribute("FieldY");
+			if (str.ToLong(&lval))
+				info.fieldy = lval;
+			str = child->GetAttribute("FieldZ");
+			if (str.ToLong(&lval))
+				info.fieldz = lval;
+			str = child->GetAttribute("PosX");
+			if (str.ToDouble(&dval))
+				info.posx = dval;
+			str = child->GetAttribute("PosY");
+			if (str.ToDouble(&dval))
+				info.posy = dval;
+			str = child->GetAttribute("PosZ");
+			if (str.ToDouble(&dval))
+				info.posz = dval;
+			list.push_back(info);
+		}
+		child = child->GetNext();
+	}
+	if (list.empty())
+		return false;
+	return true;
 }
 
 void LIFReader::FillLifInfo()
