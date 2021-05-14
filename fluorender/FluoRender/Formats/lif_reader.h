@@ -102,6 +102,7 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 	unsigned int m_datatype;//pixel type of data: 0-na; 1-8bit; 2-16bit 4-32bit
+	bool m_tile_scan;
 
 	//wavelength info
 	struct WavelengthInfo
@@ -225,18 +226,21 @@ private:
 				blocks[i].chan = chan;
 				blocks[i].time = time;
 				if (blocks[i].z_inc)
+				{
 					blocks[i].loc = loc + blocks[i].z_inc * i;
+					if (blocks[i].x_size == 0)
+						blocks[i].x_size = 1;
+					if (blocks[i].y_size == 0)
+						blocks[i].y_size = 1;
+					if (blocks[i].z_size == 0)
+						blocks[i].z_size = 1;
+				}
 				else if (blocks[0].inc)
 				{
-					blocks[i].inc = blocks[0].inc;
+					//tiled scan
+					blocks[i] = blocks[0];
 					blocks[i].loc = loc + blocks[0].inc * i;
 				}
-				if (blocks[i].x_size == 0)
-					blocks[i].x_size = 1;
-				if (blocks[i].y_size == 0)
-					blocks[i].y_size = 1;
-				if (blocks[i].z_size == 0)
-					blocks[i].z_size = 1;
 			}
 		}
 	};
@@ -327,6 +331,7 @@ private:
 	unsigned long long ReadMetadata(FILE* pfile, unsigned long long ioffset);
 	unsigned long long PreReadMemoryBlock(FILE* pfile, unsigned long long ioffset);
 	bool ReadMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
+	bool CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val);
 	void ReadElement(wxXmlNode* node);
 	void ReadData(wxXmlNode* node, std::wstring &name);
 	ImageInfo* ReadImage(wxXmlNode* node, std::wstring &name);
@@ -334,6 +339,7 @@ private:
 	void AddSubBlockInfo(ImageInfo &imgi, unsigned int dim, unsigned int size,
 		double orig, double len, unsigned long long inc);
 	bool ReadTileScanInfo(wxXmlNode* node, TileList& list);
+	void GenImageInfo(ImageInfo* imgi);
 
 	ImageInfo* FindImageInfoMbid(std::wstring &mbid)
 	{
