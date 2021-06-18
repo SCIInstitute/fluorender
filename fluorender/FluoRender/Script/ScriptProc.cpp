@@ -498,6 +498,8 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 	fconfig.Read("source", &source);
 	int mode;
 	fconfig.Read("format", &mode, 0);
+	bool crop;
+	fconfig.Read("crop", &crop, false);
 	bool bake;
 	fconfig.Read("bake", &bake, false);
 	bool compression;
@@ -571,7 +573,7 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 			str += ".tif";
 		else if (mode == 2)
 			str += ".nrrd";
-		(*i)->Save(str, mode, bake, compression);
+		(*i)->Save(str, mode, crop, bake, compression);
 		if (del_vol)
 			delete *i;
 	}

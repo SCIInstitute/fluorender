@@ -116,6 +116,7 @@ bool VRenderFrame::m_compression = false;
 bool VRenderFrame::m_skip_brick = false;
 wxString VRenderFrame::m_time_id = "_T";
 bool VRenderFrame::m_load_mask = true;
+bool VRenderFrame::m_save_crop = false;
 bool VRenderFrame::m_save_compress = true;
 bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
@@ -2889,7 +2890,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 				new_folder = filename + "_files";
 				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
-				vd->Save(str, 0, false, VRenderFrame::GetCompression());
+				vd->Save(str, 0, VRenderFrame::GetCrop(),
+					false, VRenderFrame::GetCompression());
 				fconfig.Write("path", str);
 				new_chan = true;
 			}

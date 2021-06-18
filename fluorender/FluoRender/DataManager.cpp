@@ -1252,7 +1252,7 @@ void VolumeData::SetResize(int resize, int nx, int ny, int nz)
 }
 
 //save
-void VolumeData::Save(wxString &filename, int mode, bool bake, bool compress)
+void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool compress)
 {
 	if (!m_vr || !m_tex)
 		return;

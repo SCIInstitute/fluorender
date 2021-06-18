@@ -285,6 +285,11 @@ public:
 	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view = 0);
 	void LoadMeshes(wxArrayString files, VRenderView* view = 0);
 
+	//crop
+	static void SetCrop(bool value)
+	{ m_save_crop = value; }
+	static bool GetCrop()
+	{ return m_save_crop; }
 	//compression
 	static void SetCompression(bool value)
 	{ m_save_compress = value; }
@@ -430,6 +435,8 @@ private:
 	static wxString m_time_id;
 	//load volume mask
 	static bool m_load_mask;
+	//save crop
+	static bool m_save_crop;
 	//save compressed
 	static bool m_save_compress;
 	//embed files in project
