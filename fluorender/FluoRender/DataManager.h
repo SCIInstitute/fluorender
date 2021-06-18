@@ -439,6 +439,9 @@ public:
 	double GetMaxValue() {return m_max_value;}
 	void SetMaxValue(double val) {m_max_value = val;}
 
+	//clip size
+	void GetClipValues(int &ox, int &oy, int &oz,
+		int &nx, int &ny, int &nz);
 	//clip distance
 	void SetClipDistance(int distx, int disty, int distz);
 	void GetClipDistance(int &distx, int &disty, int &distz);

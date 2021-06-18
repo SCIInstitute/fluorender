@@ -1281,6 +1281,20 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 	data = m_tex->get_nrrd(0);
 	if (data)
 	{
+		//clipping planes
+		vector<fluo::Plane*> *planes = m_vr->get_planes();
+		int bits = data->type==nrrdTypeUShort?16:8;
+		int ox, oy, oz, nx, ny, nz;
+		ox = oy = oz = 0;
+		if (crop)
+		{
+			GetClipValues(ox, oy, oz, nx, ny, nz);
+		}
+		else
+		{
+			GetResolution(nx, ny, nz);
+		}
+
 		if (bake)
 		{
 			wxProgressDialog *prg_diag = new wxProgressDialog(
@@ -1289,14 +1303,6 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 				100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
 			//process the data
-			int bits = data->type==nrrdTypeUShort?16:8;
-			int nx = int(data->axis[0].size);
-			int ny = int(data->axis[1].size);
-			int nz = int(data->axis[2].size);
-
-			//clipping planes
-			vector<fluo::Plane*> *planes = m_vr->get_planes();
-
 			Nrrd* baked_data = nrrdNew();
 			if (bits == 8)
 			{
@@ -2412,6 +2418,34 @@ void VolumeData::SetBlendMode(int mode)
 int VolumeData::GetBlendMode()
 {
 	return m_blend_mode;
+}
+
+//clip size
+void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
+	int &nx, int &ny, int &nz)
+{
+	vector<fluo::Plane*> *planes = m_vr->get_planes();
+	if (planes->size() != 6)
+		return;
+
+	int resx, resy, resz;
+	GetResolution(resx, resy, resz);
+
+	//calculating planes
+	//get six planes
+	fluo::Plane* px1 = (*planes)[0];
+	fluo::Plane* px2 = (*planes)[1];
+	fluo::Plane* py1 = (*planes)[2];
+	fluo::Plane* py2 = (*planes)[3];
+	fluo::Plane* pz1 = (*planes)[4];
+	fluo::Plane* pz2 = (*planes)[5];
+
+	ox = int(-resx*px1->d() + 0.499);
+	oy = int(-resy*py1->d() + 0.499);
+	oz = int(-resz*pz1->d() + 0.499);
+	nx = int(resx*px2->d() + 0.499) - ox;
+	ny = int(resy*py2->d() + 0.499) - oy;
+	nz = int(resz*pz2->d() + 0.499) - oz;
 }
 
 //clip distance

@@ -435,7 +435,15 @@ void DataListCtrl::OnRename(wxCommandEvent& event)
 	}
 }
 
-//ch1
+//crop
+void DataListCtrl::OnCropCheck(wxCommandEvent &event)
+{
+	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
+	if (ch1)
+		VRenderFrame::SetCrop(ch1->GetValue());
+}
+
+//compress
 void DataListCtrl::OnCompCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
@@ -509,17 +517,26 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
-	//compressed
+	//crop
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* crop_chk = new wxCheckBox(panel, ID_CROP,
+		"Use Clipping Planes to Crop");
+	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(DataListCtrl::OnCropCheck), NULL, panel);
+	crop_chk->SetValue(VRenderFrame::GetCrop());
+	sizer1->Add(10, 10);
+	sizer1->Add(crop_chk);
+	//compressed
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* comp_chk = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCompCheck), NULL, panel);
 	comp_chk->SetValue(VRenderFrame::GetCompression());
-	sizer1->Add(10, 10);
-	sizer1->Add(comp_chk);
+	sizer2->Add(10, 10);
+	sizer2->Add(comp_chk);
 	//resize
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* resize_chk = new wxCheckBox(panel, ID_RESIZE_CHK,
 		"Resize");
 	resize_chk->Connect(resize_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
@@ -536,20 +553,22 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(DataListCtrl::OnSizeZText), NULL, panel);
-	sizer2->Add(10, 10);
-	sizer2->Add(resize_chk, 0, wxALIGN_CENTER);
-	sizer2->Add(10, 10);
-	sizer2->Add(size_x_txt, 0, wxALIGN_CENTER);
-	sizer2->Add(10, 10);
-	sizer2->Add(size_y_txt, 0, wxALIGN_CENTER);
-	sizer2->Add(10, 10);
-	sizer2->Add(size_z_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(resize_chk, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(size_x_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(size_y_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(size_z_txt, 0, wxALIGN_CENTER);
 
 	//group
 	group1->Add(10, 10);
 	group1->Add(sizer1);
 	group1->Add(10, 10);
 	group1->Add(sizer2);
+	group1->Add(10, 10);
+	group1->Add(sizer3);
 	group1->Add(10, 20);
 
 	panel->SetSizerAndFit(group1);

@@ -82,6 +82,7 @@ private:
 	void OnAddToView(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	void OnRename(wxCommandEvent& event);
+	void OnCropCheck(wxCommandEvent& event);
 	void OnCompCheck(wxCommandEvent &event);
 	void OnResizeCheck(wxCommandEvent &event);
 	void OnSizeXText(wxCommandEvent &event);
