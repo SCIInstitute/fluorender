@@ -28,66 +28,68 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESAMPLER_H_
 #define _VOLUMESAMPLER_H_
 
-#include <nrrd.h>
-#ifdef STATIC_COMPILE
-#define nrrdWrap nrrdWrap_va
-#define nrrdAxisInfoSet nrrdAxisInfoSet_va
-#endif
+#include "DataManager.h"
 
 namespace flrd
 {
+	enum SampDataType
+	{
+		SDT_Data = 0,
+		SDT_Mask,
+		SDT_Label,
+	};
 	class VolumeSampler
 	{
 	public:
 		VolumeSampler();
 		~VolumeSampler();
 
-		void SetVolume(Nrrd *data);
-		Nrrd* GetVolume();
-		Nrrd* GetResult();
+		void SetInput(VolumeData *data);
+		VolumeData* GetInput();
+		VolumeData* GetResult();
 		void SetSize(int nx, int ny, int nz);
-		void SetSpacings(double spcx, double spcy, double spcz);
-		void SetType(int type);
+		void SetFilter(int type);
 		void SetFilterSize(int fx, int fy, int fz);
-		void Resize();
+		void SetCrop(bool crop);
+		void Resize(SampDataType type);
 		double Sample(double x, double y, double z);
 		unsigned int SampleInt(double x, double y, double z);
 
 	private:
-		Nrrd *m_vd_r;	//result volume data
-		Nrrd *m_vd;	//volume data A
+		VolumeData *m_input;	//input
+		VolumeData *m_result;	//result
+		void* m_raw_input;		//
+		void* m_raw_result;		//
 
+		//input size
+		int m_nx_in;
+		int m_ny_in;
+		int m_nz_in;
 		//new size
 		int m_nx;
 		int m_ny;
 		int m_nz;
-		//old size
-		int m_nx_in;
-		int m_ny_in;
-		int m_nz_in;
-		//bits
+		//input bits
 		int m_bits;
-		int m_bits_in;
-		//spacings
-		double m_spcx_in;
-		double m_spcy_in;
-		double m_spcz_in;
 
-		int m_type;	//sampler type
-					//0:nearest neighbor;
-					//1:linear;
-					//2:box;
+		bool m_crop;
+		int m_filter;	//sampler type
+						//0:nearest neighbor;
+						//1:linear;
+						//2:box;
 		//filter size
 		int m_fx;
 		int m_fy;
 		int m_fz;
 
 		int m_border;	//border handling
-					//0:set to 0;
-					//1:clamp to border
-					//2:mirror
+						//0:set to 0;
+						//1:clamp to border
+						//2:mirror
 
 	private:
+		Nrrd* GetNrrd(VolumeData* vd, SampDataType type);
+		void* GetRaw(VolumeData* vd, SampDataType type);
 		bool ijk(int &i, int &j, int &k);
 		void xyz2ijk(double x, double y, double z,
 			int &i, int &j, int &k);

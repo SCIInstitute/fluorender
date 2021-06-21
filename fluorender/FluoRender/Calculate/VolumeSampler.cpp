@@ -31,20 +31,18 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 VolumeSampler::VolumeSampler() :
-	m_vd_r(0),
-	m_vd(0),
-	m_nx(0),
-	m_ny(0),
-	m_nz(0),
+	m_result(0),
+	m_input(0),
+	m_raw_input(0),
+	m_raw_result(0),
 	m_nx_in(0),
 	m_ny_in(0),
 	m_nz_in(0),
-	m_bits(0),
-	m_bits_in(0),
-	m_spcx_in(1.0),
-	m_spcy_in(1.0),
-	m_spcz_in(1.0),
-	m_type(0),
+	m_nx(0),
+	m_ny(0),
+	m_nz(0),
+	m_crop(false),
+	m_filter(0),
 	m_fx(0),
 	m_fy(0),
 	m_fz(0),
@@ -56,19 +54,19 @@ VolumeSampler::~VolumeSampler()
 {
 }
 
-void VolumeSampler::SetVolume(Nrrd *data)
+void VolumeSampler::SetInput(VolumeData *data)
 {
-	m_vd = data;
+	m_input = data;
 }
 
-Nrrd* VolumeSampler::GetVolume()
+VolumeData* VolumeSampler::GetInput()
 {
-	return m_vd;
+	return m_input;
 }
 
-Nrrd* VolumeSampler::GetResult()
+VolumeData* VolumeSampler::GetResult()
 {
-	return m_vd_r;
+	return m_result;
 }
 
 void VolumeSampler::SetSize(int nx, int ny, int nz)
@@ -78,16 +76,9 @@ void VolumeSampler::SetSize(int nx, int ny, int nz)
 	m_nz = nz;
 }
 
-void VolumeSampler::SetSpacings(double spcx, double spcy, double spcz)
+void VolumeSampler::SetFilter(int type)
 {
-	m_spcx_in = spcx;
-	m_spcy_in = spcy;
-	m_spcz_in = spcz;
-}
-
-void VolumeSampler::SetType(int type)
-{
-	m_type = type;
+	m_filter = type;
 }
 
 void VolumeSampler::SetFilterSize(int fx, int fy, int fz)
@@ -97,51 +88,52 @@ void VolumeSampler::SetFilterSize(int fx, int fy, int fz)
 	m_fz = fz;
 }
 
-void VolumeSampler::Resize()
+void VolumeSampler::SetCrop(bool crop)
 {
-	if (!m_vd)
+	m_crop = crop;
+}
+
+void VolumeSampler::Resize(SampDataType type)
+{
+	if (!m_input)
 		return;
 	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
 		return;
-
-	//create m_vd_r
-	if (m_vd_r && m_vd_r->data)
-		nrrdNuke(m_vd_r);
-
-	
-	m_nx_in = m_vd->axis[0].size;
-	m_ny_in = m_vd->axis[1].size;
-	m_nz_in = m_vd->axis[2].size;
-	if (m_nx == m_nx_in && m_ny == m_ny_in && m_nz == m_nz_in)
-	{
-		nrrdCopy(m_vd_r, m_vd);
-		return;
-	}
-	else
-		m_vd_r = nrrdNew();
-
-	switch (m_vd->type)
+	m_raw_input = GetRaw(m_input, type);
+	//create m_result
+	if (m_result)
+		delete m_result;
+	m_result = new VolumeData();
+	//input size
+	m_input->GetResolution(m_nx_in, m_ny_in, m_nz_in);
+	//input spacing
+	double spcx, spcy, spcz;
+	m_input->GetSpacings(spcx, spcy, spcz);
+	//bits
+	Nrrd* input_nrrd = GetNrrd(m_input, type);
+	switch (input_nrrd->type)
 	{
 	case nrrdTypeChar:
 	case nrrdTypeUChar:
-		m_bits_in = 8;
+		m_bits = 8;
 		break;
 	case nrrdTypeShort:
 	case nrrdTypeUShort:
-		m_bits_in = 16;
+		m_bits = 16;
 		break;
 	case nrrdTypeInt:
 	case nrrdTypeUInt:
-		m_bits_in = 32;
+		m_bits = 32;
 		break;
 	}
-	m_bits = m_bits_in;
 
-	void *data = 0;
+	//input raw
+	m_raw_input = GetRaw(m_input, type);
+	//output raw
 	unsigned long long total_size = (unsigned long long)m_nx*
 		(unsigned long long)m_ny*(unsigned long long)m_nz;
-	data = (void*)(new unsigned char[total_size * (m_bits /8)]);
-	if (!data)
+	m_raw_result = (void*)(new unsigned char[total_size * (m_bits /8)]);
+	if (!m_raw_result)
 		throw std::runtime_error("Unable to allocate memory.");
 
 	unsigned long long index;
@@ -159,43 +151,72 @@ void VolumeSampler::Resize()
 		y = (double(j) + 0.5) / double(m_ny);
 		z = (double(k) + 0.5) / double(m_nz);
 		if (m_bits == 32)
-			((unsigned int*)data)[index] = SampleInt(x, y, z);
+			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
 		else
 		{
 			value = Sample(x, y, z);
 			if (m_bits == 8)
-				((unsigned char*)data)[index] = (unsigned char)(value * 255);
+				((unsigned char*)m_raw_result)[index] = (unsigned char)(value * 255);
 			else if (m_bits == 16)
-				((unsigned short*)data)[index] = (unsigned short)(value * 65535);
+				((unsigned short*)m_raw_result)[index] = (unsigned short)(value * 65535);
 		}
 	}
 
 	//write to nrrd
+	Nrrd* nrrd_result = nrrdNew();
 	if (m_bits == 8)
-		nrrdWrap(m_vd_r, (uint8_t*)data, nrrdTypeUChar,
+		nrrdWrap(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 	else if (m_bits == 16)
-		nrrdWrap(m_vd_r, (uint16_t*)data, nrrdTypeUShort,
+		nrrdWrap(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 	else if (m_bits == 32)
-		nrrdWrap(m_vd_r, (uint32_t*)data, nrrdTypeUInt,
+		nrrdWrap(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 
-	double spcx, spcy, spcz;
-	spcx = m_spcx_in * double(m_nx_in) / double(m_nx);
-	spcy = m_spcy_in * double(m_ny_in) / double(m_ny);
-	spcz = m_spcz_in * double(m_nz_in) / double(m_nz);
-	nrrdAxisInfoSet(m_vd_r, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet(m_vd_r, nrrdAxisInfoMax, spcx*m_nx,
+	spcx *= double(m_nx_in) / double(m_nx);
+	spcy *= double(m_ny_in) / double(m_ny);
+	spcz *= double(m_nz_in) / double(m_nz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
 		spcy*m_ny, spcz*m_nz);
-	nrrdAxisInfoSet(m_vd_r, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(m_vd_r, nrrdAxisInfoSize, (size_t)m_nx,
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
 		(size_t)m_ny, (size_t)m_nz);
+}
+
+Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)
+{
+	if (!vd || !vd->GetTexture())
+		return 0;
+	flvr::Texture* tex = vd->GetTexture();
+	int index;
+	switch (type)
+	{
+	case SDT_Data:
+		index = 0;
+		break;
+	case SDT_Mask:
+		index = tex->nmask();
+		break;
+	case SDT_Label:
+		index = tex->nlabel();
+		break;
+	}
+	return tex->get_nrrd(index);
+}
+
+void* VolumeSampler::GetRaw(VolumeData* vd, SampDataType type)
+{
+	Nrrd* nrrd = GetNrrd(vd, type);
+	if (nrrd)
+		return nrrd->data;
+	return 0;
 }
 
 double VolumeSampler::Sample(double x, double y, double z)
 {
-	switch (m_type)
+	switch (m_filter)
 	{
 	case 0:
 		return SampleNearestNeighbor(x, y, z);
@@ -209,14 +230,18 @@ double VolumeSampler::Sample(double x, double y, double z)
 
 unsigned int VolumeSampler::SampleInt(double x, double y, double z)
 {
+	if (!m_raw_input)
+		return 0;
 	int i, j, k;
 	xyz2ijk(x, y, z, i, j, k);
 	if (!ijk(i, j, k))
-		return 0.0;
-	unsigned long long index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
-		(unsigned long long)k + (unsigned long long)m_nx_in*
+		return 0;
+	int nx, ny, nz;
+	m_input->GetResolution(nx, ny, nz);
+	unsigned long long index = (unsigned long long)nx*(unsigned long long)ny*
+		(unsigned long long)k + (unsigned long long)nx*
 		(unsigned long long)j + (unsigned long long)i;
-	return ((unsigned int*)(m_vd->data))[index];
+	return ((unsigned int*)m_raw_input)[index];
 }
 
 bool VolumeSampler::ijk(int &i, int &j, int &k)
@@ -322,10 +347,10 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 	unsigned long long index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
 		(unsigned long long)k + (unsigned long long)m_nx_in*
 		(unsigned long long)j + (unsigned long long)i;
-	if (m_bits_in == 8)
-		return double(((unsigned char*)(m_vd->data))[index]) / 255.0;
-	else if (m_bits_in == 16)
-		return double(((unsigned short*)(m_vd->data))[index]) / 65535.0;
+	if (m_bits == 8)
+		return double(((unsigned char*)m_raw_input)[index]) / 255.0;
+	else if (m_bits == 16)
+		return double(((unsigned short*)m_raw_input)[index]) / 65535.0;
 	return 0.0;
 }
 
@@ -350,10 +375,10 @@ double VolumeSampler::SampleBox(double x, double y, double z)
 			index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
 				(unsigned long long)kk + (unsigned long long)m_nx_in*
 				(unsigned long long)jj + (unsigned long long)ii;
-			if (m_bits_in == 8)
-				sum += double(((unsigned char*)(m_vd->data))[index]) / 255.0;
-			else if (m_bits_in == 16)
-				sum += double(((unsigned short*)(m_vd->data))[index]) / 65535.0;
+			if (m_bits == 8)
+				sum += double(((unsigned char*)m_raw_input)[index]) / 255.0;
+			else if (m_bits == 16)
+				sum += double(((unsigned short*)m_raw_input)[index]) / 65535.0;
 		}
 		count++;
 	}

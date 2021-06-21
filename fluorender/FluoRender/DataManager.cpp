@@ -1276,25 +1276,14 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 
 	double spcx, spcy, spcz;
 	GetSpacings(spcx, spcy, spcz);
+	int nx, ny, nz;
+	GetResolution(nx, ny, nz);
+	int bits = GetBits();
 
 	//save data
 	data = m_tex->get_nrrd(0);
 	if (data)
 	{
-		//clipping planes
-		vector<fluo::Plane*> *planes = m_vr->get_planes();
-		int bits = data->type==nrrdTypeUShort?16:8;
-		int ox, oy, oz, nx, ny, nz;
-		ox = oy = oz = 0;
-		if (crop)
-		{
-			GetClipValues(ox, oy, oz, nx, ny, nz);
-		}
-		else
-		{
-			GetResolution(nx, ny, nz);
-		}
-
 		if (bake)
 		{
 			wxProgressDialog *prg_diag = new wxProgressDialog(
@@ -1319,28 +1308,15 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 				{
 					prg_diag->Update(95*(i+1)/nx);
 					for (int j=0; j<ny; j++)
-						for (int k=0; k<nz; k++)
-						{
-							int index = nx*ny*k + nx*j + i;
-							bool clipped = false;
-							fluo::Point p(double(i) / double(nx),
-								double(j) / double(ny),
-								double(k) / double(nz));
-							for (int pi = 0; pi < 6; ++pi)
-							{
-								if ((*planes)[pi] &&
-									(*planes)[pi]->eval_point(p) < 0.0)
-								{
-									val8[index] = 0;
-									clipped = true;
-								}
-							}
-							if (!clipped)
-							{
-								double new_value = GetTransferedValue(i, j, k);
-								val8[index] = uint8(new_value*255.0);
-							}
-						}
+					for (int k=0; k<nz; k++)
+					{
+						int index = nx*ny*k + nx*j + i;
+						fluo::Point p(double(i) / double(nx),
+							double(j) / double(ny),
+							double(k) / double(nz));
+						double new_value = GetTransferedValue(i, j, k);
+						val8[index] = uint8(new_value*255.0);
+					}
 				}
 				nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 			}
@@ -1359,28 +1335,15 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 				{
 					prg_diag->Update(95*(i+1)/nx);
 					for (int j=0; j<ny; j++)
-						for (int k=0; k<nz; k++)
-						{
-							int index = nx*ny*k + nx*j + i;
-							bool clipped = false;
-							fluo::Point p(double(i) / double(nx),
-								double(j) / double(ny),
-								double(k) / double(nz));
-							for (int pi = 0; pi < 6; ++pi)
-							{
-								if ((*planes)[pi] &&
-									(*planes)[pi]->eval_point(p) < 0.0)
-								{
-									val16[index] = 0;
-									clipped = true;
-								}
-							}
-							if (!clipped)
-							{
-								double new_value = GetTransferedValue(i, j, k);
-								val16[index] = uint16(new_value*65535.0);
-							}
-						}
+					for (int k=0; k<nz; k++)
+					{
+						int index = nx*ny*k + nx*j + i;
+						fluo::Point p(double(i) / double(nx),
+							double(j) / double(ny),
+							double(k) / double(nz));
+						double new_value = GetTransferedValue(i, j, k);
+						val16[index] = uint16(new_value*65535.0);
+					}
 				}
 				nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
 			}
@@ -1396,7 +1359,7 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 			delete prg_diag;
 		}
 
-		if (m_resize)
+		if (m_resize || crop)
 		{
 			flrd::VolumeSampler sampler;
 			sampler.SetVolume(data);
