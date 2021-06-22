@@ -26,7 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
-#include "Calculate/VolumeSampler.h"
+#include <Calculate/VolumeSampler.h>
+#include <Calculate/VolumeBaker.h>
 #include "teem/Nrrd/nrrd.h"
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
@@ -626,28 +627,23 @@ void VolumeData::LoadMask(Nrrd* mask)
 	if (!mask || !m_tex || !m_vr)
 		return;
 
+	//prepare the texture bricks for the mask
+	m_tex->add_empty_mask();
+	m_tex->set_nrrd(mask, m_tex->nmask());
+
 	int nx2, ny2, nz2;
 	nx2 = mask->axis[0].size;
 	ny2 = mask->axis[1].size;
 	nz2 = mask->axis[2].size;
 	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
 	{
-		double spcx, spcy, spcz;
-		GetSpacings(spcx, spcy, spcz);
 		flrd::VolumeSampler sampler;
-		sampler.SetVolume(mask);
+		sampler.SetInput(this);
 		sampler.SetSize(m_res_x, m_res_y, m_res_z);
-		sampler.SetSpacings(spcx, spcy, spcz);
-		sampler.SetType(0);
+		sampler.SetFilter(0);
 		//sampler.SetFilterSize(2, 2, 0);
-		sampler.Resize();
-		nrrdNuke(mask);
-		mask = sampler.GetResult();
+		sampler.Resize(flrd::SDT_Mask, true);
 	}
-
-	//prepare the texture bricks for the mask
-	m_tex->add_empty_mask();
-	m_tex->set_nrrd(mask, m_tex->nmask());
 }
 
 void VolumeData::AddEmptyMask(int mode, bool change)
@@ -874,25 +870,22 @@ void VolumeData::LoadLabel(Nrrd* label)
 	if (!label || !m_tex || !m_vr)
 		return;
 
+	m_tex->add_empty_label();
+	m_tex->set_nrrd(label, m_tex->nlabel());
+
 	int nx2, ny2, nz2;
 	nx2 = label->axis[0].size;
 	ny2 = label->axis[1].size;
 	nz2 = label->axis[2].size;
 	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
 	{
-		double spcx, spcy, spcz;
-		GetSpacings(spcx, spcy, spcz);
 		flrd::VolumeSampler sampler;
-		sampler.SetVolume(label);
+		sampler.SetInput(this);
 		sampler.SetSize(m_res_x, m_res_y, m_res_z);
-		sampler.SetSpacings(spcx, spcy, spcz);
-		sampler.Resize();
-		nrrdNuke(label);
-		label = sampler.GetResult();
+		sampler.Resize(flrd::SDT_Label, true);
+		//nrrdNuke(label);
+		//label = sampler.GetResult();
 	}
-
-	m_tex->add_empty_label();
-	m_tex->set_nrrd(label, m_tex->nlabel());
 }
 
 void VolumeData::SetOrderedID(unsigned int* val)
@@ -1257,8 +1250,25 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 	if (!m_vr || !m_tex)
 		return;
 
-	Nrrd* data = 0;
-	bool delete_data = false;
+	VolumeData* temp = 0;
+	if (bake)
+	{
+		flrd::VolumeBaker baker;
+		baker.SetInput(temp ? temp : this);
+		baker.Bake(temp);
+		temp = baker.GetResult();
+	}
+
+	if (m_resize || crop)
+	{
+		flrd::VolumeSampler sampler;
+		sampler.SetInput(temp ? temp : this);
+		sampler.SetSize(m_rnx, m_rny, m_rnz);
+		sampler.SetFilter(0);
+		//sampler.SetFilterSize(2, 2, 0);
+		sampler.Resize(flrd::SDT_All, temp);
+		temp = sampler.GetResult();
+	}
 
 	BaseWriter *writer = 0;
 	switch (mode)
@@ -1274,125 +1284,40 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, bool bake, bool c
 		break;
 	}
 
-	double spcx, spcy, spcz;
-	GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	GetResolution(nx, ny, nz);
-	int bits = GetBits();
-
 	//save data
-	data = m_tex->get_nrrd(0);
+	Nrrd* data = 0;
+	if (temp)
+	{
+		if (temp->GetTexture())
+			data = temp->GetTexture()->get_nrrd(0);
+	}
+	else
+	{
+		data = m_tex->get_nrrd(0);
+	}
 	if (data)
 	{
-		if (bake)
-		{
-			wxProgressDialog *prg_diag = new wxProgressDialog(
-				"FluoRender: Baking volume data...",
-				"Baking volume data. Please wait.",
-				100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
-
-			//process the data
-			Nrrd* baked_data = nrrdNew();
-			if (bits == 8)
-			{
-				unsigned long long mem_size = (unsigned long long)nx*
-					(unsigned long long)ny*(unsigned long long)nz;
-				uint8 *val8 = new (std::nothrow) uint8[mem_size];
-				if (!val8)
-				{
-					wxMessageBox("Not enough memory. Please save project and restart.");
-					return;
-				}
-				//transfer function
-				for (int i=0; i<nx; i++)
-				{
-					prg_diag->Update(95*(i+1)/nx);
-					for (int j=0; j<ny; j++)
-					for (int k=0; k<nz; k++)
-					{
-						int index = nx*ny*k + nx*j + i;
-						fluo::Point p(double(i) / double(nx),
-							double(j) / double(ny),
-							double(k) / double(nz));
-						double new_value = GetTransferedValue(i, j, k);
-						val8[index] = uint8(new_value*255.0);
-					}
-				}
-				nrrdWrap(baked_data, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
-			}
-			else if (bits == 16)
-			{
-				unsigned long long mem_size = (unsigned long long)nx*
-					(unsigned long long)ny*(unsigned long long)nz;
-				uint16 *val16 = new (std::nothrow) uint16[mem_size];
-				if (!val16)
-				{
-					wxMessageBox("Not enough memory. Please save project and restart.");
-					return;
-				}
-				//transfer function
-				for (int i=0; i<nx; i++)
-				{
-					prg_diag->Update(95*(i+1)/nx);
-					for (int j=0; j<ny; j++)
-					for (int k=0; k<nz; k++)
-					{
-						int index = nx*ny*k + nx*j + i;
-						fluo::Point p(double(i) / double(nx),
-							double(j) / double(ny),
-							double(k) / double(nz));
-						double new_value = GetTransferedValue(i, j, k);
-						val16[index] = uint16(new_value*65535.0);
-					}
-				}
-				nrrdWrap(baked_data, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
-			}
-			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
-			nrrdAxisInfoSet(baked_data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet(baked_data, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
-
-			data = baked_data;
-			delete_data = true;
-
-			prg_diag->Update(100);
-			delete prg_diag;
-		}
-
-		if (m_resize || crop)
-		{
-			flrd::VolumeSampler sampler;
-			sampler.SetVolume(data);
-			sampler.SetSize(m_rnx, m_rny, m_rnz);
-			sampler.SetSpacings(spcx, spcy, spcz);
-			sampler.SetType(0);
-			//sampler.SetFilterSize(2, 2, 0);
-			sampler.Resize();
-			Nrrd* temp = data;
-			data = sampler.GetResult();
-			if (data)
-			{
-				spcx = data->axis[0].spacing;
-				spcy = data->axis[1].spacing;
-				spcz = data->axis[2].spacing;
-			}
-			if (delete_data)
-				nrrdNuke(temp);
-		}
-
+		double spcx, spcy, spcz;
+		spcx = data->axis[0].spacing;
+		spcy = data->axis[1].spacing;
+		spcz = data->axis[2].spacing;
 		writer->SetData(data);
 		writer->SetSpacings(spcx, spcy, spcz);
 		writer->SetCompression(compress);
 		writer->Save(filename.ToStdWstring(), mode);
-
-		if (delete_data)
-			nrrdNuke(data);
 	}
 	delete writer;
 
+	if (m_resize || crop)
+	{
+		temp->SaveMask(false, 0, 0);
+		temp->SaveLabel(false, 0, 0);
+	}
+
+	if (temp)
+		delete temp;
+
 	m_tex_path = filename;
-	SaveMask(false, 0, 0);
-	SaveLabel(false, 0, 0);
 }
 
 void VolumeData::SaveMask(bool use_reader, int t, int c)
@@ -1401,7 +1326,6 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 		return;
 
 	Nrrd* data = 0;
-	bool delete_data = false;
 	double spcx, spcy, spcz;
 	GetSpacings(spcx, spcy, spcz);
 
@@ -1409,24 +1333,6 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	data = GetMask(true);
 	if (!data)
 		return;
-	if (m_resize)
-	{
-		flrd::VolumeSampler sampler;
-		sampler.SetVolume(data);
-		sampler.SetSize(m_rnx, m_rny, m_rnz);
-		sampler.SetSpacings(spcx, spcy, spcz);
-		sampler.SetType(0);
-		//sampler.SetFilterSize(2, 2, 0);
-		sampler.Resize();
-		data = sampler.GetResult();
-		if (data)
-		{
-			spcx = data->axis[0].spacing;
-			spcy = data->axis[1].spacing;
-			spcz = data->axis[2].spacing;
-			delete_data = true;
-		}
-	}
 
 	MSKWriter msk_writer;
 	msk_writer.SetData(data);
@@ -1437,8 +1343,6 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	else
 		filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".msk";
 	msk_writer.Save(filename, 0);
-	if (delete_data)
-		nrrdNuke(data);
 }
 
 void VolumeData::SaveLabel(bool use_reader, int t, int c)
@@ -1447,7 +1351,6 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 		return;
 
 	Nrrd* data = 0;
-	bool delete_data = false;
 	double spcx, spcy, spcz;
 	GetSpacings(spcx, spcy, spcz);
 
@@ -1455,23 +1358,6 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 	data = GetLabel(true);
 	if (!data)
 		return;
-
-	if (m_resize)
-	{
-		flrd::VolumeSampler sampler;
-		sampler.SetVolume(data);
-		sampler.SetSize(m_rnx, m_rny, m_rnz);
-		sampler.SetSpacings(spcx, spcy, spcz);
-		sampler.Resize();
-		data = sampler.GetResult();
-		if (data)
-		{
-			spcx = data->axis[0].spacing;
-			spcy = data->axis[1].spacing;
-			spcz = data->axis[2].spacing;
-			delete_data = true;
-		}
-	}
 
 	MSKWriter msk_writer;
 	msk_writer.SetData(data);
@@ -1482,8 +1368,6 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 	else
 		filename = m_tex_path.substr(0, m_tex_path.find_last_of('.')) + ".lbl";
 	msk_writer.Save(filename, 1);
-	if (delete_data)
-		nrrdNuke(data);
 }
 
 //bounding box

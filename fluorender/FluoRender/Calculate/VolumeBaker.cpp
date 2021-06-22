@@ -1,0 +1,168 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+#include "VolumeBaker.h"
+#include <stdexcept>
+
+using namespace flrd;
+
+VolumeBaker::VolumeBaker() :
+	m_result(0),
+	m_input(0),
+	m_raw_input(0),
+	m_raw_result(0),
+	m_nx(0),
+	m_ny(0),
+	m_nz(0),
+	m_bits(0)
+{
+
+}
+
+VolumeBaker::~VolumeBaker()
+{
+	//if (m_result)
+	//	delete m_result;
+}
+
+void VolumeBaker::SetInput(VolumeData *data)
+{
+	m_input = data;
+}
+
+VolumeData* VolumeBaker::GetInput()
+{
+	return m_input;
+}
+
+VolumeData* VolumeBaker::GetResult()
+{
+	return m_result;
+}
+
+void VolumeBaker::Bake(bool replace)
+{
+	if (!m_input)
+		return;
+	m_raw_input = GetRaw(m_input);
+	Nrrd* input_nrrd = GetNrrd(m_input);
+	if (!input_nrrd)
+		return;
+
+	//input size
+	m_nx = input_nrrd->axis[0].size;
+	m_ny = input_nrrd->axis[1].size;
+	m_nz = input_nrrd->axis[2].size;
+	//bits
+	switch (input_nrrd->type)
+	{
+	case nrrdTypeChar:
+	case nrrdTypeUChar:
+		m_bits = 8;
+		break;
+	case nrrdTypeShort:
+	case nrrdTypeUShort:
+		m_bits = 16;
+		break;
+	case nrrdTypeInt:
+	case nrrdTypeUInt:
+		m_bits = 32;
+		break;
+	}
+
+	//output raw
+	unsigned long long total_size = (unsigned long long)m_nx*
+		(unsigned long long)m_ny*(unsigned long long)m_nz;
+	m_raw_result = (void*)(new unsigned char[total_size * (m_bits / 8)]);
+	if (!m_raw_result)
+		throw std::runtime_error("Unable to allocate memory.");
+
+	//transfer function
+	unsigned long long index;
+	for (int i = 0; i < m_nx; i++)
+	for (int j = 0; j < m_ny; j++)
+	for (int k = 0; k < m_nz; k++)
+	{
+		index = (unsigned long long)m_nx * m_ny * k +
+			(unsigned long long)m_nx * j + i;
+		fluo::Point p(double(i) / double(m_nx),
+			double(j) / double(m_ny),
+			double(k) / double(m_nz));
+		double new_value = m_input->GetTransferedValue(i, j, k);
+		if (m_bits == 8)
+			((unsigned char*)m_raw_result)[index] = uint8(new_value*255.0);
+		else if (m_bits == 16)
+			((unsigned short*)m_raw_result)[index] = uint16(new_value*65535.0);
+	}
+
+	//write to nrrd
+	Nrrd* nrrd_result = nrrdNew();
+	if (m_bits == 8)
+		nrrdWrap(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
+			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+	else if (m_bits == 16)
+		nrrdWrap(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
+			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+
+	//spacing
+	double spcx, spcy, spcz;
+	m_input->GetSpacings(spcx, spcy, spcz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
+		spcy*m_ny, spcz*m_nz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
+		(size_t)m_ny, (size_t)m_nz);
+
+	if (replace)
+	{
+		m_input->Replace(nrrd_result, true);
+	}
+	else
+	{
+		if (!m_result)
+			m_result = new VolumeData();
+		m_result->Replace(nrrd_result, false);
+	}
+}
+
+Nrrd* VolumeBaker::GetNrrd(VolumeData* vd)
+{
+	if (!vd || !vd->GetTexture())
+		return 0;
+	flvr::Texture* tex = vd->GetTexture();
+	return tex->get_nrrd(0);
+}
+
+void* VolumeBaker::GetRaw(VolumeData* vd)
+{
+	Nrrd* nrrd = GetNrrd(vd);
+	if (nrrd)
+		return nrrd->data;
+	return 0;
+}
+

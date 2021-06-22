@@ -41,6 +41,7 @@ VolumeSampler::VolumeSampler() :
 	m_nx(0),
 	m_ny(0),
 	m_nz(0),
+	m_bits(0),
 	m_crop(false),
 	m_filter(0),
 	m_fx(0),
@@ -52,6 +53,8 @@ VolumeSampler::VolumeSampler() :
 
 VolumeSampler::~VolumeSampler()
 {
+	//if (m_result)
+	//	delete m_result;
 }
 
 void VolumeSampler::SetInput(VolumeData *data)
@@ -93,24 +96,24 @@ void VolumeSampler::SetCrop(bool crop)
 	m_crop = crop;
 }
 
-void VolumeSampler::Resize(SampDataType type)
+void VolumeSampler::Resize(SampDataType type, bool replace)
 {
 	if (!m_input)
 		return;
 	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
 		return;
-	m_raw_input = GetRaw(m_input, type);
-	//create m_result
-	if (m_result)
-		delete m_result;
-	m_result = new VolumeData();
-	//input size
-	m_input->GetResolution(m_nx_in, m_ny_in, m_nz_in);
-	//input spacing
-	double spcx, spcy, spcz;
-	m_input->GetSpacings(spcx, spcy, spcz);
-	//bits
 	Nrrd* input_nrrd = GetNrrd(m_input, type);
+	if (!input_nrrd)
+		return;
+	m_raw_input = input_nrrd->data;
+	if (!m_raw_input)
+		return;
+
+	//input size
+	m_nx_in = input_nrrd->axis[0].size;
+	m_ny_in = input_nrrd->axis[1].size;
+	m_nz_in = input_nrrd->axis[2].size;
+	//bits
 	switch (input_nrrd->type)
 	{
 	case nrrdTypeChar:
@@ -127,8 +130,6 @@ void VolumeSampler::Resize(SampDataType type)
 		break;
 	}
 
-	//input raw
-	m_raw_input = GetRaw(m_input, type);
 	//output raw
 	unsigned long long total_size = (unsigned long long)m_nx*
 		(unsigned long long)m_ny*(unsigned long long)m_nz;
@@ -174,6 +175,9 @@ void VolumeSampler::Resize(SampDataType type)
 		nrrdWrap(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 
+	//spacing
+	double spcx, spcy, spcz;
+	m_input->GetSpacings(spcx, spcy, spcz);
 	spcx *= double(m_nx_in) / double(m_nx);
 	spcy *= double(m_ny_in) / double(m_ny);
 	spcz *= double(m_nz_in) / double(m_nz);
@@ -183,6 +187,40 @@ void VolumeSampler::Resize(SampDataType type)
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
 		(size_t)m_ny, (size_t)m_nz);
+
+	if (replace)
+	{
+		switch (type)
+		{
+		case SDT_Data:
+			m_input->Replace(nrrd_result, true);
+			break;
+		case SDT_Mask:
+			m_input->LoadMask(nrrd_result);
+			break;
+		case SDT_Label:
+			m_input->LoadLabel(nrrd_result);
+			break;
+		}
+	}
+	else
+	{
+		//create m_result
+		if (!m_result)
+			m_result = new VolumeData();
+		switch (type)
+		{
+		case SDT_Data:
+			m_result->Replace(nrrd_result, false);
+			break;
+		case SDT_Mask:
+			m_result->LoadMask(nrrd_result);
+			break;
+		case SDT_Label:
+			m_result->LoadLabel(nrrd_result);
+			break;
+		}
+	}
 }
 
 Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)

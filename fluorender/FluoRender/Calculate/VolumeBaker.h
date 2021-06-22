@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,36 +25,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VOLUMESAMPLER_H_
-#define _VOLUMESAMPLER_H_
+#ifndef _VOLUMEBAKER_H_
+#define _VOLUMEBAKER_H_
 
 #include "DataManager.h"
 
 namespace flrd
 {
-	enum SampDataType
-	{
-		SDT_All = 0,
-		SDT_Data,
-		SDT_Mask,
-		SDT_Label,
-	};
-	class VolumeSampler
+	class VolumeBaker
 	{
 	public:
-		VolumeSampler();
-		~VolumeSampler();
+		VolumeBaker();
+		~VolumeBaker();
 
 		void SetInput(VolumeData *data);
 		VolumeData* GetInput();
 		VolumeData* GetResult();
-		void SetSize(int nx, int ny, int nz);
-		void SetFilter(int type);
-		void SetFilterSize(int fx, int fy, int fz);
-		void SetCrop(bool crop);
-		void Resize(SampDataType type, bool replace);
-		double Sample(double x, double y, double z);
-		unsigned int SampleInt(double x, double y, double z);
+		void Bake(bool replace);
 
 	private:
 		VolumeData *m_input;	//input
@@ -62,41 +49,16 @@ namespace flrd
 		void* m_raw_input;		//
 		void* m_raw_result;		//
 
-		//input size
-		int m_nx_in;
-		int m_ny_in;
-		int m_nz_in;
-		//new size
+		//size
 		int m_nx;
 		int m_ny;
 		int m_nz;
 		//input bits
 		int m_bits;
 
-		bool m_crop;
-		int m_filter;	//sampler type
-						//0:nearest neighbor;
-						//1:linear;
-						//2:box;
-		//filter size
-		int m_fx;
-		int m_fy;
-		int m_fz;
-
-		int m_border;	//border handling
-						//0:set to 0;
-						//1:clamp to border
-						//2:mirror
-
 	private:
-		Nrrd* GetNrrd(VolumeData* vd, SampDataType type);
-		void* GetRaw(VolumeData* vd, SampDataType type);
-		bool ijk(int &i, int &j, int &k);
-		void xyz2ijk(double x, double y, double z,
-			int &i, int &j, int &k);
-		double SampleNearestNeighbor(double x, double y, double z);
-		double SampleLinear(double x, double y, double z);
-		double SampleBox(double x, double y, double z);
+		Nrrd* GetNrrd(VolumeData* vd);
+		void* GetRaw(VolumeData* vd);
 	};
 }
-#endif//_VOLUMESAMPLER_H_
+#endif//_VOLUMEBAKER_H_
