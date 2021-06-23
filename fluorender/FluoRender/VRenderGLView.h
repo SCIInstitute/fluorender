@@ -467,6 +467,7 @@ public:
 	//clipping plane rotations
 	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
 	void GetClippingPlaneRotations(double &rotx, double &roty, double &rotz);
+	fluo::Quaternion GetClipRotation() { return m_q_cl; }
 
 	//interpolation
 	void SetIntp(bool mode);

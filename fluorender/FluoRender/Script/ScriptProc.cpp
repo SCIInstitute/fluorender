@@ -573,7 +573,7 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 			str += ".tif";
 		else if (mode == 2)
 			str += ".nrrd";
-		(*i)->Save(str, mode, crop, bake, compression);
+		(*i)->Save(str, mode, crop, bake, compression, fluo::Quaternion());
 		if (del_vol)
 			delete *i;
 	}

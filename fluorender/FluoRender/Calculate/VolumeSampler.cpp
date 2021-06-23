@@ -43,6 +43,13 @@ VolumeSampler::VolumeSampler() :
 	m_nz(0),
 	m_bits(0),
 	m_crop(false),
+	m_crop_calc(false),
+	m_ox(0),
+	m_oy(0),
+	m_oz(0),
+	m_lx(0),
+	m_ly(0),
+	m_lz(0),
 	m_filter(0),
 	m_fx(0),
 	m_fy(0),
@@ -96,11 +103,22 @@ void VolumeSampler::SetCrop(bool crop)
 	m_crop = crop;
 }
 
+void VolumeSampler::SetClipRotation(fluo::Quaternion &q)
+{
+	m_q_cl = q;
+}
+
 void VolumeSampler::Resize(SampDataType type, bool replace)
 {
-	if (!m_input)
+	if (type == SDT_All)
+	{
+		Resize(SDT_Data, replace);
+		Resize(SDT_Mask, replace);
+		Resize(SDT_Label, replace);
 		return;
-	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
+	}
+
+	if (!m_input)
 		return;
 	Nrrd* input_nrrd = GetNrrd(m_input, type);
 	if (!input_nrrd)
@@ -130,9 +148,54 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		break;
 	}
 
+	//use input size if no resizing
+	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
+	{
+		m_nx = m_nx_in;
+		m_ny = m_ny_in;
+		m_nz = m_nz_in;
+	}
+
+	if (m_crop)
+	{
+		if (!m_crop_calc)
+		{
+			//recalculate range
+			vector<fluo::Plane*> *planes =
+				m_input->GetVR()->get_planes();
+			if (planes->size() != 6)
+				return;
+
+			//calculating planes
+			//get six planes
+			fluo::Plane* px1 = (*planes)[0];
+			fluo::Plane* px2 = (*planes)[1];
+			fluo::Plane* py1 = (*planes)[2];
+			fluo::Plane* py2 = (*planes)[3];
+			fluo::Plane* pz1 = (*planes)[4];
+			fluo::Plane* pz2 = (*planes)[5];
+
+			m_ox = int(-m_nx * px1->d() + 0.499);
+			m_oy = int(-m_ny * py1->d() + 0.499);
+			m_oz = int(-m_nz * pz1->d() + 0.499);
+			m_lx = int(m_nx * px2->d() + 0.499) - m_ox;
+			m_ly = int(m_ny * py2->d() + 0.499) - m_oy;
+			m_lz = int(m_nz * pz2->d() + 0.499) - m_oz;
+
+			m_crop_calc = true;
+		}
+	}
+	else
+	{
+		m_ox = m_oy = m_oz = 0;
+		m_lx = m_nx;
+		m_ly = m_ny;
+		m_lz = m_nz;
+	}
+
 	//output raw
-	unsigned long long total_size = (unsigned long long)m_nx*
-		(unsigned long long)m_ny*(unsigned long long)m_nz;
+	unsigned long long total_size = (unsigned long long)m_lx*
+		(unsigned long long)m_ly*(unsigned long long)m_lz;
 	m_raw_result = (void*)(new unsigned char[total_size * (m_bits /8)]);
 	if (!m_raw_result)
 		throw std::runtime_error("Unable to allocate memory.");
@@ -141,16 +204,16 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	int i, j, k;
 	double x, y, z;
 	double value;
-	for (k = 0; k < m_nz; ++k)
-	for (j = 0; j < m_ny; ++j)
-	for (i = 0; i < m_nx; ++i)
+	for (k = 0; k < m_lz; ++k)
+	for (j = 0; j < m_ly; ++j)
+	for (i = 0; i < m_lx; ++i)
 	{
-		index = (unsigned long long)m_nx*(unsigned long long)m_ny*
-			(unsigned long long)k + (unsigned long long)m_nx*
+		index = (unsigned long long)m_lx*(unsigned long long)m_ly*
+			(unsigned long long)k + (unsigned long long)m_lx*
 			(unsigned long long)j + (unsigned long long)i;
-		x = (double(i) + 0.5) / double(m_nx);
-		y = (double(j) + 0.5) / double(m_ny);
-		z = (double(k) + 0.5) / double(m_nz);
+		x = (double(m_ox+i) + 0.5) / double(m_nx);
+		y = (double(m_oy+j) + 0.5) / double(m_ny);
+		z = (double(m_oz+k) + 0.5) / double(m_nz);
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
 		else
@@ -167,13 +230,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	Nrrd* nrrd_result = nrrdNew();
 	if (m_bits == 8)
 		nrrdWrap(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
-			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 	else if (m_bits == 16)
 		nrrdWrap(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
-			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 	else if (m_bits == 32)
 		nrrdWrap(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
-			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 
 	//spacing
 	double spcx, spcy, spcz;
@@ -182,11 +245,11 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	spcy *= double(m_ny_in) / double(m_ny);
 	spcz *= double(m_nz_in) / double(m_nz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
-		spcy*m_ny, spcz*m_nz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_lx,
+		spcy*m_ly, spcz*m_lz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
-		(size_t)m_ny, (size_t)m_nz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_lx,
+		(size_t)m_ly, (size_t)m_lz);
 
 	if (replace)
 	{
@@ -207,11 +270,21 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	{
 		//create m_result
 		if (!m_result)
+		{
 			m_result = new VolumeData();
+			wxString name, path;
+			if (type == SDT_Data)
+				m_result->Load(nrrd_result, name, path);
+		}
+		else
+		{
+			if (type == SDT_Data)
+				m_result->Replace(nrrd_result, false);
+		}
 		switch (type)
 		{
 		case SDT_Data:
-			m_result->Replace(nrrd_result, false);
+			//m_result->Replace(nrrd_result, false);
 			break;
 		case SDT_Mask:
 			m_result->LoadMask(nrrd_result);

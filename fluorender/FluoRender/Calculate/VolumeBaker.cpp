@@ -145,8 +145,13 @@ void VolumeBaker::Bake(bool replace)
 	else
 	{
 		if (!m_result)
+		{
 			m_result = new VolumeData();
-		m_result->Replace(nrrd_result, false);
+			wxString name, path;
+			m_result->Load(nrrd_result, name, path);
+		}
+		else
+			m_result->Replace(nrrd_result, false);
 	}
 }
 

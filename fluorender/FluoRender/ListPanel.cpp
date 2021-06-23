@@ -594,7 +594,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				m_vd = vr_frame->GetDataManager()->GetVolumeData(name);
 			else
 				return;
-
+			fluo::Quaternion q = vr_frame->GetView(0)->m_glview->GetClipRotation();
 			if (m_vd)
 				m_vd->SetResize(0, -1, -1, -1);
 
@@ -615,7 +615,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				{
 					m_vd->Save(filename, fopendlg->GetFilterIndex(),
 						VRenderFrame::GetCrop(),
-						false, VRenderFrame::GetCompression());
+						false, VRenderFrame::GetCompression(), q);
 					wxString str = m_vd->GetPath();
 					SetText(item, 2, str);
 				}
@@ -708,12 +708,13 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			if (vr_frame)
 			{
+				fluo::Quaternion q = vr_frame->GetView(0)->m_glview->GetClipRotation();
 				VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
 				if (vd)
 				{
 					vd->Save(filename, fopendlg->GetFilterIndex(),
 						VRenderFrame::GetCrop(),
-						true, VRenderFrame::GetCompression());
+						true, VRenderFrame::GetCompression(), q);
 					wxString str = vd->GetPath();
 					SetText(item, 2, str);
 				}

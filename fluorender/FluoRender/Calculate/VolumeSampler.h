@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMESAMPLER_H_
 
 #include "DataManager.h"
+#include <Types/Quaternion.h>
 
 namespace flrd
 {
@@ -52,6 +53,7 @@ namespace flrd
 		void SetFilter(int type);
 		void SetFilterSize(int fx, int fy, int fz);
 		void SetCrop(bool crop);
+		void SetClipRotation(fluo::Quaternion &q);
 		void Resize(SampDataType type, bool replace);
 		double Sample(double x, double y, double z);
 		unsigned int SampleInt(double x, double y, double z);
@@ -66,14 +68,24 @@ namespace flrd
 		int m_nx_in;
 		int m_ny_in;
 		int m_nz_in;
-		//new size
+		//new size (resize)
 		int m_nx;
 		int m_ny;
 		int m_nz;
 		//input bits
 		int m_bits;
-
+		//crop
 		bool m_crop;
+		//crop size (of new size)
+		bool m_crop_calc;
+		int m_ox;
+		int m_oy;
+		int m_oz;
+		int m_lx;
+		int m_ly;
+		int m_lz;
+		fluo::Quaternion m_q_cl;//rotation
+
 		int m_filter;	//sampler type
 						//0:nearest neighbor;
 						//1:linear;
