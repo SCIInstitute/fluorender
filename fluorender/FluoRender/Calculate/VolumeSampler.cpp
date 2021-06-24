@@ -163,24 +163,61 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			//recalculate range
 			vector<fluo::Plane*> *planes =
 				m_input->GetVR()->get_planes();
-			if (planes->size() != 6)
-				return;
+			fluo::Plane p[6];
+			int np = int(planes->size());
 
-			//calculating planes
 			//get six planes
-			fluo::Plane* px1 = (*planes)[0];
-			fluo::Plane* px2 = (*planes)[1];
-			fluo::Plane* py1 = (*planes)[2];
-			fluo::Plane* py2 = (*planes)[3];
-			fluo::Plane* pz1 = (*planes)[4];
-			fluo::Plane* pz2 = (*planes)[5];
+			for (int i = 0; i < 6; ++i)
+			{
+				if (i < np)
+				{
+					p[i] = *((*planes)[i]);
+					p[i].Restore();
+				}
+				else
+				{
+					switch (i)
+					{
+					case 0:
+						p[i] = fluo::Plane(
+							fluo::Point(0.0, 0.0, 0.0)
+							, fluo::Vector(1.0, 0.0, 0.0));
+						break;
+					case 1:
+						p[i] = fluo::Plane(
+							fluo::Point(1.0, 0.0, 0.0),
+							fluo::Vector(-1.0, 0.0, 0.0));
+						break;
+					case 2:
+						p[i] = fluo::Plane(
+							fluo::Point(0.0, 0.0, 0.0),
+							fluo::Vector(0.0, 1.0, 0.0));
+						break;
+					case 3:
+						p[i] = fluo::Plane(
+							fluo::Point(0.0, 1.0, 0.0),
+							fluo::Vector(0.0, -1.0, 0.0));
+						break;
+					case 4:
+						p[i] = fluo::Plane(
+							fluo::Point(0.0, 0.0, 0.0),
+							fluo::Vector(0.0, 0.0, 1.0));
+						break;
+					case 5:
+						p[i] = fluo::Plane(
+							fluo::Point(0.0, 0.0, 1.0),
+							fluo::Vector(0.0, 0.0, -1.0));
+						break;
+					}
+				}
+			}
 
-			m_ox = int(-m_nx * px1->d() + 0.499);
-			m_oy = int(-m_ny * py1->d() + 0.499);
-			m_oz = int(-m_nz * pz1->d() + 0.499);
-			m_lx = int(m_nx * px2->d() + 0.499) - m_ox;
-			m_ly = int(m_ny * py2->d() + 0.499) - m_oy;
-			m_lz = int(m_nz * pz2->d() + 0.499) - m_oz;
+			m_ox = int(-m_nx * p[0].d() + 0.499);
+			m_oy = int(-m_ny * p[2].d() + 0.499);
+			m_oz = int(-m_nz * p[4].d() + 0.499);
+			m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
+			m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
+			m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
 
 			m_crop_calc = true;
 		}
@@ -200,6 +237,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	if (!m_raw_result)
 		throw std::runtime_error("Unable to allocate memory.");
 
+	//check rotation
+	bool rot = !m_q_cl.IsIdentity();
+
 	unsigned long long index;
 	int i, j, k;
 	double x, y, z;
@@ -214,6 +254,17 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		x = (double(m_ox+i) + 0.5) / double(m_nx);
 		y = (double(m_oy+j) + 0.5) / double(m_ny);
 		z = (double(m_oz+k) + 0.5) / double(m_nz);
+		if (rot)
+		{
+			fluo::Vector vec(x - 0.5,
+				y - 0.5,
+				z - 0.5);
+			fluo::Quaternion qvec(vec);
+			qvec = (-m_q_cl) * qvec * (m_q_cl);
+			x = qvec.x + 0.5;
+			y = qvec.y + 0.5;
+			z = qvec.z + 0.5;
+		}
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
 		else

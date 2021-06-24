@@ -1244,6 +1244,14 @@ void VolumeData::SetResize(int resize, int nx, int ny, int nz)
 		m_rnz = nz;
 }
 
+void VolumeData::GetResize(bool &resize, int &nx, int &ny, int &nz)
+{
+	resize = m_resize;
+	nx = m_rnx;
+	ny = m_rny;
+	nz = m_rnz;
+}
+
 //save
 void VolumeData::Save(wxString &filename, int mode, bool crop,
 	bool bake, bool compress, fluo::Quaternion &q)
@@ -1313,6 +1321,7 @@ void VolumeData::Save(wxString &filename, int mode, bool crop,
 
 	if (m_resize || crop)
 	{
+		temp->SetPath(filename);
 		temp->SaveMask(false, 0, 0);
 		temp->SaveLabel(false, 0, 0);
 	}

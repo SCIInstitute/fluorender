@@ -553,6 +553,20 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(DataListCtrl::OnSizeZText), NULL, panel);
+	if (m_vd)
+	{
+		bool resize;
+		int nx, ny, nz;
+		m_vd->GetResize(resize, nx, ny, nz);
+		bool bval = resize > 0;
+		resize_chk->SetValue(bval);
+		if (bval)
+		{
+			size_x_txt->SetValue(std::to_string(nx));
+			size_y_txt->SetValue(std::to_string(ny));
+			size_z_txt->SetValue(std::to_string(nz));
+		}
+	}
 	sizer3->Add(10, 10);
 	sizer3->Add(resize_chk, 0, wxALIGN_CENTER);
 	sizer3->Add(10, 10);
@@ -596,7 +610,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				return;
 			fluo::Quaternion q = vr_frame->GetView(0)->m_glview->GetClipRotation();
 			if (m_vd)
-				m_vd->SetResize(0, -1, -1, -1);
+				m_vd->SetResize(0, 0, 0, 0);
 
 			wxFileDialog *fopendlg = new wxFileDialog(
 				m_frame, "Save Volume Data", "", "",
@@ -623,7 +637,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 			delete fopendlg;
 
 			if (m_vd)
-				m_vd->SetResize(0, -1, -1, -1);
+				m_vd->SetResize(0, 0, 0, 0);
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
