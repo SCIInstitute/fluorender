@@ -786,7 +786,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	double t = interpolator->GetLastT();
 	t = t<0.0?0.0:t+duration;
 
-	interpolator->Begin(t);
+	interpolator->Begin(t, duration);
 
 	//for all volumes
 	for (int i=0; i<mgr->GetVolumeNum() ; i++)
@@ -1037,7 +1037,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 
 	do
 	{
-		interpolator->Begin(t);
+		interpolator->Begin(t, duration);
 
 		//for all volumes
 		for (i=0; i<m_view->GetAllVolumeNum(); i++)

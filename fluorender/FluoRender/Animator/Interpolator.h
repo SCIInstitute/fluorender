@@ -42,8 +42,9 @@ using namespace std;
 typedef struct
 {
 	int id;		//identifier
-	double t;	//time: 0-linear; 1-spline
-	int type;	//interpolation method
+	double t;	//key time
+	double dt;	//duration
+	int type;	//interpolation method: 0-linear; 1-spline
 	vector<FlKey*> keys; //keys
 	string desc;//descriptions
 } FlKeyGroup;
@@ -56,7 +57,7 @@ public:
 
 	//create
 	//return group id
-	int Begin(double t);
+	int Begin(double t, double dt);
 	//return successfulness
 	int AddKey(FlKey *key);
 	//return completeness
@@ -82,6 +83,7 @@ public:
 	//modify
 	void Clear();
 	void RemoveKey(int id);
+	void FixTime(int index = 0);
 	void ChangeTime(int index, double time);
 	void ChangeDuration(int index, double duration);
 	void MoveKeyBefore(int from_idx, int to_idx);

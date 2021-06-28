@@ -3424,6 +3424,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.SetPath(str);
 			fconfig.Write("id", key_group->id);
 			fconfig.Write("t", key_group->t);
+			fconfig.Write("dt", key_group->dt);
 			fconfig.Write("type", key_group->type);
 			str = key_group->desc;
 			fconfig.Write("desc", str);
@@ -4892,6 +4893,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 					key_group->id = iVal;
 				if (fconfig.Read("t", &dVal))
 					key_group->t = dVal;
+				if (fconfig.Read("dt", &dVal))
+					key_group->dt = dVal;
 				if (fconfig.Read("type", &iVal))
 					key_group->type = iVal;
 				if (fconfig.Read("desc", &sVal))

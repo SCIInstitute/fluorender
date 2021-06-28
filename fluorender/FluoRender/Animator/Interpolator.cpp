@@ -42,7 +42,7 @@ Interpolator::~Interpolator()
 }
 
 //return group id, enable adding
-int Interpolator::Begin(double t)
+int Interpolator::Begin(double t, double dt)
 {
 	m_id++;
 	FlKeyGroup *group = new FlKeyGroup();
@@ -51,6 +51,7 @@ int Interpolator::Begin(double t)
 	group->id = m_id;
 	group->type = 0;
 	group->t = t;
+	group->dt = dt;
 
 	m_key_list.push_back(group);
 	m_adding = 1;
@@ -170,9 +171,7 @@ double Interpolator::GetKeyDuration(int index)
 {
 	if (index>0 && (size_t)index<m_key_list.size())
 	{
-		double t0 = m_key_list[index-1]->t;
-		double t1 = m_key_list[index]->t;
-		return t1-t0;
+		return m_key_list[index]->dt;
 	}
 	else
 		return 0.0;
@@ -223,8 +222,6 @@ void Interpolator::RemoveKey(int id)
 		if (!group) continue;
 		if (group->id == id)
 		{
-			if (i>0 && i<(int)m_key_list.size()-1)
-				time = m_key_list[i-1]->t+m_key_list[i+1]->t-m_key_list[i]->t;
 			for (int j=0; j<(int)group->keys.size(); j++)
 				if (group->keys[j])
 					delete group->keys[j];
@@ -234,8 +231,8 @@ void Interpolator::RemoveKey(int id)
 			break;
 		}
 	}
-	if (found && i<(int)m_key_list.size())
-		ChangeTime(i, time);
+	if (found)
+		FixTime(i);
 }
 
 //move before
@@ -264,15 +261,15 @@ void Interpolator::MoveKeyBefore(int from_idx, int to_idx)
 	//	from_grp->t = m_key_list[to_idx-1]->t+from_duration;
 	//else
 	//	from_grp->t = 0.0;
-	double tmp_t = from_grp->t;
-	from_grp->t = to_grp->t;
-	to_grp->t = tmp_t;
+	//double tmp_t = from_grp->t;
+	//from_grp->t = to_grp->t;
+	//to_grp->t = tmp_t;
 
 	//insert before
 	m_key_list.erase(m_key_list.begin() + from_idx);
 	m_key_list.insert(m_key_list.begin() + to_idx, from_grp);
 
-	//ChangeDuration(to_idx+1, to_duration);
+	FixTime(to_idx);
 }
 
 //move after
@@ -288,51 +285,62 @@ void Interpolator::MoveKeyAfter(int from_idx, int to_idx)
 	if (to_idx<0 || to_idx>=(int)m_key_list.size())
 		return;
 	FlKeyGroup *to_grp = m_key_list[to_idx];
-	double tmp_t = from_grp->t;
-	from_grp->t = to_grp->t;
-	to_grp->t = tmp_t;
 
 	//insert after
 	m_key_list.erase(m_key_list.begin() + from_idx);
 	m_key_list.insert(m_key_list.begin() + to_idx, from_grp);
 
-	//ChangeDuration(from_idx, to_duration);
+	FixTime(from_idx);
+}
+
+void Interpolator::FixTime(int index)
+{
+	if (index < 0 || index >= (int)m_key_list.size())
+		return;
+
+	for (size_t i = index; i < m_key_list.size(); ++i)
+	{
+		if (i == 0)
+			continue;
+		m_key_list[i]->t = m_key_list[i - 1]->t +
+			m_key_list[i]->dt;
+		
+	}
 }
 
 void Interpolator::ChangeTime(int index, double time)
 {
-	if (index<=0 || index>=(int)m_key_list.size())
+	if (index<0 || index>=(int)m_key_list.size())
 		return;
 
-	double dura = 0.0;
-	for (int i=index; i<(int)m_key_list.size(); i++)
+	m_key_list[index]->t = time;
+	if (index > 0)
 	{
-		double dura_tmp = 0.0;
-		if (i < (int)m_key_list.size() - 1)
-			dura_tmp = m_key_list[i+1]->t -
-					   m_key_list[i]->t;
-		if (i==index)
-			m_key_list[i]->t = time;
-		else
-			m_key_list[i]->t = m_key_list[i-1]->t + dura;
-		dura = dura_tmp;
+		m_key_list[index]->dt = m_key_list[index]->t -
+			m_key_list[index - 1]->t;
+	}
+
+	double dura = 0.0;
+	for (int i=index+1; i<(int)m_key_list.size(); i++)
+	{
+		m_key_list[i]->t = m_key_list[i-1]->t +
+			m_key_list[i]->dt;
 	}
 }
 
 void Interpolator::ChangeDuration(int index, double duration)
 {
-	if (index<=0 || index>=(int)m_key_list.size())
+	if (index<0 || index>=(int)m_key_list.size())
 		return;
 
-	double dura = duration;
+	m_key_list[index]->dt = duration;
 	for (int i=index; i<(int)m_key_list.size(); i++)
 	{
-		double dura_tmp = 0.0;
-		if (i < (int)m_key_list.size() - 1)
-			dura_tmp = m_key_list[i+1]->t -
-					   m_key_list[i]->t;
-		m_key_list[i]->t = m_key_list[i-1]->t + dura;
-		dura = dura_tmp;
+		if (i > 0)
+		{
+			m_key_list[i]->t = m_key_list[i - 1]->t +
+				m_key_list[i]->dt;
+		}
 	}
 }
 
