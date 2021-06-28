@@ -247,7 +247,7 @@ namespace flvr
 			TextTexture* tex_p =
 				text_texture_manager_.text_texture(*p);
 			if (tex_p)
-				len += tex_p->width_;
+				len += (tex_p->ax_ >> 6);
 		}
 		return len;
 	}

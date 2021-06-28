@@ -116,6 +116,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_disp_scale_bar(false),
 	m_disp_scale_bar_text(false),
 	m_sb_length(50),
+	m_sb_x(0),
+	m_sb_y(0),
 	m_sb_unit(1),
 	m_sb_height(0.0),
 	//ortho size
@@ -7732,9 +7734,8 @@ void VRenderGLView::DrawScaleBar()
 	if (!va_scale_bar)
 		return;
 
-	double offset = 0.0;
-	if (m_draw_legend)
-		offset = m_sb_height;
+	//if (m_draw_legend)
+	//	offset = m_sb_height;
 	int nx, ny;
 	GetRenderSize(nx, ny);
 	float sx, sy;
@@ -7747,6 +7748,8 @@ void VRenderGLView::DrawScaleBar()
 	double textlen =
 		m_text_renderer.RenderTextLen(wsb_text);
 	fluo::Color text_color = GetTextColor();
+	double font_height =
+		flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
 
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
@@ -7762,8 +7765,8 @@ void VRenderGLView::DrawScaleBar()
 			framex *= m_enlarge_scale;
 			framey *= m_enlarge_scale;
 		}
-		px = (0.95*framew + framex) / nx;
-		py = (0.05*frameh + framey + offset) / ny;
+		px = (framex + framew - font_height + m_sb_x) / nx;
+		py = (1.1 * font_height + framey + m_sb_y) / ny;
 		ph = 5.0 / ny;
 		if (m_enlarge)
 			ph *= m_enlarge_scale;
@@ -7774,8 +7777,8 @@ void VRenderGLView::DrawScaleBar()
 
 		if (m_disp_scale_bar_text)
 		{
-			px = 0.95*framew + framex - (len*nx + textlen + nx) / 2.0;
-			py = ny / 2.0 - ny + 0.065*frameh + framey + offset;
+			px = px * nx - 0.5 * (len * nx + textlen + nx) + m_sb_x;
+			py = py * ny + 0.5 * font_height - ny / 2.0 + m_sb_y;
 			m_text_renderer.RenderText(
 				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);
@@ -7783,8 +7786,8 @@ void VRenderGLView::DrawScaleBar()
 	}
 	else
 	{
-		px = 0.95;
-		py = 0.05 + offset / ny;
+		px = (nx - font_height + m_sb_x) / nx;
+		py = (1.1 * font_height + m_sb_y) / ny;
 		ph = 5.0 / ny;
 		if (m_enlarge)
 			ph *= m_enlarge_scale;
@@ -7795,8 +7798,8 @@ void VRenderGLView::DrawScaleBar()
 
 		if (m_disp_scale_bar_text)
 		{
-			px = 0.95*nx - (len*nx + textlen + nx) / 2.0;
-			py = ny / 2.0 - 0.935*ny + offset;
+			px = px * nx - 0.5 * (len * nx + textlen + nx) + m_sb_x;
+			py = (py - 0.5) * ny + 0.5 * font_height + m_sb_y;
 			m_text_renderer.RenderText(
 				wsb_text, text_color,
 				px*sx, py*sy, sx, sy);

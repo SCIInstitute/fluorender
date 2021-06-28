@@ -675,6 +675,8 @@ public:
 	bool m_disp_scale_bar;
 	bool m_disp_scale_bar_text;
 	double m_sb_length;
+	double m_sb_x;
+	double m_sb_y;
 	int m_sb_unit;
 	wxString m_sb_text;
 	wxString m_sb_num;

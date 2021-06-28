@@ -242,28 +242,12 @@ void Interpolator::MoveKeyBefore(int from_idx, int to_idx)
 		from_idx == to_idx-1)
 		return;
 
-	//double from_duration = 0.0;
-	//if (from_idx != 0)
-	//	from_duration = m_key_list[from_idx]->t -
-	//	m_key_list[from_idx-1]->t;
-	//double to_duration = 0.0;
-	//if (to_idx != 0)
-	//	to_duration = m_key_list[to_idx]->t -
-	//	m_key_list[to_idx-1]->t;
-
 	if (from_idx<0 || from_idx>=(int)m_key_list.size())
 		return;
 	FlKeyGroup *from_grp = m_key_list[from_idx];
 	if (to_idx<0 || to_idx>=(int)m_key_list.size())
 		return;
 	FlKeyGroup *to_grp = m_key_list[to_idx];
-	//if (to_idx > 0)
-	//	from_grp->t = m_key_list[to_idx-1]->t+from_duration;
-	//else
-	//	from_grp->t = 0.0;
-	//double tmp_t = from_grp->t;
-	//from_grp->t = to_grp->t;
-	//to_grp->t = tmp_t;
 
 	//insert before
 	m_key_list.erase(m_key_list.begin() + from_idx);
@@ -304,7 +288,6 @@ void Interpolator::FixTime(int index)
 			continue;
 		m_key_list[i]->t = m_key_list[i - 1]->t +
 			m_key_list[i]->dt;
-		
 	}
 }
 
