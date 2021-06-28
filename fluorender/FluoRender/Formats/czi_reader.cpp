@@ -217,6 +217,12 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		t < (int)m_czi_info.times.size() &&
 		c < (int)m_czi_info.times[t].channels.size())
 	{
+		ChannelInfo *cinfo = GetChaninfo(t, c);
+		if (!cinfo)
+		{
+			fclose(pfile);
+			return 0;
+		}
 		//allocate memory for nrrd
 		switch (m_datatype)
 		{
@@ -225,7 +231,6 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
-			ChannelInfo *cinfo = GetChaninfo(t, c);
 			for (i = 0; i < (int)cinfo->blocks.size(); i++)
 			{
 				SubBlockInfo* sbi = &(cinfo->blocks[i]);
@@ -245,7 +250,6 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 			unsigned long long mem_size = (unsigned long long)m_x_size*
 				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
 			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
-			ChannelInfo *cinfo = GetChaninfo(t, c);
 			for (i = 0; i < (int)cinfo->blocks.size(); i++)
 			{
 				SubBlockInfo* sbi = &(cinfo->blocks[i]);
