@@ -4895,6 +4895,13 @@ void VRenderFrame::OpenProject(wxString& filename)
 					key_group->t = dVal;
 				if (fconfig.Read("dt", &dVal))
 					key_group->dt = dVal;
+				else
+				{
+					if (key_list->empty())
+						key_group->dt = 0;
+					else
+						key_group->dt = key_group->t - key_list->back()->t;
+				}
 				if (fconfig.Read("type", &iVal))
 					key_group->type = iVal;
 				if (fconfig.Read("desc", &sVal))
