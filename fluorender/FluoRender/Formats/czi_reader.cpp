@@ -114,6 +114,12 @@ int CZIReader::Preprocess()
 			ReadSegment(pfile, m_dir_pos, SegDirectory);
 	}
 
+	//if 2d
+	if (m_czi_info.zmin == std::numeric_limits<int>::max())
+		m_czi_info.zmin = 0;
+	if (m_czi_info.zmax == std::numeric_limits<int>::min())
+		m_czi_info.zmax = 1;
+
 	fclose(pfile);
 
 	m_cur_time = 0;

@@ -113,6 +113,25 @@ private:
 		unsigned int compress;
 		//pixel type
 		unsigned int pxtype;
+
+		SubBlockInfo():
+			dirpos(0),
+			chan(0),
+			time(0),
+			x(0),
+			y(0),
+			z(0),
+			x_size(1),
+			y_size(1),
+			z_size(1),
+			x_start(0),
+			y_start(0),
+			z_start(0),
+			loc(0),
+			size(0),
+			compress(0),
+			pxtype(0)
+		{}
 	};
 	struct ChannelInfo
 	{
