@@ -297,6 +297,36 @@ bool RulerListCtrl::GetCurrSelection(std::vector<int> &sel)
 	return false;
 }
 
+void RulerListCtrl::ClearSelection()
+{
+	long item = -1;
+	for (;;)
+	{
+		item = GetNextItem(item,
+			wxLIST_NEXT_ALL,
+			wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		SetItemState(item, 0, wxLIST_MASK_STATE);
+	}
+}
+
+void RulerListCtrl::SelectGroup(unsigned int group)
+{
+	ClearSelection();
+	if (!m_view)
+		return;
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list) return;
+	for (int i = 0; i < (int)ruler_list->size(); i++)
+	{
+		flrd::Ruler* ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+		if (ruler->Group() == group)
+			SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	}
+}
+
 void RulerListCtrl::DeleteSelection()
 {
 	if (!m_rhdl)
@@ -840,7 +870,9 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_COMBOBOX(ID_RelaxDataCmb, MeasureDlg::OnRelaxData)
 	//ruler list
 	EVT_BUTTON(ID_NewGroup, MeasureDlg::OnNewGroup)
-	EVT_BUTTON(ID_SetGroup, MeasureDlg::OnSetGroup)
+	EVT_BUTTON(ID_ChgGroup, MeasureDlg::OnChgGroup)
+	EVT_BUTTON(ID_SelGroup, MeasureDlg::OnSelGroup)
+	EVT_BUTTON(ID_DispTglGroup, MeasureDlg::OnDispTglGroup)
 	//align
 	EVT_BUTTON(ID_AlignX, MeasureDlg::OnAlignRuler)
 	EVT_BUTTON(ID_AlignY, MeasureDlg::OnAlignRuler)
@@ -1054,14 +1086,23 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_group = new wxButton(this, ID_NewGroup, "New Group",
 		wxDefaultPosition, wxSize(65, 22));
-	m_set_group = new wxButton(this, ID_SetGroup, "Set Group",
-		wxDefaultPosition, wxSize(65, 22));
+	st = new wxStaticText(this, 0, "Group ID:",
+		wxDefaultPosition, wxSize(65, -1));
 	m_group_text = new wxTextCtrl(this, ID_GroupText, "0",
 		wxDefaultPosition, wxSize(40, 22), 0, vald_int);
-	sizer21->Add(5, 5);
+	m_chg_group = new wxButton(this, ID_ChgGroup, "Change",
+		wxDefaultPosition, wxSize(65, 22));
+	m_sel_group = new wxButton(this, ID_SelGroup, "Select",
+		wxDefaultPosition, wxSize(65, 22));
+	m_disptgl_group = new wxButton(this, ID_DispTglGroup, "Display",
+		wxDefaultPosition, wxSize(65, 22));
 	sizer21->Add(m_new_group, 0, wxALIGN_CENTER);
-	sizer21->Add(m_set_group, 0, wxALIGN_CENTER);
+	sizer21->AddStretchSpacer();
+	sizer21->Add(st, 0, wxALIGN_CENTER);
 	sizer21->Add(m_group_text, 0, wxALIGN_CENTER);
+	sizer21->Add(m_chg_group, 0, wxALIGN_CENTER);
+	sizer21->Add(m_sel_group, 0, wxALIGN_CENTER);
+	sizer21->Add(m_disptgl_group, 0, wxALIGN_CENTER);
 	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 	sizer_2->Add(sizer21, 0, wxEXPAND);
@@ -2089,13 +2130,70 @@ void MeasureDlg::OnNewGroup(wxCommandEvent& event)
 		m_rhdl->NewGroup();
 }
 
-void MeasureDlg::OnSetGroup(wxCommandEvent& event)
+void MeasureDlg::OnChgGroup(wxCommandEvent& event)
 {
 	if (!m_rhdl)
 		return;
 	unsigned long ival;
 	if (m_group_text->GetValue().ToULong(&ival))
 		m_rhdl->SetGroup(ival);
+
+	//update group
+	if (!m_view)
+		return;
+	std::vector<int> sel;
+	if (!m_rulerlist->GetCurrSelection(sel))
+		return;
+	for (size_t i = 0; i < sel.size(); ++i)
+	{
+		int index = sel[i];
+		flrd::Ruler* ruler = m_view->GetRuler(
+			m_rulerlist->GetItemData(index));
+		if (!ruler)
+			continue;
+		ruler->Group(ival);
+	}
+	m_rulerlist->UpdateRulers(m_view);
+}
+
+void MeasureDlg::OnSelGroup(wxCommandEvent& event)
+{
+	unsigned long ival;
+	if (!m_group_text->GetValue().ToULong(&ival))
+		return;
+	m_rulerlist->SelectGroup(ival);
+}
+
+void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
+{
+	unsigned long ival;
+	if (!m_group_text->GetValue().ToULong(&ival))
+		return;
+	if (!m_view)
+		return;
+	flrd::RulerList* ruler_list = m_view->GetRulerList();
+	if (!ruler_list) return;
+	bool disp;
+	bool first = true;
+	for (int i = 0; i < (int)ruler_list->size(); i++)
+	{
+		flrd::Ruler* ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+		if (ruler->Group() == ival)
+		{
+			if (first)
+			{
+				first = false;
+				disp = !ruler->GetDisp();
+			}
+			ruler->SetDisp(disp);
+			if (disp)
+				m_rulerlist->SetItemBackgroundColour(i, wxColour(255, 255, 255));
+			else
+				m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
+		}
+	}
+	m_view->RefreshGL();
 }
 
 void MeasureDlg::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)

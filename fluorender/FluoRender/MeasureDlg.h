@@ -70,6 +70,8 @@ public:
 	void UpdateRulers(VRenderView* vrv=0);
 
 	bool GetCurrSelection(std::vector<int> &sel);
+	void ClearSelection();
+	void SelectGroup(unsigned int group);
 	void DeleteSelection();
 	void DeleteAll(bool cur_time=false);
 
@@ -153,8 +155,10 @@ public:
 		ID_RelaxDataCmb,
 		//ruler list
 		ID_NewGroup,
-		ID_SetGroup,
 		ID_GroupText,
+		ID_ChgGroup,
+		ID_SelGroup,
+		ID_DispTglGroup,
 		//align
 		ID_AlignCenter,
 		ID_AlignX,
@@ -195,8 +199,10 @@ private:
 
 	//list ctrl
 	wxButton* m_new_group;
-	wxButton* m_set_group;
 	wxTextCtrl* m_group_text;
+	wxButton* m_chg_group;
+	wxButton* m_sel_group;
+	wxButton* m_disptgl_group;
 	RulerListCtrl *m_rulerlist;
 	//tool bar
 	wxToolBar *m_toolbar1;
@@ -266,7 +272,9 @@ private:
 	void OnRelaxData(wxCommandEvent& event);
 	//ruler list
 	void OnNewGroup(wxCommandEvent& event);
-	void OnSetGroup(wxCommandEvent& event);
+	void OnChgGroup(wxCommandEvent& event);
+	void OnSelGroup(wxCommandEvent& event);
+	void OnDispTglGroup(wxCommandEvent& event);
 	//align
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
