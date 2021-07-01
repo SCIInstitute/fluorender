@@ -463,6 +463,10 @@ unsigned int CZIReader::ReadDirectoryEntry(FILE* pfile)
 
 	unsigned int dirpos = 32 + dim_count * 20;
 	sbi.dirpos = dirpos;
+
+	//skip pyramid levels for now
+	if (pyra_type > 0)
+		return dirpos;
 	//add info to list
 	TimeInfo *timeinfo = GetTimeinfo(sbi.time);
 	if (timeinfo)
@@ -522,13 +526,13 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 	std::set<int> channums;
 	std::set<int> timenums;
 	for (size_t i = 0; i < m_czi_info.times.size(); ++i)
-		for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
-			for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
-			{
-				channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
-				timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
-				pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
-			}
+	for (size_t j = 0; j < m_czi_info.times[i].channels.size(); ++j)
+	for (size_t k = 0; k < m_czi_info.times[i].channels[j].blocks.size(); ++k)
+	{
+		channums.insert(m_czi_info.times[i].channels[j].blocks[k].chan);
+		timenums.insert(m_czi_info.times[i].channels[j].blocks[k].time);
+		pixtypes.insert(m_czi_info.times[i].channels[j].blocks[k].pxtype);
+	}
 	m_time_num = timenums.size();
 	m_chan_num = channums.size();
 	m_slice_num = m_czi_info.zmax - m_czi_info.zmin;
@@ -693,7 +697,9 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	unsigned short minv = std::numeric_limits<unsigned short>::max();
 	unsigned short maxv = 0;
 	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
-	unsigned long long pos = xysize * sbi->z + m_x_size * sbi->y + sbi->x;//consider it a brick
+	unsigned long long pos = xysize * sbi->z +
+		(unsigned long long)m_x_size * sbi->y +
+		(unsigned long long)sbi->x;//consider it a brick
 
 	if (bricks || compress)
 	{
@@ -716,7 +722,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				for (int i = 0; i < sbi->z_size; ++i)
 				for (int j = 0; j < sbi->y_size; ++j)
 					memcpy((unsigned char*)val + pos + xysize * i + m_x_size * j,
-						block + i * sbi->x_size * sbi->y_size + j * sbi->y_size, sbi->x_size);
+						block + i * sbi->x_size * sbi->y_size + j * sbi->x_size, sbi->x_size);
 			}
 		}
 			break;
@@ -735,7 +741,8 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				for (int i = 0; i < sbi->z_size; ++i)
 				for (int j = 0; j < sbi->y_size; ++j)
 					memcpy((unsigned short*)val + pos + xysize * i + m_x_size * j,
-						block + i * sbi->x_size * sbi->y_size + j * sbi->y_size, sbi->x_size);
+						(unsigned short*)block + i * sbi->x_size * sbi->y_size + j * sbi->x_size,
+						2 * sbi->x_size);
 			}
 			//get min max
 			GetMinMax16B((unsigned short*)val + pos,
