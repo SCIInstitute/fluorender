@@ -49,6 +49,7 @@ class RulerListCtrl : public wxListCtrl
 		ID_NameText = ID_MEASURE1,
 		ID_CenterText,
 		ID_ColorPicker,
+		ID_ToggleDisp
 	};
 
 public:
@@ -92,6 +93,9 @@ private:
 
 private:
 	void EndEdit(bool update=true);
+
+	void OnContextMenu(wxContextMenuEvent &event);
+	void OnToggleDisp(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelection(wxListEvent &event);
 	void OnEndSelection(wxListEvent &event);
@@ -102,7 +106,6 @@ private:
 	void OnScroll(wxMouseEvent& event);
 	void OnTextFocus(wxCommandEvent& event);
 	void OnAct(wxListEvent &event);
-	void OnContextMenu(wxContextMenuEvent &event);
 
 	DECLARE_EVENT_TABLE()
 protected: //Possible TODO

@@ -53,6 +53,7 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 	EVT_MOUSEWHEEL(RulerListCtrl::OnScroll)
 	EVT_LIST_ITEM_ACTIVATED(wxID_ANY, RulerListCtrl::OnAct)
 	EVT_CONTEXT_MENU(RulerListCtrl::OnContextMenu)
+	EVT_MENU(ID_ToggleDisp, RulerListCtrl::OnToggleDisp)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
@@ -755,6 +756,52 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 
 void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
 {
+	if (!GetSelectedItemCount())
+		return;
+
+	wxPoint point = event.GetPosition();
+	// If from keyboard
+	if (point.x == -1 && point.y == -1)
+	{
+		wxSize size = GetSize();
+		point.x = size.x / 2;
+		point.y = size.y / 2;
+	}
+	else
+	{
+		point = ScreenToClient(point);
+	}
+
+	wxMenu menu;
+	menu.Append(ID_ToggleDisp, "ToggleDisplay");
+	PopupMenu(&menu, point.x, point.y);
+}
+
+void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	std::vector<int> sel;
+	if (!GetCurrSelection(sel))
+		return;
+
+	for (size_t i = 0; i < sel.size(); ++i)
+	{
+		int index = sel[i];
+		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(index));
+		if (!ruler) continue;
+		ruler->ToggleDisp();
+		bool disp = ruler->GetDisp();
+		if (disp)
+			SetItemBackgroundColour(index, wxColour(255, 255, 255));
+		else
+			SetItemBackgroundColour(index, wxColour(200, 200, 200));
+	}
+	//m_name_text->Hide();
+	//m_center_text->Hide();
+	//m_color_picker->Hide();
+	//SetItemState(item, 0, wxLIST_STATE_SELECTED);
+	m_view->RefreshGL();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
