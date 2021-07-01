@@ -688,18 +688,28 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		return;
 	if (m_editing_item == -1)
 		return;
+	std::vector<int> sel;
+	if (!GetCurrSelection(sel))
+		return;
 
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
-	if (!ruler) return;
-	ruler->SetColor(color);
 	wxString str_color;
 	str_color = wxString::Format("RGB(%d, %d, %d)",
 		int(color.r()*255),
 		int(color.g()*255),
 		int(color.b()*255));
 	SetText(m_editing_item, 3, str_color);
+
+	for (size_t i = 0; i < sel.size(); ++i)
+	{
+		int index = sel[i];
+		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(index));
+		if (!ruler)
+			continue;
+		ruler->SetColor(color);
+	}
+
 	m_view->RefreshGL();
 }
 
