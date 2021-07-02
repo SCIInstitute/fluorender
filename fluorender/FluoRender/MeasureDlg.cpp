@@ -307,7 +307,7 @@ void RulerListCtrl::ClearSelection()
 			wxLIST_STATE_SELECTED);
 		if (item == -1)
 			break;
-		SetItemState(item, 0, wxLIST_MASK_STATE);
+		SetItemState(item, 0, wxLIST_STATE_SELECTED);
 	}
 }
 
