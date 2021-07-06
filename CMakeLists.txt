@@ -80,7 +80,7 @@ add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Dat
 add_definitions(-DVERSION_MINOR=26.3)					# 
 add_definitions(-DVERSION_MAJOR_TAG="2")				# 
 add_definitions(-DVERSION_MINOR_TAG="26.3")				# 
-add_definitions(-DVERSION_COPYRIGHT="March 2021")		# Up to here!
+add_definitions(-DVERSION_COPYRIGHT="July 2021")		# Up to here!
 
 #windows
 if(WIN32)
