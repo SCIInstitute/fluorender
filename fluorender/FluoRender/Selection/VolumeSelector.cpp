@@ -94,6 +94,10 @@ void VolumeSelector::Segment(int mx, int my)
 	if (m_test_speed)
 		m_t1 = std::chrono::high_resolution_clock::now();
 
+	//notify volume that mask is cleared
+	if (m_mode == 6)
+		m_vd->SetMaskClear();
+
 	//save view
 	m_mv_mat = m_view->GetDrawMat();
 	m_prj_mat = m_view->GetProjection();

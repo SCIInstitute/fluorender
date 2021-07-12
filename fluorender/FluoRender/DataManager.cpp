@@ -212,6 +212,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	//mask mode
 	m_mask_mode = copy.m_mask_mode;
 	m_use_mask_threshold = false;
+	m_mask_clear = true;
 
 	//volume properties
 	m_scalar_scale = copy.m_scalar_scale;

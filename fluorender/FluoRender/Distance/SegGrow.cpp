@@ -52,6 +52,24 @@ const char* str_cl_segrow = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
+"	unsigned int index = nx*ny*k + nx*j + i;\n" \
+"	unsigned int lv = index + 1;\n" \
+"	if (value == 0.0)\n" \
+"		lv = 0;\n" \
+"	atomic_xchg(label+index, lv);\n" \
+"}\n" \
+"//initialize but keep old values\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t mask,\n" \
+"	__global unsigned int* label,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz)\n" \
+"{\n" \
+"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
+"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
+"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
+"	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
 "	if (value == 0.0)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
@@ -60,7 +78,7 @@ const char* str_cl_segrow = \
 "	atomic_xchg(label+index, index + 1);\n" \
 "}\n" \
 "//grow ids reverse\n" \
-"__kernel void kernel_1(\n" \
+"__kernel void kernel_2(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -136,7 +154,7 @@ const char* str_cl_segrow = \
 "	}\n" \
 "}\n" \
 "//grow id ordered\n" \
-"__kernel void kernel_2(\n" \
+"__kernel void kernel_3(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -212,7 +230,7 @@ const char* str_cl_segrow = \
 "	}\n" \
 "}\n" \
 "//count newly grown labels\n" \
-"__kernel void kernel_3(\n" \
+"__kernel void kernel_4(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -269,7 +287,7 @@ const char* str_cl_segrow = \
 "		atomic_xchg(ids+index*maxc+c, lids[c]);\n" \
 "}\n" \
 "//find connected parts\n" \
-"__kernel void kernel_4(\n" \
+"__kernel void kernel_5(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -364,7 +382,7 @@ const char* str_cl_segrow = \
 "		atomic_xchg(cids+(index*nid)*6+c, lcids[c]);\n" \
 "}\n" \
 "//merge connected ids\n" \
-"__kernel void kernel_5(\n" \
+"__kernel void kernel_6(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -408,7 +426,7 @@ const char* str_cl_segrow = \
 "	}\n" \
 "}\n" \
 "//find connectivity/center of new ids\n" \
-"__kernel void kernel_6(\n" \
+"__kernel void kernel_7(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -551,7 +569,7 @@ const char* str_cl_segrow = \
 "	}\n" \
 "}\n" \
 "//fix processed ids\n" \
-"__kernel void kernel_7(\n" \
+"__kernel void kernel_8(\n" \
 "	__global unsigned int* label,\n" \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
@@ -704,25 +722,35 @@ bool SegGrow::CheckBricks()
 
 void SegGrow::Compute()
 {
+	//debug
+#ifdef _DEBUG
+	unsigned int* val = 0;
+	std::ofstream ofs;
+#endif
+
 	if (!m_handler)
 		return;
 	if (!CheckBricks())
 		return;
 
 	m_list.clear();
+	bool clear_label = m_vd->GetMaskClear();
+	m_vd->SetMaskClear(false);
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
-	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
-	int kernel_1 = kernel_prog->createKernel("kernel_1");//grow reverse
-	int kernel_2 = kernel_prog->createKernel("kernel_2");//grow ordered
-	int kernel_3 = kernel_prog->createKernel("kernel_3");//count
-	int kernel_4 = kernel_prog->createKernel("kernel_4");//find connected parts
-	int kernel_5 = kernel_prog->createKernel("kernel_5");//merge connected parts
-	int kernel_6 = kernel_prog->createKernel("kernel_6");//get shape
+	int kernel_0 = kernel_prog->createKernel(
+		clear_label?"kernel_0":"kernel_1");//init ordered
+	//int kernel_0 = kernel_prog->createKernel("kernel_1");
+	int kernel_1 = kernel_prog->createKernel("kernel_2");//grow reverse
+	int kernel_2 = kernel_prog->createKernel("kernel_3");//grow ordered
+	int kernel_3 = kernel_prog->createKernel("kernel_4");//count
+	int kernel_4 = kernel_prog->createKernel("kernel_5");//find connected parts
+	int kernel_5 = kernel_prog->createKernel("kernel_6");//merge connected parts
+	int kernel_6 = kernel_prog->createKernel("kernel_7");//get shape
 
 	int bnum = 0;
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -800,6 +828,13 @@ void SegGrow::Compute()
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*m_branches*gsize.gsxyz, (void*)(pids));
 		kernel_prog->setKernelArgLocal(sizeof(unsigned int)*m_branches);
 		
+		//debug
+		//val = new unsigned int[nx*ny*nz];
+		//kernel_prog->readBuffer(arg_label, val);
+		//ofs.open("E:/DATA/Test/grow/labelbuf.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz*sizeof(unsigned int));
+		//delete[] val;
+		//ofs.close();
 		//first pass
 		kernel_prog->executeKernel(kernel_0, 3, global_size, local_size);
 		for (int i = 0; i < 2; ++i)
@@ -1143,7 +1178,7 @@ void SegGrow::Compute()
 		vol_kernel_factory_.kernel(str_cl_segrow);
 	if (!kernel_prog)
 		return;
-	int kernel_7 = kernel_prog->createKernel("kernel_7");//finalize
+	int kernel_7 = kernel_prog->createKernel("kernel_8");//finalize
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];

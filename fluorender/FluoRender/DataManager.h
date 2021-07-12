@@ -240,6 +240,8 @@ public:
 	//change: whether changes label when it already exists
 	void AddEmptyLabel(int mode=0, bool change=true);
 	bool SearchLabel(unsigned int label);
+	void SetMaskClear(bool bval = true) { m_mask_clear = bval; }
+	bool GetMaskClear() { return m_mask_clear; }
 
 	//save
 	double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
@@ -593,6 +595,9 @@ private:
 
 	vector<VD_Landmark> m_landmarks;
 	wstring m_metadata_id;
+
+	//mask cleared
+	bool m_mask_clear;
 
 private:
 	//label functions
