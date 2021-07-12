@@ -1184,11 +1184,13 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 			vd = m_glview->m_cur_vol;
 		else if (m_glview->m_vd_pop_list.size())
 			vd = m_glview->m_vd_pop_list[0];
-		double spcx, spcy, spcz;
 		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-		if (spcx > 0.0)
+		{
+			double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			if (spcx > 0.0)
 				scale /= m_glview->Get121ScaleFactor() * spcx;
+		}
 		}
 		break;
 	}
