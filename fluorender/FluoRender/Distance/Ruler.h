@@ -133,6 +133,14 @@ namespace flrd
 				return true;
 			return false;
 		}
+		void SetId(unsigned int id)
+		{
+			m_id = id;
+		}
+		unsigned int GetId()
+		{
+			return m_id;
+		}
 
 		friend class Ruler;
 

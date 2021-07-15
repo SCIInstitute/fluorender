@@ -628,11 +628,12 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 					RulerPoint* rp = ruler->GetPoint(rbi, rpi);
 					if (!rp) continue;
 					fconfig.Write(wxString::Format("point%d", (int)rpi),
-						wxString::Format("%f %f %f %d",
+						wxString::Format("%f %f %f %d %d",
 						rp->GetPoint().x(),
 						rp->GetPoint().y(),
 						rp->GetPoint().z(),
-						rp->GetLocked()));
+						rp->GetLocked(),
+						rp->GetId()));
 				}
 			}
 		}
@@ -647,6 +648,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 	int rbi, rpi;
 	float x, y, z;
 	int l = 0;
+	unsigned int id;
 	if (m_ruler_list)
 	{
 		m_ruler_list->clear();
@@ -720,7 +722,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 							{
 								if (fconfig.Read(wxString::Format("point%d", rpi), &str))
 								{
-									if (SSCANF(str.c_str(), "%f%f%f%d", &x, &y, &z, &l))
+									if (SSCANF(str.c_str(), "%f%f%f%d%u", &x, &y, &z, &l, &id))
 									{
 										fluo::Point point(x, y, z);
 										if (rbi > 0 && rpi == 0)
