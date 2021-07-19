@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.h"
+#include <Utils.h>
 #include <wx/xml/xml.h>
 #include "../compatibility.h"
 #include <fstream>
@@ -244,7 +245,12 @@ int PVXMLReader::Preprocess()
 					if (m_force_stack)
 						frame_info->z = k;
 					else
-						frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
+					{
+						double dt = frame_info->z_start - m_z_min;
+						if (std::abs(dt) > fluo::Epsilon(10))
+							frame_info->z = int(dt / m_zspc + 0.5);
+						else frame_info->z = k;
+					}
 				}
 				if (m_user_flip_y==0 && !flipy)
 				{
