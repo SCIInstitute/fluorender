@@ -148,6 +148,7 @@ private:
 		double mpp_y;//microns per pixel y
 		int bit_depth;
 		int seq_type;//sequence type for non-standard formats
+						//1-stack; 2-time
 	};
 	StateShard m_current_state;
 	vector<StateShard> m_state_shard_stack;

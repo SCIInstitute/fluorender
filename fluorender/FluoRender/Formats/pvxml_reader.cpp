@@ -213,7 +213,9 @@ int PVXMLReader::Preprocess()
 	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
 	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
 	if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
-	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
+	double dt = m_z_max - m_z_min;
+	if (std::abs(dt) > fluo::Epsilon(10))
+		m_slice_num = int(dt / m_zspc + 0.5);
 
 	if (m_user_flip_y == 1 ||
 		m_user_flip_y == 0)
@@ -494,8 +496,16 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 		}
 		else if (child->GetName() == "Frame")
 		{
-			ReadFrame(child);
-			m_seq_slice_num++;
+			if (m_current_state.seq_type == 2)
+			{
+				m_new_seq = true;
+				ReadFrame(child);
+			}
+			else
+			{
+				ReadFrame(child);
+				m_seq_slice_num++;
+			}
 		}
 		child = child->GetNext();
 	}
@@ -516,7 +526,10 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	}
 	else
 	{
-		m_slice_num = m_seq_slice_num;
+		if (m_current_state.seq_type == 2)
+			m_slice_num = 1;
+		else
+			m_slice_num = m_seq_slice_num;
 		m_zspc = m_seq_zspc;
 	}
 	m_pvxml_info.back().back().grid_index = m_current_state.grid_index;
