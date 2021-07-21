@@ -223,6 +223,7 @@ namespace flrd
 		//distance
 		double GetDistp();
 		//coords
+		void SetCalc(bool bval = true) { m_calc = bval; }
 		fluo::Point &GetCenter();
 		fluo::Point GetCenter(double sx, double sy, double sz);
 		fluo::BBox &GetBox();

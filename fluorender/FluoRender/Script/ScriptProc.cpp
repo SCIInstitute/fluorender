@@ -282,6 +282,11 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 	int tseq_cur_num = m_view->m_tseq_cur_num;
 	int tseq_prv_num = m_view->m_tseq_prv_num;
 
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	if (time_mode != index)
+		return;
+
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
