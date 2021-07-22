@@ -2100,6 +2100,7 @@ void TraceDlg::CellNewID(bool append)
 			std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 		tm_processor.SetVolCacheSize(4);
 		//add
+		cell->Calc();
 		tm_processor.AddCellDup(cell, m_cur_time);
 	}
 	CellUpdate();

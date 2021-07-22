@@ -324,6 +324,7 @@ namespace flrd
 		m_size_ui = celp->GetSizeUi();
 		m_size_d = celp->GetSizeD();
 		m_box = celp->GetBox();
+		m_calc = true;
 	}
 
 	inline void Cell::Inc(size_t i, size_t j, size_t k, double value)
