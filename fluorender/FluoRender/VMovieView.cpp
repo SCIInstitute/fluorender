@@ -697,7 +697,8 @@ void VMovieView::SetView(int index) {
 		m_views_cmb->SetSelection(index);
 }
 
-void VMovieView::OnTimer(wxTimerEvent& event) {
+void VMovieView::OnTimer(wxTimerEvent& event)
+{
 	//get all of the progress info
 	double len;
 	long fps;
@@ -734,7 +735,8 @@ void VMovieView::OnTimer(wxTimerEvent& event) {
 	int frame = int(fps * m_cur_time + 0.5);
 	SetProgress(m_cur_time / len);
 	//update the rendering frame since we have advanced.
-	if (frame != m_last_frame) {
+	if (frame != m_last_frame)
+	{
 		int start_time = STOI(m_time_start_text->GetValue().fn_str());
 		int end_time = STOI(m_time_end_text->GetValue().fn_str());
 		int tot_time = end_time - start_time + 1;
@@ -1212,7 +1214,7 @@ void VMovieView::SetRendering(double pcnt)
 				vrv->m_glview->SetLockCamObject(true);
 			int end_frame = int(interpolator->GetLastT());
 			vrv->SetParams(pcnt * end_frame);
-			vrv->RefreshGL();
+			vrv->RefreshGL(false);
 			return;
 		}
 	}
@@ -1256,7 +1258,7 @@ void VMovieView::SetRendering(double pcnt)
 		else if (m_z_rd->GetValue())
 			vrv->SetRotations(x, y, val);
 	}
-	vrv->RefreshGL();
+	vrv->RefreshGL(false);
 }
 
 void VMovieView::OnTimeEnter(wxCommandEvent& event) {
