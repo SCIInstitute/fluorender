@@ -2086,6 +2086,9 @@ void TraceDlg::CellNewID(bool append)
 		}
 	}
 
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_current();
+
 	//save label mask to disk
 	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 
@@ -2104,9 +2107,6 @@ void TraceDlg::CellNewID(bool append)
 		tm_processor.AddCellDup(cell, m_cur_time);
 	}
 	CellUpdate();
-
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
 
 }
 
