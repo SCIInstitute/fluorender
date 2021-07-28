@@ -287,6 +287,12 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 	if (time_mode != index)
 		return;
 
+	double extx, exty, extz;
+	fconfig.Read("ext_x", &extx, 0.1);
+	fconfig.Read("ext_y", &exty, 0.1);
+	fconfig.Read("ext_z", &extz, 0);
+	fluo::Vector ext(extx, exty, extz);
+
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
@@ -304,7 +310,7 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
 
-	tm_processor.TrackStencils(tseq_prv_num, tseq_cur_num);
+	tm_processor.TrackStencils(tseq_prv_num, tseq_cur_num, ext);
 
 	//add traces to trace dialog
 	if (m_vrv && m_frame && m_frame->GetTraceDlg())

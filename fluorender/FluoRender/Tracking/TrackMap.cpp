@@ -4483,7 +4483,8 @@ void TrackMapProcessor::GetPaths(CelpList &cell_list, PathList &path_list, size_
 	}
 }
 
-bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
+bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
+	fluo::Vector &ext)
 {
 	//check validity
 	if (!m_map->ExtendFrameNum(std::max(f1, f2)))
@@ -4550,7 +4551,6 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 
 	//find matching stencil in frame2
 	fluo::Point center;
-	fluo::Vector ext(1.5, 1.5, 0.5);
 	float prob;
 	Stencil s1, s2;
 	s2.data = data2;

@@ -155,7 +155,8 @@ namespace flrd
 		void GetPaths(CelpList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
 
 		//tracking by matching user input
-		bool TrackStencils(size_t frame1, size_t frame2);
+		bool TrackStencils(size_t frame1, size_t frame2,
+			fluo::Vector &ext);
 
 		//connect and disconnect functions for cache queue
 		typedef boost::function<void (VolCache&)> func_cache;
