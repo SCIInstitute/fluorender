@@ -191,9 +191,11 @@ namespace flrd
 		Stencil& s2, const fluo::Vector &ext,
 		fluo::Point &center, float &prob)
 	{
-		//std::ofstream file;
-		//file.open("E:/Data/Holly/test/test.txt");
-
+//#ifdef _DEBUG
+//		std::ofstream ofs;
+//		ofs.open("E:/Data/Test/stencil/test.data",
+//			std::ios::out | std::ios::binary);
+//#endif
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
 		range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
@@ -225,11 +227,9 @@ namespace flrd
 			p = s1 * s2;
 			//p = similar(s1, s2);
 
-			//file << p;
-			//if (i < maxx)
-			//	file << "\t";
-			//else
-			//	file << "\n";
+//#ifdef _DEBUG
+//			ofs.write((char*)(&p), sizeof(float));
+//#endif
 
 			sump += p;
 			if (p < minp)
@@ -239,13 +239,15 @@ namespace flrd
 			}
 		}
 		prob = minp * total / sump;
-		//center += s1.box.size() / 2;
 		//center is actually the corner
 		s2.box = fluo::BBox(center,
 			fluo::Point(center + s1.box.size()));
 		s2.id = s1.id;
 
-		//file.close();
+//#ifdef _DEBUG
+//		ofs.close();
+//#endif
+
 		return true;
 	}
 
