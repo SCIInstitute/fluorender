@@ -87,6 +87,7 @@ bool ExMax1::Execute()
 	//	else
 	//		return false;
 	//}
+	return true;
 }
 
 void ExMax1::Initialize()

@@ -42,6 +42,7 @@ namespace flrd
 	{
 	public:
 		ExMax1():
+			m_clnum(2),
 			m_eps(1e-6f),
 			m_max_iter(300) {};
 		~ExMax1() {};
@@ -63,6 +64,8 @@ namespace flrd
 		//float GetProb();
 
 	private:
+		//cluster number
+		unsigned int m_clnum;
 		Cluster m_data;
 		//ClusterSet m_result;
 		EmVec m_spc;//spacings
