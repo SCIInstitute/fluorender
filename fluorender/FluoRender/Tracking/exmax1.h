@@ -42,9 +42,10 @@ namespace flrd
 	{
 	public:
 		ExMax1():
-			m_clnum(2),
 			m_eps(1e-6f),
-			m_max_iter(300) {};
+			m_max_iter(100),
+			m_spc({1, 1, 1})
+		{};
 		~ExMax1() {};
 
 		void SetData(Cluster &data)
@@ -61,11 +62,10 @@ namespace flrd
 		}
 		void AddClusterPoint(const EmVec &p, const float value);
 		bool Execute();
-		//float GetProb();
+		fluo::Point GetCenter();
+		float GetProb();
 
 	private:
-		//cluster number
-		unsigned int m_clnum;
 		Cluster m_data;
 		//ClusterSet m_result;
 		EmVec m_spc;//spacings
@@ -82,15 +82,13 @@ namespace flrd
 			EmMat covar;
 		};
 		//all paramters to estimate
-		std::vector<Params> m_params;
-		std::vector<Params> m_params_prv;
+		Params m_params;
+		Params m_params_prv;
 		//likelihood
 		double m_likelihood;
 		double m_likelihood_prv;
 		//membership probabilities
-		std::vector<std::vector<double>> m_mem_prob;//0-idx: comps; 1-idx: points
-		std::vector<std::vector<double>> m_mem_prob_prv;//for comparison
-		std::vector<double> m_count;//count for changes
+		std::vector<double> m_mem_prob;//0-idx: comps; 1-idx: points
 
 		void Initialize();
 		void Expectation();

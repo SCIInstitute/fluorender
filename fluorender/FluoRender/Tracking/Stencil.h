@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Stencil_h
 #define FL_Stencil_h
 
+#include "exmax1.h"
 #include <Types/BBox.h>
 #include <unordered_map>
 
@@ -212,11 +213,10 @@ namespace flrd
 		size_t total = (maxx - minx + 1) *
 			(maxy - miny + 1) * (maxz - minz + 1);
 		float p;
-		float minp = total;
-		float sump = 0;
 		fluo::Point s2min(minx, miny, minz);
 		s2.box = fluo::BBox(s2min, s2min);
 		fluo::BBox s2temp = s2.box;
+		ExMax1 em1;
 		size_t i, j, k, ti, tj, tk;
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
@@ -227,22 +227,25 @@ namespace flrd
 			p = s1 * s2;
 			//p = similar(s1, s2);
 
+			EmVec pnt = {
+				static_cast<double>(s2.box.Min().x()),
+				static_cast<double>(s2.box.Min().y()),
+				static_cast<double>(s2.box.Min().z()) };
+			em1.AddClusterPoint(
+				pnt, p);
 //#ifdef _DEBUG
 //			ofs.write((char*)(&p), sizeof(float));
 //#endif
 
-			sump += p;
-			if (p < minp)
-			{
-				minp = p;
-				center = s2.box.Min();
-			}
 		}
-		prob = minp * total / sump;
+
+		em1.Execute();
+		center = em1.GetCenter();
 		//center is actually the corner
 		s2.box = fluo::BBox(center,
 			fluo::Point(center + s1.box.size()));
 		s2.id = s1.id;
+		prob = em1.GetProb();
 
 //#ifdef _DEBUG
 //		ofs.close();
