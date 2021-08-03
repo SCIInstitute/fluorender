@@ -181,10 +181,17 @@ double ExMax1::Gaussian(EmVec &p, EmVec &m, EmMat &s)
 	double det = determinant(s);
 	if (det == 0.0)
 	{
+		double a00 = A00(s);
+		double a11 = A11(s);
+		double a22 = A22(s);
+		double eps = std::max(a00, std::max(a11, a22)) * fluo::Epsilon();
 		//perturb
-		A00(s) = A00(s) < 0.5 ? 0.5 : A00(s);
-		A11(s) = A11(s) < 0.5 ? 0.5 : A11(s);
-		A22(s) = A22(s) < 0.5 ? 0.5 : A22(s);
+		if (a00 == 0.0)
+			A00(s) = eps;
+		if (a11 == 0.0)
+			A11(s) = eps;
+		if (a22 == 0.0)
+			A22(s) = eps;
 		det = determinant(s);
 	}
 	EmVec d = p - m;

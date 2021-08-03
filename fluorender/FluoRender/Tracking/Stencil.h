@@ -194,7 +194,7 @@ namespace flrd
 	{
 //#ifdef _DEBUG
 //		std::ofstream ofs;
-//		ofs.open("E:/Data/Test/stencil/test.data",
+//		ofs.open("E:/Data/Test/pattern_tracking/test.data",
 //			std::ios::out | std::ios::binary);
 //#endif
 		fluo::BBox range = s1.box;
@@ -236,7 +236,6 @@ namespace flrd
 //#ifdef _DEBUG
 //			ofs.write((char*)(&p), sizeof(float));
 //#endif
-
 		}
 
 		em1.Execute();
@@ -250,7 +249,6 @@ namespace flrd
 //#ifdef _DEBUG
 //		ofs.close();
 //#endif
-
 		return true;
 	}
 
