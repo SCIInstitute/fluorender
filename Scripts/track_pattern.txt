@@ -3,8 +3,8 @@ tasknum=2
 [tasks/task0]
 type=sparse_tracking
 time_mode=1
-ext_x=4
-ext_y=4
+ext_x=0.1
+ext_y=0.1
 ext_z=0.1
 [tasks/task1]
 type=fetch_mask

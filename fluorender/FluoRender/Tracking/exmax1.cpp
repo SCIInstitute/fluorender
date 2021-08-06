@@ -80,21 +80,15 @@ fluo::Point ExMax1::GetCenter()
 		A2(m_params.mean));
 }
 
-float ExMax1::GetProb()
+double ExMax1::GetProb()
 {
 	if (m_mem_prob.empty())
 		return 0.0f;
 
 	double sum = 0;
-	size_t size = m_mem_prob.size();
-	for (size_t i = 0; i < size; ++i)
-	{
-		sum += m_mem_prob[i];
-	}
-	if (size)
-		return float(sum / size);
-	else
-		return 0.0f;
+	for (auto& n : m_mem_prob)
+		sum += n;
+	return sum / m_mem_prob.size();
 }
 
 void ExMax1::Initialize()
@@ -146,6 +140,7 @@ void ExMax1::Initialize()
 	boost::qvm::A00(m_params.covar) = boost::qvm::A0(trace);
 	boost::qvm::A11(m_params.covar) = boost::qvm::A1(trace);
 	boost::qvm::A22(m_params.covar) = boost::qvm::A2(trace);
+	//Regulate(m_params.covar);
 	m_params.tau = 1;
 
 	m_mem_prob.resize(m_data.size(), 0);
@@ -159,43 +154,12 @@ void ExMax1::Expectation()
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		double sum = m_params_prv.tau *
+		m_mem_prob[i] = /*m_params_prv.tau **/
 			Gaussian((*iter)->centerf,
 				m_params_prv.mean,
 				m_params_prv.covar) * (*iter)->intensity;
-		if (sum > 0.0)
-			m_mem_prob[i] = m_params_prv.tau *
-				Gaussian((*iter)->centerf,
-				m_params_prv.mean,
-				m_params_prv.covar) * (*iter)->intensity / sum;
-		else
-			m_mem_prob[i] = 1.0;
 		i++;
 	}
-}
-
-double ExMax1::Gaussian(EmVec &p, EmVec &m, EmMat &s)
-{
-	using namespace boost::qvm;
-	double pi2_3 = 248.050213442399; //(2pi)^3
-	double det = determinant(s);
-	if (det == 0.0)
-	{
-		double a00 = A00(s);
-		double a11 = A11(s);
-		double a22 = A22(s);
-		double eps = std::max(a00, std::max(a11, a22)) * fluo::Epsilon();
-		//perturb
-		if (a00 == 0.0)
-			A00(s) = eps;
-		if (a11 == 0.0)
-			A11(s) = eps;
-		if (a22 == 0.0)
-			A22(s) = eps;
-		det = determinant(s);
-	}
-	EmVec d = p - m;
-	return exp(-0.5 * dot(d, inverse(s) * d)) / sqrt(pi2_3 * det);
 }
 
 void ExMax1::Maximization()
@@ -211,7 +175,7 @@ void ExMax1::Maximization()
 	}
 
 	//tau
-	m_params.tau = sum_t / m_data.size();
+	//m_params.tau = sum_t / m_data.size();
 
 	//mean
 	i = 0;
@@ -246,28 +210,105 @@ void ExMax1::Maximization()
 		i++;
 	}
 	m_params.covar = sum_s / sum_t;
+	//Regulate(m_params.covar);
 }
 
 bool ExMax1::Converge()
 {
 	//compute likelihood
-	double c = 2.75681559961402;
-	m_likelihood = 0;
-	double l;
-	for (ClusterIter iter = m_data.begin();
-		iter != m_data.end(); ++iter)
-	{
-		l = log(m_params_prv.tau);
-		l -= 0.5 * log(boost::qvm::determinant(m_params_prv.covar));
-		EmVec d = (*iter)->centerf - m_params_prv.mean;
-		l -= 0.5 * boost::qvm::dot(d, boost::qvm::inverse(m_params_prv.covar) * d);
-		l -= c;
-		m_likelihood += l * (*iter)->intensity;
-	}
-
-	if (fabs((m_likelihood - m_likelihood_prv) / m_likelihood) > m_eps)
+	//m_likelihood = GetProb();
+	m_likelihood = mag(m_params.mean - m_params_prv.mean);
+	if (fabs(m_likelihood) > m_eps)
 		return false;
 	else
 		return true;
 }
 
+double ExMax1::Gaussian(EmVec &p, EmVec &m, EmMat &s)
+{
+	using namespace boost::qvm;
+	double pi2_3 = 248.050213442399; //(2pi)^3
+	double det = Det(s);
+	EmVec d = p - m;
+
+	EmMat inv = Inv(s);
+	//double dt = dot(d, inv * d);
+	//double e = exp(-0.5 * dt);
+	//double sq = sqrt(pi2_3 * det);
+	//return e / sq;
+	return exp(-0.5 * dot(d, inv * d)) / sqrt(pi2_3 * det);
+}
+
+double ExMax1::Det(EmMat &mat)
+{
+	double det = determinant(mat);
+	if (det == 0.0)
+	{
+		//get 2d
+		boost::qvm::mat<double, 2, 2> m2;
+		A00(m2) = A00(mat);
+		A01(m2) = A01(mat);
+		A10(m2) = A10(mat);
+		A11(m2) = A11(mat);
+		det = determinant(m2);
+	}
+	return det;
+}
+
+EmMat ExMax1::Inv(EmMat &mat)
+{
+	EmMat result = mat;
+	double det = determinant(mat);
+	if (det == 0.0)
+	{
+		//get 2d
+		boost::qvm::mat<double, 2, 2> m2;
+		A00(m2) = A00(mat);
+		A01(m2) = A01(mat);
+		A10(m2) = A10(mat);
+		A11(m2) = A11(mat);
+		m2 = inverse(m2);
+		A00(result) = A00(m2);
+		A01(result) = A01(m2);
+		A10(result) = A10(m2);
+		A11(result) = A11(m2);
+	}
+	else
+	{
+		result = inverse(mat);
+	}
+	return result;
+}
+
+//void ExMax1::Regulate(EmMat &s)
+//{
+//	double det = determinant(s);
+//	if (det == 0.0)
+//	{
+//		double dv[3] = { A00(s), A11(s), A22(s) };
+//		if (m_cov_eps == 0.0)
+//		{
+//			for (const double &ev : dv)
+//			{
+//				if (ev != 0.0)
+//				{
+//					if (m_cov_eps == 0.0)
+//						m_cov_eps = ev;
+//					else
+//						m_cov_eps = std::min(m_cov_eps, ev);
+//				}
+//			}
+//			if (m_cov_eps == 0.0)
+//				m_cov_eps = 0.5;
+//			else
+//				m_cov_eps *= 0.5;
+//		}
+//		//perturb
+//		if (dv[0] == 0.0)
+//			A00(s) = m_cov_eps;
+//		if (dv[1] == 0.0)
+//			A11(s) = m_cov_eps;
+//		if (dv[2] == 0.0)
+//			A22(s) = m_cov_eps;
+//	}
+//}

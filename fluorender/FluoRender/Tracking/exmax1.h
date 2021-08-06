@@ -42,9 +42,10 @@ namespace flrd
 	{
 	public:
 		ExMax1():
-			m_eps(1e-6f),
-			m_max_iter(100),
-			m_spc({1, 1, 1})
+			m_eps(1e-3),
+			m_max_iter(10),
+			m_spc({1, 1, 1}),
+			m_cov_eps(0.0)
 		{};
 		~ExMax1() {};
 
@@ -63,7 +64,7 @@ namespace flrd
 		void AddClusterPoint(const EmVec &p, const float value);
 		bool Execute();
 		fluo::Point GetCenter();
-		float GetProb();
+		double GetProb();
 
 	private:
 		Cluster m_data;
@@ -89,12 +90,16 @@ namespace flrd
 		double m_likelihood_prv;
 		//membership probabilities
 		std::vector<double> m_mem_prob;//0-idx: comps; 1-idx: points
+		double m_cov_eps;
 
 		void Initialize();
 		void Expectation();
-		double Gaussian(EmVec &p, EmVec &m, EmMat &s);
 		void Maximization();
 		bool Converge();
+		double Gaussian(EmVec &p, EmVec &m, EmMat &s);
+		double Det(EmMat &mat);
+		EmMat Inv(EmMat &mat);
+		//void Regulate(EmMat &s);
 	};
 }
 #endif//FL_Exmax1_h
