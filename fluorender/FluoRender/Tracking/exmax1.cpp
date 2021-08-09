@@ -146,6 +146,9 @@ void ExMax1::Initialize()
 	m_mem_prob.resize(m_data.size(), 0);
 
 	m_likelihood = 0;
+
+	//limit
+	m_eps = m_eps == 0.0 ? 1e-2 : m_eps * 1e-2;
 }
 
 void ExMax1::Expectation()
@@ -280,35 +283,35 @@ EmMat ExMax1::Inv(EmMat &mat)
 	return result;
 }
 
-//void ExMax1::Regulate(EmMat &s)
-//{
-//	double det = determinant(s);
-//	if (det == 0.0)
-//	{
-//		double dv[3] = { A00(s), A11(s), A22(s) };
-//		if (m_cov_eps == 0.0)
-//		{
-//			for (const double &ev : dv)
-//			{
-//				if (ev != 0.0)
-//				{
-//					if (m_cov_eps == 0.0)
-//						m_cov_eps = ev;
-//					else
-//						m_cov_eps = std::min(m_cov_eps, ev);
-//				}
-//			}
-//			if (m_cov_eps == 0.0)
-//				m_cov_eps = 0.5;
-//			else
-//				m_cov_eps *= 0.5;
-//		}
-//		//perturb
-//		if (dv[0] == 0.0)
-//			A00(s) = m_cov_eps;
-//		if (dv[1] == 0.0)
-//			A11(s) = m_cov_eps;
-//		if (dv[2] == 0.0)
-//			A22(s) = m_cov_eps;
-//	}
-//}
+void ExMax1::Regulate(EmMat &s)
+{
+	double det = determinant(s);
+	if (det == 0.0)
+	{
+		double dv[3] = { A00(s), A11(s), A22(s) };
+		if (m_cov_eps == 0.0)
+		{
+			for (const double &ev : dv)
+			{
+				if (ev != 0.0)
+				{
+					if (m_cov_eps == 0.0)
+						m_cov_eps = ev;
+					else
+						m_cov_eps = std::min(m_cov_eps, ev);
+				}
+			}
+			if (m_cov_eps == 0.0)
+				m_cov_eps = 0.5;
+			else
+				m_cov_eps *= 0.5;
+		}
+		//perturb
+		if (dv[0] == 0.0)
+			A00(s) = m_cov_eps;
+		if (dv[1] == 0.0)
+			A11(s) = m_cov_eps;
+		if (dv[2] == 0.0)
+			A22(s) = m_cov_eps;
+	}
+}

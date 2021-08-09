@@ -42,8 +42,8 @@ namespace flrd
 	{
 	public:
 		ExMax1():
-			m_eps(1e-3),
-			m_max_iter(10),
+			m_eps(0),
+			m_max_iter(30),
 			m_spc({1, 1, 1}),
 			m_cov_eps(0.0)
 		{};
@@ -60,6 +60,7 @@ namespace flrd
 		void SetSpacings(double spcx, double spcy, double spcz)
 		{
 			m_spc = { spcx, spcy, spcz };
+			m_eps = std::min(spcx, std::min(spcy, spcz));
 		}
 		void AddClusterPoint(const EmVec &p, const float value);
 		bool Execute();
@@ -99,7 +100,7 @@ namespace flrd
 		double Gaussian(EmVec &p, EmVec &m, EmMat &s);
 		double Det(EmMat &mat);
 		EmMat Inv(EmMat &mat);
-		//void Regulate(EmMat &s);
+		void Regulate(EmMat &s);
 	};
 }
 #endif//FL_Exmax1_h
