@@ -340,12 +340,6 @@ private:
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	//unsigned int GetMappedID(unsigned int id, unsigned int* data_label1,
-	//	unsigned int* data_label2, unsigned long long size);
-	//tests
-	void Test1();
-	void Test2(int type);
-
 	//read/delete volume cache from file
 	void ReadVolCache(flrd::VolCache& vol_cache);
 	void DelVolCache(flrd::VolCache& vol_cache);
