@@ -1,14 +1,8 @@
 [tasks]
-tasknum=2
+tasknum=1
 [tasks/task0]
 type=sparse_tracking
 time_mode=1
 ext_x=0.1
 ext_y=0.1
 ext_z=0.1
-[tasks/task1]
-type=fetch_mask
-time_mode=1
-chan_mode=0
-mask=1
-label=1
