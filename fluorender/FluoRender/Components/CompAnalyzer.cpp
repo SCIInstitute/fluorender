@@ -768,12 +768,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		i != comps.end(); ++i)
 	{
 		if (comp_header != "")
-		{
-			if (i == comps.begin())
-				stream << comp_header << "\t";
-			else
-				stream << "\t";
-		}
+			stream << comp_header << "\t";
 
 		std::list<unsigned int> ids;
 		std::list<unsigned int> brick_ids;
