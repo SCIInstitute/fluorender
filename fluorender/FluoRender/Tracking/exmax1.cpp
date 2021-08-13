@@ -148,7 +148,7 @@ void ExMax1::Initialize()
 	m_likelihood = 0;
 
 	//limit
-	m_eps = m_eps == 0.0 ? 1e-2 : m_eps * 1e-2;
+	m_eps = m_eps == 0.0 ? m_l : m_eps * m_l;
 }
 
 void ExMax1::Expectation()

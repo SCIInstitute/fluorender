@@ -43,7 +43,7 @@ namespace flrd
 	public:
 		ExMax1():
 			m_eps(0),
-			m_max_iter(15),
+			m_max_iter(50),
 			m_spc({1, 1, 1}),
 			m_cov_eps(0.0)
 		{};
@@ -73,6 +73,7 @@ namespace flrd
 		EmVec m_spc;//spacings
 		//measure for convergence
 		float m_eps;
+		const float m_l = 1e-2;
 		//maximum iteration number
 		size_t m_max_iter;
 
