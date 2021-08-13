@@ -235,11 +235,10 @@ double ExMax1::Gaussian(EmVec &p, EmVec &m, EmMat &s)
 	EmVec d = p - m;
 
 	EmMat inv = Inv(s);
-	//double dt = dot(d, inv * d);
-	//double e = exp(-0.5 * dt);
-	//double sq = sqrt(pi2_3 * det);
-	//return e / sq;
-	return exp(-0.5 * dot(d, inv * d)) / sqrt(pi2_3 * det);
+	if (det == 0.0)
+		return 0.0;
+	else
+		return exp(-0.5 * dot(d, inv * d)) / sqrt(pi2_3 * det);
 }
 
 double ExMax1::Det(EmMat &mat)
@@ -254,6 +253,10 @@ double ExMax1::Det(EmMat &mat)
 		A10(m2) = A10(mat);
 		A11(m2) = A11(mat);
 		det = determinant(m2);
+	}
+	if (det == 0.0)
+	{
+		det = std::max(A00(mat), A11(mat));
 	}
 	return det;
 }
@@ -270,11 +273,22 @@ EmMat ExMax1::Inv(EmMat &mat)
 		A01(m2) = A01(mat);
 		A10(m2) = A10(mat);
 		A11(m2) = A11(mat);
-		m2 = inverse(m2);
-		A00(result) = A00(m2);
-		A01(result) = A01(m2);
-		A10(result) = A10(m2);
-		A11(result) = A11(m2);
+		det = determinant(m2);
+		if (det == 0.0)
+		{
+			if (A00(m2) != 0.0)
+				A00(result) = 1.0 / A00(m2);
+			if (A11(m2) != 0.0)
+				A11(result) = 1.0 / A11(m2);
+		}
+		else
+		{
+			m2 = inverse(m2);
+			A00(result) = A00(m2);
+			A01(result) = A01(m2);
+			A10(result) = A10(m2);
+			A11(result) = A11(m2);
+		}
 	}
 	else
 	{
