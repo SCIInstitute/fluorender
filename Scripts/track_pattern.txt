@@ -6,3 +6,5 @@ time_mode=1
 ext_x=0.1
 ext_y=0.1
 ext_z=0.1
+iter=25
+eps=1e-3

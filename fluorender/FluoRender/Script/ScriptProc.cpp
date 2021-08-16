@@ -293,6 +293,11 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 	fconfig.Read("ext_z", &extz, 0);
 	fluo::Vector ext(extx, exty, extz);
 
+	int iter;
+	fconfig.Read("iter", &iter, 25);
+	double eps;
+	fconfig.Read("eps", &eps, 1e-3);
+
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	int resx, resy, resz;
@@ -303,8 +308,8 @@ void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
 	tm_processor.SetScale(cur_vol->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
-	//tm_processor.SetSizeThresh(component_size);
-	//tm_processor.SetContactThresh(contact_factor);
+	tm_processor.SetMaxIter(iter);
+	tm_processor.SetEps(eps);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),

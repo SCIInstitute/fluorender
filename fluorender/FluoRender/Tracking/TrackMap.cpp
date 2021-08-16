@@ -4513,6 +4513,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	size_t nx = m_map->m_size_x;
 	size_t ny = m_map->m_size_y;
 	size_t nz = m_map->m_size_z;
+	float spcx = m_map->m_spc_x;
+	float spcy = m_map->m_spc_y;
+	float spcz = m_map->m_spc_z;
 	unsigned int label_value;
 
 	//get all stencils from frame1
@@ -4562,7 +4565,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	for (iter = stencil_list.begin(); iter != stencil_list.end(); ++iter)
 	{
 		s1 = iter->second;
-		if (match_stencils(s1, s2, ext, center, prob))
+		if (match_stencils(s1, s2, ext, center,
+			prob, m_max_iter, m_eps,
+			spcx, spcy, spcz))
 		{
 			//if (prob > 0.5f)
 			//	continue;

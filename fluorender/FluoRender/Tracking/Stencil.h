@@ -190,7 +190,9 @@ namespace flrd
 
 	inline bool match_stencils(const Stencil& s1,
 		Stencil& s2, const fluo::Vector &ext,
-		fluo::Point &center, float &prob)
+		fluo::Point &center, float &prob,
+		int iter, float eps, float spcx,
+		float spcy, float spcz)
 	{
 //#ifdef _DEBUG
 //		std::ofstream ofs;
@@ -217,6 +219,8 @@ namespace flrd
 		s2.box = fluo::BBox(s2min, s2min);
 		fluo::BBox s2temp = s2.box;
 		ExMax1 em1;
+		em1.SetSpacings(spcx, spcy, spcz);
+		em1.SetIter(iter, eps);
 		size_t i, j, k, ti, tj, tk;
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
