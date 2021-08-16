@@ -82,6 +82,7 @@ namespace flrd
 		float m_l;
 		//maximum iteration number
 		size_t m_max_iter;
+		int m_inc_counter;
 
 		//parameters to estimate
 		struct Params

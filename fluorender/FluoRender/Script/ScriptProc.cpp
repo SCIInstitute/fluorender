@@ -92,6 +92,8 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 					RunRandomColors(index, fconfig);
 				else if (str == "fetch_mask")
 					RunFetchMask(index, fconfig);
+				else if (str == "clear_mask")
+					RunClearMask(index, fconfig);
 				else if (str == "save_mask")
 					RunSaveMask(index, fconfig);
 				else if (str == "opencl")
@@ -437,6 +439,58 @@ void ScriptProc::RunFetchMask(int index, wxFileConfig &fconfig)
 				(*i)->LoadLabel(label_nrrd_new);
 			else
 				(*i)->AddEmptyLabel(0, true);
+		}
+	}
+}
+
+void ScriptProc::RunClearMask(int index, wxFileConfig &fconfig)
+{
+	if (!m_view || !m_frame) return;
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+
+	int tseq_cur_num = m_view->m_tseq_cur_num;
+	int view_begin_frame = m_view->m_begin_frame;
+	int view_end_frame = m_view->m_end_frame;
+
+	int time_mode, chan_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	bool start_frame, end_frame;
+	fconfig.Read("start_frame", &start_frame, false);
+	fconfig.Read("end_frame", &end_frame, false);
+	if (time_mode != index)
+	{
+		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
+			!(end_frame && tseq_cur_num == view_end_frame))
+			return;
+	}
+	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	std::vector<VolumeData*> vlist;
+	if (chan_mode == 0)
+	{
+		vlist.push_back(cur_vol);
+	}
+	else
+	{
+		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
+			vlist.push_back(m_view->GetDispVolumeData(i));
+	}
+	bool bmask, blabel;
+	fconfig.Read("mask", &bmask, 1);
+	fconfig.Read("label", &blabel, 1);
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		//clear the mask
+		if (bmask)
+		{
+			(*i)->AddEmptyMask(0, true);
+		}
+		//clear the label
+		if (blabel)
+		{
+			(*i)->AddEmptyLabel(0, true);
 		}
 	}
 }

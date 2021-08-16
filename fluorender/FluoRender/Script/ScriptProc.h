@@ -69,6 +69,7 @@ namespace flrd
 		void RunSparseTracking(int index, wxFileConfig &fconfig);
 		void RunRandomColors(int index, wxFileConfig &fconfig);
 		void RunFetchMask(int index, wxFileConfig &fconfig);
+		void RunClearMask(int index, wxFileConfig &fconfig);
 		void RunSaveMask(int index, wxFileConfig &fconfig);
 		void RunSaveVolume(int index, wxFileConfig &fconfig);
 		void RunCalculate(int index, wxFileConfig &fconfig);

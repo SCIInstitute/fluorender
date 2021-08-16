@@ -45,7 +45,7 @@ void ExMax1::AddClusterPoint(const EmVec &p, const float value)
 	pp->noise = true;
 	using namespace boost::qvm;
 	pp->centeri = p;
-	pp->centerf = { A0(p)*A0(m_spc), A1(p)*A1(m_spc), A2(p)*A2(m_spc) };
+	pp->centerf = { A0(p), A1(p), A2(p) };
 	pp->intensity = value;
 	m_data.push_back(pp);
 }
@@ -57,17 +57,21 @@ bool ExMax1::Execute()
 
 	Initialize();
 
-	size_t counter = 0;
-	do
+	if (m_max_iter)
 	{
-		m_params_prv = m_params;
-		m_likelihood_prv = m_likelihood;
-		Expectation();
-		Maximization();
-		counter++;
+		size_t counter = 0;
+		do
+		{
+			if (m_inc_counter > 3)
+				break;
+			m_params_prv = m_params;
+			m_likelihood_prv = m_likelihood;
+			Expectation();
+			Maximization();
+			counter++;
+		} while (!Converge() &&
+			counter < m_max_iter);
 	}
-	while (!Converge() &&
-		counter < m_max_iter);
 
 	return true;
 }
@@ -149,6 +153,7 @@ void ExMax1::Initialize()
 
 	//limit
 	m_eps = m_eps == 0.0 ? m_l : m_eps * m_l;
+	m_inc_counter = 0;
 }
 
 void ExMax1::Expectation()
@@ -221,6 +226,8 @@ bool ExMax1::Converge()
 	//compute likelihood
 	//m_likelihood = GetProb();
 	m_likelihood = mag(m_params.mean - m_params_prv.mean);
+	if (m_likelihood > m_likelihood_prv)
+		m_inc_counter++;
 	if (fabs(m_likelihood) > m_eps)
 		return false;
 	else
