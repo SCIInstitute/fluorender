@@ -86,8 +86,8 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 					RunNoiseReduction(index, fconfig);
 				else if (str == "selection_tracking")
 					RunSelectionTracking(index, fconfig);
-				else if (str == "sparse_tracking")
-					RunSparseTracking(index, fconfig);
+				else if (str == "mask_tracking")
+					RunMaskTracking(index, fconfig);
 				else if (str == "random_colors")
 					RunRandomColors(index, fconfig);
 				else if (str == "fetch_mask")
@@ -269,7 +269,7 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunSparseTracking(int index, wxFileConfig &fconfig)
+void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;

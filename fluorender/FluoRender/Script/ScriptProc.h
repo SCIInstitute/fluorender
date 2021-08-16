@@ -66,7 +66,7 @@ namespace flrd
 	private:
 		void RunNoiseReduction(int index, wxFileConfig &fconfig);
 		void RunSelectionTracking(int index, wxFileConfig &fconfig);
-		void RunSparseTracking(int index, wxFileConfig &fconfig);
+		void RunMaskTracking(int index, wxFileConfig &fconfig);
 		void RunRandomColors(int index, wxFileConfig &fconfig);
 		void RunFetchMask(int index, wxFileConfig &fconfig);
 		void RunClearMask(int index, wxFileConfig &fconfig);
@@ -82,7 +82,6 @@ namespace flrd
 		void RunUnlinkCells(int index, wxFileConfig &fconfig);
 
 		//read/delete volume cache
-		//for sparse tracking
 		void ReadVolCache(VolCache& vol_cache);
 		void DelVolCache(VolCache& vol_cache);
 	};
