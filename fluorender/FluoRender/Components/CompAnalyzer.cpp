@@ -328,7 +328,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			if (bn > 1)
 				size_limit = m_slimit;
 			else
-				size_limit = 2;
+				size_limit = 0;
 			if (iter->second->GetSize() < size_limit)
 				continue;
 			//iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
