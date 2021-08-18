@@ -121,10 +121,14 @@ void ExMax1::Initialize()
 	}
 
 	//normalize
-	for (ClusterIter iter = m_data.begin();
-		iter != m_data.end(); ++iter)
+	float range = maxint - minint;
+	if (range > 0.0f)
 	{
-		(*iter)->intensity = 1.0 - ((*iter)->intensity - minint) / (maxint - minint);
+		for (ClusterIter iter = m_data.begin();
+			iter != m_data.end(); ++iter)
+		{
+			(*iter)->intensity = 1.0 - ((*iter)->intensity - minint) / range;
+		}
 	}
 
 	EmVec trace = { 0, 0, 0 };
@@ -194,7 +198,8 @@ void ExMax1::Maximization()
 		sum_p += (*iter)->centerf * (*iter)->intensity * m_mem_prob[i];
 		i++;
 	}
-	m_params.mean = sum_p / sum_t;
+	if (sum_t != 0.0)
+		m_params.mean = sum_p / sum_t;
 
 	//covar/sigma
 	i = 0;
@@ -217,7 +222,8 @@ void ExMax1::Maximization()
 		sum_s += form * m_mem_prob[i] * (*iter)->intensity;
 		i++;
 	}
-	m_params.covar = sum_s / sum_t;
+	if (sum_t != 0.0)
+		m_params.covar = sum_s / sum_t;
 	//Regulate(m_params.covar);
 }
 
@@ -226,7 +232,7 @@ bool ExMax1::Converge()
 	//compute likelihood
 	//m_likelihood = GetProb();
 	m_likelihood = mag(m_params.mean - m_params_prv.mean);
-	if (m_likelihood > m_likelihood_prv)
+	if (m_likelihood >= m_likelihood_prv)
 		m_inc_counter++;
 	if (fabs(m_likelihood) > m_eps)
 		return false;
@@ -239,13 +245,11 @@ double ExMax1::Gaussian(EmVec &p, EmVec &m, EmMat &s)
 	using namespace boost::qvm;
 	double pi2_3 = 248.050213442399; //(2pi)^3
 	double det = Det(s);
-	EmVec d = p - m;
-
-	EmMat inv = Inv(s);
-	if (det == 0.0)
+	if (std::abs(det) < fluo::Epsilon(10))
 		return 0.0;
-	else
-		return exp(-0.5 * dot(d, inv * d)) / sqrt(pi2_3 * det);
+	EmVec d = p - m;
+	EmMat inv = Inv(s);
+	return exp(-0.5 * dot(d, inv * d)) / sqrt(pi2_3 * det);
 }
 
 double ExMax1::Det(EmMat &mat)
