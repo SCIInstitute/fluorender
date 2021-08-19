@@ -4551,6 +4551,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 			stencil.nz = nz;
 			stencil.bits = m_map->m_data_bits;
 			stencil.scale = m_map->m_scale;
+			stencil.fsize = m_filter;
 			stencil.box.extend(fluo::Point(i, j, k));
 			stencil_list.insert(std::pair<unsigned int, Stencil>
 				(label_value, stencil));

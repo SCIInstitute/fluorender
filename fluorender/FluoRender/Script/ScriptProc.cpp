@@ -299,6 +299,8 @@ void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 	fconfig.Read("iter", &iter, 25);
 	double eps;
 	fconfig.Read("eps", &eps, 1e-3);
+	int fsize;
+	fconfig.Read("fsize", &fsize, 1);
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
@@ -312,6 +314,7 @@ void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetMaxIter(iter);
 	tm_processor.SetEps(eps);
+	tm_processor.SetFilterSize(fsize);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),

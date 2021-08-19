@@ -67,6 +67,7 @@ namespace flrd
 		m_split(false),
 		m_max_iter(25),
 		m_eps(1e-3),
+		m_filter(1),
 		m_map(track_map) {}
 		~TrackMapProcessor();
 
@@ -79,6 +80,7 @@ namespace flrd
 		void SetSplit(bool value);
 		void SetMaxIter(int value);
 		void SetEps(float value);
+		void SetFilterSize(size_t value);
 
 		void SetSizes(size_t nx, size_t ny, size_t nz);
 		void SetBits(size_t bits);
@@ -174,6 +176,7 @@ namespace flrd
 		int m_level_thresh;
 		int m_max_iter;
 		float m_eps;
+		size_t m_filter;
 		bool m_merge;
 		bool m_split;
 		//uncertainty filter
@@ -417,6 +420,11 @@ namespace flrd
 	inline void TrackMapProcessor::SetEps(float value)
 	{
 		m_eps = value;
+	}
+
+	inline void TrackMapProcessor::SetFilterSize(size_t value)
+	{
+		m_filter = value;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, const bool value)

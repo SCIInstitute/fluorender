@@ -37,7 +37,7 @@ namespace flrd
 	struct Stencil
 	{
 		Stencil() :
-		data(0), scale(1.0f) {}
+		data(0), scale(1.0f), fsize(1) {}
 		
 		bool valid() const
 		{
@@ -60,6 +60,54 @@ namespace flrd
 		{
 			box.extend(fluo::Point(i, j, k));
 		}
+		float get(size_t i, size_t j, size_t k) const
+		{
+			if (!data)
+				return 0.0f;
+			if (!valid(i, j, k))
+				return 0.0f;
+			unsigned long long index =
+				(unsigned long long)nx*ny*k +
+				(unsigned long long)nx*j +
+				(unsigned long long)i;
+			if (bits == 8)
+				return ((unsigned char*)data)[index] / 255.0f;
+			else
+				return ((unsigned short*)data)[index] * scale / 65535.0f;
+		}
+		float getfilter(size_t i, size_t j, size_t k) const
+		{
+			if (!data)
+				return 0.0f;
+			if (!valid(i, j, k))
+				return 0.0f;
+			if (fsize > 1)
+			{
+				size_t count = 0;
+				float sum = 0;
+				float val;
+				int lb = fsize / 2 + fsize % 2 - 1;
+				int ub = fsize / 2;
+				for (int ii = -lb; ii <= ub; ++ii)
+				for (int jj = -lb; jj <= ub; ++jj)
+				//for (int kk = -lb; kk <= ub; ++kk)
+				{
+					val = get(i + ii, j + jj, k);
+					if (val > 0.0)
+					{
+						sum += val;
+						count++;
+					}
+				}
+				if (count)
+					return sum / count;
+			}
+			else
+			{
+				return get(i, j, k);
+			}
+			return 0.0f;
+		}
 
 		//pointer to the entire data
 		void* data;
@@ -70,6 +118,7 @@ namespace flrd
 		size_t bits;
 		float scale;
 		fluo::BBox box;
+		size_t fsize;//filter size (box)
 	};
 
 	typedef std::unordered_map<unsigned int, Stencil> StencilList;
@@ -100,21 +149,10 @@ namespace flrd
 		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
 		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
 		{
-			if (!s1.valid(i, j, k) ||
-				!s2.valid(i2, j2, k2))
-				continue;
 			//get v1
-			index = s1.nx*s1.ny*k + s1.nx*j + i;
-			if (s1.bits == 8)
-				v1 = ((unsigned char*)(s1.data))[index] / 255.0f;
-			else
-				v1 = ((unsigned short*)(s1.data))[index] * s1.scale / 65535.0f;
+			v1 = s1.getfilter(i, j, k);
 			//get v2
-			index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-			if (s2.bits == 8)
-				v2 = ((unsigned char*)(s2.data))[index] / 255.0f;
-			else
-				v2 = ((unsigned short*)(s2.data))[index] * s2.scale / 65535.0f;
+			v2 = s2.getfilter(i2, j2, k2);
 			//get d
 			d = fabs(v1 - v2);
 			result += d;
