@@ -7,4 +7,5 @@ ext_x=0.1
 ext_y=0.1
 ext_z=0.1
 iter=50
-eps=1e-2
+eps=1e-3
+fsize=1
