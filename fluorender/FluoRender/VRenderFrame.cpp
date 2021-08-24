@@ -2888,7 +2888,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				fluo::Quaternion qtemp;
 				vd->Save(str, 0, false, false, VRenderFrame::GetCompression(), qtemp);
@@ -3062,7 +3062,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + md->GetName() + ".obj";
 				md->Save(str);
 			}
@@ -3131,7 +3131,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
 				ann->Save(str);
 			}
@@ -3375,7 +3375,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	{
 		wxString new_folder;
 		new_folder = filename + "_files";
-		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		MkDirW(new_folder.ToStdWstring());
 		std::wstring wstr = filename.ToStdWstring();
 		str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
 		m_trace_dlg->SaveTrackFile(str);
@@ -3480,8 +3480,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 		}
 	}
 
-	wxFileOutputStream os(filename);
-	fconfig.Save(os);
+	SaveConfig(fconfig, filename);
 	UpdateList();
 
 	delete prg_diag;

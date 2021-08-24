@@ -4566,7 +4566,7 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
 	{
 		wxString new_folder = wxPathOnly(m_cap_file)
 			+ GETSLASH() + m_bat_folder + "_folder";
-		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		MkDirW(new_folder.ToStdWstring());
 	}
 }
 

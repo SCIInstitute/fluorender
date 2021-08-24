@@ -1944,7 +1944,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 			{
 				wxString new_folder;
 				new_folder = m_glview->m_cap_file + "_project";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 				vr_frame->SaveProject(prop_file);
 			}
@@ -2950,9 +2950,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_view_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_view_settings.dft";
+	SaveConfig(fconfig, dft);
 
 	m_default_saved = true;
 }
@@ -2966,7 +2965,7 @@ void VRenderView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
     expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_view_settings.dft";
+    wxString dft = expath + GETSLASH() + "default_view_settings.dft";
 
 	wxFileInputStream is(dft);
 

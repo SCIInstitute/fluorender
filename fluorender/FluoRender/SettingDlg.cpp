@@ -873,7 +873,7 @@ void SettingDlg::GetSettings()
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/fluorender.set";
+	wxString dft = expath + GETSLASH() + "fluorender.set";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -1526,9 +1526,8 @@ void SettingDlg::SaveSettings()
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/fluorender.set";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "fluorender.set";
+	SaveConfig(fconfig, dft);
 }
 
 void SettingDlg::UpdateTextureSize()

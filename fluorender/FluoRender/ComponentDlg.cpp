@@ -1172,7 +1172,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
 		expath = wxPathOnly(expath);
-		filename = expath + "/default_component_settings.dft";
+		filename = expath + GETSLASH() + "default_component_settings.dft";
 		get_basic = true;
 	}
 	wxFileInputStream is(filename);
@@ -1280,11 +1280,10 @@ void ComponentDlg::SaveSettings(wxString filename)
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
 		expath = wxPathOnly(expath);
-		filename = expath + "/default_component_settings.dft";
+		filename = expath + GETSLASH() + "default_component_settings.dft";
 	}
 
-	wxFileOutputStream os(filename);
-	fconfig.Save(os);
+	SaveConfig(fconfig, filename);
 }
 
 void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
@@ -2103,8 +2102,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 		}
 	}
 
-	wxFileOutputStream os(filename);
-	fconfig.Save(os);
+	SaveConfig(fconfig, filename);
 	m_cmd_file_text->SetValue(filename);
 }
 

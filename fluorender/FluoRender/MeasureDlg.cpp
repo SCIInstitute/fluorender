@@ -353,10 +353,8 @@ void RulerListCtrl::Export(wxString filename)
 	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (ruler_list)
 	{
-		wxFileOutputStream fos(filename);
-		if (!fos.Ok())
-			return;
-		wxTextOutputStream tos(fos);
+		std::ofstream os;
+		OutputStreamOpen(os, filename.ToStdString());
 
 		wxString str;
 		wxString unit;
@@ -384,30 +382,30 @@ void RulerListCtrl::Export(wxString filename)
 		std::vector<int> group_count(group_num, 0);
 
 		if (ruler_num > 1)
-			tos << "Ruler Count:\t" << ruler_num << "\n";
+			os << "Ruler Count:\t" << ruler_num << "\n";
 		if (group_num > 1)
 		{
 			//group count
-			tos << "Group Count:\t" << group_num << "\n";
+			os << "Group Count:\t" << group_num << "\n";
 			for (int i = 0; i < group_num; ++i)
 			{
-				tos << "Group " << groups[i];
+				os << "Group " << groups[i];
 				if (i < group_num - 1)
-					tos << "\t";
+					os << "\t";
 				else
-					tos << "\n";
+					os << "\n";
 			}
 			for (int i = 0; i < group_num; ++i)
 			{
-				tos << counts[i];
+				os << counts[i];
 				if (i < group_num - 1)
-					tos << "\t";
+					os << "\t";
 				else
-					tos << "\n";
+					os << "\n";
 			}
 		}
 
-		tos << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+		os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
 
 		double f = 0.0;
 		fluo::Color color;
@@ -417,11 +415,11 @@ void RulerListCtrl::Export(wxString filename)
 			ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 
-			tos << ruler->GetName() << "\t";
+			os << ruler->GetName() << "\t";
 
 			//group and count
 			unsigned int group = ruler->Group();
-			tos << group << "\t";
+			os << group << "\t";
 			int count = 0;
 			auto iter = std::find(groups.begin(), groups.end(), group);
 			if (iter != groups.end())
@@ -429,7 +427,7 @@ void RulerListCtrl::Export(wxString filename)
 				int index = std::distance(groups.begin(), iter);
 				count = ++group_count[index];
 			}
-			tos << count << "\t";
+			os << count << "\t";
 
 			//color
 			if (ruler->GetUseColor())
@@ -440,17 +438,17 @@ void RulerListCtrl::Export(wxString filename)
 			}
 			else
 				str = "N/A";
-			tos << str << "\t";
+			os << str << "\t";
 
 			//branch count
 			str = wxString::Format("%d", ruler->GetNumBranch());
-			tos << str << "\t";
+			os << str << "\t";
 			//length
 			str = wxString::Format("%.2f", ruler->GetLength());
-			tos << str << "\t";
+			os << str << "\t";
 			//angle
 			str = wxString::Format("%.1f", ruler->GetAngle());
-			tos << str << "\t";
+			os << str << "\t";
 
 			str = "";
 			//start and end points
@@ -467,23 +465,23 @@ void RulerListCtrl::Export(wxString filename)
 			}
 			else
 				str += "\t\t\t";
-			tos << str;
+			os << str;
 			
 			//time
 			if (ruler->GetTimeDep())
 				str = wxString::Format("%d", ruler->GetTime());
 			else
 				str = "N/A";
-			tos << str << "\t";
+			os << str << "\t";
 
 			//info values v1 v2
-			tos << ruler->GetInfoValues() << "\n";
+			os << ruler->GetInfoValues() << "\n";
 
 			//export points
 			if (ruler->GetNumPoint() > 2)
 			{
-				tos << ruler->GetPosNames();
-				tos << ruler->GetPosValues();
+				os << ruler->GetPosNames();
+				os << ruler->GetPosValues();
 			}
 
 			//export profile
@@ -492,16 +490,16 @@ void RulerListCtrl::Export(wxString filename)
 			{
 				double sumd = 0.0;
 				unsigned long long sumull = 0;
-				tos << ruler->GetInfoProfile() << "\n";
+				os << ruler->GetInfoProfile() << "\n";
 				for (size_t j=0; j<profile->size(); ++j)
 				{
 					//for each profile
 					int pixels = (*profile)[j].m_pixels;
 					if (pixels <= 0)
-						tos << "0.0\t";
+						os << "0.0\t";
 					else
 					{
-						tos << (*profile)[j].m_accum / pixels << "\t";
+						os << (*profile)[j].m_accum / pixels << "\t";
 						sumd += (*profile)[j].m_accum;
 						sumull += pixels;
 					}
@@ -514,20 +512,22 @@ void RulerListCtrl::Export(wxString filename)
 					if (i == 0)
 					{
 						f = avg;
-						tos << "\t" << f << "\t";
+						os << "\t" << f << "\t";
 					}
 					else
 					{
 						double df = avg - f;
 						if (f == 0.0)
-							tos << "\t" << df << "\t";
+							os << "\t" << df << "\t";
 						else
-							tos << "\t" << df / f << "\t";
+							os << "\t" << df / f << "\t";
 					}
 				}
-				tos << "\n";
+				os << "\n";
 			}
 		}
+
+		os.close();
 	}
 }
 

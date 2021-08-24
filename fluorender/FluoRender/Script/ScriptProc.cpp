@@ -583,7 +583,7 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 	fconfig.Read("delete", &del_vol, false);
 	str = wxPathOnly(pathname);
 	if (!wxDirExists(str))
-		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		MkDirW(str.ToStdWstring());
 	if (!wxDirExists(str))
 		return;
 
@@ -793,7 +793,7 @@ void ScriptProc::RunCompAnalysis(int index, wxFileConfig &fconfig)
 
 	str = wxPathOnly(pathname);
 	if (!wxDirExists(str))
-		wxFileName::Mkdir(str, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		MkDirW(str.ToStdWstring());
 	if (!wxDirExists(str))
 		return;
 

@@ -2842,15 +2842,15 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 
 void TraceDlg::SaveOutputResult(wxString &filename)
 {
-	wxFileOutputStream fos(filename);
-	if (!fos.Ok())
-		return;
-	wxTextOutputStream tos(fos);
+	std::ofstream os;
+	OutputStreamOpen(os, filename.ToStdString());
 
 	wxString str;
 	str = m_stat_text->GetValue();
 
-	tos << str;
+	os << str;
+
+	os.close();
 }
 
 //read/delete volume cache

@@ -1508,7 +1508,7 @@ void VMovieView::Run()
 		{
 			wxString new_folder;
 			new_folder = m_filename + "_project";
-			wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+			MkDirW(new_folder.ToStdWstring());
 			wstring name = m_filename.ToStdWstring();
 			name = GET_NAME(name);
 			wxString prop_file = new_folder + GETSLASH()

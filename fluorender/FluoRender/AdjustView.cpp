@@ -1275,16 +1275,15 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	m_dft_hdr = fluo::Color(dft_r_hdr, dft_g_hdr, dft_b_hdr);
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_2d_adjustment_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_2d_adjustment_settings.dft";
+	SaveConfig(fconfig, dft);
 }
 
 void AdjustView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_2d_adjustment_settings.dft";
+	wxString dft = expath + GETSLASH() + "default_2d_adjustment_settings.dft";
 
 	wxFileInputStream is(dft);
 	if (!is.IsOk())

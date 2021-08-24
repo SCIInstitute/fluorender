@@ -2568,9 +2568,8 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	mgr->m_vol_swi = swi;
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_volume_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
+	SaveConfig(fconfig, dft);
 }
 
 void VPropView::OnResetDefault(wxCommandEvent &event)

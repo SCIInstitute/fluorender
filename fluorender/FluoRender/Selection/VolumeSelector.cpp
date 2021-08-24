@@ -618,7 +618,7 @@ void VolumeSelector::LoadBrushSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
+	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -790,9 +790,8 @@ void VolumeSelector::SaveBrushSettings()
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
+	SaveConfig(fconfig, dft);
 }
 
 void VolumeSelector::PopMask()

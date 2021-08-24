@@ -3287,11 +3287,8 @@ int Annotations::Load(wxString &filename, DataManager* mgr)
 
 void Annotations::Save(wxString &filename)
 {
-	wxFileOutputStream fos(filename);
-	if (!fos.Ok())
-		return;
-
-	wxTextOutputStream tos(fos);
+	std::ofstream os;
+	OutputStreamOpen(os, filename.ToStdString());
 
 	int resx = 1;
 	int resy = 1;
@@ -3299,35 +3296,36 @@ void Annotations::Save(wxString &filename)
 	if (m_vd)
 		m_vd->GetResolution(resx, resy, resz);
 
-	tos << "Name: " << m_name << "\n";
-	tos << "Display: " << m_disp << "\n";
-	tos << "Memo:\n" << m_memo << "\n";
-	tos << "Memo Update: " << m_memo_ro << "\n";
+	os << "Name: " << m_name << "\n";
+	os << "Display: " << m_disp << "\n";
+	os << "Memo:\n" << m_memo << "\n";
+	os << "Memo Update: " << m_memo_ro << "\n";
 	if (m_vd)
 	{
-		tos << "Volume: " << m_vd->GetName() << "\n";
-		tos << "Voxel size (X Y Z):\n";
+		os << "Volume: " << m_vd->GetName() << "\n";
+		os << "Voxel size (X Y Z):\n";
 		double spcx, spcy, spcz;
 		m_vd->GetSpacings(spcx, spcy, spcz);
-		tos << spcx << "\t" << spcy << "\t" << spcz << "\n";
+		os << spcx << "\t" << spcy << "\t" << spcz << "\n";
 	}
 
 
-	tos << "\nComponents:\n";
-	tos << "ID\tX\tY\tZ\t" << m_info_meaning << "\n\n";
+	os << "\nComponents:\n";
+	os << "ID\tX\tY\tZ\t" << m_info_meaning << "\n\n";
 	for (int i=0; i<(int)m_alist.size(); i++)
 	{
 		AText* atext = m_alist[i];
 		if (atext)
 		{
-			tos << atext->m_txt << "\t";
-			tos << int(atext->m_pos.x()*resx+1.0) << "\t";
-			tos << int(atext->m_pos.y()*resy+1.0) << "\t";
-			tos << int(atext->m_pos.z()*resz+1.0) << "\t";
-			tos << atext->m_info << "\n";
+			os << atext->m_txt << "\t";
+			os << int(atext->m_pos.x()*resx+1.0) << "\t";
+			os << int(atext->m_pos.y()*resy+1.0) << "\t";
+			os << int(atext->m_pos.z()*resz+1.0) << "\t";
+			os << atext->m_info << "\n";
 		}
 	}
 
+	os.close();
 	m_data_path = filename;
 }
 
@@ -4397,7 +4395,7 @@ m_vol_exb(0.0),
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_volume_settings.dft";
+	wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
