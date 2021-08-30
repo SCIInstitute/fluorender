@@ -3033,7 +3033,7 @@ unsigned int TrackMapProcessor::GetTrackedID(
 		celp2 = (*vert2->GetCellsBegin()).lock();
 		if (!celp2)
 			continue;
-		rid = celp->Id();
+		rid = celp2->Id();
 		break;
 	}
 
