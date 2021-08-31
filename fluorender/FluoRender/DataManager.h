@@ -900,6 +900,7 @@ public:
 	bool GetMappedRulers(flrd::RulerList &rulers);
 
 	//i/o
+	void Clear();
 	bool Load(wxString &filename);
 	bool Save(wxString &filename);
 

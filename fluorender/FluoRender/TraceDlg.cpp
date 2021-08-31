@@ -290,6 +290,7 @@ void TraceListCtrl::OnDeleteSelection(wxCommandEvent& event)
 BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 //map page
 //load/save trace
+EVT_BUTTON(ID_ClearTraceBtn, TraceDlg::OnClearTrace)
 EVT_BUTTON(ID_LoadTraceBtn, TraceDlg::OnLoadTrace)
 EVT_BUTTON(ID_SaveTraceBtn, TraceDlg::OnSaveTrace)
 EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
@@ -381,6 +382,8 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(70, 20));
 	m_load_trace_text = new wxTextCtrl(page, ID_LoadTraceText, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	m_clear_trace_btn = new wxButton(page, ID_ClearTraceBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
 	m_load_trace_btn = new wxButton(page, ID_LoadTraceBtn, "Load",
 		wxDefaultPosition, wxSize(65, 23));
 	m_save_trace_btn = new wxButton(page, ID_SaveTraceBtn, "Save",
@@ -390,6 +393,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
+	sizer_1->Add(m_clear_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_save_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
@@ -1019,6 +1023,17 @@ void TraceDlg::UpdateList()
 	}
 	m_trace_list_curr->UpdateTraces(m_view);
 	Layout();
+}
+
+void TraceDlg::OnClearTrace(wxCommandEvent& event)
+{
+	if (!m_view) return;
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (trace_group)
+	{
+		trace_group->Clear();
+		m_load_trace_text->SetValue("No Track map");
+	}
 }
 
 void TraceDlg::OnLoadTrace(wxCommandEvent& event)

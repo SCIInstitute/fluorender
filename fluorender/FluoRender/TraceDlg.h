@@ -101,6 +101,7 @@ public:
 		//map page
 		//load/save trace
 		ID_LoadTraceText = ID_TRACE2,
+		ID_ClearTraceBtn,
 		ID_LoadTraceBtn,
 		ID_SaveTraceBtn,
 		ID_SaveasTraceBtn,
@@ -245,6 +246,7 @@ private:
 	//map page
 	//load/save trace
 	wxTextCtrl* m_load_trace_text;
+	wxButton* m_clear_trace_btn;
 	wxButton* m_load_trace_btn;
 	wxButton* m_save_trace_btn;
 	wxButton* m_saveas_trace_btn;
@@ -347,6 +349,7 @@ private:
 private:
 	//map page
 	//load/save trace
+	void OnClearTrace(wxCommandEvent& event);
 	void OnLoadTrace(wxCommandEvent& event);
 	void OnSaveTrace(wxCommandEvent& event);
 	void OnSaveasTrace(wxCommandEvent& event);

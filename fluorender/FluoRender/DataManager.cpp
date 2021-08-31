@@ -3831,6 +3831,11 @@ flrd::RulerListIter TraceGroup::FindRulerFromList(unsigned int id, flrd::RulerLi
 	return iter;
 }
 
+void TraceGroup::Clear()
+{
+	m_track_map->Clear();
+}
+
 bool TraceGroup::Load(wxString &filename)
 {
 	m_data_path = filename;
