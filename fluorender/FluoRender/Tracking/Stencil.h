@@ -177,52 +177,23 @@ namespace flrd
 		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
 		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
-		float v1;
-		float v1max = 0;
-		float v2max = 0;
-		fluo::Point p1max, p2max;
+		float v1, v2, d1, d2, w;
 		size_t index;
 		size_t i, i2, j, j2, k, k2;
 		for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
 		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
 		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
 		{
-			if (!s1.valid(i, j, k) ||
-				!s2.valid(i2, j2, k2))
-				continue;
 			//get v1
-			index = s1.nx*s1.ny*k + s1.nx*j + i;
-			if (s1.bits == 8)
-				v1 = ((unsigned char*)(s1.data))[index] / 255.0f;
-			else
-				v1 = ((unsigned short*)(s1.data))[index] * s1.scale / 65535.0f;
+			v1 = s1.getfilter(i, j, k);
 			//get v2
-			//index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-			//if (s2.bits == 8)
-			//	v2 = ((unsigned char*)(s2.data))[index] / 255.0f;
-			//else
-			//	v2 = ((unsigned char*)(s2.data))[index] * s2.scale / 65535.0f;
-			//get d
-			if (v1 > v1max)
-			{
-				v1max = v1;
-				p1max = fluo::Point(i, j, k);
-			}
-			//if (v2 > v2max)
-			//{
-			//	v2max = v2;
-			//	p2max = flvr::Point(i2, j2, k2);
-			//}
+			v2 = s2.getfilter(i2, j2, k2);
+			//get d weighted
+			d1 = fabs(v1 - v2);
+			d2 = 1.0 - std::min(v1, v2);
+			w = d1 * d2;
+			result += w;
 		}
-		i2 = minx2 + (maxx - minx) / 2;
-		j2 = miny2 + (maxy - miny) / 2;
-		k2 = minz2 + (maxz - minz) / 2;
-		index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-		if (s2.bits == 8)
-			v2max = ((unsigned char*)(s2.data))[index] / 255.0f;
-		else
-			v2max = ((unsigned short*)(s2.data))[index] * s2.scale / 65535.0f;
-		result = fabs(v1max - v2max);
 		return result;
 	}
 
@@ -266,8 +237,8 @@ namespace flrd
 		{
 			s2.box = s2temp;
 			s2.box.translate(fluo::Vector(ti, tj, tk));
-			p = s1 * s2;
-			//p = similar(s1, s2);
+			//p = s1 * s2;
+			p = similar(s1, s2);
 
 			EmVec pnt = {
 				static_cast<double>(s2.box.Min().x()),

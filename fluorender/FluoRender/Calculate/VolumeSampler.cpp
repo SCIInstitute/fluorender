@@ -156,10 +156,32 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_nz = m_nz_in;
 	}
 
+	//check rotation
+	bool rot = !m_q_cl.IsIdentity();
+	double x, y, z;
+
 	if (m_crop)
 	{
 		if (!m_crop_calc)
 		{
+			if (rot)
+			{
+				x = m_nx;
+				y = m_ny;
+				z = m_nz;
+				fluo::Vector vec(x - 0.5,
+					y - 0.5,
+					z - 0.5);
+				fluo::Quaternion qvec(vec);
+				qvec = (-m_q_cl) * qvec * (m_q_cl);
+				m_nx = int(std::fabs(qvec.x) + 0.5);
+				m_ny = int(std::fabs(qvec.y) + 0.5);
+				m_nz = int(std::fabs(qvec.z) + 0.5);
+				m_nx = m_nx < 1 ? 1 : m_nx;
+				m_ny = m_ny < 1 ? 1 : m_ny;
+				m_nz = m_nz < 1 ? 1 : m_nz;
+			}
+
 			//recalculate range
 			vector<fluo::Plane*> *planes =
 				m_input->GetVR()->get_planes();
@@ -237,12 +259,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	if (!m_raw_result)
 		throw std::runtime_error("Unable to allocate memory.");
 
-	//check rotation
-	bool rot = !m_q_cl.IsIdentity();
-
 	unsigned long long index;
 	int i, j, k;
-	double x, y, z;
 	double value;
 	for (k = 0; k < m_lz; ++k)
 	for (j = 0; j < m_ly; ++j)
@@ -292,9 +310,22 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	//spacing
 	double spcx, spcy, spcz;
 	m_input->GetSpacings(spcx, spcy, spcz);
-	spcx *= double(m_nx_in) / double(m_nx);
-	spcy *= double(m_ny_in) / double(m_ny);
-	spcz *= double(m_nz_in) / double(m_nz);
+	if (rot)
+	{
+		fluo::Vector vec(spcx, spcy, spcz);
+		fluo::Quaternion qvec(vec);
+		qvec = (-m_q_cl) * qvec * (m_q_cl);
+		spcx = std::abs(qvec.x);
+		spcy = std::abs(qvec.y);
+		spcz = std::abs(qvec.z);
+	}
+	else
+	{
+		spcx *= double(m_nx_in) / double(m_nx);
+		spcy *= double(m_ny_in) / double(m_ny);
+		spcz *= double(m_nz_in) / double(m_nz);
+	}
+
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_lx,
 		spcy*m_ly, spcz*m_lz);
