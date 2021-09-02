@@ -505,13 +505,18 @@ namespace flvr
 
 	double TextureRenderer::compute_rate_scale(fluo::Vector v)
 	{
-		//Transform *field_trans = tex_->transform();
-		double spcx, spcy, spcz;
-		tex_->get_spacings(spcx, spcy, spcz);
-		double z_factor = spcz / std::max(spcx, spcy);
-		fluo::Vector n(double(tex_->nx()) / double(tex_->nz()),
-			double(tex_->ny()) / double(tex_->nz()),
-			z_factor > 1.0&&z_factor < 100.0 ? sqrt(z_factor) : 1.0);
+		//double spcx, spcy, spcz;
+		//tex_->get_spacings(spcx, spcy, spcz);
+		//double z_factor = spcz / std::max(spcx, spcy);
+		//double rxz = double(tex_->nx()) / double(tex_->nz());
+		//double ryz = double(tex_->ny()) / double(tex_->nz());
+		//fluo::Vector n(std::max(rxz, 1.0),
+		//	std::max(ryz, 1.0),
+		//	z_factor > 1.0&&z_factor < 100.0 ? sqrt(z_factor) : 1.0);
+		double basen = std::min(tex_->nx(), std::min(tex_->ny(), tex_->nz()));
+		fluo::Vector n(double(tex_->nx() / basen),
+			double(tex_->ny() / basen),
+			double(tex_->nz() / basen));
 
 		double e = 0.0001;
 		double a, b, c;
