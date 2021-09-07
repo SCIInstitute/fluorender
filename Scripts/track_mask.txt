@@ -3,9 +3,10 @@ tasknum=1
 [tasks/task0]
 type=mask_tracking
 time_mode=1
-ext_x=0.1
-ext_y=0.1
-ext_z=0.1
+ext_x=0.3
+ext_y=0.3
+ext_z=0.3
 iter=50
 eps=1e-3
 fsize=1
+compare=0

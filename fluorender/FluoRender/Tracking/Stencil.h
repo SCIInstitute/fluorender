@@ -197,8 +197,8 @@ namespace flrd
 		return result;
 	}
 
-	inline bool match_stencils(const Stencil& s1,
-		Stencil& s2, const fluo::Vector &ext,
+	inline bool match_stencils(const Stencil& s1, Stencil& s2,
+		const fluo::Vector &ext, const fluo::Vector &off,
 		fluo::Point &center, float &prob,
 		int iter, float eps, float spcx,
 		float spcy, float spcz)
@@ -237,15 +237,17 @@ namespace flrd
 		{
 			s2.box = s2temp;
 			s2.box.translate(fluo::Vector(ti, tj, tk));
+			s2.box.translate(off);
 			//p = s1 * s2;
 			p = similar(s1, s2);
 
 			EmVec pnt = {
 				static_cast<double>(s2.box.Min().x()),
 				static_cast<double>(s2.box.Min().y()),
-				static_cast<double>(s2.box.Min().z()) };
+				static_cast<double>(s2.box.Min().z())
+			};
 			em1.AddClusterPoint(
-				pnt, p);
+					pnt, p);
 //#ifdef _DEBUG
 //			ofs.write((char*)(&p), sizeof(float));
 //#endif

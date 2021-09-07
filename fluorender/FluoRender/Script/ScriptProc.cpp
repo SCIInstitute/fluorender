@@ -283,6 +283,7 @@ void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 
 	int tseq_cur_num = m_view->m_tseq_cur_num;
 	int tseq_prv_num = m_view->m_tseq_prv_num;
+	int view_begin_frame = m_view->m_begin_frame;
 
 	int time_mode, chan_mode;
 	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
@@ -301,6 +302,8 @@ void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 	fconfig.Read("eps", &eps, 1e-3);
 	int fsize;
 	fconfig.Read("fsize", &fsize, 1);
+	int mode;
+	fconfig.Read("compare", &mode, 0);
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
@@ -320,7 +323,8 @@ void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
 
-	tm_processor.TrackStencils(tseq_prv_num, tseq_cur_num, ext);
+	tm_processor.TrackStencils(tseq_prv_num, tseq_cur_num,
+		ext, mode, view_begin_frame);
 
 	//add traces to trace dialog
 	if (m_vrv && m_frame && m_frame->GetTraceDlg())
