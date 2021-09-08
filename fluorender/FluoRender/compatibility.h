@@ -616,7 +616,7 @@ inline void OutputStreamOpen(std::ofstream &os, std::string fname)
 
 inline void OutputStreamOpenW(std::wofstream &os, std::wstring fname)
 {
-	os.open(fname);
+    //os.open(L"test");//fname.c_str());
 }
 
 inline int MkDir(std::string dirname)
