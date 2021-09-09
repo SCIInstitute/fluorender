@@ -9,4 +9,4 @@ ext_z=0.3
 iter=50
 eps=1e-3
 fsize=1
-compare=0
+compare=1

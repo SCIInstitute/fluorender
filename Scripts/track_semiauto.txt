@@ -16,7 +16,7 @@ start_frame=0
 end_frame=0
 chan_mode=0
 use_sel=1
-th_factor=0.2
+th_factor=0.35
 [tasks/task3]
 type=save_mask
 time_mode=0
