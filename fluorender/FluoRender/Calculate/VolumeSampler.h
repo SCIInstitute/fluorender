@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMESAMPLER_H_
 
 #include "DataManager.h"
+#include <Types/Vector.h>
 #include <Types/Quaternion.h>
 
 namespace flrd
@@ -106,6 +107,7 @@ namespace flrd
 		bool ijk(int &i, int &j, int &k);
 		void xyz2ijk(double x, double y, double z,
 			int &i, int &j, int &k);
+		fluo::Vector rotate_scale(fluo::Vector &vec);
 		double SampleNearestNeighbor(double x, double y, double z);
 		double SampleLinear(double x, double y, double z);
 		double SampleBox(double x, double y, double z);

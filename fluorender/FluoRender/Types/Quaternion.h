@@ -198,6 +198,16 @@ public:
 		return sqrt(w*w + Vector(x, y, z).length2());
 	}
 
+	Point GetPoint()
+	{
+		return Point(x, y, z);
+	}
+
+	Vector GetVector()
+	{
+		return Vector(x, y, z);
+	}
+
 	Quaternion Invert()
 	{
 		return -(*this)*(1/this->Length());

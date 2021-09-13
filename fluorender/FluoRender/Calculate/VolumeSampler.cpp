@@ -164,19 +164,15 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	{
 		if (!m_crop_calc)
 		{
-			if (rot)
+			if (rot &&
+				m_nx && m_ny && m_nz)
 			{
-				x = m_nx;
-				y = m_ny;
-				z = m_nz;
-				fluo::Vector vec(x - 0.5,
-					y - 0.5,
-					z - 0.5);
-				fluo::Quaternion qvec(vec);
-				qvec = (-m_q_cl) * qvec * (m_q_cl);
-				m_nx = int(std::fabs(qvec.x) + 0.5);
-				m_ny = int(std::fabs(qvec.y) + 0.5);
-				m_nz = int(std::fabs(qvec.z) + 0.5);
+				fluo::Vector vec(m_nx - 0.5,
+					m_ny - 0.5, m_nz - 0.5);
+				vec = rotate_scale(vec);
+				m_nx = int(vec.x() + 0.5);
+				m_ny = int(vec.y() + 0.5);
+				m_nz = int(vec.z() + 0.5);
 				m_nx = m_nx < 1 ? 1 : m_nx;
 				m_ny = m_ny < 1 ? 1 : m_ny;
 				m_nz = m_nz < 1 ? 1 : m_nz;
@@ -310,14 +306,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	//spacing
 	double spcx, spcy, spcz;
 	m_input->GetSpacings(spcx, spcy, spcz);
-	if (rot)
+	if (rot && spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
 	{
 		fluo::Vector vec(spcx, spcy, spcz);
-		fluo::Quaternion qvec(vec);
-		qvec = (-m_q_cl) * qvec * (m_q_cl);
-		spcx = std::abs(qvec.x);
-		spcy = std::abs(qvec.y);
-		spcz = std::abs(qvec.z);
+		vec = rotate_scale(vec);
+		spcx = vec.x();
+		spcy = vec.y();
+		spcz = vec.z();
 	}
 	else
 	{
@@ -529,6 +524,26 @@ void VolumeSampler::xyz2ijk(double x, double y, double z,
 	i = int(x*m_nx_in);
 	j = int(y*m_ny_in);
 	k = int(z*m_nz_in);
+}
+
+fluo::Vector VolumeSampler::rotate_scale(fluo::Vector &vec)
+{
+	fluo::Vector vx1(vec.x(), 0, 0);
+	fluo::Vector vy1(0, vec.y(), 0);
+	fluo::Vector vz1(0, 0, vec.z());
+	fluo::Quaternion qx(vx1);
+	fluo::Quaternion qy(vy1);
+	fluo::Quaternion qz(vz1);
+	qx = (-m_q_cl) * qx * (m_q_cl);
+	qy = (-m_q_cl) * qy * (m_q_cl);
+	qz = (-m_q_cl) * qz * (m_q_cl);
+	fluo::Vector vx2 = qx.GetVector().normal();
+	fluo::Vector vy2 = qy.GetVector().normal();
+	fluo::Vector vz2 = qz.GetVector().normal();
+	fluo::Vector rv(1.0 / (vx2 / vec).length(),
+		1.0 / (vy2 / vec).length(),
+		1.0 / (vz2 / vec).length());
+	return rv;
 }
 
 double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
