@@ -774,7 +774,7 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 		{
 			memcpy(val8, mask->data, mem_size * sizeof(uint8));
 		}
-		m_vr->clear_tex_mask();
+		m_vr->clear_tex_mask(false);
 	}
 }
 
@@ -861,7 +861,7 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 				val8[index] = uint8(scale*((uint16*)(mask->data))[index]);
 			}
 		}
-		m_vr->clear_tex_mask();
+		m_vr->clear_tex_mask(false);
 	}
 }
 
