@@ -690,7 +690,7 @@ void TIFReader::ReadTiffFields()
 		return;
 
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF File not open for reading.");
+		return;
 	//go to the current IFD block/page
 	tiff_stream.seekg(current_offset_, tiff_stream.beg);
 	uint64_t num_entries = 0;
@@ -927,7 +927,7 @@ uint64_t TIFReader::GetTiffNextPageOffset()
 {
 	uint64_t results = 0;
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF File not open for reading.");
+		return results;
 	//go to the current IFD block/page
 	tiff_stream.seekg(current_offset_, tiff_stream.beg);
 	uint64_t num_entries = 0;
@@ -1417,7 +1417,7 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 void TIFReader::ResetTiff()
 {
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF file not open for reading.");
+		return;
 	//find the first IFD block/page
 	if (!isBig_) {
 		tiff_stream.seekg(4, tiff_stream.beg);
@@ -1443,7 +1443,7 @@ void TIFReader::OpenTiff(std::wstring name)
 	tiff_stream.open((ws2s(name)).c_str(), std::ifstream::binary);
 #endif
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("Unable to open TIFF File for reading.");
+		return;
 	tiff_stream.seekg(2, tiff_stream.beg);
 	uint16_t tiff_num = 0;
 	tiff_stream.read((char*)&tiff_num, sizeof(uint16_t));
@@ -1451,12 +1451,8 @@ void TIFReader::OpenTiff(std::wstring name)
 	swap_ |= SwapShort(tiff_num) == kBigTiff;
 	isBig_ = (SwapShort(tiff_num) == kBigTiff) || (tiff_num == kBigTiff);
 	// make sure this is a proper tiff and set the state.
-	if (isBig_ || tiff_num == kRegularTiff || swap_) {
+	if (isBig_ || tiff_num == kRegularTiff || swap_)
 		ResetTiff();
-	}
-	else {
-		throw std::runtime_error("TIFF file formatted incorrectly. Wrong Type.");
-	}
 }
 
 void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
@@ -1569,7 +1565,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	val = eight_bit ? (void*)(new unsigned char[total_size]) :
 		(void*)(new unsigned short[total_size]);
 	if (!val)
-		throw std::runtime_error("Unable to allocate memory to read TIFF.");
+		return NULL;
 
 	int max_value = 0;
 

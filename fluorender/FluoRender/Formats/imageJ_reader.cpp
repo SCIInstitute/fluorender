@@ -454,7 +454,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 	int numPages = m_slice_num;	
 	unsigned long long total_size = (unsigned long long)m_x_size*(unsigned long long)m_y_size*(unsigned long long)numPages;	
 	if (!t_data)
-		throw std::runtime_error("No data received from imageJ.");
+		return NULL;
 	
 	if (m_eight_bit)
 		nrrdWrap(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);

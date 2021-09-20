@@ -253,7 +253,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		(unsigned long long)m_ly*(unsigned long long)m_lz;
 	m_raw_result = (void*)(new unsigned char[total_size * (m_bits /8)]);
 	if (!m_raw_result)
-		throw std::runtime_error("Unable to allocate memory.");
+		return;
 
 	unsigned long long index;
 	int i, j, k;
