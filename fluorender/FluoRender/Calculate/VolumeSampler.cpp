@@ -169,7 +169,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			{
 				fluo::Vector vec(m_nx - 0.5,
 					m_ny - 0.5, m_nz - 0.5);
-				vec = rotate_scale(vec);
+				fluo::Vector vec2 = rotate_scale(vec);
+				vec = consv_volume(vec2, vec, 0);
 				m_nx = int(vec.x() + 0.5);
 				m_ny = int(vec.y() + 0.5);
 				m_nz = int(vec.z() + 0.5);
@@ -309,7 +310,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	if (rot && spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
 	{
 		fluo::Vector vec(spcx, spcy, spcz);
-		vec = rotate_scale(vec);
+		fluo::Vector vec2 = rotate_scale(vec);
+		vec = consv_volume(vec2, vec, 1);
 		spcx = vec.x();
 		spcy = vec.y();
 		spcz = vec.z();
@@ -528,22 +530,44 @@ void VolumeSampler::xyz2ijk(double x, double y, double z,
 
 fluo::Vector VolumeSampler::rotate_scale(fluo::Vector &vec)
 {
-	fluo::Vector vx1(vec.x(), 0, 0);
-	fluo::Vector vy1(0, vec.y(), 0);
-	fluo::Vector vz1(0, 0, vec.z());
-	fluo::Quaternion qx(vx1);
-	fluo::Quaternion qy(vy1);
-	fluo::Quaternion qz(vz1);
-	qx = (-m_q_cl) * qx * (m_q_cl);
-	qy = (-m_q_cl) * qy * (m_q_cl);
-	qz = (-m_q_cl) * qz * (m_q_cl);
-	fluo::Vector vx2 = qx.GetVector().normal();
-	fluo::Vector vy2 = qy.GetVector().normal();
-	fluo::Vector vz2 = qz.GetVector().normal();
-	fluo::Vector rv(1.0 / (vx2 / vec).length(),
-		1.0 / (vy2 / vec).length(),
-		1.0 / (vz2 / vec).length());
+	std::vector<fluo::Quaternion> qs;
+	std::vector<fluo::Vector> vs;
+	qs.push_back(fluo::Quaternion(0, 0, vec.z(), 0));
+	qs.push_back(fluo::Quaternion(vec.x(), 0, 0, 0));
+	qs.push_back(fluo::Quaternion(0, vec.y(), 0, 0));
+	for (auto &q : qs)
+	{
+		q = (-m_q_cl) * q * (m_q_cl);
+		vs.push_back(Abs(q.GetVector()));
+	}
+	fluo::Vector rv;
+	for (auto &v : vs)
+		rv = Max(rv, v);
 	return rv;
+}
+
+fluo::Vector VolumeSampler::consv_volume(
+	fluo::Vector &rv, fluo::Vector &vec, int minmax)
+{
+	fluo::Vector rv2 = rv;
+	//conserve volume
+	if (std::abs(vec.volume() - rv.volume()) >
+		fluo::Epsilon(3) * vec[vec.max()])
+	{
+		//align min
+		int rvmin = minmax?rv.max():rv.min();
+		int rvmax = minmax?rv.min():rv.max();
+		int rvmid = rv.mid();
+		int vecmin = minmax?vec.max():vec.min();
+		int vecmax = minmax?vec.min():vec.max();
+		int vecmid = vec.mid();
+
+		rv2[rvmin] = vec[vecmin];
+		double f = std::sqrt(vec[vecmax] * vec[vecmid] / (rv[rvmax] * rv[rvmid]));
+		rv2[rvmax] = rv[rvmax] * f;
+		rv2[rvmid] = rv[rvmid] * f;
+	}
+	return rv2;
 }
 
 double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)

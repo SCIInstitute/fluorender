@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLVECTOR_H_
 #define _FLVECTOR_H_
 
+#include <Utils.h>
 #include <string>
 #include <iosfwd>
 #include <math.h>
@@ -104,6 +105,11 @@ namespace fluo
 		inline double y() const;
 		inline void z(double);
 		inline double z() const;
+
+		inline double volume() const;//product of all
+		inline int min() const;//index to min, max index if equal
+		inline int max() const;//index to max, least index if equal
+		inline int mid() const;//index to mid, mid index if equal
 
 		inline void u(double);
 		inline double u() const;
@@ -409,6 +415,45 @@ namespace fluo
 		return z_;
 	}
 
+	inline double Vector::volume() const
+	{
+		return x_ * y_ * z_;
+	}
+
+	inline int Vector::min() const
+	{
+		if (z_ <= x_ && z_ <= y_)
+			return 2;
+		if (y_ <= x_ && y_ <= z_)
+			return 1;
+		if (x_ <= y_ && x_ <= z_)
+			return 0;
+		return 2;
+	}
+
+	inline int Vector::max() const
+	{
+		if (x_ >= y_ && x_ >= z_)
+			return 0;
+		if (y_ >= x_ && y_ >= z_)
+			return 1;
+		if (z_ >= x_ && z_ >= y_)
+			return 2;
+		return 0;
+	}
+
+	inline int Vector::mid() const
+	{
+		int imin = min();
+		int imax = max();
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i != imin && i != imax)
+				return i;
+		}
+		return 1;
+	}
+
 	inline void Vector::u(double d)
 	{
 		x_ = d;
@@ -497,6 +542,16 @@ namespace fluo
 		return Vector(std::max(v1.x(), v2.x()),
 			std::max(v1.y(), v2.y()),
 			std::max(v1.z(), v2.z()));
+	}
+
+	inline double Max(const Vector &v)
+	{
+		return Max(v.x(), v.y(), v.z());
+	}
+
+	inline double Min(const Vector &v)
+	{
+		return Min(v.x(), v.y(), v.z());
 	}
 
 } // End namespace fluo
