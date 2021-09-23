@@ -148,6 +148,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		break;
 	}
 
+	//check rotation
+	bool rot = !m_q_cl.IsIdentity();
 	//use input size if no resizing
 	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
 	{
@@ -155,9 +157,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_ny = m_ny_in;
 		m_nz = m_nz_in;
 	}
-
-	//check rotation
-	bool rot = !m_q_cl.IsIdentity();
+	fluo::Vector size(m_nx, m_ny, m_nz);
+	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
+	//spacing
+	double spcx_in, spcy_in, spcz_in;
+	m_input->GetSpacings(spcx_in, spcy_in, spcz_in);
+	fluo::Vector spc_in(spcx_in, spcy_in, spcz_in);
+	fluo::Vector spc;
 	double x, y, z;
 
 	if (m_crop)
@@ -167,13 +173,10 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			if (rot &&
 				m_nx && m_ny && m_nz)
 			{
-				fluo::Vector vec(m_nx - 0.5,
-					m_ny - 0.5, m_nz - 0.5);
-				fluo::Vector vec2 = rotate_scale(vec);
-				vec = consv_volume(vec2, vec, 0);
-				m_nx = int(vec.x() + 0.5);
-				m_ny = int(vec.y() + 0.5);
-				m_nz = int(vec.z() + 0.5);
+				rotate_scale(size_in, spc_in, size, spc);
+				m_nx = int(size.x() + 0.5);
+				m_ny = int(size.y() + 0.5);
+				m_nz = int(size.z() + 0.5);
 				m_nx = m_nx < 1 ? 1 : m_nx;
 				m_ny = m_ny < 1 ? 1 : m_ny;
 				m_nz = m_nz < 1 ? 1 : m_nz;
@@ -249,6 +252,11 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_lz = m_nz;
 	}
 
+	if (spc.x() == 0.0 || spc.y() == 0.0 || spc.z() == 0.0)
+		spc = spc_in * fluo::Vector(double(m_nx_in) / double(m_nx),
+			double(m_ny_in) / double(m_ny),
+			double(m_nz_in) / double(m_nz));
+
 	//output raw
 	unsigned long long total_size = (unsigned long long)m_lx*
 		(unsigned long long)m_ly*(unsigned long long)m_lz;
@@ -259,6 +267,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	unsigned long long index;
 	int i, j, k;
 	double value;
+	fluo::Vector vec;
+	fluo::Vector spcsize, spcsize_in;
+	if (rot)
+	{
+		spcsize = spc * size;
+		spcsize_in = spc_in * size_in;
+	}
 	for (k = 0; k < m_lz; ++k)
 	for (j = 0; j < m_ly; ++j)
 	for (i = 0; i < m_lx; ++i)
@@ -271,14 +286,16 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		z = (double(m_oz+k) + 0.5) / double(m_nz);
 		if (rot)
 		{
-			fluo::Vector vec(x - 0.5,
-				y - 0.5,
-				z - 0.5);
+			vec.Set(x, y, z);
+			vec = vec * spcsize - spcsize * 0.5;//scale and center
 			fluo::Quaternion qvec(vec);
-			qvec = (-m_q_cl) * qvec * (m_q_cl);
-			x = qvec.x + 0.5;
-			y = qvec.y + 0.5;
-			z = qvec.z + 0.5;
+			qvec = (-m_q_cl) * qvec * (m_q_cl);//rotate
+			vec = qvec.GetVector();
+			vec = vec + spcsize_in * 0.5;//translate
+			vec = vec / spcsize_in;
+			x = vec.x();
+			y = vec.y();
+			z = vec.z();
 		}
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
@@ -304,28 +321,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		nrrdWrap(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
 			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 
-	//spacing
-	double spcx, spcy, spcz;
-	m_input->GetSpacings(spcx, spcy, spcz);
-	if (rot && spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
-	{
-		fluo::Vector vec(spcx, spcy, spcz);
-		fluo::Vector vec2 = rotate_scale(vec);
-		vec = consv_volume(vec2, vec, 1);
-		spcx = vec.x();
-		spcy = vec.y();
-		spcz = vec.z();
-	}
-	else
-	{
-		spcx *= double(m_nx_in) / double(m_nx);
-		spcy *= double(m_ny_in) / double(m_ny);
-		spcz *= double(m_nz_in) / double(m_nz);
-	}
-
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_lx,
-		spcy*m_ly, spcz*m_lz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spc.x()*m_lx,
+		spc.y()*m_ly, spc.z()*m_lz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_lx,
 		(size_t)m_ly, (size_t)m_lz);
@@ -528,46 +526,35 @@ void VolumeSampler::xyz2ijk(double x, double y, double z,
 	k = int(z*m_nz_in);
 }
 
-fluo::Vector VolumeSampler::rotate_scale(fluo::Vector &vec)
+int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
+	fluo::Vector &vsize, fluo::Vector &vspc)
 {
 	std::vector<fluo::Quaternion> qs;
 	std::vector<fluo::Vector> vs;
-	qs.push_back(fluo::Quaternion(0, 0, vec.z(), 0));
-	qs.push_back(fluo::Quaternion(vec.x(), 0, 0, 0));
-	qs.push_back(fluo::Quaternion(0, vec.y(), 0, 0));
+	std::vector<fluo::Vector> vs2;
+	qs.push_back(fluo::Quaternion(1, 0, 0, 0));
+	qs.push_back(fluo::Quaternion(0, 1, 0, 0));
+	qs.push_back(fluo::Quaternion(0, 0, 1, 0));
+	fluo::Vector vec_in = vsize_in * vspc_in;
 	for (auto &q : qs)
 	{
 		q = (-m_q_cl) * q * (m_q_cl);
-		vs.push_back(Abs(q.GetVector()));
+		vs.push_back(q.GetVector() * vec_in);
+		vs2.push_back(q.GetVector() * vspc_in);
 	}
 	fluo::Vector rv;
+	int i = 0;
 	for (auto &v : vs)
-		rv = Max(rv, v);
-	return rv;
-}
-
-fluo::Vector VolumeSampler::consv_volume(
-	fluo::Vector &rv, fluo::Vector &vec, int minmax)
-{
-	fluo::Vector rv2 = rv;
-	//conserve volume
-	if (std::abs(vec.volume() - rv.volume()) >
-		fluo::Epsilon(3) * vec[vec.max()])
-	{
-		//align min
-		int rvmin = minmax?rv.max():rv.min();
-		int rvmax = minmax?rv.min():rv.max();
-		int rvmid = rv.mid();
-		int vecmin = minmax?vec.max():vec.min();
-		int vecmax = minmax?vec.min():vec.max();
-		int vecmid = vec.mid();
-
-		rv2[rvmin] = vec[vecmin];
-		double f = std::sqrt(vec[vecmax] * vec[vecmid] / (rv[rvmax] * rv[rvmid]));
-		rv2[rvmax] = rv[rvmax] * f;
-		rv2[rvmid] = rv[rvmid] * f;
-	}
-	return rv2;
+		if (i < 3) rv[i++] = v.length();
+	i = 0;
+	for (auto &v : vs2)
+		if (i < 3) vspc[i++] = v.length();
+	if (vspc.x() == 0.0 ||
+		vspc.y() == 0.0 ||
+		vspc.z() == 0.0)
+		return 0;//invalid
+	vsize = rv / vspc;
+	return 1;
 }
 
 double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)

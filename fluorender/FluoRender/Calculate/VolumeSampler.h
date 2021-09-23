@@ -107,8 +107,8 @@ namespace flrd
 		bool ijk(int &i, int &j, int &k);
 		void xyz2ijk(double x, double y, double z,
 			int &i, int &j, int &k);
-		fluo::Vector rotate_scale(fluo::Vector &vec);
-		fluo::Vector consv_volume(fluo::Vector &rv, fluo::Vector &vec, int minmax);
+		int rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
+			fluo::Vector &vsize, fluo::Vector &vspc);
 		double SampleNearestNeighbor(double x, double y, double z);
 		double SampleLinear(double x, double y, double z);
 		double SampleBox(double x, double y, double z);
