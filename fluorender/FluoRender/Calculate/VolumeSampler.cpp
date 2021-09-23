@@ -43,7 +43,6 @@ VolumeSampler::VolumeSampler() :
 	m_nz(0),
 	m_bits(0),
 	m_crop(false),
-	m_crop_calc(false),
 	m_ox(0),
 	m_oy(0),
 	m_oz(0),
@@ -168,81 +167,76 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 
 	if (m_crop)
 	{
-		if (!m_crop_calc)
+		if (rot &&
+			m_nx && m_ny && m_nz)
 		{
-			if (rot &&
-				m_nx && m_ny && m_nz)
-			{
-				rotate_scale(size_in, spc_in, size, spc);
-				m_nx = int(size.x() + 0.5);
-				m_ny = int(size.y() + 0.5);
-				m_nz = int(size.z() + 0.5);
-				m_nx = m_nx < 1 ? 1 : m_nx;
-				m_ny = m_ny < 1 ? 1 : m_ny;
-				m_nz = m_nz < 1 ? 1 : m_nz;
-			}
-
-			//recalculate range
-			vector<fluo::Plane*> *planes =
-				m_input->GetVR()->get_planes();
-			fluo::Plane p[6];
-			int np = int(planes->size());
-
-			//get six planes
-			for (int i = 0; i < 6; ++i)
-			{
-				if (i < np)
-				{
-					p[i] = *((*planes)[i]);
-					p[i].Restore();
-				}
-				else
-				{
-					switch (i)
-					{
-					case 0:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 0.0)
-							, fluo::Vector(1.0, 0.0, 0.0));
-						break;
-					case 1:
-						p[i] = fluo::Plane(
-							fluo::Point(1.0, 0.0, 0.0),
-							fluo::Vector(-1.0, 0.0, 0.0));
-						break;
-					case 2:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 0.0),
-							fluo::Vector(0.0, 1.0, 0.0));
-						break;
-					case 3:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 1.0, 0.0),
-							fluo::Vector(0.0, -1.0, 0.0));
-						break;
-					case 4:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 0.0),
-							fluo::Vector(0.0, 0.0, 1.0));
-						break;
-					case 5:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 1.0),
-							fluo::Vector(0.0, 0.0, -1.0));
-						break;
-					}
-				}
-			}
-
-			m_ox = int(-m_nx * p[0].d() + 0.499);
-			m_oy = int(-m_ny * p[2].d() + 0.499);
-			m_oz = int(-m_nz * p[4].d() + 0.499);
-			m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
-			m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
-			m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
-
-			m_crop_calc = true;
+			rotate_scale(size_in, spc_in, size, spc);
+			m_nx = int(size.x() + 0.5);
+			m_ny = int(size.y() + 0.5);
+			m_nz = int(size.z() + 0.5);
+			m_nx = m_nx < 1 ? 1 : m_nx;
+			m_ny = m_ny < 1 ? 1 : m_ny;
+			m_nz = m_nz < 1 ? 1 : m_nz;
 		}
+
+		//recalculate range
+		vector<fluo::Plane*> *planes =
+			m_input->GetVR()->get_planes();
+		fluo::Plane p[6];
+		int np = int(planes->size());
+
+		//get six planes
+		for (int i = 0; i < 6; ++i)
+		{
+			if (i < np)
+			{
+				p[i] = *((*planes)[i]);
+				p[i].Restore();
+			}
+			else
+			{
+				switch (i)
+				{
+				case 0:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 0.0)
+						, fluo::Vector(1.0, 0.0, 0.0));
+					break;
+				case 1:
+					p[i] = fluo::Plane(
+						fluo::Point(1.0, 0.0, 0.0),
+						fluo::Vector(-1.0, 0.0, 0.0));
+					break;
+				case 2:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 0.0),
+						fluo::Vector(0.0, 1.0, 0.0));
+					break;
+				case 3:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 1.0, 0.0),
+						fluo::Vector(0.0, -1.0, 0.0));
+					break;
+				case 4:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 0.0),
+						fluo::Vector(0.0, 0.0, 1.0));
+					break;
+				case 5:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 1.0),
+						fluo::Vector(0.0, 0.0, -1.0));
+					break;
+				}
+			}
+		}
+
+		m_ox = int(-m_nx * p[0].d() + 0.499);
+		m_oy = int(-m_ny * p[2].d() + 0.499);
+		m_oz = int(-m_nz * p[4].d() + 0.499);
+		m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
+		m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
+		m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
 	}
 	else
 	{

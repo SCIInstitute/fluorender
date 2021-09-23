@@ -78,7 +78,6 @@ namespace flrd
 		//crop
 		bool m_crop;
 		//crop size (of new size)
-		bool m_crop_calc;
 		int m_ox;
 		int m_oy;
 		int m_oz;
