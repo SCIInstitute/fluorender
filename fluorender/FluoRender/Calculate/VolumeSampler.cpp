@@ -156,7 +156,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_ny = m_ny_in;
 		m_nz = m_nz_in;
 	}
-	fluo::Vector size(m_nx, m_ny, m_nz);
+	fluo::Vector size(m_nx - 0.5, m_ny - 0.5, m_nz - 0.5);
 	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
 	//spacing
 	double spcx_in, spcy_in, spcz_in;
@@ -523,6 +523,7 @@ void VolumeSampler::xyz2ijk(double x, double y, double z,
 int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 	fluo::Vector &vsize, fluo::Vector &vspc)
 {
+	fluo::Vector resize = vsize / vsize_in;
 	std::vector<fluo::Quaternion> qs;
 	std::vector<fluo::Vector> vs;
 	std::vector<fluo::Vector> vs2;
@@ -547,7 +548,7 @@ int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 		vspc.y() == 0.0 ||
 		vspc.z() == 0.0)
 		return 0;//invalid
-	vsize = rv / vspc;
+	vsize = rv * resize / vspc;
 	return 1;
 }
 
