@@ -107,8 +107,8 @@ namespace fluo
 		inline double z() const;
 
 		inline double volume() const;//product of all
-		inline int min() const;//index to min, max index if equal
-		inline int max() const;//index to max, least index if equal
+		inline int min() const;//index to min, least index if equal
+		inline int max() const;//index to max, last index if equal
 		inline int mid() const;//index to mid, mid index if equal
 
 		inline void u(double);
@@ -417,29 +417,29 @@ namespace fluo
 
 	inline double Vector::volume() const
 	{
-		return x_ * y_ * z_;
+		return std::abs(x_ * y_ * z_);
 	}
 
 	inline int Vector::min() const
 	{
-		if (z_ <= x_ && z_ <= y_)
-			return 2;
-		if (y_ <= x_ && y_ <= z_)
-			return 1;
 		if (x_ <= y_ && x_ <= z_)
 			return 0;
-		return 2;
+		if (y_ <= x_ && y_ <= z_)
+			return 1;
+		if (z_ <= x_ && z_ <= y_)
+			return 2;
+		return 0;
 	}
 
 	inline int Vector::max() const
 	{
-		if (x_ >= y_ && x_ >= z_)
-			return 0;
-		if (y_ >= x_ && y_ >= z_)
-			return 1;
 		if (z_ >= x_ && z_ >= y_)
 			return 2;
-		return 0;
+		if (y_ >= x_ && y_ >= z_)
+			return 1;
+		if (x_ >= y_ && x_ >= z_)
+			return 0;
+		return 2;
 	}
 
 	inline int Vector::mid() const

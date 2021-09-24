@@ -108,6 +108,7 @@ namespace flrd
 			int &i, int &j, int &k);
 		int rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 			fluo::Vector &vsize, fluo::Vector &vspc);
+		int consv_volume(fluo::Vector &vec, fluo::Vector &vec_in);
 		double SampleNearestNeighbor(double x, double y, double z);
 		double SampleLinear(double x, double y, double z);
 		double SampleBox(double x, double y, double z);

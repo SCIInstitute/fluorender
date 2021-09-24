@@ -548,8 +548,62 @@ int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 		vspc.y() == 0.0 ||
 		vspc.z() == 0.0)
 		return 0;//invalid
+	//rescale spcs to maintain sample size
+	consv_volume(vspc, vspc_in);
 	vsize = rv * resize / vspc;
 	return 1;
+}
+
+int VolumeSampler::consv_volume(fluo::Vector &vec, fluo::Vector &vec_in)
+{
+	double vol = vec.volume();
+	double vol_in = vec_in.volume();
+	if (vol == 0.0 || vol_in == 0.0)
+		return 0;
+	//conserve volume
+	if (std::abs(vol - vol_in) >
+		fluo::Epsilon(3) * vec_in[vec_in.max()])
+	{
+		//diff array
+		double dif[9] = {
+			vec[0] - vec_in[0], vec[0] - vec_in[1], vec[0] - vec_in[2],
+			vec[1] - vec_in[0], vec[1] - vec_in[1], vec[1] - vec_in[2],
+			vec[2] - vec_in[0], vec[2] - vec_in[1], vec[2] - vec_in[2] };
+		int ind_min;
+		double val_min, val;
+		for (int i = 0; i < 9; ++i)
+		{
+			val = std::abs(dif[i]);
+			if (i == 0)
+			{
+				val_min = val;
+				ind_min = i;
+			}
+			else
+			{
+				if (val < val_min)
+				{
+					val_min = val;
+					ind_min = i;
+				}
+			}
+		}
+		int ind = ind_min / 3;
+		int ind_in = ind_min % 3;
+		//align min dif
+		double f = std::sqrt(vol_in*vec[ind]/vol/vec_in[ind_in]);
+		vec[ind] = vec_in[ind_in];
+		//the remaining 2
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i == ind)
+				continue;
+			vec[i] *= f;
+		}
+
+		return 1;
+	}
+	return 0;
 }
 
 double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
