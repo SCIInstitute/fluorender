@@ -566,7 +566,8 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		wxCommandEventHandler(DataListCtrl::OnFilterChange), NULL, panel);
 	std::vector<std::string> combo_list;
 	combo_list.push_back("Nearest neighbor");
-	combo_list.push_back("Linear");
+	combo_list.push_back("Bilinear");
+	combo_list.push_back("Trilinear");
 	combo_list.push_back("Box");
 	for (size_t i = 0; i < combo_list.size(); ++i)
 		combo->Append(combo_list[i]);

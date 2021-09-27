@@ -403,8 +403,10 @@ double VolumeSampler::Sample(double x, double y, double z)
 	case 0:
 		return SampleNearestNeighbor(x, y, z);
 	case 1:
-		return SampleLinear(x, y, z);
+		return SampleBiLinear(x, y, z);
 	case 2:
+		return SampleTriLinear(x, y, z);
+	case 3:
 		return SampleBox(x, y, z);
 	}
 	return 0.0;
@@ -515,9 +517,9 @@ bool VolumeSampler::ijk(int &i, int &j, int &k)
 void VolumeSampler::xyz2ijk(double x, double y, double z,
 	int &i, int &j, int &k)
 {
-	i = int(x*m_nx_in + 0.5);
-	j = int(y*m_ny_in + 0.5);
-	k = int(z*m_nz_in + 0.5);
+	i = int(x*m_nx_in);
+	j = int(y*m_ny_in);
+	k = int(z*m_nz_in);
 }
 
 void VolumeSampler::xyz2ijkt(
@@ -525,9 +527,9 @@ void VolumeSampler::xyz2ijkt(
 	int &i, int &j, int &k,
 	double &tx, double &ty, double &tz)
 {
-	double id = x * m_nx_in;
-	double jd = y * m_ny_in;
-	double kd = z * m_nz_in;
+	double id = x * m_nx_in - 0.5;
+	double jd = y * m_ny_in - 0.5;
+	double kd = z * m_nz_in - 0.5;
 	i = id >= 0.0 ? int(id) : int(id) - 1;
 	j = jd >= 0.0 ? int(jd) : int(jd) - 1;
 	k = kd >= 0.0 ? int(kd) : int(kd) - 1;
@@ -638,7 +640,38 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 	return 0.0;
 }
 
-double VolumeSampler::SampleLinear(double x, double y, double z)
+double VolumeSampler::SampleBiLinear(double x, double y, double z)
+{
+	int i, j, k;
+	double tx, ty, tz;
+	xyz2ijkt(x, y, z, i, j, k, tx, ty, tz);
+	double q[4] = { 0 };
+	int count = 0;
+	int in, jn;
+	unsigned long long index;
+	for (int ii = 0; ii < 2; ++ii)
+	for (int jj = 0; jj < 2; ++jj)
+	{
+		in = i + ii;
+		jn = j + jj;
+		if (ijk(in, jn, k))
+		{
+			index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+				(unsigned long long)k + (unsigned long long)m_nx_in*
+				(unsigned long long)jn + (unsigned long long)in;
+			if (m_bits == 8)
+				q[count] = double(((unsigned char*)m_raw_input)[index]) / 255.0;
+			else if (m_bits == 16)
+				q[count] = double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+		}
+		count++;
+	}
+
+	return bilerp(tx, ty,
+		q[0], q[1], q[2], q[3]);
+}
+
+double VolumeSampler::SampleTriLinear(double x, double y, double z)
 {
 	int i, j, k;
 	double tx, ty, tz;
