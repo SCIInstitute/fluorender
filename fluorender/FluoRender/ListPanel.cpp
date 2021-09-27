@@ -506,6 +506,13 @@ void DataListCtrl::OnSizeZText(wxCommandEvent &event)
 		m_vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().fn_str()));
 }
 
+void DataListCtrl::OnFilterChange(wxCommandEvent &event)
+{
+	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
+	if (combo)
+		VRenderFrame::SetFilter(combo->GetSelection());
+}
+
 wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 {
 	wxIntegerValidator<unsigned int> vald_int;
@@ -553,6 +560,18 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		wxDefaultPosition, wxSize(40, 20), 0, vald_int);
 	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(DataListCtrl::OnSizeZText), NULL, panel);
+	wxComboBox* combo = new wxComboBox(panel, ID_FILTER,
+		"Filter", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
+		wxCommandEventHandler(DataListCtrl::OnFilterChange), NULL, panel);
+	std::vector<std::string> combo_list;
+	combo_list.push_back("Nearest neighbor");
+	combo_list.push_back("Linear");
+	combo_list.push_back("Box");
+	for (size_t i = 0; i < combo_list.size(); ++i)
+		combo->Append(combo_list[i]);
+	combo->SetSelection(VRenderFrame::GetFilter());
+
 	if (m_vd)
 	{
 		bool resize;
@@ -575,6 +594,8 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	sizer3->Add(size_y_txt, 0, wxALIGN_CENTER);
 	sizer3->Add(10, 10);
 	sizer3->Add(size_z_txt, 0, wxALIGN_CENTER);
+	sizer3->Add(10, 10);
+	sizer3->Add(combo, 0, wxALIGN_CENTER);
 
 	//group
 	group1->Add(10, 10);
@@ -628,7 +649,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				if (m_vd)
 				{
 					m_vd->Save(filename, fopendlg->GetFilterIndex(),
-						VRenderFrame::GetCrop(),
+						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						false, VRenderFrame::GetCompression(), q);
 					wxString str = m_vd->GetPath();
 					SetText(item, 2, str);
@@ -727,7 +748,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 				if (vd)
 				{
 					vd->Save(filename, fopendlg->GetFilterIndex(),
-						VRenderFrame::GetCrop(),
+						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						true, VRenderFrame::GetCompression(), q);
 					wxString str = vd->GetPath();
 					SetText(item, 2, str);

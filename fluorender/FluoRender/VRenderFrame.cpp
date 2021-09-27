@@ -117,6 +117,7 @@ bool VRenderFrame::m_skip_brick = false;
 wxString VRenderFrame::m_time_id = "_T";
 bool VRenderFrame::m_load_mask = true;
 bool VRenderFrame::m_save_crop = false;
+int VRenderFrame::m_save_filter = 0;
 bool VRenderFrame::m_save_compress = true;
 bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
@@ -2891,7 +2892,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				fluo::Quaternion qtemp;
-				vd->Save(str, 0, false, false, VRenderFrame::GetCompression(), qtemp);
+				vd->Save(str, 0, false, 0, false, VRenderFrame::GetCompression(), qtemp);
 				fconfig.Write("path", str);
 				new_chan = true;
 			}

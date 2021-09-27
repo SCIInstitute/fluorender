@@ -577,6 +577,8 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 	fconfig.Read("format", &mode, 0);
 	bool crop;
 	fconfig.Read("crop", &crop, false);
+	int filter;
+	fconfig.Read("filter", &filter, 0);
 	bool bake;
 	fconfig.Read("bake", &bake, false);
 	bool compression;
@@ -651,7 +653,7 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 		else if (mode == 2)
 			str += ".nrrd";
 		fluo::Quaternion qtemp;
-		(*i)->Save(str, mode, crop, bake, compression, qtemp);
+		(*i)->Save(str, mode, crop, filter, bake, compression, qtemp);
 		if (del_vol)
 			delete *i;
 	}

@@ -88,6 +88,7 @@ private:
 	void OnSizeXText(wxCommandEvent &event);
 	void OnSizeYText(wxCommandEvent &event);
 	void OnSizeZText(wxCommandEvent &event);
+	void OnFilterChange(wxCommandEvent &event);
 	static wxWindow* CreateExtraControl(wxWindow* parent);
 	void OnSave(wxCommandEvent& event);
 	void OnBake(wxCommandEvent& event);

@@ -290,6 +290,10 @@ public:
 	{ m_save_crop = value; }
 	static bool GetCrop()
 	{ return m_save_crop; }
+	static void SetFilter(int value)
+	{ m_save_filter = value; }
+	static int GetFilter()
+	{ return m_save_filter; }
 	//compression
 	static void SetCompression(bool value)
 	{ m_save_compress = value; }
@@ -437,6 +441,8 @@ private:
 	static bool m_load_mask;
 	//save crop
 	static bool m_save_crop;
+	//filter
+	static int m_save_filter;
 	//save compressed
 	static bool m_save_compress;
 	//embed files in project

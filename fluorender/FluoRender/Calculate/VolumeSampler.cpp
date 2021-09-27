@@ -515,9 +515,25 @@ bool VolumeSampler::ijk(int &i, int &j, int &k)
 void VolumeSampler::xyz2ijk(double x, double y, double z,
 	int &i, int &j, int &k)
 {
-	i = int(x*m_nx_in);
-	j = int(y*m_ny_in);
-	k = int(z*m_nz_in);
+	i = int(x*m_nx_in + 0.5);
+	j = int(y*m_ny_in + 0.5);
+	k = int(z*m_nz_in + 0.5);
+}
+
+void VolumeSampler::xyz2ijkt(
+	double x, double y, double z,
+	int &i, int &j, int &k,
+	double &tx, double &ty, double &tz)
+{
+	double id = x * m_nx_in;
+	double jd = y * m_ny_in;
+	double kd = z * m_nz_in;
+	i = id >= 0.0 ? int(id) : int(id) - 1;
+	j = jd >= 0.0 ? int(jd) : int(jd) - 1;
+	k = kd >= 0.0 ? int(kd) : int(kd) - 1;
+	tx = id - i;
+	ty = jd - j;
+	tz = kd - k;
 }
 
 int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
@@ -624,7 +640,36 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 
 double VolumeSampler::SampleLinear(double x, double y, double z)
 {
-	return 0;
+	int i, j, k;
+	double tx, ty, tz;
+	xyz2ijkt(x, y, z, i, j, k, tx, ty, tz);
+	double q[8] = { 0 };
+	int count = 0;
+	int in, jn, kn;
+	unsigned long long index;
+	for (int ii = 0; ii < 2; ++ii)
+	for (int jj = 0; jj < 2; ++jj)
+	for (int kk = 0; kk < 2; ++kk)
+	{
+		in = i + ii;
+		jn = j + jj;
+		kn = k + kk;
+		if (ijk(in, jn, kn))
+		{
+			index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+				(unsigned long long)kn + (unsigned long long)m_nx_in*
+				(unsigned long long)jn + (unsigned long long)in;
+			if (m_bits == 8)
+				q[count] = double(((unsigned char*)m_raw_input)[index]) / 255.0;
+			else if (m_bits == 16)
+				q[count] = double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+		}
+		count++;
+	}
+
+	return trilerp(tx, ty, tz,
+		q[0], q[1], q[2], q[3],
+		q[4], q[5], q[6], q[7]);
 }
 
 double VolumeSampler::SampleBox(double x, double y, double z)
