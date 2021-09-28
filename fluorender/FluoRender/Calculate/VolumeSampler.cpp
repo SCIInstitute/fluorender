@@ -165,14 +165,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector spc;
 	double x, y, z;
 
-	if (!m_crop && ! rot)
-	{
-		m_ox = m_oy = m_oz = 0;
-		m_lx = m_nx;
-		m_ly = m_ny;
-		m_lz = m_nz;
-	}
-	else
+	if (m_crop || rot)
 	{
 		if (rot &&
 			m_nx && m_ny && m_nz)
@@ -244,6 +237,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
 		m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
 		m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
+	}
+	else
+	{
+		m_ox = m_oy = m_oz = 0;
+		m_lx = m_nx;
+		m_ly = m_ny;
+		m_lz = m_nz;
 	}
 
 	if (spc.x() == 0.0 || spc.y() == 0.0 || spc.z() == 0.0)
