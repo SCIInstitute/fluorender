@@ -165,7 +165,14 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector spc;
 	double x, y, z;
 
-	if (m_crop)
+	if (!m_crop && ! rot)
+	{
+		m_ox = m_oy = m_oz = 0;
+		m_lx = m_nx;
+		m_ly = m_ny;
+		m_lz = m_nz;
+	}
+	else
 	{
 		if (rot &&
 			m_nx && m_ny && m_nz)
@@ -238,13 +245,6 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
 		m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
 	}
-	else
-	{
-		m_ox = m_oy = m_oz = 0;
-		m_lx = m_nx;
-		m_ly = m_ny;
-		m_lz = m_nz;
-	}
 
 	if (spc.x() == 0.0 || spc.y() == 0.0 || spc.z() == 0.0)
 		spc = spc_in * fluo::Vector(double(m_nx_in) / double(m_nx),
@@ -265,8 +265,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector spcsize, spcsize_in;
 	if (rot)
 	{
-		spcsize = spc * size;
 		spcsize_in = spc_in * size_in;
+		spcsize = spc * size;
 	}
 	for (k = 0; k < m_lz; ++k)
 	for (j = 0; j < m_ly; ++j)
@@ -285,8 +285,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			fluo::Quaternion qvec(vec);
 			qvec = (-m_q_cl) * qvec * (m_q_cl);//rotate
 			vec = qvec.GetVector();
-			vec = vec + spcsize_in * 0.5;//translate
-			vec = vec / spcsize_in;
+			vec += spcsize_in * 0.5;//translate
+			vec /= spcsize_in;//normalize
 			x = vec.x();
 			y = vec.y();
 			z = vec.z();
@@ -541,7 +541,7 @@ void VolumeSampler::xyz2ijkt(
 int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 	fluo::Vector &vsize, fluo::Vector &vspc)
 {
-	fluo::Vector resize = vsize / vsize_in;
+	fluo::Vector rsf = vsize / vsize_in;//rescale factor
 	std::vector<fluo::Quaternion> qs;
 	std::vector<fluo::Vector> vs;
 	std::vector<fluo::Vector> vs2;
@@ -568,7 +568,15 @@ int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 		return 0;//invalid
 	//rescale spcs to maintain sample size
 	consv_volume(vspc, vspc_in);
-	vsize = rv * resize / vspc;
+	if (m_crop)
+	{
+		vspc /= rsf;
+		vsize = rv / vspc;
+	}
+	else
+	{
+		vsize = rv * rsf / vspc;
+	}
 	return 1;
 }
 

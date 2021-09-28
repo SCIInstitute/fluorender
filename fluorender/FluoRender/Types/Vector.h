@@ -87,6 +87,7 @@ namespace fluo
 		inline Vector operator/(const double) const;
 		inline Vector operator/(const Vector&) const;
 		inline Vector& operator/=(const double);
+		inline Vector& operator/=(const Vector&);
 		inline Vector operator+(const Vector&) const;
 		inline Vector& operator+=(const Vector&);
 		inline Vector operator-() const;
@@ -279,6 +280,14 @@ namespace fluo
 		x_ *= v.x_;
 		y_ *= v.y_;
 		z_ *= v.z_;
+		return *this;
+	}
+
+	inline Vector& Vector::operator/=(const Vector& v)
+	{
+		x_ /= v.x_;
+		y_ /= v.y_;
+		z_ /= v.z_;
 		return *this;
 	}
 

@@ -524,24 +524,24 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
 
-	//crop
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* crop_chk = new wxCheckBox(panel, ID_CROP,
-		"Use Clipping Planes to Crop");
-	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(DataListCtrl::OnCropCheck), NULL, panel);
-	crop_chk->SetValue(VRenderFrame::GetCrop());
-	sizer1->Add(10, 10);
-	sizer1->Add(crop_chk);
 	//compressed
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* comp_chk = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCompCheck), NULL, panel);
 	comp_chk->SetValue(VRenderFrame::GetCompression());
+	sizer1->Add(10, 10);
+	sizer1->Add(comp_chk);
+	//crop
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxCheckBox* crop_chk = new wxCheckBox(panel, ID_CROP,
+		"Use Clipping Planes to Crop");
+	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
+		wxCommandEventHandler(DataListCtrl::OnCropCheck), NULL, panel);
+	crop_chk->SetValue(VRenderFrame::GetCrop());
 	sizer2->Add(10, 10);
-	sizer2->Add(comp_chk);
+	sizer2->Add(crop_chk);
 	//resize
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	wxCheckBox* resize_chk = new wxCheckBox(panel, ID_RESIZE_CHK,
@@ -578,9 +578,8 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		bool resize;
 		int nx, ny, nz;
 		m_vd->GetResize(resize, nx, ny, nz);
-		bool bval = resize > 0;
-		resize_chk->SetValue(bval);
-		if (bval)
+		resize_chk->SetValue(resize);
+		if (resize)
 		{
 			size_x_txt->SetValue(std::to_string(nx));
 			size_y_txt->SetValue(std::to_string(ny));
