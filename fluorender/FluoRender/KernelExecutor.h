@@ -60,7 +60,7 @@ private:
 	bool ExecuteKernel(flvr::KernelProgram* kernel,
 		GLuint data_id, void* result,
 		size_t brick_x, size_t brick_y,
-		size_t brick_z);
+		size_t brick_z, int chars);
 
 };
 

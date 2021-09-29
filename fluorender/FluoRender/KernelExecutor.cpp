@@ -45,6 +45,18 @@ KernelExecutor::~KernelExecutor()
 void KernelExecutor::SetCode(wxString &code)
 {
 	m_code = code;
+
+	//search and replace for 16bit data
+	if (!m_vd)
+		return;
+	int bits = m_vd->GetBits();
+	if (bits > 8 && bits <= 16)
+	{
+		m_code.Replace("#define DWL ",
+			"#define DWL unsigned short//");
+		m_code.Replace("#define VSCL ",
+			"#define VSCL 65535//");
+	}
 }
 
 void KernelExecutor::LoadCode(wxString &filename)
@@ -144,6 +156,8 @@ bool KernelExecutor::Execute()
 		return false;
 	}
 
+	int bits = m_vd->GetBits();
+	int chars = bits / 8;
 	int res_x, res_y, res_z;
 	m_vd->GetResolution(res_x, res_y, res_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
@@ -171,7 +185,7 @@ bool KernelExecutor::Execute()
 		m_vd->GetSpacings(spc_x, spc_y, spc_z);
 		VolumeData* vd = new VolumeData();
 		m_vd_r.push_back(vd);
-		vd->AddEmptyData(8,
+		vd->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
@@ -230,6 +244,9 @@ bool KernelExecutor::Execute()
 			vd->SetSyncR(m_vd->GetSyncR());
 			vd->SetSyncG(m_vd->GetSyncG());
 			vd->SetSyncB(m_vd->GetSyncB());
+			//max and scale
+			vd->SetMaxValue(m_vd->GetMaxValue());
+			vd->SetScalarScale(m_vd->GetScalarScale());
 			//vd->SetCurChannel(m_vd->GetCurChannel());
 		}
 	}
@@ -247,36 +264,36 @@ bool KernelExecutor::Execute()
 		{
 			m_message += "OpenCL kernel created.\n";
 			if (bricks->size() == 1)
-				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z);
+				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z, chars);
 			else
 			{
 				int brick_x = b->nx();
 				int brick_y = b->ny();
 				int brick_z = b->nz();
-				unsigned char* bresult = new unsigned char[brick_x*brick_y*brick_z];
-				kernel_exe = ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z);
+				void* bresult = (void*)(new unsigned char[brick_x*brick_y*brick_z*chars]);
+				kernel_exe = ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z, chars);
 				if (!kernel_exe)
 					break;
 				//copy data back
-				unsigned char* ptr_br = bresult;
+				unsigned char* ptr_br = (unsigned char*)bresult;
 				unsigned char* ptr_z;
 				if (m_duplicate)
 					ptr_z = (unsigned char*)(b_r->tex_data(0));
 				else
 					ptr_z = (unsigned char*)(b->tex_data(0));
 				unsigned char* ptr_y;
-				for (int bk = 0; bk<brick_z; ++bk)
+				for (int bk = 0; bk < brick_z; ++bk)
 				{
 					ptr_y = ptr_z;
-					for (int bj = 0; bj<brick_y; ++bj)
+					for (int bj = 0; bj < brick_y; ++bj)
 					{
-						memcpy(ptr_y, ptr_br, brick_x);
-						ptr_y += res_x;
-						ptr_br += brick_x;
+						memcpy(ptr_y, ptr_br, brick_x*chars);
+						ptr_y += res_x*chars;
+						ptr_br += brick_x*chars;
 					}
-					ptr_z += res_x*res_y;
+					ptr_z += res_x*res_y*chars;
 				}
-				delete[]bresult;
+				delete[] bresult;
 			}
 		}
 		else
@@ -304,7 +321,7 @@ bool KernelExecutor::Execute()
 bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	GLuint data_id, void* result,
 	size_t brick_x, size_t brick_y,
-	size_t brick_z)
+	size_t brick_z, int chars)
 {
 	if (!kernel)
 		return false;
@@ -312,7 +329,7 @@ bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	int kernel_index = kernel->createKernel("kernel_main");
 
 	//textures
-	size_t result_size = brick_x*brick_y*brick_z*sizeof(unsigned char);
+	size_t result_size = brick_x*brick_y*brick_z*chars;
 	kernel->setKernelArgBegin(kernel_index);
 	kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
 	kernel->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, result_size, result);

@@ -1,6 +1,8 @@
 #define KX 3
 #define KY 3
 #define KZ 3
+#define DWL unsigned char
+#define VSCL 255
 __constant float krn[KX*KY*KZ] =
 {-1, 2, -1,
  2, -4, 2,
@@ -17,7 +19,7 @@ const sampler_t samp =
 	CLK_FILTER_NEAREST;
 __kernel void kernel_main(
 	read_only image3d_t data,
-	__global unsigned char* result,
+	__global DWL* result,
 	unsigned int x,
 	unsigned int y,
 	unsigned int z)
@@ -39,5 +41,5 @@ __kernel void kernel_main(
 		rvalue += krn[KX*KY*k+KX*j+i] * dvalue.x;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = clamp(rvalue, 0.0f, 1.0f)*255.0;
+	result[index] = clamp(rvalue, 0.0f, 1.0f)*VSCL;
 }
