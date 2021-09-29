@@ -66,7 +66,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[26]; loop[5] = nbs[23]; loop[6] = nbs[20]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*VSCL.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//third
@@ -74,7 +74,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[17]; loop[5] = nbs[14]; loop[6] = nbs[11]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*VSCL.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//fourth
@@ -82,7 +82,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[8]; loop[5] = nbs[5]; loop[6] = nbs[2]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*VSCL.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//fifth
@@ -90,7 +90,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[23]; loop[5] = nbs[22]; loop[6] = nbs[21]; loop[7] = nbs[12];
 	if (!check_loop(loop))
 	{
-		result[index] = value*VSCL.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	result[index] = 0.0;
