@@ -344,9 +344,11 @@ bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	wxString stime = wxString::Format("%.4f", time_span.count());
-	m_message += "OpenCL time on " +
-		kernel->get_device_name() +
-		": " + stime + " sec.\n";
+	m_message += "OpenCL time on ";
+	m_message += kernel->get_device_name().c_str();
+	m_message += ": ";
+	m_message += stime;
+	m_message += " sec.\n";
 	kernel->readBuffer(result_size, result, result);
 
 	//release buffer
