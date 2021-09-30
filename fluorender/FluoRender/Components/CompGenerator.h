@@ -60,13 +60,13 @@ namespace flrd
 		void Grow(bool, int, float, float, float);
 		void DensityField(int dsize, int wsize,
 			bool diffuse, int iter, float tran, float falloff,
-			float density, float sscale);
+			float density, float varth, float sscale);
 		void DistGrow(bool, int,
 			float, float, int, int, float, float, float);
 		void DistDensityField(
 			bool diffuse, int iter, float tran, float falloff,
 			int dsize1, int max_dist, float dist_thresh, float dist_strength,
-			int dsize2, int wsize, float density, float sscale);
+			int dsize2, int wsize, float density, float varth, float sscale);
 		void Cleanup(int, unsigned int);
 		void ClearBorders();
 		void FillBorders(float);

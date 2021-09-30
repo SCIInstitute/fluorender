@@ -600,28 +600,22 @@ const char* str_cl_density_field_3d = \
 "	int3 lb = (int3)(gid.x*gsx, gid.y*gsy, gid.z*gsz);\n" \
 "	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
+"	float gnum = (float)(gsx * gsy * gsz);\n" \
 "	float sum = 0.0;\n" \
-"	unsigned int index1;\n" \
+"	float sum2 = 0.0;\n" \
+"	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += df[index1];\n" \
+"		index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += df[index];\n" \
+"		sum2 += df[index] * df[index];\n" \
 "	}\n" \
-"	unsigned int index2 = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
-"	float avg = sum / (gsx*gsy*gsz);\n" \
-"	gavg[index2] = avg;\n" \
-"	sum = 0.0;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += (avg - df[index1])*(avg - df[index1]);\n" \
-"	}\n" \
-"	float var = sqrt(sum / (gsx*gsy*gsz));\n" \
-"	gvar[index2] = var;\n" \
+"	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
+"	float avg = sum / gnum;\n" \
+"	gavg[index] = avg;\n" \
+"	gvar[index] = sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum);\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \
@@ -708,6 +702,7 @@ const char* str_cl_density_grow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float density,\n" \
+"	float varth,\n" \
 "	float sscale)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -723,6 +718,9 @@ const char* str_cl_density_grow_3d = \
 "		unsigned char vdf = df[index2];\n" \
 "		unsigned char vavg = avg[index2];\n" \
 "		unsigned char vvar = var[index2];\n" \
+"		//break if low variance\n" \
+"		if (vvar < varth * 255)\n" \
+"			return;\n" \
 "		if (vdf < vavg - (1.0-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
@@ -776,6 +774,7 @@ const char* str_cl_density_grow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float density,\n" \
+"	float varth,\n" \
 "	float sscale,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
@@ -795,6 +794,9 @@ const char* str_cl_density_grow_3d = \
 "		unsigned char vdf = df[index2];\n" \
 "		unsigned char vavg = avg[index2];\n" \
 "		unsigned char vvar = var[index2];\n" \
+"		//break if low variance\n" \
+"		if (vvar < varth * 255)\n" \
+"			return;\n" \
 "		if (vdf < vavg - (1.0-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
@@ -1228,28 +1230,22 @@ const char* str_cl_distdens_field_3d = \
 "	int3 lb = (int3)(gid.x*gsx, gid.y*gsy, gid.z*gsz);\n" \
 "	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
+"	float gnum = (float)(gsx * gsy * gsz);\n" \
 "	float sum = 0.0;\n" \
-"	unsigned int index1;\n" \
+"	float sum2 = 0.0;\n" \
+"	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += df[index1];\n" \
+"		index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += df[index];\n" \
+"		sum2 += df[index] * df[index];\n" \
 "	}\n" \
-"	unsigned int index2 = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
-"	float avg = sum / (gsx*gsy*gsz);\n" \
-"	gavg[index2] = avg;\n" \
-"	sum = 0.0;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += (avg - df[index1])*(avg - df[index1]);\n" \
-"	}\n" \
-"	float var = sqrt(sum / (gsx*gsy*gsz));\n" \
-"	gvar[index2] = var;\n" \
+"	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
+"	float avg = sum / gnum;\n" \
+"	gavg[index] = avg;\n" \
+"	gvar[index] = sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum);\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \

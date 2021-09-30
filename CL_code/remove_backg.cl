@@ -3,6 +3,7 @@
 #define KN 1600
 #define VTH 0.0001
 #define GTH 2
+#define GTH2 4
 #define DWL unsigned char
 #define VSCL 255
 const sampler_t samp =
@@ -37,7 +38,8 @@ __kernel void kernel_main(
 	}
 	float mean = sumi / KN;
 	float var = sqrt((sumi2 + KN * mean * mean - 2.0 * mean * sumi) / KN);
-	cvalue = (var < VTH) || (cvalue - mean < var * GTH) ? 0.0 : cvalue - mean;
+	cvalue = (var < VTH) || (cvalue - mean < var * GTH) ? 0.0 : cvalue;
+	cvalue = cvalue - mean > var * GTH2 ? cvalue - mean : cvalue;
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
 	result[index] = cvalue * VSCL;
 }

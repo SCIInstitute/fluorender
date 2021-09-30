@@ -417,7 +417,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 
 void ComponentGenerator::DensityField(int dsize, int wsize,
 	bool diffuse, int iter, float tran, float falloff,
-	float density, float sscale)
+	float density, float varth, float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -599,6 +599,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&density));
+		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&varth));
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		if (m_use_mask)
 			kernel2_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
@@ -778,7 +779,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 void ComponentGenerator::DistDensityField(
 	bool diffuse, int iter, float tran, float falloff,
 	int dsize1, int max_dist, float dist_thresh, float dist_strength,
-	int dsize2, int wsize, float density, float sscale)
+	int dsize2, int wsize, float density, float varth, float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -1036,6 +1037,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		if (m_use_mask)
 			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);

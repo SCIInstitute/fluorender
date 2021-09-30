@@ -73,6 +73,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_CHECKBOX(ID_DensityCheck, ComponentDlg::OnDensityCheck)
 	EVT_COMMAND_SCROLL(ID_DensitySldr, ComponentDlg::OnDensitySldr)
 	EVT_TEXT(ID_DensityText, ComponentDlg::OnDensityText)
+	EVT_COMMAND_SCROLL(ID_VarthSldr, ComponentDlg::OnVarthSldr)
+	EVT_TEXT(ID_VarthText, ComponentDlg::OnVarthText)
 	EVT_COMMAND_SCROLL(ID_DensityWindowSizeSldr, ComponentDlg::OnDensityWindowSizeSldr)
 	EVT_TEXT(ID_DensityWindowsSizeText, ComponentDlg::OnDensityWindowSizeText)
 	EVT_COMMAND_SCROLL(ID_DensityStatsSizeSldr, ComponentDlg::OnDensityStatsSizeSldr)
@@ -356,7 +358,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Separation:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_density_sldr = new wxSlider(page, ID_DensitySldr, 1000, 0, 5000,
+	m_density_sldr = new wxSlider(page, ID_DensitySldr, 1000, 0, 10000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_density_text = new wxTextCtrl(page, ID_DensityText, "1.0",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
@@ -365,6 +367,19 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer6->Add(m_density_sldr, 1, wxEXPAND);
 	sizer6->Add(m_density_text, 0, wxALIGN_CENTER);
 	sizer6->Add(2, 2);
+	//
+	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Noise Level:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_varth_sldr = new wxSlider(page, ID_VarthSldr, 0, 0, 10000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_varth_text = new wxTextCtrl(page, ID_VarthText, "0.0",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer61->Add(2, 2);
+	sizer61->Add(st, 0, wxALIGN_CENTER);
+	sizer61->Add(m_varth_sldr, 1, wxEXPAND);
+	sizer61->Add(m_varth_text, 0, wxALIGN_CENTER);
+	sizer61->Add(2, 2);
 
 	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Filter Size:",
@@ -560,6 +575,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group1->Add(sizer5, 0, wxEXPAND);
 	group1->Add(5, 5);
 	group1->Add(sizer6, 0, wxEXPAND);
+	group1->Add(5, 5);
+	group1->Add(sizer61, 0, wxEXPAND);
 	group1->Add(5, 5);
 	group1->Add(sizer7, 0, wxEXPAND);
 	group1->Add(5, 5);
@@ -1025,6 +1042,7 @@ void ComponentDlg::Update()
 	EnableDensity(m_density);
 	m_density_check->SetValue(m_density);
 	m_density_text->SetValue(wxString::Format("%.3f", m_density_thresh));
+	m_varth_text->SetValue(wxString::Format("%.4f", m_varth));
 	m_density_window_size_text->SetValue(wxString::Format("%d", m_density_window_size));
 	m_density_stats_size_text->SetValue(wxString::Format("%d", m_density_stats_size));
 	//fixate
@@ -1119,6 +1137,7 @@ void ComponentDlg::GetSettings()
 	m_size_lm = 100;
 	m_density = false;
 	m_density_thresh = 1.0;
+	m_varth = 0.0001;
 	m_density_window_size = 5;
 	m_density_stats_size = 15;
 	m_fixate = false;
@@ -1195,6 +1214,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	fconfig.Read("size_lm", &m_size_lm);
 	fconfig.Read("density", &m_density);
 	fconfig.Read("density_thresh", &m_density_thresh);
+	fconfig.Read("varth", &m_varth);
 	fconfig.Read("density_window_size", &m_density_window_size);
 	fconfig.Read("density_stats_size", &m_density_stats_size);
 	fconfig.Read("clean", &m_clean);
@@ -1249,6 +1269,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("size_lm", m_size_lm);
 	fconfig.Write("density", m_density);
 	fconfig.Write("density_thresh", m_density_thresh);
+	fconfig.Write("varth", m_varth);
 	fconfig.Write("density_window_size", m_density_window_size);
 	fconfig.Write("density_stats_size", m_density_stats_size);
 	fconfig.Write("clean", m_clean);
@@ -1576,6 +1597,8 @@ void ComponentDlg::EnableDensity(bool value)
 	{
 		m_density_sldr->Enable();
 		m_density_text->Enable();
+		m_varth_sldr->Enable();
+		m_varth_text->Enable();
 		m_density_window_size_sldr->Enable();
 		m_density_window_size_text->Enable();
 		m_density_stats_size_sldr->Enable();
@@ -1585,6 +1608,8 @@ void ComponentDlg::EnableDensity(bool value)
 	{
 		m_density_sldr->Disable();
 		m_density_text->Disable();
+		m_varth_sldr->Disable();
+		m_varth_text->Disable();
 		m_density_window_size_sldr->Disable();
 		m_density_window_size_text->Disable();
 		m_density_stats_size_sldr->Disable();
@@ -1614,6 +1639,25 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 	m_density_text->GetValue().ToDouble(&val);
 	m_density_thresh = val;
 	m_density_sldr->SetValue(int(m_density_thresh * 1000.0 + 0.5));
+
+	if (m_auto_update)
+		GenerateComp(m_use_sel);
+}
+
+void ComponentDlg::OnVarthSldr(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 10000.0;
+	wxString str = wxString::Format("%.4f", val);
+	if (str != m_varth_text->GetValue())
+		m_varth_text->SetValue(str);
+}
+
+void ComponentDlg::OnVarthText(wxCommandEvent &event)
+{
+	double val = 0.0;
+	m_varth_text->GetValue().ToDouble(&val);
+	m_varth = val;
+	m_varth_sldr->SetValue(int(m_varth * 10000.0 + 0.5));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1815,6 +1859,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
 		params.push_back("density"); params.push_back(std::to_string(m_density));
 		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
+		params.push_back("varth"); params.push_back(std::to_string(m_varth));
 		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
 		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
 		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
@@ -1897,6 +1942,8 @@ void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
 					m_density = std::stoi(*(++it2));
 				else if (*it2 == "density_thresh")
 					m_density_thresh = std::stod(*(++it2));
+				else if (*it2 == "varth")
+					m_varth = std::stod(*(++it2));
 				else if (*it2 == "density_window_size")
 					m_density_window_size = std::stoi(*(++it2));
 				else if (*it2 == "density_stats_size")
@@ -3357,6 +3404,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_density_window_size,
 				m_density_stats_size,
 				m_density_thresh,
+				m_varth,
 				scale);
 		}
 		else
@@ -3383,6 +3431,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_thresh*m_tfactor,
 				m_falloff,
 				m_density_thresh,
+				m_varth,
 				scale);
 		}
 		else

@@ -87,6 +87,8 @@ public:
 		ID_DensityCheck,
 		ID_DensitySldr,
 		ID_DensityText,
+		ID_VarthSldr,
+		ID_VarthText,
 		ID_DensityWindowSizeSldr,
 		ID_DensityWindowsSizeText,
 		ID_DensityStatsSizeSldr,
@@ -257,6 +259,7 @@ private:
 	//density
 	bool m_density;
 	double m_density_thresh;
+	double m_varth;//variance threshold
 	int m_density_window_size;
 	int m_density_stats_size;
 	//fixate
@@ -359,6 +362,8 @@ private:
 	wxCheckBox* m_density_check;
 	wxSlider* m_density_sldr;
 	wxTextCtrl* m_density_text;
+	wxSlider* m_varth_sldr;
+	wxTextCtrl* m_varth_text;
 	wxSlider* m_density_window_size_sldr;
 	wxTextCtrl* m_density_window_size_text;
 	wxSlider* m_density_stats_size_sldr;
@@ -515,6 +520,8 @@ private:
 	void OnDensityCheck(wxCommandEvent &event);
 	void OnDensitySldr(wxScrollEvent &event);
 	void OnDensityText(wxCommandEvent &event);
+	void OnVarthSldr(wxScrollEvent &event);
+	void OnVarthText(wxCommandEvent &event);
 	void OnDensityWindowSizeSldr(wxScrollEvent &event);
 	void OnDensityWindowSizeText(wxCommandEvent &event);
 	void OnDensityStatsSizeSldr(wxScrollEvent &event);
