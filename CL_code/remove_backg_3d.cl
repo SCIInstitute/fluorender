@@ -1,6 +1,7 @@
 #define KX 40
 #define KY 40
-#define KN 1600
+#define KZ 10
+#define KN 16000
 #define VTH 0.0001
 #define GTH 2
 #define GTH2 4
@@ -28,10 +29,11 @@ __kernel void kernel_main(
 	int i, j, k;
 	for (i=0; i<KX; ++i)
 	for (j=0; j<KY; ++j)
+	for (k=0; k<KZ; ++k)
 	{
 		kc = (int4)(coord.x+(i-KX/2),
 				coord.y+(j-KY/2),
-				coord.z, 1);
+				coord.z+(k-KZ/2), 1);
 		dvalue = read_imagef(data, samp, kc);
 		sumi += dvalue.x;
 		sumi2 += dvalue.x * dvalue.x;
