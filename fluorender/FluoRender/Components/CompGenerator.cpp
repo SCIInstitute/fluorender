@@ -740,6 +740,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		unsigned int seed = iter > 10 ? iter : 11;
 		float scl_ff = diffuse ? falloff : 0.0f;
 		float grad_ff = diffuse ? falloff : 0.0f;
+		float distscl = 5.0f / max_dist;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
@@ -756,6 +757,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		if (m_use_mask)
 			kernel_prog->setKernelArgument(arg_mask);
@@ -919,6 +921,7 @@ void ComponentGenerator::DistDensityField(
 		//kernel 0
 		int nxy = nx * ny;
 		int dnxy = dnx * dny;
+		float distscl = 5.0f / max_dist;
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
 		kernel_prog_dens->setKernelArgument(arg_img);
 		kernel_prog_dens->setKernelArgument(arg_distf);
@@ -930,6 +933,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&dsize2));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		//kernel 1
 		int ngxy = ngy * ngx;
