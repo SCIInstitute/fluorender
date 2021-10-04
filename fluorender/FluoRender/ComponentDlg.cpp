@@ -371,7 +371,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Noise Level:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_varth_sldr = new wxSlider(page, ID_VarthSldr, 0, 0, 10000,
+	m_varth_sldr = new wxSlider(page, ID_VarthSldr, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_varth_text = new wxTextCtrl(page, ID_VarthText, "0.0",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
