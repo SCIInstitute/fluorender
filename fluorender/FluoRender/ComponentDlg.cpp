@@ -1726,7 +1726,12 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 		Fixate();
 
 	if (m_auto_update)
+	{
+		bool bval = m_clean;
+		m_clean = false;
 		GenerateComp(m_use_sel, false);
+		m_clean = bval;
+	}
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
@@ -1734,7 +1739,12 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 	Fixate();
 
 	if (m_auto_update)
+	{
+		bool bval = m_clean;
+		m_clean = false;
 		GenerateComp(m_use_sel, false);
+		m_clean = bval;
+	}
 }
 
 void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
