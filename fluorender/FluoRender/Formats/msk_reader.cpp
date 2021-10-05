@@ -134,8 +134,14 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 	int slice_num = int(output->axis[2].size);
 	int x_size = int(output->axis[0].size);
 	int y_size = int(output->axis[1].size);
-	int data_size = slice_num * x_size * y_size;
+	unsigned long long data_size = (unsigned long long)slice_num * x_size * y_size;
 	output->data = new unsigned char[data_size];
+	if (!output->data)
+	{
+		nrrdNuke(output);
+		fclose(msk_file);
+		return 0;
+	}
 
 	if (nrrdRead(output, msk_file, NULL))
 	{
