@@ -151,8 +151,19 @@ namespace flvr
 		return k->program();
 	}
 
-	KernelProgram* VolKernelFactory::kernel(std::string s)
+	KernelProgram* VolKernelFactory::kernel(std::string s, int bits)
 	{
+		//change string according to bits
+		if (bits > 8 && bits <= 16)
+		{
+			s = replace(s, "#define DWL ",
+				"#define DWL unsigned short//");
+			s = replace(s, "#define VSCL ",
+				"#define VSCL 65535//");
+		}
+		else if (bits > 16 && bits <= 32)
+		{ }
+
 		if (prev_kernel_ >= 0)
 		{
 			if (kernels_[prev_kernel_]->match(s))

@@ -48,11 +48,26 @@ namespace flvr
 		void clear();
 
 		KernelProgram* kernel(int type = 0);
-		KernelProgram* kernel(std::string s);
+		KernelProgram* kernel(std::string s, int bits = 8);
 
 	protected:
 		std::vector<VolKernel*> kernels_;
 		int prev_kernel_;
+
+	private:
+		std::string replace(const std::string& s,
+			const std::string& src, const std::string& rep)
+		{
+			std::string r = s;
+			size_t len = src.length();
+			size_t pos = r.find(src, 0);
+			while (pos != std::string::npos)
+			{
+				r.replace(pos, len, rep);
+				pos = r.find(src, pos+1);
+			}
+			return r;
+		}
 	};
 }
 

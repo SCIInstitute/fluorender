@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderView.h>
 #include <VRenderGLView.h>
 #include <VRenderFrame.h>
+#include <Calculate/BackgStat.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -114,6 +115,8 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 					RunLinkCells(index, fconfig);
 				else if (str == "unlink_cells")
 					RunUnlinkCells(index, fconfig);
+				else if (str == "backg_stat")
+					RunBackgroundStat(index, fconfig);
 			}
 		}
 	}
@@ -1102,6 +1105,23 @@ void ScriptProc::RunUnlinkCells(int index, wxFileConfig &fconfig)
 	cur_vol->GetResolution(resx, resy, resz);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.RemoveCells(m_sel_labels, tseq_cur_num);
+}
+
+void ScriptProc::RunBackgroundStat(int index, wxFileConfig &fconfig)
+{
+	if (!m_view || !m_frame) return;
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+
+	int tseq_cur_num = m_view->m_tseq_cur_num;
+
+	int time_mode;
+	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
+	if (time_mode != index)
+		return;
+
+	flrd::BackgStat bgs(cur_vol);
+	bgs.Run();
 }
 
 //read/delete volume cache

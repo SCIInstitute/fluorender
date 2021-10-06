@@ -45,18 +45,6 @@ KernelExecutor::~KernelExecutor()
 void KernelExecutor::SetCode(wxString &code)
 {
 	m_code = code;
-
-	//search and replace for 16bit data
-	if (!m_vd)
-		return;
-	int bits = m_vd->GetBits();
-	if (bits > 8 && bits <= 16)
-	{
-		m_code.Replace("#define DWL ",
-			"#define DWL unsigned short//");
-		m_code.Replace("#define VSCL ",
-			"#define VSCL 65535//");
-	}
 }
 
 void KernelExecutor::LoadCode(wxString &filename)
@@ -259,7 +247,9 @@ bool KernelExecutor::Execute()
 		b = (*bricks)[i];
 		if (m_duplicate) b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
-		flvr::KernelProgram* kernel = flvr::VolumeRenderer::vol_kernel_factory_.kernel(m_code.ToStdString());
+		flvr::KernelProgram* kernel =
+			flvr::VolumeRenderer::vol_kernel_factory_.
+			kernel(m_code.ToStdString(), bits);
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";

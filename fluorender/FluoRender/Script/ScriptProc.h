@@ -80,6 +80,7 @@ namespace flrd
 		void RunAddCells(int index, wxFileConfig &fconfig);
 		void RunLinkCells(int index, wxFileConfig &fconfig);
 		void RunUnlinkCells(int index, wxFileConfig &fconfig);
+		void RunBackgroundStat(int index, wxFileConfig &fconfig);
 
 		//read/delete volume cache
 		void ReadVolCache(VolCache& vol_cache);
