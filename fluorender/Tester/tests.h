@@ -8,8 +8,5 @@ void GroupTest();
 void GroupTest2();
 void GroupTest3();
 
-void SceneGraphTest();
-
 void SpecialValueTest();
 
-void FactoryTest();

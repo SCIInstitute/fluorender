@@ -441,6 +441,14 @@ namespace fluo
 	bool getValue(const std::string &name, Vector4f &value);
 	bool getValue(const std::string &name, Vector4i &value);
     */
+	//get value the class
+	Value* getValue(const std::string &name)
+	{
+		if (_value_set)
+			return _value_set->findValue(name);
+		else
+			return 0;
+	}
 
 	//sync value only sets a state but doesn't change values when called
 	//observer's value updates when the value of this changes (data flow is one-way: this -> obj)
@@ -476,8 +484,6 @@ namespace fluo
 		}
 		else return false;
 	}
-
-
 
 	bool removeValue(Value* value)
 	{
