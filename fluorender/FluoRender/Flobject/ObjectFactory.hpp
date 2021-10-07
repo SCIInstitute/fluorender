@@ -25,48 +25,67 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_OBJECTFACTORY
-#define FL_OBJECTFACTORY
+#ifndef FL_OBJECTFACTORY_HPP
+#define FL_OBJECTFACTORY_HPP
 
-#include <Flobject/Object.h>
-#include <vector>
+#include <Node.hpp>
+#include <deque>
 #include <string>
 #include <iostream>
+
+// TODO: Replace with QT XML Parser
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-namespace flrd
+namespace fluo
 {
-	class ObjectFactory : public Object
+	class ObjectFactory : public Node
 	{
 	public:
 		ObjectFactory();
 
 		//don't copy itself
-		virtual Object* clone(const CopyOp& copyop) const { return 0; }
+        virtual Object* clone(const CopyOp& copyop) const { return nullptr; }
 
 		virtual bool isSameKindAs(const Object* obj) const
-		{ return dynamic_cast<const ObjectFactory*>(obj) != NULL; }
+        { return dynamic_cast<const ObjectFactory*>(obj) != nullptr; }
 
 		virtual const char* className() const { return "ObjectFactory"; }
 
+		virtual void createDefault();
+
+        virtual void setEventHandler(Object* obj) {}
+
+		virtual unsigned int getPriority() const { return 300; }
+
+		//as observer
+        virtual void processNotification(Event& event)
+		{
+            if (event.getNotifyFlags() & Event::NOTIFY_FACTORY)
+                Object::processNotification(event);
+		}
+
+		//propagate values from object to the default
+		virtual void propValuesToDefault(Object*, const ValueCollection &names = {});
+		virtual void propValuesFromDefault(Object*, const ValueCollection &names = {});
 		//read default settings for object
 		//to take advantage of the value management system,
 		//create a default object and use it to save settings
-		bool readDefault(std::istream &is);
-		bool writeDefault(std::ostream &os, int indent = 1);
-		bool readDefault();
-		bool writeDefault();
+		bool readDefault(std::istream &is, const ValueCollection &names = {});
+		bool writeDefault(std::ostream &os, const ValueCollection &names = {}, int indent = 1);
+		bool readDefault(const ValueCollection &names = {});
+		bool writeDefault(const ValueCollection &names = {});
+
 		virtual Object* getDefault()
 		{ return findFirst(default_object_name_); }
 
-		virtual Object* build();
+		//to control how an object is built, provide a "prototype" object with values
+		//otherwise, it's default to null object and an object is cloned from the default object
+        virtual Object* build(Object* obj = nullptr);
 
 		virtual Object* clone(Object*);
 
 		virtual Object* clone(const unsigned int);
-
-		virtual void objectChanged(void*, const std::string &exp);
 
 		inline bool remove(Object* object)
 		{
@@ -84,6 +103,16 @@ namespace flrd
 				size_t end = pos + num;
 				if (end > objects_.size())
 					end = objects_.size();
+
+				//notify observers of change
+				for (auto it = objects_.begin() + pos;
+					it != objects_.begin() + end; ++it)
+				{
+					Event event;
+					event.init(Event::EVENT_NODE_REMOVED,
+						this, it->get());
+					notifyObservers(event);
+				}
 
 				objects_.erase(objects_.begin() + pos, objects_.begin() + end);
 			}
@@ -110,9 +139,9 @@ namespace flrd
 			return result;
 		}
 
-		inline Object* get(size_t i) { return objects_[i].get(); }
+		inline virtual Object* get(size_t i) { return objects_[i].get(); }
 
-		inline const Object* get(size_t i) const { return objects_[i].get(); }
+		inline virtual const Object* get(size_t i) const { return objects_[i].get(); }
 
 		inline bool contains(const Object* object) const
 		{
@@ -135,7 +164,7 @@ namespace flrd
 			return objects_.size();
 		}
 
-		inline Object* find(const unsigned int id)
+		inline virtual Object* find(const unsigned int id)
 		{
 			for (auto it = objects_.begin();
 				it != objects_.end(); ++it)
@@ -143,10 +172,10 @@ namespace flrd
 				if ((*it)->getId() == id)
 					return (*it).get();
 			}
-			return 0;
+            return nullptr;
 		}
 
-		inline Object* findFirst(const std::string &name)
+		inline virtual Object* findFirst(const std::string &name)
 		{
 			for (auto it = objects_.begin();
 				it != objects_.end(); ++it)
@@ -154,7 +183,18 @@ namespace flrd
 				if ((*it)->getName() == name)
 					return (*it).get();
 			}
-			return 0;
+            return nullptr;
+		}
+
+		inline virtual Object* findLast(const std::string &name)
+		{
+			for (auto it = objects_.rbegin();
+				it != objects_.rend(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+            return nullptr;
 		}
 
 		inline ObjectList find(const std::string &name)
@@ -167,6 +207,41 @@ namespace flrd
 					result.push_back((*it).get());
 			}
 			return result;
+		}
+
+		//find by matching values of two objects
+		inline ObjectList findByValues(const Object& obj)
+		{
+			ObjectList result;
+			for (auto it = objects_.begin();
+				it != objects_.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					result.push_back(it->get());
+			}
+			return result;
+		}
+
+		inline virtual Object* findFirstByValues(const Object& obj)
+		{
+			for (auto it = objects_.begin();
+				it != objects_.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+            return nullptr;
+		}
+
+		inline virtual Object* findLastByValues(const Object& obj)
+		{
+			for (auto it = objects_.rbegin();
+				it != objects_.rend(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+            return nullptr;
 		}
 
 		//if we want to resolve naming conflicts, more code is needed
@@ -196,21 +271,21 @@ namespace flrd
 	protected:
 		virtual ~ObjectFactory();
 
-		virtual void createDefault();
-
 		//update the values of the default volume
-		bool setDefaultValues(boost::property_tree::ptree &pt);
+		bool setDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 		//convert the values of the default volume to ptree
-		bool convDefaultValues(boost::property_tree::ptree &pt);
+		bool convDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
+		//replace values in an existing tree, assuming values are immediate children of the tree
+		bool replaceDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 
 		std::string default_object_name_;
 		std::string default_setting_filename_value_name_;
 		static unsigned int global_id_;
 		unsigned int local_id_;
 
-		//reserve the first object for default
-		//objects created later can be cloned from the first
-		std::vector<ref_ptr<Object>> objects_;
+		//reserve the LAST object for default
+		//objects created later can be cloned from the default
+		std::deque<ref_ptr<Object>> objects_;
 	};
 
 }

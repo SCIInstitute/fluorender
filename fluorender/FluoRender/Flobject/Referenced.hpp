@@ -25,14 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_REFERENCED
-#define FL_REFERENCED 1
+#ifndef FL_REFERENCED_HPP
+#define FL_REFERENCED_HPP
 
 #include <string>
 #include <set>
 
-namespace flrd
+namespace fluo
 {
+class Event;
 class Observer;
 class ObserverSet;
 class Referenced;
@@ -65,6 +66,8 @@ public:
 
 	void addObserver(Observer* observer) const;
 
+	bool hasObserver(Observer* observer) const;
+
 	ObserveeIter removeObserver(Observer* observer) const;
 
 	void holdoffObserverNotification()
@@ -86,7 +89,7 @@ protected:
 
 	void signalObserversAndDelete(bool signalDelete, bool doDelete) const;
 
-	void notifyObserversOfChange(const std::string &exp = "") const;
+	void notifyObservers(Event& event) const;
 
 	std::string _refStr;
 
@@ -95,9 +98,6 @@ protected:
 	mutable void* _observerSet;
 
 	bool _hold;
-
-	//typedef std::set<std::string> ExpSet;
-	//ExpSet _valueMask;
 };
 
 inline int Referenced::ref() const

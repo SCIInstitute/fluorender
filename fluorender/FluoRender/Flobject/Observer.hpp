@@ -25,15 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_OBSERVER
-#define FL_OBSERVER 1
+#ifndef FL_OBSERVER_HPP
+#define FL_OBSERVER_HPP
 
-#include <Flobject/Referenced.h>
+#include <Referenced.hpp>
 #include <set>
 #include <string>
 
-namespace flrd
+namespace fluo
 {
+class Event;
 class Observer
 {
 public:
@@ -41,8 +42,9 @@ public:
 	Observer();
 	virtual ~Observer();
 
-	virtual void objectDeleted(void*) {}
-	virtual void objectChanged(void*, const std::string &exp) {}
+	virtual unsigned int getPriority() const { return 9999; }//priority number to sort observers
+	virtual void objectDeleted(Event& event) {}
+	virtual void processNotification(Event& event) {}
 
 	virtual bool removeObservee(Referenced* observee);
 
@@ -50,6 +52,19 @@ public:
 
 protected:
 	Observees _observees;
+};
+
+//determines which observer to notify first
+class ObserverComparator
+{
+public:
+	bool operator() (const Observer* obsrvr1, const Observer* obsrvr2) const
+	{
+		if (obsrvr1->getPriority() != obsrvr2->getPriority())
+			return obsrvr1->getPriority() < obsrvr2->getPriority();
+		else
+			return obsrvr1 < obsrvr2;
+	}
 };
 
 class ObserverSet : public Referenced
@@ -64,12 +79,13 @@ public:
 	Referenced* addRefLock();
 
 	void addObserver(Observer* observer);
+	bool hasObserver(Observer* observer);
 	void removeObserver(Observer* observer);
 
-	void signalObjectDeleted(void* ptr);
-	void signalObjectChanged(void* ptr, const std::string &exp);
+	void signalObjectDeleted(Event& event);
+	void notifyObserver(Event& event);
 
-	typedef std::set<Observer*> Observers;
+	typedef std::set<Observer*, ObserverComparator> Observers;
 	Observers& getObservers() { return _observers; }
 	const Observers& getObservers() const { return _observers; }
 

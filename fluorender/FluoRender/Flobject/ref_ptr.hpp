@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2nullptr18 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,10 +29,10 @@ DEALINGS IN THE SOFTWARE.
 * Adapted from the ref_ptr of the OpenSceneGraph library
 */
 
-#ifndef FL_REF_PTR
-#define FL_REF_PTR 1
+#ifndef FL_REF_PTR_HPP
+#define FL_REF_PTR_HPP
 
-namespace flrd
+namespace fluo
 {
 /** Smart pointer for handling referenced counted objects.*/
 template<class T>
@@ -41,12 +41,17 @@ class ref_ptr
 public:
 	typedef T element_type;
 
-	ref_ptr() : _ptr(0) {}
+    ref_ptr() : _ptr(nullptr) {}
 	ref_ptr(T* ptr) : _ptr(ptr) { if (_ptr) _ptr->ref(); }
 	ref_ptr(const ref_ptr& rp) : _ptr(rp._ptr) { if (_ptr) _ptr->ref(); }
 	template<class Other> ref_ptr(const ref_ptr<Other>& rp) : _ptr(rp._ptr) { if (_ptr) _ptr->ref(); }
-	//ref_ptr(observer_ptr<T>& optr) : _ptr(0) { optr.lock(*this); }
-	~ref_ptr() { if (_ptr) _ptr->unref();  _ptr = 0; }
+    //ref_ptr(observer_ptr<T>& optr) : _ptr(nullptr) { optr.lock(*this); }
+	~ref_ptr()
+	{
+		if (_ptr)
+			_ptr->unref();
+        _ptr = nullptr;
+	}
 
 	ref_ptr& operator = (const ref_ptr& rp)
 	{
@@ -96,16 +101,16 @@ private:
 
 public:
 	// safe bool conversion
-	operator unspecified_bool_type() const { return valid()? &ref_ptr::_ptr : 0; }
+    operator unspecified_bool_type() const { return valid()? &ref_ptr::_ptr : nullptr; }
 
 	T& operator*() const { return *_ptr; }
 	T* operator->() const { return _ptr; }
 	T* get() const { return _ptr; }
 
-	bool operator!() const   { return _ptr==0; } // not required
-	bool valid() const       { return _ptr!=0; }
+    bool operator!() const   { return _ptr==nullptr; } // not required
+    bool valid() const       { return _ptr!=nullptr; }
 
-	T* release() { T* tmp=_ptr; if (_ptr) _ptr->unref_nodelete(); _ptr=0; return tmp; }
+    T* release() { T* tmp=_ptr; if (_ptr) _ptr->unref_nodelete(); _ptr=nullptr; return tmp; }
 
 	void swap(ref_ptr& rp) { T* tmp=_ptr; _ptr=rp._ptr; rp._ptr=tmp; }
 

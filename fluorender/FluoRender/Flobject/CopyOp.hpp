@@ -26,19 +26,26 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _COPYOP_H_
-#define _COPYOP_H_
+#ifndef COPYOP_HPP
+#define COPYOP_HPP
 
 #include <vector>
+#include <set>
+#include <EventHandler.hpp> // Not sure why, but this is needed in order
+                                         // to get Object.hpp to recognicze EventHandler
+                                         // as a class.
 
-namespace flrd
+namespace fluo
 {
 	class Referenced;
 	class Object;
 	class Node;
 	class Group;
+	class Value;
+    class ValueSet;
+    //class ref_ptr;
 
-	class CopyOp
+    class CopyOp
 	{
 	public:
 		enum Options
@@ -46,6 +53,7 @@ namespace flrd
 			SHALLOW_COPY = 0,
 			DEEP_COPY_OBJECTS = 1<<0,
 			DEEP_COPY_NODES = 1<<1,
+			DEEP_COPY_VALUES = 1<<2,
 			DEEP_COPY_ALL = 0x7FFFFFFF
 		};
 
@@ -66,4 +74,4 @@ namespace flrd
 		CopyFlags m_flags;
 	};
 }
-#endif//_COPYOP_H_
+#endif//COPYOP_HPP

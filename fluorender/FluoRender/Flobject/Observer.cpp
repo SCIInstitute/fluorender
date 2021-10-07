@@ -25,9 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Flobject/Observer.h>
+#include <Observer.hpp>
+#include <Event.hpp>
 
-using namespace flrd;
+using namespace fluo;
 
 Observer::Observer()
 {
@@ -60,7 +61,8 @@ bool Observer::removeObservee(Referenced* observee)
 }
 
 ObserverSet::ObserverSet(const Referenced* observedObject):
-	_observedObject(const_cast<Referenced*>(observedObject))
+	_observedObject(const_cast<Referenced*>(observedObject)),
+	_observers(ObserverComparator())
 {
 }
 
@@ -71,6 +73,14 @@ ObserverSet::~ObserverSet()
 void ObserverSet::addObserver(Observer* observer)
 {
 	_observers.insert(observer);
+}
+
+bool ObserverSet::hasObserver(Observer* observer)
+{
+	auto result = _observers.find(observer);
+	if (result != _observers.end())
+		return true;
+	return false;
 }
 
 void ObserverSet::removeObserver(Observer* observer)
@@ -88,34 +98,41 @@ void ObserverSet::removeObserver(Observer* observer)
 
 Referenced* ObserverSet::addRefLock()
 {
-	if (!_observedObject) return 0;
+    if (!_observedObject) return nullptr;
 
 	int refCount = _observedObject->ref();
 	if (refCount == 1)
 	{
 		_observedObject->unref_nodelete();
-		return 0;
+        return nullptr;
 	}
 
 	return _observedObject;
 }
 
-void ObserverSet::signalObjectDeleted(void* ptr)
+void ObserverSet::signalObjectDeleted(Event& event)
 {
-	for (Observers::iterator itr = _observers.begin();
-		itr != _observers.end(); ++itr)
+	//duplicate the set to a vector
+	//because observet changes over the delete process
+	std::vector<Observer*> temp_obsvrs(_observers.begin(), _observers.end());
+	for (auto itr = temp_obsvrs.begin();
+		itr != temp_obsvrs.end(); ++itr)
 	{
-		(*itr)->objectDeleted(ptr);
+		(*itr)->objectDeleted(event);
 	}
 	_observers.clear();
-	_observedObject = 0;
+    _observedObject = nullptr;
 }
 
-void ObserverSet::signalObjectChanged(void* ptr, const std::string &exp)
+void ObserverSet::notifyObserver(Event& event)
 {
+	if (event.getNotifyFlags() == Event::NOTIFY_NONE)
+		return;
+
 	for (Observers::iterator itr = _observers.begin();
 		itr != _observers.end(); ++itr)
 	{
-		(*itr)->objectChanged(ptr, exp);
+		(*itr)->processNotification(event);
 	}
 }
+
