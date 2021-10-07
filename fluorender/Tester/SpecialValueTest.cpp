@@ -1,12 +1,12 @@
 #include "tests.h"
 #include "asserts.h"
-#include "Scenegraph/VolumeData.h"
+#include <Flobject/Object.hpp>
 
-using namespace flrd;
+using namespace fluo;
 
 void SpecialValueTest()
 {
-	ref_ptr<VolumeData> vd(new VolumeData());
+	ref_ptr<Object> vd(new Object());
 	fluo::Vector spacing(1.0, 1.0, 3.0);
 	vd->addValue("spacing", spacing);
 	fluo::Vector spacing2;
@@ -18,8 +18,8 @@ void SpecialValueTest()
 	vd->getValue("position", point2);
 	ASSERT_EQ(point, point2);
 
-	ref_ptr<VolumeData> vd2(
-		new VolumeData(*vd, CopyOp::DEEP_COPY_ALL));
+	ref_ptr<Object> vd2(
+		new Object(*vd, CopyOp::DEEP_COPY_ALL));
 	vd2->syncValue("spacing", vd.get());
 	vd2->syncValue("position", vd.get());
 

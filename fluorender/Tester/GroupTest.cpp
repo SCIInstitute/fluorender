@@ -1,13 +1,13 @@
 #include "tests.h"
 #include "asserts.h"
 #include <vector>
-#include <Scenegraph/Group.h>
-#include <Scenegraph/ValueUpdateVisitor.h>
-#include <Scenegraph/DecycleVisitor.h>
-#include <Scenegraph/InfoVisitor.h>
+#include <Flobject/Group.hpp>
+#include <Flobject/ValueUpdateVisitor.hpp>
+#include <Flobject/DecycleVisitor.hpp>
+#include <Flobject/InfoVisitor.hpp>
 
 using namespace std;
-using namespace flrd;
+using namespace fluo;
 
 void GroupTest()
 {

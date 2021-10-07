@@ -1,10 +1,10 @@
 #include "tests.h"
 #include "asserts.h"
 #include <vector>
-#include <Flobject/Object.h>
+#include <Flobject/Object.hpp>
 
 using namespace std;
-using namespace flrd;
+using namespace fluo;
 
 void ObjectTest()
 {

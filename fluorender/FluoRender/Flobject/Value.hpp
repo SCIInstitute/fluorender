@@ -42,16 +42,16 @@ DEALINGS IN THE SOFTWARE.
 #include <tuple>
 #include <set>
 //FluoRender's special types
-#include <BBox.hpp>
-#include <Color.hpp>
-#include <Plane.hpp>
-#include <Point.hpp>
-#include <Quaternion.hpp>
-#include <Ray.hpp>
-#include <Transform.hpp>
-#include <Vector.hpp>
-#include <Vector4f.hpp>
-#include <Vector4i.hpp>
+#include <BBox.h>
+#include <Color.h>
+#include <Plane.h>
+#include <Point.h>
+#include <Quaternion.h>
+#include <Ray.h>
+#include <Transform.h>
+#include <Vector.h>
+#include <Vector4f.h>
+#include <Vector4i.h>
 
 namespace fluo
 {
@@ -498,14 +498,14 @@ inline bool Value::operator == (const Value& v) const
 				dynamic_cast<const TemplateValue<float>*>(&v)->getValue();
 		else
 			return fabs(dynamic_cast<const TemplateValue<float>*>(this)->getValue() -
-				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < Epslf();
+				dynamic_cast<const TemplateValue<float>*>(&v)->getValue()) < Epsilon();
 	case vt_double:
 		if (precise())
 			return dynamic_cast<const TemplateValue<double>*>(this)->getValue() ==
 				dynamic_cast<const TemplateValue<double>*>(&v)->getValue();
 		else
 			return fabs(reinterpret_cast<const TemplateValue<double>*>(this)->getValue() -
-				reinterpret_cast<const TemplateValue<double>*>(&v)->getValue()) < Epsld();
+				reinterpret_cast<const TemplateValue<double>*>(&v)->getValue()) < Epsilon(10);
 	case vt_string:
 		return dynamic_cast<const TemplateValue<std::string>*>(this)->getValue() ==
 			dynamic_cast<const TemplateValue<std::string>*>(&v)->getValue();

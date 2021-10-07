@@ -50,7 +50,7 @@ namespace fluo
 			return std::string(level_ * 2, ' ');
 		}
 
-		virtual void apply(FL::Node& node)
+		virtual void apply(Node& node)
 		{
 			std::cout << spaces() << node.className() <<
 				"-" << node.getName() << "\t" << &node << std::endl;
@@ -62,7 +62,7 @@ namespace fluo
 			level_--;
 		}
 
-		virtual void apply(FL::Group& group)
+		virtual void apply(Group& group)
 		{
 			std::cout << spaces() << group.className() <<
 				"-" << group.getName() << "\t" << &group << std::endl;
@@ -78,7 +78,7 @@ namespace fluo
 	protected:
 		unsigned int level_;
 
-		void printValues(FL::Object* object)
+		void printValues(Object* object)
 		{
 			if (!object)
 				return;
