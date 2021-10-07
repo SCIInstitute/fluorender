@@ -354,7 +354,7 @@ add_library(ANIMATORS_OBJ OBJECT
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Flobject)
 file(GLOB obj_src fluorender/FluoRender/Flobject/*.cpp)
-file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.h)
+file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
 
@@ -628,6 +628,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
