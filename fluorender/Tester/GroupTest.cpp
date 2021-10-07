@@ -77,7 +77,7 @@ void GroupTest()
 	cin.get();
 	group1->getChild(0)->accept(visitor);
 
-	DecycleVisitor decycle;
+	DecycleVisitor decycle(*group4);
 	group4->accept(decycle);
 	while (decycle.removeCycle()) {}
 
@@ -151,7 +151,7 @@ void GroupTest2()
 
 	//sync value1
 	ValueUpdateVisitor update;
-	update.setType(SYNC_VALUE);
+	update.setType(ValueUpdateVisitor::SYNC_VALUE);
 	update.setValueName("value1");
 	group4->accept(update);
 	group1->getChild(0)->setValue("value1", 1.0);
@@ -159,7 +159,7 @@ void GroupTest2()
 	group4->accept(visitor);
 
 	//sync all
-	update.setType(SYNC_ALL_VALUES);
+	update.setType(ValueUpdateVisitor::SYNC_ALL_VALUES);
 	group4->accept(update);
 	group2->getChild(1)->setValue("value2", 2.0);
 	//traverse
@@ -183,7 +183,7 @@ void GroupTest3()
 	group1->addChild(group2.get());
 	group2->addChild(group1.get());
 
-	DecycleVisitor decycle;
+	DecycleVisitor decycle(*group1);
 	group1->accept(decycle);
 	while (decycle.removeCycle()) {}
 }

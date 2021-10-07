@@ -105,7 +105,7 @@ void ObjectTest2()
 	obj2->getValue("value1", value);
 	ASSERT_EQ(1.0, value);
 
-	std::vector<std::string> names = { "value1", "value2" };
+	std::set<std::string> names = { "value1", "value2" };
 	obj1->syncValues(names, obj2);
 	obj1->setValue("value1", 4.0);
 	obj2->getValue("value1", value);
