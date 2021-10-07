@@ -1121,6 +1121,23 @@ void ScriptProc::RunBackgroundStat(int index, wxFileConfig &fconfig)
 		return;
 
 	flrd::BackgStat bgs(cur_vol);
+	bool bval;
+	fconfig.Read("use_mask", &bval, false);
+	bgs.SetUseMask(bval);
+	int ival;
+	fconfig.Read("stat_type", &ival, 0);
+	bgs.SetType(ival);
+	int kx = 0, ky = 0;
+	fconfig.Read("kx", &kx, 0);
+	fconfig.Read("ky", &ky, 0);
+	if (kx && ky)
+		bgs.SetFeatureSize2D(kx, ky);
+	float varth = 0, gauth = 0;
+	fconfig.Read("varth", &varth, 0);
+	fconfig.Read("gauth", &gauth, 0);
+	if (varth > 0.0 && gauth > 0.0)
+		bgs.SetThreshold(varth, gauth);
+
 	bgs.Run();
 }
 

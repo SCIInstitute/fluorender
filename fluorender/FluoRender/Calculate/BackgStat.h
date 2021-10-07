@@ -73,9 +73,67 @@ namespace flrd
 		}
 
 		void Run();
-		float GetResult()
+		float GetResultf(int index = 0)
 		{
-			return m_wsum;
+			switch (m_type)
+			{
+			case 0:
+				return m_sum > 0 ? m_wsum / m_sum : 0;
+			case 1:
+				switch (index)
+				{
+				case 0:
+					//min
+					return float(m_minv);
+				case 1:
+					//max
+					return float(m_maxv);
+				}
+				break;
+			case 2:
+				switch (index)
+				{
+				case 0:
+					//median
+					return float(m_medv);
+				case 1:
+					//mode
+					return float(m_modv);
+				}
+				break;
+			}
+			return 0;
+		}
+		unsigned int GetResulti(int index = 0)
+		{
+			switch (m_type)
+			{
+			case 0:
+				return m_sum > 0 ? (unsigned int)(m_wsum / m_sum + 0.5) : 0;
+			case 1:
+				switch (index)
+				{
+				case 0:
+					//min
+					return m_minv;
+				case 1:
+					//max
+					return m_maxv;
+				}
+				break;
+			case 2:
+				switch (index)
+				{
+				case 0:
+					//median
+					return m_medv;
+				case 1:
+					//mode
+					return m_modv;
+				}
+				break;
+			}
+			return 0;
 		}
 
 	private:
@@ -87,6 +145,10 @@ namespace flrd
 		//result
 		unsigned int m_sum;
 		float m_wsum;
+		unsigned int m_minv;
+		unsigned int m_maxv;
+		unsigned int m_medv;
+		unsigned int m_modv;
 
 		bool CheckBricks();
 		bool GetInfo(flvr::TextureBrick* b,

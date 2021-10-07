@@ -194,9 +194,10 @@ const char* str_cl_backg_stat = \
 "	{\n" \
 "		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;\n" \
 "		val = bkg[index];\n" \
-"		lminv = min(val, lminv);\n" \
+"		lminv = val ? min(val, lminv) : lminv;\n" \
 "		lmaxv = max(val, lmaxv);\n" \
 "	}\n" \
+"	lminv = lminv == VSCL ? 0 : lminv;\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(minv+index, (uint)(lminv));\n" \
 "	atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
@@ -206,15 +207,15 @@ const char* str_cl_backg_stat = \
 "	__global DWL* bkg,\n" \
 "	unsigned int dnxy, \n" \
 "	unsigned int dnx,\n" \
-"	DWL minv,\n" \
-"	DWL maxv,\n" \
+"	unsigned int minv,\n" \
+"	unsigned int maxv,\n" \
 "	unsigned int bin,\n" \
 "	__global unsigned int* hist)\n" \
 "{\n" \
 "	int4 coord = (int4)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2), 1);\n" \
 "	unsigned int index = dnxy* coord.z + dnx*coord.y + coord.x;\n" \
-"	DWL val = bkg[index];\n" \
+"	unsigned int val = bkg[index];\n" \
 "	if (val < minv || val > maxv)\n" \
 "		return;\n" \
 "	index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
@@ -348,15 +349,135 @@ void BackgStat::Run()
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 
 		//debug
-		val = new unsigned char[nx*ny*nz*chars];
-		kernel_prog->readBuffer(arg_bkg, val);
-		ofs.open("E:/DATA/Test/bkg/avg.bin", std::ios::out | std::ios::binary);
-		ofs.write((char*)val, nx*ny*nz*chars);
-		ofs.close();
-		delete[] val;
+		//val = new unsigned char[nx*ny*nz*chars];
+		//kernel_prog->readBuffer(arg_bkg, val);
+		//ofs.open("E:/DATA/Test/bkg/avg.bin", std::ios::out | std::ios::binary);
+		//ofs.write((char*)val, nx*ny*nz*chars);
+		//ofs.close();
+		//delete[] val;
+
+		if (m_type == 0)
+		{
+			//mean
+			unsigned int* sum = new unsigned int[gsize.gsxyz];
+			float *wsum = new float[gsize.gsxyz];
+			kernel_prog->setKernelArgBegin(kernel_index1);
+			kernel_prog->setKernelArgument(arg_bkg);
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
+
+			//execute
+			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
+			//read back
+			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), sum, sum);
+			kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
+
+			//sum
+			for (int ii = 0; ii < gsize.gsxyz; ++ii)
+			{
+				m_sum += sum[ii];
+				m_wsum += wsum[ii];
+			}
+			delete[] sum;
+			delete[] wsum;
+		}
+		else if (m_type == 1 || m_type == 2)
+		{
+			//minmax
+			unsigned int* minv = new unsigned int[gsize.gsxyz];
+			unsigned int *maxv = new unsigned int[gsize.gsxyz];
+			kernel_prog->setKernelArgBegin(kernel_index1);
+			kernel_prog->setKernelArgument(arg_bkg);
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(minv));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(maxv));
+
+			//execute
+			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
+			//read back
+			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), minv, minv);
+			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), maxv, maxv);
+
+			//collect
+			m_minv = std::numeric_limits<unsigned int>::max();
+			m_maxv = 0;
+			for (int ii = 0; ii < gsize.gsxyz; ++ii)
+			{
+				m_minv = minv[ii] ? std::min(m_minv, minv[ii]) : m_minv;
+				m_maxv = std::max(m_maxv, maxv[ii]);
+			}
+			if (m_minv == std::numeric_limits<unsigned int>::max())
+				m_minv = m_maxv;
+			delete[] minv;
+			delete[] maxv;
+		}
+		if (m_type == 2)
+		{
+			//meidan mode with known minmax
+			unsigned int bin = m_maxv - m_minv + 1;
+			unsigned int* hist = new unsigned int[bin];
+			memset(hist, 0, sizeof(unsigned int)*bin);
+			kernel_prog->setKernelArgBegin(kernel_index2);
+			kernel_prog->setKernelArgument(arg_bkg);
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_minv));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_maxv));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
+
+			//execute
+			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+			//read back
+			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
+
+			//debug
+			ofs.open("E:/DATA/Test/bkg/hist.bin", std::ios::out | std::ios::binary);
+			ofs.write((char*)hist, bin*sizeof(unsigned int));
+			ofs.close();
+
+			//collect
+			m_medv = m_modv = 0;
+			unsigned int hm = 0;
+			for (int ii = 0; ii < bin; ++ii)
+			{
+				if (hist[ii] > hm)
+				{
+					hm = hist[ii];
+					m_modv = ii;
+				}
+				if (ii == 0)
+					continue;
+				hist[ii] += hist[ii - 1];
+			}
+			m_modv += m_minv;
+			unsigned int half = hist[bin - 1] / 2;
+			for (int ii = 0; ii < bin; ++ii)
+			{
+				if (hist[ii] >= half)
+				{
+					m_medv = ii;
+					break;
+				}
+			}
+			m_medv += m_minv;
+			delete[] hist;
+		}
 
 		kernel_prog->releaseAll();
-
 	}
 }
 
