@@ -26,18 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/Group.h>
-#include <Scenegraph/NodeVisitor.h>
+#include "Group.hpp"
+#include <NodeVisitor.hpp>
 
-using namespace flrd;
+using namespace fluo;
 
 Group::Group()
 {
 
 }
 
-Group::Group(const Group& group, const CopyOp& copyop) :
-	Node(group, copyop)
+Group::Group(const Group& group, const CopyOp& copyop, bool copy_values) :
+	Node(group, copyop, false)
 {
 	for (auto it = group.m_children.begin();
 		it != group.m_children.end(); ++it)
@@ -46,6 +46,8 @@ Group::Group(const Group& group, const CopyOp& copyop) :
 		Node* child = copyop(it->get());
 		if (child) addChild(child);
 	}
+	if (copy_values)
+		copyValues(group, copyop);
 }
 
 Group::~Group()
@@ -57,11 +59,20 @@ Group::~Group()
 	}
 }
 
-void Group::traverse(NodeVisitor& nv)
+void Group::traverse(NodeVisitor& nv, bool reverse)
 {
-	for (auto it = m_children.begin();
-		it != m_children.end(); ++it)
-		(*it)->accept(nv);
+	if (reverse)
+	{
+		for (auto it = m_children.rbegin();
+			it != m_children.rend(); ++it)
+			(*it)->accept(nv);
+	}
+	else
+	{
+		for (auto it = m_children.begin();
+			it != m_children.end(); ++it)
+			(*it)->accept(nv);
+	}
 }
 
 bool Group::addChild(Node* child)
@@ -81,6 +92,14 @@ bool Group::insertChild(size_t index, Node* child)
 
 	child->addParent(this);
 
+	//parent observes children
+	child->addObserver(this);
+	//notify observers of change
+	Event event;
+	event.init(Event::EVENT_NODE_ADDED,
+		this, child);
+	notifyObservers(event);
+
 	return true;
 }
 
@@ -92,8 +111,18 @@ bool Group::removeChildren(size_t pos, size_t num)
 		if (end > m_children.size())
 			end = m_children.size();
 
-		for (unsigned int i = pos; i<end; ++i)
+		for (unsigned int i = pos; i < end; ++i)
+		{
 			m_children[i]->removeParent(this);
+
+			//parent observes children
+			m_children[i]->removeObserver(this);
+			//notify observers of change
+			Event event;
+			event.init(Event::EVENT_NODE_REMOVED,
+				this, m_children[i].get());
+			notifyObservers(event);
+		}
 		m_children.erase(m_children.begin() + pos, m_children.begin() + end);
 
 		return true;
@@ -117,10 +146,24 @@ bool Group::setChild(size_t i, Node* node)
 {
 	if (i < m_children.size() && node != nullptr)
 	{
-		ref_ptr<Node> origNode = m_children[i];
+		Node* origNode = m_children[i].get();
 		origNode->removeParent(this);
+		//parent observes children
+		origNode->removeObserver(this);
+		//notify observers of change
+		Event event;
+		event.init(Event::EVENT_NODE_REMOVED,
+			this, origNode);
+		notifyObservers(event);
+
 		m_children[i] = node;
 		node->addParent(this);
+		//parent observes children
+		node->addObserver(this);
+		//notify observers of change
+		event.init(Event::EVENT_NODE_ADDED,
+			this, node);
+		notifyObservers(event);
 
 		return true;
 	}
@@ -136,3 +179,4 @@ void Group::accept(NodeVisitor& nv)
 		nv.popFromNodePath();
 	}
 }
+

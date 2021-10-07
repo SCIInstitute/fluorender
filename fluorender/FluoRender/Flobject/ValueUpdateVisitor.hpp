@@ -26,44 +26,44 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _VALUEUPDATEVISITOR_H_
-#define _VALUEUPDATEVISITOR_H_
+#ifndef VALUEUPDATEVISITOR_HPP
+#define VALUEUPDATEVISITOR_HPP
 
-#include <Scenegraph/NodeVisitor.h>
-#include <Scenegraph/Group.h>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
 
-namespace flrd
+namespace fluo
 {
-	enum ValueUpdateVisitType
-	{
-		SYNC_VALUE = 0,
-		SYNC_VALUES,
-		SYNC_ALL_VALUES,
-		UNSYNC_VALUE,
-		UNSYNC_VALUES,
-		UNSYNC_ALL_VALUES,
-		PROP_VALUE,
-		PROP_VALUES,
-		PROP_ALL_VALUES,
-	};
-
 	class ValueUpdateVisitor : public NodeVisitor
 	{
 	public:
+		enum ValueUpdateVisitType
+		{
+			SYNC_VALUE = 0,
+			SYNC_VALUES,
+			SYNC_ALL_VALUES,
+			UNSYNC_VALUE,
+			UNSYNC_VALUES,
+			UNSYNC_ALL_VALUES,
+			PROP_VALUE,
+			PROP_VALUES,
+			PROP_ALL_VALUES,
+		};
+
 		ValueUpdateVisitor() : type_(SYNC_VALUE), object_(0)
-		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type) : type_(type), object_(0)
-		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 		ValueUpdateVisitor(Object* obj) : type_(SYNC_VALUE), object_(obj)
-		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 		ValueUpdateVisitor(ValueUpdateVisitType type, Object* obj) : type_(type), object_(obj)
-		{ setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN); }
+        { setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN); }
 
 		virtual void reset()
 		{
 			type_ = SYNC_VALUE;
 			object_ = 0;
-			setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+            setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		void setType(const ValueUpdateVisitType type)
@@ -73,22 +73,22 @@ namespace flrd
 		void setValueName(const std::string &name)
 		{
 			value_names_.clear();
-			value_names_.push_back(name);
+			value_names_.insert(name);
 		}
-		void setValueNames(const std::vector<std::string> &names)
+		void setValueNames(const ValueCollection &names)
 		{
 			value_names_ = names;
 		}
 		void addValueName(const std::string &name)
 		{
-			value_names_.push_back(name);
+			value_names_.insert(name);
 		}
-		void addValueNames(const std::vector<std::string> &names)
+		void addValueNames(const ValueCollection &names)
 		{
-			value_names_.insert(value_names_.end(), names.begin(), names.end());
+			value_names_.insert(names.begin(), names.end());
 		}
 
-		virtual void apply(flrd::Node& node)
+        virtual void apply(Node& node)
 		{
 			switch (type_)
 			{
@@ -113,7 +113,7 @@ namespace flrd
 			traverse(node);
 		}
 
-		virtual void apply(flrd::Group& group)
+        virtual void apply(Group& group)
 		{
 			switch (type_)
 			{
@@ -147,10 +147,10 @@ namespace flrd
 
 	private:
 		ValueUpdateVisitType type_;
-		std::vector<std::string> value_names_;
+		ValueCollection value_names_;
 		Object* object_;
 
-		void syncValues(flrd::Group& group)
+        void syncValues(Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{
@@ -163,7 +163,7 @@ namespace flrd
 			}
 		}
 
-		void syncAllValues(flrd::Group& group)
+        void syncAllValues(Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{
@@ -176,7 +176,7 @@ namespace flrd
 			}
 		}
 
-		void unsyncValues(flrd::Group& group)
+        void unsyncValues(Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{
@@ -189,7 +189,7 @@ namespace flrd
 			}
 		}
 
-		void unsyncAllValues(flrd::Group& group)
+        void unsyncAllValues(Group& group)
 		{
 			for (size_t i = 0; i < group.getNumChildren(); ++i)
 			{

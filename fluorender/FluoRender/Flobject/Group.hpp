@@ -26,18 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _GROUP_H_
-#define _GROUP_H_
+#ifndef GROUP_HPP
+#define GROUP_HPP
 
-#include <Scenegraph/Node.h>
+#include <Node.hpp>
 
-namespace flrd
+namespace fluo
 {
 	class Group : public Node
 	{
 	public:
 		Group();
-		Group(const Group& group, const CopyOp& copyop=CopyOp::SHALLOW_COPY);
+		Group(const Group& group, const CopyOp& copyop=CopyOp::SHALLOW_COPY, bool copy_values = true);
 
 		virtual Object* clone(const CopyOp& copyop) const
 		{
@@ -54,7 +54,7 @@ namespace flrd
 		virtual Group* asGroup() { return this; }
 		virtual const Group* asGroup() const { return this; }
 
-		virtual void traverse(NodeVisitor& nv);
+		virtual void traverse(NodeVisitor& nv, bool reverse=false);
 
 		/* children
 		*/
@@ -75,6 +75,7 @@ namespace flrd
 			else
 				return false;
 		}
+		inline bool removeAllChildren() { return removeChildren(0, getNumChildren()); }
 		virtual bool removeChildren(size_t pos, size_t num);
 		virtual bool replaceChild(Node* orig_child, Node* new_child);
 		inline size_t getNumChildren() const { return m_children.size(); }

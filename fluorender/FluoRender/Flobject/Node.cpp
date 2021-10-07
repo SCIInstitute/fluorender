@@ -26,32 +26,66 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/VolumeData.h>
-//#include <FLIVR/VolumeRenderer.h>
+#include "Node.hpp"
+#include <NodeVisitor.hpp>
 
-using namespace flrd;
+#include <algorithm>
 
-VolumeData::VolumeData()//:
-//	m_vr(0),
-//	m_tex(0)
+using namespace fluo;
+
+Node::Node() :
+	Object(),
+	m_node_mask(0xffffffff)
 {
-	//addValue("spacing x", 1.0);
-	//addValue("spacing y", 1.0);
-	//addValue("spacing z", 3.0);
 }
 
-VolumeData::VolumeData(const VolumeData& data, const CopyOp& copyop):
-	Node(data, copyop)
+Node::Node(const Node& node, const CopyOp& copyop, bool copy_values) :
+	Object(node, copyop, false),
+	m_parents(),
+	m_node_mask(node.m_node_mask)
 {
-	//volume renderer and texture
-//	m_vr = new flvr::VolumeRenderer(*data.m_vr);
-//	m_tex = data.m_tex;
+	//copy
+	if (copy_values)
+		copyValues(node, copyop);
 }
 
-VolumeData::~VolumeData()
+Node::~Node()
 {
-	//if (m_vr)
-	//	delete m_vr;
-	//if (m_tex)
-	//	delete m_tex;
+}
+
+void Node::addParent(Node* node)
+{
+	m_parents.push_back(node);
+}
+
+void Node::removeParent(Node* node)
+{
+	auto pitr = std::find(m_parents.begin(), m_parents.end(), node);
+	if (pitr != m_parents.end())
+		m_parents.erase(pitr);
+}
+
+void Node::accept(NodeVisitor& nv)
+{
+	if (nv.validNodeMask(*this))
+	{
+		nv.pushOntoNodePath(this);
+		nv.apply(*this);
+		nv.popFromNodePath();
+	}
+}
+
+void Node::ascend(NodeVisitor& nv)
+{
+	std::for_each(m_parents.begin(), m_parents.end(), NodeAcceptOp(nv));
+}
+
+//as observer
+void Node::processNotification(Event& event)
+{
+	Object::handleEvent(event);
+	//notify only if event is from child
+	if (event.getNotifyFlags() & Event::NOTIFY_PARENT &&
+		event.type != Event::EVENT_VALUE_CHANGING)
+		notifyObservers(event);
 }

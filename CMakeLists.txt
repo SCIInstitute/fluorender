@@ -358,13 +358,6 @@ file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
 
-# Scenegraph
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Scenegraph)
-file(GLOB sg_src fluorender/FluoRender/Scenegraph/*.cpp)
-file(GLOB sg_hdr fluorender/FluoRender/Scenegraph/*.h)
-add_library(SCENEGRAPH_OBJ OBJECT
-  ${sg_src} ${sg_hdr})
-
 # Types
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Types)
 file(GLOB typ_src fluorender/FluoRender/Types/*.cpp)
@@ -510,7 +503,6 @@ if(APPLE)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -544,7 +536,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -654,7 +645,6 @@ elseif(WIN32)
       #$<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:GLEW_OBJ>)
       #$<TARGET_OBJECTS:TEEM_OBJ>)
   endif()

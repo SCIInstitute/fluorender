@@ -26,22 +26,23 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _INFOVISITOR_H_
-#define _INFOVISITOR_H_
+#ifndef INFOVISITOR_HPP
+#define INFOVISITOR_HPP
 
-#include <Scenegraph/NodeVisitor.h>
-#include <Scenegraph/Group.h>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
+
 #include <iostream>
 #include <string>
 
-namespace flrd
+namespace fluo
 {
-	class InfoVisitor : public flrd::NodeVisitor
+    class InfoVisitor : public NodeVisitor
 	{
 	public:
 		InfoVisitor() : level_(0)
 		{
-			setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		std::string spaces()
@@ -49,7 +50,7 @@ namespace flrd
 			return std::string(level_ * 2, ' ');
 		}
 
-		virtual void apply(flrd::Node& node)
+		virtual void apply(FL::Node& node)
 		{
 			std::cout << spaces() << node.className() <<
 				"-" << node.getName() << "\t" << &node << std::endl;
@@ -61,7 +62,7 @@ namespace flrd
 			level_--;
 		}
 
-		virtual void apply(flrd::Group& group)
+		virtual void apply(FL::Group& group)
 		{
 			std::cout << spaces() << group.className() <<
 				"-" << group.getName() << "\t" << &group << std::endl;
@@ -77,12 +78,12 @@ namespace flrd
 	protected:
 		unsigned int level_;
 
-		void printValues(flrd::Object* object)
+		void printValues(FL::Object* object)
 		{
 			if (!object)
 				return;
 			//get all value names
-			std::vector<std::string> names =
+			ValueCollection names =
 				object->getValueNames();
 			for (auto it = names.begin();
 				it != names.end(); ++it)

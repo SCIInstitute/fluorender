@@ -26,18 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _NODE_H_
-#define _NODE_H_
+#ifndef NODE_HPP
+#define NODE_HPP
+
+#include <CopyOp.hpp>
+#include <Object.hpp>
+
 
 #include <vector>
 #include <set>
-#include <Flobject/CopyOp.h>
-#include <Flobject/Object.h>
-#if defined(__linux__)
-#include <algorithm>
-#endif
 
-namespace flrd
+
+namespace fluo
 {
 	class Group;
 	class Layer;
@@ -48,27 +48,31 @@ namespace flrd
 	class Annotations;
 	class Node;
 	class NodeVisitor;
+	class View;
+	class Root;
 
 	typedef std::vector<Node*> ParentList;
-	typedef std::vector<ref_ptr<Node>> NodeList;
+    typedef std::vector<ref_ptr<Node>> NodeList;
 	typedef std::vector<Node*> NodePath;
 	typedef std::vector<NodePath> NodePathList;
 	typedef std::set<Node*> NodeSet;
 	typedef std::set<Node*>::iterator NodeSetIter;
 
-	class Node : public Object
+    class Node : public Object
 	{
 	public:
 		Node();
-		Node(const Node&, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+        Node(const Node&, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-		virtual Object* clone(const CopyOp& copyop) const
+        virtual Object* clone(const CopyOp& copyop) const
 		{ return new Node(*this, copyop); }
 
-		virtual bool isSameKindAs(const Object* obj) const
+        virtual bool isSameKindAs(const Object* obj) const
 		{ return dynamic_cast<const Node*>(obj) != NULL; }
 
 		virtual const char* className() const { return "Node"; }
+
+		virtual unsigned int getPriority() const { return 100; }
 
 		virtual Group* asGroup() { return 0; }
 		virtual const Group* asGroup() const { return 0; }
@@ -80,14 +84,21 @@ namespace flrd
 		virtual const MeshData* asMeshData() const { return 0; }
 		virtual VolumeGroup* asVolumeGroup() { return 0; }
 		virtual const VolumeGroup* asVolumeGroup() const { return 0; }
-		virtual MeshGroup* asMeshGroup() { return 0; }
+        virtual MeshGroup* asMeshGroup() { return 0; }
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
 		virtual Annotations* asAnnotations() { return 0; }
 		virtual const Annotations* asAnnotations() const { return 0; }
+		virtual View* asView() { return 0; }
+		virtual const View* asView() const { return 0; }
+		virtual Root* asRoot() { return 0; }
+		virtual const Root* asRoot() const { return 0; }
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);
-		virtual void traverse(NodeVisitor& nv) {}
+		virtual void traverse(NodeVisitor& nv, bool reverse=false) {}
+
+		//as observer
+        virtual void processNotification(Event& event);
 
 		/* parents
 		*/
@@ -95,9 +106,9 @@ namespace flrd
 
 		inline ParentList getParents() { return m_parents; }
 
-		inline const Node* getParent(unsigned int i) const { return m_parents[i]; }
+		inline const Node* getParent(unsigned int i) const { if (getNumParents()) return m_parents[i]; else return 0; }
 
-		inline Node* getParent(unsigned int i) { return m_parents[i]; }
+		inline Node* getParent(unsigned int i) { if (getNumParents()) return m_parents[i]; else return 0; }
 
 		inline unsigned int getNumParents() const { return static_cast<unsigned int>(m_parents.size()); }
 

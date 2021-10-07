@@ -26,33 +26,34 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _DECYCLEVISITOR_H_
-#define _DECYCLEVISITOR_H_
+#ifndef DECYCLEVISITOR_HPP
+#define DECYCLEVISITOR_HPP
 
-#include <Scenegraph/NodeVisitor.h>
-#include <Scenegraph/Group.h>
+#include <NodeVisitor.hpp>
+#include <Group.hpp>
 
-namespace flrd
+namespace fluo
 {
 	class DecycleVisitor : public NodeVisitor
 	{
 	public:
-		DecycleVisitor() :
+		DecycleVisitor(Node& node) :
+			node_(node),
 			found_(false),
 			parent_(0),
 			child_(0)
 		{
-			setTraversalMode(flrd::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
-		virtual void apply(flrd::Node& node)
+		virtual void apply(Node& node)
 		{
 			if (!found_)
 				decycle();
 			traverse(node);
 		}
 
-		virtual void apply(flrd::Group& group)
+		virtual void apply(Group& group)
 		{
 			if (!found_)
 				decycle();
@@ -68,22 +69,24 @@ namespace flrd
 
 		bool removeCycle()
 		{
-			if (found_)
+			while (!found_)
 			{
-				//remove cycle
-				Group* group = dynamic_cast<Group*>(parent_);
-				if (group && child_)
-					group->removeChild(child_);
-				found_ = false;
-				parent_ = 0;
-				child_ = 0;
-				return true;
+				node_.accept(*this);
+				if (found_)
+				{
+					Group* group = dynamic_cast<Group*>(parent_);
+					if (group && child_)
+						group->removeChild(child_);
+					reset();
+				}
+				else
+					return true;
 			}
-			else
-				return false;
+			return false;
 		}
 
 	private:
+		Node &node_;
 		bool found_;
 		Node* parent_;
 		Node* child_;

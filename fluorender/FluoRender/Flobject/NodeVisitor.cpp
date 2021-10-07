@@ -26,47 +26,44 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _MESHDATA_H_
-#define _MESHDATA_H_
+#include "NodeVisitor.hpp"
+#include <Group.hpp>
 
-#include <Scenegraph/Node.h>
+using namespace fluo;
 
-struct _GLMmodel;
-typedef _GLMmodel GLMmodel;
-namespace flvr
+NodeVisitor::NodeVisitor(TraversalMode tm) :
+	Referenced()
 {
-	class MeshRenderer;
-}
-namespace flrd
-{
-	class MeshData : public Node
-	{
-	public:
-		MeshData();
-		MeshData(const MeshData& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
+	m_visitor_type = NODE_VISITOR;
+	m_traversal_number = UNINITIALIZED_FRAME_NUMBER;
 
-		virtual Object* clone(const CopyOp& copyop) const
-		{
-			return new MeshData(*this, copyop);
-		}
-
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const MeshData*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "MeshData"; }
-
-		virtual MeshData* asMeshData() { return this; }
-		virtual const MeshData* asMeshData() const { return this; }
-
-	protected:
-		virtual ~MeshData();
-
-	private:
-		//GLMmodel* m_data;
-		//flvr::MeshRenderer* m_mr;
-	};
+	m_traversal_mode = tm;
+	m_traversal_mask = 0xffffffff;
+	m_node_mask_override = 0x0;
 }
 
-#endif//_MESHDATA_H_
+NodeVisitor::NodeVisitor(VisitorType type, TraversalMode tm) :
+	Referenced()
+{
+	m_visitor_type = type;
+	m_traversal_number = UNINITIALIZED_FRAME_NUMBER;
+
+	m_traversal_mode = tm;
+	m_traversal_mask = 0xffffffff;
+	m_node_mask_override = 0x0;
+}
+
+NodeVisitor::~NodeVisitor()
+{
+
+}
+
+void NodeVisitor::apply(Node& node)
+{
+	traverse(node);
+}
+
+void NodeVisitor::apply(Group& node)
+{
+	apply(static_cast<Node&>(node));
+}

@@ -26,13 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _NODEVISITOR_H_
-#define _NODEVISITOR_H_
+#ifndef NODEVISITOR_HPP
+#define NODEVISITOR_HPP
 
-#include <Scenegraph/Node.h>
+#include <Node.hpp>
+
 #include <algorithm>
 
-namespace flrd
+namespace fluo
 {
 	const unsigned int UNINITIALIZED_FRAME_NUMBER = 0xffffffff;
 
@@ -44,8 +45,8 @@ namespace flrd
 		{
 			TRAVERSE_NONE,
 			TRAVERSE_PARENTS,
-			TRAVERSE_ALL_CHILDREN,
-			TRAVERSE_ACTIVE_CHILDREN,
+			TRAVERSE_CHILDREN,
+			TRAVERSE_CHILDREN_REV,
 		};
 
 		enum VisitorType
@@ -96,7 +97,13 @@ namespace flrd
 					return;
 			}
 			if (m_traversal_mode == TRAVERSE_PARENTS) node.ascend(*this);
-			else if (m_traversal_mode != TRAVERSE_NONE) node.traverse(*this);
+			else if (m_traversal_mode != TRAVERSE_NONE)
+			{
+				if (m_traversal_mode == TRAVERSE_CHILDREN)
+					node.traverse(*this);
+				else if (m_traversal_mode == TRAVERSE_CHILDREN_REV)
+					node.traverse(*this, true);
+			}
 		}
 		inline void pushOntoNodePath(Node* node)
 		{
