@@ -78,8 +78,7 @@ void GroupTest()
 	group1->getChild(0)->accept(visitor);
 
 	DecycleVisitor decycle(*group4);
-	group4->accept(decycle);
-	while (decycle.removeCycle()) {}
+	decycle.removeCycle();
 
 	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
 	cin.get();
@@ -184,6 +183,5 @@ void GroupTest3()
 	group2->addChild(group1.get());
 
 	DecycleVisitor decycle(*group1);
-	group1->accept(decycle);
-	while (decycle.removeCycle()) {}
+	decycle.removeCycle();
 }

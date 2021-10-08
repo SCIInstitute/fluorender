@@ -321,7 +321,25 @@ public:
 	bool setValue(const std::string &name, const Vector4f &value, Event& event);
 	bool setValue(const std::string &name, const Vector4i &value, Event& event);
     */
-    template<typename T>
+	template<typename R>
+	bool setValue(const std::string &name, R* value, Event& event)
+	{
+		Value* val = findValue(name);
+		if (val && val->_etype == Value::vt_pReferenced)
+		{
+			Referenced* old_refd = dynamic_cast<TemplateValue<Referenced*>*>(val)->getValue();
+			if (old_refd != value && old_refd)
+				old_refd->removeObserver(val);
+			(dynamic_cast<TemplateValue<Referenced*>*>(val))->setValue(value, event);
+			if (old_refd != value && value)
+				value->addObserver(val);
+			return true;
+		}
+		else
+			return false;
+	}
+
+	template<typename T>
 	bool setValue(const std::string& name, T value, Event& event)
 	{
 	  Value *val = findValue(name);

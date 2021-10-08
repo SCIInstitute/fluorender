@@ -163,7 +163,7 @@ namespace fluo
     }
 
     template<typename T, typename V>
-    bool addValue(const T &name, const V &value)
+    bool addValue(const T &name, const V value)
     {
       if(_value_set)
       {
@@ -175,7 +175,8 @@ namespace fluo
           {
             vs_value->addObserver(this);
             Event event;
-            event.init(Event::EVENT_VALUE_ADDED,this,vs_value,true);
+            event.init(Event::EVENT_VALUE_ADDED,
+				this,vs_value,true);
             vs_value->notify(event);
           }
         }
@@ -185,7 +186,32 @@ namespace fluo
         return false;
     }
 
-    template<typename VT>
+	template<typename T, typename R>
+	bool addValue(const T &name, R* value)
+	{
+		void* ref = value;
+		if (_value_set)
+		{
+			bool result = _value_set->addValue(name, (Referenced*)ref);
+			if (result)
+			{
+				Value* vs_value = _value_set->findValue(name);
+				if (vs_value)
+				{
+					vs_value->addObserver(this);
+					Event event;
+					event.init(Event::EVENT_VALUE_ADDED,
+						this, vs_value, true);
+					vs_value->notify(event);
+				}
+			}
+			return result;
+		}
+		else
+			return false;
+	}
+
+	template<typename VT>
     bool setValue(VT &vt)
     {
       Event event;
@@ -227,7 +253,7 @@ namespace fluo
       return false;
     }
 
-/* possibly not needed. Further testing required.
+// possibly not needed. Further testing required.
     template<typename T, typename R, typename E>
     bool setValue(const T &name, R *value, E &event)
     {
@@ -249,7 +275,7 @@ namespace fluo
       }
       return false;
     }
-*/
+
     template<typename T, typename V, typename E>
     bool setValue(const T &name, const V &value, E &event)
     {
@@ -293,21 +319,13 @@ namespace fluo
 		return false;
 	}
 
-    template<typename T>
+	template<typename T>
     bool getValue(T &vt)
     {
       if (_value_set)
         return _value_set->getValue(vt);
       else
         return false;
-    }
-
-    // this is a bandaid. Not sure what it does
-    template<typename T>
-    Value* getValuePointer(T &vt)
-    {
-      Value* newVal = new Value(vt);
-      return newVal;
     }
 
     template<typename T, typename V>
@@ -328,7 +346,7 @@ namespace fluo
         return false;
     }
 
-    //get value the class
+    //get value pointer
     Value* getValuePointer(const std::string &name)
     {
         if (_value_set)
@@ -441,14 +459,6 @@ namespace fluo
 	bool getValue(const std::string &name, Vector4f &value);
 	bool getValue(const std::string &name, Vector4i &value);
     */
-	//get value the class
-	Value* getValue(const std::string &name)
-	{
-		if (_value_set)
-			return _value_set->findValue(name);
-		else
-			return 0;
-	}
 
 	//sync value only sets a state but doesn't change values when called
 	//observer's value updates when the value of this changes (data flow is one-way: this -> obj)

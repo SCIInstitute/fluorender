@@ -66,7 +66,7 @@ void ObjectTest()
 	//adding the first object as a value to the second
 	//obj2 is observing obj1
 	ASSERT_TRUE(obj_list[1]->addValue("friend", obj_list[0].get()));
-	ASSERT_TRUE(obj_list[1]->setValue("friend", obj_list[0].get()));
+	//ASSERT_TRUE(obj_list[1]->setValue("friend", obj_list[0].get()));
 	Object* obj;
 	//confirming the value has been added
 	ASSERT_TRUE(obj_list[1]->getValue("friend", (Referenced**)&obj));

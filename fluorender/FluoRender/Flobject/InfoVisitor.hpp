@@ -88,7 +88,7 @@ namespace fluo
 			for (auto it = names.begin();
 				it != names.end(); ++it)
 			{
-				Value* value = object->getValue(*it);
+				Value* value = object->getValuePointer(*it);
 				if (value)
 					std::cout << *it << "(" <<
 					value->getType() << ")[" <<
