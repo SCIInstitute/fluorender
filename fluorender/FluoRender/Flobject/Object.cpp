@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-Object::Object():
+Object::Object() :
 	EventHandler(),
 	_id(0)
 {
@@ -42,7 +42,7 @@ Object::Object():
 			this, std::placeholders::_1));
 }
 
-Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values):
+Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values) :
 	EventHandler(),
 	_id(0),
 	m_name(obj.m_name)
@@ -107,396 +107,7 @@ void Object::processNotification(Event& event)
 		return;
 	notifyObservers(event);
 }
-/*
-//add functions
-bool Object::addValue(ValueTuple &vt)
-{
-	if (_value_set)
-	{
-		bool result = _value_set->addValue(vt);
-		if (result)
-		{
-			std::string name = std::get<0>(vt);
-			Value* vs_value = _value_set->findValue(name);
-			if (vs_value)
-			{
-				vs_value->addObserver(this);
-				Event event;
-				event.init(Event::EVENT_VALUE_ADDED, this, vs_value, true);
-				vs_value->notify(event);
-			}
-		}
-		return result;
-	}
-	return false;
-}
 
-//define function bodies first
-#define OBJECT_ADD_VALUE_BODY \
-	if (_value_set) \
-	{ \
-		bool result = _value_set->addValue(name, value); \
-		if (result) \
-		{ \
-			Value* vs_value = _value_set->findValue(name); \
-			if (vs_value) \
-			{ \
-				vs_value->addObserver(this); \
-				Event event; \
-				event.init(Event::EVENT_VALUE_ADDED, \
-					this, vs_value, true); \
-				vs_value->notify(event); \
-			} \
-		} \
-		return result; \
-	} \
-	else \
-		return false
-
-//actual add functions
-bool Object::addValue(const std::string &name, Referenced* value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, bool value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, char value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, unsigned char value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, short value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, unsigned short value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, long value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, unsigned long value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, long long value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, unsigned long long value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, float value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, double value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const std::string &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const std::wstring &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Point &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Vector &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const BBox &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const HSVColor &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Color &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Plane &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const PlaneSet &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Quaternion &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Ray &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Transform &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Vector4f &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-bool Object::addValue(const std::string &name, const Vector4i &value)
-{
-	OBJECT_ADD_VALUE_BODY;
-}
-
-//set functions
-bool Object::setValue(ValueTuple &vt, const Event& event)
-{
-	ValueTuple old_vt;
-	std::string name = std::get<0>(vt);
-	std::get<0>(old_vt) = name;
-	Value* value = getValue(name);
-	if (getValue(old_vt) && vt != old_vt)
-	{
-		bool result = false;
-		if (_value_set)
-		{
-			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGING,
-					this, value, true);
-			result = _value_set->setValue(vt, event);
-		}
-		return result;
-	}
-	return false;
-}
-
-//define function bodies first
-#define OBJECT_SET_VALUE_BODY \
-	if (getValue(name, old_value) && value != old_value) \
-	{ \
-		bool result = false; \
-		if (_value_set) \
-		{ \
-			if (!event.sender) \
-				event.init(Event::EVENT_VALUE_CHANGING, \
-					this, getValue(name), true); \
-			else \
-				event.push(this); \
-			result = _value_set->setValue(name, value, event); \
-			event.pop(); \
-		} \
-		return result; \
-	} \
-	return false
-
-//set functions
-bool Object::setValue(const std::string &name, Referenced* value, Event& event)
-{
-	Referenced* old_value;
-	if (getValue(name, &old_value) && value != old_value)
-	{
-		bool result = false;
-		if (_value_set)
-		{
-			if (!event.sender)
-				event.init(Event::EVENT_VALUE_CHANGING,
-					this, getValue(name), true);
-			else
-				event.push(this);
-			result = _value_set->setValue(name, value, event);
-			event.pop();
-		}
-		return result;
-	}
-	return false;
-}
-
-bool Object::setValue(const std::string &name, bool value, Event& event)
-{
-	bool old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, char value, Event& event)
-{
-	char old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, unsigned char value, Event& event)
-{
-	unsigned char old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, short value, Event& event)
-{
-	short old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, unsigned short value, Event& event)
-{
-	unsigned short old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, long value, Event& event)
-{
-	long old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, unsigned long value, Event& event)
-{
-	unsigned long old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, long long value, Event& event)
-{
-	long long old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, unsigned long long value, Event& event)
-{
-	unsigned long long old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, float value, Event& event)
-{
-	float old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, double value, Event& event)
-{
-	double old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const std::string &value, Event& event)
-{
-	std::string old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const std::wstring &value, Event& event)
-{
-	std::wstring old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Point &value, Event& event)
-{
-	Point old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Vector &value, Event& event)
-{
-	Vector old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const BBox &value, Event& event)
-{
-	BBox old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const HSVColor &value, Event& event)
-{
-	HSVColor old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Color &value, Event& event)
-{
-	Color old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Plane &value, Event& event)
-{
-	Plane old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const PlaneSet &value, Event& event)
-{
-	PlaneSet old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Quaternion &value, Event& event)
-{
-	Quaternion old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Ray &value, Event& event)
-{
-	Ray old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Transform &value, Event& event)
-{
-	Transform old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Vector4f &value, Event& event)
-{
-	Vector4f old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-
-bool Object::setValue(const std::string &name, const Vector4i &value, Event& event)
-{
-	Vector4i old_value;
-	OBJECT_SET_VALUE_BODY;
-}
-*/
 //toggle value for bool
 bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 {
@@ -505,7 +116,7 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 	{
 		if (!event.sender)
 			event.init(Event::EVENT_VALUE_CHANGING,
-                this, getValuePointer(name), true);
+				this, getValuePointer(name), true);
 		else
 			event.push(this);
 		result = _value_set->toggleValue(name, value, event);
@@ -514,162 +125,14 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 	return result;
 }
 
-/*
-//get functions
-bool Object::getValue(ValueTuple &vt)
-{
-	if (_value_set)
-		return _value_set->getValue(vt);
-	else
-		return false;
-}
-
-//define function bodies first
-#define OBJECT_GET_VALUE_BODY \
-	if (_value_set) \
-		return _value_set->getValue(name, value); \
-	else \
-		return false
-
-//get functions
-bool Object::getValue(const std::string &name, Referenced** value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, bool &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, char &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, unsigned char &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, short &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, unsigned short &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, long &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, unsigned long &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, long long &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, unsigned long long &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, float &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, double &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, std::string &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, std::wstring &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Point &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Vector &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, BBox &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, HSVColor &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Color &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Plane &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, PlaneSet &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Quaternion &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Ray &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Transform &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Vector4f &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-
-bool Object::getValue(const std::string &name, Vector4i &value)
-{
-	OBJECT_GET_VALUE_BODY;
-}
-*/
 //sync a value
 //observer's value updates when this updates
 bool Object::syncValue(const std::string &name, Object* obj)
 {
 	if (obj)
 	{
-        Value* value = getValuePointer(name);
-        Value* value2 = obj->getValuePointer(name);
+		Value* value = getValuePointer(name);
+		Value* value2 = obj->getValuePointer(name);
 		if (value && value2)
 		{
 			value->addObserver(value2);
@@ -684,8 +147,8 @@ bool Object::unsyncValue(const std::string &name, Object* obj)
 {
 	if (obj)
 	{
-        Value* value = getValuePointer(name);
-        Value* value2 = obj->getValuePointer(name);
+		Value* value = getValuePointer(name);
+		Value* value2 = obj->getValuePointer(name);
 		if (value && value2)
 		{
 			value->removeObserver(value2);
@@ -762,10 +225,10 @@ bool Object::unsyncAllValues(Object* obj)
 //propagate a value
 bool Object::propValue(const std::string &name, Object* obj)
 {
-    Value* value = getValuePointer(name);
+	Value* value = getValuePointer(name);
 	if (value)
 	{
-        Value* obj_value = obj->getValuePointer(name);
+		Value* obj_value = obj->getValuePointer(name);
 		if (obj_value)
 		{
 			Event event;
@@ -812,8 +275,8 @@ bool Object::propAllValues(Object* obj)
 //sync values belonging to the same object (mutual! hope this is not confusing)
 bool Object::syncValues(const std::string &name1, const std::string &name2)
 {
-    Value* value1 = getValuePointer(name1);
-    Value* value2 = getValuePointer(name2);
+	Value* value1 = getValuePointer(name1);
+	Value* value2 = getValuePointer(name2);
 	if (value1 && value2 &&
 		value1->getType() ==
 		value2->getType())
@@ -827,8 +290,8 @@ bool Object::syncValues(const std::string &name1, const std::string &name2)
 
 bool Object::unsyncValues(const std::string &name1, const std::string &name2)
 {
-    Value* value1 = getValuePointer(name1);
-    Value* value2 = getValuePointer(name2);
+	Value* value1 = getValuePointer(name1);
+	Value* value2 = getValuePointer(name2);
 	if (value1 && value2)
 	{
 		value1->removeObserver(value2);
@@ -867,8 +330,8 @@ bool Object::unsyncValues(const ValueCollection &names)
 //propagate values belonging to the same object (1 -> 2)
 bool Object::propValues(const std::string &name1, const std::string &name2)
 {
-    Value* value1 = getValuePointer(name1);
-    Value* value2 = getValuePointer(name2);
+	Value* value1 = getValuePointer(name1);
+	Value* value2 = getValuePointer(name2);
 	if (value1 && value2 &&
 		value1 != value2)
 	{
@@ -884,7 +347,7 @@ bool Object::propValues(const std::string &name1, const std::string &name2)
 bool Object::propValues(const std::string &name1, const ValueCollection &names)
 {
 	bool result = false;
-    Value* value1 = getValuePointer(name1);
+	Value* value1 = getValuePointer(name1);
 	if (!value1)
 		return result;
 	Event event;
@@ -893,7 +356,7 @@ bool Object::propValues(const std::string &name1, const ValueCollection &names)
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{
-        Value* value2 = getValuePointer(*it);
+		Value* value2 = getValuePointer(*it);
 		if (value2 && value2 != value1)
 			result |= value2->sync(event);
 	}
