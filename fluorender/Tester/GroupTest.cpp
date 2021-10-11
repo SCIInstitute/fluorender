@@ -51,7 +51,7 @@ void GroupTest()
 	{
 		Node* node1 = group1->getChild(i);
 		Node* node2 = group3->getChild(i);
-		ASSERT_EQ(node1, node2);
+		ASSERT_NEQ(node1, node2);
 	}
 	//group of groups
 	//ref_ptr<Group> group4(new Group());

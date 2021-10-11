@@ -10,11 +10,11 @@ int main(int argc, char* argv[])
 	//char* leak = new char[1000];
 	//memset(leak, 14, 1000);
 
-	ObjectTest();
+	//ObjectTest();
 	//ObjectTest2();
 	//ObjectTest3();
 
-	//GroupTest();
+	GroupTest();
 	//GroupTest2();
 	//GroupTest3();
 
