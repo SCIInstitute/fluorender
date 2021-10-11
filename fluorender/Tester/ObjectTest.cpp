@@ -55,7 +55,7 @@ void ObjectTest()
 	bval = true;
 	ASSERT_TRUE(obj_list[1]->setValue("bval", bval));
 	ASSERT_TRUE(obj_list[0]->getValue("bval", bval2));
-	ASSERT_EQ(bval, bval2);
+	ASSERT_NEQ(bval, bval2);
 	//obj2's bval changes --> obj1's bval syncs
 	ASSERT_TRUE(obj_list[1]->syncValue("bval", (obj_list[0]).get()));
 	bval = false;
@@ -66,7 +66,8 @@ void ObjectTest()
 	//adding the first object as a value to the second
 	//obj2 is observing obj1
 	ASSERT_TRUE(obj_list[1]->addRvalu("friend", obj_list[0].get()));
-	ASSERT_TRUE(obj_list[1]->setRvalu("friend", obj_list[0].get()));
+	//setting the same value fails
+	ASSERT_FALSE(obj_list[1]->setRvalu("friend", obj_list[0].get()));
 	Object* obj;
 	//confirming the value has been added
 	ASSERT_TRUE(obj_list[1]->getRvalu("friend", (Referenced**)&obj));
