@@ -595,6 +595,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>

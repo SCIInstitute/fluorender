@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
+#include <Flobject/Group.hpp>
 #include <Tracking/VolCache.h>
 #include <Tracking/Cell.h>
 #include <wx/string.h>
@@ -62,6 +63,9 @@ namespace flrd
 		wxString m_script_output;
 		//selected labels
 		CelpList m_sel_labels;
+
+		//output
+		fluo::ref_ptr<fluo::Group> m_output;
 
 	private:
 		void RunNoiseReduction(int index, wxFileConfig &fconfig);
