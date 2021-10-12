@@ -10,3 +10,4 @@ void GroupTest3();
 
 void SpecialValueTest();
 
+void MyTest();

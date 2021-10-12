@@ -14,11 +14,13 @@ int main(int argc, char* argv[])
 	//ObjectTest2();
 	//ObjectTest3();
 
-	GroupTest();
+	//GroupTest();
 	//GroupTest2();
 	//GroupTest3();
 
 	//SpecialValueTest();
+
+	MyTest();
 
 	printf("All done. Quit.\n");
 	cin.get();
