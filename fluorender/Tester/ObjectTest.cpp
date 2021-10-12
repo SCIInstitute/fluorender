@@ -68,9 +68,10 @@ void ObjectTest()
 	ASSERT_TRUE(obj_list[1]->addRvalu("friend", obj_list[0].get()));
 	//setting the same value fails
 	ASSERT_FALSE(obj_list[1]->setRvalu("friend", obj_list[0].get()));
-	Object* obj;
+	Referenced* ref;
 	//confirming the value has been added
-	ASSERT_TRUE(obj_list[1]->getRvalu("friend", (Referenced**)&obj));
+	ASSERT_TRUE(obj_list[1]->getRvalu("friend", &ref));
+	Object* obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(obj1, obj);
 	//modify obj2's value
 	bval = true;
@@ -78,7 +79,8 @@ void ObjectTest()
 	//erasing the first object
 	obj_list.erase(obj_list.begin());
 	//confirming the value pointing to the first object is reset
-	ASSERT_TRUE(obj_list[0]->getRvalu("friend", (Referenced**)&obj));
+	ASSERT_TRUE(obj_list[0]->getRvalu("friend", &ref));
+	obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(0, obj);
 }
 
