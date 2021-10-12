@@ -51,7 +51,10 @@ DrawVolumeDepth::~DrawVolumeDepth()
 void DrawVolumeDepth::render(Event& event)
 {
 	VolumeGroup* group;
-	getValue("volume group", (Referenced**)&group);
+	Referenced* ref;
+	if (!getRvalu("volume group", &ref))
+		return;
+	group = dynamic_cast<VolumeGroup*>(ref);
 	if (!group || !group->getNumChildren())
 		return;
 

@@ -52,7 +52,10 @@ DrawVolume::~DrawVolume()
 ProcessorBranchType DrawVolume::drawType()
 {
 	View* view;
-	getValue("view", (Referenced**)&view);
+	Referenced* ref;
+	if (!getRvalu("view", &ref))
+		return PBT_STOP;
+	view = dynamic_cast<View*>(ref);
 	if (!view)
 		return PBT_STOP;
 	long blend_mode;

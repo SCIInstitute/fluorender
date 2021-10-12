@@ -51,7 +51,10 @@ DrawMesh::~DrawMesh()
 void DrawMesh::draw(Event &event)
 {
 	MeshGroup* group;
-	getValue("mesh group", (Referenced**)&group);
+	Referenced* ref;
+	if (!getRvalu("mesh group", &ref))
+		return;
+	group = dynamic_cast<MeshGroup*>(ref);
 	if (!group)
 		return;
 	for (size_t i = 0; i < group->getNumChildren(); ++i)

@@ -60,8 +60,13 @@ class InterfaceAgent : public Object
     virtual void setObject(Object* obj)
     {
       Object* old_obj = nullptr;
-      if (getValue("asset", (Referenced**)&old_obj) && old_obj == obj)
-        return;
+	  Referenced* ref;
+	  if (getRvalu("asset", &ref))
+	  {
+		  old_obj = dynamic_cast<Object*>(ref);
+		  if (old_obj == obj)
+		  return;
+	  }
 
       if (old_obj)
         old_obj->removeObserver(this);
@@ -79,9 +84,10 @@ class InterfaceAgent : public Object
 
     virtual Object* getObject()
     {
-      Object* obj = nullptr;
-      getValue("asset", (Referenced**)&obj);
-      return obj;
+	  Referenced* ref;
+      if (getRvalu("asset", &ref))
+		return dynamic_cast<Object*>(ref);
+	  return nullptr;
     }
 
     virtual Node* getObjParent()
