@@ -67,9 +67,11 @@ void ObjectTest()
 	//obj2 is observing obj1
 	ASSERT_TRUE(obj_list[1]->addValue("friend", obj_list[0].get()));
 	ASSERT_TRUE(obj_list[1]->setValue("friend", obj_list[0].get()));
+	Referenced* ref;
 	Object* obj;
 	//confirming the value has been added
-	ASSERT_TRUE(obj_list[1]->getValue("friend", (Referenced**)&obj));
+	ASSERT_TRUE(obj_list[1]->getValue("friend", &ref));
+	obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(obj1, obj);
 	//modify obj2's value
 	bval = true;
@@ -77,7 +79,8 @@ void ObjectTest()
 	//erasing the first object
 	obj_list.erase(obj_list.begin());
 	//confirming the value pointing to the first object is reset
-	ASSERT_TRUE(obj_list[0]->getValue("friend", (Referenced**)&obj));
+	ASSERT_TRUE(obj_list[0]->getValue("friend", &ref));
+	obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(0, obj);
 }
 
