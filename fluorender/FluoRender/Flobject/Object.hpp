@@ -263,6 +263,14 @@ namespace fluo
 			}
 			return false;
 		}
+		template<typename V>
+		bool addSetValue(const std::string& name, const V &value)
+		{
+			if (addValue(name, value))
+				return true;
+			else
+				return setValue(name, value);
+		}
 
 		bool getValue(ValueTuple &vt)
 		{

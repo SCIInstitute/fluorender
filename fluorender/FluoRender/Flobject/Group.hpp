@@ -101,6 +101,42 @@ namespace fluo
 			}
 			return m_children.size();
 		}
+		virtual Node* getOrAddNode(const std::string& child_name)
+		{
+			std::string name;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				name = (*it)->getName();
+				if (name == child_name)
+					return it->get();
+			}
+			//no found
+			Node* node = new Node();
+			node->setName(child_name);
+			addChild(node);
+			return node;
+		}
+		virtual Group* getOrAddGroup(const std::string& child_name)
+		{
+			std::string name;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				name = (*it)->getName();
+				if (name == child_name)
+				{
+					Group* group = dynamic_cast<Group*>(it->get());
+					if (group)
+						return group;
+				}
+			}
+			//no found
+			Group* group = new Group();
+			group->setName(child_name);
+			addChild(group);
+			return group;
+		}
 
 		virtual void accept(NodeVisitor& nv);
 

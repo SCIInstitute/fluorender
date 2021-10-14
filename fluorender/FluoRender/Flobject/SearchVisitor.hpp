@@ -31,12 +31,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <NodeVisitor.hpp>
 #include <Group.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <MeshData.hpp>
-#include <MeshGroup.hpp>
-#include <Annotations.hpp>
-#include <View.hpp>
 
 #include <iostream>
 #include <string>
@@ -89,54 +83,6 @@ namespace fluo
 		{
 			if (!results_.empty())
 				return dynamic_cast<Group*>(results_[0]);
-			else
-				return 0;
-		}
-
-		VolumeData* getVolumeData()
-		{
-			if (!results_.empty())
-				return dynamic_cast<VolumeData*>(results_[0]);
-			else
-				return 0;
-		}
-
-		VolumeGroup* getVolumeGroup()
-		{
-			if (!results_.empty())
-				return dynamic_cast<VolumeGroup*>(results_[0]);
-			else
-				return 0;
-		}
-
-		MeshData* getMeshData()
-		{
-			if (!results_.empty())
-				return dynamic_cast<MeshData*>(results_[0]);
-			else
-				return 0;
-		}
-
-		MeshGroup* getMeshGroup()
-		{
-			if (!results_.empty())
-				return dynamic_cast<MeshGroup*>(results_[0]);
-			else
-				return 0;
-		}
-
-		Annotations* getAnnotations()
-		{
-			if (!results_.empty())
-				return dynamic_cast<Annotations*>(results_[0]);
-			else
-				return 0;
-		}
-
-		View* getView()
-		{
-			if (!results_.empty())
-				return dynamic_cast<View*>(results_[0]);
 			else
 				return 0;
 		}

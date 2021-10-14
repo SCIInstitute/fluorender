@@ -84,45 +84,45 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 				fconfig.SetPath(str);
 				fconfig.Read("type", &str, "");
 				if (str == "noise_reduction")
-					RunNoiseReduction(index, fconfig);
+					RunNoiseReduction(str, index, fconfig);
 				else if (str == "selection_tracking")
-					RunSelectionTracking(index, fconfig);
+					RunSelectionTracking(str, index, fconfig);
 				else if (str == "mask_tracking")
-					RunMaskTracking(index, fconfig);
+					RunMaskTracking(str, index, fconfig);
 				else if (str == "random_colors")
-					RunRandomColors(index, fconfig);
+					RunRandomColors(str, index, fconfig);
 				else if (str == "fetch_mask")
-					RunFetchMask(index, fconfig);
+					RunFetchMask(str, index, fconfig);
 				else if (str == "clear_mask")
-					RunClearMask(index, fconfig);
+					RunClearMask(str, index, fconfig);
 				else if (str == "save_mask")
-					RunSaveMask(index, fconfig);
+					RunSaveMask(str, index, fconfig);
 				else if (str == "opencl")
-					RunOpenCL(index, fconfig);
+					RunOpenCL(str, index, fconfig);
 				else if (str == "comp_analysis")
-					RunCompAnalysis(index, fconfig);
+					RunCompAnalysis(str, index, fconfig);
 				else if (str == "generate_comp")
-					RunGenerateComp(index, fconfig);
+					RunGenerateComp(str, index, fconfig);
 				else if (str == "ruler_profile")
-					RunRulerProfile(index, fconfig);
+					RunRulerProfile(str, index, fconfig);
 				else if (str == "save_volume")
-					RunSaveVolume(index, fconfig);
+					RunSaveVolume(str, index, fconfig);
 				else if (str == "calculate")
-					RunCalculate(index, fconfig);
+					RunCalculate(str, index, fconfig);
 				else if (str == "add_cells")
-					RunAddCells(index, fconfig);
+					RunAddCells(str, index, fconfig);
 				else if (str == "link_cells")
-					RunLinkCells(index, fconfig);
+					RunLinkCells(str, index, fconfig);
 				else if (str == "unlink_cells")
-					RunUnlinkCells(index, fconfig);
+					RunUnlinkCells(str, index, fconfig);
 				else if (str == "backg_stat")
-					RunBackgroundStat(index, fconfig);
+					RunBackgroundStat(str, index, fconfig);
 			}
 		}
 	}
 }
 
-void ScriptProc::RunNoiseReduction(int index, wxFileConfig &fconfig)
+void ScriptProc::RunNoiseReduction(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -183,7 +183,7 @@ void ScriptProc::RunNoiseReduction(int index, wxFileConfig &fconfig)
 		return; \
 	}
 
-void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
+void ScriptProc::RunSelectionTracking(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -220,7 +220,7 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 				//celp->SetSizeD(it->second->sumd);
 				//celp->SetCenter(it->second->pos);
 				//celp->SetBox(it->second->box);
-				m_sel_labels.insert(pair<unsigned int, flrd::Celp>
+				m_sel_labels.insert(std::pair<unsigned int, flrd::Celp>
 					(it->second->Id(), celp));
 			}
 		}
@@ -272,7 +272,7 @@ void ScriptProc::RunSelectionTracking(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
+void ScriptProc::RunMaskTracking(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -334,7 +334,7 @@ void ScriptProc::RunMaskTracking(int index, wxFileConfig &fconfig)
 		m_frame->GetTraceDlg()->GetSettings(m_vrv);
 }
 
-void ScriptProc::RunRandomColors(int index, wxFileConfig &fconfig)
+void ScriptProc::RunRandomColors(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -384,7 +384,7 @@ void ScriptProc::RunRandomColors(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunFetchMask(int index, wxFileConfig &fconfig)
+void ScriptProc::RunFetchMask(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -453,7 +453,7 @@ void ScriptProc::RunFetchMask(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunClearMask(int index, wxFileConfig &fconfig)
+void ScriptProc::RunClearMask(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -505,7 +505,7 @@ void ScriptProc::RunClearMask(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunSaveMask(int index, wxFileConfig &fconfig)
+void ScriptProc::RunSaveMask(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -551,7 +551,7 @@ void ScriptProc::RunSaveMask(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
+void ScriptProc::RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -662,7 +662,7 @@ void ScriptProc::RunSaveVolume(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunCalculate(int index, wxFileConfig &fconfig)
+void ScriptProc::RunCalculate(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
@@ -717,7 +717,7 @@ void ScriptProc::RunCalculate(int index, wxFileConfig &fconfig)
 		calculator->CalculateGroup(9, "", false);
 }
 
-void ScriptProc::RunOpenCL(int index, wxFileConfig &fconfig)
+void ScriptProc::RunOpenCL(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -769,7 +769,7 @@ void ScriptProc::RunOpenCL(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunCompAnalysis(int index, wxFileConfig &fconfig)
+void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -856,7 +856,7 @@ void ScriptProc::RunCompAnalysis(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunGenerateComp(int index, wxFileConfig &fconfig)
+void ScriptProc::RunGenerateComp(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -904,7 +904,7 @@ void ScriptProc::RunGenerateComp(int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunRulerProfile(int index, wxFileConfig &fconfig)
+void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -1039,7 +1039,7 @@ void ScriptProc::RunRulerProfile(int index, wxFileConfig &fconfig)
 	file.Close();
 }
 
-void ScriptProc::RunAddCells(int index, wxFileConfig &fconfig)
+void ScriptProc::RunAddCells(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -1068,7 +1068,7 @@ void ScriptProc::RunAddCells(int index, wxFileConfig &fconfig)
 	tm_processor.AddCells(m_sel_labels, tseq_cur_num);
 }
 
-void ScriptProc::RunLinkCells(int index, wxFileConfig &fconfig)
+void ScriptProc::RunLinkCells(wxString& type, int index, wxFileConfig &fconfig)
 {
 	int time_mode;
 	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
@@ -1082,7 +1082,7 @@ void ScriptProc::RunLinkCells(int index, wxFileConfig &fconfig)
 	m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 
-void ScriptProc::RunUnlinkCells(int index, wxFileConfig &fconfig)
+void ScriptProc::RunUnlinkCells(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -1107,7 +1107,7 @@ void ScriptProc::RunUnlinkCells(int index, wxFileConfig &fconfig)
 	tm_processor.RemoveCells(m_sel_labels, tseq_cur_num);
 }
 
-void ScriptProc::RunBackgroundStat(int index, wxFileConfig &fconfig)
+void ScriptProc::RunBackgroundStat(wxString& type, int index, wxFileConfig &fconfig)
 {
 	if (!m_view || !m_frame) return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
@@ -1139,6 +1139,12 @@ void ScriptProc::RunBackgroundStat(int index, wxFileConfig &fconfig)
 		bgs.SetThreshold(varth, gauth);
 
 	bgs.Run();
+
+	//output
+	float result = bgs.GetResultf();
+	fluo::Node* node = m_output->getOrAddNode(type.ToStdString());
+	std::string fn = std::to_string(tseq_cur_num);
+	node->addSetValue(fn, result);
 }
 
 //read/delete volume cache

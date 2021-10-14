@@ -68,23 +68,23 @@ namespace flrd
 		fluo::ref_ptr<fluo::Group> m_output;
 
 	private:
-		void RunNoiseReduction(int index, wxFileConfig &fconfig);
-		void RunSelectionTracking(int index, wxFileConfig &fconfig);
-		void RunMaskTracking(int index, wxFileConfig &fconfig);
-		void RunRandomColors(int index, wxFileConfig &fconfig);
-		void RunFetchMask(int index, wxFileConfig &fconfig);
-		void RunClearMask(int index, wxFileConfig &fconfig);
-		void RunSaveMask(int index, wxFileConfig &fconfig);
-		void RunSaveVolume(int index, wxFileConfig &fconfig);
-		void RunCalculate(int index, wxFileConfig &fconfig);
-		void RunOpenCL(int index, wxFileConfig &fconfig);
-		void RunCompAnalysis(int index, wxFileConfig &fconfig);
-		void RunGenerateComp(int index, wxFileConfig &fconfig);
-		void RunRulerProfile(int index, wxFileConfig &fconfig);
-		void RunAddCells(int index, wxFileConfig &fconfig);
-		void RunLinkCells(int index, wxFileConfig &fconfig);
-		void RunUnlinkCells(int index, wxFileConfig &fconfig);
-		void RunBackgroundStat(int index, wxFileConfig &fconfig);
+		void RunNoiseReduction(wxString& type, int index, wxFileConfig &fconfig);
+		void RunSelectionTracking(wxString& type, int index, wxFileConfig &fconfig);
+		void RunMaskTracking(wxString& type, int index, wxFileConfig &fconfig);
+		void RunRandomColors(wxString& type, int index, wxFileConfig &fconfig);
+		void RunFetchMask(wxString& type, int index, wxFileConfig &fconfig);
+		void RunClearMask(wxString& type, int index, wxFileConfig &fconfig);
+		void RunSaveMask(wxString& type, int index, wxFileConfig &fconfig);
+		void RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig);
+		void RunCalculate(wxString& type, int index, wxFileConfig &fconfig);
+		void RunOpenCL(wxString& type, int index, wxFileConfig &fconfig);
+		void RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfig);
+		void RunGenerateComp(wxString& type, int index, wxFileConfig &fconfig);
+		void RunRulerProfile(wxString& type, int index, wxFileConfig &fconfig);
+		void RunAddCells(wxString& type, int index, wxFileConfig &fconfig);
+		void RunLinkCells(wxString& type, int index, wxFileConfig &fconfig);
+		void RunUnlinkCells(wxString& type, int index, wxFileConfig &fconfig);
+		void RunBackgroundStat(wxString& type, int index, wxFileConfig &fconfig);
 
 		//read/delete volume cache
 		void ReadVolCache(VolCache& vol_cache);

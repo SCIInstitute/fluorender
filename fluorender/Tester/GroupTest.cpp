@@ -185,3 +185,14 @@ void GroupTest3()
 	DecycleVisitor decycle(*group1);
 	decycle.removeCycle();
 }
+
+void GroupTest4()
+{
+	ref_ptr<Group> group = new Group();
+	group->setName("group");
+	Node* node = group->getOrAddNode("child1");
+	Group* group2 = group->getOrAddGroup("child2");
+
+	InfoVisitor visitor;
+	group->accept(visitor);
+}
