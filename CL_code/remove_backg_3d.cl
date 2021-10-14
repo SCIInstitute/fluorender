@@ -9,7 +9,7 @@
 #define VSCL 255
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
-	CLK_ADDRESS_MIRRORED_REPEAT|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
 	CLK_FILTER_NEAREST;
 __kernel void kernel_main(
 	read_only image3d_t data,

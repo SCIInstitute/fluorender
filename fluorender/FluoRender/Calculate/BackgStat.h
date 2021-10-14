@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <map>
 
 using namespace std;
 
@@ -149,6 +150,8 @@ namespace flrd
 		unsigned int m_maxv;
 		unsigned int m_medv;
 		unsigned int m_modv;
+		std::map<unsigned int, unsigned int> m_hist;
+		std::vector<unsigned int> m_hist_acc;
 
 		bool CheckBricks();
 		bool GetInfo(flvr::TextureBrick* b,

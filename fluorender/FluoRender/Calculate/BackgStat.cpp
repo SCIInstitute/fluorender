@@ -44,7 +44,7 @@ const char* str_cl_backg_stat = \
 "#define VSCL 255\n" \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_MIRRORED_REPEAT|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
 "//extract background\n" \
@@ -305,7 +305,14 @@ void BackgStat::Run()
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
-	m_sum = 0; m_wsum = 0.0;
+	m_sum = 0;
+	m_wsum = 0.0;
+	m_minv = std::numeric_limits<unsigned int>::max();
+	m_maxv = 0;
+	m_medv = m_modv = 0;
+	m_hist.clear();
+	m_hist_acc.clear();
+
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
@@ -356,6 +363,10 @@ void BackgStat::Run()
 		//ofs.close();
 		//delete[] val;
 
+		//brick min and max
+		unsigned int bminv = std::numeric_limits<unsigned int>::max();
+		unsigned int bmaxv = 0;
+
 		if (m_type == 0)
 		{
 			//mean
@@ -392,7 +403,7 @@ void BackgStat::Run()
 		{
 			//minmax
 			unsigned int* minv = new unsigned int[gsize.gsxyz];
-			unsigned int *maxv = new unsigned int[gsize.gsxyz];
+			unsigned int* maxv = new unsigned int[gsize.gsxyz];
 			kernel_prog->setKernelArgBegin(kernel_index1);
 			kernel_prog->setKernelArgument(arg_bkg);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
@@ -412,30 +423,34 @@ void BackgStat::Run()
 			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), maxv, maxv);
 
 			//collect
-			m_minv = std::numeric_limits<unsigned int>::max();
-			m_maxv = 0;
 			for (int ii = 0; ii < gsize.gsxyz; ++ii)
 			{
-				m_minv = minv[ii] ? std::min(m_minv, minv[ii]) : m_minv;
-				m_maxv = std::max(m_maxv, maxv[ii]);
+				bminv = minv[ii] ? std::min(bminv, minv[ii]) : bminv;
+				bmaxv = std::max(bmaxv, maxv[ii]);
 			}
+			if (bminv == std::numeric_limits<unsigned int>::max())
+				bminv = bmaxv;
+			m_minv = bminv ? std::min(m_minv, bminv) : m_minv;
+			m_maxv = std::max(m_maxv, bmaxv);
 			if (m_minv == std::numeric_limits<unsigned int>::max())
 				m_minv = m_maxv;
+
 			delete[] minv;
 			delete[] maxv;
 		}
+
 		if (m_type == 2)
 		{
 			//meidan mode with known minmax
-			unsigned int bin = m_maxv - m_minv + 1;
+			unsigned int bin = bmaxv - bminv + 1;
 			unsigned int* hist = new unsigned int[bin];
 			memset(hist, 0, sizeof(unsigned int)*bin);
 			kernel_prog->setKernelArgBegin(kernel_index2);
 			kernel_prog->setKernelArgument(arg_bkg);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_minv));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_maxv));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bminv));
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bmaxv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
 
@@ -445,39 +460,56 @@ void BackgStat::Run()
 			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
 
 			//debug
-			ofs.open("E:/DATA/Test/bkg/hist.bin", std::ios::out | std::ios::binary);
-			ofs.write((char*)hist, bin*sizeof(unsigned int));
-			ofs.close();
+			//ofs.open("E:/DATA/Test/bkg/hist.bin", std::ios::out | std::ios::binary);
+			//ofs.write((char*)hist, bin*sizeof(unsigned int));
+			//ofs.close();
 
 			//collect
-			m_medv = m_modv = 0;
-			unsigned int hm = 0;
 			for (int ii = 0; ii < bin; ++ii)
 			{
-				if (hist[ii] > hm)
-				{
-					hm = hist[ii];
-					m_modv = ii;
-				}
-				if (ii == 0)
-					continue;
-				hist[ii] += hist[ii - 1];
+				unsigned int key = ii + bminv;
+				auto it = m_hist.find(key);
+				if (it == m_hist.end())
+					m_hist.insert(std::pair<unsigned int, unsigned int>(key, hist[ii]));
+				else
+					it->second += hist[ii];
 			}
-			m_modv += m_minv;
-			unsigned int half = hist[bin - 1] / 2;
-			for (int ii = 0; ii < bin; ++ii)
-			{
-				if (hist[ii] >= half)
-				{
-					m_medv = ii;
-					break;
-				}
-			}
-			m_medv += m_minv;
 			delete[] hist;
 		}
 
 		kernel_prog->releaseAll();
 	}
+
+	//median and mode from histogram
+	if (m_hist.empty())
+		return;
+
+	unsigned int hm = 0;
+	unsigned int ii = 0;
+	for (auto it = m_hist.begin(); it != m_hist.end(); ++it)
+	{
+		if (it->second > hm)
+		{
+			hm = it->second;
+			m_modv = it->first;
+		}
+		if (it == m_hist.begin())
+			m_hist_acc.push_back(it->second);
+		else
+			m_hist_acc.push_back(it->second + m_hist_acc[ii-1]);
+		ii++;
+	}
+	unsigned int half = m_hist_acc.back() / 2;
+	ii = 0;
+	for (auto it = m_hist_acc.begin(); it != m_hist_acc.end(); ++it)
+	{
+		if (*it >= half)
+		{
+			m_medv = ii;
+			break;
+		}
+		ii++;
+	}
+	m_medv += m_minv;
 }
 
