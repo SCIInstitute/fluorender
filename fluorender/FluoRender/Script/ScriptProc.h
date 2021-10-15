@@ -54,6 +54,8 @@ namespace flrd
 		//index: 0-pre-change; 1-post-change
 		void Run4DScript(int index, wxString &scriptname);
 
+		void ClearResults() { m_output->removeAllChildren(); }
+
 	private:
 		VRenderFrame* m_frame;
 		VRenderView* m_vrv;

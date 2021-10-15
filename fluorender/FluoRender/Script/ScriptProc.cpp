@@ -791,20 +791,22 @@ void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfi
 			return;
 	}
 	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
-	wxString str, pathname;
-	fconfig.Read("savepath", &pathname);
+	//wxString str, pathname;
+	//fconfig.Read("savepath", &pathname);
 	int verbose;
 	fconfig.Read("verbose", &verbose, 0);
 	bool consistent;
 	fconfig.Read("consistent", &consistent, true);
 	bool selected;
 	fconfig.Read("selected", &selected, false);
+	int slimit;
+	fconfig.Read("slimit", &slimit, 5);
 
-	str = wxPathOnly(pathname);
-	if (!wxDirExists(str))
-		MkDirW(str.ToStdWstring());
-	if (!wxDirExists(str))
-		return;
+	//str = wxPathOnly(pathname);
+	//if (!wxDirExists(str))
+	//	MkDirW(str.ToStdWstring());
+	//if (!wxDirExists(str))
+	//	return;
 
 	std::vector<VolumeData*> vlist;
 	if (chan_mode == 0)
@@ -817,13 +819,93 @@ void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfi
 			vlist.push_back(m_view->GetDispVolumeData(i));
 	}
 	int chan_num = vlist.size();
+	int ch = 0;
+	fluo::Vector lens;
+	std::string fn = std::to_string(tseq_cur_num);
 
-	for (auto i = vlist.begin();
-		i != vlist.end(); ++i)
+	for (auto itvol = vlist.begin();
+		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		flrd::ComponentAnalyzer comp_analyzer(*i);
+		int bn = (*itvol)->GetAllBrickNum();
+		flrd::ComponentAnalyzer comp_analyzer(*itvol);
+		comp_analyzer.SetSizeLimit(slimit);
 		comp_analyzer.Analyze(selected, consistent);
-		string result_str;
+		fluo::Group* vol_group = m_output->getOrAddGroup(std::to_string(ch));
+		CelpList* celp_list = comp_analyzer.GetCelpList();
+		CellGraph* graph = comp_analyzer.GetCellGraph();
+		if (!celp_list || !graph)
+			continue;
+		double sx = celp_list->sx;
+		double sy = celp_list->sy;
+		double sz = celp_list->sz;
+		double size_scale = sx * sy * sz;
+		double maxscale = (*itvol)->GetMaxScale();
+		double scalarscale = (*itvol)->GetScalarScale();
+		for (auto itc = celp_list->begin();
+			itc != celp_list->end(); ++itc)
+		{
+			std::list<unsigned int> ids;
+			std::list<unsigned int> brick_ids;
+			bool added = false;
+
+			if (bn > 1)
+			{
+				if (graph->Visited(itc->second))
+					continue;
+
+				CelpList list;
+				if (graph->GetLinkedComps(itc->second, list, slimit))
+				{
+					for (auto iter = list.begin();
+						iter != list.end(); ++iter)
+					{
+						ids.push_back(iter->second->Id());
+						brick_ids.push_back(iter->second->BrickId());
+					}
+					added = true;
+				}
+			}
+			if (!added)
+			{
+				ids.push_back(itc->second->Id());
+				brick_ids.push_back(itc->second->BrickId());
+			}
+
+			//pca
+			itc->second->GetPca().Compute();
+			lens = itc->second->GetPca().GetLengths();
+
+			unsigned long id = ids.front();
+			fluo::Group* comp_group = vol_group->getOrAddGroup(std::to_string(id));
+			fluo::Node* node;
+			node = comp_group->getOrAddNode("center");
+			node->addSetValue(fn, itc->second->GetCenter(sx, sy, sz));
+			node = comp_group->getOrAddNode("size_ui");
+			node->addSetValue(fn, (unsigned long)(itc->second->GetSizeUi()));
+			node = comp_group->getOrAddNode("size_d");
+			node->addSetValue(fn, itc->second->GetSizeD(scalarscale));
+			node = comp_group->getOrAddNode("phys_size_ui");
+			node->addSetValue(fn, size_scale * itc->second->GetSizeUi());
+			node = comp_group->getOrAddNode("phys_size_d");
+			node->addSetValue(fn, itc->second->GetSizeD(size_scale * scalarscale));
+			node = comp_group->getOrAddNode("ext_size_ui");
+			node->addSetValue(fn, (unsigned long)(itc->second->GetExtUi()));
+			node = comp_group->getOrAddNode("ext_size_d");
+			node->addSetValue(fn, itc->second->GetExtD(scalarscale));
+			node = comp_group->getOrAddNode("mean");
+			node->addSetValue(fn, itc->second->GetMean(maxscale));
+			node = comp_group->getOrAddNode("stdev");
+			node->addSetValue(fn, itc->second->GetStd(maxscale));
+			node = comp_group->getOrAddNode("min");
+			node->addSetValue(fn, itc->second->GetMin(maxscale));
+			node = comp_group->getOrAddNode("max");
+			node->addSetValue(fn, itc->second->GetMax(maxscale));
+			node = comp_group->getOrAddNode("distp");
+			node->addSetValue(fn, itc->second->GetDistp());
+			node = comp_group->getOrAddNode("pca_lens");
+			node->addSetValue(fn, lens);
+		}
+		/*string result_str;
 		string comp_header = wxString::Format("%d", tseq_cur_num);
 		comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
 
@@ -852,7 +934,7 @@ void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfi
 		if (verbose == 1)
 			file.Write(wxString::Format("Time point: %d\n", tseq_cur_num));
 		file.Write(result_str);
-		file.Close();
+		file.Close();*/
 	}
 }
 
@@ -1124,9 +1206,9 @@ void ScriptProc::RunBackgroundStat(wxString& type, int index, wxFileConfig &fcon
 	bool bval;
 	fconfig.Read("use_mask", &bval, false);
 	bgs.SetUseMask(bval);
-	int ival;
-	fconfig.Read("stat_type", &ival, 0);
-	bgs.SetType(ival);
+	int itype;
+	fconfig.Read("stat_type", &itype, 0);
+	bgs.SetType(itype);
 	int kx = 0, ky = 0;
 	fconfig.Read("kx", &kx, 0);
 	fconfig.Read("ky", &ky, 0);
@@ -1141,10 +1223,12 @@ void ScriptProc::RunBackgroundStat(wxString& type, int index, wxFileConfig &fcon
 	bgs.Run();
 
 	//output
+	std::string str;
 	float result = bgs.GetResultf();
 	fluo::Node* node = m_output->getOrAddNode(type.ToStdString());
-	std::string fn = std::to_string(tseq_cur_num);
-	node->addSetValue(fn, result);
+	node->addValue("stat_type", (long)itype);
+	str = std::to_string(tseq_cur_num);
+	node->addSetValue(str, result);
 }
 
 //read/delete volume cache
