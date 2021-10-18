@@ -905,36 +905,6 @@ void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfi
 			node = comp_group->getOrAddNode("pca_lens");
 			node->addSetValue(fn, lens);
 		}
-		/*string result_str;
-		string comp_header = wxString::Format("%d", tseq_cur_num);
-		comp_analyzer.OutputCompListStr(result_str, verbose, comp_header);
-
-		//save append
-		bool sf_script = tseq_cur_num == view_begin_frame;
-		wxString filename = pathname;
-		//channel
-		if (chan_num > 1)
-		{
-			wxString format = wxString::Format("%d", chan_num);
-			int ch_length = format.Length();
-			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			filename += wxString::Format(format, (*i)->GetCurChannel() + 1);
-		}
-		filename += ".txt";
-		wxFile file(filename, sf_script ? wxFile::write : wxFile::write_append);
-		if (!file.IsOpened())
-			continue;
-		if (sf_script && verbose == 0)
-		{
-			string header;
-			comp_analyzer.OutputFormHeader(header);
-			file.Write(wxString::Format("Time\t"));
-			file.Write(header);
-		}
-		if (verbose == 1)
-			file.Write(wxString::Format("Time point: %d\n", tseq_cur_num));
-		file.Write(result_str);
-		file.Close();*/
 	}
 }
 
@@ -999,6 +969,7 @@ void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfi
 	int tseq_cur_num = m_view->m_tseq_cur_num;
 	int view_begin_frame = m_view->m_begin_frame;
 	int view_end_frame = m_view->m_end_frame;
+	std::string fn = std::to_string(tseq_cur_num);
 
 	int time_mode;
 	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
@@ -1055,12 +1026,6 @@ void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfi
 		m_script_output = path;
 	}
 
-	//save append
-	bool sf_script = tseq_cur_num == view_begin_frame;
-	wxFile file(m_script_output, sf_script ? wxFile::write : wxFile::write_append);
-	if (!file.IsOpened())
-		return;
-
 	//get df/f setting
 	bool df_f = false;
 	VRenderFrame* frame = (VRenderFrame*)m_frame;
@@ -1071,7 +1036,7 @@ void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfi
 	for (size_t i = 0; i < ruler_list->size(); ++i)
 	{
 		//for each ruler
-		wxString str;
+		fluo::Group* ruler_group = m_output->getOrAddGroup(std::to_string(i));
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
@@ -1079,20 +1044,23 @@ void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfi
 		vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 		if (profile && profile->size())
 		{
+			double dval;
 			double sumd = 0.0;
 			unsigned long long sumull = 0;
 			for (size_t j = 0; j < profile->size(); ++j)
 			{
 				//for each profile
+				fluo::Node* profile_node = ruler_group->getOrAddNode(std::to_string(j));
 				int pixels = (*profile)[j].m_pixels;
 				if (pixels <= 0)
-					str += "0.0\t";
+					dval = 0;
 				else
 				{
-					str += wxString::Format("%f\t", (*profile)[j].m_accum / pixels);
+					dval = (*profile)[j].m_accum / pixels;
 					sumd += (*profile)[j].m_accum;
 					sumull += pixels;
 				}
+				profile_node->addSetValue(fn, dval);
 			}
 			if (df_f)
 			{
@@ -1101,24 +1069,21 @@ void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfi
 					avg = sumd / double(sumull);
 				if (i == 0)
 				{
-					f = avg;
-					str += wxString::Format("\t%f\t", f);
+					dval = f = avg;
 				}
 				else
 				{
 					double df = avg - f;
 					if (f == 0.0)
-						str += wxString::Format("\t%f\t", df);
+						dval = df;
 					else
-						str += wxString::Format("\t%f\t", df / f);
+						dval = df / f;
 				}
+				fluo::Node* dff_node = ruler_group->getOrAddNode("df_f");
+				dff_node->addSetValue(fn, dval);
 			}
 		}
-		str += "\t";
-		file.Write(str);
 	}
-	file.Write("\n");
-	file.Close();
 }
 
 void ScriptProc::RunAddCells(wxString& type, int index, wxFileConfig &fconfig)

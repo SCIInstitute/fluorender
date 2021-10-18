@@ -25,21 +25,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "BackgStat.h"
+#include "BasicStat.h"
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
 #include <algorithm>
-#ifdef _DEBUG
-#include <fstream>
-#endif
 
 using namespace flrd;
 
 //8-bit data
-const char* str_cl_backg_stat = \
+const char* str_cl_basic_stat = \
 "#define DWL unsigned char\n" \
 "#define VSCL 255\n" \
 "const sampler_t samp =\n" \
@@ -47,97 +44,14 @@ const char* str_cl_backg_stat = \
 "	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
 "	CLK_FILTER_NEAREST;\n" \
 "\n" \
-"//extract background\n" \
+"//count\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t data,\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int dnxy,\n" \
-"	unsigned int dnx,\n" \
-"	unsigned int kx,\n" \
-"	unsigned int ky,\n" \
-"	unsigned int kxy,\n" \
-"	float varth,\n" \
-"	float gauth)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
-"	int4 kc;\n" \
-"	float4 dvalue;\n" \
-"	dvalue = read_imagef(data, samp, coord);\n" \
-"	float cvalue = dvalue.x;\n" \
-"	float sumi = 0.0;\n" \
-"	float sumi2 = 0.0;\n" \
-"	int i, j, k;\n" \
-"	for (i = 0; i < kx; ++i)\n" \
-"	for (j = 0; j < ky; ++j)\n" \
-"	{\n" \
-"		kc = (int4)(coord.x + (i - kx / 2),\n" \
-"			coord.y + (j - ky / 2),\n" \
-"			coord.z, 1);\n" \
-"		dvalue = read_imagef(data, samp, kc);\n" \
-"		sumi += dvalue.x;\n" \
-"		sumi2 += dvalue.x * dvalue.x;\n" \
-"	}\n" \
-"	float mean = sumi / kxy;\n" \
-"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0 * mean * sumi) / kxy);\n" \
-"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0;\n" \
-"	bkg[index] = cvalue * VSCL;\n" \
-"}\n" \
-"//extract background in mask\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int dnxy,\n" \
-"	unsigned int dnx,\n" \
-"	unsigned int kx,\n" \
-"	unsigned int ky,\n" \
-"	unsigned int kxy,\n" \
-"	float varth,\n" \
-"	float gauth,\n" \
-"	__read_only image3d_t mask)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
-"	float mask_value = read_imagef(mask, samp, coord).x;\n" \
-"	if (mask_value < 1e-6)\n" \
-"	{\n" \
-"		bkg[index] = 0;\n" \
-"		return;\n" \
-"	}\n" \
-"	int4 kc;\n" \
-"	float4 dvalue;\n" \
-"	dvalue = read_imagef(data, samp, coord);\n" \
-"	float cvalue = dvalue.x;\n" \
-"	float sumi = 0.0;\n" \
-"	float sumi2 = 0.0;\n" \
-"	int i, j, k;\n" \
-"	for (i = 0; i < kx; ++i)\n" \
-"	for (j = 0; j < ky; ++j)\n" \
-"	{\n" \
-"		kc = (int4)(coord.x + (i - kx / 2),\n" \
-"			coord.y + (j - ky / 2),\n" \
-"			coord.z, 1);\n" \
-"		dvalue = read_imagef(data, samp, kc);\n" \
-"		sumi += dvalue.x;\n" \
-"		sumi2 += dvalue.x * dvalue.x;\n" \
-"	}\n" \
-"	float mean = sumi / kxy;\n" \
-"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0 * mean * sumi) / kxy);\n" \
-"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0;\n" \
-"	bkg[index] = cvalue * VSCL;\n" \
-"}\n" \
-"//count in background\n" \
-"__kernel void kernel_2(\n" \
-"	__global DWL* bkg,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
 "	__global unsigned int* count,\n" \
 "	__global float* wcount)\n" \
 "{\n" \
@@ -149,33 +63,29 @@ const char* str_cl_backg_stat = \
 "	unsigned int lsum = 0;\n" \
 "	float lwsum = 0.0;\n" \
 "	float val;\n" \
-"	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		val = bkg[index];\n" \
+"		val = read_imagef(data, samp, ijk).x;\n" \
 "		if (val > 0.0)\n" \
 "		{\n" \
 "			lsum++;\n" \
 "			lwsum += val;\n" \
 "		}\n" \
 "	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(count+index, lsum);\n" \
 "	atomic_xchg(wcount+index, lwsum);\n" \
 "}\n" \
-"//minmax in background\n" \
-"__kernel void kernel_3(\n" \
-"	__global DWL* bkg,\n" \
+"//minmax\n" \
+"__kernel void kernel_1(\n" \
+"	__read_only image3d_t data,\n" \
 "	unsigned int ngx,\n" \
 "	unsigned int ngy,\n" \
 "	unsigned int ngz,\n" \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
 "	__global uint* minv,\n" \
 "	__global uint* maxv)\n" \
 "{\n" \
@@ -187,26 +97,22 @@ const char* str_cl_backg_stat = \
 "	DWL lminv = VSCL;\n" \
 "	DWL lmaxv = 0;\n" \
 "	DWL val;\n" \
-"	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		val = bkg[index];\n" \
+"		val = read_imagef(data, samp, ijk).x * VSCL;\n" \
 "		lminv = val ? min(val, lminv) : lminv;\n" \
 "		lmaxv = max(val, lmaxv);\n" \
 "	}\n" \
 "	lminv = lminv == VSCL ? 0 : lminv;\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(minv+index, (uint)(lminv));\n" \
 "	atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
 "}\n" \
-"//histogram in background\n" \
-"__kernel void kernel_4(\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
+"//histogram\n" \
+"__kernel void kernel_2(\n" \
+"	__read_only image3d_t data,\n" \
 "	unsigned int minv,\n" \
 "	unsigned int maxv,\n" \
 "	unsigned int bin,\n" \
@@ -214,23 +120,110 @@ const char* str_cl_backg_stat = \
 "{\n" \
 "	int4 coord = (int4)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy* coord.z + dnx*coord.y + coord.x;\n" \
-"	unsigned int val = bkg[index];\n" \
+"	unsigned int val = read_imagef(data, samp, coord).x * VSCL;\n" \
 "	if (val < minv || val > maxv)\n" \
 "		return;\n" \
-"	index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
+"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
+"	atomic_inc(hist+index);\n" \
+"}\n"
+"//count in mask\n" \
+"__kernel void kernel_3(\n" \
+"	__read_only image3d_t data,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global unsigned int* count,\n" \
+"	__global float* wcount,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	unsigned int lsum = 0;\n" \
+"	float lwsum = 0.0;\n" \
+"	float val, val2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		val = read_imagef(data, samp, ijk).x;\n" \
+"		val2 = read_imagef(mask, samp, ijk).x;\n" \
+"		if (val > 0.0 && val2 > 0.0)\n" \
+"		{\n" \
+"			lsum++;\n" \
+"			lwsum += val;\n" \
+"		}\n" \
+"	}\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(count+index, lsum);\n" \
+"	atomic_xchg(wcount+index, lwsum);\n" \
+"}\n" \
+"//minmax in mask\n" \
+"__kernel void kernel_4(\n" \
+"	__read_only image3d_t data,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
+"	__global uint* minv,\n" \
+"	__global uint* maxv,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
+"	DWL lminv = VSCL;\n" \
+"	DWL lmaxv = 0;\n" \
+"	DWL val;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
+"	{\n" \
+"		val = read_imagef(data, samp, ijk).x * VSCL;\n" \
+"		float val2 = read_imagef(mask, samp, ijk).x;\n" \
+"		if (val2 > 0.0)\n" \
+"		{\n" \
+"			lminv = val ? min(val, lminv) : lminv;\n" \
+"			lmaxv = max(val, lmaxv);\n" \
+"		}\n" \
+"	}\n" \
+"	lminv = lminv == VSCL ? 0 : lminv;\n" \
+"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(minv+index, (uint)(lminv));\n" \
+"	atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
+"}\n" \
+"//histogram in mask\n" \
+"__kernel void kernel_5(\n" \
+"	__read_only image3d_t data,\n" \
+"	unsigned int minv,\n" \
+"	unsigned int maxv,\n" \
+"	unsigned int bin,\n" \
+"	__global unsigned int* hist,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int4 coord = (int4)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2), 1);\n" \
+"	float val2 = read_imagef(mask, samp, coord).x;\n" \
+"	if (val2 < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int val = read_imagef(data, samp, coord).x * VSCL;\n" \
+"	if (val < minv || val > maxv)\n" \
+"		return;\n" \
+"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
 "	atomic_inc(hist+index);\n" \
 "}\n";
 
-BackgStat::BackgStat(VolumeData* vd)
+BasicStat::BasicStat(VolumeData* vd)
 	: m_vd(vd),
 	m_use_mask(false),
 	m_type(0),
-	m_kx(40),
-	m_ky(40),
-	m_kz(10),
-	m_varth(0.0001),
-	m_gauth(2),
 	m_sum(0),
 	m_wsum(0),
 	m_minv(0),
@@ -240,11 +233,11 @@ BackgStat::BackgStat(VolumeData* vd)
 {
 }
 
-BackgStat::~BackgStat()
+BasicStat::~BasicStat()
 {
 }
 
-bool BackgStat::CheckBricks()
+bool BasicStat::CheckBricks()
 {
 	if (!m_vd)
 		return false;
@@ -256,7 +249,7 @@ bool BackgStat::CheckBricks()
 	return true;
 }
 
-bool BackgStat::GetInfo(
+bool BasicStat::GetInfo(
 	flvr::TextureBrick* b,
 	long &bits, long &nx, long &ny, long &nz)
 {
@@ -267,13 +260,8 @@ bool BackgStat::GetInfo(
 	return true;
 }
 
-void BackgStat::Run()
+void BasicStat::Run()
 {
-	//debug
-#ifdef _DEBUG
-	unsigned char* val = 0;
-	std::ofstream ofs;
-#endif
 	if (!CheckBricks())
 		return;
 	long bits = m_vd->GetBits();
@@ -281,29 +269,38 @@ void BackgStat::Run()
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_backg_stat, bits);
+		vol_kernel_factory_.kernel(str_cl_basic_stat, bits);
 	if (!kernel_prog)
 		return;
-	int kernel_index0;
-	if (m_use_mask)
-		kernel_index0 = kernel_prog->createKernel("kernel_1");
-	else
-		kernel_index0 = kernel_prog->createKernel("kernel_0");
-	int kernel_index1, kernel_index2;
+	int kernel_index0, kernel_index1;
 	switch (m_type)
 	{
 	case 0:
 		//mean
-		kernel_index1 = kernel_prog->createKernel("kernel_2");
+		if (!m_use_mask)
+			kernel_index0 = kernel_prog->createKernel("kernel_0");
+		else
+			kernel_index0 = kernel_prog->createKernel("kernel_3");
 		break;
 	case 1:
 		//minmax
-		kernel_index1 = kernel_prog->createKernel("kernel_3");
+		if (!m_use_mask)
+			kernel_index0 = kernel_prog->createKernel("kernel_1");
+		else
+			kernel_index0 = kernel_prog->createKernel("kernel_4");
 		break;
 	case 2:
 		//median
-		kernel_index1 = kernel_prog->createKernel("kernel_3");
-		kernel_index2 = kernel_prog->createKernel("kernel_4");
+		if (!m_use_mask)
+		{
+			kernel_index0 = kernel_prog->createKernel("kernel_1");
+			kernel_index1 = kernel_prog->createKernel("kernel_2");
+		}
+		else
+		{
+			kernel_index0 = kernel_prog->createKernel("kernel_4");
+			kernel_index1 = kernel_prog->createKernel("kernel_5");
+		}
 		break;
 	}
 
@@ -339,35 +336,6 @@ void BackgStat::Run()
 		size_t global_size1[3] = {
 			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
-		//set
-		unsigned int dnxy = nx * ny;
-		unsigned int dnx = nx;
-		unsigned int kxy = m_kx * m_ky;
-		kernel_prog->setKernelArgBegin(kernel_index0);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		flvr::Argument arg_bkg =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, chars*nx*ny*nz, NULL);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_kx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_ky));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&kxy));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&m_varth));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&m_gauth));
-		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
-
-		//execute
-		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
-
-		//debug
-		//val = new unsigned char[nx*ny*nz*chars];
-		//kernel_prog->readBuffer(arg_bkg, val);
-		//ofs.open("E:/DATA/Test/bkg/avg.bin", std::ios::out | std::ios::binary);
-		//ofs.write((char*)val, nx*ny*nz*chars);
-		//ofs.close();
-		//delete[] val;
-
 		//brick min and max
 		unsigned int bminv = std::numeric_limits<unsigned int>::max();
 		unsigned int bmaxv = 0;
@@ -377,20 +345,20 @@ void BackgStat::Run()
 			//mean
 			unsigned int* sum = new unsigned int[gsize.gsxyz];
 			float *wsum = new float[gsize.gsxyz];
-			kernel_prog->setKernelArgBegin(kernel_index1);
-			kernel_prog->setKernelArgument(arg_bkg);
+			kernel_prog->setKernelArgBegin(kernel_index0);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
+			if (m_use_mask)
+				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 			//execute
-			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
+			kernel_prog->executeKernel(kernel_index0, 3, global_size1, local_size);
 			//read back
 			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), sum, sum);
 			kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
@@ -409,20 +377,20 @@ void BackgStat::Run()
 			//minmax
 			unsigned int* minv = new unsigned int[gsize.gsxyz];
 			unsigned int* maxv = new unsigned int[gsize.gsxyz];
-			kernel_prog->setKernelArgBegin(kernel_index1);
-			kernel_prog->setKernelArgument(arg_bkg);
+			kernel_prog->setKernelArgBegin(kernel_index0);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(minv));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(maxv));
+			if (m_use_mask)
+				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 			//execute
-			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
+			kernel_prog->executeKernel(kernel_index0, 3, global_size1, local_size);
 			//read back
 			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), minv, minv);
 			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), maxv, maxv);
@@ -450,24 +418,19 @@ void BackgStat::Run()
 			unsigned int bin = bmaxv - bminv + 1;
 			unsigned int* hist = new unsigned int[bin];
 			memset(hist, 0, sizeof(unsigned int)*bin);
-			kernel_prog->setKernelArgBegin(kernel_index2);
-			kernel_prog->setKernelArgument(arg_bkg);
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+			kernel_prog->setKernelArgBegin(kernel_index1);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bminv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bmaxv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
+			if (m_use_mask)
+				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 			//execute
-			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 			//read back
 			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
-
-			//debug
-			//ofs.open("E:/DATA/Test/bkg/hist.bin", std::ios::out | std::ios::binary);
-			//ofs.write((char*)hist, bin*sizeof(unsigned int));
-			//ofs.close();
 
 			//collect
 			for (int ii = 0; ii < bin; ++ii)
