@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            table {
+                border-collapse: collapse;
+                border: 2px black solid;
+                font: 12px sans-serif;
+            }
+
+            td {
+                border: 1px black solid;
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://d3js.org/d3.v3.min.js"></script>
+
+        <script>
+        	let csv_data = "car name,miles/gallon,cylinders,displacement,horsepower,weight,acceleration,model year,origin\n\
+							\"chevrolet chevelle malibu\",18,8,307,130,3504,12,70,1\n\
+							\"buick skylark 320\",15,8,350,165,3693,11.5,70,1\n\
+							\"plymouth satellite\",18,8,318,150,3436,11,70,1";
+            var parsedCSV = d3.csv.parseRows(csv_data);
+
+            var container = d3.select("body")
+                .append("table")
+
+                .selectAll("tr")
+                    .data(parsedCSV).enter()
+                    .append("tr")
+
+                .selectAll("td")
+                    .data(function(d) { return d; }).enter()
+                    .append("td")
+                    .text(function(d) { return d; });
+        </script>
+    </body>
+</html>
