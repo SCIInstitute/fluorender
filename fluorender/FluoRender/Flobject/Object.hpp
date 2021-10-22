@@ -204,7 +204,13 @@ namespace fluo
 		}
 
 		template<typename V>
-		bool setValue(const string &name, const V &value, Event &event = Event())
+		bool setValue(const string &name, const V &value)
+		{
+			Event event;
+			return setValue(name, value, event);
+		}
+		template<typename V>
+		bool setValue(const string &name, const V &value, Event &event)
 		{
 			V old_value;
 			if (getValue(name, old_value) && value != old_value)
@@ -224,7 +230,12 @@ namespace fluo
 			}
 			return false;
 		}
-		bool setValue(ValueTuple& vt, Event& event = Event())
+		bool setValueTuple(ValueTuple& vt)
+		{
+			Event event;
+			return setValueTuple(vt, event);
+		}
+		bool setValueTuple(ValueTuple& vt, Event& event)
 		{
 			ValueTuple old_vt;
 			std::string name = std::get<0>(vt);
@@ -243,7 +254,12 @@ namespace fluo
 			}
 			return false;
 		}
-		bool setRvalu(const std::string& name, Referenced* value, Event& event = Event())
+		bool setRvalu(const std::string& name, Referenced* value)
+		{
+			Event event;
+			return setRvalu(name, value, event);
+		}
+		bool setRvalu(const std::string& name, Referenced* value, Event& event)
 		{
 			Referenced* old_value;
 			if (getRvalu(name, &old_value) && value != old_value)

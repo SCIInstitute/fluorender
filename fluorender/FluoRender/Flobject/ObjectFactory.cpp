@@ -81,7 +81,7 @@ bool ObjectFactory::setDefaultValues(boost::property_tree::ptree &pt, const Valu
 		ValueTuple vt{name, type, value};
 		//if no this value, add one, otherwise change its value
 		if (!object->addValue(vt))
-			object->setValue(vt);
+			object->setValueTuple(vt);
 	}
 
 	return true;
