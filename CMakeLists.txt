@@ -747,6 +747,12 @@ add_custom_command(TARGET FluoRender POST_BUILD
   "${FluoRender_SOURCE_DIR}/Scripts"
   "$<TARGET_FILE_DIR:FluoRender>/Scripts")
 
+# copy template dir to the binary directory
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Templates"
+  "$<TARGET_FILE_DIR:FluoRender>/Templates")
+
 # settings files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
