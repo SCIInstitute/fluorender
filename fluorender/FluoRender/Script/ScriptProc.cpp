@@ -35,6 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
+#include <iostream>
+#include <string> 
+#include <sstream>
+#include <fstream> 
 
 using namespace flrd;
 
@@ -50,8 +54,9 @@ ScriptProc::~ScriptProc()
 }
 
 //run 4d script
-void ScriptProc::Run4DScript(int index, wxString &scriptname)
+void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 {
+	m_fconfig = 0;
 	if (!wxFileExists(scriptname))
 	{
 		std::wstring name = scriptname.ToStdWstring();
@@ -59,7 +64,6 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 		exePath = wxPathOnly(exePath);
 		scriptname = exePath + "\\Scripts\\" + name;
-
 		if (!wxFileExists(scriptname))
 			return;
 	}
@@ -67,6 +71,8 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
+	m_fconfig = &fconfig;
+	m_time_mask = tm;
 
 	int i;
 	wxString str;
@@ -83,83 +89,128 @@ void ScriptProc::Run4DScript(int index, wxString &scriptname)
 			{
 				fconfig.SetPath(str);
 				fconfig.Read("type", &str, "");
+				m_type = str;
 				if (str == "noise_reduction")
-					RunNoiseReduction(str, index, fconfig);
-				else if (str == "selection_tracking")
-					RunSelectionTracking(str, index, fconfig);
+					RunNoiseReduction();
+				else if (str == "pre_tracking")
+					RunPreTracking();
+				else if (str == "post_tracking")
+					RunPostTracking();
 				else if (str == "mask_tracking")
-					RunMaskTracking(str, index, fconfig);
+					RunMaskTracking();
 				else if (str == "random_colors")
-					RunRandomColors(str, index, fconfig);
+					RunRandomColors();
 				else if (str == "fetch_mask")
-					RunFetchMask(str, index, fconfig);
+					RunFetchMask();
 				else if (str == "clear_mask")
-					RunClearMask(str, index, fconfig);
+					RunClearMask();
 				else if (str == "save_mask")
-					RunSaveMask(str, index, fconfig);
+					RunSaveMask();
 				else if (str == "opencl")
-					RunOpenCL(str, index, fconfig);
+					RunOpenCL();
 				else if (str == "comp_analysis")
-					RunCompAnalysis(str, index, fconfig);
+					RunCompAnalysis();
 				else if (str == "generate_comp")
-					RunGenerateComp(str, index, fconfig);
+					RunGenerateComp();
 				else if (str == "ruler_profile")
-					RunRulerProfile(str, index, fconfig);
+					RunRulerProfile();
 				else if (str == "save_volume")
-					RunSaveVolume(str, index, fconfig);
+					RunSaveVolume();
 				else if (str == "calculate")
-					RunCalculate(str, index, fconfig);
+					RunCalculate();
 				else if (str == "add_cells")
-					RunAddCells(str, index, fconfig);
+					RunAddCells();
 				else if (str == "link_cells")
-					RunLinkCells(str, index, fconfig);
+					RunLinkCells();
 				else if (str == "unlink_cells")
-					RunUnlinkCells(str, index, fconfig);
+					RunUnlinkCells();
 				else if (str == "backg_stat")
-					RunBackgroundStat(str, index, fconfig);
+					RunBackgroundStat();
 			}
 		}
 	}
 }
 
-void ScriptProc::RunNoiseReduction(wxString& type, int index, wxFileConfig &fconfig)
+bool ScriptProc::TimeCondition()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
+	if (!m_fconfig || !m_view)
+		return false;
+	int time_mode, frame_mode;
+	m_fconfig->Read("time_mode", &time_mode, TM_PRE);
+	m_fconfig->Read("frame_mode", &frame_mode, FM_ALL);
+	int curf = m_view->m_tseq_cur_num;
+	int startf = m_view->m_begin_frame;
+	int endf = m_view->m_end_frame;
+	//frame mode
+	int fm;//mask
+	int startd = curf - startf;
+	int endd = endf - curf;
+	if (startd < 15)
+		fm = 1 << startd;
+	if (endd < 15)
+		fm = FM_LAST >> endd;
+	if (startd >= 15 && endd >= 15)
+		fm = 1 << 15;
+	if (!(fm & frame_mode))
+		return false;
+	//time mode
+	if (m_time_mask & time_mode)
+		return true;
+	return false;
+}
+
+bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
+{
+	if (!m_fconfig || !m_view)
+		return false;
+	int chan_mode;
+	m_fconfig->Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;2-shown vol;3-hidden vol
+	list.clear();
+	if (chan_mode == 0)
+	{
+		VolumeData* vol = m_view->m_cur_vol;
+		if (vol)
+			list.push_back(vol);
+		else
+			return false;
+	}
+	else if (chan_mode == 1)
+	{
+		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+			list.push_back(m_view->GetAllVolumeData(i));
+	}
+	else if (chan_mode == 2)
+	{
+		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
+			list.push_back(m_view->GetDispVolumeData(i));
+	}
+	else if (chan_mode == 3)
+	{
+		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+		{
+			VolumeData* vol = m_view->GetAllVolumeData(i);
+			if (!vol->GetDisp())
+				list.push_back(vol);
+		}
+	}
+	return !list.empty();
+}
+
+void ScriptProc::RunNoiseReduction()
+{
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
+	if (!m_frame) return;
 	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
 	if (!calculator) return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
 	double thresh, size;
-	fconfig.Read("threshold", &thresh, 0.0);
-	fconfig.Read("voxelsize", &size, 0.0);
-
-	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	m_fconfig->Read("threshold", &thresh, 0.0);
+	m_fconfig->Read("voxelsize", &size, 0.0);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -176,105 +227,104 @@ void ScriptProc::RunNoiseReduction(wxString& type, int index, wxFileConfig &fcon
 }
 
 //add traces to trace dialog
-#define UPDATE_TRACE_DLG_AND_RETURN \
-	{ \
-		if (m_vrv && m_frame && m_frame->GetTraceDlg()) \
-			m_frame->GetTraceDlg()->GetSettings(m_vrv); \
-		return; \
-	}
-
-void ScriptProc::RunSelectionTracking(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::UpdateTraceDlg()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol)
-		UPDATE_TRACE_DLG_AND_RETURN;
+	if (m_vrv && m_frame && m_frame->GetTraceDlg())
+		m_frame->GetTraceDlg()->GetSettings(m_vrv);
+}
 
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int tseq_prv_num = m_view->m_tseq_prv_num;
-
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	if (time_mode != index)
+void ScriptProc::RunPreTracking()
+{
+	if (!TimeCondition())
 		return;
 
-	if (time_mode == 0)
-	{
-		//read the size threshold
-		int slimit;
-		fconfig.Read("size_limit", &slimit, 0);
-		//before updating volume
-		flrd::ComponentAnalyzer comp_analyzer(cur_vol);
-		comp_analyzer.Analyze(true, true);
-		flrd::CelpList* list = comp_analyzer.GetCelpList();
-		m_sel_labels.clear();
-		for (auto it = list->begin();
-			it != list->end(); ++it)
-		{
-			if (it->second->GetSize() > slimit)
-			{
-				flrd::Celp celp(new flrd::Cell(it->second->Id()));
-				celp->Copy(it->second, true);
-				//celp->SetSizeUi(it->second->sumi);
-				//celp->SetSizeD(it->second->sumd);
-				//celp->SetCenter(it->second->pos);
-				//celp->SetBox(it->second->box);
-				m_sel_labels.insert(std::pair<unsigned int, flrd::Celp>
-					(it->second->Id(), celp));
-			}
-		}
-	}
-	else if (time_mode == 1)
-	{
-		TraceGroup* tg = m_view->GetTraceGroup();
-		if (!tg) return;
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol)
+		UpdateTraceDlg();
 
-		//after updating volume
-		if (tg->GetTrackMap()->GetFrameNum())
+	//read the size threshold
+	int slimit;
+	m_fconfig->Read("size_limit", &slimit, 0);
+	//before updating volume
+	flrd::ComponentAnalyzer comp_analyzer(cur_vol);
+	comp_analyzer.Analyze(true, true);
+	flrd::CelpList* list = comp_analyzer.GetCelpList();
+	m_sel_labels.clear();
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		if (it->second->GetSize() > slimit)
 		{
-			//create new id list
-			tg->SetCurTime(tseq_cur_num);
-			tg->SetPrvTime(tseq_prv_num);
-			tg->UpdateCellList(m_sel_labels);
-			flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+			flrd::Celp celp(new flrd::Cell(it->second->Id()));
+			celp->Copy(it->second, true);
+			//celp->SetSizeUi(it->second->sumi);
+			//celp->SetSizeD(it->second->sumd);
+			//celp->SetCenter(it->second->pos);
+			//celp->SetBox(it->second->box);
+			m_sel_labels.insert(std::pair<unsigned int, flrd::Celp>
+				(it->second->Id(), celp));
 		}
-
-		Nrrd* mask_nrrd = cur_vol->GetMask(false);
-		Nrrd* label_nrrd = cur_vol->GetLabel(false);
-		if (!mask_nrrd || !label_nrrd)
-			UPDATE_TRACE_DLG_AND_RETURN;
-		unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
-		unsigned int* label_data = (unsigned int*)(label_nrrd->data);
-		if (!mask_data || !label_data)
-			UPDATE_TRACE_DLG_AND_RETURN;
-		int nx, ny, nz;
-		cur_vol->GetResolution(nx, ny, nz);
-		//update the mask according to the new label
-		unsigned long long for_size = nx * ny * nz;
-		memset((void*)mask_data, 0, sizeof(uint8)*for_size);
-		for (unsigned long long idx = 0;
-			idx < for_size; ++idx)
-		{
-			unsigned int label_value = label_data[idx];
-			if (tg->GetTrackMap()->GetFrameNum())
-			{
-				if (tg->FindCell(label_value))
-					mask_data[idx] = 255;
-			}
-			else
-			{
-				if (m_sel_labels.find(label_value) != m_sel_labels.end())
-					mask_data[idx] = 255;
-			}
-		}
-		UPDATE_TRACE_DLG_AND_RETURN;
 	}
 }
 
-void ScriptProc::RunMaskTracking(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunPostTracking()
 {
-	if (!m_view || !m_frame) return;
+	if (!TimeCondition())
+		return;
+
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol)
+		UpdateTraceDlg();
+
+	TraceGroup* tg = m_view->GetTraceGroup();
+	if (!tg) return;
+
+	//after updating volume
+	if (tg->GetTrackMap()->GetFrameNum())
+	{
+		//create new id list
+		tg->SetCurTime(m_view->m_tseq_cur_num);
+		tg->SetPrvTime(m_view->m_tseq_prv_num);
+		tg->UpdateCellList(m_sel_labels);
+		flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+	}
+
+	Nrrd* mask_nrrd = cur_vol->GetMask(false);
+	Nrrd* label_nrrd = cur_vol->GetLabel(false);
+	if (!mask_nrrd || !label_nrrd)
+		UpdateTraceDlg();
+	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
+	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
+	if (!mask_data || !label_data)
+		UpdateTraceDlg();
+	int nx, ny, nz;
+	cur_vol->GetResolution(nx, ny, nz);
+	//update the mask according to the new label
+	unsigned long long for_size = nx * ny * nz;
+	memset((void*)mask_data, 0, sizeof(uint8)*for_size);
+	for (unsigned long long idx = 0;
+		idx < for_size; ++idx)
+	{
+		unsigned int label_value = label_data[idx];
+		if (tg->GetTrackMap()->GetFrameNum())
+		{
+			if (tg->FindCell(label_value))
+				mask_data[idx] = 255;
+		}
+		else
+		{
+			if (m_sel_labels.find(label_value) != m_sel_labels.end())
+				mask_data[idx] = 255;
+		}
+	}
+	UpdateTraceDlg();
+}
+
+void ScriptProc::RunMaskTracking()
+{
+	if (!TimeCondition())
+		return;
+
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	TraceGroup* tg = m_view->GetTraceGroup();
@@ -284,29 +334,19 @@ void ScriptProc::RunMaskTracking(wxString& type, int index, wxFileConfig &fconfi
 		tg = m_view->GetTraceGroup();
 	}
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int tseq_prv_num = m_view->m_tseq_prv_num;
-	int view_begin_frame = m_view->m_begin_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	if (time_mode != index)
-		return;
-
 	double extx, exty, extz;
-	fconfig.Read("ext_x", &extx, 0.1);
-	fconfig.Read("ext_y", &exty, 0.1);
-	fconfig.Read("ext_z", &extz, 0);
+	m_fconfig->Read("ext_x", &extx, 0.1);
+	m_fconfig->Read("ext_y", &exty, 0.1);
+	m_fconfig->Read("ext_z", &extz, 0);
 	fluo::Vector ext(extx, exty, extz);
-
 	int iter;
-	fconfig.Read("iter", &iter, 25);
+	m_fconfig->Read("iter", &iter, 25);
 	double eps;
-	fconfig.Read("eps", &eps, 1e-3);
+	m_fconfig->Read("eps", &eps, 1e-3);
 	int fsize;
-	fconfig.Read("fsize", &fsize, 1);
+	m_fconfig->Read("fsize", &fsize, 1);
 	int mode;
-	fconfig.Read("compare", &mode, 0);
+	m_fconfig->Read("compare", &mode, 0);
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
@@ -326,54 +366,29 @@ void ScriptProc::RunMaskTracking(wxString& type, int index, wxFileConfig &fconfi
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
 
-	tm_processor.TrackStencils(tseq_prv_num, tseq_cur_num,
-		ext, mode, view_begin_frame);
+	tm_processor.TrackStencils(
+		m_view->m_tseq_prv_num,
+		m_view->m_tseq_cur_num,
+		ext, mode,
+		m_view->m_begin_frame);
 
-	//add traces to trace dialog
-	if (m_vrv && m_frame && m_frame->GetTraceDlg())
-		m_frame->GetTraceDlg()->GetSettings(m_vrv);
+	UpdateTraceDlg();
 }
 
-void ScriptProc::RunRandomColors(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunRandomColors()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
-
-	int hmode;
-	fconfig.Read("huemode", &hmode, 1);
-
+	if (!TimeCondition())
+		return;
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	if (!GetVolumes(vlist))
+		return;
 
 	VolumeSelector* selector = m_view->GetVolumeSelector();
 	if (!selector)
 		return;
+
+	int hmode;
+	m_fconfig->Read("huemode", &hmode, 1);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -384,41 +399,18 @@ void ScriptProc::RunRandomColors(wxString& type, int index, wxFileConfig &fconfi
 	}
 }
 
-void ScriptProc::RunFetchMask(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunFetchMask()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	if (!TimeCondition())
+		return;
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	if (!GetVolumes(vlist))
+		return;
+
+	int curf = m_view->m_tseq_cur_num;
 	bool bmask, blabel;
-	fconfig.Read("mask", &bmask, 1);
-	fconfig.Read("label", &blabel, 1);
+	m_fconfig->Read("mask", &bmask, 1);
+	m_fconfig->Read("label", &blabel, 1);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -430,9 +422,9 @@ void ScriptProc::RunFetchMask(wxString& type, int index, wxFileConfig &fconfig)
 		if (bmask)
 		{
 			MSKReader msk_reader;
-			wstring mskname = reader->GetCurMaskName(tseq_cur_num, (*i)->GetCurChannel());
+			wstring mskname = reader->GetCurMaskName(curf, (*i)->GetCurChannel());
 			msk_reader.SetFile(mskname);
-			Nrrd* mask_nrrd_new = msk_reader.Convert(tseq_cur_num, (*i)->GetCurChannel(), true);
+			Nrrd* mask_nrrd_new = msk_reader.Convert(curf, (*i)->GetCurChannel(), true);
 			if (mask_nrrd_new)
 				(*i)->LoadMask(mask_nrrd_new);
 			//else
@@ -442,9 +434,9 @@ void ScriptProc::RunFetchMask(wxString& type, int index, wxFileConfig &fconfig)
 		if (blabel)
 		{
 			LBLReader lbl_reader;
-			wstring lblname = reader->GetCurLabelName(tseq_cur_num, (*i)->GetCurChannel());
+			wstring lblname = reader->GetCurLabelName(curf, (*i)->GetCurChannel());
 			lbl_reader.SetFile(lblname);
-			Nrrd* label_nrrd_new = lbl_reader.Convert(tseq_cur_num, (*i)->GetCurChannel(), true);
+			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, (*i)->GetCurChannel(), true);
 			if (label_nrrd_new)
 				(*i)->LoadLabel(label_nrrd_new);
 			else
@@ -453,159 +445,85 @@ void ScriptProc::RunFetchMask(wxString& type, int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunClearMask(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunClearMask()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	if (!TimeCondition())
+		return;
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	if (!GetVolumes(vlist))
+		return;
+
 	bool bmask, blabel;
-	fconfig.Read("mask", &bmask, 1);
-	fconfig.Read("label", &blabel, 1);
+	m_fconfig->Read("mask", &bmask, 1);
+	m_fconfig->Read("label", &blabel, 1);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
 		//clear the mask
 		if (bmask)
-		{
 			(*i)->AddEmptyMask(0, true);
-		}
 		//clear the label
 		if (blabel)
-		{
 			(*i)->AddEmptyLabel(0, true);
-		}
 	}
 }
 
-void ScriptProc::RunSaveMask(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunSaveMask()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	if (!TimeCondition())
+		return;
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	if (!GetVolumes(vlist))
+		return;
+
+	int curf = m_view->m_tseq_cur_num;
 	bool bmask, blabel;
-	fconfig.Read("mask", &bmask, 1);
-	fconfig.Read("label", &blabel, 1);
+	m_fconfig->Read("mask", &bmask, 1);
+	m_fconfig->Read("label", &blabel, 1);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
 		if (bmask)
-			(*i)->SaveMask(true, tseq_cur_num, (*i)->GetCurChannel());
+			(*i)->SaveMask(true, curf, (*i)->GetCurChannel());
 		if (blabel)
-			(*i)->SaveLabel(true, tseq_cur_num, (*i)->GetCurChannel());
+			(*i)->SaveLabel(true, curf, (*i)->GetCurChannel());
 	}
 }
 
-void ScriptProc::RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunSaveVolume()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
+	if (!TimeCondition())
+		return;
 
 	wxString source;
-	fconfig.Read("source", &source);
+	m_fconfig->Read("source", &source);
 	int mode;
-	fconfig.Read("format", &mode, 0);
+	m_fconfig->Read("format", &mode, 0);
 	bool crop;
-	fconfig.Read("crop", &crop, false);
+	m_fconfig->Read("crop", &crop, false);
 	int filter;
-	fconfig.Read("filter", &filter, 0);
+	m_fconfig->Read("filter", &filter, 0);
 	bool bake;
-	fconfig.Read("bake", &bake, false);
+	m_fconfig->Read("bake", &bake, false);
 	bool compression;
-	fconfig.Read("compress", &compression, false);
+	m_fconfig->Read("compress", &compression, false);
 	wxString str, pathname;
-	fconfig.Read("savepath", &pathname, "");
+	m_fconfig->Read("savepath", &pathname, "");
 	bool del_vol;
-	fconfig.Read("delete", &del_vol, false);
+	m_fconfig->Read("delete", &del_vol, false);
 	str = wxPathOnly(pathname);
 	if (!wxDirExists(str))
 		MkDirW(str.ToStdWstring());
 	if (!wxDirExists(str))
 		return;
 
-	VolumeData* vd = m_view->GetDispVolumeData(0);
-	if (!vd)
-		return;
-	int time_num = vd->GetReader()->GetTimeNum();
 	std::vector<VolumeData*> vlist;
 	if (source == "channels" ||
 		source == "")
 	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
+		GetVolumes(vlist);
 	}
 	else if (source == "calculator")
 	{
@@ -632,7 +550,10 @@ void ScriptProc::RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig)
 			vlist.push_back(vd);
 	}
 	int chan_num = vlist.size();
-
+	int time_num;
+	if (!vlist.empty())
+		time_num = vlist[0]->GetReader()->GetTimeNum();
+	int curf = m_view->m_tseq_cur_num;
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
@@ -641,7 +562,7 @@ void ScriptProc::RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig)
 		wxString format = wxString::Format("%d", time_num);
 		int fr_length = format.Length();
 		format = wxString::Format("_T%%0%dd", fr_length);
-		str += wxString::Format(format, tseq_cur_num);
+		str += wxString::Format(format, curf);
 		//channel
 		if (chan_num > 1)
 		{
@@ -662,34 +583,20 @@ void ScriptProc::RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunCalculate(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunCalculate()
 {
-	if (!m_view || !m_frame) return;
+	if (!TimeCondition())
+		return;
+
 	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
 	if (!calculator) return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-
 	int vol_a_index;
-	fconfig.Read("vol_a", &vol_a_index, 0);
+	m_fconfig->Read("vol_a", &vol_a_index, 0);
 	int vol_b_index;
-	fconfig.Read("vol_b", &vol_b_index, 0);
+	m_fconfig->Read("vol_b", &vol_b_index, 0);
 	wxString sOper;
-	fconfig.Read("operator", &sOper, "");
+	m_fconfig->Read("operator", &sOper, "");
 
 	int vlist_size = m_view->GetDispVolumeNum();
 	//get volumes
@@ -717,46 +624,21 @@ void ScriptProc::RunCalculate(wxString& type, int index, wxFileConfig &fconfig)
 		calculator->CalculateGroup(9, "", false);
 }
 
-void ScriptProc::RunOpenCL(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunOpenCL()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
 	KernelExecutor* executor = m_view->GetKernelExecutor();
 	if (!executor) return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
-
 	wxString clname;
-	fconfig.Read("clpath", &clname, "");
+	m_fconfig->Read("clpath", &clname, "");
 	if (!wxFileExists(clname))
 		return;
-
-	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -769,59 +651,28 @@ void ScriptProc::RunOpenCL(wxString& type, int index, wxFileConfig &fconfig)
 	}
 }
 
-void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunCompAnalysis()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
-	//wxString str, pathname;
-	//fconfig.Read("savepath", &pathname);
-	int verbose;
-	fconfig.Read("verbose", &verbose, 0);
-	bool consistent;
-	fconfig.Read("consistent", &consistent, true);
-	bool selected;
-	fconfig.Read("selected", &selected, false);
-	int slimit;
-	fconfig.Read("slimit", &slimit, 5);
-
-	//str = wxPathOnly(pathname);
-	//if (!wxDirExists(str))
-	//	MkDirW(str.ToStdWstring());
-	//if (!wxDirExists(str))
-	//	return;
-
+	if (!TimeCondition())
+		return;
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	if (!GetVolumes(vlist))
+		return;
+
+	int verbose;
+	m_fconfig->Read("verbose", &verbose, 0);
+	bool consistent;
+	m_fconfig->Read("consistent", &consistent, true);
+	bool selected;
+	m_fconfig->Read("selected", &selected, false);
+	int slimit;
+	m_fconfig->Read("slimit", &slimit, 5);
+
+	int curf = m_view->m_tseq_cur_num;
 	int chan_num = vlist.size();
 	int ch = 0;
 	fluo::Vector lens;
-	std::string fn = std::to_string(tseq_cur_num);
+	std::string fn = std::to_string(curf);
 
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
@@ -908,42 +759,19 @@ void ScriptProc::RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfi
 	}
 }
 
-void ScriptProc::RunGenerateComp(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunGenerateComp()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-
-	int time_mode, chan_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-	fconfig.Read("chan_mode", &chan_mode, 0);//0-cur vol;1-every vol;...
-	bool use_sel;
-	fconfig.Read("use_sel", &use_sel);
-	double tfac = 1.0;
-	fconfig.Read("th_factor", &tfac);
+	if (!m_frame) return;
+	if (!TimeCondition())
+		return;
 	std::vector<VolumeData*> vlist;
-	if (chan_mode == 0)
-	{
-		vlist.push_back(cur_vol);
-	}
-	else
-	{
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			vlist.push_back(m_view->GetDispVolumeData(i));
-	}
+	if (!GetVolumes(vlist))
+		return;
+
+	bool use_sel;
+	m_fconfig->Read("use_sel", &use_sel);
+	double tfac = 1.0;
+	m_fconfig->Read("th_factor", &tfac);
 
 	if (!(m_frame->GetComponentDlg()))
 		return;
@@ -956,82 +784,29 @@ void ScriptProc::RunGenerateComp(wxString& type, int index, wxFileConfig &fconfi
 	}
 }
 
-void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunRulerProfile()
 {
-	if (!m_view || !m_frame) return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
+	if (!m_frame) return;
+	if (!TimeCondition())
+		return;
+
 	RulerHandler* ruler_handler = m_view->GetRulerHandler();
 	if (!ruler_handler) return;
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int view_begin_frame = m_view->m_begin_frame;
-	int view_end_frame = m_view->m_end_frame;
-	std::string fn = std::to_string(tseq_cur_num);
-
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	bool start_frame, end_frame;
-	fconfig.Read("start_frame", &start_frame, false);
-	fconfig.Read("end_frame", &end_frame, false);
-	if (time_mode != index)
-	{
-		if (!(start_frame && tseq_cur_num == view_begin_frame) &&
-			!(end_frame && tseq_cur_num == view_end_frame))
-			return;
-	}
-
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
 	ruler_handler->SetVolumeData(cur_vol);
 	for (size_t i = 0; i < ruler_list->size(); ++i)
 		ruler_handler->Profile(i);
 
-	if (tseq_cur_num == 0 ||
-		m_script_output.IsEmpty())
-	{
-		wxString path;
-		if (cur_vol)
-		{
-			path = cur_vol->GetPath();
-			path = wxPathOnly(path);
-		}
-		path += GETSLASH();
-		path += "profiles_1.txt";
-
-		while (wxFileExists(path))
-		{
-			int pos = path.Find('_', true);
-			if (pos == wxNOT_FOUND)
-			{
-				path = path.SubString(0, path.Length() - 4);
-				path += "_1.txt";
-			}
-			else
-			{
-				wxString digits;
-				for (int i = pos + 1; i < path.Length() - 1; ++i)
-				{
-					if (wxIsdigit(path[i]))
-						digits += path[i];
-					else
-						break;
-				}
-				long num = 0;
-				digits.ToLong(&num);
-				path = path.SubString(0, pos);
-				path += wxString::Format("%d.txt", num + 1);
-			}
-		}
-		m_script_output = path;
-	}
-
 	//get df/f setting
 	bool df_f = false;
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		df_f = frame->GetSettingDlg()->GetRulerDF_F();
+	if (m_frame->GetSettingDlg())
+		df_f = m_frame->GetSettingDlg()->GetRulerDF_F();
 	double f = 0.0;
+	std::string fn = std::to_string(m_view->m_tseq_cur_num);
 
 	for (size_t i = 0; i < ruler_list->size(); ++i)
 	{
@@ -1086,9 +861,10 @@ void ScriptProc::RunRulerProfile(wxString& type, int index, wxFileConfig &fconfi
 	}
 }
 
-void ScriptProc::RunAddCells(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunAddCells()
 {
-	if (!m_view || !m_frame) return;
+	if (!TimeCondition())
+		return;
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	TraceGroup* tg = m_view->GetTraceGroup();
@@ -1098,13 +874,6 @@ void ScriptProc::RunAddCells(wxString& type, int index, wxFileConfig &fconfig)
 		tg = m_view->GetTraceGroup();
 	}
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	if (time_mode != index)
-		return;
-
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	tm_processor.SetBits(cur_vol->GetBits());
@@ -1112,14 +881,13 @@ void ScriptProc::RunAddCells(wxString& type, int index, wxFileConfig &fconfig)
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
 	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.AddCells(m_sel_labels, tseq_cur_num);
+	tm_processor.AddCells(m_sel_labels,
+		m_view->m_tseq_cur_num);
 }
 
-void ScriptProc::RunLinkCells(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunLinkCells()
 {
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	if (time_mode != index)
+	if (!TimeCondition())
 		return;
 
 	if (!m_frame || !m_frame->GetTraceDlg())
@@ -1129,20 +897,15 @@ void ScriptProc::RunLinkCells(wxString& type, int index, wxFileConfig &fconfig)
 	m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 
-void ScriptProc::RunUnlinkCells(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunUnlinkCells()
 {
-	if (!m_view || !m_frame) return;
+	if (!TimeCondition())
+		return;
+
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	TraceGroup* tg = m_view->GetTraceGroup();
 	if (!tg) return;
-
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	if (time_mode != index)
-		return;
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
@@ -1151,37 +914,33 @@ void ScriptProc::RunUnlinkCells(wxString& type, int index, wxFileConfig &fconfig
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
 	tm_processor.SetSizes(resx, resy, resz);
-	tm_processor.RemoveCells(m_sel_labels, tseq_cur_num);
+	tm_processor.RemoveCells(m_sel_labels,
+		m_view->m_tseq_cur_num);
 }
 
-void ScriptProc::RunBackgroundStat(wxString& type, int index, wxFileConfig &fconfig)
+void ScriptProc::RunBackgroundStat()
 {
-	if (!m_view || !m_frame) return;
+	if (!TimeCondition())
+		return;
+
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-
-	int time_mode;
-	fconfig.Read("time_mode", &time_mode, 0);//0-post-change;1-pre-change
-	if (time_mode != index)
-		return;
-
 	flrd::BackgStat bgs(cur_vol);
 	bool bval;
-	fconfig.Read("use_mask", &bval, false);
+	m_fconfig->Read("use_mask", &bval, false);
 	bgs.SetUseMask(bval);
 	int itype;
-	fconfig.Read("stat_type", &itype, 0);
+	m_fconfig->Read("stat_type", &itype, 0);
 	bgs.SetType(itype);
 	int kx = 0, ky = 0;
-	fconfig.Read("kx", &kx, 0);
-	fconfig.Read("ky", &ky, 0);
+	m_fconfig->Read("kx", &kx, 0);
+	m_fconfig->Read("ky", &ky, 0);
 	if (kx && ky)
 		bgs.SetFeatureSize2D(kx, ky);
 	float varth = 0, gauth = 0;
-	fconfig.Read("varth", &varth, 0);
-	fconfig.Read("gauth", &gauth, 0);
+	m_fconfig->Read("varth", &varth, 0);
+	m_fconfig->Read("gauth", &gauth, 0);
 	if (varth > 0.0 && gauth > 0.0)
 		bgs.SetThreshold(varth, gauth);
 
@@ -1190,10 +949,78 @@ void ScriptProc::RunBackgroundStat(wxString& type, int index, wxFileConfig &fcon
 	//output
 	std::string str;
 	float result = bgs.GetResultf();
-	fluo::Node* node = m_output->getOrAddNode(type.ToStdString());
+	fluo::Node* node = m_output->getOrAddNode(m_type.ToStdString());
 	node->addValue("stat_type", (long)itype);
-	str = std::to_string(tseq_cur_num);
+	str = std::to_string(m_view->m_tseq_cur_num);
 	node->addSetValue(str, result);
+}
+
+void ScriptProc::ExportCompAnalysis()
+{
+	if (!m_frame) return;
+	if (!TimeCondition())
+		return;
+
+	//template
+	wxString tempfile;
+	m_fconfig->Read("template", &tempfile);
+	if (!wxFileExists(tempfile))
+	{
+		std::wstring name = tempfile.ToStdWstring();
+		name = GET_NAME(name);
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		tempfile = exePath + "\\Templates\\" + name;
+		if (!wxFileExists(tempfile))
+			return;
+	}
+	wxString outputfile;
+	m_fconfig->Read("output", &outputfile);
+	if (outputfile.IsEmpty())
+	{
+		wxFileDialog *fopendlg = new wxFileDialog(
+			m_frame, "Save Results", "", "",
+			"Web page(*.html)|*.html",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		int rval = fopendlg->ShowModal();
+		if (rval == wxID_OK)
+		{
+			outputfile = fopendlg->GetPath();
+		}
+		delete fopendlg;
+	}
+	if (outputfile.IsEmpty())
+		return;
+	wxString valuename;
+	m_fconfig->Read("value name", &valuename);
+
+	std::ifstream ifs(tempfile.ToStdString());
+	std::ofstream ofs(outputfile.ToStdString());
+	std::string line;
+	int replace = 0;//1:data;2:value name
+	while (std::getline(ifs, line))
+	{
+		if (line.find("#begin data") != std::string::npos)
+		{
+			//data
+			replace = 1;
+
+		}
+		if (line.find("#begin value name") != std::string::npos)
+		{
+			//value name
+			replace = 2;
+			ofs << "        value: +d." << valuename.ToStdString() << std::endl;
+		}
+		if (replace == 0)
+			ofs << line << std::endl;
+		if (line.find("#end") != std::string::npos)
+		{
+			replace = 0;
+		}
+	}
+	ifs.close();
+	ofs.close();
 }
 
 //read/delete volume cache

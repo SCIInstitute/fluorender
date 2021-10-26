@@ -11,20 +11,20 @@ int main(int argc, char* argv[])
 	//char* leak = new char[1000];
 	//memset(leak, 14, 1000);
 
-	ObjectTest();
-	ObjectTest2();
-	ObjectTest3();
+	//ObjectTest();
+	//ObjectTest2();
+	//ObjectTest3();
 
-	GroupTest();
-	GroupTest2();
-	GroupTest3();
-	GroupTest4();
+	//GroupTest();
+	//GroupTest2();
+	//GroupTest3();
+	//GroupTest4();
 
-	SpecialValueTest();
+	//SpecialValueTest();
 
-	MyTest();
+	//MyTest();
 
-	//reformat_data();
+	reformat_data();
 
 	printf("All done. Quit.\n");
 	cin.get();

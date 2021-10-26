@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Tracking/Cell.h>
 #include <wx/string.h>
 #include <wx/fileconf.h>
+#include <vector>
 
 class VRenderFrame;
 class VRenderView;
@@ -43,6 +44,20 @@ namespace flrd
 	class ScriptProc
 	{
 	public:
+		enum TimeMask
+		{
+			TM_NONE = 0,
+			TM_PRE = 1 << 0,
+			TM_POST = 1 << 1,
+			TM_ALL = 0x7FFFFFFF
+		};
+		enum FrameMask
+		{
+			FM_NONE = 0,
+			FM_FIRST = 1 << 0,
+			FM_LAST = 0x40000000,
+			FM_ALL = 0x7FFFFFFF
+		};
 		ScriptProc();
 		~ScriptProc();
 
@@ -52,7 +67,7 @@ namespace flrd
 
 		//run 4d script
 		//index: 0-pre-change; 1-post-change
-		void Run4DScript(int index, wxString &scriptname);
+		void Run4DScript(TimeMask tm, wxString &scriptname);
 
 		void ClearResults() { m_output->removeAllChildren(); }
 
@@ -61,8 +76,10 @@ namespace flrd
 		VRenderView* m_vrv;
 		VRenderGLView *m_view;
 
-		//file path for script
-		wxString m_script_output;
+		wxString m_type;
+		TimeMask m_time_mask;
+		wxFileConfig *m_fconfig;
+
 		//selected labels
 		CelpList m_sel_labels;
 
@@ -70,23 +87,29 @@ namespace flrd
 		fluo::ref_ptr<fluo::Group> m_output;
 
 	private:
-		void RunNoiseReduction(wxString& type, int index, wxFileConfig &fconfig);
-		void RunSelectionTracking(wxString& type, int index, wxFileConfig &fconfig);
-		void RunMaskTracking(wxString& type, int index, wxFileConfig &fconfig);
-		void RunRandomColors(wxString& type, int index, wxFileConfig &fconfig);
-		void RunFetchMask(wxString& type, int index, wxFileConfig &fconfig);
-		void RunClearMask(wxString& type, int index, wxFileConfig &fconfig);
-		void RunSaveMask(wxString& type, int index, wxFileConfig &fconfig);
-		void RunSaveVolume(wxString& type, int index, wxFileConfig &fconfig);
-		void RunCalculate(wxString& type, int index, wxFileConfig &fconfig);
-		void RunOpenCL(wxString& type, int index, wxFileConfig &fconfig);
-		void RunCompAnalysis(wxString& type, int index, wxFileConfig &fconfig);
-		void RunGenerateComp(wxString& type, int index, wxFileConfig &fconfig);
-		void RunRulerProfile(wxString& type, int index, wxFileConfig &fconfig);
-		void RunAddCells(wxString& type, int index, wxFileConfig &fconfig);
-		void RunLinkCells(wxString& type, int index, wxFileConfig &fconfig);
-		void RunUnlinkCells(wxString& type, int index, wxFileConfig &fconfig);
-		void RunBackgroundStat(wxString& type, int index, wxFileConfig &fconfig);
+		bool TimeCondition();
+		bool GetVolumes(std::vector<VolumeData*> &list);
+		void UpdateTraceDlg();
+		void RunNoiseReduction();
+		void RunPreTracking();
+		void RunPostTracking();
+		void RunMaskTracking();
+		void RunRandomColors();
+		void RunFetchMask();
+		void RunClearMask();
+		void RunSaveMask();
+		void RunSaveVolume();
+		void RunCalculate();
+		void RunOpenCL();
+		void RunCompAnalysis();
+		void RunGenerateComp();
+		void RunRulerProfile();
+		void RunAddCells();
+		void RunLinkCells();
+		void RunUnlinkCells();
+		void RunBackgroundStat();
+
+		void ExportCompAnalysis();
 
 		//read/delete volume cache
 		void ReadVolCache(VolCache& vol_cache);
