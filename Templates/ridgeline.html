@@ -1,22 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-svg { display: block; margin: 0 auto; }
-.axis .domain { display: none; }
-.axis--x text { fill: #000; }
-.axis--x line { stroke: #000; }
-.axis--id .tick line { display: none; }
-.axis--id text { font-size: 12px; fill: #000; }
-.axis--id .tick:nth-child(odd) text { fill: #777; }
-.line { fill: none; stroke: #000; }
-.area { fill: #eee; }
-.id:nth-child(odd) .area { fill: #ddd; }
-</style>
+    <style>
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .axis .domain {
+            display: none;
+        }
+
+        .axis--x text {
+            fill: #000;
+        }
+
+        .axis--x line {
+            stroke: #000;
+        }
+
+        .axis--id .tick line {
+            display: none;
+        }
+
+        .axis--id text {
+            font-size: 12px;
+            fill: #000;
+        }
+
+        .axis--id .tick:nth-child(odd) text {
+            fill: #777;
+        }
+
+        .line {
+            fill: none;
+            stroke: #000;
+        }
+
+        .area {
+            fill: #eee;
+        }
+
+        .id:nth-child(odd) .area {
+            fill: #ddd;
+        }
+    </style>
 </head>
 <body>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script>
 //#begin data
 let csv_data = "id,time,p,p_peak,p_smooth\n\
 ID-10,1440,6.45223543281662e-5,0.044022621105507795,0.044022621105507795\n\
@@ -906,25 +938,26 @@ dataFlat.sort(function (a, b) { return a.time - b.time; });
 
 var data = d3.nest()
     .key(function (d) { return d.id; })
-    .entries(dataFlat)
-    .reverse();
+    .entries(dataFlat);
 
 var num = data.length - 1;
 var x = function (d) { return d.time; };
 var y = function (d) { return d.value; };
+var extx = d3.extent(dataFlat, x);
+var exty = d3.max(dataFlat, y) - d3.min(dataFlat, y);
 
-// Sort activities by peak id time
+// Sort by peak
 function peakTime(d) {
     var i = d3.scan(d.values, function (a, b) { return y(b) - y(a); });
-    return d.values[i];
+    return d.values[i].value;
 };
 data.sort(function (a, b) { return peakTime(b) - peakTime(a); });
 
-var margin = { top: 30, right: 10, bottom: 30, left: 50 },
+var margin = { top: 100, right: 10, bottom: 30, left: 50 },
     width = 700 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
-var xScale = d3.scaleLinear().domain(d3.extent(dataFlat, x)).range([0, width]),
+var xScale = d3.scaleLinear().domain(extx).range([0, width]),
     xValue = function(d) { return xScale(x(d)); },
     xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
 
@@ -932,7 +965,7 @@ var yScale = d3.scaleLinear(),
     yValue = function(d) { return yScale(y(d)); };
 
 var id = function(d) { return d.key; },
-    idScale = d3.scaleBand().range([0, height]),
+    idScale = d3.scaleBand().range([0, height-exty]),
     idValue = function(d) { return idScale(id(d)); },
     idAxis = d3.axisLeft(idScale);
 
@@ -941,11 +974,6 @@ var area = d3.area()
     .y1(yValue);
 
 var line = area.lineY1();
-
-function parseTime(offset) {
-    var date = new Date(2017, 0, 1); // chose an arbitrary day
-    return d3.timeMinute.offset(date, offset);
-}
 
 idScale.domain(data.map(function(d) { return d.key; }));
 
@@ -960,10 +988,11 @@ yScale
 area.y0(yScale(0));
 
 var idband = idScale.bandwidth();
-var offset = 5;
+var offsetx = 20;
+var offsety = 15;
 
 var svg = d3.select('body').append('svg')
-    .attr('width', width + margin.left + margin.right + num * offset)
+    .attr('width', width + margin.left + margin.right + num * offsetx)
     .attr('height', height + margin.top + margin.bottom)
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -978,19 +1007,19 @@ svg.append('g').attr('class', 'axis axis--id')
     .selectAll("text")
     .attr('transform', function (d) {
         var ty = 0,
-            tx = offset * (num - count);
+            tx = offsetx * (num - count);
         count++;
         return 'translate(' + tx + ',' + ty + ')';
     });
 
 count = 0;
-var gChart = svg.append('g').attr('class', 'activities')
+var gChart = svg.append('g').attr('class', 'ids')
     .selectAll('.id').data(data)
     .enter().append('g')
     .attr('class', function(d) { return 'id id--' + d.key; })
     .attr('transform', function(d) {
         var ty = idValue(d) - idband + 5,
-            tx = offset * (num - count);
+            tx = offsetx * (num - count);
         count++;
         return 'translate(' + tx + ',' + ty + ')';
     });
@@ -1003,6 +1032,6 @@ gChart.append('path').attr('class', 'line')
     .datum(function(d) { return d.values; })
     .attr('d', line);
 
-</script>
+    </script>
 </body>
 </html>

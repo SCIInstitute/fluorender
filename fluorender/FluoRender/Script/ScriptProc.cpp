@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
+#include <Flobject/InfoVisitor.hpp>
 #include <DataManager.h>
 #include <VRenderView.h>
 #include <VRenderGLView.h>
@@ -47,6 +48,7 @@ ScriptProc::ScriptProc() :
 	m_vrv(0),
 	m_view(0)
 {
+	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
 }
 
 ScriptProc::~ScriptProc()
@@ -126,6 +128,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 					RunUnlinkCells();
 				else if (str == "backg_stat")
 					RunBackgroundStat();
+				else if (str == "export_comp_analysis")
+					ExportCompAnalysis();
 			}
 		}
 	}
@@ -136,8 +140,10 @@ bool ScriptProc::TimeCondition()
 	if (!m_fconfig || !m_view)
 		return false;
 	int time_mode, frame_mode;
+	wxString str;
 	m_fconfig->Read("time_mode", &time_mode, TM_PRE);
-	m_fconfig->Read("frame_mode", &frame_mode, FM_ALL);
+	m_fconfig->Read("frame_mode", &str, "FM_ALL");
+	frame_mode = FrameMode(str.ToStdString());
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
@@ -231,6 +237,25 @@ void ScriptProc::UpdateTraceDlg()
 {
 	if (m_vrv && m_frame && m_frame->GetTraceDlg())
 		m_frame->GetTraceDlg()->GetSettings(m_vrv);
+}
+
+int ScriptProc::FrameMode(std::string &str)
+{
+	if (str == "FM_NONE")
+		return FM_NONE;
+	if (str == "FM_FIRST")
+		return FM_FIRST;
+	if (str == "FM_LAST")
+		return FM_LAST;
+	if (str == "FM_EXFIRST")
+		return FM_EXFIRST;
+	if (str == "FM_EXLAST")
+		return FM_EXLAST;
+	if (str == "FM_EXBOTH")
+		return FM_EXBOTH;
+	if (str == "FM_ALL")
+		return FM_ALL;
+	return std::stoi(str, nullptr, 16);
 }
 
 void ScriptProc::RunPreTracking()
@@ -682,6 +707,7 @@ void ScriptProc::RunCompAnalysis()
 		comp_analyzer.SetSizeLimit(slimit);
 		comp_analyzer.Analyze(selected, consistent);
 		fluo::Group* vol_group = m_output->getOrAddGroup(std::to_string(ch));
+		vol_group->addSetValue("type", std::string("vol_group"));
 		CelpList* celp_list = comp_analyzer.GetCelpList();
 		CellGraph* graph = comp_analyzer.GetCellGraph();
 		if (!celp_list || !graph)
@@ -728,6 +754,7 @@ void ScriptProc::RunCompAnalysis()
 
 			unsigned long id = ids.front();
 			fluo::Group* comp_group = vol_group->getOrAddGroup(std::to_string(id));
+			comp_group->addSetValue("type", std::string("comp_group"));
 			fluo::Node* node;
 			node = comp_group->getOrAddNode("center");
 			node->addSetValue(fn, itc->second->GetCenter(sx, sy, sz));
@@ -992,7 +1019,71 @@ void ScriptProc::ExportCompAnalysis()
 	if (outputfile.IsEmpty())
 		return;
 	wxString valuename;
-	m_fconfig->Read("value name", &valuename);
+	m_fconfig->Read("value_name", &valuename);
+
+	//print lines
+	class CompVisitor : public fluo::NodeVisitor
+	{
+	public:
+		CompVisitor(std::ofstream &ofs, std::string &vname, int num) : fluo::NodeVisitor(),
+			ofs_(&ofs),
+			vname_(vname),
+			chnum_(num)
+		{
+			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void apply(fluo::Node& node)
+		{
+			std::string nname = node.getName();
+			if (nname == vname_)
+			{
+				printValues(&node);
+			}
+			traverse(node);
+		}
+
+		virtual void apply(fluo::Group& group)
+		{
+			std::string type;
+			group.getValue("type", type);
+			if (type == "vol_group")
+				ch_ = group.getName();
+			if (type == "comp_group")
+				id_ = group.getName();
+			traverse(group);
+		}
+
+	protected:
+		void printValues(fluo::Object* object)
+		{
+			if (!object)
+				return;
+			//get all value names
+			fluo::ValueCollection names =
+				object->getValueNames();
+			for (auto it = names.begin();
+				it != names.end(); ++it)
+			{
+				fluo::Value* value = object->getValuePointer(*it);
+				if (value)
+				{
+					if (chnum_ > 1)
+						*ofs_ << "CH-" << ch_ << " ";
+					*ofs_ << "ID-" << id_ << "," <<
+					value->getName() << "," <<
+					*value << "\\n\\" << std::endl;
+				}
+			}
+		}
+
+	private:
+		std::ofstream *ofs_;
+		std::string vname_;
+		int chnum_;
+		std::string ch_;
+		std::string id_;
+	};
 
 	std::ifstream ifs(tempfile.ToStdString());
 	std::ofstream ofs(outputfile.ToStdString());
@@ -1004,7 +1095,10 @@ void ScriptProc::ExportCompAnalysis()
 		{
 			//data
 			replace = 1;
-
+			ofs << "let csv_data = \"id,time," << valuename.ToStdString() << "\\n\\" << std::endl;
+			CompVisitor visitor(ofs, valuename.ToStdString(), m_output->getNumChildren());
+			m_output->accept(visitor);
+			ofs << "\";" << std::endl;
 		}
 		if (line.find("#begin value name") != std::string::npos)
 		{
@@ -1021,6 +1115,8 @@ void ScriptProc::ExportCompAnalysis()
 	}
 	ifs.close();
 	ofs.close();
+
+	::wxLaunchDefaultBrowser(outputfile.ToStdString());
 }
 
 //read/delete volume cache

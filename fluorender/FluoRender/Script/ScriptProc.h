@@ -56,6 +56,9 @@ namespace flrd
 			FM_NONE = 0,
 			FM_FIRST = 1 << 0,
 			FM_LAST = 0x40000000,
+			FM_EXFIRST = 0x7FFFFFFE,
+			FM_EXLAST = 0x3FFFFFFF,
+			FM_EXBOTH = 0x3FFFFFFE,
 			FM_ALL = 0x7FFFFFFF
 		};
 		ScriptProc();
@@ -90,6 +93,7 @@ namespace flrd
 		bool TimeCondition();
 		bool GetVolumes(std::vector<VolumeData*> &list);
 		void UpdateTraceDlg();
+		int FrameMode(std::string &str);
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();
