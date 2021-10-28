@@ -940,11 +940,26 @@ var data = d3.nest()
     .key(function (d) { return d.id; })
     .entries(dataFlat);
 
+var margin = { top: 100, right: 10, bottom: 30, left: 50 },
+    width = 700 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
 var num = data.length - 1;
 var x = function (d) { return d.time; };
 var y = function (d) { return d.value; };
 var extx = d3.extent(dataFlat, x);
-var exty = d3.max(dataFlat, y) - d3.min(dataFlat, y);
+var exty = d3.extent(dataFlat, y);
+var exty2 = exty[1] - exty[0];
+var offsetx = 20;
+var offsety = (height - exty2) / num;
+
+data.map(function (d) {
+    d.values.map(function (d) {
+        d.value -= exty[0];
+    })
+    return d;
+})
+
+var temp = d3.extent(dataFlat, y);
 
 // Sort by peak
 function peakTime(d) {
@@ -952,10 +967,6 @@ function peakTime(d) {
     return d.values[i].value;
 };
 data.sort(function (a, b) { return peakTime(b) - peakTime(a); });
-
-var margin = { top: 100, right: 10, bottom: 30, left: 50 },
-    width = 700 - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom;
 
 var xScale = d3.scaleLinear().domain(extx).range([0, width]),
     xValue = function(d) { return xScale(x(d)); },
@@ -965,8 +976,7 @@ var yScale = d3.scaleLinear(),
     yValue = function(d) { return yScale(y(d)); };
 
 var id = function(d) { return d.key; },
-    idScale = d3.scaleBand().range([0, height-exty]),
-    idValue = function(d) { return idScale(id(d)); },
+    idScale = d3.scaleBand().range([0, height-exty2]),
     idAxis = d3.axisLeft(idScale);
 
 var area = d3.area()
@@ -982,14 +992,10 @@ var overlap = 0.6;
 var areaChartHeight = (1 + overlap) * (height / idScale.domain().length);
 
 yScale
-    .domain(d3.extent(dataFlat, y))
+    .domain(exty)
     .range([areaChartHeight, 0]);
 
 area.y0(yScale(0));
-
-var idband = idScale.bandwidth();
-var offsetx = 20;
-var offsety = 15;
 
 var svg = d3.select('body').append('svg')
     .attr('width', width + margin.left + margin.right + num * offsetx)
@@ -1017,16 +1023,17 @@ var gChart = svg.append('g').attr('class', 'ids')
     .selectAll('.id').data(data)
     .enter().append('g')
     .attr('class', function(d) { return 'id id--' + d.key; })
-    .attr('transform', function(d) {
-        var ty = idValue(d) - idband + 5,
-            tx = offsetx * (num - count);
+    .attr('transform', function (d) {
+        var tx = offsetx * (num - count),
+            ty = height - exty2 - offsety * (num - count);
         count++;
         return 'translate(' + tx + ',' + ty + ')';
     });
 
 gChart.append('path').attr('class', 'area')
-    .datum(function(d) { return d.values; })
-    .attr('d', area);
+    .datum(function (d) { return d.values; })
+    .attr('d', area)
+    .attr('opacity', 0.7);
 
 gChart.append('path').attr('class', 'line')
     .datum(function(d) { return d.values; })

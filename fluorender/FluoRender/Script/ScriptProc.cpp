@@ -1020,15 +1020,24 @@ void ScriptProc::ExportCompAnalysis()
 		return;
 	wxString valuename;
 	m_fconfig->Read("value_name", &valuename);
+	double tlimit;
+	m_fconfig->Read("tlimit", &tlimit, 5);
+	int thresh = int((100 - tlimit) *
+		(m_view->m_end_frame -
+		m_view->m_begin_frame + 1)
+		/ 100 + 0.5);
 
 	//print lines
 	class CompVisitor : public fluo::NodeVisitor
 	{
 	public:
-		CompVisitor(std::ofstream &ofs, std::string &vname, int num) : fluo::NodeVisitor(),
+		CompVisitor(std::ofstream &ofs,
+			std::string &vname,
+			int num, int thresh) : fluo::NodeVisitor(),
 			ofs_(&ofs),
 			vname_(vname),
-			chnum_(num)
+			chnum_(num),
+			thresh_(thresh)
 		{
 			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
 		}
@@ -1062,6 +1071,8 @@ void ScriptProc::ExportCompAnalysis()
 			//get all value names
 			fluo::ValueCollection names =
 				object->getValueNames();
+			if (names.size() < thresh_)
+				return;
 			for (auto it = names.begin();
 				it != names.end(); ++it)
 			{
@@ -1081,6 +1092,7 @@ void ScriptProc::ExportCompAnalysis()
 		std::ofstream *ofs_;
 		std::string vname_;
 		int chnum_;
+		int thresh_;
 		std::string ch_;
 		std::string id_;
 	};
@@ -1096,7 +1108,10 @@ void ScriptProc::ExportCompAnalysis()
 			//data
 			replace = 1;
 			ofs << "let csv_data = \"id,time," << valuename.ToStdString() << "\\n\\" << std::endl;
-			CompVisitor visitor(ofs, valuename.ToStdString(), m_output->getNumChildren());
+			CompVisitor visitor(ofs,
+				valuename.ToStdString(),
+				m_output->getNumChildren(),
+				thresh);
 			m_output->accept(visitor);
 			ofs << "\";" << std::endl;
 		}
