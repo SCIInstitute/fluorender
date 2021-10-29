@@ -1107,6 +1107,7 @@ void ScriptProc::ExportCompAnalysis()
 		{
 			//data
 			replace = 1;
+			ofs << "//#begin data" << std::endl;
 			ofs << "let csv_data = \"id,time," << valuename.ToStdString() << "\\n\\" << std::endl;
 			CompVisitor visitor(ofs,
 				valuename.ToStdString(),
@@ -1119,14 +1120,15 @@ void ScriptProc::ExportCompAnalysis()
 		{
 			//value name
 			replace = 2;
+			ofs << "//#begin value name" << std::endl;
 			ofs << "        value: +d." << valuename.ToStdString() << std::endl;
 		}
-		if (replace == 0)
-			ofs << line << std::endl;
 		if (line.find("#end") != std::string::npos)
 		{
 			replace = 0;
 		}
+		if (replace == 0)
+			ofs << line << std::endl;
 	}
 	ifs.close();
 	ofs.close();
