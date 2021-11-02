@@ -141,7 +141,8 @@ bool ScriptProc::TimeCondition()
 		return false;
 	int time_mode, frame_mode;
 	wxString str;
-	m_fconfig->Read("time_mode", &time_mode, TM_PRE);
+	m_fconfig->Read("time_mode", &str, "TM_PRE");
+	time_mode = TimeMode(str.ToStdString());
 	m_fconfig->Read("frame_mode", &str, "FM_ALL");
 	frame_mode = FrameMode(str.ToStdString());
 	int curf = m_view->m_tseq_cur_num;
@@ -239,6 +240,19 @@ void ScriptProc::UpdateTraceDlg()
 		m_frame->GetTraceDlg()->GetSettings(m_vrv);
 }
 
+int ScriptProc::TimeMode(std::string &str)
+{
+	if (str == "TM_NONE")
+		return TM_NONE;
+	if (str == "TM_PRE")
+		return TM_PRE;
+	if (str == "TM_POST")
+		return TM_POST;
+	if (str == "TM_ALL")
+		return TM_ALL;
+	return std::stoi(str, nullptr, 0);
+}
+
 int ScriptProc::FrameMode(std::string &str)
 {
 	if (str == "FM_NONE")
@@ -255,7 +269,17 @@ int ScriptProc::FrameMode(std::string &str)
 		return FM_EXBOTH;
 	if (str == "FM_ALL")
 		return FM_ALL;
-	return std::stoi(str, nullptr, 16);
+	if (str.find("0x") != std::string::npos ||
+		str.find("0X") != std::string::npos)
+		return std::stoi(str, nullptr, 16);
+	return std::stoi(str, nullptr, 0);
+}
+
+wxString ScriptProc::GetPath(wxString &str)
+{
+	wxString path;
+	//fluo
+	return path;
 }
 
 void ScriptProc::RunPreTracking()
@@ -1069,8 +1093,8 @@ void ScriptProc::ExportCompAnalysis()
 			if (!object)
 				return;
 			//get all value names
-			fluo::ValueCollection names =
-				object->getValueNames();
+			fluo::ValueVector names =
+				object->getValueNames(2);
 			if (names.size() < thresh_)
 				return;
 			for (auto it = names.begin();

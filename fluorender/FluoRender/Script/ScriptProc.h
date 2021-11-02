@@ -93,7 +93,9 @@ namespace flrd
 		bool TimeCondition();
 		bool GetVolumes(std::vector<VolumeData*> &list);
 		void UpdateTraceDlg();
+		int TimeMode(std::string &str);
 		int FrameMode(std::string &str);
+		wxString GetPath(wxString &str);
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();

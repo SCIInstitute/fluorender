@@ -83,8 +83,8 @@ namespace fluo
 			if (!object)
 				return;
 			//get all value names
-			ValueCollection names =
-				object->getValueNames();
+			ValueVector names =
+				object->getValueNames(1);
 			for (auto it = names.begin();
 				it != names.end(); ++it)
 			{

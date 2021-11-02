@@ -394,7 +394,7 @@ namespace fluo
 			return addValue(value);
 		}
 
-		ValueCollection getValueNames()
+		ValueCollection getValueCollection()
 		{
 			ValueCollection result;
 			if (_value_set)
@@ -405,6 +405,56 @@ namespace fluo
 				{
 					result.insert((*it).first);
 				}
+			}
+			return result;
+		}
+		//order:0-unordered; 1-ascending; 2-descending
+		//3-numeric ascending; 4-numeric descending
+		ValueVector getValueNames(int order=0)
+		{
+			ValueVector result;
+			if (_value_set)
+			{
+				ValueSet::Values values = _value_set->getValues();
+				for (auto it = values.begin();
+					it != values.end(); ++it)
+				{
+					result.push_back((*it).first);
+				}
+			}
+			switch (order)
+			{
+			case 0:
+			default:
+				break;
+			case 1:
+				std::sort(result.begin(), result.end(),
+					[](const std::string& s1, const std::string& s2)
+					{
+						return s1 < s2;
+					});
+				break;
+			case 2:
+				std::sort(result.begin(), result.end(),
+					[](const std::string& s1, const std::string& s2)
+					{
+						return s1 > s2;
+					});
+				break;
+			case 3:
+				std::sort(result.begin(), result.end(),
+					[](const std::string& s1, const std::string& s2)
+					{
+						return std::stoi(s1) < std::stoi(s2);
+					});
+				break;
+			case 4:
+				std::sort(result.begin(), result.end(),
+					[](const std::string& s1, const std::string& s2)
+					{
+						return std::stoi(s1) > std::stoi(s2);
+					});
+				break;
 			}
 			return result;
 		}

@@ -99,7 +99,7 @@ bool ObjectFactory::convDefaultValues(boost::property_tree::ptree &pt, const Val
 	ptree parent;
 	//get all value names
 	ValueCollection all_names =
-		object->getValueNames();
+		object->getValueCollection();
 	for (auto it = all_names.begin();
 		it != all_names.end(); ++it)
 	{

@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <codecvt>
 #include <locale>
 #include <tuple>
-#include <set>
+#include <unordered_set>
 //FluoRender's special types
 #include <BBox.h>
 #include <Color.h>
@@ -58,7 +58,9 @@ namespace fluo
 	//name, type, value
 	typedef std::tuple<std::string, std::string, std::string> ValueTuple;
 	//only value names
-	typedef std::set<std::string> ValueCollection;
+	typedef std::unordered_set<std::string> ValueCollection;
+	//sorted value names
+	typedef std::vector<std::string> ValueVector;
 	//parameters are used to customize a processor
 	typedef std::vector<ValueTuple> ParameterList;
 
