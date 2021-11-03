@@ -95,7 +95,10 @@ namespace flrd
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int FrameMode(std::string &str);
-		wxString GetPath(wxString &str);
+		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
+		wxString RemoveExt(const wxString& str);
+		wxString RemoveNum(const wxString& str);
+		wxString IncreaseNum(const wxString& str);
 		void RunNoiseReduction();
 		void RunPreTracking();
 		void RunPostTracking();

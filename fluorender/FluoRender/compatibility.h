@@ -223,7 +223,7 @@ inline bool FIND_FILES_4D(std::wstring path_name,
 	std::wstring id, std::vector<std::wstring> &batch_list,
 	int &cur_batch)
 {
-	int64_t begin = path_name.find(id);
+	int64_t begin = path_name.find_last_of(id);
 	size_t id_len = id.length();
 	if (begin == -1)
 		return false;

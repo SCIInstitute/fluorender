@@ -15,4 +15,4 @@ source=calculator
 format=0
 compress=1
 delete=1
-savepath=./DATA/Calculate/FilenamePrefix
+savepath=

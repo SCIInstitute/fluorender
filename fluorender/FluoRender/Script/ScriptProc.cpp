@@ -65,7 +65,7 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 		name = GET_NAME(name);
 		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 		exePath = wxPathOnly(exePath);
-		scriptname = exePath + "\\Scripts\\" + name;
+		scriptname = exePath + GETSLASH() + "Scripts" + GETSLASH() + name;
 		if (!wxFileExists(scriptname))
 			return;
 	}
@@ -275,11 +275,112 @@ int ScriptProc::FrameMode(std::string &str)
 	return std::stoi(str, nullptr, 0);
 }
 
-wxString ScriptProc::GetPath(wxString &str)
+wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool rep)
 {
 	wxString path;
-	//fluo
+	fluo::Node* node = m_output->getChild("savepath");
+	if (node)
+	{
+		std::string name;
+		node->getValue("path", name);
+		if (!name.empty())
+			return name;
+	}
+	//not found
+	if (str.IsEmpty() ||
+		str == "FILE_DLG")
+	{
+		//file dialog
+		wxFileDialog *dlg = new wxFileDialog(
+			m_frame, "Save Results", "", "",
+			"Output file(*." + ext + ")|*." + ext,
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		int rval = dlg->ShowModal();
+		if (rval == wxID_OK)
+			path = dlg->GetPath();
+		delete dlg;
+	}
+	else if (str == "DATA_DIR")
+	{
+		//data dir
+		if (!m_view)
+			return "";
+		VolumeData* vol = m_view->m_cur_vol;
+		if (!vol)
+			return "";
+		path = vol->GetPath();
+		path = wxPathOnly(path);
+		path += GETSLASH() + "output01." + ext;
+	}
+	else
+	{
+		//specific dir
+		path = wxPathOnly(str);
+		if (!wxDirExists(path))
+			MkDirW(path.ToStdWstring());
+		if (!wxDirExists(path))
+			return "";
+		if (path == str ||
+			path == str + "/" ||
+			path == str + "\\")
+			path += GETSLASH() + "output01." + ext;//not containing filename
+		else
+			path = str;//containing filename
+	}
+	if (!rep)
+	{
+		while (wxFileExists(path))
+			path = IncreaseNum(path);
+	}
+	node = m_output->getOrAddNode("savepath");
+	node->addSetValue("path", path.ToStdString());
 	return path;
+}
+
+wxString ScriptProc::RemoveExt(const wxString& str)
+{
+	int pos = str.Find('.', true);
+	if (pos != wxNOT_FOUND)
+		return str.Left(pos);
+	return str;
+}
+
+wxString ScriptProc::RemoveNum(const wxString& str)
+{
+	wxString tmp = RemoveExt(str);
+	while (wxIsdigit(tmp.Last()))
+		tmp.RemoveLast();
+	return tmp;
+}
+
+wxString ScriptProc::IncreaseNum(const wxString& str)
+{
+	int pos = str.Find('.', true);
+	wxString ext;
+	if (pos != wxNOT_FOUND)
+		ext = str.Right(pos);
+	wxString tmp = str.Left(pos);
+	wxString digits;
+	while (wxIsdigit(tmp.Last()))
+	{
+		digits.Prepend(tmp.Last());
+		tmp.RemoveLast();
+	}
+	int len = digits.Length();
+	if (!len)
+	{
+		return tmp + "01" + ext;
+	}
+	long num;
+	digits.ToLong(&num);
+	num++;
+	digits = wxString::Format("%d", num);
+	if (digits.Length() < len)
+	{
+		wxString format = wxString::Format("%%0%dd", len);
+		digits = wxString::Format(format, num);
+	}
+	return tmp + digits + ext;
 }
 
 void ScriptProc::RunPreTracking()
@@ -558,15 +659,10 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("bake", &bake, false);
 	bool compression;
 	m_fconfig->Read("compress", &compression, false);
-	wxString str, pathname;
+	wxString pathname;
 	m_fconfig->Read("savepath", &pathname, "");
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
-	str = wxPathOnly(pathname);
-	if (!wxDirExists(str))
-		MkDirW(str.ToStdWstring());
-	if (!wxDirExists(str))
-		return;
 
 	std::vector<VolumeData*> vlist;
 	if (source == "channels" ||
@@ -603,10 +699,19 @@ void ScriptProc::RunSaveVolume()
 	if (!vlist.empty())
 		time_num = vlist[0]->GetReader()->GetTimeNum();
 	int curf = m_view->m_tseq_cur_num;
+	wxString ext, str;
+	if (mode == 0 || mode == 1)
+		ext = "tif";
+	else if (mode == 2)
+		ext = "nrrd";
+	str = GetSavePath(pathname, ext);
+	str = RemoveExt(str);
+	str = RemoveNum(str);
+	if (str.IsEmpty())
+		return;
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		str = pathname;
 		//time
 		wxString format = wxString::Format("%d", time_num);
 		int fr_length = format.Length();
@@ -621,10 +726,7 @@ void ScriptProc::RunSaveVolume()
 			str += wxString::Format(format, (*i)->GetCurChannel() + 1);
 		}
 		//ext
-		if (mode == 0 || mode == 1)
-			str += ".tif";
-		else if (mode == 2)
-			str += ".nrrd";
+		str += "." + ext;
 		fluo::Quaternion qtemp;
 		(*i)->Save(str, mode, crop, filter, bake, compression, qtemp);
 		if (del_vol)
@@ -1021,7 +1123,7 @@ void ScriptProc::ExportCompAnalysis()
 		name = GET_NAME(name);
 		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 		exePath = wxPathOnly(exePath);
-		tempfile = exePath + "\\Templates\\" + name;
+		tempfile = exePath + GETSLASH() + "Templates" + GETSLASH() + name;
 		if (!wxFileExists(tempfile))
 			return;
 	}

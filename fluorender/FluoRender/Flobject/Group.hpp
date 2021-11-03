@@ -82,6 +82,18 @@ namespace fluo
 		virtual bool setChild(size_t i, Node* node);
 		inline Node* getChild(size_t i) { return m_children[i].get(); }
 		inline const Node* getChild(size_t i) const { return m_children[i].get(); }
+		inline Node* getChild(const std::string& child_name)
+		{
+			std::string name;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				name = (*it)->getName();
+				if (name == child_name)
+					return it->get();
+			}
+			return nullptr;
+		}
 		inline bool containsNode(const Node* node) const
 		{
 			for (auto it = m_children.begin();
@@ -103,16 +115,11 @@ namespace fluo
 		}
 		virtual Node* getOrAddNode(const std::string& child_name)
 		{
-			std::string name;
-			for (auto it = m_children.begin();
-				it != m_children.end(); ++it)
-			{
-				name = (*it)->getName();
-				if (name == child_name)
-					return it->get();
-			}
+			Node* node = getChild(child_name);
+			if (node)
+				return node;
 			//no found
-			Node* node = new Node();
+			node = new Node();
 			node->setName(child_name);
 			addChild(node);
 			return node;
