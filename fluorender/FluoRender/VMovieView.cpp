@@ -45,6 +45,7 @@ EVT_TEXT(ID_CurrentTimeText, VMovieView::OnTimeText)
 EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
 EVT_COMBOBOX(ID_RotIntCmb, VMovieView::OnRotIntCmb)
 //fps, view combo, help
+EVT_TEXT(ID_FPS_Text, VMovieView::OnFpsEdit)
 EVT_COMBOBOX(ID_ViewsCombo, VMovieView::OnViewSelected)
 EVT_BUTTON(ID_HelpBtn, VMovieView::OnHelpBtn)
 //main controls
@@ -427,7 +428,8 @@ VMovieView::VMovieView(wxWindow* frame,
 	m_current_page(0),
 	m_rot_int_type(0),
 	m_delayed_stop(false),
-	m_seq_mode(0)
+	m_seq_mode(0),
+	m_fps(30)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -498,6 +500,13 @@ VMovieView::VMovieView(wxWindow* frame,
 }
 
 VMovieView::~VMovieView() {}
+
+void VMovieView::OnFpsEdit(wxCommandEvent& event)
+{
+	long lval;
+	m_fps_text->GetValue().ToLong(&lval);
+	m_fps = lval;
+}
 
 void VMovieView::OnViewSelected(wxCommandEvent& event)
 {
@@ -701,14 +710,12 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 {
 	//get all of the progress info
 	double len;
-	long fps;
 	m_movie_time->GetValue().ToDouble(&len);
-	m_fps_text->GetValue().ToLong(&fps);
 
 	if (m_delayed_stop)
 	{
 		if (m_record)
-			WriteFrameToFile(int(fps*len + 0.5));
+			WriteFrameToFile(int(m_fps*len + 0.5));
 		m_delayed_stop = false;
 		wxCommandEvent e;
 		OnStop(e);
@@ -730,9 +737,9 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 	}
 
 	//move forward in time (limits FPS usability to 100 FPS)
-	m_cur_time += 1.0 / double(fps);
+	m_cur_time += 1.0 / double(m_fps);
 	//frame only increments when time passes a whole number
-	int frame = int(fps * m_cur_time + 0.5);
+	int frame = int(m_fps * m_cur_time + 0.5);
 	SetProgress(m_cur_time / len);
 	//update the rendering frame since we have advanced.
 	if (frame != m_last_frame)
@@ -743,11 +750,11 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 		m_time_current_text->ChangeValue(wxString::Format("%d",
 			((int)(start_time + tot_time * m_cur_time / len + 0.5))));
 		if (m_record)
-			WriteFrameToFile(int(fps*len + 0.5));
+			WriteFrameToFile(int(m_fps*len + 0.5));
 		m_last_frame = frame;
 		SetRendering(m_cur_time / len);
 	}
-	if (len - m_cur_time < 0.1 / double(fps) || m_cur_time > len)
+	if (len - m_cur_time < 0.1 / double(m_fps) || m_cur_time > len)
 		m_delayed_stop = true;
 }
 
@@ -770,13 +777,11 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	int slider_pos = m_progress_sldr->GetValue();
-	long fps;
-	m_fps_text->GetValue().ToLong(&fps);
 	double len;
 	m_movie_time->GetValue().ToDouble(&len);
 	if (slider_pos < 360 && slider_pos > 0 &&
-		!(len - m_cur_time < 0.1 / double(fps) || m_cur_time > len)) {
-		m_timer.Start(int(1000.0 / double(fps) + 0.5));
+		!(len - m_cur_time < 0.1 / double(m_fps) || m_cur_time > len)) {
+		ResumeRun();
 		return;
 	}
 	wxString str = m_views_cmb->GetValue();
@@ -812,14 +817,14 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
 			int frames = int(interpolator->GetLastT());
-			double runtime = (double)frames / (double)fps;
+			double runtime = (double)frames / (double)m_fps;
 			m_movie_time->ChangeValue(wxString::Format("%.2f", runtime));
 		}
 	}
 	SetProgress(0.);
 	SetRendering(0.);
 	m_last_frame = 0;
-	m_timer.Start(int(1000.0 / double(fps) + 0.5));
+	ResumeRun();
 }
 
 void VMovieView::OnRun(wxCommandEvent& event)
@@ -1054,10 +1059,7 @@ void VMovieView::EnableTime()
 	m_dec_time_btn->Enable();
 	m_time_current_text->Enable();
 
-	wxString fps_str = m_fps_text->GetValue();
-	unsigned long fps;
-	fps_str.ToULong(&fps);
-	unsigned int mov_len = (sec - first + 1) / fps + 1;
+	unsigned int mov_len = (sec - first + 1) / m_fps + 1;
 	m_movie_time->SetValue(wxString::Format("%d", mov_len));
 }
 
@@ -1493,9 +1495,7 @@ void VMovieView::Run()
 			h *= scale;
 		}
 
-		long fps;
-		m_fps_text->GetValue().ToLong(&fps);
-		encoder_.open(m_filename.ToStdString(), w, h, fps,
+		encoder_.open(m_filename.ToStdString(), w, h, m_fps,
 			m_Mbitrate * 1000000);
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);

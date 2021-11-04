@@ -291,14 +291,10 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		str == "FILE_DLG")
 	{
 		//file dialog
-		wxFileDialog *dlg = new wxFileDialog(
-			m_frame, "Save Results", "", "",
+		path = m_frame->ScriptDialog(
+			"Save Results",
 			"Output file(*." + ext + ")|*." + ext,
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		int rval = dlg->ShowModal();
-		if (rval == wxID_OK)
-			path = dlg->GetPath();
-		delete dlg;
 	}
 	else if (str == "DATA_DIR")
 	{
@@ -1131,16 +1127,11 @@ void ScriptProc::ExportCompAnalysis()
 	m_fconfig->Read("output", &outputfile);
 	if (outputfile.IsEmpty())
 	{
-		wxFileDialog *fopendlg = new wxFileDialog(
-			m_frame, "Save Results", "", "",
+		//file dialog
+		outputfile = m_frame->ScriptDialog(
+			"Save Results",
 			"Web page(*.html)|*.html",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		int rval = fopendlg->ShowModal();
-		if (rval == wxID_OK)
-		{
-			outputfile = fopendlg->GetPath();
-		}
-		delete fopendlg;
 	}
 	if (outputfile.IsEmpty())
 		return;

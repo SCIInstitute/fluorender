@@ -135,6 +135,16 @@ public:
 	int GetCurrentPage() { return m_current_page; }
 	void SetCurrentPage(int page);
 
+	//timer
+	void ResumeRun()
+	{
+		m_timer.Start(int(1000.0 / double(m_fps) + 0.5));
+	}
+	void HoldRun()
+	{
+		m_timer.Stop();
+	}
+
 public:
 	//controls
 	wxTextCtrl *m_fps_text;
@@ -210,6 +220,7 @@ private:
 	int m_rot_int_type;//0-linear; 1-smooth
 	bool m_delayed_stop;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
+	int m_fps;
 
 private:
 	void GetSettings(int view=0);
@@ -238,6 +249,7 @@ private:
 	void OnStop(wxCommandEvent& event);
 	void OnRewind(wxCommandEvent& event);
 
+	void OnFpsEdit(wxCommandEvent& event);
 	void OnViewSelected(wxCommandEvent& event);
 
 	//right column
