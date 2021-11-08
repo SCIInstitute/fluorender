@@ -149,14 +149,14 @@ bool ScriptProc::TimeCondition()
 	int tm;//mask
 	int startd = curf - startf;
 	int endd = endf - curf;
-	if (startd < 15)
-		tm = 1 << startd;
-	if (endd < 15)
-		tm = 1 >> endd;
-	if (startd >= 15 && endd >= 15)
-		tm = 1 << 15;
+	if (startd < 6)
+		tm = TM_FIRST_BOTH << startd*2;
+	if (endd < 6)
+		tm = TM_LAST_BOTH >> endd*2;
+	if (startd >= 6 && endd >= 6)
+		tm = 0x14000;
 	//time mode
-	if (m_time_mask & tm)
+	if (m_time_mask & tm & time_mode)
 		return true;
 	return false;
 }
@@ -196,36 +196,6 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 		}
 	}
 	return !list.empty();
-}
-
-void ScriptProc::RunNoiseReduction()
-{
-	if (!TimeCondition())
-		return;
-	std::vector<VolumeData*> vlist;
-	if (!GetVolumes(vlist))
-		return;
-
-	if (!m_frame) return;
-	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-	if (!calculator) return;
-
-	double thresh, size;
-	m_fconfig->Read("threshold", &thresh, 0.0);
-	m_fconfig->Read("voxelsize", &size, 0.0);
-
-	for (auto i = vlist.begin();
-		i != vlist.end(); ++i)
-	{
-		m_view->m_cur_vol = *i;
-		calculator->SetVolumeA(*i);
-
-		//selection
-		if (m_frame->GetNoiseCancellingDlg())
-			m_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
-		//delete
-		calculator->CalculateGroup(6, "", false);
-	}
 }
 
 //add traces to trace dialog
@@ -268,8 +238,18 @@ int ScriptProc::TimeMode(std::string &str)
 	return std::stoi(str, nullptr, 0);
 }
 
+int ScriptProc::GetTimeNum()
+{
+	int startf = m_view->m_begin_frame;
+	int endf = m_view->m_end_frame;
+	if (endf >= startf)
+		return endf - startf + 1;
+	return 0;
+}
+
 wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool rep)
 {
+	wxString temp = str;
 	wxString path;
 	fluo::Node* node = m_output->getChild("savepath");
 	if (node)
@@ -280,16 +260,18 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 			return name;
 	}
 	//not found
-	if (str.IsEmpty() ||
-		str == "FILE_DLG")
+	if (temp.IsEmpty() ||
+		temp == "FILE_DLG")
 	{
 		//file dialog
 		path = m_frame->ScriptDialog(
 			"Save Results",
 			"Output file(*." + ext + ")|*." + ext,
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		if (path.IsEmpty())
+			temp = "DATA_DIR";
 	}
-	else if (str == "DATA_DIR")
+	else if (temp == "DATA_DIR")
 	{
 		//data dir
 		if (!m_view)
@@ -299,22 +281,29 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 			return "";
 		path = vol->GetPath();
 		path = wxPathOnly(path);
-		path += GETSLASH() + "output01." + ext;
+		path += GETSLASH();
+		path += "output01." + ext;
 	}
 	else
 	{
 		//specific dir
-		path = wxPathOnly(str);
+		path = temp;
+		if (temp.Find('.') != wxNOT_FOUND)
+			path = wxPathOnly(temp);
 		if (!wxDirExists(path))
 			MkDirW(path.ToStdWstring());
 		if (!wxDirExists(path))
 			return "";
-		if (path == str ||
-			path == str + "/" ||
-			path == str + "\\")
-			path += GETSLASH() + "output01." + ext;//not containing filename
+		if (path == temp)
+		{
+			wxString lc = path.Last();
+			if (lc != "/" &&
+				lc != "\\")
+				path += GETSLASH();
+			path += "output01." + ext;//not containing filename
+		}
 		else
-			path = str;//containing filename
+			path = temp;//containing filename
 	}
 	if (!rep)
 	{
@@ -322,6 +311,7 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 			path = IncreaseNum(path);
 	}
 	node = m_output->getOrAddNode("savepath");
+	path = STR_DIR_SEP(path.ToStdString());
 	node->addSetValue("path", path.ToStdString());
 	return path;
 }
@@ -370,6 +360,36 @@ wxString ScriptProc::IncreaseNum(const wxString& str)
 		digits = wxString::Format(format, num);
 	}
 	return tmp + digits + ext;
+}
+
+void ScriptProc::RunNoiseReduction()
+{
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
+	if (!m_frame) return;
+	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	if (!calculator) return;
+
+	double thresh, size;
+	m_fconfig->Read("threshold", &thresh, 0.0);
+	m_fconfig->Read("voxelsize", &size, 0.0);
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		m_view->m_cur_vol = *i;
+		calculator->SetVolumeA(*i);
+
+		//selection
+		if (m_frame->GetNoiseCancellingDlg())
+			m_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
+		//delete
+		calculator->CalculateGroup(6, "", false);
+	}
 }
 
 void ScriptProc::RunPreTracking()
@@ -684,9 +704,7 @@ void ScriptProc::RunSaveVolume()
 			vlist.push_back(vd);
 	}
 	int chan_num = vlist.size();
-	int time_num;
-	if (!vlist.empty())
-		time_num = vlist[0]->GetReader()->GetTimeNum();
+	int time_num = GetTimeNum();
 	int curf = m_view->m_tseq_cur_num;
 	wxString ext, str;
 	if (mode == 0 || mode == 1)
@@ -1064,37 +1082,47 @@ void ScriptProc::RunBackgroundStat()
 {
 	if (!TimeCondition())
 		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
+	int curf = m_view->m_tseq_cur_num;
+	int chan_num = vlist.size();
+	int ch = 0;
+	std::string fn = std::to_string(curf);
 
-	flrd::BackgStat bgs(cur_vol);
-	bool bval;
-	m_fconfig->Read("use_mask", &bval, false);
-	bgs.SetUseMask(bval);
-	int itype;
-	m_fconfig->Read("stat_type", &itype, 0);
-	bgs.SetType(itype);
-	int kx = 0, ky = 0;
-	m_fconfig->Read("kx", &kx, 0);
-	m_fconfig->Read("ky", &ky, 0);
-	if (kx && ky)
-		bgs.SetFeatureSize2D(kx, ky);
-	float varth = 0, gauth = 0;
-	m_fconfig->Read("varth", &varth, 0);
-	m_fconfig->Read("gauth", &gauth, 0);
-	if (varth > 0.0 && gauth > 0.0)
-		bgs.SetThreshold(varth, gauth);
+	for (auto itvol = vlist.begin();
+		itvol != vlist.end(); ++itvol, ++ch)
+	{
 
-	bgs.Run();
+		flrd::BackgStat bgs(*itvol);
+		bool bval;
+		m_fconfig->Read("use_mask", &bval, false);
+		bgs.SetUseMask(bval);
+		int itype;
+		m_fconfig->Read("stat_type", &itype, 0);
+		bgs.SetType(itype);
+		int kx = 0, ky = 0;
+		m_fconfig->Read("kx", &kx, 0);
+		m_fconfig->Read("ky", &ky, 0);
+		if (kx && ky)
+			bgs.SetFeatureSize2D(kx, ky);
+		float varth = 0, gauth = 0;
+		m_fconfig->Read("varth", &varth, 0);
+		m_fconfig->Read("gauth", &gauth, 0);
+		if (varth > 0.0 && gauth > 0.0)
+			bgs.SetThreshold(varth, gauth);
 
-	//output
-	std::string str;
-	float result = bgs.GetResultf();
-	fluo::Node* node = m_output->getOrAddNode(m_type.ToStdString());
-	node->addValue("stat_type", (long)itype);
-	str = std::to_string(m_view->m_tseq_cur_num);
-	node->addSetValue(str, result);
+		bgs.Run();
+		float result = bgs.GetResultf();
+
+		//output
+		fluo::Group* vol_group = m_output->getOrAddGroup(std::to_string(ch));
+		vol_group->addSetValue("type", std::string("vol_group"));
+		fluo::Node* node = vol_group->getOrAddNode(m_type.ToStdString());
+		node->addSetValue("stat_type", (long)itype);
+		node->addSetValue(fn, result);
+	}
 }
 
 void ScriptProc::ExportCompAnalysis()

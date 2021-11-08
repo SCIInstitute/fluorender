@@ -219,11 +219,23 @@ inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
 
 inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
 
+inline std::string STR_DIR_SEP(const std::string pathname)
+{
+	std::string result = pathname;
+	size_t pos = 0;
+	while ((pos = result.find("/", pos)) != std::string::npos)
+	{
+		result.replace(pos, 1, "\\");
+		pos++;
+	}
+	return result;
+}
+
 inline bool FIND_FILES_4D(std::wstring path_name,
 	std::wstring id, std::vector<std::wstring> &batch_list,
 	int &cur_batch)
 {
-	int64_t begin = path_name.find_last_of(id);
+	size_t begin = path_name.rfind(id);
 	size_t id_len = id.length();
 	if (begin == -1)
 		return false;
@@ -495,6 +507,18 @@ typedef union _LARGE_INTEGER {
 	} u;
 	long long QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
+
+inline std::string STR_DIR_SEP(const std::string pathname)
+{
+	std::string result = pathname;
+	size_t pos = 0;
+	while ((pos = result.find("\\", pos)) != std::string::npos)
+	{
+		result.replace(pos, 1, "/");
+		pos++;
+	}
+	return result;
+}
 
 inline bool FIND_FILES_4D(std::wstring path_name,
 	std::wstring id, std::vector<std::wstring> &batch_list,

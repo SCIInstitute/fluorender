@@ -94,6 +94,7 @@ namespace flrd
 		bool GetVolumes(std::vector<VolumeData*> &list);
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
+		int GetTimeNum();
 		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
 		wxString RemoveExt(const wxString& str);
 		wxString RemoveNum(const wxString& str);

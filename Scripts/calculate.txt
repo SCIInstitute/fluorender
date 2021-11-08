@@ -2,15 +2,13 @@
 tasknum=2
 [tasks/task0]
 type=calculate
-time_mode=TM_PRE
-frame_mode=FM_ALL
+time_mode=TM_ALL_PRE_LAST_BOTH
 vol_a=1
 vol_b=0
 operator=subtract
 [tasks/task1]
 type=save_volume
-time_mode=TM_PRE
-frame_mode=FM_ALL
+time_mode=TM_ALL_PRE_LAST_BOTH
 source=calculator
 format=0
 compress=1
