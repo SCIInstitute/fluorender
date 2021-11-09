@@ -273,22 +273,13 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		path = m_frame->ScriptDialog(
 			"Save Results",
 			"Output file(*." + ext + ")|*." + ext,
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			wxFD_SAVE);
 		if (path.IsEmpty())
-			temp = "DATA_DIR";
+			path = GetDataDir(ext);
 	}
 	else if (temp == "DATA_DIR")
 	{
-		//data dir
-		if (!m_view)
-			return "";
-		VolumeData* vol = m_view->m_cur_vol;
-		if (!vol)
-			return "";
-		path = vol->GetPath();
-		path = wxPathOnly(path);
-		path += GETSLASH();
-		path += "output01." + ext;
+		path = GetDataDir(ext);
 	}
 	else
 	{
@@ -322,6 +313,21 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 	return path;
 }
 
+wxString ScriptProc::GetDataDir(const wxString &ext)
+{
+	//data dir
+	if (!m_view)
+		return "";
+	VolumeData* vol = m_view->m_cur_vol;
+	if (!vol)
+		return "";
+	wxString path = vol->GetPath();
+	path = wxPathOnly(path);
+	path += GETSLASH();
+	path += "output01." + ext;
+	return path;
+}
+
 wxString ScriptProc::RemoveExt(const wxString& str)
 {
 	int pos = str.Find('.', true);
@@ -343,7 +349,7 @@ wxString ScriptProc::IncreaseNum(const wxString& str)
 	int pos = str.Find('.', true);
 	wxString ext;
 	if (pos != wxNOT_FOUND)
-		ext = str.Right(pos);
+		ext = str.Right(str.Length() - pos);
 	wxString tmp = str.Left(pos);
 	wxString digits;
 	while (wxIsdigit(tmp.Last()))
@@ -604,8 +610,8 @@ void ScriptProc::RunFetchMask()
 			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, (*i)->GetCurChannel(), true);
 			if (label_nrrd_new)
 				(*i)->LoadLabel(label_nrrd_new);
-			else
-				(*i)->AddEmptyLabel(0, true);
+			//else
+			//	(*i)->AddEmptyLabel(0, true);
 		}
 	}
 }
@@ -846,8 +852,20 @@ void ScriptProc::RunCompAnalysis()
 		flrd::ComponentAnalyzer comp_analyzer(*itvol);
 		comp_analyzer.SetSizeLimit(slimit);
 		comp_analyzer.Analyze(selected, consistent);
-		fluo::Group* vol_group = m_output->getOrAddGroup(std::to_string(ch));
-		vol_group->addSetValue("type", std::string("vol_group"));
+
+		//output
+		//time group
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
+		timeg->addSetValue("type", std::string("time"));
+		timeg->addSetValue("t", long(curf));
+		//channel group
+		fluo::Group* chg = timeg->getOrAddGroup(std::to_string(ch));
+		chg->addSetValue("type", std::string("channel"));
+		chg->addSetValue("ch", long(ch));
+		//script command
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
+		cmdg->addSetValue("type", m_type.ToStdString());
+
 		CelpList* celp_list = comp_analyzer.GetCelpList();
 		CellGraph* graph = comp_analyzer.GetCellGraph();
 		if (!celp_list || !graph)
@@ -893,35 +911,23 @@ void ScriptProc::RunCompAnalysis()
 			lens = itc->second->GetPca().GetLengths();
 
 			unsigned long id = ids.front();
-			fluo::Group* comp_group = vol_group->getOrAddGroup(std::to_string(id));
-			comp_group->addSetValue("type", std::string("comp_analysis"));
-			fluo::Node* node;
-			node = comp_group->getOrAddNode("center");
-			node->addSetValue(fn, itc->second->GetCenter(sx, sy, sz));
-			node = comp_group->getOrAddNode("size_ui");
-			node->addSetValue(fn, (unsigned long)(itc->second->GetSizeUi()));
-			node = comp_group->getOrAddNode("size_d");
-			node->addSetValue(fn, itc->second->GetSizeD(scalarscale));
-			node = comp_group->getOrAddNode("phys_size_ui");
-			node->addSetValue(fn, size_scale * itc->second->GetSizeUi());
-			node = comp_group->getOrAddNode("phys_size_d");
-			node->addSetValue(fn, itc->second->GetSizeD(size_scale * scalarscale));
-			node = comp_group->getOrAddNode("ext_size_ui");
-			node->addSetValue(fn, (unsigned long)(itc->second->GetExtUi()));
-			node = comp_group->getOrAddNode("ext_size_d");
-			node->addSetValue(fn, itc->second->GetExtD(scalarscale));
-			node = comp_group->getOrAddNode("mean");
-			node->addSetValue(fn, itc->second->GetMean(maxscale));
-			node = comp_group->getOrAddNode("stdev");
-			node->addSetValue(fn, itc->second->GetStd(maxscale));
-			node = comp_group->getOrAddNode("min");
-			node->addSetValue(fn, itc->second->GetMin(maxscale));
-			node = comp_group->getOrAddNode("max");
-			node->addSetValue(fn, itc->second->GetMax(maxscale));
-			node = comp_group->getOrAddNode("distp");
-			node->addSetValue(fn, itc->second->GetDistp());
-			node = comp_group->getOrAddNode("pca_lens");
-			node->addSetValue(fn, lens);
+
+			//result node
+			fluo::Node* node = cmdg->getOrAddNode(std::to_string(id));
+			node->addSetValue("type", std::string("comp"));
+			node->addSetValue("comp_center", itc->second->GetCenter(sx, sy, sz));
+			node->addSetValue("comp_size_ui", (unsigned long)(itc->second->GetSizeUi()));
+			node->addSetValue("comp_size_d", itc->second->GetSizeD(scalarscale));
+			node->addSetValue("comp_phys_size_ui", size_scale * itc->second->GetSizeUi());
+			node->addSetValue("comp_phys_size_d", itc->second->GetSizeD(size_scale * scalarscale));
+			node->addSetValue("comp_ext_size_ui", (unsigned long)(itc->second->GetExtUi()));
+			node->addSetValue("comp_ext_size_d", itc->second->GetExtD(scalarscale));
+			node->addSetValue("comp_mean", itc->second->GetMean(maxscale));
+			node->addSetValue("comp_stdev", itc->second->GetStd(maxscale));
+			node->addSetValue("comp_min", itc->second->GetMin(maxscale));
+			node->addSetValue("comp_max", itc->second->GetMax(maxscale));
+			node->addSetValue("comp_distp", itc->second->GetDistp());
+			node->addSetValue("comp_pca_lens", lens);
 		}
 	}
 }
@@ -1109,6 +1115,8 @@ void ScriptProc::RunBackgroundStat()
 		int itype;
 		m_fconfig->Read("stat_type", &itype, 0);
 		bgs.SetType(itype);
+		int iindx;
+		m_fconfig->Read("stat_indx", &iindx, 0);
 		int kx = 0, ky = 0;
 		m_fconfig->Read("kx", &kx, 0);
 		m_fconfig->Read("ky", &ky, 0);
@@ -1121,16 +1129,24 @@ void ScriptProc::RunBackgroundStat()
 			bgs.SetThreshold(varth, gauth);
 
 		bgs.Run();
-		float result = bgs.GetResultf();
+		float result = bgs.GetResultf(iindx);
 
 		//output
-		fluo::Group* vol_group = m_output->getOrAddGroup(std::to_string(ch));
-		vol_group->addSetValue("type", std::string("vol_group"));
-		fluo::Group* bgs_group = vol_group->getOrAddGroup(m_type.ToStdString());
-		bgs_group->addSetValue("type", m_type.ToStdString());
-		fluo::Node* node = bgs_group->getOrAddNode(std::to_string(itype));
-		node->addSetValue("stat_type", (long)itype);
-		node->addSetValue(fn, result);
+		//time group
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
+		timeg->addSetValue("type", std::string("time"));
+		timeg->addSetValue("t", long(curf));
+		//channel group
+		fluo::Group* chg = timeg->getOrAddGroup(std::to_string(ch));
+		chg->addSetValue("type", std::string("channel"));
+		chg->addSetValue("ch", long(ch));
+		//script command
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
+		cmdg->addSetValue("type", m_type.ToStdString());
+		//result node
+		fluo::Node* node = cmdg->getOrAddNode("result");
+		node->addSetValue("type", m_type.ToStdString());
+		node->addSetValue(bgs.GetTypeName(iindx), result);
 	}
 }
 
@@ -1143,7 +1159,7 @@ void ScriptProc::ExportAnalysis()
 	//template
 	wxString tempfile;
 	m_fconfig->Read("template", &tempfile);
-	tempfile = GetInputFile(tempfile, "template");
+	tempfile = GetInputFile(tempfile, "Templates");
 	if (tempfile.IsEmpty())
 		return;
 	wxString outputfile;
@@ -1164,12 +1180,6 @@ void ScriptProc::ExportAnalysis()
 	}
 	wxString js_value;
 	m_fconfig->Read("js_value", &js_value);
-	double tlimit;
-	m_fconfig->Read("tlimit", &tlimit, 5);
-	int thresh = int((100 - tlimit) *
-		(m_view->m_end_frame -
-		m_view->m_begin_frame + 1)
-		/ 100 + 0.5);
 
 	//print lines
 	class CompVisitor : public fluo::NodeVisitor
@@ -1177,22 +1187,17 @@ void ScriptProc::ExportAnalysis()
 	public:
 		CompVisitor(std::ofstream &ofs,
 			std::set<std::string> &vnames,
-			int num, int thresh) : fluo::NodeVisitor(),
+			int num) : fluo::NodeVisitor(),
 			ofs_(&ofs),
 			vnames_(vnames),
-			chnum_(num),
-			thresh_(thresh)
+			chnum_(num)
 		{
 			setTraversalMode(fluo::NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		virtual void apply(fluo::Node& node)
 		{
-			std::string nname = node.getName();
-			if (vnames_.find(nname) != vnames_.end())
-			{
-				printValues(&node);
-			}
+			printValues(&node);
 			traverse(node);
 		}
 
@@ -1200,10 +1205,10 @@ void ScriptProc::ExportAnalysis()
 		{
 			std::string type;
 			group.getValue("type", type);
-			if (type == "vol_group")
+			if (type == "time")
+				t_ = group.getName();
+			if (type == "channel")
 				ch_ = group.getName();
-			if (type == "comp_analysis")
-				id_ = group.getName();
 			traverse(group);
 		}
 
@@ -1212,23 +1217,51 @@ void ScriptProc::ExportAnalysis()
 		{
 			if (!object)
 				return;
-			//get all value names
-			fluo::ValueVector names =
-				object->getValueNames(2);
-			if (names.size() < thresh_)
-				return;
-			for (auto it = names.begin();
-				it != names.end(); ++it)
+			std::string str;
+			object->getValue("type", str);
+			if (str == "backg_stat")
 			{
-				fluo::Value* value = object->getValuePointer(*it);
-				if (value)
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
 				{
-					if (chnum_ > 1)
-						*ofs_ << "CH-" << ch_ << " ";
-					*ofs_ << "ID-" << id_ << "," <<
-					value->getName() << "," <<
-					*value << "\\n\\" << std::endl;
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
+					if (object->getValue(vt))
+					{
+						auto vit = gvalues_.find(*it);
+						if (vit == gvalues_.end())
+							gvalues_.insert(std::pair<std::string, std::string>(
+								*it, std::get<2>(vt)));
+						else
+							vit->second = std::get<2>(vt);
+					}
 				}
+			}
+			else if (str == "comp")
+			{
+				if (chnum_ > 1)
+					*ofs_ << "CH-" << ch_ << " ";
+				str = object->getName();
+				*ofs_ << "ID-" << str << "," << t_;
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
+				{
+					*ofs_ << ",";
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
+					if (object->getValue(vt))
+						*ofs_ << std::get<2>(vt);
+					else
+					{
+						//global value
+						auto vit = gvalues_.find(*it);
+						if (vit == gvalues_.end())
+							*ofs_ << "0";
+						else
+							*ofs_ << vit->second;
+					}
+				}
+				*ofs_ << "\\n\\" << std::endl;
 			}
 		}
 
@@ -1236,9 +1269,9 @@ void ScriptProc::ExportAnalysis()
 		std::ofstream *ofs_;
 		std::set<std::string> vnames_;
 		int chnum_;
-		int thresh_;
+		std::string t_;
 		std::string ch_;
-		std::string id_;
+		std::unordered_map<std::string, std::string> gvalues_;
 	};
 
 	std::ifstream ifs(tempfile.ToStdString());
@@ -1257,10 +1290,8 @@ void ScriptProc::ExportAnalysis()
 				it != vnames.end(); ++it)
 				ofs << "," << *it;
 			ofs << "\\n\\" << std::endl;
-			CompVisitor visitor(ofs,
-				vnames,
-				m_output->getNumChildren(),
-				thresh);
+			CompVisitor visitor(ofs, vnames,
+				m_view->GetAllVolumeNum());
 			m_output->accept(visitor);
 			ofs << "\";" << std::endl;
 		}

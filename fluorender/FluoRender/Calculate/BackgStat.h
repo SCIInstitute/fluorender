@@ -74,6 +74,31 @@ namespace flrd
 		}
 
 		void Run();
+		std::string GetTypeName(int index = 0)
+		{
+			switch (m_type)
+			{
+			case 0:
+				return "bkg_mean";
+			case 1:
+				switch (index)
+				{
+				case 0:
+					return "bkg_min";
+				case 1:
+					return "bkg_max";
+				}
+			case 2:
+				switch (index)
+				{
+				case 0:
+					return "bkg_median";
+				case 1:
+					return "bkg_mode";
+				}
+			}
+			return "n/a";
+		}
 		float GetResultf(int index = 0)
 		{
 			switch (m_type)

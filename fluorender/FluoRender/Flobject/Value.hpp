@@ -236,10 +236,10 @@ namespace fluo
 
 	};
 
+	typedef std::unordered_map<std::string, ref_ptr<Value>> Values;
 	class ValueSet : public Referenced
 	{
 	public:
-		typedef std::unordered_map<std::string, ref_ptr<Value>> Values;
 
 		ValueSet() : Referenced() {}
 

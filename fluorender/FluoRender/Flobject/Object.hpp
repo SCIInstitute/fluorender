@@ -399,7 +399,7 @@ namespace fluo
 			ValueCollection result;
 			if (_value_set)
 			{
-				ValueSet::Values values = _value_set->getValues();
+				Values values = _value_set->getValues();
 				for (auto it = values.begin();
 					it != values.end(); ++it)
 				{
@@ -415,7 +415,7 @@ namespace fluo
 			ValueVector result;
 			if (_value_set)
 			{
-				ValueSet::Values values = _value_set->getValues();
+				Values values = _value_set->getValues();
 				for (auto it = values.begin();
 					it != values.end(); ++it)
 				{

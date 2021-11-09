@@ -87,6 +87,9 @@ namespace flrd
 		CelpList m_sel_labels;
 
 		//output
+		//structure: output(group)--time(group)--channel(group)--script_command(group)
+		//bacg_stat(group)--single_node(node)--mean(value), etc
+		//comp_analysis(group)--comp_id(node)--size(value), pos(value), etc
 		fluo::ref_ptr<fluo::Group> m_output;
 
 	private:
@@ -97,6 +100,7 @@ namespace flrd
 		int GetTimeNum();
 		wxString GetInputFile(const wxString &str, const wxString &subd);
 		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
+		wxString GetDataDir(const wxString &ext);
 		wxString RemoveExt(const wxString& str);
 		wxString RemoveNum(const wxString& str);
 		wxString IncreaseNum(const wxString& str);

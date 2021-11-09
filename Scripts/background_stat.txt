@@ -5,6 +5,7 @@ type=backg_stat
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 stat_type=0
+stat_indx=0
 kx=100
 ky=100
 varth=0.0001
