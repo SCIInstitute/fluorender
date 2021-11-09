@@ -2,15 +2,13 @@
 tasknum=2
 [tasks/task0]
 type=generate_comp
-time_mode=1
-frame_mode=FM_ALL
+time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 use_sel=0
 th_factor=1
 [tasks/task1]
 type=save_mask
-time_mode=1
-frame_mode=FM_ALL
+time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 mask=1
 label=1

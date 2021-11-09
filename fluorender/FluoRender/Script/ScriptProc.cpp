@@ -59,17 +59,7 @@ ScriptProc::~ScriptProc()
 void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 {
 	m_fconfig = 0;
-	if (!wxFileExists(scriptname))
-	{
-		std::wstring name = scriptname.ToStdWstring();
-		name = GET_NAME(name);
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		scriptname = exePath + GETSLASH() + "Scripts" + GETSLASH() + name;
-		if (!wxFileExists(scriptname))
-			return;
-	}
-	wxFileInputStream is(scriptname);
+	wxFileInputStream is(GetInputFile(scriptname, "Scripts"));
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -128,8 +118,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 					RunUnlinkCells();
 				else if (str == "backg_stat")
 					RunBackgroundStat();
-				else if (str == "export_comp_analysis")
-					ExportCompAnalysis();
+				else if (str == "export_analysis")
+					ExportAnalysis();
 			}
 		}
 	}
@@ -245,6 +235,22 @@ int ScriptProc::GetTimeNum()
 	if (endf >= startf)
 		return endf - startf + 1;
 	return 0;
+}
+
+wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
+{
+	wxString result = str;
+	if (!wxFileExists(result))
+	{
+		std::wstring name = result.ToStdWstring();
+		name = GET_NAME(name);
+		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+		exePath = wxPathOnly(exePath);
+		result = exePath + GETSLASH() + subd + GETSLASH() + name;
+		if (!wxFileExists(result))
+			return "";
+	}
+	return result;
 }
 
 wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool rep)
@@ -795,7 +801,8 @@ void ScriptProc::RunOpenCL()
 
 	wxString clname;
 	m_fconfig->Read("clpath", &clname, "");
-	if (!wxFileExists(clname))
+	clname = GetInputFile(clname, "CL_code");
+	if (clname.IsEmpty())
 		return;
 
 	for (auto i = vlist.begin();
@@ -887,7 +894,7 @@ void ScriptProc::RunCompAnalysis()
 
 			unsigned long id = ids.front();
 			fluo::Group* comp_group = vol_group->getOrAddGroup(std::to_string(id));
-			comp_group->addSetValue("type", std::string("comp_group"));
+			comp_group->addSetValue("type", std::string("comp_analysis"));
 			fluo::Node* node;
 			node = comp_group->getOrAddNode("center");
 			node->addSetValue(fn, itc->second->GetCenter(sx, sy, sz));
@@ -1119,13 +1126,15 @@ void ScriptProc::RunBackgroundStat()
 		//output
 		fluo::Group* vol_group = m_output->getOrAddGroup(std::to_string(ch));
 		vol_group->addSetValue("type", std::string("vol_group"));
-		fluo::Node* node = vol_group->getOrAddNode(m_type.ToStdString());
+		fluo::Group* bgs_group = vol_group->getOrAddGroup(m_type.ToStdString());
+		bgs_group->addSetValue("type", m_type.ToStdString());
+		fluo::Node* node = bgs_group->getOrAddNode(std::to_string(itype));
 		node->addSetValue("stat_type", (long)itype);
 		node->addSetValue(fn, result);
 	}
 }
 
-void ScriptProc::ExportCompAnalysis()
+void ScriptProc::ExportAnalysis()
 {
 	if (!m_frame) return;
 	if (!TimeCondition())
@@ -1134,30 +1143,27 @@ void ScriptProc::ExportCompAnalysis()
 	//template
 	wxString tempfile;
 	m_fconfig->Read("template", &tempfile);
-	if (!wxFileExists(tempfile))
-	{
-		std::wstring name = tempfile.ToStdWstring();
-		name = GET_NAME(name);
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		tempfile = exePath + GETSLASH() + "Templates" + GETSLASH() + name;
-		if (!wxFileExists(tempfile))
-			return;
-	}
+	tempfile = GetInputFile(tempfile, "template");
+	if (tempfile.IsEmpty())
+		return;
 	wxString outputfile;
 	m_fconfig->Read("output", &outputfile);
-	if (outputfile.IsEmpty())
-	{
-		//file dialog
-		outputfile = m_frame->ScriptDialog(
-			"Save Results",
-			"Web page(*.html)|*.html",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	}
+	outputfile = GetSavePath(outputfile, "html", false);
 	if (outputfile.IsEmpty())
 		return;
-	wxString valuename;
-	m_fconfig->Read("value_name", &valuename);
+	int vnum;
+	m_fconfig->Read("value_num", &vnum, 0);
+	std::set<std::string> vnames;
+	for (int i = 0; i < vnum; ++i)
+	{
+		wxString str;
+		if (m_fconfig->Read(
+			wxString::Format("value_name%d", i),
+			&str))
+			vnames.insert(str.ToStdString());
+	}
+	wxString js_value;
+	m_fconfig->Read("js_value", &js_value);
 	double tlimit;
 	m_fconfig->Read("tlimit", &tlimit, 5);
 	int thresh = int((100 - tlimit) *
@@ -1170,10 +1176,10 @@ void ScriptProc::ExportCompAnalysis()
 	{
 	public:
 		CompVisitor(std::ofstream &ofs,
-			std::string &vname,
+			std::set<std::string> &vnames,
 			int num, int thresh) : fluo::NodeVisitor(),
 			ofs_(&ofs),
-			vname_(vname),
+			vnames_(vnames),
 			chnum_(num),
 			thresh_(thresh)
 		{
@@ -1183,7 +1189,7 @@ void ScriptProc::ExportCompAnalysis()
 		virtual void apply(fluo::Node& node)
 		{
 			std::string nname = node.getName();
-			if (nname == vname_)
+			if (vnames_.find(nname) != vnames_.end())
 			{
 				printValues(&node);
 			}
@@ -1196,7 +1202,7 @@ void ScriptProc::ExportCompAnalysis()
 			group.getValue("type", type);
 			if (type == "vol_group")
 				ch_ = group.getName();
-			if (type == "comp_group")
+			if (type == "comp_analysis")
 				id_ = group.getName();
 			traverse(group);
 		}
@@ -1228,7 +1234,7 @@ void ScriptProc::ExportCompAnalysis()
 
 	private:
 		std::ofstream *ofs_;
-		std::string vname_;
+		std::set<std::string> vnames_;
 		int chnum_;
 		int thresh_;
 		std::string ch_;
@@ -1246,9 +1252,13 @@ void ScriptProc::ExportCompAnalysis()
 			//data
 			replace = 1;
 			ofs << "//#begin data" << std::endl;
-			ofs << "let csv_data = \"id,time," << valuename.ToStdString() << "\\n\\" << std::endl;
+			ofs << "let csv_data = \"id,time";
+			for (auto it = vnames.begin();
+				it != vnames.end(); ++it)
+				ofs << "," << *it;
+			ofs << "\\n\\" << std::endl;
 			CompVisitor visitor(ofs,
-				valuename.ToStdString(),
+				vnames,
 				m_output->getNumChildren(),
 				thresh);
 			m_output->accept(visitor);
@@ -1259,7 +1269,7 @@ void ScriptProc::ExportCompAnalysis()
 			//value name
 			replace = 2;
 			ofs << "//#begin value name" << std::endl;
-			ofs << "        value: +d." << valuename.ToStdString() << std::endl;
+			ofs << "        value: " << js_value.ToStdString() << std::endl;
 		}
 		if (line.find("#end") != std::string::npos)
 		{

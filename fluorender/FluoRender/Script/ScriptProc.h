@@ -95,6 +95,7 @@ namespace flrd
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();
+		wxString GetInputFile(const wxString &str, const wxString &subd);
 		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
 		wxString RemoveExt(const wxString& str);
 		wxString RemoveNum(const wxString& str);
@@ -118,7 +119,7 @@ namespace flrd
 		void RunUnlinkCells();
 		void RunBackgroundStat();
 
-		void ExportCompAnalysis();
+		void ExportAnalysis();
 
 		//read/delete volume cache
 		void ReadVolCache(VolCache& vol_cache);
