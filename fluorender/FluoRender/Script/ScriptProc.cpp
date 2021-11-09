@@ -59,7 +59,10 @@ ScriptProc::~ScriptProc()
 void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 {
 	m_fconfig = 0;
-	wxFileInputStream is(GetInputFile(scriptname, "Scripts"));
+	wxString scriptfile = GetInputFile(scriptname, "Scripts");
+	if (scriptfile.IsEmpty())
+		return;
+	wxFileInputStream is(scriptfile);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -240,6 +243,8 @@ int ScriptProc::GetTimeNum()
 wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
 {
 	wxString result = str;
+	if (result.IsEmpty())
+		return result;
 	if (!wxFileExists(result))
 	{
 		std::wstring name = result.ToStdWstring();
