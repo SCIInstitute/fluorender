@@ -46,7 +46,8 @@ using namespace flrd;
 ScriptProc::ScriptProc() :
 	m_frame(0),
 	m_vrv(0),
-	m_view(0)
+	m_view(0),
+	m_rewind(false)
 {
 	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
 }
@@ -56,7 +57,7 @@ ScriptProc::~ScriptProc()
 }
 
 //run 4d script
-void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
+void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 {
 	m_fconfig = 0;
 	wxString scriptfile = GetInputFile(scriptname, "Scripts");
@@ -68,6 +69,7 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname)
 	wxFileConfig fconfig(is);
 	m_fconfig = &fconfig;
 	m_time_mask = tm;
+	m_rewind = rewind;
 
 	int i;
 	wxString str;
@@ -136,6 +138,8 @@ bool ScriptProc::TimeCondition()
 	wxString str;
 	m_fconfig->Read("time_mode", &str, "TM_ALL_PRE");
 	time_mode = TimeMode(str.ToStdString());
+	if (m_rewind && !(time_mode & TM_REWIND))
+		return false;
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
@@ -642,6 +646,7 @@ void ScriptProc::RunClearMask()
 		//clear the label
 		if (blabel)
 			(*i)->AddEmptyLabel(0, true);
+		(*i)->GetVR()->clear_tex_current();
 	}
 }
 
@@ -740,19 +745,20 @@ void ScriptProc::RunSaveVolume()
 		wxString format = wxString::Format("%d", time_num);
 		int fr_length = format.Length();
 		format = wxString::Format("_T%%0%dd", fr_length);
-		str += wxString::Format(format, curf);
+		wxString vstr = str;
+		vstr += wxString::Format(format, curf);
 		//channel
 		if (chan_num > 1)
 		{
 			format = wxString::Format("%d", chan_num);
 			int ch_length = format.Length();
 			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			str += wxString::Format(format, (*i)->GetCurChannel() + 1);
+			vstr += wxString::Format(format, (*i)->GetCurChannel() + 1);
 		}
 		//ext
-		str += "." + ext;
+		vstr += "." + ext;
 		fluo::Quaternion qtemp;
-		(*i)->Save(str, mode, crop, filter, bake, compression, qtemp);
+		(*i)->Save(vstr, mode, crop, filter, bake, compression, qtemp);
 		if (del_vol)
 			delete *i;
 	}

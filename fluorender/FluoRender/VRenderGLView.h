@@ -386,9 +386,8 @@ public:
 	void StopMovie();
 	//4d movie frame calculation
 	void Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame);
-	void Set4DSeqFrame(int frame, bool run_script);
-	void UpdateVolumeData(int frame, bool run_script,
-		VolumeData* vd, VRenderFrame* vframe);
+	void Set4DSeqFrame(int frame, bool rewind);
+	void UpdateVolumeData(int frame, VolumeData* vd, VRenderFrame* vframe);
 	//3d batch file calculation
 	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame);
 	void Set3DBatFrame(int offset);

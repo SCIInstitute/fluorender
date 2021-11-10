@@ -4,7 +4,7 @@ tasknum=2
 type=opencl
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
-clpath=copy.cl
+clpath=box.cl
 [tasks/task1]
 type=save_volume
 time_mode=TM_ALL_PRE_LAST_BOTH
@@ -12,4 +12,4 @@ source=executor
 format=0
 compress=0
 delete=1
-savepath=box.cl
+savepath=

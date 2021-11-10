@@ -240,10 +240,10 @@ public:
 		if (m_glview)
 			m_glview->Get4DSeqFrames(start_frame, end_frame, cur_frame);
 	}
-	void Set4DSeqFrame(int frame, bool run_script)
+	void Set4DSeqFrame(int frame, bool rewind)
 	{
 		if (m_glview)
-			m_glview->Set4DSeqFrame(frame, run_script);
+			m_glview->Set4DSeqFrame(frame, rewind);
 	}
 	//3d batch
 	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)

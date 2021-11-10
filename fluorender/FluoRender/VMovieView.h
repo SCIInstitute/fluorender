@@ -136,13 +136,24 @@ public:
 	void SetCurrentPage(int page);
 
 	//timer
-	void ResumeRun()
+	void TimerRun()
 	{
 		m_timer.Start(int(1000.0 / double(m_fps) + 0.5));
 	}
+	void ResumeRun()
+	{
+		if (m_timer_run)
+			TimerRun();
+	}
 	void HoldRun()
 	{
-		m_timer.Stop();
+		if (m_timer.IsRunning())
+		{
+			m_timer_run = true;
+			m_timer.Stop();
+		}
+		else
+			m_timer_run = false;
 	}
 
 public:
@@ -221,6 +232,7 @@ private:
 	bool m_delayed_stop;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 	int m_fps;
+	bool m_timer_run;//for temporary hold
 
 private:
 	void GetSettings(int view=0);
@@ -228,7 +240,7 @@ private:
 	void AddScriptToList();
 
 	//set the renderview and progress bars/text
-	void SetRendering(double pcnt);
+	void SetRendering(double pcnt, bool rewind=false);
 	void SetProgress(double pcnt);
 
 	//write frames to file

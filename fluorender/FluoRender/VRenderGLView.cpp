@@ -4681,8 +4681,7 @@ void VRenderGLView::SetParams(double t)
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		if (interpolator->GetDouble(keycode, t, frame))
-			UpdateVolumeData(int(frame + 0.5), false,
-				vd, vr_frame);
+			UpdateVolumeData(int(frame + 0.5), vd, vr_frame);
 	}
 
 	bool bx, by, bz;
@@ -4833,7 +4832,7 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 	}
 }
 
-void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
+void VRenderGLView::UpdateVolumeData(int frame,
 	VolumeData* vd, VRenderFrame* vframe)
 {
 	if (vd && vd->GetReader())
@@ -4886,7 +4885,7 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 	}
 }
 
-void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
+void VRenderGLView::Set4DSeqFrame(int frame, bool rewind)
 {
 	//compute frame number
 	int start_frame, end_frame, cur_frame;
@@ -4914,8 +4913,8 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	VolumeData* cur_vd_save = m_cur_vol;
 
 	//run pre-change script
-	if (run_script && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file);
+	if (m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
 
 	//change time frame
 	m_tseq_prv_num = m_tseq_cur_num;
@@ -4924,13 +4923,12 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
-		UpdateVolumeData(frame, run_script,
-			vd, vframe);
+		UpdateVolumeData(frame, vd, vframe);
 	}
 
 	//run post-change script
-	if (run_script && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file);
+	if (m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;

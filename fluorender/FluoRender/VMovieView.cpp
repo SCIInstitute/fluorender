@@ -781,7 +781,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	m_movie_time->GetValue().ToDouble(&len);
 	if (slider_pos < 360 && slider_pos > 0 &&
 		!(len - m_cur_time < 0.1 / double(m_fps) || m_cur_time > len)) {
-		ResumeRun();
+		TimerRun();
 		return;
 	}
 	wxString str = m_views_cmb->GetValue();
@@ -824,7 +824,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	SetProgress(0.);
 	SetRendering(0.);
 	m_last_frame = 0;
-	ResumeRun();
+	TimerRun();
 }
 
 void VMovieView::OnRun(wxCommandEvent& event)
@@ -872,7 +872,7 @@ void VMovieView::OnRewind(wxCommandEvent& event)
 	OnStop(e);
 	m_time_current_text->ChangeValue(wxString::Format("%d", 0));
 	SetProgress(0.);
-	SetRendering(0.);
+	SetRendering(0., false);
 }
 
 void VMovieView::OnFrameCheck(wxCommandEvent& event) {
@@ -1198,7 +1198,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event) {
 		m_progress_text->ChangeValue(str);
 }
 
-void VMovieView::SetRendering(double pcnt)
+void VMovieView::SetRendering(double pcnt, bool rewind)
 {
 	wxString str = m_views_cmb->GetValue();
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
@@ -1231,7 +1231,7 @@ void VMovieView::SetRendering(double pcnt)
 		int first, sec, tmp;
 		vrv->Get4DSeqFrames(first, sec, tmp);
 		if (sec - first > 0)
-			vrv->Set4DSeqFrame(time, true);
+			vrv->Set4DSeqFrame(time, rewind);
 	}
 	else if (m_seq_mode == 2)
 	{

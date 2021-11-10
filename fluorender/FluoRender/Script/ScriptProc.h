@@ -47,8 +47,9 @@ namespace flrd
 		enum TimeMask
 		{
 			TM_NONE = 0,
+			TM_REWIND = 0x8000,
 			TM_ALL_PRE = 0x2AAA5555,
-			TM_ALL_POST = 0x55552AAA,
+			TM_ALL_POST = 0x5555AAAA,
 			TM_FIRST_PRE = 1,
 			TM_FIRST_POST = 2,
 			TM_FIRST_BOTH = 3,
@@ -70,7 +71,7 @@ namespace flrd
 
 		//run 4d script
 		//index: 0-pre-change; 1-post-change
-		void Run4DScript(TimeMask tm, wxString &scriptname);
+		void Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
 
 		void ClearResults() { m_output->removeAllChildren(); }
 
@@ -82,6 +83,7 @@ namespace flrd
 		wxString m_type;
 		TimeMask m_time_mask;
 		wxFileConfig *m_fconfig;
+		bool m_rewind;
 
 		//selected labels
 		CelpList m_sel_labels;

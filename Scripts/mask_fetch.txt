@@ -2,7 +2,7 @@
 tasknum=1
 [tasks/task0]
 type=fetch_mask
-time_mode=2
+time_mode=TM_ALL_POST
 chan_mode=0
 mask=1
 label=1
