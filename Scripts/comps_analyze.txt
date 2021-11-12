@@ -9,7 +9,7 @@ selected=0
 slimit=5
 [tasks/task1]
 type=fetch_mask
-time_mode=TM_ALL_POST
+time_mode=TM_ALL_POST_REWIND
 chan_mode=0
 mask=1
 label=1

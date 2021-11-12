@@ -233,6 +233,10 @@ int ScriptProc::TimeMode(std::string &str)
 		return TM_ALL_PRE_LAST_BOTH;
 	if (str == "TM_ALL_POST_LAST_BOTH")
 		return TM_ALL_POST_LAST_BOTH;
+	if (str == "TM_ALL_PRE_REWIND")
+		return TM_ALL_PRE_REWIND;
+	if (str == "TM_ALL_POST_REWIND")
+		return TM_ALL_POST_REWIND;
 	if (str == "TM_ALL")
 		return TM_ALL;
 	return std::stoi(str, nullptr, 0);
