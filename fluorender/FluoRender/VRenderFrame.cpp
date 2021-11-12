@@ -3358,7 +3358,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("y_rd", m_movie_view->m_y_rd->GetValue());
 	fconfig.Write("z_rd", m_movie_view->m_z_rd->GetValue());
 	fconfig.Write("angle_end_text", m_movie_view->m_degree_end->GetValue());
-	fconfig.Write("step_text", m_movie_view->m_movie_time->GetValue());
+	fconfig.Write("step_text", m_movie_view->m_movie_len_text->GetValue());
 	fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
 	fconfig.Write("frame_chk", m_movie_view->m_frame_chk->GetValue());
 	fconfig.Write("center_x_text", m_movie_view->m_center_x_text->GetValue());
@@ -4610,7 +4610,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		}
 		if (fconfig.Read("step_text", &sVal))
 		{
-			m_movie_view->m_movie_time->SetValue(sVal);
+			m_movie_view->m_movie_len_text->SetValue(sVal);
 			m_mov_step = sVal;
 		}
 		if (fconfig.Read("frames_text", &sVal))

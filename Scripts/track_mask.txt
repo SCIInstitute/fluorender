@@ -1,8 +1,8 @@
 [tasks]
-tasknum=1
+tasknum=3
 [tasks/task0]
 type=mask_tracking
-time_mode=2
+time_mode=0x55552AAA
 ext_x=0.3
 ext_y=0.3
 ext_z=0.3
@@ -10,3 +10,14 @@ iter=50
 eps=1e-3
 fsize=1
 compare=1
+[tasks/task1]
+type=fetch_mask
+time_mode=TM_ALL_POST
+chan_mode=0
+mask=0
+label=1
+[tasks/task2]
+type=comp_select
+time_mode=TM_ALL_POST
+chan_mode=0
+mode=0

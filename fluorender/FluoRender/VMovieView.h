@@ -50,6 +50,8 @@ class VMovieView : public wxPanel
 		ID_IncTimeBtn,
 		ID_DecTimeBtn,
 		ID_CurrentTimeText,
+		//movie len
+		ID_MovieLenText,
 
 		//rotations
 		ID_RotChk,
@@ -58,9 +60,6 @@ class VMovieView : public wxPanel
 		ID_ZRd,
 		ID_DegreeEndText,
 		ID_RotIntCmb,
-
-		//movie time
-		ID_MovieTimeText,
 
 		//bit rate
 		ID_BitrateText,
@@ -138,7 +137,7 @@ public:
 	//timer
 	void TimerRun()
 	{
-		m_timer.Start(int(1000.0 / double(m_fps) + 0.5));
+		m_timer.Start(int(1000.0 / m_fps + 0.5));
 	}
 	void ResumeRun()
 	{
@@ -176,6 +175,7 @@ public:
 	wxButton *m_inc_time_btn;
 	wxButton *m_dec_time_btn;
 	wxTextCtrl *m_time_current_text;
+	wxTextCtrl *m_movie_len_text;
 
 	wxCheckBox *m_rot_chk;
 	wxRadioButton *m_x_rd;
@@ -183,9 +183,6 @@ public:
 	wxRadioButton *m_z_rd;
 	wxTextCtrl *m_degree_end;
 	wxComboBox *m_rot_int_cmb;
-
-	static wxTextCtrl *m_movie_time;
-	wxTextCtrl *m_bitrate_text;
 
 	//script
 	wxCheckBox *m_run_script_chk;
@@ -229,9 +226,13 @@ private:
 	QVideoEncoder encoder_;
 	wxString filetype_;
 	int m_rot_int_type;//0-linear; 1-smooth
-	bool m_delayed_stop;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
-	int m_fps;
+	double m_fps;
+	int m_start_time;
+	int m_end_time;
+	int m_current_time;
+	static double m_movie_len;
+	bool m_delayed_stop;
 	bool m_timer_run;//for temporary hold
 
 private:
@@ -261,7 +262,6 @@ private:
 	void OnStop(wxCommandEvent& event);
 	void OnRewind(wxCommandEvent& event);
 
-	void OnFpsEdit(wxCommandEvent& event);
 	void OnViewSelected(wxCommandEvent& event);
 
 	//right column
@@ -300,7 +300,11 @@ private:
 	void OnTimeEnter(wxCommandEvent& event);
 	void OnUpFrame(wxCommandEvent& event);
 	void OnDownFrame(wxCommandEvent& event);
-	void OnTimeText(wxCommandEvent& event);
+	void OnCurrentTimeText(wxCommandEvent& event);
+	void OnTimeStartText(wxCommandEvent& event);
+	void OnTimeEndText(wxCommandEvent& event);
+	void OnMovieLenText(wxCommandEvent& event);
+	void OnFpsEdit(wxCommandEvent& event);
 
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);

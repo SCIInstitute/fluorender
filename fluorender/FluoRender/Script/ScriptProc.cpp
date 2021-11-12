@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderGLView.h>
 #include <VRenderFrame.h>
 #include <Calculate/BackgStat.h>
+#include <Components/CompSelector.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -97,6 +98,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunMaskTracking();
 				else if (str == "random_colors")
 					RunRandomColors();
+				else if (str == "comp_select")
+					RunCompSelect();
 				else if (str == "fetch_mask")
 					RunFetchMask();
 				else if (str == "clear_mask")
@@ -579,6 +582,36 @@ void ScriptProc::RunRandomColors()
 	}
 }
 
+void ScriptProc::RunCompSelect()
+{
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
+	int mode;
+	m_fconfig->Read("mode", &mode, 0);
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		flrd::ComponentSelector comp_selector(*i);
+
+		switch (mode)
+		{
+		case 0:
+			comp_selector.All();
+			break;
+		case 1:
+			comp_selector.Clear();
+			break;
+		case 3:
+			comp_selector.Select(true);
+		}
+	}
+}
+
 void ScriptProc::RunFetchMask()
 {
 	if (!TimeCondition())
@@ -853,8 +886,8 @@ void ScriptProc::RunCompAnalysis()
 	int curf = m_view->m_tseq_cur_num;
 	int chan_num = vlist.size();
 	int ch = 0;
-	fluo::Vector lens;
 	std::string fn = std::to_string(curf);
+	fluo::Vector lens;
 
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
@@ -973,73 +1006,84 @@ void ScriptProc::RunRulerProfile()
 	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
 
 	RulerHandler* ruler_handler = m_view->GetRulerHandler();
 	if (!ruler_handler) return;
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
-	if (!cur_vol) return;
-	ruler_handler->SetVolumeData(cur_vol);
-	for (size_t i = 0; i < ruler_list->size(); ++i)
-		ruler_handler->Profile(i);
+	int curf = m_view->m_tseq_cur_num;
+	int chan_num = vlist.size();
+	int ch = 0;
+	std::string fn = std::to_string(curf);
 
 	//get df/f setting
 	bool df_f = false;
 	if (m_frame->GetSettingDlg())
 		df_f = m_frame->GetSettingDlg()->GetRulerDF_F();
-	double f = 0.0;
-	std::string fn = std::to_string(m_view->m_tseq_cur_num);
 
-	for (size_t i = 0; i < ruler_list->size(); ++i)
+	for (auto itvol = vlist.begin();
+		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		//for each ruler
-		fluo::Group* ruler_group = m_output->getOrAddGroup(std::to_string(i));
-		flrd::Ruler* ruler = (*ruler_list)[i];
-		if (!ruler) continue;
-		if (!ruler->GetDisp()) continue;
+		ruler_handler->SetVolumeData(*itvol);
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+			ruler_handler->Profile(i);
 
-		vector<flrd::ProfileBin>* profile = ruler->GetProfile();
-		if (profile && profile->size())
+		//output
+		//time group
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
+		timeg->addSetValue("type", std::string("time"));
+		timeg->addSetValue("t", long(curf));
+		//channel group
+		fluo::Group* chg = timeg->getOrAddGroup(std::to_string(ch));
+		chg->addSetValue("type", std::string("channel"));
+		chg->addSetValue("ch", long(ch));
+		//script command
+		fluo::Group* cmdg = chg->getOrAddGroup(m_type.ToStdString());
+		cmdg->addSetValue("type", m_type.ToStdString());
+
+		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
-			double dval;
-			double sumd = 0.0;
-			unsigned long long sumull = 0;
-			for (size_t j = 0; j < profile->size(); ++j)
+			//for each ruler
+			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(i));
+			ruler_node->addSetValue("type", std::string("ruler"));
+			flrd::Ruler* ruler = (*ruler_list)[i];
+			if (!ruler) continue;
+			if (!ruler->GetDisp()) continue;
+
+			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+			if (profile && profile->size())
 			{
-				//for each profile
-				fluo::Node* profile_node = ruler_group->getOrAddNode(std::to_string(j));
-				int pixels = (*profile)[j].m_pixels;
-				if (pixels <= 0)
-					dval = 0;
-				else
+				double dval;
+				double sumd = 0.0;
+				unsigned long long sumull = 0;
+				for (size_t j = 0; j < profile->size(); ++j)
 				{
-					dval = (*profile)[j].m_accum / pixels;
-					sumd += (*profile)[j].m_accum;
-					sumull += pixels;
-				}
-				profile_node->addSetValue(fn, dval);
-			}
-			if (df_f)
-			{
-				double avg = 0.0;
-				if (sumull != 0)
-					avg = sumd / double(sumull);
-				if (i == 0)
-				{
-					dval = f = avg;
-				}
-				else
-				{
-					double df = avg - f;
-					if (f == 0.0)
-						dval = df;
+					//for each profile
+					int pixels = (*profile)[j].m_pixels;
+					if (pixels <= 0)
+						dval = 0;
 					else
-						dval = df / f;
+					{
+						dval = (*profile)[j].m_accum / pixels;
+						sumd += (*profile)[j].m_accum;
+						sumull += pixels;
+					}
+					ruler_node->addSetValue(std::to_string(j), dval);
 				}
-				fluo::Node* dff_node = ruler_group->getOrAddNode("df_f");
-				dff_node->addSetValue(fn, dval);
+				if (df_f)
+				{
+					if (i == 0)
+					{
+						double avg = 0.0;
+						if (sumull != 0)
+							avg = sumd / double(sumull);
+						ruler_node->addSetValue("f", avg);
+					}
+				}
 			}
 		}
 	}
