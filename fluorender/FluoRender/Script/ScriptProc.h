@@ -72,7 +72,6 @@ namespace flrd
 		void SetView(VRenderGLView* view) { m_view = view; }
 
 		//run 4d script
-		//index: 0-pre-change; 1-post-change
 		void Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
 
 		void ClearResults() { m_output->removeAllChildren(); }

@@ -543,21 +543,6 @@ m_cam_lock_type(0)
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st = 0;
-	/*wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, wxID_ANY, "Automatic Keys:");
-	m_auto_key_cmb = new wxComboBox(this, ID_AutoKeyCmb, "",
-		wxDefaultPosition, wxSize(180, 30), 0, NULL, wxCB_READONLY);
-	m_auto_key_cmb->Append("Channel combination nC1");
-	m_auto_key_cmb->Append("Channel combination nC2");
-	m_auto_key_cmb->Append("Channel combination nC3");
-	m_auto_key_cmb->Select(1);
-	m_auto_key_btn = new wxButton(this, ID_AutoKeyBtn, "Generate",
-		wxDefaultPosition, wxSize(75, 23));
-	group1->Add(st, 0, wxALIGN_CENTER);
-	group1->Add(5, 5);
-	group1->Add(m_auto_key_cmb, 0, wxALIGN_CENTER);
-	group1->Add(5, 5);
-	group1->Add(m_auto_key_btn, 0, wxALIGN_CENTER);*/
 
 	//list
 	wxBoxSizer *group2 = new wxBoxSizer(wxVERTICAL);
@@ -939,10 +924,6 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	FlKeyGroup* group = interpolator->GetKeyGroup(interpolator->GetLastIndex());
 	if (group)
 		group->type = interpolation;
-
-	//insert
-	//if (index >= 0)
-	//	interpolator->MoveKeyBefore(interpolator->GetLastIndex(), index+1);
 }
 
 bool RecorderDlg::MoveOne(vector<bool>& chan_mask, int lv)
@@ -1121,96 +1102,3 @@ void RecorderDlg::OnCamLockBtn(wxCommandEvent &event)
 {
 	m_view->m_glview->SetLockCenter(m_cam_lock_type);
 }
-
-/*void RecorderDlg::OnPreview(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
-		return;
-	if (!m_view)
-	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
-		else
-			return;
-	}
-
-	Interpolator *interpolator = vr_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	wxString filename = "";
-	int begin_frame = int(interpolator->GetFirstT());
-	int end_frame = int(interpolator->GetLastT());
-	m_view->SetParamCapture(filename, begin_frame, end_frame, true);
-
-}
-
-void RecorderDlg::OnReset(wxCommandEvent &event)
-{
-	if (m_view)
-	{
-		m_view->m_glview->SetParams(0);
-		m_view->RefreshGL();
-	}
-}
-
-void RecorderDlg::OnPlay(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
-		return;
-	if (!m_view)
-	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
-		else
-			return;
-	}
-
-	Interpolator *interpolator = vr_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Save Movie Sequence", 
-		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
-
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		int begin_frame = int(interpolator->GetFirstT());
-		int end_frame = int(interpolator->GetLastT());
-		m_view->SetParamCapture(filename, begin_frame, end_frame, false);
-
-		if (vr_frame->GetSettingDlg() &&
-			vr_frame->GetSettingDlg()->GetProjSave())
-		{
-			wxString new_folder;
-			new_folder = filename + "_project";
-			MkDirW(new_folder.ToStdWstring());
-			wxString prop_file = new_folder + GETSLASH()
-				+ fopendlg->GetFilename() + "_project.vrp";
-			vr_frame->SaveProject(prop_file);
-		}
-	}
-
-	delete fopendlg;
-}
-
-void RecorderDlg::OnStop(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
-		return;
-	if (!m_view)
-	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
-		else
-			return;
-	}
-	m_view->StopMovie();
-}*/

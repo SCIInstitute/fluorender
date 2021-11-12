@@ -3475,6 +3475,11 @@ void VRenderFrame::SaveProject(wxString& filename)
 							fconfig.Write("val", bval);
 						}
 						break;
+					case FLKEY_TYPE_INT:
+						{
+							int ival = ((FlKeyInt*)key)->GetValue();
+							fconfig.Write("val", ival);
+						}
 					}
 				}
 			}
@@ -4965,6 +4970,15 @@ void VRenderFrame::OpenProject(wxString& filename)
 										if (fconfig.Read("val", &bVal))
 										{
 											FlKeyBoolean* key = new FlKeyBoolean(code, bVal);
+											key_group->keys.push_back(key);
+										}
+									}
+									break;
+								case FLKEY_TYPE_INT:
+									{
+										if (fconfig.Read("val", &iVal))
+										{
+											FlKeyInt* key = new FlKeyInt(code, iVal);
 											key_group->keys.push_back(key);
 										}
 									}
