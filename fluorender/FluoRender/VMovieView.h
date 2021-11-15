@@ -25,19 +25,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _VMovieView_H_
+#define _VMovieView_H_
+
+#include "compatibility.h"
+#include "QVideoEncoder.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
 #include <wx/clrpicker.h>
 #include <wx/notebook.h>
-#include <cstring>
-#include "RecorderDlg.h"
-#include "compatibility.h"
-#include "QVideoEncoder.h"
+#include <wx/listctrl.h>
 
-#ifndef _VMovieView_H_
-#define _VMovieView_H_
-
+class VRenderFrame;
+class VRenderView;
+class RecorderDlg;
 class VMovieView : public wxPanel
 {
 	enum
@@ -117,6 +119,7 @@ public:
 	void AddView(wxString view);
 	void DeleteView(wxString view);
 	void SetView(int index);
+	int GetView() { return m_view_idx; }
 	void DisableRot();
 	void EnableRot();
 	void DisableTime();
@@ -126,6 +129,17 @@ public:
 	void DownFrame();
 	void SetCurrentTime(size_t t);
 
+	void SetMovAxis(int value)
+	{
+		m_mov_axis = value;
+		if (m_mov_axis == 0)
+			m_x_rd->SetValue(true);
+		else if (m_mov_axis == 1)
+			m_y_rd->SetValue(true);
+		else if (m_mov_axis == 2)
+			m_z_rd->SetValue(true);
+	}
+	int GetMovAxis() { return m_mov_axis; }
 	void SetBitRate(double value) { m_Mbitrate = value; }
 	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
@@ -213,15 +227,19 @@ public:
 	static double m_Mbitrate;
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
+	VRenderView* m_view;
+	RecorderDlg* m_advanced_movie;
+	int m_view_idx;//index to current renderview
+
+	int m_mov_axis;	//0-x;1-y;2-z
 	int m_last_frame;
 	double m_starting_rot;
 	wxTimer m_timer;
 	double m_cur_time;
 	wxString m_filename;
 	bool m_running, m_record;
-	RecorderDlg * m_advanced_movie;
-	wxNotebook * m_notebook;
+	wxNotebook* m_notebook;
 	int m_current_page;
 	QVideoEncoder encoder_;
 	wxString filetype_;
@@ -236,7 +254,7 @@ private:
 	bool m_timer_run;//for temporary hold
 
 private:
-	void GetSettings(int view=0);
+	void GetSettings();
 	int GetScriptFiles(wxArrayString& list);
 	void AddScriptToList();
 

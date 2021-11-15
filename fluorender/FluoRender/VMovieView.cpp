@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VMovieView.h"
 #include "VRenderFrame.h"
+#include "VRenderView.h"
+#include "RecorderDlg.h"
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -223,13 +225,13 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	return page;
 }
 
-wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent) {
+wxWindow* VMovieView::CreateAdvancedPage(wxWindow *parent)
+{
 	wxPanel *page = new wxPanel(parent);
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_advanced_movie = new RecorderDlg(m_frame, page);
-	(reinterpret_cast<VRenderFrame*>(m_frame))->m_recorder_dlg
-		= m_advanced_movie;
+	m_frame->m_recorder_dlg = m_advanced_movie;
 	sizer_v->Add(m_advanced_movie, 0, wxEXPAND);
 	page->SetSizer(sizer_v);
 	return page;
@@ -422,7 +424,8 @@ VMovieView::VMovieView(wxWindow* frame,
 	long style,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
-	m_frame(frame),
+	m_view_idx(0),
+	m_mov_axis(1),
 	m_starting_rot(0.),
 	m_timer(this, ID_Timer),
 	m_cur_time(0.0),
@@ -436,6 +439,10 @@ VMovieView::VMovieView(wxWindow* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_frame = dynamic_cast<VRenderFrame*>(frame);
+	if (m_frame)
+		m_view = m_frame->GetView(m_view_idx);
 
 	//notebook
 	m_notebook = new wxNotebook(this, ID_Notebook);
@@ -506,32 +513,26 @@ VMovieView::~VMovieView() {}
 
 void VMovieView::OnViewSelected(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	vr_frame->m_mov_view = m_views_cmb->GetCurrentSelection();
-	GetSettings(vr_frame->m_mov_view);
+	m_view_idx = m_views_cmb->GetCurrentSelection();
+	if (!m_frame) return;
+	m_view = m_frame->GetView(m_view_idx);
+	GetSettings();
 }
 
-void VMovieView::GetSettings(int view)
+void VMovieView::GetSettings()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = (*vr_frame->GetViewList())[view];
-	if (!vrv) return;
-	m_views_cmb->SetSelection(vr_frame->m_mov_view);
-	if (vr_frame->m_mov_axis == 1)
-		m_x_rd->SetValue(true);
-	else if (vr_frame->m_mov_axis == 2)
-		m_y_rd->SetValue(true);
-	else if (vr_frame->m_mov_axis == 3)
-		m_z_rd->SetValue(true);
-	if (vr_frame->m_mov_angle_end != "")
-		m_degree_end->SetValue(vr_frame->m_mov_angle_end);
+	if (!m_view) return;
+	//m_views_cmb->SetSelection(view);
+	SetMovAxis(m_mov_axis);
 
-	if (vrv->GetFrameEnabled()) {
+	if (m_frame->m_mov_angle_end != "")
+		m_degree_end->SetValue(m_frame->m_mov_angle_end);
+
+	if (m_view->GetFrameEnabled())
+	{
 		m_frame_chk->SetValue(true);
 		int x, y, w, h;
-		vrv->GetFrame(x, y, w, h);
+		m_view->GetFrame(x, y, w, h);
 		m_center_x_text->SetValue(wxString::Format("%d",
 			int(x + w / 2.0 + 0.5)));
 		m_center_y_text->SetValue(wxString::Format("%d",
@@ -546,60 +547,59 @@ void VMovieView::GetSettings(int view)
 	GetScriptSettings();
 
 	if (m_advanced_movie)
-		m_advanced_movie->GetSettings(vrv);
+		m_advanced_movie->GetSettings(m_view);
 }
 
 void VMovieView::GetScriptSettings()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	//script
-	if (vr_frame && vr_frame->GetSettingDlg())
+	if (!m_frame || !m_frame->GetSettingDlg())
+		return;
+
+	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
+	m_run_script_chk->SetValue(
+		run_script);
+	wxString script_file =
+		m_frame->GetSettingDlg()->GetScriptFile();
+	m_script_file_text->SetValue(script_file);
+	//highlight if builtin
+	wxArrayString list;
+	if (GetScriptFiles(list))
 	{
-		bool run_script = vr_frame->GetSettingDlg()->GetRunScript();
-		m_run_script_chk->SetValue(
-			run_script);
-		wxString script_file =
-			vr_frame->GetSettingDlg()->GetScriptFile();
-		m_script_file_text->SetValue(script_file);
-		//highlight if builtin
-		wxArrayString list;
-		if (GetScriptFiles(list))
+		int idx = -1;
+		for (size_t i = 0; i < list.GetCount(); ++i)
 		{
-			int idx = -1;
-			for (size_t i = 0; i < list.GetCount(); ++i)
+			if (script_file == list[i])
 			{
-				if (script_file == list[i])
-				{
-					idx = i;
-					break;
-				}
-			}
-			if (idx >= 0)
-			{
-				m_script_list->SetItemState(idx,
-					wxLIST_STATE_SELECTED,
-					wxLIST_STATE_SELECTED);
-				//wxSize ss = m_script_list->GetItemSpacing();
-				//m_script_list->ScrollList(0, ss.y*idx);
+				idx = i;
+				break;
 			}
 		}
-		//change icon
-		if (run_script)
+		if (idx >= 0)
 		{
-			if (m_running)
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-			else
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-			m_notebook->SetPageText(4, "4D Script (Enabled)");
+			m_script_list->SetItemState(idx,
+				wxLIST_STATE_SELECTED,
+				wxLIST_STATE_SELECTED);
+			//wxSize ss = m_script_list->GetItemSpacing();
+			//m_script_list->ScrollList(0, ss.y*idx);
 		}
+	}
+	//change icon
+	if (run_script)
+	{
+		if (m_running)
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 		else
-		{
-			if (m_running)
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-			else
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-			m_notebook->SetPageText(4, "4D Script");
-		}
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+		m_notebook->SetPageText(4, "4D Script (Enabled)");
+	}
+	else
+	{
+		if (m_running)
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+		else
+			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+		m_notebook->SetPageText(4, "4D Script");
 	}
 }
 
@@ -642,20 +642,20 @@ void VMovieView::AddScriptToList()
 	}
 }
 
-void VMovieView::Init() {
+void VMovieView::Init()
+{
 	DisableTime();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 	int i = 0;
 	m_views_cmb->Clear();
-	for (i = 0; i < vr_frame->GetViewNum(); i++) {
-		VRenderView* vrv = vr_frame->GetView(i);
+	for (i = 0; i < m_frame->GetViewNum(); i++) {
+		VRenderView* vrv = m_frame->GetView(i);
 		if (vrv && m_views_cmb)
 			m_views_cmb->Append(vrv->GetName());
 	}
 	if (i)
 		m_views_cmb->Select(0);
-	GetSettings(0);
+	//GetSettings();
 }
 
 void VMovieView::GenKey()
@@ -677,12 +677,14 @@ void VMovieView::GenKey()
 	}
 }
 
-void VMovieView::AddView(wxString view) {
+void VMovieView::AddView(wxString view)
+{
 	if (m_views_cmb)
 		m_views_cmb->Append(view);
 }
 
-void VMovieView::DeleteView(wxString view) {
+void VMovieView::DeleteView(wxString view)
+{
 	if (!m_views_cmb)
 		return;
 	int cur_sel = m_views_cmb->GetCurrentSelection();
@@ -693,7 +695,8 @@ void VMovieView::DeleteView(wxString view) {
 		m_views_cmb->Select(0);
 }
 
-void VMovieView::SetView(int index) {
+void VMovieView::SetView(int index)
+{
 	if (m_views_cmb)
 		m_views_cmb->SetSelection(index);
 }
@@ -716,12 +719,8 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		wxString str = m_views_cmb->GetValue();
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (!vr_frame) return;
-		VRenderView* vrv = vr_frame->GetView(str);
-		if (!vrv) return;
-		vrv->RefreshGL(false, false);
+		if (!m_view) return;
+		m_view->RefreshGL(false, false);
 		return;
 	}
 
@@ -772,12 +771,9 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 		TimerRun();
 		return;
 	}
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
 
+	if (!m_frame || !m_view)
+		return;
 	//basic options
 	int rot_axis = 1;
 	if (m_x_rd->GetValue())
@@ -788,7 +784,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 		rot_axis = 3;
 
 	double x, y, z;
-	vrv->GetRotations(x, y, z);
+	m_view->GetRotations(x, y, z);
 	if (rot_axis == 1)
 		m_starting_rot = x;
 	else if (rot_axis == 2)
@@ -801,7 +797,7 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 		m_starting_rot = 0.;
 	if (m_current_page == 1)
 	{
-		Interpolator *interpolator = vr_frame->GetInterpolator();
+		Interpolator *interpolator = m_frame->GetInterpolator();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
 			int frames = int(interpolator->GetLastT());
@@ -850,12 +846,9 @@ void VMovieView::OnStop(wxCommandEvent& event)
 
 void VMovieView::OnRewind(wxCommandEvent& event)
 {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
-	vrv->SetParams(0.);
+	if (!m_view)
+		return;
+	m_view->SetParams(0.);
 	wxCommandEvent e;
 	OnStop(e);
 	m_current_time = 0;
@@ -864,54 +857,48 @@ void VMovieView::OnRewind(wxCommandEvent& event)
 	SetRendering(0., false);
 }
 
-void VMovieView::OnFrameCheck(wxCommandEvent& event) {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
+void VMovieView::OnFrameCheck(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
 	if (m_frame_chk->GetValue())
 	{
 		int x, y, w, h;
-		vrv->CalcFrame();
-		vrv->GetFrame(x, y, w, h);
+		m_view->CalcFrame();
+		m_view->GetFrame(x, y, w, h);
 		m_center_x_text->SetValue(wxString::Format("%d", int(x + w / 2.0 + 0.5)));
 		m_center_y_text->SetValue(wxString::Format("%d", int(y + h / 2.0 + 0.5)));
 		m_width_text->SetValue(wxString::Format("%d", w));
 		m_height_text->SetValue(wxString::Format("%d", h));
-		vrv->EnableFrame();
+		m_view->EnableFrame();
 	}
 	else
-		vrv->DisableFrame();
+		m_view->DisableFrame();
 
-	vrv->RefreshGL();
+	m_view->RefreshGL();
 }
 
-void VMovieView::OnResetFrame(wxCommandEvent& event) {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
+void VMovieView::OnResetFrame(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
 	int x, y, w, h;
-	vrv->CalcFrame();
-	vrv->GetFrame(x, y, w, h);
+	m_view->CalcFrame();
+	m_view->GetFrame(x, y, w, h);
 	m_center_x_text->SetValue(wxString::Format("%d", int(x + w / 2.0 + 0.5)));
 	m_center_y_text->SetValue(wxString::Format("%d", int(y + h / 2.0 + 0.5)));
 	m_width_text->SetValue(wxString::Format("%d", w));
 	m_height_text->SetValue(wxString::Format("%d", h));
-	vrv->RefreshGL();
+	m_view->RefreshGL();
 }
 
-void VMovieView::OnFrameEditing(wxCommandEvent& event) {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
+void VMovieView::OnFrameEditing(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+
 	int x, y, w, h;
 	wxString temp;
-
 	temp = m_center_x_text->GetValue();
 	x = STOI(temp.fn_str());
 	temp = m_center_y_text->GetValue();
@@ -921,9 +908,9 @@ void VMovieView::OnFrameEditing(wxCommandEvent& event) {
 	temp = m_height_text->GetValue();
 	h = STOI(temp.fn_str());
 
-	vrv->SetFrame(int(x - w / 2.0 + 0.5), int(y - h / 2.0 + 0.5), w, h);
-	if (vrv->GetFrameEnabled())
-		vrv->RefreshGL();
+	m_view->SetFrame(int(x - w / 2.0 + 0.5), int(y - h / 2.0 + 0.5), w, h);
+	if (m_view->GetFrameEnabled())
+		m_view->RefreshGL();
 }
 
 void VMovieView::OnFrameSpinUp(wxSpinEvent& event)
@@ -1022,21 +1009,19 @@ void VMovieView::EnableTime()
 {
 	if (!m_seq_mode)
 		m_seq_mode = 1;
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
+	if (!m_view)
+		return;
+
 	int first, sec, tmp;
 	if (m_seq_mode == 1)
 	{
-		vrv->Get4DSeqFrames(first, sec, tmp);
+		m_view->Get4DSeqFrames(first, sec, tmp);
 		m_seq_chk->SetValue(true);
 		m_bat_chk->SetValue(false);
 	}
 	else if (m_seq_mode == 2)
 	{
-		vrv->Get3DBatFrames(first, sec, tmp);
+		m_view->Get3DBatFrames(first, sec, tmp);
 		m_seq_chk->SetValue(false);
 		m_bat_chk->SetValue(true);
 	}
@@ -1091,10 +1076,11 @@ void VMovieView::OnListItemAct(wxListEvent &event)
 //script
 void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	bool run_script = m_run_script_chk->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetRunScript(run_script);
+	if (m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRunScript(run_script);
 	if (run_script)
 	{
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
@@ -1105,22 +1091,16 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 		m_notebook->SetPageText(4, "4D Script");
 	}
-	if (vr_frame)
-	{
-		VRenderView* vrv = (*vr_frame->GetViewList())[m_views_cmb->GetCurrentSelection()];
-		if (vrv)
-			vrv->RefreshGL();
-	}
+	m_view->RefreshGL();
 }
 
 void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		wxString str = m_script_file_text->GetValue();
-		vr_frame->GetSettingDlg()->SetScriptFile(str);
-	}
+	if (!m_frame || !m_frame->GetSettingDlg())
+		return;
+
+	wxString str = m_script_file_text->GetValue();
+	m_frame->GetSettingDlg()->SetScriptFile(str);
 }
 
 void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
@@ -1139,9 +1119,8 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString file = fopendlg->GetPath();
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetSettingDlg())
-			vr_frame->GetSettingDlg()->SetScriptFile(file);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->SetScriptFile(file);
 		m_script_file_text->SetValue(file);
 	}
 
@@ -1189,23 +1168,21 @@ void VMovieView::OnTimeChange(wxScrollEvent &event)
 
 void VMovieView::SetRendering(double pcnt, bool rewind)
 {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
-	vrv->m_glview->SetLockCamObject(false);
+	if (!m_frame || !m_view)
+		return;
+
+	m_view->m_glview->SetLockCamObject(false);
 	//advanced options
 	if (m_current_page == 1)
 	{
-		Interpolator *interpolator = vr_frame->GetInterpolator();
+		Interpolator *interpolator = m_frame->GetInterpolator();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
 			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
-				vrv->m_glview->SetLockCamObject(true);
+				m_view->m_glview->SetLockCamObject(true);
 			int end_frame = int(interpolator->GetLastT());
-			vrv->SetParams(pcnt * end_frame);
-			vrv->RefreshGL(false);
+			m_view->SetParams(pcnt * end_frame);
+			m_view->RefreshGL(false);
 			return;
 		}
 	}
@@ -1216,18 +1193,19 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	if (m_seq_mode == 1)
 	{
 		int first, sec, tmp;
-		vrv->Get4DSeqFrames(first, sec, tmp);
+		m_view->Get4DSeqFrames(first, sec, tmp);
 		if (sec - first > 0)
-			vrv->Set4DSeqFrame(time, rewind);
+			m_view->Set4DSeqFrame(time, rewind);
 	}
 	else if (m_seq_mode == 2)
 	{
-		vrv->Set3DBatFrame(time);
+		m_view->Set3DBatFrame(time);
 	}
 
-	if (m_rot_chk->GetValue()) {
+	if (m_rot_chk->GetValue())
+	{
 		double x, y, z, val;
-		vrv->GetRotations(x, y, z);
+		m_view->GetRotations(x, y, z);
 		if (m_x_rd->GetValue())
 			val = x;
 		if (m_y_rd->GetValue())
@@ -1241,13 +1219,13 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 			val = m_starting_rot +
 			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * deg;
 		if (m_x_rd->GetValue())
-			vrv->SetRotations(val, y, z);
+			m_view->SetRotations(val, y, z);
 		else if (m_y_rd->GetValue())
-			vrv->SetRotations(x, val, z);
+			m_view->SetRotations(x, val, z);
 		else if (m_z_rd->GetValue())
-			vrv->SetRotations(x, y, val);
+			m_view->SetRotations(x, y, val);
 	}
-	vrv->RefreshGL(false);
+	m_view->RefreshGL(false);
 }
 
 void VMovieView::OnTimeEnter(wxCommandEvent& event)
@@ -1262,7 +1240,8 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event)
 	m_time_current_text->ChangeValue(wxString::Format("%d", m_current_time));
 }
 
-void VMovieView::OnRotateChecked(wxCommandEvent& event) {
+void VMovieView::OnRotateChecked(wxCommandEvent& event)
+{
 	if (m_rot_chk->GetValue())
 		EnableRot();
 	else
@@ -1313,11 +1292,9 @@ void VMovieView::SetProgress(double pcnt)
 
 void VMovieView::WriteFrameToFile(int total_frames)
 {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
+	if (!m_view)
+		return;
+
 	wxString s_length = wxString::Format("%d", total_frames);
 	int length = s_length.Length();
 	wxString format = wxString::Format("_%%0%dd", length);
@@ -1330,24 +1307,8 @@ void VMovieView::WriteFrameToFile(int total_frames)
 	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
 	int x, y, w, h;
 	void* image = 0;
-	vrv->m_glview->ReadPixels(chann, fp32,
+	m_view->m_glview->ReadPixels(chann, fp32,
 		x, y, w, h, &image);
-
-	/*if (m_frame_chk->GetValue())
-		vrv->GetFrame(x, y, w, h);
-	else {
-		x = 0;
-		y = 0;
-		w = vrv->GetGLSize().x;
-		h = vrv->GetGLSize().y;
-	}
-
-	glPixelStorei(GL_PACK_ROW_LENGTH, w);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	unsigned char *image = new unsigned char[w*h*chann];
-	glReadBuffer(GL_FRONT);
-	glReadPixels(x, y, w, h, chann == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, image);
-	glPixelStorei(GL_PACK_ROW_LENGTH, 0);*/
 
 	string str_fn = outputfilename.ToStdString();
 	if (bmov)
@@ -1414,11 +1375,13 @@ void VMovieView::WriteFrameToFile(int total_frames)
 	}
 }
 
-void VMovieView::OnUpFrame(wxCommandEvent& event) {
+void VMovieView::OnUpFrame(wxCommandEvent& event)
+{
 	UpFrame();
 }
 
-void VMovieView::OnDownFrame(wxCommandEvent& event) {
+void VMovieView::OnDownFrame(wxCommandEvent& event)
+{
 	DownFrame();
 }
 
@@ -1435,17 +1398,15 @@ void VMovieView::SetCurrentTime(size_t t)
 
 void VMovieView::Run()
 {
-	wxString str = m_views_cmb->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	if (vr_frame && vr_frame->GetSettingDlg())
+	if (!m_frame || !m_view)
+		return;
+
+	if (m_frame->GetSettingDlg())
 	{
-		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
-		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
-		VRenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
+		VRenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
+		VRenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
+		VRenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
 	}
-	VRenderView* vrv = vr_frame->GetView(str);
-	if (!vrv) return;
 
 	wxCommandEvent e;
 	OnRewind(e);
@@ -1456,13 +1417,13 @@ void VMovieView::Run()
 	{
 		int x, y, w, h;
 		if (m_frame_chk->GetValue())
-			vrv->GetFrame(x, y, w, h);
+			m_view->GetFrame(x, y, w, h);
 		else
 		{
 			x = 0;
 			y = 0;
-			w = vrv->GetGLSize().x;
-			h = vrv->GetGLSize().y;
+			w = m_view->GetGLSize().x;
+			h = m_view->GetGLSize().y;
 		}
 		if (VRenderGLView::GetEnlarge())
 		{
@@ -1476,11 +1437,11 @@ void VMovieView::Run()
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
 	m_record = true;
-	if (vr_frame && vr_frame->GetSettingDlg())
+	if (m_frame->GetSettingDlg())
 	{
-		vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
-		vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
-		if (vr_frame->GetSettingDlg()->GetProjSave())
+		m_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
+		m_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
+		if (m_frame->GetSettingDlg()->GetProjSave())
 		{
 			wxString new_folder;
 			new_folder = m_filename + "_project";
@@ -1489,7 +1450,7 @@ void VMovieView::Run()
 			name = GET_NAME(name);
 			wxString prop_file = new_folder + GETSLASH()
 				+ name + "_project.vrp";
-			vr_frame->SaveProject(prop_file);
+			m_frame->SaveProject(prop_file);
 		}
 	}
 

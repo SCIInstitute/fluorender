@@ -26,6 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef _VRENDERFRAME_H_
+#define _VRENDERFRAME_H_
+
 #include "DataManager.h"
 #include "TreePanel.h"
 #include "ListPanel.h"
@@ -60,9 +63,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/aui.h>
 
 #include <vector>
-
-#ifndef _VRENDERFRAME_H_
-#define _VRENDERFRAME_H_
 
 using namespace std;
 
@@ -211,8 +211,6 @@ public:
 
 	//settings
 	//make movie settings
-	int m_mov_view;
-	int m_mov_axis;	//1 for x; 2 for y
 	bool m_mov_rewind;
 	wxString m_mov_angle_start;
 	wxString m_mov_angle_end;

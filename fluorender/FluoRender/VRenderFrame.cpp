@@ -134,7 +134,6 @@ VRenderFrame::VRenderFrame(
 	bool windowed,
 	bool hidepanels)
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
-	m_mov_view(0),
 	m_movie_view(0),
 	m_tree_panel(0),
 	m_list_panel(0),
@@ -667,8 +666,6 @@ VRenderFrame::VRenderFrame(
 	}
 
 	//make movie settings
-	m_mov_view = 0;
-	m_mov_axis = 1;
 	m_mov_rewind = false;
 
 	//set view default settings
@@ -3349,14 +3346,12 @@ void VRenderFrame::SaveProject(wxString& filename)
 	//movie view
 	fconfig.SetPath("/movie_panel");
 	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
-	fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
+	fconfig.Write("views_cmb", m_movie_view->GetView());
 	fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
 	fconfig.Write("seq_check", m_movie_view->m_seq_chk->GetValue());
 	fconfig.Write("frame_range", m_movie_view->m_progress_sldr->GetMax());
 	fconfig.Write("time_frame", m_movie_view->m_progress_sldr->GetValue());
-	fconfig.Write("x_rd", m_movie_view->m_x_rd->GetValue());
-	fconfig.Write("y_rd", m_movie_view->m_y_rd->GetValue());
-	fconfig.Write("z_rd", m_movie_view->m_z_rd->GetValue());
+	fconfig.Write("mov_axis", m_movie_view->GetMovAxis());
 	fconfig.Write("angle_end_text", m_movie_view->m_degree_end->GetValue());
 	fconfig.Write("step_text", m_movie_view->m_movie_len_text->GetValue());
 	fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
@@ -4578,9 +4573,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 		}
 		if (fconfig.Read("views_cmb", &iVal))
 		{
-			m_movie_view->m_views_cmb->SetSelection(iVal);
-			m_mov_view = iVal;
-			vrv = (*GetViewList())[m_mov_view];
+			m_movie_view->SetView(iVal);
+			vrv = (*GetViewList())[iVal];
 		}
 		if (fconfig.Read("rot_check", &bVal))
 		{
@@ -4598,15 +4592,22 @@ void VRenderFrame::OpenProject(wxString& filename)
 		}
 		if (fconfig.Read("x_rd", &bVal))
 		{
-			m_movie_view->m_x_rd->SetValue(bVal);
 			if (bVal)
-				m_mov_axis = 1;
+				m_movie_view->SetMovAxis(0);
 		}
 		if (fconfig.Read("y_rd", &bVal))
 		{
-			m_movie_view->m_y_rd->SetValue(bVal);
 			if (bVal)
-				m_mov_axis = 2;
+				m_movie_view->SetMovAxis(1);
+		}
+		if (fconfig.Read("z_rd", &bVal))
+		{
+			if (bVal)
+				m_movie_view->SetMovAxis(2);
+		}
+		if (fconfig.Read("mov_axis", &iVal))
+		{
+			m_movie_view->SetMovAxis(iVal);
 		}
 		if (fconfig.Read("angle_end_text", &sVal))
 		{
