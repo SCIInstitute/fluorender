@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "tif_reader.h"
 #include <boost/filesystem.hpp>
 #include "../compatibility.h"
+#include <sstream>
+#include <iomanip>
 
 TIFReader::TIFReader()
 {
@@ -316,6 +318,7 @@ int TIFReader::Preprocess()
 		for (int t = 0; t < (int)m_4d_seq.size(); t++)
 		{
 			wstring slice_str = m_4d_seq[t].slices[0].slice;
+			int tv = GetPatternNumber(slice_str, 2);
 
 			if (m_slice_seq || m_chann_seq)
 			{
@@ -323,11 +326,11 @@ int TIFReader::Preprocess()
 				std::vector<std::wstring> list;
 				std::wstring search_mask;
 				if (m_slice_seq && !m_chann_seq)
-					search_mask = GetSearchString(0);
+					search_mask = GetSearchString(0, tv);
 				else if (m_chann_seq && !m_slice_seq)
-					search_mask = GetSearchString(1);
+					search_mask = GetSearchString(1, tv);
 				else if (m_chann_seq && m_slice_seq)
-					search_mask = GetSearchString(-1);
+					search_mask = GetSearchString(-1, tv);
 				FIND_FILES(path, search_mask, list, m_cur_time);
 				m_4d_seq[t].type = 1;
 				m_4d_seq[t].slices.clear();
@@ -1994,16 +1997,44 @@ void TIFReader::AddPatternR(wchar_t c, size_t pos)
 	}
 }
 
-std::wstring TIFReader::GetSearchString(int mode)
+std::wstring TIFReader::GetSearchString(int mode, int t)
 {
 	std::wstring str;
 	for (auto it = m_name_patterns.begin();
 		it != m_name_patterns.end(); ++it)
 	{
-		if (it->type == 1 &&
-			((mode < 0 && it->use >=0) ||
-			(mode >=0 && it->use == mode)))
+		int add_ast = 0;
+		if (it->type == 1)
+		{
+			if (it->use == 0 || it->use == 1)
+			{
+				switch (mode)
+				{
+				case -1:
+					add_ast = 1;
+					break;
+				case 0:
+					if (it->use == 0)
+						add_ast = 1;
+					break;
+				case 1:
+					if (it->use == 1)
+						add_ast = 1;
+					break;
+				}
+			}
+			else if (it->use == 2)
+				add_ast = 2;
+		}
+
+		if (add_ast == 1)
 			str += L"*";
+		else if (add_ast == 2)
+		{
+			std::wstringstream ss;
+			ss << std::setw(it->len) << std::setfill(L'0') << t;
+			str += ss.str();
+		}
 		else
 			str += it->str;
 	}
