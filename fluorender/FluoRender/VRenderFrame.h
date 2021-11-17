@@ -213,7 +213,6 @@ public:
 	//make movie settings
 	bool m_mov_rewind;
 	wxString m_mov_angle_start;
-	wxString m_mov_angle_end;
 	wxString m_mov_step;
 	wxString m_mov_frames;
 

@@ -48,11 +48,11 @@ EVT_TEXT(ID_TimeEndText, VMovieView::OnTimeEndText)
 EVT_TEXT(ID_MovieLenText, VMovieView::OnMovieLenText)
 //rotations
 EVT_CHECKBOX(ID_RotChk, VMovieView::OnRotateChecked)
+EVT_TEXT(ID_DegreeText, VMovieView::OnDegreeText)
 EVT_COMBOBOX(ID_RotIntCmb, VMovieView::OnRotIntCmb)
 //fps, view combo, help
 EVT_TEXT(ID_FPS_Text, VMovieView::OnFpsEdit)
 EVT_COMBOBOX(ID_ViewsCombo, VMovieView::OnViewSelected)
-EVT_BUTTON(ID_HelpBtn, VMovieView::OnHelpBtn)
 //main controls
 EVT_BUTTON(ID_PlayPause, VMovieView::OnPrev)
 EVT_BUTTON(ID_Rewind, VMovieView::OnRewind)
@@ -93,7 +93,8 @@ double VMovieView::m_Mbitrate = 1;
 double VMovieView::m_movie_len = 5;
 wxTextCtrl * VMovieView::m_estimated_size_text = 0;
 
-wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
+wxWindow* VMovieView::CreateSimplePage(wxWindow *parent)
+{
 	wxPanel *page = new wxPanel(parent);
 
 	//validator: integer
@@ -154,14 +155,13 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	//rotations
 	m_rot_chk = new wxCheckBox(page, ID_RotChk,
 		"Rotation");
-	m_rot_chk->SetValue(true);
 	//axis
 	m_x_rd = new wxRadioButton(page, ID_XRd, "X", wxDefaultPosition, wxSize(30, 22));
 	m_y_rd = new wxRadioButton(page, ID_YRd, "Y", wxDefaultPosition, wxSize(30, 22));
 	m_z_rd = new wxRadioButton(page, ID_ZRd, "Z", wxDefaultPosition, wxSize(30, 22));
 	m_y_rd->SetValue(true);
 	//degrees
-	m_degree_end = new wxTextCtrl(page, ID_DegreeEndText, "360",
+	m_degree_text = new wxTextCtrl(page, ID_DegreeText, "360",
 		wxDefaultPosition, wxSize(50, -1));
 	st2 = new wxStaticText(page, wxID_ANY, "Degrees",
 		wxDefaultPosition, wxSize(60, -1));
@@ -174,7 +174,7 @@ wxWindow* VMovieView::CreateSimplePage(wxWindow *parent) {
 	sizer_5->Add(20, 5, 0);
 	sizer_5->Add(m_y_rd, 0, wxALIGN_CENTER);
 	sizer_5->Add(20, 5, 0);
-	sizer_5->Add(m_degree_end, 0, wxALIGN_CENTER);
+	sizer_5->Add(m_degree_text, 0, wxALIGN_CENTER);
 	sizer_5->Add(5, 5, 0);
 	sizer_5->Add(st2, 0, wxALIGN_CENTER);
 	//rotation interpolation
@@ -425,7 +425,10 @@ VMovieView::VMovieView(wxWindow* frame,
 	const wxString& name) :
 	wxPanel(parent, id, pos, size, style, name),
 	m_view_idx(0),
+	m_rotate(true),
+	m_time_seq(false),
 	m_mov_axis(1),
+	m_degree(360),
 	m_starting_rot(0.),
 	m_timer(this, ID_Timer),
 	m_cur_time(0.0),
@@ -459,8 +462,6 @@ VMovieView::VMovieView(wxWindow* frame,
 	//other
 	m_views_cmb = new wxComboBox(this, ID_ViewsCombo, "",
 		wxDefaultPosition, wxSize(120, -1), 0, NULL, wxCB_READONLY);
-	m_help_btn = new wxButton(this, ID_HelpBtn, "?",
-		wxDefaultPosition, wxSize(25, 25));
 	//sizer 1
 	sizer_1->Add(5, 5, 0);
 	wxStaticText * st = new wxStaticText(this, wxID_ANY, "FPS:",
@@ -472,8 +473,6 @@ VMovieView::VMovieView(wxWindow* frame,
 	sizer_1->AddStretchSpacer();
 	sizer_1->Add(st2, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_views_cmb, 0, wxALIGN_CENTER);
-	sizer_1->Add(5, 5, 0);
-	sizer_1->Add(m_help_btn, 0, wxALIGN_CENTER);
 
 	//the play/rewind/slider/save
 	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
@@ -522,11 +521,11 @@ void VMovieView::OnViewSelected(wxCommandEvent& event)
 void VMovieView::GetSettings()
 {
 	if (!m_view) return;
-	//m_views_cmb->SetSelection(view);
-	SetMovAxis(m_mov_axis);
 
-	if (m_frame->m_mov_angle_end != "")
-		m_degree_end->SetValue(m_frame->m_mov_angle_end);
+	SetTimeSeq(m_time_seq);
+	SetRotate(m_rotate);
+	SetMovAxis(m_mov_axis);
+	SetDegree(m_degree);
 
 	if (m_view->GetFrameEnabled())
 	{
@@ -644,7 +643,6 @@ void VMovieView::AddScriptToList()
 
 void VMovieView::Init()
 {
-	DisableTime();
 	if (!m_frame) return;
 	int i = 0;
 	m_views_cmb->Clear();
@@ -699,6 +697,52 @@ void VMovieView::SetView(int index)
 {
 	if (m_views_cmb)
 		m_views_cmb->SetSelection(index);
+}
+
+void VMovieView::SetTimeSeq(bool value)
+{
+	m_time_seq = value;
+	if (m_time_seq)
+	{
+		if (!m_seq_mode)
+			m_seq_mode = 1;
+
+		int tmp;
+		if (m_seq_mode == 1)
+		{
+			m_seq_chk->SetValue(true);
+			m_bat_chk->SetValue(false);
+			if (m_view)
+				m_view->Get4DSeqFrames(m_start_time, m_end_time, tmp);
+		}
+		else if (m_seq_mode == 2)
+		{
+			m_seq_chk->SetValue(false);
+			m_bat_chk->SetValue(true);
+			if (m_view)
+				m_view->Get3DBatFrames(m_start_time, m_end_time, tmp);
+		}
+		m_time_start_text->Enable();
+		m_time_end_text->Enable();
+		m_inc_time_btn->Enable();
+		m_dec_time_btn->Enable();
+		m_time_current_text->Enable();
+
+		m_movie_len = (m_end_time - m_start_time + 1) / m_fps;
+		m_time_start_text->ChangeValue(wxString::Format("%d", m_start_time));
+		m_time_end_text->ChangeValue(wxString::Format("%d", m_end_time));
+		m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
+	}
+	else
+	{
+		m_time_start_text->Disable();
+		m_time_end_text->Disable();
+		m_inc_time_btn->Disable();
+		m_dec_time_btn->Disable();
+		m_time_current_text->Disable();
+		m_seq_chk->SetValue(false);
+		m_bat_chk->SetValue(false);
+	}
 }
 
 void VMovieView::OnTimer(wxTimerEvent& event)
@@ -974,71 +1018,6 @@ void VMovieView::OnFrameSpinDown(wxSpinEvent& event)
 	}
 }
 
-void VMovieView::DisableRot() {
-	m_x_rd->Disable();
-	m_y_rd->Disable();
-	m_z_rd->Disable();
-	m_degree_end->Disable();
-	m_rot_chk->SetValue(false);
-}
-
-void VMovieView::EnableRot() {
-	m_x_rd->Enable();
-	m_y_rd->Enable();
-	m_z_rd->Enable();
-	m_degree_end->Enable();
-	m_rot_chk->SetValue(true);
-}
-
-void VMovieView::OnHelpBtn(wxCommandEvent &event) {
-	::wxLaunchDefaultBrowser(wxString(HELP_MANUAL) + wxString("#page=58"));
-}
-
-void VMovieView::DisableTime()
-{
-	m_time_start_text->Disable();
-	m_time_end_text->Disable();
-	m_inc_time_btn->Disable();
-	m_dec_time_btn->Disable();
-	m_time_current_text->Disable();
-	m_seq_chk->SetValue(false);
-	m_bat_chk->SetValue(false);
-}
-
-void VMovieView::EnableTime()
-{
-	if (!m_seq_mode)
-		m_seq_mode = 1;
-	if (!m_view)
-		return;
-
-	int first, sec, tmp;
-	if (m_seq_mode == 1)
-	{
-		m_view->Get4DSeqFrames(first, sec, tmp);
-		m_seq_chk->SetValue(true);
-		m_bat_chk->SetValue(false);
-	}
-	else if (m_seq_mode == 2)
-	{
-		m_view->Get3DBatFrames(first, sec, tmp);
-		m_seq_chk->SetValue(false);
-		m_bat_chk->SetValue(true);
-	}
-	m_start_time = first;
-	m_time_start_text->ChangeValue(wxString::Format("%d", m_start_time));
-	m_end_time = sec;
-	m_time_end_text->ChangeValue(wxString::Format("%d", m_end_time));
-	m_time_start_text->Enable();
-	m_time_end_text->Enable();
-	m_inc_time_btn->Enable();
-	m_dec_time_btn->Enable();
-	m_time_current_text->Enable();
-
-	m_movie_len = (m_end_time - m_start_time + 1) / m_fps;
-	m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
-}
-
 void VMovieView::UpFrame()
 {
 	if (m_running) return;
@@ -1212,12 +1191,11 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 			val = y;
 		if (m_z_rd->GetValue())
 			val = z;
-		double deg = STOD(m_degree_end->GetValue().fn_str());
 		if (m_rot_int_type == 0)
-			val = m_starting_rot + pcnt * deg;
+			val = m_starting_rot + pcnt * m_degree;
 		else if (m_rot_int_type == 1)
 			val = m_starting_rot +
-			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * deg;
+			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * m_degree;
 		if (m_x_rd->GetValue())
 			m_view->SetRotations(val, y, z);
 		else if (m_y_rd->GetValue())
@@ -1242,10 +1220,29 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event)
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event)
 {
-	if (m_rot_chk->GetValue())
-		EnableRot();
+	m_rotate = m_rot_chk->GetValue();
+	if (m_rotate)
+	{
+		m_x_rd->Enable();
+		m_y_rd->Enable();
+		m_z_rd->Enable();
+		m_degree_text->Enable();
+	}
 	else
-		DisableRot();
+	{
+		m_x_rd->Disable();
+		m_y_rd->Disable();
+		m_z_rd->Disable();
+		m_degree_text->Disable();
+	}
+}
+
+void VMovieView::OnDegreeText(wxCommandEvent &event)
+{
+	wxString str = m_degree_text->GetValue();
+	long ival = 0;
+	str.ToLong(&ival);
+	m_degree = ival;
 }
 
 void VMovieView::OnRotIntCmb(wxCommandEvent& event)
@@ -1258,12 +1255,12 @@ void VMovieView::OnSequenceChecked(wxCommandEvent& event)
 	if (m_seq_chk->GetValue())
 	{
 		m_seq_mode = 1;
-		EnableTime();
+		SetTimeSeq(true);
 	}
 	else
 	{
 		m_seq_mode = 0;
-		DisableTime();
+		SetTimeSeq(false);
 	}
 }
 
@@ -1272,12 +1269,12 @@ void VMovieView::OnBatchChecked(wxCommandEvent& event)
 	if (m_bat_chk->GetValue())
 	{
 		m_seq_mode = 2;
-		EnableTime();
+		SetTimeSeq(true);
 	}
 	else
 	{
 		m_seq_mode = 0;
-		DisableTime();
+		SetTimeSeq(false);
 	}
 }
 

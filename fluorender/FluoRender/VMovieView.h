@@ -60,7 +60,7 @@ class VMovieView : public wxPanel
 		ID_XRd,
 		ID_YRd,
 		ID_ZRd,
-		ID_DegreeEndText,
+		ID_DegreeText,
 		ID_RotIntCmb,
 
 		//bit rate
@@ -69,7 +69,6 @@ class VMovieView : public wxPanel
 		//fps, view combo, help
 		ID_FPS_Text,
 		ID_ViewsCombo,
-		ID_HelpBtn,
 
 		//main controls
 		ID_PlayPause,
@@ -120,15 +119,34 @@ public:
 	void DeleteView(wxString view);
 	void SetView(int index);
 	int GetView() { return m_view_idx; }
-	void DisableRot();
-	void EnableRot();
-	void DisableTime();
-	void EnableTime();
 
 	void UpFrame();
 	void DownFrame();
 	void SetCurrentTime(size_t t);
 
+	void SetRotate(bool value)
+	{
+		m_rotate = value;
+		if (m_rotate)
+		{
+			m_x_rd->Enable();
+			m_y_rd->Enable();
+			m_z_rd->Enable();
+			m_degree_text->Enable();
+			m_rot_chk->SetValue(true);
+		}
+		else
+		{
+			m_x_rd->Disable();
+			m_y_rd->Disable();
+			m_z_rd->Disable();
+			m_degree_text->Disable();
+			m_rot_chk->SetValue(false);
+		}
+	}
+	bool GetRotate() { return m_rotate; }
+	void SetTimeSeq(bool value);
+	bool GetTimeSeq() { return m_time_seq; }
 	void SetMovAxis(int value)
 	{
 		m_mov_axis = value;
@@ -140,6 +158,13 @@ public:
 			m_z_rd->SetValue(true);
 	}
 	int GetMovAxis() { return m_mov_axis; }
+	void SetDegree(int value)
+	{
+		m_degree = value;
+		m_degree_text->SetValue(wxString::Format("%d", m_degree));
+	}
+	int GetDegree() { return m_degree; }
+
 	void SetBitRate(double value) { m_Mbitrate = value; }
 	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
@@ -173,7 +198,6 @@ public:
 	//controls
 	wxTextCtrl *m_fps_text;
 	wxComboBox *m_views_cmb;
-	wxButton *m_help_btn;
 
 	wxButton *m_play_btn;
 	wxButton *m_rewind_btn;
@@ -195,7 +219,7 @@ public:
 	wxRadioButton *m_x_rd;
 	wxRadioButton *m_y_rd;
 	wxRadioButton *m_z_rd;
-	wxTextCtrl *m_degree_end;
+	wxTextCtrl *m_degree_text;
 	wxComboBox *m_rot_int_cmb;
 
 	//script
@@ -232,7 +256,13 @@ private:
 	RecorderDlg* m_advanced_movie;
 	int m_view_idx;//index to current renderview
 
+	bool m_rotate;
+	bool m_time_seq;
+	int m_seq_mode;//0:none; 1:4d; 2:bat
 	int m_mov_axis;	//0-x;1-y;2-z
+	int m_degree;
+	int m_rot_int_type;//0-linear; 1-smooth
+
 	int m_last_frame;
 	double m_starting_rot;
 	wxTimer m_timer;
@@ -243,8 +273,6 @@ private:
 	int m_current_page;
 	QVideoEncoder encoder_;
 	wxString filetype_;
-	int m_rot_int_type;//0-linear; 1-smooth
-	int m_seq_mode;//0:none; 1:4d; 2:bat
 	double m_fps;
 	int m_start_time;
 	int m_end_time;
@@ -274,6 +302,12 @@ private:
 	void Init();
 	void GenKey();
 
+	//basic rotation
+	void OnRotateChecked(wxCommandEvent& event);
+	void OnDegreeText(wxCommandEvent &event);
+	//rotation interpolation
+	void OnRotIntCmb(wxCommandEvent& event);
+
 	//left column
 	void OnRun(wxCommandEvent& event);
 	void OnPrev(wxCommandEvent& event);
@@ -291,7 +325,6 @@ private:
 	void OnFrameSpinDown(wxSpinEvent& event);
 
 	//help
-	void OnHelpBtn(wxCommandEvent& event);
 	void OnChEnlargeCheck(wxCommandEvent &event);
 	void OnSlEnlargeScroll(wxScrollEvent &event);
 	void OnTxEnlargeText(wxCommandEvent &event);
@@ -327,10 +360,6 @@ private:
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
 	void OnBatchChecked(wxCommandEvent& event);
-	void OnRotateChecked(wxCommandEvent& event);
-
-	//rotation interpolation
-	void OnRotIntCmb(wxCommandEvent& event);
 
 	//timer for playback.
 	void OnTimer(wxTimerEvent& event);

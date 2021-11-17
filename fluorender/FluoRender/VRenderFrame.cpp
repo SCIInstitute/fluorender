@@ -1570,9 +1570,10 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 		vrv->InitView(INIT_BOUNDS|INIT_CENTER);
 		vrv->UpdateScaleFactor(false);
 
-		if (enable_4d) {
-			m_movie_view->EnableTime();
-			m_movie_view->DisableRot();
+		if (enable_4d)
+		{
+			m_movie_view->SetTimeSeq(true);
+			m_movie_view->SetRotate(false);
 			m_movie_view->SetCurrentTime(vrv->m_glview->m_tseq_cur_num);
 		}
 
@@ -3347,12 +3348,10 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.SetPath("/movie_panel");
 	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
 	fconfig.Write("views_cmb", m_movie_view->GetView());
-	fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
-	fconfig.Write("seq_check", m_movie_view->m_seq_chk->GetValue());
-	fconfig.Write("frame_range", m_movie_view->m_progress_sldr->GetMax());
-	fconfig.Write("time_frame", m_movie_view->m_progress_sldr->GetValue());
+	fconfig.Write("rot_check", m_movie_view->GetRotate());
+	fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
 	fconfig.Write("mov_axis", m_movie_view->GetMovAxis());
-	fconfig.Write("angle_end_text", m_movie_view->m_degree_end->GetValue());
+	fconfig.Write("angle_end_text", m_movie_view->GetDegree());
 	fconfig.Write("step_text", m_movie_view->m_movie_len_text->GetValue());
 	fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
 	fconfig.Write("frame_chk", m_movie_view->m_frame_chk->GetValue());
@@ -4578,17 +4577,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 		}
 		if (fconfig.Read("rot_check", &bVal))
 		{
-			if (bVal)
-				m_movie_view->EnableRot();
-			else
-				m_movie_view->DisableRot();
+			m_movie_view->SetRotate(bVal);
 		}
 		if (fconfig.Read("seq_check", &bVal))
 		{
-			if (bVal)
-				m_movie_view->EnableTime();
-			else
-				m_movie_view->DisableTime();
+			m_movie_view->SetTimeSeq(bVal);
 		}
 		if (fconfig.Read("x_rd", &bVal))
 		{
@@ -4609,10 +4602,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			m_movie_view->SetMovAxis(iVal);
 		}
-		if (fconfig.Read("angle_end_text", &sVal))
+		if (fconfig.Read("angle_end_text", &iVal))
 		{
-			m_movie_view->m_degree_end->SetValue(sVal);
-			m_mov_angle_end = sVal;
+			m_movie_view->SetDegree(iVal);
 		}
 		if (fconfig.Read("step_text", &sVal))
 		{
