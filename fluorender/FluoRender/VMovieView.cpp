@@ -653,7 +653,7 @@ void VMovieView::Init()
 	}
 	if (i)
 		m_views_cmb->Select(0);
-	//GetSettings();
+	GetSettings();
 }
 
 void VMovieView::GenKey()
