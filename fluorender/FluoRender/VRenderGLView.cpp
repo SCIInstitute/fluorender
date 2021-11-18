@@ -230,7 +230,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_end_angle(0.0),
 	m_cur_angle(0.0),
 	m_step(0.0),
-	m_rot_axis(0),
 	m_movie_seq(0),
 	m_rewind(false),
 	m_stages(0),
@@ -4501,53 +4500,35 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 	bool rewind,
 	int len)
 {
-	double x, y, z;
-	GetRotations(x, y, z);
+	double rv[3];
+	GetRotations(rv[0], rv[1], rv[2]);
 
 	//remove the chance of the x/y/z angles being outside 360.
-	while (x > 360.)  x -= 360.;
-	while (x < -360.) x += 360.;
-	while (y > 360.)  y -= 360.;
-	while (y < -360.) y += 360.;
-	while (z > 360.)  z -= 360.;
-	while (z < -360.) z += 360.;
-	if (360. - std::abs(x) < 0.001) x = 0.;
-	if (360. - std::abs(y) < 0.001) y = 0.;
-	if (360. - std::abs(z) < 0.001) z = 0.;
+	while (rv[0] > 360.)  rv[0] -= 360.;
+	while (rv[0] < -360.) rv[0] += 360.;
+	while (rv[1] > 360.)  rv[1] -= 360.;
+	while (rv[1] < -360.) rv[1] += 360.;
+	while (rv[2] > 360.)  rv[2] -= 360.;
+	while (rv[2] < -360.) rv[2] += 360.;
+	if (360. - std::abs(rv[0]) < 0.001) rv[0] = 0.;
+	if (360. - std::abs(rv[1]) < 0.001) rv[1] = 0.;
+	if (360. - std::abs(rv[2]) < 0.001) rv[2] = 0.;
+
 	m_step = step;
 	m_total_frames = frames;
-	m_rot_axis = rot_axis;
 	m_cap_file = cap_file;
 	m_rewind = rewind;
-
 	m_movie_seq = 0;
-	switch (m_rot_axis)
+
+	m_rot_axis = rot_axis;
+	if (start_angle == 0.)
 	{
-	case 1: //X
-		if (start_angle == 0.) {
-			m_init_angle = x;
-			m_end_angle = x + end_angle;
-		}
-		m_cur_angle = x;
-		m_start_angle = x;
-		break;
-	case 2: //Y
-		if (start_angle == 0.) {
-			m_init_angle = y;
-			m_end_angle = y + end_angle;
-		}
-		m_cur_angle = y;
-		m_start_angle = y;
-		break;
-	case 3: //Z
-		if (start_angle == 0.) {
-			m_init_angle = z;
-			m_end_angle = z + end_angle;
-		}
-		m_cur_angle = z;
-		m_start_angle = z;
-		break;
+		m_init_angle = rv[m_rot_axis];
+		m_end_angle = rv[m_rot_axis] + end_angle;
 	}
+	m_cur_angle = rv[m_rot_axis];
+	m_start_angle = rv[m_rot_axis];
+
 	m_capture = true;
 	m_capture_rotat = true;
 	m_capture_rotate_over = false;
@@ -4773,21 +4754,11 @@ void VRenderGLView::SetParams(double t)
 
 void VRenderGLView::ResetMovieAngle()
 {
-	double rotx, roty, rotz;
-	GetRotations(rotx, roty, rotz);
+	double rv[3];
+	GetRotations(rv[0], rv[1], rv[2]);
+	rv[m_rot_axis] = m_init_angle;
+	SetRotations(rv[0], rv[1], rv[2]);
 
-	switch (m_rot_axis)
-	{
-	case 1:  //x
-		SetRotations(m_init_angle, roty, rotz);
-		break;
-	case 2:  //y
-		SetRotations(rotx, m_init_angle, rotz);
-		break;
-	case 3:  //z
-		SetRotations(rotx, roty, m_init_angle);
-		break;
-	}
 	m_capture = false;
 	m_capture_rotat = false;
 

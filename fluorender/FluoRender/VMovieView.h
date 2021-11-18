@@ -147,23 +147,23 @@ public:
 	bool GetRotate() { return m_rotate; }
 	void SetTimeSeq(bool value);
 	bool GetTimeSeq() { return m_time_seq; }
-	void SetMovAxis(int value)
+	void SetRotAxis(int value)
 	{
-		m_mov_axis = value;
-		if (m_mov_axis == 0)
+		m_rot_axis = value;
+		if (m_rot_axis == 0)
 			m_x_rd->SetValue(true);
-		else if (m_mov_axis == 1)
+		else if (m_rot_axis == 1)
 			m_y_rd->SetValue(true);
-		else if (m_mov_axis == 2)
+		else if (m_rot_axis == 2)
 			m_z_rd->SetValue(true);
 	}
-	int GetMovAxis() { return m_mov_axis; }
-	void SetDegree(int value)
+	int GetRotAxis() { return m_rot_axis; }
+	void SetRotDeg(int value)
 	{
-		m_degree = value;
-		m_degree_text->SetValue(wxString::Format("%d", m_degree));
+		m_rot_deg = value;
+		m_degree_text->SetValue(wxString::Format("%d", m_rot_deg));
 	}
-	int GetDegree() { return m_degree; }
+	int GetRotDeg() { return m_rot_deg; }
 	void SetMovieLen(double value)
 	{
 		m_movie_len = value;
@@ -177,18 +177,18 @@ public:
 	}
 	double GetFps() { return m_fps; }
 	//frames
-	void SetStartTime(int value)
+	void SetStartFrame(int value)
 	{
-		m_start_time = value;
-		m_time_start_text->SetValue(wxString::Format("%d", m_start_time));
+		m_start_frame = value;
+		m_time_start_text->SetValue(wxString::Format("%d", m_start_frame));
 	}
-	int GetStartTime() { return m_start_time; }
-	void SetEndTime(int value)
+	int GetStartFrame() { return m_start_frame; }
+	void SetEndFrame(int value)
 	{
-		m_end_time = value;
-		m_time_end_text->SetValue(wxString::Format("%d", m_end_time));
+		m_end_frame = value;
+		m_time_end_text->SetValue(wxString::Format("%d", m_end_frame));
 	}
-	int GetEndTime() { return m_end_time; }
+	int GetEndFrame() { return m_end_frame; }
 	//cropping
 	void SetCrop(bool value);
 	bool GetCrop() { return m_crop; }
@@ -301,22 +301,14 @@ private:
 	bool m_rotate;
 	bool m_time_seq;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
-	int m_mov_axis;	//0-x;1-y;2-z
-	int m_degree;
+	int m_rot_axis;	//0-x;1-y;2-z
+	int m_rot_deg;
 	int m_rot_int_type;//0-linear; 1-smooth
 	static double m_movie_len;
 	double m_fps;
-	int m_start_time;
-	int m_end_time;
-	int m_current_time;
-
-	//play controls
-	int m_last_frame;
-	double m_starting_rot;
-	double m_cur_time;
-	bool m_running, m_record;
-	bool m_delayed_stop;
-	bool m_timer_run;//for temporary hold
+	int m_start_frame;
+	int m_end_frame;
+	int m_cur_frame;
 
 	//cropping
 	bool m_crop;//enable cropping
@@ -325,6 +317,13 @@ private:
 	int m_crop_w;
 	int m_crop_h;
 
+	//save controls
+	int m_last_frame;//last frame nunmber to save
+	double m_starting_rot;//starting degree of rotation
+	double m_cur_time;
+	bool m_running, m_record;
+	bool m_delayed_stop;
+	bool m_timer_run;//for temporary hold
 	//save
 	wxString m_filename;
 	QVideoEncoder encoder_;
@@ -353,6 +352,7 @@ private:
 
 	//basic rotation
 	void OnRotateChecked(wxCommandEvent& event);
+	void OnRotAxis(wxCommandEvent& event);
 	void OnDegreeText(wxCommandEvent &event);
 	//rotation interpolation
 	void OnRotIntCmb(wxCommandEvent& event);

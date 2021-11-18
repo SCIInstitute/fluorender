@@ -3347,8 +3347,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("views_cmb", m_movie_view->GetView());
 	fconfig.Write("rot_check", m_movie_view->GetRotate());
 	fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
-	fconfig.Write("mov_axis", m_movie_view->GetMovAxis());
-	fconfig.Write("degree", m_movie_view->GetDegree());
+	fconfig.Write("rot_axis", m_movie_view->GetRotAxis());
+	fconfig.Write("rot_deg", m_movie_view->GetRotDeg());
 	fconfig.Write("movie_len", m_movie_view->GetMovieLen());
 	fconfig.Write("fps", m_movie_view->GetFps());
 	fconfig.Write("crop", m_movie_view->GetCrop());
@@ -3356,8 +3356,8 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("crop_y", m_movie_view->GetCropY());
 	fconfig.Write("crop_w", m_movie_view->GetCropW());
 	fconfig.Write("crop_h", m_movie_view->GetCropH());
-	fconfig.Write("start_time", m_movie_view->GetStartTime());
-	fconfig.Write("end_time", m_movie_view->GetEndTime());
+	fconfig.Write("start_frame", m_movie_view->GetStartFrame());
+	fconfig.Write("end_frame", m_movie_view->GetEndFrame());
 	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
 	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
 	//tracking diag
@@ -4584,25 +4584,25 @@ void VRenderFrame::OpenProject(wxString& filename)
 		if (fconfig.Read("x_rd", &bVal))
 		{
 			if (bVal)
-				m_movie_view->SetMovAxis(0);
+				m_movie_view->SetRotAxis(0);
 		}
 		if (fconfig.Read("y_rd", &bVal))
 		{
 			if (bVal)
-				m_movie_view->SetMovAxis(1);
+				m_movie_view->SetRotAxis(1);
 		}
 		if (fconfig.Read("z_rd", &bVal))
 		{
 			if (bVal)
-				m_movie_view->SetMovAxis(2);
+				m_movie_view->SetRotAxis(2);
 		}
-		if (fconfig.Read("mov_axis", &iVal))
+		if (fconfig.Read("rot_axis", &iVal))
 		{
-			m_movie_view->SetMovAxis(iVal);
+			m_movie_view->SetRotAxis(iVal);
 		}
-		if (fconfig.Read("degree", &iVal))
+		if (fconfig.Read("rot_deg", &iVal))
 		{
-			m_movie_view->SetDegree(iVal);
+			m_movie_view->SetRotDeg(iVal);
 		}
 		if (fconfig.Read("movie_len", &dVal))
 		{
@@ -4642,10 +4642,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			m_movie_view->UpdateCrop();
 		}
-		if (fconfig.Read("start_time", &iVal))
-			m_movie_view->SetStartTime(iVal);
-		if (fconfig.Read("end_time", &iVal))
-			m_movie_view->SetEndTime(iVal);
+		if (fconfig.Read("start_frame", &iVal))
+			m_movie_view->SetStartFrame(iVal);
+		if (fconfig.Read("end_frame", &iVal))
+			m_movie_view->SetEndFrame(iVal);
 		if (fconfig.Read("run_script", &bVal))
 			m_setting_dlg->SetRunScript(bVal);
 		if (fconfig.Read("script_file", &sVal))

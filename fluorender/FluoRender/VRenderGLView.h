@@ -861,7 +861,7 @@ private:
 	double m_end_angle;
 	double m_cur_angle;
 	double m_step;
-	int m_rot_axis; //1-X; 2-Y; 3-Z;
+	int m_rot_axis; //0-X; 1-Y; 2-Z;
 	int m_movie_seq;
 	bool m_rewind;
 	int m_stages; //0-moving to start angle; 1-moving to end; 2-rewind
