@@ -72,20 +72,20 @@ EVT_LIST_ITEM_SELECTED(ID_ScriptList, VMovieView::OnScriptListSelected)
 EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
 EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, VMovieView::OnListItemAct)
 //cropping
-EVT_CHECKBOX(ID_FrameChk, VMovieView::OnFrameCheck)
-EVT_BUTTON(ID_ResetBtn, VMovieView::OnResetFrame)
-EVT_TEXT(ID_CenterXText, VMovieView::OnFrameEditing)
-EVT_TEXT(ID_CenterYText, VMovieView::OnFrameEditing)
-EVT_TEXT(ID_WidthText, VMovieView::OnFrameEditing)
-EVT_TEXT(ID_HeightText, VMovieView::OnFrameEditing)
-EVT_SPIN_UP(ID_CenterXSpin, VMovieView::OnFrameSpinUp)
-EVT_SPIN_UP(ID_CenterYSpin, VMovieView::OnFrameSpinUp)
-EVT_SPIN_UP(ID_WidthSpin, VMovieView::OnFrameSpinUp)
-EVT_SPIN_UP(ID_HeightSpin, VMovieView::OnFrameSpinUp)
-EVT_SPIN_DOWN(ID_CenterXSpin, VMovieView::OnFrameSpinDown)
-EVT_SPIN_DOWN(ID_CenterYSpin, VMovieView::OnFrameSpinDown)
-EVT_SPIN_DOWN(ID_WidthSpin, VMovieView::OnFrameSpinDown)
-EVT_SPIN_DOWN(ID_HeightSpin, VMovieView::OnFrameSpinDown)
+EVT_CHECKBOX(ID_CropChk, VMovieView::OnCropCheck)
+EVT_BUTTON(ID_ResetBtn, VMovieView::OnResetCrop)
+EVT_TEXT(ID_CenterXText, VMovieView::OnEditCrop)
+EVT_TEXT(ID_CenterYText, VMovieView::OnEditCrop)
+EVT_TEXT(ID_WidthText, VMovieView::OnEditCrop)
+EVT_TEXT(ID_HeightText, VMovieView::OnEditCrop)
+EVT_SPIN_UP(ID_CenterXSpin, VMovieView::OnCropSpinUp)
+EVT_SPIN_UP(ID_CenterYSpin, VMovieView::OnCropSpinUp)
+EVT_SPIN_UP(ID_WidthSpin, VMovieView::OnCropSpinUp)
+EVT_SPIN_UP(ID_HeightSpin, VMovieView::OnCropSpinUp)
+EVT_SPIN_DOWN(ID_CenterXSpin, VMovieView::OnCropSpinDown)
+EVT_SPIN_DOWN(ID_CenterYSpin, VMovieView::OnCropSpinDown)
+EVT_SPIN_DOWN(ID_WidthSpin, VMovieView::OnCropSpinDown)
+EVT_SPIN_DOWN(ID_HeightSpin, VMovieView::OnCropSpinDown)
 //timer
 EVT_TIMER(ID_Timer, VMovieView::OnTimer)
 //notebook
@@ -294,13 +294,13 @@ wxWindow* VMovieView::CreateCroppingPage(wxWindow *parent) {
 	//8th line
 	st = new wxStaticText(page, 0, "Enable cropping:",
 		wxDefaultPosition, wxSize(110, 20));
-	m_frame_chk = new wxCheckBox(page, ID_FrameChk, "");
+	m_crop_chk = new wxCheckBox(page, ID_CropChk, "");
 	m_reset_btn = new wxButton(page, ID_ResetBtn, "Reset",
 		wxDefaultPosition, wxSize(110, 30));
 	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
 	sizer_8->Add(5, 5, 0);
 	sizer_8->Add(st, 0, wxALIGN_CENTER);
-	sizer_8->Add(m_frame_chk, 0, wxALIGN_CENTER);
+	sizer_8->Add(m_crop_chk, 0, wxALIGN_CENTER);
 	sizer_8->Add(100, 5, 0);
 	sizer_8->Add(m_reset_btn, 0, wxALIGN_CENTER);
 	//9th line
@@ -485,7 +485,7 @@ VMovieView::VMovieView(wxWindow* frame,
 		wxDefaultPosition, wxSize(30, 30));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	sizerH->Add(m_rewind_btn, 0, wxEXPAND);
-	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, 360);
+	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
 	sizerH->Add(m_progress_sldr, 1, wxEXPAND);
 	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",
 		wxDefaultPosition, wxSize(50, -1));
@@ -726,7 +726,7 @@ void VMovieView::SetTimeSeq(bool value)
 void VMovieView::SetCrop(bool value)
 {
 	m_crop = value;
-	m_frame_chk->SetValue(m_crop);
+	m_crop_chk->SetValue(m_crop);
 
 	if (!m_view)
 		return;
@@ -734,12 +734,12 @@ void VMovieView::SetCrop(bool value)
 	{
 		m_view->CalcFrame();
 		m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
-		m_center_x_text->SetValue(wxString::Format("%d",
+		m_center_x_text->ChangeValue(wxString::Format("%d",
 			int(m_crop_x + m_crop_w / 2.0 + 0.5)));
-		m_center_y_text->SetValue(wxString::Format("%d",
+		m_center_y_text->ChangeValue(wxString::Format("%d",
 			int(m_crop_y + m_crop_h / 2.0 + 0.5)));
-		m_width_text->SetValue(wxString::Format("%d", m_crop_w));
-		m_height_text->SetValue(wxString::Format("%d", m_crop_h));
+		m_width_text->ChangeValue(wxString::Format("%d", m_crop_w));
+		m_height_text->ChangeValue(wxString::Format("%d", m_crop_h));
 		m_view->EnableFrame();
 	}
 	else
@@ -767,8 +767,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 		if (m_record)
 			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
 		m_delayed_stop = false;
-		wxCommandEvent e;
-		OnStop(e);
+		Stop();
 		VRenderGLView::SetKeepEnlarge(false);
 		return;
 	}
@@ -811,21 +810,20 @@ void VMovieView::OnNbPageChange(wxBookCtrlEvent& event)
 		m_current_page = sel;
 }
 
-void VMovieView::OnPrev(wxCommandEvent& event)
+void VMovieView::Prev()
 {
 	if (m_running)
 	{
-		wxCommandEvent e;
-		OnStop(e);
+		Stop();
 		return;
 	}
 	m_running = true;
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	int slider_pos = m_progress_sldr->GetValue();
-	if (slider_pos < 360 && slider_pos > 0 &&
+	if (slider_pos < PROG_SLDR_MAX && slider_pos > 0 &&
 		!(m_movie_len - m_cur_time < 0.1 / m_fps ||
-		m_cur_time > m_movie_len))
+			m_cur_time > m_movie_len))
 	{
 		TimerRun();
 		return;
@@ -857,6 +855,11 @@ void VMovieView::OnPrev(wxCommandEvent& event)
 	TimerRun();
 }
 
+void VMovieView::OnPrev(wxCommandEvent& event)
+{
+	Prev();
+}
+
 void VMovieView::OnRun(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
@@ -875,7 +878,7 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	delete fopendlg;
 }
 
-void VMovieView::OnStop(wxCommandEvent& event)
+void VMovieView::Stop()
 {
 	bool run_script = m_run_script_chk->GetValue();
 	if (run_script)
@@ -890,30 +893,39 @@ void VMovieView::OnStop(wxCommandEvent& event)
 	flvr::TextureRenderer::maximize_uptime_ = false;
 }
 
-void VMovieView::OnRewind(wxCommandEvent& event)
+void VMovieView::OnStop(wxCommandEvent& event)
+{
+	Stop();
+}
+
+void VMovieView::Rewind()
 {
 	if (!m_view)
 		return;
 	m_view->SetParams(0.);
-	wxCommandEvent e;
-	OnStop(e);
+	Stop();
 	m_cur_frame = m_start_frame;
 	m_time_current_text->ChangeValue(wxString::Format("%d", m_cur_frame));
 	SetProgress(0.);
 	SetRendering(0., false);
 }
 
-void VMovieView::OnFrameCheck(wxCommandEvent& event)
+void VMovieView::OnRewind(wxCommandEvent& event)
 {
-	SetCrop(m_frame_chk->GetValue());
+	Rewind();
 }
 
-void VMovieView::OnResetFrame(wxCommandEvent& event)
+void VMovieView::OnCropCheck(wxCommandEvent& event)
+{
+	SetCrop(m_crop_chk->GetValue());
+}
+
+void VMovieView::OnResetCrop(wxCommandEvent& event)
 {
 	SetCrop(true);
 }
 
-void VMovieView::OnFrameEditing(wxCommandEvent& event)
+void VMovieView::OnEditCrop(wxCommandEvent& event)
 {
 	wxString temp;
 	temp = m_center_x_text->GetValue();
@@ -928,9 +940,8 @@ void VMovieView::OnFrameEditing(wxCommandEvent& event)
 	UpdateCrop();
 }
 
-void VMovieView::OnFrameSpinUp(wxSpinEvent& event)
+void VMovieView::OnCropSpinUp(wxSpinEvent& event)
 {
-	int ival = m_center_x_spin->GetMin();
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
 	switch (sender_id)
@@ -950,16 +961,15 @@ void VMovieView::OnFrameSpinUp(wxSpinEvent& event)
 	}
 	if (text_ctrl)
 	{
-		wxString str_val = text_ctrl->GetValue();
-		char str[256];
-		sprintf(str, "%d", STOI(str_val.fn_str()) + 1);
-		text_ctrl->SetValue(str);
-		wxCommandEvent e;
-		OnFrameEditing(e);
+		wxString str = text_ctrl->GetValue();
+		long ival;
+		if (str.ToLong(&ival))
+			text_ctrl->SetValue(wxString::Format(
+				"%d", ival + 1));
 	}
 }
 
-void VMovieView::OnFrameSpinDown(wxSpinEvent& event)
+void VMovieView::OnCropSpinDown(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -980,12 +990,11 @@ void VMovieView::OnFrameSpinDown(wxSpinEvent& event)
 	}
 	if (text_ctrl)
 	{
-		wxString str_val = text_ctrl->GetValue();
-		char str[256];
-		sprintf(str, "%d", STOI(str_val.fn_str()) - 1);
-		text_ctrl->SetValue(str);
-		wxCommandEvent e;
-		OnFrameEditing(e);
+		wxString str = text_ctrl->GetValue();
+		long ival;
+		if (str.ToLong(&ival))
+			text_ctrl->SetValue(wxString::Format(
+				"%d", ival - 1));
 	}
 }
 
@@ -1107,7 +1116,7 @@ void VMovieView::OnTimeChange(wxScrollEvent &event)
 {
 	if (m_running) return;
 	int frame = event.GetPosition();
-	double pcnt = (((double)frame) / 360.);
+	double pcnt = (((double)frame) / PROG_SLDR_MAX);
 	SetRendering(pcnt);
 
 	int time = m_end_frame - m_start_frame + 1;
@@ -1177,7 +1186,7 @@ void VMovieView::OnTimeEnter(wxCommandEvent& event)
 {
 	if (m_running) return;
 	double pcnt = (m_cur_time / m_movie_len);
-	m_progress_sldr->SetValue(360. * pcnt);
+	m_progress_sldr->SetValue(PROG_SLDR_MAX * pcnt);
 	SetRendering(pcnt);
 
 	int time = m_end_frame - m_start_frame + 1;
@@ -1258,7 +1267,7 @@ void VMovieView::OnBatchChecked(wxCommandEvent& event)
 void VMovieView::SetProgress(double pcnt)
 {
 	pcnt = std::abs(pcnt);
-	m_progress_sldr->SetValue(pcnt * 360.);
+	m_progress_sldr->SetValue(pcnt * PROG_SLDR_MAX);
 	m_cur_time = pcnt*m_movie_len;
 	wxString st = wxString::Format("%.2f", m_cur_time);
 	m_progress_text->ChangeValue(st);
@@ -1382,8 +1391,7 @@ void VMovieView::Run()
 		VRenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
 	}
 
-	wxCommandEvent e;
-	OnRewind(e);
+	Rewind();
 
 	filetype_ = m_filename.SubString(m_filename.Len() - 4,
 		m_filename.Len() - 1);
@@ -1404,7 +1412,7 @@ void VMovieView::Run()
 		}
 
 		encoder_.open(m_filename.ToStdString(), m_crop_w, m_crop_h, m_fps,
-			m_Mbitrate * 1000000);
+			m_Mbitrate * 1e6);
 	}
 	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
 	m_record = true;
@@ -1425,7 +1433,7 @@ void VMovieView::Run()
 		}
 	}
 
-	OnPrev(e);
+	Prev();
 }
 
 void VMovieView::OnCurrentTimeText(wxCommandEvent& event)

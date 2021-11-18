@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/notebook.h>
 #include <wx/listctrl.h>
 
+#define PROG_SLDR_MAX	361
+
 class VRenderFrame;
 class VRenderView;
 class RecorderDlg;
@@ -89,7 +91,7 @@ class VMovieView : public wxPanel
 		ID_GenKeyBtn,
 
 		//cropping
-		ID_FrameChk,
+		ID_CropChk,
 		ID_ResetBtn,
 		ID_CenterXText,
 		ID_CenterYText,
@@ -271,7 +273,7 @@ private:
 	wxButton* m_gen_keys_btn;
 
 	//cropping
-	wxCheckBox *m_frame_chk;
+	wxCheckBox *m_crop_chk;
 	wxButton *m_reset_btn;
 
 	wxTextCtrl *m_center_x_text;
@@ -359,19 +361,22 @@ private:
 
 	//left column
 	void OnRun(wxCommandEvent& event);
+	void Prev();
 	void OnPrev(wxCommandEvent& event);
+	void Stop();
 	void OnStop(wxCommandEvent& event);
+	void Rewind();
 	void OnRewind(wxCommandEvent& event);
 
 	void OnViewSelected(wxCommandEvent& event);
 
 	//right column
-	void OnFrameCheck(wxCommandEvent& event);
-	void OnResetFrame(wxCommandEvent& event);
-	void OnFrameEditing(wxCommandEvent& event);
+	void OnCropCheck(wxCommandEvent& event);
+	void OnResetCrop(wxCommandEvent& event);
+	void OnEditCrop(wxCommandEvent& event);
 
-	void OnFrameSpinUp(wxSpinEvent& event);
-	void OnFrameSpinDown(wxSpinEvent& event);
+	void OnCropSpinUp(wxSpinEvent& event);
+	void OnCropSpinDown(wxSpinEvent& event);
 
 	//help
 	void OnChEnlargeCheck(wxCommandEvent &event);
