@@ -209,13 +209,6 @@ public:
 		MeshData* md=0,
 		Annotations* ann=0);
 
-	//settings
-	//make movie settings
-	bool m_mov_rewind;
-	wxString m_mov_angle_start;
-	wxString m_mov_step;
-	wxString m_mov_frames;
-
 	//prop view
 	AdjustView* GetAdjustView();
 	//tool views

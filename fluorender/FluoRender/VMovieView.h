@@ -164,6 +164,43 @@ public:
 		m_degree_text->SetValue(wxString::Format("%d", m_degree));
 	}
 	int GetDegree() { return m_degree; }
+	void SetMovieLen(double value)
+	{
+		m_movie_len = value;
+		m_movie_len_text->SetValue(wxString::Format("%.2f", m_movie_len));
+	}
+	double GetMovieLen() { return m_movie_len; }
+	void SetFps(double value)
+	{
+		m_fps = value;
+		m_fps_text->SetValue(wxString::Format("%.0f", m_fps));
+	}
+	double GetFps() { return m_fps; }
+	//frames
+	void SetStartTime(int value)
+	{
+		m_start_time = value;
+		m_time_start_text->SetValue(wxString::Format("%d", m_start_time));
+	}
+	int GetStartTime() { return m_start_time; }
+	void SetEndTime(int value)
+	{
+		m_end_time = value;
+		m_time_end_text->SetValue(wxString::Format("%d", m_end_time));
+	}
+	int GetEndTime() { return m_end_time; }
+	//cropping
+	void SetCrop(bool value);
+	bool GetCrop() { return m_crop; }
+	void SetCropX(int value) { m_crop_x = value; }
+	int GetCropX() { return m_crop_x; }
+	void SetCropY(int value) { m_crop_y = value; }
+	int GetCropY() { return m_crop_y; }
+	void SetCropW(int value) { m_crop_w = value; }
+	int GetCropW() { return m_crop_w; }
+	void SetCropH(int value) { m_crop_h = value; }
+	int GetCropH() { return m_crop_h; }
+	void UpdateCrop();
 
 	void SetBitRate(double value) { m_Mbitrate = value; }
 	void SetFileName(wxString &filename) { m_filename = filename; }
@@ -194,7 +231,7 @@ public:
 			m_timer_run = false;
 	}
 
-public:
+private:
 	//controls
 	wxTextCtrl *m_fps_text;
 	wxComboBox *m_views_cmb;
@@ -256,30 +293,42 @@ private:
 	RecorderDlg* m_advanced_movie;
 	int m_view_idx;//index to current renderview
 
+	wxNotebook* m_notebook;
+	int m_current_page;
+	wxTimer m_timer;
+
+	//basic
 	bool m_rotate;
 	bool m_time_seq;
 	int m_seq_mode;//0:none; 1:4d; 2:bat
 	int m_mov_axis;	//0-x;1-y;2-z
 	int m_degree;
 	int m_rot_int_type;//0-linear; 1-smooth
-
-	int m_last_frame;
-	double m_starting_rot;
-	wxTimer m_timer;
-	double m_cur_time;
-	wxString m_filename;
-	bool m_running, m_record;
-	wxNotebook* m_notebook;
-	int m_current_page;
-	QVideoEncoder encoder_;
-	wxString filetype_;
+	static double m_movie_len;
 	double m_fps;
 	int m_start_time;
 	int m_end_time;
 	int m_current_time;
-	static double m_movie_len;
+
+	//play controls
+	int m_last_frame;
+	double m_starting_rot;
+	double m_cur_time;
+	bool m_running, m_record;
 	bool m_delayed_stop;
 	bool m_timer_run;//for temporary hold
+
+	//cropping
+	bool m_crop;//enable cropping
+	int m_crop_x;
+	int m_crop_y;
+	int m_crop_w;
+	int m_crop_h;
+
+	//save
+	wxString m_filename;
+	QVideoEncoder encoder_;
+	wxString filetype_;
 
 private:
 	void GetSettings();

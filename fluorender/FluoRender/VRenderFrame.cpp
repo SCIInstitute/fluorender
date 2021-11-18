@@ -665,9 +665,6 @@ VRenderFrame::VRenderFrame(
 		ToggleAllTools(false);
 	}
 
-	//make movie settings
-	m_mov_rewind = false;
-
 	//set view default settings
 	if (m_adjust_view && vrv)
 	{
@@ -3351,16 +3348,16 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("rot_check", m_movie_view->GetRotate());
 	fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
 	fconfig.Write("mov_axis", m_movie_view->GetMovAxis());
-	fconfig.Write("angle_end_text", m_movie_view->GetDegree());
-	fconfig.Write("step_text", m_movie_view->m_movie_len_text->GetValue());
-	fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
-	fconfig.Write("frame_chk", m_movie_view->m_frame_chk->GetValue());
-	fconfig.Write("center_x_text", m_movie_view->m_center_x_text->GetValue());
-	fconfig.Write("center_y_text", m_movie_view->m_center_y_text->GetValue());
-	fconfig.Write("width_text", m_movie_view->m_width_text->GetValue());
-	fconfig.Write("height_text", m_movie_view->m_height_text->GetValue());
-	fconfig.Write("time_start_text", m_movie_view->m_time_start_text->GetValue());
-	fconfig.Write("time_end_text", m_movie_view->m_time_end_text->GetValue());
+	fconfig.Write("degree", m_movie_view->GetDegree());
+	fconfig.Write("movie_len", m_movie_view->GetMovieLen());
+	fconfig.Write("fps", m_movie_view->GetFps());
+	fconfig.Write("crop", m_movie_view->GetCrop());
+	fconfig.Write("crop_x", m_movie_view->GetCropX());
+	fconfig.Write("crop_y", m_movie_view->GetCropY());
+	fconfig.Write("crop_w", m_movie_view->GetCropW());
+	fconfig.Write("crop_h", m_movie_view->GetCropH());
+	fconfig.Write("start_time", m_movie_view->GetStartTime());
+	fconfig.Write("end_time", m_movie_view->GetEndTime());
 	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
 	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
 	//tracking diag
@@ -4563,6 +4560,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		wxString sVal;
 		bool bVal;
 		int iVal;
+		double dVal;
 
 		//set settings for frame
 		VRenderView* vrv = 0;
@@ -4602,68 +4600,52 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			m_movie_view->SetMovAxis(iVal);
 		}
-		if (fconfig.Read("angle_end_text", &iVal))
+		if (fconfig.Read("degree", &iVal))
 		{
 			m_movie_view->SetDegree(iVal);
 		}
-		if (fconfig.Read("step_text", &sVal))
+		if (fconfig.Read("movie_len", &dVal))
 		{
-			m_movie_view->m_movie_len_text->SetValue(sVal);
-			m_mov_step = sVal;
+			m_movie_view->SetMovieLen(dVal);
 		}
-		if (fconfig.Read("frames_text", &sVal))
+		if (fconfig.Read("fps", &dVal))
 		{
-			m_movie_view->m_fps_text->SetValue(sVal);
-			m_mov_frames = sVal;
+			m_movie_view->SetFps(dVal);
 		}
-		if (fconfig.Read("frame_chk", &bVal))
+		if (fconfig.Read("crop", &bVal))
 		{
-			m_movie_view->m_frame_chk->SetValue(bVal);
-			if (vrv)
-			{
-				if (bVal)
-					vrv->EnableFrame();
-				else
-					vrv->DisableFrame();
-			}
+			m_movie_view->SetCrop(bVal);
 		}
-		long frame_x, frame_y, frame_w, frame_h;
 		bool b_x, b_y, b_w, b_h;
 		b_x = b_y = b_w = b_h = false;
-		if (fconfig.Read("center_x_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_x", &iVal))
 		{
-			m_movie_view->m_center_x_text->SetValue(sVal);
-			sVal.ToLong(&frame_x);
+			m_movie_view->SetCropX(iVal);
 			b_x = true;
 		}
-		if (fconfig.Read("center_y_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_y", &iVal))
 		{
-			m_movie_view->m_center_y_text->SetValue(sVal);
-			sVal.ToLong(&frame_y);
+			m_movie_view->SetCropY(iVal);
 			b_y = true;
 		}
-		if (fconfig.Read("width_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_w", &iVal))
 		{
-			m_movie_view->m_width_text->SetValue(sVal);
-			sVal.ToLong(&frame_w);
+			m_movie_view->SetCropW(iVal);
 			b_w = true;
 		}
-		if (fconfig.Read("height_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_h", &iVal))
 		{
-			m_movie_view->m_height_text->SetValue(sVal);
-			sVal.ToLong(&frame_h);
+			m_movie_view->SetCropH(iVal);
 			b_h = true;
 		}
-		if (vrv && b_x && b_y && b_w && b_h)
+		if (b_x && b_y && b_w && b_h)
 		{
-			vrv->SetFrame(int(frame_x-frame_w/2.0+0.5),
-				int(frame_y-frame_h/2.0+0.5),
-				frame_w, frame_h);
+			m_movie_view->UpdateCrop();
 		}
-		if (fconfig.Read("time_start_text", &sVal))
-			m_movie_view->m_time_start_text->SetValue(sVal);
-		if (fconfig.Read("time_end_text", &sVal))
-			m_movie_view->m_time_end_text->SetValue(sVal);
+		if (fconfig.Read("start_time", &iVal))
+			m_movie_view->SetStartTime(iVal);
+		if (fconfig.Read("end_time", &iVal))
+			m_movie_view->SetEndTime(iVal);
 		if (fconfig.Read("run_script", &bVal))
 			m_setting_dlg->SetRunScript(bVal);
 		if (fconfig.Read("script_file", &sVal))
