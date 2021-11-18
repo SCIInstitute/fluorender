@@ -49,11 +49,11 @@ class VMovieView : public wxPanel
 		//time sequence
 		ID_SeqChk = ID_MOVIEW_VIEW,
 		ID_BatChk,//batch mutual exclusive with seq(4d)
-		ID_TimeStartText,
-		ID_TimeEndText,
 		ID_IncTimeBtn,
 		ID_DecTimeBtn,
-		ID_CurrentTimeText,
+		ID_StartFrameText,
+		ID_EndFrameText,
+		ID_CurFrameText,
 		//movie len
 		ID_MovieLenText,
 
@@ -182,13 +182,13 @@ public:
 	void SetStartFrame(int value)
 	{
 		m_start_frame = value;
-		m_time_start_text->SetValue(wxString::Format("%d", m_start_frame));
+		m_start_frame_text->SetValue(wxString::Format("%d", m_start_frame));
 	}
 	int GetStartFrame() { return m_start_frame; }
 	void SetEndFrame(int value)
 	{
 		m_end_frame = value;
-		m_time_end_text->SetValue(wxString::Format("%d", m_end_frame));
+		m_end_frame_text->SetValue(wxString::Format("%d", m_end_frame));
 	}
 	int GetEndFrame() { return m_end_frame; }
 	//cropping
@@ -247,11 +247,11 @@ private:
 	//basic movie controls
 	wxCheckBox *m_seq_chk;
 	wxCheckBox *m_bat_chk;
-	wxTextCtrl *m_time_start_text;
-	wxTextCtrl *m_time_end_text;
 	wxButton *m_inc_time_btn;
 	wxButton *m_dec_time_btn;
-	wxTextCtrl *m_time_current_text;
+	wxTextCtrl *m_cur_frame_text;
+	wxTextCtrl *m_start_frame_text;
+	wxTextCtrl *m_end_frame_text;
 	wxTextCtrl *m_movie_len_text;
 
 	wxCheckBox *m_rot_chk;
@@ -306,7 +306,8 @@ private:
 	int m_rot_axis;	//0-x;1-y;2-z
 	int m_rot_deg;
 	int m_rot_int_type;//0-linear; 1-smooth
-	static double m_movie_len;
+	static double m_movie_len;//length in sec
+	double m_cur_time;//time in sec
 	double m_fps;
 	int m_start_frame;
 	int m_end_frame;
@@ -322,7 +323,6 @@ private:
 	//save controls
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation
-	double m_cur_time;
 	bool m_running, m_record;
 	bool m_delayed_stop;
 	bool m_timer_run;//for temporary hold
@@ -402,12 +402,12 @@ private:
 
 	//time slider
 	void OnTimeChange(wxScrollEvent &event);
-	void OnTimeEnter(wxCommandEvent& event);
+	void OnTimeText(wxCommandEvent& event);
 	void OnUpFrame(wxCommandEvent& event);
 	void OnDownFrame(wxCommandEvent& event);
-	void OnCurrentTimeText(wxCommandEvent& event);
-	void OnTimeStartText(wxCommandEvent& event);
-	void OnTimeEndText(wxCommandEvent& event);
+	void OnCurFrameText(wxCommandEvent& event);
+	void OnStartFrameText(wxCommandEvent& event);
+	void OnEndFrameText(wxCommandEvent& event);
 	void OnMovieLenText(wxCommandEvent& event);
 	void OnFpsEdit(wxCommandEvent& event);
 
