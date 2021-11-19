@@ -1185,7 +1185,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	int time = m_end_frame - m_start_frame + 1;
 	time = int(m_start_frame + time * pcnt + 0.5);
 
-	if (m_seq_mode == 1)
+	if (m_seq_mode == 0 || m_seq_mode == 1)
 	{
 		m_view->Set4DSeqFrame(time, m_start_frame, m_end_frame, rewind);
 	}
@@ -1194,7 +1194,8 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 		m_view->Set3DBatFrame(time);
 	}
 
-	if (m_rot_chk->GetValue())
+	//rotate animation
+	if (m_rotate)
 	{
 		double rval[3];
 		double val;
@@ -1208,6 +1209,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 		rval[m_rot_axis] = val;
 		m_view->SetRotations(rval[0], rval[1], rval[2]);
 	}
+
 	m_view->RefreshGL(false);
 }
 

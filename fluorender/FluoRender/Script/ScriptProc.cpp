@@ -146,6 +146,9 @@ bool ScriptProc::TimeCondition()
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
+	if (startf < 0 || startf > endf ||
+		curf < startf || curf > endf)
+		return false;
 	int tm;//mask
 	int startd = curf - startf;
 	int endd = endf - curf;

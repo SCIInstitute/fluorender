@@ -4825,17 +4825,12 @@ void VRenderGLView::UpdateVolumeData(int frame,
 
 void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
+	//skip update if frame num unchanged
+	bool update = m_tseq_cur_num == frame ? false : true;
 	//compute frame number
 	m_begin_frame = start_frame;
 	m_end_frame = end_frame;
 	m_total_frames = std::abs(end_frame - start_frame + 1);
-	//if (frame > end_frame)
-	//	frame = end_frame;
-	//if (frame < start_frame)
-	//	frame = start_frame;
-	//skip if frame unchanged
-	if (m_tseq_cur_num == frame)
-		return;
 
 	//save currently selected volume
 	VolumeData* cur_vd_save = m_cur_vol;
@@ -4848,11 +4843,9 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	m_tseq_prv_num = m_tseq_cur_num;
 	m_tseq_cur_num = frame;
 
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_pop_list[i];
-		UpdateVolumeData(frame, vd, m_frame);
-	}
+	if (update)
+	for (auto i : m_vd_pop_list)
+		UpdateVolumeData(frame, i, m_frame);
 
 	//run post-change script
 	if (m_run_script)
