@@ -543,8 +543,7 @@ void VMovieView::GetScriptSettings()
 		return;
 
 	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
-	m_run_script_chk->SetValue(
-		run_script);
+	m_run_script_chk->SetValue(run_script);
 	wxString script_file =
 		m_frame->GetSettingDlg()->GetScriptFile();
 	m_script_file_text->SetValue(script_file);
@@ -1044,6 +1043,7 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	bool run_script = m_run_script_chk->GetValue();
 	if (m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRunScript(run_script);
+	m_view->m_glview->SetRun4DScript(run_script);
 	if (run_script)
 	{
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
@@ -1064,6 +1064,7 @@ void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
 
 	wxString str = m_script_file_text->GetValue();
 	m_frame->GetSettingDlg()->SetScriptFile(str);
+	m_view->m_glview->SetScriptFile(str);
 }
 
 void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
@@ -1084,6 +1085,7 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 		wxString file = fopendlg->GetPath();
 		if (m_frame && m_frame->GetSettingDlg())
 			m_frame->GetSettingDlg()->SetScriptFile(file);
+		m_view->m_glview->SetScriptFile(file);
 		m_script_file_text->SetValue(file);
 	}
 

@@ -47,7 +47,7 @@ value=0
 [save\ cmp]
 value=0
 [run\ script]
-value=1
+value=0
 file=
 [paint\ history]
 value=1

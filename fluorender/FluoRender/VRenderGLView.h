@@ -487,6 +487,7 @@ public:
 	//run 4d script
 	void SetRun4DScript(bool runscript) { m_run_script = runscript; }
 	bool GetRun4DScript() { return m_run_script; }
+	void SetScriptFile(wxString &str) { m_script_file = str; }
 
 	//start loop update
 	void StartLoopUpdate();
@@ -719,7 +720,7 @@ private:
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	VRenderView* m_vrv;
 	//populated lists of data
 	bool m_vd_pop_dirty;
