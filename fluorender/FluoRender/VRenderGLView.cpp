@@ -2404,7 +2404,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 		if (mask)
 		{
 			//drawlabel
-			if (m_run_script &&
+			if (vd->GetLabelMode() &&
 				vd->GetMask(false) &&
 				vd->GetLabel(false))
 				continue;
@@ -2427,7 +2427,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 			if (vd->GetBlendMode() != 2)
 			{
 				//drawlabel
-				if (m_run_script &&
+				if (vd->GetLabelMode() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
 					vd->SetMaskMode(4);
@@ -3408,7 +3408,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 			if (vr)
 			{
 				//drawlabel
-				if (vd->GetMask(false) &&
+				if (vd->GetLabelMode() &&
+					vd->GetMask(false) &&
 					vd->GetLabel(false))
 					vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -8970,10 +8971,10 @@ void VRenderGLView::StartLoopUpdate()
 						if (vd->GetShadow())
 							total_num++;
 						//mask
+						int vdmm = vd->GetMaskMode();
 						if (vd->GetTexture() &&
 							vd->GetTexture()->nmask() != -1 &&
-							(!m_run_script ||
-							(m_run_script &&
+							(vdmm != 4 || (vdmm==4 &&
 							vd->GetTexture()->nlabel() ==-1)))
 							total_num++;
 					}

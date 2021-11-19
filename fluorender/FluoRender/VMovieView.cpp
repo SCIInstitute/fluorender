@@ -539,10 +539,11 @@ void VMovieView::GetSettings()
 void VMovieView::GetScriptSettings()
 {
 	//script
-	if (!m_frame || !m_frame->GetSettingDlg())
+	if (!m_view || !m_frame || !m_frame->GetSettingDlg())
 		return;
 
 	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
+	m_view->m_glview->SetRun4DScript(run_script);
 	m_run_script_chk->SetValue(run_script);
 	wxString script_file =
 		m_frame->GetSettingDlg()->GetScriptFile();

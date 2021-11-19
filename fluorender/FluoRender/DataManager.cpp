@@ -83,6 +83,7 @@ VolumeData::VolumeData()
 	m_stream_mode = 0;
 
 	//mask mode
+	m_label_mode = 0;
 	m_mask_mode = 0;
 	m_use_mask_threshold = false;
 
@@ -210,6 +211,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_stream_mode = copy.m_stream_mode;
 
 	//mask mode
+	m_label_mode = copy.m_label_mode;
 	m_mask_mode = copy.m_mask_mode;
 	m_use_mask_threshold = false;
 	m_mask_clear = true;
