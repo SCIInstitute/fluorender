@@ -4741,7 +4741,7 @@ void VRenderGLView::StopMovie()
 	m_capture_param = false;
 }
 
-void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame)
+void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 {
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -4759,7 +4759,6 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 				//first dataset
 				start_frame = vd_start_frame;
 				end_frame = vd_end_frame;
-				cur_frame = vd_cur_frame;
 			}
 			else
 			{
@@ -4824,18 +4823,16 @@ void VRenderGLView::UpdateVolumeData(int frame,
 	}
 }
 
-void VRenderGLView::Set4DSeqFrame(int frame, bool rewind)
+void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
 	//compute frame number
-	int start_frame, end_frame, cur_frame;
-	Get4DSeqFrames(start_frame, end_frame, cur_frame);
 	m_begin_frame = start_frame;
 	m_end_frame = end_frame;
 	m_total_frames = std::abs(end_frame - start_frame + 1);
-	if (frame > end_frame)
-		frame = end_frame;
-	if (frame < start_frame)
-		frame = start_frame;
+	//if (frame > end_frame)
+	//	frame = end_frame;
+	//if (frame < start_frame)
+	//	frame = start_frame;
 	//skip if frame unchanged
 	if (m_tseq_cur_num == frame)
 		return;
@@ -4869,7 +4866,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool rewind)
 	RefreshGL(17);
 }
 
-void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
+void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
 {
 	m_bat_folder = "";
 
@@ -4894,7 +4891,6 @@ void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_fr
 				//first dataset
 				start_frame = vd_start_frame;
 				end_frame = vd_end_frame;
-				cur_frame = 0;
 			}
 			else
 			{
@@ -4906,7 +4902,6 @@ void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_fr
 			}
 		}
 	}
-	cur_frame -= start_frame;
 	end_frame -= start_frame;
 	start_frame = 0;
 }

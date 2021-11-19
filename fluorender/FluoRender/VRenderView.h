@@ -235,21 +235,21 @@ public:
 	//movie export
 	//get frame info
 	//4d sequence
-	void Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame)
+	void Get4DSeqRange(int &start_frame, int &end_frame)
 	{
 		if (m_glview)
-			m_glview->Get4DSeqFrames(start_frame, end_frame, cur_frame);
+			m_glview->Get4DSeqRange(start_frame, end_frame);
 	}
-	void Set4DSeqFrame(int frame, bool rewind)
+	void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 	{
 		if (m_glview)
-			m_glview->Set4DSeqFrame(frame, rewind);
+			m_glview->Set4DSeqFrame(frame, start_frame, end_frame, rewind);
 	}
 	//3d batch
-	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
+	void Get3DBatRange(int &start_frame, int &end_frame)
 	{
 		if (m_glview)
-			m_glview->Get3DBatFrames(start_frame, end_frame, cur_frame);
+			m_glview->Get3DBatRange(start_frame, end_frame);
 	}
 	void Set3DBatFrame(int offset)
 	{
@@ -257,33 +257,6 @@ public:
 			m_glview->Set3DBatFrame(offset);
 	}
 	//set movie export
-	void Set3DRotCapture(double start_angle,
-		double end_angle,
-		double step,
-		int frames,
-		int rot_axis,
-		wxString &cap_file,
-		bool rewind,
-		int len = 4)
-	{
-		if (m_glview)
-			m_glview->Set3DRotCapture(start_angle, end_angle, step, frames, rot_axis, cap_file, rewind, len);
-	}
-	void Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
-	{
-		if (m_glview)
-			m_glview->Set4DSeqCapture(cap_file, begin_frame, end_frame, rewind);
-	}
-	void Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
-	{
-		if (m_glview)
-			m_glview->Set3DBatCapture(cap_file, begin_frame, end_frame);
-	}
-	void SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
-	{
-		if (m_glview)
-			m_glview->SetParamCapture(cap_file, begin_frame, end_frame, rewind);
-	}
 	void SetParams(double p) {
 		if (m_glview)
 			m_glview->SetParams(p);

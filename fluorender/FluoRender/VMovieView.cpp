@@ -532,7 +532,6 @@ void VMovieView::GetSettings()
 	SetCrop(m_view->GetFrameEnabled());
 	AddScriptToList();
 	GetScriptSettings();
-
 	if (m_advanced_movie)
 		m_advanced_movie->GetSettings(m_view);
 }
@@ -696,20 +695,19 @@ void VMovieView::SetTimeSeq(bool value)
 		if (!m_seq_mode)
 			m_seq_mode = 1;
 
-		int tmp;
 		if (m_seq_mode == 1)
 		{
 			m_seq_chk->SetValue(true);
 			m_bat_chk->SetValue(false);
 			if (m_view)
-				m_view->Get4DSeqFrames(m_start_frame, m_end_frame, tmp);
+				m_view->Get4DSeqRange(m_start_frame, m_end_frame);
 		}
 		else if (m_seq_mode == 2)
 		{
 			m_seq_chk->SetValue(false);
 			m_bat_chk->SetValue(true);
 			if (m_view)
-				m_view->Get3DBatFrames(m_start_frame, m_end_frame, tmp);
+				m_view->Get3DBatRange(m_start_frame, m_end_frame);
 		}
 	}
 	else
@@ -1096,6 +1094,13 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 			m_frame->GetSettingDlg()->SetScriptFile(file);
 		m_view->m_glview->SetScriptFile(file);
 		m_script_file_text->SetValue(file);
+
+		//enable script if not
+		if (!m_run_script_chk->GetValue())
+		{
+			m_run_script_chk->SetValue(true);
+			OnRunScriptChk(event);
+		}
 	}
 
 	delete fopendlg;
@@ -1182,10 +1187,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 
 	if (m_seq_mode == 1)
 	{
-		int first, sec, tmp;
-		m_view->Get4DSeqFrames(first, sec, tmp);
-		if (sec - first > 0)
-			m_view->Set4DSeqFrame(time, rewind);
+		m_view->Set4DSeqFrame(time, m_start_frame, m_end_frame, rewind);
 	}
 	else if (m_seq_mode == 2)
 	{
