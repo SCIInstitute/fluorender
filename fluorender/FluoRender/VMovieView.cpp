@@ -68,6 +68,7 @@ EVT_TEXT(ID_ScriptFileText, VMovieView::OnScriptFileEdit)
 EVT_BUTTON(ID_ScriptClearBtn, VMovieView::OnScriptClearBtn)
 EVT_BUTTON(ID_ScriptFileBtn, VMovieView::OnScriptFileBtn)
 EVT_LIST_ITEM_SELECTED(ID_ScriptList, VMovieView::OnScriptListSelected)
+EVT_LIST_ITEM_ACTIVATED(ID_ScriptList, VMovieView::OnScriptListSelected)
 //auto key
 EVT_BUTTON(ID_GenKeyBtn, VMovieView::OnGenKey)
 EVT_LIST_ITEM_ACTIVATED(ID_AutoKeyList, VMovieView::OnListItemAct)
@@ -548,6 +549,7 @@ void VMovieView::GetScriptSettings()
 	wxString script_file =
 		m_frame->GetSettingDlg()->GetScriptFile();
 	m_script_file_text->SetValue(script_file);
+	m_view->m_glview->SetScriptFile(script_file);
 	//highlight if builtin
 	wxArrayString list;
 	if (GetScriptFiles(list))
@@ -1045,6 +1047,12 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	if (m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRunScript(run_script);
 	m_view->m_glview->SetRun4DScript(run_script);
+	wxString str = m_script_file_text->GetValue();
+	if (!str.IsEmpty())
+	{
+		m_frame->GetSettingDlg()->SetScriptFile(str);
+		m_view->m_glview->SetScriptFile(str);
+	}
 	if (run_script)
 	{
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
@@ -1107,6 +1115,13 @@ void VMovieView::OnScriptListSelected(wxListEvent &event)
 		file = exePath + GETSLASH() + "Scripts" +
 			GETSLASH() + file + ".txt";
 		m_script_file_text->SetValue(file);
+
+		//enable script if not
+		if (!m_run_script_chk->GetValue())
+		{
+			m_run_script_chk->SetValue(true);
+			OnRunScriptChk(event);
+		}
 	}
 }
 
