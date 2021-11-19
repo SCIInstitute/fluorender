@@ -114,6 +114,7 @@ class VPropView: public wxPanel
 		ID_NRChk,
 		ID_DepthChk,
 		ID_TranspChk,
+		ID_CompChk,
 };
 
 public:
@@ -325,6 +326,8 @@ private:
 	void OnFluoRender(wxCommandEvent &event);
 	//transparency
 	void OnTranspChk(wxCommandEvent &event);
+	//component display
+	void OnCompChk(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

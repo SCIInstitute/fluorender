@@ -1059,6 +1059,7 @@ public:
 	void SetShadowParams(double val);
 	void SetMode(int mode);
 	void SetAlphaPower(double val);
+	void SetLabelMode(int mode);
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
@@ -1305,6 +1306,7 @@ public:
 	bool m_vol_shw;		//enable shadow
 	double m_vol_swi;	//shadow intensity
 	bool m_vol_trp;		//hi transp
+	int m_vol_com;		//component display
 
 	bool m_vol_test_wiref;		//wireframe mode
 

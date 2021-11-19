@@ -4266,6 +4266,16 @@ void DataGroup::SetAlphaPower(double val)
 	}
 }
 
+void DataGroup::SetLabelMode(int val)
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetLabelMode(val);
+	}
+}
+
 void DataGroup::SetNR(bool val)
 {
 	for (int i=0; i<GetVolumeNum(); i++)
@@ -4392,6 +4402,7 @@ m_vol_exb(0.0),
 	m_vol_inv(false),
 	m_vol_mip(false),
 	m_vol_trp(false),
+	m_vol_com(0),
 	m_vol_nrd(false),
 	m_vol_shw(false),
 	m_vol_swi(0.0),
@@ -4465,6 +4476,8 @@ m_vol_exb(0.0),
 		m_vol_mip = bval;
 	if (fconfig.Read("enable_trp", &bval))
 		m_vol_trp = bval;
+	if (fconfig.Read("enable_comp", &ival))
+		m_vol_com = ival;
 	if (fconfig.Read("noise_rd", &bval))
 		m_vol_nrd = bval;
 
@@ -4565,7 +4578,8 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 		vd->SetMode(m_vol_mip?1:0);
 		vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
 		vd->SetNR(m_vol_nrd);
-		//inversion
+		vd->SetLabelMode(m_vol_com);
+		//interpolation
 		vd->SetInterpolate(m_vol_interp);
 		//inversion
 		vd->SetInvert(m_vol_inv);

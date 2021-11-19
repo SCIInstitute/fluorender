@@ -108,6 +108,8 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
 	//transp
 	EVT_TOOL(ID_TranspChk, VPropView::OnTranspChk)
+	//components
+	EVT_TOOL(ID_CompChk, VPropView::OnCompChk)
 END_EVENT_TABLE()
 
 VPropView::VPropView(wxWindow* frame,
@@ -413,6 +415,13 @@ wxPanel(parent, id, pos, size,style, name),
 		"Invert data intensity values",
 		"Invert data intensity values");
 	m_options_toolbar->ToggleTool(ID_InvChk,false);
+	//component display
+	bitmap = wxGetBitmapFromMemory(comp_off);
+	m_options_toolbar->AddCheckTool(ID_CompChk, "Components",
+		bitmap, wxNullBitmap,
+		"Show components",
+		"Show components");
+	m_options_toolbar->ToggleTool(ID_CompChk, false);
 	//interpolation
 	bitmap = wxGetBitmapFromMemory(interpolate);
 	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
@@ -516,11 +525,11 @@ wxPanel(parent, id, pos, size,style, name),
 	st = new wxStaticText(this, 0, "Effects: ",
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxToggleButton(this, ID_ColormapInvBtn,
-		L"\u262f", wxDefaultPosition, wxSize(20, 24));
+		L"\u262f", wxDefaultPosition, wxSize(24, 24));
 #ifdef _WIN32
-	wxFont font(28, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	wxFont font(30, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 #else
-	wxFont font(14, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	wxFont font(15, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 #endif
 	m_colormap_inv_btn->SetFont(font);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
@@ -815,6 +824,21 @@ void VPropView::GetSettings()
 		m_options_toolbar->ToggleTool(ID_TranspChk, false);
 		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
 			wxGetBitmapFromMemory(transplo));
+	}
+
+	//component display
+	int label_mode = m_vd->GetLabelMode();
+	if (label_mode)
+	{
+		m_options_toolbar->ToggleTool(ID_CompChk, true);
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp));
+	}
+	else
+	{
+		m_options_toolbar->ToggleTool(ID_CompChk, false);
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp_off));
 	}
 
 	//noise reduction
@@ -1995,6 +2019,31 @@ void VPropView::OnTranspChk(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
+void VPropView::OnCompChk(wxCommandEvent &event)
+{
+	bool bval = m_options_toolbar->GetToolState(ID_CompChk);
+	if (bval)
+	{
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp));
+		if (m_sync_group && m_group)
+			m_group->SetLabelMode(1);
+		else if (m_vd)
+			m_vd->SetLabelMode(1);
+	}
+	else
+	{
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp_off));
+		if (m_sync_group && m_group)
+			m_group->SetLabelMode(0);
+		else if (m_vd)
+			m_vd->SetLabelMode(0);
+	}
+
+	RefreshVRenderViews(false, true);
+}
+
 //noise reduction
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
@@ -2552,6 +2601,10 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	bool trp = m_options_toolbar->GetToolState(ID_TranspChk);
 	fconfig.Write("enable_trp", trp);
 	mgr->m_vol_trp = trp;
+	//enable component display
+	int comp = m_options_toolbar->GetToolState(ID_CompChk);
+	fconfig.Write("enable_comp", comp);
+	mgr->m_vol_com = comp;
 	//noise reduction
 	bool nrd = m_options_toolbar->GetToolState(ID_NRChk);
 	fconfig.Write("noise_rd", nrd);
@@ -2748,6 +2801,13 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_group->SetAlphaPower(bval ? 2.0 : 1.0);
 	else
 		m_vd->SetAlphaPower(bval ? 2.0 : 1.0);
+	//component display
+	ival = mgr->m_vol_com;
+	m_options_toolbar->ToggleTool(ID_CompChk, ival?true:false);
+	if (m_sync_group && m_group)
+		m_group->SetLabelMode(ival);
+	else
+		m_vd->SetLabelMode(ival);
 	//noise reduction
 	bval = mgr->m_vol_nrd;
 	m_options_toolbar->ToggleTool(ID_NRChk,bval);
