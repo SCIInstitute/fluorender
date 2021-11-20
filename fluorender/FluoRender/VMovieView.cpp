@@ -1185,7 +1185,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	int time = m_end_frame - m_start_frame + 1;
 	time = int(m_start_frame + time * pcnt + 0.5);
 
-	if (m_seq_mode == 0 || m_seq_mode == 1)
+	if (m_seq_mode == 1)
 	{
 		m_view->Set4DSeqFrame(time, m_start_frame, m_end_frame, rewind);
 	}
@@ -1222,6 +1222,7 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event)
 		m_y_rd->Enable();
 		m_z_rd->Enable();
 		m_degree_text->Enable();
+		m_rot_int_cmb->Enable();
 	}
 	else
 	{
@@ -1229,6 +1230,10 @@ void VMovieView::OnRotateChecked(wxCommandEvent& event)
 		m_y_rd->Disable();
 		m_z_rd->Disable();
 		m_degree_text->Disable();
+		m_rot_int_cmb->Disable();
+		//enable time seq if not
+		if (m_seq_mode == 0)
+			SetTimeSeq(true);
 	}
 }
 

@@ -3482,13 +3482,6 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	//update
 	m_view->RefreshGL();
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetSettingDlg()->SetRunScript(true);
-		vr_frame->GetMovieView()->GetScriptSettings();
-	}
-
 	if (command && m_record_cmd)
 		AddCmd("generate");
 }
@@ -3544,15 +3537,6 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 		cg.FillBorders(0.1);
 
 	m_view->RefreshGL();
-
-	//connection.disconnect();
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetSettingDlg()->SetRunScript(true);
-		vr_frame->GetMovieView()->GetScriptSettings();
-	}
 
 	if (command && m_record_cmd)
 		AddCmd("clean");
