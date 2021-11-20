@@ -8959,11 +8959,11 @@ void VRenderGLView::StartLoopUpdate()
 						if (vd->GetShadow())
 							total_num++;
 						//mask
-						int vdmm = vd->GetMaskMode();
 						if (vd->GetTexture() &&
 							vd->GetTexture()->nmask() != -1 &&
-							(vdmm != 4 || (vdmm==4 &&
-							vd->GetTexture()->nlabel() ==-1)))
+							(!vd->GetLabelMode() ||
+							(vd->GetLabelMode() &&
+							vd->GetTexture()->nlabel() == -1)))
 							total_num++;
 					}
 				}
