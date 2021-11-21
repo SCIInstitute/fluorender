@@ -84,6 +84,8 @@ public:
 	//flipping
 	void SetFlipX(int flip) {m_user_flip_x = flip;}
 	void SetFlipY(int flip) {m_user_flip_y = flip;}
+	void SetSeqType(int value) { m_seq_type = value; }
+
 private:
 	wstring m_data_name;
 
@@ -222,6 +224,8 @@ private:
 	//actual flags for flipping
 	bool m_flip_x;
 	bool m_flip_y;
+	//seq type
+	int m_seq_type;
 
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);

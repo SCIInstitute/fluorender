@@ -1269,11 +1269,14 @@ public:
 	bool GetOverrideVox()
 	{ return m_override_vox; }
 
-	//flags for pvxml flipping
+	//flags for pvxml settings
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
 	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
+	void SetPvxmlSeqType(int value) { m_pvxml_seq_type = value; }
+	int GetPvxmlSeqType() { return m_pvxml_seq_type; }
+
 public:
 	//default values
 	//volume
@@ -1344,6 +1347,7 @@ private:
 	//flgs for pvxml flipping
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
+	int m_pvxml_seq_type;
 };
 
 #endif//_DATAMANAGER_H_

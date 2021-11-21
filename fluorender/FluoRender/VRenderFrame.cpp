@@ -481,6 +481,7 @@ VRenderFrame::VRenderFrame(
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
 	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
 	m_data_mgr.SetPvxmlFlipY(m_setting_dlg->GetPvxmlFlipY());
+	m_data_mgr.SetPvxmlSeqType(m_setting_dlg->GetPvxmlSeqType());
 	flvr::VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
 	flvr::MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
 	TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());

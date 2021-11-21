@@ -64,6 +64,7 @@ PVXMLReader::PVXMLReader()
 	m_user_flip_y = 0;
 	m_flip_x = false;
 	m_flip_y = false;
+	m_seq_type = 1;
 }
 
 PVXMLReader::~PVXMLReader()
@@ -287,6 +288,7 @@ void PVXMLReader::UpdateStateShard(wxXmlNode *stateNode)
 {
 	if (m_state_shard_stack.size())
 		m_current_state = m_state_shard_stack.back();
+	m_current_state.seq_type = m_seq_type;
 	wxXmlNode *child = stateNode->GetChildren();
 	while (child)
 	{
@@ -1059,8 +1061,8 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 			{
 				unsigned short value;
 				value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-				if ((double)value > m_max_value)
-					m_max_value = (double)value;
+				//if ((double)value > m_max_value)
+				m_max_value = (double)value;
 			}
 			break;
 		}

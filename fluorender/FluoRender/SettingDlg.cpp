@@ -841,6 +841,7 @@ void SettingDlg::GetSettings()
 	m_ruler_size_thresh = 5;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
+	m_pvxml_seq_type = 1;
 	m_api_type = 0;
 	m_red_bit = 8;
 	m_green_bit = 8;
@@ -1094,11 +1095,12 @@ void SettingDlg::GetSettings()
 		fconfig.Read("size thresh", &m_ruler_size_thresh);
 	}
 	//flags for pvxml flipping
-	if (fconfig.Exists("/pvxml flip"))
+	if (fconfig.Exists("/pvxml"))
 	{
-		fconfig.SetPath("/pvxml flip");
-		fconfig.Read("x", &m_pvxml_flip_x);
-		fconfig.Read("y", &m_pvxml_flip_y);
+		fconfig.SetPath("/pvxml");
+		fconfig.Read("flip_x", &m_pvxml_flip_x);
+		fconfig.Read("flip_y", &m_pvxml_flip_y);
+		fconfig.Read("seq_type", &m_pvxml_seq_type);
 	}
 	//pixel format
 	if (fconfig.Exists("/pixel format"))
@@ -1476,9 +1478,10 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("size thresh", m_ruler_size_thresh);
 
 	//flags for flipping pvxml
-	fconfig.SetPath("/pvxml flip");
-	fconfig.Write("x", m_pvxml_flip_x);
-	fconfig.Write("y", m_pvxml_flip_y);
+	fconfig.SetPath("/pvxml");
+	fconfig.Write("flip_x", m_pvxml_flip_x);
+	fconfig.Write("flip_y", m_pvxml_flip_y);
+	fconfig.Write("seq_type", m_pvxml_seq_type);
 
 	//pixel format
 	fconfig.SetPath("/pixel format");

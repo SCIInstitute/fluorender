@@ -4703,6 +4703,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 				reader = new PVXMLReader();
 				((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
 				((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
+				((PVXMLReader*)reader)->SetSeqType(m_pvxml_seq_type);
 			}
 			else if (type == LOAD_TYPE_BRKXML)
 				reader = new BRKXMLReader();

@@ -239,11 +239,13 @@ public:
 	//ruler size thresh
 	int GetRulerSizeThresh() { return m_ruler_size_thresh; }
 	void SetRulerSizeThresh(int val) { m_ruler_size_thresh = val; }
-	//flags for pvxml flipping
+	//flags for pvxml settings
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
 	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
+	void SetPvxmlSeqType(int value) { m_pvxml_seq_type = value; }
+	int GetPvxmlSeqType() { return m_pvxml_seq_type; }
 	//pixel format
 	int GetApiType() { return m_api_type; }
 	int GetRedBit() {return m_red_bit;}
@@ -375,6 +377,7 @@ private:
 	//flip pvxml frame
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
+	int m_pvxml_seq_type;
 	//pixel format
 	int m_api_type;//0-default; 1-amd; 2-nv
 	int m_red_bit;
