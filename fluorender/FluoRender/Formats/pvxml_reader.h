@@ -134,8 +134,7 @@ private:
 			lpf(0),
 			mpp_x(0),
 			mpp_y(0),
-			bit_depth(0),
-			seq_type(0) {}
+			bit_depth(0) {}
 		int grid_index;
 		int grid_index_x;
 		int grid_index_y;
@@ -149,8 +148,6 @@ private:
 		double mpp_x;//microns per pixel x
 		double mpp_y;//microns per pixel y
 		int bit_depth;
-		int seq_type;//sequence type for non-standard formats
-						//1-stack; 2-time
 	};
 	StateShard m_current_state;
 	vector<StateShard> m_state_shard_stack;

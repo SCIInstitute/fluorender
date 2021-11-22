@@ -96,7 +96,7 @@ size\ thresh=2
 [pvxml]
 flip_x=0
 flip_y=0
-seq_type=2
+seq_type=0
 [pixel\ format]
 api_type=0
 red_bit=8
