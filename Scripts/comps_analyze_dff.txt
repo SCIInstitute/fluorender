@@ -15,8 +15,8 @@ type=comp_analysis
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 consistent=1
-selected=0
-slimit=5
+selected=1
+slimit=500
 [tasks/task2]
 type=fetch_mask
 time_mode=TM_ALL_POST_REWIND
