@@ -140,7 +140,8 @@ bool ScriptProc::TimeCondition()
 	int time_mode;
 	wxString str;
 	m_fconfig->Read("time_mode", &str, "TM_ALL_PRE");
-	time_mode = TimeMode(str.ToStdString());
+	std::string mode_str = str.ToStdString();
+	time_mode = TimeMode(mode_str);
 	if (m_rewind && !(time_mode & TM_REWIND))
 		return false;
 	int curf = m_view->m_tseq_cur_num;
