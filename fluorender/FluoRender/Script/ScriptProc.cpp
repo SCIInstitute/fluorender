@@ -1362,7 +1362,10 @@ void ScriptProc::ExportAnalysis()
 			//value name
 			replace = 2;
 			ofs << "//#begin value name" << std::endl;
-			ofs << "        value: " << js_value.ToStdString() << std::endl;
+			ofs << "        value: " << js_value.ToStdString();
+			if (js_value.find(',') == std::string::npos)
+				ofs << ",";
+			ofs << std::endl;
 		}
 		if (line.find("#end") != std::string::npos)
 		{
