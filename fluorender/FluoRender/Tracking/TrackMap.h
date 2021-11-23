@@ -68,6 +68,7 @@ namespace flrd
 		m_max_iter(25),
 		m_eps(1e-3),
 		m_filter(1),
+		m_stencil_thresh(2),
 		m_map(track_map) {}
 		~TrackMapProcessor();
 
@@ -81,6 +82,7 @@ namespace flrd
 		void SetMaxIter(int value);
 		void SetEps(float value);
 		void SetFilterSize(size_t value);
+		void SetStencilThresh(const fluo::Point &value);
 
 		void SetSizes(size_t nx, size_t ny, size_t nz);
 		void SetBits(size_t bits);
@@ -180,6 +182,7 @@ namespace flrd
 		size_t m_filter;
 		bool m_merge;
 		bool m_split;
+		fluo::Point m_stencil_thresh;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
 		//the trackmap
@@ -426,6 +429,11 @@ namespace flrd
 	inline void TrackMapProcessor::SetFilterSize(size_t value)
 	{
 		m_filter = value;
+	}
+
+	inline void TrackMapProcessor::SetStencilThresh(const fluo::Point &value)
+	{
+		m_stencil_thresh = value;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, const bool value)

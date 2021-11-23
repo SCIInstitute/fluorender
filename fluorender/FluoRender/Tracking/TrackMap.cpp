@@ -4576,7 +4576,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		s1 = iter->second;
 		//filter out small
 		fluo::Point s1size = s1.box.size();
-		if (s1size.x() < 2 && s1size.y() < 2 && s1size.z() < 2)
+		if (s1size.x() < m_stencil_thresh.x() &&
+			s1size.y() < m_stencil_thresh.y() &&
+			s1size.z() < m_stencil_thresh.z())
 			continue;
 		//get offset
 		fluo::Vector off;

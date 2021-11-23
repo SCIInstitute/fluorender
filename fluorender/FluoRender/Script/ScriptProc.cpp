@@ -538,6 +538,8 @@ void ScriptProc::RunMaskTracking()
 	m_fconfig->Read("fsize", &fsize, 1);
 	int mode;
 	m_fconfig->Read("compare", &mode, 0);
+	int stsize;
+	m_fconfig->Read("stsize", &stsize, 2);
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
@@ -552,6 +554,7 @@ void ScriptProc::RunMaskTracking()
 	tm_processor.SetMaxIter(iter);
 	tm_processor.SetEps(eps);
 	tm_processor.SetFilterSize(fsize);
+	tm_processor.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
