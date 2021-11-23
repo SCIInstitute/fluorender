@@ -43,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 #include <chrono>
 
+class VRenderFrame;
 class VRenderView;
 class VolumeData;
 
@@ -144,6 +145,14 @@ public:
 		ID_CompAllBtn,
 		ID_CompClearBtn,
 		ID_ShuffleBtn,
+		//ID edit controls
+		ID_NewIdText,
+		ID_NewIdXBtn,
+		ID_CompNewBtn,
+		ID_CompAddBtn,
+		ID_CompReplaceBtn,
+		ID_CompCleanBkgBtn,
+		ID_CompCombineBtn,
 		//options
 		ID_ConSizeSldr,
 		ID_ConSizeText,
@@ -189,8 +198,7 @@ public:
 		ID_OutputGrid
 	};
 
-	ComponentDlg(wxWindow* frame,
-		wxWindow* parent);
+	ComponentDlg(VRenderFrame* frame);
 	~ComponentDlg();
 
 	void Update();
@@ -233,7 +241,7 @@ public:
 	void ExcludeComps();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	VRenderView* m_view;
 
 	//progress
@@ -415,6 +423,14 @@ private:
 	wxButton* m_comp_all_btn;
 	wxButton* m_comp_clear_btn;
 	wxButton* m_shuffle_btn;
+	//modify
+	wxTextCtrl* m_new_id_text;
+	wxButton* m_new_id_x_btn;
+	wxButton* m_comp_new_btn;
+	wxButton* m_comp_add_btn;
+	wxButton* m_comp_replace_btn;
+	wxButton* m_comp_clean_bkg_btn;
+	wxButton* m_comp_combine_btn;
 	//stats
 	wxCheckBox* m_analysis_min_check;
 	wxSpinCtrl* m_analysis_min_spin;
@@ -579,6 +595,15 @@ private:
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
 	void OnShuffle(wxCommandEvent &event);
+	//modify
+	void OnNewIDText(wxCommandEvent &event);
+	void OnNewIDX(wxCommandEvent& event);
+	void OnCompNew(wxCommandEvent& event);
+	void OnCompAdd(wxCommandEvent& event);
+	void OnCompReplace(wxCommandEvent& event);
+	void OnCompCleanBkg(wxCommandEvent& event);
+	void OnCompCombine(wxCommandEvent& event);
+	//options
 	void OnConSizeSldr(wxScrollEvent &event);
 	void OnConSizeText(wxCommandEvent &event);
 	void OnConsistentCheck(wxCommandEvent &event);

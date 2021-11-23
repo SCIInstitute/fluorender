@@ -2199,6 +2199,225 @@ void TraceDlg::CellEraseID()
 	CellUpdate();
 }
 
+void TraceDlg::CellReplaceID()
+{
+	if (!m_view)
+		return;
+
+	//get id
+	wxString str = m_cell_new_id_text->GetValue();
+	unsigned long id;
+	if (!str.ToULong(&id))
+		return;
+	if (!id)
+		return;
+
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
+
+	//current T
+	flrd::CelpList list_cur;
+	flrd::CelpListIter cell_iter;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Nrrd* nrrd_mask = vd->GetMask(true);
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	//get current label
+	flvr::Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	//replace ID
+	std::unordered_map<unsigned int, unsigned int> list_rep;
+	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
+	unsigned int old_id, new_id;
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	unsigned long long index;
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	for (index = 0; index < for_size; ++index)
+	{
+		old_id = data_label[index];
+		if (!data_mask[index] ||
+			!old_id ||
+			old_id == id)
+			continue;
+
+		list_rep_iter = list_rep.find(old_id);
+		if (list_rep_iter != list_rep.end())
+		{
+			data_label[index] = list_rep_iter->second;
+			continue;
+		}
+
+		cell_iter = list_cur.find(old_id);
+		if (cell_iter != list_cur.end())
+		{
+			new_id = id;
+			while (vd->SearchLabel(new_id))
+				new_id += 253;
+			//add cell to list_rep
+			list_rep.insert(pair<unsigned int, unsigned int>
+				(old_id, new_id));
+			if (track_map)
+				trace_group->ReplaceCellID(old_id, new_id,
+					m_cur_time);
+			data_label[index] = new_id;
+		}
+	}
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_current();
+	//save label mask to disk
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
+
+	CellUpdate();
+}
+
+void TraceDlg::CellCombineID()
+{
+	if (!m_view)
+		return;
+
+	//trace group
+	TraceGroup *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//current T
+	flrd::CelpList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	if (list_cur.size() <= 1)
+		//nothing to combine
+		return;
+
+	//find the largest cell in the list
+	flrd::Celp cell;
+	flrd::CelpListIter cell_iter;
+	for (cell_iter = list_cur.begin();
+		cell_iter != list_cur.end(); ++cell_iter)
+	{
+		if (cell)
+		{
+			if (cell_iter->second->GetSizeUi() >
+				cell->GetSizeUi())
+				cell = cell_iter->second;
+		}
+		else
+			cell = cell_iter->second;
+	}
+	if (!cell)
+		return;
+
+	//get current mask
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	if (!vd)
+		return;
+	Nrrd* nrrd_mask = vd->GetMask(true);
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	//get current label
+	flvr::Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+		return;
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+	//combine IDs
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	unsigned long long index;
+	unsigned long long for_size = (unsigned long long)nx *
+		(unsigned long long)ny * (unsigned long long)nz;
+	for (index = 0; index < for_size; ++index)
+	{
+		if (!data_mask[index] ||
+			!data_label[index])
+			continue;
+		cell_iter = list_cur.find(data_label[index]);
+		if (cell_iter != list_cur.end())
+			data_label[index] = cell->Id();
+	}
+	//invalidate label mask in gpu
+	vd->GetVR()->clear_tex_current();
+	//save label mask to disk
+	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
+
+	//modify graphs
+	trace_group->CombineCells(cell, list_cur,
+		m_cur_time);
+
+	//update view
+	CellUpdate();
+}
+
 void TraceDlg::CellLink(bool exclusive)
 {
 	if (!m_view)
@@ -2478,221 +2697,12 @@ void TraceDlg::OnCellAppendID(wxCommandEvent &event)
 
 void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//get id
-	wxString str = m_cell_new_id_text->GetValue();
-	unsigned long id;
-	if (!str.ToULong(&id))
-		return;
-	if (!id)
-		return;
-
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
-
-	//current T
-	flrd::CelpList list_cur;
-	flrd::CelpListIter cell_iter;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	//replace ID
-	std::unordered_map<unsigned int, unsigned int> list_rep;
-	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
-	unsigned int old_id, new_id;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	for (index = 0; index < for_size; ++index)
-	{
-		old_id = data_label[index];
-		if (!data_mask[index] ||
-			!old_id ||
-			old_id == id)
-			continue;
-
-		list_rep_iter = list_rep.find(old_id);
-		if (list_rep_iter != list_rep.end())
-		{
-			data_label[index] = list_rep_iter->second;
-			continue;
-		}
-
-		cell_iter = list_cur.find(old_id);
-		if (cell_iter != list_cur.end())
-		{
-			new_id = id;
-			while (vd->SearchLabel(new_id))
-				new_id += 253;
-			//add cell to list_rep
-			list_rep.insert(pair<unsigned int, unsigned int>
-				(old_id, new_id));
-			if (track_map)
-				trace_group->ReplaceCellID(old_id, new_id,
-					m_cur_time);
-			data_label[index] = new_id;
-		}
-	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
-	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-
-	CellUpdate();
+	CellReplaceID();
 }
 
 void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	if (list_cur.size() <= 1)
-		//nothing to combine
-		return;
-
-	//find the largest cell in the list
-	flrd::Celp cell;
-	flrd::CelpListIter cell_iter;
-	for (cell_iter = list_cur.begin();
-	cell_iter != list_cur.end(); ++cell_iter)
-	{
-		if (cell)
-		{
-			if (cell_iter->second->GetSizeUi() >
-				cell->GetSizeUi())
-				cell = cell_iter->second;
-		}
-		else
-			cell = cell_iter->second;
-	}
-	if (!cell)
-		return;
-
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//combine IDs
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (!data_mask[index] ||
-			!data_label[index])
-			continue;
-		cell_iter = list_cur.find(data_label[index]);
-		if (cell_iter != list_cur.end())
-			data_label[index] = cell->Id();
-	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
-	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-
-	//modify graphs
-	trace_group->CombineCells(cell, list_cur,
-		m_cur_time);
-
-	//update view
-	CellUpdate();
+	CellCombineID();
 }
 
 void TraceDlg::OnCellSeparateID(wxCommandEvent& event)

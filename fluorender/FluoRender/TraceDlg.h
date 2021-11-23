@@ -190,6 +190,8 @@ public:
 	void CellLink(bool exclusive);
 	void CellNewID(bool append);
 	void CellEraseID();
+	void CellReplaceID();
+	void CellCombineID();
 	void CompDelete();
 	void CompClear();
 	//uncertain filtering

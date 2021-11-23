@@ -513,7 +513,7 @@ VRenderFrame::VRenderFrame(
 	m_ocl_dlg = new OclDlg(this, this);
 
 	//component dialog
-	m_component_dlg = new ComponentDlg(this, this);
+	m_component_dlg = new ComponentDlg(this);
 
 	//calculation dialog
 	m_calculation_dlg = new CalculationDlg(this, this);

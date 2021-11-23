@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
 #include <Components/CompSelector.h>
+#include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
 #include <Cluster/kmeans.h>
 #include <Cluster/exmax.h>
@@ -130,6 +131,15 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
 	EVT_BUTTON(ID_ShuffleBtn, ComponentDlg::OnShuffle)
+	//modify
+	EVT_TEXT(ID_NewIdText, ComponentDlg::OnNewIDText)
+	EVT_BUTTON(ID_NewIdXBtn, ComponentDlg::OnNewIDX)
+	EVT_BUTTON(ID_CompNewBtn, ComponentDlg::OnCompNew)
+	EVT_BUTTON(ID_CompAddBtn, ComponentDlg::OnCompAdd)
+	EVT_BUTTON(ID_CompReplaceBtn, ComponentDlg::OnCompReplace)
+	EVT_BUTTON(ID_CompCleanBkgBtn, ComponentDlg::OnCompCleanBkg)
+	EVT_BUTTON(ID_CompCombineBtn, ComponentDlg::OnCompCombine)
+	//options
 	EVT_COMMAND_SCROLL(ID_ConSizeSldr, ComponentDlg::OnConSizeSldr)
 	EVT_TEXT(ID_ConSizeText, ComponentDlg::OnConSizeText)
 	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
@@ -176,18 +186,19 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
 END_EVENT_TABLE()
 
-ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
-	: wxPanel(parent, wxID_ANY,
+ComponentDlg::ComponentDlg(VRenderFrame *frame)
+	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(500, 650),
+		wxSize(600, 800),
 		0, "ComponentDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	m_hold_history(false),
 	m_test_speed(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetMinSize(wxSize(100, 100));
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
@@ -207,6 +218,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 	panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_shuffle_btn = new wxButton(panel_bot, ID_ShuffleBtn, "Shuffle",
+		wxDefaultPosition, wxDefaultSize);
 	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Sel.",
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
@@ -219,6 +232,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Anlyz. Sel.",
 		wxDefaultPosition, wxSize(75, -1));
+	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
@@ -823,80 +837,118 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxDefaultSize);
-	m_shuffle_btn = new wxButton(page, ID_ShuffleBtn, "Shuffle",
-		wxDefaultPosition, wxDefaultSize);
-	sizer11->Add(5, 5);
-	sizer12->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
-	sizer11->Add(5, 5);
-	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(5, 5);
+	sizer12->Add(m_comp_append_btn, 1, wxEXPAND);
+	sizer12->Add(m_comp_exclusive_btn, 1, wxEXPAND);
+	sizer12->Add(m_comp_all_btn, 1, wxEXPAND);
+	sizer12->Add(5, 5);
+	sizer12->Add(m_comp_full_btn, 1, wxEXPAND);
+	sizer12->Add(m_comp_clear_btn, 1, wxEXPAND);
 	//
 	sizer1->Add(10, 10);
-	sizer1->Add(sizer11, 0, wxEXPAND);
+	sizer1->Add(sizer11, 1, wxEXPAND);
 	sizer1->Add(10, 10);
-	sizer1->Add(sizer12, 0, wxEXPAND);
+	sizer1->Add(sizer12, 1, wxEXPAND);
 	sizer1->Add(10, 10);
 
-	//Options
+	//modify
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Modify IDs"),
+		wxVERTICAL);
+	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "ID:",
+		wxDefaultPosition, wxDefaultSize);
+	m_new_id_text = new wxTextCtrl(page, ID_NewIdText, "",
+		wxDefaultPosition, wxSize(80, 23));
+	m_new_id_x_btn = new wxButton(page, ID_NewIdXBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
+	sizer21->Add(5, 5);
+	sizer21->Add(st, 0, wxALIGN_CENTER);
+	sizer21->Add(m_new_id_text, 0, wxALIGN_CENTER);
+	sizer21->Add(m_new_id_x_btn, 0, wxALIGN_CENTER);
+	//buttons
+	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	m_comp_new_btn = new wxButton(page, ID_CompNewBtn, "Assign",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_add_btn = new wxButton(page, ID_CompAddBtn, "Add",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_replace_btn = new wxButton(page, ID_CompReplaceBtn, "Replace",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_clean_bkg_btn = new wxButton(page, ID_CompCleanBkgBtn, "Clean Sel.",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_combine_btn = new wxButton(page, ID_CompCombineBtn, "Combine",
+		wxDefaultPosition, wxDefaultSize);
+	sizer22->Add(5, 5);
+	sizer22->Add(m_comp_new_btn, 1, wxEXPAND);
+	sizer22->Add(m_comp_add_btn, 1, wxEXPAND);
+	sizer22->Add(m_comp_replace_btn, 1, wxEXPAND);
+	sizer22->Add(5, 5);
+	sizer22->Add(m_comp_clean_bkg_btn, 1, wxEXPAND);
+	sizer22->Add(m_comp_combine_btn, 1, wxEXPAND);
+	//
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer21, 1, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer22, 1, wxEXPAND);
+	sizer2->Add(10, 10);
+
+	//Options
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Options"),
 		wxVERTICAL);
-	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Contact Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_con_size_sldr = new wxSlider(page, ID_ConSizeSldr, 5, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_con_size_text = new wxTextCtrl(page, ID_ConSizeText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer21->Add(5, 5);
-	sizer21->Add(st, 0, wxALIGN_CENTER);
-	sizer21->Add(5, 5);
-	sizer21->Add(m_con_size_sldr, 1, wxEXPAND);
-	sizer21->Add(5, 5);
-	sizer21->Add(m_con_size_text, 0, wxALIGN_CENTER);
-	sizer21->Add(5, 5);
-	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	sizer31->Add(5, 5);
+	sizer31->Add(st, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_con_size_sldr, 1, wxEXPAND);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_con_size_text, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
+	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	m_consistent_check = new wxCheckBox(page, ID_ConsistentCheck, "Make color consistent for multiple bricks",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer22->Add(5, 5);
-	sizer22->Add(m_consistent_check, 0, wxALIGN_CENTER);
-	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_consistent_check, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer33 = new wxBoxSizer(wxHORIZONTAL);
 	m_colocal_check = new wxCheckBox(page, ID_ColocalCheck, "Compute colocalization with other channels",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer23->Add(5, 5);
-	sizer23->Add(m_colocal_check, 0, wxALIGN_CENTER);
+	sizer33->Add(5, 5);
+	sizer33->Add(m_colocal_check, 0, wxALIGN_CENTER);
 	//
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer21, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer22, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer23, 0, wxEXPAND);
-	sizer2->Add(10, 10);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer31, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer32, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer33, 0, wxEXPAND);
+	sizer3->Add(10, 10);
 
 	//output
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Output as New Channels"),
 		wxVERTICAL);
 	//radios
-	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Channel Type:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_output_multi_rb = new wxRadioButton(page, ID_OutputMultiRb, "Each Comp.",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_output_rgb_rb = new wxRadioButton(page, ID_OutputRgbRb, "R+G+B",
 		wxDefaultPosition, wxDefaultSize);
-	sizer31->Add(5, 5);
-	sizer31->Add(st, 0, wxALIGN_CENTER);
-	sizer31->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
-	sizer31->Add(5, 5);
-	sizer31->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
-	sizer31->Add(5, 5);
+	sizer41->Add(5, 5);
+	sizer41->Add(st, 0, wxALIGN_CENTER);
+	sizer41->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
 	//buttons
-	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Output:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
@@ -907,64 +959,64 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_output_sn_btn = new wxButton(page, ID_OutputSnBtn, "Serial No.",
 		wxDefaultPosition, wxSize(75, 23));
-	sizer32->Add(5, 5);
-	sizer32->Add(st, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_random_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_size_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_id_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_sn_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(5, 5);
+	sizer42->Add(5, 5);
+	sizer42->Add(st, 0, wxALIGN_CENTER);
+	sizer42->Add(m_output_random_btn, 1, wxEXPAND);
+	sizer42->Add(m_output_size_btn, 1, wxEXPAND);
+	sizer42->Add(m_output_id_btn, 1, wxEXPAND);
+	sizer42->Add(m_output_sn_btn, 1, wxEXPAND);
+	sizer42->Add(5, 5);
 	//
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer31, 0, wxEXPAND);
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer32, 0, wxEXPAND);
-	sizer3->Add(10, 10);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer41, 1, wxEXPAND);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer42, 1, wxEXPAND);
+	sizer4->Add(10, 10);
 
-	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Distances"),
 		wxVERTICAL);
-	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer51 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Filter Nearest Neighbors",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dist_all_chan_check = new wxCheckBox(page, ID_DistAllChanCheck, "All Channel Results",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
 		wxDefaultPosition, wxDefaultSize);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
-	sizer41->AddStretchSpacer(1);
-	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
+	sizer51->Add(5, 5);
+	sizer51->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
+	sizer51->Add(5, 5);
+	sizer51->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
+	sizer51->AddStretchSpacer(1);
+	sizer51->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
+	sizer51->Add(5, 5);
+	wxBoxSizer *sizer52 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer42->Add(5, 5);
-	sizer42->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
-	sizer42->Add(5, 5);
-	sizer42->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
-	sizer42->Add(5, 5);
+	sizer52->Add(5, 5);
+	sizer52->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
+	sizer52->Add(5, 5);
+	sizer52->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
+	sizer52->Add(5, 5);
 	//
-	sizer4->Add(10, 10);
-	sizer4->Add(sizer41, 0, wxEXPAND);
-	sizer4->Add(10, 10);
-	sizer4->Add(sizer42, 0, wxEXPAND);
-	sizer4->Add(10, 10);
+	sizer5->Add(10, 10);
+	sizer5->Add(sizer51, 0, wxEXPAND);
+	sizer5->Add(10, 10);
+	sizer5->Add(sizer52, 0, wxEXPAND);
+	sizer5->Add(10, 10);
 
 	//alignment
-	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer6 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
 		wxVERTICAL);
-	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center = new wxCheckBox(page, ID_AlignCenter,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer51->Add(5, 5);
-	sizer51->Add(m_align_center, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer52 = new wxBoxSizer(wxHORIZONTAL);
+	sizer61->Add(5, 5);
+	sizer61->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer62 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Tri Axes:",
 		wxDefaultPosition, wxSize(50, 22));
 	m_align_xyz = new wxButton(page, ID_AlignXYZ, "XYZ",
@@ -979,20 +1031,20 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_zyx = new wxButton(page, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, wxSize(65, 22));
-	sizer52->Add(5, 5);
-	sizer52->Add(st, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_xyz, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_yxz, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_zxy, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_xzy, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_yzx, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_zyx, 0, wxALIGN_CENTER);
+	sizer62->Add(5, 5);
+	sizer62->Add(st, 0, wxALIGN_CENTER);
+	sizer62->Add(m_align_xyz, 1, wxEXPAND);
+	sizer62->Add(m_align_yxz, 1, wxEXPAND);
+	sizer62->Add(m_align_zxy, 1, wxEXPAND);
+	sizer62->Add(m_align_xzy, 1, wxEXPAND);
+	sizer62->Add(m_align_yzx, 1, wxEXPAND);
+	sizer62->Add(m_align_zyx, 1, wxEXPAND);
 	//
-	sizer5->Add(5, 5);
-	sizer5->Add(sizer51, 0, wxEXPAND);
-	sizer5->Add(5, 5);
-	sizer5->Add(sizer52, 0, wxEXPAND);
-	sizer5->Add(5, 5);
+	sizer6->Add(5, 5);
+	sizer6->Add(sizer61, 1, wxEXPAND);
+	sizer6->Add(5, 5);
+	sizer6->Add(sizer62, 1, wxEXPAND);
+	sizer6->Add(5, 5);
 
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -1006,6 +1058,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer4, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer5, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer6, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -2295,6 +2349,9 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
+	int shuffle = 0;
+	if (m_view && m_view->m_glview->m_cur_vol)
+		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
 	wxString str = m_comp_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2304,12 +2361,7 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 			color = wxColor(24, 167, 181);
 		else
 		{
-			fluo::Color c;
-			if (m_view && m_view->m_glview->m_cur_vol)
-			{
-				VolumeData* vd = m_view->m_glview->m_cur_vol;
-				c = fluo::Color(id, vd->GetShuffle());
-			}
+			fluo::Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
 		m_comp_id_text->SetBackgroundColour(color);
@@ -2410,18 +2462,17 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		m_view->RefreshGL();
 
 		//frame
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			if (vr_frame->GetBrushToolDlg())
+			if (m_frame->GetBrushToolDlg())
 			{
 				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update(0);
-				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+					m_frame->GetBrushToolDlg()->Update(0);
+				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (vr_frame->GetColocalizationDlg() &&
+			if (m_frame->GetColocalizationDlg() &&
 				m_view->m_glview->m_paint_colocalize)
-				vr_frame->GetColocalizationDlg()->Colocalize();
+				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }
@@ -2459,18 +2510,17 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	m_view->RefreshGL();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
+		if (m_frame->GetBrushToolDlg())
 		{
 			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update(0);
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				m_frame->GetBrushToolDlg()->Update(0);
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (vr_frame->GetColocalizationDlg() &&
+		if (m_frame->GetColocalizationDlg() &&
 			m_view->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2487,18 +2537,17 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 	m_view->RefreshGL();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
+		if (m_frame->GetBrushToolDlg())
 		{
 			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update(0);
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				m_frame->GetBrushToolDlg()->Update(0);
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (vr_frame->GetColocalizationDlg() &&
+		if (m_frame->GetColocalizationDlg() &&
 			m_view->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2515,9 +2564,8 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	m_view->RefreshGL();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
@@ -2532,6 +2580,74 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 
 	vd->IncShuffle();
 	m_view->RefreshGL();
+}
+
+//modify
+void ComponentDlg::OnNewIDText(wxCommandEvent &event)
+{
+	int shuffle = 0;
+	if (m_view && m_view->m_glview->m_cur_vol)
+		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
+	wxString str = m_new_id_text->GetValue();
+	unsigned long id;
+	wxColor color(255, 255, 255);
+	if (str.ToULong(&id))
+	{
+		if (!id)
+			color = wxColor(24, 167, 181);
+		else
+		{
+			fluo::Color c(id, shuffle);
+			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+		}
+		m_new_id_text->SetBackgroundColour(color);
+	}
+	else
+		m_new_id_text->SetBackgroundColour(color);
+	m_new_id_text->Refresh();
+}
+
+void ComponentDlg::OnNewIDX(wxCommandEvent& event)
+{
+	m_new_id_text->Clear();
+}
+
+void ComponentDlg::OnCompNew(wxCommandEvent& event)
+{
+	if (!m_frame || !m_frame->GetTraceDlg())
+		return;
+	m_frame->GetTraceDlg()->CellNewID(false);
+}
+
+void ComponentDlg::OnCompAdd(wxCommandEvent& event)
+{
+	if (!m_frame || !m_frame->GetTraceDlg())
+		return;
+	m_frame->GetTraceDlg()->CellNewID(true);
+}
+
+void ComponentDlg::OnCompReplace(wxCommandEvent& event)
+{
+	if (!m_frame || !m_frame->GetTraceDlg())
+		return;
+	m_frame->GetTraceDlg()->CellReplaceID();
+}
+
+void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	flrd::ComponentEditor editor(vd);
+	editor.Clean(0);
+	m_view->RefreshGL();
+}
+
+void ComponentDlg::OnCompCombine(wxCommandEvent& event)
+{
+	if (!m_frame || !m_frame->GetTraceDlg())
+		return;
+	m_frame->GetTraceDlg()->CellCombineID();
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
@@ -2619,8 +2735,7 @@ void ComponentDlg::OutputMulti(int color_type)
 	list<VolumeData*> channs;
 	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
 			wxString group_name = "";
 			DataGroup* group = 0;
@@ -2629,7 +2744,7 @@ void ComponentDlg::OutputMulti(int color_type)
 				VolumeData* vd = *i;
 				if (vd)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					m_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -2650,8 +2765,8 @@ void ComponentDlg::OutputMulti(int color_type)
 				col = vd->GetHdr();
 				group->SetHdrAll(col);
 			}
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd->GetName());
 			m_view->RefreshGL();
 		}
 	}
@@ -2666,8 +2781,7 @@ void ComponentDlg::OutputRgb(int color_type)
 	list<VolumeData*> channs;
 	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
 			wxString group_name = "";
 			DataGroup* group = 0;
@@ -2676,7 +2790,7 @@ void ComponentDlg::OutputRgb(int color_type)
 				VolumeData* vd = *i;
 				if (vd)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					m_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -2697,8 +2811,8 @@ void ComponentDlg::OutputRgb(int color_type)
 				col = vd->GetHdr();
 				group->SetHdrAll(col);
 			}
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd->GetName());
 			m_view->RefreshGL();
 		}
 	}
@@ -2733,15 +2847,14 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 	{
 		ann->SetVolume(vd);
 		ann->SetTransform(vd->GetTexture()->transform());
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			DataManager* mgr = vr_frame->GetDataManager();
+			DataManager* mgr = m_frame->GetDataManager();
 			if (mgr)
 				mgr->AddAnnotations(ann);
 			m_view->AddAnnotations(ann);
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd->GetName());
 		}
 		m_view->RefreshGL();
 	}
@@ -3572,18 +3685,17 @@ void ComponentDlg::SelectFullComp()
 	m_view->RefreshGL();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
+		if (m_frame->GetBrushToolDlg())
 		{
 			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update(0);
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				m_frame->GetBrushToolDlg()->Update(0);
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (vr_frame->GetColocalizationDlg() &&
+		if (m_frame->GetColocalizationDlg() &&
 			m_view->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -4139,18 +4251,17 @@ void ComponentDlg::IncludeComps()
 		m_view->RefreshGL(false);
 
 		//frame
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			if (vr_frame->GetBrushToolDlg())
+			if (m_frame->GetBrushToolDlg())
 			{
 				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update(0);
-				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+					m_frame->GetBrushToolDlg()->Update(0);
+				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (vr_frame->GetColocalizationDlg() &&
+			if (m_frame->GetColocalizationDlg() &&
 				m_view->m_glview->m_paint_colocalize)
-				vr_frame->GetColocalizationDlg()->Colocalize();
+				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }
@@ -4194,18 +4305,17 @@ void ComponentDlg::ExcludeComps()
 		m_view->RefreshGL(false);
 
 		//frame
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			if (vr_frame->GetBrushToolDlg())
+			if (m_frame->GetBrushToolDlg())
 			{
 				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update(0);
-				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+					m_frame->GetBrushToolDlg()->Update(0);
+				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (vr_frame->GetColocalizationDlg() &&
+			if (m_frame->GetColocalizationDlg() &&
 				m_view->m_glview->m_paint_colocalize)
-				vr_frame->GetColocalizationDlg()->Colocalize();
+				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }
