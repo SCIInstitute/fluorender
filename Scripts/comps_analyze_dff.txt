@@ -26,10 +26,10 @@ label=1
 [tasks/task3]
 type=export_analysis
 time_mode=TM_LAST_POST
-template=deltaf_f.html
+template=ridgeline.html
 output=DATA_DIR
 value_num=3
 value_name0=comp_mean
 value_name1=comp_min
 value_name2=bkg_median
-js_value=+d.comp_mean
+js_value=(+d.comp_mean - +d.bkg_median) / (+d.bkg_median)
