@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VMovieView_H_
 #define _VMovieView_H_
 
+#include "compatibility.h"
 #include "QVideoEncoder.h"
 #include <wx/wx.h>
 #include <wx/panel.h>

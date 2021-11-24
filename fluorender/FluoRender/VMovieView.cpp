@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "VRenderView.h"
 #include "RecorderDlg.h"
-#include "compatibility.h"
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
