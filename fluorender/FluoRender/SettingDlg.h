@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/treectrl.h>
+#include <vector>
 
 #define TOOL_PAINT_BRUSH	1
 #define TOOL_MEASUREMENT	2
@@ -43,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #define TOOL_CALCULATIONS	10
 
 //enum BitmapFontType;
+class VRenderFrame;
 class SettingDlg : public wxPanel
 {
 	enum
@@ -126,8 +128,7 @@ class SettingDlg : public wxPanel
 	};
 
 public:
-	SettingDlg(wxWindow* frame,
-		wxWindow* parent);
+	SettingDlg(VRenderFrame* frame);
 	~SettingDlg();
 
 	void GetSettings();
@@ -305,7 +306,7 @@ public:
 	bool getIJMode() { return m_ij_mode; }
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 
 	int m_gmc_mode;			//1-pre-calculated (removed);
 							//2-real-time 7 sample;

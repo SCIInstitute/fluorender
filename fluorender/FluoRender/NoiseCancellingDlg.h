@@ -31,10 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <Types/Color.h>
 
+class VRenderFrame;
 class VRenderView;
 class VolumeData;
 class DataGroup;
-
 class NoiseCancellingDlg : public wxPanel
 {
 public:
@@ -50,8 +50,7 @@ public:
 		ID_EnhanceSelChk
 	};
 
-	NoiseCancellingDlg(wxWindow* frame,
-		wxWindow* parent);
+	NoiseCancellingDlg(VRenderFrame* frame);
 	~NoiseCancellingDlg();
 
 	void GetSettings(VRenderView* vrv);
@@ -61,8 +60,7 @@ public:
 	void Preview(bool select, double size, double thresh);
 
 private:
-	wxWindow* m_frame;
-
+	VRenderFrame* m_frame;
 	//current view
 	VRenderView *m_view;
 

@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MManipulator.h"
 #include "VRenderFrame.h"
+#include "DataManager.h"
+#include "compatibility.h"
 
 BEGIN_EVENT_TABLE(MManipulator, wxPanel)
 	EVT_SPIN_UP(wxID_ANY, MManipulator::OnSpinUp)
@@ -34,15 +36,15 @@ BEGIN_EVENT_TABLE(MManipulator, wxPanel)
 	EVT_TEXT_ENTER(wxID_ANY, MManipulator::OnValueEnter)
 END_EVENT_TABLE()
 
-MManipulator::MManipulator(wxWindow* frame, wxWindow* parent,
-	wxWindowID id,
+MManipulator::MManipulator(VRenderFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-wxPanel(parent, id, pos, size, style, name),
-m_frame(frame),
-m_md(0)
+	wxPanel(parent, wxID_ANY, pos, size, style, name),
+	m_frame(frame),
+	m_md(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -159,8 +161,8 @@ MeshData* MManipulator::GetMeshData()
 
 void MManipulator::RefreshVRenderViews()
 {
-	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	vrender_frame->RefreshVRenderViews();
+	if (m_frame)
+		m_frame->RefreshVRenderViews();
 }
 
 void MManipulator::GetData()

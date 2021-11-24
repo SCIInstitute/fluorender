@@ -28,16 +28,16 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _APROPVIEW_H_
 #define _APROPVIEW_H_
 
-#include "DataManager.h"
-#include "VRenderView.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 
 using namespace std;
 
+class VRenderFrame;
+class VRenderView;
+class Annotations;
 class APropView : public wxPanel
 {
 	enum
@@ -47,8 +47,8 @@ class APropView : public wxPanel
 	};
 
 public:
-	APropView(wxWindow* frame, wxWindow* parent,
-		wxWindowID id,
+	APropView(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -62,7 +62,7 @@ public:
 	void GetSettings();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	Annotations* m_ann;
 	VRenderView* m_vrv;
 

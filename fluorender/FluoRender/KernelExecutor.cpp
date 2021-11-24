@@ -26,6 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "KernelExecutor.h"
+#include "DataManager.h"
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <boost/chrono.hpp>
@@ -309,7 +312,7 @@ bool KernelExecutor::Execute()
 }
 
 bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
-	GLuint data_id, void* result,
+	unsigned int data_id, void* result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z, int chars)
 {

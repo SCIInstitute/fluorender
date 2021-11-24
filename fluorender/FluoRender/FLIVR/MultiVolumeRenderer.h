@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef SLIVR_MultiVolumeRenderer_h
-#define SLIVR_MultiVolumeRenderer_h
+#ifndef MultiVolumeRenderer_h
+#define MultiVolumeRenderer_h
 
 #include "GL/glew.h"
 #include <Types/BBox.h>

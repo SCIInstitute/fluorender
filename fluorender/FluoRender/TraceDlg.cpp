@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
+#include "DataManager.h"
 #include "VRenderFrame.h"
 #include "VRenderView.h"
 #include <Components/CompSelector.h>
@@ -51,13 +52,12 @@ EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
 
 TraceListCtrl::TraceListCtrl(
-	wxWindow* frame,
+	VRenderFrame* frame,
 	wxWindow* parent,
-	wxWindowID id,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxListCtrl(parent, id, pos, size, style),
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
 	m_type(0)
 {
 	// temporarily block events during constructor:
@@ -135,7 +135,16 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	if (cells.empty())
 		return;
 	else
-		std::sort(cells.begin(), cells.end(), sort_cells);
+		std::sort(cells.begin(), cells.end(),
+		[](const flrd::Celp &c1, const flrd::Celp &c2) -> bool
+	{
+		unsigned int vid1 = c1->GetVertexId();
+		unsigned int vid2 = c2->GetVertexId();
+		if (vid1 == vid2)
+			return c1->GetSizeUi() > c2->GetSizeUi();
+		else
+			return vid1 < vid2;
+	});
 
 	wxString gtype;
 	unsigned int id;
@@ -761,11 +770,11 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	return page;
 }
 
-TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
-	: wxPanel(parent, wxID_ANY,
+TraceDlg::TraceDlg(VRenderFrame* frame)
+	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition, wxSize(550, 650),
 		0, "TraceDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	//m_mask(0),
 	m_cur_time(-1),
@@ -836,9 +845,9 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	sizer_21->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
 	wxBoxSizer* sizer_22 = new wxBoxSizer(wxHORIZONTAL);
-	m_trace_list_curr = new TraceListCtrl(frame, this, wxID_ANY);
+	m_trace_list_curr = new TraceListCtrl(frame, this);
 	m_trace_list_curr->m_type = 0;
-	m_trace_list_prev = new TraceListCtrl(frame, this, wxID_ANY);
+	m_trace_list_prev = new TraceListCtrl(frame, this);
 	m_trace_list_prev->m_type = 1;
 	sizer_22->Add(m_trace_list_curr, 1, wxEXPAND);
 	sizer_22->Add(m_trace_list_prev, 1, wxEXPAND);
@@ -916,23 +925,22 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	}
 
 	//settings for tracking
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
+	if (m_frame && m_frame->GetSettingDlg())
 	{
 		m_iter_num =
-			vr_frame->GetSettingDlg()->GetTrackIter();
+			m_frame->GetSettingDlg()->GetTrackIter();
 		m_size_thresh =
-			vr_frame->GetSettingDlg()->GetComponentSize();
+			m_frame->GetSettingDlg()->GetComponentSize();
 		m_consistent_color =
-			vr_frame->GetSettingDlg()->GetConsistentColor();
+			m_frame->GetSettingDlg()->GetConsistentColor();
 		m_try_merge =
-			vr_frame->GetSettingDlg()->GetTryMerge();
+			m_frame->GetSettingDlg()->GetTryMerge();
 		m_try_split =
-			vr_frame->GetSettingDlg()->GetTrySplit();
+			m_frame->GetSettingDlg()->GetTrySplit();
 		m_similarity =
-			vr_frame->GetSettingDlg()->GetSimilarity();
+			m_frame->GetSettingDlg()->GetSimilarity();
 		m_contact_factor =
-			vr_frame->GetSettingDlg()->GetContactFactor();
+			m_frame->GetSettingDlg()->GetContactFactor();
 		//
 		m_map_iter_spin->SetValue(m_iter_num);
 		m_map_size_spin->SetValue(m_size_thresh);
@@ -1232,9 +1240,8 @@ void TraceDlg::UncertainFilter(bool input)
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
@@ -1290,72 +1297,64 @@ void TraceDlg::OnMapIterSpin(wxSpinEvent& event)
 {
 	m_iter_num = m_map_iter_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
 }
 
 void TraceDlg::OnMapIterText(wxCommandEvent& event)
 {
 	m_iter_num = m_map_iter_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
 }
 
 void TraceDlg::OnMapSizeSpin(wxSpinEvent& event)
 {
 	m_size_thresh = m_map_size_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
 }
 
 void TraceDlg::OnMapSizeText(wxCommandEvent& event)
 {
 	m_size_thresh = m_map_size_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
 }
 
 void TraceDlg::OnMapConsistentBtn(wxCommandEvent& event)
 {
 	m_consistent_color = m_map_consistent_btn->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetConsistentColor(m_consistent_color);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetConsistentColor(m_consistent_color);
 }
 
 void TraceDlg::OnMapMergeBtn(wxCommandEvent& event)
 {
 	m_try_merge = m_map_merge_btn->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTryMerge(m_try_merge);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTryMerge(m_try_merge);
 }
 
 void TraceDlg::OnMapSplitBtn(wxCommandEvent& event)
 {
 	m_try_split = m_map_split_btn->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTrySplit(m_try_split);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTrySplit(m_try_split);
 }
 
 void TraceDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
 {
 	m_similarity = m_map_similar_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetSimilarity(m_similarity);
 }
 
 void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
@@ -1366,9 +1365,8 @@ void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
 	{
 		m_similarity = dval;
 		//save settings
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetSettingDlg())
-			vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->SetSimilarity(m_similarity);
 	}
 }
 
@@ -1376,9 +1374,8 @@ void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 {
 	m_contact_factor = m_map_contact_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
 }
 
 void TraceDlg::OnMapContactText(wxCommandEvent& event)
@@ -1389,9 +1386,8 @@ void TraceDlg::OnMapContactText(wxCommandEvent& event)
 	{
 		m_contact_factor = dval;
 		//save settings
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetSettingDlg())
-			vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
 	}
 }
 
@@ -1420,9 +1416,8 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 		m_view->GetRulerList()->push_back(*iter);
 	}
 	m_view->RefreshGL();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMeasureDlg())
-		vr_frame->GetMeasureDlg()->GetSettings(m_view);
+	if (m_frame && m_frame->GetMeasureDlg())
+		m_frame->GetMeasureDlg()->GetSettings(m_view);
 	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
 }
 
@@ -1734,9 +1729,8 @@ void TraceDlg::CompDelete()
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::CompClear()
@@ -1754,9 +1748,8 @@ void TraceDlg::CompClear()
 	m_trace_list_prev->DeleteAllItems();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompIDText(wxCommandEvent &event)
@@ -1858,9 +1851,8 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompExclusive(wxCommandEvent &event)
@@ -1893,9 +1885,8 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 //ID link controls
@@ -1937,9 +1928,8 @@ void TraceDlg::CellFull()
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list)
@@ -2503,8 +2493,7 @@ void TraceDlg::OnCellLink(wxCommandEvent &event)
 
 void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame || !vr_frame->GetComponentDlg())
+	if (!m_frame || !m_frame->GetComponentDlg())
 		return;
 	if (!m_view)
 		return;
@@ -2519,8 +2508,8 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
-	flrd::CelpList in = vr_frame->GetComponentDlg()->GetInCells();
-	flrd::CelpList out = vr_frame->GetComponentDlg()->GetOutCells();
+	flrd::CelpList in = m_frame->GetComponentDlg()->GetInCells();
+	flrd::CelpList out = m_frame->GetComponentDlg()->GetOutCells();
 	tm_processor.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();
@@ -2971,16 +2960,14 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMovieView())
-		vr_frame->GetMovieView()->DownFrame();
+	if (m_frame && m_frame->GetMovieView())
+		m_frame->GetMovieView()->DownFrame();
 }
 
 void TraceDlg::OnCellNext(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMovieView())
-		vr_frame->GetMovieView()->UpFrame();
+	if (m_frame && m_frame->GetMovieView())
+		m_frame->GetMovieView()->UpFrame();
 }
 
 //auto tracking

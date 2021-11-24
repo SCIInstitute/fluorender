@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef SLIVR_VolumeRenderer_h
-#define SLIVR_VolumeRenderer_h
+#ifndef VolumeRenderer_h
+#define VolumeRenderer_h
 
 #include <Types/Color.h>
 #include <Types/Plane.h>

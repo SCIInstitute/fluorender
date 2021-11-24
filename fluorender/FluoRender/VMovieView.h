@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VMovieView_H_
 #define _VMovieView_H_
 
-#include "compatibility.h"
 #include "QVideoEncoder.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
@@ -108,9 +107,7 @@ class VMovieView : public wxPanel
 	};
 
 public:
-	VMovieView(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	VMovieView(VRenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,

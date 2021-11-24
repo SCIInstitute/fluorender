@@ -746,8 +746,8 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	return page;
 }
 
-SettingDlg::SettingDlg(wxWindow *frame, wxWindow *parent) :
-	wxPanel(parent, wxID_ANY,
+SettingDlg::SettingDlg(VRenderFrame *frame) :
+	wxPanel(frame, wxID_ANY,
 		wxDefaultPosition, wxSize(450, 750),
 		0, "SettingDlg"),
 	m_frame(frame)
@@ -1522,9 +1522,8 @@ void SettingDlg::SaveSettings()
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
-		m_plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
+	if (m_frame && m_frame->GetClippingView())
+		m_plane_mode = m_frame->GetClippingView()->GetPlaneMode();
 	fconfig.Write("mode", m_plane_mode);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
@@ -1580,16 +1579,14 @@ void SettingDlg::GetShadowDir(double& x, double &y)
 void SettingDlg::OnSave(wxCommandEvent &event)
 {
 	SaveSettings();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowPane(this, false);
+	if (m_frame)
+		m_frame->ShowPane(this, false);
 }
 
 void SettingDlg::OnClose(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowPane(this, false);
+	if (m_frame)
+		m_frame->ShowPane(this, false);
 }
 
 void SettingDlg::OnShow(wxShowEvent &event)
@@ -1622,12 +1619,11 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 	else
 		m_mouse_int = false;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 			{
 				vrv->SetAdaptive(m_mouse_int);
@@ -1655,12 +1651,11 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	m_peeling_layers_sldr->SetValue(ival);
 	m_peeling_layers = ival;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 			{
 				vrv->SetPeelingLayers(ival);
@@ -1677,12 +1672,11 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 	else
 		m_micro_blend = false;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 			{
 				vrv->SetBlendSlices(m_micro_blend);
@@ -1716,12 +1710,11 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 		m_shadow_dir = false;
 	}
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 				vrv->RefreshGL();
 		}
@@ -1744,12 +1737,11 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	m_shadow_dir_sldr->SetValue(int(deg));
 	SetShadowDir(deg);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 				vrv->RefreshGL();
 		}
@@ -1788,11 +1780,10 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_detail_level_offset_sldr->Disable();
 		m_detail_level_offset_text->Disable();
 	}
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		vr_frame->SetTextureRendererSettings();
-		vr_frame->RefreshVRenderViews();
+		m_frame->SetTextureRendererSettings();
+		m_frame->RefreshVRenderViews();
 	}
 }
 
@@ -1816,12 +1807,11 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 	else
 		m_grad_bg = false;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 			{
 				vrv->SetGradBg(m_grad_bg);
@@ -1867,12 +1857,11 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 	m_pin_threshold_sldr->SetValue(int(dval/10.0));
 	m_pin_threshold = dval / 100.0;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 				vrv->m_pin_scale_thresh = m_pin_threshold;
 		}
@@ -1886,10 +1875,9 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 	VRenderGLView::m_linked_rot = linked_rot;
 	VRenderGLView::m_master_linked_view = 0;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && 0 < vr_frame->GetViewNum())
+	if (m_frame && 0 < m_frame->GetViewNum())
 	{
-		VRenderView* view = vr_frame->GetView(0);
+		VRenderView* view = m_frame->GetView(0);
 		if (view)
 			view->RefreshGL();
 	}
@@ -1899,10 +1887,9 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 {
 	m_stereo = m_stereo_chk->GetValue();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && 0 < vr_frame->GetViewNum())
+	if (m_frame && 0 < m_frame->GetViewNum())
 	{
-		VRenderView* view = vr_frame->GetView(0);
+		VRenderView* view = m_frame->GetView(0);
 		if (view)
 		{
 			view->SetStereo(m_stereo);
@@ -1927,10 +1914,9 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	m_eye_dist_sldr->SetValue(int(dval * 10.0));
 	m_eye_dist = dval;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && 0 < vr_frame->GetViewNum())
+	if (m_frame && 0 < m_frame->GetViewNum())
 	{
-		VRenderView* view = vr_frame->GetView(0);
+		VRenderView* view = m_frame->GetView(0);
 		if (view)
 		{
 			view->SetEyeDist(m_eye_dist);
@@ -1947,11 +1933,8 @@ void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
 	else
 		m_override_vox = false;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetDataManager()->SetOverrideVox(m_override_vox);
-	}
+	if (m_frame)
+		m_frame->GetDataManager()->SetOverrideVox(m_override_vox);
 }
 
 //wavelength to color
@@ -1977,15 +1960,12 @@ void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
 	if (m_wav_color1_cmb)
 		m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetDataManager())
-	{
-		vr_frame->GetDataManager()->SetWavelengthColor(
+	if (m_frame && m_frame->GetDataManager())
+		m_frame->GetDataManager()->SetWavelengthColor(
 			m_wav_color1,
 			m_wav_color2,
 			m_wav_color3,
 			m_wav_color4);
-	}
 }
 
 void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
@@ -1993,15 +1973,12 @@ void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
 	if (m_wav_color2_cmb)
 		m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetDataManager())
-	{
-		vr_frame->GetDataManager()->SetWavelengthColor(
+	if (m_frame && m_frame->GetDataManager())
+		m_frame->GetDataManager()->SetWavelengthColor(
 			m_wav_color1,
 			m_wav_color2,
 			m_wav_color3,
 			m_wav_color4);
-	}
 }
 
 void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
@@ -2009,15 +1986,12 @@ void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
 	if (m_wav_color3_cmb)
 		m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetDataManager())
-	{
-		vr_frame->GetDataManager()->SetWavelengthColor(
+	if (m_frame && m_frame->GetDataManager())
+		m_frame->GetDataManager()->SetWavelengthColor(
 			m_wav_color1,
 			m_wav_color2,
 			m_wav_color3,
 			m_wav_color4);
-	}
 }
 
 void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
@@ -2025,15 +1999,12 @@ void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 	if (m_wav_color4_cmb)
 		m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetDataManager())
-	{
-		vr_frame->GetDataManager()->SetWavelengthColor(
+	if (m_frame && m_frame->GetDataManager())
+		m_frame->GetDataManager()->SetWavelengthColor(
 			m_wav_color1,
 			m_wav_color2,
 			m_wav_color3,
 			m_wav_color4);
-	}
 }
 
 //texture size
@@ -2175,12 +2146,11 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 	m_detail_level_offset_sldr->SetValue(val);
 	m_detail_level_offset = -val;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 				vrv->RefreshGL();
 		}
@@ -2199,14 +2169,13 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		wxString loc = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + str + ".ttf";
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
 			flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
 			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 			{
-				VRenderView* vrv = (*vr_frame->GetViewList())[i];
+				VRenderView* vrv = (*m_frame->GetViewList())[i];
 				if (vrv)
 					vrv->RefreshGL();
 			}
@@ -2222,13 +2191,12 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 	{
 		m_text_size = size;
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
 			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 			{
-				VRenderView* vrv = (*vr_frame->GetViewList())[i];
+				VRenderView* vrv = (*m_frame->GetViewList())[i];
 				if (vrv)
 					vrv->RefreshGL();
 			}
@@ -2239,12 +2207,11 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 {
 	m_text_color = m_text_color_cmb->GetCurrentSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 		{
-			VRenderView* vrv = (*vr_frame->GetViewList())[i];
+			VRenderView* vrv = (*m_frame->GetViewList())[i];
 			if (vrv)
 				vrv->RefreshGL();
 		}
@@ -2268,12 +2235,11 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 	{
 		m_line_width_sldr->SetValue(ival);
 		m_line_width = ival;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			for (int i = 0; i < (int)vr_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
 			{
-				VRenderView* vrv = (*vr_frame->GetViewList())[i];
+				VRenderView* vrv = (*m_frame->GetViewList())[i];
 				if (vrv)
 					vrv->RefreshGL();
 			}
@@ -2297,9 +2263,8 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 	str.ToULong(&ival);
 	m_paint_hist_depth_sldr->SetValue(ival);
 	m_paint_hist_depth = ival;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->SetTextureUndos();
+	if (m_frame)
+		m_frame->SetTextureUndos();
 }
 
 // Java settings.
@@ -2308,11 +2273,6 @@ void SettingDlg::OnJavaJvmEdit(wxCommandEvent &event)
 	wxString str = m_java_jvm_text->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	/*m_paint_hist_depth_sldr->SetValue(ival);
-	m_paint_hist_depth = ival;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->SetTextureUndos();*/
 }
 
 void SettingDlg::OnJavaIJEdit(wxCommandEvent &event)
@@ -2320,11 +2280,6 @@ void SettingDlg::OnJavaIJEdit(wxCommandEvent &event)
 	wxString str = m_java_ij_text->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	/*m_paint_hist_depth_sldr->SetValue(ival);
-	m_paint_hist_depth = ival;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	vr_frame->SetTextureUndos();*/
 }
 
 void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
@@ -2332,11 +2287,6 @@ void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
 	wxString str = m_java_bioformats_text->GetValue();
 	unsigned long ival;
 	str.ToULong(&ival);
-	/*m_paint_hist_depth_sldr->SetValue(ival);
-	m_paint_hist_depth = ival;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	vr_frame->SetTextureUndos();*/
 }
 
 void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)

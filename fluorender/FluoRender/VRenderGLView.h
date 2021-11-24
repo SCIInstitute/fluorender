@@ -119,14 +119,13 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderView;
 class VRenderFrame;
+class VRenderView;
 class VRenderGLView : public wxGLCanvas
 {
 public:
-	VRenderGLView(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	VRenderGLView(VRenderFrame* frame,
+		VRenderView* parent,
 		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,

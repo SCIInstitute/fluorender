@@ -28,25 +28,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VPROPVIEW_H_
 #define _VPROPVIEW_H_
 
-#include "DataManager.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 #include <wx/tglbtn.h>
 
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Types/Color.h>
-#include <Types/BBox.h>
-#include <Types/Point.h>
-
-
 using namespace std;
 
+class VRenderFrame;
 class VRenderView;
-
+class VolumeData;
+class DataGroup;
 class VPropView: public wxPanel
 {
 	enum
@@ -118,8 +111,8 @@ class VPropView: public wxPanel
 };
 
 public:
-	VPropView(wxWindow* frame, wxWindow* parent,
-		wxWindowID id,
+	VPropView(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -140,7 +133,7 @@ public:
 	VRenderView* GetView();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	VolumeData* m_vd;
 
 	bool m_lumi_change;

@@ -26,13 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "HelpDlg.h"
+#include "VRenderFrame.h"
 
 BEGIN_EVENT_TABLE(HelpDlg, wxPanel)
 END_EVENT_TABLE()
 
-HelpDlg::HelpDlg(wxWindow *frame, 
-				 wxWindow *parent) :
-wxPanel(parent, wxID_ANY,
+HelpDlg::HelpDlg(VRenderFrame *frame) :
+wxPanel(frame, wxID_ANY,
 		 wxDefaultPosition, wxSize(600, 600),
 		 0, "HelpDlg"),
 m_html(0)

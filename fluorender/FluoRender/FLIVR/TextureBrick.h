@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef SLIVR_TextureBrick_h
-#define SLIVR_TextureBrick_h
+#ifndef TextureBrick_h
+#define TextureBrick_h
 
 #include "GL/glew.h"
 #include <Types/Ray.h>

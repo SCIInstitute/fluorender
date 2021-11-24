@@ -26,11 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-//#include "Debug.h"
-#include <wx/wx.h>
-
 #ifndef _MAIN_H_
 #define _MAIN_H_
+
+//#include "Debug.h"
+#include <wx/wx.h>
 
 class VRenderApp : public wxApp
 {

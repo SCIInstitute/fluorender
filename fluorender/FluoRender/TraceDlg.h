@@ -29,17 +29,18 @@ DEALINGS IN THE SOFTWARE.
 #define _TRACEDLG_H_
 
 #include "Main.h"
-#include "DataManager.h"
+#include <Tracking/Cell.h>
+#include <Tracking/VolCache.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/notebook.h>
 #include <wx/tglbtn.h>
-#include "teem/Nrrd/nrrd.h"
 #include <vector>
 
 using namespace std;
 
+class VRenderFrame;
 class VRenderView;
 
 class TraceListCtrl : public wxListCtrl
@@ -51,9 +52,8 @@ class TraceListCtrl : public wxListCtrl
 	};
 
 public:
-	TraceListCtrl(wxWindow *frame,
+	TraceListCtrl(VRenderFrame *frame,
 		wxWindow* parent,
-		wxWindowID id,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxSize(100, 100),
 		long style = wxLC_REPORT);
@@ -70,17 +70,6 @@ public:
 private:
 	VRenderView *m_view;
 	int m_type;//0-current; 1-previous
-
-private:
-	static bool sort_cells(const flrd::Celp c1, const flrd::Celp c2)
-	{
-		unsigned int vid1 = c1->GetVertexId();
-		unsigned int vid2 = c2->GetVertexId();
-		if (vid1 == vid2)
-			return c1->GetSizeUi() > c2->GetSizeUi();
-		else
-			return vid1 < vid2;
-	};
 
 private:
 	void OnKeyDown(wxKeyEvent& event);
@@ -175,8 +164,7 @@ public:
 		ID_StatText
 	};
 
-	TraceDlg(wxWindow* frame,
-		wxWindow* parent);
+	TraceDlg(VRenderFrame* frame);
 	~TraceDlg();
 
 	void GetSettings(VRenderView* vrv);
@@ -221,7 +209,7 @@ private:
 		int contact_num;
 	} comp_info;
 
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	//current view
 	VRenderView* m_view;
 	//tab control

@@ -34,8 +34,8 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
+class VRenderFrame;
 class VRenderView;
-
 class KeyListCtrl : public wxListCtrl
 {
 	enum
@@ -47,9 +47,8 @@ class KeyListCtrl : public wxListCtrl
 	};
 
 public:
-	KeyListCtrl(wxWindow *frame,
+	KeyListCtrl(VRenderFrame *frame,
 		wxWindow* parent,
-		wxWindowID id,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -66,7 +65,7 @@ public:
 	friend class RecorderDlg;
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	wxImageList *m_images;
 
 	wxTextCtrl *m_frame_text;
@@ -123,7 +122,7 @@ public:
 		ID_CamLockBtn
 	};
 
-	RecorderDlg(wxWindow* frame,
+	RecorderDlg(VRenderFrame* frame,
 		wxWindow* parent);
 	~RecorderDlg();
 
@@ -147,7 +146,7 @@ private:
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	//current view
 	VRenderView* m_view;
 

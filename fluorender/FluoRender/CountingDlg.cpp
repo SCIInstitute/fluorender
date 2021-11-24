@@ -36,11 +36,11 @@ BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
 END_EVENT_TABLE()
 
-CountingDlg::CountingDlg(wxWindow *frame, wxWindow*parent)
-: wxPanel(parent, wxID_ANY,
+CountingDlg::CountingDlg(VRenderFrame *frame)
+: wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(400, 150),
 0, "CountingDlg"),
-m_frame(parent),
+m_frame(frame),
 m_view(0),
 m_max_value(255.0)
 {
@@ -176,9 +176,8 @@ void CountingDlg::GetSettings(VRenderView* vrv)
 		return;
 
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	if (m_frame)
+		sel_vol = m_frame->GetCurSelVol();
 
 	m_view = vrv;
 }

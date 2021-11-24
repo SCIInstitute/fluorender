@@ -25,19 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
-#include "VRenderView.h"
-#include <wx/wx.h>
-#include <wx/panel.h>
-#include <wx/glcanvas.h>
-#include <wx/clrpicker.h>
-#include <wx/slider.h>
-
 #ifndef _MPROPVIEW_H_
 #define _MPROPVIEW_H_
 
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/clrpicker.h>
+#include <wx/slider.h>
+
 using namespace std;
 
+class VRenderFrame;
+class VRenderView;
+class MeshData;
 class MPropView: public wxPanel
 {
 	enum
@@ -60,8 +60,8 @@ class MPropView: public wxPanel
 	};
 
 public:
-	MPropView(wxWindow* frame, wxWindow* parent,
-		wxWindowID id,
+	MPropView(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -75,9 +75,9 @@ public:
 	void GetSettings();
 
 private:
-	wxWindow* m_frame;
-	MeshData* m_md;
+	VRenderFrame* m_frame;
 	VRenderView* m_vrv;
+	MeshData* m_md;
 
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;

@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Tester.h"
 #include "VRenderFrame.h"
-
 #include "Formats/tif_reader.h"
 
 BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
@@ -47,16 +46,16 @@ BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
 	EVT_BUTTON(ID_B1Btn, TesterDlg::OnB1)
 END_EVENT_TABLE()
 
-TesterDlg::TesterDlg(wxWindow *frame, wxWindow *parent)
-: wxDialog(parent, wxID_ANY, wxString("Tester"),
+TesterDlg::TesterDlg(VRenderFrame *frame)
+: wxDialog(frame, wxID_ANY, wxString("Tester"),
 		   wxDefaultPosition, wxSize(600, 600),
 		   wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
 		   wxMAXIMIZE_BOX|wxMINIMIZE_BOX),
 m_p1(1.0),
 m_p2(0.0),
 m_p3(0.0),
-m_p4(0.0)//,
-//m_frame(frame)
+m_p4(0.0),
+m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -159,12 +158,12 @@ void TesterDlg::OnP1Change(wxScrollEvent &event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->sfactor_ = val;
 		vd->GetVR()->resize();
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 		m_p1 = val;
 	}
 
@@ -177,11 +176,11 @@ void TesterDlg::OnP2Change(wxScrollEvent &event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->filter_size_min_ = val;
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 		m_p2 = val;//
 	}
 
@@ -194,11 +193,11 @@ void TesterDlg::OnP3Change(wxScrollEvent &event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->filter_size_max_ = val;
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 		m_p3 = val;
 	}
 
@@ -211,11 +210,11 @@ void TesterDlg::OnP4Change(wxScrollEvent &event)
 {
 /*	int ival = event.GetPosition();
 	double val = ival*4.0/1000.0;
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->filter_size_shp_ = val;
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 		m_p4 = val;
 	}
 
@@ -232,12 +231,12 @@ void TesterDlg::OnP1Check(wxCommandEvent& event)
 	else
 		val = m_p1;
 
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->sfactor_ = val;
 		vd->GetVR()->resize();
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 	}
 
 	wxString str = wxString::Format("%f", val);
@@ -253,11 +252,11 @@ void TesterDlg::OnP2Check(wxCommandEvent& event)
 	else
 		val = m_p2;
 
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->filter_size_min_ = val;
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 	}
 
 	wxString str = wxString::Format("%f", val);
@@ -273,11 +272,11 @@ void TesterDlg::OnP3Check(wxCommandEvent& event)
 	else
 		val = m_p3;
 
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->filter_size_max_ = val;
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 	}
 
 	wxString str = wxString::Format("%f", val);
@@ -293,11 +292,11 @@ void TesterDlg::OnP4Check(wxCommandEvent& event)
 	else
 		val = m_p4;
 
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->filter_size_shp_ = val;
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 	}
 
 	wxString str = wxString::Format("%f", val);
@@ -326,7 +325,7 @@ void TesterDlg::OnAllCheck(wxCommandEvent& event)
 		val4 = m_p4;
 	}
 
-	VolumeData* vd = ((VRenderFrame*)m_frame)->GetDataManager()->GetVolumeData(0);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
 		vd->GetVR()->sfactor_ = val1;
@@ -334,7 +333,7 @@ void TesterDlg::OnAllCheck(wxCommandEvent& event)
 		vd->GetVR()->filter_size_max_ = val3;
 		vd->GetVR()->filter_size_shp_ = val4;
 		vd->GetVR()->resize();
-		((VRenderFrame*)m_frame)->RefreshVRenderViews();
+		m_frame->RefreshVRenderViews();
 	}
 */
 }

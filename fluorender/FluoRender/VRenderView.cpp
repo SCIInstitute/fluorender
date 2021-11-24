@@ -99,14 +99,12 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_KEY_DOWN(VRenderView::OnKeyDown)
 END_EVENT_TABLE()
 
-VRenderView::VRenderView(wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+VRenderView::VRenderView(VRenderFrame* frame,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxPanel(parent, id, pos, size, style),
+	wxPanel(frame, wxID_ANY, pos, size, style),
 	m_default_saved(false),
 	m_frame(frame),
 	m_timer(this,ID_RotateTimer),
@@ -221,7 +219,7 @@ wxPanel(parent, id, pos, size, style),
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
-	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
+	m_glview = new VRenderGLView(frame, this, attriblist, sharedContext);
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;

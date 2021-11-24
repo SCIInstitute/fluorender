@@ -27,22 +27,24 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "APropView.h"
 #include "VRenderFrame.h"
+#include "DataManager.h"
+#include "VRenderView.h"
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(APropView, wxPanel)
 	EVT_BUTTON(ID_MemoUpdateBtn, APropView::OnMemoUpdateBtn)
 END_EVENT_TABLE()
 
-APropView::APropView(wxWindow* frame, wxWindow* parent,
-	wxWindowID id,
+APropView::APropView(VRenderFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-wxPanel(parent, id, pos, size, style, name),
-m_frame(frame),
-m_ann(0),
-m_vrv(0)
+	wxPanel(parent, wxID_ANY, pos, size, style, name),
+	m_frame(frame),
+	m_ann(0),
+	m_vrv(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -113,9 +115,8 @@ Annotations* APropView::GetAnnotations()
 
 void APropView::RefreshVRenderViews(bool tree)
 {
-	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	if (vrender_frame)
-		vrender_frame->RefreshVRenderViews(tree);
+	if (m_frame)
+		m_frame->RefreshVRenderViews(tree);
 }
 
 void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
@@ -123,7 +124,7 @@ void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
 	if (m_ann)
 	{
 		wxString memo = m_memo_text->GetValue();
-                std::string str = memo.ToStdString();
+		std::string str = memo.ToStdString();
 		m_ann->SetMemo(str);
 	}
 }

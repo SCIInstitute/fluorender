@@ -28,11 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _KERNELEXECUTOR_H_
 #define _KERNELEXECUTOR_H_
 
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <wx/string.h>
 #include <vector>
 
+class VolumeData;
+namespace flvr
+{
+	class KernelProgram;
+}
 class KernelExecutor
 {
 public:
@@ -58,7 +61,7 @@ private:
 	wxString m_message;
 
 	bool ExecuteKernel(flvr::KernelProgram* kernel,
-		GLuint data_id, void* result,
+		unsigned int data_id, void* result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z, int chars);
 

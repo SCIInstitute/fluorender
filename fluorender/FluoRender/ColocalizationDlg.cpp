@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
-#include "VRenderFrame.h"
 #include "DataManager.h"
+#include "VRenderFrame.h"
 #include <Calculate/Compare.h>
 
 BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
@@ -51,12 +51,11 @@ BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
 	EVT_GRID_LABEL_LEFT_CLICK(ColocalizationDlg::OnGridLabelClick)
 END_EVENT_TABLE()
 
-ColocalizationDlg::ColocalizationDlg(wxWindow* frame,
-	wxWindow* parent) :
-wxPanel(parent, wxID_ANY,
+ColocalizationDlg::ColocalizationDlg(VRenderFrame* frame) :
+wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(500, 500),
 0, "ColocalizationDlg"),
-m_frame(parent),
+m_frame(frame),
 m_view(0),
 m_group(0),
 m_hold_history(false),

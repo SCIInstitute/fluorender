@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef SLIVR_MeshRenderer_h
-#define SLIVR_MeshRenderer_h
+#ifndef MeshRenderer_h
+#define MeshRenderer_h
 
 #include "ShaderProgram.h"
 #include "MshShader.h"

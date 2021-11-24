@@ -25,13 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-
 #ifndef _CONVERTDLG_H_
 #define _CONVERTDLG_H_
 
-class VRenderView;
+#include <wx/wx.h>
 
+class VRenderFrame;
+class VRenderView;
 class ConvertDlg : public wxPanel
 {
 public:
@@ -51,13 +51,13 @@ public:
 		ID_StatText
 	};
 
-	ConvertDlg(wxWindow* frame, wxWindow* parent);
+	ConvertDlg(VRenderFrame* frame);
 	~ConvertDlg();
 
 	void GetSettings(VRenderView* vrv);
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 
 	//convert from volume to polygon mesh
 	wxSlider* m_cnv_vol_mesh_thresh_sldr;

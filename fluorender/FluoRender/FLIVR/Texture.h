@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef SLIVR_Texture_h
-#define SLIVR_Texture_h
+#ifndef Texture_h
+#define Texture_h
 
 #include <vector>
 #include <Types/Transform.h>

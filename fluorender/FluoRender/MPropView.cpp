@@ -26,7 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MPropView.h"
+#include "DataManager.h"
 #include "VRenderFrame.h"
+#include "VRenderView.h"
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MPropView, wxPanel)
@@ -50,16 +52,16 @@ BEGIN_EVENT_TABLE(MPropView, wxPanel)
 	EVT_TEXT(ID_size_text, MPropView::OnSizeText)
 END_EVENT_TABLE()
 
-MPropView::MPropView(wxWindow* frame, wxWindow* parent,
-	wxWindowID id,
+MPropView::MPropView(VRenderFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-wxPanel(parent, id, pos, size,style, name),
-m_frame(frame),
-m_md(0),
-m_vrv(0)
+	wxPanel(parent, wxID_ANY, pos, size,style, name),
+	m_frame(frame),
+	m_md(0),
+	m_vrv(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -247,9 +249,8 @@ MeshData* MPropView::GetMeshData()
 
 void MPropView::RefreshVRenderViews(bool tree)
 {
-	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	if (vrender_frame)
-		vrender_frame->RefreshVRenderViews(tree);
+	if (m_frame)
+		m_frame->RefreshVRenderViews(tree);
 }
 
 //lighting

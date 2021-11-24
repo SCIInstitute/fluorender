@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VRenderGLView.h"
 
+class VRenderFrame;
 class VRenderView: public wxPanel
 {
 public:
@@ -81,9 +82,7 @@ public:
 		ID_FreeChk
 	};
 
-	VRenderView(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	VRenderView(VRenderFrame* frame,
 		wxGLContext* sharedContext=0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

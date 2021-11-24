@@ -167,7 +167,7 @@ VRenderFrame::VRenderFrame(
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
 	//create this first to read the settings
-	m_setting_dlg = new SettingDlg(this, this);
+	m_setting_dlg = new SettingDlg(this);
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
@@ -392,31 +392,31 @@ VRenderFrame::VRenderFrame(
 	m_main_tb->Realize();
 
 	//create render view
-	VRenderView *vrv = new VRenderView(this, this, wxID_ANY);
+	VRenderView *vrv = new VRenderView(this);
 	vrv->InitView();
 	m_vrv_list.push_back(vrv);
 
 	//create list view
-	m_list_panel = new ListPanel(this, this, wxID_ANY,
+	m_list_panel = new ListPanel(this,
 		wxDefaultPosition, wxSize(350, 300));
 
 	//create tree view
-	m_tree_panel = new TreePanel(this, this, wxID_ANY,
+	m_tree_panel = new TreePanel(this,
 		wxDefaultPosition, wxSize(350, 300));
 
 	//create movie view (sets the m_recorder_dlg)
-	m_movie_view = new VMovieView(this, this, wxID_ANY,
-		wxDefaultPosition, wxSize(350, 300));
+	m_movie_view = new VMovieView(this,
+		wxDefaultPosition, wxSize(350, 400));
 
 	//create prop panel
 	m_prop_panel = new wxPanel(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VPropView(this, m_prop_panel, wxID_ANY);
-	m_mesh_prop = new MPropView(this, m_prop_panel, wxID_ANY);
-	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
-	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
+	m_volume_prop = new VPropView(this, m_prop_panel);
+	m_mesh_prop = new MPropView(this, m_prop_panel);
+	m_mesh_manip = new MManipulator(this, m_prop_panel);
+	m_annotation_prop = new APropView(this, m_prop_panel);
 	m_prop_panel->SetSizer(m_prop_sizer);
 	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
 	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
@@ -428,14 +428,14 @@ VRenderFrame::VRenderFrame(
 	m_annotation_prop->Show(false);
 
 	//clipping view
-	m_clip_view = new ClippingView(this, this, wxID_ANY,
+	m_clip_view = new ClippingView(this,
 		wxDefaultPosition, wxSize(130,700));
 	m_clip_view->SetDataManager(&m_data_mgr);
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
 		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
-	m_adjust_view = new AdjustView(this, this, wxID_ANY,
+	m_adjust_view = new AdjustView(this,
 		wxDefaultPosition, wxSize(130, 700));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
@@ -488,43 +488,43 @@ VRenderFrame::VRenderFrame(
 	VolumeMeshConv::SetSoftThreshold(m_setting_dlg->GetSoftThreshold());
 
 	//brush tool dialog
-	m_brush_tool_dlg = new BrushToolDlg(this, this);
+	m_brush_tool_dlg = new BrushToolDlg(this);
 
 	//noise cancelling dialog
-	m_noise_cancelling_dlg = new NoiseCancellingDlg(this, this);
+	m_noise_cancelling_dlg = new NoiseCancellingDlg(this);
 
 	//counting dialog
-	m_counting_dlg = new CountingDlg(this, this);
+	m_counting_dlg = new CountingDlg(this);
 
 	//convert dialog
-	m_convert_dlg = new ConvertDlg(this, this);
+	m_convert_dlg = new ConvertDlg(this);
 
 	//colocalization dialog
-	m_colocalization_dlg = new ColocalizationDlg(this, this);
+	m_colocalization_dlg = new ColocalizationDlg(this);
 
 	//measure dialog
-	m_measure_dlg = new MeasureDlg(this, this);
+	m_measure_dlg = new MeasureDlg(this);
 
 	//trace dialog
-	m_trace_dlg = new TraceDlg(this, this);
+	m_trace_dlg = new TraceDlg(this);
 	m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
 	//ocl dialog
-	m_ocl_dlg = new OclDlg(this, this);
+	m_ocl_dlg = new OclDlg(this);
 
 	//component dialog
 	m_component_dlg = new ComponentDlg(this);
 
 	//calculation dialog
-	m_calculation_dlg = new CalculationDlg(this, this);
+	m_calculation_dlg = new CalculationDlg(this);
 
 	//help dialog
-	m_help_dlg = new HelpDlg(this, this);
+	m_help_dlg = new HelpDlg(this);
 	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
 
 	//tester
 	//shown for testing parameters
-	m_tester = new TesterDlg(this, this);
+	m_tester = new TesterDlg(this);
 	if (m_setting_dlg->GetTestMode(2))
 		m_tester->Show(true);
 	else
@@ -937,11 +937,11 @@ wxString VRenderFrame::CreateView(int row)
 	if (m_vrv_list.size()>0)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
-		vrv = new VRenderView(this, this, wxID_ANY, sharedContext);
+		vrv = new VRenderView(this, sharedContext);
 	}
 	else
 	{
-		vrv = new VRenderView(this, this, wxID_ANY);
+		vrv = new VRenderView(this);
 	}
 
 	if (vrv)

@@ -27,11 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
 #include "VRenderFrame.h"
+#include "compatibility.h"
+//resources
+#include "Formats/png_resource.h"
 #include "tick.xpm"
 #include "cross.xpm"
-#include "Formats/png_resource.h"
-
-//resources
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
@@ -72,13 +72,12 @@ BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)
 END_EVENT_TABLE()
 
 DataTreeCtrl::DataTreeCtrl(
-	wxWindow* frame,
+	VRenderFrame* frame,
 	wxWindow* parent,
-	wxWindowID id,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxTreeCtrl(parent, id, pos, size, style),
+wxTreeCtrl(parent, wxID_ANY, pos, size, style),
 	m_frame(frame),
 	m_fixed(false),
 	m_scroll_pos(-1)
@@ -137,15 +136,14 @@ void DataTreeCtrl::DeleteSelection()
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 		if (item_data && item_data->type == 1)//view
 		{
 			wxString name = GetItemText(sel_item);
-			vr_frame->DeleteVRenderView(name);
+			m_frame->DeleteVRenderView(name);
 		}
 
 		wxString name_data = GetItemText(sel_item);
@@ -161,7 +159,7 @@ void DataTreeCtrl::DeleteSelection()
 			{
 			case 1://view
 				{
-					VRenderView* vrv = vr_frame->GetView(par_name);
+					VRenderView* vrv = m_frame->GetView(par_name);
 					if (!vrv)
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
@@ -176,7 +174,7 @@ void DataTreeCtrl::DeleteSelection()
 								vrv->RemoveVolumeData(name_data);
 								if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
 								{
-									AdjustView* adjust_view = vr_frame->GetAdjustView();
+									AdjustView* adjust_view = m_frame->GetAdjustView();
 									if (adjust_view)
 									{
 										adjust_view->SetRenderView(vrv);
@@ -212,28 +210,28 @@ void DataTreeCtrl::DeleteSelection()
 							vrv->RemoveGroup(name_data);
 						}
 					}
-					vr_frame->UpdateTree();
-					vr_frame->RefreshVRenderViews();
-					vr_frame->OnSelection(1);
+					m_frame->UpdateTree();
+					m_frame->RefreshVRenderViews();
+					m_frame->OnSelection(1);
 				}
 				break;
 			case 5://group
 				{
 					wxTreeItemId gpar_item = GetItemParent(par_item);
 					wxString gpar_name = GetItemText(gpar_item);
-					VRenderView* vrv = vr_frame->GetView(gpar_name);
+					VRenderView* vrv = m_frame->GetView(gpar_name);
 					if (!vrv)
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 					if (item_data && item_data->type == 2)
 						vrv->RemoveVolumeData(name_data);
-					vr_frame->UpdateTree();
-					vr_frame->RefreshVRenderViews();
-					vr_frame->OnSelection(1);
+					m_frame->UpdateTree();
+					m_frame->RefreshVRenderViews();
+					m_frame->OnSelection(1);
 
 					if (vrv->GetVolMethod() == VOL_METHOD_MULTI)
 					{
-						AdjustView* adjust_view = vr_frame->GetAdjustView();
+						AdjustView* adjust_view = m_frame->GetAdjustView();
 						if (adjust_view)
 						{
 							adjust_view->SetRenderView(vrv);
@@ -246,15 +244,15 @@ void DataTreeCtrl::DeleteSelection()
 				{
 					wxTreeItemId gpar_item = GetItemParent(par_item);
 					wxString gpar_name = GetItemText(gpar_item);
-					VRenderView* vrv = vr_frame->GetView(gpar_name);
+					VRenderView* vrv = m_frame->GetView(gpar_name);
 					if (!vrv)
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 					if (item_data && item_data->type==3)
 						vrv->RemoveMeshData(name_data);
-					vr_frame->UpdateTree();
-					vr_frame->RefreshVRenderViews();
-					vr_frame->OnSelection(1);
+					m_frame->UpdateTree();
+					m_frame->RefreshVRenderViews();
+					m_frame->OnSelection(1);
 				}
 				break;
 			}
@@ -269,10 +267,9 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 
 	int flag;
 	wxTreeItemId sel_item = HitTest(ScreenToClient(event.GetPosition()), flag);
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk())
 	{
 		SelectItem(sel_item);
 
@@ -310,7 +307,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 					menu.Append(ID_AddDataGroup, "Add Volume Group");
 					menu.Append(ID_AddMeshGroup, "Add Mesh Group");
 					wxString str = GetItemText(sel_item);
-					if (str != vr_frame->GetView(0)->GetName())
+					if (str != m_frame->GetView(0)->GetName())
 						menu.Append(ID_CloseView, "Close");
 				}
 				break;
@@ -324,7 +321,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 				menu.Append(ID_RemoveData, "Delete");
 				menu.AppendSeparator();
 				menu.Append(ID_CopyMask, "Copy Mask");
-				if (vr_frame->m_vd_copy)
+				if (m_frame->m_vd_copy)
 				{
 					menu.Append(ID_PasteMask, "Paste Mask");
 					menu.Append(ID_MergeMask, "Merge Mask");
@@ -402,9 +399,8 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		wxString viewname = "";
 		wxString itemname = "";
@@ -444,12 +440,12 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 			}
 		}
 
-		VRenderView* vrv = vr_frame->GetView(viewname);
+		VRenderView* vrv = m_frame->GetView(viewname);
 		if (vrv)
 		{
 			vrv->Isolate(item_type, itemname);
 			vrv->RefreshGL(true);
-			vr_frame->UpdateTreeIcons();
+			m_frame->UpdateTreeIcons();
 		}
 
 		UpdateSelection();
@@ -462,9 +458,8 @@ void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		wxString viewname = "";
 		wxString itemname = "";
@@ -504,12 +499,12 @@ void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
 			}
 		}
 
-		VRenderView* vrv = vr_frame->GetView(viewname);
+		VRenderView* vrv = m_frame->GetView(viewname);
 		if (vrv)
 		{
 			vrv->ShowAll();
 			vrv->RefreshGL();
-			vr_frame->UpdateTreeIcons();
+			m_frame->UpdateTreeIcons();
 		}
 
 		UpdateSelection();
@@ -527,15 +522,14 @@ void DataTreeCtrl::OnCloseView(wxCommandEvent& event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 		if (item_data && item_data->type == 1)//view
 		{
 			wxString name = GetItemText(sel_item);
-			vr_frame->DeleteVRenderView(name);
+			m_frame->DeleteVRenderView(name);
 		}
 	}
 }
@@ -546,16 +540,15 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 		if (item_data && item_data->type == 3)//mesh data
 		{
 			wxString name = GetItemText(sel_item);
-			MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-			vr_frame->OnSelection(6, 0, 0, 0, md);
+			MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+			m_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
 }
@@ -566,8 +559,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 
 	if (!sel_item.IsOk())
 	{
@@ -582,7 +574,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 		{
 			//view
 			wxString name = GetItemText(sel_item);
-			VRenderView* vrv = vr_frame->GetView(name);
+			VRenderView* vrv = m_frame->GetView(name);
 			if (vrv)
 			{
 				wxString group_name = vrv->AddMGroup();
@@ -601,7 +593,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 				{
 					//volume in view
 					wxString name = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						wxString group_name = vrv->AddMGroup();
@@ -618,7 +610,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							VRenderView* vrv = vr_frame->GetView(name);
+							VRenderView* vrv = m_frame->GetView(name);
 							if (vrv)
 							{
 								wxString group_name = vrv->AddMGroup();
@@ -640,7 +632,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 				{
 					//mesh in view
 					wxString name = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						wxString group_name = vrv->AddMGroup();
@@ -657,7 +649,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							VRenderView* vrv = vr_frame->GetView(name);
+							VRenderView* vrv = m_frame->GetView(name);
 							if (vrv)
 							{
 								wxString group_name = vrv->AddMGroup();
@@ -680,7 +672,7 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 				{
 					//group in view
 					wxString name = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						wxString group_name = vrv->AddMGroup();
@@ -698,8 +690,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 
 	if (!sel_item.IsOk())
 	{
@@ -714,7 +705,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 		{
 			//view
 			wxString name = GetItemText(sel_item);
-			VRenderView* vrv = vr_frame->GetView(name);
+			VRenderView* vrv = m_frame->GetView(name);
 			if (vrv)
 			{
 				wxString group_name = vrv->AddGroup();
@@ -733,7 +724,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 				{
 					//volume in view
 					wxString name = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						wxString group_name = vrv->AddGroup();
@@ -750,7 +741,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							VRenderView* vrv = vr_frame->GetView(name);
+							VRenderView* vrv = m_frame->GetView(name);
 							if (vrv)
 							{
 								wxString group_name = vrv->AddGroup();
@@ -772,7 +763,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 				{
 					//mesh in view
 					wxString name = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						wxString group_name = vrv->AddGroup();
@@ -789,7 +780,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 						if (gpar_data && gpar_data->type == 1)
 						{
 							wxString name = GetItemText(gpar_item);
-							VRenderView* vrv = vr_frame->GetView(name);
+							VRenderView* vrv = m_frame->GetView(name);
 							if (vrv)
 							{
 								wxString group_name = vrv->AddGroup();
@@ -812,7 +803,7 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 				{
 					//group in view
 					wxString name = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						wxString group_name = vrv->AddGroup();
@@ -836,81 +827,71 @@ void DataTreeCtrl::OnExpand(wxCommandEvent &event)
 //edit
 void DataTreeCtrl::OnEdit(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowPaintTool();
+	if (m_frame)
+		m_frame->ShowPaintTool();
 }
 
 //measurement
 void DataTreeCtrl::OnMeasurement(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowMeasureDlg();
+	if (m_frame)
+		m_frame->ShowMeasureDlg();
 }
 
 //trace
 void DataTreeCtrl::OnTrace(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowTraceDlg();
+	if (m_frame)
+		m_frame->ShowTraceDlg();
 }
 
 //noise cancelling
 void DataTreeCtrl::OnNoiseCancelling(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowNoiseCancellingDlg();
+	if (m_frame)
+		m_frame->ShowNoiseCancellingDlg();
 }
 
 //counting
 void DataTreeCtrl::OnCounting(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowCountingDlg();
+	if (m_frame)
+		m_frame->ShowCountingDlg();
 }
 
 //colocalzation
 void DataTreeCtrl::OnColocalization(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowColocalizationDlg();
+	if (m_frame)
+		m_frame->ShowColocalizationDlg();
 }
 
 //convert
 void DataTreeCtrl::OnConvert(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowConvertDlg();
+	if (m_frame)
+		m_frame->ShowConvertDlg();
 }
 
 //ocl
 void DataTreeCtrl::OnOcl(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowOclDlg();
+	if (m_frame)
+		m_frame->ShowOclDlg();
 }
 
 //component
 void DataTreeCtrl::OnComponent(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowComponentDlg();
+	if (m_frame)
+		m_frame->ShowComponentDlg();
 }
 
 //calculations
 void DataTreeCtrl::OnCalculations(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		vr_frame->ShowCalculationDlg();
+	if (m_frame)
+		m_frame->ShowCalculationDlg();
 }
 
 //randomize color
@@ -920,8 +901,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 	if (!sel_item.IsOk()) return;
 
 	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
@@ -931,21 +911,21 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	if (item_data->type == 1)
 	{
 		//view
-		VRenderView* vrv = vr_frame->GetView(name);
+		VRenderView* vrv = m_frame->GetView(name);
 		if (vrv)
 			vrv->RandomizeColor();
 	}
 	else if (item_data->type == 2)
 	{
 		//volume
-		VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+		VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 		if (vd)
 			vd->RandomizeColor();
 	}
 	else if (item_data->type == 3)
 	{
 		//mesh
-		MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+		MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
 		if (md)
 			md->RandomizeColor();
 	}
@@ -953,7 +933,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	{
 		//volume group
 		wxString par_name = GetItemText(GetItemParent(sel_item));
-		VRenderView* vrv = vr_frame->GetView(par_name);
+		VRenderView* vrv = m_frame->GetView(par_name);
 		if (vrv)
 		{
 			DataGroup* group = vrv->GetGroup(name);
@@ -965,7 +945,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	{
 		//mesh group
 		wxString par_name = GetItemText(GetItemParent(sel_item));
-		VRenderView* vrv = vr_frame->GetView(par_name);
+		VRenderView* vrv = m_frame->GetView(par_name);
 		if (vrv)
 		{
 			MeshGroup* group = vrv->GetMGroup(name);
@@ -975,10 +955,10 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	}
 
 	m_scroll_pos = GetScrollPos(wxVERTICAL);
-	vr_frame->UpdateTree(name);
+	m_frame->UpdateTree(name);
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 	UpdateSelection();
-	vr_frame->RefreshVRenderViews();
+	m_frame->RefreshVRenderViews();
 }
 
 void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
@@ -1013,15 +993,14 @@ void DataTreeCtrl::OnIntersectMask(wxCommandEvent& event)
 void DataTreeCtrl::UpdateSelection()
 {
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (!vr_frame)
+	if (!m_frame)
 		return;
 
 	//clear volume A for all views
-	for (int i=0; i<vr_frame->GetViewNum(); i++)
+	for (int i=0; i< m_frame->GetViewNum(); i++)
 	{
-		VRenderView* vrv = vr_frame->GetView(i);
+		VRenderView* vrv = m_frame->GetView(i);
 		if (vrv)
 			vrv->SetVolumeA(0);
 	}
@@ -1036,19 +1015,19 @@ void DataTreeCtrl::UpdateSelection()
 			switch (item_data->type)
 			{
 			case 0://root
-				vr_frame->OnSelection(0);
+				m_frame->OnSelection(0);
 				break;
 			case 1://view
-				//vr_frame->OnSelection(0);
+				//m_frame->OnSelection(0);
 				{
 					wxString str = GetItemText(sel_item);
-					VRenderView* vrv = vr_frame->GetView(str);
-					vr_frame->OnSelection(1, vrv, 0, 0, 0);
+					VRenderView* vrv = m_frame->GetView(str);
+					m_frame->OnSelection(1, vrv, 0, 0, 0);
 				}
 				break;
 			case 2://volume data
 				{
-					if (vr_frame->GetAdjustView())
+					if (m_frame->GetAdjustView())
 					{
 						wxTreeItemId par_item = GetItemParent(sel_item);
 						if (par_item.IsOk())
@@ -1058,14 +1037,14 @@ void DataTreeCtrl::UpdateSelection()
 							{
 								//par is group
 								wxString str = GetItemText(GetItemParent(par_item));
-								VRenderView* vrv = vr_frame->GetView(str);
+								VRenderView* vrv = m_frame->GetView(str);
 								if (vrv)
 								{
-									VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+									VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 									str = GetItemText(par_item);
 									DataGroup* group = vrv->GetGroup(str);
-									vr_frame->GetAdjustView()->SetGroupLink(group);
-									vr_frame->OnSelection(2, vrv, group, vd, 0);
+									m_frame->GetAdjustView()->SetGroupLink(group);
+									m_frame->OnSelection(2, vrv, group, vd, 0);
 									vrv->SetVolumeA(vd);
 								}
 							}
@@ -1073,12 +1052,12 @@ void DataTreeCtrl::UpdateSelection()
 							{
 								//par is view
 								wxString str = GetItemText(par_item);
-								VRenderView* vrv = vr_frame->GetView(str);
+								VRenderView* vrv = m_frame->GetView(str);
 								if (vrv)
 								{
-									VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
-									vr_frame->GetAdjustView()->SetGroupLink(0);
-									vr_frame->OnSelection(2, vrv, 0, vd);
+									VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									m_frame->GetAdjustView()->SetGroupLink(0);
+									m_frame->OnSelection(2, vrv, 0, vd);
 									vrv->SetVolumeA(vd);
 								}
 							}
@@ -1096,22 +1075,22 @@ void DataTreeCtrl::UpdateSelection()
 						{
 							//par is group
 							wxString str = GetItemText(GetItemParent(par_item));
-							VRenderView* vrv = vr_frame->GetView(str);
+							VRenderView* vrv = m_frame->GetView(str);
 							if (vrv)
 							{
-								MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-								vr_frame->OnSelection(3, vrv, 0, 0, md);
+								MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+								m_frame->OnSelection(3, vrv, 0, 0, md);
 							}
 						}
 						else if (par_item_data && par_item_data->type == 1)
 						{
 							//par is view
 							wxString str = GetItemText(par_item);
-							VRenderView* vrv = vr_frame->GetView(str);
+							VRenderView* vrv = m_frame->GetView(str);
 							if (vrv)
 							{
-								MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
-								vr_frame->OnSelection(3, vrv, 0, 0, md);
+								MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+								m_frame->OnSelection(3, vrv, 0, 0, md);
 							}
 						}
 					}
@@ -1120,29 +1099,29 @@ void DataTreeCtrl::UpdateSelection()
 			case 4://annotations
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					VRenderView* vrv = vr_frame->GetView(par_name);
-					Annotations* ann = vr_frame->GetDataManager()->GetAnnotations(name);
-					vr_frame->OnSelection(4, vrv, 0, 0, 0, ann);
+					VRenderView* vrv = m_frame->GetView(par_name);
+					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					m_frame->OnSelection(4, vrv, 0, 0, 0, ann);
 				}
 				break;
 			case 5://group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					VRenderView* vrv = vr_frame->GetView(par_name);
+					VRenderView* vrv = m_frame->GetView(par_name);
 					if (vrv)
 					{
 						DataGroup* group = vrv->GetGroup(name);
-						vr_frame->OnSelection(5, vrv, group);
+						m_frame->OnSelection(5, vrv, group);
 					}
 				}
 				break;
 			case 6://mesh group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					VRenderView* vrv = vr_frame->GetView(par_name);
+					VRenderView* vrv = m_frame->GetView(par_name);
 					if (vrv)
 					{
-						vr_frame->OnSelection(0);
+						m_frame->OnSelection(0);
 					}
 				}
 				break;
@@ -1159,8 +1138,8 @@ void DataTreeCtrl::UpdateSelection()
 					list_type = DATA_MESH;
 				else if (item_data->type == 4)
 					list_type = DATA_ANNOTATIONS;
-				if (vr_frame->GetList())
-					vr_frame->GetList()->SetSelection(list_type, name);
+				if (m_frame->GetList())
+					m_frame->GetList()->SetSelection(list_type, name);
 			}
 		}
 	}
@@ -1268,11 +1247,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 		return;
 
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	wxString name = "";
 	bool rc = wxGetKeyState(WXK_CONTROL);
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		name = GetItemText(sel_item);
 		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
@@ -1282,7 +1260,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			{
 			case 1://view
 				{
-					VRenderView* vrv = vr_frame->GetView(name);
+					VRenderView* vrv = m_frame->GetView(name);
 					if (vrv)
 					{
 						if (rc)
@@ -1294,7 +1272,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 2://volume data
 				{
-					VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+					VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 					if (vd)
 					{
 						if (rc)
@@ -1302,9 +1280,9 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 						else
 						{
 							vd->ToggleDisp();
-							for (int i=0; i<vr_frame->GetViewNum(); i++)
+							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
-								VRenderView* vrv = vr_frame->GetView(i);
+								VRenderView* vrv = m_frame->GetView(i);
 								if (vrv)
 									vrv->SetVolPopDirty();
 							}
@@ -1314,7 +1292,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 3://mesh data
 				{
-					MeshData* md = vr_frame->GetDataManager()->GetMeshData(name);
+					MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
 					if (md)
 					{
 						if (rc)
@@ -1322,9 +1300,9 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 						else
 						{
 							md->ToggleDisp();
-							for (int i=0; i<vr_frame->GetViewNum(); i++)
+							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
-								VRenderView* vrv = vr_frame->GetView(i);
+								VRenderView* vrv = m_frame->GetView(i);
 								if (vrv)
 									vrv->SetMeshPopDirty();
 							}
@@ -1334,7 +1312,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 4://annotations
 				{
-					Annotations* ann = vr_frame->GetDataManager()->GetAnnotations(name);
+					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
 					if (ann)
 					{
 						ann->ToggleDisp();
@@ -1344,7 +1322,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			case 5://group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					VRenderView* vrv = vr_frame->GetView(par_name);
+					VRenderView* vrv = m_frame->GetView(par_name);
 					if (vrv)
 					{
 						DataGroup* group = vrv->GetGroup(name);
@@ -1364,7 +1342,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 			case 6://mesh group
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
-					VRenderView* vrv = vr_frame->GetView(par_name);
+					VRenderView* vrv = m_frame->GetView(par_name);
 					if (vrv)
 					{
 						MeshGroup* group = vrv->GetMGroup(name);
@@ -1386,12 +1364,12 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 
 		m_scroll_pos = GetScrollPos(wxVERTICAL);
 		if (rc)
-			vr_frame->UpdateTree(name);
+			m_frame->UpdateTree(name);
 		else
-			vr_frame->UpdateTreeIcons();
+			m_frame->UpdateTreeIcons();
 		SetScrollPos(wxVERTICAL, m_scroll_pos);
 		UpdateSelection();
-		vr_frame->RefreshVRenderViews(false, true);
+		m_frame->RefreshVRenderViews(false, true);
 	}
 }
 
@@ -1445,11 +1423,10 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		src_par_item = src_item.IsOk()?GetItemParent(src_item):0,
 		dst_par_item = dst_item.IsOk()?GetItemParent(dst_item):0;
 	m_drag_item = (wxTreeItemId)0l;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
 	if (src_item.IsOk() && dst_item.IsOk() &&
 		src_par_item.IsOk() &&
-		dst_par_item.IsOk() && vr_frame)
+		dst_par_item.IsOk() && m_frame)
 	{
 		int src_type = ((LayerInfo*)GetItemData(src_item))->type;
 		int src_par_type = ((LayerInfo*)GetItemData(src_par_item))->type;
@@ -1470,7 +1447,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			if (src_type == 2 && dst_type == 5)
 			{
 				//move volume to the group in the same view
-				VRenderView* vrv = vr_frame->GetView(src_par_name);
+				VRenderView* vrv = m_frame->GetView(src_par_name);
 				if (vrv)
 				{
 					wxString str("");
@@ -1480,7 +1457,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			else if (src_type==3 && dst_type==6)
 			{
 				//move mesh into a group
-				VRenderView* vrv = vr_frame->GetView(src_par_name);
+				VRenderView* vrv = m_frame->GetView(src_par_name);
 				if (vrv)
 				{
 					wxString str("");
@@ -1489,7 +1466,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 			else
 			{
-				VRenderView* vrv = vr_frame->GetView(src_par_name);
+				VRenderView* vrv = m_frame->GetView(src_par_name);
 				if (vrv)
 					vrv->MoveLayerinView(src_name, dst_name);
 			}
@@ -1501,7 +1478,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move volume within the same group
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			VRenderView* vrv = vr_frame->GetView(str);
+			VRenderView* vrv = m_frame->GetView(str);
 			if (vrv)
 				vrv->MoveLayerinGroup(src_par_name, src_name, dst_name);
 		}
@@ -1513,7 +1490,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			//move volume outside of the group
 			if (dst_type == 5) //dst is group
 			{
-				VRenderView* vrv = vr_frame->GetView(dst_par_name);
+				VRenderView* vrv = m_frame->GetView(dst_par_name);
 				if (vrv)
 				{
 					wxString str("");
@@ -1522,7 +1499,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 			else
 			{
-				VRenderView *vrv = vr_frame->GetView(dst_par_name);
+				VRenderView *vrv = m_frame->GetView(dst_par_name);
 				if (vrv)
 					vrv->MoveLayertoView(src_par_name, src_name, dst_name);
 			}
@@ -1533,7 +1510,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
 		{
 			//move volume into group
-			VRenderView* vrv = vr_frame->GetView(src_par_name);
+			VRenderView* vrv = m_frame->GetView(src_par_name);
 			if (vrv)
 				vrv->MoveLayertoGroup(dst_par_name, src_name, dst_name);
 		}
@@ -1546,7 +1523,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move volume from one group to another
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			VRenderView* vrv = vr_frame->GetView(str);
+			VRenderView* vrv = m_frame->GetView(str);
 			if (vrv)
 				vrv->MoveLayerfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
 		}
@@ -1556,7 +1533,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
 		{
 			//move volume outside of the group
-			VRenderView* vrv = vr_frame->GetView(dst_name);
+			VRenderView* vrv = m_frame->GetView(dst_name);
 			if (vrv)
 			{
 				wxString str("");
@@ -1570,7 +1547,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move mesh within the same group
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			VRenderView* vrv = vr_frame->GetView(str);
+			VRenderView* vrv = m_frame->GetView(str);
 			if (vrv)
 				vrv->MoveMeshinGroup(src_par_name, src_name, dst_name);
 		}
@@ -1582,7 +1559,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			//move mesh outside of the group
 			if (dst_type == 6) //dst is group
 			{
-				VRenderView* vrv = vr_frame->GetView(dst_par_name);
+				VRenderView* vrv = m_frame->GetView(dst_par_name);
 				if (vrv)
 				{
 					wxString str("");
@@ -1591,7 +1568,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 			else
 			{
-				VRenderView *vrv = vr_frame->GetView(dst_par_name);
+				VRenderView *vrv = m_frame->GetView(dst_par_name);
 				if (vrv)
 					vrv->MoveMeshtoView(src_par_name, src_name, dst_name);
 			}
@@ -1602,7 +1579,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
 		{
 			//move mesh into group
-			VRenderView* vrv = vr_frame->GetView(src_par_name);
+			VRenderView* vrv = m_frame->GetView(src_par_name);
 			if (vrv)
 				vrv->MoveMeshtoGroup(dst_par_name, src_name, dst_name);
 		}
@@ -1615,7 +1592,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		{
 			//move mesh from one group to another
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			VRenderView* vrv = vr_frame->GetView(str);
+			VRenderView* vrv = m_frame->GetView(str);
 			if (vrv)
 				vrv->MoveMeshfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
 		}
@@ -1625,7 +1602,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
 		{
 			//move mesh outside of the group
-			VRenderView* vrv = vr_frame->GetView(dst_name);
+			VRenderView* vrv = m_frame->GetView(dst_name);
 			if (vrv)
 			{
 				wxString str("");
@@ -1633,11 +1610,11 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			}
 		}
 
-		vr_frame->UpdateTree(src_name);
-		vr_frame->RefreshVRenderViews();
+		m_frame->UpdateTree(src_name);
+		m_frame->RefreshVRenderViews();
 	}
 	else if (src_item.IsOk() && src_par_item.IsOk() &&
-		!dst_item.IsOk() && vr_frame)
+		!dst_item.IsOk() && m_frame)
 	{
 		//move volume out of the group
 		int src_type = ((LayerInfo*)GetItemData(src_item))->type;
@@ -1649,14 +1626,14 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		if (src_type == 2 && src_par_type == 5)
 		{
 			wxString str = GetItemText(GetItemParent(src_par_item));
-			VRenderView* vrv = vr_frame->GetView(str);
+			VRenderView* vrv = m_frame->GetView(str);
 			if (vrv)
 			{
 				wxString str("");
 				vrv->MoveLayertoView(src_par_name, src_name, str);
 
-				vr_frame->UpdateTree(src_name);
-				vr_frame->RefreshVRenderViews();
+				m_frame->UpdateTree(src_name);
+				m_frame->RefreshVRenderViews();
 			}
 		}
 	}
@@ -1891,9 +1868,8 @@ void DataTreeCtrl::SetMGroupItemImage(const wxTreeItemId item, int image)
 void DataTreeCtrl::BrushClear()
 {
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		//select data
 		wxString name = GetItemText(sel_item);
@@ -1908,10 +1884,10 @@ void DataTreeCtrl::BrushClear()
 				{
 					//par is group
 					wxString str = GetItemText(GetItemParent(par_item));
-					VRenderView* vrv = vr_frame->GetView(str);
+					VRenderView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
 							int int_mode = vrv->GetIntMode();
@@ -1929,10 +1905,10 @@ void DataTreeCtrl::BrushClear()
 				{
 					//par is view
 					wxString str = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(str);
+					VRenderView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
 							int int_mode = vrv->GetIntMode();
@@ -1954,9 +1930,8 @@ void DataTreeCtrl::BrushClear()
 void DataTreeCtrl::BrushCreate()
 {
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		//select data
 		wxString name = GetItemText(sel_item);
@@ -1972,10 +1947,10 @@ void DataTreeCtrl::BrushCreate()
 					//par is group
 					wxString group_name = GetItemText(par_item);
 					wxString str = GetItemText(GetItemParent(par_item));
-					VRenderView* vrv = vr_frame->GetView(str);
+					VRenderView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
@@ -1991,10 +1966,10 @@ void DataTreeCtrl::BrushCreate()
 				{
 					//par is view
 					wxString str = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(str);
+					VRenderView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
@@ -2014,9 +1989,8 @@ void DataTreeCtrl::BrushCreate()
 void DataTreeCtrl::BrushCreateInv()
 {
 	wxTreeItemId sel_item = GetSelection();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
-	if (sel_item.IsOk() && vr_frame)
+	if (sel_item.IsOk() && m_frame)
 	{
 		//select data
 		wxString name = GetItemText(sel_item);
@@ -2038,10 +2012,10 @@ void DataTreeCtrl::BrushCreateInv()
 					//par is group
 					wxString group_name = GetItemText(par_item);
 					wxString str = GetItemText(GetItemParent(par_item));
-					VRenderView* vrv = vr_frame->GetView(str);
+					VRenderView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
@@ -2057,10 +2031,10 @@ void DataTreeCtrl::BrushCreateInv()
 				{
 					//par is view
 					wxString str = GetItemText(par_item);
-					VRenderView* vrv = vr_frame->GetView(str);
+					VRenderView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
@@ -2082,15 +2056,14 @@ void DataTreeCtrl::CopyMask(bool copy_data)
 {
 	wxTreeItemId sel_item = GetSelection();
 	if (!sel_item.IsOk()) return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 
 	wxString name = GetItemText(sel_item);
-	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 	if (vd)
 	{
-		vr_frame->m_vd_copy = vd;
-		vr_frame->m_copy_data = copy_data;
+		m_frame->m_vd_copy = vd;
+		m_frame->m_copy_data = copy_data;
 	}
 }
 
@@ -2100,11 +2073,10 @@ void DataTreeCtrl::PasteMask(int op)
 		return;
 	wxTreeItemId sel_item = GetSelection();
 	if (!sel_item.IsOk()) return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
+	if (!m_frame) return;
 
 	wxString name = GetItemText(sel_item);
-	VolumeData* vd = vr_frame->GetDataManager()->GetVolumeData(name);
+	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 	VRenderView* vrv = 0;
 	DataGroup* group = 0;
 	wxTreeItemId par_item = GetItemParent(sel_item);
@@ -2115,7 +2087,7 @@ void DataTreeCtrl::PasteMask(int op)
 		{
 			//par is group
 			wxString str = GetItemText(GetItemParent(par_item));
-			vrv = vr_frame->GetView(str);
+			vrv = m_frame->GetView(str);
 			str = GetItemText(par_item);
 			group = vrv->GetGroup(str);
 		}
@@ -2123,34 +2095,34 @@ void DataTreeCtrl::PasteMask(int op)
 		{
 			//par is view
 			wxString str = GetItemText(par_item);
-			vrv = vr_frame->GetView(str);
+			vrv = m_frame->GetView(str);
 		}
 	}
 	bool apply_group = false;
 	if (vrv)
 		apply_group = vrv->m_glview->GetVolumeSelector()->GetSelectGroup();
 
-	if (vd && vr_frame->m_vd_copy)
+	if (vd && m_frame->m_vd_copy)
 	{
 		//prevent self copying
-		if (!vr_frame->m_copy_data &&
-			vd == vr_frame->m_vd_copy)
+		if (!m_frame->m_copy_data &&
+			vd == m_frame->m_vd_copy)
 			return;
 
 		//undo/redo
 		if (flvr::Texture::mask_undo_num_ > 0 &&
 			vd->GetTexture())
 			vd->GetTexture()->push_mask();
-		if (vr_frame->m_copy_data)
+		if (m_frame->m_copy_data)
 		{
-			Nrrd* data = vr_frame->m_vd_copy->GetVolume(false);
-			if (vr_frame->m_vd_copy->GetBits() == 16)
-				vd->AddMask16(data, op, vr_frame->m_vd_copy->GetScalarScale());
+			Nrrd* data = m_frame->m_vd_copy->GetVolume(false);
+			if (m_frame->m_vd_copy->GetBits() == 16)
+				vd->AddMask16(data, op, m_frame->m_vd_copy->GetScalarScale());
 			else
 				vd->AddMask(data, op);
 		}
 		else
-			vd->AddMask(vr_frame->m_vd_copy->GetMask(false), op);
+			vd->AddMask(m_frame->m_vd_copy->GetMask(false), op);
 
 		if (apply_group)
 		{
@@ -2168,12 +2140,12 @@ void DataTreeCtrl::PasteMask(int op)
 			}
 		}
 
-		vr_frame->RefreshVRenderViews();
-		if (vr_frame->GetBrushToolDlg())
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		if (vr_frame->GetColocalizationDlg() &&
+		m_frame->RefreshVRenderViews();
+		if (m_frame->GetBrushToolDlg())
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+		if (m_frame->GetColocalizationDlg() &&
 			vrv->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2193,18 +2165,16 @@ BEGIN_EVENT_TABLE(TreePanel, wxPanel)
 	EVT_TOOL(ID_BrushCreate, TreePanel::OnBrushCreate)
 	END_EVENT_TABLE()
 
-	TreePanel::TreePanel(wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+TreePanel::TreePanel(VRenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-wxPanel(parent, id, pos, size, style, name),
+	wxPanel(frame, wxID_ANY, pos, size, style, name),
 	m_frame(frame)
 {
 	//create data tree
-	m_datatree = new DataTreeCtrl(frame, this, wxID_ANY);
+	m_datatree = new DataTreeCtrl(frame, this);
 
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -2321,9 +2291,8 @@ void TreePanel::DeleteAll()
 	if (m_datatree)
 	{
 		m_datatree->DeleteAll();
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
-			vr_frame->m_vd_copy = 0;
+		if (m_frame)
+			m_frame->m_vd_copy = 0;
 	}
 }
 
@@ -2507,39 +2476,36 @@ void TreePanel::OnRemoveData(wxCommandEvent &event)
 void TreePanel::OnBrushAppend(wxCommandEvent &event)
 {
 	BrushAppend();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (m_frame && m_frame->GetBrushToolDlg())
 	{
 		if (m_toolbar->GetToolState(ID_BrushAppend))
-			vr_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushAppend);
+			m_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushAppend);
 		else
-			vr_frame->GetBrushToolDlg()->SelectBrush(0);
+			m_frame->GetBrushToolDlg()->SelectBrush(0);
 	}
 }
 
 void TreePanel::OnBrushDiffuse(wxCommandEvent &event)
 {
 	BrushDiffuse();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (m_frame && m_frame->GetBrushToolDlg())
 	{
 		if (m_toolbar->GetToolState(ID_BrushDiffuse))
-			vr_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+			m_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
 		else
-			vr_frame->GetBrushToolDlg()->SelectBrush(0);
+			m_frame->GetBrushToolDlg()->SelectBrush(0);
 	}
 }
 
 void TreePanel::OnBrushDesel(wxCommandEvent &event)
 {
 	BrushDesel();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
+	if (m_frame && m_frame->GetBrushToolDlg())
 	{
 		if (m_toolbar->GetToolState(ID_BrushDesel))
-			vr_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushDesel);
+			m_frame->GetBrushToolDlg()->SelectBrush(BrushToolDlg::ID_BrushDesel);
 		else
-			vr_frame->GetBrushToolDlg()->SelectBrush(0);
+			m_frame->GetBrushToolDlg()->SelectBrush(0);
 	}
 }
 
@@ -2551,17 +2517,15 @@ void TreePanel::OnBrushClear(wxCommandEvent &event)
 void TreePanel::OnBrushErase(wxCommandEvent &event)
 {
 	BrushErase();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->SelectBrush(0);
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->SelectBrush(0);
 }
 
 void TreePanel::OnBrushCreate(wxCommandEvent &event)
 {
 	BrushCreate();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->SelectBrush(0);
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->SelectBrush(0);
 }
 
 //control from outside
@@ -2569,37 +2533,30 @@ void TreePanel::BrushAppend()
 {
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
+	if (!m_frame) return;
 
 	if (m_toolbar->GetToolState(ID_BrushAppend))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(2);
-					vrv->SetPaintMode(2);
-					m_datatree->m_fixed = true;
-				}
+				vrv->SetIntMode(2);
+				vrv->SetPaintMode(2);
+				m_datatree->m_fixed = true;
 			}
 		}
 	}
 	else
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(1);
-					m_datatree->m_fixed = false;
-				}
+				vrv->SetIntMode(1);
+				m_datatree->m_fixed = false;
 			}
 		}
 	}
@@ -2609,37 +2566,30 @@ void TreePanel::BrushDiffuse()
 {
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
+	if (!m_frame) return;
 
 	if (m_toolbar->GetToolState(ID_BrushDiffuse))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(2);
-					vrv->SetPaintMode(4);
-					m_datatree->m_fixed = true;
-				}
+				vrv->SetIntMode(2);
+				vrv->SetPaintMode(4);
+				m_datatree->m_fixed = true;
 			}
 		}
 	}
 	else
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(1);
-					m_datatree->m_fixed = false;
-				}
+				vrv->SetIntMode(1);
+				m_datatree->m_fixed = false;
 			}
 		}
 	}
@@ -2650,37 +2600,30 @@ void TreePanel::BrushSolid(bool state)
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
+	if (!m_frame) return;
 
 	if (state)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(2);
-					vrv->SetPaintMode(8);
-					m_datatree->m_fixed = true;
-				}
+				vrv->SetIntMode(2);
+				vrv->SetPaintMode(8);
+				m_datatree->m_fixed = true;
 			}
 		}
 	}
 	else
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(1);
-					m_datatree->m_fixed = false;
-				}
+				vrv->SetIntMode(1);
+				m_datatree->m_fixed = false;
 			}
 		}
 	}
@@ -2691,36 +2634,29 @@ void TreePanel::BrushGrow(bool state)
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
+	if (!m_frame) return;
 
 	if (state)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			for (int i = 0; i < vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(10);
-					m_datatree->m_fixed = true;
-				}
+				vrv->SetIntMode(10);
+				m_datatree->m_fixed = true;
 			}
 		}
 	}
 	else
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			for (int i = 0; i < vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(1);
-					m_datatree->m_fixed = false;
-				}
+				vrv->SetIntMode(1);
+				m_datatree->m_fixed = false;
 			}
 		}
 	}
@@ -2730,37 +2666,30 @@ void TreePanel::BrushDesel()
 {
 	m_toolbar->ToggleTool(ID_BrushAppend, false);
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+	if (!m_frame) return;
 
 	if (m_toolbar->GetToolState(ID_BrushDesel))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(2);
-					vrv->SetPaintMode(3);
-					m_datatree->m_fixed = true;
-				}
+				vrv->SetIntMode(2);
+				vrv->SetPaintMode(3);
+				m_datatree->m_fixed = true;
 			}
 		}
 	}
 	else
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			for (int i=0; i<vr_frame->GetViewNum(); i++)
+			VRenderView* vrv = m_frame->GetView(i);
+			if (vrv)
 			{
-				VRenderView* vrv = vr_frame->GetView(i);
-				if (vrv)
-				{
-					vrv->SetIntMode(1);
-					m_datatree->m_fixed = false;
-				}
+				vrv->SetIntMode(1);
+				m_datatree->m_fixed = false;
 			}
 		}
 	}
@@ -2770,19 +2699,6 @@ void TreePanel::BrushClear()
 {
 	if (m_datatree)
 		m_datatree->BrushClear();
-
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	//if (vr_frame)
-	//{
-	//	for (int i=0; i<vr_frame->GetViewNum(); i++)
-	//	{
-	//		VRenderView* vrv = vr_frame->GetView(i);
-	//		if (vrv)
-	//		{
-	//			vrv->SetIntMode(4);
-	//		}
-	//	}
-	//}
 }
 
 void TreePanel::BrushErase()
@@ -2791,12 +2707,11 @@ void TreePanel::BrushErase()
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = vr_frame->GetView(i);
+			VRenderView* vrv = m_frame->GetView(i);
 			if (vrv)
 			{
 				vrv->SetIntMode(1);
@@ -2815,12 +2730,11 @@ void TreePanel::BrushCreate()
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i=0; i<vr_frame->GetViewNum(); i++)
+		for (int i=0; i< m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = vr_frame->GetView(i);
+			VRenderView* vrv = m_frame->GetView(i);
 			if (vrv)
 			{
 				vrv->SetIntMode(1);

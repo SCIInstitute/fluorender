@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
+#include "DataManager.h"
 #include "VRenderFrame.h"
 #include "VRenderView.h"
 #include <wx/wfstream.h>
@@ -47,12 +48,11 @@ BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
 END_EVENT_TABLE()
 
-OclDlg::OclDlg(wxWindow* frame,
-wxWindow* parent) :
-wxPanel(parent, wxID_ANY,
+OclDlg::OclDlg(VRenderFrame* frame) :
+wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(550, 600),
 0, "OclDlg"),
-m_frame(parent),
+m_frame(frame),
 m_view(0)
 {
 	// temporarily block events during constructor:
@@ -363,14 +363,13 @@ void OclDlg::Execute()
 		VolumeData* vd_r = executor->GetResult(true);
 		if (!vd_r)
 			return;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			vr_frame->GetDataManager()->AddVolumeData(vd_r);
+			m_frame->GetDataManager()->AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
 			vd->SetDisp(false);
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd_r->GetName());
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd_r->GetName());
 		}
 	}
 

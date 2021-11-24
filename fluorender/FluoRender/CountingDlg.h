@@ -30,10 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
+class VRenderFrame;
 class VRenderView;
 class VolumeData;
 class DataGroup;
-
 class CountingDlg : public wxPanel
 {
 public:
@@ -49,15 +49,13 @@ public:
 		ID_CAVolUnitText
 	};
 
-	CountingDlg(wxWindow* frame,
-		wxWindow* parent);
+	CountingDlg(VRenderFrame* frame);
 	~CountingDlg();
 
 	void GetSettings(VRenderView* vrv);
 
 private:
-	wxWindow* m_frame;
-
+	VRenderFrame* m_frame;
 	//current view
 	VRenderView *m_view;
 

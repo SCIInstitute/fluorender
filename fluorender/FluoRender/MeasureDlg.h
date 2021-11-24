@@ -34,14 +34,19 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
 #include <Types/Color.h>
-#include <Distance/RulerHandler.h>
-#include <Distance/DistCalculator.h>
-#include <Distance/RulerAlign.h>
 
 using namespace std;
 
+class VRenderFrame;
 class VRenderView;
-
+namespace flrd
+{
+	class DistCalculator;
+	class Ruler;
+	class RulerList;
+	class RulerAlign;
+	class RulerHandler;
+}
 class RulerListCtrl : public wxListCtrl
 {
 	enum
@@ -53,9 +58,8 @@ class RulerListCtrl : public wxListCtrl
 	};
 
 public:
-	RulerListCtrl(wxWindow *frame,
+	RulerListCtrl(VRenderFrame *frame,
 		wxWindow* parent,
-		wxWindowID id,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style=wxLC_REPORT|wxLC_SINGLE_SEL);
@@ -83,7 +87,7 @@ public:
 	friend class MeasureDlg;
 
 private:
-	//wxWindow* m_frame;
+	wxWindow* m_frame;
 	VRenderView *m_view;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
@@ -175,8 +179,7 @@ public:
 		ID_AlignZYX,
 	};
 
-	MeasureDlg(wxWindow* frame,
-		wxWindow* parent);
+	MeasureDlg(VRenderFrame* frame);
 	~MeasureDlg();
 
 	void GetSettings(VRenderView* vrv);
@@ -192,7 +195,7 @@ public:
 	void Prune(int idx, int len);
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	//current view
 	VRenderView* m_view;
 	flrd::RulerHandler *m_rhdl;
@@ -233,8 +236,8 @@ private:
 	wxButton* m_align_yzx;
 	wxButton* m_align_zyx;
 
-	flrd::DistCalculator m_calculator;
-	flrd::RulerAlign m_aligner;
+	flrd::DistCalculator* m_calculator;
+	flrd::RulerAlign* m_aligner;
 	bool m_edited;
 
 private:

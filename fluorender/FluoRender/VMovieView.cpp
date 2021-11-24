@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "VRenderView.h"
 #include "RecorderDlg.h"
+#include "compatibility.h"
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -417,14 +418,13 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 	return page;
 }
 
-VMovieView::VMovieView(wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+VMovieView::VMovieView(VRenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, id, pos, size, style, name),
+	wxPanel(frame, wxID_ANY, pos, size, style, name),
+	m_frame(frame),
 	m_view_idx(0),
 	m_rotate(true),
 	m_time_seq(false),
@@ -447,7 +447,6 @@ VMovieView::VMovieView(wxWindow* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_frame = dynamic_cast<VRenderFrame*>(frame);
 	if (m_frame)
 		m_view = m_frame->GetView(m_view_idx);
 

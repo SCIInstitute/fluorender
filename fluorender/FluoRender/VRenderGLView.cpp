@@ -64,15 +64,14 @@ EVT_TIMER(ID_ftrigger, VRenderGLView::OnQuitFscreen)
 EVT_CLOSE(VRenderGLView::OnClose)
 END_EVENT_TABLE()
 
-VRenderGLView::VRenderGLView(wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+VRenderGLView::VRenderGLView(VRenderFrame* frame,
+	VRenderView* parent,
 	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxGLCanvas(parent, attriblist, id, pos, size, style),
+	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
 	//public
 	//set gl
 	m_set_gl(false),
@@ -137,8 +136,8 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	//ruler time dependent
 	m_ruler_time_dep(true),
 	//private
-	m_frame(dynamic_cast<VRenderFrame*>(frame)),
-	m_vrv((VRenderView*)parent),
+	m_frame(frame),
+	m_vrv(parent),
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),

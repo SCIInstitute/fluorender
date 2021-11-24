@@ -27,19 +27,21 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MeasureDlg.h"
 #include "VRenderFrame.h"
+#include <Distance/RulerHandler.h>
+#include <Distance/DistCalculator.h>
+#include <Distance/RulerAlign.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/clipbrd.h>
-#include "Formats/png_resource.h"
-#include "ruler.xpm"
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <iterator>
-
 //resources
+#include "Formats/png_resource.h"
+#include "ruler.xpm"
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
@@ -57,14 +59,13 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
-	wxWindow* frame,
+	VRenderFrame* frame,
 	wxWindow* parent,
-	wxWindowID id,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxListCtrl(parent, id, pos, size, style)//,
-	//m_frame(frame)
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
+	m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -888,15 +889,18 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_BUTTON(ID_AlignZYX, MeasureDlg::OnAlignPca)
 END_EVENT_TABLE()
 
-MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
-	: wxPanel(parent,wxID_ANY,
+MeasureDlg::MeasureDlg(VRenderFrame* frame)
+	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(500, 600),
 	0, "MeasureDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	m_rhdl(0),
 	m_edited(false)
 {
+	m_calculator = new flrd::DistCalculator();
+	m_aligner = new flrd::RulerAlign();
+
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	wxIntegerValidator<unsigned int> vald_int;
@@ -1103,7 +1107,7 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 	sizer21->Add(m_chg_group, 0, wxALIGN_CENTER);
 	sizer21->Add(m_sel_group, 0, wxALIGN_CENTER);
 	sizer21->Add(m_disptgl_group, 0, wxALIGN_CENTER);
-	m_rulerlist = new RulerListCtrl(frame, this, wxID_ANY,
+	m_rulerlist = new RulerListCtrl(frame, this,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 	sizer_2->Add(sizer21, 0, wxEXPAND);
 	sizer_2->Add(5, 5);
@@ -1193,6 +1197,10 @@ MeasureDlg::MeasureDlg(wxWindow* frame, wxWindow* parent)
 
 MeasureDlg::~MeasureDlg()
 {
+	if (m_calculator)
+		delete m_calculator;
+	if (m_aligner)
+		delete m_aligner;
 }
 
 void MeasureDlg::GetSettings(VRenderView* vrv)
@@ -1204,7 +1212,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 	if (!m_rhdl)
 		return;
 	m_rulerlist->m_rhdl = m_rhdl;
-	m_aligner.SetView(m_view->m_glview);
+	m_aligner->SetView(m_view->m_glview);
 
 	UpdateList();
 	if (m_view && m_view->m_glview)
@@ -1273,22 +1281,21 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 
 		m_use_transfer_chk->SetValue(m_view->m_glview->m_ruler_use_transf);
 		m_transient_chk->SetValue(m_view->m_glview->m_ruler_time_dep);
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
-		if (frame && frame->GetSettingDlg())
+		if (m_frame && m_frame->GetSettingDlg())
 		{
 			//ruler exports df/f
-			bool bval = frame->GetSettingDlg()->GetRulerDF_F();
+			bool bval = m_frame->GetSettingDlg()->GetRulerDF_F();
 			m_df_f_chk->SetValue(bval);
 			m_rulerlist->m_ruler_df_f = bval;
 			//relax
 			m_relax_value_spin->SetValue(
-				frame->GetSettingDlg()->GetRulerRelaxF1());
+				m_frame->GetSettingDlg()->GetRulerRelaxF1());
 			m_auto_relax_btn->SetValue(
-				frame->GetSettingDlg()->GetRulerAutoRelax());
+				m_frame->GetSettingDlg()->GetRulerAutoRelax());
 			m_view->m_glview->m_ruler_autorelax =
-				frame->GetSettingDlg()->GetRulerAutoRelax();
+				m_frame->GetSettingDlg()->GetRulerAutoRelax();
 			m_relax_data_cmb->Select(
-				frame->GetSettingDlg()->GetRulerRelaxType());
+				m_frame->GetSettingDlg()->GetRulerRelaxType());
 		}
 	}
 }
@@ -1756,11 +1763,11 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 
 void MeasureDlg::OnDistance(wxCommandEvent& event)
 {
-	if (!m_view)
+	if (!m_view || !m_frame)
 		return;
 
 	flrd::ComponentAnalyzer* analyzer =
-		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
+		m_frame->GetComponentDlg()->GetAnalyzer();
 	if (!analyzer)
 		return;
 	m_rhdl->SetCompAnalyzer(analyzer);
@@ -1823,7 +1830,7 @@ void MeasureDlg::OnProject(wxCommandEvent& event)
 
 void MeasureDlg::Project(int idx)
 {
-	if (!m_view)
+	if (!m_view || !m_frame)
 		return;
 	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list)
@@ -1832,7 +1839,7 @@ void MeasureDlg::Project(int idx)
 		return;
 	flrd::Ruler* ruler = ruler_list->at(idx);
 	flrd::ComponentAnalyzer* analyzer =
-		((VRenderFrame*)m_frame)->GetComponentDlg()->GetAnalyzer();
+		m_frame->GetComponentDlg()->GetAnalyzer();
 	flrd::CelpList* list = 0;
 	if (!analyzer)
 		return;
@@ -1840,9 +1847,9 @@ void MeasureDlg::Project(int idx)
 	if (list->empty())
 		return;
 
-	m_calculator.SetCelpList(list);
-	m_calculator.SetRuler(ruler);
-	m_calculator.Project();
+	m_calculator->SetCelpList(list);
+	m_calculator->SetRuler(ruler);
+	m_calculator->Project();
 
 	std::vector<flrd::Celp> comps;
 	for (auto it = list->begin();
@@ -1906,10 +1913,9 @@ void MeasureDlg::Relax(int idx)
 	if (idx < 0 || idx >= ruler_list->size())
 		return;
 	flrd::Ruler* ruler = ruler_list->at(idx);
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
 	flrd::ComponentAnalyzer* analyzer = 0;
-	if (frame && frame->GetComponentDlg())
-		analyzer = frame->GetComponentDlg()->GetAnalyzer();
+	if (m_frame && m_frame->GetComponentDlg())
+		analyzer = m_frame->GetComponentDlg()->GetAnalyzer();
 	if (!analyzer)
 		return;
 	flrd::CelpList* list = 0;
@@ -1919,19 +1925,19 @@ void MeasureDlg::Relax(int idx)
 	double infr = 2.0;
 	int type = 1;
 	int iter = 10;
-	if (frame && frame->GetSettingDlg())
+	if (m_frame && m_frame->GetSettingDlg())
 	{
-		iter = frame->GetSettingDlg()->GetRulerRelaxIter();
-		infr = frame->GetSettingDlg()->GetRulerInfr();
-		type = frame->GetSettingDlg()->GetRulerRelaxType();
+		iter = m_frame->GetSettingDlg()->GetRulerRelaxIter();
+		infr = m_frame->GetSettingDlg()->GetRulerInfr();
+		type = m_frame->GetSettingDlg()->GetRulerRelaxType();
 	}
 
-	m_calculator.SetF1(m_relax_value_spin->GetValue());
-	m_calculator.SetInfr(infr);
-	m_calculator.SetCelpList(list);
-	m_calculator.SetRuler(ruler);
-	m_calculator.SetVolume(m_view->m_glview->m_cur_vol);
-	m_calculator.CenterRuler(type, m_edited, iter);
+	m_calculator->SetF1(m_relax_value_spin->GetValue());
+	m_calculator->SetInfr(infr);
+	m_calculator->SetCelpList(list);
+	m_calculator->SetRuler(ruler);
+	m_calculator->SetVolume(m_view->m_glview->m_cur_vol);
+	m_calculator->CenterRuler(type, m_edited, iter);
 	m_edited = false;
 	m_view->RefreshGL();
 	GetSettings(m_view);
@@ -2039,9 +2045,8 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 		break;
 	}
 	m_view->SetPointVolumeMode(mode);
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetPointVolumeMode(mode);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetPointVolumeMode(mode);
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
@@ -2051,9 +2056,8 @@ void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 
 	bool use_transfer = m_use_transfer_chk->GetValue();
 	m_view->SetRulerUseTransf(use_transfer);
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
 }
 
 void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
@@ -2063,9 +2067,8 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 
 	bool val = m_transient_chk->GetValue();
 	m_view->SetRulerTimeDep(val);
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerTimeDep(val);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerTimeDep(val);
 }
 
 void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
@@ -2076,17 +2079,15 @@ void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 	bool val = m_df_f_chk->GetValue();
 	m_rulerlist->m_ruler_df_f = val;
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerDF_F(val);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerDF_F(val);
 }
 
 void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 {
 	bool bval = m_auto_relax_btn->GetValue();
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerAutoRelax(bval);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerAutoRelax(bval);
 	if (m_view)
 		m_view->m_glview->m_ruler_autorelax = bval;
 }
@@ -2094,11 +2095,10 @@ void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
-	m_calculator.SetF1(dval);
+	m_calculator->SetF1(dval);
 	//relax
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 }
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
@@ -2107,20 +2107,18 @@ void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 	double dval;
 	if (str.ToDouble(&dval))
 	{
-		m_calculator.SetF1(dval);
+		m_calculator->SetF1(dval);
 		//relax
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
-		if (frame && frame->GetSettingDlg())
-			frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 	}
 }
 
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 {
 	int ival = m_relax_data_cmb->GetSelection();
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		frame->GetSettingDlg()->SetRulerRelaxType(ival);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetRulerRelaxType(ival);
 }
 
 //ruler list
@@ -2237,7 +2235,7 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 	if (!ruler_list)
 		return;
 	flrd::Ruler* ruler = ruler_list->at(sel[0]);
-	m_aligner.SetRuler(ruler);
+	m_aligner->SetRuler(ruler);
 
 	int axis_type = 0;
 	switch (event.GetId())
@@ -2261,7 +2259,7 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	m_aligner.AlignRuler(axis_type);
+	m_aligner->AlignRuler(axis_type);
 	if (m_align_center->GetValue())
 		AlignCenter(ruler, 0);
 }
@@ -2279,7 +2277,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 		return;
 	for (int i = 0; i < sel.size(); ++i)
 		list.push_back((*ruler_list)[sel[i]]);
-	m_aligner.SetRulerList(&list);
+	m_aligner->SetRulerList(&list);
 
 	int axis_type = 0;
 	switch (event.GetId())
@@ -2303,7 +2301,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	m_aligner.AlignPca(axis_type);
+	m_aligner->AlignPca(axis_type);
 	if (m_align_center->GetValue())
 		AlignCenter(0, &list);
 }

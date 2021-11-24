@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
 #include "VRenderFrame.h"
+#include "VRenderView.h"
+#include "DataManager.h"
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
@@ -66,14 +68,12 @@ BEGIN_EVENT_TABLE(AdjustView, wxPanel)
 	EVT_BUTTON(ID_DefaultBtn, AdjustView::OnSaveDefault)
 END_EVENT_TABLE()
 
-AdjustView::AdjustView(wxWindow* frame,
-					   wxWindow* parent,
-					   wxWindowID id,
+AdjustView::AdjustView(VRenderFrame* frame,
 					   const wxPoint& pos,
 					   const wxSize& size,
 					   long style,
-					   const wxString& name):
-wxPanel(parent, id, pos, size, style, name),
+					   const wxString& name) :
+wxPanel(frame, wxID_ANY, pos, size, style, name),
 m_frame(frame),
 m_type(-1),
 m_glview(0),
@@ -346,8 +346,8 @@ AdjustView::~AdjustView()
 
 void AdjustView::RefreshVRenderViews(bool interactive)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	vr_frame->RefreshVRenderViews(false, interactive);
+	if (m_frame)
+		m_frame->RefreshVRenderViews(false, interactive);
 }
 
 void AdjustView::GetSettings()
@@ -528,6 +528,84 @@ void AdjustView::EnableAll()
 	m_b_reset_btn->Enable();
 	//save as default
 	m_dft_btn->Enable();
+}
+
+//set view
+void AdjustView::SetRenderView(VRenderView *view)
+{
+	if (view)
+	{
+		m_glview = view->m_glview;
+		m_type = 1;
+		GetSettings();
+	}
+	else
+	{
+		m_type = -1;
+		DisableAll();
+	}
+}
+
+VRenderGLView* AdjustView::GetRenderView()
+{
+	return m_glview;
+}
+
+//set volume data
+void AdjustView::SetVolumeData(VolumeData* vd)
+{
+	if (vd)
+	{
+		m_vd = vd;
+		m_type = 2;
+		GetSettings();
+	}
+	else
+	{
+		m_type = -1;
+		DisableAll();
+	}
+}
+
+VolumeData* AdjustView::GetVolumeData()
+{
+	return m_vd;
+}
+
+//set group
+void AdjustView::SetGroup(DataGroup *group)
+{
+	if (group)
+	{
+		m_group = group;
+		m_type = 5;
+		GetSettings();
+	}
+	else
+	{
+		m_type = -1;
+		DisableAll();
+	}
+}
+
+DataGroup* AdjustView::GetGroup()
+{
+	return m_group;
+}
+
+//set volume adjustment to link to group
+void AdjustView::SetGroupLink(DataGroup *group)
+{
+	if (group)
+	{
+		m_group = group;
+		m_link_group = true;
+	}
+	else
+	{
+		m_group = 0;
+		m_link_group = false;
+	}
 }
 
 void AdjustView::OnRGammaChange(wxScrollEvent & event)

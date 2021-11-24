@@ -25,15 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-
 #ifndef _CALCULATIONDLG_H_
 #define _CALCULATIONDLG_H_
 
+#include <wx/wx.h>
+
+class VRenderFrame;
 class VRenderView;
 class VolumeData;
 class DataGroup;
-
 class CalculationDlg : public wxPanel
 {
 public:
@@ -56,15 +56,13 @@ public:
 		ID_CalcCombineBtn
 	};
 
-	CalculationDlg(wxWindow* frame,
-		wxWindow* parent);
+	CalculationDlg(VRenderFrame* frame);
 	~CalculationDlg();
 
 	void SetGroup(DataGroup* group);
 
 private:
-	wxWindow* m_frame;
-
+	VRenderFrame* m_frame;
 	//current view
 	VRenderView *m_cur_view;
 	//current volume
