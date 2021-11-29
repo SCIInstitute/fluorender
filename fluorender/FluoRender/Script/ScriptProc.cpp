@@ -606,6 +606,10 @@ void ScriptProc::RunCompSelect()
 
 	int mode;
 	m_fconfig->Read("mode", &mode, 0);
+	int comp_min;
+	m_fconfig->Read("comp_min", &comp_min, 0);
+	int comp_max;
+	m_fconfig->Read("comp_max", &comp_max, 0);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -620,7 +624,12 @@ void ScriptProc::RunCompSelect()
 		case 1:
 			comp_selector.Clear();
 			break;
-		case 3:
+		case 2:
+		default:
+			if (comp_min)
+				comp_selector.SetMinNum(true, comp_min);
+			if (comp_max)
+				comp_selector.SetMaxNum(true, comp_max);
 			comp_selector.Select(true);
 		}
 	}
@@ -1035,7 +1044,9 @@ void ScriptProc::RunGenerateComp()
 	wxString cmdfile;
 	m_fconfig->Read("comp_command", &cmdfile);
 	cmdfile = GetInputFile(cmdfile, "Commands");
-	if (!cmdfile.IsEmpty())
+	if (cmdfile.IsEmpty())
+		m_frame->GetComponentDlg()->ResetCmd();
+	else
 		m_frame->GetComponentDlg()->LoadCmd(cmdfile);
 
 	for (auto i = vlist.begin();

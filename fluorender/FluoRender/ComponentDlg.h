@@ -218,6 +218,9 @@ public:
 		return &m_comp_analyzer;
 	}
 
+	//command
+	void LoadCmd(const wxString &filename);
+	void SaveCmd(const wxString &filename);
 	void AddCmd(const std::string &type);
 	void ResetCmd();
 	void PlayCmd(bool use_sel, double tfactor);
@@ -239,10 +242,6 @@ public:
 	void SetCompSelection(std::set<unsigned long long>& ids, int mode);
 	void IncludeComps();
 	void ExcludeComps();
-
-	//command
-	void LoadCmd(const wxString &filename);
-	void SaveCmd(const wxString &filename);
 
 private:
 	VRenderFrame* m_frame;

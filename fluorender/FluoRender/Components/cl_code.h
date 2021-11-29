@@ -615,7 +615,8 @@ const char* str_cl_density_field_3d = \
 "	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
 "	float avg = sum / gnum;\n" \
 "	gavg[index] = avg;\n" \
-"	gvar[index] = sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum);\n" \
+"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum), 0.0, 255.0);\n" \
+"	gvar[index] = v;\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \
@@ -1464,7 +1465,8 @@ const char* str_cl_distdens_field_3d = \
 "	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
 "	float avg = sum / gnum;\n" \
 "	gavg[index] = avg;\n" \
-"	gvar[index] = sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum);\n" \
+"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum), 0.0, 255.0);\n" \
+"	gvar[index] = v;\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \
