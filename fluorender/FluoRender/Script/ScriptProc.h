@@ -113,6 +113,7 @@ namespace flrd
 		void RunMaskTracking();
 		void RunRandomColors();
 		void RunCompSelect();
+		void RunCompEdit();
 		void RunFetchMask();
 		void RunClearMask();
 		void RunSaveMask();

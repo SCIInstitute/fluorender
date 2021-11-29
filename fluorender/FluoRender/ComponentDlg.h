@@ -240,6 +240,10 @@ public:
 	void IncludeComps();
 	void ExcludeComps();
 
+	//command
+	void LoadCmd(const wxString &filename);
+	void SaveCmd(const wxString &filename);
+
 private:
 	VRenderFrame* m_frame;
 	VRenderView* m_view;

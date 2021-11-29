@@ -395,8 +395,8 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 	// modify the digitizing region
 	sprintf(m_lc.lcName,
-		"FluoRender Digitizing %x",
-		reinterpret_cast<unsigned int>(hInst));
+		"FluoRender Digitizing %llx",
+		reinterpret_cast<unsigned long long>(hInst));
 
 	// We process WT_PACKET (CXO_MESSAGES) messages.
 	m_lc.lcOptions |= CXO_MESSAGES;
@@ -4835,7 +4835,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	VolumeData* cur_vd_save = m_cur_vol;
 
 	//run pre-change script
-	if (m_run_script)
+	if (update && m_run_script)
 		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
 
 	//change time frame
@@ -4847,7 +4847,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 		UpdateVolumeData(frame, i, m_frame);
 
 	//run post-change script
-	if (m_run_script)
+	if (update && m_run_script)
 		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
 
 	//restore currently selected volume

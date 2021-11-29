@@ -2079,80 +2079,12 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 	}
 	wxString filename = fopendlg->GetPath();
 	delete fopendlg;
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-	m_cmd_file_text->SetValue(filename);
 
-	m_command.clear();
-	int cmd_count = 0;
-	wxString str;
-	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
-	while (fconfig.Exists(cmd_str))
-	{
-		flrd::CompCmdParams params;
-		fconfig.SetPath(cmd_str);
-		str = fconfig.Read("type", "");
-		if (str == "generate" ||
-			str == "clean" ||
-			str == "fixate")
-			params.push_back(str.ToStdString());
-		else
-			continue;
-		long lval;
-		if (fconfig.Read("iter", &lval))
-		{ params.push_back("iter"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("use_dist_field", &lval))
-		{ params.push_back("use_dist_field"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("dist_filter_size", &lval))
-		{ params.push_back("dist_filter_size"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("max_dist", &lval))
-		{ params.push_back("max_dist"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("diff", &lval))
-		{ params.push_back("diff"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("density", &lval))
-		{ params.push_back("density"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("density_window_size", &lval))
-		{ params.push_back("density_window_size"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("density_stats_size", &lval))
-		{ params.push_back("density_stats_size"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("cleanb", &lval))
-		{ params.push_back("cleanb"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("clean_iter", &lval))
-		{ params.push_back("clean_iter"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("clean_size_vl", &lval))
-		{ params.push_back("clean_size_vl"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("fix_size", &lval))
-		{ params.push_back("fix_size"); params.push_back(std::to_string(lval)); }
-		double dval;
-		if (fconfig.Read("thresh", &dval))
-		{ params.push_back("thresh"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("dist_strength", &dval))
-		{ params.push_back("dist_strength"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("dist_thresh", &dval))
-		{ params.push_back("dist_thresh"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("falloff", &dval))
-		{ params.push_back("falloff"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("density_thresh", &dval))
-		{ params.push_back("density_thresh"); params.push_back(std::to_string(dval)); }
-
-		m_command.push_back(params);
-		cmd_count++;
-		cmd_str = "/cmd" + std::to_string(cmd_count);
-	}
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	LoadCmd(filename);
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 {
-	if (m_command.empty())
-	{
-		AddCmd("generate");
-	}
-
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender component generator macro command",
 		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -2164,57 +2096,8 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 	}
 	wxString filename = fopendlg->GetPath();
 	delete fopendlg;
-	wxFileConfig fconfig("", "", filename, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	fconfig.DeleteAll();
 
-	int cmd_count = 0;
-
-	for (auto it = m_command.begin();
-		it != m_command.end(); ++it)
-	{
-		if (it->empty())
-			continue;
-		if ((*it)[0] == "generate" ||
-			(*it)[0] == "clean" ||
-			(*it)[0] == "fixate")
-		{
-			std::string str = "/cmd" + std::to_string(cmd_count++);
-			fconfig.SetPath(str);
-			str = (*it)[0];
-			fconfig.Write("type", wxString(str));
-		}
-		for (auto it2 = it->begin();
-			it2 != it->end(); ++it2)
-		{
-			if (*it2 == "iter" ||
-				*it2 == "use_dist_field" ||
-				*it2 == "dist_filter_size" ||
-				*it2 == "max_dist" ||
-				*it2 == "diff" ||
-				*it2 == "density" ||
-				*it2 == "density_window_size" ||
-				*it2 == "density_stats_size" ||
-				*it2 == "cleanb" ||
-				*it2 == "clean_iter" ||
-				*it2 == "clean_size_vl" ||
-				*it2 == "fix_size")
-			{
-				fconfig.Write(*it2, std::stoi(*(++it2)));
-			}
-			else if (*it2 == "thresh" ||
-				*it2 == "dist_strength" ||
-				*it2 == "dist_thresh" ||
-				*it2 == "falloff" ||
-				*it2 == "density_thresh")
-			{
-				fconfig.Write(*it2, std::stod(*(++it2)));
-			}
-		}
-	}
-
-	SaveConfig(fconfig, filename);
-	m_cmd_file_text->SetValue(filename);
+	SaveCmd(filename);
 }
 
 //clustering page
@@ -4115,6 +3998,170 @@ void ComponentDlg::FindCelps(flrd::CelpList &list,
 			}
 		}
 	}
+}
+
+//command
+void ComponentDlg::LoadCmd(const wxString &filename)
+{
+	wxFileInputStream is(filename);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+	m_cmd_file_text->SetValue(filename);
+
+	m_command.clear();
+	int cmd_count = 0;
+	wxString str;
+	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
+	while (fconfig.Exists(cmd_str))
+	{
+		flrd::CompCmdParams params;
+		fconfig.SetPath(cmd_str);
+		str = fconfig.Read("type", "");
+		if (str == "generate" ||
+			str == "clean" ||
+			str == "fixate")
+			params.push_back(str.ToStdString());
+		else
+			continue;
+		long lval;
+		if (fconfig.Read("iter", &lval))
+		{
+			params.push_back("iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("use_dist_field", &lval))
+		{
+			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("dist_filter_size", &lval))
+		{
+			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("max_dist", &lval))
+		{
+			params.push_back("max_dist"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("diff", &lval))
+		{
+			params.push_back("diff"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density", &lval))
+		{
+			params.push_back("density"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_window_size", &lval))
+		{
+			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_stats_size", &lval))
+		{
+			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("cleanb", &lval))
+		{
+			params.push_back("cleanb"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_iter", &lval))
+		{
+			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_size_vl", &lval))
+		{
+			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("fix_size", &lval))
+		{
+			params.push_back("fix_size"); params.push_back(std::to_string(lval));
+		}
+		double dval;
+		if (fconfig.Read("thresh", &dval))
+		{
+			params.push_back("thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_strength", &dval))
+		{
+			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_thresh", &dval))
+		{
+			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("falloff", &dval))
+		{
+			params.push_back("falloff"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("density_thresh", &dval))
+		{
+			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
+		}
+
+		m_command.push_back(params);
+		cmd_count++;
+		cmd_str = "/cmd" + std::to_string(cmd_count);
+	}
+	//record
+	int ival = m_command.size();
+	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+}
+
+void ComponentDlg::SaveCmd(const wxString &filename)
+{
+	if (m_command.empty())
+	{
+		AddCmd("generate");
+	}
+
+	wxFileConfig fconfig("", "", filename, "",
+		wxCONFIG_USE_LOCAL_FILE);
+	fconfig.DeleteAll();
+
+	int cmd_count = 0;
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate" ||
+			(*it)[0] == "clean" ||
+			(*it)[0] == "fixate")
+		{
+			std::string str = "/cmd" + std::to_string(cmd_count++);
+			fconfig.SetPath(str);
+			str = (*it)[0];
+			fconfig.Write("type", wxString(str));
+		}
+		for (auto it2 = it->begin();
+			it2 != it->end(); ++it2)
+		{
+			if (*it2 == "iter" ||
+				*it2 == "use_dist_field" ||
+				*it2 == "dist_filter_size" ||
+				*it2 == "max_dist" ||
+				*it2 == "diff" ||
+				*it2 == "density" ||
+				*it2 == "density_window_size" ||
+				*it2 == "density_stats_size" ||
+				*it2 == "cleanb" ||
+				*it2 == "clean_iter" ||
+				*it2 == "clean_size_vl" ||
+				*it2 == "fix_size")
+			{
+				fconfig.Write(*it2, std::stoi(*(++it2)));
+			}
+			else if (*it2 == "thresh" ||
+				*it2 == "dist_strength" ||
+				*it2 == "dist_thresh" ||
+				*it2 == "falloff" ||
+				*it2 == "density_thresh")
+			{
+				fconfig.Write(*it2, std::stod(*(++it2)));
+			}
+		}
+	}
+
+	SaveConfig(fconfig, filename);
+	m_cmd_file_text->SetValue(filename);
 }
 
 void ComponentDlg::StartTimer(std::string str)

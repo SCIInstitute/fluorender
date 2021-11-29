@@ -518,14 +518,15 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//init
-		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index0, 3, global_size2, local_size);
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog->readBuffer(arg_df, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//delete[] val;
 		//ofs.close();
@@ -535,11 +536,11 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[ngx*ngy*ngz];
 		//kernel_prog->readBuffer(arg_gavg, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//kernel_prog->readBuffer(arg_gvar, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//delete[] val;
@@ -560,11 +561,11 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog->readBuffer(arg_avg, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//kernel_prog->readBuffer(arg_var, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//delete[] val;
@@ -917,6 +918,7 @@ void ComponentGenerator::DistDensityField(
 		dnx = gsx * ngx;
 		dny = gsy * ngy;
 		dnz = gsz * ngz;
+		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		//set
 		//kernel 0
 		int nxy = nx * ny;
@@ -962,7 +964,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 
 		//init
-		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size, local_size);
+		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog_dens->readBuffer(arg_densf, val);

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderFrame.h>
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
+#include <Components/CompEditor.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -100,6 +101,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunRandomColors();
 				else if (str == "comp_select")
 					RunCompSelect();
+				else if (str == "comp_edit")
+					RunCompEdit();
 				else if (str == "fetch_mask")
 					RunFetchMask();
 				else if (str == "clear_mask")
@@ -623,6 +626,33 @@ void ScriptProc::RunCompSelect()
 	}
 }
 
+void ScriptProc::RunCompEdit()
+{
+	if (!TimeCondition())
+		return;
+	std::vector<VolumeData*> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
+	int edit_type;
+	m_fconfig->Read("edit_type", &edit_type, 0);
+	int mode;
+	m_fconfig->Read("mode", &mode, 0);
+
+	for (auto i = vlist.begin();
+		i != vlist.end(); ++i)
+	{
+		flrd::ComponentEditor comp_selector(*i);
+
+		switch (edit_type)
+		{
+		case 0:
+			comp_selector.Clean(mode);
+			break;
+		}
+	}
+}
+
 void ScriptProc::RunFetchMask()
 {
 	if (!TimeCondition())
@@ -995,14 +1025,18 @@ void ScriptProc::RunGenerateComp()
 	std::vector<VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
+	if (!(m_frame->GetComponentDlg()))
+		return;
 
 	bool use_sel;
 	m_fconfig->Read("use_sel", &use_sel);
 	double tfac = 1.0;
 	m_fconfig->Read("th_factor", &tfac);
-
-	if (!(m_frame->GetComponentDlg()))
-		return;
+	wxString cmdfile;
+	m_fconfig->Read("comp_command", &cmdfile);
+	cmdfile = GetInputFile(cmdfile, "Commands");
+	if (!cmdfile.IsEmpty())
+		m_frame->GetComponentDlg()->LoadCmd(cmdfile);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
