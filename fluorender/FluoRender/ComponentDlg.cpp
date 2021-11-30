@@ -3706,8 +3706,10 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 				{
 					c = fluo::Color(lval, vd->GetShuffle());
 					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-					m_output_grid->SetCellBackgroundColour(i, k, color);
 				}
+				else
+					color = wxColor(255, 255, 255);
+				m_output_grid->SetCellBackgroundColour(i, k, color);
 			}
 			++k;
 		} while (cur_line.IsEmpty() == false);

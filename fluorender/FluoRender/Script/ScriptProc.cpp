@@ -62,10 +62,12 @@ ScriptProc::~ScriptProc()
 void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 {
 	m_fconfig = 0;
+	m_fconfig_name = "";
 	wxString scriptfile = GetInputFile(scriptname, "Scripts");
 	if (scriptfile.IsEmpty())
 		return;
-	wxFileInputStream is(scriptfile);
+	m_fconfig_name = scriptfile;
+	wxFileInputStream is(m_fconfig_name);
 	if (!is.IsOk())
 		return;
 	wxFileConfig fconfig(is);
@@ -261,19 +263,31 @@ int ScriptProc::GetTimeNum()
 wxString ScriptProc::GetInputFile(const wxString &str, const wxString &subd)
 {
 	wxString result = str;
+	bool exist = false;
 	if (result.IsEmpty())
 		return result;
-	if (!wxFileExists(result))
+	exist = wxFileExists(result);
+	if (!exist)
 	{
+		//find in default folder
 		std::wstring name = result.ToStdWstring();
 		name = GET_NAME(name);
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		result = exePath + GETSLASH() + subd + GETSLASH() + name;
-		if (!wxFileExists(result))
-			return "";
+		wxString path = wxStandardPaths::Get().GetExecutablePath();
+		path = wxPathOnly(path);
+		result = path + GETSLASH() + subd + GETSLASH() + name;
+		exist = wxFileExists(result);
 	}
-	return result;
+	if (!exist)
+	{
+		//find in config file folder
+		wxString path = wxPathOnly(m_fconfig_name);
+		result = path + GETSLASH() + str;
+		exist = wxFileExists(result);
+	}
+	if (exist)
+		return result;
+	else
+		return "";
 }
 
 wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool rep)

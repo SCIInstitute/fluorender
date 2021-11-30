@@ -84,6 +84,7 @@ namespace flrd
 		wxString m_type;
 		TimeMask m_time_mask;
 		wxFileConfig *m_fconfig;
+		wxString m_fconfig_name;
 		bool m_rewind;
 
 		//selected labels
