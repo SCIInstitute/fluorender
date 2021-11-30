@@ -82,7 +82,8 @@ const char* str_cl_backg_stat = \
 "	float mean = sumi / kxy;\n" \
 "	float var = sqrt((sumi2 + kxy * mean * mean - 2.0 * mean * sumi) / kxy);\n" \
 "	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0;\n" \
-"	bkg[index] = cvalue * VSCL;\n" \
+"	DWL bv = cvalue * VSCL;\n" \
+"	bkg[index] = bv;\n" \
 "}\n" \
 "//extract background in mask\n" \
 "__kernel void kernel_1(\n" \
@@ -126,7 +127,8 @@ const char* str_cl_backg_stat = \
 "	float mean = sumi / kxy;\n" \
 "	float var = sqrt((sumi2 + kxy * mean * mean - 2.0 * mean * sumi) / kxy);\n" \
 "	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0;\n" \
-"	bkg[index] = cvalue * VSCL;\n" \
+"	DWL bv = cvalue * VSCL;\n" \
+"	bkg[index] = bv;\n" \
 "}\n" \
 "//count in background\n" \
 "__kernel void kernel_2(\n" \
