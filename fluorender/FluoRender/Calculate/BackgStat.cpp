@@ -165,8 +165,10 @@ const char* str_cl_backg_stat = \
 "		}\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(wcount+index, lwsum);\n" \
+"	//atomic_xchg(count+index, lsum);\n" \
+"	//atomic_xchg(wcount+index, lwsum);\n" \
+"	count[index] = lsum;\n" \
+"	wcount[index] = lwsum;\n" \
 "}\n" \
 "//minmax in background\n" \
 "__kernel void kernel_3(\n" \
@@ -201,8 +203,10 @@ const char* str_cl_backg_stat = \
 "	}\n" \
 "	lminv = lminv == VSCL ? 0 : lminv;\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(minv+index, (uint)(lminv));\n" \
-"	atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
+"	//atomic_xchg(minv+index, (uint)(lminv));\n" \
+"	//atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
+"	minv[index] = (uint)(lminv);\n" \
+"	maxv[index] = (uint)(lmaxv);\n" \
 "}\n" \
 "//histogram in background\n" \
 "__kernel void kernel_4(\n" \
