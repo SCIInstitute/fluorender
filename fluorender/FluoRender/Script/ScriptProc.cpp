@@ -1035,7 +1035,7 @@ void ScriptProc::RunCompAnalysis()
 			node->addSetValue("comp_min", itc->second->GetMin(maxscale));
 			node->addSetValue("comp_max", itc->second->GetMax(maxscale));
 			node->addSetValue("comp_distp", itc->second->GetDistp());
-			node->addSetValue("comp_pca_lens", lens);
+			node->addSetValue("comp_pca_lens", lens.x());
 		}
 	}
 }
