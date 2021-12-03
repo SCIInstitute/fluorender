@@ -114,6 +114,17 @@ ID-2031461,9,867.646\n\
 //#end data
 
 var dataFlat = d3.csvParseRows(csv_data);
+var data = dataFlat.slice(1);
+data.sort(function (a, b)
+{
+	if (a[0] < b[0])
+		return -1;
+	else if (a[0] > b[0])
+		return 1;
+	else
+		return +a[1] - +b[1];
+});
+data.splice(0, 0, dataFlat[0]);
 
 var table = d3.select('body').append('table')
 .style("border-collapse", "collapse")
@@ -122,7 +133,7 @@ var table = d3.select('body').append('table')
 // headers
 table.append("thead").append("tr")
 .selectAll("th")
-.data(dataFlat[0])
+.data(data[0])
 .enter().append("th")
 .text(function(d) { return d; })
 .style("border", "1px black solid")
@@ -133,7 +144,7 @@ table.append("thead").append("tr")
 
 // data
 table.append("tbody")
-.selectAll("tr").data(dataFlat.slice(1))
+.selectAll("tr").data(data.slice(1))
 .enter().append("tr")
 .selectAll("td")
 .data(function(d){return d;})
@@ -144,11 +155,20 @@ table.append("tbody")
 d3.select(this).style("background-color", "lightgray");
 })
 .on("mouseout", function(){
-d3.select(this).style("background-color", "white");
+d3.select(this).style("background-color", function(d, i) {
+	if (i%2 == 0) { return "lightblue"; }
+	else { return "white"; }
+});
 })
 .text(function(d){return d;})
 .style("font-size", "12px");
 
+
+
+table.selectAll("tr").style("background-color", function(d, i) {
+	if (i%2 == 0) { return "lightblue"; }
+	else { return "white"; }
+});
         </script>
     </body>
 </html>
