@@ -146,29 +146,45 @@ table.append("thead").append("tr")
 table.append("tbody")
 .selectAll("tr").data(data.slice(1))
 .enter().append("tr")
+.on("mouseover", function(){
+d3.select(this).style("background-color", "lightgray");
+})
+.on("mouseout", function(d, i){
+table.selectAll("tr").style("background-color", function(d, i) {
+	if (i%2 == 0) { return "lightcyan"; }
+	else { return "white"; }
+});
+})
 .selectAll("td")
 .data(function(d){return d;})
 .enter().append("td")
 .style("border", "1px black solid")
 .style("padding", "5px")
-.on("mouseover", function(){
-d3.select(this).style("background-color", "lightgray");
-})
-.on("mouseout", function(){
-d3.select(this).style("background-color", function(d, i) {
-	if (i%2 == 0) { return "lightblue"; }
-	else { return "white"; }
-});
-})
 .text(function(d){return d;})
-.style("font-size", "12px");
-
-
+.style("font-size", "12px")
+.attr('class', function(d, i){ return "col_" + i;});
 
 table.selectAll("tr").style("background-color", function(d, i) {
-	if (i%2 == 0) { return "lightblue"; }
+	if (i%2 == 0) { return "lightcyan"; }
 	else { return "white"; }
 });
+
+table.selectAll("td.col_0").style("background-color", function(d, i){
+	return colorCode(d);
+});
+
+function colorCode(d){
+	var color = d3.rgb(24, 167, 181);
+	var matches = d.match(/(\d+)/);
+	if (matches)
+	{
+		var id = matches[0];
+		var hue = (id % 253) * 60.0 / 45.0;
+		color = d3.hsl(hue, 1, 0.5);
+	}
+	return color;
+}
+
         </script>
     </body>
 </html>

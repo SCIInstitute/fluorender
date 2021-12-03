@@ -2247,10 +2247,8 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 			fluo::Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
-		m_comp_id_text->SetBackgroundColour(color);
 	}
-	else
-		m_comp_id_text->SetBackgroundColour(color);
+	m_comp_id_text->SetBackgroundColour(color);
 	m_comp_id_text->Refresh();
 }
 
