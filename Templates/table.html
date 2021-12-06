@@ -175,7 +175,7 @@ table.selectAll("td.col_0").style("background-color", function(d, i){
 
 function colorCode(d){
 	var color = d3.rgb(24, 167, 181);
-	var matches = d.match(/(\d+)/);
+	var matches = d.match(/(\d+)(?!.*\d)/);
 	if (matches)
 	{
 		var id = matches[0];
