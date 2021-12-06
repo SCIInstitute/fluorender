@@ -1189,7 +1189,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	}
 	else if (m_seq_mode == 2)
 	{
-		m_view->Set3DBatFrame(time);
+		m_view->Set3DBatFrame(time, m_start_frame, m_end_frame, rewind);
 	}
 
 	//rotate animation

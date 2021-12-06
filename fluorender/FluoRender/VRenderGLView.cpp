@@ -4629,7 +4629,7 @@ void VRenderGLView::SetParams(double t)
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		if (interpolator->GetDouble(keycode, t, frame))
-			UpdateVolumeData(int(frame + 0.5), vd, m_frame);
+			UpdateVolumeData(int(frame + 0.5), vd);
 	}
 
 	bool bx, by, bz;
@@ -4769,8 +4769,7 @@ void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 	}
 }
 
-void VRenderGLView::UpdateVolumeData(int frame,
-	VolumeData* vd, VRenderFrame* vframe)
+void VRenderGLView::UpdateVolumeData(int frame, VolumeData* vd)
 {
 	if (vd && vd->GetReader())
 	{
@@ -4794,8 +4793,8 @@ void VRenderGLView::UpdateVolumeData(int frame,
 				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
 				vd->SetCurTime(reader->GetCurTime());
 				//update rulers
-				if (vframe && vframe->GetMeasureDlg())
-					vframe->GetMeasureDlg()->UpdateList();
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->UpdateList();
 			}
 			else
 			{
@@ -4810,8 +4809,8 @@ void VRenderGLView::UpdateVolumeData(int frame,
 				vd->SetSpacings(spcx, spcy, spcz);
 
 				//update rulers
-				if (vframe && vframe->GetMeasureDlg())
-					vframe->GetMeasureDlg()->UpdateList();
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->UpdateList();
 
 				clear_pool = true;
 			}
@@ -4819,6 +4818,121 @@ void VRenderGLView::UpdateVolumeData(int frame,
 
 		if (clear_pool && vd->GetVR())
 			vd->GetVR()->clear_tex_pool();
+	}
+}
+
+void VRenderGLView::ReloadVolumeData(int frame)
+{
+	int i, j;
+	vector<BaseReader*> reader_list;
+	m_bat_folder = "";
+
+	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd && vd->GetReader())
+		{
+			flvr::Texture *tex = vd->GetTexture();
+			BaseReader* reader = vd->GetReader();
+			if (tex && tex->isBrxml())
+			{
+				BRKXMLReader *br = (BRKXMLReader *)reader;
+				int curlv = tex->GetCurLevel();
+				for (j = 0; j < br->GetLevelNum(); j++)
+				{
+					tex->setLevel(j);
+					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+				}
+				tex->setLevel(curlv);
+				tex->set_FrameAndChannel(0, vd->GetCurChannel());
+				vd->SetCurTime(reader->GetCurTime());
+				wxString data_name = wxString(reader->GetDataName());
+				if (i > 0)
+					m_bat_folder += "_";
+				m_bat_folder += data_name;
+
+				int chan_num = 0;
+				if (data_name.Find("_1ch") != -1)
+					chan_num = 1;
+				else if (data_name.Find("_2ch") != -1)
+					chan_num = 2;
+				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
+					vd->SetDisp(false);
+				else
+					vd->SetDisp(true);
+
+				if (reader->GetChanNum() > 1)
+					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
+				vd->SetName(data_name);
+			}
+			else
+			{
+				bool found = false;
+				for (j = 0; j < (int)reader_list.size(); j++)
+				{
+					if (reader == reader_list[j])
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					reader->LoadOffset(frame);
+					reader_list.push_back(reader);
+				}
+
+				double spcx, spcy, spcz;
+				vd->GetSpacings(spcx, spcy, spcz);
+
+				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
+				if (vd->Replace(data, true))
+					vd->SetDisp(true);
+				else
+				{
+					vd->SetDisp(false);
+					continue;
+				}
+
+				wxString data_name = wxString(reader->GetDataName());
+				if (i > 0)
+					m_bat_folder += "_";
+				m_bat_folder += data_name;
+
+				int chan_num = 0;
+				if (data_name.Find("_1ch") != -1)
+					chan_num = 1;
+				else if (data_name.Find("_2ch") != -1)
+					chan_num = 2;
+				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
+					vd->SetDisp(false);
+				else
+					vd->SetDisp(true);
+
+				if (reader->GetChanNum() > 1)
+					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
+				vd->SetName(data_name);
+				vd->SetPath(wxString(reader->GetPathName()));
+				vd->SetCurTime(reader->GetCurTime());
+				if (!reader->IsSpcInfoValid())
+					vd->SetSpacings(spcx, spcy, spcz);
+				else
+					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+				if (vd->GetVR())
+					vd->GetVR()->clear_tex_pool();
+			}
+		}
+	}
+
+	InitView(INIT_BOUNDS | INIT_CENTER);
+
+	if (m_frame)
+	{
+		m_frame->UpdateList();
+		m_frame->UpdateTree(
+			m_frame->GetCurSelVol() ?
+			m_frame->GetCurSelVol()->GetName() :
+			"");
 	}
 }
 
@@ -4844,7 +4958,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 
 	if (update)
 	for (auto i : m_vd_pop_list)
-		UpdateVolumeData(frame, i, m_frame);
+		UpdateVolumeData(frame, i);
 
 	//run post-change script
 	if (update && m_run_script)
@@ -4898,124 +5012,39 @@ void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
 	start_frame = 0;
 }
 
-void VRenderGLView::Set3DBatFrame(int offset)
+void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
-	int i, j;
-	vector<BaseReader*> reader_list;
-	m_bat_folder = "";
+	//skip update if frame num unchanged
+	bool update = m_tseq_cur_num == frame ? false : true;
+	//compute frame number
+	m_begin_frame = start_frame;
+	m_end_frame = end_frame;
+	m_total_frames = std::abs(end_frame - start_frame + 1);
 
+	//save currently selected volume
+	VolumeData* cur_vd_save = m_cur_vol;
+
+	//run pre-change script
+	if (update && m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+
+	//change time frame
 	m_tseq_prv_num = m_tseq_cur_num;
-	m_tseq_cur_num = offset;
-	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_pop_list[i];
-		if (vd && vd->GetReader())
-		{
-			flvr::Texture *tex = vd->GetTexture();
-			BaseReader* reader = vd->GetReader();
-			if (tex && tex->isBrxml())
-			{
-				BRKXMLReader *br = (BRKXMLReader *)reader;
-				int curlv = tex->GetCurLevel();
-				for (int j = 0; j < br->GetLevelNum(); j++)
-				{
-					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
-				}
-				tex->setLevel(curlv);
-				tex->set_FrameAndChannel(0, vd->GetCurChannel());
-				vd->SetCurTime(reader->GetCurTime());
-				wxString data_name = wxString(reader->GetDataName());
-				if (i > 0)
-					m_bat_folder += "_";
-				m_bat_folder += data_name;
+	m_tseq_cur_num = frame;
 
-				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
-					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
-					chan_num = 2;
-				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
-					vd->SetDisp(false);
-				else
-					vd->SetDisp(true);
+	if (update)
+		ReloadVolumeData(frame);
 
-				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
-				vd->SetName(data_name);
-			}
-			else
-			{
-				//if (reader->GetOffset() == offset) return;
-				bool found = false;
-				for (j = 0; j<(int)reader_list.size(); j++)
-				{
-					if (reader == reader_list[j])
-					{
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-				{
-					reader->LoadOffset(offset);
-					reader_list.push_back(reader);
-				}
+	//run post-change script
+	if (update && m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
 
-				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
-
-				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
-				if (vd->Replace(data, true))
-					vd->SetDisp(true);
-				else
-				{
-					vd->SetDisp(false);
-					continue;
-				}
-
-				wxString data_name = wxString(reader->GetDataName());
-				if (i > 0)
-					m_bat_folder += "_";
-				m_bat_folder += data_name;
-
-				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
-					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
-					chan_num = 2;
-				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
-					vd->SetDisp(false);
-				else
-					vd->SetDisp(true);
-
-				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
-				vd->SetName(data_name);
-				vd->SetPath(wxString(reader->GetPathName()));
-				vd->SetCurTime(reader->GetCurTime());
-				if (!reader->IsSpcInfoValid())
-					vd->SetSpacings(spcx, spcy, spcz);
-				else
-					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-				if (vd->GetVR())
-					vd->GetVR()->clear_tex_pool();
-			}
-		}
-	}
-
-	InitView(INIT_BOUNDS | INIT_CENTER);
+	//restore currently selected volume
+	m_cur_vol = cur_vd_save;
+	m_selector.SetVolume(m_cur_vol);
+	m_calculator.SetVolumeA(m_cur_vol);
 
 	RefreshGL(18);
-
-	if (m_frame)
-	{
-		m_frame->UpdateList();
-		m_frame->UpdateTree(
-			m_frame->GetCurSelVol() ?
-			m_frame->GetCurSelVol()->GetName() :
-			"");
-	}
 }
 
 //pre-draw processings

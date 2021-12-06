@@ -386,10 +386,11 @@ public:
 	//4d movie frame calculation
 	void Get4DSeqRange(int &start_frame, int &end_frame);
 	void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind);
-	void UpdateVolumeData(int frame, VolumeData* vd, VRenderFrame* vframe);
+	void UpdateVolumeData(int frame, VolumeData* vd);
+	void ReloadVolumeData(int frame);
 	//3d batch file calculation
 	void Get3DBatRange(int &start_frame, int &end_frame);
-	void Set3DBatFrame(int offset);
+	void Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind);
 
 	//frame for capturing
 	void EnableFrame() { m_draw_frame = true; }

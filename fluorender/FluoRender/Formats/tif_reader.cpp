@@ -1189,73 +1189,58 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 
 wstring TIFReader::GetCurDataName(int t, int c)
 {
-	if (isHyperstack_ && !isHsTimeSeq_)
-		return m_path_name;
-	else
-	{
-		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+	if (isHsTimeSeq_ && !isHyperstack_)
+		if (t >= 0 && t < (int)m_4d_seq.size())
 			return (m_4d_seq[t].slices)[0].slice;
-		else
-			return L"";
-	}
+	return m_path_name;
 }
 
 wstring TIFReader::GetCurMaskName(int t, int c)
 {
-	if (isHyperstack_)
+	wostringstream woss;
+	wstring mask_name;
+	if (!isHyperstack_)
 	{
-		wostringstream woss;
-		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-		if (m_time_num > 1) woss << "_T" << t;
-		if (m_chan_num > 1) woss << "_C" << c;
-		woss << ".msk";
-		wstring mask_name = woss.str();
-		return mask_name;
-	}
-	else
-	{
-		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
 			wstring data_name = (m_4d_seq[t].slices)[0].slice;
-			wostringstream woss;
 			woss << data_name.substr(0, data_name.find_last_of('.'));
 			if (m_chan_num > 1) woss << "_C" << c;
 			woss << ".msk";
-			wstring mask_name = woss.str();
+			mask_name = woss.str();
 			return mask_name;
 		}
-		else
-			return L"";
 	}
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".msk";
+	mask_name = woss.str();
+	return mask_name;
 }
 
 wstring TIFReader::GetCurLabelName(int t, int c)
 {
-	if (isHyperstack_)
+	wostringstream woss;
+	wstring label_name;
+	if (!isHyperstack_)
 	{
-		wostringstream woss;
-		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-		if (m_time_num > 1) woss << "_T" << t;
-		if (m_chan_num > 1) woss << "_C" << c;
-		woss << ".lbl";
-		wstring label_name = woss.str();
-		return label_name;
-	}
-	else
-	{
-		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
 			wstring data_name = (m_4d_seq[t].slices)[0].slice;
-			wostringstream woss;
 			woss << data_name.substr(0, data_name.find_last_of('.'));
 			if (m_chan_num > 1) woss << "_C" << c;
 			woss << ".lbl";
-			wstring label_name = woss.str();
+			label_name = woss.str();
 			return label_name;
 		}
-		else
-			return L"";
 	}
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".lbl";
+	label_name = woss.str();
+	return label_name;
 }
 
 bool TIFReader::tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)

@@ -58,7 +58,7 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 	//sp->predictor = m_predictor;
 	sp->stride = 1;
 	//sp->rowsize = m_x_size;
-	sp->dec_codetab = new code_t[CSIZE*sizeof(code_t)];
+	sp->dec_codetab = new code_t[CSIZE * sizeof(code_t)];
 	int icode = 255;
 	do
 	{
@@ -67,7 +67,7 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 		sp->dec_codetab[icode].length = 1;
 		sp->dec_codetab[icode].next = NULL;
 	} while (icode--);
-	sp->maxcode = MAXCODE(BITS_MIN)-1;
+	sp->maxcode = MAXCODE(BITS_MIN) - 1;
 	sp->nbits = BITS_MIN;
 	sp->nextbits = 0;
 	sp->nextdata = 0;
@@ -75,12 +75,12 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 	sp->dec_nbitsmask = MAXCODE(BITS_MIN);
 	sp->dec_bitsleft = occ0 << 3;
 	sp->dec_free_entp = sp->dec_codetab + CODE_FIRST;
-	memset(sp->dec_free_entp, 0, (CSIZE-CODE_FIRST)*sizeof(code_t));
+	memset(sp->dec_free_entp, 0, (CSIZE - CODE_FIRST) * sizeof(code_t));
 	sp->dec_oldcodep = &sp->dec_codetab[-1];
-	sp->dec_maxcodep = &sp->dec_codetab[sp->dec_nbitsmask-1];
+	sp->dec_maxcodep = &sp->dec_codetab[sp->dec_nbitsmask - 1];
 
-	char *op = (char*) op0;
-	long occ = (long) occ0;
+	char *op = (char*)op0;
+	long occ = (long)occ0;
 	char *tp;
 	unsigned char *bp;
 	hcode_t code;
@@ -108,7 +108,7 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 			free_entp = sp->dec_codetab + CODE_FIRST;
 			nbits = BITS_MIN;
 			nbitsmask = MAXCODE(BITS_MIN);
-			maxcodep = sp->dec_codetab + nbitsmask-1;
+			maxcodep = sp->dec_codetab + nbitsmask - 1;
 			GetNextCode(sp, bp, code);
 			//NextCode(tif, sp, bp, code, GetNextCode);
 			if (code == CODE_EOI)
@@ -120,8 +120,8 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 		codep = sp->dec_codetab + code;
 
 		/*
-	 	 * Add the new entry to the code table.
-	 	 */
+		 * Add the new entry to the code table.
+		 */
 		if (free_entp < &sp->dec_codetab[0] ||
 			free_entp >= &sp->dec_codetab[CSIZE])
 			return 0;
@@ -132,15 +132,15 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 			return 0;
 
 		free_entp->firstchar = free_entp->next->firstchar;
-		free_entp->length = free_entp->next->length+1;
+		free_entp->length = free_entp->next->length + 1;
 		free_entp->value = (codep < free_entp) ?
-		    codep->firstchar : free_entp->firstchar;
+			codep->firstchar : free_entp->firstchar;
 		if (++free_entp > maxcodep)
 		{
 			if (++nbits > BITS_MAX)		/* should not happen */
 				nbits = BITS_MAX;
 			nbitsmask = MAXCODE(nbits);
-			maxcodep = sp->dec_codetab + nbitsmask-1;
+			maxcodep = sp->dec_codetab + nbitsmask - 1;
 		}
 		oldcodep = codep;
 		if (code >= 256)
@@ -149,7 +149,7 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 			 * Code maps to a string, copy string
 			 * value to output (written in reverse).
 			 */
-			if(codep->length == 0)
+			if (codep->length == 0)
 				return 0;
 			if (codep->length > occ)
 			{
@@ -189,11 +189,12 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 			if (codep)
 				break;
 			op += len, occ -= len;
-		} else
+		}
+		else
 			*op++ = (char)code, occ--;
 	}
 
-	delete []sp->dec_codetab;
+	delete[]sp->dec_codetab;
 	delete sp;
 
 	if (occ > 0)
@@ -204,79 +205,85 @@ int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 
 void BaseReader::DecodeAcc8(tidata_t cp0, tsize_t cc, tsize_t stride)
 {
-    char* cp = (char*) cp0;
-    if((cc%stride)!=0) return;
-    if (cc > stride) {
-        /*
-         * Pipeline the most common cases.
-         */
-        if (stride == 3)  {
-            unsigned int cr = cp[0];
-            unsigned int cg = cp[1];
-            unsigned int cb = cp[2];
-            cc -= 3;
-            cp += 3;
-            while (cc>0) {
-                cp[0] = (char) (cr += cp[0]);
-                cp[1] = (char) (cg += cp[1]);
-                cp[2] = (char) (cb += cp[2]);
-                cc -= 3;
-                cp += 3;
-            }
-        } else if (stride == 4)  {
-            unsigned int cr = cp[0];
-            unsigned int cg = cp[1];
-            unsigned int cb = cp[2];
-            unsigned int ca = cp[3];
-            cc -= 4;
-            cp += 4;
-            while (cc>0) {
-                cp[0] = (char) (cr += cp[0]);
-                cp[1] = (char) (cg += cp[1]);
-                cp[2] = (char) (cb += cp[2]);
-                cp[3] = (char) (ca += cp[3]);
-                cc -= 4;
-                cp += 4;
-            }
-        } else  {
-            cc -= stride;
-            do {
-                REPEAT4(stride, cp[stride] =
-                        (char) (cp[stride] + *cp); cp++)
-                cc -= stride;
-            } while (cc>0);
-        }
-    }
+	char* cp = (char*)cp0;
+	if ((cc%stride) != 0) return;
+	if (cc > stride) {
+		/*
+		 * Pipeline the most common cases.
+		 */
+		if (stride == 3) {
+			unsigned int cr = cp[0];
+			unsigned int cg = cp[1];
+			unsigned int cb = cp[2];
+			cc -= 3;
+			cp += 3;
+			while (cc > 0) {
+				cp[0] = (char)(cr += cp[0]);
+				cp[1] = (char)(cg += cp[1]);
+				cp[2] = (char)(cb += cp[2]);
+				cc -= 3;
+				cp += 3;
+			}
+		}
+		else if (stride == 4) {
+			unsigned int cr = cp[0];
+			unsigned int cg = cp[1];
+			unsigned int cb = cp[2];
+			unsigned int ca = cp[3];
+			cc -= 4;
+			cp += 4;
+			while (cc > 0) {
+				cp[0] = (char)(cr += cp[0]);
+				cp[1] = (char)(cg += cp[1]);
+				cp[2] = (char)(cb += cp[2]);
+				cp[3] = (char)(ca += cp[3]);
+				cc -= 4;
+				cp += 4;
+			}
+		}
+		else {
+			cc -= stride;
+			do {
+				REPEAT4(stride, cp[stride] =
+					(char)(cp[stride] + *cp); cp++)
+					cc -= stride;
+			} while (cc > 0);
+		}
+	}
 }
 
 void BaseReader::DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride)
 {
-    uint16* wp = (uint16*) cp0;
-    tsize_t wc = cc / 2;
-    
-    if((cc%(2*stride))!=0) return;
-    
-    if (wc > stride) {
-        wc -= stride;
-        do {
-            REPEAT4(stride, wp[stride] += wp[0]; wp++)
-            wc -= stride;
-        } while (wc > 0);
-    }
+	uint16* wp = (uint16*)cp0;
+	tsize_t wc = cc / 2;
+
+	if ((cc % (2 * stride)) != 0) return;
+
+	if (wc > stride) {
+		wc -= stride;
+		do {
+			REPEAT4(stride, wp[stride] += wp[0]; wp++)
+				wc -= stride;
+		} while (wc > 0);
+	}
 }
 
-Nrrd* BaseReader::Convert(bool get_max) { return Convert(0,get_max); }
+Nrrd* BaseReader::Convert(bool get_max) { return Convert(0, get_max); }
 
-Nrrd* BaseReader::Convert(int c, bool get_max) { return Convert(0,c,get_max); }
+Nrrd* BaseReader::Convert(int c, bool get_max) { return Convert(0, c, get_max); }
 
 int BaseReader::LoadOffset(int offset)
 {
-   if (m_batch_list.size() <=1) return -1; 
-   int result = offset % m_batch_list.size();
-   m_path_name = m_batch_list[result];
-   Preprocess();
-   m_cur_batch = result;
-   return result;
+	if (m_batch_list.size() <= 1) return -1;
+	int result = offset;
+	if (offset < 0)
+		result = 0;
+	if (offset >= (int)m_batch_list.size())
+		result = (int)m_batch_list.size() - 1;
+	m_path_name = m_batch_list[result];
+	Preprocess();
+	m_cur_batch = result;
+	return result;
 }
 
 int BaseReader::GetOffset() { return m_cur_batch; }

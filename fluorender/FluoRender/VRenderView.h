@@ -250,10 +250,10 @@ public:
 		if (m_glview)
 			m_glview->Get3DBatRange(start_frame, end_frame);
 	}
-	void Set3DBatFrame(int offset)
+	void Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
 	{
 		if (m_glview)
-			m_glview->Set3DBatFrame(offset);
+			m_glview->Set3DBatFrame(frame, start_frame, end_frame, rewind);
 	}
 	//set movie export
 	void SetParams(double p) {

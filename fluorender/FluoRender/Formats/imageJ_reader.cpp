@@ -271,24 +271,28 @@ wstring ImageJReader::GetTimeId()
 
 wstring ImageJReader::GetCurDataName(int t, int c)
 {
-	wstring path, name;
-	SEP_PATH_NAME(m_path_name, path, name);
-	return name;
+	return m_path_name;
 }
 
 wstring ImageJReader::GetCurMaskName(int t, int c)
 {
-	wstring path, name;
-	SEP_PATH_NAME(m_path_name, path, name);
-	wstring mask_name = name.substr(0, name.find_last_of('.')) + L".msk";
+	wostringstream woss;
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".msk";
+	wstring mask_name = woss.str();
 	return mask_name;
 }
 
 wstring ImageJReader::GetCurLabelName(int t, int c)
 {
-	wstring path, name;
-	SEP_PATH_NAME(m_path_name, path, name);
-	wstring label_name = name.substr(0, name.find_last_of('.')) + L".lbl";
+	wostringstream woss;
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".lbl";
+	wstring label_name = woss.str();
 	return label_name;
 }
 
