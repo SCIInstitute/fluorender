@@ -396,17 +396,22 @@ VRenderFrame::VRenderFrame(
 	vrv->InitView();
 	m_vrv_list.push_back(vrv);
 
+#ifdef _WIN32
+	wxSize panel_size(350, 300);
+#else
+	wxSize panel_size(400, 300);
+#endif
 	//create list view
 	m_list_panel = new ListPanel(this,
-		wxDefaultPosition, wxSize(350, 300));
+		wxDefaultPosition, panel_size);
 
 	//create tree view
 	m_tree_panel = new TreePanel(this,
-		wxDefaultPosition, wxSize(350, 300));
+		wxDefaultPosition, panel_size);
 
 	//create movie view (sets the m_recorder_dlg)
 	m_movie_view = new VMovieView(this,
-		wxDefaultPosition, wxSize(350, 400));
+		wxDefaultPosition, panel_size);
 
 	//create prop panel
 	m_prop_panel = new wxPanel(this, wxID_ANY,
@@ -537,16 +542,16 @@ VRenderFrame::VRenderFrame(
 		Top().CloseButton(false).Layer(4));
 	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
 		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-		Left().CloseButton(true).BestSize(wxSize(350, 280)).
-		FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
 	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
 		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
-		Left().CloseButton(true).BestSize(wxSize(350, 300)).
-		FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
 	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
 		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
-		Left().CloseButton(true).BestSize(wxSize(350, 320)).
-		FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
 		Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
