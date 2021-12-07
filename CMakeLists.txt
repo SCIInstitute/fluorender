@@ -516,6 +516,10 @@ if(APPLE)
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
+  add_executable(Tester MACOSX_BUNDLE
+    ${tester_src} ${tester_hdr}
+    $<TARGET_OBJECTS:TYPES_OBJ>
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>)
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)
@@ -643,11 +647,8 @@ elseif(WIN32)
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
-      #$<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>)
-      #$<TARGET_OBJECTS:TEEM_OBJ>)
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>)
   endif()
 endif()
 
@@ -701,7 +702,7 @@ if(UNIX OR APPLE OR MINGW)
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES})
-#${JNI_LIBRARIES})   
+	#${JNI_LIBRARIES})
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
@@ -714,11 +715,6 @@ elseif(WIN32)
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES})
-  target_link_libraries(Tester
-    ${OPENGL_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${FREETYPE_LIBRARIES})
-    #${wxWidgets_LIBRARIES})
 endif()
 
 
