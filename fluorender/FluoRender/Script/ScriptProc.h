@@ -74,7 +74,7 @@ namespace flrd
 		//run 4d script
 		void Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
 
-		void ClearResults() { m_output->removeAllChildren(); }
+		void ClearResults() { m_output.clear(); }
 
 	private:
 		VRenderFrame* m_frame;
@@ -94,7 +94,7 @@ namespace flrd
 		//structure: output(group)--time(group)--channel(group)--script_command(group)
 		//bacg_stat(group)--single_node(node)--mean(value), etc
 		//comp_analysis(group)--comp_id(node)--size(value), pos(value), etc
-		fluo::ref_ptr<fluo::Group> m_output;
+		std::vector<fluo::ref_ptr<fluo::Group>> m_output;
 
 	private:
 		bool TimeCondition();
