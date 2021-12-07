@@ -304,14 +304,20 @@ void OclDlg::AddKernelsToList()
 	wxString loc = exePath + GETSLASH() + "CL_code" +
 		GETSLASH() + "*.cl";
 	wxLogNull logNo;
+	wxArrayString list;
 	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
 		file = wxFileNameFromPath(file);
 		file = file.BeforeLast('.');
-		m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), file);
+		list.Add(file);
 		file = wxFindNextFile();
 	}
+	list.Sort();
+	for (size_t i = 0; i < list.GetCount(); ++i)
+		m_kernel_list->InsertItem(
+			m_kernel_list->GetItemCount(),
+			list[i]);
 }
 
 void OclDlg::Execute()

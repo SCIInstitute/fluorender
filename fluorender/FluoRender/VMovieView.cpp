@@ -607,6 +607,7 @@ int VMovieView::GetScriptFiles(wxArrayString& list)
 		list.Add(file);
 		file = wxFindNextFile();
 	}
+	list.Sort();
 	return list.GetCount();
 }
 

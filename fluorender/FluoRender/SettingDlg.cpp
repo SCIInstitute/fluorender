@@ -142,14 +142,18 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxString loc = exePath + GETSLASH() + "Fonts" +
 		GETSLASH() + "*.ttf";
 	wxLogNull logNo;
+	wxArrayString list;
 	wxString file = wxFindFirstFile(loc);
 	while (!file.empty())
 	{
 		file = wxFileNameFromPath(file);
 		file = file.BeforeLast('.');
-		m_font_cmb->Append(file);
+		list.Add(file);
 		file = wxFindNextFile();
 	}
+	list.Sort();
+	for (size_t i = 0; i < list.GetCount(); ++i)
+		m_font_cmb->Append(list[i]);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_cmb);
