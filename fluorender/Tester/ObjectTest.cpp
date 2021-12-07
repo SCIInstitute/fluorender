@@ -201,5 +201,9 @@ void ObjectTest4()
 	obj_list.push_back(obj);
 
 	Object* test_object = obj->getTest();
-	cout << test_object->getName();
+	cout << test_object->getName() << endl;
+
+	ref_ptr<Object> obj2 = obj;
+
+	obj2 = ref_ptr<Object>(new Object());
 }

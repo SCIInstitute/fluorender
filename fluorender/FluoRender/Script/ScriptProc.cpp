@@ -51,9 +51,7 @@ ScriptProc::ScriptProc() :
 	m_view(0),
 	m_rewind(false)
 {
-	fluo::Group* root = new fluo::Group();
-	root->setName("root");
-	m_output.push_back(root);
+	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
 }
 
 ScriptProc::~ScriptProc()
@@ -296,7 +294,7 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 {
 	wxString temp = str;
 	wxString path;
-	fluo::Node* node = m_output[0]->getChild("savepath");
+	fluo::Node* node = m_output->getChild("savepath");
 	if (node)
 	{
 		std::string name;
@@ -346,7 +344,7 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		while (wxFileExists(path))
 			path = IncreaseNum(path);
 	}
-	node = m_output[0]->getOrAddNode("savepath");
+	node = m_output->getOrAddNode("savepath");
 	path = STR_DIR_SEP(path.ToStdString());
 	node->addSetValue("path", path.ToStdString());
 	return path;
@@ -965,7 +963,7 @@ void ScriptProc::RunCompAnalysis()
 
 		//output
 		//time group
-		fluo::Group* timeg = m_output[0]->getOrAddGroup(fn);
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
 		timeg->addSetValue("type", std::string("time"));
 		timeg->addSetValue("t", long(curf));
 		//channel group
@@ -1106,7 +1104,7 @@ void ScriptProc::RunRulerProfile()
 
 		//output
 		//time group
-		fluo::Group* timeg = m_output[0]->getOrAddGroup(fn);
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
 		timeg->addSetValue("type", std::string("time"));
 		timeg->addSetValue("t", long(curf));
 		//channel group
@@ -1260,7 +1258,7 @@ void ScriptProc::RunBackgroundStat()
 
 		//output
 		//time group
-		fluo::Group* timeg = m_output[0]->getOrAddGroup(fn);
+		fluo::Group* timeg = m_output->getOrAddGroup(fn);
 		timeg->addSetValue("type", std::string("time"));
 		timeg->addSetValue("t", long(curf));
 		//channel group
@@ -1419,7 +1417,7 @@ void ScriptProc::ExportAnalysis()
 			ofs << "\\n\\" << std::endl;
 			CompVisitor visitor(ofs, vnames,
 				m_view->GetAllVolumeNum());
-			m_output[0]->accept(visitor);
+			m_output->accept(visitor);
 			ofs << "\";" << std::endl;
 		}
 		if (line.find("#begin value name") != std::string::npos)
