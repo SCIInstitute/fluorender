@@ -172,3 +172,34 @@ void ObjectTest3()
 	obj1->toggleValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
 }
+
+void ObjectTest4()
+{
+	class TestObject : public Object
+	{
+	public:
+		TestObject()
+		{
+			m_test = new Object();
+			m_test->setName("test object");
+		}
+
+		Object* getTest()
+		{
+			return m_test.get();
+		}
+
+	protected:
+		virtual ~TestObject() {}
+
+	private:
+		ref_ptr<Object> m_test;
+	};
+
+	TestObject* obj = new TestObject();
+	vector<ref_ptr<Object>> obj_list;
+	obj_list.push_back(obj);
+
+	Object* test_object = obj->getTest();
+	cout << test_object->getName();
+}
