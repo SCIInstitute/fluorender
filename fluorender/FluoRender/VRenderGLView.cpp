@@ -4241,7 +4241,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				if (m_paint_colocalize && m_frame->GetColocalizationDlg())
 					m_frame->GetColocalizationDlg()->Colocalize();
 				if (m_int_mode == 12 && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+					m_frame->GetMeasureDlg()->GetSettings(this);
 			}
 		}
 
@@ -9354,8 +9354,13 @@ void VRenderGLView::HaltLoopUpdate()
 }
 
 //new function to refresh
-void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
+void VRenderGLView::RefreshGL(int debug_code,
+	bool erase,
+	bool start_loop)
 {
+	//m_force_clear = force_clear;
+	//m_interactive = interactive;
+
 	//for debugging refresh events
 	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
 	m_updating = true;
@@ -9678,7 +9683,7 @@ void VRenderGLView::GetTraces(bool update)
 	if (update)
 	{
 		if (m_vrv && m_frame && m_frame->GetTraceDlg())
-			m_frame->GetTraceDlg()->GetSettings(m_vrv);
+			m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
 	}
 }
 
@@ -9851,8 +9856,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			if (m_int_mode == 14)
 				m_ruler_handler.DeletePoint();
-			if (m_vrv && m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(41);
 		}
 
@@ -9942,8 +9947,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			//add one point to a ruler
 			m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
-			if (m_vrv && m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(27);
 			return;
 		}
@@ -9965,8 +9970,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
-			if (m_vrv && m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			return;
 		}
 		else if (m_int_mode == 10 ||
@@ -9977,7 +9982,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 13)
 		{
-			if (m_vrv && m_frame && m_frame->GetMeasureDlg())
+			if (m_frame && m_frame->GetMeasureDlg())
 			{
 				if (m_ruler_autorelax)
 				{
@@ -9985,7 +9990,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_frame->GetMeasureDlg()->Relax(
 						m_ruler_handler.GetRulerIndex());
 				}
-				m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			}
 			RefreshGL(29);
 			return;
@@ -10016,7 +10021,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 				m_ruler_handler.FinishRuler();
 			}
-			if (m_vrv && m_frame && m_frame->GetMeasureDlg())
+			if (m_frame && m_frame->GetMeasureDlg())
 			{
 				if (m_ruler_autorelax)
 				{
@@ -10024,7 +10029,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_frame->GetMeasureDlg()->Relax(
 						m_ruler_handler.GetRulerIndex());
 				}
-				m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			}
 			RefreshGL(29);
 			return;
@@ -10194,9 +10199,9 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (rval)
 			{
 				RefreshGL(35);
-				if (m_vrv && m_frame && m_frame->GetMeasureDlg())
+				if (m_frame && m_frame->GetMeasureDlg())
 				{
-					m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+					m_frame->GetMeasureDlg()->GetSettings(this);
 					m_frame->GetMeasureDlg()->SetEdit();
 				}
 			}
@@ -10207,8 +10212,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				//add one point to a ruler
 				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
-				if (m_vrv && m_frame && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
 			}
 		}

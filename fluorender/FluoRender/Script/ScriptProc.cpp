@@ -211,7 +211,7 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 void ScriptProc::UpdateTraceDlg()
 {
 	if (m_vrv && m_frame && m_frame->GetTraceDlg())
-		m_frame->GetTraceDlg()->GetSettings(m_vrv);
+		m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
 }
 
 int ScriptProc::TimeMode(std::string &str)
@@ -665,12 +665,13 @@ void ScriptProc::RunCompEdit()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		flrd::ComponentEditor comp_selector(*i);
+		flrd::ComponentEditor editor;
+		editor.SetVolume(*i);
 
 		switch (edit_type)
 		{
 		case 0:
-			comp_selector.Clean(mode);
+			editor.Clean(mode);
 			break;
 		}
 	}
@@ -1191,7 +1192,7 @@ void ScriptProc::RunLinkCells()
 	if (!m_frame || !m_frame->GetTraceDlg())
 		return;
 
-	m_frame->GetTraceDlg()->GetSettings(m_vrv);
+	m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
 	m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 

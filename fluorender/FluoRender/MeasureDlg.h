@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 namespace flrd
 {
 	class DistCalculator;
@@ -71,7 +71,7 @@ public:
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
 	void AdjustSize();
-	void UpdateRulers(VRenderView* vrv=0);
+	void UpdateRulers(VRenderGLView* vrv=0);
 
 	bool GetCurrSelection(std::vector<int> &sel);
 	void ClearSelection();
@@ -88,7 +88,7 @@ public:
 
 private:
 	wxWindow* m_frame;
-	VRenderView *m_view;
+	VRenderGLView *m_view;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
@@ -182,8 +182,8 @@ public:
 	MeasureDlg(VRenderFrame* frame);
 	~MeasureDlg();
 
-	void GetSettings(VRenderView* vrv);
-	VRenderView* GetView();
+	void GetSettings(VRenderGLView* vrv);
+	VRenderGLView* GetView();
 	void UpdateList();
 
 	//processing
@@ -197,7 +197,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderView* m_view;
+	VRenderGLView* m_view;
 	flrd::RulerHandler *m_rhdl;
 
 	//list ctrl

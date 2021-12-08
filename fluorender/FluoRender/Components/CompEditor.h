@@ -30,17 +30,28 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <Cell.h>
+#include <wx/string.h>
 
+class VRenderGLView;
 class VolumeData;
 namespace flrd
 {
+	class VolCache;
 	//class ComponentAnalyzer;
 	class ComponentEditor
 	{
 	public:
-		ComponentEditor(VolumeData* vd);
+		ComponentEditor();
 		~ComponentEditor();
 
+		void SetView(VRenderGLView* view)
+		{
+			m_view = view;
+		}
+		VRenderGLView* GetView()
+		{
+			return m_view;
+		}
 		void SetVolume(VolumeData* vd)
 		{
 			m_vd = vd;
@@ -49,11 +60,24 @@ namespace flrd
 		{
 			return m_vd;
 		}
+		wxString GetOutput();
 
 		void Clean(int mode);
+		void NewId(unsigned int id, bool id_empty, bool append);
+		void Replace(unsigned int id, bool id_empty);
+		void Replace(unsigned int id, bool id_empty, CelpList &list);
+		void Combine();
+		void Combine(CelpList &list);
 
 	private:
 		VolumeData* m_vd;
+		VRenderGLView* m_view;
+		wxString m_output;
+
+	private:
+		//read/delete volume cache from file
+		void ReadVolCache(VolCache& vol_cache);
+		void DelVolCache(VolCache& vol_cache);
 
 	};
 }

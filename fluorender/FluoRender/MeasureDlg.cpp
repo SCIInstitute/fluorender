@@ -181,7 +181,7 @@ void RulerListCtrl::AdjustSize()
 	SetColumnWidth(10, wxLIST_AUTOSIZE_USEHEADER);
 }
 
-void RulerListCtrl::UpdateRulers(VRenderView* vrv)
+void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 {
 	m_name_text->Hide();
 	m_center_text->Hide();
@@ -209,11 +209,11 @@ void RulerListCtrl::UpdateRulers(VRenderView* vrv)
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->GetTimeDep() &&
-			ruler->GetTime() != m_view->m_glview->m_tseq_cur_num)
+			ruler->GetTime() != m_view->m_tseq_cur_num)
 			continue;
 
 		wxString unit;
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			unit = "nm";
@@ -336,7 +336,7 @@ void RulerListCtrl::DeleteSelection()
 	GetCurrSelection(sel);
 	m_rhdl->DeleteSelection(sel);
 	UpdateRulers();
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void RulerListCtrl::DeleteAll(bool cur_time)
@@ -345,7 +345,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 		return;
 	m_rhdl->DeleteAll(cur_time);
 	UpdateRulers();
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void RulerListCtrl::Export(wxString filename)
@@ -362,7 +362,7 @@ void RulerListCtrl::Export(wxString filename)
 		int num_points;
 		fluo::Point p;
 		flrd::Ruler* ruler;
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			unit = "nm";
@@ -657,7 +657,7 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 	if (!ruler) return;
 	ruler->SetName(str);
 	SetText(m_editing_item, 0, str);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void RulerListCtrl::OnCenterText(wxCommandEvent& event)
@@ -711,7 +711,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 		x, y, z);
 	SetText(m_editing_item, 7, str);
 	SetText(m_editing_item, 9, str);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
@@ -742,7 +742,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		ruler->SetColor(color);
 	}
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void RulerListCtrl::OnScroll(wxScrollWinEvent& event)
@@ -782,7 +782,7 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 	m_center_text->Hide();
 	m_color_picker->Hide();
 	SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
@@ -832,7 +832,7 @@ void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
 	//m_center_text->Hide();
 	//m_color_picker->Hide();
 	//SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1203,7 +1203,7 @@ MeasureDlg::~MeasureDlg()
 		delete m_aligner;
 }
 
-void MeasureDlg::GetSettings(VRenderView* vrv)
+void MeasureDlg::GetSettings(VRenderGLView* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -1212,10 +1212,10 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 	if (!m_rhdl)
 		return;
 	m_rulerlist->m_rhdl = m_rhdl;
-	m_aligner->SetView(m_view->m_glview);
+	m_aligner->SetView(m_view);
 
 	UpdateList();
-	if (m_view && m_view->m_glview)
+	if (m_view)
 	{
 		m_toolbar1->ToggleTool(ID_LocatorBtn, false);
 		m_toolbar1->ToggleTool(ID_ProbeBtn, false);
@@ -1230,7 +1230,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 		m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 		m_toolbar2->ToggleTool(ID_LockBtn, false);
 
-		int int_mode = m_view->m_glview->GetIntMode();
+		int int_mode = m_view->GetIntMode();
 		if (int_mode == 5 || int_mode == 7)
 		{
 			int ruler_type = m_rhdl->GetType();
@@ -1260,7 +1260,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 		else if (int_mode == 14)
 			m_toolbar2->ToggleTool(ID_RulerDelBtn, true);
 
-		switch (m_view->m_glview->m_point_volume_mode)
+		switch (m_view->m_point_volume_mode)
 		{
 		case 0:
 			m_view_plane_rd->SetValue(true);
@@ -1279,8 +1279,8 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 			break;
 		}
 
-		m_use_transfer_chk->SetValue(m_view->m_glview->m_ruler_use_transf);
-		m_transient_chk->SetValue(m_view->m_glview->m_ruler_time_dep);
+		m_use_transfer_chk->SetValue(m_view->m_ruler_use_transf);
+		m_transient_chk->SetValue(m_view->m_ruler_time_dep);
 		if (m_frame && m_frame->GetSettingDlg())
 		{
 			//ruler exports df/f
@@ -1292,7 +1292,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 				m_frame->GetSettingDlg()->GetRulerRelaxF1());
 			m_auto_relax_btn->SetValue(
 				m_frame->GetSettingDlg()->GetRulerAutoRelax());
-			m_view->m_glview->m_ruler_autorelax =
+			m_view->m_ruler_autorelax =
 				m_frame->GetSettingDlg()->GetRulerAutoRelax();
 			m_relax_data_cmb->Select(
 				m_frame->GetSettingDlg()->GetRulerRelaxType());
@@ -1300,7 +1300,7 @@ void MeasureDlg::GetSettings(VRenderView* vrv)
 	}
 }
 
-VRenderView* MeasureDlg::GetView()
+VRenderGLView* MeasureDlg::GetView()
 {
 	return m_view;
 }
@@ -1511,26 +1511,26 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 	{
 		m_view->SetIntMode(12);
 		m_rhdl->SetType(1);
-		if (m_view->m_glview->GetRulerRenderer())
-			m_view->m_glview->GetRulerRenderer()->SetDrawText(false);
+		if (m_view->GetRulerRenderer())
+			m_view->GetRulerRenderer()->SetDrawText(false);
 		//reset label volume
-		if (m_view->m_glview->m_cur_vol)
+		if (m_view->m_cur_vol)
 		{
-			m_view->m_glview->m_cur_vol->
+			m_view->m_cur_vol->
 				GetVR()->clear_tex_mask();
-			m_view->m_glview->m_cur_vol->
+			m_view->m_cur_vol->
 				GetVR()->clear_tex_label();
-			m_view->m_glview->m_cur_vol->
+			m_view->m_cur_vol->
 				AddEmptyMask(0, true);
-			m_view->m_glview->m_cur_vol->
+			m_view->m_cur_vol->
 				AddEmptyLabel(0, true);
 		}
 	}
 	else
 	{
 		m_view->SetIntMode(1);
-		if (m_view->m_glview->GetRulerRenderer())
-			m_view->m_glview->GetRulerRenderer()->SetDrawText(true);
+		if (m_view->GetRulerRenderer())
+			m_view->GetRulerRenderer()->SetDrawText(true);
 	}
 }
 
@@ -1601,7 +1601,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 
 	if (count)
 	{
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 		GetSettings(m_view);
 	}
 	m_edited = true;
@@ -1728,10 +1728,10 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		ruler->SetRulerType(2);
 		ruler->SetName("Average");
 		ruler->AddPoint(avg);
-		ruler->SetTimeDep(m_view->m_glview->m_ruler_time_dep);
-		ruler->SetTime(m_view->m_glview->m_tseq_cur_num);
+		ruler->SetTimeDep(m_view->m_ruler_time_dep);
+		ruler->SetTime(m_view->m_tseq_cur_num);
 		ruler_list->push_back(ruler);
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 		GetSettings(m_view);
 	}
 }
@@ -1740,7 +1740,7 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		m_rhdl->SetVolumeData(m_view->m_glview->m_cur_vol);
+		m_rhdl->SetVolumeData(m_view->m_cur_vol);
 		std::vector<int> sel;
 		if (m_rulerlist->GetCurrSelection(sel))
 		{
@@ -1936,10 +1936,10 @@ void MeasureDlg::Relax(int idx)
 	m_calculator->SetInfr(infr);
 	m_calculator->SetCelpList(list);
 	m_calculator->SetRuler(ruler);
-	m_calculator->SetVolume(m_view->m_glview->m_cur_vol);
+	m_calculator->SetVolume(m_view->m_cur_vol);
 	m_calculator->CenterRuler(type, m_edited, iter);
 	m_edited = false;
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 	GetSettings(m_view);
 }
 
@@ -1952,7 +1952,7 @@ void MeasureDlg::Prune(int len)
 			Prune(sel[i], len);
 	}
 	if (m_view)
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	GetSettings(m_view);
 }
 
@@ -2027,7 +2027,7 @@ void MeasureDlg::OnExport(wxCommandEvent& event)
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 {
-	if (!m_view || !m_view->m_glview)
+	if (!m_view)
 		return;
 
 	int mode = 0;
@@ -2044,36 +2044,36 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 		mode = 2;
 		break;
 	}
-	m_view->SetPointVolumeMode(mode);
+	m_view->m_point_volume_mode = mode;
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetPointVolumeMode(mode);
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 {
-	if (!m_view || !m_view->m_glview)
+	if (!m_view)
 		return;
 
 	bool use_transfer = m_use_transfer_chk->GetValue();
-	m_view->SetRulerUseTransf(use_transfer);
+	m_view->m_ruler_use_transf = use_transfer;
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
 }
 
 void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 {
-	if (!m_view || !m_view->m_glview)
+	if (!m_view)
 		return;
 
 	bool val = m_transient_chk->GetValue();
-	m_view->SetRulerTimeDep(val);
+	m_view->m_ruler_time_dep = val;
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerTimeDep(val);
 }
 
 void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 {
-	if (!m_view || !m_view->m_glview)
+	if (!m_view)
 		return;
 
 	bool val = m_df_f_chk->GetValue();
@@ -2089,7 +2089,7 @@ void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerAutoRelax(bval);
 	if (m_view)
-		m_view->m_glview->m_ruler_autorelax = bval;
+		m_view->m_ruler_autorelax = bval;
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
@@ -2191,7 +2191,7 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 				m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
 		}
 	}
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void MeasureDlg::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)

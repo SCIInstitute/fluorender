@@ -301,6 +301,10 @@ private:
 	bool m_consistent;
 	bool m_colocal;
 
+	//modify
+	unsigned int m_cell_new_id;
+	bool m_cell_new_id_empty;
+
 	//distance
 	bool m_use_dist_neighbor;
 	int m_dist_neighbor;

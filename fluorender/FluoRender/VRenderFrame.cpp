@@ -2072,8 +2072,8 @@ void VRenderFrame::UpdateTree(wxString name)
 						sel_item = item;
 						vrv->SetVolumeA(vd);
 						GetBrushToolDlg()->GetSettings(vrv);
-						GetMeasureDlg()->GetSettings(vrv);
-						GetTraceDlg()->GetSettings(vrv);
+						GetMeasureDlg()->GetSettings(vrv->m_glview);
+						GetTraceDlg()->GetSettings(vrv->m_glview);
 						GetOclDlg()->GetSettings(vrv);
 						GetComponentDlg()->SetView(vrv);
 						GetColocalizationDlg()->SetView(vrv);
@@ -2148,8 +2148,8 @@ void VRenderFrame::UpdateTree(wxString name)
 							sel_item = item;
 							vrv->SetVolumeA(vd);
 							GetBrushToolDlg()->GetSettings(vrv);
-							GetMeasureDlg()->GetSettings(vrv);
-							GetTraceDlg()->GetSettings(vrv);
+							GetMeasureDlg()->GetSettings(vrv->m_glview);
+							GetTraceDlg()->GetSettings(vrv->m_glview);
 							GetOclDlg()->GetSettings(vrv);
 							GetComponentDlg()->SetView(vrv);
 							GetColocalizationDlg()->SetView(vrv);
@@ -2304,7 +2304,7 @@ void VRenderFrame::OnSelection(int type,
 	if (m_counting_dlg)
 		m_counting_dlg->GetSettings(vrv);
 	if (m_measure_dlg)
-		m_measure_dlg->GetSettings(vrv);
+		m_measure_dlg->GetSettings(vrv->m_glview);
 	if (m_noise_cancelling_dlg)
 		m_noise_cancelling_dlg->GetSettings(vrv);
 	if (m_ocl_dlg)
@@ -2312,7 +2312,7 @@ void VRenderFrame::OnSelection(int type,
 	if (m_recorder_dlg)
 		m_recorder_dlg->GetSettings(vrv);
 	if (m_trace_dlg)
-		m_trace_dlg->GetSettings(vrv);
+		m_trace_dlg->GetSettings(vrv->m_glview);
 
 	switch (type)
 	{
@@ -4666,7 +4666,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		wxString sVal;
 		if (fconfig.Read("track_file", &sVal))
 		{
-			m_trace_dlg->GetSettings(m_vrv_list[0]);
+			m_trace_dlg->GetSettings(m_vrv_list[0]->m_glview);
 			m_trace_dlg->LoadTrackFile(sVal);
 		}
 	}

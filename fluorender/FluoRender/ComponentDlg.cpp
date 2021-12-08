@@ -194,7 +194,9 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 	m_frame(frame),
 	m_view(0),
 	m_hold_history(false),
-	m_test_speed(false)
+	m_test_speed(false),
+	m_cell_new_id(0),
+	m_cell_new_id_empty(true)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -2482,9 +2484,14 @@ void ComponentDlg::OnNewIDText(wxCommandEvent &event)
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
 		m_new_id_text->SetBackgroundColour(color);
+		m_cell_new_id = id;
+		m_cell_new_id_empty = false;
 	}
 	else
+	{
 		m_new_id_text->SetBackgroundColour(color);
+		m_cell_new_id_empty = true;
+	}
 	m_new_id_text->Refresh();
 }
 
@@ -2495,40 +2502,55 @@ void ComponentDlg::OnNewIDX(wxCommandEvent& event)
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)
 {
-	if (!m_frame || !m_frame->GetTraceDlg())
+	if (!m_view)
 		return;
-	m_frame->GetTraceDlg()->CellNewID(false);
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view->m_glview);
+	editor.NewId(m_cell_new_id,
+		m_cell_new_id_empty, false);
+	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 {
-	if (!m_frame || !m_frame->GetTraceDlg())
+	if (!m_view)
 		return;
-	m_frame->GetTraceDlg()->CellNewID(true);
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view->m_glview);
+	editor.NewId(m_cell_new_id,
+		m_cell_new_id_empty, true);
+	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 {
-	if (!m_frame || !m_frame->GetTraceDlg())
+	if (!m_view)
 		return;
-	m_frame->GetTraceDlg()->CellReplaceID();
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view->m_glview);
+	editor.Replace(m_cell_new_id,
+		m_cell_new_id_empty);
+	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	flrd::ComponentEditor editor(vd);
+	flrd::ComponentEditor editor;
+	editor.SetVolume(m_view->m_glview->m_cur_vol);
 	editor.Clean(0);
 	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 {
-	if (!m_frame || !m_frame->GetTraceDlg())
+	if (!m_view)
 		return;
-	m_frame->GetTraceDlg()->CellCombineID();
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view->m_glview);
+	editor.Combine();
+	m_view->RefreshGL();
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
