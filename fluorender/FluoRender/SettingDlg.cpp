@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "SettingDlg.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>

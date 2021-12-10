@@ -10357,11 +10357,18 @@ void VRenderGLView::SetBackgroundColor(fluo::Color &color)
 	{
 		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
+	if (m_vrv)
+	{
+		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+		m_vrv->m_bg_color_picker->SetColour(c);
+	}
 }
 
-void VRenderGLView::SetGradBg(bool val)
+void VRenderGLView::SetFog(bool b)
 {
-	m_grad_bg = val;
+	m_use_fog = b;
+	if (m_vrv)
+		m_vrv->m_left_toolbar->ToggleTool(VRenderView::ID_DepthAttenChk, b);
 }
 
 void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_update)

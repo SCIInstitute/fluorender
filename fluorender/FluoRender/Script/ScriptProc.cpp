@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include "ScriptProc.h"
 #include <Flobject/InfoVisitor.hpp>
 #include <DataManager.h>
-#include <VRenderView.h>
 #include <VRenderGLView.h>
 #include <VRenderFrame.h>
 #include <Calculate/BackgStat.h>

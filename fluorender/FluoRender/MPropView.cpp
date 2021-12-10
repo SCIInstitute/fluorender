@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include "MPropView.h"
 #include "DataManager.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MPropView, wxPanel)

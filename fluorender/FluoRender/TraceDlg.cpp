@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include "TraceDlg.h"
 #include "DataManager.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>

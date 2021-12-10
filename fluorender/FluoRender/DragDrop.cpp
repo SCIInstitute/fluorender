@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "DragDrop.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 
 DnDFile::DnDFile(wxWindow *frame, wxWindow *view)
 : m_frame(frame),

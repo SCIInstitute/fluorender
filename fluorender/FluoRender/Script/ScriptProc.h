@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 class VRenderFrame;
-class VRenderView;
 class VRenderGLView;
 class VolumeData;
 namespace flrd

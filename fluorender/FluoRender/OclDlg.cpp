@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include "OclDlg.h"
 #include "DataManager.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>

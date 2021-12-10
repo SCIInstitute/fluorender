@@ -187,7 +187,6 @@ public:
 	
 	//views
 	int GetViewNum();
-	//vector <VRenderView*>* GetViewList();
 	VRenderGLView* GetView(int index);
 	VRenderGLView* GetView(wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);

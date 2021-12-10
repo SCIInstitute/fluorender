@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderView;
 class Annotations;
 class APropView : public wxPanel
 {

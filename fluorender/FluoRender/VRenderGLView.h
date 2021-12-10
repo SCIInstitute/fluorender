@@ -351,13 +351,16 @@ public:
 	fluo::Color GetBackgroundColor();
 	fluo::Color GetTextColor();
 	void SetBackgroundColor(fluo::Color &color);
-	void SetGradBg(bool val);
+	void SetGradBg(bool val) { m_grad_bg = val; }
+	void SetPointVolumeMode(int val) { m_point_volume_mode = val; }
+	void SetRulerUseTransf(bool val) { m_ruler_use_transf = val; }
+	void SetRulerTimeDep(bool val) { m_ruler_time_dep = val; }
 
 	//disply modes
 	int GetDrawType() { return m_draw_type; }
 	void SetVolMethod(int method);
 	int GetVolMethod() { return m_vol_method; }
-	void SetFog(bool b = true) { m_use_fog = b; }
+	void SetFog(bool b = true);
 	bool GetFog() { return m_use_fog; }
 	void SetFogIntensity(double i) { m_fog_intensity = i; }
 	double GetFogIntensity() { return m_fog_intensity; }

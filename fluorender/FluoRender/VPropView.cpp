@@ -920,6 +920,7 @@ void VPropView::InitVRenderViews(unsigned int type)
 			if (view)
 			{
 				view->InitView(type);
+				view->m_vrv->UpdateView();
 			}
 		}
 	}

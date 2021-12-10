@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VMovieView.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 #include "RecorderDlg.h"
 #include <tiffio.h>
 #include <wx/aboutdlg.h>

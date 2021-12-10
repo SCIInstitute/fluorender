@@ -26,7 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VRenderFrame.h"
+#include "compatibility.h"
 #include "DragDrop.h"
+#include <Formats/png_resource.h>
+#include <Formats/msk_writer.h>
+#include <Formats/msk_reader.h>
+#include <Converters/VolumeMeshConv.h>
+#include <Selection/VolumeSelector.h>
+#include <FLIVR/TextRenderer.h>
+#include <FLIVR/VertexArray.h>
+#include <FLIVR/Framebuffer.h>
+#include <FLIVR/VolShader.h>
+#include <FLIVR/SegShader.h>
+#include <FLIVR/VolCalShader.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -34,18 +46,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/progdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
-#include "Formats/png_resource.h"
-#include "Formats/msk_writer.h"
-#include "Formats/msk_reader.h"
-#include "Converters/VolumeMeshConv.h"
-#include <Selection/VolumeSelector.h>
-#include "compatibility.h"
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -393,7 +393,8 @@ VRenderFrame::VRenderFrame(
 
 	//create render view
 	VRenderView *vrv = new VRenderView(this);
-	vrv->InitView();
+	vrv->m_glview->InitView();
+	vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
 
 #ifdef _WIN32
@@ -471,16 +472,16 @@ VRenderFrame::VRenderFrame(
 	int c4 = m_setting_dlg->GetWavelengthColor(4);
 	if (c1 && c2 && c3 && c4)
 		m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
-	m_vrv_list[0]->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	m_vrv_list[0]->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	m_vrv_list[0]->SetAdaptive(m_setting_dlg->GetMouseInt());
-	m_vrv_list[0]->SetGradBg(m_setting_dlg->GetGradBg());
 	m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-	m_vrv_list[0]->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	m_vrv_list[0]->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	m_vrv_list[0]->SetStereo(m_setting_dlg->GetStereo());
-	m_vrv_list[0]->SetEyeDist(m_setting_dlg->GetEyeDist());
+	m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
+	m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
+	m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
+	m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
 	if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	m_time_id = m_setting_dlg->GetTimeId();
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
@@ -905,10 +906,10 @@ VRenderFrame::~VRenderFrame()
 	flvr::TextureRenderer::cal_shader_factory_.clear();
 	flvr::TextureRenderer::img_shader_factory_.clear();
 	flvr::TextRenderer::text_texture_manager_.clear();
-	for (int i=0; i<(int)m_vrv_list.size(); i++)
+	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
-		if (vrv) vrv->Clear();
+		VRenderGLView* view = GetView(i);
+		if (view) view->ClearAll();
 	}
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
@@ -949,39 +950,42 @@ wxString VRenderFrame::CreateView(int row)
 		vrv = new VRenderView(this);
 	}
 
-	if (vrv)
+	if (!vrv)
+		return "NO_NAME";
+	VRenderGLView* view = vrv->m_glview;
+	if (!view)
+		return "NO_NAME";
+
+	m_vrv_list.push_back(vrv);
+	if (m_movie_view)
+		m_movie_view->AddView(vrv->GetName());
+	if (m_setting_dlg->GetTestMode(3))
 	{
-		m_vrv_list.push_back(vrv);
-		if (m_movie_view)
-			m_movie_view->AddView(vrv->GetName());
-		if (m_setting_dlg->GetTestMode(3))
-		{
-			vrv->m_glview->m_test_wiref = true;
-			vrv->m_glview->m_draw_bounds = true;
-			vrv->m_glview->m_draw_grid = true;
-		}
-		vrv->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-		vrv->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-		vrv->SetAdaptive(m_setting_dlg->GetMouseInt());
-		vrv->SetGradBg(m_setting_dlg->GetGradBg());
-		vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-		vrv->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-		vrv->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-		vrv->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+		view->m_test_wiref = true;
+		view->m_draw_bounds = true;
+		view->m_draw_grid = true;
 	}
+	view->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	view->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	view->SetAdaptive(m_setting_dlg->GetMouseInt());
+	view->SetGradBg(m_setting_dlg->GetGradBg());
+	view->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	view->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	view->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 
 	//reset gl
-	for (int i = 0; i < m_vrv_list.size(); ++i)
+	for (int i = 0; i < GetViewNum(); ++i)
 	{
-		if (m_vrv_list[i])
-			m_vrv_list[i]->m_glview->m_set_gl = false;
+		if (GetView(i))
+			GetView(i)->m_set_gl = false;
 	}
 
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
 
 	//set view default settings
-	if (m_adjust_view && vrv)
+	if (m_adjust_view)
 	{
 		/*Color gamma, brightness, hdr;
 		bool sync_r, sync_g, sync_b;
@@ -989,27 +993,27 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->m_glview->SetGamma(gamma);
 		vrv->m_glview->SetBrightness(brightness);
 		vrv->m_glview->SetHdr(hdr);*/
-		vrv->m_glview->SetSyncR(true);
-		vrv->m_glview->SetSyncG(true);
-		vrv->m_glview->SetSyncB(true);
+		view->SetSyncR(true);
+		view->SetSyncG(true);
+		view->SetSyncB(true);
 	}
 
 	//add volumes
-	if (m_vrv_list.size() > 0 && vrv)
+	if (GetViewNum() > 0)
 	{
-		VRenderView* vrv0 = m_vrv_list[0];
-		if (vrv0)
+		VRenderGLView* view0 = GetView(0);
+		if (view0)
 		{
-			for (int i = 0; i < vrv0->GetDispVolumeNum(); ++i)
+			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
 			{
-				VolumeData* vd = vrv0->GetDispVolumeData(i);
+				VolumeData* vd = view0->GetDispVolumeData(i);
 				if (vd)
 				{
 					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
 
 					if (vd_add)
 					{
-						int chan_num = vrv->GetAny();
+						int chan_num = view->GetAny();
 						fluo::Color color(1.0, 1.0, 1.0);
 						if (chan_num == 0)
 							color = fluo::Color(1.0, 0.0, 0.0);
@@ -1021,21 +1025,19 @@ wxString VRenderFrame::CreateView(int row)
 						if (chan_num >= 0 && chan_num < 3)
 							vd_add->SetColor(color);
 
-						vrv->AddVolumeData(vd_add);
+						view->AddVolumeData(vd_add);
 					}
 				}
 			}
 		}
 		//update
-		vrv->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		vrv->UpdateView();
 	}
 
 	UpdateTree();
 
-	if (vrv)
-		return vrv->GetName();
-	else
-		return wxString("NO_NAME");
+	return vrv->GetName();
 }
 
 //views
@@ -1791,9 +1793,9 @@ void VRenderFrame::UpdateTreeIcons()
 	wxTreeItemId root = treectrl->GetRootItem();
 	wxTreeItemIdValue ck_view;
 	int counter = 0;
-	for (i=0; i<(int)m_vrv_list.size(); i++)
+	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderView *vrv = m_vrv_list[i];
+		VRenderGLView *view = GetView(i);
 		wxTreeItemId vrv_item;
 		if (i==0)
 			vrv_item = treectrl->GetFirstChild(root, ck_view);
@@ -1803,12 +1805,12 @@ void VRenderFrame::UpdateTreeIcons()
 		if (!vrv_item.IsOk())
 			continue;
 
-		m_tree_panel->SetViewItemImage(vrv_item, vrv->GetDraw());
+		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
 
 		wxTreeItemIdValue ck_layer;
-		for (j=0; j<vrv->GetLayerNum(); j++)
+		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = vrv->GetLayer(j);
+			TreeLayer* layer = view->GetLayer(j);
 			wxTreeItemId layer_item;
 			if (j==0)
 				layer_item = treectrl->GetFirstChild(vrv_item, ck_layer);
@@ -1905,13 +1907,13 @@ void VRenderFrame::UpdateTreeColors()
 {
 	int i, j, k;
 	int counter = 0;
-	for (i=0 ; i<(int)m_vrv_list.size() ; i++)
+	for (i=0 ; i<GetViewNum() ; i++)
 	{
-		VRenderView *vrv = m_vrv_list[i];
+		VRenderGLView *view = GetView(i);
 
-		for (j=0; j<vrv->GetLayerNum(); j++)
+		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = vrv->GetLayer(j);
+			TreeLayer* layer = view->GetLayer(j);
 			switch (layer->IsA())
 			{
 			case 0://root
@@ -2033,7 +2035,7 @@ void VRenderFrame::UpdateTree(wxString name)
 		int j, k;
 
 		wxString view_name = view->m_vrv->GetName();
-		view->m_vrv->OrganizeLayers();
+		view->OrganizeLayers();
 		wxTreeItemId vrv_item = m_tree_panel->AddViewItem(view_name);
 		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
 		if (name == view_name)
@@ -2524,10 +2526,10 @@ void VRenderFrame::DeleteVRenderView(int i)
 		int j;
 		wxString str = m_vrv_list[i]->GetName();
 
-		for (j=0 ; j<m_vrv_list[i]->GetAllVolumeNum() ; j++)
-			m_vrv_list[i]->GetAllVolumeData(j)->SetDisp(true);
-		for (j=0 ; j<m_vrv_list[i]->GetMeshNum() ; j++)
-			m_vrv_list[i]->GetMeshData(j)->SetDisp(true);
+		for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
+			GetView(i)->GetAllVolumeData(j)->SetDisp(true);
+		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
+			GetView(i)->GetMeshData(j)->SetDisp(true);
 		VRenderView* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
@@ -3500,7 +3502,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
-	m_vrv_list[0]->Clear();
+	GetView(0)->ClearAll();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	//VRenderView::ResetID();
