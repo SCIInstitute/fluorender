@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class VolumeData;
 namespace flrd
 {
@@ -128,7 +128,7 @@ public:
 	BrushToolDlg(VRenderFrame* frame);
 	~BrushToolDlg();
 
-	void GetSettings(VRenderView* vrv);
+	void GetSettings(VRenderGLView* view);
 
 	//set the brush icon down
 	void SelectBrush(int id);
@@ -147,7 +147,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderView *m_view;
+	VRenderGLView *m_view;
 	flrd::VolumeSelector *m_selector;
 
 	//max volume value

@@ -226,9 +226,11 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 		{
 			wxMenu menu;
 			wxMenu *add_to_menu = new wxMenu;
-			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				add_to_menu->Append(Menu_View_start + i, (*m_frame->GetViewList())[i]->GetName());
+				VRenderGLView* view = m_frame->GetView(i);
+				add_to_menu->Append(Menu_View_start + i,
+					view->m_vrv->GetName());
 			}
 
 			menu.Append(Menu_AddTo, "Add to", add_to_menu);
@@ -295,21 +297,21 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 	if (m_frame)
 	{
+		VRenderGLView* view = m_frame->GetView(menu_index);
 		if (GetItemText(item) == "Volume")
 		{
 			name = GetText(item, 1);
 			VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 			if (vd)
 			{
-				VRenderView* view = (*m_frame->GetViewList())[menu_index];
 				if (view)
 				{
 					VolumeData* vd_add = vd;
 
-					for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+					for (int i = 0; i < m_frame->GetViewNum(); ++i)
 					{
-						VRenderView* vrv = (*m_frame->GetViewList())[i];
-						if (vrv && vrv->GetVolumeData(name))
+						VRenderGLView* v = m_frame->GetView(i);
+						if (v && v->GetVolumeData(name))
 						{
 							vd_add = m_frame->GetDataManager()->DuplicateVolumeData(vd);
 							break;
@@ -349,7 +351,6 @@ void DataListCtrl::AddToView(int menu_index, long item)
 			MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
 			if (md)
 			{
-				VRenderView* view = (*m_frame->GetViewList())[menu_index];
 				if (view)
 				{
 					int chan_num = view->GetAny();
@@ -364,7 +365,6 @@ void DataListCtrl::AddToView(int menu_index, long item)
 			Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
 			if (ann)
 			{
-				VRenderView* view = (*m_frame->GetViewList())[menu_index];
 				if (view)
 				{
 					int chan_num = view->GetAny();
@@ -375,11 +375,14 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		}
 
 		//update
-		if (view_empty)
-			(*m_frame->GetViewList())[menu_index]->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-		else
-			(*m_frame->GetViewList())[menu_index]->InitView(INIT_BOUNDS | INIT_CENTER);
-		(*m_frame->GetViewList())[menu_index]->RefreshGL();
+		if (view)
+		{
+			if (view_empty)
+				view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+			else
+				view->InitView(INIT_BOUNDS | INIT_CENTER);
+			view->RefreshGL(39);
+		}
 		m_frame->UpdateTree(name);
 	}
 }
@@ -622,7 +625,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				m_vd = m_frame->GetDataManager()->GetVolumeData(name);
 			else
 				return;
-			fluo::Quaternion q = m_frame->GetView(0)->m_glview->GetClipRotation();
+			fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
 			if (m_vd)
 				m_vd->SetResize(0, 0, 0, 0);
 
@@ -733,7 +736,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 
 			if (m_frame)
 			{
-				fluo::Quaternion q = m_frame->GetView(0)->m_glview->GetClipRotation();
+				fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
 				VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 				if (vd)
 				{
@@ -777,7 +780,7 @@ void DataListCtrl::OnAct(wxListEvent &event)
 		wxLIST_STATE_SELECTED);
 	if (m_frame && item != -1)
 	{
-		index = m_frame->GetViewList()->size() - 1;
+		index = m_frame->GetViewNum() - 1;
 		AddToView(index, item);
 	}
 }
@@ -877,9 +880,9 @@ void DataListCtrl::DeleteSelection()
 				name = GetText(item, 1);
 				int i;
 				//from view
-				for (i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderView* view = (*m_frame->GetViewList())[i];
+					VRenderGLView* view = m_frame->GetView(i);
 					if (view)
 					{
 						view->RemoveVolumeDataDup(name);
@@ -901,9 +904,9 @@ void DataListCtrl::DeleteSelection()
 				name = GetText(item, 1);
 				int i;
 				//from view
-				for (i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderView* view = (*m_frame->GetViewList())[i];
+					VRenderGLView* view = m_frame->GetView(i);
 					if (view)
 					{
 						view->RemoveMeshData(name);
@@ -925,9 +928,9 @@ void DataListCtrl::DeleteSelection()
 				name = GetText(item, 1);
 				int i;
 				//from view
-				for (i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderView* view = (*m_frame->GetViewList())[i];
+					VRenderGLView* view = m_frame->GetView(i);
 					if (view)
 						view->RemoveAnnotations(name);
 				}
@@ -959,9 +962,9 @@ void DataListCtrl::DeleteAll()
 			name = GetText(item, 1);
 			int i;
 			//from view
-			for (i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = (*m_frame->GetViewList())[i];
+				VRenderGLView* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveVolumeDataDup(name);
 			}
@@ -979,9 +982,9 @@ void DataListCtrl::DeleteAll()
 			name = GetText(item, 1);
 			int i;
 			//from view
-			for (i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = (*m_frame->GetViewList())[i];
+				VRenderGLView* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveMeshData(name);
 			}
@@ -999,9 +1002,9 @@ void DataListCtrl::DeleteAll()
 			name = GetText(item, 1);
 			int i;
 			//from view
-			for (i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = (*m_frame->GetViewList())[i];
+				VRenderGLView* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveAnnotations(name);
 			}

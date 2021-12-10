@@ -486,12 +486,12 @@ BrushToolDlg::~BrushToolDlg()
 		delete m_aligner;
 }
 
-void BrushToolDlg::GetSettings(VRenderView* vrv)
+void BrushToolDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv)
+	if (!view)
 		return;
-	m_view = vrv;
-	m_aligner->SetView(m_view->m_glview);
+	m_view = view;
+	m_aligner->SetView(m_view);
 	m_selector = m_view->GetVolumeSelector();
 	if (!m_selector)
 		return;
@@ -722,7 +722,7 @@ void BrushToolDlg::OnGrow(wxCommandEvent &event)
 	else
 	{
 		if (m_view)
-			m_view->SetIntMode();
+			m_view->SetIntMode(1);
 	}
 	if (m_frame && m_frame->GetTree())
 		m_frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
@@ -782,7 +782,7 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 	if (m_selector)
 		m_selector->UndoMask();
 	if (m_view)
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	UpdateUndoRedo();
 }
 
@@ -791,7 +791,7 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 	if (m_selector)
 		m_selector->RedoMask();
 	if (m_view)
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	UpdateUndoRedo();
 }
 
@@ -871,7 +871,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -902,7 +902,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -932,7 +932,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -961,7 +961,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -989,7 +989,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1034,7 +1034,7 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 	{
 		m_selector->SetBrushSize(val, -1.0);
 		if (m_view->GetIntMode()==2)
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 	}
 }
 
@@ -1056,7 +1056,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 		{
 			m_selector->SetUseBrushSize2(true);
 			m_selector->SetBrushSize(val1, val2);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 	else
@@ -1067,7 +1067,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 		{
 			m_selector->SetUseBrushSize2(false);
 			m_selector->SetBrushSize(val1, val2);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1092,7 +1092,7 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	{
 		m_selector->SetBrushSize(-1.0, val);
 		if (m_view->GetIntMode()==2)
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 	}
 }
 
@@ -1230,7 +1230,7 @@ void BrushToolDlg::UpdateSize()
 	wxString unit;
 	if (m_view)
 	{
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			unit = L"nm\u00B3";
@@ -1290,7 +1290,7 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 {
 	if (m_view)
-		m_view->m_glview->m_paint_count = m_auto_update_btn->GetValue();
+		m_view->m_paint_count = m_auto_update_btn->GetValue();
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)

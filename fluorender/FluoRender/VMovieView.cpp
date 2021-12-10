@@ -527,7 +527,7 @@ void VMovieView::GetSettings()
 	SetRotAxis(m_rot_axis);
 	SetRotDeg(m_rot_deg);
 	SetCurrentTime(m_start_frame);
-	SetCrop(m_view->GetFrameEnabled());
+	SetCrop(m_view->m_draw_frame);
 	AddScriptToList();
 	GetScriptSettings();
 	if (m_advanced_movie)
@@ -541,12 +541,12 @@ void VMovieView::GetScriptSettings()
 		return;
 
 	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
-	m_view->m_glview->SetRun4DScript(run_script);
+	m_view->SetRun4DScript(run_script);
 	m_run_script_chk->SetValue(run_script);
 	wxString script_file =
 		m_frame->GetSettingDlg()->GetScriptFile();
 	m_script_file_text->SetValue(script_file);
-	m_view->m_glview->SetScriptFile(script_file);
+	m_view->SetScriptFile(script_file);
 	//highlight if builtin
 	wxArrayString list;
 	if (GetScriptFiles(list))
@@ -633,10 +633,11 @@ void VMovieView::Init()
 	if (!m_frame) return;
 	int i = 0;
 	m_views_cmb->Clear();
-	for (i = 0; i < m_frame->GetViewNum(); i++) {
-		VRenderView* vrv = m_frame->GetView(i);
-		if (vrv && m_views_cmb)
-			m_views_cmb->Append(vrv->GetName());
+	for (i = 0; i < m_frame->GetViewNum(); i++)
+	{
+		VRenderGLView* view = m_frame->GetView(i);
+		if (view && m_views_cmb)
+			m_views_cmb->Append(view->m_vrv->GetName());
 	}
 	if (i)
 		m_views_cmb->Select(0);
@@ -744,7 +745,7 @@ void VMovieView::SetCrop(bool value)
 	else
 		m_view->DisableFrame();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void VMovieView::UpdateCrop()
@@ -755,7 +756,7 @@ void VMovieView::UpdateCrop()
 	m_view->SetFrame(int(m_crop_x - m_crop_w / 2.0 + 0.5),
 		int(m_crop_y - m_crop_h / 2.0 + 0.5), m_crop_w, m_crop_h);
 	if (m_crop)
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 }
 
 void VMovieView::OnTimer(wxTimerEvent& event)
@@ -776,7 +777,8 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		if (!m_view) return;
-		m_view->RefreshGL(false, false);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39, false, false);
 		return;
 	}
 
@@ -1043,12 +1045,12 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	bool run_script = m_run_script_chk->GetValue();
 	if (m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRunScript(run_script);
-	m_view->m_glview->SetRun4DScript(run_script);
+	m_view->SetRun4DScript(run_script);
 	wxString str = m_script_file_text->GetValue();
 	if (!str.IsEmpty())
 	{
 		m_frame->GetSettingDlg()->SetScriptFile(str);
-		m_view->m_glview->SetScriptFile(str);
+		m_view->SetScriptFile(str);
 	}
 	if (run_script)
 	{
@@ -1060,7 +1062,7 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 		m_notebook->SetPageText(4, "4D Script");
 	}
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
@@ -1070,7 +1072,7 @@ void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
 
 	wxString str = m_script_file_text->GetValue();
 	m_frame->GetSettingDlg()->SetScriptFile(str);
-	m_view->m_glview->SetScriptFile(str);
+	m_view->SetScriptFile(str);
 }
 
 void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
@@ -1091,7 +1093,7 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 		wxString file = fopendlg->GetPath();
 		if (m_frame && m_frame->GetSettingDlg())
 			m_frame->GetSettingDlg()->SetScriptFile(file);
-		m_view->m_glview->SetScriptFile(file);
+		m_view->SetScriptFile(file);
 		m_script_file_text->SetValue(file);
 
 		//enable script if not
@@ -1165,7 +1167,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	if (!m_frame || !m_view)
 		return;
 
-	m_view->m_glview->SetLockCamObject(false);
+	m_view->SetLockCamObject(false);
 	//advanced options
 	if (m_current_page == 1)
 	{
@@ -1173,10 +1175,11 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
 			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
-				m_view->m_glview->SetLockCamObject(true);
+				m_view->SetLockCamObject(true);
 			int end_frame = int(interpolator->GetLastT());
 			m_view->SetParams(pcnt * end_frame);
-			m_view->RefreshGL(false);
+			m_view->SetInteractive(false);
+			m_view->RefreshGL(39);
 			return;
 		}
 	}
@@ -1209,7 +1212,8 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 		m_view->SetRotations(rval[0], rval[1], rval[2]);
 	}
 
-	m_view->RefreshGL(false);
+	m_view->SetInteractive(false);
+	m_view->RefreshGL(39);
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event)
@@ -1313,8 +1317,7 @@ void VMovieView::WriteFrameToFile(int total_frames)
 	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
 	int x, y, w, h;
 	void* image = 0;
-	m_view->m_glview->ReadPixels(chann, fp32,
-		x, y, w, h, &image);
+	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
 
 	string str_fn = outputfilename.ToStdString();
 	if (bmov)

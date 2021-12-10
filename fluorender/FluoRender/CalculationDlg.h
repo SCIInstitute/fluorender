@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class VolumeData;
 class DataGroup;
 class CalculationDlg : public wxPanel
@@ -64,7 +64,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderView *m_cur_view;
+	VRenderGLView *m_view;
 	//current volume
 	VolumeData *m_vol1;
 	VolumeData *m_vol2;

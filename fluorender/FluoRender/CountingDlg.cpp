@@ -170,16 +170,15 @@ void CountingDlg::LoadDefault()
 	}
 }
 
-void CountingDlg::GetSettings(VRenderView* vrv)
+void CountingDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv)
+	if (!view)
 		return;
+	m_view = view;
 
 	VolumeData* sel_vol = 0;
 	if (m_frame)
 		sel_vol = m_frame->GetCurSelVol();
-
-	m_view = vrv;
 }
 
 void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)
@@ -195,7 +194,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -211,7 +210,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	flrd::CelpList *list = ca.GetCelpList();
 	if (!list || list->empty())
@@ -250,7 +249,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		wxString vol_unit_text;
 		vol_unit_text = wxString::Format("%.0f", vol_unit);
 		vol_unit_text += " ";
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			vol_unit_text += L"nm\u00B3";

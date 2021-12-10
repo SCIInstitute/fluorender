@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class MeshData;
 class MPropView: public wxPanel
 {
@@ -68,7 +68,8 @@ public:
 		const wxString& name = "MPropView");
 	~MPropView();
 
-	void SetMeshData(MeshData* md, VRenderView* vrv);
+	void SetView(VRenderGLView* view);
+	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
 	void RefreshVRenderViews(bool tree=false);
 
@@ -76,7 +77,7 @@ public:
 
 private:
 	VRenderFrame* m_frame;
-	VRenderView* m_vrv;
+	VRenderGLView* m_view;
 	MeshData* m_md;
 
 	wxCheckBox *m_light_chk;

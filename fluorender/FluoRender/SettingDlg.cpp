@@ -1625,13 +1625,13 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
 			{
-				vrv->SetAdaptive(m_mouse_int);
-				vrv->RefreshGL();
+				view->SetAdaptive(m_mouse_int);
+				view->RefreshGL(39);
 			}
 		}
 	}
@@ -1657,13 +1657,13 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
 			{
-				vrv->SetPeelingLayers(ival);
-				vrv->RefreshGL();
+				view->SetPeelingLayers(ival);
+				view->RefreshGL(39);
 			}
 		}
 	}
@@ -1678,13 +1678,13 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
 			{
-				vrv->SetBlendSlices(m_micro_blend);
-				vrv->RefreshGL();
+				view->SetBlendSlices(m_micro_blend);
+				view->RefreshGL(39);
 			}
 		}
 	}
@@ -1716,11 +1716,11 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-				vrv->RefreshGL();
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+				view->RefreshGL(39);
 		}
 	}
 }
@@ -1743,11 +1743,11 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-				vrv->RefreshGL();
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+				view->RefreshGL(39);
 		}
 	}
 }
@@ -1813,13 +1813,13 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
 			{
-				vrv->SetGradBg(m_grad_bg);
-				vrv->RefreshGL();
+				view->SetGradBg(m_grad_bg);
+				view->RefreshGL(39);
 			}
 		}
 	}
@@ -1863,11 +1863,11 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-				vrv->m_pin_scale_thresh = m_pin_threshold;
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+				view->m_vrv->m_pin_scale_thresh = m_pin_threshold;
 		}
 	}
 }
@@ -1881,9 +1881,9 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
-		VRenderView* view = m_frame->GetView(0);
+		VRenderGLView* view = m_frame->GetView(0);
 		if (view)
-			view->RefreshGL();
+			view->RefreshGL(39);
 	}
 }
 
@@ -1893,11 +1893,11 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 	m_stereo = m_stereo_chk->GetValue();
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
-		VRenderView* view = m_frame->GetView(0);
+		VRenderGLView* view = m_frame->GetView(0);
 		if (view)
 		{
 			view->SetStereo(m_stereo);
-			view->RefreshGL();
+			view->RefreshGL(39);
 		}
 	}
 }
@@ -1920,11 +1920,11 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 
 	if (m_frame && 0 < m_frame->GetViewNum())
 	{
-		VRenderView* view = m_frame->GetView(0);
+		VRenderGLView* view = m_frame->GetView(0);
 		if (view)
 		{
 			view->SetEyeDist(m_eye_dist);
-			view->RefreshGL();
+			view->RefreshGL(39);
 		}
 	}
 }
@@ -2152,11 +2152,11 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-				vrv->RefreshGL();
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+				view->RefreshGL(39);
 		}
 	}
 }
@@ -2177,11 +2177,11 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		{
 			flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
 			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderView* vrv = (*m_frame->GetViewList())[i];
-				if (vrv)
-					vrv->RefreshGL();
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view)
+					view->RefreshGL(39);
 			}
 		}
 	}
@@ -2198,11 +2198,11 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 		if (m_frame)
 		{
 			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderView* vrv = (*m_frame->GetViewList())[i];
-				if (vrv)
-					vrv->RefreshGL();
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view)
+					view->RefreshGL(39);
 			}
 		}
 	}
@@ -2213,11 +2213,11 @@ void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 	m_text_color = m_text_color_cmb->GetCurrentSelection();
 	if (m_frame)
 	{
-		for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-				vrv->RefreshGL();
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
+				view->RefreshGL(39);
 		}
 	}
 }
@@ -2241,11 +2241,11 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 		m_line_width = ival;
 		if (m_frame)
 		{
-			for (int i = 0; i < (int)m_frame->GetViewList()->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderView* vrv = (*m_frame->GetViewList())[i];
-				if (vrv)
-					vrv->RefreshGL();
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view)
+					view->RefreshGL(39);
 			}
 		}
 	}

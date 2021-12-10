@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class DataGroup;
 class ColocalizationDlg : public wxPanel
 {
@@ -65,9 +65,9 @@ public:
 	ColocalizationDlg(VRenderFrame* frame);
 	~ColocalizationDlg();
 
-	void SetView(VRenderView* vrv)
+	void SetView(VRenderGLView* view)
 	{
-		m_view = vrv;
+		m_view = view;
 	}
 	void SetGroup(DataGroup* group)
 	{
@@ -97,7 +97,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderView* m_view;
+	VRenderGLView* m_view;
 	DataGroup *m_group;
 
 	wxString m_output_file;

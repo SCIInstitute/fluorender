@@ -365,7 +365,6 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_calculator.SetView(this);
 	m_calculator.SetVolumeSelector(&m_selector);
 	m_scriptor.SetFrame(m_frame);
-	m_scriptor.SetVrv(m_vrv);
 	m_scriptor.SetView(this);
 }
 
@@ -2117,7 +2116,7 @@ void VRenderGLView::ChangeBrushSize(int value)
 {
 	m_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
 	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+		m_frame->GetBrushToolDlg()->GetSettings(this);
 }
 
 //calculations
@@ -5252,11 +5251,10 @@ void VRenderGLView::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = m_frame->GetView(i);
-				if (view && view->m_glview &&
-					view->m_glview != this)
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view && view != this)
 				{
-					view->m_glview->m_set_gl = false;
+					view->m_set_gl = false;
 				}
 			}
 		}
@@ -5403,12 +5401,11 @@ void VRenderGLView::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = m_frame->GetView(i);
-				if (view && view->m_glview &&
-					view->m_glview != this)
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view && view != this)
 				{
-					view->m_glview->SetRotations(m_rotx, m_roty, m_rotz, true);
-					view->RefreshGL();
+					view->SetRotations(m_rotx, m_roty, m_rotz, true);
+					view->RefreshGL(39);
 				}
 			}
 		}

@@ -1411,11 +1411,11 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void ComponentDlg::SetView(VRenderView* vrv)
+void ComponentDlg::SetView(VRenderGLView* view)
 {
-	m_view = vrv;
+	m_view = view;
 	if (m_view)
-		m_aligner.SetView(m_view->m_glview);
+		m_aligner.SetView(m_view);
 }
 
 //comp generate page
@@ -2235,8 +2235,8 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
 	int shuffle = 0;
-	if (m_view && m_view->m_glview->m_cur_vol)
-		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
+	if (m_view && m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
 	wxString str = m_comp_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2328,7 +2328,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2342,19 +2342,19 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		comp_selector.SetAnalyzer(&m_comp_analyzer);
 		comp_selector.Exclusive();
 
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 
 		//frame
 		if (m_frame)
 		{
 			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_glview->m_paint_count)
+				if (m_view->m_paint_count)
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_glview->m_paint_colocalize)
+				m_view->m_paint_colocalize)
 				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
@@ -2376,7 +2376,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2390,19 +2390,19 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	comp_selector.SetAnalyzer(&m_comp_analyzer);
 	comp_selector.Select(get_all);
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
 	if (m_frame)
 	{
 		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_glview->m_paint_count)
+			if (m_view->m_paint_count)
 				m_frame->GetBrushToolDlg()->Update(0);
 			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
 		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_glview->m_paint_colocalize)
+			m_view->m_paint_colocalize)
 			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
@@ -2413,23 +2413,23 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
 	if (m_frame)
 	{
 		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_glview->m_paint_count)
+			if (m_view->m_paint_count)
 				m_frame->GetBrushToolDlg()->Update(0);
 			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
 		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_glview->m_paint_colocalize)
+			m_view->m_paint_colocalize)
 			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
@@ -2440,11 +2440,11 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
 	if (m_frame && m_frame->GetBrushToolDlg())
@@ -2457,20 +2457,20 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
 	vd->IncShuffle();
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 //modify
 void ComponentDlg::OnNewIDText(wxCommandEvent &event)
 {
 	int shuffle = 0;
-	if (m_view && m_view->m_glview->m_cur_vol)
-		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
+	if (m_view && m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
 	wxString str = m_new_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2505,10 +2505,10 @@ void ComponentDlg::OnCompNew(wxCommandEvent& event)
 	if (!m_view)
 		return;
 	flrd::ComponentEditor editor;
-	editor.SetView(m_view->m_glview);
+	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
 		m_cell_new_id_empty, false);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
@@ -2516,10 +2516,10 @@ void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 	if (!m_view)
 		return;
 	flrd::ComponentEditor editor;
-	editor.SetView(m_view->m_glview);
+	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
 		m_cell_new_id_empty, true);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
@@ -2527,10 +2527,10 @@ void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 	if (!m_view)
 		return;
 	flrd::ComponentEditor editor;
-	editor.SetView(m_view->m_glview);
+	editor.SetView(m_view);
 	editor.Replace(m_cell_new_id,
 		m_cell_new_id_empty);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
@@ -2538,9 +2538,9 @@ void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 	if (!m_view)
 		return;
 	flrd::ComponentEditor editor;
-	editor.SetVolume(m_view->m_glview->m_cur_vol);
+	editor.SetVolume(m_view->m_cur_vol);
 	editor.Clean(0);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
@@ -2548,9 +2548,9 @@ void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 	if (!m_view)
 		return;
 	flrd::ComponentEditor editor;
-	editor.SetView(m_view->m_glview);
+	editor.SetView(m_view);
 	editor.Combine();
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
@@ -2633,7 +2633,7 @@ void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	list<VolumeData*> channs;
 	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
@@ -2670,7 +2670,7 @@ void ComponentDlg::OutputMulti(int color_type)
 			}
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->GetName());
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -2679,7 +2679,7 @@ void ComponentDlg::OutputRgb(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	list<VolumeData*> channs;
 	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
@@ -2716,7 +2716,7 @@ void ComponentDlg::OutputRgb(int color_type)
 			}
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->GetName());
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -2743,7 +2743,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		type = 1;
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	Annotations* ann = new Annotations();
 	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent, type))
@@ -2759,7 +2759,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->GetName());
 		}
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -3155,7 +3155,7 @@ void ComponentDlg::Cluster()
 
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -3327,7 +3327,7 @@ void ComponentDlg::Cluster()
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
 		vd->GetVR()->clear_tex_label();
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	}
 
 	delete method;
@@ -3373,7 +3373,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3496,7 +3496,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	SetOutput(m_titles, m_values);
 
 	//update
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	if (command && m_record_cmd)
 		AddCmd("generate");
@@ -3506,7 +3506,7 @@ void ComponentDlg::Fixate(bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	vd->PushLabel(true);
@@ -3519,7 +3519,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3552,7 +3552,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	if (command && m_record_cmd)
 		AddCmd("clean");
@@ -3567,7 +3567,7 @@ void ComponentDlg::SelectFullComp()
 		if (!m_view)
 			return;
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
@@ -3585,19 +3585,19 @@ void ComponentDlg::SelectFullComp()
 		OnCompAppend(e);
 	}
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
 	if (m_frame)
 	{
 		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_glview->m_paint_count)
+			if (m_view->m_paint_count)
 				m_frame->GetBrushToolDlg()->Update(0);
 			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
 		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_glview->m_paint_colocalize)
+			m_view->m_paint_colocalize)
 			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
@@ -3616,7 +3616,7 @@ void ComponentDlg::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3645,7 +3645,7 @@ void ComponentDlg::Analyze(bool sel)
 	{
 		//invalidate label mask in gpu
 		vd->GetVR()->clear_tex_label();
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	}
 
 	if (m_comp_analyzer.GetListSize() > 10000)
@@ -3700,8 +3700,8 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 
 	fluo::Color c;
 	VolumeData* vd = 0;
-	if (m_view && m_view->m_glview->m_cur_vol)
-		vd = m_view->m_glview->m_cur_vol;
+	if (m_view && m_view->m_cur_vol)
+		vd = m_view->m_cur_vol;
 	unsigned long lval;
 	wxColor color;
 
@@ -4212,12 +4212,13 @@ void ComponentDlg::StopTimer(std::string str)
 
 void ComponentDlg::GetCompSelection()
 {
-	if (m_view && m_view->m_glview)
+	if (m_view)
 	{
 		flrd::CelpList cl;
 		GetCellList(cl);
-		m_view->m_glview->SetCellList(cl);
-		m_view->RefreshGL(false);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -4288,7 +4289,7 @@ void ComponentDlg::IncludeComps()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -4316,20 +4317,21 @@ void ComponentDlg::IncludeComps()
 		SetOutput(str1, str2);
 
 		cl.clear();
-		m_view->m_glview->SetCellList(cl);
-		m_view->RefreshGL(false);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
 
 		//frame
 		if (m_frame)
 		{
 			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_glview->m_paint_count)
+				if (m_view->m_paint_count)
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_glview->m_paint_colocalize)
+				m_view->m_paint_colocalize)
 				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
@@ -4339,7 +4341,7 @@ void ComponentDlg::ExcludeComps()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -4370,20 +4372,21 @@ void ComponentDlg::ExcludeComps()
 		SetOutput(str1, str2);
 
 		cl.clear();
-		m_view->m_glview->SetCellList(cl);
-		m_view->RefreshGL(false);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
 
 		//frame
 		if (m_frame)
 		{
 			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_glview->m_paint_count)
+				if (m_view->m_paint_count)
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
 			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_glview->m_paint_colocalize)
+				m_view->m_paint_colocalize)
 				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}

@@ -43,8 +43,7 @@ APropView::APropView(VRenderFrame* frame,
 	const wxString& name) :
 	wxPanel(parent, wxID_ANY, pos, size, style, name),
 	m_frame(frame),
-	m_ann(0),
-	m_vrv(0)
+	m_ann(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -100,10 +99,9 @@ void APropView::GetSettings()
 	}
 }
 
-void APropView::SetAnnotations(Annotations* ann, VRenderView* vrv)
+void APropView::SetAnnotations(Annotations* ann)
 {
 	m_ann = ann;
-	m_vrv = vrv;
 
 	GetSettings();
 }

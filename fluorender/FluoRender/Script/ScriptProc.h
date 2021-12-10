@@ -68,7 +68,6 @@ namespace flrd
 		~ScriptProc();
 
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetVrv(VRenderView* vrv) { m_vrv = vrv; }
 		void SetView(VRenderGLView* view) { m_view = view; }
 
 		//run 4d script
@@ -78,7 +77,6 @@ namespace flrd
 
 	private:
 		VRenderFrame* m_frame;
-		VRenderView* m_vrv;
 		VRenderGLView *m_view;
 
 		wxString m_type;

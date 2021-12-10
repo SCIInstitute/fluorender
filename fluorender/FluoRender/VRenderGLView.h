@@ -342,6 +342,10 @@ public:
 	double GetFarClip() { return m_far_clip; }
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
+	//intearctive
+	void SetInteractive(bool val) { m_interactive = val; }
+	bool GetInteractive() { return m_interactive; }
+
 	//background color
 	fluo::Color GetBackgroundColor();
 	fluo::Color GetTextColor();
@@ -623,6 +627,7 @@ public:
 	void UpdateClips();
 
 public:
+	VRenderView* m_vrv;
 	//set gl context
 	bool m_set_gl;
 	//script run
@@ -721,7 +726,6 @@ private:
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	VRenderFrame* m_frame;
-	VRenderView* m_vrv;
 	//populated lists of data
 	bool m_vd_pop_dirty;
 	vector <VolumeData*> m_vd_pop_list;

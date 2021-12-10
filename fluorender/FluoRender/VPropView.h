@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class VolumeData;
 class DataGroup;
 class VPropView: public wxPanel
@@ -129,8 +129,8 @@ public:
 	DataGroup* GetGroup();
 
 	//sync view in depth mode
-	void SetView(VRenderView* view);
-	VRenderView* GetView();
+	void SetView(VRenderGLView* view);
+	VRenderGLView* GetView();
 
 private:
 	VRenderFrame* m_frame;
@@ -139,7 +139,7 @@ private:
 	bool m_lumi_change;
 	bool m_sync_group;
 	DataGroup* m_group;
-	VRenderView* m_vrv;
+	VRenderGLView* m_view;
 	double m_max_val;
 
 	//1st line

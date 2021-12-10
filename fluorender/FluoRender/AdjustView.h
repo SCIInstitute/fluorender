@@ -54,7 +54,6 @@ DEALINGS IN THE SOFTWARE.
 	int(v*100.0+0.5)
 
 class VRenderFrame;
-class VRenderView;
 class VRenderGLView;
 class VolumeData;
 class DataGroup;
@@ -115,7 +114,7 @@ public:
 		return m_type;
 	}
 	//set view
-	void SetRenderView(VRenderView *view);
+	void SetRenderView(VRenderGLView *view);
 	VRenderGLView* GetRenderView();
 	//set volume data
 	void SetVolumeData(VolumeData* vd);
@@ -156,7 +155,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	int m_type;
-	VRenderGLView *m_glview;
+	VRenderGLView *m_view;
 	VolumeData* m_vd;
 	DataGroup* m_group;
 	bool m_link_group;

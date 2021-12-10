@@ -193,15 +193,15 @@ OclDlg::~OclDlg()
 {
 }
 
-void OclDlg::GetSettings(VRenderView* vrv)
+void OclDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv) return;
-	m_view = vrv;
+	if (!view) return;
+	m_view = view;
 
 	AddKernelsToList();
 }
 
-VRenderView* OclDlg::GetView()
+VRenderGLView* OclDlg::GetView()
 {
 	return m_view;
 }
@@ -335,7 +335,7 @@ void OclDlg::Execute()
 	wxString code = m_kernel_edit_stc->GetText();
 
 	//get volume currently selected
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	bool dup = true;
@@ -379,7 +379,7 @@ void OclDlg::Execute()
 		}
 	}
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)

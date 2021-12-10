@@ -130,7 +130,7 @@ VPropView::VPropView(VRenderFrame* frame,
 	m_lumi_change(false),
 	m_sync_group(false),
 	m_group(0),
-	m_vrv(0),
+	m_view(0),
 	m_max_val(255.0),
 	m_space_x_text(0),
 	m_space_y_text(0),
@@ -914,12 +914,12 @@ void VPropView::InitVRenderViews(unsigned int type)
 {
 	if (m_frame)
 	{
-		for (int i=0 ; i< m_frame->GetViewNum(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = m_frame->GetView(i);
-			if (vrv)
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
 			{
-				vrv->InitView(type);
+				view->InitView(type);
 			}
 		}
 	}
@@ -940,14 +940,14 @@ DataGroup* VPropView::GetGroup()
 	return m_group;
 }
 
-void VPropView::SetView(VRenderView *view)
+void VPropView::SetView(VRenderGLView *view)
 {
-	m_vrv = view;
+	m_view = view;
 }
 
-VRenderView* VPropView::GetView()
+VRenderGLView* VPropView::GetView()
 {
-	return m_vrv;
+	return m_view;
 }
 
 //1
@@ -1373,11 +1373,11 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 	m_sample_sldr->SetValue(int(val));
 
 	//set sample rate value
-	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
+	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
 	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
+			VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->SetSampleRate(srate);
 		}
@@ -2037,11 +2037,11 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth_off));
 
-	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
+	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
 	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
+			VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->SetNR(val);
 		}
@@ -2320,8 +2320,8 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 		m_group->SetInterpolate(inv);
 	else if (m_vd)
 		m_vd->SetInterpolate(inv);
-	if (m_vrv)
-		m_vrv->m_glview->SetIntp(inv);
+	if (m_view)
+		m_view->SetIntp(inv);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2399,8 +2399,8 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//interpolation
 		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
 		m_group->SetInterpolate(bVal);
-		if (m_vrv)
-			m_vrv->m_glview->SetIntp(bVal);
+		if (m_view)
+			m_view->SetIntp(bVal);
 		//MIP
 		bVal = m_options_toolbar->GetToolState(ID_MipChk);
 		m_group->SetMode(bVal?1:0);

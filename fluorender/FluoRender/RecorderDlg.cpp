@@ -48,12 +48,13 @@ END_EVENT_TABLE()
 
 KeyListCtrl::KeyListCtrl(
 	VRenderFrame* frame,
-	wxWindow* parent,
+	RecorderDlg* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
 wxListCtrl(parent, wxID_ANY, pos, size, style),
 m_frame(frame),
+m_recdlg(parent),
 m_editing_item(-1),
 m_dragging_to_item(-1)
 {
@@ -219,7 +220,7 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 	long id;
 	str.ToLong(&id);
 
-	if (!m_frame)
+	if (!m_frame || !m_recdlg)
 		return;
 	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
@@ -227,13 +228,11 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 
 	int index = interpolator->GetKeyIndex(int(id));
 	double time = interpolator->GetKeyTime(index);
-	VRenderView* view = m_frame->GetRecorderDlg()->GetView();
-	if (!view)
-		view = m_frame->GetView(0);
+	VRenderGLView* view = m_recdlg->GetView();
 	if (view)
 	{
-		view->m_glview->SetParams(time);
-		view->RefreshGL();
+		view->SetParams(time);
+		view->RefreshGL(39);
 	}
 }
 
@@ -613,9 +612,9 @@ RecorderDlg::~RecorderDlg()
 {
 }
 
-void RecorderDlg::GetSettings(VRenderView* vrv)
+void RecorderDlg::GetSettings(VRenderGLView* view)
 {
-	m_view = vrv;
+	m_view = view;
 }
 
 void RecorderDlg::SetSelection(int index)
@@ -708,7 +707,7 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 			double ct = vd->GetCurTime();
 			FlKeyCode keycode;
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->GetName();
+			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			keycode.l2 = 0;
@@ -765,7 +764,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	{
 		VolumeData* vd = mgr->GetVolumeData(i);
 		keycode.l0 = 1;
-		keycode.l0_name = m_view->GetName();
+		keycode.l0_name = m_view->m_vrv->GetName();
 		keycode.l1 = 2;
 		keycode.l1_name = vd->GetName();
 		//display
@@ -832,16 +831,13 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->GetName();
+	keycode.l0_name = m_view->m_vrv->GetName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->GetName();
+	keycode.l1_name = m_view->m_vrv->GetName();
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	//double rotx, roty, rotz;
-	//m_view->GetRotations(rotx, roty, rotz);
-	fluo::Quaternion q = m_view->m_glview->GetRotations();
-	//q.FromEuler(rotx, roty, rotz);
+	fluo::Quaternion q = m_view->GetRotations();
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	interpolator->AddKey(flkeyQ);
 	//translation
@@ -888,7 +884,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//scale
-	double scale = m_view->m_glview->m_scale_factor;
+	double scale = m_view->m_scale_factor;
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
 	interpolator->AddKey(flkey);
@@ -1011,7 +1007,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->GetName();
+			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			//display only
@@ -1086,5 +1082,5 @@ void RecorderDlg::OnCamLockCmb(wxCommandEvent &event)
 
 void RecorderDlg::OnCamLockBtn(wxCommandEvent &event)
 {
-	m_view->m_glview->SetLockCenter(m_cam_lock_type);
+	m_view->SetLockCenter(m_cam_lock_type);
 }

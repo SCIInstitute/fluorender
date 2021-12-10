@@ -134,10 +134,11 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(VRenderView* vrv)
+void NoiseCancellingDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv)
+	if (!view)
 		return;
+	m_view = view;
 
 	VolumeData* sel_vol = 0;
 	if (m_frame)
@@ -145,7 +146,6 @@ void NoiseCancellingDlg::GetSettings(VRenderView* vrv)
 	else
 		return;
 
-	m_view = vrv;
 
 	//threshold range
 	if (sel_vol)
@@ -169,7 +169,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -191,7 +191,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	comp_selector.SetAnalyzer(&ca);
 	comp_selector.CompFull();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 //threshold

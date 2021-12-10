@@ -47,7 +47,6 @@ using namespace flrd;
 
 ScriptProc::ScriptProc() :
 	m_frame(0),
-	m_vrv(0),
 	m_view(0),
 	m_rewind(false)
 {
@@ -210,8 +209,8 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 //add traces to trace dialog
 void ScriptProc::UpdateTraceDlg()
 {
-	if (m_vrv && m_frame && m_frame->GetTraceDlg())
-		m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
+	if (m_view && m_frame && m_frame->GetTraceDlg())
+		m_frame->GetTraceDlg()->GetSettings(m_view);
 }
 
 int ScriptProc::TimeMode(std::string &str)
@@ -1192,7 +1191,7 @@ void ScriptProc::RunLinkCells()
 	if (!m_frame || !m_frame->GetTraceDlg())
 		return;
 
-	m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
+	m_frame->GetTraceDlg()->GetSettings(m_view);
 	m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 

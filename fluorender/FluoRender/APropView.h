@@ -55,7 +55,7 @@ public:
 		const wxString& name = "APropView");
 	~APropView();
 
-	void SetAnnotations(Annotations* ann, VRenderView* vrv);
+	void SetAnnotations(Annotations* ann);
 	Annotations* GetAnnotations();
 	void RefreshVRenderViews(bool tree=false);
 
@@ -64,7 +64,6 @@ public:
 private:
 	VRenderFrame* m_frame;
 	Annotations* m_ann;
-	VRenderView* m_vrv;
 
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

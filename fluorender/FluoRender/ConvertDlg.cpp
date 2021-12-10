@@ -298,7 +298,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		if (md && m_frame->GetView(0))
 		{
 			m_frame->GetView(0)->AddMeshData(md);
-			m_frame->GetView(0)->RefreshGL();
+			m_frame->GetView(0)->RefreshGL(39);
 		}
 		m_frame->UpdateList();
 		m_frame->UpdateTree();

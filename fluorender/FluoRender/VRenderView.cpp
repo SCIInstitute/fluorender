@@ -130,7 +130,7 @@ VRenderView::VRenderView(VRenderFrame* frame,
 
 	m_id = m_max_id;
 	wxString name = wxString::Format("Render View:%d", m_max_id++);
-	this->SetName(name);
+	SetName(name);
 	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
 	//render view/////////////////////////////////////////////////
 	int red_bit = 8;
@@ -309,7 +309,8 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	}
 
 	CreateBar();
-	if (m_glview) {
+	if (m_glview)
+	{
 		m_glview->SetSBText(L"50 \u03BCm");
 		m_glview->SetScaleBarLen(1.);
 	}
@@ -764,8 +765,8 @@ void VRenderView::Clear()
 {
 	if (m_glview)
 		m_glview->Clear();
-	ClearVolList();
-	ClearMeshList();
+	m_glview->ClearVolList();
+	m_glview->ClearMeshList();
 }
 
 //data management

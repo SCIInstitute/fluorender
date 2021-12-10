@@ -187,9 +187,9 @@ public:
 	
 	//views
 	int GetViewNum();
-	vector <VRenderView*>* GetViewList();
-	VRenderView* GetView(int index);
-	VRenderView* GetView(wxString& name);
+	//vector <VRenderView*>* GetViewList();
+	VRenderGLView* GetView(int index);
+	VRenderGLView* GetView(wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
@@ -203,7 +203,7 @@ public:
 
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		VRenderView* vrv=0,
+		VRenderGLView* view=0,
 		DataGroup* group=0,
 		VolumeData* vd=0,
 		MeshData* md=0,
@@ -272,8 +272,8 @@ public:
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
-	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view = 0);
-	void LoadMeshes(wxArrayString files, VRenderView* view = 0);
+	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view = 0);
+	void LoadMeshes(wxArrayString files, VRenderGLView* view = 0);
 
 	//crop
 	static void SetCrop(bool value)

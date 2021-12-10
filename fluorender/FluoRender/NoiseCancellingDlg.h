@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class VolumeData;
 class DataGroup;
 class NoiseCancellingDlg : public wxPanel
@@ -53,7 +53,7 @@ public:
 	NoiseCancellingDlg(VRenderFrame* frame);
 	~NoiseCancellingDlg();
 
-	void GetSettings(VRenderView* vrv);
+	void GetSettings(VRenderGLView* view);
 	void SetDftThresh(double thresh) {m_dft_thresh = thresh;}
 	void SetDftSize(double size) {m_dft_size = size;}
 
@@ -62,7 +62,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderView *m_view;
+	VRenderGLView *m_view;
 
 	//max volume value
 	double m_max_value;

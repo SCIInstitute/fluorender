@@ -44,7 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class VolumeData;
 
 DECLARE_APP(VRenderApp)
@@ -205,8 +205,8 @@ public:
 	void GetSettings();
 	void LoadSettings(wxString filename);
 	void SaveSettings(wxString filename);
-	void SetView(VRenderView* vrv);
-	VRenderView* GetView() { return m_view; }
+	void SetView(VRenderGLView* view);
+	VRenderGLView* GetView() { return m_view; }
 
 	void GenerateComp(bool use_sel, bool command=true);
 	void Fixate(bool command = true);
@@ -245,7 +245,7 @@ public:
 
 private:
 	VRenderFrame* m_frame;
-	VRenderView* m_view;
+	VRenderGLView* m_view;
 
 	//progress
 	float m_prog_bit;

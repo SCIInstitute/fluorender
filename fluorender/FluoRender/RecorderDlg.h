@@ -35,7 +35,8 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
+class RecorderDlg;
 class KeyListCtrl : public wxListCtrl
 {
 	enum
@@ -48,7 +49,7 @@ class KeyListCtrl : public wxListCtrl
 
 public:
 	KeyListCtrl(VRenderFrame *frame,
-		wxWindow* parent,
+		RecorderDlg* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -66,6 +67,7 @@ public:
 
 private:
 	VRenderFrame* m_frame;
+	RecorderDlg* m_recdlg;
 	wxImageList *m_images;
 
 	wxTextCtrl *m_frame_text;
@@ -126,8 +128,8 @@ public:
 		wxWindow* parent);
 	~RecorderDlg();
 
-	void GetSettings(VRenderView* vrv);
-	VRenderView* GetView()
+	void GetSettings(VRenderGLView* view);
+	VRenderGLView* GetView()
 	{
 		return m_view;
 	}
@@ -148,7 +150,7 @@ private:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderView* m_view;
+	VRenderGLView* m_view;
 
 	//automatic keys
 	wxComboBox *m_auto_key_cmb;

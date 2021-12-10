@@ -80,15 +80,15 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".lif" ||
 					 suffix == ".lof")
 			{
-				vr_frame->LoadVolumes(filenames, false, (VRenderView*)m_view);
+				vr_frame->LoadVolumes(filenames, false, ((VRenderView*)m_view)->m_glview);
 			}
 			else if (suffix == ".obj")
 			{
-				vr_frame->LoadMeshes(filenames, (VRenderView*)m_view);
+				vr_frame->LoadMeshes(filenames, ((VRenderView*)m_view)->m_glview);
 			}
 			else
 			{
-				vr_frame->LoadVolumes(filenames, true, (VRenderView*)m_view);
+				vr_frame->LoadVolumes(filenames, true, ((VRenderView*)m_view)->m_glview);
 			}
 		}
 	}

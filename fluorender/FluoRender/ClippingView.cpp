@@ -487,14 +487,13 @@ void ClippingView::SetHoldPlanes(bool hold)
 	{
 		if (!m_frame)
 			return;
-		vector <VRenderView*>* vrv_list = m_frame->GetViewList();
-		for (int i = 0; i<(int)vrv_list->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			if ((*vrv_list)[i])
-			{
-				(*vrv_list)[i]->m_glview->m_draw_clip = true;
-				(*vrv_list)[i]->m_glview->m_clip_mask = -1;
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			view->m_draw_clip = true;
+			view->m_clip_mask = -1;
 		}
 	}
 }
@@ -934,15 +933,14 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	//views
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				vrv->m_glview->m_clip_mask = -1;
-				vrv->m_glview->UpdateClips();
-				vrv->RefreshGL();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			view->m_clip_mask = -1;
+			view->UpdateClips();
+			view->RefreshGL(39);
 		}
 	}
 }
@@ -1037,18 +1035,16 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				if (m_link_x)
-					vrv->m_glview->m_clip_mask = 3;
-				else
-					vrv->m_glview->m_clip_mask = 1;
-
-				vrv->m_glview->UpdateClips();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			if (m_link_x)
+				view->m_clip_mask = 3;
+			else
+				view->m_clip_mask = 1;
+			view->UpdateClips();
 		}
 	}
 	RefreshVRenderViews(true);
@@ -1151,18 +1147,16 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				if (m_link_x)
-					vrv->m_glview->m_clip_mask = 3;
-				else
-					vrv->m_glview->m_clip_mask = 2;
-
-				vrv->m_glview->UpdateClips();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			if (m_link_x)
+				view->m_clip_mask = 3;
+			else
+				view->m_clip_mask = 2;
+			view->UpdateClips();
 		}
 	}
 
@@ -1259,18 +1253,16 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				if (m_link_y)
-					vrv->m_glview->m_clip_mask = 12;
-				else
-					vrv->m_glview->m_clip_mask = 4;
-
-				vrv->m_glview->UpdateClips();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			if (m_link_y)
+				view->m_clip_mask = 12;
+			else
+				view->m_clip_mask = 4;
+			view->UpdateClips();
 		}
 	}
 
@@ -1374,18 +1366,16 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				if (m_link_y)
-					vrv->m_glview->m_clip_mask = 12;
-				else
-					vrv->m_glview->m_clip_mask = 8;
-
-				vrv->m_glview->UpdateClips();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			if (m_link_y)
+				view->m_clip_mask = 12;
+			else
+				view->m_clip_mask = 8;
+			view->UpdateClips();
 		}
 	}
 
@@ -1481,18 +1471,16 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				if (m_link_z)
-					vrv->m_glview->m_clip_mask = 48;
-				else
-					vrv->m_glview->m_clip_mask = 16;
-
-				vrv->m_glview->UpdateClips();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			if (m_link_z)
+				view->m_clip_mask = 48;
+			else
+				view->m_clip_mask = 16;
+			view->UpdateClips();
 		}
 	}
 
@@ -1596,18 +1584,16 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 
 	if (m_frame)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				if (m_link_z)
-					vrv->m_glview->m_clip_mask = 48;
-				else
-					vrv->m_glview->m_clip_mask = 32;
-
-				vrv->m_glview->UpdateClips();
-			}
+			VRenderGLView* view = m_frame->GetView(i);
+			if (!view)
+				continue;
+			if (m_link_z)
+				view->m_clip_mask = 48;
+			else
+				view->m_clip_mask = 32;
+			view->UpdateClips();
 		}
 	}
 
@@ -1662,15 +1648,13 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 	if (!m_frame)
 		return;
 
-	int i;
-	for (i=0; i< m_frame->GetViewNum(); i++)
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderView *vrv = m_frame->GetView(i);
-		if (vrv)
-		{
-			if (vrv->m_glview->m_capture)
-				return;
-		}
+		VRenderGLView* view = m_frame->GetView(i);
+		if (!view)
+			continue;
+		if (view->m_capture)
+			return;
 	}
 
 	wxPoint pos = wxGetMousePosition();
@@ -1680,14 +1664,13 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 	{
 		if (!m_draw_clip)
 		{
-			vector <VRenderView*>* vrv_list = m_frame->GetViewList();
-			for (i=0; i<(int)vrv_list->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				if ((*vrv_list)[i])
-				{
-					(*vrv_list)[i]->m_glview->m_draw_clip = true;
-					(*vrv_list)[i]->m_glview->m_clip_mask = -1;
-				}
+				VRenderGLView* view = m_frame->GetView(i);
+				if (!view)
+					continue;
+				view->m_draw_clip = true;
+				view->m_clip_mask = -1;
 			}
 			RefreshVRenderViews();
 			m_draw_clip = true;
@@ -1697,11 +1680,12 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 	{
 		if (m_draw_clip)
 		{
-			vector <VRenderView*>* vrv_list = m_frame->GetViewList();
-			for (i=0; i<(int)vrv_list->size(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				if ((*vrv_list)[i])
-					(*vrv_list)[i]->m_glview->m_draw_clip = false;
+				VRenderGLView* view = m_frame->GetView(i);
+				if (!view)
+					continue;
+				view->m_draw_clip = false;
 			}
 			RefreshVRenderViews();
 			m_draw_clip = false;
@@ -1757,42 +1741,42 @@ void ClippingView::OnLinkZCheck(wxCommandEvent &event)
 
 void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 {
-	if (m_frame)
+	if (!m_frame)
+		return;
+
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
-		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				vrv->SetClipMode(2);
-				vrv->RefreshGL();
-				double rotx, roty, rotz;
-				vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-				m_x_rot_sldr->SetValue(int(rotx));
-				m_y_rot_sldr->SetValue(int(roty));
-				m_z_rot_sldr->SetValue(int(rotz));
-				m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
-				m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
-				m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
-			}
-		}
+		VRenderGLView* view = m_frame->GetView(i);
+		if (!view)
+			continue;
+
+		view->SetClipMode(2);
+		view->RefreshGL(39);
+		double rotx, roty, rotz;
+		view->GetClippingPlaneRotations(rotx, roty, rotz);
+		m_x_rot_sldr->SetValue(int(rotx));
+		m_y_rot_sldr->SetValue(int(roty));
+		m_z_rot_sldr->SetValue(int(rotz));
+		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
+		m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
+		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
 	}
 }
 
 void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 {
-	if (m_frame)
+	if (!m_frame)
+		return;
+
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
-		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				//reset rotations
-				vrv->SetClippingPlaneRotations(0.0, 0.0, 0.0);
-				vrv->RefreshGL();
-			}
-		}
+		VRenderGLView* view = m_frame->GetView(i);
+		if (!view)
+			continue;
+
+		//reset rotations
+		view->SetClippingPlaneRotations(0.0, 0.0, 0.0);
+		view->RefreshGL(39);
 	}
 	wxString str = "0.0";
 	m_x_rot_sldr->SetValue(0);
@@ -1818,19 +1802,19 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_x_rot_sldr->SetValue(int(val));
 
-	if (m_frame)
+	if (!m_frame)
+		return;
+
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
-		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				double rotx, roty, rotz;
-				vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-				vrv->SetClippingPlaneRotations(val, roty, rotz);
-				vrv->RefreshGL();
-			}
-		}
+		VRenderGLView* view = m_frame->GetView(i);
+		if (!view)
+			continue;
+
+		double rotx, roty, rotz;
+		view->GetClippingPlaneRotations(rotx, roty, rotz);
+		view->SetClippingPlaneRotations(val, roty, rotz);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1849,19 +1833,19 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_y_rot_sldr->SetValue(int(val));
 
-	if (m_frame)
+	if (!m_frame)
+		return;
+
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
-		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				double rotx, roty, rotz;
-				vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-				vrv->SetClippingPlaneRotations(rotx, val, rotz);
-				vrv->RefreshGL();
-			}
-		}
+		VRenderGLView* view = m_frame->GetView(i);
+		if (!view)
+			continue;
+
+		double rotx, roty, rotz;
+		view->GetClippingPlaneRotations(rotx, roty, rotz);
+		view->SetClippingPlaneRotations(rotx, val, rotz);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1880,19 +1864,19 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_z_rot_sldr->SetValue(int(val));
 
-	if (m_frame)
+	if (!m_frame)
+		return;
+
+	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		for (int i=0; i<(int)m_frame->GetViewList()->size(); i++)
-		{
-			VRenderView *vrv = (*m_frame->GetViewList())[i];
-			if (vrv)
-			{
-				double rotx, roty, rotz;
-				vrv->GetClippingPlaneRotations(rotx, roty, rotz);
-				vrv->SetClippingPlaneRotations(rotx, roty, val);
-				vrv->RefreshGL();
-			}
-		}
+		VRenderGLView* view = m_frame->GetView(i);
+		if (!view)
+			continue;
+
+		double rotx, roty, rotz;
+		view->GetClippingPlaneRotations(rotx, roty, rotz);
+		view->SetClippingPlaneRotations(rotx, roty, val);
+		view->RefreshGL(39);
 	}
 }
 

@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #define PROG_SLDR_MAX	361
 
 class VRenderFrame;
-class VRenderView;
+class VRenderGLView;
 class RecorderDlg;
 class VMovieView : public wxPanel
 {
@@ -289,7 +289,7 @@ private:
 
 private:
 	VRenderFrame* m_frame;
-	VRenderView* m_view;
+	VRenderGLView* m_view;
 	RecorderDlg* m_advanced_movie;
 	int m_view_idx;//index to current renderview
 

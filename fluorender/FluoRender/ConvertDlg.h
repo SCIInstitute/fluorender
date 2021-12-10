@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderFrame;
-class VRenderView;
 class ConvertDlg : public wxPanel
 {
 public:
@@ -53,8 +52,6 @@ public:
 
 	ConvertDlg(VRenderFrame* frame);
 	~ConvertDlg();
-
-	void GetSettings(VRenderView* vrv);
 
 private:
 	VRenderFrame* m_frame;
