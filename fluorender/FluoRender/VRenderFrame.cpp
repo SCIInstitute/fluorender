@@ -2027,7 +2027,7 @@ void VRenderFrame::UpdateTree(wxString name)
 
 	for (int i = 0; i < GetViewNum(); i++)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		VRenderGLView* view = GetView(i);
 		if (!view)
 			continue;
 		int j, k;
@@ -4076,14 +4076,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			if (i>0)
 				CreateView();
-			VRenderView* vrv = GetLastView();
-			if (!vrv)
+			VRenderGLView* view = GetLastView();
+			if (!view)
 				continue;
 
-			vrv->Clear();
+			view->ClearAll();
 
 			if (i==0 && m_setting_dlg && m_setting_dlg->GetTestMode(1))
-				vrv->m_glview->m_test_speed = true;
+				view->m_test_speed = true;
 
 			wxString str;
 			//old
@@ -4099,10 +4099,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 					{
 						VolumeData* vd = m_data_mgr.GetVolumeData(str);
 						if (vd)
-							vrv->AddVolumeData(vd);
+							view->AddVolumeData(vd);
 					}
 				}
-				vrv->SetVolPopDirty();
+				view->SetVolPopDirty();
 			}
 			//meshes
 			str = wxString::Format("/views/%d/meshes", i);
@@ -4116,7 +4116,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					{
 						MeshData* md = m_data_mgr.GetMeshData(str);
 						if (md)
-							vrv->AddMeshData(md);
+							view->AddMeshData(md);
 					}
 				}
 			}
@@ -4145,7 +4145,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										VolumeData* vd = m_data_mgr.GetVolumeData(str);
 										if (vd)
-											vrv->AddVolumeData(vd);
+											view->AddVolumeData(vd);
 									}
 								}
 								break;
@@ -4155,7 +4155,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										MeshData* md = m_data_mgr.GetMeshData(str);
 										if (md)
-											vrv->AddMeshData(md);
+											view->AddMeshData(md);
 									}
 								}
 								break;
@@ -4165,7 +4165,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										Annotations* ann = m_data_mgr.GetAnnotations(str);
 										if (ann)
-											vrv->AddAnnotations(ann);
+											view->AddAnnotations(ann);
 									}
 								}
 								break;
@@ -4176,8 +4176,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										if (fconfig.Read("id", &id))
 											DataGroup::SetID(id);
-										str = vrv->AddGroup(str);
-										DataGroup* group = vrv->GetGroup(str);
+										str = view->AddGroup(str);
+										DataGroup* group = view->GetGroup(str);
 										if (group)
 										{
 											//display
@@ -4235,7 +4235,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												}
 											}
 										}
-										vrv->SetVolPopDirty();
+										view->SetVolPopDirty();
 									}
 								}
 								break;
@@ -4246,8 +4246,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										if (fconfig.Read("id", &id))
 											MeshGroup::SetID(id);
-										str = vrv->AddMGroup(str);
-										MeshGroup* group = vrv->GetMGroup(str);
+										str = view->AddMGroup(str);
+										MeshGroup* group = view->GetMGroup(str);
 										if (group)
 										{
 											//display
@@ -4272,7 +4272,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												}
 											}
 										}
-										vrv->SetMeshPopDirty();
+										view->SetMeshPopDirty();
 									}
 								}
 								break;
@@ -4289,147 +4289,147 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(wxString::Format("/views/%d/properties", i));
 				bool draw;
 				if (fconfig.Read("drawall", &draw))
-					vrv->SetDraw(draw);
+					view->SetDraw(draw);
 				//properties
 				bool persp;
 				if (fconfig.Read("persp", &persp))
-					vrv->SetPersp(persp);
+					view->SetPersp(persp);
 				else
-					vrv->SetPersp(true);
+					view->SetPersp(true);
 				bool free;
 				if (fconfig.Read("free", &free))
-					vrv->SetFree(free);
+					view->SetFree(free);
 				else
-					vrv->SetFree(false);
+					view->SetFree(false);
 				double aov;
 				if (fconfig.Read("aov", &aov))
-					vrv->SetAov(aov);
+					view->SetAov(aov);
 				double nearclip;
 				if (fconfig.Read("nearclip", &nearclip))
-					vrv->SetNearClip(nearclip);
+					view->SetNearClip(nearclip);
 				double farclip;
 				if (fconfig.Read("farclip", &farclip))
-					vrv->SetFarClip(farclip);
+					view->SetFarClip(farclip);
 				if (fconfig.Read("backgroundcolor", &str))
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->SetBackgroundColor(col);
+						view->SetBackgroundColor(col);
 					}
 				}
 				int volmethod;
 				if (fconfig.Read("volmethod", &volmethod))
-					vrv->SetVolMethod(volmethod);
+					view->SetVolMethod(volmethod);
 				int peellayers;
 				if (fconfig.Read("peellayers", &peellayers))
-					vrv->SetPeelingLayers(peellayers);
+					view->SetPeelingLayers(peellayers);
 				bool fog;
 				if (fconfig.Read("fog", &fog))
-					vrv->SetFog(fog);
+					view->SetFog(fog);
 				double fogintensity;
 				if (fconfig.Read("fogintensity", &fogintensity))
-					vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
+					view->m_vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
 				if (fconfig.Read("draw_camctr", &bVal))
 				{
-					vrv->m_glview->m_draw_camctr = bVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
+					view->m_draw_camctr = bVal;
+					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
 				}
 				if (fconfig.Read("draw_info", &iVal))
 				{
-					vrv->m_glview->m_draw_info = iVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
+					view->m_draw_info = iVal;
+					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
-					vrv->m_glview->m_draw_legend = bVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
+					view->m_draw_legend = bVal;
+					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
 				}
 
 				//camera
 				if (fconfig.Read("translation", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetTranslations(x, y, z);
+						view->SetTranslations(x, y, z);
 				}
 				if (fconfig.Read("rotation", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetRotations(x, y, z);
+						view->SetRotations(x, y, z);
 				}
 				if (fconfig.Read("zero_quat", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f%f", &x, &y, &z, &w))
-						vrv->m_glview->SetZeroQuat(x, y, z, w);
+						view->SetZeroQuat(x, y, z, w);
 				}
 				if (fconfig.Read("center", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetCenters(x, y, z);
+						view->SetCenters(x, y, z);
 				}
 				double dist;
 				if (fconfig.Read("centereyedist", &dist))
-					vrv->SetCenterEyeDist(dist);
+					view->SetCenterEyeDist(dist);
 				double radius = 5.0;
 				if (fconfig.Read("radius", &radius))
-					vrv->SetRadius(radius);
+					view->SetRadius(radius);
 				double initdist;
 				if (fconfig.Read("initdist", &initdist))
-					vrv->m_glview->SetInitDist(initdist);
+					view->SetInitDist(initdist);
 				else
-					vrv->m_glview->SetInitDist(radius/tan(d2r(vrv->GetAov()/2.0)));
+					view->SetInitDist(radius/tan(d2r(view->GetAov()/2.0)));
 				int scale_mode;
 				if (fconfig.Read("scale_mode", &scale_mode))
-					vrv->SetScaleMode(scale_mode, false);
+					view->m_vrv->SetScaleMode(scale_mode, false);
 				double scale;
 				if (!fconfig.Read("scale", &scale))
-					scale = radius / tan(d2r(vrv->GetAov() / 2.0)) / dist;
-				vrv->m_glview->m_scale_factor = scale;
-				vrv->UpdateScaleFactor(false);
+					scale = radius / tan(d2r(view->GetAov() / 2.0)) / dist;
+				view->m_scale_factor = scale;
+				view->m_vrv->UpdateScaleFactor(false);
 				bool pin_rot_center;
 				if (fconfig.Read("pin_rot_center", &pin_rot_center))
 				{
-					vrv->m_glview->m_pin_rot_center = pin_rot_center;
+					view->m_pin_rot_center = pin_rot_center;
 					if (pin_rot_center)
-						vrv->m_glview->m_rot_center_dirty = true;
+						view->m_rot_center_dirty = true;
 				}
 				//object
 				if (fconfig.Read("obj_center", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetObjCenters(x, y, z);
+						view->SetObjCenters(x, y, z);
 				}
 				if (fconfig.Read("obj_trans", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetObjTrans(x, y, z);
+						view->SetObjTrans(x, y, z);
 				}
 				if (fconfig.Read("obj_rot", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 					{
 						if (l_major <= 2 && d_minor < 24.3)
-							vrv->SetObjRot(x, y+180.0, z+180.0);
+							view->SetObjRot(x, y+180.0, z+180.0);
 						else
-							vrv->SetObjRot(x, y, z);
+							view->SetObjRot(x, y, z);
 					}
 				}
 				//scale bar
 				bool disp;
 				if (fconfig.Read("disp_scale_bar", &disp))
-					vrv->m_glview->m_disp_scale_bar = disp;
+					view->m_disp_scale_bar = disp;
 				if (fconfig.Read("disp_scale_bar_text", &disp))
-					vrv->m_glview->m_disp_scale_bar_text = disp;
+					view->m_disp_scale_bar_text = disp;
 				double length;
 				if (fconfig.Read("sb_length", &length))
-					vrv->m_glview->m_sb_length = length;
+					view->m_sb_length = length;
 				if (fconfig.Read("sb_text", &str))
-					vrv->m_glview->m_sb_text = str;
+					view->m_sb_text = str;
 				if (fconfig.Read("sb_num", &str))
-					vrv->m_glview->m_sb_num = str;
+					view->m_sb_num = str;
 				int unit;
 				if (fconfig.Read("sb_unit", &unit))
-					vrv->m_glview->m_sb_unit = unit;
+					view->m_sb_unit = unit;
 
 				//2d sdjustment settings
 				if (fconfig.Read("gamma", &str))
@@ -4437,7 +4437,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->m_glview->SetGamma(col);
+						view->SetGamma(col);
 					}
 				}
 				if (fconfig.Read("brightness", &str))
@@ -4445,7 +4445,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->m_glview->SetBrightness(col);
+						view->SetBrightness(col);
 					}
 				}
 				if (fconfig.Read("hdr", &str))
@@ -4453,32 +4453,32 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->m_glview->SetHdr(col);
+						view->SetHdr(col);
 					}
 				}
 				if (fconfig.Read("sync_r", &bVal))
-					vrv->m_glview->SetSyncR(bVal);
+					view->SetSyncR(bVal);
 				if (fconfig.Read("sync_g", &bVal))
-					vrv->m_glview->SetSyncG(bVal);
+					view->SetSyncG(bVal);
 				if (fconfig.Read("sync_b", &bVal))
-					vrv->m_glview->SetSyncB(bVal);
+					view->SetSyncB(bVal);
 
 				//clipping plane rotations
 				int clip_mode;
 				if (fconfig.Read("clip_mode", &clip_mode))
-					vrv->SetClipMode(clip_mode);
+					view->SetClipMode(clip_mode);
 				double rotx_cl, roty_cl, rotz_cl;
 				if (fconfig.Read("rotx_cl", &rotx_cl) &&
 					fconfig.Read("roty_cl", &roty_cl) &&
 					fconfig.Read("rotz_cl", &rotz_cl))
 				{
-					vrv->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
+					view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
 					m_clip_view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
 				}
 
 				//painting parameters
 				double dVal;
-				flrd::VolumeSelector* selector = vrv->GetVolumeSelector();
+				flrd::VolumeSelector* selector = view->GetVolumeSelector();
 				if (selector)
 				{
 					if (fconfig.Read("brush_use_pres", &bVal))
@@ -4500,11 +4500,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 				}
 
 				//rulers
-				if (vrv->GetRulerList() &&
+				if (view->GetRulerList() &&
 					fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
 				{
 					fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-					vrv->GetRulerHandler()->Read(fconfig, i);
+					view->GetRulerHandler()->Read(fconfig, i);
 				}
 			}
 		}
@@ -4567,7 +4567,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		double dVal;
 
 		//set settings for frame
-		VRenderView* vrv = 0;
+		VRenderGLView* view = 0;
 		if (fconfig.Read("cur_page", &iVal))
 		{
 			m_movie_view->SetCurrentPage(iVal);
@@ -4575,7 +4575,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		if (fconfig.Read("views_cmb", &iVal))
 		{
 			m_movie_view->SetView(iVal);
-			vrv = (*GetViewList())[iVal];
+			view = GetView(iVal);
 		}
 		if (fconfig.Read("rot_check", &bVal))
 		{

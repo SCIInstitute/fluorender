@@ -141,6 +141,7 @@ public:
 	//initialization
 	void Init();
 
+	void ClearAll();
 	//Clear all layers
 	void Clear();
 

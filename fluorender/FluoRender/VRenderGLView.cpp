@@ -626,6 +626,13 @@ void VRenderGLView::Init()
 	}
 }
 
+void VRenderGLView::ClearAll()
+{
+	Clear();
+	ClearVolList();
+	ClearMeshList();
+}
+
 void VRenderGLView::Clear()
 {
 	m_loader.RemoveAllLoadedBrick();
