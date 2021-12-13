@@ -368,13 +368,10 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_run_script_chk = new wxCheckBox(page, ID_RunScriptChk,
-		"Enable execution of a script on 4D data during playback.");
-	wxStaticText* st = new wxStaticText(page, 0,
-		"Also enable this option to show component colors.");
+		"Enable execution of a script during playback.");
+	wxStaticText* st;
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_run_script_chk);
-	sizer_v->Add(5, 5);
-	sizer_v->Add(st, 0, wxALIGN_LEFT);
 	sizer_v->Add(5, 5);
 
 	//browse button
@@ -454,7 +451,7 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	m_notebook->AddPage(CreateAdvancedPage(m_notebook), "Advanced");
 	m_notebook->AddPage(CreateAutoKeyPage(m_notebook), "Auto Key");
 	m_notebook->AddPage(CreateCroppingPage(m_notebook), "Cropping");
-	m_notebook->AddPage(CreateScriptPage(m_notebook), "4D Script");
+	m_notebook->AddPage(CreateScriptPage(m_notebook), "Script");
 	//renderview selector
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//FPS
@@ -575,7 +572,7 @@ void VMovieView::GetScriptSettings()
 			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 		else
 			m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-		m_notebook->SetPageText(4, "4D Script (Enabled)");
+		m_notebook->SetPageText(4, "Script (Enabled)");
 	}
 	else
 	{
@@ -583,7 +580,7 @@ void VMovieView::GetScriptSettings()
 			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 		else
 			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-		m_notebook->SetPageText(4, "4D Script");
+		m_notebook->SetPageText(4, "Script");
 	}
 }
 
@@ -1054,12 +1051,12 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	if (run_script)
 	{
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-		m_notebook->SetPageText(4, "4D Script (Enabled)");
+		m_notebook->SetPageText(4, "Script (Enabled)");
 	}
 	else
 	{
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-		m_notebook->SetPageText(4, "4D Script");
+		m_notebook->SetPageText(4, "Script");
 	}
 	m_view->RefreshGL(39);
 }
