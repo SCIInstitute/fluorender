@@ -6,7 +6,7 @@ time_mode=TM_FIRST_PRE
 chan_mode=0
 use_sel=0
 th_factor=1
-comp_command=cell_50.txt
+comp_command=cell_30.txt
 [tasks/task1]
 type=comp_select
 time_mode=TM_FIRST_PRE
@@ -30,8 +30,8 @@ time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 stat_type=2
 stat_indx=0
-kx=100
-ky=100
+kx=10
+ky=10
 varth=0.0001
 gauth=1
 [tasks/task5]
