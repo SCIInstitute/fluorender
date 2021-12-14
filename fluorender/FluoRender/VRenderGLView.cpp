@@ -4915,7 +4915,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 
 	//run pre-change script
 	if (run_script && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_PRE, m_script_file);
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file);
 
 	//change time frame
 	m_tseq_prv_num = m_tseq_cur_num;
@@ -4930,7 +4930,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
 
 	//run post-change script
 	if (run_script && m_run_script)
-		m_scriptor.Run4DScript(flrd::ScriptProc::TM_POST, m_script_file);
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file);
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;

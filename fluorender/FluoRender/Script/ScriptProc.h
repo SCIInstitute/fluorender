@@ -47,19 +47,19 @@ namespace flrd
 		enum TimeMask
 		{
 			TM_NONE = 0,
-			TM_PRE = 1 << 0,
-			TM_POST = 1 << 1,
-			TM_ALL = 0x7FFFFFFF
-		};
-		enum FrameMask
-		{
-			FM_NONE = 0,
-			FM_FIRST = 1 << 0,
-			FM_LAST = 0x40000000,
-			FM_EXFIRST = 0x7FFFFFFE,
-			FM_EXLAST = 0x3FFFFFFF,
-			FM_EXBOTH = 0x3FFFFFFE,
-			FM_ALL = 0x7FFFFFFF
+			TM_ALL_PRE = 0x2AAA5555,
+			TM_ALL_POST = 0x55552AAA,
+			TM_FIRST_PRE = 1,
+			TM_FIRST_POST = 2,
+			TM_FIRST_BOTH = 3,
+			TM_LAST_PRE = 0x20000000,
+			TM_LAST_POST = 0x40000000,
+			TM_LAST_BOTH = 0x60000000,
+			TM_ALL_PRE_FIRST_BOTH = 0x2AAA5557,
+			TM_ALL_POST_FIRST_BOTH = 0x55552AAB,
+			TM_ALL_PRE_LAST_BOTH = 0x6AAA5555,
+			TM_ALL_POST_LAST_BOTH = 0x75552AAA,
+			TM_ALL = 0x7FFF7FFF
 		};
 		ScriptProc();
 		~ScriptProc();
@@ -94,7 +94,6 @@ namespace flrd
 		bool GetVolumes(std::vector<VolumeData*> &list);
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
-		int FrameMode(std::string &str);
 		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
 		wxString RemoveExt(const wxString& str);
 		wxString RemoveNum(const wxString& str);

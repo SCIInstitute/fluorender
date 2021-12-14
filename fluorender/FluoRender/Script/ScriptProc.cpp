@@ -139,29 +139,24 @@ bool ScriptProc::TimeCondition()
 {
 	if (!m_fconfig || !m_view)
 		return false;
-	int time_mode, frame_mode;
+	int time_mode;
 	wxString str;
-	m_fconfig->Read("time_mode", &str, "TM_PRE");
+	m_fconfig->Read("time_mode", &str, "TM_ALL_PRE");
 	time_mode = TimeMode(str.ToStdString());
-	m_fconfig->Read("frame_mode", &str, "FM_ALL");
-	frame_mode = FrameMode(str.ToStdString());
 	int curf = m_view->m_tseq_cur_num;
 	int startf = m_view->m_begin_frame;
 	int endf = m_view->m_end_frame;
-	//frame mode
-	int fm;//mask
+	int tm;//mask
 	int startd = curf - startf;
 	int endd = endf - curf;
 	if (startd < 15)
-		fm = 1 << startd;
+		tm = 1 << startd;
 	if (endd < 15)
-		fm = FM_LAST >> endd;
+		tm = 1 >> endd;
 	if (startd >= 15 && endd >= 15)
-		fm = 1 << 15;
-	if (!(fm & frame_mode))
-		return false;
+		tm = 1 << 15;
 	//time mode
-	if (m_time_mask & time_mode)
+	if (m_time_mask & tm)
 		return true;
 	return false;
 }
@@ -244,34 +239,32 @@ int ScriptProc::TimeMode(std::string &str)
 {
 	if (str == "TM_NONE")
 		return TM_NONE;
-	if (str == "TM_PRE")
-		return TM_PRE;
-	if (str == "TM_POST")
-		return TM_POST;
+	if (str == "TM_ALL_PRE")
+		return TM_ALL_PRE;
+	if (str == "TM_ALL_POST")
+		return TM_ALL_POST;
+	if (str == "TM_FIRST_PRE")
+		return TM_FIRST_PRE;
+	if (str == "TM_FIRST_POST")
+		return TM_FIRST_POST;
+	if (str == "TM_FIRST_BOTH")
+		return TM_FIRST_BOTH;
+	if (str == "TM_LAST_PRE")
+		return TM_LAST_PRE;
+	if (str == "TM_LAST_POST")
+		return TM_LAST_POST;
+	if (str == "TM_LAST_BOTH")
+		return TM_LAST_BOTH;
+	if (str == "TM_ALL_PRE_FIRST_BOTH")
+		return TM_ALL_PRE_FIRST_BOTH;
+	if (str == "TM_ALL_POST_FIRST_BOTH")
+		return TM_ALL_POST_FIRST_BOTH;
+	if (str == "TM_ALL_PRE_LAST_BOTH")
+		return TM_ALL_PRE_LAST_BOTH;
+	if (str == "TM_ALL_POST_LAST_BOTH")
+		return TM_ALL_POST_LAST_BOTH;
 	if (str == "TM_ALL")
 		return TM_ALL;
-	return std::stoi(str, nullptr, 0);
-}
-
-int ScriptProc::FrameMode(std::string &str)
-{
-	if (str == "FM_NONE")
-		return FM_NONE;
-	if (str == "FM_FIRST")
-		return FM_FIRST;
-	if (str == "FM_LAST")
-		return FM_LAST;
-	if (str == "FM_EXFIRST")
-		return FM_EXFIRST;
-	if (str == "FM_EXLAST")
-		return FM_EXLAST;
-	if (str == "FM_EXBOTH")
-		return FM_EXBOTH;
-	if (str == "FM_ALL")
-		return FM_ALL;
-	if (str.find("0x") != std::string::npos ||
-		str.find("0X") != std::string::npos)
-		return std::stoi(str, nullptr, 16);
 	return std::stoi(str, nullptr, 0);
 }
 
