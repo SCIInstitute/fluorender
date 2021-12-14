@@ -730,10 +730,10 @@ void VMovieView::SetCrop(bool value)
 	{
 		m_view->CalcFrame();
 		m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
-		m_center_x_text->ChangeValue(wxString::Format("%d",
-			int(m_crop_x + m_crop_w / 2.0 + 0.5)));
-		m_center_y_text->ChangeValue(wxString::Format("%d",
-			int(m_crop_y + m_crop_h / 2.0 + 0.5)));
+		m_crop_x = int(m_crop_x + m_crop_w / 2.0 + 0.5);
+		m_crop_y = int(m_crop_y + m_crop_h / 2.0 + 0.5);
+		m_center_x_text->ChangeValue(wxString::Format("%d", m_crop_x));
+		m_center_y_text->ChangeValue(wxString::Format("%d", m_crop_y));
 		m_width_text->ChangeValue(wxString::Format("%d", m_crop_w));
 		m_height_text->ChangeValue(wxString::Format("%d", m_crop_h));
 		m_view->EnableFrame();

@@ -1975,7 +1975,6 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
 	str += unit_text;
 	if (m_glview)
 	{
-		//m_glview->SetScaleBarLen(len);
 		m_glview->SetSBText(str);
 		m_glview->SetScaleBarLen(len);
 		m_glview->m_sb_num = num_text;
@@ -1989,7 +1988,11 @@ void VRenderView::OnScaleUnitSelected(wxCommandEvent& event) {
 
 void VRenderView::OnScaleBar(wxCommandEvent& event)
 {
-	switch (m_draw_scalebar) {
+	if (!m_glview)
+		return;
+
+	switch (m_draw_scalebar)
+	{
 	case kOff:
 		m_draw_scalebar = kOn;
 		m_glview->m_disp_scale_bar = true;
@@ -1998,8 +2001,6 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 			wxGetBitmapFromMemory(scale_text_off));
 		m_scale_text->Enable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->DisableSBText();
-		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kOn:
 		m_draw_scalebar = kText;
@@ -2009,8 +2010,6 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 			wxGetBitmapFromMemory(scale_text));
 		m_scale_text->Enable();
 		m_scale_cmb->Enable();
-		if (m_glview) m_glview->EnableSBText();
-		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kText:
 		m_draw_scalebar = kOff;
@@ -2020,12 +2019,11 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 			wxGetBitmapFromMemory(scalebar));
 		m_scale_text->Disable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->DisableScaleBar();
-		if (m_glview) m_glview->DisableSBText();
 		break;
 	default:
 		break;
 	}
+	OnScaleTextEditing(event);
 	RefreshGL();
 }
 
