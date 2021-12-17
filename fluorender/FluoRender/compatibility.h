@@ -48,9 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <locale>
 #include <vector>
-#include <ole2.h>
-#include <time.h>
-#include <ctime>
+#include <chrono>
 #include <sys/types.h>
 #include <ctype.h>
 #include <tiffio.h>
@@ -215,9 +213,17 @@ inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
 inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
 
-inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
+inline unsigned long long TIME()
+{
+	using namespace std::chrono;
+	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
+}
 
-inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
+inline unsigned long long GET_TICK_COUNT()
+{
+	using namespace std::chrono;
+	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
+}
 
 inline std::string STR_DIR_SEP(const std::string pathname)
 {

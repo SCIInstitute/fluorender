@@ -296,7 +296,7 @@ namespace flvr
 			{
 				if (TextureRenderer::mem_swap_)
 				{
-					uint32_t rn_time = GET_TICK_COUNT();
+					unsigned long long rn_time = GET_TICK_COUNT();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
 						break;
 				}

@@ -85,7 +85,7 @@ bool VRenderApp::OnInit()
 	//add png handler
 	wxImage::AddHandler(new wxPNGHandler);
 	//random numbers
-	srand((unsigned int)TIME(NULL));
+	srand((unsigned int)TIME());
 
 	//the frame
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
