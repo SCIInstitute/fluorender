@@ -84,6 +84,8 @@ public:
 	//flipping
 	void SetFlipX(int flip) {m_user_flip_x = flip;}
 	void SetFlipY(int flip) {m_user_flip_y = flip;}
+	void SetSeqType(int value) { m_seq_type = value; }
+
 private:
 	wstring m_data_name;
 
@@ -132,8 +134,7 @@ private:
 			lpf(0),
 			mpp_x(0),
 			mpp_y(0),
-			bit_depth(0),
-			seq_type(0) {}
+			bit_depth(0) {}
 		int grid_index;
 		int grid_index_x;
 		int grid_index_y;
@@ -147,7 +148,6 @@ private:
 		double mpp_x;//microns per pixel x
 		double mpp_y;//microns per pixel y
 		int bit_depth;
-		int seq_type;//sequence type for non-standard formats
 	};
 	StateShard m_current_state;
 	vector<StateShard> m_state_shard_stack;
@@ -221,6 +221,8 @@ private:
 	//actual flags for flipping
 	bool m_flip_x;
 	bool m_flip_y;
+	//seq type
+	int m_seq_type;
 
 private:
 	bool ConvertS(int c, TimeDataInfo* time_data_info, unsigned short *val);

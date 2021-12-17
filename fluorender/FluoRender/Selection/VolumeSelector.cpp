@@ -411,7 +411,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_vd->GetName() +
 		wxString::Format("_COMP1"));
-	//vd_r->SetCurChannel(0);
+	vd_r->SetCurChannel(0);
 	//green volume
 	if (!vd_g)
 		vd_g = new VolumeData();
@@ -422,7 +422,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_vd->GetName() +
 		wxString::Format("_COMP2"));
-	//vd_g->SetCurChannel(1);
+	vd_g->SetCurChannel(1);
 	//blue volume
 	if (!vd_b)
 		vd_b = new VolumeData();
@@ -433,7 +433,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_vd->GetName() +
 		wxString::Format("_COMP3"));
-	//vd_b->SetCurChannel(2);
+	vd_b->SetCurChannel(2);
 
 	//get new data
 	//red volume
@@ -618,7 +618,7 @@ void VolumeSelector::LoadBrushSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
+	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -790,9 +790,8 @@ void VolumeSelector::SaveBrushSettings()
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
+	SaveConfig(fconfig, dft);
 }
 
 void VolumeSelector::PopMask()

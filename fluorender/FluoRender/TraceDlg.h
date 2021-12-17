@@ -29,18 +29,19 @@ DEALINGS IN THE SOFTWARE.
 #define _TRACEDLG_H_
 
 #include "Main.h"
-#include "DataManager.h"
+#include <Tracking/Cell.h>
+#include <Tracking/VolCache.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/notebook.h>
 #include <wx/tglbtn.h>
-#include "teem/Nrrd/nrrd.h"
 #include <vector>
 
 using namespace std;
 
-class VRenderView;
+class VRenderFrame;
+class VRenderGLView;
 
 class TraceListCtrl : public wxListCtrl
 {
@@ -51,9 +52,8 @@ class TraceListCtrl : public wxListCtrl
 	};
 
 public:
-	TraceListCtrl(wxWindow *frame,
+	TraceListCtrl(VRenderFrame *frame,
 		wxWindow* parent,
-		wxWindowID id,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxSize(100, 100),
 		long style = wxLC_REPORT);
@@ -61,26 +61,15 @@ public:
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void UpdateTraces(VRenderView* vrv=0);
+	void UpdateTraces(VRenderGLView* vrv=0);
 	void DeleteSelection();
 	wxString GetText(long item, int col);
 
 	friend class TraceDlg;
 
 private:
-	VRenderView *m_view;
+	VRenderGLView *m_view;
 	int m_type;//0-current; 1-previous
-
-private:
-	static bool sort_cells(const flrd::Celp c1, const flrd::Celp c2)
-	{
-		unsigned int vid1 = c1->GetVertexId();
-		unsigned int vid2 = c2->GetVertexId();
-		if (vid1 == vid2)
-			return c1->GetSizeUi() > c2->GetSizeUi();
-		else
-			return vid1 < vid2;
-	};
 
 private:
 	void OnKeyDown(wxKeyEvent& event);
@@ -101,6 +90,7 @@ public:
 		//map page
 		//load/save trace
 		ID_LoadTraceText = ID_TRACE2,
+		ID_ClearTraceBtn,
 		ID_LoadTraceBtn,
 		ID_SaveTraceBtn,
 		ID_SaveasTraceBtn,
@@ -174,12 +164,11 @@ public:
 		ID_StatText
 	};
 
-	TraceDlg(wxWindow* frame,
-		wxWindow* parent);
+	TraceDlg(VRenderFrame* frame);
 	~TraceDlg();
 
-	void GetSettings(VRenderView* vrv);
-	VRenderView* GetView();
+	void GetSettings(VRenderGLView* vrv);
+	VRenderGLView* GetView();
 	void UpdateList();
 	void SetCellSize(int size);
 
@@ -189,6 +178,8 @@ public:
 	void CellLink(bool exclusive);
 	void CellNewID(bool append);
 	void CellEraseID();
+	void CellReplaceID();
+	void CellCombineID();
 	void CompDelete();
 	void CompClear();
 	//uncertain filtering
@@ -218,9 +209,9 @@ private:
 		int contact_num;
 	} comp_info;
 
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	//current view
-	VRenderView* m_view;
+	VRenderGLView* m_view;
 	//tab control
 	wxNotebook *m_notebook;
 
@@ -242,9 +233,14 @@ private:
 
 	wxString m_track_file;
 
+	//ids
+	unsigned int m_cell_new_id;
+	bool m_cell_new_id_empty;
+
 	//map page
 	//load/save trace
 	wxTextCtrl* m_load_trace_text;
+	wxButton* m_clear_trace_btn;
 	wxButton* m_load_trace_btn;
 	wxButton* m_save_trace_btn;
 	wxButton* m_saveas_trace_btn;
@@ -340,12 +336,6 @@ private:
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	//unsigned int GetMappedID(unsigned int id, unsigned int* data_label1,
-	//	unsigned int* data_label2, unsigned long long size);
-	//tests
-	void Test1();
-	void Test2(int type);
-
 	//read/delete volume cache from file
 	void ReadVolCache(flrd::VolCache& vol_cache);
 	void DelVolCache(flrd::VolCache& vol_cache);
@@ -353,6 +343,7 @@ private:
 private:
 	//map page
 	//load/save trace
+	void OnClearTrace(wxCommandEvent& event);
 	void OnLoadTrace(wxCommandEvent& event);
 	void OnSaveTrace(wxCommandEvent& event);
 	void OnSaveasTrace(wxCommandEvent& event);

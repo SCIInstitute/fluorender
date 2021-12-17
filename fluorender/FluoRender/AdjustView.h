@@ -25,14 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
-#include "VRenderView.h"
+#ifndef _ADJUSTVIEW_H_
+#define _ADJUSTVIEW_H_
+
+#include <Types/Color.h>
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/slider.h>
-
-#ifndef _ADJUSTVIEW_H_
-#define _ADJUSTVIEW_H_
 
 //all convert v1 to v2
 #define GammaUI2(v1, v2) \
@@ -54,6 +53,10 @@ DEALINGS IN THE SOFTWARE.
 #define Hdr2UIP(v) \
 	int(v*100.0+0.5)
 
+class VRenderFrame;
+class VRenderGLView;
+class VolumeData;
+class DataGroup;
 class AdjustView: public wxPanel
 {
 	enum
@@ -91,13 +94,11 @@ class AdjustView: public wxPanel
 	};
 
 public:
-	AdjustView(wxWindow* frame,
-			   wxWindow* parent,
-			   wxWindowID id,
-			   const wxPoint& pos=wxDefaultPosition,
-			   const wxSize& size=wxDefaultSize,
-			   long style=0,
-			   const wxString& name="AdjustView");
+	AdjustView(VRenderFrame* frame,
+		const wxPoint& pos=wxDefaultPosition,
+		const wxSize& size=wxDefaultSize,
+		long style=0,
+		const wxString& name="AdjustView");
 	~AdjustView();
 
 	//refresh
@@ -113,76 +114,16 @@ public:
 		return m_type;
 	}
 	//set view
-	void SetRenderView(VRenderView *view)
-	{
-		if (view)
-		{
-			m_glview = view->m_glview;
-			m_type = 1;
-			GetSettings();
-		}
-		else
-		{
-			m_type = -1;
-			DisableAll();
-		}
-	}
-	VRenderGLView* GetRenderView()
-	{
-		return m_glview;
-	}
+	void SetRenderView(VRenderGLView *view);
+	VRenderGLView* GetRenderView();
 	//set volume data
-	void SetVolumeData(VolumeData* vd)
-	{
-		if (vd)
-		{
-			m_vd = vd;
-			m_type = 2;
-			GetSettings();
-		}
-		else
-		{
-			m_type = -1;
-			DisableAll();
-		}
-	}
-	VolumeData* GetVolumeData()
-	{
-		return m_vd;
-	}
+	void SetVolumeData(VolumeData* vd);
+	VolumeData* GetVolumeData();
 	//set group
-	void SetGroup(DataGroup *group)
-	{
-		if (group)
-		{
-			m_group = group;
-			m_type = 5;
-			GetSettings();
-		}
-		else
-		{
-			m_type = -1;
-			DisableAll();
-		}
-	}
-	DataGroup* GetGroup()
-	{
-		return m_group;
-	}
+	void SetGroup(DataGroup *group);
+	DataGroup* GetGroup();
 	//set volume adjustment to link to group
-	void SetGroupLink(DataGroup *group)
-	{
-		if (group)
-		{
-			m_group = group;
-			m_link_group = true;
-		}
-		else
-		{
-			m_group = 0;
-			m_link_group = false;
-		}
-	}
+	void SetGroupLink(DataGroup *group);
 
 	//load default settings
 	void LoadSettings();
@@ -212,9 +153,9 @@ public:
 	void UpdateSync();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	int m_type;
-	VRenderGLView *m_glview;
+	VRenderGLView *m_view;
 	VolumeData* m_vd;
 	DataGroup* m_group;
 	bool m_link_group;

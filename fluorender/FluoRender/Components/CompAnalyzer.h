@@ -63,6 +63,8 @@ namespace flrd
 		{ m_slimit = size; }
 		bool GetAnalyzed()
 		{ return m_analyzed; }
+		bool GetColocal()
+		{ return m_colocal; }
 		void SetVolume(VolumeData* vd)
 		{
 			if (!vd)

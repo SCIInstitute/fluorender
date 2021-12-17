@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
 #include <Components/CompSelector.h>
+#include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
 #include <Cluster/kmeans.h>
 #include <Cluster/exmax.h>
@@ -73,6 +74,8 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_CHECKBOX(ID_DensityCheck, ComponentDlg::OnDensityCheck)
 	EVT_COMMAND_SCROLL(ID_DensitySldr, ComponentDlg::OnDensitySldr)
 	EVT_TEXT(ID_DensityText, ComponentDlg::OnDensityText)
+	EVT_COMMAND_SCROLL(ID_VarthSldr, ComponentDlg::OnVarthSldr)
+	EVT_TEXT(ID_VarthText, ComponentDlg::OnVarthText)
 	EVT_COMMAND_SCROLL(ID_DensityWindowSizeSldr, ComponentDlg::OnDensityWindowSizeSldr)
 	EVT_TEXT(ID_DensityWindowsSizeText, ComponentDlg::OnDensityWindowSizeText)
 	EVT_COMMAND_SCROLL(ID_DensityStatsSizeSldr, ComponentDlg::OnDensityStatsSizeSldr)
@@ -128,6 +131,15 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_BUTTON(ID_CompAllBtn, ComponentDlg::OnCompAll)
 	EVT_BUTTON(ID_CompClearBtn, ComponentDlg::OnCompClear)
 	EVT_BUTTON(ID_ShuffleBtn, ComponentDlg::OnShuffle)
+	//modify
+	EVT_TEXT(ID_NewIdText, ComponentDlg::OnNewIDText)
+	EVT_BUTTON(ID_NewIdXBtn, ComponentDlg::OnNewIDX)
+	EVT_BUTTON(ID_CompNewBtn, ComponentDlg::OnCompNew)
+	EVT_BUTTON(ID_CompAddBtn, ComponentDlg::OnCompAdd)
+	EVT_BUTTON(ID_CompReplaceBtn, ComponentDlg::OnCompReplace)
+	EVT_BUTTON(ID_CompCleanBkgBtn, ComponentDlg::OnCompCleanBkg)
+	EVT_BUTTON(ID_CompCombineBtn, ComponentDlg::OnCompCombine)
+	//options
 	EVT_COMMAND_SCROLL(ID_ConSizeSldr, ComponentDlg::OnConSizeSldr)
 	EVT_TEXT(ID_ConSizeText, ComponentDlg::OnConSizeText)
 	EVT_CHECKBOX(ID_ConsistentCheck, ComponentDlg::OnConsistentCheck)
@@ -174,18 +186,21 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
 END_EVENT_TABLE()
 
-ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
-	: wxPanel(parent, wxID_ANY,
+ComponentDlg::ComponentDlg(VRenderFrame *frame)
+	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
-		wxSize(500, 650),
+		wxSize(600, 800),
 		0, "ComponentDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	m_hold_history(false),
-	m_test_speed(false)
+	m_test_speed(false),
+	m_cell_new_id(0),
+	m_cell_new_id_empty(true)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetMinSize(wxSize(100, 100));
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxSplitterWindow *splittermain = new wxSplitterWindow(this, wxID_ANY,
@@ -205,6 +220,8 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 
 	panel_bot = new wxPanel(splittermain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_shuffle_btn = new wxButton(panel_bot, ID_ShuffleBtn, "Shuffle",
+		wxDefaultPosition, wxDefaultSize);
 	m_use_sel_chk = new wxCheckBox(panel_bot, ID_UseSelChk, "Use Sel.",
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, ID_GenerateBtn, "Generate",
@@ -217,6 +234,7 @@ ComponentDlg::ComponentDlg(wxWindow *frame, wxWindow *parent)
 		wxDefaultPosition, wxSize(75, -1));
 	m_analyze_sel_btn = new wxButton(panel_bot, ID_AnalyzeSelBtn, "Anlyz. Sel.",
 		wxDefaultPosition, wxSize(75, -1));
+	sizer1->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
 	sizer1->AddStretchSpacer();
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
@@ -356,7 +374,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	wxBoxSizer* sizer6 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Separation:",
 		wxDefaultPosition, wxSize(100, 23));
-	m_density_sldr = new wxSlider(page, ID_DensitySldr, 1000, 0, 5000,
+	m_density_sldr = new wxSlider(page, ID_DensitySldr, 1000, 0, 10000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_density_text = new wxTextCtrl(page, ID_DensityText, "1.0",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
@@ -365,6 +383,19 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer6->Add(m_density_sldr, 1, wxEXPAND);
 	sizer6->Add(m_density_text, 0, wxALIGN_CENTER);
 	sizer6->Add(2, 2);
+	//
+	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Noise Level:",
+		wxDefaultPosition, wxSize(100, 23));
+	m_varth_sldr = new wxSlider(page, ID_VarthSldr, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_varth_text = new wxTextCtrl(page, ID_VarthText, "0.0",
+		wxDefaultPosition, wxSize(60, 20), 0, vald_fp3);
+	sizer61->Add(2, 2);
+	sizer61->Add(st, 0, wxALIGN_CENTER);
+	sizer61->Add(m_varth_sldr, 1, wxEXPAND);
+	sizer61->Add(m_varth_text, 0, wxALIGN_CENTER);
+	sizer61->Add(2, 2);
 
 	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Filter Size:",
@@ -560,6 +591,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group1->Add(sizer5, 0, wxEXPAND);
 	group1->Add(5, 5);
 	group1->Add(sizer6, 0, wxEXPAND);
+	group1->Add(5, 5);
+	group1->Add(sizer61, 0, wxEXPAND);
 	group1->Add(5, 5);
 	group1->Add(sizer7, 0, wxEXPAND);
 	group1->Add(5, 5);
@@ -806,80 +839,118 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_comp_clear_btn = new wxButton(page, ID_CompClearBtn, "Clear",
 		wxDefaultPosition, wxDefaultSize);
-	m_shuffle_btn = new wxButton(page, ID_ShuffleBtn, "Shuffle",
-		wxDefaultPosition, wxDefaultSize);
-	sizer11->Add(5, 5);
-	sizer12->Add(m_comp_append_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_exclusive_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_all_btn, 0, wxALIGN_CENTER);
-	sizer11->Add(5, 5);
-	sizer12->Add(m_comp_full_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_comp_clear_btn, 0, wxALIGN_CENTER);
-	sizer12->Add(m_shuffle_btn, 0, wxALIGN_CENTER);
+	sizer12->Add(5, 5);
+	sizer12->Add(m_comp_append_btn, 1, wxEXPAND);
+	sizer12->Add(m_comp_exclusive_btn, 1, wxEXPAND);
+	sizer12->Add(m_comp_all_btn, 1, wxEXPAND);
+	sizer12->Add(5, 5);
+	sizer12->Add(m_comp_full_btn, 1, wxEXPAND);
+	sizer12->Add(m_comp_clear_btn, 1, wxEXPAND);
 	//
 	sizer1->Add(10, 10);
-	sizer1->Add(sizer11, 0, wxEXPAND);
+	sizer1->Add(sizer11, 1, wxEXPAND);
 	sizer1->Add(10, 10);
-	sizer1->Add(sizer12, 0, wxEXPAND);
+	sizer1->Add(sizer12, 1, wxEXPAND);
 	sizer1->Add(10, 10);
 
-	//Options
+	//modify
 	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
+		new wxStaticBox(page, wxID_ANY, "Modify IDs"),
+		wxVERTICAL);
+	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "ID:",
+		wxDefaultPosition, wxDefaultSize);
+	m_new_id_text = new wxTextCtrl(page, ID_NewIdText, "",
+		wxDefaultPosition, wxSize(80, 23));
+	m_new_id_x_btn = new wxButton(page, ID_NewIdXBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
+	sizer21->Add(5, 5);
+	sizer21->Add(st, 0, wxALIGN_CENTER);
+	sizer21->Add(m_new_id_text, 0, wxALIGN_CENTER);
+	sizer21->Add(m_new_id_x_btn, 0, wxALIGN_CENTER);
+	//buttons
+	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	m_comp_new_btn = new wxButton(page, ID_CompNewBtn, "Assign",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_add_btn = new wxButton(page, ID_CompAddBtn, "Add",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_replace_btn = new wxButton(page, ID_CompReplaceBtn, "Replace",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_clean_bkg_btn = new wxButton(page, ID_CompCleanBkgBtn, "Clean Sel.",
+		wxDefaultPosition, wxDefaultSize);
+	m_comp_combine_btn = new wxButton(page, ID_CompCombineBtn, "Combine",
+		wxDefaultPosition, wxDefaultSize);
+	sizer22->Add(5, 5);
+	sizer22->Add(m_comp_new_btn, 1, wxEXPAND);
+	sizer22->Add(m_comp_add_btn, 1, wxEXPAND);
+	sizer22->Add(m_comp_replace_btn, 1, wxEXPAND);
+	sizer22->Add(5, 5);
+	sizer22->Add(m_comp_clean_bkg_btn, 1, wxEXPAND);
+	sizer22->Add(m_comp_combine_btn, 1, wxEXPAND);
+	//
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer21, 1, wxEXPAND);
+	sizer2->Add(10, 10);
+	sizer2->Add(sizer22, 1, wxEXPAND);
+	sizer2->Add(10, 10);
+
+	//Options
+	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Options"),
 		wxVERTICAL);
-	wxBoxSizer *sizer21 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Contact Size:",
 		wxDefaultPosition, wxSize(100, 23));
 	m_con_size_sldr = new wxSlider(page, ID_ConSizeSldr, 5, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_con_size_text = new wxTextCtrl(page, ID_ConSizeText, "5",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer21->Add(5, 5);
-	sizer21->Add(st, 0, wxALIGN_CENTER);
-	sizer21->Add(5, 5);
-	sizer21->Add(m_con_size_sldr, 1, wxEXPAND);
-	sizer21->Add(5, 5);
-	sizer21->Add(m_con_size_text, 0, wxALIGN_CENTER);
-	sizer21->Add(5, 5);
-	wxBoxSizer *sizer22 = new wxBoxSizer(wxHORIZONTAL);
+	sizer31->Add(5, 5);
+	sizer31->Add(st, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_con_size_sldr, 1, wxEXPAND);
+	sizer31->Add(5, 5);
+	sizer31->Add(m_con_size_text, 0, wxALIGN_CENTER);
+	sizer31->Add(5, 5);
+	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
 	m_consistent_check = new wxCheckBox(page, ID_ConsistentCheck, "Make color consistent for multiple bricks",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer22->Add(5, 5);
-	sizer22->Add(m_consistent_check, 0, wxALIGN_CENTER);
-	wxBoxSizer *sizer23 = new wxBoxSizer(wxHORIZONTAL);
+	sizer32->Add(5, 5);
+	sizer32->Add(m_consistent_check, 0, wxALIGN_CENTER);
+	wxBoxSizer *sizer33 = new wxBoxSizer(wxHORIZONTAL);
 	m_colocal_check = new wxCheckBox(page, ID_ColocalCheck, "Compute colocalization with other channels",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer23->Add(5, 5);
-	sizer23->Add(m_colocal_check, 0, wxALIGN_CENTER);
+	sizer33->Add(5, 5);
+	sizer33->Add(m_colocal_check, 0, wxALIGN_CENTER);
 	//
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer21, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer22, 0, wxEXPAND);
-	sizer2->Add(10, 10);
-	sizer2->Add(sizer23, 0, wxEXPAND);
-	sizer2->Add(10, 10);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer31, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer32, 0, wxEXPAND);
+	sizer3->Add(10, 10);
+	sizer3->Add(sizer33, 0, wxEXPAND);
+	sizer3->Add(10, 10);
 
 	//output
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Output as New Channels"),
 		wxVERTICAL);
 	//radios
-	wxBoxSizer *sizer31 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Channel Type:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_output_multi_rb = new wxRadioButton(page, ID_OutputMultiRb, "Each Comp.",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
 	m_output_rgb_rb = new wxRadioButton(page, ID_OutputRgbRb, "R+G+B",
 		wxDefaultPosition, wxDefaultSize);
-	sizer31->Add(5, 5);
-	sizer31->Add(st, 0, wxALIGN_CENTER);
-	sizer31->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
-	sizer31->Add(5, 5);
-	sizer31->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
-	sizer31->Add(5, 5);
+	sizer41->Add(5, 5);
+	sizer41->Add(st, 0, wxALIGN_CENTER);
+	sizer41->Add(m_output_multi_rb, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
+	sizer41->Add(m_output_rgb_rb, 0, wxALIGN_CENTER);
+	sizer41->Add(5, 5);
 	//buttons
-	wxBoxSizer *sizer32 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Output:",
 		wxDefaultPosition, wxSize(100, 20));
 	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
@@ -890,64 +961,64 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 23));
 	m_output_sn_btn = new wxButton(page, ID_OutputSnBtn, "Serial No.",
 		wxDefaultPosition, wxSize(75, 23));
-	sizer32->Add(5, 5);
-	sizer32->Add(st, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_random_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_size_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_id_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(m_output_sn_btn, 0, wxALIGN_CENTER);
-	sizer32->Add(5, 5);
+	sizer42->Add(5, 5);
+	sizer42->Add(st, 0, wxALIGN_CENTER);
+	sizer42->Add(m_output_random_btn, 1, wxEXPAND);
+	sizer42->Add(m_output_size_btn, 1, wxEXPAND);
+	sizer42->Add(m_output_id_btn, 1, wxEXPAND);
+	sizer42->Add(m_output_sn_btn, 1, wxEXPAND);
+	sizer42->Add(5, 5);
 	//
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer31, 0, wxEXPAND);
-	sizer3->Add(10, 10);
-	sizer3->Add(sizer32, 0, wxEXPAND);
-	sizer3->Add(10, 10);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer41, 1, wxEXPAND);
+	sizer4->Add(10, 10);
+	sizer4->Add(sizer42, 1, wxEXPAND);
+	sizer4->Add(10, 10);
 
-	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Distances"),
 		wxVERTICAL);
-	wxBoxSizer *sizer41 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer51 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_check = new wxCheckBox(page, ID_DistNeighborCheck, "Filter Nearest Neighbors",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dist_all_chan_check = new wxCheckBox(page, ID_DistAllChanCheck, "All Channel Results",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dist_output_btn = new wxButton(page, ID_DistOutputBtn, "Compute",
 		wxDefaultPosition, wxDefaultSize);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	sizer41->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
-	sizer41->AddStretchSpacer(1);
-	sizer41->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
-	sizer41->Add(5, 5);
-	wxBoxSizer *sizer42 = new wxBoxSizer(wxHORIZONTAL);
+	sizer51->Add(5, 5);
+	sizer51->Add(m_dist_neighbor_check, 0, wxALIGN_CENTER);
+	sizer51->Add(5, 5);
+	sizer51->Add(m_dist_all_chan_check, 0, wxALIGN_CENTER);
+	sizer51->AddStretchSpacer(1);
+	sizer51->Add(m_dist_output_btn, 0, wxALIGN_CENTER);
+	sizer51->Add(5, 5);
+	wxBoxSizer *sizer52 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSlider(page, ID_DistNeighborSldr, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_dist_neighbor_text = new wxTextCtrl(page, ID_DistNeighborText, "1",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	sizer42->Add(5, 5);
-	sizer42->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
-	sizer42->Add(5, 5);
-	sizer42->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
-	sizer42->Add(5, 5);
+	sizer52->Add(5, 5);
+	sizer52->Add(m_dist_neighbor_sldr, 1, wxEXPAND);
+	sizer52->Add(5, 5);
+	sizer52->Add(m_dist_neighbor_text, 0, wxALIGN_CENTER);
+	sizer52->Add(5, 5);
 	//
-	sizer4->Add(10, 10);
-	sizer4->Add(sizer41, 0, wxEXPAND);
-	sizer4->Add(10, 10);
-	sizer4->Add(sizer42, 0, wxEXPAND);
-	sizer4->Add(10, 10);
+	sizer5->Add(10, 10);
+	sizer5->Add(sizer51, 0, wxEXPAND);
+	sizer5->Add(10, 10);
+	sizer5->Add(sizer52, 0, wxEXPAND);
+	sizer5->Add(10, 10);
 
 	//alignment
-	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
+	wxBoxSizer *sizer6 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
 		wxVERTICAL);
-	wxBoxSizer* sizer51 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer61 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center = new wxCheckBox(page, ID_AlignCenter,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	sizer51->Add(5, 5);
-	sizer51->Add(m_align_center, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer52 = new wxBoxSizer(wxHORIZONTAL);
+	sizer61->Add(5, 5);
+	sizer61->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer62 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Tri Axes:",
 		wxDefaultPosition, wxSize(50, 22));
 	m_align_xyz = new wxButton(page, ID_AlignXYZ, "XYZ",
@@ -962,20 +1033,20 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(65, 22));
 	m_align_zyx = new wxButton(page, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, wxSize(65, 22));
-	sizer52->Add(5, 5);
-	sizer52->Add(st, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_xyz, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_yxz, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_zxy, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_xzy, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_yzx, 0, wxALIGN_CENTER);
-	sizer52->Add(m_align_zyx, 0, wxALIGN_CENTER);
+	sizer62->Add(5, 5);
+	sizer62->Add(st, 0, wxALIGN_CENTER);
+	sizer62->Add(m_align_xyz, 1, wxEXPAND);
+	sizer62->Add(m_align_yxz, 1, wxEXPAND);
+	sizer62->Add(m_align_zxy, 1, wxEXPAND);
+	sizer62->Add(m_align_xzy, 1, wxEXPAND);
+	sizer62->Add(m_align_yzx, 1, wxEXPAND);
+	sizer62->Add(m_align_zyx, 1, wxEXPAND);
 	//
-	sizer5->Add(5, 5);
-	sizer5->Add(sizer51, 0, wxEXPAND);
-	sizer5->Add(5, 5);
-	sizer5->Add(sizer52, 0, wxEXPAND);
-	sizer5->Add(5, 5);
+	sizer6->Add(5, 5);
+	sizer6->Add(sizer61, 1, wxEXPAND);
+	sizer6->Add(5, 5);
+	sizer6->Add(sizer62, 1, wxEXPAND);
+	sizer6->Add(5, 5);
 
 	//all
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
@@ -989,6 +1060,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizerv->Add(sizer4, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 	sizerv->Add(sizer5, 0, wxEXPAND);
+	sizerv->Add(10, 10);
+	sizerv->Add(sizer6, 0, wxEXPAND);
 	sizerv->Add(10, 10);
 
 	page->SetSizer(sizerv);
@@ -1025,6 +1098,7 @@ void ComponentDlg::Update()
 	EnableDensity(m_density);
 	m_density_check->SetValue(m_density);
 	m_density_text->SetValue(wxString::Format("%.3f", m_density_thresh));
+	m_varth_text->SetValue(wxString::Format("%.4f", m_varth));
 	m_density_window_size_text->SetValue(wxString::Format("%d", m_density_window_size));
 	m_density_stats_size_text->SetValue(wxString::Format("%d", m_density_stats_size));
 	//fixate
@@ -1119,6 +1193,7 @@ void ComponentDlg::GetSettings()
 	m_size_lm = 100;
 	m_density = false;
 	m_density_thresh = 1.0;
+	m_varth = 0.0001;
 	m_density_window_size = 5;
 	m_density_stats_size = 15;
 	m_fixate = false;
@@ -1172,7 +1247,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
 		expath = wxPathOnly(expath);
-		filename = expath + "/default_component_settings.dft";
+		filename = expath + GETSLASH() + "default_component_settings.dft";
 		get_basic = true;
 	}
 	wxFileInputStream is(filename);
@@ -1195,6 +1270,7 @@ void ComponentDlg::LoadSettings(wxString filename)
 	fconfig.Read("size_lm", &m_size_lm);
 	fconfig.Read("density", &m_density);
 	fconfig.Read("density_thresh", &m_density_thresh);
+	fconfig.Read("varth", &m_varth);
 	fconfig.Read("density_window_size", &m_density_window_size);
 	fconfig.Read("density_stats_size", &m_density_stats_size);
 	fconfig.Read("clean", &m_clean);
@@ -1249,6 +1325,7 @@ void ComponentDlg::SaveSettings(wxString filename)
 	fconfig.Write("size_lm", m_size_lm);
 	fconfig.Write("density", m_density);
 	fconfig.Write("density_thresh", m_density_thresh);
+	fconfig.Write("varth", m_varth);
 	fconfig.Write("density_window_size", m_density_window_size);
 	fconfig.Write("density_stats_size", m_density_stats_size);
 	fconfig.Write("clean", m_clean);
@@ -1280,11 +1357,10 @@ void ComponentDlg::SaveSettings(wxString filename)
 	{
 		wxString expath = wxStandardPaths::Get().GetExecutablePath();
 		expath = wxPathOnly(expath);
-		filename = expath + "/default_component_settings.dft";
+		filename = expath + GETSLASH() + "default_component_settings.dft";
 	}
 
-	wxFileOutputStream os(filename);
-	fconfig.Save(os);
+	SaveConfig(fconfig, filename);
 }
 
 void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
@@ -1335,11 +1411,11 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void ComponentDlg::SetView(VRenderView* vrv)
+void ComponentDlg::SetView(VRenderGLView* view)
 {
-	m_view = vrv;
+	m_view = view;
 	if (m_view)
-		m_aligner.SetView(m_view->m_glview);
+		m_aligner.SetView(m_view);
 }
 
 //comp generate page
@@ -1577,6 +1653,8 @@ void ComponentDlg::EnableDensity(bool value)
 	{
 		m_density_sldr->Enable();
 		m_density_text->Enable();
+		m_varth_sldr->Enable();
+		m_varth_text->Enable();
 		m_density_window_size_sldr->Enable();
 		m_density_window_size_text->Enable();
 		m_density_stats_size_sldr->Enable();
@@ -1586,6 +1664,8 @@ void ComponentDlg::EnableDensity(bool value)
 	{
 		m_density_sldr->Disable();
 		m_density_text->Disable();
+		m_varth_sldr->Disable();
+		m_varth_text->Disable();
 		m_density_window_size_sldr->Disable();
 		m_density_window_size_text->Disable();
 		m_density_stats_size_sldr->Disable();
@@ -1615,6 +1695,25 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 	m_density_text->GetValue().ToDouble(&val);
 	m_density_thresh = val;
 	m_density_sldr->SetValue(int(m_density_thresh * 1000.0 + 0.5));
+
+	if (m_auto_update)
+		GenerateComp(m_use_sel);
+}
+
+void ComponentDlg::OnVarthSldr(wxScrollEvent &event)
+{
+	double val = (double)event.GetPosition() / 10000.0;
+	wxString str = wxString::Format("%.4f", val);
+	if (str != m_varth_text->GetValue())
+		m_varth_text->SetValue(str);
+}
+
+void ComponentDlg::OnVarthText(wxCommandEvent &event)
+{
+	double val = 0.0;
+	m_varth_text->GetValue().ToDouble(&val);
+	m_varth = val;
+	m_varth_sldr->SetValue(int(m_varth * 10000.0 + 0.5));
 
 	if (m_auto_update)
 		GenerateComp(m_use_sel);
@@ -1683,7 +1782,12 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 		Fixate();
 
 	if (m_auto_update)
+	{
+		bool bval = m_clean;
+		m_clean = false;
 		GenerateComp(m_use_sel, false);
+		m_clean = bval;
+	}
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
@@ -1691,7 +1795,12 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 	Fixate();
 
 	if (m_auto_update)
+	{
+		bool bval = m_clean;
+		m_clean = false;
 		GenerateComp(m_use_sel, false);
+		m_clean = bval;
+	}
 }
 
 void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
@@ -1816,6 +1925,7 @@ void ComponentDlg::AddCmd(const std::string &type)
 		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
 		params.push_back("density"); params.push_back(std::to_string(m_density));
 		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
+		params.push_back("varth"); params.push_back(std::to_string(m_varth));
 		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
 		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
 		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
@@ -1898,6 +2008,8 @@ void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
 					m_density = std::stoi(*(++it2));
 				else if (*it2 == "density_thresh")
 					m_density_thresh = std::stod(*(++it2));
+				else if (*it2 == "varth")
+					m_varth = std::stod(*(++it2));
 				else if (*it2 == "density_window_size")
 					m_density_window_size = std::stoi(*(++it2));
 				else if (*it2 == "density_stats_size")
@@ -1969,80 +2081,12 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 	}
 	wxString filename = fopendlg->GetPath();
 	delete fopendlg;
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-	m_cmd_file_text->SetValue(filename);
 
-	m_command.clear();
-	int cmd_count = 0;
-	wxString str;
-	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
-	while (fconfig.Exists(cmd_str))
-	{
-		flrd::CompCmdParams params;
-		fconfig.SetPath(cmd_str);
-		str = fconfig.Read("type", "");
-		if (str == "generate" ||
-			str == "clean" ||
-			str == "fixate")
-			params.push_back(str.ToStdString());
-		else
-			continue;
-		long lval;
-		if (fconfig.Read("iter", &lval))
-		{ params.push_back("iter"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("use_dist_field", &lval))
-		{ params.push_back("use_dist_field"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("dist_filter_size", &lval))
-		{ params.push_back("dist_filter_size"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("max_dist", &lval))
-		{ params.push_back("max_dist"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("diff", &lval))
-		{ params.push_back("diff"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("density", &lval))
-		{ params.push_back("density"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("density_window_size", &lval))
-		{ params.push_back("density_window_size"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("density_stats_size", &lval))
-		{ params.push_back("density_stats_size"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("cleanb", &lval))
-		{ params.push_back("cleanb"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("clean_iter", &lval))
-		{ params.push_back("clean_iter"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("clean_size_vl", &lval))
-		{ params.push_back("clean_size_vl"); params.push_back(std::to_string(lval)); }
-		if (fconfig.Read("fix_size", &lval))
-		{ params.push_back("fix_size"); params.push_back(std::to_string(lval)); }
-		double dval;
-		if (fconfig.Read("thresh", &dval))
-		{ params.push_back("thresh"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("dist_strength", &dval))
-		{ params.push_back("dist_strength"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("dist_thresh", &dval))
-		{ params.push_back("dist_thresh"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("falloff", &dval))
-		{ params.push_back("falloff"); params.push_back(std::to_string(dval)); }
-		if (fconfig.Read("density_thresh", &dval))
-		{ params.push_back("density_thresh"); params.push_back(std::to_string(dval)); }
-
-		m_command.push_back(params);
-		cmd_count++;
-		cmd_str = "/cmd" + std::to_string(cmd_count);
-	}
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	LoadCmd(filename);
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 {
-	if (m_command.empty())
-	{
-		AddCmd("generate");
-	}
-
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender component generator macro command",
 		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -2054,58 +2098,8 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 	}
 	wxString filename = fopendlg->GetPath();
 	delete fopendlg;
-	wxFileConfig fconfig("", "", filename, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	fconfig.DeleteAll();
 
-	int cmd_count = 0;
-
-	for (auto it = m_command.begin();
-		it != m_command.end(); ++it)
-	{
-		if (it->empty())
-			continue;
-		if ((*it)[0] == "generate" ||
-			(*it)[0] == "clean" ||
-			(*it)[0] == "fixate")
-		{
-			std::string str = "/cmd" + std::to_string(cmd_count++);
-			fconfig.SetPath(str);
-			str = (*it)[0];
-			fconfig.Write("type", wxString(str));
-		}
-		for (auto it2 = it->begin();
-			it2 != it->end(); ++it2)
-		{
-			if (*it2 == "iter" ||
-				*it2 == "use_dist_field" ||
-				*it2 == "dist_filter_size" ||
-				*it2 == "max_dist" ||
-				*it2 == "diff" ||
-				*it2 == "density" ||
-				*it2 == "density_window_size" ||
-				*it2 == "density_stats_size" ||
-				*it2 == "cleanb" ||
-				*it2 == "clean_iter" ||
-				*it2 == "clean_size_vl" ||
-				*it2 == "fix_size")
-			{
-				fconfig.Write(*it2, std::stoi(*(++it2)));
-			}
-			else if (*it2 == "thresh" ||
-				*it2 == "dist_strength" ||
-				*it2 == "dist_thresh" ||
-				*it2 == "falloff" ||
-				*it2 == "density_thresh")
-			{
-				fconfig.Write(*it2, std::stod(*(++it2)));
-			}
-		}
-	}
-
-	wxFileOutputStream os(filename);
-	fconfig.Save(os);
-	m_cmd_file_text->SetValue(filename);
+	SaveCmd(filename);
 }
 
 //clustering page
@@ -2240,6 +2234,9 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
+	int shuffle = 0;
+	if (m_view && m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
 	wxString str = m_comp_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2249,18 +2246,11 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 			color = wxColor(24, 167, 181);
 		else
 		{
-			fluo::Color c;
-			if (m_view && m_view->m_glview->m_cur_vol)
-			{
-				VolumeData* vd = m_view->m_glview->m_cur_vol;
-				c = fluo::Color(id, vd->GetShuffle());
-			}
+			fluo::Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
-		m_comp_id_text->SetBackgroundColour(color);
 	}
-	else
-		m_comp_id_text->SetBackgroundColour(color);
+	m_comp_id_text->SetBackgroundColour(color);
 	m_comp_id_text->Refresh();
 }
 
@@ -2338,7 +2328,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2352,21 +2342,20 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		comp_selector.SetAnalyzer(&m_comp_analyzer);
 		comp_selector.Exclusive();
 
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 
 		//frame
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			if (vr_frame->GetBrushToolDlg())
+			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update(0);
-				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				if (m_view->m_paint_count)
+					m_frame->GetBrushToolDlg()->Update(0);
+				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (vr_frame->GetColocalizationDlg() &&
-				m_view->m_glview->m_paint_colocalize)
-				vr_frame->GetColocalizationDlg()->Colocalize();
+			if (m_frame->GetColocalizationDlg() &&
+				m_view->m_paint_colocalize)
+				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }
@@ -2387,7 +2376,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2401,21 +2390,20 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	comp_selector.SetAnalyzer(&m_comp_analyzer);
 	comp_selector.Select(get_all);
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
+		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update(0);
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			if (m_view->m_paint_count)
+				m_frame->GetBrushToolDlg()->Update(0);
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (vr_frame->GetColocalizationDlg() &&
-			m_view->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetColocalizationDlg() &&
+			m_view->m_paint_colocalize)
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2425,25 +2413,24 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
+		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update(0);
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			if (m_view->m_paint_count)
+				m_frame->GetBrushToolDlg()->Update(0);
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (vr_frame->GetColocalizationDlg() &&
-			m_view->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetColocalizationDlg() &&
+			m_view->m_paint_colocalize)
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2453,16 +2440,15 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
@@ -2471,12 +2457,100 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
 	vd->IncShuffle();
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
+}
+
+//modify
+void ComponentDlg::OnNewIDText(wxCommandEvent &event)
+{
+	int shuffle = 0;
+	if (m_view && m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
+	wxString str = m_new_id_text->GetValue();
+	unsigned long id;
+	wxColor color(255, 255, 255);
+	if (str.ToULong(&id))
+	{
+		if (!id)
+			color = wxColor(24, 167, 181);
+		else
+		{
+			fluo::Color c(id, shuffle);
+			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+		}
+		m_new_id_text->SetBackgroundColour(color);
+		m_cell_new_id = id;
+		m_cell_new_id_empty = false;
+	}
+	else
+	{
+		m_new_id_text->SetBackgroundColour(color);
+		m_cell_new_id_empty = true;
+	}
+	m_new_id_text->Refresh();
+}
+
+void ComponentDlg::OnNewIDX(wxCommandEvent& event)
+{
+	m_new_id_text->Clear();
+}
+
+void ComponentDlg::OnCompNew(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.NewId(m_cell_new_id,
+		m_cell_new_id_empty, false);
+	m_view->RefreshGL(39);
+}
+
+void ComponentDlg::OnCompAdd(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.NewId(m_cell_new_id,
+		m_cell_new_id_empty, true);
+	m_view->RefreshGL(39);
+}
+
+void ComponentDlg::OnCompReplace(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.Replace(m_cell_new_id,
+		m_cell_new_id_empty);
+	m_view->RefreshGL(39);
+}
+
+void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	flrd::ComponentEditor editor;
+	editor.SetVolume(m_view->m_cur_vol);
+	editor.Clean(0);
+	m_view->RefreshGL(39);
+}
+
+void ComponentDlg::OnCompCombine(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.Combine();
+	m_view->RefreshGL(39);
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
@@ -2559,13 +2633,12 @@ void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	list<VolumeData*> channs;
 	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
 			wxString group_name = "";
 			DataGroup* group = 0;
@@ -2574,7 +2647,7 @@ void ComponentDlg::OutputMulti(int color_type)
 				VolumeData* vd = *i;
 				if (vd)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					m_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -2595,9 +2668,9 @@ void ComponentDlg::OutputMulti(int color_type)
 				col = vd->GetHdr();
 				group->SetHdrAll(col);
 			}
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
-			m_view->RefreshGL();
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd->GetName());
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -2606,13 +2679,12 @@ void ComponentDlg::OutputRgb(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	list<VolumeData*> channs;
 	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
 			wxString group_name = "";
 			DataGroup* group = 0;
@@ -2621,7 +2693,7 @@ void ComponentDlg::OutputRgb(int color_type)
 				VolumeData* vd = *i;
 				if (vd)
 				{
-					vr_frame->GetDataManager()->AddVolumeData(vd);
+					m_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
 						group_name = m_view->AddGroup("");
@@ -2642,9 +2714,9 @@ void ComponentDlg::OutputRgb(int color_type)
 				col = vd->GetHdr();
 				group->SetHdrAll(col);
 			}
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
-			m_view->RefreshGL();
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd->GetName());
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -2671,24 +2743,23 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		type = 1;
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	Annotations* ann = new Annotations();
 	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent, type))
 	{
 		ann->SetVolume(vd);
 		ann->SetTransform(vd->GetTexture()->transform());
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			DataManager* mgr = vr_frame->GetDataManager();
+			DataManager* mgr = m_frame->GetDataManager();
 			if (mgr)
 				mgr->AddAnnotations(ann);
 			m_view->AddAnnotations(ann);
-			vr_frame->UpdateList();
-			vr_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateList();
+			m_frame->UpdateTree(vd->GetName());
 		}
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -3084,7 +3155,7 @@ void ComponentDlg::Cluster()
 
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -3256,7 +3327,7 @@ void ComponentDlg::Cluster()
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
 		vd->GetVR()->clear_tex_label();
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	}
 
 	delete method;
@@ -3302,7 +3373,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3359,6 +3430,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_density_window_size,
 				m_density_stats_size,
 				m_density_thresh,
+				m_varth,
 				scale);
 		}
 		else
@@ -3385,6 +3457,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 				m_thresh*m_tfactor,
 				m_falloff,
 				m_density_thresh,
+				m_varth,
 				scale);
 		}
 		else
@@ -3423,14 +3496,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	SetOutput(m_titles, m_values);
 
 	//update
-	m_view->RefreshGL();
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetSettingDlg()->SetRunScript(true);
-		vr_frame->GetMovieView()->GetScriptSettings();
-	}
+	m_view->RefreshGL(39);
 
 	if (command && m_record_cmd)
 		AddCmd("generate");
@@ -3440,7 +3506,7 @@ void ComponentDlg::Fixate(bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	vd->PushLabel(true);
@@ -3453,7 +3519,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3486,16 +3552,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
-	m_view->RefreshGL();
-
-	//connection.disconnect();
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		vr_frame->GetSettingDlg()->SetRunScript(true);
-		vr_frame->GetMovieView()->GetScriptSettings();
-	}
+	m_view->RefreshGL(39);
 
 	if (command && m_record_cmd)
 		AddCmd("clean");
@@ -3510,7 +3567,7 @@ void ComponentDlg::SelectFullComp()
 		if (!m_view)
 			return;
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
@@ -3528,21 +3585,20 @@ void ComponentDlg::SelectFullComp()
 		OnCompAppend(e);
 	}
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
+		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_glview->m_paint_count)
-				vr_frame->GetBrushToolDlg()->Update(0);
-			vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			if (m_view->m_paint_count)
+				m_frame->GetBrushToolDlg()->Update(0);
+			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (vr_frame->GetColocalizationDlg() &&
-			m_view->m_glview->m_paint_colocalize)
-			vr_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetColocalizationDlg() &&
+			m_view->m_paint_colocalize)
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -3560,7 +3616,7 @@ void ComponentDlg::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3589,7 +3645,7 @@ void ComponentDlg::Analyze(bool sel)
 	{
 		//invalidate label mask in gpu
 		vd->GetVR()->clear_tex_label();
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	}
 
 	if (m_comp_analyzer.GetListSize() > 10000)
@@ -3644,8 +3700,8 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 
 	fluo::Color c;
 	VolumeData* vd = 0;
-	if (m_view && m_view->m_glview->m_cur_vol)
-		vd = m_view->m_glview->m_cur_vol;
+	if (m_view && m_view->m_cur_vol)
+		vd = m_view->m_cur_vol;
 	unsigned long lval;
 	wxColor color;
 
@@ -3670,8 +3726,10 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 				{
 					c = fluo::Color(lval, vd->GetShuffle());
 					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-					m_output_grid->SetCellBackgroundColour(i, k, color);
 				}
+				else
+					color = wxColor(255, 255, 255);
+				m_output_grid->SetCellBackgroundColour(i, k, color);
 			}
 			++k;
 		} while (cur_line.IsEmpty() == false);
@@ -3964,6 +4022,170 @@ void ComponentDlg::FindCelps(flrd::CelpList &list,
 	}
 }
 
+//command
+void ComponentDlg::LoadCmd(const wxString &filename)
+{
+	wxFileInputStream is(filename);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+	m_cmd_file_text->SetValue(filename);
+
+	m_command.clear();
+	int cmd_count = 0;
+	wxString str;
+	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
+	while (fconfig.Exists(cmd_str))
+	{
+		flrd::CompCmdParams params;
+		fconfig.SetPath(cmd_str);
+		str = fconfig.Read("type", "");
+		if (str == "generate" ||
+			str == "clean" ||
+			str == "fixate")
+			params.push_back(str.ToStdString());
+		else
+			continue;
+		long lval;
+		if (fconfig.Read("iter", &lval))
+		{
+			params.push_back("iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("use_dist_field", &lval))
+		{
+			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("dist_filter_size", &lval))
+		{
+			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("max_dist", &lval))
+		{
+			params.push_back("max_dist"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("diff", &lval))
+		{
+			params.push_back("diff"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density", &lval))
+		{
+			params.push_back("density"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_window_size", &lval))
+		{
+			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_stats_size", &lval))
+		{
+			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("cleanb", &lval))
+		{
+			params.push_back("cleanb"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_iter", &lval))
+		{
+			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_size_vl", &lval))
+		{
+			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("fix_size", &lval))
+		{
+			params.push_back("fix_size"); params.push_back(std::to_string(lval));
+		}
+		double dval;
+		if (fconfig.Read("thresh", &dval))
+		{
+			params.push_back("thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_strength", &dval))
+		{
+			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_thresh", &dval))
+		{
+			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("falloff", &dval))
+		{
+			params.push_back("falloff"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("density_thresh", &dval))
+		{
+			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
+		}
+
+		m_command.push_back(params);
+		cmd_count++;
+		cmd_str = "/cmd" + std::to_string(cmd_count);
+	}
+	//record
+	int ival = m_command.size();
+	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+}
+
+void ComponentDlg::SaveCmd(const wxString &filename)
+{
+	if (m_command.empty())
+	{
+		AddCmd("generate");
+	}
+
+	wxFileConfig fconfig("", "", filename, "",
+		wxCONFIG_USE_LOCAL_FILE);
+	fconfig.DeleteAll();
+
+	int cmd_count = 0;
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate" ||
+			(*it)[0] == "clean" ||
+			(*it)[0] == "fixate")
+		{
+			std::string str = "/cmd" + std::to_string(cmd_count++);
+			fconfig.SetPath(str);
+			str = (*it)[0];
+			fconfig.Write("type", wxString(str));
+		}
+		for (auto it2 = it->begin();
+			it2 != it->end(); ++it2)
+		{
+			if (*it2 == "iter" ||
+				*it2 == "use_dist_field" ||
+				*it2 == "dist_filter_size" ||
+				*it2 == "max_dist" ||
+				*it2 == "diff" ||
+				*it2 == "density" ||
+				*it2 == "density_window_size" ||
+				*it2 == "density_stats_size" ||
+				*it2 == "cleanb" ||
+				*it2 == "clean_iter" ||
+				*it2 == "clean_size_vl" ||
+				*it2 == "fix_size")
+			{
+				fconfig.Write(*it2, std::stoi(*(++it2)));
+			}
+			else if (*it2 == "thresh" ||
+				*it2 == "dist_strength" ||
+				*it2 == "dist_thresh" ||
+				*it2 == "falloff" ||
+				*it2 == "density_thresh")
+			{
+				fconfig.Write(*it2, std::stod(*(++it2)));
+			}
+		}
+	}
+
+	SaveConfig(fconfig, filename);
+	m_cmd_file_text->SetValue(filename);
+}
+
 void ComponentDlg::StartTimer(std::string str)
 {
 	if (m_test_speed)
@@ -3990,12 +4212,13 @@ void ComponentDlg::StopTimer(std::string str)
 
 void ComponentDlg::GetCompSelection()
 {
-	if (m_view && m_view->m_glview)
+	if (m_view)
 	{
 		flrd::CelpList cl;
 		GetCellList(cl);
-		m_view->m_glview->SetCellList(cl);
-		m_view->RefreshGL(false);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
 	}
 }
 
@@ -4066,7 +4289,7 @@ void ComponentDlg::IncludeComps()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -4094,22 +4317,22 @@ void ComponentDlg::IncludeComps()
 		SetOutput(str1, str2);
 
 		cl.clear();
-		m_view->m_glview->SetCellList(cl);
-		m_view->RefreshGL(false);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
 
 		//frame
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			if (vr_frame->GetBrushToolDlg())
+			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update(0);
-				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				if (m_view->m_paint_count)
+					m_frame->GetBrushToolDlg()->Update(0);
+				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (vr_frame->GetColocalizationDlg() &&
-				m_view->m_glview->m_paint_colocalize)
-				vr_frame->GetColocalizationDlg()->Colocalize();
+			if (m_frame->GetColocalizationDlg() &&
+				m_view->m_paint_colocalize)
+				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }
@@ -4118,7 +4341,7 @@ void ComponentDlg::ExcludeComps()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -4149,22 +4372,22 @@ void ComponentDlg::ExcludeComps()
 		SetOutput(str1, str2);
 
 		cl.clear();
-		m_view->m_glview->SetCellList(cl);
-		m_view->RefreshGL(false);
+		m_view->SetCellList(cl);
+		m_view->SetInteractive(false);
+		m_view->RefreshGL(39);
 
 		//frame
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			if (vr_frame->GetBrushToolDlg())
+			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_glview->m_paint_count)
-					vr_frame->GetBrushToolDlg()->Update(0);
-				vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				if (m_view->m_paint_count)
+					m_frame->GetBrushToolDlg()->Update(0);
+				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (vr_frame->GetColocalizationDlg() &&
-				m_view->m_glview->m_paint_colocalize)
-				vr_frame->GetColocalizationDlg()->Colocalize();
+			if (m_frame->GetColocalizationDlg() &&
+				m_view->m_paint_colocalize)
+				m_frame->GetColocalizationDlg()->Colocalize();
 		}
 	}
 }

@@ -25,191 +25,176 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _RECORDERDLG_H_
+#define _RECORDERDLG_H_
+
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <vector>
 
-#ifndef _RECORDERDLG_H_
-#define _RECORDERDLG_H_
-
 using namespace std;
 
-class VRenderView;
-
+class VRenderFrame;
+class VRenderGLView;
+class RecorderDlg;
 class KeyListCtrl : public wxListCtrl
 {
-   enum
-   {
-      ID_FrameText = ID_RECORD1,
-      ID_DurationText,
-      ID_InterpoCmb,
-      ID_DescriptionText
-   };
+	enum
+	{
+		ID_FrameText = ID_RECORD1,
+		ID_DurationText,
+		ID_InterpoCmb,
+		ID_DescriptionText
+	};
 
-   public:
-   KeyListCtrl(wxWindow *frame,
-         wxWindow* parent,
-         wxWindowID id,
-         const wxPoint& pos = wxDefaultPosition,
-         const wxSize& size = wxDefaultSize,
-         long style=wxLC_REPORT|wxLC_SINGLE_SEL);
-   ~KeyListCtrl();
+public:
+	KeyListCtrl(VRenderFrame *frame,
+		RecorderDlg* parent,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
+	~KeyListCtrl();
 
-   void Append(int id, int time, int duration, int interp, string &description);
-   void DeleteSel();
-   void DeleteAll();
-   wxString GetText(long item, int col);
-   void SetText(long item, int col, wxString &str);
-   void Update();
-   void UpdateText();
+	void Append(int id, int time, int duration, int interp, string &description);
+	void DeleteSel();
+	void DeleteAll();
+	wxString GetText(long item, int col);
+	void SetText(long item, int col, wxString &str);
+	void Update();
+	void UpdateText();
 
-   friend class RecorderDlg;
+	friend class RecorderDlg;
 
-   private:
-   wxWindow* m_frame;
-   wxImageList *m_images;
+private:
+	VRenderFrame* m_frame;
+	RecorderDlg* m_recdlg;
+	wxImageList *m_images;
 
-   wxTextCtrl *m_frame_text;
-   wxTextCtrl *m_duration_text;
-   wxComboBox *m_interpolation_cmb;
-   wxTextCtrl *m_description_text;
+	wxTextCtrl *m_frame_text;
+	wxTextCtrl *m_duration_text;
+	wxComboBox *m_interpolation_cmb;
+	wxTextCtrl *m_description_text;
 
-   long m_editing_item;
-   long m_dragging_to_item;
+	long m_editing_item;
+	long m_dragging_to_item;
 
-   private:
-   void EndEdit(bool update=true);
+private:
+	void EndEdit(bool update = true);
 
-   private:
-   void OnAct(wxListEvent &event);
-   void OnSelection(wxListEvent &event);
-   void OnEndSelection(wxListEvent &event);
-   void OnFrameText(wxCommandEvent& event);
-   void OnDurationText(wxCommandEvent& event);
-   void OnInterpoCmb(wxCommandEvent& event);
-   void OnDescritionText(wxCommandEvent& event);
-   void OnBeginDrag(wxListEvent& event);
-   void OnDragging(wxMouseEvent& event);
-   void OnEndDrag(wxMouseEvent& event);
+private:
+	void OnAct(wxListEvent &event);
+	void OnSelection(wxListEvent &event);
+	void OnEndSelection(wxListEvent &event);
+	void OnFrameText(wxCommandEvent& event);
+	void OnDurationText(wxCommandEvent& event);
+	void OnInterpoCmb(wxCommandEvent& event);
+	void OnDescritionText(wxCommandEvent& event);
+	void OnBeginDrag(wxListEvent& event);
+	void OnDragging(wxMouseEvent& event);
+	void OnEndDrag(wxMouseEvent& event);
 
-   void OnKeyDown(wxKeyEvent& event);
-   void OnKeyUp(wxKeyEvent& event);
-   void OnScroll(wxScrollWinEvent& event);
-   void OnScroll(wxMouseEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
+	void OnKeyUp(wxKeyEvent& event);
+	void OnScroll(wxScrollWinEvent& event);
+	void OnScroll(wxMouseEvent& event);
 
-   DECLARE_EVENT_TABLE()
-   protected: //Possible TODO
-      wxSize GetSizeAvailableForScrollTarget(const wxSize& size) { 
-         return size - GetEffectiveMinSize(); 
-      }
+	DECLARE_EVENT_TABLE()
+protected: //Possible TODO
+	wxSize GetSizeAvailableForScrollTarget(const wxSize& size) {
+		return size - GetEffectiveMinSize();
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 class RecorderDlg : public wxPanel
 {
-   public:
-      enum
-      {
-         ID_SetKeyBtn = ID_RECORD2,
-         ID_DurationText,
-         ID_InterpolationCmb,
-         ID_DelKeyBtn,
-         ID_InsKeyBtn,
-         ID_DelAllBtn,
-         ID_AutoKeyCmb,
-         ID_AutoKeyBtn,
-		 ID_CamLockChk,
-		 ID_CamLockCmb,
-		 ID_CamLockBtn
-      };
+public:
+	enum
+	{
+		ID_SetKeyBtn = ID_RECORD2,
+		ID_DurationText,
+		ID_InterpolationCmb,
+		ID_DelKeyBtn,
+		ID_InsKeyBtn,
+		ID_DelAllBtn,
+		ID_AutoKeyCmb,
+		ID_AutoKeyBtn,
+		ID_CamLockChk,
+		ID_CamLockCmb,
+		ID_CamLockBtn
+	};
 
-      RecorderDlg(wxWindow* frame,
-            wxWindow* parent);
-      ~RecorderDlg();
+	RecorderDlg(VRenderFrame* frame,
+		wxWindow* parent);
+	~RecorderDlg();
 
-      void GetSettings(VRenderView* vrv);
-      VRenderView* GetView()
-      { return m_view; }
-      void UpdateList()
-      { m_keylist->Update(); }
-      void SetSelection(int index);
-	 // void Save() { 
-		//wxCommandEvent e;
-		//OnPlay(e); 
-	 // }
-	 // void Rewind() { 
-		//wxCommandEvent e;
-		//OnReset(e); 
-	 // }
-	 // void Stop() { 
-		//wxCommandEvent e;
-		//OnStop(e); 
-	 // }
-	 // void Play() { 
-		//wxCommandEvent e;
-		//OnPreview(e); 
-	 // }
+	void GetSettings(VRenderGLView* view);
+	VRenderGLView* GetView()
+	{
+		return m_view;
+	}
+	void UpdateList()
+	{
+		m_keylist->Update();
+	}
+	void SetSelection(int index);
 
-      void AutoKeyChanComb(int comb);
+	void AutoKeyChanComb(int comb);
 
-	  bool GetCamLock() { return m_cam_lock; }
+	bool GetCamLock() { return m_cam_lock; }
 
 private:
 	bool m_cam_lock;
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
 
-   private:
-      wxWindow* m_frame;
-      //current view
-      VRenderView* m_view;
+private:
+	VRenderFrame* m_frame;
+	//current view
+	VRenderGLView* m_view;
 
-      //automatic keys
-      wxComboBox *m_auto_key_cmb;
-      //generate
-      //wxButton *m_auto_key_btn;
+	//automatic keys
+	wxComboBox *m_auto_key_cmb;
+	//generate
+	//wxButton *m_auto_key_btn;
 
-      //list ctrl
-      KeyListCtrl *m_keylist;
+	//list ctrl
+	KeyListCtrl *m_keylist;
 
-      //default duration
-      wxTextCtrl *m_duration_text;
-      //default interpolation
-      wxComboBox *m_interpolation_cmb;
-      //set key
-      wxButton *m_set_key_btn;
-      //insert key
-      //wxButton *m_insert_key_btn;
-      //delete key
-      wxButton *m_del_key_btn;
-      //delete all keys
-      wxButton *m_del_all_btn;
-	  //lock cam center object
-	  wxCheckBox *m_cam_lock_chk;
-	  wxComboBox *m_cam_lock_cmb;
-	  wxButton *m_cam_lock_btn;
+	//default duration
+	wxTextCtrl *m_duration_text;
+	//default interpolation
+	wxComboBox *m_interpolation_cmb;
+	//set key
+	wxButton *m_set_key_btn;
+	//insert key
+	//wxButton *m_insert_key_btn;
+	//delete key
+	wxButton *m_del_key_btn;
+	//delete all keys
+	wxButton *m_del_all_btn;
+	//lock cam center object
+	wxCheckBox *m_cam_lock_chk;
+	wxComboBox *m_cam_lock_cmb;
+	wxButton *m_cam_lock_btn;
 
-   private:
-      //insert/append key
-      void InsertKey(int index, double duration, int interpolation);
-      bool MoveOne(vector<bool>& chan_mask, int lv);
-      bool GetMask(vector<bool>& chan_mask);
+private:
+	//insert/append key
+	void InsertKey(int index, double duration, int interpolation);
+	bool MoveOne(vector<bool>& chan_mask, int lv);
+	bool GetMask(vector<bool>& chan_mask);
 
-      void OnCh1Check(wxCommandEvent &event);
-      static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
-      void OnAutoKey(wxCommandEvent &event);
-      void OnSetKey(wxCommandEvent &event);
-      void OnInsKey(wxCommandEvent &event);
-      void OnDelKey(wxCommandEvent &event);
-      void OnDelAll(wxCommandEvent &event);
-	  void OnCamLockChk(wxCommandEvent &event);
-	  void OnCamLockCmb(wxCommandEvent &event);
-	  void OnCamLockBtn(wxCommandEvent &event);
-      //void OnPreview(wxCommandEvent &event);
-      //void OnReset(wxCommandEvent &event);
-      //void OnPlay(wxCommandEvent &event);
-      //void OnStop(wxCommandEvent &event);
+	void OnCh1Check(wxCommandEvent &event);
+	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
+	void OnAutoKey(wxCommandEvent &event);
+	void OnSetKey(wxCommandEvent &event);
+	void OnInsKey(wxCommandEvent &event);
+	void OnDelKey(wxCommandEvent &event);
+	void OnDelAll(wxCommandEvent &event);
+	void OnCamLockChk(wxCommandEvent &event);
+	void OnCamLockCmb(wxCommandEvent &event);
+	void OnCamLockBtn(wxCommandEvent &event);
 
-      DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
 
 #endif//_RECORDERDLG_H_

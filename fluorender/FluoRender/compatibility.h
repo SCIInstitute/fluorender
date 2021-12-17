@@ -41,18 +41,22 @@ DEALINGS IN THE SOFTWARE.
 #include <cstdarg>
 #include <cstdint>
 #include <string>
-#include <cstring> 
+#include <cstring>
+#include <fstream>
 #include <locale>
 #include <vector>
 #include <windows.h>
 #include <ole2.h>
+#include <time.h>
 #include <ctime>
 #include <sys/types.h>
 #include <ctype.h>
-#include <wx/wx.h>
 #include "tiffio.h"
 #include <direct.h>
 #include <codecvt>
+#include <wx/wx.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 
 #define GETCURRENTDIR _getcwd
 
@@ -156,6 +160,30 @@ inline FILE* WFOPEN(FILE** fp, const wchar_t* fname, const wchar_t* mode) {
 	return *fp;
 }
 
+inline void OutputStreamOpen(std::ofstream &os, std::string fname)
+{
+	fname = "\x5c\x5c\x3f\x5c" + fname;
+	os.open(fname);
+}
+
+inline void OutputStreamOpenW(std::wofstream &os, std::wstring fname)
+{
+	fname = L"\x5c\x5c\x3f\x5c" + fname;
+	os.open(fname);
+}
+
+inline int MkDir(std::string dirname)
+{
+	dirname = "\x5c\x5c\x3f\x5c" + dirname;
+	return _mkdir(dirname.c_str());
+}
+
+inline int MkDirW(std::wstring dirname)
+{
+	dirname = L"\x5c\x5c\x3f\x5c" + dirname;
+	return _wmkdir(dirname.c_str());
+}
+
 inline errno_t STRCPY(char* d, size_t n, const char* s) { return strcpy_s(d, n, s); }
 
 inline errno_t STRNCPY(char* d, size_t n, const char* s, size_t x) {
@@ -192,11 +220,23 @@ inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
 
 inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
 
+inline std::string STR_DIR_SEP(const std::string pathname)
+{
+	std::string result = pathname;
+	size_t pos = 0;
+	while ((pos = result.find("/", pos)) != std::string::npos)
+	{
+		result.replace(pos, 1, "\\");
+		pos++;
+	}
+	return result;
+}
+
 inline bool FIND_FILES_4D(std::wstring path_name,
 	std::wstring id, std::vector<std::wstring> &batch_list,
 	int &cur_batch)
 {
-	int64_t begin = path_name.find(id);
+	size_t begin = path_name.rfind(id);
 	size_t id_len = id.length();
 	if (begin == -1)
 		return false;
@@ -292,10 +332,18 @@ inline void FIND_FILES(std::wstring m_path_name,
 	FindClose(hFind);
 }
 
+inline void SaveConfig(wxFileConfig &file, wxString str)
+{
+	str = "\x5c\x5c\x3f\x5c" + str;
+	wxFileOutputStream os(str);
+	file.Save(os);
+}
+
 #else // MAC OSX or LINUX
 
 #include <string>
 #include <cstring>
+#include <fstream>
 #include <locale>
 #include <unistd.h>
 #include <dirent.h>
@@ -305,6 +353,9 @@ inline void FIND_FILES(std::wstring m_path_name,
 #include <iostream>
 #include "tiffio.h"
 #include <codecvt>
+#include <wx/wx.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 
 #define GETCURRENTDIR getcwd
 
@@ -458,6 +509,18 @@ typedef union _LARGE_INTEGER {
 	long long QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
 
+inline std::string STR_DIR_SEP(const std::string pathname)
+{
+	std::string result = pathname;
+	size_t pos = 0;
+	while ((pos = result.find("\\", pos)) != std::string::npos)
+	{
+		result.replace(pos, 1, "/");
+		pos++;
+	}
+	return result;
+}
+
 inline bool FIND_FILES_4D(std::wstring path_name,
 	std::wstring id, std::vector<std::wstring> &batch_list,
 	int &cur_batch)
@@ -571,10 +634,36 @@ inline FILE* FOPEN(FILE ** fp, const char* filename, const char* mode) {
 	return *fp;
 }
 
+inline void OutputStreamOpen(std::ofstream &os, std::string fname)
+{
+	os.open(fname);
+}
+
+inline void OutputStreamOpenW(std::wofstream &os, std::wstring fname)
+{
+    //os.open(L"test");//fname.c_str());
+}
+
+inline int MkDir(std::string dirname)
+{
+	return mkdir(dirname.c_str(), 0777);
+}
+
+inline int MkDirW(std::wstring dirname)
+{
+	return mkdir(ws2s(dirname).c_str(), 0777);
+}
+
 inline uint32_t GET_TICK_COUNT() {
 	struct timeval ts;
 	gettimeofday(&ts, NULL);
 	return ts.tv_sec * 1000 + ts.tv_usec / 1000;
+}
+
+inline void SaveConfig(wxFileConfig &file, wxString str)
+{
+	wxFileOutputStream os(str);
+	file.Save(os);
 }
 
 //LINUX SPECIFIC

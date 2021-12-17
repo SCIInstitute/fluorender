@@ -400,7 +400,7 @@ private:
 	//name pattern
 	void AnalyzeNamePattern(std::wstring &path_name);
 	void AddPatternR(wchar_t c, size_t pos);//add backwards
-	std::wstring GetSearchString(int mode);
+	std::wstring GetSearchString(int mode, int t);
 	int GetPatternNumber(std::wstring &path_name, int mode, bool count=false);
 
 	//invalidate page info

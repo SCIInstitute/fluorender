@@ -47,14 +47,14 @@ BEGIN_EVENT_TABLE(KeyListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 
 KeyListCtrl::KeyListCtrl(
-	wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+	VRenderFrame* frame,
+	RecorderDlg* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxListCtrl(parent, id, pos, size, style),
+wxListCtrl(parent, wxID_ANY, pos, size, style),
 m_frame(frame),
+m_recdlg(parent),
 m_editing_item(-1),
 m_dragging_to_item(-1)
 {
@@ -132,10 +132,9 @@ void KeyListCtrl::DeleteSel()
 	long id;
 	str.ToLong(&id);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 	interpolator->RemoveKey(id);
@@ -144,10 +143,9 @@ void KeyListCtrl::DeleteSel()
 
 void KeyListCtrl::DeleteAll()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 	interpolator->Clear();
@@ -162,10 +160,9 @@ void KeyListCtrl::Update()
 	m_description_text->Hide();
 	m_editing_item = -1;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -183,10 +180,9 @@ void KeyListCtrl::Update()
 
 void KeyListCtrl::UpdateText()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -224,22 +220,19 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 	long id;
 	str.ToLong(&id);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame || !m_recdlg)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
 	int index = interpolator->GetKeyIndex(int(id));
 	double time = interpolator->GetKeyTime(index);
-	VRenderView* view = vr_frame->GetRecorderDlg()->GetView();
-	if (!view)
-		view = vr_frame->GetView(0);
+	VRenderGLView* view = m_recdlg->GetView();
 	if (view)
 	{
-		view->m_glview->SetParams(time);
-		view->RefreshGL();
+		view->SetParams(time);
+		view->RefreshGL(39);
 	}
 }
 
@@ -337,10 +330,9 @@ void KeyListCtrl::OnFrameText(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -362,10 +354,9 @@ void KeyListCtrl::OnDurationText(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -388,10 +379,9 @@ void KeyListCtrl::OnInterpoCmb(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -415,10 +405,9 @@ void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
 	long id;
 	str.ToLong(&id);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -470,10 +459,9 @@ void KeyListCtrl::OnDragging(wxMouseEvent& event)
 	long index = HitTest(pos, flags, NULL); // got to use it at last
 	if (index >=0 && index != m_editing_item && index != m_dragging_to_item)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (!vr_frame)
+		if (!m_frame)
 			return;
-		Interpolator* interpolator = vr_frame->GetInterpolator();
+		Interpolator* interpolator = m_frame->GetInterpolator();
 		if (!interpolator)
 			return;
 
@@ -528,7 +516,7 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_CamLockBtn, RecorderDlg::OnCamLockBtn)
 END_EVENT_TABLE()
 
-RecorderDlg::RecorderDlg(wxWindow* frame, wxWindow* parent)
+RecorderDlg::RecorderDlg(VRenderFrame* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
 wxPoint(500, 150), wxSize(450, 650),
 0, "RecorderDlg"),
@@ -543,26 +531,11 @@ m_cam_lock_type(0)
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st = 0;
-	/*wxBoxSizer *group1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, wxID_ANY, "Automatic Keys:");
-	m_auto_key_cmb = new wxComboBox(this, ID_AutoKeyCmb, "",
-		wxDefaultPosition, wxSize(180, 30), 0, NULL, wxCB_READONLY);
-	m_auto_key_cmb->Append("Channel combination nC1");
-	m_auto_key_cmb->Append("Channel combination nC2");
-	m_auto_key_cmb->Append("Channel combination nC3");
-	m_auto_key_cmb->Select(1);
-	m_auto_key_btn = new wxButton(this, ID_AutoKeyBtn, "Generate",
-		wxDefaultPosition, wxSize(75, 23));
-	group1->Add(st, 0, wxALIGN_CENTER);
-	group1->Add(5, 5);
-	group1->Add(m_auto_key_cmb, 0, wxALIGN_CENTER);
-	group1->Add(5, 5);
-	group1->Add(m_auto_key_btn, 0, wxALIGN_CENTER);*/
 
 	//list
 	wxBoxSizer *group2 = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, wxID_ANY, "Key Frames:");
-	m_keylist = new KeyListCtrl(frame, this, wxID_ANY);
+	m_keylist = new KeyListCtrl(frame, this);
 	group2->Add(st, 0, wxEXPAND);
 	group2->Add(5, 5);
 	group2->Add(m_keylist, 1, wxEXPAND);
@@ -639,9 +612,9 @@ RecorderDlg::~RecorderDlg()
 {
 }
 
-void RecorderDlg::GetSettings(VRenderView* vrv)
+void RecorderDlg::GetSettings(VRenderGLView* view)
 {
-	m_view = vrv;
+	m_view = view;
 }
 
 void RecorderDlg::SetSelection(int index)
@@ -692,10 +665,9 @@ void RecorderDlg::OnSetKey(wxCommandEvent &event)
 void RecorderDlg::OnInsKey(wxCommandEvent &event)
 {
 	wxString str;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	Interpolator* interpolator = vr_frame->GetInterpolator();
+	Interpolator* interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 	long item = m_keylist->GetNextItem(-1,
@@ -712,7 +684,7 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 	//check if 4D
 	bool is_4d = false;
 	VolumeData* vd = 0;
-	DataManager* mgr = vr_frame->GetDataManager();
+	DataManager* mgr = m_frame->GetDataManager();
 	if (mgr)
 	{
 		for (int i = 0; i < mgr->GetVolumeNum(); i++)
@@ -729,13 +701,13 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 	double duration = 0.0;
 	if (is_4d)
 	{
-		Interpolator *interpolator = vr_frame->GetInterpolator();
+		Interpolator *interpolator = m_frame->GetInterpolator();
 		if (interpolator && m_view)
 		{
 			double ct = vd->GetCurTime();
 			FlKeyCode keycode;
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->GetName();
+			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			keycode.l2 = 0;
@@ -760,21 +732,20 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 
 void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
 	if (!m_view)
 	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
+		if (m_frame->GetView(0))
+			m_view = m_frame->GetView(0);
 		else
 			return;
 	}
 
-	DataManager* mgr = vr_frame->GetDataManager();
+	DataManager* mgr = m_frame->GetDataManager();
 	if (!mgr)
 		return;
-	Interpolator *interpolator = vr_frame->GetInterpolator();
+	Interpolator *interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 	FlKeyCode keycode;
@@ -793,7 +764,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	{
 		VolumeData* vd = mgr->GetVolumeData(i);
 		keycode.l0 = 1;
-		keycode.l0_name = m_view->GetName();
+		keycode.l0_name = m_view->m_vrv->GetName();
 		keycode.l1 = 2;
 		keycode.l1_name = vd->GetName();
 		//display
@@ -860,16 +831,13 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->GetName();
+	keycode.l0_name = m_view->m_vrv->GetName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->GetName();
+	keycode.l1_name = m_view->m_vrv->GetName();
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	//double rotx, roty, rotz;
-	//m_view->GetRotations(rotx, roty, rotz);
-	fluo::Quaternion q = m_view->m_glview->GetRotations();
-	//q.FromEuler(rotx, roty, rotz);
+	fluo::Quaternion q = m_view->GetRotations();
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	interpolator->AddKey(flkeyQ);
 	//translation
@@ -916,7 +884,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//scale
-	double scale = m_view->m_glview->m_scale_factor;
+	double scale = m_view->m_scale_factor;
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
 	interpolator->AddKey(flkey);
@@ -939,10 +907,6 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	FlKeyGroup* group = interpolator->GetKeyGroup(interpolator->GetLastIndex());
 	if (group)
 		group->type = interpolation;
-
-	//insert
-	//if (index >= 0)
-	//	interpolator->MoveKeyBefore(interpolator->GetLastIndex(), index+1);
 }
 
 bool RecorderDlg::MoveOne(vector<bool>& chan_mask, int lv)
@@ -994,21 +958,20 @@ bool RecorderDlg::GetMask(vector<bool>& chan_mask)
 
 void RecorderDlg::AutoKeyChanComb(int comb)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
 	if (!m_view)
 	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
+		if (m_frame->GetView(0))
+			m_view = m_frame->GetView(0);
 		else
 			return;
 	}
 
-	DataManager* mgr = vr_frame->GetDataManager();
+	DataManager* mgr = m_frame->GetDataManager();
 	if (!mgr)
 		return;
-	Interpolator *interpolator = vr_frame->GetInterpolator();
+	Interpolator *interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 
@@ -1044,7 +1007,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->GetName();
+			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->GetName();
 			//display only
@@ -1119,98 +1082,5 @@ void RecorderDlg::OnCamLockCmb(wxCommandEvent &event)
 
 void RecorderDlg::OnCamLockBtn(wxCommandEvent &event)
 {
-	m_view->m_glview->SetLockCenter(m_cam_lock_type);
+	m_view->SetLockCenter(m_cam_lock_type);
 }
-
-/*void RecorderDlg::OnPreview(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
-		return;
-	if (!m_view)
-	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
-		else
-			return;
-	}
-
-	Interpolator *interpolator = vr_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	wxString filename = "";
-	int begin_frame = int(interpolator->GetFirstT());
-	int end_frame = int(interpolator->GetLastT());
-	m_view->SetParamCapture(filename, begin_frame, end_frame, true);
-
-}
-
-void RecorderDlg::OnReset(wxCommandEvent &event)
-{
-	if (m_view)
-	{
-		m_view->m_glview->SetParams(0);
-		m_view->RefreshGL();
-	}
-}
-
-void RecorderDlg::OnPlay(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
-		return;
-	if (!m_view)
-	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
-		else
-			return;
-	}
-
-	Interpolator *interpolator = vr_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Save Movie Sequence", 
-		"", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
-
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		int begin_frame = int(interpolator->GetFirstT());
-		int end_frame = int(interpolator->GetLastT());
-		m_view->SetParamCapture(filename, begin_frame, end_frame, false);
-
-		if (vr_frame->GetSettingDlg() &&
-			vr_frame->GetSettingDlg()->GetProjSave())
-		{
-			wxString new_folder;
-			new_folder = filename + "_project";
-			wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
-			wxString prop_file = new_folder + GETSLASH()
-				+ fopendlg->GetFilename() + "_project.vrp";
-			vr_frame->SaveProject(prop_file);
-		}
-	}
-
-	delete fopendlg;
-}
-
-void RecorderDlg::OnStop(wxCommandEvent &event)
-{
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
-		return;
-	if (!m_view)
-	{
-		if (vr_frame && vr_frame->GetView(0))
-			m_view = vr_frame->GetView(0);
-		else
-			return;
-	}
-	m_view->StopMovie();
-}*/

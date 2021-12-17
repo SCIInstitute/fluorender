@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Stencil_h
 #define FL_Stencil_h
 
+#include "exmax1.h"
 #include <Types/BBox.h>
 #include <unordered_map>
 
@@ -36,7 +37,7 @@ namespace flrd
 	struct Stencil
 	{
 		Stencil() :
-		data(0), scale(1.0f) {}
+		data(0), scale(1.0f), fsize(1) {}
 		
 		bool valid() const
 		{
@@ -59,6 +60,54 @@ namespace flrd
 		{
 			box.extend(fluo::Point(i, j, k));
 		}
+		float get(size_t i, size_t j, size_t k) const
+		{
+			if (!data)
+				return 0.0f;
+			if (!valid(i, j, k))
+				return 0.0f;
+			unsigned long long index =
+				(unsigned long long)nx*ny*k +
+				(unsigned long long)nx*j +
+				(unsigned long long)i;
+			if (bits == 8)
+				return ((unsigned char*)data)[index] / 255.0f;
+			else
+				return ((unsigned short*)data)[index] * scale / 65535.0f;
+		}
+		float getfilter(size_t i, size_t j, size_t k) const
+		{
+			if (!data)
+				return 0.0f;
+			if (!valid(i, j, k))
+				return 0.0f;
+			if (fsize > 1)
+			{
+				size_t count = 0;
+				float sum = 0;
+				float val;
+				int lb = fsize / 2 + fsize % 2 - 1;
+				int ub = fsize / 2;
+				for (int ii = -lb; ii <= ub; ++ii)
+				for (int jj = -lb; jj <= ub; ++jj)
+				//for (int kk = -lb; kk <= ub; ++kk)
+				{
+					val = get(i + ii, j + jj, k);
+					if (val > 0.0)
+					{
+						sum += val;
+						count++;
+					}
+				}
+				if (count)
+					return sum / count;
+			}
+			else
+			{
+				return get(i, j, k);
+			}
+			return 0.0f;
+		}
 
 		//pointer to the entire data
 		void* data;
@@ -69,6 +118,7 @@ namespace flrd
 		size_t bits;
 		float scale;
 		fluo::BBox box;
+		size_t fsize;//filter size (box)
 	};
 
 	typedef std::unordered_map<unsigned int, Stencil> StencilList;
@@ -99,21 +149,10 @@ namespace flrd
 		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
 		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
 		{
-			if (!s1.valid(i, j, k) ||
-				!s2.valid(i2, j2, k2))
-				continue;
 			//get v1
-			index = s1.nx*s1.ny*k + s1.nx*j + i;
-			if (s1.bits == 8)
-				v1 = ((unsigned char*)(s1.data))[index] / 255.0f;
-			else
-				v1 = ((unsigned short*)(s1.data))[index] * s1.scale / 65535.0f;
+			v1 = s1.getfilter(i, j, k);
 			//get v2
-			index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-			if (s2.bits == 8)
-				v2 = ((unsigned char*)(s2.data))[index] / 255.0f;
-			else
-				v2 = ((unsigned short*)(s2.data))[index] * s2.scale / 65535.0f;
+			v2 = s2.getfilter(i2, j2, k2);
 			//get d
 			d = fabs(v1 - v2);
 			result += d;
@@ -138,62 +177,37 @@ namespace flrd
 		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
 		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
-		float v1;
-		float v1max = 0;
-		float v2max = 0;
-		fluo::Point p1max, p2max;
+		float v1, v2, d1, d2, w;
 		size_t index;
 		size_t i, i2, j, j2, k, k2;
 		for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
 		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
 		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
 		{
-			if (!s1.valid(i, j, k) ||
-				!s2.valid(i2, j2, k2))
-				continue;
 			//get v1
-			index = s1.nx*s1.ny*k + s1.nx*j + i;
-			if (s1.bits == 8)
-				v1 = ((unsigned char*)(s1.data))[index] / 255.0f;
-			else
-				v1 = ((unsigned short*)(s1.data))[index] * s1.scale / 65535.0f;
+			v1 = s1.getfilter(i, j, k);
 			//get v2
-			//index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-			//if (s2.bits == 8)
-			//	v2 = ((unsigned char*)(s2.data))[index] / 255.0f;
-			//else
-			//	v2 = ((unsigned char*)(s2.data))[index] * s2.scale / 65535.0f;
-			//get d
-			if (v1 > v1max)
-			{
-				v1max = v1;
-				p1max = fluo::Point(i, j, k);
-			}
-			//if (v2 > v2max)
-			//{
-			//	v2max = v2;
-			//	p2max = flvr::Point(i2, j2, k2);
-			//}
+			v2 = s2.getfilter(i2, j2, k2);
+			//get d weighted
+			d1 = fabs(v1 - v2);
+			d2 = 1.0 - std::min(v1, v2);
+			w = d1 * d2;
+			result += w;
 		}
-		i2 = minx2 + (maxx - minx) / 2;
-		j2 = miny2 + (maxy - miny) / 2;
-		k2 = minz2 + (maxz - minz) / 2;
-		index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-		if (s2.bits == 8)
-			v2max = ((unsigned char*)(s2.data))[index] / 255.0f;
-		else
-			v2max = ((unsigned short*)(s2.data))[index] * s2.scale / 65535.0f;
-		result = fabs(v1max - v2max);
 		return result;
 	}
 
-	inline bool match_stencils(const Stencil& s1,
-		Stencil& s2, const fluo::Vector &ext,
-		fluo::Point &center, float &prob)
+	inline bool match_stencils(const Stencil& s1, Stencil& s2,
+		const fluo::Vector &ext, const fluo::Vector &off,
+		fluo::Point &center, float &prob,
+		int iter, float eps, float spcx,
+		float spcy, float spcz)
 	{
-		//std::ofstream file;
-		//file.open("E:/Data/Holly/test/test.txt");
-
+//#ifdef _DEBUG
+//		std::ofstream ofs;
+//		ofs.open("E:/Data/Test/pattern_tracking/test.data",
+//			std::ios::out | std::ios::binary);
+//#endif
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
 		range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
@@ -210,11 +224,12 @@ namespace flrd
 		size_t total = (maxx - minx + 1) *
 			(maxy - miny + 1) * (maxz - minz + 1);
 		float p;
-		float minp = total;
-		float sump = 0;
 		fluo::Point s2min(minx, miny, minz);
 		s2.box = fluo::BBox(s2min, s2min);
 		fluo::BBox s2temp = s2.box;
+		ExMax1 em1;
+		em1.SetSpacings(spcx, spcy, spcz);
+		em1.SetIter(iter, eps);
 		size_t i, j, k, ti, tj, tk;
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
@@ -222,30 +237,33 @@ namespace flrd
 		{
 			s2.box = s2temp;
 			s2.box.translate(fluo::Vector(ti, tj, tk));
-			p = s1 * s2;
-			//p = similar(s1, s2);
+			s2.box.translate(off);
+			//p = s1 * s2;
+			p = similar(s1, s2);
 
-			//file << p;
-			//if (i < maxx)
-			//	file << "\t";
-			//else
-			//	file << "\n";
-
-			sump += p;
-			if (p < minp)
-			{
-				minp = p;
-				center = s2.box.Min();
-			}
+			EmVec pnt = {
+				static_cast<double>(s2.box.Min().x()),
+				static_cast<double>(s2.box.Min().y()),
+				static_cast<double>(s2.box.Min().z())
+			};
+			em1.AddClusterPoint(
+					pnt, p);
+//#ifdef _DEBUG
+//			ofs.write((char*)(&p), sizeof(float));
+//#endif
 		}
-		prob = minp * total / sump;
-		//center += s1.box.size() / 2;
+
+		em1.Execute();
+		center = em1.GetCenter();
 		//center is actually the corner
 		s2.box = fluo::BBox(center,
 			fluo::Point(center + s1.box.size()));
 		s2.id = s1.id;
+		prob = em1.GetProb();
 
-		//file.close();
+//#ifdef _DEBUG
+//		ofs.close();
+//#endif
 		return true;
 	}
 

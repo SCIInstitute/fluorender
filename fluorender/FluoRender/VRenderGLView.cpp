@@ -64,15 +64,14 @@ EVT_TIMER(ID_ftrigger, VRenderGLView::OnQuitFscreen)
 EVT_CLOSE(VRenderGLView::OnClose)
 END_EVENT_TABLE()
 
-VRenderGLView::VRenderGLView(wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+VRenderGLView::VRenderGLView(VRenderFrame* frame,
+	VRenderView* parent,
 	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxGLCanvas(parent, attriblist, id, pos, size, style),
+	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
 	//public
 	//set gl
 	m_set_gl(false),
@@ -138,7 +137,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ruler_time_dep(true),
 	//private
 	m_frame(frame),
-	m_vrv((VRenderView*)parent),
+	m_vrv(parent),
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
@@ -230,7 +229,6 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_end_angle(0.0),
 	m_cur_angle(0.0),
 	m_step(0.0),
-	m_rot_axis(0),
 	m_movie_seq(0),
 	m_rewind(false),
 	m_stages(0),
@@ -352,8 +350,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_selector.LoadBrushSettings();
 
 	m_timer = new nv::Timer(10);
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBenchmark())
+	if (m_frame && m_frame->GetBenchmark())
 		m_benchmark = true;
 	else
 		m_benchmark = false;
@@ -364,11 +361,10 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 	m_ruler_renderer.SetRulerList(&m_ruler_list);
 	m_vp.SetView(this);
 	m_selector.SetView(this);
-	m_calculator.SetFrame((VRenderFrame*)m_frame);
+	m_calculator.SetFrame(m_frame);
 	m_calculator.SetView(this);
 	m_calculator.SetVolumeSelector(&m_selector);
-	m_scriptor.SetFrame((VRenderFrame*)m_frame);
-	m_scriptor.SetVrv(m_vrv);
+	m_scriptor.SetFrame(m_frame);
 	m_scriptor.SetView(this);
 }
 
@@ -398,8 +394,8 @@ HCTX VRenderGLView::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 	// modify the digitizing region
 	sprintf(m_lc.lcName,
-		"FluoRender Digitizing %x",
-		reinterpret_cast<unsigned int>(hInst));
+		"FluoRender Digitizing %llx",
+		reinterpret_cast<unsigned long long>(hInst));
 
 	// We process WT_PACKET (CXO_MESSAGES) messages.
 	m_lc.lcOptions |= CXO_MESSAGES;
@@ -570,11 +566,10 @@ VRenderGLView::~VRenderGLView()
 		m_full_screen = false;
 		m_vrv->m_glview = 0;
 		m_vrv->m_full_frame = 0;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			vr_frame->ClearVrvList();
-			vr_frame->Close();
+			m_frame->ClearVrvList();
+			m_frame->Close();
 		}
 	}
 
@@ -602,13 +597,12 @@ void VRenderGLView::Init()
 {
 	if (!m_initialized)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 		flvr::ShaderProgram::init_shaders_supported();
-		if (vr_frame && vr_frame->GetSettingDlg())
+		if (m_frame && m_frame->GetSettingDlg())
 		{
-			flvr::KernelProgram::set_platform_id(vr_frame->
+			flvr::KernelProgram::set_platform_id(m_frame->
 				GetSettingDlg()->GetCLPlatformID());
-			flvr::KernelProgram::set_device_id(vr_frame->
+			flvr::KernelProgram::set_device_id(m_frame->
 				GetSettingDlg()->GetCLDeviceID());
 		}
 		flvr::KernelProgram::init_kernels_supported();
@@ -617,11 +611,11 @@ void VRenderGLView::Init()
         if (ctx != flvr::TextureRenderer::gl_context_)
             flvr::TextureRenderer::gl_context_ = ctx;
 #endif
-		if (vr_frame)
+		if (m_frame)
 		{
-			vr_frame->SetTextureRendererSettings();
-			vr_frame->SetTextureUndos();
-			vr_frame->GetSettingDlg()->UpdateTextureSize();
+			m_frame->SetTextureRendererSettings();
+			m_frame->SetTextureUndos();
+			m_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		glEnable(GL_MULTISAMPLE);
@@ -630,6 +624,13 @@ void VRenderGLView::Init()
 
 		m_timer->start();
 	}
+}
+
+void VRenderGLView::ClearAll()
+{
+	Clear();
+	ClearVolList();
+	ClearMeshList();
 }
 
 void VRenderGLView::Clear()
@@ -1279,10 +1280,9 @@ void VRenderGLView::DrawVolumes(int peel)
 		m_force_clear = false;
 		m_load_update = false;
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame &&
-			vr_frame->GetSettingDlg() &&
-			vr_frame->GetSettingDlg()->GetUpdateOrder() == 1)
+		if (m_frame &&
+			m_frame->GetSettingDlg() &&
+			m_frame->GetSettingDlg()->GetUpdateOrder() == 1)
 		{
 			if (m_interactive)
 				ClearFinalBuffer();
@@ -1738,10 +1738,9 @@ void VRenderGLView::OrganizeLayers()
 				}
 			}
 
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame)
+			if (m_frame)
 			{
-				AdjustView* adjust_view = vr_frame->GetAdjustView();
+				AdjustView* adjust_view = m_frame->GetAdjustView();
 				if (adjust_view)
 				{
 					adjust_view->SetGroupLink(le_group);
@@ -2110,13 +2109,12 @@ void VRenderGLView::Segment()
 	}
 
 	//update
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		if (vr_frame->GetBrushToolDlg())
-			vr_frame->GetBrushToolDlg()->Update(count?0:1);
-		if (colocal && vr_frame->GetColocalizationDlg())
-			vr_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetBrushToolDlg())
+			m_frame->GetBrushToolDlg()->Update(count?0:1);
+		if (colocal && m_frame->GetColocalizationDlg())
+			m_frame->GetColocalizationDlg()->Colocalize();
 	}
 }
 
@@ -2124,9 +2122,8 @@ void VRenderGLView::Segment()
 void VRenderGLView::ChangeBrushSize(int value)
 {
 	m_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->GetSettings(m_vrv);
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->GetSettings(this);
 }
 
 //calculations
@@ -2378,8 +2375,6 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 
 	int i;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-
 	//count volumes with mask
 	int cnt_mask = 0;
 	for (i = 0; i<(int)list.size(); i++)
@@ -2413,11 +2408,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 			continue;
 		if (mask)
 		{
-			//when run script
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame &&
-				vr_frame->GetSettingDlg() &&
-				vr_frame->GetSettingDlg()->GetRunScript() &&
+			//drawlabel
+			if (vd->GetLabelMode() &&
 				vd->GetMask(false) &&
 				vd->GetLabel(false))
 				continue;
@@ -2439,11 +2431,8 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 		{
 			if (vd->GetBlendMode() != 2)
 			{
-				//when run script
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame &&
-					vr_frame->GetSettingDlg() &&
-					vr_frame->GetSettingDlg()->GetRunScript() &&
+				//drawlabel
+				if (vd->GetLabelMode() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
 					vd->SetMaskMode(4);
@@ -3105,9 +3094,8 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 	}
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
 	double dir_x = 0.0, dir_y = 0.0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
 	img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
 	//2d adjustment
 
@@ -3339,9 +3327,8 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		}
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
 		double dir_x = 0.0, dir_y = 0.0;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetSettingDlg())
-			vr_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
 		img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
 		//2d adjustment
 
@@ -3425,10 +3412,8 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 			flvr::VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (vr_frame &&
-					vr_frame->GetSettingDlg() &&
-					vr_frame->GetSettingDlg()->GetRunScript() &&
+				//drawlabel
+				if (vd->GetLabelMode() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
 					vd->SetMaskMode(4);
@@ -3541,7 +3526,6 @@ void VRenderGLView::SetBrush(int mode)
 {
 	m_prev_focus = FindFocus();
 	SetFocus();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
 	int ruler_type = m_ruler_handler.GetType();
 
@@ -3577,13 +3561,12 @@ void VRenderGLView::SetBrush(int mode)
 
 void VRenderGLView::UpdateBrushState()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	TreePanel* tree_panel = 0;
 	BrushToolDlg* brush_dlg = 0;
-	if (vr_frame)
+	if (m_frame)
 	{
-		tree_panel = vr_frame->GetTree();
-		brush_dlg = vr_frame->GetBrushToolDlg();
+		tree_panel = m_frame->GetTree();
+		brush_dlg = m_frame->GetBrushToolDlg();
 	}
 
 	if (m_int_mode != 2 && m_int_mode != 7)
@@ -3751,20 +3734,19 @@ void VRenderGLView::PickMesh()
 		MeshData* md = m_md_pop_list[choose - 1];
 		if (md)
 		{
-			VRenderFrame* frame = (VRenderFrame*)m_frame;
-			if (frame && frame->GetTree())
+			if (m_frame && m_frame->GetTree())
 			{
-				frame->GetTree()->SetFocus();
-				frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
+				m_frame->GetTree()->SetFocus();
+				m_frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
 			}
 			RefreshGL(27);
 		}
 	}
 	else
 	{
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
-		if (frame && frame->GetCurSelType() == 3 && frame->GetTree())
-			frame->GetTree()->Select(m_vrv->GetName(), "");
+		if (m_frame && m_frame->GetCurSelType() == 3 &&
+			m_frame->GetTree())
+			m_frame->GetTree()->Select(m_vrv->GetName(), "");
 	}
 	m_mv_mat = mv_temp;
 }
@@ -3820,11 +3802,10 @@ void VRenderGLView::PickVolume()
 
 	if (picked_vd)
 	{
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
-		if (frame && frame->GetTree())
+		if (m_frame && m_frame->GetTree())
 		{
-			frame->GetTree()->SetFocus();
-			frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
+			m_frame->GetTree()->SetFocus();
+			m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
 		}
 		//update label selection
 		SetCompSelection(ip, kmode);
@@ -3837,12 +3818,11 @@ void VRenderGLView::PickVolume()
 void VRenderGLView::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetComponentDlg())
+	if (m_frame && m_frame->GetComponentDlg())
 	{
 		std::set<unsigned long long> ids;
-		frame->GetComponentDlg()->GetAnalyzer()->GetCompsPoint(p, ids);
-		frame->GetComponentDlg()->SetCompSelection(ids, mode);
+		m_frame->GetComponentDlg()->GetAnalyzer()->GetCompsPoint(p, ids);
+		m_frame->GetComponentDlg()->SetCompSelection(ids, mode);
 	}
 }
 
@@ -3853,8 +3833,6 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 	bool start_loop = true;
 	bool set_focus = false;
 	m_retain_finalbuffer = false;
-
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
 
 	//check memory swap status
 	if (flvr::TextureRenderer::get_mem_swap() &&
@@ -3886,7 +3864,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		//m_retain_finalbuffer = true;
 	}
 
-	if (frame && frame->GetBenchmark())
+	if (m_frame && m_frame->GetBenchmark())
 	{
 		double fps = 1.0 / m_timer->average();
 		wxString title = wxString(FLUORENDER_TITLE) +
@@ -3894,7 +3872,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			"." + wxString(VERSION_MINOR_TAG) +
 			" Benchmarking... FPS = " +
 			wxString::Format("%.2f", fps);
-		frame->SetTitle(title);
+		m_frame->SetTitle(title);
 
 		refresh = true;
 		if (flvr::TextureRenderer::get_mem_swap() &&
@@ -4063,8 +4041,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 				wxGetKeyState(WXK_SPACE)))
 		{
 			m_tseq_forward = true;
-			if (frame && frame->GetMovieView())
-				frame->GetMovieView()->UpFrame();
+			if (m_frame && m_frame->GetMovieView())
+				m_frame->GetMovieView()->UpFrame();
 			refresh = true;
 			set_focus = true;
 		}
@@ -4077,8 +4055,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('a')))
 		{
 			m_tseq_backward = true;
-			if (frame && frame->GetMovieView())
-				frame->GetMovieView()->DownFrame();
+			if (m_frame && m_frame->GetMovieView())
+				m_frame->GetMovieView()->DownFrame();
 			refresh = true;
 			set_focus = true;
 		}
@@ -4092,8 +4070,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('s')))
 		{
 			m_clip_up = true;
-			if (frame && frame->GetClippingView())
-				frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+			if (m_frame && m_frame->GetClippingView())
+				m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
 			refresh = true;
 			set_focus = true;
 		}
@@ -4105,8 +4083,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('w')))
 		{
 			m_clip_down = true;
-			if (frame && frame->GetClippingView())
-				frame->GetClippingView()->MoveLinkedClippingPlanes(0);
+			if (m_frame && m_frame->GetClippingView())
+				m_frame->GetClippingView()->MoveLinkedClippingPlanes(0);
 			refresh = true;
 			set_focus = true;
 		}
@@ -4119,10 +4097,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('f')))
 		{
 			m_cell_full = true;
-			if (frame && frame->GetComponentDlg())
-				frame->GetComponentDlg()->SelectFullComp();
-			if (frame && frame->GetTraceDlg())
-				frame->GetTraceDlg()->CellUpdate();
+			if (m_frame && m_frame->GetComponentDlg())
+				m_frame->GetComponentDlg()->SelectFullComp();
+			if (m_frame && m_frame->GetTraceDlg())
+				m_frame->GetTraceDlg()->CellUpdate();
 			refresh = true;
 			set_focus = true;
 		}
@@ -4134,8 +4112,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('l')))
 		{
 			m_cell_link = true;
-			if (frame && frame->GetTraceDlg())
-				frame->GetTraceDlg()->CellLink(false);
+			if (m_frame && m_frame->GetTraceDlg())
+				m_frame->GetTraceDlg()->CellLink(false);
 			refresh = true;
 			set_focus = true;
 		}
@@ -4147,8 +4125,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('n')))
 		{
 			m_cell_new_id = true;
-			if (frame && frame->GetTraceDlg())
-				frame->GetTraceDlg()->CellNewID(false);
+			if (m_frame && m_frame->GetTraceDlg())
+				m_frame->GetTraceDlg()->CellNewID(false);
 			refresh = true;
 			set_focus = true;
 		}
@@ -4159,10 +4137,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('c')) &&
 			!m_clear_mask)
 		{
-			if (frame && frame->GetTree())
-				frame->GetTree()->BrushClear();
-			if (frame && frame->GetTraceDlg())
-				frame->GetTraceDlg()->CompClear();
+			if (m_frame && m_frame->GetTree())
+				m_frame->GetTree()->BrushClear();
+			if (m_frame && m_frame->GetTraceDlg())
+				m_frame->GetTraceDlg()->CompClear();
 			m_clear_mask = true;
 			refresh = true;
 			set_focus = true;
@@ -4174,8 +4152,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('m')) &&
 			!m_save_mask)
 		{
-			if (frame && frame->GetList())
-				frame->GetList()->SaveAllMasks();
+			if (m_frame && m_frame->GetList())
+				m_frame->GetList()->SaveAllMasks();
 			m_save_mask = true;
 			set_focus = true;
 		}
@@ -4202,8 +4180,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(WXK_RETURN) &&
 			!m_comp_include)
 		{
-			if (frame && frame->GetComponentDlg())
-				frame->GetComponentDlg()->IncludeComps();
+			if (m_frame && m_frame->GetComponentDlg())
+				m_frame->GetComponentDlg()->IncludeComps();
 			m_comp_include = true;
 			refresh = true;
 			set_focus = true;
@@ -4215,8 +4193,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('\\')) &&
 			!m_comp_exclude)
 		{
-			if (frame && frame->GetComponentDlg())
-				frame->GetComponentDlg()->ExcludeComps();
+			if (m_frame && m_frame->GetComponentDlg())
+				m_frame->GetComponentDlg()->ExcludeComps();
 			m_comp_exclude = true;
 			refresh = true;
 			set_focus = true;
@@ -4228,8 +4206,8 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('r')) &&
 			!m_ruler_relax)
 		{
-			if (frame && frame->GetMeasureDlg())
-				frame->GetMeasureDlg()->Relax();
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->Relax();
 			m_ruler_relax = true;
 			refresh = true;
 			set_focus = true;
@@ -4244,10 +4222,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			wxGetMouseState().LeftIsDown() &&
 			m_grow_on)
 		{
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 			int sz = 5;
-			if (vr_frame && vr_frame->GetSettingDlg())
-				sz = vr_frame->GetSettingDlg()->GetRulerSizeThresh();
+			if (m_frame && m_frame->GetSettingDlg())
+				sz = m_frame->GetSettingDlg()->GetRulerSizeThresh();
 			//event.RequestMore();
 			m_selector.SetInitMask(2);
 			Segment();
@@ -4263,14 +4240,14 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			refresh = true;
 			start_loop = true;
 			//update
-			if (vr_frame)
+			if (m_frame)
 			{
-				if (m_paint_count && vr_frame->GetBrushToolDlg())
-					vr_frame->GetBrushToolDlg()->Update(0);
-				if (m_paint_colocalize && vr_frame->GetColocalizationDlg())
-					vr_frame->GetColocalizationDlg()->Colocalize();
-				if (m_int_mode == 12 && vr_frame->GetMeasureDlg())
-					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				if (m_paint_count && m_frame->GetBrushToolDlg())
+					m_frame->GetBrushToolDlg()->Update(0);
+				if (m_paint_colocalize && m_frame->GetColocalizationDlg())
+					m_frame->GetColocalizationDlg()->Colocalize();
+				if (m_int_mode == 12 && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->GetSettings(this);
 			}
 		}
 
@@ -4280,13 +4257,13 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			SetFocus();
 			m_clear_buffer = true;
 			m_updating = true;
-			if (frame && frame->GetStatusBar())
-				frame->GetStatusBar()->PushStatusText("Forced Refresh");
+			if (m_frame && m_frame->GetStatusBar())
+				m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
 			wxSizeEvent e;
 			OnResize(e);
 			RefreshGL(14);
-			if (frame && frame->GetStatusBar())
-				frame->GetStatusBar()->PopStatusText();
+			if (m_frame && m_frame->GetStatusBar())
+				m_frame->GetStatusBar()->PopStatusText();
 			return;
 		}
 	}
@@ -4449,8 +4426,7 @@ void VRenderGLView::OnKeyDown(wxKeyEvent& event)
 void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 {
 	m_fullscreen_trigger.Stop();
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (!frame || !m_vrv)
+	if (!m_frame || !m_vrv)
 		return;
 
 	m_full_screen = false;
@@ -4458,8 +4434,8 @@ void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 	{
 		if (m_vrv->m_full_frame)
 			m_vrv->m_full_frame->Hide();
-		if (frame)
-			frame->Close();
+		if (m_frame)
+			m_frame->Close();
 	}
 	else if (GetParent() == m_vrv->m_full_frame)
 	{
@@ -4467,17 +4443,17 @@ void VRenderGLView::OnQuitFscreen(wxTimerEvent& event)
 		m_vrv->m_view_sizer->Add(this, 1, wxEXPAND);
 		m_vrv->Layout();
 		m_vrv->m_full_frame->Hide();
-		if (frame)
+		if (m_frame)
 		{
 #ifdef _WIN32
-			if (frame->GetSettingDlg() &&
-				!frame->GetSettingDlg()->GetShowCursor())
+			if (m_frame->GetSettingDlg() &&
+				!m_frame->GetSettingDlg()->GetShowCursor())
 				ShowCursor(true);
 #endif
-			frame->Iconize(false);
-			frame->SetFocus();
-			frame->Raise();
-			frame->Show();
+			m_frame->Iconize(false);
+			m_frame->SetFocus();
+			m_frame->Raise();
+			m_frame->Show();
 		}
 		RefreshGL(40);
 	}
@@ -4501,53 +4477,35 @@ void VRenderGLView::Set3DRotCapture(double start_angle,
 	bool rewind,
 	int len)
 {
-	double x, y, z;
-	GetRotations(x, y, z);
+	double rv[3];
+	GetRotations(rv[0], rv[1], rv[2]);
 
 	//remove the chance of the x/y/z angles being outside 360.
-	while (x > 360.)  x -= 360.;
-	while (x < -360.) x += 360.;
-	while (y > 360.)  y -= 360.;
-	while (y < -360.) y += 360.;
-	while (z > 360.)  z -= 360.;
-	while (z < -360.) z += 360.;
-	if (360. - std::abs(x) < 0.001) x = 0.;
-	if (360. - std::abs(y) < 0.001) y = 0.;
-	if (360. - std::abs(z) < 0.001) z = 0.;
+	while (rv[0] > 360.)  rv[0] -= 360.;
+	while (rv[0] < -360.) rv[0] += 360.;
+	while (rv[1] > 360.)  rv[1] -= 360.;
+	while (rv[1] < -360.) rv[1] += 360.;
+	while (rv[2] > 360.)  rv[2] -= 360.;
+	while (rv[2] < -360.) rv[2] += 360.;
+	if (360. - std::abs(rv[0]) < 0.001) rv[0] = 0.;
+	if (360. - std::abs(rv[1]) < 0.001) rv[1] = 0.;
+	if (360. - std::abs(rv[2]) < 0.001) rv[2] = 0.;
+
 	m_step = step;
 	m_total_frames = frames;
-	m_rot_axis = rot_axis;
 	m_cap_file = cap_file;
 	m_rewind = rewind;
-
 	m_movie_seq = 0;
-	switch (m_rot_axis)
+
+	m_rot_axis = rot_axis;
+	if (start_angle == 0.)
 	{
-	case 1: //X
-		if (start_angle == 0.) {
-			m_init_angle = x;
-			m_end_angle = x + end_angle;
-		}
-		m_cur_angle = x;
-		m_start_angle = x;
-		break;
-	case 2: //Y
-		if (start_angle == 0.) {
-			m_init_angle = y;
-			m_end_angle = y + end_angle;
-		}
-		m_cur_angle = y;
-		m_start_angle = y;
-		break;
-	case 3: //Z
-		if (start_angle == 0.) {
-			m_init_angle = z;
-			m_end_angle = z + end_angle;
-		}
-		m_cur_angle = z;
-		m_start_angle = z;
-		break;
+		m_init_angle = rv[m_rot_axis];
+		m_end_angle = rv[m_rot_axis] + end_angle;
 	}
+	m_cur_angle = rv[m_rot_axis];
+	m_start_angle = rv[m_rot_axis];
+
 	m_capture = true;
 	m_capture_rotat = true;
 	m_capture_rotate_over = false;
@@ -4566,7 +4524,7 @@ void VRenderGLView::Set3DBatCapture(wxString &cap_file, int begin_frame, int end
 	{
 		wxString new_folder = wxPathOnly(m_cap_file)
 			+ GETSLASH() + m_bat_folder + "_folder";
-		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		MkDirW(new_folder.ToStdWstring());
 	}
 }
 
@@ -4581,9 +4539,6 @@ void VRenderGLView::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end
 	m_capture = true;
 	m_movie_seq = begin_frame;
 	m_4d_rewind = rewind;
-	VRenderFrame* vframe = (VRenderFrame*)m_frame;
-	if (vframe && vframe->GetSettingDlg())
-		m_run_script = vframe->GetSettingDlg()->GetRunScript();
 }
 
 void VRenderGLView::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
@@ -4602,11 +4557,10 @@ void VRenderGLView::SetParams(double t)
 {
 	if (!m_vrv)
 		return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	ClippingView* clip_view = vr_frame->GetClippingView();
-	Interpolator *interpolator = vr_frame->GetInterpolator();
+	ClippingView* clip_view = m_frame->GetClippingView();
+	Interpolator *interpolator = m_frame->GetInterpolator();
 	if (!interpolator)
 		return;
 	FlKeyCode keycode;
@@ -4681,8 +4635,7 @@ void VRenderGLView::SetParams(double t)
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		if (interpolator->GetDouble(keycode, t, frame))
-			UpdateVolumeData(int(frame + 0.5), false,
-				vd, vr_frame);
+			UpdateVolumeData(int(frame + 0.5), vd);
 	}
 
 	bool bx, by, bz;
@@ -4761,34 +4714,24 @@ void VRenderGLView::SetParams(double t)
 		}
 	}
 
-	if (clip_view)
-		clip_view->SetVolumeData(vr_frame->GetCurSelVol());
-	if (vr_frame)
+	if (m_frame && clip_view)
+		clip_view->SetVolumeData(m_frame->GetCurSelVol());
+	if (m_frame)
 	{
-		vr_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : "");
+		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : "");
 		int index = interpolator->GetKeyIndexFromTime(t);
-		vr_frame->GetRecorderDlg()->SetSelection(index);
+		m_frame->GetRecorderDlg()->SetSelection(index);
 	}
 	SetVolPopDirty();
 }
 
 void VRenderGLView::ResetMovieAngle()
 {
-	double rotx, roty, rotz;
-	GetRotations(rotx, roty, rotz);
+	double rv[3];
+	GetRotations(rv[0], rv[1], rv[2]);
+	rv[m_rot_axis] = m_init_angle;
+	SetRotations(rv[0], rv[1], rv[2]);
 
-	switch (m_rot_axis)
-	{
-	case 1:  //x
-		SetRotations(m_init_angle, roty, rotz);
-		break;
-	case 2:  //y
-		SetRotations(rotx, m_init_angle, rotz);
-		break;
-	case 3:  //z
-		SetRotations(rotx, roty, m_init_angle);
-		break;
-	}
 	m_capture = false;
 	m_capture_rotat = false;
 
@@ -4803,7 +4746,7 @@ void VRenderGLView::StopMovie()
 	m_capture_param = false;
 }
 
-void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame)
+void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 {
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -4821,7 +4764,6 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 				//first dataset
 				start_frame = vd_start_frame;
 				end_frame = vd_end_frame;
-				cur_frame = vd_cur_frame;
 			}
 			else
 			{
@@ -4833,8 +4775,7 @@ void VRenderGLView::Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_fr
 	}
 }
 
-void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
-	VolumeData* vd, VRenderFrame* vframe)
+void VRenderGLView::UpdateVolumeData(int frame, VolumeData* vd)
 {
 	if (vd && vd->GetReader())
 	{
@@ -4858,8 +4799,8 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
 				vd->SetCurTime(reader->GetCurTime());
 				//update rulers
-				if (vframe && vframe->GetMeasureDlg())
-					vframe->GetMeasureDlg()->UpdateList();
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->UpdateList();
 			}
 			else
 			{
@@ -4874,8 +4815,8 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 				vd->SetSpacings(spcx, spcy, spcz);
 
 				//update rulers
-				if (vframe && vframe->GetMeasureDlg())
-					vframe->GetMeasureDlg()->UpdateList();
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->UpdateList();
 
 				clear_pool = true;
 			}
@@ -4886,111 +4827,13 @@ void VRenderGLView::UpdateVolumeData(int frame, bool run_script,
 	}
 }
 
-void VRenderGLView::Set4DSeqFrame(int frame, bool run_script)
-{
-	//compute frame number
-	int start_frame, end_frame, cur_frame;
-	Get4DSeqFrames(start_frame, end_frame, cur_frame);
-	m_begin_frame = start_frame;
-	m_end_frame = end_frame;
-	m_total_frames = std::abs(end_frame - start_frame + 1);
-	if (frame > end_frame)
-		frame = end_frame;
-	if (frame < start_frame)
-		frame = start_frame;
-	//skip if frame unchanged
-	if (m_tseq_cur_num == frame)
-		return;
-
-	//get settings
-	VRenderFrame* vframe = (VRenderFrame*)m_frame;
-	if (vframe && vframe->GetSettingDlg())
-	{
-		m_run_script = vframe->GetSettingDlg()->GetRunScript();
-		m_script_file = vframe->GetSettingDlg()->GetScriptFile();
-	}
-
-	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
-
-	//run pre-change script
-	if (run_script && m_run_script)
-		m_scriptor.Run4DScript(0, m_script_file);
-
-	//change time frame
-	m_tseq_prv_num = m_tseq_cur_num;
-	m_tseq_cur_num = frame;
-
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_pop_list[i];
-		UpdateVolumeData(frame, run_script,
-			vd, vframe);
-	}
-
-	//run post-change script
-	if (run_script && m_run_script)
-		m_scriptor.Run4DScript(1, m_script_file);
-
-	//restore currently selected volume
-	m_cur_vol = cur_vd_save;
-	m_selector.SetVolume(m_cur_vol);
-	m_calculator.SetVolumeA(m_cur_vol);
-
-	RefreshGL(17);
-}
-
-void VRenderGLView::Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
-{
-	m_bat_folder = "";
-
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_pop_list[i];
-		if (vd && vd->GetReader())
-		{
-			BaseReader* reader = vd->GetReader();
-			reader->SetBatch(true);
-
-			int vd_cur_frame = reader->GetCurBatch();
-			int vd_start_frame = -vd_cur_frame;
-			int vd_end_frame = reader->GetBatchNum() - 1 - vd_cur_frame;
-
-			if (i > 0)
-				m_bat_folder += "_";
-			m_bat_folder += wxString(reader->GetDataName());
-
-			if (i == 0)
-			{
-				//first dataset
-				start_frame = vd_start_frame;
-				end_frame = vd_end_frame;
-				cur_frame = 0;
-			}
-			else
-			{
-				//datasets after the first one
-				if (vd_start_frame < start_frame)
-					start_frame = vd_start_frame;
-				if (vd_end_frame > end_frame)
-					end_frame = vd_end_frame;
-			}
-		}
-	}
-	cur_frame -= start_frame;
-	end_frame -= start_frame;
-	start_frame = 0;
-}
-
-void VRenderGLView::Set3DBatFrame(int offset)
+void VRenderGLView::ReloadVolumeData(int frame)
 {
 	int i, j;
 	vector<BaseReader*> reader_list;
 	m_bat_folder = "";
 
-	m_tseq_prv_num = m_tseq_cur_num;
-	m_tseq_cur_num = offset;
-	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
+	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
@@ -5001,7 +4844,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 			{
 				BRKXMLReader *br = (BRKXMLReader *)reader;
 				int curlv = tex->GetCurLevel();
-				for (int j = 0; j < br->GetLevelNum(); j++)
+				for (j = 0; j < br->GetLevelNum(); j++)
 				{
 					tex->setLevel(j);
 					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
@@ -5019,7 +4862,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 					chan_num = 1;
 				else if (data_name.Find("_2ch") != -1)
 					chan_num = 2;
-				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
+				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
 					vd->SetDisp(false);
 				else
 					vd->SetDisp(true);
@@ -5030,9 +4873,8 @@ void VRenderGLView::Set3DBatFrame(int offset)
 			}
 			else
 			{
-				//if (reader->GetOffset() == offset) return;
 				bool found = false;
-				for (j = 0; j<(int)reader_list.size(); j++)
+				for (j = 0; j < (int)reader_list.size(); j++)
 				{
 					if (reader == reader_list[j])
 					{
@@ -5042,7 +4884,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 				}
 				if (!found)
 				{
-					reader->LoadOffset(offset);
+					reader->LoadOffset(frame);
 					reader_list.push_back(reader);
 				}
 
@@ -5068,7 +4910,7 @@ void VRenderGLView::Set3DBatFrame(int offset)
 					chan_num = 1;
 				else if (data_name.Find("_2ch") != -1)
 					chan_num = 2;
-				if (chan_num>0 && vd->GetCurChannel() >= chan_num)
+				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
 					vd->SetDisp(false);
 				else
 					vd->SetDisp(true);
@@ -5090,17 +4932,125 @@ void VRenderGLView::Set3DBatFrame(int offset)
 
 	InitView(INIT_BOUNDS | INIT_CENTER);
 
-	RefreshGL(18);
-
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		vr_frame->UpdateList();
-		vr_frame->UpdateTree(
-			vr_frame->GetCurSelVol() ?
-			vr_frame->GetCurSelVol()->GetName() :
+		m_frame->UpdateList();
+		m_frame->UpdateTree(
+			m_frame->GetCurSelVol() ?
+			m_frame->GetCurSelVol()->GetName() :
 			"");
 	}
+}
+
+void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
+{
+	//skip update if frame num unchanged
+	bool update = m_tseq_cur_num == frame ? false : true;
+	//compute frame number
+	m_begin_frame = start_frame;
+	m_end_frame = end_frame;
+	m_total_frames = std::abs(end_frame - start_frame + 1);
+
+	//save currently selected volume
+	VolumeData* cur_vd_save = m_cur_vol;
+
+	//run pre-change script
+	if (update && m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+
+	//change time frame
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+
+	if (update)
+	for (auto i : m_vd_pop_list)
+		UpdateVolumeData(frame, i);
+
+	//run post-change script
+	if (update && m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
+
+	//restore currently selected volume
+	m_cur_vol = cur_vd_save;
+	m_selector.SetVolume(m_cur_vol);
+	m_calculator.SetVolumeA(m_cur_vol);
+
+	RefreshGL(17);
+}
+
+void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
+{
+	m_bat_folder = "";
+
+	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
+	{
+		VolumeData* vd = m_vd_pop_list[i];
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
+			reader->SetBatch(true);
+
+			int vd_cur_frame = reader->GetCurBatch();
+			int vd_start_frame = -vd_cur_frame;
+			int vd_end_frame = reader->GetBatchNum() - 1 - vd_cur_frame;
+
+			if (i > 0)
+				m_bat_folder += "_";
+			m_bat_folder += wxString(reader->GetDataName());
+
+			if (i == 0)
+			{
+				//first dataset
+				start_frame = vd_start_frame;
+				end_frame = vd_end_frame;
+			}
+			else
+			{
+				//datasets after the first one
+				if (vd_start_frame < start_frame)
+					start_frame = vd_start_frame;
+				if (vd_end_frame > end_frame)
+					end_frame = vd_end_frame;
+			}
+		}
+	}
+	end_frame -= start_frame;
+	start_frame = 0;
+}
+
+void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
+{
+	//skip update if frame num unchanged
+	bool update = m_tseq_cur_num == frame ? false : true;
+	//compute frame number
+	m_begin_frame = start_frame;
+	m_end_frame = end_frame;
+	m_total_frames = std::abs(end_frame - start_frame + 1);
+
+	//save currently selected volume
+	VolumeData* cur_vd_save = m_cur_vol;
+
+	//run pre-change script
+	if (update && m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, m_script_file, rewind);
+
+	//change time frame
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+
+	if (update)
+		ReloadVolumeData(frame);
+
+	//run post-change script
+	if (update && m_run_script)
+		m_scriptor.Run4DScript(flrd::ScriptProc::TM_ALL_POST, m_script_file, rewind);
+
+	//restore currently selected volume
+	m_cur_vol = cur_vd_save;
+	m_selector.SetVolume(m_cur_vol);
+	m_calculator.SetVolumeA(m_cur_vol);
+
+	RefreshGL(18);
 }
 
 //pre-draw processings
@@ -5304,16 +5254,14 @@ void VRenderGLView::ForceDraw()
 	{
 		SetCurrent(*m_glRC);
 		m_set_gl = true;
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			for (int i = 0; i<vr_frame->GetViewNum(); i++)
+			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = vr_frame->GetView(i);
-				if (view && view->m_glview &&
-					view->m_glview != this)
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view && view != this)
 				{
-					view->m_glview->m_set_gl = false;
+					view->m_set_gl = false;
 				}
 			}
 		}
@@ -5456,17 +5404,15 @@ void VRenderGLView::ForceDraw()
 			this != m_master_linked_view)
 			return;
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			for (int i = 0; i<vr_frame->GetViewNum(); i++)
+			for (int i = 0; i< m_frame->GetViewNum(); i++)
 			{
-				VRenderView* view = vr_frame->GetView(i);
-				if (view && view->m_glview &&
-					view->m_glview != this)
+				VRenderGLView* view = m_frame->GetView(i);
+				if (view && view != this)
 				{
-					view->m_glview->SetRotations(m_rotx, m_roty, m_rotz, true);
-					view->RefreshGL();
+					view->SetRotations(m_rotx, m_roty, m_rotz, true);
+					view->RefreshGL(39);
 				}
 			}
 		}
@@ -6066,20 +6012,18 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 		bool sync_b = group->GetSyncB();
 		vd->SetSyncB(sync_b);
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			vr_frame->GetAdjustView()->SetVolumeData(vd);
-			vr_frame->GetAdjustView()->SetGroupLink(group);
+			m_frame->GetAdjustView()->SetVolumeData(vd);
+			m_frame->GetAdjustView()->SetGroupLink(group);
 		}
 	}
 
 	m_vd_pop_dirty = true;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (m_frame)
 	{
-		AdjustView* adjust_view = vr_frame->GetAdjustView();
+		AdjustView* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
 			adjust_view->SetGroupLink(group);
@@ -6110,9 +6054,8 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 	bool found = false;
 	DataGroup* group = 0;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame) return;
-	DataManager *dm = vr_frame->GetDataManager();
+	if (!m_frame) return;
+	DataManager *dm = m_frame->GetDataManager();
 	if (!dm) return;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -6163,10 +6106,9 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 
 	if (found)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame)
+		if (m_frame)
 		{
-			AdjustView* adjust_view = vr_frame->GetAdjustView();
+			AdjustView* adjust_view = m_frame->GetAdjustView();
 			if (adjust_view)
 			{
 				adjust_view->SetVolumeData(dst);
@@ -6852,10 +6794,9 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (m_frame)
 	{
-		AdjustView* adjust_view = vr_frame->GetAdjustView();
+		AdjustView* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
 			adjust_view->SetVolumeData(src_vd);
@@ -7075,10 +7016,9 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		m_layer_list.push_back(group);
 
 	//set default settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		AdjustView* adjust_view = vr_frame->GetAdjustView();
+		AdjustView* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view && group)
 		{
 			fluo::Color gamma, brightness, hdr;
@@ -7121,10 +7061,9 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 	if (!group)
 		return 0;
 	//set default settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		AdjustView* adjust_view = vr_frame->GetAdjustView();
+		AdjustView* adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 		{
 			fluo::Color gamma, brightness, hdr;
@@ -7306,11 +7245,10 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	int i;
 	bool link = false;
 	PLANE_MODES plane_mode = kNormal;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
+	if (m_frame && m_frame->GetClippingView())
 	{
-		link = vr_frame->GetClippingView()->GetChannLink();
-		plane_mode = vr_frame->GetClippingView()->GetPlaneMode();
+		link = m_frame->GetClippingView()->GetChannLink();
+		plane_mode = m_frame->GetClippingView()->GetPlaneMode();
 	}
 
 	if (plane_mode == kNone)
@@ -7829,8 +7767,7 @@ void VRenderGLView::DrawScaleBar()
 
 void VRenderGLView::DrawLegend()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
 
 	double font_height =
@@ -7918,9 +7855,9 @@ void VRenderGLView::DrawLegend()
 				cur_line++;
 			}
 			bool highlighted = false;
-			if (vr_frame->GetCurSelType() == 2 &&
-				vr_frame->GetCurSelVol() &&
-				vr_frame->GetCurSelVol()->GetName() == wxstr)
+			if (m_frame->GetCurSelType() == 2 &&
+				m_frame->GetCurSelVol() &&
+				m_frame->GetCurSelVol()->GetName() == wxstr)
 				highlighted = true;
 			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
 				nx, ny, wxstr, m_vd_pop_list[i]->GetColor(),
@@ -7951,9 +7888,9 @@ void VRenderGLView::DrawLegend()
 			m_md_pop_list[i]->GetMaterial(amb, diff, spec, shine, alpha);
 			fluo::Color c(diff.r(), diff.g(), diff.b());
 			bool highlighted = false;
-			if (vr_frame->GetCurSelType() == 3 &&
-				vr_frame->GetCurSelMesh() &&
-				vr_frame->GetCurSelMesh()->GetName() == wxstr)
+			if (m_frame->GetCurSelType() == 3 &&
+				m_frame->GetCurSelMesh() &&
+				m_frame->GetCurSelMesh()->GetName() == wxstr)
 				highlighted = true;
 			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
 				nx, ny, wxstr, c, font_height, highlighted);
@@ -8985,10 +8922,6 @@ void VRenderGLView::StartLoopUpdate()
 	//  TextureRenderer::get_start_update_loop() &&
 	//  !TextureRenderer::get_done_update_loop())
 	//  return;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	bool draw_label = vr_frame &&
-		vr_frame->GetSettingDlg() &&
-		vr_frame->GetSettingDlg()->GetRunScript();
 
 	if (flvr::TextureRenderer::get_mem_swap())
 	{
@@ -9060,7 +8993,8 @@ void VRenderGLView::StartLoopUpdate()
 						//mask
 						if (vd->GetTexture() &&
 							vd->GetTexture()->nmask() != -1 &&
-							(!draw_label || (draw_label &&
+							(!vd->GetLabelMode() ||
+							(vd->GetLabelMode() &&
 							vd->GetTexture()->nlabel() == -1)))
 							total_num++;
 					}
@@ -9424,8 +9358,13 @@ void VRenderGLView::HaltLoopUpdate()
 }
 
 //new function to refresh
-void VRenderGLView::RefreshGL(int debug_code, bool erase, bool start_loop)
+void VRenderGLView::RefreshGL(int debug_code,
+	bool erase,
+	bool start_loop)
 {
+	//m_force_clear = force_clear;
+	//m_interactive = interactive;
+
 	//for debugging refresh events
 	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_vrv->m_id, debug_code, m_interactive);
 	m_updating = true;
@@ -9441,9 +9380,8 @@ void VRenderGLView::DrawRulers()
 	if (m_ruler_list.empty())
 		return;
 	double width = 1.0;
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		width = frame->GetSettingDlg()->GetLineWidth();
+	if (m_frame && m_frame->GetSettingDlg())
+		width = m_frame->GetSettingDlg()->GetLineWidth();
 	m_ruler_renderer.SetLineSize(width);
 	m_ruler_renderer.Draw();
 }
@@ -9473,9 +9411,8 @@ void VRenderGLView::DrawCells()
 	if (m_cell_list.empty())
 		return;
 	double width = 1.0;
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetSettingDlg())
-		width = frame->GetSettingDlg()->GetLineWidth();
+	if (m_frame && m_frame->GetSettingDlg())
+		width = m_frame->GetSettingDlg()->GetLineWidth();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -9643,9 +9580,8 @@ void VRenderGLView::DrawTraces()
 		m_trace_group)
 	{
 		double width = 1.0;
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
-		if (frame && frame->GetSettingDlg())
-			width = frame->GetSettingDlg()->GetLineWidth();
+		if (m_frame && m_frame->GetSettingDlg())
+			width = m_frame->GetSettingDlg()->GetLineWidth();
 
 		//glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
@@ -9750,9 +9686,8 @@ void VRenderGLView::GetTraces(bool update)
 	//add traces to trace dialog
 	if (update)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (m_vrv && vr_frame && vr_frame->GetTraceDlg())
-			vr_frame->GetTraceDlg()->GetSettings(m_vrv);
+		if (m_vrv && m_frame && m_frame->GetTraceDlg())
+			m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
 	}
 }
 
@@ -9925,9 +9860,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			if (m_int_mode == 14)
 				m_ruler_handler.DeletePoint();
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(41);
 		}
 
@@ -10017,9 +9951,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			//add one point to a ruler
 			m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(27);
 			return;
 		}
@@ -10041,9 +9974,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(27);
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+			if (m_frame && m_frame->GetMeasureDlg())
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			return;
 		}
 		else if (m_int_mode == 10 ||
@@ -10054,16 +9986,15 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 13)
 		{
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+			if (m_frame && m_frame->GetMeasureDlg())
 			{
 				if (m_ruler_autorelax)
 				{
-					vr_frame->GetMeasureDlg()->SetEdit();
-					vr_frame->GetMeasureDlg()->Relax(
+					m_frame->GetMeasureDlg()->SetEdit();
+					m_frame->GetMeasureDlg()->Relax(
 						m_ruler_handler.GetRulerIndex());
 				}
-				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			}
 			RefreshGL(29);
 			return;
@@ -10094,16 +10025,15 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
 				m_ruler_handler.FinishRuler();
 			}
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+			if (m_frame && m_frame->GetMeasureDlg())
 			{
 				if (m_ruler_autorelax)
 				{
-					vr_frame->GetMeasureDlg()->SetEdit();
-					vr_frame->GetMeasureDlg()->Relax(
+					m_frame->GetMeasureDlg()->SetEdit();
+					m_frame->GetMeasureDlg()->Relax(
 						m_ruler_handler.GetRulerIndex());
 				}
-				vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				m_frame->GetMeasureDlg()->GetSettings(this);
 			}
 			RefreshGL(29);
 			return;
@@ -10273,11 +10203,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			if (rval)
 			{
 				RefreshGL(35);
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
+				if (m_frame && m_frame->GetMeasureDlg())
 				{
-					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
-					vr_frame->GetMeasureDlg()->SetEdit();
+					m_frame->GetMeasureDlg()->GetSettings(this);
+					m_frame->GetMeasureDlg()->SetEdit();
 				}
 			}
 		}
@@ -10287,9 +10216,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			{
 				//add one point to a ruler
 				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
-				VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-				if (m_vrv && vr_frame && vr_frame->GetMeasureDlg())
-					vr_frame->GetMeasureDlg()->GetSettings(m_vrv);
+				if (m_frame && m_frame->GetMeasureDlg())
+					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
 			}
 		}
@@ -10354,9 +10282,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 	if (m_draw_info & INFO_DISP)
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetMovieView() &&
-			vr_frame->GetMovieView()->GetRunning())
+		if (m_frame && m_frame->GetMovieView() &&
+			m_frame->GetMovieView()->GetRunning())
 			return;
 		if (m_enable_vr)
 			return;
@@ -10393,10 +10320,9 @@ fluo::Color VRenderGLView::GetBackgroundColor()
 
 fluo::Color VRenderGLView::GetTextColor()
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (!frame || !frame->GetSettingDlg())
+	if (!m_frame || !m_frame->GetSettingDlg())
 		return m_bg_color_inv;
-	switch (frame->GetSettingDlg()->GetTextColor())
+	switch (m_frame->GetSettingDlg()->GetTextColor())
 	{
 	case 0://background inverted
 		return m_bg_color_inv;
@@ -10431,11 +10357,18 @@ void VRenderGLView::SetBackgroundColor(fluo::Color &color)
 	{
 		m_bg_color_inv = fluo::Color(1.0, 1.0, 1.0);
 	}
+	if (m_vrv)
+	{
+		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+		m_vrv->m_bg_color_picker->SetColour(c);
+	}
 }
 
-void VRenderGLView::SetGradBg(bool val)
+void VRenderGLView::SetFog(bool b)
 {
-	m_grad_bg = val;
+	m_use_fog = b;
+	if (m_vrv)
+		m_vrv->m_left_toolbar->ToggleTool(VRenderView::ID_DepthAttenChk, b);
 }
 
 void VRenderGLView::SetRotations(double rotx, double roty, double rotz, bool ui_update)
@@ -10682,9 +10615,8 @@ void VRenderGLView::switchLevel(VolumeData *vd)
 				}
 			}
 			//apply offset
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-			if (vr_frame && vr_frame->GetSettingDlg())
-				lv += vr_frame->GetSettingDlg()->GetDetailLevelOffset();
+			if (m_frame && m_frame->GetSettingDlg())
+				lv += m_frame->GetSettingDlg()->GetDetailLevelOffset();
 			if (lv < 0) lv = 0;
 			//if (m_interactive) lv += 1;
 			if (lv >= lvnum) lv = lvnum - 1;

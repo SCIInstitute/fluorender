@@ -25,12 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-#include <wx/listctrl.h>
-
 #ifndef _LISTPANEL_H_
 #define _LISTPANEL_H_
 
+#include <wx/wx.h>
+#include <wx/listctrl.h>
+
+class VRenderFrame;
 class VolumeData;
 class DataListCtrl : public wxListCtrl
 {
@@ -48,9 +49,8 @@ class DataListCtrl : public wxListCtrl
 	};
 
 public:
-	DataListCtrl(wxWindow *frame,
+	DataListCtrl(VRenderFrame *frame,
 		wxWindow* parent,
-		wxWindowID id,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -66,7 +66,7 @@ public:
 	friend class ListPanel;
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	static VolumeData* m_vd;
 
 	wxTextCtrl *m_rename_text;
@@ -88,6 +88,7 @@ private:
 	void OnSizeXText(wxCommandEvent &event);
 	void OnSizeYText(wxCommandEvent &event);
 	void OnSizeZText(wxCommandEvent &event);
+	void OnFilterChange(wxCommandEvent &event);
 	static wxWindow* CreateExtraControl(wxWindow* parent);
 	void OnSave(wxCommandEvent& event);
 	void OnBake(wxCommandEvent& event);
@@ -124,9 +125,7 @@ class ListPanel : public wxPanel
 		ID_DeleteAll
 	};
 public:
-	ListPanel(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	ListPanel(VRenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -141,7 +140,6 @@ public:
 	void SaveAllMasks();
 
 private:
-	//wxWindow* m_frame;
 	DataListCtrl *m_datalist;
 	wxToolBar *m_toolbar;
 

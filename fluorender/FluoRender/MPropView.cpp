@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MPropView.h"
+#include "DataManager.h"
 #include "VRenderFrame.h"
 #include <wx/valnum.h>
 
@@ -50,16 +51,16 @@ BEGIN_EVENT_TABLE(MPropView, wxPanel)
 	EVT_TEXT(ID_size_text, MPropView::OnSizeText)
 END_EVENT_TABLE()
 
-MPropView::MPropView(wxWindow* frame, wxWindow* parent,
-	wxWindowID id,
+MPropView::MPropView(VRenderFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-wxPanel(parent, id, pos, size,style, name),
-m_frame(frame),
-m_md(0),
-m_vrv(0)
+	wxPanel(parent, wxID_ANY, pos, size,style, name),
+	m_frame(frame),
+	m_md(0),
+	m_view(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -232,12 +233,15 @@ void MPropView::GetSettings()
 	m_size_text->SetValue(wxString::Format("%d", limit));
 }
 
-void MPropView::SetMeshData(MeshData* md, VRenderView* vrv)
+void MPropView::SetView(VRenderGLView* view)
+{
+	m_view = view;
+}
+
+void MPropView::SetMeshData(MeshData* md)
 {
 	m_md = md;
 	GetSettings();
-
-	m_vrv = vrv;
 }
 
 MeshData* MPropView::GetMeshData()
@@ -247,21 +251,20 @@ MeshData* MPropView::GetMeshData()
 
 void MPropView::RefreshVRenderViews(bool tree)
 {
-	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	if (vrender_frame)
-		vrender_frame->RefreshVRenderViews(tree);
+	if (m_frame)
+		m_frame->RefreshVRenderViews(tree);
 }
 
 //lighting
 void MPropView::OnLightingCheck(wxCommandEvent& event)
 {
-	if (m_md && m_vrv)
+	if (m_md && m_view)
 	{
 		bool val = m_light_chk->GetValue();
 		m_md->SetLighting(val);
-		for (int i=0; i<m_vrv->GetMeshNum(); i++)
+		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_vrv->GetMeshData(i);
+			MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->SetLighting(val);
 		}
@@ -362,13 +365,13 @@ void MPropView::OnScaleText(wxCommandEvent& event)
 //shadow
 void MPropView::OnShadowCheck(wxCommandEvent& event)
 {
-	if (m_md && m_vrv)
+	if (m_md && m_view)
 	{
 		bool val = m_shadow_chk->GetValue();
 		m_md->SetShadow(val);
-		for (int i=0; i<m_vrv->GetMeshNum(); i++)
+		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_vrv->GetMeshData(i);
+			MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->SetShadow(val);
 		}
@@ -391,12 +394,12 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 	str.ToDouble(&dval);
 	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
 
-	if (m_md && m_vrv)
+	if (m_md && m_view)
 	{
 		m_md->SetShadowParams(dval);
-		for (int i=0; i<m_vrv->GetMeshNum(); i++)
+		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_vrv->GetMeshData(i);
+			MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->SetShadowParams(dval);
 		}

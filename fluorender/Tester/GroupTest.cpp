@@ -1,13 +1,13 @@
 #include "tests.h"
 #include "asserts.h"
 #include <vector>
-#include <Scenegraph/Group.h>
-#include <Scenegraph/ValueUpdateVisitor.h>
-#include <Scenegraph/DecycleVisitor.h>
-#include <Scenegraph/InfoVisitor.h>
+#include <Flobject/Group.hpp>
+#include <Flobject/ValueUpdateVisitor.hpp>
+#include <Flobject/DecycleVisitor.hpp>
+#include <Flobject/InfoVisitor.hpp>
 
 using namespace std;
-using namespace flrd;
+using namespace fluo;
 
 void GroupTest()
 {
@@ -51,7 +51,7 @@ void GroupTest()
 	{
 		Node* node1 = group1->getChild(i);
 		Node* node2 = group3->getChild(i);
-		ASSERT_EQ(node1, node2);
+		ASSERT_NEQ(node1, node2);
 	}
 	//group of groups
 	//ref_ptr<Group> group4(new Group());
@@ -77,9 +77,8 @@ void GroupTest()
 	cin.get();
 	group1->getChild(0)->accept(visitor);
 
-	DecycleVisitor decycle;
-	group4->accept(decycle);
-	while (decycle.removeCycle()) {}
+	DecycleVisitor decycle(*group4);
+	decycle.removeCycle();
 
 	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
 	cin.get();
@@ -151,7 +150,7 @@ void GroupTest2()
 
 	//sync value1
 	ValueUpdateVisitor update;
-	update.setType(SYNC_VALUE);
+	update.setType(ValueUpdateVisitor::SYNC_VALUE);
 	update.setValueName("value1");
 	group4->accept(update);
 	group1->getChild(0)->setValue("value1", 1.0);
@@ -159,7 +158,7 @@ void GroupTest2()
 	group4->accept(visitor);
 
 	//sync all
-	update.setType(SYNC_ALL_VALUES);
+	update.setType(ValueUpdateVisitor::SYNC_ALL_VALUES);
 	group4->accept(update);
 	group2->getChild(1)->setValue("value2", 2.0);
 	//traverse
@@ -183,7 +182,17 @@ void GroupTest3()
 	group1->addChild(group2.get());
 	group2->addChild(group1.get());
 
-	DecycleVisitor decycle;
-	group1->accept(decycle);
-	while (decycle.removeCycle()) {}
+	DecycleVisitor decycle(*group1);
+	decycle.removeCycle();
+}
+
+void GroupTest4()
+{
+	ref_ptr<Group> group = new Group();
+	group->setName("group");
+	Node* node = group->getOrAddNode("child1");
+	Group* group2 = group->getOrAddGroup("child2");
+
+	InfoVisitor visitor;
+	group->accept(visitor);
 }

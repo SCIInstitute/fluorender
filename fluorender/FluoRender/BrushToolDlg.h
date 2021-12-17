@@ -32,12 +32,15 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
-#include <Distance/RulerAlign.h>
-#include <Selection/VolumeSelector.h>
 
-class VRenderView;
+class VRenderFrame;
+class VRenderGLView;
 class VolumeData;
-
+namespace flrd
+{
+	class RulerAlign;
+	class VolumeSelector;
+}
 struct GridData
 {
 	int voxel_sum;
@@ -122,11 +125,10 @@ public:
 		ID_OutputGrid
 	};
 
-	BrushToolDlg(wxWindow* frame,
-		wxWindow* parent);
+	BrushToolDlg(VRenderFrame* frame);
 	~BrushToolDlg();
 
-	void GetSettings(VRenderView* vrv);
+	void GetSettings(VRenderGLView* view);
 
 	//set the brush icon down
 	void SelectBrush(int id);
@@ -143,10 +145,9 @@ public:
 	void PasteData();
 
 private:
-	wxWindow* m_frame;
-
+	VRenderFrame* m_frame;
 	//current view
-	VRenderView *m_view;
+	VRenderGLView *m_view;
 	flrd::VolumeSelector *m_selector;
 
 	//max volume value
@@ -157,7 +158,7 @@ private:
 	//output
 	bool m_hold_history;
 
-	flrd::RulerAlign m_aligner;
+	flrd::RulerAlign* m_aligner;
 
 	//paint tools
 	//toolbar

@@ -1,5 +1,6 @@
 #define TH 0.1
-#define SCL 255.0
+#define DWL unsigned char
+#define VSCL 255
 bool check_tail(bool n[])
 {
 	int count = 0;
@@ -121,7 +122,7 @@ const sampler_t samp =
 	CLK_FILTER_NEAREST;
 __kernel void kernel_main(
 	read_only image3d_t data,
-	__global unsigned char* result,
+	__global DWL* result,
 	unsigned int x,
 	unsigned int y,
 	unsigned int z)
@@ -154,7 +155,7 @@ __kernel void kernel_main(
 	//check tail
 	if (check_tail(nbs))
 	{
-		result[index] = value*SCL;
+		result[index] = value*VSCL;
 		return;
 	}
 	//extended points
@@ -254,5 +255,5 @@ __kernel void kernel_main(
 		result[index] = 0.0;
 		return;
 	}
-	result[index] = value*SCL;
+	result[index] = value*VSCL;
 }

@@ -391,19 +391,39 @@ bool NRRDReader::nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 
 wstring NRRDReader::GetCurDataName(int t, int c)
 {
-	return m_4d_seq[t].filename;
+	if (t >= 0 && t < (int)m_4d_seq.size())
+		return m_4d_seq[t].filename;
+	return m_path_name;
 }
 
 wstring NRRDReader::GetCurMaskName(int t, int c)
 {
-	wstring data_name = m_4d_seq[t].filename;
-	wstring mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
+	wstring mask_name;
+	if (t >= 0 && t < (int)m_4d_seq.size())
+	{
+		wstring data_name = m_4d_seq[t].filename;
+		mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
+		return mask_name;
+	}
+	mask_name = m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) mask_name += L"_T" + std::to_wstring(t);
+	if (m_chan_num > 1) mask_name += L"_C" + std::to_wstring(c);
+	mask_name += L".msk";
 	return mask_name;
 }
 
 wstring NRRDReader::GetCurLabelName(int t, int c)
 {
-	wstring data_name = m_4d_seq[t].filename;
-	wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
+	wstring label_name;
+	if (t >= 0 && t < (int)m_4d_seq.size())
+	{
+		wstring data_name = m_4d_seq[t].filename;
+		wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
+		return label_name;
+	}
+	label_name = m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) label_name += L"_T" + std::to_wstring(t);
+	if (m_chan_num > 1) label_name += L"_C" + std::to_wstring(c);
+	label_name += L".lbl";
 	return label_name;
 }

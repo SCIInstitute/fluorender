@@ -2,6 +2,7 @@
 //#include <vld.h>
 #include "asserts.h"
 #include "tests.h"
+#include "reformat_data.h"
 
 using namespace std;
 
@@ -13,18 +14,20 @@ int main(int argc, char* argv[])
 	//ObjectTest();
 	//ObjectTest2();
 	//ObjectTest3();
+	ObjectTest4();
 
 	//GroupTest();
 	//GroupTest2();
 	//GroupTest3();
-
-	//SceneGraphTest();
+	//GroupTest4();
 
 	//SpecialValueTest();
 
-	FactoryTest();
+	//MyTest();
 
-	printf("All done. Quit.\n");
+	//reformat_data();
+
+	cout << "All done. Quit." << endl;
 	cin.get();
 	return 0;
 }

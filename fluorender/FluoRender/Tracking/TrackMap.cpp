@@ -3033,7 +3033,7 @@ unsigned int TrackMapProcessor::GetTrackedID(
 		celp2 = (*vert2->GetCellsBegin()).lock();
 		if (!celp2)
 			continue;
-		rid = celp->Id();
+		rid = celp2->Id();
 		break;
 	}
 
@@ -4483,7 +4483,8 @@ void TrackMapProcessor::GetPaths(CelpList &cell_list, PathList &path_list, size_
 	}
 }
 
-bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
+bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
+	fluo::Vector &ext, int mode, size_t start)
 {
 	//check validity
 	if (!m_map->ExtendFrameNum(std::max(f1, f2)))
@@ -4492,11 +4493,14 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 	size_t frame_num = m_map->m_frame_num;
 	if (f1 >= frame_num || f2 >= frame_num || f1 == f2)
 		return false;
+	if (start >= frame_num)
+		return false;
 
 	//get data and label
+	size_t f0 = mode == 1?start:f1;
 	m_vol_cache.set_max_size(2);
-	VolCache cache = m_vol_cache.get(f1);
-	m_vol_cache.protect(f1);
+	VolCache cache = m_vol_cache.get(f0);
+	m_vol_cache.protect(f0);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
@@ -4512,7 +4516,15 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 	size_t nx = m_map->m_size_x;
 	size_t ny = m_map->m_size_y;
 	size_t nz = m_map->m_size_z;
+	float spcx = m_map->m_spc_x;
+	float spcy = m_map->m_spc_y;
+	float spcz = m_map->m_spc_z;
 	unsigned int label_value;
+
+	//clear label2
+	unsigned long long clear_size = (unsigned long long)nx *
+		ny * nz * sizeof(unsigned int);
+	memset(label2, 0, clear_size);
 
 	//get all stencils from frame1
 	StencilList stencil_list;
@@ -4542,6 +4554,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 			stencil.nz = nz;
 			stencil.bits = m_map->m_data_bits;
 			stencil.scale = m_map->m_scale;
+			stencil.fsize = m_filter;
 			stencil.box.extend(fluo::Point(i, j, k));
 			stencil_list.insert(std::pair<unsigned int, Stencil>
 				(label_value, stencil));
@@ -4550,7 +4563,6 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 
 	//find matching stencil in frame2
 	fluo::Point center;
-	fluo::Vector ext(1.5, 1.5, 0.5);
 	float prob;
 	Stencil s1, s2;
 	s2.data = data2;
@@ -4562,7 +4574,29 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 	for (iter = stencil_list.begin(); iter != stencil_list.end(); ++iter)
 	{
 		s1 = iter->second;
-		if (match_stencils(s1, s2, ext, center, prob))
+		//filter out small
+		fluo::Point s1size = s1.box.size();
+		if (s1size.x() < m_stencil_thresh.x() &&
+			s1size.y() < m_stencil_thresh.y() &&
+			s1size.z() < m_stencil_thresh.z())
+			continue;
+		//get offset
+		fluo::Vector off;
+		if (mode == 1 &&
+			f1 != f0)
+		{
+			//start frame
+			Celp temp = GetCell(f0, s1.id);
+			if (temp)
+				off = fluo::Vector(temp->GetCenter());
+			//prev frame
+			temp = GetCell(f1, s1.id);
+			if (temp)
+				off = fluo::Vector(temp->GetCenter()) - off;
+		}
+		if (match_stencils(s1, s2, ext, off, center,
+			prob, m_max_iter, m_eps,
+			spcx, spcy, spcz))
 		{
 			//if (prob > 0.5f)
 			//	continue;
@@ -4575,17 +4609,19 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2)
 			Celp celp1(new Cell(s1.id));
 			celp1->SetCenter(s1.box.center());
 			celp1->SetBox(s1.box);
+			celp1->SetCalc();
 			AddCell(celp1, f1, iter);
 			//add s2 id to track map
 			Celp celp2(new Cell(s2.id));
 			celp2->SetCenter(s2.box.center());
 			celp2->SetBox(s2.box);
+			celp2->SetCalc();
 			AddCell(celp2, f2, iter);
 			//connect cells
 			LinkCells(celp1, celp2, f1, f2, false);
 		}
 	}
 
-	m_vol_cache.unprotect(f1);
+	m_vol_cache.unprotect(f0);
 	return true;
 }

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMESAMPLER_H_
 
 #include "DataManager.h"
+#include <Types/Vector.h>
 #include <Types/Quaternion.h>
 
 namespace flrd
@@ -77,7 +78,6 @@ namespace flrd
 		//crop
 		bool m_crop;
 		//crop size (of new size)
-		bool m_crop_calc;
 		int m_ox;
 		int m_oy;
 		int m_oz;
@@ -88,8 +88,9 @@ namespace flrd
 
 		int m_filter;	//sampler type
 						//0:nearest neighbor;
-						//1:linear;
-						//2:box;
+						//1:bilinear;
+						//2:trilinear;
+						//3:box;
 		//filter size
 		int m_fx;
 		int m_fy;
@@ -103,12 +104,44 @@ namespace flrd
 	private:
 		Nrrd* GetNrrd(VolumeData* vd, SampDataType type);
 		void* GetRaw(VolumeData* vd, SampDataType type);
+		double SampleNearestNeighbor(double x, double y, double z);
+		double SampleBiLinear(double x, double y, double z);
+		double SampleTriLinear(double x, double y, double z);
+		double SampleBox(double x, double y, double z);
+		int rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
+			fluo::Vector &vsize, fluo::Vector &vspc);
+		int consv_volume(fluo::Vector &vec, fluo::Vector &vec_in);
 		bool ijk(int &i, int &j, int &k);
 		void xyz2ijk(double x, double y, double z,
 			int &i, int &j, int &k);
-		double SampleNearestNeighbor(double x, double y, double z);
-		double SampleLinear(double x, double y, double z);
-		double SampleBox(double x, double y, double z);
+		void xyz2ijkt(double x, double y, double z,
+			int &i, int &j, int &k,
+			double &tx, double &ty, double &tz);
+		//interpolation linear
+		//t - normalized factor [0, 1]
+		double lerp(double t, double q0, double q1)
+		{
+			return (1.0 - t) * q0 + t * q1;
+		}
+		double bilerp(double tx, double ty,
+			double q00, double q01, double q10, double q11)
+		{
+			double r1 = lerp(tx, q00, q10);
+			double r2 = lerp(tx, q01, q11);
+			return lerp(ty, r1, r2);
+		}
+		double trilerp(double tx, double ty, double tz,
+			double q000, double q001, double q010, double q011,
+			double q100, double q101, double q110, double q111)
+		{
+			double x00 = lerp(tx, q000, q100);
+			double x10 = lerp(tx, q010, q110);
+			double x01 = lerp(tx, q001, q101);
+			double x11 = lerp(tx, q011, q111);
+			double r0 = lerp(ty, x00, x10);
+			double r1 = lerp(ty, x01, x11);
+			return lerp(tz, r0, r1);
+		}
 	};
 }
 #endif//_VOLUMESAMPLER_H_

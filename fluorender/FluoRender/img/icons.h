@@ -346,6 +346,10 @@ public:
 	const static unsigned char transphi_png[950];
 	/* transplo.png - 473 bytes */
 	const static unsigned char transplo_png[473];
+	/* comp.png - 1159 bytes */
+	const static unsigned char comp_png[1159];
+	/* comp_off.png - 1151 bytes */
+	const static unsigned char comp_off_png[1151];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

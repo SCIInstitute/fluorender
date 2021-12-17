@@ -36,11 +36,11 @@ BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
 END_EVENT_TABLE()
 
-CountingDlg::CountingDlg(wxWindow *frame, wxWindow*parent)
-: wxPanel(parent, wxID_ANY,
+CountingDlg::CountingDlg(VRenderFrame *frame)
+: wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(400, 150),
 0, "CountingDlg"),
-m_frame(parent),
+m_frame(frame),
 m_view(0),
 m_max_value(255.0)
 {
@@ -133,7 +133,7 @@ void CountingDlg::LoadDefault()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_brush_settings.dft";
+	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
 		return;
@@ -170,17 +170,15 @@ void CountingDlg::LoadDefault()
 	}
 }
 
-void CountingDlg::GetSettings(VRenderView* vrv)
+void CountingDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv)
+	if (!view)
 		return;
+	m_view = view;
 
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
-
-	m_view = vrv;
+	if (m_frame)
+		sel_vol = m_frame->GetCurSelVol();
 }
 
 void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)
@@ -196,7 +194,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -212,7 +210,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 
 	flrd::CelpList *list = ca.GetCelpList();
 	if (!list || list->empty())
@@ -251,7 +249,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		wxString vol_unit_text;
 		vol_unit_text = wxString::Format("%.0f", vol_unit);
 		vol_unit_text += " ";
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			vol_unit_text += L"nm\u00B3";

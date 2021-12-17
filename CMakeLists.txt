@@ -77,10 +77,10 @@ endif()
 add_definitions(-DFLUORENDER_TITLE="FluoRender")
 
 add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=26.3)					# 
+add_definitions(-DVERSION_MINOR=27)						# 
 add_definitions(-DVERSION_MAJOR_TAG="2")				# 
-add_definitions(-DVERSION_MINOR_TAG="26.3")				# 
-add_definitions(-DVERSION_COPYRIGHT="July 2021")		# Up to here!
+add_definitions(-DVERSION_MINOR_TAG="27")				# 
+add_definitions(-DVERSION_COPYRIGHT="December 2021")	# Up to here!
 
 #windows
 if(WIN32)
@@ -127,7 +127,8 @@ add_definitions(-DID_RESIZE_X_TXT=ID_RESIZE_CHK+1)
 add_definitions(-DID_RESIZE_Y_TXT=ID_RESIZE_X_TXT+1)
 add_definitions(-DID_RESIZE_Z_TXT=ID_RESIZE_Y_TXT+1)
 add_definitions(-DID_SAVE_ALPHA=ID_RESIZE_Z_TXT+1)
-add_definitions(-DID_EMBED_FILES=ID_SAVE_ALPHA+1)
+add_definitions(-DID_FILTER=ID_SAVE_ALPHA+1)
+add_definitions(-DID_EMBED_FILES=ID_FILTER+1)
 add_definitions(-DID_READ_ZSLICE=ID_EMBED_FILES+1)
 add_definitions(-DID_READ_CHANN=ID_READ_ZSLICE+1)
 add_definitions(-DID_DIGI_ORDER=ID_READ_CHANN+1)
@@ -353,16 +354,9 @@ add_library(ANIMATORS_OBJ OBJECT
 # Flobject
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Flobject)
 file(GLOB obj_src fluorender/FluoRender/Flobject/*.cpp)
-file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.h)
+file(GLOB obj_hdr fluorender/FluoRender/Flobject/*.hpp)
 add_library(FLOBJECT_OBJ OBJECT
   ${obj_src} ${obj_hdr})
-
-# Scenegraph
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Scenegraph)
-file(GLOB sg_src fluorender/FluoRender/Scenegraph/*.cpp)
-file(GLOB sg_hdr fluorender/FluoRender/Scenegraph/*.h)
-add_library(SCENEGRAPH_OBJ OBJECT
-  ${sg_src} ${sg_hdr})
 
 # Types
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Types)
@@ -509,7 +503,6 @@ if(APPLE)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -523,6 +516,10 @@ if(APPLE)
     $<TARGET_OBJECTS:GLEW_OBJ>
     $<TARGET_OBJECTS:POLE_OBJ>
     $<TARGET_OBJECTS:TEEM_OBJ>)
+  add_executable(Tester MACOSX_BUNDLE
+    ${tester_src} ${tester_hdr}
+    $<TARGET_OBJECTS:TYPES_OBJ>
+    $<TARGET_OBJECTS:FLOBJECT_OBJ>)
 elseif(UNIX OR MINGW)
   # Linux
   #if(NOT OPEN_GL_HEADER_LOC)
@@ -543,7 +540,6 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:NV_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
@@ -603,6 +599,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -627,6 +624,7 @@ elseif(WIN32)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
       $<TARGET_OBJECTS:TYPES_OBJ>
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
@@ -649,12 +647,8 @@ elseif(WIN32)
     endif()
     add_executable(Tester
       ${tester_src} ${tester_hdr}
-      #$<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:TYPES_OBJ>
-      $<TARGET_OBJECTS:FLOBJECT_OBJ>
-      $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
-      $<TARGET_OBJECTS:GLEW_OBJ>)
-      #$<TARGET_OBJECTS:TEEM_OBJ>)
+      $<TARGET_OBJECTS:FLOBJECT_OBJ>)
   endif()
 endif()
 
@@ -708,7 +702,7 @@ if(UNIX OR APPLE OR MINGW)
     ${PNG_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${ND2_LIBRARIES})
-#${JNI_LIBRARIES})   
+	#${JNI_LIBRARIES})
 elseif(WIN32)
   target_link_libraries(FluoRender
     secur32.lib
@@ -721,11 +715,6 @@ elseif(WIN32)
     ${FREETYPE_LIBRARIES}
     ${wxWidgets_LIBRARIES}
     ${ND2_LIBRARIES})
-  target_link_libraries(Tester
-    ${OPENGL_LIBRARIES}
-    ${OpenCL_LIBRARIES}
-    ${FREETYPE_LIBRARIES})
-    #${wxWidgets_LIBRARIES})
 endif()
 
 
@@ -753,6 +742,18 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Scripts"
   "$<TARGET_FILE_DIR:FluoRender>/Scripts")
+
+# copy template dir to the binary directory
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Templates"
+  "$<TARGET_FILE_DIR:FluoRender>/Templates")
+
+# copy command dir to the binary directory
+add_custom_command(TARGET FluoRender POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${FluoRender_SOURCE_DIR}/Commands"
+  "$<TARGET_FILE_DIR:FluoRender>/Commands")
 
 # settings files
 add_custom_command(TARGET FluoRender POST_BUILD

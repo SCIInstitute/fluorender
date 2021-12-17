@@ -328,7 +328,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 			if (bn > 1)
 				size_limit = m_slimit;
 			else
-				size_limit = 2;
+				size_limit = 0;
 			if (iter->second->GetSize() < size_limit)
 				continue;
 			//iter->second->var = sqrt(iter->second->m2 / (iter->second->sumi));
@@ -768,12 +768,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		i != comps.end(); ++i)
 	{
 		if (comp_header != "")
-		{
-			if (i == comps.begin())
-				stream << comp_header << "\t";
-			else
-				stream << "\t";
-		}
+			stream << comp_header << "\t";
 
 		std::list<unsigned int> ids;
 		std::list<unsigned int> brick_ids;

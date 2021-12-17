@@ -26,7 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VRenderFrame.h"
+#include "compatibility.h"
 #include "DragDrop.h"
+#include <Formats/png_resource.h>
+#include <Formats/msk_writer.h>
+#include <Formats/msk_reader.h>
+#include <Converters/VolumeMeshConv.h>
+#include <Selection/VolumeSelector.h>
+#include <FLIVR/TextRenderer.h>
+#include <FLIVR/VertexArray.h>
+#include <FLIVR/Framebuffer.h>
+#include <FLIVR/VolShader.h>
+#include <FLIVR/SegShader.h>
+#include <FLIVR/VolCalShader.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -34,18 +46,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/progdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
-#include "Formats/png_resource.h"
-#include "Formats/msk_writer.h"
-#include "Formats/msk_reader.h"
-#include "Converters/VolumeMeshConv.h"
-#include <Selection/VolumeSelector.h>
-#include "compatibility.h"
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -117,6 +117,7 @@ bool VRenderFrame::m_skip_brick = false;
 wxString VRenderFrame::m_time_id = "_T";
 bool VRenderFrame::m_load_mask = true;
 bool VRenderFrame::m_save_crop = false;
+int VRenderFrame::m_save_filter = 0;
 bool VRenderFrame::m_save_compress = true;
 bool VRenderFrame::m_vrp_embed = false;
 bool VRenderFrame::m_save_project = false;
@@ -133,7 +134,6 @@ VRenderFrame::VRenderFrame(
 	bool windowed,
 	bool hidepanels)
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
-	m_mov_view(0),
 	m_movie_view(0),
 	m_tree_panel(0),
 	m_list_panel(0),
@@ -167,7 +167,7 @@ VRenderFrame::VRenderFrame(
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
 	//create this first to read the settings
-	m_setting_dlg = new SettingDlg(this, this);
+	m_setting_dlg = new SettingDlg(this);
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
@@ -392,31 +392,37 @@ VRenderFrame::VRenderFrame(
 	m_main_tb->Realize();
 
 	//create render view
-	VRenderView *vrv = new VRenderView(this, this, wxID_ANY);
-	vrv->InitView();
+	VRenderView *vrv = new VRenderView(this);
+	vrv->m_glview->InitView();
+	vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
 
+#ifdef _WIN32
+	wxSize panel_size(350, 300);
+#else
+	wxSize panel_size(400, 300);
+#endif
 	//create list view
-	m_list_panel = new ListPanel(this, this, wxID_ANY,
-		wxDefaultPosition, wxSize(350, 300));
+	m_list_panel = new ListPanel(this,
+		wxDefaultPosition, panel_size);
 
 	//create tree view
-	m_tree_panel = new TreePanel(this, this, wxID_ANY,
-		wxDefaultPosition, wxSize(350, 300));
+	m_tree_panel = new TreePanel(this,
+		wxDefaultPosition, panel_size);
 
 	//create movie view (sets the m_recorder_dlg)
-	m_movie_view = new VMovieView(this, this, wxID_ANY,
-		wxDefaultPosition, wxSize(350, 300));
+	m_movie_view = new VMovieView(this,
+		wxDefaultPosition, panel_size);
 
 	//create prop panel
 	m_prop_panel = new wxPanel(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VPropView(this, m_prop_panel, wxID_ANY);
-	m_mesh_prop = new MPropView(this, m_prop_panel, wxID_ANY);
-	m_mesh_manip = new MManipulator(this, m_prop_panel, wxID_ANY);
-	m_annotation_prop = new APropView(this, m_prop_panel, wxID_ANY);
+	m_volume_prop = new VPropView(this, m_prop_panel);
+	m_mesh_prop = new MPropView(this, m_prop_panel);
+	m_mesh_manip = new MManipulator(this, m_prop_panel);
+	m_annotation_prop = new APropView(this, m_prop_panel);
 	m_prop_panel->SetSizer(m_prop_sizer);
 	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
 	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
@@ -428,14 +434,14 @@ VRenderFrame::VRenderFrame(
 	m_annotation_prop->Show(false);
 
 	//clipping view
-	m_clip_view = new ClippingView(this, this, wxID_ANY,
+	m_clip_view = new ClippingView(this,
 		wxDefaultPosition, wxSize(130,700));
 	m_clip_view->SetDataManager(&m_data_mgr);
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
 		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
-	m_adjust_view = new AdjustView(this, this, wxID_ANY,
+	m_adjust_view = new AdjustView(this,
 		wxDefaultPosition, wxSize(130, 700));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
@@ -466,64 +472,65 @@ VRenderFrame::VRenderFrame(
 	int c4 = m_setting_dlg->GetWavelengthColor(4);
 	if (c1 && c2 && c3 && c4)
 		m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
-	m_vrv_list[0]->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	m_vrv_list[0]->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	m_vrv_list[0]->SetAdaptive(m_setting_dlg->GetMouseInt());
-	m_vrv_list[0]->SetGradBg(m_setting_dlg->GetGradBg());
 	m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-	m_vrv_list[0]->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	m_vrv_list[0]->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	m_vrv_list[0]->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	m_vrv_list[0]->SetStereo(m_setting_dlg->GetStereo());
-	m_vrv_list[0]->SetEyeDist(m_setting_dlg->GetEyeDist());
+	m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
+	m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
+	m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
+	m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
 	if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	m_time_id = m_setting_dlg->GetTimeId();
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
 	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
 	m_data_mgr.SetPvxmlFlipY(m_setting_dlg->GetPvxmlFlipY());
+	m_data_mgr.SetPvxmlSeqType(m_setting_dlg->GetPvxmlSeqType());
 	flvr::VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
 	flvr::MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
 	TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());
 	VolumeMeshConv::SetSoftThreshold(m_setting_dlg->GetSoftThreshold());
 
 	//brush tool dialog
-	m_brush_tool_dlg = new BrushToolDlg(this, this);
+	m_brush_tool_dlg = new BrushToolDlg(this);
 
 	//noise cancelling dialog
-	m_noise_cancelling_dlg = new NoiseCancellingDlg(this, this);
+	m_noise_cancelling_dlg = new NoiseCancellingDlg(this);
 
 	//counting dialog
-	m_counting_dlg = new CountingDlg(this, this);
+	m_counting_dlg = new CountingDlg(this);
 
 	//convert dialog
-	m_convert_dlg = new ConvertDlg(this, this);
+	m_convert_dlg = new ConvertDlg(this);
 
 	//colocalization dialog
-	m_colocalization_dlg = new ColocalizationDlg(this, this);
+	m_colocalization_dlg = new ColocalizationDlg(this);
 
 	//measure dialog
-	m_measure_dlg = new MeasureDlg(this, this);
+	m_measure_dlg = new MeasureDlg(this);
 
 	//trace dialog
-	m_trace_dlg = new TraceDlg(this, this);
+	m_trace_dlg = new TraceDlg(this);
 	m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
 	//ocl dialog
-	m_ocl_dlg = new OclDlg(this, this);
+	m_ocl_dlg = new OclDlg(this);
 
 	//component dialog
-	m_component_dlg = new ComponentDlg(this, this);
+	m_component_dlg = new ComponentDlg(this);
 
 	//calculation dialog
-	m_calculation_dlg = new CalculationDlg(this, this);
+	m_calculation_dlg = new CalculationDlg(this);
 
 	//help dialog
-	m_help_dlg = new HelpDlg(this, this);
+	m_help_dlg = new HelpDlg(this);
 	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
 
 	//tester
 	//shown for testing parameters
-	m_tester = new TesterDlg(this, this);
+	m_tester = new TesterDlg(this);
 	if (m_setting_dlg->GetTestMode(2))
 		m_tester->Show(true);
 	else
@@ -536,16 +543,16 @@ VRenderFrame::VRenderFrame(
 		Top().CloseButton(false).Layer(4));
 	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
 		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-		Left().CloseButton(true).BestSize(wxSize(350, 280)).
-		FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
 	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
 		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
-		Left().CloseButton(true).BestSize(wxSize(350, 300)).
-		FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
 	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
 		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
-		Left().CloseButton(true).BestSize(wxSize(350, 320)).
-		FloatingSize(wxSize(350, 300)).Layer(3));
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
 	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
 		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
 		Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
@@ -664,11 +671,6 @@ VRenderFrame::VRenderFrame(
 		m_ui_state = true;
 		ToggleAllTools(false);
 	}
-
-	//make movie settings
-	m_mov_view = 0;
-	m_mov_axis = 1;
-	m_mov_rewind = false;
 
 	//set view default settings
 	if (m_adjust_view && vrv)
@@ -904,10 +906,10 @@ VRenderFrame::~VRenderFrame()
 	flvr::TextureRenderer::cal_shader_factory_.clear();
 	flvr::TextureRenderer::img_shader_factory_.clear();
 	flvr::TextRenderer::text_texture_manager_.clear();
-	for (int i=0; i<(int)m_vrv_list.size(); i++)
+	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
-		if (vrv) vrv->Clear();
+		VRenderGLView* view = GetView(i);
+		if (view) view->ClearAll();
 	}
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
@@ -941,46 +943,49 @@ wxString VRenderFrame::CreateView(int row)
 	if (m_vrv_list.size()>0)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
-		vrv = new VRenderView(this, this, wxID_ANY, sharedContext);
+		vrv = new VRenderView(this, sharedContext);
 	}
 	else
 	{
-		vrv = new VRenderView(this, this, wxID_ANY);
+		vrv = new VRenderView(this);
 	}
 
-	if (vrv)
+	if (!vrv)
+		return "NO_NAME";
+	VRenderGLView* view = vrv->m_glview;
+	if (!view)
+		return "NO_NAME";
+
+	m_vrv_list.push_back(vrv);
+	if (m_movie_view)
+		m_movie_view->AddView(vrv->GetName());
+	if (m_setting_dlg->GetTestMode(3))
 	{
-		m_vrv_list.push_back(vrv);
-		if (m_movie_view)
-			m_movie_view->AddView(vrv->GetName());
-		if (m_setting_dlg->GetTestMode(3))
-		{
-			vrv->m_glview->m_test_wiref = true;
-			vrv->m_glview->m_draw_bounds = true;
-			vrv->m_glview->m_draw_grid = true;
-		}
-		vrv->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-		vrv->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-		vrv->SetAdaptive(m_setting_dlg->GetMouseInt());
-		vrv->SetGradBg(m_setting_dlg->GetGradBg());
-		vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-		vrv->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-		vrv->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-		vrv->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+		view->m_test_wiref = true;
+		view->m_draw_bounds = true;
+		view->m_draw_grid = true;
 	}
+	view->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	view->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	view->SetAdaptive(m_setting_dlg->GetMouseInt());
+	view->SetGradBg(m_setting_dlg->GetGradBg());
+	view->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	view->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	view->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 
 	//reset gl
-	for (int i = 0; i < m_vrv_list.size(); ++i)
+	for (int i = 0; i < GetViewNum(); ++i)
 	{
-		if (m_vrv_list[i])
-			m_vrv_list[i]->m_glview->m_set_gl = false;
+		if (GetView(i))
+			GetView(i)->m_set_gl = false;
 	}
 
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
 
 	//set view default settings
-	if (m_adjust_view && vrv)
+	if (m_adjust_view)
 	{
 		/*Color gamma, brightness, hdr;
 		bool sync_r, sync_g, sync_b;
@@ -988,27 +993,27 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->m_glview->SetGamma(gamma);
 		vrv->m_glview->SetBrightness(brightness);
 		vrv->m_glview->SetHdr(hdr);*/
-		vrv->m_glview->SetSyncR(true);
-		vrv->m_glview->SetSyncG(true);
-		vrv->m_glview->SetSyncB(true);
+		view->SetSyncR(true);
+		view->SetSyncG(true);
+		view->SetSyncB(true);
 	}
 
 	//add volumes
-	if (m_vrv_list.size() > 0 && vrv)
+	if (GetViewNum() > 0)
 	{
-		VRenderView* vrv0 = m_vrv_list[0];
-		if (vrv0)
+		VRenderGLView* view0 = GetView(0);
+		if (view0)
 		{
-			for (int i = 0; i < vrv0->GetDispVolumeNum(); ++i)
+			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
 			{
-				VolumeData* vd = vrv0->GetDispVolumeData(i);
+				VolumeData* vd = view0->GetDispVolumeData(i);
 				if (vd)
 				{
 					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
 
 					if (vd_add)
 					{
-						int chan_num = vrv->GetAny();
+						int chan_num = view->GetAny();
 						fluo::Color color(1.0, 1.0, 1.0);
 						if (chan_num == 0)
 							color = fluo::Color(1.0, 0.0, 0.0);
@@ -1020,21 +1025,19 @@ wxString VRenderFrame::CreateView(int row)
 						if (chan_num >= 0 && chan_num < 3)
 							vd_add->SetColor(color);
 
-						vrv->AddVolumeData(vd_add);
+						view->AddVolumeData(vd_add);
 					}
 				}
 			}
 		}
 		//update
-		vrv->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		vrv->UpdateView();
 	}
 
 	UpdateTree();
 
-	if (vrv)
-		return vrv->GetName();
-	else
-		return wxString("NO_NAME");
+	return vrv->GetName();
 }
 
 //views
@@ -1043,28 +1046,24 @@ int VRenderFrame::GetViewNum()
 	return m_vrv_list.size();
 }
 
-vector <VRenderView*>* VRenderFrame::GetViewList()
+VRenderGLView* VRenderFrame::GetView(int index)
 {
-	return &m_vrv_list;
-}
-
-VRenderView* VRenderFrame::GetView(int index)
-{
-	if (index>=0 && index<(int)m_vrv_list.size())
-		return m_vrv_list[index];
-	else
-		return 0;
-}
-
-VRenderView* VRenderFrame::GetView(wxString& name)
-{
-	for (int i=0; i<(int)m_vrv_list.size(); i++)
+	if (index >= 0 && index < (int)m_vrv_list.size())
 	{
-		VRenderView* vrv = m_vrv_list[i];
-		if (vrv && vrv->GetName() == name)
-		{
-			return vrv;
-		}
+		VRenderView* v = m_vrv_list[index];
+		if (v)
+			return v->m_glview;
+	}
+	return 0;
+}
+
+VRenderGLView* VRenderFrame::GetView(wxString& name)
+{
+	for (size_t i=0; i < m_vrv_list.size(); ++i)
+	{
+		VRenderView* v = m_vrv_list[i];
+		if (v && v->GetName() == name)
+			return v->m_glview;
 	}
 	return 0;
 }
@@ -1362,11 +1361,11 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderView* vrv = GetView(0);
+		VRenderGLView* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, false, vrv);
+		LoadVolumes(paths, false, view);
 
 		if (m_setting_dlg)
 		{
@@ -1395,11 +1394,11 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderView* vrv = GetView(0);
+		VRenderGLView* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, true, vrv);
+		LoadVolumes(paths, true, view);
 
 		if (m_setting_dlg)
 		{
@@ -1412,21 +1411,21 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view)
+void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view)
 {
 	int j;
 
 	VolumeData* vd_sel = 0;
 	DataGroup* group_sel = 0;
-	VRenderView* vrv = 0;
+	VRenderGLView* v = 0;
 
 	if (view)
-		vrv = view;
+		v = view;
 	else
-		vrv = GetView(0);
+		v = GetView(0);
 
 	wxProgressDialog *prg_diag = 0;
-	if (vrv)
+	if (v)
 	{
 		bool streaming = m_setting_dlg->GetMemSwap();
 		double gpu_size = m_setting_dlg->GetGraphicsMem();
@@ -1499,7 +1498,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 
 			if (ch_num > 1)
 			{
-				DataGroup* group = vrv->AddOrGetGroup();
+				DataGroup* group = v->AddOrGetGroup();
 				if (group)
 				{
 					for (int i=ch_num; i>0; i--)
@@ -1507,7 +1506,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 						VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
 						if (vd)
 						{
-							vrv->AddVolumeData(vd, group->GetName());
+							v->AddVolumeData(vd, group->GetName());
 							wxString vol_name = vd->GetName();
 							if (vol_name.Find("_1ch")!=-1 &&
 								(i==1 || i==2))
@@ -1534,7 +1533,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 				VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
 				if (vd)
 				{
-					int chan_num = vrv->GetDispVolumeNum();
+					int chan_num = v->GetDispVolumeNum();
 					fluo::Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
 						color = fluo::Color(1.0, 0.0, 0.0);
@@ -1548,11 +1547,11 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 					else
 						vd->RandomizeColor();
 
-					vrv->AddVolumeData(vd);
+					v->AddVolumeData(vd);
 					vd_sel = vd;
 
 					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
-						vrv->m_glview->m_tseq_cur_num = vd->GetReader()->GetCurTime();
+						v->m_tseq_cur_num = vd->GetReader()->GetCurTime();
 						enable_4d = true;
 					}
 				}
@@ -1567,21 +1566,22 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderView
 			UpdateTree(vd_sel->GetName());
 		else
 			UpdateTree();
-		vrv->RefreshGL();
+		v->RefreshGL(39);
 
-		vrv->InitView(INIT_BOUNDS|INIT_CENTER);
-		vrv->UpdateScaleFactor(false);
+		v->InitView(INIT_BOUNDS|INIT_CENTER);
+		v->m_vrv->UpdateScaleFactor(false);
 
-		if (enable_4d) {
-			m_movie_view->EnableTime();
-			m_movie_view->DisableRot();
-			m_movie_view->SetCurrentTime(vrv->m_glview->m_tseq_cur_num);
+		if (enable_4d)
+		{
+			m_movie_view->SetTimeSeq(true);
+			m_movie_view->SetRotate(false);
+			m_movie_view->SetCurrentTime(v->m_tseq_cur_num);
 		}
 
 		delete prg_diag;
 	}
 
-	vrv->RefreshGL();//added by Takashi
+	v->RefreshGL(39);//added by Takashi
 }
 
 void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
@@ -1631,10 +1631,10 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 		m_movie_view->Run();
 }
 
-void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
+void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 {
-	if (!vrv)
-		vrv = GetView(0);
+	if (!view)
+		view = GetView(0);
 
 	MeshData* md_sel = 0;
 
@@ -1645,7 +1645,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 
 	MeshGroup* group = 0;
 	if (files.Count() > 1)
-		group = vrv->AddOrGetMGroup();
+		group = view->AddOrGetMGroup();
 
 	for (int i=0; i<(int)files.Count(); i++)
 	{
@@ -1655,15 +1655,15 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 		m_data_mgr.LoadMeshData(filename);
 
 		MeshData* md = m_data_mgr.GetLastMeshData();
-		if (vrv && md)
+		if (view && md)
 		{
 			if (group)
 			{
 				group->InsertMeshData(group->GetMeshNum()-1, md);
-				vrv->SetMeshPopDirty();
+				view->SetMeshPopDirty();
 			}
 			else
-				vrv->AddMeshData(md);
+				view->AddMeshData(md);
 
 			if (i==int(files.Count()-1))
 				md_sel = md;
@@ -1676,8 +1676,8 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderView* vrv)
 	else
 		UpdateTree();
 
-	if (vrv)
-		vrv->InitView(INIT_BOUNDS|INIT_CENTER);
+	if (view)
+		view->InitView(INIT_BOUNDS|INIT_CENTER);
 
 	delete prg_diag;
 }
@@ -1691,11 +1691,11 @@ void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderView* vrv = GetView(0);
+		VRenderGLView* view = GetView(0);
 		wxArrayString files;
 		fopendlg->GetPaths(files);
 
-		LoadMeshes(files, vrv);
+		LoadMeshes(files, view);
 	}
 
 	if (fopendlg)
@@ -1793,9 +1793,9 @@ void VRenderFrame::UpdateTreeIcons()
 	wxTreeItemId root = treectrl->GetRootItem();
 	wxTreeItemIdValue ck_view;
 	int counter = 0;
-	for (i=0; i<(int)m_vrv_list.size(); i++)
+	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderView *vrv = m_vrv_list[i];
+		VRenderGLView *view = GetView(i);
 		wxTreeItemId vrv_item;
 		if (i==0)
 			vrv_item = treectrl->GetFirstChild(root, ck_view);
@@ -1805,12 +1805,12 @@ void VRenderFrame::UpdateTreeIcons()
 		if (!vrv_item.IsOk())
 			continue;
 
-		m_tree_panel->SetViewItemImage(vrv_item, vrv->GetDraw());
+		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
 
 		wxTreeItemIdValue ck_layer;
-		for (j=0; j<vrv->GetLayerNum(); j++)
+		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = vrv->GetLayer(j);
+			TreeLayer* layer = view->GetLayer(j);
 			wxTreeItemId layer_item;
 			if (j==0)
 				layer_item = treectrl->GetFirstChild(vrv_item, ck_layer);
@@ -1907,13 +1907,13 @@ void VRenderFrame::UpdateTreeColors()
 {
 	int i, j, k;
 	int counter = 0;
-	for (i=0 ; i<(int)m_vrv_list.size() ; i++)
+	for (i=0 ; i<GetViewNum() ; i++)
 	{
-		VRenderView *vrv = m_vrv_list[i];
+		VRenderGLView *view = GetView(i);
 
-		for (j=0; j<vrv->GetLayerNum(); j++)
+		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = vrv->GetLayer(j);
+			TreeLayer* layer = view->GetLayer(j);
 			switch (layer->IsA())
 			{
 			case 0://root
@@ -2027,22 +2027,23 @@ void VRenderFrame::UpdateTree(wxString name)
 
 	wxTreeItemId sel_item;
 
-	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
+	for (int i = 0; i < GetViewNum(); i++)
 	{
-		int j, k;
-		VRenderView *vrv = m_vrv_list[i];
-		if (!vrv)
+		VRenderGLView* view = GetView(i);
+		if (!view)
 			continue;
+		int j, k;
 
-		vrv->OrganizeLayers();
-		wxTreeItemId vrv_item = m_tree_panel->AddViewItem(vrv->GetName());
-		m_tree_panel->SetViewItemImage(vrv_item, vrv->GetDraw());
-		if (name == vrv->GetName())
+		wxString view_name = view->m_vrv->GetName();
+		view->OrganizeLayers();
+		wxTreeItemId vrv_item = m_tree_panel->AddViewItem(view_name);
+		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
+		if (name == view_name)
 			m_tree_panel->SelectItem(vrv_item);
 
-		for (j=0; j<vrv->GetLayerNum(); j++)
+		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = vrv->GetLayer(j);
+			TreeLayer* layer = view->GetLayer(j);
 			switch (layer->IsA())
 			{
 			case 0://root
@@ -2068,13 +2069,13 @@ void VRenderFrame::UpdateTree(wxString name)
 					if (name == vd->GetName())
 					{
 						sel_item = item;
-						vrv->SetVolumeA(vd);
-						GetBrushToolDlg()->GetSettings(vrv);
-						GetMeasureDlg()->GetSettings(vrv);
-						GetTraceDlg()->GetSettings(vrv);
-						GetOclDlg()->GetSettings(vrv);
-						GetComponentDlg()->SetView(vrv);
-						GetColocalizationDlg()->SetView(vrv);
+						view->SetVolumeA(vd);
+						GetBrushToolDlg()->GetSettings(view);
+						GetMeasureDlg()->GetSettings(view);
+						GetTraceDlg()->GetSettings(view);
+						GetOclDlg()->GetSettings(view);
+						GetComponentDlg()->SetView(view);
+						GetColocalizationDlg()->SetView(view);
 					}
 				}
 				break;
@@ -2144,13 +2145,13 @@ void VRenderFrame::UpdateTree(wxString name)
 						if (name == vd->GetName())
 						{
 							sel_item = item;
-							vrv->SetVolumeA(vd);
-							GetBrushToolDlg()->GetSettings(vrv);
-							GetMeasureDlg()->GetSettings(vrv);
-							GetTraceDlg()->GetSettings(vrv);
-							GetOclDlg()->GetSettings(vrv);
-							GetComponentDlg()->SetView(vrv);
-							GetColocalizationDlg()->SetView(vrv);
+							view->SetVolumeA(vd);
+							GetBrushToolDlg()->GetSettings(view);
+							GetMeasureDlg()->GetSettings(view);
+							GetTraceDlg()->GetSettings(view);
+							GetOclDlg()->GetSettings(view);
+							GetComponentDlg()->SetView(view);
+							GetColocalizationDlg()->SetView(view);
 						}
 					}
 					if (name == group->GetName())
@@ -2255,7 +2256,7 @@ ListPanel *VRenderFrame::GetList()
 
 //on selections
 void VRenderFrame::OnSelection(int type,
-	VRenderView* vrv,
+	VRenderGLView* view,
 	DataGroup* group,
 	VolumeData* vd,
 	MeshData* md,
@@ -2263,8 +2264,8 @@ void VRenderFrame::OnSelection(int type,
 {
 	if (m_adjust_view)
 	{
-		m_adjust_view->SetRenderView(vrv);
-		if (!vrv || vd)
+		m_adjust_view->SetRenderView(view);
+		if (!view || vd)
 			m_adjust_view->SetVolumeData(vd);
 	}
 
@@ -2294,23 +2295,23 @@ void VRenderFrame::OnSelection(int type,
 		m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
 
 	if (m_brush_tool_dlg)
-		m_brush_tool_dlg->GetSettings(vrv);
+		m_brush_tool_dlg->GetSettings(view);
 	if (m_colocalization_dlg)
-		m_colocalization_dlg->SetView(vrv);
+		m_colocalization_dlg->SetView(view);
 	if (m_component_dlg)
-		m_component_dlg->SetView(vrv);
+		m_component_dlg->SetView(view);
 	if (m_counting_dlg)
-		m_counting_dlg->GetSettings(vrv);
+		m_counting_dlg->GetSettings(view);
 	if (m_measure_dlg)
-		m_measure_dlg->GetSettings(vrv);
+		m_measure_dlg->GetSettings(view);
 	if (m_noise_cancelling_dlg)
-		m_noise_cancelling_dlg->GetSettings(vrv);
+		m_noise_cancelling_dlg->GetSettings(view);
 	if (m_ocl_dlg)
-		m_ocl_dlg->GetSettings(vrv);
+		m_ocl_dlg->GetSettings(view);
 	if (m_recorder_dlg)
-		m_recorder_dlg->GetSettings(vrv);
+		m_recorder_dlg->GetSettings(view);
 	if (m_trace_dlg)
-		m_trace_dlg->GetSettings(vrv);
+		m_trace_dlg->GetSettings(view);
 
 	switch (type)
 	{
@@ -2335,7 +2336,7 @@ void VRenderFrame::OnSelection(int type,
 		{
 			m_volume_prop->SetVolumeData(vd);
 			m_volume_prop->SetGroup(group);
-			m_volume_prop->SetView(vrv);
+			m_volume_prop->SetView(view);
 			if (!m_volume_prop->IsShown())
 			{
 				m_volume_prop->Show(true);
@@ -2350,12 +2351,12 @@ void VRenderFrame::OnSelection(int type,
 			wxString str = vd->GetName();
 			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
-			for (int i=0; i<(int)m_vrv_list.size(); i++)
+			for (size_t i=0; i< GetViewNum(); ++i)
 			{
-				VRenderView* vrv = m_vrv_list[i];
-				if (!vrv)
+				VRenderGLView* v = GetView(i);
+				if (!v)
 					continue;
-				vrv->m_glview->m_cur_vol = vd;
+				v->m_cur_vol = vd;
 			}
 
 			if (m_volume_prop)
@@ -2384,7 +2385,8 @@ void VRenderFrame::OnSelection(int type,
 	case 3:  //mesh
 		if (md)
 		{
-			m_mesh_prop->SetMeshData(md, vrv);
+			m_mesh_prop->SetView(view);
+			m_mesh_prop->SetMeshData(md);
 			if (!m_mesh_prop->IsShown())
 			{
 				m_mesh_prop->Show(true);
@@ -2415,7 +2417,7 @@ void VRenderFrame::OnSelection(int type,
 	case 4:  //annotations
 		if (ann)
 		{
-			m_annotation_prop->SetAnnotations(ann, vrv);
+			m_annotation_prop->SetAnnotations(ann);
 			if (!m_annotation_prop->IsShown())
 			{
 				m_annotation_prop->Show(true);
@@ -2524,10 +2526,10 @@ void VRenderFrame::DeleteVRenderView(int i)
 		int j;
 		wxString str = m_vrv_list[i]->GetName();
 
-		for (j=0 ; j<m_vrv_list[i]->GetAllVolumeNum() ; j++)
-			m_vrv_list[i]->GetAllVolumeData(j)->SetDisp(true);
-		for (j=0 ; j<m_vrv_list[i]->GetMeshNum() ; j++)
-			m_vrv_list[i]->GetMeshData(j)->SetDisp(true);
+		for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
+			GetView(i)->GetAllVolumeData(j)->SetDisp(true);
+		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
+			GetView(i)->GetMeshData(j)->SetDisp(true);
 		VRenderView* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
@@ -2545,8 +2547,8 @@ void VRenderFrame::DeleteVRenderView(wxString &name)
 {
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderView* vrv = GetView(i);
-		if (vrv && name == vrv->GetName() && vrv->m_id > 1)
+		VRenderGLView* view = GetView(i);
+		if (view && name == view->m_vrv->GetName() && view->m_vrv->m_id > 1)
 		{
 			DeleteVRenderView(i);
 			return;
@@ -2888,10 +2890,10 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				fluo::Quaternion qtemp;
-				vd->Save(str, 0, false, false, VRenderFrame::GetCompression(), qtemp);
+				vd->Save(str, 0, false, 0, false, VRenderFrame::GetCompression(), qtemp);
 				fconfig.Write("path", str);
 				new_chan = true;
 			}
@@ -3062,7 +3064,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + md->GetName() + ".obj";
 				md->Save(str);
 			}
@@ -3131,7 +3133,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
 				ann->Save(str);
 			}
@@ -3145,21 +3147,21 @@ void VRenderFrame::SaveProject(wxString& filename)
 	}
 	//views
 	fconfig.SetPath("/views");
-	fconfig.Write("num", (int)m_vrv_list.size());
-	for (i=0; i<(int)m_vrv_list.size(); i++)
+	fconfig.Write("num", GetViewNum());
+	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
-		if (vrv)
+		VRenderGLView* view = GetView(i);
+		if (view)
 		{
 			str = wxString::Format("/views/%d", i);
 			fconfig.SetPath(str);
 			//view layers
 			str = wxString::Format("/views/%d/layers", i);
 			fconfig.SetPath(str);
-			fconfig.Write("num", vrv->GetLayerNum());
-			for (j=0; j<vrv->GetLayerNum(); j++)
+			fconfig.Write("num", view->GetLayerNum());
+			for (j=0; j< view->GetLayerNum(); j++)
 			{
-				TreeLayer* layer = vrv->GetLayer(j);
+				TreeLayer* layer = view->GetLayer(j);
 				if (!layer)
 					continue;
 				str = wxString::Format("/views/%d/layers/%d", i, j);
@@ -3235,89 +3237,89 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//properties
 			fconfig.SetPath(wxString::Format("/views/%d/properties", i));
-			fconfig.Write("drawall", vrv->GetDraw());
-			fconfig.Write("persp", vrv->GetPersp());
-			fconfig.Write("free", vrv->GetFree());
-			fconfig.Write("aov", vrv->GetAov());
-			fconfig.Write("nearclip", vrv->GetNearClip());
-			fconfig.Write("farclip", vrv->GetFarClip());
+			fconfig.Write("drawall", view->GetDraw());
+			fconfig.Write("persp", view->GetPersp());
+			fconfig.Write("free", view->GetFree());
+			fconfig.Write("aov", view->GetAov());
+			fconfig.Write("nearclip", view->GetNearClip());
+			fconfig.Write("farclip", view->GetFarClip());
 			fluo::Color bkcolor;
-			bkcolor = vrv->GetBackgroundColor();
+			bkcolor = view->GetBackgroundColor();
 			str = wxString::Format("%f %f %f", bkcolor.r(), bkcolor.g(), bkcolor.b());
 			fconfig.Write("backgroundcolor", str);
-			fconfig.Write("drawtype", vrv->GetDrawType());
-			fconfig.Write("volmethod", vrv->GetVolMethod());
-			fconfig.Write("peellayers", vrv->GetPeelingLayers());
-			fconfig.Write("fog", vrv->GetFog());
-			fconfig.Write("fogintensity", (double)vrv->GetFogIntensity());
-			fconfig.Write("draw_camctr", vrv->m_glview->m_draw_camctr);
-			fconfig.Write("draw_info", vrv->m_glview->m_draw_info);
-			fconfig.Write("draw_legend", vrv->m_glview->m_draw_legend);
+			fconfig.Write("drawtype", view->GetDrawType());
+			fconfig.Write("volmethod", view->GetVolMethod());
+			fconfig.Write("peellayers", view->GetPeelingLayers());
+			fconfig.Write("fog", view->GetFog());
+			fconfig.Write("fogintensity", (double)view->GetFogIntensity());
+			fconfig.Write("draw_camctr", view->m_draw_camctr);
+			fconfig.Write("draw_info", view->m_draw_info);
+			fconfig.Write("draw_legend", view->m_draw_legend);
 
 			double x, y, z;
 			//camera
-			vrv->GetTranslations(x, y, z);
+			view->GetTranslations(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("translation", str);
-			vrv->GetRotations(x, y, z);
+			view->GetRotations(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("rotation", str);
-			fluo::Quaternion q = vrv->m_glview->GetZeroQuat();
+			fluo::Quaternion q = view->GetZeroQuat();
 			str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
 			fconfig.Write("zero_quat", str);
-			vrv->GetCenters(x, y, z);
+			view->GetCenters(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("center", str);
-			fconfig.Write("centereyedist", vrv->GetCenterEyeDist());
-			fconfig.Write("radius", vrv->GetRadius());
-			fconfig.Write("initdist", vrv->m_glview->GetInitDist());
-			fconfig.Write("scale_mode", vrv->m_glview->m_scale_mode);
-			fconfig.Write("scale", vrv->m_glview->m_scale_factor);
-			fconfig.Write("pin_rot_center", vrv->m_glview->m_pin_rot_center);
+			fconfig.Write("centereyedist", view->GetCenterEyeDist());
+			fconfig.Write("radius", view->GetRadius());
+			fconfig.Write("initdist", view->GetInitDist());
+			fconfig.Write("scale_mode", view->m_scale_mode);
+			fconfig.Write("scale", view->m_scale_factor);
+			fconfig.Write("pin_rot_center", view->m_pin_rot_center);
 			//object
-			vrv->GetObjCenters(x, y, z);
+			view->GetObjCenters(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("obj_center", str);
-			vrv->GetObjTrans(x, y, z);
+			view->GetObjTrans(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("obj_trans", str);
-			vrv->GetObjRot(x, y, z);
+			view->GetObjRot(x, y, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("obj_rot", str);
 			//scale bar
-			fconfig.Write("disp_scale_bar", vrv->m_glview->m_disp_scale_bar);
-			fconfig.Write("disp_scale_bar_text", vrv->m_glview->m_disp_scale_bar_text);
-			fconfig.Write("sb_length", vrv->m_glview->m_sb_length);
-			str = vrv->m_glview->m_sb_text;
+			fconfig.Write("disp_scale_bar", view->m_disp_scale_bar);
+			fconfig.Write("disp_scale_bar_text", view->m_disp_scale_bar_text);
+			fconfig.Write("sb_length", view->m_sb_length);
+			str = view->m_sb_text;
 			fconfig.Write("sb_text", str);
-			str = vrv->m_glview->m_sb_num;
+			str = view->m_sb_num;
 			fconfig.Write("sb_num", str);
-			fconfig.Write("sb_unit", vrv->m_glview->m_sb_unit);
+			fconfig.Write("sb_unit", view->m_sb_unit);
 
 			//2d adjustment
-			str = wxString::Format("%f %f %f", vrv->m_glview->GetGamma().r(),
-				vrv->m_glview->GetGamma().g(), vrv->m_glview->GetGamma().b());
+			str = wxString::Format("%f %f %f", view->GetGamma().r(),
+				view->GetGamma().g(), view->GetGamma().b());
 			fconfig.Write("gamma", str);
-			str = wxString::Format("%f %f %f", vrv->m_glview->GetBrightness().r(),
-				vrv->m_glview->GetBrightness().g(), vrv->m_glview->GetBrightness().b());
+			str = wxString::Format("%f %f %f", view->GetBrightness().r(),
+				view->GetBrightness().g(), view->GetBrightness().b());
 			fconfig.Write("brightness", str);
-			str = wxString::Format("%f %f %f", vrv->m_glview->GetHdr().r(),
-				vrv->m_glview->GetHdr().g(), vrv->m_glview->GetHdr().b());
+			str = wxString::Format("%f %f %f", view->GetHdr().r(),
+				view->GetHdr().g(), view->GetHdr().b());
 			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", vrv->m_glview->GetSyncR());
-			fconfig.Write("sync_g", vrv->m_glview->GetSyncG());
-			fconfig.Write("sync_b", vrv->m_glview->GetSyncB());
+			fconfig.Write("sync_r", view->GetSyncR());
+			fconfig.Write("sync_g", view->GetSyncG());
+			fconfig.Write("sync_b", view->GetSyncB());
 
 			//clipping plane rotations
-			fconfig.Write("clip_mode", vrv->GetClipMode());
+			fconfig.Write("clip_mode", view->GetClipMode());
 			double rotx_cl, roty_cl, rotz_cl;
-			vrv->GetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
+			view->GetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
 			fconfig.Write("rotx_cl", rotx_cl);
 			fconfig.Write("roty_cl", roty_cl);
 			fconfig.Write("rotz_cl", rotz_cl);
 
 			//painting parameters
-			flrd::VolumeSelector* selector = vrv->GetVolumeSelector();
+			flrd::VolumeSelector* selector = view->GetVolumeSelector();
 			if (selector)
 			{
 				fconfig.Write("brush_use_pres", selector->GetBrushUsePres());
@@ -3331,7 +3333,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 
 			//rulers
 			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-			vrv->GetRulerHandler()->Save(fconfig, i);
+			view->GetRulerHandler()->Save(fconfig, i);
 		}
 	}
 	//clipping planes
@@ -3348,24 +3350,20 @@ void VRenderFrame::SaveProject(wxString& filename)
 	//movie view
 	fconfig.SetPath("/movie_panel");
 	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
-	fconfig.Write("views_cmb", m_movie_view->m_views_cmb->GetCurrentSelection());
-	fconfig.Write("rot_check", m_movie_view->m_rot_chk->GetValue());
-	fconfig.Write("seq_check", m_movie_view->m_seq_chk->GetValue());
-	fconfig.Write("frame_range", m_movie_view->m_progress_sldr->GetMax());
-	fconfig.Write("time_frame", m_movie_view->m_progress_sldr->GetValue());
-	fconfig.Write("x_rd", m_movie_view->m_x_rd->GetValue());
-	fconfig.Write("y_rd", m_movie_view->m_y_rd->GetValue());
-	fconfig.Write("z_rd", m_movie_view->m_z_rd->GetValue());
-	fconfig.Write("angle_end_text", m_movie_view->m_degree_end->GetValue());
-	fconfig.Write("step_text", m_movie_view->m_movie_time->GetValue());
-	fconfig.Write("frames_text", m_movie_view->m_fps_text->GetValue());
-	fconfig.Write("frame_chk", m_movie_view->m_frame_chk->GetValue());
-	fconfig.Write("center_x_text", m_movie_view->m_center_x_text->GetValue());
-	fconfig.Write("center_y_text", m_movie_view->m_center_y_text->GetValue());
-	fconfig.Write("width_text", m_movie_view->m_width_text->GetValue());
-	fconfig.Write("height_text", m_movie_view->m_height_text->GetValue());
-	fconfig.Write("time_start_text", m_movie_view->m_time_start_text->GetValue());
-	fconfig.Write("time_end_text", m_movie_view->m_time_end_text->GetValue());
+	fconfig.Write("views_cmb", m_movie_view->GetView());
+	fconfig.Write("rot_check", m_movie_view->GetRotate());
+	fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
+	fconfig.Write("rot_axis", m_movie_view->GetRotAxis());
+	fconfig.Write("rot_deg", m_movie_view->GetRotDeg());
+	fconfig.Write("movie_len", m_movie_view->GetMovieLen());
+	fconfig.Write("fps", m_movie_view->GetFps());
+	fconfig.Write("crop", m_movie_view->GetCrop());
+	fconfig.Write("crop_x", m_movie_view->GetCropX());
+	fconfig.Write("crop_y", m_movie_view->GetCropY());
+	fconfig.Write("crop_w", m_movie_view->GetCropW());
+	fconfig.Write("crop_h", m_movie_view->GetCropH());
+	fconfig.Write("start_frame", m_movie_view->GetStartFrame());
+	fconfig.Write("end_frame", m_movie_view->GetEndFrame());
 	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
 	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
 	//tracking diag
@@ -3375,7 +3373,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	{
 		wxString new_folder;
 		new_folder = filename + "_files";
-		wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		MkDirW(new_folder.ToStdWstring());
 		std::wstring wstr = filename.ToStdWstring();
 		str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
 		m_trace_dlg->SaveTrackFile(str);
@@ -3474,14 +3472,18 @@ void VRenderFrame::SaveProject(wxString& filename)
 							fconfig.Write("val", bval);
 						}
 						break;
+					case FLKEY_TYPE_INT:
+						{
+							int ival = ((FlKeyInt*)key)->GetValue();
+							fconfig.Write("val", ival);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	wxFileOutputStream os(filename);
-	fconfig.Save(os);
+	SaveConfig(fconfig, filename);
 	UpdateList();
 
 	delete prg_diag;
@@ -3500,7 +3502,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
-	m_vrv_list[0]->Clear();
+	GetView(0)->ClearAll();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	//VRenderView::ResetID();
@@ -4076,14 +4078,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			if (i>0)
 				CreateView();
-			VRenderView* vrv = GetLastView();
-			if (!vrv)
+			VRenderGLView* view = GetLastView();
+			if (!view)
 				continue;
 
-			vrv->Clear();
+			view->ClearAll();
 
 			if (i==0 && m_setting_dlg && m_setting_dlg->GetTestMode(1))
-				vrv->m_glview->m_test_speed = true;
+				view->m_test_speed = true;
 
 			wxString str;
 			//old
@@ -4099,10 +4101,10 @@ void VRenderFrame::OpenProject(wxString& filename)
 					{
 						VolumeData* vd = m_data_mgr.GetVolumeData(str);
 						if (vd)
-							vrv->AddVolumeData(vd);
+							view->AddVolumeData(vd);
 					}
 				}
-				vrv->SetVolPopDirty();
+				view->SetVolPopDirty();
 			}
 			//meshes
 			str = wxString::Format("/views/%d/meshes", i);
@@ -4116,7 +4118,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					{
 						MeshData* md = m_data_mgr.GetMeshData(str);
 						if (md)
-							vrv->AddMeshData(md);
+							view->AddMeshData(md);
 					}
 				}
 			}
@@ -4145,7 +4147,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										VolumeData* vd = m_data_mgr.GetVolumeData(str);
 										if (vd)
-											vrv->AddVolumeData(vd);
+											view->AddVolumeData(vd);
 									}
 								}
 								break;
@@ -4155,7 +4157,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										MeshData* md = m_data_mgr.GetMeshData(str);
 										if (md)
-											vrv->AddMeshData(md);
+											view->AddMeshData(md);
 									}
 								}
 								break;
@@ -4165,7 +4167,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										Annotations* ann = m_data_mgr.GetAnnotations(str);
 										if (ann)
-											vrv->AddAnnotations(ann);
+											view->AddAnnotations(ann);
 									}
 								}
 								break;
@@ -4176,8 +4178,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										if (fconfig.Read("id", &id))
 											DataGroup::SetID(id);
-										str = vrv->AddGroup(str);
-										DataGroup* group = vrv->GetGroup(str);
+										str = view->AddGroup(str);
+										DataGroup* group = view->GetGroup(str);
 										if (group)
 										{
 											//display
@@ -4235,7 +4237,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												}
 											}
 										}
-										vrv->SetVolPopDirty();
+										view->SetVolPopDirty();
 									}
 								}
 								break;
@@ -4246,8 +4248,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										if (fconfig.Read("id", &id))
 											MeshGroup::SetID(id);
-										str = vrv->AddMGroup(str);
-										MeshGroup* group = vrv->GetMGroup(str);
+										str = view->AddMGroup(str);
+										MeshGroup* group = view->GetMGroup(str);
 										if (group)
 										{
 											//display
@@ -4272,7 +4274,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												}
 											}
 										}
-										vrv->SetMeshPopDirty();
+										view->SetMeshPopDirty();
 									}
 								}
 								break;
@@ -4289,147 +4291,147 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(wxString::Format("/views/%d/properties", i));
 				bool draw;
 				if (fconfig.Read("drawall", &draw))
-					vrv->SetDraw(draw);
+					view->SetDraw(draw);
 				//properties
 				bool persp;
 				if (fconfig.Read("persp", &persp))
-					vrv->SetPersp(persp);
+					view->SetPersp(persp);
 				else
-					vrv->SetPersp(true);
+					view->SetPersp(true);
 				bool free;
 				if (fconfig.Read("free", &free))
-					vrv->SetFree(free);
+					view->SetFree(free);
 				else
-					vrv->SetFree(false);
+					view->SetFree(false);
 				double aov;
 				if (fconfig.Read("aov", &aov))
-					vrv->SetAov(aov);
+					view->SetAov(aov);
 				double nearclip;
 				if (fconfig.Read("nearclip", &nearclip))
-					vrv->SetNearClip(nearclip);
+					view->SetNearClip(nearclip);
 				double farclip;
 				if (fconfig.Read("farclip", &farclip))
-					vrv->SetFarClip(farclip);
+					view->SetFarClip(farclip);
 				if (fconfig.Read("backgroundcolor", &str))
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->SetBackgroundColor(col);
+						view->SetBackgroundColor(col);
 					}
 				}
 				int volmethod;
 				if (fconfig.Read("volmethod", &volmethod))
-					vrv->SetVolMethod(volmethod);
+					view->SetVolMethod(volmethod);
 				int peellayers;
 				if (fconfig.Read("peellayers", &peellayers))
-					vrv->SetPeelingLayers(peellayers);
+					view->SetPeelingLayers(peellayers);
 				bool fog;
 				if (fconfig.Read("fog", &fog))
-					vrv->SetFog(fog);
+					view->SetFog(fog);
 				double fogintensity;
 				if (fconfig.Read("fogintensity", &fogintensity))
-					vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
+					view->m_vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
 				if (fconfig.Read("draw_camctr", &bVal))
 				{
-					vrv->m_glview->m_draw_camctr = bVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
+					view->m_draw_camctr = bVal;
+					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
 				}
 				if (fconfig.Read("draw_info", &iVal))
 				{
-					vrv->m_glview->m_draw_info = iVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
+					view->m_draw_info = iVal;
+					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
-					vrv->m_glview->m_draw_legend = bVal;
-					vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
+					view->m_draw_legend = bVal;
+					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
 				}
 
 				//camera
 				if (fconfig.Read("translation", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetTranslations(x, y, z);
+						view->SetTranslations(x, y, z);
 				}
 				if (fconfig.Read("rotation", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetRotations(x, y, z);
+						view->SetRotations(x, y, z);
 				}
 				if (fconfig.Read("zero_quat", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f%f", &x, &y, &z, &w))
-						vrv->m_glview->SetZeroQuat(x, y, z, w);
+						view->SetZeroQuat(x, y, z, w);
 				}
 				if (fconfig.Read("center", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetCenters(x, y, z);
+						view->SetCenters(x, y, z);
 				}
 				double dist;
 				if (fconfig.Read("centereyedist", &dist))
-					vrv->SetCenterEyeDist(dist);
+					view->SetCenterEyeDist(dist);
 				double radius = 5.0;
 				if (fconfig.Read("radius", &radius))
-					vrv->SetRadius(radius);
+					view->SetRadius(radius);
 				double initdist;
 				if (fconfig.Read("initdist", &initdist))
-					vrv->m_glview->SetInitDist(initdist);
+					view->SetInitDist(initdist);
 				else
-					vrv->m_glview->SetInitDist(radius/tan(d2r(vrv->GetAov()/2.0)));
+					view->SetInitDist(radius/tan(d2r(view->GetAov()/2.0)));
 				int scale_mode;
 				if (fconfig.Read("scale_mode", &scale_mode))
-					vrv->SetScaleMode(scale_mode, false);
+					view->m_vrv->SetScaleMode(scale_mode, false);
 				double scale;
 				if (!fconfig.Read("scale", &scale))
-					scale = radius / tan(d2r(vrv->GetAov() / 2.0)) / dist;
-				vrv->m_glview->m_scale_factor = scale;
-				vrv->UpdateScaleFactor(false);
+					scale = radius / tan(d2r(view->GetAov() / 2.0)) / dist;
+				view->m_scale_factor = scale;
+				view->m_vrv->UpdateScaleFactor(false);
 				bool pin_rot_center;
 				if (fconfig.Read("pin_rot_center", &pin_rot_center))
 				{
-					vrv->m_glview->m_pin_rot_center = pin_rot_center;
+					view->m_pin_rot_center = pin_rot_center;
 					if (pin_rot_center)
-						vrv->m_glview->m_rot_center_dirty = true;
+						view->m_rot_center_dirty = true;
 				}
 				//object
 				if (fconfig.Read("obj_center", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetObjCenters(x, y, z);
+						view->SetObjCenters(x, y, z);
 				}
 				if (fconfig.Read("obj_trans", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						vrv->SetObjTrans(x, y, z);
+						view->SetObjTrans(x, y, z);
 				}
 				if (fconfig.Read("obj_rot", &str))
 				{
 					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 					{
 						if (l_major <= 2 && d_minor < 24.3)
-							vrv->SetObjRot(x, y+180.0, z+180.0);
+							view->SetObjRot(x, y+180.0, z+180.0);
 						else
-							vrv->SetObjRot(x, y, z);
+							view->SetObjRot(x, y, z);
 					}
 				}
 				//scale bar
 				bool disp;
 				if (fconfig.Read("disp_scale_bar", &disp))
-					vrv->m_glview->m_disp_scale_bar = disp;
+					view->m_disp_scale_bar = disp;
 				if (fconfig.Read("disp_scale_bar_text", &disp))
-					vrv->m_glview->m_disp_scale_bar_text = disp;
+					view->m_disp_scale_bar_text = disp;
 				double length;
 				if (fconfig.Read("sb_length", &length))
-					vrv->m_glview->m_sb_length = length;
+					view->m_sb_length = length;
 				if (fconfig.Read("sb_text", &str))
-					vrv->m_glview->m_sb_text = str;
+					view->m_sb_text = str;
 				if (fconfig.Read("sb_num", &str))
-					vrv->m_glview->m_sb_num = str;
+					view->m_sb_num = str;
 				int unit;
 				if (fconfig.Read("sb_unit", &unit))
-					vrv->m_glview->m_sb_unit = unit;
+					view->m_sb_unit = unit;
 
 				//2d sdjustment settings
 				if (fconfig.Read("gamma", &str))
@@ -4437,7 +4439,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->m_glview->SetGamma(col);
+						view->SetGamma(col);
 					}
 				}
 				if (fconfig.Read("brightness", &str))
@@ -4445,7 +4447,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->m_glview->SetBrightness(col);
+						view->SetBrightness(col);
 					}
 				}
 				if (fconfig.Read("hdr", &str))
@@ -4453,32 +4455,32 @@ void VRenderFrame::OpenProject(wxString& filename)
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						vrv->m_glview->SetHdr(col);
+						view->SetHdr(col);
 					}
 				}
 				if (fconfig.Read("sync_r", &bVal))
-					vrv->m_glview->SetSyncR(bVal);
+					view->SetSyncR(bVal);
 				if (fconfig.Read("sync_g", &bVal))
-					vrv->m_glview->SetSyncG(bVal);
+					view->SetSyncG(bVal);
 				if (fconfig.Read("sync_b", &bVal))
-					vrv->m_glview->SetSyncB(bVal);
+					view->SetSyncB(bVal);
 
 				//clipping plane rotations
 				int clip_mode;
 				if (fconfig.Read("clip_mode", &clip_mode))
-					vrv->SetClipMode(clip_mode);
+					view->SetClipMode(clip_mode);
 				double rotx_cl, roty_cl, rotz_cl;
 				if (fconfig.Read("rotx_cl", &rotx_cl) &&
 					fconfig.Read("roty_cl", &roty_cl) &&
 					fconfig.Read("rotz_cl", &rotz_cl))
 				{
-					vrv->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
+					view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
 					m_clip_view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
 				}
 
 				//painting parameters
 				double dVal;
-				flrd::VolumeSelector* selector = vrv->GetVolumeSelector();
+				flrd::VolumeSelector* selector = view->GetVolumeSelector();
 				if (selector)
 				{
 					if (fconfig.Read("brush_use_pres", &bVal))
@@ -4500,11 +4502,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 				}
 
 				//rulers
-				if (vrv->GetRulerList() &&
+				if (view->GetRulerList() &&
 					fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
 				{
 					fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-					vrv->GetRulerHandler()->Read(fconfig, i);
+					view->GetRulerHandler()->Read(fconfig, i);
 				}
 			}
 		}
@@ -4564,108 +4566,92 @@ void VRenderFrame::OpenProject(wxString& filename)
 		wxString sVal;
 		bool bVal;
 		int iVal;
+		double dVal;
 
 		//set settings for frame
-		VRenderView* vrv = 0;
+		VRenderGLView* view = 0;
 		if (fconfig.Read("cur_page", &iVal))
 		{
 			m_movie_view->SetCurrentPage(iVal);
 		}
 		if (fconfig.Read("views_cmb", &iVal))
 		{
-			m_movie_view->m_views_cmb->SetSelection(iVal);
-			m_mov_view = iVal;
-			vrv = (*GetViewList())[m_mov_view];
+			m_movie_view->SetView(iVal);
+			view = GetView(iVal);
 		}
 		if (fconfig.Read("rot_check", &bVal))
 		{
-			if (bVal)
-				m_movie_view->EnableRot();
-			else
-				m_movie_view->DisableRot();
+			m_movie_view->SetRotate(bVal);
 		}
 		if (fconfig.Read("seq_check", &bVal))
 		{
-			if (bVal)
-				m_movie_view->EnableTime();
-			else
-				m_movie_view->DisableTime();
+			m_movie_view->SetTimeSeq(bVal);
 		}
 		if (fconfig.Read("x_rd", &bVal))
 		{
-			m_movie_view->m_x_rd->SetValue(bVal);
 			if (bVal)
-				m_mov_axis = 1;
+				m_movie_view->SetRotAxis(0);
 		}
 		if (fconfig.Read("y_rd", &bVal))
 		{
-			m_movie_view->m_y_rd->SetValue(bVal);
 			if (bVal)
-				m_mov_axis = 2;
+				m_movie_view->SetRotAxis(1);
 		}
-		if (fconfig.Read("angle_end_text", &sVal))
+		if (fconfig.Read("z_rd", &bVal))
 		{
-			m_movie_view->m_degree_end->SetValue(sVal);
-			m_mov_angle_end = sVal;
+			if (bVal)
+				m_movie_view->SetRotAxis(2);
 		}
-		if (fconfig.Read("step_text", &sVal))
+		if (fconfig.Read("rot_axis", &iVal))
 		{
-			m_movie_view->m_movie_time->SetValue(sVal);
-			m_mov_step = sVal;
+			m_movie_view->SetRotAxis(iVal);
 		}
-		if (fconfig.Read("frames_text", &sVal))
+		if (fconfig.Read("rot_deg", &iVal))
 		{
-			m_movie_view->m_fps_text->SetValue(sVal);
-			m_mov_frames = sVal;
+			m_movie_view->SetRotDeg(iVal);
 		}
-		if (fconfig.Read("frame_chk", &bVal))
+		if (fconfig.Read("movie_len", &dVal))
 		{
-			m_movie_view->m_frame_chk->SetValue(bVal);
-			if (vrv)
-			{
-				if (bVal)
-					vrv->EnableFrame();
-				else
-					vrv->DisableFrame();
-			}
+			m_movie_view->SetMovieLen(dVal);
 		}
-		long frame_x, frame_y, frame_w, frame_h;
+		if (fconfig.Read("fps", &dVal))
+		{
+			m_movie_view->SetFps(dVal);
+		}
+		if (fconfig.Read("crop", &bVal))
+		{
+			m_movie_view->SetCrop(bVal);
+		}
 		bool b_x, b_y, b_w, b_h;
 		b_x = b_y = b_w = b_h = false;
-		if (fconfig.Read("center_x_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_x", &iVal))
 		{
-			m_movie_view->m_center_x_text->SetValue(sVal);
-			sVal.ToLong(&frame_x);
+			m_movie_view->SetCropX(iVal);
 			b_x = true;
 		}
-		if (fconfig.Read("center_y_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_y", &iVal))
 		{
-			m_movie_view->m_center_y_text->SetValue(sVal);
-			sVal.ToLong(&frame_y);
+			m_movie_view->SetCropY(iVal);
 			b_y = true;
 		}
-		if (fconfig.Read("width_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_w", &iVal))
 		{
-			m_movie_view->m_width_text->SetValue(sVal);
-			sVal.ToLong(&frame_w);
+			m_movie_view->SetCropW(iVal);
 			b_w = true;
 		}
-		if (fconfig.Read("height_text", &sVal) && sVal!="")
+		if (fconfig.Read("crop_h", &iVal))
 		{
-			m_movie_view->m_height_text->SetValue(sVal);
-			sVal.ToLong(&frame_h);
+			m_movie_view->SetCropH(iVal);
 			b_h = true;
 		}
-		if (vrv && b_x && b_y && b_w && b_h)
+		if (b_x && b_y && b_w && b_h)
 		{
-			vrv->SetFrame(int(frame_x-frame_w/2.0+0.5),
-				int(frame_y-frame_h/2.0+0.5),
-				frame_w, frame_h);
+			m_movie_view->UpdateCrop();
 		}
-		if (fconfig.Read("time_start_text", &sVal))
-			m_movie_view->m_time_start_text->SetValue(sVal);
-		if (fconfig.Read("time_end_text", &sVal))
-			m_movie_view->m_time_end_text->SetValue(sVal);
+		if (fconfig.Read("start_frame", &iVal))
+			m_movie_view->SetStartFrame(iVal);
+		if (fconfig.Read("end_frame", &iVal))
+			m_movie_view->SetEndFrame(iVal);
 		if (fconfig.Read("run_script", &bVal))
 			m_setting_dlg->SetRunScript(bVal);
 		if (fconfig.Read("script_file", &sVal))
@@ -4680,7 +4666,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		wxString sVal;
 		if (fconfig.Read("track_file", &sVal))
 		{
-			m_trace_dlg->GetSettings(m_vrv_list[0]);
+			m_trace_dlg->GetSettings(m_vrv_list[0]->m_glview);
 			m_trace_dlg->LoadTrackFile(sVal);
 		}
 	}
@@ -4965,6 +4951,15 @@ void VRenderFrame::OpenProject(wxString& filename)
 										if (fconfig.Read("val", &bVal))
 										{
 											FlKeyBoolean* key = new FlKeyBoolean(code, bVal);
+											key_group->keys.push_back(key);
+										}
+									}
+									break;
+								case FLKEY_TYPE_INT:
+									{
+										if (fconfig.Read("val", &iVal))
+										{
+											FlKeyInt* key = new FlKeyInt(code, iVal);
 											key_group->keys.push_back(key);
 										}
 									}

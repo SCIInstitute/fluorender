@@ -40,11 +40,11 @@ BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
 	EVT_CHECKBOX(ID_EnhanceSelChk, NoiseCancellingDlg::OnEnhanceSelChk)
 END_EVENT_TABLE()
 
-NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *frame, wxWindow *parent)
-: wxPanel(parent, wxID_ANY,
+NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
+: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 150),
 	0, "NoiseCancellingDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	m_max_value(255.0),
 	m_dft_thresh(0.5),
@@ -134,19 +134,18 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(VRenderView* vrv)
+void NoiseCancellingDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv)
+	if (!view)
 		return;
+	m_view = view;
 
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	if (m_frame)
+		sel_vol = m_frame->GetCurSelVol();
 	else
 		return;
 
-	m_view = vrv;
 
 	//threshold range
 	if (sel_vol)
@@ -170,7 +169,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -192,7 +191,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	comp_selector.SetAnalyzer(&ca);
 	comp_selector.CompFull();
 
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 //threshold
@@ -214,12 +213,11 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 
 	//change mask threshold
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	if (m_frame)
+		sel_vol = m_frame->GetCurSelVol();
 	if (sel_vol)
 		sel_vol->SetMaskThreshold(m_dft_thresh);
-	vr_frame->RefreshVRenderViews();
+	m_frame->RefreshVRenderViews();
 }
 
 //voxel size
@@ -250,9 +248,8 @@ void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 
 void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent &event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushErase();
+	if (m_frame && m_frame->GetTree())
+		m_frame->GetTree()->BrushErase();
 }
 
 void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
@@ -263,9 +260,8 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 	bool enhance = m_enhance_sel_chk->GetValue();
 
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-		sel_vol = vr_frame->GetCurSelVol();
+	if (m_frame)
+		sel_vol = m_frame->GetCurSelVol();
 	if (enhance && sel_vol)
 	{
 		fluo::Color mask_color = sel_vol->GetMaskColor();
@@ -286,6 +282,6 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 	{
 		sel_vol->SetHdr(m_hdr);
 	}
-	if (vr_frame)
-		vr_frame->RefreshVRenderViews();
+	if (m_frame)
+		m_frame->RefreshVRenderViews();
 }

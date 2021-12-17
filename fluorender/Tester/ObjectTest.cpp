@@ -1,10 +1,10 @@
 #include "tests.h"
 #include "asserts.h"
 #include <vector>
-#include <Flobject/Object.h>
+#include <Flobject/Object.hpp>
 
 using namespace std;
-using namespace flrd;
+using namespace fluo;
 
 void ObjectTest()
 {
@@ -55,7 +55,7 @@ void ObjectTest()
 	bval = true;
 	ASSERT_TRUE(obj_list[1]->setValue("bval", bval));
 	ASSERT_TRUE(obj_list[0]->getValue("bval", bval2));
-	ASSERT_EQ(bval, bval2);
+	ASSERT_NEQ(bval, bval2);
 	//obj2's bval changes --> obj1's bval syncs
 	ASSERT_TRUE(obj_list[1]->syncValue("bval", (obj_list[0]).get()));
 	bval = false;
@@ -65,11 +65,13 @@ void ObjectTest()
 
 	//adding the first object as a value to the second
 	//obj2 is observing obj1
-	ASSERT_TRUE(obj_list[1]->addValue("friend", obj_list[0].get()));
-	ASSERT_TRUE(obj_list[1]->setValue("friend", obj_list[0].get()));
-	Object* obj;
+	ASSERT_TRUE(obj_list[1]->addRvalu("friend", obj_list[0].get()));
+	//setting the same value fails
+	ASSERT_FALSE(obj_list[1]->setRvalu("friend", obj_list[0].get()));
+	Referenced* ref;
 	//confirming the value has been added
-	ASSERT_TRUE(obj_list[1]->getValue("friend", (Referenced**)&obj));
+	ASSERT_TRUE(obj_list[1]->getRvalu("friend", &ref));
+	Object* obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(obj1, obj);
 	//modify obj2's value
 	bval = true;
@@ -77,7 +79,8 @@ void ObjectTest()
 	//erasing the first object
 	obj_list.erase(obj_list.begin());
 	//confirming the value pointing to the first object is reset
-	ASSERT_TRUE(obj_list[0]->getValue("friend", (Referenced**)&obj));
+	ASSERT_TRUE(obj_list[0]->getRvalu("friend", &ref));
+	obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(0, obj);
 }
 
@@ -105,7 +108,7 @@ void ObjectTest2()
 	obj2->getValue("value1", value);
 	ASSERT_EQ(1.0, value);
 
-	std::vector<std::string> names = { "value1", "value2" };
+	ValueCollection names = { "value1", "value2" };
 	obj1->syncValues(names, obj2);
 	obj1->setValue("value1", 4.0);
 	obj2->getValue("value1", value);
@@ -168,4 +171,39 @@ void ObjectTest3()
 	ASSERT_EQ(!bval, bval2);
 	obj1->toggleValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
+}
+
+void ObjectTest4()
+{
+	class TestObject : public Object
+	{
+	public:
+		TestObject()
+		{
+			m_test = new Object();
+			m_test->setName("test object");
+		}
+
+		Object* getTest()
+		{
+			return m_test.get();
+		}
+
+	protected:
+		virtual ~TestObject() {}
+
+	private:
+		ref_ptr<Object> m_test;
+	};
+
+	TestObject* obj = new TestObject();
+	vector<ref_ptr<Object>> obj_list;
+	obj_list.push_back(obj);
+
+	Object* test_object = obj->getTest();
+	cout << test_object->getName() << endl;
+
+	ref_ptr<Object> obj2 = obj;
+
+	obj2 = ref_ptr<Object>(new Object());
 }

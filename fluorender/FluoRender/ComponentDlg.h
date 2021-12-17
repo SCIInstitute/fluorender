@@ -43,7 +43,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 #include <chrono>
 
-class VRenderView;
+class VRenderFrame;
+class VRenderGLView;
 class VolumeData;
 
 DECLARE_APP(VRenderApp)
@@ -87,6 +88,8 @@ public:
 		ID_DensityCheck,
 		ID_DensitySldr,
 		ID_DensityText,
+		ID_VarthSldr,
+		ID_VarthText,
 		ID_DensityWindowSizeSldr,
 		ID_DensityWindowsSizeText,
 		ID_DensityStatsSizeSldr,
@@ -142,6 +145,14 @@ public:
 		ID_CompAllBtn,
 		ID_CompClearBtn,
 		ID_ShuffleBtn,
+		//ID edit controls
+		ID_NewIdText,
+		ID_NewIdXBtn,
+		ID_CompNewBtn,
+		ID_CompAddBtn,
+		ID_CompReplaceBtn,
+		ID_CompCleanBkgBtn,
+		ID_CompCombineBtn,
 		//options
 		ID_ConSizeSldr,
 		ID_ConSizeText,
@@ -187,16 +198,15 @@ public:
 		ID_OutputGrid
 	};
 
-	ComponentDlg(wxWindow* frame,
-		wxWindow* parent);
+	ComponentDlg(VRenderFrame* frame);
 	~ComponentDlg();
 
 	void Update();
 	void GetSettings();
 	void LoadSettings(wxString filename);
 	void SaveSettings(wxString filename);
-	void SetView(VRenderView* vrv);
-	VRenderView* GetView() { return m_view; }
+	void SetView(VRenderGLView* view);
+	VRenderGLView* GetView() { return m_view; }
 
 	void GenerateComp(bool use_sel, bool command=true);
 	void Fixate(bool command = true);
@@ -208,6 +218,9 @@ public:
 		return &m_comp_analyzer;
 	}
 
+	//command
+	void LoadCmd(const wxString &filename);
+	void SaveCmd(const wxString &filename);
 	void AddCmd(const std::string &type);
 	void ResetCmd();
 	void PlayCmd(bool use_sel, double tfactor);
@@ -231,8 +244,8 @@ public:
 	void ExcludeComps();
 
 private:
-	wxWindow* m_frame;
-	VRenderView* m_view;
+	VRenderFrame* m_frame;
+	VRenderGLView* m_view;
 
 	//progress
 	float m_prog_bit;
@@ -257,6 +270,7 @@ private:
 	//density
 	bool m_density;
 	double m_density_thresh;
+	double m_varth;//variance threshold
 	int m_density_window_size;
 	int m_density_stats_size;
 	//fixate
@@ -286,6 +300,10 @@ private:
 	//options
 	bool m_consistent;
 	bool m_colocal;
+
+	//modify
+	unsigned int m_cell_new_id;
+	bool m_cell_new_id_empty;
 
 	//distance
 	bool m_use_dist_neighbor;
@@ -359,6 +377,8 @@ private:
 	wxCheckBox* m_density_check;
 	wxSlider* m_density_sldr;
 	wxTextCtrl* m_density_text;
+	wxSlider* m_varth_sldr;
+	wxTextCtrl* m_varth_text;
 	wxSlider* m_density_window_size_sldr;
 	wxTextCtrl* m_density_window_size_text;
 	wxSlider* m_density_stats_size_sldr;
@@ -410,6 +430,14 @@ private:
 	wxButton* m_comp_all_btn;
 	wxButton* m_comp_clear_btn;
 	wxButton* m_shuffle_btn;
+	//modify
+	wxTextCtrl* m_new_id_text;
+	wxButton* m_new_id_x_btn;
+	wxButton* m_comp_new_btn;
+	wxButton* m_comp_add_btn;
+	wxButton* m_comp_replace_btn;
+	wxButton* m_comp_clean_bkg_btn;
+	wxButton* m_comp_combine_btn;
 	//stats
 	wxCheckBox* m_analysis_min_check;
 	wxSpinCtrl* m_analysis_min_spin;
@@ -515,6 +543,8 @@ private:
 	void OnDensityCheck(wxCommandEvent &event);
 	void OnDensitySldr(wxScrollEvent &event);
 	void OnDensityText(wxCommandEvent &event);
+	void OnVarthSldr(wxScrollEvent &event);
+	void OnVarthText(wxCommandEvent &event);
 	void OnDensityWindowSizeSldr(wxScrollEvent &event);
 	void OnDensityWindowSizeText(wxCommandEvent &event);
 	void OnDensityStatsSizeSldr(wxScrollEvent &event);
@@ -572,6 +602,15 @@ private:
 	void OnCompAll(wxCommandEvent &event);
 	void OnCompClear(wxCommandEvent &event);
 	void OnShuffle(wxCommandEvent &event);
+	//modify
+	void OnNewIDText(wxCommandEvent &event);
+	void OnNewIDX(wxCommandEvent& event);
+	void OnCompNew(wxCommandEvent& event);
+	void OnCompAdd(wxCommandEvent& event);
+	void OnCompReplace(wxCommandEvent& event);
+	void OnCompCleanBkg(wxCommandEvent& event);
+	void OnCompCombine(wxCommandEvent& event);
+	//options
 	void OnConSizeSldr(wxScrollEvent &event);
 	void OnConSizeText(wxCommandEvent &event);
 	void OnConsistentCheck(wxCommandEvent &event);

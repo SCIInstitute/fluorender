@@ -25,17 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
+#ifndef _OCLDLG_H_
+#define _OCLDLG_H_
+
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
 #include <wx/listctrl.h>
 #include <string>
 
-#ifndef _OCLDLG_H_
-#define _OCLDLG_H_
-
-class VRenderView;
-
+class VRenderFrame;
+class VRenderGLView;
 class OclDlg : public wxPanel
 {
 public:
@@ -54,16 +53,15 @@ public:
 		ID_OutputTxt
 	};
 
-	OclDlg(wxWindow* frame,
-		wxWindow* parent);
+	OclDlg(VRenderFrame* frame);
 	~OclDlg();
 
-	void GetSettings(VRenderView* vrv);
-	VRenderView* GetView();
+	void GetSettings(VRenderGLView* view);
+	VRenderGLView* GetView();
 
 private:
-	wxWindow* m_frame;
-	VRenderView* m_view;
+	VRenderFrame* m_frame;
+	VRenderGLView* m_view;
 
 	//ui
 	wxTextCtrl* m_kernel_file_txt;

@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/treectrl.h>
-#include "compatibility.h"
 
 //tree icon
 #define icon_change	1
@@ -45,6 +44,7 @@ public:
 				//5-group; 6-mesh group
 };
 
+class VRenderFrame;
 class VolumeData;
 
 class DataTreeCtrl: public wxTreeCtrl
@@ -80,9 +80,8 @@ class DataTreeCtrl: public wxTreeCtrl
 	};
 
 public:
-	DataTreeCtrl(wxWindow* frame,
+	DataTreeCtrl(VRenderFrame* frame,
 		wxWindow* parent,
-		wxWindowID id,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=wxTR_HAS_BUTTONS|
@@ -144,7 +143,7 @@ public:
 	friend class TreePanel;
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 
 	//drag
 	wxTreeItemId m_drag_item;
@@ -217,9 +216,7 @@ public:
 		ID_BrushCreate
 	};
 
-	TreePanel(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	TreePanel(VRenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -274,7 +271,7 @@ public:
 	void BrushGrow(bool state);
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
 

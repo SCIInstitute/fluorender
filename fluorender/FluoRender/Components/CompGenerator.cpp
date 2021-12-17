@@ -417,7 +417,7 @@ void ComponentGenerator::Grow(bool diffuse, int iter, float tran, float falloff,
 
 void ComponentGenerator::DensityField(int dsize, int wsize,
 	bool diffuse, int iter, float tran, float falloff,
-	float density, float sscale)
+	float density, float varth, float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -518,14 +518,15 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//init
-		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
+		kernel_prog->executeKernel(kernel_index0, 3, global_size2, local_size);
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog->readBuffer(arg_df, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//delete[] val;
 		//ofs.close();
@@ -535,11 +536,11 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[ngx*ngy*ngz];
 		//kernel_prog->readBuffer(arg_gavg, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//kernel_prog->readBuffer(arg_gvar, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//delete[] val;
@@ -560,11 +561,11 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog->readBuffer(arg_avg, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//kernel_prog->readBuffer(arg_var, val);
-		//ofs.open("C:/Users/ASUS2/Documents/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
+		//ofs.open("E:/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//delete[] val;
@@ -599,6 +600,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&density));
+		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&varth));
 		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		if (m_use_mask)
 			kernel2_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
@@ -739,6 +741,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		unsigned int seed = iter > 10 ? iter : 11;
 		float scl_ff = diffuse ? falloff : 0.0f;
 		float grad_ff = diffuse ? falloff : 0.0f;
+		float distscl = 5.0f / max_dist;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
@@ -755,6 +758,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		if (m_use_mask)
 			kernel_prog->setKernelArgument(arg_mask);
@@ -778,7 +782,7 @@ void ComponentGenerator::DistGrow(bool diffuse, int iter,
 void ComponentGenerator::DistDensityField(
 	bool diffuse, int iter, float tran, float falloff,
 	int dsize1, int max_dist, float dist_thresh, float dist_strength,
-	int dsize2, int wsize, float density, float sscale)
+	int dsize2, int wsize, float density, float varth, float sscale)
 {
 	//debug
 #ifdef _DEBUG
@@ -914,10 +918,12 @@ void ComponentGenerator::DistDensityField(
 		dnx = gsx * ngx;
 		dny = gsy * ngy;
 		dnz = gsz * ngz;
+		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		//set
 		//kernel 0
 		int nxy = nx * ny;
 		int dnxy = dnx * dny;
+		float distscl = 5.0f / max_dist;
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
 		kernel_prog_dens->setKernelArgument(arg_img);
 		kernel_prog_dens->setKernelArgument(arg_distf);
@@ -929,6 +935,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&dsize2));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		//kernel 1
 		int ngxy = ngy * ngx;
@@ -957,7 +964,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 
 		//init
-		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size, local_size);
+		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
 		//kernel_prog_dens->readBuffer(arg_densf, val);
@@ -1036,6 +1043,7 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
 		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		if (m_use_mask)
 			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);

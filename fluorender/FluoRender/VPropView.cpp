@@ -26,17 +26,23 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VPropView.h"
+#include "DataManager.h"
 #include "VRenderFrame.h"
+#include <FLIVR/MultiVolumeRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/VolShaderCode.h>
+#include <Types/Color.h>
+#include <Types/BBox.h>
+#include <Types/Point.h>
+#include "png_resource.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include <wx/aboutdlg.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
 #include <wx/hyperlink.h>
-#include "png_resource.h"
 #include <wx/stdpaths.h>
 #include "img/icons.h"
-#include <FLIVR/VolShaderCode.h>
 #include <limits>
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
@@ -108,22 +114,23 @@ BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	EVT_TOOL(ID_DepthChk, VPropView::OnDepthCheck)
 	//transp
 	EVT_TOOL(ID_TranspChk, VPropView::OnTranspChk)
+	//components
+	EVT_TOOL(ID_CompChk, VPropView::OnCompChk)
 END_EVENT_TABLE()
 
-VPropView::VPropView(wxWindow* frame,
-wxWindow* parent,
-wxWindowID id,
-const wxPoint& pos,
-const wxSize& size,
-long style,
-const wxString& name):
-wxPanel(parent, id, pos, size,style, name),
+VPropView::VPropView(VRenderFrame* frame,
+	wxWindow* parent,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style,
+	const wxString& name) :
+	wxPanel(parent, wxID_ANY, pos, size,style, name),
 	m_frame(frame),
 	m_vd(0),
 	m_lumi_change(false),
 	m_sync_group(false),
 	m_group(0),
-	m_vrv(0),
+	m_view(0),
 	m_max_val(255.0),
 	m_space_x_text(0),
 	m_space_y_text(0),
@@ -413,6 +420,13 @@ wxPanel(parent, id, pos, size,style, name),
 		"Invert data intensity values",
 		"Invert data intensity values");
 	m_options_toolbar->ToggleTool(ID_InvChk,false);
+	//component display
+	bitmap = wxGetBitmapFromMemory(comp_off);
+	m_options_toolbar->AddCheckTool(ID_CompChk, "Components",
+		bitmap, wxNullBitmap,
+		"Show components",
+		"Show components");
+	m_options_toolbar->ToggleTool(ID_CompChk, false);
 	//interpolation
 	bitmap = wxGetBitmapFromMemory(interpolate);
 	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
@@ -516,11 +530,11 @@ wxPanel(parent, id, pos, size,style, name),
 	st = new wxStaticText(this, 0, "Effects: ",
 		wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxToggleButton(this, ID_ColormapInvBtn,
-		L"\u262f", wxDefaultPosition, wxSize(20, 24));
+		L"\u262f", wxDefaultPosition, wxSize(24, 24));
 #ifdef _WIN32
-	wxFont font(28, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	wxFont font(30, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 #else
-	wxFont font(14, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
+	wxFont font(15, wxFONTFAMILY_DEFAULT, wxNORMAL, wxNORMAL);
 #endif
 	m_colormap_inv_btn->SetFont(font);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
@@ -817,6 +831,21 @@ void VPropView::GetSettings()
 			wxGetBitmapFromMemory(transplo));
 	}
 
+	//component display
+	int label_mode = m_vd->GetLabelMode();
+	if (label_mode)
+	{
+		m_options_toolbar->ToggleTool(ID_CompChk, true);
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp));
+	}
+	else
+	{
+		m_options_toolbar->ToggleTool(ID_CompChk, false);
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp_off));
+	}
+
 	//noise reduction
 	bool nr = m_vd->GetNR();
 	m_options_toolbar->ToggleTool(ID_NRChk,nr);
@@ -877,22 +906,21 @@ VolumeData* VPropView::GetVolumeData()
 
 void VPropView::RefreshVRenderViews(bool tree, bool interactive)
 {
-	VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
-	if (vrender_frame)
-		vrender_frame->RefreshVRenderViews(tree, interactive);
+	if (m_frame)
+		m_frame->RefreshVRenderViews(tree, interactive);
 }
 
 void VPropView::InitVRenderViews(unsigned int type)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		for (int i=0 ; i<vr_frame->GetViewNum(); i++)
+		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			if (vrv)
+			VRenderGLView* view = m_frame->GetView(i);
+			if (view)
 			{
-				vrv->InitView(type);
+				view->InitView(type);
+				view->m_vrv->UpdateView();
 			}
 		}
 	}
@@ -913,14 +941,14 @@ DataGroup* VPropView::GetGroup()
 	return m_group;
 }
 
-void VPropView::SetView(VRenderView *view)
+void VPropView::SetView(VRenderGLView *view)
 {
-	m_vrv = view;
+	m_view = view;
 }
 
-VRenderView* VPropView::GetView()
+VRenderGLView* VPropView::GetView()
 {
-	return m_vrv;
+	return m_view;
 }
 
 //1
@@ -1093,10 +1121,9 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 
 	//update colocalization
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetColocalizationDlg() &&
-		frame->GetColocalizationDlg()->GetThreshUpdate())
-		frame->GetColocalizationDlg()->Colocalize();
+	if (m_frame && m_frame->GetColocalizationDlg() &&
+		m_frame->GetColocalizationDlg()->GetThreshUpdate())
+		m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VPropView::OnRightThreshChange(wxScrollEvent & event)
@@ -1142,10 +1169,9 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 	}
 
 	//update colocalization
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetColocalizationDlg() &&
-		frame->GetColocalizationDlg()->GetThreshUpdate())
-		frame->GetColocalizationDlg()->Colocalize();
+	if (m_frame && m_frame->GetColocalizationDlg() &&
+		m_frame->GetColocalizationDlg()->GetThreshUpdate())
+		m_frame->GetColocalizationDlg()->Colocalize();
 
 }
 
@@ -1348,11 +1374,11 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 	m_sample_sldr->SetValue(int(val));
 
 	//set sample rate value
-	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
+	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
 	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
+			VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->SetSampleRate(srate);
 		}
@@ -1500,10 +1526,9 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 		m_vd->SetColormapDisp(colormap);
 	}
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		AdjustView *adjust_view = vr_frame->GetAdjustView();
+		AdjustView *adjust_view = m_frame->GetAdjustView();
 		if (adjust_view)
 			adjust_view->UpdateSync();
 	}
@@ -1621,10 +1646,9 @@ void VPropView::OnColormapInvBtn(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 
 	//update colocalization
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetColocalizationDlg() &&
-		frame->GetColocalizationDlg()->GetColormapUpdate())
-		frame->GetColocalizationDlg()->Colocalize();
+	if (m_frame && m_frame->GetColocalizationDlg() &&
+		m_frame->GetColocalizationDlg()->GetColormapUpdate())
+		m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VPropView::OnColormapCombo(wxCommandEvent &event)
@@ -1647,10 +1671,9 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 
 	//update colocalization
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetColocalizationDlg() &&
-		frame->GetColocalizationDlg()->GetColormapUpdate())
-		frame->GetColocalizationDlg()->Colocalize();
+	if (m_frame && m_frame->GetColocalizationDlg() &&
+		m_frame->GetColocalizationDlg()->GetColormapUpdate())
+		m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VPropView::OnColormapCombo2(wxCommandEvent &event)
@@ -1699,11 +1722,9 @@ void VPropView::OnColorChange(wxColor c)
 			m_color2_btn->SetColour(wxc);
 		}
 
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-
-		if (vr_frame)
+		if (m_frame)
 		{
-			AdjustView *adjust_view = vr_frame->GetAdjustView();
+			AdjustView *adjust_view = m_frame->GetAdjustView();
 			if (adjust_view)
 				adjust_view->UpdateSync();
 		}
@@ -1940,20 +1961,6 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 
 	if (val==1)
 	{
-		//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		//if (vr_frame)
-		//{
-		//	for (int i=0; i<(int)vr_frame->GetViewList()->size(); i++)
-		//	{
-		//		VRenderView *vrv = (*vr_frame->GetViewList())[i];
-		//		if (vrv && vrv->GetVolMethod()==VOL_METHOD_MULTI)
-		//		{
-		//			::wxMessageBox("MIP is not supported in Depth mode.");
-		//			m_options_toolbar->ToggleTool(ID_MipChk,false);
-		//			return;
-		//		}
-		//	}
-		//}
 		EnableMip();
 		if (m_threh_st)
 			m_threh_st->SetLabel("Shade Threshold : ");
@@ -1995,6 +2002,31 @@ void VPropView::OnTranspChk(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
+void VPropView::OnCompChk(wxCommandEvent &event)
+{
+	bool bval = m_options_toolbar->GetToolState(ID_CompChk);
+	if (bval)
+	{
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp));
+		if (m_sync_group && m_group)
+			m_group->SetLabelMode(1);
+		else if (m_vd)
+			m_vd->SetLabelMode(1);
+	}
+	else
+	{
+		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
+			wxGetBitmapFromMemory(comp_off));
+		if (m_sync_group && m_group)
+			m_group->SetLabelMode(0);
+		else if (m_vd)
+			m_vd->SetLabelMode(0);
+	}
+
+	RefreshVRenderViews(false, true);
+}
+
 //noise reduction
 void VPropView::OnNRCheck(wxCommandEvent &event)
 {
@@ -2006,11 +2038,11 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth_off));
 
-	if (m_vrv && m_vrv->GetVolMethod()==VOL_METHOD_MULTI)
+	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
 	{
-		for (int i=0; i<m_vrv->GetAllVolumeNum(); i++)
+		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_vrv->GetAllVolumeData(i);
+			VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->SetNR(val);
 		}
@@ -2028,11 +2060,10 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 	RefreshVRenderViews(false, true);
 }
 
-void VPropView::OnFluoRender(wxCommandEvent &event) {
+void VPropView::OnFluoRender(wxCommandEvent &event)
+{
 	if (!m_frame) return;
-	VRenderFrame* rf = reinterpret_cast<VRenderFrame*>(m_frame);
-	if (!rf) return;
-	rf->OnInfo(event);
+	m_frame->OnInfo(event);
 }
 
 //depth mode
@@ -2094,9 +2125,8 @@ bool VPropView::SetSpacings()
 	if (spcz<=0.0)
 		return false;
 	bool override_vox = true;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		override_vox = vr_frame->GetSettingDlg()->GetOverrideVox();
+	if (m_frame && m_frame->GetSettingDlg())
+		override_vox = m_frame->GetSettingDlg()->GetOverrideVox();
 
 	if ((m_sync_group || override_vox) && m_group)
 	{
@@ -2291,8 +2321,8 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 		m_group->SetInterpolate(inv);
 	else if (m_vd)
 		m_vd->SetInterpolate(inv);
-	if (m_vrv)
-		m_vrv->m_glview->SetIntp(inv);
+	if (m_view)
+		m_view->SetIntp(inv);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2370,8 +2400,8 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//interpolation
 		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
 		m_group->SetInterpolate(bVal);
-		if (m_vrv)
-			m_vrv->m_glview->SetIntp(bVal);
+		if (m_view)
+			m_view->SetIntp(bVal);
 		//MIP
 		bVal = m_options_toolbar->GetToolState(ID_MipChk);
 		m_group->SetMode(bVal?1:0);
@@ -2410,10 +2440,9 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 
 void VPropView::OnSaveDefault(wxCommandEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	DataManager *mgr = vr_frame->GetDataManager();
+	DataManager *mgr = m_frame->GetDataManager();
 	if (!mgr)
 		return;
 
@@ -2552,6 +2581,10 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	bool trp = m_options_toolbar->GetToolState(ID_TranspChk);
 	fconfig.Write("enable_trp", trp);
 	mgr->m_vol_trp = trp;
+	//enable component display
+	int comp = m_options_toolbar->GetToolState(ID_CompChk);
+	fconfig.Write("enable_comp", comp);
+	mgr->m_vol_com = comp;
 	//noise reduction
 	bool nrd = m_options_toolbar->GetToolState(ID_NRChk);
 	fconfig.Write("noise_rd", nrd);
@@ -2568,17 +2601,15 @@ void VPropView::OnSaveDefault(wxCommandEvent& event)
 	mgr->m_vol_swi = swi;
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_volume_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
+	SaveConfig(fconfig, dft);
 }
 
 void VPropView::OnResetDefault(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	DataManager *mgr = vr_frame->GetDataManager();
+	DataManager *mgr = m_frame->GetDataManager();
 	if (!mgr)
 		return;
 	if (!m_vd)
@@ -2749,6 +2780,13 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		m_group->SetAlphaPower(bval ? 2.0 : 1.0);
 	else
 		m_vd->SetAlphaPower(bval ? 2.0 : 1.0);
+	//component display
+	ival = mgr->m_vol_com;
+	m_options_toolbar->ToggleTool(ID_CompChk, ival?true:false);
+	if (m_sync_group && m_group)
+		m_group->SetLabelMode(ival);
+	else
+		m_vd->SetLabelMode(ival);
 	//noise reduction
 	bval = mgr->m_vol_nrd;
 	m_options_toolbar->ToggleTool(ID_NRChk,bval);

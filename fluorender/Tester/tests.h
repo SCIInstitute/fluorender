@@ -3,13 +3,13 @@
 void ObjectTest();
 void ObjectTest2();
 void ObjectTest3();
+void ObjectTest4();
 
 void GroupTest();
 void GroupTest2();
 void GroupTest3();
-
-void SceneGraphTest();
+void GroupTest4();
 
 void SpecialValueTest();
 
-void FactoryTest();
+void MyTest();

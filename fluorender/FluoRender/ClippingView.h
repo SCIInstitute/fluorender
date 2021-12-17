@@ -25,14 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
+#ifndef _CLIPPINGVIEW_H_
+#define _CLIPPINGVIEW_H_
+
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/slider.h>
 #include <wx/spinbutt.h>
-
-#ifndef _CLIPPINGVIEW_H_
-#define _CLIPPINGVIEW_H_
 
 //plane modes
 enum PLANE_MODES
@@ -45,6 +44,10 @@ enum PLANE_MODES
 	kNone
 };
 
+class VRenderFrame;
+class VolumeData;
+class MeshData;
+class DataManager;
 class ClippingView: public wxPanel
 {
 	enum
@@ -91,9 +94,7 @@ class ClippingView: public wxPanel
 	};
 
 public:
-	ClippingView(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	ClippingView(VRenderFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
@@ -167,8 +168,7 @@ public:
 	void MoveLinkedClippingPlanes(int dir);
 
 private:
-	wxWindow* m_frame;
-
+	VRenderFrame* m_frame;
 	int m_sel_type;		//curent selection type
 	VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data

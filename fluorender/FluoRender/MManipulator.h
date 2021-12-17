@@ -25,15 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
-#include <wx/wx.h>
-#include <wx/panel.h>
-#include <wx/spinbutt.h>
-#include "compatibility.h"
-
 #ifndef _MMANIPULATOR_H_
 #define _MMANIPULATOR_H_
 
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/spinbutt.h>
+
+class VRenderFrame;
+class MeshData;
 class MManipulator: public wxPanel
 {
 	enum
@@ -59,8 +59,8 @@ class MManipulator: public wxPanel
 	};
 
 public:
-	MManipulator(wxWindow* frame, wxWindow* parent,
-		wxWindowID id,
+	MManipulator(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -74,7 +74,7 @@ public:
 	void UpdateData();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	MeshData* m_md;
 
 	wxStaticText* m_trans_st;

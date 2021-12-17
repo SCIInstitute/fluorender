@@ -28,13 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
+#include <Flobject/Group.hpp>
 #include <Tracking/VolCache.h>
 #include <Tracking/Cell.h>
 #include <wx/string.h>
 #include <wx/fileconf.h>
+#include <vector>
 
 class VRenderFrame;
-class VRenderView;
 class VRenderGLView;
 class VolumeData;
 namespace flrd
@@ -42,46 +43,92 @@ namespace flrd
 	class ScriptProc
 	{
 	public:
+		enum TimeMask
+		{
+			TM_NONE = 0,
+			TM_REWIND = 0x8000,
+			TM_ALL_PRE = 0x2AAA5555,
+			TM_ALL_POST = 0x55552AAA,
+			TM_FIRST_PRE = 1,
+			TM_FIRST_POST = 2,
+			TM_FIRST_BOTH = 3,
+			TM_LAST_PRE = 0x20000000,
+			TM_LAST_POST = 0x40000000,
+			TM_LAST_BOTH = 0x60000000,
+			TM_ALL_PRE_FIRST_BOTH = 0x2AAA5557,
+			TM_ALL_POST_FIRST_BOTH = 0x55552AAB,
+			TM_ALL_PRE_LAST_BOTH = 0x6AAA5555,
+			TM_ALL_POST_LAST_BOTH = 0x75552AAA,
+			TM_ALL_PRE_REWIND = 0x2AAAD555,
+			TM_ALL_POST_REWIND = 0x5555AAAA,
+			TM_ALL = 0x7FFF7FFF
+		};
 		ScriptProc();
 		~ScriptProc();
 
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetVrv(VRenderView* vrv) { m_vrv = vrv; }
 		void SetView(VRenderGLView* view) { m_view = view; }
 
 		//run 4d script
-		//index: 0-pre-change; 1-post-change
-		void Run4DScript(int index, wxString &scriptname);
+		void Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
+
+		void ClearResults() { m_output->removeAllChildren(); }
 
 	private:
 		VRenderFrame* m_frame;
-		VRenderView* m_vrv;
 		VRenderGLView *m_view;
 
-		//file path for script
-		wxString m_script_output;
+		wxString m_type;
+		TimeMask m_time_mask;
+		wxFileConfig *m_fconfig;
+		wxString m_fconfig_name;
+		bool m_rewind;
+
 		//selected labels
 		CelpList m_sel_labels;
 
+		//output
+		//structure: output(group)--time(group)--channel(group)--script_command(group)
+		//bacg_stat(group)--single_node(node)--mean(value), etc
+		//comp_analysis(group)--comp_id(node)--size(value), pos(value), etc
+		fluo::ref_ptr<fluo::Group> m_output;
+
 	private:
-		void RunNoiseReduction(int index, wxFileConfig &fconfig);
-		void RunSelectionTracking(int index, wxFileConfig &fconfig);
-		void RunSparseTracking(int index, wxFileConfig &fconfig);
-		void RunRandomColors(int index, wxFileConfig &fconfig);
-		void RunFetchMask(int index, wxFileConfig &fconfig);
-		void RunSaveMask(int index, wxFileConfig &fconfig);
-		void RunSaveVolume(int index, wxFileConfig &fconfig);
-		void RunCalculate(int index, wxFileConfig &fconfig);
-		void RunOpenCL(int index, wxFileConfig &fconfig);
-		void RunCompAnalysis(int index, wxFileConfig &fconfig);
-		void RunGenerateComp(int index, wxFileConfig &fconfig);
-		void RunRulerProfile(int index, wxFileConfig &fconfig);
-		void RunAddCells(int index, wxFileConfig &fconfig);
-		void RunLinkCells(int index, wxFileConfig &fconfig);
-		void RunUnlinkCells(int index, wxFileConfig &fconfig);
+		bool TimeCondition();
+		bool GetVolumes(std::vector<VolumeData*> &list);
+		void UpdateTraceDlg();
+		int TimeMode(std::string &str);
+		int GetTimeNum();
+		wxString GetInputFile(const wxString &str, const wxString &subd);
+		wxString GetSavePath(const wxString &str, const wxString &ext, bool rep = true);
+		wxString GetDataDir(const wxString &ext);
+		wxString RemoveExt(const wxString& str);
+		wxString RemoveNum(const wxString& str);
+		wxString IncreaseNum(const wxString& str);
+		void RunNoiseReduction();
+		void RunPreTracking();
+		void RunPostTracking();
+		void RunMaskTracking();
+		void RunRandomColors();
+		void RunCompSelect();
+		void RunCompEdit();
+		void RunFetchMask();
+		void RunClearMask();
+		void RunSaveMask();
+		void RunSaveVolume();
+		void RunCalculate();
+		void RunOpenCL();
+		void RunCompAnalysis();
+		void RunGenerateComp();
+		void RunRulerProfile();
+		void RunAddCells();
+		void RunLinkCells();
+		void RunUnlinkCells();
+		void RunBackgroundStat();
+
+		void ExportAnalysis();
 
 		//read/delete volume cache
-		//for sparse tracking
 		void ReadVolCache(VolCache& vol_cache);
 		void DelVolCache(VolCache& vol_cache);
 	};

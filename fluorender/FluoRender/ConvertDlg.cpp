@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
-#include "Converters/VolumeMeshConv.h"
 #include "VRenderFrame.h"
 #include "DataManager.h"
+#include "Converters/VolumeMeshConv.h"
 #include <wx/progdlg.h>
 #include <wx/valnum.h>
 
@@ -43,11 +43,11 @@ BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
 	EVT_BUTTON(ID_CnvVolMeshConvertBtn, ConvertDlg::OnCnvVolMeshConvert)
 END_EVENT_TABLE()
 
-ConvertDlg::ConvertDlg(wxWindow *frame, wxWindow *parent) :
-wxPanel(parent, wxID_ANY,
+ConvertDlg::ConvertDlg(VRenderFrame *frame) :
+wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 300),
 	0, "ConvertDlg"),
-	m_frame(parent)
+	m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -216,11 +216,10 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent &event)
 void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 {
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
 
-	sel_vol = vr_frame->GetCurSelVol();
+	sel_vol = m_frame->GetCurSelVol();
 
 	if (!sel_vol)
 		return;
@@ -293,16 +292,16 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		float area;
 		float scale[3] = {1.0f, 1.0f, 1.0f};
 		glmArea(mesh, scale, &area);
-		DataManager* mgr = vr_frame->GetDataManager();
+		DataManager* mgr = m_frame->GetDataManager();
 		mgr->LoadMeshData(mesh);
 		MeshData* md = mgr->GetLastMeshData();
-		if (md && vr_frame->GetView(0))
+		if (md && m_frame->GetView(0))
 		{
-			vr_frame->GetView(0)->AddMeshData(md);
-			vr_frame->GetView(0)->RefreshGL();
+			m_frame->GetView(0)->AddMeshData(md);
+			m_frame->GetView(0)->RefreshGL(39);
 		}
-		vr_frame->UpdateList();
-		vr_frame->UpdateTree();
+		m_frame->UpdateList();
+		m_frame->UpdateTree();
 		(*m_stat_text) <<
 			"The surface area of mesh object " <<
 			md->GetName() << " is " <<

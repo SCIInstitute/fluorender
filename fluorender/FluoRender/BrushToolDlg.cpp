@@ -29,11 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Calculate/Count.h>
 #include <Distance/Cov.h>
+#include <Distance/RulerAlign.h>
+#include <Selection/VolumeSelector.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
-#include "Formats/png_resource.h"
-
 //resources
+#include "Formats/png_resource.h"
 #include "img/icons.h"
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
@@ -109,12 +110,13 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	EVT_GRID_SELECT_CELL(BrushToolDlg::OnSelectCell)
 END_EVENT_TABLE()
 
-BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
-	: wxPanel(parent, wxID_ANY,
+BrushToolDlg::BrushToolDlg(
+	VRenderFrame *frame)
+	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	wxSize(500, 620),
 	0, "BrushToolDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	m_selector(0),
 	m_max_value(255.0),
@@ -122,6 +124,7 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 	m_dft_scl_translate(0.0),
 	m_hold_history(false)
 {
+	m_aligner = new flrd::RulerAlign();
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -479,25 +482,26 @@ BrushToolDlg::BrushToolDlg(wxWindow *frame, wxWindow *parent)
 
 BrushToolDlg::~BrushToolDlg()
 {
+	if (m_aligner)
+		delete m_aligner;
 }
 
-void BrushToolDlg::GetSettings(VRenderView* vrv)
+void BrushToolDlg::GetSettings(VRenderGLView* view)
 {
-	if (!vrv)
+	if (!view)
 		return;
-	m_view = vrv;
-	m_aligner.SetView(m_view->m_glview);
+	m_view = view;
+	m_aligner->SetView(m_view);
 	m_selector = m_view->GetVolumeSelector();
 	if (!m_selector)
 		return;
 
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		sel_vol = vr_frame->GetCurSelVol();
-		vr_frame->GetNoiseCancellingDlg()->GetSettings(m_view);
-		vr_frame->GetCountingDlg()->GetSettings(m_view);
+		sel_vol = m_frame->GetCurSelVol();
+		m_frame->GetNoiseCancellingDlg()->GetSettings(m_view);
+		m_frame->GetCountingDlg()->GetSettings(m_view);
 		//vr_frame->GetColocalizationDlg()->GetSettings(m_view);
 	}
 
@@ -631,10 +635,9 @@ void BrushToolDlg::SelectBrush(int id)
 
 void BrushToolDlg::UpdateUndoRedo()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		VolumeData* vd = vr_frame->GetCurSelVol();
+		VolumeData* vd = m_frame->GetCurSelVol();
 		if (vd && vd->GetTexture())
 		{
 			m_toolbar->EnableTool(ID_BrushUndo,
@@ -647,8 +650,7 @@ void BrushToolDlg::UpdateUndoRedo()
 
 void BrushToolDlg::UpdateMaskTb()
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	bool bval = vr_frame && vr_frame->m_vd_copy;
+	bool bval = m_frame && m_frame->m_vd_copy;
 	m_mask_tb->EnableTool(ID_MaskPaste, bval);
 	m_mask_tb->EnableTool(ID_MaskMerge, bval);
 	m_mask_tb->EnableTool(ID_MaskExclude, bval);
@@ -663,14 +665,13 @@ void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
+	if (m_frame && m_frame->GetTree())
 	{
 		if (m_toolbar->GetToolState(ID_BrushAppend))
-			frame->GetTree()->SelectBrush(TreePanel::ID_BrushAppend);
+			m_frame->GetTree()->SelectBrush(TreePanel::ID_BrushAppend);
 		else
-			frame->GetTree()->SelectBrush(0);
-		frame->GetTree()->BrushAppend();
+			m_frame->GetTree()->SelectBrush(0);
+		m_frame->GetTree()->BrushAppend();
 	}
 	GetSettings(m_view);
 }
@@ -682,14 +683,13 @@ void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
+	if (m_frame && m_frame->GetTree())
 	{
 		if (m_toolbar->GetToolState(ID_BrushDiffuse))
-			frame->GetTree()->SelectBrush(TreePanel::ID_BrushDiffuse);
+			m_frame->GetTree()->SelectBrush(TreePanel::ID_BrushDiffuse);
 		else
-			frame->GetTree()->SelectBrush(0);
-		frame->GetTree()->BrushDiffuse();
+			m_frame->GetTree()->SelectBrush(0);
+		m_frame->GetTree()->BrushDiffuse();
 	}
 	GetSettings(m_view);
 }
@@ -701,9 +701,8 @@ void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushSolid(m_toolbar->GetToolState(ID_BrushSolid));
+	if (m_frame && m_frame->GetTree())
+		m_frame->GetTree()->BrushSolid(m_toolbar->GetToolState(ID_BrushSolid));
 	GetSettings(m_view);
 }
 
@@ -723,11 +722,10 @@ void BrushToolDlg::OnGrow(wxCommandEvent &event)
 	else
 	{
 		if (m_view)
-			m_view->SetIntMode();
+			m_view->SetIntMode(1);
 	}
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
+	if (m_frame && m_frame->GetTree())
+		m_frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
 	GetSettings(m_view);
 }
 
@@ -738,23 +736,21 @@ void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
+	if (m_frame && m_frame->GetTree())
 	{
 		if (m_toolbar->GetToolState(ID_BrushDesel))
-			frame->GetTree()->SelectBrush(TreePanel::ID_BrushDesel);
+			m_frame->GetTree()->SelectBrush(TreePanel::ID_BrushDesel);
 		else
-			frame->GetTree()->SelectBrush(0);
-		frame->GetTree()->BrushDesel();
+			m_frame->GetTree()->SelectBrush(0);
+		m_frame->GetTree()->BrushDesel();
 	}
 	GetSettings(m_view);
 }
 
 void BrushToolDlg::OnBrushClear(wxCommandEvent &event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushClear();
+	if (m_frame && m_frame->GetTree())
+		m_frame->GetTree()->BrushClear();
 }
 
 void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
@@ -765,9 +761,8 @@ void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushErase();
+	if (m_frame && m_frame->GetTree())
+		m_frame->GetTree()->BrushErase();
 }
 
 void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
@@ -778,9 +773,8 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 	m_toolbar->ToggleTool(ID_BrushSolid, false);
 	m_toolbar->ToggleTool(ID_Grow, false);
 
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree())
-		frame->GetTree()->BrushCreate();
+	if (m_frame && m_frame->GetTree())
+		m_frame->GetTree()->BrushCreate();
 }
 
 void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
@@ -788,7 +782,7 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 	if (m_selector)
 		m_selector->UndoMask();
 	if (m_view)
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	UpdateUndoRedo();
 }
 
@@ -797,62 +791,56 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 	if (m_selector)
 		m_selector->RedoMask();
 	if (m_view)
-		m_view->RefreshGL();
+		m_view->RefreshGL(39);
 	UpdateUndoRedo();
 }
 
 //mask tools
 void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree() &&
-		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->CopyMask(false);
+	if (m_frame && m_frame->GetTree() &&
+		m_frame->GetTree()->GetTreeCtrl())
+		m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);
 	UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree() &&
-		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->CopyMask(true);
+	if (m_frame && m_frame->GetTree() &&
+		m_frame->GetTree()->GetTreeCtrl())
+		m_frame->GetTree()->GetTreeCtrl()->CopyMask(true);
 	UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree() &&
-		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->PasteMask(0);
+	if (m_frame && m_frame->GetTree() &&
+		m_frame->GetTree()->GetTreeCtrl())
+		m_frame->GetTree()->GetTreeCtrl()->PasteMask(0);
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree() &&
-		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->PasteMask(1);
+	if (m_frame && m_frame->GetTree() &&
+		m_frame->GetTree()->GetTreeCtrl())
+		m_frame->GetTree()->GetTreeCtrl()->PasteMask(1);
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree() &&
-		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->PasteMask(2);
+	if (m_frame && m_frame->GetTree() &&
+		m_frame->GetTree()->GetTreeCtrl())
+		m_frame->GetTree()->GetTreeCtrl()->PasteMask(2);
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
 {
-	VRenderFrame* frame = (VRenderFrame*)m_frame;
-	if (frame && frame->GetTree() &&
-		frame->GetTree()->GetTreeCtrl())
-		frame->GetTree()->GetTreeCtrl()->PasteMask(3);
+	if (m_frame && m_frame->GetTree() &&
+		m_frame->GetTree()->GetTreeCtrl())
+		m_frame->GetTree()->GetTreeCtrl()->PasteMask(3);
 	UpdateUndoRedo();
 }
 
@@ -883,7 +871,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -914,7 +902,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -944,7 +932,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -973,7 +961,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1001,7 +989,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1046,7 +1034,7 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 	{
 		m_selector->SetBrushSize(val, -1.0);
 		if (m_view->GetIntMode()==2)
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 	}
 }
 
@@ -1068,7 +1056,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 		{
 			m_selector->SetUseBrushSize2(true);
 			m_selector->SetBrushSize(val1, val2);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 	else
@@ -1079,7 +1067,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 		{
 			m_selector->SetUseBrushSize2(false);
 			m_selector->SetBrushSize(val1, val2);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1104,7 +1092,7 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	{
 		m_selector->SetBrushSize(-1.0, val);
 		if (m_view->GetIntMode()==2)
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 	}
 }
 
@@ -1168,10 +1156,10 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && m_view)
+
+	if (m_frame && m_view)
 	{
-		VolumeData* vd = vr_frame->GetCurSelVol();
+		VolumeData* vd = m_frame->GetCurSelVol();
 		if (vd && vd->GetTexture())
 		{
 			flrd::Cov cover(vd);
@@ -1179,8 +1167,8 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 			{
 				std::vector<double> cov = cover.GetCov();
 				fluo::Point center = cover.GetCenter();
-				m_aligner.SetCovMat(cov);
-				m_aligner.AlignPca(axis_type, false);
+				m_aligner->SetCovMat(cov);
+				m_aligner->AlignPca(axis_type, false);
 				if (m_align_center->GetValue())
 				{
 					double tx, ty, tz;
@@ -1213,10 +1201,9 @@ void BrushToolDlg::UpdateSize()
 {
 	GridData data;
 	VolumeData* sel_vol = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame)
+	if (!m_frame)
 		return;
-	sel_vol = vr_frame->GetCurSelVol();
+	sel_vol = m_frame->GetCurSelVol();
 	if (!sel_vol)
 		return;
 
@@ -1243,7 +1230,7 @@ void BrushToolDlg::UpdateSize()
 	wxString unit;
 	if (m_view)
 	{
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			unit = L"nm\u00B3";
@@ -1303,7 +1290,7 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 {
 	if (m_view)
-		m_view->m_glview->m_paint_count = m_auto_update_btn->GetValue();
+		m_view->m_paint_count = m_auto_update_btn->GetValue();
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)

@@ -26,10 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
+#include "DataManager.h"
 #include "VRenderFrame.h"
-#include "VRenderView.h"
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
+#include <Components/CompEditor.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -51,13 +52,12 @@ EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
 
 TraceListCtrl::TraceListCtrl(
-	wxWindow* frame,
+	VRenderFrame* frame,
 	wxWindow* parent,
-	wxWindowID id,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxListCtrl(parent, id, pos, size, style),
+	wxListCtrl(parent, wxID_ANY, pos, size, style),
 	m_type(0)
 {
 	// temporarily block events during constructor:
@@ -112,17 +112,18 @@ void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::UpdateTraces(VRenderView* vrv)
+void TraceListCtrl::UpdateTraces(VRenderGLView* vrv)
 {
-	if (vrv)
-		m_view = vrv;
+	m_view = vrv;
+	if (!m_view)
+		return;
 
 	TraceGroup* traces = m_view->GetTraceGroup();
 	if (!traces)
 		return;
 	int shuffle = 0;
-	if (m_view->m_glview->m_cur_vol)
-		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
+	if (m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
 
 	DeleteAllItems();
 
@@ -135,7 +136,16 @@ void TraceListCtrl::UpdateTraces(VRenderView* vrv)
 	if (cells.empty())
 		return;
 	else
-		std::sort(cells.begin(), cells.end(), sort_cells);
+		std::sort(cells.begin(), cells.end(),
+		[](const flrd::Celp &c1, const flrd::Celp &c2) -> bool
+	{
+		unsigned int vid1 = c1->GetVertexId();
+		unsigned int vid2 = c2->GetVertexId();
+		if (vid1 == vid2)
+			return c1->GetSizeUi() > c2->GetSizeUi();
+		else
+			return vid1 < vid2;
+	});
 
 	wxString gtype;
 	unsigned int id;
@@ -290,6 +300,7 @@ void TraceListCtrl::OnDeleteSelection(wxCommandEvent& event)
 BEGIN_EVENT_TABLE(TraceDlg, wxPanel)
 //map page
 //load/save trace
+EVT_BUTTON(ID_ClearTraceBtn, TraceDlg::OnClearTrace)
 EVT_BUTTON(ID_LoadTraceBtn, TraceDlg::OnLoadTrace)
 EVT_BUTTON(ID_SaveTraceBtn, TraceDlg::OnSaveTrace)
 EVT_BUTTON(ID_SaveasTraceBtn, TraceDlg::OnSaveasTrace)
@@ -381,6 +392,8 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 		wxDefaultPosition, wxSize(70, 20));
 	m_load_trace_text = new wxTextCtrl(page, ID_LoadTraceText, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	m_clear_trace_btn = new wxButton(page, ID_ClearTraceBtn, "X",
+		wxDefaultPosition, wxSize(23, 23));
 	m_load_trace_btn = new wxButton(page, ID_LoadTraceBtn, "Load",
 		wxDefaultPosition, wxSize(65, 23));
 	m_save_trace_btn = new wxButton(page, ID_SaveTraceBtn, "Save",
@@ -390,6 +403,7 @@ wxWindow* TraceDlg::CreateMapPage(wxWindow *parent)
 	sizer_1->Add(5, 5);
 	sizer_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_text, 1, wxEXPAND);
+	sizer_1->Add(m_clear_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_load_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_save_trace_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_saveas_trace_btn, 0, wxALIGN_CENTER);
@@ -757,11 +771,11 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	return page;
 }
 
-TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
-	: wxPanel(parent, wxID_ANY,
+TraceDlg::TraceDlg(VRenderFrame* frame)
+	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition, wxSize(550, 650),
 		0, "TraceDlg"),
-	m_frame(parent),
+	m_frame(frame),
 	m_view(0),
 	//m_mask(0),
 	m_cur_time(-1),
@@ -773,7 +787,9 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	m_try_merge(false),
 	m_try_split(false),
 	m_similarity(0.2),
-	m_contact_factor(0.6)
+	m_contact_factor(0.6),
+	m_cell_new_id(0),
+	m_cell_new_id_empty(true)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -832,9 +848,9 @@ TraceDlg::TraceDlg(wxWindow* frame, wxWindow* parent)
 	sizer_21->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
 	wxBoxSizer* sizer_22 = new wxBoxSizer(wxHORIZONTAL);
-	m_trace_list_curr = new TraceListCtrl(frame, this, wxID_ANY);
+	m_trace_list_curr = new TraceListCtrl(frame, this);
 	m_trace_list_curr->m_type = 0;
-	m_trace_list_prev = new TraceListCtrl(frame, this, wxID_ANY);
+	m_trace_list_prev = new TraceListCtrl(frame, this);
 	m_trace_list_prev->m_type = 1;
 	sizer_22->Add(m_trace_list_curr, 1, wxEXPAND);
 	sizer_22->Add(m_trace_list_prev, 1, wxEXPAND);
@@ -876,12 +892,14 @@ TraceDlg::~TraceDlg()
 	//}
 }
 
-void TraceDlg::GetSettings(VRenderView* vrv)
+void TraceDlg::GetSettings(VRenderGLView* vrv)
 {
-	if (!vrv) return;
 	m_view = vrv;
-	m_cur_time = m_view->m_glview->m_tseq_cur_num;
-	m_prv_time = m_view->m_glview->m_tseq_prv_num;
+	if (!m_view)
+		return;
+
+	m_cur_time = m_view->m_tseq_cur_num;
+	m_prv_time = m_view->m_tseq_prv_num;
 
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
@@ -912,23 +930,22 @@ void TraceDlg::GetSettings(VRenderView* vrv)
 	}
 
 	//settings for tracking
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
+	if (m_frame && m_frame->GetSettingDlg())
 	{
 		m_iter_num =
-			vr_frame->GetSettingDlg()->GetTrackIter();
+			m_frame->GetSettingDlg()->GetTrackIter();
 		m_size_thresh =
-			vr_frame->GetSettingDlg()->GetComponentSize();
+			m_frame->GetSettingDlg()->GetComponentSize();
 		m_consistent_color =
-			vr_frame->GetSettingDlg()->GetConsistentColor();
+			m_frame->GetSettingDlg()->GetConsistentColor();
 		m_try_merge =
-			vr_frame->GetSettingDlg()->GetTryMerge();
+			m_frame->GetSettingDlg()->GetTryMerge();
 		m_try_split =
-			vr_frame->GetSettingDlg()->GetTrySplit();
+			m_frame->GetSettingDlg()->GetTrySplit();
 		m_similarity =
-			vr_frame->GetSettingDlg()->GetSimilarity();
+			m_frame->GetSettingDlg()->GetSimilarity();
 		m_contact_factor =
-			vr_frame->GetSettingDlg()->GetContactFactor();
+			m_frame->GetSettingDlg()->GetContactFactor();
 		//
 		m_map_iter_spin->SetValue(m_iter_num);
 		m_map_size_spin->SetValue(m_size_thresh);
@@ -947,17 +964,19 @@ void TraceDlg::SetCellSize(int size)
 
 }
 
-VRenderView* TraceDlg::GetView()
+VRenderGLView* TraceDlg::GetView()
 {
 	return m_view;
 }
 
 void TraceDlg::UpdateList()
 {
-	if (!m_view) return;
+	if (!m_view)
+		return;
+
 	int shuffle = 0;
-	if (m_view->m_glview->m_cur_vol)
-		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
+	if (m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
@@ -1021,9 +1040,23 @@ void TraceDlg::UpdateList()
 	Layout();
 }
 
+void TraceDlg::OnClearTrace(wxCommandEvent& event)
+{
+	if (!m_view)
+		return;
+
+	TraceGroup* trace_group = m_view->GetTraceGroup();
+	if (trace_group)
+	{
+		trace_group->Clear();
+		m_load_trace_text->SetValue("No Track map");
+	}
+}
+
 void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 {
-	if (!m_view) return;
+	if (!m_view)
+		return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose a FluoRender track file",
@@ -1042,7 +1075,8 @@ void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 
 void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 {
-	if (!m_view) return;
+	if (!m_view)
+		return;
 
 	wxString filename;
 	TraceGroup* trace_group = m_view->GetTraceGroup();
@@ -1059,7 +1093,8 @@ void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 
 void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 {
-	if (!m_view) return;
+	if (!m_view)
+		return;
 
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Save a FluoRender track file",
@@ -1097,7 +1132,7 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetGhostNum(ival);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1112,7 +1147,7 @@ void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetDrawTail(show);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1127,7 +1162,7 @@ void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetDrawLead(show);
-			m_view->RefreshGL();
+			m_view->RefreshGL(39);
 		}
 	}
 }
@@ -1209,7 +1244,7 @@ void TraceDlg::UncertainFilter(bool input)
 	tm_processor.SetUncertainLow(ival);
 	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SelectList(list_out);
 
@@ -1217,9 +1252,8 @@ void TraceDlg::UncertainFilter(bool input)
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompUncertainBtn(wxCommandEvent &event)
@@ -1275,72 +1309,64 @@ void TraceDlg::OnMapIterSpin(wxSpinEvent& event)
 {
 	m_iter_num = m_map_iter_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
 }
 
 void TraceDlg::OnMapIterText(wxCommandEvent& event)
 {
 	m_iter_num = m_map_iter_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTrackIter(m_iter_num);
 }
 
 void TraceDlg::OnMapSizeSpin(wxSpinEvent& event)
 {
 	m_size_thresh = m_map_size_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
 }
 
 void TraceDlg::OnMapSizeText(wxCommandEvent& event)
 {
 	m_size_thresh = m_map_size_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetComponentSize(m_size_thresh);
 }
 
 void TraceDlg::OnMapConsistentBtn(wxCommandEvent& event)
 {
 	m_consistent_color = m_map_consistent_btn->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetConsistentColor(m_consistent_color);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetConsistentColor(m_consistent_color);
 }
 
 void TraceDlg::OnMapMergeBtn(wxCommandEvent& event)
 {
 	m_try_merge = m_map_merge_btn->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTryMerge(m_try_merge);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTryMerge(m_try_merge);
 }
 
 void TraceDlg::OnMapSplitBtn(wxCommandEvent& event)
 {
 	m_try_split = m_map_split_btn->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetTrySplit(m_try_split);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetTrySplit(m_try_split);
 }
 
 void TraceDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
 {
 	m_similarity = m_map_similar_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetSimilarity(m_similarity);
 }
 
 void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
@@ -1351,9 +1377,8 @@ void TraceDlg::OnMapSimilarText(wxCommandEvent& event)
 	{
 		m_similarity = dval;
 		//save settings
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetSettingDlg())
-			vr_frame->GetSettingDlg()->SetSimilarity(m_similarity);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->SetSimilarity(m_similarity);
 	}
 }
 
@@ -1361,9 +1386,8 @@ void TraceDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
 {
 	m_contact_factor = m_map_contact_spin->GetValue();
 	//save settings
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-		vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+	if (m_frame && m_frame->GetSettingDlg())
+		m_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
 }
 
 void TraceDlg::OnMapContactText(wxCommandEvent& event)
@@ -1374,9 +1398,8 @@ void TraceDlg::OnMapContactText(wxCommandEvent& event)
 	{
 		m_contact_factor = dval;
 		//save settings
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (vr_frame && vr_frame->GetSettingDlg())
-			vr_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
+		if (m_frame && m_frame->GetSettingDlg())
+			m_frame->GetSettingDlg()->SetContactFactor(m_contact_factor);
 	}
 }
 
@@ -1389,7 +1412,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	double spcx, spcy, spcz;
@@ -1404,10 +1427,9 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 		(*iter)->Scale(spcx, spcy, spcz);
 		m_view->GetRulerList()->push_back(*iter);
 	}
-	m_view->RefreshGL();
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMeasureDlg())
-		vr_frame->GetMeasureDlg()->GetSettings(m_view);
+	m_view->RefreshGL(39);
+	if (m_frame && m_frame->GetMeasureDlg())
+		m_frame->GetMeasureDlg()->GetSettings(m_view);
 	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
 }
 
@@ -1416,7 +1438,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	TraceGroup *trace_group = m_view->GetTraceGroup();
@@ -1460,7 +1482,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentAnalyzer comp_analyzer(vd);
 	comp_analyzer.Analyze(true, true);
 	string str;
@@ -1705,7 +1727,7 @@ void TraceDlg::CompDelete()
 	}
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	if (ids.size() == 1)
 	{
@@ -1719,9 +1741,8 @@ void TraceDlg::CompDelete()
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::CompClear()
@@ -1730,7 +1751,7 @@ void TraceDlg::CompClear()
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
@@ -1739,9 +1760,8 @@ void TraceDlg::CompClear()
 	m_trace_list_prev->DeleteAllItems();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompIDText(wxCommandEvent &event)
@@ -1777,12 +1797,12 @@ void TraceDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
 	vd->IncShuffle();
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void TraceDlg::OnCompFull(wxCommandEvent &event)
@@ -1832,7 +1852,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 		unsigned int id = (unsigned int)ival;
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
@@ -1843,9 +1863,8 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::OnCompExclusive(wxCommandEvent &event)
@@ -1867,7 +1886,7 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	{
 		unsigned int id = ival;
 		//get current mask
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
+		VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
@@ -1878,9 +1897,8 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 //ID link controls
@@ -1897,8 +1915,8 @@ void TraceDlg::CellUpdate()
 		else
 			m_view->CreateTraceGroup();
 
-		m_view->m_glview->GetTraces(false);
-		m_view->RefreshGL();
+		m_view->GetTraces(false);
+		m_view->RefreshGL(39);
 		GetSettings(m_view);
 	}
 }
@@ -1914,7 +1932,7 @@ void TraceDlg::CellFull()
 	str.ToLong(&ival);
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetMinNum(true, slimit);
 	comp_selector.CompFull();
@@ -1922,9 +1940,8 @@ void TraceDlg::CellFull()
 	CellUpdate();
 
 	//frame
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetBrushToolDlg())
-		vr_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	if (m_frame && m_frame->GetBrushToolDlg())
+		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 }
 
 void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list)
@@ -1956,157 +1973,11 @@ void TraceDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpLis
 
 void TraceDlg::CellNewID(bool append)
 {
-	if (!m_view)
-		return;
-
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-	{
-		m_view->CreateTraceGroup();
-		trace_group = m_view->GetTraceGroup();
-	}
-
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = 0;
-	//get current mask
-	nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-	{
-		vd->AddEmptyMask(0);
-		nrrd_mask = vd->GetMask(false);
-	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-
-	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-	{
-		vd->AddEmptyLabel();
-		nrrd_label = tex->get_nrrd(tex->nlabel());
-	}
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
-
-	//get ID of currently/previously masked region
-	unsigned long id_str;
-	unsigned long id_vol = 0;
-	bool id_str_empty = false;
-	wxString str = m_cell_new_id_text->GetValue();
-	if (!str.ToULong(&id_str))
-	{
-		id_str_empty = true;
-		for (index = 0; index < for_size; ++index)
-		{
-			if (data_mask[index] &&
-				data_label[index])
-			{
-				id_vol = data_label[index];
-				break;
-			}
-		}
-	}
-
-	//generate a unique ID
-	unsigned int new_id = 0;
-	unsigned int inc = 0;
-	if (id_str_empty)
-	{
-		if (id_vol)
-		{
-			new_id = id_vol + 10;
-			inc = 10;
-		}
-		else
-		{
-			new_id = 10;
-			inc = 10;
-		}
-	}
-	else
-	{
-		if (id_str)
-		{
-			new_id = id_str;
-			inc = 253;
-		}
-		else
-		{
-			new_id = 0;
-			inc = 0;
-		}
-	}
-	unsigned int stop_id = new_id;
-	if (inc)
-	{
-		while (vd->SearchLabel(new_id))
-		{
-			new_id += inc;
-			if (new_id == stop_id)
-			{
-				(*m_stat_text) << wxString::Format(
-					"ID assignment failed. Type a different ID than %d",
-					stop_id);
-				return;
-			}
-		}
-	}
-
-	//update label volume, set mask region to the new ID
-	int i, j, k;
-	flrd::Celp cell;
-	if (new_id)
-		cell = flrd::Celp(new flrd::Cell(new_id));
-	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		if (data_mask[index])
-		{
-			if (append && data_label[index])
-				continue;
-			data_label[index] = new_id;
-			if (new_id)
-				cell->Inc(i, j, k, 1.0f);
-		}
-	}
-
-	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-
-	if (new_id)
-	{
-		//trace_group->AddCell(cell, m_cur_time);
-		flrd::pTrackMap track_map = trace_group->GetTrackMap();
-		flrd::TrackMapProcessor tm_processor(track_map);
-		//register file reading and deleteing functions
-		tm_processor.RegisterCacheQueueFuncs(
-			std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-			std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-		tm_processor.SetVolCacheSize(4);
-		//add
-		tm_processor.AddCellDup(cell, m_cur_time);
-	}
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.NewId(m_cell_new_id,
+		m_cell_new_id_empty, append);
 	CellUpdate();
-
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
-
 }
 
 void TraceDlg::CellEraseID()
@@ -2122,7 +1993,7 @@ void TraceDlg::CellEraseID()
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	//get prev mask
@@ -2180,6 +2051,80 @@ void TraceDlg::CellEraseID()
 		vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
 	}
 
+	CellUpdate();
+}
+
+void TraceDlg::CellReplaceID()
+{
+	//current T
+	flrd::CelpList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.Replace(m_cell_new_id,
+		m_cell_new_id_empty, list_cur);
+
+	CellUpdate();
+}
+
+void TraceDlg::CellCombineID()
+{
+	//current T
+	flrd::CelpList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+
+	flrd::ComponentEditor editor;
+	editor.SetView(m_view);
+	editor.Combine(list_cur);
+
+	//update view
 	CellUpdate();
 }
 
@@ -2258,7 +2203,7 @@ void TraceDlg::CellLink(bool exclusive)
 		m_cur_time, m_prv_time, exclusive);
 
 	//update view
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void TraceDlg::OnCellLink(wxCommandEvent &event)
@@ -2268,8 +2213,7 @@ void TraceDlg::OnCellLink(wxCommandEvent &event)
 
 void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (!vr_frame || !vr_frame->GetComponentDlg())
+	if (!m_frame || !m_frame->GetComponentDlg())
 		return;
 	if (!m_view)
 		return;
@@ -2284,8 +2228,8 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
-	flrd::CelpList in = vr_frame->GetComponentDlg()->GetInCells();
-	flrd::CelpList out = vr_frame->GetComponentDlg()->GetOutCells();
+	flrd::CelpList in = m_frame->GetComponentDlg()->GetInCells();
+	flrd::CelpList out = m_frame->GetComponentDlg()->GetOutCells();
 	tm_processor.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();
@@ -2342,7 +2286,7 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 	trace_group->IsolateCells(list_cur, m_cur_time);
 
 	//update view
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 void TraceDlg::OnCellUnlink(wxCommandEvent &event)
@@ -2417,15 +2361,15 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 		m_cur_time, m_prv_time);
 
 	//update view
-	m_view->RefreshGL();
+	m_view->RefreshGL(39);
 }
 
 //ID edit controls
 void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 {
 	int shuffle = 0;
-	if (m_view && m_view->m_glview->m_cur_vol)
-		shuffle = m_view->m_glview->m_cur_vol->GetShuffle();
+	if (m_view && m_view->m_cur_vol)
+		shuffle = m_view->m_cur_vol->GetShuffle();
 	wxString str = m_cell_new_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2439,9 +2383,14 @@ void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
 		m_cell_new_id_text->SetBackgroundColour(color);
+		m_cell_new_id = id;
+		m_cell_new_id_empty = false;
 	}
 	else
+	{
 		m_cell_new_id_text->SetBackgroundColour(color);
+		m_cell_new_id_empty = true;
+	}
 	m_cell_new_id_text->Refresh();
 }
 
@@ -2462,221 +2411,12 @@ void TraceDlg::OnCellAppendID(wxCommandEvent &event)
 
 void TraceDlg::OnCellReplaceID(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//get id
-	wxString str = m_cell_new_id_text->GetValue();
-	unsigned long id;
-	if (!str.ToULong(&id))
-		return;
-	if (!id)
-		return;
-
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
-
-	//current T
-	flrd::CelpList list_cur;
-	flrd::CelpListIter cell_iter;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	//replace ID
-	std::unordered_map<unsigned int, unsigned int> list_rep;
-	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
-	unsigned int old_id, new_id;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	for (index = 0; index < for_size; ++index)
-	{
-		old_id = data_label[index];
-		if (!data_mask[index] ||
-			!old_id ||
-			old_id == id)
-			continue;
-
-		list_rep_iter = list_rep.find(old_id);
-		if (list_rep_iter != list_rep.end())
-		{
-			data_label[index] = list_rep_iter->second;
-			continue;
-		}
-
-		cell_iter = list_cur.find(old_id);
-		if (cell_iter != list_cur.end())
-		{
-			new_id = id;
-			while (vd->SearchLabel(new_id))
-				new_id += 253;
-			//add cell to list_rep
-			list_rep.insert(pair<unsigned int, unsigned int>
-				(old_id, new_id));
-			if (track_map)
-				trace_group->ReplaceCellID(old_id, new_id,
-					m_cur_time);
-			data_label[index] = new_id;
-		}
-	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
-	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-
-	CellUpdate();
+	CellReplaceID();
 }
 
 void TraceDlg::OnCellCombineID(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	if (list_cur.size() <= 1)
-		//nothing to combine
-		return;
-
-	//find the largest cell in the list
-	flrd::Celp cell;
-	flrd::CelpListIter cell_iter;
-	for (cell_iter = list_cur.begin();
-	cell_iter != list_cur.end(); ++cell_iter)
-	{
-		if (cell)
-		{
-			if (cell_iter->second->GetSizeUi() >
-				cell->GetSizeUi())
-				cell = cell_iter->second;
-		}
-		else
-			cell = cell_iter->second;
-	}
-	if (!cell)
-		return;
-
-	//get current mask
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-	//combine IDs
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (!data_mask[index] ||
-			!data_label[index])
-			continue;
-		cell_iter = list_cur.find(data_label[index]);
-		if (cell_iter != list_cur.end())
-			data_label[index] = cell->Id();
-	}
-	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
-	//save label mask to disk
-	vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
-
-	//modify graphs
-	trace_group->CombineCells(cell, list_cur,
-		m_cur_time);
-
-	//update view
-	CellUpdate();
+	CellCombineID();
 }
 
 void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
@@ -2777,7 +2517,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	//modify graphs
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	int resx, resy, resz;
@@ -2815,7 +2555,7 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	if (!m_view)
 		return;
 
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	int resx, resy, resz;
@@ -2841,299 +2581,24 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 
 void TraceDlg::SaveOutputResult(wxString &filename)
 {
-	wxFileOutputStream fos(filename);
-	if (!fos.Ok())
-		return;
-	wxTextOutputStream tos(fos);
+	std::ofstream os;
+	OutputStreamOpen(os, filename.ToStdString());
 
 	wxString str;
 	str = m_stat_text->GetValue();
 
-	tos << str;
-}
+	os << str;
 
-void TraceDlg::Test1()
-{
-	//wxMessageBox("It happens.");
-	if (!m_view)
-		return;
-
-	//get data
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
-	if (!vd)
-		return;
-	//get mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	//get label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	//get statistics on selection
-	//get these values for each selected ID:
-	//total voxels/surface voxels/contact voxels
-	vector<comp_info> info_list;
-	int ilist;
-	int found;
-	int i, j, k;
-	int nx, ny, nz;
-	unsigned long long index;
-	unsigned long long indexn;
-	unsigned int id;
-	bool surface_vox, contact_vox;
-	vd->GetResolution(nx, ny, nz);
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx*ny*k + nx*j + i;
-				if (data_mask[index] &&
-					data_label[index])
-				{
-					id = data_label[index];
-					//determine the numbers
-					if (i == 0 || i == nx - 1 ||
-						j == 0 || j == ny - 1 ||
-						k == 0 || k == nz - 1)
-					{
-						//border voxel
-						surface_vox = true;
-						//determine contact
-						contact_vox = false;
-						if (i > 0)
-						{
-							indexn = index - 1;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								contact_vox = true;
-						}
-						if (!contact_vox && i < nx - 1)
-						{
-							indexn = index + 1;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								contact_vox = true;
-						}
-						if (!contact_vox && j > 0)
-						{
-							indexn = index - nx;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								contact_vox = true;
-						}
-						if (!contact_vox && j < ny - 1)
-						{
-							indexn = index + nx;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								contact_vox = true;
-						}
-						if (!contact_vox && k > 0)
-						{
-							indexn = index - nx*ny;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								contact_vox = true;
-						}
-						if (!contact_vox && k < nz - 1)
-						{
-							indexn = index + nx*ny;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								contact_vox = true;
-						}
-					}
-					else
-					{
-						surface_vox = false;
-						contact_vox = false;
-						//i-1
-						indexn = index - 1;
-						if (data_label[indexn] == 0)
-							surface_vox = true;
-						if (data_label[indexn] &&
-							data_label[indexn] != id)
-							surface_vox = contact_vox = true;
-						//i+1
-						if (!surface_vox || !contact_vox)
-						{
-							indexn = index + 1;
-							if (data_label[indexn] == 0)
-								surface_vox = true;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								surface_vox = contact_vox = true;
-						}
-						//j-1
-						if (!surface_vox || !contact_vox)
-						{
-							indexn = index - nx;
-							if (data_label[indexn] == 0)
-								surface_vox = true;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								surface_vox = contact_vox = true;
-						}
-						//j+1
-						if (!surface_vox || !contact_vox)
-						{
-							indexn = index + nx;
-							if (data_label[indexn] == 0)
-								surface_vox = true;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								surface_vox = contact_vox = true;
-						}
-						//k-1
-						if (!surface_vox || !contact_vox)
-						{
-							indexn = index - nx*ny;
-							if (data_label[indexn] == 0)
-								surface_vox = true;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								surface_vox = contact_vox = true;
-						}
-						//k+1
-						if (!surface_vox || !contact_vox)
-						{
-							indexn = index + nx*ny;
-							if (data_label[indexn] == 0)
-								surface_vox = true;
-							if (data_label[indexn] &&
-								data_label[indexn] != id)
-								surface_vox = contact_vox = true;
-						}
-					}
-
-					//update list
-					//find in info list
-					found = -1;
-					for (ilist = 0; ilist < (int)info_list.size(); ++ilist)
-					{
-						if (info_list[ilist].id == id)
-						{
-							found = ilist;
-							break;
-						}
-					}
-					if (found == -1)
-					{
-						//not found
-						comp_info info;
-						info.id = id;
-						info.total_num = 1;
-						info.surface_num = surface_vox ? 1 : 0;
-						info.contact_num = contact_vox ? 1 : 0;
-						info_list.push_back(info);
-					}
-					else
-					{
-						//found
-						info_list[found].total_num++;
-						info_list[found].surface_num += surface_vox ? 1 : 0;
-						info_list[found].contact_num += contact_vox ? 1 : 0;
-					}
-				}
-			}
-	wxString str = "Statistics on the selection:\n";
-	for (i = 0; i < (int)info_list.size(); ++i)
-	{
-		str += wxString::Format("ID: %u, ", info_list[i].id);
-		str += wxString::Format("TotalN: %d, ", info_list[i].total_num);
-		str += wxString::Format("SurfaceN: %d, ", info_list[i].surface_num);
-		str += wxString::Format("ContactN: %d, ", info_list[i].contact_num);
-		str += wxString::Format("Ratio: %.2f\n", (double)info_list[i].contact_num / (double)info_list[i].surface_num);
-	}
-	m_stat_text->SetValue(str);
-}
-
-void TraceDlg::Test2(int type)
-{
-	/*	if (!m_view)
-			return;
-		//trace group
-		TraceGroup *trace_group = m_view->GetTraceGroup();
-		if (!trace_group)
-			return;
-		//get data
-		VolumeData* vd = m_view->m_glview->m_cur_vol;
-		if (!vd)
-			return;
-		//get mask
-		Nrrd* nrrd_mask = vd->GetMask();
-		if (!nrrd_mask)
-			return;
-		unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-		if (!data_mask)
-			return;
-		//get label
-		Texture* tex = vd->GetTexture();
-		if (!tex)
-			return;
-		Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-		if (!nrrd_label)
-			return;
-		unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-		if (!data_label)
-			return;
-
-		//get current selection
-		unsigned long id;
-		wxString str;
-		set<unsigned int> id_list;
-		set<unsigned int>::iterator id_iter;
-		long item = -1;
-		for (;;)
-		{
-			item = m_trace_list_curr->GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_DONTCARE);
-			if (item != -1)
-			{
-				str = m_trace_list_curr->GetText(item ,0);
-				str.ToULong(&id);
-				id_list.insert(id);
-			}
-			else break;
-		}
-		if (id_list.empty())
-			return;
-
-		//search from current frame onward
-		str = "";
-		int time = m_view->m_glview->m_tseq_cur_num;
-		for (id_iter=id_list.begin();
-			id_iter!=id_list.end(); ++id_iter)
-		{
-			id = *id_iter;
-			if (trace_group->FindPattern(type, id, time))
-			{
-				str += wxString::Format("ID: %u, ", id);
-				str += wxString::Format("time: %d\n", time);
-			}
-		}
-		m_stat_text->SetValue(str);*/
+	os.close();
 }
 
 //read/delete volume cache
 void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 {
 	//get volume, readers
-	if (!m_view || !m_view->m_glview)
+	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -3144,7 +2609,7 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 	int chan = vd->GetCurChannel();
 	int frame = vol_cache.frame;
 
-	if (frame == m_view->m_glview->m_tseq_cur_num)
+	if (frame == m_view->m_tseq_cur_num)
 	{
 		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
@@ -3180,9 +2645,9 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 
 void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 {
-	if (!m_view || !m_view->m_glview)
+	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -3205,7 +2670,7 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 	}
 
 	vol_cache.valid = false;
-	if (frame != m_view->m_glview->m_tseq_cur_num)
+	if (frame != m_view->m_tseq_cur_num)
 	{
 		if (vol_cache.data)
 			nrrdNuke((Nrrd*)vol_cache.nrrd_data);
@@ -3220,16 +2685,14 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 
 void TraceDlg::OnCellPrev(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMovieView())
-		vr_frame->GetMovieView()->DownFrame();
+	if (m_frame && m_frame->GetMovieView())
+		m_frame->GetMovieView()->DownFrame();
 }
 
 void TraceDlg::OnCellNext(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetMovieView())
-		vr_frame->GetMovieView()->UpFrame();
+	if (m_frame && m_frame->GetMovieView())
+		m_frame->GetMovieView()->UpFrame();
 }
 
 //auto tracking
@@ -3244,7 +2707,7 @@ void TraceDlg::GenMap()
 	if (!trace_group)
 		return;
 
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -3360,7 +2823,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		return;
 
 	//get trace group
-	VolumeData* vd = m_view->m_glview->m_cur_vol;
+	VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	TraceGroup *trace_group = m_view->GetTraceGroup();

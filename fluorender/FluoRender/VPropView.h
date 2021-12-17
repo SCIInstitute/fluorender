@@ -28,25 +28,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VPROPVIEW_H_
 #define _VPROPVIEW_H_
 
-#include "DataManager.h"
 #include <wx/wx.h>
 #include <wx/panel.h>
-#include <wx/glcanvas.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 #include <wx/tglbtn.h>
 
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <Types/Color.h>
-#include <Types/BBox.h>
-#include <Types/Point.h>
-
-
 using namespace std;
 
-class VRenderView;
-
+class VRenderFrame;
+class VRenderGLView;
+class VolumeData;
+class DataGroup;
 class VPropView: public wxPanel
 {
 	enum
@@ -114,11 +107,12 @@ class VPropView: public wxPanel
 		ID_NRChk,
 		ID_DepthChk,
 		ID_TranspChk,
+		ID_CompChk,
 };
 
 public:
-	VPropView(wxWindow* frame, wxWindow* parent,
-		wxWindowID id,
+	VPropView(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -135,17 +129,17 @@ public:
 	DataGroup* GetGroup();
 
 	//sync view in depth mode
-	void SetView(VRenderView* view);
-	VRenderView* GetView();
+	void SetView(VRenderGLView* view);
+	VRenderGLView* GetView();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
 	VolumeData* m_vd;
 
 	bool m_lumi_change;
 	bool m_sync_group;
 	DataGroup* m_group;
-	VRenderView* m_vrv;
+	VRenderGLView* m_view;
 	double m_max_val;
 
 	//1st line
@@ -325,6 +319,8 @@ private:
 	void OnFluoRender(wxCommandEvent &event);
 	//transparency
 	void OnTranspChk(wxCommandEvent &event);
+	//component display
+	void OnCompChk(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

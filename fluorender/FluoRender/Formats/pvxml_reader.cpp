@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "pvxml_reader.h"
+#include <Utils.h>
 #include <wx/xml/xml.h>
 #include "../compatibility.h"
 #include <fstream>
@@ -63,6 +64,7 @@ PVXMLReader::PVXMLReader()
 	m_user_flip_y = 0;
 	m_flip_x = false;
 	m_flip_y = false;
+	m_seq_type = 0;
 }
 
 PVXMLReader::~PVXMLReader()
@@ -212,7 +214,9 @@ int PVXMLReader::Preprocess()
 	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
 	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
 	if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
-	m_slice_num = int((m_z_max - m_z_min) / m_zspc + 0.5);
+	double dt = m_z_max - m_z_min;
+	if (std::abs(dt) > fluo::Epsilon(10))
+		m_slice_num = int(dt / m_zspc + 0.5);
 
 	if (m_user_flip_y == 1 ||
 		m_user_flip_y == 0)
@@ -244,7 +248,12 @@ int PVXMLReader::Preprocess()
 					if (m_force_stack)
 						frame_info->z = k;
 					else
-						frame_info->z = int((frame_info->z_start - m_z_min) / m_zspc + 0.5);
+					{
+						double dt = frame_info->z_start - m_z_min;
+						if (std::abs(dt) > fluo::Epsilon(10))
+							frame_info->z = int(dt / m_zspc + 0.5);
+						else frame_info->z = k;
+					}
 				}
 				if (m_user_flip_y==0 && !flipy)
 				{
@@ -386,7 +395,7 @@ void PVXMLReader::ReadKey(wxXmlNode* keyNode)
 	else if (strKey == "seqType")
 	{
 		strValue.ToLong(&ival);
-		m_current_state.seq_type = ival;
+		m_seq_type = ival;
 	}
 }
 
@@ -460,7 +469,13 @@ void PVXMLReader::ReadIndexedKey(wxXmlNode* keyNode, wxString &key)
 
 void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 {
-	if (m_current_state.seq_type == 1)
+	//get type
+	wxString type = seqNode->GetAttribute("type");
+	if (type == "TSeries Timed Element" &&
+		!m_seq_type)
+		m_seq_type = 2;
+
+	if (m_seq_type == 1)
 	{
 		if (!m_force_stack)
 		{
@@ -488,8 +503,16 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 		}
 		else if (child->GetName() == "Frame")
 		{
-			ReadFrame(child);
-			m_seq_slice_num++;
+			if (m_seq_type == 2)
+			{
+				m_new_seq = true;
+				ReadFrame(child);
+			}
+			else
+			{
+				ReadFrame(child);
+				m_seq_slice_num++;
+			}
 		}
 		child = child->GetNext();
 	}
@@ -510,7 +533,10 @@ void PVXMLReader::ReadSequence(wxXmlNode* seqNode)
 	}
 	else
 	{
-		m_slice_num = m_seq_slice_num;
+		if (m_seq_type == 2)
+			m_slice_num = 1;
+		else
+			m_slice_num = m_seq_slice_num;
 		m_zspc = m_seq_zspc;
 	}
 	m_pvxml_info.back().back().grid_index = m_current_state.grid_index;
@@ -553,18 +579,15 @@ void PVXMLReader::ReadFrame(wxXmlNode* frameNode)
 		m_seq_zspc = spc<m_seq_zspc?spc:m_seq_zspc;
 	}
 	m_seq_zpos = frame_info.z_start;
-	ival = 2<<(m_current_state.bit_depth-1);
-	if (m_max_value == 0.0)
+	if (m_xspc == 0.0)
 	{
 		m_xspc = m_current_state.mpp_x;
 		m_yspc = m_current_state.mpp_y;
-		m_max_value = ival;
 	}
 	else
 	{
 		m_xspc = m_current_state.mpp_x<m_xspc?m_current_state.mpp_x:m_xspc;
 		m_yspc = m_current_state.mpp_y<m_yspc?m_current_state.mpp_y:m_yspc;
-		m_max_value = ival>m_max_value?ival:m_max_value;
 	}
 
 	bool apart = false;
@@ -874,6 +897,18 @@ Nrrd *PVXMLReader::Convert(int t, int c, bool get_max)
 			nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
 			nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 			nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+
+			if (get_max)
+			{
+				double value;
+				unsigned long long totali = (unsigned long long)m_slice_num*
+					m_x_size*m_y_size;
+				for (unsigned long long i = 0; i < totali; ++i)
+				{
+					value = val[i];
+					m_max_value = value > m_max_value ? value : m_max_value;
+				}
+			}
 		}
 	}
 
@@ -1040,8 +1075,8 @@ void PVXMLReader::ReadTiff(char *pbyData, unsigned short *val)
 			{
 				unsigned short value;
 				value = *((unsigned short*)(pbyData+offset+2+12*i+8));
-				if ((double)value > m_max_value)
-					m_max_value = (double)value;
+				//if ((double)value > m_max_value)
+				m_max_value = (double)value;
 			}
 			break;
 		}

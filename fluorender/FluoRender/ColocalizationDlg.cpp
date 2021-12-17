@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
-#include "VRenderFrame.h"
 #include "DataManager.h"
+#include "VRenderFrame.h"
 #include <Calculate/Compare.h>
 
 BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
@@ -51,12 +51,11 @@ BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
 	EVT_GRID_LABEL_LEFT_CLICK(ColocalizationDlg::OnGridLabelClick)
 END_EVENT_TABLE()
 
-ColocalizationDlg::ColocalizationDlg(wxWindow* frame,
-	wxWindow* parent) :
-wxPanel(parent, wxID_ANY,
+ColocalizationDlg::ColocalizationDlg(VRenderFrame* frame) :
+wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(500, 500),
 0, "ColocalizationDlg"),
-m_frame(parent),
+m_frame(frame),
 m_view(0),
 m_group(0),
 m_hold_history(false),
@@ -198,7 +197,7 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 	wxColor color;
 	VolumeData* vd = 0;
 	if (m_colormap && m_view)
-		vd = m_view->m_glview->m_cur_vol;
+		vd = m_view->m_cur_vol;
 	bool colormap = m_colormap && vd && (m_cm_max - m_cm_min) > 0.0;
 
 	i = 0;
@@ -330,7 +329,7 @@ void ColocalizationDlg::Colocalize()
 	}
 	if (m_view)
 	{
-		switch (m_view->m_glview->m_sb_unit)
+		switch (m_view->m_sb_unit)
 		{
 		case 0:
 			unit = L"nm\u00B3";
@@ -558,7 +557,7 @@ void ColocalizationDlg::OnAutoUpdate(wxCommandEvent &event)
 {
 	m_auto_update = m_auto_update_btn->GetValue();
 	if (m_view)
-		m_view->m_glview->m_paint_colocalize = m_auto_update;
+		m_view->m_paint_colocalize = m_auto_update;
 }
 
 void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)

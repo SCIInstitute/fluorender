@@ -25,12 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <wx/wx.h>
-#include <wx/dialog.h>
-
 #ifndef _TESTER_H_
 #define _TESTER_H_
 
+#include <wx/wx.h>
+#include <wx/dialog.h>
+
+class VRenderFrame;
 class TesterDlg : public wxDialog
 {
 	enum
@@ -54,8 +55,7 @@ class TesterDlg : public wxDialog
 	};
 
 public:
-	TesterDlg(wxWindow* frame,
-		wxWindow* parent);
+	TesterDlg(VRenderFrame* frame);
 	~TesterDlg();
 
 	//values
@@ -89,7 +89,7 @@ public:
 	wxButton *m_b1_btn;
 
 private:
-	//wxWindow* m_frame;
+	VRenderFrame* m_frame;
 
 	//sliders
 	void OnP1Change(wxScrollEvent &event);

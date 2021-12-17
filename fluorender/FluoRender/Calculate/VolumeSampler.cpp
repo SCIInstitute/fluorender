@@ -43,7 +43,6 @@ VolumeSampler::VolumeSampler() :
 	m_nz(0),
 	m_bits(0),
 	m_crop(false),
-	m_crop_calc(false),
 	m_ox(0),
 	m_oy(0),
 	m_oz(0),
@@ -148,6 +147,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		break;
 	}
 
+	//check rotation
+	bool rot = !m_q_cl.IsIdentity();
 	//use input size if no resizing
 	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
 	{
@@ -155,72 +156,87 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_ny = m_ny_in;
 		m_nz = m_nz_in;
 	}
+	fluo::Vector size(m_nx - 0.5, m_ny - 0.5, m_nz - 0.5);
+	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
+	//spacing
+	double spcx_in, spcy_in, spcz_in;
+	m_input->GetSpacings(spcx_in, spcy_in, spcz_in);
+	fluo::Vector spc_in(spcx_in, spcy_in, spcz_in);
+	fluo::Vector spc;
+	double x, y, z;
 
-	if (m_crop)
+	if (m_crop || rot)
 	{
-		if (!m_crop_calc)
+		if (rot &&
+			m_nx && m_ny && m_nz)
 		{
-			//recalculate range
-			vector<fluo::Plane*> *planes =
-				m_input->GetVR()->get_planes();
-			fluo::Plane p[6];
-			int np = int(planes->size());
+			rotate_scale(size_in, spc_in, size, spc);
+			m_nx = int(size.x() + 0.5);
+			m_ny = int(size.y() + 0.5);
+			m_nz = int(size.z() + 0.5);
+			m_nx = m_nx < 1 ? 1 : m_nx;
+			m_ny = m_ny < 1 ? 1 : m_ny;
+			m_nz = m_nz < 1 ? 1 : m_nz;
+		}
 
-			//get six planes
-			for (int i = 0; i < 6; ++i)
+		//recalculate range
+		vector<fluo::Plane*> *planes =
+			m_input->GetVR()->get_planes();
+		fluo::Plane p[6];
+		int np = int(planes->size());
+
+		//get six planes
+		for (int i = 0; i < 6; ++i)
+		{
+			if (i < np)
 			{
-				if (i < np)
+				p[i] = *((*planes)[i]);
+				p[i].Restore();
+			}
+			else
+			{
+				switch (i)
 				{
-					p[i] = *((*planes)[i]);
-					p[i].Restore();
-				}
-				else
-				{
-					switch (i)
-					{
-					case 0:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 0.0)
-							, fluo::Vector(1.0, 0.0, 0.0));
-						break;
-					case 1:
-						p[i] = fluo::Plane(
-							fluo::Point(1.0, 0.0, 0.0),
-							fluo::Vector(-1.0, 0.0, 0.0));
-						break;
-					case 2:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 0.0),
-							fluo::Vector(0.0, 1.0, 0.0));
-						break;
-					case 3:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 1.0, 0.0),
-							fluo::Vector(0.0, -1.0, 0.0));
-						break;
-					case 4:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 0.0),
-							fluo::Vector(0.0, 0.0, 1.0));
-						break;
-					case 5:
-						p[i] = fluo::Plane(
-							fluo::Point(0.0, 0.0, 1.0),
-							fluo::Vector(0.0, 0.0, -1.0));
-						break;
-					}
+				case 0:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 0.0)
+						, fluo::Vector(1.0, 0.0, 0.0));
+					break;
+				case 1:
+					p[i] = fluo::Plane(
+						fluo::Point(1.0, 0.0, 0.0),
+						fluo::Vector(-1.0, 0.0, 0.0));
+					break;
+				case 2:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 0.0),
+						fluo::Vector(0.0, 1.0, 0.0));
+					break;
+				case 3:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 1.0, 0.0),
+						fluo::Vector(0.0, -1.0, 0.0));
+					break;
+				case 4:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 0.0),
+						fluo::Vector(0.0, 0.0, 1.0));
+					break;
+				case 5:
+					p[i] = fluo::Plane(
+						fluo::Point(0.0, 0.0, 1.0),
+						fluo::Vector(0.0, 0.0, -1.0));
+					break;
 				}
 			}
-
-			m_ox = int(-m_nx * p[0].d() + 0.499);
-			m_oy = int(-m_ny * p[2].d() + 0.499);
-			m_oz = int(-m_nz * p[4].d() + 0.499);
-			m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
-			m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
-			m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
-
-			m_crop_calc = true;
 		}
+
+		m_ox = int(-m_nx * p[0].d() + 0.499);
+		m_oy = int(-m_ny * p[2].d() + 0.499);
+		m_oz = int(-m_nz * p[4].d() + 0.499);
+		m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
+		m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
+		m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
 	}
 	else
 	{
@@ -230,20 +246,28 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_lz = m_nz;
 	}
 
+	if (spc.x() == 0.0 || spc.y() == 0.0 || spc.z() == 0.0)
+		spc = spc_in * fluo::Vector(double(m_nx_in) / double(m_nx),
+			double(m_ny_in) / double(m_ny),
+			double(m_nz_in) / double(m_nz));
+
 	//output raw
 	unsigned long long total_size = (unsigned long long)m_lx*
 		(unsigned long long)m_ly*(unsigned long long)m_lz;
 	m_raw_result = (void*)(new unsigned char[total_size * (m_bits /8)]);
 	if (!m_raw_result)
-		throw std::runtime_error("Unable to allocate memory.");
-
-	//check rotation
-	bool rot = !m_q_cl.IsIdentity();
+		return;
 
 	unsigned long long index;
 	int i, j, k;
-	double x, y, z;
 	double value;
+	fluo::Vector vec;
+	fluo::Vector spcsize, spcsize_in;
+	if (rot)
+	{
+		spcsize_in = spc_in * size_in;
+		spcsize = spc * size;
+	}
 	for (k = 0; k < m_lz; ++k)
 	for (j = 0; j < m_ly; ++j)
 	for (i = 0; i < m_lx; ++i)
@@ -256,14 +280,16 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		z = (double(m_oz+k) + 0.5) / double(m_nz);
 		if (rot)
 		{
-			fluo::Vector vec(x - 0.5,
-				y - 0.5,
-				z - 0.5);
+			vec.Set(x, y, z);
+			vec = vec * spcsize - spcsize * 0.5;//scale and center
 			fluo::Quaternion qvec(vec);
-			qvec = (-m_q_cl) * qvec * (m_q_cl);
-			x = qvec.x + 0.5;
-			y = qvec.y + 0.5;
-			z = qvec.z + 0.5;
+			qvec = (-m_q_cl) * qvec * (m_q_cl);//rotate
+			vec = qvec.GetVector();
+			vec += spcsize_in * 0.5;//translate
+			vec /= spcsize_in;//normalize
+			x = vec.x();
+			y = vec.y();
+			z = vec.z();
 		}
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
@@ -289,15 +315,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		nrrdWrap(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
 			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 
-	//spacing
-	double spcx, spcy, spcz;
-	m_input->GetSpacings(spcx, spcy, spcz);
-	spcx *= double(m_nx_in) / double(m_nx);
-	spcy *= double(m_ny_in) / double(m_ny);
-	spcz *= double(m_nz_in) / double(m_nz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_lx,
-		spcy*m_ly, spcz*m_lz);
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
+	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spc.x()*m_lx,
+		spc.y()*m_ly, spc.z()*m_lz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_lx,
 		(size_t)m_ly, (size_t)m_lz);
@@ -383,8 +403,10 @@ double VolumeSampler::Sample(double x, double y, double z)
 	case 0:
 		return SampleNearestNeighbor(x, y, z);
 	case 1:
-		return SampleLinear(x, y, z);
+		return SampleBiLinear(x, y, z);
 	case 2:
+		return SampleTriLinear(x, y, z);
+	case 3:
 		return SampleBox(x, y, z);
 	}
 	return 0.0;
@@ -500,6 +522,116 @@ void VolumeSampler::xyz2ijk(double x, double y, double z,
 	k = int(z*m_nz_in);
 }
 
+void VolumeSampler::xyz2ijkt(
+	double x, double y, double z,
+	int &i, int &j, int &k,
+	double &tx, double &ty, double &tz)
+{
+	double id = x * m_nx_in - 0.5;
+	double jd = y * m_ny_in - 0.5;
+	double kd = z * m_nz_in - 0.5;
+	i = id >= 0.0 ? int(id) : int(id) - 1;
+	j = jd >= 0.0 ? int(jd) : int(jd) - 1;
+	k = kd >= 0.0 ? int(kd) : int(kd) - 1;
+	tx = id - i;
+	ty = jd - j;
+	tz = kd - k;
+}
+
+int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
+	fluo::Vector &vsize, fluo::Vector &vspc)
+{
+	fluo::Vector rsf = vsize / vsize_in;//rescale factor
+	std::vector<fluo::Quaternion> qs;
+	std::vector<fluo::Vector> vs;
+	std::vector<fluo::Vector> vs2;
+	qs.push_back(fluo::Quaternion(1, 0, 0, 0));
+	qs.push_back(fluo::Quaternion(0, 1, 0, 0));
+	qs.push_back(fluo::Quaternion(0, 0, 1, 0));
+	fluo::Vector vec_in = vsize_in * vspc_in;
+	for (auto &q : qs)
+	{
+		q = (-m_q_cl) * q * (m_q_cl);
+		vs.push_back(q.GetVector() * vec_in);
+		vs2.push_back(q.GetVector() * vspc_in);
+	}
+	fluo::Vector rv;
+	int i = 0;
+	for (auto &v : vs)
+		if (i < 3) rv[i++] = v.length();
+	i = 0;
+	for (auto &v : vs2)
+		if (i < 3) vspc[i++] = v.length();
+	if (vspc.x() == 0.0 ||
+		vspc.y() == 0.0 ||
+		vspc.z() == 0.0)
+		return 0;//invalid
+	//rescale spcs to maintain sample size
+	consv_volume(vspc, vspc_in);
+	if (m_crop)
+	{
+		vspc /= rsf;
+		vsize = rv / vspc;
+	}
+	else
+	{
+		vsize = rv * rsf / vspc;
+	}
+	return 1;
+}
+
+int VolumeSampler::consv_volume(fluo::Vector &vec, fluo::Vector &vec_in)
+{
+	double vol = vec.volume();
+	double vol_in = vec_in.volume();
+	if (vol == 0.0 || vol_in == 0.0)
+		return 0;
+	//conserve volume
+	if (std::abs(vol - vol_in) >
+		fluo::Epsilon(3) * vec_in[vec_in.max()])
+	{
+		//diff array
+		double dif[9] = {
+			vec[0] - vec_in[0], vec[0] - vec_in[1], vec[0] - vec_in[2],
+			vec[1] - vec_in[0], vec[1] - vec_in[1], vec[1] - vec_in[2],
+			vec[2] - vec_in[0], vec[2] - vec_in[1], vec[2] - vec_in[2] };
+		int ind_min;
+		double val_min, val;
+		for (int i = 0; i < 9; ++i)
+		{
+			val = std::abs(dif[i]);
+			if (i == 0)
+			{
+				val_min = val;
+				ind_min = i;
+			}
+			else
+			{
+				if (val < val_min)
+				{
+					val_min = val;
+					ind_min = i;
+				}
+			}
+		}
+		int ind = ind_min / 3;
+		int ind_in = ind_min % 3;
+		//align min dif
+		double f = std::sqrt(vol_in*vec[ind]/vol/vec_in[ind_in]);
+		vec[ind] = vec_in[ind_in];
+		//the remaining 2
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i == ind)
+				continue;
+			vec[i] *= f;
+		}
+
+		return 1;
+	}
+	return 0;
+}
+
 double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 {
 	int i, j, k;
@@ -516,9 +648,69 @@ double VolumeSampler::SampleNearestNeighbor(double x, double y, double z)
 	return 0.0;
 }
 
-double VolumeSampler::SampleLinear(double x, double y, double z)
+double VolumeSampler::SampleBiLinear(double x, double y, double z)
 {
-	return 0;
+	int i, j, k;
+	double tx, ty, tz;
+	xyz2ijkt(x, y, z, i, j, k, tx, ty, tz);
+	double q[4] = { 0 };
+	int count = 0;
+	int in, jn;
+	unsigned long long index;
+	for (int ii = 0; ii < 2; ++ii)
+	for (int jj = 0; jj < 2; ++jj)
+	{
+		in = i + ii;
+		jn = j + jj;
+		if (ijk(in, jn, k))
+		{
+			index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+				(unsigned long long)k + (unsigned long long)m_nx_in*
+				(unsigned long long)jn + (unsigned long long)in;
+			if (m_bits == 8)
+				q[count] = double(((unsigned char*)m_raw_input)[index]) / 255.0;
+			else if (m_bits == 16)
+				q[count] = double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+		}
+		count++;
+	}
+
+	return bilerp(tx, ty,
+		q[0], q[1], q[2], q[3]);
+}
+
+double VolumeSampler::SampleTriLinear(double x, double y, double z)
+{
+	int i, j, k;
+	double tx, ty, tz;
+	xyz2ijkt(x, y, z, i, j, k, tx, ty, tz);
+	double q[8] = { 0 };
+	int count = 0;
+	int in, jn, kn;
+	unsigned long long index;
+	for (int ii = 0; ii < 2; ++ii)
+	for (int jj = 0; jj < 2; ++jj)
+	for (int kk = 0; kk < 2; ++kk)
+	{
+		in = i + ii;
+		jn = j + jj;
+		kn = k + kk;
+		if (ijk(in, jn, kn))
+		{
+			index = (unsigned long long)m_nx_in*(unsigned long long)m_ny_in*
+				(unsigned long long)kn + (unsigned long long)m_nx_in*
+				(unsigned long long)jn + (unsigned long long)in;
+			if (m_bits == 8)
+				q[count] = double(((unsigned char*)m_raw_input)[index]) / 255.0;
+			else if (m_bits == 16)
+				q[count] = double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+		}
+		count++;
+	}
+
+	return trilerp(tx, ty, tz,
+		q[0], q[1], q[2], q[3],
+		q[4], q[5], q[6], q[7]);
 }
 
 double VolumeSampler::SampleBox(double x, double y, double z)

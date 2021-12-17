@@ -99,14 +99,12 @@ BEGIN_EVENT_TABLE(VRenderView, wxPanel)
 	EVT_KEY_DOWN(VRenderView::OnKeyDown)
 END_EVENT_TABLE()
 
-VRenderView::VRenderView(wxWindow* frame,
-	wxWindow* parent,
-	wxWindowID id,
+VRenderView::VRenderView(VRenderFrame* frame,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-wxPanel(parent, id, pos, size, style),
+	wxPanel(frame, wxID_ANY, pos, size, style),
 	m_default_saved(false),
 	m_frame(frame),
 	m_timer(this,ID_RotateTimer),
@@ -132,7 +130,7 @@ wxPanel(parent, id, pos, size, style),
 
 	m_id = m_max_id;
 	wxString name = wxString::Format("Render View:%d", m_max_id++);
-	this->SetName(name);
+	SetName(name);
 	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
 	//render view/////////////////////////////////////////////////
 	int red_bit = 8;
@@ -221,7 +219,7 @@ wxPanel(parent, id, pos, size, style),
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
-	m_glview = new VRenderGLView(frame, this, wxID_ANY, attriblist, sharedContext);
+	m_glview = new VRenderGLView(frame, this, attriblist, sharedContext);
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
@@ -311,7 +309,8 @@ wxPanel(parent, id, pos, size, style),
 	}
 
 	CreateBar();
-	if (m_glview) {
+	if (m_glview)
+	{
 		m_glview->SetSBText(L"50 \u03BCm");
 		m_glview->SetScaleBarLen(1.);
 	}
@@ -499,14 +498,14 @@ void VRenderView::CreateBar()
 	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Projection:");
 	m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
 		wxDefaultPosition, wxSize(180, 20), wxSL_HORIZONTAL);
-	m_aov_sldr->SetValue(GetPersp()?GetAov():10);
+	m_aov_sldr->SetValue(m_glview->GetPersp()? m_glview->GetAov():10);
 	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
 		wxIdleEventHandler(VRenderView::OnAovSldrIdle),
 		NULL, this);
 	m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	m_aov_text->ChangeValue(GetPersp()?wxString::Format("%d", 
-		int(GetAov())):"Ortho");
+	m_aov_text->ChangeValue(m_glview->GetPersp()?wxString::Format("%d",
+		int(m_glview->GetAov())):"Ortho");
 	m_options_toolbar->AddControl(st2);
 	m_options_toolbar->AddControl(m_aov_sldr);
 	m_options_toolbar->AddControl(m_aov_text);
@@ -518,7 +517,7 @@ void VRenderView::CreateBar()
 		"Change the camera to a 'Free-Fly' Mode",
 		"Change the camera to a 'Free-Fly' Mode");
 
-	if (GetFree())
+	if (m_glview->GetFree())
 		m_options_toolbar->ToggleTool(ID_FreeChk,true);
 	else
 		m_options_toolbar->ToggleTool(ID_FreeChk,false);
@@ -753,418 +752,17 @@ void VRenderView::CreateBar()
 
 }
 
-//recalculate view according to object bounds
-void VRenderView::InitView(unsigned int type)
+void VRenderView::UpdateView(bool ui_update)
 {
-	if (m_glview)
-		m_glview->InitView(type);
-	if (m_use_dft_settings)
-		UpdateView();
-}
-
-void VRenderView::Clear()
-{
-	if (m_glview)
-		m_glview->Clear();
-	ClearVolList();
-	ClearMeshList();
-}
-
-//data management
-int VRenderView::GetDispVolumeNum()
-{
-	if (m_glview)
-		return m_glview->GetDispVolumeNum();
-	else
-		return 0;
-}
-
-int VRenderView::GetAny()
-{
-	if (m_glview)
-		return m_glview->GetAny();
-	else
-		return 0;
-}
-
-int VRenderView::GetAllVolumeNum()
-{
-	if (m_glview)
-		return m_glview->GetAllVolumeNum();
-	else return 0;
-}
-
-int VRenderView::GetMeshNum()
-{
-	if (m_glview)
-		return m_glview->GetMeshNum();
-	else
-		return 0;
-}
-
-int VRenderView::GetGroupNum()
-{
-	if (m_glview)
-		return m_glview->GetGroupNum();
-	else
-		return 0;
-}
-
-int VRenderView::GetLayerNum()
-{
-	if (m_glview)
-		return m_glview->GetLayerNum();
-	else
-		return 0;
-}
-
-VolumeData* VRenderView::GetAllVolumeData(int index)
-{
-	if (m_glview)
-		return m_glview->GetAllVolumeData(index);
-	else
-		return 0;
-}
-
-VolumeData* VRenderView::GetDispVolumeData(int index)
-{
-	if (m_glview)
-		return m_glview->GetDispVolumeData(index);
-	else
-		return 0;
-}
-
-MeshData* VRenderView::GetMeshData(int index)
-{
-	if (m_glview)
-		return m_glview->GetMeshData(index);
-	else
-		return 0;
-}
-
-TreeLayer* VRenderView::GetLayer(int index)
-{
-	if (m_glview)
-		return m_glview->GetLayer(index);
-	else
-		return 0;
-}
-
-flvr::MultiVolumeRenderer* VRenderView::GetMultiVolumeData()
-{
-	if (m_glview)
-		return m_glview->GetMultiVolumeData();
-	else
-		return 0;
-}
-
-VolumeData* VRenderView::GetVolumeData(wxString &name)
-{
-	if (m_glview)
-		return m_glview->GetVolumeData(name);
-	else
-		return 0;
-}
-
-MeshData* VRenderView::GetMeshData(wxString &name)
-{
-	if (m_glview)
-		return m_glview->GetMeshData(name);
-	else
-		return 0;
-}
-
-Annotations* VRenderView::GetAnnotations(wxString &name)
-{
-	if (m_glview)
-		return m_glview->GetAnnotations(name);
-	else
-		return 0;
-}
-
-DataGroup* VRenderView::GetGroup(wxString &name)
-{
-	if (m_glview)
-		return m_glview->GetGroup(name);
-	else
-		return 0;
-}
-
-DataGroup* VRenderView::GetGroup(int index)
-{
-	if (m_glview)
-		return m_glview->GetGroup(index);
-	else
-		return 0;
-}
-
-DataGroup* VRenderView::AddVolumeData(VolumeData* vd, wxString group_name)
-{
-	if (m_glview) {
-		double val = 50.;
-		m_scale_text->GetValue().ToDouble(&val);
-		m_glview->SetScaleBarLen(val);
-		return m_glview->AddVolumeData(vd, group_name);
-	}
-	else
-		return 0;
-}
-
-void VRenderView::AddMeshData(MeshData* md)
-{
-	if (m_glview)
-		m_glview->AddMeshData(md);
-}
-
-void VRenderView::AddAnnotations(Annotations* ann)
-{
-	if (m_glview)
-		m_glview->AddAnnotations(ann);
-}
-
-wxString VRenderView::AddGroup(wxString str, wxString prev_group)
-{
-	if (m_glview)
-		return m_glview->AddGroup(str);
-	else
-		return "";
-}
-
-DataGroup* VRenderView::AddOrGetGroup()
-{
-	if (m_glview)
-		return m_glview->AddOrGetGroup();
-	else
-		return 0;
-}
-
-wxString VRenderView::AddMGroup(wxString str)
-{
-	if (m_glview)
-		return m_glview->AddMGroup(str);
-	else
-		return "";
-}
-
-MeshGroup* VRenderView::AddOrGetMGroup()
-{
-	if (m_glview)
-		return m_glview->AddOrGetMGroup();
-	else
-		return 0;
-}
-
-MeshGroup* VRenderView::GetMGroup(wxString &str)
-{
-	if (m_glview)
-		return m_glview->GetMGroup(str);
-	else return 0;
-}
-
-void VRenderView::RemoveVolumeData(wxString &name)
-{
-	if (m_glview)
-		m_glview->RemoveVolumeData(name);
-}
-
-void VRenderView::RemoveVolumeDataDup(wxString &name)
-{
-	if (m_glview)
-		m_glview->RemoveVolumeDataDup(name);
-}
-
-void VRenderView::RemoveMeshData(wxString &name)
-{
-	if (m_glview)
-		m_glview->RemoveMeshData(name);
-}
-
-void VRenderView::RemoveAnnotations(wxString &name)
-{
-	if (m_glview)
-		m_glview->RemoveAnnotations(name);
-}
-
-void VRenderView::RemoveGroup(wxString &name)
-{
-	if (m_glview)
-		m_glview->RemoveGroup(name);
-}
-
-void VRenderView::Isolate(int type, wxString name)
-{
-	if (m_glview)
-		m_glview->Isolate(type, name);
-}
-
-void VRenderView::ShowAll()
-{
-	if (m_glview)
-		m_glview->ShowAll();
-}
-
-//move
-void VRenderView::MoveLayerinView(wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveLayerinView(src_name, dst_name);
-}
-
-//move volume
-void VRenderView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveLayerinGroup(group_name, src_name, dst_name);
-}
-
-void VRenderView::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveLayertoView(group_name, src_name, dst_name);
-}
-
-void VRenderView::MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveLayertoGroup(group_name, src_name, dst_name);
-}
-
-void VRenderView::MoveLayerfromtoGroup(wxString &src_group_name,
-	wxString &dst_group_name,
-	wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveLayerfromtoGroup(src_group_name,
-		dst_group_name, src_name, dst_name);
-}
-
-//move mesh
-void VRenderView::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveMeshinGroup(group_name, src_name, dst_name);
-}
-
-void VRenderView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveMeshtoView(group_name, src_name, dst_name);
-}
-
-void VRenderView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveMeshtoGroup(group_name, src_name, dst_name);
-}
-
-void VRenderView::MoveMeshfromtoGroup(wxString &src_group_name,
-	wxString &dst_group_name,
-	wxString &src_name, wxString &dst_name)
-{
-	if (m_glview)
-		m_glview->MoveMeshfromtoGroup(src_group_name,
-		dst_group_name, src_name, dst_name);
-}
-
-//reorganize layers in view
-void VRenderView::OrganizeLayers()
-{
-	if (m_glview)
-		m_glview->OrganizeLayers();
-}
-
-//randomize color
-void VRenderView::RandomizeColor()
-{
-	if (m_glview)
-		m_glview->RandomizeColor();
-}
-
-//toggle hiding/displaying
-void VRenderView::SetDraw(bool draw)
-{
-	if (m_glview)
-		m_glview->SetDraw(draw);
-}
-
-void VRenderView::ToggleDraw()
-{
-	if (m_glview)
-		m_glview->ToggleDraw();
-}
-
-bool VRenderView::GetDraw()
-{
-	if (m_glview)
-		return m_glview->GetDraw();
-	else
-		return false;
-}
-
-//camera operations
-void VRenderView::GetTranslations(double &transx, double &transy, double &transz)
-{
-	if (m_glview)
-		m_glview->GetTranslations(transx, transy, transz);
-}
-
-void VRenderView::SetTranslations(double transx, double transy, double transz)
-{
-	if (m_glview)
-		m_glview->SetTranslations(transx, transy, transz);
-}
-
-void VRenderView::GetRotations(double &rotx, double &roty, double &rotz)
-{
-	if (m_glview)
-		m_glview->GetRotations(rotx, roty, rotz);
-}
-
-void VRenderView::SetRotations(double rotx, double roty, double rotz, bool ui_update)
-{
-	if (m_glview)
-		m_glview->SetRotations(rotx, roty, rotz, ui_update);
-
-}
-
-void VRenderView::GetCenters(double &ctrx, double &ctry, double &ctrz)
-{
-	if (m_glview)
-		m_glview->GetCenters(ctrx, ctry, ctrz);
-}
-
-void VRenderView::SetCenters(double ctrx, double ctry, double ctrz)
-{
-	if (m_glview)
-		m_glview->SetCenters(ctrx, ctry, ctrz);
-}
-
-double VRenderView::GetCenterEyeDist()
-{
-	if (m_glview)
-		return m_glview->GetCenterEyeDist();
-	else
-		return 0.0;
-}
-
-void VRenderView::SetCenterEyeDist(double dist)
-{
-	if (m_glview)
-		m_glview->SetCenterEyeDist(dist);
-}
-
-double VRenderView::GetRadius()
-{
-	if (m_glview)
-		return m_glview->GetRadius();
-	else
-		return 0.0;
-}
-
-void VRenderView::SetRadius(double r)
-{
-	if (m_glview)
-		m_glview->SetRadius(r);
+	double rotx, roty, rotz;
+	wxString str_val = m_x_rot_text->GetValue();
+	rotx = STOD(str_val.fn_str());
+	str_val = m_y_rot_text->GetValue();
+	roty = STOD(str_val.fn_str());
+	str_val = m_z_rot_text->GetValue();
+	rotz = STOD(str_val.fn_str());
+	m_glview->SetRotations(rotx, roty, rotz, ui_update);
+	RefreshGL(true);
 }
 
 void VRenderView::UpdateScaleFactor(bool update_text)
@@ -1292,254 +890,10 @@ void VRenderView::SetScaleMode(int mode, bool update)
 		UpdateScaleFactor();
 }
 
-//object operations
-void VRenderView::GetObjCenters(double &ctrx, double &ctry, double &ctrz)
-{
-	if (m_glview)
-		m_glview->GetObjCenters(ctrx, ctry, ctrz);
-}
-
-void VRenderView::SetObjCenters(double ctrx, double ctry, double ctrz)
-{
-	if (m_glview)
-		m_glview->SetObjCenters(ctrx, ctry, ctrz);
-}
-
-void VRenderView::GetObjTrans(double &transx, double &transy, double &transz)
-{
-	if (m_glview)
-		m_glview->GetObjTrans(transx, transy, transz);
-}
-
-void VRenderView::SetObjTrans(double transx, double transy, double transz)
-{
-	if (m_glview)
-		m_glview->SetObjTrans(transx, transy, transz);
-}
-
-void VRenderView::GetObjRot(double &rotx, double &roty, double &rotz)
-{
-	if (m_glview)
-		m_glview->GetObjRot(rotx, roty, rotz);
-}
-
-void VRenderView::SetObjRot(double rotx, double roty, double rotz)
-{
-	if (m_glview)
-		m_glview->SetObjRot(rotx, roty, rotz);
-}
-
-//camera properties
-double VRenderView::GetAov()
-{
-	if (m_glview)
-		return m_glview->GetAov();
-	else
-		return 0.0;
-}
-
-void VRenderView::SetAov(double aov)
-{
-	if (m_glview)
-		m_glview->SetAov(aov);
-}
-
-double VRenderView::GetNearClip()
-{
-	if (m_glview)
-		return m_glview->GetNearClip();
-	else
-		return 0.0;
-}
-
-void VRenderView::SetNearClip(double nc)
-{
-	if (m_glview)
-		m_glview->SetNearClip(nc);
-}
-
-double VRenderView::GetFarClip()
-{
-	if (m_glview)
-		return m_glview->GetFarClip();
-	else
-		return 0.0;
-}
-
-void VRenderView::SetFarClip(double fc)
-{
-	if (m_glview)
-		m_glview->SetFarClip(fc);
-}
-
-//background color
-fluo::Color VRenderView::GetBackgroundColor()
-{
-	if (m_glview)
-		return m_glview->GetBackgroundColor();
-	else
-		return fluo::Color(0, 0, 0);
-}
-
-void VRenderView::SetBackgroundColor(fluo::Color &color)
-{
-	if (m_glview)
-		m_glview->SetBackgroundColor(color);
-	wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
-	m_bg_color_picker->SetColour(c);
-}
-
-void VRenderView::SetGradBg(bool val)
-{
-	if (m_glview)
-		m_glview->SetGradBg(val);
-}
-
 //rot center anchor thresh
 void VRenderView::SetPinThreshold(double value)
 {
 	m_pin_scale_thresh = value;
-}
-
-//point volume mode
-void VRenderView::SetPointVolumeMode(int mode)
-{
-	if (m_glview)
-		m_glview->m_point_volume_mode = mode;
-}
-
-int VRenderView::GetPointVolumeMode()
-{
-	if (m_glview)
-		return m_glview->m_point_volume_mode;
-	else
-		return 0;
-}
-
-//ruler uses trnasfer function
-void VRenderView::SetRulerUseTransf(bool val)
-{
-	if (m_glview)
-		m_glview->m_ruler_use_transf = val;
-}
-
-bool VRenderView::GetRulerUseTransf()
-{
-	if (m_glview)
-		return m_glview->m_ruler_use_transf;
-	else
-		return false;
-}
-
-//ruler time dependent
-void VRenderView::SetRulerTimeDep(bool val)
-{
-	if (m_glview)
-		m_glview->m_ruler_time_dep = val;
-}
-
-bool VRenderView::GetRulerTimeDep()
-{
-	if (m_glview)
-		return m_glview->m_ruler_time_dep;
-	else
-		return true;
-}
-
-//disply modes
-int VRenderView::GetDrawType()
-{
-	if (m_glview)
-		return m_glview->GetDrawType();
-	else
-		return 0;
-}
-
-void VRenderView::SetVolMethod(int method)
-{
-	if (m_glview)
-		m_glview->SetVolMethod(method);
-}
-
-int VRenderView::GetVolMethod()
-{
-	if (m_glview)
-		return m_glview->GetVolMethod();
-	else
-		return 0;
-}
-
-//other properties
-void VRenderView::SetPeelingLayers(int n)
-{
-	if (m_glview)
-		m_glview->SetPeelingLayers(n);
-}
-
-int VRenderView::GetPeelingLayers()
-{
-	if (m_glview)
-		return m_glview->GetPeelingLayers();
-	else
-		return 0;
-}
-
-void VRenderView::SetBlendSlices(bool val)
-{
-	if (m_glview)
-		m_glview->SetBlendSlices(val);
-}
-
-bool VRenderView::GetBlendSlices()
-{
-	if (m_glview)
-		return m_glview->GetBlendSlices();
-	else
-		return false;
-}
-
-void VRenderView::SetAdaptive(bool val)
-{
-	if (m_glview)
-		m_glview->SetAdaptive(val);
-}
-
-bool VRenderView::GetAdaptive()
-{
-	if (m_glview)
-		return m_glview->GetAdaptive();
-	else
-		return false;
-}
-
-void VRenderView::SetFog(bool b)
-{
-	if (m_glview)
-		m_glview->SetFog(b);
-	if (m_left_toolbar)
-		m_left_toolbar->ToggleTool(ID_DepthAttenChk, b);
-}
-
-bool VRenderView::GetFog()
-{
-	if (m_glview)
-		return m_glview->GetFog();
-	else
-		return false;
-}
-
-void VRenderView::SetFogIntensity(double i)
-{
-	if (m_glview)
-		m_glview->SetFogIntensity(i);
-}
-
-double VRenderView::GetFogIntensity()
-{
-	if (m_glview)
-		return m_glview->GetFogIntensity();
-	else
-		return 0.0;
 }
 
 //reset counter
@@ -1581,13 +935,13 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	switch (sender_id)
 	{
 	case ID_VolumeSeqRd:
-		SetVolMethod(VOL_METHOD_SEQ);
+		m_glview->SetVolMethod(VOL_METHOD_SEQ);
 		break;
 	case ID_VolumeMultiRd:
-		SetVolMethod(VOL_METHOD_MULTI);
+		m_glview->SetVolMethod(VOL_METHOD_MULTI);
 		break;
 	case ID_VolumeCompRd:
-		SetVolMethod(VOL_METHOD_COMP);
+		m_glview->SetVolMethod(VOL_METHOD_COMP);
 		break;
 	}
 
@@ -1944,7 +1298,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 			{
 				wxString new_folder;
 				new_folder = m_glview->m_cap_file + "_project";
-				wxFileName::Mkdir(new_folder, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+				MkDirW(new_folder.ToStdWstring());
 				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 				vr_frame->SaveProject(prop_file);
 			}
@@ -1960,7 +1314,7 @@ void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
 {
 	if (m_left_toolbar->GetToolState(ID_DepthAttenChk))
 	{
-		SetFog(true);
+		m_glview->SetFog(true);
 		m_depth_atten_factor_sldr->Enable();
 		m_depth_atten_factor_text->Enable();
 		m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
@@ -1968,7 +1322,7 @@ void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
 	}
 	else
 	{
-		SetFog(false);
+		m_glview->SetFog(false);
 		m_depth_atten_factor_sldr->Disable();
 		m_depth_atten_factor_text->Disable();
 		m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
@@ -1991,7 +1345,7 @@ void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	wxString str = m_depth_atten_factor_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	SetFogIntensity(val);
+	m_glview->SetFogIntensity(val);
 	m_depth_atten_factor_sldr->SetValue(int(val*100.0));
 	RefreshGL(true);
 }
@@ -2171,19 +1525,6 @@ void VRenderView::OnScaleReset(wxCommandEvent &event)
 }
 
 //bar bottom
-void VRenderView::UpdateView(bool ui_update)
-{
-	double rotx, roty, rotz;
-	wxString str_val = m_x_rot_text->GetValue();
-	rotx = STOD(str_val.fn_str());
-	str_val = m_y_rot_text->GetValue();
-	roty = STOD(str_val.fn_str());
-	str_val = m_z_rot_text->GetValue();
-	rotz = STOD(str_val.fn_str());
-	SetRotations(rotx, roty, rotz, ui_update);
-	RefreshGL(true);
-}
-
 void VRenderView::OnValueEdit(wxCommandEvent& event)
 {
 	UpdateView(false);
@@ -2251,7 +1592,7 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
 	m_x_rot_text->ChangeValue("0.0");
 	m_y_rot_text->ChangeValue("0.0");
 	m_z_rot_text->ChangeValue("0.0");
-	SetRotations(0.0, 0.0, 0.0);
+	m_glview->SetRotations(0.0, 0.0, 0.0);
 	RefreshGL(true);
 	if (m_glview->m_mouse_focus)
 		m_glview->SetFocus();
@@ -2529,22 +1870,22 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		SetRotations(0.0, 90.0, 0.0, true);
+		m_glview->SetRotations(0.0, 90.0, 0.0, true);
 		break;
 	case 1://-X
-		SetRotations(0.0, 270.0, 0.0, true);
+		m_glview->SetRotations(0.0, 270.0, 0.0, true);
 		break;
 	case 2://+Y
-		SetRotations(90.0, 0.0, 0.0, true);
+		m_glview->SetRotations(90.0, 0.0, 0.0, true);
 		break;
 	case 3://-Y
-		SetRotations(270.0, 0.0, 0.0, true);
+		m_glview->SetRotations(270.0, 0.0, 0.0, true);
 		break;
 	case 4://+Z
-		SetRotations(0.0, 0.0, 0.0, true);
+		m_glview->SetRotations(0.0, 0.0, 0.0, true);
 		break;
 	case 5:
-		SetRotations(0.0, 180.0, 0.0, true);
+		m_glview->SetRotations(0.0, 180.0, 0.0, true);
 		break;
 	}
 	if (sel < 6)
@@ -2569,15 +1910,15 @@ void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	SetBackgroundColor(color);
+	m_glview->SetBackgroundColor(color);
 	RefreshGL();
 }
 
 void VRenderView::OnBgInvBtn(wxCommandEvent& event)
 {
-	fluo::Color c = GetBackgroundColor();
+	fluo::Color c = m_glview->GetBackgroundColor();
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	SetBackgroundColor(c);
+	m_glview->SetBackgroundColor(c);
 	RefreshGL();
 }
 
@@ -2611,7 +1952,8 @@ void VRenderView::OnColormapCheck(wxCommandEvent& event)
 	RefreshGL();
 }
 
-void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
+void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
+{
 	wxString str, num_text, unit_text;
 	num_text = m_scale_text->GetValue();
 	double len;
@@ -2631,8 +1973,8 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event) {
 		break;
 	}
 	str += unit_text;
-	if (m_glview) {
-		//m_glview->SetScaleBarLen(len);
+	if (m_glview)
+	{
 		m_glview->SetSBText(str);
 		m_glview->SetScaleBarLen(len);
 		m_glview->m_sb_num = num_text;
@@ -2646,7 +1988,11 @@ void VRenderView::OnScaleUnitSelected(wxCommandEvent& event) {
 
 void VRenderView::OnScaleBar(wxCommandEvent& event)
 {
-	switch (m_draw_scalebar) {
+	if (!m_glview)
+		return;
+
+	switch (m_draw_scalebar)
+	{
 	case kOff:
 		m_draw_scalebar = kOn;
 		m_glview->m_disp_scale_bar = true;
@@ -2655,8 +2001,6 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 			wxGetBitmapFromMemory(scale_text_off));
 		m_scale_text->Enable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->DisableSBText();
-		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kOn:
 		m_draw_scalebar = kText;
@@ -2666,8 +2010,6 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 			wxGetBitmapFromMemory(scale_text));
 		m_scale_text->Enable();
 		m_scale_cmb->Enable();
-		if (m_glview) m_glview->EnableSBText();
-		if (m_glview) m_glview->EnableScaleBar();
 		break;
 	case kText:
 		m_draw_scalebar = kOff;
@@ -2677,12 +2019,11 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 			wxGetBitmapFromMemory(scalebar));
 		m_scale_text->Disable();
 		m_scale_cmb->Disable();
-		if (m_glview) m_glview->DisableScaleBar();
-		if (m_glview) m_glview->DisableSBText();
 		break;
 	default:
 		break;
 	}
+	OnScaleTextEditing(event);
 	RefreshGL();
 }
 
@@ -2735,7 +2076,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 	wxString str = m_aov_text->GetValue();
 	if (str == "Ortho")
 	{
-		SetPersp(false);
+		m_glview->SetPersp(false);
 		m_aov_sldr->SetValue(10);
 		RefreshGL(true);
 		return;
@@ -2745,7 +2086,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 		return;
 	if (val ==0 || val == 10)
 	{
-		SetPersp(false);
+		m_glview->SetPersp(false);
 		m_aov_text->ChangeValue("Ortho");
 		m_aov_sldr->SetValue(10);
 	}
@@ -2761,8 +2102,8 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 			m_aov_text->ChangeValue("100");
 			m_aov_sldr->SetValue(100);
 		}
-		SetPersp(true);
-		SetAov(val);
+		m_glview->SetPersp(true);
+		m_glview->SetAov(val);
 		m_aov_sldr->SetValue(val);
 	}
 	RefreshGL(true);
@@ -2771,15 +2112,15 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 void VRenderView::OnFreeChk(wxCommandEvent& event)
 {
 	if (m_options_toolbar->GetToolState(ID_FreeChk))
-		SetFree(true); 
+		m_glview->SetFree(true);
 	else
 	{
-		SetFree(false);
+		m_glview->SetFree(false);
 		int val = m_aov_sldr->GetValue();
 		if (val == 10)
-			SetPersp(false);
+			m_glview->SetPersp(false);
 		else
-			SetPersp(true);
+			m_glview->SetPersp(true);
 	}
 	RefreshGL();
 }
@@ -2938,7 +2279,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//camera center
 	if (mask & 0x800)
 	{
-		GetCenters(x, y, z);
+		m_glview->GetCenters(x, y, z);
 		str = wxString::Format("%f %f %f", x, y, z);
 		fconfig.Write("center", str);
 	}
@@ -2950,9 +2291,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/default_view_settings.dft";
-	wxFileOutputStream os(dft);
-	fconfig.Save(os);
+	wxString dft = expath + GETSLASH() + "default_view_settings.dft";
+	SaveConfig(fconfig, dft);
 
 	m_default_saved = true;
 }
@@ -2966,7 +2306,7 @@ void VRenderView::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
     expath = wxPathOnly(expath);
-    wxString dft = expath + "/default_view_settings.dft";
+    wxString dft = expath + GETSLASH() + "default_view_settings.dft";
 
 	wxFileInputStream is(dft);
 
@@ -2983,11 +2323,11 @@ void VRenderView::LoadSettings()
 	double dVal;
 	int iVal;
 	if (fconfig.Read("volume_seq_rd", &bVal) && bVal)
-		SetVolMethod(VOL_METHOD_SEQ);
+		m_glview->SetVolMethod(VOL_METHOD_SEQ);
 	if (fconfig.Read("volume_multi_rd", &bVal) && bVal)
-		SetVolMethod(VOL_METHOD_MULTI);
+		m_glview->SetVolMethod(VOL_METHOD_MULTI);
 	if (fconfig.Read("volume_comp_rd", &bVal) && bVal)
-		SetVolMethod(VOL_METHOD_COMP);
+		m_glview->SetVolMethod(VOL_METHOD_COMP);
 
 	wxString str;
 	if (fconfig.Read("bg_color_picker", &str))
@@ -2997,7 +2337,7 @@ void VRenderView::LoadSettings()
 		wxColor cVal(r, g, b);
 		m_bg_color_picker->SetColour(cVal);
 		fluo::Color c(r/255.0, g/255.0, b/255.0);
-		SetBackgroundColor(c);
+		m_glview->SetBackgroundColor(c);
 	}
 	if (fconfig.Read("cam_ctr_chk", &bVal))
 	{
@@ -3030,19 +2370,19 @@ void VRenderView::LoadSettings()
 	if (fconfig.Read("persp", &bVal))
 	{
 		if (bVal)
-			SetPersp(true);
+			m_glview->SetPersp(true);
 		else
-			SetPersp(false);
+			m_glview->SetPersp(false);
 	}
 	if (fconfig.Read("aov", &dVal))
 	{
-		SetAov(dVal);
+		m_glview->SetAov(dVal);
 	}
 	if (fconfig.Read("free_rd", &bVal))
 	{
 		m_options_toolbar->ToggleTool(ID_FreeChk,bVal);
 		if (bVal)
-			SetFree(true);
+			m_glview->SetFree(true);
 	}
 	if (fconfig.Read("x_rot", &str))
 	{
@@ -3115,7 +2455,7 @@ void VRenderView::LoadSettings()
 	if (fconfig.Read("depth_atten_chk", &bVal))
 	{
 		//m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
-		SetFog(bVal);
+		m_glview->SetFog(bVal);
 		if (bVal)
 		{
 			m_depth_atten_factor_sldr->Enable();
@@ -3132,14 +2472,14 @@ void VRenderView::LoadSettings()
 		m_depth_atten_factor_text->ChangeValue(str);
 		str.ToDouble(&dVal);
 		m_depth_atten_factor_sldr->SetValue(int(dVal*100));
-		SetFogIntensity(dVal);
+		m_glview->SetFogIntensity(dVal);
 		m_dft_depth_atten_factor = dVal;
 	}
 	if (fconfig.Read("center", &str))
 	{
 		float x, y, z;
 		SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
-		SetCenters(x, y, z);
+		m_glview->SetCenters(x, y, z);
 	}
 
 	m_use_dft_settings = true;

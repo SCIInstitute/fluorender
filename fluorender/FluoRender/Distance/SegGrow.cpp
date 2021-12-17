@@ -107,45 +107,14 @@ const char* str_cl_segrow = \
 "		if (label_v == 0 || label_v & 0x80000000)\n" \
 "			continue;\n" \
 "		label_m = label_v;\n" \
-"		//-x\n" \
-"		if (ijk.x > 0)\n" \
+"		//search neighbors\n" \
+"		for (int i = -1; i < 2; ++i)\n" \
+"		for (int j = -1; j < 2; ++j)\n" \
+"		for (int k = -1; k < 2; ++k)\n" \
 "		{\n" \
-"			m = label[index - 1];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"			label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//+x\n" \
-"		if (ijk.x < nx-1)\n" \
-"		{\n" \
-"			m = label[index + 1];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//-y\n" \
-"		if (ijk.y > 0)\n" \
-"		{\n" \
-"			m = label[index - nx];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//+y\n" \
-"		if (ijk.y < ny-1)\n" \
-"		{\n" \
-"			m = label[index + nx];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//-z\n" \
-"		if (ijk.z > 0)\n" \
-"		{\n" \
-"			m = label[index - nxy];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//+z\n" \
-"		if (ijk.z < nz-1)\n" \
-"		{\n" \
-"			m = label[index + nxy];\n" \
+"			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)\n" \
+"				continue;\n" \
+"			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];\n" \
 "			if (m  && !(m & 0x80000000))\n" \
 "				label_m = max(label_m, m);\n" \
 "		}\n" \
@@ -183,45 +152,14 @@ const char* str_cl_segrow = \
 "		if (label_v == 0 || label_v & 0x80000000)\n" \
 "			continue;\n" \
 "		label_m = label_v;\n" \
-"		//-x\n" \
-"		if (ijk.x > 0)\n" \
+"		//search neighbors\n" \
+"		for (int i = -1; i < 2; ++i)\n" \
+"		for (int j = -1; j < 2; ++j)\n" \
+"		for (int k = -1; k < 2; ++k)\n" \
 "		{\n" \
-"			m = label[index - 1];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"			label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//+x\n" \
-"		if (ijk.x < nx-1)\n" \
-"		{\n" \
-"			m = label[index + 1];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//-y\n" \
-"		if (ijk.y > 0)\n" \
-"		{\n" \
-"			m = label[index - nx];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//+y\n" \
-"		if (ijk.y < ny-1)\n" \
-"		{\n" \
-"			m = label[index + nx];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//-z\n" \
-"		if (ijk.z > 0)\n" \
-"		{\n" \
-"			m = label[index - nxy];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		//+z\n" \
-"		if (ijk.z < nz-1)\n" \
-"		{\n" \
-"			m = label[index + nxy];\n" \
+"			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)\n" \
+"				continue;\n" \
+"			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];\n" \
 "			if (m  && !(m & 0x80000000))\n" \
 "				label_m = max(label_m, m);\n" \
 "		}\n" \
@@ -489,65 +427,14 @@ const char* str_cl_segrow = \
 "		lcsum[c*3] += (float)(ijk.x);\n" \
 "		lcsum[c*3+1] += (float)(ijk.y);\n" \
 "		lcsum[c*3+2] += (float)(ijk.z);\n" \
-"		//-x\n" \
-"		if (ijk.x > 0)\n" \
+"		//search neighbors\n" \
+"		for (int i = -1; i < 2; ++i)\n" \
+"		for (int j = -1; j < 2; ++j)\n" \
+"		for (int k = -1; k < 2; ++k)\n" \
 "		{\n" \
-"			m = label[index - 1];\n" \
-"			if (m != label_v && m & 0x80000000)\n" \
-"			{\n" \
-"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
-"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
-"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
-"			}\n" \
-"		}\n" \
-"		//+x\n" \
-"		if (ijk.x < nx-1)\n" \
-"		{\n" \
-"			m = label[index + 1];\n" \
-"			if (m != label_v && m & 0x80000000)\n" \
-"			{\n" \
-"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
-"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
-"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
-"			}\n" \
-"		}\n" \
-"		//-y\n" \
-"		if (ijk.y > 0)\n" \
-"		{\n" \
-"			m = label[index - nx];\n" \
-"			if (m != label_v && m & 0x80000000)\n" \
-"			{\n" \
-"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
-"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
-"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
-"			}\n" \
-"		}\n" \
-"		//+y\n" \
-"		if (ijk.y < ny-1)\n" \
-"		{\n" \
-"			m = label[index + nx];\n" \
-"			if (m != label_v && m & 0x80000000)\n" \
-"			{\n" \
-"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
-"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
-"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
-"			}\n" \
-"		}\n" \
-"		//-z\n" \
-"		if (ijk.z > 0)\n" \
-"		{\n" \
-"			m = label[index - nxy];\n" \
-"			if (m != label_v && m & 0x80000000)\n" \
-"			{\n" \
-"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
-"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
-"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
-"			}\n" \
-"		}\n" \
-"		//+z\n" \
-"		if (ijk.z < nz-1)\n" \
-"		{\n" \
-"			m = label[index + nxy];\n" \
+"			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)\n" \
+"				continue;\n" \
+"			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];\n" \
 "			if (m != label_v && m & 0x80000000)\n" \
 "			{\n" \
 "				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \

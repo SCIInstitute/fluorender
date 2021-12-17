@@ -44,13 +44,13 @@ BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	EVT_BUTTON(ID_CalcCombineBtn, CalculationDlg::OnCalcCombine)
 END_EVENT_TABLE()
 
-CalculationDlg::CalculationDlg(wxWindow *frame, wxWindow *parent)
-	: wxPanel(parent, wxID_ANY,
-		wxDefaultPosition,
-		wxSize(500, 350),
-		0, "CalculationDlg"),
-		m_frame(frame),
-		m_group(0)
+CalculationDlg::CalculationDlg(VRenderFrame *frame)
+	: wxPanel(frame, wxID_ANY,
+	wxDefaultPosition,
+	wxSize(500, 350),
+	0, "CalculationDlg"),
+	m_frame(frame),
+	m_group(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -137,35 +137,60 @@ void CalculationDlg::SetGroup(DataGroup* group)
 //operands
 void CalculationDlg::OnLoadA(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	m_view = 0;
+	if (m_frame)
 	{
-		switch (vr_frame->GetCurSelType())
+		switch (m_frame->GetCurSelType())
 		{
 		case 2://volume
-			m_vol1 = vr_frame->GetCurSelVol();
+			m_vol1 = m_frame->GetCurSelVol();
 			m_group = 0;
 			if (m_vol1)
-				m_calc_a_text->SetValue(m_vol1->GetName());
+			{
+				wxString str = m_vol1->GetName();
+				m_calc_a_text->SetValue(str);
+				for (int i = 0; i < m_frame->GetViewNum(); i++)
+				{
+					VRenderGLView* view = m_frame->GetView(i);
+					if (view && view->GetVolumeData(str))
+					{
+						m_view = view;
+						break;
+					}
+				}
+			}
 			break;
 		case 5://volume group
 			m_vol1 = 0;
 			if (m_group)
-				m_calc_a_text->SetValue(m_group->GetName());
+			{
+				wxString str = m_group->GetName();
+				m_calc_a_text->SetValue(str);
+				for (int i = 0; i < m_frame->GetViewNum(); i++)
+				{
+					VRenderGLView* view = m_frame->GetView(i);
+					if (view && view->GetGroup(str))
+					{
+						m_view = view;
+						break;
+					}
+				}
+			}
 			break;
 		}
+		if (!m_view)
+			m_view = m_frame->GetView(0);
 	}
 }
 
 void CalculationDlg::OnLoadB(wxCommandEvent &event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
+	if (m_frame)
 	{
-		switch (vr_frame->GetCurSelType())
+		switch (m_frame->GetCurSelType())
 		{
 		case 2://volume
-			m_vol2 = vr_frame->GetCurSelVol();
+			m_vol2 = m_frame->GetCurSelVol();
 			if (m_vol2)
 				m_calc_b_text->SetValue(m_vol2->GetName());
 			break;
@@ -180,169 +205,81 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 //operators
 void CalculationDlg::OnCalcSub(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i = 0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (!m_cur_view) return;
-		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
-		if (!calculator) return;
-		calculator->SetVolumeA(m_vol1);
-		calculator->SetVolumeB(m_vol2);
-		calculator->CalculateGroup(1);
-	}
+	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	if (!calculator) return;
+	calculator->SetVolumeA(m_vol1);
+	calculator->SetVolumeB(m_vol2);
+	calculator->CalculateGroup(1);
 }
 
 void CalculationDlg::OnCalcAdd(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i = 0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (!m_cur_view) return;
-		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
-		if (!calculator) return;
-		calculator->SetVolumeA(m_vol1);
-		calculator->SetVolumeB(m_vol2);
-		calculator->CalculateGroup(2);
-	}
+	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	if (!calculator) return;
+	calculator->SetVolumeA(m_vol1);
+	calculator->SetVolumeB(m_vol2);
+	calculator->CalculateGroup(2);
 }
 
 void CalculationDlg::OnCalcDiv(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i = 0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (!m_cur_view) return;
-		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
-		if (!calculator) return;
-		calculator->SetVolumeA(m_vol1);
-		calculator->SetVolumeB(m_vol2);
-		calculator->CalculateGroup(3);
-	}
+	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	if (!calculator) return;
+	calculator->SetVolumeA(m_vol1);
+	calculator->SetVolumeB(m_vol2);
+	calculator->CalculateGroup(3);
 }
 
 void CalculationDlg::OnCalcIsc(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	if (!m_vol1 || !m_vol2)
 		return;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i = 0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (!m_cur_view) return;
-		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
-		if (!calculator) return;
-		calculator->SetVolumeA(m_vol1);
-		calculator->SetVolumeB(m_vol2);
-		calculator->CalculateGroup(4);
-	}
+	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	if (!calculator) return;
+	calculator->SetVolumeA(m_vol1);
+	calculator->SetVolumeB(m_vol2);
+	calculator->CalculateGroup(4);
 }
 
 //one-operators
 void CalculationDlg::OnCalcFill(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	if (!m_vol1)
 		return;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame)
-	{
-		m_cur_view = 0;
-		for (int i = 0; i<vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_vol1->GetName();
-			if (vrv && vrv->GetVolumeData(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
-		if (!m_cur_view) return;
-		flrd::VolumeCalculator* calculator = m_cur_view->GetVolumeCalculator();
-		if (!calculator) return;
-		calculator->SetVolumeA(m_vol1);
-		m_vol2 = 0;
-		calculator->SetVolumeB(0);
-		m_calc_b_text->Clear();
-		calculator->CalculateGroup(9);
-	}
+	flrd::VolumeCalculator* calculator = m_view->GetVolumeCalculator();
+	if (!calculator) return;
+	calculator->SetVolumeA(m_vol1);
+	m_vol2 = 0;
+	calculator->SetVolumeB(0);
+	m_calc_b_text->Clear();
+	calculator->CalculateGroup(9);
 }
 
 void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 {
+	if (!m_frame || !m_view)
+		return;
 	if (m_calc_a_text->GetValue() == "")
 		return;
 	if (!m_group)
@@ -362,24 +299,6 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 	Op.SetVolumes(channs);
 	if (Op.Execute())
 	{
-		VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-		if (!vr_frame)
-			return;
-		m_cur_view = 0;
-		for (int i = 0; i < vr_frame->GetViewNum(); i++)
-		{
-			VRenderView* vrv = vr_frame->GetView(i);
-			wxString str = m_group->GetName();
-			if (vrv && vrv->GetGroup(str))
-			{
-				m_cur_view = vrv;
-				break;
-			}
-		}
-
-		if (!m_cur_view)
-			m_cur_view = vr_frame->GetView(0);
-
 		std::list<VolumeData*> results;
 		Op.GetResults(results);
 		if (results.empty())
@@ -394,13 +313,13 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 			if (vd)
 			{
 				if (!volume) volume = vd;
-				vr_frame->GetDataManager()->AddVolumeData(vd);
+				m_frame->GetDataManager()->AddVolumeData(vd);
 				if (i == results.begin())
 				{
-					group_name = m_cur_view->AddGroup("");
-					group = m_cur_view->GetGroup(group_name);
+					group_name = m_view->AddGroup("");
+					group = m_view->GetGroup(group_name);
 				}
-				m_cur_view->AddVolumeData(vd, group_name);
+				m_view->AddVolumeData(vd, group_name);
 			}
 		}
 		if (group && volume)
@@ -412,9 +331,9 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 			col = volume->GetHdr();
 			group->SetHdrAll(col);
 		}
-		vr_frame->UpdateList();
-		vr_frame->UpdateTree(m_group->GetName());
-		m_cur_view->RefreshGL();
+		m_frame->UpdateList();
+		m_frame->UpdateTree(m_group->GetName());
+		m_view->RefreshGL(39);
 	}
 
 }

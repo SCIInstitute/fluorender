@@ -26,12 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Flobject/CopyOp.h>
-#include <Flobject/Referenced.h>
-#include <Flobject/Object.h>
-#include <Scenegraph/Node.h>
+#include <CopyOp.hpp>
+#include <Referenced.hpp>
+#include <CopyOp.hpp>
+#include <Node.hpp>
 
-using namespace flrd;
+using namespace fluo;
 
 Referenced* CopyOp::operator() (const Referenced* ref) const
 {

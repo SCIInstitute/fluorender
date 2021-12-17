@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "tif_reader.h"
 #include <boost/filesystem.hpp>
 #include "../compatibility.h"
+#include <sstream>
+#include <iomanip>
 
 TIFReader::TIFReader()
 {
@@ -316,6 +318,7 @@ int TIFReader::Preprocess()
 		for (int t = 0; t < (int)m_4d_seq.size(); t++)
 		{
 			wstring slice_str = m_4d_seq[t].slices[0].slice;
+			int tv = GetPatternNumber(slice_str, 2);
 
 			if (m_slice_seq || m_chann_seq)
 			{
@@ -323,11 +326,11 @@ int TIFReader::Preprocess()
 				std::vector<std::wstring> list;
 				std::wstring search_mask;
 				if (m_slice_seq && !m_chann_seq)
-					search_mask = GetSearchString(0);
+					search_mask = GetSearchString(0, tv);
 				else if (m_chann_seq && !m_slice_seq)
-					search_mask = GetSearchString(1);
+					search_mask = GetSearchString(1, tv);
 				else if (m_chann_seq && m_slice_seq)
-					search_mask = GetSearchString(-1);
+					search_mask = GetSearchString(-1, tv);
 				FIND_FILES(path, search_mask, list, m_cur_time);
 				m_4d_seq[t].type = 1;
 				m_4d_seq[t].slices.clear();
@@ -690,7 +693,7 @@ void TIFReader::ReadTiffFields()
 		return;
 
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF File not open for reading.");
+		return;
 	//go to the current IFD block/page
 	tiff_stream.seekg(current_offset_, tiff_stream.beg);
 	uint64_t num_entries = 0;
@@ -927,7 +930,7 @@ uint64_t TIFReader::GetTiffNextPageOffset()
 {
 	uint64_t results = 0;
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF File not open for reading.");
+		return results;
 	//go to the current IFD block/page
 	tiff_stream.seekg(current_offset_, tiff_stream.beg);
 	uint64_t num_entries = 0;
@@ -1186,73 +1189,58 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 
 wstring TIFReader::GetCurDataName(int t, int c)
 {
-	if (isHyperstack_ && !isHsTimeSeq_)
-		return m_path_name;
-	else
-	{
-		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+	if (isHsTimeSeq_ && !isHyperstack_)
+		if (t >= 0 && t < (int)m_4d_seq.size())
 			return (m_4d_seq[t].slices)[0].slice;
-		else
-			return L"";
-	}
+	return m_path_name;
 }
 
 wstring TIFReader::GetCurMaskName(int t, int c)
 {
-	if (isHyperstack_)
+	wostringstream woss;
+	wstring mask_name;
+	if (!isHyperstack_)
 	{
-		wostringstream woss;
-		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-		if (m_time_num > 1) woss << "_T" << t;
-		if (m_chan_num > 1) woss << "_C" << c;
-		woss << ".msk";
-		wstring mask_name = woss.str();
-		return mask_name;
-	}
-	else
-	{
-		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
 			wstring data_name = (m_4d_seq[t].slices)[0].slice;
-			wostringstream woss;
 			woss << data_name.substr(0, data_name.find_last_of('.'));
 			if (m_chan_num > 1) woss << "_C" << c;
 			woss << ".msk";
-			wstring mask_name = woss.str();
+			mask_name = woss.str();
 			return mask_name;
 		}
-		else
-			return L"";
 	}
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".msk";
+	mask_name = woss.str();
+	return mask_name;
 }
 
 wstring TIFReader::GetCurLabelName(int t, int c)
 {
-	if (isHyperstack_)
+	wostringstream woss;
+	wstring label_name;
+	if (!isHyperstack_)
 	{
-		wostringstream woss;
-		woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
-		if (m_time_num > 1) woss << "_T" << t;
-		if (m_chan_num > 1) woss << "_C" << c;
-		woss << ".lbl";
-		wstring label_name = woss.str();
-		return label_name;
-	}
-	else
-	{
-		if (t >= 0 && t < (int64_t)m_4d_seq.size())
+		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
 			wstring data_name = (m_4d_seq[t].slices)[0].slice;
-			wostringstream woss;
 			woss << data_name.substr(0, data_name.find_last_of('.'));
 			if (m_chan_num > 1) woss << "_C" << c;
 			woss << ".lbl";
-			wstring label_name = woss.str();
+			label_name = woss.str();
 			return label_name;
 		}
-		else
-			return L"";
 	}
+	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
+	if (m_time_num > 1) woss << "_T" << t;
+	if (m_chan_num > 1) woss << "_C" << c;
+	woss << ".lbl";
+	label_name = woss.str();
+	return label_name;
 }
 
 bool TIFReader::tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
@@ -1417,7 +1405,7 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 void TIFReader::ResetTiff()
 {
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("TIFF file not open for reading.");
+		return;
 	//find the first IFD block/page
 	if (!isBig_) {
 		tiff_stream.seekg(4, tiff_stream.beg);
@@ -1443,7 +1431,7 @@ void TIFReader::OpenTiff(std::wstring name)
 	tiff_stream.open((ws2s(name)).c_str(), std::ifstream::binary);
 #endif
 	if (!tiff_stream.is_open())
-		throw std::runtime_error("Unable to open TIFF File for reading.");
+		return;
 	tiff_stream.seekg(2, tiff_stream.beg);
 	uint16_t tiff_num = 0;
 	tiff_stream.read((char*)&tiff_num, sizeof(uint16_t));
@@ -1451,12 +1439,8 @@ void TIFReader::OpenTiff(std::wstring name)
 	swap_ |= SwapShort(tiff_num) == kBigTiff;
 	isBig_ = (SwapShort(tiff_num) == kBigTiff) || (tiff_num == kBigTiff);
 	// make sure this is a proper tiff and set the state.
-	if (isBig_ || tiff_num == kRegularTiff || swap_) {
+	if (isBig_ || tiff_num == kRegularTiff || swap_)
 		ResetTiff();
-	}
-	else {
-		throw std::runtime_error("TIFF file formatted incorrectly. Wrong Type.");
-	}
 }
 
 void TIFReader::CloseTiff() { if (tiff_stream.is_open()) tiff_stream.close(); }
@@ -1569,7 +1553,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	val = eight_bit ? (void*)(new unsigned char[total_size]) :
 		(void*)(new unsigned short[total_size]);
 	if (!val)
-		throw std::runtime_error("Unable to allocate memory to read TIFF.");
+		return NULL;
 
 	int max_value = 0;
 
@@ -1998,16 +1982,44 @@ void TIFReader::AddPatternR(wchar_t c, size_t pos)
 	}
 }
 
-std::wstring TIFReader::GetSearchString(int mode)
+std::wstring TIFReader::GetSearchString(int mode, int t)
 {
 	std::wstring str;
 	for (auto it = m_name_patterns.begin();
 		it != m_name_patterns.end(); ++it)
 	{
-		if (it->type == 1 &&
-			((mode < 0 && it->use >=0) ||
-			(mode >=0 && it->use == mode)))
+		int add_ast = 0;
+		if (it->type == 1)
+		{
+			if (it->use == 0 || it->use == 1)
+			{
+				switch (mode)
+				{
+				case -1:
+					add_ast = 1;
+					break;
+				case 0:
+					if (it->use == 0)
+						add_ast = 1;
+					break;
+				case 1:
+					if (it->use == 1)
+						add_ast = 1;
+					break;
+				}
+			}
+			else if (it->use == 2)
+				add_ast = 2;
+		}
+
+		if (add_ast == 1)
 			str += L"*";
+		else if (add_ast == 2)
+		{
+			std::wstringstream ss;
+			ss << std::setw(it->len) << std::setfill(L'0') << t;
+			str += ss.str();
+		}
 		else
 			str += it->str;
 	}

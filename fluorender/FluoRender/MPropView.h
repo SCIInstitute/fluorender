@@ -25,19 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
-#include "VRenderView.h"
-#include <wx/wx.h>
-#include <wx/panel.h>
-#include <wx/glcanvas.h>
-#include <wx/clrpicker.h>
-#include <wx/slider.h>
-
 #ifndef _MPROPVIEW_H_
 #define _MPROPVIEW_H_
 
+#include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/clrpicker.h>
+#include <wx/slider.h>
+
 using namespace std;
 
+class VRenderFrame;
+class VRenderGLView;
+class MeshData;
 class MPropView: public wxPanel
 {
 	enum
@@ -60,24 +60,25 @@ class MPropView: public wxPanel
 	};
 
 public:
-	MPropView(wxWindow* frame, wxWindow* parent,
-		wxWindowID id,
+	MPropView(VRenderFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "MPropView");
 	~MPropView();
 
-	void SetMeshData(MeshData* md, VRenderView* vrv);
+	void SetView(VRenderGLView* view);
+	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
 	void RefreshVRenderViews(bool tree=false);
 
 	void GetSettings();
 
 private:
-	wxWindow* m_frame;
+	VRenderFrame* m_frame;
+	VRenderGLView* m_view;
 	MeshData* m_md;
-	VRenderView* m_vrv;
 
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;

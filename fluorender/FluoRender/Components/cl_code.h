@@ -600,28 +600,23 @@ const char* str_cl_density_field_3d = \
 "	int3 lb = (int3)(gid.x*gsx, gid.y*gsy, gid.z*gsz);\n" \
 "	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
+"	float gnum = (float)(gsx * gsy * gsz);\n" \
 "	float sum = 0.0;\n" \
-"	unsigned int index1;\n" \
+"	float sum2 = 0.0;\n" \
+"	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += df[index1];\n" \
+"		index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += df[index];\n" \
+"		sum2 += df[index] * df[index];\n" \
 "	}\n" \
-"	unsigned int index2 = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
-"	float avg = sum / (gsx*gsy*gsz);\n" \
-"	gavg[index2] = avg;\n" \
-"	sum = 0.0;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += (avg - df[index1])*(avg - df[index1]);\n" \
-"	}\n" \
-"	float var = sqrt(sum / (gsx*gsy*gsz));\n" \
-"	gvar[index2] = var;\n" \
+"	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
+"	float avg = sum / gnum;\n" \
+"	gavg[index] = avg;\n" \
+"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum), 0.0, 255.0);\n" \
+"	gvar[index] = v;\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \
@@ -708,6 +703,7 @@ const char* str_cl_density_grow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float density,\n" \
+"	float varth,\n" \
 "	float sscale)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -723,6 +719,9 @@ const char* str_cl_density_grow_3d = \
 "		unsigned char vdf = df[index2];\n" \
 "		unsigned char vavg = avg[index2];\n" \
 "		unsigned char vvar = var[index2];\n" \
+"		//break if low variance\n" \
+"		if (vvar < varth * 255)\n" \
+"			return;\n" \
 "		if (vdf < vavg - (1.0-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
@@ -776,6 +775,7 @@ const char* str_cl_density_grow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float density,\n" \
+"	float varth,\n" \
 "	float sscale,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
@@ -795,6 +795,9 @@ const char* str_cl_density_grow_3d = \
 "		unsigned char vdf = df[index2];\n" \
 "		unsigned char vavg = avg[index2];\n" \
 "		unsigned char vvar = var[index2];\n" \
+"		//break if low variance\n" \
+"		if (vvar < varth * 255)\n" \
+"			return;\n" \
 "		if (vdf < vavg - (1.0-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
@@ -1033,6 +1036,222 @@ const char* str_cl_dist_field_2d = \
 "}\n" \
 ;
 
+const char* str_cl_dist_field_3d = \
+"const sampler_t samp =\n" \
+"	CLK_NORMALIZED_COORDS_FALSE|\n" \
+"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
+"	CLK_FILTER_NEAREST;\n" \
+"\n" \
+"float get_2d_density(image3d_t image, int4 pos, int r)\n" \
+"{\n" \
+"	float sum = 0.0f;\n" \
+"	int d = 2*r+1;\n" \
+"	for (int i=-r; i<=r; ++i)\n" \
+"	for (int j=-r; j<=r; ++j)\n" \
+"		sum += read_imagef(image, samp, pos+(int4)(i, j, 0, 0)).x;\n" \
+"	return sum / (float)(d * d);\n" \
+"}\n" \
+"__kernel void kernel_0(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int dsize,\n" \
+"	float th,\n" \
+"	float sscale,\n" \
+"	unsigned char ini)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (ijk.x == 0 || ijk.x == nx-1 ||\n" \
+"		ijk.y == 0 || ijk.y == ny-1 ||\n" \
+"		ijk.z == 0 || ijk.z == nz-1)\n" \
+"	{\n" \
+"		df[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	float dval = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
+"	dval *= sscale;\n" \
+"	if (dval > th)\n" \
+"		df[index] = ini;\n" \
+"	else\n" \
+"		df[index] = 0;\n" \
+"}\n" \
+"\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		unsigned char v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		unsigned char v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		unsigned char v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		unsigned char v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		unsigned char v5 = df[nxy*(ijk.z-1) + nx*ijk.y + ijk.x];\n" \
+"		unsigned char v6 = df[nxy*(ijk.z+1) + nx*ijk.y + ijk.x];\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn ||\n" \
+"			v5 == nn || v6 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		short v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		short v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		short v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		short v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		short v5 = df[nxy*(ijk.z-1) + nx*ijk.y + ijk.x];\n" \
+"		short v6 = df[nxy*(ijk.z+1) + nx*ijk.y + ijk.x];\n" \
+"		short rre = (ijk.x % 13 + ijk.y % 17 + ijk.z % 7) % 6;\n" \
+"		v1 = rre == 0 ? -1 : v1;\n" \
+"		v2 = rre == 5 ? -1 : v2;\n" \
+"		v3 = rre == 2 ? -1 : v3;\n" \
+"		v4 = rre == 3 ? -1 : v4;\n" \
+"		v5 = rre == 1 ? -1 : v5;\n" \
+"		v6 = rre == 4 ? -1 : v6;\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn ||\n" \
+"			v5 == nn || v6 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
+"//compute dist field in mask\n" \
+"__kernel void kernel_3(\n" \
+"	__read_only image3d_t data,\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int dsize,\n" \
+"	float th,\n" \
+"	float sscale,\n" \
+"	unsigned char ini,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"	{\n" \
+"		df[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	if (ijk.x == 0 || ijk.x == nx-1 ||\n" \
+"		ijk.y == 0 || ijk.y == ny-1 ||\n" \
+"		ijk.z == 0 || ijk.z == nz-1)\n" \
+"	{\n" \
+"		df[index] = 0;\n" \
+"		return;\n" \
+"	}\n" \
+"	//float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
+"	float dval = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
+"	dval *= sscale;\n" \
+"	if (dval > th)\n" \
+"		df[index] = ini;\n" \
+"	else\n" \
+"		df[index] = 0;\n" \
+"}\n" \
+"//compute dist field in mask\n" \
+"__kernel void kernel_4(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		unsigned char v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		unsigned char v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		unsigned char v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		unsigned char v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		unsigned char v5 = df[nxy*(ijk.z-1) + nx*ijk.y + ijk.x];\n" \
+"		unsigned char v6 = df[nxy*(ijk.z+1) + nx*ijk.y + ijk.x];\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn ||\n" \
+"			v5 == nn || v6 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
+"//compute dist field in mask\n" \
+"__kernel void kernel_5(\n" \
+"	__global unsigned char* df,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	unsigned char ini,\n" \
+"	unsigned char nn,\n" \
+"	unsigned char re,\n" \
+"	__read_only image3d_t mask)\n" \
+"{\n" \
+"	int3 ijk = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
+"	if (mask_value < 1e-6)\n" \
+"		return;\n" \
+"	unsigned int nxy = nx*ny;\n" \
+"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	if (df[index] == ini)\n" \
+"	{\n" \
+"		short v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
+"		short v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
+"		short v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
+"		short v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
+"		short v5 = df[nxy*(ijk.z-1) + nx*ijk.y + ijk.x];\n" \
+"		short v6 = df[nxy*(ijk.z+1) + nx*ijk.y + ijk.x];\n" \
+"		short rre = (ijk.x % 13 + ijk.y % 17 + ijk.z % 7) % 6;\n" \
+"		v1 = rre == 0 ? -1 : v1;\n" \
+"		v2 = rre == 5 ? -1 : v2;\n" \
+"		v3 = rre == 2 ? -1 : v3;\n" \
+"		v4 = rre == 3 ? -1 : v4;\n" \
+"		v5 = rre == 1 ? -1 : v5;\n" \
+"		v6 = rre == 4 ? -1 : v6;\n" \
+"		if (v1 == nn || v2 == nn ||\n" \
+"			v3 == nn || v4 == nn ||\n" \
+"			v5 == nn || v6 == nn)\n" \
+"			df[index] = re;\n" \
+"	}\n" \
+"}\n" \
+;
+
 const char* str_cl_dist_grow_3d = \
 "const sampler_t samp =\n" \
 "	CLK_NORMALIZED_COORDS_FALSE|\n" \
@@ -1064,6 +1283,7 @@ const char* str_cl_dist_grow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float sscale,\n" \
+"	float distscl,\n" \
 "	float dist_strength)\n" \
 "{\n" \
 "	int3 coord = (int3)(get_global_id(0),\n" \
@@ -1075,7 +1295,7 @@ const char* str_cl_dist_grow_3d = \
 "	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
-"	float distv = distf[index] / 255.0;\n" \
+"	float distv = distscl * distf[index];\n" \
 "	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
@@ -1120,6 +1340,7 @@ const char* str_cl_dist_grow_3d = \
 "	float value_f,\n" \
 "	float grad_f,\n" \
 "	float sscale,\n" \
+"	float distscl,\n" \
 "	float dist_strength,\n" \
 "	__read_only image3d_t mask)\n" \
 "{\n" \
@@ -1135,7 +1356,7 @@ const char* str_cl_dist_grow_3d = \
 "	atomic_inc(rcnt);\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
-"	float distv = distf[index] / 255.0;\n" \
+"	float distv = distscl * distf[index];\n" \
 "	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
@@ -1198,13 +1419,14 @@ const char* str_cl_distdens_field_3d = \
 "	unsigned int dnx,\n" \
 "	int dsize,\n" \
 "	float sscale,\n" \
+"	float distscl,\n" \
 "	float dist_strength)\n" \
 "{\n" \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	float distv = (float)(distf[index]) / 255.0;\n" \
+"	float distv = distscl * distf[index];\n" \
 "	density = density * (1.0 - dist_strength) + distv * dist_strength;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
 "	densf[index] = (unsigned char)(density * 255.0);\n" \
@@ -1228,28 +1450,23 @@ const char* str_cl_distdens_field_3d = \
 "	int3 lb = (int3)(gid.x*gsx, gid.y*gsy, gid.z*gsz);\n" \
 "	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
+"	float gnum = (float)(gsx * gsy * gsz);\n" \
 "	float sum = 0.0;\n" \
-"	unsigned int index1;\n" \
+"	float sum2 = 0.0;\n" \
+"	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += df[index1];\n" \
+"		index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
+"		sum += df[index];\n" \
+"		sum2 += df[index] * df[index];\n" \
 "	}\n" \
-"	unsigned int index2 = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
-"	float avg = sum / (gsx*gsy*gsz);\n" \
-"	gavg[index2] = avg;\n" \
-"	sum = 0.0;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		index1 = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		sum += (avg - df[index1])*(avg - df[index1]);\n" \
-"	}\n" \
-"	float var = sqrt(sum / (gsx*gsy*gsz));\n" \
-"	gvar[index2] = var;\n" \
+"	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
+"	float avg = sum / gnum;\n" \
+"	gavg[index] = avg;\n" \
+"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum), 0.0, 255.0);\n" \
+"	gvar[index] = v;\n" \
 "}\n" \
 "\n" \
 "//interpolate statistics on density field\n" \
@@ -2467,66 +2684,5 @@ const char* str_cl_match_slices = \
 "			label2[sidx] = value_l1;\n" \
 "	}\n" \
 "}\n";
-
-const char* str_cl_dist_field_3d = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned char* df,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	float th,\n" \
-"	float sscale)\n" \
-"{\n" \
-"	int3 ijk = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	if (ijk.x == 0 || ijk.x == nx-1 ||\n" \
-"		ijk.y == 0 || ijk.y == ny-1 ||\n" \
-"		ijk.z == 0 || ijk.z == nz-1)\n" \
-"	{\n" \
-"		df[index] = 0;\n" \
-"		return;\n" \
-"	}\n" \
-"	float dval = read_imagef(data, samp, (int4)(ijk, 1)).x;\n" \
-"	dval *= sscale;\n" \
-"	if (dval > th)\n" \
-"		df[index] = 1;\n" \
-"	else\n" \
-"		df[index] = 0;\n" \
-"}\n" \
-"\n" \
-"__kernel void kernel_1(\n" \
-"	__global unsigned char* df,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	unsigned char nn,\n" \
-"	unsigned char re)\n" \
-"{\n" \
-"	int3 ijk = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	unsigned int nxy = nx*ny;\n" \
-"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"	if (df[index] == 1)\n" \
-"	{\n" \
-"		unsigned char v1 = df[nxy*ijk.z + nx*ijk.y + ijk.x - 1];\n" \
-"		unsigned char v2 = df[nxy*ijk.z + nx*ijk.y + ijk.x + 1];\n" \
-"		unsigned char v3 = df[nxy*ijk.z + nx*(ijk.y-1) + ijk.x];\n" \
-"		unsigned char v4 = df[nxy*ijk.z + nx*(ijk.y+1) + ijk.x];\n" \
-"		unsigned char v5 = df[nxy*(ijk.z-1) + nx*ijk.y + ijk.x];\n" \
-"		unsigned char v6 = df[nxy*(ijk.z+1) + nx*ijk.y + ijk.x];\n" \
-"		if (v1 == nn || v2 == nn ||\n" \
-"			v3 == nn || v4 == nn ||\n" \
-"			v5 == nn || v6 == nn)\n" \
-"			df[index] = re;\n" \
-"	}\n" \
-"}\n" \
-;
 
 #endif

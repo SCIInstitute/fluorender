@@ -1,13 +1,15 @@
 #define KX 3
 #define KY 3
 #define KZ 3
+#define DWL unsigned char
+#define VSCL 255
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_CLAMP_TO_EDGE|
 	CLK_FILTER_NEAREST;
 __kernel void kernel_main(
 	read_only image3d_t data,
-	__global unsigned char* result,
+	__global DWL* result,
 	unsigned int x,
 	unsigned int y,
 	unsigned int z)
@@ -48,5 +50,5 @@ __kernel void kernel_main(
 		id++;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = rvalue[KX*KY*KZ/2-1]*255.0;
+	result[index] = rvalue[KX*KY*KZ/2-1]*VSCL;
 }

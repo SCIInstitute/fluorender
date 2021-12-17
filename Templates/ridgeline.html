@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .axis .domain {
+            display: none;
+        }
+
+        .axis--x text {
+            font-size: 15px;
+            fill: #000;
+        }
+
+        .axis--x line {
+            stroke: #000;
+        }
+
+        .axis--id .tick line {
+            display: none;
+        }
+
+        .axis--id text {
+            font-size: 15px;
+            fill: #000;
+        }
+
+        .axis--id .tick:nth-child(odd) text {
+            fill: #777;
+        }
+
+        .line {
+            fill: none;
+            stroke: #000;
+        }
+
+        .area {
+            fill: #eee;
+        }
+
+        .id:nth-child(odd) .area {
+            fill: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script>
+//#begin data
+let csv_data = "id,time,mean\n\
+ID-2029425,0,863.75\n\
+ID-2029425,1,842.152\n\
+ID-2029425,10,822.884\n\
+ID-2029425,11,851.102\n\
+ID-2029425,12,845.319\n\
+ID-2029425,13,789.232\n\
+ID-2029425,14,762.804\n\
+ID-2029425,15,784.259\n\
+ID-2029425,16,794.991\n\
+ID-2029425,17,811.803\n\
+ID-2029425,18,789.672\n\
+ID-2029425,19,818.441\n\
+ID-2029425,2,863.622\n\
+ID-2029425,20,784.09\n\
+ID-2029425,21,795.655\n\
+ID-2029425,22,810.762\n\
+ID-2029425,23,801.461\n\
+ID-2029425,24,779.971\n\
+ID-2029425,25,779.012\n\
+ID-2029425,26,729.718\n\
+ID-2029425,27,748.565\n\
+ID-2029425,28,742.056\n\
+ID-2029425,29,801.465\n\
+ID-2029425,3,881.849\n\
+ID-2029425,4,869.729\n\
+ID-2029425,5,883.842\n\
+ID-2029425,6,870.607\n\
+ID-2029425,7,874.836\n\
+ID-2029425,8,844.315\n\
+ID-2029425,9,842.821\n\
+ID-2031493,0,956.147\n\
+ID-2031493,1,920.711\n\
+ID-2031493,10,825.219\n\
+ID-2031493,11,847.114\n\
+ID-2031493,12,809.274\n\
+ID-2031493,13,826.206\n\
+ID-2031493,14,818.437\n\
+ID-2031493,15,836.476\n\
+ID-2031493,16,839.461\n\
+ID-2031493,17,795.745\n\
+ID-2031493,18,813.717\n\
+ID-2031493,19,812.246\n\
+ID-2031493,2,925.303\n\
+ID-2031493,20,837.056\n\
+ID-2031493,21,876.629\n\
+ID-2031493,22,871.243\n\
+ID-2031493,23,840.172\n\
+ID-2031493,24,867.471\n\
+ID-2031493,25,873.652\n\
+ID-2031493,26,871.822\n\
+ID-2031493,27,864.26\n\
+ID-2031493,28,875.626\n\
+ID-2031493,29,816.977\n\
+ID-2031493,3,927.768\n\
+ID-2031493,4,907.141\n\
+ID-2031493,5,962.451\n\
+ID-2031493,6,947.706\n\
+ID-2031493,7,910.895\n\
+ID-2031493,8,904.96\n\
+ID-2031493,9,863.782\n\
+ID-2031461,0,916.224\n\
+ID-2031461,1,933.961\n\
+ID-2031461,10,831.255\n\
+ID-2031461,11,842.813\n\
+ID-2031461,12,842.247\n\
+ID-2031461,13,823.129\n\
+ID-2031461,14,834.224\n\
+ID-2031461,15,821.896\n\
+ID-2031461,16,794.961\n\
+ID-2031461,17,823.481\n\
+ID-2031461,18,781.364\n\
+ID-2031461,19,819.548\n\
+ID-2031461,2,919.05\n\
+ID-2031461,20,839.306\n\
+ID-2031461,21,851.95\n\
+ID-2031461,22,848.649\n\
+ID-2031461,23,857.647\n\
+ID-2031461,24,833.413\n\
+ID-2031461,25,860.429\n\
+ID-2031461,26,863.478\n\
+ID-2031461,27,914.06\n\
+ID-2031461,28,872.422\n\
+ID-2031461,29,892.885\n\
+ID-2031461,3,901.321\n\
+ID-2031461,4,931.812\n\
+ID-2031461,5,907.501\n\
+ID-2031461,6,901.899\n\
+ID-2031461,7,914.24\n\
+ID-2031461,8,888.268\n\
+ID-2031461,9,867.646\n\
+";
+//#end data
+
+function row(d) {
+    return {
+        id: d.id,
+        time: +d.time,
+//#begin value name
+        value: +d.mean
+//#end value name
+    };
+}
+
+var dataFlat = d3.csvParse(csv_data, row);
+
+// Sort by time
+dataFlat.sort(function (a, b) { return a.time - b.time; });
+
+var data = d3.nest()
+    .key(function (d) { return d.id; })
+    .entries(dataFlat);
+
+var gw = 1000,
+	gh = 800;
+var sclf = 0.5;
+var roffx = 0.2;
+var roffy = 0.67;
+var magaxx = 5;
+var magaxy = 25;
+var opac = 0.6;
+var line_type =
+	d3.curveMonotoneX;
+	//d3.curveLinear;
+var margin = { top: 10, right: 10, bottom: 50, left: 150 },
+    width = gw - margin.left - margin.right,
+    height = gh - margin.top - margin.bottom;
+var num = data.length;
+var x = function (d) { return d.time; };
+var y = function (d) { return d.value; };
+var extx = d3.extent(dataFlat, x);
+var exty = d3.extent(dataFlat, y);
+var exty2 = exty[1] - exty[0];
+var offsetx = width * roffx / num;
+var offsety = height * roffy / num;
+var scaley = height * roffy * sclf / exty2;
+
+data.map(function (d) {
+    d.values.map(function (d) {
+        d.value -= exty[0];
+    })
+    return d;
+})
+
+// Sort by peak
+function peakTime(d) {
+    var i = d3.scan(d.values, function (a, b) { return y(b) - y(a); });
+    return d.values[i].value;
+};
+data.sort(function (a, b) { return peakTime(b) - peakTime(a); });
+
+var xScale = d3.scaleLinear().domain(extx).range([0, width]),
+    xValue = function(d) { return xScale(x(d)); },
+    xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
+
+var areaChartHeight = exty2 * scaley;
+var yScale = d3.scaleLinear(),
+    yValue = function(d) {
+    	 return yScale(y(d));
+    };
+yScale
+    .domain([0, exty2])
+    .range([areaChartHeight, 0]);
+var area = d3.area()
+	.curve(line_type)
+    .x(xValue)
+    .y0(height - magaxx)
+    .y1(yValue);
+
+var line = area.lineY1();
+
+var id = function(d) { return d.key; },
+    idScale = d3.scaleBand().range([0, height - magaxx * 2]),
+    idAxis = d3.axisLeft(idScale);
+
+idScale.domain(data.map(function(d) { return d.key; }));
+
+// Percent two area charts can overlap
+var svg = d3.select('body').append('svg')
+    .attr('width', width + margin.left + margin.right + num * offsetx)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+svg.append('clipPath')
+	.attr('id', 'rect_clip')
+	.append('rect')
+	.attr('x', 0)
+	.attr('y', 0)
+	.attr('height', height - magaxx * 2)
+	.attr('width', width + margin.left + margin.right + num * offsetx);
+let count = 0;
+var gChart = svg.append('g').attr('class', 'ids')
+	.attr('clip-path', 'url(#rect_clip)')
+    .selectAll('.id').data(data)
+    .enter().append('g')
+    .attr('class', function(d) { return 'id id--' + d.key; })
+    .attr('transform', function (d) {
+        var tx = offsetx * (num - count - 1),
+        	ty = height * roffy - magaxx - offsety * (num - count);
+        count++;
+        return 'translate(' + tx + ',' + ty + ')';
+    });
+
+gChart.append('path').attr('class', 'area')
+    .datum(function (d) { return d.values; })
+    .attr('d', area)
+    .attr('opacity', opac);
+
+gChart.append('path').attr('class', 'line')
+    .datum(function(d) { return d.values; })
+    .attr('d', line);
+
+count = 0;
+svg.append('g').attr('class', 'axis axis--id')
+    .call(idAxis)
+    .selectAll("text")
+    .attr('transform', function (d) {
+        var tx = offsetx * (num - count - 1) - magaxy,
+        	ty = 0;
+        count++;
+        return 'translate(' + tx + ',' + ty + ')';
+    });
+
+svg.append('g').attr('class', 'axis axis--x')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(xAxis);
+
+    </script>
+</body>
+</html>

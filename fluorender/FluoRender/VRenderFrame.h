@@ -26,6 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef _VRENDERFRAME_H_
+#define _VRENDERFRAME_H_
+
 #include "DataManager.h"
 #include "TreePanel.h"
 #include "ListPanel.h"
@@ -60,9 +63,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/aui.h>
 
 #include <vector>
-
-#ifndef _VRENDERFRAME_H_
-#define _VRENDERFRAME_H_
 
 using namespace std;
 
@@ -187,9 +187,8 @@ public:
 	
 	//views
 	int GetViewNum();
-	vector <VRenderView*>* GetViewList();
-	VRenderView* GetView(int index);
-	VRenderView* GetView(wxString& name);
+	VRenderGLView* GetView(int index);
+	VRenderGLView* GetView(wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(wxString &name);
@@ -203,21 +202,11 @@ public:
 
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		VRenderView* vrv=0,
+		VRenderGLView* view=0,
 		DataGroup* group=0,
 		VolumeData* vd=0,
 		MeshData* md=0,
 		Annotations* ann=0);
-
-	//settings
-	//make movie settings
-	int m_mov_view;
-	int m_mov_axis;	//1 for x; 2 for y
-	bool m_mov_rewind;
-	wxString m_mov_angle_start;
-	wxString m_mov_angle_end;
-	wxString m_mov_step;
-	wxString m_mov_frames;
 
 	//prop view
 	AdjustView* GetAdjustView();
@@ -282,14 +271,18 @@ public:
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
-	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderView* view = 0);
-	void LoadMeshes(wxArrayString files, VRenderView* view = 0);
+	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view = 0);
+	void LoadMeshes(wxArrayString files, VRenderGLView* view = 0);
 
 	//crop
 	static void SetCrop(bool value)
 	{ m_save_crop = value; }
 	static bool GetCrop()
 	{ return m_save_crop; }
+	static void SetFilter(int value)
+	{ m_save_filter = value; }
+	static int GetFilter()
+	{ return m_save_filter; }
 	//compression
 	static void SetCompression(bool value)
 	{ m_save_compress = value; }
@@ -357,6 +350,22 @@ public:
 
 	void ClearVrvList()
 	{ m_vrv_list.clear(); }
+
+	wxString ScriptDialog(const wxString& title,
+		const wxString& wildcard, long style)
+	{
+		m_movie_view->HoldRun();
+		wxString result;
+		wxFileDialog *dlg = new wxFileDialog(
+			this, title, "", "",
+			wildcard, style);
+		int rval = dlg->ShowModal();
+		if (rval == wxID_OK)
+			result = dlg->GetPath();
+		delete dlg;
+		m_movie_view->ResumeRun();
+		return result;
+	}
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
@@ -437,6 +446,8 @@ private:
 	static bool m_load_mask;
 	//save crop
 	static bool m_save_crop;
+	//filter
+	static int m_save_filter;
 	//save compressed
 	static bool m_save_compress;
 	//embed files in project
@@ -457,7 +468,7 @@ private:
 private:
 	//views
 	wxString CreateView(int row=1);
-	VRenderView* GetLastView() {return m_vrv_list[m_vrv_list.size()-1];}
+	VRenderGLView* GetLastView() {return m_vrv_list[m_vrv_list.size()-1]->m_glview;}
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
 	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);

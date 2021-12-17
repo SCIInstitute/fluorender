@@ -2,6 +2,8 @@
 #define KY 3
 #define KZ 3
 #define TH 0.1
+#define DWL unsigned char
+#define VSCL 255
 bool check_loop(bool loop[])
 {
 	int count = loop[0]?1:0;
@@ -22,7 +24,7 @@ const sampler_t samp =
 	CLK_FILTER_NEAREST;
 __kernel void kernel_main(
 	read_only image3d_t data,
-	__global unsigned char* result,
+	__global DWL* result,
 	unsigned int x,
 	unsigned int y,
 	unsigned int z)
@@ -56,7 +58,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[25]; loop[5] = nbs[22]; loop[6] = nbs[19]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*255.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//second
@@ -64,7 +66,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[26]; loop[5] = nbs[23]; loop[6] = nbs[20]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*255.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//third
@@ -72,7 +74,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[17]; loop[5] = nbs[14]; loop[6] = nbs[11]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*255.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//fourth
@@ -80,7 +82,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[8]; loop[5] = nbs[5]; loop[6] = nbs[2]; loop[7] = nbs[10];
 	if (!check_loop(loop))
 	{
-		result[index] = value*255.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	//fifth
@@ -88,7 +90,7 @@ __kernel void kernel_main(
 	loop[4] = nbs[23]; loop[5] = nbs[22]; loop[6] = nbs[21]; loop[7] = nbs[12];
 	if (!check_loop(loop))
 	{
-		result[index] = value*255.0;
+		result[index] = value*VSCL;
 		return;
 	}
 	result[index] = 0.0;
