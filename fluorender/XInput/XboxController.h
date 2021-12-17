@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 // No MFC
 #define WIN32_LEAN_AND_MEAN
-
 // We need the Windows Header and the XInput Header
 #include <windows.h>
 #include <XInput.h>

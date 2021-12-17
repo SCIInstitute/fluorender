@@ -28,14 +28,16 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_BackgStat_h
 #define FL_BackgStat_h
 
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <vector>
 #include <map>
 
 using namespace std;
 
 class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class BackgStat

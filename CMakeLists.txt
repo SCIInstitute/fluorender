@@ -365,12 +365,12 @@ file(GLOB typ_hdr fluorender/FluoRender/Types/*.h)
 add_library(TYPES_OBJ OBJECT
   ${typ_src} ${typ_hdr})
 
-# NV
-include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/NV)
-file(GLOB nv_src fluorender/FluoRender/NV/*.cpp)
-file(GLOB nv_hdr fluorender/FluoRender/NV/*.h)
-add_library(NV_OBJ OBJECT
-  ${nv_src} ${nv_hdr})
+# Timer
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Timer)
+file(GLOB timer_src fluorender/FluoRender/Timer/*.cpp)
+file(GLOB timer_hdr fluorender/FluoRender/Timer/*.h)
+add_library(TIMER_OBJ OBJECT
+  ${timer_src} ${timer_hdr})
 
 # FLIVR
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/FLIVR)
@@ -503,7 +503,7 @@ if(APPLE)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:NV_OBJ>
+    $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
@@ -540,7 +540,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:TYPES_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
-    $<TARGET_OBJECTS:NV_OBJ>
+    $<TARGET_OBJECTS:TIMER_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
     $<TARGET_OBJECTS:VIDEO_OBJ>
     $<TARGET_OBJECTS:TRACKING_OBJ>
@@ -604,7 +604,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:NV_OBJ>
+      $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>
@@ -629,7 +629,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
-      $<TARGET_OBJECTS:NV_OBJ>
+      $<TARGET_OBJECTS:TIMER_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
       $<TARGET_OBJECTS:VIDEO_OBJ>
       $<TARGET_OBJECTS:TRACKING_OBJ>

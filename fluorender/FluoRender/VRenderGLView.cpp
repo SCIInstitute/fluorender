@@ -39,9 +39,10 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <wx/stdpaths.h>
+#include <Debug.h>
+#include <Timer.h>
 #include "png_resource.h"
 #include "img/icons.h"
-#include <Debug.h>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -349,7 +350,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 
 	m_selector.LoadBrushSettings();
 
-	m_timer = new nv::Timer(10);
+	m_timer = new Fltimer(10);
 	if (m_frame && m_frame->GetBenchmark())
 		m_benchmark = true;
 	else

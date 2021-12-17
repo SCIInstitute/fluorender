@@ -9,6 +9,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #include <strsafe.h>
+#define WINDOWS_LEAN_AND_MEAN
 #include <Windows.h>
 
 #ifdef _DEBUG

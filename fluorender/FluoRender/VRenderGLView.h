@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <Types/Quaternion.h>
 #include "compatibility.h"
+#include <Timer.h>
 
 #include <wx/wx.h>
 #include <wx/clrpicker.h>
@@ -60,13 +61,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <stdarg.h>
-#include "NV/Timer.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _WIN32
-//#include <Windows.h>
 //wacom support
 #include <wx/msw/private.h>
 #include <MSGPACK.h>
@@ -924,7 +923,7 @@ private:
 	flrd::ScriptProc m_scriptor;
 
 	//timer
-	nv::Timer *m_timer;
+	Fltimer *m_timer;
 
 	//timer for full screen
 	wxTimer m_fullscreen_trigger;

@@ -16,13 +16,12 @@
 ---------------------------------------------------------------------------- */
 #pragma once
 
+#define WINDOWS_LEAN_AND_MEAN
 #include	<windows.h>
 #include	<stdio.h>
 #include	<assert.h>
 #include	<stdarg.h>
-
 #include	"wintab.h"		// NOTE: get from wactab header package
-
 
 //////////////////////////////////////////////////////////////////////////////
 #define WACOM_DEBUG

@@ -36,6 +36,9 @@ DEALINGS IN THE SOFTWARE.
 
 #ifdef _WIN32 //WINDOWS ONLY
 
+#include <wx/wx.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
@@ -45,18 +48,14 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <locale>
 #include <vector>
-#include <windows.h>
 #include <ole2.h>
 #include <time.h>
 #include <ctime>
 #include <sys/types.h>
 #include <ctype.h>
-#include "tiffio.h"
+#include <tiffio.h>
 #include <direct.h>
 #include <codecvt>
-#include <wx/wx.h>
-#include <wx/fileconf.h>
-#include <wx/wfstream.h>
 
 #define GETCURRENTDIR _getcwd
 
