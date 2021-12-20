@@ -26,22 +26,22 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _VOLUMEDATA_H_
-#define _VOLUMEDATA_H_
+#ifndef VOLUMEDATA_HPP
+#define VOLUMEDATA_HPP
 
-#include <Scenegraph/Node.h>
-#include <nrrd.h>
+#include <Node.hpp>
+#include <teem/nrrd.h>
 #include <glm/glm.hpp>
 #include <vector>
 
-namespace FLIVR
+namespace flvr
 {
 class VolumeRenderer;
 class Texture;
 class TextureBrick;
 }
 class BaseReader;
-namespace FL
+namespace fluo
 {
 	class VolumeFactory;
 	class VolumeData;
@@ -81,24 +81,25 @@ namespace FL
 		BaseReader* GetReader();
 
 		//load
-		int LoadData(Nrrd* data, const std::string &name, const std::wstring &path);
+        int LoadData(Nrrd* data, const std::string &name, const std::wstring &path);
 		int ReplaceData(Nrrd* data, bool del_tex);
 		int ReplaceData(VolumeData* data);
 		Nrrd* GetData(bool ret);
 
-		//empty data
+        //empty data
+        
 		void AddEmptyData(int bits,
 			int nx, int ny, int nz,
 			double spcx, double spcy, double spcz,
 			int brick_size = 0);
-
+        
 		//load mask
 		void LoadMask(Nrrd* mask);
 		Nrrd* GetMask(bool ret);
 
 		//empty mask
 		//mode: 0-zeros; 1-255; 2-leave as is
-		void AddEmptyMask(int mdoe);
+        void AddEmptyMask(int mdoe);
 
 		//load label
 		void LoadLabel(Nrrd* label);
@@ -110,17 +111,17 @@ namespace FL
 		bool SearchLabel(unsigned int label);
 
 		//save
-		double GetOriginalValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
-		double GetTransferValue(int i, int j, int k, FLIVR::TextureBrick* b = 0);
-		void SaveData(std::wstring &filename, int mode = 0, bool bake = false, bool compress = false);
-		void SaveMask(bool use_reader, long t, long c);
-		void SaveLabel(bool use_reader, long t, long c);
+        double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
+        double GetTransferValue(int i, int j, int k, flvr::TextureBrick* b = 0);
+        void SaveData(std::wstring &filename, int mode = 0, bool bake = false, bool compress = false);
+        void SaveMask(bool use_reader, long t, long c);
+        void SaveLabel(bool use_reader, long t, long c);
 
 		//volume renderer
-		FLIVR::VolumeRenderer* GetRenderer();
+		flvr::VolumeRenderer* GetRenderer();
 
 		//texture
-		FLIVR::Texture* GetTexture();
+		flvr::Texture* GetTexture();
 		void SetTexture();
 
 		//draw
@@ -146,7 +147,7 @@ namespace FL
 		void Calculate(int type, VolumeData* vd_a, VolumeData* vd_b);
 
 		//color map
-		FLTYPE::Color GetColorFromColormap(double value);
+		fluo::Color GetColorFromColormap(double value);
 
 		friend class VolumeFactory;
 
@@ -154,8 +155,8 @@ namespace FL
 		virtual ~VolumeData();
 
 	private:
-		FLIVR::VolumeRenderer *m_vr;
-		FLIVR::Texture *m_tex;
+		flvr::VolumeRenderer *m_vr;
+		flvr::Texture *m_tex;
 		BaseReader *m_reader;
 
 		std::vector<VD_Landmark> m_landmarks;

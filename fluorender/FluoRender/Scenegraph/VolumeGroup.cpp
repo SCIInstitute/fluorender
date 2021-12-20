@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/VolumeGroup.h>
-#include <Scenegraph/VolumeData.h>
+#include "VolumeGroup.hpp"
+#include <VolumeData.hpp>
 
-using namespace FL;
+using namespace fluo;
 
 VolumeGroup::VolumeGroup()
 {

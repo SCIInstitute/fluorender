@@ -25,51 +25,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef NAMES_HPP
+#define NAMES_HPP
 
-#ifndef VOLUMEGROUP_HPP
-#define VOLUMEGROUP_HPP
+#include <string>
 
-#include <Group.hpp>
+const std::string flstrOrigin = "origin";
+const std::string flstrFactoryGroup = "factory group";
+const std::string flstrVolumeFactory = "volume factory";
+const std::string flstrDefaultVolume = "default volume";
+const std::string flstrMeshFactory = "mesh factory";
+const std::string flstrDefaultMesh = "default mesh";
+const std::string flstrAnnotationFactory = "annotation factory";
+const std::string flstrDefaultAnnotations = "default annotations";
+const std::string flstrAgentFactory = "agent factory";
+const std::string flstrRenderer2DFactory = "renderer2d factory";
+const std::string flstrDefaultRenderer2D = "default renderer2d";
+const std::string flstrRenderer3DFactory = "renderer3d factory";
+const std::string flstrDefaultRenderer3D = "default renderer3d";
+const std::string flstrProcessorNodeFactory = "processor node factory";
+const std::string flstrDefaultProcessorNode = "default processor node";
+const std::string flstrProcessorFactory = "processor factory";
+const std::string flstrDefaultProcessor = "default processor";
 
-namespace fluo
-{
-	class VolumeFactory;
-	class VolumeData;
-	class VolumeGroup : public Group
-	{
-	public:
-		VolumeGroup();
-		VolumeGroup(const VolumeGroup& group, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
-		VolumeGroup(const VolumeData& vd, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
-
-		virtual Object* clone(const CopyOp& copyop) const
-		{
-			return new VolumeGroup(*this, copyop);
-		}
-
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const VolumeGroup*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "VolumeGroup"; }
-
-		virtual VolumeGroup* asVolumeGroup() { return this; }
-		virtual const VolumeGroup* asVolumeGroup() const { return this; }
-
-		//manage value syncs
-		virtual bool insertChild(size_t index, Node* child);
-		virtual bool setChild(size_t i, Node* node);
-		virtual bool removeChildren(size_t pos, size_t num);
-
-		friend class VolumeFactory;
-
-	protected:
-		virtual ~VolumeGroup();
-
-	private:
-		void OnRandomizeColor(Event& event);//randomize color
-	};
-}
-
-#endif//_VOLUMEGROUP_H_
+#endif//NAMES_HPP

@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEFACTORY_H_
 #define _VOLUMEFACTORY_H_
 
-#include <Flobject/ObjectFactory.h>
-#include <Scenegraph/VolumeData.h>
+#include <ObjectFactory.hpp>
+#include <VolumeData.hpp>
 
-namespace FL
+namespace fluo
 {
 	class VolumeFactory : public ObjectFactory
 	{
@@ -91,6 +91,9 @@ namespace FL
 		virtual ~VolumeFactory();
 
 		void OnSetDefault(Event& event);
+
+    private:
+      const std::string current = "current";
 	};
 
 }

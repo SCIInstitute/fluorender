@@ -25,25 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _GLOBAL_H_
-#define _GLOBAL_H_
+#ifndef GLOBAL_HPP
+#define GLOBAL_HPP
 
-#include <Scenegraph/VolumeFactory.h>
-#include <Scenegraph/MeshFactory.h>
-#include <Scenegraph/AnnotationFactory.h>
-#include <Fui/AgentFactory.h>
-#include <Fui/IconList.h>
-#include <Processor/ProcessorFactory.h>
+#include <Group.hpp>
+#include <string>
 
-namespace FL
+class AgentFactory;
+namespace fluo
 {
+	class VolumeFactory;
+	class MeshFactory;
+	class AnnotationFactory;
+	class Renderer2DFactory;
+	class Renderer3DFactory;
 	//automatically creates the factories and provide global access
 	class Global
 	{
 	public:
 		static Global& instance() { return instance_; }
 
-		inline size_t getNum()
+		Object* get(const std::string &name);
+		VolumeFactory* getVolumeFactory();
+		MeshFactory* getMeshFactory();
+		AnnotationFactory* getAnnotationFactory();
+		AgentFactory* getAgentFactory();
+		Renderer2DFactory* getRenderer2DFactory();
+		Renderer3DFactory* getRenderer3DFactory();
+
+/*		inline size_t getNum()
 		{
 			size_t volume_num = volume_factory_->getNum();
 			size_t mesh_num = mesh_factory_->getNum();
@@ -100,7 +110,7 @@ namespace FL
 		AnnotationFactory& getAnnotationFactory()
 		{ return *annotation_factory_;}
 
-		FUI::AgentFactory& getAgentFactory()
+        AgentFactory& getAgentFactory()
 		{ return *agent_factory_; }
 
 		FUI::IconList& getIconList(bool shown)
@@ -115,26 +125,20 @@ namespace FL
 
 		ProcessorFactory& getProcessorFactory()
 		{ return *processor_factory_; }
-
+*/
 	private:
 		Global();
 
 		static Global instance_;
 
-		//objects in these will be shown in the list panel
-		ref_ptr<VolumeFactory> volume_factory_;
-		ref_ptr<MeshFactory> mesh_factory_;
-		ref_ptr<AnnotationFactory> annotation_factory_;
+		ref_ptr<Group> origin_;//the root of everything else
 
-		//list of agent
-		ref_ptr<FUI::AgentFactory> agent_factory_;
+	private:
+#define BUILD_AND_ADD(cls, par) \
+	{cls* obj = new cls();\
+	par->addChild(obj);}
 
-		//list of processors
-		ref_ptr<ProcessorFactory> processor_factory_;
-
-		//icon list
-		FUI::IconList shown_icon_list_;
-		FUI::IconList hidden_icon_list_;
+		void BuildFactories();
 	};
 }
 

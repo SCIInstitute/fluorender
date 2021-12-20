@@ -25,18 +25,96 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Global/Global.h>
 
-using namespace FL;
+#include "Global.hpp"
+#include "Names.hpp"
+#include <AnnotationFactory.hpp>
+#include <MeshFactory.hpp>
+#include <VolumeFactory.hpp>
+#include <FUI/Panels/AgentFactory.hpp>
+#include <Renderer2DFactory.hpp>
+#include <Renderer3DFactory.hpp>
+#include <SearchVisitor.hpp>
+
+using namespace fluo;
 
 Global Global::instance_;
 Global::Global()
 {
-	volume_factory_ = ref_ptr<VolumeFactory>(new VolumeFactory());
-	mesh_factory_ = ref_ptr<MeshFactory>(new MeshFactory());
-	annotation_factory_ = ref_ptr<AnnotationFactory>(new AnnotationFactory());
+	origin_ = ref_ptr<Group>(new Group());
+	origin_->setName(flstrOrigin);
+	BuildFactories();
+}
 
-	agent_factory_ = ref_ptr<FUI::AgentFactory>(new FUI::AgentFactory());
+void Global::BuildFactories()
+{
+	Group* factory_group = new Group();
+	factory_group->setName(flstrFactoryGroup);
+	origin_->addChild(factory_group);
+	BUILD_AND_ADD(VolumeFactory, factory_group);
+	BUILD_AND_ADD(MeshFactory, factory_group);
+	BUILD_AND_ADD(AnnotationFactory, factory_group);
+	BUILD_AND_ADD(AgentFactory, factory_group);
+	BUILD_AND_ADD(Renderer2DFactory, factory_group);
+	BUILD_AND_ADD(Renderer3DFactory, factory_group);
+}
 
-	processor_factory_ = ref_ptr<ProcessorFactory>(new ProcessorFactory());
+Object* Global::get(const std::string &name)
+{
+	SearchVisitor visitor;
+	visitor.matchName(name);
+	origin_->accept(visitor);
+	ObjectList* list = visitor.getResult();
+	if (list->empty())
+		return 0;
+	else
+		return (*list)[0];
+}
+
+VolumeFactory* Global::getVolumeFactory()
+{
+	Object* obj = get(flstrVolumeFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<VolumeFactory*>(obj);
+}
+
+MeshFactory* Global::getMeshFactory()
+{
+	Object* obj = get(flstrMeshFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<MeshFactory*>(obj);
+}
+
+AnnotationFactory* Global::getAnnotationFactory()
+{
+	Object* obj = get(flstrAnnotationFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AnnotationFactory*>(obj);
+}
+
+AgentFactory* Global::getAgentFactory()
+{
+	Object* obj = get(flstrAgentFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AgentFactory*>(obj);
+}
+
+Renderer2DFactory* Global::getRenderer2DFactory()
+{
+	Object* obj = get(flstrRenderer2DFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<Renderer2DFactory*>(obj);
+}
+
+Renderer3DFactory* Global::getRenderer3DFactory()
+{
+	Object* obj = get(flstrRenderer3DFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<Renderer3DFactory*>(obj);
 }

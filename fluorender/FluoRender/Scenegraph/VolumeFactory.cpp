@@ -26,17 +26,20 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Scenegraph/VolumeFactory.h>
-#include <Scenegraph/VolumeGroup.h>
+#include "VolumeFactory.hpp"
+#include <VolumeGroup.hpp>
+#include <Names.hpp>
 
-using namespace FL;
+using namespace fluo;
 
 VolumeFactory::VolumeFactory()
 {
-	m_name = "volume factory";
-	default_object_name_ = "default volume";
+	m_name = flstrVolumeFactory;
+	default_object_name_ = flstrDefaultVolume;
 
-	addValue("current", (VolumeData*)(0));//current volume data
+    VolumeData* currentVD = new VolumeData();
+
+	addValue(current, currentVD);//current volume data
 
 	setValueChangedFunction(
 		default_setting_filename_value_name_,
@@ -72,10 +75,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("sync g", bool(false));
 		vd->addValue("sync b", bool(false));
 
-		vd->addValue("bounds", FLTYPE::BBox());
+		vd->addValue("bounds", BBox());
 		//clipping planes
-		vd->addValue("clip planes", FLTYPE::PlaneSet(6));
-		vd->addValue("clip bounds", FLTYPE::BBox());
+		vd->addValue("clip planes", PlaneSet(6));
+		vd->addValue("clip bounds", BBox());
 		//save clip values individually
 		//actual clipping planes are calculated after either
 		//clip values or rotations are changed
@@ -101,7 +104,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("clip display", bool(false));
 		vd->addValue("clip hold", bool(false));
 		vd->addValue("clip mask", long(-1));
-		vd->addValue("clip render mode", long(FLTYPE::PRMNormal));
+		vd->addValue("clip render mode", long(PRMNormal));
 
 		vd->addValue("data path", std::wstring());//path to original file
 		vd->addValue("channel", long(0));//channel index of the original file
@@ -144,10 +147,10 @@ void VolumeFactory::createDefault()
 		vd->addValue("shadow int", double(1));
 		vd->addValue("sample rate", double(1));//sample rate
 		//color
-		vd->addValue("color", FLTYPE::Color(1.0));
-		vd->addValue("hsv", FLTYPE::HSVColor(FLTYPE::Color(1.0)));
+		vd->addValue("color", Color(1.0));
+		vd->addValue("hsv", HSVColor(Color(1.0)));
 		vd->addValue("luminance", double(1.0));
-		vd->addValue("sec color", FLTYPE::Color(1.0));//secondary color
+		vd->addValue("sec color", Color(1.0));//secondary color
 		vd->addValue("sec color set", bool(false));
 		vd->addValue("randomize color", bool(false));//set to change color
 
@@ -227,8 +230,8 @@ void VolumeFactory::createDefault()
 		vd->addValue("estimate thresh", double(0));
 
 		//parameters not in original class but passed to renderer
-		vd->addValue("viewport", FLTYPE::GLint4());//viewport
-		vd->addValue("clear color", FLTYPE::GLfloat4());//clear color
+		vd->addValue("viewport", Vector4i());//viewport
+		vd->addValue("clear color", Vector4f());//clear color
 		vd->addValue("cur framebuffer", (unsigned long)(0));//current framebuffer
 
 		//multires level
@@ -237,7 +240,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("level num", long(1));
 
 		//tex transform
-		vd->addValue("tex transform", FLTYPE::Transform());
+		vd->addValue("tex transform", Transform());
 
 		//selected on the ui
 		vd->addValue("selected", bool(false));
@@ -344,8 +347,11 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	new_vd->setName(name);
 
 	objects_.push_front(new_vd);
-	setValue("current", new_vd);
 
+    Referenced* temp = new_vd; //needed so the correct function is called.
+
+	setValue(current, temp);
+    new_vd = dynamic_cast<VolumeData*>(temp);
 	setEventHandler(new_vd);
 
 	//notify observers
@@ -360,6 +366,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 VolumeData* VolumeFactory::clone(const unsigned int id)
 {
 	Object* object = find(id);
+    std::cout << object->getId() << " " << object->getName() << std::endl;
 	if (object)
 	{
 		VolumeData* vd = dynamic_cast<VolumeData*>(object);
