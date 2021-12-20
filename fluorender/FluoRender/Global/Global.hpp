@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 
 #define glbin fluo::Global::instance()
 #define glbin_timer fluo::Global::instance().getTimer()
+#define glbin_volf fluo::Global::instance().getVolumeFactory()
 
 //class AgentFactory;
 class Fltimer;

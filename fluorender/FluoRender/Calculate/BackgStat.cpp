@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "BackgStat.h"
-#include <DataManager.h>
+#include <VolumeData.hpp>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -229,7 +229,7 @@ const char* str_cl_backg_stat = \
 "	atomic_inc(hist+index);\n" \
 "}\n";
 
-BackgStat::BackgStat(VolumeData* vd)
+BackgStat::BackgStat(fluo::VolumeData* vd)
 	: m_vd(vd),
 	m_use_mask(false),
 	m_type(0),
@@ -283,7 +283,8 @@ void BackgStat::Run()
 #endif
 	if (!CheckBricks())
 		return;
-	long bits = m_vd->GetBits();
+	long bits;
+	m_vd->getValue("bits", bits);
 	int chars = bits / 8;
 
 	//create program and kernels
@@ -332,10 +333,10 @@ void BackgStat::Run()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
+		GLint tid = m_vd->GetRenderer()->load_brick(b);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(b);
+			mid = m_vd->GetRenderer()->load_brick_mask(b);
 
 		//compute workload
 		flvr::GroupSize gsize;
