@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,142 +25,93 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef NV_TIMER_H
-#define NV_TIMER_H
-// ----------------------------------------------------------------------------
-// 
-// Content:
-//      Timer class
-//
-// Description:
-//      A high precision timer with built in filtering (averaging) 
-//      capabilities.
-//
-// Author: Frank Jargstorff (03/08/04)
-//
-// Note:
-//      Copyright (C) 2004 NVIDIA Crop. 
-//
-// ----------------------------------------------------------------------------
+#ifndef FLTIMER_H
+#define FLTIMER_H
 
-
-//
-// Includes
-//
-
-#ifdef _WIN32
-#define WINDOWS_LEAN_AND_MEAN
-#include <windows.h>
-#include <winbase.h>
-
-// includes for other OSes will go here
-#else
-#include <time.h>
-#include <sys/time.h>
-#endif
-
-//
-// Namespace
-//
-
-namespace nv {
-
-
-	// ----------------------------------------------------------------------------
-	// Timer class
+class Fltimer
+{
+public:
+	// 
+	// Construction and destruction
 	//
-	class Timer
-	{
-	public:
-		// 
-		// Construction and destruction
-		//
 
-		// Default constructor
-		//
-		Timer(unsigned int nBoxFilterSize = 1);
+	// Default constructor
+	//
+	Fltimer(unsigned int nBoxFilterSize = 1);
 
-		// Destructor
-		//
-		~Timer();
+	// Destructor
+	//
+	~Fltimer();
 
 
-		//
-		// Public methods
-		//
+	//
+	// Public methods
+	//
 
-		// start
-		//
-		void
-			start();
+	// start
+	//
+	void
+		start();
 
-		// stop
-		//
-		void
-			stop();
+	// stop
+	//
+	void
+		stop();
 
-		// sample
-		//
-		void
-			sample();
+	// sample
+	//
+	void
+		sample();
 
-		// time
-		//
-		// Description:
-		//      Time interval in ms
-		//
-		double
-			time()
-			const;
+	// time
+	//
+	// Description:
+	//      Time interval in ms
+	//
+	double
+		time()
+		const;
 
-		// average
-		//
-		// Description:
-		//      Average time interval of the last events in ms.
-		//          Box filter size determines how many events get
-		//      tracked. If not at least filter-size events were timed
-		//      the result is undetermined.
-		//
-		double
-			average()
-			const;
+	// average
+	//
+	// Description:
+	//      Average time interval of the last events in ms.
+	//          Box filter size determines how many events get
+	//      tracked. If not at least filter-size events were timed
+	//      the result is undetermined.
+	//
+	double
+		average()
+		const;
 
-		unsigned long long
-			count() const;
+	unsigned long long
+		count() const;
 
-		double
-			total_time() const;
+	double
+		total_time() const;
 
-		double
-			total_fps() const;
+	double
+		total_fps() const;
 
-	private:
-		//
-		// Private data
-		//
+private:
+	//
+	// Private data
+	//
 
-#ifdef _WIN32
-		LARGE_INTEGER _nStartCount;
-		LARGE_INTEGER _nStopCount;
-		LARGE_INTEGER _nFrequency;
-		// Data for other OSes potentially goes here
-#else
-		unsigned long long _nStartCount;
-		unsigned long long _nStopCount;
-		unsigned long long _nFrequency;
-#endif
+	unsigned long long _nStartCount;
+	unsigned long long _nStopCount;
+	unsigned long long _nFrequency;
 
-		double _nLastPeriod;
-		double _nSum;
-		double _nTotal;
-		unsigned long long _nCount;
+	double _nLastPeriod;
+	double _nSum;
+	double _nTotal;
+	unsigned long long _nCount;
 
-		unsigned int _nBoxFilterSize;
-		unsigned int _iFilterPosition;
-		double *     _aIntervals;
+	unsigned int _nBoxFilterSize;
+	unsigned int _iFilterPosition;
+	double *     _aIntervals;
 
-		bool _bClockRuns;
-	};
-}; // end namespace nv
+	bool _bClockRuns;
+};
 
-#endif // NV_TIMER_H 
+#endif // FLTIMER_H 

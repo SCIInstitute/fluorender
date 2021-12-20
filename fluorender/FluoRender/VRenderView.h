@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define _VRENDERVIEW_H_
 
 #include "VRenderGLView.h"
+#include <wx/clrpicker.h>
+#include <wx/spinbutt.h>
 
 namespace FL
 {

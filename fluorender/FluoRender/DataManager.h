@@ -25,19 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <GL/glew.h>
-#include "compatibility.h"
-#include <vector>
-#include <string.h>
-#include <tiffio.h>
-//#include "FLIVR/BBox.h"
-//#include "FLIVR/Color.h"
-//#include "FLIVR/Point.h"
+#ifndef _DATAMANAGER_H_
+#define _DATAMANAGER_H_
+
 #include "FLIVR/MeshRenderer.h"
 #include "FLIVR/VolumeRenderer.h"
 #include <FLIVR/VertexArray.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
 #include "Formats/base_reader.h"
 #include "Formats/oib_reader.h"
 #include "Formats/oif_reader.h"
@@ -53,9 +46,12 @@ DEALINGS IN THE SOFTWARE.
 #include "Formats/brkxml_reader.h"
 #include "Formats/imageJ_reader.h"
 #include "Tracking/TrackMap.h"
-
-#ifndef _DATAMANAGER_H_
-#define _DATAMANAGER_H_
+#include <wx/wfstream.h>
+#include <wx/fileconf.h>
+#include <vector>
+#include <string.h>
+#include <tiffio.h>
+#include "compatibility.h"
 
 using namespace std;
 using namespace FLIVR;

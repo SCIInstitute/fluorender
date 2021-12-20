@@ -36,24 +36,24 @@ DEALINGS IN THE SOFTWARE.
 
 #ifdef _WIN32 //WINDOWS ONLY
 
+#include <wx/wx.h>
+#include <wx/fileconf.h>
+#include <wx/wfstream.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
 #include <cstdint>
 #include <string>
-#include <cstring> 
+#include <cstring>
+#include <fstream>
 #include <locale>
 #include <vector>
-#include <windows.h>
-#include <ole2.h>
-#include <ctime>
+#include <chrono>
 #include <sys/types.h>
 #include <ctype.h>
-//#include <wx/wx.h>
-#include "tiffio.h"
+#include <tiffio.h>
 #include <direct.h>
 #include <codecvt>
-#include <fstream>
 
 #define GETCURRENTDIR _getcwd
 
@@ -187,9 +187,9 @@ inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 //inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
 //inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
 
-inline time_t TIME(time_t* n) { return _time32((__time32_t*)n); }
+inline time_t TIME(time_t* n) { return 0; }// _time32((__time32_t*)n); }
 
-inline uint32_t GET_TICK_COUNT() { return GetTickCount(); }
+inline uint32_t GET_TICK_COUNT() { return 0; }// GetTickCount(); }
 
 inline bool FIND_FILES_4D(std::wstring path_name,
 	std::wstring id, std::vector<std::wstring> &batch_list,

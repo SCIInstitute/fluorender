@@ -26,9 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <boost/process.hpp>
-#include "VRenderGLView.h"
-#include "VRenderView.h"
+#include <VRenderGLView.h>
+#include <VRenderView.h>
 #include <VRenderFrame.h>
 #include <Fui/TreePanel.h>
 #include <Global/Global.h>
@@ -39,17 +38,17 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderer/ClipPlaneRenderer.h>
 #include <Types/Plane.h>
 #include <FLIVR/Point.h>
-#include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
+#include <FLIVR/Framebuffer.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <wx/stdpaths.h>
-#include "png_resource.h"
-#include "img/icons.h"
-#include <utility>
+#include <png_resource.h>
+#include <img/icons.h>
 #include <Debug.h>
+//#include <boost/process.hpp>
 
 bool VRenderGLView::m_linked_rot = false;
 VRenderGLView* VRenderGLView::m_master_linked_view = 0;
@@ -369,7 +368,7 @@ VRenderGLView::VRenderGLView(wxWindow* frame,
 
 	LoadBrushSettings();
 
-	m_timer = new nv::Timer(10);
+	m_timer = new Fltimer(10);
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetBenchmark())
 		m_benchmark = true;
@@ -6572,28 +6571,28 @@ void VRenderGLView::RunSeparateChannels(wxFileConfig &fconfig)
 
 void VRenderGLView::RunExternalExe(wxFileConfig &fconfig)
 {
-#ifndef __linux__
-	wxString pathname;
-	fconfig.Read("exepath", &pathname);
-	if (!wxFileExists(pathname))
-		return;
-	FL::VolumeData* vd = m_cur_vol;
-	if (!vd)
-		return;
-	BaseReader* reader = vd->GetReader();
-	if (!reader)
-		return;
-	long channel;
-	vd->getValue("channel", channel);
-	wxString data_name = reader->GetCurDataName(m_tseq_cur_num, channel);
-
-	vector<string> args;
-	args.push_back(pathname.ToStdString());
-	args.push_back(data_name.ToStdString());
-	boost::process::child c(pathname.ToStdString(),
-		data_name.ToStdString());
-	c.wait();
-#endif
+//#ifndef __linux__
+//	wxString pathname;
+//	fconfig.Read("exepath", &pathname);
+//	if (!wxFileExists(pathname))
+//		return;
+//	FL::VolumeData* vd = m_cur_vol;
+//	if (!vd)
+//		return;
+//	BaseReader* reader = vd->GetReader();
+//	if (!reader)
+//		return;
+//	long channel;
+//	vd->getValue("channel", channel);
+//	wxString data_name = reader->GetCurDataName(m_tseq_cur_num, channel);
+//
+//	vector<string> args;
+//	args.push_back(pathname.ToStdString());
+//	args.push_back(data_name.ToStdString());
+//	boost::process::child c(pathname.ToStdString(),
+//		data_name.ToStdString());
+//	c.wait();
+//#endif
 }
 
 void VRenderGLView::RunFetchMask(wxFileConfig &fconfig)

@@ -29,40 +29,30 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERGLVIEW_H_
 #define _VRENDERGLVIEW_H_
 
+#include <DataManager.h>
+#include <VolumeLoader.h>
 #include <Fui/RenderCanvasAgent.h>
 #include <Types/Quaternion.h>
 #include <Types/Color.h>
 #include <Types/BBox.h>
-#include "DataManager.h"
-#include "VolumeLoader.h"
-#include "utility.h"
-#include "VolumeSelector.h"
-#include "KernelExecutor.h"
+#include <VolumeSelector.h>
+#include <KernelExecutor.h>
 #include <Calculate/VolumeCalculator.h>
-
-#include "FLIVR/ShaderProgram.h"
-#include "FLIVR/KernelProgram.h"
-#include "FLIVR/MultiVolumeRenderer.h"
-#include "FLIVR/ImgShader.h"
-#include "FLIVR/VolKernel.h"
+#include <FLIVR/ShaderProgram.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/MultiVolumeRenderer.h>
+#include <FLIVR/ImgShader.h>
+#include <FLIVR/VolKernel.h>
 #include <FLIVR/TextRenderer.h>
-#include "compatibility.h"
-
-#include <wx/wx.h>
-#include <wx/clrpicker.h>
-#include <wx/spinbutt.h>
-#include <wx/glcanvas.h>
-#include <wx/event.h>
-#include <wx/timer.h>
-
+#include <Timer.h>
+#include <utility.h>
+#include <glm/glm.hpp>
 #include <vector>
 #include <stdarg.h>
-#include "NV/Timer.h"
-
-#include <glm/glm.hpp>
+#include <openvr.h>
+#include <compatibility.h>
 
 #ifdef _WIN32
-//#include <Windows.h>
 //wacom support
 #include <wx/msw/private.h>
 #include <MSGPACK.h>
@@ -74,8 +64,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Wacom/Utils.h>
 #include <XInput/XboxController.h>
 #endif
-
-#include <openvr.h>
+#include <wx/glcanvas.h>
 
 #define VOL_METHOD_SEQ    1
 #define VOL_METHOD_MULTI  2
@@ -853,7 +842,7 @@ private:
 	KernelExecutor m_kernel_executor;
 
 	//timer
-	nv::Timer *m_timer;
+	Fltimer *m_timer;
 
 	//timer for full screen
 	wxTimer m_fullscreen_trigger;
