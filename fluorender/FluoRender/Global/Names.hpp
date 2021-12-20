@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -47,5 +47,6 @@ const std::string flstrProcessorNodeFactory = "processor node factory";
 const std::string flstrDefaultProcessorNode = "default processor node";
 const std::string flstrProcessorFactory = "processor factory";
 const std::string flstrDefaultProcessor = "default processor";
+const std::string flstrTimer = "default timer";
 
 #endif//NAMES_HPP

@@ -48,7 +48,6 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <locale>
 #include <vector>
-#include <chrono>
 #include <sys/types.h>
 #include <ctype.h>
 #include <tiffio.h>
@@ -212,18 +211,6 @@ inline int STOI(wxChar * s) { return (s ? _wtoi(s) : 0); }
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
 inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
-
-inline unsigned long long TIME()
-{
-	using namespace std::chrono;
-	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
-}
-
-inline unsigned long long GET_TICK_COUNT()
-{
-	using namespace std::chrono;
-	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
-}
 
 inline std::string STR_DIR_SEP(const std::string pathname)
 {
@@ -500,8 +487,6 @@ inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
-inline time_t TIME(time_t* n) { return time(n); }
-
 typedef union _LARGE_INTEGER {
 	struct {
 		unsigned int LowPart;
@@ -657,12 +642,6 @@ inline int MkDir(std::string dirname)
 inline int MkDirW(std::wstring dirname)
 {
 	return mkdir(ws2s(dirname).c_str(), 0777);
-}
-
-inline uint32_t GET_TICK_COUNT() {
-	struct timeval ts;
-	gettimeofday(&ts, NULL);
-	return ts.tv_sec * 1000 + ts.tv_usec / 1000;
 }
 
 inline void SaveConfig(wxFileConfig &file, wxString str)

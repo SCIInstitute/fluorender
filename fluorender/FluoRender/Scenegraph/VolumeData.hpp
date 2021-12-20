@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define VOLUMEDATA_HPP
 
 #include <Node.hpp>
-#include <teem/nrrd.h>
+#include <Nrrd/nrrd.h>
 #include <glm/glm.hpp>
 #include <vector>
 

@@ -31,7 +31,8 @@
 #include "ShaderProgram.h"
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include "../compatibility.h"
+#include <Timer.h>
+#include <Global.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -296,7 +297,7 @@ namespace flvr
 			{
 				if (TextureRenderer::mem_swap_)
 				{
-					unsigned long long rn_time = GET_TICK_COUNT();
+					unsigned long long rn_time = glbin_timer->get_ticks();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
 						break;
 				}

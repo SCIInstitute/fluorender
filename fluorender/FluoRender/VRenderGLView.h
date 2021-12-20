@@ -50,7 +50,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <Types/Quaternion.h>
 #include "compatibility.h"
-#include <Timer.h>
 
 #include <wx/wx.h>
 #include <wx/clrpicker.h>
@@ -921,9 +920,6 @@ private:
 
 	//scriptor
 	flrd::ScriptProc m_scriptor;
-
-	//timer
-	Fltimer *m_timer;
 
 	//timer for full screen
 	wxTimer m_fullscreen_trigger;

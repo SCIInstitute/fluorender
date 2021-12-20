@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,12 +28,13 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Global.hpp"
 #include "Names.hpp"
-#include <AnnotationFactory.hpp>
-#include <MeshFactory.hpp>
+#include <Timer.h>
+//#include <AnnotationFactory.hpp>
+//#include <MeshFactory.hpp>
 #include <VolumeFactory.hpp>
-#include <FUI/Panels/AgentFactory.hpp>
-#include <Renderer2DFactory.hpp>
-#include <Renderer3DFactory.hpp>
+//#include <FUI/Panels/AgentFactory.hpp>
+//#include <Renderer2DFactory.hpp>
+//#include <Renderer3DFactory.hpp>
 #include <SearchVisitor.hpp>
 
 using namespace fluo;
@@ -43,7 +44,15 @@ Global::Global()
 {
 	origin_ = ref_ptr<Group>(new Group());
 	origin_->setName(flstrOrigin);
+	BuildTimer();
 	BuildFactories();
+}
+
+void Global::BuildTimer()
+{
+	Fltimer* timer = new Fltimer();
+	timer->setName(flstrTimer);
+	origin_->addChild(timer);
 }
 
 void Global::BuildFactories()
@@ -52,11 +61,11 @@ void Global::BuildFactories()
 	factory_group->setName(flstrFactoryGroup);
 	origin_->addChild(factory_group);
 	BUILD_AND_ADD(VolumeFactory, factory_group);
-	BUILD_AND_ADD(MeshFactory, factory_group);
-	BUILD_AND_ADD(AnnotationFactory, factory_group);
-	BUILD_AND_ADD(AgentFactory, factory_group);
-	BUILD_AND_ADD(Renderer2DFactory, factory_group);
-	BUILD_AND_ADD(Renderer3DFactory, factory_group);
+	//BUILD_AND_ADD(MeshFactory, factory_group);
+	//BUILD_AND_ADD(AnnotationFactory, factory_group);
+	//BUILD_AND_ADD(AgentFactory, factory_group);
+	//BUILD_AND_ADD(Renderer2DFactory, factory_group);
+	//BUILD_AND_ADD(Renderer3DFactory, factory_group);
 }
 
 Object* Global::get(const std::string &name)
@@ -71,6 +80,14 @@ Object* Global::get(const std::string &name)
 		return (*list)[0];
 }
 
+Fltimer* Global::getTimer()
+{
+	Object* obj = get(flstrTimer);
+	if (!obj)
+		return 0;
+	return dynamic_cast<Fltimer*>(obj);
+}
+
 VolumeFactory* Global::getVolumeFactory()
 {
 	Object* obj = get(flstrVolumeFactory);
@@ -79,42 +96,42 @@ VolumeFactory* Global::getVolumeFactory()
 	return dynamic_cast<VolumeFactory*>(obj);
 }
 
-MeshFactory* Global::getMeshFactory()
-{
-	Object* obj = get(flstrMeshFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<MeshFactory*>(obj);
-}
-
-AnnotationFactory* Global::getAnnotationFactory()
-{
-	Object* obj = get(flstrAnnotationFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<AnnotationFactory*>(obj);
-}
-
-AgentFactory* Global::getAgentFactory()
-{
-	Object* obj = get(flstrAgentFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<AgentFactory*>(obj);
-}
-
-Renderer2DFactory* Global::getRenderer2DFactory()
-{
-	Object* obj = get(flstrRenderer2DFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<Renderer2DFactory*>(obj);
-}
-
-Renderer3DFactory* Global::getRenderer3DFactory()
-{
-	Object* obj = get(flstrRenderer3DFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<Renderer3DFactory*>(obj);
-}
+//MeshFactory* Global::getMeshFactory()
+//{
+//	Object* obj = get(flstrMeshFactory);
+//	if (!obj)
+//		return 0;
+//	return dynamic_cast<MeshFactory*>(obj);
+//}
+//
+//AnnotationFactory* Global::getAnnotationFactory()
+//{
+//	Object* obj = get(flstrAnnotationFactory);
+//	if (!obj)
+//		return 0;
+//	return dynamic_cast<AnnotationFactory*>(obj);
+//}
+//
+//AgentFactory* Global::getAgentFactory()
+//{
+//	Object* obj = get(flstrAgentFactory);
+//	if (!obj)
+//		return 0;
+//	return dynamic_cast<AgentFactory*>(obj);
+//}
+//
+//Renderer2DFactory* Global::getRenderer2DFactory()
+//{
+//	Object* obj = get(flstrRenderer2DFactory);
+//	if (!obj)
+//		return 0;
+//	return dynamic_cast<Renderer2DFactory*>(obj);
+//}
+//
+//Renderer3DFactory* Global::getRenderer3DFactory()
+//{
+//	Object* obj = get(flstrRenderer3DFactory);
+//	if (!obj)
+//		return 0;
+//	return dynamic_cast<Renderer3DFactory*>(obj);
+//}

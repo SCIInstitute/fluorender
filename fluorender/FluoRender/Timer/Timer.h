@@ -28,7 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FLTIMER_H
 #define FLTIMER_H
 
-class Fltimer
+#include <Flobject/Node.hpp>
+
+class Fltimer : public fluo::Node
 {
 public:
 	// 
@@ -38,11 +40,22 @@ public:
 	// Default constructor
 	//
 	Fltimer(unsigned int nBoxFilterSize = 1);
+	Fltimer(const Fltimer& data, const fluo::CopyOp& copyop = fluo::CopyOp::SHALLOW_COPY, bool copy_values = true);
 
-	// Destructor
-	//
-	~Fltimer();
+	virtual Object* clone(const fluo::CopyOp& copyop) const
+	{
+		return new Fltimer(*this, copyop);
+	}
 
+	virtual bool isSameKindAs(const Object* obj) const
+	{
+		return dynamic_cast<const Fltimer*>(obj) != NULL;
+	}
+
+	virtual const char* className() const { return "Fltimer"; }
+
+	virtual Fltimer* asFltimer() { return this; }
+	virtual const Fltimer* asFltimer() const { return this; }
 
 	//
 	// Public methods
@@ -92,6 +105,15 @@ public:
 
 	double
 		total_fps() const;
+
+	unsigned long long sys_time();
+
+	unsigned long long get_ticks();
+
+protected:
+	// Destructor
+	//
+	virtual ~Fltimer();
 
 private:
 	//

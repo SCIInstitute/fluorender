@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "Timer.h"
 #include <chrono>
-#include <assert.h>
 
 using namespace std::chrono;
 // Default constructor
@@ -54,10 +53,32 @@ Fltimer::Fltimer(unsigned int nBoxFilterSize) :
 		_aIntervals[iInterval] = 0.0;
 }
 
+Fltimer::Fltimer(const Fltimer& data, const fluo::CopyOp& copyop, bool copy_values) :
+	_nStartCount(data._nStartCount),
+	_nStopCount(data._nStopCount),
+	_nFrequency(data._nFrequency),
+	_nLastPeriod(data._nLastPeriod),
+	_nSum(data._nSum),
+	_nTotal(data._nTotal),
+	_nCount(data._nCount),
+	_nBoxFilterSize(data._nBoxFilterSize),
+	_iFilterPosition(data._iFilterPosition),
+	_aIntervals(data._aIntervals),
+	_bClockRuns(data._bClockRuns)
+{
+	// create array to store timing results
+	_aIntervals = new double[_nBoxFilterSize];
+
+	// initialize inverals with 0
+	for (unsigned int iInterval = 0; iInterval < _nBoxFilterSize; ++iInterval)
+		_aIntervals[iInterval] = 0.0;
+}
+
 // Destructor
 //
 Fltimer::~Fltimer()
 {
+	stop();
 	delete[] _aIntervals;
 }
 
@@ -168,4 +189,14 @@ Fltimer::total_fps() const
 		return static_cast<double>(_nCount) / _nTotal;
 	else
 		return 0;
+}
+
+unsigned long long Fltimer::sys_time()
+{
+	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
+}
+
+unsigned long long Fltimer::get_ticks()
+{
+	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
 }

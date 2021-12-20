@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -30,19 +30,19 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VolumeData.hpp"
 #include <FLIVR/VolumeRenderer.h>
-#include <Plane.hpp>
-#include <Formats/base_reader.hpp>
-#include <Formats/oib_reader.hpp>
-#include <Formats/nrrd_reader.hpp>
-#include <Formats/tif_reader.hpp>
-#include <Formats/nrrd_writer.hpp>
-#include <Formats/tif_writer.hpp>
-#include <Formats/msk_reader.hpp>
-#include <Formats/msk_writer.hpp>
-#include <Formats/lsm_reader.hpp>
-#include <Formats/lbl_reader.hpp>
-#include <Formats/pvxml_reader.hpp>
-#include <Formats/brkxml_reader.hpp>
+#include <Plane.h>
+#include <Formats/base_reader.h>
+#include <Formats/oib_reader.h>
+#include <Formats/nrrd_reader.h>
+#include <Formats/tif_reader.h>
+#include <Formats/nrrd_writer.h>
+#include <Formats/tif_writer.h>
+#include <Formats/msk_reader.h>
+#include <Formats/msk_writer.h>
+#include <Formats/lsm_reader.h>
+#include <Formats/lbl_reader.h>
+#include <Formats/pvxml_reader.h>
+#include <Formats/brkxml_reader.h>
 //#include <Formats/imageJ_reader.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

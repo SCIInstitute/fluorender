@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -37,14 +37,14 @@ VolumeFactory::VolumeFactory()
 	m_name = flstrVolumeFactory;
 	default_object_name_ = flstrDefaultVolume;
 
-    VolumeData* currentVD = new VolumeData();
+	VolumeData* currentVD = new VolumeData();
 
 	addValue(current, currentVD);//current volume data
 
 	setValueChangedFunction(
 		default_setting_filename_value_name_,
 		std::bind(&VolumeFactory::OnSetDefault,
-		this, std::placeholders::_1));
+			this, std::placeholders::_1));
 }
 
 VolumeFactory::~VolumeFactory()
@@ -348,10 +348,10 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 
 	objects_.push_front(new_vd);
 
-    Referenced* temp = new_vd; //needed so the correct function is called.
+	Referenced* temp = new_vd; //needed so the correct function is called.
 
 	setValue(current, temp);
-    new_vd = dynamic_cast<VolumeData*>(temp);
+	new_vd = dynamic_cast<VolumeData*>(temp);
 	setEventHandler(new_vd);
 
 	//notify observers
@@ -366,7 +366,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 VolumeData* VolumeFactory::clone(const unsigned int id)
 {
 	Object* object = find(id);
-    std::cout << object->getId() << " " << object->getName() << std::endl;
+	std::cout << object->getId() << " " << object->getName() << std::endl;
 	if (object)
 	{
 		VolumeData* vd = dynamic_cast<VolumeData*>(object);

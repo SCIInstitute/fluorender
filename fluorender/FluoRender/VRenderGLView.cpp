@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Global.hpp>
+#include <Timer.h>
 #include <Components/CompAnalyzer.h>
 #include <Calculate/Count.h>
 #include <Distance/SegGrow.h>
@@ -40,7 +42,6 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtx/string_cast.hpp>
 #include <wx/stdpaths.h>
 #include <Debug.h>
-#include <Timer.h>
 #include "png_resource.h"
 #include "img/icons.h"
 
@@ -350,7 +351,6 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 
 	m_selector.LoadBrushSettings();
 
-	m_timer = new Fltimer(10);
 	if (m_frame && m_frame->GetBenchmark())
 		m_benchmark = true;
 	else
@@ -491,20 +491,19 @@ VRenderGLView::~VRenderGLView()
 {
 	if (m_benchmark)
 	{
-		int msec = int(m_timer->total_time() * 1000.0);
-		double fps = m_timer->total_fps();
+		int msec = int(glbin_timer->total_time() * 1000.0);
+		double fps = glbin_timer->total_fps();
 		wxString string = wxString("FluoRender has finished benchmarking.\n") +
 			wxString("Results:\n") +
 			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.GetWidth(), m_size.GetHeight()) +
 			wxString("Time: ") + wxString::Format("%d msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", m_timer->count()) +
+			wxString("Frames: ") + wxString::Format("%llu\n", glbin_timer->count()) +
 			wxString("FPS: ") + wxString::Format("%.2f", fps);
 		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
 			wxOK | wxICON_INFORMATION);
 		diag->ShowModal();
 	}
-	m_timer->stop();
-	delete m_timer;
+	glbin_timer->stop();
 
 	m_selector.SaveBrushSettings();
 
@@ -623,7 +622,7 @@ void VRenderGLView::Init()
 
 		m_initialized = true;
 
-		m_timer->start();
+		glbin_timer->start();
 	}
 }
 
@@ -1305,7 +1304,7 @@ void VRenderGLView::DrawVolumes(int peel)
 		if (flvr::TextureRenderer::get_mem_swap())
 		{
 			//set start time for the texture renderer
-			flvr::TextureRenderer::set_st_time(GET_TICK_COUNT());
+			flvr::TextureRenderer::set_st_time(glbin_timer->get_ticks());
 
 			flvr::TextureRenderer::set_interactive(m_interactive);
 			//if in interactive mode, do interactive bricking also
@@ -1519,7 +1518,7 @@ void VRenderGLView::DrawVolumes(int peel)
 
 	if (flvr::TextureRenderer::get_mem_swap())
 	{
-		flvr::TextureRenderer::set_consumed_time(GET_TICK_COUNT() - flvr::TextureRenderer::get_st_time());
+		flvr::TextureRenderer::set_consumed_time(glbin_timer->get_ticks() - flvr::TextureRenderer::get_st_time());
 		if (flvr::TextureRenderer::get_start_update_loop() &&
 			flvr::TextureRenderer::get_done_update_loop())
 			flvr::TextureRenderer::reset_update_loop();
@@ -2461,7 +2460,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = GET_TICK_COUNT();
+		unsigned int rn_time = glbin_timer->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -2657,7 +2656,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = GET_TICK_COUNT();
+		unsigned int rn_time = glbin_timer->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -2953,7 +2952,7 @@ void VRenderGLView::DrawOLShading(VolumeData* vd)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = GET_TICK_COUNT();
+		unsigned int rn_time = glbin_timer->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -3190,7 +3189,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = GET_TICK_COUNT();
+		unsigned int rn_time = glbin_timer->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -3867,7 +3866,7 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 
 	if (m_frame && m_frame->GetBenchmark())
 	{
-		double fps = 1.0 / m_timer->average();
+		double fps = 1.0 / glbin_timer->average();
 		wxString title = wxString(FLUORENDER_TITLE) +
 			" " + wxString(VERSION_MAJOR_TAG) +
 			"." + wxString(VERSION_MINOR_TAG) +
@@ -5388,7 +5387,7 @@ void VRenderGLView::ForceDraw()
 	else
 		SwapBuffers();
 
-	m_timer->sample();
+	glbin_timer->sample();
 	m_drawing = false;
 
 	DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
@@ -8467,7 +8466,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	float gapw = flvr::TextRenderer::text_texture_manager_.GetSize();
 	float gaph = gapw * 2;
 
-	double fps_ = 1.0 / m_timer->average();
+	double fps_ = 1.0 / glbin_timer->average();
 	wxString str;
 	fluo::Color text_color = GetTextColor();
 	if (flvr::TextureRenderer::get_mem_swap())

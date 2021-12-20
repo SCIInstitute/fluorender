@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
-#include <boost/bind.hpp>
 #include <limits>
 #include <string>
 #include <cctype>

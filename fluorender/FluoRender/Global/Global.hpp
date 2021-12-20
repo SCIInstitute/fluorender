@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -31,14 +31,18 @@ DEALINGS IN THE SOFTWARE.
 #include <Group.hpp>
 #include <string>
 
-class AgentFactory;
+#define glbin fluo::Global::instance()
+#define glbin_timer fluo::Global::instance().getTimer()
+
+//class AgentFactory;
+class Fltimer;
 namespace fluo
 {
 	class VolumeFactory;
-	class MeshFactory;
-	class AnnotationFactory;
-	class Renderer2DFactory;
-	class Renderer3DFactory;
+	//class MeshFactory;
+	//class AnnotationFactory;
+	//class Renderer2DFactory;
+	//class Renderer3DFactory;
 	//automatically creates the factories and provide global access
 	class Global
 	{
@@ -46,12 +50,13 @@ namespace fluo
 		static Global& instance() { return instance_; }
 
 		Object* get(const std::string &name);
+		Fltimer* getTimer();
 		VolumeFactory* getVolumeFactory();
-		MeshFactory* getMeshFactory();
-		AnnotationFactory* getAnnotationFactory();
-		AgentFactory* getAgentFactory();
-		Renderer2DFactory* getRenderer2DFactory();
-		Renderer3DFactory* getRenderer3DFactory();
+		//MeshFactory* getMeshFactory();
+		//AnnotationFactory* getAnnotationFactory();
+		//AgentFactory* getAgentFactory();
+		//Renderer2DFactory* getRenderer2DFactory();
+		//Renderer3DFactory* getRenderer3DFactory();
 
 /*		inline size_t getNum()
 		{
@@ -138,6 +143,7 @@ namespace fluo
 	{cls* obj = new cls();\
 	par->addChild(obj);}
 
+		void BuildTimer();
 		void BuildFactories();
 	};
 }

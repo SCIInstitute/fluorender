@@ -37,9 +37,10 @@
 #include <FLIVR/VertexArray.h>
 #include <Types/Color.h>
 #include <Types/Utils.h>
+#include <Timer.h>
+#include <Global.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
-#include "compatibility.h"
 #include <wx/utils.h>
 
 using namespace std;
@@ -871,7 +872,7 @@ namespace flvr
 								unsigned long elapsed;
 								long t;
 								do {
-									rn_time = GET_TICK_COUNT();
+									rn_time = glbin_timer->get_ticks();
 									elapsed = rn_time - st_time_;
 									t = up_time_ - elapsed;
 									if (t > 0) wxMilliSleep(t);

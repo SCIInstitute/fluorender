@@ -27,14 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Main.h"
-#include <cstdio>
-#include <iostream>
+#include "VRenderFrame.h"
+#include <Timer.h>
+#include <Global.hpp>
+#include "JVMInitializer.h"
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
-#include "VRenderFrame.h"
-#include "compatibility.h"
-#include "JVMInitializer.h"
+#include <cstdio>
+#include <iostream>
 
 IMPLEMENT_APP(VRenderApp)
 
@@ -85,7 +86,7 @@ bool VRenderApp::OnInit()
 	//add png handler
 	wxImage::AddHandler(new wxPNGHandler);
 	//random numbers
-	srand((unsigned int)TIME());
+	srand((unsigned int)glbin_timer->sys_time());
 
 	//the frame
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
