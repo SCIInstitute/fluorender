@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Cov.h"
+#include <VolumeData.hpp>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -119,7 +120,7 @@ const char* str_cl_cov = \
 "}\n" \
 ;
 
-Cov::Cov(VolumeData* vd)
+Cov::Cov(fluo::VolumeData* vd)
 	: m_vd(vd),
 	m_use_mask(false)
 {
@@ -182,7 +183,7 @@ bool Cov::ComputeCenter()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint mid = m_vd->GetRenderer()->load_brick_mask(b);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -262,7 +263,7 @@ bool Cov::ComputeCov()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint mid = m_vd->GetRenderer()->load_brick_mask(b);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -319,3 +320,46 @@ bool Cov::Compute(int type)
 	return result;
 }
 
+std::vector<double> Cov::GetCov()
+{
+	if (m_vd)
+	{
+		//set to correct spacings
+		double spcx, spcy, spcz;
+		m_vd->getValue("spc x", spcx);
+		m_vd->getValue("spc y", spcy);
+		m_vd->getValue("spc z", spcz);
+		m_cov[0] *= spcx * spcx;
+		m_cov[1] *= spcx * spcy;
+		m_cov[2] *= spcx * spcz;
+		m_cov[3] *= spcy * spcy;
+		m_cov[4] *= spcy * spcz;
+		m_cov[5] *= spcz * spcz;
+	}
+
+	std::vector<double> cov;
+	for (int i = 0; i < 6; ++i)
+		cov.push_back(m_cov[i]);
+	return cov;
+}
+
+fluo::Point Cov::GetCenter()
+{
+	if (m_vd)
+	{
+		//set to correct spacings
+		double spcx, spcy, spcz;
+		m_vd->getValue("spc x", spcx);
+		m_vd->getValue("spc y", spcy);
+		m_vd->getValue("spc z", spcz);
+		m_center[0] *= spcx;
+		m_center[1] *= spcy;
+		m_center[2] *= spcz;
+	}
+
+	fluo::Point center;
+	center.x(m_center[0]);
+	center.y(m_center[1]);
+	center.z(m_center[2]);
+	return center;
+}

@@ -27,12 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompSelector.h"
 #include "CompAnalyzer.h"
-#include "DataManager.h"
+#include <VolumeData.hpp>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <set>
 
 using namespace flrd;
 
-ComponentSelector::ComponentSelector(VolumeData* vd)
+ComponentSelector::ComponentSelector(fluo::VolumeData* vd)
 	: m_vd(vd),
 	m_analyzer(0),
 	m_sel_all(false),
@@ -90,13 +92,15 @@ void ComponentSelector::CompFull()
 
 	//get selected IDs
 	int i, j, k;
-	int nx, ny, nz;
+	long nx, ny, nz;
 	unsigned long long index;
 	unsigned int label_value;
 	unsigned int brick_id;
 	CelpList sel_labels;
 	CelpListIter label_iter;
-	m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
@@ -173,7 +177,7 @@ void ComponentSelector::CompFull()
 		b->valid_mask();
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 void ComponentSelector::Select(bool all, bool rmask)
@@ -204,7 +208,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (!data_label)
 		return;
 
-	int bn = m_vd->GetBrickNum();
+	long bn;
+	m_vd->getValue("brick num", bn);
 	unsigned int idsel, bidsel;
 	if (bn > 1)
 	{
@@ -218,8 +223,10 @@ void ComponentSelector::Select(bool all, bool rmask)
 	}
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx*
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -377,7 +384,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask(false);
+	m_vd->GetRenderer()->clear_tex_mask(false);
 }
 
 void ComponentSelector::Exclusive()
@@ -407,14 +414,16 @@ void ComponentSelector::All()
 		return;
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 255, for_size);
 	m_vd->GetTexture()->valid_all_mask();
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 void ComponentSelector::Clear(bool invalidate)
@@ -435,14 +444,16 @@ void ComponentSelector::Clear(bool invalidate)
 		return;
 
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
-		m_vd->GetVR()->clear_tex_mask();
+		m_vd->GetRenderer()->clear_tex_mask();
 	m_vd->GetTexture()->invalid_all_mask();
 }
 
@@ -468,8 +479,10 @@ void ComponentSelector::Delete()
 	if (!data_label)
 		return;
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -481,7 +494,7 @@ void ComponentSelector::Delete()
 			data_mask[index] = 0;
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
@@ -508,13 +521,16 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 	if (!data_label)
 		return;
 	//select append
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long key;
-	int bn = m_vd->GetBrickNum();
+	long bn;
+	m_vd->getValue("brick num", bn);
 	for (index = 0; index < for_size; ++index)
 	{
 		if (clear_all)
@@ -536,7 +552,7 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		}
 	}
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 	if (clear_all)
 		tex->invalid_all_mask();
 }
@@ -578,8 +594,10 @@ void ComponentSelector::SelectList(CelpList& list)
 	unsigned long long index;
 	unsigned long long key;
 	int i, j, k;
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
@@ -612,7 +630,7 @@ void ComponentSelector::SelectList(CelpList& list)
 	//}
 
 	//invalidate label mask in gpu
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)

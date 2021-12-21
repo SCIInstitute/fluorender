@@ -55,8 +55,11 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
-class DataGroup;
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class AdjustView: public wxPanel
 {
 	enum
@@ -117,13 +120,13 @@ public:
 	void SetRenderView(VRenderGLView *view);
 	VRenderGLView* GetRenderView();
 	//set volume data
-	void SetVolumeData(VolumeData* vd);
-	VolumeData* GetVolumeData();
+	void SetVolumeData(fluo::VolumeData* vd);
+	fluo::VolumeData* GetVolumeData();
 	//set group
-	void SetGroup(DataGroup *group);
-	DataGroup* GetGroup();
+	void SetGroup(fluo::VolumeGroup *group);
+	fluo::VolumeGroup* GetGroup();
 	//set volume adjustment to link to group
-	void SetGroupLink(DataGroup *group);
+	void SetGroupLink(fluo::VolumeGroup *group);
 
 	//load default settings
 	void LoadSettings();
@@ -156,8 +159,8 @@ private:
 	VRenderFrame* m_frame;
 	int m_type;
 	VRenderGLView *m_view;
-	VolumeData* m_vd;
-	DataGroup* m_group;
+	fluo::VolumeData* m_vd;
+	fluo::VolumeGroup* m_group;
 	bool m_link_group;
 
 	//sync flags

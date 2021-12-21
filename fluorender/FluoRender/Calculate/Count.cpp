@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Count.h"
+#include <VolumeData.hpp>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -76,7 +77,7 @@ const char* str_cl_count_voxels = \
 "	atomic_xchg(wcount+index, lwsum);\n" \
 "}\n";
 
-CountVoxels::CountVoxels(VolumeData* vd)
+CountVoxels::CountVoxels(fluo::VolumeData* vd)
 	: m_vd(vd),
 	m_use_mask(false),
 	m_sum(0),
@@ -147,15 +148,13 @@ void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
 	return (void*)temp;
 }
 
-void* CountVoxels::GetVolData(VolumeData* vd)
+void* CountVoxels::GetVolData(fluo::VolumeData* vd)
 {
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
 	Nrrd* nrrd_data = 0;
 	if (m_use_mask)
 		nrrd_data = vd->GetMask(false);
 	if (!nrrd_data)
-		nrrd_data = vd->GetVolume(false);
+		nrrd_data = vd->GetData(false);
 	if (!nrrd_data)
 		return 0;
 	return nrrd_data->data;
@@ -191,8 +190,8 @@ void CountVoxels::Count()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint tid = m_vd->GetRenderer()->load_brick(b);
+		GLint mid = m_vd->GetRenderer()->load_brick_mask(b);
 
 		//compute workload
 		flvr::GroupSize gsize;

@@ -28,15 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Relax_h
 #define FL_Relax_h
 
-#include <Distance/Ruler.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
+#include <Ruler.h>
 #include <Types/Point.h>
 #include <vector>
 
-using namespace std;
-
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class Relax
@@ -53,7 +52,7 @@ namespace flrd
 		{
 			return m_use_mask;
 		}
-		void SetVolume(VolumeData* vd)
+		void SetVolume(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 		}
@@ -83,7 +82,7 @@ namespace flrd
 
 	private:
 		bool m_use_mask;//use mask instead of data
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		//Ruler
 		Ruler *m_ruler;
 		//spring

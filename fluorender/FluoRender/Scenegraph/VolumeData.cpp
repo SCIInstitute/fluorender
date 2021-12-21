@@ -2182,6 +2182,13 @@ void VolumeData::SetTexture()
 	m_tex = 0;
 }
 
+int VolumeData::GetAllBrickNum()
+{
+	if (!m_tex)
+		return 0;
+	return m_tex->get_brick_num();
+}
+
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 	glm::mat4 &proj_mat, glm::mat4 &tex_mat)
 {

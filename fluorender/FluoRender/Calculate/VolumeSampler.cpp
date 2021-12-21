@@ -26,6 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeSampler.h"
+#include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
+#include <FLIVR/VolumeRenderer.h>
+#include <base_reader.h>
+#include <string>
+#include <vector>
 #include <stdexcept>
 
 using namespace flrd;
@@ -63,17 +70,17 @@ VolumeSampler::~VolumeSampler()
 	//	delete m_result;
 }
 
-void VolumeSampler::SetInput(VolumeData *data)
+void VolumeSampler::SetInput(fluo::VolumeData *data)
 {
 	m_input = data;
 }
 
-VolumeData* VolumeSampler::GetInput()
+fluo::VolumeData* VolumeSampler::GetInput()
 {
 	return m_input;
 }
 
-VolumeData* VolumeSampler::GetResult()
+fluo::VolumeData* VolumeSampler::GetResult()
 {
 	return m_result;
 }
@@ -160,7 +167,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
 	//spacing
 	double spcx_in, spcy_in, spcz_in;
-	m_input->GetSpacings(spcx_in, spcy_in, spcz_in);
+	m_input->getValue("spc x", spcx_in);
+	m_input->getValue("spc y", spcy_in);
+	m_input->getValue("spc z", spcz_in);
 	fluo::Vector spc_in(spcx_in, spcy_in, spcz_in);
 	fluo::Vector spc;
 	double x, y, z;
@@ -180,8 +189,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		}
 
 		//recalculate range
-		vector<fluo::Plane*> *planes =
-			m_input->GetVR()->get_planes();
+		std::vector<fluo::Plane*> *planes =
+			m_input->GetRenderer()->get_planes();
 		fluo::Plane p[6];
 		int np = int(planes->size());
 
@@ -327,7 +336,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		switch (type)
 		{
 		case SDT_Data:
-			m_input->Replace(nrrd_result, true);
+			m_input->ReplaceData(nrrd_result, true);
 			break;
 		case SDT_Mask:
 			m_input->LoadMask(nrrd_result);
@@ -342,15 +351,16 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		//create m_result
 		if (!m_result)
 		{
-			m_result = new VolumeData();
-			wxString name, path;
+			m_result = glbin_volf->build();
+			std::string name;
+			std::wstring path;
 			if (type == SDT_Data)
-				m_result->Load(nrrd_result, name, path);
+				m_result->LoadData(nrrd_result, name, path);
 		}
 		else
 		{
 			if (type == SDT_Data)
-				m_result->Replace(nrrd_result, false);
+				m_result->ReplaceData(nrrd_result, false);
 		}
 		switch (type)
 		{
@@ -367,7 +377,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	}
 }
 
-Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)
+Nrrd* VolumeSampler::GetNrrd(fluo::VolumeData* vd, SampDataType type)
 {
 	if (!vd || !vd->GetTexture())
 		return 0;
@@ -388,7 +398,7 @@ Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)
 	return tex->get_nrrd(index);
 }
 
-void* VolumeSampler::GetRaw(VolumeData* vd, SampDataType type)
+void* VolumeSampler::GetRaw(fluo::VolumeData* vd, SampDataType type)
 {
 	Nrrd* nrrd = GetNrrd(vd, type);
 	if (nrrd)
@@ -420,11 +430,11 @@ unsigned int VolumeSampler::SampleInt(double x, double y, double z)
 	xyz2ijk(x, y, z, i, j, k);
 	if (!ijk(i, j, k))
 		return 0;
-	int nx, ny, nz;
-	m_input->GetResolution(nx, ny, nz);
-	unsigned long long index = (unsigned long long)nx*(unsigned long long)ny*
-		(unsigned long long)k + (unsigned long long)nx*
-		(unsigned long long)j + (unsigned long long)i;
+	long nx, ny, nz;
+	m_input->getValue("res x", nx);
+	m_input->getValue("res y", ny);
+	m_input->getValue("res z", nz);
+	unsigned long long index = (unsigned long long)nx*ny*k + (unsigned long long)nx*j + (unsigned long long)i;
 	return ((unsigned int*)m_raw_input)[index];
 }
 

@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include "png_resource.h"
@@ -551,7 +552,7 @@ VRenderGLView* AdjustView::GetRenderView()
 }
 
 //set volume data
-void AdjustView::SetVolumeData(VolumeData* vd)
+void AdjustView::SetVolumeData(fluo::VolumeData* vd)
 {
 	if (vd)
 	{
@@ -566,13 +567,13 @@ void AdjustView::SetVolumeData(VolumeData* vd)
 	}
 }
 
-VolumeData* AdjustView::GetVolumeData()
+fluo::VolumeData* AdjustView::GetVolumeData()
 {
 	return m_vd;
 }
 
 //set group
-void AdjustView::SetGroup(DataGroup *group)
+void AdjustView::SetGroup(fluo::VolumeGroup *group)
 {
 	if (group)
 	{
@@ -587,13 +588,13 @@ void AdjustView::SetGroup(DataGroup *group)
 	}
 }
 
-DataGroup* AdjustView::GetGroup()
+fluo::VolumeGroup* AdjustView::GetGroup()
 {
 	return m_group;
 }
 
 //set volume adjustment to link to group
-void AdjustView::SetGroupLink(DataGroup *group)
+void AdjustView::SetGroupLink(fluo::VolumeGroup *group)
 {
 	if (group)
 	{
@@ -650,14 +651,18 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 		m_view->SetGamma(gamma);
 	}
 
-	TreeLayer *layer = 0;
+	fluo::Object* layer = 0;
 	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
+		layer = m_vd;
 	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
+		layer = m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		double gr, gg, gb;
+		layer->getValue("gamma r", gr);
+		layer->getValue("gamma g", gg);
+		layer->getValue("gamma b", gb);
+		fluo::Color gamma(gr, gg, gb);
 		GammaUI2(val, gamma[0]);
 		if (m_sync_r)
 		{
@@ -666,10 +671,14 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		layer->SetGamma(gamma);
+		layer->setValue("gamma r", gamma.r());
+		layer->setValue("gamma g", gamma.g());
+		layer->setValue("gamma b", gamma.b());
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//{
+		//	m_group->SetGammaAll(gamma);
+		//}
 
 	}
 	RefreshVRenderViews(true);
@@ -718,14 +727,18 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 		m_view->SetGamma(gamma);
 	}
 
-	TreeLayer *layer = 0;
+	fluo::Object* layer = 0;
 	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
+		layer = m_vd;
 	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
+		layer = m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		double gr, gg, gb;
+		layer->getValue("gamma r", gr);
+		layer->getValue("gamma g", gg);
+		layer->getValue("gamma b", gb);
+		fluo::Color gamma(gr, gg, gb);
 		GammaUI2(val, gamma[1]);
 		if (m_sync_g)
 		{
@@ -734,10 +747,12 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		layer->SetGamma(gamma);
+		layer->setValue("gamma r", gamma.r());
+		layer->setValue("gamma g", gamma.g());
+		layer->setValue("gamma b", gamma.b());
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 
 	}
 	RefreshVRenderViews(true);
@@ -786,14 +801,18 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 		m_view->SetGamma(gamma);
 	}
 
-	TreeLayer *layer = 0;
+	fluo::Object* layer = 0;
 	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
+		layer = m_vd;
 	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
+		layer = m_group;
 	if (layer)
 	{
-		fluo::Color gamma = layer->GetGamma();
+		double gr, gg, gb;
+		layer->getValue("gamma r", gr);
+		layer->getValue("gamma g", gg);
+		layer->getValue("gamma b", gb);
+		fluo::Color gamma(gr, gg, gb);
 		GammaUI2(val, gamma[2]);
 		if (m_sync_b)
 		{
@@ -802,10 +821,12 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 			if (m_sync_g)
 				GammaUI2(val, gamma[1]);
 		}
-		layer->SetGamma(gamma);
+		layer->setValue("gamma r", gamma.r());
+		layer->setValue("gamma g", gamma.g());
+		layer->setValue("gamma b", gamma.b());
 
-		if (m_link_group && m_group)
-			m_group->SetGammaAll(gamma);
+		//if (m_link_group && m_group)
+		//	m_group->SetGammaAll(gamma);
 
 	}
 	RefreshVRenderViews(true);
@@ -855,14 +876,18 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 		m_view->SetBrightness(brightness);
 	}
 
-	TreeLayer *layer = 0;
+	fluo::Object* layer = 0;
 	if (m_type == 2 && m_vd)
-		layer = (TreeLayer*)m_vd;
+		layer = m_vd;
 	else if (m_type == 5 && m_group)
-		layer = (TreeLayer*)m_group;
+		layer = m_group;
 	if (layer)
 	{
-		fluo::Color brightness = layer->GetBrightness();
+		double br, bg, bb;
+		layer->getValue("brightness r", br);
+		layer->getValue("brightness g", bg);
+		layer->getValue("brightness b", bb);
+		fluo::Color brightness(br, bg, bb);
 		BrightnessUI2(val, brightness[0]);
 		if (m_sync_r)
 		{
@@ -871,10 +896,12 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 			if (m_sync_b)
 				BrightnessUI2(val, brightness[2]);
 		}
-		layer->SetBrightness(brightness);
+		layer->setValue("brightness r", brightness.r());
+		layer->setValue("brightness g", brightness.g());
+		layer->setValue("brightness b", brightness.b());
 
-		if (m_link_group && m_group)
-			m_group->SetBrightnessAll(brightness);
+		//if (m_link_group && m_group)
+		//	m_group->SetBrightnessAll(brightness);
 
 	}
 	RefreshVRenderViews(true);

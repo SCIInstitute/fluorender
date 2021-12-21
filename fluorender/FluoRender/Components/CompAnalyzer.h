@@ -28,21 +28,27 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompAnalyzer_h
 #define FL_CompAnalyzer_h
 
+#include <Tracking/Cell.h>
+#include <boost/signals2.hpp>
 #include <string>
 #include <vector>
 #include <set>
-#include <boost/signals2.hpp>
-#include <Tracking/Cell.h>
-#include "DataManager.h"
+#include <list>
 
-class VolumeData;
 class Annotations;
-
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	struct CompGroup
 	{
-		VolumeData* vd;//associated volume
+		fluo::VolumeData* vd;//associated volume
 		bool dirty;
 		CelpList celps;
 		CellGraph graph;//links comps in multibrick volume
@@ -54,7 +60,7 @@ namespace flrd
 	class ComponentAnalyzer
 	{
 	public:
-		ComponentAnalyzer(VolumeData* vd=0);
+		ComponentAnalyzer(fluo::VolumeData* vd=0);
 		~ComponentAnalyzer();
 
 		unsigned int GetSizeLimit()
@@ -65,7 +71,7 @@ namespace flrd
 		{ return m_analyzed; }
 		bool GetColocal()
 		{ return m_colocal; }
-		void SetVolume(VolumeData* vd)
+		void SetVolume(fluo::VolumeData* vd)
 		{
 			if (!vd)
 				return;
@@ -74,18 +80,18 @@ namespace flrd
 				compgroup = AddCompGroup(vd);
 			m_compgroup = compgroup;
 		}
-		VolumeData* GetVolume()
+		fluo::VolumeData* GetVolume()
 		{
 			if (m_compgroup)
 				return m_compgroup->vd;
 			return 0;
 		}
 
-		void SetCoVolumes(std::vector<VolumeData*> &list)
+		void SetCoVolumes(std::vector<fluo::VolumeData*> &list)
 		{
 			m_vd_list = list;
 		}
-		void AddCoVolume(VolumeData* vd)
+		void AddCoVolume(fluo::VolumeData* vd)
 		{
 			m_vd_list.push_back(vd);
 		}
@@ -137,8 +143,8 @@ namespace flrd
 		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
 		bool GenAnnotations(Annotations &ann, bool consistent, int type);
 		//color_type: 1-id-based; 2-size-based
-		bool GenMultiChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
-		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
+		bool GenMultiChannels(std::list<fluo::VolumeData*> &channs, int color_type, bool consistent);
+		bool GenRgbChannels(std::list<fluo::VolumeData*> &channs, int color_type, bool consistent);
 
 		//update progress
 		boost::signals2::signal<void()> m_sig_progress;
@@ -148,7 +154,7 @@ namespace flrd
 		int m_bn;
 		bool m_colocal;
 		unsigned int m_slimit;//size limit for connecting components
-		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
+		std::vector<fluo::VolumeData*> m_vd_list;//list of volumes for colocalization analysis
 
 		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
 		CompGroup* m_compgroup;//current group
@@ -161,7 +167,7 @@ namespace flrd
 			int i, int j, int k);
 
 		bool GetColor(unsigned int id, int brick_id,
-			VolumeData* vd, int color_type,
+			fluo::VolumeData* vd, int color_type,
 			fluo::Color &color);
 		int GetColocalization(size_t bid,
 			unsigned int bi,
@@ -179,7 +185,7 @@ namespace flrd
 			unsigned int* data);
 
 		//comp groups
-		CompGroup* FindCompGroup(VolumeData* vd)
+		CompGroup* FindCompGroup(fluo::VolumeData* vd)
 		{
 			for (size_t i = 0; i < m_comp_groups.size(); ++i)
 			{
@@ -188,7 +194,7 @@ namespace flrd
 			}
 			return 0;
 		}
-		CompGroup* AddCompGroup(VolumeData* vd)
+		CompGroup* AddCompGroup(fluo::VolumeData* vd)
 		{
 			if (!vd)
 				return 0;

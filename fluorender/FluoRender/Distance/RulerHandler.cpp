@@ -27,17 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerHandler.h"
-#include "VRenderGLView.h"
+#include <VolumeData.hpp>
+#include <Cov.h>
 #include <FLIVR/Texture.h>
-#include <DataManager.h>
 #include <Components/CompAnalyzer.h>
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
-#include <Distance/Cov.h>
 #include <Calculate/Count.h>
+#include <VRenderGLView.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
+#include <string>
 
 using namespace flrd;
 
@@ -366,7 +367,7 @@ void RulerHandler::AddPaintRulerPoint()
 	flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
 	if (!selector)
 		return;
-	VolumeData* vd = selector->GetVolume();
+	fluo::VolumeData* vd = selector->GetVolume();
 	if (!vd)
 		return;
 
@@ -763,14 +764,18 @@ int RulerHandler::Profile(int index)
 		return 0;
 
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue("spc x", spcx);
+	m_vd->getValue("spc y", spcy);
+	m_vd->getValue("spc z", spcz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
 		nx <= 0 || ny <= 0 || nz <= 0)
 		return 0;
 	//get data
-	m_vd->GetVR()->return_mask();
+	m_vd->GetRenderer()->return_mask();
 	flvr::Texture* tex = m_vd->GetTexture();
 	if (!tex) return 0;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -782,7 +787,8 @@ int RulerHandler::Profile(int index)
 	void* mask = 0;
 	if (nrrd_mask)
 		mask = nrrd_mask->data;
-	double scale = m_vd->GetScalarScale();
+	double scale;
+	m_vd->getValue("int scale", scale);
 
 	if (ruler->GetRulerType() == 3 && mask)
 	{
@@ -938,8 +944,8 @@ int RulerHandler::Profile(int index)
 				profile->erase(profile->begin() + total_dist, profile->begin() + bins - 1);
 		}
 	}
-	wxString str("Profile of volume ");
-	str = str + m_vd->GetName();
+	std::string str("Profile of volume ");
+	str = str + std::string(m_vd->getName());
 	ruler->SetInfoProfile(str);
 	return 1;
 }

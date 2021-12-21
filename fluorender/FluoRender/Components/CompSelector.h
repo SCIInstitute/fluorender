@@ -35,19 +35,22 @@ namespace flvr
 {
 	class Texture;
 }
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class ComponentAnalyzer;
 	class ComponentSelector
 	{
 	public:
-		ComponentSelector(VolumeData* vd);
+		ComponentSelector(fluo::VolumeData* vd);
 		~ComponentSelector();
 
-		void SetVolume(VolumeData* vd)
+		void SetVolume(fluo::VolumeData* vd)
 		{ m_vd = vd; }
-		VolumeData* GetVolume()
+		fluo::VolumeData* GetVolume()
 		{ return m_vd; }
 		void SetAnalyzer(ComponentAnalyzer* analyzer);
 		ComponentAnalyzer* GetAnalyzer();
@@ -74,7 +77,7 @@ namespace flrd
 		void SelectList(CelpList& list);
 
 	private:
-		VolumeData* m_vd;
+		fluo::VolumeData* m_vd;
 		ComponentAnalyzer* m_analyzer;
 		bool m_sel_all;
 		unsigned long long m_id;

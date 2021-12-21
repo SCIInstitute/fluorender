@@ -28,12 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompEditor_h
 #define FL_CompEditor_h
 
-#include <vector>
 #include <Cell.h>
-#include <wx/string.h>
+#include <vector>
+#include <string>
 
 class VRenderGLView;
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolCache;
@@ -52,15 +55,15 @@ namespace flrd
 		{
 			return m_view;
 		}
-		void SetVolume(VolumeData* vd)
+		void SetVolume(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 		}
-		VolumeData* GetVolume()
+		fluo::VolumeData* GetVolume()
 		{
 			return m_vd;
 		}
-		wxString GetOutput();
+		std::string GetOutput();
 
 		void Clean(int mode);
 		void NewId(unsigned int id, bool id_empty, bool append);
@@ -70,9 +73,9 @@ namespace flrd
 		void Combine(CelpList &list);
 
 	private:
-		VolumeData* m_vd;
+		fluo::VolumeData* m_vd;
 		VRenderGLView* m_view;
-		wxString m_output;
+		std::string m_output;
 
 	private:
 		//read/delete volume cache from file

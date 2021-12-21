@@ -26,9 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompEditor.h"
+#include <VolumeData.hpp>
 #include <Tracking/VolCache.h>
 #include <VRenderGLView.h>
-#include <DataManager.h>
 
 using namespace flrd;
 
@@ -42,7 +42,7 @@ ComponentEditor::~ComponentEditor()
 
 }
 
-wxString ComponentEditor::GetOutput()
+std::string ComponentEditor::GetOutput()
 {
 	return m_output;
 }
@@ -66,8 +66,10 @@ void ComponentEditor::Clean(int mode)
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -86,7 +88,7 @@ void ComponentEditor::Clean(int mode)
 			break;
 		}
 	}
-	m_vd->GetVR()->clear_tex_current();
+	m_vd->GetRenderer()->clear_tex_current();
 }
 
 void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
@@ -251,7 +253,7 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 
 	int cur_time = m_view->m_tseq_cur_num;
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -272,8 +274,10 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 		return;
 
 	unsigned int old_id;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -288,9 +292,11 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 		data_label[index] = id;
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
-	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
+	long chan;
+	vd->getValue("channel", chan);
+	vd->SaveLabel(true, cur_time, chan);
 }
 
 void ComponentEditor::Replace(unsigned int id,
@@ -309,7 +315,7 @@ void ComponentEditor::Replace(unsigned int id,
 	int cur_time = m_view->m_tseq_cur_num;
 
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -334,8 +340,10 @@ void ComponentEditor::Replace(unsigned int id,
 	std::unordered_map<unsigned int, unsigned int> list_rep;
 	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
 	unsigned int old_id, new_id;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -361,7 +369,7 @@ void ComponentEditor::Replace(unsigned int id,
 			while (vd->SearchLabel(new_id))
 				new_id += 253;
 			//add cell to list_rep
-			list_rep.insert(pair<unsigned int, unsigned int>
+			list_rep.insert(std::pair<unsigned int, unsigned int>
 				(old_id, new_id));
 			if (track_map)
 				trace_group->ReplaceCellID(old_id, new_id,
@@ -370,9 +378,11 @@ void ComponentEditor::Replace(unsigned int id,
 		}
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
-	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
+	long chan;
+	vd->getValue("channel", chan);
+	vd->SaveLabel(true, cur_time, chan);
 }
 
 void ComponentEditor::Combine()
@@ -382,7 +392,7 @@ void ComponentEditor::Combine()
 
 	int cur_time = m_view->m_tseq_cur_num;
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -404,8 +414,10 @@ void ComponentEditor::Combine()
 
 	//combine IDs
 	unsigned int id = 0;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -420,9 +432,11 @@ void ComponentEditor::Combine()
 			data_label[index] = id;
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
-	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
+	long chan;
+	vd->getValue("channel", chan);
+	vd->SaveLabel(true, cur_time, chan);
 }
 
 void ComponentEditor::Combine(CelpList &list)
@@ -456,7 +470,7 @@ void ComponentEditor::Combine(CelpList &list)
 		return;
 
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -476,8 +490,10 @@ void ComponentEditor::Combine(CelpList &list)
 	if (!data_label)
 		return;
 	//combine IDs
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd->getValue("res x", nx);
+	m_vd->getValue("res y", ny);
+	m_vd->getValue("res z", nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -491,9 +507,11 @@ void ComponentEditor::Combine(CelpList &list)
 			data_label[index] = cell->Id();
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
-	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
+	long chan;
+	vd->getValue("channel", chan);
+	vd->SaveLabel(true, cur_time, chan);
 
 	//modify graphs
 	trace_group->CombineCells(cell, list,
@@ -506,7 +524,7 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 	//get volume, readers
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -514,7 +532,8 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 		return;
 	LBLReader lbl_reader;
 
-	int chan = vd->GetCurChannel();
+	long chan;
+	vd->getValue("channel", chan);
 	int frame = vol_cache.frame;
 
 	if (frame == m_view->m_tseq_cur_num)
@@ -555,13 +574,14 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return;
-	int chan = vd->GetCurChannel();
+	long chan;
+	vd->getValue("channel", chan);
 	int frame = vol_cache.frame;
 
 	if (vol_cache.valid && vol_cache.modified)
@@ -571,7 +591,9 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
 		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
+		vd->getValue("spc x", spcx);
+		vd->getValue("spc y", spcy);
+		vd->getValue("spc z", spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
 		wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);

@@ -26,7 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
-#include "DataManager.h"
+#include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include <VRenderFrame.h>
 #include <VRenderGLView.h>
 #include <Selection/VolumeSelector.h>
@@ -48,29 +50,29 @@ VolumeCalculator::~VolumeCalculator()
 {
 }
 
-void VolumeCalculator::SetVolumeA(VolumeData *vd)
+void VolumeCalculator::SetVolumeA(fluo::VolumeData *vd)
 {
 	m_vd_a = vd;
 }
 
-void VolumeCalculator::SetVolumeB(VolumeData *vd)
+void VolumeCalculator::SetVolumeB(fluo::VolumeData *vd)
 {
 	m_vd_b = vd;
 }
 
-VolumeData* VolumeCalculator::GetVolumeA()
+fluo::VolumeData* VolumeCalculator::GetVolumeA()
 {
 	return m_vd_a;
 }
 
-VolumeData* VolumeCalculator::GetVolumeB()
+fluo::VolumeData* VolumeCalculator::GetVolumeB()
 {
 	return m_vd_b;
 }
 
-VolumeData* VolumeCalculator::GetResult(bool pop)
+fluo::VolumeData* VolumeCalculator::GetResult(bool pop)
 {
-	VolumeData* vd = 0;
+	fluo::VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 	{
 		vd = m_vd_r.back();
@@ -80,55 +82,22 @@ VolumeData* VolumeCalculator::GetResult(bool pop)
 	return vd;
 }
 
-void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
+void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, bool add)
 {
 	if (!m_view || !m_frame)
 		return;
 
 	Calculate(type);
-	VolumeData* vd = GetResult(add);
-	VolumeData* vd_a = GetVolumeA();
+	fluo::VolumeData* vd = GetResult(add);
+	fluo::VolumeData* vd_a = GetVolumeA();
 	if (vd && vd_a)
 	{
 		//clipping planes
-		vector<fluo::Plane*> *planes = vd_a->GetVR() ? vd_a->GetVR()->get_planes() : 0;
-		if (planes && vd->GetVR())
-			vd->GetVR()->set_planes(planes);
-		//transfer function
-		vd->Set3DGamma(vd_a->Get3DGamma());
-		vd->SetBoundary(vd_a->GetBoundary());
-		vd->SetOffset(vd_a->GetOffset());
-		vd->SetLeftThresh(vd_a->GetLeftThresh());
-		vd->SetRightThresh(vd_a->GetRightThresh());
-		fluo::Color col = vd_a->GetColor();
-		vd->SetColor(col);
-		vd->SetAlpha(vd_a->GetAlpha());
-		//shading
-		vd->SetShading(vd_a->GetShading());
-		double amb, diff, spec, shine;
-		vd_a->GetMaterial(amb, diff, spec, shine);
-		vd->SetMaterial(amb, diff, spec, shine);
-		//shadow
-		vd->SetShadow(vd_a->GetShadow());
-		double shadow;
-		vd_a->GetShadowParams(shadow);
-		vd->SetShadowParams(shadow);
-		//sample rate
-		vd->SetSampleRate(vd_a->GetSampleRate());
-		//2d adjusts
-		col = vd_a->GetGamma();
-		vd->SetGamma(col);
-		col = vd_a->GetBrightness();
-		vd->SetBrightness(col);
-		col = vd_a->GetHdr();
-		vd->SetHdr(col);
-		vd->SetSyncR(vd_a->GetSyncR());
-		vd->SetSyncG(vd_a->GetSyncG());
-		vd->SetSyncB(vd_a->GetSyncB());
-		//max
-		vd->SetScalarScale(vd_a->GetScalarScale());
-		vd->SetGMScale(vd_a->GetGMScale());
-		vd->SetMaxValue(vd_a->GetMaxValue());
+		vector<fluo::Plane*> *planes =
+			vd_a->GetRenderer() ?
+			vd_a->GetRenderer()->get_planes() : 0;
+		if (planes && vd->GetRenderer())
+			vd->GetRenderer()->set_planes(planes);
 
 		if (type == 1 ||
 			type == 2 ||
@@ -149,42 +118,42 @@ void VolumeCalculator::CalculateSingle(int type, wxString prev_group, bool add)
 						type == 6 ||
 						type == 9)
 					{
-						vd_a->SetDisp(false);
+						vd_a->setValue("display", false);
 					}
 					else if (type == 1 ||
 						type == 2 ||
 						type == 3 ||
 						type == 4)
 					{
-						vd_a->SetDisp(false);
-						VolumeData* vd_b = GetVolumeB();
+						vd_a->setValue("display", false);
+						fluo::VolumeData* vd_b = GetVolumeB();
 						if (vd_b)
-							vd_b->SetDisp(false);
+							vd_b->setValue("display", false);
 					}
 					m_frame->UpdateList();
-					m_frame->UpdateTree(vd->GetName());
+					m_frame->UpdateTree(vd->getName());
 				}
 		}
 		else if (type == 7)
 		{
-			vd_a->Replace(vd);
-			delete vd;
+			vd_a->ReplaceData(vd);
+			glbin_volf->remove(vd);
 			m_frame->GetPropView()->SetVolumeData(vd_a);
 		}
 		m_view->RefreshGL(5);
 	}
 }
 
-void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
+void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, bool add)
 {
 	if (type == 5 ||
 		type == 6 ||
 		type == 7)
 	{
-		vector<VolumeData*> vd_list;
+		vector<fluo::VolumeData*> vd_list;
 		if (m_selector && m_selector->GetSelectGroup())
 		{
-			VolumeData* vd = GetVolumeA();
+			fluo::VolumeData* vd = GetVolumeA();
 			DataGroup* group = 0;
 			if (vd)
 			{
@@ -196,7 +165,7 @@ void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
 						DataGroup* tmp_group = (DataGroup*)layer;
 						for (int j = 0; j < tmp_group->GetVolumeNum(); j++)
 						{
-							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+							fluo::VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
 							if (tmp_vd && tmp_vd == vd)
 							{
 								group = tmp_group;
@@ -212,8 +181,12 @@ void VolumeCalculator::CalculateGroup(int type, wxString prev_group, bool add)
 			{
 				for (int i = 0; i < group->GetVolumeNum(); i++)
 				{
-					VolumeData* tmp_vd = group->GetVolumeData(i);
-					if (tmp_vd && tmp_vd->GetDisp())
+					fluo::VolumeData* tmp_vd = group->GetVolumeData(i);
+					if (!tmp_vd)
+						continue;
+					bool disp;
+					tmp_vd->getValue("display", disp);
+					if (disp)
 						vd_list.push_back(tmp_vd);
 				}
 				for (size_t i = 0; i < vd_list.size(); ++i)
@@ -246,7 +219,7 @@ void VolumeCalculator::Calculate(int type)
 	case 8://intersection with mask
 	{
 		CreateVolumeResult2();
-		VolumeData* vd = 0;
+		fluo::VolumeData* vd = 0;
 		if (!m_vd_r.empty())
 			vd = m_vd_r.back();
 		if (!vd)
@@ -261,7 +234,7 @@ void VolumeCalculator::Calculate(int type)
 		if (!m_vd_a || !m_vd_a->GetMask(false))
 			return;
 		CreateVolumeResult1();
-		VolumeData* vd = 0;
+		fluo::VolumeData* vd = 0;
 		if (!m_vd_r.empty())
 			vd = m_vd_r.back();
 		if (!vd)
@@ -274,7 +247,7 @@ void VolumeCalculator::Calculate(int type)
 		if (!m_vd_a)
 			return;
 		CreateVolumeResult1();
-		VolumeData* vd = 0;
+		fluo::VolumeData* vd = 0;
 		if (!m_vd_r.empty())
 			vd = m_vd_r.back();
 		if (!vd)
@@ -290,28 +263,29 @@ void VolumeCalculator::CreateVolumeResult1()
 	if (!m_vd_a)
 		return;
 
-	int res_x, res_y, res_z;
-	double spc_x, spc_y, spc_z;
-
-	m_vd_a->GetResolution(res_x, res_y, res_z);
-	m_vd_a->GetSpacings(spc_x, spc_y, spc_z);
 	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
+	long res_x, res_y, res_z;
+	double spc_x, spc_y, spc_z;
+	m_vd_a->getValue("res x", res_x);
+	m_vd_a->getValue("res y", res_y);
+	m_vd_a->getValue("res z", res_z);
+	m_vd_a->getValue("spc x", spc_x);
+	m_vd_a->getValue("spc y", spc_y);
+	m_vd_a->getValue("spc z", spc_z);
+	double max_int;
+	m_vd_a->getValue("max int", max_int);
+	int bits = (max_int >255.0) ? 16 : 8;
 
-	int bits = (m_vd_a->GetMaxValue()>255.0)?
-	  16:8;
-	//int bits = 8;  //it has an unknown problem with 16 bit data
-
-	VolumeData* vd = new VolumeData();
+	fluo::VolumeData* vd = glbin_volf->build(m_vd_a);
 	vd->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd->SetSpcFromFile(true);
-	//vd->SetCurChannel(m_vd_a->GetCurChannel());
+	vd->setValue("spc from file", true);
 	m_vd_r.push_back(vd);
 
-	wxString name = m_vd_a->GetName();
-	wxString str_type;
+	std::string name = m_vd_a->getName();
+	std::string str_type;
 	switch (m_type)
 	{
 	case 5://substraction
@@ -324,7 +298,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		str_type = "_FILLED";
 		break;
 	}
-	vd->SetName(name + str_type);
+	vd->setName(name + str_type);
 }
 
 void VolumeCalculator::CreateVolumeResult2()
@@ -332,23 +306,29 @@ void VolumeCalculator::CreateVolumeResult2()
 	if (!m_vd_a || !m_vd_b)
 		return;
 
-	int res_x_a, res_y_a, res_z_a;
-	int res_x_b, res_y_b, res_z_b;
+	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
+	long res_x_a, res_y_a, res_z_a;
+	long res_x_b, res_y_b, res_z_b;
 	double spc_x_a, spc_y_a, spc_z_a;
 	double spc_x_b, spc_y_b, spc_z_b;
-
-	m_vd_a->GetResolution(res_x_a, res_y_a, res_z_a);
-	m_vd_b->GetResolution(res_x_b, res_y_b, res_z_b);
-	m_vd_a->GetSpacings(spc_x_a, spc_y_a, spc_z_a);
-	m_vd_b->GetSpacings(spc_x_b, spc_y_b, spc_z_b);
-	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
-
-	int bits = (m_vd_a->GetMaxValue()>255.0||m_vd_b->GetMaxValue()>255.0)?
-	  16:8;
-	//int bits = 8;  //it has an unknown problem with 16 bit data
-	int res_x, res_y, res_z;
+	m_vd_a->getValue("res x", res_x_a);
+	m_vd_a->getValue("res y", res_y_a);
+	m_vd_a->getValue("res z", res_z_a);
+	m_vd_a->getValue("spc x", spc_x_a);
+	m_vd_a->getValue("spc y", spc_y_a);
+	m_vd_a->getValue("spc z", spc_z_a);
+	m_vd_b->getValue("res x", res_x_b);
+	m_vd_b->getValue("res y", res_y_b);
+	m_vd_b->getValue("res z", res_z_b);
+	m_vd_b->getValue("spc x", spc_x_b);
+	m_vd_b->getValue("spc y", spc_y_b);
+	m_vd_b->getValue("spc z", spc_z_b);
+	double max_int_a, max_int_b;
+	m_vd_a->getValue("max int", max_int_a);
+	m_vd_b->getValue("max int", max_int_b);
+	int bits = (max_int_a >255.0|| max_int_b >255.0)?16:8;
+	long res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
-
 	res_x = std::max(res_x_a, res_x_b);
 	res_y = std::max(res_y_a, res_y_b);
 	res_z = std::max(res_z_a, res_z_b);
@@ -356,22 +336,17 @@ void VolumeCalculator::CreateVolumeResult2()
 	spc_y = std::max(spc_y_a, spc_y_b);
 	spc_z = std::max(spc_z_a, spc_z_b);
 
-	VolumeData* vd = new VolumeData();
+	fluo::VolumeData* vd = glbin_volf->build(m_vd_a);
 	vd->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd->SetSpcFromFile(true);
+	vd->setValue("spc from file", true);
 	m_vd_r.push_back(vd);
 
-	wxString name_a = m_vd_a->GetName();
-	wxString name_b = m_vd_b->GetName();
-	size_t len = 15;
-	if (name_a.length() > len)
-		name_a = name_a.Left(len);
-	if (name_b.length() > len)
-		name_b = name_b.Left(len);
-	wxString str_type;
+	std::string name_a = m_vd_a->getName();
+	std::string name_b = m_vd_b->getName();
+	std::string str_type;
 	switch (m_type)
 	{
 	case 1://substraction
@@ -387,8 +362,8 @@ void VolumeCalculator::CreateVolumeResult2()
 		str_type = "_AND_";
 		break;
 	}
-	wxString name = name_a + str_type + name_b;
-	vd->SetName(name);
+	std::string name = name_a + str_type + name_b;
+	vd->setName(name);
 }
 
 //fill holes
@@ -396,7 +371,7 @@ void VolumeCalculator::FillHoles(double thresh)
 {
 	if (!m_vd_a)
 		return;
-	VolumeData* vd = 0;
+	fluo::VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 		vd = m_vd_r.back();
 	if (!vd)
@@ -423,8 +398,13 @@ void VolumeCalculator::FillHoles(double thresh)
 		return;
 
 	//resolution
-	int nx, ny, nz;
-	m_vd_a->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	m_vd_a->getValue("res x", nx);
+	m_vd_a->getValue("res y", ny);
+	m_vd_a->getValue("res z", nz);
+	//scale
+	double int_scale;
+	m_vd_a->getValue("int scale", int_scale);
 
 	wxProgressDialog *prog_diag = new wxProgressDialog(
 		"FluoRender: Voxel Consolidation",
@@ -447,7 +427,7 @@ void VolumeCalculator::FillHoles(double thresh)
 			if (nrrd_a->type == nrrdTypeUChar)
 				value_a = ((unsigned char*)data_a)[index];
 			else if (nrrd_a->type == nrrdTypeUShort)
-				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*m_vd_a->GetScalarScale() / 257.0);
+				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*int_scale / 257.0);
 			if (value_a > thresh * 255)
 			{
 				bbox.extend(fluo::Point(i, j, k));

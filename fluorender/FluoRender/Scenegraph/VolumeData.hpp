@@ -123,6 +123,7 @@ namespace fluo
 		//texture
 		flvr::Texture* GetTexture();
 		void SetTexture();
+		int GetAllBrickNum();
 
 		//draw
 		void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat);

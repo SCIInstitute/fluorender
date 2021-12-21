@@ -26,7 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeBaker.h"
+#include <VolumeData.hpp>
+#include <base_reader.h>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
+#include <FLIVR/Texture.h>
 #include <stdexcept>
+#include <string>
 
 using namespace flrd;
 
@@ -45,21 +51,19 @@ VolumeBaker::VolumeBaker() :
 
 VolumeBaker::~VolumeBaker()
 {
-	//if (m_result)
-	//	delete m_result;
 }
 
-void VolumeBaker::SetInput(VolumeData *data)
+void VolumeBaker::SetInput(fluo::VolumeData *data)
 {
 	m_input = data;
 }
 
-VolumeData* VolumeBaker::GetInput()
+fluo::VolumeData* VolumeBaker::GetInput()
 {
 	return m_input;
 }
 
-VolumeData* VolumeBaker::GetResult()
+fluo::VolumeData* VolumeBaker::GetResult()
 {
 	return m_result;
 }
@@ -112,11 +116,11 @@ void VolumeBaker::Bake(bool replace)
 		fluo::Point p(double(i) / double(m_nx),
 			double(j) / double(m_ny),
 			double(k) / double(m_nz));
-		double new_value = m_input->GetTransferedValue(i, j, k);
+		double new_value = m_input->GetTransferValue(i, j, k);
 		if (m_bits == 8)
-			((unsigned char*)m_raw_result)[index] = uint8(new_value*255.0);
+			((unsigned char*)m_raw_result)[index] = unsigned char(new_value*255.0+0.5);
 		else if (m_bits == 16)
-			((unsigned short*)m_raw_result)[index] = uint16(new_value*65535.0);
+			((unsigned short*)m_raw_result)[index] = unsigned short(new_value*65535.0+0.5);
 	}
 
 	//write to nrrd
@@ -130,7 +134,9 @@ void VolumeBaker::Bake(bool replace)
 
 	//spacing
 	double spcx, spcy, spcz;
-	m_input->GetSpacings(spcx, spcy, spcz);
+	m_input->getValue("spc x", spcx);
+	m_input->getValue("spc y", spcy);
+	m_input->getValue("spc z", spcz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
 		spcy*m_ny, spcz*m_nz);
@@ -140,22 +146,23 @@ void VolumeBaker::Bake(bool replace)
 
 	if (replace)
 	{
-		m_input->Replace(nrrd_result, true);
+		m_input->ReplaceData(nrrd_result, true);
 	}
 	else
 	{
 		if (!m_result)
 		{
-			m_result = new VolumeData();
-			wxString name, path;
-			m_result->Load(nrrd_result, name, path);
+			m_result = glbin_volf->build();
+			std::string name;
+			std::wstring path;
+			m_result->LoadData(nrrd_result, name, path);
 		}
 		else
-			m_result->Replace(nrrd_result, false);
+			m_result->ReplaceData(nrrd_result, false);
 	}
 }
 
-Nrrd* VolumeBaker::GetNrrd(VolumeData* vd)
+Nrrd* VolumeBaker::GetNrrd(fluo::VolumeData* vd)
 {
 	if (!vd || !vd->GetTexture())
 		return 0;
@@ -163,7 +170,7 @@ Nrrd* VolumeBaker::GetNrrd(VolumeData* vd)
 	return tex->get_nrrd(0);
 }
 
-void* VolumeBaker::GetRaw(VolumeData* vd)
+void* VolumeBaker::GetRaw(fluo::VolumeData* vd)
 {
 	Nrrd* nrrd = GetNrrd(vd);
 	if (nrrd)

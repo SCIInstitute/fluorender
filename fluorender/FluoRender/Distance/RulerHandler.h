@@ -29,15 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerHandler_H_
 #define _RulerHandler_H_
 
-#include <Distance/Ruler.h>
+#include <Ruler.h>
 #include <Selection/VolumePoint.h>
 #include <string>
 #include <algorithm>
 
 class VRenderGLView;
 class wxFileConfig;
-class VolumeData;
-
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class ComponentAnalyzer;
@@ -73,7 +75,7 @@ namespace flrd
 			m_vp.SetView(view);
 		}
 
-		void SetVolumeData(VolumeData* vd)
+		void SetVolumeData(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 			m_vp.SetVolumeData(vd);
@@ -162,7 +164,7 @@ namespace flrd
 	private:
 		unsigned int m_group;
 		VRenderGLView *m_view;
-		VolumeData * m_vd;
+		fluo::VolumeData * m_vd;
 		ComponentAnalyzer* m_ca;
 		VolumePoint m_vp;
 		Ruler *m_ruler;

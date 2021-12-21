@@ -128,6 +128,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("int scale", double(1));//scaling factor for intensity values
 		vd->addValue("gm scale", double(1));//scaling factor for gradient magnitude values
 		vd->addValue("max int", double(255));//max intensity value from integer reading
+		vd->addValue("max scale", double(255));//max intensity based on bits
 		vd->addValue("gamma 3d", double(1));
 		vd->addValue("extract boundary", double(0));//previously called gm thresh
 		vd->addValue("saturation", double(1));//previously called offset, low offset
@@ -153,6 +154,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("sec color", Color(1.0));//secondary color
 		vd->addValue("sec color set", bool(false));
 		vd->addValue("randomize color", bool(false));//set to change color
+		vd->addValue("shuffle", long(0));//comp id shuffle
 
 		//resolution
 		vd->addValue("res x", long(0));
@@ -244,6 +246,9 @@ void VolumeFactory::createDefault()
 
 		//selected on the ui
 		vd->addValue("selected", bool(false));
+
+		//mask cleared
+		vd->addValue("mask clear", bool(false));
 	}
 }
 

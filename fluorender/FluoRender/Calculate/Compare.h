@@ -28,20 +28,25 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Compare_h
 #define FL_Compare_h
 
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <boost/signals2.hpp>
 
 using namespace std;
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	struct Argument;
+	class TextureBrick;
+}
 namespace flrd
 {
 	class ChannelCompare
 	{
 	public:
-		ChannelCompare(VolumeData* vd1, VolumeData* vd2);
+		ChannelCompare(fluo::VolumeData* vd1, fluo::VolumeData* vd2);
 		~ChannelCompare();
 
 		void SetUseMask(bool use_mask)
@@ -65,7 +70,7 @@ namespace flrd
 		boost::signals2::signal<void(std::string)> postwork;
 
 	private:
-		VolumeData *m_vd1, *m_vd2;
+		fluo::VolumeData *m_vd1, *m_vd2;
 		bool m_use_mask;//use mask instead of data
 		bool m_int_weighted;//sum of intensity instead of voxel count
 		bool m_init;
@@ -76,7 +81,7 @@ namespace flrd
 			long &bits, long &bits2,
 			long &nx, long &ny, long &nz);
 		void* GetVolDataBrick(flvr::TextureBrick* b);
-		void* GetVolData(VolumeData* vd);
+		void* GetVolData(fluo::VolumeData* vd);
 	};
 
 }
