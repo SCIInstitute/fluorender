@@ -82,6 +82,10 @@ using namespace std;
 #define LOAD_TYPE_LIF		10
 #define LOAD_TYPE_LOF		11
 
+namespace fluo
+{
+	class VolumeData;
+}
 class TreeLayer
 {
 public:
@@ -181,7 +185,7 @@ struct VD_Landmark
 	double spcx, spcy, spcz;
 };
 
-class VolumeData : public TreeLayer
+/*class VolumeData : public TreeLayer
 {
 public:
 	VolumeData();
@@ -607,7 +611,7 @@ private:
 	void SetOrderedID(unsigned int* val);
 	void SetReverseID(unsigned int* val);
 	void SetShuffledID(unsigned int* val);
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define MESH_COLOR_AMB	1
@@ -771,8 +775,8 @@ public:
 	string GetTextInfo(int index);
 	void AddText(std::string str, fluo::Point pos, std::string info);
 	void SetTransform(fluo::Transform *tform);
-	void SetVolume(VolumeData* vd);
-	VolumeData* GetVolume();
+	void SetVolume(fluo::VolumeData* vd);
+	fluo::VolumeData* GetVolume();
 
 	void Clear();
 
@@ -811,7 +815,7 @@ private:
 	static int m_num;
 	vector<AText*> m_alist;
 	fluo::Transform *m_tform;
-	VolumeData* m_vd;
+	fluo::VolumeData* m_vd;
 
 	bool m_disp;
 
@@ -949,7 +953,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class DataGroup : public TreeLayer
+/*class DataGroup : public TreeLayer
 {
 public:
 	DataGroup();
@@ -1089,7 +1093,7 @@ private:
 	bool m_sync_volume_prop;
 
 	bool m_disp;
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MeshGroup : public TreeLayer
@@ -1195,7 +1199,7 @@ public:
 	//load volume
 	int LoadVolumeData(wxString &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
-	void SetVolumeDefault(VolumeData* vd);
+	void SetVolumeDefault(fluo::VolumeData* vd);
 	//load volume options
 	void SetSliceSequence(bool ss) {m_sliceSequence = ss;}
 	void SetChannSequence(bool cs) { m_channSequence = cs; }
@@ -1205,22 +1209,15 @@ public:
 	void SetSkipBrick(bool skip) {m_skip_brick = skip;}
 	void SetTimeId(wxString str) {m_timeId = str;}
 	void SetLoadMask(bool load_mask) {m_load_mask = load_mask;}
-	void AddVolumeData(VolumeData* vd);
-	VolumeData* DuplicateVolumeData(VolumeData* vd);
+	void AddVolumeData(fluo::VolumeData* vd);
+	fluo::VolumeData* DuplicateVolumeData(fluo::VolumeData* vd);
 	void RemoveVolumeData(int index);
-	void RemoveVolumeData(const wxString &name);
+	void RemoveVolumeData(const std::string &name);
 	int GetVolumeNum();
-	VolumeData* GetVolumeData(int index);
-	VolumeData* GetVolumeData(wxString &name);
-	int GetVolumeIndex(wxString &name);
-	VolumeData* GetLastVolumeData()
-	{
-		int num = m_vd_list.size();
-		if (num)
-			return m_vd_list[num-1];
-		else
-			return 0;
-	};
+	fluo::VolumeData* GetVolumeData(int index);
+	fluo::VolumeData* GetVolumeData(const std::string &name);
+	int GetVolumeIndex(const std::string &name);
+	fluo::VolumeData* GetLastVolumeData();
 
 	//load mesh
 	int LoadMeshData(wxString &filename);
@@ -1236,7 +1233,7 @@ public:
 			return m_md_list[num-1];
 		else
 			return 0;
-	};
+	}
 	void RemoveMeshData(int index);
 
 	//annotations
@@ -1317,7 +1314,6 @@ public:
 	fluo::Color m_vol_wav[4];
 
 private:
-	vector <VolumeData*> m_vd_list;
 	vector <MeshData*> m_md_list;
 	vector <BaseReader*> m_reader_list;
 	vector <Annotations*> m_annotation_list;

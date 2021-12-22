@@ -1402,8 +1402,7 @@ bool ComponentAnalyzer::GetColor(
 	case 1:
 	default:
 		{
-			long shuffle;
-			vd->getValue("shuffle", shuffle);
+			int shuffle = vd->GetShuffle();
 			color = fluo::Color(id, shuffle);
 		}
 		return true;

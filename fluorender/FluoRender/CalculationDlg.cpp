@@ -27,7 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
 #include "VRenderFrame.h"
-#include "Calculate/CombineList.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
+#include <Calculate/CombineList.h>
+#include <string>
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	//calculations
@@ -128,7 +131,7 @@ CalculationDlg::~CalculationDlg()
 
 }
 
-void CalculationDlg::SetGroup(DataGroup* group)
+void CalculationDlg::SetGroup(fluo::VolumeGroup* group)
 {
 	m_group = group;
 }
@@ -147,7 +150,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 			m_group = 0;
 			if (m_vol1)
 			{
-				wxString str = m_vol1->GetName();
+				std::string str = m_vol1->getName();
 				m_calc_a_text->SetValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
@@ -164,7 +167,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 			m_vol1 = 0;
 			if (m_group)
 			{
-				wxString str = m_group->GetName();
+				std::string str = m_group->getName();
 				m_calc_a_text->SetValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
@@ -192,11 +195,11 @@ void CalculationDlg::OnLoadB(wxCommandEvent &event)
 		case 2://volume
 			m_vol2 = m_frame->GetCurSelVol();
 			if (m_vol2)
-				m_calc_b_text->SetValue(m_vol2->GetName());
+				m_calc_b_text->SetValue(m_vol2->getName());
 			break;
 		case 5://volume group
 			if (m_group)
-				m_calc_b_text->SetValue(m_group->GetName());
+				m_calc_b_text->SetValue(m_group->getName());
 			break;
 		}
 	}
@@ -286,12 +289,13 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		return;
 
 	flrd::CombineList Op;
-	wxString name = m_group->GetName() + "_combined";
-	Op.SetName(name.ToStdString());
-	std::list<VolumeData*> channs;
-	for (int i = 0; i < m_group->GetVolumeNum(); ++i)
+	std::string name = m_group->getName();
+	name += "_combined";
+	Op.SetName(name);
+	std::list<fluo::VolumeData*> channs;
+	for (int i = 0; i < m_group->getNumChildren(); ++i)
 	{
-		VolumeData* vd = m_group->GetVolumeData(i);
+		fluo::VolumeData* vd = m_group->getChild(i)->asVolumeData();
 		if (!vd)
 			continue;
 		channs.push_back(vd);
@@ -299,17 +303,17 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 	Op.SetVolumes(channs);
 	if (Op.Execute())
 	{
-		std::list<VolumeData*> results;
+		std::list<fluo::VolumeData*> results;
 		Op.GetResults(results);
 		if (results.empty())
 			return;
 
-		wxString group_name = "";
-		DataGroup* group = 0;
-		VolumeData* volume = 0;
+		std::string group_name = "";
+		fluo::VolumeGroup* group = 0;
+		fluo::VolumeData* volume = 0;
 		for (auto i = results.begin(); i != results.end(); ++i)
 		{
-			VolumeData* vd = *i;
+			fluo::VolumeData* vd = *i;
 			if (vd)
 			{
 				if (!volume) volume = vd;
@@ -322,17 +326,17 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 				m_view->AddVolumeData(vd, group_name);
 			}
 		}
-		if (group && volume)
-		{
-			fluo::Color col = volume->GetGamma();
-			group->SetGammaAll(col);
-			col = volume->GetBrightness();
-			group->SetBrightnessAll(col);
-			col = volume->GetHdr();
-			group->SetHdrAll(col);
-		}
+		//if (group && volume)
+		//{
+		//	fluo::Color col = volume->GetGamma();
+		//	group->SetGammaAll(col);
+		//	col = volume->GetBrightness();
+		//	group->SetBrightnessAll(col);
+		//	col = volume->GetHdr();
+		//	group->SetHdrAll(col);
+		//}
 		m_frame->UpdateList();
-		m_frame->UpdateTree(m_group->GetName());
+		m_frame->UpdateTree(m_group->getName());
 		m_view->RefreshGL(39);
 	}
 

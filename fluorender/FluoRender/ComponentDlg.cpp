@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
@@ -2327,7 +2328,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2375,7 +2376,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2412,7 +2413,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
@@ -2439,7 +2440,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
@@ -2456,7 +2457,7 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -2632,9 +2633,9 @@ void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	list<VolumeData*> channs;
+	list<fluo::VolumeData*> channs;
 	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
 	{
 		if (m_frame)
@@ -2643,7 +2644,7 @@ void ComponentDlg::OutputMulti(int color_type)
 			DataGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
-				VolumeData* vd = *i;
+				fluo::VolumeData* vd = *i;
 				if (vd)
 				{
 					m_frame->GetDataManager()->AddVolumeData(vd);
@@ -2655,20 +2656,20 @@ void ComponentDlg::OutputMulti(int color_type)
 					m_view->AddVolumeData(vd, group_name);
 				}
 			}
-			if (group)
-			{
-				//group->SetSyncRAll(true);
-				//group->SetSyncGAll(true);
-				//group->SetSyncBAll(true);
-				fluo::Color col = vd->GetGamma();
-				group->SetGammaAll(col);
-				col = vd->GetBrightness();
-				group->SetBrightnessAll(col);
-				col = vd->GetHdr();
-				group->SetHdrAll(col);
-			}
+			//if (group)
+			//{
+			//	//group->SetSyncRAll(true);
+			//	//group->SetSyncGAll(true);
+			//	//group->SetSyncBAll(true);
+			//	fluo::Color col = vd->GetGamma();
+			//	group->SetGammaAll(col);
+			//	col = vd->GetBrightness();
+			//	group->SetBrightnessAll(col);
+			//	col = vd->GetHdr();
+			//	group->SetHdrAll(col);
+			//}
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateTree(vd->getName());
 			m_view->RefreshGL(39);
 		}
 	}
@@ -2678,9 +2679,9 @@ void ComponentDlg::OutputRgb(int color_type)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	list<VolumeData*> channs;
+	list<fluo::VolumeData*> channs;
 	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
 	{
 		if (m_frame)
@@ -2689,7 +2690,7 @@ void ComponentDlg::OutputRgb(int color_type)
 			DataGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
-				VolumeData* vd = *i;
+				fluo::VolumeData* vd = *i;
 				if (vd)
 				{
 					m_frame->GetDataManager()->AddVolumeData(vd);
@@ -2701,18 +2702,18 @@ void ComponentDlg::OutputRgb(int color_type)
 					m_view->AddVolumeData(vd, group_name);
 				}
 			}
-			if (group)
-			{
-				//group->SetSyncRAll(true);
-				//group->SetSyncGAll(true);
-				//group->SetSyncBAll(true);
-				fluo::Color col = vd->GetGamma();
-				group->SetGammaAll(col);
-				col = vd->GetBrightness();
-				group->SetBrightnessAll(col);
-				col = vd->GetHdr();
-				group->SetHdrAll(col);
-			}
+			//if (group)
+			//{
+			//	//group->SetSyncRAll(true);
+			//	//group->SetSyncGAll(true);
+			//	//group->SetSyncBAll(true);
+			//	fluo::Color col = vd->GetGamma();
+			//	group->SetGammaAll(col);
+			//	col = vd->GetBrightness();
+			//	group->SetBrightnessAll(col);
+			//	col = vd->GetHdr();
+			//	group->SetHdrAll(col);
+			//}
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->GetName());
 			m_view->RefreshGL(39);
@@ -2742,7 +2743,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		type = 1;
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
 	Annotations* ann = new Annotations();
 	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent, type))
@@ -2756,7 +2757,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 				mgr->AddAnnotations(ann);
 			m_view->AddAnnotations(ann);
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateTree(vd->getName());
 		}
 		m_view->RefreshGL(39);
 	}
@@ -3154,7 +3155,7 @@ void ComponentDlg::Cluster()
 
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -3163,7 +3164,8 @@ void ComponentDlg::Cluster()
 	Nrrd* nrrd_data = tex->get_nrrd(0);
 	if (!nrrd_data)
 		return;
-	int bits = vd->GetBits();
+	long bits;
+	vd->getValue("bits", bits);
 	void* data_data = nrrd_data->data;
 	if (!data_data)
 		return;
@@ -3177,18 +3179,23 @@ void ComponentDlg::Cluster()
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
 	{
-		vd->AddEmptyLabel();
+		vd->AddEmptyLabel(0);
 		nrrd_label = tex->get_nrrd(tex->nlabel());
 	}
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	double scale = vd->GetScalarScale();
+	long nx, ny, nz;
+	vd->getValue("res x", nx);
+	vd->getValue("res y", ny);
+	vd->getValue("res z", nz);
+	double scale;
+	vd->getValue("int scale", scale);
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	vd->getValue("spc x", spcx);
+	vd->getValue("spc y", spcy);
+	vd->getValue("spc z", spcz);
 
 	flrd::ClusterMethod* method = 0;
 	//switch method
@@ -3325,7 +3332,7 @@ void ComponentDlg::Cluster()
 	{
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
-		vd->GetVR()->clear_tex_label();
+		vd->GetRenderer()->clear_tex_label();
 		m_view->RefreshGL(39);
 	}
 
@@ -3372,7 +3379,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3386,7 +3393,8 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 
 	//get brick number
 	int bn = vd->GetAllBrickNum();
-	double scale = vd->GetScalarScale();
+	double scale;
+	vd->getValue("int scale", scale);
 
 	flrd::ComponentGenerator cg(vd);
 	boost::signals2::connection preconn =
@@ -3402,7 +3410,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 
 	cg.SetUseMask(use_sel);
 
-	vd->AddEmptyMask(1, !cg.GetUseMask());//select all if no mask, otherwise keep
+	vd->AddEmptyMask(cg.GetUseMask()?2:1);//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
@@ -3505,7 +3513,7 @@ void ComponentDlg::Fixate(bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	vd->PushLabel(true);
@@ -3518,7 +3526,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3566,7 +3574,7 @@ void ComponentDlg::SelectFullComp()
 		if (!m_view)
 			return;
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
@@ -3615,7 +3623,7 @@ void ComponentDlg::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -3633,7 +3641,7 @@ void ComponentDlg::Analyze(bool sel)
 		m_comp_analyzer.ClearCoVolumes();
 		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
 		{
-			VolumeData* vdi = m_view->GetDispVolumeData(i);
+			fluo::VolumeData* vdi = m_view->GetDispVolumeData(i);
 			if (vdi != vd)
 				m_comp_analyzer.AddCoVolume(vdi);
 		}
@@ -3643,7 +3651,7 @@ void ComponentDlg::Analyze(bool sel)
 	if (m_consistent)
 	{
 		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_label();
+		vd->GetRenderer()->clear_tex_label();
 		m_view->RefreshGL(39);
 	}
 
@@ -3698,7 +3706,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	} while (cur_line.IsEmpty() == false);
 
 	fluo::Color c;
-	VolumeData* vd = 0;
+	fluo::VolumeData* vd = 0;
 	if (m_view && m_view->m_cur_vol)
 		vd = m_view->m_cur_vol;
 	unsigned long lval;
@@ -4288,7 +4296,7 @@ void ComponentDlg::IncludeComps()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -4340,7 +4348,7 @@ void ComponentDlg::ExcludeComps()
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 

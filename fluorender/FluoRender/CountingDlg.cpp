@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CountingDlg.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 
@@ -176,7 +177,7 @@ void CountingDlg::GetSettings(VRenderGLView* view)
 		return;
 	m_view = view;
 
-	VolumeData* sel_vol = 0;
+	fluo::VolumeData* sel_vol = 0;
 	if (m_frame)
 		sel_vol = m_frame->GetCurSelVol();
 }
@@ -194,7 +195,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -202,10 +203,11 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	flrd::ComponentGenerator cg(vd);
 	cg.SetUseMask(select);
-	vd->AddEmptyMask(1, !cg.GetUseMask());
+	vd->AddEmptyMask(cg.GetUseMask() ? 2 : 1);
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
 	cg.ShuffleID();
-	double scale = vd->GetScalarScale();
+	double scale;
+	vd->getValue("int scale", scale);
 	cg.Grow(false, -1, 0.0, 0.0, scale);
 
 	flrd::ComponentAnalyzer ca(vd);
@@ -244,7 +246,9 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		m_ca_volume_text->SetValue(wxString::Format("%d", vox));
 
 		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
+		vd->getValue("spc x", spcx);
+		vd->getValue("spc y", spcy);
+		vd->getValue("spc z", spcz);
 		double vol_unit = vox * spcx*spcy*spcz;
 		wxString vol_unit_text;
 		vol_unit_text = wxString::Format("%.0f", vol_unit);

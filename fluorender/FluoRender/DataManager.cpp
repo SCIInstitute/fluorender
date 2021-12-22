@@ -26,6 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
+#include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
 #include "teem/Nrrd/nrrd.h"
@@ -59,7 +62,7 @@ TreeLayer::~TreeLayer()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-VolumeData::VolumeData()
+/*VolumeData::VolumeData()
 {
 	m_reader = 0;
 
@@ -2423,7 +2426,7 @@ void VolumeData::LoadLabel2()
 		memcpy(data->data, m_label_save, size * sizeof(unsigned int));
 		m_vr->clear_tex_current();
 	}
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
@@ -3152,14 +3155,14 @@ void Annotations::SetTransform(fluo::Transform *tform)
 	m_tform = tform;
 }
 
-void Annotations::SetVolume(VolumeData *vd)
+void Annotations::SetVolume(fluo::VolumeData *vd)
 {
 	m_vd = vd;
 	if (m_vd)
-		m_name += "_FROM_" + m_vd->GetName();
+		m_name += "_FROM_" + std::string(m_vd->getName());
 }
 
-VolumeData* Annotations::GetVolume()
+fluo::VolumeData* Annotations::GetVolume()
 {
 	return m_vd;
 }
@@ -3244,7 +3247,7 @@ int Annotations::Load(wxString &filename, DataManager* mgr)
 		else if (sline.SubString(0, 7) == "Volume: ")
 		{
 			str = sline.SubString(8, sline.Length()-1);
-			VolumeData* vd = mgr->GetVolumeData(str);
+			fluo::VolumeData* vd = mgr->GetVolumeData(str.ToStdString());
 			if (vd)
 			{
 				m_vd = vd;
@@ -3292,11 +3295,15 @@ void Annotations::Save(wxString &filename)
 	std::ofstream os;
 	OutputStreamOpen(os, filename.ToStdString());
 
-	int resx = 1;
-	int resy = 1;
-	int resz = 1;
+	long resx = 1;
+	long resy = 1;
+	long resz = 1;
 	if (m_vd)
-		m_vd->GetResolution(resx, resy, resz);
+	{
+		m_vd->getValue("res x", resx);
+		m_vd->getValue("res y", resy);
+		m_vd->getValue("res z", resz);
+	}
 
 	os << "Name: " << m_name << "\n";
 	os << "Display: " << m_disp << "\n";
@@ -3304,10 +3311,12 @@ void Annotations::Save(wxString &filename)
 	os << "Memo Update: " << m_memo_ro << "\n";
 	if (m_vd)
 	{
-		os << "Volume: " << m_vd->GetName() << "\n";
+		os << "Volume: " << m_vd->getName() << "\n";
 		os << "Voxel size (X Y Z):\n";
 		double spcx, spcy, spcz;
-		m_vd->GetSpacings(spcx, spcy, spcz);
+		m_vd->getValue("spc x", spcx);
+		m_vd->getValue("spc y", spcy);
+		m_vd->getValue("spc z", spcz);
 		os << spcx << "\t" << spcy << "\t" << spcz << "\n";
 	}
 
@@ -3347,7 +3356,7 @@ bool Annotations::InsideClippingPlanes(fluo::Point &pos)
 	if (!m_vd)
 		return true;
 
-	vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
 	if (!planes)
 		return true;
 	if (planes->size() != 6)
@@ -3403,11 +3412,15 @@ AText* Annotations::GetAText(wxString str)
 		sX.ToDouble(&x);
 		sY.ToDouble(&y);
 		sZ.ToDouble(&z);
-		int resx = 1;
-		int resy = 1;
-		int resz = 1;
+		long resx = 1;
+		long resy = 1;
+		long resz = 1;
 		if (m_vd)
-			m_vd->GetResolution(resx, resy, resz);
+		{
+			m_vd->getValue("res x", resx);
+			m_vd->getValue("res y", resy);
+			m_vd->getValue("res z", resz);
+		}
 		x /= resx?resx:1;
 		y /= resy?resy:1;
 		z /= resz?resz:1;
@@ -3912,7 +3925,7 @@ unsigned int TraceGroup::Draw(vector<float> &verts, int shuffle)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int DataGroup::m_num = 0;
+/*int DataGroup::m_num = 0;
 DataGroup::DataGroup()
 {
 	type = 5;//group
@@ -4341,7 +4354,7 @@ void DataGroup::AddMask(Nrrd* mask, int op)
 		if (vd)
 			vd->AddMask(mask, op);
 	}
-}
+}*/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int MeshGroup::m_num = 0;
 MeshGroup::MeshGroup()
@@ -4511,9 +4524,9 @@ m_vol_exb(0.0),
 
 DataManager::~DataManager()
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-		if (m_vd_list[i])
-			delete m_vd_list[i];
+	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
+	//	if (m_vd_list[i])
+	//		delete m_vd_list[i];
 	for (int i=0 ; i<(int)m_md_list.size() ; i++)
 		if (m_md_list[i])
 			delete m_md_list[i];
@@ -4527,9 +4540,10 @@ DataManager::~DataManager()
 
 void DataManager::ClearAll()
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-		if (m_vd_list[i])
-			delete m_vd_list[i];
+	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
+	//	if (m_vd_list[i])
+	//		delete m_vd_list[i];
+	glbin_volf->removeAll();
 	for (int i=0 ; i<(int)m_md_list.size() ; i++)
 		if (m_md_list[i])
 			delete m_md_list[i];
@@ -4539,54 +4553,17 @@ void DataManager::ClearAll()
 	for (int i=0; i<(int)m_annotation_list.size(); i++)
 		if (m_annotation_list[i])
 			delete m_annotation_list[i];
-	m_vd_list.clear();
+	//m_vd_list.clear();
 	m_md_list.clear();
 	m_reader_list.clear();
 	m_annotation_list.clear();
 }
 
-void DataManager::SetVolumeDefault(VolumeData* vd)
+void DataManager::SetVolumeDefault(fluo::VolumeData* vd)
 {
 	if (m_use_defaults)
 	{
-		vd->SetWireframe(m_vol_test_wiref);
-		vd->Set3DGamma(m_vol_gam);
-		vd->SetBoundary(m_vol_exb);
-		vd->SetOffset(m_vol_of1);
-		vd->SetLeftThresh(m_vol_lth);
-		vd->SetRightThresh(m_vol_hth);
-		vd->SetAlpha(m_vol_alf);
-		vd->SetSampleRate(m_vol_spr);
-		double amb, diff, spec, shine;
-		vd->GetMaterial(amb, diff, spec, shine);
-		vd->SetMaterial(m_vol_lsh, diff, spec, m_vol_hsh);
-		if (!vd->GetSpcFromFile())
-			vd->SetBaseSpacings(m_vol_xsp, m_vol_ysp, m_vol_zsp);
-		vd->SetColormapMode(m_vol_cmm);
-		vd->SetColormapInv(m_vol_cmi?-1.0:1.0);
-		vd->SetColormap(m_vol_cmp);
-		vd->SetColormapProj(m_vol_cmj);
-		vd->SetColormapValues(m_vol_lcm, m_vol_hcm);
-
-		vd->SetEnableAlpha(m_vol_eap);
-		int resx, resy, resz;
-		vd->GetResolution(resx, resy, resz);
-		if (resz > 1)
-			vd->SetShading(m_vol_esh);
-		else
-			vd->SetShading(false);
-		vd->SetMode(m_vol_mip?1:0);
-		vd->SetAlphaPower(m_vol_trp ? 2.0 : 1.0);
-		vd->SetNR(m_vol_nrd);
-		vd->SetLabelMode(m_vol_com);
-		//interpolation
-		vd->SetInterpolate(m_vol_interp);
-		//inversion
-		vd->SetInvert(m_vol_inv);
-
-		//shadow
-		vd->SetShadow(m_vol_shw);
-		vd->SetShadowParams(m_vol_swi);
+		glbin_volf->propValuesToDefault(vd);
 	}
 }
 
@@ -4754,11 +4731,11 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 	for (i=(ch_num>=0?ch_num:0);
 		i<(ch_num>=0?ch_num+1:chan); i++)
 	{
-		VolumeData *vd = new VolumeData();
+		fluo::VolumeData *vd = glbin_volf->build();
 		if (!vd)
 			continue;
 
-		vd->SetSkipBrick(m_skip_brick);
+		vd->setValue("skip brick", m_skip_brick);
 		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;
@@ -4782,10 +4759,10 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		}
 
 		vd->SetReader(reader);
-		vd->SetCompression(m_compression);
+		vd->setValue("compression", m_compression);
 
 		bool valid_spc = reader->IsSpcInfoValid();
-		if (vd->Load(data, name, pathname))
+		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
 		{
 			if (m_load_mask)
 			{
@@ -4806,24 +4783,30 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			}
 			if (type == LOAD_TYPE_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
 			//for 2D data
-			int xres, yres, zres;
-			vd->GetResolution(xres, yres, zres);
+			long xres, yres, zres;
+			vd->getValue("res x", xres);
+			vd->getValue("res y", yres);
+			vd->getValue("res z", zres);
 			double zspcfac = (double)std::max(xres, yres) / 256.0;
 			if (zspcfac < 1.0) zspcfac = 1.0;
 			double tester = reader->GetXSpc();
-			if (zres == 1) vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
-			else vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-			vd->SetSpcFromFile(valid_spc);
-			vd->SetScalarScale(reader->GetScalarScale());
-			vd->SetMaxValue(reader->GetMaxValue());
-			vd->SetCurTime(reader->GetCurTime());
-			vd->SetCurChannel(i);
+			vd->setValue("base spc x", reader->GetXSpc());
+			vd->setValue("base spc y", reader->GetYSpc());
+			if (zres == 1)
+				vd->setValue("base spc z", reader->GetXSpc()*zspcfac);
+			else
+				vd->setValue("base spc z", reader->GetZSpc());
+			vd->setValue("spc from file", valid_spc);
+			vd->setValue("int scale", reader->GetScalarScale());
+			vd->setValue("max int", reader->GetMaxValue());
+			vd->setValue("time", reader->GetCurTime());
+			vd->setValue("channel", i);
 			//++
 			result++;
 		}
 		else
 		{
-			delete vd;
+			glbin_volf->remove(vd);
 			continue;
 		}
 
@@ -4834,11 +4817,11 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		double wavelength = reader->GetExcitationWavelength(i);
 		if (wavelength > 0.0) {
 			fluo::Color col = GetWavelengthColor(wavelength);
-			vd->SetColor(col);
+			vd->setValue("color", col);
 		}
 		else if (wavelength < 0.) {
 			fluo::Color white(1.0, 1.0, 1.0);
-			vd->SetColor(white);
+			vd->setValue("color", white);
 		}
 		else
 		{
@@ -4847,18 +4830,18 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			fluo::Color green(0.0, 1.0, 0.0);
 			fluo::Color blue(0.0, 0.0, 1.0);
 			if (chan == 1) {
-				vd->SetColor(white);
+				vd->setValue("color", white);
 			}
 			else
 			{
 				if (i == 0)
-					vd->SetColor(red);
+					vd->setValue("color", red);
 				else if (i == 1)
-					vd->SetColor(green);
+					vd->setValue("color", green);
 				else if (i == 2)
-					vd->SetColor(blue);
+					vd->setValue("color", blue);
 				else
-					vd->SetColor(white);
+					vd->setValue("color", white);
 			}
 		}
 
@@ -4911,12 +4894,9 @@ int DataManager::LoadMeshData(GLMmodel* mesh)
 	return 1;
 }
 
-VolumeData* DataManager::GetVolumeData(int index)
+fluo::VolumeData* DataManager::GetVolumeData(int index)
 {
-	if (index>=0 && index<(int)m_vd_list.size())
-		return m_vd_list[index];
-	else
-		return 0;
+	return glbin_volf->get(index);
 }
 
 MeshData* DataManager::GetMeshData(int index)
@@ -4927,16 +4907,9 @@ MeshData* DataManager::GetMeshData(int index)
 		return 0;
 }
 
-VolumeData* DataManager::GetVolumeData(wxString &name)
+fluo::VolumeData* DataManager::GetVolumeData(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-	{
-		if (name == m_vd_list[i]->GetName())
-		{
-			return m_vd_list[i];
-		}
-	}
-	return 0;
+	return glbin_volf->findFirst(name);
 }
 
 MeshData* DataManager::GetMeshData(wxString &name)
@@ -4951,18 +4924,14 @@ MeshData* DataManager::GetMeshData(wxString &name)
 	return 0;
 }
 
-int DataManager::GetVolumeIndex(wxString &name)
+int DataManager::GetVolumeIndex(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-	{
-		if (!m_vd_list[i])
-			continue;
-		if (name == m_vd_list[i]->GetName())
-		{
-			return i;
-		}
-	}
-	return -1;
+	return glbin_volf->getIndex(name);
+}
+
+fluo::VolumeData* DataManager::GetLastVolumeData()
+{
+	return glbin_volf->getLast();
 }
 
 int DataManager::GetMeshIndex(wxString &name)
@@ -4979,44 +4948,12 @@ int DataManager::GetMeshIndex(wxString &name)
 
 void DataManager::RemoveVolumeData(int index)
 {
-	VolumeData* data = m_vd_list[index];
-	if (!data)
-		return;
-	
-	for (auto iter = m_vd_list.begin();
-		iter != m_vd_list.end();)
-	{
-		VolumeData* vd = *iter;
-		bool del = false;
-		if (vd)
-		{
-			if (vd == data)
-				del = true;
-			if (vd->GetDup())
-			{
-				if (vd->GetDupData() == data)
-					del = true;
-			}
-		}
-		if (del)
-		{
-			iter = m_vd_list.erase(iter);
-			delete vd;
-		}
-		else
-			++iter;
-	}	
+	glbin_volf->remove(index);
 }
 
-void DataManager::RemoveVolumeData(const wxString &name)
+void DataManager::RemoveVolumeData(const std::string &name)
 {
-	for (int i = 0; i<(int)m_vd_list.size(); i++)
-	{
-		if (name == m_vd_list[i]->GetName())
-		{
-			RemoveVolumeData(i);
-		}
-	}
+	glbin_volf->remove(name);
 }
 
 void DataManager::RemoveMeshData(int index)
@@ -5032,7 +4969,7 @@ void DataManager::RemoveMeshData(int index)
 
 int DataManager::GetVolumeNum()
 {
-	return m_vd_list.size();
+	return glbin_volf->getNum();
 }
 
 int DataManager::GetMeshNum()
@@ -5040,12 +4977,12 @@ int DataManager::GetMeshNum()
 	return m_md_list.size();
 }
 
-void DataManager::AddVolumeData(VolumeData* vd)
+void DataManager::AddVolumeData(fluo::VolumeData* vd)
 {
 	if (!vd)
 		return;
 
-	wxString name = vd->GetName();
+	wxString name = vd->getName();
 	wxString new_name = name;
 
 	int i;
@@ -5053,33 +4990,33 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		new_name = name+wxString::Format("_%d", i);
 
 	if (i>1)
-		vd->SetName(new_name);
+		vd->setName(new_name.ToStdString());
 
 	if (m_override_vox)
 	{
-		if (m_vd_list.size() > 0)
-		{
-			double spcx, spcy, spcz;
-			m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
-			vd->SetSpacings(spcx, spcy, spcz);
-			vd->SetBaseSpacings(spcx, spcy, spcz);
-			//vd->SetSpcFromFile(true);
-		}
+		//if (m_vd_list.size() > 0)
+		//{
+		//	double spcx, spcy, spcz;
+		//	m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
+		//	vd->SetSpacings(spcx, spcy, spcz);
+		//	vd->SetBaseSpacings(spcx, spcy, spcz);
+		//	//vd->SetSpcFromFile(true);
+		//}
 	}
-	m_vd_list.push_back(vd);
 }
 
-VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
+fluo::VolumeData* DataManager::DuplicateVolumeData(fluo::VolumeData* vd)
 {
-	VolumeData* vd_new = 0;
+	return glbin_volf->build(vd);
+	//VolumeData* vd_new = 0;
 
-	if (vd)
-	{
-		vd_new = new VolumeData(*vd);
-		AddVolumeData(vd_new);
-	}
+	//if (vd)
+	//{
+	//	vd_new = new VolumeData(*vd);
+	//	AddVolumeData(vd_new);
+	//}
 
-	return vd_new;
+	//return vd_new;
 }
 
 int DataManager::LoadAnnotations(wxString &filename)
@@ -5174,15 +5111,8 @@ int DataManager::GetAnnotationIndex(wxString &name)
 bool DataManager::CheckNames(wxString &str)
 {
 	bool result = false;
-	for (unsigned int i=0; i<m_vd_list.size(); i++)
-	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd && vd->GetName()==str)
-		{
-			result = true;
-			break;
-		}
-	}
+	if (glbin_volf->findFirst(str.ToStdString()))
+		result = true;
 	if (!result)
 	{
 		for (unsigned int i=0; i<m_md_list.size(); i++)

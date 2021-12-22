@@ -154,7 +154,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("sec color", Color(1.0));//secondary color
 		vd->addValue("sec color set", bool(false));
 		vd->addValue("randomize color", bool(false));//set to change color
-		vd->addValue("shuffle", long(0));//comp id shuffle
+		//vd->addValue("shuffle", long(0));//comp id shuffle
 
 		//resolution
 		vd->addValue("res x", long(0));

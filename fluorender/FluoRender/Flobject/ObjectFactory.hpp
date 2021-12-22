@@ -96,6 +96,11 @@ namespace fluo
 				return false;
 		}
 
+		inline bool remove(const std::string &name)
+		{
+			return remove(findFirst(name));
+		}
+
 		inline bool remove(size_t pos, size_t num = 1)
 		{
 			if (pos < objects_.size() && num > 0)
@@ -117,6 +122,13 @@ namespace fluo
 				objects_.erase(objects_.begin() + pos, objects_.begin() + end);
 			}
 			return false;
+		}
+
+		inline bool removeAll()
+		{
+			size_t n = objects_.size();
+			if (n > 1)
+				objects_.erase(objects_.begin(), objects_.begin() + n - 2);
 		}
 
 		inline size_t getNum(bool include_default = false) const
@@ -143,6 +155,11 @@ namespace fluo
 
 		inline virtual const Object* get(size_t i) const { return objects_[i].get(); }
 
+		inline virtual Object* getLast()
+		{
+			return objects_.front().get();
+		}
+
 		inline bool contains(const Object* object) const
 		{
 			for (auto it = objects_.begin();
@@ -162,6 +179,11 @@ namespace fluo
 					return i;
 			}
 			return objects_.size();
+		}
+
+		inline size_t getIndex(const std::string &name)
+		{
+			return getIndex(findFirst(name));
 		}
 
 		inline virtual Object* find(const unsigned int id)

@@ -26,12 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "KernelExecutor.h"
-#include "DataManager.h"
+#include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
+#include <FLIVR/Texture.h>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <boost/chrono.hpp>
+#include <vector>
+#include <string>
 
 using namespace boost::chrono;
 
@@ -76,7 +83,7 @@ void KernelExecutor::LoadCode(wxString &filename)
 		filename + " read.\n";
 }
 
-void KernelExecutor::SetVolume(VolumeData *vd)
+void KernelExecutor::SetVolume(fluo::VolumeData *vd)
 {
 	m_vd = vd;
 }
@@ -86,14 +93,14 @@ void KernelExecutor::SetDuplicate(bool dup)
 	m_duplicate = dup;
 }
 
-VolumeData* KernelExecutor::GetVolume()
+fluo::VolumeData* KernelExecutor::GetVolume()
 {
 	return m_vd;
 }
 
-VolumeData* KernelExecutor::GetResult(bool pop)
+fluo::VolumeData* KernelExecutor::GetResult(bool pop)
 {
-	VolumeData* vd = 0;
+	fluo::VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 	{
 		vd = m_vd_r.back();
@@ -134,7 +141,7 @@ bool KernelExecutor::Execute()
 		m_message = "No volume selected. Select a volume first.\n";
 		return false;
 	}
-	flvr::VolumeRenderer* vr = m_vd->GetVR();
+	flvr::VolumeRenderer* vr = m_vd->GetRenderer();
 	if (!vr)
 	{
 		m_message = "Volume corrupted.\n";
@@ -147,16 +154,19 @@ bool KernelExecutor::Execute()
 		return false;
 	}
 
-	int bits = m_vd->GetBits();
+	long bits;
+	m_vd->getValue("bits", bits);
 	int chars = bits / 8;
-	int res_x, res_y, res_z;
-	m_vd->GetResolution(res_x, res_y, res_z);
+	long res_x, res_y, res_z;
+	m_vd->getValue("res x", res_x);
+	m_vd->getValue("res y", res_y);
+	m_vd->getValue("res z", res_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
 	fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
 	tex->set_sort_bricks();
-	vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 	if (!bricks || bricks->size() == 0)
 	{
 		m_message = "Volume empty.\n";
@@ -166,23 +176,26 @@ bool KernelExecutor::Execute()
 	m_message = "";
 	//execute for each brick
 	flvr::TextureBrick *b, *b_r;
-	vector<flvr::TextureBrick*> *bricks_r;
+	std::vector<flvr::TextureBrick*> *bricks_r;
 	void *result;
 
 	if (m_duplicate)
 	{
 		//result
 		double spc_x, spc_y, spc_z;
-		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		VolumeData* vd = new VolumeData();
+		m_vd->getValue("spc x", spc_x);
+		m_vd->getValue("spc y", spc_y);
+		m_vd->getValue("spc z", spc_z);
+		fluo::VolumeData* vd = glbin_volf->build(m_vd);
 		m_vd_r.push_back(vd);
 		vd->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
-		vd->SetSpcFromFile(true);
-		wxString name = m_vd->GetName();
-		vd->SetName(name + "_CL");
+		vd->setValue("spc from file", true);
+		std::string name = m_vd->getName();
+		name += "_CL";
+		vd->setName(name);
 		flvr::Texture* tex_r = vd->GetTexture();
 		if (!tex_r)
 			return false;
@@ -201,44 +214,10 @@ bool KernelExecutor::Execute()
 		if (m_vd)
 		{
 			//clipping planes
-			vector<fluo::Plane*> *planes = m_vd->GetVR() ? m_vd->GetVR()->get_planes() : 0;
-			if (planes && vd->GetVR())
-				vd->GetVR()->set_planes(planes);
-			//transfer function
-			vd->Set3DGamma(m_vd->Get3DGamma());
-			vd->SetBoundary(m_vd->GetBoundary());
-			vd->SetOffset(m_vd->GetOffset());
-			vd->SetLeftThresh(m_vd->GetLeftThresh());
-			vd->SetRightThresh(m_vd->GetRightThresh());
-			fluo::Color col = m_vd->GetColor();
-			vd->SetColor(col);
-			vd->SetAlpha(m_vd->GetAlpha());
-			//shading
-			vd->SetShading(m_vd->GetShading());
-			double amb, diff, spec, shine;
-			m_vd->GetMaterial(amb, diff, spec, shine);
-			vd->SetMaterial(amb, diff, spec, shine);
-			//shadow
-			vd->SetShadow(m_vd->GetShadow());
-			double shadow;
-			m_vd->GetShadowParams(shadow);
-			vd->SetShadowParams(shadow);
-			//sample rate
-			vd->SetSampleRate(m_vd->GetSampleRate());
-			//2d adjusts
-			col = m_vd->GetGamma();
-			vd->SetGamma(col);
-			col = m_vd->GetBrightness();
-			vd->SetBrightness(col);
-			col = m_vd->GetHdr();
-			vd->SetHdr(col);
-			vd->SetSyncR(m_vd->GetSyncR());
-			vd->SetSyncG(m_vd->GetSyncG());
-			vd->SetSyncB(m_vd->GetSyncB());
-			//max and scale
-			vd->SetMaxValue(m_vd->GetMaxValue());
-			vd->SetScalarScale(m_vd->GetScalarScale());
-			//vd->SetCurChannel(m_vd->GetCurChannel());
+			std::vector<fluo::Plane*> *planes =
+				m_vd->GetRenderer() ? m_vd->GetRenderer()->get_planes() : 0;
+			if (planes && vd->GetRenderer())
+				vd->GetRenderer()->set_planes(planes);
 		}
 	}
 	else
@@ -300,13 +279,13 @@ bool KernelExecutor::Execute()
 	if (!kernel_exe)
 	{
 		if (m_duplicate && !m_vd_r.empty())
-			delete m_vd_r.back();
+			glbin_volf->remove(m_vd_r.back());
 		m_vd_r.pop_back();
 		return false;
 	}
 
 	if (!m_duplicate)
-		m_vd->GetVR()->clear_tex_current();
+		m_vd->GetRenderer()->clear_tex_current();
 
 	return true;
 }

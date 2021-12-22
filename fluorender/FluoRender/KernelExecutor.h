@@ -31,7 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/string.h>
 #include <vector>
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flvr
 {
 	class KernelProgram;
@@ -44,17 +47,17 @@ public:
 
 	void SetCode(wxString &code);
 	void LoadCode(wxString &filename);
-	void SetVolume(VolumeData *vd);
+	void SetVolume(fluo::VolumeData *vd);
 	void SetDuplicate(bool dup);
-	VolumeData* GetVolume();
-	VolumeData* GetResult(bool pop);
+	fluo::VolumeData* GetVolume();
+	fluo::VolumeData* GetResult(bool pop);
 	bool GetMessage(wxString &msg);
 
 	bool Execute();
 
 private:
-	VolumeData *m_vd;
-	std::vector<VolumeData*> m_vd_r;//result
+	fluo::VolumeData *m_vd;
+	std::vector<fluo::VolumeData*> m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
 
 	wxString m_code;

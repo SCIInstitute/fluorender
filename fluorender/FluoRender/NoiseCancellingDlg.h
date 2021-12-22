@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
-class DataGroup;
 class NoiseCancellingDlg : public wxPanel
 {
 public:

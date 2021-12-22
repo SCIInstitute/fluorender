@@ -32,8 +32,6 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
-class DataGroup;
 class CountingDlg : public wxPanel
 {
 public:

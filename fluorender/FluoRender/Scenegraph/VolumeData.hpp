@@ -45,6 +45,7 @@ namespace fluo
 {
 	class VolumeFactory;
 	class VolumeData;
+	class Quaternion;
 	typedef std::vector<VolumeData*> VolumeList;
 	struct VD_Landmark
 	{
@@ -99,7 +100,7 @@ namespace fluo
 
 		//empty mask
 		//mode: 0-zeros; 1-255; 2-leave as is
-		void AddEmptyMask(int mdoe);
+		void AddEmptyMask(int mode);
 
 		//load label
 		void LoadLabel(Nrrd* label);
@@ -107,13 +108,19 @@ namespace fluo
 
 		//empty label
 		//mode: 0-zeros; 1-ordered; 2-shuffled
-		void AddEmptyLabel(int mode);
+		void AddEmptyLabel(int mode, bool change);
 		bool SearchLabel(unsigned int label);
+		//save label
+		void PushLabel(bool ret);
+		void PopLabel();
+		void LoadLabel2();
 
 		//save
 		double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
 		double GetTransferValue(int i, int j, int k, flvr::TextureBrick* b = 0);
-		void SaveData(std::wstring &filename, int mode = 0, bool bake = false, bool compress = false);
+		void SaveData(const std::wstring &filename,
+			int mode, bool crop, int filter, bool bake,
+			bool compress, fluo::Quaternion &q);
 		void SaveMask(bool use_reader, long t, long c);
 		void SaveLabel(bool use_reader, long t, long c);
 
@@ -150,6 +157,10 @@ namespace fluo
 		//color map
 		fluo::Color GetColorFromColormap(double value);
 
+		void SetShuffle(int val);
+		int GetShuffle();
+		void IncShuffle();
+
 		friend class VolumeFactory;
 
 	protected:
@@ -162,6 +173,8 @@ namespace fluo
 
 		std::vector<VD_Landmark> m_landmarks;
 		std::wstring m_metadata_id;
+		//save label
+		void* m_label_save;
 
 	private:
 		//label functions

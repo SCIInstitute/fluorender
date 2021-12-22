@@ -35,7 +35,10 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class RulerAlign;

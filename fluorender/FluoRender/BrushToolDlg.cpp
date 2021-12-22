@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
 #include <Calculate/Count.h>
 #include <Distance/Cov.h>
 #include <Distance/RulerAlign.h>
@@ -496,7 +497,7 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 	if (!m_selector)
 		return;
 
-	VolumeData* sel_vol = 0;
+	fluo::VolumeData* sel_vol = 0;
 	if (m_frame)
 	{
 		sel_vol = m_frame->GetCurSelVol();
@@ -512,7 +513,7 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 	//threshold range
 	if (sel_vol)
 	{
-		m_max_value = sel_vol->GetMaxValue();
+		sel_vol->getValue("max int", m_max_value);
 		//falloff
 		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0+0.5));
 		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
@@ -637,7 +638,7 @@ void BrushToolDlg::UpdateUndoRedo()
 {
 	if (m_frame)
 	{
-		VolumeData* vd = m_frame->GetCurSelVol();
+		fluo::VolumeData* vd = m_frame->GetCurSelVol();
 		if (vd && vd->GetTexture())
 		{
 			m_toolbar->EnableTool(ID_BrushUndo,
@@ -1159,7 +1160,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 
 	if (m_frame && m_view)
 	{
-		VolumeData* vd = m_frame->GetCurSelVol();
+		fluo::VolumeData* vd = m_frame->GetCurSelVol();
 		if (vd && vd->GetTexture())
 		{
 			flrd::Cov cover(vd);
@@ -1200,7 +1201,7 @@ void BrushToolDlg::Update(int mode)
 void BrushToolDlg::UpdateSize()
 {
 	GridData data;
-	VolumeData* sel_vol = 0;
+	fluo::VolumeData* sel_vol = 0;
 	if (!m_frame)
 		return;
 	sel_vol = m_frame->GetCurSelVol();
@@ -1211,18 +1212,27 @@ void BrushToolDlg::UpdateSize()
 	counter.SetUseMask(true);
 	counter.Count();
 	data.voxel_sum = counter.GetSum();
-	double scale = sel_vol->GetScalarScale();
+	double scale;
+	sel_vol->getValue("int scale", scale);
 	data.voxel_wsum = counter.GetWeightedSum() * scale;
 	if (data.voxel_sum)
 	{
 		data.avg_int = data.voxel_wsum / data.voxel_sum;
-		if (sel_vol->GetBits() == 8)
+		long bits;
+		sel_vol->getValue("bits", bits);
+		if (bits == 8)
 			data.avg_int *= 255.0;
-		else if (sel_vol->GetBits() == 16)
-			data.avg_int *= sel_vol->GetMaxValue();
+		else if (bits == 16)
+		{
+			double maxint;
+			sel_vol->getValue("max int", maxint);
+			data.avg_int *= maxint;
+		}
 	}
 	double spcx, spcy, spcz;
-	sel_vol->GetSpacings(spcx, spcy, spcz);
+	sel_vol->getValue("spc x", spcx);
+	sel_vol->getValue("spc y", spcy);
+	sel_vol->getValue("spc z", spcz);
 	double vvol = spcx * spcy * spcz;
 	vvol = vvol == 0.0 ? 1.0 : vvol;
 	data.size = data.voxel_sum * vvol;

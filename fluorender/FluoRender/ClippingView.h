@@ -45,9 +45,12 @@ enum PLANE_MODES
 };
 
 class VRenderFrame;
-class VolumeData;
-class MeshData;
 class DataManager;
+namespace fluo
+{
+	class VolumeData;
+}
+class MeshData;
 class ClippingView: public wxPanel
 {
 	enum
@@ -101,11 +104,11 @@ public:
 		const wxString& name="ClippingView");
 	~ClippingView();
 
-	void SetVolumeData(VolumeData* vd);
+	void SetVolumeData(fluo::VolumeData* vd);
 	void SetMeshData(MeshData* md);
 	void SetDataManager(DataManager* mgr);
 	int GetSelType();
-	VolumeData* GetVolumeData();
+	fluo::VolumeData* GetVolumeData();
 	MeshData* GetMeshData();
 	void RefreshVRenderViews(bool interactive=true);
 
@@ -170,7 +173,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	int m_sel_type;		//curent selection type
-	VolumeData* m_vd;	//current volume data
+	fluo::VolumeData* m_vd;	//current volume data
 	MeshData* m_md;		//current mesh data
 	DataManager* m_mgr;	//manage all if clipping planes are synced
 	bool m_draw_clip;

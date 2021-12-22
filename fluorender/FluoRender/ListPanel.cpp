@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include "ListPanel.h"
 #include "DataManager.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include "Formats/png_resource.h"
 #include <wx/valnum.h>
 
@@ -52,7 +55,7 @@ EVT_SCROLLWIN(DataListCtrl::OnScroll)
 EVT_MOUSEWHEEL(DataListCtrl::OnScroll)
 END_EVENT_TABLE()
 
-VolumeData* DataListCtrl::m_vd = 0;
+fluo::VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
 	VRenderFrame* frame,
@@ -86,7 +89,7 @@ DataListCtrl::~DataListCtrl()
 	delete m_rename_text;
 }
 
-void DataListCtrl::Append(int type, wxString name, wxString path)
+void DataListCtrl::Append(int type, const wxString &name, const wxString &path)
 {
 	long tmp = 0;
 	if (type == DATA_VOLUME)
@@ -113,7 +116,7 @@ wxString DataListCtrl::GetText(long item, int col)
 	return info.GetText();
 }
 
-void DataListCtrl::SetText(long item, int col, wxString &str)
+void DataListCtrl::SetText(long item, int col, const wxString &str)
 {
 	wxListItem info;
 	info.SetId(item);
@@ -124,7 +127,7 @@ void DataListCtrl::SetText(long item, int col, wxString &str)
 	SetItem(info);
 }
 
-void DataListCtrl::SetSelection(int type, wxString &name)
+void DataListCtrl::SetSelection(int type, const wxString &name)
 {
 	wxString str_type;
 	switch (type)
@@ -173,11 +176,14 @@ void DataListCtrl::SaveSelMask()
 		wxString name = GetText(item, 1);
 		if (m_frame)
 		{
-			VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+			fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
 			if (vd)
 			{
-				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+				long time, chan;
+				vd->getValue("time", time);
+				vd->getValue("channel", chan);
+				vd->SaveMask(true, time, chan);
+				vd->SaveLabel(true, time, chan);
 			}
 		}
 	}
@@ -193,11 +199,14 @@ void DataListCtrl::SaveAllMasks()
 			wxString name = GetText(item, 1);
 			if (m_frame)
 			{
-				VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+				fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
 				if (vd)
 				{
-					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+					long time, chan;
+					vd->getValue("time", time);
+					vd->getValue("channel", chan);
+					vd->SaveMask(true, time, chan);
+					vd->SaveLabel(true, time, chan);
 				}
 			}
 		}
@@ -247,10 +256,12 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					if (GetItemText(item) == "Volume")
 					{
 						wxString name = GetText(item, 1);
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
 						if (vd)
 						{
-							if (vd->GetPath() == "")
+							std::wstring path;
+							vd->getValue("data path", path);
+							if (path.empty())
 								menu.Append(Menu_Save, "Save...");
 							else
 								menu.Append(Menu_Save, "Save As...");
@@ -301,19 +312,19 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		if (GetItemText(item) == "Volume")
 		{
 			name = GetText(item, 1);
-			VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+			fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
 			if (vd)
 			{
 				if (view)
 				{
-					VolumeData* vd_add = vd;
+					fluo::VolumeData* vd_add = vd;
 
 					for (int i = 0; i < m_frame->GetViewNum(); ++i)
 					{
 						VRenderGLView* v = m_frame->GetView(i);
 						if (v && v->GetVolumeData(name))
 						{
-							vd_add = m_frame->GetDataManager()->DuplicateVolumeData(vd);
+							vd_add = glbin_volf->build(vd);
 							break;
 						}
 					}
@@ -329,9 +340,9 @@ void DataListCtrl::AddToView(int menu_index, long item)
 						color = fluo::Color(0.0, 0.0, 1.0);
 
 					if (chan_num >= 0 && chan_num < 3)
-						vd_add->SetColor(color);
+						vd_add->setValue("color", color);
 
-					DataGroup *group = view->AddVolumeData(vd_add);
+					fluo::VolumeGroup *group = view->AddVolumeData(vd_add);
 					m_frame->OnSelection(2, view, group, vd_add, 0);
 					if (view->GetVolMethod() == VOL_METHOD_MULTI)
 					{
@@ -465,8 +476,10 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 	{
 		if (m_vd && resize)
 		{
-			int nx, ny, nz;
-			m_vd->GetResolution(nx, ny, nz);
+			long nx, ny, nz;
+			m_vd->getValue("res x", nx);
+			m_vd->getValue("res y", ny);
+			m_vd->getValue("res z", nz);
 			size_x_txt->SetValue(wxString::Format("%d", nx));
 			size_y_txt->SetValue(wxString::Format("%d", ny));
 			size_z_txt->SetValue(wxString::Format("%d", nz));
@@ -479,28 +492,40 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 		}
 	}
 	if (m_vd)
-		m_vd->SetResize(resize ? 1 : 0, -1, -1, -1);
+		m_vd->setValue("resize", resize);
 }
 
 void DataListCtrl::OnSizeXText(wxCommandEvent &event)
 {
 	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_x_txt && m_vd)
-		m_vd->SetResize(-1, STOI(size_x_txt->GetValue().fn_str()), -1, -1);
+	{
+		long lval;
+		size_x_txt->GetValue().ToLong(&lval);
+		m_vd->setValue("resize x", lval);
+	}
 }
 
 void DataListCtrl::OnSizeYText(wxCommandEvent &event)
 {
 	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_y_txt && m_vd)
-		m_vd->SetResize(-1, -1, STOI(size_y_txt->GetValue().fn_str()), -1);
+	{
+		long lval;
+		size_y_txt->GetValue().ToLong(&lval);
+		m_vd->setValue("resize y", lval);
+	}
 }
 
 void DataListCtrl::OnSizeZText(wxCommandEvent &event)
 {
 	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_z_txt && m_vd)
-		m_vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().fn_str()));
+	{
+		long lval;
+		size_z_txt->GetValue().ToLong(&lval);
+		m_vd->setValue("resize z", lval);
+	}
 }
 
 void DataListCtrl::OnFilterChange(wxCommandEvent &event)
@@ -573,8 +598,11 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	if (m_vd)
 	{
 		bool resize;
-		int nx, ny, nz;
-		m_vd->GetResize(resize, nx, ny, nz);
+		long nx, ny, nz;
+		m_vd->getValue("resize", resize);
+		m_vd->getValue("resize x", nx);
+		m_vd->getValue("resize y", ny);
+		m_vd->getValue("resize z", nz);
 		resize_chk->SetValue(resize);
 		if (resize)
 		{
@@ -622,12 +650,17 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 		{
 
 			if (m_frame)
-				m_vd = m_frame->GetDataManager()->GetVolumeData(name);
+				m_vd = glbin_volf->findFirst(name.ToStdString());
 			else
 				return;
 			fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
 			if (m_vd)
-				m_vd->SetResize(0, 0, 0, 0);
+			{
+				m_vd->setValue("resize", false);
+				m_vd->setValue("resize x", 0);
+				m_vd->setValue("resize y", 0);
+				m_vd->setValue("resize z", 0);
+			}
 
 			wxFileDialog *fopendlg = new wxFileDialog(
 				m_frame, "Save Volume Data", "", "",
@@ -644,17 +677,23 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				wxString filename = fopendlg->GetPath();
 				if (m_vd)
 				{
-					m_vd->Save(filename, fopendlg->GetFilterIndex(),
+					m_vd->SaveData(filename.ToStdWstring(), fopendlg->GetFilterIndex(),
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						false, VRenderFrame::GetCompression(), q);
-					wxString str = m_vd->GetPath();
+					std::wstring str;
+					m_vd->getValue("data path", str);
 					SetText(item, 2, str);
 				}
 			}
 			delete fopendlg;
 
 			if (m_vd)
-				m_vd->SetResize(0, 0, 0, 0);
+			{
+				m_vd->setValue("resize", false);
+				m_vd->setValue("resize x", 0);
+				m_vd->setValue("resize y", 0);
+				m_vd->setValue("resize z", 0);
+			}
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
@@ -737,13 +776,14 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 			if (m_frame)
 			{
 				fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
-				VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+				fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 				if (vd)
 				{
-					vd->Save(filename, fopendlg->GetFilterIndex(),
+					vd->SaveData(filename.ToStdWstring(), fopendlg->GetFilterIndex(),
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						true, VRenderFrame::GetCompression(), q);
-					wxString str = vd->GetPath();
+					std::wstring str;
+					vd->getValue("data path", str);
 					SetText(item, 2, str);
 				}
 			}
@@ -832,9 +872,9 @@ void DataListCtrl::EndEdit(bool update)
 
 				if (GetItemText(item) == "Volume")
 				{
-					VolumeData* vd = mgr->GetVolumeData(name);
+					fluo::VolumeData* vd = mgr->GetVolumeData(name.ToStdString());
 					if (vd)
-						vd->SetName(new_name2);
+						vd->setName(new_name2.ToStdString());
 				}
 				else if (GetItemText(item) == "Mesh")
 				{
@@ -892,7 +932,7 @@ void DataListCtrl::DeleteSelection()
 				DataManager* mgr = m_frame->GetDataManager();
 				if (mgr)
 				{
-					int index = mgr->GetVolumeIndex(name);
+					int index = mgr->GetVolumeIndex(name.ToStdString());
 					if (index != -1)
 					{
 						mgr->RemoveVolumeData(index);
@@ -972,7 +1012,7 @@ void DataListCtrl::DeleteAll()
 			DataManager* mgr = m_frame->GetDataManager();
 			if (mgr)
 			{
-				int index = mgr->GetVolumeIndex(name);
+				int index = mgr->GetVolumeIndex(name.ToStdString());
 				if (index != -1)
 					mgr->RemoveVolumeData(index);
 			}
@@ -1109,7 +1149,7 @@ ListPanel::~ListPanel()
 {
 }
 
-void ListPanel::Append(int type, wxString name, wxString path)
+void ListPanel::Append(int type, const wxString &name, const wxString &path)
 {
 	if (m_datalist)
 		m_datalist->Append(type, name, path);
@@ -1123,7 +1163,7 @@ wxString ListPanel::GetText(long item, int col)
 	return str;
 }
 
-void ListPanel::SetText(long item, int col, wxString &str)
+void ListPanel::SetText(long item, int col, const wxString &str)
 {
 	if (m_datalist)
 		m_datalist->SetText(item, col, str);
@@ -1135,7 +1175,7 @@ void ListPanel::DeleteAllItems()
 		m_datalist->DeleteAllItems();
 }
 
-void ListPanel::SetSelection(int type, wxString &name)
+void ListPanel::SetSelection(int type, const wxString &name)
 {
 	if (m_datalist)
 		m_datalist->SetSelection(type, name);

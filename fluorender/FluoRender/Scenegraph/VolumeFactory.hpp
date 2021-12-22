@@ -68,6 +68,11 @@ namespace fluo
 			return dynamic_cast<VolumeData*>(const_cast<Object*>(ObjectFactory::get(i)));
 		}
 
+		inline virtual VolumeData* getLast()
+		{
+			return dynamic_cast<VolumeData*>(const_cast<Object*>(ObjectFactory::getLast()));
+		}
+
 		inline virtual VolumeData* find(const unsigned int id)
 		{
 			return dynamic_cast<VolumeData*>(ObjectFactory::find(id));

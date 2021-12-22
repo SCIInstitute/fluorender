@@ -32,7 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 
 class VRenderFrame;
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 class DataListCtrl : public wxListCtrl
 {
 	enum
@@ -56,10 +59,10 @@ public:
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 	~DataListCtrl();
 
-	void Append(int type, wxString name, wxString path);
+	void Append(int type, const wxString &name, const wxString &path);
 	wxString GetText(long item, int col);
-	void SetText(long item, int col, wxString &str);
-	void SetSelection(int type, wxString &name);
+	void SetText(long item, int col, const wxString &str);
+	void SetSelection(int type, const wxString &name);
 	void SaveSelMask();
 	void SaveAllMasks();
 
@@ -67,7 +70,7 @@ public:
 
 private:
 	VRenderFrame* m_frame;
-	static VolumeData* m_vd;
+	static fluo::VolumeData* m_vd;
 
 	wxTextCtrl *m_rename_text;
 
@@ -132,11 +135,11 @@ public:
 		const wxString& name = "ListPanel");
 	~ListPanel();
 
-	void Append(int type, wxString name, wxString path);
+	void Append(int type, const wxString &name, const wxString &path);
 	wxString GetText(long item, int col);
-	void SetText(long item, int col, wxString &str);
+	void SetText(long item, int col, const wxString &str);
 	void DeleteAllItems();
-	void SetSelection(int type, wxString &name);
+	void SetSelection(int type, const wxString &name);
 	void SaveAllMasks();
 
 private:

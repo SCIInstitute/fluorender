@@ -32,8 +32,11 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
-class DataGroup;
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class CalculationDlg : public wxPanel
 {
 public:
@@ -59,16 +62,16 @@ public:
 	CalculationDlg(VRenderFrame* frame);
 	~CalculationDlg();
 
-	void SetGroup(DataGroup* group);
+	void SetGroup(fluo::VolumeGroup* group);
 
 private:
 	VRenderFrame* m_frame;
 	//current view
 	VRenderGLView *m_view;
 	//current volume
-	VolumeData *m_vol1;
-	VolumeData *m_vol2;
-	DataGroup *m_group;
+	fluo::VolumeData *m_vol1;
+	fluo::VolumeData *m_vol2;
+	fluo::VolumeGroup *m_group;
 
 	//calculations
 	//operands

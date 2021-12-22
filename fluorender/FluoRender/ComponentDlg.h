@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include "Main.h"
-#include "DataManager.h"
 #include <Components/CompGenerator.h>
 #include <Components/CompAnalyzer.h>
 #include <Distance/RulerAlign.h>
@@ -45,7 +44,6 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
 
 DECLARE_APP(VRenderApp)
 class ComponentDlg : public wxPanel
