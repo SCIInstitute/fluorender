@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderGLView.h"
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <Global.hpp>
 #include <Timer.h>
 #include <Components/CompAnalyzer.h>
@@ -541,7 +543,7 @@ VRenderGLView::~VRenderGLView()
 			continue;
 		if (m_layer_list[i]->IsA() == 5)//group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			delete group;
 		}
 		else if (m_layer_list[i]->IsA() == 6)//mesh group
@@ -645,7 +647,7 @@ void VRenderGLView::Clear()
 			continue;
 		if (m_layer_list[i]->IsA() == 5)//group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			delete group;
 		}
 		else if (m_layer_list[i]->IsA() == 6)//mesh group
@@ -1300,7 +1302,7 @@ void VRenderGLView::DrawVolumes(int peel)
 
 		PopVolumeList();
 
-		vector<VolumeData*> quota_vd_list;
+		vector<fluo::VolumeData*> quota_vd_list;
 		if (flvr::TextureRenderer::get_mem_swap())
 		{
 			//set start time for the texture renderer
@@ -1350,13 +1352,13 @@ void VRenderGLView::DrawVolumes(int peel)
 				{
 					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
 					//not considering mask for now
-					vector<VolumeData*>::iterator cur_iter;
+					vector<fluo::VolumeData*>::iterator cur_iter;
 					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
 					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
 					int vd_index;
 					if (cur_iter != m_vd_pop_list.end())
 					{
-						VolumeData* vd;
+						fluo::VolumeData* vd;
 						vd = *cur_iter;
 						quota_vd_list.push_back(vd);
 						int count_bricks = vd->GetBrickNum();
@@ -1389,13 +1391,13 @@ void VRenderGLView::DrawVolumes(int peel)
 				else if (m_vd_pop_list.size() == 1)
 				{
 					quota_bricks_chan = quota_bricks;
-					VolumeData* vd = m_vd_pop_list[0];
+					fluo::VolumeData* vd = m_vd_pop_list[0];
 					if (vd)
 						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
 				}
 
 				//get and set center point
-				VolumeData* vd = m_cur_vol;
+				fluo::VolumeData* vd = m_cur_vol;
 				if (!vd)
 					if (m_vd_pop_list.size())
 						vd = m_vd_pop_list[0];
@@ -1436,7 +1438,7 @@ void VRenderGLView::DrawVolumes(int peel)
 		else
 		{
 			int i, j;
-			vector<VolumeData*> list;
+			vector<fluo::VolumeData*> list;
 			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
 			{
 				if (!m_layer_list[i])
@@ -1445,7 +1447,7 @@ void VRenderGLView::DrawVolumes(int peel)
 				{
 				case 2://volume data (this won't happen now)
 				{
-					VolumeData* vd = (VolumeData*)m_layer_list[i];
+					fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 					if (vd && vd->GetDisp())
 					{
 						if (flvr::TextureRenderer::get_mem_swap() &&
@@ -1472,12 +1474,12 @@ void VRenderGLView::DrawVolumes(int peel)
 							DrawVolumesComp(list, true, peel);
 						list.clear();
 					}
-					DataGroup* group = (DataGroup*)m_layer_list[i];
+					fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 					if (!group->GetDisp())
 						continue;
 					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
 					{
-						VolumeData* vd = group->GetVolumeData(j);
+						fluo::VolumeData* vd = group->GetVolumeData(j);
 						if (vd && vd->GetDisp())
 						{
 							if (flvr::TextureRenderer::get_mem_swap() &&
@@ -1668,14 +1670,14 @@ void VRenderGLView::PopVolumeList()
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 			if (vd->GetDisp())
 				m_vd_pop_list.push_back(vd);
 		}
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (!group->GetDisp())
 				continue;
 			for (j = 0; j<group->GetVolumeNum(); j++)
@@ -1695,7 +1697,7 @@ void VRenderGLView::PopVolumeList()
 //if no group in view
 void VRenderGLView::OrganizeLayers()
 {
-	DataGroup* le_group = 0;
+	fluo::VolumeGroup* le_group = 0;
 	int i;
 
 	//find last empty group
@@ -1705,7 +1707,7 @@ void VRenderGLView::OrganizeLayers()
 		if (layer && layer->IsA() == 5)
 		{
 			//layer is group
-			DataGroup* group = (DataGroup*)layer;
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 			if (group->GetVolumeNum() == 0)
 			{
 				le_group = group;
@@ -1720,7 +1722,7 @@ void VRenderGLView::OrganizeLayers()
 		if (layer && layer->IsA() == 2)
 		{
 			//layer is volume
-			VolumeData* vd = (VolumeData*)layer;
+			fluo::VolumeData* vd = (fluo::VolumeData*)layer;
 			wxString name = vd->GetName();
 			if (le_group)
 			{
@@ -2127,13 +2129,13 @@ void VRenderGLView::ChangeBrushSize(int value)
 }
 
 //calculations
-void VRenderGLView::SetVolumeA(VolumeData* vd)
+void VRenderGLView::SetVolumeA(fluo::VolumeData* vd)
 {
 	m_calculator.SetVolumeA(vd);
 	m_selector.SetVolume(vd);
 }
 
-void VRenderGLView::SetVolumeB(VolumeData* vd)
+void VRenderGLView::SetVolumeB(fluo::VolumeData* vd)
 {
 	m_calculator.SetVolumeB(vd);
 }
@@ -2368,7 +2370,7 @@ void VRenderGLView::DrawVRBuffer()
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int peel)
+void VRenderGLView::DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask, int peel)
 {
 	if (list.size() <= 0)
 		return;
@@ -2379,7 +2381,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	int cnt_mask = 0;
 	for (i = 0; i<(int)list.size(); i++)
 	{
-		VolumeData* vd = list[i];
+		fluo::VolumeData* vd = list[i];
 		if (!vd || !vd->GetDisp())
 			continue;
 		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
@@ -2403,7 +2405,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	//draw each volume to fbo
 	for (i = 0; i<(int)list.size(); i++)
 	{
-		VolumeData* vd = list[i];
+		fluo::VolumeData* vd = list[i];
 		if (!vd || !vd->GetDisp())
 			continue;
 		if (mask)
@@ -2446,7 +2448,7 @@ void VRenderGLView::DrawVolumesComp(vector<VolumeData*> &list, bool mask, int pe
 	}
 }
 
-void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
+void VRenderGLView::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -2552,7 +2554,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 
 	if (vd->GetShadow())
 	{
-		vector<VolumeData*> list;
+		vector<fluo::VolumeData*> list;
 		list.push_back(vd);
 		DrawOLShadows(list);
 	}
@@ -2644,7 +2646,7 @@ void VRenderGLView::DrawOVER(VolumeData* vd, bool mask, int peel)
 	}
 }
 
-void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
+void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -2848,7 +2850,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 
 	if (shadow)
 	{
-		vector<VolumeData*> list;
+		vector<fluo::VolumeData*> list;
 		list.push_back(vd);
 		DrawOLShadows(list);
 	}
@@ -2943,7 +2945,7 @@ void VRenderGLView::DrawMIP(VolumeData* vd, int peel)
 	}
 }
 
-void VRenderGLView::DrawOLShading(VolumeData* vd)
+void VRenderGLView::DrawOLShading(fluo::VolumeData* vd)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -3154,7 +3156,7 @@ void VRenderGLView::DrawOLShadowsMesh(double darkness)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
+void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -3168,11 +3170,11 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 	bool has_shadow = false;
 	vector<int> colormodes;
 	vector<bool> shadings;
-	vector<VolumeData*> list;
+	vector<fluo::VolumeData*> list;
 	//generate list
 	for (i = 0; i<vlist.size(); i++)
 	{
-		VolumeData* vd = vlist[i];
+		fluo::VolumeData* vd = vlist[i];
 		if (vd && vd->GetShadow())
 		{
 			colormodes.push_back(vd->GetColormapMode());
@@ -3225,7 +3227,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		;
 	else if (list.size() == 1)
 	{
-		VolumeData* vd = list[0];
+		fluo::VolumeData* vd = list[0];
 		//save
 		int colormode = vd->GetColormapMode();
 		bool shading = vd->GetVR()->get_shading();
@@ -3257,7 +3259,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 		m_mvr->clear_vr();
 		for (i = 0; i<list.size(); i++)
 		{
-			VolumeData* vd = list[i];
+			fluo::VolumeData* vd = list[i];
 			vd->GetVR()->set_shading(false);
 			vd->SetMode(0);
 			vd->SetColormapMode(2);
@@ -3281,7 +3283,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 		for (i = 0; i<list.size(); i++)
 		{
-			VolumeData* vd = list[i];
+			fluo::VolumeData* vd = list[i];
 			vd->RestoreMode();
 			vd->SetColormapMode(colormodes[i]);
 			vd->GetVR()->set_shading(shadings[i]);
@@ -3383,7 +3385,7 @@ void VRenderGLView::DrawOLShadows(vector<VolumeData*> &vlist)
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
+void VRenderGLView::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -3406,7 +3408,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 	m_mvr->clear_vr();
 	for (i = 0; i<(int)list.size(); i++)
 	{
-		VolumeData* vd = list[i];
+		fluo::VolumeData* vd = list[i];
 		if (vd && vd->GetDisp())
 		{
 			flvr::VolumeRenderer* vr = vd->GetVR();
@@ -3507,7 +3509,7 @@ void VRenderGLView::DrawVolumesMulti(vector<VolumeData*> &list, int peel)
 		img_shader->bind();
 	}
 	fluo::Color gamma, brightness, hdr;
-	VolumeData* vd = list[0];
+	fluo::VolumeData* vd = list[0];
 	gamma = vd->GetGamma();
 	brightness = vd->GetBrightness();
 	hdr = vd->GetHdr();
@@ -3757,8 +3759,8 @@ void VRenderGLView::PickVolume()
 	double dist = 0.0;
 	double min_dist = -1.0;
 	fluo::Point p, ip, pp;
-	VolumeData* vd = 0;
-	VolumeData* picked_vd = 0;
+	fluo::VolumeData* vd = 0;
+	fluo::VolumeData* picked_vd = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
 		vd = m_vd_pop_list[i];
@@ -4569,7 +4571,7 @@ void VRenderGLView::SetParams(double t)
 
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
-		VolumeData* vd = GetAllVolumeData(i);
+		fluo::VolumeData* vd = GetAllVolumeData(i);
 		if (!vd) continue;
 
 		keycode.l1 = 2;
@@ -4750,7 +4752,7 @@ void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 {
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		fluo::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
 			BaseReader* reader = vd->GetReader();
@@ -4775,7 +4777,7 @@ void VRenderGLView::Get4DSeqRange(int &start_frame, int &end_frame)
 	}
 }
 
-void VRenderGLView::UpdateVolumeData(int frame, VolumeData* vd)
+void VRenderGLView::UpdateVolumeData(int frame, fluo::VolumeData* vd)
 {
 	if (vd && vd->GetReader())
 	{
@@ -4835,7 +4837,7 @@ void VRenderGLView::ReloadVolumeData(int frame)
 
 	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		fluo::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
 			flvr::Texture *tex = vd->GetTexture();
@@ -4952,7 +4954,7 @@ void VRenderGLView::Set4DSeqFrame(int frame, int start_frame, int end_frame, boo
 	m_total_frames = std::abs(end_frame - start_frame + 1);
 
 	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
+	fluo::VolumeData* cur_vd_save = m_cur_vol;
 
 	//run pre-change script
 	if (update && m_run_script)
@@ -4984,7 +4986,7 @@ void VRenderGLView::Get3DBatRange(int &start_frame, int &end_frame)
 
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		fluo::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetReader())
 		{
 			BaseReader* reader = vd->GetReader();
@@ -5028,7 +5030,7 @@ void VRenderGLView::Set3DBatFrame(int frame, int start_frame, int end_frame, boo
 	m_total_frames = std::abs(end_frame - start_frame + 1);
 
 	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
+	fluo::VolumeData* cur_vd_save = m_cur_vol;
 
 	//run pre-change script
 	if (update && m_run_script)
@@ -5430,7 +5432,7 @@ void VRenderGLView::SetCenter()
 {
 	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
 
-	VolumeData *vd = 0;
+	fluo::VolumeData *vd = 0;
 	if (m_cur_vol)
 		vd = m_cur_vol;
 	else if (m_vd_pop_list.size())
@@ -5478,7 +5480,7 @@ double VRenderGLView::Get121ScaleFactor()
 	double spc_x = 1.0;
 	double spc_y = 1.0;
 	double spc_z = 1.0;
-	VolumeData *vd = 0;
+	fluo::VolumeData *vd = 0;
 	if (m_cur_vol)
 		vd = m_cur_vol;
 	else if (m_vd_pop_list.size())
@@ -5505,7 +5507,7 @@ void VRenderGLView::SetScale121()
 		break;
 	case 2:
 		{
-		VolumeData *vd = 0;
+		fluo::VolumeData *vd = 0;
 		if (m_cur_vol)
 			vd = m_cur_vol;
 		else if (m_vd_pop_list.size())
@@ -5694,7 +5696,7 @@ void VRenderGLView::SetVolMethod(int method)
 	}
 }
 
-VolumeData* VRenderGLView::GetAllVolumeData(int index)
+fluo::VolumeData* VRenderGLView::GetAllVolumeData(int index)
 {
 	int cnt = 0;
 	int i, j;
@@ -5706,12 +5708,12 @@ VolumeData* VRenderGLView::GetAllVolumeData(int index)
 		{
 		case 2:  //volume data
 			if (cnt == index)
-				return (VolumeData*)m_layer_list[i];
+				return (fluo::VolumeData*)m_layer_list[i];
 			cnt++;
 			break;
 		case 5:  //group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (!group)
 				break;
 			for (j = 0; j<group->GetVolumeNum(); j++)
@@ -5727,7 +5729,7 @@ VolumeData* VRenderGLView::GetAllVolumeData(int index)
 	return 0;
 }
 
-VolumeData* VRenderGLView::GetDispVolumeData(int index)
+fluo::VolumeData* VRenderGLView::GetDispVolumeData(int index)
 {
 	if (GetDispVolumeNum() <= 0)
 		return 0;
@@ -5754,7 +5756,7 @@ MeshData* VRenderGLView::GetMeshData(int index)
 		return 0;
 }
 
-VolumeData* VRenderGLView::GetVolumeData(wxString &name)
+fluo::VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 {
 	int i, j;
 
@@ -5766,19 +5768,19 @@ VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 			if (vd && vd->GetName() == name)
 				return vd;
 		}
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (!group)
 				break;
 			for (j = 0; j<group->GetVolumeNum(); j++)
 			{
-				VolumeData* vd = group->GetVolumeData(j);
+				fluo::VolumeData* vd = group->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 					return vd;
 			}
@@ -5845,7 +5847,7 @@ Annotations* VRenderGLView::GetAnnotations(wxString &name)
 	return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(wxString &name)
+fluo::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
 {
 	int i;
 
@@ -5857,7 +5859,7 @@ DataGroup* VRenderGLView::GetGroup(wxString &name)
 		{
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group && group->GetName() == name)
 				return group;
 		}
@@ -5866,7 +5868,7 @@ DataGroup* VRenderGLView::GetGroup(wxString &name)
 	return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(int index)
+fluo::VolumeGroup* VRenderGLView::GetGroup(int index)
 {
 	int i;
 	int count = 0;
@@ -5879,7 +5881,7 @@ DataGroup* VRenderGLView::GetGroup(int index)
 		{
 			if (count == index)
 			{
-				DataGroup* group = (DataGroup*)m_layer_list[i];
+				fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 				return group;
 			}
 			count++;
@@ -5888,17 +5890,17 @@ DataGroup* VRenderGLView::GetGroup(int index)
 	return 0;
 }
 
-DataGroup* VRenderGLView::GetGroup(VolumeData* vd)
+fluo::VolumeGroup* VRenderGLView::GetGroup(fluo::VolumeData* vd)
 {
 	for (int i = 0; i < GetLayerNum(); i++)
 	{
 		TreeLayer* layer = GetLayer(i);
 		if (layer && layer->IsA() == 5)
 		{
-			DataGroup* group = (DataGroup*)layer;
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 			for (int j = 0; j < group->GetVolumeNum(); j++)
 			{
-				VolumeData* tmp_vd = group->GetVolumeData(j);
+				fluo::VolumeData* tmp_vd = group->GetVolumeData(j);
 				if (tmp_vd && tmp_vd == vd)
 					return group;
 			}
@@ -5936,7 +5938,7 @@ int VRenderGLView::GetAllVolumeNum()
 			break;
 		case 5:  //group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			num += group->GetVolumeNum();
 		}
 		break;
@@ -5951,12 +5953,12 @@ int VRenderGLView::GetMeshNum()
 	return m_md_pop_list.size();
 }
 
-DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
+fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, wxString group_name)
 {
 	//m_layer_list.push_back(vd);
 	int i;
-	DataGroup* group = 0;
-	DataGroup* group_temp = 0;
+	fluo::VolumeGroup* group = 0;
+	fluo::VolumeGroup* group_temp = 0;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -5964,7 +5966,7 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 		if (layer && layer->IsA() == 5)
 		{
 			//layer is group
-			group_temp = (DataGroup*)layer;
+			group_temp = (fluo::VolumeGroup*)layer;
 			if (group_temp && group_temp->GetName() == group_name)
 			{
 				group = group_temp;
@@ -5986,7 +5988,7 @@ DataGroup* VRenderGLView::AddVolumeData(VolumeData* vd, wxString group_name)
 
 	/*for (i=0; i<1; i++)
 	{
-	VolumeData* vol_data = group->GetVolumeData(i);
+	fluo::VolumeData* vol_data = group->GetVolumeData(i);
 	if (vol_data)
 	{
 	double spcx, spcy, spcz;
@@ -6047,12 +6049,12 @@ void VRenderGLView::AddAnnotations(Annotations* ann)
 	m_layer_list.push_back(ann);
 }
 
-void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
+void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
 {
 	int i, j;
 
 	bool found = false;
-	DataGroup* group = 0;
+	fluo::VolumeGroup* group = 0;
 
 	if (!m_frame) return;
 	DataManager *dm = m_frame->GetDataManager();
@@ -6066,7 +6068,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 			if (vd && vd->GetName() == name)
 			{
 				if (m_cur_vol == vd) m_cur_vol = dst;
@@ -6082,10 +6084,10 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, VolumeData *dst)
 		break;
 		case 5://group
 		{
-			DataGroup* tmpgroup = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* tmpgroup = (fluo::VolumeGroup*)m_layer_list[i];
 			for (j = 0; j<tmpgroup->GetVolumeNum(); j++)
 			{
-				VolumeData* vd = tmpgroup->GetVolumeData(j);
+				fluo::VolumeData* vd = tmpgroup->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 				{
 					if (m_cur_vol == vd) m_cur_vol = dst;
@@ -6130,7 +6132,7 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)(*iter);
+			fluo::VolumeData* vd = (fluo::VolumeData*)(*iter);
 			if (vd && vd->GetName() == name)
 			{
 				m_layer_list.erase(iter);
@@ -6143,10 +6145,10 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)(*iter);
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)(*iter);
 			for (int j = 0; j < group->GetVolumeNum(); ++j)
 			{
-				VolumeData* vd = group->GetVolumeData(j);
+				fluo::VolumeData* vd = group->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 				{
 					group->RemoveVolumeData(j);
@@ -6163,7 +6165,7 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 
 void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 {
-	VolumeData* vd_main = 0;
+	fluo::VolumeData* vd_main = 0;
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end() && !vd_main;
 		++iter)
@@ -6174,7 +6176,7 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)(*iter);
+			fluo::VolumeData* vd = (fluo::VolumeData*)(*iter);
 			if (vd && vd->GetName() == name)
 			{
 				vd_main = vd;
@@ -6184,10 +6186,10 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)(*iter);
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)(*iter);
 			for (int j = 0; j<group->GetVolumeNum(); j++)
 			{
-				VolumeData* vd = group->GetVolumeData(j);
+				fluo::VolumeData* vd = group->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 				{
 					vd_main = vd;
@@ -6214,7 +6216,7 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)(*iter);
+			fluo::VolumeData* vd = (fluo::VolumeData*)(*iter);
 			bool del = false;
 			if (vd)
 			{
@@ -6238,10 +6240,10 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)(*iter);
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)(*iter);
 			for (int j = group->GetVolumeNum()-1; j >= 0; --j)
 			{
-				VolumeData* vd = group->GetVolumeData(j);
+				fluo::VolumeData* vd = group->GetVolumeData(j);
 				if (vd)
 				{
 					bool del = false;
@@ -6342,12 +6344,12 @@ void VRenderGLView::RemoveGroup(wxString &name)
 		{
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group && group->GetName() == name)
 			{
 				for (j = group->GetVolumeNum() - 1; j >= 0; j--)
 				{
-					VolumeData* vd = group->GetVolumeData(j);
+					fluo::VolumeData* vd = group->GetVolumeData(j);
 					if (vd)
 					{
 						group->RemoveVolumeData(j);
@@ -6394,7 +6396,7 @@ void VRenderGLView::Isolate(int type, wxString name)
 		{
 		case 2://volume
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 			if (vd)
 			{
 				if (type == 2 &&
@@ -6433,7 +6435,7 @@ void VRenderGLView::Isolate(int type, wxString name)
 		break;
 		case 5://volume group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group)
 			{
 				if (type == 5)
@@ -6449,7 +6451,7 @@ void VRenderGLView::Isolate(int type, wxString name)
 				{
 					for (int i = 0; i<(int)group->GetVolumeNum(); i++)
 					{
-						VolumeData* vd = group->GetVolumeData(i);
+						fluo::VolumeData* vd = group->GetVolumeData(i);
 						if (vd)
 						{
 							if (type == 2 &&
@@ -6544,7 +6546,7 @@ void VRenderGLView::ShowAll()
 		{
 		case 2://volume
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 			if (vd)
 				vd->SetDisp(true);
 		}
@@ -6565,13 +6567,13 @@ void VRenderGLView::ShowAll()
 		break;
 		case 5:
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group)
 			{
 				group->SetDisp(true);
 				for (int j = 0; j<group->GetVolumeNum(); ++j)
 				{
-					VolumeData* vd = group->GetVolumeData(j);
+					fluo::VolumeData* vd = group->GetVolumeData(j);
 					if (vd)
 						vd->SetDisp(true);
 				}
@@ -6603,11 +6605,11 @@ void VRenderGLView::ShowAll()
 //source is after the destination
 void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	DataGroup* group = GetGroup(group_name);
+	fluo::VolumeGroup* group = GetGroup(group_name);
 	if (!group)
 		return;
 
-	VolumeData* src_vd = 0;
+	fluo::VolumeData* src_vd = 0;
 	int i, src_index;
 	for (i = 0; i<group->GetVolumeNum(); i++)
 	{
@@ -6642,11 +6644,11 @@ void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, w
 //source is after the destination
 void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	DataGroup* group = GetGroup(group_name);
+	fluo::VolumeGroup* group = GetGroup(group_name);
 	if (!group)
 		return;
 
-	VolumeData* src_vd = 0;
+	fluo::VolumeData* src_vd = 0;
 	int i;
 	for (i = 0; i<group->GetVolumeNum(); i++)
 	{
@@ -6684,7 +6686,7 @@ void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wx
 //source is after the destination
 void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	VolumeData* src_vd = 0;
+	fluo::VolumeData* src_vd = 0;
 	int i;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -6692,12 +6694,12 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 		wxString name = m_layer_list[i]->GetName();
 		if (name == src_name && m_layer_list[i]->IsA() == 2)//is volume data
 		{
-			src_vd = (VolumeData*)m_layer_list[i];
+			src_vd = (fluo::VolumeData*)m_layer_list[i];
 			m_layer_list.erase(m_layer_list.begin() + i);
 			break;
 		}
 	}
-	DataGroup* group = GetGroup(group_name);
+	fluo::VolumeGroup* group = GetGroup(group_name);
 	if (!group || !src_vd)
 		return;
 	if (group->GetVolumeNum() == 0 || dst_name == "")
@@ -6739,11 +6741,11 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 //sourece is after the destination
 void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
-	DataGroup* src_group = GetGroup(src_group_name);
+	fluo::VolumeGroup* src_group = GetGroup(src_group_name);
 	if (!src_group)
 		return;
 	int i;
-	VolumeData* src_vd = 0;
+	fluo::VolumeData* src_vd = 0;
 	for (i = 0; i<src_group->GetVolumeNum(); i++)
 	{
 		wxString name = src_group->GetVolumeData(i)->GetName();
@@ -6754,7 +6756,7 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 			break;
 		}
 	}
-	DataGroup* dst_group = GetGroup(dst_group_name);
+	fluo::VolumeGroup* dst_group = GetGroup(dst_group_name);
 	if (!dst_group || !src_vd)
 		return;
 	if (dst_group->GetVolumeNum() == 0 || dst_name == "")
@@ -6989,7 +6991,7 @@ TreeLayer* VRenderGLView::GetLayer(int index)
 
 wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 {
-	DataGroup* group = new DataGroup();
+	fluo::VolumeGroup* group = new fluo::VolumeGroup();
 	if (group && str != "")
 		group->SetName(str);
 
@@ -7002,7 +7004,7 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		{
 		case 5://group
 		{
-			DataGroup* group_temp = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group_temp = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group_temp && group_temp->GetName() == prev_group)
 			{
 				m_layer_list.insert(m_layer_list.begin() + i + 1, group);
@@ -7039,7 +7041,7 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		return "";
 }
 
-DataGroup* VRenderGLView::AddOrGetGroup()
+fluo::VolumeGroup* VRenderGLView::AddOrGetGroup()
 {
 	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
@@ -7049,7 +7051,7 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 		{
 		case 5://group
 		{
-			DataGroup* group_temp = (DataGroup*)m_layer_list[i];
+			fluo::VolumeGroup* group_temp = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group_temp && !group_temp->GetVolumeNum())
 				return group_temp;
 		}
@@ -7057,7 +7059,7 @@ DataGroup* VRenderGLView::AddOrGetGroup()
 		}
 	}
 	//group not found
-	DataGroup* group = new DataGroup();
+	fluo::VolumeGroup* group = new fluo::VolumeGroup();
 	if (!group)
 		return 0;
 	//set default settings
@@ -7299,7 +7301,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 
 	for (i = 0; i<GetDispVolumeNum(); i++)
 	{
-		VolumeData* vd = GetDispVolumeData(i);
+		fluo::VolumeData* vd = GetDispVolumeData(i);
 		if (!vd)
 			continue;
 
@@ -8588,7 +8590,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 		{
 			for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 			{
-				VolumeData* vd = m_vd_pop_list[i];
+				fluo::VolumeData* vd = m_vd_pop_list[i];
 				if (vd && vd->GetVR())
 				{
 					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetVR()->get_slice_num());
@@ -8823,7 +8825,7 @@ void VRenderGLView::SetSortBricks()
 
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		fluo::VolumeData* vd = m_vd_pop_list[i];
 		if (vd && vd->GetTexture())
 			vd->GetTexture()->set_sort_bricks();
 	}
@@ -8947,7 +8949,7 @@ void VRenderGLView::StartLoopUpdate()
 		int i, j, k;
 		for (i = 0; i<m_vd_pop_list.size(); i++)
 		{
-			VolumeData* vd = m_vd_pop_list[i];
+			fluo::VolumeData* vd = m_vd_pop_list[i];
 			if (vd)
 			{
 				switchLevel(vd);
@@ -9008,10 +9010,10 @@ void VRenderGLView::StartLoopUpdate()
 		vector<VolumeLoaderData> queues;
 		if (m_vol_method == VOL_METHOD_MULTI)
 		{
-			vector<VolumeData*> list;
+			vector<fluo::VolumeData*> list;
 			for (i = 0; i<m_vd_pop_list.size(); i++)
 			{
-				VolumeData* vd = m_vd_pop_list[i];
+				fluo::VolumeData* vd = m_vd_pop_list[i];
 				if (!vd || !vd->GetDisp() || !vd->isBrxml())
 					continue;
 				flvr::Texture* tex = vd->GetTexture();
@@ -9027,7 +9029,7 @@ void VRenderGLView::StartLoopUpdate()
 			vector<VolumeLoaderData> tmp_shadow;
 			for (i = 0; i < list.size(); i++)
 			{
-				VolumeData* vd = list[i];
+				fluo::VolumeData* vd = list[i];
 				flvr::Texture* tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
 				vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
@@ -9062,16 +9064,24 @@ void VRenderGLView::StartLoopUpdate()
 				}
 			}
 			if (flvr::TextureRenderer::get_update_order() == 1)
-				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_dsc);
+				std::sort(queues.begin(), queues.end(),
+				[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+				{ return b2.brick->get_d() > b1.brick->get_d(); });
 			else if (flvr::TextureRenderer::get_update_order() == 0)
-				std::sort(queues.begin(), queues.end(), VolumeLoader::sort_data_asc);
+				std::sort(queues.begin(), queues.end(),
+				[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+				{ return b2.brick->get_d() < b1.brick->get_d(); });
 
 			if (!tmp_shade.empty())
 			{
 				if (flvr::TextureRenderer::get_update_order() == 1)
-					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
+					std::sort(tmp_shade.begin(), tmp_shade.end(),
+					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+					{ return b2.brick->get_d() > b1.brick->get_d(); });
 				else if (flvr::TextureRenderer::get_update_order() == 0)
-					std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
+					std::sort(tmp_shade.begin(), tmp_shade.end(),
+					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+					{ return b2.brick->get_d() < b1.brick->get_d(); });
 				queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 			}
 			if (!tmp_shadow.empty())
@@ -9105,7 +9115,7 @@ void VRenderGLView::StartLoopUpdate()
 				{
 				case 2://volume data (this won't happen now)
 				{
-					VolumeData* vd = (VolumeData*)m_layer_list[i];
+					fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 					vector<VolumeLoaderData> tmp_shade;
 					vector<VolumeLoaderData> tmp_shadow;
 					if (vd && vd->GetDisp() && vd->isBrxml())
@@ -9167,13 +9177,13 @@ void VRenderGLView::StartLoopUpdate()
 				break;
 				case 5://group
 				{
-					vector<VolumeData*> list;
-					DataGroup* group = (DataGroup*)m_layer_list[i];
+					vector<fluo::VolumeData*> list;
+					fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 					if (!group->GetDisp())
 						continue;
 					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
 					{
-						VolumeData* vd = group->GetVolumeData(j);
+						fluo::VolumeData* vd = group->GetVolumeData(j);
 						if (!vd || !vd->GetDisp() || !vd->isBrxml())
 							continue;
 						flvr::Texture* tex = vd->GetTexture();
@@ -9195,7 +9205,7 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						for (k = 0; k < list.size(); k++)
 						{
-							VolumeData* vd = list[k];
+							fluo::VolumeData* vd = list[k];
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
@@ -9232,17 +9242,25 @@ void VRenderGLView::StartLoopUpdate()
 						if (!tmp_q.empty())
 						{
 							if (flvr::TextureRenderer::get_update_order() == 1)
-								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_dsc);
+								std::sort(tmp_q.begin(), tmp_q.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+								{ return b2.brick->get_d() > b1.brick->get_d(); });
 							else if (flvr::TextureRenderer::get_update_order() == 0)
-								std::sort(tmp_q.begin(), tmp_q.end(), VolumeLoader::sort_data_asc);
+								std::sort(tmp_q.begin(), tmp_q.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+								{ return b2.brick->get_d() < b1.brick->get_d(); });
 							queues.insert(queues.end(), tmp_q.begin(), tmp_q.end());
 						}
 						if (!tmp_shade.empty())
 						{
 							if (flvr::TextureRenderer::get_update_order() == 1)
-								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_dsc);
+								std::sort(tmp_shade.begin(), tmp_shade.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+								{ return b2.brick->get_d() > b1.brick->get_d(); });
 							else if (flvr::TextureRenderer::get_update_order() == 0)
-								std::sort(tmp_shade.begin(), tmp_shade.end(), VolumeLoader::sort_data_asc);
+								std::sort(tmp_shade.begin(), tmp_shade.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+								{ return b2.brick->get_d() < b1.brick->get_d(); });
 							queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
 						}
 						if (!tmp_shadow.empty())
@@ -9270,7 +9288,7 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						for (j = 0; j < list.size(); j++)
 						{
-							VolumeData* vd = list[j];
+							fluo::VolumeData* vd = list[j];
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
@@ -10546,7 +10564,7 @@ void VRenderGLView::DrawViewQuad()
 		quad_va->draw();
 }
 
-void VRenderGLView::switchLevel(VolumeData *vd)
+void VRenderGLView::switchLevel(fluo::VolumeData *vd)
 {
 	if (!vd) return;
 

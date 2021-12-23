@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"
@@ -683,19 +686,15 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 	}
 	//check if 4D
 	bool is_4d = false;
-	VolumeData* vd = 0;
-	DataManager* mgr = m_frame->GetDataManager();
-	if (mgr)
+	fluo::VolumeData* vd = 0;
+	for (size_t i = 0; i < glbin_volf->getNum(); ++i)
 	{
-		for (int i = 0; i < mgr->GetVolumeNum(); i++)
+		vd = glbin_volf->get(i);
+		if (vd && vd->GetReader() &&
+			vd->GetReader()->GetTimeNum() > 1)
 		{
-			vd = mgr->GetVolumeData(i);
-			if (vd->GetReader() &&
-				vd->GetReader()->GetTimeNum() > 1)
-			{
-				is_4d = true;
-				break;
-			}
+			is_4d = true;
+			break;
 		}
 	}
 	double duration = 0.0;
@@ -704,12 +703,13 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 		Interpolator *interpolator = m_frame->GetInterpolator();
 		if (interpolator && m_view)
 		{
-			double ct = vd->GetCurTime();
+			long ct;
+			vd->getValue("time", ct);
 			FlKeyCode keycode;
 			keycode.l0 = 1;
 			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = vd->getName();
 			keycode.l2 = 0;
 			keycode.l2_name = "frame";
 			double frame;
@@ -760,20 +760,22 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	interpolator->Begin(t, duration);
 
 	//for all volumes
-	for (int i=0; i<mgr->GetVolumeNum() ; i++)
+	for (size_t i = 0; i < glbin_volf->getNum(); ++i)
 	{
-		VolumeData* vd = mgr->GetVolumeData(i);
+		fluo::VolumeData* vd = glbin_volf->get(i);
 		keycode.l0 = 1;
 		keycode.l0_name = m_view->m_vrv->GetName();
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = vd->getName();
 		//display
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
-		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
+		bool bval;
+		vd->getValue("display", bval);
+		flkeyB = new FlKeyBoolean(keycode, bval);
 		interpolator->AddKey(flkeyB);
 		//clipping planes
-		vector<fluo::Plane*> * planes = vd->GetVR()->get_planes();
+		std::vector<fluo::Plane*> * planes = vd->GetRenderer()->get_planes();
 		if (!planes)
 			continue;
 		if (planes->size() != 6)
@@ -823,7 +825,8 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		interpolator->AddKey(flkey);
 		//t
-		int frame = vd->GetCurTime();
+		long frame;
+		vd->getValue("time", frame);
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		flkey = new FlKeyDouble(keycode, frame);
@@ -1005,11 +1008,11 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		//for all volumes
 		for (i=0; i<m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(i);
+			fluo::VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
 			keycode.l0_name = m_view->m_vrv->GetName();
 			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
+			keycode.l1_name = vd->getName();
 			//display only
 			keycode.l2 = 0;
 			keycode.l2_name = "display";

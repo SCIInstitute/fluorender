@@ -37,7 +37,10 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class ScriptProc
@@ -95,7 +98,7 @@ namespace flrd
 
 	private:
 		bool TimeCondition();
-		bool GetVolumes(std::vector<VolumeData*> &list);
+		bool GetVolumes(std::vector<fluo::VolumeData*> &list);
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();

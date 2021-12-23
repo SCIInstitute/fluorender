@@ -26,8 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
-#include "DataManager.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <Calculate/Compare.h>
 
 BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
@@ -195,7 +196,7 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 	fluo::Color c;
 	double val;
 	wxColor color;
-	VolumeData* vd = 0;
+	fluo::VolumeData* vd = 0;
 	if (m_colormap && m_view)
 		vd = m_view->m_cur_vol;
 	bool colormap = m_colormap && vd && (m_cm_max - m_cm_min) > 0.0;
@@ -317,7 +318,7 @@ void ColocalizationDlg::Colocalize()
 	double spcx, spcy, spcz;
 	double spc;
 	wxString unit;
-	VolumeData* vd = m_group->GetVolumeData(0);
+	fluo::VolumeData* vd = m_group->GetVolumeData(0);
 	if (!vd)
 	{
 		spc = spcx = spcy = spcz = 1.0;
@@ -369,8 +370,8 @@ void ColocalizationDlg::Colocalize()
 		{
 			for (int it2 = it1; it2 < num; ++it2)
 			{
-				VolumeData* vd1 = m_group->GetVolumeData(it1);
-				VolumeData* vd2 = m_group->GetVolumeData(it2);
+				fluo::VolumeData* vd1 = m_group->GetVolumeData(it1);
+				fluo::VolumeData* vd2 = m_group->GetVolumeData(it2);
 				if (!vd1 || !vd2 ||
 					!vd1->GetDisp() ||
 					!vd2->GetDisp())
@@ -417,8 +418,8 @@ void ColocalizationDlg::Colocalize()
 		for (int it1 = 0; it1 < num; ++it1)
 		for (int it2 = 0; it2 < num; ++it2)
 		{
-			VolumeData* vd1 = m_group->GetVolumeData(it1);
-			VolumeData* vd2 = m_group->GetVolumeData(it2);
+			fluo::VolumeData* vd1 = m_group->GetVolumeData(it1);
+			fluo::VolumeData* vd2 = m_group->GetVolumeData(it2);
 			if (!vd1 || !vd2 ||
 				!vd1->GetDisp() ||
 				!vd2->GetDisp())
@@ -460,7 +461,7 @@ void ColocalizationDlg::Colocalize()
 				m_titles += wxString::Format("%d (%%)", int(i + 1));
 			else
 				m_titles += wxString::Format("%d", int(i + 1));
-			VolumeData* vd = m_group->GetVolumeData(i);
+			fluo::VolumeData* vd = m_group->GetVolumeData(i);
 			if (vd)
 				name = vd->GetName();
 			else

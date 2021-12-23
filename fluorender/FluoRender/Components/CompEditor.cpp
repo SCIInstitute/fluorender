@@ -104,7 +104,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = 0;

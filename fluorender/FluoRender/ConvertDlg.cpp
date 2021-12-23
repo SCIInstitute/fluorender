@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
-#include "Converters/VolumeMeshConv.h"
+#include <VolumeData.hpp>
+#include <Converters/VolumeMeshConv.h>
 #include <wx/progdlg.h>
 #include <wx/valnum.h>
 
@@ -215,7 +215,7 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent &event)
 
 void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 {
-	VolumeData* sel_vol = 0;
+	fluo::VolumeData* sel_vol = 0;
 	if (!m_frame)
 		return;
 

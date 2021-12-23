@@ -39,7 +39,10 @@ DEALINGS IN THE SOFTWARE.
 #define BRUSH_TOOL_ITER_STRONG	60
 
 class VRenderGLView;
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolumeSelector
@@ -49,8 +52,8 @@ namespace flrd
 		~VolumeSelector();
 
 		void SetView(VRenderGLView* view) { m_view = view; }
-		void SetVolume(VolumeData *vd) { m_vd = vd; }
-		VolumeData* GetVolume() { return m_vd; }
+		void SetVolume(fluo::VolumeData *vd) { m_vd = vd; }
+		fluo::VolumeData* GetVolume() { return m_vd; }
 		//modes
 		void SetMode(int mode) { m_mode = mode; }
 		int GetMode() { return m_mode; }
@@ -205,8 +208,8 @@ namespace flrd
 
 		void Segment(int mx = 0, int my = 0);
 		void Select(double radius);
-		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
-		VolumeData* GetResult(bool pop);
+		void CompExportRandomColor(int hmode, fluo::VolumeData* vd_r, fluo::VolumeData* vd_g, fluo::VolumeData* vd_b, bool select, bool hide);
+		fluo::VolumeData* GetResult(bool pop);
 
 		//mask
 		void PopMask();
@@ -226,7 +229,7 @@ namespace flrd
 
 	private:
 		VRenderGLView *m_view;
-		VolumeData *m_vd;	//volume data for segmentation
+		fluo::VolumeData *m_vd;	//volume data for segmentation
 		unsigned int m_2d_mask;	//2d mask from painting
 		unsigned int m_2d_weight1;//2d weight map (after tone mapping)
 		unsigned int m_2d_weight2;//2d weight map	(before tone mapping)
@@ -283,7 +286,7 @@ namespace flrd
 		bool m_brush_size_data;
 
 		//exported volumes
-		std::vector<VolumeData*> m_result_vols;
+		std::vector<fluo::VolumeData*> m_result_vols;
 
 		//a random variable
 		int m_randv;

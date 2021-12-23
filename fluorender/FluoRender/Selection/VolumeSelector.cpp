@@ -27,10 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumeSelector.h"
-#include "DataManager.h"
 #include "VRenderGLView.h"
 #include "VRenderFrame.h"
 #include "utility.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>
@@ -147,13 +148,13 @@ void VolumeSelector::Segment(int mx, int my)
 	double r = m_brush_radius2 - m_brush_radius1;
 	if (m_select_multi == 1)
 	{
-		DataGroup* group = m_view->GetGroup(m_vd);
+		fluo::VolumeGroup* group = m_view->GetGroup(m_vd);
 		if (group && group->GetVolumeNum() > 1)
 		{
-			VolumeData* save = m_vd;
+			fluo::VolumeData* save = m_vd;
 			for (int i = 0; i < group->GetVolumeNum(); i++)
 			{
-				VolumeData* vd = group->GetVolumeData(i);
+				fluo::VolumeData* vd = group->GetVolumeData(i);
 				if (vd && vd->GetDisp())
 				{
 					m_vd = vd;
@@ -363,8 +364,8 @@ double VolumeSelector::HueCalculation(int mode, unsigned int label)
 	return hue;
 }
 
-void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
-	VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide)
+void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
+	fluo::VolumeData* vd_g, fluo::VolumeData* vd_b, bool select, bool hide)
 {
 	if (!m_vd ||
 		!m_vd->GetTexture() ||
@@ -560,9 +561,9 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		m_vd->SetDisp(false);
 }
 
-VolumeData* VolumeSelector::GetResult(bool pop)
+fluo::VolumeData* VolumeSelector::GetResult(bool pop)
 {
-	VolumeData* vd = 0;
+	fluo::VolumeData* vd = 0;
 	if (!m_result_vols.empty())
 	{
 		vd = m_result_vols.back();

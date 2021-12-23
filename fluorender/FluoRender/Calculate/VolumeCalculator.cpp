@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
 #include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <VRenderFrame.h>
@@ -154,7 +155,7 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 		if (m_selector && m_selector->GetSelectGroup())
 		{
 			fluo::VolumeData* vd = GetVolumeA();
-			DataGroup* group = 0;
+			fluo::VolumeGroup* group = 0;
 			if (vd)
 			{
 				for (int i = 0; i < m_view->GetLayerNum(); i++)
@@ -162,7 +163,7 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 					TreeLayer* layer = m_view->GetLayer(i);
 					if (layer && layer->IsA() == 5)
 					{
-						DataGroup* tmp_group = (DataGroup*)layer;
+						fluo::VolumeGroup* tmp_group = (fluo::VolumeGroup*)layer;
 						for (int j = 0; j < tmp_group->GetVolumeNum(); j++)
 						{
 							fluo::VolumeData* tmp_vd = tmp_group->GetVolumeData(j);

@@ -135,6 +135,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("low threshold", double(0));
 		vd->addValue("high threshold", double(1));
 		vd->addValue("alpha", double(1));
+		vd->addValue("alpha power", double(1));
 		vd->addValue("alpha enable", bool(true));
 		vd->addValue("mat amb", double(1));//materials
 		vd->addValue("mat diff", double(1));
@@ -193,6 +194,7 @@ void VolumeFactory::createDefault()
 		vd->addValue("colormap low", double(0));
 		vd->addValue("colormap high", double(1));
 		vd->addValue("colormap proj", long(0));
+		vd->addValue("colormap inv", double(1.0));
 
 		//texture ids will be removed later
 		vd->addValue("2d mask id", (unsigned long)(0));//2d mask texture for segmentation
@@ -218,6 +220,9 @@ void VolumeFactory::createDefault()
 
 		//interpolate
 		vd->addValue("interpolate", bool(true));
+
+		//label mode
+		vd->addValue("label mode", long(1));
 
 		//depth attenuation, also called fog previously
 		vd->addValue("depth atten", bool(false));
@@ -249,6 +254,9 @@ void VolumeFactory::createDefault()
 
 		//mask cleared
 		vd->addValue("mask clear", bool(false));
+
+		//sync group
+		vd->addValue("sync group", bool(false));
 	}
 }
 
@@ -284,6 +292,7 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, "sec color set", OnSecColorSetChanged);
 	ADD_AFTER_EVENT(vd, "luminance", OnLuminanceChanged);
 	ADD_AFTER_EVENT(vd, "alpha", OnAlphaChanged);
+	ADD_AFTER_EVENT(vd, "alpha power", OnAlphaPowerChanged);
 	ADD_AFTER_EVENT(vd, "alpha enable", OnAlphaEnableChanged);
 	ADD_AFTER_EVENT(vd, "mask thresh", OnMaskThreshChanged);
 	ADD_AFTER_EVENT(vd, "use mask thresh", OnUseMaskThreshChanged);

@@ -119,6 +119,11 @@ using namespace std;
 
 class VRenderFrame;
 class VRenderView;
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VRenderGLView : public wxGLCanvas
 {
 public:
@@ -153,30 +158,30 @@ public:
 	int GetMeshNum();
 	int GetGroupNum();
 	int GetLayerNum();
-	VolumeData* GetAllVolumeData(int index);
-	VolumeData* GetDispVolumeData(int index);
+	fluo::VolumeData* GetAllVolumeData(int index);
+	fluo::VolumeData* GetDispVolumeData(int index);
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
-	VolumeData* GetVolumeData(wxString &name);
+	fluo::VolumeData* GetVolumeData(wxString &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
-	DataGroup* GetGroup(wxString &name);
-	DataGroup* GetGroup(int index);
-	DataGroup* GetGroup(VolumeData* vd);
+	fluo::VolumeGroup* GetGroup(wxString &name);
+	fluo::VolumeGroup* GetGroup(int index);
+	fluo::VolumeGroup* GetGroup(fluo::VolumeData* vd);
 	MeshGroup* GetMGroup(wxString str);
 	//add
-	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name = "");
+	fluo::VolumeGroup* AddVolumeData(fluo::VolumeData* vd, wxString group_name = "");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	wxString AddGroup(wxString str, wxString prev_group = "");
-	DataGroup* AddOrGetGroup();
+	fluo::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str);
 	MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(wxString &name);
 	void RemoveVolumeDataDup(wxString &name);//remove all duplicated data
-	void ReplaceVolumeData(wxString &name, VolumeData *dst);
+	void ReplaceVolumeData(wxString &name, fluo::VolumeData *dst);
 	void RemoveMeshData(wxString &name);
 	void RemoveAnnotations(wxString &name);
 	void RemoveGroup(wxString &name);
@@ -392,7 +397,7 @@ public:
 	//4d movie frame calculation
 	void Get4DSeqRange(int &start_frame, int &end_frame);
 	void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind);
-	void UpdateVolumeData(int frame, VolumeData* vd);
+	void UpdateVolumeData(int frame, fluo::VolumeData* vd);
 	void ReloadVolumeData(int frame);
 	//3d batch file calculation
 	void Get3DBatRange(int &start_frame, int &end_frame);
@@ -454,8 +459,8 @@ public:
 	int GetPaintMode();
 
 	//calculations
-	void SetVolumeA(VolumeData* vd);
-	void SetVolumeB(VolumeData* vd);
+	void SetVolumeA(fluo::VolumeData* vd);
+	void SetVolumeB(fluo::VolumeData* vd);
 
 	//segment volumes in current view
 	void Segment();
@@ -674,7 +679,7 @@ public:
 	bool m_draw_grid;
 	bool m_draw_rulers;
 	//current volume
-	VolumeData *m_cur_vol;
+	fluo::VolumeData *m_cur_vol;
 	//clipping settings
 	int m_clip_mask;
 	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference
@@ -730,7 +735,7 @@ private:
 	VRenderFrame* m_frame;
 	//populated lists of data
 	bool m_vd_pop_dirty;
-	vector <VolumeData*> m_vd_pop_list;
+	vector <fluo::VolumeData*> m_vd_pop_list;
 	bool m_md_pop_dirty;
 	vector <MeshData*> m_md_pop_list;
 	//real data list
@@ -1082,13 +1087,13 @@ private:
 	void ClearVRBuffer();
 	void DrawVRBuffer();
 	//different volume drawing modes
-	void DrawVolumesMulti(vector<VolumeData*> &list, int peel = 0);
-	void DrawVolumesComp(vector<VolumeData*> &list, bool mask = false, int peel = 0);
-	void DrawMIP(VolumeData* vd, int peel = 0);
-	void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
+	void DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel = 0);
+	void DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask = false, int peel = 0);
+	void DrawMIP(fluo::VolumeData* vd, int peel = 0);
+	void DrawOVER(fluo::VolumeData* vd, bool mask, int peel = 0);
 	//overlay passes
-	void DrawOLShading(VolumeData* vd);
-	void DrawOLShadows(vector<VolumeData*> &vlist);
+	void DrawOLShading(fluo::VolumeData* vd);
+	void DrawOLShadows(vector<fluo::VolumeData*> &vlist);
 	void DrawOLShadowsMesh(double darkenss);
 
 	//get mesh shadow
@@ -1140,7 +1145,7 @@ private:
 	//draw quad
 	void DrawViewQuad();
 
-	void switchLevel(VolumeData *vd);
+	void switchLevel(fluo::VolumeData *vd);
 
 	DECLARE_EVENT_TABLE()
 

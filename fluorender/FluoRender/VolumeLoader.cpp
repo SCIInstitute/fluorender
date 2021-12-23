@@ -27,6 +27,8 @@
 //  
 
 #include "VolumeLoader.h"
+#include <VolumeData.hpp>
+#include <FLIVR/TextureBrick.h>
 #include <wx/utils.h> 
 
 VolumeDecompressorThread::VolumeDecompressorThread(VolumeLoader *vl)
@@ -338,7 +340,7 @@ void VolumeLoader::ClearQueues()
 	}
 }
 
-void VolumeLoader::Set(vector<VolumeLoaderData> vld)
+void VolumeLoader::Set(std::vector<VolumeLoaderData> vld)
 {
 	Abort();
 	//StopAll();
@@ -399,12 +401,14 @@ void VolumeLoader::CleanupLoadedBrick()
 			required += (size_t)b->nx()*(size_t)b->ny()*(size_t)b->nz()*(size_t)b->nb(0);
 	}
 
-	vector<VolumeLoaderData> vd_undisp;
-	vector<VolumeLoaderData> b_undisp;
-	vector<VolumeLoaderData> b_drawn;
+	std::vector<VolumeLoaderData> vd_undisp;
+	std::vector<VolumeLoaderData> b_undisp;
+	std::vector<VolumeLoaderData> b_drawn;
+	bool disp;
 	for (auto elem : m_loaded)
 	{
-		if (!elem.second.vd->GetDisp())
+		elem.second.vd->getValue("display", disp);
+		if (!disp)
 			vd_undisp.push_back(elem.second);
 		else if (!elem.second.brick->get_disp())
 			b_undisp.push_back(elem.second);
@@ -496,7 +500,7 @@ void VolumeLoader::RemoveAllLoadedBrick()
 	m_loaded.clear();
 }
 
-void VolumeLoader::RemoveBrickVD(VolumeData *vd)
+void VolumeLoader::RemoveBrickVD(fluo::VolumeData *vd)
 {
 	StopAll();
 	auto ite = m_loaded.begin();

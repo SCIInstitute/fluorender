@@ -29,17 +29,26 @@
 #ifndef _VOLUMELOADER_H_
 #define _VOLUMELOADER_H_
 
-#include "DataManager.h"
-#include "TextureBrick.h"
 #include <wx/thread.h>
+#include <vector>
+#include <unordered_map>
 
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	class FileLocInfo;
+	class TextureBrick;
+}
 class VolumeLoader;
 
 struct VolumeLoaderData
 {
 	flvr::FileLocInfo *finfo;
 	flvr::TextureBrick *brick;
-	VolumeData *vd;
+	fluo::VolumeData *vd;
 	unsigned long long datasize;
 	int mode;
 };
@@ -50,7 +59,7 @@ struct VolumeDecompressorData
 	size_t in_size;
 	flvr::TextureBrick *b;
 	flvr::FileLocInfo *finfo;
-	VolumeData *vd;
+	fluo::VolumeData *vd;
 	unsigned long long datasize;
 	int mode;
 };
@@ -82,7 +91,7 @@ public:
 	~VolumeLoader();
 	void Queue(VolumeLoaderData brick);
 	void ClearQueues();
-	void Set(vector<VolumeLoaderData> vld);
+	void Set(std::vector<VolumeLoaderData> vld);
 	void Abort();
 	void StopAll();
 	bool Run();
@@ -90,26 +99,17 @@ public:
 	void SetMemoryLimitByte(long long limit) { m_memory_limit = limit; }
 	void CleanupLoadedBrick();
 	void RemoveAllLoadedBrick();
-	void RemoveBrickVD(VolumeData *vd);
+	void RemoveBrickVD(fluo::VolumeData *vd);
 	void GetPalams(long long &used_mem, int &running_decomp_th, int &queue_num, int &decomp_queue_num);
-
-	static bool sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2)
-	{
-		return b2.brick->get_d() > b1.brick->get_d();
-	}
-	static bool sort_data_asc(const VolumeLoaderData b1, const VolumeLoaderData b2)
-	{
-		return b2.brick->get_d() < b1.brick->get_d();
-	}
 
 protected:
 	VolumeLoaderThread *m_thread;
 	wxCriticalSection m_pThreadCS;
-	vector<VolumeLoaderData> m_queues;
-	vector<VolumeLoaderData> m_queued;
-	vector<VolumeDecompressorData> m_decomp_queues;
-	vector<VolumeDecompressorThread *> m_decomp_threads;
-	unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
+	std::vector<VolumeLoaderData> m_queues;
+	std::vector<VolumeLoaderData> m_queued;
+	std::vector<VolumeDecompressorData> m_decomp_queues;
+	std::vector<VolumeDecompressorThread *> m_decomp_threads;
+	std::unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
 	int m_running_decomp_th;
 	int m_max_decomp_th;
 	bool m_valid;

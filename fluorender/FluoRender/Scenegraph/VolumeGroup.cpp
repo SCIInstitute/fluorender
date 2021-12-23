@@ -163,3 +163,11 @@ void VolumeGroup::OnRandomizeColor(Event& event)
 	}
 }
 
+void VolumeGroup::AddMask(Nrrd* mask, int op)
+{
+	for (auto it = m_children.begin();
+		it != m_children.end(); ++it)
+	{
+		(*it)->asVolumeData()->AddMask(mask, op);
+	}
+}

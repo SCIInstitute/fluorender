@@ -26,9 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Diffusion.h"
-#include <DataManager.h>
+#include <VolumeData.hpp>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <vector>
 #ifdef _DEBUG
 #include <fstream>
@@ -179,7 +182,7 @@ const char* str_cl_diffusion = \
 "}\n" \
 ;
 
-Diffusion::Diffusion(VolumeData* vd)
+Diffusion::Diffusion(fluo::VolumeData* vd)
 	: m_vd(vd)
 {
 }
@@ -292,9 +295,9 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 	//clipping planes
 	cl_float4 p[6];
-	if (m_vd && m_vd->GetVR())
+	if (m_vd && m_vd->GetRenderer())
 	{
-		vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+		vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -315,7 +318,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(b);
+		GLint did = m_vd->GetRenderer()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
 
@@ -391,9 +394,9 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	bool inv;
 	float scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
 		offset, sw;
-	if (m_vd && m_vd->GetVR())
+	if (m_vd && m_vd->GetRenderer())
 	{
-		flvr::VolumeRenderer* vr = m_vd->GetVR();
+		flvr::VolumeRenderer* vr = m_vd->GetRenderer();
 		vector<fluo::Plane*> *planes = vr->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
@@ -425,7 +428,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(b);
+		GLint did = m_vd->GetRenderer()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
 

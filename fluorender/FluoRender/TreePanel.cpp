@@ -27,7 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
 #include "VRenderFrame.h"
-#include "compatibility.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
+#include <compatibility.h>
 //resources
 #include "Formats/png_resource.h"
 #include "tick.xpm"
@@ -167,10 +169,10 @@ void DataTreeCtrl::DeleteSelection()
 					{
 						if (item_data->type == 2)//volume data
 						{
-							VolumeData* vd = view->GetVolumeData(name_data);
+							fluo::VolumeData* vd = view->GetVolumeData(name_data);
 							if (vd)
 							{
-								vd->SetDisp(true);
+								vd->setValue("display", true);
 								view->RemoveVolumeData(name_data);
 								if (view->GetVolMethod() == VOL_METHOD_MULTI)
 								{
@@ -918,9 +920,12 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	else if (item_data->type == 2)
 	{
 		//volume
-		VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+		fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 		if (vd)
-			vd->RandomizeColor();
+		{
+			bool rc;
+			vd->toggleValue("randomize color", rc);
+		}
 	}
 	else if (item_data->type == 3)
 	{
@@ -936,9 +941,12 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		VRenderGLView* view = m_frame->GetView(par_name);
 		if (view)
 		{
-			DataGroup* group = view->GetGroup(name);
+			fluo::VolumeGroup* group = view->GetGroup(name);
 			if (group)
-				group->RandomizeColor();
+			{
+				bool rc;
+				group->toggleValue("randomize color", rc);
+			}
 		}
 	}
 	else if (item_data->type == 6)
@@ -1040,9 +1048,9 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderGLView* view = m_frame->GetView(str);
 								if (view)
 								{
-									VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 									str = GetItemText(par_item);
-									DataGroup* group = view->GetGroup(str);
+									fluo::VolumeGroup* group = view->GetGroup(str);
 									m_frame->GetAdjustView()->SetGroupLink(group);
 									m_frame->OnSelection(2, view, group, vd, 0);
 									view->SetVolumeA(vd);
@@ -1055,7 +1063,7 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderGLView* view = m_frame->GetView(str);
 								if (view)
 								{
-									VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 									m_frame->GetAdjustView()->SetGroupLink(0);
 									m_frame->OnSelection(2, view, 0, vd);
 									view->SetVolumeA(vd);
@@ -1110,7 +1118,7 @@ void DataTreeCtrl::UpdateSelection()
 					VRenderGLView* view = m_frame->GetView(par_name);
 					if (view)
 					{
-						DataGroup* group = view->GetGroup(name);
+						fluo::VolumeGroup* group = view->GetGroup(name);
 						m_frame->OnSelection(5, view, group);
 					}
 				}
@@ -1249,6 +1257,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	wxTreeItemId sel_item = GetSelection();
 	wxString name = "";
 	bool rc = wxGetKeyState(WXK_CONTROL);
+	bool bval;
 
 	if (sel_item.IsOk() && m_frame)
 	{
@@ -1272,14 +1281,14 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 2://volume data
 				{
-					VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 					if (vd)
 					{
 						if (rc)
-							vd->RandomizeColor();
+							vd->toggleValue("randomize color", bval);
 						else
 						{
-							vd->ToggleDisp();
+							vd->toggleValue("display", bval);
 							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
 								VRenderGLView* view = m_frame->GetView(i);
@@ -1325,14 +1334,14 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					VRenderGLView* view = m_frame->GetView(par_name);
 					if (view)
 					{
-						DataGroup* group = view->GetGroup(name);
+						fluo::VolumeGroup* group = view->GetGroup(name);
 						if (group)
 						{
 							if (rc)
-								group->RandomizeColor();
+								group->toggleValue("randomize color", bval);
 							else
 							{
-								group->ToggleDisp();
+								group->toggleValue("display", bval);
 								view->SetVolPopDirty();
 							}
 						}
@@ -1887,7 +1896,7 @@ void DataTreeCtrl::BrushClear()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 						if (vd)
 						{
 							int int_mode = view->GetIntMode();
@@ -1908,7 +1917,7 @@ void DataTreeCtrl::BrushClear()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 						if (vd)
 						{
 							int int_mode = view->GetIntMode();
@@ -1950,14 +1959,14 @@ void DataTreeCtrl::BrushCreate()
 					VRenderGLView* vrv = m_frame->GetView(str);
 					if (vrv)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
 							if (calculator)
 							{
 								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(5, group_name);
+								calculator->CalculateGroup(5, group_name.ToStdString());
 							}
 						}
 					}
@@ -1969,7 +1978,7 @@ void DataTreeCtrl::BrushCreate()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
@@ -2015,14 +2024,14 @@ void DataTreeCtrl::BrushCreateInv()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
 							if (calculator)
 							{
 								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(cal_type, group_name);
+								calculator->CalculateGroup(cal_type, group_name.ToStdString());
 							}
 						}
 					}
@@ -2034,7 +2043,7 @@ void DataTreeCtrl::BrushCreateInv()
 					VRenderGLView* view = m_frame->GetView(str);
 					if (view)
 					{
-						VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 						if (vd)
 						{
 							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
@@ -2059,7 +2068,7 @@ void DataTreeCtrl::CopyMask(bool copy_data)
 	if (!m_frame) return;
 
 	wxString name = GetItemText(sel_item);
-	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+	fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 	if (vd)
 	{
 		m_frame->m_vd_copy = vd;
@@ -2076,9 +2085,9 @@ void DataTreeCtrl::PasteMask(int op)
 	if (!m_frame) return;
 
 	wxString name = GetItemText(sel_item);
-	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+	fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 	VRenderGLView* view = 0;
-	DataGroup* group = 0;
+	fluo::VolumeGroup* group = 0;
 	wxTreeItemId par_item = GetItemParent(sel_item);
 	if (par_item.IsOk())
 	{

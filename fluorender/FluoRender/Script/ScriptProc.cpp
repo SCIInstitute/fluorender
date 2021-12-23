@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include "ScriptProc.h"
 #include <Flobject/InfoVisitor.hpp>
-#include <DataManager.h>
 #include <VRenderGLView.h>
 #include <VRenderFrame.h>
+#include <VolumeData.hpp>
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
@@ -168,7 +168,7 @@ bool ScriptProc::TimeCondition()
 	return false;
 }
 
-bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
+bool ScriptProc::GetVolumes(std::vector<fluo::VolumeData*> &list)
 {
 	if (!m_fconfig || !m_view)
 		return false;
@@ -177,7 +177,7 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 	list.clear();
 	if (chan_mode == 0)
 	{
-		VolumeData* vol = m_view->m_cur_vol;
+		fluo::VolumeData* vol = m_view->m_cur_vol;
 		if (vol)
 			list.push_back(vol);
 		else
@@ -197,7 +197,7 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*> &list)
 	{
 		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
 		{
-			VolumeData* vol = m_view->GetAllVolumeData(i);
+			fluo::VolumeData* vol = m_view->GetAllVolumeData(i);
 			if (!vol->GetDisp())
 				list.push_back(vol);
 		}
@@ -353,7 +353,7 @@ wxString ScriptProc::GetDataDir(const wxString &ext)
 	//data dir
 	if (!m_view)
 		return "";
-	VolumeData* vol = m_view->m_cur_vol;
+	fluo::VolumeData* vol = m_view->m_cur_vol;
 	if (!vol)
 		return "";
 	wxString path = vol->GetPath();
@@ -413,7 +413,7 @@ void ScriptProc::RunNoiseReduction()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -444,7 +444,7 @@ void ScriptProc::RunPreTracking()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol)
 		UpdateTraceDlg();
 
@@ -478,7 +478,7 @@ void ScriptProc::RunPostTracking()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol)
 		UpdateTraceDlg();
 
@@ -531,7 +531,7 @@ void ScriptProc::RunMaskTracking()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	TraceGroup* tg = m_view->GetTraceGroup();
 	if (!tg)
@@ -588,7 +588,7 @@ void ScriptProc::RunRandomColors()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -612,7 +612,7 @@ void ScriptProc::RunCompSelect()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -651,7 +651,7 @@ void ScriptProc::RunCompEdit()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -679,7 +679,7 @@ void ScriptProc::RunFetchMask()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -725,7 +725,7 @@ void ScriptProc::RunClearMask()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -750,7 +750,7 @@ void ScriptProc::RunSaveMask()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -791,7 +791,7 @@ void ScriptProc::RunSaveVolume()
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
 
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (source == "channels" ||
 		source == "")
 	{
@@ -801,7 +801,7 @@ void ScriptProc::RunSaveVolume()
 	{
 		VolumeCalculator* calculator = m_view->GetVolumeCalculator();
 		if (!calculator) return;
-		VolumeData* vd = 0;
+		fluo::VolumeData* vd = 0;
 		while (vd = calculator->GetResult(true))
 			vlist.push_back(vd);
 	}
@@ -809,7 +809,7 @@ void ScriptProc::RunSaveVolume()
 	{
 		VolumeSelector* selector = m_view->GetVolumeSelector();
 		if (!selector) return;
-		VolumeData* vd = 0;
+		fluo::VolumeData* vd = 0;
 		while (vd = selector->GetResult(true))
 			vlist.push_back(vd);
 	}
@@ -817,7 +817,7 @@ void ScriptProc::RunSaveVolume()
 	{
 		KernelExecutor* executor = m_view->GetKernelExecutor();
 		if (!executor) return;
-		VolumeData* vd = 0;
+		fluo::VolumeData* vd = 0;
 		while (vd = executor->GetResult(true))
 			vlist.push_back(vd);
 	}
@@ -877,10 +877,10 @@ void ScriptProc::RunCalculate()
 
 	int vlist_size = m_view->GetDispVolumeNum();
 	//get volumes
-	VolumeData* vol_a = 0;
+	fluo::VolumeData* vol_a = 0;
 	if (vol_a_index >= 0 && vol_a_index < vlist_size)
 		vol_a = m_view->GetDispVolumeData(vol_a_index);
-	VolumeData* vol_b = 0;
+	fluo::VolumeData* vol_b = 0;
 	if (vol_b_index >= 0 && vol_b_index < vlist_size)
 		vol_b = m_view->GetDispVolumeData(vol_b_index);
 	if (!vol_a && !vol_b)
@@ -905,7 +905,7 @@ void ScriptProc::RunOpenCL()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -933,7 +933,7 @@ void ScriptProc::RunCompAnalysis()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1044,7 +1044,7 @@ void ScriptProc::RunGenerateComp()
 	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 	if (!(m_frame->GetComponentDlg()))
@@ -1075,7 +1075,7 @@ void ScriptProc::RunRulerProfile()
 	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1162,7 +1162,7 @@ void ScriptProc::RunAddCells()
 {
 	if (!TimeCondition())
 		return;
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	TraceGroup* tg = m_view->GetTraceGroup();
 	if (!tg)
@@ -1199,7 +1199,7 @@ void ScriptProc::RunUnlinkCells()
 	if (!TimeCondition())
 		return;
 
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	TraceGroup* tg = m_view->GetTraceGroup();
 	if (!tg) return;
@@ -1219,7 +1219,7 @@ void ScriptProc::RunBackgroundStat()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<fluo::VolumeData*> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1447,7 +1447,7 @@ void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	BaseReader* reader = cur_vol->GetReader();
 	if (!reader)
@@ -1490,7 +1490,7 @@ void ScriptProc::DelVolCache(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
-	VolumeData* cur_vol = m_view->m_cur_vol;
+	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 	vol_cache.valid = false;
 	if (vol_cache.data)

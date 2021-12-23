@@ -428,6 +428,16 @@ void VolumeData::OnAlphaChanged(Event& event)
 	m_vr->set_alpha(alpha);
 }
 
+void VolumeData::OnAlphaPowerChanged(Event& event)
+{
+	if (!m_vr)
+		return;
+
+	double dval;
+	getValue("alpha power", dval);
+	m_vr->set_alpha_power(dval);
+}
+
 void VolumeData::OnAlphaEnableChanged(Event& event)
 {
 	if (!m_vr)
@@ -660,6 +670,12 @@ void VolumeData::OnInterpolateChanged(Event& event)
 	bool interpolate;
 	getValue("interpolate", interpolate);
 	m_vr->set_interpolate(interpolate);
+}
+
+void VolumeData::OnLabelModeChanged(Event& event)
+{
+	if (!m_vr)
+		return;
 }
 
 void VolumeData::OnDepthAttenChanged(Event& event)
@@ -1499,6 +1515,184 @@ void VolumeData::AddEmptyMask(int mode)
 	{
 		if (empty)
 			memset((void*)val8, 0, mem_size * sizeof(uint8));
+	}
+}
+
+void VolumeData::AddMask(Nrrd* mask, int op)
+{
+	if (!mask || !mask->data || !m_tex || !m_vr)
+		return;
+	long resx, resy, resz;
+	getValue("res x", resx);
+	getValue("res y", resy);
+	getValue("res z", resz);
+	if (mask->dim != 3 ||
+		mask->axis[0].size != resx ||
+		mask->axis[1].size != resy ||
+		mask->axis[2].size != resz)
+		return;
+
+	Nrrd *nrrd_mask = 0;
+	uint8 *val8 = 0;
+	unsigned long long mem_size = (unsigned long long)resx*
+		(unsigned long long)resy*(unsigned long long)resz;
+	//prepare the texture bricks for the mask
+	bool empty = m_tex->add_empty_mask();
+	if (empty)
+	{
+		//add the nrrd data for mask
+		nrrd_mask = nrrdNew();
+		val8 = new (std::nothrow) uint8[mem_size];
+		if (!val8)
+		{
+			wxMessageBox("Not enough memory. Please save project and restart.");
+			return;
+		}
+		double spcx, spcy, spcz;
+		m_tex->get_spacings(spcx, spcy, spcz);
+		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
+
+		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
+	}
+	else
+	{
+		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
+		val8 = (uint8*)nrrd_mask->data;
+	}
+
+	if (val8)
+	{
+		if (op > 0 && !empty)
+		{
+			switch (op)
+			{
+			case 1://union
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					val8[index] = std::max(val8[index],
+						((uint8*)(mask->data))[index]);
+				}
+				break;
+			case 2://exclude
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					if (std::min(val8[index],
+						((uint8*)(mask->data))[index]) > 0)
+						val8[index] = 0;
+				}
+				break;
+			case 3://intersect
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					val8[index] = std::min(val8[index],
+						((uint8*)(mask->data))[index]);
+				}
+				break;
+			}
+		}
+		else//replace
+		{
+			memcpy(val8, mask->data, mem_size * sizeof(uint8));
+		}
+		m_vr->clear_tex_mask(false);
+	}
+}
+
+void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
+{
+	if (!mask || !mask->data || !m_tex || !m_vr)
+		return;
+	long resx, resy, resz;
+	getValue("res x", resx);
+	getValue("res y", resy);
+	getValue("res z", resz);
+	if (mask->dim != 3 ||
+		mask->axis[0].size != resx ||
+		mask->axis[1].size != resy ||
+		mask->axis[2].size != resz)
+		return;
+
+	Nrrd *nrrd_mask = 0;
+	uint8 *val8 = 0;
+	unsigned long long mem_size = (unsigned long long)resx*
+		(unsigned long long)resy*(unsigned long long)resz;
+	//prepare the texture bricks for the mask
+	bool empty = m_tex->add_empty_mask();
+	if (empty)
+	{
+		//add the nrrd data for mask
+		nrrd_mask = nrrdNew();
+		val8 = new (std::nothrow) uint8[mem_size];
+		if (!val8)
+		{
+			wxMessageBox("Not enough memory. Please save project and restart.");
+			return;
+		}
+		double spcx, spcy, spcz;
+		m_tex->get_spacings(spcx, spcy, spcz);
+		nrrdWrap(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet(nrrd_mask, nrrdAxisInfoMax, spcx*resx, spcy*resy, spcz*resz);
+
+		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
+	}
+	else
+	{
+		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
+		val8 = (uint8*)nrrd_mask->data;
+	}
+
+	if (val8)
+	{
+		if (op > 0 && !empty)
+		{
+			switch (op)
+			{
+			case 1://union
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					val8[index] = std::max(val8[index],
+						uint8(scale*((uint16*)(mask->data))[index]));
+				}
+				break;
+			case 2://exclude
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					if (std::min(val8[index],
+						uint8(scale*((uint16*)(mask->data))[index])) > 0)
+						val8[index] = 0;
+				}
+				break;
+			case 3://intersect
+				for (unsigned long long index = 0;
+					index < mem_size; ++index)
+				{
+					val8[index] = std::min(val8[index],
+						uint8(scale*((uint16*)(mask->data))[index]));
+				}
+				break;
+			}
+		}
+		else//replace
+		{
+			for (unsigned long long index = 0;
+				index < mem_size; ++index)
+			{
+				val8[index] = uint8(scale*((uint16*)(mask->data))[index]);
+			}
+		}
+		m_vr->clear_tex_mask(false);
 	}
 }
 

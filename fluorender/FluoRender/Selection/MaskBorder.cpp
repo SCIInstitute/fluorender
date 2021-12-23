@@ -25,8 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DataManager.h"
 #include "MaskBorder.h"
+#include <VolumeData.hpp>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
+#include <vector>
 
 using namespace flrd;
 
@@ -74,7 +80,7 @@ const char* str_cl_check_box_borders = \
 "}\n" \
 ;
 
-MaskBorder::MaskBorder(VolumeData* vd)
+MaskBorder::MaskBorder(fluo::VolumeData* vd)
 	: m_vd(vd)
 {
 }
@@ -87,7 +93,7 @@ bool MaskBorder::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -136,7 +142,7 @@ void MaskBorder::Compute(int order)
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint mid = m_vd->GetRenderer()->load_brick_mask(b);
 
 		size_t global_size[2] = { 1, 1 };
 		size_t local_size[2] = { 1, 1 };

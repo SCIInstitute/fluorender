@@ -26,8 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
-#include "DataManager.h"
 #include "VRenderFrame.h"
+#include "VRenderGLView.h"
+#include <VolumeData.hpp>
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>
@@ -38,11 +39,9 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/dirdlg.h>
 #include "png_resource.h"
 #include "img/icons.h"
-#include <boost/chrono.hpp>
+#include <chrono>
 #include <set>
 #include <limits>
-
-using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(TraceListCtrl, wxListCtrl)
 EVT_KEY_DOWN(TraceListCtrl::OnKeyDown)
@@ -1244,7 +1243,7 @@ void TraceDlg::UncertainFilter(bool input)
 	tm_processor.SetUncertainLow(ival);
 	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SelectList(list_out);
 
@@ -1412,11 +1411,13 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	TraceGroup* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	vd->getValue("spc x", spcx);
+	vd->getValue("spc y", spcy);
+	vd->getValue("spc z", spcz);
 
 	//get rulers
 	flrd::RulerList rulers;
@@ -1438,7 +1439,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	TraceGroup *trace_group = m_view->GetTraceGroup();
@@ -1450,12 +1451,20 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
+	vd->getValue("res x", resx);
+	vd->getValue("res y", resy);
+	vd->getValue("res z", resz);
+	vd->getValue("spc x", spcx);
+	vd->getValue("spc y", spcy);
+	vd->getValue("spc z", spcz);
+	long lval;
+	vd->getValue("bits", lval);
+	tm_processor.SetBits(lval);
+	double dval;
+	vd->getValue("int scale", dval);
+	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.RegisterCacheQueueFuncs(
@@ -1482,7 +1491,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentAnalyzer comp_analyzer(vd);
 	comp_analyzer.Analyze(true, true);
 	string str;
@@ -1727,7 +1736,7 @@ void TraceDlg::CompDelete()
 	}
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	if (ids.size() == 1)
 	{
@@ -1751,7 +1760,7 @@ void TraceDlg::CompClear()
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
@@ -1797,7 +1806,7 @@ void TraceDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 
@@ -1852,7 +1861,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 		unsigned int id = (unsigned int)ival;
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
@@ -1886,7 +1895,7 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	{
 		unsigned int id = ival;
 		//get current mask
-		VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->m_cur_vol;
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
@@ -1932,7 +1941,7 @@ void TraceDlg::CellFull()
 	str.ToLong(&ival);
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetMinNum(true, slimit);
 	comp_selector.CompFull();
@@ -1993,7 +2002,7 @@ void TraceDlg::CellEraseID()
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	//get prev mask
@@ -2012,8 +2021,10 @@ void TraceDlg::CellEraseID()
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	vd->getValue("res x", nx);
+	vd->getValue("res y", ny);
+	vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -2046,9 +2057,11 @@ void TraceDlg::CellEraseID()
 		}
 
 		//invalidate label mask in gpu
-		vd->GetVR()->clear_tex_current();
+		vd->GetRenderer()->clear_tex_current();
 		//save label mask to disk
-		vd->SaveLabel(true, m_cur_time, vd->GetCurChannel());
+		long chan;
+		vd->getValue("channel", chan);
+		vd->SaveLabel(true, m_cur_time, chan);
 	}
 
 	CellUpdate();
@@ -2517,11 +2530,13 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	//modify graphs
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
+	vd->getValue("res x", resx);
+	vd->getValue("res y", resy);
+	vd->getValue("res z", resz);
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
@@ -2532,8 +2547,12 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
+	long lval;
+	vd->getValue("bits", lval);
+	tm_processor.SetBits(lval);
+	double dval;
+	vd->getValue("int scale", dval);
+	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
@@ -2543,7 +2562,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 	//m_view->RefreshGL();
 	//update view
 	//CellUpdate();
@@ -2555,19 +2574,25 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	if (!m_view)
 		return;
 
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
+	vd->getValue("res x", resx);
+	vd->getValue("res y", resy);
+	vd->getValue("res z", resz);
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
+	long lval;
+	vd->getValue("bits", lval);
+	tm_processor.SetBits(lval);
+	double dval;
+	vd->getValue("int scale", dval);
+	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	tm_processor.RegisterCacheQueueFuncs(
@@ -2598,7 +2623,7 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 	//get volume, readers
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -2606,7 +2631,8 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 		return;
 	LBLReader lbl_reader;
 
-	int chan = vd->GetCurChannel();
+	long chan;
+	vd->getValue("channel", chan);
 	int frame = vol_cache.frame;
 
 	if (frame == m_view->m_tseq_cur_num)
@@ -2647,13 +2673,14 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 {
 	if (!m_view)
 		return;
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return;
-	int chan = vd->GetCurChannel();
+	long chan;
+	vd->getValue("channel", chan);
 	int frame = vol_cache.frame;
 
 	if (vol_cache.valid && vol_cache.modified)
@@ -2663,7 +2690,9 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
 		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
+		vd->getValue("spc x", spcx);
+		vd->getValue("spc y", spcy);
+		vd->getValue("spc z", spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
 		wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);
@@ -2707,7 +2736,7 @@ void TraceDlg::GenMap()
 	if (!trace_group)
 		return;
 
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -2722,12 +2751,20 @@ void TraceDlg::GenMap()
 	//get and set parameters
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
+	vd->getValue("res x", resx);
+	vd->getValue("res y", resy);
+	vd->getValue("res z", resz);
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
+	vd->getValue("spc x", spcx);
+	vd->getValue("spc y", spcy);
+	vd->getValue("spc z", spcz);
+	long lval;
+	vd->getValue("bits", lval);
+	tm_processor.SetBits(lval);
+	double dval;
+	vd->getValue("int scale", dval);
+	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(m_size_thresh);
@@ -2743,7 +2780,8 @@ void TraceDlg::GenMap()
 	tm_processor.SetSplit(m_try_split);
 
 	//start timing
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t1 =
+		std::chrono::high_resolution_clock::now();
 	//initialization
 	for (int i = 0; i < frames; ++i)
 	{
@@ -2808,8 +2846,10 @@ void TraceDlg::GenMap()
 		}
 	}
 
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::chrono::high_resolution_clock::time_point t2 =
+		std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span =
+		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	GetSettings(m_view);
@@ -2823,7 +2863,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		return;
 
 	//get trace group
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	TraceGroup *trace_group = m_view->GetTraceGroup();
@@ -2851,12 +2891,20 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 
 	//get and set parameters
 	flrd::TrackMapProcessor tm_processor(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
+	vd->getValue("res x", resx);
+	vd->getValue("res y", resy);
+	vd->getValue("res z", resz);
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(vd->GetBits());
-	tm_processor.SetScale(vd->GetScalarScale());
+	vd->getValue("spc x", spcx);
+	vd->getValue("spc y", spcy);
+	vd->getValue("spc z", spcz);
+	long lval;
+	vd->getValue("bits", lval);
+	tm_processor.SetBits(lval);
+	double dval;
+	vd->getValue("int scale", dval);
+	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetSizeThresh(m_size_thresh);
@@ -2871,7 +2919,8 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 	tm_processor.SetMerge(m_try_merge);
 	tm_processor.SetSplit(m_try_split);
 
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t1 =
+		std::chrono::high_resolution_clock::now();
 
 	//not sure if counters need to be cleared for all refinement
 	//if (clear_counters)
@@ -2911,8 +2960,10 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		}
 	}
 
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::chrono::high_resolution_clock::time_point t2 =
+		std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span =
+		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	(*m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
 	CellUpdate();

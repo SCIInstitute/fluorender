@@ -105,6 +105,11 @@ using namespace std;
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
 
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VRenderFrame: public wxFrame
 {
 	enum
@@ -203,8 +208,8 @@ public:
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
 		VRenderGLView* view=0,
-		DataGroup* group=0,
-		VolumeData* vd=0,
+		fluo::VolumeGroup* group=0,
+		fluo::VolumeData* vd=0,
 		MeshData* md=0,
 		Annotations* ann=0);
 
@@ -262,7 +267,7 @@ public:
 	int GetCurSelType()
 	{ return m_cur_sel_type; }
 	//get current selected volume
-	VolumeData* GetCurSelVol()
+	fluo::VolumeData* GetCurSelVol()
 	{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
 	//get current selected mesh
 	MeshData* GetCurSelMesh()
@@ -370,7 +375,7 @@ public:
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
 	VMovieView* m_movie_view;
-	VolumeData* m_vd_copy;//for copying mask source
+	fluo::VolumeData* m_vd_copy;//for copying mask source
 	bool m_copy_data;//copy data or mask
 
 private:

@@ -26,15 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
-#include "DataManager.h"
+#include <VolumeData.hpp>
 #include "VRenderFrame.h"
+#include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
 #include <wx/valnum.h>
-#include "compatibility.h"
-//#include <boost/chrono.hpp>
-//using namespace boost::chrono;
 
 BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
@@ -334,11 +332,11 @@ void OclDlg::Execute()
 	wxString code = m_kernel_edit_stc->GetText();
 
 	//get volume currently selected
-	VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
 	bool dup = true;
-	wxString vd_name = vd->GetName();
+	wxString vd_name = vd->getName();
 	if (vd_name.Find("_CL") != wxNOT_FOUND)
 		dup = false;
 
@@ -365,16 +363,16 @@ void OclDlg::Execute()
 	//add result for rendering
 	if (dup)
 	{
-		VolumeData* vd_r = executor->GetResult(true);
+		fluo::VolumeData* vd_r = executor->GetResult(true);
 		if (!vd_r)
 			return;
 		if (m_frame)
 		{
 			m_frame->GetDataManager()->AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
-			vd->SetDisp(false);
+			vd->setValue("display", false);
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd_r->GetName());
+			m_frame->UpdateTree(vd_r->getName());
 		}
 	}
 

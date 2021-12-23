@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define VOLUMEGROUP_HPP
 
 #include <Group.hpp>
+#include <Nrrd/nrrd.h>
 
 namespace fluo
 {
@@ -61,6 +62,8 @@ namespace fluo
 		virtual bool insertChild(size_t index, Node* child);
 		virtual bool setChild(size_t i, Node* node);
 		virtual bool removeChildren(size_t pos, size_t num);
+
+		void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
 
 		friend class VolumeFactory;
 

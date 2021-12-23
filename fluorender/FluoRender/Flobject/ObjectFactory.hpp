@@ -129,6 +129,7 @@ namespace fluo
 			size_t n = objects_.size();
 			if (n > 1)
 				objects_.erase(objects_.begin(), objects_.begin() + n - 2);
+			return false;
 		}
 
 		inline size_t getNum(bool include_default = false) const

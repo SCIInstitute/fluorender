@@ -38,8 +38,11 @@ using namespace std;
 
 class VRenderFrame;
 class VRenderGLView;
-class VolumeData;
-class DataGroup;
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class VPropView: public wxPanel
 {
 	enum
@@ -119,14 +122,14 @@ public:
 		const wxString& name = "VPropView");
 	~VPropView();
 
-	void SetVolumeData(VolumeData* vd);
-	VolumeData* GetVolumeData();
+	void SetVolumeData(fluo::VolumeData* vd);
+	fluo::VolumeData* GetVolumeData();
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void InitVRenderViews(unsigned int type);
 
 	//sync group
-	void SetGroup(DataGroup* group);
-	DataGroup* GetGroup();
+	void SetGroup(fluo::VolumeGroup* group);
+	fluo::VolumeGroup* GetGroup();
 
 	//sync view in depth mode
 	void SetView(VRenderGLView* view);
@@ -134,11 +137,11 @@ public:
 
 private:
 	VRenderFrame* m_frame;
-	VolumeData* m_vd;
+	fluo::VolumeData* m_vd;
 
 	bool m_lumi_change;
 	bool m_sync_group;
-	DataGroup* m_group;
+	fluo::VolumeGroup* m_group;
 	VRenderGLView* m_view;
 	double m_max_val;
 

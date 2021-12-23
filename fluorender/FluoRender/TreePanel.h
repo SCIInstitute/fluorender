@@ -45,8 +45,6 @@ public:
 };
 
 class VRenderFrame;
-class VolumeData;
-
 class DataTreeCtrl: public wxTreeCtrl
 {
 	enum

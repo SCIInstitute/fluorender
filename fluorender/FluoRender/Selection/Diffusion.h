@@ -30,13 +30,13 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VolumeData;
 namespace flvr
 {
 	class TextureBrick;
 }
 namespace fluo
 {
+	class VolumeData;
 	class Point;
 }
 namespace flrd
@@ -44,14 +44,14 @@ namespace flrd
 	class Diffusion
 	{
 	public:
-		Diffusion(VolumeData* vd);
+		Diffusion(fluo::VolumeData* vd);
 		~Diffusion();
 
 		void Init(fluo::Point& ip, double ini_thresh);
 		void Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate);
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 
 	private:
 		bool CheckBricks();

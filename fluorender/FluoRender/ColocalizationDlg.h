@@ -37,7 +37,11 @@ DEALINGS IN THE SOFTWARE.
 
 class VRenderFrame;
 class VRenderGLView;
-class DataGroup;
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class ColocalizationDlg : public wxPanel
 {
 public:
@@ -69,7 +73,7 @@ public:
 	{
 		m_view = view;
 	}
-	void SetGroup(DataGroup* group)
+	void SetGroup(fluo::VolumeGroup* group)
 	{
 		m_group = group;
 	}
@@ -98,7 +102,7 @@ private:
 	VRenderFrame* m_frame;
 	//current view
 	VRenderGLView* m_view;
-	DataGroup *m_group;
+	fluo::VolumeGroup *m_group;
 
 	wxString m_output_file;
 

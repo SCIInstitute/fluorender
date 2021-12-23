@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/ShaderProgram.h>
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
 #include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
@@ -777,7 +778,7 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 		break;
 	case 2:
 		{
-		VolumeData *vd = 0;
+		fluo::VolumeData *vd = 0;
 		if (m_glview->m_cur_vol)
 			vd = m_glview->m_cur_vol;
 		else if (m_glview->m_vd_pop_list.size())
@@ -838,7 +839,7 @@ void VRenderView::SetScaleFactor(double s, bool update)
 		break;
 	case 2:
 		{
-		VolumeData *vd = 0;
+		fluo::VolumeData *vd = 0;
 		if (m_glview->m_cur_vol)
 			vd = m_glview->m_cur_vol;
 		else if (m_glview->m_vd_pop_list.size())
@@ -1025,14 +1026,14 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	m_glview->SetSyncB(b);
 
 	//sync properties of the selcted volume
-	VolumeData* svd = vr_frame->GetCurSelVol();
+	fluo::VolumeData* svd = vr_frame->GetCurSelVol();
 	if (!svd)
 	svd = GetAllVolumeData(0);
 	if (svd)
 	{
 	for (int i=0; i<GetAllVolumeNum(); i++)
 	{
-	VolumeData* vd = GetAllVolumeData(i);
+	fluo::VolumeData* vd = GetAllVolumeData(i);
 	if (vd)
 	{
 	vd->SetNR(svd->GetNR());
@@ -1379,7 +1380,7 @@ void VRenderView::OnPin(wxCommandEvent &event)
 		break;
 	case 2:
 		{
-		VolumeData *vd = 0;
+		fluo::VolumeData *vd = 0;
 		if (m_glview->m_cur_vol)
 			vd = m_glview->m_cur_vol;
 		else if (m_glview->m_vd_pop_list.size())

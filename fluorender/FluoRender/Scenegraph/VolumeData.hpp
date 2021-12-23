@@ -101,6 +101,8 @@ namespace fluo
 		//empty mask
 		//mode: 0-zeros; 1-255; 2-leave as is
 		void AddEmptyMask(int mode);
+		void AddMask(Nrrd* mask, int op);
+		void AddMask16(Nrrd* mask, int op, double scale);
 
 		//load label
 		void LoadLabel(Nrrd* label);
@@ -207,6 +209,7 @@ namespace fluo
 		void OnSecColorSetChanged(Event& event);
 		void OnLuminanceChanged(Event& event);
 		void OnAlphaChanged(Event& event);
+		void OnAlphaPowerChanged(Event& event);
 		void OnAlphaEnableChanged(Event& event);
 		void OnMaskThreshChanged(Event& event);
 		void OnUseMaskThreshChanged(Event& event);
@@ -223,6 +226,7 @@ namespace fluo
 		void OnLevelChanged(Event& event);
 		void OnDisplayChanged(Event& event);
 		void OnInterpolateChanged(Event& event);
+		void OnLabelModeChanged(Event& event);
 		void OnDepthAttenChanged(Event& event);
 		void OnSkipBrickChanged(Event& event);
 		void OnClipPlanesChanged(Event& event);

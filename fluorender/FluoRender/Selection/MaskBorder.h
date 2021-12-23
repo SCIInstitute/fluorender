@@ -28,25 +28,22 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_MaskBorder_h
 #define FL_MaskBorder_h
 
-#include <vector>
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-
-using namespace std;
-
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class MaskBorder
 	{
 	public:
-		MaskBorder(VolumeData* vd);
+		MaskBorder(fluo::VolumeData* vd);
 		~MaskBorder();
 
 		void Compute(int order);
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 
 	private:
 		bool CheckBricks();

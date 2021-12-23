@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
@@ -2641,7 +2642,7 @@ void ComponentDlg::OutputMulti(int color_type)
 		if (m_frame)
 		{
 			wxString group_name = "";
-			DataGroup* group = 0;
+			fluo::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
 				fluo::VolumeData* vd = *i;
@@ -2687,7 +2688,7 @@ void ComponentDlg::OutputRgb(int color_type)
 		if (m_frame)
 		{
 			wxString group_name = "";
-			DataGroup* group = 0;
+			fluo::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
 				fluo::VolumeData* vd = *i;

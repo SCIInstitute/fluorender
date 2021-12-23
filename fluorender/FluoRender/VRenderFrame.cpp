@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "compatibility.h"
 #include "DragDrop.h"
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
@@ -1006,10 +1008,10 @@ wxString VRenderFrame::CreateView(int row)
 		{
 			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
 			{
-				VolumeData* vd = view0->GetDispVolumeData(i);
+				fluo::VolumeData* vd = view0->GetDispVolumeData(i);
 				if (vd)
 				{
-					VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
+					fluo::VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
 
 					if (vd_add)
 					{
@@ -1415,8 +1417,8 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 {
 	int j;
 
-	VolumeData* vd_sel = 0;
-	DataGroup* group_sel = 0;
+	fluo::VolumeData* vd_sel = 0;
+	fluo::VolumeGroup* group_sel = 0;
 	VRenderGLView* v = 0;
 
 	if (view)
@@ -1498,12 +1500,12 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 
 			if (ch_num > 1)
 			{
-				DataGroup* group = v->AddOrGetGroup();
+				fluo::VolumeGroup* group = v->AddOrGetGroup();
 				if (group)
 				{
 					for (int i=ch_num; i>0; i--)
 					{
-						VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
+						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
 						if (vd)
 						{
 							v->AddVolumeData(vd, group->GetName());
@@ -1530,7 +1532,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			}
 			else if (ch_num == 1)
 			{
-				VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
+				fluo::VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
 				if (vd)
 				{
 					int chan_num = v->GetDispVolumeNum();
@@ -1824,7 +1826,7 @@ void VRenderFrame::UpdateTreeIcons()
 			{
 			case 2://volume
 				{
-					VolumeData* vd = (VolumeData*)layer;
+					fluo::VolumeData* vd = (VolumeData*)layer;
 					if (!vd)
 						break;
 					counter++;
@@ -1851,14 +1853,14 @@ void VRenderFrame::UpdateTreeIcons()
 				break;
 			case 5://volume group
 				{
-					DataGroup* group = (DataGroup*)layer;
+					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 					if (!group)
 						break;
 					m_tree_panel->SetGroupItemImage(layer_item, int(group->GetDisp()));
 					wxTreeItemIdValue ck_volume;
 					for (k=0; k<group->GetVolumeNum(); k++)
 					{
-						VolumeData* vd = group->GetVolumeData(k);
+						fluo::VolumeData* vd = group->GetVolumeData(k);
 						if (!vd)
 							continue;
 						wxTreeItemId volume_item;
@@ -1922,7 +1924,7 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 2://volume
 				{
-					VolumeData* vd = (VolumeData*)layer;
+					fluo::VolumeData* vd = (VolumeData*)layer;
 					if (!vd)
 						break;
 					fluo::Color c = vd->GetColor();
@@ -1962,12 +1964,12 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 5://group
 				{
-					DataGroup* group = (DataGroup*)layer;
+					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 					if (!group)
 						break;
 					for (k=0; k<group->GetVolumeNum(); k++)
 					{
-						VolumeData* vd = group->GetVolumeData(k);
+						fluo::VolumeData* vd = group->GetVolumeData(k);
 						if (!vd)
 							break;
 						fluo::Color c = vd->GetColor();
@@ -2052,7 +2054,7 @@ void VRenderFrame::UpdateTree(wxString name)
 				break;
 			case 2://volume data
 				{
-					VolumeData* vd = (VolumeData*)layer;
+					fluo::VolumeData* vd = (VolumeData*)layer;
 					if (!vd)
 						break;
 					//append icon for volume
@@ -2119,7 +2121,7 @@ void VRenderFrame::UpdateTree(wxString name)
 				break;
 			case 5://group
 				{
-					DataGroup* group = (DataGroup*)layer;
+					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 					if (!group)
 						break;
 					//append group item to tree
@@ -2128,7 +2130,7 @@ void VRenderFrame::UpdateTree(wxString name)
 					//append volume data to group
 					for (k=0; k<group->GetVolumeNum(); k++)
 					{
-						VolumeData* vd = group->GetVolumeData(k);
+						fluo::VolumeData* vd = group->GetVolumeData(k);
 						if (!vd)
 							continue;
 						//add icon
@@ -2207,7 +2209,7 @@ void VRenderFrame::UpdateList()
 
 	for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
 	{
-		VolumeData* vd = m_data_mgr.GetVolumeData(i);
+		fluo::VolumeData* vd = m_data_mgr.GetVolumeData(i);
 		if (vd && !vd->GetDup())
 		{
 			wxString name = vd->GetName();
@@ -2257,8 +2259,8 @@ ListPanel *VRenderFrame::GetList()
 //on selections
 void VRenderFrame::OnSelection(int type,
 	VRenderGLView* view,
-	DataGroup* group,
-	VolumeData* vd,
+	fluo::VolumeGroup* group,
+	fluo::VolumeData* vd,
 	MeshData* md,
 	Annotations* ann)
 {
@@ -2282,7 +2284,7 @@ void VRenderFrame::OnSelection(int type,
 		case 4:
 			if (ann)
 			{
-				VolumeData* vd_ann = ann->GetVolume();
+				fluo::VolumeData* vd_ann = ann->GetVolume();
 				m_clip_view->SetVolumeData(vd_ann);
 			}
 			break;
@@ -2871,7 +2873,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			"Saving volume data. Please wait.");
 		tick_cnt++;
 
-		VolumeData* vd = m_data_mgr.GetVolumeData(i);
+		fluo::VolumeData* vd = m_data_mgr.GetVolumeData(i);
 		if (vd)
 		{
 			str = wxString::Format("/data/volume/%d", i);
@@ -3182,11 +3184,11 @@ void VRenderFrame::SaveProject(wxString& filename)
 					break;
 				case 5://group
 					{
-						DataGroup* group = (DataGroup*)layer;
+						fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 
 						fconfig.Write("type", 5);
 						fconfig.Write("name", layer->GetName());
-						fconfig.Write("id", DataGroup::GetID());
+						fconfig.Write("id", fluo::VolumeGroup::GetID());
 						//dispaly
 						fconfig.Write("display", group->GetDisp());
 						//2d adjustment
@@ -3497,7 +3499,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	int i, j, k;
 	//clear
 	m_data_mgr.ClearAll();
-	DataGroup::ResetID();
+	fluo::VolumeGroup::ResetID();
 	MeshGroup::ResetID();
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
@@ -3506,7 +3508,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	//VRenderView::ResetID();
-	DataGroup::ResetID();
+	fluo::VolumeGroup::ResetID();
 	MeshGroup::ResetID();
 
 
@@ -3637,7 +3639,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					else if (suffix == ".lof")
 						loaded_num = m_data_mgr.LoadVolumeData(str, LOAD_TYPE_LOF, false, cur_chan, cur_time);
 				}
-				VolumeData* vd = 0;
+				fluo::VolumeData* vd = 0;
 				if (loaded_num)
 					vd = m_data_mgr.GetLastVolumeData();
 				if (vd)
@@ -4099,7 +4101,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						VolumeData* vd = m_data_mgr.GetVolumeData(str);
+						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(str);
 						if (vd)
 							view->AddVolumeData(vd);
 					}
@@ -4145,7 +4147,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										VolumeData* vd = m_data_mgr.GetVolumeData(str);
+										fluo::VolumeData* vd = m_data_mgr.GetVolumeData(str);
 										if (vd)
 											view->AddVolumeData(vd);
 									}
@@ -4177,9 +4179,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										int id;
 										if (fconfig.Read("id", &id))
-											DataGroup::SetID(id);
+											fluo::VolumeGroup::SetID(id);
 										str = view->AddGroup(str);
-										DataGroup* group = view->GetGroup(str);
+										fluo::VolumeGroup* group = view->GetGroup(str);
 										if (group)
 										{
 											//display
@@ -4230,7 +4232,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												{
 													if (fconfig.Read(wxString::Format("vol_%d", k), &str))
 													{
-														VolumeData* vd = m_data_mgr.GetVolumeData(str);
+														fluo::VolumeData* vd = m_data_mgr.GetVolumeData(str);
 														if (vd)
 															group->InsertVolumeData(k-1, vd);
 													}
@@ -4539,7 +4541,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			m_cur_sel_vol = cur_sel_vol;
 			if (m_cur_sel_vol != -1)
 			{
-				VolumeData* vd = m_data_mgr.GetVolumeData(m_cur_sel_vol);
+				fluo::VolumeData* vd = m_data_mgr.GetVolumeData(m_cur_sel_vol);
 				OnSelection(2, 0, 0, vd);
 			}
 		}
