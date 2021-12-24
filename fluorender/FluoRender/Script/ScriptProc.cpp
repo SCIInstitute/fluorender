@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderGLView.h>
 #include <VRenderFrame.h>
 #include <VolumeData.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
@@ -694,13 +696,15 @@ void ScriptProc::RunFetchMask()
 		BaseReader* reader = (*i)->GetReader();
 		if (!reader)
 			return;
+		long chan;
+		(*i)->getValue("channel", chan);
 		//load and replace the mask
 		if (bmask)
 		{
 			MSKReader msk_reader;
-			wstring mskname = reader->GetCurMaskName(curf, (*i)->GetCurChannel());
+			wstring mskname = reader->GetCurMaskName(curf, chan);
 			msk_reader.SetFile(mskname);
-			Nrrd* mask_nrrd_new = msk_reader.Convert(curf, (*i)->GetCurChannel(), true);
+			Nrrd* mask_nrrd_new = msk_reader.Convert(curf, chan, true);
 			if (mask_nrrd_new)
 				(*i)->LoadMask(mask_nrrd_new);
 			//else
@@ -710,9 +714,9 @@ void ScriptProc::RunFetchMask()
 		if (blabel)
 		{
 			LBLReader lbl_reader;
-			wstring lblname = reader->GetCurLabelName(curf, (*i)->GetCurChannel());
+			wstring lblname = reader->GetCurLabelName(curf, chan);
 			lbl_reader.SetFile(lblname);
-			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, (*i)->GetCurChannel(), true);
+			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, chan, true);
 			if (label_nrrd_new)
 				(*i)->LoadLabel(label_nrrd_new);
 			//else
@@ -742,7 +746,7 @@ void ScriptProc::RunClearMask()
 		//clear the label
 		if (blabel)
 			(*i)->AddEmptyLabel(0, true);
-		(*i)->GetVR()->clear_tex_current();
+		(*i)->GetRenderer()->clear_tex_current();
 	}
 }
 
@@ -762,10 +766,12 @@ void ScriptProc::RunSaveMask()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
+		long chan;
+		(*i)->getValue("channel", chan);
 		if (bmask)
-			(*i)->SaveMask(true, curf, (*i)->GetCurChannel());
+			(*i)->SaveMask(true, curf, chan);
 		if (blabel)
-			(*i)->SaveLabel(true, curf, (*i)->GetCurChannel());
+			(*i)->SaveLabel(true, curf, chan);
 	}
 }
 
@@ -856,7 +862,7 @@ void ScriptProc::RunSaveVolume()
 		fluo::Quaternion qtemp;
 		(*i)->Save(vstr, mode, crop, filter, bake, compression, qtemp);
 		if (del_vol)
-			delete *i;
+			glbin_volf->remove(*i);
 	}
 }
 

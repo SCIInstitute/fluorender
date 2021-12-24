@@ -2641,7 +2641,7 @@ void ComponentDlg::OutputMulti(int color_type)
 	{
 		if (m_frame)
 		{
-			wxString group_name = "";
+			std::string group_name;
 			fluo::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
@@ -2687,7 +2687,7 @@ void ComponentDlg::OutputRgb(int color_type)
 	{
 		if (m_frame)
 		{
-			wxString group_name = "";
+			std::string group_name;
 			fluo::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
@@ -2716,7 +2716,7 @@ void ComponentDlg::OutputRgb(int color_type)
 			//	group->SetHdrAll(col);
 			//}
 			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->GetName());
+			m_frame->UpdateTree(vd->getName());
 			m_view->RefreshGL(39);
 		}
 	}
@@ -3180,7 +3180,7 @@ void ComponentDlg::Cluster()
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
 	{
-		vd->AddEmptyLabel(0);
+		vd->AddEmptyLabel(0, true);
 		nrrd_label = tex->get_nrrd(tex->nlabel());
 	}
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
@@ -3411,7 +3411,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 
 	cg.SetUseMask(use_sel);
 
-	vd->AddEmptyMask(cg.GetUseMask()?2:1);//select all if no mask, otherwise keep
+	vd->AddEmptyMask(cg.GetUseMask()?2:1, true);//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();

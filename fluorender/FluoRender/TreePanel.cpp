@@ -920,7 +920,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	else if (item_data->type == 2)
 	{
 		//volume
-		fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+		fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 		if (vd)
 		{
 			bool rc;
@@ -1048,7 +1048,7 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderGLView* view = m_frame->GetView(str);
 								if (view)
 								{
-									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 									str = GetItemText(par_item);
 									fluo::VolumeGroup* group = view->GetGroup(str);
 									m_frame->GetAdjustView()->SetGroupLink(group);
@@ -1063,7 +1063,7 @@ void DataTreeCtrl::UpdateSelection()
 								VRenderGLView* view = m_frame->GetView(str);
 								if (view)
 								{
-									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 									m_frame->GetAdjustView()->SetGroupLink(0);
 									m_frame->OnSelection(2, view, 0, vd);
 									view->SetVolumeA(vd);
@@ -1281,7 +1281,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 2://volume data
 				{
-					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
+					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 					if (vd)
 					{
 						if (rc)
@@ -2124,9 +2124,15 @@ void DataTreeCtrl::PasteMask(int op)
 			vd->GetTexture()->push_mask();
 		if (m_frame->m_copy_data)
 		{
-			Nrrd* data = m_frame->m_vd_copy->GetVolume(false);
-			if (m_frame->m_vd_copy->GetBits() == 16)
-				vd->AddMask16(data, op, m_frame->m_vd_copy->GetScalarScale());
+			Nrrd* data = m_frame->m_vd_copy->GetData(false);
+			long bits;
+			m_frame->m_vd_copy->getValue("bits", bits);
+			if (bits == 16)
+			{
+				double scale;
+				m_frame->m_vd_copy->getValue("int scale", scale);
+				vd->AddMask16(data, op, scale);
+			}
 			else
 				vd->AddMask(data, op);
 		}

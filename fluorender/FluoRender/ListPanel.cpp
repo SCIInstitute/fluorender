@@ -322,7 +322,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 					for (int i = 0; i < m_frame->GetViewNum(); ++i)
 					{
 						VRenderGLView* v = m_frame->GetView(i);
-						if (v && v->GetVolumeData(name))
+						if (v && v->GetVolumeData(name.ToStdString()))
 						{
 							vd_add = glbin_volf->build(vd);
 							break;
@@ -925,7 +925,7 @@ void DataListCtrl::DeleteSelection()
 					VRenderGLView* view = m_frame->GetView(i);
 					if (view)
 					{
-						view->RemoveVolumeDataDup(name);
+						view->RemoveVolumeDataDup(name.ToStdString());
 					}
 				}
 				//from datamanager
@@ -1006,7 +1006,7 @@ void DataListCtrl::DeleteAll()
 			{
 				VRenderGLView* view = m_frame->GetView(i);
 				if (view)
-					view->RemoveVolumeDataDup(name);
+					view->RemoveVolumeDataDup(name.ToStdString());
 			}
 			//from datamanager
 			DataManager* mgr = m_frame->GetDataManager();

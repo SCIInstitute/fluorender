@@ -112,7 +112,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 	nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
 	{
-		vd->AddEmptyMask(0);
+		vd->AddEmptyMask(0, true);
 		nrrd_mask = vd->GetMask(false);
 	}
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
@@ -126,15 +126,17 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
 	{
-		vd->AddEmptyLabel();
+		vd->AddEmptyLabel(0, true);
 		nrrd_label = tex->get_nrrd(tex->nlabel());
 	}
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	vd->getValue("res x", nx);
+	vd->getValue("res y", ny);
+	vd->getValue("res z", nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -220,11 +222,13 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 			}
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetRenderer()->clear_tex_current();
 
 	//save label mask to disk
 	int cur_time = m_view->m_tseq_cur_num;
-	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
+	long chan;
+	vd->getValue("channel", chan);
+	vd->SaveLabel(true, cur_time, chan);
 
 	if (new_id)
 	{

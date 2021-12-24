@@ -100,7 +100,7 @@ namespace fluo
 
 		//empty mask
 		//mode: 0-zeros; 1-255; 2-leave as is
-		void AddEmptyMask(int mode);
+		void AddEmptyMask(int mode, bool change);
 		void AddMask(Nrrd* mask, int op);
 		void AddMask16(Nrrd* mask, int op, double scale);
 

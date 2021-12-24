@@ -237,9 +237,13 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	VolumeMeshConv converter;
 	converter.SetVolume(sel_vol->GetTexture()->get_nrrd(0));
 	double spcx, spcy, spcz;
-	sel_vol->GetSpacings(spcx, spcy, spcz);
+	sel_vol->getValue("spc x", spcx);
+	sel_vol->getValue("spc y", spcy);
+	sel_vol->getValue("spc z", spcz);
 	converter.SetVolumeSpacings(spcx, spcy, spcz);
-	converter.SetMaxValue(sel_vol->GetMaxValue());
+	double int_max;
+	sel_vol->getValue("max int", int_max);
+	converter.SetMaxValue(int_max);
 	wxString str;
 	//get iso value
 	str = m_cnv_vol_mesh_thresh_text->GetValue();
@@ -259,11 +263,11 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	if (m_cnv_vol_mesh_usetransf_chk->GetValue())
 	{
 		double gamma, lo_thresh, hi_thresh, offset, gm_thresh;
-		gamma = sel_vol->Get3DGamma();
-		lo_thresh = sel_vol->GetLeftThresh();
-		hi_thresh = sel_vol->GetRightThresh();
-		offset = sel_vol->GetOffset();
-		gm_thresh = sel_vol->GetBoundary();
+		sel_vol->getValue("gamma 3d", gamma);
+		sel_vol->getValue("low threshold", lo_thresh);
+		sel_vol->getValue("high threshold", hi_thresh);
+		sel_vol->getValue("saturation", offset);
+		sel_vol->getValue("extract boundary", gm_thresh);
 		converter.SetVolumeTransfer(gamma, lo_thresh, hi_thresh, offset, gm_thresh);
 		converter.SetVolumeUseTrans(true);
 	}
@@ -272,7 +276,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	//get use selection
 	if (m_cnv_vol_mesh_selected_chk->GetValue())
 	{
-		sel_vol->GetVR()->return_mask();
+		sel_vol->GetRenderer()->return_mask();
 		converter.SetVolumeMask(sel_vol->GetTexture()->get_nrrd(sel_vol->GetTexture()->nmask()));
 		converter.SetVolumeUseMask(true);
 	}

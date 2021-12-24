@@ -291,7 +291,7 @@ namespace flrd
 		wxString GetPosNames();
 
 		//profile
-		void SetInfoProfile(wxString &str)
+		void SetInfoProfile(const wxString &str)
 		{
 			m_info_profile = str;
 		}

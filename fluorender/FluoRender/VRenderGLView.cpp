@@ -537,21 +537,21 @@ VRenderGLView::~VRenderGLView()
 
 	int i;
 	//delete groups
-	for (i = 0; i<(int)m_layer_list.size(); i++)
-	{
-		if (!m_layer_list[i])
-			continue;
-		if (m_layer_list[i]->IsA() == 5)//group
-		{
-			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			delete group;
-		}
-		else if (m_layer_list[i]->IsA() == 6)//mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			delete group;
-		}
-	}
+	//for (i = 0; i<(int)m_layer_list.size(); i++)
+	//{
+	//	if (!m_layer_list[i])
+	//		continue;
+	//	if (m_layer_list[i]->IsA() == 5)//group
+	//	{
+	//		fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
+	//		delete group;
+	//	}
+	//	else if (m_layer_list[i]->IsA() == 6)//mesh group
+	//	{
+	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		delete group;
+	//	}
+	//}
 
 	//delete rulers
 	for (i = 0; i<(int)m_ruler_list.size(); i++)
@@ -647,8 +647,8 @@ void VRenderGLView::Clear()
 			continue;
 		if (m_layer_list[i]->IsA() == 5)//group
 		{
-			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			delete group;
+			//fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
+			//delete group;
 		}
 		else if (m_layer_list[i]->IsA() == 6)//mesh group
 		{
@@ -2793,13 +2793,17 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 
 		if (color_mode == 1)
 		{
+			long cproj;
+			vd->getValue("colormap proj", cproj);
+			long ctype;
+			vd->getValue("colormap type", ctype);
 			//2d adjustment
-			if (vd->GetColormapProj())
+			if (cproj)
 				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
-					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
+					IMG_SHDR_GRADIENT_PROJ_MAP, ctype);
 			else
 				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
-					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
+					IMG_SHDR_GRADIENT_MAP, ctype);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -2809,12 +2813,16 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 				img_shader->bind();
 			}
 			double lo, hi;
-			vd->GetColormapValues(lo, hi);
+			vd->getValue("colormap low", lo);
+			vd->getValue("colormap high", hi);
 			img_shader->setLocalParam(
 				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
-			fluo::Color c = vd->GetColor();
+			fluo::Color c;
+			vd->getValue("color", c);
+			double cinv;
+			vd->getValue("colormap inv", cinv);
 			img_shader->setLocalParam(
-				6, c.r(), c.g(), c.b(), vd->GetColormapInv());
+				6, c.r(), c.g(), c.b(), cinv);
 			img_shader->setLocalParam(
 				9, c.r(), c.g(), c.b(), 0.0);
 			//2d adjustment

@@ -203,7 +203,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	flrd::ComponentGenerator cg(vd);
 	cg.SetUseMask(select);
-	vd->AddEmptyMask(cg.GetUseMask() ? 2 : 1);
+	vd->AddEmptyMask(cg.GetUseMask() ? 2 : 1, true);
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
 	cg.ShuffleID();
 	double scale;

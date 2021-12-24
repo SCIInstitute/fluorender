@@ -392,12 +392,12 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	//clipping planes
 	cl_float4 p[6];
 	bool inv;
-	float scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
+	double scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
 		offset, sw;
 	if (m_vd && m_vd->GetRenderer())
 	{
 		flvr::VolumeRenderer* vr = m_vd->GetRenderer();
-		vector<fluo::Plane*> *planes = vr->get_planes();
+		std::vector<fluo::Plane*> *planes = vr->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -408,19 +408,19 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 				float(abcd[3]) };
 		}
 		//params
-		inv = m_vd->GetInvert();
-		scalar_scale = m_vd->GetScalarScale();
-		lo_thresh = m_vd->GetLeftThresh();
-		hi_thresh = m_vd->GetRightThresh();
-		gamma3d = m_vd->Get3DGamma();
-		gm_thresh = m_vd->GetBoundary();
-		offset = m_vd->GetOffset();
-		sw = m_vd->GetSoftThreshold();
+		m_vd->getValue("invert", inv);
+		m_vd->getValue("int scale", scalar_scale);
+		m_vd->getValue("low threshold", lo_thresh);
+		m_vd->getValue("high threhsold", hi_thresh);
+		m_vd->getValue("gamma 3d", gamma3d);
+		m_vd->getValue("extract boundary", gm_thresh);
+		m_vd->getValue("saturation", offset);
+		m_vd->getValue("soft thresh", sw);
 	}
 
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];

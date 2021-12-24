@@ -310,7 +310,7 @@ void ColocalizationDlg::Colocalize()
 	if (!m_group)
 		return;
 
-	int num = m_group->GetVolumeNum();
+	int num = m_group->getNumChildren();
 	if (num < 2)
 		return;
 
@@ -318,14 +318,16 @@ void ColocalizationDlg::Colocalize()
 	double spcx, spcy, spcz;
 	double spc;
 	wxString unit;
-	fluo::VolumeData* vd = m_group->GetVolumeData(0);
+	fluo::VolumeData* vd = m_group->getChild(0)->asVolumeData();
 	if (!vd)
 	{
 		spc = spcx = spcy = spcz = 1.0;
 	}
 	else
 	{
-		vd->GetSpacings(spcx, spcy, spcz);
+		vd->getValue("spc x", spcx);
+		vd->getValue("spc y", spcy);
+		vd->getValue("spc z", spcz);
 		spc = spcx * spcy * spcz;
 	}
 	if (m_view)
@@ -370,11 +372,14 @@ void ColocalizationDlg::Colocalize()
 		{
 			for (int it2 = it1; it2 < num; ++it2)
 			{
-				fluo::VolumeData* vd1 = m_group->GetVolumeData(it1);
-				fluo::VolumeData* vd2 = m_group->GetVolumeData(it2);
-				if (!vd1 || !vd2 ||
-					!vd1->GetDisp() ||
-					!vd2->GetDisp())
+				fluo::VolumeData* vd1 = m_group->getChild(it1)->asVolumeData();
+				fluo::VolumeData* vd2 = m_group->getChild(it2)->asVolumeData();
+				if (!vd1 || !vd2)
+					continue;
+				bool disp1, disp2;
+				vd1->getValue("display", disp1);
+				vd2->getValue("display", disp2);
+				if (!disp1 || !disp2)
 					continue;
 
 				flrd::ChannelCompare compare(vd1, vd2);
@@ -397,12 +402,12 @@ void ColocalizationDlg::Colocalize()
 				case 2://threshold
 				{
 					//get threshold values
-					float th1, th2, th3, th4;
-					th1 = (float)(vd1->GetLeftThresh());
-					th2 = (float)(vd1->GetRightThresh());
-					th3 = (float)(vd2->GetLeftThresh());
-					th4 = (float)(vd2->GetRightThresh());
-					compare.Threshold(th1, th2, th3, th4);
+					double th1, th2, th3, th4;
+					vd1->getValue("low threhsold", th1);
+					vd1->getValue("high threhsold", th2);
+					vd2->getValue("low threhsold", th3);
+					vd2->getValue("high threhsold", th4);
+					compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
 				}
 				break;
 				}
@@ -418,11 +423,14 @@ void ColocalizationDlg::Colocalize()
 		for (int it1 = 0; it1 < num; ++it1)
 		for (int it2 = 0; it2 < num; ++it2)
 		{
-			fluo::VolumeData* vd1 = m_group->GetVolumeData(it1);
-			fluo::VolumeData* vd2 = m_group->GetVolumeData(it2);
-			if (!vd1 || !vd2 ||
-				!vd1->GetDisp() ||
-				!vd2->GetDisp())
+			fluo::VolumeData* vd1 = m_group->getChild(it1)->asVolumeData();
+			fluo::VolumeData* vd2 = m_group->getChild(it2)->asVolumeData();
+			if (!vd1 || !vd2)
+				continue;
+			bool disp1, disp2;
+			vd1->getValue("display", disp1);
+			vd2->getValue("display", disp2);
+			if (!disp1 || !disp2)
 				continue;
 
 			flrd::ChannelCompare compare(vd1, vd2);
@@ -435,12 +443,12 @@ void ColocalizationDlg::Colocalize()
 				compare.postwork.connect(std::bind(
 					&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
 			//get threshold values
-			float th1, th2, th3, th4;
-			th1 = (float)(vd1->GetLeftThresh());
-			th2 = (float)(vd1->GetRightThresh());
-			th3 = (float)(vd2->GetLeftThresh());
-			th4 = (float)(vd2->GetRightThresh());
-			compare.Threshold(th1, th2, th3, th4);
+			double th1, th2, th3, th4;
+			vd1->getValue("low threhsold", th1);
+			vd1->getValue("high threhsold", th2);
+			vd2->getValue("low threhsold", th3);
+			vd2->getValue("high threhsold", th4);
+			compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
 			rm[it1][it2] = compare.Result();
 		}
 	}
@@ -461,9 +469,9 @@ void ColocalizationDlg::Colocalize()
 				m_titles += wxString::Format("%d (%%)", int(i + 1));
 			else
 				m_titles += wxString::Format("%d", int(i + 1));
-			fluo::VolumeData* vd = m_group->GetVolumeData(i);
+			fluo::VolumeData* vd = m_group->getChild(i)->asVolumeData();
 			if (vd)
-				name = vd->GetName();
+				name = vd->getName();
 			else
 				name = "";
 			m_titles += ": " + name;

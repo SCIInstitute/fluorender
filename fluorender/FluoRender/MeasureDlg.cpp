@@ -1518,9 +1518,9 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 		if (m_view->m_cur_vol)
 		{
 			m_view->m_cur_vol->
-				GetVR()->clear_tex_mask();
+				GetRenderer()->clear_tex_mask();
 			m_view->m_cur_vol->
-				GetVR()->clear_tex_label();
+				GetRenderer()->clear_tex_label();
 			m_view->m_cur_vol->
 				AddEmptyMask(0, true);
 			m_view->m_cur_vol->

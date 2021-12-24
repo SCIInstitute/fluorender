@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include "utility.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Selection/PaintBoxes.h>
@@ -97,7 +99,7 @@ void VolumeSelector::Segment(int mx, int my)
 
 	//notify volume that mask is cleared
 	if (m_mode == 6)
-		m_vd->SetMaskClear();
+		m_vd->setValue("mask clear", true);
 
 	//save view
 	m_mv_mat = m_view->GetDrawMat();
@@ -109,10 +111,10 @@ void VolumeSelector::Segment(int mx, int my)
 	if (m_mode == 9)
 	{
 		GLint mp[2] = { mx, my };
-		m_vd->GetVR()->set_mouse_position(mp);
+		m_vd->GetRenderer()->set_mouse_position(mp);
 		valid_mvec = GetMouseVec(mx, my, mvec);
 	}
-	m_vd->GetVR()->set_mouse_vec(mvec);
+	m_vd->GetRenderer()->set_mouse_vec(mvec);
 
 	flvr::Framebuffer* paint_buffer =
 		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
@@ -149,16 +151,21 @@ void VolumeSelector::Segment(int mx, int my)
 	if (m_select_multi == 1)
 	{
 		fluo::VolumeGroup* group = m_view->GetGroup(m_vd);
-		if (group && group->GetVolumeNum() > 1)
+		if (group && group->getNumChildren() > 1)
 		{
 			fluo::VolumeData* save = m_vd;
-			for (int i = 0; i < group->GetVolumeNum(); i++)
+			for (int i = 0; i < group->getNumChildren(); i++)
 			{
-				fluo::VolumeData* vd = group->GetVolumeData(i);
-				if (vd && vd->GetDisp())
+				fluo::VolumeData* vd = group->getChild(i)->asVolumeData();
+				if (vd)
 				{
-					m_vd = vd;
-					Select(r);
+					bool disp;
+					vd->getValue("display", disp);
+					if (disp)
+					{
+						m_vd = vd;
+						Select(r);
+					}
 				}
 			}
 			m_vd = save;
@@ -193,11 +200,17 @@ void VolumeSelector::Select(double radius)
 
 	//insert the mask volume into m_vd
 	m_vd->AddEmptyMask(0, false);
-	m_vd->Set2dMask(m_2d_mask);
+	m_vd->setValue("2d mask id", (unsigned long)m_2d_mask);
 	if (m_use2d && glIsTexture(m_2d_weight1) && glIsTexture(m_2d_weight2))
-		m_vd->Set2DWeight(m_2d_weight1, m_2d_weight2);
+	{
+		m_vd->setValue("2d weight1 id", (unsigned long)m_2d_weight1);
+		m_vd->setValue("2d weight2 id", (unsigned long)m_2d_weight2);
+	}
 	else
-		m_vd->Set2DWeight(0, 0);
+	{
+		m_vd->setValue("2d weight1 id", (unsigned long)0);
+		m_vd->setValue("2d weight2 id", (unsigned long)0);
+	}
 
 	if (flvr::Texture::mask_undo_num_>0 &&
 		m_vd->GetTexture())
@@ -287,7 +300,10 @@ void VolumeSelector::Select(double radius)
 		{
 			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
-			ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
+			double est_thresh, int_scale;
+			m_vd->getValue("estimate thresh", est_thresh);
+			m_vd->getValue("int scale", int_scale);
+			ini_thresh = est_thresh * int_scale;
 			if (m_iter_num > BRUSH_TOOL_ITER_WEAK)
 				ini_thresh /= 2.0;
 			m_scl_translate = ini_thresh;
@@ -336,12 +352,12 @@ void VolumeSelector::Select(double radius)
 	}
 
 	if (flvr::Texture::mask_undo_num_>0 &&
-		m_vd->GetVR())
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer())
+		m_vd->GetRenderer()->return_mask();
 
 	if (m_mode == 6)
 	{
-		m_vd->SetUseMaskThreshold(false);
+		m_vd->setValue("use mask thresh", false);
 		m_vd->GetTexture()->invalid_all_mask();
 	}
 }
@@ -374,7 +390,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 		return;
 
 	if (select)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetRenderer()->return_mask();
 
 	//get all the data from original volume
 	flvr::Texture* tex_mvd = m_vd->GetTexture();
@@ -391,50 +407,54 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 	if (!data_mvd || (select&&!data_mvd_mask) || !data_mvd_label) return;
 
 	//create new volumes
-	int res_x, res_y, res_z;
+	long res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
 	int bits = 8;
-	m_vd->GetResolution(res_x, res_y, res_z);
-	m_vd->GetSpacings(spc_x, spc_y, spc_z);
+	m_vd->getValue("res x", res_x);
+	m_vd->getValue("res y", res_y);
+	m_vd->getValue("res z", res_z);
+	m_vd->getValue("spc x", spc_x);
+	m_vd->getValue("spc y", spc_y);
+	m_vd->getValue("spc z", spc_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 	unsigned long long for_size = (unsigned long long)(res_x)*res_y*res_z;
 
 	bool push_new = true;
 	//red volume
 	if (!vd_r)
-		vd_r = new VolumeData();
+		vd_r = glbin_volf->build(m_vd);
 	else
 		push_new = false;
 	vd_r->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_vd->GetName() +
-		wxString::Format("_COMP1"));
-	vd_r->SetCurChannel(0);
+	vd_r->setValue("spc from file", true);
+	vd_r->setName(m_vd->getName() +
+		std::string("_COMP1"));
+	vd_r->setValue("channel", 0);
 	//green volume
 	if (!vd_g)
-		vd_g = new VolumeData();
+		vd_g = glbin_volf->build(m_vd);
 	vd_g->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_vd->GetName() +
-		wxString::Format("_COMP2"));
-	vd_g->SetCurChannel(1);
+	vd_g->setValue("spc from file", true);
+	vd_g->setName(m_vd->getName() +
+		std::string("_COMP2"));
+	vd_g->setValue("channel", 1);
 	//blue volume
 	if (!vd_b)
-		vd_b = new VolumeData();
+		vd_b = glbin_volf->build(m_vd);
 	vd_b->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_vd->GetName() +
-		wxString::Format("_COMP3"));
-	vd_b->SetCurChannel(2);
+	vd_b->setValue("spc from file", true);
+	vd_b->setName(m_vd->getName() +
+		std::string("_COMP3"));
+	vd_b->setValue("channel", 1);
 
 	//get new data
 	//red volume
@@ -462,6 +482,8 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 	if (hide)
 		m_randv = int((double)rand()/(RAND_MAX)*900+100);
 	//populate the data
+	double int_scale;
+	m_vd->getValue("int scale", int_scale);
 	unsigned long long idx;
 	for (idx = 0; idx < for_size; ++idx)
 	{
@@ -482,11 +504,10 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 			{
 				if (select)
 					value = double(((unsigned short*)data_mvd)[idx]) *
-					m_vd->GetScalarScale() *
-					double(data_mvd_mask[idx]) / 16581375.0;
+					int_scale * double(data_mvd_mask[idx]) / 16581375.0;
 				else
 					value = double(((unsigned short*)data_mvd)[idx]) *
-					m_vd->GetScalarScale() / 65535.0;
+					int_scale / 65535.0;
 			}
 			fluo::Color color;
 			if (hmode == 0)
@@ -507,47 +528,9 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 	fluo::Color red(  1.0,0.0,0.0);
 	fluo::Color green(0.0,1.0,0.0);
 	fluo::Color blue( 0.0,0.0,1.0);
-	vd_r->SetColor(red);
-	vd_g->SetColor(green);
-	vd_b->SetColor(blue);
-	bool bval = m_vd->GetEnableAlpha();
-	vd_r->SetEnableAlpha(bval);
-	vd_g->SetEnableAlpha(bval);
-	vd_b->SetEnableAlpha(bval);
-	bval = m_vd->GetShading();
-	vd_r->SetShading(bval);
-	vd_g->SetShading(bval);
-	vd_b->SetShading(bval);
-	vd_r->SetShadow(false);
-	vd_g->SetShadow(false);
-	vd_b->SetShadow(false);
-	//other settings
-	double amb, diff, spec, shine;
-	m_vd->GetMaterial(amb, diff, spec, shine);
-	vd_r->Set3DGamma(m_vd->Get3DGamma());
-	vd_r->SetBoundary(m_vd->GetBoundary());
-	vd_r->SetOffset(m_vd->GetOffset());
-	vd_r->SetLeftThresh(m_vd->GetLeftThresh());
-	vd_r->SetRightThresh(m_vd->GetRightThresh());
-	vd_r->SetAlpha(m_vd->GetAlpha());
-	vd_r->SetSampleRate(m_vd->GetSampleRate());
-	vd_r->SetMaterial(amb, diff, spec, shine);
-	vd_g->Set3DGamma(m_vd->Get3DGamma());
-	vd_g->SetBoundary(m_vd->GetBoundary());
-	vd_g->SetOffset(m_vd->GetOffset());
-	vd_g->SetLeftThresh(m_vd->GetLeftThresh());
-	vd_g->SetRightThresh(m_vd->GetRightThresh());
-	vd_g->SetAlpha(m_vd->GetAlpha());
-	vd_g->SetSampleRate(m_vd->GetSampleRate());
-	vd_g->SetMaterial(amb, diff, spec, shine);
-	vd_b->Set3DGamma(m_vd->Get3DGamma());
-	vd_b->SetBoundary(m_vd->GetBoundary());
-	vd_b->SetOffset(m_vd->GetOffset());
-	vd_b->SetLeftThresh(m_vd->GetLeftThresh());
-	vd_b->SetRightThresh(m_vd->GetRightThresh());
-	vd_b->SetAlpha(m_vd->GetAlpha());
-	vd_b->SetSampleRate(m_vd->GetSampleRate());
-	vd_b->SetMaterial(amb, diff, spec, shine);
+	vd_r->setValue("color", red);
+	vd_g->setValue("color", green);
+	vd_b->setValue("color", blue);
 
 	if (push_new)
 	{
@@ -558,7 +541,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 
 	//turn off m_vd
 	if (hide)
-		m_vd->SetDisp(false);
+		m_vd->setValue("display", false);
 }
 
 fluo::VolumeData* VolumeSelector::GetResult(bool pop)
@@ -801,7 +784,7 @@ void VolumeSelector::PopMask()
 		return;
 
 	m_vd->GetTexture()->pop_mask();
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 void VolumeSelector::UndoMask()
@@ -810,7 +793,7 @@ void VolumeSelector::UndoMask()
 		return;
 
 	m_vd->GetTexture()->mask_undos_backward();
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 void VolumeSelector::RedoMask()
@@ -819,7 +802,7 @@ void VolumeSelector::RedoMask()
 		return;
 
 	m_vd->GetTexture()->mask_undos_forward();
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetRenderer()->clear_tex_mask();
 }
 
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)

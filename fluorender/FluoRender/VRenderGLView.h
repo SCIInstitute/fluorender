@@ -163,25 +163,25 @@ public:
 	MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
-	fluo::VolumeData* GetVolumeData(wxString &name);
+	fluo::VolumeData* GetVolumeData(const std::string &name);
 	MeshData* GetMeshData(wxString &name);
 	Annotations* GetAnnotations(wxString &name);
-	fluo::VolumeGroup* GetGroup(wxString &name);
+	fluo::VolumeGroup* GetGroup(const std::string &name);
 	fluo::VolumeGroup* GetGroup(int index);
 	fluo::VolumeGroup* GetGroup(fluo::VolumeData* vd);
 	MeshGroup* GetMGroup(wxString str);
 	//add
-	fluo::VolumeGroup* AddVolumeData(fluo::VolumeData* vd, wxString group_name = "");
+	fluo::VolumeGroup* AddVolumeData(fluo::VolumeData* vd, const std::string &group_name = "");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
-	wxString AddGroup(wxString str, wxString prev_group = "");
+	std::string AddGroup(const std::string &str, const std::string &prev_group = "");
 	fluo::VolumeGroup* AddOrGetGroup();
 	wxString AddMGroup(wxString str);
 	MeshGroup* AddOrGetMGroup();
 	//remove
-	void RemoveVolumeData(wxString &name);
-	void RemoveVolumeDataDup(wxString &name);//remove all duplicated data
-	void ReplaceVolumeData(wxString &name, fluo::VolumeData *dst);
+	void RemoveVolumeData(const std::string &name);
+	void RemoveVolumeDataDup(const std::string &name);//remove all duplicated data
+	void ReplaceVolumeData(const std::string &name, fluo::VolumeData *dst);
 	void RemoveMeshData(wxString &name);
 	void RemoveAnnotations(wxString &name);
 	void RemoveGroup(wxString &name);
