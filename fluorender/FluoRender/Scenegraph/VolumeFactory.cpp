@@ -257,6 +257,9 @@ void VolumeFactory::createDefault()
 
 		//sync group
 		vd->addValue("sync group", bool(false));
+
+		//duplicate
+		vd->addValue("duplicate", bool(false));
 	}
 }
 

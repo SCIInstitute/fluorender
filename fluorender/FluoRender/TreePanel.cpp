@@ -169,11 +169,11 @@ void DataTreeCtrl::DeleteSelection()
 					{
 						if (item_data->type == 2)//volume data
 						{
-							fluo::VolumeData* vd = view->GetVolumeData(name_data);
+							fluo::VolumeData* vd = view->GetVolumeData(name_data.ToStdString());
 							if (vd)
 							{
 								vd->setValue("display", true);
-								view->RemoveVolumeData(name_data);
+								view->RemoveVolumeData(name_data.ToStdString());
 								if (view->GetVolMethod() == VOL_METHOD_MULTI)
 								{
 									AdjustView* adjust_view = m_frame->GetAdjustView();
@@ -226,7 +226,7 @@ void DataTreeCtrl::DeleteSelection()
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 					if (item_data && item_data->type == 2)
-						view->RemoveVolumeData(name_data);
+						view->RemoveVolumeData(name_data.ToStdString());
 					m_frame->UpdateTree();
 					m_frame->RefreshVRenderViews();
 					m_frame->OnSelection(1);
@@ -941,7 +941,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		VRenderGLView* view = m_frame->GetView(par_name);
 		if (view)
 		{
-			fluo::VolumeGroup* group = view->GetGroup(name);
+			fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
 			if (group)
 			{
 				bool rc;
@@ -1050,7 +1050,7 @@ void DataTreeCtrl::UpdateSelection()
 								{
 									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
 									str = GetItemText(par_item);
-									fluo::VolumeGroup* group = view->GetGroup(str);
+									fluo::VolumeGroup* group = view->GetGroup(str.ToStdString());
 									m_frame->GetAdjustView()->SetGroupLink(group);
 									m_frame->OnSelection(2, view, group, vd, 0);
 									view->SetVolumeA(vd);
@@ -1118,7 +1118,7 @@ void DataTreeCtrl::UpdateSelection()
 					VRenderGLView* view = m_frame->GetView(par_name);
 					if (view)
 					{
-						fluo::VolumeGroup* group = view->GetGroup(name);
+						fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
 						m_frame->OnSelection(5, view, group);
 					}
 				}
@@ -1334,7 +1334,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					VRenderGLView* view = m_frame->GetView(par_name);
 					if (view)
 					{
-						fluo::VolumeGroup* group = view->GetGroup(name);
+						fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
 						if (group)
 						{
 							if (rc)
@@ -2098,7 +2098,7 @@ void DataTreeCtrl::PasteMask(int op)
 			wxString str = GetItemText(GetItemParent(par_item));
 			view = m_frame->GetView(str);
 			str = GetItemText(par_item);
-			group = view->GetGroup(str);
+			group = view->GetGroup(str.ToStdString());
 		}
 		else if (par_item_data && par_item_data->type == 1)
 		{

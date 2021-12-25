@@ -786,7 +786,10 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 		if (vd)
 		{
 			double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			vd->getValue("spc x", spcx);
+			vd->getValue("spc y", spcy);
+			vd->getValue("spc z", spcz);
+			//vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 			if (spcx > 0.0)
 				scale /= m_glview->Get121ScaleFactor() * spcx;
 		}
@@ -844,9 +847,10 @@ void VRenderView::SetScaleFactor(double s, bool update)
 			vd = m_glview->m_cur_vol;
 		else if (m_glview->m_vd_pop_list.size())
 			vd = m_glview->m_vd_pop_list[0];
-		double spcx, spcy, spcz;
+		double spcx;
 		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			vd->getValue("spc x", spcx);
+			//vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 		if (spcx > 0.0)
 			m_glview->m_scale_factor = s * m_glview->Get121ScaleFactor() * spcx;
 		}
@@ -1385,9 +1389,10 @@ void VRenderView::OnPin(wxCommandEvent &event)
 			vd = m_glview->m_cur_vol;
 		else if (m_glview->m_vd_pop_list.size())
 			vd = m_glview->m_vd_pop_list[0];
-		double spcx, spcy, spcz;
+		double spcx;
 		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+			vd->getValue("spc x", spcx);
+			//vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 		if (spcx > 0.0)
 			scale /= m_glview->Get121ScaleFactor() * spcx;
 		}

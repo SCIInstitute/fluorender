@@ -200,7 +200,9 @@ bool ScriptProc::GetVolumes(std::vector<fluo::VolumeData*> &list)
 		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
 		{
 			fluo::VolumeData* vol = m_view->GetAllVolumeData(i);
-			if (!vol->GetDisp())
+			bool disp;
+			vol->getValue("display", disp);
+			if (!disp)
 				list.push_back(vol);
 		}
 	}
@@ -358,7 +360,9 @@ wxString ScriptProc::GetDataDir(const wxString &ext)
 	fluo::VolumeData* vol = m_view->m_cur_vol;
 	if (!vol)
 		return "";
-	wxString path = vol->GetPath();
+	std::wstring str;
+	vol->getValue("data path", str);
+	wxString path = str;
 	path = wxPathOnly(path);
 	path += GETSLASH();
 	path += "output01." + ext;
@@ -505,8 +509,10 @@ void ScriptProc::RunPostTracking()
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!mask_data || !label_data)
 		UpdateTraceDlg();
-	int nx, ny, nz;
-	cur_vol->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	cur_vol->getValue("res x", nx);
+	cur_vol->getValue("res y", ny);
+	cur_vol->getValue("res z", nz);
 	//update the mask according to the new label
 	unsigned long long for_size = nx * ny * nz;
 	memset((void*)mask_data, 0, sizeof(uint8)*for_size);
@@ -560,12 +566,20 @@ void ScriptProc::RunMaskTracking()
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	int resx, resy, resz;
-	cur_vol->GetResolution(resx, resy, resz);
+	long resx, resy, resz;
+	cur_vol->getValue("res x", resx);
+	cur_vol->getValue("res y", resy);
+	cur_vol->getValue("res z", resz);
 	double spcx, spcy, spcz;
-	cur_vol->GetSpacings(spcx, spcy, spcz);
-	tm_processor.SetBits(cur_vol->GetBits());
-	tm_processor.SetScale(cur_vol->GetScalarScale());
+	cur_vol->getValue("spc x", spcx);
+	cur_vol->getValue("spc y", spcy);
+	cur_vol->getValue("spc z", spcz);
+	long bits;
+	cur_vol->getValue("bits", bits);
+	tm_processor.SetBits(bits);
+	double scale;
+	cur_vol->getValue("int scale", scale);
+	tm_processor.SetScale(scale);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
 	tm_processor.SetMaxIter(iter);
@@ -855,12 +869,14 @@ void ScriptProc::RunSaveVolume()
 			format = wxString::Format("%d", chan_num);
 			int ch_length = format.Length();
 			format = wxString::Format("_CH%%0%dd", ch_length + 1);
-			vstr += wxString::Format(format, (*i)->GetCurChannel() + 1);
+			long chan;
+			(*i)->getValue("channel", chan);
+			vstr += wxString::Format(format, chan + 1);
 		}
 		//ext
 		vstr += "." + ext;
 		fluo::Quaternion qtemp;
-		(*i)->Save(vstr, mode, crop, filter, bake, compression, qtemp);
+		(*i)->SaveData(vstr.ToStdWstring(), mode, crop, filter, bake, compression, qtemp);
 		if (del_vol)
 			glbin_volf->remove(*i);
 	}
@@ -927,7 +943,7 @@ void ScriptProc::RunOpenCL()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		(*i)->GetVR()->clear_tex_current();
+		(*i)->GetRenderer()->clear_tex_current();
 		executor->LoadCode(clname);
 		executor->SetVolume(*i);
 		executor->SetDuplicate(true);
@@ -987,8 +1003,10 @@ void ScriptProc::RunCompAnalysis()
 		double sy = celp_list->sy;
 		double sz = celp_list->sz;
 		double size_scale = sx * sy * sz;
-		double maxscale = (*itvol)->GetMaxScale();
-		double scalarscale = (*itvol)->GetScalarScale();
+		double maxscale;
+		(*itvol)->getValue("max scale", maxscale);
+		double scalarscale;
+		(*itvol)->getValue("int scale", scalarscale);
 		for (auto itc = celp_list->begin();
 			itc != celp_list->end(); ++itc)
 		{
@@ -1179,10 +1197,16 @@ void ScriptProc::RunAddCells()
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(cur_vol->GetBits());
-	tm_processor.SetScale(cur_vol->GetScalarScale());
-	int resx, resy, resz;
-	cur_vol->GetResolution(resx, resy, resz);
+	long bits;
+	cur_vol->getValue("bits", bits);
+	tm_processor.SetBits(bits);
+	double scale;
+	cur_vol->getValue("int scale", scale);
+	tm_processor.SetScale(scale);
+	long resx, resy, resz;
+	cur_vol->getValue("res x", resx);
+	cur_vol->getValue("res y", resy);
+	cur_vol->getValue("res z", resz);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.AddCells(m_sel_labels,
 		m_view->m_tseq_cur_num);
@@ -1212,10 +1236,16 @@ void ScriptProc::RunUnlinkCells()
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
-	tm_processor.SetBits(cur_vol->GetBits());
-	tm_processor.SetScale(cur_vol->GetScalarScale());
-	int resx, resy, resz;
-	cur_vol->GetResolution(resx, resy, resz);
+	long bits;
+	cur_vol->getValue("bits", bits);
+	tm_processor.SetBits(bits);
+	double scale;
+	cur_vol->getValue("int scale", scale);
+	tm_processor.SetScale(scale);
+	long resx, resy, resz;
+	cur_vol->getValue("res x", resx);
+	cur_vol->getValue("res y", resy);
+	cur_vol->getValue("res z", resz);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.RemoveCells(m_sel_labels,
 		m_view->m_tseq_cur_num);
@@ -1460,7 +1490,8 @@ void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
 		return;
 	LBLReader lbl_reader;
 
-	int chan = cur_vol->GetCurChannel();
+	long chan;
+	cur_vol->getValue("channel", chan);
 	int frame = vol_cache.frame;
 
 	Nrrd* data = reader->Convert(frame, chan, true);
@@ -1471,10 +1502,14 @@ void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
 	Nrrd* label = lbl_reader.Convert(frame, chan, true);
 	if (!label)
 	{
-		int resx, resy, resz;
-		cur_vol->GetResolution(resx, resy, resz);
+		long resx, resy, resz;
+		cur_vol->getValue("res x", resx);
+		cur_vol->getValue("res y", resy);
+		cur_vol->getValue("res z", resz);
 		double spcx, spcy, spcz;
-		cur_vol->GetSpacings(spcx, spcy, spcz);
+		cur_vol->getValue("spc x", spcx);
+		cur_vol->getValue("spc y", spcy);
+		cur_vol->getValue("spc z", spcz);
 		label = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)resx*
 			(unsigned long long)resy*(unsigned long long)resz;
@@ -1507,10 +1542,13 @@ void ScriptProc::DelVolCache(flrd::VolCache& vol_cache)
 	}
 	if (vol_cache.label)
 	{
-		int chan = cur_vol->GetCurChannel();
+		long chan;
+		cur_vol->getValue("channel", chan);
 		int frame = vol_cache.frame;
 		double spcx, spcy, spcz;
-		cur_vol->GetSpacings(spcx, spcy, spcz);
+		cur_vol->getValue("spc x", spcx);
+		cur_vol->getValue("spc y", spcy);
+		cur_vol->getValue("spc z", spcz);
 
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)(vol_cache.nrrd_label));

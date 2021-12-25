@@ -717,6 +717,30 @@ void VolumeData::OnClipPlanesChanged(Event& event)
 		planelist.push_back(plane);
 	}
 	m_vr->set_planes(&planelist);
+
+	//calculating planes
+	//get six planes
+	fluo::Plane* px1 = &(planeset[0]);
+	fluo::Plane* px2 = &(planeset[1]);
+	fluo::Plane* py1 = &(planeset[2]);
+	fluo::Plane* py2 = &(planeset[3]);
+	fluo::Plane* pz1 = &(planeset[4]);
+	fluo::Plane* pz2 = &(planeset[5]);
+	fluo::BBox bounds;
+	getValue("bounds", bounds);
+
+	fluo::Vector diff =
+		bounds.Max() - bounds.Min();
+	fluo::Point min = fluo::Point(
+		bounds.Min().x() - diff.x()*px1->d(),
+		bounds.Min().y() - diff.y()*py1->d(),
+		bounds.Min().z() - diff.z()*pz1->d());
+	fluo::Point max = fluo::Point(
+		bounds.Min().x() + diff.x()*px2->d(),
+		bounds.Min().y() + diff.y()*py2->d(),
+		bounds.Min().z() + diff.z()*pz2->d());
+
+	setValue("clip bounds", fluo::BBox(min, max));
 }
 
 void VolumeData::OnIntScaleChanged(Event& event)

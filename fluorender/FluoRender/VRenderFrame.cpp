@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include "DragDrop.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
@@ -1025,7 +1027,7 @@ wxString VRenderFrame::CreateView(int row)
 							color = fluo::Color(0.0, 0.0, 1.0);
 
 						if (chan_num >= 0 && chan_num < 3)
-							vd_add->SetColor(color);
+							vd_add->setValue("color", color);
 
 						view->AddVolumeData(vd_add);
 					}
@@ -1508,13 +1510,13 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
 						if (vd)
 						{
-							v->AddVolumeData(vd, group->GetName());
-							wxString vol_name = vd->GetName();
+							v->AddVolumeData(vd, group->getName());
+							wxString vol_name = vd->getName();
 							if (vol_name.Find("_1ch")!=-1 &&
 								(i==1 || i==2))
-								vd->SetDisp(false);
+								vd->setValue("display", false);
 							if (vol_name.Find("_2ch")!=-1 && i==1)
-								vd->SetDisp(false);
+								vd->setValue("display", false);
 
 							if (i==ch_num)
 							{
@@ -1527,7 +1529,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 						}
 					}
 					if (j > 0)
-						group->SetDisp(false);
+						group->setValue("display", false);
 				}
 			}
 			else if (ch_num == 1)
@@ -1544,10 +1546,11 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 					else if (chan_num == 2)
 						color = fluo::Color(0.0, 0.0, 1.0);
 
+					bool bval;
 					if (chan_num >=0 && chan_num <3)
-						vd->SetColor(color);
+						vd->setValue("color", color);
 					else
-						vd->RandomizeColor();
+						vd->toggleValue("randomize color", bval);
 
 					v->AddVolumeData(vd);
 					vd_sel = vd;
@@ -1565,7 +1568,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 
 		UpdateList();
 		if (vd_sel)
-			UpdateTree(vd_sel->GetName());
+			UpdateTree(vd_sel->getName());
 		else
 			UpdateTree();
 		v->RefreshGL(39);
@@ -1826,11 +1829,13 @@ void VRenderFrame::UpdateTreeIcons()
 			{
 			case 2://volume
 				{
-					fluo::VolumeData* vd = (VolumeData*)layer;
+					fluo::VolumeData* vd = (fluo::VolumeData*)layer;
 					if (!vd)
 						break;
 					counter++;
-					m_tree_panel->SetVolItemImage(layer_item, vd->GetDisp()?2*counter+1:2*counter);
+					bool disp;
+					vd->getValue("display", disp);
+					m_tree_panel->SetVolItemImage(layer_item, disp?2*counter+1:2*counter);
 				}
 				break;
 			case 3://mesh
@@ -1856,11 +1861,13 @@ void VRenderFrame::UpdateTreeIcons()
 					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 					if (!group)
 						break;
-					m_tree_panel->SetGroupItemImage(layer_item, int(group->GetDisp()));
+					bool disp;
+					group->getValue("display", disp);
+					m_tree_panel->SetGroupItemImage(layer_item, int(disp));
 					wxTreeItemIdValue ck_volume;
-					for (k=0; k<group->GetVolumeNum(); k++)
+					for (k=0; k<group->getNumChildren(); k++)
 					{
-						fluo::VolumeData* vd = group->GetVolumeData(k);
+						fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
 						if (!vd)
 							continue;
 						wxTreeItemId volume_item;
@@ -1871,7 +1878,8 @@ void VRenderFrame::UpdateTreeIcons()
 						if (!volume_item.IsOk())
 							continue;
 						counter++;
-						m_tree_panel->SetVolItemImage(volume_item, vd->GetDisp()?2*counter+1:2*counter);
+						vd->getValue("display", disp);
+						m_tree_panel->SetVolItemImage(volume_item, disp?2*counter+1:2*counter);
 					}
 				}
 				break;
@@ -1924,10 +1932,11 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 2://volume
 				{
-					fluo::VolumeData* vd = (VolumeData*)layer;
+					fluo::VolumeData* vd = (fluo::VolumeData*)layer;
 					if (!vd)
 						break;
-					fluo::Color c = vd->GetColor();
+					fluo::Color c;
+					vd->getValue("color", c);
 					wxColor wxc(
 						(unsigned char)(c.r()*255),
 						(unsigned char)(c.g()*255),
@@ -1967,12 +1976,13 @@ void VRenderFrame::UpdateTreeColors()
 					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 					if (!group)
 						break;
-					for (k=0; k<group->GetVolumeNum(); k++)
+					for (k=0; k<group->getNumChildren(); k++)
 					{
-						fluo::VolumeData* vd = group->GetVolumeData(k);
+						fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
 						if (!vd)
 							break;
-						fluo::Color c = vd->GetColor();
+						fluo::Color c;
+						vd->getValue("color", c);
 						wxColor wxc(
 							(unsigned char)(c.r()*255),
 							(unsigned char)(c.g()*255),
@@ -2054,21 +2064,24 @@ void VRenderFrame::UpdateTree(wxString name)
 				break;
 			case 2://volume data
 				{
-					fluo::VolumeData* vd = (VolumeData*)layer;
+					fluo::VolumeData* vd = (fluo::VolumeData*)layer;
 					if (!vd)
 						break;
 					//append icon for volume
 					m_tree_panel->AppendIcon();
-					fluo::Color c = vd->GetColor();
+					fluo::Color c;
+					vd->getValue("color", c);
 					wxColor wxc(
 						(unsigned char)(c.r()*255),
 						(unsigned char)(c.g()*255),
 						(unsigned char)(c.b()*255));
 					int ii = m_tree_panel->GetIconNum()-1;
 					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->GetName());
-					m_tree_panel->SetVolItemImage(item, vd->GetDisp()?2*ii+1:2*ii);
-					if (name == vd->GetName())
+					wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->getName());
+					bool disp;
+					vd->getValue("display", disp);
+					m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
+					if (name == vd->getName())
 					{
 						sel_item = item;
 						view->SetVolumeA(vd);
@@ -2125,26 +2138,31 @@ void VRenderFrame::UpdateTree(wxString name)
 					if (!group)
 						break;
 					//append group item to tree
-					wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->GetName());
-					m_tree_panel->SetGroupItemImage(group_item, int(group->GetDisp()));
+					wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->getName());
+					bool disp;
+					group->getValue("display", disp);
+					m_tree_panel->SetGroupItemImage(group_item, int(disp));
 					//append volume data to group
-					for (k=0; k<group->GetVolumeNum(); k++)
+					for (k=0; k<group->getNumChildren(); k++)
 					{
-						fluo::VolumeData* vd = group->GetVolumeData(k);
+						fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
 						if (!vd)
 							continue;
 						//add icon
 						m_tree_panel->AppendIcon();
-						fluo::Color c = vd->GetColor();
+						fluo::Color c;
+						vd->getValue("color", c);
 						wxColor wxc(
 							(unsigned char)(c.r()*255),
 							(unsigned char)(c.g()*255),
 							(unsigned char)(c.b()*255));
 						int ii = m_tree_panel->GetIconNum()-1;
 						m_tree_panel->ChangeIconColor(ii, wxc);
-						wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->GetName());
-						m_tree_panel->SetVolItemImage(item, vd->GetDisp()?2*ii+1:2*ii);
-						if (name == vd->GetName())
+						wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->getName());
+						bool disp;
+						vd->getValue("display", disp);
+						m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
+						if (name == vd->getName())
 						{
 							sel_item = item;
 							view->SetVolumeA(vd);
@@ -2156,7 +2174,7 @@ void VRenderFrame::UpdateTree(wxString name)
 							GetColocalizationDlg()->SetView(view);
 						}
 					}
-					if (name == group->GetName())
+					if (name == group->getName())
 						sel_item = group_item;
 				}
 				break;
@@ -2210,10 +2228,14 @@ void VRenderFrame::UpdateList()
 	for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
 	{
 		fluo::VolumeData* vd = m_data_mgr.GetVolumeData(i);
-		if (vd && !vd->GetDup())
+		bool dup;
+		vd->getValue("duplicate", dup);
+		if (vd && !dup)
 		{
-			wxString name = vd->GetName();
-			wxString path = vd->GetPath();
+			wxString name = vd->getName();
+			std::wstring str;
+			vd->getValue("data path", str);
+			wxString path = str;
 			m_list_panel->Append(DATA_VOLUME, name, path);
 		}
 	}
@@ -2334,8 +2356,12 @@ void VRenderFrame::OnSelection(int type,
 		m_aui_mgr.Update();
 		break;
 	case 2:  //volume
-		if (vd && vd->GetDisp())
+		if (vd)
 		{
+			bool disp;
+			vd->getValue("display", disp);
+			if (!disp)
+				break;
 			m_volume_prop->SetVolumeData(vd);
 			m_volume_prop->SetGroup(group);
 			m_volume_prop->SetView(view);
@@ -2348,9 +2374,9 @@ void VRenderFrame::OnSelection(int type,
 				m_prop_panel->Layout();
 			}
 			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->GetName());
+				wxString(UITEXT_PROPERTIES)+wxString(" - ")+vd->getName());
 			m_aui_mgr.Update();
-			wxString str = vd->GetName();
+			std::string str = vd->getName();
 			m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
 			for (size_t i=0; i< GetViewNum(); ++i)
@@ -2529,7 +2555,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 		wxString str = m_vrv_list[i]->GetName();
 
 		for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
-			GetView(i)->GetAllVolumeData(j)->SetDisp(true);
+			GetView(i)->GetAllVolumeData(j)->setValue("display", true);
 		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
 			GetView(i)->GetMeshData(j)->SetDisp(true);
 		VRenderView* vrv = m_vrv_list[i];
@@ -2862,6 +2888,11 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("up time", m_setting_dlg->GetResponseTime());
 	fconfig.Write("update order", m_setting_dlg->GetUpdateOrder());
 
+	bool bval;
+	long lval;
+	double dval;
+	std::wstring wsval;
+	double dx, dy, dz;
 	//save data list
 	//volume
 	fconfig.SetPath("/data/volume");
@@ -2879,23 +2910,25 @@ void VRenderFrame::SaveProject(wxString& filename)
 			str = wxString::Format("/data/volume/%d", i);
 			//name
 			fconfig.SetPath(str);
-			str = vd->GetName();
+			str = vd->getName();
 			fconfig.Write("name", str);
 			//compression
 			fconfig.Write("compression", m_compression);
 			//skip brick
-			fconfig.Write("skip_brick", vd->GetSkipBrick());
+			vd->getValue("skip brick", bval);
+			fconfig.Write("skip_brick", bval);
 			//path
-			str = vd->GetPath();
+			vd->getValue("data path", wsval);
+			str = wsval;
 			bool new_chan = false;
 			if (str == "" || m_vrp_embed)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
 				MkDirW(new_folder.ToStdWstring());
-				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
+				str = new_folder + GETSLASH() + vd->getName() + ".tif";
 				fluo::Quaternion qtemp;
-				vd->Save(str, 0, false, 0, false, VRenderFrame::GetCompression(), qtemp);
+				vd->SaveData(str.ToStdWstring(), 0, false, 0, false, VRenderFrame::GetCompression(), qtemp);
 				fconfig.Write("path", str);
 				new_chan = true;
 			}
@@ -2914,63 +2947,83 @@ void VRenderFrame::SaveProject(wxString& filename)
 				fconfig.Write("slice_seq", false);
 				fconfig.Write("time_id", "");
 			}
-			fconfig.Write("cur_time", vd->GetCurTime());
-			fconfig.Write("cur_chan", new_chan?0:vd->GetCurChannel());
+			vd->getValue("time", lval);
+			fconfig.Write("cur_time", lval);
+			vd->getValue("channel", lval);
+			fconfig.Write("cur_chan", new_chan?0:lval);
 
 			//volume properties
 			fconfig.SetPath("properties");
-			fconfig.Write("display", vd->GetDisp());
+			vd->getValue("display", bval);
+			fconfig.Write("display", bval);
 
 			//properties
-			fconfig.Write("3dgamma", vd->Get3DGamma());
-			fconfig.Write("boundary", vd->GetBoundary());
-			fconfig.Write("contrast", vd->GetOffset());
-			fconfig.Write("left_thresh", vd->GetLeftThresh());
-			fconfig.Write("right_thresh", vd->GetRightThresh());
-			fluo::Color color = vd->GetColor();
+			vd->getValue("gamma 3d", dval);
+			fconfig.Write("3dgamma", dval);
+			vd->getValue("extract boundary", dval);
+			fconfig.Write("boundary", dval);
+			vd->getValue("saturation", dval);
+			fconfig.Write("contrast", dval);
+			vd->getValue("low threshold", dval);
+			fconfig.Write("left_thresh", dval);
+			vd->getValue("high threshold", dval);
+			fconfig.Write("right_thresh", dval);
+			fluo::Color color;
+			vd->getValue("color", color);
 			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
 			fconfig.Write("color", str);
-			double hue, sat, val;
-			vd->GetHSV(hue, sat, val);
-			str = wxString::Format("%f %f %f", hue, sat, val);
+			fluo::HSVColor hsv;
+			vd->getValue("hsv", hsv);
+			str = wxString::Format("%f %f %f", hsv.hue(), hsv.sat(), hsv.val());
 			fconfig.Write("hsv", str);
-			color = vd->GetMaskColor();
+			vd->getValue("sec color", color);
 			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
 			fconfig.Write("mask_color", str);
-			fconfig.Write("mask_color_set", vd->GetMaskColorSet());
-			fconfig.Write("enable_alpha", vd->GetEnableAlpha());
-			fconfig.Write("alpha", vd->GetAlpha());
-			double amb, diff, spec, shine;
-			vd->GetMaterial(amb, diff, spec, shine);
-			fconfig.Write("ambient", amb);
-			fconfig.Write("diffuse", diff);
-			fconfig.Write("specular", spec);
-			fconfig.Write("shininess", shine);
-			fconfig.Write("shading", vd->GetShading());
-			fconfig.Write("samplerate", vd->GetSampleRate());
+			vd->getValue("sec color set", bval);
+			fconfig.Write("mask_color_set", bval);
+			vd->getValue("alpha enable", bval);
+			fconfig.Write("enable_alpha", bval);
+			vd->getValue("alpha", dval);
+			fconfig.Write("alpha", dval);
+			vd->getValue("mat amb", dval);
+			fconfig.Write("ambient", dval);
+			vd->getValue("mat diff", dval);
+			fconfig.Write("diffuse", dval);
+			vd->getValue("mat spec", dval);
+			fconfig.Write("specular", dval);
+			vd->getValue("mat shine", dval);
+			fconfig.Write("shininess", dval);
+			vd->getValue("shading enable", bval);
+			fconfig.Write("shading", bval);
+			vd->getValue("sample rate", dval);
+			fconfig.Write("samplerate", dval);
 
 			//resolution scale
-			double resx, resy, resz;
-			double b_resx, b_resy, b_resz;
-			double s_resx, s_resy, s_resz;
-			double sclx, scly, sclz;
-			vd->GetSpacings(resx, resy, resz);
-			vd->GetBaseSpacings(b_resx, b_resy, b_resz);
-			vd->GetSpacingScales(s_resx, s_resy, s_resz);
-			vd->GetScalings(sclx, scly, sclz);
-			str = wxString::Format("%lf %lf %lf", resx, resy, resz);
+			vd->getValue("spc x", dx);
+			vd->getValue("spc y", dy);
+			vd->getValue("spc z", dz);
+			str = wxString::Format("%lf %lf %lf", dx, dy, dz);
 			fconfig.Write("res", str);
-			str = wxString::Format("%lf %lf %lf", b_resx, b_resy, b_resz);
+			vd->getValue("base spc x", dx);
+			vd->getValue("base spc y", dy);
+			vd->getValue("base spc z", dz);
+			str = wxString::Format("%lf %lf %lf", dx, dy, dz);
 			fconfig.Write("b_res", str);
-			str = wxString::Format("%lf %lf %lf", s_resx, s_resy, s_resz);
+			vd->getValue("spc scl x", dx);
+			vd->getValue("spc scl y", dy);
+			vd->getValue("spc scl z", dz);
+			str = wxString::Format("%lf %lf %lf", dx, dy, dz);
 			fconfig.Write("s_res", str);
-			str = wxString::Format("%lf %lf %lf", sclx, scly, sclz);
+			vd->getValue("scale x", dx);
+			vd->getValue("scale y", dy);
+			vd->getValue("scale z", dz);
+			str = wxString::Format("%lf %lf %lf", dx, dy, dz);
 			fconfig.Write("scl", str);
 
 			//planes
 			vector<fluo::Plane*> *planes = 0;
-			if (vd->GetVR())
-				planes = vd->GetVR()->get_planes();
+			if (vd->GetRenderer())
+				planes = vd->GetRenderer()->get_planes();
 			if (planes && planes->size() == 6)
 			{
 				fluo::Plane* plane = 0;
@@ -3003,50 +3056,75 @@ void VRenderFrame::SaveProject(wxString& filename)
 			}
 
 			//2d adjustment settings
-			str = wxString::Format("%f %f %f", vd->GetGamma().r(), vd->GetGamma().g(), vd->GetGamma().b());
+			vd->getValue("gamma r", dx);
+			vd->getValue("gamma g", dy);
+			vd->getValue("gamma b", dz);
+			str = wxString::Format("%f %f %f", dx, dy, dz);
 			fconfig.Write("gamma", str);
-			str = wxString::Format("%f %f %f", vd->GetBrightness().r(), vd->GetBrightness().g(), vd->GetBrightness().b());
+			vd->getValue("brightness r", dx);
+			vd->getValue("brightness g", dy);
+			vd->getValue("brightness b", dz);
+			str = wxString::Format("%f %f %f", dx, dy, dz);
 			fconfig.Write("brightness", str);
-			str = wxString::Format("%f %f %f", vd->GetHdr().r(), vd->GetHdr().g(), vd->GetHdr().b());
+			vd->getValue("equalize r", dx);
+			vd->getValue("equalize g", dy);
+			vd->getValue("equalize b", dz);
+			str = wxString::Format("%f %f %f", dx, dy, dz);
 			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", vd->GetSyncR());
-			fconfig.Write("sync_g", vd->GetSyncG());
-			fconfig.Write("sync_b", vd->GetSyncB());
+			vd->getValue("sync r", bval);
+			fconfig.Write("sync_r", bval);
+			vd->getValue("sync g", bval);
+			fconfig.Write("sync_g", bval);
+			vd->getValue("sync b", bval);
+			fconfig.Write("sync_b", bval);
 
 			//colormap settings
-			fconfig.Write("colormap_mode", vd->GetColormapMode());
-			fconfig.Write("colormap_inv", vd->GetColormapInv());
-			fconfig.Write("colormap", vd->GetColormap());
-			fconfig.Write("colormap_proj", vd->GetColormapProj());
-			double low, high;
-			vd->GetColormapValues(low, high);
-			fconfig.Write("colormap_lo_value", low);
-			fconfig.Write("colormap_hi_value", high);
+			vd->getValue("colormap mode", lval);
+			fconfig.Write("colormap_mode", lval);
+			vd->getValue("colormap inv", dval);
+			fconfig.Write("colormap_inv", dval);
+			vd->getValue("colormap type", lval);
+			fconfig.Write("colormap", lval);
+			vd->getValue("colormap proj", lval);
+			fconfig.Write("colormap_proj", lval);
+			vd->getValue("colormap low", dval);
+			fconfig.Write("colormap_lo_value", dval);
+			vd->getValue("colormap high", dval);
+			fconfig.Write("colormap_hi_value", dval);
 
 			//high transp
-			fconfig.Write("alpha_power", vd->GetAlphaPower());
+			vd->getValue("alpha power", dval);
+			fconfig.Write("alpha_power", dval);
 			//inversion
-			fconfig.Write("inv", vd->GetInvert());
+			vd->getValue("invert", bval);
+			fconfig.Write("inv", bval);
 			//mip enable
-			fconfig.Write("mode", vd->GetMode());
+			vd->getValue("mip mode", lval);
+			fconfig.Write("mode", lval);
 			//noise reduction
-			fconfig.Write("noise_red", vd->GetNR());
+			vd->getValue("noise redct", bval);
+			fconfig.Write("noise_red", bval);
 			//depth override
-			fconfig.Write("depth_ovrd", vd->GetBlendMode());
+			vd->getValue("blend mode", lval);
+			fconfig.Write("depth_ovrd", lval);
 
 			//shadow
-			fconfig.Write("shadow", vd->GetShadow());
+			vd->getValue("shadow enable", bval);
+			fconfig.Write("shadow", bval);
 			//shadow intensity
-			double shadow_int;
-			vd->GetShadowParams(shadow_int);
-			fconfig.Write("shadow_darkness", shadow_int);
+			vd->getValue("shadow int", dval);
+			fconfig.Write("shadow_darkness", dval);
 
 			//legend
-			fconfig.Write("legend", vd->GetLegend());
+			vd->getValue("legend", bval);
+			fconfig.Write("legend", bval);
 
 			//mask
-			vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-			vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+			long time, chan;
+			vd->getValue("time", time);
+			vd->getValue("channel", chan);
+			vd->SaveMask(true, time, chan);
+			vd->SaveLabel(true, time, chan);
 		}
 	}
 	//mesh
@@ -3187,31 +3265,42 @@ void VRenderFrame::SaveProject(wxString& filename)
 						fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
 
 						fconfig.Write("type", 5);
-						fconfig.Write("name", layer->GetName());
-						fconfig.Write("id", fluo::VolumeGroup::GetID());
+						fconfig.Write("name", group->getName());
+						fconfig.Write("id", group->getId());
 						//dispaly
-						fconfig.Write("display", group->GetDisp());
+						group->getValue("display", bval);
+						fconfig.Write("display", bval);
 						//2d adjustment
-						str = wxString::Format("%f %f %f", group->GetGamma().r(),
-							group->GetGamma().g(), group->GetGamma().b());
+						group->getValue("gamma r", dx);
+						group->getValue("gamma g", dy);
+						group->getValue("gamma b", dz);
+						str = wxString::Format("%f %f %f", dx, dy, dz);
 						fconfig.Write("gamma", str);
-						str = wxString::Format("%f %f %f", group->GetBrightness().r(),
-							group->GetBrightness().g(), group->GetBrightness().b());
+						group->getValue("brightness r", dx);
+						group->getValue("brightness g", dy);
+						group->getValue("brightness b", dz);
+						str = wxString::Format("%f %f %f", dx, dy, dz);
 						fconfig.Write("brightness", str);
-						str = wxString::Format("%f %f %f", group->GetHdr().r(),
-							group->GetHdr().g(), group->GetHdr().b());
+						group->getValue("equalize r", dx);
+						group->getValue("equalize g", dy);
+						group->getValue("equalize b", dz);
+						str = wxString::Format("%f %f %f", dx, dy, dz);
 						fconfig.Write("hdr", str);
-						fconfig.Write("sync_r", group->GetSyncR());
-						fconfig.Write("sync_g", group->GetSyncG());
-						fconfig.Write("sync_b", group->GetSyncB());
+						group->getValue("sync r", bval);
+						fconfig.Write("sync_r", bval);
+						group->getValue("sync g", bval);
+						fconfig.Write("sync_g", bval);
+						group->getValue("sync b", bval);
+						fconfig.Write("sync_b", bval);
 						//sync volume properties
-						fconfig.Write("sync_vp", group->GetVolumeSyncProp());
+						group->getValue("sync group", bval);
+						fconfig.Write("sync_vp", bval);
 						//volumes
 						str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
 						fconfig.SetPath(str);
-						fconfig.Write("num", group->GetVolumeNum());
-						for (k=0; k<group->GetVolumeNum(); k++)
-							fconfig.Write(wxString::Format("vol_%d", k), group->GetVolumeData(k)->GetName());
+						fconfig.Write("num", group->getNumChildren());
+						for (k=0; k<group->getNumChildren(); k++)
+							fconfig.Write(wxString::Format("vol_%d", k), group->getChild(k)->getName());
 
 					}
 					break;
@@ -3456,7 +3545,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 					{
 					case FLKEY_TYPE_DOUBLE:
 						{
-							double dval = ((FlKeyDouble*)key)->GetValue();
+							dval = ((FlKeyDouble*)key)->GetValue();
 							fconfig.Write("val", dval);
 						}
 						break;
@@ -3470,7 +3559,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 						break;
 					case FLKEY_TYPE_BOOLEAN:
 						{
-							bool bval = ((FlKeyBoolean*)key)->GetValue();
+							bval = ((FlKeyBoolean*)key)->GetValue();
 							fconfig.Write("val", bval);
 						}
 						break;
@@ -3499,7 +3588,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	int i, j, k;
 	//clear
 	m_data_mgr.ClearAll();
-	fluo::VolumeGroup::ResetID();
+	//fluo::VolumeGroup::ResetID();
 	MeshGroup::ResetID();
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
@@ -3508,9 +3597,12 @@ void VRenderFrame::OpenProject(wxString& filename)
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	//VRenderView::ResetID();
-	fluo::VolumeGroup::ResetID();
+	//fluo::VolumeGroup::ResetID();
 	MeshGroup::ResetID();
-
+	double dx, dy, dz;
+	long lval;
+	double dval;
+	bool bval;
 
 	wxFileInputStream is(filename);
 	if (!is.IsOk())
@@ -3645,14 +3737,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 				if (vd)
 				{
 					if (fconfig.Read("name", &str))
-						vd->SetName(str);//setname
+						vd->setName(str.ToStdString());//setname
 					//volume properties
 					if (fconfig.Exists("properties"))
 					{
 						fconfig.SetPath("properties");
 						bool disp;
 						if (fconfig.Read("display", &disp))
-							vd->SetDisp(disp);
+							vd->setValue("dispplay", disp);
 
 						//old colormap
 						if (fconfig.Read("widget", &str))
@@ -3668,50 +3760,48 @@ void VRenderFrame::OpenProject(wxString& filename)
 							while(!isspace(c)) ss.read(&c,1);
 							ss >> type >> left_x >> left_y >> width >>
 								height >> offset1 >> offset2 >> gamma;
-							vd->Set3DGamma(gamma);
-							vd->SetBoundary(left_y);
-							vd->SetOffset(offset1);
-							vd->SetLeftThresh(left_x);
-							vd->SetRightThresh(left_x+width);
+							vd->setValue("gamma 3d", double(gamma));
+							vd->setValue("extract boundary", double(left_y));
+							vd->setValue("saturation", double(offset1));
+							vd->setValue("low threshold", double(left_x));
+							vd->setValue("high threshold", double(left_x+width));
 							if (fconfig.Read("widgetcolor", &str))
 							{
 								float red, green, blue;
 								if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
 									fluo::Color col(red,green,blue);
-									vd->SetColor(col);
+									vd->setValue("color", col);
 								}
 							}
 							double alpha;
 							if (fconfig.Read("widgetalpha", &alpha))
-								vd->SetAlpha(alpha);
+								vd->setValue("alpha", alpha);
 						}
 
 						//transfer function
-						double dval;
-						bool bval;
 						if (fconfig.Read("3dgamma", &dval))
-							vd->Set3DGamma(dval);
+							vd->setValue("gamma 3d", dval);
 						if (fconfig.Read("boundary", &dval))
-							vd->SetBoundary(dval);
+							vd->setValue("extract boundary", dval);
 						if (fconfig.Read("contrast", &dval))
-							vd->SetOffset(dval);
+							vd->setValue("saturation", dval);
 						if (fconfig.Read("left_thresh", &dval))
-							vd->SetLeftThresh(dval);
+							vd->setValue("low threshold", dval);
 						if (fconfig.Read("right_thresh", &dval))
-							vd->SetRightThresh(dval);
+							vd->setValue("high threshold", dval);
 						if (fconfig.Read("color", &str))
 						{
 							float red, green, blue;
 							if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
 								fluo::Color col(red,green,blue);
-								vd->SetColor(col);
+								vd->setValue("color", col);
 							}
 						}
 						if (fconfig.Read("hsv", &str))
 						{
 							float hue, sat, val;
 							if (SSCANF(str.c_str(), "%f%f%f", &hue, &sat, &val))
-								vd->SetHSV(hue, sat, val);
+								vd->setValue("hsv", fluo::HSVColor(hue, sat, val));
 						}
 						if (fconfig.Read("mask_color", &str))
 						{
@@ -3719,72 +3809,84 @@ void VRenderFrame::OpenProject(wxString& filename)
 							if (SSCANF(str.c_str(), "%f%f%f", &red, &green, &blue)){
 								fluo::Color col(red,green,blue);
 								if (fconfig.Read("mask_color_set", &bval))
-									vd->SetMaskColor(col, bval);
-								else
-									vd->SetMaskColor(col);
+								{
+									vd->setValue("sec color set", bval);
+									vd->setValue("sec color", col);
+								}
 							}
 						}
 						if (fconfig.Read("enable_alpha", &bval))
-							vd->SetEnableAlpha(bval);
+							vd->setValue("alpha enable", bval);
 						if (fconfig.Read("alpha", &dval))
-							vd->SetAlpha(dval);
+							vd->setValue("alpha", dval);
 
 						//shading
-						double amb, diff, spec, shine;
-						if (fconfig.Read("ambient", &amb)&&
-							fconfig.Read("diffuse", &diff)&&
-							fconfig.Read("specular", &spec)&&
-							fconfig.Read("shininess", &shine))
-							vd->SetMaterial(amb, diff, spec, shine);
-						bool shading;
-						if (fconfig.Read("shading", &shading))
-							vd->SetShading(shading);
-						double srate;
-						if (fconfig.Read("samplerate", &srate))
-						{
-							if (l_major<2)
-								vd->SetSampleRate(srate/5.0);
-							else
-								vd->SetSampleRate(srate);
-						}
+						if (fconfig.Read("ambient", &dval))
+							vd->setValue("mat amb", dval);
+						if (fconfig.Read("diffuse", &dval))
+							vd->setValue("mat diff", dval);
+						if (fconfig.Read("specular", &dval))
+							vd->setValue("mat spec", dval);
+						if (fconfig.Read("shininess", &dval))
+							vd->setValue("mat shine", dval);
+						if (fconfig.Read("shading", &bval))
+							vd->setValue("shading enable", bval);
+						if (fconfig.Read("samplerate", &dval))
+							vd->setValue("sample rate", dval);
 
 						//spacings and scales
-						if (!vd->isBrxml())
+						bool multires = false;
+						vd->getValue("multires", multires);
+						if (!multires)
 						{
 							if (fconfig.Read("res", &str))
 							{
-								double resx, resy, resz;
-								if (SSCANF(str.c_str(), "%lf%lf%lf", &resx, &resy, &resz))
-									vd->SetSpacings(resx, resy, resz);
+								if (SSCANF(str.c_str(), "%lf%lf%lf", &dx, &dy, &dz))
+								{
+									vd->setValue("spc x", dx);
+									vd->setValue("spc y", dy);
+									vd->setValue("spc z", dz);
+								}
 							}
 						}
 						else
 						{
 							if (fconfig.Read("b_res", &str))
 							{
-								double b_resx, b_resy, b_resz;
-								if (SSCANF(str.c_str(), "%lf%lf%lf", &b_resx, &b_resy, &b_resz))
-									vd->SetBaseSpacings(b_resx, b_resy, b_resz);
+								if (SSCANF(str.c_str(), "%lf%lf%lf", &dx, &dy, &dz))
+								{
+									vd->setValue("base spc x", dx);
+									vd->setValue("base spc y", dy);
+									vd->setValue("base spc z", dz);
+								}
 							}
 							if (fconfig.Read("s_res", &str))
 							{
-								double s_resx, s_resy, s_resz;
-								if (SSCANF(str.c_str(), "%lf%lf%lf", &s_resx, &s_resy, &s_resz))
-									vd->SetSpacingScales(s_resx, s_resy, s_resz);
+								if (SSCANF(str.c_str(), "%lf%lf%lf", &dx, &dy, &dz))
+								{
+									vd->setValue("spc scl x", dx);
+									vd->setValue("spc scl y", dy);
+									vd->setValue("spc scl z", dz);
+								}
 							}
 						}
 						if (fconfig.Read("scl", &str))
 						{
-							double sclx, scly, sclz;
-							if (SSCANF(str.c_str(), "%lf%lf%lf", &sclx, &scly, &sclz))
-								vd->SetScalings(sclx, scly, sclz);
+							if (SSCANF(str.c_str(), "%lf%lf%lf", &dx, &dy, &dz))
+							{
+								vd->setValue("scale x", dx);
+								vd->setValue("scale y", dy);
+								vd->setValue("scale z", dz);
+							}
 						}
 
 						vector<fluo::Plane*> *planes = 0;
-						if (vd->GetVR())
-							planes = vd->GetVR()->get_planes();
-						int iresx, iresy, iresz;
-						vd->GetResolution(iresx, iresy, iresz);
+						if (vd->GetRenderer())
+							planes = vd->GetRenderer()->get_planes();
+						long iresx, iresy, iresz;
+						vd->getValue("res x", iresx);
+						vd->getValue("res y", iresy);
+						vd->getValue("res z", iresz);
 						if (planes && planes->size()==6)
 						{
 							double val;
@@ -3839,81 +3941,79 @@ void VRenderFrame::OpenProject(wxString& filename)
 									fluo::Vector(0.0, 0.0, -1.0));
 						}
 
+						float r, g, b;
 						//2d adjustment settings
 						if (fconfig.Read("gamma", &str))
 						{
-							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								fluo::Color col(r,g,b);
-								vd->SetGamma(col);
+								vd->setValue("gamma r", double(r));
+								vd->setValue("gamma g", double(g));
+								vd->setValue("gamma b", double(b));
 							}
 						}
 						if (fconfig.Read("brightness", &str))
 						{
-							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								fluo::Color col(r,g,b);
-								vd->SetBrightness(col);
+								vd->setValue("brightness r", double(r));
+								vd->setValue("brightness g", double(g));
+								vd->setValue("brightness b", double(b));
 							}
 						}
 						if (fconfig.Read("hdr", &str))
 						{
-							float r, g, b;
 							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								fluo::Color col(r,g,b);
-								vd->SetHdr(col);
+								vd->setValue("equalize r", double(r));
+								vd->setValue("equalize g", double(g));
+								vd->setValue("equalize b", double(b));
 							}
 						}
-						bool bVal;
-						if (fconfig.Read("sync_r", &bVal))
-							vd->SetSyncR(bVal);
-						if (fconfig.Read("sync_g", &bVal))
-							vd->SetSyncG(bVal);
-						if (fconfig.Read("sync_b", &bVal))
-							vd->SetSyncB(bVal);
+						if (fconfig.Read("sync_r", &bval))
+							vd->setValue("sync r", bval);
+						if (fconfig.Read("sync_g", &bval))
+							vd->setValue("sync g", bval);
+						if (fconfig.Read("sync_b", &bval))
+							vd->setValue("sync b", bval);
 
 						//colormap settings
-						if (fconfig.Read("colormap_mode", &iVal))
-							vd->SetColormapMode(iVal);
+						if (fconfig.Read("colormap_mode", &lval))
+							vd->setValue("colormap mode", lval);
 						if (fconfig.Read("colormap_inv", &dval))
-							vd->SetColormapInv(dval);
-						if (fconfig.Read("colormap", &iVal))
-							vd->SetColormap(iVal);
-						if (fconfig.Read("colormap_proj", &iVal))
-							vd->SetColormapProj(iVal);
-						double low, high;
-						if (fconfig.Read("colormap_lo_value", &low) &&
-							fconfig.Read("colormap_hi_value", &high))
-						{
-							vd->SetColormapValues(low, high);
-						}
+							vd->setValue("colormap inv", dval);
+						if (fconfig.Read("colormap", &lval))
+							vd->setValue("colormap type", lval);
+						if (fconfig.Read("colormap_proj", &lval))
+							vd->setValue("colormap proj", lval);
+						if (fconfig.Read("colormap_lo_value", &dval))
+							vd->setValue("colormap low", dval);
+						if (fconfig.Read("colormap_hi_value", &dval))
+							vd->setValue("colormap high", dval);
 
 						//high transp
 						if (fconfig.Read("alpha_power", &dval))
-							vd->SetAlphaPower(dval);
+							vd->setValue("alpha power", dval);
 						//inversion
-						if (fconfig.Read("inv", &bVal))
-							vd->SetInvert(bVal);
+						if (fconfig.Read("inv", &bval))
+							vd->setValue("invert", bval);
 						//mip enable
-						if (fconfig.Read("mode", &iVal))
-							vd->SetMode(iVal);
+						if (fconfig.Read("mode", &lval))
+							vd->setValue("mip mode", lval);
 						//noise reduction
-						if (fconfig.Read("noise_red", &bVal))
-							vd->SetNR(bVal);
+						if (fconfig.Read("noise_red", &bval))
+							vd->setValue("noise redct", bval);
 						//depth override
-						if (fconfig.Read("depth_ovrd", &iVal))
-							vd->SetBlendMode(iVal);
+						if (fconfig.Read("depth_ovrd", &lval))
+							vd->setValue("blend mode", lval);
 
 						//shadow
-						if (fconfig.Read("shadow", &bVal))
-							vd->SetShadow(bVal);
+						if (fconfig.Read("shadow", &bval))
+							vd->setValue("shadow enable", bval);
 						//shaodw intensity
 						if (fconfig.Read("shadow_darkness", &dval))
-							vd->SetShadowParams(dval);
+							vd->setValue("shadow int", dval);
 
 						//legend
-						if (fconfig.Read("legend", &bVal))
-							vd->SetLegend(bVal);
+						if (fconfig.Read("legend", &bval))
+							vd->setValue("legend", bval);
 
 						//mask
 						if (fconfig.Read("mask", &str))
@@ -4101,7 +4201,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(str);
+						fluo::VolumeData* vd = glbin_volf->findFirst(str.ToStdString());
 						if (vd)
 							view->AddVolumeData(vd);
 					}
@@ -4147,7 +4247,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										fluo::VolumeData* vd = m_data_mgr.GetVolumeData(str);
+										fluo::VolumeData* vd = glbin_volf->findFirst(str.ToStdString());
 										if (vd)
 											view->AddVolumeData(vd);
 									}
@@ -4178,51 +4278,52 @@ void VRenderFrame::OpenProject(wxString& filename)
 									if (fconfig.Read("name", &str))
 									{
 										int id;
-										if (fconfig.Read("id", &id))
-											fluo::VolumeGroup::SetID(id);
-										str = view->AddGroup(str);
-										fluo::VolumeGroup* group = view->GetGroup(str);
+										//if (fconfig.Read("id", &id))
+										//	fluo::VolumeGroup::SetID(id);
+										str = view->AddGroup(str.ToStdString());
+										fluo::VolumeGroup* group = view->GetGroup(str.ToStdString());
 										if (group)
 										{
 											//display
-											if (fconfig.Read("display", &bVal))
+											if (fconfig.Read("display", &bval))
 											{
-												group->SetDisp(bVal);
+												group->setValue("display", bval);
 											}
+											float r, g, b;
 											//2d adjustment
 											if (fconfig.Read("gamma", &str))
 											{
-												float r, g, b;
-												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-													fluo::Color col(r,g,b);
-													group->SetGamma(col);
+												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
+													group->setValue("gamma r", double(r));
+													group->setValue("gamma g", double(g));
+													group->setValue("gamma b", double(b));
 												}
 											}
 											if (fconfig.Read("brightness", &str))
 											{
-												float r, g, b;
-												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-													fluo::Color col(r,g,b);
-													group->SetBrightness(col);
+												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
+													group->setValue("brightness r", double(r));
+													group->setValue("brightness g", double(g));
+													group->setValue("brightness b", double(b));
 												}
 											}
 											if (fconfig.Read("hdr", &str))
 											{
-												float r, g, b;
-												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-													fluo::Color col(r,g,b);
-													group->SetHdr(col);
+												if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)) {
+													group->setValue("equalize r", double(r));
+													group->setValue("equalize g", double(g));
+													group->setValue("equalize b", double(b));
 												}
 											}
-											if (fconfig.Read("sync_r", &bVal))
-												group->SetSyncR(bVal);
-											if (fconfig.Read("sync_g", &bVal))
-												group->SetSyncG(bVal);
-											if (fconfig.Read("sync_b", &bVal))
-												group->SetSyncB(bVal);
+											if (fconfig.Read("sync_r", &bval))
+												group->setValue("sync r", bval);
+											if (fconfig.Read("sync_g", &bval))
+												group->setValue("sync g", bval);
+											if (fconfig.Read("sync_b", &bval))
+												group->setValue("sync b", bval);
 											//sync volume properties
-											if (fconfig.Read("sync_vp", &bVal))
-												group->SetVolumeSyncProp(bVal);
+											if (fconfig.Read("sync_vp", &bval))
+												group->setValue("sync group", bval);
 											//volumes
 											if (fconfig.Exists(wxString::Format("/views/%d/layers/%d/volumes", i, j)))
 											{
@@ -4232,9 +4333,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 												{
 													if (fconfig.Read(wxString::Format("vol_%d", k), &str))
 													{
-														fluo::VolumeData* vd = m_data_mgr.GetVolumeData(str);
+														fluo::VolumeData* vd = glbin_volf->findFirst(str.ToStdString());
 														if (vd)
-															group->InsertVolumeData(k-1, vd);
+															group->addChild(vd);
 													}
 												}
 											}
@@ -4984,7 +5085,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 		case 2:  //volume
 			if (m_data_mgr.GetVolumeData(m_cur_sel_vol))
-				UpdateTree(m_data_mgr.GetVolumeData(m_cur_sel_vol)->GetName());
+				UpdateTree(m_data_mgr.GetVolumeData(m_cur_sel_vol)->getName());
 			else
 				UpdateTree();
 			break;
@@ -5001,7 +5102,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	else if (m_cur_sel_vol != -1)
 	{
 		if (m_data_mgr.GetVolumeData(m_cur_sel_vol))
-			UpdateTree(m_data_mgr.GetVolumeData(m_cur_sel_vol)->GetName());
+			UpdateTree(m_data_mgr.GetVolumeData(m_cur_sel_vol)->getName());
 		else
 			UpdateTree();
 	}

@@ -164,9 +164,9 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 					if (layer && layer->IsA() == 5)
 					{
 						fluo::VolumeGroup* tmp_group = (fluo::VolumeGroup*)layer;
-						for (int j = 0; j < tmp_group->GetVolumeNum(); j++)
+						for (int j = 0; j < tmp_group->getNumChildren(); j++)
 						{
-							fluo::VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+							fluo::VolumeData* tmp_vd = tmp_group->getChild(j)->asVolumeData();
 							if (tmp_vd && tmp_vd == vd)
 							{
 								group = tmp_group;
@@ -178,11 +178,11 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 						break;
 				}
 			}
-			if (group && group->GetVolumeNum() > 1)
+			if (group && group->getNumChildren() > 1)
 			{
-				for (int i = 0; i < group->GetVolumeNum(); i++)
+				for (int i = 0; i < group->getNumChildren(); i++)
 				{
-					fluo::VolumeData* tmp_vd = group->GetVolumeData(i);
+					fluo::VolumeData* tmp_vd = group->getChild(i)->asVolumeData();
 					if (!tmp_vd)
 						continue;
 					bool disp;

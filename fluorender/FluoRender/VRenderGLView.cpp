@@ -797,7 +797,7 @@ void VRenderGLView::CalcFogRange()
 	bool use_box = false;
 	if (m_cur_vol)
 	{
-		bbox = m_cur_vol->GetClippedBounds();
+		m_cur_vol->getValue("clip bounds", bbox);
 		use_box = true;
 	}
 	else if (!m_md_pop_list.empty())
@@ -1313,12 +1313,12 @@ void VRenderGLView::DrawVolumes(int peel)
 			if (m_interactive)
 			{
 				//calculate quota
-				int total_bricks = flvr::TextureRenderer::get_total_brick_num();
-				int quota_bricks = 1;// total_bricks / 2;
-				int fin_bricks = finished_bricks;
-				int last_bricks = flvr::TextureRenderer::
+				long total_bricks = flvr::TextureRenderer::get_total_brick_num();
+				long quota_bricks = 1;// total_bricks / 2;
+				long fin_bricks = finished_bricks;
+				long last_bricks = flvr::TextureRenderer::
 					get_est_bricks(3);
-				int adj_bricks = 0;
+				long adj_bricks = 0;
 				unsigned long up_time = flvr::TextureRenderer::get_cor_up_time();
 				unsigned long consumed_time = flvr::TextureRenderer::get_consumed_time();
 				if (consumed_time == 0)
@@ -1327,7 +1327,7 @@ void VRenderGLView::DrawVolumes(int peel)
 					quota_bricks = 1;
 				else
 				{
-					adj_bricks = std::max(1, int(double(last_bricks) *
+					adj_bricks = std::max(long(1), long(double(last_bricks) *
 						double(up_time) / double(consumed_time)));
 					quota_bricks = flvr::TextureRenderer::
 						get_est_bricks(0, adj_bricks);
@@ -1361,9 +1361,11 @@ void VRenderGLView::DrawVolumes(int peel)
 						fluo::VolumeData* vd;
 						vd = *cur_iter;
 						quota_vd_list.push_back(vd);
-						int count_bricks = vd->GetBrickNum();
+						long brick_num, count_bricks;
+						vd->getValue("brick num", brick_num);
+						count_bricks = brick_num;
 						quota_bricks_chan = std::min(count_bricks, quota_bricks);
-						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
 						int count = 0;
 						while (count_bricks < quota_bricks &&
 							quota_vd_list.size() < m_vd_pop_list.size())
@@ -1377,13 +1379,12 @@ void VRenderGLView::DrawVolumes(int peel)
 								(size_t)vd_index >= m_vd_pop_list.size())
 								continue;
 							vd = m_vd_pop_list[vd_index];
-							int brick_num = vd->GetBrickNum();
 							quota_vd_list.push_back(vd);
 							if (count_bricks + brick_num > quota_bricks)
 								quota_bricks_chan = quota_bricks - count_bricks;
 							else
 								quota_bricks_chan = brick_num;
-							vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+							vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
 							count_bricks += quota_bricks_chan;
 						}
 					}
@@ -1393,7 +1394,7 @@ void VRenderGLView::DrawVolumes(int peel)
 					quota_bricks_chan = quota_bricks;
 					fluo::VolumeData* vd = m_vd_pop_list[0];
 					if (vd)
-						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
 				}
 
 				//get and set center point
@@ -2468,12 +2469,12 @@ void VRenderGLView::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
 			return;
 		if (mask)
 		{
-			if (vd->GetVR()->get_done_loop(4))
+			if (vd->GetRenderer()->get_done_loop(4))
 				do_over = false;
 		}
 		else
 		{
-			if (vd->GetVR()->get_done_loop(0))
+			if (vd->GetRenderer()->get_done_loop(0))
 				do_over = false;
 		}
 	}
@@ -2538,8 +2539,8 @@ void VRenderGLView::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		if (vd->GetVR())
-			vd->GetVR()->set_depth_peel(peel);
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_depth_peel(peel);
 		if (mask)
 			vd->SetStreamMode(4);
 		else
@@ -2662,11 +2663,11 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (vd->GetVR()->get_done_loop(1))
+		if (vd->GetRenderer()->get_done_loop(1))
 			do_mip = false;
 	}
 
-	bool shading = vd->GetVR()->get_shading();
+	bool shading = vd->GetRenderer()->get_shading();
 	bool shadow = vd->GetShadow();
 	int color_mode = vd->GetColormapMode();
 	bool enable_alpha = vd->GetEnableAlpha();
@@ -2738,9 +2739,9 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		if (vd->GetVR())
-			vd->GetVR()->set_depth_peel(peel);
-		vd->GetVR()->set_shading(false);
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_depth_peel(peel);
+		vd->GetRenderer()->set_shading(false);
 		//turn off colormap proj
 		int saved_colormap_proj = vd->GetColormapProj();
 		if (color_mode == 0)
@@ -2939,7 +2940,7 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
-	vd->GetVR()->set_shading(shading);
+	vd->GetRenderer()->set_shading(shading);
 	vd->SetColormapMode(color_mode);
 
 	//if vd is duplicated
@@ -2966,7 +2967,7 @@ void VRenderGLView::DrawOLShading(fluo::VolumeData* vd)
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (vd->GetVR()->get_done_loop(2))
+		if (vd->GetRenderer()->get_done_loop(2))
 			return;
 	}
 
@@ -2982,7 +2983,7 @@ void VRenderGLView::DrawOLShading(fluo::VolumeData* vd)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	vd->GetVR()->set_shading(true);
+	vd->GetRenderer()->set_shading(true);
 	bool alpha = vd->GetEnableAlpha();
 	vd->SetEnableAlpha(true);
 	vd->SetMode(2);
@@ -3186,7 +3187,7 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		if (vd && vd->GetShadow())
 		{
 			colormodes.push_back(vd->GetColormapMode());
-			shadings.push_back(vd->GetVR()->get_shading());
+			shadings.push_back(vd->GetRenderer()->get_shading());
 			list.push_back(vd);
 			has_shadow = true;
 		}
@@ -3204,7 +3205,7 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 			flvr::TextureRenderer::get_up_time())
 			return;
 		if (list.size() == 1 && list[0]->GetShadow())
-			if (list[0]->GetVR()->get_done_loop(3))
+			if (list[0]->GetRenderer()->get_done_loop(3))
 				return;
 	}
 
@@ -3238,9 +3239,9 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		fluo::VolumeData* vd = list[0];
 		//save
 		int colormode = vd->GetColormapMode();
-		bool shading = vd->GetVR()->get_shading();
+		bool shading = vd->GetRenderer()->get_shading();
 		//set to draw depth
-		vd->GetVR()->set_shading(false);
+		vd->GetRenderer()->set_shading(false);
 		vd->SetMode(0);
 		vd->SetColormapMode(2);
 		if (overlay_buffer)
@@ -3259,7 +3260,7 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		vd->RestoreMode();
 		vd->SetMaskMode(msk_mode);
 		vd->SetColormapMode(colormode);
-		vd->GetVR()->set_shading(shading);
+		vd->GetRenderer()->set_shading(shading);
 		vd->GetShadowParams(shadow_darkness);
 	}
 	else
@@ -3268,12 +3269,12 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			fluo::VolumeData* vd = list[i];
-			vd->GetVR()->set_shading(false);
+			vd->GetRenderer()->set_shading(false);
 			vd->SetMode(0);
 			vd->SetColormapMode(2);
 			if (overlay_buffer)
 				vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-			flvr::VolumeRenderer* vr = list[i]->GetVR();
+			flvr::VolumeRenderer* vr = list[i]->GetRenderer();
 			if (vr)
 			{
 				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -3294,7 +3295,7 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 			fluo::VolumeData* vd = list[i];
 			vd->RestoreMode();
 			vd->SetColormapMode(colormodes[i]);
-			vd->GetVR()->set_shading(shadings[i]);
+			vd->GetRenderer()->set_shading(shadings[i]);
 		}
 		list[0]->GetShadowParams(shadow_darkness);
 	}
@@ -3419,7 +3420,7 @@ void VRenderGLView::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
 		fluo::VolumeData* vd = list[i];
 		if (vd && vd->GetDisp())
 		{
-			flvr::VolumeRenderer* vr = vd->GetVR();
+			flvr::VolumeRenderer* vr = vd->GetRenderer();
 			if (vr)
 			{
 				//drawlabel
@@ -3450,10 +3451,10 @@ void VRenderGLView::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	mv_mat2 = m_vd_pop_list[0]->GetVR()->m_mv_mat * mv_mat2;
+	mv_mat2 = m_vd_pop_list[0]->GetRenderer()->m_mv_mat * mv_mat2;
 	m_mvr->set_matrices(mv_mat2,
-		m_vd_pop_list[0]->GetVR()->m_proj_mat,
-		m_vd_pop_list[0]->GetVR()->m_tex_mat);
+		m_vd_pop_list[0]->GetRenderer()->m_proj_mat,
+		m_vd_pop_list[0]->GetRenderer()->m_tex_mat);
 
 	//generate textures & buffer objects
 	//frame buffer for each volume
@@ -4593,7 +4594,7 @@ void VRenderGLView::SetParams(double t)
 			vd->SetDisp(bval);
 
 		//clipping planes
-		vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
+		vector<fluo::Plane*> *planes = vd->GetRenderer()->get_planes();
 		if (!planes) continue;
 		if (planes->size() != 6) continue;
 		fluo::Plane *plane = 0;
@@ -4803,7 +4804,7 @@ void VRenderGLView::UpdateVolumeData(int frame, fluo::VolumeData* vd)
 				for (int j = 0; j < br->GetLevelNum(); j++)
 				{
 					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
 				}
 				tex->setLevel(curlv);
 				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
@@ -4832,8 +4833,8 @@ void VRenderGLView::UpdateVolumeData(int frame, fluo::VolumeData* vd)
 			}
 		}
 
-		if (clear_pool && vd->GetVR())
-			vd->GetVR()->clear_tex_pool();
+		if (clear_pool && vd->GetRenderer())
+			vd->GetRenderer()->clear_tex_pool();
 	}
 }
 
@@ -4857,7 +4858,7 @@ void VRenderGLView::ReloadVolumeData(int frame)
 				for (j = 0; j < br->GetLevelNum(); j++)
 				{
 					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
 				}
 				tex->setLevel(curlv);
 				tex->set_FrameAndChannel(0, vd->GetCurChannel());
@@ -4934,8 +4935,8 @@ void VRenderGLView::ReloadVolumeData(int frame)
 					vd->SetSpacings(spcx, spcy, spcz);
 				else
 					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
-				if (vd->GetVR())
-					vd->GetVR()->clear_tex_pool();
+				if (vd->GetRenderer())
+					vd->GetRenderer()->clear_tex_pool();
 			}
 		}
 	}
@@ -5449,7 +5450,7 @@ void VRenderGLView::SetCenter()
 	if (vd)
 	{
 		fluo::BBox bbox = vd->GetBounds();
-		flvr::VolumeRenderer *vr = vd->GetVR();
+		flvr::VolumeRenderer *vr = vd->GetRenderer();
 		if (!vr) return;
 		vector<fluo::Plane*> *planes = vr->get_planes();
 		if (planes->size() != 6) return;
@@ -6081,7 +6082,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
 			{
 				if (m_cur_vol == vd) m_cur_vol = dst;
 				m_loader.RemoveBrickVD(vd);
-				vd->GetVR()->clear_tex_current();
+				vd->GetRenderer()->clear_tex_current();
 				m_layer_list[i] = dst;
 				m_vd_pop_dirty = true;
 				found = true;
@@ -6100,7 +6101,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
 				{
 					if (m_cur_vol == vd) m_cur_vol = dst;
 					m_loader.RemoveBrickVD(vd);
-					vd->GetVR()->clear_tex_current();
+					vd->GetRenderer()->clear_tex_current();
 					tmpgroup->ReplaceVolumeData(j, dst);
 					m_vd_pop_dirty = true;
 					found = true;
@@ -7316,7 +7317,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		if (vd != m_cur_vol)
 			continue;
 
-		flvr::VolumeRenderer *vr = vd->GetVR();
+		flvr::VolumeRenderer *vr = vd->GetRenderer();
 		if (!vr)
 			continue;
 
@@ -8557,7 +8558,7 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			m_cur_vol->GetResolution(resx, resy, resz);
 			double spcx, spcy, spcz;
 			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			vector<fluo::Plane*> *planes = m_cur_vol->GetVR()->get_planes();
+			vector<fluo::Plane*> *planes = m_cur_vol->GetRenderer()->get_planes();
 			fluo::Plane* plane = (*planes)[4];
 			double abcd[4];
 			plane->get_copy(abcd);
@@ -8599,9 +8600,9 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 			for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 			{
 				fluo::VolumeData* vd = m_vd_pop_list[i];
-				if (vd && vd->GetVR())
+				if (vd && vd->GetRenderer())
 				{
-					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetVR()->get_slice_num());
+					str = wxString::Format("SLICES_%d: %d", i + 1, vd->GetRenderer()->get_slice_num());
 					wstr_temp = str.ToStdWstring();
 					px = gapw - nx / 2;
 					py = ny / 2 - gaph*(3 + i) / 2;
@@ -8728,8 +8729,8 @@ void VRenderGLView::UpdateClips()
 		else
 			scale = fluo::Vector(1.0, 1.0, 1.0);
 
-		if (m_vd_pop_list[i]->GetVR())
-			planes = m_vd_pop_list[i]->GetVR()->get_planes();
+		if (m_vd_pop_list[i]->GetRenderer())
+			planes = m_vd_pop_list[i]->GetRenderer()->get_planes();
 		if (planes && planes->size() == 6)
 		{
 			double x1, x2, y1, y2, z1, z2;
@@ -8880,8 +8881,8 @@ void VRenderGLView::RestorePlanes()
 			continue;
 
 		planes = 0;
-		if (m_vd_pop_list[i]->GetVR())
-			planes = m_vd_pop_list[i]->GetVR()->get_planes();
+		if (m_vd_pop_list[i]->GetRenderer())
+			planes = m_vd_pop_list[i]->GetRenderer()->get_planes();
 		if (planes && planes->size() == 6)
 		{
 			(*planes)[0]->Restore();
@@ -8970,14 +8971,14 @@ void VRenderGLView::StartLoopUpdate()
 					fluo::Transform *tform = tex->transform();
 					double mvmat[16];
 					tform->get_trans(mvmat);
-					vd->GetVR()->m_mv_mat2 = glm::mat4(
+					vd->GetRenderer()->m_mv_mat2 = glm::mat4(
 						mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 						mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 						mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 						mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-					vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat * vd->GetVR()->m_mv_mat2;
+					vd->GetRenderer()->m_mv_mat2 = vd->GetRenderer()->m_mv_mat * vd->GetRenderer()->m_mv_mat2;
 
-					fluo::Ray view_ray = vd->GetVR()->compute_view();
+					fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 					vector<flvr::TextureBrick*> *bricks = 0;
 					bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 					if (!bricks || bricks->size() == 0)
@@ -8986,7 +8987,7 @@ void VRenderGLView::StartLoopUpdate()
 					{
 						(*bricks)[j]->set_drawn(false);
 						if ((*bricks)[j]->get_priority() > 0 ||
-							!vd->GetVR()->test_against_view((*bricks)[j]->bbox(), m_persp))
+							!vd->GetRenderer()->test_against_view((*bricks)[j]->bbox(), m_persp))
 						{
 							(*bricks)[j]->set_disp(false);
 							continue;
@@ -9010,8 +9011,8 @@ void VRenderGLView::StartLoopUpdate()
 					}
 				}
 				vd->SetBrickNum(num_chan);
-				if (vd->GetVR())
-					vd->GetVR()->set_done_loop(false);
+				if (vd->GetRenderer())
+					vd->GetRenderer()->set_done_loop(false);
 			}
 		}
 
@@ -9039,7 +9040,7 @@ void VRenderGLView::StartLoopUpdate()
 			{
 				fluo::VolumeData* vd = list[i];
 				flvr::Texture* tex = vd->GetTexture();
-				fluo::Ray view_ray = vd->GetVR()->compute_view();
+				fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 				vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetMode() == 1 ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShading());
@@ -9100,7 +9101,7 @@ void VRenderGLView::StartLoopUpdate()
 					flvr::TextureRenderer::set_update_order(0);
 					for (i = 0; i < list.size(); i++)
 					{
-						fluo::Ray view_ray = list[i]->GetVR()->compute_view();
+						fluo::Ray view_ray = list[i]->GetRenderer()->compute_view();
 						list[i]->GetTexture()->set_sort_bricks();
 						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 						list[i]->GetTexture()->set_sort_bricks();
@@ -9131,7 +9132,7 @@ void VRenderGLView::StartLoopUpdate()
 						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
-						fluo::Ray view_ray = vd->GetVR()->compute_view();
+						fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
@@ -9171,7 +9172,7 @@ void VRenderGLView::StartLoopUpdate()
 							{
 								int order = flvr::TextureRenderer::get_update_order();
 								flvr::TextureRenderer::set_update_order(0);
-								fluo::Ray view_ray = vd->GetVR()->compute_view();
+								fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 								tex->set_sort_bricks();
 								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 								tex->set_sort_bricks();
@@ -9197,7 +9198,7 @@ void VRenderGLView::StartLoopUpdate()
 						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
 							continue;
-						fluo::Ray view_ray = vd->GetVR()->compute_view();
+						fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
@@ -9215,7 +9216,7 @@ void VRenderGLView::StartLoopUpdate()
 						{
 							fluo::VolumeData* vd = list[k];
 							flvr::Texture* tex = vd->GetTexture();
-							fluo::Ray view_ray = vd->GetVR()->compute_view();
+							fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShading());
@@ -9279,7 +9280,7 @@ void VRenderGLView::StartLoopUpdate()
 								flvr::TextureRenderer::set_update_order(0);
 								for (k = 0; k < list.size(); k++)
 								{
-									fluo::Ray view_ray = list[k]->GetVR()->compute_view();
+									fluo::Ray view_ray = list[k]->GetRenderer()->compute_view();
 									list[i]->GetTexture()->set_sort_bricks();
 									list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									list[i]->GetTexture()->set_sort_bricks();
@@ -9298,7 +9299,7 @@ void VRenderGLView::StartLoopUpdate()
 						{
 							fluo::VolumeData* vd = list[j];
 							flvr::Texture* tex = vd->GetTexture();
-							fluo::Ray view_ray = vd->GetVR()->compute_view();
+							fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetMode() == 1 ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShading());
@@ -9336,7 +9337,7 @@ void VRenderGLView::StartLoopUpdate()
 								{
 									int order = flvr::TextureRenderer::get_update_order();
 									flvr::TextureRenderer::set_update_order(0);
-									fluo::Ray view_ray = vd->GetVR()->compute_view();
+									fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 									tex->set_sort_bricks();
 									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									tex->set_sort_bricks();
@@ -9667,7 +9668,7 @@ void VRenderGLView::GetTraces(bool update)
 	int nx, ny, nz;
 	//return current mask (into system memory)
 	if (!m_cur_vol) return;
-	m_cur_vol->GetVR()->return_mask();
+	m_cur_vol->GetRenderer()->return_mask();
 	m_cur_vol->GetResolution(nx, ny, nz);
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
