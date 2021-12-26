@@ -1407,10 +1407,10 @@ void VRenderGLView::DrawVolumes(int peel)
 				if (m_vp.GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
 					(vd && m_vp.GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
 				{
-					int resx, resy, resz;
+					long resx, resy, resz;
 					double sclx, scly, sclz;
 					double spcx, spcy, spcz;
-					vd->GetResolution(resx, resy, resz);
+					vd->getValue("res x", resx); , resy, resz);
 					vd->GetScalings(sclx, scly, sclz);
 					vd->GetSpacings(spcx, spcy, spcz);
 					p = fluo::Point(p.x() / (resx*sclx*spcx),
@@ -10701,7 +10701,8 @@ void VRenderGLView::SetLockCenterVol()
 {
 	if (!m_cur_vol)
 		return;
-	fluo::BBox box = m_cur_vol->GetClippedBounds();
+	fluo::BBox box;
+	m_cur_vol->getValue("clip bounds", box);
 	m_lock_center = box.center();
 }
 

@@ -34,8 +34,8 @@ using namespace fluo;
 
 VolumeFactory::VolumeFactory()
 {
-	m_name = flstrVolumeFactory;
-	default_object_name_ = flstrDefaultVolume;
+	m_name = gstVolumeFactory;
+	default_object_name_ = gstDefaultVolume;
 
 	VolumeData* currentVD = new VolumeData();
 
@@ -214,6 +214,8 @@ void VolumeFactory::createDefault()
 
 		//brisk skipping
 		vd->addValue("skip brick", bool(false));
+		//valid brick number
+		vd->addValue("brick num", long(0));
 
 		//shown in legend
 		vd->addValue("legend", bool(true));
@@ -229,9 +231,6 @@ void VolumeFactory::createDefault()
 		vd->addValue("da int", double(0.5));
 		vd->addValue("da start", double(0));
 		vd->addValue("da end", double(1));
-
-		//valid brick number
-		vd->addValue("brick num", long(0));
 
 		//estimate threshold
 		vd->addValue("estimate thresh", double(0));
