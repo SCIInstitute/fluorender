@@ -4735,7 +4735,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		if (!vd)
 			continue;
 
-		vd->setValue("skip brick", m_skip_brick);
+		vd->setValue(gstSkipBrick, m_skip_brick);
 		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;

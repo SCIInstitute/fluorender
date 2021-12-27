@@ -2229,7 +2229,7 @@ void VRenderFrame::UpdateList()
 	{
 		fluo::VolumeData* vd = m_data_mgr.GetVolumeData(i);
 		bool dup;
-		vd->getValue("duplicate", dup);
+		vd->getValue(gstDuplicate, dup);
 		if (vd && !dup)
 		{
 			wxString name = vd->getName();
@@ -2915,7 +2915,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			//compression
 			fconfig.Write("compression", m_compression);
 			//skip brick
-			vd->getValue("skip brick", bval);
+			vd->getValue(gstSkipBrick, bval);
 			fconfig.Write("skip_brick", bval);
 			//path
 			vd->getValue(gstDataPath, wsval);
@@ -3116,7 +3116,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("shadow_darkness", dval);
 
 			//legend
-			vd->getValue("legend", bval);
+			vd->getValue(gstLegend, bval);
 			fconfig.Write("legend", bval);
 
 			//mask
@@ -3293,7 +3293,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 						group->getValue(gstSyncB, bval);
 						fconfig.Write("sync_b", bval);
 						//sync volume properties
-						group->getValue("sync group", bval);
+						group->getValue(gstSyncGroup, bval);
 						fconfig.Write("sync_vp", bval);
 						//volumes
 						str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
@@ -3836,7 +3836,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 						//spacings and scales
 						bool multires = false;
-						vd->getValue("multires", multires);
+						vd->getValue(gstMultires, multires);
 						if (!multires)
 						{
 							if (fconfig.Read("res", &str))
@@ -4013,7 +4013,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 
 						//legend
 						if (fconfig.Read("legend", &bval))
-							vd->setValue("legend", bval);
+							vd->setValue(gstLegend, bval);
 
 						//mask
 						if (fconfig.Read("mask", &str))
@@ -4323,7 +4323,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												group->setValue(gstSyncB, bval);
 											//sync volume properties
 											if (fconfig.Read("sync_vp", &bval))
-												group->setValue("sync group", bval);
+												group->setValue(gstSyncGroup, bval);
 											//volumes
 											if (fconfig.Exists(wxString::Format("/views/%d/layers/%d/volumes", i, j)))
 											{

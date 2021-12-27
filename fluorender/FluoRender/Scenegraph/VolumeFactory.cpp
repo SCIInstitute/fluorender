@@ -116,7 +116,7 @@ void VolumeFactory::createDefault()
 		//mip
 		vd->addValue(gstMipMode, long(0));//0-normal; 1-MIP
 		vd->addValue(gstOverlayMode, long(0));//0-unset; 1-base layer; 2-white; 3-white mip
-		//vd->addValue("stream mode", long(0));//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
+		vd->addValue(gstStreamMode, long(0));//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		vd->addValue(gstMaskMode, long(0));//0-normal, 1-render with mask, 2-render with mask excluded,
 											//3-random color with label, 4-random color with label+mask
 		vd->addValue(gstUseMaskThresh, bool(false));// use mask threshold
@@ -213,52 +213,52 @@ void VolumeFactory::createDefault()
 		vd->addValue(gstResizeZ, long(0));
 
 		//brisk skipping
-		vd->addValue("skip brick", bool(false));
+		vd->addValue(gstSkipBrick, bool(false));
 		//valid brick number
-		vd->addValue("brick num", long(0));
+		vd->addValue(gstBrickNum, long(0));
 
 		//shown in legend
-		vd->addValue("legend", bool(true));
+		vd->addValue(gstLegend, bool(true));
 
 		//interpolate
-		vd->addValue("interpolate", bool(true));
+		vd->addValue(gstInterpolate, bool(true));
 
 		//label mode
-		vd->addValue("label mode", long(1));
+		vd->addValue(gstLabelMode, long(1));
 
 		//depth attenuation, also called fog previously
-		vd->addValue("depth atten", bool(false));
-		vd->addValue("da int", double(0.5));
-		vd->addValue("da start", double(0));
-		vd->addValue("da end", double(1));
+		vd->addValue(gstDepthAtten, bool(false));
+		vd->addValue(gstDaInt, double(0.5));
+		vd->addValue(gstDaStart, double(0));
+		vd->addValue(gstDaEnd, double(1));
 
 		//estimate threshold
-		vd->addValue("estimate thresh", double(0));
+		vd->addValue(gstEstimateThresh, double(0));
 
 		//parameters not in original class but passed to renderer
-		vd->addValue("viewport", Vector4i());//viewport
-		vd->addValue("clear color", Vector4f());//clear color
-		vd->addValue("cur framebuffer", (unsigned long)(0));//current framebuffer
+		vd->addValue(gstViewport, Vector4i());//viewport
+		vd->addValue(gstClearColor, Vector4f());//clear color
+		vd->addValue(gstCurFramebuffer, (unsigned long)(0));//current framebuffer
 
 		//multires level
-		vd->addValue("multires", bool(false));
-		vd->addValue("level", long(0));
-		vd->addValue("level num", long(1));
+		vd->addValue(gstMultires, bool(false));
+		vd->addValue(gstLevel, long(0));
+		vd->addValue(gstLevelNum, long(1));
 
 		//tex transform
-		vd->addValue("tex transform", Transform());
+		vd->addValue(gstTexTransform, Transform());
 
 		//selected on the ui
-		vd->addValue("selected", bool(false));
+		vd->addValue(gstSelected, bool(false));
 
 		//mask cleared
-		vd->addValue("mask clear", bool(false));
+		vd->addValue(gstMaskClear, bool(false));
 
 		//sync group
-		vd->addValue("sync group", bool(false));
+		vd->addValue(gstSyncGroup, bool(false));
 
 		//duplicate
-		vd->addValue("duplicate", bool(false));
+		vd->addValue(gstDuplicate, bool(false));
 	}
 }
 
@@ -276,9 +276,9 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	//handle after events
 	ADD_AFTER_EVENT(vd, gstMipMode, OnMipModeChanged);
 	ADD_AFTER_EVENT(vd, gstOverlayMode, OnOverlayModeChanged);
-	ADD_AFTER_EVENT(vd, "viewport", OnViewportChanged);
-	ADD_AFTER_EVENT(vd, "clear color", OnClearColorChanged);
-	ADD_AFTER_EVENT(vd, "cur framebuffer", OnCurFramebufferChanged);
+	ADD_AFTER_EVENT(vd, gstViewport, OnViewportChanged);
+	ADD_AFTER_EVENT(vd, gstClearColor, OnClearColorChanged);
+	ADD_AFTER_EVENT(vd, gstCurFramebuffer, OnCurFramebufferChanged);
 	ADD_AFTER_EVENT(vd, gstCompression, OnCompressionChanged);
 	ADD_AFTER_EVENT(vd, gstInvert, OnInvertChanged);
 	ADD_AFTER_EVENT(vd, gstMaskMode, OnMaskModeChanged);
@@ -320,11 +320,11 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, gstSpcSclX, OnSpacingScaleChanged);
 	ADD_AFTER_EVENT(vd, gstSpcSclY, OnSpacingScaleChanged);
 	ADD_AFTER_EVENT(vd, gstSpcSclZ, OnSpacingScaleChanged);
-	ADD_AFTER_EVENT(vd, "level", OnLevelChanged);
+	ADD_AFTER_EVENT(vd, gstLevel, OnLevelChanged);
 	ADD_AFTER_EVENT(vd, gstDisplay, OnDisplayChanged);
-	ADD_AFTER_EVENT(vd, "interpolate", OnInterpolateChanged);
-	ADD_AFTER_EVENT(vd, "depth atten", OnDepthAttenChanged);
-	ADD_AFTER_EVENT(vd, "skip brick", OnSkipBrickChanged);
+	ADD_AFTER_EVENT(vd, gstInterpolate, OnInterpolateChanged);
+	ADD_AFTER_EVENT(vd, gstDepthAtten, OnDepthAttenChanged);
+	ADD_AFTER_EVENT(vd, gstSkipBrick, OnSkipBrickChanged);
 	ADD_AFTER_EVENT(vd, gstClipPlanes, OnClipPlanesChanged);
 	ADD_AFTER_EVENT(vd, gstSyncR, OnSyncOutputChannels);
 	ADD_AFTER_EVENT(vd, gstSyncG, OnSyncOutputChannels);

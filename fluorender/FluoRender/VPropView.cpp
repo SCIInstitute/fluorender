@@ -758,12 +758,12 @@ void VPropView::GetSettings()
 
 	//legend
 	bool bval;
-	m_vd->getValue("legend", bval);
+	m_vd->getValue(gstLegend, bval);
 	m_options_toolbar->ToggleTool(ID_LegendChk, bval);
 
 	//interpolate
 	bool interp;
-	m_vd->getValue("interpolate", interp);
+	m_vd->getValue(gstInterpolate, interp);
 	m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
 	if(interp) 
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
@@ -774,7 +774,7 @@ void VPropView::GetSettings()
 
 	//sync group
 	if (m_group)
-		m_group->getValue("sync group", m_sync_group);
+		m_group->getValue(gstSyncGroup, m_sync_group);
 	m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
 
 	//colormap
@@ -852,7 +852,7 @@ void VPropView::GetSettings()
 	}
 
 	//component display
-	m_vd->getValue("label mode", lval);
+	m_vd->getValue(gstLabelMode, lval);
 	if (lval)
 	{
 		m_options_toolbar->ToggleTool(ID_CompChk, true);
@@ -951,7 +951,7 @@ void VPropView::SetGroup(fluo::VolumeGroup* group)
 	m_group = group;
 	if (m_group)
 	{
-		m_group->getValue("sync group", m_sync_group);
+		m_group->getValue(gstSyncGroup, m_sync_group);
 		m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
 	}
 }
@@ -2030,18 +2030,18 @@ void VPropView::OnCompChk(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
 			wxGetBitmapFromMemory(comp));
 		if (m_sync_group && m_group)
-			m_group->setValue("label mode", long(1));
+			m_group->setValue(gstLabelMode, long(1));
 		else if (m_vd)
-			m_vd->setValue("label mode", long(1));
+			m_vd->setValue(gstLabelMode, long(1));
 	}
 	else
 	{
 		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
 			wxGetBitmapFromMemory(comp_off));
 		if (m_sync_group && m_group)
-			m_group->setValue("label mode", long(0));
+			m_group->setValue(gstLabelMode, long(0));
 		else if (m_vd)
-			m_vd->setValue("label mode", long(0));
+			m_vd->setValue(gstLabelMode, long(0));
 	}
 
 	RefreshVRenderViews(false, true);
@@ -2352,7 +2352,7 @@ void VPropView::OnLegendCheck(wxCommandEvent& event)
 {
 	bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
 	if (m_vd)
-		m_vd->setValue("legend", leg);
+		m_vd->setValue(gstLegend, leg);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2368,9 +2368,9 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
 		wxGetBitmapFromMemory(interpolate_off));
 	if (m_sync_group && m_group)
-		m_group->setValue("interpolate", inv);
+		m_group->setValue(gstInterpolate, inv);
 	else if (m_vd)
-		m_vd->setValue("interpolate", inv);
+		m_vd->setValue(gstInterpolate, inv);
 	if (m_view)
 		m_view->SetIntp(inv);
 
@@ -2382,7 +2382,7 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 {
 	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
 	if (m_group)
-		m_group->setValue("sync group", m_sync_group);
+		m_group->setValue(gstSyncGroup, m_sync_group);
 
 	if (m_sync_group && m_group)
 	{
@@ -2449,7 +2449,7 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		m_group->setValue(gstInvert, bVal);
 		//interpolation
 		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
-		m_group->setValue("interpolate", bVal);
+		m_group->setValue(gstInterpolate, bVal);
 		if (m_view)
 			m_view->SetIntp(bVal);
 		//MIP
@@ -2831,9 +2831,9 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	ival = mgr->m_vol_com;
 	m_options_toolbar->ToggleTool(ID_CompChk, ival?true:false);
 	if (m_sync_group && m_group)
-		m_group->setValue("label mode", ival);
+		m_group->setValue(gstLabelMode, ival);
 	else
-		m_vd->setValue("label mode", ival);
+		m_vd->setValue(gstLabelMode, ival);
 	//noise reduction
 	bval = mgr->m_vol_nrd;
 	m_options_toolbar->ToggleTool(ID_NRChk,bval);

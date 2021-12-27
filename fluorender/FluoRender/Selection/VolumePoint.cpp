@@ -118,7 +118,7 @@ double VolumePoint::GetPointVolume(
 		unsigned long long vindex;
 		int data_nx, data_ny, data_nz;
 		bool multires;
-		m_vd->getValue("multires", multires);
+		m_vd->getValue(gstMultires, multires);
 		if (multires)
 		{
 			data_nx = tex->nx();

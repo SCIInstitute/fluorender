@@ -629,8 +629,8 @@ void SegGrow::Compute()
 
 	m_list.clear();
 	bool clear_label;
-	m_vd->getValue("mask clear", clear_label);
-	m_vd->setValue("mask clear", false);
+	m_vd->getValue(gstMaskClear, clear_label);
+	m_vd->setValue(gstMaskClear, false);
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::

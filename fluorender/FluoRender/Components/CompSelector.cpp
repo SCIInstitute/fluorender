@@ -209,7 +209,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 		return;
 
 	long bn;
-	m_vd->getValue("brick num", bn);
+	m_vd->getValue(gstBrickNum, bn);
 	unsigned int idsel, bidsel;
 	if (bn > 1)
 	{
@@ -530,7 +530,7 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long key;
 	long bn;
-	m_vd->getValue("brick num", bn);
+	m_vd->getValue(gstBrickNum, bn);
 	for (index = 0; index < for_size; ++index)
 	{
 		if (clear_all)

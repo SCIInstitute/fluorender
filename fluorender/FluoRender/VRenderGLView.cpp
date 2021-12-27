@@ -1362,7 +1362,7 @@ void VRenderGLView::DrawVolumes(int peel)
 						vd = *cur_iter;
 						quota_vd_list.push_back(vd);
 						long brick_num, count_bricks;
-						vd->getValue("brick num", brick_num);
+						vd->getValue(gstBrickNum, brick_num);
 						count_bricks = brick_num;
 						quota_bricks_chan = std::min(count_bricks, quota_bricks);
 						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
@@ -1410,9 +1410,15 @@ void VRenderGLView::DrawVolumes(int peel)
 					long resx, resy, resz;
 					double sclx, scly, sclz;
 					double spcx, spcy, spcz;
-					vd->getValue(gstResX, resx); , resy, resz);
-					vd->GetScalings(sclx, scly, sclz);
-					vd->GetSpacings(spcx, spcy, spcz);
+					vd->getValue(gstResX, resx);
+					vd->getValue(gstResY, resy);
+					vd->getValue(gstResZ, resz);
+					vd->getValue(gstScaleX, sclx);
+					vd->getValue(gstScaleY, scly);
+					vd->getValue(gstScaleZ, sclz);
+					vd->getValue(gstSpcX, spcx);
+					vd->getValue(gstSpcY, spcy);
+					vd->getValue(gstSpcZ, spcz);
 					p = fluo::Point(p.x() / (resx*sclx*spcx),
 						p.y() / (resy*scly*spcy),
 						p.z() / (resz*sclz*spcz));
@@ -1449,7 +1455,11 @@ void VRenderGLView::DrawVolumes(int peel)
 				case 2://volume data (this won't happen now)
 				{
 					fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
-					if (vd && vd->GetDisp())
+					if (!vd)
+						continue;
+					bool disp;
+					vd->getValue(gstDisplay, disp);
+					if (disp)
 					{
 						if (flvr::TextureRenderer::get_mem_swap() &&
 							flvr::TextureRenderer::get_interactive() &&
@@ -1476,12 +1486,20 @@ void VRenderGLView::DrawVolumes(int peel)
 						list.clear();
 					}
 					fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-					if (!group->GetDisp())
+					if (!group)
 						continue;
-					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+					bool disp;
+					group->getValue(gstDisplay, disp);
+					if (!disp)
+						continue;
+					for (j = group->getNumChildren() - 1; j >= 0; j--)
 					{
-						fluo::VolumeData* vd = group->GetVolumeData(j);
-						if (vd && vd->GetDisp())
+						fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+						if (!vd)
+							continue;
+						bool disp;
+						vd->getValue(gstDisplay, disp);
+						if (disp)
 						{
 							if (flvr::TextureRenderer::get_mem_swap() &&
 								flvr::TextureRenderer::get_interactive() &&
@@ -1498,7 +1516,9 @@ void VRenderGLView::DrawVolumes(int peel)
 					}
 					if (!list.empty())
 					{
-						if (group->GetBlendMode() == VOL_METHOD_MULTI)
+						long blend_mode;
+						group->getValue(gstBlendMode, blend_mode);
+						if (blend_mode == VOL_METHOD_MULTI)
 							DrawVolumesMulti(list, peel);
 						else
 							DrawVolumesComp(list, false, peel);
@@ -1672,19 +1692,29 @@ void VRenderGLView::PopVolumeList()
 		case 2://volume data
 		{
 			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
-			if (vd->GetDisp())
+			if (!vd)
+				continue;
+			bool disp;
+			vd->getValue(gstDisplay, disp);
+			if (disp)
 				m_vd_pop_list.push_back(vd);
 		}
 		break;
 		case 5://group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			if (!group->GetDisp())
+			bool disp;
+			group->getValue(gstDisplay, disp);
+			if (!disp)
 				continue;
-			for (j = 0; j<group->GetVolumeNum(); j++)
+			for (j = 0; j<group->getNumChildren(); j++)
 			{
-				if (group->GetVolumeData(j) && group->GetVolumeData(j)->GetDisp())
-					m_vd_pop_list.push_back(group->GetVolumeData(j));
+				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+				if (!vd)
+					continue;
+				vd->getValue(gstDisplay, disp);
+				if (disp)
+					m_vd_pop_list.push_back(vd);
 			}
 		}
 		break;
@@ -1709,7 +1739,7 @@ void VRenderGLView::OrganizeLayers()
 		{
 			//layer is group
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
-			if (group->GetVolumeNum() == 0)
+			if (group->getNumChildren() == 0)
 			{
 				le_group = group;
 				break;
@@ -1724,20 +1754,20 @@ void VRenderGLView::OrganizeLayers()
 		{
 			//layer is volume
 			fluo::VolumeData* vd = (fluo::VolumeData*)layer;
-			wxString name = vd->GetName();
+			std::string name = vd->getName();
 			if (le_group)
 			{
 				RemoveVolumeData(name);
-				le_group->InsertVolumeData(le_group->GetVolumeNum(), vd);
+				le_group->insertChild(le_group->getNumChildren(), vd);
 			}
 			else
 			{
-				wxString group_name = AddGroup("");
+				std::string group_name = AddGroup("");
 				le_group = GetGroup(group_name);
 				if (le_group)
 				{
 					RemoveVolumeData(name);
-					le_group->InsertVolumeData(le_group->GetVolumeNum(), vd);
+					le_group->insertChild(le_group->getNumChildren(), vd);
 				}
 			}
 
@@ -2383,7 +2413,11 @@ void VRenderGLView::DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask, 
 	for (i = 0; i<(int)list.size(); i++)
 	{
 		fluo::VolumeData* vd = list[i];
-		if (!vd || !vd->GetDisp())
+		if (!vd)
+			continue;
+		bool disp;
+		vd->getValue(gstDisplay, disp);
+		if (!disp)
 			continue;
 		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			cnt_mask++;
@@ -2407,40 +2441,54 @@ void VRenderGLView::DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask, 
 	for (i = 0; i<(int)list.size(); i++)
 	{
 		fluo::VolumeData* vd = list[i];
-		if (!vd || !vd->GetDisp())
+		if (!vd)
+			continue;
+		bool disp;
+		vd->getValue(gstDisplay, disp);
+		if (!disp)
 			continue;
 		if (mask)
 		{
 			//drawlabel
-			if (vd->GetLabelMode() &&
+			long label_mode;
+			vd->getValue(gstLabelMode, label_mode);
+			if (label_mode &&
 				vd->GetMask(false) &&
 				vd->GetLabel(false))
 				continue;
 
 			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			{
-				vd->SetMaskMode(1);
+				vd->setValue(gstMaskMode, long(1));
 				int vol_method = m_vol_method;
 				m_vol_method = VOL_METHOD_COMP;
-				if (vd->GetMode() == 1)
+				long mip_mode;
+				vd->getValue(gstMipMode, mip_mode);
+				if (mip_mode == 1)
 					DrawMIP(vd, peel);
 				else
 					DrawOVER(vd, mask, peel);
-				vd->SetMaskMode(0);
+				vd->setValue(gstMaskMode, long(0));
 				m_vol_method = vol_method;
 			}
 		}
 		else
 		{
-			if (vd->GetBlendMode() != 2)
+			long blend_mode;
+			vd->getValue(gstBlendMode, blend_mode);
+			if (blend_mode != 2)
 			{
 				//drawlabel
-				if (vd->GetLabelMode() &&
+				long label_mode;
+				vd->getValue(gstLabelMode, label_mode);
+				if (label_mode &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+					vd->setValue(gstMaskMode, long(4));
 
-				if (vd->GetMode() == 1)
+				long mip_mode;
+				vd->getValue(gstMipMode, mip_mode);
+				if (mip_mode == 1)
 					DrawMIP(vd, peel);
 				else
 					DrawOVER(vd, mask, peel);
@@ -2542,18 +2590,23 @@ void VRenderGLView::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
 		if (vd->GetRenderer())
 			vd->GetRenderer()->set_depth_peel(peel);
 		if (mask)
-			vd->SetStreamMode(4);
+			vd->setValue(gstStreamMode, long(4));
 		else
-			vd->SetStreamMode(0);
+			vd->setValue(gstStreamMode, long(0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->SetCurFramebuffer(m_cur_framebuffer);
+		vd->setValue(gstDepthAtten, m_use_fog);
+		vd->setValue(gstDaInt, m_fog_intensity);
+		vd->setValue(gstDaStart, m_fog_start);
+		vd->setValue(gstDaEnd, m_fog_end);
+		vd->setValue(gstViewport, fluo::Vector4i(vp));
+		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
+		vd->setValue(gstCurFramebuffer, (unsigned long)m_cur_framebuffer);
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 	}
 
-	if (vd->GetShadow())
+	bool shadow;
+	vd->getValue(gstShadowEnable, shadow);
+	if (shadow)
 	{
 		vector<fluo::VolumeData*> list;
 		list.push_back(vd);

@@ -99,7 +99,7 @@ void VolumeSelector::Segment(int mx, int my)
 
 	//notify volume that mask is cleared
 	if (m_mode == 6)
-		m_vd->setValue("mask clear", true);
+		m_vd->setValue(gstMaskClear, true);
 
 	//save view
 	m_mv_mat = m_view->GetDrawMat();
@@ -301,7 +301,7 @@ void VolumeSelector::Select(double radius)
 			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 			double est_thresh, int_scale;
-			m_vd->getValue("estimate thresh", est_thresh);
+			m_vd->getValue(gstEstimateThresh, est_thresh);
 			m_vd->getValue(gstIntScale, int_scale);
 			ini_thresh = est_thresh * int_scale;
 			if (m_iter_num > BRUSH_TOOL_ITER_WEAK)

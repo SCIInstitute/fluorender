@@ -411,7 +411,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		m_vd->getValue(gstInvert, inv);
 		m_vd->getValue(gstIntScale, scalar_scale);
 		m_vd->getValue(gstLowThreshold, lo_thresh);
-		m_vd->getValue("high threhsold", hi_thresh);
+		m_vd->getValue(gstHighThreshold, hi_thresh);
 		m_vd->getValue(gstGamma3d, gamma3d);
 		m_vd->getValue(gstExtractBoundary, gm_thresh);
 		m_vd->getValue(gstSaturation, offset);

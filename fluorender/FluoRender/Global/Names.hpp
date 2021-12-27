@@ -215,5 +215,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSyncGroup "sync group"
 //duplicated
 #define gstDuplicate "duplicate"
+//stream mode
+#define gstStreamMode "stream mode"
 
 #endif//NAMES_HPP

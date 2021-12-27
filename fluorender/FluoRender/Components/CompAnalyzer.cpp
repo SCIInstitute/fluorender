@@ -686,7 +686,7 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 	if (!id)
 		return;
 	long bn;
-	vd->getValue("brick num", bn);
+	vd->getValue(gstBrickNum, bn);
 
 	unsigned long long ull;
 	if (bn > 1)

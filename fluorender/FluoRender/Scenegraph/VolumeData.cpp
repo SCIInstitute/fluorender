@@ -240,7 +240,7 @@ void VolumeData::OnViewportChanged(Event& event)
 		return;
 
 	Vector4i vp;
-	getValue("viewport", vp);
+	getValue(gstViewport, vp);
 
 	m_vr->set_viewport(vp.get());
 }
@@ -251,7 +251,7 @@ void VolumeData::OnClearColorChanged(Event& event)
 		return;
 
 	Vector4f clear_color;
-	getValue("clear color", clear_color);
+	getValue(gstClearColor, clear_color);
 	m_vr->set_clear_color(clear_color.get());
 }
 
@@ -261,7 +261,7 @@ void VolumeData::OnCurFramebufferChanged(Event& event)
 		return;
 
 	unsigned long cur_framebuffer;
-	getValue("cur framebuffer", cur_framebuffer);
+	getValue(gstCurFramebuffer, cur_framebuffer);
 	m_vr->set_cur_framebuffer(cur_framebuffer);
 }
 
@@ -593,7 +593,7 @@ void VolumeData::OnSpacingChanged(Event& event)
 	Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    setValue("tex transform", *temp, texTransform);
+    setValue(gstTexTransform, *temp, texTransform);
 }
 
 void VolumeData::OnBaseSpacingChanged(Event& event)
@@ -607,7 +607,7 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	m_tex->set_base_spacings(spc_x, spc_y, spc_z);
 
 	long level;
-	getValue("level", level);
+	getValue(gstLevel, level);
 	m_tex->get_spacings(spc_x, spc_y, spc_z, level);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
 	setValue(gstSpcX, spc_x, event);
@@ -618,7 +618,7 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    setValue("tex transform", *temp, texTransform);
+    setValue(gstTexTransform, *temp, texTransform);
 }
 
 void VolumeData::OnSpacingScaleChanged(Event& event)
@@ -637,11 +637,11 @@ void VolumeData::OnLevelChanged(Event& event)
 	if (!m_tex)
 		return;
 	bool multires = false;
-	getValue("multires", multires);
+	getValue(gstMultires, multires);
 	if (!multires)
 		return;
 	long level;
-	getValue("level", level);
+	getValue(gstLevel, level);
 	m_tex->setLevel(level);
 	BBox bbox;
 	m_tex->get_bounds(bbox);
@@ -652,7 +652,7 @@ void VolumeData::OnLevelChanged(Event& event)
 	Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    setValue("tex transform", *temp, texTransform);
+    setValue(gstTexTransform, *temp, texTransform);
 }
 
 void VolumeData::OnDisplayChanged(Event& event)
@@ -668,7 +668,7 @@ void VolumeData::OnInterpolateChanged(Event& event)
 		return;
 
 	bool interpolate;
-	getValue("interpolate", interpolate);
+	getValue(gstInterpolate, interpolate);
 	m_vr->set_interpolate(interpolate);
 }
 
@@ -685,10 +685,10 @@ void VolumeData::OnDepthAttenChanged(Event& event)
 
 	bool depth_atten;
 	double da_int, da_start, da_end;
-	getValue("depth atten", depth_atten);
-	getValue("da int", da_int);
-	getValue("da start", da_start);
-	getValue("da end", da_end);
+	getValue(gstDepthAtten, depth_atten);
+	getValue(gstDaInt, da_int);
+	getValue(gstDaStart, da_start);
+	getValue(gstDaEnd, da_end);
 	m_vr->set_fog(depth_atten, da_int, da_start, da_end);
 }
 
@@ -697,7 +697,7 @@ void VolumeData::OnSkipBrickChanged(Event& event)
 	if (!m_tex)
 		return;
 	bool skip_brick;
-	getValue("skip brick", skip_brick);
+	getValue(gstSkipBrick, skip_brick);
 	m_tex->set_use_priority(skip_brick);
 }
 
@@ -1130,7 +1130,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 
 	m_tex = new flvr::Texture();
 	//bool skip_brick;
-	//getValue("skip brick", skip_brick);
+	//getValue(gstSkipBrick, skip_brick);
 	//m_tex->set_use_priority(skip_brick);
 
 	if (m_reader && m_reader->GetType() == READER_BRKXML_TYPE)
@@ -1209,10 +1209,10 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 
 		//bool depth_atten;
 		//double da_int, da_start, da_end;
-		//getValue("depth atten", depth_atten);
-		//getValue("da int", da_int);
-		//getValue("da start", da_start);
-		//getValue("da end", da_end);
+		//getValue(gstDepthAtten, depth_atten);
+		//getValue(gstDaInt, da_int);
+		//getValue(gstDaStart, da_start);
+		//getValue(gstDaEnd, da_end);
 		//m_vr->set_fog(false, da_int, da_start, da_end);
 
 		//double high_threshold;
@@ -1246,7 +1246,7 @@ int VolumeData::ReplaceData(Nrrd* data, bool del_tex)
 			delete m_tex;
 		m_tex = new flvr::Texture();
 		bool skip_brick;
-		getValue("skip brick", skip_brick);
+		getValue(gstSkipBrick, skip_brick);
 		m_tex->set_use_priority(skip_brick);
 		double max_int;
 		getValue(gstMaxInt, max_int);
@@ -1907,7 +1907,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 	long bits;
 	getValue(gstBits, bits);
 	bool multires;
-	getValue("multires", multires);
+	getValue(gstMultires, multires);
 	double int_scale;
 	getValue(gstIntScale, int_scale);
 
@@ -1964,7 +1964,7 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 	long bits;
 	getValue(gstBits, bits);
 	bool multires;
-	getValue("multires", multires);
+	getValue(gstMultires, multires);
 
 	int64_t nx, ny, nz;
 	if (multires)
@@ -2398,7 +2398,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 		getValue(gst2dWeight1Id, weight1);
 		getValue(gst2dWeight2Id, weight2);
 		long brick_num;
-		getValue("brick num", brick_num);
+		getValue(gstBrickNum, brick_num);
 
 		m_vr->set_2d_mask(mask_id);
 		m_vr->set_2d_weight(weight1, weight2);
@@ -2418,7 +2418,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 			double est_thresh = m_vr->get_estimated_thresh();
             Event estimateThreshEvent;
             estimateThreshEvent.setNotifyFlags(Event::NOTIFY_SELF);
-            setValue("estimate thresh", est_thresh, estimateThreshEvent);
+            setValue(gstEstimateThresh, est_thresh, estimateThreshEvent);
 		}
 	}
 }

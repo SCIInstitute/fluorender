@@ -403,10 +403,10 @@ void ColocalizationDlg::Colocalize()
 				{
 					//get threshold values
 					double th1, th2, th3, th4;
-					vd1->getValue("low threhsold", th1);
-					vd1->getValue("high threhsold", th2);
-					vd2->getValue("low threhsold", th3);
-					vd2->getValue("high threhsold", th4);
+					vd1->getValue(gstLowThreshold, th1);
+					vd1->getValue(gstHighThreshold, th2);
+					vd2->getValue(gstLowThreshold, th3);
+					vd2->getValue(gstHighThreshold, th4);
 					compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
 				}
 				break;
@@ -444,10 +444,10 @@ void ColocalizationDlg::Colocalize()
 					&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
 			//get threshold values
 			double th1, th2, th3, th4;
-			vd1->getValue("low threhsold", th1);
-			vd1->getValue("high threhsold", th2);
-			vd2->getValue("low threhsold", th3);
-			vd2->getValue("high threhsold", th4);
+			vd1->getValue(gstLowThreshold, th1);
+			vd1->getValue(gstHighThreshold, th2);
+			vd2->getValue(gstLowThreshold, th3);
+			vd2->getValue(gstHighThreshold, th4);
 			compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
 			rm[it1][it2] = compare.Result();
 		}
