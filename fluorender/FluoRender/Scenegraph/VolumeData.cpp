@@ -137,7 +137,7 @@ void VolumeData::Initialize()
 //{
 //	//save mode
 //	long mode;
-//	getValue("mip mode", mode);
+//	getValue(gstMipMode, mode);
 //	setValue("saved mode", mode);
 //}
 
@@ -148,7 +148,7 @@ void VolumeData::OnMipModeChanged(Event& event)
 		return;
 
 	long mode;
-	getValue("mip mode", mode);
+	getValue(gstMipMode, mode);
 
 	switch (mode)
 	{
@@ -167,35 +167,35 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 		return;
 
 	long mode;
-	getValue("overlay mode", mode);
+	getValue(gstOverlayMode, mode);
 
 	switch (mode)
 	{
 	case 0://restore
 	{
 		Color color;
-		getValue("color", color);
+		getValue(gstColor, color);
 		m_vr->set_color(color);
 		double alpha;
-		getValue("alpha", alpha);
+		getValue(gstAlpha, alpha);
 		m_vr->set_alpha(alpha);
 		bool shading_enable;
-		getValue("shading enable", shading_enable);
+		getValue(gstShadingEnable, shading_enable);
 		m_vr->set_shading(shading_enable);
 		bool colormap_enable;
-		getValue("colormap enable", colormap_enable);
+		getValue(gstColormapEnable, colormap_enable);
 		m_vr->set_colormap_mode(colormap_enable?1:0);
 		long mask_mode;
-		getValue("mask mode", mask_mode);
+		getValue(gstMaskMode, mask_mode);
 		m_vr->set_ml_mode(mask_mode);
 		long mip_mode;
-		getValue("mip mode", mip_mode);
+		getValue(gstMipMode, mip_mode);
 		if (mip_mode == 1)
 			m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
 		else
 			m_vr->set_mode(flvr::TextureRenderer::MODE_OVER);
 		bool alpha_enable;
-		getValue("alpha enable", alpha_enable);
+		getValue(gstAlphaEnable, alpha_enable);
 		m_vr->set_solid(!alpha_enable);
 	}
 	break;
@@ -221,7 +221,7 @@ void VolumeData::OnOverlayModeChanged(Event& event)
 	case 3://white mip
 	{
 		bool colormap_enable;
-		getValue("colormap enable", colormap_enable);
+		getValue(gstColormapEnable, colormap_enable);
 		if (colormap_enable)
 		{
 			m_vr->set_mode(flvr::TextureRenderer::MODE_MIP);
@@ -271,7 +271,7 @@ void VolumeData::OnCompressionChanged(Event& event)
 		return;
 
 	bool compression;
-	getValue("compression", compression);
+	getValue(gstCompression, compression);
 	m_vr->set_compression(compression);
 }
 
@@ -281,7 +281,7 @@ void VolumeData::OnInvertChanged(Event& event)
 		return;
 
 	bool invert;
-	getValue("invert", invert);
+	getValue(gstInvert, invert);
 	m_vr->set_inversion(invert);
 }
 
@@ -291,7 +291,7 @@ void VolumeData::OnMaskModeChanged(Event& event)
 		return;
 
 	long mask_mode;
-	getValue("mask mode", mask_mode);
+	getValue(gstMaskMode, mask_mode);
 	m_vr->set_ml_mode(mask_mode);
 }
 
@@ -301,7 +301,7 @@ void VolumeData::OnNoiseRedctChanged(Event& event)
 		return;
 
 	bool noise_redct;
-	getValue("noise redct", noise_redct);
+	getValue(gstNoiseRedct, noise_redct);
 	m_vr->SetNoiseRed(noise_redct);
 }
 
@@ -311,7 +311,7 @@ void VolumeData::On2dDmapIdChanged(Event& event)
 		return;
 
 	unsigned long dmap_id;
-	getValue("2d dmap id", dmap_id);
+	getValue(gst2dDmapId, dmap_id);
 	m_vr->set_2d_dmap(dmap_id);
 }
 
@@ -321,7 +321,7 @@ void VolumeData::OnGamma3dChanged(Event& event)
 		return;
 
 	double gamma_3d;
-	getValue("gamma 3d", gamma_3d);
+	getValue(gstGamma3d, gamma_3d);
 	m_vr->set_gamma3d(gamma_3d);
 }
 
@@ -331,7 +331,7 @@ void VolumeData::OnExtractBoundaryChanged(Event& event)
 		return;
 
 	double extract_boundary;
-	getValue("extract boundary", extract_boundary);
+	getValue(gstExtractBoundary, extract_boundary);
 	m_vr->set_gm_thresh(extract_boundary);
 }
 
@@ -341,7 +341,7 @@ void VolumeData::OnSaturationChanged(Event& event)
 		return;
 
 	double saturation;
-	getValue("saturation", saturation);
+	getValue(gstSaturation, saturation);
 	m_vr->set_offset(saturation);
 }
 
@@ -351,7 +351,7 @@ void VolumeData::OnLowThresholdChanged(Event& event)
 		return;
 
 	double low_threshold;
-	getValue("low threshold", low_threshold);
+	getValue(gstLowThreshold, low_threshold);
 	m_vr->set_lo_thresh(low_threshold);
 }
 
@@ -361,7 +361,7 @@ void VolumeData::OnHighThresholdChanged(Event& event)
 		return;
 
 	double high_threshold;
-	getValue("high threshold", high_threshold);
+	getValue(gstHighThreshold, high_threshold);
 	m_vr->set_hi_thresh(high_threshold);
 }
 
@@ -370,13 +370,13 @@ void VolumeData::OnColorChanged(Event& event)
 	if (!m_vr)
 		return;
 	Color color;
-	getValue("color", color);
+	getValue(gstColor, color);
 	m_vr->set_color(color);
 	HSVColor hsv(color);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("hsv", hsv, event);
+	setValue(gstHsv, hsv, event);
 	event.setNotifyFlags(Event::NOTIFY_SELF | Event::NOTIFY_AGENT);
-	setValue("luminance", hsv.val(), event);
+	setValue(gstLuminance, hsv.val(), event);
 }
 
 void VolumeData::OnSecColorChanged(Event& event)
@@ -385,10 +385,10 @@ void VolumeData::OnSecColorChanged(Event& event)
 		return;
 
 	Color sec_color;
-	getValue("sec color", sec_color);
+	getValue(gstSecColor, sec_color);
 	m_vr->set_mask_color(sec_color);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("sec color set", bool(true), event);
+	setValue(gstSecColorSet, bool(true), event);
 }
 
 void VolumeData::OnSecColorSetChanged(Event& event)
@@ -397,7 +397,7 @@ void VolumeData::OnSecColorSetChanged(Event& event)
 		return;
 
 	bool sec_color_set;
-	getValue("sec color set", sec_color_set);
+	getValue(gstSecColorSet, sec_color_set);
 	if (!sec_color_set)
 		m_vr->reset_mask_color_set();
 }
@@ -408,13 +408,13 @@ void VolumeData::OnLuminanceChanged(Event& event)
 		return;
 
 	double luminance;
-	getValue("luminance", luminance);
+	getValue(gstLuminance, luminance);
 	HSVColor hsv;
-	getValue("hsv", hsv);
+	getValue(gstHsv, hsv);
 	hsv.val(luminance);
 	Color color(hsv);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("color", color, event);
+	setValue(gstColor, color, event);
 	m_vr->set_color(color);
 }
 
@@ -424,7 +424,7 @@ void VolumeData::OnAlphaChanged(Event& event)
 		return;
 
 	double alpha;
-	getValue("alpha", alpha);
+	getValue(gstAlpha, alpha);
 	m_vr->set_alpha(alpha);
 }
 
@@ -434,7 +434,7 @@ void VolumeData::OnAlphaPowerChanged(Event& event)
 		return;
 
 	double dval;
-	getValue("alpha power", dval);
+	getValue(gstAlphaPower, dval);
 	m_vr->set_alpha_power(dval);
 }
 
@@ -444,12 +444,12 @@ void VolumeData::OnAlphaEnableChanged(Event& event)
 		return;
 
 	bool alpha_enable;
-	getValue("alpha enable", alpha_enable);
+	getValue(gstAlphaEnable, alpha_enable);
 	m_vr->set_solid(!alpha_enable);
 	if (alpha_enable)
 	{
 		double alpha;
-		getValue("alpha", alpha);
+		getValue(gstAlpha, alpha);
 		m_vr->set_alpha(alpha);
 	}
 	else
@@ -462,7 +462,7 @@ void VolumeData::OnMaskThreshChanged(Event& event)
 		return;
 
 	double mask_thresh;
-	getValue("mask thresh", mask_thresh);
+	getValue(gstMaskThresh, mask_thresh);
 	m_vr->set_mask_thresh(mask_thresh);
 }
 
@@ -472,7 +472,7 @@ void VolumeData::OnUseMaskThreshChanged(Event& event)
 		return;
 
 	bool use_mask_thresh;
-	getValue("use mask thresh", use_mask_thresh);
+	getValue(gstUseMaskThresh, use_mask_thresh);
 	if (!use_mask_thresh)
 		m_vr->set_mask_thresh(0.0);
 }
@@ -483,7 +483,7 @@ void VolumeData::OnShadingEnableChanged(Event& event)
 		return;
 
 	bool shading_enable;
-	getValue("shading enable", shading_enable);
+	getValue(gstShadingEnable, shading_enable);
 	m_vr->set_shading(shading_enable);
 }
 
@@ -493,27 +493,27 @@ void VolumeData::OnMaterialChanged(Event& event)
 		return;
 
 	double mat_amb, mat_diff, mat_spec, mat_shine;
-	getValue("mat amb", mat_amb);
-	getValue("mat diff", mat_diff);
-	getValue("mat spec", mat_spec);
-	getValue("mat shine", mat_shine);
+	getValue(gstMatAmb, mat_amb);
+	getValue(gstMatDiff, mat_diff);
+	getValue(gstMatSpec, mat_spec);
+	getValue(gstMatShine, mat_shine);
 	m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
 }
 
 void VolumeData::OnLowShadingChanged(Event& event)
 {
 	double low_shading;
-	getValue("low shading", low_shading);
+	getValue(gstLowShading, low_shading);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("mat amb", low_shading, event);
+	setValue(gstMatAmb, low_shading, event);
 }
 
 void VolumeData::OnHighShadingChanged(Event& event)
 {
 	double high_shading;
-	getValue("high shading", high_shading);
+	getValue(gstHighShading, high_shading);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("mat shine", high_shading, event);
+	setValue(gstMatShine, high_shading, event);
 }
 
 void VolumeData::OnSampleRateChanged(Event& event)
@@ -522,7 +522,7 @@ void VolumeData::OnSampleRateChanged(Event& event)
 		return;
 
 	double sample_rate;
-	getValue("sample rate", sample_rate);
+	getValue(gstSampleRate, sample_rate);
 	m_vr->set_sampling_rate(sample_rate);
 }
 
@@ -532,9 +532,9 @@ void VolumeData::OnColormapModeChanged(Event& event)
 		return;
 
 	long colormap_mode;
-	getValue("colormap mode", colormap_mode);
+	getValue(gstColormapMode, colormap_mode);
 	Color color;
-	getValue("color", color);
+	getValue(gstColor, color);
 	m_vr->set_colormap_mode(colormap_mode);
 	m_vr->set_color(color);
 }
@@ -545,8 +545,8 @@ void VolumeData::OnColormapValueChanged(Event& event)
 		return;
 
 	double colormap_low, colormap_high;
-	getValue("colormap low", colormap_low);
-	getValue("colormap high", colormap_high);
+	getValue(gstColormapLow, colormap_low);
+	getValue(gstColormapHigh, colormap_high);
 	m_vr->set_colormap_values(colormap_low, colormap_high);
 }
 
@@ -555,7 +555,7 @@ void VolumeData::OnColormapTypeChanged(Event& event)
 	if (!m_vr)
 		return;
 	long colormap_type;
-	getValue("colormap type", colormap_type);
+	getValue(gstColormapType, colormap_type);
 	m_vr->set_colormap(colormap_type);
 }
 
@@ -565,7 +565,7 @@ void VolumeData::OnColormapProjChanged(Event& event)
 		return;
 
 	long colormap_proj;
-	getValue("colormap proj", colormap_proj);
+	getValue(gstColormapProj, colormap_proj);
 	m_vr->set_colormap_proj(colormap_proj);
 }
 
@@ -574,20 +574,20 @@ void VolumeData::OnSpacingChanged(Event& event)
 	if (!m_tex)
 		return;
 	double spc_x, spc_y, spc_z;
-	getValue("spc x", spc_x);
-	getValue("spc y", spc_y);
-	getValue("spc z", spc_z);
+	getValue(gstSpcX, spc_x);
+	getValue(gstSpcY, spc_y);
+	getValue(gstSpcZ, spc_z);
 	m_tex->set_spacings(spc_x, spc_y, spc_z);
 	BBox bbox;
 	m_tex->get_bounds(bbox);
 	event.setNotifyFlags(Event::NOTIFY_PARENT | Event::NOTIFY_AGENT);
-	setValue("bounds", bbox, event);
+	setValue(gstBounds, bbox, event);
 
 	//m_tex->get_base_spacings(spc_x, spc_y, spc_z);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("base spc x", spc_x, event);
-	setValue("base spc y", spc_y, event);
-	setValue("base spc z", spc_z, event);
+	setValue(gstBaseSpcX, spc_x, event);
+	setValue(gstBaseSpcY, spc_y, event);
+	setValue(gstBaseSpcZ, spc_z, event);
 
 	//tex transform
 	Transform *temp = m_tex->transform();
@@ -601,18 +601,18 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	if (!m_tex)
 		return;
 	double spc_x, spc_y, spc_z;
-	getValue("base spc x", spc_x);
-	getValue("base spc y", spc_y);
-	getValue("base spc z", spc_z);
+	getValue(gstBaseSpcX, spc_x);
+	getValue(gstBaseSpcY, spc_y);
+	getValue(gstBaseSpcZ, spc_z);
 	m_tex->set_base_spacings(spc_x, spc_y, spc_z);
 
 	long level;
 	getValue("level", level);
 	m_tex->get_spacings(spc_x, spc_y, spc_z, level);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("spc x", spc_x, event);
-	setValue("spc y", spc_y, event);
-	setValue("spc z", spc_z, event);
+	setValue(gstSpcX, spc_x, event);
+	setValue(gstSpcY, spc_y, event);
+	setValue(gstSpcZ, spc_z, event);
 
 	//tex transform
 	Transform *temp = m_tex->transform();
@@ -626,9 +626,9 @@ void VolumeData::OnSpacingScaleChanged(Event& event)
 	if (!m_tex)
 		return;
 	double spc_x, spc_y, spc_z;
-	getValue("spc scl x", spc_x);
-	getValue("spc scl y", spc_y);
-	getValue("spc scl z", spc_z);
+	getValue(gstSpcSclX, spc_x);
+	getValue(gstSpcSclY, spc_y);
+	getValue(gstSpcSclZ, spc_z);
 	m_tex->set_spacing_scales(spc_x, spc_y, spc_z);
 }
 
@@ -646,7 +646,7 @@ void VolumeData::OnLevelChanged(Event& event)
 	BBox bbox;
 	m_tex->get_bounds(bbox);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	setValue("bounds", bbox, event);
+	setValue(gstBounds, bbox, event);
 
 	//tex transform
 	Transform *temp = m_tex->transform();
@@ -707,7 +707,7 @@ void VolumeData::OnClipPlanesChanged(Event& event)
 		return;
 
 	PlaneSet planeset;
-	getValue("clip planes", planeset);
+	getValue(gstClipPlanes, planeset);
 
 	//this needs to be made consistent in the future
 	std::vector<Plane*> planelist(0);
@@ -727,7 +727,7 @@ void VolumeData::OnClipPlanesChanged(Event& event)
 	fluo::Plane* pz1 = &(planeset[4]);
 	fluo::Plane* pz2 = &(planeset[5]);
 	fluo::BBox bounds;
-	getValue("bounds", bounds);
+	getValue(gstBounds, bounds);
 
 	fluo::Vector diff =
 		bounds.Max() - bounds.Min();
@@ -740,7 +740,7 @@ void VolumeData::OnClipPlanesChanged(Event& event)
 		bounds.Min().y() + diff.y()*py2->d(),
 		bounds.Min().z() + diff.z()*pz2->d());
 
-	setValue("clip bounds", fluo::BBox(min, max));
+	setValue(gstClipBounds, fluo::BBox(min, max));
 }
 
 void VolumeData::OnIntScaleChanged(Event& event)
@@ -749,7 +749,7 @@ void VolumeData::OnIntScaleChanged(Event& event)
 		return;
 
 	double int_scale;
-	getValue("int scale", int_scale);
+	getValue(gstIntScale, int_scale);
 	m_vr->set_scalar_scale(int_scale);
 	m_vr->set_gm_scale(int_scale);
 }
@@ -757,24 +757,24 @@ void VolumeData::OnIntScaleChanged(Event& event)
 void VolumeData::OnSyncOutputChannels(Event& event)
 {
 	ValueCollection ss_gamma = {
-		"gamma r",
-		"gamma g",
-		"gamma b"
+		gstGammaR,
+		gstGammaG,
+		gstGammaB
 	};
 	ValueCollection ss_brigt = {
-		"brightness r",
-		"brightness g",
-		"brightness b"
+		gstBrightnessR,
+		gstBrightnessG,
+		gstBrightnessB
 	};
 	ValueCollection ss_equal = {
-		"equalize r",
-		"equalize g",
-		"equalize b"
+		gstEqualizeR,
+		gstEqualizeG,
+		gstEqualizeB
 	};
 	bool sync_r, sync_g, sync_b;
-	getValue("sync r", sync_r);
-	getValue("sync g", sync_g);
-	getValue("sync b", sync_b);
+	getValue(gstSyncR, sync_r);
+	getValue(gstSyncG, sync_g);
+	getValue(gstSyncB, sync_b);
 
 	//unsync all for the sake of simplicity
 	unsyncValues(ss_gamma);
@@ -787,21 +787,21 @@ void VolumeData::OnSyncOutputChannels(Event& event)
 	ss_equal.clear();
 	if (sync_r)
 	{
-		ss_gamma.insert("gamma r");
-		ss_brigt.insert("brightness r");
-		ss_equal.insert("equalize r");
+		ss_gamma.insert(gstGammaR);
+		ss_brigt.insert(gstBrightnessR);
+		ss_equal.insert(gstEqualizeR);
 	}
 	if (sync_g)
 	{
-		ss_gamma.insert("gamma g");
-		ss_brigt.insert("brightness g");
-		ss_equal.insert("equalize g");
+		ss_gamma.insert(gstGammaG);
+		ss_brigt.insert(gstBrightnessG);
+		ss_equal.insert(gstEqualizeG);
 	}
 	if (sync_b)
 	{
-		ss_gamma.insert("gamma b");
-		ss_brigt.insert("brightness b");
-		ss_equal.insert("equalize b");
+		ss_gamma.insert(gstGammaB);
+		ss_brigt.insert(gstBrightnessB);
+		ss_equal.insert(gstEqualizeB);
 	}
 	syncValues(ss_gamma);
 	syncValues(ss_brigt);
@@ -811,35 +811,35 @@ void VolumeData::OnSyncOutputChannels(Event& event)
 void VolumeData::OnClipX1Changed(Event& event)
 {
 	bool clip_link;
-	getValue("clip link x", clip_link);
+	getValue(gstClipLinkX, clip_link);
 	double value1, value2;
 	double clip_dist;
 	if (clip_link)
 	{
-		getValue("clip dist x", clip_dist);
-		getValue("clip x1", value1);
+		getValue(gstClipDistX, clip_dist);
+		getValue(gstClipX1, value1);
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip x1", 1.0 - clip_dist, event);
-			setValue("clip x2", 1.0, event);
+			setValue(gstClipX1, 1.0 - clip_dist, event);
+			setValue(gstClipX2, 1.0, event);
 		}
 		else
-			setValue("clip x2", value2, event);
+			setValue(gstClipX2, value2, event);
 	}
 	else
 	{
-		getValue("clip x1", value1);
-		getValue("clip x2", value2);
+		getValue(gstClipX1, value1);
+		getValue(gstClipX2, value2);
 		if (value1 >= value2)
 		{
 			long resx;
-			getValue("res x", resx);
+			getValue(gstResX, resx);
 			value1 = value2 - 1.0 / resx;
-			setValue("clip x1", value1);
+			setValue(gstClipX1, value1);
 		}
 		clip_dist = value2 - value1;
-		setValue("clip dist x", clip_dist, event);
+		setValue(gstClipDistX, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -848,35 +848,35 @@ void VolumeData::OnClipX1Changed(Event& event)
 void VolumeData::OnClipX2Changed(Event& event)
 {
 	bool clip_link;
-	getValue("clip link x", clip_link);
+	getValue(gstClipLinkX, clip_link);
 	double value1, value2;
 	double clip_dist;
 	if (clip_link)
 	{
-		getValue("clip dist x", clip_dist);
-		getValue("clip x2", value2);
+		getValue(gstClipDistX, clip_dist);
+		getValue(gstClipX2, value2);
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			setValue("clip x1", 0.0, event);
-			setValue("clip x2", clip_dist, event);
+			setValue(gstClipX1, 0.0, event);
+			setValue(gstClipX2, clip_dist, event);
 		}
 		else
-			setValue("clip x1", value1, event);
+			setValue(gstClipX1, value1, event);
 	}
 	else
 	{
-		getValue("clip x1", value1);
-		getValue("clip x2", value2);
+		getValue(gstClipX1, value1);
+		getValue(gstClipX2, value2);
 		if (value1 >= value2)
 		{
 			long resx;
-			getValue("res x", resx);
+			getValue(gstResX, resx);
 			value2 = value1 + 1.0 / resx;
-			setValue("clip x2", value2);
+			setValue(gstClipX2, value2);
 		}
 		clip_dist = value2 - value1;
-		setValue("clip dist x", clip_dist, event);
+		setValue(gstClipDistX, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -885,35 +885,35 @@ void VolumeData::OnClipX2Changed(Event& event)
 void VolumeData::OnClipY1Changed(Event& event)
 {
 	bool clip_link;
-	getValue("clip link y", clip_link);
+	getValue(gstClipLinkY, clip_link);
 	double value1, value2;
 	double clip_dist;
 	if (clip_link)
 	{
-		getValue("clip dist y", clip_dist);
-		getValue("clip y1", value1);
+		getValue(gstClipDistY, clip_dist);
+		getValue(gstClipY1, value1);
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip y1", 1.0 - clip_dist, event);
-			setValue("clip y2", 1.0, event);
+			setValue(gstClipY1, 1.0 - clip_dist, event);
+			setValue(gstClipY2, 1.0, event);
 		}
 		else
-			setValue("clip y2", value2, event);
+			setValue(gstClipY2, value2, event);
 	}
 	else
 	{
-		getValue("clip y1", value1);
-		getValue("clip y2", value2);
+		getValue(gstClipY1, value1);
+		getValue(gstClipY2, value2);
 		if (value1 >= value2)
 		{
 			long resy;
-			getValue("res y", resy);
+			getValue(gstResY, resy);
 			value1 = value2 - 1.0 / resy;
-			setValue("clip y1", value1);
+			setValue(gstClipY1, value1);
 		}
 		clip_dist = value2 - value1;
-		setValue("clip dist y", clip_dist, event);
+		setValue(gstClipDistY, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -922,35 +922,35 @@ void VolumeData::OnClipY1Changed(Event& event)
 void VolumeData::OnClipY2Changed(Event& event)
 {
 	bool clip_link;
-	getValue("clip link y", clip_link);
+	getValue(gstClipLinkY, clip_link);
 	double value1, value2;
 	double clip_dist;
 	if (clip_link)
 	{
-		getValue("clip dist y", clip_dist);
-		getValue("clip y2", value2);
+		getValue(gstClipDistY, clip_dist);
+		getValue(gstClipY2, value2);
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			setValue("clip y1", 0.0, event);
-			setValue("clip y2", clip_dist, event);
+			setValue(gstClipY1, 0.0, event);
+			setValue(gstClipY2, clip_dist, event);
 		}
 		else
-			setValue("clip y1", value1, event);
+			setValue(gstClipY1, value1, event);
 	}
 	else
 	{
-		getValue("clip y1", value1);
-		getValue("clip y2", value2);
+		getValue(gstClipY1, value1);
+		getValue(gstClipY2, value2);
 		if (value1 >= value2)
 		{
 			long resy;
-			getValue("res y", resy);
+			getValue(gstResY, resy);
 			value2 = value1 + 1.0 / resy;
-			setValue("clip y2", value2);
+			setValue(gstClipY2, value2);
 		}
 		clip_dist = value2 - value1;
-		setValue("clip dist y", clip_dist, event);
+		setValue(gstClipDistY, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -959,35 +959,35 @@ void VolumeData::OnClipY2Changed(Event& event)
 void VolumeData::OnClipZ1Changed(Event& event)
 {
 	bool clip_link;
-	getValue("clip link z", clip_link);
+	getValue(gstClipLinkZ, clip_link);
 	double value1, value2;
 	double clip_dist;
 	if (clip_link)
 	{
-		getValue("clip dist z", clip_dist);
-		getValue("clip z1", value1);
+		getValue(gstClipDistZ, clip_dist);
+		getValue(gstClipZ1, value1);
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			setValue("clip z1", 1.0 - clip_dist, event);
-			setValue("clip z2", 1.0, event);
+			setValue(gstClipZ1, 1.0 - clip_dist, event);
+			setValue(gstClipZ2, 1.0, event);
 		}
 		else
-			setValue("clip z2", value2, event);
+			setValue(gstClipZ2, value2, event);
 	}
 	else
 	{
-		getValue("clip z1", value1);
-		getValue("clip z2", value2);
+		getValue(gstClipZ1, value1);
+		getValue(gstClipZ2, value2);
 		if (value1 >= value2)
 		{
 			long resz;
-			getValue("res z", resz);
+			getValue(gstResZ, resz);
 			value1 = value2 - 1.0 / resz;
-			setValue("clip z1", value1);
+			setValue(gstClipZ1, value1);
 		}
 		clip_dist = value2 - value1;
-		setValue("clip dist z", clip_dist, event);
+		setValue(gstClipDistZ, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -996,35 +996,35 @@ void VolumeData::OnClipZ1Changed(Event& event)
 void VolumeData::OnClipZ2Changed(Event& event)
 {
 	bool clip_link;
-	getValue("clip link z", clip_link);
+	getValue(gstClipLinkZ, clip_link);
 	double value1, value2;
 	double clip_dist;
 	if (clip_link)
 	{
-		getValue("clip dist z", clip_dist);
-		getValue("clip z2", value2);
+		getValue(gstClipDistZ, clip_dist);
+		getValue(gstClipZ2, value2);
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			setValue("clip z1", 0.0, event);
-			setValue("clip z2", clip_dist, event);
+			setValue(gstClipZ1, 0.0, event);
+			setValue(gstClipZ2, clip_dist, event);
 		}
 		else
-			setValue("clip z1", value1, event);
+			setValue(gstClipZ1, value1, event);
 	}
 	else
 	{
-		getValue("clip z1", value1);
-		getValue("clip z2", value2);
+		getValue(gstClipZ1, value1);
+		getValue(gstClipZ2, value2);
 		if (value1 >= value2)
 		{
 			long resz;
-			getValue("res z", resz);
+			getValue(gstResZ, resz);
 			value2 = value1 + 1.0 / resz;
-			setValue("clip z2", value2);
+			setValue(gstClipZ2, value2);
 		}
 		clip_dist = value2 - value1;
-		setValue("clip dist z", clip_dist, event);
+		setValue(gstClipDistZ, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -1038,24 +1038,24 @@ void VolumeData::OnClipRot(Event& event)
 void VolumeData::UpdateClippingPlanes(Event& event)
 {
 	double clip_x1, clip_x2, clip_y1, clip_y2, clip_z1, clip_z2;
-	getValue("clip x1", clip_x1);
-	getValue("clip x2", clip_x2);
-	getValue("clip y1", clip_y1);
-	getValue("clip y2", clip_y2);
-	getValue("clip z1", clip_z1);
-	getValue("clip z2", clip_z2);
+	getValue(gstClipX1, clip_x1);
+	getValue(gstClipX2, clip_x2);
+	getValue(gstClipY1, clip_y1);
+	getValue(gstClipY2, clip_y2);
+	getValue(gstClipZ1, clip_z1);
+	getValue(gstClipZ2, clip_z2);
 	double clip_rot_x, clip_rot_y, clip_rot_z;
-	getValue("clip rot x", clip_rot_x);
-	getValue("clip rot y", clip_rot_y);
-	getValue("clip rot z", clip_rot_z);
+	getValue(gstClipRotX, clip_rot_x);
+	getValue(gstClipRotY, clip_rot_y);
+	getValue(gstClipRotZ, clip_rot_z);
 	double spc_x, spc_y, spc_z;
 	long res_x, res_y, res_z;
-	getValue("spc x", spc_x);
-	getValue("spc y", spc_y);
-	getValue("spc z", spc_z);
-	getValue("res x", res_x);
-	getValue("res y", res_y);
-	getValue("res z", res_z);
+	getValue(gstSpcX, spc_x);
+	getValue(gstSpcY, spc_y);
+	getValue(gstSpcZ, spc_z);
+	getValue(gstResX, res_x);
+	getValue(gstResY, res_y);
+	getValue(gstResZ, res_z);
 
 	Quaternion cl_quat;
 	cl_quat.FromEuler(clip_rot_x, clip_rot_y, clip_rot_z);
@@ -1087,7 +1087,7 @@ void VolumeData::UpdateClippingPlanes(Event& event)
 	planes.Scale(scale);
 	planes.Translate(trans2);
 	//set and update to the renderer
-	setValue("clip planes", planes, event);
+	setValue(gstClipPlanes, planes, event);
 }
 
 //randomize color
@@ -1095,7 +1095,7 @@ void VolumeData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
-	setValue("color", color, event);
+	setValue(gstColor, color, event);
 }
 
 //functions from old class
@@ -1117,7 +1117,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 	if (!data || data->dim != 3)
 		return 0;
 
-	setValue("data path", path);
+	setValue(gstDataPath, path);
 	setName(name);
 
 	if (m_tex)
@@ -1166,7 +1166,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 			delete m_vr;
 
 		PlaneSet planeset;
-		getValue("clip planes", planeset);
+		getValue(gstClipPlanes, planeset);
 		//this needs to be made consistent in the future
 		vector<Plane*> planelist(0);
 		for (int i = 0; i < planeset.GetSize(); ++i)
@@ -1181,26 +1181,26 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
         Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
 		bounds.extend(pmin);
 		bounds.extend(pmax);
-		setValue("bounds", bounds);
-		setValue("res x", long(nv->axis[0].size));
-		setValue("res y", long(nv->axis[1].size));
-		setValue("res z", long(nv->axis[2].size));
+		setValue(gstBounds, bounds);
+		setValue(gstResX, long(nv->axis[0].size));
+		setValue(gstResY, long(nv->axis[1].size));
+		setValue(gstResZ, long(nv->axis[2].size));
 		Initialize();
 
 		//double sample_rate;
-		//getValue("sample rate", sample_rate);
+		//getValue(gstSampleRate, sample_rate);
 		//m_vr->set_sampling_rate(sample_rate);
 		//double mat_amb, mat_diff, mat_spec, mat_shine;
-		//getValue("mat amb", mat_amb);
-		//getValue("mat diff", mat_diff);
-		//getValue("mat spec", mat_spec);
-		//getValue("mat shine", mat_shine);
+		//getValue(gstMatAmb, mat_amb);
+		//getValue(gstMatDiff, mat_diff);
+		//getValue(gstMatSpec, mat_spec);
+		//getValue(gstMatShine, mat_shine);
 		//m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
 		//bool shading;
-		//getValue("shading enable", shading);
+		//getValue(gstShadingEnable, shading);
 		//m_vr->set_shading(shading);
 		//double int_scale;
-		//getValue("int scale", int_scale);
+		//getValue(gstIntScale, int_scale);
 		//m_vr->set_scalar_scale(int_scale);
 		//m_vr->set_gm_scale(int_scale);
 
@@ -1216,13 +1216,13 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		//m_vr->set_fog(false, da_int, da_start, da_end);
 
 		//double high_threshold;
-		//getValue("high threshold", high_threshold);
+		//getValue(gstHighThreshold, high_threshold);
 		//m_vr->set_hi_thresh(high_threshold);
 		//
 		//double spcx, spcy, spcz;
-		//getValue("spc x", spcx);
-		//getValue("spc y", spcy);
-		//getValue("spc z", spcz);
+		//getValue(gstSpcX, spcx);
+		//getValue(gstSpcY, spcy);
+		//getValue(gstSpcZ, spcz);
 		//m_tex->set_spacings(spcx, spcy, spcz);
 		//m_tex->set_base_spacings(spcx, spcy, spcz);
 	}
@@ -1238,9 +1238,9 @@ int VolumeData::ReplaceData(Nrrd* data, bool del_tex)
 	if (del_tex)
 	{
 		Nrrd *nv = data;
-		setValue("res x", long(nv->axis[0].size));
-		setValue("res y", long(nv->axis[1].size));
-		setValue("res z", long(nv->axis[2].size));
+		setValue(gstResX, long(nv->axis[0].size));
+		setValue(gstResY, long(nv->axis[1].size));
+		setValue(gstResZ, long(nv->axis[2].size));
 
 		if (m_tex)
 			delete m_tex;
@@ -1249,7 +1249,7 @@ int VolumeData::ReplaceData(Nrrd* data, bool del_tex)
 		getValue("skip brick", skip_brick);
 		m_tex->set_use_priority(skip_brick);
 		double max_int;
-		getValue("max int", max_int);
+		getValue(gstMaxInt, max_int);
 		m_tex->build(nv, 0, 0, max_int, 0, 0);
 	}
 	else
@@ -1272,12 +1272,12 @@ int VolumeData::ReplaceData(VolumeData* data)
 	if (!data)
 		return 0;
 	long resx, resy, resz, resx2, resy2, resz2;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
-	data->getValue("res x", resx2);
-	data->getValue("res y", resy2);
-	data->getValue("res z", resz2);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
+	data->getValue(gstResX, resx2);
+	data->getValue(gstResY, resy2);
+	data->getValue(gstResZ, resz2);
 	if (resx != resx2 || resy != resy2 || resz != resz2)
 		return 0;
 
@@ -1292,10 +1292,7 @@ int VolumeData::ReplaceData(VolumeData* data)
 	}
 	m_tex = data->GetTexture();
 	data->SetTexture();
-	ValueCollection names;
-	names.insert("int scale");
-	names.insert("gm scale");
-	names.insert("max int");
+	ValueCollection names{ gstIntScale, gstGmScale, gstMaxInt };
 	data->propValues(names, this);
 	if (m_vr)
 		m_vr->set_texture(m_tex);
@@ -1342,7 +1339,7 @@ void VolumeData::AddEmptyData(int bits,
 		memset((void*)val8, 0, sizeof(uint8)*nx*ny*nz);
         //nrrdWrap(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz); //may be deprecated
         nrrdWrap_va(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
-		setValue("bits", long(8));
+		setValue(gstBits, long(8));
 	}
 	else if (bits == 16)
 	{
@@ -1357,7 +1354,7 @@ void VolumeData::AddEmptyData(int bits,
 		memset((void*)val16, 0, sizeof(uint16)*nx*ny*nz);
         //nrrdWrap(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz); //may be deprecated
         nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
-		setValue("bits", long(16));
+		setValue(gstBits, long(16));
     }
     
     /*
@@ -1374,9 +1371,9 @@ void VolumeData::AddEmptyData(int bits,
     nrrdAxisInfoSet_va(nv, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
 
 	//resolution
-	setValue("res x", long(nv->axis[0].size));
-	setValue("res y", long(nv->axis[1].size));
-	setValue("res z", long(nv->axis[2].size));
+	setValue(gstResX, long(nv->axis[0].size));
+	setValue(gstResY, long(nv->axis[1].size));
+	setValue(gstResZ, long(nv->axis[2].size));
 
 	//bounding box
 	BBox bounds;
@@ -1384,7 +1381,7 @@ void VolumeData::AddEmptyData(int bits,
     Point pmin(nv->axis[0].min, nv->axis[1].min, nv->axis[2].min);
 	bounds.extend(pmin);
 	bounds.extend(pmax);
-	setValue("bounds", bounds);
+	setValue(gstBounds, bounds);
 
 	//create texture
 	m_tex = new flvr::Texture();
@@ -1396,7 +1393,7 @@ void VolumeData::AddEmptyData(int bits,
 	//clipping planes
 	//this needs to be made consistent in the future
 	PlaneSet planeset;
-	getValue("clip planes", planeset);
+	getValue(gstClipPlanes, planeset);
 	vector<Plane*> planelist(0);
 	for (int i = 0; i < planeset.GetSize(); ++i)
 	{
@@ -1407,19 +1404,19 @@ void VolumeData::AddEmptyData(int bits,
 	//create volume renderer
 	m_vr = new flvr::VolumeRenderer(m_tex, planelist);
 	double sample_rate;
-	getValue("sample rate", sample_rate);
+	getValue(gstSampleRate, sample_rate);
 	m_vr->set_sampling_rate(sample_rate);
 	double mat_amb, mat_diff, mat_spec, mat_shine;
-	getValue("mat amb", mat_amb);
-	getValue("mat diff", mat_diff);
-	getValue("mat spec", mat_spec);
-	getValue("mat shine", mat_shine);
+	getValue(gstMatAmb, mat_amb);
+	getValue(gstMatDiff, mat_diff);
+	getValue(gstMatSpec, mat_spec);
+	getValue(gstMatShine, mat_shine);
 	m_vr->set_material(mat_amb, mat_diff, mat_spec, mat_shine);
 	bool shading;
-	getValue("shading enable", shading);
+	getValue(gstShadingEnable, shading);
 	m_vr->set_shading(shading);
 	double int_scale;
-	getValue("int scale", int_scale);
+	getValue(gstIntScale, int_scale);
 	m_vr->set_scalar_scale(int_scale);
 	m_vr->set_gm_scale(int_scale);
 
@@ -1440,16 +1437,16 @@ void VolumeData::LoadMask(Nrrd* mask)
 	ny2 = mask->axis[1].size;
 	nz2 = mask->axis[2].size;
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	if (resx != nx2 || resy != ny2 || resz != nz2)
 	{
 		double spcx, spcy, spcz;
 		//GetSpacings(spcx, spcy, spcz);
-		getValue("spc x", spcx);
-		getValue("spc y", spcy);
-		getValue("spc z", spcz);
+		getValue(gstSpcX, spcx);
+		getValue(gstSpcY, spcy);
+		getValue(gstSpcZ, spcz);
 		FL::VolumeSampler sampler;
 		sampler.SetVolume(mask);
 		sampler.SetSize(resx, resy, resz);
@@ -1485,9 +1482,9 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	Nrrd *nrrd_mask = 0;
 	uint8 *val8 = 0;
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	//prepare the texture bricks for the mask
@@ -1545,9 +1542,9 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	if (!mask || !mask->data || !m_tex || !m_vr)
 		return;
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	if (mask->dim != 3 ||
 		mask->axis[0].size != resx ||
 		mask->axis[1].size != resy ||
@@ -1632,9 +1629,9 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 	if (!mask || !mask->data || !m_tex || !m_vr)
 		return;
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	if (mask->dim != 3 ||
 		mask->axis[0].size != resx ||
 		mask->axis[1].size != resy ||
@@ -1730,16 +1727,16 @@ void VolumeData::LoadLabel(Nrrd* label)
 	ny2 = label->axis[1].size;
 	nz2 = label->axis[2].size;
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	if (resx != nx2 || resy != ny2 || resz != nz2)
 	{
 		double spcx, spcy, spcz;
 		//GetSpacings(spcx, spcy, spcz);
-		getValue("spc x", spcx);
-		getValue("spc y", spcy);
-		getValue("spc z", spcz);
+		getValue(gstSpcX, spcx);
+		getValue(gstSpcY, spcy);
+		getValue(gstSpcZ, spcz);
 		FL::VolumeSampler sampler;
 		sampler.SetVolume(label);
 		sampler.SetSize(resx, resy, resz);
@@ -1770,9 +1767,9 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 		return;
 
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	Nrrd *nrrd_label = 0;
@@ -1847,9 +1844,9 @@ bool VolumeData::SearchLabel(unsigned int label)
 		return false;
 
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	for (unsigned long long index = 0; index < mem_size; ++index)
@@ -1872,9 +1869,9 @@ void VolumeData::PushLabel(bool ret)
 	if (!data || !data->data)
 		return;
 	long nx, ny, nz;
-	getValue("res x", nx);
-	getValue("res y", ny);
-	getValue("res z", nz);
+	getValue(gstResX, nx);
+	getValue(gstResY, ny);
+	getValue(gstResZ, nz);
 	unsigned long long size = (unsigned long long)nx * ny * nz;
 	if (!m_label_save)
 		m_label_save = new unsigned int[size];
@@ -1895,9 +1892,9 @@ void VolumeData::LoadLabel2()
 		if (!data || !data->data)
 			return;
 		long nx, ny, nz;
-		getValue("res x", nx);
-		getValue("res y", ny);
-		getValue("res z", nz);
+		getValue(gstResX, nx);
+		getValue(gstResY, ny);
+		getValue(gstResZ, nz);
 		unsigned long long size = (unsigned long long)nx * ny * nz;
 		memcpy(data->data, m_label_save, size * sizeof(unsigned int));
 		m_vr->clear_tex_current();
@@ -1908,11 +1905,11 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	long bits;
-	getValue("bits", bits);
+	getValue(gstBits, bits);
 	bool multires;
 	getValue("multires", multires);
 	double int_scale;
-	getValue("int scale", int_scale);
+	getValue(gstIntScale, int_scale);
 
 	int64_t nx, ny, nz;
 	if (multires)
@@ -1965,7 +1962,7 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	long bits;
-	getValue("bits", bits);
+	getValue(gstBits, bits);
 	bool multires;
 	getValue("multires", multires);
 
@@ -2002,14 +1999,14 @@ double VolumeData::GetTransferValue(int i, int j, int k, flvr::TextureBrick* b)
 
 	//this will become inefficient, package transfer function in the future
 	double lo_thresh, hi_thresh, soft_thresh, gamma3d, extract_boundary, saturation, alpha, int_scale;
-	getValue("low threshold", lo_thresh);
-	getValue("high threshold", hi_thresh);
-	getValue("soft thresh", soft_thresh);
-	getValue("gamma 3d", gamma3d);
-	getValue("extract boundary", extract_boundary);
-	getValue("saturation", saturation);
-	getValue("alpha", alpha);
-	getValue("int scale", int_scale);
+	getValue(gstLowThreshold, lo_thresh);
+	getValue(gstHighThreshold, hi_thresh);
+	getValue(gstSoftThresh, soft_thresh);
+	getValue(gstGamma3d, gamma3d);
+	getValue(gstExtractBoundary, extract_boundary);
+	getValue(gstSaturation, saturation);
+	getValue(gstAlpha, alpha);
+	getValue(gstIntScale, int_scale);
 
 	if (bits == 8)
 	{
@@ -2122,11 +2119,11 @@ void VolumeData::SaveData(const std::wstring &filename,
 	}
 
 	bool resize;
-	getValue("resize", resize);
+	getValue(gstResize, resize);
 	long rnx, rny, rnz;
-	getValue("resize x", rnx);
-	getValue("resize y", rny);
-	getValue("resize z", rnz);
+	getValue(gstResizeX, rnx);
+	getValue(gstResizeY, rny);
+	getValue(gstResizeZ, rnz);
 	if (resize || crop)
 	{
 		flrd::VolumeSampler sampler;
@@ -2180,7 +2177,7 @@ void VolumeData::SaveData(const std::wstring &filename,
 
 	if (resize || crop)
 	{
-		temp->setValue("data path", filename);
+		temp->setValue(gstDataPath, filename);
 		temp->SaveMask(false, 0, 0);
 		temp->SaveLabel(false, 0, 0);
 	}
@@ -2193,7 +2190,7 @@ void VolumeData::SaveData(const std::wstring &filename,
 	if (temp)
 		glbin_volf->remove(temp);
 
-	setValue("data path", filename);
+	setValue(gstDataPath, filename);
 }
 
 void VolumeData::SaveMask(bool use_reader, long t, long c)
@@ -2202,17 +2199,17 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 		return;
 
 	if (t == -1)
-		getValue("time", t);
+		getValue(gstTime, t);
 	if (c == -1)
-		getValue("channel", c);
+		getValue(gstChannel, c);
 
 	Nrrd* data = 0;
 	bool delete_data = false;
 	double spcx, spcy, spcz;
 	//GetSpacings(spcx, spcy, spcz);
-	getValue("spc x", spcx);
-	getValue("spc y", spcy);
-	getValue("spc z", spcz);
+	getValue(gstSpcX, spcx);
+	getValue(gstSpcY, spcy);
+	getValue(gstSpcZ, spcz);
 
 	//save mask
 	if (m_tex->nmask() != -1)
@@ -2225,11 +2222,11 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
             //to reduce coupling
             
 /*			bool resize;
-			getValue("resize", resize);
+			getValue(gstResize, resize);
 			long resize_x, resize_y, resize_z;
-			getValue("resize x", resize_x);
-			getValue("resize y", resize_y);
-			getValue("resize z", resize_z);
+			getValue(gstResizeX, resize_x);
+			getValue(gstResizeY, resize_y);
+			getValue(gstResizeZ, resize_z);
 			if (resize)
 			{
 				FL::VolumeSampler sampler;
@@ -2253,7 +2250,7 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
 			wstring filename, tex_path;
-			getValue("data path", tex_path);
+			getValue(gstDataPath, tex_path);
 			if (use_reader && m_reader)
 				filename = m_reader->GetCurMaskName(t, c);
 			else
@@ -2271,17 +2268,17 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 		return;
 
 	if (t == -1)
-		getValue("time", t);
+		getValue(gstTime, t);
 	if (c == -1)
-		getValue("channel", c);
+		getValue(gstChannel, c);
 
 	Nrrd* data = 0;
 	bool delete_data = false;
 	double spcx, spcy, spcz;
 	//GetSpacings(spcx, spcy, spcz);
-	getValue("spc x", spcx);
-	getValue("spc y", spcy);
-	getValue("spc z", spcz);
+	getValue(gstSpcX, spcx);
+	getValue(gstSpcY, spcy);
+	getValue(gstSpcZ, spcz);
 
 	//save label
 	if (m_tex->nlabel() != -1)
@@ -2293,11 +2290,11 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
             //to reduce coupling
             
 /*			bool resize;
-			getValue("resize", resize);
+			getValue(gstResize, resize);
 			long resize_x, resize_y, resize_z;
-			getValue("resize x", resize_x);
-			getValue("resize y", resize_y);
-			getValue("resize z", resize_z);
+			getValue(gstResizeX, resize_x);
+			getValue(gstResizeY, resize_y);
+			getValue(gstResizeZ, resize_z);
 			if (resize)
 			{
 				FL::VolumeSampler sampler;
@@ -2319,7 +2316,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
 			wstring filename, tex_path;
-			getValue("data path", tex_path);
+			getValue(gstDataPath, tex_path);
 			if (use_reader && m_reader)
 				filename = m_reader->GetCurLabelName(t, c);
 			else
@@ -2361,9 +2358,9 @@ void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 	glm::mat4 &proj_mat, glm::mat4 &tex_mat)
 {
 	double sclx, scly, sclz;
-	getValue("scale x", sclx);
-	getValue("scale y", scly);
-	getValue("scale z", sclz);
+	getValue(gstScaleX, sclx);
+	getValue(gstScaleY, scly);
+	getValue(gstScaleZ, sclz);
 	glm::mat4 scale_mv = glm::scale(mv_mat, glm::vec3(sclx, scly, sclz));
 	if (m_vr)
 		m_vr->set_matrices(scale_mv, proj_mat, tex_mat);
@@ -2374,9 +2371,9 @@ void VolumeData::Draw(bool ortho, bool adaptive,
 	bool interactive, double zoom, int stream_mode)
 {
 	bool test_wire;
-	getValue("test wire", test_wire);
+	getValue(gstTestWire, test_wire);
 	bool draw_bounds;
-	getValue("draw bounds", draw_bounds);
+	getValue(gstDrawBounds, draw_bounds);
 
 	if (m_vr)
 	{
@@ -2397,9 +2394,9 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 	if (m_vr)
 	{
 		unsigned long mask_id, weight1, weight2;
-		getValue("2d mask id", mask_id);
-		getValue("2d weight1 id", weight1);
-		getValue("2d weight2 id", weight2);
+		getValue(gst2dMaskId, mask_id);
+		getValue(gst2dWeight1Id, weight1);
+		getValue(gst2dWeight2Id, weight2);
 		long brick_num;
 		getValue("brick num", brick_num);
 
@@ -2438,7 +2435,7 @@ void VolumeData::Calculate(int type, VolumeData *vd_a, VolumeData *vd_b)
 	if (m_vr)
 	{
 		double hi_thresh;
-		vd_a->getValue("high threshold", hi_thresh);
+		vd_a->getValue(gstHighThreshold, hi_thresh);
 		if (type == 6 || type == 7)
 			m_vr->set_hi_thresh(hi_thresh);
 		m_vr->calculate(type,
@@ -2451,10 +2448,10 @@ Color VolumeData::GetColorFromColormap(double value)
 {
 	Color color;
 	long type;
-	getValue("colormap type", type);
+	getValue(gstColormapType, type);
 	double low, high;
-	getValue("colormap low", low);
-	getValue("colormap high", high);
+	getValue(gstColormapLow, low);
+	getValue(gstColormapHigh, high);
 
 	double v = (value - low) / (high - low);
 	switch (type)
@@ -2526,9 +2523,9 @@ void VolumeData::IncShuffle()
 void VolumeData::SetOrderedID(unsigned int* val)
 {
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	for (unsigned long long index = 0;
@@ -2539,9 +2536,9 @@ void VolumeData::SetOrderedID(unsigned int* val)
 void VolumeData::SetReverseID(unsigned int* val)
 {
 	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 	unsigned long long mem_size = (unsigned long long)resx*
 		(unsigned long long)resy*(unsigned long long)resz;
 	for (unsigned long long index = 0;
@@ -2552,9 +2549,9 @@ void VolumeData::SetReverseID(unsigned int* val)
 void VolumeData::SetShuffledID(unsigned int* val)
 {
 /*	long resx, resy, resz;
-	getValue("res x", resx);
-	getValue("res y", resy);
-	getValue("res z", resz);
+	getValue(gstResX, resx);
+	getValue(gstResY, resy);
+	getValue(gstResZ, resz);
 
 	unsigned int x, y, z;
 	unsigned int res;

@@ -407,7 +407,7 @@ void VolumeLoader::CleanupLoadedBrick()
 	bool disp;
 	for (auto elem : m_loaded)
 	{
-		elem.second.vd->getValue("display", disp);
+		elem.second.vd->getValue(gstDisplay, disp);
 		if (!disp)
 			vd_undisp.push_back(elem.second);
 		else if (!elem.second.brick->get_disp())

@@ -119,17 +119,17 @@ void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, 
 						type == 6 ||
 						type == 9)
 					{
-						vd_a->setValue("display", false);
+						vd_a->setValue(gstDisplay, false);
 					}
 					else if (type == 1 ||
 						type == 2 ||
 						type == 3 ||
 						type == 4)
 					{
-						vd_a->setValue("display", false);
+						vd_a->setValue(gstDisplay, false);
 						fluo::VolumeData* vd_b = GetVolumeB();
 						if (vd_b)
-							vd_b->setValue("display", false);
+							vd_b->setValue(gstDisplay, false);
 					}
 					m_frame->UpdateList();
 					m_frame->UpdateTree(vd->getName());
@@ -186,7 +186,7 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 					if (!tmp_vd)
 						continue;
 					bool disp;
-					tmp_vd->getValue("display", disp);
+					tmp_vd->getValue(gstDisplay, disp);
 					if (disp)
 						vd_list.push_back(tmp_vd);
 				}
@@ -267,14 +267,14 @@ void VolumeCalculator::CreateVolumeResult1()
 	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
 	long res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
-	m_vd_a->getValue("res x", res_x);
-	m_vd_a->getValue("res y", res_y);
-	m_vd_a->getValue("res z", res_z);
-	m_vd_a->getValue("spc x", spc_x);
-	m_vd_a->getValue("spc y", spc_y);
-	m_vd_a->getValue("spc z", spc_z);
+	m_vd_a->getValue(gstResX, res_x);
+	m_vd_a->getValue(gstResY, res_y);
+	m_vd_a->getValue(gstResZ, res_z);
+	m_vd_a->getValue(gstSpcX, spc_x);
+	m_vd_a->getValue(gstSpcY, spc_y);
+	m_vd_a->getValue(gstSpcZ, spc_z);
 	double max_int;
-	m_vd_a->getValue("max int", max_int);
+	m_vd_a->getValue(gstMaxInt, max_int);
 	int bits = (max_int >255.0) ? 16 : 8;
 
 	fluo::VolumeData* vd = glbin_volf->build(m_vd_a);
@@ -282,7 +282,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd->setValue("spc from file", true);
+	vd->setValue(gstSpcFromFile, true);
 	m_vd_r.push_back(vd);
 
 	std::string name = m_vd_a->getName();
@@ -312,21 +312,21 @@ void VolumeCalculator::CreateVolumeResult2()
 	long res_x_b, res_y_b, res_z_b;
 	double spc_x_a, spc_y_a, spc_z_a;
 	double spc_x_b, spc_y_b, spc_z_b;
-	m_vd_a->getValue("res x", res_x_a);
-	m_vd_a->getValue("res y", res_y_a);
-	m_vd_a->getValue("res z", res_z_a);
-	m_vd_a->getValue("spc x", spc_x_a);
-	m_vd_a->getValue("spc y", spc_y_a);
-	m_vd_a->getValue("spc z", spc_z_a);
-	m_vd_b->getValue("res x", res_x_b);
-	m_vd_b->getValue("res y", res_y_b);
-	m_vd_b->getValue("res z", res_z_b);
-	m_vd_b->getValue("spc x", spc_x_b);
-	m_vd_b->getValue("spc y", spc_y_b);
-	m_vd_b->getValue("spc z", spc_z_b);
+	m_vd_a->getValue(gstResX, res_x_a);
+	m_vd_a->getValue(gstResY, res_y_a);
+	m_vd_a->getValue(gstResZ, res_z_a);
+	m_vd_a->getValue(gstSpcX, spc_x_a);
+	m_vd_a->getValue(gstSpcY, spc_y_a);
+	m_vd_a->getValue(gstSpcZ, spc_z_a);
+	m_vd_b->getValue(gstResX, res_x_b);
+	m_vd_b->getValue(gstResY, res_y_b);
+	m_vd_b->getValue(gstResZ, res_z_b);
+	m_vd_b->getValue(gstSpcX, spc_x_b);
+	m_vd_b->getValue(gstSpcY, spc_y_b);
+	m_vd_b->getValue(gstSpcZ, spc_z_b);
 	double max_int_a, max_int_b;
-	m_vd_a->getValue("max int", max_int_a);
-	m_vd_b->getValue("max int", max_int_b);
+	m_vd_a->getValue(gstMaxInt, max_int_a);
+	m_vd_b->getValue(gstMaxInt, max_int_b);
 	int bits = (max_int_a >255.0|| max_int_b >255.0)?16:8;
 	long res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
@@ -342,7 +342,7 @@ void VolumeCalculator::CreateVolumeResult2()
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd->setValue("spc from file", true);
+	vd->setValue(gstSpcFromFile, true);
 	m_vd_r.push_back(vd);
 
 	std::string name_a = m_vd_a->getName();
@@ -400,12 +400,12 @@ void VolumeCalculator::FillHoles(double thresh)
 
 	//resolution
 	long nx, ny, nz;
-	m_vd_a->getValue("res x", nx);
-	m_vd_a->getValue("res y", ny);
-	m_vd_a->getValue("res z", nz);
+	m_vd_a->getValue(gstResX, nx);
+	m_vd_a->getValue(gstResY, ny);
+	m_vd_a->getValue(gstResZ, nz);
 	//scale
 	double int_scale;
-	m_vd_a->getValue("int scale", int_scale);
+	m_vd_a->getValue(gstIntScale, int_scale);
 
 	wxProgressDialog *prog_diag = new wxProgressDialog(
 		"FluoRender: Voxel Consolidation",

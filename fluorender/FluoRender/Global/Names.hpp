@@ -179,8 +179,8 @@ DEALINGS IN THE SOFTWARE.
 //resize
 #define gstResize "resize"
 #define gstResizeX "resize x"
-#define gstResizeX "resize y"
-#define gstResizeX "resize z"
+#define gstResizeY "resize y"
+#define gstResizeZ "resize z"
 //brick
 #define gstSkipBrick "skip brick"
 #define gstBrickNum "brick num"

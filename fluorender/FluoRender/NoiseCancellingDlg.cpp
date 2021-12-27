@@ -151,16 +151,16 @@ void NoiseCancellingDlg::GetSettings(VRenderGLView* view)
 	//threshold range
 	if (sel_vol)
 	{
-		sel_vol->getValue("max int", m_max_value);
+		sel_vol->getValue(gstMaxInt, m_max_value);
 		//threshold
 		m_threshold_sldr->SetRange(0, int(m_max_value*10.0));
 		m_threshold_sldr->SetValue(int(m_dft_thresh*m_max_value*10.0+0.5));
 		m_threshold_text->ChangeValue(wxString::Format("%.1f", m_dft_thresh*m_max_value));
 		//voxel
 		long nx, ny, nz;
-		sel_vol->getValue("res x", nx);
-		sel_vol->getValue("res y", ny);
-		sel_vol->getValue("res z", nz);
+		sel_vol->getValue(gstResX, nx);
+		sel_vol->getValue(gstResY, ny);
+		sel_vol->getValue(gstResZ, nz);
 		m_voxel_sldr->SetRange(1, nx);
 		m_voxel_sldr->SetValue(int(m_dft_size));
 		m_voxel_text->ChangeValue(wxString::Format("%d", int(m_dft_size)));
@@ -182,7 +182,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
 	cg.ShuffleID();
 	double scale;
-	vd->getValue("int scale", scale);
+	vd->getValue(gstIntScale, scale);
 	cg.Grow(false, -1, thresh, 0.0, scale);
 
 	flrd::ComponentAnalyzer ca(vd);
@@ -220,7 +220,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 	if (m_frame)
 		sel_vol = m_frame->GetCurSelVol();
 	if (sel_vol)
-		sel_vol->setValue("mask thresh", m_dft_thresh);
+		sel_vol->setValue(gstMaskThresh, m_dft_thresh);
 	m_frame->RefreshVRenderViews();
 }
 
@@ -269,7 +269,7 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 	if (enhance && sel_vol)
 	{
 		fluo::Color mask_color;
-		sel_vol->getValue("sec color", mask_color);
+		sel_vol->getValue(gstSecColor, mask_color);
 		double hdr_r = 0.0;
 		double hdr_g = 0.0;
 		double hdr_b = 0.0;
@@ -280,19 +280,19 @@ void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
 		if (mask_color.b() > 0.0)
 			hdr_b = 0.4;
 		fluo::Color hdr_color(hdr_r, hdr_g, hdr_b);
-		sel_vol->getValue("equalize r", hdr_r);
-		sel_vol->getValue("equalize g", hdr_g);
-		sel_vol->getValue("equalize b", hdr_b);
+		sel_vol->getValue(gstEqualizeR, hdr_r);
+		sel_vol->getValue(gstEqualizeG, hdr_g);
+		sel_vol->getValue(gstEqualizeB, hdr_b);
 		m_hdr = fluo::Color(hdr_r, hdr_g, hdr_b);
-		sel_vol->setValue("equalize r", hdr_color.r());
-		sel_vol->setValue("equalize g", hdr_color.g());
-		sel_vol->setValue("equalize b", hdr_color.b());
+		sel_vol->setValue(gstEqualizeR, hdr_color.r());
+		sel_vol->setValue(gstEqualizeG, hdr_color.g());
+		sel_vol->setValue(gstEqualizeB, hdr_color.b());
 	}
 	else if (!enhance && sel_vol)
 	{
-		sel_vol->setValue("equalize r", m_hdr.r());
-		sel_vol->setValue("equalize g", m_hdr.g());
-		sel_vol->setValue("equalize b", m_hdr.b());
+		sel_vol->setValue(gstEqualizeR, m_hdr.r());
+		sel_vol->setValue(gstEqualizeG, m_hdr.g());
+		sel_vol->setValue(gstEqualizeB, m_hdr.b());
 	}
 	if (m_frame)
 		m_frame->RefreshVRenderViews();

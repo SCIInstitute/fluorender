@@ -105,9 +105,9 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	if (!vd || !vd->GetTexture())
 		return;
 	double sx, sy, sz;
-	vd->getValue("spc x", sx);
-	vd->getValue("spc y", sy);
-	vd->getValue("spc z", sz);
+	vd->getValue(gstSpcX, sx);
+	vd->getValue(gstSpcY, sy);
+	vd->getValue(gstSpcZ, sz);
 	std::vector<flvr::TextureBrick*> *bricks =
 		vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
@@ -227,9 +227,9 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		else
 		{
 			// get data if there is only one brick
-			vd->getValue("res x", nx);
-			vd->getValue("res y", ny);
-			vd->getValue("res z", nz);
+			vd->getValue(gstResX, nx);
+			vd->getValue(gstResY, ny);
+			vd->getValue(gstResZ, nz);
 			Nrrd* nrrd_data = vd->GetData(false);
 			if (nrrd_data)
 			{
@@ -670,9 +670,9 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 	if (!data_label)
 		return;
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	int ix = (int)(p.x() + 0.5);
 	int iy = (int)(p.y() + 0.5);
 	int iz = (int)(p.z() + 0.5);
@@ -777,9 +777,9 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	double sz = comps.sz;
 	double size_scale = sx * sy * sz;
 	double maxscale;
-	vd->getValue("max scale", maxscale);
+	vd->getValue(gstMaxScale, maxscale);
 	double intscale;
-	vd->getValue("int scale", intscale);
+	vd->getValue(gstIntScale, intscale);
 	fluo::Vector lens;
 
 	graph.ClearVisited();
@@ -1013,13 +1013,13 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 	else if (bits == nrrdTypeUShort)
 		scale = 65535.0;
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 
 	//comp list
 	CelpList &comps = m_compgroup->celps;
@@ -1104,13 +1104,13 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<fluo::VolumeData*>& channs, i
 	if (!data_label)
 		return false;
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	unsigned int count = 1;
@@ -1139,7 +1139,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<fluo::VolumeData*>& channs, i
 			nx, ny, nz,
 			spcx, spcy, spcz,
 			brick_size);
-		vdn->setValue("spc from file", true);
+		vdn->setValue(gstSpcFromFile, true);
 		name = vd->getName();
 		name += "_COMP" + std::to_string(count++);
 		name += "_SIZE" + std::to_string(i->second->GetSizeUi());
@@ -1247,7 +1247,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<fluo::VolumeData*>& channs, i
 		fluo::Color c;
 		if (GetColor(i->second->Id(), i->second->BrickId(), vd, color_type, c))
 		{
-			vdn->setValue("color", c);
+			vdn->setValue(gstColor, c);
 			channs.push_back(vdn);
 		}
 		else
@@ -1292,13 +1292,13 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int
 	if (!data_label)
 		return false;
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume
@@ -1307,7 +1307,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int
 		nx, ny, nz,
 		spcx, spcy, spcz,
 		brick_size);
-	vd_r->setValue("spc from file", true);
+	vd_r->setValue(gstSpcFromFile, true);
 	vd_r->setName(std::string(vd->getName()) + "_CH_R");
 	//green volume
 	fluo::VolumeData* vd_g = glbin_volf->build(vd);
@@ -1315,7 +1315,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int
 		nx, ny, nz,
 		spcx, spcy, spcz,
 		brick_size);
-	vd_g->setValue("spc from file", true);
+	vd_g->setValue(gstSpcFromFile, true);
 	vd_g->setName(std::string(vd->getName()) + "_CH_G");
 	//blue volume
 	fluo::VolumeData* vd_b = glbin_volf->build(vd);
@@ -1323,7 +1323,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int
 		nx, ny, nz,
 		spcx, spcy, spcz,
 		brick_size);
-	vd_b->setValue("spc from file", true);
+	vd_b->setValue(gstSpcFromFile, true);
 	vd_b->setName(std::string(vd->getName()) + "_CH_B");
 
 	//get new data
@@ -1355,7 +1355,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int
 	unsigned int value_label;
 	fluo::Color color;
 	double max_value;
-	vd->getValue("max int", max_value);
+	vd->getValue(gstMaxInt, max_value);
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
@@ -1376,9 +1376,9 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int
 	fluo::Color red(1.0, 0.0, 0.0);
 	fluo::Color green(0.0, 1.0, 0.0);
 	fluo::Color blue(0.0, 0.0, 1.0);
-	vd_r->setValue("color", red);
-	vd_g->setValue("color", green);
-	vd_b->setValue("color", blue);
+	vd_r->setValue(gstColor, red);
+	vd_g->setValue(gstColor, green);
+	vd_b->setValue(gstColor, blue);
 
 	channs.push_back(vd_r);
 	channs.push_back(vd_g);

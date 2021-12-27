@@ -160,7 +160,7 @@ void VolumeSelector::Segment(int mx, int my)
 				if (vd)
 				{
 					bool disp;
-					vd->getValue("display", disp);
+					vd->getValue(gstDisplay, disp);
 					if (disp)
 					{
 						m_vd = vd;
@@ -200,16 +200,16 @@ void VolumeSelector::Select(double radius)
 
 	//insert the mask volume into m_vd
 	m_vd->AddEmptyMask(0, false);
-	m_vd->setValue("2d mask id", (unsigned long)m_2d_mask);
+	m_vd->setValue(gst2dMaskId, (unsigned long)m_2d_mask);
 	if (m_use2d && glIsTexture(m_2d_weight1) && glIsTexture(m_2d_weight2))
 	{
-		m_vd->setValue("2d weight1 id", (unsigned long)m_2d_weight1);
-		m_vd->setValue("2d weight2 id", (unsigned long)m_2d_weight2);
+		m_vd->setValue(gst2dWeight1Id, (unsigned long)m_2d_weight1);
+		m_vd->setValue(gst2dWeight2Id, (unsigned long)m_2d_weight2);
 	}
 	else
 	{
-		m_vd->setValue("2d weight1 id", (unsigned long)0);
-		m_vd->setValue("2d weight2 id", (unsigned long)0);
+		m_vd->setValue(gst2dWeight1Id, (unsigned long)0);
+		m_vd->setValue(gst2dWeight2Id, (unsigned long)0);
 	}
 
 	if (flvr::Texture::mask_undo_num_>0 &&
@@ -302,7 +302,7 @@ void VolumeSelector::Select(double radius)
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 			double est_thresh, int_scale;
 			m_vd->getValue("estimate thresh", est_thresh);
-			m_vd->getValue("int scale", int_scale);
+			m_vd->getValue(gstIntScale, int_scale);
 			ini_thresh = est_thresh * int_scale;
 			if (m_iter_num > BRUSH_TOOL_ITER_WEAK)
 				ini_thresh /= 2.0;
@@ -357,7 +357,7 @@ void VolumeSelector::Select(double radius)
 
 	if (m_mode == 6)
 	{
-		m_vd->setValue("use mask thresh", false);
+		m_vd->setValue(gstUseMaskThresh, false);
 		m_vd->GetTexture()->invalid_all_mask();
 	}
 }
@@ -410,12 +410,12 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 	long res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
 	int bits = 8;
-	m_vd->getValue("res x", res_x);
-	m_vd->getValue("res y", res_y);
-	m_vd->getValue("res z", res_z);
-	m_vd->getValue("spc x", spc_x);
-	m_vd->getValue("spc y", spc_y);
-	m_vd->getValue("spc z", spc_z);
+	m_vd->getValue(gstResX, res_x);
+	m_vd->getValue(gstResY, res_y);
+	m_vd->getValue(gstResZ, res_z);
+	m_vd->getValue(gstSpcX, spc_x);
+	m_vd->getValue(gstSpcY, spc_y);
+	m_vd->getValue(gstSpcZ, spc_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 	unsigned long long for_size = (unsigned long long)(res_x)*res_y*res_z;
 
@@ -429,10 +429,10 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd_r->setValue("spc from file", true);
+	vd_r->setValue(gstSpcFromFile, true);
 	vd_r->setName(m_vd->getName() +
 		std::string("_COMP1"));
-	vd_r->setValue("channel", 0);
+	vd_r->setValue(gstChannel, 0);
 	//green volume
 	if (!vd_g)
 		vd_g = glbin_volf->build(m_vd);
@@ -440,10 +440,10 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd_g->setValue("spc from file", true);
+	vd_g->setValue(gstSpcFromFile, true);
 	vd_g->setName(m_vd->getName() +
 		std::string("_COMP2"));
-	vd_g->setValue("channel", 1);
+	vd_g->setValue(gstChannel, 1);
 	//blue volume
 	if (!vd_b)
 		vd_b = glbin_volf->build(m_vd);
@@ -451,10 +451,10 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
-	vd_b->setValue("spc from file", true);
+	vd_b->setValue(gstSpcFromFile, true);
 	vd_b->setName(m_vd->getName() +
 		std::string("_COMP3"));
-	vd_b->setValue("channel", 1);
+	vd_b->setValue(gstChannel, 1);
 
 	//get new data
 	//red volume
@@ -483,7 +483,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 		m_randv = int((double)rand()/(RAND_MAX)*900+100);
 	//populate the data
 	double int_scale;
-	m_vd->getValue("int scale", int_scale);
+	m_vd->getValue(gstIntScale, int_scale);
 	unsigned long long idx;
 	for (idx = 0; idx < for_size; ++idx)
 	{
@@ -528,9 +528,9 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 	fluo::Color red(  1.0,0.0,0.0);
 	fluo::Color green(0.0,1.0,0.0);
 	fluo::Color blue( 0.0,0.0,1.0);
-	vd_r->setValue("color", red);
-	vd_g->setValue("color", green);
-	vd_b->setValue("color", blue);
+	vd_r->setValue(gstColor, red);
+	vd_g->setValue(gstColor, green);
+	vd_b->setValue(gstColor, blue);
 
 	if (push_new)
 	{
@@ -541,7 +541,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, fluo::VolumeData* vd_r,
 
 	//turn off m_vd
 	if (hide)
-		m_vd->setValue("display", false);
+		m_vd->setValue(gstDisplay, false);
 }
 
 fluo::VolumeData* VolumeSelector::GetResult(bool pop)

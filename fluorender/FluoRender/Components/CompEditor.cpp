@@ -67,9 +67,9 @@ void ComponentEditor::Clean(int mode)
 		return;
 
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -134,9 +134,9 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 		return;
 
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -227,7 +227,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 	//save label mask to disk
 	int cur_time = m_view->m_tseq_cur_num;
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	vd->SaveLabel(true, cur_time, chan);
 
 	if (new_id)
@@ -279,9 +279,9 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 
 	unsigned int old_id;
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -299,7 +299,7 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	vd->SaveLabel(true, cur_time, chan);
 }
 
@@ -345,9 +345,9 @@ void ComponentEditor::Replace(unsigned int id,
 	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
 	unsigned int old_id, new_id;
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -385,7 +385,7 @@ void ComponentEditor::Replace(unsigned int id,
 	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	vd->SaveLabel(true, cur_time, chan);
 }
 
@@ -419,9 +419,9 @@ void ComponentEditor::Combine()
 	//combine IDs
 	unsigned int id = 0;
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -439,7 +439,7 @@ void ComponentEditor::Combine()
 	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	vd->SaveLabel(true, cur_time, chan);
 }
 
@@ -495,9 +495,9 @@ void ComponentEditor::Combine(CelpList &list)
 		return;
 	//combine IDs
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -514,7 +514,7 @@ void ComponentEditor::Combine(CelpList &list)
 	vd->GetRenderer()->clear_tex_current();
 	//save label mask to disk
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	vd->SaveLabel(true, cur_time, chan);
 
 	//modify graphs
@@ -537,7 +537,7 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 	LBLReader lbl_reader;
 
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	int frame = vol_cache.frame;
 
 	if (frame == m_view->m_tseq_cur_num)
@@ -585,7 +585,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 	if (!reader)
 		return;
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	int frame = vol_cache.frame;
 
 	if (vol_cache.valid && vol_cache.modified)
@@ -595,9 +595,9 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
 		double spcx, spcy, spcz;
-		vd->getValue("spc x", spcx);
-		vd->getValue("spc y", spcy);
-		vd->getValue("spc z", spcz);
+		vd->getValue(gstSpcX, spcx);
+		vd->getValue(gstSpcY, spcy);
+		vd->getValue(gstSpcZ, spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
 		wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);

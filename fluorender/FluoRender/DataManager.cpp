@@ -3300,9 +3300,9 @@ void Annotations::Save(wxString &filename)
 	long resz = 1;
 	if (m_vd)
 	{
-		m_vd->getValue("res x", resx);
-		m_vd->getValue("res y", resy);
-		m_vd->getValue("res z", resz);
+		m_vd->getValue(gstResX, resx);
+		m_vd->getValue(gstResY, resy);
+		m_vd->getValue(gstResZ, resz);
 	}
 
 	os << "Name: " << m_name << "\n";
@@ -3314,9 +3314,9 @@ void Annotations::Save(wxString &filename)
 		os << "Volume: " << m_vd->getName() << "\n";
 		os << "Voxel size (X Y Z):\n";
 		double spcx, spcy, spcz;
-		m_vd->getValue("spc x", spcx);
-		m_vd->getValue("spc y", spcy);
-		m_vd->getValue("spc z", spcz);
+		m_vd->getValue(gstSpcX, spcx);
+		m_vd->getValue(gstSpcY, spcy);
+		m_vd->getValue(gstSpcZ, spcz);
 		os << spcx << "\t" << spcy << "\t" << spcz << "\n";
 	}
 
@@ -3417,9 +3417,9 @@ AText* Annotations::GetAText(wxString str)
 		long resz = 1;
 		if (m_vd)
 		{
-			m_vd->getValue("res x", resx);
-			m_vd->getValue("res y", resy);
-			m_vd->getValue("res z", resz);
+			m_vd->getValue(gstResX, resx);
+			m_vd->getValue(gstResY, resy);
+			m_vd->getValue(gstResZ, resz);
 		}
 		x /= resx?resx:1;
 		y /= resy?resy:1;
@@ -4759,7 +4759,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		}
 
 		vd->SetReader(reader);
-		vd->setValue("compression", m_compression);
+		vd->setValue(gstCompression, m_compression);
 
 		bool valid_spc = reader->IsSpcInfoValid();
 		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
@@ -4784,23 +4784,23 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			if (type == LOAD_TYPE_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
 			//for 2D data
 			long xres, yres, zres;
-			vd->getValue("res x", xres);
-			vd->getValue("res y", yres);
-			vd->getValue("res z", zres);
+			vd->getValue(gstResX, xres);
+			vd->getValue(gstResY, yres);
+			vd->getValue(gstResZ, zres);
 			double zspcfac = (double)std::max(xres, yres) / 256.0;
 			if (zspcfac < 1.0) zspcfac = 1.0;
 			double tester = reader->GetXSpc();
-			vd->setValue("base spc x", reader->GetXSpc());
-			vd->setValue("base spc y", reader->GetYSpc());
+			vd->setValue(gstBaseSpcX, reader->GetXSpc());
+			vd->setValue(gstBaseSpcY, reader->GetYSpc());
 			if (zres == 1)
-				vd->setValue("base spc z", reader->GetXSpc()*zspcfac);
+				vd->setValue(gstBaseSpcZ, reader->GetXSpc()*zspcfac);
 			else
-				vd->setValue("base spc z", reader->GetZSpc());
-			vd->setValue("spc from file", valid_spc);
-			vd->setValue("int scale", reader->GetScalarScale());
-			vd->setValue("max int", reader->GetMaxValue());
-			vd->setValue("time", reader->GetCurTime());
-			vd->setValue("channel", i);
+				vd->setValue(gstBaseSpcZ, reader->GetZSpc());
+			vd->setValue(gstSpcFromFile, valid_spc);
+			vd->setValue(gstIntScale, reader->GetScalarScale());
+			vd->setValue(gstMaxInt, reader->GetMaxValue());
+			vd->setValue(gstTime, reader->GetCurTime());
+			vd->setValue(gstChannel, i);
 			//++
 			result++;
 		}
@@ -4817,11 +4817,11 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		double wavelength = reader->GetExcitationWavelength(i);
 		if (wavelength > 0.0) {
 			fluo::Color col = GetWavelengthColor(wavelength);
-			vd->setValue("color", col);
+			vd->setValue(gstColor, col);
 		}
 		else if (wavelength < 0.) {
 			fluo::Color white(1.0, 1.0, 1.0);
-			vd->setValue("color", white);
+			vd->setValue(gstColor, white);
 		}
 		else
 		{
@@ -4830,18 +4830,18 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			fluo::Color green(0.0, 1.0, 0.0);
 			fluo::Color blue(0.0, 0.0, 1.0);
 			if (chan == 1) {
-				vd->setValue("color", white);
+				vd->setValue(gstColor, white);
 			}
 			else
 			{
 				if (i == 0)
-					vd->setValue("color", red);
+					vd->setValue(gstColor, red);
 				else if (i == 1)
-					vd->setValue("color", green);
+					vd->setValue(gstColor, green);
 				else if (i == 2)
-					vd->setValue("color", blue);
+					vd->setValue(gstColor, blue);
 				else
-					vd->setValue("color", white);
+					vd->setValue(gstColor, white);
 			}
 		}
 

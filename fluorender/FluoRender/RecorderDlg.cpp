@@ -704,7 +704,7 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 		if (interpolator && m_view)
 		{
 			long ct;
-			vd->getValue("time", ct);
+			vd->getValue(gstTime, ct);
 			FlKeyCode keycode;
 			keycode.l0 = 1;
 			keycode.l0_name = m_view->m_vrv->GetName();
@@ -771,7 +771,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
 		bool bval;
-		vd->getValue("display", bval);
+		vd->getValue(gstDisplay, bval);
 		flkeyB = new FlKeyBoolean(keycode, bval);
 		interpolator->AddKey(flkeyB);
 		//clipping planes
@@ -826,7 +826,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		interpolator->AddKey(flkey);
 		//t
 		long frame;
-		vd->getValue("time", frame);
+		vd->getValue(gstTime, frame);
 		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		flkey = new FlKeyDouble(keycode, frame);

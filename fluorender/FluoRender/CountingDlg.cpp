@@ -207,7 +207,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 	vd->AddEmptyLabel(0, !cg.GetUseMask());
 	cg.ShuffleID();
 	double scale;
-	vd->getValue("int scale", scale);
+	vd->getValue(gstIntScale, scale);
 	cg.Grow(false, -1, 0.0, 0.0, scale);
 
 	flrd::ComponentAnalyzer ca(vd);
@@ -246,9 +246,9 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		m_ca_volume_text->SetValue(wxString::Format("%d", vox));
 
 		double spcx, spcy, spcz;
-		vd->getValue("spc x", spcx);
-		vd->getValue("spc y", spcy);
-		vd->getValue("spc z", spcz);
+		vd->getValue(gstSpcX, spcx);
+		vd->getValue(gstSpcY, spcy);
+		vd->getValue(gstSpcZ, spcz);
 		double vol_unit = vox * spcx*spcy*spcz;
 		wxString vol_unit_text;
 		vol_unit_text = wxString::Format("%.0f", vol_unit);

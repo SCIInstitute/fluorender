@@ -172,7 +172,7 @@ void DataTreeCtrl::DeleteSelection()
 							fluo::VolumeData* vd = view->GetVolumeData(name_data.ToStdString());
 							if (vd)
 							{
-								vd->setValue("display", true);
+								vd->setValue(gstDisplay, true);
 								view->RemoveVolumeData(name_data.ToStdString());
 								if (view->GetVolMethod() == VOL_METHOD_MULTI)
 								{
@@ -924,7 +924,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		if (vd)
 		{
 			bool rc;
-			vd->toggleValue("randomize color", rc);
+			vd->toggleValue(gstRamdomizeColor, rc);
 		}
 	}
 	else if (item_data->type == 3)
@@ -945,7 +945,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 			if (group)
 			{
 				bool rc;
-				group->toggleValue("randomize color", rc);
+				group->toggleValue(gstRamdomizeColor, rc);
 			}
 		}
 	}
@@ -1285,10 +1285,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					if (vd)
 					{
 						if (rc)
-							vd->toggleValue("randomize color", bval);
+							vd->toggleValue(gstRamdomizeColor, bval);
 						else
 						{
-							vd->toggleValue("display", bval);
+							vd->toggleValue(gstDisplay, bval);
 							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
 								VRenderGLView* view = m_frame->GetView(i);
@@ -1338,10 +1338,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 						if (group)
 						{
 							if (rc)
-								group->toggleValue("randomize color", bval);
+								group->toggleValue(gstRamdomizeColor, bval);
 							else
 							{
-								group->toggleValue("display", bval);
+								group->toggleValue(gstDisplay, bval);
 								view->SetVolPopDirty();
 							}
 						}
@@ -2126,11 +2126,11 @@ void DataTreeCtrl::PasteMask(int op)
 		{
 			Nrrd* data = m_frame->m_vd_copy->GetData(false);
 			long bits;
-			m_frame->m_vd_copy->getValue("bits", bits);
+			m_frame->m_vd_copy->getValue(gstBits, bits);
 			if (bits == 16)
 			{
 				double scale;
-				m_frame->m_vd_copy->getValue("int scale", scale);
+				m_frame->m_vd_copy->getValue(gstIntScale, scale);
 				vd->AddMask16(data, op, scale);
 			}
 			else

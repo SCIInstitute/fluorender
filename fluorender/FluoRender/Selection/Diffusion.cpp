@@ -408,14 +408,14 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 				float(abcd[3]) };
 		}
 		//params
-		m_vd->getValue("invert", inv);
-		m_vd->getValue("int scale", scalar_scale);
-		m_vd->getValue("low threshold", lo_thresh);
+		m_vd->getValue(gstInvert, inv);
+		m_vd->getValue(gstIntScale, scalar_scale);
+		m_vd->getValue(gstLowThreshold, lo_thresh);
 		m_vd->getValue("high threhsold", hi_thresh);
-		m_vd->getValue("gamma 3d", gamma3d);
-		m_vd->getValue("extract boundary", gm_thresh);
-		m_vd->getValue("saturation", offset);
-		m_vd->getValue("soft thresh", sw);
+		m_vd->getValue(gstGamma3d, gamma3d);
+		m_vd->getValue(gstExtractBoundary, gm_thresh);
+		m_vd->getValue(gstSaturation, offset);
+		m_vd->getValue(gstSoftThresh, sw);
 	}
 
 

@@ -98,9 +98,9 @@ void ComponentSelector::CompFull()
 	unsigned int brick_id;
 	CelpList sel_labels;
 	CelpListIter label_iter;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
@@ -224,9 +224,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 
 	//select append
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long for_size = (unsigned long long)nx*
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -415,9 +415,9 @@ void ComponentSelector::All()
 
 	//select append
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 255, for_size);
@@ -445,9 +445,9 @@ void ComponentSelector::Clear(bool invalidate)
 
 	//select append
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	memset(data_mask, 0, for_size);
@@ -480,9 +480,9 @@ void ComponentSelector::Delete()
 		return;
 	//select append
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -522,9 +522,9 @@ void ComponentSelector::Delete(std::vector<unsigned long long> &ids)
 		return;
 	//select append
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
@@ -595,9 +595,9 @@ void ComponentSelector::SelectList(CelpList& list)
 	unsigned long long key;
 	int i, j, k;
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];

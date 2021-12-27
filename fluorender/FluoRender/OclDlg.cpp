@@ -370,7 +370,7 @@ void OclDlg::Execute()
 		{
 			m_frame->GetDataManager()->AddVolumeData(vd_r);
 			m_view->AddVolumeData(vd_r);
-			vd->setValue("display", false);
+			vd->setValue(gstDisplay, false);
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd_r->getName());
 		}

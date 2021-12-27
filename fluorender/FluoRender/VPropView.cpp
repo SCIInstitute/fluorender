@@ -610,7 +610,7 @@ void VPropView::GetSettings()
 	int ival = 0;
 
 	//maximum value
-	m_vd->getValue("max int", m_max_val);
+	m_vd->getValue(gstMaxInt, m_max_val);
 	m_max_val = std::max(255.0, m_max_val);
 
 	//set range
@@ -622,21 +622,21 @@ void VPropView::GetSettings()
 	//gamma
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
 		vald_fp->SetRange(0.0, 10.0);
-	m_vd->getValue("gamma 3d", dval);
+	m_vd->getValue(gstGamma3d, dval);
 	m_gamma_sldr->SetValue(int(dval*100.0+0.5));
 	str = wxString::Format("%.2f", dval);
 	m_gamma_text->ChangeValue(str);
 	//boundary
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
-	m_vd->getValue("extract boundary", dval);
+	m_vd->getValue(gstExtractBoundary, dval);
 	m_boundary_sldr->SetValue(int(dval*2000.0+0.5));
 	str = wxString::Format("%.4f", dval);
 	m_boundary_text->ChangeValue(str);
 	//contrast
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
 		vald_i->SetMin(0);
-	m_vd->getValue("saturation", dval);
+	m_vd->getValue(gstSaturation, dval);
 	ival = int(dval*m_max_val+0.5);
 	m_saturation_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -645,7 +645,7 @@ void VPropView::GetSettings()
 	//left threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
-	m_vd->getValue("low threshold", dval);
+	m_vd->getValue(gstLowThreshold, dval);
 	ival = int(dval*m_max_val+0.5);
 	m_left_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -654,7 +654,7 @@ void VPropView::GetSettings()
 	//right threshold
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
 		vald_i->SetMin(0);
-	m_vd->getValue("high threshold", dval);
+	m_vd->getValue(gstHighThreshold, dval);
 	ival = int(dval*m_max_val+0.5);
 	m_right_thresh_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -663,7 +663,7 @@ void VPropView::GetSettings()
 	//luminance
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
 		vald_i->SetMin(0);
-	m_vd->getValue("luminance", dval);
+	m_vd->getValue(gstLuminance, dval);
 	ival = int(dval*m_max_val+0.5);
 	m_luminance_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
@@ -671,14 +671,14 @@ void VPropView::GetSettings()
 	m_luminance_text->ChangeValue(str);
 	//color
 	fluo::Color c;
-	m_vd->getValue("color", c);
+	m_vd->getValue(gstColor, c);
 	wxColor wxc((unsigned char)(c.r()*255+0.5),
 		(unsigned char)(c.g()*255+0.5),
 		(unsigned char)(c.b()*255+0.5));
 	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color_btn->SetColour(wxc);
-	m_vd->getValue("sec color", c);
+	m_vd->getValue(gstSecColor, c);
 	wxc = wxColor((unsigned char)(c.r()*255+0.5),
 		(unsigned char)(c.g()*255+0.5),
 		(unsigned char)(c.b()*255+0.5));
@@ -688,14 +688,14 @@ void VPropView::GetSettings()
 	//alpha
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
 		vald_i->SetMin(0);
-	m_vd->getValue("alpha", dval);
+	m_vd->getValue(gstAlpha, dval);
 	ival = int(dval*m_max_val+0.5);
 	m_alpha_sldr->SetRange(0, int(m_max_val));
 	str = wxString::Format("%d", ival);
 	m_alpha_sldr->SetValue(ival);
 	m_alpha_text->ChangeValue(str);
 	bool alpha;
-	m_vd->getValue("alpha enable", alpha);
+	m_vd->getValue(gstAlphaEnable, alpha);
 	m_alpha_tool->ToggleTool(ID_AlphaChk,alpha);
 
 	//shadings
@@ -704,10 +704,10 @@ void VPropView::GetSettings()
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_hi_shading_text->GetValidator()))
 		vald_fp->SetRange(0.0, 100.0);
 	double amb, diff, spec, shine;
-	m_vd->getValue("mat amb", amb);
-	m_vd->getValue("mat diff", diff);
-	m_vd->getValue("mat spec", spec);
-	m_vd->getValue("mat shine", shine);
+	m_vd->getValue(gstMatAmb, amb);
+	m_vd->getValue(gstMatDiff, diff);
+	m_vd->getValue(gstMatSpec, spec);
+	m_vd->getValue(gstMatShine, shine);
 	m_low_shading_sldr->SetValue(amb*100.0);
 	str = wxString::Format("%.2f", amb);
 	m_low_shading_text->ChangeValue(str);
@@ -721,10 +721,10 @@ void VPropView::GetSettings()
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
 		vald_fp->SetRange(0.0, 1.0);
 	bool shadow;
-	m_vd->getValue("shadow enable", shadow);
+	m_vd->getValue(gstShadowEnable, shadow);
 	m_shadow_tool->ToggleTool(ID_ShadowChk, shadow);
 	double shadow_int;
-	m_vd->getValue("shadow int", shadow_int);
+	m_vd->getValue(gstShadowInt, shadow_int);
 	m_shadow_sldr->SetValue(int(shadow_int*100.0+0.5));
 	str = wxString::Format("%.2f", shadow_int);
 	m_shadow_text->ChangeValue(str);
@@ -733,16 +733,16 @@ void VPropView::GetSettings()
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
 		vald_fp->SetRange(0.0, 100.0);
 	double sr;
-	m_vd->getValue("sample rate", sr);
+	m_vd->getValue(gstSampleRate, sr);
 	m_sample_sldr->SetValue(sr*10.0);
 	str = wxString::Format("%.1f", sr);
 	m_sample_text->ChangeValue(str);
 
 	//spacings
 	double spcx, spcy, spcz;
-	m_vd->getValue("spc x", spcx);
-	m_vd->getValue("spc y", spcy);
-	m_vd->getValue("spc z", spcz);
+	m_vd->getValue(gstSpcX, spcx);
+	m_vd->getValue(gstSpcY, spcy);
+	m_vd->getValue(gstSpcZ, spcz);
 	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 		vald_fp->SetMin(0.0);
 	str = wxString::Format("%.3f", spcx);
@@ -779,8 +779,8 @@ void VPropView::GetSettings()
 
 	//colormap
 	double low, high;
-	m_vd->getValue("colormap low", low);
-	m_vd->getValue("colormap high", high);
+	m_vd->getValue(gstColormapLow, low);
+	m_vd->getValue(gstColormapHigh, high);
 	//low
 	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_value_text->GetValidator()))
 		vald_i->SetMin(0);
@@ -798,20 +798,20 @@ void VPropView::GetSettings()
 	m_colormap_high_value_sldr->SetValue(ival);
 	m_colormap_high_value_text->ChangeValue(str);
 	//colormap
-	m_vd->getValue("colormap inv", dval);
+	m_vd->getValue(gstColormapInv, dval);
 	m_colormap_inv_btn->SetValue(dval>0.0?false:true);
 	long lval;
-	m_vd->getValue("colormap type", lval);
+	m_vd->getValue(gstColormapType, lval);
 	m_colormap_combo->SetSelection(lval);
-	m_vd->getValue("colormap proj", lval);
+	m_vd->getValue(gstColormapProj, lval);
 	m_colormap_combo2->SetSelection(lval);
 	//mode
 	bool colormap_enable;
-	m_vd->getValue("colormap enable", colormap_enable);
+	m_vd->getValue(gstColormapEnable, colormap_enable);
 	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap_enable);
 
 	//inversion
-	m_vd->getValue("invert", bval);
+	m_vd->getValue(gstInvert, bval);
 	m_options_toolbar->ToggleTool(ID_InvChk, bval);
 	if(bval)
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
@@ -822,7 +822,7 @@ void VPropView::GetSettings()
 
 	//MIP
 	long mip_mode;
-	m_vd->getValue("mip mode", mip_mode);
+	m_vd->getValue(gstMipMode, mip_mode);
 	if (mip_mode == 1)
 	{
 		m_options_toolbar->ToggleTool(ID_MipChk,true);
@@ -837,7 +837,7 @@ void VPropView::GetSettings()
 	}
 
 	//transparency
-	m_vd->getValue("alpha power", dval);
+	m_vd->getValue(gstAlphaPower, dval);
 	if (dval > 1.1)
 	{
 		m_options_toolbar->ToggleTool(ID_TranspChk, true);
@@ -867,7 +867,7 @@ void VPropView::GetSettings()
 	}
 
 	//noise reduction
-	m_vd->getValue("noise redct", bval);
+	m_vd->getValue(gstNoiseRedct, bval);
 	m_options_toolbar->ToggleTool(ID_NRChk, bval);
 	if(bval)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
@@ -877,7 +877,7 @@ void VPropView::GetSettings()
 		wxGetBitmapFromMemory(smooth_off));
 
 	//blend mode
-	m_vd->getValue("blend mode", lval);
+	m_vd->getValue(gstBlendMode, lval);
 	if (lval == 2)
 	{
 		m_options_toolbar->ToggleTool(ID_DepthChk,true);
@@ -978,7 +978,7 @@ void VPropView::OnGammaSync(wxMouseEvent& event)
 	double dVal;
 	str.ToDouble(&dVal);
 	if (m_group)
-		m_group->setValue("gamma 3d", dVal);
+		m_group->setValue(gstGamma3d, dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1000,9 +1000,9 @@ void VPropView::OnGammaText(wxCommandEvent& event)
 
 	//set gamma value
 	if (m_sync_group && m_group)
-		m_group->setValue("gamma 3d", val);
+		m_group->setValue(gstGamma3d, val);
 	else if (m_vd)
-		m_vd->setValue("gamma 3d", val);
+		m_vd->setValue(gstGamma3d, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1013,7 +1013,7 @@ void VPropView::OnBoundarySync(wxMouseEvent& event)
 	double dVal;
 	str.ToDouble(&dVal);
 	if (m_group)
-		m_group->setValue("extract boundary", dVal);
+		m_group->setValue(gstExtractBoundary, dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1035,9 +1035,9 @@ void VPropView::OnBoundaryText(wxCommandEvent& event)
 
 	//set boundary value
 	if (m_sync_group && m_group)
-		m_group->setValue("extract boundary", val);
+		m_group->setValue(gstExtractBoundary, val);
 	else if (m_vd)
-		m_vd->setValue("extract boundary", val);
+		m_vd->setValue(gstExtractBoundary, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1050,7 +1050,7 @@ void VPropView::OnSaturationSync(wxMouseEvent& event)
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
 	if (m_group)
-		m_group->setValue("saturation", dVal);
+		m_group->setValue(gstSaturation, dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1078,9 +1078,9 @@ void VPropView::OnSaturationText(wxCommandEvent& event)
 
 	//set contrast value
 	if (m_sync_group && m_group)
-		m_group->setValue("saturation", val);
+		m_group->setValue(gstSaturation, val);
 	else if (m_vd)
-		m_vd->setValue("saturation", val);
+		m_vd->setValue(gstSaturation, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1092,12 +1092,12 @@ void VPropView::OnThreshSync(wxMouseEvent& event)
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
 	if (m_group)
-		m_group->setValue("low threshold", dVal);
+		m_group->setValue(gstLowThreshold, dVal);
 	str = m_right_thresh_text->GetValue();
 	str.ToLong(&iVal);
 	dVal = double(iVal) / m_max_val;
 	if (m_group)
-		m_group->setValue("high threshold", dVal);
+		m_group->setValue(gstHighThreshold, dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1134,9 +1134,9 @@ void VPropView::OnLeftThreshText(wxCommandEvent &event)
 
 	//set left threshold value
 	if (m_sync_group && m_group)
-		m_group->setValue("low threshold", val);
+		m_group->setValue(gstLowThreshold, val);
 	else if (m_vd)
-		m_vd->setValue("low threshold", val);
+		m_vd->setValue(gstLowThreshold, val);
 
 	RefreshVRenderViews(false, true);
 
@@ -1181,9 +1181,9 @@ void VPropView::OnRightThreshText(wxCommandEvent &event)
 
 		//set right threshold value
 		if (m_sync_group && m_group)
-			m_group->setValue("high threshold", val);
+			m_group->setValue(gstHighThreshold, val);
 		else if (m_vd)
-			m_vd->setValue("high threshold", val);
+			m_vd->setValue(gstHighThreshold, val);
 
 		RefreshVRenderViews(false, true);
 	}
@@ -1203,7 +1203,7 @@ void VPropView::OnLuminanceSync(wxMouseEvent& event)
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
 	if (m_group)
-		m_group->setValue("luminance", dVal);
+		m_group->setValue(gstLuminance, dVal);
 	RefreshVRenderViews(true, true);
 }
 
@@ -1230,14 +1230,14 @@ void VPropView::OnLuminanceText(wxCommandEvent &event)
 	m_luminance_sldr->SetValue(ival);
 
 	if (m_sync_group && m_group)
-		m_group->setValue("luminance", val);
+		m_group->setValue(gstLuminance, val);
 	else if (m_vd)
-		m_vd->setValue("luminance", val);
+		m_vd->setValue(gstLuminance, val);
 
 	if (m_vd)
 	{
 		fluo::Color color;
-		m_vd->getValue("color", color);
+		m_vd->getValue(gstColor, color);
 		wxColor wxc((unsigned char)(color.r()*255),
 			(unsigned char)(color.g()*255),
 			(unsigned char)(color.b()*255));
@@ -1259,8 +1259,8 @@ void VPropView::OnShadowSync(wxMouseEvent& event)
 	str.ToDouble(&dVal);
 	if (m_group)
 	{
-		m_group->setValue("shadow enable", bVal);
-		m_group->setValue("shadow int", dVal);
+		m_group->setValue(gstShadowEnable, bVal);
+		m_group->setValue(gstShadowInt, dVal);
 	}
 	RefreshVRenderViews(false, true);
 }
@@ -1269,13 +1269,13 @@ void VPropView::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
 	long lval;
-	m_group->getValue("blend mode", lval);
+	m_group->getValue(gstBlendMode, lval);
 	if (m_sync_group && m_group)
-		m_group->setValue("shadow enable", shadow);
+		m_group->setValue(gstShadowEnable, shadow);
 	else if (m_group && lval ==2)
-		m_vd->setValue("shadow enable", shadow);
+		m_vd->setValue(gstShadowEnable, shadow);
 	else if (m_vd)
-		m_vd->setValue("shadow enable", shadow);
+		m_vd->setValue(gstShadowEnable, shadow);
 
 	if (shadow)
 		EnableShadow();
@@ -1300,15 +1300,15 @@ void VPropView::OnShadowText(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_shadow_sldr->SetValue(int(val*100.0+0.5));
 	long lval;
-	m_group->getValue("blend mode", lval);
+	m_group->getValue(gstBlendMode, lval);
 
 	//set shadow darkness
 	if (m_sync_group && m_group)
-		m_group->setValue("shadow int", val);
+		m_group->setValue(gstShadowInt, val);
 	else if (m_group && lval ==2)
-		m_group->setValue("shadow int", val);
+		m_group->setValue(gstShadowInt, val);
 	else if (m_vd)
-		m_vd->setValue("shadow int", val);
+		m_vd->setValue(gstShadowInt, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1321,7 +1321,7 @@ void VPropView::OnAlphaSync(wxMouseEvent& event)
 	str.ToLong(&iVal);
 	double dVal = double(iVal) / m_max_val;
 	if (m_group)
-		m_group->setValue("alpha", dVal);
+		m_group->setValue(gstAlpha, dVal);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1329,9 +1329,9 @@ void VPropView::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
 	if (m_sync_group && m_group)
-		m_group->setValue("alpha enable", alpha);
+		m_group->setValue(gstAlphaEnable, alpha);
 	else if (m_vd)
-		m_vd->setValue("alpha enable", alpha);
+		m_vd->setValue(gstAlphaEnable, alpha);
 
 	if (alpha)
 		EnableAlpha();
@@ -1365,9 +1365,9 @@ void VPropView::OnAlphaText(wxCommandEvent& event)
 
 	//set alpha value
 	if (m_sync_group && m_group)
-		m_group->setValue("alpha", val);
+		m_group->setValue(gstAlpha, val);
 	else if (m_vd)
-		m_vd->setValue("alpha", val);
+		m_vd->setValue(gstAlpha, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1378,7 +1378,7 @@ void VPropView::OnSampleSync(wxMouseEvent& event)
 	double srate = 0.0;
 	str.ToDouble(&srate);
 	if (m_group)
-		m_group->setValue("sample rate", srate);
+		m_group->setValue(gstSampleRate, srate);
 	RefreshVRenderViews(false, true);
 }
 
@@ -1405,19 +1405,19 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 		{
 			fluo::VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
-				vd->setValue("sample rate", srate);
+				vd->setValue(gstSampleRate, srate);
 		}
 	}
 	else
 	{
 		long lval;
-		m_group->getValue("blend mode", lval);
+		m_group->getValue(gstBlendMode, lval);
 		if (m_sync_group && m_group)
-			m_group->setValue("sample rate", srate);
+			m_group->setValue(gstSampleRate, srate);
 		else if (m_group && lval ==2)
-			m_group->setValue("sample rate", srate);
+			m_group->setValue(gstSampleRate, srate);
 		else if (m_vd)
-			m_vd->setValue("sample rate", srate);
+			m_vd->setValue(gstSampleRate, srate);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -1435,9 +1435,9 @@ void VPropView::OnShadingSync(wxMouseEvent& event)
 	str.ToDouble(&dVal2);
 	if (m_group)
 	{
-		m_group->setValue("shading enable", bVal);
-		m_group->setValue("low shading", dVal);
-		m_group->setValue("high shading", dVal2);
+		m_group->setValue(gstShadingEnable, bVal);
+		m_group->setValue(gstLowShading, dVal);
+		m_group->setValue(gstHighShading, dVal2);
 	}
 	RefreshVRenderViews(false, true);
 }
@@ -1460,9 +1460,9 @@ void VPropView::OnHiShadingText(wxCommandEvent &event)
 
 	//set high shading value
 	if (m_sync_group && m_group)
-		m_group->setValue("high shading", val);
+		m_group->setValue(gstHighShading, val);
 	else if (m_vd)
-		m_vd->setValue("high shading", val);
+		m_vd->setValue(gstHighShading, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1484,9 +1484,9 @@ void VPropView::OnLowShadingText(wxCommandEvent &event)
 
 	//set low shading value
 	if (m_sync_group && m_group)
-		m_group->setValue("low shading", val);
+		m_group->setValue(gstLowShading, val);
 	else if (m_vd)
-		m_vd->setValue("low shading", val);
+		m_vd->setValue(gstLowShading, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1495,9 +1495,9 @@ void VPropView::OnShadingEnable(wxCommandEvent &event)
 {
 	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
 	if (m_sync_group && m_group)
-		m_group->setValue("shading enable", shading);
+		m_group->setValue(gstShadingEnable, shading);
 	else if (m_vd)
-		m_vd->setValue("shading enable", shading);
+		m_vd->setValue(gstShadingEnable, shading);
 
 	if (shading)
 		EnableShading();
@@ -1514,8 +1514,8 @@ void VPropView::OnColormapSync(wxMouseEvent& event)
 	{
 		bool bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 		long lval = bVal ? 1 : 0;
-		m_group->setValue("colormap mode", lval);
-		m_group->setValue("colormap enable", bVal);
+		m_group->setValue(gstColormapMode, lval);
+		m_group->setValue(gstColormapEnable, bVal);
 		long iVal;
 		double dVal1, dVal2;
 		wxString str = m_colormap_low_value_text->GetValue();
@@ -1524,17 +1524,17 @@ void VPropView::OnColormapSync(wxMouseEvent& event)
 		str = m_colormap_high_value_text->GetValue();
 		str.ToLong(&iVal);
 		dVal2 = double(iVal) / m_max_val;
-		m_group->setValue("colormap low", dVal1);
-		m_group->setValue("colormap high", dVal2);
+		m_group->setValue(gstColormapLow, dVal1);
+		m_group->setValue(gstColormapHigh, dVal2);
 		//colormap
 		iVal = m_colormap_combo->GetCurrentSelection();
-		m_group->setValue("colormap type", iVal);
+		m_group->setValue(gstColormapType, iVal);
 		//colormap inv
 		bVal = m_colormap_inv_btn->GetValue();
-		m_group->setValue("colormap inv", bVal?-1.0:1.0);
+		m_group->setValue(gstColormapInv, bVal?-1.0:1.0);
 		//colormap proj
 		iVal = m_colormap_combo2->GetCurrentSelection();
-		m_group->setValue("colormap proj", iVal);
+		m_group->setValue(gstColormapProj, iVal);
 	}
 	RefreshVRenderViews(false, true);
 }
@@ -1547,13 +1547,13 @@ void VPropView::OnEnableColormap(wxCommandEvent &event)
 	long lval = colormap ? 1 : 0;
 	if (m_sync_group && m_group)
 	{
-		m_group->setValue("colormap mode", lval);
-		m_group->setValue("colormap enable", colormap);
+		m_group->setValue(gstColormapMode, lval);
+		m_group->setValue(gstColormapEnable, colormap);
 	}
 	else if (m_vd)
 	{
-		m_vd->setValue("colormap mode", lval);
-		m_vd->setValue("colormap enable", colormap);
+		m_vd->setValue(gstColormapMode, lval);
+		m_vd->setValue(gstColormapEnable, colormap);
 	}
 
 	if (m_frame)
@@ -1606,9 +1606,9 @@ void VPropView::OnColormapHighValueText(wxCommandEvent &event)
 		double val = double(iVal)/m_max_val;
 
 		if (m_sync_group && m_group)
-			m_group->setValue("colormap high", val);
+			m_group->setValue(gstColormapHigh, val);
 		else if (m_vd)
-			m_vd->setValue("colormap high", val);
+			m_vd->setValue(gstColormapHigh, val);
 
 		RefreshVRenderViews(false, true);
 	}
@@ -1646,9 +1646,9 @@ void VPropView::OnColormapLowValueText(wxCommandEvent &event)
 	double val = double(iVal)/m_max_val;
 
 	if (m_sync_group && m_group)
-		m_group->setValue("colormap low", val);
+		m_group->setValue(gstColormapLow, val);
 	else if (m_vd)
-		m_vd->setValue("colormap low", val);
+		m_vd->setValue(gstColormapLow, val);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1662,9 +1662,9 @@ void VPropView::OnColormapInvBtn(wxCommandEvent &event)
 
 	double dval = val ? -1.0 : 1.0;
 	if (m_sync_group && m_group)
-		m_group->setValue("colormap inv", dval);
+		m_group->setValue(gstColormapInv, dval);
 	else if (m_vd)
-		m_vd->setValue("colormap inv", dval);
+		m_vd->setValue(gstColormapInv, dval);
 
 	RefreshVRenderViews(false, true);
 
@@ -1687,9 +1687,9 @@ void VPropView::OnColormapCombo(wxCommandEvent &event)
 	}
 
 	if (m_sync_group && m_group)
-		m_group->setValue("colormap type", colormap);
+		m_group->setValue(gstColormapType, colormap);
 	else if (m_vd)
-		m_vd->setValue("colormap type", colormap);
+		m_vd->setValue(gstColormapType, colormap);
 
 	RefreshVRenderViews(false, true);
 
@@ -1707,9 +1707,9 @@ void VPropView::OnColormapCombo2(wxCommandEvent &event)
 	OnEnableColormap(event);
 
 	if (m_sync_group && m_group)
-		m_group->setValue("colormap proj", colormap_proj);
+		m_group->setValue(gstColormapProj, colormap_proj);
 	else if (m_vd)
-		m_vd->setValue("colormap proj", colormap_proj);
+		m_vd->setValue(gstColormapProj, colormap_proj);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1720,20 +1720,20 @@ void VPropView::OnColorChange(wxColor c)
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
 	{
-		m_vd->setValue("color", color);
+		m_vd->setValue(gstColor, color);
 
 		double lum;
-		m_vd->getValue("luminance", lum);
+		m_vd->getValue(gstLuminance, lum);
 		int ilum = int(lum*m_max_val+0.5);
 		m_luminance_sldr->SetValue(ilum);
 		wxString str = wxString::Format("%d", ilum);
 		m_luminance_text->ChangeValue(str);
 
 		bool bval;
-		m_vd->getValue("sec color set", bval);
+		m_vd->getValue(gstSecColorSet, bval);
 		if (!bval)
 		{
-			m_vd->getValue("sec color", color);
+			m_vd->getValue(gstSecColor, color);
 			wxColor wxc((unsigned char)(color.r()*255),
 				(unsigned char)(color.g()*255),
 				(unsigned char)(color.b()*255));
@@ -1758,7 +1758,7 @@ void VPropView::OnColor2Change(wxColor c)
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
 	{
-		m_vd->setValue("sec color", color);
+		m_vd->setValue(gstSecColor, color);
 		RefreshVRenderViews(true, true);
 	}
 }
@@ -1963,9 +1963,9 @@ void VPropView::OnInvCheck(wxCommandEvent &event)
 		wxGetBitmapFromMemory(invert_off));
 
 	if (m_sync_group && m_group)
-		m_group->setValue("invert", inv);
+		m_group->setValue(gstInvert, inv);
 	else if (m_vd)
-		m_vd->setValue("invert", inv);
+		m_vd->setValue(gstInvert, inv);
 
 	RefreshVRenderViews(false, true);
 }
@@ -1975,9 +1975,9 @@ void VPropView::OnMIPCheck(wxCommandEvent &event)
 	long val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
 
 	if (m_sync_group && m_group)
-		m_group->setValue("mip mode", val);
+		m_group->setValue(gstMipMode, val);
 	else if (m_vd)
-		m_vd->setValue("mip mode", val);
+		m_vd->setValue(gstMipMode, val);
 
 	if (val==1)
 	{
@@ -2005,18 +2005,18 @@ void VPropView::OnTranspChk(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
 			wxGetBitmapFromMemory(transphi));
 		if (m_sync_group && m_group)
-			m_group->setValue("alpha power", 2.0);
+			m_group->setValue(gstAlphaPower, 2.0);
 		else if (m_vd)
-			m_vd->setValue("alpha power", 2.0);
+			m_vd->setValue(gstAlphaPower, 2.0);
 	}
 	else
 	{
 		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
 			wxGetBitmapFromMemory(transplo));
 		if (m_sync_group && m_group)
-			m_group->setValue("alpha power", 1.0);
+			m_group->setValue(gstAlphaPower, 1.0);
 		else if (m_vd)
-			m_vd->setValue("alpha power", 1.0);
+			m_vd->setValue(gstAlphaPower, 1.0);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -2064,19 +2064,19 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 		{
 			fluo::VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
-				vd->setValue("noise redct", val);
+				vd->setValue(gstNoiseRedct, val);
 		}
 	}
 	else
 	{
 		long lval;
-		m_group->getValue("blend mode", lval);
+		m_group->getValue(gstBlendMode, lval);
 		if (m_sync_group && m_group)
-			m_group->setValue("noise redct", val);
+			m_group->setValue(gstNoiseRedct, val);
 		else if (m_group && lval==2)
-			m_group->setValue("noise redct", val);
+			m_group->setValue(gstNoiseRedct, val);
 		else if (m_vd)
-			m_vd->setValue("noise redct", val);
+			m_vd->setValue(gstNoiseRedct, val);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -2101,14 +2101,14 @@ void VPropView::OnDepthCheck(wxCommandEvent &event)
 	{
 		if (m_group)
 		{
-			m_group->setValue("blend mode", long(2));
+			m_group->setValue(gstBlendMode, long(2));
 			if (m_vd)
 			{
 				fluo::ValueCollection names{
-					"noise redct",
-					"sample rate",
-					"shadow enable",
-					"shadow int"
+					gstNoiseRedct,
+					gstSampleRate,
+					gstShadowEnable,
+					gstShadowInt
 				};
 				m_group->propValues(names, m_vd);
 			}
@@ -2117,7 +2117,7 @@ void VPropView::OnDepthCheck(wxCommandEvent &event)
 	else
 	{
 		if (m_group)
-			m_group->setValue("blend mode", long(0));
+			m_group->setValue(gstBlendMode, long(0));
 	}
 
 	RefreshVRenderViews(false, true);
@@ -2156,22 +2156,22 @@ bool VPropView::SetSpacings()
 		for (int i = 0; i < m_group->getNumChildren(); i++)
 		{
 			fluo::Object* obj = m_group->getChild(i);
-			obj->setValue("spc x", spcx);
-			obj->setValue("spc y", spcy);
-			obj->setValue("spc z", spcz);
-			obj->setValue("base spc x", spcx);
-			obj->setValue("base spc y", spcy);
-			obj->setValue("base spc z", spcz);
+			obj->setValue(gstSpcX, spcx);
+			obj->setValue(gstSpcY, spcy);
+			obj->setValue(gstSpcZ, spcz);
+			obj->setValue(gstBaseSpcX, spcx);
+			obj->setValue(gstBaseSpcY, spcy);
+			obj->setValue(gstBaseSpcZ, spcz);
 		}
 	}
 	else if (m_vd)
 	{
-		m_vd->setValue("spc x", spcx);
-		m_vd->setValue("spc y", spcy);
-		m_vd->setValue("spc z", spcz);
-		m_vd->setValue("base spc x", spcx);
-		m_vd->setValue("base spc y", spcy);
-		m_vd->setValue("base spc z", spcz);
+		m_vd->setValue(gstSpcX, spcx);
+		m_vd->setValue(gstSpcY, spcy);
+		m_vd->setValue(gstSpcZ, spcz);
+		m_vd->setValue(gstBaseSpcX, spcx);
+		m_vd->setValue(gstBaseSpcY, spcy);
+		m_vd->setValue(gstBaseSpcZ, spcz);
 	}
 	else return false;
 
@@ -2182,7 +2182,7 @@ bool VPropView::SetSpacings()
 void VPropView::EnableAlpha()
 {
 	long lval;
-	m_vd->getValue("mip mode", lval);
+	m_vd->getValue(gstMipMode, lval);
 	if (lval != 1)
 	{
 		m_alpha_sldr->Enable();
@@ -2203,7 +2203,7 @@ void VPropView::EnableShading()
 	m_hi_shading_sldr->Enable();
 	m_hi_shading_text->Enable();
 	long lval;
-	m_vd->getValue("mip mode", lval);
+	m_vd->getValue(gstMipMode, lval);
 	if (lval == 1)
 	{
 		m_left_thresh_sldr->Enable();
@@ -2220,9 +2220,9 @@ void VPropView::DisableShading()
 	m_hi_shading_sldr->Disable();
 	m_hi_shading_text->Disable();
 	long lval;
-	m_vd->getValue("mip mode", lval);
+	m_vd->getValue(gstMipMode, lval);
 	bool bval;
-	m_vd->getValue("shadow enable", bval);
+	m_vd->getValue(gstShadowEnable, bval);
 	if (lval == 1 && !bval)
 	{
 		m_left_thresh_sldr->Disable();
@@ -2237,7 +2237,7 @@ void VPropView::EnableShadow()
 	m_shadow_sldr->Enable();
 	m_shadow_text->Enable();
 	long lval;
-	m_vd->getValue("mip mode", lval);
+	m_vd->getValue(gstMipMode, lval);
 	if (lval == 1)
 	{
 		m_left_thresh_sldr->Enable();
@@ -2252,9 +2252,9 @@ void VPropView::DisableShadow()
 	m_shadow_sldr->Disable();
 	m_shadow_text->Disable();
 	long lval;
-	m_vd->getValue("mip mode", lval);
+	m_vd->getValue(gstMipMode, lval);
 	bool bval;
-	m_vd->getValue("shading enable", bval);
+	m_vd->getValue(gstShadingEnable, bval);
 	if (lval == 1 && !bval)
 	{
 		m_left_thresh_sldr->Disable();
@@ -2288,8 +2288,8 @@ void VPropView::EnableMip()
 	m_luminance_sldr->Disable();
 	m_luminance_text->Disable();
 	bool bval1, bval2;
-	m_vd->getValue("shading enable", bval1);
-	m_vd->getValue("shadow enable", bval2);
+	m_vd->getValue(gstShadingEnable, bval1);
+	m_vd->getValue(gstShadowEnable, bval2);
 	if (bval1 || bval2)
 		EnableShading();
 	else
@@ -2299,7 +2299,7 @@ void VPropView::EnableMip()
 void VPropView::DisableMip()
 {
 	bool bval1, bval2;
-	m_vd->getValue("alpha enable", bval1);
+	m_vd->getValue(gstAlphaEnable, bval1);
 	if (bval1)
 		EnableAlpha();
 	else
@@ -2308,8 +2308,8 @@ void VPropView::DisableMip()
 	m_boundary_text->Enable();
 	m_luminance_sldr->Enable();
 	m_luminance_text->Enable();
-	m_vd->getValue("shading enable", bval1);
-	m_vd->getValue("shadow enable", bval2);
+	m_vd->getValue(gstShadingEnable, bval1);
+	m_vd->getValue(gstShadowEnable, bval2);
 	if (bval1 || bval2)
 		EnableShading();
 	else
@@ -2325,7 +2325,7 @@ void VPropView::UpdateMaxVal(double value)
 {
 	if (!m_vd) return;
 	long bits;
-	m_vd->getValue("bits", bits);
+	m_vd->getValue(gstBits, bits);
 	if (bits == 8)
 		return;
 	else if (bits > 8)
@@ -2336,8 +2336,8 @@ void VPropView::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_vd->setValue("max int", m_max_val);
-	m_vd->setValue("int scale", 65535.0 / m_max_val);
+	m_vd->setValue(gstMaxInt, m_max_val);
+	m_vd->setValue(gstIntScale, 65535.0 / m_max_val);
 	GetSettings();
 }
 
@@ -2394,26 +2394,26 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//gamma
 		str = m_gamma_text->GetValue();
 		str.ToDouble(&dVal);
-		m_group->setValue("gamma 3d", dVal);
+		m_group->setValue(gstGamma3d, dVal);
 		//boundary
 		str = m_boundary_text->GetValue();
 		str.ToDouble(&dVal);
-		m_group->setValue("extract boundary", dVal);
+		m_group->setValue(gstExtractBoundary, dVal);
 		//saturation
 		str = m_saturation_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
-		m_group->setValue("saturation", dVal);
+		m_group->setValue(gstSaturation, dVal);
 		//left threshold
 		str = m_left_thresh_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
-		m_group->setValue("low threshold", dVal);
+		m_group->setValue(gstLowThreshold, dVal);
 		//right thresh
 		str = m_right_thresh_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
-		m_group->setValue("high threshold", dVal);
+		m_group->setValue(gstHighThreshold, dVal);
 		//luminance
 		//str = m_luminance_text->GetValue();
 		//str.ToLong(&iVal);
@@ -2421,32 +2421,32 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		//m_group->SetLuminance(dVal);
 		//shadow
 		bVal = m_shadow_tool->GetToolState(ID_ShadowChk);
-		m_group->setValue("shadow enable", bVal);
+		m_group->setValue(gstShadowEnable, bVal);
 		str = m_shadow_text->GetValue();
 		str.ToDouble(&dVal);
-		m_group->setValue("shadow int", dVal);
+		m_group->setValue(gstShadowInt, dVal);
 		//high shading
 		str = m_hi_shading_text->GetValue();
 		str.ToDouble(&dVal);
-		m_group->setValue("high shading", dVal);
+		m_group->setValue(gstHighShading, dVal);
 		//alpha
 		str = m_alpha_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
-		m_group->setValue("alpha", dVal);
+		m_group->setValue(gstAlpha, dVal);
 		//sample rate
 		str = m_sample_text->GetValue();
 		str.ToDouble(&dVal);
-		m_group->setValue("sample rate", dVal);
+		m_group->setValue(gstSampleRate, dVal);
 		//shading
 		bVal = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-		m_group->setValue("shading enable", bVal);
+		m_group->setValue(gstShadingEnable, bVal);
 		str = m_low_shading_text->GetValue();
 		str.ToDouble(&dVal);
-		m_group->setValue("low shading", dVal);
+		m_group->setValue(gstLowShading, dVal);
 		//inversion
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
-		m_group->setValue("invert", bVal);
+		m_group->setValue(gstInvert, bVal);
 		//interpolation
 		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
 		m_group->setValue("interpolate", bVal);
@@ -2454,35 +2454,35 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 			m_view->SetIntp(bVal);
 		//MIP
 		bVal = m_options_toolbar->GetToolState(ID_MipChk);
-		m_group->setValue("mip mode", long(bVal?1:0));
+		m_group->setValue(gstMipMode, long(bVal?1:0));
 		//transp
 		bVal = m_options_toolbar->GetToolState(ID_TranspChk);
-		m_group->setValue("alpha power", bVal ? 2.0 : 1.0);
+		m_group->setValue(gstAlphaPower, bVal ? 2.0 : 1.0);
 		//noise reduction
 		bVal = m_options_toolbar->GetToolState(ID_InvChk);
-		m_group->setValue("noise redct", bVal);
+		m_group->setValue(gstNoiseRedct, bVal);
 		//colormap low
 		str = m_colormap_low_value_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
-		m_group->setValue("colormap low", dVal);
+		m_group->setValue(gstColormapLow, dVal);
 		//colormap high
 		str = m_colormap_high_value_text->GetValue();
 		str.ToLong(&iVal);
 		dVal = double(iVal) / m_max_val;
-		m_group->setValue("colormap high", dVal);
+		m_group->setValue(gstColormapHigh, dVal);
 		//colormap mode
 		bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
-		m_group->setValue("colormap mode", long(bVal?1:0));
+		m_group->setValue(gstColormapMode, long(bVal?1:0));
 		//colormap
 		iVal = m_colormap_combo->GetCurrentSelection();
-		m_group->setValue("colormap type", iVal);
+		m_group->setValue(gstColormapType, iVal);
 		//colormap inv
 		bVal = m_colormap_inv_btn->GetValue();
-		m_group->setValue("colormap inv", bVal ? -1.0 : 1.0);
+		m_group->setValue(gstColormapInv, bVal ? -1.0 : 1.0);
 		//colormap proj
 		iVal = m_colormap_combo2->GetCurrentSelection();
-		m_group->setValue("colormap proj", iVal);
+		m_group->setValue(gstColormapProj, iVal);
 	}
 
 	RefreshVRenderViews(false, true);
@@ -2676,63 +2676,63 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_gamma_text->ChangeValue(str);
 	ival = int(dval*100.0+0.5);
 	m_gamma_sldr->SetValue(ival);
-	m_vd->setValue("gamma 3d", dval);
+	m_vd->setValue(gstGamma3d, dval);
 	//extract boundary
 	dval = mgr->m_vol_exb;
 	str = wxString::Format("%.4f", dval);
 	m_boundary_text->ChangeValue(str);
 	ival = int(dval*2000.0+0.5);
 	m_boundary_sldr->SetValue(ival);
-	m_vd->setValue("extract boundary", dval);
+	m_vd->setValue(gstExtractBoundary, dval);
 	//low offset
 	dval = mgr->m_vol_of1;
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
 	m_saturation_text->ChangeValue(str);
 	m_saturation_sldr->SetValue(ival);
-	m_vd->setValue("saturation", dval);
+	m_vd->setValue(gstSaturation, dval);
 	//low thresholding
 	dval = mgr->m_vol_lth;
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
 	m_left_thresh_text->ChangeValue(str);
 	m_left_thresh_sldr->SetValue(ival);
-	m_vd->setValue("low threshold", dval);
+	m_vd->setValue(gstLowThreshold, dval);
 	//high thresholding
 	dval = mgr->m_vol_hth;
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
 	m_right_thresh_text->ChangeValue(str);
 	m_right_thresh_sldr->SetValue(ival);
-	m_vd->setValue("high threshold", dval);
+	m_vd->setValue(gstHighThreshold, dval);
 	//low shading
 	dval = mgr->m_vol_lsh;
 	str = wxString::Format("%.2f", dval);
 	m_low_shading_text->ChangeValue(str);
 	ival = int(dval*100.0+0.5);
 	m_low_shading_sldr->SetValue(ival);
-	m_vd->setValue("mat amb", dval);
+	m_vd->setValue(gstMatAmb, dval);
 	//high shading
 	dval = mgr->m_vol_hsh;
 	str = wxString::Format("%.2f", dval);
 	m_hi_shading_text->ChangeValue(str);
 	ival = int(dval*10.0+0.5);
 	m_hi_shading_sldr->SetValue(ival);
-	m_vd->setValue("mat shine", dval);
+	m_vd->setValue(gstMatShine, dval);
 	//alpha
 	dval = mgr->m_vol_alf;
 	ival = int(dval*m_max_val+0.5);
 	str = wxString::Format("%d", ival);
 	m_alpha_text->ChangeValue(str);
 	m_alpha_sldr->SetValue(ival);
-	m_vd->setValue("alpha", dval);
+	m_vd->setValue(gstAlpha, dval);
 	//sample rate
 	dval = mgr->m_vol_spr;
 	str = wxString::Format("%.1f", dval);
 	m_sample_text->ChangeValue(str);
 	ival = int(dval*10.0+0.5);
 	m_sample_sldr->SetValue(ival);
-	m_vd->setValue("sample rate", dval);
+	m_vd->setValue(gstSampleRate, dval);
 	//luminance
 	dval = mgr->m_vol_lum;
 	ival = int(dval*m_max_val+0.5);
@@ -2740,17 +2740,17 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	m_luminance_text->ChangeValue(str);
 	m_luminance_sldr->SetValue(ival);
 	fluo::HSVColor hsv;
-	m_vd->getValue("hsv", hsv);
+	m_vd->getValue(gstHsv, hsv);
 	fluo::Color color(hsv);
-	m_vd->setValue("sec color set", false);
-	m_vd->setValue("color", color);
+	m_vd->setValue(gstSecColorSet, false);
+	m_vd->setValue(gstColor, color);
 	wxColor wxc((unsigned char)(color.r()*255),
 		(unsigned char)(color.g()*255),
 		(unsigned char)(color.b()*255));
 	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color_btn->SetColour(wxc);
-	m_vd->getValue("sec color", color);
+	m_vd->getValue(gstSecColor, color);
 	wxc = wxColor((unsigned char)(color.r()*255),
 		(unsigned char)(color.g()*255),
 		(unsigned char)(color.b()*255));
@@ -2758,18 +2758,18 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 	m_color2_btn->SetColour(wxc);
 	//colormap mode
-	m_vd->setValue("colormap mode", long(mgr->m_vol_cmm));
+	m_vd->setValue(gstColormapMode, long(mgr->m_vol_cmm));
 	bool colormap = mgr->m_vol_cmm == 1;
 	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
 	//colormap inv
 	m_colormap_inv_btn->SetValue(mgr->m_vol_cmi);
-	m_vd->setValue("colormap inv", mgr->m_vol_cmi?-1.0:1.0);
+	m_vd->setValue(gstColormapInv, mgr->m_vol_cmi?-1.0:1.0);
 	//colormap
 	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
-	m_vd->setValue("colormap type", long(mgr->m_vol_cmp));
+	m_vd->setValue(gstColormapType, long(mgr->m_vol_cmp));
 	//colormap projection
 	m_colormap_combo2->SetSelection(mgr->m_vol_cmj);
-	m_vd->setValue("colormap proj", long(mgr->m_vol_cmj));
+	m_vd->setValue(gstColormapProj, long(mgr->m_vol_cmj));
 	//colormap low value
 	dval = mgr->m_vol_lcm;
 	ival = int(dval*m_max_val+0.5);
@@ -2782,51 +2782,51 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	str = wxString::Format("%d", ival);
 	m_colormap_high_value_text->ChangeValue(str);
 	m_colormap_high_value_sldr->SetValue(ival);
-	m_vd->setValue("colormap low", lcm);
-	m_vd->setValue("colormap high", dval);
+	m_vd->setValue(gstColormapLow, lcm);
+	m_vd->setValue(gstColormapHigh, dval);
 	//shadow intensity
 	dval = mgr->m_vol_swi;
 	str = wxString::Format("%.2f", dval);
 	ival = int(dval*100.0+0.5);
 	m_shadow_text->ChangeValue(str);
 	m_shadow_sldr->SetValue(ival);
-	m_vd->setValue("shadow int", dval);
+	m_vd->setValue(gstShadowInt, dval);
 
 	//enable alpha
 	bval = mgr->m_vol_eap;
 	m_alpha_tool->ToggleTool(ID_AlphaChk,bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("alpha enable", bval);
+		m_group->setValue(gstAlphaEnable, bval);
 	else
-		m_vd->setValue("alpha enable", bval);
+		m_vd->setValue(gstAlphaEnable, bval);
 	//enable shading
 	bval = mgr->m_vol_esh;
 	m_shade_tool->ToggleTool(ID_ShadingEnableChk,bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("shading enable", bval);
+		m_group->setValue(gstShadingEnable, bval);
 	else
-		m_vd->setValue("shading enable", bval);
+		m_vd->setValue(gstShadingEnable, bval);
 	//inversion
 	bval = mgr->m_vol_inv;
 	m_options_toolbar->ToggleTool(ID_InvChk,bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("invert", bval);
+		m_group->setValue(gstInvert, bval);
 	else
-		m_vd->setValue("invert", bval);
+		m_vd->setValue(gstInvert, bval);
 	//enable mip
 	bval = mgr->m_vol_mip;
 	m_options_toolbar->ToggleTool(ID_MipChk,bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("mip mode", long(bval?1:0));
+		m_group->setValue(gstMipMode, long(bval?1:0));
 	else
-		m_vd->setValue("mip mode", long(bval ? 1 : 0));
+		m_vd->setValue(gstMipMode, long(bval ? 1 : 0));
 	//enable transp
 	bval = mgr->m_vol_trp;
 	m_options_toolbar->ToggleTool(ID_TranspChk, bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("alpha power", bval ? 2.0 : 1.0);
+		m_group->setValue(gstAlphaPower, bval ? 2.0 : 1.0);
 	else
-		m_vd->setValue("alpha power", bval ? 2.0 : 1.0);
+		m_vd->setValue(gstAlphaPower, bval ? 2.0 : 1.0);
 	//component display
 	ival = mgr->m_vol_com;
 	m_options_toolbar->ToggleTool(ID_CompChk, ival?true:false);
@@ -2838,41 +2838,41 @@ void VPropView::OnResetDefault(wxCommandEvent &event)
 	bval = mgr->m_vol_nrd;
 	m_options_toolbar->ToggleTool(ID_NRChk,bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("noise redct", bval);
+		m_group->setValue(gstNoiseRedct, bval);
 	else
-		m_vd->setValue("noise redct", bval);
+		m_vd->setValue(gstNoiseRedct, bval);
 	//shadow
 	bval = mgr->m_vol_shw;
 	m_shadow_tool->ToggleTool(ID_ShadowChk,bval);
 	if (m_sync_group && m_group)
-		m_group->setValue("shadow enable", bval);
+		m_group->setValue(gstShadowEnable, bval);
 	else
-		m_vd->setValue("shadow enable", bval);
+		m_vd->setValue(gstShadowEnable, bval);
 	//colormap
 	if (m_sync_group && m_group)
-		m_group->setValue("colormap mode", long(mgr->m_vol_cmm));
+		m_group->setValue(gstColormapMode, long(mgr->m_vol_cmm));
 
-	m_vd->getValue("alpha enable", bval);
+	m_vd->getValue(gstAlphaEnable, bval);
 	if (bval)
 		EnableAlpha();
 	else
 		DisableAlpha();
-	m_vd->getValue("shading enable", bval);
+	m_vd->getValue(gstShadingEnable, bval);
 	if (bval)
 		EnableShading();
 	else
 		DisableShading();
-	m_vd->getValue("shadow enable", bval);
+	m_vd->getValue(gstShadowEnable, bval);
 	if (bval)
 		EnableShadow();
 	else
 		DisableShadow();
-	m_vd->getValue("colormap mode", ival);
+	m_vd->getValue(gstColormapMode, ival);
 	if (ival == 1)
 		EnableColormap();
 	else
 		DisableColormap();
-	m_vd->getValue("mip mode", ival);
+	m_vd->getValue(gstMipMode, ival);
 	if (ival == 1)
 		EnableMip();
 	else

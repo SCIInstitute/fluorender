@@ -266,7 +266,7 @@ void BasicStat::Run()
 	if (!CheckBricks())
 		return;
 	long bits;
-	m_vd->getValue("bits", bits);
+	m_vd->getValue(gstBits, bits);
 	int chars = bits / 8;
 
 	//create program and kernels

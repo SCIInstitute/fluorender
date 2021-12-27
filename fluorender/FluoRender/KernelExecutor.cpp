@@ -155,12 +155,12 @@ bool KernelExecutor::Execute()
 	}
 
 	long bits;
-	m_vd->getValue("bits", bits);
+	m_vd->getValue(gstBits, bits);
 	int chars = bits / 8;
 	long res_x, res_y, res_z;
-	m_vd->getValue("res x", res_x);
-	m_vd->getValue("res y", res_y);
-	m_vd->getValue("res z", res_z);
+	m_vd->getValue(gstResX, res_x);
+	m_vd->getValue(gstResY, res_y);
+	m_vd->getValue(gstResZ, res_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
@@ -183,16 +183,16 @@ bool KernelExecutor::Execute()
 	{
 		//result
 		double spc_x, spc_y, spc_z;
-		m_vd->getValue("spc x", spc_x);
-		m_vd->getValue("spc y", spc_y);
-		m_vd->getValue("spc z", spc_z);
+		m_vd->getValue(gstSpcX, spc_x);
+		m_vd->getValue(gstSpcY, spc_y);
+		m_vd->getValue(gstSpcZ, spc_z);
 		fluo::VolumeData* vd = glbin_volf->build(m_vd);
 		m_vd_r.push_back(vd);
 		vd->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
-		vd->setValue("spc from file", true);
+		vd->setValue(gstSpcFromFile, true);
 		std::string name = m_vd->getName();
 		name += "_CL";
 		vd->setName(name);

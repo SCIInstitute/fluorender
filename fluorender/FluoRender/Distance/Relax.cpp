@@ -199,9 +199,9 @@ bool Relax::Compute()
 	BuildSpring();
 
 	double dx, dy, dz;
-	m_vd->getValue("spc x", dx);
-	m_vd->getValue("spc y", dy);
-	m_vd->getValue("spc z", dz);
+	m_vd->getValue(gstSpcX, dx);
+	m_vd->getValue(gstSpcY, dy);
+	m_vd->getValue(gstSpcZ, dz);
 	cl_float3 scl = { (float)dx, (float)dy, (float)dz };
 
 	m_dsp.assign(m_snum * 3, 0.0);

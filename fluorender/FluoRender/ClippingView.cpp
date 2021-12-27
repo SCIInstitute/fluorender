@@ -588,9 +588,9 @@ void ClippingView::GetSettings()
 	switch (m_sel_type)
 	{
 	case 2:	//volume
-		m_vd->getValue("res x", resx);
-		m_vd->getValue("res y", resy);
-		m_vd->getValue("res z", resz);
+		m_vd->getValue(gstResX, resx);
+		m_vd->getValue(gstResY, resy);
+		m_vd->getValue(gstResZ, resz);
 		resx_n = resy_n = resz_n = 0;
 		break;
 	case 3:	//mesh
@@ -626,9 +626,9 @@ void ClippingView::GetSettings()
 	case 2:	//volume
 		{
 			double distx, disty, distz;
-			m_vd->getValue("clip dist x", distx);
-			m_vd->getValue("clip dist y", disty);
-			m_vd->getValue("clip dist z", distz);
+			m_vd->getValue(gstClipDistX, distx);
+			m_vd->getValue(gstClipDistY, disty);
+			m_vd->getValue(gstClipDistZ, distz);
 			distx *= resx; disty *= resy; distz *= resz;
 			if (distx == 0)
 			{
@@ -651,9 +651,9 @@ void ClippingView::GetSettings()
 				wxString::Format("%d", disty));
 			m_xy_dist_text->SetValue(
 				wxString::Format("%d", distz));
-			m_vd->setValue("clip dist x", distx);
-			m_vd->setValue("clip dist y", disty);
-			m_vd->setValue("clip dist z", distz);
+			m_vd->setValue(gstClipDistX, distx);
+			m_vd->setValue(gstClipDistY, disty);
+			m_vd->setValue(gstClipDistZ, distz);
 	}
 		break;
 	case 3:	//mesh
@@ -792,9 +792,9 @@ void ClippingView::OnLinkChannelsBtn(wxCommandEvent &event)
 				continue;
 
 			long resx, resy, resz;
-			vd->getValue("res x", resx);
-			vd->getValue("res y", resy);
-			vd->getValue("res z", resz);
+			vd->getValue(gstResX, resx);
+			vd->getValue(gstResY, resy);
+			vd->getValue(gstResZ, resz);
 
 			(*planes)[0]->ChangePlane(fluo::Point(double(x1_val)/double(resx), 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
 			(*planes)[1]->ChangePlane(fluo::Point(double(x2_val)/double(resx), 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
@@ -857,9 +857,9 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
@@ -970,9 +970,9 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
@@ -1084,9 +1084,9 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
@@ -1192,9 +1192,9 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
@@ -1307,9 +1307,9 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
@@ -1416,9 +1416,9 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
 		planes = m_vd->GetRenderer()->get_planes();
@@ -1530,9 +1530,9 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 	if (!m_vd)
 		return;
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 	vector<fluo::Plane*> *planes = 0;
 	if (m_vd->GetRenderer())
 		planes = m_vd->GetRenderer()->get_planes();
@@ -1977,11 +1977,11 @@ void ClippingView::OnSliderRClick(wxCommandEvent& event)
 
 	//good rate
 	double sample_rate;
-	m_vd->getValue("sample rate", sample_rate);
+	m_vd->getValue(gstSampleRate, sample_rate);
 	if (sample_rate < 2.0)
 	{
 		sample_rate = 2.0;
-		m_vd->setValue("sample rate", sample_rate);
+		m_vd->setValue(gstSampleRate, sample_rate);
 	}
 	if (m_toolbar->GetToolState(ID_LinkChannelsBtn))
 	{
@@ -1993,20 +1993,20 @@ void ClippingView::OnSliderRClick(wxCommandEvent& event)
 				fluo::VolumeData* vd = m_mgr->GetVolumeData(i);
 				if (!vd || vd == m_vd)
 					continue;
-				vd->getValue("sample rate", sample_rate);
+				vd->getValue(gstSampleRate, sample_rate);
 				if (sample_rate < 2.0)
 				{
 					sample_rate = 2.0;
-					vd->setValue("sample rate", sample_rate);
+					vd->setValue(gstSampleRate, sample_rate);
 				}
 			}
 		}
 	}
 
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	if (id == ID_X1ClipSldr)
 	{
@@ -2158,9 +2158,9 @@ void ClippingView::OnYZClipBtn(wxCommandEvent& event)
 		return;
 
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	wxString str = m_yz_dist_text->GetValue();
 	long dist;
@@ -2193,7 +2193,7 @@ void ClippingView::OnYZClipBtn(wxCommandEvent& event)
 		m_x2_clip_text->SetValue(
 			wxString::Format("%d", x2));
 		SetXLink(true);
-		m_vd->setValue("clip dist x", double(dist)/resx);
+		m_vd->setValue(gstClipDistX, double(dist)/resx);
 	}
 	else
 	{
@@ -2211,9 +2211,9 @@ void ClippingView::OnXZClipBtn(wxCommandEvent& event)
 		return;
 
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	wxString str = m_xz_dist_text->GetValue();
 	long dist;
@@ -2246,7 +2246,7 @@ void ClippingView::OnXZClipBtn(wxCommandEvent& event)
 		m_y2_clip_text->SetValue(
 			wxString::Format("%d", y2));
 		SetYLink(true);
-		m_vd->setValue("clip dist y", double(dist) / resy);
+		m_vd->setValue(gstClipDistY, double(dist) / resy);
 	}
 	else
 	{
@@ -2264,9 +2264,9 @@ void ClippingView::OnXYClipBtn(wxCommandEvent& event)
 		return;
 
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	wxString str = m_xy_dist_text->GetValue();
 	long dist;
@@ -2299,7 +2299,7 @@ void ClippingView::OnXYClipBtn(wxCommandEvent& event)
 		m_z2_clip_text->SetValue(
 			wxString::Format("%d", z2));
 		SetZLink(true);
-		m_vd->setValue("clip dist z", double(dist) / resz);
+		m_vd->setValue(gstClipDistZ, double(dist) / resz);
 	}
 	else
 	{
@@ -2319,9 +2319,9 @@ void ClippingView::MoveLinkedClippingPlanes(int dir)
 		return;
 
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	wxString str;
 	long dist;
@@ -2420,9 +2420,9 @@ void ClippingView::OnSliderKeyDown(wxKeyEvent& event)
 		return;
 
 	long resx, resy, resz;
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 
 	int id = event.GetId();
 	int key = event.GetKeyCode();

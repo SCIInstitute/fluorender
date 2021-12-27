@@ -1415,9 +1415,9 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	if (!vd)
 		return;
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 
 	//get rulers
 	flrd::RulerList rulers;
@@ -1453,17 +1453,17 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	flrd::TrackMapProcessor tm_processor(track_map);
 	long resx, resy, resz;
 	double spcx, spcy, spcz;
-	vd->getValue("res x", resx);
-	vd->getValue("res y", resy);
-	vd->getValue("res z", resz);
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstResX, resx);
+	vd->getValue(gstResY, resy);
+	vd->getValue(gstResZ, resz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 	long lval;
-	vd->getValue("bits", lval);
+	vd->getValue(gstBits, lval);
 	tm_processor.SetBits(lval);
 	double dval;
-	vd->getValue("int scale", dval);
+	vd->getValue(gstIntScale, dval);
 	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
@@ -2022,9 +2022,9 @@ void TraceDlg::CellEraseID()
 		return;
 
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	unsigned long long for_size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -2060,7 +2060,7 @@ void TraceDlg::CellEraseID()
 		vd->GetRenderer()->clear_tex_current();
 		//save label mask to disk
 		long chan;
-		vd->getValue("channel", chan);
+		vd->getValue(gstChannel, chan);
 		vd->SaveLabel(true, m_cur_time, chan);
 	}
 
@@ -2534,9 +2534,9 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	if (!vd)
 		return;
 	long resx, resy, resz;
-	vd->getValue("res x", resx);
-	vd->getValue("res y", resy);
-	vd->getValue("res z", resz);
+	vd->getValue(gstResX, resx);
+	vd->getValue(gstResY, resy);
+	vd->getValue(gstResZ, resz);
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
@@ -2548,10 +2548,10 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	long lval;
-	vd->getValue("bits", lval);
+	vd->getValue(gstBits, lval);
 	tm_processor.SetBits(lval);
 	double dval;
-	vd->getValue("int scale", dval);
+	vd->getValue(gstIntScale, dval);
 	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
@@ -2578,9 +2578,9 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	if (!vd)
 		return;
 	long resx, resy, resz;
-	vd->getValue("res x", resx);
-	vd->getValue("res y", resy);
-	vd->getValue("res z", resz);
+	vd->getValue(gstResX, resx);
+	vd->getValue(gstResY, resy);
+	vd->getValue(gstResZ, resz);
 	TraceGroup *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
@@ -2588,10 +2588,10 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	long lval;
-	vd->getValue("bits", lval);
+	vd->getValue(gstBits, lval);
 	tm_processor.SetBits(lval);
 	double dval;
-	vd->getValue("int scale", dval);
+	vd->getValue(gstIntScale, dval);
 	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
@@ -2632,7 +2632,7 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 	LBLReader lbl_reader;
 
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	int frame = vol_cache.frame;
 
 	if (frame == m_view->m_tseq_cur_num)
@@ -2680,7 +2680,7 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 	if (!reader)
 		return;
 	long chan;
-	vd->getValue("channel", chan);
+	vd->getValue(gstChannel, chan);
 	int frame = vol_cache.frame;
 
 	if (vol_cache.valid && vol_cache.modified)
@@ -2690,9 +2690,9 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 		MSKWriter msk_writer;
 		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
 		double spcx, spcy, spcz;
-		vd->getValue("spc x", spcx);
-		vd->getValue("spc y", spcy);
-		vd->getValue("spc z", spcz);
+		vd->getValue(gstSpcX, spcx);
+		vd->getValue(gstSpcY, spcy);
+		vd->getValue(gstSpcZ, spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
 		wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);
@@ -2752,18 +2752,18 @@ void TraceDlg::GenMap()
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	long resx, resy, resz;
-	vd->getValue("res x", resx);
-	vd->getValue("res y", resy);
-	vd->getValue("res z", resz);
+	vd->getValue(gstResX, resx);
+	vd->getValue(gstResY, resy);
+	vd->getValue(gstResZ, resz);
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 	long lval;
-	vd->getValue("bits", lval);
+	vd->getValue(gstBits, lval);
 	tm_processor.SetBits(lval);
 	double dval;
-	vd->getValue("int scale", dval);
+	vd->getValue(gstIntScale, dval);
 	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
@@ -2892,18 +2892,18 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 	//get and set parameters
 	flrd::TrackMapProcessor tm_processor(track_map);
 	long resx, resy, resz;
-	vd->getValue("res x", resx);
-	vd->getValue("res y", resy);
-	vd->getValue("res z", resz);
+	vd->getValue(gstResX, resx);
+	vd->getValue(gstResY, resy);
+	vd->getValue(gstResZ, resz);
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 	long lval;
-	vd->getValue("bits", lval);
+	vd->getValue(gstBits, lval);
 	tm_processor.SetBits(lval);
 	double dval;
-	vd->getValue("int scale", dval);
+	vd->getValue(gstIntScale, dval);
 	tm_processor.SetScale(dval);
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);

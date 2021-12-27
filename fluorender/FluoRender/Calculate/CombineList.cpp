@@ -55,13 +55,13 @@ int CombineList::Execute()
 		return 0;
 
 	fluo::VolumeData* fvd = *m_channs.begin();
-	fvd->getValue("res x", m_resx);
-	fvd->getValue("res y", m_resy);
-	fvd->getValue("res z", m_resz);
-	fvd->getValue("spc x", m_spcx);
-	fvd->getValue("spc y", m_spcy);
-	fvd->getValue("spc z", m_spcz);
-	fvd->getValue("bits", m_bits);
+	fvd->getValue(gstResX, m_resx);
+	fvd->getValue(gstResY, m_resy);
+	fvd->getValue(gstResZ, m_resz);
+	fvd->getValue(gstSpcX, m_spcx);
+	fvd->getValue(gstSpcY, m_spcy);
+	fvd->getValue(gstSpcZ, m_spcz);
+	fvd->getValue(gstBits, m_bits);
 	int brick_size = fvd->GetTexture()->get_build_max_tex_size();
 	if (m_name == "")
 		m_name = "combined_volume";
@@ -72,7 +72,7 @@ int CombineList::Execute()
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
-	vd_r->setValue("spc from file", true);
+	vd_r->setValue(gstSpcFromFile, true);
 	vd_r->setName(m_name + "_CH_R");
 	//green volume
 	fluo::VolumeData* vd_g = glbin_volf->build(fvd);
@@ -80,7 +80,7 @@ int CombineList::Execute()
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
-	vd_g->setValue("spc from file", true);
+	vd_g->setValue(gstSpcFromFile, true);
 	vd_g->setName(m_name + "_CH_G");
 	//blue volume
 	fluo::VolumeData* vd_b = glbin_volf->build(fvd);
@@ -88,7 +88,7 @@ int CombineList::Execute()
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
-	vd_b->setValue("spc from file", true);
+	vd_b->setValue(gstSpcFromFile, true);
 	vd_b->setName(m_name + "_CH_B");
 
 	//get new data
@@ -121,13 +121,13 @@ int CombineList::Execute()
 		iter != m_channs.end(); ++iter)
 	{
 		long nx, ny, nz;
-		(*iter)->getValue("res x", nx);
-		(*iter)->getValue("res y", ny);
-		(*iter)->getValue("res z", nz);
+		(*iter)->getValue(gstResX, nx);
+		(*iter)->getValue(gstResY, ny);
+		(*iter)->getValue(gstResZ, nz);
 		if (!(nx == m_resx && ny == m_resy && nz == m_resz))
 			continue;
 		fluo::Color color;
-		(*iter)->getValue("color", color);
+		(*iter)->getValue(gstColor, color);
 		Nrrd* nrrd_iter = (*iter)->GetData(false);
 		if (!nrrd_iter)
 			continue;
@@ -166,9 +166,9 @@ int CombineList::Execute()
 	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
 	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);
 	fluo::Color blue = fluo::Color(0.0, 0.0, 1.0);
-	vd_r->setValue("color", red);
-	vd_g->setValue("color", green);
-	vd_b->setValue("color", blue);
+	vd_r->setValue(gstColor, red);
+	vd_g->setValue(gstColor, green);
+	vd_b->setValue(gstColor, blue);
 
 	m_results.push_back(vd_r);
 	m_results.push_back(vd_g);

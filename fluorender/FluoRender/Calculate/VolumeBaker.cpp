@@ -134,9 +134,9 @@ void VolumeBaker::Bake(bool replace)
 
 	//spacing
 	double spcx, spcy, spcz;
-	m_input->getValue("spc x", spcx);
-	m_input->getValue("spc y", spcy);
-	m_input->getValue("spc z", spcz);
+	m_input->getValue(gstSpcX, spcx);
+	m_input->getValue(gstSpcY, spcy);
+	m_input->getValue(gstSpcZ, spcz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
 		spcy*m_ny, spcz*m_nz);

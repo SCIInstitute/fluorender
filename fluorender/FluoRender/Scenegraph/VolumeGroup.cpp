@@ -58,18 +58,18 @@ bool VolumeGroup::insertChild(size_t index, Node* child)
 	if (child)
 	{
 		std::string ss[] = {
-			"gamma r",
-			"gamma g",
-			"gamma b",
-			"brightness r",
-			"brightness g",
-			"brightness b",
-			"equalize r",
-			"equalize g",
-			"equalize b",
-			"sync r",
-			"sync g",
-			"sync b"
+			gstGammaR,
+			gstGammaG,
+			gstGammaB,
+			gstBrightnessR,
+			gstBrightnessG,
+			gstBrightnessB,
+			gstEqualizeR,
+			gstEqualizeG,
+			gstEqualizeB,
+			gstSyncR,
+			gstSyncG,
+			gstSyncB
 		};
 		ValueCollection names(std::begin(ss), std::end(ss));
 		syncValues(names, child);
@@ -87,18 +87,18 @@ bool VolumeGroup::removeChildren(size_t pos, size_t num)
 			end = m_children.size();
 
 		std::string ss[] = {
-			"gamma r",
-			"gamma g",
-			"gamma b",
-			"brightness r",
-			"brightness g",
-			"brightness b",
-			"equalize r",
-			"equalize g",
-			"equalize b",
-			"sync r",
-			"sync g",
-			"sync b"
+			gstGammaR,
+			gstGammaG,
+			gstGammaB,
+			gstBrightnessR,
+			gstBrightnessG,
+			gstBrightnessB,
+			gstEqualizeR,
+			gstEqualizeG,
+			gstEqualizeB,
+			gstSyncR,
+			gstSyncG,
+			gstSyncB
 		};
 		ValueCollection names(std::begin(ss), std::end(ss));
 
@@ -120,18 +120,18 @@ bool VolumeGroup::setChild(size_t i, Node* node)
 	if (i < m_children.size() && node)
 	{
 		std::string ss[] = {
-			"gamma r",
-			"gamma g",
-			"gamma b",
-			"brightness r",
-			"brightness g",
-			"brightness b",
-			"equalize r",
-			"equalize g",
-			"equalize b",
-			"sync r",
-			"sync g",
-			"sync b"
+			gstGammaR,
+			gstGammaG,
+			gstGammaB,
+			gstBrightnessR,
+			gstBrightnessG,
+			gstBrightnessB,
+			gstEqualizeR,
+			gstEqualizeG,
+			gstEqualizeB,
+			gstSyncR,
+			gstSyncG,
+			gstSyncB
 		};
 		ValueCollection names(std::begin(ss), std::end(ss));
 
@@ -159,7 +159,7 @@ void VolumeGroup::OnRandomizeColor(Event& event)
 		it != m_children.end(); ++it)
 	{
 		bool bval;
-		(*it)->toggleValue("randomize color", bval, event);
+		(*it)->toggleValue(gstRamdomizeColor, bval, event);
 	}
 }
 

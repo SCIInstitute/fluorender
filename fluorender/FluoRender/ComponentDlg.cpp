@@ -3166,7 +3166,7 @@ void ComponentDlg::Cluster()
 	if (!nrrd_data)
 		return;
 	long bits;
-	vd->getValue("bits", bits);
+	vd->getValue(gstBits, bits);
 	void* data_data = nrrd_data->data;
 	if (!data_data)
 		return;
@@ -3188,15 +3188,15 @@ void ComponentDlg::Cluster()
 		return;
 
 	long nx, ny, nz;
-	vd->getValue("res x", nx);
-	vd->getValue("res y", ny);
-	vd->getValue("res z", nz);
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	double scale;
-	vd->getValue("int scale", scale);
+	vd->getValue(gstIntScale, scale);
 	double spcx, spcy, spcz;
-	vd->getValue("spc x", spcx);
-	vd->getValue("spc y", spcy);
-	vd->getValue("spc z", spcz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
 
 	flrd::ClusterMethod* method = 0;
 	//switch method
@@ -3395,7 +3395,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	//get brick number
 	int bn = vd->GetAllBrickNum();
 	double scale;
-	vd->getValue("int scale", scale);
+	vd->getValue(gstIntScale, scale);
 
 	flrd::ComponentGenerator cg(vd);
 	boost::signals2::connection preconn =

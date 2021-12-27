@@ -764,13 +764,13 @@ int RulerHandler::Profile(int index)
 		return 0;
 
 	double spcx, spcy, spcz;
-	m_vd->getValue("spc x", spcx);
-	m_vd->getValue("spc y", spcy);
-	m_vd->getValue("spc z", spcz);
+	m_vd->getValue(gstSpcX, spcx);
+	m_vd->getValue(gstSpcY, spcy);
+	m_vd->getValue(gstSpcZ, spcz);
 	long nx, ny, nz;
-	m_vd->getValue("res x", nx);
-	m_vd->getValue("res y", ny);
-	m_vd->getValue("res z", nz);
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
 		nx <= 0 || ny <= 0 || nz <= 0)
 		return 0;
@@ -788,7 +788,7 @@ int RulerHandler::Profile(int index)
 	if (nrrd_mask)
 		mask = nrrd_mask->data;
 	double scale;
-	m_vd->getValue("int scale", scale);
+	m_vd->getValue(gstIntScale, scale);
 
 	if (ruler->GetRulerType() == 3 && mask)
 	{

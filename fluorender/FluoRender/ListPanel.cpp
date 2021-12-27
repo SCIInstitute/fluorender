@@ -180,8 +180,8 @@ void DataListCtrl::SaveSelMask()
 			if (vd)
 			{
 				long time, chan;
-				vd->getValue("time", time);
-				vd->getValue("channel", chan);
+				vd->getValue(gstTime, time);
+				vd->getValue(gstChannel, chan);
 				vd->SaveMask(true, time, chan);
 				vd->SaveLabel(true, time, chan);
 			}
@@ -203,8 +203,8 @@ void DataListCtrl::SaveAllMasks()
 				if (vd)
 				{
 					long time, chan;
-					vd->getValue("time", time);
-					vd->getValue("channel", chan);
+					vd->getValue(gstTime, time);
+					vd->getValue(gstChannel, chan);
 					vd->SaveMask(true, time, chan);
 					vd->SaveLabel(true, time, chan);
 				}
@@ -260,7 +260,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 						if (vd)
 						{
 							std::wstring path;
-							vd->getValue("data path", path);
+							vd->getValue(gstDataPath, path);
 							if (path.empty())
 								menu.Append(Menu_Save, "Save...");
 							else
@@ -340,7 +340,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 						color = fluo::Color(0.0, 0.0, 1.0);
 
 					if (chan_num >= 0 && chan_num < 3)
-						vd_add->setValue("color", color);
+						vd_add->setValue(gstColor, color);
 
 					fluo::VolumeGroup *group = view->AddVolumeData(vd_add);
 					m_frame->OnSelection(2, view, group, vd_add, 0);
@@ -477,9 +477,9 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 		if (m_vd && resize)
 		{
 			long nx, ny, nz;
-			m_vd->getValue("res x", nx);
-			m_vd->getValue("res y", ny);
-			m_vd->getValue("res z", nz);
+			m_vd->getValue(gstResX, nx);
+			m_vd->getValue(gstResY, ny);
+			m_vd->getValue(gstResZ, nz);
 			size_x_txt->SetValue(wxString::Format("%d", nx));
 			size_y_txt->SetValue(wxString::Format("%d", ny));
 			size_z_txt->SetValue(wxString::Format("%d", nz));
@@ -492,7 +492,7 @@ void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
 		}
 	}
 	if (m_vd)
-		m_vd->setValue("resize", resize);
+		m_vd->setValue(gstResize, resize);
 }
 
 void DataListCtrl::OnSizeXText(wxCommandEvent &event)
@@ -502,7 +502,7 @@ void DataListCtrl::OnSizeXText(wxCommandEvent &event)
 	{
 		long lval;
 		size_x_txt->GetValue().ToLong(&lval);
-		m_vd->setValue("resize x", lval);
+		m_vd->setValue(gstResizeX, lval);
 	}
 }
 
@@ -513,7 +513,7 @@ void DataListCtrl::OnSizeYText(wxCommandEvent &event)
 	{
 		long lval;
 		size_y_txt->GetValue().ToLong(&lval);
-		m_vd->setValue("resize y", lval);
+		m_vd->setValue(gstResizeY, lval);
 	}
 }
 
@@ -524,7 +524,7 @@ void DataListCtrl::OnSizeZText(wxCommandEvent &event)
 	{
 		long lval;
 		size_z_txt->GetValue().ToLong(&lval);
-		m_vd->setValue("resize z", lval);
+		m_vd->setValue(gstResizeZ, lval);
 	}
 }
 
@@ -599,10 +599,10 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	{
 		bool resize;
 		long nx, ny, nz;
-		m_vd->getValue("resize", resize);
-		m_vd->getValue("resize x", nx);
-		m_vd->getValue("resize y", ny);
-		m_vd->getValue("resize z", nz);
+		m_vd->getValue(gstResize, resize);
+		m_vd->getValue(gstResizeX, nx);
+		m_vd->getValue(gstResizeY, ny);
+		m_vd->getValue(gstResizeZ, nz);
 		resize_chk->SetValue(resize);
 		if (resize)
 		{
@@ -656,10 +656,10 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 			fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
 			if (m_vd)
 			{
-				m_vd->setValue("resize", false);
-				m_vd->setValue("resize x", 0);
-				m_vd->setValue("resize y", 0);
-				m_vd->setValue("resize z", 0);
+				m_vd->setValue(gstResize, false);
+				m_vd->setValue(gstResizeX, 0);
+				m_vd->setValue(gstResizeY, 0);
+				m_vd->setValue(gstResizeZ, 0);
 			}
 
 			wxFileDialog *fopendlg = new wxFileDialog(
@@ -681,7 +681,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						false, VRenderFrame::GetCompression(), q);
 					std::wstring str;
-					m_vd->getValue("data path", str);
+					m_vd->getValue(gstDataPath, str);
 					SetText(item, 2, str);
 				}
 			}
@@ -689,10 +689,10 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 			if (m_vd)
 			{
-				m_vd->setValue("resize", false);
-				m_vd->setValue("resize x", 0);
-				m_vd->setValue("resize y", 0);
-				m_vd->setValue("resize z", 0);
+				m_vd->setValue(gstResize, false);
+				m_vd->setValue(gstResizeX, 0);
+				m_vd->setValue(gstResizeY, 0);
+				m_vd->setValue(gstResizeZ, 0);
 			}
 		}
 		else if (GetItemText(item) == "Mesh")
@@ -783,7 +783,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						true, VRenderFrame::GetCompression(), q);
 					std::wstring str;
-					vd->getValue("data path", str);
+					vd->getValue(gstDataPath, str);
 					SetText(item, 2, str);
 				}
 			}

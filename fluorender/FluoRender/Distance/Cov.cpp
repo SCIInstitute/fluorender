@@ -326,9 +326,9 @@ std::vector<double> Cov::GetCov()
 	{
 		//set to correct spacings
 		double spcx, spcy, spcz;
-		m_vd->getValue("spc x", spcx);
-		m_vd->getValue("spc y", spcy);
-		m_vd->getValue("spc z", spcz);
+		m_vd->getValue(gstSpcX, spcx);
+		m_vd->getValue(gstSpcY, spcy);
+		m_vd->getValue(gstSpcZ, spcz);
 		m_cov[0] *= spcx * spcx;
 		m_cov[1] *= spcx * spcy;
 		m_cov[2] *= spcx * spcz;
@@ -349,9 +349,9 @@ fluo::Point Cov::GetCenter()
 	{
 		//set to correct spacings
 		double spcx, spcy, spcz;
-		m_vd->getValue("spc x", spcx);
-		m_vd->getValue("spc y", spcy);
-		m_vd->getValue("spc z", spcz);
+		m_vd->getValue(gstSpcX, spcx);
+		m_vd->getValue(gstSpcY, spcy);
+		m_vd->getValue(gstSpcZ, spcz);
 		m_center[0] *= spcx;
 		m_center[1] *= spcy;
 		m_center[2] *= spcz;

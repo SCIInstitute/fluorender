@@ -513,7 +513,7 @@ void BrushToolDlg::GetSettings(VRenderGLView* view)
 	//threshold range
 	if (sel_vol)
 	{
-		sel_vol->getValue("max int", m_max_value);
+		sel_vol->getValue(gstMaxInt, m_max_value);
 		//falloff
 		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0+0.5));
 		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
@@ -1213,26 +1213,26 @@ void BrushToolDlg::UpdateSize()
 	counter.Count();
 	data.voxel_sum = counter.GetSum();
 	double scale;
-	sel_vol->getValue("int scale", scale);
+	sel_vol->getValue(gstIntScale, scale);
 	data.voxel_wsum = counter.GetWeightedSum() * scale;
 	if (data.voxel_sum)
 	{
 		data.avg_int = data.voxel_wsum / data.voxel_sum;
 		long bits;
-		sel_vol->getValue("bits", bits);
+		sel_vol->getValue(gstBits, bits);
 		if (bits == 8)
 			data.avg_int *= 255.0;
 		else if (bits == 16)
 		{
 			double maxint;
-			sel_vol->getValue("max int", maxint);
+			sel_vol->getValue(gstMaxInt, maxint);
 			data.avg_int *= maxint;
 		}
 	}
 	double spcx, spcy, spcz;
-	sel_vol->getValue("spc x", spcx);
-	sel_vol->getValue("spc y", spcy);
-	sel_vol->getValue("spc z", spcz);
+	sel_vol->getValue(gstSpcX, spcx);
+	sel_vol->getValue(gstSpcY, spcy);
+	sel_vol->getValue(gstSpcZ, spcz);
 	double vvol = spcx * spcy * spcz;
 	vvol = vvol == 0.0 ? 1.0 : vvol;
 	data.size = data.voxel_sum * vvol;

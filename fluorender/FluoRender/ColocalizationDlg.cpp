@@ -325,9 +325,9 @@ void ColocalizationDlg::Colocalize()
 	}
 	else
 	{
-		vd->getValue("spc x", spcx);
-		vd->getValue("spc y", spcy);
-		vd->getValue("spc z", spcz);
+		vd->getValue(gstSpcX, spcx);
+		vd->getValue(gstSpcY, spcy);
+		vd->getValue(gstSpcZ, spcz);
 		spc = spcx * spcy * spcz;
 	}
 	if (m_view)
@@ -377,8 +377,8 @@ void ColocalizationDlg::Colocalize()
 				if (!vd1 || !vd2)
 					continue;
 				bool disp1, disp2;
-				vd1->getValue("display", disp1);
-				vd2->getValue("display", disp2);
+				vd1->getValue(gstDisplay, disp1);
+				vd2->getValue(gstDisplay, disp2);
 				if (!disp1 || !disp2)
 					continue;
 
@@ -428,8 +428,8 @@ void ColocalizationDlg::Colocalize()
 			if (!vd1 || !vd2)
 				continue;
 			bool disp1, disp2;
-			vd1->getValue("display", disp1);
-			vd2->getValue("display", disp2);
+			vd1->getValue(gstDisplay, disp1);
+			vd2->getValue(gstDisplay, disp2);
 			if (!disp1 || !disp2)
 				continue;
 

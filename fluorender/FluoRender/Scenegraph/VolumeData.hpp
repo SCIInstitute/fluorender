@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define VOLUMEDATA_HPP
 
 #include <Node.hpp>
+#include <Names.hpp>
 #include <Nrrd/nrrd.h>
 #include <glm/glm.hpp>
 #include <vector>

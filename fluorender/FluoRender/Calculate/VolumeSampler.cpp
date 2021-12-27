@@ -167,9 +167,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
 	//spacing
 	double spcx_in, spcy_in, spcz_in;
-	m_input->getValue("spc x", spcx_in);
-	m_input->getValue("spc y", spcy_in);
-	m_input->getValue("spc z", spcz_in);
+	m_input->getValue(gstSpcX, spcx_in);
+	m_input->getValue(gstSpcY, spcy_in);
+	m_input->getValue(gstSpcZ, spcz_in);
 	fluo::Vector spc_in(spcx_in, spcy_in, spcz_in);
 	fluo::Vector spc;
 	double x, y, z;
@@ -431,9 +431,9 @@ unsigned int VolumeSampler::SampleInt(double x, double y, double z)
 	if (!ijk(i, j, k))
 		return 0;
 	long nx, ny, nz;
-	m_input->getValue("res x", nx);
-	m_input->getValue("res y", ny);
-	m_input->getValue("res z", nz);
+	m_input->getValue(gstResX, nx);
+	m_input->getValue(gstResY, ny);
+	m_input->getValue(gstResZ, nz);
 	unsigned long long index = (unsigned long long)nx*ny*k + (unsigned long long)nx*j + (unsigned long long)i;
 	return ((unsigned int*)m_raw_input)[index];
 }

@@ -797,7 +797,7 @@ void VRenderGLView::CalcFogRange()
 	bool use_box = false;
 	if (m_cur_vol)
 	{
-		m_cur_vol->getValue("clip bounds", bbox);
+		m_cur_vol->getValue(gstClipBounds, bbox);
 		use_box = true;
 	}
 	else if (!m_md_pop_list.empty())
@@ -1410,7 +1410,7 @@ void VRenderGLView::DrawVolumes(int peel)
 					long resx, resy, resz;
 					double sclx, scly, sclz;
 					double spcx, spcy, spcz;
-					vd->getValue("res x", resx); , resy, resz);
+					vd->getValue(gstResX, resx); , resy, resz);
 					vd->GetScalings(sclx, scly, sclz);
 					vd->GetSpacings(spcx, spcy, spcz);
 					p = fluo::Point(p.x() / (resx*sclx*spcx),
@@ -2795,9 +2795,9 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 		if (color_mode == 1)
 		{
 			long cproj;
-			vd->getValue("colormap proj", cproj);
+			vd->getValue(gstColormapProj, cproj);
 			long ctype;
-			vd->getValue("colormap type", ctype);
+			vd->getValue(gstColormapType, ctype);
 			//2d adjustment
 			if (cproj)
 				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
@@ -2814,14 +2814,14 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 				img_shader->bind();
 			}
 			double lo, hi;
-			vd->getValue("colormap low", lo);
-			vd->getValue("colormap high", hi);
+			vd->getValue(gstColormapLow, lo);
+			vd->getValue(gstColormapHigh, hi);
 			img_shader->setLocalParam(
 				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
 			fluo::Color c;
-			vd->getValue("color", c);
+			vd->getValue(gstColor, c);
 			double cinv;
-			vd->getValue("colormap inv", cinv);
+			vd->getValue(gstColormapInv, cinv);
 			img_shader->setLocalParam(
 				6, c.r(), c.g(), c.b(), cinv);
 			img_shader->setLocalParam(
@@ -10702,7 +10702,7 @@ void VRenderGLView::SetLockCenterVol()
 	if (!m_cur_vol)
 		return;
 	fluo::BBox box;
-	m_cur_vol->getValue("clip bounds", box);
+	m_cur_vol->getValue(gstClipBounds, box);
 	m_lock_center = box.center();
 }
 

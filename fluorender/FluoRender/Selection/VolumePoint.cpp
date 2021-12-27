@@ -85,17 +85,17 @@ double VolumePoint::GetPointVolume(
 	int tmp_xx, tmp_yy, tmp_zz;
 	fluo::Point nmp;
 	double spcx, spcy, spcz;
-	m_vd->getValue("spc x", spcx);
-	m_vd->getValue("spc y", spcy);
-	m_vd->getValue("spc z", spcz);
+	m_vd->getValue(gstSpcX, spcx);
+	m_vd->getValue(gstSpcY, spcy);
+	m_vd->getValue(gstSpcZ, spcz);
 	long resx, resy, resz;//reslevel
 	//m_vd->GetResolution(resx, resy, resz, m_vd->GetLevel());
-	m_vd->getValue("res x", resx);
-	m_vd->getValue("res y", resy);
-	m_vd->getValue("res z", resz);
+	m_vd->getValue(gstResX, resx);
+	m_vd->getValue(gstResY, resy);
+	m_vd->getValue(gstResZ, resz);
 	//volume bounding box
 	fluo::BBox bbox;
-	m_vd->getValue("bounds", bbox);
+	m_vd->getValue(gstBounds, bbox);
 	fluo::Vector vv = mp2 - mp1;
 	vv.normalize();
 	fluo::Point hit;
@@ -105,7 +105,7 @@ double VolumePoint::GetPointVolume(
 	vector<fluo::Plane*> *planes = 0;
 	double mspc = 1.0;
 	double srate;
-	m_vd->getValue("sample rate", srate);
+	m_vd->getValue(gstSampleRate, srate);
 	if (srate > 0.0)
 		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / srate;
 	if (m_vd->GetRenderer())

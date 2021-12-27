@@ -1111,9 +1111,9 @@ void SegGrow::Compute()
 
 	//add ruler points
 	double spcx, spcy, spcz;
-	m_vd->getValue("spc x", spcx);
-	m_vd->getValue("spc y", spcy);
-	m_vd->getValue("spc z", spcz);
+	m_vd->getValue(gstSpcX, spcx);
+	m_vd->getValue(gstSpcY, spcy);
+	m_vd->getValue(gstSpcZ, spcz);
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{

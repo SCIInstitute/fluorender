@@ -664,9 +664,9 @@ void ChannelCompare::Product()
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1, ss2;
 	double dval;
-	m_vd1->getValue("int scale", dval);
+	m_vd1->getValue(gstIntScale, dval);
 	ss1 = (float)dval;
-	m_vd2->getValue("int scale", dval);
+	m_vd2->getValue(gstIntScale, dval);
 	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
@@ -777,9 +777,9 @@ void ChannelCompare::MinValue()
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1, ss2;
 	double dval;
-	m_vd1->getValue("int scale", dval);
+	m_vd1->getValue(gstIntScale, dval);
 	ss1 = (float)dval;
-	m_vd2->getValue("int scale", dval);
+	m_vd2->getValue(gstIntScale, dval);
 	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
@@ -890,9 +890,9 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1, ss2;
 	double dval;
-	m_vd1->getValue("int scale", dval);
+	m_vd1->getValue(gstIntScale, dval);
 	ss1 = (float)dval;
-	m_vd2->getValue("int scale", dval);
+	m_vd2->getValue(gstIntScale, dval);
 	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
@@ -995,9 +995,9 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1, ss2;
 	double dval;
-	m_vd1->getValue("int scale", dval);
+	m_vd1->getValue(gstIntScale, dval);
 	ss1 = (float)dval;
-	m_vd2->getValue("int scale", dval);
+	m_vd2->getValue(gstIntScale, dval);
 	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
