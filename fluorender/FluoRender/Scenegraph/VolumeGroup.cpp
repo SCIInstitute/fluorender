@@ -159,7 +159,7 @@ void VolumeGroup::OnRandomizeColor(Event& event)
 		it != m_children.end(); ++it)
 	{
 		bool bval;
-		(*it)->toggleValue(gstRamdomizeColor, bval, event);
+		(*it)->toggleValue(gstRandomizeColor, bval, event);
 	}
 }
 

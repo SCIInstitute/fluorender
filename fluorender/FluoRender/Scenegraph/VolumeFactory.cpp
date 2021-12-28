@@ -154,7 +154,7 @@ void VolumeFactory::createDefault()
 		vd->addValue(gstLuminance, double(1.0));
 		vd->addValue(gstSecColor, Color(1.0));//secondary color
 		vd->addValue(gstSecColorSet, bool(false));
-		vd->addValue(gstRamdomizeColor, bool(false));//set to change color
+		vd->addValue(gstRandomizeColor, bool(false));//set to change color
 		//vd->addValue("shuffle", long(0));//comp id shuffle
 
 		//resolution
@@ -338,7 +338,7 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, gstClipRotX, OnClipRot);
 	ADD_AFTER_EVENT(vd, gstClipRotY, OnClipRot);
 	ADD_AFTER_EVENT(vd, gstClipRotZ, OnClipRot);
-	ADD_AFTER_EVENT(vd, gstRamdomizeColor, OnRandomizeColor);
+	ADD_AFTER_EVENT(vd, gstRandomizeColor, OnRandomizeColor);
 }
 
 VolumeData* VolumeFactory::build(VolumeData* vd)
@@ -403,7 +403,7 @@ VolumeGroup* VolumeFactory::buildGroup(VolumeData* vd)
 	{
 		group->setName("Group");
 		group->setValueChangedFunction(
-			gstRamdomizeColor, std::bind(
+			gstRandomizeColor, std::bind(
 				&VolumeGroup::OnRandomizeColor,
 				group, std::placeholders::_1));
 	}

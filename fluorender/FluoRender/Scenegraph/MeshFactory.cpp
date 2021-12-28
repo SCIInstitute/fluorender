@@ -36,8 +36,8 @@ using namespace fluo;
 
 MeshFactory::MeshFactory()
 {
-	m_name = flstrMeshFactory;
-	default_object_name_ = flstrDefaultMesh;
+	m_name = gstMeshFactory;
+	default_object_name_ = gstDefaultMesh;
 
 	addValue("current", (MeshData*)(0));//current mesh data (for processing etc)
 }
@@ -116,7 +116,7 @@ void MeshFactory::createDefault()
 		md->addValue(gstViewport, Vector4i());
 
 		//sync group
-		vd->addValue(gstSyncGroup, bool(false));
+		md->addValue(gstSyncGroup, bool(false));
 
 		//selected on the ui
 		md->addValue(gstSelected, bool(false));

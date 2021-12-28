@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "ConvertDlg.h"
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
+#include <MeshData.hpp>
 #include <Converters/VolumeMeshConv.h>
 #include <wx/progdlg.h>
 #include <wx/valnum.h>
@@ -298,7 +299,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		glmArea(mesh, scale, &area);
 		DataManager* mgr = m_frame->GetDataManager();
 		mgr->LoadMeshData(mesh);
-		MeshData* md = mgr->GetLastMeshData();
+		fluo::MeshData* md = mgr->GetLastMeshData();
 		if (md && m_frame->GetView(0))
 		{
 			m_frame->GetView(0)->AddMeshData(md);
@@ -308,7 +309,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		m_frame->UpdateTree();
 		(*m_stat_text) <<
 			"The surface area of mesh object " <<
-			md->GetName() << " is " <<
+			md->getName() << " is " <<
 			wxString::Format("%f", area) << "\n";
 	}
 

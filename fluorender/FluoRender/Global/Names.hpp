@@ -134,7 +134,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstLuminance "luminance"
 #define gstSecColor "sec color"
 #define gstSecColorSet "sec color set"
-#define gstRamdomizeColor "randomize color"
+#define gstRandomizeColor "randomize color"
 //resolution
 #define gstResX "res x"
 #define gstResY "res y"

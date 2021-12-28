@@ -31,6 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <MeshData.hpp>
+#include <MeshGroup.hpp>
+#include <MeshFactory.hpp>
 #include <Global.hpp>
 #include <Timer.h>
 #include <Components/CompAnalyzer.h>
@@ -548,7 +551,7 @@ VRenderGLView::~VRenderGLView()
 	//	}
 	//	else if (m_layer_list[i]->IsA() == 6)//mesh group
 	//	{
-	//		MeshGroup* group = (MeshGroup*)m_layer_list[i];
+	//		fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
 	//		delete group;
 	//	}
 	//}
@@ -652,8 +655,8 @@ void VRenderGLView::Clear()
 		}
 		else if (m_layer_list[i]->IsA() == 6)//mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			delete group;
+			//fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
+			//delete group;
 		}
 	}
 
@@ -804,9 +807,13 @@ void VRenderGLView::CalcFogRange()
 	{
 		for (size_t i = 0; i<m_md_pop_list.size(); ++i)
 		{
-			if (m_md_pop_list[i]->GetDisp())
+			bool disp;
+			m_md_pop_list[i]->getValue(gstDisplay, disp);
+			if (disp)
 			{
-				bbox.extend(m_md_pop_list[i]->GetBounds());
+				fluo::BBox b;
+				m_md_pop_list[i]->getValue(gstBounds, b);
+				bbox.extend(b);
 				use_box = true;
 			}
 		}
@@ -1213,28 +1220,43 @@ void VRenderGLView::DrawMeshes(int peel)
 			continue;
 		if (m_layer_list[i]->IsA() == 3)
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md && md->GetDisp())
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
+			if (!md) continue;
+			bool disp;
+			md->getValue(gstDisplay, disp);
+			if (disp)
 			{
 				md->SetMatrices(m_mv_mat, m_proj_mat);
-				md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-				md->SetViewport(vp);
+				md->setValue(gstDepthAtten, m_use_fog);
+				md->setValue(gstDaInt, m_fog_intensity);
+				md->setValue(gstDaStart, m_fog_start);
+				md->setValue(gstDaEnd, m_fog_end);
+				md->setValue(gstViewport, fluo::Vector4i(vp));
 				md->Draw(peel);
 			}
 		}
 		else if (m_layer_list[i]->IsA() == 6)
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group && group->GetDisp())
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
+			if (!group) continue;
+			bool disp;
+			group->getValue(gstDisplay, disp);
+			if (disp)
 			{
-				for (int j = 0; j<(int)group->GetMeshNum(); j++)
+				for (int j = 0; j<(int)group->getNumChildren(); j++)
 				{
-					MeshData* md = group->GetMeshData(j);
-					if (md && md->GetDisp())
+					fluo::MeshData* md = group->getChild(j)->asMeshData();
+					if (!md) continue;
+					bool disp;
+					md->getValue(gstDisplay, disp);
+					if (disp)
 					{
 						md->SetMatrices(m_mv_mat, m_proj_mat);
-						md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-						md->SetViewport(vp);
+						md->setValue(gstDepthAtten, m_use_fog);
+						md->setValue(gstDaInt, m_fog_intensity);
+						md->setValue(gstDaStart, m_fog_start);
+						md->setValue(gstDaEnd, m_fog_end);
+						md->setValue(gstViewport, fluo::Vector4i(vp));
 						md->Draw(peel);
 					}
 				}
@@ -1650,21 +1672,30 @@ void VRenderGLView::PopMeshList()
 		{
 		case 3://mesh data
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md->GetDisp())
-				m_md_pop_list.push_back(md);
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
+			if (md)
+			{
+				bool disp;
+				md->getValue(gstDisplay, disp);
+				if (disp)
+					m_md_pop_list.push_back(md);
+			}
 		}
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (!group->GetDisp())
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
+			if (!group) continue;
+			bool disp;
+			group->getValue(gstDisplay, disp);
+			if (!disp)
 				continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
+			for (j = 0; j<group->getNumChildren(); j++)
 			{
-				if (group->GetMeshData(j) &&
-					group->GetMeshData(j)->GetDisp())
-					m_md_pop_list.push_back(group->GetMeshData(j));
+				fluo::MeshData* md = group->getChild(j)->asMeshData();
+				md->getValue(gstDisplay, disp);
+				if (disp)
+					m_md_pop_list.push_back(md);
 			}
 		}
 		break;
@@ -3128,25 +3159,38 @@ bool VRenderGLView::GetMeshShadow(double &val)
 			continue;
 		if (m_layer_list[i]->IsA() == 3)
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md && md->GetDisp())
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
+			if (!md) continue;
+			bool disp;
+			md->getValue(gstDisplay, disp);
+			if (disp)
 			{
-				md->GetShadowParams(val);
-				return md->GetShadow();
+				md->getValue(gstShadowInt, val);
+				bool shadow;
+				md->getValue(gstShadowEnable, shadow);
+				return shadow;
 			}
 		}
 		else if (m_layer_list[i]->IsA() == 6)
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group && group->GetDisp())
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
+			if (!group) continue;
+			bool disp;
+			group->getValue(gstDisplay, disp);
+			if (disp)
 			{
-				for (int j = 0; j<(int)group->GetMeshNum(); j++)
+				for (int j = 0; j<(int)group->getNumChildren(); j++)
 				{
-					MeshData* md = group->GetMeshData(j);
-					if (md && md->GetDisp())
+					fluo::MeshData* md = group->getChild(j)->asMeshData();
+					if (!md)
+						continue;
+					md->getValue(gstDisplay, disp);
+					if (disp)
 					{
-						md->GetShadowParams(val);
-						return md->GetShadow();
+						md->getValue(gstShadowInt, val);
+						bool shadow;
+						md->getValue(gstShadowEnable, shadow);
+						return shadow;
 					}
 				}
 			}
@@ -3863,7 +3907,7 @@ void VRenderGLView::PickMesh()
 	glDepthFunc(GL_LEQUAL);
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
 	{
-		MeshData* md = m_md_pop_list[i];
+		fluo::MeshData* md = m_md_pop_list[i];
 		if (md)
 		{
 			md->SetMatrices(m_mv_mat, m_proj_mat);
@@ -3879,13 +3923,13 @@ void VRenderGLView::PickMesh()
 
 	if (choose >0 && choose <= (int)m_md_pop_list.size())
 	{
-		MeshData* md = m_md_pop_list[choose - 1];
+		fluo::MeshData* md = m_md_pop_list[choose - 1];
 		if (md)
 		{
 			if (m_frame && m_frame->GetTree())
 			{
 				m_frame->GetTree()->SetFocus();
-				m_frame->GetTree()->Select(m_vrv->GetName(), md->GetName());
+				m_frame->GetTree()->Select(m_vrv->GetName(), md->getName());
 			}
 			RefreshGL(27);
 		}
@@ -5929,7 +5973,7 @@ fluo::VolumeData* VRenderGLView::GetDispVolumeData(int index)
 		return 0;
 }
 
-MeshData* VRenderGLView::GetMeshData(int index)
+fluo::MeshData* VRenderGLView::GetMeshData(int index)
 {
 	if (GetMeshNum() <= 0)
 		return 0;
@@ -5978,7 +6022,7 @@ fluo::VolumeData* VRenderGLView::GetVolumeData(const std::string &name)
 	return 0;
 }
 
-MeshData* VRenderGLView::GetMeshData(wxString &name)
+fluo::MeshData* VRenderGLView::GetMeshData(const std::string &name)
 {
 	int i, j;
 
@@ -5990,19 +6034,19 @@ MeshData* VRenderGLView::GetMeshData(wxString &name)
 		{
 		case 3://mesh data
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md && md->GetName() == name)
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
+			if (md && name == md->getName())
 				return md;
 		}
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
 			if (!group) continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
+			for (j = 0; j<group->getNumChildren(); j++)
 			{
-				MeshData* md = group->GetMeshData(j);
-				if (md && md->GetName() == name)
+				fluo::MeshData* md = group->getChild(j)->asMeshData();
+				if (md && name == md->getName())
 					return md;
 			}
 		}
@@ -6224,9 +6268,9 @@ fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, const std:
 	return group;
 }
 
-void VRenderGLView::AddMeshData(MeshData* md)
+void VRenderGLView::AddMeshData(fluo::MeshData* md)
 {
-	m_layer_list.push_back(md);
+	m_layer_list.push_back((TreeLayer*)md);
 	m_md_pop_dirty = true;
 }
 
@@ -6465,7 +6509,7 @@ void VRenderGLView::RemoveVolumeDataDup(const std::string &name)
 	}
 }
 
-void VRenderGLView::RemoveMeshData(wxString &name)
+void VRenderGLView::RemoveMeshData(const std::string &name)
 {
 	int i, j;
 
@@ -6477,8 +6521,8 @@ void VRenderGLView::RemoveMeshData(wxString &name)
 		{
 		case 3://mesh data
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
-			if (md && md->GetName() == name)
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
+			if (md && name == md->getName())
 			{
 				m_layer_list.erase(m_layer_list.begin() + i);
 				m_md_pop_dirty = true;
@@ -6488,14 +6532,14 @@ void VRenderGLView::RemoveMeshData(wxString &name)
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
 			if (!group) continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
+			for (j = 0; j<group->getNumChildren(); j++)
 			{
-				MeshData* md = group->GetMeshData(j);
-				if (md && md->GetName() == name)
+				fluo::MeshData* md = group->getChild(j)->asMeshData();
+				if (md && name == md->getName())
 				{
-					group->RemoveMeshData(j);
+					group->removeChild(j);
 					m_md_pop_dirty = true;
 					return;
 				}
@@ -6523,7 +6567,7 @@ void VRenderGLView::RemoveAnnotations(wxString &name)
 	}
 }
 
-void VRenderGLView::RemoveGroup(wxString &name)
+void VRenderGLView::RemoveGroup(const std::string &name)
 {
 	int i, j;
 	for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -6554,19 +6598,19 @@ void VRenderGLView::RemoveGroup(wxString &name)
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group && group->GetName() == name)
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
+			if (group && name == group->getName())
 			{
-				for (j = group->GetMeshNum() - 1; j >= 0; j--)
+				for (j = group->getNumChildren() - 1; j >= 0; j--)
 				{
-					MeshData* md = group->GetMeshData(j);
+					fluo::MeshData* md = group->getChild(j)->asMeshData();
 					if (md)
 					{
-						group->RemoveMeshData(j);
+						group->removeChild(j);
 					}
 				}
 				m_layer_list.erase(m_layer_list.begin() + i);
-				delete group;
+				//delete group;
 				m_md_pop_dirty = true;
 			}
 		}
@@ -6599,14 +6643,14 @@ void VRenderGLView::Isolate(int type, wxString name)
 		break;
 		case 3://mesh
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
 			if (md)
 			{
 				if (type == 3 &&
-					md->GetName() == name)
-					md->SetDisp(false);
+					name == md->getName())
+					md->setValue(gstDisplay, false);
 				else
-					md->SetDisp(false);
+					md->setValue(gstDisplay, false);
 			}
 		}
 		break;
@@ -6657,30 +6701,30 @@ void VRenderGLView::Isolate(int type, wxString name)
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
 			if (group)
 			{
 				if (type == 6)
 				{
-					if (group->GetName() == name)
-						group->SetDisp(true);
+					if (name == group->getName())
+						group->setValue(gstDisplay, true);
 					else
-						group->SetDisp(false);
+						group->setValue(gstDisplay, false);
 				}
 				else if (type == 5)
-					group->SetDisp(false);
+					group->setValue(gstDisplay, false);
 				else
 				{
-					for (int i = 0; i < (int)group->GetMeshNum(); i++)
+					for (int i = 0; i < (int)group->getNumChildren(); i++)
 					{
-						MeshData* md = group->GetMeshData(i);
+						fluo::MeshData* md = group->getChild(i)->asMeshData();
 						if (md)
 						{
 							if (type == 3 &&
-								md->GetName() == name)
-								md->SetDisp(true);
+								name == md->getName())
+								md->setValue(gstDisplay, true);
 							else
-								md->SetDisp(false);
+								md->setValue(gstDisplay, false);
 						}
 					}
 				}
@@ -6743,9 +6787,9 @@ void VRenderGLView::ShowAll()
 		break;
 		case 3://mesh
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
 			if (md)
-				md->SetDisp(true);
+				md->setValue(gstDisplay, true);
 		}
 		break;
 		case 4://annotation
@@ -6772,15 +6816,15 @@ void VRenderGLView::ShowAll()
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
 			if (group)
 			{
-				group->SetDisp(true);
-				for (int j = 0; j<group->GetMeshNum(); ++j)
+				group->setValue(gstDisplay, true);
+				for (int j = 0; j<group->getNumChildren(); ++j)
 				{
-					MeshData* md = group->GetMeshData(j);
+					fluo::MeshData* md = group->getChild(j)->asMeshData();
 					if (md)
-						md->SetDisp(true);
+						md->setValue(gstDisplay, true);
 				}
 			}
 		}
@@ -6989,34 +7033,34 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 //move mesh within a group
 void VRenderGLView::MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshGroup* group = GetMGroup(group_name);
+	fluo::MeshGroup* group = GetMGroup(group_name.ToStdString());
 	if (!group)
 		return;
 
-	MeshData* src_md = 0;
+	fluo::MeshData* src_md = 0;
 	int i, src_index;
-	for (i = 0; i<group->GetMeshNum(); i++)
+	for (i = 0; i<group->getNumChildren(); i++)
 	{
-		wxString name = group->GetMeshData(i)->GetName();
+		wxString name = group->getChild(i)->getName();
 		if (name == src_name)
 		{
 			src_index = i;
-			src_md = group->GetMeshData(i);
-			group->RemoveMeshData(i);
+			src_md = group->getChild(i)->asMeshData();
+			group->removeChild(i);
 			break;
 		}
 	}
 	if (!src_md)
 		return;
-	for (i = 0; i<group->GetMeshNum(); i++)
+	for (i = 0; i<group->getNumChildren(); i++)
 	{
-		wxString name = group->GetMeshData(i)->GetName();
+		wxString name = group->getChild(i)->getName();
 		if (name == dst_name)
 		{
 			if (i >= src_index)
-				group->InsertMeshData(i, src_md);
+				group->insertChild(i, src_md);
 			else
-				group->InsertMeshData(i - 1, src_md);
+				group->insertChild(i - 1, src_md);
 			break;
 		}
 	}
@@ -7028,26 +7072,26 @@ void VRenderGLView::MoveMeshinGroup(wxString &group_name, wxString &src_name, wx
 //move mesh out of a group
 void VRenderGLView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshGroup* group = GetMGroup(group_name);
+	fluo::MeshGroup* group = GetMGroup(group_name.ToStdString());
 	if (!group)
 		return;
 
-	MeshData* src_md = 0;
+	fluo::MeshData* src_md = 0;
 	int i;
-	for (i = 0; i<group->GetMeshNum(); i++)
+	for (i = 0; i<group->getNumChildren(); i++)
 	{
-		wxString name = group->GetMeshData(i)->GetName();
+		wxString name = group->getChild(i)->getName();
 		if (name == src_name)
 		{
-			src_md = group->GetMeshData(i);
-			group->RemoveMeshData(i);
+			src_md = group->getChild(i)->asMeshData();
+			group->removeChild(i);
 			break;
 		}
 	}
 	if (!src_md)
 		return;
 	if (dst_name == "")
-		m_layer_list.push_back(src_md);
+		m_layer_list.push_back((TreeLayer*)src_md);
 	else
 	{
 		for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -7055,7 +7099,7 @@ void VRenderGLView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxS
 			wxString name = m_layer_list[i]->GetName();
 			if (name == dst_name)
 			{
-				m_layer_list.insert(m_layer_list.begin() + i + 1, src_md);
+				m_layer_list.insert(m_layer_list.begin() + i + 1, (TreeLayer*)src_md);
 				break;
 			}
 		}
@@ -7067,7 +7111,7 @@ void VRenderGLView::MoveMeshtoView(wxString &group_name, wxString &src_name, wxS
 //move mesh into a group
 void VRenderGLView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshData* src_md = 0;
+	fluo::MeshData* src_md = 0;
 	int i;
 
 	for (i = 0; i<(int)m_layer_list.size(); i++)
@@ -7075,24 +7119,24 @@ void VRenderGLView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wx
 		wxString name = m_layer_list[i]->GetName();
 		if (name == src_name && m_layer_list[i]->IsA() == 3)
 		{
-			src_md = (MeshData*)m_layer_list[i];
+			src_md = (fluo::MeshData*)m_layer_list[i];
 			m_layer_list.erase(m_layer_list.begin() + i);
 			break;
 		}
 	}
-	MeshGroup* group = GetMGroup(group_name);
+	fluo::MeshGroup* group = GetMGroup(group_name.ToStdString());
 	if (!group || !src_md)
 		return;
-	if (group->GetMeshNum() == 0 || dst_name == "")
-		group->InsertMeshData(0, src_md);
+	if (group->getNumChildren() == 0 || dst_name == "")
+		group->insertChild(0, src_md);
 	else
 	{
-		for (i = 0; i<group->GetMeshNum(); i++)
+		for (i = 0; i<group->getNumChildren(); i++)
 		{
-			wxString name = group->GetMeshData(i)->GetName();
+			wxString name = group->getChild(i)->getName();
 			if (name == dst_name)
 			{
-				group->InsertMeshData(i, src_md);
+				group->insertChild(i, src_md);
 				break;
 			}
 		}
@@ -7104,34 +7148,34 @@ void VRenderGLView::MoveMeshtoGroup(wxString &group_name, wxString &src_name, wx
 //move mesh out of then into a group
 void VRenderGLView::MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
-	MeshGroup* src_group = GetMGroup(src_group_name);
+	fluo::MeshGroup* src_group = GetMGroup(src_group_name.ToStdString());
 	if (!src_group)
 		return;
 	int i;
-	MeshData* src_md = 0;
-	for (i = 0; i<src_group->GetMeshNum(); i++)
+	fluo::MeshData* src_md = 0;
+	for (i = 0; i<src_group->getNumChildren(); i++)
 	{
-		wxString name = src_group->GetMeshData(i)->GetName();
+		wxString name = src_group->getChild(i)->getName();
 		if (name == src_name)
 		{
-			src_md = src_group->GetMeshData(i);
-			src_group->RemoveMeshData(i);
+			src_md = src_group->getChild(i)->asMeshData();
+			src_group->removeChild(i);
 			break;
 		}
 	}
-	MeshGroup* dst_group = GetMGroup(dst_group_name);
+	fluo::MeshGroup* dst_group = GetMGroup(dst_group_name.ToStdString());
 	if (!dst_group || !src_md)
 		return;
-	if (dst_group->GetMeshNum() == 0 || dst_name == "")
-		dst_group->InsertMeshData(0, src_md);
+	if (dst_group->getNumChildren() == 0 || dst_name == "")
+		dst_group->insertChild(0, src_md);
 	else
 	{
-		for (i = 0; i<dst_group->GetMeshNum(); i++)
+		for (i = 0; i<dst_group->getNumChildren(); i++)
 		{
-			wxString name = dst_group->GetMeshData(i)->GetName();
+			wxString name = dst_group->getChild(i)->getName();
 			if (name == dst_name)
 			{
-				dst_group->InsertMeshData(i, src_md);
+				dst_group->insertChild(i, src_md);
 				break;
 			}
 		}
@@ -7273,20 +7317,20 @@ fluo::VolumeGroup* VRenderGLView::AddOrGetGroup()
 	return group;
 }
 
-wxString VRenderGLView::AddMGroup(wxString str)
+std::string VRenderGLView::AddMGroup(const std::string &str)
 {
-	MeshGroup* group = new MeshGroup();
+	fluo::MeshGroup* group = glbin_mshf->buildGroup();
 	if (group && str != "")
-		group->SetName(str);
-	m_layer_list.push_back(group);
+		group->setName(str);
+	m_layer_list.push_back((TreeLayer*)group);
 
 	if (group)
-		return group->GetName();
+		return group->getName();
 	else
 		return "";
 }
 
-MeshGroup* VRenderGLView::AddOrGetMGroup()
+fluo::MeshGroup* VRenderGLView::AddOrGetMGroup()
 {
 	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
@@ -7296,22 +7340,22 @@ MeshGroup* VRenderGLView::AddOrGetMGroup()
 		{
 		case 6://group
 		{
-			MeshGroup* group_temp = (MeshGroup*)m_layer_list[i];
-			if (group_temp && !group_temp->GetMeshNum())
+			fluo::MeshGroup* group_temp = (fluo::MeshGroup*)m_layer_list[i];
+			if (group_temp && !group_temp->getNumChildren())
 				return group_temp;
 		}
 		break;
 		}
 	}
 	//group not found
-	MeshGroup* group = new MeshGroup();
+	fluo::MeshGroup* group = new fluo::MeshGroup();
 	if (!group)
 		return 0;
-	m_layer_list.push_back(group);
+	m_layer_list.push_back((TreeLayer*)group);
 	return group;
 }
 
-MeshGroup* VRenderGLView::GetMGroup(wxString str)
+fluo::MeshGroup* VRenderGLView::GetMGroup(const std::string &str)
 {
 	int i;
 
@@ -7323,8 +7367,8 @@ MeshGroup* VRenderGLView::GetMGroup(wxString str)
 		{
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (group && group->GetName() == str)
+			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
+			if (group && str == group->getName())
 				return group;
 		}
 		}
@@ -7349,8 +7393,12 @@ void VRenderGLView::InitView(unsigned int type)
 			m_vd_pop_list[i]->getValue(gstBounds, bounds);
 			m_bounds.extend(bounds);
 		}
-		for (i = 0; i<(int)m_md_pop_list.size(); i++)
-			m_bounds.extend(m_md_pop_list[i]->GetBounds());
+		for (i = 0; i < (int)m_md_pop_list.size(); i++)
+		{
+			fluo::BBox b;
+			m_md_pop_list[i]->getValue(gstBounds, b);
+			m_bounds.extend(b);
+		}
 
 		if (m_bounds.valid())
 		{
@@ -8015,9 +8063,12 @@ void VRenderGLView::DrawLegend()
 	}
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
 	{
-		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
+		if (!m_md_pop_list[i]) continue;
+		bool legend;
+		m_md_pop_list[i]->getValue(gstLegend, legend);
+		if (legend)
 		{
-			wxstr = m_md_pop_list[i]->GetName();
+			wxstr = m_md_pop_list[i]->getName();
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
@@ -8072,9 +8123,12 @@ void VRenderGLView::DrawLegend()
 	}
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
 	{
-		if (m_md_pop_list[i] && m_md_pop_list[i]->GetLegend())
+		if (!m_md_pop_list[i]) continue;
+		bool legend;
+		m_md_pop_list[i]->getValue(gstLegend, legend);
+		if (legend)
 		{
-			wxstr = m_md_pop_list[i]->GetName();
+			wxstr = m_md_pop_list[i]->getName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
@@ -8089,17 +8143,15 @@ void VRenderGLView::DrawLegend()
 				xpos = 0.0;
 				cur_line++;
 			}
-			fluo::Color amb, diff, spec;
-			double shine, alpha;
-			m_md_pop_list[i]->GetMaterial(amb, diff, spec, shine, alpha);
-			fluo::Color c(diff.r(), diff.g(), diff.b());
+			fluo::Color color;
+			m_md_pop_list[i]->getValue(gstColor, color);
 			bool highlighted = false;
 			if (m_frame->GetCurSelType() == 3 &&
 				m_frame->GetCurSelMesh() &&
-				m_frame->GetCurSelMesh()->GetName() == wxstr)
+				wxstr == m_frame->GetCurSelMesh()->getName())
 				highlighted = true;
 			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
-				nx, ny, wxstr, c, font_height, highlighted);
+				nx, ny, wxstr, color, font_height, highlighted);
 		}
 	}
 

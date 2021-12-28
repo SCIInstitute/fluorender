@@ -416,7 +416,7 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 		m_md->setValue(gstShadowInt, dval);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_view->GetMeshData(i);
+			fluo::MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->setValue(gstShadowInt, dval);
 		}

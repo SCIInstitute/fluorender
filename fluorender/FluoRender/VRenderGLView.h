@@ -123,6 +123,8 @@ namespace fluo
 {
 	class VolumeData;
 	class VolumeGroup;
+	class MeshData;
+	class MeshGroup;
 }
 class VRenderGLView : public wxGLCanvas
 {
@@ -160,31 +162,31 @@ public:
 	int GetLayerNum();
 	fluo::VolumeData* GetAllVolumeData(int index);
 	fluo::VolumeData* GetDispVolumeData(int index);
-	MeshData* GetMeshData(int index);
+	fluo::MeshData* GetMeshData(int index);
 	TreeLayer* GetLayer(int index);
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	fluo::VolumeData* GetVolumeData(const std::string &name);
-	MeshData* GetMeshData(wxString &name);
+	fluo::MeshData* GetMeshData(const std::string &name);
 	Annotations* GetAnnotations(wxString &name);
 	fluo::VolumeGroup* GetGroup(const std::string &name);
 	fluo::VolumeGroup* GetGroup(int index);
 	fluo::VolumeGroup* GetGroup(fluo::VolumeData* vd);
-	MeshGroup* GetMGroup(wxString str);
+	fluo::MeshGroup* GetMGroup(const std::string &str);
 	//add
 	fluo::VolumeGroup* AddVolumeData(fluo::VolumeData* vd, const std::string &group_name = "");
-	void AddMeshData(MeshData* md);
+	void AddMeshData(fluo::MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	std::string AddGroup(const std::string &str, const std::string &prev_group = "");
 	fluo::VolumeGroup* AddOrGetGroup();
-	wxString AddMGroup(wxString str);
-	MeshGroup* AddOrGetMGroup();
+	std::string AddMGroup(const std::string &str);
+	fluo::MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(const std::string &name);
 	void RemoveVolumeDataDup(const std::string &name);//remove all duplicated data
 	void ReplaceVolumeData(const std::string &name, fluo::VolumeData *dst);
-	void RemoveMeshData(wxString &name);
+	void RemoveMeshData(const std::string &name);
 	void RemoveAnnotations(wxString &name);
-	void RemoveGroup(wxString &name);
+	void RemoveGroup(const std::string &name);
 	//isolate
 	void Isolate(int type, wxString name);
 	void ShowAll();
@@ -737,7 +739,7 @@ private:
 	bool m_vd_pop_dirty;
 	vector <fluo::VolumeData*> m_vd_pop_list;
 	bool m_md_pop_dirty;
-	vector <MeshData*> m_md_pop_list;
+	vector <fluo::MeshData*> m_md_pop_list;
 	//real data list
 	vector <TreeLayer*> m_layer_list;
 	//ruler list

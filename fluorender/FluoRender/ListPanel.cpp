@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
+#include <MeshData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include "Formats/png_resource.h"
@@ -272,10 +273,12 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					else if (GetItemText(item) == "Mesh")
 					{
 						wxString name = GetText(item, 1);
-						MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+						fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 						if (md)
 						{
-							if (md->GetPath() == "")
+							std::wstring path;
+							md->getValue(gstDataPath, path);
+							if (path == L"")
 								menu.Append(Menu_Save, "Save...");
 							else
 								menu.Append(Menu_Save, "Save As...");
@@ -359,7 +362,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		else if (GetItemText(item) == "Mesh")
 		{
 			name = GetText(item, 1);
-			MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+			fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 			if (md)
 			{
 				if (view)
@@ -710,11 +713,12 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 				if (m_frame)
 				{
-					MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+					fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 					if (md)
 					{
-						md->Save(filename);
-						wxString str = md->GetPath();
+						md->SaveData(filename.ToStdString());
+						std::wstring str;
+						md->getValue(gstDataPath, str);
 						SetText(item, 2, str);
 					}
 				}
@@ -878,9 +882,9 @@ void DataListCtrl::EndEdit(bool update)
 				}
 				else if (GetItemText(item) == "Mesh")
 				{
-					MeshData* md = mgr->GetMeshData(name);
+					fluo::MeshData* md = mgr->GetMeshData(name.ToStdString());
 					if (md)
-						md->SetName(new_name2);
+						md->setName(new_name2.ToStdString());
 				}
 				else if (GetItemText(item) == "Annotations")
 				{
@@ -949,14 +953,14 @@ void DataListCtrl::DeleteSelection()
 					VRenderGLView* view = m_frame->GetView(i);
 					if (view)
 					{
-						view->RemoveMeshData(name);
+						view->RemoveMeshData(name.ToStdString());
 					}
 				}
 				//from datamanager
 				DataManager* mgr = m_frame->GetDataManager();
 				if (mgr)
 				{
-					int index = mgr->GetMeshIndex(name);
+					int index = mgr->GetMeshIndex(name.ToStdString());
 					if (index != -1)
 					{
 						mgr->RemoveMeshData(index);
@@ -1026,13 +1030,13 @@ void DataListCtrl::DeleteAll()
 			{
 				VRenderGLView* view = m_frame->GetView(i);
 				if (view)
-					view->RemoveMeshData(name);
+					view->RemoveMeshData(name.ToStdString());
 			}
 			//from datamanager
 			DataManager* mgr = m_frame->GetDataManager();
 			if (mgr)
 			{
-				int index = mgr->GetMeshIndex(name);
+				int index = mgr->GetMeshIndex(name.ToStdString());
 				if (index != -1)
 					mgr->RemoveMeshData(index);
 			}

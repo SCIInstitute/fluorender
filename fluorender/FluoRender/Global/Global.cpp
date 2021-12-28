@@ -98,7 +98,7 @@ VolumeFactory* Global::getVolumeFactory()
 
 MeshFactory* Global::getMeshFactory()
 {
-	Object* obj = get(flstrMeshFactory);
+	Object* obj = get(gstMeshFactory);
 	if (!obj)
 		return 0;
 	return dynamic_cast<MeshFactory*>(obj);

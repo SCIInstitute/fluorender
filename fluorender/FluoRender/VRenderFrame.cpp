@@ -1552,7 +1552,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 					if (chan_num >=0 && chan_num <3)
 						vd->setValue(gstColor, color);
 					else
-						vd->toggleValue(gstRamdomizeColor, bval);
+						vd->toggleValue(gstRandomizeColor, bval);
 
 					v->AddVolumeData(vd);
 					vd_sel = vd;
@@ -2439,7 +2439,7 @@ void VRenderFrame::OnSelection(int type,
 				wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->getName());
 			m_aui_mgr.Update();
 			wxString str = md->getName();
-			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
+			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str.ToStdString());
 			md->setValue(gstDrawBounds, true);
 		}
 
@@ -2569,7 +2569,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 		for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
 			GetView(i)->GetAllVolumeData(j)->setValue(gstDisplay, true);
 		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
-			GetView(i)->GetMeshData(j)->SetDisp(true);
+			GetView(i)->GetMeshData(j)->setValue(gstDisplay, true);
 		VRenderView* vrv = m_vrv_list[i];
 		m_vrv_list.erase(m_vrv_list.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
@@ -4273,7 +4273,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						fluo::MeshData* md = m_data_mgr.GetMeshData(str);
+						fluo::MeshData* md = m_data_mgr.GetMeshData(str.ToStdString());
 						if (md)
 							view->AddMeshData(md);
 					}
@@ -4312,7 +4312,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										fluo::MeshData* md = m_data_mgr.GetMeshData(str);
+										fluo::MeshData* md = m_data_mgr.GetMeshData(str.ToStdString());
 										if (md)
 											view->AddMeshData(md);
 									}
@@ -4406,8 +4406,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										//if (fconfig.Read("id", &id))
 										//	MeshGroup::SetID(id);
-										str = view->AddMGroup(str);
-										fluo::MeshGroup* group = view->GetMGroup(str);
+										str = view->AddMGroup(str.ToStdString());
+										fluo::MeshGroup* group = view->GetMGroup(str.ToStdString());
 										if (group)
 										{
 											//display
@@ -4425,7 +4425,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 												{
 													if (fconfig.Read(wxString::Format("mesh_%d", k), &str))
 													{
-														fluo::MeshData* md = m_data_mgr.GetMeshData(str);
+														fluo::MeshData* md = m_data_mgr.GetMeshData(str.ToStdString());
 														if (md)
 															group->insertChild(k-1, md);
 													}

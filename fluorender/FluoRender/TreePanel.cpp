@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <MeshData.hpp>
+#include <MeshGroup.hpp>
 #include <compatibility.h>
 //resources
 #include "Formats/png_resource.h"
@@ -187,11 +189,11 @@ void DataTreeCtrl::DeleteSelection()
 						}
 						else if (item_data->type == 3)//mesh data
 						{
-							MeshData* md = view->GetMeshData(name_data);
+							fluo::MeshData* md = view->GetMeshData(name_data.ToStdString());
 							if (md)
 							{
-								md->SetDisp(true);
-								view->RemoveMeshData(name_data);
+								md->setValue(gstDisplay, true);
+								view->RemoveMeshData(name_data.ToStdString());
 							}
 						}
 						else if (item_data->type == 4)//annotations
@@ -205,11 +207,11 @@ void DataTreeCtrl::DeleteSelection()
 						}
 						else if (item_data->type == 5)//group
 						{
-							view->RemoveGroup(name_data);
+							view->RemoveGroup(name_data.ToStdString());
 						}
 						else if (item_data->type == 6)//mesh group
 						{
-							view->RemoveGroup(name_data);
+							view->RemoveGroup(name_data.ToStdString());
 						}
 					}
 					m_frame->UpdateTree();
@@ -251,7 +253,7 @@ void DataTreeCtrl::DeleteSelection()
 						break;
 					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 					if (item_data && item_data->type==3)
-						view->RemoveMeshData(name_data);
+						view->RemoveMeshData(name_data.ToStdString());
 					m_frame->UpdateTree();
 					m_frame->RefreshVRenderViews();
 					m_frame->OnSelection(1);
@@ -549,7 +551,7 @@ void DataTreeCtrl::OnManipulateData(wxCommandEvent& event)
 		if (item_data && item_data->type == 3)//mesh data
 		{
 			wxString name = GetItemText(sel_item);
-			MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+			fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 			m_frame->OnSelection(6, 0, 0, 0, md);
 		}
 	}
@@ -924,15 +926,18 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		if (vd)
 		{
 			bool rc;
-			vd->toggleValue(gstRamdomizeColor, rc);
+			vd->toggleValue(gstRandomizeColor, rc);
 		}
 	}
 	else if (item_data->type == 3)
 	{
 		//mesh
-		MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+		fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 		if (md)
-			md->RandomizeColor();
+		{
+			bool bval;
+			md->toggleValue(gstRandomizeColor, bval);
+		}
 	}
 	else if (item_data->type == 5)
 	{
@@ -945,7 +950,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 			if (group)
 			{
 				bool rc;
-				group->toggleValue(gstRamdomizeColor, rc);
+				group->toggleValue(gstRandomizeColor, rc);
 			}
 		}
 	}
@@ -956,9 +961,12 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 		VRenderGLView* view = m_frame->GetView(par_name);
 		if (view)
 		{
-			MeshGroup* group = view->GetMGroup(name);
+			fluo::MeshGroup* group = view->GetMGroup(name.ToStdString());
 			if (group)
-				group->RandomizeColor();
+			{
+				bool bval;
+				group->toggleValue(gstRandomizeColor, bval);
+			}
 		}
 	}
 
@@ -1086,7 +1094,7 @@ void DataTreeCtrl::UpdateSelection()
 							VRenderGLView* view = m_frame->GetView(str);
 							if (view)
 							{
-								MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+								fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 								m_frame->OnSelection(3, view, 0, 0, md);
 							}
 						}
@@ -1097,7 +1105,7 @@ void DataTreeCtrl::UpdateSelection()
 							VRenderGLView* view = m_frame->GetView(str);
 							if (view)
 							{
-								MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+								fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 								m_frame->OnSelection(3, view, 0, 0, md);
 							}
 						}
@@ -1285,7 +1293,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					if (vd)
 					{
 						if (rc)
-							vd->toggleValue(gstRamdomizeColor, bval);
+							vd->toggleValue(gstRandomizeColor, bval);
 						else
 						{
 							vd->toggleValue(gstDisplay, bval);
@@ -1301,14 +1309,18 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 3://mesh data
 				{
-					MeshData* md = m_frame->GetDataManager()->GetMeshData(name);
+				fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
 					if (md)
 					{
 						if (rc)
-							md->RandomizeColor();
+						{
+							bool bval;
+							md->toggleValue(gstRandomizeColor, bval);
+						}
 						else
 						{
-							md->ToggleDisp();
+							bool bval;
+							md->toggleValue(gstDisplay, bval);
 							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
 								VRenderGLView* view = m_frame->GetView(i);
@@ -1338,7 +1350,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 						if (group)
 						{
 							if (rc)
-								group->toggleValue(gstRamdomizeColor, bval);
+								group->toggleValue(gstRandomizeColor, bval);
 							else
 							{
 								group->toggleValue(gstDisplay, bval);
@@ -1354,14 +1366,18 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					VRenderGLView* view = m_frame->GetView(par_name);
 					if (view)
 					{
-						MeshGroup* group = view->GetMGroup(name);
+						fluo::MeshGroup* group = view->GetMGroup(name.ToStdString());
 						if (group)
 						{
 							if (rc)
-								group->RandomizeColor();
+							{
+								bool bval;
+								group->toggleValue(gstRandomizeColor, bval);
+							}
 							else
 							{
-								group->ToggleDisp();
+								bool bval;
+								group->toggleValue(gstDisplay, bval);
 								view->SetMeshPopDirty();
 							}
 						}
