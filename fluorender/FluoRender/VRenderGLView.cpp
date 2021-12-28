@@ -2676,11 +2676,21 @@ void VRenderGLView::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	fluo::Color gamma = vd->GetGamma();
-	fluo::Color brightness = vd->GetBrightness();
+	double r, g, b;
+	vd->getValue(gstGammaR, r);
+	vd->getValue(gstGammaG, g);
+	vd->getValue(gstGammaB, b);
+	fluo::Color gamma(r, g, b);
+	vd->getValue(gstBrightnessR, r);
+	vd->getValue(gstBrightnessG, g);
+	vd->getValue(gstBrightnessB, b);
+	fluo::Color brightness(r, g, b);
+	vd->getValue(gstEqualizeR, r);
+	vd->getValue(gstEqualizeG, g);
+	vd->getValue(gstEqualizeB, b);
+	fluo::Color hdr(r, g, b);
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	fluo::Color hdr = vd->GetHdr();
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
@@ -2720,12 +2730,18 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 			do_mip = false;
 	}
 
-	bool shading = vd->GetRenderer()->get_shading();
-	bool shadow = vd->GetShadow();
-	int color_mode = vd->GetColormapMode();
-	bool enable_alpha = vd->GetEnableAlpha();
-	flvr::ShaderProgram* img_shader = 0;
+	bool shading;
+	vd->getValue(gstShadingEnable, shading);
+	bool shadow;
+	vd->getValue(gstShadowEnable, shadow);
+	long color_mode;
+	vd->getValue(gstColormapMode, color_mode);
+	bool enable_alpha;
+	vd->getValue(gstAlphaEnable, enable_alpha);
+	long saved_mip_mode;
+	vd->getValue(gstMipMode, saved_mip_mode);
 
+	flvr::ShaderProgram* img_shader = 0;
 	flvr::Framebuffer* chann_buffer =
 		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
 	flvr::Framebuffer* overlay_buffer = 0;
@@ -2796,37 +2812,41 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 			vd->GetRenderer()->set_depth_peel(peel);
 		vd->GetRenderer()->set_shading(false);
 		//turn off colormap proj
-		int saved_colormap_proj = vd->GetColormapProj();
+		long saved_colormap_proj;
+		vd->getValue(gstColormapProj, saved_colormap_proj);
 		if (color_mode == 0)
-			vd->SetColormapProj(0);
+			vd->setValue(gstColormapProj, long(0));
 		if (color_mode == 1)
 		{
-			vd->SetMode(3);
-			vd->SetFog(false, m_fog_intensity, m_fog_start, m_fog_end);
+			vd->setValue(gstMipMode, long(3));
+			vd->setValue(gstDepthAtten, false);
 		}
 		else
 		{
-			vd->SetMode(1);
-			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			vd->setValue(gstMipMode, long(1));
+			vd->setValue(gstDepthAtten, m_use_fog);
+			vd->setValue(gstDaInt, m_fog_intensity);
+			vd->setValue(gstDaStart, m_fog_start);
+			vd->setValue(gstDaEnd, m_fog_end);
 		}
 		//turn off alpha
 		if (color_mode == 1)
-			vd->SetEnableAlpha(false);
+			vd->setValue(gstAlphaEnable, false);
 		//draw
-		vd->SetStreamMode(1);
+		vd->setValue(gstStreamMode, long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->SetCurFramebuffer(m_cur_framebuffer);
+		vd->setValue(gstViewport, fluo::Vector4i(vp));
+		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
+		vd->setValue(gstCurFramebuffer, unsigned long(m_cur_framebuffer));
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
 		if (color_mode == 0)
-			vd->SetColormapProj(saved_colormap_proj);
+			vd->setValue(gstColormapProj, saved_colormap_proj);
 		if (color_mode == 1)
 		{
-			vd->RestoreMode();
+			vd->setValue(gstMipMode, saved_mip_mode);
 			//restore alpha
-			vd->SetEnableAlpha(enable_alpha);
+			vd->setValue(gstAlphaEnable, enable_alpha);
 		}
 
 		//bind channel fbo for final composition
@@ -2980,11 +3000,21 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 			img_shader->create();
 		img_shader->bind();
 	}
-	fluo::Color gamma = vd->GetGamma();
-	fluo::Color brightness = vd->GetBrightness();
+	double r, g, b;
+	vd->getValue(gstGammaR, r);
+	vd->getValue(gstGammaG, g);
+	vd->getValue(gstGammaB, b);
+	fluo::Color gamma(r, g, b);
+	vd->getValue(gstBrightnessR, r);
+	vd->getValue(gstBrightnessG, g);
+	vd->getValue(gstBrightnessB, b);
+	fluo::Color brightness(r, g, b);
+	vd->getValue(gstEqualizeR, r);
+	vd->getValue(gstEqualizeG, g);
+	vd->getValue(gstEqualizeB, b);
+	fluo::Color hdr(r, g, b);
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	fluo::Color hdr = vd->GetHdr();
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
@@ -2993,8 +3023,8 @@ void VRenderGLView::DrawMIP(fluo::VolumeData* vd, int peel)
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 
-	vd->GetRenderer()->set_shading(shading);
-	vd->SetColormapMode(color_mode);
+	vd->setValue(gstShadingEnable, shading);
+	vd->setValue(gstColormapMode, color_mode);
 
 	//if vd is duplicated
 	if (flvr::TextureRenderer::get_mem_swap() &&
@@ -3036,18 +3066,25 @@ void VRenderGLView::DrawOLShading(fluo::VolumeData* vd)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	vd->GetRenderer()->set_shading(true);
-	bool alpha = vd->GetEnableAlpha();
-	vd->SetEnableAlpha(true);
-	vd->SetMode(2);
-	int colormode = vd->GetColormapMode();
-	vd->SetStreamMode(2);
+	vd->setValue(gstShadingEnable, true);
+	bool alpha;
+	vd->getValue(gstAlphaEnable, alpha);
+	vd->setValue(gstAlphaEnable, true);
+	long mip_mode;
+	vd->getValue(gstMipMode, mip_mode);
+	vd->setValue(gstMipMode, long(2));
+	long colormode;
+	vd->getValue(gstColormapMode, colormode);
+	vd->setValue(gstStreamMode, long(2));
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+	vd->setValue(gstDepthAtten, m_use_fog);
+	vd->setValue(gstDaInt, m_fog_intensity);
+	vd->setValue(gstDaStart, m_fog_start);
+	vd->setValue(gstDaEnd, m_fog_end);
 	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
-	vd->RestoreMode();
-	vd->SetColormapMode(colormode);
-	vd->SetEnableAlpha(alpha);
+	vd->setValue(gstMipMode, mip_mode);
+	vd->setValue(gstColormapMode, colormode);
+	vd->setValue(gstAlphaEnable, alpha);
 
 	//bind fbo for final composition
 	flvr::Framebuffer* chann_buffer =
@@ -3230,17 +3267,29 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 
 	size_t i;
 	bool has_shadow = false;
-	vector<int> colormodes;
+	vector<long> colormodes;
 	vector<bool> shadings;
+	vector<long> mip_modes;
 	vector<fluo::VolumeData*> list;
 	//generate list
 	for (i = 0; i<vlist.size(); i++)
 	{
 		fluo::VolumeData* vd = vlist[i];
-		if (vd && vd->GetShadow())
+		if (!vd)
+			continue;
+		bool shadow;
+		vd->getValue(gstShadowEnable, shadow);
+		if (shadow)
 		{
-			colormodes.push_back(vd->GetColormapMode());
-			shadings.push_back(vd->GetRenderer()->get_shading());
+			long colormode;
+			vd->getValue(gstColormapMode, colormode);
+			colormodes.push_back(colormode);
+			bool shading;
+			vd->getValue(gstShadingEnable, shading);
+			shadings.push_back(shading);
+			long mip_mode;
+			vd->getValue(gstMipMode, mip_mode);
+			mip_modes.push_back(mip_mode);
 			list.push_back(vd);
 			has_shadow = true;
 		}
@@ -3257,9 +3306,13 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (list.size() == 1 && list[0]->GetShadow())
-			if (list[0]->GetRenderer()->get_done_loop(3))
+		if (list.size() == 1)
+		{
+			bool shadow;
+			list[0]->getValue(gstShadowEnable, shadow);
+			if (shadow && list[0]->GetRenderer()->get_done_loop(3))
 				return;
+		}
 	}
 
 	flvr::Framebuffer* overlay_buffer =
@@ -3291,30 +3344,39 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 	{
 		fluo::VolumeData* vd = list[0];
 		//save
-		int colormode = vd->GetColormapMode();
-		bool shading = vd->GetRenderer()->get_shading();
+		long colormode;
+		vd->getValue(gstColormapMode, colormode);
+		bool shading;
+		vd->getValue(gstShadingEnable, shading);
+		long mip_mode;
+		vd->getValue(gstMipMode, mip_mode);
 		//set to draw depth
-		vd->GetRenderer()->set_shading(false);
-		vd->SetMode(0);
-		vd->SetColormapMode(2);
+		vd->setValue(gstShadingEnable, false);
+		vd->setValue(gstMipMode, long(0));
+		vd->setValue(gstColormapMode, long(2));
 		if (overlay_buffer)
-			vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		int msk_mode = vd->GetMaskMode();
-		vd->SetMaskMode(0);
+			vd->setValue(gst2dDmapId,
+			(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+		long msk_mode;
+		vd->getValue(gstMaskMode, msk_mode);
+		vd->setValue(gstMaskMode, long(0));
 		//draw
-		vd->SetStreamMode(3);
+		vd->setValue(gstStreamMode, long(3));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->SetCurFramebuffer(m_cur_framebuffer);
+		vd->setValue(gstDepthAtten, m_use_fog);
+		vd->setValue(gstDaInt, m_fog_intensity);
+		vd->setValue(gstDaStart, m_fog_start);
+		vd->setValue(gstDaEnd, m_fog_end);
+		vd->setValue(gstViewport, fluo::Vector4i(vp));
+		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
+		vd->setValue(gstCurFramebuffer, (unsigned long)(m_cur_framebuffer));
 		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
-		vd->RestoreMode();
-		vd->SetMaskMode(msk_mode);
-		vd->SetColormapMode(colormode);
-		vd->GetRenderer()->set_shading(shading);
-		vd->GetShadowParams(shadow_darkness);
+		vd->setValue(gstMipMode, mip_mode);
+		vd->setValue(gstMaskMode, msk_mode);
+		vd->setValue(gstColormapMode, colormode);
+		vd->setValue(gstShadingEnable, shading);
+		vd->setValue(gstShadowInt, shadow_darkness);
 	}
 	else
 	{
@@ -3322,16 +3384,20 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			fluo::VolumeData* vd = list[i];
-			vd->GetRenderer()->set_shading(false);
-			vd->SetMode(0);
-			vd->SetColormapMode(2);
+			vd->setValue(gstShadingEnable, false);
+			vd->setValue(gstMipMode, long(0));
+			vd->setValue(gstColormapMode, long(2));
 			if (overlay_buffer)
-				vd->Set2dDmap(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0));
+				vd->setValue(gst2dDmapId,
+				(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
 			flvr::VolumeRenderer* vr = list[i]->GetRenderer();
 			if (vr)
 			{
 				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				list[i]->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				list[i]->setValue(gstDepthAtten, m_use_fog);
+				list[i]->setValue(gstDaInt, m_fog_intensity);
+				list[i]->setValue(gstDaStart, m_fog_start);
+				list[i]->setValue(gstDaEnd, m_fog_end);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -3346,11 +3412,11 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			fluo::VolumeData* vd = list[i];
-			vd->RestoreMode();
-			vd->SetColormapMode(colormodes[i]);
-			vd->GetRenderer()->set_shading(shadings[i]);
+			vd->setValue(gstMipMode, mip_modes[i]);
+			vd->setValue(gstColormapMode, colormodes[i]);
+			vd->setValue(gstShadingEnable, shadings[i]);
 		}
-		list[0]->GetShadowParams(shadow_darkness);
+		list[0]->getValue(gstShadowInt, shadow_darkness);
 	}
 
 	//
@@ -3471,18 +3537,27 @@ void VRenderGLView::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
 	for (i = 0; i<(int)list.size(); i++)
 	{
 		fluo::VolumeData* vd = list[i];
-		if (vd && vd->GetDisp())
+		if (!vd)
+			continue;
+		bool disp;
+		vd->getValue(gstDisplay, disp);
+		if (disp)
 		{
 			flvr::VolumeRenderer* vr = vd->GetRenderer();
 			if (vr)
 			{
 				//drawlabel
-				if (vd->GetLabelMode() &&
+				long label_mode;
+				vd->getValue(gstLabelMode, label_mode);
+				if (label_mode &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+					vd->setValue(gstMaskMode, long(4));
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				vd->setValue(gstDepthAtten, m_use_fog);
+				vd->setValue(gstDaInt, m_fog_intensity);
+				vd->setValue(gstDaStart, m_fog_start);
+				vd->setValue(gstDaEnd, m_fog_end);
 				vr->set_zoom(zoom, sf121);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
@@ -3570,11 +3645,20 @@ void VRenderGLView::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
 		}
 		img_shader->bind();
 	}
-	fluo::Color gamma, brightness, hdr;
 	fluo::VolumeData* vd = list[0];
-	gamma = vd->GetGamma();
-	brightness = vd->GetBrightness();
-	hdr = vd->GetHdr();
+	double r, g, b;
+	vd->getValue(gstGammaR, r);
+	vd->getValue(gstGammaG, g);
+	vd->getValue(gstGammaB, b);
+	fluo::Color gamma(r, g, b);
+	vd->getValue(gstBrightnessR, r);
+	vd->getValue(gstBrightnessG, g);
+	vd->getValue(gstBrightnessB, b);
+	fluo::Color brightness(r, g, b);
+	vd->getValue(gstEqualizeR, r);
+	vd->getValue(gstEqualizeG, g);
+	vd->getValue(gstEqualizeB, b);
+	fluo::Color hdr(r, g, b);
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
 	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
 	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
@@ -3827,8 +3911,10 @@ void VRenderGLView::PickVolume()
 	{
 		vd = m_vd_pop_list[i];
 		if (!vd) continue;
-		int mode = 2;
-		if (vd->GetMode() == 1) mode = 1;
+		long mode = 2;
+		long mip_mode;
+		vd->getValue(gstMipMode, mip_mode);
+		if (mip_mode == 1) mode = 1;
 		m_vp.SetVolumeData(vd);
 		dist = m_vp.GetPointVolume(old_mouse_X, old_mouse_Y,
 			mode, true, 0.5, p, ip);
@@ -3869,7 +3955,7 @@ void VRenderGLView::PickVolume()
 		if (m_frame && m_frame->GetTree())
 		{
 			m_frame->GetTree()->SetFocus();
-			m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->GetName());
+			m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->getName());
 		}
 		//update label selection
 		SetCompSelection(ip, kmode);
@@ -3951,8 +4037,10 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		fluo::Point p, ip;
 		int nx = GetGLSize().x;
 		int ny = GetGLSize().y;
-		int mode = 2;
-		if (m_cur_vol->GetMode() == 1) mode = 1;
+		long mode = 2;
+		long mip_mode;
+		m_cur_vol->getValue(gstMipMode, mip_mode);
+		if (mip_mode == 1) mode = 1;
 		m_vp.SetVolumeData(m_cur_vol);
 		double dist = m_vp.GetPointVolume(nx / 2.0, ny / 2.0,
 			mode, true, m_pin_pick_thresh, p, ip);
@@ -3972,7 +4060,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 			obj_transz = p.z();
 			double thresh = 10.0;
 			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			m_cur_vol->getValue(gstSpcX, spcx);
+			m_cur_vol->getValue(gstSpcY, spcy);
+			m_cur_vol->getValue(gstSpcZ, spcz);
 			thresh *= spcx;
 			if (sqrt((m_obj_transx - obj_transx)*(m_obj_transx - obj_transx) +
 				(m_obj_transy - obj_transy)*(m_obj_transy - obj_transy) +
@@ -4637,14 +4727,14 @@ void VRenderGLView::SetParams(double t)
 		if (!vd) continue;
 
 		keycode.l1 = 2;
-		keycode.l1_name = vd->GetName();
+		keycode.l1_name = vd->getName();
 
 		//display
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
 		bool bval;
 		if (interpolator->GetBoolean(keycode, t, bval))
-			vd->SetDisp(bval);
+			vd->setValue(gstDisplay, bval);
 
 		//clipping planes
 		vector<fluo::Plane*> *planes = vd->GetRenderer()->get_planes();
@@ -4782,7 +4872,7 @@ void VRenderGLView::SetParams(double t)
 		clip_view->SetVolumeData(m_frame->GetCurSelVol());
 	if (m_frame)
 	{
-		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->GetName() : "");
+		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->getName() : "");
 		int index = interpolator->GetKeyIndexFromTime(t);
 		m_frame->GetRecorderDlg()->SetSelection(index);
 	}
@@ -4846,7 +4936,9 @@ void VRenderGLView::UpdateVolumeData(int frame, fluo::VolumeData* vd)
 		BaseReader* reader = vd->GetReader();
 		bool clear_pool = false;
 
-		if (vd->GetCurTime() != frame)
+		long cur_time;
+		vd->getValue(gstTime, cur_time);
+		if (cur_time != frame)
 		{
 			flvr::Texture *tex = vd->GetTexture();
 			if (tex && tex->isBrxml())
@@ -4860,8 +4952,10 @@ void VRenderGLView::UpdateVolumeData(int frame, fluo::VolumeData* vd)
 					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
 				}
 				tex->setLevel(curlv);
-				tex->set_FrameAndChannel(frame, vd->GetCurChannel());
-				vd->SetCurTime(reader->GetCurTime());
+				long chan;
+				vd->getValue(gstChannel, chan);
+				tex->set_FrameAndChannel(frame, chan);
+				vd->setValue(gstTime, long(reader->GetCurTime()));
 				//update rulers
 				if (m_frame && m_frame->GetMeasureDlg())
 					m_frame->GetMeasureDlg()->UpdateList();
@@ -4869,14 +4963,20 @@ void VRenderGLView::UpdateVolumeData(int frame, fluo::VolumeData* vd)
 			else
 			{
 				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
+				vd->getValue(gstSpcX, spcx);
+				vd->getValue(gstSpcY, spcy);
+				vd->getValue(gstSpcZ, spcz);
 
-				Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
-				if (!vd->Replace(data, false))
+				long chan;
+				vd->getValue(gstChannel, chan);
+				Nrrd* data = reader->Convert(frame, chan, false);
+				if (!vd->ReplaceData(data, false))
 					return;
 
-				vd->SetCurTime(reader->GetCurTime());
-				vd->SetSpacings(spcx, spcy, spcz);
+				vd->setValue(gstTime, long(reader->GetCurTime()));
+				vd->setValue(gstSpcX, spcx);
+				vd->setValue(gstSpcY, spcy);
+				vd->setValue(gstSpcZ, spcz);
 
 				//update rulers
 				if (m_frame && m_frame->GetMeasureDlg())
@@ -4914,8 +5014,10 @@ void VRenderGLView::ReloadVolumeData(int frame)
 					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
 				}
 				tex->setLevel(curlv);
-				tex->set_FrameAndChannel(0, vd->GetCurChannel());
-				vd->SetCurTime(reader->GetCurTime());
+				long chan;
+				vd->getValue(gstChannel, chan);
+				tex->set_FrameAndChannel(0, chan);
+				vd->setValue(gstTime, long(reader->GetCurTime()));
 				wxString data_name = wxString(reader->GetDataName());
 				if (i > 0)
 					m_bat_folder += "_";
@@ -4926,14 +5028,14 @@ void VRenderGLView::ReloadVolumeData(int frame)
 					chan_num = 1;
 				else if (data_name.Find("_2ch") != -1)
 					chan_num = 2;
-				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
-					vd->SetDisp(false);
+				if (chan_num > 0 && chan >= chan_num)
+					vd->setValue(gstDisplay, false);
 				else
-					vd->SetDisp(true);
+					vd->setValue(gstDisplay, true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
-				vd->SetName(data_name);
+					data_name += wxString::Format("_%d", chan + 1);
+				vd->setName(data_name.ToStdString());
 			}
 			else
 			{
@@ -4953,14 +5055,17 @@ void VRenderGLView::ReloadVolumeData(int frame)
 				}
 
 				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
-
-				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
-				if (vd->Replace(data, true))
-					vd->SetDisp(true);
+				vd->getValue(gstSpcX, spcx);
+				vd->getValue(gstSpcY, spcy);
+				vd->getValue(gstSpcZ, spcz);
+				long chan;
+				vd->getValue(gstChannel, chan);
+				Nrrd* data = reader->Convert(0, chan, true);
+				if (vd->ReplaceData(data, true))
+					vd->setValue(gstDisplay, true);
 				else
 				{
-					vd->SetDisp(false);
+					vd->setValue(gstDisplay, false);
 					continue;
 				}
 
@@ -4974,20 +5079,28 @@ void VRenderGLView::ReloadVolumeData(int frame)
 					chan_num = 1;
 				else if (data_name.Find("_2ch") != -1)
 					chan_num = 2;
-				if (chan_num > 0 && vd->GetCurChannel() >= chan_num)
-					vd->SetDisp(false);
+				if (chan_num > 0 && chan >= chan_num)
+					vd->setValue(gstDisplay, false);
 				else
-					vd->SetDisp(true);
+					vd->setValue(gstDisplay, true);
 
 				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", vd->GetCurChannel() + 1);
-				vd->SetName(data_name);
-				vd->SetPath(wxString(reader->GetPathName()));
-				vd->SetCurTime(reader->GetCurTime());
+					data_name += wxString::Format("_%d", chan + 1);
+				vd->setName(data_name.ToStdString());
+				vd->setValue(gstDataPath, reader->GetPathName());
+				vd->setValue(gstTime, long(reader->GetCurTime()));
 				if (!reader->IsSpcInfoValid())
-					vd->SetSpacings(spcx, spcy, spcz);
+				{
+					vd->setValue(gstSpcX, spcx);
+					vd->setValue(gstSpcY, spcy);
+					vd->setValue(gstSpcZ, spcz);
+				}
 				else
-					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+				{
+					vd->setValue(gstSpcX, reader->GetXSpc());
+					vd->setValue(gstSpcY, reader->GetYSpc());
+					vd->setValue(gstSpcZ, reader->GetZSpc());
+				}
 				if (vd->GetRenderer())
 					vd->GetRenderer()->clear_tex_pool();
 			}
@@ -5001,7 +5114,7 @@ void VRenderGLView::ReloadVolumeData(int frame)
 		m_frame->UpdateList();
 		m_frame->UpdateTree(
 			m_frame->GetCurSelVol() ?
-			m_frame->GetCurSelVol()->GetName() :
+			m_frame->GetCurSelVol()->getName() :
 			"");
 	}
 }
@@ -5502,7 +5615,8 @@ void VRenderGLView::SetCenter()
 
 	if (vd)
 	{
-		fluo::BBox bbox = vd->GetBounds();
+		fluo::BBox bbox;
+		vd->getValue(gstBounds, bbox);
 		flvr::VolumeRenderer *vr = vd->GetRenderer();
 		if (!vr) return;
 		vector<fluo::Plane*> *planes = vr->get_planes();
@@ -5548,7 +5662,12 @@ double VRenderGLView::Get121ScaleFactor()
 	else if (m_vd_pop_list.size())
 		vd = m_vd_pop_list[0];
 	if (vd)
-		vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
+	{
+		vd->getValue(gstSpcX, spc_x);
+		vd->getValue(gstSpcY, spc_y);
+		vd->getValue(gstSpcZ, spc_z);
+		//vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
+	}
 	spc_y = spc_y<EPS ? 1.0 : spc_y;
 
 	result = 2.0*m_radius / spc_y / double(ny);
@@ -5576,7 +5695,12 @@ void VRenderGLView::SetScale121()
 			vd = m_vd_pop_list[0];
 		double spcx, spcy, spcz;
 		if (vd)
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		{
+			vd->getValue(gstSpcX, spcx);
+			vd->getValue(gstSpcY, spcy);
+			vd->getValue(gstSpcZ, spcz);
+			//vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
+		}
 		if (spcx > 0.0)
 			value /= spcx;
 		}
@@ -5778,10 +5902,10 @@ fluo::VolumeData* VRenderGLView::GetAllVolumeData(int index)
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (!group)
 				break;
-			for (j = 0; j<group->GetVolumeNum(); j++)
+			for (j = 0; j<group->getNumChildren(); j++)
 			{
 				if (cnt == index)
-					return group->GetVolumeData(j);
+					return group->getChild(j)->asVolumeData();
 				cnt++;
 			}
 		}
@@ -5818,7 +5942,7 @@ MeshData* VRenderGLView::GetMeshData(int index)
 		return 0;
 }
 
-fluo::VolumeData* VRenderGLView::GetVolumeData(wxString &name)
+fluo::VolumeData* VRenderGLView::GetVolumeData(const std::string &name)
 {
 	int i, j;
 
@@ -5831,7 +5955,7 @@ fluo::VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 		case 2://volume data
 		{
 			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
-			if (vd && vd->GetName() == name)
+			if (vd && name == vd->getName())
 				return vd;
 		}
 		break;
@@ -5840,10 +5964,10 @@ fluo::VolumeData* VRenderGLView::GetVolumeData(wxString &name)
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (!group)
 				break;
-			for (j = 0; j<group->GetVolumeNum(); j++)
+			for (j = 0; j<group->getNumChildren(); j++)
 			{
-				fluo::VolumeData* vd = group->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
+				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+				if (vd && name == vd->getName())
 					return vd;
 			}
 		}
@@ -5909,7 +6033,7 @@ Annotations* VRenderGLView::GetAnnotations(wxString &name)
 	return 0;
 }
 
-fluo::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
+fluo::VolumeGroup* VRenderGLView::GetGroup(const std::string &name)
 {
 	int i;
 
@@ -5922,7 +6046,7 @@ fluo::VolumeGroup* VRenderGLView::GetGroup(wxString &name)
 		case 5://group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group && group->GetName() == name)
+			if (group && name == group->getName())
 				return group;
 		}
 		}
@@ -5960,9 +6084,9 @@ fluo::VolumeGroup* VRenderGLView::GetGroup(fluo::VolumeData* vd)
 		if (layer && layer->IsA() == 5)
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
-			for (int j = 0; j < group->GetVolumeNum(); j++)
+			for (int j = 0; j < group->getNumChildren(); j++)
 			{
-				fluo::VolumeData* tmp_vd = group->GetVolumeData(j);
+				fluo::VolumeData* tmp_vd = group->getChild(j)->asVolumeData();
 				if (tmp_vd && tmp_vd == vd)
 					return group;
 			}
@@ -6001,7 +6125,7 @@ int VRenderGLView::GetAllVolumeNum()
 		case 5:  //group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			num += group->GetVolumeNum();
+			num += group->getNumChildren();
 		}
 		break;
 		}
@@ -6015,7 +6139,7 @@ int VRenderGLView::GetMeshNum()
 	return m_md_pop_list.size();
 }
 
-fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, wxString group_name)
+fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, const std::string &group_name)
 {
 	//m_layer_list.push_back(vd);
 	int i;
@@ -6029,7 +6153,7 @@ fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, wxString g
 		{
 			//layer is group
 			group_temp = (fluo::VolumeGroup*)layer;
-			if (group_temp && group_temp->GetName() == group_name)
+			if (group_temp && group_name == group_temp->getName())
 			{
 				group = group_temp;
 				break;
@@ -6042,7 +6166,7 @@ fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, wxString g
 
 	if (!group)
 	{
-		wxString group_name = AddGroup("");
+		std::string group_name = AddGroup("");
 		group = GetGroup(group_name);
 		if (!group)
 			return 0;
@@ -6059,22 +6183,22 @@ fluo::VolumeGroup* VRenderGLView::AddVolumeData(fluo::VolumeData* vd, wxString g
 	}
 	}*/
 
-	group->InsertVolumeData(group->GetVolumeNum() - 1, vd);
+	group->insertChild(group->getNumChildren() - 1, vd);
 
 	if (group && vd)
 	{
-		fluo::Color gamma = group->GetGamma();
-		vd->SetGamma(gamma);
-		fluo::Color brightness = group->GetBrightness();
-		vd->SetBrightness(brightness);
-		fluo::Color hdr = group->GetHdr();
-		vd->SetHdr(hdr);
-		bool sync_r = group->GetSyncR();
-		vd->SetSyncR(sync_r);
-		bool sync_g = group->GetSyncG();
-		vd->SetSyncG(sync_g);
-		bool sync_b = group->GetSyncB();
-		vd->SetSyncB(sync_b);
+		//fluo::Color gamma = group->GetGamma();
+		//vd->SetGamma(gamma);
+		//fluo::Color brightness = group->GetBrightness();
+		//vd->SetBrightness(brightness);
+		//fluo::Color hdr = group->GetHdr();
+		//vd->SetHdr(hdr);
+		//bool sync_r = group->GetSyncR();
+		//vd->SetSyncR(sync_r);
+		//bool sync_g = group->GetSyncG();
+		//vd->SetSyncG(sync_g);
+		//bool sync_b = group->GetSyncB();
+		//vd->SetSyncB(sync_b);
 
 		if (m_frame)
 		{
@@ -6111,7 +6235,7 @@ void VRenderGLView::AddAnnotations(Annotations* ann)
 	m_layer_list.push_back(ann);
 }
 
-void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
+void VRenderGLView::ReplaceVolumeData(const std::string &name, fluo::VolumeData *dst)
 {
 	int i, j;
 
@@ -6131,12 +6255,12 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
 		case 2://volume data
 		{
 			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
-			if (vd && vd->GetName() == name)
+			if (vd && name == vd->getName())
 			{
 				if (m_cur_vol == vd) m_cur_vol = dst;
 				m_loader.RemoveBrickVD(vd);
 				vd->GetRenderer()->clear_tex_current();
-				m_layer_list[i] = dst;
+				m_layer_list[i] = (TreeLayer*)dst;
 				m_vd_pop_dirty = true;
 				found = true;
 				dm->RemoveVolumeData(name);
@@ -6147,15 +6271,15 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
 		case 5://group
 		{
 			fluo::VolumeGroup* tmpgroup = (fluo::VolumeGroup*)m_layer_list[i];
-			for (j = 0; j<tmpgroup->GetVolumeNum(); j++)
+			for (j = 0; j<tmpgroup->getNumChildren(); j++)
 			{
-				fluo::VolumeData* vd = tmpgroup->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
+				fluo::VolumeData* vd = tmpgroup->getChild(j)->asVolumeData();
+				if (vd && name == vd->getName())
 				{
 					if (m_cur_vol == vd) m_cur_vol = dst;
 					m_loader.RemoveBrickVD(vd);
 					vd->GetRenderer()->clear_tex_current();
-					tmpgroup->ReplaceVolumeData(j, dst);
+					tmpgroup->replaceChild(j, dst);
 					m_vd_pop_dirty = true;
 					found = true;
 					group = tmpgroup;
@@ -6183,7 +6307,7 @@ void VRenderGLView::ReplaceVolumeData(wxString &name, fluo::VolumeData *dst)
 	}
 }
 
-void VRenderGLView::RemoveVolumeData(wxString &name)
+void VRenderGLView::RemoveVolumeData(const std::string &name)
 {
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end(); ++iter)
@@ -6195,7 +6319,7 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 		case 2://volume data
 		{
 			fluo::VolumeData* vd = (fluo::VolumeData*)(*iter);
-			if (vd && vd->GetName() == name)
+			if (vd && name == vd->getName())
 			{
 				m_layer_list.erase(iter);
 				if (m_cur_vol == vd)
@@ -6208,12 +6332,12 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 		case 5://group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)(*iter);
-			for (int j = 0; j < group->GetVolumeNum(); ++j)
+			for (int j = 0; j < group->getNumChildren(); ++j)
 			{
-				fluo::VolumeData* vd = group->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
+				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+				if (vd && name == vd->getName())
 				{
-					group->RemoveVolumeData(j);
+					group->removeChild(j);
 					if (m_cur_vol == vd)
 						m_cur_vol = 0;
 					m_vd_pop_dirty = true;
@@ -6225,7 +6349,7 @@ void VRenderGLView::RemoveVolumeData(wxString &name)
 	}
 }
 
-void VRenderGLView::RemoveVolumeDataDup(wxString &name)
+void VRenderGLView::RemoveVolumeDataDup(const std::string &name)
 {
 	fluo::VolumeData* vd_main = 0;
 	for (auto iter = m_layer_list.begin();
@@ -6239,7 +6363,7 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		case 2://volume data
 		{
 			fluo::VolumeData* vd = (fluo::VolumeData*)(*iter);
-			if (vd && vd->GetName() == name)
+			if (vd && name == vd->getName())
 			{
 				vd_main = vd;
 				m_vd_pop_dirty = true;
@@ -6249,10 +6373,10 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		case 5://group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)(*iter);
-			for (int j = 0; j<group->GetVolumeNum(); j++)
+			for (int j = 0; j<group->getNumChildren(); j++)
 			{
-				fluo::VolumeData* vd = group->GetVolumeData(j);
-				if (vd && vd->GetName() == name)
+				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+				if (vd && name == vd->getName())
 				{
 					vd_main = vd;
 					m_vd_pop_dirty = true;
@@ -6284,10 +6408,12 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 			{
 				if (vd == vd_main)
 					del = true;
-				if (vd->GetDup())
+				bool dup;
+				vd->getValue(gstDuplicate, dup);
+				if (dup)
 				{
-					if (vd->GetDupData() == vd_main)
-						del = true;
+					//if (vd->GetDupData() == vd_main)
+					//	del = true;
 				}
 			}
 			if (del)
@@ -6303,16 +6429,18 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 		case 5://group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)(*iter);
-			for (int j = group->GetVolumeNum()-1; j >= 0; --j)
+			for (int j = group->getNumChildren()-1; j >= 0; --j)
 			{
-				fluo::VolumeData* vd = group->GetVolumeData(j);
+				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
 				if (vd)
 				{
 					bool del = false;
-					if (vd->GetDup())
+					bool dup;
+					vd->getValue(gstDuplicate, dup);
+					if (dup)
 					{
-						if (vd->GetDupData() == vd_main)
-							del = true;
+						//if (vd->GetDupData() == vd_main)
+						//	del = true;
 					}
 					else
 					{
@@ -6321,7 +6449,7 @@ void VRenderGLView::RemoveVolumeDataDup(wxString &name)
 					}
 					if (del)
 					{
-						group->RemoveVolumeData(j);
+						group->removeChild(j);
 						if (m_cur_vol == vd)
 							m_cur_vol = 0;
 					}
@@ -6407,19 +6535,19 @@ void VRenderGLView::RemoveGroup(wxString &name)
 		case 5://group
 		{
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group && group->GetName() == name)
+			if (group && name == group->getName())
 			{
-				for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+				for (j = group->getNumChildren() - 1; j >= 0; j--)
 				{
-					fluo::VolumeData* vd = group->GetVolumeData(j);
+					fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
 					if (vd)
 					{
-						group->RemoveVolumeData(j);
+						group->removeChild(j);
 						//if add back to view
 					}
 				}
 				m_layer_list.erase(m_layer_list.begin() + i);
-				delete group;
+				//delete group;
 				m_vd_pop_dirty = true;
 			}
 		}
@@ -6462,10 +6590,10 @@ void VRenderGLView::Isolate(int type, wxString name)
 			if (vd)
 			{
 				if (type == 2 &&
-					vd->GetName() == name)
-					vd->SetDisp(true);
+					name == vd->getName())
+					vd->setValue(gstDisplay, true);
 				else
-					vd->SetDisp(false);
+					vd->setValue(gstDisplay, false);
 			}
 		}
 		break;
@@ -6502,25 +6630,25 @@ void VRenderGLView::Isolate(int type, wxString name)
 			{
 				if (type == 5)
 				{
-					if (group->GetName() == name)
-						group->SetDisp(true);
+					if (name == group->getName())
+						group->setValue(gstDisplay, true);
 					else
-						group->SetDisp(false);
+						group->setValue(gstDisplay, false);
 				}
 				else if (type == 6)
-					group->SetDisp(false);
+					group->setValue(gstDisplay, false);
 				else
 				{
-					for (int i = 0; i<(int)group->GetVolumeNum(); i++)
+					for (int i = 0; i<(int)group->getNumChildren(); i++)
 					{
-						fluo::VolumeData* vd = group->GetVolumeData(i);
+						fluo::VolumeData* vd = group->getChild(i)->asVolumeData();
 						if (vd)
 						{
 							if (type == 2 &&
-								vd->GetName() == name)
-								vd->SetDisp(true);
+								name == vd->getName())
+								vd->setValue(gstDisplay, true);
 							else
-								vd->SetDisp(false);
+								vd->setValue(gstDisplay, false);
 						}
 					}
 				}
@@ -6610,7 +6738,7 @@ void VRenderGLView::ShowAll()
 		{
 			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 			if (vd)
-				vd->SetDisp(true);
+				vd->setValue(gstDisplay, true);
 		}
 		break;
 		case 3://mesh
@@ -6632,12 +6760,12 @@ void VRenderGLView::ShowAll()
 			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 			if (group)
 			{
-				group->SetDisp(true);
-				for (int j = 0; j<group->GetVolumeNum(); ++j)
+				group->setValue(gstDisplay, true);
+				for (int j = 0; j<group->getNumChildren(); ++j)
 				{
-					fluo::VolumeData* vd = group->GetVolumeData(j);
+					fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
 					if (vd)
-						vd->SetDisp(true);
+						vd->setValue(gstDisplay, true);
 				}
 			}
 		}
@@ -6667,34 +6795,34 @@ void VRenderGLView::ShowAll()
 //source is after the destination
 void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	fluo::VolumeGroup* group = GetGroup(group_name);
+	fluo::VolumeGroup* group = GetGroup(group_name.ToStdString());
 	if (!group)
 		return;
 
 	fluo::VolumeData* src_vd = 0;
 	int i, src_index;
-	for (i = 0; i<group->GetVolumeNum(); i++)
+	for (i = 0; i<group->getNumChildren(); i++)
 	{
-		wxString name = group->GetVolumeData(i)->GetName();
+		wxString name = group->getChild(i)->getName();
 		if (name == src_name)
 		{
 			src_index = i;
-			src_vd = group->GetVolumeData(i);
-			group->RemoveVolumeData(i);
+			src_vd = group->getChild(i)->asVolumeData();
+			group->removeChild(i);
 			break;
 		}
 	}
 	if (!src_vd)
 		return;
-	for (i = 0; i<group->GetVolumeNum(); i++)
+	for (i = 0; i<group->getNumChildren(); i++)
 	{
-		wxString name = group->GetVolumeData(i)->GetName();
+		wxString name = group->getChild(i)->getName();
 		if (name == dst_name)
 		{
 			if (i >= src_index)
-				group->InsertVolumeData(i, src_vd);
+				group->insertChild(i, src_vd);
 			else
-				group->InsertVolumeData(i - 1, src_vd);
+				group->insertChild(i - 1, src_vd);
 			break;
 		}
 	}
@@ -6706,19 +6834,19 @@ void VRenderGLView::MoveLayerinGroup(wxString &group_name, wxString &src_name, w
 //source is after the destination
 void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name)
 {
-	fluo::VolumeGroup* group = GetGroup(group_name);
+	fluo::VolumeGroup* group = GetGroup(group_name.ToStdString());
 	if (!group)
 		return;
 
 	fluo::VolumeData* src_vd = 0;
 	int i;
-	for (i = 0; i<group->GetVolumeNum(); i++)
+	for (i = 0; i<group->getNumChildren(); i++)
 	{
-		wxString name = group->GetVolumeData(i)->GetName();
+		wxString name = group->getChild(i)->getName();
 		if (name == src_name)
 		{
-			src_vd = group->GetVolumeData(i);
-			group->RemoveVolumeData(i);
+			src_vd = group->getChild(i)->asVolumeData();
+			group->removeChild(i);
 			break;
 		}
 	}
@@ -6726,7 +6854,7 @@ void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wx
 		return;
 	if (dst_name == "")
 	{
-		m_layer_list.push_back(src_vd);
+		m_layer_list.push_back((TreeLayer*)src_vd);
 	}
 	else
 	{
@@ -6735,7 +6863,7 @@ void VRenderGLView::MoveLayertoView(wxString &group_name, wxString &src_name, wx
 			wxString name = m_layer_list[i]->GetName();
 			if (name == dst_name)
 			{
-				m_layer_list.insert(m_layer_list.begin() + i + 1, src_vd);
+				m_layer_list.insert(m_layer_list.begin() + i + 1, (TreeLayer*)src_vd);
 				break;
 			}
 		}
@@ -6761,39 +6889,33 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 			break;
 		}
 	}
-	fluo::VolumeGroup* group = GetGroup(group_name);
+	fluo::VolumeGroup* group = GetGroup(group_name.ToStdString());
 	if (!group || !src_vd)
 		return;
-	if (group->GetVolumeNum() == 0 || dst_name == "")
+	if (group->getNumChildren() == 0 || dst_name == "")
 	{
-		group->InsertVolumeData(0, src_vd);
+		group->insertChild(0, src_vd);
 	}
 	else
 	{
-		for (i = 0; i<group->GetVolumeNum(); i++)
+		for (i = 0; i<group->getNumChildren(); i++)
 		{
-			wxString name = group->GetVolumeData(i)->GetName();
+			wxString name = group->getChild(i)->getName();
 			if (name == dst_name)
 			{
-				group->InsertVolumeData(i, src_vd);
+				group->insertChild(i, src_vd);
 				break;
 			}
 		}
 	}
 
 	//set the 2d adjustment settings of the volume the same as the group
-	fluo::Color gamma = group->GetGamma();
-	src_vd->SetGamma(gamma);
-	fluo::Color brightness = group->GetBrightness();
-	src_vd->SetBrightness(brightness);
-	fluo::Color hdr = group->GetHdr();
-	src_vd->SetHdr(hdr);
-	bool sync_r = group->GetSyncR();
-	src_vd->SetSyncR(sync_r);
-	bool sync_g = group->GetSyncG();
-	src_vd->SetSyncG(sync_g);
-	bool sync_b = group->GetSyncB();
-	src_vd->SetSyncB(sync_b);
+	fluo::ValueCollection names{
+		gstGammaR, gstGammaG, gstGammaB,
+		gstBrightnessR, gstBrightnessG, gstBrightnessB,
+		gstEqualizeR, gstEqualizeG, gstEqualizeB,
+		gstSyncR, gstSyncG, gstSyncB };
+	src_vd->propValues(names, group);
 
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
@@ -6803,36 +6925,36 @@ void VRenderGLView::MoveLayertoGroup(wxString &group_name, wxString &src_name, w
 //sourece is after the destination
 void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name)
 {
-	fluo::VolumeGroup* src_group = GetGroup(src_group_name);
+	fluo::VolumeGroup* src_group = GetGroup(src_group_name.ToStdString());
 	if (!src_group)
 		return;
 	int i;
 	fluo::VolumeData* src_vd = 0;
-	for (i = 0; i<src_group->GetVolumeNum(); i++)
+	for (i = 0; i<src_group->getNumChildren(); i++)
 	{
-		wxString name = src_group->GetVolumeData(i)->GetName();
+		wxString name = src_group->getChild(i)->getName();
 		if (name == src_name)
 		{
-			src_vd = src_group->GetVolumeData(i);
-			src_group->RemoveVolumeData(i);
+			src_vd = src_group->getChild(i)->asVolumeData();
+			src_group->removeChild(i);
 			break;
 		}
 	}
-	fluo::VolumeGroup* dst_group = GetGroup(dst_group_name);
+	fluo::VolumeGroup* dst_group = GetGroup(dst_group_name.ToStdString());
 	if (!dst_group || !src_vd)
 		return;
-	if (dst_group->GetVolumeNum() == 0 || dst_name == "")
+	if (dst_group->getNumChildren() == 0 || dst_name == "")
 	{
-		dst_group->InsertVolumeData(0, src_vd);
+		dst_group->insertChild(0, src_vd);
 	}
 	else
 	{
-		for (i = 0; i<dst_group->GetVolumeNum(); i++)
+		for (i = 0; i<dst_group->getNumChildren(); i++)
 		{
-			wxString name = dst_group->GetVolumeData(i)->GetName();
+			wxString name = dst_group->getChild(i)->getName();
 			if (name == dst_name)
 			{
-				dst_group->InsertVolumeData(i, src_vd);
+				dst_group->insertChild(i, src_vd);
 				break;
 			}
 		}
@@ -6842,18 +6964,12 @@ void VRenderGLView::MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst
 	//src_group->ResetSync();
 
 	//set the 2d adjustment settings of the volume the same as the group
-	fluo::Color gamma = dst_group->GetGamma();
-	src_vd->SetGamma(gamma);
-	fluo::Color brightness = dst_group->GetBrightness();
-	src_vd->SetBrightness(brightness);
-	fluo::Color hdr = dst_group->GetHdr();
-	src_vd->SetHdr(hdr);
-	bool sync_r = dst_group->GetSyncR();
-	src_vd->SetSyncR(sync_r);
-	bool sync_g = dst_group->GetSyncG();
-	src_vd->SetSyncG(sync_g);
-	bool sync_b = dst_group->GetSyncB();
-	src_vd->SetSyncB(sync_b);
+	fluo::ValueCollection names{
+		gstGammaR, gstGammaG, gstGammaB,
+		gstBrightnessR, gstBrightnessG, gstBrightnessB,
+		gstEqualizeR, gstEqualizeG, gstEqualizeB,
+		gstSyncR, gstSyncG, gstSyncB };
+	src_vd->propValues(names, dst_group);
 
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
@@ -7051,11 +7167,11 @@ TreeLayer* VRenderGLView::GetLayer(int index)
 		return 0;
 }
 
-wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
+std::string VRenderGLView::AddGroup(const std::string &str, const std::string &prev_group)
 {
 	fluo::VolumeGroup* group = new fluo::VolumeGroup();
 	if (group && str != "")
-		group->SetName(str);
+		group->setName(str);
 
 	bool found_prev = false;
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -7067,9 +7183,9 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		case 5://group
 		{
 			fluo::VolumeGroup* group_temp = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group_temp && group_temp->GetName() == prev_group)
+			if (group_temp && prev_group == group_temp->getName())
 			{
-				m_layer_list.insert(m_layer_list.begin() + i + 1, group);
+				m_layer_list.insert(m_layer_list.begin() + i + 1, (TreeLayer*)group);
 				found_prev = true;
 			}
 		}
@@ -7077,7 +7193,7 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 		}
 	}
 	if (!found_prev)
-		m_layer_list.push_back(group);
+		m_layer_list.push_back((TreeLayer*)group);
 
 	//set default settings
 	if (m_frame)
@@ -7088,17 +7204,23 @@ wxString VRenderGLView::AddGroup(wxString str, wxString prev_group)
 			fluo::Color gamma, brightness, hdr;
 			bool sync_r, sync_g, sync_b;
 			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-			group->SetGamma(gamma);
-			group->SetBrightness(brightness);
-			group->SetHdr(hdr);
-			group->SetSyncR(sync_r);
-			group->SetSyncG(sync_g);
-			group->SetSyncB(sync_b);
+			group->setValue(gstGammaR, gamma.r());
+			group->setValue(gstGammaG, gamma.g());
+			group->setValue(gstGammaB, gamma.b());
+			group->setValue(gstBrightnessR, brightness.r());
+			group->setValue(gstBrightnessG, brightness.g());
+			group->setValue(gstBrightnessB, brightness.b());
+			group->setValue(gstEqualizeR, hdr.r());
+			group->setValue(gstEqualizeG, hdr.g());
+			group->setValue(gstEqualizeB, hdr.b());
+			group->setValue(gstSyncR, sync_r);
+			group->setValue(gstSyncG, sync_g);
+			group->setValue(gstSyncB, sync_b);
 		}
 	}
 
 	if (group)
-		return group->GetName();
+		return group->getName();
 	else
 		return "";
 }
@@ -7114,7 +7236,7 @@ fluo::VolumeGroup* VRenderGLView::AddOrGetGroup()
 		case 5://group
 		{
 			fluo::VolumeGroup* group_temp = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group_temp && !group_temp->GetVolumeNum())
+			if (group_temp && !group_temp->getNumChildren())
 				return group_temp;
 		}
 		break;
@@ -7133,15 +7255,21 @@ fluo::VolumeGroup* VRenderGLView::AddOrGetGroup()
 			fluo::Color gamma, brightness, hdr;
 			bool sync_r, sync_g, sync_b;
 			adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-			group->SetGamma(gamma);
-			group->SetBrightness(brightness);
-			group->SetHdr(hdr);
-			group->SetSyncR(sync_r);
-			group->SetSyncG(sync_g);
-			group->SetSyncB(sync_b);
+			group->setValue(gstGammaR, gamma.r());
+			group->setValue(gstGammaG, gamma.g());
+			group->setValue(gstGammaB, gamma.b());
+			group->setValue(gstBrightnessR, brightness.r());
+			group->setValue(gstBrightnessG, brightness.g());
+			group->setValue(gstBrightnessB, brightness.b());
+			group->setValue(gstEqualizeR, hdr.r());
+			group->setValue(gstEqualizeG, hdr.g());
+			group->setValue(gstEqualizeB, hdr.b());
+			group->setValue(gstSyncR, sync_r);
+			group->setValue(gstSyncG, sync_g);
+			group->setValue(gstSyncB, sync_b);
 		}
 	}
-	m_layer_list.push_back(group);
+	m_layer_list.push_back((TreeLayer*)group);
 	return group;
 }
 
@@ -7215,8 +7343,12 @@ void VRenderGLView::InitView(unsigned int type)
 		PopVolumeList();
 		PopMeshList();
 
-		for (i = 0; i<(int)m_vd_pop_list.size(); i++)
-			m_bounds.extend(m_vd_pop_list[i]->GetBounds());
+		fluo::BBox bounds;
+		for (i = 0; i < (int)m_vd_pop_list.size(); i++)
+		{
+			m_vd_pop_list[i]->getValue(gstBounds, bounds);
+			m_bounds.extend(bounds);
+		}
 		for (i = 0; i<(int)m_md_pop_list.size(); i++)
 			m_bounds.extend(m_md_pop_list[i]->GetBounds());
 
@@ -7459,7 +7591,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			plane_mode == kNormalBack)
 		{
 			if (!link)
-				color = vd->GetColor();
+				vd->getValue(gstColor, color);
 		}
 		else
 			color = GetTextColor();
@@ -7473,7 +7605,9 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		double sclx, scly, sclz;
-		vd->GetScalings(sclx, scly, sclz);
+		vd->getValue(gstScaleX, sclx);
+		vd->getValue(gstScaleY, scly);
+		vd->getValue(gstScaleZ, sclz);
 		glm::mat4 mv_mat = glm::scale(m_mv_mat,
 			glm::vec3(float(sclx), float(scly), float(sclz)));
 		glm::mat4 mv_mat2 = glm::mat4(
@@ -7858,9 +7992,13 @@ void VRenderGLView::DrawLegend()
 	//first pass
 	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
+
+		if (!m_vd_pop_list[i]) continue;
+		bool legend;
+		m_vd_pop_list[i]->getValue(gstLegend, legend);
+		if (legend)
 		{
-			wxstr = m_vd_pop_list[i]->GetName();
+			wxstr = m_vd_pop_list[i]->getName();
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
 			length += name_len;
@@ -7901,9 +8039,12 @@ void VRenderGLView::DrawLegend()
 	length = 0.0;
 	for (i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
-		if (m_vd_pop_list[i] && m_vd_pop_list[i]->GetLegend())
+		if (!m_vd_pop_list[i]) continue;
+		bool legend;
+		m_vd_pop_list[i]->getValue(gstLegend, legend);
+		if (legend)
 		{
-			wxstr = m_vd_pop_list[i]->GetName();
+			wxstr = m_vd_pop_list[i]->getName();
 			xpos = length;
 			wstr = wxstr.ToStdWstring();
 			name_len = m_text_renderer.RenderTextLen(wstr) + font_height;
@@ -7921,11 +8062,12 @@ void VRenderGLView::DrawLegend()
 			bool highlighted = false;
 			if (m_frame->GetCurSelType() == 2 &&
 				m_frame->GetCurSelVol() &&
-				m_frame->GetCurSelVol()->GetName() == wxstr)
+				wxstr == m_frame->GetCurSelVol()->getName())
 				highlighted = true;
+			fluo::Color color;
+			m_vd_pop_list[i]->getValue(gstColor, color);
 			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
-				nx, ny, wxstr, m_vd_pop_list[i]->GetColor(),
-				font_height, highlighted);
+				nx, ny, wxstr, color, font_height, highlighted);
 		}
 	}
 	for (i = 0; i<(int)m_md_pop_list.size(); i++)
@@ -8301,21 +8443,26 @@ void VRenderGLView::DrawColormap()
 	double max_val = 255.0;
 	bool enable_alpha = false;
 
-	if (m_cur_vol &&
-		m_cur_vol->GetColormapMode())
+	if (!m_cur_vol) return;
+	long colormap_mode;
+	m_cur_vol->getValue(gstColormapMode, colormap_mode);
+	if (colormap_mode)
 	{
 		double low, high;
-		m_cur_vol->GetColormapValues(low, high);
+		m_cur_vol->getValue(gstColormapLow, low);
+		m_cur_vol->getValue(gstColormapHigh, high);
 		m_value_2 = low;
 		m_value_6 = high;
 		m_value_4 = (low + high) / 2.0;
 		m_value_3 = (low + m_value_4) / 2.0;
 		m_value_5 = (m_value_4 + high) / 2.0;
-		max_val = m_cur_vol->GetMaxValue();
-		enable_alpha = m_cur_vol->GetEnableAlpha();
-		fluo::Color vd_color = m_cur_vol->GetColor();
-		SetColormapColors(m_cur_vol->GetColormap(),
-			vd_color, m_cur_vol->GetColormapInv());
+		m_cur_vol->getValue(gstMaxInt, max_val);
+		m_cur_vol->getValue(gstAlphaEnable, enable_alpha);
+		fluo::Color vd_color;
+		m_cur_vol->getValue(gstColor, vd_color);
+		bool colormap_inv;
+		m_cur_vol->getValue(gstColormapInv, colormap_inv);
+		SetColormapColors(colormap_mode, vd_color, colormap_inv);
 	}
 	else return;
 

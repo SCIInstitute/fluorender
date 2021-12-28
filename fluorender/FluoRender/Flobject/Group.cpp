@@ -142,6 +142,14 @@ bool Group::replaceChild(Node* orig_child, Node* new_child)
 	return false;
 }
 
+bool Group::replaceChild(size_t pos, Node* new_child)
+{
+	Node* child = getChild(pos);
+	if (!child)
+		return false;
+	return replaceChild(child, new_child);
+}
+
 bool Group::setChild(size_t i, Node* node)
 {
 	if (i < m_children.size() && node != nullptr)
