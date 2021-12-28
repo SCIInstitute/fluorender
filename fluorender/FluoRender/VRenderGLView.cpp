@@ -3412,9 +3412,9 @@ void VRenderGLView::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
 		for (i = 0; i<list.size(); i++)
 		{
 			fluo::VolumeData* vd = list[i];
-			vd->setValue(gstMipMode, mip_modes[i]);
-			vd->setValue(gstColormapMode, colormodes[i]);
-			vd->setValue(gstShadingEnable, shadings[i]);
+			vd->setValue(gstMipMode, long(mip_modes[i]));
+			vd->setValue(gstColormapMode, long(colormodes[i]));
+			vd->setValue(gstShadingEnable, bool(shadings[i]));
 		}
 		list[0]->getValue(gstShadowInt, shadow_darkness);
 	}
