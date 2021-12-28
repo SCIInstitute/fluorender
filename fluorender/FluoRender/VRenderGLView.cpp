@@ -8754,10 +8754,14 @@ void VRenderGLView::DrawInfo(int nx, int ny)
 	{
 		if (m_cur_vol)
 		{
-			int resx, resy, resz;
-			m_cur_vol->GetResolution(resx, resy, resz);
+			long resx, resy, resz;
+			m_cur_vol->getValue(gstResX, resx);
+			m_cur_vol->getValue(gstResY, resy);
+			m_cur_vol->getValue(gstResZ, resz);
 			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
+			m_cur_vol->getValue(gstSpcX, spcx);
+			m_cur_vol->getValue(gstSpcY, spcy);
+			m_cur_vol->getValue(gstSpcZ, spcz);
 			vector<fluo::Plane*> *planes = m_cur_vol->GetRenderer()->get_planes();
 			fluo::Plane* plane = (*planes)[4];
 			double abcd[4];
@@ -8917,9 +8921,13 @@ void VRenderGLView::UpdateClips()
 			continue;
 
 		double spcx, spcy, spcz;
-		int resx, resy, resz;
-		m_vd_pop_list[i]->GetSpacings(spcx, spcy, spcz);
-		m_vd_pop_list[i]->GetResolution(resx, resy, resz);
+		long resx, resy, resz;
+		m_vd_pop_list[i]->getValue(gstSpcX, spcx);
+		m_vd_pop_list[i]->getValue(gstSpcY, spcy);
+		m_vd_pop_list[i]->getValue(gstSpcZ, spcz);
+		m_vd_pop_list[i]->getValue(gstResX, resx);
+		m_vd_pop_list[i]->getValue(gstResY, resy);
+		m_vd_pop_list[i]->getValue(gstResZ, resz);
 		fluo::Vector scale;
 		if (spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
 		{
@@ -9196,21 +9204,28 @@ void VRenderGLView::StartLoopUpdate()
 							(*bricks)[j]->set_disp(true);
 						total_num++;
 						num_chan++;
-						if (vd->GetMode() == 1 &&
-							vd->GetShading())
+						long mip_mode;
+						vd->getValue(gstMipMode, mip_mode);
+						bool shading;
+						vd->getValue(gstShadingEnable, shading);
+						if (mip_mode == 1 && shading)
 							total_num++;
-						if (vd->GetShadow())
+						bool shadow;
+						vd->getValue(gstShadowEnable, shadow);
+						if (shadow)
 							total_num++;
 						//mask
+						long label_mode;
+						vd->getValue(gstLabelMode, label_mode);
 						if (vd->GetTexture() &&
 							vd->GetTexture()->nmask() != -1 &&
-							(!vd->GetLabelMode() ||
-							(vd->GetLabelMode() &&
+							(!label_mode ||
+							(label_mode &&
 							vd->GetTexture()->nlabel() == -1)))
 							total_num++;
 					}
 				}
-				vd->SetBrickNum(num_chan);
+				vd->setValue(gstBrickNum, long(num_chan));
 				if (vd->GetRenderer())
 					vd->GetRenderer()->set_done_loop(false);
 			}
@@ -9223,7 +9238,10 @@ void VRenderGLView::StartLoopUpdate()
 			for (i = 0; i<m_vd_pop_list.size(); i++)
 			{
 				fluo::VolumeData* vd = m_vd_pop_list[i];
-				if (!vd || !vd->GetDisp() || !vd->isBrxml())
+				bool disp, multires;
+				vd->getValue(gstDisplay, disp);
+				vd->getValue(gstMultires, multires);
+				if (!vd || !disp || !multires)
 					continue;
 				flvr::Texture* tex = vd->GetTexture();
 				if (!tex)
@@ -9242,9 +9260,14 @@ void VRenderGLView::StartLoopUpdate()
 				flvr::Texture* tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 				vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-				int mode = vd->GetMode() == 1 ? 1 : 0;
-				bool shade = (mode == 1 && vd->GetShading());
-				bool shadow = vd->GetShadow();
+				long mip_mode;
+				vd->getValue(gstMipMode, mip_mode);
+				int mode = mip_mode == 1 ? 1 : 0;
+				bool shading;
+				vd->getValue(gstShadingEnable, shading);
+				bool shade = (mode == 1 && shading);
+				bool shadow;
+				vd->getValue(gstShadowEnable, shadow);
 				for (j = 0; j < bricks->size(); j++)
 				{
 					VolumeLoaderData d;
@@ -9307,10 +9330,14 @@ void VRenderGLView::StartLoopUpdate()
 						list[i]->GetTexture()->set_sort_bricks();
 					}
 					flvr::TextureRenderer::set_update_order(order);
-					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+					std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+						[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+						{ return b2.brick->get_d() > b1.brick->get_d(); });
 				}
 				else if (flvr::TextureRenderer::get_update_order() == 0)
-					std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+					std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+						[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+					{ return b2.brick->get_d() > b1.brick->get_d(); });
 				queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 			}
 		}
@@ -9327,7 +9354,10 @@ void VRenderGLView::StartLoopUpdate()
 					fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 					vector<VolumeLoaderData> tmp_shade;
 					vector<VolumeLoaderData> tmp_shadow;
-					if (vd && vd->GetDisp() && vd->isBrxml())
+					bool disp, multires;
+					vd->getValue(gstDisplay, disp);
+					vd->getValue(gstMultires, multires);
+					if (vd && disp && multires)
 					{
 						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
@@ -9336,9 +9366,14 @@ void VRenderGLView::StartLoopUpdate()
 						vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
-						int mode = vd->GetMode() == 1 ? 1 : 0;
-						bool shade = (mode == 1 && vd->GetShading());
-						bool shadow = vd->GetShadow();
+						long mip_mode;
+						vd->getValue(gstMipMode, mip_mode);
+						int mode = mip_mode == 1 ? 1 : 0;
+						bool shading;
+						vd->getValue(gstShadingEnable, shading);
+						bool shade = (mode == 1 && shading);
+						bool shadow;
+						vd->getValue(gstShadowEnable, shadow);
 						for (j = 0; j<bricks->size(); j++)
 						{
 							VolumeLoaderData d;
@@ -9377,7 +9412,9 @@ void VRenderGLView::StartLoopUpdate()
 								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 								tex->set_sort_bricks();
 								flvr::TextureRenderer::set_update_order(order);
-								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+									[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+									{ return b2.brick->get_d() > b1.brick->get_d(); });
 							}
 							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 						}
@@ -9388,12 +9425,17 @@ void VRenderGLView::StartLoopUpdate()
 				{
 					vector<fluo::VolumeData*> list;
 					fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-					if (!group->GetDisp())
+					bool disp;
+					group->getValue(gstDisplay, disp);
+					if (!disp)
 						continue;
-					for (j = group->GetVolumeNum() - 1; j >= 0; j--)
+					for (j = group->getNumChildren() - 1; j >= 0; j--)
 					{
-						fluo::VolumeData* vd = group->GetVolumeData(j);
-						if (!vd || !vd->GetDisp() || !vd->isBrxml())
+						fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+						bool disp, multires;
+						vd->getValue(gstDisplay, disp);
+						vd->getValue(gstMultires, multires);
+						if (!vd || !disp || !multires)
 							continue;
 						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
@@ -9410,7 +9452,9 @@ void VRenderGLView::StartLoopUpdate()
 					vector<VolumeLoaderData> tmp_q;
 					vector<VolumeLoaderData> tmp_shade;
 					vector<VolumeLoaderData> tmp_shadow;
-					if (group->GetBlendMode() == VOL_METHOD_MULTI)
+					long blend_mode;
+					group->getValue(gstBlendMode, blend_mode);
+					if (blend_mode == VOL_METHOD_MULTI)
 					{
 						for (k = 0; k < list.size(); k++)
 						{
@@ -9418,9 +9462,14 @@ void VRenderGLView::StartLoopUpdate()
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-							int mode = vd->GetMode() == 1 ? 1 : 0;
-							bool shade = (mode == 1 && vd->GetShading());
-							bool shadow = vd->GetShadow();
+							long mip_mode;
+							vd->getValue(gstMipMode, mip_mode);
+							int mode = mip_mode == 1 ? 1 : 0;
+							bool shading;
+							vd->getValue(gstShadingEnable, shading);
+							bool shade = (mode == 1 && shading);
+							bool shadow;
+							vd->getValue(gstShadowEnable, shadow);
 							for (j = 0; j < bricks->size(); j++)
 							{
 								VolumeLoaderData d;
@@ -9486,10 +9535,14 @@ void VRenderGLView::StartLoopUpdate()
 									list[i]->GetTexture()->set_sort_bricks();
 								}
 								flvr::TextureRenderer::set_update_order(order);
-								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+									[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+									{ return b2.brick->get_d() > b1.brick->get_d(); });
 							}
 							else if (flvr::TextureRenderer::get_update_order() == 0)
-								std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+									[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+									{ return b2.brick->get_d() > b1.brick->get_d(); });
 							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 						}
 					}
@@ -9501,9 +9554,14 @@ void VRenderGLView::StartLoopUpdate()
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetRenderer()->compute_view();
 							vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-							int mode = vd->GetMode() == 1 ? 1 : 0;
-							bool shade = (mode == 1 && vd->GetShading());
-							bool shadow = vd->GetShadow();
+							long mip_mode;
+							vd->getValue(gstMipMode, mip_mode);
+							int mode = mip_mode == 1 ? 1 : 0;
+							bool shading;
+							vd->getValue(gstShadingEnable, shading);
+							bool shade = (mode == 1 && shading);
+							bool shadow;
+							vd->getValue(gstShadowEnable, shadow);
 							for (k = 0; k<bricks->size(); k++)
 							{
 								VolumeLoaderData d;
@@ -9542,7 +9600,9 @@ void VRenderGLView::StartLoopUpdate()
 									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									tex->set_sort_bricks();
 									flvr::TextureRenderer::set_update_order(order);
-									std::sort(tmp_shadow.begin(), tmp_shadow.end(), VolumeLoader::sort_data_asc);
+									std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+										[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+										{ return b2.brick->get_d() > b1.brick->get_d(); });
 								}
 								queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 							}
@@ -9816,7 +9876,9 @@ void VRenderGLView::DrawTraces()
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		double spcx, spcy, spcz;
-		m_cur_vol->GetSpacings(spcx, spcy, spcz);
+		m_cur_vol->getValue(gstSpcX, spcx);
+		m_cur_vol->getValue(gstSpcY, spcy);
+		m_cur_vol->getValue(gstSpcZ, spcz);
 		glm::mat4 matrix = glm::scale(m_mv_mat,
 			glm::vec3(float(spcx), float(spcy), float(spcz)));
 		matrix = m_proj_mat*matrix;
@@ -9865,11 +9927,13 @@ void VRenderGLView::GetTraces(bool update)
 		return;
 
 	int ii, jj, kk;
-	int nx, ny, nz;
+	long nx, ny, nz;
 	//return current mask (into system memory)
 	if (!m_cur_vol) return;
 	m_cur_vol->GetRenderer()->return_mask();
-	m_cur_vol->GetResolution(nx, ny, nz);
+	m_cur_vol->getValue(gstResX, nx);
+	m_cur_vol->getValue(gstResY, ny);
+	m_cur_vol->getValue(gstResZ, nz);
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = m_cur_vol->GetMask(true);
 	if (!mask_nrrd) return;
@@ -10557,7 +10621,11 @@ fluo::Color VRenderGLView::GetTextColor()
 		return m_bg_color;
 	case 2://secondary color of current volume
 		if (m_cur_vol)
-			return m_cur_vol->GetMaskColor();
+		{
+			fluo::Color color;
+			m_cur_vol->getValue(gstSecColor, color);
+			return color;
+		}
 		else
 			return m_bg_color_inv;
 	}
@@ -10714,7 +10782,8 @@ void VRenderGLView::CalcFrame()
 		miny = 1.0;
 		maxy = -1.0;
 		vector<fluo::Point> points;
-		fluo::BBox bbox = m_cur_vol->GetBounds();
+		fluo::BBox bbox;
+		m_cur_vol->getValue(gstBounds, bbox);
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
 		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
@@ -10788,7 +10857,8 @@ void VRenderGLView::switchLevel(fluo::VolumeData *vd)
 	flvr::Texture *vtex = vd->GetTexture();
 	if (vtex && vtex->isBrxml())
 	{
-		int prev_lv = vd->GetLevel();
+		long prev_lv;
+		vd->getValue(gstLevelNum, prev_lv);
 		int new_lv = 0;
 
 		if (m_res_mode > 0)
@@ -10857,7 +10927,7 @@ void VRenderGLView::switchLevel(fluo::VolumeData *vd)
 				for (int i = 0; i < bricks->size(); i++)
 					(*bricks)[i]->set_disp(false);
 			}
-			vd->SetLevel(new_lv);
+			vd->setValue(gstLevel, long(new_lv));
 			vtex->set_sort_bricks();
 		}
 	}
