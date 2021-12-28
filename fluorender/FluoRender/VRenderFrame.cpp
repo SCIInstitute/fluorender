@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include "DragDrop.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <MeshData.hpp>
+#include <MeshGroup.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <Formats/png_resource.h>
@@ -1641,14 +1643,14 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 	if (!view)
 		view = GetView(0);
 
-	MeshData* md_sel = 0;
+	fluo::MeshData* md_sel = 0;
 
 	wxProgressDialog *prg_diag = new wxProgressDialog(
 		"FluoRender: Loading mesh data...",
 		"Reading and processing selected mesh data. Please wait.",
 		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-	MeshGroup* group = 0;
+	fluo::MeshGroup* group = 0;
 	if (files.Count() > 1)
 		group = view->AddOrGetMGroup();
 
@@ -1659,12 +1661,12 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 		wxString filename = files[i];
 		m_data_mgr.LoadMeshData(filename);
 
-		MeshData* md = m_data_mgr.GetLastMeshData();
+		fluo::MeshData* md = m_data_mgr.GetLastMeshData();
 		if (view && md)
 		{
 			if (group)
 			{
-				group->InsertMeshData(group->GetMeshNum()-1, md);
+				group->insertChild(group->getNumChildren()-1, md);
 				view->SetMeshPopDirty();
 			}
 			else
@@ -1677,7 +1679,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
 
 	UpdateList();
 	if (md_sel)
-		UpdateTree(md_sel->GetName());
+		UpdateTree(md_sel->getName());
 	else
 		UpdateTree();
 
@@ -1840,11 +1842,13 @@ void VRenderFrame::UpdateTreeIcons()
 				break;
 			case 3://mesh
 				{
-					MeshData* md = (MeshData*)layer;
+					fluo::MeshData* md = (fluo::MeshData*)layer;
 					if (!md)
 						break;
 					counter++;
-					m_tree_panel->SetMeshItemImage(layer_item, md->GetDisp()?2*counter+1:2*counter);
+					bool disp;
+					md->getValue(gstDisplay, disp);
+					m_tree_panel->SetMeshItemImage(layer_item, disp?2*counter+1:2*counter);
 				}
 				break;
 			case 4://annotations
@@ -1885,14 +1889,16 @@ void VRenderFrame::UpdateTreeIcons()
 				break;
 			case 6://mesh group
 				{
-					MeshGroup* group = (MeshGroup*)layer;
+					fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
 					if (!group)
 						break;
-					m_tree_panel->SetMGroupItemImage(layer_item, int(group->GetDisp()));
+					bool disp;
+					group->getValue(gstDisplay, disp);
+					m_tree_panel->SetMGroupItemImage(layer_item, int(disp));
 					wxTreeItemIdValue ck_mesh;
-					for (k=0; k<group->GetMeshNum(); k++)
+					for (k=0; k<group->getNumChildren(); k++)
 					{
-						MeshData* md = group->GetMeshData(k);
+						fluo::MeshData* md = group->getChild(k)->asMeshData();
 						if (!md)
 							continue;
 						wxTreeItemId mesh_item;
@@ -1903,7 +1909,9 @@ void VRenderFrame::UpdateTreeIcons()
 						if (!mesh_item.IsOk())
 							continue;
 						counter++;
-						m_tree_panel->SetMeshItemImage(mesh_item, md->GetDisp()?2*counter+1:2*counter);
+						bool disp;
+						md->getValue(gstDisplay, disp);
+						m_tree_panel->SetMeshItemImage(mesh_item, disp?2*counter+1:2*counter);
 					}
 				}
 				break;
@@ -1947,16 +1955,15 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 3://mesh
 				{
-					MeshData* md = (MeshData*)layer;
+					fluo::MeshData* md = (fluo::MeshData*)layer;
 					if (!md)
 						break;
-					fluo::Color amb, diff, spec;
-					double shine, alpha;
-					md->GetMaterial(amb, diff, spec, shine, alpha);
+					fluo::Color color;
+					md->getValue(gstColor, color);
 					wxColor wxc(
-						(unsigned char)(diff.r()*255),
-						(unsigned char)(diff.g()*255),
-						(unsigned char)(diff.b()*255));
+						(unsigned char)(color.r()*255),
+						(unsigned char)(color.g()*255),
+						(unsigned char)(color.b()*255));
 					m_tree_panel->ChangeIconColor(counter+1, wxc);
 					counter++;
 				}
@@ -1994,21 +2001,20 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 6://mesh group
 				{
-					MeshGroup* group = (MeshGroup*)layer;
+					fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
 					if (!group)
 						break;
-					for (k=0; k<group->GetMeshNum(); k++)
+					for (k=0; k<group->getNumChildren(); k++)
 					{
-						MeshData* md = group->GetMeshData(k);
+						fluo::MeshData* md = group->getChild(k)->asMeshData();
 						if (!md)
 							break;
-						fluo::Color amb, diff, spec;
-						double shine, alpha;
-						md->GetMaterial(amb, diff, spec, shine, alpha);
+						fluo::Color color;
+						md->getValue(gstColor, color);
 						wxColor wxc(
-							(unsigned char)(diff.r()*255),
-							(unsigned char)(diff.g()*255),
-							(unsigned char)(diff.b()*255));
+							(unsigned char)(color.r()*255),
+							(unsigned char)(color.g()*255),
+							(unsigned char)(color.b()*255));
 						m_tree_panel->ChangeIconColor(counter+1, wxc);
 						counter++;
 					}
@@ -2096,23 +2102,24 @@ void VRenderFrame::UpdateTree(wxString name)
 				break;
 			case 3://mesh data
 				{
-					MeshData* md = (MeshData*)layer;
+					fluo::MeshData* md = (fluo::MeshData*)layer;
 					if (!md)
 						break;
 					//append icon for mesh
 					m_tree_panel->AppendIcon();
-					fluo::Color amb, diff, spec;
-					double shine, alpha;
-					md->GetMaterial(amb, diff, spec, shine, alpha);
+					fluo::Color color;
+					md->getValue(gstColor, color);
 					wxColor wxc(
-						(unsigned char)(diff.r()*255),
-						(unsigned char)(diff.g()*255),
-						(unsigned char)(diff.b()*255));
+						(unsigned char)(color.r()*255),
+						(unsigned char)(color.g()*255),
+						(unsigned char)(color.b()*255));
 					int ii = m_tree_panel->GetIconNum()-1;
 					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->GetName());
-					m_tree_panel->SetMeshItemImage(item, md->GetDisp()?2*ii+1:2*ii);
-					if (name == md->GetName())
+					wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->getName());
+					bool disp;
+					md->getValue(gstDisplay, disp);
+					m_tree_panel->SetMeshItemImage(item, disp ?2*ii+1:2*ii);
+					if (name == md->getName())
 						sel_item = item;
 				}
 				break;
@@ -2180,35 +2187,38 @@ void VRenderFrame::UpdateTree(wxString name)
 				break;
 			case 6://mesh group
 				{
-					MeshGroup* group = (MeshGroup*)layer;
+					fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
 					if (!group)
 						break;
 					//append group item to tree
-					wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->GetName());
-					m_tree_panel->SetMGroupItemImage(group_item, int(group->GetDisp()));
+					wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->getName());
+					bool disp;
+					group->getValue(gstDisplay, disp);
+					m_tree_panel->SetMGroupItemImage(group_item, int(disp));
 					//append mesh data to group
-					for (k=0; k<group->GetMeshNum(); k++)
+					for (k=0; k<group->getNumChildren(); k++)
 					{
-						MeshData* md = group->GetMeshData(k);
+						fluo::MeshData* md = group->getChild(k)->asMeshData();
 						if (!md)
 							continue;
 						//add icon
 						m_tree_panel->AppendIcon();
-						fluo::Color amb, diff, spec;
-						double shine, alpha;
-						md->GetMaterial(amb, diff, spec, shine, alpha);
+						fluo::Color color;
+						md->getValue(gstColor, color);
 						wxColor wxc(
-							(unsigned char)(diff.r()*255),
-							(unsigned char)(diff.g()*255),
-							(unsigned char)(diff.b()*255));
+							(unsigned char)(color.r()*255),
+							(unsigned char)(color.g()*255),
+							(unsigned char)(color.b()*255));
 						int ii = m_tree_panel->GetIconNum()-1;
 						m_tree_panel->ChangeIconColor(ii, wxc);
-						wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->GetName());
-						m_tree_panel->SetMeshItemImage(item, md->GetDisp()?2*ii+1:2*ii);
-						if (name == md->GetName())
+						wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->getName());
+						bool disp;
+						md->getValue(gstDisplay, disp);
+						m_tree_panel->SetMeshItemImage(item, disp?2*ii+1:2*ii);
+						if (name == md->getName())
 							sel_item = item;
 					}
-					if (name == group->GetName())
+					if (name == group->getName())
 						sel_item = group_item;
 				}
 				break;
@@ -2242,11 +2252,13 @@ void VRenderFrame::UpdateList()
 
 	for (int i=0 ; i<m_data_mgr.GetMeshNum() ; i++)
 	{
-		MeshData* md = m_data_mgr.GetMeshData(i);
+		fluo::MeshData* md = m_data_mgr.GetMeshData(i);
 		if (md)
 		{
-			wxString name = md->GetName();
-			wxString path = md->GetPath();
+			wxString name = md->getName();
+			std::wstring wstr;
+			md->getValue(gstDataPath, wstr);
+			wxString path = wstr;
 			m_list_panel->Append(DATA_MESH, name, path);
 		}
 	}
@@ -2283,7 +2295,7 @@ void VRenderFrame::OnSelection(int type,
 	VRenderGLView* view,
 	fluo::VolumeGroup* group,
 	fluo::VolumeData* vd,
-	MeshData* md,
+	fluo::MeshData* md,
 	Annotations* ann)
 {
 	if (m_adjust_view)
@@ -2316,7 +2328,7 @@ void VRenderFrame::OnSelection(int type,
 	m_cur_sel_type = type;
 	//clear mesh boundbox
 	if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
-		m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
+		m_data_mgr.GetMeshData(m_cur_sel_mesh)->setValue(gstDrawBounds, false);
 
 	if (m_brush_tool_dlg)
 		m_brush_tool_dlg->GetSettings(view);
@@ -2424,11 +2436,11 @@ void VRenderFrame::OnSelection(int type,
 				m_prop_panel->Layout();
 			}
 			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
+				wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->getName());
 			m_aui_mgr.Update();
-			wxString str = md->GetName();
+			wxString str = md->getName();
 			m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
-			md->SetDrawBounds(true);
+			md->setValue(gstDrawBounds, true);
 		}
 
 		if (m_volume_prop)
@@ -2502,7 +2514,7 @@ void VRenderFrame::OnSelection(int type,
 				m_prop_panel->Layout();
 			}
 			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString("Manipulations - ")+md->GetName());
+				wxString("Manipulations - ")+md->getName());
 			m_aui_mgr.Update();
 		}
 
@@ -3137,66 +3149,94 @@ void VRenderFrame::SaveProject(wxString& filename)
 			"Saving mesh data. Please wait.");
 		tick_cnt++;
 
-		MeshData* md = m_data_mgr.GetMeshData(i);
+		fluo::MeshData* md = m_data_mgr.GetMeshData(i);
 		if (md)
 		{
-			if (md->GetPath() == "" || m_vrp_embed)
+			std::wstring wstr;
+			md->getValue(gstDataPath, wstr);
+			if (wstr == "" || m_vrp_embed)
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
 				MkDirW(new_folder.ToStdWstring());
-				str = new_folder + GETSLASH() + md->GetName() + ".obj";
-				md->Save(str);
+				str = new_folder + GETSLASH() + md->getName() + ".obj";
+				md->SaveData(str.ToStdString());
 			}
 			str = wxString::Format("/data/mesh/%d", i);
 			fconfig.SetPath(str);
-			str = md->GetName();
+			str = md->getName();
 			fconfig.Write("name", str);
-			str = md->GetPath();
+			str = wstr;
 			fconfig.Write("path", str);
 			//mesh prperties
 			fconfig.SetPath("properties");
-			fconfig.Write("display", md->GetDisp());
+			bool bval;
+			md->getValue(gstDisplay, bval);
+			fconfig.Write("display", bval);
 			//lighting
-			fconfig.Write("lighting", md->GetLighting());
+			md->getValue(gstShadingEnable, bval);
+			fconfig.Write("lighting", bval);
 			//material
-			fluo::Color amb, diff, spec;
-			double shine, alpha;
-			md->GetMaterial(amb, diff, spec, shine, alpha);
-			str = wxString::Format("%f %f %f", amb.r(), amb.g(), amb.b());
-			fconfig.Write("ambient", str);
-			str = wxString::Format("%f %f %f", diff.r(), diff.g(), diff.b());
-			fconfig.Write("diffuse", str);
-			str = wxString::Format("%f %f %f", spec.r(), spec.g(), spec.b());
-			fconfig.Write("specular", str);
+			fluo::Color color;
+			double amb, diff, spec, shine, alpha;
+			md->getValue(gstColor, color);
+			md->getValue(gstMatAmb, amb);
+			md->getValue(gstMatDiff, diff);
+			md->getValue(gstMatSpec, spec);
+			md->getValue(gstMatShine, shine);
+			md->getValue(gstAlpha, alpha);
+			str = wxString::Format("%f %f %f", color.r(), color.g(), color.b());
+			fconfig.Write("color", str);
+			fconfig.Write("ambient", amb);
+			fconfig.Write("diffuse", diff);
+			fconfig.Write("specular", spec);
 			fconfig.Write("shininess", shine);
 			fconfig.Write("alpha", alpha);
 			//2d adjustment settings
-			str = wxString::Format("%f %f %f", md->GetGamma().r(), md->GetGamma().g(), md->GetGamma().b());
+			double r, g, b;
+			md->getValue(gstGammaR, r);
+			md->getValue(gstGammaG, g);
+			md->getValue(gstGammaB, b);
+			str = wxString::Format("%f %f %f", r, g, b);
 			fconfig.Write("gamma", str);
-			str = wxString::Format("%f %f %f", md->GetBrightness().r(), md->GetBrightness().g(), md->GetBrightness().b());
+			md->getValue(gstBrightnessR, r);
+			md->getValue(gstBrightnessG, g);
+			md->getValue(gstBrightnessB, b);
+			str = wxString::Format("%f %f %f", r, g, b);
 			fconfig.Write("brightness", str);
-			str = wxString::Format("%f %f %f", md->GetHdr().r(), md->GetHdr().g(), md->GetHdr().b());
+			md->getValue(gstEqualizeR, r);
+			md->getValue(gstEqualizeG, g);
+			md->getValue(gstEqualizeB, b);
+			str = wxString::Format("%f %f %f", r, g, b);
 			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", md->GetSyncR());
-			fconfig.Write("sync_g", md->GetSyncG());
-			fconfig.Write("sync_b", md->GetSyncB());
+			md->getValue(gstSyncR, bval);
+			fconfig.Write("sync_r", bval);
+			md->getValue(gstSyncG, bval);
+			fconfig.Write("sync_g", bval);
+			md->getValue(gstSyncB, bval);
+			fconfig.Write("sync_b", bval);
 			//shadow
-			fconfig.Write("shadow", md->GetShadow());
-			double darkness;
-			md->GetShadowParams(darkness);
-			fconfig.Write("shadow_darkness", darkness);
+			md->getValue(gstShadowEnable, bval);
+			fconfig.Write("shadow", bval);
+			md->getValue(gstShadowInt, dval);
+			fconfig.Write("shadow_darkness", dval);
 
 			//mesh transform
 			fconfig.SetPath("../transform");
 			double x, y, z;
-			md->GetTranslation(x, y, z);
+			md->getValue(gstTransX, x);
+			md->getValue(gstTransY, y);
+			md->getValue(gstTransZ, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("translation", str);
-			md->GetRotation(x, y, z);
+			md->getValue(gstRotX, x);
+			md->getValue(gstRotY, y);
+			md->getValue(gstRotZ, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("rotation", str);
-			md->GetScaling(x, y, z);
+			md->getValue(gstScaleX, x);
+			md->getValue(gstScaleY, y);
+			md->getValue(gstScaleZ, z);
 			str = wxString::Format("%f %f %f", x, y, z);
 			fconfig.Write("scaling", str);
 		}
@@ -3306,21 +3346,23 @@ void VRenderFrame::SaveProject(wxString& filename)
 					break;
 				case 6://mesh group
 					{
-						MeshGroup* group = (MeshGroup*)layer;
+						fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
 
 						fconfig.Write("type", 6);
 						fconfig.Write("name", layer->GetName());
-						fconfig.Write("id", MeshGroup::GetID());
+						//fconfig.Write("id", MeshGroup::GetID());
 						//display
-						fconfig.Write("display", group->GetDisp());
+						group->getValue(gstDisplay, bval);
+						fconfig.Write("display", bval);
 						//sync mesh properties
-						fconfig.Write("sync_mp", group->GetMeshSyncProp());
+						group->getValue(gstSyncGroup, bval);
+						fconfig.Write("sync_mp", bval);
 						//meshes
 						str = wxString::Format("/views/%d/layers/%d/meshes", i, j);
 						fconfig.SetPath(str);
-						fconfig.Write("num", group->GetMeshNum());
-						for (k=0; k<group->GetMeshNum(); k++)
-							fconfig.Write(wxString::Format("mesh_%d", k), group->GetMeshData(k)->GetName());
+						fconfig.Write("num", group->getNumChildren());
+						for (k=0; k<group->getNumChildren(); k++)
+							fconfig.Write(wxString::Format("mesh_%d", k), group->getChild(k)->getName());
 					}
 					break;
 				}
@@ -3589,7 +3631,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	//clear
 	m_data_mgr.ClearAll();
 	//fluo::VolumeGroup::ResetID();
-	MeshGroup::ResetID();
+	//MeshGroup::ResetID();
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
@@ -3598,7 +3640,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		DeleteVRenderView(i);
 	//VRenderView::ResetID();
 	//fluo::VolumeGroup::ResetID();
-	MeshGroup::ResetID();
+	//MeshGroup::ResetID();
 	double dx, dy, dz;
 	long lval;
 	double dval;
@@ -4052,94 +4094,107 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					m_data_mgr.LoadMeshData(str);
 				}
-				MeshData* md = m_data_mgr.GetLastMeshData();
+				fluo::MeshData* md = m_data_mgr.GetLastMeshData();
 				if (md)
 				{
 					if (fconfig.Read("name", &str))
-						md->SetName(str);//setname
+						md->setName(str.ToStdString());//setname
 					//mesh properties
 					if (fconfig.Exists("properties"))
 					{
 						fconfig.SetPath("properties");
 						bool disp;
 						if (fconfig.Read("display", &disp))
-							md->SetDisp(disp);
+							md->setValue(gstDisplay, disp);
 						//lighting
 						bool lighting;
 						if (fconfig.Read("lighting", &lighting))
-							md->SetLighting(lighting);
-						double shine, alpha;
+							md->setValue(gstShadingEnable, lighting);
 						float r=0.0f, g=0.0f, b=0.0f;
-						if (fconfig.Read("ambient", &str))
+						if (fconfig.Read("color", &str))
+						{
 							SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
-						fluo::Color amb(r, g, b);
-						if (fconfig.Read("diffuse", &str))
-							SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
-						fluo::Color diff(r, g, b);
-						if (fconfig.Read("specular", &str))
-							SSCANF(str.c_str(), "%f%f%f", &r, &g, &b);
-						fluo::Color spec(r, g, b);
-						fconfig.Read("shininess", &shine, 30.0);
-						fconfig.Read("alpha", &alpha, 0.5);
-						md->SetMaterial(amb, diff, spec, shine, alpha);
+							fluo::Color color(r, g, b);
+							md->setValue(gstColor, color);
+						}
+						if (fconfig.Read("ambient", &dval))
+							md->setValue(gstMatAmb, dval);
+						if (fconfig.Read("diffuse", &dval))
+							md->setValue(gstMatDiff, dval);
+						if (fconfig.Read("specular", &dval))
+							md->setValue(gstMatSpec, dval);
+						if (fconfig.Read("shininess", &dval))
+							md->setValue(gstMatShine, dval);
+						if (fconfig.Read("alpha", &dval))
+							md->setValue(gstAlpha, dval);
 						//2d adjusment settings
 						if (fconfig.Read("gamma", &str))
 						{
 							float r, g, b;
-							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								fluo::Color col(r,g,b);
-								md->SetGamma(col);
+							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+							{
+								md->setValue(gstGammaR, double(r));
+								md->setValue(gstGammaG, double(g));
+								md->setValue(gstGammaB, double(b));
 							}
 						}
 						if (fconfig.Read("brightness", &str))
 						{
 							float r, g, b;
-							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								fluo::Color col(r,g,b);
-								md->SetBrightness(col);
+							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+							{
+								md->setValue(gstBrightnessR, double(r));
+								md->setValue(gstBrightnessG, double(g));
+								md->setValue(gstBrightnessB, double(b));
 							}
 						}
 						if (fconfig.Read("hdr", &str))
 						{
 							float r, g, b;
-							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-								fluo::Color col(r,g,b);
-								md->SetHdr(col);
+							if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b))
+							{
+								md->setValue(gstEqualizeR, double(r));
+								md->setValue(gstEqualizeG, double(g));
+								md->setValue(gstEqualizeB, double(b));
 							}
 						}
-						bool bVal;
-						if (fconfig.Read("sync_r", &bVal))
-							md->SetSyncG(bVal);
-						if (fconfig.Read("sync_g", &bVal))
-							md->SetSyncG(bVal);
-						if (fconfig.Read("sync_b", &bVal))
-							md->SetSyncB(bVal);
+						if (fconfig.Read("sync_r", &bval))
+							md->setValue(gstSyncR, bval);
+						if (fconfig.Read("sync_g", &bval))
+							md->setValue(gstSyncG, bval);
+						if (fconfig.Read("sync_b", &bval))
+							md->setValue(gstSyncB, bval);
 						//shadow
-						if (fconfig.Read("shadow", &bVal))
-							md->SetShadow(bVal);
-						double darkness;
-						if (fconfig.Read("shadow_darkness", &darkness))
-							md->SetShadowParams(darkness);
+						if (fconfig.Read("shadow", &bval))
+							md->setValue(gstShadowEnable, bval);
+						if (fconfig.Read("shadow_darkness", &dval))
+							md->setValue(gstShadowInt, dval);
 
 						//mesh transform
 						if (fconfig.Exists("../transform"))
 						{
 							fconfig.SetPath("../transform");
 							float x, y, z;
-							if (fconfig.Read("translation", &str))
+							if (fconfig.Read("translation", &str) &&
+								SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 							{
-								if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-									md->SetTranslation(x, y, z);
+									md->setValue(gstTransX, double(x));
+									md->setValue(gstTransY, double(y));
+									md->setValue(gstTransZ, double(z));
 							}
-							if (fconfig.Read("rotation", &str))
+							if (fconfig.Read("rotation", &str) &&
+								SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 							{
-								if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-									md->SetRotation(x, y, z);
+								md->setValue(gstRotX, double(x));
+								md->setValue(gstRotY, double(y));
+								md->setValue(gstRotZ, double(z));
 							}
-							if (fconfig.Read("scaling", &str))
+							if (fconfig.Read("scaling", &str) &&
+								SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
 							{
-								if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-									md->SetScaling(x, y, z);
+								md->setValue(gstScaleX, double(x));
+								md->setValue(gstScaleY, double(y));
+								md->setValue(gstScaleZ, double(z));
 							}
 						}
 
@@ -4218,7 +4273,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 				{
 					if (fconfig.Read(wxString::Format("name%d", j), &str))
 					{
-						MeshData* md = m_data_mgr.GetMeshData(str);
+						fluo::MeshData* md = m_data_mgr.GetMeshData(str);
 						if (md)
 							view->AddMeshData(md);
 					}
@@ -4257,7 +4312,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										MeshData* md = m_data_mgr.GetMeshData(str);
+										fluo::MeshData* md = m_data_mgr.GetMeshData(str);
 										if (md)
 											view->AddMeshData(md);
 									}
@@ -4349,18 +4404,18 @@ void VRenderFrame::OpenProject(wxString& filename)
 									if (fconfig.Read("name", &str))
 									{
 										int id;
-										if (fconfig.Read("id", &id))
-											MeshGroup::SetID(id);
+										//if (fconfig.Read("id", &id))
+										//	MeshGroup::SetID(id);
 										str = view->AddMGroup(str);
-										MeshGroup* group = view->GetMGroup(str);
+										fluo::MeshGroup* group = view->GetMGroup(str);
 										if (group)
 										{
 											//display
-											if (fconfig.Read("display", &bVal))
-												group->SetDisp(bVal);
+											if (fconfig.Read("display", &bval))
+												group->setValue(gstDisplay, bval);
 											//sync mesh properties
-											if (fconfig.Read("sync_mp", &bVal))
-												group->SetMeshSyncProp(bVal);
+											if (fconfig.Read("sync_mp", &bval))
+												group->setValue(gstSyncGroup, bval);
 											//meshes
 											if (fconfig.Exists(wxString::Format("/views/%d/layers/%d/meshes", i, j)))
 											{
@@ -4370,9 +4425,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 												{
 													if (fconfig.Read(wxString::Format("mesh_%d", k), &str))
 													{
-														MeshData* md = m_data_mgr.GetMeshData(str);
+														fluo::MeshData* md = m_data_mgr.GetMeshData(str);
 														if (md)
-															group->InsertMeshData(k-1, md);
+															group->insertChild(k-1, md);
 													}
 												}
 											}
@@ -5091,7 +5146,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 			break;
 		case 3:  //mesh
 			if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
-				UpdateTree(m_data_mgr.GetMeshData(m_cur_sel_mesh)->GetName());
+				UpdateTree(m_data_mgr.GetMeshData(m_cur_sel_mesh)->getName());
 			else
 				UpdateTree();
 			break;

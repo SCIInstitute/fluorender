@@ -218,4 +218,17 @@ DEALINGS IN THE SOFTWARE.
 //stream mode
 #define gstStreamMode "stream mode"
 
+//specific to mesh
+#define gstBoundsTf "bounds tf"//bounding box after transformation
+#define gstCenter "center"
+#define gstLimitEnable "limit enable"//size limiter
+#define gstLimit "limit"
+//transformation
+#define gstTransX "trans x"
+#define gstTransY "trans y"
+#define gstTransZ "trans z"
+#define gstRotX "rot x"
+#define gstRotY "rot y"
+#define gstRotZ "rot z"
+
 #endif//NAMES_HPP

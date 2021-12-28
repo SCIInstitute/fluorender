@@ -85,6 +85,7 @@ using namespace std;
 namespace fluo
 {
 	class VolumeData;
+	class MeshData;
 }
 class TreeLayer
 {
@@ -614,7 +615,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define MESH_COLOR_AMB	1
+/*#define MESH_COLOR_AMB	1
 #define MESH_COLOR_DIFF	2
 #define MESH_COLOR_SPEC	3
 #define MESH_FLOAT_SHN	4
@@ -723,7 +724,7 @@ private:
 
 	//legend
 	bool m_legend;
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class AText
@@ -1096,7 +1097,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MeshGroup : public TreeLayer
+/*class MeshGroup : public TreeLayer
 {
 public:
 	MeshGroup();
@@ -1179,7 +1180,7 @@ private:
 	vector<MeshData*> m_md_list;
 	bool m_sync_mesh_prop;
 	bool m_disp;
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class DataManager
@@ -1223,17 +1224,11 @@ public:
 	int LoadMeshData(wxString &filename);
 	int LoadMeshData(GLMmodel* mesh);
 	int GetMeshNum();
-	MeshData* GetMeshData(int index);
-	MeshData* GetMeshData(wxString &name);
-	int GetMeshIndex(wxString &name);
-	MeshData* GetLastMeshData()
-	{
-		int num = m_md_list.size();
-		if (num)
-			return m_md_list[num-1];
-		else
-			return 0;
-	}
+	fluo::MeshData* GetMeshData(int index);
+	fluo::MeshData* GetMeshData(const std::string &name);
+	int GetMeshIndex(const std::string &name);
+	fluo::MeshData* GetLastMeshData();
+
 	void RemoveMeshData(int index);
 
 	//annotations
@@ -1314,7 +1309,6 @@ public:
 	fluo::Color m_vol_wav[4];
 
 private:
-	vector <MeshData*> m_md_list;
 	vector <BaseReader*> m_reader_list;
 	vector <Annotations*> m_annotation_list;
 

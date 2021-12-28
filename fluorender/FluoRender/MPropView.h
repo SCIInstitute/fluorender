@@ -37,7 +37,10 @@ using namespace std;
 
 class VRenderFrame;
 class VRenderGLView;
-class MeshData;
+namespace fluo
+{
+	class MeshData;
+}
 class MPropView: public wxPanel
 {
 	enum
@@ -69,8 +72,8 @@ public:
 	~MPropView();
 
 	void SetView(VRenderGLView* view);
-	void SetMeshData(MeshData* md);
-	MeshData* GetMeshData();
+	void SetMeshData(fluo::MeshData* md);
+	fluo::MeshData* GetMeshData();
 	void RefreshVRenderViews(bool tree=false);
 
 	void GetSettings();
@@ -78,7 +81,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	VRenderGLView* m_view;
-	MeshData* m_md;
+	fluo::MeshData* m_md;
 
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MPropView.h"
-#include "DataManager.h"
 #include "VRenderFrame.h"
+#include <MeshData.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MPropView, wxPanel)
@@ -193,18 +193,26 @@ void MPropView::GetSettings()
 		return;
 
 	wxString str;
-	fluo::Color amb, diff, spec;
+	fluo::Color color;
+	double amb, diff, spec;
 	double shine, alpha;
-	m_md->GetMaterial(amb, diff, spec, shine, alpha);
+	m_md->getValue(gstColor, color);
+	m_md->getValue(gstMatAmb, amb);
+	m_md->getValue(gstMatDiff, diff);
+	m_md->getValue(gstMatSpec, spec);
+	m_md->getValue(gstMatShine, shine);
+	m_md->getValue(gstAlpha, alpha);
 
 	wxColor c;
-	c = wxColor(diff.r()*255, diff.g()*255, diff.b()*255);
+	c = wxColor(diff*color.r()*255, diff*color.g()*255, diff*color.b()*255);
 	m_diff_picker->SetColour(c);
-	c = wxColor(spec.r()*255, spec.g()*255, spec.b()*255);
+	c = wxColor(spec*color.r()*255, spec*color.g()*255, spec*color.b()*255);
 	m_spec_picker->SetColour(c);
 
 	//lighting
-	m_light_chk->SetValue(m_md->GetLighting());
+	bool bval;
+	m_md->getValue(gstShadingEnable, bval);
+	m_light_chk->SetValue(bval);
 	//shine
 	m_shine_sldr->SetValue(int(shine));
 	str = wxString::Format("%.0f", shine);
@@ -215,22 +223,27 @@ void MPropView::GetSettings()
 	m_alpha_text->ChangeValue(str);
 	//scaling
 	double sx, sy, sz;
-	m_md->GetScaling(sx, sy, sz);
+	m_md->getValue(gstScaleX, sx);
+	m_md->getValue(gstScaleY, sy);
+	m_md->getValue(gstScaleZ, sz);
 	m_scale_sldr->SetValue(int(sx*100.0+0.5));
 	str = wxString::Format("%.2f", sx);
 	m_scale_text->ChangeValue(str);
 	//shadow
-	double darkness;
-	m_shadow_chk->SetValue(m_md->GetShadow());
-	m_md->GetShadowParams(darkness);
-	m_shadow_sldr->SetValue(int(darkness*100.0+0.5));
-	str = wxString::Format("%.2f", darkness);
+	double dval;
+	m_md->getValue(gstShadowEnable, bval);
+	m_shadow_chk->SetValue(bval);
+	m_md->getValue(gstShadowInt, dval);
+	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
+	str = wxString::Format("%.2f", dval);
 	m_shadow_text->ChangeValue(str);
 	//size limiter
-	m_size_chk->SetValue(m_md->GetLimit());
-	int limit = m_md->GetLimitNumber();
-	m_size_sldr->SetValue(limit);
-	m_size_text->SetValue(wxString::Format("%d", limit));
+	long lval;
+	m_md->getValue(gstLimitEnable, bval);
+	m_size_chk->SetValue(bval);
+	m_md->getValue(gstLimit, lval);
+	m_size_sldr->SetValue(lval);
+	m_size_text->SetValue(wxString::Format("%d", lval));
 }
 
 void MPropView::SetView(VRenderGLView* view)
@@ -238,13 +251,13 @@ void MPropView::SetView(VRenderGLView* view)
 	m_view = view;
 }
 
-void MPropView::SetMeshData(MeshData* md)
+void MPropView::SetMeshData(fluo::MeshData* md)
 {
 	m_md = md;
 	GetSettings();
 }
 
-MeshData* MPropView::GetMeshData()
+fluo::MeshData* MPropView::GetMeshData()
 {
 	return m_md;
 }
@@ -261,12 +274,12 @@ void MPropView::OnLightingCheck(wxCommandEvent& event)
 	if (m_md && m_view)
 	{
 		bool val = m_light_chk->GetValue();
-		m_md->SetLighting(val);
+		m_md->setValue(gstShadingEnable, val);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_view->GetMeshData(i);
+			fluo::MeshData* md = m_view->GetMeshData(i);
 			if (md)
-				md->SetLighting(val);
+				md->setValue(gstShadingEnable, val);
 		}
 		RefreshVRenderViews();
 	}
@@ -278,9 +291,9 @@ void MPropView::OnDiffChange(wxColourPickerEvent& event)
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_md)
 	{
-		m_md->SetColor(color, MESH_COLOR_DIFF);
-		fluo::Color amb = color * 0.3;
-		m_md->SetColor(amb, MESH_COLOR_AMB);
+		m_md->setValue(gstColor, color);
+		fluo::HSVColor hsv(color);
+		m_md->setValue(gstMatAmb, hsv.val());
 		RefreshVRenderViews(true);
 	}
 }
@@ -291,7 +304,9 @@ void MPropView::OnSpecChange(wxColourPickerEvent& event)
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_md)
 	{
-		m_md->SetColor(color, MESH_COLOR_SPEC);
+		m_md->setValue(gstColor, color);
+		fluo::HSVColor hsv(color);
+		m_md->setValue(gstMatSpec, hsv.val());
 		RefreshVRenderViews();
 	}
 }
@@ -313,7 +328,7 @@ void MPropView::OnShineText(wxCommandEvent& event)
 
 	if (m_md)
 	{
-		m_md->SetFloat(shine, MESH_FLOAT_SHN);
+		m_md->setValue(gstMatShine, shine);
 		RefreshVRenderViews();
 	}
 }
@@ -335,7 +350,7 @@ void MPropView::OnAlphaText(wxCommandEvent& event)
 
 	if (m_md)
 	{
-		m_md->SetFloat(alpha, MESH_FLOAT_ALPHA);
+		m_md->setValue(gstAlpha, alpha);
 		RefreshVRenderViews();
 	}
 }
@@ -357,7 +372,9 @@ void MPropView::OnScaleText(wxCommandEvent& event)
 
 	if (m_md)
 	{
-		m_md->SetScaling(dval, dval, dval);
+		m_md->setValue(gstScaleX, dval);
+		m_md->setValue(gstScaleY, dval);
+		m_md->setValue(gstScaleZ, dval);
 		RefreshVRenderViews();
 	}
 }
@@ -368,12 +385,12 @@ void MPropView::OnShadowCheck(wxCommandEvent& event)
 	if (m_md && m_view)
 	{
 		bool val = m_shadow_chk->GetValue();
-		m_md->SetShadow(val);
+		m_md->setValue(gstShadowEnable, val);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_view->GetMeshData(i);
+			fluo::MeshData* md = m_view->GetMeshData(i);
 			if (md)
-				md->SetShadow(val);
+				md->setValue(gstShadowEnable, val);
 		}
 		RefreshVRenderViews();
 	}
@@ -396,12 +413,12 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 
 	if (m_md && m_view)
 	{
-		m_md->SetShadowParams(dval);
+		m_md->setValue(gstShadowInt, dval);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
 			MeshData* md = m_view->GetMeshData(i);
 			if (md)
-				md->SetShadowParams(dval);
+				md->setValue(gstShadowInt, dval);
 		}
 		RefreshVRenderViews();
 	}
@@ -413,7 +430,7 @@ void MPropView::OnSizeCheck(wxCommandEvent& event)
 	bool bval = m_size_chk->GetValue();
 	if (m_md)
 	{
-		m_md->SetLimit(bval);
+		m_md->setValue(gstLimitEnable, bval);
 		RefreshVRenderViews();
 	}
 }
@@ -435,8 +452,10 @@ void MPropView::OnSizeText(wxCommandEvent& event)
 
 	if (m_md)
 	{
-		m_md->SetLimitNumer(val);
-		if (m_md->GetLimit())
+		m_md->setValue(gstLimit, val);
+		bool bval;
+		m_md->getValue(gstLimitEnable, bval);
+		if (bval)
 			RefreshVRenderViews();
 	}
 }

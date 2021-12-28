@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MManipulator.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <MeshData.hpp>
 #include "compatibility.h"
 
 BEGIN_EVENT_TABLE(MManipulator, wxPanel)
@@ -149,12 +149,12 @@ MManipulator::~MManipulator()
 {
 }
 
-void MManipulator::SetMeshData(MeshData* md)
+void MManipulator::SetMeshData(fluo::MeshData* md)
 {
 	m_md = md;
 }
 
-MeshData* MManipulator::GetMeshData()
+fluo::MeshData* MManipulator::GetMeshData()
 {
 	return m_md;
 }
@@ -170,9 +170,11 @@ void MManipulator::GetData()
 	if (!m_md)
 		return;
 
-	double x, y, z;
 	wxString str;
-	m_md->GetTranslation(x, y, z);
+	double x, y, z;
+	m_md->getValue(gstTransX, x);
+	m_md->getValue(gstTransY, y);
+	m_md->getValue(gstTransZ, z);
 	//sprintf(str, "%.2f", x);
 	str = wxString::Format("%.2f", x);
 	m_x_trans_text->SetValue(str);
@@ -182,7 +184,9 @@ void MManipulator::GetData()
 	//sprintf(str, "%.2f", z);
 	str = wxString::Format("%.2f", z);
 	m_z_trans_text->SetValue(str);
-	m_md->GetRotation(x, y, z);
+	m_md->getValue(gstRotX, x);
+	m_md->getValue(gstRotY, y);
+	m_md->getValue(gstRotZ, z);
 	//sprintf(str, "%.2f", x);
 	str = wxString::Format("%.2f", x);
 	m_x_rot_text->SetValue(str);
@@ -192,7 +196,9 @@ void MManipulator::GetData()
 	//sprintf(str, "%.2f", z);
 	str = wxString::Format("%.2f", z);
 	m_z_rot_text->SetValue(str);
-	m_md->GetScaling(x, y, z);
+	m_md->getValue(gstScaleX, x);
+	m_md->getValue(gstScaleY, y);
+	m_md->getValue(gstScaleZ, z);
 	//sprintf(str, "%.2f", x);
 	str = wxString::Format("%.2f", x);
 	m_x_scl_text->SetValue(str);
@@ -302,7 +308,9 @@ void MManipulator::UpdateData()
 	y = STOD(str.fn_str());
 	str = m_z_trans_text->GetValue();
 	z = STOD(str.fn_str());
-	m_md->SetTranslation(x, y, z);
+	m_md->setValue(gstTransX, x);
+	m_md->setValue(gstTransY, y);
+	m_md->setValue(gstTransZ, z);
 
 	str = m_x_rot_text->GetValue();
 	x = STOD(str.fn_str());
@@ -310,7 +318,9 @@ void MManipulator::UpdateData()
 	y = STOD(str.fn_str());
 	str = m_z_rot_text->GetValue();
 	z = STOD(str.fn_str());
-	m_md->SetRotation(x, y, z);
+	m_md->setValue(gstRotX, x);
+	m_md->setValue(gstRotY, y);
+	m_md->setValue(gstRotZ, z);
 
 	str = m_x_scl_text->GetValue();
 	x = STOD(str.fn_str());
@@ -318,7 +328,9 @@ void MManipulator::UpdateData()
 	y = STOD(str.fn_str());
 	str = m_z_scl_text->GetValue();
 	z = STOD(str.fn_str());
-	m_md->SetScaling(x, y, z);
+	m_md->setValue(gstScaleX, x);
+	m_md->setValue(gstScaleY, y);
+	m_md->setValue(gstScaleZ, z);
 
 	RefreshVRenderViews();
 }

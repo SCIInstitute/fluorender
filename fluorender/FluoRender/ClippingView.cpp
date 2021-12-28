@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ClippingView.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
 #include <VolumeData.hpp>
+#include <MeshData.hpp>
 #include "compatibility.h"
 #include <wx/valnum.h>
 #include "png_resource.h"
@@ -541,7 +541,7 @@ fluo::VolumeData* ClippingView::GetVolumeData()
 	return m_vd;
 }
 
-MeshData* ClippingView::GetMeshData()
+fluo::MeshData* ClippingView::GetMeshData()
 {
 	return m_md;
 }
@@ -554,7 +554,7 @@ void ClippingView::SetVolumeData(fluo::VolumeData* vd)
 	GetSettings();
 }
 
-void ClippingView::SetMeshData(MeshData* md)
+void ClippingView::SetMeshData(fluo::MeshData* md)
 {
 	if (!md) return;
 	m_md = md;
@@ -668,8 +668,8 @@ void ClippingView::GetSettings()
 			planes = m_vd->GetRenderer()->get_planes();
 		break;
 	case 3:	//mesh
-		if (m_md->GetMR())
-			planes = m_md->GetMR()->get_planes();
+		if (m_md->GetRenderer())
+			planes = m_md->GetRenderer()->get_planes();
 		break;
 	}
 	if (!planes)

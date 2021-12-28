@@ -27,8 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "DataManager.h"
 #include <VolumeData.hpp>
+#include <MeshData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
+#include <MeshFactory.hpp>
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
 #include "teem/Nrrd/nrrd.h"
@@ -2429,7 +2431,7 @@ void VolumeData::LoadLabel2()
 }*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MeshData::MeshData() :
+/*MeshData::MeshData() :
 m_data(0),
 	m_mr(0),
 	m_center(0.0, 0.0, 0.0),
@@ -2507,7 +2509,6 @@ int MeshData::Load(GLMmodel* mesh)
 		m_data->nummaterials = 1;
 	}
 
-	/* set the default material */
 	m_data->materials[0].name = NULL;
 	m_data->materials[0].ambient[0] = m_mat_amb.r();
 	m_data->materials[0].ambient[1] = m_mat_amb.g();
@@ -2589,7 +2590,6 @@ int MeshData::Load(wxString &filename)
 		m_data->nummaterials = 1;
 	}
 
-	/* set the default material */
 	m_data->materials[0].name = NULL;
 	m_data->materials[0].ambient[0] = m_mat_amb.r();
 	m_data->materials[0].ambient[1] = m_mat_amb.g();
@@ -3034,7 +3034,7 @@ void MeshData::SetLimitNumer(int val)
 int MeshData::GetLimitNumber()
 {
 	return m_limit;
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 AText::AText()
@@ -4356,7 +4356,7 @@ void DataGroup::AddMask(Nrrd* mask, int op)
 	}
 }*/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int MeshGroup::m_num = 0;
+/*int MeshGroup::m_num = 0;
 MeshGroup::MeshGroup()
 {
 	type = 6;//mesh group
@@ -4385,7 +4385,7 @@ void MeshGroup::RandomizeColor()
 			md->SetColor(amb, MESH_COLOR_AMB);
 		}
 	}
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DataManager::DataManager() :
@@ -4527,9 +4527,9 @@ DataManager::~DataManager()
 	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	//	if (m_vd_list[i])
 	//		delete m_vd_list[i];
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-		if (m_md_list[i])
-			delete m_md_list[i];
+	//for (int i=0 ; i<(int)m_md_list.size() ; i++)
+	//	if (m_md_list[i])
+	//		delete m_md_list[i];
 	for (int i=0; i<(int)m_reader_list.size(); i++)
 		if (m_reader_list[i])
 			delete m_reader_list[i];
@@ -4540,13 +4540,14 @@ DataManager::~DataManager()
 
 void DataManager::ClearAll()
 {
+	glbin_volf->removeAll();
+	glbin_mshf->removeAll();
 	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	//	if (m_vd_list[i])
 	//		delete m_vd_list[i];
-	glbin_volf->removeAll();
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-		if (m_md_list[i])
-			delete m_md_list[i];
+	//for (int i=0 ; i<(int)m_md_list.size() ; i++)
+	//	if (m_md_list[i])
+	//		delete m_md_list[i];
 	for (int i=0; i<(int)m_reader_list.size(); i++)
 		if (m_reader_list[i])
 			delete m_reader_list[i];
@@ -4554,7 +4555,7 @@ void DataManager::ClearAll()
 		if (m_annotation_list[i])
 			delete m_annotation_list[i];
 	//m_vd_list.clear();
-	m_md_list.clear();
+	//m_md_list.clear();
 	m_reader_list.clear();
 	m_annotation_list.clear();
 }
@@ -4860,17 +4861,17 @@ int DataManager::LoadMeshData(wxString &filename)
 			return 0;
 	}
 
-	MeshData *md = new MeshData();
-	md->Load(pathname);
+	fluo::MeshData *md = glbin_mshf->build();
+	md->LoadData(pathname.ToStdString());
 
-	wxString name = md->GetName();
+	wxString name = md->getName();
 	wxString new_name = name;
 	int i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name+wxString::Format("_%d", i);
 	if (i>1)
-		md->SetName(new_name);
-	m_md_list.push_back(md);
+		md->setName(new_name.ToStdString());
+	//m_md_list.push_back(md);
 
 	return 1;
 }
@@ -4879,17 +4880,17 @@ int DataManager::LoadMeshData(GLMmodel* mesh)
 {
 	if (!mesh) return 0;
 
-	MeshData *md = new MeshData();
-	md->Load(mesh);
+	fluo::MeshData *md = glbin_mshf->build();
+	md->LoadData(mesh);
 
-	wxString name = md->GetName();
+	wxString name = md->getName();
 	wxString new_name = name;
 	int i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name+wxString::Format("_%d", i);
 	if (i>1)
-		md->SetName(new_name);
-	m_md_list.push_back(md);
+		md->setName(new_name.ToStdString());
+	//m_md_list.push_back(md);
 
 	return 1;
 }
@@ -4899,12 +4900,9 @@ fluo::VolumeData* DataManager::GetVolumeData(int index)
 	return glbin_volf->get(index);
 }
 
-MeshData* DataManager::GetMeshData(int index)
+fluo::MeshData* DataManager::GetMeshData(int index)
 {
-	if (index>=0 && index<(int)m_md_list.size())
-		return m_md_list[index];
-	else
-		return 0;
+	return glbin_mshf->get(index);
 }
 
 fluo::VolumeData* DataManager::GetVolumeData(const std::string &name)
@@ -4912,16 +4910,9 @@ fluo::VolumeData* DataManager::GetVolumeData(const std::string &name)
 	return glbin_volf->findFirst(name);
 }
 
-MeshData* DataManager::GetMeshData(wxString &name)
+fluo::MeshData* DataManager::GetMeshData(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-	{
-		if (name == m_md_list[i]->GetName())
-		{
-			return m_md_list[i];
-		}
-	}
-	return 0;
+	return glbin_mshf->findFirst(name);
 }
 
 int DataManager::GetVolumeIndex(const std::string &name)
@@ -4934,16 +4925,14 @@ fluo::VolumeData* DataManager::GetLastVolumeData()
 	return glbin_volf->getLast();
 }
 
-int DataManager::GetMeshIndex(wxString &name)
+int DataManager::GetMeshIndex(const std::string &name)
 {
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-	{
-		if (name == m_md_list[i]->GetName())
-		{
-			return i;
-		}
-	}
-	return -1;
+	return glbin_mshf->getIndex(name);
+}
+
+fluo::MeshData* DataManager::GetLastMeshData()
+{
+	return glbin_mshf->getLast();
 }
 
 void DataManager::RemoveVolumeData(int index)
@@ -4958,13 +4947,7 @@ void DataManager::RemoveVolumeData(const std::string &name)
 
 void DataManager::RemoveMeshData(int index)
 {
-	MeshData* data = m_md_list[index];
-	if (data)
-	{
-		m_md_list.erase(m_md_list.begin()+index);
-		delete data;
-		data = 0;
-	}
+	glbin_mshf->remove(index);
 }
 
 int DataManager::GetVolumeNum()
@@ -4974,7 +4957,7 @@ int DataManager::GetVolumeNum()
 
 int DataManager::GetMeshNum()
 {
-	return m_md_list.size();
+	return glbin_mshf->getNum();
 }
 
 void DataManager::AddVolumeData(fluo::VolumeData* vd)
@@ -5113,18 +5096,8 @@ bool DataManager::CheckNames(wxString &str)
 	bool result = false;
 	if (glbin_volf->findFirst(str.ToStdString()))
 		result = true;
-	if (!result)
-	{
-		for (unsigned int i=0; i<m_md_list.size(); i++)
-		{
-			MeshData* md = m_md_list[i];
-			if (md && md->GetName()==str)
-			{
-				result = true;
-				break;
-			}
-		}
-	}
+	if (glbin_mshf->findFirst(str.ToStdString()))
+		result = true;
 	if (!result)
 	{
 		for (unsigned int i=0; i<m_annotation_list.size(); i++)

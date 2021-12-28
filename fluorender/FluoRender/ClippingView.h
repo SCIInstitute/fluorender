@@ -49,8 +49,8 @@ class DataManager;
 namespace fluo
 {
 	class VolumeData;
+	class MeshData;
 }
-class MeshData;
 class ClippingView: public wxPanel
 {
 	enum
@@ -105,11 +105,11 @@ public:
 	~ClippingView();
 
 	void SetVolumeData(fluo::VolumeData* vd);
-	void SetMeshData(MeshData* md);
+	void SetMeshData(fluo::MeshData* md);
 	void SetDataManager(DataManager* mgr);
 	int GetSelType();
 	fluo::VolumeData* GetVolumeData();
-	MeshData* GetMeshData();
+	fluo::MeshData* GetMeshData();
 	void RefreshVRenderViews(bool interactive=true);
 
 	bool GetChannLink()
@@ -174,7 +174,7 @@ private:
 	VRenderFrame* m_frame;
 	int m_sel_type;		//curent selection type
 	fluo::VolumeData* m_vd;	//current volume data
-	MeshData* m_md;		//current mesh data
+	fluo::MeshData* m_md;		//current mesh data
 	DataManager* m_mgr;	//manage all if clipping planes are synced
 	bool m_draw_clip;
 	bool m_hold_planes;

@@ -76,7 +76,6 @@ namespace fluo
 		virtual VolumeData* asVolumeData() { return this; }
 		virtual const VolumeData* asVolumeData() const { return this; }
 
-
 		//functions from old class
 		//reader
 		void SetReader(BaseReader* reader);

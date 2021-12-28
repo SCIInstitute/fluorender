@@ -34,13 +34,14 @@ DEALINGS IN THE SOFTWARE.
 #define glbin fluo::Global::instance()
 #define glbin_timer fluo::Global::instance().getTimer()
 #define glbin_volf fluo::Global::instance().getVolumeFactory()
+#define glbin_mshf fluo::Global::instance().getMeshFactory()
 
 //class AgentFactory;
 class Fltimer;
 namespace fluo
 {
 	class VolumeFactory;
-	//class MeshFactory;
+	class MeshFactory;
 	//class AnnotationFactory;
 	//class Renderer2DFactory;
 	//class Renderer3DFactory;
@@ -53,7 +54,7 @@ namespace fluo
 		Object* get(const std::string &name);
 		Fltimer* getTimer();
 		VolumeFactory* getVolumeFactory();
-		//MeshFactory* getMeshFactory();
+		MeshFactory* getMeshFactory();
 		//AnnotationFactory* getAnnotationFactory();
 		//AgentFactory* getAgentFactory();
 		//Renderer2DFactory* getRenderer2DFactory();

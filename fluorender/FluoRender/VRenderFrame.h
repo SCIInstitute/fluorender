@@ -109,6 +109,8 @@ namespace fluo
 {
 	class VolumeData;
 	class VolumeGroup;
+	class MeshData;
+	class MeshGroup;
 }
 class VRenderFrame: public wxFrame
 {
@@ -210,7 +212,7 @@ public:
 		VRenderGLView* view=0,
 		fluo::VolumeGroup* group=0,
 		fluo::VolumeData* vd=0,
-		MeshData* md=0,
+		fluo::MeshData* md=0,
 		Annotations* ann=0);
 
 	//prop view
@@ -270,7 +272,7 @@ public:
 	fluo::VolumeData* GetCurSelVol()
 	{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
 	//get current selected mesh
-	MeshData* GetCurSelMesh()
+	fluo::MeshData* GetCurSelMesh()
 	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
 
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);

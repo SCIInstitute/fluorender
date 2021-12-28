@@ -33,7 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 
 class VRenderFrame;
-class MeshData;
+namespace fluo
+{
+	class MeshData;
+}
 class MManipulator: public wxPanel
 {
 	enum
@@ -67,15 +70,15 @@ public:
 		const wxString& name = "MManipulator");
 	~MManipulator();
 
-	void SetMeshData(MeshData* md);
-	MeshData* GetMeshData();
+	void SetMeshData(fluo::MeshData* md);
+	fluo::MeshData* GetMeshData();
 	void RefreshVRenderViews();
 	void GetData();
 	void UpdateData();
 
 private:
 	VRenderFrame* m_frame;
-	MeshData* m_md;
+	fluo::MeshData* m_md;
 
 	wxStaticText* m_trans_st;
 	wxStaticText* m_x_trans_st;
