@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData.hpp>
 #include <MeshGroup.hpp>
 #include <MeshFactory.hpp>
+#include <Annotations.hpp>
 #include <Global.hpp>
 #include <Timer.h>
 #include <Components/CompAnalyzer.h>
@@ -1600,16 +1601,10 @@ void VRenderGLView::DrawAnnotations()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
-	float px, py;
-
 	fluo::Transform mv;
 	fluo::Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
 	p.set(glm::value_ptr(m_proj_mat));
-
 	fluo::Color text_color = GetTextColor();
 
 	for (size_t i = 0; i<m_layer_list.size(); i++)
@@ -1618,37 +1613,14 @@ void VRenderGLView::DrawAnnotations()
 			continue;
 		if (m_layer_list[i]->IsA() == 4)
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
 			if (!ann) continue;
-			if (ann->GetDisp())
+			bool disp;
+			ann->getValue(gstDisplay, disp);
+			if (disp)
 			{
-				string str;
-				fluo::Point pos;
-				wstring wstr;
-				for (int j = 0; j<ann->GetTextNum(); ++j)
-				{
-					str = ann->GetTextText(j);
-					wstr = s2ws(str);
-					pos = ann->GetTextPos(j);
-					if (!ann->InsideClippingPlanes(pos))
-						continue;
-					pos = ann->GetTextTransformedPos(j);
-					pos = mv.transform(pos);
-					pos = p.transform(pos);
-					if (pos.x() >= -1.0 && pos.x() <= 1.0 &&
-						pos.y() >= -1.0 && pos.y() <= 1.0)
-					{
-						if (m_persp && (pos.z() <= 0.0 || pos.z() >= 1.0))
-							continue;
-						if (!m_persp && (pos.z() >= 0.0 || pos.z() <= -1.0))
-							continue;
-						px = pos.x()*nx / 2.0;
-						py = pos.y()*ny / 2.0;
-						m_text_renderer.RenderText(
-							wstr, text_color,
-							px*sx, py*sy, sx, sy);
-					}
-				}
+				ann->setValue(gstColor, text_color);
+				ann->Draw(nx, ny, mv, p, m_persp);
 			}
 		}
 	}
@@ -6056,7 +6028,7 @@ fluo::MeshData* VRenderGLView::GetMeshData(const std::string &name)
 	return 0;
 }
 
-Annotations* VRenderGLView::GetAnnotations(wxString &name)
+fluo::Annotations* VRenderGLView::GetAnnotations(const std::string &name)
 {
 	int i;
 
@@ -6068,8 +6040,8 @@ Annotations* VRenderGLView::GetAnnotations(wxString &name)
 		{
 		case 4://annotations
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
-			if (ann && ann->GetName() == name)
+			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
+			if (ann && name == ann->getName())
 				return ann;
 		}
 		}
@@ -6274,9 +6246,9 @@ void VRenderGLView::AddMeshData(fluo::MeshData* md)
 	m_md_pop_dirty = true;
 }
 
-void VRenderGLView::AddAnnotations(Annotations* ann)
+void VRenderGLView::AddAnnotations(fluo::Annotations* ann)
 {
-	m_layer_list.push_back(ann);
+	m_layer_list.push_back((TreeLayer*)ann);
 }
 
 void VRenderGLView::ReplaceVolumeData(const std::string &name, fluo::VolumeData *dst)
@@ -6550,7 +6522,7 @@ void VRenderGLView::RemoveMeshData(const std::string &name)
 	}
 }
 
-void VRenderGLView::RemoveAnnotations(wxString &name)
+void VRenderGLView::RemoveAnnotations(const std::string &name)
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -6558,8 +6530,8 @@ void VRenderGLView::RemoveAnnotations(wxString &name)
 			continue;
 		if (m_layer_list[i]->IsA() == 4)
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
-			if (ann && ann->GetName() == name)
+			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
+			if (ann && name == ann->getName())
 			{
 				m_layer_list.erase(m_layer_list.begin() + i);
 			}
@@ -6656,14 +6628,14 @@ void VRenderGLView::Isolate(int type, wxString name)
 		break;
 		case 4://annotation
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
 			if (ann)
 			{
 				if (type == 4 &&
-					ann->GetName() == name)
-					ann->SetDisp(true);
+					name == ann->getName())
+					ann->setValue(gstDisplay, true);
 				else
-					ann->SetDisp(false);
+					ann->setValue(gstDisplay, false);
 			}
 		}
 		break;
@@ -6794,9 +6766,9 @@ void VRenderGLView::ShowAll()
 		break;
 		case 4://annotation
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
 			if (ann)
-				ann->SetDisp(true);
+				ann->setValue(gstDisplay, true);
 		}
 		break;
 		case 5:

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CompAnalyzer.h"
 #include <DataManager.h>
 #include <VolumeData.hpp>
+#include <Annotations.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <FLIVR/TextureBrick.h>
@@ -992,7 +993,7 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	return surface_vox ? 1 : 0;
 }
 
-bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int type)
+bool ComponentAnalyzer::GenAnnotations(fluo::Annotations *ann, bool consistent, int type)
 {
 	if (!m_compgroup)
 		return false;
@@ -1062,7 +1063,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 			str = std::to_string(count);
 		}
 		fluo::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
-		ann.AddText(str, p, sinfo);
+		ann->addText(p, str, sinfo);
 		++count;
 	}
 	return true;

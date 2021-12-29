@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #define ANNOTATIONS_HPP
 
 #include <Node.hpp>
+#include <Names.hpp>
+#include <FLIVR/TextRenderer.h>
 #include <string>
 #include <vector>
 
@@ -64,17 +66,25 @@ namespace fluo
 		virtual const Annotations* asAnnotations() const { return this; }
 
 		//load
-		int LoadData(const std::string &filename);
-		void SaveData(const std::string &filename);
+		int LoadData(const std::wstring &filename);
+		void SaveData(const std::wstring &filename);
+
+		//text
+		void addText(const fluo::Point &pos, const std::string &str, const std::string &info);
+
+		//draw
+		void Draw(int nx, int ny, Transform &mv, Transform &p, bool persp);
 
 	protected:
 		virtual ~Annotations();
 
 	private:
 		std::vector<Atext> alist_;
+		flvr::TextRenderer m_text_renderer;
 
 	private:
 		Atext buildAtext(const std::string str);
+		bool insideClippingPlanes(Point &pos);
 	};
 }
 

@@ -51,6 +51,36 @@ namespace fluo
 
 		virtual Annotations* clone(const unsigned int);
 
+		inline virtual Annotations* get(size_t i)
+		{
+			return dynamic_cast<Annotations*>(ObjectFactory::get(i));
+		}
+
+		inline virtual const Annotations* get(size_t i) const
+		{
+			return dynamic_cast<Annotations*>(const_cast<Object*>(ObjectFactory::get(i)));
+		}
+
+		inline virtual Annotations* getLast()
+		{
+			return dynamic_cast<Annotations*>(const_cast<Object*>(ObjectFactory::getLast()));
+		}
+
+		inline virtual Annotations* find(const unsigned int id)
+		{
+			return dynamic_cast<Annotations*>(ObjectFactory::find(id));
+		}
+
+		inline virtual Annotations* findFirst(const std::string &name)
+		{
+			return dynamic_cast<Annotations*>(ObjectFactory::findFirst(name));
+		}
+
+		inline virtual Annotations* findLast(const std::string &name)
+		{
+			return dynamic_cast<Annotations*>(ObjectFactory::findLast(name));
+		}
+
 	protected:
 		virtual ~AnnotationFactory();
 		virtual void createDefault();

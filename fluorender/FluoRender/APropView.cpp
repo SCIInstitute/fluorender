@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "APropView.h"
 #include "VRenderFrame.h"
-#include "DataManager.h"
+#include <Annotations.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(APropView, wxPanel)
@@ -84,9 +84,12 @@ void APropView::GetSettings()
 	if (!m_ann)
 		return;
 
-	wxString memo = m_ann->GetMemo();
+	std::string memo;
+	m_ann->getValue(gstMemo, memo);
 	m_memo_text->SetValue(memo);
-	if (m_ann->GetMemoRO())
+	bool bval;
+	m_ann->getValue(gstMemoRo, bval);
+	if (bval)
 	{
 		m_memo_text->SetEditable(false);
 		m_memo_update_btn->Disable();
@@ -98,14 +101,14 @@ void APropView::GetSettings()
 	}
 }
 
-void APropView::SetAnnotations(Annotations* ann)
+void APropView::SetAnnotations(fluo::Annotations* ann)
 {
 	m_ann = ann;
 
 	GetSettings();
 }
 
-Annotations* APropView::GetAnnotations()
+fluo::Annotations* APropView::GetAnnotations()
 {
 	return m_ann;
 }
@@ -122,6 +125,6 @@ void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
 	{
 		wxString memo = m_memo_text->GetValue();
 		std::string str = memo.ToStdString();
-		m_ann->SetMemo(str);
+		m_ann->setValue(gstMemo, str);
 	}
 }

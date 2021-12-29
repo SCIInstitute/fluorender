@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeGroup.hpp>
 #include <MeshData.hpp>
 #include <MeshGroup.hpp>
+#include <Annotations.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <Formats/png_resource.h>
@@ -1853,11 +1854,13 @@ void VRenderFrame::UpdateTreeIcons()
 				break;
 			case 4://annotations
 				{
-					Annotations* ann = (Annotations*)layer;
+					fluo::Annotations* ann = (fluo::Annotations*)layer;
 					if (!ann)
 						break;
 					counter++;
-					m_tree_panel->SetAnnotationItemImage(layer_item, ann->GetDisp()?2*counter+1:2*counter);
+					bool disp;
+					ann->getValue(gstDisplay, disp);
+					m_tree_panel->SetAnnotationItemImage(layer_item, disp?2*counter+1:2*counter);
 				}
 				break;
 			case 5://volume group
@@ -1970,7 +1973,7 @@ void VRenderFrame::UpdateTreeColors()
 				break;
 			case 4://annotations
 				{
-					Annotations* ann = (Annotations*)layer;
+					fluo::Annotations* ann = (fluo::Annotations*)layer;
 					if (!ann)
 						break;
 					wxColor wxc(255, 255, 255);
@@ -2125,7 +2128,7 @@ void VRenderFrame::UpdateTree(wxString name)
 				break;
 			case 4://annotations
 				{
-					Annotations* ann = (Annotations*)layer;
+					fluo::Annotations* ann = (fluo::Annotations*)layer;
 					if (!ann)
 						break;
 					//append icon for annotations
@@ -2133,9 +2136,11 @@ void VRenderFrame::UpdateTree(wxString name)
 					wxColor wxc(255, 255, 255);
 					int ii = m_tree_panel->GetIconNum()-1;
 					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->GetName());
-					m_tree_panel->SetAnnotationItemImage(item, ann->GetDisp()?2*ii+1:2*ii);
-					if (name == ann->GetName())
+					wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->getName());
+					bool disp;
+					ann->getValue(gstDisplay, disp);
+					m_tree_panel->SetAnnotationItemImage(item, disp?2*ii+1:2*ii);
+					if (name == ann->getName())
 						sel_item = item;
 				}
 				break;
@@ -2265,11 +2270,13 @@ void VRenderFrame::UpdateList()
 
 	for (int i=0; i<m_data_mgr.GetAnnotationNum(); i++)
 	{
-		Annotations* ann = m_data_mgr.GetAnnotations(i);
+		fluo::Annotations* ann = m_data_mgr.GetAnnotations(i);
 		if (ann)
 		{
-			wxString name = ann->GetName();
-			wxString path = ann->GetPath();
+			wxString name = ann->getName();
+			std::wstring wstr;
+			ann->getValue(gstDataPath, wstr);
+			wxString path = wstr;
 			m_list_panel->Append(DATA_ANNOTATIONS, name, path);
 		}
 	}
@@ -2296,7 +2303,7 @@ void VRenderFrame::OnSelection(int type,
 	fluo::VolumeGroup* group,
 	fluo::VolumeData* vd,
 	fluo::MeshData* md,
-	Annotations* ann)
+	fluo::Annotations* ann)
 {
 	if (m_adjust_view)
 	{
@@ -2318,7 +2325,9 @@ void VRenderFrame::OnSelection(int type,
 		case 4:
 			if (ann)
 			{
-				fluo::VolumeData* vd_ann = ann->GetVolume();
+				fluo::Referenced* ref;
+				ann->getRvalu(gstVolume, &ref);
+				fluo::VolumeData* vd_ann = dynamic_cast<fluo::VolumeData*>(ref);
 				m_clip_view->SetVolumeData(vd_ann);
 			}
 			break;
@@ -2467,7 +2476,7 @@ void VRenderFrame::OnSelection(int type,
 				m_prop_panel->Layout();
 			}
 			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
+				wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->getName());
 			m_aui_mgr.Update();
 		}
 
@@ -3246,22 +3255,24 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("num", m_data_mgr.GetAnnotationNum());
 	for (i=0; i<m_data_mgr.GetAnnotationNum(); i++)
 	{
-		Annotations* ann = m_data_mgr.GetAnnotations(i);
+		fluo::Annotations* ann = m_data_mgr.GetAnnotations(i);
 		if (ann)
 		{
-			if (ann->GetPath() == "")
+			std::wstring wstr;
+			ann->getValue(gstDataPath, wstr);
+			if (wstr.empty())
 			{
 				wxString new_folder;
 				new_folder = filename + "_files";
 				MkDirW(new_folder.ToStdWstring());
-				str = new_folder + GETSLASH() + ann->GetName() + ".txt";
-				ann->Save(str);
+				str = new_folder + GETSLASH() + ann->getName() + ".txt";
+				ann->SaveData(str.ToStdWstring());
 			}
 			str = wxString::Format("/data/annotations/%d", i);
 			fconfig.SetPath(str);
-			str = ann->GetName();
+			str = ann->getName();
 			fconfig.Write("name", str);
-			str = ann->GetPath();
+			str = wstr;
 			fconfig.Write("path", str);
 		}
 	}
@@ -4322,7 +4333,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 								{
 									if (fconfig.Read("name", &str))
 									{
-										Annotations* ann = m_data_mgr.GetAnnotations(str);
+										fluo::Annotations* ann = m_data_mgr.GetAnnotations(str.ToStdString());
 										if (ann)
 											view->AddAnnotations(ann);
 									}

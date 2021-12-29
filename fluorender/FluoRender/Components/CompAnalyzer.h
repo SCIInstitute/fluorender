@@ -35,10 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <list>
 
-class Annotations;
 namespace fluo
 {
 	class VolumeData;
+	class Annotations;
 }
 namespace flvr
 {
@@ -141,7 +141,7 @@ namespace flrd
 		void OutputCompListStream(std::ostream &stream, int verbose, std::string comp_header = "");
 		void OutputCompListStr(std::string &str, int verbose, std::string comp_header="");
 		void OutputCompListFile(std::string &filename, int verbose, std::string comp_header = "");
-		bool GenAnnotations(Annotations &ann, bool consistent, int type);
+		bool GenAnnotations(fluo::Annotations *ann, bool consistent, int type);
 		//color_type: 1-id-based; 2-size-based
 		bool GenMultiChannels(std::list<fluo::VolumeData*> &channs, int color_type, bool consistent);
 		bool GenRgbChannels(std::list<fluo::VolumeData*> &channs, int color_type, bool consistent);

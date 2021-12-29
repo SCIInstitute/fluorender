@@ -1238,16 +1238,9 @@ public:
 	void RemoveAnnotations(int index);
 	int GetAnnotationNum();
 	fluo::Annotations* GetAnnotations(int index);
-	fluo::Annotations* GetAnnotations(wxString &name);
-	int GetAnnotationIndex(wxString &name);
-	fluo::Annotations* GetLastAnnotations()
-	{
-		int num = m_annotation_list.size();
-		if (num)
-			return m_annotation_list[num-1];
-		else
-			return 0;
-	}
+	fluo::Annotations* GetAnnotations(const std::string &name);
+	int GetAnnotationIndex(const std::string &name);
+	fluo::Annotations* GetLastAnnotations();
 
 	bool CheckNames(wxString &str);
 

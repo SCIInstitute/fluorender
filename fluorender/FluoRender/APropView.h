@@ -36,7 +36,10 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class Annotations;
+namespace fluo
+{
+	class Annotations;
+}
 class APropView : public wxPanel
 {
 	enum
@@ -54,15 +57,15 @@ public:
 		const wxString& name = "APropView");
 	~APropView();
 
-	void SetAnnotations(Annotations* ann);
-	Annotations* GetAnnotations();
+	void SetAnnotations(fluo::Annotations* ann);
+	fluo::Annotations* GetAnnotations();
 	void RefreshVRenderViews(bool tree=false);
 
 	void GetSettings();
 
 private:
 	VRenderFrame* m_frame;
-	Annotations* m_ann;
+	fluo::Annotations* m_ann;
 
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
+#include <Annotations.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include "Formats/png_resource.h"
@@ -278,7 +279,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 						{
 							std::wstring path;
 							md->getValue(gstDataPath, path);
-							if (path == L"")
+							if (path.empty())
 								menu.Append(Menu_Save, "Save...");
 							else
 								menu.Append(Menu_Save, "Save As...");
@@ -287,10 +288,12 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					else if (GetItemText(item) == "Annotations")
 					{
 						wxString name = GetText(item, 1);
-						Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+						fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
 						if (ann)
 						{
-							if (ann->GetPath() == "")
+							std::wstring path;
+							ann->getValue(gstDataPath, path);
+							if (path.empty())
 								menu.Append(Menu_Save, "Save...");
 							else
 								menu.Append(Menu_Save, "Save As...");
@@ -376,7 +379,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		else if (GetItemText(item) == "Annotations")
 		{
 			name = GetText(item, 1);
-			Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+			fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
 			if (ann)
 			{
 				if (view)
@@ -740,12 +743,13 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 				if (m_frame)
 				{
-					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
 					if (ann)
 					{
-						ann->Save(filename);
-						wxString str = ann->GetPath();
-						SetText(item, 2, str);
+						ann->SaveData(filename.ToStdWstring());
+						std::wstring wstr;
+						ann->getValue(gstDataPath, wstr);
+						SetText(item, 2, wstr);
 					}
 				}
 			}
@@ -888,9 +892,9 @@ void DataListCtrl::EndEdit(bool update)
 				}
 				else if (GetItemText(item) == "Annotations")
 				{
-					Annotations* ann = mgr->GetAnnotations(name);
+					fluo::Annotations* ann = mgr->GetAnnotations(name.ToStdString());
 					if (ann)
-						ann->SetName(new_name2);
+						ann->setName(new_name2.ToStdString());
 				}
 
 				//update ui
@@ -976,13 +980,13 @@ void DataListCtrl::DeleteSelection()
 				{
 					VRenderGLView* view = m_frame->GetView(i);
 					if (view)
-						view->RemoveAnnotations(name);
+						view->RemoveAnnotations(name.ToStdString());
 				}
 				//from datamanager
 				DataManager* mgr = m_frame->GetDataManager();
 				if (mgr)
 				{
-					int index = mgr->GetAnnotationIndex(name);
+					int index = mgr->GetAnnotationIndex(name.ToStdString());
 					if (index != -1)
 						mgr->RemoveAnnotations(index);
 				}
@@ -1050,13 +1054,13 @@ void DataListCtrl::DeleteAll()
 			{
 				VRenderGLView* view = m_frame->GetView(i);
 				if (view)
-					view->RemoveAnnotations(name);
+					view->RemoveAnnotations(name.ToStdString());
 			}
 			//from datamanager
 			DataManager* mgr = m_frame->GetDataManager();
 			if (mgr)
 			{
-				int index = mgr->GetAnnotationIndex(name);
+				int index = mgr->GetAnnotationIndex(name.ToStdString());
 				if (index != -1)
 					mgr->RemoveAnnotations(index);
 			}

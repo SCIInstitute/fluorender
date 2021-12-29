@@ -32,9 +32,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.hpp>
 #include <VolumeFactory.hpp>
 #include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <compatibility.h>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
 
 using namespace fluo;
 
@@ -53,7 +56,7 @@ Annotations::~Annotations()
 {
 }
 
-int Annotations::LoadData(const std::string &filename)
+int Annotations::LoadData(const std::wstring &filename)
 {
 	std::ifstream fis(filename, std::ios::in);
 	if (fis.bad())
@@ -61,12 +64,12 @@ int Annotations::LoadData(const std::string &filename)
 
 	std::string str, sline, memo;
 
-	while (std::getline(fis, sline))
+	while (!fis.eof())
 	{
-
+		std::getline(fis, sline);
 		if (sline.substr(0, 6) == "Name: ")
 		{
-			m_name = sline.substr(6, sline.length() - 7);
+			m_name = sline.substr(6, sline.length() - 6);
 		}
 		else if (sline.substr(0, 9) == "Display: ")
 		{
@@ -92,7 +95,7 @@ int Annotations::LoadData(const std::string &filename)
 		}
 		else if (sline.substr(0, 8) == "Volume: ")
 		{
-			str = sline.substr(8, sline.length() - 9);
+			str = sline.substr(8, sline.length() - 8);
 			fluo::VolumeData* vd = glbin_volf->findFirst(str);
 			if (vd)
 			{
@@ -118,7 +121,7 @@ int Annotations::LoadData(const std::string &filename)
 					tab_counter++;
 				if (tab_counter == 4)
 				{
-					setValue(gstInfoHeader, str.substr(i + 1, str.length()));
+					setValue(gstInfoHeader, str.substr(i + 1, str.length()-i-1));
 					break;
 				}
 			}
@@ -137,10 +140,11 @@ int Annotations::LoadData(const std::string &filename)
 	return 1;
 }
 
-void Annotations::SaveData(const std::string &filename)
+void Annotations::SaveData(const std::wstring &filename)
 {
 	std::ofstream os;
-	OutputStreamOpen(os, filename);
+	std::string str = ws2s(filename);
+	OutputStreamOpen(os, str);
 
 	long resx = 1;
 	long resy = 1;
@@ -156,7 +160,6 @@ void Annotations::SaveData(const std::string &filename)
 	}
 
 	bool bval;
-	std::string str;
 	os << "Name: " << getName() << "\n";
 	getValue(gstDisplay, bval);
 	os << "Display: " << bval << "\n";
@@ -190,6 +193,56 @@ void Annotations::SaveData(const std::string &filename)
 
 	os.close();
 	setValue(gstDataPath, filename);
+}
+
+void Annotations::addText(const fluo::Point &pos,
+	const std::string &str, const std::string &info)
+{
+	Atext atext;
+	atext.m_pos = pos;
+	atext.m_txt = str;
+	atext.m_info = info;
+	alist_.push_back(atext);
+}
+
+void Annotations::Draw(int nx, int ny, Transform &mv, Transform &p, bool persp)
+{
+	Transform tfm;
+	getValue(gstTransform, tfm);
+	Color color;
+	getValue(gstColor, color);
+
+	Point pos;
+	std::string str;
+	std::wstring wstr;
+	float sx, sy;
+	sx = 2.0 / nx;
+	sy = 2.0 / ny;
+	float px, py;
+	for (size_t i = 0; i < alist_.size(); ++i)
+	{
+		pos = alist_[i].m_pos;
+		str = alist_[i].m_txt;
+		wstr = s2ws(str);
+		if (!insideClippingPlanes(pos))
+			continue;
+		pos = tfm.transform(pos);
+		pos = mv.transform(pos);
+		pos = p.transform(pos);
+		if (pos.x() >= -1.0 && pos.x() <= 1.0 &&
+			pos.y() >= -1.0 && pos.y() <= 1.0)
+		{
+			if (persp && (pos.z() <= 0.0 || pos.z() >= 1.0))
+				continue;
+			if (!persp && (pos.z() >= 0.0 || pos.z() <= -1.0))
+				continue;
+			px = pos.x()*nx / 2.0;
+			py = pos.y()*ny / 2.0;
+			m_text_renderer.RenderText(
+				wstr, color,
+				px*sx, py*sy, sx, sy);
+		}
+	}
 }
 
 Atext Annotations::buildAtext(const std::string str)
@@ -251,3 +304,32 @@ Atext Annotations::buildAtext(const std::string str)
 
 	return atext;
 }
+
+//test if point is inside the clipping planes
+bool Annotations::insideClippingPlanes(Point &pos)
+{
+	Referenced* ref;
+	getRvalu(gstVolume, &ref);
+	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+	if (!vd)
+		return true;
+
+	std::vector<Plane*> *planes = vd->GetRenderer()->get_planes();
+	if (!planes)
+		return true;
+	if (planes->size() != 6)
+		return true;
+
+	fluo::Plane* plane = 0;
+	for (int i = 0; i < 6; i++)
+	{
+		plane = (*planes)[i];
+		if (!plane)
+			continue;
+		if (plane->eval_point(pos) < 0)
+			return false;
+	}
+
+	return true;
+}
+

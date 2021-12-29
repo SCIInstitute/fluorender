@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <Annotations.hpp>
+#include <Global.hpp>
+#include <AnnotationFactory.hpp>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Cluster/dbscan.h>
@@ -2746,11 +2749,11 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		return;
 	fluo::VolumeData* vd = m_view->m_cur_vol;
 	m_comp_analyzer.SetVolume(vd);
-	Annotations* ann = new Annotations();
-	if (m_comp_analyzer.GenAnnotations(*ann, m_consistent, type))
+	fluo::Annotations* ann = glbin_annf->build();
+	if (m_comp_analyzer.GenAnnotations(ann, m_consistent, type))
 	{
-		ann->SetVolume(vd);
-		ann->SetTransform(vd->GetTexture()->transform());
+		ann->setRvalu(gstVolume, vd);
+		ann->setValue(gstTransform, vd->GetTexture()->transform());
 		if (m_frame)
 		{
 			DataManager* mgr = m_frame->GetDataManager();

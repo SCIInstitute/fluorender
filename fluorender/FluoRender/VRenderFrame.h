@@ -111,6 +111,7 @@ namespace fluo
 	class VolumeGroup;
 	class MeshData;
 	class MeshGroup;
+	class Annotations;
 }
 class VRenderFrame: public wxFrame
 {
@@ -213,7 +214,7 @@ public:
 		fluo::VolumeGroup* group=0,
 		fluo::VolumeData* vd=0,
 		fluo::MeshData* md=0,
-		Annotations* ann=0);
+		fluo::Annotations* ann=0);
 
 	//prop view
 	AdjustView* GetAdjustView();

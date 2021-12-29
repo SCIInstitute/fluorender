@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <FLIVR/MeshRenderer.h>
 #include <FLIVR/glm.h>
+#include <compatibility.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace fluo;
@@ -274,14 +275,16 @@ int MeshData::LoadData(GLMmodel* mesh)
 	return 1;
 }
 
-int MeshData::LoadData(std::string &filename)
+int MeshData::LoadData(const std::wstring &filename)
 {
 	bool no_fail = true;
-	GLMmodel* mesh = glmReadOBJ(filename.c_str(), &no_fail);
+	std::string str = ws2s(filename);
+	GLMmodel* mesh = glmReadOBJ(str.c_str(), &no_fail);
+	setValue(gstDataPath, filename);
 	return LoadData(mesh);
 }
 
-void MeshData::SaveData(std::string& filename)
+void MeshData::SaveData(const std::string& filename)
 {
 	if (!m_data)
 		return;

@@ -51,6 +51,7 @@ void AnnotationFactory::createDefault()
 		objects_.push_back(ad);
 
 		//add default values here
+		ad->addValue(gstColor, Color());
 		ad->addRvalu(gstVolume, (Referenced*)0);
 		ad->addValue(gstTransform, Transform());
 		ad->addValue(gstDisplay, bool(true));

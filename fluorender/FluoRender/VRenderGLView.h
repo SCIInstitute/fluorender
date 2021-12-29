@@ -125,6 +125,7 @@ namespace fluo
 	class VolumeGroup;
 	class MeshData;
 	class MeshGroup;
+	class Annotations;
 }
 class VRenderGLView : public wxGLCanvas
 {
@@ -167,7 +168,7 @@ public:
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	fluo::VolumeData* GetVolumeData(const std::string &name);
 	fluo::MeshData* GetMeshData(const std::string &name);
-	Annotations* GetAnnotations(wxString &name);
+	fluo::Annotations* GetAnnotations(const std::string &name);
 	fluo::VolumeGroup* GetGroup(const std::string &name);
 	fluo::VolumeGroup* GetGroup(int index);
 	fluo::VolumeGroup* GetGroup(fluo::VolumeData* vd);
@@ -175,7 +176,7 @@ public:
 	//add
 	fluo::VolumeGroup* AddVolumeData(fluo::VolumeData* vd, const std::string &group_name = "");
 	void AddMeshData(fluo::MeshData* md);
-	void AddAnnotations(Annotations* ann);
+	void AddAnnotations(fluo::Annotations* ann);
 	std::string AddGroup(const std::string &str, const std::string &prev_group = "");
 	fluo::VolumeGroup* AddOrGetGroup();
 	std::string AddMGroup(const std::string &str);
@@ -185,7 +186,7 @@ public:
 	void RemoveVolumeDataDup(const std::string &name);//remove all duplicated data
 	void ReplaceVolumeData(const std::string &name, fluo::VolumeData *dst);
 	void RemoveMeshData(const std::string &name);
-	void RemoveAnnotations(wxString &name);
+	void RemoveAnnotations(const std::string &name);
 	void RemoveGroup(const std::string &name);
 	//isolate
 	void Isolate(int type, wxString name);

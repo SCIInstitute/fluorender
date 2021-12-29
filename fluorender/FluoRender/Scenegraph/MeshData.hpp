@@ -68,10 +68,10 @@ namespace fluo
 
 		//load
 		int LoadData(GLMmodel* mesh);
-		int LoadData(std::string &filename);
+		int LoadData(const std::wstring &filename);
 
 		//save
-		void SaveData(std::string &filename);
+		void SaveData(const std::string &filename);
 
 		//mesh renderer
 		flvr::MeshRenderer* GetRenderer();

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeGroup.hpp>
 #include <MeshData.hpp>
 #include <MeshGroup.hpp>
+#include <Annotations.hpp>
 #include <compatibility.h>
 //resources
 #include "Formats/png_resource.h"
@@ -198,11 +199,11 @@ void DataTreeCtrl::DeleteSelection()
 						}
 						else if (item_data->type == 4)//annotations
 						{
-							Annotations* ann = view->GetAnnotations(name_data);
+							fluo::Annotations* ann = view->GetAnnotations(name_data.ToStdString());
 							if (ann)
 							{
-								ann->SetDisp(true);
-								view->RemoveAnnotations(name_data);
+								ann->setValue(gstDisplay, true);
+								view->RemoveAnnotations(name_data.ToStdString());
 							}
 						}
 						else if (item_data->type == 5)//group
@@ -1116,7 +1117,7 @@ void DataTreeCtrl::UpdateSelection()
 				{
 					wxString par_name = GetItemText(GetItemParent(sel_item));
 					VRenderGLView* view = m_frame->GetView(par_name);
-					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
 					m_frame->OnSelection(4, view, 0, 0, 0, ann);
 				}
 				break;
@@ -1314,12 +1315,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 					{
 						if (rc)
 						{
-							bool bval;
 							md->toggleValue(gstRandomizeColor, bval);
 						}
 						else
 						{
-							bool bval;
 							md->toggleValue(gstDisplay, bval);
 							for (int i=0; i< m_frame->GetViewNum(); i++)
 							{
@@ -1333,10 +1332,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 				break;
 			case 4://annotations
 				{
-					Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name);
+					fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
 					if (ann)
 					{
-						ann->ToggleDisp();
+						ann->toggleValue(gstDisplay, bval);
 					}
 				}
 				break;
@@ -1371,12 +1370,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 						{
 							if (rc)
 							{
-								bool bval;
 								group->toggleValue(gstRandomizeColor, bval);
 							}
 							else
 							{
-								bool bval;
 								group->toggleValue(gstDisplay, bval);
 								view->SetMeshPopDirty();
 							}

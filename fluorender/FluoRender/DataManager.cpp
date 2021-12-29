@@ -4535,15 +4535,16 @@ DataManager::~DataManager()
 	for (int i=0; i<(int)m_reader_list.size(); i++)
 		if (m_reader_list[i])
 			delete m_reader_list[i];
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
-		if (m_annotation_list[i])
-			delete m_annotation_list[i];
+	//for (int i=0; i<(int)m_annotation_list.size(); i++)
+	//	if (m_annotation_list[i])
+	//		delete m_annotation_list[i];
 }
 
 void DataManager::ClearAll()
 {
 	glbin_volf->removeAll();
 	glbin_mshf->removeAll();
+	glbin_annf->removeAll();
 	//for (int i=0 ; i<(int)m_vd_list.size() ; i++)
 	//	if (m_vd_list[i])
 	//		delete m_vd_list[i];
@@ -4553,13 +4554,13 @@ void DataManager::ClearAll()
 	for (int i=0; i<(int)m_reader_list.size(); i++)
 		if (m_reader_list[i])
 			delete m_reader_list[i];
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
-		if (m_annotation_list[i])
-			delete m_annotation_list[i];
+	//for (int i=0; i<(int)m_annotation_list.size(); i++)
+	//	if (m_annotation_list[i])
+	//		delete m_annotation_list[i];
 	//m_vd_list.clear();
 	//m_md_list.clear();
 	m_reader_list.clear();
-	m_annotation_list.clear();
+	//m_annotation_list.clear();
 }
 
 void DataManager::SetVolumeDefault(fluo::VolumeData* vd)
@@ -4864,7 +4865,7 @@ int DataManager::LoadMeshData(wxString &filename)
 	}
 
 	fluo::MeshData *md = glbin_mshf->build();
-	md->LoadData(pathname.ToStdString());
+	md->LoadData(pathname.ToStdWstring());
 
 	wxString name = md->getName();
 	wxString new_name = name;
@@ -5015,26 +5016,26 @@ int DataManager::LoadAnnotations(wxString &filename)
 	}
 
 	fluo::Annotations* ann = glbin_annf->build();
-	ann->LoadData(pathname, this);
+	ann->LoadData(pathname.ToStdWstring());
 
-	wxString name = ann->GetName();
+	wxString name = ann->getName();
 	wxString new_name = name;
 	int i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name+wxString::Format("_%d", i);
 	if (i>1)
-		ann->SetName(new_name);
-	m_annotation_list.push_back(ann);
+		ann->setName(new_name.ToStdString());
+	//m_annotation_list.push_back(ann);
 
 	return 1;
 }
 
-void DataManager::AddAnnotations(Annotations* ann)
+void DataManager::AddAnnotations(fluo::Annotations* ann)
 {
 	if (!ann)
 		return;
 
-	wxString name = ann->GetName();
+	wxString name = ann->getName();
 	wxString new_name = name;
 
 	int i;
@@ -5042,55 +5043,46 @@ void DataManager::AddAnnotations(Annotations* ann)
 		new_name = name+wxString::Format("_%d", i);
 
 	if (i>1)
-		ann->SetName(new_name);
+		ann->setName(new_name.ToStdString());
 
-	m_annotation_list.push_back(ann);
+	//m_annotation_list.push_back(ann);
 }
 
 void DataManager::RemoveAnnotations(int index)
 {
-	Annotations* ann = m_annotation_list[index];
-	if (ann)
-	{
-		m_annotation_list.erase(m_annotation_list.begin()+index);
-		delete ann;
-		ann = 0;
-	}
+	glbin_annf->remove(index);
+	//Annotations* ann = m_annotation_list[index];
+	//if (ann)
+	//{
+	//	m_annotation_list.erase(m_annotation_list.begin()+index);
+	//	delete ann;
+	//	ann = 0;
+	//}
 }
 
 int DataManager::GetAnnotationNum()
 {
-	return m_annotation_list.size();
+	return glbin_annf->getNum();
 }
 
-Annotations* DataManager::GetAnnotations(int index)
+fluo::Annotations* DataManager::GetAnnotations(int index)
 {
-	if (index>=0 && index<(int)m_annotation_list.size())
-		return m_annotation_list[index];
-	else
-		return 0;
+	return glbin_annf->get(index);
 }
 
-Annotations* DataManager::GetAnnotations(wxString &name)
+fluo::Annotations* DataManager::GetAnnotations(const std::string &name)
 {
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
-	{
-		if (name == m_annotation_list[i]->GetName())
-			return m_annotation_list[i];
-	}
-	return 0;
+	return glbin_annf->findFirst(name);
 }
 
-int DataManager::GetAnnotationIndex(wxString &name)
+int DataManager::GetAnnotationIndex(const std::string &name)
 {
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
-	{
-		if (!m_annotation_list[i])
-			continue;
-		if (name == m_annotation_list[i]->GetName())
-			return i;
-	}
-	return -1;
+	return glbin_annf->getIndex(name);
+}
+
+fluo::Annotations* DataManager::GetLastAnnotations()
+{
+	return glbin_annf->getLast();
 }
 
 bool DataManager::CheckNames(wxString &str)
@@ -5100,18 +5092,8 @@ bool DataManager::CheckNames(wxString &str)
 		result = true;
 	if (glbin_mshf->findFirst(str.ToStdString()))
 		result = true;
-	if (!result)
-	{
-		for (unsigned int i=0; i<m_annotation_list.size(); i++)
-		{
-			Annotations* ann = m_annotation_list[i];
-			if (ann && ann->GetName()==str)
-			{
-				result = true;
-				break;
-			}
-		}
-	}
+	if (glbin_annf->findFirst(str.ToStdString()))
+		result = true;
 	return result;
 }
 
