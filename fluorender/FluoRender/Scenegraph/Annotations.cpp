@@ -38,16 +38,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-AText::AText()
-{
-	addValue(gstText, std::string(""));
-	addValue(gstLocation, Point());
-	addValue(gstInfo, std::string(""));
-}
-
-AText::~AText()
-{}
-
 Annotations::Annotations()
 {
 }
@@ -136,8 +126,8 @@ int Annotations::LoadData(const std::string &filename)
 			std::getline(fis, str);
 			while (!fis.eof())
 			{
-				//if (AText* atext = GetAText(str))
-				//	m_alist.push_back(atext);
+				Atext atext = buildAtext(str);
+				alist_.push_back(atext);
 				std::getline(fis, str);
 			}
 		}
@@ -152,48 +142,112 @@ void Annotations::SaveData(const std::string &filename)
 	std::ofstream os;
 	OutputStreamOpen(os, filename);
 
-/*	long resx = 1;
+	long resx = 1;
 	long resy = 1;
 	long resz = 1;
-	if (m_vd)
+	Referenced* ref;
+	getRvalu(gstVolume, &ref);
+	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+	if (vd)
 	{
-		m_vd->getValue(gstResX, resx);
-		m_vd->getValue(gstResY, resy);
-		m_vd->getValue(gstResZ, resz);
+		vd->getValue(gstResX, resx);
+		vd->getValue(gstResY, resy);
+		vd->getValue(gstResZ, resz);
 	}
 
-	os << "Name: " << m_name << "\n";
-	os << "Display: " << m_disp << "\n";
-	os << "Memo:\n" << m_memo << "\n";
-	os << "Memo Update: " << m_memo_ro << "\n";
-	if (m_vd)
+	bool bval;
+	std::string str;
+	os << "Name: " << getName() << "\n";
+	getValue(gstDisplay, bval);
+	os << "Display: " << bval << "\n";
+	getValue(gstMemo, str);
+	os << "Memo:\n" << str << "\n";
+	getValue(gstMemoRo, bval);
+	os << "Memo Update: " << bval << "\n";
+	if (vd)
 	{
-		os << "Volume: " << m_vd->getName() << "\n";
+		os << "Volume: " << vd->getName() << "\n";
 		os << "Voxel size (X Y Z):\n";
 		double spcx, spcy, spcz;
-		m_vd->getValue(gstSpcX, spcx);
-		m_vd->getValue(gstSpcY, spcy);
-		m_vd->getValue(gstSpcZ, spcz);
+		vd->getValue(gstSpcX, spcx);
+		vd->getValue(gstSpcY, spcy);
+		vd->getValue(gstSpcZ, spcz);
 		os << spcx << "\t" << spcy << "\t" << spcz << "\n";
 	}
 
 
 	os << "\nComponents:\n";
-	os << "ID\tX\tY\tZ\t" << m_info_meaning << "\n\n";
-	for (int i = 0; i < (int)m_alist.size(); i++)
+	getValue(gstInfoHeader, str);
+	os << "ID\tX\tY\tZ\t" << str << "\n\n";
+	for (size_t i = 0; i < alist_.size(); i++)
 	{
-		AText* atext = m_alist[i];
-		if (atext)
-		{
-			os << atext->m_txt << "\t";
-			os << int(atext->m_pos.x()*resx + 1.0) << "\t";
-			os << int(atext->m_pos.y()*resy + 1.0) << "\t";
-			os << int(atext->m_pos.z()*resz + 1.0) << "\t";
-			os << atext->m_info << "\n";
-		}
+		os << alist_[i].m_txt << "\t";
+		os << int(alist_[i].m_pos.x()*resx + 1.0) << "\t";
+		os << int(alist_[i].m_pos.y()*resy + 1.0) << "\t";
+		os << int(alist_[i].m_pos.z()*resz + 1.0) << "\t";
+		os << alist_[i].m_info << "\n";
 	}
-*/
+
 	os.close();
 	setValue(gstDataPath, filename);
 }
 
+Atext Annotations::buildAtext(const std::string str)
+{
+	Atext atext;
+	std::string sID;
+	std::string sX;
+	std::string sY;
+	std::string sZ;
+	std::string sInfo;
+	int tab_counter = 0;
+
+	for (size_t i = 0; i < str.length(); i++)
+	{
+		if (str[i] == '\t')
+			tab_counter++;
+		else
+		{
+			if (tab_counter == 0)
+				sID += str[i];
+			else if (tab_counter == 1)
+				sX += str[i];
+			else if (tab_counter == 2)
+				sY += str[i];
+			else if (tab_counter == 3)
+				sZ += str[i];
+			else if (tab_counter == 4)
+			{
+				sInfo = str.substr(i, str.length() - i);
+				break;
+			}
+		}
+	}
+	if (tab_counter == 4)
+	{
+		double x = std::stod(sX);
+		double y = std::stod(sY);
+		double z = std::stod(sZ);
+		long resx = 1;
+		long resy = 1;
+		long resz = 1;
+		Referenced* ref;
+		getRvalu(gstVolume, &ref);
+		VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+		if (vd)
+		{
+			vd->getValue(gstResX, resx);
+			vd->getValue(gstResY, resy);
+			vd->getValue(gstResZ, resz);
+		}
+		x /= resx ? resx : 1;
+		y /= resy ? resy : 1;
+		z /= resz ? resz : 1;
+		fluo::Point pos(x, y, z);
+		atext.m_pos = pos;
+		atext.m_txt = sID;
+		atext.m_info = sInfo;
+	}
+
+	return atext;
+}

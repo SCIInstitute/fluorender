@@ -57,7 +57,7 @@ void AnnotationFactory::createDefault()
 		ad->addValue(gstMemo, std::string());
 		ad->addValue(gstMemoRo, bool(true));//memo is read only
 		ad->addValue(gstDataPath, std::wstring());
-		ad->addValue(gstInfoHeader, std::wstring());
+		ad->addValue(gstInfoHeader, std::string());
 	}
 }
 

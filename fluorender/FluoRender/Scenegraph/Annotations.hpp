@@ -35,15 +35,11 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class AText : public Object
+	struct Atext
 	{
-	public:
-		AText();
-
-	protected:
-		~AText();
-
-	private:
+		Point m_pos;
+		std::string m_txt;
+		std::string m_info;
 	};
 
 	class Annotations : public Node
@@ -75,7 +71,10 @@ namespace fluo
 		virtual ~Annotations();
 
 	private:
-		std::vector<ref_ptr<AText>> alist_;
+		std::vector<Atext> alist_;
+
+	private:
+		Atext buildAtext(const std::string str);
 	};
 }
 
