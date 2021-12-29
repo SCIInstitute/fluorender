@@ -3439,7 +3439,7 @@ AText* Annotations::GetAText(wxString str)
 int TraceGroup::m_num = 0;
 TraceGroup::TraceGroup()
 {
-	type = 8;//traces
+	//type = 8;//traces
 	m_num++;
 	m_name = wxString::Format("Traces %d", m_num);
 	m_cur_time = -1;

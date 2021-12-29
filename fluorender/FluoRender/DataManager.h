@@ -836,7 +836,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class TraceGroup : public TreeLayer
+class TraceGroup
 {
 public:
 	TraceGroup();
@@ -927,7 +927,8 @@ public:
 
 private:
 	static int m_num;
-	wxString m_data_path;
+	std::string m_name;
+	std::wstring m_data_path;
 	//for selective drawing
 	int m_cur_time;
 	int m_prv_time;
