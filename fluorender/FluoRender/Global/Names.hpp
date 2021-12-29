@@ -231,4 +231,16 @@ DEALINGS IN THE SOFTWARE.
 #define gstRotY "rot y"
 #define gstRotZ "rot z"
 
+//specific to ann
+#define gstVolume "volume"
+#define gstTransform "transform"
+#define gstMemo "memo"
+#define gstMemoRo "memo ro"
+#define gstInfoHeader "info header"
+
+//specific to atext
+#define gstText "text"
+#define gstLocation "location"
+#define gstInfo	"info"
+
 #endif//NAMES_HPP

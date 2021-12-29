@@ -86,6 +86,7 @@ namespace fluo
 {
 	class VolumeData;
 	class MeshData;
+	class Annotations;
 }
 class TreeLayer
 {
@@ -179,14 +180,14 @@ protected:
 	TreeLayer* m_associated;
 };
 
-struct VD_Landmark
+/*struct VD_Landmark
 {
 	wstring name;
 	double x, y, z;
 	double spcx, spcy, spcz;
 };
 
-/*class VolumeData : public TreeLayer
+class VolumeData : public TreeLayer
 {
 public:
 	VolumeData();
@@ -727,7 +728,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class AText
+/*class AText
 {
 public:
 	AText();
@@ -746,10 +747,10 @@ private:
 	string m_txt;
 	fluo::Point m_pos;
 	string m_info;
-};
+};*/
 
 class DataManager;
-class Annotations : public TreeLayer
+/*class Annotations : public TreeLayer
 {
 public:
 	Annotations();
@@ -832,7 +833,7 @@ private:
 
 private:
 	AText* GetAText(wxString str);
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class TraceGroup : public TreeLayer
@@ -1233,13 +1234,13 @@ public:
 
 	//annotations
 	int LoadAnnotations(wxString &filename);
-	void AddAnnotations(Annotations* ann);
+	void AddAnnotations(fluo::Annotations* ann);
 	void RemoveAnnotations(int index);
 	int GetAnnotationNum();
-	Annotations* GetAnnotations(int index);
-	Annotations* GetAnnotations(wxString &name);
+	fluo::Annotations* GetAnnotations(int index);
+	fluo::Annotations* GetAnnotations(wxString &name);
 	int GetAnnotationIndex(wxString &name);
-	Annotations* GetLastAnnotations()
+	fluo::Annotations* GetLastAnnotations()
 	{
 		int num = m_annotation_list.size();
 		if (num)
@@ -1310,7 +1311,7 @@ public:
 
 private:
 	vector <BaseReader*> m_reader_list;
-	vector <Annotations*> m_annotation_list;
+	//vector <fluo::Annotations*> m_annotation_list;
 
 	bool m_use_defaults;
 

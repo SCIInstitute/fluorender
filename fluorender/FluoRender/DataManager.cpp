@@ -28,9 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
+#include <Annotations.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <MeshFactory.hpp>
+#include <AnnotationFactory.hpp>
 #include <Calculate/VolumeSampler.h>
 #include <Calculate/VolumeBaker.h>
 #include "teem/Nrrd/nrrd.h"
@@ -3037,7 +3039,7 @@ int MeshData::GetLimitNumber()
 }*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AText::AText()
+/*AText::AText()
 {
 }
 
@@ -3430,7 +3432,7 @@ AText* Annotations::GetAText(wxString str)
 	}
 
 	return atext;
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5012,8 +5014,8 @@ int DataManager::LoadAnnotations(wxString &filename)
 			return 0;
 	}
 
-	Annotations* ann = new Annotations();
-	ann->Load(pathname, this);
+	fluo::Annotations* ann = glbin_annf->build();
+	ann->LoadData(pathname, this);
 
 	wxString name = ann->GetName();
 	wxString new_name = name;

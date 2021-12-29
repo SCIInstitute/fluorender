@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Global.hpp"
 #include "Names.hpp"
 #include <Timer.h>
-//#include <AnnotationFactory.hpp>
+#include <AnnotationFactory.hpp>
 #include <MeshFactory.hpp>
 #include <VolumeFactory.hpp>
 //#include <FUI/Panels/AgentFactory.hpp>
@@ -62,7 +62,7 @@ void Global::BuildFactories()
 	origin_->addChild(factory_group);
 	BUILD_AND_ADD(VolumeFactory, factory_group);
 	BUILD_AND_ADD(MeshFactory, factory_group);
-	//BUILD_AND_ADD(AnnotationFactory, factory_group);
+	BUILD_AND_ADD(AnnotationFactory, factory_group);
 	//BUILD_AND_ADD(AgentFactory, factory_group);
 	//BUILD_AND_ADD(Renderer2DFactory, factory_group);
 	//BUILD_AND_ADD(Renderer3DFactory, factory_group);
@@ -104,14 +104,14 @@ MeshFactory* Global::getMeshFactory()
 	return dynamic_cast<MeshFactory*>(obj);
 }
 
-//AnnotationFactory* Global::getAnnotationFactory()
-//{
-//	Object* obj = get(flstrAnnotationFactory);
-//	if (!obj)
-//		return 0;
-//	return dynamic_cast<AnnotationFactory*>(obj);
-//}
-//
+AnnotationFactory* Global::getAnnotationFactory()
+{
+	Object* obj = get(gstAnnotationFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AnnotationFactory*>(obj);
+}
+
 //AgentFactory* Global::getAgentFactory()
 //{
 //	Object* obj = get(flstrAgentFactory);
