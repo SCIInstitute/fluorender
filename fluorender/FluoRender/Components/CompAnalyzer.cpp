@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompAnalyzer.h"
-#include <DataManager.h>
 #include <VolumeData.hpp>
 #include <Annotations.hpp>
 #include <Global.hpp>
@@ -34,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/Texture.h>
 #include <FLIVR/VolumeRenderer.h>
-#include <Nrrd/nrrd.h>
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <sstream>

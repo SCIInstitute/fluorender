@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Annotations.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
+#include <MeshFactory.hpp>
+#include <AnnotationFactory.hpp>
 #include "Formats/png_resource.h"
 #include <wx/valnum.h>
 
@@ -274,7 +276,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					else if (GetItemText(item) == "Mesh")
 					{
 						wxString name = GetText(item, 1);
-						fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+						fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
 						if (md)
 						{
 							std::wstring path;
@@ -288,7 +290,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 					else if (GetItemText(item) == "Annotations")
 					{
 						wxString name = GetText(item, 1);
-						fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
+						fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
 						if (ann)
 						{
 							std::wstring path;
@@ -365,7 +367,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		else if (GetItemText(item) == "Mesh")
 		{
 			name = GetText(item, 1);
-			fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+			fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
 			if (md)
 			{
 				if (view)
@@ -379,7 +381,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		else if (GetItemText(item) == "Annotations")
 		{
 			name = GetText(item, 1);
-			fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
+			fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
 			if (ann)
 			{
 				if (view)
@@ -716,7 +718,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 				if (m_frame)
 				{
-					fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+					fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
 					if (md)
 					{
 						md->SaveData(filename.ToStdString());
@@ -743,7 +745,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 
 				if (m_frame)
 				{
-					fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
+					fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
 					if (ann)
 					{
 						ann->SaveData(filename.ToStdWstring());
@@ -784,7 +786,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 			if (m_frame)
 			{
 				fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
-				fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+				fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
 				if (vd)
 				{
 					vd->SaveData(filename.ToStdWstring(), fopendlg->GetFilterIndex(),
@@ -937,15 +939,7 @@ void DataListCtrl::DeleteSelection()
 					}
 				}
 				//from datamanager
-				DataManager* mgr = m_frame->GetDataManager();
-				if (mgr)
-				{
-					int index = mgr->GetVolumeIndex(name.ToStdString());
-					if (index != -1)
-					{
-						mgr->RemoveVolumeData(index);
-					}
-				}
+				glbin_volf->remove(name.ToStdString());
 			}
 			else if (GetItemText(item) == "Mesh")
 			{
@@ -961,15 +955,7 @@ void DataListCtrl::DeleteSelection()
 					}
 				}
 				//from datamanager
-				DataManager* mgr = m_frame->GetDataManager();
-				if (mgr)
-				{
-					int index = mgr->GetMeshIndex(name.ToStdString());
-					if (index != -1)
-					{
-						mgr->RemoveMeshData(index);
-					}
-				}
+				glbin_mshf->remove(name.ToStdString());
 			}
 			else if (GetItemText(item) == "Annotations")
 			{
@@ -983,13 +969,7 @@ void DataListCtrl::DeleteSelection()
 						view->RemoveAnnotations(name.ToStdString());
 				}
 				//from datamanager
-				DataManager* mgr = m_frame->GetDataManager();
-				if (mgr)
-				{
-					int index = mgr->GetAnnotationIndex(name.ToStdString());
-					if (index != -1)
-						mgr->RemoveAnnotations(index);
-				}
+				glbin_annf->remove(name.ToStdString());
 			}
 		}
 		m_frame->UpdateList();
@@ -1017,13 +997,7 @@ void DataListCtrl::DeleteAll()
 					view->RemoveVolumeDataDup(name.ToStdString());
 			}
 			//from datamanager
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-			{
-				int index = mgr->GetVolumeIndex(name.ToStdString());
-				if (index != -1)
-					mgr->RemoveVolumeData(index);
-			}
+			glbin_volf->remove(name.ToStdString());
 		}
 		else if (GetItemText(item) == "Mesh")
 		{
@@ -1037,13 +1011,7 @@ void DataListCtrl::DeleteAll()
 					view->RemoveMeshData(name.ToStdString());
 			}
 			//from datamanager
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-			{
-				int index = mgr->GetMeshIndex(name.ToStdString());
-				if (index != -1)
-					mgr->RemoveMeshData(index);
-			}
+			glbin_mshf->remove(name.ToStdString());
 		}
 		else if (GetItemText(item) == "Annotations")
 		{
@@ -1057,13 +1025,7 @@ void DataListCtrl::DeleteAll()
 					view->RemoveAnnotations(name.ToStdString());
 			}
 			//from datamanager
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-			{
-				int index = mgr->GetAnnotationIndex(name.ToStdString());
-				if (index != -1)
-					mgr->RemoveAnnotations(index);
-			}
+			glbin_annf->remove(name.ToStdString());
 		}
 
 		item = GetNextItem(item);
