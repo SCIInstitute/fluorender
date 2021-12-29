@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/Count.h>
 #include <Distance/SegGrow.h>
 #include <Distance/Cov.h>
+#include <Tracking/Tracks.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -9849,7 +9850,7 @@ void VRenderGLView::GetCellPoints(fluo::BBox& box,
 }
 
 //traces
-TraceGroup* VRenderGLView::GetTraceGroup()
+flrd::Tracks* VRenderGLView::GetTraceGroup()
 {
 	return m_trace_group;
 }
@@ -9859,7 +9860,7 @@ void VRenderGLView::CreateTraceGroup()
 	if (m_trace_group)
 		delete m_trace_group;
 
-	m_trace_group = new TraceGroup;
+	m_trace_group = new flrd::Tracks;
 }
 
 int VRenderGLView::LoadTraceGroup(wxString filename)
@@ -9867,14 +9868,14 @@ int VRenderGLView::LoadTraceGroup(wxString filename)
 	if (m_trace_group)
 		delete m_trace_group;
 
-	m_trace_group = new TraceGroup;
-	return m_trace_group->Load(filename);
+	m_trace_group = new flrd::Tracks;
+	return m_trace_group->LoadData(filename.ToStdWstring());
 }
 
 int VRenderGLView::SaveTraceGroup(wxString filename)
 {
 	if (m_trace_group)
-		return m_trace_group->Save(filename);
+		return m_trace_group->SaveData(filename.ToStdWstring());
 	else
 		return 0;
 }

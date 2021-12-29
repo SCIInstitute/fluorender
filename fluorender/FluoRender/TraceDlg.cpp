@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>
+#include <Tracking/Tracks.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -117,7 +118,7 @@ void TraceListCtrl::UpdateTraces(VRenderGLView* vrv)
 	if (!m_view)
 		return;
 
-	TraceGroup* traces = m_view->GetTraceGroup();
+	flrd::Tracks* traces = m_view->GetTraceGroup();
 	if (!traces)
 		return;
 	int shuffle = 0;
@@ -900,7 +901,7 @@ void TraceDlg::GetSettings(VRenderGLView* vrv)
 	m_cur_time = m_view->m_tseq_cur_num;
 	m_prv_time = m_view->m_tseq_prv_num;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
 		wxString str;
@@ -976,7 +977,7 @@ void TraceDlg::UpdateList()
 	int shuffle = 0;
 	if (m_view->m_cur_vol)
 		shuffle = m_view->m_cur_vol->GetShuffle();
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
 		int cur_time = trace_group->GetCurTime();
@@ -1044,7 +1045,7 @@ void TraceDlg::OnClearTrace(wxCommandEvent& event)
 	if (!m_view)
 		return;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
 		trace_group->Clear();
@@ -1078,7 +1079,7 @@ void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 		return;
 
 	wxString filename;
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 		filename = trace_group->GetPath();
 	if (wxFileExists(filename))
@@ -1127,7 +1128,7 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		TraceGroup* trace_group = m_view->GetTraceGroup();
+		flrd::Tracks* trace_group = m_view->GetTraceGroup();
 		if (trace_group)
 		{
 			trace_group->SetGhostNum(ival);
@@ -1142,7 +1143,7 @@ void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		TraceGroup* trace_group = m_view->GetTraceGroup();
+		flrd::Tracks* trace_group = m_view->GetTraceGroup();
 		if (trace_group)
 		{
 			trace_group->SetDrawTail(show);
@@ -1157,7 +1158,7 @@ void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		TraceGroup* trace_group = m_view->GetTraceGroup();
+		flrd::Tracks* trace_group = m_view->GetTraceGroup();
 		if (trace_group)
 		{
 			trace_group->SetDrawLead(show);
@@ -1184,7 +1185,7 @@ void TraceDlg::OnCellSizeText(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		TraceGroup* trace_group = m_view->GetTraceGroup();
+		flrd::Tracks* trace_group = m_view->GetTraceGroup();
 		if (trace_group)
 		{
 			trace_group->SetCellSize(ival);
@@ -1198,7 +1199,7 @@ void TraceDlg::UncertainFilter(bool input)
 	if (!m_view)
 		return;
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
@@ -1277,7 +1278,7 @@ void TraceDlg::OnCompUncertainLowText(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		TraceGroup* trace_group = m_view->GetTraceGroup();
+		flrd::Tracks* trace_group = m_view->GetTraceGroup();
 		if (trace_group)
 		{
 			trace_group->SetUncertainLow(ival);
@@ -1408,7 +1409,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	if (!m_view)
 		return;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	fluo::VolumeData* vd = m_view->m_cur_vol;
@@ -1442,7 +1443,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -1504,7 +1505,7 @@ void TraceDlg::OnAnalyzeLink(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	size_t frames = trace_group->GetTrackMap()->GetFrameNum();
@@ -1537,7 +1538,7 @@ void TraceDlg::OnAnalyzeUncertainHist(wxCommandEvent &event)
 	if (!m_view)
 		return;
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
@@ -1630,7 +1631,7 @@ void TraceDlg::OnAnalyzePath(wxCommandEvent &event)
 	if (!m_view)
 		return;
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	if (!trace_group->GetTrackMap()->GetFrameNum())
@@ -1918,7 +1919,7 @@ void TraceDlg::CellUpdate()
 		wxString str = m_ghost_num_text->GetValue();
 		long ival;
 		str.ToLong(&ival);
-		TraceGroup* trace_group = m_view->GetTraceGroup();
+		flrd::Tracks* trace_group = m_view->GetTraceGroup();
 		if (trace_group)
 			trace_group->SetGhostNum(ival);
 		else
@@ -1995,7 +1996,7 @@ void TraceDlg::CellEraseID()
 		return;
 
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 	{
 		m_view->CreateTraceGroup();
@@ -2146,7 +2147,7 @@ void TraceDlg::CellLink(bool exclusive)
 	if (!m_view)
 		return;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 	{
 		m_view->CreateTraceGroup();
@@ -2230,7 +2231,7 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 		return;
 	if (!m_view)
 		return;
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2258,7 +2259,7 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2307,7 +2308,7 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2438,7 +2439,7 @@ void TraceDlg::OnCellSeparateID(wxCommandEvent& event)
 		return;
 
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2541,7 +2542,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	if (!tex)
 		return;
 
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2581,7 +2582,7 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	vd->getValue(gstResX, resx);
 	vd->getValue(gstResY, resy);
 	vd->getValue(gstResZ, resz);
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2732,7 +2733,7 @@ void TraceDlg::GenMap()
 
 	//get trace group
 	m_view->CreateTraceGroup();
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 
@@ -2866,7 +2867,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 	fluo::VolumeData* vd = m_view->m_cur_vol;
 	if (!vd)
 		return;
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	if (t < 0)
@@ -2972,7 +2973,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 int TraceDlg::GetTrackFileExist(bool save)
 {
 	if (!m_view) return 0;
-	TraceGroup* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return 0;
 	wxString filename = trace_group->GetPath();

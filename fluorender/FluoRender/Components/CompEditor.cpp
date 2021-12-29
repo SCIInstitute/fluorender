@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompEditor.h"
 #include <VolumeData.hpp>
+#include <Tracking/Tracks.h>
 #include <Tracking/VolCache.h>
 #include <VRenderGLView.h>
 
@@ -97,7 +98,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 		return;
 
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 	{
 		m_view->CreateTraceGroup();
@@ -314,7 +315,7 @@ void ComponentEditor::Replace(unsigned int id,
 		return;
 
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	Tracks *trace_group = m_view->GetTraceGroup();
 	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
 	int cur_time = m_view->m_tseq_cur_num;
 
@@ -450,7 +451,7 @@ void ComponentEditor::Combine(CelpList &list)
 	if (list.size() <= 1)
 		return;//nothing to combine
 	//trace group
-	TraceGroup *trace_group = m_view->GetTraceGroup();
+	Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
 	int cur_time = m_view->m_tseq_cur_num;

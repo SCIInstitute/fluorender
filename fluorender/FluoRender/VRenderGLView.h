@@ -127,6 +127,10 @@ namespace fluo
 	class MeshGroup;
 	class Annotations;
 }
+namespace flrd
+{
+	class Tracks;
+}
 class VRenderGLView : public wxGLCanvas
 {
 public:
@@ -526,7 +530,7 @@ public:
 	void OnMouse(wxMouseEvent& event);
 
 	//traces
-	TraceGroup* GetTraceGroup();
+	flrd::Tracks* GetTraceGroup();
 	void CreateTraceGroup();
 	int LoadTraceGroup(wxString filename);
 	int SaveTraceGroup(wxString filename);
@@ -747,7 +751,7 @@ private:
 	flrd::RulerList m_ruler_list;
 	flrd::Ruler *m_cur_ruler;
 	//traces
-	TraceGroup* m_trace_group;
+	flrd::Tracks* m_trace_group;
 	//multivolume
 	flvr::MultiVolumeRenderer* m_mvr;
 	//highlighted comps

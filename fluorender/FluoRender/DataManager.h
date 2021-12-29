@@ -836,7 +836,7 @@ private:
 };*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class TraceGroup
+/*class TraceGroup
 {
 public:
 	TraceGroup();
@@ -915,7 +915,7 @@ public:
 
 	//draw
 	unsigned int Draw(vector<float> &verts, int shuffle);
-
+*/
 	//pattern search
 /*	typedef struct
 	{
@@ -925,7 +925,7 @@ public:
 	//type: 1-diamond; 2-branching
 	bool FindPattern(int type, unsigned int id, int time);*/
 
-private:
+/*private:
 	static int m_num;
 	std::string m_name;
 	std::wstring m_data_path;
@@ -953,7 +953,7 @@ private:
 		flrd::RulerList &rulers,
 		size_t frame1, size_t frame2);
 	flrd::RulerListIter FindRulerFromList(unsigned int id, flrd::RulerList &list);
-};
+};*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*class DataGroup : public TreeLayer

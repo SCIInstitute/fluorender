@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
+#include <Tracking/Tracks.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -488,7 +489,7 @@ void ScriptProc::RunPostTracking()
 	if (!cur_vol)
 		UpdateTraceDlg();
 
-	TraceGroup* tg = m_view->GetTraceGroup();
+	flrd::Tracks* tg = m_view->GetTraceGroup();
 	if (!tg) return;
 
 	//after updating volume
@@ -541,7 +542,7 @@ void ScriptProc::RunMaskTracking()
 
 	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
+	flrd::Tracks* tg = m_view->GetTraceGroup();
 	if (!tg)
 	{
 		m_view->CreateTraceGroup();
@@ -1188,7 +1189,7 @@ void ScriptProc::RunAddCells()
 		return;
 	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
+	flrd::Tracks* tg = m_view->GetTraceGroup();
 	if (!tg)
 	{
 		m_view->CreateTraceGroup();
@@ -1231,7 +1232,7 @@ void ScriptProc::RunUnlinkCells()
 
 	fluo::VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
+	flrd::Tracks* tg = m_view->GetTraceGroup();
 	if (!tg) return;
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();

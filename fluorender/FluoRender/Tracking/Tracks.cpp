@@ -27,13 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Tracks.h"
+#include <FLIVR/VertexArray.h>
+#include <FLIVR/TextureRenderer.h>
+#include <compatibility.h>
+
+using namespace flrd;
 
 int Tracks::m_num = 0;
 Tracks::Tracks()
 {
 	//type = 8;//traces
 	m_num++;
-	m_name = wxString::Format("Traces %d", m_num);
+	m_name = "Traces " + std::to_string(m_num);
 	m_cur_time = -1;
 	m_prv_time = -1;
 	m_ghost_num = 10;
@@ -66,6 +71,39 @@ void Tracks::SetPrvTime(int time)
 int Tracks::GetPrvTime()
 {
 	return m_prv_time;
+}
+
+void Tracks::SetGhostNum(int num)
+{
+	m_ghost_num = num;
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+}
+
+int Tracks::GetGhostNum()
+{
+	return m_ghost_num;
+}
+
+void Tracks::SetDrawTail(bool draw)
+{
+	m_draw_tail = draw;
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+}
+
+bool Tracks::GetDrawTail()
+{
+	return m_draw_tail;
+}
+
+void Tracks::SetDrawLead(bool draw)
+{
+	m_draw_lead = draw;
+	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Traces);
+}
+
+bool Tracks::GetDrawLead()
+{
+	return m_draw_lead;
 }
 
 //get information
@@ -119,7 +157,7 @@ void Tracks::UpdateCellList(flrd::CelpList &cur_sel_list)
 		{
 			if (cell_iter->second->GetSizeUi() >
 				(unsigned int)m_cell_size)
-				m_cell_list.insert(pair<unsigned int, flrd::Celp>
+				m_cell_list.insert(std::pair<unsigned int, flrd::Celp>
 				(cell_iter->second->Id(), cell_iter->second));
 		}
 		return;
@@ -445,23 +483,23 @@ void Tracks::Clear()
 	m_track_map->Clear();
 }
 
-bool Tracks::Load(wxString &filename)
+bool Tracks::LoadData(const std::wstring &filename)
 {
 	m_data_path = filename;
 	flrd::TrackMapProcessor tm_processor(m_track_map);
-	std::string str = ws2s(m_data_path.ToStdWstring());
+	std::string str = ws2s(m_data_path);
 	return tm_processor.Import(str);
 }
 
-bool Tracks::Save(wxString &filename)
+bool Tracks::SaveData(const std::wstring &filename)
 {
 	m_data_path = filename;
 	flrd::TrackMapProcessor tm_processor(m_track_map);
-	std::string str = ws2s(m_data_path.ToStdWstring());
+	std::string str = ws2s(m_data_path);
 	return tm_processor.Export(str);
 }
 
-unsigned int Tracks::Draw(vector<float> &verts, int shuffle)
+unsigned int Tracks::Draw(std::vector<float> &verts, int shuffle)
 {
 	unsigned int result = 0;
 	size_t frame_num = m_track_map->GetFrameNum();
