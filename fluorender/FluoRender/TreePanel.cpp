@@ -408,14 +408,14 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 	if (sel_item.IsOk() && m_frame)
 	{
 		wxString viewname = "";
-		wxString itemname = "";
+		std::string itemname;
 		int item_type = 0;
 
 		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
 		if (item_data)
 		{
 			item_type = item_data->type;
-			itemname = GetItemText(sel_item);
+			itemname = GetItemText(sel_item).ToStdString();
 			wxTreeItemId par_item = GetItemParent(sel_item);
 			if (par_item.IsOk())
 			{
@@ -1150,11 +1150,11 @@ void DataTreeCtrl::UpdateSelection()
 			{
 				int list_type = 0;
 				if (item_data->type == 2)
-					list_type = DATA_VOLUME;
+					list_type = 1;
 				else if (item_data->type == 3)
-					list_type = DATA_MESH;
+					list_type = 2;
 				else if (item_data->type == 4)
-					list_type = DATA_ANNOTATIONS;
+					list_type = 3;
 				if (m_frame->GetList())
 					m_frame->GetList()->SetSelection(list_type, name);
 			}
@@ -1455,10 +1455,10 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		int dst_type = ((LayerInfo*)GetItemData(dst_item))->type;
 		int dst_par_type = ((LayerInfo*)GetItemData(dst_par_item))->type;
 
-		wxString src_name = GetItemText(src_item);
-		wxString src_par_name = GetItemText(src_par_item);
-		wxString dst_name = GetItemText(dst_item);
-		wxString dst_par_name = GetItemText(dst_par_item);
+		std::string src_name = GetItemText(src_item).ToStdString();
+		std::string src_par_name = GetItemText(src_par_item).ToStdString();
+		std::string dst_name = GetItemText(dst_item).ToStdString();
+		std::string dst_par_name = GetItemText(dst_par_item).ToStdString();
 
 		if (src_par_type == 1 &&
 			dst_par_type == 1 &&
@@ -1471,20 +1471,14 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 				//move volume to the group in the same view
 				VRenderGLView* view = m_frame->GetView(src_par_name);
 				if (view)
-				{
-					wxString str("");
-					view->MoveLayertoGroup(dst_name, src_name, str);
-				}
+					view->MoveLayertoGroup(dst_name, src_name, "");
 			}
 			else if (src_type==3 && dst_type==6)
 			{
 				//move mesh into a group
 				VRenderGLView* view = m_frame->GetView(src_par_name);
 				if (view)
-				{
-					wxString str("");
-					view->MoveMeshtoGroup(dst_name, src_name, str);
-				}
+					view->MoveMeshtoGroup(dst_name, src_name, "");
 			}
 			else
 			{
@@ -1514,10 +1508,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			{
 				VRenderGLView* view = m_frame->GetView(dst_par_name);
 				if (view)
-				{
-					wxString str("");
-					view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, str);
-				}
+					view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, "");
 			}
 			else
 			{
@@ -1557,10 +1548,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			//move volume outside of the group
 			VRenderGLView* view = m_frame->GetView(dst_name);
 			if (view)
-			{
-				wxString str("");
-				view->MoveLayertoView(src_par_name, src_name, str);
-			}
+				view->MoveLayertoView(src_par_name, src_name, "");
 		}
 		else if (src_par_type == 6 &&
 			dst_par_type == 6 &&
@@ -1583,10 +1571,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			{
 				VRenderGLView* view = m_frame->GetView(dst_par_name);
 				if (view)
-				{
-					wxString str("");
-					view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, str);
-				}
+					view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, "");
 			}
 			else
 			{
@@ -1626,10 +1611,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			//move mesh outside of the group
 			VRenderGLView* view = m_frame->GetView(dst_name);
 			if (view)
-			{
-				wxString str("");
-				view->MoveMeshtoView(src_par_name, src_name, str);
-			}
+				view->MoveMeshtoView(src_par_name, src_name, "");
 		}
 
 		m_frame->UpdateTree(src_name);
@@ -1642,8 +1624,8 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		int src_type = ((LayerInfo*)GetItemData(src_item))->type;
 		int src_par_type = ((LayerInfo*)GetItemData(src_par_item))->type;
 
-		wxString src_name = GetItemText(src_item);
-		wxString src_par_name = GetItemText(src_par_item);
+		std::string src_name = GetItemText(src_item).ToStdString();
+		std::string src_par_name = GetItemText(src_par_item).ToStdString();
 
 		if (src_type == 2 && src_par_type == 5)
 		{
@@ -1651,8 +1633,7 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 			VRenderGLView* view = m_frame->GetView(str);
 			if (view)
 			{
-				wxString str("");
-				view->MoveLayertoView(src_par_name, src_name, str);
+				view->MoveLayertoView(src_par_name, src_name, "");
 
 				m_frame->UpdateTree(src_name);
 				m_frame->RefreshVRenderViews();

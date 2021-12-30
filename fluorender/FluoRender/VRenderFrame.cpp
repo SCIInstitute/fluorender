@@ -497,7 +497,7 @@ VRenderFrame::VRenderFrame(
 	m_data_mgr.SetPvxmlSeqType(m_setting_dlg->GetPvxmlSeqType());
 	flvr::VolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
 	flvr::MultiVolumeRenderer::set_soft_threshold(m_setting_dlg->GetSoftThreshold());
-	TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());
+	//TreeLayer::SetSoftThreshsold(m_setting_dlg->GetSoftThreshold());
 	VolumeMeshConv::SetSoftThreshold(m_setting_dlg->GetSoftThreshold());
 
 	//brush tool dialog
@@ -1064,7 +1064,7 @@ VRenderGLView* VRenderFrame::GetView(int index)
 	return 0;
 }
 
-VRenderGLView* VRenderFrame::GetView(wxString& name)
+VRenderGLView* VRenderFrame::GetView(const wxString& name)
 {
 	for (size_t i=0; i < m_vrv_list.size(); ++i)
 	{
@@ -1818,7 +1818,7 @@ void VRenderFrame::UpdateTreeIcons()
 		wxTreeItemIdValue ck_layer;
 		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = view->GetLayer(j);
+			fluo::Object* layer = view->GetLayer(j);
 			wxTreeItemId layer_item;
 			if (j==0)
 				layer_item = treectrl->GetFirstChild(vrv_item, ck_layer);
@@ -1828,96 +1828,73 @@ void VRenderFrame::UpdateTreeIcons()
 			if (!layer_item.IsOk())
 				continue;
 
-			switch (layer->IsA())
+			if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
 			{
-			case 2://volume
+				counter++;
+				bool disp;
+				vd->getValue(gstDisplay, disp);
+				m_tree_panel->SetVolItemImage(layer_item, disp?2*counter+1:2*counter);
+			}
+			else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
+			{
+				counter++;
+				bool disp;
+				md->getValue(gstDisplay, disp);
+				m_tree_panel->SetMeshItemImage(layer_item, disp?2*counter+1:2*counter);
+			}
+			else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
+			{
+				counter++;
+				bool disp;
+				ann->getValue(gstDisplay, disp);
+				m_tree_panel->SetAnnotationItemImage(layer_item, disp?2*counter+1:2*counter);
+			}
+			else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
+			{
+				bool disp;
+				group->getValue(gstDisplay, disp);
+				m_tree_panel->SetGroupItemImage(layer_item, int(disp));
+				wxTreeItemIdValue ck_volume;
+				for (k=0; k<group->getNumChildren(); k++)
 				{
-					fluo::VolumeData* vd = (fluo::VolumeData*)layer;
+					fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
 					if (!vd)
-						break;
+						continue;
+					wxTreeItemId volume_item;
+					if (k==0)
+						volume_item = treectrl->GetFirstChild(layer_item, ck_volume);
+					else
+						volume_item = treectrl->GetNextChild(layer_item, ck_volume);
+					if (!volume_item.IsOk())
+						continue;
 					counter++;
-					bool disp;
 					vd->getValue(gstDisplay, disp);
-					m_tree_panel->SetVolItemImage(layer_item, disp?2*counter+1:2*counter);
+					m_tree_panel->SetVolItemImage(volume_item, disp?2*counter+1:2*counter);
 				}
-				break;
-			case 3://mesh
+			}
+			else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
+			{
+				bool disp;
+				group->getValue(gstDisplay, disp);
+				m_tree_panel->SetMGroupItemImage(layer_item, int(disp));
+				wxTreeItemIdValue ck_mesh;
+				for (k=0; k<group->getNumChildren(); k++)
 				{
-					fluo::MeshData* md = (fluo::MeshData*)layer;
+					fluo::MeshData* md = group->getChild(k)->asMeshData();
 					if (!md)
-						break;
+						continue;
+					wxTreeItemId mesh_item;
+					if (k==0)
+						mesh_item = treectrl->GetFirstChild(layer_item, ck_mesh);
+					else
+						mesh_item = treectrl->GetNextChild(layer_item, ck_mesh);
+					if (!mesh_item.IsOk())
+						continue;
 					counter++;
 					bool disp;
 					md->getValue(gstDisplay, disp);
-					m_tree_panel->SetMeshItemImage(layer_item, disp?2*counter+1:2*counter);
+					m_tree_panel->SetMeshItemImage(mesh_item, disp?2*counter+1:2*counter);
 				}
-				break;
-			case 4://annotations
-				{
-					fluo::Annotations* ann = (fluo::Annotations*)layer;
-					if (!ann)
-						break;
-					counter++;
-					bool disp;
-					ann->getValue(gstDisplay, disp);
-					m_tree_panel->SetAnnotationItemImage(layer_item, disp?2*counter+1:2*counter);
-				}
-				break;
-			case 5://volume group
-				{
-					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
-					if (!group)
-						break;
-					bool disp;
-					group->getValue(gstDisplay, disp);
-					m_tree_panel->SetGroupItemImage(layer_item, int(disp));
-					wxTreeItemIdValue ck_volume;
-					for (k=0; k<group->getNumChildren(); k++)
-					{
-						fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
-						if (!vd)
-							continue;
-						wxTreeItemId volume_item;
-						if (k==0)
-							volume_item = treectrl->GetFirstChild(layer_item, ck_volume);
-						else
-							volume_item = treectrl->GetNextChild(layer_item, ck_volume);
-						if (!volume_item.IsOk())
-							continue;
-						counter++;
-						vd->getValue(gstDisplay, disp);
-						m_tree_panel->SetVolItemImage(volume_item, disp?2*counter+1:2*counter);
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
-					if (!group)
-						break;
-					bool disp;
-					group->getValue(gstDisplay, disp);
-					m_tree_panel->SetMGroupItemImage(layer_item, int(disp));
-					wxTreeItemIdValue ck_mesh;
-					for (k=0; k<group->getNumChildren(); k++)
-					{
-						fluo::MeshData* md = group->getChild(k)->asMeshData();
-						if (!md)
-							continue;
-						wxTreeItemId mesh_item;
-						if (k==0)
-							mesh_item = treectrl->GetFirstChild(layer_item, ck_mesh);
-						else
-							mesh_item = treectrl->GetNextChild(layer_item, ck_mesh);
-						if (!mesh_item.IsOk())
-							continue;
-						counter++;
-						bool disp;
-						md->getValue(gstDisplay, disp);
-						m_tree_panel->SetMeshItemImage(mesh_item, disp?2*counter+1:2*counter);
-					}
-				}
-				break;
 			}
 		}
 	}
@@ -1934,16 +1911,23 @@ void VRenderFrame::UpdateTreeColors()
 
 		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = view->GetLayer(j);
-			switch (layer->IsA())
+			fluo::Object* layer = view->GetLayer(j);
+			if (fluo::Node* vd = dynamic_cast<fluo::Node*>(layer))
 			{
-			case 0://root
-				break;
-			case 1://view
-				break;
-			case 2://volume
+				fluo::Color c;
+				vd->getValue(gstColor, c);
+				wxColor wxc(
+					(unsigned char)(c.r()*255),
+					(unsigned char)(c.g()*255),
+					(unsigned char)(c.b()*255));
+				m_tree_panel->ChangeIconColor(counter+1, wxc);
+				counter++;
+			}
+			else if (fluo::Group* group = dynamic_cast<fluo::Group*>(layer))
+			{
+				for (k=0; k<group->getNumChildren(); k++)
 				{
-					fluo::VolumeData* vd = (fluo::VolumeData*)layer;
+					fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
 					if (!vd)
 						break;
 					fluo::Color c;
@@ -1955,74 +1939,6 @@ void VRenderFrame::UpdateTreeColors()
 					m_tree_panel->ChangeIconColor(counter+1, wxc);
 					counter++;
 				}
-				break;
-			case 3://mesh
-				{
-					fluo::MeshData* md = (fluo::MeshData*)layer;
-					if (!md)
-						break;
-					fluo::Color color;
-					md->getValue(gstColor, color);
-					wxColor wxc(
-						(unsigned char)(color.r()*255),
-						(unsigned char)(color.g()*255),
-						(unsigned char)(color.b()*255));
-					m_tree_panel->ChangeIconColor(counter+1, wxc);
-					counter++;
-				}
-				break;
-			case 4://annotations
-				{
-					fluo::Annotations* ann = (fluo::Annotations*)layer;
-					if (!ann)
-						break;
-					wxColor wxc(255, 255, 255);
-					m_tree_panel->ChangeIconColor(counter+1, wxc);
-					counter++;
-				}
-				break;
-			case 5://group
-				{
-					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
-					if (!group)
-						break;
-					for (k=0; k<group->getNumChildren(); k++)
-					{
-						fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
-						if (!vd)
-							break;
-						fluo::Color c;
-						vd->getValue(gstColor, c);
-						wxColor wxc(
-							(unsigned char)(c.r()*255),
-							(unsigned char)(c.g()*255),
-							(unsigned char)(c.b()*255));
-						m_tree_panel->ChangeIconColor(counter+1, wxc);
-						counter++;
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
-					if (!group)
-						break;
-					for (k=0; k<group->getNumChildren(); k++)
-					{
-						fluo::MeshData* md = group->getChild(k)->asMeshData();
-						if (!md)
-							break;
-						fluo::Color color;
-						md->getValue(gstColor, color);
-						wxColor wxc(
-							(unsigned char)(color.r()*255),
-							(unsigned char)(color.g()*255),
-							(unsigned char)(color.b()*255));
-						m_tree_panel->ChangeIconColor(counter+1, wxc);
-						counter++;
-					}
-				}
-				break;
 			}
 		}
 	}
@@ -2064,19 +1980,82 @@ void VRenderFrame::UpdateTree(wxString name)
 
 		for (j=0; j< view->GetLayerNum(); j++)
 		{
-			TreeLayer* layer = view->GetLayer(j);
-			switch (layer->IsA())
+			fluo::Object* layer = view->GetLayer(j);
+			if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
 			{
-			case 0://root
-				break;
-			case 1://view
-				break;
-			case 2://volume data
+				//append icon for volume
+				m_tree_panel->AppendIcon();
+				fluo::Color c;
+				vd->getValue(gstColor, c);
+				wxColor wxc(
+					(unsigned char)(c.r()*255),
+					(unsigned char)(c.g()*255),
+					(unsigned char)(c.b()*255));
+				int ii = m_tree_panel->GetIconNum()-1;
+				m_tree_panel->ChangeIconColor(ii, wxc);
+				wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->getName());
+				bool disp;
+				vd->getValue(gstDisplay, disp);
+				m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
+				if (name == vd->getName())
 				{
-					fluo::VolumeData* vd = (fluo::VolumeData*)layer;
+					sel_item = item;
+					view->SetVolumeA(vd);
+					GetBrushToolDlg()->GetSettings(view);
+					GetMeasureDlg()->GetSettings(view);
+					GetTraceDlg()->GetSettings(view);
+					GetOclDlg()->GetSettings(view);
+					GetComponentDlg()->SetView(view);
+					GetColocalizationDlg()->SetView(view);
+				}
+			}
+			else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
+			{
+				//append icon for mesh
+				m_tree_panel->AppendIcon();
+				fluo::Color color;
+				md->getValue(gstColor, color);
+				wxColor wxc(
+					(unsigned char)(color.r()*255),
+					(unsigned char)(color.g()*255),
+					(unsigned char)(color.b()*255));
+				int ii = m_tree_panel->GetIconNum()-1;
+				m_tree_panel->ChangeIconColor(ii, wxc);
+				wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->getName());
+				bool disp;
+				md->getValue(gstDisplay, disp);
+				m_tree_panel->SetMeshItemImage(item, disp ?2*ii+1:2*ii);
+				if (name == md->getName())
+					sel_item = item;
+			}
+			else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
+			{
+				//append icon for annotations
+				m_tree_panel->AppendIcon();
+				wxColor wxc(255, 255, 255);
+				int ii = m_tree_panel->GetIconNum()-1;
+				m_tree_panel->ChangeIconColor(ii, wxc);
+				wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->getName());
+				bool disp;
+				ann->getValue(gstDisplay, disp);
+				m_tree_panel->SetAnnotationItemImage(item, disp?2*ii+1:2*ii);
+				if (name == ann->getName())
+					sel_item = item;
+			}
+			else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
+			{
+				//append group item to tree
+				wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->getName());
+				bool disp;
+				group->getValue(gstDisplay, disp);
+				m_tree_panel->SetGroupItemImage(group_item, int(disp));
+				//append volume data to group
+				for (k=0; k<group->getNumChildren(); k++)
+				{
+					fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
 					if (!vd)
-						break;
-					//append icon for volume
+						continue;
+					//add icon
 					m_tree_panel->AppendIcon();
 					fluo::Color c;
 					vd->getValue(gstColor, c);
@@ -2086,7 +2065,7 @@ void VRenderFrame::UpdateTree(wxString name)
 						(unsigned char)(c.b()*255));
 					int ii = m_tree_panel->GetIconNum()-1;
 					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->getName());
+					wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->getName());
 					bool disp;
 					vd->getValue(gstDisplay, disp);
 					m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
@@ -2102,13 +2081,23 @@ void VRenderFrame::UpdateTree(wxString name)
 						GetColocalizationDlg()->SetView(view);
 					}
 				}
-				break;
-			case 3://mesh data
+				if (name == group->getName())
+					sel_item = group_item;
+			}
+			else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
+			{
+				//append group item to tree
+				wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->getName());
+				bool disp;
+				group->getValue(gstDisplay, disp);
+				m_tree_panel->SetMGroupItemImage(group_item, int(disp));
+				//append mesh data to group
+				for (k=0; k<group->getNumChildren(); k++)
 				{
-					fluo::MeshData* md = (fluo::MeshData*)layer;
+					fluo::MeshData* md = group->getChild(k)->asMeshData();
 					if (!md)
-						break;
-					//append icon for mesh
+						continue;
+					//add icon
 					m_tree_panel->AppendIcon();
 					fluo::Color color;
 					md->getValue(gstColor, color);
@@ -2118,115 +2107,15 @@ void VRenderFrame::UpdateTree(wxString name)
 						(unsigned char)(color.b()*255));
 					int ii = m_tree_panel->GetIconNum()-1;
 					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->getName());
+					wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->getName());
 					bool disp;
 					md->getValue(gstDisplay, disp);
-					m_tree_panel->SetMeshItemImage(item, disp ?2*ii+1:2*ii);
+					m_tree_panel->SetMeshItemImage(item, disp?2*ii+1:2*ii);
 					if (name == md->getName())
 						sel_item = item;
 				}
-				break;
-			case 4://annotations
-				{
-					fluo::Annotations* ann = (fluo::Annotations*)layer;
-					if (!ann)
-						break;
-					//append icon for annotations
-					m_tree_panel->AppendIcon();
-					wxColor wxc(255, 255, 255);
-					int ii = m_tree_panel->GetIconNum()-1;
-					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->getName());
-					bool disp;
-					ann->getValue(gstDisplay, disp);
-					m_tree_panel->SetAnnotationItemImage(item, disp?2*ii+1:2*ii);
-					if (name == ann->getName())
-						sel_item = item;
-				}
-				break;
-			case 5://group
-				{
-					fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
-					if (!group)
-						break;
-					//append group item to tree
-					wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->getName());
-					bool disp;
-					group->getValue(gstDisplay, disp);
-					m_tree_panel->SetGroupItemImage(group_item, int(disp));
-					//append volume data to group
-					for (k=0; k<group->getNumChildren(); k++)
-					{
-						fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
-						if (!vd)
-							continue;
-						//add icon
-						m_tree_panel->AppendIcon();
-						fluo::Color c;
-						vd->getValue(gstColor, c);
-						wxColor wxc(
-							(unsigned char)(c.r()*255),
-							(unsigned char)(c.g()*255),
-							(unsigned char)(c.b()*255));
-						int ii = m_tree_panel->GetIconNum()-1;
-						m_tree_panel->ChangeIconColor(ii, wxc);
-						wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->getName());
-						bool disp;
-						vd->getValue(gstDisplay, disp);
-						m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
-						if (name == vd->getName())
-						{
-							sel_item = item;
-							view->SetVolumeA(vd);
-							GetBrushToolDlg()->GetSettings(view);
-							GetMeasureDlg()->GetSettings(view);
-							GetTraceDlg()->GetSettings(view);
-							GetOclDlg()->GetSettings(view);
-							GetComponentDlg()->SetView(view);
-							GetColocalizationDlg()->SetView(view);
-						}
-					}
-					if (name == group->getName())
-						sel_item = group_item;
-				}
-				break;
-			case 6://mesh group
-				{
-					fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
-					if (!group)
-						break;
-					//append group item to tree
-					wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->getName());
-					bool disp;
-					group->getValue(gstDisplay, disp);
-					m_tree_panel->SetMGroupItemImage(group_item, int(disp));
-					//append mesh data to group
-					for (k=0; k<group->getNumChildren(); k++)
-					{
-						fluo::MeshData* md = group->getChild(k)->asMeshData();
-						if (!md)
-							continue;
-						//add icon
-						m_tree_panel->AppendIcon();
-						fluo::Color color;
-						md->getValue(gstColor, color);
-						wxColor wxc(
-							(unsigned char)(color.r()*255),
-							(unsigned char)(color.g()*255),
-							(unsigned char)(color.b()*255));
-						int ii = m_tree_panel->GetIconNum()-1;
-						m_tree_panel->ChangeIconColor(ii, wxc);
-						wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->getName());
-						bool disp;
-						md->getValue(gstDisplay, disp);
-						m_tree_panel->SetMeshItemImage(item, disp?2*ii+1:2*ii);
-						if (name == md->getName())
-							sel_item = item;
-					}
-					if (name == group->getName())
-						sel_item = group_item;
-				}
-				break;
+				if (name == group->getName())
+					sel_item = group_item;
 			}
 		}
 	}
@@ -2251,7 +2140,7 @@ void VRenderFrame::UpdateList()
 			std::wstring str;
 			vd->getValue(gstDataPath, str);
 			wxString path = str;
-			m_list_panel->Append(DATA_VOLUME, name, path);
+			m_list_panel->Append(1, name, path);
 		}
 	}
 
@@ -2264,7 +2153,7 @@ void VRenderFrame::UpdateList()
 			std::wstring wstr;
 			md->getValue(gstDataPath, wstr);
 			wxString path = wstr;
-			m_list_panel->Append(DATA_MESH, name, path);
+			m_list_panel->Append(2, name, path);
 		}
 	}
 
@@ -2277,7 +2166,7 @@ void VRenderFrame::UpdateList()
 			std::wstring wstr;
 			ann->getValue(gstDataPath, wstr);
 			wxString path = wstr;
-			m_list_panel->Append(DATA_ANNOTATIONS, name, path);
+			m_list_panel->Append(3, name, path);
 		}
 	}
 }
@@ -2592,7 +2481,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 	}
 }
 
-void VRenderFrame::DeleteVRenderView(wxString &name)
+void VRenderFrame::DeleteVRenderView(const wxString &name)
 {
 	for (int i=0; i<GetViewNum(); i++)
 	{
@@ -3292,90 +3181,83 @@ void VRenderFrame::SaveProject(wxString& filename)
 			fconfig.Write("num", view->GetLayerNum());
 			for (j=0; j< view->GetLayerNum(); j++)
 			{
-				TreeLayer* layer = view->GetLayer(j);
+				fluo::Object* layer = view->GetLayer(j);
 				if (!layer)
 					continue;
 				str = wxString::Format("/views/%d/layers/%d", i, j);
 				fconfig.SetPath(str);
-				switch (layer->IsA())
+				if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
 				{
-				case 2://volume data
 					fconfig.Write("type", 2);
-					fconfig.Write("name", layer->GetName());
-					break;
-				case 3://mesh data
+					fconfig.Write("name", layer->getName());
+				}
+				else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
+				{
 					fconfig.Write("type", 3);
-					fconfig.Write("name", layer->GetName());
-					break;
-				case 4://annotations
+					fconfig.Write("name", layer->getName());
+				}
+				else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
+				{
 					fconfig.Write("type", 4);
-					fconfig.Write("name", layer->GetName());
-					break;
-				case 5://group
-					{
-						fluo::VolumeGroup* group = (fluo::VolumeGroup*)layer;
-
-						fconfig.Write("type", 5);
-						fconfig.Write("name", group->getName());
-						fconfig.Write("id", group->getId());
-						//dispaly
-						group->getValue(gstDisplay, bval);
-						fconfig.Write("display", bval);
-						//2d adjustment
-						group->getValue(gstGammaR, dx);
-						group->getValue(gstGammaG, dy);
-						group->getValue(gstGammaB, dz);
-						str = wxString::Format("%f %f %f", dx, dy, dz);
-						fconfig.Write("gamma", str);
-						group->getValue(gstBrightnessR, dx);
-						group->getValue(gstBrightnessG, dy);
-						group->getValue(gstBrightnessB, dz);
-						str = wxString::Format("%f %f %f", dx, dy, dz);
-						fconfig.Write("brightness", str);
-						group->getValue(gstEqualizeR, dx);
-						group->getValue(gstEqualizeG, dy);
-						group->getValue(gstEqualizeB, dz);
-						str = wxString::Format("%f %f %f", dx, dy, dz);
-						fconfig.Write("hdr", str);
-						group->getValue(gstSyncR, bval);
-						fconfig.Write("sync_r", bval);
-						group->getValue(gstSyncG, bval);
-						fconfig.Write("sync_g", bval);
-						group->getValue(gstSyncB, bval);
-						fconfig.Write("sync_b", bval);
-						//sync volume properties
-						group->getValue(gstSyncGroup, bval);
-						fconfig.Write("sync_vp", bval);
-						//volumes
-						str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
-						fconfig.SetPath(str);
-						fconfig.Write("num", group->getNumChildren());
-						for (k=0; k<group->getNumChildren(); k++)
-							fconfig.Write(wxString::Format("vol_%d", k), group->getChild(k)->getName());
-
-					}
-					break;
-				case 6://mesh group
-					{
-						fluo::MeshGroup* group = (fluo::MeshGroup*)layer;
-
-						fconfig.Write("type", 6);
-						fconfig.Write("name", layer->GetName());
-						//fconfig.Write("id", MeshGroup::GetID());
-						//display
-						group->getValue(gstDisplay, bval);
-						fconfig.Write("display", bval);
-						//sync mesh properties
-						group->getValue(gstSyncGroup, bval);
-						fconfig.Write("sync_mp", bval);
-						//meshes
-						str = wxString::Format("/views/%d/layers/%d/meshes", i, j);
-						fconfig.SetPath(str);
-						fconfig.Write("num", group->getNumChildren());
-						for (k=0; k<group->getNumChildren(); k++)
-							fconfig.Write(wxString::Format("mesh_%d", k), group->getChild(k)->getName());
-					}
-					break;
+					fconfig.Write("name", layer->getName());
+				}
+				else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
+				{
+					fconfig.Write("type", 5);
+					fconfig.Write("name", group->getName());
+					fconfig.Write("id", group->getId());
+					//dispaly
+					group->getValue(gstDisplay, bval);
+					fconfig.Write("display", bval);
+					//2d adjustment
+					group->getValue(gstGammaR, dx);
+					group->getValue(gstGammaG, dy);
+					group->getValue(gstGammaB, dz);
+					str = wxString::Format("%f %f %f", dx, dy, dz);
+					fconfig.Write("gamma", str);
+					group->getValue(gstBrightnessR, dx);
+					group->getValue(gstBrightnessG, dy);
+					group->getValue(gstBrightnessB, dz);
+					str = wxString::Format("%f %f %f", dx, dy, dz);
+					fconfig.Write("brightness", str);
+					group->getValue(gstEqualizeR, dx);
+					group->getValue(gstEqualizeG, dy);
+					group->getValue(gstEqualizeB, dz);
+					str = wxString::Format("%f %f %f", dx, dy, dz);
+					fconfig.Write("hdr", str);
+					group->getValue(gstSyncR, bval);
+					fconfig.Write("sync_r", bval);
+					group->getValue(gstSyncG, bval);
+					fconfig.Write("sync_g", bval);
+					group->getValue(gstSyncB, bval);
+					fconfig.Write("sync_b", bval);
+					//sync volume properties
+					group->getValue(gstSyncGroup, bval);
+					fconfig.Write("sync_vp", bval);
+					//volumes
+					str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
+					fconfig.SetPath(str);
+					fconfig.Write("num", group->getNumChildren());
+					for (k=0; k<group->getNumChildren(); k++)
+						fconfig.Write(wxString::Format("vol_%d", k), group->getChild(k)->getName());
+				}
+				else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
+				{
+					fconfig.Write("type", 6);
+					fconfig.Write("name", layer->getName());
+					//fconfig.Write("id", MeshGroup::GetID());
+					//display
+					group->getValue(gstDisplay, bval);
+					fconfig.Write("display", bval);
+					//sync mesh properties
+					group->getValue(gstSyncGroup, bval);
+					fconfig.Write("sync_mp", bval);
+					//meshes
+					str = wxString::Format("/views/%d/layers/%d/meshes", i, j);
+					fconfig.SetPath(str);
+					fconfig.Write("num", group->getNumChildren());
+					for (k=0; k<group->getNumChildren(); k++)
+						fconfig.Write(wxString::Format("mesh_%d", k), group->getChild(k)->getName());
 				}
 			}
 

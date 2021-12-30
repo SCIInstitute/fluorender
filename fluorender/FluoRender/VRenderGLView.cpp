@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <VolumeFactory.hpp>
 #include <MeshData.hpp>
 #include <MeshGroup.hpp>
 #include <MeshFactory.hpp>
@@ -6299,27 +6300,19 @@ void VRenderGLView::RemoveMeshData(const std::string &name)
 {
 	int i, j;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
+		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
 		{
-		case 3://mesh data
-		{
-			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
-			if (md && name == md->getName())
+			if (name == md->getName())
 			{
 				m_layer_list.erase(m_layer_list.begin() + i);
 				m_md_pop_dirty = true;
 				return;
 			}
 		}
-		break;
-		case 6://mesh group
+		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))//mesh group
 		{
-			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
-			if (!group) continue;
 			for (j = 0; j<group->getNumChildren(); j++)
 			{
 				fluo::MeshData* md = group->getChild(j)->asMeshData();
@@ -6331,24 +6324,17 @@ void VRenderGLView::RemoveMeshData(const std::string &name)
 				}
 			}
 		}
-		break;
-		}
 	}
 }
 
 void VRenderGLView::RemoveAnnotations(const std::string &name)
 {
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+	for (int i = 0; i<GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		if (m_layer_list[i]->IsA() == 4)
+		if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(GetLayer(i)))
 		{
-			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
-			if (ann && name == ann->getName())
-			{
+			if (name == ann->getName())
 				m_layer_list.erase(m_layer_list.begin() + i);
-			}
 		}
 	}
 }
@@ -6356,16 +6342,11 @@ void VRenderGLView::RemoveAnnotations(const std::string &name)
 void VRenderGLView::RemoveGroup(const std::string &name)
 {
 	int i, j;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
+		if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
 		{
-		case 5://group
-		{
-			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group && name == group->getName())
+			if (name == group->getName())
 			{
 				for (j = group->getNumChildren() - 1; j >= 0; j--)
 				{
@@ -6381,11 +6362,9 @@ void VRenderGLView::RemoveGroup(const std::string &name)
 				m_vd_pop_dirty = true;
 			}
 		}
-		break;
-		case 6://mesh group
+		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))//mesh group
 		{
-			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
-			if (group && name == group->getName())
+			if (name == group->getName())
 			{
 				for (j = group->getNumChildren() - 1; j >= 0; j--)
 				{
@@ -6400,125 +6379,22 @@ void VRenderGLView::RemoveGroup(const std::string &name)
 				m_md_pop_dirty = true;
 			}
 		}
-		break;
-		}
 	}
 }
 
 //isolate
 void VRenderGLView::Isolate(int type, const std::string &name)
 {
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+	for (int i = 0; i < GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i]) continue;
-
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume
-		{
-			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
-			if (vd)
-			{
-				if (type == 2 &&
-					name == vd->getName())
-					vd->setValue(gstDisplay, true);
-				else
-					vd->setValue(gstDisplay, false);
-			}
-		}
-		break;
-		case 3://mesh
-		{
-			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
-			if (md)
-			{
-				if (type == 3 &&
-					name == md->getName())
-					md->setValue(gstDisplay, false);
-				else
-					md->setValue(gstDisplay, false);
-			}
-		}
-		break;
-		case 4://annotation
-		{
-			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
-			if (ann)
-			{
-				if (type == 4 &&
-					name == ann->getName())
-					ann->setValue(gstDisplay, true);
-				else
-					ann->setValue(gstDisplay, false);
-			}
-		}
-		break;
-		case 5://volume group
-		{
-			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group)
-			{
-				if (type == 5)
-				{
-					if (name == group->getName())
-						group->setValue(gstDisplay, true);
-					else
-						group->setValue(gstDisplay, false);
-				}
-				else if (type == 6)
-					group->setValue(gstDisplay, false);
-				else
-				{
-					for (int i = 0; i<(int)group->getNumChildren(); i++)
-					{
-						fluo::VolumeData* vd = group->getChild(i)->asVolumeData();
-						if (vd)
-						{
-							if (type == 2 &&
-								name == vd->getName())
-								vd->setValue(gstDisplay, true);
-							else
-								vd->setValue(gstDisplay, false);
-						}
-					}
-				}
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
-			if (group)
-			{
-				if (type == 6)
-				{
-					if (name == group->getName())
-						group->setValue(gstDisplay, true);
-					else
-						group->setValue(gstDisplay, false);
-				}
-				else if (type == 5)
-					group->setValue(gstDisplay, false);
-				else
-				{
-					for (int i = 0; i < (int)group->getNumChildren(); i++)
-					{
-						fluo::MeshData* md = group->getChild(i)->asMeshData();
-						if (md)
-						{
-							if (type == 3 &&
-								name == md->getName())
-								md->setValue(gstDisplay, true);
-							else
-								md->setValue(gstDisplay, false);
-						}
-					}
-				}
-			}
-		}
-		break;
-		}
+		fluo::Object* layer = GetLayer(i);
+		if (!layer) continue;
+		if (name == layer->getName())
+			layer->setValue(gstDisplay, true);
+		else
+			layer->setValue(gstDisplay, false);
 	}
+
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
 }
@@ -6529,11 +6405,12 @@ void VRenderGLView::MoveLayerinView(const std::string &src_name, const std::stri
 {
 	int i, src_index;
 	fluo::Object* src = 0;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		if (m_layer_list[i] && src_name == m_layer_list[i]->getName())
+		fluo::Object* layer = GetLayer(i);
+		if (layer && src_name == layer->getName())
 		{
-			src = m_layer_list[i];
+			src = layer;
 			src_index = i;
 			m_layer_list.erase(m_layer_list.begin() + i);
 			break;
@@ -6541,9 +6418,10 @@ void VRenderGLView::MoveLayerinView(const std::string &src_name, const std::stri
 	}
 	if (!src)
 		return;
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		if (m_layer_list[i] && dst_name == m_layer_list[i]->getName())
+		fluo::Object* layer = GetLayer(i);
+		if (layer && dst_name == layer->getName())
 		{
 			if (i >= src_index)
 				m_layer_list.insert(m_layer_list.begin() + i + 1, src);
@@ -6558,64 +6436,11 @@ void VRenderGLView::MoveLayerinView(const std::string &src_name, const std::stri
 
 void VRenderGLView::ShowAll()
 {
-	for (unsigned int i = 0; i<m_layer_list.size(); ++i)
+	for (unsigned int i = 0; i < GetLayerNum(); ++i)
 	{
-		if (!m_layer_list[i]) continue;
-
-		switch (m_layer_list[i]->IsA())
-		{
-		case 2://volume
-		{
-			fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
-			if (vd)
-				vd->setValue(gstDisplay, true);
-		}
-		break;
-		case 3://mesh
-		{
-			fluo::MeshData* md = (fluo::MeshData*)m_layer_list[i];
-			if (md)
-				md->setValue(gstDisplay, true);
-		}
-		break;
-		case 4://annotation
-		{
-			fluo::Annotations* ann = (fluo::Annotations*)m_layer_list[i];
-			if (ann)
-				ann->setValue(gstDisplay, true);
-		}
-		break;
-		case 5:
-		{
-			fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group)
-			{
-				group->setValue(gstDisplay, true);
-				for (int j = 0; j<group->getNumChildren(); ++j)
-				{
-					fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
-					if (vd)
-						vd->setValue(gstDisplay, true);
-				}
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
-			if (group)
-			{
-				group->setValue(gstDisplay, true);
-				for (int j = 0; j<group->getNumChildren(); ++j)
-				{
-					fluo::MeshData* md = group->getChild(j)->asMeshData();
-					if (md)
-						md->setValue(gstDisplay, true);
-				}
-			}
-		}
-		break;
-		}
+		fluo::Object* layer = GetLayer(i);
+		if (layer)
+			layer->setValue(gstDisplay, true);
 	}
 	m_vd_pop_dirty = true;
 	m_md_pop_dirty = true;
@@ -6688,9 +6513,9 @@ void VRenderGLView::MoveLayertoView(const std::string &group_name, const std::st
 	}
 	else
 	{
-		for (i = 0; i<(int)m_layer_list.size(); i++)
+		for (i = 0; i<GetLayerNum(); i++)
 		{
-			std::string name = m_layer_list[i]->getName();
+			std::string name = GetLayer(i)->getName();
 			if (name == dst_name)
 			{
 				m_layer_list.insert(m_layer_list.begin() + i + 1, src_vd);
@@ -6709,16 +6534,16 @@ void VRenderGLView::MoveLayertoGroup(const std::string &group_name, const std::s
 	fluo::VolumeData* src_vd = 0;
 	int i;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		std::string name = m_layer_list[i]->getName();
-		if (name != src_name) continue;
-		//is volume data
-		src_vd = dynamic_cast<fluo::VolumeData*>(m_layer_list[i].get());
-		if (src_vd)
+		if (src_vd = dynamic_cast<fluo::VolumeData*>(GetLayer(i)))
 		{
-			m_layer_list.erase(m_layer_list.begin() + i);
-			break;
+			//is volume data
+			if (src_name == src_vd->getName())
+			{
+				m_layer_list.erase(m_layer_list.begin() + i);
+				break;
+			}
 		}
 	}
 	fluo::VolumeGroup* group = GetGroup(group_name);
@@ -6888,9 +6713,9 @@ void VRenderGLView::MoveMeshtoView(const std::string &group_name,
 		m_layer_list.push_back(src_md);
 	else
 	{
-		for (i = 0; i<(int)m_layer_list.size(); i++)
+		for (i = 0; i<GetLayerNum(); i++)
 		{
-			std::string name = m_layer_list[i]->getName();
+			std::string name = GetLayer(i)->getName();
 			if (name == dst_name)
 			{
 				m_layer_list.insert(m_layer_list.begin() + i + 1, src_md);
@@ -6909,11 +6734,11 @@ void VRenderGLView::MoveMeshtoGroup(const std::string &group_name,
 	fluo::MeshData* src_md = 0;
 	int i;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		std::string name = m_layer_list[i]->getName();
+		std::string name = GetLayer(i)->getName();
 		if (name != src_name) continue;
-		src_md = dynamic_cast<fluo::MeshData*>(m_layer_list[i].get());
+		if (src_md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
 		{
 			m_layer_list.erase(m_layer_list.begin() + i);
 			break;
@@ -6988,9 +6813,9 @@ int VRenderGLView::GetGroupNum()
 {
 	int group_num = 0;
 
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+	for (int i = 0; i<GetLayerNum(); i++)
 	{
-		fluo::VolumeGroup *group = dynamic_cast<fluo::VolumeGroup*>(m_layer_list[i].get());
+		fluo::VolumeGroup *group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i));
 		if (group)
 			group_num++;
 	}
@@ -7017,15 +6842,15 @@ std::string VRenderGLView::AddGroup(const std::string &str, const std::string &p
 		group->setName(str);
 
 	bool found_prev = false;
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+	for (int i = 0; i<GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		fluo::VolumeGroup* group_temp = dynamic_cast<fluo::VolumeGroup*>(m_layer_list[i].get());
-		if (group_temp && prev_group == group_temp->getName())
+		if (fluo::VolumeGroup* group_temp = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
 		{
-			m_layer_list.insert(m_layer_list.begin() + i + 1, group);
-			found_prev = true;
+			if (prev_group == group_temp->getName())
+			{
+				m_layer_list.insert(m_layer_list.begin() + i + 1, group);
+				found_prev = true;
+			}
 		}
 	}
 	if (!found_prev)
@@ -7063,23 +6888,16 @@ std::string VRenderGLView::AddGroup(const std::string &str, const std::string &p
 
 fluo::VolumeGroup* VRenderGLView::AddOrGetGroup()
 {
-	for (int i = 0; i < (int)m_layer_list.size(); i++)
+	for (int i = 0; i < GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
+		if (fluo::VolumeGroup* group_temp = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
 		{
-		case 5://group
-		{
-			fluo::VolumeGroup* group_temp = (fluo::VolumeGroup*)m_layer_list[i];
-			if (group_temp && !group_temp->getNumChildren())
+			if (!group_temp->getNumChildren())
 				return group_temp;
-		}
-		break;
 		}
 	}
 	//group not found
-	fluo::VolumeGroup* group = new fluo::VolumeGroup();
+	fluo::VolumeGroup* group = glbin_volf->buildGroup();
 	if (!group)
 		return 0;
 	//set default settings
@@ -7124,23 +6942,16 @@ std::string VRenderGLView::AddMGroup(const std::string &str)
 
 fluo::MeshGroup* VRenderGLView::AddOrGetMGroup()
 {
-	for (int i = 0; i < (int)m_layer_list.size(); i++)
+	for (int i = 0; i < GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
+		if (fluo::MeshGroup* group_temp = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
 		{
-		case 6://group
-		{
-			fluo::MeshGroup* group_temp = (fluo::MeshGroup*)m_layer_list[i];
 			if (group_temp && !group_temp->getNumChildren())
 				return group_temp;
 		}
-		break;
-		}
 	}
 	//group not found
-	fluo::MeshGroup* group = new fluo::MeshGroup();
+	fluo::MeshGroup* group = glbin_mshf->buildGroup();
 	if (!group)
 		return 0;
 	m_layer_list.push_back(group);
@@ -7151,18 +6962,12 @@ fluo::MeshGroup* VRenderGLView::GetMGroup(const std::string &str)
 {
 	int i;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (i = 0; i<GetLayerNum(); i++)
 	{
-		if (!m_layer_list[i])
-			continue;
-		switch (m_layer_list[i]->IsA())
+		if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
 		{
-		case 6://mesh group
-		{
-			fluo::MeshGroup* group = (fluo::MeshGroup*)m_layer_list[i];
 			if (group && str == group->getName())
 				return group;
-		}
 		}
 	}
 	return 0;
@@ -9185,23 +8990,18 @@ void VRenderGLView::StartLoopUpdate()
 				queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
 			}
 		}
-		else if (m_layer_list.size() > 0)
+		else if (GetLayerNum() > 0)
 		{
-			for (i = (int)m_layer_list.size() - 1; i >= 0; i--)
+			for (i = GetLayerNum() - 1; i >= 0; i--)
 			{
-				if (!m_layer_list[i])
-					continue;
-				switch (m_layer_list[i]->IsA())
+				if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(GetLayer(i)))
 				{
-				case 2://volume data (this won't happen now)
-				{
-					fluo::VolumeData* vd = (fluo::VolumeData*)m_layer_list[i];
 					vector<VolumeLoaderData> tmp_shade;
 					vector<VolumeLoaderData> tmp_shadow;
 					bool disp, multires;
 					vd->getValue(gstDisplay, disp);
 					vd->getValue(gstMultires, multires);
-					if (vd && disp && multires)
+					if (disp && multires)
 					{
 						flvr::Texture* tex = vd->GetTexture();
 						if (!tex)
@@ -9264,11 +9064,9 @@ void VRenderGLView::StartLoopUpdate()
 						}
 					}
 				}
-				break;
-				case 5://group
+				else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))//group
 				{
 					vector<fluo::VolumeData*> list;
-					fluo::VolumeGroup* group = (fluo::VolumeGroup*)m_layer_list[i];
 					bool disp;
 					group->getValue(gstDisplay, disp);
 					if (!disp)
@@ -9453,8 +9251,6 @@ void VRenderGLView::StartLoopUpdate()
 						}
 					}
 
-				}
-				break;
 				}
 			}
 		}
@@ -9802,7 +9598,7 @@ void VRenderGLView::GetTraces(bool update)
 			{
 				flrd::Celp cell(new flrd::Cell(label_value));
 				cell->Inc(ii, jj, kk, 1.0f);
-				sel_labels.insert(pair<unsigned int, flrd::Celp>
+				sel_labels.insert(std::pair<unsigned int, flrd::Celp>
 					(label_value, cell));
 			}
 			else

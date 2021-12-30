@@ -135,3 +135,9 @@ AnnotationFactory* Global::getAnnotationFactory()
 //		return 0;
 //	return dynamic_cast<Renderer3DFactory*>(obj);
 //}
+
+bool Global::checkName(const std::string &name)
+{
+	Object* obj = get(name);
+	return (obj != nullptr);
+}

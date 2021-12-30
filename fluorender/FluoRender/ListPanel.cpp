@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
-#include "DataManager.h"
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
@@ -96,11 +95,11 @@ DataListCtrl::~DataListCtrl()
 void DataListCtrl::Append(int type, const wxString &name, const wxString &path)
 {
 	long tmp = 0;
-	if (type == DATA_VOLUME)
+	if (type == 1)
 		tmp = InsertItem(GetItemCount(), "Volume");
-	else if (type == DATA_MESH)
+	else if (type == 2)
 		tmp = InsertItem(GetItemCount(), "Mesh");
-	else if (type == DATA_ANNOTATIONS)
+	else if (type == 3)
 		tmp = InsertItem(GetItemCount(), "Annotations");
 
 	SetItem(tmp, 1, name);
@@ -136,13 +135,13 @@ void DataListCtrl::SetSelection(int type, const wxString &name)
 	wxString str_type;
 	switch (type)
 	{
-	case DATA_VOLUME:
+	case 1:
 		str_type = "Volume";
 		break;
-	case DATA_MESH:
+	case 2:
 		str_type = "Mesh";
 		break;
-	case DATA_ANNOTATIONS:
+	case 3:
 		str_type = "Annotations";
 		break;
 	}
@@ -867,37 +866,18 @@ void DataListCtrl::EndEdit(bool update)
 		long item = GetNextItem(-1,
 			wxLIST_NEXT_ALL,
 			wxLIST_STATE_SELECTED);
-		DataManager* mgr = m_frame ? m_frame->GetDataManager() : 0;
-
-		if (item != -1 && mgr)
+		if (item != -1)
 		{
 			wxString name = GetText(item, 1);
 
 			if (new_name != name)
 			{
-				wxString new_name2 = new_name;
-				for (int i = 1; mgr->CheckNames(new_name2); i++)
-					new_name2 = new_name + wxString::Format("_%d", i);
-
-
-				if (GetItemText(item) == "Volume")
-				{
-					fluo::VolumeData* vd = mgr->GetVolumeData(name.ToStdString());
-					if (vd)
-						vd->setName(new_name2.ToStdString());
-				}
-				else if (GetItemText(item) == "Mesh")
-				{
-					fluo::MeshData* md = mgr->GetMeshData(name.ToStdString());
-					if (md)
-						md->setName(new_name2.ToStdString());
-				}
-				else if (GetItemText(item) == "Annotations")
-				{
-					fluo::Annotations* ann = mgr->GetAnnotations(name.ToStdString());
-					if (ann)
-						ann->setName(new_name2.ToStdString());
-				}
+				std::string new_name2 = new_name.ToStdString();
+				for (int i = 1; glbin.checkName(new_name2); i++)
+					new_name2 = new_name + "_" + std::to_string(i);
+				fluo::Object* obj = glbin.get(name.ToStdString());
+				if (obj)
+					obj->setName(new_name2);
 
 				//update ui
 				SetText(item, 1, new_name2);

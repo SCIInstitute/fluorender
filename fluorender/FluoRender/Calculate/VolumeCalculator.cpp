@@ -160,10 +160,8 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 			{
 				for (int i = 0; i < m_view->GetLayerNum(); i++)
 				{
-					TreeLayer* layer = m_view->GetLayer(i);
-					if (layer && layer->IsA() == 5)
+					if (fluo::VolumeGroup* tmp_group = dynamic_cast<fluo::VolumeGroup*>(m_view->GetLayer(i)))
 					{
-						fluo::VolumeGroup* tmp_group = (fluo::VolumeGroup*)layer;
 						for (int j = 0; j < tmp_group->getNumChildren(); j++)
 						{
 							fluo::VolumeData* tmp_vd = tmp_group->getChild(j)->asVolumeData();

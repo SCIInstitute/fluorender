@@ -61,6 +61,9 @@ namespace fluo
 		//Renderer2DFactory* getRenderer2DFactory();
 		//Renderer3DFactory* getRenderer3DFactory();
 
+		//check name duplication
+		bool checkName(const std::string &name);
+
 /*		inline size_t getNum()
 		{
 			size_t volume_num = volume_factory_->getNum();

@@ -196,10 +196,10 @@ public:
 	//views
 	int GetViewNum();
 	VRenderGLView* GetView(int index);
-	VRenderGLView* GetView(wxString& name);
+	VRenderGLView* GetView(const wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
-	void DeleteVRenderView(wxString &name);
+	void DeleteVRenderView(const wxString &name);
 
 	//organize render views
 	void OrganizeVRenderViews(int mode);
