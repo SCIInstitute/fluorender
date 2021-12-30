@@ -33,11 +33,16 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
+#include <msk_reader.h>
+#include <msk_writer.h>
+#include <lbl_reader.h>
+#include <FLIVR/VertexArray.h>
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Tracking/Tracks.h>
 #include <utility.h>
+#include <Nrrd/nrrd.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
 #include <iostream>

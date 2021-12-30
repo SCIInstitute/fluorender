@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "VRenderGLView.h"
 #include <VolumeData.hpp>
+#include <lbl_reader.h>
+#include <msk_writer.h>
+#include <FLIVR/VertexArray.h>
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>

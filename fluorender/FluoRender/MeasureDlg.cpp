@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "MeasureDlg.h"
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
+#include <FLIVR/VertexArray.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/DistCalculator.h>
 #include <Distance/RulerAlign.h>

@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
-#include "compatibility.h"
+#include <FLIVR/MeshRenderer.h>
+#include <compatibility.h>
 #include <wx/valnum.h>
 #include "png_resource.h"
 #include "img/icons.h"

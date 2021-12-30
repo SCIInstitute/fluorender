@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
+#include <base_reader.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include "key.xpm"

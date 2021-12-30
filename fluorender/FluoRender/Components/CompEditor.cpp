@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <Tracking/Tracks.h>
 #include <Tracking/VolCache.h>
+#include <lbl_reader.h>
+#include <msk_writer.h>
 #include <VRenderGLView.h>
 
 using namespace flrd;

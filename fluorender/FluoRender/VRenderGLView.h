@@ -114,8 +114,6 @@ DEALINGS IN THE SOFTWARE.
 
 #define ID_ftrigger	ID_VRENDER_VIEW1
 
-using namespace std;
-
 class VRenderFrame;
 class VRenderView;
 namespace fluo
@@ -167,7 +165,7 @@ public:
 	fluo::VolumeData* GetAllVolumeData(int index);
 	fluo::VolumeData* GetDispVolumeData(int index);
 	fluo::MeshData* GetMeshData(int index);
-	TreeLayer* GetLayer(int index);
+	fluo::Object* GetLayer(int index);
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
 	fluo::VolumeData* GetVolumeData(const std::string &name);
 	fluo::MeshData* GetMeshData(const std::string &name);
@@ -192,20 +190,20 @@ public:
 	void RemoveAnnotations(const std::string &name);
 	void RemoveGroup(const std::string &name);
 	//isolate
-	void Isolate(int type, wxString name);
+	void Isolate(int type, const std::string &name);
 	void ShowAll();
 	//move
-	void MoveLayerinView(wxString &src_name, wxString &dst_name);
+	void MoveLayerinView(const std::string &src_name, const std::string &dst_name);
 	//move volume
-	void MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name);
+	void MoveLayerinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayertoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayertoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveLayerfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name);
 	//move mesh
-	void MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name);
+	void MoveMeshinGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshtoView(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshtoGroup(const std::string &group_name, const std::string &src_name, const std::string &dst_name);
+	void MoveMeshfromtoGroup(const std::string &src_group_name, const std::string &dst_group_name, const std::string &src_name, const std::string &dst_name);
 	//
 	void PopVolumeList();
 	void PopMeshList();
@@ -520,7 +518,7 @@ public:
 
 	//draw highlighted comps
 	void DrawCells();
-	unsigned int DrawCellVerts(vector<float>& verts);
+	unsigned int DrawCellVerts(std::vector<float>& verts);
 	void GetCellPoints(fluo::BBox& box,
 		fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
 		fluo::Transform& mv, fluo::Transform& p);
@@ -739,13 +737,13 @@ private:
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	VRenderFrame* m_frame;
-	//populated lists of data
+	//temporary lists of data
 	bool m_vd_pop_dirty;
-	vector <fluo::VolumeData*> m_vd_pop_list;
+	std::vector <fluo::VolumeData*> m_vd_pop_list;
 	bool m_md_pop_dirty;
-	vector <fluo::MeshData*> m_md_pop_list;
+	std::vector <fluo::MeshData*> m_md_pop_list;
 	//real data list
-	vector <TreeLayer*> m_layer_list;
+	std::vector<fluo::ref_ptr<fluo::Object>> m_layer_list;
 	//ruler list
 	flrd::RulerList m_ruler_list;
 	flrd::Ruler *m_cur_ruler;
@@ -1093,13 +1091,13 @@ private:
 	void ClearVRBuffer();
 	void DrawVRBuffer();
 	//different volume drawing modes
-	void DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel = 0);
-	void DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask = false, int peel = 0);
+	void DrawVolumesMulti(std::vector<fluo::VolumeData*> &list, int peel = 0);
+	void DrawVolumesComp(std::vector<fluo::VolumeData*> &list, bool mask = false, int peel = 0);
 	void DrawMIP(fluo::VolumeData* vd, int peel = 0);
 	void DrawOVER(fluo::VolumeData* vd, bool mask, int peel = 0);
 	//overlay passes
 	void DrawOLShading(fluo::VolumeData* vd);
-	void DrawOLShadows(vector<fluo::VolumeData*> &vlist);
+	void DrawOLShadows(std::vector<fluo::VolumeData*> &vlist);
 	void DrawOLShadowsMesh(double darkenss);
 
 	//get mesh shadow
