@@ -382,7 +382,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 VolumeData* VolumeFactory::clone(const unsigned int id)
 {
 	Object* object = find(id);
-	std::cout << object->getId() << " " << object->getName() << std::endl;
+	//std::cout << object->getId() << " " << object->getName() << std::endl;
 	if (object)
 	{
 		VolumeData* vd = dynamic_cast<VolumeData*>(object);
