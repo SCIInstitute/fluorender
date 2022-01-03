@@ -50,6 +50,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstDefaultMesh "default mesh"
 #define gstAnnotationFactory "annotation factory"
 #define gstDefaultAnnotations "default annotations"
+#define gstRenderviewFactory "renderview factory"
+#define gstDefaultRenderview "default renderview"
 #define gstAgentFactory "agent factory"
 #define gstRenderer2DFactory "renderer2d factory"
 #define gstDefaultRenderer2D "default renderer2d"

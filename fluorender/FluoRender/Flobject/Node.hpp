@@ -32,10 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <CopyOp.hpp>
 #include <Object.hpp>
 
-
 #include <vector>
 #include <set>
-
 
 namespace fluo
 {
@@ -48,7 +46,7 @@ namespace fluo
 	class Annotations;
 	class Node;
 	class NodeVisitor;
-	class View;
+	class Renderview;
 	class Root;
 
 	typedef std::vector<Node*> ParentList;
@@ -88,8 +86,8 @@ namespace fluo
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
 		virtual Annotations* asAnnotations() { return 0; }
 		virtual const Annotations* asAnnotations() const { return 0; }
-		virtual View* asView() { return 0; }
-		virtual const View* asView() const { return 0; }
+		virtual Renderview* asRenderview() { return 0; }
+		virtual const Renderview* asRenderview() const { return 0; }
 		virtual Root* asRoot() { return 0; }
 		virtual const Root* asRoot() const { return 0; }
 
