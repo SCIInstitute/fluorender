@@ -6837,7 +6837,7 @@ fluo::Object* VRenderGLView::GetLayer(int index)
 
 std::string VRenderGLView::AddGroup(const std::string &str, const std::string &prev_group)
 {
-	fluo::VolumeGroup* group = new fluo::VolumeGroup();
+	fluo::VolumeGroup* group = glbin_volf->buildGroup();
 	if (group && str != "")
 		group->setName(str);
 
@@ -6883,7 +6883,7 @@ std::string VRenderGLView::AddGroup(const std::string &str, const std::string &p
 	if (group)
 		return group->getName();
 	else
-		return "";
+		return "Group";
 }
 
 fluo::VolumeGroup* VRenderGLView::AddOrGetGroup()

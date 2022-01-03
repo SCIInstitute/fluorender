@@ -1510,7 +1510,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 				{
 					for (int i=ch_num; i>0; i--)
 					{
-						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-i);
+						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(ch_num-i);
 						if (vd)
 						{
 							v->AddVolumeData(vd, group->getName());
@@ -1537,7 +1537,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLVi
 			}
 			else if (ch_num == 1)
 			{
-				fluo::VolumeData* vd = m_data_mgr.GetVolumeData(m_data_mgr.GetVolumeNum()-1);
+				fluo::VolumeData* vd = m_data_mgr.GetVolumeData(0);
 				if (vd)
 				{
 					int chan_num = v->GetDispVolumeNum();

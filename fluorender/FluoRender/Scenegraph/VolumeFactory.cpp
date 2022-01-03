@@ -340,6 +340,8 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 
 VolumeData* VolumeFactory::build(VolumeData* vd)
 {
+	if (vd)
+		return clone(vd);
 	unsigned int default_id = 0;
 	return clone(default_id);
 }
