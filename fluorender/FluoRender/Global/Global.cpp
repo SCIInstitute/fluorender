@@ -46,6 +46,7 @@ Global::Global()
 	origin_->setName(gstOrigin);
 	BuildTimer();
 	BuildFactories();
+	BuildPaths();
 }
 
 void Global::BuildTimer()
@@ -66,6 +67,18 @@ void Global::BuildFactories()
 	//BUILD_AND_ADD(AgentFactory, factory_group);
 	//BUILD_AND_ADD(Renderer2DFactory, factory_group);
 	//BUILD_AND_ADD(Renderer3DFactory, factory_group);
+	
+	//create default
+	//getVolumeFactory()->createDefault();
+	getMeshFactory()->createDefault();
+	getAnnotationFactory()->createDefault();
+}
+
+void Global::BuildPaths()
+{
+	Node* paths = new Node();
+	paths->setName(gstPaths);
+	origin_->addChild(paths);
 }
 
 Object* Global::get(const std::string &name)
@@ -140,4 +153,23 @@ bool Global::checkName(const std::string &name)
 {
 	Object* obj = get(name);
 	return (obj != nullptr);
+}
+
+//paths
+void Global::setExecutablePath(const std::wstring &path)
+{
+	Object* paths = get(gstPaths);
+	if (!paths)
+		return;
+	paths->addSetValue(gstExecutablePath, path);
+}
+
+std::wstring Global::getExecutablePath()
+{
+	Object* paths = get(gstPaths);
+	if (!paths)
+		return L"";
+	std::wstring path;
+	paths->getValue(gstExecutablePath, path);
+	return path;
 }

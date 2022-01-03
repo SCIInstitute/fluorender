@@ -33,8 +33,16 @@ DEALINGS IN THE SOFTWARE.
 
 //timer
 #define gstTimer "default timer"
+//paths
+#define gstPaths "paths"
+#define gstExecutablePath "executable path"
+
+//current object
+#define gstCurrent "current"
 
 //factories & defaults
+#define gstDefaultFile "default file"
+#define gstDefaultObject "default object"
 #define gstFactoryGroup "factory group"
 #define gstVolumeFactory "volume factory"
 #define gstDefaultVolume "default volume"

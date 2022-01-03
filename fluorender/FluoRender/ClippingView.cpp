@@ -647,11 +647,11 @@ void ClippingView::GetSettings()
 				distz = distz==0?1:distz;
 			}
 			m_yz_dist_text->SetValue(
-				wxString::Format("%d", distx));
+				wxString::Format("%.0f", distx));
 			m_xz_dist_text->SetValue(
-				wxString::Format("%d", disty));
+				wxString::Format("%.0f", disty));
 			m_xy_dist_text->SetValue(
-				wxString::Format("%d", distz));
+				wxString::Format("%.0f", distz));
 			m_vd->setValue(gstClipDistX, distx);
 			m_vd->setValue(gstClipDistY, disty);
 			m_vd->setValue(gstClipDistZ, distz);

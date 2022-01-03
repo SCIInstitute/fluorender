@@ -64,6 +64,10 @@ namespace fluo
 		//check name duplication
 		bool checkName(const std::string &name);
 
+		//paths
+		void setExecutablePath(const std::wstring &path);
+		std::wstring getExecutablePath();
+
 /*		inline size_t getNum()
 		{
 			size_t volume_num = volume_factory_->getNum();
@@ -146,11 +150,12 @@ namespace fluo
 
 	private:
 #define BUILD_AND_ADD(cls, par) \
-	{cls* obj = new cls();\
-	par->addChild(obj);}
+		{cls* obj = new cls();\
+		par->addChild(obj);}
 
 		void BuildTimer();
 		void BuildFactories();
+		void BuildPaths();
 	};
 }
 

@@ -152,9 +152,19 @@ namespace fluo
 			return result;
 		}
 
-		inline virtual Object* get(size_t i) { return objects_[i].get(); }
+		inline virtual Object* get(size_t i)
+		{
+			if (i < objects_.size())
+				return objects_[i].get();
+			return nullptr;
+		}
 
-		inline virtual const Object* get(size_t i) const { return objects_[i].get(); }
+		inline virtual const Object* get(size_t i) const
+		{
+			if (i < objects_.size())
+				return objects_[i].get();
+			return nullptr;
+		}
 
 		inline virtual Object* getLast()
 		{
@@ -302,7 +312,6 @@ namespace fluo
 		bool replaceDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 
 		std::string default_object_name_;
-		std::string default_setting_filename_value_name_;
 		static unsigned int global_id_;
 		unsigned int local_id_;
 

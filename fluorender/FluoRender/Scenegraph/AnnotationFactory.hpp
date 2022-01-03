@@ -45,6 +45,8 @@ namespace fluo
 
 		virtual const char* className() const { return "AnnotationFactory"; }
 
+		virtual void createDefault();
+
 		virtual Annotations* build(Annotations* ann = 0);
 
 		virtual Annotations* clone(Annotations*);
@@ -83,7 +85,6 @@ namespace fluo
 
 	protected:
 		virtual ~AnnotationFactory();
-		virtual void createDefault();
 	};
 }
 

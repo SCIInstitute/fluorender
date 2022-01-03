@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ObjectFactory.hpp>
+#include <Names.hpp>
 
 using namespace fluo;
 
@@ -38,9 +39,8 @@ ObjectFactory::ObjectFactory() :
 {
 	m_name = "object factory";
 	default_object_name_ = "default object";
-	default_setting_filename_value_name_ = "default filename";//maybe not necessary
 	std::string filename = "";
-	addValue(default_setting_filename_value_name_, filename);
+	addValue(gstDefaultFile, std::string(""));
 }
 
 ObjectFactory::~ObjectFactory()
@@ -237,7 +237,7 @@ bool ObjectFactory::writeDefault(std::ostream &os, const ValueCollection &names,
 bool ObjectFactory::readDefault(const ValueCollection &names)
 {
 	std::string filename;
-	getValue(default_setting_filename_value_name_, filename);
+	getValue(gstDefaultFile, filename);
 
 	using boost::property_tree::ptree;
 	ptree pt;
@@ -257,7 +257,7 @@ bool ObjectFactory::readDefault(const ValueCollection &names)
 bool ObjectFactory::writeDefault(const ValueCollection &names)
 {
 	std::string filename;
-	getValue(default_setting_filename_value_name_, filename);
+	getValue(gstDefaultFile, filename);
 
 	using boost::property_tree::ptree;
 	ptree pt;

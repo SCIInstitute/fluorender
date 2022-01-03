@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Timer.h>
 #include <Global.hpp>
+#include <VolumeFactory.hpp>
 #include "JVMInitializer.h"
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
@@ -119,6 +120,13 @@ bool VRenderApp::OnInit()
 
 	// Adding JVm initialization.
 	JVMInitializer*	pInstance = JVMInitializer::getInstance((((VRenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
+	
+	//global init
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	wxString dft = expath + "/Defaults/volume_data.dftx";
+	glbin_volf->setValue(gstDefaultFile, dft.ToStdString());
+
 	return true;
 }
 
