@@ -27,6 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Renderview.hpp"
+#include <Group.hpp>
+#include <Timer.h>
+#include <VolumeData.hpp>
+#include <MeshData.hpp>
+#include <VolumeLoader.h>
+#include <Global.hpp>
+#include <FLIVR/TextureRenderer.h>
+#include <FLIVR/ShaderProgram.h>
+#include <FLIVR/KernelProgram.h>
 
 using namespace fluo;
 
@@ -44,4 +53,28 @@ Renderview::~Renderview()
 {
 
 }
+
+void Renderview::Init()
+{
+	bool bval;
+	getValue(gstInitialized, bval);
+	if (!bval)
+	{
+		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
+		glEnable(GL_MULTISAMPLE);
+
+		setValue(gstInitialized, true);
+
+		glbin_timer->start();
+	}
+}
+
+void Renderview::Clear()
+{
+	m_loader->RemoveAllLoadedBrick();
+	flvr::TextureRenderer::clear_tex_pool();
+
+	setRvalu(gstCurrentVolume, (Referenced*)(0));
+}
+
 

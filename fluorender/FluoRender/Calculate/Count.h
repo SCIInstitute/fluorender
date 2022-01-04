@@ -28,8 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Count_h
 #define FL_Count_h
 
-using namespace std;
-
 namespace fluo
 {
 	class VolumeData;

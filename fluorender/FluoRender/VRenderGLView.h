@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VolumeLoader.h"
 #include "utility.h"
-#include "KernelExecutor.h"
+#include <Calculate/KernelExecutor.h>
 #include <Calculate/VolumeCalculator.h>
 #include <Selection/VolumeSelector.h>
 #include <Script/ScriptProc.h>
@@ -144,7 +144,6 @@ public:
 #ifdef _WIN32
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
-	wxString GetOGLVersion();
 	//initialization
 	void Init();
 
@@ -492,7 +491,7 @@ public:
 	//get volume calculator
 	flrd::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
 	//get kernel executor
-	KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
+	flrd::KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
 	//text renderer
 	flvr::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
 
@@ -733,7 +732,6 @@ private:
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	wxSize m_size;
-	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	VRenderFrame* m_frame;
@@ -925,7 +923,7 @@ private:
 	flrd::VolumeCalculator m_calculator;
 
 	//kernel executor
-	KernelExecutor m_kernel_executor;
+	flrd::KernelExecutor m_kernel_executor;
 
 	//scriptor
 	flrd::ScriptProc m_scriptor;

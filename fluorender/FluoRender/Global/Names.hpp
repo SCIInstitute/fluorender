@@ -253,4 +253,174 @@ DEALINGS IN THE SOFTWARE.
 #define gstLocation "location"
 #define gstInfo	"info"
 
+//specific to renderview
+#define gstInitialized "initialized"
+#define gstInitView "init view"
+#define gstCurrentVolume "current volume"
+#define gstSetGl "set gl"//set gl context
+#define gstRunScript "run script"//script run
+#define gstScriptFile "script file"
+#define gstCapture "capture"//capture modes
+#define gstCaptureRot "capture rot"
+#define gstCaptureRotOver "capture rot over"
+#define gstCaptureTime "capture time"
+#define gstCaptureBat "capture bat"
+#define gstCaptureParam "capture param"
+#define gstBeginFrame "begin frame"
+#define gstEndFrame "end frame"
+#define gstCurrentFrame "current frame"
+#define gstPreviousFrame "previous frame"
+#define gstParamFrame "param frame"
+#define gstTotalFrames "total frames"
+#define gstCaptureFile "capture file"
+#define gstBatFolder "bat folder"
+#define gstRetainFb "retain fb"//sometimes we don't redraw everything,
+								//just use the final buffer from last draw
+#define gstUpdating "updating"
+#define gstDrawAll "draw all"//draw settings
+#define gstDrawType "draw type"
+#define gstMixMethod "mix method"
+#define gstPeelNum "peel num"//peeling layer num
+#define gstMicroBlendEnable "micro blend enable"//mix at slice level
+#define gstDrawAnnotations "draw annotations"
+#define gstDrawCamCtr "draw cam ctr"
+#define gstCamCtrSize "cam ctr size"
+#define gstDrawInfo "draw info"
+#define gstLoadUpdate "load update"
+#define gstDrawFrame "draw frame"
+#define gstTestSpeed "test speed"
+#define gstDrawClip "draw clip"
+#define gstDrawLegend "draw legend"
+#define gstDrawColormap "draw colormap"
+#define gstMouseFocus "mouse focus"
+#define gstTestWiref "test wiref"
+#define gstDrawBounds "draw bounds"
+#define gstDrawGrid "draw grid"
+#define gstDrawRulers "draw rulers"
+#define gstClipMask "clip mask"//clipping settings
+#define gstClipMode "clip mode"//0-normal; 1-ortho planes; 2-rot difference
+#define gstDrawScaleBar "draw scale bar"//scale bar settings
+#define gstDrawScaleBarText "draw scale bar text"
+#define gstScaleBarLen "scale bar len"
+#define gstScaleBarPosX "scale bar pos x"
+#define gstScaleBarPosY "scale bar pos y"
+#define gstScaleBarUnit "scale bar unit"
+#define gstScaleBarText "scale bar text"
+#define gstScaleBarNum "scale bar num"
+#define gstScaleBarHeight "scale bar height"
+#define gstOrthoLeft "ortho left"//orthographic view size
+#define gstOrthoRight "ortho right"
+#define gstOrthoBottom "ortho bottom"
+#define gstOrthoTop "ortho top"
+#define gstScaleFactor "scale factor"//scale factor
+#define gstScaleFactorSaved "scale factor saved"
+#define gstScaleMode "scale mode"//zoom ratio meaning: 0-view; 1-pixel; 2-data(pixel*xy spc)
+#define gstAutoPinRotCtr "auto pin rot ctr"//pin rotation center
+#define gstPinRotCtr "pin rot ctr"
+#define gstRotCtrDirty "rot ctr dirty"//request rot ctr update
+#define gstPinThresh "pin thresh"//ray casting threshold value
+#define gstRotCtrPin "rot ctr pin"//rotation center point from pin
+#define gstPointVolumeMode "point volume mode"//0: use view plane; 1: use max value; 2: use accumulated value
+#define gstRulerUseTransf "ruler use transf"//ruler use volume transfer function
+#define gstRulerTransient "ruler transient"//ruler is time dependent
+#define gstLinkedRot "linked rot"
+#define gstPaintCount "paint count"//count voxels after painting
+#define gstPaintColocalize "paint colocalize"//compute colocalization after painting
+#define gstRulerRelax "ruler relax"//compute ruler relax after drawing
+#define gstDrawing "drawing"//is busy drawing
+#define gstRefresh "refresh"//flag to request refresh
+#define gstWidth "width"//from m_size
+#define gstHeight "height"//from m_size
+#define gstVolListDirty "vol list dirty"//request vol pop list update
+#define gstMshListDirty "msh list dirty"//request msh pop list update
+#define gstBgColor "background color"//bg
+#define gstBgColorInv "background color inv"//inverted background color
+#define gstGradBg "gradient background"
+#define gstAov "aov"//angle of view frustrum
+#define gstNearClip "near clip"
+#define gstFarClip "far clip"
+#define gstInterpolation "interpolation"
+#define gstInterMode "inter mode"  //interactive mode
+					 //1-normal viewing
+					 //2-painting
+					 //3-rotate clipping planes
+					 //4-one-time rendering update in painting mode
+					 //5-ruler mode
+					 //6-edit ruler
+					 //7-paint with locator
+					 //8-same as 4, but for paint ruler mode
+					 //9-move ruler
+					 //10-grow, click and hold to activate
+					 //11-lock ruler point for relaxing
+					 //12-grow with ruler
+					 //13-pencil with multipoint ruler
+					 //14-delete ruler point
+#define gstForceClear "force clear"//forced update
+#define gstInteractive "interactive"//currently user is interacting with view
+#define gstAdaptive "adaptive"//drawing quality is adaptive to speed
+#define gstClearBuffer "clear buffer"
+#define gstBrushState "brush state"  //sets the button state of the tree panel
+						//0-not set
+						//2-append
+						//3-erase
+						//4-diffuse
+						//8-solid
+#define gstGrowEnable "grow enable"//flag for grow is currently on for idle events
+#define gstResize "resize"//request to resize
+#define gstDrawBrush "draw brush"//brush settings
+#define gstPaintEnable "paint enable"
+#define gstPaintDisplay "paint display"
+#define gstClearPaint "clear paint"
+#define gstCurrentFb "current fb"//current 2d framebuffer
+#define gstPerspective "perspective"//camera settings
+#define gstFree "free"
+#define gstCamDist "cam dist"
+#define gstCamDistIni "cam dist ini"
+#define gstCamTransX "cam trans x"//camera translation
+#define gstCamTransY "cam trans y"
+#define gstCamTransZ "cam trans z"
+#define gstCamTransSavedX "cam trans saved x"
+#define gstCamTransSavedY "cam trans saved y"
+#define gstCamTransSavedZ "cam trans saved z"
+#define gstCamRotX "cam rot x"//camera rotation
+#define gstCamRotY "cam rot y"
+#define gstCamRotZ "cam rot z"
+#define gstCamRotSavedX "cam rot saved x"
+#define gstCamRotSavedY "cam rot saved y"
+#define gstCamRotSavedZ "cam rot saved z"
+#define gstCamRotZeroX "cam rot zero x"//camera rotation at zero setting
+#define gstCamRotZeroY "cam rot zero y"
+#define gstCamRotZeroZ "cam rot zero z"
+#define gstCamCtrX "cam ctr x"//camera center
+#define gstCamCtrY "cam ctr y"
+#define gstCamCtrZ "cam ctr z"
+#define gstCamCtrSavedX "cam ctr saved x"
+#define gstCamCtrSavedY "cam ctr saved y"
+#define gstCamCtrSavedZ "cam ctr saved z"
+#define gstCamRotQ "cam rot q"//rotation in quaternion
+#define gstCamRotZeroQ "cam rot zero q"//rotation at zero setting
+#define gstCamUp "cam up"//camera up vector
+#define gstCamHead "cam head"//camera heading vector
+#define gstObjCtrX "obj ctr x"//object center
+#define gstObjCtrY "obj ctr y"
+#define gstObjCtrZ "obj ctr z"
+#define gstObjTransX "obj trans x"//object translation
+#define gstObjTransY "obj trans y"
+#define gstObjTransZ "obj trans z"
+#define gstObjTransSavedX "obj trans saved x"
+#define gstObjTransSavedY "obj trans saved y"
+#define gstObjTransSavedZ "obj trans saved z"
+#define gstObjRotX "obj rot x"//object rotation
+#define gstObjRotY "obj rot y"
+#define gstObjRotZ "obj rot z"
+#define gstGearedEnable "geared enable"//enable geared rotation
+#define gstCamLockObjEnable "cam lock obj enable"//enable locking camera on a point
+#define gstCamLockCtr "cam lock ctr"
+#define gstCamLockPick "cam lock pick"//camera locking center by picking
+#define gstRadius "radius"//scene size in terms of radius of a sphere
+#define gstMouseX "mouse x"//mouse pos
+#define gstMouseY "mouse y"
+#define gstMousePrvX "mouse prv x"
+#define gstMousePrvY "mouse prv y"
+
 #endif//NAMES_HPP

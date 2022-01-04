@@ -324,6 +324,17 @@ inline void FIND_FILES(std::wstring m_path_name,
 	FindClose(hFind);
 }
 
+inline bool FILE_EXISTS(const std::string& name)
+{
+	if (FILE *file = fopen(name.c_str(), "r"))
+	{
+		fclose(file);
+		return true;
+	}
+	else
+		return false;
+}
+
 inline void SaveConfig(wxFileConfig &file, wxString str)
 {
 	str = "\x5c\x5c\x3f\x5c" + str;
@@ -642,6 +653,12 @@ inline int MkDir(std::string dirname)
 inline int MkDirW(std::wstring dirname)
 {
 	return mkdir(ws2s(dirname).c_str(), 0777);
+}
+
+inline bool FILE_EXISTS(const std::string& name)
+{
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
 }
 
 inline void SaveConfig(wxFileConfig &file, wxString str)

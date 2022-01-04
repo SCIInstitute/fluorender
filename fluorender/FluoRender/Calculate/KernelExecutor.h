@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _KERNELEXECUTOR_H_
 #define _KERNELEXECUTOR_H_
 
-#include <wx/string.h>
 #include <vector>
+#include <string>
 
 namespace fluo
 {
@@ -39,35 +39,38 @@ namespace flvr
 {
 	class KernelProgram;
 }
-class KernelExecutor
+namespace flrd
 {
-public:
-	KernelExecutor();
-	~KernelExecutor();
+	class KernelExecutor
+	{
+	public:
+		KernelExecutor();
+		~KernelExecutor();
 
-	void SetCode(wxString &code);
-	void LoadCode(wxString &filename);
-	void SetVolume(fluo::VolumeData *vd);
-	void SetDuplicate(bool dup);
-	fluo::VolumeData* GetVolume();
-	fluo::VolumeData* GetResult(bool pop);
-	bool GetMessage(wxString &msg);
+		void SetCode(const std::string &code);
+		void LoadCode(const std::string &filename);
+		void SetVolume(fluo::VolumeData *vd);
+		void SetDuplicate(bool dup);
+		fluo::VolumeData* GetVolume();
+		fluo::VolumeData* GetResult(bool pop);
+		bool GetMessage(std::string &msg);
 
-	bool Execute();
+		bool Execute();
 
-private:
-	fluo::VolumeData *m_vd;
-	std::vector<fluo::VolumeData*> m_vd_r;//result
-	bool m_duplicate;//whether duplicate the input volume
+	private:
+		fluo::VolumeData *m_vd;
+		std::vector<fluo::VolumeData*> m_vd_r;//result
+		bool m_duplicate;//whether duplicate the input volume
 
-	wxString m_code;
-	wxString m_message;
+		std::string m_code;
+		std::string m_message;
 
-	bool ExecuteKernel(flvr::KernelProgram* kernel,
-		unsigned int data_id, void* result,
-		size_t brick_x, size_t brick_y,
-		size_t brick_z, int chars);
+		bool ExecuteKernel(flvr::KernelProgram* kernel,
+			unsigned int data_id, void* result,
+			size_t brick_x, size_t brick_y,
+			size_t brick_z, int chars);
 
-};
+	};
+}
 
 #endif//_KERNELEXECUTOR_H_

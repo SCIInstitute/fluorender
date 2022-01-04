@@ -51,14 +51,7 @@ void RenderviewFactory::createDefault()
 		objects_.push_back(view);
 
 		//add default values here
-		//view->addValue(gstColor, Color());
-		//view->addRvalu(gstVolume, (Referenced*)0);
-		//view->addValue(gstTransform, Transform());
-		//view->addValue(gstDisplay, bool(true));
-		//view->addValue(gstMemo, std::string());
-		//view->addValue(gstMemoRo, bool(true));//memo is read only
-		//view->addValue(gstDataPath, std::wstring());
-		//view->addValue(gstInfoHeader, std::string());
+		view->addValue(gstSetGl, bool(false));
 	}
 }
 

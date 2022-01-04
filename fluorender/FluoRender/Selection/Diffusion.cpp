@@ -446,8 +446,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z()) };
-		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, 1.0, lo_thresh, hi_thresh };
-		cl_float4 loc3 = { 1.0f / gamma3d, gm_thresh, offset, sw };
+		cl_float4 loc2 = { float(inv ? -scalar_scale : scalar_scale), float(1.0), float(lo_thresh), float(hi_thresh) };
+		cl_float4 loc3 = { float(1.0f / gamma3d), float(gm_thresh), float(offset), float(sw) };
 		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);

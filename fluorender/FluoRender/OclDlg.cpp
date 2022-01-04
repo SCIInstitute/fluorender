@@ -26,8 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
-#include <VolumeData.hpp>
 #include "VRenderFrame.h"
+#include <VolumeData.hpp>
+#include <Calculate/KernelExecutor.h>
 #include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
@@ -323,7 +324,7 @@ void OclDlg::Execute()
 
 	if (!m_view)
 		return;
-	KernelExecutor* executor = m_view->GetKernelExecutor();
+	flrd::KernelExecutor* executor = m_view->GetKernelExecutor();
 	if (!executor)
 		return;
 
@@ -341,7 +342,7 @@ void OclDlg::Execute()
 		dup = false;
 
 	executor->SetVolume(vd);
-	executor->SetCode(code);
+	executor->SetCode(code.ToStdString());
 	executor->SetDuplicate(dup);
 	executor->Execute();
 
@@ -356,7 +357,7 @@ void OclDlg::Execute()
 	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
 	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
-	wxString str;
+	std::string str;
 	executor->GetMessage(str);
 	(*m_output_txt) << str;
 

@@ -10583,10 +10583,6 @@ int VRenderGLView::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
 }
 #endif
 
-wxString VRenderGLView::GetOGLVersion() {
-	return m_GLversion;
-}
-
 void VRenderGLView::SetLockCenter(int type)
 {
 	switch (type)

@@ -950,7 +950,7 @@ void ScriptProc::RunOpenCL()
 		i != vlist.end(); ++i)
 	{
 		(*i)->GetRenderer()->clear_tex_current();
-		executor->LoadCode(clname);
+		executor->LoadCode(clname.ToStdString());
 		executor->SetVolume(*i);
 		executor->SetDuplicate(true);
 		executor->Execute();

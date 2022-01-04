@@ -34,13 +34,15 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-#include <wx/wfstream.h>
-#include <wx/txtstrm.h>
-#include <boost/chrono.hpp>
+#include <compatibility.h>
+#include <chrono>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <fstream>
 
-using namespace boost::chrono;
+using namespace std::chrono;
+using namespace flrd;
 
 KernelExecutor::KernelExecutor()
 	: m_vd(0),
@@ -52,31 +54,32 @@ KernelExecutor::~KernelExecutor()
 {
 }
 
-void KernelExecutor::SetCode(wxString &code)
+void KernelExecutor::SetCode(const std::string &code)
 {
 	m_code = code;
 }
 
-void KernelExecutor::LoadCode(wxString &filename)
+void KernelExecutor::LoadCode(const std::string &filename)
 {
-	if (!wxFileExists(filename))
+	if (!FILE_EXISTS(filename))
 	{
 		m_message = "Kernel file " +
 			filename + " doesn't exist.\n";
 		return;
 	}
-	wxFileInputStream input(filename);
-	wxTextInputStream cl_file(input);
-	if (!input.IsOk())
+	std::ifstream ifs(filename, std::ios::in);
+	if (ifs.bad())
 	{
 		m_message = "Kernel file " +
 			filename + " reading failed.\n";
 		return;
 	}
 	m_code = "";
-	while (!input.Eof())
+	std::string str;
+	while (!ifs.eof())
 	{
-		m_code += cl_file.ReadLine();
+		std::getline(ifs, str);
+		m_code += str;
 		m_code += "\n";
 	}
 	m_message = "Kernel file " +
@@ -110,7 +113,7 @@ fluo::VolumeData* KernelExecutor::GetResult(bool pop)
 	return vd;
 }
 
-bool KernelExecutor::GetMessage(wxString &msg)
+bool KernelExecutor::GetMessage(std::string &msg)
 {
 	if (m_message == "")
 		return false;
@@ -231,7 +234,7 @@ bool KernelExecutor::Execute()
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel =
 			flvr::VolumeRenderer::vol_kernel_factory_.
-			kernel(m_code.ToStdString(), bits);
+			kernel(m_code, bits);
 		if (kernel)
 		{
 			m_message += "OpenCL kernel created.\n";
