@@ -44,7 +44,7 @@ VolumeDecompressorThread::~VolumeDecompressorThread()
 
 wxThread::ExitCode VolumeDecompressorThread::Entry()
 {
-/*	unsigned int st_time = GET_TICK_COUNT();
+/*	unsigned long long st_time = GET_TICK_COUNT();
 
 	m_vl->m_pThreadCS.Enter();
 	m_vl->m_running_decomp_th++;
@@ -120,7 +120,7 @@ VolumeLoaderThread::~VolumeLoaderThread()
 
 wxThread::ExitCode VolumeLoaderThread::Entry()
 {
-	//unsigned int st_time = GET_TICK_COUNT();
+	//unsigned long long st_time = GET_TICK_COUNT();
 
 	while (m_vl->m_running_decomp_th > 0)
 	{

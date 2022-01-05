@@ -28,13 +28,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Diffusion_h
 #define FL_Diffusion_h
 
-#include <vector>
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-
 using namespace std;
 
+class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+}
+namespace fluo
+{
+	class Point;
+}
 namespace flrd
 {
 	class Diffusion

@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <base_reader.h>
 #include <stdio.h>
-//#include <windows.h>
 #include <vector>
 #include <fstream>
 #include <iostream>

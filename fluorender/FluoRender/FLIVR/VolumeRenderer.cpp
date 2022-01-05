@@ -804,7 +804,7 @@ namespace flvr
 			//comment off when debug_ds
 			//if (mem_swap_)
 			//{
-			//	uint32_t rn_time = GET_TICK_COUNT();
+			//	unsigned long long rn_time = GET_TICK_COUNT();
 			//	if (rn_time - st_time_ > get_up_time())
 			//		break;
 			//}

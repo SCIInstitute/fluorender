@@ -65,6 +65,10 @@ namespace flrd
 		m_level_thresh(2),
 		m_merge(false),
 		m_split(false),
+		m_max_iter(25),
+		m_eps(1e-3),
+		m_filter(1),
+		m_stencil_thresh(2),
 		m_map(track_map) {}
 		~TrackMapProcessor();
 
@@ -75,6 +79,10 @@ namespace flrd
 		void SetUncertainLow(unsigned int value);
 		void SetMerge(bool value);
 		void SetSplit(bool value);
+		void SetMaxIter(int value);
+		void SetEps(float value);
+		void SetFilterSize(size_t value);
+		void SetStencilThresh(const fluo::Point &value);
 
 		void SetSizes(size_t nx, size_t ny, size_t nz);
 		void SetBits(size_t bits);
@@ -155,7 +163,9 @@ namespace flrd
 		void GetPaths(CelpList &cell_list, PathList &path_list, size_t frame1, size_t frame2);
 
 		//tracking by matching user input
-		bool TrackStencils(size_t frame1, size_t frame2);
+		//mode: 0-compare adj; 1-compare start;
+		bool TrackStencils(size_t frame1, size_t frame2,
+			fluo::Vector &ext, int mode, size_t start);
 
 		//connect and disconnect functions for cache queue
 		typedef boost::function<void (VolCache&)> func_cache;
@@ -167,8 +177,12 @@ namespace flrd
 		float m_size_thresh;
 		float m_similar_thresh;
 		int m_level_thresh;
+		int m_max_iter;
+		float m_eps;
+		size_t m_filter;
 		bool m_merge;
 		bool m_split;
+		fluo::Point m_stencil_thresh;
 		//uncertainty filter
 		unsigned int m_uncertain_low;
 		//the trackmap
@@ -400,6 +414,26 @@ namespace flrd
 	inline void TrackMapProcessor::SetSplit(bool value)
 	{
 		m_split = value;
+	}
+
+	inline void TrackMapProcessor::SetMaxIter(int value)
+	{
+		m_max_iter = value;
+	}
+
+	inline void TrackMapProcessor::SetEps(float value)
+	{
+		m_eps = value;
+	}
+
+	inline void TrackMapProcessor::SetFilterSize(size_t value)
+	{
+		m_filter = value;
+	}
+
+	inline void TrackMapProcessor::SetStencilThresh(const fluo::Point &value)
+	{
+		m_stencil_thresh = value;
 	}
 
 	inline void TrackMapProcessor::WriteBool(std::ofstream& ofs, const bool value)

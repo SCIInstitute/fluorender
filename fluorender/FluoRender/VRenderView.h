@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "VRenderGLView.h"
 
+class VRenderFrame;
 class VRenderView: public wxPanel
 {
 public:
@@ -81,147 +82,20 @@ public:
 		ID_FreeChk
 	};
 
-	VRenderView(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	VRenderView(VRenderFrame* frame,
 		wxGLContext* sharedContext=0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0);
 	~VRenderView();
 
-	//recalculate view according to object bounds
-	void InitView(unsigned int type=INIT_BOUNDS);
-
-	//clear layers
-	void Clear();
-
-	//data management
-	int GetAny();
-	int GetDispVolumeNum();
-	int GetAllVolumeNum();
-	int GetMeshNum();
-	int GetGroupNum();
-	int GetLayerNum();
-	VolumeData* GetAllVolumeData(int index);
-	VolumeData* GetDispVolumeData(int index);
-	MeshData* GetMeshData(int index);
-	TreeLayer* GetLayer(int index);
-	flvr::MultiVolumeRenderer* GetMultiVolumeData();
-	VolumeData* GetVolumeData(wxString &name);
-	MeshData* GetMeshData(wxString &name);
-	Annotations* GetAnnotations(wxString &name);
-	DataGroup* GetGroup(wxString &name);
-	DataGroup* GetGroup(int index);
-	DataGroup* AddVolumeData(VolumeData* vd, wxString group_name="");
-	void AddMeshData(MeshData* md);
-	void AddAnnotations(Annotations* ann);
-	wxString AddGroup(wxString str = "", wxString prev_group="");
-	DataGroup* AddOrGetGroup();
-	wxString AddMGroup(wxString str = "");
-	MeshGroup* AddOrGetMGroup();
-	MeshGroup* GetMGroup(wxString &name);
-	void RemoveVolumeData(wxString &name);
-	void RemoveVolumeDataDup(wxString &name);
-	void RemoveMeshData(wxString &name);
-	void RemoveAnnotations(wxString &name);
-	void RemoveGroup(wxString &name);
-	void Isolate(int type, wxString name);
-	void ShowAll();
-	//move
-	void MoveLayerinView(wxString &src_name, wxString &dst_name);
-	//move volume
-	void MoveLayerinGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayertoView(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayertoGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveLayerfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name);
-	//move mesh
-	void MoveMeshinGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshtoView(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshtoGroup(wxString &group_name, wxString &src_name, wxString &dst_name);
-	void MoveMeshfromtoGroup(wxString &src_group_name, wxString &dst_group_name, wxString &src_name, wxString &dst_name);
-	//reorganize layers in view
-	void OrganizeLayers();
-	//randomize color
-	void RandomizeColor();
-
-	//toggle hiding/displaying
-	void SetDraw(bool draw);
-	void ToggleDraw();
-	bool GetDraw();
-
-	//camera operations
-	void GetTranslations(double &transx, double &transy, double &transz);
-	void SetTranslations(double transx, double transy, double transz);
-	void GetRotations(double &rotx, double &roty, double &rotz);
-	void SetRotations(double rotx, double roty, double rotz, bool ui_update=true);
-	void GetCenters(double &ctrx, double &ctry, double &ctrz);
-	void SetCenters(double ctrx, double ctry, double ctrz);
-	double GetCenterEyeDist();
-	void SetCenterEyeDist(double dist);
-	double GetRadius();
-	void SetRadius(double r);
+	//update
+	void UpdateView(bool ui_update = true);
 	void UpdateScaleFactor(bool update_text = true);
 	void SetScaleFactor(double s, bool update);
 	void SetScaleMode(int mode, bool update);
-
-	//object operations
-	void GetObjCenters(double &ctrx, double &ctry, double &ctrz);
-	void SetObjCenters(double ctrx, double ctry, double ctrz);
-	void GetObjTrans(double &transx, double &transy, double &transz);
-	void SetObjTrans(double transx, double transy, double transz);
-	void GetObjRot(double &rotx, double &roty, double &rotz);
-	void SetObjRot(double rotx, double roty, double rotz);
-
-	//camera properties
-	bool GetPersp() {if (m_glview) return m_glview->GetPersp(); else return true;}
-	void SetPersp(bool persp) {if (m_glview) m_glview->SetPersp(persp);}
-	bool GetFree() {if (m_glview) return m_glview->GetFree(); else return false;}
-	void SetFree(bool free) {if (m_glview) m_glview->SetFree(free);}
-	double GetAov();
-	void SetAov(double aov);
-	double GetNearClip();
-	void SetNearClip(double nc);
-	double GetFarClip();
-	void SetFarClip(double fc);
-
-	//background color
-	fluo::Color GetBackgroundColor();
-	fluo::Color GetTextColor();
-	void SetBackgroundColor(fluo::Color &color);
-	void SetGradBg(bool val);
-
 	//rot center anchor thresh
 	void SetPinThreshold(double value);
-
-	//point volume mode
-	void SetPointVolumeMode(int mode);
-	int GetPointVolumeMode();
-
-	//ruler uses transfer function
-	void SetRulerUseTransf(bool val);
-	bool GetRulerUseTransf();
-
-	//ruler time dependent
-	void SetRulerTimeDep(bool val);
-	bool GetRulerTimeDep();
-
-	//disply modes
-	int GetDrawType();
-	void SetVolMethod(int method);
-	int GetVolMethod();
-
-	//other properties
-	void SetFog(bool b=true);
-	bool GetFog();
-	void SetFogIntensity(double i);
-	double GetFogIntensity();
-	void SetPeelingLayers(int n);
-	int GetPeelingLayers();
-	void SetBlendSlices(bool val);
-	bool GetBlendSlices();
-	void SetAdaptive(bool val);
-	bool GetAdaptive();
 
 	//reset counter
 	static void ResetID();
@@ -231,226 +105,6 @@ public:
 
 	//refresh glview
 	void RefreshGL(bool intactive=true, bool start_loop=true);
-
-	//movie export
-	//get frame info
-	//4d sequence
-	void Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame)
-	{
-		if (m_glview)
-			m_glview->Get4DSeqFrames(start_frame, end_frame, cur_frame);
-	}
-	void Set4DSeqFrame(int frame, bool run_script)
-	{
-		if (m_glview)
-			m_glview->Set4DSeqFrame(frame, run_script);
-	}
-	//3d batch
-	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame)
-	{
-		if (m_glview)
-			m_glview->Get3DBatFrames(start_frame, end_frame, cur_frame);
-	}
-	void Set3DBatFrame(int offset)
-	{
-		if (m_glview)
-			m_glview->Set3DBatFrame(offset);
-	}
-	//set movie export
-	void Set3DRotCapture(double start_angle,
-		double end_angle,
-		double step,
-		int frames,
-		int rot_axis,
-		wxString &cap_file,
-		bool rewind,
-		int len = 4)
-	{
-		if (m_glview)
-			m_glview->Set3DRotCapture(start_angle, end_angle, step, frames, rot_axis, cap_file, rewind, len);
-	}
-	void Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
-	{
-		if (m_glview)
-			m_glview->Set4DSeqCapture(cap_file, begin_frame, end_frame, rewind);
-	}
-	void Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
-	{
-		if (m_glview)
-			m_glview->Set3DBatCapture(cap_file, begin_frame, end_frame);
-	}
-	void SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
-	{
-		if (m_glview)
-			m_glview->SetParamCapture(cap_file, begin_frame, end_frame, rewind);
-	}
-	void SetParams(double p) {
-		if (m_glview)
-			m_glview->SetParams(p);
-	}
-	//reset & stop
-	void ResetMovieAngle()
-	{
-		if (m_glview)
-			m_glview->ResetMovieAngle();
-	}
-	void StopMovie()
-	{
-		if (m_glview)
-			m_glview->StopMovie();
-	}
-
-	//movie frame
-	void EnableFrame()
-	{
-		if (m_glview) m_glview->EnableFrame();
-	}
-	void DisableFrame()
-	{
-		if (m_glview) m_glview->DisableFrame();
-	}
-	void SetFrame(int x, int y, int w, int h)
-	{
-		if (m_glview) m_glview->SetFrame(x, y, w, h);
-	}
-	void GetFrame(int &x, int &y, int &w, int &h)
-	{
-		if (m_glview) m_glview->GetFrame(x, y, w, h);
-	}
-	void CalcFrame()
-	{
-		if (m_glview) m_glview->CalcFrame();
-	}
-	bool GetFrameEnabled()
-	{
-		if (m_glview) return m_glview->m_draw_frame;
-		return false;
-	}
-	wxSize GetGLSize()
-	{
-		if (m_glview) return m_glview->GetSize();
-		else return wxSize(0, 0);
-	}
-	//scale bar
-	void SetScaleBarLen(double len)
-	{if (m_glview) m_glview->SetScaleBarLen(len);}
-
-	//set dirty
-	void SetVolPopDirty()
-	{if (m_glview) m_glview->SetVolPopDirty();}
-	void SetMeshPopDirty()
-	{if (m_glview) m_glview->SetMeshPopDirty();}
-	//clear
-	void ClearVolList()
-	{if (m_glview) m_glview->ClearVolList();}
-	void ClearMeshList()
-	{if (m_glview) m_glview->ClearMeshList();}
-
-	//inteactive mode selection
-	int GetIntMode()
-	{if (m_glview) return m_glview->GetIntMode(); else return 1;}
-	void SetIntMode(int mode = 1)
-	{if (m_glview) m_glview->SetIntMode(mode);}
-
-	//set paint use 2d results
-	void SetPaintUse2d(bool use2d)
-	{if (m_glview) m_glview->SetPaintUse2d(use2d);}
-	bool GetPaintUse2d()
-	{if (m_glview) return m_glview->GetPaintUse2d(); else return false;}
-
-	//segmentation mode selection
-	void SetPaintMode(int mode)
-	{if (m_glview) m_glview->SetPaintMode(mode);}
-	int GetPaintMode()
-	{if (m_glview) return m_glview->GetPaintMode(); else return 0;}
-
-	//segment volumes in current view
-	void Segment()
-	{if (m_glview) m_glview->Segment();}
-
-	//calculations
-	void SetVolumeA(VolumeData* vd)
-	{if (m_glview) m_glview->SetVolumeA(vd);}
-	void SetVolumeB(VolumeData* vd)
-	{if (m_glview) m_glview->SetVolumeB(vd);}
-	//void Calculate(int type, wxString prev_group="")
-	//{if (m_glview) return m_glview->Calculate(type, prev_group);}
-
-	//set clip mode
-	void SetClipMode(int mode)
-	{
-		if (m_glview) m_glview->SetClipMode(mode);
-	}
-	int GetClipMode()
-	{
-		if (m_glview) return m_glview->GetClipMode();
-		return 0;
-	}
-	//restore clipping planes
-	void RestorePlanes()
-	{
-		if (m_glview) m_glview->RestorePlanes();
-	}
-	void SetClippingPlaneRotations(double rotx, double roty, double rotz)
-	{
-		if (m_glview) m_glview->SetClippingPlaneRotations(rotx, roty, rotz);
-	}
-	void GetClippingPlaneRotations(double &rotx, double &roty, double &rotz)
-	{
-		if (m_glview) m_glview->GetClippingPlaneRotations(rotx, roty, rotz);
-	}
-
-	//get volume selector
-	flrd::VolumeSelector* GetVolumeSelector()
-	{
-		if (m_glview) return m_glview->GetVolumeSelector(); else return 0;
-	}
-	//get volume calculator
-	flrd::VolumeCalculator* GetVolumeCalculator()
-	{
-		if (m_glview) return m_glview->GetVolumeCalculator(); else return 0;
-	}
-	//get kernel executor
-	KernelExecutor* GetKernelExecutor()
-	{
-		if (m_glview) return m_glview->GetKernelExecutor(); else return 0;
-	}
-
-	//rulers
-	flrd::RulerList* GetRulerList()
-	{
-		if (m_glview) return m_glview->GetRulerList(); else return 0;
-	}
-	flrd::Ruler* GetRuler(unsigned int id)
-	{
-		if (m_glview) return m_glview->GetRuler(id); else return 0;
-	}
-	flrd::RulerHandler* GetRulerHandler()
-	{
-		if (m_glview) return &m_glview->m_ruler_handler; else return 0;
-	}
-
-	//traces
-	void CreateTraceGroup()
-	{
-		if (m_glview) m_glview->CreateTraceGroup();
-	}
-	TraceGroup* GetTraceGroup()
-	{
-		if (m_glview) return m_glview->GetTraceGroup(); else return 0;
-	}
-	int LoadTraceGroup(wxString filename)
-	{
-		if (m_glview) return m_glview->LoadTraceGroup(filename); else return 0;
-	}
-	int SaveTraceGroup(wxString filename)
-	{
-		if (m_glview) return m_glview->SaveTraceGroup(filename); else return 0;
-	}
-	void ExportTrace(wxString filename, unsigned int id)
-	{
-		if (m_glview) m_glview->ExportTrace(filename, id);
-	}
 
 	//bit mask for items to save
 	bool m_default_saved;
@@ -465,14 +119,6 @@ public:
 #ifdef _WIN32
 		if (m_glview) m_glview->InitOpenVR();
 #endif
-	}
-	void SetStereo(bool bval)
-	{
-		if (m_glview) m_glview->SetStereo(bval);
-	}
-	void SetEyeDist(double dval)
-	{
-		if (m_glview) m_glview->SetEyeDist(dval);
 	}
 
 public:
@@ -560,9 +206,6 @@ private:
 	void CreateBar();
 	//load default settings from file
 	void LoadSettings();
-
-	//update
-	void UpdateView(bool ui_update=true);
 
 	//bar top
 	void OnVolumeMethodCheck(wxCommandEvent& event);

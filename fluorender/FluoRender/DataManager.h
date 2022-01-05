@@ -25,10 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <GL/glew.h>
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
 
+#include <GL/glew.h>
 #include "compatibility.h"
 #include <vector>
 #include <string.h>
@@ -248,7 +248,7 @@ public:
 	double GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b=0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void GetResize(bool &resize, int &nx, int &ny, int &nz);
-	void Save(wxString &filename, int mode, bool crop,
+	void Save(wxString &filename, int mode, bool crop, int filter,
 		bool bake, bool compress, fluo::Quaternion &q);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);
@@ -412,6 +412,8 @@ public:
 	bool GetInvert();
 
 	//mask mode
+	void SetLabelMode(int mode) { m_label_mode = mode; }
+	int GetLabelMode() { return m_label_mode; }
 	void SetMaskMode(int mode);
 	int GetMaskMode();
 
@@ -500,6 +502,7 @@ private:
 	int m_stream_mode;	//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 
 	//mask mode
+	int m_label_mode;	//0-not used, 1-show label
 	int m_mask_mode;	//0-normal, 1-render with mask, 2-render with mask excluded,
 						//3-random color with label, 4-random color with label+mask
 	bool m_use_mask_threshold;// use mask threshold
@@ -896,13 +899,11 @@ public:
 	bool DivideCells(flrd::CelpList &list, size_t frame);
 	bool ReplaceCellID(unsigned int old_id, unsigned int new_id, size_t frame);
 
-	//sparse tracking
-	bool TrackStencils();
-
 	//rulers
 	bool GetMappedRulers(flrd::RulerList &rulers);
 
 	//i/o
+	void Clear();
 	bool Load(wxString &filename);
 	bool Save(wxString &filename);
 
@@ -1058,6 +1059,7 @@ public:
 	void SetShadowParams(double val);
 	void SetMode(int mode);
 	void SetAlphaPower(double val);
+	void SetLabelMode(int mode);
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
@@ -1267,11 +1269,14 @@ public:
 	bool GetOverrideVox()
 	{ return m_override_vox; }
 
-	//flags for pvxml flipping
+	//flags for pvxml settings
 	void SetPvxmlFlipX(bool flip) {m_pvxml_flip_x = flip;}
 	bool GetPvxmlFlipX() {return m_pvxml_flip_x;}
 	void SetPvxmlFlipY(bool flip) {m_pvxml_flip_y = flip;}
 	bool GetPvxmlFlipY() {return m_pvxml_flip_y;}
+	void SetPvxmlSeqType(int value) { m_pvxml_seq_type = value; }
+	int GetPvxmlSeqType() { return m_pvxml_seq_type; }
+
 public:
 	//default values
 	//volume
@@ -1304,6 +1309,7 @@ public:
 	bool m_vol_shw;		//enable shadow
 	double m_vol_swi;	//shadow intensity
 	bool m_vol_trp;		//hi transp
+	int m_vol_com;		//component display
 
 	bool m_vol_test_wiref;		//wireframe mode
 
@@ -1341,6 +1347,7 @@ private:
 	//flgs for pvxml flipping
 	bool m_pvxml_flip_x;
 	bool m_pvxml_flip_y;
+	int m_pvxml_seq_type;
 };
 
 #endif//_DATAMANAGER_H_

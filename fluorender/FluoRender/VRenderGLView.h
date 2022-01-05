@@ -50,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/BBox.h>
 #include <Types/Quaternion.h>
 #include "compatibility.h"
+#include <Timer.h>
 
 #include <wx/wx.h>
 #include <wx/clrpicker.h>
@@ -60,13 +61,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <stdarg.h>
-#include "NV/Timer.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _WIN32
-//#include <Windows.h>
 //wacom support
 #include <wx/msw/private.h>
 #include <MSGPACK.h>
@@ -119,14 +118,13 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderView;
 class VRenderFrame;
+class VRenderView;
 class VRenderGLView : public wxGLCanvas
 {
 public:
-	VRenderGLView(wxWindow* frame,
-		wxWindow* parent,
-		wxWindowID id,
+	VRenderGLView(VRenderFrame* frame,
+		VRenderView* parent,
 		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,
@@ -142,6 +140,7 @@ public:
 	//initialization
 	void Init();
 
+	void ClearAll();
 	//Clear all layers
 	void Clear();
 
@@ -343,17 +342,24 @@ public:
 	double GetFarClip() { return m_far_clip; }
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
+	//intearctive
+	void SetInteractive(bool val) { m_interactive = val; }
+	bool GetInteractive() { return m_interactive; }
+
 	//background color
 	fluo::Color GetBackgroundColor();
 	fluo::Color GetTextColor();
 	void SetBackgroundColor(fluo::Color &color);
-	void SetGradBg(bool val);
+	void SetGradBg(bool val) { m_grad_bg = val; }
+	void SetPointVolumeMode(int val) { m_point_volume_mode = val; }
+	void SetRulerUseTransf(bool val) { m_ruler_use_transf = val; }
+	void SetRulerTimeDep(bool val) { m_ruler_time_dep = val; }
 
 	//disply modes
 	int GetDrawType() { return m_draw_type; }
 	void SetVolMethod(int method);
 	int GetVolMethod() { return m_vol_method; }
-	void SetFog(bool b = true) { m_use_fog = b; }
+	void SetFog(bool b = true);
 	bool GetFog() { return m_use_fog; }
 	void SetFogIntensity(double i) { m_fog_intensity = i; }
 	double GetFogIntensity() { return m_fog_intensity; }
@@ -385,13 +391,13 @@ public:
 	void ResetMovieAngle();
 	void StopMovie();
 	//4d movie frame calculation
-	void Get4DSeqFrames(int &start_frame, int &end_frame, int &cur_frame);
-	void Set4DSeqFrame(int frame, bool run_script);
-	void UpdateVolumeData(int frame, bool run_script,
-		VolumeData* vd, VRenderFrame* vframe);
+	void Get4DSeqRange(int &start_frame, int &end_frame);
+	void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind);
+	void UpdateVolumeData(int frame, VolumeData* vd);
+	void ReloadVolumeData(int frame);
 	//3d batch file calculation
-	void Get3DBatFrames(int &start_frame, int &end_frame, int &cur_frame);
-	void Set3DBatFrame(int offset);
+	void Get3DBatRange(int &start_frame, int &end_frame);
+	void Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind);
 
 	//frame for capturing
 	void EnableFrame() { m_draw_frame = true; }
@@ -488,6 +494,7 @@ public:
 	//run 4d script
 	void SetRun4DScript(bool runscript) { m_run_script = runscript; }
 	bool GetRun4DScript() { return m_run_script; }
+	void SetScriptFile(wxString &str) { m_script_file = str; }
 
 	//start loop update
 	void StartLoopUpdate();
@@ -623,6 +630,7 @@ public:
 	void UpdateClips();
 
 public:
+	VRenderView* m_vrv;
 	//set gl context
 	bool m_set_gl;
 	//script run
@@ -720,8 +728,7 @@ private:
 	wxString m_GLversion;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
-	wxWindow* m_frame;
-	VRenderView* m_vrv;
+	VRenderFrame* m_frame;
 	//populated lists of data
 	bool m_vd_pop_dirty;
 	vector <VolumeData*> m_vd_pop_list;
@@ -862,7 +869,7 @@ private:
 	double m_end_angle;
 	double m_cur_angle;
 	double m_step;
-	int m_rot_axis; //1-X; 2-Y; 3-Z;
+	int m_rot_axis; //0-X; 1-Y; 2-Z;
 	int m_movie_seq;
 	bool m_rewind;
 	int m_stages; //0-moving to start angle; 1-moving to end; 2-rewind
@@ -916,7 +923,7 @@ private:
 	flrd::ScriptProc m_scriptor;
 
 	//timer
-	nv::Timer *m_timer;
+	Fltimer *m_timer;
 
 	//timer for full screen
 	wxTimer m_fullscreen_trigger;
