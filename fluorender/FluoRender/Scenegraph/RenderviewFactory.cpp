@@ -51,7 +51,37 @@ void RenderviewFactory::createDefault()
 		objects_.push_back(view);
 
 		//add default values here
+		view->addValue(gstInitialized, bool(false));
+		view->addValue(gstInitView, bool(false));
+		view->addRvalu(gstCurrentVolume, (Referenced*)(0));
 		view->addValue(gstSetGl, bool(false));
+		view->addValue(gstRunScript, bool(false));
+		view->addValue(gstScriptFile, std::string(""));
+		view->addValue(gstCapture, bool(false));
+		view->addValue(gstCaptureRot, bool(false));
+		view->addValue(gstCaptureRotOver, bool(false));
+		view->addValue(gstCaptureTime, bool(false));
+		view->addValue(gstCaptureBat, bool(false));
+		view->addValue(gstCaptureParam, bool(false));
+		view->addValue(gstBeginFrame, long(0));
+		view->addValue(gstEndFrame, long(0));
+		view->addValue(gstCurrentFrame, long(0));
+		view->addValue(gstPreviousFrame, long(0));
+		view->addValue(gstParamFrame, long(0));
+		view->addValue(gstTotalFrames, long(0));
+		view->addValue(gstCaptureFile, std::string(""));
+		view->addValue(gstBatFolder, std::string(""));
+		view->addValue(gstRetainFb, bool(false));
+		view->addValue(gstUpdating, bool(true));
+		view->addValue(gstDrawAll, bool(true));
+		view->addValue(gstDrawType, long(1));
+		view->addValue(gstDrawMask, bool(true));
+		view->addValue(gstMixMethod, long(Renderview::MIX_METHOD_SEQ));
+		view->addValue(gstPeelNum, long(1));
+		view->addValue(gstMicroBlendEnable, bool(false));
+		view->addValue(gstDrawAnnotations, bool(true));
+		view->addValue(gstDrawCamCtr, bool(false));
+		view->addValue(gstCamCtrSize, double(2.0));
 	}
 }
 

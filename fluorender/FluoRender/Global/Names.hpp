@@ -279,6 +279,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstUpdating "updating"
 #define gstDrawAll "draw all"//draw settings
 #define gstDrawType "draw type"
+#define gstDrawMask "draw mask"
 #define gstMixMethod "mix method"
 #define gstPeelNum "peel num"//peeling layer num
 #define gstMicroBlendEnable "micro blend enable"//mix at slice level
@@ -401,6 +402,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstCamRotZeroQ "cam rot zero q"//rotation at zero setting
 #define gstCamUp "cam up"//camera up vector
 #define gstCamHead "cam head"//camera heading vector
+#define gstClipRotQ "clip rot q"//clipping plane rotation
+#define gstClipRotZeroQ "clip rot zero q"
+#define gstClipRotX "clip rot x"
+#define gstClipRotY "clip rot y"
+#define gstClipRotZ "clip rot z"
 #define gstObjCtrX "obj ctr x"//object center
 #define gstObjCtrY "obj ctr y"
 #define gstObjCtrZ "obj ctr z"
@@ -422,5 +428,62 @@ DEALINGS IN THE SOFTWARE.
 #define gstMouseY "mouse y"
 #define gstMousePrvX "mouse prv x"
 #define gstMousePrvY "mouse prv y"
+#define gstMovInitAng "mov init ang"//movie properties
+#define gstMovStartAng "mov start ang"
+#define gstMovEndAng "mov end ang"
+#define gstMovCurAng "mov cur ang"
+#define gstMovStep "mov step"
+#define gstMovRotAxis "mov rot axis"//0-X; 1-Y; 2-Z;
+#define gstMovSeqNum "mov seq num"
+#define gstMovRewind "mov rewind"
+#define gstMovStage "mov stage"//0-moving to start angle; 1-moving to end; 2-rewind
+#define gstMovRewind4d "mov rewind 4d"
+#define gstCropX "crop x"//movie frame properties
+#define gstCropY "crop y"
+#define gstCropW "crop w"
+#define gstCropH "crop h"
+#define gstColor1 "color1"//colormap settings
+#define gstColor2 "color2"
+#define gstColor3 "color3"
+#define gstColor4 "color4"
+#define gstColor5 "color5"
+#define gstColor6 "color6"
+#define gstColor7 "color7"
+#define gstColVal1 "col val 1"
+#define gstColVal2 "col val 2"
+#define gstColVal3 "col val 3"
+#define gstColVal4 "col val 4"
+#define gstColVal5 "col val 5"
+#define gstColVal6 "col val 6"
+#define gstColVal7 "col val 7"
+#define gstPick "pick"//for selection
+#define gstPreDraw "pre draw"
+#define gstTextSize "text size"
+#define gstKeepEnlarge "keep enlarge"
+#define gstEnlarge "enlarge"
+#define gstEnlargeScale "enlarge scale"
+#define gstBenchmark "benchmark"
+#define gstNodrawCount "nodraw count"
+#define gstLoadMainThread "load main thread"
+#define gstResMode "res mode"
+#define gstTouchEnable "touch enable"
+#define gstPtr1Id "ptr1 id"
+#define gstPtr1X "ptr1 x"
+#define gstPtr1Y "ptr1 y"
+#define gstPtr1XSave "ptr1 x save"
+#define gstPtr1YSave "ptr1 y save"
+#define gstPtr2Id "ptr2 id"
+#define gstPtr2X "ptr2 x"
+#define gstPtr2Y "ptr2 y"
+#define gstPtr2XSave "ptr2 x save"
+#define gstPtr2YSave "ptr2 y save"
+#define gstFullScreen "full screen"
+#define gstVrEnable "vr enable"
+#define gstOpenvrEnable "openvr enable"
+#define gstVrSizeX "vr size x"
+#define gstVrSizeY "vr size y"
+#define gstVrEyeOffset "vr eye offset"
+#define gstVrEyeIdx "vr eye idx"//0-left;1-right
+
 
 #endif//NAMES_HPP
