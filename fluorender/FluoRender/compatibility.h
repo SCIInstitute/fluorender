@@ -500,7 +500,7 @@ inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
-inline time_t TIME(time_t* n) { return time(n); }
+inline time_t TIME() { return time(NULL); }
 
 typedef union _LARGE_INTEGER {
 	struct {
