@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_BackgStat_h
 
 #include <vector>
+#include <string>
 #include <map>
 
 using namespace std;
