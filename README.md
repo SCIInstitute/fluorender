@@ -32,10 +32,10 @@ We recommend building FluoRender outside of the source tree. <br/>
 
 1) Clone the latest wxWidgets using GIT (<code>git clone git@github.com:wxWidgets/wxWidgets.git</code>).
    
-   * The steps following will assume the wxWidgets root directory is at <code>~/wxWidgets</code>
+   * The steps following will assume the wxWidgets root directory is at <code>/wxWidgets</code>
 
 2) Build wxWidgets from the command line.
-   * <code>cd ~/wxWidgets/</code>
+   * <code>cd /wxWidgets/</code>
    
    * <code>mkdir mybuild</code>
    
@@ -51,7 +51,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * Build boost using <code>./bootstrap.sh</code> and <code>./b2</code> in the boost directory.
    
-   * The steps following will assume the boost root directory is at <code>~/boost_1_xx_0</code> (your version might differ).
+   * The steps following will assume the boost root directory is at <code>/boost_1_xx_0</code> (your version might differ).
 
 4) Get homebrew, libtiff, and freetype
 
@@ -71,7 +71,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * <code>cd build</code><br/>
 
-   * <code>cmake -G Xcode -DwxWidgets_CONFIG_EXECUTABLE="/wxWidgets/mybuild/wx-config" -DwxWidgets_wxrc_EXECUTABLE="/wxWidgets/mybuild/utils/wxrc/wxrc" -DwxWidgets_USE_DEBUG=ON -DwxWidgets_ROOT_DIR="~/wxWidgets" -DBoost_INCLUDE_DIR="/Users/YourUserName/boost_1_xx_0" -DCMAKE_BUILD_TYPE="Debug" ..</code> (replace directories with your versions)
+   * <code>cmake -G Xcode -DwxWidgets_CONFIG_EXECUTABLE="/wxWidgets/mybuild/wx-config" -DwxWidgets_wxrc_EXECUTABLE="/wxWidgets/mybuild/utils/wxrc/wxrc" -DwxWidgets_USE_DEBUG=ON -DwxWidgets_ROOT_DIR="/wxWidgets" -DBoost_INCLUDE_DIR="/Users/YourUserName/boost_1_xx_0" -DCMAKE_BUILD_TYPE="Debug" ..</code> (replace directories with your versions)
 
 5) Open the Xcode file generated to build and run FluoRender.
 
