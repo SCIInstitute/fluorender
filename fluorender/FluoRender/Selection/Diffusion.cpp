@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <vector>
-#include <stddef.h>
 #ifdef _DEBUG
 #include <fstream>
 #endif
