@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Diffusion_h
 #define FL_Diffusion_h
 
-using namespace std;
+#include <stddef.h>
 
 namespace flvr
 {

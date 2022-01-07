@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_BackgStat_h
 
 #include <vector>
+#include <string>
 #include <map>
 
 using namespace std;
@@ -81,28 +82,36 @@ namespace flrd
 		void Run();
 		std::string GetTypeName(int index = 0)
 		{
+			std::string result = "n/a";
 			switch (m_type)
 			{
 			case 0:
-				return "bkg_mean";
+				result = "bkg_mean";
+				break;
 			case 1:
 				switch (index)
 				{
 				case 0:
-					return "bkg_min";
+					result = "bkg_min";
+					break;
 				case 1:
-					return "bkg_max";
+					result = "bkg_max";
+					break;
 				}
+				break;
 			case 2:
 				switch (index)
 				{
 				case 0:
-					return "bkg_median";
+					result = "bkg_median";
+					break;
 				case 1:
-					return "bkg_mode";
+					result = "bkg_mode";
+					break;
 				}
+				break;
 			}
-			return "n/a";
+			return result;
 		}
 		float GetResultf(int index = 0)
 		{
