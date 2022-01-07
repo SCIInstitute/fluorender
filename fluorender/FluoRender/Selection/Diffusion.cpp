@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <vector>
+#include <stddef.h>
 #ifdef _DEBUG
 #include <fstream>
 #endif
@@ -192,7 +193,7 @@ bool Diffusion::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -294,7 +295,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	cl_float4 p[6];
 	if (m_vd && m_vd->GetVR())
 	{
-		vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+		std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -307,7 +308,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
@@ -394,7 +395,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	if (m_vd && m_vd->GetVR())
 	{
 		flvr::VolumeRenderer* vr = m_vd->GetVR();
-		vector<fluo::Plane*> *planes = vr->get_planes();
+		std::vector<fluo::Plane*> *planes = vr->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -417,7 +418,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
