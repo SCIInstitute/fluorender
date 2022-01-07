@@ -71,7 +71,7 @@ We recommend building FluoRender outside of the source tree. <br/>
    
    * <code>cd build</code><br/>
 
-   * <code>cmake -G Xcode -DwxWidgets_CONFIG_EXECUTABLE="/wxWidgets/mybuild/wx-config" -DwxWidgets_wxrc_EXECUTABLE="/wxWidgets/mybuild/utils/wxrc/wxrc" -DwxWidgets_USE_DEBUG=ON -DwxWidgets_ROOT_DIR="/wxWidgets" -DBoost_INCLUDE_DIR="/Users/YourUserName/boost_1_xx_0" -DCMAKE_BUILD_TYPE="Debug" ..</code> (replace directories with your versions)
+   * <code>cmake -G Xcode -DwxWidgets_CONFIG_EXECUTABLE="/wxWidgets/mybuild/wx-config" -DwxWidgets_wxrc_EXECUTABLE="/wxWidgets/mybuild/utils/wxrc/wxrc" -DwxWidgets_USE_DEBUG=ON -DwxWidgets_ROOT_DIR="/wxWidgets" -DBoost_INCLUDE_DIR="/Users/YourUserName/boost_1_xx_0" -DJAVA_AWT_INCLUDE_PATH="/Library/Java/JavaVirtualMachines/jdk-xx.x.x.jdk/Contents/Home/include" -DJAVA_INCLUDE_PATH="/Library/Java/JavaVirtualMachines/jdk-xx.x.x.jdk/Contents/Home/include" -DJAVA_INCLUDE_PATH2="/Library/Java/JavaVirtualMachines/jdk-xx.x.x.jdk/Contents/Home/include/darwin" -DCMAKE_BUILD_TYPE="Debug" ..</code> (replace directories with your versions)
 
 5) Open the Xcode file generated to build and run FluoRender.
 
