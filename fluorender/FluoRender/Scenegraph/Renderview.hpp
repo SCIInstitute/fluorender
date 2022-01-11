@@ -97,6 +97,23 @@ namespace fluo
 			INIT_ROTATE = 1 << 3,
 			INIT_OBJ_TRANSL = 1 << 4,
 		};
+		//plane modes
+		enum ClipPlaneModes
+		{
+			kNormal,
+			kFrame,
+			kLowTrans,
+			kLowTransBack,
+			kNormalBack,
+			kNone
+		};
+		//clipping plane winding
+		enum ClipPlaneWinding
+		{
+			CULL_OFF = 0,
+			FRONT_FACE = 1,
+			BACK_FACE = 2
+		};
 
 		Renderview();
 		Renderview(const Renderview& view, const CopyOp& copyop = CopyOp::SHALLOW_COPY);

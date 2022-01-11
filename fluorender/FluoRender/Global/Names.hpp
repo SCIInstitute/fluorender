@@ -254,6 +254,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstInfo	"info"
 
 //specific to renderview
+#define gstUseDefault "use default"
+#define gstClipLinkChan "clip link chan"
+#define gstClipPlaneMode "clip plane mode"
 #define gstInitialized "initialized"
 #define gstInitView "init view"
 #define gstCurrentVolume "current volume"
@@ -334,6 +337,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstHeight "height"//from m_size
 #define gstVolListDirty "vol list dirty"//request vol pop list update
 #define gstMshListDirty "msh list dirty"//request msh pop list update
+#define gstTextColor "text color"//text color
 #define gstBgColor "background color"//bg
 #define gstBgColorInv "background color inv"//inverted background color
 #define gstGradBg "gradient background"

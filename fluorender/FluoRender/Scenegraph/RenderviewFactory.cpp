@@ -51,6 +51,29 @@ void RenderviewFactory::createDefault()
 		objects_.push_back(view);
 
 		//add default values here
+		//common
+		view->addValue(gstBounds, BBox());
+		view->addValue(gstDepthAtten, bool(false));
+		view->addValue(gstDaInt, double(0.5));
+		view->addValue(gstDaStart, double(0));
+		view->addValue(gstDaEnd, double(1));
+		//output (2d) adjustments
+		view->addValue(gstGammaR, double(1));
+		view->addValue(gstGammaG, double(1));
+		view->addValue(gstGammaB, double(1));
+		view->addValue(gstBrightnessR, double(1));
+		view->addValue(gstBrightnessG, double(1));
+		view->addValue(gstBrightnessB, double(1));
+		view->addValue(gstEqualizeR, double(0));
+		view->addValue(gstEqualizeG, double(0));
+		view->addValue(gstEqualizeB, double(0));
+		view->addValue(gstSyncR, bool(false));
+		view->addValue(gstSyncG, bool(false));
+		view->addValue(gstSyncB, bool(false));
+		//special
+		view->addValue(gstUseDefault, bool(false));
+		view->addValue(gstClipLinkChan, bool(false));
+		view->addValue(gstClipPlaneMode, long(Renderview::kNormal));
 		view->addValue(gstInitialized, bool(false));
 		view->addValue(gstInitView, bool(false));
 		view->addRvalu(gstCurrentVolume, (Referenced*)(0));
@@ -130,6 +153,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstHeight, long(0));
 		view->addValue(gstVolListDirty, bool(true));
 		view->addValue(gstMshListDirty, bool(false));
+		view->addValue(gstTextColor, Color());
 		view->addValue(gstBgColor, Color(0.0));
 		view->addValue(gstBgColorInv, Color(1.0));
 		view->addValue(gstGradBg, bool(false));
