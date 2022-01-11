@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/ImgShader.h>
 #include <FLIVR/VertexArray.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace fluo;
 
@@ -639,6 +640,154 @@ void Renderview::PopMeshList()
 	visitor.getResult(m_msh_list);
 
 	setValue(gstMshListDirty, false);
+}
+
+void Renderview::ClearVolList()
+{
+	m_loader->RemoveAllLoadedBrick();
+	flvr::TextureRenderer::clear_tex_pool();
+	m_vol_list.clear();
+}
+
+void Renderview::ClearMeshList()
+{
+	m_msh_list.clear();
+}
+
+void Renderview::HandleProjection(int nx, int ny, bool vr)
+{
+	bool bval;
+	getValue(gstFree, bval);
+	double radius, aov, scale_factor, distance;
+	getValue(gstRadius, radius);
+	getValue(gstAov, aov);
+	getValue(gstScaleFactor, scale_factor);
+	if (!bval)
+	{
+		distance = radius / tan(d2r(aov / 2.0)) / scale_factor;
+		setValue(gstCamDist, distance);
+	}
+
+	double aspect = (double)nx / (double)ny;
+	double ortho_left = -radius * aspect / scale_factor;
+	double ortho_right = -ortho_left;
+	double ortho_bottom = -radius / scale_factor;
+	double ortho_top = -ortho_bottom;
+	setValue(gstOrthoLeft, ortho_left);
+	setValue(gstOrthoRight, ortho_right);
+	setValue(gstOrthoBottom, ortho_bottom);
+	setValue(gstOrthoTop, ortho_top);
+
+	double nc, fc;
+	getValue(gstNearClip, nc);
+	getValue(gstFarClip, fc);
+	getValue(gstOpenvrEnable, bval);
+	if (vr && bval)
+	{
+#ifdef _WIN32
+		//get projection matrix
+		long lval;
+		getValue(gstVrEyeIdx, lval);
+		vr::EVREye eye = lval ? vr::Eye_Right : vr::Eye_Left;
+		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, nc, fc);
+		static int ti[] = { 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 };
+		for (int i = 0; i < 16; ++i)
+			glm::value_ptr(m_proj_mat)[i] =
+			((float*)(proj_mat.m))[ti[i]];
+#endif
+	}
+	else
+	{
+		getValue(gstPerspective, bval);
+		if (bval)
+		{
+			m_proj_mat = glm::perspective(glm::radians(aov), aspect, nc, fc);
+		}
+		else
+		{
+			m_proj_mat = glm::ortho(ortho_left, ortho_right, ortho_bottom, ortho_top,
+				-fc / 100.0, fc);
+		}
+	}
+}
+
+void Renderview::HandleCamera(bool vr)
+{
+	double dx, dy, dz;
+	getValue(gstTransX, dx);
+	getValue(gstTransY, dy);
+	getValue(gstTransZ, dz);
+	Vector pos(dx, dy, dz);
+	pos.normalize();
+	bool bval;
+	getValue(gstFree, bval);
+	if (bval)
+		pos *= 0.1;
+	else
+	{
+		double distance;
+		getValue(gstCamDist, distance);
+		pos *= distance;
+	}
+	glm::vec3 eye(pos.x(), pos.y(), pos.z());
+	glm::vec3 center(0.0);
+	Vector vval;
+	getValue(gstCamUp, vval);
+	glm::vec3 up(vval.x(), vval.y(), vval.z());
+
+	if (bval)
+	{
+		getValue(gstCamCtrX, dx);
+		getValue(gstCamCtrY, dy);
+		getValue(gstCamCtrZ, dz);
+		center = glm::vec3(dx, dy, dz);
+		eye += center;
+	}
+
+	getValue(gstVrEnable, bval);
+	if (vr && bval)
+	{
+		long lval;
+		getValue(gstVrEyeIdx, lval);
+		double dval;
+		getValue(gstVrEyeOffset, dval);
+		glm::vec3 offset((lval ? 1.0 : -1.0) * dval / 2.0, 0.0, 0.0);
+		m_mv_mat = glm::lookAt(
+			eye + offset,
+			center + offset,
+			up);
+	}
+	else
+	{
+		m_mv_mat = glm::lookAt(eye, center, up);
+	}
+
+	getValue(gstCamLockObjEnable, bval);
+	if (bval)
+	{
+		Point pval;
+		getValue(gstCamLockCtr, pval);
+		//rotate first
+		glm::vec3 v1(0, 0, -1);//initial cam direction
+		glm::mat4 mv_mat = GetDrawMat();
+		glm::vec4 lock_ctr(pval.x(), pval.y(), pval.z(), 1);
+		lock_ctr = mv_mat * lock_ctr;
+		glm::vec3 v2(lock_ctr);
+		v2 = glm::normalize(v2);
+		float c = glm::dot(v1, v2);
+		if (std::abs(std::abs(c) - 1) < fluo::Epsilon())
+			return;
+		glm::vec3 v = glm::cross(v1, v2);
+		glm::mat3 vx(
+			0, -v.z, v.y,
+			v.z, 0, -v.x,
+			-v.y, v.x, 0);
+		glm::mat3 vx2 = vx * vx;
+		glm::mat3 rot3(1);
+		rot3 += vx + vx2 / (1 + c);
+		glm::mat4 rot4(rot3);
+		m_mv_mat = rot4 * glm::lookAt(eye, center, up);
+	}
 }
 
 
