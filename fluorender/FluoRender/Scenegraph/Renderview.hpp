@@ -58,6 +58,7 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 class VolumeLoader;
+class Interpolator;
 namespace flrd
 {
 	class VolumeSelector;
@@ -79,6 +80,7 @@ namespace flvr
 }
 namespace fluo
 {
+	class RenderviewFactory;
 	class Renderview : public Group
 	{
 	public:
@@ -155,14 +157,14 @@ namespace fluo
 		void HandleCamera(bool vr = false);
 
 		//movie capture
-		void Set3DRotCapture(const std::string &cap_file, double start_angle, double end_angle,
-			double step, int frames, int rot_axis, bool rewind, int len);
+		void Set3DRotCapture(const std::wstring &cap_file, double start_angle, double end_angle,
+			double step, long frames, long rot_axis, bool rewind);
 		//time sequence data
-		void Set4DSeqCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind);
+		void Set4DSeqCapture(const std::wstring &cap_file, long begin_frame, long end_frame, bool rewind);
 		//batch files
-		void Set3DBatCapture(const std::string &cap_file, int begin_frame, int end_frame);
+		void Set3DBatCapture(const std::wstring &cap_file, long begin_frame, long end_frame);
 		//parameter recording/capture
-		void SetParamCapture(const std::string &cap_file, int begin_frame, int end_frame, bool rewind);
+		void SetParamCapture(const std::wstring &cap_file, long begin_frame, long end_frame, bool rewind);
 		//set parameters
 		void SetParams(double t);
 		//reset and stop
@@ -216,9 +218,9 @@ namespace fluo
 		//traces
 		flrd::Tracks* GetTraceGroup();
 		void CreateTraceGroup();
-		int LoadTraceGroup(const std::string &filename);
-		int SaveTraceGroup(const std::string &filename);
-		void ExportTrace(const std::string &filename, unsigned int id);
+		int LoadTraceGroup(const std::wstring &filename);
+		int SaveTraceGroup(const std::wstring &filename);
+		void ExportTrace(const std::wstring &filename, unsigned int id);
 		void DrawTraces();
 		void GetTraces(bool update = false);
 
@@ -384,6 +386,8 @@ namespace fluo
 		void InitOpenVR();
 #endif
 
+		friend class RenderviewFactory;
+
 	protected:
 		virtual ~Renderview();
 
@@ -414,6 +418,7 @@ namespace fluo
 		flrd::RulerRenderer *m_ruler_renderer;
 		flrd::VolumePoint *m_vp;
 		VolumeLoader *m_loader;
+		Interpolator* m_interpolator;
 
 		//glm matrices
 		glm::mat4 m_mv_mat;
@@ -433,6 +438,12 @@ namespace fluo
 		XboxController* m_controller;
 #endif
 #endif
+
+		private:
+			void OnCamRotChanged(Event& event);//update rotation
+			void OnPerspectiveChanged(Event& event);
+			void OnVolListDirtyChanged(Event& event);
+			void OnMshListDirtyChanged(Event& event);
 	};
 }
 

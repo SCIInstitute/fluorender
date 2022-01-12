@@ -79,7 +79,7 @@ void RenderviewFactory::createDefault()
 		view->addRvalu(gstCurrentVolume, (Referenced*)(0));
 		view->addValue(gstSetGl, bool(false));
 		view->addValue(gstRunScript, bool(false));
-		view->addValue(gstScriptFile, std::string(""));
+		view->addValue(gstScriptFile, std::wstring(L""));
 		view->addValue(gstCapture, bool(false));
 		view->addValue(gstCaptureRot, bool(false));
 		view->addValue(gstCaptureRotOver, bool(false));
@@ -92,8 +92,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstPreviousFrame, long(0));
 		view->addValue(gstParamFrame, long(0));
 		view->addValue(gstTotalFrames, long(0));
-		view->addValue(gstCaptureFile, std::string(""));
-		view->addValue(gstBatFolder, std::string(""));
+		view->addValue(gstCaptureFile, std::wstring(L""));
+		view->addValue(gstBatFolder, std::wstring(L""));
 		view->addValue(gstRetainFb, bool(false));
 		view->addValue(gstUpdating, bool(true));
 		view->addValue(gstDrawAll, bool(true));
@@ -286,6 +286,26 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstVrEyeOffset, double(6));
 		view->addValue(gstVrEyeIdx, long(0));
 	}
+}
+
+#define ADD_BEFORE_EVENT(obj, name, funct) \
+	obj->setValueChangingFunction(name, std::bind(&Renderview::funct, obj, std::placeholders::_1))
+
+#define ADD_AFTER_EVENT(obj, name, funct) \
+	obj->setValueChangedFunction(name, std::bind(&Renderview::funct, obj, std::placeholders::_1))
+
+void RenderviewFactory::setEventHandler(Renderview* view)
+{
+	//handle before events
+	//ADD_BEFORE_EVENT(view, gstMipMode, OnMipModeChanging);
+
+	//handle after events
+	ADD_AFTER_EVENT(view, gstCamRotX, OnCamRotChanged);
+	ADD_AFTER_EVENT(view, gstCamRotY, OnCamRotChanged);
+	ADD_AFTER_EVENT(view, gstCamRotZ, OnCamRotChanged);
+	ADD_AFTER_EVENT(view, gstPerspective, OnPerspectiveChanged);
+	ADD_AFTER_EVENT(view, gstVolListDirty, OnVolListDirtyChanged);
+	ADD_AFTER_EVENT(view, gstMshListDirty, OnMshListDirtyChanged);
 }
 
 Renderview* RenderviewFactory::build(Renderview* view)

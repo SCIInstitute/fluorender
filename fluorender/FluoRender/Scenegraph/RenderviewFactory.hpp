@@ -47,6 +47,8 @@ namespace fluo
 
 		virtual void createDefault();
 
+		virtual void setEventHandler(Renderview* view);
+
 		virtual Renderview* build(Renderview* view = 0);
 
 		virtual Renderview* clone(Renderview*);

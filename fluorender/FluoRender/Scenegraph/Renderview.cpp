@@ -29,11 +29,15 @@ DEALINGS IN THE SOFTWARE.
 #include "Renderview.hpp"
 #include <Group.hpp>
 #include <Timer.h>
+#include <RenderviewFactory.hpp>
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
 #include <NodeVisitor.hpp>
 #include <Global.hpp>
+#include <SearchVisitor.hpp>
 #include <VolumeLoader.h>
+#include <compatibility.h>
+#include <Animator/Interpolator.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/ShaderProgram.h>
@@ -109,7 +113,7 @@ void Renderview::InitView(unsigned int type)
 		if (bounds.valid())
 		{
 			setValue(gstBounds, bounds);
-			fluo::Vector diag = bounds.diagonal();
+			Vector diag = bounds.diagonal();
 			double radius = sqrt(diag.x()*diag.x() + diag.y()*diag.y()) / 2.0;
 			if (radius < 0.1)
 				radius = 348.0;
@@ -289,16 +293,16 @@ void Renderview::DrawClippingPlanes(bool border, int face_winding)
 
 		//calculating planes
 		//get six planes
-		fluo::Plane* px1 = (*planes)[0];
-		fluo::Plane* px2 = (*planes)[1];
-		fluo::Plane* py1 = (*planes)[2];
-		fluo::Plane* py2 = (*planes)[3];
-		fluo::Plane* pz1 = (*planes)[4];
-		fluo::Plane* pz2 = (*planes)[5];
+		Plane* px1 = (*planes)[0];
+		Plane* px2 = (*planes)[1];
+		Plane* py1 = (*planes)[2];
+		Plane* py2 = (*planes)[3];
+		Plane* pz1 = (*planes)[4];
+		Plane* pz2 = (*planes)[5];
 
 		//calculate 4 lines
-		fluo::Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
-		fluo::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
+		Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
+		Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
 		//x1z1
 		if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
 			continue;
@@ -313,7 +317,7 @@ void Renderview::DrawClippingPlanes(bool border, int face_winding)
 			continue;
 
 		//calculate 8 points
-		fluo::Point pp[8];
+		Point pp[8];
 		//p0 = l_x1z1 * py1
 		if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
 			continue;
@@ -341,7 +345,7 @@ void Renderview::DrawClippingPlanes(bool border, int face_winding)
 
 		//draw the six planes out of the eight points
 		//get color
-		fluo::Color color(1.0, 1.0, 1.0);
+		Color color(1.0, 1.0, 1.0);
 		double plane_trans = 0.0;
 		if (face_winding == BACK_FACE &&
 			(clip_mask == 3 ||
@@ -376,7 +380,7 @@ void Renderview::DrawClippingPlanes(bool border, int face_winding)
 		//transform
 		if (!vd->GetTexture())
 			continue;
-		fluo::Transform *tform = vd->GetTexture()->transform();
+		Transform *tform = vd->GetTexture()->transform();
 		if (!tform)
 			continue;
 		double mvmat[16];
@@ -400,7 +404,7 @@ void Renderview::DrawClippingPlanes(bool border, int face_winding)
 			flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Clip_Planes);
 		if (!va_clipp)
 			return;
-		std::vector<fluo::Point> clip_points(pp, pp + 8);
+		std::vector<Point> clip_points(pp, pp + 8);
 		va_clipp->set_param(clip_points);
 		va_clipp->draw_begin();
 		//draw
@@ -775,7 +779,7 @@ void Renderview::HandleCamera(bool vr)
 		glm::vec3 v2(lock_ctr);
 		v2 = glm::normalize(v2);
 		float c = glm::dot(v1, v2);
-		if (std::abs(std::abs(c) - 1) < fluo::Epsilon())
+		if (std::abs(std::abs(c) - 1) < Epsilon())
 			return;
 		glm::vec3 v = glm::cross(v1, v2);
 		glm::mat3 vx(
@@ -790,4 +794,362 @@ void Renderview::HandleCamera(bool vr)
 	}
 }
 
+void Renderview::Set3DRotCapture(
+	const std::wstring &cap_file,
+	double start_angle,
+	double end_angle,
+	double step,
+	long frames,
+	long rot_axis,
+	bool rewind)
+{
+	double rv[3];
+	getValue(gstRotX, rv[0]);
+	getValue(gstRotY, rv[1]);
+	getValue(gstRotZ, rv[2]);
 
+	//remove the chance of the x/y/z angles being outside 360.
+	while (rv[0] > 360.)  rv[0] -= 360.;
+	while (rv[0] < -360.) rv[0] += 360.;
+	while (rv[1] > 360.)  rv[1] -= 360.;
+	while (rv[1] < -360.) rv[1] += 360.;
+	while (rv[2] > 360.)  rv[2] -= 360.;
+	while (rv[2] < -360.) rv[2] += 360.;
+	if (360. - std::abs(rv[0]) < 0.001) rv[0] = 0.;
+	if (360. - std::abs(rv[1]) < 0.001) rv[1] = 0.;
+	if (360. - std::abs(rv[2]) < 0.001) rv[2] = 0.;
+
+	setValue(gstMovStep, step);
+	setValue(gstTotalFrames, frames);
+	setValue(gstCaptureFile, cap_file);
+	setValue(gstMovRewind, rewind);
+	setValue(gstMovSeqNum, long(0));
+	setValue(gstMovRotAxis, rot_axis);
+	if (start_angle == 0.)
+	{
+		setValue(gstMovInitAng, rv[rot_axis]);
+		setValue(gstMovEndAng, rv[rot_axis] + end_angle);
+	}
+	setValue(gstMovCurAng, rv[rot_axis]);
+	setValue(gstMovStartAng, rv[rot_axis]);
+	setValue(gstCapture, true);
+	setValue(gstCaptureRot, true);
+	setValue(gstCaptureRotOver, false);
+	setValue(gstMovStage, long(0));
+}
+
+void Renderview::Set4DSeqCapture(
+	const std::wstring &cap_file,
+	long begin_frame, long end_frame, bool rewind)
+{
+	setValue(gstCaptureFile, cap_file);
+	setValue(gstCurrentFrame, begin_frame);
+	setValue(gstPreviousFrame, begin_frame);
+	setValue(gstBeginFrame, begin_frame);
+	setValue(gstEndFrame, end_frame);
+	setValue(gstCaptureTime, true);
+	setValue(gstCapture, true);
+	setValue(gstMovSeqNum, begin_frame);
+	setValue(gstMovRewind4d, rewind);
+}
+
+void Renderview::Set3DBatCapture(
+	const std::wstring &cap_file,
+	long begin_frame, long end_frame)
+{
+	setValue(gstCaptureFile, cap_file);
+	setValue(gstBeginFrame, begin_frame);
+	setValue(gstEndFrame, end_frame);
+	setValue(gstCaptureBat, true);
+	setValue(gstCapture, true);
+
+	long lval;
+	getValue(gstTotalFrames, lval);
+	std::wstring wsval;
+	getValue(gstBatFolder, wsval);
+	if (!cap_file.empty() && lval > 1)
+	{
+		std::wstring new_folder = GET_PATH(cap_file)
+			+ GETSLASH() + wsval + L"_folder";
+		MkDirW(new_folder);
+	}
+}
+
+void Renderview::SetParamCapture(
+	const std::wstring &cap_file,
+	long begin_frame, long end_frame, bool rewind)
+{
+	setValue(gstCaptureFile, cap_file);
+	setValue(gstParamFrame, begin_frame);
+	setValue(gstBeginFrame, begin_frame);
+	setValue(gstEndFrame, end_frame);
+	setValue(gstCaptureParam, true);
+	setValue(gstCapture, true);
+	setValue(gstMovSeqNum, begin_frame);
+	setValue(gstMovRewind4d, rewind);
+}
+
+void Renderview::SetParams(double t)
+{
+	FlKeyCode keycode;
+	keycode.l0 = 1;
+	keycode.l0_name = getName();
+
+	//get all volume data under view
+	SearchVisitor visitor;
+	visitor.matchClassName("VolumeData");
+	accept(visitor);
+	ObjectList* list = visitor.getResult();
+	for (auto i : *list)
+	{
+		VolumeData* vd = dynamic_cast<VolumeData*>(i);
+		if (!vd) continue;
+
+		keycode.l1 = 2;
+		keycode.l1_name = vd->getName();
+
+		//display
+		keycode.l2 = 0;
+		keycode.l2_name = "display";
+		bool bval;
+		if (m_interpolator->GetBoolean(keycode, t, bval))
+			vd->setValue(gstDisplay, bval);
+
+		//clipping planes
+		vector<Plane*> *planes = vd->GetRenderer()->get_planes();
+		if (!planes) continue;
+		if (planes->size() != 6) continue;
+		Plane *plane = 0;
+		double val = 0;
+		//x1
+		plane = (*planes)[0];
+		keycode.l2 = 0;
+		keycode.l2_name = "x1_val";
+		if (m_interpolator->GetDouble(keycode, t, val))
+			plane->ChangePlane(Point(abs(val), 0.0, 0.0),
+				Vector(1.0, 0.0, 0.0));
+		//x2
+		plane = (*planes)[1];
+		keycode.l2 = 0;
+		keycode.l2_name = "x2_val";
+		if (m_interpolator->GetDouble(keycode, t, val))
+			plane->ChangePlane(Point(abs(val), 0.0, 0.0),
+				Vector(-1.0, 0.0, 0.0));
+		//y1
+		plane = (*planes)[2];
+		keycode.l2 = 0;
+		keycode.l2_name = "y1_val";
+		if (m_interpolator->GetDouble(keycode, t, val))
+			plane->ChangePlane(Point(0.0, abs(val), 0.0),
+				Vector(0.0, 1.0, 0.0));
+		//y2
+		plane = (*planes)[3];
+		keycode.l2 = 0;
+		keycode.l2_name = "y2_val";
+		if (m_interpolator->GetDouble(keycode, t, val))
+			plane->ChangePlane(Point(0.0, abs(val), 0.0),
+				Vector(0.0, -1.0, 0.0));
+		//z1
+		plane = (*planes)[4];
+		keycode.l2 = 0;
+		keycode.l2_name = "z1_val";
+		if (m_interpolator->GetDouble(keycode, t, val))
+			plane->ChangePlane(Point(0.0, 0.0, abs(val)),
+				Vector(0.0, 0.0, 1.0));
+		//z2
+		plane = (*planes)[5];
+		keycode.l2 = 0;
+		keycode.l2_name = "z2_val";
+		if (m_interpolator->GetDouble(keycode, t, val))
+			plane->ChangePlane(Point(0.0, 0.0, abs(val)),
+				Vector(0.0, 0.0, -1.0));
+		//t
+		double frame;
+		keycode.l2 = 0;
+		keycode.l2_name = "frame";
+		if (m_interpolator->GetDouble(keycode, t, frame))
+			UpdateVolumeData(int(frame + 0.5), vd);
+	}
+
+	bool bx, by, bz;
+	//for the view
+	keycode.l1 = 1;
+	keycode.l1_name = getName();
+	//translation
+	double tx, ty, tz;
+	keycode.l2 = 0;
+	keycode.l2_name = "translation_x";
+	bx = m_interpolator->GetDouble(keycode, t, tx);
+	keycode.l2_name = "translation_y";
+	by = m_interpolator->GetDouble(keycode, t, ty);
+	keycode.l2_name = "translation_z";
+	bz = m_interpolator->GetDouble(keycode, t, tz);
+	if (bx && by && bz)
+	{
+		setValue(gstCamTransX, tx);
+		setValue(gstCamTransY, ty);
+		setValue(gstCamTransZ, tz);
+		double d = std::sqrt(tx*tx + ty * ty + tz * tz);
+	}
+	//centers
+	keycode.l2_name = "center_x";
+	bx = m_interpolator->GetDouble(keycode, t, tx);
+	keycode.l2_name = "center_y";
+	by = m_interpolator->GetDouble(keycode, t, ty);
+	keycode.l2_name = "center_z";
+	bz = m_interpolator->GetDouble(keycode, t, tz);
+	if (bx && by && bz)
+	{
+		setValue(gstCamCtrX, tx);
+		setValue(gstCamCtrY, ty);
+		setValue(gstCamCtrZ, tz);
+	}
+	//obj translation
+	keycode.l2_name = "obj_trans_x";
+	bx = m_interpolator->GetDouble(keycode, t, tx);
+	keycode.l2_name = "obj_trans_y";
+	by = m_interpolator->GetDouble(keycode, t, ty);
+	keycode.l2_name = "obj_trans_z";
+	bz = m_interpolator->GetDouble(keycode, t, tz);
+	if (bx && by && bz)
+	{
+		setValue(gstObjTransX, tx);
+		setValue(gstObjTransY, ty);
+		setValue(gstObjTransZ, tz);
+	}
+	//scale
+	double scale;
+	keycode.l2_name = "scale";
+	if (m_interpolator->GetDouble(keycode, t, scale))
+	{
+		setValue(gstScaleFactor, scale);
+		//m_vrv->UpdateScaleFactor(false);
+	}
+	//rotation
+	keycode.l2 = 0;
+	keycode.l2_name = "rotation";
+	Quaternion q;
+	if (m_interpolator->GetQuaternion(keycode, t, q))
+	{
+		setValue(gstCamRotQ, q);
+		Quaternion zq;
+		getValue(gstCamRotZeroQ, zq);
+		q *= -zq;
+		double rotx, roty, rotz;
+		q.ToEuler(rotx, roty, rotz);
+		setValue(gstCamRotX, rotx);
+		setValue(gstCamRotY, roty);
+		setValue(gstCamRotZ, rotz);
+		//SetRotations(rotx, roty, rotz, true);
+	}
+	//intermixing mode
+	keycode.l2_name = "volmethod";
+	int ival;
+	if (m_interpolator->GetInt(keycode, t, ival))
+		setValue(gstMixMethod, long(ival));
+	//perspective angle
+	keycode.l2_name = "aov";
+	double aov;
+	if (m_interpolator->GetDouble(keycode, t, aov))
+	{
+		if (aov <= 10)
+		{
+			setValue(gstPerspective, false);
+			//m_vrv->m_aov_text->ChangeValue("Ortho");
+			//m_vrv->m_aov_sldr->SetValue(10);
+		}
+		else
+		{
+			setValue(gstPerspective, true);
+			setValue(gstAov, aov);
+		}
+	}
+
+	//if (m_frame && clip_view)
+	//	clip_view->SetVolumeData(m_frame->GetCurSelVol());
+	//if (m_frame)
+	//{
+	//	m_frame->UpdateTree(m_cur_vol ? m_cur_vol->getName() : "");
+	//	int index = interpolator->GetKeyIndexFromTime(t);
+	//	m_frame->GetRecorderDlg()->SetSelection(index);
+	//}
+	setValue(gstVolListDirty, true);
+}
+
+//event functions
+void Renderview::OnCamRotChanged(Event& event)
+{
+	double dval;
+	getValue(gstCamRotX, dval);
+	dval = RoundDeg(dval);
+	setValue(gstCamRotX, dval);
+	getValue(gstCamRotY, dval);
+	dval = RoundDeg(dval);
+	setValue(gstCamRotY, dval);
+	getValue(gstCamRotZ, dval);
+	dval = RoundDeg(dval);
+	setValue(gstCamRotZ, dval);
+	
+	A2Q();
+
+	getValue(gstCamDist, dval);
+	Quaternion q;
+	getValue(gstCamRotQ, q);
+	Quaternion cam_pos(0.0, 0.0, dval, 0.0);
+	Quaternion cam_pos2 = (-q) * cam_pos * q;
+	setValue(gstCamTransX, cam_pos2.x);
+	setValue(gstCamTransY, cam_pos2.y);
+	setValue(gstCamTransZ, cam_pos2.z);
+
+	Quaternion up(0.0, 1.0, 0.0, 0.0);
+	Quaternion up2 = (-q) * up * q;
+	Vector vval(up2.x, up2.y, up2.z);
+	setValue(gstCamUp, vval);
+}
+
+void Renderview::OnPerspectiveChanged(Event& event)
+{
+	bool free, persp;
+	getValue(gstFree, free);
+	getValue(gstPerspective, persp);
+	if (free && !persp)
+	{
+		setValue(gstFree, false);
+
+		//restore camera translation
+		double dval;
+		getValue(gstCamTransSavedX, dval); setValue(gstCamTransX, dval);
+		getValue(gstCamTransSavedY, dval); setValue(gstCamTransY, dval);
+		getValue(gstCamTransSavedZ, dval); setValue(gstCamTransZ, dval);
+		getValue(gstCamCtrSavedX, dval); setValue(gstCamCtrX, dval);
+		getValue(gstCamCtrSavedY, dval); setValue(gstCamCtrY, dval);
+		getValue(gstCamCtrSavedZ, dval); setValue(gstCamCtrZ, dval);
+		//restore object translation
+		getValue(gstObjTransSavedX, dval); setValue(gstObjTransX, dval);
+		getValue(gstObjTransSavedY, dval); setValue(gstObjTransY, dval);
+		getValue(gstObjTransSavedZ, dval); setValue(gstObjTransZ, dval);
+		//restore scale factor
+		getValue(gstScaleFactorSaved, dval); setValue(gstScaleFactor, dval);
+		//restore camera rotation
+		getValue(gstCamRotSavedX, dval); setValue(gstCamRotX, dval);
+		getValue(gstCamRotSavedY, dval); setValue(gstCamRotY, dval);
+		getValue(gstCamRotSavedZ, dval); setValue(gstCamRotZ, dval);
+		//m_vrv->UpdateScaleFactor(false);
+		//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+		//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+		//m_vrv->m_scale_factor_text->ChangeValue(str);
+		//m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FreeChk, false);
+
+		//SetRotations(m_rotx, m_roty, m_rotz);
+	}
+}
+
+void Renderview::OnVolListDirtyChanged(Event& event)
+{
+	PopVolumeList();
+}
+
+void Renderview::OnMshListDirtyChanged(Event& event)
+{
+	PopMeshList();
+}

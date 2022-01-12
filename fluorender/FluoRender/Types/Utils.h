@@ -276,6 +276,12 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
     *returnCos = std::cos(theta);
 }
 
+inline double RoundDeg(double d)
+{
+	if (d > 360.0) return d - int(d / 360) * 360;
+	if (d < 0.0) return d - int(d / 360 - 1) * 360;
+}
+
 } // namespace fluo
 
 #endif//_FLTYPEUTILS_H_
