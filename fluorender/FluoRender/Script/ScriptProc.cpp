@@ -65,7 +65,7 @@ ScriptProc::~ScriptProc()
 }
 
 //run 4d script
-void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
+void ScriptProc::Run4DScript(TimeMask tm, const wxString &scriptname, bool rewind)
 {
 	m_fconfig = 0;
 	m_fconfig_name = "";

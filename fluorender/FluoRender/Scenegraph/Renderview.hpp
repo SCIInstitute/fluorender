@@ -171,8 +171,8 @@ namespace fluo
 		void ResetMovieAngle();
 		void StopMovie();
 		//4d movie frame calculation
-		void Get4DSeqRange(int &start_frame, int &end_frame);
-		void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind);
+		void Get4DSeqRange(long &start_frame, long &end_frame);
+		void Set4DSeqFrame(long frame, long start_frame, long end_frame, bool rewind);
 		void UpdateVolumeData(int frame, fluo::VolumeData* vd);
 		void ReloadVolumeData(int frame);
 		//3d batch file calculation

@@ -38,12 +38,16 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeLoader.h>
 #include <compatibility.h>
 #include <Animator/Interpolator.h>
+#include <Script/ScriptProc.h>
+#include <Selection/VolumeSelector.h>
+#include <Calculate/VolumeCalculator.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/ImgShader.h>
 #include <FLIVR/VertexArray.h>
+#include <Formats/base_reader.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -1076,7 +1080,118 @@ void Renderview::SetParams(double t)
 	setValue(gstVolListDirty, true);
 }
 
-//event functions
+void Renderview::ResetMovieAngle()
+{
+	long axis;
+	getValue(gstMovRotAxis, axis);
+	std::string s;
+	switch (axis)
+	{
+	case 0:
+		s = gstCamRotX;
+		break;
+	case 1:
+		s = gstCamRotY;
+		break;
+	case 2:
+		s = gstCamRotZ;
+		break;
+	}
+	double dval;
+	getValue(gstMovInitAng, dval);
+	setValue(s, dval);
+
+	setValue(gstCapture, false);
+	setValue(gstCaptureRot, false);
+
+	RefreshGL(16);
+}
+
+void Renderview::StopMovie()
+{
+	setValue(gstCapture, false);
+	setValue(gstCaptureRot, false);
+	setValue(gstCaptureTime, false);
+	setValue(gstCaptureParam, false);
+}
+
+void Renderview::Get4DSeqRange(long &start_frame, long &end_frame)
+{
+	int i = 0;//counter
+	for (auto vd : m_vol_list)
+	{
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
+
+			long vd_start_frame = 0;
+			long vd_end_frame = reader->GetTimeNum() - 1;
+			long vd_cur_frame = reader->GetCurTime();
+
+			if (i == 0)
+			{
+				//first dataset
+				start_frame = vd_start_frame;
+				end_frame = vd_end_frame;
+			}
+			else
+			{
+				//datasets after the first one
+				if (vd_end_frame > end_frame)
+					end_frame = vd_end_frame;
+			}
+		}
+		i++;
+	}
+}
+
+void Renderview::Set4DSeqFrame(long frame, long start_frame, long end_frame, bool rewind)
+{
+	long lval;
+	//compute frame number
+	setValue(gstBeginFrame, start_frame);
+	setValue(gstEndFrame, end_frame);
+	lval = std::abs(end_frame - start_frame + 1);
+	setValue(gstTotalFrames, lval);
+	//skip update if frame num unchanged
+	getValue(gstCurrentFrame, lval);
+	bool update = lval == frame ? false : true;
+
+	//save currently selected volume
+	Referenced* ref;
+	getRvalu(gstCurrentVolume, &ref);
+
+	//run pre-change script
+	bool bval;
+	getValue(gstRunScript, bval);
+	std::wstring script_file;
+	getValue(gstScriptFile, script_file);
+	if (update && bval)
+		m_scriptor->Run4DScript(flrd::ScriptProc::TM_ALL_PRE, script_file, rewind);
+
+	//change time frame
+	setValue(gstPreviousFrame, lval);
+	setValue(gstCurrentFrame, frame);
+
+	if (update)
+		for (auto i : m_vol_list)
+			UpdateVolumeData(frame, i.get());
+
+	//run post-change script
+	if (update && bval)
+		m_scriptor->Run4DScript(flrd::ScriptProc::TM_ALL_POST, script_file, rewind);
+
+	//restore currently selected volume
+	setRvalu(gstCurrentVolume, ref);
+	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+	m_selector->SetVolume(vd);
+	m_calculator->SetVolumeA(vd);
+
+	RefreshGL(17);
+}
+
+
+//event functions/////////////////////////////////////////////////////////////////////////////////
 void Renderview::OnCamRotChanged(Event& event)
 {
 	double dval;
