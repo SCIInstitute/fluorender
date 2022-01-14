@@ -237,13 +237,11 @@ namespace fluo
 		void GetTraces(bool update = false);
 
 		//read pixels
-		void ReadPixels(
-			int chann, bool fp32,
-			int &x, int &y, int &w, int &h,
-			void** image);
+		void ReadPixels(long chann, bool fp32,
+			long &x, long &y, long &w, long &h, void** image);
 
 		//set cell list
-		void SetCellList(flrd::CelpList *list);
+		void SetCellList(flrd::CelpList *list) { m_cell_list = list; }
 
 		glm::mat4 GetModelView()
 		{
@@ -255,41 +253,53 @@ namespace fluo
 		}
 		glm::mat4 GetObjectMat()
 		{
+			double dx, dy, dz;
 			glm::mat4 obj_mat = m_mv_mat;
-			////translate object
-			//obj_mat = glm::translate(obj_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-			////rotate object
-			//obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-			//obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-			//obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-			////center object
-			//obj_mat = glm::translate(obj_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+			//translate object
+			getValue(gstObjTransX, dx); getValue(gstObjTransY, dy); getValue(gstObjTransZ, dz);
+			obj_mat = glm::translate(obj_mat, glm::vec3(dx, dy, dz));
+			//rotate object
+			getValue(gstObjRotX, dx); getValue(gstObjRotY, dy); getValue(gstObjRotZ, dz);
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(dy)), glm::vec3(0.0, 1.0, 0.0));
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(dz)), glm::vec3(0.0, 0.0, 1.0));
+			obj_mat = glm::rotate(obj_mat, float(glm::radians(dx)), glm::vec3(1.0, 0.0, 0.0));
+			//center object
+			getValue(gstObjCtrX, dx); getValue(gstObjCtrY, dy); getValue(gstObjCtrZ, dz);
+			obj_mat = glm::translate(obj_mat, glm::vec3(-dx, -dy, -dz));
 			return obj_mat;
 		}
 		glm::mat4 GetDrawMat()
 		{
+			double dx, dy, dz;
 			glm::mat4 drw_mat = m_mv_mat;
-			////translate object
-			//drw_mat = glm::translate(drw_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-			////rotate object
-			//drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-			//drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-			//drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-			////center object
-			//drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+			//translate object
+			getValue(gstObjTransX, dx); getValue(gstObjTransY, dy); getValue(gstObjTransZ, dz);
+			drw_mat = glm::translate(drw_mat, glm::vec3(dx, dy, dz));
+			//rotate object
+			getValue(gstObjRotX, dx); getValue(gstObjRotY, dy); getValue(gstObjRotZ, dz);
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(dx)), glm::vec3(1.0, 0.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(dy)), glm::vec3(0.0, 1.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(dz)), glm::vec3(0.0, 0.0, 1.0));
+			//center object
+			getValue(gstObjCtrX, dx); getValue(gstObjCtrY, dy); getValue(gstObjCtrZ, dz);
+			drw_mat = glm::translate(drw_mat, glm::vec3(-dx, -dy, -dz));
 			return drw_mat;
 		}
 		glm::mat4 GetInvtMat()
 		{
+			double dx, dy, dz;
 			glm::mat4 inv_mat = m_mv_mat;
-			////translate object
-			//inv_mat = glm::translate(inv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-			////rotate object
-			//inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-			//inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-			//inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-			////center object
-			//inv_mat = glm::translate(inv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+			//translate object
+			getValue(gstObjTransX, dx); getValue(gstObjTransY, dy); getValue(gstObjTransZ, dz);
+			inv_mat = glm::translate(inv_mat, glm::vec3(dx, dy, dz));
+			//rotate object
+			getValue(gstObjRotX, dx); getValue(gstObjRotY, dy); getValue(gstObjRotZ, dz);
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(dz)), glm::vec3(0.0, 0.0, 1.0));
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(dy)), glm::vec3(0.0, 1.0, 0.0));
+			inv_mat = glm::rotate(inv_mat, float(glm::radians(dx)), glm::vec3(1.0, 0.0, 0.0));
+			//center object
+			getValue(gstObjCtrX, dx); getValue(gstObjCtrY, dy); getValue(gstObjCtrZ, dz);
+			inv_mat = glm::translate(inv_mat, glm::vec3(-dx, -dy, -dz));
 			return inv_mat;
 		}
 
