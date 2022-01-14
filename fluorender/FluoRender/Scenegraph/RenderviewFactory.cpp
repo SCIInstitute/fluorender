@@ -71,6 +71,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstSyncG, bool(false));
 		view->addValue(gstSyncB, bool(false));
 		//special
+		view->addValue(gstSizeX, long(800));
+		view->addValue(gstSizeY, long(600));
 		view->addValue(gstUseDefault, bool(false));
 		view->addValue(gstClipLinkChan, bool(false));
 		view->addValue(gstClipPlaneMode, long(Renderview::kNormal));
@@ -107,7 +109,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstCamCtrSize, double(2.0));
 		view->addValue(gstDrawInfo, long(250));
 		view->addValue(gstLoadUpdate, bool(false));
-		view->addValue(gstDrawFrame, bool(false));
+		view->addValue(gstDrawCropFrame, bool(false));
 		view->addValue(gstTestSpeed, bool(false));
 		view->addValue(gstDrawClip, bool(false));
 		view->addValue(gstDrawLegend, bool(false));
@@ -149,6 +151,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstRulerRelax, bool(false));
 		view->addValue(gstDrawing, bool(false));
 		view->addValue(gstRefresh, bool(false));
+		view->addValue(gstRefreshErase, bool(false));
+		view->addValue(gstRefreshNotify, bool(false));
 		view->addValue(gstWidth, long(0));
 		view->addValue(gstHeight, long(0));
 		view->addValue(gstVolListDirty, bool(true));
@@ -229,6 +233,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMouseY, long(-1));
 		view->addValue(gstMousePrvX, long(-1));
 		view->addValue(gstMousePrvY, long(-1));
+		view->addValue(gstMouseClientX, long(-1));
+		view->addValue(gstMouseClientY, long(-1));
 		view->addValue(gstMovInitAng, double(0));
 		view->addValue(gstMovStartAng, double(0));
 		view->addValue(gstMovEndAng, double(0));
@@ -285,6 +291,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstVrSizeY, unsigned long(0));
 		view->addValue(gstVrEyeOffset, double(6));
 		view->addValue(gstVrEyeIdx, long(0));
+		view->addValue(gstSwapBuffers, bool(false));
+		view->addValue(gstLineWidth, double(3));
 	}
 }
 

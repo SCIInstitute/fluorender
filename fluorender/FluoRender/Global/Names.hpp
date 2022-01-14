@@ -254,6 +254,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstInfo	"info"
 
 //specific to renderview
+#define gstSizeX "size x"
+#define gstSizeY "size y"
 #define gstUseDefault "use default"
 #define gstClipLinkChan "clip link chan"
 #define gstClipPlaneMode "clip plane mode"
@@ -291,7 +293,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCamCtrSize "cam ctr size"
 #define gstDrawInfo "draw info"
 #define gstLoadUpdate "load update"
-#define gstDrawFrame "draw frame"
+#define gstDrawCropFrame "draw crop frame"
 #define gstTestSpeed "test speed"
 #define gstDrawClip "draw clip"
 #define gstDrawLegend "draw legend"
@@ -332,7 +334,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstPaintColocalize "paint colocalize"//compute colocalization after painting
 #define gstRulerRelax "ruler relax"//compute ruler relax after drawing
 #define gstDrawing "drawing"//is busy drawing
+#define gstRefreshErase "refresh erase"//erase during refresh
 #define gstRefresh "refresh"//flag to request refresh
+#define gstRefreshNotify "refresh notify"//ask ui to actually refresh
 #define gstWidth "width"//from m_size
 #define gstHeight "height"//from m_size
 #define gstVolListDirty "vol list dirty"//request vol pop list update
@@ -432,6 +436,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstMouseY "mouse y"
 #define gstMousePrvX "mouse prv x"
 #define gstMousePrvY "mouse prv y"
+#define gstMouseClientX "mouse client x"//from screentoclient()
+#define gstMouseClientY "mouse client y"
 #define gstMovInitAng "mov init ang"//movie properties
 #define gstMovStartAng "mov start ang"
 #define gstMovEndAng "mov end ang"
@@ -488,6 +494,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstVrSizeY "vr size y"
 #define gstVrEyeOffset "vr eye offset"
 #define gstVrEyeIdx "vr eye idx"//0-left;1-right
-
+#define gstSwapBuffers "swap buffers"
+#define gstLineWidth "line width"//for drawing on screen lines
 
 #endif//NAMES_HPP

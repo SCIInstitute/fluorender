@@ -116,6 +116,19 @@ namespace fluo
 			FRONT_FACE = 1,
 			BACK_FACE = 2
 		};
+		//information bits
+		enum InfoEntries
+		{
+			INFO_NONE  = 0,
+			INFO_DISP  = 1 << 0,
+			INFO_POS   = 1 << 1,
+			INFO_FRAME = 1 << 2,
+			INFO_FPS   = 1 << 3,
+			INFO_T     = 1 << 4,
+			INFO_X     = 1 << 5,
+			INFO_Y     = 1 << 6,
+			INFO_Z     = 1 << 7
+		};
 
 		Renderview();
 		Renderview(const Renderview& view, const CopyOp& copyop = CopyOp::SHALLOW_COPY);
@@ -173,11 +186,11 @@ namespace fluo
 		//4d movie frame calculation
 		void Get4DSeqRange(long &start_frame, long &end_frame);
 		void Set4DSeqFrame(long frame, long start_frame, long end_frame, bool rewind);
-		void UpdateVolumeData(int frame, fluo::VolumeData* vd);
+		void UpdateVolumeData(long frame, VolumeData* vd);
 		void ReloadVolumeData(int frame);
 		//3d batch file calculation
-		void Get3DBatRange(int &start_frame, int &end_frame);
-		void Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind);
+		void Get3DBatRange(long &start_frame, long &end_frame);
+		void Set3DBatFrame(long frame, long start_frame, long end_frame, bool rewind);
 		//crop for capturing
 		void CalculateCrop();
 
@@ -203,24 +216,23 @@ namespace fluo
 
 		//rulers
 		void DrawRulers();
-		flrd::RulerList* GetRulerList();
 		flrd::Ruler* GetRuler(unsigned int id);
+		flrd::RulerList* GetRulerList() { return m_ruler_list; }
 		flrd::RulerHandler* GetRulerHandler() { return m_ruler_handler; }
 		flrd::RulerRenderer* GetRulerRenderer() { return m_ruler_renderer; }
 
 		//draw highlighted comps
 		void DrawCells();
 		unsigned int DrawCellVerts(std::vector<float>& verts);
-		void GetCellPoints(fluo::BBox& box,
-			fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
-			fluo::Transform& mv, fluo::Transform& p);
+		void GetCellPoints(BBox& box,
+			Point& p1, Point& p2, Point& p3, Point& p4,
+			Transform& mv, Transform& p);
 
 		//traces
-		flrd::Tracks* GetTraceGroup();
+		flrd::Tracks* GetTraceGroup() { return m_trace_group; }
 		void CreateTraceGroup();
 		int LoadTraceGroup(const std::wstring &filename);
 		int SaveTraceGroup(const std::wstring &filename);
-		void ExportTrace(const std::wstring &filename, unsigned int id);
 		void DrawTraces();
 		void GetTraces(bool update = false);
 
@@ -289,11 +301,11 @@ namespace fluo
 		void DrawScaleBar();
 		void DrawLegend();
 		void DrawName(double x, double y, int nx, int ny,
-			const std::string &name, fluo::Color color,
+			const std::string &name, Color color,
 			double font_height, bool hilighted = false);
 		void DrawFrame();
 		void DrawClippingPlanes(bool border, int face_winding);
-		void SetColormapColors(int colormap, fluo::Color &c, double inv);
+		void SetColormapColors(int colormap, Color &c, double inv);
 		void DrawColormap();
 		void DrawGradBg();
 		void DrawInfo(int nx, int ny);
@@ -321,7 +333,7 @@ namespace fluo
 		void DrawAnnotations();
 		//framebuffer
 		void BindRenderBuffer();
-		void GetRenderSize(int &nx, int &ny);
+		void GetRenderSize(long &nx, long &ny);
 		//draw out the framebuffer after composition
 		void PrepFinalBuffer();
 		void ClearFinalBuffer();
@@ -331,13 +343,13 @@ namespace fluo
 		void ClearVRBuffer();
 		void DrawVRBuffer();
 		//different volume drawing modes
-		void DrawVolumesMulti(std::vector<fluo::VolumeData*> &list, int peel = 0);
-		void DrawVolumesComp(std::vector<fluo::VolumeData*> &list, bool mask = false, int peel = 0);
-		void DrawMIP(fluo::VolumeData* vd, int peel = 0);
-		void DrawOVER(fluo::VolumeData* vd, bool mask, int peel = 0);
+		void DrawVolumesMulti(std::vector<VolumeData*> &list, int peel = 0);
+		void DrawVolumesComp(std::vector<VolumeData*> &list, bool mask = false, int peel = 0);
+		void DrawMIP(VolumeData* vd, int peel = 0);
+		void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
 		//overlay passes
-		void DrawOLShading(fluo::VolumeData* vd);
-		void DrawOLShadows(std::vector<fluo::VolumeData*> &vlist);
+		void DrawOLShading(VolumeData* vd);
+		void DrawOLShadows(std::vector<VolumeData*> &vlist);
 		void DrawOLShadowsMesh(double darkenss);
 
 		//get mesh shadow
@@ -347,14 +359,14 @@ namespace fluo
 		void DrawCircles(
 			double cx, double cy,
 			double r1, double r2,
-			fluo::Color &color,
+			Color &color,
 			glm::mat4 &matrix);
 		void DrawBrush();
 		void PaintStroke();
 		void DisplayStroke();
 
-		fluo::Quaternion Trackball(double dx, double dy);
-		fluo::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
+		Quaternion Trackball(double dx, double dy);
+		Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 		void Q2A();
 		void A2Q();
 		//sort bricks after the view has been changed
@@ -373,12 +385,12 @@ namespace fluo
 		void Pick();
 		void PickMesh();
 		void PickVolume();
-		void SetCompSelection(fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
+		void SetCompSelection(Point& p, int mode);//node: 0-exclusive; 1-add or remove
 
 		//draw quad
 		void DrawViewQuad();
 
-		void switchLevel(fluo::VolumeData *vd);
+		void switchLevel(VolumeData *vd);
 
 #ifdef _WIN32
 		//wacom tablet

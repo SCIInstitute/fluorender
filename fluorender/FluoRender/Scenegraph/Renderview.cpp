@@ -31,23 +31,31 @@ DEALINGS IN THE SOFTWARE.
 #include <Timer.h>
 #include <RenderviewFactory.hpp>
 #include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
 #include <MeshData.hpp>
 #include <NodeVisitor.hpp>
 #include <Global.hpp>
 #include <SearchVisitor.hpp>
 #include <VolumeLoader.h>
 #include <compatibility.h>
+#include <Debug.h>
 #include <Animator/Interpolator.h>
 #include <Script/ScriptProc.h>
 #include <Selection/VolumeSelector.h>
 #include <Calculate/VolumeCalculator.h>
+#include <Distance/Ruler.h>
+#include <Distance/RulerRenderer.h>
+#include <Tracking/Cell.h>
+#include <Tracking/Tracks.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/ImgShader.h>
 #include <FLIVR/VertexArray.h>
+#include <FLIVR/TextRenderer.h>
 #include <Formats/base_reader.h>
+#include <Formats/brkxml_reader.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -920,7 +928,7 @@ void Renderview::SetParams(double t)
 			vd->setValue(gstDisplay, bval);
 
 		//clipping planes
-		vector<Plane*> *planes = vd->GetRenderer()->get_planes();
+		std::vector<Plane*> *planes = vd->GetRenderer()->get_planes();
 		if (!planes) continue;
 		if (planes->size() != 6) continue;
 		Plane *plane = 0;
@@ -1188,6 +1196,1423 @@ void Renderview::Set4DSeqFrame(long frame, long start_frame, long end_frame, boo
 	m_calculator->SetVolumeA(vd);
 
 	RefreshGL(17);
+}
+
+void Renderview::UpdateVolumeData(long frame, VolumeData* vd)
+{
+	if (vd && vd->GetReader())
+	{
+		BaseReader* reader = vd->GetReader();
+		bool clear_pool = false;
+
+		long cur_time;
+		vd->getValue(gstTime, cur_time);
+		if (cur_time != frame)
+		{
+			flvr::Texture *tex = vd->GetTexture();
+			if (tex && tex->isBrxml())
+			{
+				BRKXMLReader *br = (BRKXMLReader *)reader;
+				br->SetCurTime(frame);
+				int curlv = tex->GetCurLevel();
+				for (int j = 0; j < br->GetLevelNum(); j++)
+				{
+					tex->setLevel(j);
+					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
+				}
+				tex->setLevel(curlv);
+				long chan;
+				vd->getValue(gstChannel, chan);
+				tex->set_FrameAndChannel(frame, chan);
+				vd->setValue(gstTime, long(reader->GetCurTime()));
+				//update rulers
+				//if (m_frame && m_frame->GetMeasureDlg())
+				//	m_frame->GetMeasureDlg()->UpdateList();
+			}
+			else
+			{
+				double spcx, spcy, spcz;
+				vd->getValue(gstSpcX, spcx);
+				vd->getValue(gstSpcY, spcy);
+				vd->getValue(gstSpcZ, spcz);
+
+				long chan;
+				vd->getValue(gstChannel, chan);
+				Nrrd* data = reader->Convert(frame, chan, false);
+				if (!vd->ReplaceData(data, false))
+					return;
+
+				vd->setValue(gstTime, long(reader->GetCurTime()));
+				vd->setValue(gstSpcX, spcx);
+				vd->setValue(gstSpcY, spcy);
+				vd->setValue(gstSpcZ, spcz);
+
+				//update rulers
+				//if (m_frame && m_frame->GetMeasureDlg())
+				//	m_frame->GetMeasureDlg()->UpdateList();
+
+				clear_pool = true;
+			}
+		}
+
+		if (clear_pool && vd->GetRenderer())
+			vd->GetRenderer()->clear_tex_pool();
+	}
+}
+
+void Renderview::ReloadVolumeData(int frame)
+{
+	int i = 0; int j;
+	std::vector<BaseReader*> reader_list;
+	std::wstring bat_folder;
+
+	for (auto vd : m_vol_list)
+	{
+		if (vd && vd->GetReader())
+		{
+			flvr::Texture *tex = vd->GetTexture();
+			BaseReader* reader = vd->GetReader();
+			if (tex && tex->isBrxml())
+			{
+				BRKXMLReader *br = (BRKXMLReader *)reader;
+				int curlv = tex->GetCurLevel();
+				for (j = 0; j < br->GetLevelNum(); j++)
+				{
+					tex->setLevel(j);
+					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
+				}
+				tex->setLevel(curlv);
+				long chan;
+				vd->getValue(gstChannel, chan);
+				tex->set_FrameAndChannel(0, chan);
+				vd->setValue(gstTime, long(reader->GetCurTime()));
+				std::wstring data_name = reader->GetDataName();
+				if (i > 0)
+					bat_folder += L"_";
+				bat_folder += data_name;
+
+				int chan_num = 0;
+				if (data_name.find(L"_1ch") != std::wstring::npos)
+					chan_num = 1;
+				else if (data_name.find(L"_2ch") != std::wstring::npos)
+					chan_num = 2;
+				if (chan_num > 0 && chan >= chan_num)
+					vd->setValue(gstDisplay, false);
+				else
+					vd->setValue(gstDisplay, true);
+
+				if (reader->GetChanNum() > 1)
+					data_name += std::to_wstring(chan + 1);
+				vd->setName(ws2s(data_name));
+			}
+			else
+			{
+				bool found = false;
+				for (j = 0; j < (int)reader_list.size(); j++)
+				{
+					if (reader == reader_list[j])
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					reader->LoadOffset(frame);
+					reader_list.push_back(reader);
+				}
+
+				double spcx, spcy, spcz;
+				vd->getValue(gstSpcX, spcx);
+				vd->getValue(gstSpcY, spcy);
+				vd->getValue(gstSpcZ, spcz);
+				long chan;
+				vd->getValue(gstChannel, chan);
+				Nrrd* data = reader->Convert(0, chan, true);
+				if (vd->ReplaceData(data, true))
+					vd->setValue(gstDisplay, true);
+				else
+				{
+					vd->setValue(gstDisplay, false);
+					continue;
+				}
+
+				wxString data_name = wxString(reader->GetDataName());
+				if (i > 0)
+					bat_folder += L"_";
+				bat_folder += data_name;
+
+				int chan_num = 0;
+				if (data_name.Find("_1ch") != -1)
+					chan_num = 1;
+				else if (data_name.Find("_2ch") != -1)
+					chan_num = 2;
+				if (chan_num > 0 && chan >= chan_num)
+					vd->setValue(gstDisplay, false);
+				else
+					vd->setValue(gstDisplay, true);
+
+				if (reader->GetChanNum() > 1)
+					data_name += wxString::Format("_%d", chan + 1);
+				vd->setName(data_name.ToStdString());
+				vd->setValue(gstDataPath, reader->GetPathName());
+				vd->setValue(gstTime, long(reader->GetCurTime()));
+				if (!reader->IsSpcInfoValid())
+				{
+					vd->setValue(gstSpcX, spcx);
+					vd->setValue(gstSpcY, spcy);
+					vd->setValue(gstSpcZ, spcz);
+				}
+				else
+				{
+					vd->setValue(gstSpcX, reader->GetXSpc());
+					vd->setValue(gstSpcY, reader->GetYSpc());
+					vd->setValue(gstSpcZ, reader->GetZSpc());
+				}
+				if (vd->GetRenderer())
+					vd->GetRenderer()->clear_tex_pool();
+			}
+		}
+		i++;
+	}
+	//set bat folder name
+	setValue(gstBatFolder, bat_folder);
+
+	InitView(INIT_BOUNDS | INIT_CENTER);
+
+	//if (m_frame)
+	//{
+	//	m_frame->UpdateList();
+	//	m_frame->UpdateTree(
+	//		m_frame->GetCurSelVol() ?
+	//		m_frame->GetCurSelVol()->getName() :
+	//		"");
+	//}
+}
+
+void Renderview::Get3DBatRange(long &start_frame, long &end_frame)
+{
+	int i = 0;//counter
+	std::wstring bat_folder;
+
+	for (auto vd : m_vol_list)
+	{
+		if (vd && vd->GetReader())
+		{
+			BaseReader* reader = vd->GetReader();
+			reader->SetBatch(true);
+
+			int vd_cur_frame = reader->GetCurBatch();
+			int vd_start_frame = -vd_cur_frame;
+			int vd_end_frame = reader->GetBatchNum() - 1 - vd_cur_frame;
+
+			if (i > 0)
+				bat_folder += L"_";
+			bat_folder += reader->GetDataName();
+
+			if (i == 0)
+			{
+				//first dataset
+				start_frame = vd_start_frame;
+				end_frame = vd_end_frame;
+			}
+			else
+			{
+				//datasets after the first one
+				if (vd_start_frame < start_frame)
+					start_frame = vd_start_frame;
+				if (vd_end_frame > end_frame)
+					end_frame = vd_end_frame;
+			}
+		}
+		i++;
+	}
+	end_frame -= start_frame;
+	start_frame = 0;
+}
+
+void Renderview::Set3DBatFrame(long frame, long start_frame, long end_frame, bool rewind)
+{
+	long lval;
+	//compute frame number
+	setValue(gstBeginFrame, start_frame);
+	setValue(gstEndFrame, end_frame);
+	lval = std::abs(end_frame - start_frame + 1);
+	setValue(gstTotalFrames, lval);
+	//skip update if frame num unchanged
+	getValue(gstCurrentFrame, lval);
+	bool update = lval == frame ? false : true;
+
+	//save currently selected volume
+	Referenced* ref;
+	getRvalu(gstCurrentVolume, &ref);
+
+	//run pre-change script
+	bool bval;
+	getValue(gstRunScript, bval);
+	std::wstring script_file;
+	getValue(gstScriptFile, script_file);
+	if (update && bval)
+		m_scriptor->Run4DScript(flrd::ScriptProc::TM_ALL_PRE, script_file, rewind);
+
+	//change time frame
+	setValue(gstPreviousFrame, lval);
+	setValue(gstCurrentFrame, frame);
+
+	if (update)
+		ReloadVolumeData(frame);
+
+	//run post-change script
+	if (update && bval)
+		m_scriptor->Run4DScript(flrd::ScriptProc::TM_ALL_POST, script_file, rewind);
+
+	//restore currently selected volume
+	setValue(gstCurrentVolume, ref);
+	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+	m_selector->SetVolume(vd);
+	m_calculator->SetVolumeA(vd);
+
+	RefreshGL(18);
+}
+
+void Renderview::CalculateCrop()
+{
+	long w, h;
+	getValue(gstSizeX, w);
+	getValue(gstSizeY, h);
+
+	Referenced* ref;
+	getRvalu(gstCurrentVolume, &ref);
+
+	if (ref)
+	{
+		//projection
+		HandleProjection(w, h);
+		//Transformation
+		HandleCamera();
+
+		glm::mat4 mv_temp = GetDrawMat();
+		Transform mv;
+		Transform pr;
+		mv.set(glm::value_ptr(mv_temp));
+		pr.set(glm::value_ptr(m_proj_mat));
+
+		double minx, maxx, miny, maxy;
+		minx = 1.0;
+		maxx = -1.0;
+		miny = 1.0;
+		maxy = -1.0;
+		std::vector<Point> points;
+		BBox bbox;
+		VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+		vd->getValue(gstBounds, bbox);
+		points.push_back(Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
+		points.push_back(Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
+
+		Point p;
+		for (unsigned int i = 0; i < points.size(); ++i)
+		{
+			p = mv.transform(points[i]);
+			p = pr.transform(p);
+			minx = p.x() < minx ? p.x() : minx;
+			maxx = p.x() > maxx ? p.x() : maxx;
+			miny = p.y() < miny ? p.y() : miny;
+			maxy = p.y() > maxy ? p.y() : maxy;
+		}
+
+		minx = Clamp(minx, -1.0, 1.0);
+		maxx = Clamp(maxx, -1.0, 1.0);
+		miny = Clamp(miny, -1.0, 1.0);
+		maxy = Clamp(maxy, -1.0, 1.0);
+
+		setValue(gstCropX, long((minx + 1.0)*w / 2.0 + 1.0));
+		setValue(gstCropY, long((miny + 1.0)*h / 2.0 + 1.0));
+		setValue(gstCropW, long((maxx - minx)*w / 2.0 - 1.5));
+		setValue(gstCropH, long((maxy - miny)*h / 2.0 - 1.5));
+
+	}
+	else
+	{
+		long size;
+		if (w > h)
+		{
+			size = h;
+			setValue(gstCropX, long((w - h) / 2.0));
+			setValue(gstCropY, long(0));
+		}
+		else
+		{
+			size = w;
+			setValue(gstCropX, long(0));
+			setValue(gstCropY, long((h - w) / 2.0));
+		}
+		setValue(gstCropW, size);
+		setValue(gstCropH, size);
+	}
+}
+
+//segment volumes in current view
+void Renderview::Segment()
+{
+	int mode = m_selector->GetMode();
+	HandleCamera();
+	if (mode == 9)
+	{
+		long lx, ly;
+		getValue(gstMouseClientX, lx);
+		getValue(gstMouseClientY, ly);
+		m_selector->Segment(lx, ly);
+	}
+	else
+		m_selector->Segment();
+
+	//bool count = false;
+	//bool colocal = false;
+	//if (mode == 1 ||
+	//	mode == 2 ||
+	//	mode == 3 ||
+	//	mode == 4 ||
+	//	mode == 5 ||
+	//	mode == 7 ||
+	//	mode == 8 ||
+	//	mode == 9)
+	//{
+	//	if (m_paint_count)
+	//		count = true;
+	//	if (m_paint_colocalize)
+	//		colocal = true;
+	//}
+
+	////update
+	//if (m_frame)
+	//{
+	//	if (m_frame->GetBrushToolDlg())
+	//		m_frame->GetBrushToolDlg()->Update(count ? 0 : 1);
+	//	if (colocal && m_frame->GetColocalizationDlg())
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
+}
+
+void Renderview::ForceDraw()
+{
+//#ifdef _WIN32
+//	if (!m_set_gl)
+//	{
+//		SetCurrent(*m_glRC);
+//		m_set_gl = true;
+//		if (m_frame)
+//		{
+//			for (int i = 0; i < m_frame->GetViewNum(); i++)
+//			{
+//				VRenderGLView* view = m_frame->GetView(i);
+//				if (view && view != this)
+//				{
+//					view->m_set_gl = false;
+//				}
+//			}
+//		}
+//	}
+//#endif
+//#if defined(_DARWIN) || defined(__linux__)
+//	SetCurrent(*m_glRC);
+//#endif
+	Init();
+	//wxPaintDC dc(this);
+
+	bool bval;
+	getValue(gstResize, bval);
+	if (bval)
+		setValue(gstRetainFb, false);
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	PopMeshList();
+	long draw_type;
+	if (m_msh_list.empty())
+		draw_type = 1;
+	else
+		draw_type = 2;
+	setValue(gstDrawType, draw_type);
+
+	setValue(gstDrawing, true);
+	PreDraw();
+
+	getValue(gstVrEnable, bval);
+	if (bval)
+	{
+		PrepVRBuffer();
+		BindRenderBuffer();
+	}
+
+	switch (draw_type)
+	{
+	case 1:  //draw volumes only
+		Draw();
+		break;
+	case 2:  //draw volumes and meshes with depth peeling
+		DrawDP();
+		break;
+	}
+
+	getValue(gstDrawCamCtr, bval);
+	if (bval) DrawCamCtr();
+	getValue(gstDrawLegend, bval);
+	if (bval) DrawLegend();
+	getValue(gstDrawScaleBar, bval);
+	if (bval) DrawScaleBar();
+	getValue(gstDrawColormap, bval);
+	if (bval) DrawColormap();
+
+	PostDraw();
+
+	//draw frame after capture
+	getValue(gstDrawCropFrame, bval);
+	if (bval) DrawFrame();
+	//draw info
+	getValue(gstDrawInfo, bval);
+	if (bval & INFO_DISP) DrawInfo(nx, ny);
+
+	long int_mode;
+	getValue(gstInterMode, int_mode);
+	if (int_mode == 2 ||
+		int_mode == 7)  //painting mode
+	{
+		getValue(gstDrawBrush, bval);
+		if (bval) DrawBrush();
+		getValue(gstPaintEnable, bval);
+		if (bval) PaintStroke();//for volume segmentation
+		bool bval2;
+		getValue(gstPaintDisplay, bval2);
+		if (bval && bval2) DisplayStroke();//show the paint strokes
+	}
+	else if (int_mode == 4)
+		setValue(gstInterMode, 2);
+	else if (int_mode == 8)
+		setValue(gstInterMode, 7);
+
+
+#ifdef _WIN32
+	if (flvr::TextureRenderer::get_invalidate_tex())
+	{
+//		for (int i = 0; i < m_dp_tex_list.size(); ++i)
+//			glInvalidateTexImage(m_dp_tex_list[i], 0);
+//		glInvalidateTexImage(m_tex_paint, 0);
+//		glInvalidateTexImage(m_tex_final, 0);
+//		glInvalidateTexImage(m_tex, 0);
+//		glInvalidateTexImage(m_tex_temp, 0);
+//		glInvalidateTexImage(m_tex_wt2, 0);
+//		glInvalidateTexImage(m_tex_ol1, 0);
+//		glInvalidateTexImage(m_tex_ol2, 0);
+//		glInvalidateTexImage(m_tex_pick, 0);
+//		glInvalidateTexImage(m_tex_pick_depth, 0);
+	}
+#endif
+
+	//swap
+	getValue(gstVrEnable, bval);
+	if (bval)
+	{
+		long lval;
+		getValue(gstVrEyeIdx, lval);
+		if (lval)
+		{
+			DrawVRBuffer();
+			setValue(gstVrEyeIdx, long(0));
+			toggleValue(gstSwapBuffers, bval);
+			//SwapBuffers();
+		}
+		else
+		{
+			setValue(gstVrEyeIdx, long(1));
+			RefreshGL(99);
+		}
+	}
+	else
+		toggleValue(gstSwapBuffers, bval);
+		//SwapBuffers();
+
+	glbin_timer->sample();
+	setValue(gstDrawing, false);
+
+	getValue(gstInteractive, bval);
+	DBGPRINT(L"buffer swapped\t%d\n", bval);
+
+	getValue(gstResize, bval);
+	if (bval) setValue(gstResize, false);
+	getValue(gstEnlarge, bval);
+	if (bval)
+		ResetEnlarge();
+
+	//if (m_linked_rot)
+	//{
+	//	if (!m_master_linked_view ||
+	//		this != m_master_linked_view)
+	//		return;
+
+	//	if (m_frame)
+	//	{
+	//		for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//		{
+	//			VRenderGLView* view = m_frame->GetView(i);
+	//			if (view && view != this)
+	//			{
+	//				view->SetRotations(m_rotx, m_roty, m_rotz, true);
+	//				view->RefreshGL(39);
+	//			}
+	//		}
+	//	}
+
+	//	m_master_linked_view = 0;
+	//}
+}
+
+//start loop update
+void Renderview::StartLoopUpdate()
+{
+	////this is for debug_ds, comment when done
+	//if (TextureRenderer::get_mem_swap() &&
+	//  TextureRenderer::get_start_update_loop() &&
+	//  !TextureRenderer::get_done_update_loop())
+	//  return;
+
+	if (!flvr::TextureRenderer::get_mem_swap()) return;
+	if (flvr::TextureRenderer::active_view_ > 0 &&
+		flvr::TextureRenderer::active_view_ != getId()) return;
+	else flvr::TextureRenderer::active_view_ = getId();
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	//projection
+	HandleProjection(nx, ny, true);
+	//Transformation
+	HandleCamera(true);
+	glm::mat4 mv_temp = m_mv_mat;
+	m_mv_mat = GetDrawMat();
+
+	PopVolumeList();
+	int total_num = 0;
+	int num_chan;
+	//reset drawn status for all bricks
+	int i, j, k;
+	bool persp;
+	getValue(gstPerspective, persp);
+	for (auto vd : m_vol_list)
+	{
+		if (!vd) continue;
+
+		switchLevel(vd.get());
+		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+
+		num_chan = 0;
+		flvr::Texture* tex = vd->GetTexture();
+		if (tex)
+		{
+			Transform *tform = tex->transform();
+			double mvmat[16];
+			tform->get_trans(mvmat);
+			vd->GetRenderer()->m_mv_mat2 = glm::mat4(
+				mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+				mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+				mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+				mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+			vd->GetRenderer()->m_mv_mat2 = vd->GetRenderer()->m_mv_mat * vd->GetRenderer()->m_mv_mat2;
+
+			Ray view_ray = vd->GetRenderer()->compute_view();
+			std::vector<flvr::TextureBrick*> *bricks = 0;
+			bricks = tex->get_sorted_bricks(view_ray, !persp);
+			if (!bricks || bricks->size() == 0)
+				continue;
+			for (j = 0; j < bricks->size(); j++)
+			{
+				(*bricks)[j]->set_drawn(false);
+				if ((*bricks)[j]->get_priority() > 0 ||
+					!vd->GetRenderer()->test_against_view((*bricks)[j]->bbox(), persp))
+				{
+					(*bricks)[j]->set_disp(false);
+					continue;
+				}
+				else
+					(*bricks)[j]->set_disp(true);
+				total_num++;
+				num_chan++;
+				long mip_mode;
+				vd->getValue(gstMipMode, mip_mode);
+				bool shading;
+				vd->getValue(gstShadingEnable, shading);
+				if (mip_mode == 1 && shading)
+					total_num++;
+				bool shadow;
+				vd->getValue(gstShadowEnable, shadow);
+				if (shadow)
+					total_num++;
+				//mask
+				long label_mode;
+				vd->getValue(gstLabelMode, label_mode);
+				if (vd->GetTexture() &&
+					vd->GetTexture()->nmask() != -1 &&
+					(!label_mode ||
+					(label_mode &&
+						vd->GetTexture()->nlabel() == -1)))
+					total_num++;
+			}
+		}
+		vd->setValue(gstBrickNum, long(num_chan));
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_done_loop(false);
+	}
+
+	std::vector<VolumeLoaderData> queues;
+	long mix_method;
+	getValue(gstMixMethod, mix_method);
+	if (mix_method == MIX_METHOD_MULTI)
+	{
+		std::vector<VolumeData*> list;
+		for (auto vd : m_vol_list)
+		{
+			if (!vd) continue;
+			bool disp, multires;
+			vd->getValue(gstDisplay, disp);
+			vd->getValue(gstMultires, multires);
+			if (!disp || !multires)
+				continue;
+			flvr::Texture* tex = vd->GetTexture();
+			if (!tex)
+				continue;
+			std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
+			if (!bricks || bricks->size() == 0)
+				continue;
+			list.push_back(vd.get());
+		}
+
+		std::vector<VolumeLoaderData> tmp_shade;
+		std::vector<VolumeLoaderData> tmp_shadow;
+		for (auto vd : list)
+		{
+			if (!vd) continue;
+			flvr::Texture* tex = vd->GetTexture();
+			Ray view_ray = vd->GetRenderer()->compute_view();
+			std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !persp);
+			long mip_mode;
+			vd->getValue(gstMipMode, mip_mode);
+			int mode = mip_mode == 1 ? 1 : 0;
+			bool shading;
+			vd->getValue(gstShadingEnable, shading);
+			bool shade = (mode == 1 && shading);
+			bool shadow;
+			vd->getValue(gstShadowEnable, shadow);
+			for (j = 0; j < bricks->size(); j++)
+			{
+				VolumeLoaderData d;
+				flvr::TextureBrick* b = (*bricks)[j];
+				if (b->get_disp())
+				{
+					d.brick = b;
+					d.finfo = tex->GetFileName(b->getID());
+					d.vd = vd;
+					if (!b->drawn(mode))
+					{
+						d.mode = mode;
+						queues.push_back(d);
+					}
+					if (shade && !b->drawn(2))
+					{
+						d.mode = 2;
+						tmp_shade.push_back(d);
+					}
+					if (shadow && !b->drawn(3))
+					{
+						d.mode = 3;
+						tmp_shadow.push_back(d);
+					}
+				}
+			}
+		}
+		if (flvr::TextureRenderer::get_update_order() == 1)
+			std::sort(queues.begin(), queues.end(),
+				[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+		{ return b2.brick->get_d() > b1.brick->get_d(); });
+		else if (flvr::TextureRenderer::get_update_order() == 0)
+			std::sort(queues.begin(), queues.end(),
+				[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+		{ return b2.brick->get_d() < b1.brick->get_d(); });
+
+		if (!tmp_shade.empty())
+		{
+			if (flvr::TextureRenderer::get_update_order() == 1)
+				std::sort(tmp_shade.begin(), tmp_shade.end(),
+					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+			{ return b2.brick->get_d() > b1.brick->get_d(); });
+			else if (flvr::TextureRenderer::get_update_order() == 0)
+				std::sort(tmp_shade.begin(), tmp_shade.end(),
+					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+			{ return b2.brick->get_d() < b1.brick->get_d(); });
+			queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+		}
+		if (!tmp_shadow.empty())
+		{
+			if (flvr::TextureRenderer::get_update_order() == 1)
+			{
+				int order = flvr::TextureRenderer::get_update_order();
+				flvr::TextureRenderer::set_update_order(0);
+				for (i = 0; i < list.size(); i++)
+				{
+					Ray view_ray = list[i]->GetRenderer()->compute_view();
+					list[i]->GetTexture()->set_sort_bricks();
+					list[i]->GetTexture()->get_sorted_bricks(view_ray, !persp); //recalculate brick.d_
+					list[i]->GetTexture()->set_sort_bricks();
+				}
+				flvr::TextureRenderer::set_update_order(order);
+				std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+				{ return b2.brick->get_d() > b1.brick->get_d(); });
+			}
+			else if (flvr::TextureRenderer::get_update_order() == 0)
+				std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+					[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+			{ return b2.brick->get_d() > b1.brick->get_d(); });
+			queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+		}
+	}
+	else if (getNumChildren() > 0)
+	{
+		for (i = getNumChildren() - 1; i >= 0; i--)
+		{
+			if (VolumeData* vd = getChild(i)->asVolumeData())
+			{
+				std::vector<VolumeLoaderData> tmp_shade;
+				std::vector<VolumeLoaderData> tmp_shadow;
+				bool disp, multires;
+				vd->getValue(gstDisplay, disp);
+				vd->getValue(gstMultires, multires);
+				if (disp && multires)
+				{
+					flvr::Texture* tex = vd->GetTexture();
+					if (!tex)
+						continue;
+					Ray view_ray = vd->GetRenderer()->compute_view();
+					std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !persp);
+					if (!bricks || bricks->size() == 0)
+						continue;
+					long mip_mode;
+					vd->getValue(gstMipMode, mip_mode);
+					int mode = mip_mode == 1 ? 1 : 0;
+					bool shading;
+					vd->getValue(gstShadingEnable, shading);
+					bool shade = (mode == 1 && shading);
+					bool shadow;
+					vd->getValue(gstShadowEnable, shadow);
+					for (j = 0; j < bricks->size(); j++)
+					{
+						VolumeLoaderData d;
+						flvr::TextureBrick* b = (*bricks)[j];
+						if (b->get_disp())
+						{
+							d.brick = b;
+							d.finfo = tex->GetFileName(b->getID());
+							d.vd = vd;
+							if (!b->drawn(mode))
+							{
+								d.mode = mode;
+								queues.push_back(d);
+							}
+							if (shade && !b->drawn(2))
+							{
+								d.mode = 2;
+								tmp_shade.push_back(d);
+							}
+							if (shadow && !b->drawn(3))
+							{
+								d.mode = 3;
+								tmp_shadow.push_back(d);
+							}
+						}
+					}
+					if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+					if (!tmp_shadow.empty())
+					{
+						if (flvr::TextureRenderer::get_update_order() == 1)
+						{
+							int order = flvr::TextureRenderer::get_update_order();
+							flvr::TextureRenderer::set_update_order(0);
+							Ray view_ray = vd->GetRenderer()->compute_view();
+							tex->set_sort_bricks();
+							tex->get_sorted_bricks(view_ray, !persp); //recalculate brick.d_
+							tex->set_sort_bricks();
+							flvr::TextureRenderer::set_update_order(order);
+							std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+							{ return b2.brick->get_d() > b1.brick->get_d(); });
+						}
+						queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+					}
+				}
+			}
+			else if (VolumeGroup* group = getChild(i)->asVolumeGroup())//group
+			{
+				std::vector<VolumeData*> list;
+				bool disp;
+				group->getValue(gstDisplay, disp);
+				if (!disp)
+					continue;
+				for (j = group->getNumChildren() - 1; j >= 0; j--)
+				{
+					VolumeData* vd = group->getChild(j)->asVolumeData();
+					bool disp, multires;
+					vd->getValue(gstDisplay, disp);
+					vd->getValue(gstMultires, multires);
+					if (!vd || !disp || !multires)
+						continue;
+					flvr::Texture* tex = vd->GetTexture();
+					if (!tex)
+						continue;
+					Ray view_ray = vd->GetRenderer()->compute_view();
+					std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !persp);
+					if (!bricks || bricks->size() == 0)
+						continue;
+					list.push_back(vd);
+				}
+				if (list.empty())
+					continue;
+
+				std::vector<VolumeLoaderData> tmp_q;
+				std::vector<VolumeLoaderData> tmp_shade;
+				std::vector<VolumeLoaderData> tmp_shadow;
+				long blend_mode;
+				group->getValue(gstBlendMode, blend_mode);
+				if (blend_mode == MIX_METHOD_MULTI)
+				{
+					for (k = 0; k < list.size(); k++)
+					{
+						VolumeData* vd = list[k];
+						flvr::Texture* tex = vd->GetTexture();
+						Ray view_ray = vd->GetRenderer()->compute_view();
+						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !persp);
+						long mip_mode;
+						vd->getValue(gstMipMode, mip_mode);
+						int mode = mip_mode == 1 ? 1 : 0;
+						bool shading;
+						vd->getValue(gstShadingEnable, shading);
+						bool shade = (mode == 1 && shading);
+						bool shadow;
+						vd->getValue(gstShadowEnable, shadow);
+						for (j = 0; j < bricks->size(); j++)
+						{
+							VolumeLoaderData d;
+							flvr::TextureBrick* b = (*bricks)[j];
+							if (b->get_disp())
+							{
+								d.brick = b;
+								d.finfo = tex->GetFileName(b->getID());
+								d.vd = vd;
+								if (!b->drawn(mode))
+								{
+									d.mode = mode;
+									tmp_q.push_back(d);
+								}
+								if (shade && !b->drawn(2))
+								{
+									d.mode = 2;
+									tmp_shade.push_back(d);
+								}
+								if (shadow && !b->drawn(3))
+								{
+									d.mode = 3;
+									tmp_shadow.push_back(d);
+								}
+							}
+						}
+					}
+					if (!tmp_q.empty())
+					{
+						if (flvr::TextureRenderer::get_update_order() == 1)
+							std::sort(tmp_q.begin(), tmp_q.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+						{ return b2.brick->get_d() > b1.brick->get_d(); });
+						else if (flvr::TextureRenderer::get_update_order() == 0)
+							std::sort(tmp_q.begin(), tmp_q.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+						{ return b2.brick->get_d() < b1.brick->get_d(); });
+						queues.insert(queues.end(), tmp_q.begin(), tmp_q.end());
+					}
+					if (!tmp_shade.empty())
+					{
+						if (flvr::TextureRenderer::get_update_order() == 1)
+							std::sort(tmp_shade.begin(), tmp_shade.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+						{ return b2.brick->get_d() > b1.brick->get_d(); });
+						else if (flvr::TextureRenderer::get_update_order() == 0)
+							std::sort(tmp_shade.begin(), tmp_shade.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+						{ return b2.brick->get_d() < b1.brick->get_d(); });
+						queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+					}
+					if (!tmp_shadow.empty())
+					{
+						if (flvr::TextureRenderer::get_update_order() == 1)
+						{
+							int order = flvr::TextureRenderer::get_update_order();
+							flvr::TextureRenderer::set_update_order(0);
+							for (k = 0; k < list.size(); k++)
+							{
+								Ray view_ray = list[k]->GetRenderer()->compute_view();
+								list[i]->GetTexture()->set_sort_bricks();
+								list[i]->GetTexture()->get_sorted_bricks(view_ray, !persp); //recalculate brick.d_
+								list[i]->GetTexture()->set_sort_bricks();
+							}
+							flvr::TextureRenderer::set_update_order(order);
+							std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+							{ return b2.brick->get_d() > b1.brick->get_d(); });
+						}
+						else if (flvr::TextureRenderer::get_update_order() == 0)
+							std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+								[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+						{ return b2.brick->get_d() > b1.brick->get_d(); });
+						queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+					}
+				}
+				else
+				{
+					for (j = 0; j < list.size(); j++)
+					{
+						VolumeData* vd = list[j];
+						flvr::Texture* tex = vd->GetTexture();
+						Ray view_ray = vd->GetRenderer()->compute_view();
+						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !persp);
+						long mip_mode;
+						vd->getValue(gstMipMode, mip_mode);
+						int mode = mip_mode == 1 ? 1 : 0;
+						bool shading;
+						vd->getValue(gstShadingEnable, shading);
+						bool shade = (mode == 1 && shading);
+						bool shadow;
+						vd->getValue(gstShadowEnable, shadow);
+						for (k = 0; k < bricks->size(); k++)
+						{
+							VolumeLoaderData d;
+							flvr::TextureBrick* b = (*bricks)[k];
+							if (b->get_disp())
+							{
+								d.brick = b;
+								d.finfo = tex->GetFileName(b->getID());
+								d.vd = vd;
+								if (!b->drawn(mode))
+								{
+									d.mode = mode;
+									queues.push_back(d);
+								}
+								if (shade && !b->drawn(2))
+								{
+									d.mode = 2;
+									tmp_shade.push_back(d);
+								}
+								if (shadow && !b->drawn(3))
+								{
+									d.mode = 3;
+									tmp_shadow.push_back(d);
+								}
+							}
+						}
+						if (!tmp_shade.empty()) queues.insert(queues.end(), tmp_shade.begin(), tmp_shade.end());
+						if (!tmp_shadow.empty())
+						{
+							if (flvr::TextureRenderer::get_update_order() == 1)
+							{
+								int order = flvr::TextureRenderer::get_update_order();
+								flvr::TextureRenderer::set_update_order(0);
+								Ray view_ray = vd->GetRenderer()->compute_view();
+								tex->set_sort_bricks();
+								tex->get_sorted_bricks(view_ray, !persp); //recalculate brick.d_
+								tex->set_sort_bricks();
+								flvr::TextureRenderer::set_update_order(order);
+								std::sort(tmp_shadow.begin(), tmp_shadow.end(),
+									[](const VolumeLoaderData b1, const VolumeLoaderData b2)
+								{ return b2.brick->get_d() > b1.brick->get_d(); });
+							}
+							queues.insert(queues.end(), tmp_shadow.begin(), tmp_shadow.end());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (queues.size() > 0)
+	//&& !m_interactive)
+	{
+		m_loader->Set(queues);
+		m_loader->SetMemoryLimitByte((long long)flvr::TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
+		flvr::TextureRenderer::set_load_on_main_thread(false);
+		m_loader->Run();
+	}
+
+	long draw_type;
+	getValue(gstDrawType, draw_type);
+	if (total_num > 0)
+	{
+		flvr::TextureRenderer::set_update_loop();
+		if (draw_type == 1)
+			flvr::TextureRenderer::set_total_brick_num(total_num);
+		else if (draw_type == 2)
+		{
+			long lval;
+			getValue(gstPeelNum, lval);
+			flvr::TextureRenderer::set_total_brick_num(total_num*(lval + 1));
+		}
+		flvr::TextureRenderer::reset_done_current_chan();
+	}
+}
+
+//halt loop update
+void Renderview::HaltLoopUpdate()
+{
+	if (flvr::TextureRenderer::get_mem_swap())
+		flvr::TextureRenderer::reset_update_loop();
+}
+
+//new function to refresh
+void Renderview::RefreshGL(int debug_code,
+	bool erase,
+	bool start_loop)
+{
+	//m_force_clear = force_clear;
+	//m_interactive = interactive;
+
+	//for debugging refresh events
+	bool bval;
+	getValue(gstInteractive, bval);
+	DBGPRINT(L"%d\trefresh\t%d\t%d\n", getId(), debug_code, bval);
+	setValue(gstUpdating, true);
+	if (start_loop)
+		StartLoopUpdate();
+	SetSortBricks();
+	setValue(gstRefresh, true);
+	setValue(gstRefreshErase, erase);
+	toggleValue(gstRefreshNotify, bval);
+	//Refresh(erase);
+}
+
+void Renderview::DrawRulers()
+{
+	if (m_ruler_list->empty())
+		return;
+	double width;
+	getValue(gstLineWidth, width);
+	m_ruler_renderer->SetLineSize(width);
+	m_ruler_renderer->Draw();
+}
+
+flrd::Ruler* Renderview::GetRuler(unsigned int id)
+{
+	m_cur_ruler = 0;
+	for (auto i : *m_ruler_list)
+	{
+		if (i && i->Id() == id)
+		{
+			m_cur_ruler = i;
+			break;
+		}
+	}
+	return m_cur_ruler;
+}
+
+//draw highlighted comps
+void Renderview::DrawCells()
+{
+	if (m_cell_list->empty())
+		return;
+	double width = 1.0;
+	getValue(gstLineWidth, width);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	width = m_frame->GetSettingDlg()->GetLineWidth();
+	long lx, ly;
+	getValue(gstSizeX, lx);
+	getValue(gstSizeY, ly);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	glm::mat4 matrix = glm::ortho(float(0), float(lx), float(0), float(ly));
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	shader->setLocalParam(0, lx, ly, width, 0.0);
+
+	flvr::VertexArray* va_rulers =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Rulers);
+	if (va_rulers)
+	{
+		vector<float> verts;
+		unsigned int num = DrawCellVerts(verts);
+		if (num)
+		{
+			va_rulers->buffer_data(flvr::VABuf_Coord,
+				sizeof(float)*verts.size(),
+				&verts[0], GL_STREAM_DRAW);
+			va_rulers->set_param(0, num);
+			va_rulers->draw();
+		}
+	}
+
+	if (shader && shader->valid())
+		shader->release();
+}
+
+unsigned int Renderview::DrawCellVerts(vector<float>& verts)
+{
+	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
+	float px, py;
+
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+
+	//estimate
+	int vert_num = m_cell_list->size();
+	verts.reserve(vert_num * 8 * 3 * 2);
+
+	unsigned int num = 0;
+	Point p1, p2, p3, p4;
+	Color c;
+	getValue(gstTextColor, c);
+	double sx, sy, sz;
+	sx = m_cell_list->sx;
+	sy = m_cell_list->sy;
+	sz = m_cell_list->sz;
+	for (auto it = m_cell_list->begin();
+		it != m_cell_list->end(); ++it)
+	{
+		BBox box = it->second->GetBox(sx, sy, sz);
+		GetCellPoints(box, p1, p2, p3, p4, mv, p);
+
+		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p2.x()); verts.push_back(p2.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p2.x()); verts.push_back(p2.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p3.x()); verts.push_back(p3.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p3.x()); verts.push_back(p3.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p4.x()); verts.push_back(p4.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p4.x()); verts.push_back(p4.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
+		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		num += 8;
+	}
+
+	return num;
+}
+
+void Renderview::GetCellPoints(BBox& box,
+	Point& p1, Point& p2, Point& p3, Point& p4,
+	Transform& mv, Transform& p)
+{
+	//get 6 points of the jack of bbox
+	Point pp[6];
+	Point c = box.center();
+	pp[0] = Point(box.Min().x(), c.y(), c.z());
+	pp[1] = Point(box.Max().x(), c.y(), c.z());
+	pp[2] = Point(c.x(), box.Min().y(), c.z());
+	pp[3] = Point(c.x(), box.Max().y(), c.z());
+	pp[4] = Point(c.x(), c.y(), box.Min().z());
+	pp[5] = Point(c.x(), c.y(), box.Max().z());
+
+	double minx = std::numeric_limits<double>::max();
+	double maxx = -std::numeric_limits<double>::max();
+	double miny = std::numeric_limits<double>::max();
+	double maxy = -std::numeric_limits<double>::max();
+
+	for (int i = 0; i < 6; ++i)
+	{
+		pp[i] = mv.transform(pp[i]);
+		pp[i] = p.transform(pp[i]);
+		minx = std::min(minx, pp[i].x());
+		maxx = std::max(maxx, pp[i].x());
+		miny = std::min(miny, pp[i].y());
+		maxy = std::max(maxy, pp[i].y());
+	}
+
+	long lx, ly;
+	getValue(gstSizeX, lx);
+	getValue(gstSizeY, ly);
+
+	p1 = Point((minx + 1)*lx / 2, (miny + 1)*ly / 2, 0.0);
+	p2 = Point((maxx + 1)*lx / 2, (miny + 1)*ly / 2, 0.0);
+	p3 = Point((maxx + 1)*lx / 2, (maxy + 1)*ly / 2, 0.0);
+	p4 = Point((minx + 1)*lx / 2, (maxy + 1)*ly / 2, 0.0);
+}
+
+void Renderview::CreateTraceGroup()
+{
+	if (m_trace_group)
+		delete m_trace_group;
+
+	m_trace_group = new flrd::Tracks;
+}
+
+int Renderview::LoadTraceGroup(const std::wstring &filename)
+{
+	if (m_trace_group)
+		delete m_trace_group;
+
+	m_trace_group = new flrd::Tracks;
+	return m_trace_group->LoadData(filename);
+}
+
+int Renderview::SaveTraceGroup(const std::wstring &filename)
+{
+	if (m_trace_group)
+		return m_trace_group->SaveData(filename);
+	else
+		return 0;
+}
+
+void Renderview::DrawTraces()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentVolume, &ref);
+	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+	if (!vd || !m_trace_group) return;
+
+	double width = 1.0;
+	getValue(gstLineWidth, width);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	width = m_frame->GetSettingDlg()->GetLineWidth();
+	long lx, ly;
+	getValue(gstSizeX, lx);
+	getValue(gstSizeY, ly);
+
+	//glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+	double spcx, spcy, spcz;
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
+	glm::mat4 matrix = glm::scale(m_mv_mat,
+		glm::vec3(float(spcx), float(spcy), float(spcz)));
+	matrix = m_proj_mat * matrix;
+
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	shader->setLocalParam(0, lx, ly, width, 0.0);
+
+	flvr::VertexArray* va_traces =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Traces);
+	if (va_traces)
+	{
+		if (va_traces->get_dirty())
+		{
+			vector<float> verts;
+			unsigned int num = m_trace_group->Draw(verts, vd->GetShuffle());
+			if (num)
+			{
+				va_traces->buffer_data(flvr::VABuf_Coord,
+					sizeof(float)*verts.size(),
+					&verts[0], GL_STREAM_DRAW);
+				va_traces->set_param(0, num);
+				va_traces->draw();
+			}
+		}
+		else
+			va_traces->draw();
+	}
+
+	if (shader && shader->valid())
+		shader->release();
+	//glDisable(GL_LINE_SMOOTH);
+
+}
+
+void Renderview::GetTraces(bool update)
+{
+	Referenced* ref;
+	getRvalu(gstCurrentVolume, &ref);
+	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+	if (!vd || !m_trace_group) return;
+
+	int ii, jj, kk;
+	long nx, ny, nz;
+	//return current mask (into system memory)
+	vd->GetRenderer()->return_mask();
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
+	//find labels in the old that are selected by the current mask
+	Nrrd* mask_nrrd = vd->GetMask(true);
+	if (!mask_nrrd) return;
+	Nrrd* label_nrrd = vd->GetLabel(true);
+	if (!label_nrrd) return;
+	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
+	if (!mask_data) return;
+	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
+	if (!label_data) return;
+	flrd::CelpList sel_labels;
+	flrd::CelpListIter label_iter;
+	for (ii = 0; ii < nx; ii++)
+	for (jj = 0; jj < ny; jj++)
+	for (kk = 0; kk < nz; kk++)
+	{
+		int index = nx * ny*kk + nx * jj + ii;
+		unsigned int label_value = label_data[index];
+		if (mask_data[index] && label_value)
+		{
+			label_iter = sel_labels.find(label_value);
+			if (label_iter == sel_labels.end())
+			{
+				flrd::Celp cell(new flrd::Cell(label_value));
+				cell->Inc(ii, jj, kk, 1.0f);
+				sel_labels.insert(std::pair<unsigned int, flrd::Celp>
+					(label_value, cell));
+			}
+			else
+			{
+				label_iter->second->Inc(ii, jj, kk, 1.0f);
+			}
+		}
+	}
+
+	//create id list
+	long lval;
+	getValue(gstCurrentFrame, lval);
+	m_trace_group->SetCurTime(lval);
+	m_trace_group->SetPrvTime(lval);
+	m_trace_group->UpdateCellList(sel_labels);
+	//m_trace_group->SetPrvTime(m_tseq_prv_num);
+
+	//add traces to trace dialog
+	//if (update)
+	//{
+	//	if (m_vrv && m_frame && m_frame->GetTraceDlg())
+	//		m_frame->GetTraceDlg()->GetSettings(m_vrv->m_glview);
+	//}
 }
 
 
