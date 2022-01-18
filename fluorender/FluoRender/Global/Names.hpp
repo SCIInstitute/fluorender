@@ -261,7 +261,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipPlaneMode "clip plane mode"
 #define gstInitialized "initialized"
 #define gstInitView "init view"
+#define gstCurrentSelect "current select"
 #define gstCurrentVolume "current volume"
+#define gstCurrentMesh "current mesh"
 #define gstSetGl "set gl"//set gl context
 #define gstRunScript "run script"//script run
 #define gstScriptFile "script file"

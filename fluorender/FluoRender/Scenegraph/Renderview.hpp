@@ -311,7 +311,7 @@ namespace fluo
 		void DrawScaleBar();
 		void DrawLegend();
 		void DrawName(double x, double y, int nx, int ny,
-			const std::string &name, Color color,
+			const std::wstring &name, Color color,
 			double font_height, bool hilighted = false);
 		void DrawFrame();
 		void DrawClippingPlanes(bool border, int face_winding);

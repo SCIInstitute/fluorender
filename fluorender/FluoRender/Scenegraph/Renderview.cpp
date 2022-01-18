@@ -2619,7 +2619,7 @@ void Renderview::DrawScaleBar()
 	getValue(gstScaleBarText, wsb_text);
 	double textlen =
 		m_text_renderer->RenderTextLen(wsb_text);
-	fluo::Color text_color;
+	Color text_color;
 	getValue(gstTextColor, text_color);
 	double font_height =
 		flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
@@ -3024,6 +3024,229 @@ void Renderview::DrawClippingPlanes(bool border, int face_winding)
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
+}
+
+void Renderview::DrawLegend()
+{
+	double font_height =
+		flvr::TextRenderer::text_texture_manager_.GetSize() + 3.0;
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	double xoffset = 10.0;
+	double yoffset = 10.0;
+	bool draw_cropf;
+	getValue(gstDrawCropFrame, draw_cropf);
+	long lx, ly, lw, lh;
+	getValue(gstCropX, lx);
+	getValue(gstCropY, ly);
+	getValue(gstCropW, lw);
+	getValue(gstCropH, lh);
+	if (draw_cropf)
+	{
+		xoffset = 10.0 + lx;
+		yoffset = ny - lh - ly + 10.0;
+	}
+
+	wstring wstr;
+	double length = 0.0;
+	double name_len = 0.0;
+	double gap_width = font_height * 1.5;
+	int lines = 0;
+	bool bval;
+	//first pass
+	for (auto vd : m_vol_list)
+	{
+
+		if (!vd) continue;
+		vd->getValue(gstLegend, bval);
+		if (bval)
+		{
+			wstr = s2ws(vd->getName());
+			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			length += name_len;
+			if (length < double(draw_cropf ? lw : nx) - gap_width)
+			{
+				length += gap_width;
+			}
+			else
+			{
+				length = name_len + gap_width;
+				lines++;
+			}
+		}
+	}
+	for (auto md : m_msh_list)
+	{
+		if (!md) continue;
+		md->getValue(gstLegend, bval);
+		if (bval)
+		{
+			wstr = s2ws(md->getName());
+			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			length += name_len;
+			if (length < double(draw_cropf ? lw : nx) - gap_width)
+			{
+				length += gap_width;
+			}
+			else
+			{
+				length = name_len + gap_width;
+				lines++;
+			}
+		}
+	}
+
+	//second pass
+	int cur_line = 0;
+	double xpos;
+	length = 0.0;
+	long current_sel;
+	Referenced* ref = 0;
+	getValue(gstCurrentSelect, current_sel);
+	switch (current_sel)
+	{
+	case 2:
+		getRvalu(gstCurrentVolume, &ref);
+		break;
+	case 3:
+		getRvalu(gstCurrentMesh, &ref);
+		break;
+	}
+	for (auto vd : m_vol_list)
+	{
+		if (!vd) continue;
+		vd->getValue(gstLegend, bval);
+		if (bval)
+		{
+			wstr = s2ws(vd->getName());
+			xpos = length;
+			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			length += name_len;
+			if (length < double(draw_cropf ? lw : nx) - gap_width)
+			{
+				length += gap_width;
+			}
+			else
+			{
+				length = name_len + gap_width;
+				xpos = 0.0;
+				cur_line++;
+			}
+			bool highlighted = false;
+			if (current_sel == 2 && ref)
+			{
+				VolumeData* vd = dynamic_cast<VolumeData*>(ref);
+				if (vd && s2ws(vd->getName()) == wstr)
+					highlighted = true;
+			}
+			Color color;
+			vd->getValue(gstColor, color);
+			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
+				nx, ny, wstr, color, font_height, highlighted);
+		}
+	}
+	for (auto md : m_msh_list)
+	{
+		if (!md) continue;
+		md->getValue(gstLegend, bval);
+		if (bval)
+		{
+			wstr = s2ws(md->getName());
+			xpos = length;
+			name_len = m_text_renderer->RenderTextLen(wstr) + font_height;
+			length += name_len;
+			if (length < double(draw_cropf ? lw : nx) - gap_width)
+			{
+				length += gap_width;
+			}
+			else
+			{
+				length = name_len + gap_width;
+				xpos = 0.0;
+				cur_line++;
+			}
+			Color color;
+			md->getValue(gstColor, color);
+			bool highlighted = false;
+			if (current_sel == 3 && ref)
+			{
+				MeshData* md = dynamic_cast<MeshData*>(ref);
+				if (md && s2ws(md->getName()) == wstr)
+					highlighted = true;
+			}
+			DrawName(xpos + xoffset, ny - (lines - cur_line + 0.1)*font_height - yoffset,
+				nx, ny, wstr, color, font_height, highlighted);
+		}
+	}
+
+	setValue(gstScaleBarHeight, (lines + 1)*font_height);
+}
+
+void Renderview::DrawName(
+	double x, double y, int nx, int ny,
+	const std::wstring &name, Color color,
+	double font_height,
+	bool highlighted)
+{
+	flvr::VertexArray* va_legend_squares =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Legend_Squares);
+	if (!va_legend_squares)
+		return;
+
+	float sx, sy;
+	sx = 2.0 / nx;
+	sy = 2.0 / ny;
+	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+
+	std::vector<std::pair<unsigned int, double>> params;
+	params.push_back(std::pair<unsigned int, double>(0, x + 0.2*font_height));
+	params.push_back(std::pair<unsigned int, double>(1, ny - y + 0.2*font_height));
+	params.push_back(std::pair<unsigned int, double>(2, x + 0.8*font_height));
+	params.push_back(std::pair<unsigned int, double>(3, ny - y + 0.8*font_height));
+	va_legend_squares->set_param(params);
+	va_legend_squares->draw_begin();
+	Color text_color;
+	getValue(gstTextColor, text_color);
+	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
+	va_legend_squares->draw_legend_square(0);
+	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
+	va_legend_squares->draw_legend_square(1);
+	va_legend_squares->draw_end();
+
+	if (shader && shader->valid())
+		shader->release();
+
+	float px1 = x + font_height - nx / 2;
+	float py1 = ny / 2 - y + 0.25*font_height;
+	m_text_renderer->RenderText(
+		name, text_color,
+		px1*sx, py1*sy, sx, sy);
+	if (highlighted)
+	{
+		px1 -= 0.5;
+		py1 += 0.5;
+		m_text_renderer->RenderText(
+			name, color,
+			px1*sx, py1*sy, sx, sy);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 }
 
 

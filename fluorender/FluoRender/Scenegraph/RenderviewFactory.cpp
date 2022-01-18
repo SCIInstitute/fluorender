@@ -78,7 +78,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstClipPlaneMode, long(Renderview::kNormal));
 		view->addValue(gstInitialized, bool(false));
 		view->addValue(gstInitView, bool(false));
+		view->addValue(gstCurrentSelect, long(0));//0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
 		view->addRvalu(gstCurrentVolume, (Referenced*)(0));
+		view->addRvalu(gstCurrentMesh, (Referenced*)(0));
 		view->addValue(gstSetGl, bool(false));
 		view->addValue(gstRunScript, bool(false));
 		view->addValue(gstScriptFile, std::wstring(L""));
