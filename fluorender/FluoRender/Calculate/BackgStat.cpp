@@ -67,8 +67,8 @@ const char* str_cl_backg_stat = \
 "	float4 dvalue;\n" \
 "	dvalue = read_imagef(data, samp, coord);\n" \
 "	float cvalue = dvalue.x;\n" \
-"	float sumi = 0.0;\n" \
-"	float sumi2 = 0.0;\n" \
+"	float sumi = 0.0f;\n" \
+"	float sumi2 = 0.0f;\n" \
 "	int i, j, k;\n" \
 "	for (i = 0; i < kx; ++i)\n" \
 "	for (j = 0; j < ky; ++j)\n" \
@@ -81,8 +81,8 @@ const char* str_cl_backg_stat = \
 "		sumi2 += dvalue.x * dvalue.x;\n" \
 "	}\n" \
 "	float mean = sumi / kxy;\n" \
-"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0 * mean * sumi) / kxy);\n" \
-"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0;\n" \
+"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0f * mean * sumi) / kxy);\n" \
+"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0f;\n" \
 "	DWL bv = cvalue * VSCL;\n" \
 "	bkg[index] = bv;\n" \
 "}\n" \
@@ -103,7 +103,7 @@ const char* str_cl_backg_stat = \
 "		get_global_id(1), get_global_id(2), 1);\n" \
 "	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
 "	float mask_value = read_imagef(mask, samp, coord).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "	{\n" \
 "		bkg[index] = 0;\n" \
 "		return;\n" \
@@ -112,8 +112,8 @@ const char* str_cl_backg_stat = \
 "	float4 dvalue;\n" \
 "	dvalue = read_imagef(data, samp, coord);\n" \
 "	float cvalue = dvalue.x;\n" \
-"	float sumi = 0.0;\n" \
-"	float sumi2 = 0.0;\n" \
+"	float sumi = 0.0f;\n" \
+"	float sumi2 = 0.0f;\n" \
 "	int i, j, k;\n" \
 "	for (i = 0; i < kx; ++i)\n" \
 "	for (j = 0; j < ky; ++j)\n" \
@@ -126,8 +126,8 @@ const char* str_cl_backg_stat = \
 "		sumi2 += dvalue.x * dvalue.x;\n" \
 "	}\n" \
 "	float mean = sumi / kxy;\n" \
-"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0 * mean * sumi) / kxy);\n" \
-"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0;\n" \
+"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0f * mean * sumi) / kxy);\n" \
+"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0f;\n" \
 "	DWL bv = cvalue * VSCL;\n" \
 "	bkg[index] = bv;\n" \
 "}\n" \
@@ -150,7 +150,7 @@ const char* str_cl_backg_stat = \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0;\n" \
+"	float lwsum = 0.0f;\n" \
 "	float val;\n" \
 "	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
@@ -159,7 +159,7 @@ const char* str_cl_backg_stat = \
 "	{\n" \
 "		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;\n" \
 "		val = bkg[index];\n" \
-"		if (val > 0.0)\n" \
+"		if (val > 0.0f)\n" \
 "		{\n" \
 "			lsum++;\n" \
 "			lwsum += val;\n" \
