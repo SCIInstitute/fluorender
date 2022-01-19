@@ -59,7 +59,7 @@ const char* str_cl_chann_threshold = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -95,7 +95,7 @@ const char* str_cl_chann_threshold = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float m, v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -131,7 +131,7 @@ const char* str_cl_chann_threshold = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -140,7 +140,7 @@ const char* str_cl_chann_threshold = \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
-"			lsum += 1.0;\n" \
+"			lsum += 1.0f;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -167,7 +167,7 @@ const char* str_cl_chann_threshold = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float m, v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -180,7 +180,7 @@ const char* str_cl_chann_threshold = \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
 "		if (v1 > th.x && v1 <= th.y && v2 > th.z && v2 <= th.w)\n" \
-"			lsum += 1.0;\n" \
+"			lsum += 1.0f;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -210,7 +210,7 @@ const char* str_cl_chann_dotprod = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -244,7 +244,7 @@ const char* str_cl_chann_dotprod = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float m, v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -280,7 +280,7 @@ const char* str_cl_chann_dotprod = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -288,8 +288,8 @@ const char* str_cl_chann_dotprod = \
 "	{\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (v1 * v2 > 0.0)\n" \
-"			lsum += 1.0;\n" \
+"		if (v1 * v2 > 0.0f)\n" \
+"			lsum += 1.0f;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -315,7 +315,7 @@ const char* str_cl_chann_dotprod = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float m, v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -327,8 +327,8 @@ const char* str_cl_chann_dotprod = \
 "		if (m < 1e-6) continue;\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (v1 * v2 > 0.0)\n" \
-"			lsum += 1.0;\n" \
+"		if (v1 * v2 > 0.0f)\n" \
+"			lsum += 1.0f;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -358,7 +358,7 @@ const char* str_cl_chann_minvalue = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -392,7 +392,7 @@ const char* str_cl_chann_minvalue = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float m, v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -428,7 +428,7 @@ const char* str_cl_chann_minvalue = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -436,8 +436,8 @@ const char* str_cl_chann_minvalue = \
 "	{\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (min(v1, v2) > 0.0)\n" \
-"			lsum += 1.0;\n" \
+"		if (min(v1, v2) > 0.0f)\n" \
+"			lsum += 1.0f;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -463,7 +463,7 @@ const char* str_cl_chann_minvalue = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float lsum = 0.0;\n" \
+"	float lsum = 0.0f;\n" \
 "	float m, v1, v2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -475,8 +475,8 @@ const char* str_cl_chann_minvalue = \
 "		if (m < 1e-6) continue;\n" \
 "		v1 = read_imagef(chann1, samp, ijk).x * ss1;\n" \
 "		v2 = read_imagef(chann2, samp, ijk).x * ss2;\n" \
-"		if (min(v1, v2) > 0.0)\n" \
-"			lsum += 1.0;\n" \
+"		if (min(v1, v2) > 0.0f)\n" \
+"			lsum += 1.0f;\n" \
 "	}\n" \
 "	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \

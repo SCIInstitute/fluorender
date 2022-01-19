@@ -61,14 +61,14 @@ const char* str_cl_basic_stat = \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0;\n" \
+"	float lwsum = 0.0f;\n" \
 "	float val;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		val = read_imagef(data, samp, ijk).x;\n" \
-"		if (val > 0.0)\n" \
+"		if (val > 0.0f)\n" \
 "		{\n" \
 "			lsum++;\n" \
 "			lwsum += val;\n" \
@@ -144,7 +144,7 @@ const char* str_cl_basic_stat = \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0;\n" \
+"	float lwsum = 0.0f;\n" \
 "	float val, val2;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -152,7 +152,7 @@ const char* str_cl_basic_stat = \
 "	{\n" \
 "		val = read_imagef(data, samp, ijk).x;\n" \
 "		val2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (val > 0.0 && val2 > 0.0)\n" \
+"		if (val > 0.0f && val2 > 0.0f)\n" \
 "		{\n" \
 "			lsum++;\n" \
 "			lwsum += val;\n" \
@@ -188,7 +188,7 @@ const char* str_cl_basic_stat = \
 "	{\n" \
 "		val = read_imagef(data, samp, ijk).x * VSCL;\n" \
 "		float val2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (val2 > 0.0)\n" \
+"		if (val2 > 0.0f)\n" \
 "		{\n" \
 "			lminv = val ? min(val, lminv) : lminv;\n" \
 "			lmaxv = max(val, lmaxv);\n" \

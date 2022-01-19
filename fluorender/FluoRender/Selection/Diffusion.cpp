@@ -69,12 +69,12 @@ const char* str_cl_diffusion = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
 "	pt = pt * scl + trl;\n" \
-"	if (dot(pt, p0.xyz)+p0.w < 0.0 ||\n" \
-"		dot(pt, p1.xyz)+p1.w < 0.0 ||\n" \
-"		dot(pt, p2.xyz)+p2.w < 0.0 ||\n" \
-"		dot(pt, p3.xyz)+p3.w < 0.0 ||\n" \
-"		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
-"		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
+"	if (dot(pt, p0.xyz)+p0.w < 0.0f ||\n" \
+"		dot(pt, p1.xyz)+p1.w < 0.0f ||\n" \
+"		dot(pt, p2.xyz)+p2.w < 0.0f ||\n" \
+"		dot(pt, p3.xyz)+p3.w < 0.0f ||\n" \
+"		dot(pt, p4.xyz)+p4.w < 0.0f ||\n" \
+"		dot(pt, p5.xyz)+p5.w < 0.0f)\n" \
 "		return;\n" \
 "	mask[index] = val;\n" \
 "}\n" \
@@ -100,51 +100,51 @@ const char* str_cl_diffusion = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	float3 dir = (float3)(1.0/(float)(nx), 1.0/(float)(ny), 1.0/(float)(nz));\n" \
+"	float3 dir = (float3)(1.0f/(float)(nx), 1.0f/(float)(ny), 1.0f/(float)(nz));\n" \
 "	float3 pt = dir * (float3)((float)(i), (float)(j), (float)(k));\n" \
 "	pt = pt * scl + trl;\n" \
-"	if (dot(pt, p0.xyz)+p0.w < 0.0 ||\n" \
-"		dot(pt, p1.xyz)+p1.w < 0.0 ||\n" \
-"		dot(pt, p2.xyz)+p2.w < 0.0 ||\n" \
-"		dot(pt, p3.xyz)+p3.w < 0.0 ||\n" \
-"		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
-"		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
+"	if (dot(pt, p0.xyz)+p0.w < 0.0f ||\n" \
+"		dot(pt, p1.xyz)+p1.w < 0.0f ||\n" \
+"		dot(pt, p2.xyz)+p2.w < 0.0f ||\n" \
+"		dot(pt, p3.xyz)+p3.w < 0.0f ||\n" \
+"		dot(pt, p4.xyz)+p4.w < 0.0f ||\n" \
+"		dot(pt, p5.xyz)+p5.w < 0.0f)\n" \
 "		return;\n" \
 "	//grad compute\n" \
 "	float3 v;\n" \
 "	v.x = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	float3 n = (float3)(0.0);\n" \
+"	float3 n = (float3)(0.0f);\n" \
 "	n.x += read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
 "	n.x -= read_imagef(data, samp, (int4)(i-1, j, k, 1)).x;\n" \
 "	n.y += read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
 "	n.y -= read_imagef(data, samp, (int4)(i, j-1, k, 1)).x;\n" \
-"	n.z += read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)+min((float)(nz)/(float)(nx), 1.0f), 1.0)).x;\n" \
-"	n.z -= read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)-min((float)(nz)/(float)(nx), 1.0f), 1.0)).x;\n" \
+"	n.z += read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)+min((float)(nz)/(float)(nx), 1.0f), 1.0f)).x;\n" \
+"	n.z -= read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)-min((float)(nz)/(float)(nx), 1.0f), 1.0f)).x;\n" \
 "	v.y = length(n);\n" \
-"	v.y = 0.5 * (loc2.x<0.0?(1.0+v.y*loc2.x):v.y*loc2.x);\n" \
+"	v.y = 0.5f * (loc2.x<0.0f?(1.0f+v.y*loc2.x):v.y*loc2.x);\n" \
 "	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L\n" \
 "	float c;\n" \
-"	v.x = loc2.x < 0.0 ? (1.0 + v.x*loc2.x) : v.x*loc2.x;\n" \
+"	v.x = loc2.x < 0.0f ? (1.0f + v.x*loc2.x) : v.x*loc2.x;\n" \
 "	if (v.x < loc2.z - loc3.w || (loc2.w<1.0 && v.x>loc2.w + loc3.w))\n" \
-"		c = 0.0;\n" \
+"		c = 0.0f;\n" \
 "	else\n" \
 "	{\n" \
-"		v.x = (v.x < loc2.z ? (loc3.w - loc2.z + v.x) / loc3.w : (loc2.w<1.0 && v.x>loc2.w ? (loc3.w - v.x + loc2.w) / loc3.w : 1.0))*v.x;\n" \
-"		v.x = (loc3.y > 0.0 ? clamp(v.y / loc3.y, 0.0f, 1.0f + loc3.y*10.0f) : 1.0)*v.x;\n" \
-"		c = pow(clamp(v.x / loc3.z, loc3.x<1.0 ? -(loc3.x - 1.0f)*0.00001f : 0.0f, loc3.x>1.0 ? 0.9999f : 1.0f), loc3.x);\n" \
+"		v.x = (v.x < loc2.z ? (loc3.w - loc2.z + v.x) / loc3.w : (loc2.w<1.0f && v.x>loc2.w ? (loc3.w - v.x + loc2.w) / loc3.w : 1.0f))*v.x;\n" \
+"		v.x = (loc3.y > 0.0f ? clamp(v.y / loc3.y, 0.0f, 1.0f + loc3.y*10.0f) : 1.0f)*v.x;\n" \
+"		c = pow(clamp(v.x / loc3.z, loc3.x<1.0f ? -(loc3.x - 1.0f)*0.00001f : 0.0f, loc3.x>1.0f ? 0.9999f : 1.0f), loc3.x);\n" \
 "	}\n" \
 "	//SEG_BODY_DB_GROW_STOP_FUNC\n" \
-"	if (c <= 0.0001)\n" \
+"	if (c <= 0.0001f)\n" \
 "		return;\n" \
-"	v.x = c > 1.0 ? 1.0 : c;\n" \
+"	v.x = c > 1.0f ? 1.0f : c;\n" \
 "	float stop =\n" \
-"		(loc7.y >= 1.0 ? 1.0 : (v.y > sqrt(loc7.y)*2.12 ? 0.0 : exp(-v.y*v.y / loc7.y)))*\n" \
-"		(v.x > loc7.w ? 1.0 : (loc7.z > 0.0 ? (v.x < loc7.w - sqrt(loc7.z)*2.12 ? 0.0 : exp(-(v.x - loc7.w)*(v.x - loc7.w) / loc7.z)) : 0.0));\n" \
-"	if (stop <= 0.0001)\n" \
+"		(loc7.y >= 1.0f ? 1.0f : (v.y > sqrt(loc7.y)*2.12f ? 0.0f : exp(-v.y*v.y / loc7.y)))*\n" \
+"		(v.x > loc7.w ? 1.0f : (loc7.z > 0.0f ? (v.x < loc7.w - sqrt(loc7.z)*2.12f ? 0.0 : exp(-(v.x - loc7.w)*(v.x - loc7.w) / loc7.z)) : 0.0f));\n" \
+"	if (stop <= 0.0001f)\n" \
 "		return;\n" \
 "	//SEG_BODY_DB_GROW_BLEND_APPEND\n" \
 "	unsigned char cc = mask[index];\n" \
-"	float val = (1.0 - stop) * (float)(cc);\n" \
+"	float val = (1.0f - stop) * (float)(cc);\n" \
 "	int3 nb_coord;\n" \
 "	int3 max_nb;\n" \
 "	unsigned int nb_index;\n" \
@@ -167,14 +167,14 @@ const char* str_cl_diffusion = \
 "			max_nb = nb_coord;\n" \
 "		}\n" \
 "	}\n" \
-"	if (loc7.y > 0.0)\n" \
+"	if (loc7.y > 0.0f)\n" \
 "	{\n" \
-"		m = (unsigned char)((read_imagef(data, samp, (int4)(max_nb, 1)).x + loc7.y) * 255.0);\n" \
-"		mx = (unsigned char)(read_imagef(data, samp, (int4)(i, j, k, 1)).x * 255.0);\n" \
-"		if (m < mx || m - mx > (unsigned char)(510.0*loc7.y))\n" \
+"		m = (unsigned char)((read_imagef(data, samp, (int4)(max_nb, 1)).x + loc7.y) * 255.0f);\n" \
+"		mx = (unsigned char)(read_imagef(data, samp, (int4)(i, j, k, 1)).x * 255.0f);\n" \
+"		if (m < mx || m - mx > (unsigned char)(510.0f*loc7.y))\n" \
 "			return;\n" \
 "	}\n" \
-"	cc = clamp(cc * (unsigned char)(stop * 255.0), 0, 255);\n" \
+"	cc = clamp(cc * (unsigned char)(stop * 255.0f), 0, 255);\n" \
 "	mask[index] = cc;\n" \
 "}\n" \
 ;

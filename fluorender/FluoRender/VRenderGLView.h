@@ -1153,7 +1153,11 @@ private:
 
 inline wxSize VRenderGLView::GetGLSize()
 {
-	wxSize size = GetSize();
+	double dval = 1;
+#ifdef _DARWIN
+	dval = GetDPIScaleFactor();
+#endif
+	wxSize size = GetSize() * dval;
 	if (m_enlarge)
 		size.Set(size.x * m_enlarge_scale,
 			size.y * m_enlarge_scale);
