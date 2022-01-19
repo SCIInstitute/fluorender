@@ -46,18 +46,18 @@ const char* str_cl_shuffle_id_3d = \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
 "	pt = pt * scl + trl;\n" \
-"	if (dot(pt, p0.xyz)+p0.w < 0.0 ||\n" \
-"		dot(pt, p1.xyz)+p1.w < 0.0 ||\n" \
-"		dot(pt, p2.xyz)+p2.w < 0.0 ||\n" \
-"		dot(pt, p3.xyz)+p3.w < 0.0 ||\n" \
-"		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
-"		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
+"	if (dot(pt, p0.xyz)+p0.w < 0.0f ||\n" \
+"		dot(pt, p1.xyz)+p1.w < 0.0f ||\n" \
+"		dot(pt, p2.xyz)+p2.w < 0.0f ||\n" \
+"		dot(pt, p3.xyz)+p3.w < 0.0f ||\n" \
+"		dot(pt, p4.xyz)+p4.w < 0.0f ||\n" \
+"		dot(pt, p5.xyz)+p5.w < 0.0f)\n" \
 "	{\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "		return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001)\n" \
+"	if (value < 0.001f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -102,23 +102,23 @@ const char* str_cl_shuffle_id_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
 "	pt = pt * scl + trl;\n" \
-"	if (dot(pt, p0.xyz)+p0.w < 0.0 ||\n" \
-"		dot(pt, p1.xyz)+p1.w < 0.0 ||\n" \
-"		dot(pt, p2.xyz)+p2.w < 0.0 ||\n" \
-"		dot(pt, p3.xyz)+p3.w < 0.0 ||\n" \
-"		dot(pt, p4.xyz)+p4.w < 0.0 ||\n" \
-"		dot(pt, p5.xyz)+p5.w < 0.0)\n" \
+"	if (dot(pt, p0.xyz)+p0.w < 0.0f ||\n" \
+"		dot(pt, p1.xyz)+p1.w < 0.0f ||\n" \
+"		dot(pt, p2.xyz)+p2.w < 0.0f ||\n" \
+"		dot(pt, p3.xyz)+p3.w < 0.0f ||\n" \
+"		dot(pt, p4.xyz)+p4.w < 0.0f ||\n" \
+"		dot(pt, p5.xyz)+p5.w < 0.0f)\n" \
 "	{\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "		return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001)\n" \
+"	if (value < 0.001f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -155,7 +155,7 @@ const char* str_cl_shuffle_id_3d = \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001)\n" \
+"	if (value < 0.001f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -315,7 +315,7 @@ const char* str_cl_set_bit_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
@@ -351,7 +351,7 @@ const char* str_cl_set_bit_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	*maxv = max(szbuf[index], *maxv);\n" \
@@ -371,7 +371,7 @@ const char* str_cl_set_bit_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
@@ -409,7 +409,7 @@ const char* str_cl_set_bit_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	//break if too small\n" \
@@ -507,7 +507,7 @@ const char* str_cl_brainbow_3d = \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(coord, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
@@ -535,7 +535,7 @@ const char* str_cl_brainbow_3d = \
 "	{\n" \
 "		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(nb_coord, 1)).x;\n" \
-"		if (mask_value < 1e-6)\n" \
+"		if (mask_value < 1e-6f)\n" \
 "			continue;\n" \
 "		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
 "			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
@@ -579,7 +579,7 @@ const char* str_cl_density_field_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize);\n" \
-"	df[index] = (unsigned char)(density * sscale * 255.0);\n" \
+"	df[index] = (unsigned char)(density * sscale * 255.0f);\n" \
 "}\n" \
 "\n" \
 "//compute statistics on density field\n" \
@@ -615,7 +615,7 @@ const char* str_cl_density_field_3d = \
 "	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
 "	float avg = sum / gnum;\n" \
 "	gavg[index] = avg;\n" \
-"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum), 0.0, 255.0);\n" \
+"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0f * avg * sum) / gnum), 0.0f, 255.0f);\n" \
 "	gvar[index] = v;\n" \
 "}\n" \
 "\n" \
@@ -638,7 +638,7 @@ const char* str_cl_density_field_3d = \
 "	int3 gijk;\n" \
 "	gijk = ijk % (int3)(gsx, gsy, gsz);\n" \
 "	gid = ijk / (int3)(gsx, gsy, gsz);\n" \
-"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(gsx/2.0, gsy/2.0, gsz/2.0));\n" \
+"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(gsx/2.0f, gsy/2.0f, gsz/2.0f));\n" \
 "	int3 gcrd = clamp(gid + (int3)(0, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
 "	uchar c000 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
 "	gcrd = clamp(gid + (int3)(1, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
@@ -655,16 +655,16 @@ const char* str_cl_density_field_3d = \
 "	uchar c011 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
 "	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
 "	uchar c111 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
-"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0, gsy/2.0, gsz/2.0)) / (float3)(gsx, gsy, gsz);\n" \
+"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0f, gsy/2.0f, gsz/2.0f)) / (float3)(gsx, gsy, gsz);\n" \
 "	int3 delta = isless(d, (float3)(0.0));\n" \
 "	d -= (float3)(delta.x, delta.y, delta.z);\n" \
-"	float c00 = (float)(c000)*(1.0-d.x) + (float)(c100)*d.x;\n" \
-"	float c01 = (float)(c001)*(1.0-d.x) + (float)(c101)*d.x;\n" \
-"	float c10 = (float)(c010)*(1.0-d.x) + (float)(c110)*d.x;\n" \
-"	float c11 = (float)(c011)*(1.0-d.x) + (float)(c111)*d.x;\n" \
-"	float c0 = c00*(1.0-d.y) + c10*d.y;\n" \
-"	float c1 = c01*(1.0-d.y) + c11*d.y;\n" \
-"	idf[dnxy* ijk.z + dnx*ijk.y + ijk.x] = c0*(1.0-d.z) + c1*d.z;\n" \
+"	float c00 = (float)(c000)*(1.0f-d.x) + (float)(c100)*d.x;\n" \
+"	float c01 = (float)(c001)*(1.0f-d.x) + (float)(c101)*d.x;\n" \
+"	float c10 = (float)(c010)*(1.0f-d.x) + (float)(c110)*d.x;\n" \
+"	float c11 = (float)(c011)*(1.0f-d.x) + (float)(c111)*d.x;\n" \
+"	float c0 = c00*(1.0f-d.y) + c10*d.y;\n" \
+"	float c1 = c01*(1.0f-d.y) + c11*d.y;\n" \
+"	idf[dnxy* ijk.z + dnx*ijk.y + ijk.x] = c0*(1.0f-d.z) + c1*d.z;\n" \
 "}\n" \
 ;
 
@@ -722,7 +722,7 @@ const char* str_cl_density_grow_3d = \
 "		//break if low variance\n" \
 "		if (vvar < varth * 255)\n" \
 "			return;\n" \
-"		if (vdf < vavg - (1.0-density)*vvar)\n" \
+"		if (vdf < vavg - (1.0f-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
@@ -782,7 +782,7 @@ const char* str_cl_density_grow_3d = \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(coord, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
@@ -798,7 +798,7 @@ const char* str_cl_density_grow_3d = \
 "		//break if low variance\n" \
 "		if (vvar < varth * 255)\n" \
 "			return;\n" \
-"		if (vdf < vavg - (1.0-density)*vvar)\n" \
+"		if (vdf < vavg - (1.0f-density)*vvar)\n" \
 "			return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
@@ -823,7 +823,7 @@ const char* str_cl_density_grow_3d = \
 "	{\n" \
 "		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(nb_coord, 1)).x;\n" \
-"		if (mask_value < 1e-6)\n" \
+"		if (mask_value < 1e-6f)\n" \
 "			continue;\n" \
 "		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
 "			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
@@ -952,7 +952,7 @@ const char* str_cl_dist_field_2d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "	{\n" \
 "		df[index] = 0;\n" \
 "		return;\n" \
@@ -985,7 +985,7 @@ const char* str_cl_dist_field_2d = \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int nxy = nx*ny;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
@@ -1014,7 +1014,7 @@ const char* str_cl_dist_field_2d = \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int nxy = nx*ny;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
@@ -1159,7 +1159,7 @@ const char* str_cl_dist_field_3d = \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "	{\n" \
 "		df[index] = 0;\n" \
 "		return;\n" \
@@ -1193,7 +1193,7 @@ const char* str_cl_dist_field_3d = \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int nxy = nx*ny;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
@@ -1225,7 +1225,7 @@ const char* str_cl_dist_field_3d = \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(ijk, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int nxy = nx*ny;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
@@ -1296,7 +1296,7 @@ const char* str_cl_dist_grow_3d = \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
 "	float distv = distscl * distf[index];\n" \
-"	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
+"	value = value * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
 "	float stop =\n" \
@@ -1347,7 +1347,7 @@ const char* str_cl_dist_grow_3d = \
 "	int3 coord = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(coord, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*coord.z + nx*coord.y + coord.x;\n" \
 "	unsigned int label_v = label[index];\n" \
@@ -1357,7 +1357,7 @@ const char* str_cl_dist_grow_3d = \
 "	float value = read_imagef(data, samp, (int4)(coord, 1)).x;\n" \
 "	value *= sscale;\n" \
 "	float distv = distscl * distf[index];\n" \
-"	value = value * (1.0 - dist_strength) + distv * dist_strength;\n" \
+"	value = value * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	float grad = length(sscale * vol_grad_func(data, (int4)(coord, 1)));\n" \
 "	//stop function\n" \
 "	float stop =\n" \
@@ -1377,7 +1377,7 @@ const char* str_cl_dist_grow_3d = \
 "	{\n" \
 "		nb_coord = (int3)(coord.x+i, coord.y+j, coord.z+k);\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(nb_coord, 1)).x;\n" \
-"		if (mask_value < 1e-6)\n" \
+"		if (mask_value < 1e-6f)\n" \
 "			continue;\n" \
 "		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
 "			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
@@ -1451,8 +1451,8 @@ const char* str_cl_distdens_field_3d = \
 "	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
 "	float gnum = (float)(gsx * gsy * gsz);\n" \
-"	float sum = 0.0;\n" \
-"	float sum2 = 0.0;\n" \
+"	float sum = 0.0f;\n" \
+"	float sum2 = 0.0f;\n" \
 "	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -1465,7 +1465,7 @@ const char* str_cl_distdens_field_3d = \
 "	index = ngxy * gid.z + ngx * gid.y + gid.x;\n" \
 "	float avg = sum / gnum;\n" \
 "	gavg[index] = avg;\n" \
-"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0 * avg * sum) / gnum), 0.0, 255.0);\n" \
+"	float v = clamp(sqrt((sum2 + avg * avg * gnum - 2.0f * avg * sum) / gnum), 0.0f, 255.0f);\n" \
 "	gvar[index] = v;\n" \
 "}\n" \
 "\n" \
@@ -1488,7 +1488,7 @@ const char* str_cl_distdens_field_3d = \
 "	int3 gijk;\n" \
 "	gijk = ijk % (int3)(gsx, gsy, gsz);\n" \
 "	gid = ijk / (int3)(gsx, gsy, gsz);\n" \
-"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(gsx/2.0, gsy/2.0, gsz/2.0));\n" \
+"	gid += isless((float3)(gijk.x, gijk.y, gijk.z), (float3)(gsx/2.0f, gsy/2.0f, gsz/2.0f));\n" \
 "	int3 gcrd = clamp(gid + (int3)(0, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
 "	uchar c000 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
 "	gcrd = clamp(gid + (int3)(1, 0, 0), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
@@ -1505,8 +1505,8 @@ const char* str_cl_distdens_field_3d = \
 "	uchar c011 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
 "	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
 "	uchar c111 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
-"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0, gsy/2.0, gsz/2.0)) / (float3)(gsx, gsy, gsz);\n" \
-"	int3 delta = isless(d, (float3)(0.0));\n" \
+"	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0f, gsy/2.0f, gsz/2.0f)) / (float3)(gsx, gsy, gsz);\n" \
+"	int3 delta = isless(d, (float3)(0.0f));\n" \
 "	d -= (float3)(delta.x, delta.y, delta.z);\n" \
 "	float c00 = (float)(c000)*(1.0-d.x) + (float)(c100)*d.x;\n" \
 "	float c01 = (float)(c001)*(1.0-d.x) + (float)(c101)*d.x;\n" \
@@ -1514,7 +1514,7 @@ const char* str_cl_distdens_field_3d = \
 "	float c11 = (float)(c011)*(1.0-d.x) + (float)(c111)*d.x;\n" \
 "	float c0 = c00*(1.0-d.y) + c10*d.y;\n" \
 "	float c1 = c01*(1.0-d.y) + c11*d.y;\n" \
-"	idf[dnxy* ijk.z + dnx*ijk.y + ijk.x] = c0*(1.0-d.z) + c1*d.z;\n" \
+"	idf[dnxy* ijk.z + dnx*ijk.y + ijk.x] = c0*(1.0f-d.z) + c1*d.z;\n" \
 "}\n" \
 ;
 
@@ -1669,7 +1669,7 @@ const char* str_cl_cleanup_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
@@ -1706,7 +1706,7 @@ const char* str_cl_cleanup_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int value_l = label[index];\n" \
@@ -1744,7 +1744,7 @@ const char* str_cl_cleanup_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	//break if large enough\n" \
@@ -1769,7 +1769,7 @@ const char* str_cl_cleanup_3d = \
 "			(k==nz-1 && nk==1))\n" \
 "			continue;\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i+ni, j+nj, k+nk, 1)).x;\n" \
-"		if (mask_value < 1e-6)\n" \
+"		if (mask_value < 1e-6f)\n" \
 "			continue;\n" \
 "		nb_index = nx*ny*(k+nk) + nx*(j+nj) + i+ni;\n" \
 "		dist = abs(nk) + abs(nj) + abs(ni);\n" \
@@ -1823,7 +1823,7 @@ const char* str_cl_clear_borders_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	if (i == 0 || i == nx-1 ||\n" \
@@ -1897,12 +1897,12 @@ const char* str_cl_fill_borders_3d = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float mask_value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (mask_value < 1e-6)\n" \
+"	if (mask_value < 1e-6f)\n" \
 "		return;\n" \
 "	if (nx > 1 && i == 0)\n" \
 "	{\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i+1, j, k, 1)).x;\n" \
-"		if (mask_value > 1e-6)\n" \
+"		if (mask_value > 1e-6f)\n" \
 "		{\n" \
 "			float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "			float nb_value = read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
@@ -1917,7 +1917,7 @@ const char* str_cl_fill_borders_3d = \
 "	if (ny > 1 && j == 0)\n" \
 "	{\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i, j+1, k, 1)).x;\n" \
-"		if (mask_value > 1e-6)\n" \
+"		if (mask_value > 1e-6f)\n" \
 "		{\n" \
 "			float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "			float nb_value = read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
@@ -1932,7 +1932,7 @@ const char* str_cl_fill_borders_3d = \
 "	if (nz > 1 && k == 0)\n" \
 "	{\n" \
 "		mask_value = read_imagef(mask, samp, (int4)(i, j, k+1, 1)).x;\n" \
-"		if (mask_value > 1e-6)\n" \
+"		if (mask_value > 1e-6f)\n" \
 "		{\n" \
 "			float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
 "			float nb_value = read_imagef(data, samp, (int4)(i, j, k+1, 1)).x;\n" \
@@ -1968,8 +1968,8 @@ const char* str_cl_slice_brainbow = \
 "		read_imagef(image, samp, pos+(int2)(-1, 1)).x;\n" \
 "	//rotate\n" \
 "	float2 grad2r;\n" \
-"	grad2r.x = dot(grad2, (float2)(-0.707, 0.707));\n" \
-"	grad2r.y = dot(grad2, (float2)(-0.707, -0.707));\n" \
+"	grad2r.x = dot(grad2, (float2)(-0.707f, 0.707f));\n" \
+"	grad2r.y = dot(grad2, (float2)(-0.707f, -0.707f));\n" \
 "	return 0.586f*grad1 + 0.414f*grad2r;\n" \
 "}\n" \
 "\n" \
@@ -2360,7 +2360,7 @@ const char* str_cl_shuffle_id_2d = \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001)\n" \
+"	if (value < 0.001f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -2400,8 +2400,8 @@ const char* str_cl_grow_size = \
 "		read_imagef(image, samp, pos+(int2)(-1, 1)).x;\n" \
 "	//rotate\n" \
 "	float2 grad2r;\n" \
-"	grad2r.x = dot(grad2, (float2)(-0.707, 0.707));\n" \
-"	grad2r.y = dot(grad2, (float2)(-0.707, -0.707));\n" \
+"	grad2r.x = dot(grad2, (float2)(-0.707f, 0.707f));\n" \
+"	grad2r.y = dot(grad2, (float2)(-0.707f, -0.707f));\n" \
 "	return 0.586f*grad1 + 0.414f*grad2r;\n" \
 "}\n" \
 "\n" \
@@ -2673,7 +2673,7 @@ const char* str_cl_match_slices = \
 "		return;\n" \
 "	unsigned int size_and = mask_and[index];\n" \
 "	if ((float)size_and/(float)size1 +\n" \
-"		(float)size_and/(float)size2 <= 1.0)\n" \
+"		(float)size_and/(float)size2 <= 1.0f)\n" \
 "		return;\n" \
 "	unsigned int sidx;\n" \
 "	for (unsigned int ii=0; ii<nx; ++ii)\n" \
