@@ -58,13 +58,13 @@ const char* str_cl_cov = \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int lsum = 0;\n" \
-"	float3 lcsum = (float3)(0.0, 0.0, 0.0);\n" \
+"	float3 lcsum = (float3)(0.0f, 0.0f, 0.0f);\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		float mval = read_imagef(mask, samp, ijk).x;\n" \
-"		if (mval > 0.0)\n" \
+"		if (mval > 0.0f)\n" \
 "		{\n" \
 "			lsum++;\n" \
 "			lcsum.x += (float)(ijk.x);\n" \
@@ -94,13 +94,13 @@ const char* str_cl_cov = \
 "	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float xx = 0.0, xy = 0.0, xz = 0.0, yy = 0.0, yz = 0.0, zz = 0.0;\n" \
+"	float xx = 0.0f, xy = 0.0f, xz = 0.0f, yy = 0.0f, yz = 0.0f, zz = 0.0f;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		float mval = read_imagef(mask, samp, ijk).x;\n" \
-"		if (mval < 0.0001)\n" \
+"		if (mval < 0.0001f)\n" \
 "			continue;\n" \
 "		float3 fijk = (float3)(ijk.x, ijk.y, ijk.z) + orig - center;\n" \
 "		xx += fijk.x * fijk.x;\n" \

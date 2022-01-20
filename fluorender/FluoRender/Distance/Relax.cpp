@@ -70,15 +70,15 @@ const char* str_cl_relax = \
 "	for (c = 0; c < np; ++c)\n" \
 "	{\n" \
 "		if (slk[c]) continue;\n" \
-"		dsp = (float3)(0.0, 0.0, 0.0);\n" \
-"		wsum = 0.0;\n" \
+"		dsp = (float3)(0.0f, 0.0f, 0.0f);\n" \
+"		wsum = 0.0f;\n" \
 "		pos = (float3)(spp[c*3], spp[c*3+1], spp[c*3+2]);\n" \
 "		for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "		for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "		for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "		{\n" \
 "			w = read_imagef(data, samp, ijk).x;\n" \
-"			if (w == 0.0) continue;\n" \
+"			if (w == 0.0f) continue;\n" \
 "			loc = (org + (float3)(ijk.x, ijk.y, ijk.z)) * scl;\n" \
 "			dir = loc - pos;\n" \
 "			dist = length(dir);\n" \

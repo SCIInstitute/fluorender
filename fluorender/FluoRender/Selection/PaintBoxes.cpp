@@ -53,12 +53,12 @@ const char* str_cl_paint_boxes = \
 "	unsigned int i = (unsigned int)(get_global_id(0));\n" \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	float v = read_imagef(paint, samp, (int2)(i, j)).x;\n" \
-"	if (v < 0.45)\n" \
+"	if (v < 0.45f)\n" \
 "		return;\n" \
-"	float x = (float)(i) * 2.0 / (float)(nx) - 1.0;\n" \
-"	float y = (float)(j) * 2.0 / (float)(ny) - 1.0;\n" \
-"	float4 mp1 = (float4)(x, y, 0.0, 1.0);\n" \
-"	float4 mp2 = (float4)(x, y, 1.0, 1.0);\n" \
+"	float x = (float)(i) * 2.0f / (float)(nx) - 1.0f;\n" \
+"	float y = (float)(j) * 2.0f / (float)(ny) - 1.0f;\n" \
+"	float4 mp1 = (float4)(x, y, 0.0f, 1.0f);\n" \
+"	float4 mp2 = (float4)(x, y, 1.0f, 1.0f);\n" \
 "	mp1 = (float4)(dot(mp1, imat0), dot(mp1, imat1), dot(mp1, imat2), dot(mp1, imat3));\n" \
 "	mp1 /= mp1.w;\n" \
 "	mp2 = (float4)(dot(mp2, imat0), dot(mp2, imat1), dot(mp2, imat2), dot(mp2, imat3));\n" \

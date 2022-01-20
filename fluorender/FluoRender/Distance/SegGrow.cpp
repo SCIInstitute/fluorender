@@ -61,7 +61,7 @@ const char* str_cl_segrow = \
 "	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	unsigned int lv = index + 1;\n" \
-"	if (value == 0.0)\n" \
+"	if (value == 0.0f)\n" \
 "		lv = 0;\n" \
 "	atomic_xchg(label+index, lv);\n" \
 "}\n" \
@@ -77,7 +77,7 @@ const char* str_cl_segrow = \
 "	unsigned int j = (unsigned int)(get_global_id(1));\n" \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value == 0.0)\n" \
+"	if (value == 0.0f)\n" \
 "		return;\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	if (label[index] > 0)\n" \
@@ -407,9 +407,9 @@ const char* str_cl_segrow = \
 "		lcids[c*3+1] = 0;\n" \
 "		lcids[c*3+2] = 0;\n" \
 "		lsum[c] = 0;\n" \
-"		lcsum[c*3] = 0.0;\n" \
-"		lcsum[c*3+1] = 0.0;\n" \
-"		lcsum[c*3+2] = 0.0;\n" \
+"		lcsum[c*3] = 0.0f;\n" \
+"		lcsum[c*3+1] = 0.0f;\n" \
+"		lcsum[c*3+2] = 0.0f;\n" \
 "	}\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \

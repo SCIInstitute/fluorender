@@ -59,14 +59,14 @@ const char* str_cl_count_voxels = \
 "	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0;\n" \
+"	float lwsum = 0.0f;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		float v1 = read_imagef(data, samp, ijk).x;\n" \
 "		float v2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (v2 > 0.0)\n" \
+"		if (v2 > 0.0f)\n" \
 "		{\n" \
 "			lsum++;\n" \
 "			lwsum += v1;\n" \
