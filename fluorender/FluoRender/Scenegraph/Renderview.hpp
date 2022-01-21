@@ -33,6 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _WIN32
 #include <GL/wglew.h>
 #endif
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
+#include <MeshData.hpp>
+#include <MeshGroup.hpp>
 #include <Group.hpp>
 #include <Names.hpp>
 #include <glm/glm.hpp>
@@ -164,6 +168,12 @@ namespace fluo
 		//clear
 		void ClearVolList();
 		void ClearMeshList();
+		//current data
+		VolumeData* GetCurrentVolume();
+		MeshData* GetCurrentMesh();
+		//conversion
+		VolumeList GetVolList();
+		MeshList GetMeshList();
 
 		//handle camera
 		void HandleProjection(int nx, int ny, bool vr = false);
@@ -313,12 +323,12 @@ namespace fluo
 		void DrawName(double x, double y, int nx, int ny,
 			const std::wstring &name, Color color,
 			double font_height, bool hilighted = false);
-		void DrawFrame();
+		void DrawCropFrame();
 		void DrawClippingPlanes(bool border, int face_winding);
-		void SetColormapColors(int colormap, Color &c, double inv);
+		void SetColormapColors(long colormap, Color &c, double inv);
 		void DrawColormap();
 		void DrawGradBg();
-		void DrawInfo(int nx, int ny);
+		void DrawInfo();
 
 		//depth
 		double CalcZ(double z);
@@ -327,13 +337,13 @@ namespace fluo
 		void Draw();//draw volumes only
 		void DrawDP();//draw volumes and meshes with depth peeling
 					  //mesh and volume
-		void DrawMeshes(int peel = 0);//0: no dp
+		void DrawMeshes(long peel = 0);//0: no dp
 									  //1: draw depth after 15 (15)
 									  //2: draw mesh after 14 (14, 15)
 									  //3: draw mesh after 13 and before 15 (13, 14, 15)
 									  //4: draw mesh before 15 (at 14) (14, 15)
 									  //5: draw mesh at 15 (15)
-		void DrawVolumes(int peel = 0);//0: no dep
+		void DrawVolumes(long peel = 0);//0: no dep
 									   //1: draw volume befoew 15 (15)
 									   //2: draw volume after 15 (14, 15)
 									   //3: draw volume after 14 and before 15 (13, 14, 15)
@@ -461,11 +471,13 @@ namespace fluo
 #endif
 #endif
 
-		private:
-			void OnCamRotChanged(Event& event);//update rotation
-			void OnPerspectiveChanged(Event& event);
-			void OnVolListDirtyChanged(Event& event);
-			void OnMshListDirtyChanged(Event& event);
+	private:
+		void OnCamRotChanged(Event& event);//update rotation
+		void OnPerspectiveChanged(Event& event);
+		void OnVolListDirtyChanged(Event& event);
+		void OnMshListDirtyChanged(Event& event);
+		void OnCurrentVolumeChanged(Event& event);
+		void OnCurrentMeshChanged(Event& event);
 	};
 }
 

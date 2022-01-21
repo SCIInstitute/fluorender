@@ -80,7 +80,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstInitView, bool(false));
 		view->addValue(gstCurrentSelect, long(0));//0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
 		view->addRvalu(gstCurrentVolume, (Referenced*)(0));
+		view->addValue(gstCurVolIdx, long(-1));
 		view->addRvalu(gstCurrentMesh, (Referenced*)(0));
+		view->addValue(gstCurMshIdx, long(-1));
 		view->addValue(gstSetGl, bool(false));
 		view->addValue(gstRunScript, bool(false));
 		view->addValue(gstScriptFile, std::wstring(L""));
@@ -99,6 +101,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstCaptureFile, std::wstring(L""));
 		view->addValue(gstBatFolder, std::wstring(L""));
 		view->addValue(gstRetainFb, bool(false));
+		view->addValue(gstUpdateOrder, long(0));
 		view->addValue(gstUpdating, bool(true));
 		view->addValue(gstDrawAll, bool(true));
 		view->addValue(gstDrawType, long(1));
@@ -316,6 +319,8 @@ void RenderviewFactory::setEventHandler(Renderview* view)
 	ADD_AFTER_EVENT(view, gstPerspective, OnPerspectiveChanged);
 	ADD_AFTER_EVENT(view, gstVolListDirty, OnVolListDirtyChanged);
 	ADD_AFTER_EVENT(view, gstMshListDirty, OnMshListDirtyChanged);
+	ADD_AFTER_EVENT(view, gstCurrentVolume, OnCurrentVolumeChanged);
+	ADD_AFTER_EVENT(view, gstCurrentMesh, OnCurrentMeshChanged);
 }
 
 Renderview* RenderviewFactory::build(Renderview* view)

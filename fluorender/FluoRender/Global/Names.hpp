@@ -263,7 +263,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstInitView "init view"
 #define gstCurrentSelect "current select"
 #define gstCurrentVolume "current volume"
+#define gstCurVolIdx "cur vol idx"
 #define gstCurrentMesh "current mesh"
+#define gstCurMshIdx "cur msh idx"
 #define gstSetGl "set gl"//set gl context
 #define gstRunScript "run script"//script run
 #define gstScriptFile "script file"
@@ -284,6 +286,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRetainFb "retain fb"//sometimes we don't redraw everything,
 								//just use the final buffer from last draw
 #define gstUpdating "updating"
+#define gstUpdateOrder "update order"//front to back (1) or back to front (0)
 #define gstDrawAll "draw all"//draw settings
 #define gstDrawType "draw type"
 #define gstDrawMask "draw mask"
