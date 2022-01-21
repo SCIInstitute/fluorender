@@ -93,6 +93,8 @@ void MeshFactory::createDefault()
 		//shadow
 		md->addValue(gstShadowEnable, bool(false));
 		md->addValue(gstShadowInt, double(1));
+		md->addValue(gstShadowDirX, double(0));
+		md->addValue(gstShadowDirY, double(0));
 
 		//size limiter
 		md->addValue(gstLimitEnable, bool(false));

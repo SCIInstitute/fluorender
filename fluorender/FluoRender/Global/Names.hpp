@@ -137,6 +137,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstHighShading "high shading"
 #define gstShadowEnable "shadow enable"
 #define gstShadowInt "shadow int"
+#define gstShadowDirX "shadow dir x"
+#define gstShadowDirY "shadow dir y"
 #define gstSampleRate "sample rate"
 //color
 #define gstColor "color"
@@ -170,7 +172,6 @@ DEALINGS IN THE SOFTWARE.
 //display
 #define gstDisplay "display"
 #define gstDrawBounds "draw bounds"
-#define gstTestWire "test wire"
 //colormap
 #define gstColormapEnable "colormap enable"
 #define gstColormapMode "colormap mode"
@@ -353,7 +354,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstAov "aov"//angle of view frustrum
 #define gstNearClip "near clip"
 #define gstFarClip "far clip"
-#define gstInterpolation "interpolation"
 #define gstInterMode "inter mode"  //interactive mode
 					 //1-normal viewing
 					 //2-painting
@@ -385,7 +385,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstPaintEnable "paint enable"
 #define gstPaintDisplay "paint display"
 #define gstClearPaint "clear paint"
-#define gstCurrentFb "current fb"//current 2d framebuffer
 #define gstPerspective "perspective"//camera settings
 #define gstFree "free"
 #define gstCamDist "cam dist"
@@ -443,6 +442,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMousePrvY "mouse prv y"
 #define gstMouseClientX "mouse client x"//from screentoclient()
 #define gstMouseClientY "mouse client y"
+#define gstMouseIn "mouse in"
 #define gstMovInitAng "mov init ang"//movie properties
 #define gstMovStartAng "mov start ang"
 #define gstMovEndAng "mov end ang"

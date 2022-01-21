@@ -280,6 +280,7 @@ inline double RoundDeg(double d)
 {
 	if (d > 360.0) return d - int(d / 360) * 360;
 	if (d < 0.0) return d - int(d / 360 - 1) * 360;
+	return d;
 }
 
 } // namespace fluo

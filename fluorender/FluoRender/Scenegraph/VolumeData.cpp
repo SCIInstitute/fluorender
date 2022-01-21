@@ -2371,7 +2371,7 @@ void VolumeData::Draw(bool ortho, bool adaptive,
 	bool interactive, double zoom, int stream_mode)
 {
 	bool test_wire;
-	getValue(gstTestWire, test_wire);
+	getValue(gstTestWiref, test_wire);
 	bool draw_bounds;
 	getValue(gstDrawBounds, draw_bounds);
 

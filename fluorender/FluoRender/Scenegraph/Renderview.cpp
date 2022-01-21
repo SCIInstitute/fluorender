@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Renderview.hpp"
 #include <Group.hpp>
 #include <Timer.h>
+#include <Annotations.hpp>
 #include <RenderviewFactory.hpp>
 #include <NodeVisitor.hpp>
 #include <Global.hpp>
@@ -59,6 +60,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Formats/brkxml_reader.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <array>
 
 using namespace fluo;
 
@@ -246,7 +248,7 @@ void Renderview::PopVolumeList()
 		}
 
 	private:
-		std::vector<VolumeData*> list_;
+		VolumeList list_;
 	};
 	PopVolumeVisitor visitor;
 	accept(visitor);
@@ -1556,7 +1558,7 @@ void Renderview::StartLoopUpdate()
 	getValue(gstMixMethod, mix_method);
 	if (mix_method == MIX_METHOD_MULTI)
 	{
-		std::vector<VolumeData*> list;
+		VolumeList list;
 		for (auto vd : m_vol_list)
 		{
 			if (!vd) continue;
@@ -1739,7 +1741,7 @@ void Renderview::StartLoopUpdate()
 			}
 			else if (VolumeGroup* group = getChild(i)->asVolumeGroup())//group
 			{
-				std::vector<VolumeData*> list;
+				VolumeList list;
 				bool disp;
 				group->getValue(gstDisplay, disp);
 				if (!disp)
@@ -3985,6 +3987,35 @@ void Renderview::DrawInfo()
 	}
 }
 
+double Renderview::Get121ScaleFactor()
+{
+	double result = 1.0;
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	double spc_x = 1.0;
+	double spc_y = 1.0;
+	double spc_z = 1.0;
+	VolumeData *vd = GetCurrentVolume();
+	if (!vd && !m_vol_list.empty())
+		vd = m_vol_list.front().get();
+	if (vd)
+	{
+		vd->getValue(gstSpcX, spc_x);
+		vd->getValue(gstSpcY, spc_y);
+		vd->getValue(gstSpcZ, spc_z);
+		//vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
+	}
+	spc_y = spc_y < Epsilon() ? 1.0 : spc_y;
+
+	double dval;
+	getValue(gstRadius, dval);
+	result = 2.0*dval / spc_y / ny;
+
+	return result;
+}
+
 //depth buffer calculation
 double Renderview::CalcZ(double z)
 {
@@ -4824,6 +4855,2043 @@ void Renderview::DrawVolumes(long peel)
 	//			m_nodraw_count++;
 	//	}
 	//}
+}
+
+void Renderview::DrawAnnotations()
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	Transform mv;
+	Transform p;
+	mv.set(glm::value_ptr(m_mv_mat));
+	p.set(glm::value_ptr(m_proj_mat));
+	Color text_color;
+	getValue(gstTextColor, text_color);
+	bool persp;
+	getValue(gstPerspective, persp);
+
+	for (size_t i = 0; i < getNumChildren(); i++)
+	{
+		if (Annotations* ann = dynamic_cast<Annotations*>(getChild(i)))
+		{
+			bool disp;
+			ann->getValue(gstDisplay, disp);
+			if (disp)
+			{
+				ann->setValue(gstColor, text_color);
+				ann->Draw(nx, ny, mv, p, persp);
+			}
+		}
+	}
+}
+
+//vr buffers
+void Renderview::GetRenderSize(long &nx, long &ny)
+{
+	bool bval;
+	getValue(gstOpenvrEnable, bval);
+	if (bval)
+	{
+		getValue(gstVrSizeX, nx);
+		getValue(gstVrSizeY, ny);
+	}
+	else
+	{
+		getValue(gstSizeX, nx);
+		getValue(gstSizeY, ny);
+		getValue(gstVrEnable, bval);
+		if (bval)
+			nx /= 2;
+	}
+}
+
+//draw out the framebuffer after composition
+void Renderview::PrepFinalBuffer()
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	//generate textures & buffer objects
+	glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+	//frame buffer for final
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "final");
+	if (final_buffer)
+		final_buffer->protect();
+}
+
+void Renderview::ClearFinalBuffer()
+{
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"final");
+	if (final_buffer)
+		final_buffer->bind();
+	//clear color buffer to black for compositing
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Renderview::DrawFinalBuffer()
+{
+	bool bval;
+	getValue(gstEnlarge, bval);
+	if (bval)
+		return;
+
+	//bind back the window frame buffer
+	BindRenderBuffer();
+
+	//draw the final buffer to the windows buffer
+	glActiveTexture(GL_TEXTURE0);
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+	if (final_buffer)
+		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	glDisable(GL_DEPTH_TEST);
+
+	//2d adjustment
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	double r, g, b;
+	getValue(gstGammaR, r); getValue(gstGammaG, g); getValue(gstGammaB, b);
+	img_shader->setLocalParam(0, r, g, b, 1.0);
+	getValue(gstBrightnessR, r); getValue(gstBrightnessG, g); getValue(gstBrightnessB, b);
+	img_shader->setLocalParam(1, r, g, b, 1.0);
+	getValue(gstEqualizeR, r); getValue(gstEqualizeG, g); getValue(gstEqualizeB, b);
+	img_shader->setLocalParam(2, r, g, b, 0.0);
+	//2d adjustment
+
+	DrawViewQuad();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//get pixel value
+	bool pin_rc, rc_dirty, free;
+	getValue(gstPinRotCtr, pin_rc);
+	getValue(gstRotCtrDirty, rc_dirty);
+	getValue(gstFree, free);
+	if (pin_rc && rc_dirty && !free)
+	{
+		unsigned char pixel[4];
+		long nx, ny;
+		GetRenderSize(nx, ny);
+		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+		setValue(gstPinThresh, 0.8 * double(pixel[3]) / 255.0);
+	}
+}
+
+void Renderview::PrepVRBuffer()
+{
+	bool bval;
+	getValue(gstOpenvrEnable, bval);
+	if (bval)
+	{
+#ifdef _WIN32
+		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
+		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+#endif
+	}
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	//generate textures & buffer objects
+	glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+	//frame buffer for one eye
+	std::string vr_buf_name;
+	long lval;
+	getValue(gstVrEyeIdx, lval);
+	if (lval)
+		vr_buf_name = "vr right";
+	else
+		vr_buf_name = "vr left";
+
+	flvr::Framebuffer* vr_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_UChar_RGBA, nx, ny, vr_buf_name);
+	if (vr_buffer)
+		vr_buffer->protect();
+}
+
+void Renderview::BindRenderBuffer()
+{
+	bool bval;
+	getValue(gstVrEnable, bval);
+	if (bval)
+	{
+		std::string vr_buf_name;
+		long lval;
+		getValue(gstVrEyeIdx, lval);
+		if (lval)
+			vr_buf_name = "vr right";
+		else
+			vr_buf_name = "vr left";
+		flvr::Framebuffer* vr_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				vr_buf_name);
+		if (vr_buffer)
+			vr_buffer->bind();
+	}
+	else
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderview::ClearVRBuffer()
+{
+	BindRenderBuffer();
+	//clear color buffer to black for compositing
+	glClearDepth(1.0);
+	Color c;
+	getValue(gstBgColor, c);
+	glClearColor(c.r(), c.g(), c.b(), 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderview::DrawVRBuffer()
+{
+	long vr_x, vr_y, gl_x, gl_y;
+	GetRenderSize(vr_x, vr_y);
+	getValue(gstSizeX, gl_x);
+	getValue(gstSizeY, gl_y);
+	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, gl_x, vp_y);
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	//left eye
+	flvr::Framebuffer* buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"vr left");
+	if (buffer)
+		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	flvr::VertexArray* quad_va =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Left_Square);
+	if (quad_va)
+		quad_va->draw();
+	//openvr left eye
+	bool bval;
+	getValue(gstOpenvrEnable, bval);
+	if (bval)
+	{
+#ifdef _WIN32
+		vr::Texture_t left_eye = {};
+		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		left_eye.eType = vr::TextureType_OpenGL;
+		left_eye.eColorSpace = vr::ColorSpace_Gamma;
+		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
+#endif
+	}
+	//right eye
+	buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"vr right");
+	if (buffer)
+		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	quad_va =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Right_Square);
+	if (quad_va)
+		quad_va->draw();
+	//openvr left eye
+	if (bval)
+	{
+#ifdef _WIN32
+		vr::Texture_t right_eye = {};
+		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		right_eye.eType = vr::TextureType_OpenGL;
+		right_eye.eColorSpace = vr::ColorSpace_Gamma;
+		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
+#endif
+	}
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+}
+
+//draw multi volumes with depth consideration
+//peel==true -- depth peeling
+void Renderview::DrawVolumesMulti(VolumeList &list, long peel)
+{
+	if (list.empty())
+		return;
+
+	if (!m_mvr)
+		m_mvr = new flvr::MultiVolumeRenderer();
+	if (!m_mvr)
+		return;
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+	double dval;
+	getValue(gstScaleFactor, dval);
+	GLfloat zoom = dval;
+	GLfloat sf121 = Get121ScaleFactor();
+	bool bval;
+	getValue(gstMicroBlendEnable, bval);
+	m_mvr->set_blend_slices(bval);
+	bool use_fog;
+	double fog_intensity, fog_start, fog_end;
+	getValue(gstDepthAtten, use_fog);
+	getValue(gstDaInt, fog_intensity);
+	getValue(gstDaStart, fog_start);
+	getValue(gstDaEnd, fog_end);
+
+	int i;
+	m_mvr->clear_vr();
+	for (i = 0; i < (int)list.size(); i++)
+	{
+		VolumeData* vd = list[i];
+		if (!vd)
+			continue;
+		bool disp;
+		vd->getValue(gstDisplay, disp);
+		if (disp)
+		{
+			flvr::VolumeRenderer* vr = vd->GetRenderer();
+			if (vr)
+			{
+				//drawlabel
+				long label_mode;
+				vd->getValue(gstLabelMode, label_mode);
+				if (label_mode &&
+					vd->GetMask(false) &&
+					vd->GetLabel(false))
+					vd->setValue(gstMaskMode, long(4));
+				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				vd->setValue(gstDepthAtten, use_fog);
+				vd->setValue(gstDaInt, fog_intensity);
+				vd->setValue(gstDaStart, fog_start);
+				vd->setValue(gstDaEnd, fog_end);
+				vr->set_zoom(zoom, sf121);
+				m_mvr->add_vr(vr);
+				m_mvr->set_sampling_rate(vr->get_sampling_rate());
+				m_mvr->SetNoiseRed(vr->GetNoiseRed());
+			}
+		}
+	}
+
+	if (m_mvr->get_vr_num() <= 0)
+		return;
+	m_mvr->set_depth_peel(peel);
+
+	// Set up transform
+	Transform *tform = list[0]->GetTexture()->transform();
+	float mvmat[16];
+	tform->get_trans(mvmat);
+	glm::mat4 mv_mat2 = glm::mat4(
+		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+	mv_mat2 = list[0]->GetRenderer()->m_mv_mat * mv_mat2;
+	m_mvr->set_matrices(mv_mat2,
+		list[0]->GetRenderer()->m_proj_mat,
+		list[0]->GetRenderer()->m_tex_mat);
+
+	//generate textures & buffer objects
+	//frame buffer for each volume
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "channel");
+	//bind the fbo
+	unsigned long ulval;
+	if (chann_buffer)
+	{
+		chann_buffer->protect();
+		chann_buffer->bind();
+		ulval = (unsigned long)(chann_buffer->id());
+		setValue(gstCurFramebuffer, ulval);
+	}
+	if (!flvr::TextureRenderer::get_mem_swap() ||
+		(flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		flvr::
+			TextureRenderer::reset_clear_chan_buffer();
+	}
+
+	//draw multiple volumes at the same time
+	m_mvr->set_viewport(vp);
+	m_mvr->set_clear_color(clear_color);
+	getValue(gstCurFramebuffer, ulval);
+	m_mvr->set_cur_framebuffer(ulval);
+	bool test_wiref, adaptive, interactive, persp, interpolate;
+	getValue(gstTestWiref, test_wiref);
+	getValue(gstAdaptive, adaptive);
+	getValue(gstInteractive, interactive);
+	getValue(gstPerspective, persp);
+	getValue(gstInterpolate, interpolate);
+	m_mvr->draw(test_wiref, adaptive, interactive, !persp, interpolate);
+
+	//draw shadows
+	DrawOLShadows(list);
+
+	//bind fbo for final composition
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"final");
+	if (final_buffer)
+		final_buffer->bind();
+	glActiveTexture(GL_TEXTURE0);
+	if (chann_buffer)
+		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//build mipmap
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glEnable(GL_BLEND);
+	long lval;
+	getValue(gstMixMethod, lval);
+	if (lval == MIX_METHOD_COMP)
+		glBlendFunc(GL_ONE, GL_ONE);
+	else
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+
+	//2d adjustment
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+		{
+			img_shader->create();
+		}
+		img_shader->bind();
+	}
+	VolumeData* vd = list[0];
+	double r, g, b;
+	vd->getValue(gstGammaR, r);
+	vd->getValue(gstGammaG, g);
+	vd->getValue(gstGammaB, b);
+	Color gamma(r, g, b);
+	vd->getValue(gstBrightnessR, r);
+	vd->getValue(gstBrightnessG, g);
+	vd->getValue(gstBrightnessB, b);
+	Color brightness(r, g, b);
+	vd->getValue(gstEqualizeR, r);
+	vd->getValue(gstEqualizeG, g);
+	vd->getValue(gstEqualizeB, b);
+	Color hdr(r, g, b);
+	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	//2d adjustment
+
+	DrawViewQuad();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+}
+
+//Draw the volmues with compositing
+//peel==true -- depth peeling
+void Renderview::DrawVolumesComp(VolumeList &list, bool mask, long peel)
+{
+	if (list.empty()
+		)
+		return;
+
+	int i;
+
+	//count volumes with mask
+	int cnt_mask = 0;
+	for (i = 0; i < (int)list.size(); i++)
+	{
+		VolumeData* vd = list[i];
+		if (!vd)
+			continue;
+		bool disp;
+		vd->getValue(gstDisplay, disp);
+		if (!disp)
+			continue;
+		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+			cnt_mask++;
+	}
+
+	if (mask && cnt_mask == 0)
+		return;
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	//generate textures & buffer objects
+	//frame buffer for each volume
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "channel");
+	if (chann_buffer)
+		chann_buffer->protect();
+
+	//draw each volume to fbo
+	for (i = 0; i < (int)list.size(); i++)
+	{
+		VolumeData* vd = list[i];
+		if (!vd)
+			continue;
+		bool disp;
+		vd->getValue(gstDisplay, disp);
+		if (!disp)
+			continue;
+		if (mask)
+		{
+			//drawlabel
+			long label_mode;
+			vd->getValue(gstLabelMode, label_mode);
+			if (label_mode &&
+				vd->GetMask(false) &&
+				vd->GetLabel(false))
+				continue;
+
+			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+			{
+				vd->setValue(gstMaskMode, long(1));
+				long mix_method;
+				getValue(gstMixMethod, mix_method);
+				setValue(gstMixMethod, MIX_METHOD_COMP);
+				long mip_mode;
+				vd->getValue(gstMipMode, mip_mode);
+				if (mip_mode == 1)
+					DrawMIP(vd, peel);
+				else
+					DrawOVER(vd, mask, peel);
+				vd->setValue(gstMaskMode, long(0));
+				setValue(gstMixMethod, mix_method);
+			}
+		}
+		else
+		{
+			long blend_mode;
+			vd->getValue(gstBlendMode, blend_mode);
+			if (blend_mode != 2)
+			{
+				//drawlabel
+				long label_mode;
+				vd->getValue(gstLabelMode, label_mode);
+				if (label_mode &&
+					vd->GetMask(false) &&
+					vd->GetLabel(false))
+					vd->setValue(gstMaskMode, long(4));
+
+				long mip_mode;
+				vd->getValue(gstMipMode, mip_mode);
+				if (mip_mode == 1)
+					DrawMIP(vd, peel);
+				else
+					DrawOVER(vd, mask, peel);
+			}
+		}
+	}
+}
+
+void Renderview::DrawMIP(VolumeData* vd, long peel)
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+
+	bool do_mip = true;
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+	{
+		unsigned int rn_time = glbin_timer->get_ticks();
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
+			return;
+		if (vd->GetRenderer()->get_done_loop(1))
+			do_mip = false;
+	}
+
+	bool shading;
+	vd->getValue(gstShadingEnable, shading);
+	bool shadow;
+	vd->getValue(gstShadowEnable, shadow);
+	long color_mode;
+	vd->getValue(gstColormapMode, color_mode);
+	bool enable_alpha;
+	vd->getValue(gstAlphaEnable, enable_alpha);
+	long saved_mip_mode;
+	vd->getValue(gstMipMode, saved_mip_mode);
+
+	flvr::ShaderProgram* img_shader = 0;
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	flvr::Framebuffer* overlay_buffer = 0;
+	if (do_mip)
+	{
+		//before rendering this channel, save final buffer to temp buffer
+		if (flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_start_update_loop() &&
+			flvr::TextureRenderer::get_save_final_buffer())
+		{
+			flvr::TextureRenderer::reset_save_final_buffer();
+
+			//bind temporary framebuffer for comp in stream mode
+			flvr::Framebuffer* temp_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+					flvr::FB_Render_RGBA, nx, ny, "temporary");
+			if (temp_buffer)
+			{
+				temp_buffer->bind();
+				temp_buffer->protect();
+			}
+			glClearColor(0.0, 0.0, 0.0, 0.0);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glActiveTexture(GL_TEXTURE0);
+			flvr::Framebuffer* final_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+			if (final_buffer)
+				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			glDisable(GL_BLEND);
+			glDisable(GL_DEPTH_TEST);
+
+			img_shader =
+				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			if (img_shader)
+			{
+				if (!img_shader->valid())
+					img_shader->create();
+				img_shader->bind();
+			}
+			DrawViewQuad();
+			if (img_shader && img_shader->valid())
+				img_shader->release();
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
+		//bind the fbo
+		overlay_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				flvr::FB_Render_RGBA, nx, ny);
+		if (overlay_buffer)
+		{
+			overlay_buffer->bind();
+			overlay_buffer->protect();
+			setValue(gstCurFramebuffer, (unsigned long)(overlay_buffer->id()));
+		}
+
+		if (!flvr::TextureRenderer::get_mem_swap() ||
+			(flvr::TextureRenderer::get_mem_swap() &&
+				flvr::TextureRenderer::get_clear_chan_buffer()))
+		{
+			glClearColor(0.0, 0.0, 0.0, 0.0);
+			glClear(GL_COLOR_BUFFER_BIT);
+			flvr::TextureRenderer::reset_clear_chan_buffer();
+		}
+
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_depth_peel(peel);
+		vd->GetRenderer()->set_shading(false);
+		//turn off colormap proj
+		long saved_colormap_proj;
+		vd->getValue(gstColormapProj, saved_colormap_proj);
+		if (color_mode == 0)
+			vd->setValue(gstColormapProj, long(0));
+		if (color_mode == 1)
+		{
+			vd->setValue(gstMipMode, long(3));
+			vd->setValue(gstDepthAtten, false);
+		}
+		else
+		{
+			vd->setValue(gstMipMode, long(1));
+			ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
+			propValues(fog, vd);
+		}
+		//turn off alpha
+		if (color_mode == 1)
+			vd->setValue(gstAlphaEnable, false);
+		//draw
+		vd->setValue(gstStreamMode, long(1));
+		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->setValue(gstViewport, Vector4i(vp));
+		vd->setValue(gstClearColor, Vector4f(clear_color));
+		propValue(gstCurFramebuffer, vd);
+		bool adaptive, interactive, persp;
+		double scale_factor;
+		getValue(gstAdaptive, adaptive);
+		getValue(gstInteractive, interactive);
+		getValue(gstPerspective, persp);
+		getValue(gstScaleFactor, scale_factor);
+		vd->Draw(!persp, adaptive, interactive, scale_factor, Get121ScaleFactor());
+		//restore
+		if (color_mode == 0)
+			vd->setValue(gstColormapProj, saved_colormap_proj);
+		if (color_mode == 1)
+		{
+			vd->setValue(gstMipMode, saved_mip_mode);
+			//restore alpha
+			vd->setValue(gstAlphaEnable, enable_alpha);
+		}
+
+		//bind channel fbo for final composition
+		if (chann_buffer)
+			chann_buffer->bind();
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		if (overlay_buffer)
+		{
+			//ok to unprotect
+			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			overlay_buffer->unprotect();
+		}
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+		if (color_mode == 1)
+		{
+			long cproj;
+			vd->getValue(gstColormapProj, cproj);
+			long ctype;
+			vd->getValue(gstColormapType, ctype);
+			//2d adjustment
+			if (cproj)
+				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
+					IMG_SHDR_GRADIENT_PROJ_MAP, ctype);
+			else
+				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
+					IMG_SHDR_GRADIENT_MAP, ctype);
+			if (img_shader)
+			{
+				if (!img_shader->valid())
+				{
+					img_shader->create();
+				}
+				img_shader->bind();
+			}
+			double lo, hi;
+			vd->getValue(gstColormapLow, lo);
+			vd->getValue(gstColormapHigh, hi);
+			img_shader->setLocalParam(
+				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
+			Color c;
+			vd->getValue(gstColor, c);
+			double cinv;
+			vd->getValue(gstColormapInv, cinv);
+			img_shader->setLocalParam(
+				6, c.r(), c.g(), c.b(), cinv);
+			img_shader->setLocalParam(
+				9, c.r(), c.g(), c.b(), 0.0);
+			//2d adjustment
+		}
+		else
+		{
+			img_shader =
+				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		}
+
+		if (img_shader)
+		{
+			if (!img_shader->valid())
+				img_shader->create();
+			img_shader->bind();
+		}
+		DrawViewQuad();
+		if (img_shader && img_shader->valid())
+			img_shader->release();
+
+		if (color_mode == 1 &&
+			img_shader &&
+			img_shader->valid())
+		{
+			img_shader->release();
+		}
+	}
+
+	if (shading)
+	{
+		DrawOLShading(vd);
+	}
+
+	if (shadow)
+	{
+		VolumeList list;
+		list.push_back(vd);
+		DrawOLShadows(list);
+	}
+
+	//bind fbo for final composition
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"final");
+	if (final_buffer)
+		final_buffer->bind();
+
+	if (flvr::TextureRenderer::get_mem_swap())
+	{
+		//restore temp buffer to final buffer
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		flvr::Framebuffer* temp_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				"temporary");
+		if (temp_buffer)
+		{
+			//bind tex from temp buffer
+			//it becomes unprotected afterwards
+			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			temp_buffer->unprotect();
+		}
+		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+
+		img_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		if (img_shader)
+		{
+			if (!img_shader->valid())
+				img_shader->create();
+			img_shader->bind();
+		}
+		DrawViewQuad();
+		if (img_shader && img_shader->valid())
+			img_shader->release();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	if (chann_buffer)
+		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//build mipmap
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glEnable(GL_BLEND);
+	long lval;
+	getValue(gstMixMethod, lval);
+	if (lval == MIX_METHOD_COMP)
+		glBlendFunc(GL_ONE, GL_ONE);
+	else
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+
+	//2d adjustment
+	img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	double r, g, b;
+	vd->getValue(gstGammaR, r);
+	vd->getValue(gstGammaG, g);
+	vd->getValue(gstGammaB, b);
+	Color gamma(r, g, b);
+	vd->getValue(gstBrightnessR, r);
+	vd->getValue(gstBrightnessG, g);
+	vd->getValue(gstBrightnessB, b);
+	Color brightness(r, g, b);
+	vd->getValue(gstEqualizeR, r);
+	vd->getValue(gstEqualizeG, g);
+	vd->getValue(gstEqualizeB, b);
+	Color hdr(r, g, b);
+	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	//2d adjustment
+
+	DrawViewQuad();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+
+	vd->setValue(gstShadingEnable, shading);
+	vd->setValue(gstColormapMode, color_mode);
+
+	//if vd is duplicated
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_done_current_chan())
+	{
+		vector<flvr::TextureBrick*> *bricks =
+			vd->GetTexture()->get_bricks();
+		for (int i = 0; i < bricks->size(); i++)
+			(*bricks)[i]->set_drawn(false);
+	}
+}
+
+void Renderview::DrawOVER(VolumeData* vd, bool mask, int peel)
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+
+	flvr::ShaderProgram* img_shader = 0;
+
+	bool do_over = true;
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+	{
+		unsigned int rn_time = glbin_timer->get_ticks();
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
+			return;
+		if (mask)
+		{
+			if (vd->GetRenderer()->get_done_loop(4))
+				do_over = false;
+		}
+		else
+		{
+			if (vd->GetRenderer()->get_done_loop(0))
+				do_over = false;
+		}
+	}
+
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	if (do_over)
+	{
+		//before rendering this channel, save final buffer to temp buffer
+		if (flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_start_update_loop() &&
+			flvr::TextureRenderer::get_save_final_buffer())
+		{
+			flvr::TextureRenderer::reset_save_final_buffer();
+
+			//bind temporary framebuffer for comp in stream mode
+			flvr::Framebuffer* temp_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+					flvr::FB_Render_RGBA, nx, ny, "temporary");
+			if (temp_buffer)
+			{
+				temp_buffer->bind();
+				temp_buffer->protect();
+			}
+			glClearColor(0.0, 0.0, 0.0, 0.0);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glActiveTexture(GL_TEXTURE0);
+			flvr::Framebuffer* final_buffer =
+				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+			if (final_buffer)
+				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			glDisable(GL_BLEND);
+			glDisable(GL_DEPTH_TEST);
+
+			img_shader =
+				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			if (img_shader)
+			{
+				if (!img_shader->valid())
+					img_shader->create();
+				img_shader->bind();
+			}
+			DrawViewQuad();
+			if (img_shader && img_shader->valid())
+				img_shader->release();
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		//bind the fbo
+		if (chann_buffer)
+		{
+			chann_buffer->bind();
+			setValue(gstCurFramebuffer, (unsigned long)(chann_buffer->id()));
+		}
+
+		if (!flvr::TextureRenderer::get_mem_swap() ||
+			(flvr::TextureRenderer::get_mem_swap() &&
+				flvr::TextureRenderer::get_clear_chan_buffer()))
+		{
+			glClearColor(0.0, 0.0, 0.0, 0.0);
+			glClear(GL_COLOR_BUFFER_BIT);
+			flvr::TextureRenderer::reset_clear_chan_buffer();
+		}
+
+		if (vd->GetRenderer())
+			vd->GetRenderer()->set_depth_peel(peel);
+		if (mask)
+			vd->setValue(gstStreamMode, long(4));
+		else
+			vd->setValue(gstStreamMode, long(0));
+		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
+		propValues(fog, vd);
+		vd->setValue(gstViewport, Vector4i(vp));
+		vd->setValue(gstClearColor, Vector4f(clear_color));
+		propValue(gstCurFramebuffer, vd);
+		bool adaptive, interactive, persp;
+		double scale_factor;
+		getValue(gstAdaptive, adaptive);
+		getValue(gstInteractive, interactive);
+		getValue(gstPerspective, persp);
+		getValue(gstScaleFactor, scale_factor);
+		vd->Draw(!persp, adaptive, interactive, scale_factor, Get121ScaleFactor());
+	}
+
+	bool shadow;
+	vd->getValue(gstShadowEnable, shadow);
+	if (shadow)
+	{
+		VolumeList list;
+		list.push_back(vd);
+		DrawOLShadows(list);
+	}
+
+	//bind fbo for final composition
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			"final");
+	if (final_buffer)
+		final_buffer->bind();
+
+	if (flvr::TextureRenderer::get_mem_swap())
+	{
+		//restore temp buffer to final buffer
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		flvr::Framebuffer* temp_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				"temporary");
+		if (temp_buffer)
+		{
+			//temp buffer becomes unused after texture is bound
+			//ok to unprotect
+			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			temp_buffer->unprotect();
+		}
+		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+
+		img_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		if (img_shader)
+		{
+			if (!img_shader->valid())
+				img_shader->create();
+			img_shader->bind();
+		}
+		DrawViewQuad();
+		if (img_shader && img_shader->valid())
+			img_shader->release();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	if (chann_buffer)
+		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//build mipmap
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glEnable(GL_BLEND);
+	long lval;
+	getValue(gstMixMethod, lval);
+	if (lval == MIX_METHOD_COMP)
+		glBlendFunc(GL_ONE, GL_ONE);
+	else
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+
+	//2d adjustment
+	img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	double r, g, b;
+	vd->getValue(gstGammaR, r);
+	vd->getValue(gstGammaG, g);
+	vd->getValue(gstGammaB, b);
+	Color gamma(r, g, b);
+	vd->getValue(gstBrightnessR, r);
+	vd->getValue(gstBrightnessG, g);
+	vd->getValue(gstBrightnessB, b);
+	Color brightness(r, g, b);
+	vd->getValue(gstEqualizeR, r);
+	vd->getValue(gstEqualizeG, g);
+	vd->getValue(gstEqualizeB, b);
+	Color hdr(r, g, b);
+	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	//2d adjustment
+
+	DrawViewQuad();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+
+	//if vd is duplicated
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_done_current_chan())
+	{
+		vector<flvr::TextureBrick*> *bricks =
+			vd->GetTexture()->get_bricks();
+		for (int i = 0; i < bricks->size(); i++)
+			(*bricks)[i]->set_drawn(false);
+	}
+}
+
+void Renderview::DrawOLShading(VolumeData* vd)
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+	{
+		unsigned int rn_time = glbin_timer->get_ticks();
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
+			return;
+		if (vd->GetRenderer()->get_done_loop(2))
+			return;
+	}
+
+	//shading pass
+	flvr::Framebuffer* overlay_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind();
+		overlay_buffer->protect();
+	}
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	vd->setValue(gstShadingEnable, true);
+	bool alpha;
+	vd->getValue(gstAlphaEnable, alpha);
+	vd->setValue(gstAlphaEnable, true);
+	long mip_mode;
+	vd->getValue(gstMipMode, mip_mode);
+	vd->setValue(gstMipMode, long(2));
+	long colormode;
+	vd->getValue(gstColormapMode, colormode);
+	vd->setValue(gstStreamMode, long(2));
+	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+	ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
+	propValues(fog, vd);
+	bool adaptive, interactive, persp;
+	double scale_factor;
+	getValue(gstAdaptive, adaptive);
+	getValue(gstInteractive, interactive);
+	getValue(gstPerspective, persp);
+	getValue(gstScaleFactor, scale_factor);
+	vd->Draw(!persp, adaptive, interactive, scale_factor, Get121ScaleFactor());
+	vd->setValue(gstMipMode, mip_mode);
+	vd->setValue(gstColormapMode, colormode);
+	vd->setValue(gstAlphaEnable, alpha);
+
+	//bind fbo for final composition
+	flvr::Framebuffer* chann_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+	if (chann_buffer)
+		chann_buffer->bind();
+	glActiveTexture(GL_TEXTURE0);
+	if (overlay_buffer)
+	{
+		//ok to unprotect
+		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		overlay_buffer->unprotect();
+	}
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+	//glBlendEquation(GL_MIN);
+	glDisable(GL_DEPTH_TEST);
+
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	DrawViewQuad();
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void Renderview::DrawOLShadows(VolumeList &vlist)
+{
+	if (vlist.empty())
+		return;
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+	GLfloat clear_color[4] = { 1, 1, 1, 1 };
+
+	size_t i;
+	bool has_shadow = false;
+	vector<long> colormodes;
+	vector<bool> shadings;
+	vector<long> mip_modes;
+	VolumeList list;
+	//generate list
+	for (i = 0; i < vlist.size(); i++)
+	{
+		VolumeData* vd = vlist[i];
+		if (!vd)
+			continue;
+		bool shadow;
+		vd->getValue(gstShadowEnable, shadow);
+		if (shadow)
+		{
+			long colormode;
+			vd->getValue(gstColormapMode, colormode);
+			colormodes.push_back(colormode);
+			bool shading;
+			vd->getValue(gstShadingEnable, shading);
+			shadings.push_back(shading);
+			long mip_mode;
+			vd->getValue(gstMipMode, mip_mode);
+			mip_modes.push_back(mip_mode);
+			list.push_back(vd);
+			has_shadow = true;
+		}
+	}
+
+	if (!has_shadow)
+		return;
+
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+	{
+		unsigned int rn_time = glbin_timer->get_ticks();
+		if (rn_time - flvr::TextureRenderer::get_st_time() >
+			flvr::TextureRenderer::get_up_time())
+			return;
+		if (list.size() == 1)
+		{
+			bool shadow;
+			list[0]->getValue(gstShadowEnable, shadow);
+			if (shadow && list[0]->GetRenderer()->get_done_loop(3))
+				return;
+		}
+	}
+
+	flvr::Framebuffer* overlay_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind();
+		overlay_buffer->protect();
+		setValue(gstCurFramebuffer, (unsigned long)(overlay_buffer->id()));
+	}
+
+	if (!flvr::TextureRenderer::get_mem_swap() ||
+		(flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		glClearColor(1.0, 1.0, 1.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		flvr::TextureRenderer::reset_clear_chan_buffer();
+	}
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+
+	double shadow_darkness = 0.0;
+
+	if (list.empty())
+		;
+	else if (list.size() == 1)
+	{
+		VolumeData* vd = list[0];
+		//save
+		long colormode;
+		vd->getValue(gstColormapMode, colormode);
+		bool shading;
+		vd->getValue(gstShadingEnable, shading);
+		long mip_mode;
+		vd->getValue(gstMipMode, mip_mode);
+		//set to draw depth
+		vd->setValue(gstShadingEnable, false);
+		vd->setValue(gstMipMode, long(0));
+		vd->setValue(gstColormapMode, long(2));
+		if (overlay_buffer)
+			vd->setValue(gst2dDmapId,
+			(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+		long msk_mode;
+		vd->getValue(gstMaskMode, msk_mode);
+		vd->setValue(gstMaskMode, long(0));
+		//draw
+		vd->setValue(gstStreamMode, long(3));
+		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
+		propValues(fog, vd);
+		vd->setValue(gstViewport, Vector4i(vp));
+		vd->setValue(gstClearColor, Vector4f(clear_color));
+		propValue(gstCurFramebuffer, vd);
+		bool adaptive, interactive, persp;
+		double scale_factor;
+		getValue(gstAdaptive, adaptive);
+		getValue(gstInteractive, interactive);
+		getValue(gstPerspective, persp);
+		getValue(gstScaleFactor, scale_factor);
+		vd->Draw(!persp, adaptive, interactive, scale_factor, Get121ScaleFactor());
+		//restore
+		vd->setValue(gstMipMode, mip_mode);
+		vd->setValue(gstMaskMode, msk_mode);
+		vd->setValue(gstColormapMode, colormode);
+		vd->setValue(gstShadingEnable, shading);
+		vd->setValue(gstShadowInt, shadow_darkness);
+	}
+	else
+	{
+		m_mvr->clear_vr();
+		for (i = 0; i < list.size(); i++)
+		{
+			VolumeData* vd = list[i];
+			vd->setValue(gstShadingEnable, false);
+			vd->setValue(gstMipMode, long(0));
+			vd->setValue(gstColormapMode, long(2));
+			if (overlay_buffer)
+				vd->setValue(gst2dDmapId,
+				(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+			flvr::VolumeRenderer* vr = list[i]->GetRenderer();
+			if (vr)
+			{
+				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
+				propValues(fog, list[i]);
+				m_mvr->add_vr(vr);
+				m_mvr->set_sampling_rate(vr->get_sampling_rate());
+				m_mvr->SetNoiseRed(vr->GetNoiseRed());
+			}
+		}
+		//draw
+		m_mvr->set_viewport(vp);
+		m_mvr->set_clear_color(clear_color);
+		unsigned long ulval;
+		getValue(gstCurFramebuffer, ulval);
+		m_mvr->set_cur_framebuffer(ulval);
+		bool test_wiref, adaptive, interactive, persp, interpolate;
+		getValue(gstTestWiref, test_wiref);
+		getValue(gstAdaptive, adaptive);
+		getValue(gstInteractive, interactive);
+		getValue(gstPerspective, persp);
+		getValue(gstInterpolate, interpolate);
+		m_mvr->draw(test_wiref, adaptive, interactive, !persp, interpolate);
+
+		for (i = 0; i < list.size(); i++)
+		{
+			VolumeData* vd = list[i];
+			vd->setValue(gstMipMode, long(mip_modes[i]));
+			vd->setValue(gstColormapMode, long(colormodes[i]));
+			vd->setValue(gstShadingEnable, bool(shadings[i]));
+		}
+		list[0]->getValue(gstShadowInt, shadow_darkness);
+	}
+
+	//
+	if (!flvr::TextureRenderer::get_mem_swap() ||
+		(flvr::TextureRenderer::get_mem_swap() &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		//shadow pass
+		//bind the fbo
+		flvr::Framebuffer* temp_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+				flvr::FB_Render_RGBA, nx, ny);
+		if (temp_buffer)
+		{
+			temp_buffer->bind();
+			temp_buffer->protect();
+		}
+		glClearColor(1.0, 1.0, 1.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		if (overlay_buffer)
+		{
+			//ok to unprotect
+			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			overlay_buffer->unprotect();
+		}
+		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+
+		//2d adjustment
+		flvr::ShaderProgram* img_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+		if (img_shader)
+		{
+			if (!img_shader->valid())
+				img_shader->create();
+			img_shader->bind();
+		}
+		bool bval;
+		getValue(gstPerspective, bval);
+		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, bval ? 2e10 : 1e6, 0.0);
+		double dir_x = 0.0, dir_y = 0.0;
+		getValue(gstShadowDirX, dir_x);
+		getValue(gstShadowDirY, dir_y);
+		img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
+		//2d adjustment
+
+		DrawViewQuad();
+
+		if (img_shader && img_shader->valid())
+			img_shader->release();
+
+		//bind fbo for final composition
+		flvr::Framebuffer* chann_buffer =
+			flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+		if (chann_buffer)
+			chann_buffer->bind();
+		glActiveTexture(GL_TEXTURE0);
+		if (temp_buffer)
+		{
+			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			temp_buffer->unprotect();
+		}
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+		glDisable(GL_DEPTH_TEST);
+
+		//2d adjustment
+		img_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+		if (img_shader)
+		{
+			if (!img_shader->valid())
+				img_shader->create();
+			img_shader->bind();
+		}
+		double dval;
+		getValue(gstScaleFactor, dval);
+		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(dval, 1.0), 0.0);
+		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
+		glActiveTexture(GL_TEXTURE1);
+		if (chann_buffer)
+			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		//2d adjustment
+
+		DrawViewQuad();
+
+		if (img_shader && img_shader->valid())
+			img_shader->release();
+	}
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0);
+
+	glBlendEquation(GL_FUNC_ADD);
+}
+
+void Renderview::DrawOLShadowsMesh(double darkness)
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	//shadow pass
+	//bind the fbo
+	flvr::Framebuffer* overlay_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind();
+		overlay_buffer->protect();
+	}
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glActiveTexture(GL_TEXTURE0);
+	string name = "peel buffer" + std::to_string(0);
+	flvr::Framebuffer* peel_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+	if (peel_buffer)
+		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+
+	//2d adjustment
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+		{
+			img_shader->create();
+		}
+		img_shader->bind();
+	}
+	bool bval;
+	getValue(gstPerspective, bval);
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, bval ? 2e10 : 1e6, 0.0);
+	double dir_x = 0.0, dir_y = 0.0;
+	getValue(gstShadowDirX, dir_x);
+	getValue(gstShadowDirY, dir_y);
+	img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
+	//2d adjustment
+
+	DrawViewQuad();
+
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+
+	//
+	//bind fbo for final composition
+	BindRenderBuffer();
+	glActiveTexture(GL_TEXTURE0);
+	if (overlay_buffer)
+	{
+		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		overlay_buffer->unprotect();
+	}
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+	glDisable(GL_DEPTH_TEST);
+
+	//2d adjustment
+	img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	double dval;
+	getValue(gstScaleFactor, dval);
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(dval, 1.0), 0.0);
+	img_shader->setLocalParam(1, darkness, 0.0, 0.0, 0.0);
+	glActiveTexture(GL_TEXTURE1);
+	if (peel_buffer)
+		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+	glActiveTexture(GL_TEXTURE2);
+	flvr::Framebuffer* final_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+	if (final_buffer)
+		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//2d adjustment
+
+	DrawViewQuad();
+
+	if (img_shader && img_shader->valid())
+	{
+		img_shader->release();
+	}
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
+}
+
+bool Renderview::GetMeshShadow(double &val)
+{
+	for (int i = 0; i < getNumChildren(); i++)
+	{
+		if (MeshData* md = dynamic_cast<MeshData*>(getChild(i)))
+		{
+			bool disp;
+			md->getValue(gstDisplay, disp);
+			if (disp)
+			{
+				md->getValue(gstShadowInt, val);
+				bool shadow;
+				md->getValue(gstShadowEnable, shadow);
+				return shadow;
+			}
+		}
+		else if (MeshGroup* group = dynamic_cast<MeshGroup*>(getChild(i)))
+		{
+			bool disp;
+			group->getValue(gstDisplay, disp);
+			if (disp)
+			{
+				for (int j = 0; j < (int)group->getNumChildren(); j++)
+				{
+					MeshData* md = group->getChild(j)->asMeshData();
+					if (!md)
+						continue;
+					md->getValue(gstDisplay, disp);
+					if (disp)
+					{
+						md->getValue(gstShadowInt, val);
+						bool shadow;
+						md->getValue(gstShadowEnable, shadow);
+						return shadow;
+					}
+				}
+			}
+		}
+	}
+	val = 0.0;
+	return false;
+}
+
+void Renderview::DrawCircles(double cx, double cy,
+	double r1, double r2, Color &color, glm::mat4 &matrix)
+{
+	flvr::ShaderProgram* shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+
+	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
+	//apply translate first
+	glm::mat4 mat0 = matrix * glm::translate(
+		glm::mat4(), glm::vec3(cx, cy, 0.0));
+	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
+
+	flvr::VertexArray* va_circles =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Brush_Circles);
+	if (va_circles)
+	{
+		//set parameters
+		std::vector<std::pair<unsigned int, double>> params;
+		params.push_back(std::pair<unsigned int, double>(0, r1));
+		params.push_back(std::pair<unsigned int, double>(1, r2));
+		params.push_back(std::pair<unsigned int, double>(2, 60.0));
+		va_circles->set_param(params);
+		va_circles->draw();
+	}
+
+	if (shader && shader->valid())
+		shader->release();
+}
+
+//draw the brush shape
+void Renderview::DrawBrush()
+{
+	double pressure = m_selector->GetNormPress();
+
+	bool bval;
+	getValue(gstMouseIn, bval);
+	if (bval)
+	{
+		long nx, ny;
+		GetRenderSize(nx, ny);
+		float sx, sy;
+		sx = 2.0 / nx;
+		sy = 2.0 / ny;
+		long lx, ly;
+		getValue(gstMouseX, lx);
+		getValue(gstMouseY, ly);
+
+		//draw the circles
+		//set up the matrices
+		glm::mat4 proj_mat;
+		double cx, cy;
+		if (m_selector->GetBrushSizeData())
+		{
+			double dl, dr, dt, db;
+			getValue(gstOrthoLeft, dl);
+			getValue(gstOrthoRight, dr);
+			getValue(gstOrthoBottom, db);
+			getValue(gstOrthoTop, dt);
+			proj_mat = glm::ortho(float(dl), float(dr), float(dt), float(db));
+			cx = dl + lx * (dr - dl) / nx;
+			cy = db + ly * (dt - db) / ny;
+		}
+		else
+		{
+			proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
+			cx = lx;
+			cy = ny - ly;
+		}
+
+		//attributes
+		glDisable(GL_DEPTH_TEST);
+
+		int mode = m_selector->GetMode();
+
+		Color text_color;
+		getValue(gstTextColor, text_color);
+
+		double br1 = m_selector->GetBrushSize1();
+		double br2 = m_selector->GetBrushSize2();
+
+		if (mode == 1 ||
+			mode == 2)
+			DrawCircles(cx, cy, br1*pressure,
+				br2*pressure, text_color, proj_mat);
+		else if (mode == 8)
+			DrawCircles(cx, cy, br1*pressure,
+				-1.0, text_color, proj_mat);
+		else if (mode == 3 ||
+			mode == 4)
+			DrawCircles(cx, cy, -1.0,
+				br2*pressure, text_color, proj_mat);
+
+		float cx2 = lx;
+		float cy2 = ny - ly;
+		float px, py;
+		px = cx2 - 7 - nx / 2.0;
+		py = cy2 - 3 - ny / 2.0;
+		wstring wstr;
+		switch (mode)
+		{
+		case 1:
+			wstr = L"S";
+			break;
+		case 2:
+			wstr = L"+";
+			break;
+		case 3:
+			wstr = L"-";
+			break;
+		case 4:
+			wstr = L"*";
+			break;
+		}
+		m_text_renderer->RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
+
+		glEnable(GL_DEPTH_TEST);
+
+	}
+}
+
+//paint strokes on the paint fbo
+void Renderview::PaintStroke()
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+
+	double pressure = m_selector->GetNormPress();
+
+	//generate texture and buffer objects
+	//painting fbo
+	flvr::Framebuffer* paint_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Render_RGBA, nx, ny, "paint brush");
+	if (!paint_buffer)
+		return;
+	paint_buffer->bind();
+	paint_buffer->protect();
+	//clear if asked so
+	bool bval;
+	getValue(gstClearPaint, bval);
+	if (bval)
+	{
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		setValue(gstClearPaint, false);
+	}
+	else
+	{
+		//paint shader
+		flvr::ShaderProgram* paint_shader =
+			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
+		if (paint_shader)
+		{
+			if (!paint_shader->valid())
+				paint_shader->create();
+			paint_shader->bind();
+		}
+
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_MAX);
+
+		double radius1 = m_selector->GetBrushSize1();
+		double radius2 = m_selector->GetBrushSize2();
+		double bspc = m_selector->GetBrushSpacing();
+		bool bs_data = m_selector->GetBrushSizeData();
+		long lx, ly, lxp, lyp;
+		getValue(gstMouseX, lx); getValue(gstMouseY, ly);
+		getValue(gstMousePrvX, lxp); getValue(gstMousePrvY, lyp);
+		double px = double(lx - lxp);
+		double py = double(ly - lyp);
+		double dist = sqrt(px*px + py * py);
+		double step = radius1 * pressure * bspc;
+		int repeat = int(dist / step + 0.5);
+		double spx = (double)lxp;
+		double spy = (double)lyp;
+		if (repeat > 0)
+		{
+			px /= repeat;
+			py /= repeat;
+		}
+
+		double dl, dr, dt, db;
+		getValue(gstOrthoLeft, dl);
+		getValue(gstOrthoRight, dr);
+		getValue(gstOrthoBottom, db);
+		getValue(gstOrthoTop, dt);
+		//set the width and height
+		if (bs_data)
+		{
+			paint_shader->setLocalParam(1, dr - dl, dt - db, 0.0f, 0.0f);
+		}
+		else
+			paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
+
+		double x, y;
+		double cx, cy;
+		for (int i = 0; i <= repeat; i++)
+		{
+			x = spx + i * px;
+			y = spy + i * py;
+			if (bs_data)
+			{
+				cx = x * (dr - dl) / nx;
+				cy = (ny - y) * (dt - db) / ny;
+			}
+			else
+			{
+				cx = x;
+				cy = double(ny) - y;
+			}
+			switch (m_selector->GetMode())
+			{
+			case 3:
+				radius1 = radius2;
+				break;
+			case 4:
+				radius1 = 0.0;
+				break;
+			case 8:
+				radius2 = radius1;
+				break;
+			default:
+				break;
+			}
+			//send uniforms to paint shader
+			paint_shader->setLocalParam(0, cx, cy,
+				radius1*pressure,
+				radius2*pressure);
+			//draw a square
+			DrawViewQuad();
+		}
+
+		//release paint shader
+		if (paint_shader && paint_shader->valid())
+			paint_shader->release();
+	}
+
+	//bind back the window frame buffer
+	BindRenderBuffer();
+	glBlendEquation(GL_FUNC_ADD);
+	RefreshGL(3);
+}
+
+//show the stroke buffer
+void Renderview::DisplayStroke()
+{
+	//painting texture
+	flvr::Framebuffer* paint_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+	if (!paint_buffer)
+		return;
+
+	//draw the final buffer to the windows buffer
+	glActiveTexture(GL_TEXTURE0);
+	paint_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+
+	flvr::ShaderProgram* img_shader =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (img_shader)
+	{
+		if (!img_shader->valid())
+			img_shader->create();
+		img_shader->bind();
+	}
+	DrawViewQuad();
+	if (img_shader && img_shader->valid())
+		img_shader->release();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_DEPTH_TEST);
+}
+
+Quaternion Renderview::Trackball(double dx, double dy)
+{
+	Quaternion q;
+	Vector a; /* Axis of rotation */
+	double phi;  /* how much to rotate about axis */
+
+	if (dx == 0.0 && dy == 0.0)
+	{
+		/* Zero rotation */
+		return q;
+	}
+
+	a = Vector(-dy, dx, 0.0);
+	phi = a.length() / 3.0;
+	a.normalize();
+	
+	bool bval;
+	getValue(gstGearedEnable, bval);
+	if (bval && phi < 45.0)
+	{
+		/* Zero rotation */
+		return q;
+	}
+
+	//rotate back to local
+	Quaternion aq(a);
+	Quaternion vq;
+	getValue(gstCamRotQ, vq);
+	aq = (-vq) * aq * vq;
+	if (bval)
+	{
+		//rotate back to basis
+		Quaternion zq;
+		getValue(gstCamRotZeroQ, zq);
+		aq = (zq)* aq * (-zq);
+		a = Vector(aq.x, aq.y, aq.z);
+		a.normalize();
+		//snap to closest basis component
+		double maxv = std::max(std::fabs(a.x()),
+			std::max(std::fabs(a.y()), std::fabs(a.z())));
+		if (std::fabs(maxv - std::fabs(a.x())) < Epsilon())
+			a = Vector(a.x() < 0 ? -1 : 1, 0, 0);
+		else if (std::fabs(maxv - std::fabs(a.y())) < Epsilon())
+			a = Vector(0, a.y() < 0 ? -1 : 1, 0);
+		else if (std::fabs(maxv - std::fabs(a.z())) < Epsilon())
+			a = Vector(0, 0, a.z() < 0 ? -1 : 1);
+		aq = Quaternion(a);
+		//rotate again to restore
+		aq = (-zq) * aq * zq;
+		a = Vector(aq.x, aq.y, aq.z);
+		a.normalize();
+		//snap to 45 deg
+		phi = int(phi / 45.0) * 45.0;
+	}
+	else
+	{
+		a = Vector(aq.x, aq.y, aq.z);
+		a.normalize();
+	}
+
+	q = Quaternion(phi, a);
+	q.Normalize();
+
+	return q;
+}
+
+Quaternion Renderview::TrackballClip(long p1x, long p1y, long p2x, long p2y)
+{
+	Quaternion q;
+	Vector a; /* Axis of rotation */
+	double phi;  /* how much to rotate about axis */
+
+	if (p1x == p2x && p1y == p2y)
+	{
+		/* Zero rotation */
+		return q;
+	}
+
+	a = Vector(p2y - p1y, p2x - p1x, 0.0);
+	phi = a.length() / 3.0;
+	a.normalize();
+	Quaternion q_a(a);
+	//rotate back to local
+	Quaternion q2;
+	double dx, dy, dz;
+	getValue(gstCamRotX, dx);
+	getValue(gstCamRotY, dy);
+	getValue(gstCamRotZ, dz);
+	q2.FromEuler(-dx, dy, dz);
+	q_a = (q2)* q_a * (-q2);
+	Quaternion q_cl;
+	getValue(gstClipRotQ, q_cl);
+	q_a = (q_cl)* q_a * (-q_cl);
+	a = Vector(q_a.x, q_a.y, q_a.z);
+	a.normalize();
+
+	q = Quaternion(phi, a);
+	q.Normalize();
+
+	return q;
+}
+
+void Renderview::Q2A()
+{
+	//view changed, re-sort bricks
+	//SetSortBricks();
+	Quaternion vq, zq;
+	getValue(gstCamRotQ, vq);
+	getValue(gstCamRotZeroQ, zq);
+	Quaternion q = vq * (-zq);
+	double dx, dy, dz;
+	q.ToEuler(dx, dy, dz);
+
+	setValue(gstCamRotX, dx);
+	setValue(gstCamRotX, dx);
+	setValue(gstCamRotX, dx);
+
+	long lval;
+	getValue(gstClipMode, lval);
+	if (lval)
+		UpdateClips();
+}
+
+void Renderview::A2Q()
+{
+	//view changed, re-sort bricks
+	//SetSortBricks();
+	double dx, dy, dz;
+	getValue(gstCamRotX, dx);
+	getValue(gstCamRotY, dy);
+	getValue(gstCamRotZ, dz);
+	Quaternion q, zq;
+	getValue(gstCamRotZeroQ, zq);
+	q.FromEuler(dx, dy, dz);
+	q = q * zq;
+	setValue(gstCamRotQ, q);
+
+	long lval;
+	getValue(gstClipMode, lval);
+	if (lval)
+		UpdateClips();
 }
 
 

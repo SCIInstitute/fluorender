@@ -144,6 +144,8 @@ void VolumeFactory::createDefault()
 		vd->addValue(gstHighShading, double(10));//highg shading
 		vd->addValue(gstShadowEnable, bool(false));//shadow
 		vd->addValue(gstShadowInt, double(1));
+		vd->addValue(gstShadowDirX, double(0));
+		vd->addValue(gstShadowDirY, double(0));
 		vd->addValue(gstSampleRate, double(1));//sample rate
 		//color
 		vd->addValue(gstColor, Color(1.0));
@@ -182,7 +184,7 @@ void VolumeFactory::createDefault()
 		vd->addValue(gstBits, long(8));//bits
 		vd->addValue(gstDisplay, bool(true));
 		vd->addValue(gstDrawBounds, bool(false));
-		vd->addValue(gstTestWire, bool(false));
+		vd->addValue(gstTestWiref, bool(false));
 
 		//color map settings
 		vd->addValue(gstColormapEnable, bool(false));

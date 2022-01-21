@@ -330,6 +330,8 @@ namespace fluo
 		void DrawGradBg();
 		void DrawInfo();
 
+		double Get121ScaleFactor();
+
 		//depth
 		double CalcZ(double z);
 		void CalcFogRange();
@@ -363,13 +365,13 @@ namespace fluo
 		void ClearVRBuffer();
 		void DrawVRBuffer();
 		//different volume drawing modes
-		void DrawVolumesMulti(std::vector<VolumeData*> &list, int peel = 0);
-		void DrawVolumesComp(std::vector<VolumeData*> &list, bool mask = false, int peel = 0);
-		void DrawMIP(VolumeData* vd, int peel = 0);
+		void DrawVolumesMulti(VolumeList &list, long peel = 0);
+		void DrawVolumesComp(VolumeList &list, bool mask = false, long peel = 0);
+		void DrawMIP(VolumeData* vd, long peel = 0);
 		void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
 		//overlay passes
 		void DrawOLShading(VolumeData* vd);
-		void DrawOLShadows(std::vector<VolumeData*> &vlist);
+		void DrawOLShadows(VolumeList &vlist);
 		void DrawOLShadowsMesh(double darkenss);
 
 		//get mesh shadow
@@ -386,7 +388,7 @@ namespace fluo
 		void DisplayStroke();
 
 		Quaternion Trackball(double dx, double dy);
-		Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
+		Quaternion TrackballClip(long p1x, long p1y, long p2x, long p2y);
 		void Q2A();
 		void A2Q();
 		//sort bricks after the view has been changed

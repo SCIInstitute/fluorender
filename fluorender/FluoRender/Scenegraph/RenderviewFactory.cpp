@@ -57,6 +57,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstDaInt, double(0.5));
 		view->addValue(gstDaStart, double(0));
 		view->addValue(gstDaEnd, double(1));
+		//shadow
+		view->addValue(gstShadowDirX, double(0));
+		view->addValue(gstShadowDirY, double(0));
 		//output (2d) adjustments
 		view->addValue(gstGammaR, double(1));
 		view->addValue(gstGammaG, double(1));
@@ -169,7 +172,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstAov, double(15));
 		view->addValue(gstNearClip, double(0.1));
 		view->addValue(gstFarClip, double(100));
-		view->addValue(gstInterpolation, bool(true));
+		view->addValue(gstInterpolate, bool(true));
 		view->addValue(gstInterMode, long(1));
 		view->addValue(gstForceClear, bool(false));
 		view->addValue(gstInteractive, bool(false));
@@ -182,7 +185,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstPaintEnable, bool(false));
 		view->addValue(gstPaintDisplay, bool(false));
 		view->addValue(gstClearPaint, bool(true));
-		view->addValue(gstCurrentFb, unsigned long(0));
+		view->addValue(gstCurFramebuffer, unsigned long(0));
 		view->addValue(gstPerspective, bool(false));
 		view->addValue(gstFree, bool(false));
 		view->addValue(gstCamDist, double(10));
@@ -240,6 +243,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMousePrvY, long(-1));
 		view->addValue(gstMouseClientX, long(-1));
 		view->addValue(gstMouseClientY, long(-1));
+		view->addValue(gstMouseIn, bool(true));
 		view->addValue(gstMovInitAng, double(0));
 		view->addValue(gstMovStartAng, double(0));
 		view->addValue(gstMovEndAng, double(0));
