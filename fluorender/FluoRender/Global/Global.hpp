@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_mshf fluo::Global::instance().getMeshFactory()
 #define glbin_annf fluo::Global::instance().getAnnotationFactory()
 #define glbin_revf fluo::Global::instance().getRenderviewFactory()
+#define glbin_agtf fluo::Global::instance().getAgentFactory()
 
 //class AgentFactory;
 class Fltimer;
@@ -46,6 +47,7 @@ namespace fluo
 	class MeshFactory;
 	class AnnotationFactory;
 	class RenderviewFactory;
+	class AgentFactory;
 	//class Renderer2DFactory;
 	//class Renderer3DFactory;
 	//automatically creates the factories and provide global access
@@ -60,7 +62,7 @@ namespace fluo
 		MeshFactory* getMeshFactory();
 		AnnotationFactory* getAnnotationFactory();
 		RenderviewFactory* getRenderviewFactory();
-		//AgentFactory* getAgentFactory();
+		AgentFactory* getAgentFactory();
 		//Renderer2DFactory* getRenderer2DFactory();
 		//Renderer3DFactory* getRenderer3DFactory();
 

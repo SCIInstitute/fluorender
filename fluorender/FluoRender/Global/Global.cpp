@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshFactory.hpp>
 #include <VolumeFactory.hpp>
 #include <RenderviewFactory.hpp>
-//#include <FUI/Panels/AgentFactory.hpp>
+#include <AgentFactory.hpp>
 //#include <Renderer2DFactory.hpp>
 //#include <Renderer3DFactory.hpp>
 #include <SearchVisitor.hpp>
@@ -66,7 +66,7 @@ void Global::BuildFactories()
 	BUILD_AND_ADD(MeshFactory, factory_group);
 	BUILD_AND_ADD(AnnotationFactory, factory_group);
 	BUILD_AND_ADD(RenderviewFactory, factory_group);
-	//BUILD_AND_ADD(AgentFactory, factory_group);
+	BUILD_AND_ADD(AgentFactory, factory_group);
 	//BUILD_AND_ADD(Renderer2DFactory, factory_group);
 	//BUILD_AND_ADD(Renderer3DFactory, factory_group);
 	
@@ -136,14 +136,14 @@ RenderviewFactory* Global::getRenderviewFactory()
 	return dynamic_cast<RenderviewFactory*>(obj);
 }
 
-//AgentFactory* Global::getAgentFactory()
-//{
-//	Object* obj = get(flstrAgentFactory);
-//	if (!obj)
-//		return 0;
-//	return dynamic_cast<AgentFactory*>(obj);
-//}
-//
+AgentFactory* Global::getAgentFactory()
+{
+	Object* obj = get(gstAgentFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AgentFactory*>(obj);
+}
+
 //Renderer2DFactory* Global::getRenderer2DFactory()
 //{
 //	Object* obj = get(flstrRenderer2DFactory);

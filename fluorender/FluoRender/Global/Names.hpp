@@ -505,5 +505,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstVrEyeIdx "vr eye idx"//0-left;1-right
 #define gstSwapBuffers "swap buffers"
 #define gstLineWidth "line width"//for drawing on screen lines
+#define gstHwnd "hwnd"//handle to window
+#define gstHinstance "hinstance"//handle to instance
 
 #endif//NAMES_HPP

@@ -139,7 +139,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstScaleBarPosY, double(0));
 		view->addValue(gstScaleBarUnit, long(1));
 		view->addValue(gstScaleBarText, std::wstring(L""));
-		view->addValue(gstScaleBarNum, std::wstring(L""));
+		view->addValue(gstScaleBarNum, std::wstring(L"50"));
 		view->addValue(gstScaleBarHeight, double(0));
 		view->addValue(gstOrthoLeft, double(0));
 		view->addValue(gstOrthoRight, double(1));
@@ -306,6 +306,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstSwapBuffers, bool(false));
 		view->addValue(gstLineWidth, double(3));
 		view->addValue(gstLevelOffset, long(0));
+		view->addValue(gstHwnd, unsigned long long(0));
+		view->addValue(gstHinstance, unsigned long long(0));
 	}
 }
 

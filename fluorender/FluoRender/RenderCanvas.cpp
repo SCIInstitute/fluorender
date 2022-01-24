@@ -27,8 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RenderCanvas.h"
+#include <AgentFactory.hpp>
 #include "VRenderView.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
+#include <RenderviewFactory.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <VolumeFactory.hpp>
@@ -326,6 +329,13 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	m_controller(0)
 #endif
 {
+	fluo::Renderview* view = glbin_revf->build();
+	view->setName(m_vrv->GetName().ToStdString());
+	m_agent = glbin_agtf->getOrAddRenderCanvasAgent(view->getName(), *this);
+	m_agent->setObject(view);
+	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());
+	m_agent->setValue(gstHinstance, (unsigned long long)::wxGetInstance());
+
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 

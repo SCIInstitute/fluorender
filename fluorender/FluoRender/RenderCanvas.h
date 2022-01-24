@@ -29,8 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERGLVIEW_H_
 #define _VRENDERGLVIEW_H_
 
-#include "VolumeLoader.h"
-#include "utility.h"
+#include <RenderCanvasAgent.hpp>
+#include <VolumeLoader.h>
+#include <utility.h>
 #include <Calculate/KernelExecutor.h>
 #include <Calculate/VolumeCalculator.h>
 #include <Selection/VolumeSelector.h>
@@ -48,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 #include <Types/BBox.h>
 #include <Types/Quaternion.h>
-#include "compatibility.h"
+#include <compatibility.h>
 
 #include <wx/wx.h>
 #include <wx/clrpicker.h>
@@ -729,6 +730,7 @@ public:
 	bool m_ruler_autorelax;
 
 private:
+	fluo::RenderCanvasAgent* m_agent;
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	wxSize m_size;
@@ -1152,6 +1154,7 @@ private:
 	DECLARE_EVENT_TABLE()
 
 	friend class VRenderView;
+	friend class fluo::RenderCanvasAgent;
 };
 
 inline wxSize RenderCanvas::GetGLSize()

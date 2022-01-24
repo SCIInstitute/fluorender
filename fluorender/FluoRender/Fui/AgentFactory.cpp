@@ -27,13 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <AgentFactory.hpp>
+#include <RenderCanvas.h>
 //#include <Fui/ListModel.h>
 //#include <Fui/TreeModel.h>
 //#include <Fui/TreePanel.h>
 //#include <Fui/VolumePropAgent.h>
 //#include <Fui/VolumePropPanel.h>
-//#include <Fui/RenderCanvasAgent.h>
-//#include <RenderCanvas.h>
 //#include <Fui/OutAdjustAgent.h>
 //#include <Fui/OutAdjustPanel.h>
 //#include <Fui/ClipPlaneAgent.h>
@@ -53,6 +52,40 @@ AgentFactory::AgentFactory()
 AgentFactory::~AgentFactory()
 {
 
+}
+
+RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<RenderCanvasAgent*>(result);
+
+	//not found
+	RenderCanvasAgent* render_canvas_agent =
+		new RenderCanvasAgent(static_cast<RenderCanvas&>(window));
+	if (render_canvas_agent)
+	{
+		render_canvas_agent->setName(name);
+		render_canvas_agent->setValueChangedFunction("bounds",
+			std::bind(&RenderCanvasAgent::OnBoundsChanged,
+				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setDefaultValueChangedFunction(
+			std::bind(&RenderCanvasAgent::handleValueChanged,
+				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setNodeAddedFunction(
+			std::bind(&RenderCanvasAgent::OnSceneChanged,
+				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setNodeRemovedFunction(
+			std::bind(&RenderCanvasAgent::OnSceneChanged,
+				render_canvas_agent, std::placeholders::_1));
+		objects_.push_front(render_canvas_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, render_canvas_agent);
+		notifyObservers(event);
+	}
+
+	return render_canvas_agent;
 }
 
 //ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
@@ -140,40 +173,6 @@ AgentFactory::~AgentFactory()
 //	}
 //
 //	return volume_prop_agent;
-//}
-//
-//RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<RenderCanvasAgent*>(result);
-//
-//	//not found
-//	RenderCanvasAgent* render_canvas_agent =
-//		new RenderCanvasAgent(static_cast<RenderCanvas&>(window));
-//	if (render_canvas_agent)
-//	{
-//		render_canvas_agent->setName(name);
-//		render_canvas_agent->setValueChangedFunction("bounds",
-//			std::bind(&RenderCanvasAgent::OnBoundsChanged,
-//				render_canvas_agent, std::placeholders::_1));
-//		render_canvas_agent->setDefaultValueChangedFunction(
-//			std::bind(&RenderCanvasAgent::handleValueChanged,
-//				render_canvas_agent, std::placeholders::_1));
-//		render_canvas_agent->setNodeAddedFunction(
-//			std::bind(&RenderCanvasAgent::OnSceneChanged,
-//				render_canvas_agent, std::placeholders::_1));
-//		render_canvas_agent->setNodeRemovedFunction(
-//			std::bind(&RenderCanvasAgent::OnSceneChanged,
-//				render_canvas_agent, std::placeholders::_1));
-//		objects_.push_front(render_canvas_agent);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, render_canvas_agent);
-//		notifyObservers(event);
-//	}
-//
-//	return render_canvas_agent;
 //}
 //
 //OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wxWindow &window)

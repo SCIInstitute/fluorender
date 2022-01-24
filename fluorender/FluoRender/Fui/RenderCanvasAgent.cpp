@@ -50,10 +50,10 @@ Renderview* RenderCanvasAgent::getObject()
 
 void RenderCanvasAgent::UpdateAllSettings()
 {
+	setValue(gstForceClear, true);
+	setValue(gstInteractive, false);
 	Renderview* view = getObject();
 	if (!view) return;
-	view->setValue(gstForceClear, true);
-	view->setValue(gstInteractive, false);
 	view->RefreshGL(41);
 }
 
@@ -65,10 +65,10 @@ RenderCanvas &RenderCanvasAgent::getCanvas()
 void RenderCanvasAgent::handleValueChanged(Event& event)
 {
 	Object::handleValueChanged(event);
+	setValue(gstForceClear, true);
+	setValue(gstInteractive, false);
 	Renderview* view = getObject();
 	if (!view) return;
-	view->setValue(gstForceClear, true);
-	view->setValue(gstInteractive, false);
 	view->RefreshGL(41);
 }
 
@@ -76,7 +76,7 @@ void RenderCanvasAgent::OnBoundsChanged(Event& event)
 {
 	Renderview* view = getObject();
 	if (!view) return;
-	view->InitView(Renderview::INIT_BOUNDS | Renderview::INIT_CENTER);
+	view->InitView(INIT_BOUNDS | INIT_CENTER);
 }
 
 void RenderCanvasAgent::OnSceneChanged(Event& event)

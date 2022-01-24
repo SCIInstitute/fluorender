@@ -90,6 +90,37 @@ void Renderview::Init()
 	getValue(gstInitialized, bval);
 	if (!bval)
 	{
+#ifdef _WIN32
+		//tablet initialization
+		if (m_selector->GetBrushUsePres())
+		{
+			if (!m_hTab && LoadWintab() &&
+				gpWTInfoA(0, 0, NULL))
+			{
+				unsigned long long hwnd, hinst;
+				getValue(gstHwnd, hwnd);
+				getValue(gstHinstance, hinst);
+				m_hTab = TabletInit((HWND)hwnd, (HINSTANCE)hinst);
+			}
+			else
+				m_selector->SetBrushUsePres(false);
+		}
+
+		//check touch
+		HMODULE user32 = LoadLibrary(L"user32");
+		GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
+			(GetProcAddress(user32, "GetPointerInfo"));
+		if (GetPI != NULL)
+			setValue(gstTouchEnable, true);
+		else
+			setValue(gstTouchEnable, false);
+
+		//xbox controller
+#ifdef USE_XINPUT
+		m_controller = new XboxController(1);
+#endif
+#endif
+
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		glEnable(GL_MULTISAMPLE);
 
