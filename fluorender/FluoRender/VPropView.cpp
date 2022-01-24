@@ -936,7 +936,7 @@ void VPropView::InitVRenderViews(unsigned int type)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); i++)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (view)
 			{
 				view->InitView(type);
@@ -961,12 +961,12 @@ fluo::VolumeGroup* VPropView::GetGroup()
 	return m_group;
 }
 
-void VPropView::SetView(VRenderGLView *view)
+void VPropView::SetView(RenderCanvas *view)
 {
 	m_view = view;
 }
 
-VRenderGLView* VPropView::GetView()
+RenderCanvas* VPropView::GetView()
 {
 	return m_view;
 }

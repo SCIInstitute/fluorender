@@ -631,7 +631,7 @@ void VMovieView::Init()
 	m_views_cmb->Clear();
 	for (i = 0; i < m_frame->GetViewNum(); i++)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (view && m_views_cmb)
 			m_views_cmb->Append(view->m_vrv->GetName());
 	}
@@ -764,7 +764,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
 		m_delayed_stop = false;
 		Stop();
-		VRenderGLView::SetKeepEnlarge(false);
+		RenderCanvas::SetKeepEnlarge(false);
 		return;
 	}
 
@@ -869,7 +869,7 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		m_filename = fopendlg->GetPath();
-		VRenderGLView::SetKeepEnlarge(true);
+		RenderCanvas::SetKeepEnlarge(true);
 		Run();
 	}
 	delete fopendlg;
@@ -1426,9 +1426,9 @@ void VMovieView::Run()
 			m_crop_w = m_view->GetGLSize().x;
 			m_crop_h = m_view->GetGLSize().y;
 		}
-		if (VRenderGLView::GetEnlarge())
+		if (RenderCanvas::GetEnlarge())
 		{
-			double scale = VRenderGLView::GetEnlargeScale();
+			double scale = RenderCanvas::GetEnlargeScale();
 			m_crop_w *= scale;
 			m_crop_h *= scale;
 		}
@@ -1532,7 +1532,7 @@ void VMovieView::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		VRenderGLView::SetEnlarge(enlarge);
+		RenderCanvas::SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1580,7 +1580,7 @@ void VMovieView::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	VRenderGLView::SetEnlargeScale(dval);
+	RenderCanvas::SetEnlargeScale(dval);
 	int ival = int(dval * 10 + 0.5);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())

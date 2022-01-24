@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -70,7 +70,7 @@ namespace flrd
 		~ScriptProc();
 
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetView(RenderCanvas* view) { m_view = view; }
 
 		//run 4d script
 		void Run4DScript(TimeMask tm, const wxString &scriptname, bool rewind);
@@ -79,7 +79,7 @@ namespace flrd
 
 	private:
 		VRenderFrame* m_frame;
-		VRenderGLView *m_view;
+		RenderCanvas *m_view;
 
 		wxString m_type;
 		TimeMask m_time_mask;

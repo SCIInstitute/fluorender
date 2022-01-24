@@ -171,7 +171,7 @@ void CountingDlg::LoadDefault()
 	}
 }
 
-void CountingDlg::GetSettings(VRenderGLView* view)
+void CountingDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view)
 		return;

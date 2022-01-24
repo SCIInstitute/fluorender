@@ -487,7 +487,7 @@ BrushToolDlg::~BrushToolDlg()
 		delete m_aligner;
 }
 
-void BrushToolDlg::GetSettings(VRenderGLView* view)
+void BrushToolDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view)
 		return;

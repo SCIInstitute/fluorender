@@ -135,7 +135,7 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(VRenderGLView* view)
+void NoiseCancellingDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view)
 		return;

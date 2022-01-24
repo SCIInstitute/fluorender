@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "ScriptProc.h"
 #include <Flobject/InfoVisitor.hpp>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <VRenderFrame.h>
 #include <VolumeData.hpp>
 #include <Global.hpp>

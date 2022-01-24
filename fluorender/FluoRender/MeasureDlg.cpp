@@ -183,7 +183,7 @@ void RulerListCtrl::AdjustSize()
 	SetColumnWidth(10, wxLIST_AUTOSIZE_USEHEADER);
 }
 
-void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
+void RulerListCtrl::UpdateRulers(RenderCanvas* vrv)
 {
 	m_name_text->Hide();
 	m_center_text->Hide();
@@ -1205,7 +1205,7 @@ MeasureDlg::~MeasureDlg()
 		delete m_aligner;
 }
 
-void MeasureDlg::GetSettings(VRenderGLView* vrv)
+void MeasureDlg::GetSettings(RenderCanvas* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -1302,7 +1302,7 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 	}
 }
 
-VRenderGLView* MeasureDlg::GetView()
+RenderCanvas* MeasureDlg::GetView()
 {
 	return m_view;
 }

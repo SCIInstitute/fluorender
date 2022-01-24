@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -67,7 +67,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	//current volume
 	fluo::VolumeData *m_vol1;
 	fluo::VolumeData *m_vol2;

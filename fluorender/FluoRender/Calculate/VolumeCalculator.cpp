@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <VRenderFrame.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <Selection/VolumeSelector.h>
 #include <wx/progdlg.h>
 

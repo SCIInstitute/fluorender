@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumePoint.h"
 #include <VolumeData.hpp>
 #include <FLIVR/Texture.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <FLIVR/Texture.h>
 #include <glm/gtc/type_ptr.hpp>
 

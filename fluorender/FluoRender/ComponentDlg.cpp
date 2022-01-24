@@ -1415,7 +1415,7 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void ComponentDlg::SetView(VRenderGLView* view)
+void ComponentDlg::SetView(RenderCanvas* view)
 {
 	m_view = view;
 	if (m_view)

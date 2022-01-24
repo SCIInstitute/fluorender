@@ -915,7 +915,7 @@ VRenderFrame::~VRenderFrame()
 	flvr::TextRenderer::text_texture_manager_.clear();
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (view) view->ClearAll();
 	}
 	m_aui_mgr.UnInit();
@@ -959,7 +959,7 @@ wxString VRenderFrame::CreateView(int row)
 
 	if (!vrv)
 		return "NO_NAME";
-	VRenderGLView* view = vrv->m_glview;
+	RenderCanvas* view = vrv->m_glview;
 	if (!view)
 		return "NO_NAME";
 
@@ -1008,7 +1008,7 @@ wxString VRenderFrame::CreateView(int row)
 	//add volumes
 	if (GetViewNum() > 0)
 	{
-		VRenderGLView* view0 = GetView(0);
+		RenderCanvas* view0 = GetView(0);
 		if (view0)
 		{
 			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
@@ -1053,7 +1053,7 @@ int VRenderFrame::GetViewNum()
 	return m_vrv_list.size();
 }
 
-VRenderGLView* VRenderFrame::GetView(int index)
+RenderCanvas* VRenderFrame::GetView(int index)
 {
 	if (index >= 0 && index < (int)m_vrv_list.size())
 	{
@@ -1064,7 +1064,7 @@ VRenderGLView* VRenderFrame::GetView(int index)
 	return 0;
 }
 
-VRenderGLView* VRenderFrame::GetView(const wxString& name)
+RenderCanvas* VRenderFrame::GetView(const wxString& name)
 {
 	for (size_t i=0; i < m_vrv_list.size(); ++i)
 	{
@@ -1368,7 +1368,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderGLView* view = GetView(0);
+		RenderCanvas* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
@@ -1401,7 +1401,7 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderGLView* view = GetView(0);
+		RenderCanvas* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
@@ -1418,13 +1418,13 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view)
+void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view)
 {
 	int j;
 
 	fluo::VolumeData* vd_sel = 0;
 	fluo::VolumeGroup* group_sel = 0;
-	VRenderGLView* v = 0;
+	RenderCanvas* v = 0;
 
 	if (view)
 		v = view;
@@ -1639,7 +1639,7 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 		m_movie_view->Run();
 }
 
-void VRenderFrame::LoadMeshes(wxArrayString files, VRenderGLView* view)
+void VRenderFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
 {
 	if (!view)
 		view = GetView(0);
@@ -1699,7 +1699,7 @@ void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		VRenderGLView* view = GetView(0);
+		RenderCanvas* view = GetView(0);
 		wxArrayString files;
 		fopendlg->GetPaths(files);
 
@@ -1803,7 +1803,7 @@ void VRenderFrame::UpdateTreeIcons()
 	int counter = 0;
 	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView *view = GetView(i);
+		RenderCanvas *view = GetView(i);
 		wxTreeItemId vrv_item;
 		if (i==0)
 			vrv_item = treectrl->GetFirstChild(root, ck_view);
@@ -1907,7 +1907,7 @@ void VRenderFrame::UpdateTreeColors()
 	int counter = 0;
 	for (i=0 ; i<GetViewNum() ; i++)
 	{
-		VRenderGLView *view = GetView(i);
+		RenderCanvas *view = GetView(i);
 
 		for (j=0; j< view->GetLayerNum(); j++)
 		{
@@ -1966,7 +1966,7 @@ void VRenderFrame::UpdateTree(wxString name)
 
 	for (int i = 0; i < GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (!view)
 			continue;
 		int j, k;
@@ -2188,7 +2188,7 @@ ListPanel *VRenderFrame::GetList()
 
 //on selections
 void VRenderFrame::OnSelection(int type,
-	VRenderGLView* view,
+	RenderCanvas* view,
 	fluo::VolumeGroup* group,
 	fluo::VolumeData* vd,
 	fluo::MeshData* md,
@@ -2291,7 +2291,7 @@ void VRenderFrame::OnSelection(int type,
 
 			for (size_t i=0; i< GetViewNum(); ++i)
 			{
-				VRenderGLView* v = GetView(i);
+				RenderCanvas* v = GetView(i);
 				if (!v)
 					continue;
 				v->m_cur_vol = vd;
@@ -2485,7 +2485,7 @@ void VRenderFrame::DeleteVRenderView(const wxString &name)
 {
 	for (int i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (view && name == view->m_vrv->GetName() && view->m_vrv->m_id > 1)
 		{
 			DeleteVRenderView(i);
@@ -3170,7 +3170,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("num", GetViewNum());
 	for (i=0; i<GetViewNum(); i++)
 	{
-		VRenderGLView* view = GetView(i);
+		RenderCanvas* view = GetView(i);
 		if (view)
 		{
 			str = wxString::Format("/views/%d", i);
@@ -4128,7 +4128,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			if (i>0)
 				CreateView();
-			VRenderGLView* view = GetLastView();
+			RenderCanvas* view = GetLastView();
 			if (!view)
 				continue;
 
@@ -4620,7 +4620,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		double dVal;
 
 		//set settings for frame
-		VRenderGLView* view = 0;
+		RenderCanvas* view = 0;
 		if (fconfig.Read("cur_page", &iVal))
 		{
 			m_movie_view->SetCurrentPage(iVal);

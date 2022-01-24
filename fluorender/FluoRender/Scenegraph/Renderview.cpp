@@ -1300,7 +1300,7 @@ void Renderview::ForceDraw()
 //		{
 //			for (int i = 0; i < m_frame->GetViewNum(); i++)
 //			{
-//				VRenderGLView* view = m_frame->GetView(i);
+//				RenderCanvas* view = m_frame->GetView(i);
 //				if (view && view != this)
 //				{
 //					view->m_set_gl = false;
@@ -1450,7 +1450,7 @@ void Renderview::ForceDraw()
 	//	{
 	//		for (int i = 0; i < m_frame->GetViewNum(); i++)
 	//		{
-	//			VRenderGLView* view = m_frame->GetView(i);
+	//			RenderCanvas* view = m_frame->GetView(i);
 	//			if (view && view != this)
 	//			{
 	//				view->SetRotations(m_rotx, m_roty, m_rotz, true);

@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -47,11 +47,11 @@ namespace flrd
 		ComponentEditor();
 		~ComponentEditor();
 
-		void SetView(VRenderGLView* view)
+		void SetView(RenderCanvas* view)
 		{
 			m_view = view;
 		}
-		VRenderGLView* GetView()
+		RenderCanvas* GetView()
 		{
 			return m_view;
 		}
@@ -74,7 +74,7 @@ namespace flrd
 
 	private:
 		fluo::VolumeData* m_vd;
-		VRenderGLView* m_view;
+		RenderCanvas* m_view;
 		std::string m_output;
 
 	private:

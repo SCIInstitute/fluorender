@@ -154,7 +154,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 				m_calc_a_text->SetValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view && view->GetVolumeData(str))
 					{
 						m_view = view;
@@ -171,7 +171,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent &event)
 				m_calc_a_text->SetValue(str);
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view && view->GetGroup(str))
 					{
 						m_view = view;

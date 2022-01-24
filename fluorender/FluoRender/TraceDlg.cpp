@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
 #include "VRenderFrame.h"
-#include "VRenderGLView.h"
+#include "RenderCanvas.h"
 #include <VolumeData.hpp>
 #include <lbl_reader.h>
 #include <msk_writer.h>
@@ -115,7 +115,7 @@ void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::UpdateTraces(VRenderGLView* vrv)
+void TraceListCtrl::UpdateTraces(RenderCanvas* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -895,7 +895,7 @@ TraceDlg::~TraceDlg()
 	//}
 }
 
-void TraceDlg::GetSettings(VRenderGLView* vrv)
+void TraceDlg::GetSettings(RenderCanvas* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -967,7 +967,7 @@ void TraceDlg::SetCellSize(int size)
 
 }
 
-VRenderGLView* TraceDlg::GetView()
+RenderCanvas* TraceDlg::GetView()
 {
 	return m_view;
 }

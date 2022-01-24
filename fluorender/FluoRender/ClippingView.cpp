@@ -491,7 +491,7 @@ void ClippingView::SetHoldPlanes(bool hold)
 			return;
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			view->m_draw_clip = true;
@@ -948,7 +948,7 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			view->m_clip_mask = -1;
@@ -1052,7 +1052,7 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			if (m_link_x)
@@ -1166,7 +1166,7 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			if (m_link_x)
@@ -1274,7 +1274,7 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			if (m_link_y)
@@ -1390,7 +1390,7 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			if (m_link_y)
@@ -1497,7 +1497,7 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			if (m_link_z)
@@ -1612,7 +1612,7 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 	{
 		for (int i = 0; i < m_frame->GetViewNum(); ++i)
 		{
-			VRenderGLView* view = m_frame->GetView(i);
+			RenderCanvas* view = m_frame->GetView(i);
 			if (!view)
 				continue;
 			if (m_link_z)
@@ -1676,7 +1676,7 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (!view)
 			continue;
 		if (view->m_capture)
@@ -1692,7 +1692,7 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 		{
 			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (!view)
 					continue;
 				view->m_draw_clip = true;
@@ -1708,7 +1708,7 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 		{
 			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (!view)
 					continue;
 				view->m_draw_clip = false;
@@ -1772,7 +1772,7 @@ void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (!view)
 			continue;
 
@@ -1796,7 +1796,7 @@ void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (!view)
 			continue;
 
@@ -1833,7 +1833,7 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (!view)
 			continue;
 
@@ -1864,7 +1864,7 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (!view)
 			continue;
 
@@ -1895,7 +1895,7 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 
 	for (int i = 0; i < m_frame->GetViewNum(); ++i)
 	{
-		VRenderGLView* view = m_frame->GetView(i);
+		RenderCanvas* view = m_frame->GetView(i);
 		if (!view)
 			continue;
 

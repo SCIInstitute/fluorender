@@ -191,7 +191,7 @@ OclDlg::~OclDlg()
 {
 }
 
-void OclDlg::GetSettings(VRenderGLView* view)
+void OclDlg::GetSettings(RenderCanvas* view)
 {
 	if (!view) return;
 	m_view = view;
@@ -199,7 +199,7 @@ void OclDlg::GetSettings(VRenderGLView* view)
 	AddKernelsToList();
 }
 
-VRenderGLView* OclDlg::GetView()
+RenderCanvas* OclDlg::GetView()
 {
 	return m_view;
 }

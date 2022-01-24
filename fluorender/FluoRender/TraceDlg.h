@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 
 class TraceListCtrl : public wxListCtrl
 {
@@ -61,14 +61,14 @@ public:
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void UpdateTraces(VRenderGLView* vrv=0);
+	void UpdateTraces(RenderCanvas* vrv=0);
 	void DeleteSelection();
 	wxString GetText(long item, int col);
 
 	friend class TraceDlg;
 
 private:
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	int m_type;//0-current; 1-previous
 
 private:
@@ -167,8 +167,8 @@ public:
 	TraceDlg(VRenderFrame* frame);
 	~TraceDlg();
 
-	void GetSettings(VRenderGLView* vrv);
-	VRenderGLView* GetView();
+	void GetSettings(RenderCanvas* vrv);
+	RenderCanvas* GetView();
 	void UpdateList();
 	void SetCellSize(int size);
 
@@ -211,7 +211,7 @@ private:
 
 	VRenderFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	//tab control
 	wxNotebook *m_notebook;
 

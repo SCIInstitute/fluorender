@@ -220,7 +220,7 @@ VRenderView::VRenderView(VRenderFrame* frame,
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
-	m_glview = new VRenderGLView(frame, this, attriblist, sharedContext);
+	m_glview = new RenderCanvas(frame, this, attriblist, sharedContext);
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
@@ -1120,7 +1120,7 @@ void VRenderView::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		VRenderGLView::SetEnlarge(enlarge);
+		RenderCanvas::SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1168,7 +1168,7 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	VRenderGLView::SetEnlargeScale(dval);
+	RenderCanvas::SetEnlargeScale(dval);
 	int ival = int(dval * 10 + 0.5);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
@@ -1276,8 +1276,8 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 void VRenderView::OnCapture(wxCommandEvent& event)
 {
 	//reset enlargement
-	VRenderGLView::SetEnlarge(false);
-	VRenderGLView::SetEnlargeScale(1.0);
+	RenderCanvas::SetEnlarge(false);
+	RenderCanvas::SetEnlargeScale(1.0);
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 

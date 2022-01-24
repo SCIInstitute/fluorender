@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -131,7 +131,7 @@ public:
 	BrushToolDlg(VRenderFrame* frame);
 	~BrushToolDlg();
 
-	void GetSettings(VRenderGLView* view);
+	void GetSettings(RenderCanvas* view);
 
 	//set the brush icon down
 	void SelectBrush(int id);
@@ -150,7 +150,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	flrd::VolumeSelector *m_selector;
 
 	//max volume value

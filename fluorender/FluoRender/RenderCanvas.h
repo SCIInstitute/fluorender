@@ -128,17 +128,17 @@ namespace flrd
 {
 	class Tracks;
 }
-class VRenderGLView : public wxGLCanvas
+class RenderCanvas : public wxGLCanvas
 {
 public:
-	VRenderGLView(VRenderFrame* frame,
+	RenderCanvas(VRenderFrame* frame,
 		VRenderView* parent,
 		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0);
-	~VRenderGLView();
+	~RenderCanvas();
 
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
@@ -720,7 +720,7 @@ public:
 	bool m_ruler_time_dep;
 	//linked rotation
 	static bool m_linked_rot;
-	static VRenderGLView* m_master_linked_view;
+	static RenderCanvas* m_master_linked_view;
 	//count after paint
 	bool m_paint_count;
 	//colocalize after paint
@@ -1154,7 +1154,7 @@ private:
 	friend class VRenderView;
 };
 
-inline wxSize VRenderGLView::GetGLSize()
+inline wxSize RenderCanvas::GetGLSize()
 {
 	double dval = 1;
 #ifdef _DARWIN

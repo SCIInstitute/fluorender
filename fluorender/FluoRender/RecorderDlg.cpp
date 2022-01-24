@@ -232,7 +232,7 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 
 	int index = interpolator->GetKeyIndex(int(id));
 	double time = interpolator->GetKeyTime(index);
-	VRenderGLView* view = m_recdlg->GetView();
+	RenderCanvas* view = m_recdlg->GetView();
 	if (view)
 	{
 		view->SetParams(time);
@@ -616,7 +616,7 @@ RecorderDlg::~RecorderDlg()
 {
 }
 
-void RecorderDlg::GetSettings(VRenderGLView* view)
+void RecorderDlg::GetSettings(RenderCanvas* view)
 {
 	m_view = view;
 }

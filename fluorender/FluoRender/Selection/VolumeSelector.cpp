@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumeSelector.h"
-#include "VRenderGLView.h"
+#include "RenderCanvas.h"
 #include "VRenderFrame.h"
 #include "utility.h"
 #include <VolumeData.hpp>

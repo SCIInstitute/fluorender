@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
 #include <Calculate/Count.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>

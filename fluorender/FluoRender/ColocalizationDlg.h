@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -69,7 +69,7 @@ public:
 	ColocalizationDlg(VRenderFrame* frame);
 	~ColocalizationDlg();
 
-	void SetView(VRenderGLView* view)
+	void SetView(RenderCanvas* view)
 	{
 		m_view = view;
 	}
@@ -101,7 +101,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	fluo::VolumeGroup *m_group;
 
 	wxString m_output_file;

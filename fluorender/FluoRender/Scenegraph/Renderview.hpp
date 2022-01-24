@@ -152,7 +152,7 @@ namespace fluo
 		virtual Renderview* asRenderview() { return this; }
 		virtual const Renderview* asRenderview() const { return this; }
 
-		//migrated from the VRenderGLView class
+		//migrated from the RenderCanvas class
 		//initialization
 		void Init();
 

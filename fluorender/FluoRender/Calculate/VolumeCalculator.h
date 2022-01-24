@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -47,7 +47,7 @@ namespace flrd
 		~VolumeCalculator();
 
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetView(RenderCanvas* view) { m_view = view; }
 		void SetVolumeSelector(VolumeSelector* selector) { m_selector = selector; }
 
 		void SetVolumeA(fluo::VolumeData *vd);
@@ -67,7 +67,7 @@ namespace flrd
 
 	private:
 		VRenderFrame* m_frame;
-		VRenderGLView* m_view;
+		RenderCanvas* m_view;
 		VolumeSelector* m_selector;
 		std::vector<fluo::VolumeData*> m_vd_r;//result volume data (stack)
 

@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -132,8 +132,8 @@ public:
 	fluo::VolumeGroup* GetGroup();
 
 	//sync view in depth mode
-	void SetView(VRenderGLView* view);
-	VRenderGLView* GetView();
+	void SetView(RenderCanvas* view);
+	RenderCanvas* GetView();
 
 private:
 	VRenderFrame* m_frame;
@@ -142,7 +142,7 @@ private:
 	bool m_lumi_change;
 	bool m_sync_group;
 	fluo::VolumeGroup* m_group;
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 	double m_max_val;
 
 	//1st line

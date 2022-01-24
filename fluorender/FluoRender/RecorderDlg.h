@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 class RecorderDlg;
 class KeyListCtrl : public wxListCtrl
 {
@@ -128,8 +128,8 @@ public:
 		wxWindow* parent);
 	~RecorderDlg();
 
-	void GetSettings(VRenderGLView* view);
-	VRenderGLView* GetView()
+	void GetSettings(RenderCanvas* view);
+	RenderCanvas* GetView()
 	{
 		return m_view;
 	}
@@ -150,7 +150,7 @@ private:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 
 	//automatic keys
 	wxComboBox *m_auto_key_cmb;

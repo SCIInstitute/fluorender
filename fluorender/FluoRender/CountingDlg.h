@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 class CountingDlg : public wxPanel
 {
 public:
@@ -50,12 +50,12 @@ public:
 	CountingDlg(VRenderFrame* frame);
 	~CountingDlg();
 
-	void GetSettings(VRenderGLView* view);
+	void GetSettings(RenderCanvas* view);
 
 private:
 	VRenderFrame* m_frame;
 	//current view
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 
 	//max volume value
 	double m_max_value;

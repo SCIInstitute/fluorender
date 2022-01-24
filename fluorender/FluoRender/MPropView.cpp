@@ -246,7 +246,7 @@ void MPropView::GetSettings()
 	m_size_text->SetValue(wxString::Format("%d", lval));
 }
 
-void MPropView::SetView(VRenderGLView* view)
+void MPropView::SetView(RenderCanvas* view)
 {
 	m_view = view;
 }

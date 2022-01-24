@@ -240,7 +240,7 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 			wxMenu *add_to_menu = new wxMenu;
 			for (int i = 0; i < m_frame->GetViewNum(); ++i)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				add_to_menu->Append(Menu_View_start + i,
 					view->m_vrv->GetName());
 			}
@@ -315,7 +315,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 	if (m_frame)
 	{
-		VRenderGLView* view = m_frame->GetView(menu_index);
+		RenderCanvas* view = m_frame->GetView(menu_index);
 		if (GetItemText(item) == "Volume")
 		{
 			name = GetText(item, 1);
@@ -328,7 +328,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 
 					for (int i = 0; i < m_frame->GetViewNum(); ++i)
 					{
-						VRenderGLView* v = m_frame->GetView(i);
+						RenderCanvas* v = m_frame->GetView(i);
 						if (v && v->GetVolumeData(name.ToStdString()))
 						{
 							vd_add = glbin_volf->build(vd);
@@ -912,7 +912,7 @@ void DataListCtrl::DeleteSelection()
 				//from view
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view)
 					{
 						view->RemoveVolumeDataDup(name.ToStdString());
@@ -928,7 +928,7 @@ void DataListCtrl::DeleteSelection()
 				//from view
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view)
 					{
 						view->RemoveMeshData(name.ToStdString());
@@ -944,7 +944,7 @@ void DataListCtrl::DeleteSelection()
 				//from view
 				for (int i = 0; i < m_frame->GetViewNum(); i++)
 				{
-					VRenderGLView* view = m_frame->GetView(i);
+					RenderCanvas* view = m_frame->GetView(i);
 					if (view)
 						view->RemoveAnnotations(name.ToStdString());
 				}
@@ -972,7 +972,7 @@ void DataListCtrl::DeleteAll()
 			//from view
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveVolumeDataDup(name.ToStdString());
 			}
@@ -986,7 +986,7 @@ void DataListCtrl::DeleteAll()
 			//from view
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveMeshData(name.ToStdString());
 			}
@@ -1000,7 +1000,7 @@ void DataListCtrl::DeleteAll()
 			//from view
 			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
-				VRenderGLView* view = m_frame->GetView(i);
+				RenderCanvas* view = m_frame->GetView(i);
 				if (view)
 					view->RemoveAnnotations(name.ToStdString());
 			}

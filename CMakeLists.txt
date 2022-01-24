@@ -344,6 +344,13 @@ file(GLOB fmt_rsc fluorender/FluoRender/Formats/*.class)
 add_library(FORMATS_OBJ OBJECT
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
 
+# Fui
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Fui)
+file(GLOB fui_src fluorender/FluoRender/Fui/*.cpp)
+file(GLOB fui_hdr fluorender/FluoRender/Fui/*.hpp)
+add_library(FUI_OBJ OBJECT
+	${fui_src} ${fui_hdr})
+
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Global)
 file(GLOB glb_src fluorender/FluoRender/Global/*.cpp)
@@ -521,6 +528,7 @@ if(APPLE)
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
@@ -560,6 +568,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
     $<TARGET_OBJECTS:FORMATS_OBJ>
+    $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
@@ -626,6 +635,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
@@ -653,6 +663,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
       $<TARGET_OBJECTS:FORMATS_OBJ>
+      $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 class OclDlg : public wxPanel
 {
 public:
@@ -56,12 +56,12 @@ public:
 	OclDlg(VRenderFrame* frame);
 	~OclDlg();
 
-	void GetSettings(VRenderGLView* view);
-	VRenderGLView* GetView();
+	void GetSettings(RenderCanvas* view);
+	RenderCanvas* GetView();
 
 private:
 	VRenderFrame* m_frame;
-	VRenderGLView* m_view;
+	RenderCanvas* m_view;
 
 	//ui
 	wxTextCtrl* m_kernel_file_txt;

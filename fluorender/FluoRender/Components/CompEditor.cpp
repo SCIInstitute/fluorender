@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Tracking/VolCache.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
-#include <VRenderGLView.h>
+#include <RenderCanvas.h>
 
 using namespace flrd;
 

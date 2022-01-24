@@ -54,7 +54,7 @@ DEALINGS IN THE SOFTWARE.
 	int(v*100.0+0.5)
 
 class VRenderFrame;
-class VRenderGLView;
+class RenderCanvas;
 namespace fluo
 {
 	class VolumeData;
@@ -117,8 +117,8 @@ public:
 		return m_type;
 	}
 	//set view
-	void SetRenderView(VRenderGLView *view);
-	VRenderGLView* GetRenderView();
+	void SetRenderView(RenderCanvas *view);
+	RenderCanvas* GetRenderView();
 	//set volume data
 	void SetVolumeData(fluo::VolumeData* vd);
 	fluo::VolumeData* GetVolumeData();
@@ -158,7 +158,7 @@ public:
 private:
 	VRenderFrame* m_frame;
 	int m_type;
-	VRenderGLView *m_view;
+	RenderCanvas *m_view;
 	fluo::VolumeData* m_vd;
 	fluo::VolumeGroup* m_group;
 	bool m_link_group;

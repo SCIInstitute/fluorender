@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERVIEW_H_
 #define _VRENDERVIEW_H_
 
-#include "VRenderGLView.h"
+#include "RenderCanvas.h"
 
 class VRenderFrame;
 class VRenderView: public wxPanel
@@ -127,7 +127,7 @@ public:
 	int m_id;
 
 	//render view///////////////////////////////////////////////
-	VRenderGLView *m_glview;
+	RenderCanvas *m_glview;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;
 

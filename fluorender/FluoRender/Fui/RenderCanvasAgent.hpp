@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,67 +25,42 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _RENDERCANVASAGENT_H_
+#define _RENDERCANVASAGENT_H_
 
-#ifndef _RulerRenderer_H_
-#define _RulerRenderer_H_
-
-#include <Distance/Ruler.h>
-#include <Types/Color.h>
-#include <Types/Point.h>
-#include <Types/Transform.h>
-#include <vector>
+#include <InterfaceAgent.hpp>
+#include <Renderview.hpp>
 
 class RenderCanvas;
-
-namespace flrd
+namespace fluo
 {
-	class RulerRenderer
+	class RenderCanvasAgent : public InterfaceAgent
 	{
 	public:
-		RulerRenderer();
-		~RulerRenderer();
+		RenderCanvasAgent(RenderCanvas &canvas);
 
-		void SetView(RenderCanvas* view)
+		virtual bool isSameKindAs(const Object* obj) const
 		{
-			m_view = view;
+			return dynamic_cast<const RenderCanvasAgent*>(obj) != NULL;
 		}
 
-		void SetRulerList(flrd::RulerList* ruler_list)
-		{
-			m_ruler_list = ruler_list;
-		}
+		virtual const char* className() const { return "RenderCanvasAgent"; }
 
-		flrd::RulerList* GetRulerList()
-		{
-			return m_ruler_list;
-		}
+		virtual void setObject(Renderview* view);
+		virtual Renderview* getObject();
 
-		void SetLineSize(double val)
-		{
-			m_line_size = val;
-		}
+		virtual void UpdateAllSettings();
 
-		void SetDrawText(bool val)
-		{
-			m_draw_text = val;
-		}
+		RenderCanvas &getCanvas();
 
-		void Draw();
+		friend class AgentFactory;
 
-	private:
-		RenderCanvas *m_view;
-		RulerList *m_ruler_list;
-		double m_line_size;
-		bool m_draw_text;
+	protected:
+		RenderCanvas &canvas_;
 
-	private:
-		unsigned int DrawVerts(std::vector<float> &verts);
-		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c);
-		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
-			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
-			std::vector<float> &verts, unsigned int& num);
-		void DrawText(int, int, int);
+		virtual void handleValueChanged(Event& event);
+		void OnBoundsChanged(Event& event);
+		void OnSceneChanged(Event& event);
 	};
-
 }
-#endif//_RulerRenderer_H_
+#endif//_RENDERCANVASAGENT_H_

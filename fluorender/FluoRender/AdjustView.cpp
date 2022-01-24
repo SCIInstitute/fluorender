@@ -543,7 +543,7 @@ void AdjustView::EnableAll()
 }
 
 //set view
-void AdjustView::SetRenderView(VRenderGLView *view)
+void AdjustView::SetRenderView(RenderCanvas *view)
 {
 	if (view)
 	{
@@ -558,7 +558,7 @@ void AdjustView::SetRenderView(VRenderGLView *view)
 	}
 }
 
-VRenderGLView* AdjustView::GetRenderView()
+RenderCanvas* AdjustView::GetRenderView()
 {
 	return m_view;
 }

@@ -195,8 +195,8 @@ public:
 	
 	//views
 	int GetViewNum();
-	VRenderGLView* GetView(int index);
-	VRenderGLView* GetView(const wxString& name);
+	RenderCanvas* GetView(int index);
+	RenderCanvas* GetView(const wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(const wxString &name);
@@ -210,7 +210,7 @@ public:
 
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		VRenderGLView* view=0,
+		RenderCanvas* view=0,
 		fluo::VolumeGroup* group=0,
 		fluo::VolumeData* vd=0,
 		fluo::MeshData* md=0,
@@ -279,8 +279,8 @@ public:
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
-	void LoadVolumes(wxArrayString files, bool withImageJ, VRenderGLView* view = 0);
-	void LoadMeshes(wxArrayString files, VRenderGLView* view = 0);
+	void LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view = 0);
+	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
 
 	//crop
 	static void SetCrop(bool value)
@@ -476,7 +476,7 @@ private:
 private:
 	//views
 	wxString CreateView(int row=1);
-	VRenderGLView* GetLastView() {return m_vrv_list[m_vrv_list.size()-1]->m_glview;}
+	RenderCanvas* GetLastView() {return m_vrv_list[m_vrv_list.size()-1]->m_glview;}
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
 	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
