@@ -373,6 +373,8 @@ namespace fluo
 		void DrawOLShading(VolumeData* vd);
 		void DrawOLShadows(VolumeList &vlist);
 		void DrawOLShadowsMesh(double darkenss);
+		//draw quad
+		void DrawViewQuad();
 
 		//get mesh shadow
 		bool GetMeshShadow(double &val);
@@ -400,17 +402,14 @@ namespace fluo
 		void ResetEnlarge();
 
 		//brush states update
-		void SetBrush(int mode);
-		void UpdateBrushState();
+		void SetBrush(long mode);
+		//void UpdateBrushState();
 
 		//selection
 		void Pick();
 		void PickMesh();
 		void PickVolume();
-		void SetCompSelection(Point& p, int mode);//node: 0-exclusive; 1-add or remove
-
-		//draw quad
-		void DrawViewQuad();
+		//void SetCompSelection(Point& p, long mode);//node: 0-exclusive; 1-add or remove
 
 		void switchLevel(VolumeData *vd);
 

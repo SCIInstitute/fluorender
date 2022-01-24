@@ -102,6 +102,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstParamFrame, long(0));
 		view->addValue(gstTotalFrames, long(0));
 		view->addValue(gstCaptureFile, std::wstring(L""));
+		view->addValue(gstCaptureAlpha, bool(false));
+		view->addValue(gstCaptureFloat, bool(false));
+		view->addValue(gstCaptureCompress, bool(false));
 		view->addValue(gstBatFolder, std::wstring(L""));
 		view->addValue(gstRetainFb, bool(false));
 		view->addValue(gstUpdateOrder, long(0));
@@ -302,6 +305,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstVrEyeIdx, long(0));
 		view->addValue(gstSwapBuffers, bool(false));
 		view->addValue(gstLineWidth, double(3));
+		view->addValue(gstLevelOffset, long(0));
 	}
 }
 

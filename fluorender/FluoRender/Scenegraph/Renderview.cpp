@@ -64,6 +64,11 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
+#ifdef _WIN32
+HCTX Renderview::m_hTab = 0;
+LOGCONTEXTA Renderview::m_lc;
+#endif
+
 Renderview::Renderview()
 {
 }
@@ -6426,6 +6431,14 @@ void Renderview::DrawOLShadowsMesh(double darkness)
 	glEnable(GL_DEPTH_TEST);
 }
 
+void Renderview::DrawViewQuad()
+{
+	flvr::VertexArray* quad_va =
+		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Norm_Square);
+	if (quad_va)
+		quad_va->draw();
+}
+
 bool Renderview::GetMeshShadow(double &val)
 {
 	for (int i = 0; i < getNumChildren(); i++)
@@ -6893,6 +6906,549 @@ void Renderview::A2Q()
 	if (lval)
 		UpdateClips();
 }
+
+//sort bricks after view changes
+void Renderview::SetSortBricks()
+{
+	PopVolumeList();
+
+	for (auto vd : m_vol_list)
+	{
+		if (vd && vd->GetTexture())
+			vd->GetTexture()->set_sort_bricks();
+	}
+}
+
+//pre-draw processings
+void Renderview::PreDraw()
+{
+	//skip if not done with loop
+	if (flvr::TextureRenderer::get_mem_swap())
+	{
+		bool bval;
+		getValue(gstPreDraw, bval);
+		if (bval)
+			setValue(gstPreDraw, false);
+		else
+			return;
+	}
+}
+
+void Renderview::PostDraw()
+{
+	//skip if not done with loop
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+		return;
+
+	//output animations
+	bool bval;
+	std::wstring cap_file;
+	getValue(gstCapture, bval);
+	getValue(gstCaptureFile, cap_file);
+	if (!bval || cap_file.empty()) return;
+
+	//capture
+	int chann;
+	bool fp32, compress;
+	getValue(gstCaptureAlpha, bval);
+	chann = bval ? 4 : 3;
+	getValue(gstCaptureFloat, fp32);
+	getValue(gstCaptureCompress, compress);
+	long x, y, w, h;
+	void* image = 0;
+	ReadPixels(chann, fp32, x, y, w, h, &image);
+
+	TIFF *out = TIFFOpenW(cap_file, "wb");
+	if (!out)
+		return;
+	TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
+	TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
+	TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
+	if (fp32)
+	{
+		TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 32);
+		TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+	}
+	else
+	{
+		TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+		//TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+	}
+	TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+	TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+	if (compress)
+		TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+
+	tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
+	void *buf = NULL;
+	buf = _TIFFmalloc(linebytes);
+	TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
+	for (uint32 row = 0; row < (uint32)h; row++)
+	{
+		if (fp32)
+		{
+			float* line = ((float*)image) + (h - row - 1) * chann * w;
+			memcpy(buf, line, linebytes);
+		}
+		else
+		{// check the index here, and figure out why not using h*linebytes
+			unsigned char* line = ((unsigned char*)image) + (h - row - 1) * chann * w;
+			memcpy(buf, line, linebytes);
+		}
+		if (TIFFWriteScanline(out, buf, row, 0) < 0)
+			break;
+	}
+	TIFFClose(out);
+	if (buf)
+		_TIFFfree(buf);
+	if (image)
+		delete[]image;
+
+	setValue(gstCapture, false);
+}
+
+void Renderview::ResetEnlarge()
+{
+	//skip if not done with loop
+	if (flvr::TextureRenderer::get_mem_swap() &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+		return;
+	bool bval;
+	getValue(gstKeepEnlarge, bval);
+	if (bval)
+		return;
+	setValue(gstEnlarge, false);
+	double text_size;
+	getValue(gstTextSize, text_size);
+	flvr::TextRenderer::text_texture_manager_.SetSize(text_size);
+	RefreshGL(19);
+}
+
+void Renderview::SetBrush(long mode)
+{
+	//m_prev_focus = FindFocus();
+	//SetFocus();
+
+	int ruler_type = m_ruler_handler->GetType();
+	long int_mode;
+	getValue(gstInterMode, int_mode);
+
+	if (int_mode == 5 ||
+		int_mode == 7)
+	{
+		setValue(gstInterMode, 7);
+		if (ruler_type == 3)
+			m_selector->SetMode(8);
+		else
+			m_selector->SetMode(1);
+	}
+	else if (int_mode == 8)
+	{
+		if (ruler_type == 3)
+			m_selector->SetMode(8);
+		else
+			m_selector->SetMode(1);
+	}
+	else if (int_mode == 10)
+	{
+		m_selector->SetMode(9);
+	}
+	else
+	{
+		setValue(gstInterMode, 2);
+		m_selector->SetMode(mode);
+	}
+	setValue(gstPaintDisplay, true);
+	setValue(gstDrawBrush, true);
+	m_selector->ChangeBrushSetsIndex();
+}
+
+//selection
+void Renderview::Pick()
+{
+	bool bval;
+	getValue(gstDrawAll, bval);
+	if (bval)
+	{
+		PickVolume();
+		PickMesh();
+	}
+}
+
+void Renderview::PickMesh()
+{
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	if (nx <= 0 || ny <= 0)
+		return;
+	long lx, ly;
+	getValue(gstMouseClientX, lx);
+	getValue(gstMouseClientY, ly);
+	if (lx<0 || lx >= nx ||
+		ly <= 0 || ly>ny)
+		return;
+
+	//projection
+	HandleProjection(nx, ny);
+	//Transformation
+	HandleCamera();
+	//obj
+	glm::mat4 mv_temp = m_mv_mat;
+	m_mv_mat = GetDrawMat();
+
+	//set up fbo
+	setValue(gstCurFramebuffer, (unsigned long)(0));
+	//bind
+	flvr::Framebuffer* pick_buffer =
+		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+			flvr::FB_Pick_Int32_Float, nx, ny);
+	if (pick_buffer)
+		pick_buffer->bind();
+
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearDepth(1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glScissor(lx, ny - ly, 1, 1);
+	glEnable(GL_SCISSOR_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	unsigned int i = 0;
+	for (auto md : m_msh_list)
+	{
+		if (!md) continue;
+		md->SetMatrices(m_mv_mat, m_proj_mat);
+		md->DrawInt(i + 1);
+		i++;
+	}
+	glDisable(GL_SCISSOR_TEST);
+
+	unsigned int choose = 0;
+	if (pick_buffer)
+		choose = pick_buffer->read_value(lx, ny - ly);
+	unsigned long ulval;
+	getValue(gstCurFramebuffer, ulval);
+	glBindFramebuffer(GL_FRAMEBUFFER, ulval);
+
+	if (choose > 0 && choose <= m_msh_list.size())
+	{
+		MeshData* md = m_msh_list[choose - 1].get();
+		if (md)
+		{
+			//if (m_frame && m_frame->GetTree())
+			//{
+			//	m_frame->GetTree()->SetFocus();
+			//	m_frame->GetTree()->Select(m_vrv->GetName(), md->getName());
+			//}
+			RefreshGL(27);
+		}
+	}
+	else
+	{
+		//if (m_frame && m_frame->GetCurSelType() == 3 &&
+		//	m_frame->GetTree())
+		//	m_frame->GetTree()->Select(m_vrv->GetName(), "");
+	}
+	m_mv_mat = mv_temp;
+}
+
+void Renderview::PickVolume()
+{
+	int kmode = 0;// wxGetKeyState(WXK_CONTROL) ? 1 : 0;
+	double dist = 0.0;
+	double min_dist = -1.0;
+	Point p, ip, pp;
+	VolumeData* picked_vd = 0;
+	long lx, ly;
+	getValue(gstMouseX, lx);
+	getValue(gstMouseY, ly);
+	bool persp;
+	getValue(gstPerspective, persp);
+	for (auto vd : m_vol_list)
+	{
+		if (!vd) continue;
+		long mode = 2;
+		long mip_mode;
+		vd->getValue(gstMipMode, mip_mode);
+		if (mip_mode == 1) mode = 1;
+		m_vp->SetVolumeData(vd.get());
+
+		dist = m_vp->GetPointVolume(lx, ly,
+			mode, true, 0.5, p, ip);
+		if (dist > 0.0)
+		{
+			if (min_dist < 0.0)
+			{
+				min_dist = dist;
+				picked_vd = vd.get();
+				pp = p;
+			}
+			else
+			{
+				if (persp)
+				{
+					if (dist < min_dist)
+					{
+						min_dist = dist;
+						picked_vd = vd.get();
+						pp = p;
+					}
+				}
+				else
+				{
+					if (dist > min_dist)
+					{
+						min_dist = dist;
+						picked_vd = vd.get();
+						pp = p;
+					}
+				}
+			}
+		}
+	}
+
+	if (picked_vd)
+	{
+		//if (m_frame && m_frame->GetTree())
+		//{
+		//	m_frame->GetTree()->SetFocus();
+		//	m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->getName());
+		//}
+		//update label selection
+		//SetCompSelection(ip, kmode);
+
+		bool bval;
+		getValue(gstCamLockPick, bval);
+		if (bval)
+			setValue(gstCamLockCtr, pp);
+	}
+}
+
+void Renderview::switchLevel(VolumeData *vd)
+{
+	if (!vd) return;
+
+	long nx, ny;
+	GetRenderSize(nx, ny);
+	bool bval;
+	getValue(gstEnlarge, bval);
+	if (bval)
+	{
+		double dval;
+		getValue(gstEnlargeScale, dval);
+		nx = long(nx * dval);
+		ny = long(ny * dval);
+	}
+
+	flvr::Texture *vtex = vd->GetTexture();
+	if (vtex && vtex->isBrxml())
+	{
+		long prev_lv;
+		vd->getValue(gstLevelNum, prev_lv);
+		int new_lv = 0;
+
+		long lval;
+		getValue(gstResMode, lval);
+		if (lval > 0)
+		{
+			double res_scale = 1.0;
+			switch (lval)
+			{
+			case 1:
+				res_scale = 1;
+				break;
+			case 2:
+				res_scale = 1.5;
+				break;
+			case 3:
+				res_scale = 2.0;
+				break;
+			case 4:
+				res_scale = 3.0;
+				break;
+			default:
+				res_scale = 1.0;
+			}
+			std::vector<double> sfs;
+			std::vector<double> spx, spy, spz;
+			int lvnum = vtex->GetLevelNum();
+			double dval;
+			getValue(gstRadius, dval);
+			for (int i = 0; i < lvnum; i++)
+			{
+				double aspect = (double)nx / (double)ny;
+
+				double spc_x;
+				double spc_y;
+				double spc_z;
+				vtex->get_spacings(spc_x, spc_y, spc_z, i);
+				spc_x = spc_x < Epsilon() ? 1.0 : spc_x;
+				spc_y = spc_y < Epsilon() ? 1.0 : spc_y;
+
+				spx.push_back(spc_x);
+				spy.push_back(spc_y);
+				spz.push_back(spc_z);
+
+				double sf = 2.0*dval*res_scale / spc_y / double(ny);
+				sfs.push_back(sf);
+			}
+
+			int lv = lvnum - 1;
+			getValue(gstScaleFactor, dval);
+			//if (!m_manip)
+			{
+				for (int i = lvnum - 1; i >= 0; i--)
+				{
+					if (dval / 5 > (/*m_interactive ? sfs[i] * 16.0 :*/ sfs[i])) lv = i - 1;
+				}
+			}
+			//apply offset
+			getValue(gstLevelOffset, lval);
+			lv += lval;
+			if (lv < 0) lv = 0;
+			//if (m_interactive) lv += 1;
+			if (lv >= lvnum) lv = lvnum - 1;
+			new_lv = lv;
+		}
+		if (prev_lv != new_lv)
+		{
+			vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
+			if (bricks)
+			{
+				for (int i = 0; i < bricks->size(); i++)
+					(*bricks)[i]->set_disp(false);
+			}
+			vd->setValue(gstLevel, long(new_lv));
+			vtex->set_sort_bricks();
+		}
+	}
+}
+
+#ifdef _WIN32
+//tablet init
+HCTX Renderview::TabletInit(HWND hWnd, HINSTANCE hInst)
+{
+	HCTX hctx = NULL;
+	UINT wDevice = 0;
+	UINT wExtX = 0;
+	UINT wExtY = 0;
+	UINT wWTInfoRetVal = 0;
+	AXIS TabletX = { 0 };
+	AXIS TabletY = { 0 };
+	AXIS TabletNPress = { 0 };
+	AXIS TabletTPress = { 0 };
+
+	// Set option to move system cursor before getting default system context.
+	m_lc.lcOptions |= CXO_SYSTEM;
+
+	// Open default system context so that we can get tablet data
+	// in screen coordinates (not tablet coordinates).
+	wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &m_lc);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXTA));
+
+	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
+
+	// modify the digitizing region
+	sprintf(m_lc.lcName,
+		"FluoRender Digitizing %llx",
+		reinterpret_cast<unsigned long long>(hInst));
+
+	// We process WT_PACKET (CXO_MESSAGES) messages.
+	m_lc.lcOptions |= CXO_MESSAGES;
+
+	// What data items we want to be included in the tablet packets
+	m_lc.lcPktData = PACKETDATA;
+
+	// Which packet items should show change in value since the last
+	// packet (referred to as 'relative' data) and which items
+	// should be 'absolute'.
+	m_lc.lcPktMode = PACKETMODE;
+
+	// This bitfield determines whether or not this context will receive
+	// a packet when a value for each packet field changes.  This is not
+	// supported by the Intuos Wintab.  Your context will always receive
+	// packets, even if there has been no change in the data.
+	m_lc.lcMoveMask = PACKETDATA;
+
+	// Which buttons events will be handled by this context.  lcBtnMask
+	// is a bitfield with one bit per button.
+	m_lc.lcBtnUpMask = m_lc.lcBtnDnMask;
+
+	// Set the entire tablet as active
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
+	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
+	if (wWTInfoRetVal == sizeof(AXIS))
+		m_selector->SetBrushPnMax(TabletNPress.axMax);
+	else
+		m_selector->SetBrushPnMax(1.0);
+
+	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
+	if (wWTInfoRetVal == sizeof(AXIS))
+		m_selector->SetBrushPtMax(TabletTPress.axMax);
+	else
+		m_selector->SetBrushPnMax(1.0);
+
+	//m_lc.lcInOrgX = 0;
+	//m_lc.lcInOrgY = 0;
+	//m_lc.lcInExtX = TabletX.axMax;
+	//m_lc.lcInExtY = TabletY.axMax;
+
+	//// Guarantee the output coordinate space to be in screen coordinates.
+	//m_lc.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	//m_lc.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	//m_lc.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
+
+	//														// In Wintab, the tablet origin is lower left.  Move origin to upper left
+	//														// so that it coincides with screen origin.
+	//m_lc.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);	//SM_CYSCREEN );
+
+	//														// Leave the system origin and extents as received:
+	//														// lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
+
+	//														// open the region
+	//														// The Wintab spec says we must open the context disabled if we are
+	//														// using cursor masks.
+	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
+
+	WacomTrace("HCTX: %i\n", hctx);
+
+	return hctx;
+}
+
+void Renderview::InitOpenVR()
+{
+	//openvr initilization
+	vr::EVRInitError vr_error;
+	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+	if (vr_error == vr::VRInitError_None &&
+		vr::VRCompositor())
+	{
+		setValue(gstOpenvrEnable, true);
+		//get render size
+		uint32_t uix, uiy;
+		m_vr_system->GetRecommendedRenderTargetSize(&uix, &uiy);
+		setValue(gstVrSizeX, (unsigned long)(uix));
+		setValue(gstVrSizeY, (unsigned long)(uiy));
+		//get eye offset
+		//vr::HmdMatrix34_t eye_mat;
+		//eye_mat = m_vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+		//double eye_x = eye_mat.m[0][3];
+		//double eye_y = eye_mat.m[1][3];
+		//double eye_z = eye_mat.m[2][3];
+		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
+	}//otherwise use default settings
+}
+#endif
+
 
 
 //event functions/////////////////////////////////////////////////////////////////////////////////

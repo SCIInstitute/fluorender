@@ -216,6 +216,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMultires "multires"
 #define gstLevel "level"
 #define gstLevelNum "level num"
+#define gstLevelOffset "level offset"//offset to detail level
 //tex transform
 #define gstTexTransform "tex transform"
 //selection
@@ -283,6 +284,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstParamFrame "param frame"
 #define gstTotalFrames "total frames"
 #define gstCaptureFile "capture file"
+#define gstCaptureAlpha "capture alpha"
+#define gstCaptureFloat "capture float"
+#define gstCaptureCompress "capture compress"
 #define gstBatFolder "bat folder"
 #define gstRetainFb "retain fb"//sometimes we don't redraw everything,
 								//just use the final buffer from last draw
