@@ -507,5 +507,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstLineWidth "line width"//for drawing on screen lines
 #define gstHwnd "hwnd"//handle to window
 #define gstHinstance "hinstance"//handle to instance
+#define gstBmRuntime "bm runtime"//benchmark runtime in msec
+#define gstBmFrames "bm frames"//benchmark frames ran
+#define gstBmFps "bm fps"//benchmark fps
 
 #endif//NAMES_HPP

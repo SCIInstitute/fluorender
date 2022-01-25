@@ -211,8 +211,8 @@ namespace fluo
 		flrd::VolumeSelector* GetVolumeSelector() { return m_selector; }
 		//get volume calculator
 		flrd::VolumeCalculator* GetVolumeCalculator() { return m_calculator; }
-		//get kernel executor
-		flrd::KernelExecutor* GetKernelExecutor() { return m_kernel_executor; }
+		//scriptor
+		flrd::ScriptProc* GetScriptProc() { return m_scriptor; }
 		//text renderer
 		flvr::TextRenderer* GetTextRenderer() { return m_text_renderer; }
 
@@ -230,6 +230,8 @@ namespace fluo
 		flrd::RulerList* GetRulerList() { return m_ruler_list; }
 		flrd::RulerHandler* GetRulerHandler() { return m_ruler_handler; }
 		flrd::RulerRenderer* GetRulerRenderer() { return m_ruler_renderer; }
+
+		flrd::VolumePoint* GetVolumePoint() { return m_volume_point; }
 
 		//draw highlighted comps
 		void DrawCells();
@@ -442,24 +444,21 @@ namespace fluo
 		flrd::VolumeSelector *m_selector;
 		//calculator
 		flrd::VolumeCalculator *m_calculator;
-		//kernel executor
-		flrd::KernelExecutor *m_kernel_executor;
 		//scriptor
 		flrd::ScriptProc *m_scriptor;
 		//handle rulers
 		flrd::RulerHandler *m_ruler_handler;
 		flrd::RulerRenderer *m_ruler_renderer;
-		flrd::VolumePoint *m_vp;
+		flrd::VolumePoint *m_volume_point;
 		VolumeLoader *m_loader;
 		Interpolator* m_interpolator;
+		//text renderer
+		flvr::TextRenderer *m_text_renderer;
 
 		//glm matrices
 		glm::mat4 m_mv_mat;
 		glm::mat4 m_proj_mat;
 		glm::mat4 m_tex_mat;
-
-		//text renderer
-		flvr::TextRenderer *m_text_renderer;
 
 #ifdef _WIN32
 		//wacom support

@@ -308,6 +308,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstLevelOffset, long(0));
 		view->addValue(gstHwnd, unsigned long long(0));
 		view->addValue(gstHinstance, unsigned long long(0));
+		view->addValue(gstBmRuntime, unsigned long long(0));
+		view->addValue(gstBmFrames, unsigned long long(0));
+		view->addValue(gstBmFps, double(0));
 	}
 }
 

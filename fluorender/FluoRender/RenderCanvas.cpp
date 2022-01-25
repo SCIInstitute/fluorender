@@ -86,249 +86,252 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	const wxSize& size,
 	long style) :
 	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
-	//public
-	//set gl
-	m_set_gl(false),
-	//capture modes
-	m_capture(false),
-	m_capture_rotat(false),
-	m_capture_rotate_over(false),
-	m_capture_tsequ(false),
-	m_capture_bat(false),
-	m_capture_param(false),
-	//begin and end frame
-	m_begin_frame(0),
-	m_end_frame(0),
-	//counters
-	m_tseq_cur_num(0),
-	m_tseq_prv_num(0),
-	m_param_cur_num(0),
-	m_total_frames(0),
-	//hud
-	m_updating(true),
-	m_draw_annotations(true),
-	m_draw_camctr(false),
-	m_camctr_size(2.0),
-	m_draw_info(250),
-	m_load_update(false),
-	m_retain_finalbuffer(false),
-	m_draw_frame(false),
-	m_test_speed(false),
-	m_draw_clip(false),
-	m_draw_legend(false),
-	m_draw_colormap(false),
-	m_mouse_focus(false),
-	m_test_wiref(false),
-	m_draw_rulers(true),
-	//current volume
-	m_cur_vol(0),
-	//clipping settings
-	m_clip_mask(-1),
-	m_clip_mode(2),
-	//scale bar
-	m_disp_scale_bar(false),
-	m_disp_scale_bar_text(false),
-	m_sb_length(50),
-	m_sb_x(0),
-	m_sb_y(0),
-	m_sb_unit(1),
-	m_sb_height(0.0),
-	//ortho size
-	m_ortho_left(0.0),
-	m_ortho_right(1.0),
-	m_ortho_bottom(0.0),
-	m_ortho_top(1.0),
-	//scale factor
-	m_scale_factor(1.0),
-	m_scale_factor_saved(1.0),
-	//scale mode
-	m_scale_mode(0),
-	//mode in determining depth of volume
-	m_point_volume_mode(0),
-	//ruler use volume transfer function
-	m_ruler_use_transf(false),
-	//ruler time dependent
-	m_ruler_time_dep(true),
-	//private
 	m_frame(frame),
-	m_vrv(parent),
+	m_vrv(parent)
+	////public
+	////set gl
+	//m_set_gl(false),
+	////capture modes
+	//m_capture(false),
+	//m_capture_rotat(false),
+	//m_capture_rotate_over(false),
+	//m_capture_tsequ(false),
+	//m_capture_bat(false),
+	//m_capture_param(false),
+	////begin and end frame
+	//m_begin_frame(0),
+	//m_end_frame(0),
+	////counters
+	//m_tseq_cur_num(0),
+	//m_tseq_prv_num(0),
+	//m_param_cur_num(0),
+	//m_total_frames(0),
+	////hud
+	//m_updating(true),
+	//m_draw_annotations(true),
+	//m_draw_camctr(false),
+	//m_camctr_size(2.0),
+	//m_draw_info(250),
+	//m_load_update(false),
+	//m_retain_finalbuffer(false),
+	//m_draw_frame(false),
+	//m_test_speed(false),
+	//m_draw_clip(false),
+	//m_draw_legend(false),
+	//m_draw_colormap(false),
+	//m_mouse_focus(false),
+	//m_test_wiref(false),
+	//m_draw_rulers(true),
+	////current volume
+	//m_cur_vol(0),
+	////clipping settings
+	//m_clip_mask(-1),
+	//m_clip_mode(2),
+	////scale bar
+	//m_disp_scale_bar(false),
+	//m_disp_scale_bar_text(false),
+	//m_sb_length(50),
+	//m_sb_x(0),
+	//m_sb_y(0),
+	//m_sb_unit(1),
+	//m_sb_height(0.0),
+	////ortho size
+	//m_ortho_left(0.0),
+	//m_ortho_right(1.0),
+	//m_ortho_bottom(0.0),
+	//m_ortho_top(1.0),
+	////scale factor
+	//m_scale_factor(1.0),
+	//m_scale_factor_saved(1.0),
+	////scale mode
+	//m_scale_mode(0),
+	////mode in determining depth of volume
+	//m_point_volume_mode(0),
+	////ruler use volume transfer function
+	//m_ruler_use_transf(false),
+	////ruler time dependent
+	//m_ruler_time_dep(true),
+	//private
 	//populated lists of data
-	m_vd_pop_dirty(true),
-	m_md_pop_dirty(true),
-	//traces
-	m_trace_group(0),
-	//multivolume
-	m_mvr(0),
-	//initializaion
-	m_initialized(false),
-	m_init_view(false),
-	//bg color
-	m_bg_color(0.0, 0.0, 0.0),
-	m_bg_color_inv(1.0, 1.0, 1.0),
-	m_grad_bg(false),
-	//frustrum
-	m_aov(15.0),
-	m_near_clip(0.1),
-	m_far_clip(100.0),
-	//interpolation
-	m_intp(true),
-	//previous focus
-	m_prev_focus(0),
-	//interactive modes
-	m_int_mode(1),
-	m_force_clear(false),
-	m_interactive(false),
-	m_clear_buffer(false),
-	m_adaptive(true),
-	m_brush_state(0),
-	m_grow_on(false),
-	//resizing
-	m_resize(false),
-	//brush tools
-	m_draw_brush(false),
-	m_paint_enable(false),
-	m_paint_display(false),
-	//paint buffer
-	m_clear_paint(true),
-	//camera controls
-	m_persp(false),
-	m_free(false),
-	//camera distance
-	m_distance(10.0),
-	m_init_dist(10.0),
-	//camera translation
-	m_transx(0.0), m_transy(0.0), m_transz(0.0),
-	m_transx_saved(0.0), m_transy_saved(0.0), m_transz_saved(0.0),
-	//camera rotation
-	m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
-	m_rotx_saved(0.0), m_roty_saved(0.0), m_rotz_saved(0.0),
-	//camera center
-	m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
-	m_ctrx_saved(0.0), m_ctry_saved(0.0), m_ctrz_saved(0.0),
-	//camera direction
-	m_up(0.0, 1.0, 0.0),
-	m_head(0.0, 0.0, -1.0),
-	//object center
-	m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
-	//object translation
-	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
-	m_obj_transx_saved(0.0), m_obj_transy_saved(0.0), m_obj_transz_saved(0.0),
-	//object rotation
-	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
-	m_rot_lock(false),
-	//lock cam center
-	m_lock_cam_object(false),
-	m_pick_lock_center(false),
-	//object bounding box
-	m_radius(348.0),
-	//mouse position
-	old_mouse_X(-1), old_mouse_Y(-1),
-	prv_mouse_X(-1), prv_mouse_Y(-1),
-	//draw controls
-	m_draw_bounds(false),
-	m_draw_all(true),
-	m_draw_grid(false),
-	m_draw_type(1),
-	m_vol_method(VOL_METHOD_SEQ),
-	m_peeling_layers(1),
-	m_blend_slices(false),
-	//fog
-	m_use_fog(true),
-	m_fog_intensity(0.0),
-	m_fog_start(0.0),
-	m_fog_end(0.0),
-	//movie properties
-	m_init_angle(0.0),
-	m_start_angle(0.0),
-	m_end_angle(0.0),
-	m_cur_angle(0.0),
-	m_step(0.0),
-	m_movie_seq(0),
-	m_rewind(false),
-	m_stages(0),
-	m_4d_rewind(false),
-	//movie frame properties
-	m_frame_x(-1),
-	m_frame_y(-1),
-	m_frame_w(-1),
-	m_frame_h(-1),
-	//post image processing
-	m_gamma(fluo::Color(1.0, 1.0, 1.0)),
-	m_brightness(fluo::Color(1.135, 1.135, 1.135)),
-	m_hdr(0.0, 0.0, 0.0),
-	m_sync_r(false),
-	m_sync_g(false),
-	m_sync_b(false),
-	//volume color map
-	m_color_1(fluo::Color(0.0, 0.0, 1.0)),
-	m_value_2(0.0),
-	m_color_2(fluo::Color(0.0, 0.0, 1.0)),
-	m_value_3(0.25),
-	m_color_3(fluo::Color(0.0, 1.0, 1.0)),
-	m_value_4(0.5),
-	m_color_4(fluo::Color(0.0, 1.0, 0.0)),
-	m_value_5(0.75),
-	m_color_5(fluo::Color(1.0, 1.0, 0.0)),
-	m_value_6(1.0),
-	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
-	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
-	//clipping plane rotations
-	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
-	//selection
-	m_pick(false),
-	m_draw_mask(true),
-	m_clear_mask(false),
-	m_save_mask(false),
-	//move view
-	m_move_left(false),
-	m_move_right(false),
-	m_move_up(false),
-	m_move_down(false),
-	//move time
-	m_tseq_forward(false),
-	m_tseq_backward(false),
-	//move clip
-	m_clip_up(false),
-	m_clip_down(false),
-	//full cell
-	m_cell_full(false),
-	//link cells
-	m_cell_link(false),
-	//new cell id
-	m_cell_new_id(false),
-	//comp include
-	m_comp_include(false),
-	//comp exclude
-	m_comp_exclude(false),
-	//timer for fullscreen
-	m_fullscreen_trigger(this, ID_ftrigger),
-	//nodraw count
-	m_nodraw_count(0),
-	//pin rotation center
-	m_auto_update_rot_center(true),
-	m_pin_rot_center(false),
-	m_rot_center_dirty(false),
-	m_pin_pick_thresh(0.6),
-	m_res_mode(1),
-	m_enable_touch(false),
-	m_ptr_id1(-1),
-	m_ptr_id2(-1),
-	m_full_screen(false),
-	m_drawing(false),
-	m_refresh(false),
-	m_paint_count(false),
-	m_paint_colocalize(false),
-	m_ruler_autorelax(false),
-	//vr settings
-	m_enable_vr(false),
-	m_use_openvr(false),
-	m_vr_eye_offset(6.0),
-	m_vr_eye_idx(0)
-#if defined(_WIN32) && defined(USE_XINPUT)
-	,
-	m_controller(0)
-#endif
+	//m_vd_pop_dirty(true),
+	//m_md_pop_dirty(true),
+	////traces
+	//m_trace_group(0),
+	////multivolume
+	//m_mvr(0),
+	////initializaion
+	//m_initialized(false),
+	//m_init_view(false),
+	////bg color
+	//m_bg_color(0.0, 0.0, 0.0),
+	//m_bg_color_inv(1.0, 1.0, 1.0),
+	//m_grad_bg(false),
+	////frustrum
+	//m_aov(15.0),
+	//m_near_clip(0.1),
+	//m_far_clip(100.0),
+	////interpolation
+	//m_intp(true),
+	////previous focus
+	//m_prev_focus(0),
+	////interactive modes
+	//m_int_mode(1),
+	//m_force_clear(false),
+	//m_interactive(false),
+	//m_clear_buffer(false),
+	//m_adaptive(true),
+	//m_brush_state(0),
+	//m_grow_on(false),
+	////resizing
+	//m_resize(false),
+	////brush tools
+	//m_draw_brush(false),
+	//m_paint_enable(false),
+	//m_paint_display(false),
+	////paint buffer
+	//m_clear_paint(true),
+	////camera controls
+	//m_persp(false),
+	//m_free(false),
+	////camera distance
+	//m_distance(10.0),
+	//m_init_dist(10.0),
+	////camera translation
+	//m_transx(0.0), m_transy(0.0), m_transz(0.0),
+	//m_transx_saved(0.0), m_transy_saved(0.0), m_transz_saved(0.0),
+	////camera rotation
+	//m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
+	//m_rotx_saved(0.0), m_roty_saved(0.0), m_rotz_saved(0.0),
+	////camera center
+	//m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
+	//m_ctrx_saved(0.0), m_ctry_saved(0.0), m_ctrz_saved(0.0),
+	////camera direction
+	//m_up(0.0, 1.0, 0.0),
+	//m_head(0.0, 0.0, -1.0),
+	////object center
+	//m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
+	////object translation
+	//m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
+	//m_obj_transx_saved(0.0), m_obj_transy_saved(0.0), m_obj_transz_saved(0.0),
+	////object rotation
+	//m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
+	//m_rot_lock(false),
+	////lock cam center
+	//m_lock_cam_object(false),
+	//m_pick_lock_center(false),
+	////object bounding box
+	//m_radius(348.0),
+	////mouse position
+	//old_mouse_X(-1), old_mouse_Y(-1),
+	//prv_mouse_X(-1), prv_mouse_Y(-1),
+	////draw controls
+	//m_draw_bounds(false),
+	//m_draw_all(true),
+	//m_draw_grid(false),
+	//m_draw_type(1),
+	//m_vol_method(VOL_METHOD_SEQ),
+	//m_peeling_layers(1),
+	//m_blend_slices(false),
+	////fog
+	//m_use_fog(true),
+	//m_fog_intensity(0.0),
+	//m_fog_start(0.0),
+	//m_fog_end(0.0),
+	////movie properties
+	//m_init_angle(0.0),
+	//m_start_angle(0.0),
+	//m_end_angle(0.0),
+	//m_cur_angle(0.0),
+	//m_step(0.0),
+	//m_movie_seq(0),
+	//m_rewind(false),
+	//m_stages(0),
+	//m_4d_rewind(false),
+	////movie frame properties
+	//m_frame_x(-1),
+	//m_frame_y(-1),
+	//m_frame_w(-1),
+	//m_frame_h(-1),
+	////post image processing
+	//m_gamma(fluo::Color(1.0, 1.0, 1.0)),
+	//m_brightness(fluo::Color(1.135, 1.135, 1.135)),
+	//m_hdr(0.0, 0.0, 0.0),
+	//m_sync_r(false),
+	//m_sync_g(false),
+	//m_sync_b(false),
+	////volume color map
+	//m_color_1(fluo::Color(0.0, 0.0, 1.0)),
+	//m_value_2(0.0),
+	//m_color_2(fluo::Color(0.0, 0.0, 1.0)),
+	//m_value_3(0.25),
+	//m_color_3(fluo::Color(0.0, 1.0, 1.0)),
+	//m_value_4(0.5),
+	//m_color_4(fluo::Color(0.0, 1.0, 0.0)),
+	//m_value_5(0.75),
+	//m_color_5(fluo::Color(1.0, 1.0, 0.0)),
+	//m_value_6(1.0),
+	//m_color_6(fluo::Color(1.0, 0.0, 0.0)),
+	//m_color_7(fluo::Color(1.0, 0.0, 0.0)),
+	////clipping plane rotations
+	//m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
+	////selection
+	//m_pick(false),
+	//m_draw_mask(true),
+	//m_clear_mask(false),
+	//m_save_mask(false),
+	////move view
+	//m_move_left(false),
+	//m_move_right(false),
+	//m_move_up(false),
+	//m_move_down(false),
+	////move time
+	//m_tseq_forward(false),
+	//m_tseq_backward(false),
+	////move clip
+	//m_clip_up(false),
+	//m_clip_down(false),
+	////full cell
+	//m_cell_full(false),
+	////link cells
+	//m_cell_link(false),
+	////new cell id
+	//m_cell_new_id(false),
+	////comp include
+	//m_comp_include(false),
+	////comp exclude
+	//m_comp_exclude(false),
+	////timer for fullscreen
+	//m_fullscreen_trigger(this, ID_ftrigger),
+	////nodraw count
+	//m_nodraw_count(0),
+	////pin rotation center
+	//m_auto_update_rot_center(true),
+	//m_pin_rot_center(false),
+	//m_rot_center_dirty(false),
+	//m_pin_pick_thresh(0.6),
+	//m_res_mode(1),
+	//m_enable_touch(false),
+	//m_ptr_id1(-1),
+	//m_ptr_id2(-1),
+	//m_full_screen(false),
+	//m_drawing(false),
+	//m_refresh(false),
+	//m_paint_count(false),
+	//m_paint_colocalize(false),
+	//m_ruler_autorelax(false),
+	////vr settings
+	//m_enable_vr(false),
+	//m_use_openvr(false),
+	//m_vr_eye_offset(6.0),
+	//m_vr_eye_idx(0)
+//#if defined(_WIN32) && defined(USE_XINPUT)
+//	,
+//	m_controller(0)
+//#endif
 {
+	m_glRC = sharedContext;
+	m_sharedRC = m_glRC ? true : false;
+
 	fluo::Renderview* view = glbin_revf->build();
 	view->setName(m_vrv->GetName().ToStdString());
 	m_agent = glbin_agtf->getOrAddRenderCanvasAgent(view->getName(), *this);
@@ -336,232 +339,238 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());
 	m_agent->setValue(gstHinstance, (unsigned long long)::wxGetInstance());
 
-	m_glRC = sharedContext;
-	m_sharedRC = m_glRC ? true : false;
+//	m_sb_num = "50";
+//#ifdef _WIN32
+//	//tablet initialization
+//	if (m_selector.GetBrushUsePres())
+//	{
+//		if (!m_hTab && LoadWintab() &&
+//			gpWTInfoA(0, 0, NULL))
+//		{
+//			m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
+//		}
+//		else
+//			m_selector.SetBrushUsePres(false);
+//	}
+//
+//	//check touch
+//	HMODULE user32 = LoadLibrary(L"user32");
+//	GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
+//		(GetProcAddress(user32, "GetPointerInfo"));
+//	if (GetPI != NULL)
+//		m_enable_touch = true;
+//	else
+//		m_enable_touch = false;
+//
+//	//xbox controller
+//#ifdef USE_XINPUT
+//	m_controller = new XboxController(1);
+//#endif
+//#endif
 
-	m_sb_num = "50";
-#ifdef _WIN32
-	//tablet initialization
-	if (m_selector.GetBrushUsePres())
-	{
-		if (!m_hTab && LoadWintab() &&
-			gpWTInfoA(0, 0, NULL))
-		{
-			m_hTab = TabletInit((HWND)GetHWND(), (HINSTANCE)::wxGetInstance());
-		}
-		else
-			m_selector.SetBrushUsePres(false);
-	}
+//	m_selector.LoadBrushSettings();
 
-	//check touch
-	HMODULE user32 = LoadLibrary(L"user32");
-	GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
-		(GetProcAddress(user32, "GetPointerInfo"));
-	if (GetPI != NULL)
-		m_enable_touch = true;
-	else
-		m_enable_touch = false;
+	bool bval = m_frame && m_frame->GetBenchmark();
+	m_agent->setValue(gstBenchmark, bval);
 
-	//xbox controller
-#ifdef USE_XINPUT
-	m_controller = new XboxController(1);
-#endif
-#endif
-
-	m_selector.LoadBrushSettings();
-
-	if (m_frame && m_frame->GetBenchmark())
-		m_benchmark = true;
-	else
-		m_benchmark = false;
-
-	m_ruler_handler.SetView(this);
-	m_ruler_handler.SetRulerList(&m_ruler_list);
-	m_ruler_renderer.SetView(this);
-	m_ruler_renderer.SetRulerList(&m_ruler_list);
-	m_vp.SetView(this);
-	m_selector.SetView(this);
-	m_calculator.SetFrame(m_frame);
-	m_calculator.SetView(this);
-	m_calculator.SetVolumeSelector(&m_selector);
-	m_scriptor.SetFrame(m_frame);
-	m_scriptor.SetView(this);
+	m_agent->getObject()->GetRulerHandler()->SetView(this);
+	m_agent->getObject()->GetRulerHandler()->SetRulerList(
+		m_agent->getObject()->GetRulerList());
+	m_agent->getObject()->GetRulerRenderer()->SetView(this);
+	m_agent->getObject()->GetRulerRenderer()->SetRulerList(
+		m_agent->getObject()->GetRulerList());
+	m_agent->getObject()->GetVolumePoint()->SetView(this);
+	m_agent->getObject()->GetVolumeSelector()->SetView(this);
+	m_agent->getObject()->GetVolumeCalculator()->SetFrame(m_frame);
+	m_agent->getObject()->GetVolumeCalculator()->SetView(this);
+	m_agent->getObject()->GetVolumeCalculator()->SetVolumeSelector(
+		m_agent->getObject()->GetVolumeSelector());
+	m_agent->getObject()->GetScriptProc()->SetFrame(m_frame);
+	m_agent->getObject()->GetScriptProc()->SetView(this);
 }
 
-#ifdef _WIN32
-//tablet init
-HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
-{
-	HCTX hctx = NULL;
-	UINT wDevice = 0;
-	UINT wExtX = 0;
-	UINT wExtY = 0;
-	UINT wWTInfoRetVal = 0;
-	AXIS TabletX = { 0 };
-	AXIS TabletY = { 0 };
-	AXIS TabletNPress = { 0 };
-	AXIS TabletTPress = { 0 };
+//#ifdef _WIN32
+////tablet init
+//HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
+//{
+//	HCTX hctx = NULL;
+//	UINT wDevice = 0;
+//	UINT wExtX = 0;
+//	UINT wExtY = 0;
+//	UINT wWTInfoRetVal = 0;
+//	AXIS TabletX = { 0 };
+//	AXIS TabletY = { 0 };
+//	AXIS TabletNPress = { 0 };
+//	AXIS TabletTPress = { 0 };
+//
+//	// Set option to move system cursor before getting default system context.
+//	m_lc.lcOptions |= CXO_SYSTEM;
+//
+//	// Open default system context so that we can get tablet data
+//	// in screen coordinates (not tablet coordinates).
+//	wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &m_lc);
+//	WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXTA));
+//
+//	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
+//
+//	// modify the digitizing region
+//	sprintf(m_lc.lcName,
+//		"FluoRender Digitizing %llx",
+//		reinterpret_cast<unsigned long long>(hInst));
+//
+//	// We process WT_PACKET (CXO_MESSAGES) messages.
+//	m_lc.lcOptions |= CXO_MESSAGES;
+//
+//	// What data items we want to be included in the tablet packets
+//	m_lc.lcPktData = PACKETDATA;
+//
+//	// Which packet items should show change in value since the last
+//	// packet (referred to as 'relative' data) and which items
+//	// should be 'absolute'.
+//	m_lc.lcPktMode = PACKETMODE;
+//
+//	// This bitfield determines whether or not this context will receive
+//	// a packet when a value for each packet field changes.  This is not
+//	// supported by the Intuos Wintab.  Your context will always receive
+//	// packets, even if there has been no change in the data.
+//	m_lc.lcMoveMask = PACKETDATA;
+//
+//	// Which buttons events will be handled by this context.  lcBtnMask
+//	// is a bitfield with one bit per button.
+//	m_lc.lcBtnUpMask = m_lc.lcBtnDnMask;
+//
+//	// Set the entire tablet as active
+//	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
+//	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+//
+//	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
+//	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+//
+//	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
+//	if (wWTInfoRetVal == sizeof(AXIS))
+//		m_selector.SetBrushPnMax(TabletNPress.axMax);
+//	else
+//		m_selector.SetBrushPnMax(1.0);
+//
+//	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
+//	if (wWTInfoRetVal == sizeof(AXIS))
+//		m_selector.SetBrushPtMax(TabletTPress.axMax);
+//	else
+//		m_selector.SetBrushPnMax(1.0);
+//
+///*	m_lc.lcInOrgX = 0;
+//	m_lc.lcInOrgY = 0;
+//	m_lc.lcInExtX = TabletX.axMax;
+//	m_lc.lcInExtY = TabletY.axMax;
+//
+//	// Guarantee the output coordinate space to be in screen coordinates.  
+//	m_lc.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+//	m_lc.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+//	m_lc.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
+//
+//														   // In Wintab, the tablet origin is lower left.  Move origin to upper left
+//														   // so that it coincides with screen origin.
+//	m_lc.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);	//SM_CYSCREEN );
+//
+//															// Leave the system origin and extents as received:
+//															// lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
+//
+//															// open the region
+//															// The Wintab spec says we must open the context disabled if we are 
+//															// using cursor masks.  
+//*/	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
+//
+//	WacomTrace("HCTX: %i\n", hctx);
+//
+//	return hctx;
+//}
 
-	// Set option to move system cursor before getting default system context.
-	m_lc.lcOptions |= CXO_SYSTEM;
-
-	// Open default system context so that we can get tablet data
-	// in screen coordinates (not tablet coordinates).
-	wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &m_lc);
-	WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXTA));
-
-	WACOM_ASSERT(m_lc.lcOptions & CXO_SYSTEM);
-
-	// modify the digitizing region
-	sprintf(m_lc.lcName,
-		"FluoRender Digitizing %llx",
-		reinterpret_cast<unsigned long long>(hInst));
-
-	// We process WT_PACKET (CXO_MESSAGES) messages.
-	m_lc.lcOptions |= CXO_MESSAGES;
-
-	// What data items we want to be included in the tablet packets
-	m_lc.lcPktData = PACKETDATA;
-
-	// Which packet items should show change in value since the last
-	// packet (referred to as 'relative' data) and which items
-	// should be 'absolute'.
-	m_lc.lcPktMode = PACKETMODE;
-
-	// This bitfield determines whether or not this context will receive
-	// a packet when a value for each packet field changes.  This is not
-	// supported by the Intuos Wintab.  Your context will always receive
-	// packets, even if there has been no change in the data.
-	m_lc.lcMoveMask = PACKETDATA;
-
-	// Which buttons events will be handled by this context.  lcBtnMask
-	// is a bitfield with one bit per button.
-	m_lc.lcBtnUpMask = m_lc.lcBtnDnMask;
-
-	// Set the entire tablet as active
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
-	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
-
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
-	WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
-
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_NPRESSURE, &TabletNPress);
-	if (wWTInfoRetVal == sizeof(AXIS))
-		m_selector.SetBrushPnMax(TabletNPress.axMax);
-	else
-		m_selector.SetBrushPnMax(1.0);
-
-	wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_TPRESSURE, &TabletTPress);
-	if (wWTInfoRetVal == sizeof(AXIS))
-		m_selector.SetBrushPtMax(TabletTPress.axMax);
-	else
-		m_selector.SetBrushPnMax(1.0);
-
-/*	m_lc.lcInOrgX = 0;
-	m_lc.lcInOrgY = 0;
-	m_lc.lcInExtX = TabletX.axMax;
-	m_lc.lcInExtY = TabletY.axMax;
-
-	// Guarantee the output coordinate space to be in screen coordinates.  
-	m_lc.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-	m_lc.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-	m_lc.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
-
-														   // In Wintab, the tablet origin is lower left.  Move origin to upper left
-														   // so that it coincides with screen origin.
-	m_lc.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);	//SM_CYSCREEN );
-
-															// Leave the system origin and extents as received:
-															// lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
-
-															// open the region
-															// The Wintab spec says we must open the context disabled if we are 
-															// using cursor masks.  
-*/	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
-
-	WacomTrace("HCTX: %i\n", hctx);
-
-	return hctx;
-}
-
-void RenderCanvas::InitOpenVR()
-{
-	//openvr initilization
-	vr::EVRInitError vr_error;
-	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
-	if (vr_error == vr::VRInitError_None &&
-		vr::VRCompositor())
-	{
-		m_use_openvr = true;
-		//get render size
-		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
-		//get eye offset
-		//vr::HmdMatrix34_t eye_mat;
-		//eye_mat = m_vr_system->GetEyeToHeadTransform(vr::Eye_Left);
-		//double eye_x = eye_mat.m[0][3];
-		//double eye_y = eye_mat.m[1][3];
-		//double eye_z = eye_mat.m[2][3];
-		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
-	}//otherwise use default settings
-}
-#endif
+//void RenderCanvas::InitOpenVR()
+//{
+//	//openvr initilization
+//	vr::EVRInitError vr_error;
+//	m_vr_system = vr::VR_Init(&vr_error, vr::VRApplication_Scene, 0);
+//	if (vr_error == vr::VRInitError_None &&
+//		vr::VRCompositor())
+//	{
+//		m_use_openvr = true;
+//		//get render size
+//		m_vr_system->GetRecommendedRenderTargetSize(&m_vr_size[0], &m_vr_size[1]);
+//		//get eye offset
+//		//vr::HmdMatrix34_t eye_mat;
+//		//eye_mat = m_vr_system->GetEyeToHeadTransform(vr::Eye_Left);
+//		//double eye_x = eye_mat.m[0][3];
+//		//double eye_y = eye_mat.m[1][3];
+//		//double eye_z = eye_mat.m[2][3];
+//		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
+//	}//otherwise use default settings
+//}
+//#endif
 
 RenderCanvas::~RenderCanvas()
 {
-	if (m_benchmark)
+	bool bval;
+	m_agent->getValue(gstBenchmark, bval);
+	if (bval)
 	{
-		int msec = int(glbin_timer->total_time() * 1000.0);
-		double fps = glbin_timer->total_fps();
+		unsigned long long msec, frames;
+		double fps;
+		m_agent->getValue(gstBmRuntime, msec);
+		m_agent->getValue(gstBmFrames, frames);
+		m_agent->getValue(gstBmFps, fps);
+		long lx, ly;
+		m_agent->getValue(gstSizeX, lx);
+		m_agent->getValue(gstSizeY, ly);
 		wxString string = wxString("FluoRender has finished benchmarking.\n") +
 			wxString("Results:\n") +
-			wxString("Render size: ") + wxString::Format("%d X %d\n", m_size.GetWidth(), m_size.GetHeight()) +
-			wxString("Time: ") + wxString::Format("%d msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", glbin_timer->count()) +
+			wxString("Render size: ") + wxString::Format("%d X %d\n", lx, ly) +
+			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
+			wxString("Frames: ") + wxString::Format("%llu\n", frames) +
 			wxString("FPS: ") + wxString::Format("%.2f", fps);
 		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
 			wxOK | wxICON_INFORMATION);
 		diag->ShowModal();
 	}
-	glbin_timer->stop();
+	//glbin_timer->stop();
 
-	m_selector.SaveBrushSettings();
+	//m_selector.SaveBrushSettings();
 
-#ifdef _WIN32
-	//tablet
-	if (m_hTab)
-	{
-		gpWTClose(m_hTab);
-		m_hTab = 0;
-		UnloadWintab();
-	}
-#endif
+//#ifdef _WIN32
+//	//tablet
+//	if (m_hTab)
+//	{
+//		gpWTClose(m_hTab);
+//		m_hTab = 0;
+//		UnloadWintab();
+//	}
+//#endif
+//
+//#ifdef _WIN32
+//	if (m_enable_vr && m_use_openvr)
+//	{
+//		//vr shutdown
+//		vr::VR_Shutdown();
+//		//UnloadVR();
+//	}
+//#endif
+//
+//#ifdef _WIN32
+//	//if (m_controller)
+//	//	delete m_controller;
+//#endif
 
-#ifdef _WIN32
-	if (m_enable_vr && m_use_openvr)
-	{
-		//vr shutdown
-		vr::VR_Shutdown();
-		//UnloadVR();
-	}
-#endif
+	//m_loader.StopAll();
 
-#ifdef _WIN32
-	//if (m_controller)
-	//	delete m_controller;
-#endif
+	//int i;
+	////delete rulers
+	//for (i = 0; i<(int)m_ruler_list.size(); i++)
+	//{
+	//	if (m_ruler_list[i])
+	//		delete m_ruler_list[i];
+	//}
 
-	m_loader.StopAll();
-
-	int i;
-	//delete rulers
-	for (i = 0; i<(int)m_ruler_list.size(); i++)
-	{
-		if (m_ruler_list[i])
-			delete m_ruler_list[i];
-	}
-
-	if (m_trace_group)
-		delete m_trace_group;
+	//if (m_trace_group)
+	//	delete m_trace_group;
 
 	if (m_full_screen)
 	{
@@ -575,8 +584,8 @@ RenderCanvas::~RenderCanvas()
 		}
 	}
 
-	if (m_mvr)
-		delete m_mvr;
+	//if (m_mvr)
+	//	delete m_mvr;
 
 	if (!m_sharedRC)
 		delete m_glRC;
@@ -619,12 +628,12 @@ void RenderCanvas::Init()
 			m_frame->SetTextureUndos();
 			m_frame->GetSettingDlg()->UpdateTextureSize();
 		}
-		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
-		glEnable(GL_MULTISAMPLE);
+		////glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
+		//glEnable(GL_MULTISAMPLE);
 
-		m_initialized = true;
+		//m_initialized = true;
 
-		glbin_timer->start();
+		//glbin_timer->start();
 	}
 }
 

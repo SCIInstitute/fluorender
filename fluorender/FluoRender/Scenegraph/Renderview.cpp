@@ -71,17 +71,97 @@ LOGCONTEXTA Renderview::m_lc;
 
 Renderview::Renderview()
 {
+	m_cur_ruler = 0;
+	m_trace_group = 0;
+	m_mvr = 0;
+	m_cell_list = 0;
+	//temporary, dynamic data will be managed by global
+	m_ruler_list = new flrd::RulerList();
+	m_selector = new flrd::VolumeSelector();
+	m_calculator = new flrd::VolumeCalculator();
+	m_scriptor = new flrd::ScriptProc();
+	m_ruler_handler = new flrd::RulerHandler();
+	m_ruler_renderer = new flrd::RulerRenderer();
+	m_volume_point = new flrd::VolumePoint();
+	m_loader = new VolumeLoader();
+	m_interpolator = new Interpolator();
+	m_text_renderer = new flvr::TextRenderer();
 }
 
 Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	Group(view, copyop)
 {
-
+	m_cur_ruler = 0;
+	m_trace_group = 0;
+	m_mvr = 0;
+	m_cell_list = 0;
+	//temporary, dynamic data will be managed by global
+	m_ruler_list = new flrd::RulerList();
+	m_selector = new flrd::VolumeSelector();
+	m_calculator = new flrd::VolumeCalculator();
+	m_scriptor = new flrd::ScriptProc();
+	m_ruler_handler = new flrd::RulerHandler();
+	m_ruler_renderer = new flrd::RulerRenderer();
+	m_volume_point = new flrd::VolumePoint();
+	m_loader = new VolumeLoader();
+	m_interpolator = new Interpolator();
+	m_text_renderer = new flvr::TextRenderer();
 }
 
 Renderview::~Renderview()
 {
+#ifdef _WIN32
+	//tablet
+	if (m_hTab)
+	{
+		gpWTClose(m_hTab);
+		m_hTab = 0;
+		UnloadWintab();
+	}
+	bool enable_vr, enable_openvr;
+	getValue(gstVrEnable, enable_vr);
+	getValue(gstOpenvrEnable, enable_openvr);
+	if (enable_vr && enable_openvr)
+	{
+		//vr shutdown
+		vr::VR_Shutdown();
+		//UnloadVR();
+	}
+	//if (m_controller)
+	//	delete m_controller;
+#endif
+	bool bval;
+	getValue(gstBenchmark, bval);
+	if (bval)
+	{
+		unsigned long long ullval = (unsigned long long)(glbin_timer->total_time() * 1000.0);
+		setValue(gstBmRuntime, ullval);
+		ullval = glbin_timer->count();
+		setValue(gstBmFrames, ullval);
+		double dval = glbin_timer->total_fps();
+		setValue(gstBmFps, dval);
+	}
+	glbin_timer->stop();
+	m_selector->SaveBrushSettings();
+	m_loader->StopAll();
 
+	//temporary, dynamic data will be managed by global
+	if (m_mvr) delete m_mvr;
+	if (m_trace_group) delete m_trace_group;
+	for (auto i : *m_ruler_list)
+	{
+		if (i) delete i;
+	}
+	if (m_ruler_list) delete m_ruler_list;
+	if (m_selector) delete m_selector;
+	if (m_calculator) delete m_calculator;
+	if (m_scriptor) delete m_scriptor;
+	if (m_ruler_handler) delete m_ruler_handler;
+	if (m_ruler_renderer) delete m_ruler_renderer;
+	if (m_volume_point) delete m_volume_point;
+	if (m_loader) delete m_loader;
+	if (m_interpolator) delete m_interpolator;
+	if (m_text_renderer) delete m_text_renderer;
 }
 
 void Renderview::Init()
@@ -90,6 +170,7 @@ void Renderview::Init()
 	getValue(gstInitialized, bval);
 	if (!bval)
 	{
+		m_controller = 0;
 #ifdef _WIN32
 		//tablet initialization
 		if (m_selector->GetBrushUsePres())
@@ -120,6 +201,7 @@ void Renderview::Init()
 		m_controller = new XboxController(1);
 #endif
 #endif
+		m_selector->LoadBrushSettings();
 
 		//glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		glEnable(GL_MULTISAMPLE);
@@ -2047,7 +2129,7 @@ flrd::Ruler* Renderview::GetRuler(unsigned int id)
 //draw highlighted comps
 void Renderview::DrawCells()
 {
-	if (m_cell_list->empty())
+	if (!m_cell_list || m_cell_list->empty())
 		return;
 	double width = 1.0;
 	getValue(gstLineWidth, width);
@@ -2094,9 +2176,11 @@ void Renderview::DrawCells()
 
 unsigned int Renderview::DrawCellVerts(std::vector<float>& verts)
 {
+	if (!m_cell_list)
+		return 0;
+
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
-
 	Transform mv;
 	Transform p;
 	mv.set(glm::value_ptr(m_mv_mat));
@@ -3932,9 +4016,9 @@ void Renderview::DrawInfo()
 		long lx, ly;
 		getValue(gstMouseClientX, lx);
 		getValue(gstMouseClientY, ly);
-		m_vp->SetVolumeData(cvol);
-		if ((m_vp->GetPointVolumeBox(lx, ly, true, p) > 0.0) ||
-			m_vp->GetPointPlane(lx, ly, 0, true, p) > 0.0)
+		m_volume_point->SetVolumeData(cvol);
+		if ((m_volume_point->GetPointVolumeBox(lx, ly, true, p) > 0.0) ||
+			m_volume_point->GetPointPlane(lx, ly, 0, true, p) > 0.0)
 		{
 			getValue(gstCurrentFrame, lval);
 			wstr = L"T: "; wstr += std::to_wstring(lval);
@@ -4731,10 +4815,10 @@ void Renderview::DrawVolumes(long peel)
 				if (!vd)
 					if (m_vol_list.size())
 						vd = m_vol_list[0].get();
-				m_vp->SetVolumeData(vd);
+				m_volume_point->SetVolumeData(vd);
 				Point p;
-				if (m_vp->GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
-					(vd && m_vp->GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
+				if (m_volume_point->GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
+					(vd && m_volume_point->GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
 				{
 					long resx, resy, resz;
 					double sclx, scly, sclz;
@@ -7206,9 +7290,9 @@ void Renderview::PickVolume()
 		long mip_mode;
 		vd->getValue(gstMipMode, mip_mode);
 		if (mip_mode == 1) mode = 1;
-		m_vp->SetVolumeData(vd.get());
+		m_volume_point->SetVolumeData(vd.get());
 
-		dist = m_vp->GetPointVolume(lx, ly,
+		dist = m_volume_point->GetPointVolume(lx, ly,
 			mode, true, 0.5, p, ip);
 		if (dist > 0.0)
 		{
