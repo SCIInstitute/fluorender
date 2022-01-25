@@ -87,7 +87,9 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	long style) :
 	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
 	m_frame(frame),
-	m_vrv(parent)
+	m_vrv(parent),
+	//initializaion
+	m_initialized(false)
 	////public
 	////set gl
 	//m_set_gl(false),
@@ -159,8 +161,6 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	//m_trace_group(0),
 	////multivolume
 	//m_mvr(0),
-	////initializaion
-	//m_initialized(false),
 	//m_init_view(false),
 	////bg color
 	//m_bg_color(0.0, 0.0, 0.0),
@@ -381,8 +381,8 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 		m_agent->getObject()->GetRulerList());
 	m_agent->getObject()->GetVolumePoint()->SetView(this);
 	m_agent->getObject()->GetVolumeSelector()->SetView(this);
-	m_agent->getObject()->GetVolumeCalculator()->SetFrame(m_frame);
-	m_agent->getObject()->GetVolumeCalculator()->SetView(this);
+	m_agent->getObject()->GetVolumeCalculator()->SetRoot(glbin_root);
+	m_agent->getObject()->GetVolumeCalculator()->SetView(view);
 	m_agent->getObject()->GetVolumeCalculator()->SetVolumeSelector(
 		m_agent->getObject()->GetVolumeSelector());
 	m_agent->getObject()->GetScriptProc()->SetFrame(m_frame);
@@ -593,15 +593,21 @@ RenderCanvas::~RenderCanvas()
 
 void RenderCanvas::OnResize(wxSizeEvent& event)
 {
-	wxSize size = GetGLSize();
-	if (m_size == size)
-		return;
-	else
-		m_size = size;
-
+	//wxSize size = GetGLSize();
+	//if (m_size == size)
+	//	return;
+	//else
+	//	m_size = size;
+	double dval = 1;
+#ifdef _DARWIN
+	dval = GetDPIScaleFactor();
+#endif
+	wxSize size = GetSize() * dval;
+	m_agent->setValue(gstSizeX, long(size.x));
+	m_agent->setValue(gstSizeY, long(size.y));
 	m_vrv->UpdateScaleFactor(false);
-
-	RefreshGL(1);
+	m_agent->getObject()->RefreshGL(1);
+	//RefreshGL(1);
 }
 
 void RenderCanvas::Init()
@@ -619,8 +625,8 @@ void RenderCanvas::Init()
 		flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
-        if (ctx != flvr::TextureRenderer::gl_context_)
-            flvr::TextureRenderer::gl_context_ = ctx;
+		if (ctx != flvr::TextureRenderer::gl_context_)
+			flvr::TextureRenderer::gl_context_ = ctx;
 #endif
 		if (m_frame)
 		{
@@ -631,7 +637,7 @@ void RenderCanvas::Init()
 		////glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		//glEnable(GL_MULTISAMPLE);
 
-		//m_initialized = true;
+		m_initialized = true;
 
 		//glbin_timer->start();
 	}
@@ -5367,15 +5373,6 @@ void RenderCanvas::ResetEnlarge()
 //draw
 void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
-	if (!m_refresh)
-		m_retain_finalbuffer = true;
-	else
-		m_refresh = false;
-	ForceDraw();
-}
-
-void RenderCanvas::ForceDraw()
-{
 #ifdef _WIN32
 	if (!m_set_gl)
 	{
@@ -5383,7 +5380,7 @@ void RenderCanvas::ForceDraw()
 		m_set_gl = true;
 		if (m_frame)
 		{
-			for (int i = 0; i< m_frame->GetViewNum(); i++)
+			for (int i = 0; i < m_frame->GetViewNum(); i++)
 			{
 				RenderCanvas* view = m_frame->GetView(i);
 				if (view && view != this)
@@ -5397,8 +5394,41 @@ void RenderCanvas::ForceDraw()
 #if defined(_DARWIN) || defined(__linux__)
 	SetCurrent(*m_glRC);
 #endif
-	Init();
 	wxPaintDC dc(this);
+	Init();
+	m_agent->getObject()->ForceDraw();
+	//if (!m_refresh)
+	//	m_retain_finalbuffer = true;
+	//else
+	//	m_refresh = false;
+	//ForceDraw();
+}
+
+void RenderCanvas::ForceDraw()
+{
+//#ifdef _WIN32
+//	if (!m_set_gl)
+//	{
+//		SetCurrent(*m_glRC);
+//		m_set_gl = true;
+//		if (m_frame)
+//		{
+//			for (int i = 0; i< m_frame->GetViewNum(); i++)
+//			{
+//				RenderCanvas* view = m_frame->GetView(i);
+//				if (view && view != this)
+//				{
+//					view->m_set_gl = false;
+//				}
+//			}
+//		}
+//	}
+//#endif
+//#if defined(_DARWIN) || defined(__linux__)
+//	SetCurrent(*m_glRC);
+//#endif
+//	Init();
+//	wxPaintDC dc(this);
 
 	if (m_resize)
 		m_retain_finalbuffer = false;

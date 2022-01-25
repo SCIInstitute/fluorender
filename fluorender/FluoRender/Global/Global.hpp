@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_annf fluo::Global::instance().getAnnotationFactory()
 #define glbin_revf fluo::Global::instance().getRenderviewFactory()
 #define glbin_agtf fluo::Global::instance().getAgentFactory()
+#define glbin_root fluo::Global::instance().getRoot()
 
 //class AgentFactory;
 class Fltimer;
@@ -50,13 +51,14 @@ namespace fluo
 	class AgentFactory;
 	//class Renderer2DFactory;
 	//class Renderer3DFactory;
+	class Root;
 	//automatically creates the factories and provide global access
 	class Global
 	{
 	public:
 		static Global& instance() { return instance_; }
 
-		Object* get(const std::string &name);
+		Object* get(const std::string &name, Group* start = nullptr);
 		Fltimer* getTimer();
 		VolumeFactory* getVolumeFactory();
 		MeshFactory* getMeshFactory();
@@ -65,6 +67,7 @@ namespace fluo
 		AgentFactory* getAgentFactory();
 		//Renderer2DFactory* getRenderer2DFactory();
 		//Renderer3DFactory* getRenderer3DFactory();
+		Root* getRoot();
 
 		//check name duplication
 		bool checkName(const std::string &name);
@@ -161,6 +164,7 @@ namespace fluo
 		void BuildTimer();
 		void BuildFactories();
 		void BuildPaths();
+		void BuildRoot();
 	};
 }
 

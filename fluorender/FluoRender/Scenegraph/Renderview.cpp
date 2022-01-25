@@ -29,8 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #include "Renderview.hpp"
 #include <Group.hpp>
 #include <Timer.h>
+#include <Root.hpp>
 #include <Annotations.hpp>
 #include <RenderviewFactory.hpp>
+#include <VolumeFactory.hpp>
 #include <NodeVisitor.hpp>
 #include <Global.hpp>
 #include <SearchVisitor.hpp>
@@ -164,6 +166,72 @@ Renderview::~Renderview()
 	if (m_text_renderer) delete m_text_renderer;
 }
 
+VolumeGroup* Renderview::addVolumeData(VolumeData* vd, const std::string &group_name)
+{
+	Object* obj = glbin.get(group_name, glbin_root);
+	VolumeGroup* group = dynamic_cast<VolumeGroup*>(obj);
+	if (!group)
+	{
+		group = glbin_volf->buildGroup();
+		if (!group)
+			return 0;
+		group->setName(group_name);
+		addChild(group);
+	}
+
+	/*for (i=0; i<1; i++)
+	{
+	VolumeData* vol_data = group->GetVolumeData(i);
+	if (vol_data)
+	{
+	double spcx, spcy, spcz;
+	vol_data->GetSpacings(spcx, spcy, spcz);
+	vd->SetSpacings(spcx, spcy, spcz);
+	}
+	}*/
+
+	group->insertChild(group->getNumChildren() - 1, vd);
+
+	if (group && vd)
+	{
+		//Color gamma = group->GetGamma();
+		//vd->SetGamma(gamma);
+		//Color brightness = group->GetBrightness();
+		//vd->SetBrightness(brightness);
+		//Color hdr = group->GetHdr();
+		//vd->SetHdr(hdr);
+		//bool sync_r = group->GetSyncR();
+		//vd->SetSyncR(sync_r);
+		//bool sync_g = group->GetSyncG();
+		//vd->SetSyncG(sync_g);
+		//bool sync_b = group->GetSyncB();
+		//vd->SetSyncB(sync_b);
+
+		//if (m_frame)
+		//{
+		//	m_frame->GetAdjustView()->SetVolumeData(vd);
+		//	m_frame->GetAdjustView()->SetGroupLink(group);
+		//}
+	}
+
+	setValue(gstVolListDirty, true);
+
+	//if (m_frame)
+	//{
+	//	AdjustView* adjust_view = m_frame->GetAdjustView();
+	//	if (adjust_view)
+	//	{
+	//		adjust_view->SetGroupLink(group);
+	//		adjust_view->UpdateSync();
+	//	}
+	//}
+
+	setValue(gstLoadUpdate, true);
+
+	return group;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 void Renderview::Init()
 {
 	bool bval;
@@ -1404,6 +1472,12 @@ void Renderview::Segment()
 
 void Renderview::ForceDraw()
 {
+	bool bval;
+	getValue(gstRefresh, bval);
+	if (!bval)
+		setValue(gstRetainFb, true);
+	else
+		setValue(gstRefresh, false);
 //#ifdef _WIN32
 //	if (!m_set_gl)
 //	{
@@ -1428,7 +1502,6 @@ void Renderview::ForceDraw()
 	Init();
 	//wxPaintDC dc(this);
 
-	bool bval;
 	getValue(gstResize, bval);
 	if (bval)
 		setValue(gstRetainFb, false);
@@ -2420,18 +2493,18 @@ void Renderview::GetTraces(bool update)
 void Renderview::ReadPixels(long chann, bool fp32,
 	long &x, long &y, long &w, long &h, void** image)
 {
-	bool bval;
-	bool enlarge;
 	long lx, ly, lw, lh;
-	getValue(gstDrawCropFrame, enlarge);
-	if (enlarge)
+	bool enlarge;
+	getValue(gstEnlarge, enlarge);
+	bool bval;
+	getValue(gstDrawCropFrame, bval);
+	if (bval)
 	{
 		getValue(gstCropX, lx);
 		getValue(gstCropY, ly);
 		getValue(gstCropW, lw);
 		getValue(gstCropH, lh);
-		getValue(gstEnlarge, bval);
-		if (bval)
+		if (enlarge)
 		{
 			double dval;
 			getValue(gstEnlargeScale, dval);
@@ -7567,6 +7640,42 @@ void Renderview::InitOpenVR()
 
 
 //event functions/////////////////////////////////////////////////////////////////////////////////
+void Renderview::OnSizeXChanged(Event& event)
+{
+	double dval;
+	getValue(gstEnlargeScale, dval);
+	if (dval == 1) return;
+	long lval;
+	getValue(gstSizeX, lval);
+	lval = long(lval * dval + 0.5);
+	setValue(gstSizeX, lval);
+}
+
+void Renderview::OnSizeYChanged(Event& event)
+{
+	double dval;
+	getValue(gstEnlargeScale, dval);
+	if (dval == 1) return;
+	long lval;
+	getValue(gstSizeY, lval);
+	lval = long(lval * dval + 0.5);
+	setValue(gstSizeY, lval);
+}
+
+void Renderview::OnEnlargeScaleChanged(Event& event)
+{
+	double dval;
+	getValue(gstEnlargeScale, dval);
+	if (dval == 1) return;
+	long lx, ly;
+	getValue(gstSizeX, lx);
+	getValue(gstSizeY, ly);
+	lx = long(lx * dval + 0.5);
+	ly = long(ly * dval + 0.5);
+	setValue(gstSizeX, lx);
+	setValue(gstSizeY, ly);
+}
+
 void Renderview::OnCamRotChanged(Event& event)
 {
 	double dval;

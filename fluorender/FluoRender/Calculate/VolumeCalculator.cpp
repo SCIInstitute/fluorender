@@ -26,19 +26,21 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VolumeCalculator.h"
+#include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
-#include <VRenderFrame.h>
-#include <RenderCanvas.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/Texture.h>
 #include <Selection/VolumeSelector.h>
 #include <wx/progdlg.h>
 
 using namespace flrd;
 
 VolumeCalculator::VolumeCalculator():
-	m_frame(0),
+	m_root(0),
 	m_view(0),
 	m_selector(0),
 	m_vd_a(0),
@@ -85,7 +87,7 @@ fluo::VolumeData* VolumeCalculator::GetResult(bool pop)
 
 void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, bool add)
 {
-	if (!m_view || !m_frame)
+	if (!m_view || !m_root)
 		return;
 
 	Calculate(type);
@@ -94,7 +96,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, 
 	if (vd && vd_a)
 	{
 		//clipping planes
-		vector<fluo::Plane*> *planes =
+		std::vector<fluo::Plane*> *planes =
 			vd_a->GetRenderer() ?
 			vd_a->GetRenderer()->get_planes() : 0;
 		if (planes && vd->GetRenderer())
@@ -111,9 +113,9 @@ void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, 
 		{
 				if (add)
 				{
-					m_frame->GetDataManager()->AddVolumeData(vd);
+					//m_frame->GetDataManager()->AddVolumeData(vd);
 					//vr_frame->GetDataManager()->SetVolumeDefault(vd);
-					m_view->AddVolumeData(vd, prev_group);
+					m_view->addVolumeData(vd, prev_group);
 
 					if (type == 5 ||
 						type == 6 ||
@@ -131,15 +133,15 @@ void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, 
 						if (vd_b)
 							vd_b->setValue(gstDisplay, false);
 					}
-					m_frame->UpdateList();
-					m_frame->UpdateTree(vd->getName());
+					//m_frame->UpdateList();
+					//m_frame->UpdateTree(vd->getName());
 				}
 		}
 		else if (type == 7)
 		{
 			vd_a->ReplaceData(vd);
 			glbin_volf->remove(vd);
-			m_frame->GetPropView()->SetVolumeData(vd_a);
+			//m_frame->GetPropView()->SetVolumeData(vd_a);
 		}
 		m_view->RefreshGL(5);
 	}
@@ -151,31 +153,11 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 		type == 6 ||
 		type == 7)
 	{
-		vector<fluo::VolumeData*> vd_list;
+		std::vector<fluo::VolumeData*> vd_list;
 		if (m_selector && m_selector->GetSelectGroup())
 		{
 			fluo::VolumeData* vd = GetVolumeA();
-			fluo::VolumeGroup* group = 0;
-			if (vd)
-			{
-				for (int i = 0; i < m_view->GetLayerNum(); i++)
-				{
-					if (fluo::VolumeGroup* tmp_group = dynamic_cast<fluo::VolumeGroup*>(m_view->GetLayer(i)))
-					{
-						for (int j = 0; j < tmp_group->getNumChildren(); j++)
-						{
-							fluo::VolumeData* tmp_vd = tmp_group->getChild(j)->asVolumeData();
-							if (tmp_vd && tmp_vd == vd)
-							{
-								group = tmp_group;
-								break;
-							}
-						}
-					}
-					if (group)
-						break;
-				}
-			}
+			fluo::VolumeGroup* group = vd->getParent(0)->asVolumeGroup();
 			if (group && group->getNumChildren() > 1)
 			{
 				for (int i = 0; i < group->getNumChildren(); i++)

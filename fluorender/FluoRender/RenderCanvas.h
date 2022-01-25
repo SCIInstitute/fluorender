@@ -731,6 +731,9 @@ public:
 
 private:
 	fluo::RenderCanvasAgent* m_agent;
+	//initializaion
+	bool m_initialized;
+
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	wxSize m_size;
@@ -755,8 +758,6 @@ private:
 	flrd::CelpList m_cell_list;
 	//fisrt volume data in the depth groups
 	//VolumeData* m_first_depth_vd;
-	//initializaion
-	bool m_initialized;
 	bool m_init_view;
 	//bg color
 	fluo::Color m_bg_color;

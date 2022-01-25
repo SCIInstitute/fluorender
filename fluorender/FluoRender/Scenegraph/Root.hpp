@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,64 +25,53 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef FL_CompEditor_h
-#define FL_CompEditor_h
 
-#include <Cell.h>
-#include <vector>
-#include <string>
+#ifndef _ROOT_H_
+#define _ROOT_H_
+
+#include <Names.hpp>
+#include <Group.hpp>
 
 namespace fluo
 {
-	class Renderview;
-	class VolumeData;
-}
-namespace flrd
-{
-	class VolCache;
-	//class ComponentAnalyzer;
-	class ComponentEditor
+	enum SortMethod
+	{
+		SortNone = 0,//no sorting
+		SortAscend = 1,//ascending
+		SortDescend = 2//descending
+	};
+
+	class Root : public Group
 	{
 	public:
-		ComponentEditor();
-		~ComponentEditor();
+		Root();
+		Root(const Root& root, const CopyOp& copyop = CopyOp::SHALLOW_COPY) {}
 
-		void SetView(fluo::Renderview* view)
+		virtual Object* clone(const CopyOp& copyop) const
 		{
-			m_view = view;
+			return 0;
 		}
-		fluo::Renderview* GetView()
+
+		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return m_view;
+			return dynamic_cast<const Root*>(obj) != NULL;
 		}
-		void SetVolume(fluo::VolumeData* vd)
+
+		virtual const char* className() const { return "Root"; }
+
+		virtual Root* asRoot() { return this; }
+		virtual const Root* asRoot() const { return this; }
+
+		virtual bool addChild(Node* child);
+		virtual bool insertChild(size_t index, Node* child);
+		virtual bool removeChildren(size_t pos, size_t num);
+		virtual bool setChild(size_t i, Node* node);
+
+	protected:
+		virtual ~Root()
 		{
-			m_vd = vd;
 		}
-		fluo::VolumeData* GetVolume()
-		{
-			return m_vd;
-		}
-		std::string GetOutput();
-
-		void Clean(int mode);
-		void NewId(unsigned int id, bool id_empty, bool append);
-		void Replace(unsigned int id, bool id_empty);
-		void Replace(unsigned int id, bool id_empty, CelpList &list);
-		void Combine();
-		void Combine(CelpList &list);
-
-	private:
-		fluo::VolumeData* m_vd;
-		fluo::Renderview* m_view;
-		std::string m_output;
-
-	private:
-		fluo::VolumeData* GetCurrentVolume();
-		//read/delete volume cache from file
-		void ReadVolCache(VolCache& vol_cache);
-		void DelVolCache(VolCache& vol_cache);
-
 	};
 }
-#endif//FL_CompEditor_h
+
+#endif//_ROOT_H_

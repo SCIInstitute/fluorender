@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentFactory.hpp>
 //#include <Renderer2DFactory.hpp>
 //#include <Renderer3DFactory.hpp>
+#include <Root.hpp>
 #include <SearchVisitor.hpp>
 
 using namespace fluo;
@@ -48,6 +49,7 @@ Global::Global()
 	BuildTimer();
 	BuildFactories();
 	BuildPaths();
+	BuildRoot();
 }
 
 void Global::BuildTimer()
@@ -84,11 +86,21 @@ void Global::BuildPaths()
 	origin_->addChild(paths);
 }
 
-Object* Global::get(const std::string &name)
+void Global::BuildRoot()
+{
+	Root* root = new Root();
+	root->setName(gstRoot);
+	origin_->addChild(root);
+}
+
+Object* Global::get(const std::string &name, Group* start)
 {
 	SearchVisitor visitor;
 	visitor.matchName(name);
-	origin_->accept(visitor);
+	if (start)
+		start->accept(visitor);
+	else
+		origin_->accept(visitor);
 	ObjectList* list = visitor.getResult();
 	if (list->empty())
 		return 0;
@@ -159,6 +171,12 @@ AgentFactory* Global::getAgentFactory()
 //		return 0;
 //	return dynamic_cast<Renderer3DFactory*>(obj);
 //}
+
+Root* Global::getRoot()
+{
+	Object* obj = get(gstRoot);
+	return dynamic_cast<Root*>(obj);
+}
 
 bool Global::checkName(const std::string &name)
 {

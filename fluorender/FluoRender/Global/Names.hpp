@@ -62,6 +62,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstProcessorFactory "processor factory"
 #define gstDefaultProcessor "default processor"
 
+//root
+#define gstRoot "root"
+#define gstSortValue "sort value"
+#define gstSortMethod "sort method"
+#define gstActivated "activated"
+
 //properties
 //output adjustments
 #define gstGammaR "gamma r"

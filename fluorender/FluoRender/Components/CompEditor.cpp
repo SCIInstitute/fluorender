@@ -27,11 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CompEditor.h"
 #include <VolumeData.hpp>
+#include <Renderview.hpp>
+#include <FLIVR/VolumeRenderer.h>
 #include <Tracking/Tracks.h>
+#include <Tracking/TrackMap.h>
 #include <Tracking/VolCache.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
-#include <RenderCanvas.h>
 
 using namespace flrd;
 
@@ -107,7 +109,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = 0;
@@ -228,7 +230,8 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 	vd->GetRenderer()->clear_tex_current();
 
 	//save label mask to disk
-	int cur_time = m_view->m_tseq_cur_num;
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
 	long chan;
 	vd->getValue(gstChannel, chan);
 	vd->SaveLabel(true, cur_time, chan);
@@ -258,9 +261,10 @@ void ComponentEditor::Replace(unsigned int id, bool id_empty)
 	if (!id)
 		return;
 
-	int cur_time = m_view->m_tseq_cur_num;
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
 	//get current mask
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -319,10 +323,11 @@ void ComponentEditor::Replace(unsigned int id,
 	//trace group
 	Tracks *trace_group = m_view->GetTraceGroup();
 	bool track_map = trace_group && trace_group->GetTrackMap()->GetFrameNum();
-	int cur_time = m_view->m_tseq_cur_num;
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
 
 	//get current mask
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -397,9 +402,10 @@ void ComponentEditor::Combine()
 	if (!m_view)
 		return;
 
-	int cur_time = m_view->m_tseq_cur_num;
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
 	//get current mask
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -456,7 +462,8 @@ void ComponentEditor::Combine(CelpList &list)
 	Tracks *trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
-	int cur_time = m_view->m_tseq_cur_num;
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
 
 	//find the largest cell in the list
 	flrd::Celp cell;
@@ -477,7 +484,7 @@ void ComponentEditor::Combine(CelpList &list)
 		return;
 
 	//get current mask
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -525,13 +532,20 @@ void ComponentEditor::Combine(CelpList &list)
 		cur_time);
 }
 
+fluo::VolumeData* ComponentEditor::GetCurrentVolume()
+{
+	fluo::Referenced* ref;
+	m_view->getRvalu(gstCurrentVolume, &ref);
+	return dynamic_cast<fluo::VolumeData*>(ref);
+}
+
 //read/delete volume cache
 void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 {
 	//get volume, readers
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -542,8 +556,10 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 	long chan;
 	vd->getValue(gstChannel, chan);
 	int frame = vol_cache.frame;
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
 
-	if (frame == m_view->m_tseq_cur_num)
+	if (frame == cur_time)
 	{
 		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
@@ -581,7 +597,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -607,7 +623,9 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 	}
 
 	vol_cache.valid = false;
-	if (frame != m_view->m_tseq_cur_num)
+	long cur_time;
+	m_view->getValue(gstCurrentFrame, cur_time);
+	if (frame != cur_time)
 	{
 		if (vol_cache.data)
 			nrrdNuke((Nrrd*)vol_cache.nrrd_data);

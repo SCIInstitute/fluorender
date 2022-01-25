@@ -152,6 +152,9 @@ namespace fluo
 		virtual Renderview* asRenderview() { return this; }
 		virtual const Renderview* asRenderview() const { return this; }
 
+		//organize data
+		VolumeGroup* addVolumeData(VolumeData* vd, const std::string &group_name = "");
+
 		//migrated from the RenderCanvas class
 		//initialization
 		void Init();
@@ -472,6 +475,9 @@ namespace fluo
 #endif
 
 	private:
+		void OnSizeXChanged(Event& event);//compute size with enlargement
+		void OnSizeYChanged(Event& event);
+		void OnEnlargeScaleChanged(Event& event);//
 		void OnCamRotChanged(Event& event);//update rotation
 		void OnPerspectiveChanged(Event& event);
 		void OnVolListDirtyChanged(Event& event);
