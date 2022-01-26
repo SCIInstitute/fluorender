@@ -47,7 +47,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Distance/RulerRenderer.h>
 #include <Distance/RulerHandler.h>
-#include <Tracking/Cell.h>
 #include <Tracking/Tracks.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
@@ -76,7 +75,6 @@ Renderview::Renderview()
 	m_cur_ruler = 0;
 	m_trace_group = 0;
 	m_mvr = 0;
-	m_cell_list = 0;
 	//temporary, dynamic data will be managed by global
 	m_ruler_list = new flrd::RulerList();
 	m_selector = new flrd::VolumeSelector();
@@ -96,7 +94,6 @@ Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	m_cur_ruler = 0;
 	m_trace_group = 0;
 	m_mvr = 0;
-	m_cell_list = 0;
 	//temporary, dynamic data will be managed by global
 	m_ruler_list = new flrd::RulerList();
 	m_selector = new flrd::VolumeSelector();
@@ -2220,7 +2217,7 @@ flrd::Ruler* Renderview::GetRuler(unsigned int id)
 //draw highlighted comps
 void Renderview::DrawCells()
 {
-	if (!m_cell_list || m_cell_list->empty())
+	if (m_cell_list.empty())
 		return;
 	double width = 1.0;
 	getValue(gstLineWidth, width);
@@ -2267,9 +2264,6 @@ void Renderview::DrawCells()
 
 unsigned int Renderview::DrawCellVerts(std::vector<float>& verts)
 {
-	if (!m_cell_list)
-		return 0;
-
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 	Transform mv;
@@ -2278,7 +2272,7 @@ unsigned int Renderview::DrawCellVerts(std::vector<float>& verts)
 	p.set(glm::value_ptr(m_proj_mat));
 
 	//estimate
-	int vert_num = m_cell_list->size();
+	int vert_num = m_cell_list.size();
 	verts.reserve(vert_num * 8 * 3 * 2);
 
 	unsigned int num = 0;
@@ -2286,11 +2280,11 @@ unsigned int Renderview::DrawCellVerts(std::vector<float>& verts)
 	Color c;
 	getValue(gstTextColor, c);
 	double sx, sy, sz;
-	sx = m_cell_list->sx;
-	sy = m_cell_list->sy;
-	sz = m_cell_list->sz;
-	for (auto it = m_cell_list->begin();
-		it != m_cell_list->end(); ++it)
+	sx = m_cell_list.sx;
+	sy = m_cell_list.sy;
+	sz = m_cell_list.sz;
+	for (auto it = m_cell_list.begin();
+		it != m_cell_list.end(); ++it)
 	{
 		BBox box = it->second->GetBox(sx, sy, sz);
 		GetCellPoints(box, p1, p2, p3, p4, mv, p);

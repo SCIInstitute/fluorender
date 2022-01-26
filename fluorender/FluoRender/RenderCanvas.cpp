@@ -373,10 +373,10 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	bool bval = m_frame && m_frame->GetBenchmark();
 	m_agent->setValue(gstBenchmark, bval);
 
-	m_agent->getObject()->GetRulerHandler()->SetView(this);
+	view->GetRulerHandler()->SetView(view);
 	m_agent->getObject()->GetRulerHandler()->SetRulerList(
 		m_agent->getObject()->GetRulerList());
-	m_agent->getObject()->GetRulerRenderer()->SetView(this);
+	m_agent->getObject()->GetRulerRenderer()->SetView(view);
 	m_agent->getObject()->GetRulerRenderer()->SetRulerList(
 		m_agent->getObject()->GetRulerList());
 	m_agent->getObject()->GetVolumePoint()->SetView(this);

@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshGroup.hpp>
 #include <Group.hpp>
 #include <Names.hpp>
+#include <Cell.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
@@ -73,7 +74,6 @@ namespace flrd
 	class RulerHandler;
 	class RulerRenderer;
 	class Tracks;
-	class CelpList;
 	class ScriptProc;
 	class VolumePoint;
 }
@@ -258,7 +258,7 @@ namespace fluo
 			long &x, long &y, long &w, long &h, void** image);
 
 		//set cell list
-		void SetCellList(flrd::CelpList *list) { m_cell_list = list; }
+		void SetCellList(flrd::CelpList &list) { m_cell_list = list; }
 
 		glm::mat4 GetModelView()
 		{
@@ -444,7 +444,7 @@ namespace fluo
 		//multivolume
 		flvr::MultiVolumeRenderer* m_mvr;
 		//highlighted comps
-		flrd::CelpList *m_cell_list;
+		flrd::CelpList m_cell_list;
 		//volume selector for segmentation
 		flrd::VolumeSelector *m_selector;
 		//calculator

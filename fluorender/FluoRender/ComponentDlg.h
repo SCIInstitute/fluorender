@@ -41,9 +41,13 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
 #include <chrono>
+#include <set>
 
 class VRenderFrame;
-class RenderCanvas;
+namespace fluo
+{
+	class Renderview;
+}
 
 DECLARE_APP(VRenderApp)
 class ComponentDlg : public wxPanel
@@ -203,8 +207,8 @@ public:
 	void GetSettings();
 	void LoadSettings(wxString filename);
 	void SaveSettings(wxString filename);
-	void SetView(RenderCanvas* view);
-	RenderCanvas* GetView() { return m_view; }
+	void SetView(fluo::Renderview* view);
+	fluo::Renderview* GetView() { return m_view; }
 
 	void GenerateComp(bool use_sel, bool command=true);
 	void Fixate(bool command = true);
@@ -243,7 +247,7 @@ public:
 
 private:
 	VRenderFrame* m_frame;
-	RenderCanvas* m_view;
+	fluo::Renderview* m_view;
 
 	//progress
 	float m_prog_bit;

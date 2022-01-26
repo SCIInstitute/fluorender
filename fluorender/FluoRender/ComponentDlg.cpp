@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Annotations.hpp>
@@ -43,7 +44,6 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <string>
 #include <cctype>
-#include <set>
 #include <fstream>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
@@ -1415,7 +1415,7 @@ void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void ComponentDlg::SetView(RenderCanvas* view)
+void ComponentDlg::SetView(fluo::Renderview* view)
 {
 	m_view = view;
 	if (m_view)
@@ -2238,9 +2238,11 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
-	int shuffle = 0;
-	if (m_view && m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
+	if (!m_view) return;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd) return;
+	int shuffle = vd->GetShuffle();
+
 	wxString str = m_comp_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2321,6 +2323,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
+	bool bval;
 	wxString str;
 	std::string sstr;
 	//get id
@@ -2332,7 +2335,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 	if (GetIds(sstr, id, brick_id))
 	{
 		//get current mask
-		fluo::VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->GetCurrentVolume();
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2353,13 +2356,17 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		{
 			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_paint_count)
+				m_view->getValue(gstPaintCount, bval);
+				if (bval)
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_paint_colocalize)
-				m_frame->GetColocalizationDlg()->Colocalize();
+			if (m_frame->GetColocalizationDlg())
+			{
+				m_view->getValue(gstPaintColocalize, bval);
+				if (bval)
+					m_frame->GetColocalizationDlg()->Colocalize();
+			}
 		}
 	}
 }
@@ -2380,7 +2387,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	get_all = !get_all;
 
 	//get current mask
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
 
@@ -2397,17 +2404,22 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	m_view->RefreshGL(39);
 
 	//frame
+	bool bval;
 	if (m_frame)
 	{
 		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_paint_count)
+			m_view->getValue(gstPaintCount, bval);
+			if (bval)
 				m_frame->GetBrushToolDlg()->Update(0);
 			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetColocalizationDlg())
+		{
+			m_view->getValue(gstPaintColocalize, bval);
+			if (bval)
+				m_frame->GetColocalizationDlg()->Colocalize();
+		}
 	}
 }
 
@@ -2417,24 +2429,29 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
 	m_view->RefreshGL(39);
 
 	//frame
+	bool bval;
 	if (m_frame)
 	{
 		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_paint_count)
+			m_view->getValue(gstPaintCount, bval);
+			if (bval)
 				m_frame->GetBrushToolDlg()->Update(0);
 			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetColocalizationDlg())
+		{
+			m_view->getValue(gstPaintColocalize, bval);
+			if (bval)
+				m_frame->GetColocalizationDlg()->Colocalize();
+		}
 	}
 }
 
@@ -2444,7 +2461,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
@@ -2461,7 +2478,7 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -2472,9 +2489,11 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 //modify
 void ComponentDlg::OnNewIDText(wxCommandEvent &event)
 {
-	int shuffle = 0;
-	if (m_view && m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
+	if (!m_view) return;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd) return;
+	int shuffle = vd->GetShuffle();
+
 	wxString str = m_new_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2542,7 +2561,7 @@ void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 	if (!m_view)
 		return;
 	flrd::ComponentEditor editor;
-	editor.SetVolume(m_view->m_cur_vol);
+	editor.SetVolume(m_view->GetCurrentVolume());
 	editor.Clean(0);
 	m_view->RefreshGL(39);
 }
@@ -2637,14 +2656,13 @@ void ComponentDlg::OutputMulti(int color_type)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	m_comp_analyzer.SetVolume(vd);
 	list<fluo::VolumeData*> channs;
 	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
 	{
 		if (m_frame)
 		{
-			std::string group_name;
 			fluo::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
@@ -2654,10 +2672,9 @@ void ComponentDlg::OutputMulti(int color_type)
 					m_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
-						group_name = m_view->AddGroup("");
-						group = m_view->GetGroup(group_name);
+						group = m_view->addVolumeGroup("");
 					}
-					m_view->AddVolumeData(vd, group_name);
+					m_view->addVolumeData(vd, group);
 				}
 			}
 			//if (group)
@@ -2683,27 +2700,25 @@ void ComponentDlg::OutputRgb(int color_type)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	m_comp_analyzer.SetVolume(vd);
 	list<fluo::VolumeData*> channs;
 	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
 	{
 		if (m_frame)
 		{
-			std::string group_name;
 			fluo::VolumeGroup* group = 0;
 			for (auto i = channs.begin(); i != channs.end(); ++i)
 			{
 				fluo::VolumeData* vd = *i;
 				if (vd)
 				{
-					m_frame->GetDataManager()->AddVolumeData(vd);
+					//m_frame->GetDataManager()->AddVolumeData(vd);
 					if (i == channs.begin())
 					{
-						group_name = m_view->AddGroup("");
-						group = m_view->GetGroup(group_name);
+						group = m_view->addVolumeGroup("");
 					}
-					m_view->AddVolumeData(vd, group_name);
+					m_view->addVolumeData(vd, group);
 				}
 			}
 			//if (group)
@@ -2747,7 +2762,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		type = 1;
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	m_comp_analyzer.SetVolume(vd);
 	fluo::Annotations* ann = glbin_annf->build();
 	if (m_comp_analyzer.GenAnnotations(ann, m_consistent, type))
@@ -2756,10 +2771,10 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 		ann->setValue(gstTransform, vd->GetTexture()->transform());
 		if (m_frame)
 		{
-			DataManager* mgr = m_frame->GetDataManager();
-			if (mgr)
-				mgr->AddAnnotations(ann);
-			m_view->AddAnnotations(ann);
+			//DataManager* mgr = m_frame->GetDataManager();
+			//if (mgr)
+			//	mgr->AddAnnotations(ann);
+			m_view->addChild(ann);
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->getName());
 		}
@@ -3057,11 +3072,12 @@ void ComponentDlg::AlignCenter(flrd::Ruler* ruler)
 		return;
 	fluo::Point center = ruler->GetCenter();
 	double tx, ty, tz;
-	m_view->GetObjCenters(tx, ty, tz);
-	m_view->SetObjTrans(
-		tx - center.x(),
-		center.y() - ty,
-		center.z() - tz);
+	m_view->getValue(gstObjCtrX, tx);
+	m_view->getValue(gstObjCtrY, ty);
+	m_view->getValue(gstObjCtrZ, tz);
+	m_view->setValue(gstObjTransX, tx - center.x());
+	m_view->setValue(gstObjTransY, center.y() - ty);
+	m_view->setValue(gstObjTransZ, center.z() - tz);
 }
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
@@ -3159,7 +3175,7 @@ void ComponentDlg::Cluster()
 
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -3383,7 +3399,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -3517,7 +3533,7 @@ void ComponentDlg::Fixate(bool command)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	vd->PushLabel(true);
@@ -3530,7 +3546,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -3578,7 +3594,7 @@ void ComponentDlg::SelectFullComp()
 		if (!m_view)
 			return;
 		//get current mask
-		fluo::VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->GetCurrentVolume();
 		flrd::ComponentSelector comp_selector(vd);
 		//cell size filter
 		bool use = m_analysis_min_check->GetValue();
@@ -3599,17 +3615,22 @@ void ComponentDlg::SelectFullComp()
 	m_view->RefreshGL(39);
 
 	//frame
+	bool bval;
 	if (m_frame)
 	{
 		if (m_frame->GetBrushToolDlg())
 		{
-			if (m_view->m_paint_count)
+			m_view->getValue(gstPaintCount, bval);
+			if (bval)
 				m_frame->GetBrushToolDlg()->Update(0);
 			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 		}
-		if (m_frame->GetColocalizationDlg() &&
-			m_view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
+		if (m_frame->GetColocalizationDlg())
+		{
+			m_view->getValue(gstPaintColocalize, bval);
+			if (bval)
+				m_frame->GetColocalizationDlg()->Colocalize();
+		}
 	}
 }
 
@@ -3627,7 +3648,7 @@ void ComponentDlg::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -3643,9 +3664,9 @@ void ComponentDlg::Analyze(bool sel)
 	if (m_colocal)
 	{
 		m_comp_analyzer.ClearCoVolumes();
-		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
+		fluo::VolumeList list = m_view->GetVolList();
+		for (auto vdi : list)
 		{
-			fluo::VolumeData* vdi = m_view->GetDispVolumeData(i);
 			if (vdi != vd)
 				m_comp_analyzer.AddCoVolume(vdi);
 		}
@@ -3711,8 +3732,8 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 
 	fluo::Color c;
 	fluo::VolumeData* vd = 0;
-	if (m_view && m_view->m_cur_vol)
-		vd = m_view->m_cur_vol;
+	if (m_view)
+		vd = m_view->GetCurrentVolume();
 	unsigned long lval;
 	wxColor color;
 
@@ -4012,7 +4033,7 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 void ComponentDlg::FindCelps(flrd::CelpList &list,
 	flrd::CelpListIter &it, bool links)
 {
-	list.insert(pair<unsigned long long, flrd::Celp>
+	list.insert(std::pair<unsigned long long, flrd::Celp>
 		(it->second->GetEId(), it->second));
 
 	if (links)
@@ -4026,7 +4047,7 @@ void ComponentDlg::FindCelps(flrd::CelpList &list,
 			for (auto it2 = links.begin();
 				it2 != links.end(); ++it2)
 			{
-				list.insert(pair<unsigned long long, flrd::Celp>
+				list.insert(std::pair<unsigned long long, flrd::Celp>
 					(it2->second->GetEId(), it2->second));
 			}
 		}
@@ -4228,7 +4249,7 @@ void ComponentDlg::GetCompSelection()
 		flrd::CelpList cl;
 		GetCellList(cl);
 		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
+		m_view->setValue(gstInteractive, false);
 		m_view->RefreshGL(39);
 	}
 }
@@ -4300,7 +4321,7 @@ void ComponentDlg::IncludeComps()
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -4329,21 +4350,26 @@ void ComponentDlg::IncludeComps()
 
 		cl.clear();
 		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
+		m_view->setValue(gstInteractive, false);
 		m_view->RefreshGL(39);
 
 		//frame
+		bool bval;
 		if (m_frame)
 		{
 			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_paint_count)
+				m_view->getValue(gstPaintCount, bval);
+				if (bval)
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_paint_colocalize)
-				m_frame->GetColocalizationDlg()->Colocalize();
+			if (m_frame->GetColocalizationDlg())
+			{
+				m_view->getValue(gstPaintColocalize, bval);
+				if (bval)
+					m_frame->GetColocalizationDlg()->Colocalize();
+			}
 		}
 	}
 }
@@ -4352,7 +4378,7 @@ void ComponentDlg::ExcludeComps()
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -4384,21 +4410,26 @@ void ComponentDlg::ExcludeComps()
 
 		cl.clear();
 		m_view->SetCellList(cl);
-		m_view->SetInteractive(false);
+		m_view->setValue(gstInteractive, false);
 		m_view->RefreshGL(39);
 
 		//frame
+		bool bval;
 		if (m_frame)
 		{
 			if (m_frame->GetBrushToolDlg())
 			{
-				if (m_view->m_paint_count)
+				m_view->getValue(gstPaintCount, bval);
+				if (bval)
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
 			}
-			if (m_frame->GetColocalizationDlg() &&
-				m_view->m_paint_colocalize)
-				m_frame->GetColocalizationDlg()->Colocalize();
+			if (m_frame->GetColocalizationDlg())
+			{
+				m_view->getValue(gstPaintColocalize, bval);
+				if (bval)
+					m_frame->GetColocalizationDlg()->Colocalize();
+			}
 		}
 	}
 }

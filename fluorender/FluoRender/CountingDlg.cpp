@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CountingDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
@@ -171,7 +172,7 @@ void CountingDlg::LoadDefault()
 	}
 }
 
-void CountingDlg::GetSettings(RenderCanvas* view)
+void CountingDlg::GetSettings(fluo::Renderview* view)
 {
 	if (!view)
 		return;
@@ -195,7 +196,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -253,7 +254,9 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 		wxString vol_unit_text;
 		vol_unit_text = wxString::Format("%.0f", vol_unit);
 		vol_unit_text += " ";
-		switch (m_view->m_sb_unit)
+		long sb_unit;
+		m_view->getValue(gstScaleBarUnit, sb_unit);
+		switch (sb_unit)
 		{
 		case 0:
 			vol_unit_text += L"nm\u00B3";
