@@ -35,8 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Transform.h>
 #include <vector>
 
-class RenderCanvas;
-
+namespace fluo
+{
+	class Renderview;
+}
 namespace flrd
 {
 	class RulerRenderer
@@ -45,7 +47,7 @@ namespace flrd
 		RulerRenderer();
 		~RulerRenderer();
 
-		void SetView(RenderCanvas* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 		}
@@ -73,7 +75,7 @@ namespace flrd
 		void Draw();
 
 	private:
-		RenderCanvas *m_view;
+		fluo::Renderview *m_view;
 		RulerList *m_ruler_list;
 		double m_line_size;
 		bool m_draw_text;

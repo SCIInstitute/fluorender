@@ -27,13 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerRenderer.h"
-#include "RenderCanvas.h"
+#include <Renderview.hpp>
 #include <Types/Vector.h>
 #include <Types/Quaternion.h>
 #include <FLIVR/TextRenderer.h>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/VertexArray.h>
 #include <FLIVR/TextureRenderer.h>
+#include <FLIVR/ImgShader.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;
@@ -60,9 +61,11 @@ void RulerRenderer::Draw()
 	if (m_ruler_list->empty())
 		return;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long tseq_cur_num;
+	m_view->getValue(gstCurrentFrame, tseq_cur_num);
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -108,10 +111,14 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	if (!m_view || !m_ruler_list)
 		return 0;
 
-	int tseq_cur_num = m_view->m_tseq_cur_num;
-	bool persp = m_view->GetPersp();
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long tseq_cur_num;
+	m_view->getValue(gstCurrentFrame, tseq_cur_num);
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
+	bool persp;
+	m_view->getValue(gstPerspective, persp);
+
 	float w = flvr::TextRenderer::text_texture_manager_.GetSize() / 4.0f;
 	float px, py;
 
@@ -133,7 +140,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	fluo::Point p1, p2;
 	flrd::RulerPoint *rp1, *rp2;
 	fluo::Color c;
-	fluo::Color text_color = m_view->GetTextColor();
+	fluo::Color text_color;
+	m_view->getValue(gstTextColor, text_color);
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*m_ruler_list)[i];
@@ -440,9 +448,11 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 	if (!m_view)
 		return;
 
-	bool persp = m_view->GetPersp();
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
+	bool persp;
+	m_view->getValue(gstPerspective, persp);
 	float px, py;
 	fluo::Point p1, p2;
 	int sec = 20;
@@ -458,7 +468,7 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 	for (int i = 1; i <= sec; ++i)
 	{
 		double theta = 90.0 * i / sec;
-		double rth = d2r(theta);
+		double rth = fluo::d2r(theta);
 		fluo::Quaternion q(theta, axis);
 		q.Normalize();
 		fluo::Quaternion q2 = (-q) * q0 * q;
@@ -500,7 +510,8 @@ void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 	sx = 2.0 / nx;
 	sy = 2.0 / ny;
 	fluo::Color c;
-	fluo::Color text_color = m_view->GetTextColor();
+	fluo::Color text_color;
+	m_view->getValue(gstTextColor, text_color);
 	fluo::Point p2;
 	float px, py, p2x, p2y;
 	fluo::Transform mv, p;

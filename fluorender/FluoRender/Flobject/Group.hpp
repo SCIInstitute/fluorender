@@ -60,6 +60,7 @@ namespace fluo
 		*/
 		virtual bool addChild(Node* child);
 		virtual bool insertChild(size_t index, Node* child);
+		virtual bool insertChildAfter(Node* prv_child, Node* child);
 		inline bool removeChild(Node* child)
 		{
 			size_t pos = getChildIndex(child);

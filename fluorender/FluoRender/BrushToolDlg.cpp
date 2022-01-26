@@ -487,7 +487,7 @@ BrushToolDlg::~BrushToolDlg()
 		delete m_aligner;
 }
 
-void BrushToolDlg::GetSettings(RenderCanvas* view)
+void BrushToolDlg::GetSettings(fluo::Renderview* view)
 {
 	if (!view)
 		return;
@@ -718,12 +718,12 @@ void BrushToolDlg::OnGrow(wxCommandEvent &event)
 		m_toolbar->ToggleTool(ID_BrushSolid, false);
 
 		if (m_view)
-			m_view->SetIntMode(10);
+			m_view->setValue(gstInterMode, long(10));
 	}
 	else
 	{
 		if (m_view)
-			m_view->SetIntMode(1);
+			m_view->setValue(gstInterMode, long(1));
 	}
 	if (m_frame && m_frame->GetTree())
 		m_frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
@@ -1034,7 +1034,9 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 	if (m_view && m_selector)
 	{
 		m_selector->SetBrushSize(val, -1.0);
-		if (m_view->GetIntMode()==2)
+		long lval;
+		m_view->getValue(gstInterMode, lval);
+		if (lval == 2)
 			m_view->RefreshGL(39);
 	}
 }
@@ -1092,7 +1094,9 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	if (m_view && m_selector)
 	{
 		m_selector->SetBrushSize(-1.0, val);
-		if (m_view->GetIntMode()==2)
+		long lval;
+		m_view->getValue(gstInterMode, lval);
+		if (lval == 2)
 			m_view->RefreshGL(39);
 	}
 }
@@ -1173,11 +1177,15 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 				if (m_align_center->GetValue())
 				{
 					double tx, ty, tz;
-					m_view->GetObjCenters(tx, ty, tz);
-					m_view->SetObjTrans(
-						tx - center.x(),
-						center.y() - ty,
-						center.z() - tz);
+					m_view->getValue(gstObjCtrX, tx);
+					m_view->getValue(gstObjCtrY, ty);
+					m_view->getValue(gstObjCtrZ, tz);
+					tx = tx - center.x();
+					ty = center.y() - ty;
+					tz = center.z() - tz;
+					m_view->setValue(gstObjTransX, tx);
+					m_view->setValue(gstObjTransY, ty);
+					m_view->setValue(gstObjTransZ, tz);
 				}
 			}
 		}
@@ -1240,7 +1248,9 @@ void BrushToolDlg::UpdateSize()
 	wxString unit;
 	if (m_view)
 	{
-		switch (m_view->m_sb_unit)
+		long lval;
+		m_view->getValue(gstScaleBarUnit, lval);
+		switch (lval)
 		{
 		case 0:
 			unit = L"nm\u00B3";
@@ -1300,7 +1310,7 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 {
 	if (m_view)
-		m_view->m_paint_count = m_auto_update_btn->GetValue();
+		m_view->setValue(gstPaintCount, m_auto_update_btn->GetValue());
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)

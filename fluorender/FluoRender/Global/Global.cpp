@@ -90,6 +90,13 @@ void Global::BuildRoot()
 {
 	Root* root = new Root();
 	root->setName(gstRoot);
+	root->addValue(gstCurrentSelect, long(0));
+	root->addRvalu(gstCurrentView, (Referenced*)(0));
+	root->addRvalu(gstCurrentVolume, (Referenced*)(0));
+	root->addRvalu(gstCurrentMesh, (Referenced*)(0));
+	root->addRvalu(gstCurrentVolumeGroup, (Referenced*)(0));
+	root->addRvalu(gstCurrentMeshGroup, (Referenced*)(0));
+	root->addRvalu(gstCurrentAnnotations, (Referenced*)(0));
 	origin_->addChild(root);
 }
 

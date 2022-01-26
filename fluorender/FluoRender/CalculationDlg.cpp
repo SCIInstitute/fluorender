@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
 #include "VRenderFrame.h"
+#include <Global.hpp>
+#include <Root.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Calculate/CombineList.h>
@@ -140,69 +142,106 @@ void CalculationDlg::SetGroup(fluo::VolumeGroup* group)
 //operands
 void CalculationDlg::OnLoadA(wxCommandEvent &event)
 {
-	m_view = 0;
-	if (m_frame)
+	std::string str;
+	long sel_type;
+	glbin_root->getValue(gstCurrentSelect, sel_type);
+	switch (sel_type)
 	{
-		switch (m_frame->GetCurSelType())
-		{
-		case 2://volume
-			m_vol1 = m_frame->GetCurSelVol();
-			m_group = 0;
-			if (m_vol1)
-			{
-				std::string str = m_vol1->getName();
-				m_calc_a_text->SetValue(str);
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetView(i);
-					if (view && view->GetVolumeData(str))
-					{
-						m_view = view;
-						break;
-					}
-				}
-			}
-			break;
-		case 5://volume group
-			m_vol1 = 0;
-			if (m_group)
-			{
-				std::string str = m_group->getName();
-				m_calc_a_text->SetValue(str);
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetView(i);
-					if (view && view->GetGroup(str))
-					{
-						m_view = view;
-						break;
-					}
-				}
-			}
-			break;
-		}
-		if (!m_view)
-			m_view = m_frame->GetView(0);
+	case 2://volume
+		m_view = glbin_root->getCurrentRenderview();
+		m_vol1 = glbin_root->getCurrentVolumeData();
+		m_group = 0;
+		str = m_vol1->getName();
+		break;
+	case 5://volume group
+		m_view = glbin_root->getCurrentRenderview();
+		m_vol1 = 0;
+		m_group = glbin_root->getCurrentVolumeGroup();
+		str = m_group->getName();
+		break;
 	}
+	m_calc_a_text->SetValue(str);
+	//if (m_frame)
+	//{
+	//	switch (m_frame->GetCurSelType())
+	//	{
+	//	case 2://volume
+	//		m_vol1 = m_frame->GetCurSelVol();
+	//		m_group = 0;
+	//		if (m_vol1)
+	//		{
+	//			std::string str = m_vol1->getName();
+	//			m_calc_a_text->SetValue(str);
+	//			for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(i);
+	//				if (view && view->GetVolumeData(str))
+	//				{
+	//					m_view = view;
+	//					break;
+	//				}
+	//			}
+	//		}
+	//		break;
+	//	case 5://volume group
+	//		m_vol1 = 0;
+	//		if (m_group)
+	//		{
+	//			std::string str = m_group->getName();
+	//			m_calc_a_text->SetValue(str);
+	//			for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(i);
+	//				if (view && view->GetGroup(str))
+	//				{
+	//					m_view = view;
+	//					break;
+	//				}
+	//			}
+	//		}
+	//		break;
+	//	}
+	//	if (!m_view)
+	//		m_view = m_frame->GetView(0);
+	//}
 }
 
 void CalculationDlg::OnLoadB(wxCommandEvent &event)
 {
-	if (m_frame)
+	std::string str;
+	long sel_type;
+	glbin_root->getValue(gstCurrentSelect, sel_type);
+	switch (sel_type)
 	{
-		switch (m_frame->GetCurSelType())
-		{
-		case 2://volume
-			m_vol2 = m_frame->GetCurSelVol();
-			if (m_vol2)
-				m_calc_b_text->SetValue(m_vol2->getName());
-			break;
-		case 5://volume group
-			if (m_group)
-				m_calc_b_text->SetValue(m_group->getName());
-			break;
-		}
+	case 2://volume
+		m_view = glbin_root->getCurrentRenderview();
+		m_vol2 = glbin_root->getCurrentVolumeData();
+		m_group = 0;
+		str = m_vol2->getName();
+		break;
+	case 5://volume group
+		m_view = glbin_root->getCurrentRenderview();
+		m_vol2 = 0;
+		m_group = glbin_root->getCurrentVolumeGroup();
+		str = m_group->getName();
+		break;
 	}
+	m_calc_b_text->SetValue(str);
+	//if (m_frame)
+	//{
+	//	switch (m_frame->GetCurSelType())
+	//	{
+	//	case 2://volume
+	//		m_vol2 = m_frame->GetCurSelVol();
+	//		if (m_vol2)
+	//			m_calc_b_text->SetValue(m_vol2->getName());
+	//		break;
+	//	case 5://volume group
+	//		if (m_group)
+	//			m_calc_b_text->SetValue(m_group->getName());
+	//		break;
+	//	}
+	//}
 }
 
 //operators
@@ -308,7 +347,6 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		if (results.empty())
 			return;
 
-		std::string group_name = "";
 		fluo::VolumeGroup* group = 0;
 		fluo::VolumeData* volume = 0;
 		for (auto i = results.begin(); i != results.end(); ++i)
@@ -317,13 +355,10 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 			if (vd)
 			{
 				if (!volume) volume = vd;
-				m_frame->GetDataManager()->AddVolumeData(vd);
+				//m_frame->GetDataManager()->AddVolumeData(vd);
 				if (i == results.begin())
-				{
-					group_name = m_view->AddGroup("");
-					group = m_view->GetGroup(group_name);
-				}
-				m_view->AddVolumeData(vd, group_name);
+					group = m_view->addVolumeGroup();
+				m_view->addVolumeData(vd, group);
 			}
 		}
 		//if (group && volume)

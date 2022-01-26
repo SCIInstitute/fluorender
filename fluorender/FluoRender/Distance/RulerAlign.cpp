@@ -26,10 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Distance/RulerAlign.h>
+#include <RulerAlign.h>
+#include <Renderview.hpp>
 #include <Types/Quaternion.h>
 #include <Types/Utils.h>
-#include <RenderCanvas.h>
 #include <Distance/Pca.h>
 
 using namespace flrd;
@@ -71,12 +71,14 @@ void RulerAlign::AlignRuler(int axis_type)
 	fluo::Vector rotv = Cross(m_axis, axis);
 	rotv.normalize();
 	double ang = Dot(m_axis, axis);
-	ang = r2d(std::acos(ang));
+	ang = fluo::r2d(std::acos(ang));
 	fluo::Quaternion q(ang, rotv);
+	m_view->setValue(gstCamRotZeroQ, fluo::Quaternion());
 	double qx, qy, qz;
-	m_view->ResetZeroRotations(qx, qy, qz);
 	q.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz);
+	m_view->setValue(gstCamRotX, qx);
+	m_view->setValue(gstCamRotY, -qy);
+	m_view->setValue(gstCamRotZ, -qz);
 	m_view->RefreshGL(50);
 }
 
@@ -133,7 +135,7 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	rotv.normalize();
 	//angle between source0 and target0
 	double ang = Dot(source0, target0);
-	ang = r2d(std::acos(ang));
+	ang = fluo::r2d(std::acos(ang));
 	fluo::Quaternion q(ang, rotv);
 	q.Normalize();
 	//rotate source1
@@ -143,7 +145,7 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	s1v.normalize();
 	//angle between s1v and target1
 	ang = Dot(s1v, target1);
-	ang = r2d(std::acos(ang));
+	ang = fluo::r2d(std::acos(ang));
 	//decide direction
 	fluo::Vector dir = Cross(s1v, target1);
 	double t0_dir = Dot(target0, dir);
@@ -153,9 +155,11 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	fluo::Quaternion rotq(ang, source0);
 	rotq.Normalize();
 	fluo::Quaternion q2 = q * rotq;
+	m_view->setValue(gstCamRotZeroQ, fluo::Quaternion());
 	double qx, qy, qz;
-	m_view->ResetZeroRotations(qx, qy, qz);
 	q2.ToEuler(qx, qy, qz);
-	m_view->SetRotations(qx, -qy, -qz);
+	m_view->setValue(gstCamRotX, qx);
+	m_view->setValue(gstCamRotY, -qy);
+	m_view->setValue(gstCamRotZ, -qz);
 	m_view->RefreshGL(50);
 }

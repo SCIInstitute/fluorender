@@ -34,10 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <algorithm>
 
-class RenderCanvas;
 class wxFileConfig;
 namespace fluo
 {
+	class Renderview;
 	class VolumeData;
 }
 namespace flrd
@@ -69,7 +69,7 @@ namespace flrd
 			m_group = group;
 		}
 
-		void SetView(RenderCanvas* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 			m_vp.SetView(view);
@@ -163,7 +163,7 @@ namespace flrd
 
 	private:
 		unsigned int m_group;
-		RenderCanvas *m_view;
+		fluo::Renderview *m_view;
 		fluo::VolumeData * m_vd;
 		ComponentAnalyzer* m_ca;
 		VolumePoint m_vp;

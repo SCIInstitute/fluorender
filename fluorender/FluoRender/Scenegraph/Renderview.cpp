@@ -166,16 +166,34 @@ Renderview::~Renderview()
 	if (m_text_renderer) delete m_text_renderer;
 }
 
+VolumeGroup* Renderview::addVolumeGroup(const std::string &group_name, const std::string &prv_group_name)
+{
+	VolumeGroup* group = glbin_volf->buildGroup();
+	if (group && group_name != "")
+		group->setName(group_name);
+	VolumeGroup* prv_group = dynamic_cast<VolumeGroup*>(glbin.get(prv_group_name, glbin_root));
+	if (!insertChildAfter(prv_group, group))
+		addChild(group);
+	return group;
+}
+
 VolumeGroup* Renderview::addVolumeData(VolumeData* vd, const std::string &group_name)
 {
-	Object* obj = glbin.get(group_name, glbin_root);
+	Object* obj = glbin.get(group_name, this);
 	VolumeGroup* group = dynamic_cast<VolumeGroup*>(obj);
+	addVolumeData(vd, group);
+	if (group)
+		group->setName(group_name);
+	return group;
+}
+
+VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
+{
 	if (!group)
 	{
 		group = glbin_volf->buildGroup();
 		if (!group)
 			return 0;
-		group->setName(group_name);
 		addChild(group);
 	}
 
@@ -190,7 +208,7 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, const std::string &group_
 	}
 	}*/
 
-	group->insertChild(group->getNumChildren() - 1, vd);
+	group->addChild(vd);
 
 	if (group && vd)
 	{

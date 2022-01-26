@@ -39,6 +39,16 @@ DEALINGS IN THE SOFTWARE.
 
 //current object
 #define gstCurrent "current"
+#define gstCurrentSelect "current select"//0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group; 7:annotations
+#define gstCurrentView "current view"
+#define gstCurrentVolume "current volume"
+#define gstCurrentMesh "current mesh"
+#define gstCurrentVolumeGroup "current volume group"
+#define gstCurrentMeshGroup "current mesh group"
+#define gstCurrentAnnotations "current annotations"
+#define gstCurVolIdx "cur vol idx"
+#define gstCurMshIdx "cur msh idx"
+
 
 //factories & defaults
 #define gstDefaultFile "default file"
@@ -269,11 +279,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipPlaneMode "clip plane mode"
 #define gstInitialized "initialized"
 #define gstInitView "init view"
-#define gstCurrentSelect "current select"
-#define gstCurrentVolume "current volume"
-#define gstCurVolIdx "cur vol idx"
-#define gstCurrentMesh "current mesh"
-#define gstCurMshIdx "cur msh idx"
 #define gstSetGl "set gl"//set gl context
 #define gstRunScript "run script"//script run
 #define gstScriptFile "script file"

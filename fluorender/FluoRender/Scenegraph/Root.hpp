@@ -34,6 +34,13 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
+	class Renderview;
+	class VolumeData;
+	class VolumeGroup;
+	class MeshData;
+	class MeshGroup;
+	class Annotations;
+
 	enum SortMethod
 	{
 		SortNone = 0,//no sorting
@@ -66,6 +73,14 @@ namespace fluo
 		virtual bool insertChild(size_t index, Node* child);
 		virtual bool removeChildren(size_t pos, size_t num);
 		virtual bool setChild(size_t i, Node* node);
+
+		//currently highlighted
+		Renderview* getCurrentRenderview();
+		VolumeData* getCurrentVolumeData();
+		VolumeGroup* getCurrentVolumeGroup();
+		MeshData* getCurrentMeshData();
+		MeshGroup* getCurrentMeshGroup();
+		Annotations* getCurrentAnnotations();
 
 	protected:
 		virtual ~Root()

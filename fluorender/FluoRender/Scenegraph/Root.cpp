@@ -27,6 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Root.hpp>
+#include <Renderview.hpp>
+#include <VolumeData.hpp>
+#include <MeshData.hpp>
+#include <VolumeGroup.hpp>
+#include <MeshGroup.hpp>
+#include <Annotations.hpp>
 
 using namespace fluo;
 
@@ -87,3 +93,45 @@ bool Root::setChild(size_t i, Node* node)
 	return result;
 }
 
+//currently highlighted
+Renderview* Root::getCurrentRenderview()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentView, &ref);
+	return dynamic_cast<Renderview*>(ref);
+}
+
+VolumeData* Root::getCurrentVolumeData()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentVolume, &ref);
+	return dynamic_cast<VolumeData*>(ref);
+}
+
+VolumeGroup* Root::getCurrentVolumeGroup()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentVolumeGroup, &ref);
+	return dynamic_cast<VolumeGroup*>(ref);
+}
+
+MeshData* Root::getCurrentMeshData()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentMesh, &ref);
+	return dynamic_cast<MeshData*>(ref);
+}
+
+MeshGroup* Root::getCurrentMeshGroup()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentMeshGroup, &ref);
+	return dynamic_cast<MeshGroup*>(ref);
+}
+
+Annotations* Root::getCurrentAnnotations()
+{
+	Referenced* ref;
+	getRvalu(gstCurrentAnnotations, &ref);
+	return dynamic_cast<Annotations*>(ref);
+}

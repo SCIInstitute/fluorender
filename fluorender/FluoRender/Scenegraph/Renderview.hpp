@@ -153,7 +153,9 @@ namespace fluo
 		virtual const Renderview* asRenderview() const { return this; }
 
 		//organize data
+		VolumeGroup* addVolumeGroup(const std::string &group_name = "", const std::string &prv_group_name = "");
 		VolumeGroup* addVolumeData(VolumeData* vd, const std::string &group_name = "");
+		VolumeGroup* addVolumeData(VolumeData* vd, VolumeGroup* group = nullptr);
 
 		//migrated from the RenderCanvas class
 		//initialization

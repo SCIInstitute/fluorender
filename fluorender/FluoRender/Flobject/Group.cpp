@@ -103,6 +103,19 @@ bool Group::insertChild(size_t index, Node* child)
 	return true;
 }
 
+bool Group::insertChildAfter(Node* prv_child, Node* child)
+{
+	if (prv_child == nullptr || child == nullptr)
+		return false;
+
+	for (size_t i = 0; i < m_children.size(); ++i)
+	{
+		if (m_children[i].get() == prv_child)
+			return insertChild(i + 1, child);
+	}
+	return addChild(child);
+}
+
 bool Group::removeChildren(size_t pos, size_t num)
 {
 	if (pos < m_children.size() && num > 0)

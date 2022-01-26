@@ -326,6 +326,9 @@ void RenderviewFactory::setEventHandler(Renderview* view)
 	//ADD_BEFORE_EVENT(view, gstMipMode, OnMipModeChanging);
 
 	//handle after events
+	ADD_AFTER_EVENT(view, gstSizeX, OnSizeXChanged);
+	ADD_AFTER_EVENT(view, gstSizeY, OnSizeYChanged);
+	ADD_AFTER_EVENT(view, gstEnlargeScale, OnEnlargeScaleChanged);
 	ADD_AFTER_EVENT(view, gstCamRotX, OnCamRotChanged);
 	ADD_AFTER_EVENT(view, gstCamRotY, OnCamRotChanged);
 	ADD_AFTER_EVENT(view, gstCamRotZ, OnCamRotChanged);

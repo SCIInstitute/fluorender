@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "AdjustView.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Global.hpp>
@@ -76,7 +77,6 @@ AdjustView::AdjustView(VRenderFrame* frame,
 					   long style,
 					   const wxString& name) :
 wxPanel(frame, wxID_ANY, pos, size, style, name),
-m_frame(frame),
 m_type(-1),
 m_view(0),
 m_vd(0),
@@ -348,8 +348,8 @@ AdjustView::~AdjustView()
 
 void AdjustView::RefreshVRenderViews(bool interactive)
 {
-	if (m_frame)
-		m_frame->RefreshVRenderViews(false, interactive);
+	//if (m_frame)
+	//	m_frame->RefreshVRenderViews(false, interactive);
 }
 
 void AdjustView::GetSettings()
@@ -376,20 +376,20 @@ void AdjustView::GetSettings()
 		if (m_view)
 		{
 			//red
-			sync_r = m_view->GetSyncR();
-			Gamma2UI(m_view->GetGamma().r(), r_gamma);
-			Brightness2UI(m_view->GetBrightness().r(), r_brightness);
-			Hdr2UI(m_view->GetHdr().r(), r_hdr);
-			//green
-			sync_g = m_view->GetSyncG();
-			Gamma2UI(m_view->GetGamma().g(), g_gamma);
-			Brightness2UI(m_view->GetBrightness().g(), g_brightness);
-			Hdr2UI(m_view->GetHdr().g(), g_hdr);
-			//blue
-			sync_b = m_view->GetSyncB();
-			Gamma2UI(m_view->GetGamma().b(), b_gamma);
-			Brightness2UI(m_view->GetBrightness().b(), b_brightness);
-			Hdr2UI(m_view->GetHdr().b(), b_hdr);
+			//sync_r = m_view->GetSyncR();
+			//Gamma2UI(m_view->GetGamma().r(), r_gamma);
+			//Brightness2UI(m_view->GetBrightness().r(), r_brightness);
+			//Hdr2UI(m_view->GetHdr().r(), r_hdr);
+			////green
+			//sync_g = m_view->GetSyncG();
+			//Gamma2UI(m_view->GetGamma().g(), g_gamma);
+			//Brightness2UI(m_view->GetBrightness().g(), g_brightness);
+			//Hdr2UI(m_view->GetHdr().g(), g_hdr);
+			////blue
+			//sync_b = m_view->GetSyncB();
+			//Gamma2UI(m_view->GetGamma().b(), b_gamma);
+			//Brightness2UI(m_view->GetBrightness().b(), b_brightness);
+			//Hdr2UI(m_view->GetHdr().b(), b_hdr);
 		}
 		break;
 	case 2://volume data
@@ -543,7 +543,7 @@ void AdjustView::EnableAll()
 }
 
 //set view
-void AdjustView::SetRenderView(RenderCanvas *view)
+void AdjustView::SetView(fluo::Renderview *view)
 {
 	if (view)
 	{
@@ -558,7 +558,7 @@ void AdjustView::SetRenderView(RenderCanvas *view)
 	}
 }
 
-RenderCanvas* AdjustView::GetRenderView()
+fluo::Renderview* AdjustView::GetView()
 {
 	return m_view;
 }
@@ -651,7 +651,9 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		double r, g, b;
+		m_view->getValue(gstGammaR, r); m_view->getValue(gstGammaG, g); m_view->getValue(gstGammaB, b);
+		fluo::Color gamma(r, g, b);
 		GammaUI2(val, gamma[0]);
 		if (m_sync_r)
 		{
@@ -660,7 +662,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->setValue(gstGammaR, gamma[0]); m_view->setValue(gstGammaG, gamma[1]); m_view->setValue(gstGammaB, gamma[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -727,7 +729,9 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		double r, g, b;
+		m_view->getValue(gstGammaR, r); m_view->getValue(gstGammaG, g); m_view->getValue(gstGammaB, b);
+		fluo::Color gamma(r, g, b);
 		GammaUI2(val, gamma[1]);
 		if (m_sync_g)
 		{
@@ -736,7 +740,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 			if (m_sync_b)
 				GammaUI2(val, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->setValue(gstGammaR, gamma[0]); m_view->setValue(gstGammaG, gamma[1]); m_view->setValue(gstGammaB, gamma[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -801,7 +805,9 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		double r, g, b;
+		m_view->getValue(gstGammaR, r); m_view->getValue(gstGammaG, g); m_view->getValue(gstGammaB, b);
+		fluo::Color gamma(r, g, b);
 		GammaUI2(val, gamma[2]);
 		if (m_sync_b)
 		{
@@ -810,7 +816,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 			if (m_sync_g)
 				GammaUI2(val, gamma[1]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->setValue(gstGammaR, gamma[0]); m_view->setValue(gstGammaG, gamma[1]); m_view->setValue(gstGammaB, gamma[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -876,7 +882,9 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color brightness = m_view->GetBrightness();
+		double r, g, b;
+		m_view->getValue(gstBrightnessR, r); m_view->getValue(gstBrightnessG, g); m_view->getValue(gstBrightnessB, b);
+		fluo::Color brightness(r, g, b);
 		BrightnessUI2(val, brightness[0]);
 		if (m_sync_r)
 		{
@@ -885,7 +893,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 			if (m_sync_b)
 				BrightnessUI2(val, brightness[2]);
 		}
-		m_view->SetBrightness(brightness);
+		m_view->setValue(gstBrightnessR, brightness[0]); m_view->setValue(gstBrightnessG, brightness[1]); m_view->setValue(gstBrightnessB, brightness[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -950,7 +958,9 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color brightness = m_view->GetBrightness();
+		double r, g, b;
+		m_view->getValue(gstBrightnessR, r); m_view->getValue(gstBrightnessG, g); m_view->getValue(gstBrightnessB, b);
+		fluo::Color brightness(r, g, b);
 		BrightnessUI2(val, brightness[1]);
 		if (m_sync_g)
 		{
@@ -959,7 +969,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 			if (m_sync_b)
 				BrightnessUI2(val, brightness[2]);
 		}
-		m_view->SetBrightness(brightness);
+		m_view->setValue(gstBrightnessR, brightness[0]); m_view->setValue(gstBrightnessG, brightness[1]); m_view->setValue(gstBrightnessB, brightness[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -1024,7 +1034,9 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color brightness = m_view->GetBrightness();
+		double r, g, b;
+		m_view->getValue(gstBrightnessR, r); m_view->getValue(gstBrightnessG, g); m_view->getValue(gstBrightnessB, b);
+		fluo::Color brightness(r, g, b);
 		BrightnessUI2(val, brightness[2]);
 		if (m_sync_b)
 		{
@@ -1033,7 +1045,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 			if (m_sync_g)
 				BrightnessUI2(val, brightness[1]);
 		}
-		m_view->SetBrightness(brightness);
+		m_view->setValue(gstBrightnessR, brightness[0]); m_view->setValue(gstBrightnessG, brightness[1]); m_view->setValue(gstBrightnessB, brightness[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -1098,7 +1110,9 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color hdr = m_view->GetHdr();
+		double r, g, b;
+		m_view->getValue(gstEqualizeR, r); m_view->getValue(gstEqualizeG, g); m_view->getValue(gstEqualizeB, b);
+		fluo::Color hdr(r, g, b);
 		HdrUI2(val, hdr[0]);
 		if (m_sync_r)
 		{
@@ -1107,7 +1121,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 			if (m_sync_b)
 				HdrUI2(val, hdr[2]);
 		}
-		m_view->SetHdr(hdr);
+		m_view->setValue(gstEqualizeR, hdr[0]); m_view->setValue(gstEqualizeG, hdr[1]); m_view->setValue(gstEqualizeB, hdr[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -1172,7 +1186,9 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color hdr = m_view->GetHdr();
+		double r, g, b;
+		m_view->getValue(gstEqualizeR, r); m_view->getValue(gstEqualizeG, g); m_view->getValue(gstEqualizeB, b);
+		fluo::Color hdr(r, g, b);
 		HdrUI2(val, hdr[1]);
 		if (m_sync_g)
 		{
@@ -1181,7 +1197,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 			if (m_sync_b)
 				HdrUI2(val, hdr[2]);
 		}
-		m_view->SetHdr(hdr);
+		m_view->setValue(gstEqualizeR, hdr[0]); m_view->setValue(gstEqualizeG, hdr[1]); m_view->setValue(gstEqualizeB, hdr[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -1246,7 +1262,9 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 
 	if (m_view && m_type==1)
 	{
-		fluo::Color hdr = m_view->GetHdr();
+		double r, g, b;
+		m_view->getValue(gstEqualizeR, r); m_view->getValue(gstEqualizeG, g); m_view->getValue(gstEqualizeB, b);
+		fluo::Color hdr(r, g, b);
 		HdrUI2(val, hdr[2]);
 		if (m_sync_b)
 		{
@@ -1255,7 +1273,7 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 			if (m_sync_g)
 				HdrUI2(val, hdr[1]);
 		}
-		m_view->SetHdr(hdr);
+		m_view->setValue(gstEqualizeR, hdr[0]); m_view->setValue(gstEqualizeG, hdr[1]); m_view->setValue(gstEqualizeB, hdr[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -1298,7 +1316,7 @@ void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 	{
 	case 1://view
 		if (m_view)
-			m_view->SetSyncR(m_sync_r);
+			m_view->setValue(gstSyncR, m_sync_r);
 		break;
 	case 2://volume data
 		if (m_vd)
@@ -1324,7 +1342,7 @@ void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 	{
 	case 1://view
 		if (m_view)
-			m_view->SetSyncG(m_sync_g);
+			m_view->setValue(gstSyncG, m_sync_g);
 		break;
 	case 2://volume data
 		if (m_vd)
@@ -1350,7 +1368,7 @@ void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 	{
 	case 1://view
 		if (m_view)
-			m_view->SetSyncB(m_sync_b);
+			m_view->setValue(gstSyncB, m_sync_b);
 		break;
 	case 2://volume data
 		if (m_vd)
@@ -1666,12 +1684,14 @@ void AdjustView::UpdateSync()
 	else if (m_type == 1 && m_view)
 	{
 		//means this is depth mode
-		if (m_view->GetVolMethod() != VOL_METHOD_MULTI)
+		long mix_method;
+		m_view->getValue(gstMixMethod, mix_method);
+		if (mix_method != fluo::Renderview::MIX_METHOD_MULTI)
 			return;
 		
-		for (i=0; i<m_view->GetDispVolumeNum(); i++)
+		fluo::VolumeList list = m_view->GetVolList();
+		for (auto vd : list)
 		{
-			fluo::VolumeData* vd = m_view->GetDispVolumeData(i);
 			if (vd)
 			{
 				long cm_mode;
@@ -1716,15 +1736,15 @@ void AdjustView::UpdateSync()
 			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
 			if (r_v)
 			{
-				gamma = m_view->GetGamma().r();
-				brightness = m_view->GetBrightness().r();
-				hdr = m_view->GetHdr().r();
+				m_view->getValue(gstGammaR, gamma);
+				m_view->getValue(gstBrightnessR, brightness);
+				m_view->getValue(gstEqualizeR, hdr);
 			}
 			else if (g_v)
 			{
-				gamma = m_view->GetGamma().g();
-				brightness = m_view->GetBrightness().g();
-				hdr = m_view->GetHdr().g();
+				m_view->getValue(gstGammaG, gamma);
+				m_view->getValue(gstBrightnessG, brightness);
+				m_view->getValue(gstEqualizeG, hdr);
 			}
 
 			if (g_v)
@@ -1770,7 +1790,9 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		double r, g, b;
+		m_view->getValue(gstGammaR, r); m_view->getValue(gstGammaG, g); m_view->getValue(gstGammaB, b);
+		fluo::Color gamma(r, g, b);
 		GammaUI2(dft_value, gamma[0]);
 		if (m_sync_r)
 		{
@@ -1779,7 +1801,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 			if (m_sync_b)
 				GammaUI2(dft_value, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->setValue(gstGammaR, gamma[0]); m_view->setValue(gstGammaG, gamma[1]); m_view->setValue(gstGammaB, gamma[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -1834,7 +1856,9 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color brightness = m_view->GetBrightness();
+		double r, g, b;
+		m_view->getValue(gstBrightnessR, r); m_view->getValue(gstBrightnessG, g); m_view->getValue(gstBrightnessB, b);
+		fluo::Color brightness(r, g, b);
 		BrightnessUI2(dft_value, brightness[0]);
 		if (m_sync_r)
 		{
@@ -1843,7 +1867,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 			if (m_sync_b)
 				BrightnessUI2(dft_value, brightness[2]);
 		}
-		m_view->SetBrightness(brightness);
+		m_view->setValue(gstBrightnessR, brightness[0]); m_view->setValue(gstBrightnessG, brightness[1]); m_view->setValue(gstBrightnessB, brightness[2]);
 	}
 
 	if (layer)
@@ -1893,7 +1917,9 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color hdr = m_view->GetHdr();
+		double r, g, b;
+		m_view->getValue(gstEqualizeR, r); m_view->getValue(gstEqualizeG, g); m_view->getValue(gstEqualizeB, b);
+		fluo::Color hdr(r, g, b);
 		hdr[0] = dft_value;
 		if (m_sync_r)
 		{
@@ -1902,7 +1928,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 			if (m_sync_b)
 				hdr[2] = dft_value;
 		}
-		m_view->SetHdr(hdr);
+		m_view->setValue(gstEqualizeR, hdr[0]); m_view->setValue(gstEqualizeG, hdr[1]); m_view->setValue(gstEqualizeB, hdr[2]);
 	}
 
 	if (layer)
@@ -1957,7 +1983,9 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		double r, g, b;
+		m_view->getValue(gstGammaR, r); m_view->getValue(gstGammaG, g); m_view->getValue(gstGammaB, b);
+		fluo::Color gamma(r, g, b);
 		GammaUI2(dft_value, gamma[1]);
 		if (m_sync_g)
 		{
@@ -1966,7 +1994,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 			if (m_sync_b)
 				GammaUI2(dft_value, gamma[2]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->setValue(gstGammaR, gamma[0]); m_view->setValue(gstGammaG, gamma[1]); m_view->setValue(gstGammaB, gamma[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -2021,7 +2049,9 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color brightness = m_view->GetBrightness();
+		double r, g, b;
+		m_view->getValue(gstBrightnessR, r); m_view->getValue(gstBrightnessG, g); m_view->getValue(gstBrightnessB, b);
+		fluo::Color brightness(r, g, b);
 		BrightnessUI2(dft_value, brightness[1]);
 		if (m_sync_g)
 		{
@@ -2030,7 +2060,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 			if (m_sync_b)
 				BrightnessUI2(dft_value, brightness[2]);
 		}
-		m_view->SetBrightness(brightness);
+		m_view->setValue(gstBrightnessR, brightness[0]); m_view->setValue(gstBrightnessG, brightness[1]); m_view->setValue(gstBrightnessB, brightness[2]);
 	}
 
 	if (layer)
@@ -2080,7 +2110,9 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color hdr = m_view->GetHdr();
+		double r, g, b;
+		m_view->getValue(gstEqualizeR, r); m_view->getValue(gstEqualizeG, g); m_view->getValue(gstEqualizeB, b);
+		fluo::Color hdr(r, g, b);
 		hdr[1] = dft_value;
 		if (m_sync_g)
 		{
@@ -2089,7 +2121,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 			if (m_sync_b)
 				hdr[2] = dft_value;
 		}
-		m_view->SetHdr(hdr);
+		m_view->setValue(gstEqualizeR, hdr[0]); m_view->setValue(gstEqualizeG, hdr[1]); m_view->setValue(gstEqualizeB, hdr[2]);
 	}
 
 	if (layer)
@@ -2144,7 +2176,9 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color gamma = m_view->GetGamma();
+		double r, g, b;
+		m_view->getValue(gstGammaR, r); m_view->getValue(gstGammaG, g); m_view->getValue(gstGammaB, b);
+		fluo::Color gamma(r, g, b);
 		GammaUI2(dft_value, gamma[2]);
 		if (m_sync_b)
 		{
@@ -2153,7 +2187,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 			if (m_sync_g)
 				GammaUI2(dft_value, gamma[1]);
 		}
-		m_view->SetGamma(gamma);
+		m_view->setValue(gstGammaR, gamma[0]); m_view->setValue(gstGammaG, gamma[1]); m_view->setValue(gstGammaB, gamma[2]);
 	}
 
 	fluo::Object* layer = 0;
@@ -2208,7 +2242,9 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color brightness = m_view->GetBrightness();
+		double r, g, b;
+		m_view->getValue(gstBrightnessR, r); m_view->getValue(gstBrightnessG, g); m_view->getValue(gstBrightnessB, b);
+		fluo::Color brightness(r, g, b);
 		BrightnessUI2(dft_value, brightness[2]);
 		if (m_sync_b)
 		{
@@ -2217,7 +2253,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 			if (m_sync_g)
 				BrightnessUI2(dft_value, brightness[1]);
 		}
-		m_view->SetBrightness(brightness);
+		m_view->setValue(gstBrightnessR, brightness[0]); m_view->setValue(gstBrightnessG, brightness[1]); m_view->setValue(gstBrightnessB, brightness[2]);
 	}
 
 	if (layer)
@@ -2267,7 +2303,9 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 
 	if (m_view)
 	{
-		fluo::Color hdr = m_view->GetHdr();
+		double r, g, b;
+		m_view->getValue(gstEqualizeR, r); m_view->getValue(gstEqualizeG, g); m_view->getValue(gstEqualizeB, b);
+		fluo::Color hdr(r, g, b);
 		hdr[2] = dft_value;
 		if (m_sync_b)
 		{
@@ -2276,7 +2314,7 @@ void AdjustView::OnBReset(wxCommandEvent &event)
 			if (m_sync_g)
 				hdr[1] = dft_value;
 		}
-		m_view->SetHdr(hdr);
+		m_view->setValue(gstEqualizeR, hdr[0]); m_view->setValue(gstEqualizeG, hdr[1]); m_view->setValue(gstEqualizeB, hdr[2]);
 	}
 
 	if (layer)
