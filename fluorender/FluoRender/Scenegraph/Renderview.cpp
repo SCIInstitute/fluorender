@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Distance/RulerRenderer.h>
 #include <Distance/RulerHandler.h>
+#include <Distance/Cov.h>
 #include <Tracking/Tracks.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
@@ -407,7 +408,6 @@ void Renderview::PopVolumeList()
 	if (!bval)
 		return;
 
-	int i, j;
 	m_vol_list.clear();
 
 	class PopVolumeVisitor : public NodeVisitor
@@ -460,6 +460,57 @@ void Renderview::PopVolumeList()
 	setValue(gstVolListDirty, false);
 }
 
+void Renderview::PopFullVolList()
+{
+	bool bval;
+	getValue(gstVolListDirty, bval);
+	if (!bval)
+		return;
+
+	m_vol_list.clear();
+
+	class PopVolumeVisitor : public NodeVisitor
+	{
+	public:
+		PopVolumeVisitor() : NodeVisitor()
+		{
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void reset()
+		{
+			list_.clear();
+		}
+
+		virtual void apply(Node& node)
+		{
+			VolumeData* vd = node.asVolumeData();
+			if (vd)
+				list_.push_back(vd);
+			traverse(node);
+		}
+
+		virtual void apply(Group& group)
+		{
+			traverse(group);
+		}
+
+		void getResult(std::vector<ref_ptr<VolumeData>> &list)
+		{
+			for (auto vd : list_)
+				list.push_back(vd);
+		}
+
+	private:
+		VolumeList list_;
+	};
+	PopVolumeVisitor visitor;
+	accept(visitor);
+	visitor.getResult(m_vol_list);
+
+	setValue(gstVolListDirty, false);
+}
+
 void Renderview::PopMeshList()
 {
 	bool bval;
@@ -467,7 +518,6 @@ void Renderview::PopMeshList()
 	if (!bval)
 		return;
 
-	int i, j;
 	m_msh_list.clear();
 
 	class PopMeshVisitor : public NodeVisitor
@@ -502,6 +552,57 @@ void Renderview::PopMeshList()
 			bool result = group.getValue(gstDisplay, disp);
 			if (!result || disp)
 				traverse(group);
+		}
+
+		void getResult(std::vector<ref_ptr<MeshData>> &list)
+		{
+			for (auto md : list_)
+				list.push_back(md);
+		}
+
+	private:
+		std::vector<MeshData*> list_;
+	};
+	PopMeshVisitor visitor;
+	accept(visitor);
+	visitor.getResult(m_msh_list);
+
+	setValue(gstMshListDirty, false);
+}
+
+void Renderview::PopFullMeshList()
+{
+	bool bval;
+	getValue(gstMshListDirty, bval);
+	if (!bval)
+		return;
+
+	m_msh_list.clear();
+
+	class PopMeshVisitor : public NodeVisitor
+	{
+	public:
+		PopMeshVisitor() : NodeVisitor()
+		{
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void reset()
+		{
+			list_.clear();
+		}
+
+		virtual void apply(Node& node)
+		{
+			MeshData* md = node.asMeshData();
+			if (md)
+				list_.push_back(md);
+			traverse(node);
+		}
+
+		virtual void apply(Group& group)
+		{
+			traverse(group);
 		}
 
 		void getResult(std::vector<ref_ptr<MeshData>> &list)
@@ -560,6 +661,22 @@ MeshList Renderview::GetMeshList()
 {
 	MeshList list;
 	for (auto md : m_msh_list)
+		list.push_back(md.get());
+	return list;
+}
+
+VolumeList Renderview::GetFullVolList()
+{
+	VolumeList list;
+	for (auto vd : m_vol_full_list)
+		list.push_back(vd.get());
+	return list;
+}
+
+MeshList Renderview::GetFullMeshList()
+{
+	MeshList list;
+	for (auto md : m_msh_full_list)
 		list.push_back(md.get());
 	return list;
 }
@@ -7430,6 +7547,53 @@ void Renderview::PickVolume()
 	}
 }
 
+void Renderview::SetLockCenter(int type)
+{
+	switch (type)
+	{
+	case 1:
+	default:
+		SetLockCenterVol();
+		break;
+	case 2:
+		setValue(gstCamLockPick, true);
+		break;
+	case 3:
+		SetLockCenterRuler();
+		break;
+	case 4:
+		SetLockCenterSel();
+		break;
+	}
+}
+
+void Renderview::SetLockCenterVol()
+{
+	VolumeData* vd = GetCurrentVolume();
+	if (!vd)
+		return;
+	fluo::BBox box;
+	vd->getValue(gstClipBounds, box);
+	setValue(gstCamLockCtr, box.center());
+}
+
+void Renderview::SetLockCenterRuler()
+{
+	if (!m_cur_ruler)
+		return;
+	setValue(gstCamLockCtr, m_cur_ruler->GetCenter());
+}
+
+void Renderview::SetLockCenterSel()
+{
+	VolumeData* vd = GetCurrentVolume();
+	if (!vd)
+		return;
+	flrd::Cov cover(vd);
+	cover.Compute(1);
+	setValue(gstCamLockCtr, cover.GetCenter());
+}
+
 void Renderview::switchLevel(VolumeData *vd)
 {
 	if (!vd) return;
@@ -7766,6 +7930,18 @@ void Renderview::OnVolListDirtyChanged(Event& event)
 void Renderview::OnMshListDirtyChanged(Event& event)
 {
 	PopMeshList();
+	OnCurrentMeshChanged(event);
+}
+
+void Renderview::OnFullVolListDirtyChanged(Event& event)
+{
+	PopFullVolList();
+	OnCurrentVolumeChanged(event);
+}
+
+void Renderview::OnFullMshListDirtyChanged(Event& event)
+{
+	PopFullMeshList();
 	OnCurrentMeshChanged(event);
 }
 

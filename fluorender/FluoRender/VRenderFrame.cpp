@@ -2196,7 +2196,7 @@ void VRenderFrame::OnSelection(int type,
 {
 	if (m_adjust_view)
 	{
-		m_adjust_view->SetRenderView(view);
+		m_adjust_view->SetView(view);
 		if (!view || vd)
 			m_adjust_view->SetVolumeData(vd);
 	}
@@ -4718,7 +4718,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 		if (fconfig.Read("track_file", &sVal))
 		{
 			m_trace_dlg->GetSettings(m_vrv_list[0]->m_glview);
-			m_trace_dlg->LoadTrackFile(sVal);
+			m_trace_dlg->LoadTrackFile(sVal.ToStdWstring());
 		}
 	}
 	/*	//brushtool diag

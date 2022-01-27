@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
 #include "VRenderFrame.h"
+#include <Global.hpp>
+#include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
@@ -232,7 +235,7 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 
 	int index = interpolator->GetKeyIndex(int(id));
 	double time = interpolator->GetKeyTime(index);
-	RenderCanvas* view = m_recdlg->GetView();
+	fluo::Renderview* view = m_recdlg->GetView();
 	if (view)
 	{
 		view->SetParams(time);
@@ -616,7 +619,7 @@ RecorderDlg::~RecorderDlg()
 {
 }
 
-void RecorderDlg::GetSettings(RenderCanvas* view)
+void RecorderDlg::GetSettings(fluo::Renderview* view)
 {
 	m_view = view;
 }
@@ -708,7 +711,7 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 			vd->getValue(gstTime, ct);
 			FlKeyCode keycode;
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->m_vrv->GetName();
+			keycode.l0_name = m_view->getName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->getName();
 			keycode.l2 = 0;
@@ -737,10 +740,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		return;
 	if (!m_view)
 	{
-		if (m_frame->GetView(0))
-			m_view = m_frame->GetView(0);
-		else
-			return;
+		m_view = glbin_root->getChild(0)->asRenderview();
 	}
 
 	DataManager* mgr = m_frame->GetDataManager();
@@ -765,7 +765,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	{
 		fluo::VolumeData* vd = glbin_volf->get(i);
 		keycode.l0 = 1;
-		keycode.l0_name = m_view->m_vrv->GetName();
+		keycode.l0_name = m_view->getName();
 		keycode.l1 = 2;
 		keycode.l1_name = vd->getName();
 		//display
@@ -835,18 +835,21 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_vrv->GetName();
+	keycode.l0_name = m_view->getName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_vrv->GetName();
+	keycode.l1_name = m_view->getName();
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	fluo::Quaternion q = m_view->GetRotations();
+	fluo::Quaternion q;
+	m_view->getValue(gstCamRotQ, q);
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	interpolator->AddKey(flkeyQ);
 	//translation
 	double tx, ty, tz;
-	m_view->GetTranslations(tx, ty, tz);
+	m_view->getValue(gstCamTransX, tx);
+	m_view->getValue(gstCamTransY, ty);
+	m_view->getValue(gstCamTransZ, tz);
 	//x
 	keycode.l2_name = "translation_x";
 	flkey = new FlKeyDouble(keycode, tx);
@@ -860,7 +863,9 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//centers
-	m_view->GetCenters(tx, ty, tz);
+	m_view->getValue(gstCamCtrX, tx);
+	m_view->getValue(gstCamCtrY, ty);
+	m_view->getValue(gstCamCtrZ, tz);
 	//x
 	keycode.l2_name = "center_x";
 	flkey = new FlKeyDouble(keycode, tx);
@@ -874,7 +879,9 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//obj traslation
-	m_view->GetObjTrans(tx, ty, tz);
+	m_view->getValue(gstObjTransX, tx);
+	m_view->getValue(gstObjTransY, ty);
+	m_view->getValue(gstObjTransZ, tz);
 	//x
 	keycode.l2_name = "obj_trans_x";
 	flkey = new FlKeyDouble(keycode, tx);
@@ -888,18 +895,22 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//scale
-	double scale = m_view->m_scale_factor;
+	double scale;
+	m_view->getValue(gstScaleFactor, scale);
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
 	interpolator->AddKey(flkey);
 	//intermixing mode
-	int ival = m_view->GetVolMethod();
+	long lval;
+	m_view->getValue(gstMixMethod, lval);
 	keycode.l2_name = "volmethod";
-	flkeyI = new FlKeyInt(keycode, ival);
+	flkeyI = new FlKeyInt(keycode, lval);
 	interpolator->AddKey(flkeyI);
 	//perspective angle
-	bool persp = m_view->GetPersp();
-	double aov = m_view->GetAov();
+	bool persp;
+	m_view->getValue(gstPerspective, persp);
+	double aov;
+	m_view->getValue(gstAov, aov);
 	if (!persp)
 		aov = 9.9;
 	keycode.l2_name = "aov";
@@ -966,10 +977,7 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		return;
 	if (!m_view)
 	{
-		if (m_frame->GetView(0))
-			m_view = m_frame->GetView(0);
-		else
-			return;
+		m_view = glbin_root->getChild(0)->asRenderview();
 	}
 
 	DataManager* mgr = m_frame->GetDataManager();
@@ -991,7 +999,8 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 	if (t>0.0) t += duration;
 
 	int i;
-	int numChan = m_view->GetAllVolumeNum();
+	fluo::VolumeList list = m_view->GetFullVolList();
+	int numChan = int(list.size());
 	vector<bool> chan_mask;
 	//initiate mask
 	for (i=0; i<numChan; i++)
@@ -1007,11 +1016,11 @@ void RecorderDlg::AutoKeyChanComb(int comb)
 		interpolator->Begin(t, duration);
 
 		//for all volumes
-		for (i=0; i<m_view->GetAllVolumeNum(); i++)
+		for (auto vd : list)
 		{
-			fluo::VolumeData* vd = m_view->GetAllVolumeData(i);
+			if (!vd) continue;
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->m_vrv->GetName();
+			keycode.l0_name = m_view->getName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->getName();
 			//display only

@@ -35,8 +35,11 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class RenderCanvas;
 class RecorderDlg;
+namespace fluo
+{
+	class Renderview;
+}
 class KeyListCtrl : public wxListCtrl
 {
 	enum
@@ -128,8 +131,8 @@ public:
 		wxWindow* parent);
 	~RecorderDlg();
 
-	void GetSettings(RenderCanvas* view);
-	RenderCanvas* GetView()
+	void GetSettings(fluo::Renderview* view);
+	fluo::Renderview* GetView()
 	{
 		return m_view;
 	}
@@ -150,7 +153,7 @@ private:
 private:
 	VRenderFrame* m_frame;
 	//current view
-	RenderCanvas* m_view;
+	fluo::Renderview* m_view;
 
 	//automatic keys
 	wxComboBox *m_auto_key_cmb;

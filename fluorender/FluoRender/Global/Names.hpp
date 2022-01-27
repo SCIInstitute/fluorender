@@ -361,7 +361,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstWidth "width"//from m_size
 #define gstHeight "height"//from m_size
 #define gstVolListDirty "vol list dirty"//request vol pop list update
+#define gstFullVolListDirty "full vol list dirty"
 #define gstMshListDirty "msh list dirty"//request msh pop list update
+#define gstFullMshListDirty "full msh list dirty"
 #define gstTextColor "text color"//text color
 #define gstBgColor "background color"//bg
 #define gstBgColorInv "background color inv"//inverted background color

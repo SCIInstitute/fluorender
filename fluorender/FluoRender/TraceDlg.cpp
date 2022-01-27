@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
 #include "VRenderFrame.h"
-#include "RenderCanvas.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <lbl_reader.h>
 #include <msk_writer.h>
@@ -115,7 +115,7 @@ void TraceListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
 	SetItemBackgroundColour(tmp, color);
 }
 
-void TraceListCtrl::UpdateTraces(RenderCanvas* vrv)
+void TraceListCtrl::UpdateTraces(fluo::Renderview* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -125,8 +125,9 @@ void TraceListCtrl::UpdateTraces(RenderCanvas* vrv)
 	if (!traces)
 		return;
 	int shuffle = 0;
-	if (m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (vd)
+		shuffle = vd->GetShuffle();
 
 	DeleteAllItems();
 
@@ -895,14 +896,14 @@ TraceDlg::~TraceDlg()
 	//}
 }
 
-void TraceDlg::GetSettings(RenderCanvas* vrv)
+void TraceDlg::GetSettings(fluo::Renderview* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
 		return;
 
-	m_cur_time = m_view->m_tseq_cur_num;
-	m_prv_time = m_view->m_tseq_prv_num;
+	m_view->getValue(gstCurrentFrame, m_cur_time);
+	m_view->getValue(gstPreviousFrame, m_prv_time);
 
 	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
@@ -967,7 +968,7 @@ void TraceDlg::SetCellSize(int size)
 
 }
 
-RenderCanvas* TraceDlg::GetView()
+fluo::Renderview* TraceDlg::GetView()
 {
 	return m_view;
 }
@@ -978,8 +979,9 @@ void TraceDlg::UpdateList()
 		return;
 
 	int shuffle = 0;
-	if (m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (vd)
+		shuffle = vd->GetShuffle();
 	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 	{
@@ -1068,7 +1070,7 @@ void TraceDlg::OnLoadTrace(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		std::wstring filename = fopendlg->GetPath();
 		LoadTrackFile(filename);
 	}
 
@@ -1081,7 +1083,7 @@ void TraceDlg::OnSaveTrace(wxCommandEvent& event)
 	if (!m_view)
 		return;
 
-	wxString filename;
+	std::wstring filename;
 	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (trace_group)
 		filename = trace_group->GetPath();
@@ -1247,7 +1249,7 @@ void TraceDlg::UncertainFilter(bool input)
 	tm_processor.SetUncertainLow(ival);
 	tm_processor.GetCellsByUncertainty(list_in, list_out, m_cur_time);
 
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SelectList(list_out);
 
@@ -1415,7 +1417,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	double spcx, spcy, spcz;
@@ -1443,7 +1445,7 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	if (!m_view)
 		return;
 
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	flrd::Tracks *trace_group = m_view->GetTraceGroup();
@@ -1495,7 +1497,7 @@ void TraceDlg::OnAnalyzeComp(wxCommandEvent &event)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentAnalyzer comp_analyzer(vd);
 	comp_analyzer.Analyze(true, true);
 	string str;
@@ -1740,7 +1742,7 @@ void TraceDlg::CompDelete()
 	}
 
 	//get current vd
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	if (ids.size() == 1)
 	{
@@ -1764,7 +1766,7 @@ void TraceDlg::CompClear()
 		return;
 
 	//get current vd
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
@@ -1810,7 +1812,7 @@ void TraceDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	//get current vd
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -1865,7 +1867,7 @@ void TraceDlg::OnCompAppend(wxCommandEvent &event)
 
 		unsigned int id = (unsigned int)ival;
 		//get current mask
-		fluo::VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->GetCurrentVolume();
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
@@ -1899,7 +1901,7 @@ void TraceDlg::OnCompExclusive(wxCommandEvent &event)
 	{
 		unsigned int id = ival;
 		//get current mask
-		fluo::VolumeData* vd = m_view->m_cur_vol;
+		fluo::VolumeData* vd = m_view->GetCurrentVolume();
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SetId(id);
 		comp_selector.SetMinNum(true, slimit);
@@ -1945,7 +1947,7 @@ void TraceDlg::CellFull()
 	str.ToLong(&ival);
 	unsigned int slimit = (unsigned int)ival;
 	//get current mask
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.SetMinNum(true, slimit);
 	comp_selector.CompFull();
@@ -2006,7 +2008,7 @@ void TraceDlg::CellEraseID()
 		trace_group = m_view->GetTraceGroup();
 	}
 
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	//get prev mask
@@ -2385,8 +2387,12 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 void TraceDlg::OnCellNewIDText(wxCommandEvent &event)
 {
 	int shuffle = 0;
-	if (m_view && m_view->m_cur_vol)
-		shuffle = m_view->m_cur_vol->GetShuffle();
+	if (m_view)
+	{
+		fluo::VolumeData* vd = m_view->GetCurrentVolume();
+		if (vd)
+			shuffle = vd->GetShuffle();
+	}
 	wxString str = m_cell_new_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -2534,7 +2540,7 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 		return;
 
 	//modify graphs
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	long resx, resy, resz;
@@ -2578,7 +2584,7 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	if (!m_view)
 		return;
 
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	long resx, resy, resz;
@@ -2627,7 +2633,7 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 	//get volume, readers
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -2638,8 +2644,9 @@ void TraceDlg::ReadVolCache(flrd::VolCache& vol_cache)
 	long chan;
 	vd->getValue(gstChannel, chan);
 	int frame = vol_cache.frame;
-
-	if (frame == m_view->m_tseq_cur_num)
+	long lval;
+	m_view->getValue(gstCurrentFrame, lval);
+	if (frame == lval)
 	{
 		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
@@ -2677,7 +2684,7 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -2703,7 +2710,9 @@ void TraceDlg::DelVolCache(flrd::VolCache& vol_cache)
 	}
 
 	vol_cache.valid = false;
-	if (frame != m_view->m_tseq_cur_num)
+	long lval;
+	m_view->getValue(gstCurrentFrame, lval);
+	if (frame != lval)
 	{
 		if (vol_cache.data)
 			nrrdNuke((Nrrd*)vol_cache.nrrd_data);
@@ -2740,7 +2749,7 @@ void TraceDlg::GenMap()
 	if (!trace_group)
 		return;
 
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	BaseReader* reader = vd->GetReader();
@@ -2867,7 +2876,7 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 		return;
 
 	//get trace group
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	flrd::Tracks *trace_group = m_view->GetTraceGroup();
@@ -2979,7 +2988,7 @@ int TraceDlg::GetTrackFileExist(bool save)
 	flrd::Tracks* trace_group = m_view->GetTraceGroup();
 	if (!trace_group)
 		return 0;
-	wxString filename = trace_group->GetPath();
+	std::wstring filename = trace_group->GetPath();
 	if (wxFileExists(filename))
 	{
 		if (save)
@@ -2993,12 +3002,12 @@ int TraceDlg::GetTrackFileExist(bool save)
 		return 1;
 }
 
-wxString TraceDlg::GetTrackFile()
+std::wstring TraceDlg::GetTrackFile()
 {
 	return m_track_file;
 }
 
-void TraceDlg::LoadTrackFile(wxString &file)
+void TraceDlg::LoadTrackFile(const std::wstring &file)
 {
 	if (!m_view) return;
 	int rval = m_view->LoadTraceGroup(file);
@@ -3009,7 +3018,7 @@ void TraceDlg::LoadTrackFile(wxString &file)
 	}
 }
 
-void TraceDlg::SaveTrackFile(wxString &file)
+void TraceDlg::SaveTrackFile(const std::wstring &file)
 {
 	if (!m_view) return;
 	int rval = m_view->SaveTraceGroup(file);

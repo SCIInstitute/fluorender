@@ -166,8 +166,10 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstRefreshNotify, bool(false));
 		view->addValue(gstWidth, long(0));
 		view->addValue(gstHeight, long(0));
-		view->addValue(gstVolListDirty, bool(true));
+		view->addValue(gstVolListDirty, bool(false));
 		view->addValue(gstMshListDirty, bool(false));
+		view->addValue(gstFullVolListDirty, bool(false));
+		view->addValue(gstFullMshListDirty, bool(false));
 		view->addValue(gstTextColor, Color());
 		view->addValue(gstBgColor, Color(0.0));
 		view->addValue(gstBgColorInv, Color(1.0));
@@ -335,6 +337,8 @@ void RenderviewFactory::setEventHandler(Renderview* view)
 	ADD_AFTER_EVENT(view, gstPerspective, OnPerspectiveChanged);
 	ADD_AFTER_EVENT(view, gstVolListDirty, OnVolListDirtyChanged);
 	ADD_AFTER_EVENT(view, gstMshListDirty, OnMshListDirtyChanged);
+	ADD_AFTER_EVENT(view, gstFullVolListDirty, OnFullVolListDirtyChanged);
+	ADD_AFTER_EVENT(view, gstFullMshListDirty, OnFullMshListDirtyChanged);
 	ADD_AFTER_EVENT(view, gstCurrentVolume, OnCurrentVolumeChanged);
 	ADD_AFTER_EVENT(view, gstCurrentMesh, OnCurrentMeshChanged);
 }

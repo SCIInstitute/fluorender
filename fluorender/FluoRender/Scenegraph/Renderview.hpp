@@ -167,18 +167,22 @@ namespace fluo
 		//recalculate view according to object bounds
 		void InitView(unsigned int type = INIT_BOUNDS);
 
-		//temporary lists
-		void PopVolumeList();
-		void PopMeshList();
-		//clear
-		void ClearVolList();
-		void ClearMeshList();
 		//current data
 		VolumeData* GetCurrentVolume();
 		MeshData* GetCurrentMesh();
+		//temporary lists
+		void PopVolumeList();
+		void PopFullVolList();
+		void PopMeshList();
+		void PopFullMeshList();
+		//clear
+		void ClearVolList();
+		void ClearMeshList();
 		//conversion
 		VolumeList GetVolList();
+		VolumeList GetFullVolList();
 		MeshList GetMeshList();
+		MeshList GetFullMeshList();
 
 		//handle camera
 		void HandleProjection(int nx, int ny, bool vr = false);
@@ -420,6 +424,12 @@ namespace fluo
 		void PickVolume();
 		//void SetCompSelection(Point& p, long mode);//node: 0-exclusive; 1-add or remove
 
+		//camera lock
+		void SetLockCenter(int type);
+		void SetLockCenterVol();
+		void SetLockCenterRuler();
+		void SetLockCenterSel();
+
 		void switchLevel(VolumeData *vd);
 
 #ifdef _WIN32
@@ -435,8 +445,10 @@ namespace fluo
 
 	private:
 		//temporary lists of data
-		std::vector<ref_ptr<VolumeData>> m_vol_list;
-		std::vector<ref_ptr<MeshData>> m_msh_list;
+		std::vector<ref_ptr<VolumeData>> m_vol_list;//only shown volumes
+		std::vector<ref_ptr<VolumeData>> m_vol_full_list;
+		std::vector<ref_ptr<MeshData>> m_msh_list;//only shown meshes
+		std::vector<ref_ptr<MeshData>> m_msh_full_list;
 		//some of these may be put on the scenegraph later
 		//ruler list
 		flrd::RulerList *m_ruler_list;
@@ -488,6 +500,8 @@ namespace fluo
 		void OnPerspectiveChanged(Event& event);
 		void OnVolListDirtyChanged(Event& event);
 		void OnMshListDirtyChanged(Event& event);
+		void OnFullVolListDirtyChanged(Event& event);
+		void OnFullMshListDirtyChanged(Event& event);
 		void OnCurrentVolumeChanged(Event& event);
 		void OnCurrentMeshChanged(Event& event);
 	};

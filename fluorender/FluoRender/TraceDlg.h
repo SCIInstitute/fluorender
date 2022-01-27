@@ -41,8 +41,10 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class RenderCanvas;
-
+namespace fluo
+{
+	class Renderview;
+}
 class TraceListCtrl : public wxListCtrl
 {
 	enum
@@ -61,14 +63,14 @@ public:
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void UpdateTraces(RenderCanvas* vrv=0);
+	void UpdateTraces(fluo::Renderview* view=0);
 	void DeleteSelection();
 	wxString GetText(long item, int col);
 
 	friend class TraceDlg;
 
 private:
-	RenderCanvas *m_view;
+	fluo::Renderview *m_view;
 	int m_type;//0-current; 1-previous
 
 private:
@@ -167,8 +169,8 @@ public:
 	TraceDlg(VRenderFrame* frame);
 	~TraceDlg();
 
-	void GetSettings(RenderCanvas* vrv);
-	RenderCanvas* GetView();
+	void GetSettings(fluo::Renderview* vrv);
+	fluo::Renderview* GetView();
 	void UpdateList();
 	void SetCellSize(int size);
 
@@ -196,9 +198,9 @@ public:
 
 	//track map file
 	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
-	wxString GetTrackFile();
-	void LoadTrackFile(wxString &file);
-	void SaveTrackFile(wxString &file);
+	std::wstring GetTrackFile();
+	void LoadTrackFile(const std::wstring &file);
+	void SaveTrackFile(const std::wstring &file);
 
 private:
 	typedef struct
@@ -211,13 +213,13 @@ private:
 
 	VRenderFrame* m_frame;
 	//current view
-	RenderCanvas* m_view;
+	fluo::Renderview* m_view;
 	//tab control
 	wxNotebook *m_notebook;
 
 	//time sequence setting
-	int m_cur_time;
-	int m_prv_time;
+	long m_cur_time;
+	long m_prv_time;
 
 	//cluster number
 	int m_clnum;
@@ -231,7 +233,7 @@ private:
 	double m_similarity;
 	double m_contact_factor;
 
-	wxString m_track_file;
+	std::wstring m_track_file;
 
 	//ids
 	unsigned int m_cell_new_id;

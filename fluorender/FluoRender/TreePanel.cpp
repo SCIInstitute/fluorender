@@ -182,7 +182,7 @@ void DataTreeCtrl::DeleteSelection()
 									AdjustView* adjust_view = m_frame->GetAdjustView();
 									if (adjust_view)
 									{
-										adjust_view->SetRenderView(view);
+										adjust_view->SetView(view);
 										adjust_view->UpdateSync();
 									}
 								}
@@ -239,7 +239,7 @@ void DataTreeCtrl::DeleteSelection()
 						AdjustView* adjust_view = m_frame->GetAdjustView();
 						if (adjust_view)
 						{
-							adjust_view->SetRenderView(view);
+							adjust_view->SetView(view);
 							adjust_view->UpdateSync();
 						}
 					}
