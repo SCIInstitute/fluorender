@@ -36,9 +36,9 @@ DEALINGS IN THE SOFTWARE.
 using namespace std;
 
 class VRenderFrame;
-class RenderCanvas;
 namespace fluo
 {
+	class Renderview;
 	class MeshData;
 }
 class MPropView: public wxPanel
@@ -71,7 +71,7 @@ public:
 		const wxString& name = "MPropView");
 	~MPropView();
 
-	void SetView(RenderCanvas* view);
+	void SetView(fluo::Renderview* view);
 	void SetMeshData(fluo::MeshData* md);
 	fluo::MeshData* GetMeshData();
 	void RefreshVRenderViews(bool tree=false);
@@ -80,7 +80,7 @@ public:
 
 private:
 	VRenderFrame* m_frame;
-	RenderCanvas* m_view;
+	fluo::Renderview* m_view;
 	fluo::MeshData* m_md;
 
 	wxCheckBox *m_light_chk;

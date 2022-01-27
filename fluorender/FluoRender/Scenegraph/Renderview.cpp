@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumeSelector.h>
 #include <Selection/VolumePoint.h>
 #include <Calculate/VolumeCalculator.h>
+#include <Calculate/KernelExecutor.h>
 #include <Distance/Ruler.h>
 #include <Distance/RulerRenderer.h>
 #include <Distance/RulerHandler.h>
@@ -77,6 +78,7 @@ Renderview::Renderview()
 	m_mvr = 0;
 	//temporary, dynamic data will be managed by global
 	m_ruler_list = new flrd::RulerList();
+	m_kernel_executor = new flrd::KernelExecutor();
 	m_selector = new flrd::VolumeSelector();
 	m_calculator = new flrd::VolumeCalculator();
 	m_scriptor = new flrd::ScriptProc();
@@ -96,6 +98,7 @@ Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	m_mvr = 0;
 	//temporary, dynamic data will be managed by global
 	m_ruler_list = new flrd::RulerList();
+	m_kernel_executor = new flrd::KernelExecutor();
 	m_selector = new flrd::VolumeSelector();
 	m_calculator = new flrd::VolumeCalculator();
 	m_scriptor = new flrd::ScriptProc();
@@ -145,22 +148,21 @@ Renderview::~Renderview()
 	m_loader->StopAll();
 
 	//temporary, dynamic data will be managed by global
-	if (m_mvr) delete m_mvr;
-	if (m_trace_group) delete m_trace_group;
+	delete m_mvr;
+	delete m_trace_group;
 	for (auto i : *m_ruler_list)
-	{
-		if (i) delete i;
-	}
-	if (m_ruler_list) delete m_ruler_list;
-	if (m_selector) delete m_selector;
-	if (m_calculator) delete m_calculator;
-	if (m_scriptor) delete m_scriptor;
-	if (m_ruler_handler) delete m_ruler_handler;
-	if (m_ruler_renderer) delete m_ruler_renderer;
-	if (m_volume_point) delete m_volume_point;
-	if (m_loader) delete m_loader;
-	if (m_interpolator) delete m_interpolator;
-	if (m_text_renderer) delete m_text_renderer;
+		delete i;
+	delete m_ruler_list;
+	delete m_kernel_executor;
+	delete m_selector;
+	delete m_calculator;
+	delete m_scriptor;
+	delete m_ruler_handler;
+	delete m_ruler_renderer;
+	delete m_volume_point;
+	delete m_loader;
+	delete m_interpolator;
+	delete m_text_renderer;
 }
 
 VolumeGroup* Renderview::addVolumeGroup(const std::string &group_name, const std::string &prv_group_name)

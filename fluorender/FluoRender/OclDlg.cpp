@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/KernelExecutor.h>
 #include <compatibility.h>
@@ -191,7 +192,7 @@ OclDlg::~OclDlg()
 {
 }
 
-void OclDlg::GetSettings(RenderCanvas* view)
+void OclDlg::GetSettings(fluo::Renderview* view)
 {
 	if (!view) return;
 	m_view = view;
@@ -199,7 +200,7 @@ void OclDlg::GetSettings(RenderCanvas* view)
 	AddKernelsToList();
 }
 
-RenderCanvas* OclDlg::GetView()
+fluo::Renderview* OclDlg::GetView()
 {
 	return m_view;
 }
@@ -333,7 +334,7 @@ void OclDlg::Execute()
 	wxString code = m_kernel_edit_stc->GetText();
 
 	//get volume currently selected
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 	bool dup = true;
@@ -369,8 +370,8 @@ void OclDlg::Execute()
 			return;
 		if (m_frame)
 		{
-			m_frame->GetDataManager()->AddVolumeData(vd_r);
-			m_view->AddVolumeData(vd_r);
+			//m_frame->GetDataManager()->AddVolumeData(vd_r);
+			m_view->addVolumeData(vd_r, 0);
 			vd->setValue(gstDisplay, false);
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd_r->getName());

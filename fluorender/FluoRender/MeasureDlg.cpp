@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MeasureDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <FLIVR/VertexArray.h>
 #include <Distance/RulerHandler.h>
@@ -183,13 +184,13 @@ void RulerListCtrl::AdjustSize()
 	SetColumnWidth(10, wxLIST_AUTOSIZE_USEHEADER);
 }
 
-void RulerListCtrl::UpdateRulers(RenderCanvas* vrv)
+void RulerListCtrl::UpdateRulers(fluo::Renderview* view)
 {
 	m_name_text->Hide();
 	m_center_text->Hide();
 	m_color_picker->Hide();
-	if (vrv)
-		m_view = vrv;
+	if (view)
+		m_view = view;
 
 	flrd::RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list) return;
@@ -206,16 +207,19 @@ void RulerListCtrl::UpdateRulers(RenderCanvas* vrv)
 	wxString points;
 	fluo::Point p;
 	int num_points;
+	long cur_frame, sb_unit;
+	m_view->getValue(gstCurrentFrame, cur_frame);
+	m_view->getValue(gstScaleBarUnit, sb_unit);
 	for (int i=0; i<(int)ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->GetTimeDep() &&
-			ruler->GetTime() != m_view->m_tseq_cur_num)
+			ruler->GetTime() != cur_frame)
 			continue;
 
 		wxString unit;
-		switch (m_view->m_sb_unit)
+		switch (sb_unit)
 		{
 		case 0:
 			unit = "nm";
@@ -364,7 +368,9 @@ void RulerListCtrl::Export(wxString filename)
 		int num_points;
 		fluo::Point p;
 		flrd::Ruler* ruler;
-		switch (m_view->m_sb_unit)
+		long sb_unit;
+		m_view->getValue(gstScaleBarUnit, sb_unit);
+		switch (sb_unit)
 		{
 		case 0:
 			unit = "nm";
@@ -1205,7 +1211,7 @@ MeasureDlg::~MeasureDlg()
 		delete m_aligner;
 }
 
-void MeasureDlg::GetSettings(RenderCanvas* vrv)
+void MeasureDlg::GetSettings(fluo::Renderview* vrv)
 {
 	m_view = vrv;
 	if (!m_view)
@@ -1232,7 +1238,8 @@ void MeasureDlg::GetSettings(RenderCanvas* vrv)
 		m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 		m_toolbar2->ToggleTool(ID_LockBtn, false);
 
-		int int_mode = m_view->GetIntMode();
+		long int_mode;
+		m_view->getValue(gstInterMode, int_mode);
 		if (int_mode == 5 || int_mode == 7)
 		{
 			int ruler_type = m_rhdl->GetType();
@@ -1262,7 +1269,9 @@ void MeasureDlg::GetSettings(RenderCanvas* vrv)
 		else if (int_mode == 14)
 			m_toolbar2->ToggleTool(ID_RulerDelBtn, true);
 
-		switch (m_view->m_point_volume_mode)
+		long point_volume_mode;
+		m_view->getValue(gstPointVolumeMode, point_volume_mode);
+		switch (point_volume_mode)
 		{
 		case 0:
 			m_view_plane_rd->SetValue(true);
@@ -1281,8 +1290,11 @@ void MeasureDlg::GetSettings(RenderCanvas* vrv)
 			break;
 		}
 
-		m_use_transfer_chk->SetValue(m_view->m_ruler_use_transf);
-		m_transient_chk->SetValue(m_view->m_ruler_time_dep);
+		bool bval;
+		m_view->getValue(gstRulerUseTransf, bval);
+		m_use_transfer_chk->SetValue(bval);
+		m_view->getValue(gstRulerTransient, bval);
+		m_transient_chk->SetValue(bval);
 		if (m_frame && m_frame->GetSettingDlg())
 		{
 			//ruler exports df/f
@@ -1294,15 +1306,15 @@ void MeasureDlg::GetSettings(RenderCanvas* vrv)
 				m_frame->GetSettingDlg()->GetRulerRelaxF1());
 			m_auto_relax_btn->SetValue(
 				m_frame->GetSettingDlg()->GetRulerAutoRelax());
-			m_view->m_ruler_autorelax =
-				m_frame->GetSettingDlg()->GetRulerAutoRelax();
+			m_view->setValue(gstRulerRelax, 
+				m_frame->GetSettingDlg()->GetRulerAutoRelax());
 			m_relax_data_cmb->Select(
 				m_frame->GetSettingDlg()->GetRulerRelaxType());
 		}
 	}
 }
 
-RenderCanvas* MeasureDlg::GetView()
+fluo::Renderview* MeasureDlg::GetView()
 {
 	return m_view;
 }
@@ -1334,12 +1346,12 @@ void MeasureDlg::OnNewLocator(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_LocatorBtn))
 	{
-		m_view->SetIntMode(5);
+		m_view->setValue(gstInterMode, long(5));
 		m_rhdl->SetType(2);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 	}
 }
 
@@ -1364,12 +1376,12 @@ void MeasureDlg::OnNewProbe(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_ProbeBtn))
 	{
-		m_view->SetIntMode(5);
+		m_view->setValue(gstInterMode, long(5));
 		m_rhdl->SetType(3);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 	}
 }
 
@@ -1394,12 +1406,12 @@ void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_ProtractorBtn))
 	{
-		m_view->SetIntMode(5);
+		m_view->setValue(gstInterMode, long(5));
 		m_rhdl->SetType(4);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 	}
 }
 
@@ -1424,12 +1436,12 @@ void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_RulerBtn))
 	{
-		m_view->SetIntMode(5);
+		m_view->setValue(gstInterMode, long(5));
 		m_rhdl->SetType(0);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 	}
 }
 
@@ -1451,12 +1463,12 @@ void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
 	{
-		m_view->SetIntMode(5);
+		m_view->setValue(gstInterMode, long(5));
 		m_rhdl->SetType(1);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 		m_rhdl->FinishRuler();
 	}
 }
@@ -1482,12 +1494,12 @@ void MeasureDlg::OnEllipse(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_EllipseBtn))
 	{
-		m_view->SetIntMode(5);
+		m_view->setValue(gstInterMode, long(5));
 		m_rhdl->SetType(5);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 	}
 }
 
@@ -1511,26 +1523,23 @@ void MeasureDlg::OnGrow(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_GrowBtn))
 	{
-		m_view->SetIntMode(12);
+		m_view->setValue(gstInterMode, long(12));
 		m_rhdl->SetType(1);
 		if (m_view->GetRulerRenderer())
 			m_view->GetRulerRenderer()->SetDrawText(false);
 		//reset label volume
-		if (m_view->m_cur_vol)
+		fluo::VolumeData* vd = m_view->GetCurrentVolume();
+		if (vd)
 		{
-			m_view->m_cur_vol->
-				GetRenderer()->clear_tex_mask();
-			m_view->m_cur_vol->
-				GetRenderer()->clear_tex_label();
-			m_view->m_cur_vol->
-				AddEmptyMask(0, true);
-			m_view->m_cur_vol->
-				AddEmptyLabel(0, true);
+			vd->GetRenderer()->clear_tex_mask();
+			vd->GetRenderer()->clear_tex_label();
+			vd->AddEmptyMask(0, true);
+			vd->AddEmptyLabel(0, true);
 		}
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 		if (m_view->GetRulerRenderer())
 			m_view->GetRulerRenderer()->SetDrawText(true);
 	}
@@ -1556,14 +1565,14 @@ void MeasureDlg::OnPencil(wxCommandEvent& event)
 
 	if (m_toolbar1->GetToolState(ID_PencilBtn))
 	{
-		m_view->SetIntMode(13);
+		m_view->setValue(gstInterMode, long(13));
 		m_rhdl->SetType(1);
 		//if (m_view->m_glview->GetRulerRenderer())
 		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(false);
 	}
 	else
 	{
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 		//if (m_view->m_glview->GetRulerRenderer())
 		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(true);
 	}
@@ -1628,9 +1637,9 @@ void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_RulerEditBtn))
-		m_view->SetIntMode(6);
+		m_view->setValue(gstInterMode, long(6));
 	else
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 
 	//m_edited = true;
 }
@@ -1655,9 +1664,9 @@ void MeasureDlg::OnRulerDel(wxCommandEvent& event)
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_RulerDelBtn))
-		m_view->SetIntMode(14);
+		m_view->setValue(gstInterMode, long(14));
 	else
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 
 	//m_edited = true;
 }
@@ -1682,9 +1691,9 @@ void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 	m_toolbar2->ToggleTool(ID_LockBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_RulerMoveBtn))
-		m_view->SetIntMode(9);
+		m_view->setValue(gstInterMode, long(9));
 	else
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 
 	//m_edited = true;
 }
@@ -1730,8 +1739,12 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		ruler->SetRulerType(2);
 		ruler->SetName("Average");
 		ruler->AddPoint(avg);
-		ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		ruler->SetTime(m_view->m_tseq_cur_num);
+		bool bval;
+		m_view->getValue(gstRulerTransient, bval);
+		ruler->SetTimeDep(bval);
+		long lval;
+		m_view->getValue(gstCurrentFrame, lval);
+		ruler->SetTime(lval);
 		ruler_list->push_back(ruler);
 		m_view->RefreshGL(39);
 		GetSettings(m_view);
@@ -1742,7 +1755,7 @@ void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
 	if (m_view)
 	{
-		m_rhdl->SetVolumeData(m_view->m_cur_vol);
+		m_rhdl->SetVolumeData(m_view->GetCurrentVolume());
 		std::vector<int> sel;
 		if (m_rulerlist->GetCurrSelection(sel))
 		{
@@ -1938,7 +1951,7 @@ void MeasureDlg::Relax(int idx)
 	m_calculator->SetInfr(infr);
 	m_calculator->SetCelpList(list);
 	m_calculator->SetRuler(ruler);
-	m_calculator->SetVolume(m_view->m_cur_vol);
+	m_calculator->SetVolume(m_view->GetCurrentVolume());
 	m_calculator->CenterRuler(type, m_edited, iter);
 	m_edited = false;
 	m_view->RefreshGL(39);
@@ -1983,9 +1996,9 @@ void MeasureDlg::OnLock(wxCommandEvent& event)
 	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
 
 	if (m_toolbar2->GetToolState(ID_LockBtn))
-		m_view->SetIntMode(11);
+		m_view->setValue(gstInterMode, long(11));
 	else
-		m_view->SetIntMode(1);
+		m_view->setValue(gstInterMode, long(1));
 }
 
 void MeasureDlg::OnPrune(wxCommandEvent& event)
@@ -2032,7 +2045,7 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 	if (!m_view)
 		return;
 
-	int mode = 0;
+	long mode = 0;
 	int sender_id = event.GetId();
 	switch (sender_id)
 	{
@@ -2046,7 +2059,7 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 		mode = 2;
 		break;
 	}
-	m_view->m_point_volume_mode = mode;
+	m_view->setValue(gstPointVolumeMode, mode);
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetPointVolumeMode(mode);
 }
@@ -2057,7 +2070,7 @@ void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 		return;
 
 	bool use_transfer = m_use_transfer_chk->GetValue();
-	m_view->m_ruler_use_transf = use_transfer;
+	m_view->setValue(gstRulerUseTransf, use_transfer);
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
 }
@@ -2068,7 +2081,7 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 		return;
 
 	bool val = m_transient_chk->GetValue();
-	m_view->m_ruler_time_dep = val;
+	m_view->setValue(gstRulerTransient, val);
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerTimeDep(val);
 }
@@ -2091,7 +2104,7 @@ void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerAutoRelax(bval);
 	if (m_view)
-		m_view->m_ruler_autorelax = bval;
+		m_view->setValue(gstRulerRelax, bval);
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
@@ -2218,11 +2231,12 @@ void MeasureDlg::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
 	if (valid_center)
 	{
 		double tx, ty, tz;
-		m_view->GetObjCenters(tx, ty, tz);
-		m_view->SetObjTrans(
-			tx - center.x(),
-			center.y() - ty,
-			center.z() - tz);
+		m_view->getValue(gstObjCtrX, tx);
+		m_view->getValue(gstObjCtrY, ty);
+		m_view->getValue(gstObjCtrZ, tz);
+		m_view->setValue(gstObjTransX, tx - center.x());
+		m_view->setValue(gstObjTransY, center.y() - ty);
+		m_view->setValue(gstObjTransZ, center.z() - tz);
 	}
 }
 

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include "Components/CompSelector.h"
 #include <wx/valnum.h>
@@ -135,7 +136,7 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(RenderCanvas* view)
+void NoiseCancellingDlg::GetSettings(fluo::Renderview* view)
 {
 	if (!view)
 		return;
@@ -172,7 +173,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->m_cur_vol;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 

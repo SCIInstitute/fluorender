@@ -212,6 +212,8 @@ namespace fluo
 		//segment volumes in current view
 		void Segment();
 
+		//kernel executor
+		flrd::KernelExecutor* GetKernelExecutor() { return m_kernel_executor; }
 		//get volume selector
 		flrd::VolumeSelector* GetVolumeSelector() { return m_selector; }
 		//get volume calculator
@@ -445,6 +447,8 @@ namespace fluo
 		flvr::MultiVolumeRenderer* m_mvr;
 		//highlighted comps
 		flrd::CelpList m_cell_list;
+		//kernel executer
+		flrd::KernelExecutor *m_kernel_executor;
 		//volume selector for segmentation
 		flrd::VolumeSelector *m_selector;
 		//calculator

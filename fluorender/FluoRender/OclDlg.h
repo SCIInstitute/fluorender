@@ -34,7 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class VRenderFrame;
-class RenderCanvas;
+namespace fluo
+{
+	class Renderview;
+}
 class OclDlg : public wxPanel
 {
 public:
@@ -56,12 +59,12 @@ public:
 	OclDlg(VRenderFrame* frame);
 	~OclDlg();
 
-	void GetSettings(RenderCanvas* view);
-	RenderCanvas* GetView();
+	void GetSettings(fluo::Renderview* view);
+	fluo::Renderview* GetView();
 
 private:
 	VRenderFrame* m_frame;
-	RenderCanvas* m_view;
+	fluo::Renderview* m_view;
 
 	//ui
 	wxTextCtrl* m_kernel_file_txt;

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "MPropView.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <MeshData.hpp>
 #include <wx/valnum.h>
 
@@ -246,7 +247,7 @@ void MPropView::GetSettings()
 	m_size_text->SetValue(wxString::Format("%d", lval));
 }
 
-void MPropView::SetView(RenderCanvas* view)
+void MPropView::SetView(fluo::Renderview* view)
 {
 	m_view = view;
 }
@@ -275,9 +276,9 @@ void MPropView::OnLightingCheck(wxCommandEvent& event)
 	{
 		bool val = m_light_chk->GetValue();
 		m_md->setValue(gstShadingEnable, val);
-		for (int i=0; i< m_view->GetMeshNum(); i++)
+		fluo::MeshList list = m_view->GetMeshList();
+		for (auto md : list)
 		{
-			fluo::MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->setValue(gstShadingEnable, val);
 		}
@@ -386,9 +387,9 @@ void MPropView::OnShadowCheck(wxCommandEvent& event)
 	{
 		bool val = m_shadow_chk->GetValue();
 		m_md->setValue(gstShadowEnable, val);
-		for (int i=0; i< m_view->GetMeshNum(); i++)
+		fluo::MeshList list = m_view->GetMeshList();
+		for (auto md : list)
 		{
-			fluo::MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->setValue(gstShadowEnable, val);
 		}
@@ -414,9 +415,9 @@ void MPropView::OnShadowText(wxCommandEvent& event)
 	if (m_md && m_view)
 	{
 		m_md->setValue(gstShadowInt, dval);
-		for (int i=0; i< m_view->GetMeshNum(); i++)
+		fluo::MeshList list = m_view->GetMeshList();
+		for (auto md : list)
 		{
-			fluo::MeshData* md = m_view->GetMeshData(i);
 			if (md)
 				md->setValue(gstShadowInt, dval);
 		}
