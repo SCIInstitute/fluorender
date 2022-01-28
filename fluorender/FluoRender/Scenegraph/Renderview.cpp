@@ -233,6 +233,7 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 	}
 
 	setValue(gstVolListDirty, true);
+	setValue(gstFullVolListDirty, true);
 
 	//if (m_frame)
 	//{
@@ -247,6 +248,13 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 	setValue(gstLoadUpdate, true);
 
 	return group;
+}
+
+void Renderview::addMeshData(fluo::MeshData* md)
+{
+	addChild(md);
+	setValue(gstMshListDirty, true);
+	setValue(gstFullMshListDirty, true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -648,6 +656,35 @@ MeshData* Renderview::GetCurrentMesh()
 	return dynamic_cast<MeshData*>(ref);
 }
 
+//indexed data
+VolumeData* Renderview::GetVolume(size_t i)
+{
+	if (i >= m_vol_full_list.size())
+		return nullptr;
+	return m_vol_full_list[i].get();
+}
+
+MeshData* Renderview::GetMesh(size_t i)
+{
+	if (i >= m_msh_full_list.size())
+		return nullptr;
+	return m_msh_full_list[i].get();
+}
+
+VolumeData* Renderview::GetShownVolume(size_t i)
+{
+	if (i >= m_vol_list.size())
+		return nullptr;
+	return m_vol_list[i].get();
+}
+
+MeshData* Renderview::GetShownMesh(size_t i)
+{
+	if (i >= m_msh_list.size())
+		return nullptr;
+	return m_msh_list[i].get();
+}
+
 //conversion
 VolumeList Renderview::GetVolList()
 {
@@ -679,6 +716,27 @@ MeshList Renderview::GetFullMeshList()
 	for (auto md : m_msh_full_list)
 		list.push_back(md.get());
 	return list;
+}
+
+//num
+size_t Renderview::GetVolListSize()
+{
+	return m_vol_list.size();
+}
+
+size_t Renderview::GetFullVolListSize()
+{
+	return m_vol_full_list.size();
+}
+
+size_t Renderview::GetMeshListSize()
+{
+	return m_msh_list.size();
+}
+
+size_t Renderview::GetFullMeshListSize()
+{
+	return m_msh_full_list.size();
 }
 
 void Renderview::HandleProjection(int nx, int ny, bool vr)
@@ -5077,7 +5135,7 @@ void Renderview::DrawVolumes(long peel)
 							flvr::TextureRenderer::get_interactive() &&
 							quota_vd_list.size() > 0)
 						{
-							if (find(quota_vd_list.begin(),
+							if (std::find(quota_vd_list.begin(),
 								quota_vd_list.end(), vd) !=
 								quota_vd_list.end())
 								list.push_back(vd);
@@ -5114,7 +5172,7 @@ void Renderview::DrawVolumes(long peel)
 								flvr::TextureRenderer::get_interactive() &&
 								quota_vd_list.size() > 0)
 							{
-								if (find(quota_vd_list.begin(),
+								if (std::find(quota_vd_list.begin(),
 									quota_vd_list.end(), vd) !=
 									quota_vd_list.end())
 									list.push_back(vd);
@@ -7981,4 +8039,30 @@ void Renderview::OnCurrentMeshChanged(Event& event)
 		i++;
 	}
 	setValue(gstCurMshIdx, idx);
+}
+
+void Renderview::OnTextColorModeChanged(Event& event)
+{
+	Color color;
+	long lval;
+	getValue(gstTextColorMode, lval);
+	switch (lval)
+	{
+	case 0://background inverted
+		getValue(gstBgColorInv, color);
+		break;
+	case 1://background
+		getValue(gstBgColor, color);
+		break;
+	case 2://secondary color of current volume
+		{
+			VolumeData* vd = GetCurrentVolume();
+			if (vd)
+				vd->getValue(gstSecColor, color);
+			else
+				getValue(gstBgColorInv, color);
+		}
+		break;
+	}
+	setValue(gstTextColor, color);
 }

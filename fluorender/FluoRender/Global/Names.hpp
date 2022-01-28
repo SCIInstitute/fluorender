@@ -153,6 +153,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstHighShading "high shading"
 #define gstShadowEnable "shadow enable"
 #define gstShadowInt "shadow int"
+#define gstShadowDirEnable "shadow dir enable"
 #define gstShadowDirX "shadow dir x"
 #define gstShadowDirY "shadow dir y"
 #define gstSampleRate "sample rate"
@@ -350,7 +351,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstPointVolumeMode "point volume mode"//0: use view plane; 1: use max value; 2: use accumulated value
 #define gstRulerUseTransf "ruler use transf"//ruler use volume transfer function
 #define gstRulerTransient "ruler transient"//ruler is time dependent
-#define gstLinkedRot "linked rot"
+#define gstLinkedRot "linked rot"//link rotation to views
 #define gstPaintCount "paint count"//count voxels after painting
 #define gstPaintColocalize "paint colocalize"//compute colocalization after painting
 #define gstRulerRelax "ruler relax"//compute ruler relax after drawing
@@ -364,6 +365,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstFullVolListDirty "full vol list dirty"
 #define gstMshListDirty "msh list dirty"//request msh pop list update
 #define gstFullMshListDirty "full msh list dirty"
+#define gstTextColorMode "text color mode"//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
 #define gstTextColor "text color"//text color
 #define gstBgColor "background color"//bg
 #define gstBgColorInv "background color inv"//inverted background color

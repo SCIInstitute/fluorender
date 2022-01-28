@@ -31,9 +31,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Types/Point.h>
 
-class RenderCanvas;
 namespace fluo
 {
+	class Renderview;
 	class VolumeData;
 }
 namespace flrd
@@ -44,7 +44,7 @@ namespace flrd
 		VolumePoint() : m_view(0), m_vd(0) {}
 		~VolumePoint() {}
 
-		void SetView(RenderCanvas* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 		}
@@ -72,7 +72,7 @@ namespace flrd
 			fluo::Point &mp);
 
 	private:
-		RenderCanvas* m_view;
+		fluo::Renderview* m_view;
 		fluo::VolumeData* m_vd;
 	};
 }

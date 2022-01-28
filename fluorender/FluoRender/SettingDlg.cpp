@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "SettingDlg.h"
 #include "VRenderFrame.h"
+#include <Root.hpp>
+#include <Renderview.hpp>
+#include <Global.hpp>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
@@ -1622,17 +1625,12 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 	else
 		m_mouse_int = false;
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetAdaptive(m_mouse_int);
-				view->RefreshGL(39);
-			}
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstAdaptive, m_mouse_int);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1654,17 +1652,12 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	m_peeling_layers_sldr->SetValue(ival);
 	m_peeling_layers = ival;
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetPeelingLayers(ival);
-				view->RefreshGL(39);
-			}
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstPeelNum, ival);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1675,17 +1668,12 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 	else
 		m_micro_blend = false;
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetBlendSlices(m_micro_blend);
-				view->RefreshGL(39);
-			}
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstMicroBlendEnable, m_micro_blend);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1713,14 +1701,14 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 		m_shadow_dir = false;
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstShadowDirEnable, m_shadow_dir);
+		view->setValue(gstShadowDirX, m_shadow_dir_x);
+		view->setValue(gstShadowDirY, m_shadow_dir);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1740,14 +1728,14 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	m_shadow_dir_sldr->SetValue(int(deg));
 	SetShadowDir(deg);
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstShadowDirEnable, m_shadow_dir);
+		view->setValue(gstShadowDirX, m_shadow_dir_x);
+		view->setValue(gstShadowDirY, m_shadow_dir);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1810,17 +1798,12 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 	else
 		m_grad_bg = false;
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetGradBg(m_grad_bg);
-				view->RefreshGL(39);
-			}
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstGradBg, m_grad_bg);
+		view->RefreshGL(39);
 	}
 }
 
@@ -1860,45 +1843,37 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 	m_pin_threshold_sldr->SetValue(int(dval/10.0));
 	m_pin_threshold = dval / 100.0;
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->m_vrv->m_pin_scale_thresh = m_pin_threshold;
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstPinThresh, m_pin_threshold);
 	}
 }
 
 //link rotations
 void SettingDlg::OnRotLink(wxCommandEvent& event)
 {
-	bool linked_rot = m_rot_link_chk->GetValue();
-	RenderCanvas::m_linked_rot = linked_rot;
-	RenderCanvas::m_master_linked_view = 0;
+	//bool linked_rot = m_rot_link_chk->GetValue();
+	//RenderCanvas::m_linked_rot = linked_rot;
+	//RenderCanvas::m_master_linked_view = 0;
 
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-			view->RefreshGL(39);
-	}
+	//if (m_frame && 0 < m_frame->GetViewNum())
+	//{
+	//	RenderCanvas* view = m_frame->GetView(0);
+	//	if (view)
+	//		view->RefreshGL(39);
+	//}
 }
 
 //stereo
 void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 {
 	m_stereo = m_stereo_chk->GetValue();
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->SetStereo(m_stereo);
-			view->RefreshGL(39);
-		}
-	}
+	fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
+	if (!view) return;
+	view->setValue(gstVrEnable, m_stereo);
+	view->RefreshGL(39);
 }
 
 void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
@@ -1917,15 +1892,10 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	m_eye_dist_sldr->SetValue(int(dval * 10.0));
 	m_eye_dist = dval;
 
-	if (m_frame && 0 < m_frame->GetViewNum())
-	{
-		RenderCanvas* view = m_frame->GetView(0);
-		if (view)
-		{
-			view->SetEyeDist(m_eye_dist);
-			view->RefreshGL(39);
-		}
-	}
+	fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
+	if (!view) return;
+	view->setValue(gstVrEyeOffset, m_eye_dist);
+	view->RefreshGL(39);
 }
 
 //override vox
@@ -2149,14 +2119,12 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 	m_detail_level_offset_sldr->SetValue(val);
 	m_detail_level_offset = -val;
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstLevelOffset, val);
+		view->RefreshGL(39);
 	}
 }
 
@@ -2172,16 +2140,14 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 		wxString loc = exePath + GETSLASH() + "Fonts" +
 			GETSLASH() + str + ".ttf";
 
-		if (m_frame)
+		flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
+		flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
+		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 		{
-			flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
-			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RefreshGL(39);
-			}
+			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+			if (!view) continue;
+			view->setValue(gstTextSize, m_text_size);
+			view->RefreshGL(39);
 		}
 	}
 }
@@ -2194,15 +2160,13 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 	{
 		m_text_size = size;
 
-		if (m_frame)
+		flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
+		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 		{
-			flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RefreshGL(39);
-			}
+			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+			if (!view) continue;
+			view->setValue(gstTextSize, m_text_size);
+			view->RefreshGL(39);
 		}
 	}
 }
@@ -2210,14 +2174,12 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 {
 	m_text_color = m_text_color_cmb->GetCurrentSelection();
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-				view->RefreshGL(39);
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstTextColorMode, m_text_color);
+		view->RefreshGL(39);
 	}
 }
 
@@ -2238,14 +2200,12 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 	{
 		m_line_width_sldr->SetValue(ival);
 		m_line_width = ival;
-		if (m_frame)
+		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 		{
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RefreshGL(39);
-			}
+			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+			if (!view) continue;
+			view->setValue(gstLineWidth, m_line_width);
+			view->RefreshGL(39);
 		}
 	}
 }

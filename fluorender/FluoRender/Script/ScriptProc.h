@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
+#include <VolumeData.hpp>
 #include <Flobject/Group.hpp>
 #include <Tracking/VolCache.h>
 #include <Tracking/Cell.h>
@@ -36,10 +37,9 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 class VRenderFrame;
-class RenderCanvas;
 namespace fluo
 {
-	class VolumeData;
+	class Renderview;
 }
 namespace flrd
 {
@@ -70,7 +70,7 @@ namespace flrd
 		~ScriptProc();
 
 		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(RenderCanvas* view) { m_view = view; }
+		void SetView(fluo::Renderview* view) { m_view = view; }
 
 		//run 4d script
 		void Run4DScript(TimeMask tm, const wxString &scriptname, bool rewind);
@@ -79,7 +79,7 @@ namespace flrd
 
 	private:
 		VRenderFrame* m_frame;
-		RenderCanvas *m_view;
+		fluo::Renderview *m_view;
 
 		wxString m_type;
 		TimeMask m_time_mask;
@@ -98,7 +98,7 @@ namespace flrd
 
 	private:
 		bool TimeCondition();
-		bool GetVolumes(std::vector<fluo::VolumeData*> &list);
+		bool GetVolumes(fluo::VolumeList &list);
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();

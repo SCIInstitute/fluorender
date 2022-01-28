@@ -154,8 +154,10 @@ namespace fluo
 
 		//organize data
 		VolumeGroup* addVolumeGroup(const std::string &group_name = "", const std::string &prv_group_name = "");
-		VolumeGroup* addVolumeData(VolumeData* vd, const std::string &group_name = "");
-		VolumeGroup* addVolumeData(VolumeData* vd, VolumeGroup* group = nullptr);
+		VolumeGroup* addVolumeData(VolumeData* vd, const std::string &group_name);
+		VolumeGroup* addVolumeData(VolumeData* vd, VolumeGroup* group);
+		void addMeshData(fluo::MeshData* md);
+
 
 		//migrated from the RenderCanvas class
 		//initialization
@@ -170,6 +172,11 @@ namespace fluo
 		//current data
 		VolumeData* GetCurrentVolume();
 		MeshData* GetCurrentMesh();
+		//indexed data
+		VolumeData* GetVolume(size_t i);
+		MeshData* GetMesh(size_t i);
+		VolumeData* GetShownVolume(size_t i);
+		MeshData* GetShownMesh(size_t i);
 		//temporary lists
 		void PopVolumeList();
 		void PopFullVolList();
@@ -183,6 +190,11 @@ namespace fluo
 		VolumeList GetFullVolList();
 		MeshList GetMeshList();
 		MeshList GetFullMeshList();
+		//num
+		size_t GetVolListSize();
+		size_t GetFullVolListSize();
+		size_t GetMeshListSize();
+		size_t GetFullMeshListSize();
 
 		//handle camera
 		void HandleProjection(int nx, int ny, bool vr = false);
@@ -504,6 +516,7 @@ namespace fluo
 		void OnFullMshListDirtyChanged(Event& event);
 		void OnCurrentVolumeChanged(Event& event);
 		void OnCurrentMeshChanged(Event& event);
+		void OnTextColorModeChanged(Event& event);
 	};
 }
 

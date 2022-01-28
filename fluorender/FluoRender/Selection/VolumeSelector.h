@@ -38,9 +38,9 @@ DEALINGS IN THE SOFTWARE.
 #define BRUSH_TOOL_ITER_NORMAL	30
 #define BRUSH_TOOL_ITER_STRONG	60
 
-class RenderCanvas;
 namespace fluo
 {
+	class Renderview;
 	class VolumeData;
 }
 namespace flrd
@@ -51,7 +51,7 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
-		void SetView(RenderCanvas* view) { m_view = view; }
+		void SetView(fluo::Renderview* view) { m_view = view; }
 		void SetVolume(fluo::VolumeData *vd) { m_vd = vd; }
 		fluo::VolumeData* GetVolume() { return m_vd; }
 		//modes
@@ -228,7 +228,7 @@ namespace flrd
 		double GetSpanSec() { return m_span_sec; }
 
 	private:
-		RenderCanvas *m_view;
+		fluo::Renderview *m_view;
 		fluo::VolumeData *m_vd;	//volume data for segmentation
 		unsigned int m_2d_mask;	//2d mask from painting
 		unsigned int m_2d_weight1;//2d weight map (after tone mapping)

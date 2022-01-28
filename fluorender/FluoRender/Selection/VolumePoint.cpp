@@ -27,10 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumePoint.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <FLIVR/Texture.h>
-#include <RenderCanvas.h>
 #include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;
@@ -42,8 +43,9 @@ double VolumePoint::GetPointVolume(
 {
 	if (!m_view || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -102,7 +104,7 @@ double VolumePoint::GetPointVolume(
 	double max_int = 0.0;
 	double alpha = 0.0;
 	double value = 0.0;
-	vector<fluo::Plane*> *planes = 0;
+	std::vector<fluo::Plane*> *planes = 0;
 	double mspc = 1.0;
 	double srate;
 	m_vd->getValue(gstSampleRate, srate);
@@ -266,12 +268,13 @@ double VolumePoint::GetPointVolumeBox(
 {
 	if (!m_view || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
@@ -369,12 +372,13 @@ double VolumePoint::GetPointVolumeBox2(
 {
 	if (!m_view || !m_vd)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
+	std::vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
@@ -472,8 +476,9 @@ double VolumePoint::GetPointPlane(
 {
 	if (!m_view)
 		return -1.0;
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -497,7 +502,9 @@ double VolumePoint::GetPointPlane(
 	p.set(glm::value_ptr(prj_mat));
 
 	fluo::Vector n(0.0, 0.0, 1.0);
-	fluo::Point center(0.0, 0.0, -m_view->GetCenterEyeDist());
+	double dval;
+	m_view->getValue(gstCamDist, dval);
+	fluo::Point center(0.0, 0.0, -dval);
 	if (planep)
 	{
 		center = *planep;

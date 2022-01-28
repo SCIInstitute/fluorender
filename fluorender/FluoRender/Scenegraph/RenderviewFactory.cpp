@@ -58,6 +58,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstDaStart, double(0));
 		view->addValue(gstDaEnd, double(1));
 		//shadow
+		view->addValue(gstShadowDirEnable, bool(false));
 		view->addValue(gstShadowDirX, double(0));
 		view->addValue(gstShadowDirY, double(0));
 		//output (2d) adjustments
@@ -170,6 +171,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMshListDirty, bool(false));
 		view->addValue(gstFullVolListDirty, bool(false));
 		view->addValue(gstFullMshListDirty, bool(false));
+		view->addValue(gstTextColorMode, long(0));
 		view->addValue(gstTextColor, Color());
 		view->addValue(gstBgColor, Color(0.0));
 		view->addValue(gstBgColorInv, Color(1.0));
@@ -341,6 +343,7 @@ void RenderviewFactory::setEventHandler(Renderview* view)
 	ADD_AFTER_EVENT(view, gstFullMshListDirty, OnFullMshListDirtyChanged);
 	ADD_AFTER_EVENT(view, gstCurrentVolume, OnCurrentVolumeChanged);
 	ADD_AFTER_EVENT(view, gstCurrentMesh, OnCurrentMeshChanged);
+	ADD_AFTER_EVENT(view, gstTextColorMode, OnTextColorModeChanged);
 }
 
 Renderview* RenderviewFactory::build(Renderview* view)

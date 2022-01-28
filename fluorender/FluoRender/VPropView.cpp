@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <Global.hpp>
+#include <Root.hpp>
 #include <FLIVR/MultiVolumeRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/VolShaderCode.h>
@@ -933,17 +935,12 @@ void VPropView::RefreshVRenderViews(bool tree, bool interactive)
 
 void VPropView::InitVRenderViews(unsigned int type)
 {
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->InitView(type);
-				view->m_vrv->UpdateView();
-			}
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->InitView(type);
+		//view->m_vrv->UpdateView();
 	}
 }
 

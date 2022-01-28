@@ -1109,7 +1109,7 @@ void TraceDlg::OnSaveasTrace(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		SaveTrackFile(filename);
+		SaveTrackFile(filename.ToStdWstring());
 	}
 
 	if (fopendlg)

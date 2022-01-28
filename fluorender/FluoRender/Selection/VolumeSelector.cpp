@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "VolumeSelector.h"
-#include "RenderCanvas.h"
 #include "VRenderFrame.h"
 #include "utility.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Global.hpp>
@@ -131,7 +131,9 @@ void VolumeSelector::Segment(int mx, int my)
 			final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
 			chann_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	//orthographic
-	SetOrthographic(!m_view->GetPersp());
+	bool bval;
+	m_view->getValue(gstPerspective, bval);
+	SetOrthographic(!bval);
 
 	//modulate threshold with pressure
 	double gm_falloff_save, scl_translate_save;
@@ -264,7 +266,9 @@ void VolumeSelector::Select(double radius)
 		{
 			flrd::PaintBoxes pb;
 			pb.SetBricks(bricks);
-			pb.SetPersp(!m_view->GetPersp());
+			bool bval;
+			m_view->getValue(gstPerspective, bval);
+			pb.SetPersp(!bval);
 			fluo::Transform *tform = m_vd->GetTexture()->transform();
 			double mvmat[16];
 			tform->get_trans(mvmat);
@@ -280,7 +284,10 @@ void VolumeSelector::Select(double radius)
 			pr.set(glm::value_ptr(m_prj_mat));
 			mat.set(glm::value_ptr(cmat));
 			pb.SetMats(mv, pr, mat);
-			pb.SetPaintTex(m_2d_mask, m_view->GetGLSize().x, m_view->GetGLSize().y);
+			long nx, ny;
+			m_view->getValue(gstSizeX, nx);
+			m_view->getValue(gstSizeY, ny);
+			pb.SetPaintTex(m_2d_mask, nx, ny);
 			if (m_mode == 9)
 				pb.SetMousePos(m_mx, m_my);
 			pb.Compute();
@@ -828,8 +835,9 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		m_mx0 < 0 || m_my0 < 0)
 		return false;
 	
-	int nx = m_view->GetGLSize().x;
-	int ny = m_view->GetGLSize().y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);

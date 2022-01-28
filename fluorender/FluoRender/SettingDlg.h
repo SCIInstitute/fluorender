@@ -342,8 +342,8 @@ private:
 	wxString m_script_file;
 	//text size
 	wxString m_font_file;	//font lib file in the Fonts folder
-	int m_text_size;		//text size in viewport
-	int m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
+	long m_text_size;		//text size in viewport
+	long m_text_color;		//text color: 0- contrast to bg; 1-same as bg; 2-volume sec color
 	//line width
 	double m_line_width;	//line width
 	//memory limit

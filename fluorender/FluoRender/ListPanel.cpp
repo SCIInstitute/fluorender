@@ -331,7 +331,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 					}
 				}
 
-				int chan_num = view->GetAny();
+				int chan_num = view->GetFullVolListSize();
 				view_empty = chan_num > 0 ? false : view_empty;
 				fluo::Color color(1.0, 1.0, 1.0);
 				if (chan_num == 0)
@@ -344,9 +344,11 @@ void DataListCtrl::AddToView(int menu_index, long item)
 				if (chan_num >= 0 && chan_num < 3)
 					vd_add->setValue(gstColor, color);
 
-				fluo::VolumeGroup *group = view->AddVolumeData(vd_add);
+				fluo::VolumeGroup *group = view->addVolumeData(vd_add, 0);
 				m_frame->OnSelection(2, view, group, vd_add, 0);
-				if (view->GetVolMethod() == VOL_METHOD_MULTI)
+				long lval;
+				view->getValue(gstMixMethod, lval);
+				if (lval == fluo::Renderview::MIX_METHOD_MULTI)
 				{
 					AdjustView* adjust_view = m_frame->GetAdjustView();
 					if (adjust_view)
@@ -366,9 +368,9 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		{
 			if (view)
 			{
-				int chan_num = view->GetAny();
+				int chan_num = view->GetFullVolListSize() + view->GetFullMeshListSize();
 				view_empty = chan_num > 0 ? false : view_empty;
-				view->AddMeshData(md);
+				view->addMeshData(md);
 			}
 		}
 	}
@@ -380,9 +382,9 @@ void DataListCtrl::AddToView(int menu_index, long item)
 		{
 			if (view)
 			{
-				int chan_num = view->GetAny();
+				int chan_num = view->GetFullVolListSize() + view->GetFullMeshListSize();;
 				view_empty = chan_num > 0 ? false : view_empty;
-				view->AddAnnotations(ann);
+				view->addChild(ann);
 			}
 		}
 	}
@@ -890,127 +892,127 @@ void DataListCtrl::OnEndEditName(wxCommandEvent& event)
 
 void DataListCtrl::DeleteSelection()
 {
-	wxString name = "";
+	//wxString name = "";
 
-	if (m_frame && GetSelectedItemCount() > 0)
-	{
-		long item = GetNextItem(-1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_SELECTED);
-		if (item != -1)
-		{
-			if (GetItemText(item) == "Volume")
-			{
-				name = GetText(item, 1);
-				int i;
-				//from view
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetView(i);
-					if (view)
-					{
-						view->RemoveVolumeDataDup(name.ToStdString());
-					}
-				}
-				//from datamanager
-				glbin_volf->remove(name.ToStdString());
-			}
-			else if (GetItemText(item) == "Mesh")
-			{
-				name = GetText(item, 1);
-				int i;
-				//from view
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetView(i);
-					if (view)
-					{
-						view->RemoveMeshData(name.ToStdString());
-					}
-				}
-				//from datamanager
-				glbin_mshf->remove(name.ToStdString());
-			}
-			else if (GetItemText(item) == "Annotations")
-			{
-				name = GetText(item, 1);
-				int i;
-				//from view
-				for (int i = 0; i < m_frame->GetViewNum(); i++)
-				{
-					RenderCanvas* view = m_frame->GetView(i);
-					if (view)
-						view->RemoveAnnotations(name.ToStdString());
-				}
-				//from datamanager
-				glbin_annf->remove(name.ToStdString());
-			}
-		}
-		m_frame->UpdateList();
-		m_frame->UpdateTree(name);
-		m_frame->RefreshVRenderViews();
-	}
+	//if (m_frame && GetSelectedItemCount() > 0)
+	//{
+	//	long item = GetNextItem(-1,
+	//		wxLIST_NEXT_ALL,
+	//		wxLIST_STATE_SELECTED);
+	//	if (item != -1)
+	//	{
+	//		if (GetItemText(item) == "Volume")
+	//		{
+	//			name = GetText(item, 1);
+	//			int i;
+	//			//from view
+	//			for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(i);
+	//				if (view)
+	//				{
+	//					view->RemoveVolumeDataDup(name.ToStdString());
+	//				}
+	//			}
+	//			//from datamanager
+	//			glbin_volf->remove(name.ToStdString());
+	//		}
+	//		else if (GetItemText(item) == "Mesh")
+	//		{
+	//			name = GetText(item, 1);
+	//			int i;
+	//			//from view
+	//			for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(i);
+	//				if (view)
+	//				{
+	//					view->RemoveMeshData(name.ToStdString());
+	//				}
+	//			}
+	//			//from datamanager
+	//			glbin_mshf->remove(name.ToStdString());
+	//		}
+	//		else if (GetItemText(item) == "Annotations")
+	//		{
+	//			name = GetText(item, 1);
+	//			int i;
+	//			//from view
+	//			for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(i);
+	//				if (view)
+	//					view->RemoveAnnotations(name.ToStdString());
+	//			}
+	//			//from datamanager
+	//			glbin_annf->remove(name.ToStdString());
+	//		}
+	//	}
+	//	m_frame->UpdateList();
+	//	m_frame->UpdateTree(name);
+	//	m_frame->RefreshVRenderViews();
+	//}
 }
 
 void DataListCtrl::DeleteAll()
 {
-	wxString name = "";
+	//wxString name = "";
 
-	long item = GetNextItem(-1);
-	while (item != -1 && m_frame)
-	{
-		if (GetItemText(item) == "Volume")
-		{
-			name = GetText(item, 1);
-			int i;
-			//from view
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RemoveVolumeDataDup(name.ToStdString());
-			}
-			//from datamanager
-			glbin_volf->remove(name.ToStdString());
-		}
-		else if (GetItemText(item) == "Mesh")
-		{
-			name = GetText(item, 1);
-			int i;
-			//from view
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RemoveMeshData(name.ToStdString());
-			}
-			//from datamanager
-			glbin_mshf->remove(name.ToStdString());
-		}
-		else if (GetItemText(item) == "Annotations")
-		{
-			name = GetText(item, 1);
-			int i;
-			//from view
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view)
-					view->RemoveAnnotations(name.ToStdString());
-			}
-			//from datamanager
-			glbin_annf->remove(name.ToStdString());
-		}
+	//long item = GetNextItem(-1);
+	//while (item != -1 && m_frame)
+	//{
+	//	if (GetItemText(item) == "Volume")
+	//	{
+	//		name = GetText(item, 1);
+	//		int i;
+	//		//from view
+	//		for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//		{
+	//			RenderCanvas* view = m_frame->GetView(i);
+	//			if (view)
+	//				view->RemoveVolumeDataDup(name.ToStdString());
+	//		}
+	//		//from datamanager
+	//		glbin_volf->remove(name.ToStdString());
+	//	}
+	//	else if (GetItemText(item) == "Mesh")
+	//	{
+	//		name = GetText(item, 1);
+	//		int i;
+	//		//from view
+	//		for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//		{
+	//			RenderCanvas* view = m_frame->GetView(i);
+	//			if (view)
+	//				view->RemoveMeshData(name.ToStdString());
+	//		}
+	//		//from datamanager
+	//		glbin_mshf->remove(name.ToStdString());
+	//	}
+	//	else if (GetItemText(item) == "Annotations")
+	//	{
+	//		name = GetText(item, 1);
+	//		int i;
+	//		//from view
+	//		for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//		{
+	//			RenderCanvas* view = m_frame->GetView(i);
+	//			if (view)
+	//				view->RemoveAnnotations(name.ToStdString());
+	//		}
+	//		//from datamanager
+	//		glbin_annf->remove(name.ToStdString());
+	//	}
 
-		item = GetNextItem(item);
-	}
+	//	item = GetNextItem(item);
+	//}
 
-	DeleteAllItems();
-	if (m_frame)
-	{
-		m_frame->UpdateTree();
-		m_frame->RefreshVRenderViews();
-	}
+	//DeleteAllItems();
+	//if (m_frame)
+	//{
+	//	m_frame->UpdateTree();
+	//	m_frame->RefreshVRenderViews();
+	//}
 }
 
 void DataListCtrl::OnScroll(wxScrollWinEvent& event)

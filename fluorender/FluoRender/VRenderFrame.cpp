@@ -3397,12 +3397,11 @@ void VRenderFrame::SaveProject(wxString& filename)
 	int ival = m_trace_dlg->GetTrackFileExist(true);
 	if (ival == 1)
 	{
-		wxString new_folder;
-		new_folder = filename + "_files";
-		MkDirW(new_folder.ToStdWstring());
-		std::wstring wstr = filename.ToStdWstring();
-		str = new_folder + GETSLASH() + GET_NAME(wstr) + ".track";
-		m_trace_dlg->SaveTrackFile(str);
+		std::wstring new_folder;
+		new_folder = filename.ToStdWstring() + L"_files";
+		MkDirW(new_folder);
+		std::wstring wstr = new_folder + GETSLASH() + GET_NAME(filename.ToStdWstring()) + L".track";
+		m_trace_dlg->SaveTrackFile(wstr);
 	}
 	fconfig.Write("track_file", m_trace_dlg->GetTrackFile());
 /*	//brushtool diag
