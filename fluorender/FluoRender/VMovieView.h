@@ -40,8 +40,11 @@ DEALINGS IN THE SOFTWARE.
 #define PROG_SLDR_MAX	361
 
 class VRenderFrame;
-class RenderCanvas;
 class RecorderDlg;
+namespace fluo
+{
+	class Renderview;
+}
 class VMovieView : public wxPanel
 {
 	enum
@@ -289,8 +292,8 @@ private:
 
 private:
 	VRenderFrame* m_frame;
-	RenderCanvas* m_view;
 	RecorderDlg* m_advanced_movie;
+	fluo::Renderview* m_view;
 	int m_view_idx;//index to current renderview
 
 	wxNotebook* m_notebook;
@@ -307,16 +310,16 @@ private:
 	static double m_movie_len;//length in sec
 	double m_cur_time;//time in sec
 	double m_fps;
-	int m_start_frame;
-	int m_end_frame;
-	int m_cur_frame;
+	long m_start_frame;
+	long m_end_frame;
+	long m_cur_frame;
 
 	//cropping
 	bool m_crop;//enable cropping
-	int m_crop_x;
-	int m_crop_y;
-	int m_crop_w;
-	int m_crop_h;
+	long m_crop_x;
+	long m_crop_y;
+	long m_crop_w;
+	long m_crop_h;
 
 	//save controls
 	int m_last_frame;//last frame nunmber to save

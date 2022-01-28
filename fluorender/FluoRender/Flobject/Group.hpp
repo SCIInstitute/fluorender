@@ -115,6 +115,90 @@ namespace fluo
 			}
 			return m_children.size();
 		}
+		inline size_t getChildIndex(const std::string &name)
+		{
+			return getChildIndex(findFirstChild(name));
+		}
+		inline virtual Node* findChild(const unsigned int id)
+		{
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if ((*it)->getId() == id)
+					return (*it).get();
+			}
+			return nullptr;
+		}
+
+		inline virtual Node* findFirstChild(const std::string &name)
+		{
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+			return nullptr;
+		}
+
+		inline virtual Node* findLastChild(const std::string &name)
+		{
+			for (auto it = m_children.rbegin();
+				it != m_children.rend(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+			return nullptr;
+		}
+
+		inline ObjectList find(const std::string &name)
+		{
+			ObjectList result;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if ((*it)->getName() == name)
+					result.push_back((*it).get());
+			}
+			return result;
+		}
+
+		//find by matching values of two objects
+		inline ObjectList findByValues(const Object& obj)
+		{
+			ObjectList result;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					result.push_back(it->get());
+			}
+			return result;
+		}
+
+		inline virtual Object* findFirstByValues(const Object& obj)
+		{
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+			return nullptr;
+		}
+
+		inline virtual Object* findLastByValues(const Object& obj)
+		{
+			for (auto it = m_children.rbegin();
+				it != m_children.rend(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+			return nullptr;
+		}
+
 		virtual Node* getOrAddNode(const std::string& child_name)
 		{
 			Node* node = getChild(child_name);

@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include "VMovieView.h"
 #include "VRenderFrame.h"
 #include "RecorderDlg.h"
+#include <Renderview.hpp>
+#include <Global.hpp>
+#include <Root.hpp>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -442,8 +445,7 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	if (m_frame)
-		m_view = m_frame->GetView(m_view_idx);
+	m_view = glbin_root->getChild(m_view_idx)->asRenderview();
 
 	//notebook
 	m_notebook = new wxNotebook(this, ID_Notebook);
@@ -509,8 +511,7 @@ VMovieView::~VMovieView() {}
 void VMovieView::OnViewSelected(wxCommandEvent& event)
 {
 	m_view_idx = m_views_cmb->GetCurrentSelection();
-	if (!m_frame) return;
-	m_view = m_frame->GetView(m_view_idx);
+	m_view = glbin_root->getChild(m_view_idx)->asRenderview();;
 	GetSettings();
 }
 
@@ -523,7 +524,9 @@ void VMovieView::GetSettings()
 	SetRotAxis(m_rot_axis);
 	SetRotDeg(m_rot_deg);
 	SetCurrentTime(m_start_frame);
-	SetCrop(m_view->m_draw_frame);
+	bool bval;
+	m_view->getValue(gstDrawCropFrame, bval);
+	SetCrop(bval);
 	AddScriptToList();
 	GetScriptSettings();
 	if (m_advanced_movie)
@@ -537,12 +540,12 @@ void VMovieView::GetScriptSettings()
 		return;
 
 	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
-	m_view->SetRun4DScript(run_script);
+	m_view->setValue(gstRunScript, run_script);
 	m_run_script_chk->SetValue(run_script);
 	wxString script_file =
 		m_frame->GetSettingDlg()->GetScriptFile();
 	m_script_file_text->SetValue(script_file);
-	m_view->SetScriptFile(script_file);
+	m_view->setValue(gstScriptFile, script_file.ToStdWstring());
 	//highlight if builtin
 	wxArrayString list;
 	if (GetScriptFiles(list))
@@ -728,18 +731,19 @@ void VMovieView::SetCrop(bool value)
 		return;
 	if (m_crop)
 	{
-		m_view->CalcFrame();
-		m_view->GetFrame(m_crop_x, m_crop_y, m_crop_w, m_crop_h);
-		m_crop_x = int(m_crop_x + m_crop_w / 2.0 + 0.5);
-		m_crop_y = int(m_crop_y + m_crop_h / 2.0 + 0.5);
+		m_view->CalculateCrop();
+		m_view->getValue(gstCropX, m_crop_x); m_view->getValue(gstCropY, m_crop_y);
+		m_view->getValue(gstCropW, m_crop_w); m_view->getValue(gstCropH, m_crop_h);
+		m_crop_x = long(m_crop_x + m_crop_w / 2.0 + 0.5);
+		m_crop_y = long(m_crop_y + m_crop_h / 2.0 + 0.5);
 		m_center_x_text->ChangeValue(wxString::Format("%d", m_crop_x));
 		m_center_y_text->ChangeValue(wxString::Format("%d", m_crop_y));
 		m_width_text->ChangeValue(wxString::Format("%d", m_crop_w));
 		m_height_text->ChangeValue(wxString::Format("%d", m_crop_h));
-		m_view->EnableFrame();
+		m_view->setValue(gstDrawCropFrame, true);
 	}
 	else
-		m_view->DisableFrame();
+		m_view->setValue(gstDrawCropFrame, false);
 
 	m_view->RefreshGL(39);
 }
@@ -749,8 +753,10 @@ void VMovieView::UpdateCrop()
 	if (!m_view)
 		return;
 
-	m_view->SetFrame(int(m_crop_x - m_crop_w / 2.0 + 0.5),
-		int(m_crop_y - m_crop_h / 2.0 + 0.5), m_crop_w, m_crop_h);
+	m_view->setValue(gstCropX, long(m_crop_x - m_crop_w / 2.0 + 0.5));
+	m_view->setValue(gstCropY, long(m_crop_y - m_crop_h / 2.0 + 0.5));
+	m_view->setValue(gstCropW, m_crop_w);
+	m_view->setValue(gstCropH, m_crop_h);
 	if (m_crop)
 		m_view->RefreshGL(39);
 }
@@ -773,7 +779,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
 		if (!m_view) return;
-		m_view->SetInteractive(false);
+		m_view->setValue(gstInteractive, false);
 		m_view->RefreshGL(39, false, false);
 		return;
 	}
@@ -830,7 +836,9 @@ void VMovieView::Prev()
 		return;
 	//basic options
 	double rval[3];
-	m_view->GetRotations(rval[0], rval[1], rval[2]);
+	m_view->getValue(gstCamRotX, rval[0]);
+	m_view->getValue(gstCamRotY, rval[1]);
+	m_view->getValue(gstCamRotZ, rval[2]);
 	m_starting_rot = rval[m_rot_axis];
 	while (m_starting_rot > 360.) m_starting_rot -= 360.;
 	while (m_starting_rot < -360.) m_starting_rot += 360.;
@@ -1041,12 +1049,12 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 	bool run_script = m_run_script_chk->GetValue();
 	if (m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRunScript(run_script);
-	m_view->SetRun4DScript(run_script);
+	m_view->setValue(gstRunScript, run_script);
 	wxString str = m_script_file_text->GetValue();
 	if (!str.IsEmpty())
 	{
 		m_frame->GetSettingDlg()->SetScriptFile(str);
-		m_view->SetScriptFile(str);
+		m_view->setValue(gstScriptFile, str.ToStdWstring());
 	}
 	if (run_script)
 	{
@@ -1068,7 +1076,7 @@ void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
 
 	wxString str = m_script_file_text->GetValue();
 	m_frame->GetSettingDlg()->SetScriptFile(str);
-	m_view->SetScriptFile(str);
+	m_view->setValue(gstScriptFile, str.ToStdWstring());
 }
 
 void VMovieView::OnScriptClearBtn(wxCommandEvent &event)
@@ -1089,7 +1097,7 @@ void VMovieView::OnScriptFileBtn(wxCommandEvent &event)
 		wxString file = fopendlg->GetPath();
 		if (m_frame && m_frame->GetSettingDlg())
 			m_frame->GetSettingDlg()->SetScriptFile(file);
-		m_view->SetScriptFile(file);
+		m_view->setValue(gstScriptFile, file.ToStdWstring());
 		m_script_file_text->SetValue(file);
 
 		//enable script if not
@@ -1163,7 +1171,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	if (!m_frame || !m_view)
 		return;
 
-	m_view->SetLockCamObject(false);
+	m_view->setValue(gstCamLockObjEnable, false);
 	//advanced options
 	if (m_current_page == 1)
 	{
@@ -1171,10 +1179,10 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
 			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
-				m_view->SetLockCamObject(true);
+				m_view->setValue(gstCamLockObjEnable, true);
 			int end_frame = int(interpolator->GetLastT());
 			m_view->SetParams(pcnt * end_frame);
-			m_view->SetInteractive(false);
+			m_view->setValue(gstInteractive, false);
 			m_view->RefreshGL(39);
 			return;
 		}
@@ -1195,20 +1203,30 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	//rotate animation
 	if (m_rotate)
 	{
-		double rval[3];
-		double val;
-		m_view->GetRotations(rval[0], rval[1], rval[2]);
-		val = rval[m_rot_axis];
+		std::string sval;
+		switch (m_rot_axis)
+		{
+		case 0:
+			sval = gstCamRotX;
+			break;
+		case 1:
+			sval = gstCamRotY;
+			break;
+		case 2:
+			sval = gstCamRotZ;
+			break;
+		}
+		double dval;
+		m_view->getValue(sval, dval);
 		if (m_rot_int_type == 0)
-			val = m_starting_rot + pcnt * m_rot_deg;
+			dval = m_starting_rot + pcnt * m_rot_deg;
 		else if (m_rot_int_type == 1)
-			val = m_starting_rot +
+			dval = m_starting_rot +
 			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * m_rot_deg;
-		rval[m_rot_axis] = val;
-		m_view->SetRotations(rval[0], rval[1], rval[2]);
+		m_view->setValue(sval, dval);
 	}
 
-	m_view->SetInteractive(false);
+	m_view->setValue(gstInteractive, false);
 	m_view->RefreshGL(39);
 }
 
@@ -1311,7 +1329,7 @@ void VMovieView::WriteFrameToFile(int total_frames)
 	bool bmov = filetype_.IsSameAs(".mov");
 	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
 	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
-	int x, y, w, h;
+	long x, y, w, h;
 	void* image = 0;
 	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
 
@@ -1423,8 +1441,8 @@ void VMovieView::Run()
 		{
 			m_crop_x = 0;
 			m_crop_y = 0;
-			m_crop_w = m_view->GetGLSize().x;
-			m_crop_h = m_view->GetGLSize().y;
+			m_view->getValue(gstSizeX, m_crop_w);
+			m_view->getValue(gstSizeY, m_crop_h);
 		}
 		if (RenderCanvas::GetEnlarge())
 		{

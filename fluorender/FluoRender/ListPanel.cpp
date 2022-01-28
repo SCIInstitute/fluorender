@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ListPanel.h"
 #include "VRenderFrame.h"
+#include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
 #include <Annotations.hpp>
@@ -177,17 +179,14 @@ void DataListCtrl::SaveSelMask()
 	if (item != -1 && GetItemText(item) == "Volume")
 	{
 		wxString name = GetText(item, 1);
-		if (m_frame)
+		fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
+		if (vd)
 		{
-			fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
-			if (vd)
-			{
-				long time, chan;
-				vd->getValue(gstTime, time);
-				vd->getValue(gstChannel, chan);
-				vd->SaveMask(true, time, chan);
-				vd->SaveLabel(true, time, chan);
-			}
+			long time, chan;
+			vd->getValue(gstTime, time);
+			vd->getValue(gstChannel, chan);
+			vd->SaveMask(true, time, chan);
+			vd->SaveLabel(true, time, chan);
 		}
 	}
 }
@@ -200,17 +199,14 @@ void DataListCtrl::SaveAllMasks()
 		if (GetItemText(item) == "Volume")
 		{
 			wxString name = GetText(item, 1);
-			if (m_frame)
+			fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
+			if (vd)
 			{
-				fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
-				if (vd)
-				{
-					long time, chan;
-					vd->getValue(gstTime, time);
-					vd->getValue(gstChannel, chan);
-					vd->SaveMask(true, time, chan);
-					vd->SaveLabel(true, time, chan);
-				}
+				long time, chan;
+				vd->getValue(gstTime, time);
+				vd->getValue(gstChannel, chan);
+				vd->SaveMask(true, time, chan);
+				vd->SaveLabel(true, time, chan);
 			}
 		}
 		item = GetNextItem(item);
@@ -234,175 +230,173 @@ void DataListCtrl::OnContextMenu(wxContextMenuEvent &event)
 			point = ScreenToClient(point);
 		}
 
-		if (m_frame)
+		wxMenu menu;
+		wxMenu *add_to_menu = new wxMenu;
+		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 		{
-			wxMenu menu;
-			wxMenu *add_to_menu = new wxMenu;
-			for (int i = 0; i < m_frame->GetViewNum(); ++i)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				add_to_menu->Append(Menu_View_start + i,
-					view->m_vrv->GetName());
-			}
+			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+			if (!view) continue;
 
-			menu.Append(Menu_AddTo, "Add to", add_to_menu);
-			if (GetSelectedItemCount() == 1)
+			add_to_menu->Append(Menu_View_start + i,
+				view->getName());
+		}
+
+		menu.Append(Menu_AddTo, "Add to", add_to_menu);
+		if (GetSelectedItemCount() == 1)
+		{
+			menu.Append(Menu_Del, "Delete");
+			menu.Append(Menu_Rename, "Rename");
+			//save/save as
+			long item = GetNextItem(-1,
+				wxLIST_NEXT_ALL,
+				wxLIST_STATE_SELECTED);
+			if (item != -1)
 			{
-				menu.Append(Menu_Del, "Delete");
-				menu.Append(Menu_Rename, "Rename");
-				//save/save as
-				long item = GetNextItem(-1,
-					wxLIST_NEXT_ALL,
-					wxLIST_STATE_SELECTED);
-				if (item != -1)
+				if (GetItemText(item) == "Volume")
 				{
-					if (GetItemText(item) == "Volume")
+					wxString name = GetText(item, 1);
+					fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
+					if (vd)
 					{
-						wxString name = GetText(item, 1);
-						fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
-						if (vd)
-						{
-							std::wstring path;
-							vd->getValue(gstDataPath, path);
-							if (path.empty())
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-							menu.Append(Menu_Bake, "Bake...");
-							menu.Append(Menu_SaveMask, "Save Mask");
-						}
+						std::wstring path;
+						vd->getValue(gstDataPath, path);
+						if (path.empty())
+							menu.Append(Menu_Save, "Save...");
+						else
+							menu.Append(Menu_Save, "Save As...");
+						menu.Append(Menu_Bake, "Bake...");
+						menu.Append(Menu_SaveMask, "Save Mask");
 					}
-					else if (GetItemText(item) == "Mesh")
+				}
+				else if (GetItemText(item) == "Mesh")
+				{
+					wxString name = GetText(item, 1);
+					fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
+					if (md)
 					{
-						wxString name = GetText(item, 1);
-						fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
-						if (md)
-						{
-							std::wstring path;
-							md->getValue(gstDataPath, path);
-							if (path.empty())
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-						}
+						std::wstring path;
+						md->getValue(gstDataPath, path);
+						if (path.empty())
+							menu.Append(Menu_Save, "Save...");
+						else
+							menu.Append(Menu_Save, "Save As...");
 					}
-					else if (GetItemText(item) == "Annotations")
+				}
+				else if (GetItemText(item) == "Annotations")
+				{
+					wxString name = GetText(item, 1);
+					fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
+					if (ann)
 					{
-						wxString name = GetText(item, 1);
-						fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
-						if (ann)
-						{
-							std::wstring path;
-							ann->getValue(gstDataPath, path);
-							if (path.empty())
-								menu.Append(Menu_Save, "Save...");
-							else
-								menu.Append(Menu_Save, "Save As...");
-						}
+						std::wstring path;
+						ann->getValue(gstDataPath, path);
+						if (path.empty())
+							menu.Append(Menu_Save, "Save...");
+						else
+							menu.Append(Menu_Save, "Save As...");
 					}
 				}
 			}
-
-			PopupMenu(&menu, point.x, point.y);
 		}
+
+		PopupMenu(&menu, point.x, point.y);
 	}
 }
 
 void DataListCtrl::AddToView(int menu_index, long item)
 {
+	if (!m_frame)
+		return;
 	bool view_empty = true;
 	wxString name = "";
 
-	if (m_frame)
+	fluo::Renderview* view = glbin_root->getChild(menu_index)->asRenderview();
+	if (GetItemText(item) == "Volume")
 	{
-		RenderCanvas* view = m_frame->GetView(menu_index);
-		if (GetItemText(item) == "Volume")
+		name = GetText(item, 1);
+		fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
+		if (vd)
 		{
-			name = GetText(item, 1);
-			fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
-			if (vd)
+			if (view)
 			{
-				if (view)
+				fluo::VolumeData* vd_add = vd;
+
+				for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 				{
-					fluo::VolumeData* vd_add = vd;
-
-					for (int i = 0; i < m_frame->GetViewNum(); ++i)
+					fluo::Renderview* v = glbin_root->getChild(i)->asRenderview();
+					if (v && v->findFirstChild(name.ToStdString()))
 					{
-						RenderCanvas* v = m_frame->GetView(i);
-						if (v && v->GetVolumeData(name.ToStdString()))
-						{
-							vd_add = glbin_volf->build(vd);
-							break;
-						}
+						vd_add = glbin_volf->build(vd);
+						break;
 					}
+				}
 
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					fluo::Color color(1.0, 1.0, 1.0);
-					if (chan_num == 0)
-						color = fluo::Color(1.0, 0.0, 0.0);
-					else if (chan_num == 1)
-						color = fluo::Color(0.0, 1.0, 0.0);
-					else if (chan_num == 2)
-						color = fluo::Color(0.0, 0.0, 1.0);
+				int chan_num = view->GetAny();
+				view_empty = chan_num > 0 ? false : view_empty;
+				fluo::Color color(1.0, 1.0, 1.0);
+				if (chan_num == 0)
+					color = fluo::Color(1.0, 0.0, 0.0);
+				else if (chan_num == 1)
+					color = fluo::Color(0.0, 1.0, 0.0);
+				else if (chan_num == 2)
+					color = fluo::Color(0.0, 0.0, 1.0);
 
-					if (chan_num >= 0 && chan_num < 3)
-						vd_add->setValue(gstColor, color);
+				if (chan_num >= 0 && chan_num < 3)
+					vd_add->setValue(gstColor, color);
 
-					fluo::VolumeGroup *group = view->AddVolumeData(vd_add);
-					m_frame->OnSelection(2, view, group, vd_add, 0);
-					if (view->GetVolMethod() == VOL_METHOD_MULTI)
+				fluo::VolumeGroup *group = view->AddVolumeData(vd_add);
+				m_frame->OnSelection(2, view, group, vd_add, 0);
+				if (view->GetVolMethod() == VOL_METHOD_MULTI)
+				{
+					AdjustView* adjust_view = m_frame->GetAdjustView();
+					if (adjust_view)
 					{
-						AdjustView* adjust_view = m_frame->GetAdjustView();
-						if (adjust_view)
-						{
-							adjust_view->SetView(view);
-							adjust_view->UpdateSync();
-						}
+						adjust_view->SetView(view);
+						adjust_view->UpdateSync();
 					}
 				}
 			}
 		}
-		else if (GetItemText(item) == "Mesh")
-		{
-			name = GetText(item, 1);
-			fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
-			if (md)
-			{
-				if (view)
-				{
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					view->AddMeshData(md);
-				}
-			}
-		}
-		else if (GetItemText(item) == "Annotations")
-		{
-			name = GetText(item, 1);
-			fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
-			if (ann)
-			{
-				if (view)
-				{
-					int chan_num = view->GetAny();
-					view_empty = chan_num > 0 ? false : view_empty;
-					view->AddAnnotations(ann);
-				}
-			}
-		}
-
-		//update
-		if (view)
-		{
-			if (view_empty)
-				view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-			else
-				view->InitView(INIT_BOUNDS | INIT_CENTER);
-			view->RefreshGL(39);
-		}
-		m_frame->UpdateTree(name);
 	}
+	else if (GetItemText(item) == "Mesh")
+	{
+		name = GetText(item, 1);
+		fluo::MeshData* md = glbin_mshf->findFirst(name.ToStdString());
+		if (md)
+		{
+			if (view)
+			{
+				int chan_num = view->GetAny();
+				view_empty = chan_num > 0 ? false : view_empty;
+				view->AddMeshData(md);
+			}
+		}
+	}
+	else if (GetItemText(item) == "Annotations")
+	{
+		name = GetText(item, 1);
+		fluo::Annotations* ann = glbin_annf->findFirst(name.ToStdString());
+		if (ann)
+		{
+			if (view)
+			{
+				int chan_num = view->GetAny();
+				view_empty = chan_num > 0 ? false : view_empty;
+				view->AddAnnotations(ann);
+			}
+		}
+	}
+
+	//update
+	if (view)
+	{
+		if (view_empty)
+			view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		else
+			view->InitView(INIT_BOUNDS | INIT_CENTER);
+		view->RefreshGL(39);
+	}
+	m_frame->UpdateTree(name);
 }
 
 void DataListCtrl::OnAddToView(wxCommandEvent& event)

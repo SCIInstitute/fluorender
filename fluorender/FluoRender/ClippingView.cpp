@@ -27,8 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ClippingView.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
+#include <Global.hpp>
+#include <Root.hpp>
 #include <FLIVR/MeshRenderer.h>
 #include <compatibility.h>
 #include <wx/valnum.h>
@@ -487,15 +490,12 @@ void ClippingView::SetHoldPlanes(bool hold)
 	m_toolbar->ToggleTool(ID_HoldPlanesBtn, hold);
 	if (hold)
 	{
-		if (!m_frame)
-			return;
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
+		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			view->m_draw_clip = true;
-			view->m_clip_mask = -1;
+			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+			if (!view) continue;
+			view->setValue(gstDrawClip, true);
+			view->setValue(gstClipMask, long(-1));
 		}
 	}
 }
@@ -944,17 +944,13 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 	}
 
 	//views
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			view->m_clip_mask = -1;
-			view->UpdateClips();
-			view->RefreshGL(39);
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		view->setValue(gstClipMask, long(-1));
+		view->UpdateClips();
+		view->RefreshGL(39);
 	}
 }
 
@@ -1048,19 +1044,15 @@ void ClippingView::OnX1ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			if (m_link_x)
-				view->m_clip_mask = 3;
-			else
-				view->m_clip_mask = 1;
-			view->UpdateClips();
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		if (m_link_x)
+			view->setValue(gstClipMask, long(3));
+		else
+			view->setValue(gstClipMask, long(1));
+		view->UpdateClips();
 	}
 	RefreshVRenderViews(true);
 }
@@ -1162,21 +1154,16 @@ void ClippingView::OnX2ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			if (m_link_x)
-				view->m_clip_mask = 3;
-			else
-				view->m_clip_mask = 2;
-			view->UpdateClips();
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		if (m_link_x)
+			view->setValue(gstClipMask, long(3));
+		else
+			view->setValue(gstClipMask, long(2));
+		view->UpdateClips();
 	}
-
 	RefreshVRenderViews(true);
 }
 
@@ -1270,21 +1257,16 @@ void ClippingView::OnY1ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			if (m_link_y)
-				view->m_clip_mask = 12;
-			else
-				view->m_clip_mask = 4;
-			view->UpdateClips();
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		if (m_link_y)
+			view->setValue(gstClipMask, long(12));
+		else
+			view->setValue(gstClipMask, long(4));
+		view->UpdateClips();
 	}
-
 	RefreshVRenderViews(true);
 }
 
@@ -1386,21 +1368,16 @@ void ClippingView::OnY2ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			if (m_link_y)
-				view->m_clip_mask = 12;
-			else
-				view->m_clip_mask = 8;
-			view->UpdateClips();
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		if (m_link_y)
+			view->setValue(gstClipMask, long(12));
+		else
+			view->setValue(gstClipMask, long(8));
+		view->UpdateClips();
 	}
-
 	RefreshVRenderViews(true);
 }
 
@@ -1493,21 +1470,16 @@ void ClippingView::OnZ1ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			if (m_link_z)
-				view->m_clip_mask = 48;
-			else
-				view->m_clip_mask = 16;
-			view->UpdateClips();
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		if (m_link_z)
+			view->setValue(gstClipMask, long(48));
+		else
+			view->setValue(gstClipMask, long(16));
+		view->UpdateClips();
 	}
-
 	RefreshVRenderViews(true);
 }
 
@@ -1608,21 +1580,16 @@ void ClippingView::OnZ2ClipEdit(wxCommandEvent &event)
 		}
 	}
 
-	if (m_frame)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		for (int i = 0; i < m_frame->GetViewNum(); ++i)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (!view)
-				continue;
-			if (m_link_z)
-				view->m_clip_mask = 48;
-			else
-				view->m_clip_mask = 32;
-			view->UpdateClips();
-		}
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		if (m_link_z)
+			view->setValue(gstClipMask, long(48));
+		else
+			view->setValue(gstClipMask, long(32));
+		view->UpdateClips();
 	}
-
 	RefreshVRenderViews(true);
 }
 
@@ -1671,16 +1638,13 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 		return;
 	}
 
-	if (!m_frame)
-		return;
-
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (!view)
-			continue;
-		if (view->m_capture)
-			return;
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
+		bool bval;
+		view->getValue(gstCapture, bval);
+		if (bval) return;
 	}
 
 	wxPoint pos = wxGetMousePosition();
@@ -1690,13 +1654,12 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 	{
 		if (!m_draw_clip)
 		{
-			for (int i = 0; i < m_frame->GetViewNum(); ++i)
+			for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (!view)
-					continue;
-				view->m_draw_clip = true;
-				view->m_clip_mask = -1;
+				fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+				if (!view) continue;
+				view->setValue(gstDrawClip, true);
+				view->setValue(gstClipMask, long(-1));
 			}
 			RefreshVRenderViews();
 			m_draw_clip = true;
@@ -1706,12 +1669,11 @@ void ClippingView::OnIdle(wxIdleEvent &event)
 	{
 		if (m_draw_clip)
 		{
-			for (int i = 0; i < m_frame->GetViewNum(); ++i)
+			for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (!view)
-					continue;
-				view->m_draw_clip = false;
+				fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+				if (!view) continue;
+				view->setValue(gstDrawClip, false);
 			}
 			RefreshVRenderViews();
 			m_draw_clip = false;
@@ -1767,19 +1729,17 @@ void ClippingView::OnLinkZCheck(wxCommandEvent &event)
 
 void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 {
-	if (!m_frame)
-		return;
-
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (!view)
-			continue;
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
 
-		view->SetClipMode(2);
+		view->setValue(gstClipMode, long(2));
 		view->RefreshGL(39);
 		double rotx, roty, rotz;
-		view->GetClippingPlaneRotations(rotx, roty, rotz);
+		view->getValue(gstClipRotX, rotx);
+		view->getValue(gstClipRotY, roty);
+		view->getValue(gstClipRotZ, rotz);
 		m_x_rot_sldr->SetValue(int(rotx));
 		m_y_rot_sldr->SetValue(int(roty));
 		m_z_rot_sldr->SetValue(int(rotz));
@@ -1791,17 +1751,15 @@ void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 
 void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 {
-	if (!m_frame)
-		return;
-
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (!view)
-			continue;
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
 
 		//reset rotations
-		view->SetClippingPlaneRotations(0.0, 0.0, 0.0);
+		view->setValue(gstClipRotX, double(0));
+		view->setValue(gstClipRotY, double(0));
+		view->setValue(gstClipRotZ, double(0));
 		view->RefreshGL(39);
 	}
 	wxString str = "0.0";
@@ -1828,18 +1786,12 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_x_rot_sldr->SetValue(int(val));
 
-	if (!m_frame)
-		return;
-
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (!view)
-			continue;
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
 
-		double rotx, roty, rotz;
-		view->GetClippingPlaneRotations(rotx, roty, rotz);
-		view->SetClippingPlaneRotations(val, roty, rotz);
+		view->setValue(gstClipRotX, val);
 		view->RefreshGL(39);
 	}
 }
@@ -1859,18 +1811,12 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_y_rot_sldr->SetValue(int(val));
 
-	if (!m_frame)
-		return;
-
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (!view)
-			continue;
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
 
-		double rotx, roty, rotz;
-		view->GetClippingPlaneRotations(rotx, roty, rotz);
-		view->SetClippingPlaneRotations(rotx, val, rotz);
+		view->setValue(gstClipRotY, val);
 		view->RefreshGL(39);
 	}
 }
@@ -1890,18 +1836,12 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_z_rot_sldr->SetValue(int(val));
 
-	if (!m_frame)
-		return;
-
-	for (int i = 0; i < m_frame->GetViewNum(); ++i)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (!view)
-			continue;
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (!view) continue;
 
-		double rotx, roty, rotz;
-		view->GetClippingPlaneRotations(rotx, roty, rotz);
-		view->SetClippingPlaneRotations(rotx, roty, val);
+		view->setValue(gstClipRotZ, val);
 		view->RefreshGL(39);
 	}
 }

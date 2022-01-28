@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "VPropView.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <FLIVR/MultiVolumeRenderer.h>
@@ -961,12 +962,12 @@ fluo::VolumeGroup* VPropView::GetGroup()
 	return m_group;
 }
 
-void VPropView::SetView(RenderCanvas *view)
+void VPropView::SetView(fluo::Renderview *view)
 {
 	m_view = view;
 }
 
-RenderCanvas* VPropView::GetView()
+fluo::Renderview* VPropView::GetView()
 {
 	return m_view;
 }
@@ -1399,11 +1400,19 @@ void VPropView::OnSampleText(wxCommandEvent& event)
 	m_sample_sldr->SetValue(int(val));
 
 	//set sample rate value
-	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
+	bool bval = false;
+	if (m_view)
 	{
-		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
+		long lval;
+		m_view->getValue(gstMixMethod, lval);
+		if (lval == fluo::Renderview::MIX_METHOD_MULTI)
+			bval = true;
+	}
+	if (bval)
+	{
+		fluo::VolumeList list = m_view->GetFullVolList();
+		for (auto vd : list)
 		{
-			fluo::VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->setValue(gstSampleRate, srate);
 		}
@@ -2058,11 +2067,19 @@ void VPropView::OnNRCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth_off));
 
-	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
+	bool bval = false;
+	if (m_view)
 	{
-		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
+		long lval;
+		m_view->getValue(gstMixMethod, lval);
+		if (lval == fluo::Renderview::MIX_METHOD_MULTI)
+			bval = true;
+	}
+	if (bval)
+	{
+		fluo::VolumeList list = m_view->GetFullVolList();
+		for (auto vd : list)
 		{
-			fluo::VolumeData* vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->setValue(gstNoiseRedct, val);
 		}
@@ -2372,7 +2389,7 @@ void VPropView::OnInterpolateCheck(wxCommandEvent& event)
 	else if (m_vd)
 		m_vd->setValue(gstInterpolate, inv);
 	if (m_view)
-		m_view->SetIntp(inv);
+		m_view->setValue(gstInterpolate, inv);
 
 	RefreshVRenderViews(false, true);
 }
@@ -2451,7 +2468,7 @@ void VPropView::OnSyncGroupCheck(wxCommandEvent& event)
 		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
 		m_group->setValue(gstInterpolate, bVal);
 		if (m_view)
-			m_view->SetIntp(bVal);
+			m_view->setValue(gstInterpolate, bVal);
 		//MIP
 		bVal = m_options_toolbar->GetToolState(ID_MipChk);
 		m_group->setValue(gstMipMode, long(bVal?1:0));
