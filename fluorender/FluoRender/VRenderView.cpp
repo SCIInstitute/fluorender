@@ -27,8 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <FLIVR/ShaderProgram.h>
-#include "VRenderView.h"
-#include "VRenderFrame.h"
+#include <VRenderView.h>
+#include <VRenderFrame.h>
+#include <RenderCanvas.h>
 #include <VolumeData.hpp>
 #include <tiffio.h>
 #include <wx/utils.h>
@@ -221,6 +222,7 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
 	m_glview = new RenderCanvas(frame, this, attriblist, sharedContext);
+	m_agent = m_glview->m_agent;
 	if (!sharedContext)
 	{
 		wxGLContextAttrs contextAttrs;
@@ -310,11 +312,11 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	}
 
 	CreateBar();
-	if (m_glview)
-	{
-		m_glview->SetSBText(L"50 \u03BCm");
-		m_glview->SetScaleBarLen(1.);
-	}
+	//if (m_glview)
+	//{
+	//	m_glview->SetSBText(L"50 \u03BCm");
+	//	m_glview->SetScaleBarLen(1.);
+	//}
 	LoadSettings();
 	m_x_rotating = m_y_rotating = m_z_rotating = false;
 	m_skip_thumb = false;
@@ -388,15 +390,17 @@ void VRenderView::CreateBar()
 	stb->SetBackgroundColour(wxColour(128,128,128));
 	m_options_toolbar->AddControl(stb);
 #endif
-	switch (m_glview->GetVolMethod())
+	long lval;
+	m_agent->getValue(gstMixMethod, lval);
+	switch (lval)
 	{
-	case VOL_METHOD_SEQ:
+	case fluo::Renderview::MIX_METHOD_SEQ:
 		m_options_toolbar->ToggleTool(ID_VolumeSeqRd,true);
 		break;
-	case VOL_METHOD_MULTI:
+	case fluo::Renderview::MIX_METHOD_MULTI:
 		m_options_toolbar->ToggleTool(ID_VolumeMultiRd,true);
 		break;
-	case VOL_METHOD_COMP:
+	case fluo::Renderview::MIX_METHOD_COMP:
 		m_options_toolbar->ToggleTool(ID_VolumeCompRd,true);
 		break;
 	}
@@ -499,14 +503,17 @@ void VRenderView::CreateBar()
 	st2 = new wxStaticText(m_options_toolbar, wxID_ANY, "Projection:");
 	m_aov_sldr = new wxSlider(m_options_toolbar, ID_AovSldr, 45, 10, 100,
 		wxDefaultPosition, wxSize(180, 20), wxSL_HORIZONTAL);
-	m_aov_sldr->SetValue(m_glview->GetPersp()? m_glview->GetAov():10);
+	bool persp;
+	m_agent->getValue(gstPerspective, persp);
+	double aov;
+	m_agent->getValue(gstAov, aov);
+	m_aov_sldr->SetValue(persp ? aov : 10);
 	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
 		wxIdleEventHandler(VRenderView::OnAovSldrIdle),
 		NULL, this);
 	m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
-	m_aov_text->ChangeValue(m_glview->GetPersp()?wxString::Format("%d",
-		int(m_glview->GetAov())):"Ortho");
+	m_aov_text->ChangeValue(persp ? wxString::Format("%d", int(aov)) : "Ortho");
 	m_options_toolbar->AddControl(st2);
 	m_options_toolbar->AddControl(m_aov_sldr);
 	m_options_toolbar->AddControl(m_aov_text);
@@ -518,7 +525,9 @@ void VRenderView::CreateBar()
 		"Change the camera to a 'Free-Fly' Mode",
 		"Change the camera to a 'Free-Fly' Mode");
 
-	if (m_glview->GetFree())
+	bool bval;
+	m_agent->getValue(gstFree, bval);
+	if (bval)
 		m_options_toolbar->ToggleTool(ID_FreeChk,true);
 	else
 		m_options_toolbar->ToggleTool(ID_FreeChk,false);
@@ -940,13 +949,13 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	switch (sender_id)
 	{
 	case ID_VolumeSeqRd:
-		m_glview->SetVolMethod(VOL_METHOD_SEQ);
+		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_SEQ);
 		break;
 	case ID_VolumeMultiRd:
-		m_glview->SetVolMethod(VOL_METHOD_MULTI);
+		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_MULTI);
 		break;
 	case ID_VolumeCompRd:
-		m_glview->SetVolMethod(VOL_METHOD_COMP);
+		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_COMP);
 		break;
 	}
 
@@ -1120,7 +1129,7 @@ void VRenderView::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		RenderCanvas::SetEnlarge(enlarge);
+		m_agent->setValue(gstEnlarge, enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)

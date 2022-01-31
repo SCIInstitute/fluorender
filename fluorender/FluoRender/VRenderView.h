@@ -29,10 +29,19 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERVIEW_H_
 #define _VRENDERVIEW_H_
 
-#include "RenderCanvas.h"
+//#include "RenderCanvas.h"
 #include <wx/wx.h>
+#include <wx/panel.h>
+#include <wx/clrpicker.h>
+#include <wx/spinbutt.h>
 
+class wxGLContext;
 class VRenderFrame;
+class RenderCanvas;
+namespace fluo
+{
+	class RenderCanvasAgent;
+}
 class VRenderView: public wxPanel
 {
 public:
@@ -115,14 +124,15 @@ public:
 	void SetFullScreen();
 
 	//stereo/vr
-	void InitOpenVR()
-	{
-#ifdef _WIN32
-		if (m_glview) m_glview->InitOpenVR();
-#endif
-	}
+//	void InitOpenVR()
+//	{
+//#ifdef _WIN32
+//		if (m_glview) m_glview->InitOpenVR();
+//#endif
+//	}
 
-public:
+private:
+	fluo::RenderCanvasAgent* m_agent;
 	wxWindow* m_frame;
 	static int m_max_id;
 	int m_id;
