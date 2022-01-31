@@ -192,6 +192,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstPaintEnable, bool(false));
 		view->addValue(gstPaintDisplay, bool(false));
 		view->addValue(gstClearPaint, bool(true));
+		view->addValue(gstPaintMode, long(0));
 		view->addValue(gstCurFramebuffer, unsigned long(0));
 		view->addValue(gstPerspective, bool(false));
 		view->addValue(gstFree, bool(false));
@@ -344,6 +345,8 @@ void RenderviewFactory::setEventHandler(Renderview* view)
 	ADD_AFTER_EVENT(view, gstCurrentVolume, OnCurrentVolumeChanged);
 	ADD_AFTER_EVENT(view, gstCurrentMesh, OnCurrentMeshChanged);
 	ADD_AFTER_EVENT(view, gstTextColorMode, OnTextColorModeChanged);
+	ADD_AFTER_EVENT(view, gstInterMode, OnInterModeChanged);
+	ADD_AFTER_EVENT(view, gstPaintMode, OnPaintModeChanged);
 }
 
 Renderview* RenderviewFactory::build(Renderview* view)

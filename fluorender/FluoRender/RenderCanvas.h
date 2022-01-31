@@ -52,11 +52,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 
 #include <wx/wx.h>
-#include <wx/clrpicker.h>
-#include <wx/spinbutt.h>
 #include <wx/glcanvas.h>
-#include <wx/event.h>
-#include <wx/timer.h>
 
 #include <vector>
 #include <stdarg.h>
@@ -64,71 +60,10 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#ifdef _WIN32
-//wacom support
-#include <wx/msw/private.h>
-#include <MSGPACK.h>
-#include <wintab.h>
-#define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS |\
-		PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE)
-#define PACKETMODE	PK_BUTTONS
-#include <PKTDEF.h>
-#include <Wacom/Utils.h>
-#ifdef USE_XINPUT
-#include <XInput/XboxController.h>
-#endif
-#endif
-
-#include <openvr.h>
-
-#define VOL_METHOD_SEQ    1
-#define VOL_METHOD_MULTI  2
-#define VOL_METHOD_COMP    3
-
-#define INIT_BOUNDS  1
-#define INIT_CENTER  2
-#define INIT_TRANSL  4
-#define INIT_ROTATE  8
-#define INIT_OBJ_TRANSL  16
-
-//clipping plane mask
-#define CLIP_X1  1
-#define CLIP_X2  2
-#define CLIP_Y1  4
-#define CLIP_Y2  8
-#define CLIP_Z1  16
-#define CLIP_Z2  32
-//clipping plane winding
-#define CULL_OFF  0
-#define FRONT_FACE  1
-#define BACK_FACE  2
-
-//information bits
-#define INFO_DISP	1
-#define INFO_POS	2
-#define INFO_FRAME	4
-#define INFO_FPS	8
-#define INFO_T		16
-#define INFO_X		32
-#define INFO_Y		64
-#define INFO_Z		128
-
 #define ID_ftrigger	ID_VRENDER_VIEW1
 
 class VRenderFrame;
 class VRenderView;
-namespace fluo
-{
-	class VolumeData;
-	class VolumeGroup;
-	class MeshData;
-	class MeshGroup;
-	class Annotations;
-}
-namespace flrd
-{
-	class Tracks;
-}
 class RenderCanvas : public wxGLCanvas
 {
 public:
@@ -220,163 +155,30 @@ public:
 	//handle camera
 	void HandleProjection(int nx, int ny, bool vr = false);
 	void HandleCamera(bool vr = false);
-	//camera operations
-	void GetTranslations(double &transx, double &transy, double &transz)
-	{
-		transx = m_transx; transy = m_transy; transz = m_transz;
-	}
-	void SetTranslations(double transx, double transy, double transz)
-	{
-		m_transx = transx; m_transy = transy; m_transz = transz;
-		m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
-	}
-	fluo::Quaternion GetZeroQuat()
-	{
-		return m_zq;
-	}
-	void SetZeroQuat(double x, double y, double z, double w)
-	{
-		m_zq = fluo::Quaternion(x, y, z, w);
-	}
-	fluo::Quaternion GetRotations()
-	{
-		return m_q;
-	}
-	void GetRotations(double &rotx, double &roty, double &rotz)
-	{
-		rotx = m_rotx;
-		roty = m_roty;
-		rotz = m_rotz;
-	}
 	void SetRotations(double rotx, double roty, double rotz, bool ui_update = true);
 	void SetZeroRotations();
 	void ResetZeroRotations(double &rotx, double &roty, double &rotz);
-	void GetCenters(double &ctrx, double &ctry, double &ctrz)
-	{
-		ctrx = m_ctrx; ctry = m_ctry; ctrz = m_ctrz;
-	}
-	void SetCenters(double ctrx, double ctry, double ctrz)
-	{
-		m_ctrx = ctrx; m_ctry = ctry; m_ctrz = ctrz;
-	}
-	double GetCenterEyeDist()
-	{
-		return m_distance;
-	}
-	void SetCenterEyeDist(double dist)
-	{
-		m_distance = dist;
-	}
-	double GetInitDist()
-	{
-		return m_init_dist;
-	}
-	void SetInitDist(double dist)
-	{
-		m_init_dist = dist;
-	}
-	double GetRadius()
-	{
-		return m_radius;
-	}
 	void SetRadius(double r);
 	void SetCenter();
 	double Get121ScaleFactor();
 	void SetScale121();
 	void SetPinRotCenter(bool);
 
-	//object operations
-	void GetObjCenters(double &ctrx, double &ctry, double &ctrz)
-	{
-		ctrx = m_obj_ctrx;
-		ctry = m_obj_ctry;
-		ctrz = m_obj_ctrz;
-	}
-	void SetObjCenters(double ctrx, double ctry, double ctrz)
-	{
-		m_obj_ctrx = ctrx;
-		m_obj_ctry = ctry;
-		m_obj_ctrz = ctrz;
-	}
-	void GetObjTrans(double &transx, double &transy, double &transz)
-	{
-		transx = m_obj_transx;
-		transy = m_obj_transy;
-		transz = m_obj_transz;
-	}
-	void SetObjTrans(double transx, double transy, double transz)
-	{
-		m_obj_transx = transx;
-		m_obj_transy = transy;
-		m_obj_transz = transz;
-	}
-	void GetObjRot(double &rotx, double &roty, double &rotz)
-	{
-		rotx = m_obj_rotx;
-		roty = m_obj_roty;
-		rotz = m_obj_rotz;
-	}
-	void SetObjRot(double rotx, double roty, double rotz)
-	{
-		m_obj_rotx = rotx;
-		m_obj_roty = roty;
-		m_obj_rotz = rotz;
-	}
-	void SetRotLock(bool mode)
-	{
-		m_rot_lock = mode;
-	}
-	bool GetRotLock()
-	{
-		return m_rot_lock;
-	}
 	//lock cam center
-	void SetLockCamObject(bool bval) { m_lock_cam_object = bval; }
-	bool GetLockCamObject() { return m_lock_cam_object; }
 	void SetLockCenter(int type);
 	void SetLockCenterVol();
 	void SetLockCenterRuler();
 	void SetLockCenterSel();
 
 	//camera properties
-	bool GetPersp() { return m_persp; }
-	void SetPersp(bool persp = true);
-	bool GetFree() { return m_free; }
-	void SetFree(bool free = true);
-	double GetAov() { return m_aov; }
 	void SetAov(double aov);
-	double GetNearClip() { return m_near_clip; }
-	void SetNearClip(double nc) { m_near_clip = nc; }
-	double GetFarClip() { return m_far_clip; }
-	void SetFarClip(double fc) { m_far_clip = fc; }
-
-	//intearctive
-	void SetInteractive(bool val) { m_interactive = val; }
-	bool GetInteractive() { return m_interactive; }
 
 	//background color
 	fluo::Color GetBackgroundColor();
 	fluo::Color GetTextColor();
 	void SetBackgroundColor(fluo::Color &color);
-	void SetGradBg(bool val) { m_grad_bg = val; }
-	void SetPointVolumeMode(int val) { m_point_volume_mode = val; }
-	void SetRulerUseTransf(bool val) { m_ruler_use_transf = val; }
-	void SetRulerTimeDep(bool val) { m_ruler_time_dep = val; }
 
-	//disply modes
-	int GetDrawType() { return m_draw_type; }
-	void SetVolMethod(int method);
-	int GetVolMethod() { return m_vol_method; }
 	void SetFog(bool b = true);
-	bool GetFog() { return m_use_fog; }
-	void SetFogIntensity(double i) { m_fog_intensity = i; }
-	double GetFogIntensity() { return m_fog_intensity; }
-	void SetPeelingLayers(int n) { m_peeling_layers = n; }
-	int GetPeelingLayers() { return m_peeling_layers; }
-	void SetBlendSlices(bool val) { m_blend_slices = val; }
-	bool GetBlendSlices() { return m_blend_slices; }
-	void SetAdaptive(bool val) { m_adaptive = val; }
-	bool GetAdaptive() { return m_adaptive; }
 
 	//movie capture
 	void Set3DRotCapture(double start_angle,
@@ -408,44 +210,9 @@ public:
 	void Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind);
 
 	//frame for capturing
-	void EnableFrame() { m_draw_frame = true; }
-	void DisableFrame() { m_draw_frame = false; };
-	void SetFrame(int x, int y, int w, int h) {
-		m_frame_x = x;
-		m_frame_y = y; m_frame_w = w; m_frame_h = h;
-	}
 	void GetFrame(int &x, int &y, int &w, int &h);
 	void CalcFrame();
 
-	//scale bar
-	void EnableScaleBar() { m_disp_scale_bar = true; }
-	void DisableScaleBar() { m_disp_scale_bar = false; }
-	void EnableSBText() { m_disp_scale_bar_text = true; }
-	void DisableSBText() { m_disp_scale_bar_text = false; }
-	void SetScaleBarLen(double len) { m_sb_length = len; }
-	void SetSBText(wxString text) { m_sb_text = text; }
-
-	//gamma settings
-	fluo::Color GetGamma() { return m_gamma; }
-	void SetGamma(fluo::Color gamma) { m_gamma = gamma; }
-	//brightness adjustment
-	fluo::Color GetBrightness() { return m_brightness; }
-	void SetBrightness(fluo::Color brightness) { m_brightness = brightness; }
-	//hdr settings
-	fluo::Color GetHdr() { return m_hdr; }
-	void SetHdr(fluo::Color hdr) { m_hdr = hdr; }
-	//sync values
-	bool GetSyncR() { return m_sync_r; }
-	void SetSyncR(bool sync_r) { m_sync_r = sync_r; }
-	bool GetSyncG() { return m_sync_g; }
-	void SetSyncG(bool sync_g) { m_sync_g = sync_g; }
-	bool GetSyncB() { return m_sync_b; }
-	void SetSyncB(bool sync_b) { m_sync_b = sync_b; }
-
-	//reload volume list
-	void SetVolPopDirty() { m_vd_pop_dirty = true; }
-	//reload mesh list
-	void SetMeshPopDirty() { m_md_pop_dirty = true; }
 	//clear
 	void ClearVolList();
 	void ClearMeshList();
@@ -475,35 +242,20 @@ public:
 
 	//set clip mode
 	void SetClipMode(int mode);
-	int GetClipMode() { return m_clip_mode; }
 	//restore clipping planes
 	void RestorePlanes();
 	//clipping plane rotations
 	void SetClippingPlaneRotations(double rotx, double roty, double rotz);
 	void GetClippingPlaneRotations(double &rotx, double &roty, double &rotz);
-	fluo::Quaternion GetClipRotation() { return m_q_cl; }
 
 	//interpolation
 	void SetIntp(bool mode);
 	bool GetIntp();
 
-	//get volume selector
-	flrd::VolumeSelector* GetVolumeSelector() { return &m_selector; }
-	//get volume calculator
-	flrd::VolumeCalculator* GetVolumeCalculator() { return &m_calculator; }
-	//get kernel executor
-	flrd::KernelExecutor* GetKernelExecutor() { return &m_kernel_executor; }
-	//text renderer
-	flvr::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
-
 	//force draw
 	void ForceDraw();
 
 	//run 4d script
-	void SetRun4DScript(bool runscript) { m_run_script = runscript; }
-	bool GetRun4DScript() { return m_run_script; }
-	void SetScriptFile(wxString &str) { m_script_file = str; }
-
 	//start loop update
 	void StartLoopUpdate();
 	void HaltLoopUpdate();
@@ -513,8 +265,6 @@ public:
 	void DrawRulers();
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler(unsigned int id);
-	flrd::RulerHandler* GetRulerHandler() { return &m_ruler_handler; }
-	flrd::RulerRenderer* GetRulerRenderer() { return &m_ruler_renderer; }
 
 	//draw highlighted comps
 	void DrawCells();
@@ -535,42 +285,6 @@ public:
 	void DrawTraces();
 	void GetTraces(bool update = false);
 
-	//enlarge output image
-	static void SetKeepEnlarge(bool value)
-	{
-		m_keep_enlarge = value;
-	}
-	static void SetEnlarge(bool value)
-	{
-		m_enlarge = value;
-	}
-	static void SetEnlargeScale(double value)
-	{
-		m_enlarge_scale = value;
-		if (m_enlarge)
-		{
-			m_tsize = flvr::TextRenderer::text_texture_manager_.GetSize();
-			flvr::TextRenderer::text_texture_manager_.SetSize(m_tsize * m_enlarge_scale);
-		}
-	}
-	static bool GetEnlarge()
-	{
-		return m_enlarge;
-	}
-	static double GetEnlargeScale()
-	{
-		return m_enlarge_scale;
-	}
-
-	//stereo/vr
-	void SetStereo(bool bval)
-	{
-		m_enable_vr = bval;
-	}
-	void SetEyeDist(double dval)
-	{
-		m_vr_eye_offset = dval / 2.0;
-	}
 
 	//read pixels
 	void ReadPixels(
@@ -578,62 +292,9 @@ public:
 		int &x, int &y, int &w, int &h,
 		void** image);
 
-	//set cell list
-	void SetCellList(flrd::CelpList &list)
-	{
-		m_cell_list = list;
-	}
-
 	//get view info for external ops
 	//get size, considering enlargement
 	wxSize GetGLSize();
-	glm::mat4 GetModelView()
-	{
-		return m_mv_mat;
-	}
-	glm::mat4 GetProjection()
-	{
-		return m_proj_mat;
-	}
-	glm::mat4 GetObjectMat()
-	{
-		glm::mat4 obj_mat = m_mv_mat;
-		//translate object
-		obj_mat = glm::translate(obj_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		//center object
-		obj_mat = glm::translate(obj_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-		return obj_mat;
-	}
-	glm::mat4 GetDrawMat()
-	{
-		glm::mat4 drw_mat = m_mv_mat;
-		//translate object
-		drw_mat = glm::translate(drw_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-		return drw_mat;
-	}
-	glm::mat4 GetInvtMat()
-	{
-		glm::mat4 inv_mat = m_mv_mat;
-		//translate object
-		inv_mat = glm::translate(inv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
-		//rotate object
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		//center object
-		inv_mat = glm::translate(inv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
-		return inv_mat;
-	}
 
 	void UpdateClips();
 

@@ -517,6 +517,8 @@ namespace fluo
 		void OnCurrentVolumeChanged(Event& event);
 		void OnCurrentMeshChanged(Event& event);
 		void OnTextColorModeChanged(Event& event);
+		void OnInterModeChanged(Event& event);
+		void OnPaintModeChanged(Event& event);
 	};
 }
 

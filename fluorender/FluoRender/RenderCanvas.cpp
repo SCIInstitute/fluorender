@@ -59,14 +59,14 @@ DEALINGS IN THE SOFTWARE.
 
 bool RenderCanvas::m_linked_rot = false;
 RenderCanvas* RenderCanvas::m_master_linked_view = 0;
-bool RenderCanvas::m_keep_enlarge = false;
-bool RenderCanvas::m_enlarge = false;
-double RenderCanvas::m_enlarge_scale = 1.0;
-unsigned int RenderCanvas::m_tsize = 14.0;
-#ifdef _WIN32
-HCTX RenderCanvas::m_hTab = 0;
-LOGCONTEXTA RenderCanvas::m_lc;
-#endif
+//bool RenderCanvas::m_keep_enlarge = false;
+//bool RenderCanvas::m_enlarge = false;
+//double RenderCanvas::m_enlarge_scale = 1.0;
+//unsigned int RenderCanvas::m_tsize = 14.0;
+//#ifdef _WIN32
+//HCTX RenderCanvas::m_hTab = 0;
+//LOGCONTEXTA RenderCanvas::m_lc;
+//#endif
 
 BEGIN_EVENT_TABLE(RenderCanvas, wxGLCanvas)
 EVT_PAINT(RenderCanvas::OnDraw)
@@ -300,8 +300,8 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	//m_comp_include(false),
 	////comp exclude
 	//m_comp_exclude(false),
-	////timer for fullscreen
-	//m_fullscreen_trigger(this, ID_ftrigger),
+	//timer for fullscreen
+	m_fullscreen_trigger(this, ID_ftrigger),
 	////nodraw count
 	//m_nodraw_count(0),
 	////pin rotation center
@@ -643,1462 +643,1462 @@ void RenderCanvas::Init()
 	}
 }
 
-void RenderCanvas::ClearAll()
-{
-	Clear();
-	ClearVolList();
-	ClearMeshList();
-}
+//void RenderCanvas::ClearAll()
+//{
+//	Clear();
+//	ClearVolList();
+//	ClearMeshList();
+//}
+//
+//void RenderCanvas::Clear()
+//{
+//	m_loader.RemoveAllLoadedBrick();
+//	flvr::TextureRenderer::clear_tex_pool();
+//
+//	m_layer_list.clear();
+//	m_cur_vol = 0;
+//}
 
-void RenderCanvas::Clear()
-{
-	m_loader.RemoveAllLoadedBrick();
-	flvr::TextureRenderer::clear_tex_pool();
+//void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
+//{
+//	if (!m_free)
+//		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
+//
+//	double aspect = (double)nx / (double)ny;
+//	m_ortho_left = -m_radius * aspect / m_scale_factor;
+//	m_ortho_right = -m_ortho_left;
+//	m_ortho_bottom = -m_radius / m_scale_factor;
+//	m_ortho_top = -m_ortho_bottom;
+//
+//	if (vr && m_use_openvr)
+//	{
+//#ifdef _WIN32
+//		//get projection matrix
+//		vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
+//		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
+//		static int ti[] = { 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 };
+//		for (int i = 0; i < 16; ++i)
+//			glm::value_ptr(m_proj_mat)[i] =
+//			((float*)(proj_mat.m))[ti[i]];
+//
+//		/*{//not used
+//			double aspect;
+//			aspect = (double)nx / (double)ny;
+//			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
+//			m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
+//			m_ortho_right = aspect * m_ortho_top + frustum_shift *
+//				(m_vr_eye_idx ? 1.0 : -1.0);
+//			m_ortho_left = -aspect * m_ortho_top + frustum_shift *
+//				(m_vr_eye_idx ? -1.0 : 1.0);
+//			m_ortho_bottom = -m_ortho_top;
+//			m_proj_mat = glm::frustum(
+//				m_ortho_left, m_ortho_right,
+//				m_ortho_bottom, m_ortho_top,
+//				m_near_clip, m_far_clip);
+//		}*/
+//#endif
+//	}
+//	else
+//	{
+//		if (m_persp)
+//		{
+//			m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
+//		}
+//		else
+//		{
+//			m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
+//				-m_far_clip / 100.0, m_far_clip);
+//		}
+//	}
+//}
 
-	m_layer_list.clear();
-	m_cur_vol = 0;
-}
-
-void RenderCanvas::HandleProjection(int nx, int ny, bool vr)
-{
-	if (!m_free)
-		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
-
-	double aspect = (double)nx / (double)ny;
-	m_ortho_left = -m_radius * aspect / m_scale_factor;
-	m_ortho_right = -m_ortho_left;
-	m_ortho_bottom = -m_radius / m_scale_factor;
-	m_ortho_top = -m_ortho_bottom;
-
-	if (vr && m_use_openvr)
-	{
-#ifdef _WIN32
-		//get projection matrix
-		vr::EVREye eye = m_vr_eye_idx ? vr::Eye_Right : vr::Eye_Left;
-		auto proj_mat = m_vr_system->GetProjectionMatrix(eye, m_near_clip, m_far_clip);
-		static int ti[] = { 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15 };
-		for (int i = 0; i < 16; ++i)
-			glm::value_ptr(m_proj_mat)[i] =
-			((float*)(proj_mat.m))[ti[i]];
-
-		/*{//not used
-			double aspect;
-			aspect = (double)nx / (double)ny;
-			double frustum_shift = (m_vr_eye_offset / 2.0) * m_near_clip / m_distance;
-			m_ortho_top = std::tan(m_aov / 2.0) * m_near_clip;
-			m_ortho_right = aspect * m_ortho_top + frustum_shift *
-				(m_vr_eye_idx ? 1.0 : -1.0);
-			m_ortho_left = -aspect * m_ortho_top + frustum_shift *
-				(m_vr_eye_idx ? -1.0 : 1.0);
-			m_ortho_bottom = -m_ortho_top;
-			m_proj_mat = glm::frustum(
-				m_ortho_left, m_ortho_right,
-				m_ortho_bottom, m_ortho_top,
-				m_near_clip, m_far_clip);
-		}*/
-#endif
-	}
-	else
-	{
-		if (m_persp)
-		{
-			m_proj_mat = glm::perspective(glm::radians(m_aov), aspect, m_near_clip, m_far_clip);
-		}
-		else
-		{
-			m_proj_mat = glm::ortho(m_ortho_left, m_ortho_right, m_ortho_bottom, m_ortho_top,
-				-m_far_clip / 100.0, m_far_clip);
-		}
-	}
-}
-
-void RenderCanvas::HandleCamera(bool vr)
-{
-	fluo::Vector pos(m_transx, m_transy, m_transz);
-	pos.normalize();
-	if (m_free)
-		pos *= 0.1;
-	else
-		pos *= m_distance;
-	m_transx = pos.x();
-	m_transy = pos.y();
-	m_transz = pos.z();
-
-	glm::vec3 eye(m_transx, m_transy, m_transz);
-	glm::vec3 center(0.0);
-	glm::vec3 up(m_up.x(), m_up.y(), m_up.z());
-
-	if (m_free)
-	{
-		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
-		eye += center;
-	}
-
-	if (vr && m_enable_vr)
-	{
-		glm::vec3 offset((m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
-		m_mv_mat = glm::lookAt(
-			eye + offset,
-			center + offset,
-			up);
-	}
-	else
-	{
-		m_mv_mat = glm::lookAt(eye, center, up);
-	}
-
-	if (m_lock_cam_object)
-	{
-		//rotate first
-		glm::vec3 v1(0, 0, -1);//initial cam direction
-		glm::mat4 mv_mat = GetDrawMat();
-		glm::vec4 lock_ctr(m_lock_center.x(), m_lock_center.y(), m_lock_center.z(), 1);
-		lock_ctr = mv_mat * lock_ctr;
-		glm::vec3 v2(lock_ctr);
-		v2 = glm::normalize(v2);
-		float c = glm::dot(v1, v2);
-		if (std::abs(std::abs(c) - 1) < fluo::Epsilon())
-			return;
-		glm::vec3 v = glm::cross(v1, v2);
-		glm::mat3 vx(
-			0, -v.z, v.y,
-			v.z, 0, -v.x,
-			-v.y, v.x, 0);
-		glm::mat3 vx2 = vx * vx;
-		glm::mat3 rot3(1);
-		rot3 += vx + vx2 / (1 + c);
-		glm::mat4 rot4(rot3);
-		m_mv_mat = rot4 * glm::lookAt(eye, center, up);
-	}
-}
+//void RenderCanvas::HandleCamera(bool vr)
+//{
+//	fluo::Vector pos(m_transx, m_transy, m_transz);
+//	pos.normalize();
+//	if (m_free)
+//		pos *= 0.1;
+//	else
+//		pos *= m_distance;
+//	m_transx = pos.x();
+//	m_transy = pos.y();
+//	m_transz = pos.z();
+//
+//	glm::vec3 eye(m_transx, m_transy, m_transz);
+//	glm::vec3 center(0.0);
+//	glm::vec3 up(m_up.x(), m_up.y(), m_up.z());
+//
+//	if (m_free)
+//	{
+//		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
+//		eye += center;
+//	}
+//
+//	if (vr && m_enable_vr)
+//	{
+//		glm::vec3 offset((m_vr_eye_idx ? 1.0 : -1.0) * m_vr_eye_offset / 2.0, 0.0, 0.0);
+//		m_mv_mat = glm::lookAt(
+//			eye + offset,
+//			center + offset,
+//			up);
+//	}
+//	else
+//	{
+//		m_mv_mat = glm::lookAt(eye, center, up);
+//	}
+//
+//	if (m_lock_cam_object)
+//	{
+//		//rotate first
+//		glm::vec3 v1(0, 0, -1);//initial cam direction
+//		glm::mat4 mv_mat = GetDrawMat();
+//		glm::vec4 lock_ctr(m_lock_center.x(), m_lock_center.y(), m_lock_center.z(), 1);
+//		lock_ctr = mv_mat * lock_ctr;
+//		glm::vec3 v2(lock_ctr);
+//		v2 = glm::normalize(v2);
+//		float c = glm::dot(v1, v2);
+//		if (std::abs(std::abs(c) - 1) < fluo::Epsilon())
+//			return;
+//		glm::vec3 v = glm::cross(v1, v2);
+//		glm::mat3 vx(
+//			0, -v.z, v.y,
+//			v.z, 0, -v.x,
+//			-v.y, v.x, 0);
+//		glm::mat3 vx2 = vx * vx;
+//		glm::mat3 rot3(1);
+//		rot3 += vx + vx2 / (1 + c);
+//		glm::mat4 rot4(rot3);
+//		m_mv_mat = rot4 * glm::lookAt(eye, center, up);
+//	}
+//}
 
 //depth buffer calculation
-double RenderCanvas::CalcZ(double z)
-{
-	double result = 0.0;
-	if (m_persp)
-	{
-		if (z != 0.0)
-		{
-			result = (m_far_clip + m_near_clip) / (m_far_clip - m_near_clip) / 2.0 +
-				(-m_far_clip*m_near_clip) / (m_far_clip - m_near_clip) / z + 0.5;
-		}
-	}
-	else
-		result = (z - m_near_clip) / (m_far_clip - m_near_clip);
-	return result;
-}
+//double RenderCanvas::CalcZ(double z)
+//{
+//	double result = 0.0;
+//	if (m_persp)
+//	{
+//		if (z != 0.0)
+//		{
+//			result = (m_far_clip + m_near_clip) / (m_far_clip - m_near_clip) / 2.0 +
+//				(-m_far_clip*m_near_clip) / (m_far_clip - m_near_clip) / z + 0.5;
+//		}
+//	}
+//	else
+//		result = (z - m_near_clip) / (m_far_clip - m_near_clip);
+//	return result;
+//}
 
-void RenderCanvas::CalcFogRange()
-{
-	fluo::BBox bbox;
-	bool use_box = false;
-	if (m_cur_vol)
-	{
-		m_cur_vol->getValue(gstClipBounds, bbox);
-		use_box = true;
-	}
-	else if (!m_md_pop_list.empty())
-	{
-		for (size_t i = 0; i<m_md_pop_list.size(); ++i)
-		{
-			bool disp;
-			m_md_pop_list[i]->getValue(gstDisplay, disp);
-			if (disp)
-			{
-				fluo::BBox b;
-				m_md_pop_list[i]->getValue(gstBounds, b);
-				bbox.extend(b);
-				use_box = true;
-			}
-		}
-	}
-
-	if (use_box)
-	{
-		fluo::Transform mv;
-		mv.set(glm::value_ptr(m_mv_mat));
-
-		double minz, maxz;
-		minz = numeric_limits<double>::max();
-		maxz = -numeric_limits<double>::max();
-
-		vector<fluo::Point> points;
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
-
-		fluo::Point p;
-		for (size_t i = 0; i<points.size(); ++i)
-		{
-			p = mv.transform(points[i]);
-			minz = p.z()<minz ? p.z() : minz;
-			maxz = p.z()>maxz ? p.z() : maxz;
-		}
-
-		minz = fabs(minz);
-		maxz = fabs(maxz);
-		m_fog_start = minz<maxz ? minz : maxz;
-		m_fog_end = maxz>minz ? maxz : minz;
-		if (m_pin_rot_center)
-		{
-			p = -mv.transform(m_pin_ctr);
-			if (p.z() > m_fog_start && p.z() < m_fog_end)
-				m_fog_start = p.z();
-		}
-	}
-	else
-	{
-		m_fog_start = m_distance - m_radius / 2.0;
-		m_fog_start = m_fog_start<0.0 ? 0.0 : m_fog_start;
-		m_fog_end = m_distance + m_radius / 4.0;
-	}
-}
+//void RenderCanvas::CalcFogRange()
+//{
+//	fluo::BBox bbox;
+//	bool use_box = false;
+//	if (m_cur_vol)
+//	{
+//		m_cur_vol->getValue(gstClipBounds, bbox);
+//		use_box = true;
+//	}
+//	else if (!m_md_pop_list.empty())
+//	{
+//		for (size_t i = 0; i<m_md_pop_list.size(); ++i)
+//		{
+//			bool disp;
+//			m_md_pop_list[i]->getValue(gstDisplay, disp);
+//			if (disp)
+//			{
+//				fluo::BBox b;
+//				m_md_pop_list[i]->getValue(gstBounds, b);
+//				bbox.extend(b);
+//				use_box = true;
+//			}
+//		}
+//	}
+//
+//	if (use_box)
+//	{
+//		fluo::Transform mv;
+//		mv.set(glm::value_ptr(m_mv_mat));
+//
+//		double minz, maxz;
+//		minz = numeric_limits<double>::max();
+//		maxz = -numeric_limits<double>::max();
+//
+//		vector<fluo::Point> points;
+//		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
+//		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
+//		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
+//		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
+//		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
+//		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
+//		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
+//		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
+//
+//		fluo::Point p;
+//		for (size_t i = 0; i<points.size(); ++i)
+//		{
+//			p = mv.transform(points[i]);
+//			minz = p.z()<minz ? p.z() : minz;
+//			maxz = p.z()>maxz ? p.z() : maxz;
+//		}
+//
+//		minz = fabs(minz);
+//		maxz = fabs(maxz);
+//		m_fog_start = minz<maxz ? minz : maxz;
+//		m_fog_end = maxz>minz ? maxz : minz;
+//		if (m_pin_rot_center)
+//		{
+//			p = -mv.transform(m_pin_ctr);
+//			if (p.z() > m_fog_start && p.z() < m_fog_end)
+//				m_fog_start = p.z();
+//		}
+//	}
+//	else
+//	{
+//		m_fog_start = m_distance - m_radius / 2.0;
+//		m_fog_start = m_fog_start<0.0 ? 0.0 : m_fog_start;
+//		m_fog_end = m_distance + m_radius / 4.0;
+//	}
+//}
 
 //draw the volume data only
-void RenderCanvas::Draw()
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-
-	// clear color and depth buffers
-	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, (GLint)nx, (GLint)ny);
-
-	//gradient background
-	if (m_grad_bg)
-		DrawGradBg();
-
-	//projection
-	HandleProjection(nx, ny, true);
-	//Transformation
-	HandleCamera(true);
-
-	if (m_draw_all)
-	{
-		glm::mat4 mv_temp = m_mv_mat;
-		m_mv_mat = GetDrawMat();
-
-		if (m_use_fog)
-			CalcFogRange();
-
-		if (m_draw_grid)
-			DrawGrid();
-
-		if (m_draw_clip)
-			DrawClippingPlanes(false, BACK_FACE);
-
-		//setup
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		//draw the volumes
-		DrawVolumes();
-
-		//draw the clipping planes
-		if (m_draw_clip)
-			DrawClippingPlanes(true, FRONT_FACE);
-
-		if (m_draw_bounds)
-			DrawBounds();
-
-		if (m_draw_annotations)
-			DrawAnnotations();
-
-		if (m_draw_rulers)
-			DrawRulers();
-
-		DrawCells();
-
-		//traces
-		DrawTraces();
-
-		m_mv_mat = mv_temp;
-	}
-}
+//void RenderCanvas::Draw()
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	// clear color and depth buffers
+//	glClearDepth(1.0);
+//	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glViewport(0, 0, (GLint)nx, (GLint)ny);
+//
+//	//gradient background
+//	if (m_grad_bg)
+//		DrawGradBg();
+//
+//	//projection
+//	HandleProjection(nx, ny, true);
+//	//Transformation
+//	HandleCamera(true);
+//
+//	if (m_draw_all)
+//	{
+//		glm::mat4 mv_temp = m_mv_mat;
+//		m_mv_mat = GetDrawMat();
+//
+//		if (m_use_fog)
+//			CalcFogRange();
+//
+//		if (m_draw_grid)
+//			DrawGrid();
+//
+//		if (m_draw_clip)
+//			DrawClippingPlanes(false, BACK_FACE);
+//
+//		//setup
+//		glEnable(GL_BLEND);
+//		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//
+//		//draw the volumes
+//		DrawVolumes();
+//
+//		//draw the clipping planes
+//		if (m_draw_clip)
+//			DrawClippingPlanes(true, FRONT_FACE);
+//
+//		if (m_draw_bounds)
+//			DrawBounds();
+//
+//		if (m_draw_annotations)
+//			DrawAnnotations();
+//
+//		if (m_draw_rulers)
+//			DrawRulers();
+//
+//		DrawCells();
+//
+//		//traces
+//		DrawTraces();
+//
+//		m_mv_mat = mv_temp;
+//	}
+//}
 
 //draw with depth peeling
-void RenderCanvas::DrawDP()
-{
-	int i;
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	string name;
-	flvr::Framebuffer* peel_buffer = 0;
-
-	//clear
-	//	glDrawBuffer(GL_BACK);
-	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, (GLint)nx, (GLint)ny);
-
-	//gradient background
-	if (m_grad_bg)
-		DrawGradBg();
-
-	//projection
-	HandleProjection(nx, ny, true);
-	//Transformation
-	HandleCamera(true);
-
-	if (m_draw_all)
-	{
-		glm::mat4 mv_temp = m_mv_mat;
-		m_mv_mat = GetDrawMat();
-
-		bool use_fog_save = m_use_fog;
-		if (m_use_fog)
-			CalcFogRange();
-
-		if (m_draw_grid)
-			DrawGrid();
-
-		if (m_draw_clip)
-			DrawClippingPlanes(true, BACK_FACE);
-
-		//setup
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		m_use_fog = false;
-
-		//draw depth values of each layer into the buffers
-		for (i = 0; i<m_peeling_layers; i++)
-		{
-			name = "peel buffer" + std::to_string(i);
-			peel_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-					flvr::FB_Depth_Float, nx, ny, name);
-			if (peel_buffer)
-			{
-				peel_buffer->bind();
-				peel_buffer->protect();
-			}
-
-			glClearDepth(1.0);
-			glClear(GL_DEPTH_BUFFER_BIT);
-
-			if (i == 0)
-			{
-				DrawMeshes(0);
-			}
-			else
-			{
-				glActiveTexture(GL_TEXTURE15);
-				name = "peel buffer" + std::to_string(i-1);
-				peel_buffer =
-					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-				if (peel_buffer)
-					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-				glActiveTexture(GL_TEXTURE0);
-				DrawMeshes(1);
-				glActiveTexture(GL_TEXTURE15);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-			}
-		}
-
-		//bind back the framebuffer
-		BindRenderBuffer();
-
-		//restore fog
-		m_use_fog = use_fog_save;
-
-		//draw depth peeling
-		for (i = m_peeling_layers; i >= 0; i--)
-		{
-			if (i == 0)
-			{
-				//draw volumes before the depth
-				glActiveTexture(GL_TEXTURE15);
-				name = "peel buffer" + std::to_string(0);
-				peel_buffer =
-					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-				if (peel_buffer)
-					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-				glActiveTexture(GL_TEXTURE0);
-				DrawVolumes(1);
-				glActiveTexture(GL_TEXTURE15);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-			}
-			else
-			{
-				if (m_peeling_layers == 1)
-				{
-					//i == m_peeling_layers == 1
-					glActiveTexture(GL_TEXTURE15);
-					name = "peel buffer" + std::to_string(0);
-					peel_buffer =
-						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-					if (peel_buffer)
-						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-					glActiveTexture(GL_TEXTURE0);
-				}
-				else if (m_peeling_layers == 2)
-				{
-					glActiveTexture(GL_TEXTURE14);
-					name = "peel buffer" + std::to_string(0);
-					peel_buffer =
-						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-					if (peel_buffer)
-						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-					glActiveTexture(GL_TEXTURE15);
-					name = "peel buffer" + std::to_string(1);
-					peel_buffer =
-						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-					if (peel_buffer)
-						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-					glActiveTexture(GL_TEXTURE0);
-				}
-				else if (m_peeling_layers > 2)
-				{
-					if (i == m_peeling_layers)
-					{
-						glActiveTexture(GL_TEXTURE14);
-						name = "peel buffer" + std::to_string(i-2);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE15);
-						name = "peel buffer" + std::to_string(i-1);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE0);
-					}
-					else if (i == 1)
-					{
-						glActiveTexture(GL_TEXTURE14);
-						name = "peel buffer" + std::to_string(0);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE15);
-						name = "peel buffer" + std::to_string(1);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE0);
-					}
-					else
-					{
-						glActiveTexture(GL_TEXTURE13);
-						name = "peel buffer" + std::to_string(i-2);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE14);
-						name = "peel buffer" + std::to_string(i-1);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE15);
-						name = "peel buffer" + std::to_string(i);
-						peel_buffer =
-							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-						if (peel_buffer)
-							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-						glActiveTexture(GL_TEXTURE0);
-					}
-				}
-
-				//draw volumes
-				if (m_peeling_layers == 1)
-					//i == m_peeling_layers == 1
-					DrawVolumes(5);//draw volume after 15
-				else if (m_peeling_layers == 2)
-				{
-					if (i == 2)
-						DrawVolumes(2);//draw volume after 15
-					else if (i == 1)
-						DrawVolumes(4);//draw volume after 14 and before 15
-				}
-				else if (m_peeling_layers > 2)
-				{
-					if (i == m_peeling_layers)
-						DrawVolumes(2);//draw volume after 15
-					else if (i == 1)
-						DrawVolumes(4);//draw volume after 14 and before 15
-					else
-						DrawVolumes(3);//draw volume after 14 and before 15
-				}
-
-				//draw meshes
-				glEnable(GL_DEPTH_TEST);
-				glDepthFunc(GL_LEQUAL);
-				glEnable(GL_BLEND);
-				glBlendEquation(GL_FUNC_ADD);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-				if (m_peeling_layers == 1)
-					//i == m_peeling_layers == 1
-					DrawMeshes(5);//draw mesh at 15
-				else if (m_peeling_layers == 2)
-				{
-					if (i == 2)
-						DrawMeshes(2);//draw mesh after 14
-					else if (i == 1)
-						DrawMeshes(4);//draw mesh before 15
-				}
-				else if (m_peeling_layers > 2)
-				{
-					if (i == m_peeling_layers)
-						DrawMeshes(2);//draw mesh after 14
-					else if (i == 1)
-						DrawMeshes(4);//draw mesh before 15
-					else
-						DrawMeshes(3);//draw mesh after 13 and before 15
-				}
-
-				glActiveTexture(GL_TEXTURE13);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE14);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE15);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
-
-			}
-		}
-
-		double darkness;
-		if (GetMeshShadow(darkness))
-			DrawOLShadowsMesh(darkness);
-
-		if (m_draw_clip)
-			DrawClippingPlanes(false, FRONT_FACE);
-
-		if (m_draw_bounds)
-			DrawBounds();
-
-		if (m_draw_annotations)
-			DrawAnnotations();
-
-		if (m_draw_rulers)
-			DrawRulers();
-
-		DrawCells();
-
-		//traces
-		DrawTraces();
-
-		m_mv_mat = mv_temp;
-	}
-}
+//void RenderCanvas::DrawDP()
+//{
+//	int i;
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	string name;
+//	flvr::Framebuffer* peel_buffer = 0;
+//
+//	//clear
+//	//	glDrawBuffer(GL_BACK);
+//	glClearDepth(1.0);
+//	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glViewport(0, 0, (GLint)nx, (GLint)ny);
+//
+//	//gradient background
+//	if (m_grad_bg)
+//		DrawGradBg();
+//
+//	//projection
+//	HandleProjection(nx, ny, true);
+//	//Transformation
+//	HandleCamera(true);
+//
+//	if (m_draw_all)
+//	{
+//		glm::mat4 mv_temp = m_mv_mat;
+//		m_mv_mat = GetDrawMat();
+//
+//		bool use_fog_save = m_use_fog;
+//		if (m_use_fog)
+//			CalcFogRange();
+//
+//		if (m_draw_grid)
+//			DrawGrid();
+//
+//		if (m_draw_clip)
+//			DrawClippingPlanes(true, BACK_FACE);
+//
+//		//setup
+//		glDisable(GL_BLEND);
+//		glEnable(GL_DEPTH_TEST);
+//		glDepthFunc(GL_LEQUAL);
+//		m_use_fog = false;
+//
+//		//draw depth values of each layer into the buffers
+//		for (i = 0; i<m_peeling_layers; i++)
+//		{
+//			name = "peel buffer" + std::to_string(i);
+//			peel_buffer =
+//				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//					flvr::FB_Depth_Float, nx, ny, name);
+//			if (peel_buffer)
+//			{
+//				peel_buffer->bind();
+//				peel_buffer->protect();
+//			}
+//
+//			glClearDepth(1.0);
+//			glClear(GL_DEPTH_BUFFER_BIT);
+//
+//			if (i == 0)
+//			{
+//				DrawMeshes(0);
+//			}
+//			else
+//			{
+//				glActiveTexture(GL_TEXTURE15);
+//				name = "peel buffer" + std::to_string(i-1);
+//				peel_buffer =
+//					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//				if (peel_buffer)
+//					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//				glActiveTexture(GL_TEXTURE0);
+//				DrawMeshes(1);
+//				glActiveTexture(GL_TEXTURE15);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//				glActiveTexture(GL_TEXTURE0);
+//			}
+//		}
+//
+//		//bind back the framebuffer
+//		BindRenderBuffer();
+//
+//		//restore fog
+//		m_use_fog = use_fog_save;
+//
+//		//draw depth peeling
+//		for (i = m_peeling_layers; i >= 0; i--)
+//		{
+//			if (i == 0)
+//			{
+//				//draw volumes before the depth
+//				glActiveTexture(GL_TEXTURE15);
+//				name = "peel buffer" + std::to_string(0);
+//				peel_buffer =
+//					flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//				if (peel_buffer)
+//					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//				glActiveTexture(GL_TEXTURE0);
+//				DrawVolumes(1);
+//				glActiveTexture(GL_TEXTURE15);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//				glActiveTexture(GL_TEXTURE0);
+//			}
+//			else
+//			{
+//				if (m_peeling_layers == 1)
+//				{
+//					//i == m_peeling_layers == 1
+//					glActiveTexture(GL_TEXTURE15);
+//					name = "peel buffer" + std::to_string(0);
+//					peel_buffer =
+//						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//					if (peel_buffer)
+//						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//					glActiveTexture(GL_TEXTURE0);
+//				}
+//				else if (m_peeling_layers == 2)
+//				{
+//					glActiveTexture(GL_TEXTURE14);
+//					name = "peel buffer" + std::to_string(0);
+//					peel_buffer =
+//						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//					if (peel_buffer)
+//						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//					glActiveTexture(GL_TEXTURE15);
+//					name = "peel buffer" + std::to_string(1);
+//					peel_buffer =
+//						flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//					if (peel_buffer)
+//						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//					glActiveTexture(GL_TEXTURE0);
+//				}
+//				else if (m_peeling_layers > 2)
+//				{
+//					if (i == m_peeling_layers)
+//					{
+//						glActiveTexture(GL_TEXTURE14);
+//						name = "peel buffer" + std::to_string(i-2);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE15);
+//						name = "peel buffer" + std::to_string(i-1);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE0);
+//					}
+//					else if (i == 1)
+//					{
+//						glActiveTexture(GL_TEXTURE14);
+//						name = "peel buffer" + std::to_string(0);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE15);
+//						name = "peel buffer" + std::to_string(1);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE0);
+//					}
+//					else
+//					{
+//						glActiveTexture(GL_TEXTURE13);
+//						name = "peel buffer" + std::to_string(i-2);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE14);
+//						name = "peel buffer" + std::to_string(i-1);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE15);
+//						name = "peel buffer" + std::to_string(i);
+//						peel_buffer =
+//							flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//						if (peel_buffer)
+//							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//						glActiveTexture(GL_TEXTURE0);
+//					}
+//				}
+//
+//				//draw volumes
+//				if (m_peeling_layers == 1)
+//					//i == m_peeling_layers == 1
+//					DrawVolumes(5);//draw volume after 15
+//				else if (m_peeling_layers == 2)
+//				{
+//					if (i == 2)
+//						DrawVolumes(2);//draw volume after 15
+//					else if (i == 1)
+//						DrawVolumes(4);//draw volume after 14 and before 15
+//				}
+//				else if (m_peeling_layers > 2)
+//				{
+//					if (i == m_peeling_layers)
+//						DrawVolumes(2);//draw volume after 15
+//					else if (i == 1)
+//						DrawVolumes(4);//draw volume after 14 and before 15
+//					else
+//						DrawVolumes(3);//draw volume after 14 and before 15
+//				}
+//
+//				//draw meshes
+//				glEnable(GL_DEPTH_TEST);
+//				glDepthFunc(GL_LEQUAL);
+//				glEnable(GL_BLEND);
+//				glBlendEquation(GL_FUNC_ADD);
+//				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//
+//				if (m_peeling_layers == 1)
+//					//i == m_peeling_layers == 1
+//					DrawMeshes(5);//draw mesh at 15
+//				else if (m_peeling_layers == 2)
+//				{
+//					if (i == 2)
+//						DrawMeshes(2);//draw mesh after 14
+//					else if (i == 1)
+//						DrawMeshes(4);//draw mesh before 15
+//				}
+//				else if (m_peeling_layers > 2)
+//				{
+//					if (i == m_peeling_layers)
+//						DrawMeshes(2);//draw mesh after 14
+//					else if (i == 1)
+//						DrawMeshes(4);//draw mesh before 15
+//					else
+//						DrawMeshes(3);//draw mesh after 13 and before 15
+//				}
+//
+//				glActiveTexture(GL_TEXTURE13);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//				glActiveTexture(GL_TEXTURE14);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//				glActiveTexture(GL_TEXTURE15);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//				glActiveTexture(GL_TEXTURE0);
+//
+//			}
+//		}
+//
+//		double darkness;
+//		if (GetMeshShadow(darkness))
+//			DrawOLShadowsMesh(darkness);
+//
+//		if (m_draw_clip)
+//			DrawClippingPlanes(false, FRONT_FACE);
+//
+//		if (m_draw_bounds)
+//			DrawBounds();
+//
+//		if (m_draw_annotations)
+//			DrawAnnotations();
+//
+//		if (m_draw_rulers)
+//			DrawRulers();
+//
+//		DrawCells();
+//
+//		//traces
+//		DrawTraces();
+//
+//		m_mv_mat = mv_temp;
+//	}
+//}
 
 //draw meshes
 //peel==true -- depth peeling
-void RenderCanvas::DrawMeshes(int peel)
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-
-	for (int i = 0; i< GetLayerNum(); i++)
-	{
-		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
-		{
-			bool disp;
-			md->getValue(gstDisplay, disp);
-			if (disp)
-			{
-				md->SetMatrices(m_mv_mat, m_proj_mat);
-				md->setValue(gstDepthAtten, m_use_fog);
-				md->setValue(gstDaInt, m_fog_intensity);
-				md->setValue(gstDaStart, m_fog_start);
-				md->setValue(gstDaEnd, m_fog_end);
-				md->setValue(gstViewport, fluo::Vector4i(vp));
-				md->Draw(peel);
-			}
-		}
-		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
-		{
-			bool disp;
-			group->getValue(gstDisplay, disp);
-			if (disp)
-			{
-				for (int j = 0; j<(int)group->getNumChildren(); j++)
-				{
-					fluo::MeshData* md = group->getChild(j)->asMeshData();
-					if (!md) continue;
-					bool disp;
-					md->getValue(gstDisplay, disp);
-					if (disp)
-					{
-						md->SetMatrices(m_mv_mat, m_proj_mat);
-						md->setValue(gstDepthAtten, m_use_fog);
-						md->setValue(gstDaInt, m_fog_intensity);
-						md->setValue(gstDaStart, m_fog_start);
-						md->setValue(gstDaEnd, m_fog_end);
-						md->setValue(gstViewport, fluo::Vector4i(vp));
-						md->Draw(peel);
-					}
-				}
-			}
-		}
-	}
-}
+//void RenderCanvas::DrawMeshes(int peel)
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+//
+//	for (int i = 0; i< GetLayerNum(); i++)
+//	{
+//		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			md->getValue(gstDisplay, disp);
+//			if (disp)
+//			{
+//				md->SetMatrices(m_mv_mat, m_proj_mat);
+//				md->setValue(gstDepthAtten, m_use_fog);
+//				md->setValue(gstDaInt, m_fog_intensity);
+//				md->setValue(gstDaStart, m_fog_start);
+//				md->setValue(gstDaEnd, m_fog_end);
+//				md->setValue(gstViewport, fluo::Vector4i(vp));
+//				md->Draw(peel);
+//			}
+//		}
+//		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			group->getValue(gstDisplay, disp);
+//			if (disp)
+//			{
+//				for (int j = 0; j<(int)group->getNumChildren(); j++)
+//				{
+//					fluo::MeshData* md = group->getChild(j)->asMeshData();
+//					if (!md) continue;
+//					bool disp;
+//					md->getValue(gstDisplay, disp);
+//					if (disp)
+//					{
+//						md->SetMatrices(m_mv_mat, m_proj_mat);
+//						md->setValue(gstDepthAtten, m_use_fog);
+//						md->setValue(gstDaInt, m_fog_intensity);
+//						md->setValue(gstDaStart, m_fog_start);
+//						md->setValue(gstDaEnd, m_fog_end);
+//						md->setValue(gstViewport, fluo::Vector4i(vp));
+//						md->Draw(peel);
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
 //draw volumes
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumes(int peel)
-{
-	int finished_bricks = 0;
-	if (flvr::TextureRenderer::get_mem_swap())
-	{
-		finished_bricks = flvr::TextureRenderer::get_finished_bricks();
-		flvr::TextureRenderer::reset_finished_bricks();
-	}
+//void RenderCanvas::DrawVolumes(int peel)
+//{
+//	int finished_bricks = 0;
+//	if (flvr::TextureRenderer::get_mem_swap())
+//	{
+//		finished_bricks = flvr::TextureRenderer::get_finished_bricks();
+//		flvr::TextureRenderer::reset_finished_bricks();
+//	}
+//
+//	PrepFinalBuffer();
+//
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	flrd::RulerPoint *p0 = m_ruler_handler.GetPoint();
+//
+//	//draw
+//	if (m_load_update ||
+//		(!m_retain_finalbuffer &&
+//			m_int_mode != 2 &&
+//			m_int_mode != 7 &&
+//			m_updating) ||
+//			(!m_retain_finalbuffer &&
+//		(m_int_mode == 1 ||
+//			m_int_mode == 3 ||
+//			m_int_mode == 4 ||
+//			m_int_mode == 5 ||
+//			((m_int_mode == 6 ||
+//			m_int_mode == 9) &&
+//				!p0) ||
+//			m_int_mode == 8 ||
+//			m_force_clear)))
+//	{
+//		m_updating = false;
+//		m_force_clear = false;
+//		m_load_update = false;
+//
+//		if (m_frame &&
+//			m_frame->GetSettingDlg() &&
+//			m_frame->GetSettingDlg()->GetUpdateOrder() == 1)
+//		{
+//			if (m_interactive)
+//				ClearFinalBuffer();
+//			else if (m_clear_buffer)
+//			{
+//				ClearFinalBuffer();
+//				m_clear_buffer = false;
+//			}
+//		}
+//		else
+//			ClearFinalBuffer();
+//
+//		GLboolean bCull = glIsEnabled(GL_CULL_FACE);
+//		glDisable(GL_CULL_FACE);
+//
+//		PopVolumeList();
+//
+//		vector<fluo::VolumeData*> quota_vd_list;
+//		if (flvr::TextureRenderer::get_mem_swap())
+//		{
+//			//set start time for the texture renderer
+//			flvr::TextureRenderer::set_st_time(glbin_timer->get_ticks());
+//
+//			flvr::TextureRenderer::set_interactive(m_interactive);
+//			//if in interactive mode, do interactive bricking also
+//			if (m_interactive)
+//			{
+//				//calculate quota
+//				long total_bricks = flvr::TextureRenderer::get_total_brick_num();
+//				long quota_bricks = 1;// total_bricks / 2;
+//				long fin_bricks = finished_bricks;
+//				long last_bricks = flvr::TextureRenderer::
+//					get_est_bricks(3);
+//				long adj_bricks = 0;
+//				unsigned long up_time = flvr::TextureRenderer::get_cor_up_time();
+//				unsigned long consumed_time = flvr::TextureRenderer::get_consumed_time();
+//				if (consumed_time == 0)
+//					quota_bricks = total_bricks;
+//				else if (consumed_time / up_time > total_bricks)
+//					quota_bricks = 1;
+//				else
+//				{
+//					adj_bricks = std::max(long(1), long(double(last_bricks) *
+//						double(up_time) / double(consumed_time)));
+//					quota_bricks = flvr::TextureRenderer::
+//						get_est_bricks(0, adj_bricks);
+//				}
+//				quota_bricks = std::min(total_bricks, quota_bricks);
+//				flvr::TextureRenderer::set_quota_bricks(quota_bricks);
+//				flvr::TextureRenderer::push_quota_brick(quota_bricks);
+//				////test
+//				//std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
+//				//std::string str;
+//				//str += std::to_string(quota_bricks) + "\t";
+//				//str += std::to_string(total_bricks) + "\t";
+//				//str += std::to_string(fin_bricks) + "\t";
+//				//str += std::to_string(adj_bricks) + "\t";
+//				//str += std::to_string(TextureRenderer::get_up_time()) + "\t";
+//				//str += std::to_string(up_time) + "\t";
+//				//str += std::to_string(consumed_time) + "\n";
+//				//ofs.write(str.c_str(), str.size());
+//
+//				int quota_bricks_chan = 0;
+//				if (m_vd_pop_list.size() > 1)
+//				{
+//					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
+//					//not considering mask for now
+//					vector<fluo::VolumeData*>::iterator cur_iter;
+//					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
+//					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
+//					int vd_index;
+//					if (cur_iter != m_vd_pop_list.end())
+//					{
+//						fluo::VolumeData* vd;
+//						vd = *cur_iter;
+//						quota_vd_list.push_back(vd);
+//						long brick_num, count_bricks;
+//						vd->getValue(gstBrickNum, brick_num);
+//						count_bricks = brick_num;
+//						quota_bricks_chan = std::min(count_bricks, quota_bricks);
+//						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
+//						int count = 0;
+//						while (count_bricks < quota_bricks &&
+//							quota_vd_list.size() < m_vd_pop_list.size())
+//						{
+//							if (count % 2 == 0)
+//								vd_index = cur_index + count / 2 + 1;
+//							else
+//								vd_index = cur_index - count / 2 - 1;
+//							count++;
+//							if (vd_index < 0 ||
+//								(size_t)vd_index >= m_vd_pop_list.size())
+//								continue;
+//							vd = m_vd_pop_list[vd_index];
+//							quota_vd_list.push_back(vd);
+//							if (count_bricks + brick_num > quota_bricks)
+//								quota_bricks_chan = quota_bricks - count_bricks;
+//							else
+//								quota_bricks_chan = brick_num;
+//							vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
+//							count_bricks += quota_bricks_chan;
+//						}
+//					}
+//				}
+//				else if (m_vd_pop_list.size() == 1)
+//				{
+//					quota_bricks_chan = quota_bricks;
+//					fluo::VolumeData* vd = m_vd_pop_list[0];
+//					if (vd)
+//						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
+//				}
+//
+//				//get and set center point
+//				fluo::VolumeData* vd = m_cur_vol;
+//				if (!vd)
+//					if (m_vd_pop_list.size())
+//						vd = m_vd_pop_list[0];
+//				m_vp.SetVolumeData(vd);
+//				fluo::Point p;
+//				if (m_vp.GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
+//					(vd && m_vp.GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
+//				{
+//					long resx, resy, resz;
+//					double sclx, scly, sclz;
+//					double spcx, spcy, spcz;
+//					vd->getValue(gstResX, resx);
+//					vd->getValue(gstResY, resy);
+//					vd->getValue(gstResZ, resz);
+//					vd->getValue(gstScaleX, sclx);
+//					vd->getValue(gstScaleY, scly);
+//					vd->getValue(gstScaleZ, sclz);
+//					vd->getValue(gstSpcX, spcx);
+//					vd->getValue(gstSpcY, spcy);
+//					vd->getValue(gstSpcZ, spcz);
+//					p = fluo::Point(p.x() / (resx*sclx*spcx),
+//						p.y() / (resy*scly*spcy),
+//						p.z() / (resz*sclz*spcz));
+//					flvr::TextureRenderer::set_qutoa_center(p);
+//				}
+//				else
+//					flvr::TextureRenderer::set_interactive(false);
+//			}
+//		}
+//
+//		//handle intermixing modes
+//		if (m_vol_method == VOL_METHOD_MULTI)
+//		{
+//			if (flvr::TextureRenderer::get_mem_swap() &&
+//				flvr::TextureRenderer::get_interactive() &&
+//				quota_vd_list.size() > 0)
+//				DrawVolumesMulti(quota_vd_list, peel);
+//			else
+//				DrawVolumesMulti(m_vd_pop_list, peel);
+//			//draw masks
+//			if (m_draw_mask)
+//				DrawVolumesComp(m_vd_pop_list, true, peel);
+//		}
+//		else
+//		{
+//			int i, j;
+//			vector<fluo::VolumeData*> list;
+//			for (i = GetLayerNum() - 1; i >= 0; i--)
+//			{
+//				if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(GetLayer(i)))
+//				{
+//					bool disp;
+//					vd->getValue(gstDisplay, disp);
+//					if (disp)
+//					{
+//						if (flvr::TextureRenderer::get_mem_swap() &&
+//							flvr::TextureRenderer::get_interactive() &&
+//							quota_vd_list.size() > 0)
+//						{
+//							if (find(quota_vd_list.begin(),
+//								quota_vd_list.end(), vd) !=
+//								quota_vd_list.end())
+//								list.push_back(vd);
+//						}
+//						else
+//							list.push_back(vd);
+//					}
+//				}
+//				else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
+//				{
+//					if (!list.empty())
+//					{
+//						DrawVolumesComp(list, false, peel);
+//						//draw masks
+//						if (m_draw_mask)
+//							DrawVolumesComp(list, true, peel);
+//						list.clear();
+//					}
+//					
+//					bool disp;
+//					group->getValue(gstDisplay, disp);
+//					if (!disp)
+//						continue;
+//					for (j = group->getNumChildren() - 1; j >= 0; j--)
+//					{
+//						fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+//						if (!vd)
+//							continue;
+//						bool disp;
+//						vd->getValue(gstDisplay, disp);
+//						if (disp)
+//						{
+//							if (flvr::TextureRenderer::get_mem_swap() &&
+//								flvr::TextureRenderer::get_interactive() &&
+//								quota_vd_list.size() > 0)
+//							{
+//								if (find(quota_vd_list.begin(),
+//									quota_vd_list.end(), vd) !=
+//									quota_vd_list.end())
+//									list.push_back(vd);
+//							}
+//							else
+//								list.push_back(vd);
+//						}
+//					}
+//					if (!list.empty())
+//					{
+//						long blend_mode;
+//						group->getValue(gstBlendMode, blend_mode);
+//						if (blend_mode == VOL_METHOD_MULTI)
+//							DrawVolumesMulti(list, peel);
+//						else
+//							DrawVolumesComp(list, false, peel);
+//						//draw masks
+//						if (m_draw_mask)
+//							DrawVolumesComp(list, true, peel);
+//						list.clear();
+//					}
+//				}
+//			}
+//		}
+//
+//		if (bCull) glEnable(GL_CULL_FACE);
+//	}
+//
+//	//final composition
+//	DrawFinalBuffer();
+//
+//	if (flvr::TextureRenderer::get_mem_swap())
+//	{
+//		flvr::TextureRenderer::set_consumed_time(glbin_timer->get_ticks() - flvr::TextureRenderer::get_st_time());
+//		if (flvr::TextureRenderer::get_start_update_loop() &&
+//			flvr::TextureRenderer::get_done_update_loop())
+//			flvr::TextureRenderer::reset_update_loop();
+//	}
+//
+//	if (m_interactive)
+//	{
+//		//wxMouseState ms = wxGetMouseState();
+//		//if (ms.LeftIsDown() ||
+//		//	ms.MiddleIsDown() ||
+//		//	ms.RightIsDown())
+//		//	return;
+//		m_interactive = false;
+//		m_clear_buffer = true;
+//		RefreshGL(2);
+//	}
+//
+//	//if (TextureRenderer::get_mem_swap())
+//	//{
+//	//	if (finished_bricks == 0)
+//	//	{
+//	//		if (m_nodraw_count == 100)
+//	//		{
+//	//			TextureRenderer::set_done_update_loop();
+//	//			m_nodraw_count = 0;
+//	//		}
+//	//		else
+//	//			m_nodraw_count++;
+//	//	}
+//	//}
+//}
 
-	PrepFinalBuffer();
-
-	int nx, ny;
-	GetRenderSize(nx, ny);
-
-	flrd::RulerPoint *p0 = m_ruler_handler.GetPoint();
-
-	//draw
-	if (m_load_update ||
-		(!m_retain_finalbuffer &&
-			m_int_mode != 2 &&
-			m_int_mode != 7 &&
-			m_updating) ||
-			(!m_retain_finalbuffer &&
-		(m_int_mode == 1 ||
-			m_int_mode == 3 ||
-			m_int_mode == 4 ||
-			m_int_mode == 5 ||
-			((m_int_mode == 6 ||
-			m_int_mode == 9) &&
-				!p0) ||
-			m_int_mode == 8 ||
-			m_force_clear)))
-	{
-		m_updating = false;
-		m_force_clear = false;
-		m_load_update = false;
-
-		if (m_frame &&
-			m_frame->GetSettingDlg() &&
-			m_frame->GetSettingDlg()->GetUpdateOrder() == 1)
-		{
-			if (m_interactive)
-				ClearFinalBuffer();
-			else if (m_clear_buffer)
-			{
-				ClearFinalBuffer();
-				m_clear_buffer = false;
-			}
-		}
-		else
-			ClearFinalBuffer();
-
-		GLboolean bCull = glIsEnabled(GL_CULL_FACE);
-		glDisable(GL_CULL_FACE);
-
-		PopVolumeList();
-
-		vector<fluo::VolumeData*> quota_vd_list;
-		if (flvr::TextureRenderer::get_mem_swap())
-		{
-			//set start time for the texture renderer
-			flvr::TextureRenderer::set_st_time(glbin_timer->get_ticks());
-
-			flvr::TextureRenderer::set_interactive(m_interactive);
-			//if in interactive mode, do interactive bricking also
-			if (m_interactive)
-			{
-				//calculate quota
-				long total_bricks = flvr::TextureRenderer::get_total_brick_num();
-				long quota_bricks = 1;// total_bricks / 2;
-				long fin_bricks = finished_bricks;
-				long last_bricks = flvr::TextureRenderer::
-					get_est_bricks(3);
-				long adj_bricks = 0;
-				unsigned long up_time = flvr::TextureRenderer::get_cor_up_time();
-				unsigned long consumed_time = flvr::TextureRenderer::get_consumed_time();
-				if (consumed_time == 0)
-					quota_bricks = total_bricks;
-				else if (consumed_time / up_time > total_bricks)
-					quota_bricks = 1;
-				else
-				{
-					adj_bricks = std::max(long(1), long(double(last_bricks) *
-						double(up_time) / double(consumed_time)));
-					quota_bricks = flvr::TextureRenderer::
-						get_est_bricks(0, adj_bricks);
-				}
-				quota_bricks = std::min(total_bricks, quota_bricks);
-				flvr::TextureRenderer::set_quota_bricks(quota_bricks);
-				flvr::TextureRenderer::push_quota_brick(quota_bricks);
-				////test
-				//std::ofstream ofs("quota.txt", std::ios::out | std::ios::app);
-				//std::string str;
-				//str += std::to_string(quota_bricks) + "\t";
-				//str += std::to_string(total_bricks) + "\t";
-				//str += std::to_string(fin_bricks) + "\t";
-				//str += std::to_string(adj_bricks) + "\t";
-				//str += std::to_string(TextureRenderer::get_up_time()) + "\t";
-				//str += std::to_string(up_time) + "\t";
-				//str += std::to_string(consumed_time) + "\n";
-				//ofs.write(str.c_str(), str.size());
-
-				int quota_bricks_chan = 0;
-				if (m_vd_pop_list.size() > 1)
-				{
-					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
-					//not considering mask for now
-					vector<fluo::VolumeData*>::iterator cur_iter;
-					cur_iter = find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
-					size_t cur_index = distance(m_vd_pop_list.begin(), cur_iter);
-					int vd_index;
-					if (cur_iter != m_vd_pop_list.end())
-					{
-						fluo::VolumeData* vd;
-						vd = *cur_iter;
-						quota_vd_list.push_back(vd);
-						long brick_num, count_bricks;
-						vd->getValue(gstBrickNum, brick_num);
-						count_bricks = brick_num;
-						quota_bricks_chan = std::min(count_bricks, quota_bricks);
-						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
-						int count = 0;
-						while (count_bricks < quota_bricks &&
-							quota_vd_list.size() < m_vd_pop_list.size())
-						{
-							if (count % 2 == 0)
-								vd_index = cur_index + count / 2 + 1;
-							else
-								vd_index = cur_index - count / 2 - 1;
-							count++;
-							if (vd_index < 0 ||
-								(size_t)vd_index >= m_vd_pop_list.size())
-								continue;
-							vd = m_vd_pop_list[vd_index];
-							quota_vd_list.push_back(vd);
-							if (count_bricks + brick_num > quota_bricks)
-								quota_bricks_chan = quota_bricks - count_bricks;
-							else
-								quota_bricks_chan = brick_num;
-							vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
-							count_bricks += quota_bricks_chan;
-						}
-					}
-				}
-				else if (m_vd_pop_list.size() == 1)
-				{
-					quota_bricks_chan = quota_bricks;
-					fluo::VolumeData* vd = m_vd_pop_list[0];
-					if (vd)
-						vd->GetRenderer()->set_quota_bricks_chan(quota_bricks_chan);
-				}
-
-				//get and set center point
-				fluo::VolumeData* vd = m_cur_vol;
-				if (!vd)
-					if (m_vd_pop_list.size())
-						vd = m_vd_pop_list[0];
-				m_vp.SetVolumeData(vd);
-				fluo::Point p;
-				if (m_vp.GetPointVolumeBox(nx / 2, ny / 2, false, p) > 0.0 ||
-					(vd && m_vp.GetPointPlane(nx / 2, ny / 2, 0, false, p) > 0.0))
-				{
-					long resx, resy, resz;
-					double sclx, scly, sclz;
-					double spcx, spcy, spcz;
-					vd->getValue(gstResX, resx);
-					vd->getValue(gstResY, resy);
-					vd->getValue(gstResZ, resz);
-					vd->getValue(gstScaleX, sclx);
-					vd->getValue(gstScaleY, scly);
-					vd->getValue(gstScaleZ, sclz);
-					vd->getValue(gstSpcX, spcx);
-					vd->getValue(gstSpcY, spcy);
-					vd->getValue(gstSpcZ, spcz);
-					p = fluo::Point(p.x() / (resx*sclx*spcx),
-						p.y() / (resy*scly*spcy),
-						p.z() / (resz*sclz*spcz));
-					flvr::TextureRenderer::set_qutoa_center(p);
-				}
-				else
-					flvr::TextureRenderer::set_interactive(false);
-			}
-		}
-
-		//handle intermixing modes
-		if (m_vol_method == VOL_METHOD_MULTI)
-		{
-			if (flvr::TextureRenderer::get_mem_swap() &&
-				flvr::TextureRenderer::get_interactive() &&
-				quota_vd_list.size() > 0)
-				DrawVolumesMulti(quota_vd_list, peel);
-			else
-				DrawVolumesMulti(m_vd_pop_list, peel);
-			//draw masks
-			if (m_draw_mask)
-				DrawVolumesComp(m_vd_pop_list, true, peel);
-		}
-		else
-		{
-			int i, j;
-			vector<fluo::VolumeData*> list;
-			for (i = GetLayerNum() - 1; i >= 0; i--)
-			{
-				if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(GetLayer(i)))
-				{
-					bool disp;
-					vd->getValue(gstDisplay, disp);
-					if (disp)
-					{
-						if (flvr::TextureRenderer::get_mem_swap() &&
-							flvr::TextureRenderer::get_interactive() &&
-							quota_vd_list.size() > 0)
-						{
-							if (find(quota_vd_list.begin(),
-								quota_vd_list.end(), vd) !=
-								quota_vd_list.end())
-								list.push_back(vd);
-						}
-						else
-							list.push_back(vd);
-					}
-				}
-				else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
-				{
-					if (!list.empty())
-					{
-						DrawVolumesComp(list, false, peel);
-						//draw masks
-						if (m_draw_mask)
-							DrawVolumesComp(list, true, peel);
-						list.clear();
-					}
-					
-					bool disp;
-					group->getValue(gstDisplay, disp);
-					if (!disp)
-						continue;
-					for (j = group->getNumChildren() - 1; j >= 0; j--)
-					{
-						fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
-						if (!vd)
-							continue;
-						bool disp;
-						vd->getValue(gstDisplay, disp);
-						if (disp)
-						{
-							if (flvr::TextureRenderer::get_mem_swap() &&
-								flvr::TextureRenderer::get_interactive() &&
-								quota_vd_list.size() > 0)
-							{
-								if (find(quota_vd_list.begin(),
-									quota_vd_list.end(), vd) !=
-									quota_vd_list.end())
-									list.push_back(vd);
-							}
-							else
-								list.push_back(vd);
-						}
-					}
-					if (!list.empty())
-					{
-						long blend_mode;
-						group->getValue(gstBlendMode, blend_mode);
-						if (blend_mode == VOL_METHOD_MULTI)
-							DrawVolumesMulti(list, peel);
-						else
-							DrawVolumesComp(list, false, peel);
-						//draw masks
-						if (m_draw_mask)
-							DrawVolumesComp(list, true, peel);
-						list.clear();
-					}
-				}
-			}
-		}
-
-		if (bCull) glEnable(GL_CULL_FACE);
-	}
-
-	//final composition
-	DrawFinalBuffer();
-
-	if (flvr::TextureRenderer::get_mem_swap())
-	{
-		flvr::TextureRenderer::set_consumed_time(glbin_timer->get_ticks() - flvr::TextureRenderer::get_st_time());
-		if (flvr::TextureRenderer::get_start_update_loop() &&
-			flvr::TextureRenderer::get_done_update_loop())
-			flvr::TextureRenderer::reset_update_loop();
-	}
-
-	if (m_interactive)
-	{
-		//wxMouseState ms = wxGetMouseState();
-		//if (ms.LeftIsDown() ||
-		//	ms.MiddleIsDown() ||
-		//	ms.RightIsDown())
-		//	return;
-		m_interactive = false;
-		m_clear_buffer = true;
-		RefreshGL(2);
-	}
-
-	//if (TextureRenderer::get_mem_swap())
-	//{
-	//	if (finished_bricks == 0)
-	//	{
-	//		if (m_nodraw_count == 100)
-	//		{
-	//			TextureRenderer::set_done_update_loop();
-	//			m_nodraw_count = 0;
-	//		}
-	//		else
-	//			m_nodraw_count++;
-	//	}
-	//}
-}
-
-void RenderCanvas::DrawAnnotations()
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	fluo::Transform mv;
-	fluo::Transform p;
-	mv.set(glm::value_ptr(m_mv_mat));
-	p.set(glm::value_ptr(m_proj_mat));
-	fluo::Color text_color = GetTextColor();
-
-	for (int i = 0; i<GetLayerNum(); i++)
-	{
-		if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(GetLayer(i)))
-		{
-			bool disp;
-			ann->getValue(gstDisplay, disp);
-			if (disp)
-			{
-				ann->setValue(gstColor, text_color);
-				ann->Draw(nx, ny, mv, p, m_persp);
-			}
-		}
-	}
-}
+//void RenderCanvas::DrawAnnotations()
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	fluo::Transform mv;
+//	fluo::Transform p;
+//	mv.set(glm::value_ptr(m_mv_mat));
+//	p.set(glm::value_ptr(m_proj_mat));
+//	fluo::Color text_color = GetTextColor();
+//
+//	for (int i = 0; i<GetLayerNum(); i++)
+//	{
+//		if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			ann->getValue(gstDisplay, disp);
+//			if (disp)
+//			{
+//				ann->setValue(gstColor, text_color);
+//				ann->Draw(nx, ny, mv, p, m_persp);
+//			}
+//		}
+//	}
+//}
 
 //get populated mesh list
 //stored in m_md_pop_list
-void RenderCanvas::PopMeshList()
-{
-	if (!m_md_pop_dirty)
-		return;
-
-	int i, j;
-	m_md_pop_list.clear();
-
-	for (i = 0; i<GetLayerNum(); i++)
-	{
-		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
-		{
-			bool disp;
-			md->getValue(gstDisplay, disp);
-			if (disp)
-				m_md_pop_list.push_back(md);
-		}
-		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
-		{
-			bool disp;
-			group->getValue(gstDisplay, disp);
-			if (!disp)
-				continue;
-			for (j = 0; j<group->getNumChildren(); j++)
-			{
-				fluo::MeshData* md = group->getChild(j)->asMeshData();
-				md->getValue(gstDisplay, disp);
-				if (disp)
-					m_md_pop_list.push_back(md);
-			}
-		}
-	}
-	m_md_pop_dirty = false;
-}
+//void RenderCanvas::PopMeshList()
+//{
+//	if (!m_md_pop_dirty)
+//		return;
+//
+//	int i, j;
+//	m_md_pop_list.clear();
+//
+//	for (i = 0; i<GetLayerNum(); i++)
+//	{
+//		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			md->getValue(gstDisplay, disp);
+//			if (disp)
+//				m_md_pop_list.push_back(md);
+//		}
+//		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			group->getValue(gstDisplay, disp);
+//			if (!disp)
+//				continue;
+//			for (j = 0; j<group->getNumChildren(); j++)
+//			{
+//				fluo::MeshData* md = group->getChild(j)->asMeshData();
+//				md->getValue(gstDisplay, disp);
+//				if (disp)
+//					m_md_pop_list.push_back(md);
+//			}
+//		}
+//	}
+//	m_md_pop_dirty = false;
+//}
 
 //get populated volume list
 //stored in m_vd_pop_list
-void RenderCanvas::PopVolumeList()
-{
-	if (!m_vd_pop_dirty)
-		return;
-
-	int i, j;
-	m_vd_pop_list.clear();
-
-	for (i = 0; i<GetLayerNum(); i++)
-	{
-		if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(GetLayer(i)))
-		{
-			bool disp;
-			vd->getValue(gstDisplay, disp);
-			if (disp)
-				m_vd_pop_list.push_back(vd);
-		}
-		else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
-		{
-			bool disp;
-			group->getValue(gstDisplay, disp);
-			if (!disp)
-				continue;
-			for (j = 0; j<group->getNumChildren(); j++)
-			{
-				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
-				if (!vd)
-					continue;
-				vd->getValue(gstDisplay, disp);
-				if (disp)
-					m_vd_pop_list.push_back(vd);
-			}
-		}
-	}
-	m_vd_pop_dirty = false;
-}
+//void RenderCanvas::PopVolumeList()
+//{
+//	if (!m_vd_pop_dirty)
+//		return;
+//
+//	int i, j;
+//	m_vd_pop_list.clear();
+//
+//	for (i = 0; i<GetLayerNum(); i++)
+//	{
+//		if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			vd->getValue(gstDisplay, disp);
+//			if (disp)
+//				m_vd_pop_list.push_back(vd);
+//		}
+//		else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			group->getValue(gstDisplay, disp);
+//			if (!disp)
+//				continue;
+//			for (j = 0; j<group->getNumChildren(); j++)
+//			{
+//				fluo::VolumeData* vd = group->getChild(j)->asVolumeData();
+//				if (!vd)
+//					continue;
+//				vd->getValue(gstDisplay, disp);
+//				if (disp)
+//					m_vd_pop_list.push_back(vd);
+//			}
+//		}
+//	}
+//	m_vd_pop_dirty = false;
+//}
 
 //organize layers in view
 //put all volume data under view into last group of the view
 //if no group in view
-void RenderCanvas::OrganizeLayers()
-{
-	fluo::VolumeGroup* le_group = 0;
-	int i;
+//void RenderCanvas::OrganizeLayers()
+//{
+//	fluo::VolumeGroup* le_group = 0;
+//	int i;
+//
+//	//find last empty group
+//	for (i = GetLayerNum() - 1; i >= 0; i--)
+//	{
+//		//layer is group
+//		fluo::VolumeGroup* group =
+//			dynamic_cast<fluo::VolumeGroup*>(GetLayer(i));
+//		if (!group) continue;
+//		if (group->getNumChildren() == 0)
+//		{
+//			le_group = group;
+//			break;
+//		}
+//	}
+//
+//	for (i = 0; i<GetLayerNum(); i++)
+//	{
+//		//layer is volume
+//		fluo::VolumeData* vd =
+//			dynamic_cast<fluo::VolumeData*>(GetLayer(i));
+//		if (!vd) continue;
+//		std::string name = vd->getName();
+//		if (le_group)
+//		{
+//			RemoveVolumeData(name);
+//			le_group->insertChild(le_group->getNumChildren(), vd);
+//		}
+//		else
+//		{
+//			std::string group_name = AddGroup("");
+//			le_group = GetGroup(group_name);
+//			if (le_group)
+//			{
+//				RemoveVolumeData(name);
+//				le_group->insertChild(le_group->getNumChildren(), vd);
+//			}
+//		}
+//
+//		if (m_frame)
+//		{
+//			AdjustView* adjust_view = m_frame->GetAdjustView();
+//			if (adjust_view)
+//			{
+//				adjust_view->SetGroupLink(le_group);
+//				adjust_view->UpdateSync();
+//			}
+//		}
+//	}
+//}
 
-	//find last empty group
-	for (i = GetLayerNum() - 1; i >= 0; i--)
-	{
-		//layer is group
-		fluo::VolumeGroup* group =
-			dynamic_cast<fluo::VolumeGroup*>(GetLayer(i));
-		if (!group) continue;
-		if (group->getNumChildren() == 0)
-		{
-			le_group = group;
-			break;
-		}
-	}
+//void RenderCanvas::RandomizeColor()
+//{
+//	bool bval;
+//	for (int i = 0; i<GetLayerNum(); i++)
+//	{
+//		fluo::Object* layer = GetLayer(i);
+//		if (layer)
+//			layer->toggleValue(gstRandomizeColor, bval);
+//	}
+//}
 
-	for (i = 0; i<GetLayerNum(); i++)
-	{
-		//layer is volume
-		fluo::VolumeData* vd =
-			dynamic_cast<fluo::VolumeData*>(GetLayer(i));
-		if (!vd) continue;
-		std::string name = vd->getName();
-		if (le_group)
-		{
-			RemoveVolumeData(name);
-			le_group->insertChild(le_group->getNumChildren(), vd);
-		}
-		else
-		{
-			std::string group_name = AddGroup("");
-			le_group = GetGroup(group_name);
-			if (le_group)
-			{
-				RemoveVolumeData(name);
-				le_group->insertChild(le_group->getNumChildren(), vd);
-			}
-		}
+//void RenderCanvas::ClearVolList()
+//{
+//	m_loader.RemoveAllLoadedBrick();
+//	flvr::TextureRenderer::clear_tex_pool();
+//	m_vd_pop_list.clear();
+//}
 
-		if (m_frame)
-		{
-			AdjustView* adjust_view = m_frame->GetAdjustView();
-			if (adjust_view)
-			{
-				adjust_view->SetGroupLink(le_group);
-				adjust_view->UpdateSync();
-			}
-		}
-	}
-}
-
-void RenderCanvas::RandomizeColor()
-{
-	bool bval;
-	for (int i = 0; i<GetLayerNum(); i++)
-	{
-		fluo::Object* layer = GetLayer(i);
-		if (layer)
-			layer->toggleValue(gstRandomizeColor, bval);
-	}
-}
-
-void RenderCanvas::ClearVolList()
-{
-	m_loader.RemoveAllLoadedBrick();
-	flvr::TextureRenderer::clear_tex_pool();
-	m_vd_pop_list.clear();
-}
-
-void RenderCanvas::ClearMeshList()
-{
-	m_md_pop_list.clear();
-}
+//void RenderCanvas::ClearMeshList()
+//{
+//	m_md_pop_list.clear();
+//}
 
 //interactive modes
-int RenderCanvas::GetIntMode()
-{
-	return m_int_mode;
-}
+//int RenderCanvas::GetIntMode()
+//{
+//	return m_int_mode;
+//}
 
-void RenderCanvas::SetIntMode(int mode)
-{
-	m_int_mode = mode;
-	if (m_int_mode == 1)
-	{
-		m_brush_state = 0;
-		m_draw_brush = false;
-	}
-	else if (m_int_mode == 10 ||
-		m_int_mode == 12)
-		SetPaintMode(9);
-}
+//void RenderCanvas::SetIntMode(int mode)
+//{
+//	m_int_mode = mode;
+//	if (m_int_mode == 1)
+//	{
+//		m_brush_state = 0;
+//		m_draw_brush = false;
+//	}
+//	else if (m_int_mode == 10 ||
+//		m_int_mode == 12)
+//		SetPaintMode(9);
+//}
 
 //set use 2d rendering results
-void RenderCanvas::SetPaintUse2d(bool use2d)
-{
-	m_selector.SetPaintUse2d(use2d);
-}
+//void RenderCanvas::SetPaintUse2d(bool use2d)
+//{
+//	m_selector.SetPaintUse2d(use2d);
+//}
 
-bool RenderCanvas::GetPaintUse2d()
-{
-	return m_selector.GetPaintUse2d();
-}
+//bool RenderCanvas::GetPaintUse2d()
+//{
+//	return m_selector.GetPaintUse2d();
+//}
 
 //segmentation mdoe selection
-void RenderCanvas::SetPaintMode(int mode)
-{
-	m_selector.SetMode(mode);
-	m_brush_state = mode;
-	m_selector.ChangeBrushSetsIndex();
-}
+//void RenderCanvas::SetPaintMode(int mode)
+//{
+//	m_selector.SetMode(mode);
+//	m_brush_state = mode;
+//	m_selector.ChangeBrushSetsIndex();
+//}
 
-int RenderCanvas::GetPaintMode()
-{
-	return m_selector.GetMode();
-}
+//int RenderCanvas::GetPaintMode()
+//{
+//	return m_selector.GetMode();
+//}
 
-void RenderCanvas::DrawCircles(double cx, double cy,
-	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
-{
-	flvr::ShaderProgram* shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
-	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
-		shader->bind();
-	}
-
-	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
-	//apply translate first
-	glm::mat4 mat0 = matrix * glm::translate(
-			glm::mat4(), glm::vec3(cx, cy, 0.0));
-	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
-
-	flvr::VertexArray* va_circles =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Brush_Circles);
-	if (va_circles)
-	{
-		//set parameters
-		std::vector<std::pair<unsigned int, double>> params;
-		params.push_back(std::pair<unsigned int, double>(0, r1));
-		params.push_back(std::pair<unsigned int, double>(1, r2));
-		params.push_back(std::pair<unsigned int, double>(2, 60.0));
-		va_circles->set_param(params);
-		va_circles->draw();
-	}
-
-	if (shader && shader->valid())
-		shader->release();
-}
+//void RenderCanvas::DrawCircles(double cx, double cy,
+//	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
+//{
+//	flvr::ShaderProgram* shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
+//	if (shader)
+//	{
+//		if (!shader->valid())
+//			shader->create();
+//		shader->bind();
+//	}
+//
+//	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
+//	//apply translate first
+//	glm::mat4 mat0 = matrix * glm::translate(
+//			glm::mat4(), glm::vec3(cx, cy, 0.0));
+//	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
+//
+//	flvr::VertexArray* va_circles =
+//		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Brush_Circles);
+//	if (va_circles)
+//	{
+//		//set parameters
+//		std::vector<std::pair<unsigned int, double>> params;
+//		params.push_back(std::pair<unsigned int, double>(0, r1));
+//		params.push_back(std::pair<unsigned int, double>(1, r2));
+//		params.push_back(std::pair<unsigned int, double>(2, 60.0));
+//		va_circles->set_param(params);
+//		va_circles->draw();
+//	}
+//
+//	if (shader && shader->valid())
+//		shader->release();
+//}
 
 //draw the brush shape
-void RenderCanvas::DrawBrush()
-{
-	double pressure = m_selector.GetNormPress();
-
-	wxPoint pos1(old_mouse_X, old_mouse_Y);
-	wxRect reg = GetClientRect();
-	if (reg.Contains(pos1))
-	{
-		int nx, ny;
-		GetRenderSize(nx, ny);
-		float sx, sy;
-		sx = 2.0 / nx;
-		sy = 2.0 / ny;
-
-		//draw the circles
-		//set up the matrices
-		glm::mat4 proj_mat;
-		double cx, cy;
-		if (m_selector.GetBrushSizeData())
-		{
-			proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
-				float(m_ortho_top), float(m_ortho_bottom));
-			cx = m_ortho_left + pos1.x * (m_ortho_right - m_ortho_left) / nx;
-			cy = m_ortho_bottom + pos1.y * (m_ortho_top - m_ortho_bottom) / ny;
-		}
-		else
-		{
-			proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
-			cx = pos1.x;
-			cy = ny - pos1.y;
-		}
-
-		//attributes
-		glDisable(GL_DEPTH_TEST);
-
-		int mode = m_selector.GetMode();
-
-		fluo::Color text_color = GetTextColor();
-
-		double br1 = m_selector.GetBrushSize1();
-		double br2 = m_selector.GetBrushSize2();
-
-		if (mode == 1 ||
-			mode == 2)
-			DrawCircles(cx, cy, br1*pressure,
-				br2*pressure, text_color, proj_mat);
-		else if (mode == 8)
-			DrawCircles(cx, cy, br1*pressure,
-				-1.0, text_color, proj_mat);
-		else if (mode == 3 ||
-			mode == 4)
-			DrawCircles(cx, cy, -1.0,
-				br2*pressure, text_color, proj_mat);
-
-		float cx2 = pos1.x;
-		float cy2 = ny - pos1.y;
-		float px, py;
-		px = cx2 - 7 - nx / 2.0;
-		py = cy2 - 3 - ny / 2.0;
-		wstring wstr;
-		switch (mode)
-		{
-		case 1:
-			wstr = L"S";
-			break;
-		case 2:
-			wstr = L"+";
-			break;
-		case 3:
-			wstr = L"-";
-			break;
-		case 4:
-			wstr = L"*";
-			break;
-		}
-		m_text_renderer.RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
-
-		glEnable(GL_DEPTH_TEST);
-
-	}
-}
+//void RenderCanvas::DrawBrush()
+//{
+//	double pressure = m_selector.GetNormPress();
+//
+//	wxPoint pos1(old_mouse_X, old_mouse_Y);
+//	wxRect reg = GetClientRect();
+//	if (reg.Contains(pos1))
+//	{
+//		int nx, ny;
+//		GetRenderSize(nx, ny);
+//		float sx, sy;
+//		sx = 2.0 / nx;
+//		sy = 2.0 / ny;
+//
+//		//draw the circles
+//		//set up the matrices
+//		glm::mat4 proj_mat;
+//		double cx, cy;
+//		if (m_selector.GetBrushSizeData())
+//		{
+//			proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
+//				float(m_ortho_top), float(m_ortho_bottom));
+//			cx = m_ortho_left + pos1.x * (m_ortho_right - m_ortho_left) / nx;
+//			cy = m_ortho_bottom + pos1.y * (m_ortho_top - m_ortho_bottom) / ny;
+//		}
+//		else
+//		{
+//			proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
+//			cx = pos1.x;
+//			cy = ny - pos1.y;
+//		}
+//
+//		//attributes
+//		glDisable(GL_DEPTH_TEST);
+//
+//		int mode = m_selector.GetMode();
+//
+//		fluo::Color text_color = GetTextColor();
+//
+//		double br1 = m_selector.GetBrushSize1();
+//		double br2 = m_selector.GetBrushSize2();
+//
+//		if (mode == 1 ||
+//			mode == 2)
+//			DrawCircles(cx, cy, br1*pressure,
+//				br2*pressure, text_color, proj_mat);
+//		else if (mode == 8)
+//			DrawCircles(cx, cy, br1*pressure,
+//				-1.0, text_color, proj_mat);
+//		else if (mode == 3 ||
+//			mode == 4)
+//			DrawCircles(cx, cy, -1.0,
+//				br2*pressure, text_color, proj_mat);
+//
+//		float cx2 = pos1.x;
+//		float cy2 = ny - pos1.y;
+//		float px, py;
+//		px = cx2 - 7 - nx / 2.0;
+//		py = cy2 - 3 - ny / 2.0;
+//		wstring wstr;
+//		switch (mode)
+//		{
+//		case 1:
+//			wstr = L"S";
+//			break;
+//		case 2:
+//			wstr = L"+";
+//			break;
+//		case 3:
+//			wstr = L"-";
+//			break;
+//		case 4:
+//			wstr = L"*";
+//			break;
+//		}
+//		m_text_renderer.RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
+//
+//		glEnable(GL_DEPTH_TEST);
+//
+//	}
+//}
 
 //paint strokes on the paint fbo
-void RenderCanvas::PaintStroke()
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-
-	double pressure = m_selector.GetNormPress();
-
-	//generate texture and buffer objects
-	//painting fbo
-	flvr::Framebuffer* paint_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			flvr::FB_Render_RGBA, nx, ny, "paint brush");
-	if (!paint_buffer)
-		return;
-	paint_buffer->bind();
-	paint_buffer->protect();
-	//clear if asked so
-	if (m_clear_paint)
-	{
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		m_clear_paint = false;
-	}
-	else
-	{
-		//paint shader
-		flvr::ShaderProgram* paint_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
-		if (paint_shader)
-		{
-			if (!paint_shader->valid())
-				paint_shader->create();
-			paint_shader->bind();
-		}
-
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_MAX);
-
-		double radius1 = m_selector.GetBrushSize1();
-		double radius2 = m_selector.GetBrushSize2();
-		double bspc = m_selector.GetBrushSpacing();
-		bool bs_data = m_selector.GetBrushSizeData();
-		double px = double(old_mouse_X - prv_mouse_X);
-		double py = double(old_mouse_Y - prv_mouse_Y);
-		double dist = sqrt(px*px + py*py);
-		double step = radius1 * pressure * bspc;
-		int repeat = int(dist / step + 0.5);
-		double spx = (double)prv_mouse_X;
-		double spy = (double)prv_mouse_Y;
-		if (repeat > 0)
-		{
-			px /= repeat;
-			py /= repeat;
-		}
-
-		//set the width and height
-		if (bs_data)
-			paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
-				m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
-		else
-			paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
-
-		double x, y;
-		double cx, cy;
-		for (int i = 0; i <= repeat; i++)
-		{
-			x = spx + i*px;
-			y = spy + i*py;
-			if (bs_data)
-			{
-				cx = x * (m_ortho_right - m_ortho_left) / nx;
-				cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
-			}
-			else
-			{
-				cx = x;
-				cy = double(ny) - y;
-			}
-			switch (m_selector.GetMode())
-			{
-			case 3:
-				radius1 = radius2;
-				break;
-			case 4:
-				radius1 = 0.0;
-				break;
-			case 8:
-				radius2 = radius1;
-				break;
-			default:
-				break;
-			}
-			//send uniforms to paint shader
-			paint_shader->setLocalParam(0, cx, cy,
-				radius1*pressure,
-				radius2*pressure);
-			//draw a square
-			DrawViewQuad();
-		}
-
-		//release paint shader
-		if (paint_shader && paint_shader->valid())
-			paint_shader->release();
-	}
-
-	//bind back the window frame buffer
-	BindRenderBuffer();
-	glBlendEquation(GL_FUNC_ADD);
-	RefreshGL(3);
-}
+//void RenderCanvas::PaintStroke()
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	double pressure = m_selector.GetNormPress();
+//
+//	//generate texture and buffer objects
+//	//painting fbo
+//	flvr::Framebuffer* paint_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			flvr::FB_Render_RGBA, nx, ny, "paint brush");
+//	if (!paint_buffer)
+//		return;
+//	paint_buffer->bind();
+//	paint_buffer->protect();
+//	//clear if asked so
+//	if (m_clear_paint)
+//	{
+//		glClearColor(0.0, 0.0, 0.0, 0.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		m_clear_paint = false;
+//	}
+//	else
+//	{
+//		//paint shader
+//		flvr::ShaderProgram* paint_shader =
+//			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_PAINT);
+//		if (paint_shader)
+//		{
+//			if (!paint_shader->valid())
+//				paint_shader->create();
+//			paint_shader->bind();
+//		}
+//
+//		glDisable(GL_DEPTH_TEST);
+//		glEnable(GL_BLEND);
+//		glBlendEquation(GL_MAX);
+//
+//		double radius1 = m_selector.GetBrushSize1();
+//		double radius2 = m_selector.GetBrushSize2();
+//		double bspc = m_selector.GetBrushSpacing();
+//		bool bs_data = m_selector.GetBrushSizeData();
+//		double px = double(old_mouse_X - prv_mouse_X);
+//		double py = double(old_mouse_Y - prv_mouse_Y);
+//		double dist = sqrt(px*px + py*py);
+//		double step = radius1 * pressure * bspc;
+//		int repeat = int(dist / step + 0.5);
+//		double spx = (double)prv_mouse_X;
+//		double spy = (double)prv_mouse_Y;
+//		if (repeat > 0)
+//		{
+//			px /= repeat;
+//			py /= repeat;
+//		}
+//
+//		//set the width and height
+//		if (bs_data)
+//			paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
+//				m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
+//		else
+//			paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
+//
+//		double x, y;
+//		double cx, cy;
+//		for (int i = 0; i <= repeat; i++)
+//		{
+//			x = spx + i*px;
+//			y = spy + i*py;
+//			if (bs_data)
+//			{
+//				cx = x * (m_ortho_right - m_ortho_left) / nx;
+//				cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
+//			}
+//			else
+//			{
+//				cx = x;
+//				cy = double(ny) - y;
+//			}
+//			switch (m_selector.GetMode())
+//			{
+//			case 3:
+//				radius1 = radius2;
+//				break;
+//			case 4:
+//				radius1 = 0.0;
+//				break;
+//			case 8:
+//				radius2 = radius1;
+//				break;
+//			default:
+//				break;
+//			}
+//			//send uniforms to paint shader
+//			paint_shader->setLocalParam(0, cx, cy,
+//				radius1*pressure,
+//				radius2*pressure);
+//			//draw a square
+//			DrawViewQuad();
+//		}
+//
+//		//release paint shader
+//		if (paint_shader && paint_shader->valid())
+//			paint_shader->release();
+//	}
+//
+//	//bind back the window frame buffer
+//	BindRenderBuffer();
+//	glBlendEquation(GL_FUNC_ADD);
+//	RefreshGL(3);
+//}
 
 //show the stroke buffer
-void RenderCanvas::DisplayStroke()
-{
-	//painting texture
-	flvr::Framebuffer* paint_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
-	if (!paint_buffer)
-		return;
-
-	//draw the final buffer to the windows buffer
-	glActiveTexture(GL_TEXTURE0);
-	paint_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST);
-
-	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	DrawViewQuad();
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glEnable(GL_DEPTH_TEST);
-}
+//void RenderCanvas::DisplayStroke()
+//{
+//	//painting texture
+//	flvr::Framebuffer* paint_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer("paint brush");
+//	if (!paint_buffer)
+//		return;
+//
+//	//draw the final buffer to the windows buffer
+//	glActiveTexture(GL_TEXTURE0);
+//	paint_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	flvr::ShaderProgram* img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	DrawViewQuad();
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glEnable(GL_DEPTH_TEST);
+//}
 
 //segment volumes in current view
-void RenderCanvas::Segment()
-{
-	int mode = m_selector.GetMode();
-	HandleCamera();
-	if (mode == 9)
-	{
-		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
-		m_selector.Segment(mouse_pos.x, mouse_pos.y);
-	}
-	else
-		m_selector.Segment();
-
-	bool count = false;
-	bool colocal = false;
-	if (mode == 1 ||
-		mode == 2 ||
-		mode == 3 ||
-		mode == 4 ||
-		mode == 5 ||
-		mode == 7 ||
-		mode == 8 ||
-		mode == 9)
-	{
-		if (m_paint_count)
-			count = true;
-		if (m_paint_colocalize)
-			colocal = true;
-	}
-
-	//update
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-			m_frame->GetBrushToolDlg()->Update(count?0:1);
-		if (colocal && m_frame->GetColocalizationDlg())
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
-}
+//void RenderCanvas::Segment()
+//{
+//	int mode = m_selector.GetMode();
+//	HandleCamera();
+//	if (mode == 9)
+//	{
+//		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
+//		m_selector.Segment(mouse_pos.x, mouse_pos.y);
+//	}
+//	else
+//		m_selector.Segment();
+//
+//	bool count = false;
+//	bool colocal = false;
+//	if (mode == 1 ||
+//		mode == 2 ||
+//		mode == 3 ||
+//		mode == 4 ||
+//		mode == 5 ||
+//		mode == 7 ||
+//		mode == 8 ||
+//		mode == 9)
+//	{
+//		if (m_paint_count)
+//			count = true;
+//		if (m_paint_colocalize)
+//			colocal = true;
+//	}
+//
+//	//update
+//	if (m_frame)
+//	{
+//		if (m_frame->GetBrushToolDlg())
+//			m_frame->GetBrushToolDlg()->Update(count?0:1);
+//		if (colocal && m_frame->GetColocalizationDlg())
+//			m_frame->GetColocalizationDlg()->Colocalize();
+//	}
+//}
 
 //change brush display
 void RenderCanvas::ChangeBrushSize(int value)
@@ -2109,1559 +2109,1559 @@ void RenderCanvas::ChangeBrushSize(int value)
 }
 
 //calculations
-void RenderCanvas::SetVolumeA(fluo::VolumeData* vd)
-{
-	m_calculator.SetVolumeA(vd);
-	m_selector.SetVolume(vd);
-}
-
-void RenderCanvas::SetVolumeB(fluo::VolumeData* vd)
-{
-	m_calculator.SetVolumeB(vd);
-}
+//void RenderCanvas::SetVolumeA(fluo::VolumeData* vd)
+//{
+//	m_calculator.SetVolumeA(vd);
+//	m_selector.SetVolume(vd);
+//}
+//
+//void RenderCanvas::SetVolumeB(fluo::VolumeData* vd)
+//{
+//	m_calculator.SetVolumeB(vd);
+//}
 
 //draw out the framebuffer after composition
-void RenderCanvas::PrepFinalBuffer()
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
+//void RenderCanvas::PrepFinalBuffer()
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	//generate textures & buffer objects
+//	glActiveTexture(GL_TEXTURE0);
+//	//glEnable(GL_TEXTURE_2D);
+//	//frame buffer for final
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			flvr::FB_Render_RGBA, nx, ny, "final");
+//	if (final_buffer)
+//		final_buffer->protect();
+//}
 
-	//generate textures & buffer objects
-	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
-	//frame buffer for final
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			flvr::FB_Render_RGBA, nx, ny, "final");
-	if (final_buffer)
-		final_buffer->protect();
-}
+//void RenderCanvas::ClearFinalBuffer()
+//{
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		"final");
+//	if (final_buffer)
+//		final_buffer->bind();
+//	//clear color buffer to black for compositing
+//	glClearColor(0.0, 0.0, 0.0, 0.0);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//}
 
-void RenderCanvas::ClearFinalBuffer()
-{
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		"final");
-	if (final_buffer)
-		final_buffer->bind();
-	//clear color buffer to black for compositing
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void RenderCanvas::DrawFinalBuffer()
-{
-	if (m_enlarge)
-		return;
-
-	//bind back the window frame buffer
-	BindRenderBuffer();
-
-	//draw the final buffer to the windows buffer
-	glActiveTexture(GL_TEXTURE0);
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
-	if (final_buffer)
-		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_ONE, GL_ONE);
-	glDisable(GL_DEPTH_TEST);
-
-	//2d adjustment
-	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
-	img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
-	img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
-	//2d adjustment
-
-	DrawViewQuad();
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//get pixel value
-	if (m_pin_rot_center &&
-		m_rot_center_dirty &&
-		!m_free)
-	{
-		unsigned char pixel[4];
-		int nx, ny;
-		GetRenderSize(nx, ny);
-		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-		m_pin_pick_thresh = 0.8 * double(pixel[3]) / 255.0;
-	}
-}
+//void RenderCanvas::DrawFinalBuffer()
+//{
+//	if (m_enlarge)
+//		return;
+//
+//	//bind back the window frame buffer
+//	BindRenderBuffer();
+//
+//	//draw the final buffer to the windows buffer
+//	glActiveTexture(GL_TEXTURE0);
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+//	if (final_buffer)
+//		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//	//glBlendFunc(GL_ONE, GL_ONE);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	//2d adjustment
+//	flvr::ShaderProgram* img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
+//	img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
+//	img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
+//	//2d adjustment
+//
+//	DrawViewQuad();
+//
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//
+//	//get pixel value
+//	if (m_pin_rot_center &&
+//		m_rot_center_dirty &&
+//		!m_free)
+//	{
+//		unsigned char pixel[4];
+//		int nx, ny;
+//		GetRenderSize(nx, ny);
+//		glReadPixels(nx / 2, ny / 2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+//		m_pin_pick_thresh = 0.8 * double(pixel[3]) / 255.0;
+//	}
+//}
 
 //vr buffers
-void RenderCanvas::GetRenderSize(int &nx, int &ny)
-{
-	if (m_use_openvr)
-	{
-		nx = m_vr_size[0];
-		ny = m_vr_size[1];
-	}
-	else
-	{
-		nx = GetGLSize().x;
-		ny = GetGLSize().y;
-		if (m_enable_vr)
-			nx /= 2;
-	}
-}
+//void RenderCanvas::GetRenderSize(int &nx, int &ny)
+//{
+//	if (m_use_openvr)
+//	{
+//		nx = m_vr_size[0];
+//		ny = m_vr_size[1];
+//	}
+//	else
+//	{
+//		nx = GetGLSize().x;
+//		ny = GetGLSize().y;
+//		if (m_enable_vr)
+//			nx /= 2;
+//	}
+//}
 
-void RenderCanvas::PrepVRBuffer()
-{
-	if (m_use_openvr)
-	{
-#ifdef _WIN32
-		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
-		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
-#endif
-	}
+//void RenderCanvas::PrepVRBuffer()
+//{
+//	if (m_use_openvr)
+//	{
+//#ifdef _WIN32
+//		std::array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> tracked_device_poses;
+//		vr::VRCompositor()->WaitGetPoses(tracked_device_poses.data(), tracked_device_poses.size(), NULL, 0);
+//#endif
+//	}
+//
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	//generate textures & buffer objects
+//	glActiveTexture(GL_TEXTURE0);
+//	//glEnable(GL_TEXTURE_2D);
+//	//frame buffer for one eye
+//	std::string vr_buf_name;
+//	if (m_vr_eye_idx)
+//		vr_buf_name = "vr right";
+//	else
+//		vr_buf_name = "vr left";
+//
+//	flvr::Framebuffer* vr_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			flvr::FB_UChar_RGBA, nx, ny, vr_buf_name);
+//	if (vr_buffer)
+//		vr_buffer->protect();
+//}
 
-	int nx, ny;
-	GetRenderSize(nx, ny);
+//void RenderCanvas::BindRenderBuffer()
+//{
+//	if (m_enable_vr)
+//	{
+//		std::string vr_buf_name;
+//		if (m_vr_eye_idx)
+//			vr_buf_name = "vr right";
+//		else
+//			vr_buf_name = "vr left";
+//		flvr::Framebuffer* vr_buffer =
+//			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//				vr_buf_name);
+//		if (vr_buffer)
+//			vr_buffer->bind();
+//	}
+//	else
+//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//}
 
-	//generate textures & buffer objects
-	glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
-	//frame buffer for one eye
-	std::string vr_buf_name;
-	if (m_vr_eye_idx)
-		vr_buf_name = "vr right";
-	else
-		vr_buf_name = "vr left";
+//void RenderCanvas::ClearVRBuffer()
+//{
+//	BindRenderBuffer();
+//	//clear color buffer to black for compositing
+//	glClearDepth(1.0);
+//	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//}
 
-	flvr::Framebuffer* vr_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			flvr::FB_UChar_RGBA, nx, ny, vr_buf_name);
-	if (vr_buffer)
-		vr_buffer->protect();
-}
-
-void RenderCanvas::BindRenderBuffer()
-{
-	if (m_enable_vr)
-	{
-		std::string vr_buf_name;
-		if (m_vr_eye_idx)
-			vr_buf_name = "vr right";
-		else
-			vr_buf_name = "vr left";
-		flvr::Framebuffer* vr_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-				vr_buf_name);
-		if (vr_buffer)
-			vr_buffer->bind();
-	}
-	else
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void RenderCanvas::ClearVRBuffer()
-{
-	BindRenderBuffer();
-	//clear color buffer to black for compositing
-	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void RenderCanvas::DrawVRBuffer()
-{
-	int vr_x, vr_y, gl_x, gl_y;
-	GetRenderSize(vr_x, vr_y);
-	gl_x = GetGLSize().x;
-	gl_y = GetGLSize().y;
-	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, gl_x, vp_y);
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-
-	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	//left eye
-	flvr::Framebuffer* buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			"vr left");
-	if (buffer)
-		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	flvr::VertexArray* quad_va =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Left_Square);
-	if (quad_va)
-		quad_va->draw();
-	//openvr left eye
-	if (m_use_openvr)
-	{
-#ifdef _WIN32
-		vr::Texture_t left_eye = {};
-		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		left_eye.eType = vr::TextureType_OpenGL;
-		left_eye.eColorSpace = vr::ColorSpace_Gamma;
-		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
-#endif
-	}
-	//right eye
-	buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			"vr right");
-	if (buffer)
-		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	quad_va =
-		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Right_Square);
-	if (quad_va)
-		quad_va->draw();
-	//openvr left eye
-	if (m_use_openvr)
-	{
-#ifdef _WIN32
-		vr::Texture_t right_eye = {};
-		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
-		right_eye.eType = vr::TextureType_OpenGL;
-		right_eye.eColorSpace = vr::ColorSpace_Gamma;
-		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
-#endif
-	}
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-}
+//void RenderCanvas::DrawVRBuffer()
+//{
+//	int vr_x, vr_y, gl_x, gl_y;
+//	GetRenderSize(vr_x, vr_y);
+//	gl_x = GetGLSize().x;
+//	gl_y = GetGLSize().y;
+//	int vp_y = int((double)gl_x * vr_y / vr_x / 2.0);
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	glViewport(0, 0, gl_x, vp_y);
+//	glDisable(GL_BLEND);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	flvr::ShaderProgram* img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	//left eye
+//	flvr::Framebuffer* buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			"vr left");
+//	if (buffer)
+//		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	flvr::VertexArray* quad_va =
+//		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Left_Square);
+//	if (quad_va)
+//		quad_va->draw();
+//	//openvr left eye
+//	if (m_use_openvr)
+//	{
+//#ifdef _WIN32
+//		vr::Texture_t left_eye = {};
+//		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+//		left_eye.eType = vr::TextureType_OpenGL;
+//		left_eye.eColorSpace = vr::ColorSpace_Gamma;
+//		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
+//#endif
+//	}
+//	//right eye
+//	buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			"vr right");
+//	if (buffer)
+//		buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	quad_va =
+//		flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Right_Square);
+//	if (quad_va)
+//		quad_va->draw();
+//	//openvr left eye
+//	if (m_use_openvr)
+//	{
+//#ifdef _WIN32
+//		vr::Texture_t right_eye = {};
+//		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+//		right_eye.eType = vr::TextureType_OpenGL;
+//		right_eye.eColorSpace = vr::ColorSpace_Gamma;
+//		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);
+//#endif
+//	}
+//
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glEnable(GL_BLEND);
+//	glEnable(GL_DEPTH_TEST);
+//}
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask, int peel)
-{
-	if (list.size() <= 0)
-		return;
+//void RenderCanvas::DrawVolumesComp(vector<fluo::VolumeData*> &list, bool mask, int peel)
+//{
+//	if (list.size() <= 0)
+//		return;
+//
+//	int i;
+//
+//	//count volumes with mask
+//	int cnt_mask = 0;
+//	for (i = 0; i<(int)list.size(); i++)
+//	{
+//		fluo::VolumeData* vd = list[i];
+//		if (!vd)
+//			continue;
+//		bool disp;
+//		vd->getValue(gstDisplay, disp);
+//		if (!disp)
+//			continue;
+//		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+//			cnt_mask++;
+//	}
+//
+//	if (mask && cnt_mask == 0)
+//		return;
+//
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	//generate textures & buffer objects
+//	//frame buffer for each volume
+//	flvr::Framebuffer* chann_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		flvr::FB_Render_RGBA, nx, ny, "channel");
+//	if (chann_buffer)
+//		chann_buffer->protect();
+//
+//	//draw each volume to fbo
+//	for (i = 0; i<(int)list.size(); i++)
+//	{
+//		fluo::VolumeData* vd = list[i];
+//		if (!vd)
+//			continue;
+//		bool disp;
+//		vd->getValue(gstDisplay, disp);
+//		if (!disp)
+//			continue;
+//		if (mask)
+//		{
+//			//drawlabel
+//			long label_mode;
+//			vd->getValue(gstLabelMode, label_mode);
+//			if (label_mode &&
+//				vd->GetMask(false) &&
+//				vd->GetLabel(false))
+//				continue;
+//
+//			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+//			{
+//				vd->setValue(gstMaskMode, long(1));
+//				int vol_method = m_vol_method;
+//				m_vol_method = VOL_METHOD_COMP;
+//				long mip_mode;
+//				vd->getValue(gstMipMode, mip_mode);
+//				if (mip_mode == 1)
+//					DrawMIP(vd, peel);
+//				else
+//					DrawOVER(vd, mask, peel);
+//				vd->setValue(gstMaskMode, long(0));
+//				m_vol_method = vol_method;
+//			}
+//		}
+//		else
+//		{
+//			long blend_mode;
+//			vd->getValue(gstBlendMode, blend_mode);
+//			if (blend_mode != 2)
+//			{
+//				//drawlabel
+//				long label_mode;
+//				vd->getValue(gstLabelMode, label_mode);
+//				if (label_mode &&
+//					vd->GetMask(false) &&
+//					vd->GetLabel(false))
+//					vd->setValue(gstMaskMode, long(4));
+//
+//				long mip_mode;
+//				vd->getValue(gstMipMode, mip_mode);
+//				if (mip_mode == 1)
+//					DrawMIP(vd, peel);
+//				else
+//					DrawOVER(vd, mask, peel);
+//			}
+//		}
+//	}
+//}
 
-	int i;
+//void RenderCanvas::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+//	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+//
+//	flvr::ShaderProgram* img_shader = 0;
+//
+//	bool do_over = true;
+//	if (flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_start_update_loop() &&
+//		!flvr::TextureRenderer::get_done_update_loop())
+//	{
+//		unsigned int rn_time = glbin_timer->get_ticks();
+//		if (rn_time - flvr::TextureRenderer::get_st_time() >
+//			flvr::TextureRenderer::get_up_time())
+//			return;
+//		if (mask)
+//		{
+//			if (vd->GetRenderer()->get_done_loop(4))
+//				do_over = false;
+//		}
+//		else
+//		{
+//			if (vd->GetRenderer()->get_done_loop(0))
+//				do_over = false;
+//		}
+//	}
+//
+//	flvr::Framebuffer* chann_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+//	if (do_over)
+//	{
+//		//before rendering this channel, save final buffer to temp buffer
+//		if (flvr::TextureRenderer::get_mem_swap() &&
+//			flvr::TextureRenderer::get_start_update_loop() &&
+//			flvr::TextureRenderer::get_save_final_buffer())
+//		{
+//			flvr::TextureRenderer::reset_save_final_buffer();
+//
+//			//bind temporary framebuffer for comp in stream mode
+//			flvr::Framebuffer* temp_buffer =
+//				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//					flvr::FB_Render_RGBA, nx, ny, "temporary");
+//			if (temp_buffer)
+//			{
+//				temp_buffer->bind();
+//				temp_buffer->protect();
+//			}
+//			glClearColor(0.0, 0.0, 0.0, 0.0);
+//			glClear(GL_COLOR_BUFFER_BIT);
+//			glActiveTexture(GL_TEXTURE0);
+//			flvr::Framebuffer* final_buffer =
+//				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+//			if (final_buffer)
+//				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			glDisable(GL_BLEND);
+//			glDisable(GL_DEPTH_TEST);
+//
+//			img_shader =
+//				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//			if (img_shader)
+//			{
+//				if (!img_shader->valid())
+//					img_shader->create();
+//				img_shader->bind();
+//			}
+//			DrawViewQuad();
+//			if (img_shader && img_shader->valid())
+//				img_shader->release();
+//
+//			glBindTexture(GL_TEXTURE_2D, 0);
+//		}
+//		//bind the fbo
+//		if (chann_buffer)
+//		{
+//			chann_buffer->bind();
+//			m_cur_framebuffer = chann_buffer->id();
+//		}
+//
+//		if (!flvr::TextureRenderer::get_mem_swap() ||
+//			(flvr::TextureRenderer::get_mem_swap() &&
+//			flvr::TextureRenderer::get_clear_chan_buffer()))
+//		{
+//			glClearColor(0.0, 0.0, 0.0, 0.0);
+//			glClear(GL_COLOR_BUFFER_BIT);
+//			flvr::TextureRenderer::reset_clear_chan_buffer();
+//		}
+//
+//		if (vd->GetRenderer())
+//			vd->GetRenderer()->set_depth_peel(peel);
+//		if (mask)
+//			vd->setValue(gstStreamMode, long(4));
+//		else
+//			vd->setValue(gstStreamMode, long(0));
+//		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+//		vd->setValue(gstDepthAtten, m_use_fog);
+//		vd->setValue(gstDaInt, m_fog_intensity);
+//		vd->setValue(gstDaStart, m_fog_start);
+//		vd->setValue(gstDaEnd, m_fog_end);
+//		vd->setValue(gstViewport, fluo::Vector4i(vp));
+//		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
+//		vd->setValue(gstCurFramebuffer, (unsigned long)m_cur_framebuffer);
+//		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+//	}
+//
+//	bool shadow;
+//	vd->getValue(gstShadowEnable, shadow);
+//	if (shadow)
+//	{
+//		vector<fluo::VolumeData*> list;
+//		list.push_back(vd);
+//		DrawOLShadows(list);
+//	}
+//
+//	//bind fbo for final composition
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		"final");
+//	if (final_buffer)
+//		final_buffer->bind();
+//
+//	if (flvr::TextureRenderer::get_mem_swap())
+//	{
+//		//restore temp buffer to final buffer
+//		glClearColor(0.0, 0.0, 0.0, 0.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		glActiveTexture(GL_TEXTURE0);
+//		flvr::Framebuffer* temp_buffer =
+//			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			"temporary");
+//		if (temp_buffer)
+//		{
+//			//temp buffer becomes unused after texture is bound
+//			//ok to unprotect
+//			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			temp_buffer->unprotect();
+//		}
+//		glDisable(GL_BLEND);
+//		glDisable(GL_DEPTH_TEST);
+//
+//		img_shader =
+//			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//		if (img_shader)
+//		{
+//			if (!img_shader->valid())
+//				img_shader->create();
+//			img_shader->bind();
+//		}
+//		DrawViewQuad();
+//		if (img_shader && img_shader->valid())
+//			img_shader->release();
+//
+//		glBindTexture(GL_TEXTURE_2D, 0);
+//	}
+//
+//	glActiveTexture(GL_TEXTURE0);
+//	if (chann_buffer)
+//		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	//build mipmap
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//	glEnable(GL_BLEND);
+//	if (m_vol_method == VOL_METHOD_COMP)
+//		glBlendFunc(GL_ONE, GL_ONE);
+//	else
+//		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	//2d adjustment
+//	img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	double r, g, b;
+//	vd->getValue(gstGammaR, r);
+//	vd->getValue(gstGammaG, g);
+//	vd->getValue(gstGammaB, b);
+//	fluo::Color gamma(r, g, b);
+//	vd->getValue(gstBrightnessR, r);
+//	vd->getValue(gstBrightnessG, g);
+//	vd->getValue(gstBrightnessB, b);
+//	fluo::Color brightness(r, g, b);
+//	vd->getValue(gstEqualizeR, r);
+//	vd->getValue(gstEqualizeG, g);
+//	vd->getValue(gstEqualizeB, b);
+//	fluo::Color hdr(r, g, b);
+//	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+//	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+//	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+//	//2d adjustment
+//
+//	DrawViewQuad();
+//
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//
+//	//if vd is duplicated
+//	if (flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_done_current_chan())
+//	{
+//		vector<flvr::TextureBrick*> *bricks =
+//			vd->GetTexture()->get_bricks();
+//		for (int i = 0; i < bricks->size(); i++)
+//			(*bricks)[i]->set_drawn(false);
+//	}
+//}
 
-	//count volumes with mask
-	int cnt_mask = 0;
-	for (i = 0; i<(int)list.size(); i++)
-	{
-		fluo::VolumeData* vd = list[i];
-		if (!vd)
-			continue;
-		bool disp;
-		vd->getValue(gstDisplay, disp);
-		if (!disp)
-			continue;
-		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
-			cnt_mask++;
-	}
+//void RenderCanvas::DrawMIP(fluo::VolumeData* vd, int peel)
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+//	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+//
+//	bool do_mip = true;
+//	if (flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_start_update_loop() &&
+//		!flvr::TextureRenderer::get_done_update_loop())
+//	{
+//		unsigned int rn_time = glbin_timer->get_ticks();
+//		if (rn_time - flvr::TextureRenderer::get_st_time() >
+//			flvr::TextureRenderer::get_up_time())
+//			return;
+//		if (vd->GetRenderer()->get_done_loop(1))
+//			do_mip = false;
+//	}
+//
+//	bool shading;
+//	vd->getValue(gstShadingEnable, shading);
+//	bool shadow;
+//	vd->getValue(gstShadowEnable, shadow);
+//	long color_mode;
+//	vd->getValue(gstColormapMode, color_mode);
+//	bool enable_alpha;
+//	vd->getValue(gstAlphaEnable, enable_alpha);
+//	long saved_mip_mode;
+//	vd->getValue(gstMipMode, saved_mip_mode);
+//
+//	flvr::ShaderProgram* img_shader = 0;
+//	flvr::Framebuffer* chann_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+//	flvr::Framebuffer* overlay_buffer = 0;
+//	if (do_mip)
+//	{
+//		//before rendering this channel, save final buffer to temp buffer
+//		if (flvr::TextureRenderer::get_mem_swap() &&
+//			flvr::TextureRenderer::get_start_update_loop() &&
+//			flvr::TextureRenderer::get_save_final_buffer())
+//		{
+//			flvr::TextureRenderer::reset_save_final_buffer();
+//
+//			//bind temporary framebuffer for comp in stream mode
+//			flvr::Framebuffer* temp_buffer =
+//				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//				flvr::FB_Render_RGBA, nx, ny, "temporary");
+//			if (temp_buffer)
+//			{
+//				temp_buffer->bind();
+//				temp_buffer->protect();
+//			}
+//			glClearColor(0.0, 0.0, 0.0, 0.0);
+//			glClear(GL_COLOR_BUFFER_BIT);
+//			glActiveTexture(GL_TEXTURE0);
+//			flvr::Framebuffer* final_buffer =
+//				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+//			if (final_buffer)
+//				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			glDisable(GL_BLEND);
+//			glDisable(GL_DEPTH_TEST);
+//
+//			img_shader =
+//				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//			if (img_shader)
+//			{
+//				if (!img_shader->valid())
+//					img_shader->create();
+//				img_shader->bind();
+//			}
+//			DrawViewQuad();
+//			if (img_shader && img_shader->valid())
+//				img_shader->release();
+//
+//			glBindTexture(GL_TEXTURE_2D, 0);
+//		}
+//
+//		//bind the fbo
+//		overlay_buffer =
+//			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//				flvr::FB_Render_RGBA, nx, ny);
+//		if (overlay_buffer)
+//		{
+//			overlay_buffer->bind();
+//			overlay_buffer->protect();
+//			m_cur_framebuffer = overlay_buffer->id();
+//		}
+//
+//		if (!flvr::TextureRenderer::get_mem_swap() ||
+//			(flvr::TextureRenderer::get_mem_swap() &&
+//			flvr::TextureRenderer::get_clear_chan_buffer()))
+//		{
+//			glClearColor(0.0, 0.0, 0.0, 0.0);
+//			glClear(GL_COLOR_BUFFER_BIT);
+//			flvr::TextureRenderer::reset_clear_chan_buffer();
+//		}
+//
+//		if (vd->GetRenderer())
+//			vd->GetRenderer()->set_depth_peel(peel);
+//		vd->GetRenderer()->set_shading(false);
+//		//turn off colormap proj
+//		long saved_colormap_proj;
+//		vd->getValue(gstColormapProj, saved_colormap_proj);
+//		if (color_mode == 0)
+//			vd->setValue(gstColormapProj, long(0));
+//		if (color_mode == 1)
+//		{
+//			vd->setValue(gstMipMode, long(3));
+//			vd->setValue(gstDepthAtten, false);
+//		}
+//		else
+//		{
+//			vd->setValue(gstMipMode, long(1));
+//			vd->setValue(gstDepthAtten, m_use_fog);
+//			vd->setValue(gstDaInt, m_fog_intensity);
+//			vd->setValue(gstDaStart, m_fog_start);
+//			vd->setValue(gstDaEnd, m_fog_end);
+//		}
+//		//turn off alpha
+//		if (color_mode == 1)
+//			vd->setValue(gstAlphaEnable, false);
+//		//draw
+//		vd->setValue(gstStreamMode, long(1));
+//		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+//		vd->setValue(gstViewport, fluo::Vector4i(vp));
+//		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
+//		vd->setValue(gstCurFramebuffer, unsigned long(m_cur_framebuffer));
+//		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+//		//restore
+//		if (color_mode == 0)
+//			vd->setValue(gstColormapProj, saved_colormap_proj);
+//		if (color_mode == 1)
+//		{
+//			vd->setValue(gstMipMode, saved_mip_mode);
+//			//restore alpha
+//			vd->setValue(gstAlphaEnable, enable_alpha);
+//		}
+//
+//		//bind channel fbo for final composition
+//		if (chann_buffer)
+//			chann_buffer->bind();
+//		glClearColor(0.0, 0.0, 0.0, 0.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		glActiveTexture(GL_TEXTURE0);
+//		if (overlay_buffer)
+//		{
+//			//ok to unprotect
+//			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			overlay_buffer->unprotect();
+//		}
+//		glEnable(GL_BLEND);
+//		glBlendEquation(GL_FUNC_ADD);
+//		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//
+//		if (color_mode == 1)
+//		{
+//			long cproj;
+//			vd->getValue(gstColormapProj, cproj);
+//			long ctype;
+//			vd->getValue(gstColormapType, ctype);
+//			//2d adjustment
+//			if (cproj)
+//				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
+//					IMG_SHDR_GRADIENT_PROJ_MAP, ctype);
+//			else
+//				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
+//					IMG_SHDR_GRADIENT_MAP, ctype);
+//			if (img_shader)
+//			{
+//				if (!img_shader->valid())
+//				{
+//					img_shader->create();
+//				}
+//				img_shader->bind();
+//			}
+//			double lo, hi;
+//			vd->getValue(gstColormapLow, lo);
+//			vd->getValue(gstColormapHigh, hi);
+//			img_shader->setLocalParam(
+//				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
+//			fluo::Color c;
+//			vd->getValue(gstColor, c);
+//			double cinv;
+//			vd->getValue(gstColormapInv, cinv);
+//			img_shader->setLocalParam(
+//				6, c.r(), c.g(), c.b(), cinv);
+//			img_shader->setLocalParam(
+//				9, c.r(), c.g(), c.b(), 0.0);
+//			//2d adjustment
+//		}
+//		else
+//		{
+//			img_shader =
+//				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//		}
+//
+//		if (img_shader)
+//		{
+//			if (!img_shader->valid())
+//				img_shader->create();
+//			img_shader->bind();
+//		}
+//		DrawViewQuad();
+//		if (img_shader && img_shader->valid())
+//			img_shader->release();
+//
+//		if (color_mode == 1 &&
+//			img_shader &&
+//			img_shader->valid())
+//		{
+//			img_shader->release();
+//		}
+//	}
+//
+//	if (shading)
+//	{
+//		DrawOLShading(vd);
+//	}
+//
+//	if (shadow)
+//	{
+//		vector<fluo::VolumeData*> list;
+//		list.push_back(vd);
+//		DrawOLShadows(list);
+//	}
+//
+//	//bind fbo for final composition
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		"final");
+//	if (final_buffer)
+//		final_buffer->bind();
+//
+//	if (flvr::TextureRenderer::get_mem_swap())
+//	{
+//		//restore temp buffer to final buffer
+//		glClearColor(0.0, 0.0, 0.0, 0.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		glActiveTexture(GL_TEXTURE0);
+//		flvr::Framebuffer* temp_buffer =
+//			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//				"temporary");
+//		if (temp_buffer)
+//		{
+//			//bind tex from temp buffer
+//			//it becomes unprotected afterwards
+//			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			temp_buffer->unprotect();
+//		}
+//		glDisable(GL_BLEND);
+//		glDisable(GL_DEPTH_TEST);
+//
+//		img_shader =
+//			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//		if (img_shader)
+//		{
+//			if (!img_shader->valid())
+//				img_shader->create();
+//			img_shader->bind();
+//		}
+//		DrawViewQuad();
+//		if (img_shader && img_shader->valid())
+//			img_shader->release();
+//
+//		glBindTexture(GL_TEXTURE_2D, 0);
+//	}
+//
+//	glActiveTexture(GL_TEXTURE0);
+//	if (chann_buffer)
+//		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	//build mipmap
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//	glEnable(GL_BLEND);
+//	if (m_vol_method == VOL_METHOD_COMP)
+//		glBlendFunc(GL_ONE, GL_ONE);
+//	else
+//		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	//2d adjustment
+//	img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	double r, g, b;
+//	vd->getValue(gstGammaR, r);
+//	vd->getValue(gstGammaG, g);
+//	vd->getValue(gstGammaB, b);
+//	fluo::Color gamma(r, g, b);
+//	vd->getValue(gstBrightnessR, r);
+//	vd->getValue(gstBrightnessG, g);
+//	vd->getValue(gstBrightnessB, b);
+//	fluo::Color brightness(r, g, b);
+//	vd->getValue(gstEqualizeR, r);
+//	vd->getValue(gstEqualizeG, g);
+//	vd->getValue(gstEqualizeB, b);
+//	fluo::Color hdr(r, g, b);
+//	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+//	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+//	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+//	//2d adjustment
+//
+//	DrawViewQuad();
+//
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//
+//	vd->setValue(gstShadingEnable, shading);
+//	vd->setValue(gstColormapMode, color_mode);
+//
+//	//if vd is duplicated
+//	if (flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_done_current_chan())
+//	{
+//		vector<flvr::TextureBrick*> *bricks =
+//			vd->GetTexture()->get_bricks();
+//		for (int i = 0; i < bricks->size(); i++)
+//			(*bricks)[i]->set_drawn(false);
+//	}
+//}
 
-	if (mask && cnt_mask == 0)
-		return;
-
-	int nx, ny;
-	GetRenderSize(nx, ny);
-
-	//generate textures & buffer objects
-	//frame buffer for each volume
-	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		flvr::FB_Render_RGBA, nx, ny, "channel");
-	if (chann_buffer)
-		chann_buffer->protect();
-
-	//draw each volume to fbo
-	for (i = 0; i<(int)list.size(); i++)
-	{
-		fluo::VolumeData* vd = list[i];
-		if (!vd)
-			continue;
-		bool disp;
-		vd->getValue(gstDisplay, disp);
-		if (!disp)
-			continue;
-		if (mask)
-		{
-			//drawlabel
-			long label_mode;
-			vd->getValue(gstLabelMode, label_mode);
-			if (label_mode &&
-				vd->GetMask(false) &&
-				vd->GetLabel(false))
-				continue;
-
-			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
-			{
-				vd->setValue(gstMaskMode, long(1));
-				int vol_method = m_vol_method;
-				m_vol_method = VOL_METHOD_COMP;
-				long mip_mode;
-				vd->getValue(gstMipMode, mip_mode);
-				if (mip_mode == 1)
-					DrawMIP(vd, peel);
-				else
-					DrawOVER(vd, mask, peel);
-				vd->setValue(gstMaskMode, long(0));
-				m_vol_method = vol_method;
-			}
-		}
-		else
-		{
-			long blend_mode;
-			vd->getValue(gstBlendMode, blend_mode);
-			if (blend_mode != 2)
-			{
-				//drawlabel
-				long label_mode;
-				vd->getValue(gstLabelMode, label_mode);
-				if (label_mode &&
-					vd->GetMask(false) &&
-					vd->GetLabel(false))
-					vd->setValue(gstMaskMode, long(4));
-
-				long mip_mode;
-				vd->getValue(gstMipMode, mip_mode);
-				if (mip_mode == 1)
-					DrawMIP(vd, peel);
-				else
-					DrawOVER(vd, mask, peel);
-			}
-		}
-	}
-}
-
-void RenderCanvas::DrawOVER(fluo::VolumeData* vd, bool mask, int peel)
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-
-	flvr::ShaderProgram* img_shader = 0;
-
-	bool do_over = true;
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		unsigned int rn_time = glbin_timer->get_ticks();
-		if (rn_time - flvr::TextureRenderer::get_st_time() >
-			flvr::TextureRenderer::get_up_time())
-			return;
-		if (mask)
-		{
-			if (vd->GetRenderer()->get_done_loop(4))
-				do_over = false;
-		}
-		else
-		{
-			if (vd->GetRenderer()->get_done_loop(0))
-				do_over = false;
-		}
-	}
-
-	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
-	if (do_over)
-	{
-		//before rendering this channel, save final buffer to temp buffer
-		if (flvr::TextureRenderer::get_mem_swap() &&
-			flvr::TextureRenderer::get_start_update_loop() &&
-			flvr::TextureRenderer::get_save_final_buffer())
-		{
-			flvr::TextureRenderer::reset_save_final_buffer();
-
-			//bind temporary framebuffer for comp in stream mode
-			flvr::Framebuffer* temp_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-					flvr::FB_Render_RGBA, nx, ny, "temporary");
-			if (temp_buffer)
-			{
-				temp_buffer->bind();
-				temp_buffer->protect();
-			}
-			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glActiveTexture(GL_TEXTURE0);
-			flvr::Framebuffer* final_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
-			if (final_buffer)
-				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			glDisable(GL_BLEND);
-			glDisable(GL_DEPTH_TEST);
-
-			img_shader =
-				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
-				img_shader->bind();
-			}
-			DrawViewQuad();
-			if (img_shader && img_shader->valid())
-				img_shader->release();
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-		//bind the fbo
-		if (chann_buffer)
-		{
-			chann_buffer->bind();
-			m_cur_framebuffer = chann_buffer->id();
-		}
-
-		if (!flvr::TextureRenderer::get_mem_swap() ||
-			(flvr::TextureRenderer::get_mem_swap() &&
-			flvr::TextureRenderer::get_clear_chan_buffer()))
-		{
-			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-			flvr::TextureRenderer::reset_clear_chan_buffer();
-		}
-
-		if (vd->GetRenderer())
-			vd->GetRenderer()->set_depth_peel(peel);
-		if (mask)
-			vd->setValue(gstStreamMode, long(4));
-		else
-			vd->setValue(gstStreamMode, long(0));
-		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue(gstDepthAtten, m_use_fog);
-		vd->setValue(gstDaInt, m_fog_intensity);
-		vd->setValue(gstDaStart, m_fog_start);
-		vd->setValue(gstDaEnd, m_fog_end);
-		vd->setValue(gstViewport, fluo::Vector4i(vp));
-		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
-		vd->setValue(gstCurFramebuffer, (unsigned long)m_cur_framebuffer);
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
-	}
-
-	bool shadow;
-	vd->getValue(gstShadowEnable, shadow);
-	if (shadow)
-	{
-		vector<fluo::VolumeData*> list;
-		list.push_back(vd);
-		DrawOLShadows(list);
-	}
-
-	//bind fbo for final composition
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		"final");
-	if (final_buffer)
-		final_buffer->bind();
-
-	if (flvr::TextureRenderer::get_mem_swap())
-	{
-		//restore temp buffer to final buffer
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-		flvr::Framebuffer* temp_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			"temporary");
-		if (temp_buffer)
-		{
-			//temp buffer becomes unused after texture is bound
-			//ok to unprotect
-			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			temp_buffer->unprotect();
-		}
-		glDisable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
-
-		img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
-			img_shader->bind();
-		}
-		DrawViewQuad();
-		if (img_shader && img_shader->valid())
-			img_shader->release();
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	glActiveTexture(GL_TEXTURE0);
-	if (chann_buffer)
-		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	//build mipmap
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glEnable(GL_BLEND);
-	if (m_vol_method == VOL_METHOD_COMP)
-		glBlendFunc(GL_ONE, GL_ONE);
-	else
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST);
-
-	//2d adjustment
-	img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	double r, g, b;
-	vd->getValue(gstGammaR, r);
-	vd->getValue(gstGammaG, g);
-	vd->getValue(gstGammaB, b);
-	fluo::Color gamma(r, g, b);
-	vd->getValue(gstBrightnessR, r);
-	vd->getValue(gstBrightnessG, g);
-	vd->getValue(gstBrightnessB, b);
-	fluo::Color brightness(r, g, b);
-	vd->getValue(gstEqualizeR, r);
-	vd->getValue(gstEqualizeG, g);
-	vd->getValue(gstEqualizeB, b);
-	fluo::Color hdr(r, g, b);
-	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
-	//2d adjustment
-
-	DrawViewQuad();
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-
-	//if vd is duplicated
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_done_current_chan())
-	{
-		vector<flvr::TextureBrick*> *bricks =
-			vd->GetTexture()->get_bricks();
-		for (int i = 0; i < bricks->size(); i++)
-			(*bricks)[i]->set_drawn(false);
-	}
-}
-
-void RenderCanvas::DrawMIP(fluo::VolumeData* vd, int peel)
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-
-	bool do_mip = true;
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		unsigned int rn_time = glbin_timer->get_ticks();
-		if (rn_time - flvr::TextureRenderer::get_st_time() >
-			flvr::TextureRenderer::get_up_time())
-			return;
-		if (vd->GetRenderer()->get_done_loop(1))
-			do_mip = false;
-	}
-
-	bool shading;
-	vd->getValue(gstShadingEnable, shading);
-	bool shadow;
-	vd->getValue(gstShadowEnable, shadow);
-	long color_mode;
-	vd->getValue(gstColormapMode, color_mode);
-	bool enable_alpha;
-	vd->getValue(gstAlphaEnable, enable_alpha);
-	long saved_mip_mode;
-	vd->getValue(gstMipMode, saved_mip_mode);
-
-	flvr::ShaderProgram* img_shader = 0;
-	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
-	flvr::Framebuffer* overlay_buffer = 0;
-	if (do_mip)
-	{
-		//before rendering this channel, save final buffer to temp buffer
-		if (flvr::TextureRenderer::get_mem_swap() &&
-			flvr::TextureRenderer::get_start_update_loop() &&
-			flvr::TextureRenderer::get_save_final_buffer())
-		{
-			flvr::TextureRenderer::reset_save_final_buffer();
-
-			//bind temporary framebuffer for comp in stream mode
-			flvr::Framebuffer* temp_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-				flvr::FB_Render_RGBA, nx, ny, "temporary");
-			if (temp_buffer)
-			{
-				temp_buffer->bind();
-				temp_buffer->protect();
-			}
-			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glActiveTexture(GL_TEXTURE0);
-			flvr::Framebuffer* final_buffer =
-				flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
-			if (final_buffer)
-				final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			glDisable(GL_BLEND);
-			glDisable(GL_DEPTH_TEST);
-
-			img_shader =
-				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
-				img_shader->bind();
-			}
-			DrawViewQuad();
-			if (img_shader && img_shader->valid())
-				img_shader->release();
-
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		//bind the fbo
-		overlay_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-				flvr::FB_Render_RGBA, nx, ny);
-		if (overlay_buffer)
-		{
-			overlay_buffer->bind();
-			overlay_buffer->protect();
-			m_cur_framebuffer = overlay_buffer->id();
-		}
-
-		if (!flvr::TextureRenderer::get_mem_swap() ||
-			(flvr::TextureRenderer::get_mem_swap() &&
-			flvr::TextureRenderer::get_clear_chan_buffer()))
-		{
-			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-			flvr::TextureRenderer::reset_clear_chan_buffer();
-		}
-
-		if (vd->GetRenderer())
-			vd->GetRenderer()->set_depth_peel(peel);
-		vd->GetRenderer()->set_shading(false);
-		//turn off colormap proj
-		long saved_colormap_proj;
-		vd->getValue(gstColormapProj, saved_colormap_proj);
-		if (color_mode == 0)
-			vd->setValue(gstColormapProj, long(0));
-		if (color_mode == 1)
-		{
-			vd->setValue(gstMipMode, long(3));
-			vd->setValue(gstDepthAtten, false);
-		}
-		else
-		{
-			vd->setValue(gstMipMode, long(1));
-			vd->setValue(gstDepthAtten, m_use_fog);
-			vd->setValue(gstDaInt, m_fog_intensity);
-			vd->setValue(gstDaStart, m_fog_start);
-			vd->setValue(gstDaEnd, m_fog_end);
-		}
-		//turn off alpha
-		if (color_mode == 1)
-			vd->setValue(gstAlphaEnable, false);
-		//draw
-		vd->setValue(gstStreamMode, long(1));
-		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue(gstViewport, fluo::Vector4i(vp));
-		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
-		vd->setValue(gstCurFramebuffer, unsigned long(m_cur_framebuffer));
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
-		//restore
-		if (color_mode == 0)
-			vd->setValue(gstColormapProj, saved_colormap_proj);
-		if (color_mode == 1)
-		{
-			vd->setValue(gstMipMode, saved_mip_mode);
-			//restore alpha
-			vd->setValue(gstAlphaEnable, enable_alpha);
-		}
-
-		//bind channel fbo for final composition
-		if (chann_buffer)
-			chann_buffer->bind();
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-		if (overlay_buffer)
-		{
-			//ok to unprotect
-			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			overlay_buffer->unprotect();
-		}
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-		if (color_mode == 1)
-		{
-			long cproj;
-			vd->getValue(gstColormapProj, cproj);
-			long ctype;
-			vd->getValue(gstColormapType, ctype);
-			//2d adjustment
-			if (cproj)
-				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
-					IMG_SHDR_GRADIENT_PROJ_MAP, ctype);
-			else
-				img_shader = flvr::TextureRenderer::img_shader_factory_.shader(
-					IMG_SHDR_GRADIENT_MAP, ctype);
-			if (img_shader)
-			{
-				if (!img_shader->valid())
-				{
-					img_shader->create();
-				}
-				img_shader->bind();
-			}
-			double lo, hi;
-			vd->getValue(gstColormapLow, lo);
-			vd->getValue(gstColormapHigh, hi);
-			img_shader->setLocalParam(
-				0, lo, hi, hi - lo, enable_alpha ? 0.0 : 1.0);
-			fluo::Color c;
-			vd->getValue(gstColor, c);
-			double cinv;
-			vd->getValue(gstColormapInv, cinv);
-			img_shader->setLocalParam(
-				6, c.r(), c.g(), c.b(), cinv);
-			img_shader->setLocalParam(
-				9, c.r(), c.g(), c.b(), 0.0);
-			//2d adjustment
-		}
-		else
-		{
-			img_shader =
-				flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-		}
-
-		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
-			img_shader->bind();
-		}
-		DrawViewQuad();
-		if (img_shader && img_shader->valid())
-			img_shader->release();
-
-		if (color_mode == 1 &&
-			img_shader &&
-			img_shader->valid())
-		{
-			img_shader->release();
-		}
-	}
-
-	if (shading)
-	{
-		DrawOLShading(vd);
-	}
-
-	if (shadow)
-	{
-		vector<fluo::VolumeData*> list;
-		list.push_back(vd);
-		DrawOLShadows(list);
-	}
-
-	//bind fbo for final composition
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		"final");
-	if (final_buffer)
-		final_buffer->bind();
-
-	if (flvr::TextureRenderer::get_mem_swap())
-	{
-		//restore temp buffer to final buffer
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-		flvr::Framebuffer* temp_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-				"temporary");
-		if (temp_buffer)
-		{
-			//bind tex from temp buffer
-			//it becomes unprotected afterwards
-			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			temp_buffer->unprotect();
-		}
-		glDisable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
-
-		img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
-			img_shader->bind();
-		}
-		DrawViewQuad();
-		if (img_shader && img_shader->valid())
-			img_shader->release();
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	glActiveTexture(GL_TEXTURE0);
-	if (chann_buffer)
-		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	//build mipmap
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glEnable(GL_BLEND);
-	if (m_vol_method == VOL_METHOD_COMP)
-		glBlendFunc(GL_ONE, GL_ONE);
-	else
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST);
-
-	//2d adjustment
-	img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	double r, g, b;
-	vd->getValue(gstGammaR, r);
-	vd->getValue(gstGammaG, g);
-	vd->getValue(gstGammaB, b);
-	fluo::Color gamma(r, g, b);
-	vd->getValue(gstBrightnessR, r);
-	vd->getValue(gstBrightnessG, g);
-	vd->getValue(gstBrightnessB, b);
-	fluo::Color brightness(r, g, b);
-	vd->getValue(gstEqualizeR, r);
-	vd->getValue(gstEqualizeG, g);
-	vd->getValue(gstEqualizeB, b);
-	fluo::Color hdr(r, g, b);
-	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
-	//2d adjustment
-
-	DrawViewQuad();
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-
-	vd->setValue(gstShadingEnable, shading);
-	vd->setValue(gstColormapMode, color_mode);
-
-	//if vd is duplicated
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_done_current_chan())
-	{
-		vector<flvr::TextureBrick*> *bricks =
-			vd->GetTexture()->get_bricks();
-		for (int i = 0; i < bricks->size(); i++)
-			(*bricks)[i]->set_drawn(false);
-	}
-}
-
-void RenderCanvas::DrawOLShading(fluo::VolumeData* vd)
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
-
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		unsigned int rn_time = glbin_timer->get_ticks();
-		if (rn_time - flvr::TextureRenderer::get_st_time() >
-			flvr::TextureRenderer::get_up_time())
-			return;
-		if (vd->GetRenderer()->get_done_loop(2))
-			return;
-	}
-
-	//shading pass
-	flvr::Framebuffer* overlay_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		flvr::FB_Render_RGBA, nx, ny);
-	if (overlay_buffer)
-	{
-		overlay_buffer->bind();
-		overlay_buffer->protect();
-	}
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	vd->setValue(gstShadingEnable, true);
-	bool alpha;
-	vd->getValue(gstAlphaEnable, alpha);
-	vd->setValue(gstAlphaEnable, true);
-	long mip_mode;
-	vd->getValue(gstMipMode, mip_mode);
-	vd->setValue(gstMipMode, long(2));
-	long colormode;
-	vd->getValue(gstColormapMode, colormode);
-	vd->setValue(gstStreamMode, long(2));
-	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	vd->setValue(gstDepthAtten, m_use_fog);
-	vd->setValue(gstDaInt, m_fog_intensity);
-	vd->setValue(gstDaStart, m_fog_start);
-	vd->setValue(gstDaEnd, m_fog_end);
-	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
-	vd->setValue(gstMipMode, mip_mode);
-	vd->setValue(gstColormapMode, colormode);
-	vd->setValue(gstAlphaEnable, alpha);
-
-	//bind fbo for final composition
-	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
-	if (chann_buffer)
-		chann_buffer->bind();
-	glActiveTexture(GL_TEXTURE0);
-	if (overlay_buffer)
-	{
-		//ok to unprotect
-		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-		overlay_buffer->unprotect();
-	}
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-	//glBlendEquation(GL_MIN);
-	glDisable(GL_DEPTH_TEST);
-
-	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	DrawViewQuad();
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-}
-
+//void RenderCanvas::DrawOLShading(fluo::VolumeData* vd)
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	if (flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_start_update_loop() &&
+//		!flvr::TextureRenderer::get_done_update_loop())
+//	{
+//		unsigned int rn_time = glbin_timer->get_ticks();
+//		if (rn_time - flvr::TextureRenderer::get_st_time() >
+//			flvr::TextureRenderer::get_up_time())
+//			return;
+//		if (vd->GetRenderer()->get_done_loop(2))
+//			return;
+//	}
+//
+//	//shading pass
+//	flvr::Framebuffer* overlay_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		flvr::FB_Render_RGBA, nx, ny);
+//	if (overlay_buffer)
+//	{
+//		overlay_buffer->bind();
+//		overlay_buffer->protect();
+//	}
+//	glClearColor(1.0, 1.0, 1.0, 1.0);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//
+//	vd->setValue(gstShadingEnable, true);
+//	bool alpha;
+//	vd->getValue(gstAlphaEnable, alpha);
+//	vd->setValue(gstAlphaEnable, true);
+//	long mip_mode;
+//	vd->getValue(gstMipMode, mip_mode);
+//	vd->setValue(gstMipMode, long(2));
+//	long colormode;
+//	vd->getValue(gstColormapMode, colormode);
+//	vd->setValue(gstStreamMode, long(2));
+//	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+//	vd->setValue(gstDepthAtten, m_use_fog);
+//	vd->setValue(gstDaInt, m_fog_intensity);
+//	vd->setValue(gstDaStart, m_fog_start);
+//	vd->setValue(gstDaEnd, m_fog_end);
+//	vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+//	vd->setValue(gstMipMode, mip_mode);
+//	vd->setValue(gstColormapMode, colormode);
+//	vd->setValue(gstAlphaEnable, alpha);
+//
+//	//bind fbo for final composition
+//	flvr::Framebuffer* chann_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+//	if (chann_buffer)
+//		chann_buffer->bind();
+//	glActiveTexture(GL_TEXTURE0);
+//	if (overlay_buffer)
+//	{
+//		//ok to unprotect
+//		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//		overlay_buffer->unprotect();
+//	}
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+//	//glBlendEquation(GL_MIN);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	flvr::ShaderProgram* img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHADER_TEXTURE_LOOKUP);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	DrawViewQuad();
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//
+//	glBlendEquation(GL_FUNC_ADD);
+//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//}
+//
 //get mesh shadow
-bool RenderCanvas::GetMeshShadow(double &val)
-{
-	for (int i = 0; i<GetLayerNum(); i++)
-	{
-		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
-		{
-			bool disp;
-			md->getValue(gstDisplay, disp);
-			if (disp)
-			{
-				md->getValue(gstShadowInt, val);
-				bool shadow;
-				md->getValue(gstShadowEnable, shadow);
-				return shadow;
-			}
-		}
-		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
-		{
-			bool disp;
-			group->getValue(gstDisplay, disp);
-			if (disp)
-			{
-				for (int j = 0; j<(int)group->getNumChildren(); j++)
-				{
-					fluo::MeshData* md = group->getChild(j)->asMeshData();
-					if (!md)
-						continue;
-					md->getValue(gstDisplay, disp);
-					if (disp)
-					{
-						md->getValue(gstShadowInt, val);
-						bool shadow;
-						md->getValue(gstShadowEnable, shadow);
-						return shadow;
-					}
-				}
-			}
-		}
-	}
-	val = 0.0;
-	return false;
-}
+//bool RenderCanvas::GetMeshShadow(double &val)
+//{
+//	for (int i = 0; i<GetLayerNum(); i++)
+//	{
+//		if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			md->getValue(gstDisplay, disp);
+//			if (disp)
+//			{
+//				md->getValue(gstShadowInt, val);
+//				bool shadow;
+//				md->getValue(gstShadowEnable, shadow);
+//				return shadow;
+//			}
+//		}
+//		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(GetLayer(i)))
+//		{
+//			bool disp;
+//			group->getValue(gstDisplay, disp);
+//			if (disp)
+//			{
+//				for (int j = 0; j<(int)group->getNumChildren(); j++)
+//				{
+//					fluo::MeshData* md = group->getChild(j)->asMeshData();
+//					if (!md)
+//						continue;
+//					md->getValue(gstDisplay, disp);
+//					if (disp)
+//					{
+//						md->getValue(gstShadowInt, val);
+//						bool shadow;
+//						md->getValue(gstShadowEnable, shadow);
+//						return shadow;
+//					}
+//				}
+//			}
+//		}
+//	}
+//	val = 0.0;
+//	return false;
+//}
 
-void RenderCanvas::DrawOLShadowsMesh(double darkness)
-{
-	int nx, ny;
-	GetRenderSize(nx, ny);
+//void RenderCanvas::DrawOLShadowsMesh(double darkness)
+//{
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//
+//	//shadow pass
+//	//bind the fbo
+//	flvr::Framebuffer* overlay_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		flvr::FB_Render_RGBA, nx, ny);
+//	if (overlay_buffer)
+//	{
+//		overlay_buffer->bind();
+//		overlay_buffer->protect();
+//	}
+//	glClearColor(1.0, 1.0, 1.0, 1.0);
+//	glClear(GL_COLOR_BUFFER_BIT);
+//	glActiveTexture(GL_TEXTURE0);
+//	string name = "peel buffer" + std::to_string(0);
+//	flvr::Framebuffer* peel_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
+//	if (peel_buffer)
+//		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//	glDisable(GL_BLEND);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	//2d adjustment
+//	flvr::ShaderProgram* img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//		{
+//			img_shader->create();
+//		}
+//		img_shader->bind();
+//	}
+//	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
+//	double dir_x = 0.0, dir_y = 0.0;
+//	if (m_frame && m_frame->GetSettingDlg())
+//		m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
+//	img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
+//	//2d adjustment
+//
+//	DrawViewQuad();
+//
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//
+//	//
+//	//bind fbo for final composition
+//	BindRenderBuffer();
+//	glActiveTexture(GL_TEXTURE0);
+//	if (overlay_buffer)
+//	{
+//		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//		overlay_buffer->unprotect();
+//	}
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	//2d adjustment
+//	img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//			img_shader->create();
+//		img_shader->bind();
+//	}
+//	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
+//	img_shader->setLocalParam(1, darkness, 0.0, 0.0, 0.0);
+//	glActiveTexture(GL_TEXTURE1);
+//	if (peel_buffer)
+//		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
+//	glActiveTexture(GL_TEXTURE2);
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
+//	if (final_buffer)
+//		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	//2d adjustment
+//
+//	DrawViewQuad();
+//
+//	if (img_shader && img_shader->valid())
+//	{
+//		img_shader->release();
+//	}
+//	glActiveTexture(GL_TEXTURE1);
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//
+//	glBlendEquation(GL_FUNC_ADD);
+//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//	glEnable(GL_DEPTH_TEST);
+//}
 
-	//shadow pass
-	//bind the fbo
-	flvr::Framebuffer* overlay_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		flvr::FB_Render_RGBA, nx, ny);
-	if (overlay_buffer)
-	{
-		overlay_buffer->bind();
-		overlay_buffer->protect();
-	}
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glActiveTexture(GL_TEXTURE0);
-	string name = "peel buffer" + std::to_string(0);
-	flvr::Framebuffer* peel_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(name);
-	if (peel_buffer)
-		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-
-	//2d adjustment
-	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-		{
-			img_shader->create();
-		}
-		img_shader->bind();
-	}
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
-	double dir_x = 0.0, dir_y = 0.0;
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
-	img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
-	//2d adjustment
-
-	DrawViewQuad();
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-
-	//
-	//bind fbo for final composition
-	BindRenderBuffer();
-	glActiveTexture(GL_TEXTURE0);
-	if (overlay_buffer)
-	{
-		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-		overlay_buffer->unprotect();
-	}
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-	glDisable(GL_DEPTH_TEST);
-
-	//2d adjustment
-	img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
-		img_shader->bind();
-	}
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
-	img_shader->setLocalParam(1, darkness, 0.0, 0.0, 0.0);
-	glActiveTexture(GL_TEXTURE1);
-	if (peel_buffer)
-		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-	glActiveTexture(GL_TEXTURE2);
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer("final");
-	if (final_buffer)
-		final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	//2d adjustment
-
-	DrawViewQuad();
-
-	if (img_shader && img_shader->valid())
-	{
-		img_shader->release();
-	}
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-}
-
-void RenderCanvas::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
-{
-	if (vlist.empty())
-		return;
-
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 1, 1, 1, 1 };
-
-	size_t i;
-	bool has_shadow = false;
-	vector<long> colormodes;
-	vector<bool> shadings;
-	vector<long> mip_modes;
-	vector<fluo::VolumeData*> list;
-	//generate list
-	for (i = 0; i<vlist.size(); i++)
-	{
-		fluo::VolumeData* vd = vlist[i];
-		if (!vd)
-			continue;
-		bool shadow;
-		vd->getValue(gstShadowEnable, shadow);
-		if (shadow)
-		{
-			long colormode;
-			vd->getValue(gstColormapMode, colormode);
-			colormodes.push_back(colormode);
-			bool shading;
-			vd->getValue(gstShadingEnable, shading);
-			shadings.push_back(shading);
-			long mip_mode;
-			vd->getValue(gstMipMode, mip_mode);
-			mip_modes.push_back(mip_mode);
-			list.push_back(vd);
-			has_shadow = true;
-		}
-	}
-
-	if (!has_shadow)
-		return;
-
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		unsigned int rn_time = glbin_timer->get_ticks();
-		if (rn_time - flvr::TextureRenderer::get_st_time() >
-			flvr::TextureRenderer::get_up_time())
-			return;
-		if (list.size() == 1)
-		{
-			bool shadow;
-			list[0]->getValue(gstShadowEnable, shadow);
-			if (shadow && list[0]->GetRenderer()->get_done_loop(3))
-				return;
-		}
-	}
-
-	flvr::Framebuffer* overlay_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			flvr::FB_Render_RGBA, nx, ny);
-	if (overlay_buffer)
-	{
-		overlay_buffer->bind();
-		overlay_buffer->protect();
-		m_cur_framebuffer = overlay_buffer->id();
-	}
-
-	if (!flvr::TextureRenderer::get_mem_swap() ||
-		(flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_clear_chan_buffer()))
-	{
-		glClearColor(1.0, 1.0, 1.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		flvr::TextureRenderer::reset_clear_chan_buffer();
-	}
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-
-	double shadow_darkness = 0.0;
-
-	if (list.empty())
-		;
-	else if (list.size() == 1)
-	{
-		fluo::VolumeData* vd = list[0];
-		//save
-		long colormode;
-		vd->getValue(gstColormapMode, colormode);
-		bool shading;
-		vd->getValue(gstShadingEnable, shading);
-		long mip_mode;
-		vd->getValue(gstMipMode, mip_mode);
-		//set to draw depth
-		vd->setValue(gstShadingEnable, false);
-		vd->setValue(gstMipMode, long(0));
-		vd->setValue(gstColormapMode, long(2));
-		if (overlay_buffer)
-			vd->setValue(gst2dDmapId,
-			(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
-		long msk_mode;
-		vd->getValue(gstMaskMode, msk_mode);
-		vd->setValue(gstMaskMode, long(0));
-		//draw
-		vd->setValue(gstStreamMode, long(3));
-		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue(gstDepthAtten, m_use_fog);
-		vd->setValue(gstDaInt, m_fog_intensity);
-		vd->setValue(gstDaStart, m_fog_start);
-		vd->setValue(gstDaEnd, m_fog_end);
-		vd->setValue(gstViewport, fluo::Vector4i(vp));
-		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
-		vd->setValue(gstCurFramebuffer, (unsigned long)(m_cur_framebuffer));
-		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
-		//restore
-		vd->setValue(gstMipMode, mip_mode);
-		vd->setValue(gstMaskMode, msk_mode);
-		vd->setValue(gstColormapMode, colormode);
-		vd->setValue(gstShadingEnable, shading);
-		vd->setValue(gstShadowInt, shadow_darkness);
-	}
-	else
-	{
-		m_mvr->clear_vr();
-		for (i = 0; i<list.size(); i++)
-		{
-			fluo::VolumeData* vd = list[i];
-			vd->setValue(gstShadingEnable, false);
-			vd->setValue(gstMipMode, long(0));
-			vd->setValue(gstColormapMode, long(2));
-			if (overlay_buffer)
-				vd->setValue(gst2dDmapId,
-				(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
-			flvr::VolumeRenderer* vr = list[i]->GetRenderer();
-			if (vr)
-			{
-				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				list[i]->setValue(gstDepthAtten, m_use_fog);
-				list[i]->setValue(gstDaInt, m_fog_intensity);
-				list[i]->setValue(gstDaStart, m_fog_start);
-				list[i]->setValue(gstDaEnd, m_fog_end);
-				m_mvr->add_vr(vr);
-				m_mvr->set_sampling_rate(vr->get_sampling_rate());
-				m_mvr->SetNoiseRed(vr->GetNoiseRed());
-			}
-		}
-		//draw
-		m_mvr->set_viewport(vp);
-		m_mvr->set_clear_color(clear_color);
-		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
-
-		for (i = 0; i<list.size(); i++)
-		{
-			fluo::VolumeData* vd = list[i];
-			vd->setValue(gstMipMode, long(mip_modes[i]));
-			vd->setValue(gstColormapMode, long(colormodes[i]));
-			vd->setValue(gstShadingEnable, bool(shadings[i]));
-		}
-		list[0]->getValue(gstShadowInt, shadow_darkness);
-	}
-
-	//
-	if (!flvr::TextureRenderer::get_mem_swap() ||
-		(flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_clear_chan_buffer()))
-	{
-		//shadow pass
-		//bind the fbo
-		flvr::Framebuffer* temp_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-				flvr::FB_Render_RGBA, nx, ny);
-		if (temp_buffer)
-		{
-			temp_buffer->bind();
-			temp_buffer->protect();
-		}
-		glClearColor(1.0, 1.0, 1.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-		if (overlay_buffer)
-		{
-			//ok to unprotect
-			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			overlay_buffer->unprotect();
-		}
-		glDisable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
-
-		//2d adjustment
-		flvr::ShaderProgram* img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
-		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
-			img_shader->bind();
-		}
-		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
-		double dir_x = 0.0, dir_y = 0.0;
-		if (m_frame && m_frame->GetSettingDlg())
-			m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
-		img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
-		//2d adjustment
-
-		DrawViewQuad();
-
-		if (img_shader && img_shader->valid())
-			img_shader->release();
-
-		//bind fbo for final composition
-		flvr::Framebuffer* chann_buffer =
-			flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
-		if (chann_buffer)
-			chann_buffer->bind();
-		glActiveTexture(GL_TEXTURE0);
-		if (temp_buffer)
-		{
-			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			temp_buffer->unprotect();
-		}
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-		glDisable(GL_DEPTH_TEST);
-
-		//2d adjustment
-		img_shader =
-			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
-		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
-			img_shader->bind();
-		}
-		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
-		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
-		glActiveTexture(GL_TEXTURE1);
-		if (chann_buffer)
-			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-		//2d adjustment
-
-		DrawViewQuad();
-
-		if (img_shader && img_shader->valid())
-			img_shader->release();
-	}
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(GL_TEXTURE0);
-
-	glBlendEquation(GL_FUNC_ADD);
-}
+//void RenderCanvas::DrawOLShadows(vector<fluo::VolumeData*> &vlist)
+//{
+//	if (vlist.empty())
+//		return;
+//
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+//	GLfloat clear_color[4] = { 1, 1, 1, 1 };
+//
+//	size_t i;
+//	bool has_shadow = false;
+//	vector<long> colormodes;
+//	vector<bool> shadings;
+//	vector<long> mip_modes;
+//	vector<fluo::VolumeData*> list;
+//	//generate list
+//	for (i = 0; i<vlist.size(); i++)
+//	{
+//		fluo::VolumeData* vd = vlist[i];
+//		if (!vd)
+//			continue;
+//		bool shadow;
+//		vd->getValue(gstShadowEnable, shadow);
+//		if (shadow)
+//		{
+//			long colormode;
+//			vd->getValue(gstColormapMode, colormode);
+//			colormodes.push_back(colormode);
+//			bool shading;
+//			vd->getValue(gstShadingEnable, shading);
+//			shadings.push_back(shading);
+//			long mip_mode;
+//			vd->getValue(gstMipMode, mip_mode);
+//			mip_modes.push_back(mip_mode);
+//			list.push_back(vd);
+//			has_shadow = true;
+//		}
+//	}
+//
+//	if (!has_shadow)
+//		return;
+//
+//	if (flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_start_update_loop() &&
+//		!flvr::TextureRenderer::get_done_update_loop())
+//	{
+//		unsigned int rn_time = glbin_timer->get_ticks();
+//		if (rn_time - flvr::TextureRenderer::get_st_time() >
+//			flvr::TextureRenderer::get_up_time())
+//			return;
+//		if (list.size() == 1)
+//		{
+//			bool shadow;
+//			list[0]->getValue(gstShadowEnable, shadow);
+//			if (shadow && list[0]->GetRenderer()->get_done_loop(3))
+//				return;
+//		}
+//	}
+//
+//	flvr::Framebuffer* overlay_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			flvr::FB_Render_RGBA, nx, ny);
+//	if (overlay_buffer)
+//	{
+//		overlay_buffer->bind();
+//		overlay_buffer->protect();
+//		m_cur_framebuffer = overlay_buffer->id();
+//	}
+//
+//	if (!flvr::TextureRenderer::get_mem_swap() ||
+//		(flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_clear_chan_buffer()))
+//	{
+//		glClearColor(1.0, 1.0, 1.0, 1.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		flvr::TextureRenderer::reset_clear_chan_buffer();
+//	}
+//	glDisable(GL_BLEND);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	double shadow_darkness = 0.0;
+//
+//	if (list.empty())
+//		;
+//	else if (list.size() == 1)
+//	{
+//		fluo::VolumeData* vd = list[0];
+//		//save
+//		long colormode;
+//		vd->getValue(gstColormapMode, colormode);
+//		bool shading;
+//		vd->getValue(gstShadingEnable, shading);
+//		long mip_mode;
+//		vd->getValue(gstMipMode, mip_mode);
+//		//set to draw depth
+//		vd->setValue(gstShadingEnable, false);
+//		vd->setValue(gstMipMode, long(0));
+//		vd->setValue(gstColormapMode, long(2));
+//		if (overlay_buffer)
+//			vd->setValue(gst2dDmapId,
+//			(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+//		long msk_mode;
+//		vd->getValue(gstMaskMode, msk_mode);
+//		vd->setValue(gstMaskMode, long(0));
+//		//draw
+//		vd->setValue(gstStreamMode, long(3));
+//		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+//		vd->setValue(gstDepthAtten, m_use_fog);
+//		vd->setValue(gstDaInt, m_fog_intensity);
+//		vd->setValue(gstDaStart, m_fog_start);
+//		vd->setValue(gstDaEnd, m_fog_end);
+//		vd->setValue(gstViewport, fluo::Vector4i(vp));
+//		vd->setValue(gstClearColor, fluo::Vector4f(clear_color));
+//		vd->setValue(gstCurFramebuffer, (unsigned long)(m_cur_framebuffer));
+//		vd->Draw(!m_persp, m_adaptive, m_interactive, m_scale_factor, Get121ScaleFactor());
+//		//restore
+//		vd->setValue(gstMipMode, mip_mode);
+//		vd->setValue(gstMaskMode, msk_mode);
+//		vd->setValue(gstColormapMode, colormode);
+//		vd->setValue(gstShadingEnable, shading);
+//		vd->setValue(gstShadowInt, shadow_darkness);
+//	}
+//	else
+//	{
+//		m_mvr->clear_vr();
+//		for (i = 0; i<list.size(); i++)
+//		{
+//			fluo::VolumeData* vd = list[i];
+//			vd->setValue(gstShadingEnable, false);
+//			vd->setValue(gstMipMode, long(0));
+//			vd->setValue(gstColormapMode, long(2));
+//			if (overlay_buffer)
+//				vd->setValue(gst2dDmapId,
+//				(unsigned long)(overlay_buffer->tex_id(GL_COLOR_ATTACHMENT0)));
+//			flvr::VolumeRenderer* vr = list[i]->GetRenderer();
+//			if (vr)
+//			{
+//				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+//				list[i]->setValue(gstDepthAtten, m_use_fog);
+//				list[i]->setValue(gstDaInt, m_fog_intensity);
+//				list[i]->setValue(gstDaStart, m_fog_start);
+//				list[i]->setValue(gstDaEnd, m_fog_end);
+//				m_mvr->add_vr(vr);
+//				m_mvr->set_sampling_rate(vr->get_sampling_rate());
+//				m_mvr->SetNoiseRed(vr->GetNoiseRed());
+//			}
+//		}
+//		//draw
+//		m_mvr->set_viewport(vp);
+//		m_mvr->set_clear_color(clear_color);
+//		m_mvr->set_cur_framebuffer(m_cur_framebuffer);
+//		m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
+//
+//		for (i = 0; i<list.size(); i++)
+//		{
+//			fluo::VolumeData* vd = list[i];
+//			vd->setValue(gstMipMode, long(mip_modes[i]));
+//			vd->setValue(gstColormapMode, long(colormodes[i]));
+//			vd->setValue(gstShadingEnable, bool(shadings[i]));
+//		}
+//		list[0]->getValue(gstShadowInt, shadow_darkness);
+//	}
+//
+//	//
+//	if (!flvr::TextureRenderer::get_mem_swap() ||
+//		(flvr::TextureRenderer::get_mem_swap() &&
+//		flvr::TextureRenderer::get_clear_chan_buffer()))
+//	{
+//		//shadow pass
+//		//bind the fbo
+//		flvr::Framebuffer* temp_buffer =
+//			flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//				flvr::FB_Render_RGBA, nx, ny);
+//		if (temp_buffer)
+//		{
+//			temp_buffer->bind();
+//			temp_buffer->protect();
+//		}
+//		glClearColor(1.0, 1.0, 1.0, 1.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		glActiveTexture(GL_TEXTURE0);
+//		if (overlay_buffer)
+//		{
+//			//ok to unprotect
+//			overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			overlay_buffer->unprotect();
+//		}
+//		glDisable(GL_BLEND);
+//		glDisable(GL_DEPTH_TEST);
+//
+//		//2d adjustment
+//		flvr::ShaderProgram* img_shader =
+//			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+//		if (img_shader)
+//		{
+//			if (!img_shader->valid())
+//				img_shader->create();
+//			img_shader->bind();
+//		}
+//		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
+//		double dir_x = 0.0, dir_y = 0.0;
+//		if (m_frame && m_frame->GetSettingDlg())
+//			m_frame->GetSettingDlg()->GetShadowDir(dir_x, dir_y);
+//		img_shader->setLocalParam(1, dir_x, dir_y, 0.0, 0.0);
+//		//2d adjustment
+//
+//		DrawViewQuad();
+//
+//		if (img_shader && img_shader->valid())
+//			img_shader->release();
+//
+//		//bind fbo for final composition
+//		flvr::Framebuffer* chann_buffer =
+//			flvr::TextureRenderer::framebuffer_manager_.framebuffer("channel");
+//		if (chann_buffer)
+//			chann_buffer->bind();
+//		glActiveTexture(GL_TEXTURE0);
+//		if (temp_buffer)
+//		{
+//			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//			temp_buffer->unprotect();
+//		}
+//		glEnable(GL_BLEND);
+//		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+//		glDisable(GL_DEPTH_TEST);
+//
+//		//2d adjustment
+//		img_shader =
+//			flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+//		if (img_shader)
+//		{
+//			if (!img_shader->valid())
+//				img_shader->create();
+//			img_shader->bind();
+//		}
+//		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
+//		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
+//		glActiveTexture(GL_TEXTURE1);
+//		if (chann_buffer)
+//			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//		//2d adjustment
+//
+//		DrawViewQuad();
+//
+//		if (img_shader && img_shader->valid())
+//			img_shader->release();
+//	}
+//
+//	glActiveTexture(GL_TEXTURE1);
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glActiveTexture(GL_TEXTURE0);
+//
+//	glBlendEquation(GL_FUNC_ADD);
+//}
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
-{
-	if (list.empty())
-		return;
+//void RenderCanvas::DrawVolumesMulti(vector<fluo::VolumeData*> &list, int peel)
+//{
+//	if (list.empty())
+//		return;
+//
+//	if (!m_mvr)
+//		m_mvr = new flvr::MultiVolumeRenderer();
+//	if (!m_mvr)
+//		return;
+//
+//	int nx, ny;
+//	GetRenderSize(nx, ny);
+//	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
+//	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+//	GLfloat zoom = m_scale_factor;
+//	GLfloat sf121 = Get121ScaleFactor();
+//
+//	m_mvr->set_blend_slices(m_blend_slices);
+//
+//	int i;
+//	m_mvr->clear_vr();
+//	for (i = 0; i<(int)list.size(); i++)
+//	{
+//		fluo::VolumeData* vd = list[i];
+//		if (!vd)
+//			continue;
+//		bool disp;
+//		vd->getValue(gstDisplay, disp);
+//		if (disp)
+//		{
+//			flvr::VolumeRenderer* vr = vd->GetRenderer();
+//			if (vr)
+//			{
+//				//drawlabel
+//				long label_mode;
+//				vd->getValue(gstLabelMode, label_mode);
+//				if (label_mode &&
+//					vd->GetMask(false) &&
+//					vd->GetLabel(false))
+//					vd->setValue(gstMaskMode, long(4));
+//				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+//				vd->setValue(gstDepthAtten, m_use_fog);
+//				vd->setValue(gstDaInt, m_fog_intensity);
+//				vd->setValue(gstDaStart, m_fog_start);
+//				vd->setValue(gstDaEnd, m_fog_end);
+//				vr->set_zoom(zoom, sf121);
+//				m_mvr->add_vr(vr);
+//				m_mvr->set_sampling_rate(vr->get_sampling_rate());
+//				m_mvr->SetNoiseRed(vr->GetNoiseRed());
+//			}
+//		}
+//	}
+//
+//	if (m_mvr->get_vr_num() <= 0)
+//		return;
+//	m_mvr->set_depth_peel(peel);
+//
+//	// Set up transform
+//	fluo::Transform *tform = m_vd_pop_list[0]->GetTexture()->transform();
+//	float mvmat[16];
+//	tform->get_trans(mvmat);
+//	glm::mat4 mv_mat2 = glm::mat4(
+//		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+//		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+//		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+//		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+//	mv_mat2 = m_vd_pop_list[0]->GetRenderer()->m_mv_mat * mv_mat2;
+//	m_mvr->set_matrices(mv_mat2,
+//		m_vd_pop_list[0]->GetRenderer()->m_proj_mat,
+//		m_vd_pop_list[0]->GetRenderer()->m_tex_mat);
+//
+//	//generate textures & buffer objects
+//	//frame buffer for each volume
+//	flvr::Framebuffer* chann_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//			flvr::FB_Render_RGBA, nx, ny, "channel");
+//	//bind the fbo
+//	if (chann_buffer)
+//	{
+//		chann_buffer->protect();
+//		chann_buffer->bind();
+//		m_cur_framebuffer = chann_buffer->id();
+//	}
+//	if (!flvr::TextureRenderer::get_mem_swap() ||
+//		(flvr::TextureRenderer::get_mem_swap() &&
+//			flvr::TextureRenderer::get_clear_chan_buffer()))
+//	{
+//		glClearColor(0.0, 0.0, 0.0, 0.0);
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		flvr::
+//			TextureRenderer::reset_clear_chan_buffer();
+//	}
+//
+//	//draw multiple volumes at the same time
+//	m_mvr->set_viewport(vp);
+//	m_mvr->set_clear_color(clear_color);
+//	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
+//	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
+//
+//	//draw shadows
+//	DrawOLShadows(list);
+//
+//	//bind fbo for final composition
+//	flvr::Framebuffer* final_buffer =
+//		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+//		"final");
+//	if (final_buffer)
+//		final_buffer->bind();
+//	glActiveTexture(GL_TEXTURE0);
+//	if (chann_buffer)
+//		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+//	//build mipmap
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//	glEnable(GL_BLEND);
+//	if (m_vol_method == VOL_METHOD_COMP)
+//		glBlendFunc(GL_ONE, GL_ONE);
+//	else
+//		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//	glDisable(GL_DEPTH_TEST);
+//
+//	//2d adjustment
+//	flvr::ShaderProgram* img_shader =
+//		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+//	if (img_shader)
+//	{
+//		if (!img_shader->valid())
+//		{
+//			img_shader->create();
+//		}
+//		img_shader->bind();
+//	}
+//	fluo::VolumeData* vd = list[0];
+//	double r, g, b;
+//	vd->getValue(gstGammaR, r);
+//	vd->getValue(gstGammaG, g);
+//	vd->getValue(gstGammaB, b);
+//	fluo::Color gamma(r, g, b);
+//	vd->getValue(gstBrightnessR, r);
+//	vd->getValue(gstBrightnessG, g);
+//	vd->getValue(gstBrightnessB, b);
+//	fluo::Color brightness(r, g, b);
+//	vd->getValue(gstEqualizeR, r);
+//	vd->getValue(gstEqualizeG, g);
+//	vd->getValue(gstEqualizeB, b);
+//	fluo::Color hdr(r, g, b);
+//	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+//	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+//	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+//	//2d adjustment
+//
+//	DrawViewQuad();
+//
+//	if (img_shader && img_shader->valid())
+//		img_shader->release();
+//}
 
-	if (!m_mvr)
-		m_mvr = new flvr::MultiVolumeRenderer();
-	if (!m_mvr)
-		return;
-
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-	GLfloat zoom = m_scale_factor;
-	GLfloat sf121 = Get121ScaleFactor();
-
-	m_mvr->set_blend_slices(m_blend_slices);
-
-	int i;
-	m_mvr->clear_vr();
-	for (i = 0; i<(int)list.size(); i++)
-	{
-		fluo::VolumeData* vd = list[i];
-		if (!vd)
-			continue;
-		bool disp;
-		vd->getValue(gstDisplay, disp);
-		if (disp)
-		{
-			flvr::VolumeRenderer* vr = vd->GetRenderer();
-			if (vr)
-			{
-				//drawlabel
-				long label_mode;
-				vd->getValue(gstLabelMode, label_mode);
-				if (label_mode &&
-					vd->GetMask(false) &&
-					vd->GetLabel(false))
-					vd->setValue(gstMaskMode, long(4));
-				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->setValue(gstDepthAtten, m_use_fog);
-				vd->setValue(gstDaInt, m_fog_intensity);
-				vd->setValue(gstDaStart, m_fog_start);
-				vd->setValue(gstDaEnd, m_fog_end);
-				vr->set_zoom(zoom, sf121);
-				m_mvr->add_vr(vr);
-				m_mvr->set_sampling_rate(vr->get_sampling_rate());
-				m_mvr->SetNoiseRed(vr->GetNoiseRed());
-			}
-		}
-	}
-
-	if (m_mvr->get_vr_num() <= 0)
-		return;
-	m_mvr->set_depth_peel(peel);
-
-	// Set up transform
-	fluo::Transform *tform = m_vd_pop_list[0]->GetTexture()->transform();
-	float mvmat[16];
-	tform->get_trans(mvmat);
-	glm::mat4 mv_mat2 = glm::mat4(
-		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	mv_mat2 = m_vd_pop_list[0]->GetRenderer()->m_mv_mat * mv_mat2;
-	m_mvr->set_matrices(mv_mat2,
-		m_vd_pop_list[0]->GetRenderer()->m_proj_mat,
-		m_vd_pop_list[0]->GetRenderer()->m_tex_mat);
-
-	//generate textures & buffer objects
-	//frame buffer for each volume
-	flvr::Framebuffer* chann_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			flvr::FB_Render_RGBA, nx, ny, "channel");
-	//bind the fbo
-	if (chann_buffer)
-	{
-		chann_buffer->protect();
-		chann_buffer->bind();
-		m_cur_framebuffer = chann_buffer->id();
-	}
-	if (!flvr::TextureRenderer::get_mem_swap() ||
-		(flvr::TextureRenderer::get_mem_swap() &&
-			flvr::TextureRenderer::get_clear_chan_buffer()))
-	{
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		flvr::
-			TextureRenderer::reset_clear_chan_buffer();
-	}
-
-	//draw multiple volumes at the same time
-	m_mvr->set_viewport(vp);
-	m_mvr->set_clear_color(clear_color);
-	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-	m_mvr->draw(m_test_wiref, m_adaptive, m_interactive, !m_persp, m_intp);
-
-	//draw shadows
-	DrawOLShadows(list);
-
-	//bind fbo for final composition
-	flvr::Framebuffer* final_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-		"final");
-	if (final_buffer)
-		final_buffer->bind();
-	glActiveTexture(GL_TEXTURE0);
-	if (chann_buffer)
-		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	//build mipmap
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glEnable(GL_BLEND);
-	if (m_vol_method == VOL_METHOD_COMP)
-		glBlendFunc(GL_ONE, GL_ONE);
-	else
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST);
-
-	//2d adjustment
-	flvr::ShaderProgram* img_shader =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
-	if (img_shader)
-	{
-		if (!img_shader->valid())
-		{
-			img_shader->create();
-		}
-		img_shader->bind();
-	}
-	fluo::VolumeData* vd = list[0];
-	double r, g, b;
-	vd->getValue(gstGammaR, r);
-	vd->getValue(gstGammaG, g);
-	vd->getValue(gstGammaB, b);
-	fluo::Color gamma(r, g, b);
-	vd->getValue(gstBrightnessR, r);
-	vd->getValue(gstBrightnessG, g);
-	vd->getValue(gstBrightnessB, b);
-	fluo::Color brightness(r, g, b);
-	vd->getValue(gstEqualizeR, r);
-	vd->getValue(gstEqualizeG, g);
-	vd->getValue(gstEqualizeB, b);
-	fluo::Color hdr(r, g, b);
-	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
-	//2d adjustment
-
-	DrawViewQuad();
-
-	if (img_shader && img_shader->valid())
-		img_shader->release();
-}
-
-void RenderCanvas::SetBrush(int mode)
-{
-	m_prev_focus = FindFocus();
-	SetFocus();
-
-	int ruler_type = m_ruler_handler.GetType();
-
-	if (m_int_mode == 5 ||
-		m_int_mode == 7)
-	{
-		m_int_mode = 7;
-		if (ruler_type == 3)
-			m_selector.SetMode(8);
-		else
-			m_selector.SetMode(1);
-	}
-	else if (m_int_mode == 8)
-	{
-		if (ruler_type == 3)
-			m_selector.SetMode(8);
-		else
-			m_selector.SetMode(1);
-	}
-	else if (m_int_mode == 10)
-	{
-		m_selector.SetMode(9);
-	}
-	else
-	{
-		m_int_mode = 2;
-		m_selector.SetMode(mode);
-	}
-	m_paint_display = true;
-	m_draw_brush = true;
-	m_selector.ChangeBrushSetsIndex();
-}
+//void RenderCanvas::SetBrush(int mode)
+//{
+//	m_prev_focus = FindFocus();
+//	SetFocus();
+//
+//	int ruler_type = m_ruler_handler.GetType();
+//
+//	if (m_int_mode == 5 ||
+//		m_int_mode == 7)
+//	{
+//		m_int_mode = 7;
+//		if (ruler_type == 3)
+//			m_selector.SetMode(8);
+//		else
+//			m_selector.SetMode(1);
+//	}
+//	else if (m_int_mode == 8)
+//	{
+//		if (ruler_type == 3)
+//			m_selector.SetMode(8);
+//		else
+//			m_selector.SetMode(1);
+//	}
+//	else if (m_int_mode == 10)
+//	{
+//		m_selector.SetMode(9);
+//	}
+//	else
+//	{
+//		m_int_mode = 2;
+//		m_selector.SetMode(mode);
+//	}
+//	m_paint_display = true;
+//	m_draw_brush = true;
+//	m_selector.ChangeBrushSetsIndex();
+//}
 
 void RenderCanvas::UpdateBrushState()
 {
@@ -3673,74 +3673,98 @@ void RenderCanvas::UpdateBrushState()
 		brush_dlg = m_frame->GetBrushToolDlg();
 	}
 
+	fluo::Renderview* view = m_agent->GetObject();
 	if (m_int_mode != 2 && m_int_mode != 7)
 	{
 		if (wxGetKeyState(WXK_SHIFT))
 		{
-			SetBrush(2);
 			if (tree_panel)
 				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-			RefreshGL(6);
+			if (view)
+			{
+				view->SetBrush(2);
+				view->RefreshGL(6);
+			}
 		}
 		else if (wxGetKeyState(wxKeyCode('Z')))
 		{
-			SetBrush(4);
 			if (tree_panel)
 				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-			RefreshGL(7);
+			if (view)
+			{
+				view->SetBrush(4);
+				view->RefreshGL(7);
+			}
 		}
 		else if (wxGetKeyState(wxKeyCode('X')))
 		{
-			SetBrush(3);
 			if (tree_panel)
 				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-			RefreshGL(8);
+			if (view)
+			{
+				view->SetBrush(3);
+				view->RefreshGL(8);
+			}
 		}
 	}
 	else
 	{
-		if (m_brush_state)
+		long lval;
+		m_agent->getValue(gstBrushState, lval);
+		if (lval)
 		{
 			if (wxGetKeyState(WXK_SHIFT))
 			{
-				m_brush_state = 0;
-				SetBrush(2);
+				m_agent->setValue(gstBrushState, long(0));
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-				RefreshGL(9);
+				if (view)
+				{
+					view->SetBrush(2);
+					view->RefreshGL(9);
+				}
 			}
 			else if (wxGetKeyState(wxKeyCode('Z')))
 			{
-				m_brush_state = 0;
-				SetBrush(4);
+				m_agent->setValue(gstBrushState, long(0));
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-				RefreshGL(10);
+				if (view)
+				{
+					view->SetBrush(4);
+					view->RefreshGL(10);
+				}
 			}
 			else if (wxGetKeyState(wxKeyCode('X')))
 			{
-				m_brush_state = 0;
-				SetBrush(3);
+				m_agent->setValue(gstBrushState, long(0));
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 				if (brush_dlg)
 					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-				RefreshGL(11);
+				if (view)
+				{
+					view->SetBrush(3);
+					view->RefreshGL(11);
+				}
 			}
 			else
 			{
-				SetBrush(m_brush_state);
-				RefreshGL(12);
+				if (view)
+				{
+					view->SetBrush(lval);
+					view->RefreshGL(12);
+				}
 			}
 		}
 		else if (!wxGetKeyState(WXK_SHIFT) &&
@@ -3748,18 +3772,20 @@ void RenderCanvas::UpdateBrushState()
 			!wxGetKeyState(wxKeyCode('X')))
 		{
 			if (wxGetMouseState().LeftIsDown())
-				Segment();
-			if (m_int_mode == 7)
-				m_int_mode = 5;
+				view->Segment();
+			long lval;
+			m_agent->getValue(gstInterMode, lval);
+			if (lval == 7)
+				m_agent->setValue(gstInterMode, 5);
 			else
-				m_int_mode = 1;
-			m_paint_display = false;
-			m_draw_brush = false;
+				m_agent->setValue(gstInterMode, 1);
+			m_agent->setValue(gstPaintDisplay, false);
+			m_agent->setValue(gstDrawBrush, false);
 			if (tree_panel)
 				tree_panel->SelectBrush(0);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(0);
-			RefreshGL(13);
+			m_view->RefreshGL(13);
 
 			if (m_prev_focus)
 			{
@@ -3773,7 +3799,9 @@ void RenderCanvas::UpdateBrushState()
 //selection
 void RenderCanvas::Pick()
 {
-	if (m_draw_all)
+	bool bval;
+	m_agent->getValue(gstDrawAll, bval);
+	if (bval)
 	{
 		PickVolume();
 		PickMesh();
@@ -3782,129 +3810,131 @@ void RenderCanvas::Pick()
 
 void RenderCanvas::PickMesh()
 {
-	int i;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
-	if (nx <= 0 || ny <= 0)
-		return;
+	//int i;
+	//int nx = GetGLSize().x;
+	//int ny = GetGLSize().y;
+	//if (nx <= 0 || ny <= 0)
+	//	return;
 	wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
-	if (mouse_pos.x<0 || mouse_pos.x >= nx ||
-		mouse_pos.y <= 0 || mouse_pos.y>ny)
-		return;
+	m_agent->setValue(gstMouseClientX, long(mouse_pos.x));
+	m_agent->setValue(gstMouseClientY, long(mouse_pos.y));
+	//if (mouse_pos.x<0 || mouse_pos.x >= nx ||
+	//	mouse_pos.y <= 0 || mouse_pos.y>ny)
+	//	return;
 
-	//projection
-	HandleProjection(nx, ny);
-	//Transformation
-	HandleCamera();
-	//obj
-	glm::mat4 mv_temp = m_mv_mat;
-	m_mv_mat = GetDrawMat();
+	////projection
+	//HandleProjection(nx, ny);
+	////Transformation
+	//HandleCamera();
+	////obj
+	//glm::mat4 mv_temp = m_mv_mat;
+	//m_mv_mat = GetDrawMat();
 
-	//set up fbo
-	m_cur_framebuffer = 0;
-	//bind
-	flvr::Framebuffer* pick_buffer =
-		flvr::TextureRenderer::framebuffer_manager_.framebuffer(
-			flvr::FB_Pick_Int32_Float, nx, ny);
-	if (pick_buffer)
-		pick_buffer->bind();
+	////set up fbo
+	//m_cur_framebuffer = 0;
+	////bind
+	//flvr::Framebuffer* pick_buffer =
+	//	flvr::TextureRenderer::framebuffer_manager_.framebuffer(
+	//		flvr::FB_Pick_Int32_Float, nx, ny);
+	//if (pick_buffer)
+	//	pick_buffer->bind();
 
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClearDepth(1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0, 0.0, 0.0, 0.0);
+	//glClearDepth(1.0);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glScissor(mouse_pos.x, ny - mouse_pos.y, 1, 1);
-	glEnable(GL_SCISSOR_TEST);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	for (i = 0; i<(int)m_md_pop_list.size(); i++)
-	{
-		fluo::MeshData* md = m_md_pop_list[i];
-		if (md)
-		{
-			md->SetMatrices(m_mv_mat, m_proj_mat);
-			md->DrawInt(i + 1);
-		}
-	}
-	glDisable(GL_SCISSOR_TEST);
+	//glScissor(mouse_pos.x, ny - mouse_pos.y, 1, 1);
+	//glEnable(GL_SCISSOR_TEST);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LEQUAL);
+	//for (i = 0; i<(int)m_md_pop_list.size(); i++)
+	//{
+	//	fluo::MeshData* md = m_md_pop_list[i];
+	//	if (md)
+	//	{
+	//		md->SetMatrices(m_mv_mat, m_proj_mat);
+	//		md->DrawInt(i + 1);
+	//	}
+	//}
+	//glDisable(GL_SCISSOR_TEST);
 
-	unsigned int choose = 0;
-	if (pick_buffer)
-		choose = pick_buffer->read_value(mouse_pos.x, ny - mouse_pos.y);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
+	//unsigned int choose = 0;
+	//if (pick_buffer)
+	//	choose = pick_buffer->read_value(mouse_pos.x, ny - mouse_pos.y);
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
 
-	if (choose >0 && choose <= (int)m_md_pop_list.size())
-	{
-		fluo::MeshData* md = m_md_pop_list[choose - 1];
-		if (md)
-		{
-			if (m_frame && m_frame->GetTree())
-			{
-				m_frame->GetTree()->SetFocus();
-				m_frame->GetTree()->Select(m_vrv->GetName(), md->getName());
-			}
-			RefreshGL(27);
-		}
-	}
-	else
-	{
-		if (m_frame && m_frame->GetCurSelType() == 3 &&
-			m_frame->GetTree())
-			m_frame->GetTree()->Select(m_vrv->GetName(), "");
-	}
-	m_mv_mat = mv_temp;
+	//if (choose >0 && choose <= (int)m_md_pop_list.size())
+	//{
+	//	fluo::MeshData* md = m_md_pop_list[choose - 1];
+	//	if (md)
+	//	{
+	//		if (m_frame && m_frame->GetTree())
+	//		{
+	//			m_frame->GetTree()->SetFocus();
+	//			m_frame->GetTree()->Select(m_vrv->GetName(), md->getName());
+	//		}
+	//		RefreshGL(27);
+	//	}
+	//}
+	//else
+	//{
+	//	if (m_frame && m_frame->GetCurSelType() == 3 &&
+	//		m_frame->GetTree())
+	//		m_frame->GetTree()->Select(m_vrv->GetName(), "");
+	//}
+	//m_mv_mat = mv_temp;
 }
 
 void RenderCanvas::PickVolume()
 {
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
-	double dist = 0.0;
-	double min_dist = -1.0;
-	fluo::Point p, ip, pp;
+	//double dist = 0.0;
+	//double min_dist = -1.0;
+	//fluo::Point p, ip, pp;
 	fluo::VolumeData* vd = 0;
 	fluo::VolumeData* picked_vd = 0;
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		vd = m_vd_pop_list[i];
-		if (!vd) continue;
-		long mode = 2;
-		long mip_mode;
-		vd->getValue(gstMipMode, mip_mode);
-		if (mip_mode == 1) mode = 1;
-		m_vp.SetVolumeData(vd);
-		dist = m_vp.GetPointVolume(old_mouse_X, old_mouse_Y,
-			mode, true, 0.5, p, ip);
-		if (dist > 0.0)
-		{
-			if (min_dist < 0.0)
-			{
-				min_dist = dist;
-				picked_vd = vd;
-				pp = p;
-			}
-			else
-			{
-				if (m_persp)
-				{
-					if (dist < min_dist)
-					{
-						min_dist = dist;
-						picked_vd = vd;
-						pp = p;
-					}
-				}
-				else
-				{
-					if (dist > min_dist)
-					{
-						min_dist = dist;
-						picked_vd = vd;
-						pp = p;
-					}
-				}
-			}
-		}
-	}
+	//for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
+	//{
+	//	vd = m_vd_pop_list[i];
+	//	if (!vd) continue;
+	//	long mode = 2;
+	//	long mip_mode;
+	//	vd->getValue(gstMipMode, mip_mode);
+	//	if (mip_mode == 1) mode = 1;
+	//	m_vp.SetVolumeData(vd);
+	//	dist = m_vp.GetPointVolume(old_mouse_X, old_mouse_Y,
+	//		mode, true, 0.5, p, ip);
+	//	if (dist > 0.0)
+	//	{
+	//		if (min_dist < 0.0)
+	//		{
+	//			min_dist = dist;
+	//			picked_vd = vd;
+	//			pp = p;
+	//		}
+	//		else
+	//		{
+	//			if (m_persp)
+	//			{
+	//				if (dist < min_dist)
+	//				{
+	//					min_dist = dist;
+	//					picked_vd = vd;
+	//					pp = p;
+	//				}
+	//			}
+	//			else
+	//			{
+	//				if (dist > min_dist)
+	//				{
+	//					min_dist = dist;
+	//					picked_vd = vd;
+	//					pp = p;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 	if (picked_vd)
 	{
@@ -3916,8 +3946,8 @@ void RenderCanvas::PickVolume()
 		//update label selection
 		SetCompSelection(ip, kmode);
 
-		if (m_pick_lock_center)
-			m_lock_center = pp;
+		//if (m_pick_lock_center)
+		//	m_lock_center = pp;
 	}
 }
 
@@ -4578,502 +4608,502 @@ void RenderCanvas::OnClose(wxCloseEvent &event)
 	}
 }
 
-void RenderCanvas::Set3DRotCapture(double start_angle,
-	double end_angle,
-	double step,
-	int frames,
-	int rot_axis,
-	wxString &cap_file,
-	bool rewind,
-	int len)
-{
-	double rv[3];
-	GetRotations(rv[0], rv[1], rv[2]);
+//void RenderCanvas::Set3DRotCapture(double start_angle,
+//	double end_angle,
+//	double step,
+//	int frames,
+//	int rot_axis,
+//	wxString &cap_file,
+//	bool rewind,
+//	int len)
+//{
+//	double rv[3];
+//	GetRotations(rv[0], rv[1], rv[2]);
+//
+//	//remove the chance of the x/y/z angles being outside 360.
+//	while (rv[0] > 360.)  rv[0] -= 360.;
+//	while (rv[0] < -360.) rv[0] += 360.;
+//	while (rv[1] > 360.)  rv[1] -= 360.;
+//	while (rv[1] < -360.) rv[1] += 360.;
+//	while (rv[2] > 360.)  rv[2] -= 360.;
+//	while (rv[2] < -360.) rv[2] += 360.;
+//	if (360. - std::abs(rv[0]) < 0.001) rv[0] = 0.;
+//	if (360. - std::abs(rv[1]) < 0.001) rv[1] = 0.;
+//	if (360. - std::abs(rv[2]) < 0.001) rv[2] = 0.;
+//
+//	m_step = step;
+//	m_total_frames = frames;
+//	m_cap_file = cap_file;
+//	m_rewind = rewind;
+//	m_movie_seq = 0;
+//
+//	m_rot_axis = rot_axis;
+//	if (start_angle == 0.)
+//	{
+//		m_init_angle = rv[m_rot_axis];
+//		m_end_angle = rv[m_rot_axis] + end_angle;
+//	}
+//	m_cur_angle = rv[m_rot_axis];
+//	m_start_angle = rv[m_rot_axis];
+//
+//	m_capture = true;
+//	m_capture_rotat = true;
+//	m_capture_rotate_over = false;
+//	m_stages = 0;
+//}
 
-	//remove the chance of the x/y/z angles being outside 360.
-	while (rv[0] > 360.)  rv[0] -= 360.;
-	while (rv[0] < -360.) rv[0] += 360.;
-	while (rv[1] > 360.)  rv[1] -= 360.;
-	while (rv[1] < -360.) rv[1] += 360.;
-	while (rv[2] > 360.)  rv[2] -= 360.;
-	while (rv[2] < -360.) rv[2] += 360.;
-	if (360. - std::abs(rv[0]) < 0.001) rv[0] = 0.;
-	if (360. - std::abs(rv[1]) < 0.001) rv[1] = 0.;
-	if (360. - std::abs(rv[2]) < 0.001) rv[2] = 0.;
+//void RenderCanvas::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
+//{
+//	m_cap_file = cap_file;
+//	m_begin_frame = begin_frame;
+//	m_end_frame = end_frame;
+//	m_capture_bat = true;
+//	m_capture = true;
+//
+//	if (!m_cap_file.IsEmpty() && m_total_frames>1)
+//	{
+//		wxString new_folder = wxPathOnly(m_cap_file)
+//			+ GETSLASH() + m_bat_folder + "_folder";
+//		MkDirW(new_folder.ToStdWstring());
+//	}
+//}
 
-	m_step = step;
-	m_total_frames = frames;
-	m_cap_file = cap_file;
-	m_rewind = rewind;
-	m_movie_seq = 0;
+//void RenderCanvas::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
+//{
+//	m_cap_file = cap_file;
+//	m_tseq_cur_num = begin_frame;
+//	m_tseq_prv_num = begin_frame;
+//	m_begin_frame = begin_frame;
+//	m_end_frame = end_frame;
+//	m_capture_tsequ = true;
+//	m_capture = true;
+//	m_movie_seq = begin_frame;
+//	m_4d_rewind = rewind;
+//}
 
-	m_rot_axis = rot_axis;
-	if (start_angle == 0.)
-	{
-		m_init_angle = rv[m_rot_axis];
-		m_end_angle = rv[m_rot_axis] + end_angle;
-	}
-	m_cur_angle = rv[m_rot_axis];
-	m_start_angle = rv[m_rot_axis];
+//void RenderCanvas::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
+//{
+//	m_cap_file = cap_file;
+//	m_param_cur_num = begin_frame;
+//	m_begin_frame = begin_frame;
+//	m_end_frame = end_frame;
+//	m_capture_param = true;
+//	m_capture = true;
+//	m_movie_seq = begin_frame;
+//	m_4d_rewind = rewind;
+//}
 
-	m_capture = true;
-	m_capture_rotat = true;
-	m_capture_rotate_over = false;
-	m_stages = 0;
-}
+//void RenderCanvas::SetParams(double t)
+//{
+//	if (!m_vrv)
+//		return;
+//	if (!m_frame)
+//		return;
+//	ClippingView* clip_view = m_frame->GetClippingView();
+//	Interpolator *interpolator = m_frame->GetInterpolator();
+//	if (!interpolator)
+//		return;
+//	FlKeyCode keycode;
+//	keycode.l0 = 1;
+//	keycode.l0_name = m_vrv->GetName();
+//
+//	for (int i = 0; i<GetAllVolumeNum(); i++)
+//	{
+//		fluo::VolumeData* vd = GetAllVolumeData(i);
+//		if (!vd) continue;
+//
+//		keycode.l1 = 2;
+//		keycode.l1_name = vd->getName();
+//
+//		//display
+//		keycode.l2 = 0;
+//		keycode.l2_name = "display";
+//		bool bval;
+//		if (interpolator->GetBoolean(keycode, t, bval))
+//			vd->setValue(gstDisplay, bval);
+//
+//		//clipping planes
+//		vector<fluo::Plane*> *planes = vd->GetRenderer()->get_planes();
+//		if (!planes) continue;
+//		if (planes->size() != 6) continue;
+//		fluo::Plane *plane = 0;
+//		double val = 0;
+//		//x1
+//		plane = (*planes)[0];
+//		keycode.l2 = 0;
+//		keycode.l2_name = "x1_val";
+//		if (interpolator->GetDouble(keycode, t, val))
+//			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
+//				fluo::Vector(1.0, 0.0, 0.0));
+//		//x2
+//		plane = (*planes)[1];
+//		keycode.l2 = 0;
+//		keycode.l2_name = "x2_val";
+//		if (interpolator->GetDouble(keycode, t, val))
+//			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
+//				fluo::Vector(-1.0, 0.0, 0.0));
+//		//y1
+//		plane = (*planes)[2];
+//		keycode.l2 = 0;
+//		keycode.l2_name = "y1_val";
+//		if (interpolator->GetDouble(keycode, t, val))
+//			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
+//				fluo::Vector(0.0, 1.0, 0.0));
+//		//y2
+//		plane = (*planes)[3];
+//		keycode.l2 = 0;
+//		keycode.l2_name = "y2_val";
+//		if (interpolator->GetDouble(keycode, t, val))
+//			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
+//				fluo::Vector(0.0, -1.0, 0.0));
+//		//z1
+//		plane = (*planes)[4];
+//		keycode.l2 = 0;
+//		keycode.l2_name = "z1_val";
+//		if (interpolator->GetDouble(keycode, t, val))
+//			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
+//				fluo::Vector(0.0, 0.0, 1.0));
+//		//z2
+//		plane = (*planes)[5];
+//		keycode.l2 = 0;
+//		keycode.l2_name = "z2_val";
+//		if (interpolator->GetDouble(keycode, t, val))
+//			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
+//				fluo::Vector(0.0, 0.0, -1.0));
+//		//t
+//		double frame;
+//		keycode.l2 = 0;
+//		keycode.l2_name = "frame";
+//		if (interpolator->GetDouble(keycode, t, frame))
+//			UpdateVolumeData(int(frame + 0.5), vd);
+//	}
+//
+//	bool bx, by, bz;
+//	//for the view
+//	keycode.l1 = 1;
+//	keycode.l1_name = m_vrv->GetName();
+//	//translation
+//	double tx, ty, tz;
+//	keycode.l2 = 0;
+//	keycode.l2_name = "translation_x";
+//	bx = interpolator->GetDouble(keycode, t, tx);
+//	keycode.l2_name = "translation_y";
+//	by = interpolator->GetDouble(keycode, t, ty);
+//	keycode.l2_name = "translation_z";
+//	bz = interpolator->GetDouble(keycode, t, tz);
+//	if (bx && by && bz)
+//		SetTranslations(tx, ty, tz);
+//	//centers
+//	keycode.l2_name = "center_x";
+//	bx = interpolator->GetDouble(keycode, t, tx);
+//	keycode.l2_name = "center_y";
+//	by = interpolator->GetDouble(keycode, t, ty);
+//	keycode.l2_name = "center_z";
+//	bz = interpolator->GetDouble(keycode, t, tz);
+//	if (bx && by && bz)
+//		SetCenters(tx, ty, tz);
+//	//obj translation
+//	keycode.l2_name = "obj_trans_x";
+//	bx = interpolator->GetDouble(keycode, t, tx);
+//	keycode.l2_name = "obj_trans_y";
+//	by = interpolator->GetDouble(keycode, t, ty);
+//	keycode.l2_name = "obj_trans_z";
+//	bz = interpolator->GetDouble(keycode, t, tz);
+//	if (bx && by && bz)
+//		SetObjTrans(tx, ty, tz);
+//	//scale
+//	double scale;
+//	keycode.l2_name = "scale";
+//	if (interpolator->GetDouble(keycode, t, scale))
+//	{
+//		m_scale_factor = scale;
+//		m_vrv->UpdateScaleFactor(false);
+//	}
+//	//rotation
+//	keycode.l2 = 0;
+//	keycode.l2_name = "rotation";
+//	fluo::Quaternion q;
+//	if (interpolator->GetQuaternion(keycode, t, q))
+//	{
+//		m_q = q;
+//		q *= -m_zq;
+//		double rotx, roty, rotz;
+//		q.ToEuler(rotx, roty, rotz);
+//		SetRotations(rotx, roty, rotz, true);
+//	}
+//	//intermixing mode
+//	keycode.l2_name = "volmethod";
+//	int ival;
+//	if (interpolator->GetInt(keycode, t, ival))
+//		SetVolMethod(ival);
+//	//perspective angle
+//	keycode.l2_name = "aov";
+//	double aov;
+//	if (interpolator->GetDouble(keycode, t, aov))
+//	{
+//		if (aov <= 10)
+//		{
+//			SetPersp(false);
+//			m_vrv->m_aov_text->ChangeValue("Ortho");
+//			m_vrv->m_aov_sldr->SetValue(10);
+//		}
+//		else
+//		{
+//			SetPersp(true);
+//			SetAov(aov);
+//		}
+//	}
+//
+//	if (m_frame && clip_view)
+//		clip_view->SetVolumeData(m_frame->GetCurSelVol());
+//	if (m_frame)
+//	{
+//		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->getName() : "");
+//		int index = interpolator->GetKeyIndexFromTime(t);
+//		m_frame->GetRecorderDlg()->SetSelection(index);
+//	}
+//	SetVolPopDirty();
+//}
 
-void RenderCanvas::Set3DBatCapture(wxString &cap_file, int begin_frame, int end_frame)
-{
-	m_cap_file = cap_file;
-	m_begin_frame = begin_frame;
-	m_end_frame = end_frame;
-	m_capture_bat = true;
-	m_capture = true;
+//void RenderCanvas::ResetMovieAngle()
+//{
+//	double rv[3];
+//	GetRotations(rv[0], rv[1], rv[2]);
+//	rv[m_rot_axis] = m_init_angle;
+//	SetRotations(rv[0], rv[1], rv[2]);
+//
+//	m_capture = false;
+//	m_capture_rotat = false;
+//
+//	RefreshGL(16);
+//}
 
-	if (!m_cap_file.IsEmpty() && m_total_frames>1)
-	{
-		wxString new_folder = wxPathOnly(m_cap_file)
-			+ GETSLASH() + m_bat_folder + "_folder";
-		MkDirW(new_folder.ToStdWstring());
-	}
-}
+//void RenderCanvas::StopMovie()
+//{
+//	m_capture = false;
+//	m_capture_rotat = false;
+//	m_capture_tsequ = false;
+//	m_capture_param = false;
+//}
 
-void RenderCanvas::Set4DSeqCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
-{
-	m_cap_file = cap_file;
-	m_tseq_cur_num = begin_frame;
-	m_tseq_prv_num = begin_frame;
-	m_begin_frame = begin_frame;
-	m_end_frame = end_frame;
-	m_capture_tsequ = true;
-	m_capture = true;
-	m_movie_seq = begin_frame;
-	m_4d_rewind = rewind;
-}
+//void RenderCanvas::Get4DSeqRange(int &start_frame, int &end_frame)
+//{
+//	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
+//	{
+//		fluo::VolumeData* vd = m_vd_pop_list[i];
+//		if (vd && vd->GetReader())
+//		{
+//			BaseReader* reader = vd->GetReader();
+//
+//			int vd_start_frame = 0;
+//			int vd_end_frame = reader->GetTimeNum() - 1;
+//			int vd_cur_frame = reader->GetCurTime();
+//
+//			if (i == 0)
+//			{
+//				//first dataset
+//				start_frame = vd_start_frame;
+//				end_frame = vd_end_frame;
+//			}
+//			else
+//			{
+//				//datasets after the first one
+//				if (vd_end_frame > end_frame)
+//					end_frame = vd_end_frame;
+//			}
+//		}
+//	}
+//}
 
-void RenderCanvas::SetParamCapture(wxString &cap_file, int begin_frame, int end_frame, bool rewind)
-{
-	m_cap_file = cap_file;
-	m_param_cur_num = begin_frame;
-	m_begin_frame = begin_frame;
-	m_end_frame = end_frame;
-	m_capture_param = true;
-	m_capture = true;
-	m_movie_seq = begin_frame;
-	m_4d_rewind = rewind;
-}
+//void RenderCanvas::UpdateVolumeData(int frame, fluo::VolumeData* vd)
+//{
+//	if (vd && vd->GetReader())
+//	{
+//		BaseReader* reader = vd->GetReader();
+//		bool clear_pool = false;
+//
+//		long cur_time;
+//		vd->getValue(gstTime, cur_time);
+//		if (cur_time != frame)
+//		{
+//			flvr::Texture *tex = vd->GetTexture();
+//			if (tex && tex->isBrxml())
+//			{
+//				BRKXMLReader *br = (BRKXMLReader *)reader;
+//				br->SetCurTime(frame);
+//				int curlv = tex->GetCurLevel();
+//				for (int j = 0; j < br->GetLevelNum(); j++)
+//				{
+//					tex->setLevel(j);
+//					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
+//				}
+//				tex->setLevel(curlv);
+//				long chan;
+//				vd->getValue(gstChannel, chan);
+//				tex->set_FrameAndChannel(frame, chan);
+//				vd->setValue(gstTime, long(reader->GetCurTime()));
+//				//update rulers
+//				if (m_frame && m_frame->GetMeasureDlg())
+//					m_frame->GetMeasureDlg()->UpdateList();
+//			}
+//			else
+//			{
+//				double spcx, spcy, spcz;
+//				vd->getValue(gstSpcX, spcx);
+//				vd->getValue(gstSpcY, spcy);
+//				vd->getValue(gstSpcZ, spcz);
+//
+//				long chan;
+//				vd->getValue(gstChannel, chan);
+//				Nrrd* data = reader->Convert(frame, chan, false);
+//				if (!vd->ReplaceData(data, false))
+//					return;
+//
+//				vd->setValue(gstTime, long(reader->GetCurTime()));
+//				vd->setValue(gstSpcX, spcx);
+//				vd->setValue(gstSpcY, spcy);
+//				vd->setValue(gstSpcZ, spcz);
+//
+//				//update rulers
+//				if (m_frame && m_frame->GetMeasureDlg())
+//					m_frame->GetMeasureDlg()->UpdateList();
+//
+//				clear_pool = true;
+//			}
+//		}
+//
+//		if (clear_pool && vd->GetRenderer())
+//			vd->GetRenderer()->clear_tex_pool();
+//	}
+//}
 
-void RenderCanvas::SetParams(double t)
-{
-	if (!m_vrv)
-		return;
-	if (!m_frame)
-		return;
-	ClippingView* clip_view = m_frame->GetClippingView();
-	Interpolator *interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-	FlKeyCode keycode;
-	keycode.l0 = 1;
-	keycode.l0_name = m_vrv->GetName();
-
-	for (int i = 0; i<GetAllVolumeNum(); i++)
-	{
-		fluo::VolumeData* vd = GetAllVolumeData(i);
-		if (!vd) continue;
-
-		keycode.l1 = 2;
-		keycode.l1_name = vd->getName();
-
-		//display
-		keycode.l2 = 0;
-		keycode.l2_name = "display";
-		bool bval;
-		if (interpolator->GetBoolean(keycode, t, bval))
-			vd->setValue(gstDisplay, bval);
-
-		//clipping planes
-		vector<fluo::Plane*> *planes = vd->GetRenderer()->get_planes();
-		if (!planes) continue;
-		if (planes->size() != 6) continue;
-		fluo::Plane *plane = 0;
-		double val = 0;
-		//x1
-		plane = (*planes)[0];
-		keycode.l2 = 0;
-		keycode.l2_name = "x1_val";
-		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
-				fluo::Vector(1.0, 0.0, 0.0));
-		//x2
-		plane = (*planes)[1];
-		keycode.l2 = 0;
-		keycode.l2_name = "x2_val";
-		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
-				fluo::Vector(-1.0, 0.0, 0.0));
-		//y1
-		plane = (*planes)[2];
-		keycode.l2 = 0;
-		keycode.l2_name = "y1_val";
-		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
-				fluo::Vector(0.0, 1.0, 0.0));
-		//y2
-		plane = (*planes)[3];
-		keycode.l2 = 0;
-		keycode.l2_name = "y2_val";
-		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
-				fluo::Vector(0.0, -1.0, 0.0));
-		//z1
-		plane = (*planes)[4];
-		keycode.l2 = 0;
-		keycode.l2_name = "z1_val";
-		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
-				fluo::Vector(0.0, 0.0, 1.0));
-		//z2
-		plane = (*planes)[5];
-		keycode.l2 = 0;
-		keycode.l2_name = "z2_val";
-		if (interpolator->GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
-				fluo::Vector(0.0, 0.0, -1.0));
-		//t
-		double frame;
-		keycode.l2 = 0;
-		keycode.l2_name = "frame";
-		if (interpolator->GetDouble(keycode, t, frame))
-			UpdateVolumeData(int(frame + 0.5), vd);
-	}
-
-	bool bx, by, bz;
-	//for the view
-	keycode.l1 = 1;
-	keycode.l1_name = m_vrv->GetName();
-	//translation
-	double tx, ty, tz;
-	keycode.l2 = 0;
-	keycode.l2_name = "translation_x";
-	bx = interpolator->GetDouble(keycode, t, tx);
-	keycode.l2_name = "translation_y";
-	by = interpolator->GetDouble(keycode, t, ty);
-	keycode.l2_name = "translation_z";
-	bz = interpolator->GetDouble(keycode, t, tz);
-	if (bx && by && bz)
-		SetTranslations(tx, ty, tz);
-	//centers
-	keycode.l2_name = "center_x";
-	bx = interpolator->GetDouble(keycode, t, tx);
-	keycode.l2_name = "center_y";
-	by = interpolator->GetDouble(keycode, t, ty);
-	keycode.l2_name = "center_z";
-	bz = interpolator->GetDouble(keycode, t, tz);
-	if (bx && by && bz)
-		SetCenters(tx, ty, tz);
-	//obj translation
-	keycode.l2_name = "obj_trans_x";
-	bx = interpolator->GetDouble(keycode, t, tx);
-	keycode.l2_name = "obj_trans_y";
-	by = interpolator->GetDouble(keycode, t, ty);
-	keycode.l2_name = "obj_trans_z";
-	bz = interpolator->GetDouble(keycode, t, tz);
-	if (bx && by && bz)
-		SetObjTrans(tx, ty, tz);
-	//scale
-	double scale;
-	keycode.l2_name = "scale";
-	if (interpolator->GetDouble(keycode, t, scale))
-	{
-		m_scale_factor = scale;
-		m_vrv->UpdateScaleFactor(false);
-	}
-	//rotation
-	keycode.l2 = 0;
-	keycode.l2_name = "rotation";
-	fluo::Quaternion q;
-	if (interpolator->GetQuaternion(keycode, t, q))
-	{
-		m_q = q;
-		q *= -m_zq;
-		double rotx, roty, rotz;
-		q.ToEuler(rotx, roty, rotz);
-		SetRotations(rotx, roty, rotz, true);
-	}
-	//intermixing mode
-	keycode.l2_name = "volmethod";
-	int ival;
-	if (interpolator->GetInt(keycode, t, ival))
-		SetVolMethod(ival);
-	//perspective angle
-	keycode.l2_name = "aov";
-	double aov;
-	if (interpolator->GetDouble(keycode, t, aov))
-	{
-		if (aov <= 10)
-		{
-			SetPersp(false);
-			m_vrv->m_aov_text->ChangeValue("Ortho");
-			m_vrv->m_aov_sldr->SetValue(10);
-		}
-		else
-		{
-			SetPersp(true);
-			SetAov(aov);
-		}
-	}
-
-	if (m_frame && clip_view)
-		clip_view->SetVolumeData(m_frame->GetCurSelVol());
-	if (m_frame)
-	{
-		m_frame->UpdateTree(m_cur_vol ? m_cur_vol->getName() : "");
-		int index = interpolator->GetKeyIndexFromTime(t);
-		m_frame->GetRecorderDlg()->SetSelection(index);
-	}
-	SetVolPopDirty();
-}
-
-void RenderCanvas::ResetMovieAngle()
-{
-	double rv[3];
-	GetRotations(rv[0], rv[1], rv[2]);
-	rv[m_rot_axis] = m_init_angle;
-	SetRotations(rv[0], rv[1], rv[2]);
-
-	m_capture = false;
-	m_capture_rotat = false;
-
-	RefreshGL(16);
-}
-
-void RenderCanvas::StopMovie()
-{
-	m_capture = false;
-	m_capture_rotat = false;
-	m_capture_tsequ = false;
-	m_capture_param = false;
-}
-
-void RenderCanvas::Get4DSeqRange(int &start_frame, int &end_frame)
-{
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
-	{
-		fluo::VolumeData* vd = m_vd_pop_list[i];
-		if (vd && vd->GetReader())
-		{
-			BaseReader* reader = vd->GetReader();
-
-			int vd_start_frame = 0;
-			int vd_end_frame = reader->GetTimeNum() - 1;
-			int vd_cur_frame = reader->GetCurTime();
-
-			if (i == 0)
-			{
-				//first dataset
-				start_frame = vd_start_frame;
-				end_frame = vd_end_frame;
-			}
-			else
-			{
-				//datasets after the first one
-				if (vd_end_frame > end_frame)
-					end_frame = vd_end_frame;
-			}
-		}
-	}
-}
-
-void RenderCanvas::UpdateVolumeData(int frame, fluo::VolumeData* vd)
-{
-	if (vd && vd->GetReader())
-	{
-		BaseReader* reader = vd->GetReader();
-		bool clear_pool = false;
-
-		long cur_time;
-		vd->getValue(gstTime, cur_time);
-		if (cur_time != frame)
-		{
-			flvr::Texture *tex = vd->GetTexture();
-			if (tex && tex->isBrxml())
-			{
-				BRKXMLReader *br = (BRKXMLReader *)reader;
-				br->SetCurTime(frame);
-				int curlv = tex->GetCurLevel();
-				for (int j = 0; j < br->GetLevelNum(); j++)
-				{
-					tex->setLevel(j);
-					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
-				}
-				tex->setLevel(curlv);
-				long chan;
-				vd->getValue(gstChannel, chan);
-				tex->set_FrameAndChannel(frame, chan);
-				vd->setValue(gstTime, long(reader->GetCurTime()));
-				//update rulers
-				if (m_frame && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->UpdateList();
-			}
-			else
-			{
-				double spcx, spcy, spcz;
-				vd->getValue(gstSpcX, spcx);
-				vd->getValue(gstSpcY, spcy);
-				vd->getValue(gstSpcZ, spcz);
-
-				long chan;
-				vd->getValue(gstChannel, chan);
-				Nrrd* data = reader->Convert(frame, chan, false);
-				if (!vd->ReplaceData(data, false))
-					return;
-
-				vd->setValue(gstTime, long(reader->GetCurTime()));
-				vd->setValue(gstSpcX, spcx);
-				vd->setValue(gstSpcY, spcy);
-				vd->setValue(gstSpcZ, spcz);
-
-				//update rulers
-				if (m_frame && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->UpdateList();
-
-				clear_pool = true;
-			}
-		}
-
-		if (clear_pool && vd->GetRenderer())
-			vd->GetRenderer()->clear_tex_pool();
-	}
-}
-
-void RenderCanvas::ReloadVolumeData(int frame)
-{
-	int i, j;
-	vector<BaseReader*> reader_list;
-	m_bat_folder = "";
-
-	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
-	{
-		fluo::VolumeData* vd = m_vd_pop_list[i];
-		if (vd && vd->GetReader())
-		{
-			flvr::Texture *tex = vd->GetTexture();
-			BaseReader* reader = vd->GetReader();
-			if (tex && tex->isBrxml())
-			{
-				BRKXMLReader *br = (BRKXMLReader *)reader;
-				int curlv = tex->GetCurLevel();
-				for (j = 0; j < br->GetLevelNum(); j++)
-				{
-					tex->setLevel(j);
-					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
-				}
-				tex->setLevel(curlv);
-				long chan;
-				vd->getValue(gstChannel, chan);
-				tex->set_FrameAndChannel(0, chan);
-				vd->setValue(gstTime, long(reader->GetCurTime()));
-				wxString data_name = wxString(reader->GetDataName());
-				if (i > 0)
-					m_bat_folder += "_";
-				m_bat_folder += data_name;
-
-				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
-					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
-					chan_num = 2;
-				if (chan_num > 0 && chan >= chan_num)
-					vd->setValue(gstDisplay, false);
-				else
-					vd->setValue(gstDisplay, true);
-
-				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", chan + 1);
-				vd->setName(data_name.ToStdString());
-			}
-			else
-			{
-				bool found = false;
-				for (j = 0; j < (int)reader_list.size(); j++)
-				{
-					if (reader == reader_list[j])
-					{
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-				{
-					reader->LoadOffset(frame);
-					reader_list.push_back(reader);
-				}
-
-				double spcx, spcy, spcz;
-				vd->getValue(gstSpcX, spcx);
-				vd->getValue(gstSpcY, spcy);
-				vd->getValue(gstSpcZ, spcz);
-				long chan;
-				vd->getValue(gstChannel, chan);
-				Nrrd* data = reader->Convert(0, chan, true);
-				if (vd->ReplaceData(data, true))
-					vd->setValue(gstDisplay, true);
-				else
-				{
-					vd->setValue(gstDisplay, false);
-					continue;
-				}
-
-				wxString data_name = wxString(reader->GetDataName());
-				if (i > 0)
-					m_bat_folder += "_";
-				m_bat_folder += data_name;
-
-				int chan_num = 0;
-				if (data_name.Find("_1ch") != -1)
-					chan_num = 1;
-				else if (data_name.Find("_2ch") != -1)
-					chan_num = 2;
-				if (chan_num > 0 && chan >= chan_num)
-					vd->setValue(gstDisplay, false);
-				else
-					vd->setValue(gstDisplay, true);
-
-				if (reader->GetChanNum() > 1)
-					data_name += wxString::Format("_%d", chan + 1);
-				vd->setName(data_name.ToStdString());
-				vd->setValue(gstDataPath, reader->GetPathName());
-				vd->setValue(gstTime, long(reader->GetCurTime()));
-				if (!reader->IsSpcInfoValid())
-				{
-					vd->setValue(gstSpcX, spcx);
-					vd->setValue(gstSpcY, spcy);
-					vd->setValue(gstSpcZ, spcz);
-				}
-				else
-				{
-					vd->setValue(gstSpcX, reader->GetXSpc());
-					vd->setValue(gstSpcY, reader->GetYSpc());
-					vd->setValue(gstSpcZ, reader->GetZSpc());
-				}
-				if (vd->GetRenderer())
-					vd->GetRenderer()->clear_tex_pool();
-			}
-		}
-	}
-
-	InitView(INIT_BOUNDS | INIT_CENTER);
-
-	if (m_frame)
-	{
-		m_frame->UpdateList();
-		m_frame->UpdateTree(
-			m_frame->GetCurSelVol() ?
-			m_frame->GetCurSelVol()->getName() :
-			"");
-	}
-}
+//void RenderCanvas::ReloadVolumeData(int frame)
+//{
+//	int i, j;
+//	vector<BaseReader*> reader_list;
+//	m_bat_folder = "";
+//
+//	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
+//	{
+//		fluo::VolumeData* vd = m_vd_pop_list[i];
+//		if (vd && vd->GetReader())
+//		{
+//			flvr::Texture *tex = vd->GetTexture();
+//			BaseReader* reader = vd->GetReader();
+//			if (tex && tex->isBrxml())
+//			{
+//				BRKXMLReader *br = (BRKXMLReader *)reader;
+//				int curlv = tex->GetCurLevel();
+//				for (j = 0; j < br->GetLevelNum(); j++)
+//				{
+//					tex->setLevel(j);
+//					if (vd->GetRenderer()) vd->GetRenderer()->clear_brick_buf();
+//				}
+//				tex->setLevel(curlv);
+//				long chan;
+//				vd->getValue(gstChannel, chan);
+//				tex->set_FrameAndChannel(0, chan);
+//				vd->setValue(gstTime, long(reader->GetCurTime()));
+//				wxString data_name = wxString(reader->GetDataName());
+//				if (i > 0)
+//					m_bat_folder += "_";
+//				m_bat_folder += data_name;
+//
+//				int chan_num = 0;
+//				if (data_name.Find("_1ch") != -1)
+//					chan_num = 1;
+//				else if (data_name.Find("_2ch") != -1)
+//					chan_num = 2;
+//				if (chan_num > 0 && chan >= chan_num)
+//					vd->setValue(gstDisplay, false);
+//				else
+//					vd->setValue(gstDisplay, true);
+//
+//				if (reader->GetChanNum() > 1)
+//					data_name += wxString::Format("_%d", chan + 1);
+//				vd->setName(data_name.ToStdString());
+//			}
+//			else
+//			{
+//				bool found = false;
+//				for (j = 0; j < (int)reader_list.size(); j++)
+//				{
+//					if (reader == reader_list[j])
+//					{
+//						found = true;
+//						break;
+//					}
+//				}
+//				if (!found)
+//				{
+//					reader->LoadOffset(frame);
+//					reader_list.push_back(reader);
+//				}
+//
+//				double spcx, spcy, spcz;
+//				vd->getValue(gstSpcX, spcx);
+//				vd->getValue(gstSpcY, spcy);
+//				vd->getValue(gstSpcZ, spcz);
+//				long chan;
+//				vd->getValue(gstChannel, chan);
+//				Nrrd* data = reader->Convert(0, chan, true);
+//				if (vd->ReplaceData(data, true))
+//					vd->setValue(gstDisplay, true);
+//				else
+//				{
+//					vd->setValue(gstDisplay, false);
+//					continue;
+//				}
+//
+//				wxString data_name = wxString(reader->GetDataName());
+//				if (i > 0)
+//					m_bat_folder += "_";
+//				m_bat_folder += data_name;
+//
+//				int chan_num = 0;
+//				if (data_name.Find("_1ch") != -1)
+//					chan_num = 1;
+//				else if (data_name.Find("_2ch") != -1)
+//					chan_num = 2;
+//				if (chan_num > 0 && chan >= chan_num)
+//					vd->setValue(gstDisplay, false);
+//				else
+//					vd->setValue(gstDisplay, true);
+//
+//				if (reader->GetChanNum() > 1)
+//					data_name += wxString::Format("_%d", chan + 1);
+//				vd->setName(data_name.ToStdString());
+//				vd->setValue(gstDataPath, reader->GetPathName());
+//				vd->setValue(gstTime, long(reader->GetCurTime()));
+//				if (!reader->IsSpcInfoValid())
+//				{
+//					vd->setValue(gstSpcX, spcx);
+//					vd->setValue(gstSpcY, spcy);
+//					vd->setValue(gstSpcZ, spcz);
+//				}
+//				else
+//				{
+//					vd->setValue(gstSpcX, reader->GetXSpc());
+//					vd->setValue(gstSpcY, reader->GetYSpc());
+//					vd->setValue(gstSpcZ, reader->GetZSpc());
+//				}
+//				if (vd->GetRenderer())
+//					vd->GetRenderer()->clear_tex_pool();
+//			}
+//		}
+//	}
+//
+//	InitView(INIT_BOUNDS | INIT_CENTER);
+//
+//	if (m_frame)
+//	{
+//		m_frame->UpdateList();
+//		m_frame->UpdateTree(
+//			m_frame->GetCurSelVol() ?
+//			m_frame->GetCurSelVol()->getName() :
+//			"");
+//	}
+//}
 
 void RenderCanvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {

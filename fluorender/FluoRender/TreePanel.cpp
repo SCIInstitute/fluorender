@@ -140,129 +140,129 @@ void DataTreeCtrl::DeleteSelection()
 	if (m_fixed)
 		return;
 
-	wxTreeItemId sel_item = GetSelection();
+	//wxTreeItemId sel_item = GetSelection();
 
-	if (sel_item.IsOk() && m_frame)
-	{
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type == 1)//view
-		{
-			wxString name = GetItemText(sel_item);
-			m_frame->DeleteVRenderView(name);
-		}
+	//if (sel_item.IsOk() && m_frame)
+	//{
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data && item_data->type == 1)//view
+	//	{
+	//		wxString name = GetItemText(sel_item);
+	//		m_frame->DeleteVRenderView(name);
+	//	}
 
-		wxString name_data = GetItemText(sel_item);
-		wxTreeItemId par_item = GetItemParent(sel_item);
-		if (!par_item.IsOk())
-			return;
-		wxString par_name = GetItemText(par_item);
+	//	wxString name_data = GetItemText(sel_item);
+	//	wxTreeItemId par_item = GetItemParent(sel_item);
+	//	if (!par_item.IsOk())
+	//		return;
+	//	wxString par_name = GetItemText(par_item);
 
-		LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-		if (par_item_data)
-		{
-			switch (par_item_data->type)
-			{
-			case 1://view
-				{
-					RenderCanvas* view = m_frame->GetView(par_name);
-					if (!view)
-						break;
-					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-					if (item_data)
-					{
-						if (item_data->type == 2)//volume data
-						{
-							fluo::VolumeData* vd = view->GetVolumeData(name_data.ToStdString());
-							if (vd)
-							{
-								vd->setValue(gstDisplay, true);
-								view->RemoveVolumeData(name_data.ToStdString());
-								if (view->GetVolMethod() == VOL_METHOD_MULTI)
-								{
-									AdjustView* adjust_view = m_frame->GetAdjustView();
-									if (adjust_view)
-									{
-										adjust_view->SetView(view);
-										adjust_view->UpdateSync();
-									}
-								}
-							}
-						}
-						else if (item_data->type == 3)//mesh data
-						{
-							fluo::MeshData* md = view->GetMeshData(name_data.ToStdString());
-							if (md)
-							{
-								md->setValue(gstDisplay, true);
-								view->RemoveMeshData(name_data.ToStdString());
-							}
-						}
-						else if (item_data->type == 4)//annotations
-						{
-							fluo::Annotations* ann = view->GetAnnotations(name_data.ToStdString());
-							if (ann)
-							{
-								ann->setValue(gstDisplay, true);
-								view->RemoveAnnotations(name_data.ToStdString());
-							}
-						}
-						else if (item_data->type == 5)//group
-						{
-							view->RemoveGroup(name_data.ToStdString());
-						}
-						else if (item_data->type == 6)//mesh group
-						{
-							view->RemoveGroup(name_data.ToStdString());
-						}
-					}
-					m_frame->UpdateTree();
-					m_frame->RefreshVRenderViews();
-					m_frame->OnSelection(1);
-				}
-				break;
-			case 5://group
-				{
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					wxString gpar_name = GetItemText(gpar_item);
-					RenderCanvas* view = m_frame->GetView(gpar_name);
-					if (!view)
-						break;
-					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-					if (item_data && item_data->type == 2)
-						view->RemoveVolumeData(name_data.ToStdString());
-					m_frame->UpdateTree();
-					m_frame->RefreshVRenderViews();
-					m_frame->OnSelection(1);
+	//	LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//	if (par_item_data)
+	//	{
+	//		switch (par_item_data->type)
+	//		{
+	//		case 1://view
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(par_name);
+	//				if (!view)
+	//					break;
+	//				LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//				if (item_data)
+	//				{
+	//					if (item_data->type == 2)//volume data
+	//					{
+	//						fluo::VolumeData* vd = view->GetVolumeData(name_data.ToStdString());
+	//						if (vd)
+	//						{
+	//							vd->setValue(gstDisplay, true);
+	//							view->RemoveVolumeData(name_data.ToStdString());
+	//							if (view->GetVolMethod() == VOL_METHOD_MULTI)
+	//							{
+	//								AdjustView* adjust_view = m_frame->GetAdjustView();
+	//								if (adjust_view)
+	//								{
+	//									adjust_view->SetView(view);
+	//									adjust_view->UpdateSync();
+	//								}
+	//							}
+	//						}
+	//					}
+	//					else if (item_data->type == 3)//mesh data
+	//					{
+	//						fluo::MeshData* md = view->GetMeshData(name_data.ToStdString());
+	//						if (md)
+	//						{
+	//							md->setValue(gstDisplay, true);
+	//							view->RemoveMeshData(name_data.ToStdString());
+	//						}
+	//					}
+	//					else if (item_data->type == 4)//annotations
+	//					{
+	//						fluo::Annotations* ann = view->GetAnnotations(name_data.ToStdString());
+	//						if (ann)
+	//						{
+	//							ann->setValue(gstDisplay, true);
+	//							view->RemoveAnnotations(name_data.ToStdString());
+	//						}
+	//					}
+	//					else if (item_data->type == 5)//group
+	//					{
+	//						view->RemoveGroup(name_data.ToStdString());
+	//					}
+	//					else if (item_data->type == 6)//mesh group
+	//					{
+	//						view->RemoveGroup(name_data.ToStdString());
+	//					}
+	//				}
+	//				m_frame->UpdateTree();
+	//				m_frame->RefreshVRenderViews();
+	//				m_frame->OnSelection(1);
+	//			}
+	//			break;
+	//		case 5://group
+	//			{
+	//				wxTreeItemId gpar_item = GetItemParent(par_item);
+	//				wxString gpar_name = GetItemText(gpar_item);
+	//				RenderCanvas* view = m_frame->GetView(gpar_name);
+	//				if (!view)
+	//					break;
+	//				LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//				if (item_data && item_data->type == 2)
+	//					view->RemoveVolumeData(name_data.ToStdString());
+	//				m_frame->UpdateTree();
+	//				m_frame->RefreshVRenderViews();
+	//				m_frame->OnSelection(1);
 
-					if (view->GetVolMethod() == VOL_METHOD_MULTI)
-					{
-						AdjustView* adjust_view = m_frame->GetAdjustView();
-						if (adjust_view)
-						{
-							adjust_view->SetView(view);
-							adjust_view->UpdateSync();
-						}
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					wxString gpar_name = GetItemText(gpar_item);
-					RenderCanvas* view = m_frame->GetView(gpar_name);
-					if (!view)
-						break;
-					LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-					if (item_data && item_data->type==3)
-						view->RemoveMeshData(name_data.ToStdString());
-					m_frame->UpdateTree();
-					m_frame->RefreshVRenderViews();
-					m_frame->OnSelection(1);
-				}
-				break;
-			}
-		}
-	}
+	//				if (view->GetVolMethod() == VOL_METHOD_MULTI)
+	//				{
+	//					AdjustView* adjust_view = m_frame->GetAdjustView();
+	//					if (adjust_view)
+	//					{
+	//						adjust_view->SetView(view);
+	//						adjust_view->UpdateSync();
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		case 6://mesh group
+	//			{
+	//				wxTreeItemId gpar_item = GetItemParent(par_item);
+	//				wxString gpar_name = GetItemText(gpar_item);
+	//				RenderCanvas* view = m_frame->GetView(gpar_name);
+	//				if (!view)
+	//					break;
+	//				LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//				if (item_data && item_data->type==3)
+	//					view->RemoveMeshData(name_data.ToStdString());
+	//				m_frame->UpdateTree();
+	//				m_frame->RefreshVRenderViews();
+	//				m_frame->OnSelection(1);
+	//			}
+	//			break;
+	//		}
+	//	}
+	//}
 }
 
 void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
@@ -445,13 +445,13 @@ void DataTreeCtrl::OnIsolate(wxCommandEvent& event)
 			}
 		}
 
-		RenderCanvas* view = m_frame->GetView(viewname);
-		if (view)
-		{
-			view->Isolate(item_type, itemname);
-			view->RefreshGL(39);
-			m_frame->UpdateTreeIcons();
-		}
+		//RenderCanvas* view = m_frame->GetView(viewname);
+		//if (view)
+		//{
+		//	view->Isolate(item_type, itemname);
+		//	view->RefreshGL(39);
+		//	m_frame->UpdateTreeIcons();
+		//}
 
 		UpdateSelection();
 	}
@@ -504,13 +504,13 @@ void DataTreeCtrl::OnShowAll(wxCommandEvent& event)
 			}
 		}
 
-		RenderCanvas* view = m_frame->GetView(viewname);
-		if (view)
-		{
-			view->ShowAll();
-			view->RefreshGL(39);
-			m_frame->UpdateTreeIcons();
-		}
+		//RenderCanvas* view = m_frame->GetView(viewname);
+		//if (view)
+		//{
+		//	view->ShowAll();
+		//	view->RefreshGL(39);
+		//	m_frame->UpdateTreeIcons();
+		//}
 
 		UpdateSelection();
 	}
@@ -563,130 +563,130 @@ void DataTreeCtrl::OnAddMeshGroup(wxCommandEvent &event)
 	if (m_fixed)
 		return;
 
-	wxTreeItemId sel_item = GetSelection();
-	if (!m_frame) return;
+	//wxTreeItemId sel_item = GetSelection();
+	//if (!m_frame) return;
 
-	if (!sel_item.IsOk())
-	{
-		wxTreeItemIdValue cookie;
-		sel_item = GetFirstChild(GetRootItem(), cookie);
-	}
+	//if (!sel_item.IsOk())
+	//{
+	//	wxTreeItemIdValue cookie;
+	//	sel_item = GetFirstChild(GetRootItem(), cookie);
+	//}
 
-	if (sel_item.IsOk())
-	{
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type == 1)
-		{
-			//view
-			wxString name = GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetView(name);
-			if (view)
-			{
-				wxString group_name = view->AddMGroup("");
-				AddMGroupItem(sel_item, group_name);
-				Expand(sel_item);
-			}
-		}
-		else if (item_data && item_data->type == 2)
-		{
-			//volume
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//volume in view
-					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						AddMGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 5)
-				{
-					//volume in group
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
-							if (view)
-							{
-								wxString group_name = view->AddMGroup("");
-								AddMGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (item_data && item_data->type == 3)
-		{
-			//mesh
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//mesh in view
-					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						AddMGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 6)
-				{
-					//mesh in group
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
-							if (view)
-							{
-								wxString group_name = view->AddMGroup("");
-								AddMGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if ((item_data && item_data->type == 5) ||
-			(item_data && item_data->type == 6))
-		{
-			//group
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//group in view
-					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						wxString group_name = view->AddMGroup("");
-						AddMGroupItem(par_item, group_name);
-					}
-				}
-			}
-		}
-	}
+	//if (sel_item.IsOk())
+	//{
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data && item_data->type == 1)
+	//	{
+	//		//view
+	//		wxString name = GetItemText(sel_item);
+	//		RenderCanvas* view = m_frame->GetView(name);
+	//		if (view)
+	//		{
+	//			wxString group_name = view->AddMGroup("");
+	//			AddMGroupItem(sel_item, group_name);
+	//			Expand(sel_item);
+	//		}
+	//	}
+	//	else if (item_data && item_data->type == 2)
+	//	{
+	//		//volume
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
+	//			if (par_data && par_data->type == 1)
+	//			{
+	//				//volume in view
+	//				wxString name = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					wxString group_name = view->AddMGroup("");
+	//					AddMGroupItem(par_item, group_name);
+	//				}
+	//			}
+	//			else if (par_data && par_data->type == 5)
+	//			{
+	//				//volume in group
+	//				wxTreeItemId gpar_item = GetItemParent(par_item);
+	//				if (gpar_item.IsOk())
+	//				{
+	//					LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
+	//					if (gpar_data && gpar_data->type == 1)
+	//					{
+	//						wxString name = GetItemText(gpar_item);
+	//						RenderCanvas* view = m_frame->GetView(name);
+	//						if (view)
+	//						{
+	//							wxString group_name = view->AddMGroup("");
+	//							AddMGroupItem(gpar_item, group_name);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else if (item_data && item_data->type == 3)
+	//	{
+	//		//mesh
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
+	//			if (par_data && par_data->type == 1)
+	//			{
+	//				//mesh in view
+	//				wxString name = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					wxString group_name = view->AddMGroup("");
+	//					AddMGroupItem(par_item, group_name);
+	//				}
+	//			}
+	//			else if (par_data && par_data->type == 6)
+	//			{
+	//				//mesh in group
+	//				wxTreeItemId gpar_item = GetItemParent(par_item);
+	//				if (gpar_item.IsOk())
+	//				{
+	//					LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
+	//					if (gpar_data && gpar_data->type == 1)
+	//					{
+	//						wxString name = GetItemText(gpar_item);
+	//						RenderCanvas* view = m_frame->GetView(name);
+	//						if (view)
+	//						{
+	//							wxString group_name = view->AddMGroup("");
+	//							AddMGroupItem(gpar_item, group_name);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else if ((item_data && item_data->type == 5) ||
+	//		(item_data && item_data->type == 6))
+	//	{
+	//		//group
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_data = (LayerInfo*)GetItemData(par_item);
+	//			if (par_data && par_data->type == 1)
+	//			{
+	//				//group in view
+	//				wxString name = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					wxString group_name = view->AddMGroup("");
+	//					AddMGroupItem(par_item, group_name);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
@@ -694,130 +694,130 @@ void DataTreeCtrl::OnAddDataGroup(wxCommandEvent& event)
 	if (m_fixed)
 		return;
 
-	wxTreeItemId sel_item = GetSelection();
-	if (!m_frame) return;
+	//wxTreeItemId sel_item = GetSelection();
+	//if (!m_frame) return;
 
-	if (!sel_item.IsOk())
-	{
-		wxTreeItemIdValue cookie;
-		sel_item = GetFirstChild(GetRootItem(), cookie);
-	}
+	//if (!sel_item.IsOk())
+	//{
+	//	wxTreeItemIdValue cookie;
+	//	sel_item = GetFirstChild(GetRootItem(), cookie);
+	//}
 
-	if (sel_item.IsOk())
-	{
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type == 1)
-		{
-			//view
-			wxString name = GetItemText(sel_item);
-			RenderCanvas* view = m_frame->GetView(name);
-			if (view)
-			{
-				wxString group_name = view->AddGroup("");
-				AddGroupItem(sel_item, group_name);
-				Expand(sel_item);
-			}
-		}
-		else if (item_data && item_data->type == 2)
-		{
-			//volume
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//volume in view
-					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						AddGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 5)
-				{
-					//volume in group
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
-							if (view)
-							{
-								wxString group_name = view->AddGroup("");
-								AddGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (item_data && item_data->type == 3)
-		{
-			//mesh
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//mesh in view
-					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						AddGroupItem(par_item, group_name);
-					}
-				}
-				else if (par_data && par_data->type == 6)
-				{
-					//mesh in group
-					wxTreeItemId gpar_item = GetItemParent(par_item);
-					if (gpar_item.IsOk())
-					{
-						LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
-						if (gpar_data && gpar_data->type == 1)
-						{
-							wxString name = GetItemText(gpar_item);
-							RenderCanvas* view = m_frame->GetView(name);
-							if (view)
-							{
-								wxString group_name = view->AddGroup("");
-								AddGroupItem(gpar_item, group_name);
-							}
-						}
-					}
-				}
-			}
-		}
-		else if ((item_data && item_data->type == 5) ||
-			(item_data && item_data->type == 6))
-		{
-			//group
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_data = (LayerInfo*)GetItemData(par_item);
-				if (par_data && par_data->type == 1)
-				{
-					//group in view
-					wxString name = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						wxString group_name = view->AddGroup("");
-						AddGroupItem(par_item,group_name);
-					}
-				}
-			}
-		}
-	}
+	//if (sel_item.IsOk())
+	//{
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data && item_data->type == 1)
+	//	{
+	//		//view
+	//		wxString name = GetItemText(sel_item);
+	//		RenderCanvas* view = m_frame->GetView(name);
+	//		if (view)
+	//		{
+	//			wxString group_name = view->AddGroup("");
+	//			AddGroupItem(sel_item, group_name);
+	//			Expand(sel_item);
+	//		}
+	//	}
+	//	else if (item_data && item_data->type == 2)
+	//	{
+	//		//volume
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
+	//			if (par_data && par_data->type == 1)
+	//			{
+	//				//volume in view
+	//				wxString name = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					wxString group_name = view->AddGroup("");
+	//					AddGroupItem(par_item, group_name);
+	//				}
+	//			}
+	//			else if (par_data && par_data->type == 5)
+	//			{
+	//				//volume in group
+	//				wxTreeItemId gpar_item = GetItemParent(par_item);
+	//				if (gpar_item.IsOk())
+	//				{
+	//					LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
+	//					if (gpar_data && gpar_data->type == 1)
+	//					{
+	//						wxString name = GetItemText(gpar_item);
+	//						RenderCanvas* view = m_frame->GetView(name);
+	//						if (view)
+	//						{
+	//							wxString group_name = view->AddGroup("");
+	//							AddGroupItem(gpar_item, group_name);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else if (item_data && item_data->type == 3)
+	//	{
+	//		//mesh
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_data = (LayerInfo*) GetItemData(par_item);
+	//			if (par_data && par_data->type == 1)
+	//			{
+	//				//mesh in view
+	//				wxString name = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					wxString group_name = view->AddGroup("");
+	//					AddGroupItem(par_item, group_name);
+	//				}
+	//			}
+	//			else if (par_data && par_data->type == 6)
+	//			{
+	//				//mesh in group
+	//				wxTreeItemId gpar_item = GetItemParent(par_item);
+	//				if (gpar_item.IsOk())
+	//				{
+	//					LayerInfo* gpar_data = (LayerInfo*)GetItemData(gpar_item);
+	//					if (gpar_data && gpar_data->type == 1)
+	//					{
+	//						wxString name = GetItemText(gpar_item);
+	//						RenderCanvas* view = m_frame->GetView(name);
+	//						if (view)
+	//						{
+	//							wxString group_name = view->AddGroup("");
+	//							AddGroupItem(gpar_item, group_name);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else if ((item_data && item_data->type == 5) ||
+	//		(item_data && item_data->type == 6))
+	//	{
+	//		//group
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_data = (LayerInfo*)GetItemData(par_item);
+	//			if (par_data && par_data->type == 1)
+	//			{
+	//				//group in view
+	//				wxString name = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					wxString group_name = view->AddGroup("");
+	//					AddGroupItem(par_item,group_name);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void DataTreeCtrl::OnExpand(wxCommandEvent &event)
@@ -905,77 +905,77 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	if (m_fixed)
 		return;
 
-	wxTreeItemId sel_item = GetSelection();
-	if (!m_frame) return;
-	if (!sel_item.IsOk()) return;
+	//wxTreeItemId sel_item = GetSelection();
+	//if (!m_frame) return;
+	//if (!sel_item.IsOk()) return;
 
-	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-	if (!item_data) return;
+	//LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//if (!item_data) return;
 
-	wxString name = GetItemText(sel_item);
-	if (item_data->type == 1)
-	{
-		//view
-		RenderCanvas* view = m_frame->GetView(name);
-		if (view)
-			view->RandomizeColor();
-	}
-	else if (item_data->type == 2)
-	{
-		//volume
-		fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-		if (vd)
-		{
-			bool rc;
-			vd->toggleValue(gstRandomizeColor, rc);
-		}
-	}
-	else if (item_data->type == 3)
-	{
-		//mesh
-		fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
-		if (md)
-		{
-			bool bval;
-			md->toggleValue(gstRandomizeColor, bval);
-		}
-	}
-	else if (item_data->type == 5)
-	{
-		//volume group
-		wxString par_name = GetItemText(GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetView(par_name);
-		if (view)
-		{
-			fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
-			if (group)
-			{
-				bool rc;
-				group->toggleValue(gstRandomizeColor, rc);
-			}
-		}
-	}
-	else if (item_data->type == 6)
-	{
-		//mesh group
-		wxString par_name = GetItemText(GetItemParent(sel_item));
-		RenderCanvas* view = m_frame->GetView(par_name);
-		if (view)
-		{
-			fluo::MeshGroup* group = view->GetMGroup(name.ToStdString());
-			if (group)
-			{
-				bool bval;
-				group->toggleValue(gstRandomizeColor, bval);
-			}
-		}
-	}
+	//wxString name = GetItemText(sel_item);
+	//if (item_data->type == 1)
+	//{
+	//	//view
+	//	RenderCanvas* view = m_frame->GetView(name);
+	//	if (view)
+	//		view->RandomizeColor();
+	//}
+	//else if (item_data->type == 2)
+	//{
+	//	//volume
+	//	fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//	if (vd)
+	//	{
+	//		bool rc;
+	//		vd->toggleValue(gstRandomizeColor, rc);
+	//	}
+	//}
+	//else if (item_data->type == 3)
+	//{
+	//	//mesh
+	//	fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+	//	if (md)
+	//	{
+	//		bool bval;
+	//		md->toggleValue(gstRandomizeColor, bval);
+	//	}
+	//}
+	//else if (item_data->type == 5)
+	//{
+	//	//volume group
+	//	wxString par_name = GetItemText(GetItemParent(sel_item));
+	//	RenderCanvas* view = m_frame->GetView(par_name);
+	//	if (view)
+	//	{
+	//		fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
+	//		if (group)
+	//		{
+	//			bool rc;
+	//			group->toggleValue(gstRandomizeColor, rc);
+	//		}
+	//	}
+	//}
+	//else if (item_data->type == 6)
+	//{
+	//	//mesh group
+	//	wxString par_name = GetItemText(GetItemParent(sel_item));
+	//	RenderCanvas* view = m_frame->GetView(par_name);
+	//	if (view)
+	//	{
+	//		fluo::MeshGroup* group = view->GetMGroup(name.ToStdString());
+	//		if (group)
+	//		{
+	//			bool bval;
+	//			group->toggleValue(gstRandomizeColor, bval);
+	//		}
+	//	}
+	//}
 
-	m_scroll_pos = GetScrollPos(wxVERTICAL);
-	m_frame->UpdateTree(name);
-	SetScrollPos(wxVERTICAL, m_scroll_pos);
-	UpdateSelection();
-	m_frame->RefreshVRenderViews();
+	//m_scroll_pos = GetScrollPos(wxVERTICAL);
+	//m_frame->UpdateTree(name);
+	//SetScrollPos(wxVERTICAL, m_scroll_pos);
+	//UpdateSelection();
+	//m_frame->RefreshVRenderViews();
 }
 
 void DataTreeCtrl::OnCopyMask(wxCommandEvent& event)
@@ -1014,152 +1014,152 @@ void DataTreeCtrl::UpdateSelection()
 	if (!m_frame)
 		return;
 
-	//clear volume A for all views
-	for (int i=0; i< m_frame->GetViewNum(); i++)
-	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (view)
-			view->SetVolumeA(0);
-	}
+	////clear volume A for all views
+	//for (int i=0; i< m_frame->GetViewNum(); i++)
+	//{
+	//	RenderCanvas* view = m_frame->GetView(i);
+	//	if (view)
+	//		view->SetVolumeA(0);
+	//}
 
-	if (sel_item.IsOk())
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data)
-		{
-			switch (item_data->type)
-			{
-			case 0://root
-				m_frame->OnSelection(0);
-				break;
-			case 1://view
-				//m_frame->OnSelection(0);
-				{
-					wxString str = GetItemText(sel_item);
-					RenderCanvas* view = m_frame->GetView(str);
-					m_frame->OnSelection(1, view, 0, 0, 0);
-				}
-				break;
-			case 2://volume data
-				{
-					if (m_frame->GetAdjustView())
-					{
-						wxTreeItemId par_item = GetItemParent(sel_item);
-						if (par_item.IsOk())
-						{
-							LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-							if (par_item_data && par_item_data->type == 5)
-							{
-								//par is group
-								wxString str = GetItemText(GetItemParent(par_item));
-								RenderCanvas* view = m_frame->GetView(str);
-								if (view)
-								{
-									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-									str = GetItemText(par_item);
-									fluo::VolumeGroup* group = view->GetGroup(str.ToStdString());
-									m_frame->GetAdjustView()->SetGroupLink(group);
-									m_frame->OnSelection(2, view, group, vd, 0);
-									view->SetVolumeA(vd);
-								}
-							}
-							else if (par_item_data && par_item_data->type == 1)
-							{
-								//par is view
-								wxString str = GetItemText(par_item);
-								RenderCanvas* view = m_frame->GetView(str);
-								if (view)
-								{
-									fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-									m_frame->GetAdjustView()->SetGroupLink(0);
-									m_frame->OnSelection(2, view, 0, vd);
-									view->SetVolumeA(vd);
-								}
-							}
-						}
-					}
-				}
-				break;
-			case 3://mesh data
-				{
-					wxTreeItemId par_item = GetItemParent(sel_item);
-					if (par_item.IsOk())
-					{
-						LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-						if (par_item_data && par_item_data->type == 6)
-						{
-							//par is group
-							wxString str = GetItemText(GetItemParent(par_item));
-							RenderCanvas* view = m_frame->GetView(str);
-							if (view)
-							{
-								fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
-								m_frame->OnSelection(3, view, 0, 0, md);
-							}
-						}
-						else if (par_item_data && par_item_data->type == 1)
-						{
-							//par is view
-							wxString str = GetItemText(par_item);
-							RenderCanvas* view = m_frame->GetView(str);
-							if (view)
-							{
-								fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
-								m_frame->OnSelection(3, view, 0, 0, md);
-							}
-						}
-					}
-				}
-				break;
-			case 4://annotations
-				{
-					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
-					fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
-					m_frame->OnSelection(4, view, 0, 0, 0, ann);
-				}
-				break;
-			case 5://group
-				{
-					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
-					if (view)
-					{
-						fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
-						m_frame->OnSelection(5, view, group);
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
-					if (view)
-					{
-						m_frame->OnSelection(0);
-					}
-				}
-				break;
-			}
+	//if (sel_item.IsOk())
+	//{
+	//	//select data
+	//	wxString name = GetItemText(sel_item);
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data)
+	//	{
+	//		switch (item_data->type)
+	//		{
+	//		case 0://root
+	//			m_frame->OnSelection(0);
+	//			break;
+	//		case 1://view
+	//			//m_frame->OnSelection(0);
+	//			{
+	//				wxString str = GetItemText(sel_item);
+	//				RenderCanvas* view = m_frame->GetView(str);
+	//				m_frame->OnSelection(1, view, 0, 0, 0);
+	//			}
+	//			break;
+	//		case 2://volume data
+	//			{
+	//				if (m_frame->GetAdjustView())
+	//				{
+	//					wxTreeItemId par_item = GetItemParent(sel_item);
+	//					if (par_item.IsOk())
+	//					{
+	//						LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//						if (par_item_data && par_item_data->type == 5)
+	//						{
+	//							//par is group
+	//							wxString str = GetItemText(GetItemParent(par_item));
+	//							RenderCanvas* view = m_frame->GetView(str);
+	//							if (view)
+	//							{
+	//								fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//								str = GetItemText(par_item);
+	//								fluo::VolumeGroup* group = view->GetGroup(str.ToStdString());
+	//								m_frame->GetAdjustView()->SetGroupLink(group);
+	//								m_frame->OnSelection(2, view, group, vd, 0);
+	//								view->SetVolumeA(vd);
+	//							}
+	//						}
+	//						else if (par_item_data && par_item_data->type == 1)
+	//						{
+	//							//par is view
+	//							wxString str = GetItemText(par_item);
+	//							RenderCanvas* view = m_frame->GetView(str);
+	//							if (view)
+	//							{
+	//								fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//								m_frame->GetAdjustView()->SetGroupLink(0);
+	//								m_frame->OnSelection(2, view, 0, vd);
+	//								view->SetVolumeA(vd);
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		case 3://mesh data
+	//			{
+	//				wxTreeItemId par_item = GetItemParent(sel_item);
+	//				if (par_item.IsOk())
+	//				{
+	//					LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//					if (par_item_data && par_item_data->type == 6)
+	//					{
+	//						//par is group
+	//						wxString str = GetItemText(GetItemParent(par_item));
+	//						RenderCanvas* view = m_frame->GetView(str);
+	//						if (view)
+	//						{
+	//							fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+	//							m_frame->OnSelection(3, view, 0, 0, md);
+	//						}
+	//					}
+	//					else if (par_item_data && par_item_data->type == 1)
+	//					{
+	//						//par is view
+	//						wxString str = GetItemText(par_item);
+	//						RenderCanvas* view = m_frame->GetView(str);
+	//						if (view)
+	//						{
+	//							fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+	//							m_frame->OnSelection(3, view, 0, 0, md);
+	//						}
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		case 4://annotations
+	//			{
+	//				wxString par_name = GetItemText(GetItemParent(sel_item));
+	//				RenderCanvas* view = m_frame->GetView(par_name);
+	//				fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
+	//				m_frame->OnSelection(4, view, 0, 0, 0, ann);
+	//			}
+	//			break;
+	//		case 5://group
+	//			{
+	//				wxString par_name = GetItemText(GetItemParent(sel_item));
+	//				RenderCanvas* view = m_frame->GetView(par_name);
+	//				if (view)
+	//				{
+	//					fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
+	//					m_frame->OnSelection(5, view, group);
+	//				}
+	//			}
+	//			break;
+	//		case 6://mesh group
+	//			{
+	//				wxString par_name = GetItemText(GetItemParent(sel_item));
+	//				RenderCanvas* view = m_frame->GetView(par_name);
+	//				if (view)
+	//				{
+	//					m_frame->OnSelection(0);
+	//				}
+	//			}
+	//			break;
+	//		}
 
-			if (item_data->type == 2 ||
-				item_data->type == 3 ||
-				item_data->type == 4)
-			{
-				int list_type = 0;
-				if (item_data->type == 2)
-					list_type = 1;
-				else if (item_data->type == 3)
-					list_type = 2;
-				else if (item_data->type == 4)
-					list_type = 3;
-				if (m_frame->GetList())
-					m_frame->GetList()->SetSelection(list_type, name);
-			}
-		}
-	}
+	//		if (item_data->type == 2 ||
+	//			item_data->type == 3 ||
+	//			item_data->type == 4)
+	//		{
+	//			int list_type = 0;
+	//			if (item_data->type == 2)
+	//				list_type = 1;
+	//			else if (item_data->type == 3)
+	//				list_type = 2;
+	//			else if (item_data->type == 4)
+	//				list_type = 3;
+	//			if (m_frame->GetList())
+	//				m_frame->GetList()->SetSelection(list_type, name);
+	//		}
+	//	}
+	//}
 }
 
 wxString DataTreeCtrl::GetCurrentSel()
@@ -1268,131 +1268,131 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	bool rc = wxGetKeyState(WXK_CONTROL);
 	bool bval;
 
-	if (sel_item.IsOk() && m_frame)
-	{
-		name = GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data)
-		{
-			switch (item_data->type)
-			{
-			case 1://view
-				{
-					RenderCanvas* view = m_frame->GetView(name);
-					if (view)
-					{
-						if (rc)
-							view->RandomizeColor();
-						else
-							view->ToggleDraw();
-					}
-				}
-				break;
-			case 2://volume data
-				{
-					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-					if (vd)
-					{
-						if (rc)
-							vd->toggleValue(gstRandomizeColor, bval);
-						else
-						{
-							vd->toggleValue(gstDisplay, bval);
-							for (int i=0; i< m_frame->GetViewNum(); i++)
-							{
-								RenderCanvas* view = m_frame->GetView(i);
-								if (view)
-									view->SetVolPopDirty();
-							}
-						}
-					}
-				}
-				break;
-			case 3://mesh data
-				{
-				fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
-					if (md)
-					{
-						if (rc)
-						{
-							md->toggleValue(gstRandomizeColor, bval);
-						}
-						else
-						{
-							md->toggleValue(gstDisplay, bval);
-							for (int i=0; i< m_frame->GetViewNum(); i++)
-							{
-								RenderCanvas* view = m_frame->GetView(i);
-								if (view)
-									view->SetMeshPopDirty();
-							}
-						}
-					}
-				}
-				break;
-			case 4://annotations
-				{
-					fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
-					if (ann)
-					{
-						ann->toggleValue(gstDisplay, bval);
-					}
-				}
-				break;
-			case 5://group
-				{
-					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
-					if (view)
-					{
-						fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
-						if (group)
-						{
-							if (rc)
-								group->toggleValue(gstRandomizeColor, bval);
-							else
-							{
-								group->toggleValue(gstDisplay, bval);
-								view->SetVolPopDirty();
-							}
-						}
-					}
-				}
-				break;
-			case 6://mesh group
-				{
-					wxString par_name = GetItemText(GetItemParent(sel_item));
-					RenderCanvas* view = m_frame->GetView(par_name);
-					if (view)
-					{
-						fluo::MeshGroup* group = view->GetMGroup(name.ToStdString());
-						if (group)
-						{
-							if (rc)
-							{
-								group->toggleValue(gstRandomizeColor, bval);
-							}
-							else
-							{
-								group->toggleValue(gstDisplay, bval);
-								view->SetMeshPopDirty();
-							}
-						}
-					}
-				}
-				break;
-			}
-		}
+	//if (sel_item.IsOk() && m_frame)
+	//{
+	//	name = GetItemText(sel_item);
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data)
+	//	{
+	//		switch (item_data->type)
+	//		{
+	//		case 1://view
+	//			{
+	//				RenderCanvas* view = m_frame->GetView(name);
+	//				if (view)
+	//				{
+	//					if (rc)
+	//						view->RandomizeColor();
+	//					else
+	//						view->ToggleDraw();
+	//				}
+	//			}
+	//			break;
+	//		case 2://volume data
+	//			{
+	//				fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//				if (vd)
+	//				{
+	//					if (rc)
+	//						vd->toggleValue(gstRandomizeColor, bval);
+	//					else
+	//					{
+	//						vd->toggleValue(gstDisplay, bval);
+	//						for (int i=0; i< m_frame->GetViewNum(); i++)
+	//						{
+	//							RenderCanvas* view = m_frame->GetView(i);
+	//							if (view)
+	//								view->SetVolPopDirty();
+	//						}
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		case 3://mesh data
+	//			{
+	//			fluo::MeshData* md = m_frame->GetDataManager()->GetMeshData(name.ToStdString());
+	//				if (md)
+	//				{
+	//					if (rc)
+	//					{
+	//						md->toggleValue(gstRandomizeColor, bval);
+	//					}
+	//					else
+	//					{
+	//						md->toggleValue(gstDisplay, bval);
+	//						for (int i=0; i< m_frame->GetViewNum(); i++)
+	//						{
+	//							RenderCanvas* view = m_frame->GetView(i);
+	//							if (view)
+	//								view->SetMeshPopDirty();
+	//						}
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		case 4://annotations
+	//			{
+	//				fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
+	//				if (ann)
+	//				{
+	//					ann->toggleValue(gstDisplay, bval);
+	//				}
+	//			}
+	//			break;
+	//		case 5://group
+	//			{
+	//				wxString par_name = GetItemText(GetItemParent(sel_item));
+	//				RenderCanvas* view = m_frame->GetView(par_name);
+	//				if (view)
+	//				{
+	//					fluo::VolumeGroup* group = view->GetGroup(name.ToStdString());
+	//					if (group)
+	//					{
+	//						if (rc)
+	//							group->toggleValue(gstRandomizeColor, bval);
+	//						else
+	//						{
+	//							group->toggleValue(gstDisplay, bval);
+	//							view->SetVolPopDirty();
+	//						}
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		case 6://mesh group
+	//			{
+	//				wxString par_name = GetItemText(GetItemParent(sel_item));
+	//				RenderCanvas* view = m_frame->GetView(par_name);
+	//				if (view)
+	//				{
+	//					fluo::MeshGroup* group = view->GetMGroup(name.ToStdString());
+	//					if (group)
+	//					{
+	//						if (rc)
+	//						{
+	//							group->toggleValue(gstRandomizeColor, bval);
+	//						}
+	//						else
+	//						{
+	//							group->toggleValue(gstDisplay, bval);
+	//							view->SetMeshPopDirty();
+	//						}
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		}
+	//	}
 
-		m_scroll_pos = GetScrollPos(wxVERTICAL);
-		if (rc)
-			m_frame->UpdateTree(name);
-		else
-			m_frame->UpdateTreeIcons();
-		SetScrollPos(wxVERTICAL, m_scroll_pos);
-		UpdateSelection();
-		m_frame->RefreshVRenderViews(false, true);
-	}
+	//	m_scroll_pos = GetScrollPos(wxVERTICAL);
+	//	if (rc)
+	//		m_frame->UpdateTree(name);
+	//	else
+	//		m_frame->UpdateTreeIcons();
+	//	SetScrollPos(wxVERTICAL, m_scroll_pos);
+	//	UpdateSelection();
+	//	m_frame->RefreshVRenderViews(false, true);
+	//}
 }
 
 void DataTreeCtrl::OnBeginDrag(wxTreeEvent& event)
@@ -1446,200 +1446,200 @@ void DataTreeCtrl::OnEndDrag(wxTreeEvent& event)
 		dst_par_item = dst_item.IsOk()?GetItemParent(dst_item):0;
 	m_drag_item = (wxTreeItemId)0l;
 
-	if (src_item.IsOk() && dst_item.IsOk() &&
-		src_par_item.IsOk() &&
-		dst_par_item.IsOk() && m_frame)
-	{
-		int src_type = ((LayerInfo*)GetItemData(src_item))->type;
-		int src_par_type = ((LayerInfo*)GetItemData(src_par_item))->type;
-		int dst_type = ((LayerInfo*)GetItemData(dst_item))->type;
-		int dst_par_type = ((LayerInfo*)GetItemData(dst_par_item))->type;
+	//if (src_item.IsOk() && dst_item.IsOk() &&
+	//	src_par_item.IsOk() &&
+	//	dst_par_item.IsOk() && m_frame)
+	//{
+	//	int src_type = ((LayerInfo*)GetItemData(src_item))->type;
+	//	int src_par_type = ((LayerInfo*)GetItemData(src_par_item))->type;
+	//	int dst_type = ((LayerInfo*)GetItemData(dst_item))->type;
+	//	int dst_par_type = ((LayerInfo*)GetItemData(dst_par_item))->type;
 
-		std::string src_name = GetItemText(src_item).ToStdString();
-		std::string src_par_name = GetItemText(src_par_item).ToStdString();
-		std::string dst_name = GetItemText(dst_item).ToStdString();
-		std::string dst_par_name = GetItemText(dst_par_item).ToStdString();
+	//	std::string src_name = GetItemText(src_item).ToStdString();
+	//	std::string src_par_name = GetItemText(src_par_item).ToStdString();
+	//	std::string dst_name = GetItemText(dst_item).ToStdString();
+	//	std::string dst_par_name = GetItemText(dst_par_item).ToStdString();
 
-		if (src_par_type == 1 &&
-			dst_par_type == 1 &&
-			src_par_name == dst_par_name &&
-			src_name != dst_name)
-		{
-			//move within the same view
-			if (src_type == 2 && dst_type == 5)
-			{
-				//move volume to the group in the same view
-				RenderCanvas* view = m_frame->GetView(src_par_name);
-				if (view)
-					view->MoveLayertoGroup(dst_name, src_name, "");
-			}
-			else if (src_type==3 && dst_type==6)
-			{
-				//move mesh into a group
-				RenderCanvas* view = m_frame->GetView(src_par_name);
-				if (view)
-					view->MoveMeshtoGroup(dst_name, src_name, "");
-			}
-			else
-			{
-				RenderCanvas* view = m_frame->GetView(src_par_name);
-				if (view)
-					view->MoveLayerinView(src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 5 &&
-			dst_par_type == 5 &&
-			src_par_name == dst_par_name &&
-			src_name != dst_name)
-		{
-			//move volume within the same group
-			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
-			if (view)
-				view->MoveLayerinGroup(src_par_name, src_name, dst_name);
-		}
-		else if (src_par_type == 5 && //par is group
-			src_type == 2 && //src is volume
-			dst_par_type == 1 && //dst's par is view
-			dst_par_name == GetItemText(GetItemParent(src_par_item))) //in same view
-		{
-			//move volume outside of the group
-			if (dst_type == 5) //dst is group
-			{
-				RenderCanvas* view = m_frame->GetView(dst_par_name);
-				if (view)
-					view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, "");
-			}
-			else
-			{
-				RenderCanvas *view = m_frame->GetView(dst_par_name);
-				if (view)
-					view->MoveLayertoView(src_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 1 && //src's par is view
-			src_type == 2 && //src is volume
-			dst_par_type == 5 && //dst's par is group
-			src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
-		{
-			//move volume into group
-			RenderCanvas* view = m_frame->GetView(src_par_name);
-			if (view)
-				view->MoveLayertoGroup(dst_par_name, src_name, dst_name);
-		}
-		else if (src_par_type == 5 && //src's par is group
-			src_type == 2 && // src is volume
-			dst_par_type == 5 && //dst's par is group
-			dst_type == 2 && //dst is volume
-			GetItemText(GetItemParent(src_par_item)) == GetItemText(GetItemParent(dst_par_item)) && // in the same view
-			GetItemText(src_par_item) != GetItemText(dst_par_item))// par groups are different
-		{
-			//move volume from one group to another
-			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
-			if (view)
-				view->MoveLayerfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
-		}
-		else if (src_type == 2 && //src is volume
-			src_par_type == 5 && //src's par is group
-			dst_type == 1 && //dst is view
-			GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
-		{
-			//move volume outside of the group
-			RenderCanvas* view = m_frame->GetView(dst_name);
-			if (view)
-				view->MoveLayertoView(src_par_name, src_name, "");
-		}
-		else if (src_par_type == 6 &&
-			dst_par_type == 6 &&
-			src_par_name == dst_par_name &&
-			src_name != dst_name)
-		{
-			//move mesh within the same group
-			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
-			if (view)
-				view->MoveMeshinGroup(src_par_name, src_name, dst_name);
-		}
-		else if (src_par_type == 6 && //par is group
-			src_type == 3 && //src is mesh
-			dst_par_type == 1 && //dst's par is view
-			dst_par_name == GetItemText(GetItemParent(src_par_item))) //in same view
-		{
-			//move mesh outside of the group
-			if (dst_type == 6) //dst is group
-			{
-				RenderCanvas* view = m_frame->GetView(dst_par_name);
-				if (view)
-					view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, "");
-			}
-			else
-			{
-				RenderCanvas *view = m_frame->GetView(dst_par_name);
-				if (view)
-					view->MoveMeshtoView(src_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 1 && //src's par is view
-			src_type == 3 && //src is mesh
-			dst_par_type == 6 && //dst's par is group
-			src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
-		{
-			//move mesh into group
-			RenderCanvas* view = m_frame->GetView(src_par_name);
-			if (view)
-				view->MoveMeshtoGroup(dst_par_name, src_name, dst_name);
-		}
-		else if (src_par_type == 6 && //src's par is group
-			src_type == 3 && // src is mesh
-			dst_par_type == 6 && //dst's par is group
-			dst_type == 3 && //dst is mesh
-			GetItemText(GetItemParent(src_par_item)) == GetItemText(GetItemParent(dst_par_item)) && // in the same view
-			GetItemText(src_par_item) != GetItemText(dst_par_item))// par groups are different
-		{
-			//move mesh from one group to another
-			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
-			if (view)
-				view->MoveMeshfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
-		}
-		else if (src_type == 3 && //src is mesh
-			src_par_type == 6 && //src's par is group
-			dst_type == 1 && //dst is view
-			GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
-		{
-			//move mesh outside of the group
-			RenderCanvas* view = m_frame->GetView(dst_name);
-			if (view)
-				view->MoveMeshtoView(src_par_name, src_name, "");
-		}
+	//	if (src_par_type == 1 &&
+	//		dst_par_type == 1 &&
+	//		src_par_name == dst_par_name &&
+	//		src_name != dst_name)
+	//	{
+	//		//move within the same view
+	//		if (src_type == 2 && dst_type == 5)
+	//		{
+	//			//move volume to the group in the same view
+	//			RenderCanvas* view = m_frame->GetView(src_par_name);
+	//			if (view)
+	//				view->MoveLayertoGroup(dst_name, src_name, "");
+	//		}
+	//		else if (src_type==3 && dst_type==6)
+	//		{
+	//			//move mesh into a group
+	//			RenderCanvas* view = m_frame->GetView(src_par_name);
+	//			if (view)
+	//				view->MoveMeshtoGroup(dst_name, src_name, "");
+	//		}
+	//		else
+	//		{
+	//			RenderCanvas* view = m_frame->GetView(src_par_name);
+	//			if (view)
+	//				view->MoveLayerinView(src_name, dst_name);
+	//		}
+	//	}
+	//	else if (src_par_type == 5 &&
+	//		dst_par_type == 5 &&
+	//		src_par_name == dst_par_name &&
+	//		src_name != dst_name)
+	//	{
+	//		//move volume within the same group
+	//		wxString str = GetItemText(GetItemParent(src_par_item));
+	//		RenderCanvas* view = m_frame->GetView(str);
+	//		if (view)
+	//			view->MoveLayerinGroup(src_par_name, src_name, dst_name);
+	//	}
+	//	else if (src_par_type == 5 && //par is group
+	//		src_type == 2 && //src is volume
+	//		dst_par_type == 1 && //dst's par is view
+	//		dst_par_name == GetItemText(GetItemParent(src_par_item))) //in same view
+	//	{
+	//		//move volume outside of the group
+	//		if (dst_type == 5) //dst is group
+	//		{
+	//			RenderCanvas* view = m_frame->GetView(dst_par_name);
+	//			if (view)
+	//				view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, "");
+	//		}
+	//		else
+	//		{
+	//			RenderCanvas *view = m_frame->GetView(dst_par_name);
+	//			if (view)
+	//				view->MoveLayertoView(src_par_name, src_name, dst_name);
+	//		}
+	//	}
+	//	else if (src_par_type == 1 && //src's par is view
+	//		src_type == 2 && //src is volume
+	//		dst_par_type == 5 && //dst's par is group
+	//		src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
+	//	{
+	//		//move volume into group
+	//		RenderCanvas* view = m_frame->GetView(src_par_name);
+	//		if (view)
+	//			view->MoveLayertoGroup(dst_par_name, src_name, dst_name);
+	//	}
+	//	else if (src_par_type == 5 && //src's par is group
+	//		src_type == 2 && // src is volume
+	//		dst_par_type == 5 && //dst's par is group
+	//		dst_type == 2 && //dst is volume
+	//		GetItemText(GetItemParent(src_par_item)) == GetItemText(GetItemParent(dst_par_item)) && // in the same view
+	//		GetItemText(src_par_item) != GetItemText(dst_par_item))// par groups are different
+	//	{
+	//		//move volume from one group to another
+	//		wxString str = GetItemText(GetItemParent(src_par_item));
+	//		RenderCanvas* view = m_frame->GetView(str);
+	//		if (view)
+	//			view->MoveLayerfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
+	//	}
+	//	else if (src_type == 2 && //src is volume
+	//		src_par_type == 5 && //src's par is group
+	//		dst_type == 1 && //dst is view
+	//		GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
+	//	{
+	//		//move volume outside of the group
+	//		RenderCanvas* view = m_frame->GetView(dst_name);
+	//		if (view)
+	//			view->MoveLayertoView(src_par_name, src_name, "");
+	//	}
+	//	else if (src_par_type == 6 &&
+	//		dst_par_type == 6 &&
+	//		src_par_name == dst_par_name &&
+	//		src_name != dst_name)
+	//	{
+	//		//move mesh within the same group
+	//		wxString str = GetItemText(GetItemParent(src_par_item));
+	//		RenderCanvas* view = m_frame->GetView(str);
+	//		if (view)
+	//			view->MoveMeshinGroup(src_par_name, src_name, dst_name);
+	//	}
+	//	else if (src_par_type == 6 && //par is group
+	//		src_type == 3 && //src is mesh
+	//		dst_par_type == 1 && //dst's par is view
+	//		dst_par_name == GetItemText(GetItemParent(src_par_item))) //in same view
+	//	{
+	//		//move mesh outside of the group
+	//		if (dst_type == 6) //dst is group
+	//		{
+	//			RenderCanvas* view = m_frame->GetView(dst_par_name);
+	//			if (view)
+	//				view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, "");
+	//		}
+	//		else
+	//		{
+	//			RenderCanvas *view = m_frame->GetView(dst_par_name);
+	//			if (view)
+	//				view->MoveMeshtoView(src_par_name, src_name, dst_name);
+	//		}
+	//	}
+	//	else if (src_par_type == 1 && //src's par is view
+	//		src_type == 3 && //src is mesh
+	//		dst_par_type == 6 && //dst's par is group
+	//		src_par_name == GetItemText(GetItemParent(dst_par_item))) //in the same view
+	//	{
+	//		//move mesh into group
+	//		RenderCanvas* view = m_frame->GetView(src_par_name);
+	//		if (view)
+	//			view->MoveMeshtoGroup(dst_par_name, src_name, dst_name);
+	//	}
+	//	else if (src_par_type == 6 && //src's par is group
+	//		src_type == 3 && // src is mesh
+	//		dst_par_type == 6 && //dst's par is group
+	//		dst_type == 3 && //dst is mesh
+	//		GetItemText(GetItemParent(src_par_item)) == GetItemText(GetItemParent(dst_par_item)) && // in the same view
+	//		GetItemText(src_par_item) != GetItemText(dst_par_item))// par groups are different
+	//	{
+	//		//move mesh from one group to another
+	//		wxString str = GetItemText(GetItemParent(src_par_item));
+	//		RenderCanvas* view = m_frame->GetView(str);
+	//		if (view)
+	//			view->MoveMeshfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
+	//	}
+	//	else if (src_type == 3 && //src is mesh
+	//		src_par_type == 6 && //src's par is group
+	//		dst_type == 1 && //dst is view
+	//		GetItemText(GetItemParent(src_par_item)) == dst_name) //in the same view
+	//	{
+	//		//move mesh outside of the group
+	//		RenderCanvas* view = m_frame->GetView(dst_name);
+	//		if (view)
+	//			view->MoveMeshtoView(src_par_name, src_name, "");
+	//	}
 
-		m_frame->UpdateTree(src_name);
-		m_frame->RefreshVRenderViews();
-	}
-	else if (src_item.IsOk() && src_par_item.IsOk() &&
-		!dst_item.IsOk() && m_frame)
-	{
-		//move volume out of the group
-		int src_type = ((LayerInfo*)GetItemData(src_item))->type;
-		int src_par_type = ((LayerInfo*)GetItemData(src_par_item))->type;
+	//	m_frame->UpdateTree(src_name);
+	//	m_frame->RefreshVRenderViews();
+	//}
+	//else if (src_item.IsOk() && src_par_item.IsOk() &&
+	//	!dst_item.IsOk() && m_frame)
+	//{
+	//	//move volume out of the group
+	//	int src_type = ((LayerInfo*)GetItemData(src_item))->type;
+	//	int src_par_type = ((LayerInfo*)GetItemData(src_par_item))->type;
 
-		std::string src_name = GetItemText(src_item).ToStdString();
-		std::string src_par_name = GetItemText(src_par_item).ToStdString();
+	//	std::string src_name = GetItemText(src_item).ToStdString();
+	//	std::string src_par_name = GetItemText(src_par_item).ToStdString();
 
-		if (src_type == 2 && src_par_type == 5)
-		{
-			wxString str = GetItemText(GetItemParent(src_par_item));
-			RenderCanvas* view = m_frame->GetView(str);
-			if (view)
-			{
-				view->MoveLayertoView(src_par_name, src_name, "");
+	//	if (src_type == 2 && src_par_type == 5)
+	//	{
+	//		wxString str = GetItemText(GetItemParent(src_par_item));
+	//		RenderCanvas* view = m_frame->GetView(str);
+	//		if (view)
+	//		{
+	//			view->MoveLayertoView(src_par_name, src_name, "");
 
-				m_frame->UpdateTree(src_name);
-				m_frame->RefreshVRenderViews();
-			}
-		}
-	}
+	//			m_frame->UpdateTree(src_name);
+	//			m_frame->RefreshVRenderViews();
+	//		}
+	//	}
+	//}
 
 	SetScrollPos(wxVERTICAL, m_scroll_pos);
 }
@@ -1872,186 +1872,186 @@ void DataTreeCtrl::BrushClear()
 {
 	wxTreeItemId sel_item = GetSelection();
 
-	if (sel_item.IsOk() && m_frame)
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type==2)
-		{
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-				if (par_item_data && par_item_data->type == 5)
-				{
-					//par is group
-					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* view = m_frame->GetView(str);
-					if (view)
-					{
-						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-						if (vd)
-						{
-							int int_mode = view->GetIntMode();
-							int paint_mode = view->GetPaintMode();
-							view->SetVolumeA(vd);
-							view->SetPaintMode(6);
-							view->Segment();
-							view->RefreshGL(39);
-							view->SetPaintMode(paint_mode);
-							view->SetIntMode(int_mode);
-						}
-					}
-				}
-				else if (par_item_data && par_item_data->type == 1)
-				{
-					//par is view
-					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(str);
-					if (view)
-					{
-						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-						if (vd)
-						{
-							int int_mode = view->GetIntMode();
-							int paint_mode = view->GetPaintMode();
-							view->SetVolumeA(vd);
-							view->SetPaintMode(6);
-							view->Segment();
-							view->RefreshGL(39);
-							view->SetPaintMode(paint_mode);
-							view->SetIntMode(int_mode);
-						}
-					}
-				}
-			}
-		}
-	}
+	//if (sel_item.IsOk() && m_frame)
+	//{
+	//	//select data
+	//	wxString name = GetItemText(sel_item);
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data && item_data->type==2)
+	//	{
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//			if (par_item_data && par_item_data->type == 5)
+	//			{
+	//				//par is group
+	//				wxString str = GetItemText(GetItemParent(par_item));
+	//				RenderCanvas* view = m_frame->GetView(str);
+	//				if (view)
+	//				{
+	//					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//					if (vd)
+	//					{
+	//						int int_mode = view->GetIntMode();
+	//						int paint_mode = view->GetPaintMode();
+	//						view->SetVolumeA(vd);
+	//						view->SetPaintMode(6);
+	//						view->Segment();
+	//						view->RefreshGL(39);
+	//						view->SetPaintMode(paint_mode);
+	//						view->SetIntMode(int_mode);
+	//					}
+	//				}
+	//			}
+	//			else if (par_item_data && par_item_data->type == 1)
+	//			{
+	//				//par is view
+	//				wxString str = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(str);
+	//				if (view)
+	//				{
+	//					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//					if (vd)
+	//					{
+	//						int int_mode = view->GetIntMode();
+	//						int paint_mode = view->GetPaintMode();
+	//						view->SetVolumeA(vd);
+	//						view->SetPaintMode(6);
+	//						view->Segment();
+	//						view->RefreshGL(39);
+	//						view->SetPaintMode(paint_mode);
+	//						view->SetIntMode(int_mode);
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void DataTreeCtrl::BrushCreate()
 {
 	wxTreeItemId sel_item = GetSelection();
 
-	if (sel_item.IsOk() && m_frame)
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type==2)
-		{
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-				if (par_item_data && par_item_data->type == 5)
-				{
-					//par is group
-					wxString group_name = GetItemText(par_item);
-					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* vrv = m_frame->GetView(str);
-					if (vrv)
-					{
-						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-						if (vd)
-						{
-							flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(5, group_name.ToStdString());
-							}
-						}
-					}
-				}
-				else if (par_item_data && par_item_data->type == 1)
-				{
-					//par is view
-					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(str);
-					if (view)
-					{
-						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-						if (vd)
-						{
-							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(5);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	//if (sel_item.IsOk() && m_frame)
+	//{
+	//	//select data
+	//	wxString name = GetItemText(sel_item);
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data && item_data->type==2)
+	//	{
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//			if (par_item_data && par_item_data->type == 5)
+	//			{
+	//				//par is group
+	//				wxString group_name = GetItemText(par_item);
+	//				wxString str = GetItemText(GetItemParent(par_item));
+	//				RenderCanvas* vrv = m_frame->GetView(str);
+	//				if (vrv)
+	//				{
+	//					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//					if (vd)
+	//					{
+	//						flrd::VolumeCalculator* calculator = vrv->GetVolumeCalculator();
+	//						if (calculator)
+	//						{
+	//							calculator->SetVolumeA(vd);
+	//							calculator->CalculateGroup(5, group_name.ToStdString());
+	//						}
+	//					}
+	//				}
+	//			}
+	//			else if (par_item_data && par_item_data->type == 1)
+	//			{
+	//				//par is view
+	//				wxString str = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(str);
+	//				if (view)
+	//				{
+	//					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//					if (vd)
+	//					{
+	//						flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
+	//						if (calculator)
+	//						{
+	//							calculator->SetVolumeA(vd);
+	//							calculator->CalculateGroup(5);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void DataTreeCtrl::BrushCreateInv()
 {
 	wxTreeItemId sel_item = GetSelection();
 
-	if (sel_item.IsOk() && m_frame)
-	{
-		//select data
-		wxString name = GetItemText(sel_item);
-		int cal_type = 6;
-		if (name.Find("_DELETED")==wxNOT_FOUND)
-			cal_type = 6;
-		else
-			cal_type = 7;
+	//if (sel_item.IsOk() && m_frame)
+	//{
+	//	//select data
+	//	wxString name = GetItemText(sel_item);
+	//	int cal_type = 6;
+	//	if (name.Find("_DELETED")==wxNOT_FOUND)
+	//		cal_type = 6;
+	//	else
+	//		cal_type = 7;
 
-		LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
-		if (item_data && item_data->type==2)
-		{
-			wxTreeItemId par_item = GetItemParent(sel_item);
-			if (par_item.IsOk())
-			{
-				LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-				if (par_item_data && par_item_data->type == 5)
-				{
-					//par is group
-					wxString group_name = GetItemText(par_item);
-					wxString str = GetItemText(GetItemParent(par_item));
-					RenderCanvas* view = m_frame->GetView(str);
-					if (view)
-					{
-						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-						if (vd)
-						{
-							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(cal_type, group_name.ToStdString());
-							}
-						}
-					}
-				}
-				else if (par_item_data && par_item_data->type == 1)
-				{
-					//par is view
-					wxString str = GetItemText(par_item);
-					RenderCanvas* view = m_frame->GetView(str);
-					if (view)
-					{
-						fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-						if (vd)
-						{
-							flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
-							if (calculator)
-							{
-								calculator->SetVolumeA(vd);
-								calculator->CalculateGroup(cal_type);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	//	LayerInfo* item_data = (LayerInfo*)GetItemData(sel_item);
+	//	if (item_data && item_data->type==2)
+	//	{
+	//		wxTreeItemId par_item = GetItemParent(sel_item);
+	//		if (par_item.IsOk())
+	//		{
+	//			LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//			if (par_item_data && par_item_data->type == 5)
+	//			{
+	//				//par is group
+	//				wxString group_name = GetItemText(par_item);
+	//				wxString str = GetItemText(GetItemParent(par_item));
+	//				RenderCanvas* view = m_frame->GetView(str);
+	//				if (view)
+	//				{
+	//					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//					if (vd)
+	//					{
+	//						flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
+	//						if (calculator)
+	//						{
+	//							calculator->SetVolumeA(vd);
+	//							calculator->CalculateGroup(cal_type, group_name.ToStdString());
+	//						}
+	//					}
+	//				}
+	//			}
+	//			else if (par_item_data && par_item_data->type == 1)
+	//			{
+	//				//par is view
+	//				wxString str = GetItemText(par_item);
+	//				RenderCanvas* view = m_frame->GetView(str);
+	//				if (view)
+	//				{
+	//					fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//					if (vd)
+	//					{
+	//						flrd::VolumeCalculator* calculator = view->GetVolumeCalculator();
+	//						if (calculator)
+	//						{
+	//							calculator->SetVolumeA(vd);
+	//							calculator->CalculateGroup(cal_type);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 //mask operations
@@ -2078,84 +2078,84 @@ void DataTreeCtrl::PasteMask(int op)
 	if (!sel_item.IsOk()) return;
 	if (!m_frame) return;
 
-	wxString name = GetItemText(sel_item);
-	fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
-	RenderCanvas* view = 0;
-	fluo::VolumeGroup* group = 0;
-	wxTreeItemId par_item = GetItemParent(sel_item);
-	if (par_item.IsOk())
-	{
-		LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
-		if (par_item_data && par_item_data->type == 5)
-		{
-			//par is group
-			wxString str = GetItemText(GetItemParent(par_item));
-			view = m_frame->GetView(str);
-			str = GetItemText(par_item);
-			group = view->GetGroup(str.ToStdString());
-		}
-		else if (par_item_data && par_item_data->type == 1)
-		{
-			//par is view
-			wxString str = GetItemText(par_item);
-			view = m_frame->GetView(str);
-		}
-	}
-	bool apply_group = false;
-	if (view)
-		apply_group = view->GetVolumeSelector()->GetSelectGroup();
+	//wxString name = GetItemText(sel_item);
+	//fluo::VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name.ToStdString());
+	//RenderCanvas* view = 0;
+	//fluo::VolumeGroup* group = 0;
+	//wxTreeItemId par_item = GetItemParent(sel_item);
+	//if (par_item.IsOk())
+	//{
+	//	LayerInfo* par_item_data = (LayerInfo*)GetItemData(par_item);
+	//	if (par_item_data && par_item_data->type == 5)
+	//	{
+	//		//par is group
+	//		wxString str = GetItemText(GetItemParent(par_item));
+	//		view = m_frame->GetView(str);
+	//		str = GetItemText(par_item);
+	//		group = view->GetGroup(str.ToStdString());
+	//	}
+	//	else if (par_item_data && par_item_data->type == 1)
+	//	{
+	//		//par is view
+	//		wxString str = GetItemText(par_item);
+	//		view = m_frame->GetView(str);
+	//	}
+	//}
+	//bool apply_group = false;
+	//if (view)
+	//	apply_group = view->GetVolumeSelector()->GetSelectGroup();
 
-	if (vd && m_frame->m_vd_copy)
-	{
-		//prevent self copying
-		if (!m_frame->m_copy_data &&
-			vd == m_frame->m_vd_copy)
-			return;
+	//if (vd && m_frame->m_vd_copy)
+	//{
+	//	//prevent self copying
+	//	if (!m_frame->m_copy_data &&
+	//		vd == m_frame->m_vd_copy)
+	//		return;
 
-		//undo/redo
-		if (flvr::Texture::mask_undo_num_ > 0 &&
-			vd->GetTexture())
-			vd->GetTexture()->push_mask();
-		if (m_frame->m_copy_data)
-		{
-			Nrrd* data = m_frame->m_vd_copy->GetData(false);
-			long bits;
-			m_frame->m_vd_copy->getValue(gstBits, bits);
-			if (bits == 16)
-			{
-				double scale;
-				m_frame->m_vd_copy->getValue(gstIntScale, scale);
-				vd->AddMask16(data, op, scale);
-			}
-			else
-				vd->AddMask(data, op);
-		}
-		else
-			vd->AddMask(m_frame->m_vd_copy->GetMask(false), op);
+	//	//undo/redo
+	//	if (flvr::Texture::mask_undo_num_ > 0 &&
+	//		vd->GetTexture())
+	//		vd->GetTexture()->push_mask();
+	//	if (m_frame->m_copy_data)
+	//	{
+	//		Nrrd* data = m_frame->m_vd_copy->GetData(false);
+	//		long bits;
+	//		m_frame->m_vd_copy->getValue(gstBits, bits);
+	//		if (bits == 16)
+	//		{
+	//			double scale;
+	//			m_frame->m_vd_copy->getValue(gstIntScale, scale);
+	//			vd->AddMask16(data, op, scale);
+	//		}
+	//		else
+	//			vd->AddMask(data, op);
+	//	}
+	//	else
+	//		vd->AddMask(m_frame->m_vd_copy->GetMask(false), op);
 
-		if (apply_group)
-		{
-			Nrrd* data = vd->GetMask(false);
-			if (data)
-			{
-				if (group)
-					group->AddMask(data, 0);
-				else
-				{
-					for (int i = 0; i < view->GetGroupNum(); ++i)
-						view->GetGroup(i)->AddMask(data, 0);
-				}
+	//	if (apply_group)
+	//	{
+	//		Nrrd* data = vd->GetMask(false);
+	//		if (data)
+	//		{
+	//			if (group)
+	//				group->AddMask(data, 0);
+	//			else
+	//			{
+	//				for (int i = 0; i < view->GetGroupNum(); ++i)
+	//					view->GetGroup(i)->AddMask(data, 0);
+	//			}
 
-			}
-		}
+	//		}
+	//	}
 
-		m_frame->RefreshVRenderViews();
-		if (m_frame->GetBrushToolDlg())
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
-		if (m_frame->GetColocalizationDlg() &&
-			view->m_paint_colocalize)
-			m_frame->GetColocalizationDlg()->Colocalize();
-	}
+	//	m_frame->RefreshVRenderViews();
+	//	if (m_frame->GetBrushToolDlg())
+	//		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	//	if (m_frame->GetColocalizationDlg() &&
+	//		view->m_paint_colocalize)
+	//		m_frame->GetColocalizationDlg()->Colocalize();
+	//}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2544,31 +2544,31 @@ void TreePanel::BrushAppend()
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	if (!m_frame) return;
 
-	if (m_toolbar->GetToolState(ID_BrushAppend))
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(2);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (m_toolbar->GetToolState(ID_BrushAppend))
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(2);
+	//			view->SetPaintMode(2);
+	//			m_datatree->m_fixed = true;
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 }
 
 void TreePanel::BrushDiffuse()
@@ -2577,31 +2577,31 @@ void TreePanel::BrushDiffuse()
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	if (!m_frame) return;
 
-	if (m_toolbar->GetToolState(ID_BrushDiffuse))
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(4);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (m_toolbar->GetToolState(ID_BrushDiffuse))
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(2);
+	//			view->SetPaintMode(4);
+	//			m_datatree->m_fixed = true;
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 }
 
 void TreePanel::BrushSolid(bool state)
@@ -2611,31 +2611,31 @@ void TreePanel::BrushSolid(bool state)
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	if (!m_frame) return;
 
-	if (state)
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(8);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (state)
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(2);
+	//			view->SetPaintMode(8);
+	//			m_datatree->m_fixed = true;
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 }
 
 void TreePanel::BrushGrow(bool state)
@@ -2645,30 +2645,30 @@ void TreePanel::BrushGrow(bool state)
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 	if (!m_frame) return;
 
-	if (state)
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(10);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i = 0; i < m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (state)
+	//{
+	//	for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(10);
+	//			m_datatree->m_fixed = true;
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i = 0; i < m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 }
 
 void TreePanel::BrushDesel()
@@ -2677,31 +2677,31 @@ void TreePanel::BrushDesel()
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	if (!m_frame) return;
 
-	if (m_toolbar->GetToolState(ID_BrushDesel))
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(2);
-				view->SetPaintMode(3);
-				m_datatree->m_fixed = true;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (m_toolbar->GetToolState(ID_BrushDesel))
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(2);
+	//			view->SetPaintMode(3);
+	//			m_datatree->m_fixed = true;
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 }
 
 void TreePanel::BrushClear()
@@ -2716,18 +2716,18 @@ void TreePanel::BrushErase()
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 
-	if (m_frame)
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (m_frame)
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 
 	if (m_datatree)
 		m_datatree->BrushCreateInv();
@@ -2739,18 +2739,18 @@ void TreePanel::BrushCreate()
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	m_toolbar->ToggleTool(ID_BrushDesel, false);
 
-	if (m_frame)
-	{
-		for (int i=0; i< m_frame->GetViewNum(); i++)
-		{
-			RenderCanvas* view = m_frame->GetView(i);
-			if (view)
-			{
-				view->SetIntMode(1);
-				m_datatree->m_fixed = false;
-			}
-		}
-	}
+	//if (m_frame)
+	//{
+	//	for (int i=0; i< m_frame->GetViewNum(); i++)
+	//	{
+	//		RenderCanvas* view = m_frame->GetView(i);
+	//		if (view)
+	//		{
+	//			view->SetIntMode(1);
+	//			m_datatree->m_fixed = false;
+	//		}
+	//	}
+	//}
 
 	if (m_datatree)
 		m_datatree->BrushCreate();

@@ -630,15 +630,14 @@ void VMovieView::AddScriptToList()
 void VMovieView::Init()
 {
 	if (!m_frame) return;
-	int i = 0;
 	m_views_cmb->Clear();
-	for (i = 0; i < m_frame->GetViewNum(); i++)
+	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetView(i);
-		if (view && m_views_cmb)
-			m_views_cmb->Append(view->m_vrv->GetName());
+		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		if (view)
+			m_views_cmb->Append(view->getName());
 	}
-	if (i)
+	if (glbin_root->getNumChildren() > 0)
 		m_views_cmb->Select(0);
 	GetSettings();
 }
@@ -770,7 +769,8 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
 		m_delayed_stop = false;
 		Stop();
-		RenderCanvas::SetKeepEnlarge(false);
+		if (m_view)
+			m_view->setValue(gstKeepEnlarge, false);
 		return;
 	}
 
@@ -877,7 +877,8 @@ void VMovieView::OnRun(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		m_filename = fopendlg->GetPath();
-		RenderCanvas::SetKeepEnlarge(true);
+		if (m_view)
+			m_view->setValue(gstKeepEnlarge, true);
 		Run();
 	}
 	delete fopendlg;
@@ -1444,9 +1445,13 @@ void VMovieView::Run()
 			m_view->getValue(gstSizeX, m_crop_w);
 			m_view->getValue(gstSizeY, m_crop_h);
 		}
-		if (RenderCanvas::GetEnlarge())
+		bool bval = false;
+		if (m_view)
+			m_view->getValue(gstEnlarge, bval);
+		if (bval)
 		{
-			double scale = RenderCanvas::GetEnlargeScale();
+			double scale;
+			m_view->getValue(gstEnlargeScale, scale);
 			m_crop_w *= scale;
 			m_crop_h *= scale;
 		}
@@ -1550,7 +1555,8 @@ void VMovieView::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		RenderCanvas::SetEnlarge(enlarge);
+		if (m_view)
+			m_view->setValue(gstEnlarge, enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1598,7 +1604,8 @@ void VMovieView::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	RenderCanvas::SetEnlargeScale(dval);
+	if (m_view)
+		m_view->setValue(gstEnlargeScale, dval);
 	int ival = int(dval * 10 + 0.5);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())

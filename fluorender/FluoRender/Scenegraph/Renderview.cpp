@@ -7910,6 +7910,14 @@ void Renderview::OnEnlargeScaleChanged(Event& event)
 	ly = long(ly * dval + 0.5);
 	setValue(gstSizeX, lx);
 	setValue(gstSizeY, ly);
+	//text scale
+	bool bval;
+	getValue(gstEnlarge, bval);
+	if (bval)
+	{
+		unsigned int tsize = flvr::TextRenderer::text_texture_manager_.GetSize();
+		flvr::TextRenderer::text_texture_manager_.SetSize((unsigned int)(tsize * dval + 0.5));
+	}
 }
 
 void Renderview::OnCamRotChanged(Event& event)
@@ -8065,4 +8073,28 @@ void Renderview::OnTextColorModeChanged(Event& event)
 		break;
 	}
 	setValue(gstTextColor, color);
+}
+
+void Renderview::OnInterModeChanged(Event& event)
+{
+	long lval;
+	getValue(gstInterMode, lval);
+	if (lval == 1)
+	{
+		setValue(gstBrushState, long(0));
+		setValue(gstDrawBrush, false);
+	}
+	else if (lval == 10 || lval == 12)
+	{
+		setValue(gstPaintMode, long(9));
+	}
+}
+
+void Renderview::OnPaintModeChanged(Event& event)
+{
+	long lval;
+	getValue(gstPaintMode, lval);
+	m_selector->SetMode(lval);
+	setValue(gstBrushState, lval);
+	m_selector->ChangeBrushSetsIndex();
 }

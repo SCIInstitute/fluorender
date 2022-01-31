@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VRENDERVIEW_H_
 
 #include "RenderCanvas.h"
+#include <wx/wx.h>
 
 class VRenderFrame;
 class VRenderView: public wxPanel

@@ -404,6 +404,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstPaintEnable "paint enable"
 #define gstPaintDisplay "paint display"
 #define gstClearPaint "clear paint"
+#define gstPaintMode "paint mode"
 #define gstPerspective "perspective"//camera settings
 #define gstFree "free"
 #define gstCamDist "cam dist"
