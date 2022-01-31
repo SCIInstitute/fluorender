@@ -29,10 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include <Global.hpp>
 #include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
+#include <Calculate/VolumeCalculator.h>
 #include <Calculate/CombineList.h>
 #include <string>
+#include <list>
 
 BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	//calculations
