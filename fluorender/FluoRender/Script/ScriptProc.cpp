@@ -1491,7 +1491,11 @@ void ScriptProc::ExportAnalysis()
 	ifs.close();
 	ofs.close();
 
-	::wxLaunchDefaultBrowser(outputfile.ToStdString());
+#ifdef _DARWIN
+	outputfile.Replace(" ", "%20");
+	outputfile = "file://" + outputfile;
+#endif
+	::wxLaunchDefaultBrowser(outputfile);
 }
 
 //read/delete volume cache
