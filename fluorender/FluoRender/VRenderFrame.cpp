@@ -400,8 +400,8 @@ VRenderFrame::VRenderFrame(
 
 	//create render view
 	VRenderView *vrv = new VRenderView(this);
-	vrv->m_glview->InitView();
-	vrv->UpdateView();
+	//vrv->m_glview->InitView();
+	//vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
 
 #ifdef _WIN32

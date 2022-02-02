@@ -301,6 +301,8 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	//check ret. this is an error code when the pixel format is invalid.
 	int ret = m_glview->GetPixelFormat(&pfd);
 #endif
+	m_agent->getObject()->InitView();
+	UpdateView();
 	
 	//get actual version
 	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
@@ -771,7 +773,9 @@ void VRenderView::UpdateView(bool ui_update)
 	roty = STOD(str_val.fn_str());
 	str_val = m_z_rot_text->GetValue();
 	rotz = STOD(str_val.fn_str());
-	m_glview->SetRotations(rotx, roty, rotz, ui_update);
+	m_agent->setValue(gstCamRotX, rotx);
+	m_agent->setValue(gstCamRotY, roty);
+	m_agent->setValue(gstCamRotZ, rotz);
 	RefreshGL(true);
 }
 
@@ -1177,7 +1181,7 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	RenderCanvas::SetEnlargeScale(dval);
+	m_agent->setValue(gstEnlargeScale, dval);
 	int ival = int(dval * 10 + 0.5);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
@@ -1285,8 +1289,8 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 void VRenderView::OnCapture(wxCommandEvent& event)
 {
 	//reset enlargement
-	RenderCanvas::SetEnlarge(false);
-	RenderCanvas::SetEnlargeScale(1.0);
+	m_agent->setValue(gstEnlarge, false);
+	m_agent->setValue(gstEnlargeScale, 1.0);
 
 	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
 
@@ -1359,7 +1363,7 @@ void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	wxString str = m_depth_atten_factor_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_glview->SetFogIntensity(val);
+	m_agent->setValue(gstDaInt, val);
 	m_depth_atten_factor_sldr->SetValue(int(val*100.0));
 	RefreshGL(true);
 }
