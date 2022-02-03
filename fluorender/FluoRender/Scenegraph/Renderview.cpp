@@ -7605,6 +7605,49 @@ void Renderview::PickVolume()
 	}
 }
 
+void Renderview::SetCenter()
+{
+	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
+
+	VolumeData *vd = GetCurrentVolume();
+
+	if (vd)
+	{
+		BBox bbox;
+		vd->getValue(gstBounds, bbox);
+		flvr::VolumeRenderer *vr = vd->GetRenderer();
+		if (!vr) return;
+		vector<Plane*> *planes = vr->get_planes();
+		if (planes->size() != 6) return;
+		double x1, x2, y1, y2, z1, z2;
+		double abcd[4];
+		(*planes)[0]->get_copy(abcd);
+		x1 = fabs(abcd[3])*bbox.Max().x();
+		(*planes)[1]->get_copy(abcd);
+		x2 = fabs(abcd[3])*bbox.Max().x();
+		(*planes)[2]->get_copy(abcd);
+		y1 = fabs(abcd[3])*bbox.Max().y();
+		(*planes)[3]->get_copy(abcd);
+		y2 = fabs(abcd[3])*bbox.Max().y();
+		(*planes)[4]->get_copy(abcd);
+		z1 = fabs(abcd[3])*bbox.Max().z();
+		(*planes)[5]->get_copy(abcd);
+		z2 = fabs(abcd[3])*bbox.Max().z();
+
+		double dx, dy, dz;
+		dx = (x1 + x2) / 2.0;
+		dy = (y1 + y2) / 2.0;
+		dz = (z1 + z2) / 2.0;
+		setValue(gstObjCtrX, dx);
+		setValue(gstObjCtrY, dy);
+		setValue(gstObjCtrZ, dz);
+
+		//SetSortBricks();
+
+		RefreshGL(20);
+	}
+}
+
 void Renderview::SetLockCenter(int type)
 {
 	switch (type)

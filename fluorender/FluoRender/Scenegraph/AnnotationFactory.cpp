@@ -48,7 +48,7 @@ void AnnotationFactory::createDefault()
 	{
 		Annotations* ad = new Annotations();
 		ad->setName(default_object_name_);
-		objects_.push_back(ad);
+		objects_.push_front(ad);
 
 		//add default values here
 		ad->addValue(gstColor, Color());
@@ -76,8 +76,9 @@ Annotations* AnnotationFactory::clone(Annotations* ad)
 	new_ad->setId(global_id_);
 	std::string name = "annotations" + std::to_string(local_id_);
 	new_ad->setName(name);
+	new_ad->addRvalu(gstFactory, this);
 
-	objects_.push_back(new_ad);
+	objects_.push_front(new_ad);
 
 	return dynamic_cast<Annotations*>(new_ad);
 }

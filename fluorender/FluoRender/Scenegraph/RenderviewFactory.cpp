@@ -48,7 +48,7 @@ void RenderviewFactory::createDefault()
 	{
 		Renderview* view = new Renderview();
 		view->setName(default_object_name_);
-		objects_.push_back(view);
+		objects_.push_front(view);
 
 		//add default values here
 		//common
@@ -126,7 +126,6 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstDrawClip, bool(false));
 		view->addValue(gstDrawLegend, bool(false));
 		view->addValue(gstDrawColormap, bool(false));
-		view->addValue(gstMouseFocus, bool(false));
 		view->addValue(gstTestWiref, bool(false));
 		view->addValue(gstDrawBounds, bool(false));
 		view->addValue(gstDrawGrid, bool(false));
@@ -148,6 +147,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstOrthoTop, double(1));
 		view->addValue(gstScaleFactor, double(1));
 		view->addValue(gstScaleFactorSaved, double(1));
+		view->addValue(gstScaleFactor121, double(1));
 		view->addValue(gstScaleMode, long(0));
 		view->addValue(gstAutoPinRotCtr, bool(false));
 		view->addValue(gstPinRotCtr, bool(false));
@@ -365,8 +365,9 @@ Renderview* RenderviewFactory::clone(Renderview* view)
 	new_view->setId(global_id_);
 	std::string name = "renderview" + std::to_string(local_id_);
 	new_view->setName(name);
+	new_view->addRvalu(gstFactory, this);
 
-	objects_.push_back(new_view);
+	objects_.push_front(new_view);
 
 	return dynamic_cast<Renderview*>(new_view);
 }

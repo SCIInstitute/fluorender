@@ -349,6 +349,11 @@ namespace fluo
 		bool propValues(const std::string &name1, const std::string &name2);
 		bool propValues(const std::string &name1, const ValueCollection &names);
 
+		//reset values from factory
+		virtual bool resetValue(const std::string &name);
+		virtual bool resetValues(const ValueCollection &names);
+		virtual bool resetAllValues();
+
 		//directly add
 		bool addValue(Value* value)
 		{

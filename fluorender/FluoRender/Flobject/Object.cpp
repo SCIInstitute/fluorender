@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Object.hpp>
+#include <ObjectFactory.hpp>
+#include <Names.hpp>
 
 using namespace fluo;
 
@@ -361,4 +363,38 @@ bool Object::propValues(const std::string &name1, const ValueCollection &names)
 			result |= value2->sync(event);
 	}
 	return result;
+}
+
+//reset values from factory
+bool Object::resetValue(const std::string &name)
+{
+	Referenced* ref;
+	getRvalu(gstFactory, &ref);
+	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
+	if (!fac) return false;
+	Object* dobj = fac->getDefault();
+	if (!dobj) return false;
+	return dobj->propValue(name, this);
+}
+
+bool Object::resetValues(const ValueCollection &names)
+{
+	Referenced* ref;
+	getRvalu(gstFactory, &ref);
+	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
+	if (!fac) return false;
+	Object* dobj = fac->getDefault();
+	if (!dobj) return false;
+	return dobj->propValues(names, this);
+}
+
+bool Object::resetAllValues()
+{
+	Referenced* ref;
+	getRvalu(gstFactory, &ref);
+	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
+	if (!fac) return false;
+	Object* dobj = fac->getDefault();
+	if (!dobj) return false;
+	return dobj->propAllValues(this);
 }

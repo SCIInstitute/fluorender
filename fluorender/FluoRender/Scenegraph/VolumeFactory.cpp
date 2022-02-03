@@ -362,6 +362,7 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	new_vd->setId(global_id_);
 	std::string name = "volume" + std::to_string(local_id_);
 	new_vd->setName(name);
+	new_vd->addRvalu(gstFactory, this);
 
 	objects_.push_front(new_vd);
 

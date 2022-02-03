@@ -436,6 +436,7 @@ namespace fluo
 		void PickVolume();
 		//void SetCompSelection(Point& p, long mode);//node: 0-exclusive; 1-add or remove
 
+		void SetCenter();
 		//camera lock
 		void SetLockCenter(int type);
 		void SetLockCenterVol();

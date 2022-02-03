@@ -132,13 +132,13 @@ public:
 //	}
 
 private:
-	fluo::RenderCanvasAgent* m_agent;
-	wxWindow* m_frame;
 	static int m_max_id;
 	int m_id;
 
+	fluo::RenderCanvasAgent* m_agent;
+	wxWindow* m_frame;
 	//render view///////////////////////////////////////////////
-	RenderCanvas *m_glview;
+	RenderCanvas *m_canvas;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;
 
