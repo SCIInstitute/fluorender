@@ -122,14 +122,8 @@ public:
 
 	//set full screen
 	void SetFullScreen();
-
-	//stereo/vr
-//	void InitOpenVR()
-//	{
-//#ifdef _WIN32
-//		if (m_glview) m_glview->InitOpenVR();
-//#endif
-//	}
+	void SetCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
+	void SetFullFrame(wxFrame* ff) { m_full_frame = ff; }
 
 private:
 	static int m_max_id;

@@ -1627,11 +1627,14 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
 }
 
 //timer used for rotation scrollbars
-void VRenderView::OnTimer(wxTimerEvent& event) {
+void VRenderView::OnTimer(wxTimerEvent& event)
+{
 	wxString str;
 	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
 	double rotx, roty, rotz;
-	m_canvas->GetRotations(rotx, roty, rotz);
+	m_agent->getValue(gstCamRotX, rotx);
+	m_agent->getValue(gstCamRotY, roty);
+	m_agent->getValue(gstCamRotZ, rotz);
 	//the X bar positions
 	int pos = m_x_rot_sldr->GetThumbPosition();
 	int mid = 180;
@@ -1692,7 +1695,9 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 	if (m_rot_slider)
 	{
 		double rotx, roty, rotz, deg;
-		m_canvas->GetRotations(rotx, roty, rotz);
+		m_agent->getValue(gstCamRotX, rotx);
+		m_agent->getValue(gstCamRotY, roty);
+		m_agent->getValue(gstCamRotZ, rotz);
 		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK )
 			m_x_rotating = true;
 		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE  )
@@ -1745,7 +1750,9 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 	if (m_rot_slider)
 	{
 		double rotx, roty, rotz, deg;
-		m_canvas->GetRotations(rotx, roty, rotz);
+		m_agent->getValue(gstCamRotX, rotx);
+		m_agent->getValue(gstCamRotY, roty);
+		m_agent->getValue(gstCamRotZ, rotz);
 		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
 			m_y_rotating = true;
 		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
@@ -1799,7 +1806,9 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 	if (m_rot_slider)
 	{
 		double rotx, roty, rotz, deg;
-		m_canvas->GetRotations(rotx, roty, rotz);
+		m_agent->getValue(gstCamRotX, rotx);
+		m_agent->getValue(gstCamRotY, roty);
+		m_agent->getValue(gstCamRotZ, rotz);
 		if (event.GetEventType() == wxEVT_SCROLL_THUMBTRACK)
 			m_z_rotating = true;
 		else if (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE)
@@ -1842,7 +1851,9 @@ void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 {
 	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
 	double rotx, roty, rotz;
-	m_canvas->GetRotations(rotx, roty, rotz);
+	m_agent->getValue(gstCamRotX, rotx);
+	m_agent->getValue(gstCamRotY, roty);
+	m_agent->getValue(gstCamRotZ, rotz);
 	if (lock)
 	{
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
@@ -1856,7 +1867,7 @@ void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 			wxGetBitmapFromMemory(gear_dark));
 	}
-	m_canvas->SetRotLock(lock);
+	m_agent->setValue(gstGearedEnable, lock);
 	wxString str = wxString::Format("%.1f", rotx);
 	m_x_rot_text->SetValue(str);
 	str = wxString::Format("%.1f", roty);
@@ -1883,7 +1894,9 @@ void VRenderView::OnRotSliderType(wxCommandEvent& event)
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
 			wxGetBitmapFromMemory(slider_type_pos));
 		double rotx, roty, rotz;
-		m_canvas->GetRotations(rotx, roty, rotz);
+		m_agent->getValue(gstCamRotX, rotx);
+		m_agent->getValue(gstCamRotY, roty);
+		m_agent->getValue(gstCamRotZ, rotz);
 		m_x_rot_sldr->SetThumbPosition(int(rotx));
 		m_y_rot_sldr->SetThumbPosition(int(roty));
 		m_z_rot_sldr->SetThumbPosition(int(rotz));
@@ -1898,22 +1911,34 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		m_canvas->SetRotations(0.0, 90.0, 0.0, true);
+		m_agent->setValue(gstCamRotX, double(0));
+		m_agent->setValue(gstCamRotY, double(90));
+		m_agent->setValue(gstCamRotZ, double(0));
 		break;
 	case 1://-X
-		m_canvas->SetRotations(0.0, 270.0, 0.0, true);
+		m_agent->setValue(gstCamRotX, double(0));
+		m_agent->setValue(gstCamRotY, double(270));
+		m_agent->setValue(gstCamRotZ, double(0));
 		break;
 	case 2://+Y
-		m_canvas->SetRotations(90.0, 0.0, 0.0, true);
+		m_agent->setValue(gstCamRotX, double(90));
+		m_agent->setValue(gstCamRotY, double(0));
+		m_agent->setValue(gstCamRotZ, double(0));
 		break;
 	case 3://-Y
-		m_canvas->SetRotations(270.0, 0.0, 0.0, true);
+		m_agent->setValue(gstCamRotX, double(270));
+		m_agent->setValue(gstCamRotY, double(0));
+		m_agent->setValue(gstCamRotZ, double(0));
 		break;
 	case 4://+Z
-		m_canvas->SetRotations(0.0, 0.0, 0.0, true);
+		m_agent->setValue(gstCamRotX, double(0));
+		m_agent->setValue(gstCamRotY, double(0));
+		m_agent->setValue(gstCamRotZ, double(0));
 		break;
 	case 5:
-		m_canvas->SetRotations(0.0, 180.0, 0.0, true);
+		m_agent->setValue(gstCamRotX, double(0));
+		m_agent->setValue(gstCamRotY, double(180));
+		m_agent->setValue(gstCamRotZ, double(0));
 		break;
 	}
 	if (sel < 6)
@@ -1921,14 +1946,14 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, true);
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 			wxGetBitmapFromMemory(gear_45));
-		if (m_canvas) m_canvas->SetRotLock(true);
+		m_agent->setValue(gstGearedEnable, true);
 	}
 	else
 	{
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, false);
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 			wxGetBitmapFromMemory(gear_dark));
-		if (m_canvas) m_canvas->SetRotLock(false);
+		m_agent->setValue(gstGearedEnable, false);
 	}
 	RefreshGL();
 }
@@ -1938,45 +1963,49 @@ void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_canvas->SetBackgroundColor(color);
+	m_agent->setValue(gstBgColor, color);
 	RefreshGL();
 }
 
 void VRenderView::OnBgInvBtn(wxCommandEvent& event)
 {
-	fluo::Color c = m_canvas->GetBackgroundColor();
+	fluo::Color c;
+	m_agent->getValue(gstBgColor, c);
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	m_canvas->SetBackgroundColor(c);
+	m_agent->setValue(gstBgColor, c);
 	RefreshGL();
 }
 
 void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
 {
-	m_canvas->m_draw_camctr = 
-		m_options_toolbar->GetToolState(ID_CamCtrChk);
+	bool bval = m_options_toolbar->GetToolState(ID_CamCtrChk);
+	m_agent->setValue(gstDrawCamCtr, bval);
 	RefreshGL();
 }
 
 void VRenderView::OnFpsCheck(wxCommandEvent& event)
 {
+	long lval;
+	m_agent->getValue(gstDrawInfo, lval);
 	if (m_options_toolbar->GetToolState(ID_FpsChk))
-		m_canvas->m_draw_info |= 1;
+		lval |= 1;
 	else
-		m_canvas->m_draw_info &= ~1;
+		lval &= ~1;
+	m_agent->setValue(gstDrawInfo, lval);
 	RefreshGL();
 }
 
 void VRenderView::OnLegendCheck(wxCommandEvent& event)
 {
-	m_canvas->m_draw_legend = 
-		m_options_toolbar->GetToolState(ID_LegendChk);
+	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
+	m_agent->setValue(gstDrawLegend, bval);
 	RefreshGL();
 }
 
 void VRenderView::OnColormapCheck(wxCommandEvent& event)
 {
-	m_canvas->m_draw_colormap =
-		m_options_toolbar->GetToolState(ID_ColormapChk);
+	bool bval = m_options_toolbar->GetToolState(ID_ColormapChk);
+	m_agent->setValue(gstDrawColormap, bval);
 	RefreshGL();
 }
 
@@ -2001,13 +2030,11 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
 		break;
 	}
 	str += unit_text;
-	if (m_canvas)
-	{
-		m_canvas->SetSBText(str);
-		m_canvas->SetScaleBarLen(len);
-		m_canvas->m_sb_num = num_text;
-		m_canvas->m_sb_unit = m_scale_cmb->GetSelection();
-	}
+	long lval = m_scale_cmb->GetSelection();
+	m_agent->setValue(gstScaleBarText, str.ToStdWstring());
+	m_agent->setValue(gstScaleBarLen, len);
+	m_agent->setValue(gstScaleBarNum, num_text.ToStdWstring());
+	m_agent->setValue(gstScaleBarUnit, lval);
 	RefreshGL();
 }
 
@@ -2016,15 +2043,12 @@ void VRenderView::OnScaleUnitSelected(wxCommandEvent& event) {
 
 void VRenderView::OnScaleBar(wxCommandEvent& event)
 {
-	if (!m_canvas)
-		return;
-
 	switch (m_draw_scalebar)
 	{
 	case kOff:
 		m_draw_scalebar = kOn;
-		m_canvas->m_disp_scale_bar = true;
-		m_canvas->m_disp_scale_bar_text = false;
+		m_agent->setValue(gstDrawScaleBar, true);
+		m_agent->setValue(gstDrawScaleBarText, false);
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmapFromMemory(scale_text_off));
 		m_scale_text->Enable();
@@ -2032,8 +2056,8 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		break;
 	case kOn:
 		m_draw_scalebar = kText;
-		m_canvas->m_disp_scale_bar = true;
-		m_canvas->m_disp_scale_bar_text = true;
+		m_agent->setValue(gstDrawScaleBar, true);
+		m_agent->setValue(gstDrawScaleBarText, true);
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmapFromMemory(scale_text));
 		m_scale_text->Enable();
@@ -2041,8 +2065,8 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		break;
 	case kText:
 		m_draw_scalebar = kOff;
-		m_canvas->m_disp_scale_bar = false;
-		m_canvas->m_disp_scale_bar_text = false;
+		m_agent->setValue(gstDrawScaleBar, false);
+		m_agent->setValue(gstDrawScaleBarText, false);
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmapFromMemory(scalebar));
 		m_scale_text->Disable();
@@ -2063,7 +2087,9 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		if (vr_frame->GetClippingView()->GetHoldPlanes())
 			return;
 	}
-	if (m_canvas->m_capture)
+	bool bval;
+	m_agent->getValue(gstCapture, bval);
+	if (bval)
 		return;
 
 	wxPoint pos = wxGetMousePosition();
@@ -2073,8 +2099,8 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 	{
 		if (!m_draw_clip)
 		{
-			m_canvas->m_draw_clip = true;
-			m_canvas->m_clip_mask = -1;
+			m_agent->setValue(gstDrawClip, true);
+			m_agent->setValue(gstClipMask, long(-1));
 			RefreshGL(true);
 			m_draw_clip = true;
 		}
@@ -2083,7 +2109,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 	{
 		if (m_draw_clip)
 		{
-			m_canvas->m_draw_clip = false;
+			m_agent->setValue(gstDrawClip, false);
 			RefreshGL(true);
 			m_draw_clip = false;
 		}
@@ -2104,7 +2130,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 	wxString str = m_aov_text->GetValue();
 	if (str == "Ortho")
 	{
-		m_canvas->SetPersp(false);
+		m_agent->setValue(gstPerspective, false);
 		m_aov_sldr->SetValue(10);
 		RefreshGL(true);
 		return;
@@ -2114,7 +2140,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 		return;
 	if (val ==0 || val == 10)
 	{
-		m_canvas->SetPersp(false);
+		m_agent->setValue(gstPerspective, false);
 		m_aov_text->ChangeValue("Ortho");
 		m_aov_sldr->SetValue(10);
 	}
@@ -2130,8 +2156,8 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 			m_aov_text->ChangeValue("100");
 			m_aov_sldr->SetValue(100);
 		}
-		m_canvas->SetPersp(true);
-		m_canvas->SetAov(val);
+		m_agent->setValue(gstPerspective, true);
+		m_agent->setValue(gstAov, double(val));
 		m_aov_sldr->SetValue(val);
 	}
 	RefreshGL(true);
@@ -2140,15 +2166,15 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 void VRenderView::OnFreeChk(wxCommandEvent& event)
 {
 	if (m_options_toolbar->GetToolState(ID_FreeChk))
-		m_canvas->SetFree(true);
+		m_agent->setValue(gstFree, true);
 	else
 	{
-		m_canvas->SetFree(false);
+		m_agent->setValue(gstFree, false);
 		int val = m_aov_sldr->GetValue();
 		if (val == 10)
-			m_canvas->SetPersp(false);
+			m_agent->setValue(gstPerspective, false);
 		else
-			m_canvas->SetPersp(true);
+			m_agent->setValue(gstPerspective, true);
 	}
 	RefreshGL();
 }
@@ -2201,62 +2227,68 @@ void VRenderView::SaveDefault(unsigned int mask)
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 	wxString str;
-	bool bVal;
-	wxColor cVal;
+	bool bval;
+	double dval;
+	long lval;
+	wxColor cval;
 	double x, y, z;
 
 	//render modes
 	if (mask & 0x1)
 	{
-		bVal = m_options_toolbar->GetToolState(ID_VolumeSeqRd);
-		fconfig.Write("volume_seq_rd", bVal);
-		bVal = m_options_toolbar->GetToolState(ID_VolumeMultiRd);
-		fconfig.Write("volume_multi_rd", bVal);
-		bVal = m_options_toolbar->GetToolState(ID_VolumeCompRd);
-		fconfig.Write("volume_comp_rd", bVal);
+		bval = m_options_toolbar->GetToolState(ID_VolumeSeqRd);
+		fconfig.Write("volume_seq_rd", bval);
+		bval = m_options_toolbar->GetToolState(ID_VolumeMultiRd);
+		fconfig.Write("volume_multi_rd", bval);
+		bval = m_options_toolbar->GetToolState(ID_VolumeCompRd);
+		fconfig.Write("volume_comp_rd", bval);
 	}
 	//background color
 	if (mask & 0x2)
 	{
-		cVal = m_bg_color_picker->GetColour();
-		str = wxString::Format("%d %d %d", cVal.Red(), cVal.Green(), cVal.Blue());
+		cval = m_bg_color_picker->GetColour();
+		str = wxString::Format("%d %d %d", cval.Red(), cval.Green(), cval.Blue());
 		fconfig.Write("bg_color_picker", str);
 	}
 	//camera center
 	if (mask & 0x4)
 	{
-		bVal = m_options_toolbar->GetToolState(ID_CamCtrChk);
-		fconfig.Write("cam_ctr_chk", bVal);
+		bval = m_options_toolbar->GetToolState(ID_CamCtrChk);
+		fconfig.Write("cam_ctr_chk", bval);
 	}
 	//camctr size
 	if (mask & 0x8)
 	{
-		fconfig.Write("camctr_size", m_canvas->m_camctr_size);
+		m_agent->getValue(gstCamCtrSize, dval);
+		fconfig.Write("camctr_size", dval);
 	}
 	//fps
 	if (mask & 0x10)
 	{
-		fconfig.Write("info_chk", m_canvas->m_draw_info);
+		m_agent->getValue(gstDrawInfo, lval);
+		fconfig.Write("info_chk", lval);
 	}
 	//selection
 	if (mask & 0x20)
 	{
-		bVal = m_canvas->m_draw_legend;
-		fconfig.Write("legend_chk", bVal);
+		m_agent->getValue(gstDrawLegend, bval);
+		fconfig.Write("legend_chk", bval);
 	}
 	//mouse focus
 	if (mask & 0x40)
 	{
-		bVal = m_canvas->m_mouse_focus;
-		fconfig.Write("mouse_focus", bVal);
+		bval = m_canvas->m_mouse_focus;
+		fconfig.Write("mouse_focus", bval);
 	}
 	//ortho/persp
 	if (mask & 0x80)
 	{
-		fconfig.Write("persp", m_canvas->m_persp);
-		fconfig.Write("aov", m_canvas->m_aov);
-		bVal = m_options_toolbar->GetToolState(ID_FreeChk);
-		fconfig.Write("free_rd", bVal);
+		m_agent->getValue(gstPerspective, bval);
+		fconfig.Write("persp", bval);
+		m_agent->getValue(gstAov, dval);
+		fconfig.Write("aov", dval);
+		bval = m_options_toolbar->GetToolState(ID_FreeChk);
+		fconfig.Write("free_rd", bval);
 	}
 	//rotations
 	if (mask & 0x100)
@@ -2267,7 +2299,8 @@ void VRenderView::SaveDefault(unsigned int mask)
 		fconfig.Write("y_rot", str);
 		str = m_z_rot_text->GetValue();
 		fconfig.Write("z_rot", str);
-		fconfig.Write("rot_lock", m_canvas->GetRotLock());
+		m_agent->getValue(gstGearedEnable, bval);
+		fconfig.Write("rot_lock", bval);
 		fconfig.Write("rot_slider", m_rot_slider);
 	}
 	else
@@ -2275,14 +2308,15 @@ void VRenderView::SaveDefault(unsigned int mask)
 		fconfig.Write("x_rot", m_dft_x_rot);
 		fconfig.Write("y_rot", m_dft_y_rot);
 		fconfig.Write("z_rot", m_dft_z_rot);
-		fconfig.Write("rot_lock", m_canvas->GetRotLock());
+		m_agent->getValue(gstGearedEnable, bval);
+		fconfig.Write("rot_lock", bval);
 		fconfig.Write("rot_slider", m_rot_slider);
 	}
 	//depth atten
 	if (mask & 0x200)
 	{
-		bVal = m_left_toolbar->GetToolState(ID_DepthAttenChk);
-		fconfig.Write("depth_atten_chk", bVal);
+		bval = m_left_toolbar->GetToolState(ID_DepthAttenChk);
+		fconfig.Write("depth_atten_chk", bval);
 		str = m_depth_atten_factor_text->GetValue();
 		fconfig.Write("depth_atten_factor_text", str);
 		str.ToDouble(&m_dft_depth_atten_factor);
@@ -2290,13 +2324,16 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//scale factor
 	if (mask & 0x400)
 	{
-		fconfig.Write("pin_rot_center", m_canvas->m_pin_rot_center);
+		m_agent->getValue(gstPinRotCtr, bval);
+		fconfig.Write("pin_rot_center", bval);
 		//str = m_scale_factor_text->GetValue();
 		//fconfig.Write("scale_factor_text", str);
 		//str.ToDouble(&m_dft_scale_factor);
-		m_dft_scale_factor = m_canvas->m_scale_factor;
+		m_agent->getValue(gstScaleFactor, dval);
+		m_dft_scale_factor = dval;
 		fconfig.Write("scale_factor", m_dft_scale_factor);
-		m_dft_scale_factor_mode = m_canvas->m_scale_mode;
+		m_agent->getValue(gstScaleMode, lval);
+		m_dft_scale_factor_mode = lval;
 		fconfig.Write("scale_factor_mode", m_dft_scale_factor_mode);
 	}
 	else
@@ -2307,15 +2344,17 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//camera center
 	if (mask & 0x800)
 	{
-		m_canvas->GetCenters(x, y, z);
+		m_agent->getValue(gstCamCtrX, x);
+		m_agent->getValue(gstCamCtrY, y);
+		m_agent->getValue(gstCamCtrZ, z);
 		str = wxString::Format("%f %f %f", x, y, z);
 		fconfig.Write("center", str);
 	}
 	//colormap
 	if (mask & 0x1000)
 	{
-		bVal = m_canvas->m_draw_colormap;
-		fconfig.Write("colormap_chk", bVal);
+		m_agent->getValue(gstDrawColormap, bval);
+		fconfig.Write("colormap_chk", bval);
 	}
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -2347,15 +2386,15 @@ void VRenderView::LoadSettings()
 
 	wxFileConfig fconfig(is);
 
-	bool bVal;
-	double dVal;
-	int iVal;
-	if (fconfig.Read("volume_seq_rd", &bVal) && bVal)
-		m_canvas->SetVolMethod(VOL_METHOD_SEQ);
-	if (fconfig.Read("volume_multi_rd", &bVal) && bVal)
-		m_canvas->SetVolMethod(VOL_METHOD_MULTI);
-	if (fconfig.Read("volume_comp_rd", &bVal) && bVal)
-		m_canvas->SetVolMethod(VOL_METHOD_COMP);
+	bool bval;
+	double dval;
+	long lval;
+	if (fconfig.Read("volume_seq_rd", &bval) && bval)
+		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_SEQ);
+	if (fconfig.Read("volume_multi_rd", &bval) && bval)
+		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_MULTI);
+	if (fconfig.Read("volume_comp_rd", &bval) && bval)
+		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_COMP);
 
 	wxString str;
 	if (fconfig.Read("bg_color_picker", &str))
@@ -2365,52 +2404,48 @@ void VRenderView::LoadSettings()
 		wxColor cVal(r, g, b);
 		m_bg_color_picker->SetColour(cVal);
 		fluo::Color c(r/255.0, g/255.0, b/255.0);
-		m_canvas->SetBackgroundColor(c);
+		m_agent->setValue(gstBgColor, c);
 	}
-	if (fconfig.Read("cam_ctr_chk", &bVal))
+	if (fconfig.Read("cam_ctr_chk", &bval))
 	{
-		m_options_toolbar->ToggleTool(ID_CamCtrChk,bVal);
-		m_canvas->m_draw_camctr = bVal;
+		m_options_toolbar->ToggleTool(ID_CamCtrChk,bval);
+		m_agent->setValue(gstDrawCamCtr, bval);
 	}
-	if (fconfig.Read("camctr_size", &dVal))
+	if (fconfig.Read("camctr_size", &dval))
 	{
-		m_canvas->m_camctr_size = dVal;
+		m_agent->setValue(gstCamCtrSize, dval);
 	}
-	if (fconfig.Read("info_chk", &iVal))
+	if (fconfig.Read("info_chk", &lval))
 	{
-		m_options_toolbar->ToggleTool(ID_FpsChk, iVal&INFO_DISP);
-		m_canvas->m_draw_info = iVal;
+		m_options_toolbar->ToggleTool(ID_FpsChk, lval&fluo::Renderview::INFO_DISP);
+		m_agent->setValue(gstDrawInfo, lval);
 	}
-	if (fconfig.Read("legend_chk", &bVal))
+	if (fconfig.Read("legend_chk", &bval))
 	{
-		m_options_toolbar->ToggleTool(ID_LegendChk,bVal);
-		m_canvas->m_draw_legend = bVal;
+		m_options_toolbar->ToggleTool(ID_LegendChk,bval);
+		m_agent->setValue(gstDrawLegend, bval);
 	}
-	if (fconfig.Read("colormap_chk", &bVal))
+	if (fconfig.Read("colormap_chk", &bval))
 	{
-		m_options_toolbar->ToggleTool(ID_ColormapChk, bVal);
-		m_canvas->m_draw_colormap = bVal;
+		m_options_toolbar->ToggleTool(ID_ColormapChk, bval);
+		m_agent->setValue(gstDrawColormap, bval);
 	}
-	if (fconfig.Read("mouse_focus", &bVal))
+	if (fconfig.Read("mouse_focus", &bval))
 	{
-		m_canvas->m_mouse_focus = bVal;
+		m_canvas->m_mouse_focus = bval;
 	}
-	if (fconfig.Read("persp", &bVal))
+	if (fconfig.Read("persp", &bval))
 	{
-		if (bVal)
-			m_canvas->SetPersp(true);
-		else
-			m_canvas->SetPersp(false);
+		m_agent->setValue(gstPerspective, bval);
 	}
-	if (fconfig.Read("aov", &dVal))
+	if (fconfig.Read("aov", &dval))
 	{
-		m_canvas->SetAov(dVal);
+		m_agent->setValue(gstAov, dval);
 	}
-	if (fconfig.Read("free_rd", &bVal))
+	if (fconfig.Read("free_rd", &bval))
 	{
-		m_options_toolbar->ToggleTool(ID_FreeChk,bVal);
-		if (bVal)
-			m_canvas->SetFree(true);
+		m_options_toolbar->ToggleTool(ID_FreeChk,bval);
+		m_agent->setValue(gstFree, bval);
 	}
 	if (fconfig.Read("x_rot", &str))
 	{
@@ -2427,17 +2462,16 @@ void VRenderView::LoadSettings()
 		m_z_rot_text->ChangeValue(str);
 		str.ToDouble(&m_dft_z_rot);
 	}
-	if (fconfig.Read("rot_lock", &bVal))
+	if (fconfig.Read("rot_lock", &bval))
 	{
-		m_rot_lock_btn->ToggleTool(ID_RotLockChk,bVal);
-		if (bVal)
+		m_rot_lock_btn->ToggleTool(ID_RotLockChk,bval);
+		if (bval)
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmapFromMemory(gear_45));
 		else
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmapFromMemory(gear_dark));
-
-		m_canvas->SetRotLock(bVal);
+		m_agent->setValue(gstGearedEnable, bval);
 	}
 	if (fconfig.Read("rot_slider", &m_rot_slider))
 	{
@@ -2456,35 +2490,35 @@ void VRenderView::LoadSettings()
 	//	m_canvas->m_scale_factor = dVal/100.0;
 	//	m_dft_scale_factor = dVal;
 	//}
-	if (fconfig.Read("pin_rot_center", &bVal))
+	if (fconfig.Read("pin_rot_center", &bval))
 	{
-		m_canvas->m_pin_rot_center = bVal;
-		if (bVal)
-			m_canvas->m_rot_center_dirty = true;
-		m_pin_btn->ToggleTool(ID_PinBtn, bVal);
-		if (bVal)
+		m_agent->setValue(gstPinRotCtr, bval);
+		if (bval)
+			m_agent->setValue(gstRotCtrDirty, true);
+		m_pin_btn->ToggleTool(ID_PinBtn, bval);
+		if (bval)
 			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 				wxGetBitmapFromMemory(pin));
 		else
 			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 				wxGetBitmapFromMemory(anchor_dark));
 	}
-	if (fconfig.Read("scale_factor_mode", &iVal))
+	if (fconfig.Read("scale_factor_mode", &lval))
 	{
-		m_dft_scale_factor_mode = iVal;
-		SetScaleMode(iVal, false);
+		m_dft_scale_factor_mode = lval;
+		SetScaleMode(lval, false);
 	}
-	if (fconfig.Read("scale_factor", &dVal))
+	if (fconfig.Read("scale_factor", &dval))
 	{
-		m_dft_scale_factor = dVal;
-		m_canvas->m_scale_factor = m_dft_scale_factor;
+		m_dft_scale_factor = dval;
+		m_agent->setValue(gstScaleFactor, dval);
 		UpdateScaleFactor(false);
 	}
-	if (fconfig.Read("depth_atten_chk", &bVal))
+	if (fconfig.Read("depth_atten_chk", &bval))
 	{
 		//m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
-		m_canvas->SetFog(bVal);
-		if (bVal)
+		m_agent->setValue(gstDepthAtten, bval);
+		if (bval)
 		{
 			m_depth_atten_factor_sldr->Enable();
 			m_depth_atten_factor_text->Enable();
@@ -2498,16 +2532,18 @@ void VRenderView::LoadSettings()
 	if (fconfig.Read("depth_atten_factor_text", &str))
 	{
 		m_depth_atten_factor_text->ChangeValue(str);
-		str.ToDouble(&dVal);
-		m_depth_atten_factor_sldr->SetValue(int(dVal*100));
-		m_canvas->SetFogIntensity(dVal);
-		m_dft_depth_atten_factor = dVal;
+		str.ToDouble(&dval);
+		m_depth_atten_factor_sldr->SetValue(int(dval*100));
+		m_agent->setValue(gstDaInt, dval);
+		m_dft_depth_atten_factor = dval;
 	}
 	if (fconfig.Read("center", &str))
 	{
 		float x, y, z;
 		SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
-		m_canvas->SetCenters(x, y, z);
+		m_agent->setValue(gstCamCtrX, double(x));
+		m_agent->setValue(gstCamCtrY, double(y));
+		m_agent->setValue(gstCamCtrZ, double(z));
 	}
 
 	m_use_dft_settings = true;
