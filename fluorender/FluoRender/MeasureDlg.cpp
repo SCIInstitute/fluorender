@@ -31,8 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <FLIVR/VertexArray.h>
 #include <Distance/RulerHandler.h>
+#include <Distance/RulerRenderer.h>
 #include <Distance/DistCalculator.h>
 #include <Distance/RulerAlign.h>
+#include <FLIVR/TextureRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>

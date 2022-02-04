@@ -157,7 +157,7 @@ void VolumeCalculator::CalculateGroup(int type, const std::string &prev_group, b
 		if (m_selector && m_selector->GetSelectGroup())
 		{
 			fluo::VolumeData* vd = GetVolumeA();
-			fluo::VolumeGroup* group = vd->getParent(0)->asVolumeGroup();
+			fluo::VolumeGroup* group = vd->getParentVolumeGroup();
 			if (group && group->getNumChildren() > 1)
 			{
 				for (int i = 0; i < group->getNumChildren(); i++)

@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <Global.hpp>
+#include <FLIVR/ShaderProgram.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/TextRenderer.h>
+#include <Types/Utils.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
@@ -1780,13 +1784,13 @@ void SettingDlg::EnableStreaming(bool enable)
 
 void SettingDlg::SetShadowDir(double deg)
 {
-	m_shadow_dir_x = cos(d2r(deg));
-	m_shadow_dir_y = sin(d2r(deg));
+	m_shadow_dir_x = cos(fluo::d2r(deg));
+	m_shadow_dir_y = sin(fluo::d2r(deg));
 }
 
 double SettingDlg::GetShadowDir()
 {
-	double deg = r2d(atan2(m_shadow_dir_y, m_shadow_dir_x));
+	double deg = fluo::r2d(atan2(m_shadow_dir_y, m_shadow_dir_x));
 	return deg;
 }
 

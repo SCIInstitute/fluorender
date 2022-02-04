@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.hpp>
 #include <Root.hpp>
 #include <FLIVR/MeshRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <compatibility.h>
 #include <wx/valnum.h>
 #include "png_resource.h"

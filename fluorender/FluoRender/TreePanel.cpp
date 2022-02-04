@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "TreePanel.h"
 #include "VRenderFrame.h"
+#include <Global.hpp>
+#include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <MeshData.hpp>
@@ -312,7 +315,7 @@ void DataTreeCtrl::OnContextMenu(wxContextMenuEvent &event )
 					menu.Append(ID_AddDataGroup, "Add Volume Group");
 					menu.Append(ID_AddMeshGroup, "Add Mesh Group");
 					wxString str = GetItemText(sel_item);
-					if (str != m_frame->GetView(0)->GetName())
+					if (str != glbin_root->getCurrentRenderview()->getName())
 						menu.Append(ID_CloseView, "Close");
 				}
 				break;

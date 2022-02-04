@@ -113,6 +113,7 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	m_draw_clip(false), 
 	m_draw_scalebar(kOff),
 	m_rot_slider(true),
+	m_mouse_focus(false),
 	m_use_dft_settings(false),
 	m_dft_x_rot(0.0),
 	m_dft_y_rot(0.0),
@@ -1459,7 +1460,7 @@ void VRenderView::OnScale121(wxCommandEvent &event)
 	m_scale_factor_sldr->SetValue(dval * 100);
 	m_scale_factor_text->ChangeValue(str);
 	RefreshGL();
-	if (m_canvas->m_mouse_focus)
+	if (m_mouse_focus)
 		m_canvas->SetFocus();
 }
 
@@ -1546,7 +1547,7 @@ void VRenderView::OnScaleReset(wxCommandEvent &event)
 {
 	m_agent->resetValue(gstScaleFactor);
 	UpdateScaleFactor();
-	if (m_canvas && m_canvas->m_mouse_focus)
+	if (m_canvas && m_mouse_focus)
 		m_canvas->SetFocus();
 }
 
@@ -1626,9 +1627,11 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
 	m_x_rot_text->ChangeValue("0.0");
 	m_y_rot_text->ChangeValue("0.0");
 	m_z_rot_text->ChangeValue("0.0");
-	m_canvas->SetRotations(0.0, 0.0, 0.0);
+	m_agent->setValue(gstCamRotX, double(0));
+	m_agent->setValue(gstCamRotY, double(0));
+	m_agent->setValue(gstCamRotZ, double(0));
 	RefreshGL(true);
-	if (m_canvas->m_mouse_focus)
+	if (m_mouse_focus)
 		m_canvas->SetFocus();
 }
 
@@ -2219,6 +2222,11 @@ void VRenderView::SetFullScreen()
 	}
 }
 
+void VRenderView::AddCanvas(RenderCanvas* canvas)
+{
+	m_view_sizer->Add(canvas, 1, wxEXPAND);
+}
+
 void VRenderView::OnFullScreen(wxCommandEvent& event)
 {
 	SetFullScreen();
@@ -2283,8 +2291,7 @@ void VRenderView::SaveDefault(unsigned int mask)
 	//mouse focus
 	if (mask & 0x40)
 	{
-		bval = m_canvas->m_mouse_focus;
-		fconfig.Write("mouse_focus", bval);
+		fconfig.Write("mouse_focus", m_mouse_focus);
 	}
 	//ortho/persp
 	if (mask & 0x80)
@@ -2438,7 +2445,7 @@ void VRenderView::LoadSettings()
 	}
 	if (fconfig.Read("mouse_focus", &bval))
 	{
-		m_canvas->m_mouse_focus = bval;
+		m_mouse_focus = bval;
 	}
 	if (fconfig.Read("persp", &bval))
 	{

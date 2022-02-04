@@ -2358,7 +2358,7 @@ void VPropView::UpdateMaxVal(double value)
 void VPropView::OnSpaceText(wxCommandEvent& event)
 {
 	if (SetSpacings())
-		InitVRenderViews(INIT_BOUNDS|INIT_CENTER);
+		InitVRenderViews(fluo::Renderview::INIT_BOUNDS| fluo::Renderview::INIT_CENTER);
 }
 
 //legend

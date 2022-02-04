@@ -27,11 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/Count.h>
 #include <Distance/Cov.h>
 #include <Distance/RulerAlign.h>
 #include <Selection/VolumeSelector.h>
+#include <FLIVR/Texture.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 //resources

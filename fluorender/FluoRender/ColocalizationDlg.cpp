@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ColocalizationDlg.h"
 #include "VRenderFrame.h"
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Calculate/Compare.h>

@@ -38,6 +38,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Cluster/dbscan.h>
 #include <Cluster/kmeans.h>
 #include <Cluster/exmax.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>

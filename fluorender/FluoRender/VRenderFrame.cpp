@@ -28,12 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #include "VRenderFrame.h"
 #include "compatibility.h"
 #include "DragDrop.h"
+#include <Global.hpp>
+#include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <MeshData.hpp>
 #include <MeshGroup.hpp>
 #include <Annotations.hpp>
-#include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
@@ -46,6 +48,10 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolShader.h>
 #include <FLIVR/SegShader.h>
 #include <FLIVR/VolCalShader.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/MultiVolumeRenderer.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -464,32 +470,32 @@ VRenderFrame::VRenderFrame(
 	flvr::TextRenderer::text_texture_manager_.SetSize(m_setting_dlg->GetTextSize());
 
 	//settings dialog
-	if (m_setting_dlg->GetTestMode(1))
-		m_vrv_list[0]->m_glview->m_test_speed = true;
-	if (m_setting_dlg->GetTestMode(3))
-	{
-		m_vrv_list[0]->m_glview->m_test_wiref = true;
-		m_vrv_list[0]->m_glview->m_draw_bounds = true;
-		m_vrv_list[0]->m_glview->m_draw_grid = true;
-		m_data_mgr.m_vol_test_wiref = true;
-	}
-	int c1 = m_setting_dlg->GetWavelengthColor(1);
-	int c2 = m_setting_dlg->GetWavelengthColor(2);
-	int c3 = m_setting_dlg->GetWavelengthColor(3);
-	int c4 = m_setting_dlg->GetWavelengthColor(4);
-	if (c1 && c2 && c3 && c4)
-		m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
-	m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-	m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
-	m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
-	m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
-	m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
-	if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
+	//if (m_setting_dlg->GetTestMode(1))
+	//	m_vrv_list[0]->m_glview->m_test_speed = true;
+	//if (m_setting_dlg->GetTestMode(3))
+	//{
+	//	m_vrv_list[0]->m_glview->m_test_wiref = true;
+	//	m_vrv_list[0]->m_glview->m_draw_bounds = true;
+	//	m_vrv_list[0]->m_glview->m_draw_grid = true;
+	//	m_data_mgr.m_vol_test_wiref = true;
+	//}
+	//int c1 = m_setting_dlg->GetWavelengthColor(1);
+	//int c2 = m_setting_dlg->GetWavelengthColor(2);
+	//int c3 = m_setting_dlg->GetWavelengthColor(3);
+	//int c4 = m_setting_dlg->GetWavelengthColor(4);
+	//if (c1 && c2 && c3 && c4)
+	//	m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
+	//m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
+	//m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	//m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	//m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
+	//m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
+	//m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	//m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	//m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	//m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
+	//m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
+	//if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	m_time_id = m_setting_dlg->GetTimeId();
 	m_data_mgr.SetOverrideVox(m_setting_dlg->GetOverrideVox());
 	m_data_mgr.SetPvxmlFlipX(m_setting_dlg->GetPvxmlFlipX());
@@ -689,9 +695,9 @@ VRenderFrame::VRenderFrame(
 		//vrv->m_glview->SetGamma(gamma);
 		//vrv->m_glview->SetBrightness(brightness);
 		//vrv->m_glview->SetHdr(hdr);
-		vrv->m_glview->SetSyncR(true);
-		vrv->m_glview->SetSyncG(true);
-		vrv->m_glview->SetSyncB(true);
+		//vrv->m_glview->SetSyncR(true);
+		//vrv->m_glview->SetSyncG(true);
+		//vrv->m_glview->SetSyncB(true);
 	}
 
 	//drop target
@@ -913,11 +919,11 @@ VRenderFrame::~VRenderFrame()
 	flvr::TextureRenderer::cal_shader_factory_.clear();
 	flvr::TextureRenderer::img_shader_factory_.clear();
 	flvr::TextRenderer::text_texture_manager_.clear();
-	for (int i=0; i<GetViewNum(); i++)
-	{
-		RenderCanvas* view = GetView(i);
-		if (view) view->ClearAll();
-	}
+	//for (int i=0; i<GetViewNum(); i++)
+	//{
+	//	RenderCanvas* view = GetView(i);
+	//	if (view) view->ClearAll();
+	//}
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
 }
@@ -959,33 +965,33 @@ wxString VRenderFrame::CreateView(int row)
 
 	if (!vrv)
 		return "NO_NAME";
-	RenderCanvas* view = vrv->m_glview;
-	if (!view)
-		return "NO_NAME";
+	//RenderCanvas* view = vrv->m_glview;
+	//if (!view)
+	//	return "NO_NAME";
 
 	m_vrv_list.push_back(vrv);
 	if (m_movie_view)
 		m_movie_view->AddView(vrv->GetName());
-	if (m_setting_dlg->GetTestMode(3))
-	{
-		view->m_test_wiref = true;
-		view->m_draw_bounds = true;
-		view->m_draw_grid = true;
-	}
-	view->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	view->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	view->SetAdaptive(m_setting_dlg->GetMouseInt());
-	view->SetGradBg(m_setting_dlg->GetGradBg());
-	view->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	view->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	view->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
+	//if (m_setting_dlg->GetTestMode(3))
+	//{
+	//	view->m_test_wiref = true;
+	//	view->m_draw_bounds = true;
+	//	view->m_draw_grid = true;
+	//}
+	//view->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	//view->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	//view->SetAdaptive(m_setting_dlg->GetMouseInt());
+	//view->SetGradBg(m_setting_dlg->GetGradBg());
+	//view->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	//view->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	//view->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	//vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 
 	//reset gl
 	for (int i = 0; i < GetViewNum(); ++i)
 	{
 		if (GetView(i))
-			GetView(i)->m_set_gl = false;
+			GetView(i)->ResetGl();
 	}
 
 	//m_aui_mgr.Update();
@@ -1000,47 +1006,47 @@ wxString VRenderFrame::CreateView(int row)
 		vrv->m_glview->SetGamma(gamma);
 		vrv->m_glview->SetBrightness(brightness);
 		vrv->m_glview->SetHdr(hdr);*/
-		view->SetSyncR(true);
-		view->SetSyncG(true);
-		view->SetSyncB(true);
+		//view->SetSyncR(true);
+		//view->SetSyncG(true);
+		//view->SetSyncB(true);
 	}
 
 	//add volumes
-	if (GetViewNum() > 0)
-	{
-		RenderCanvas* view0 = GetView(0);
-		if (view0)
-		{
-			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
-			{
-				fluo::VolumeData* vd = view0->GetDispVolumeData(i);
-				if (vd)
-				{
-					fluo::VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
+	//if (GetViewNum() > 0)
+	//{
+	//	RenderCanvas* view0 = GetView(0);
+	//	if (view0)
+	//	{
+	//		for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
+	//		{
+	//			fluo::VolumeData* vd = view0->GetDispVolumeData(i);
+	//			if (vd)
+	//			{
+	//				fluo::VolumeData* vd_add = m_data_mgr.DuplicateVolumeData(vd);
 
-					if (vd_add)
-					{
-						int chan_num = view->GetAny();
-						fluo::Color color(1.0, 1.0, 1.0);
-						if (chan_num == 0)
-							color = fluo::Color(1.0, 0.0, 0.0);
-						else if (chan_num == 1)
-							color = fluo::Color(0.0, 1.0, 0.0);
-						else if (chan_num == 2)
-							color = fluo::Color(0.0, 0.0, 1.0);
+	//				if (vd_add)
+	//				{
+	//					int chan_num = view->GetAny();
+	//					fluo::Color color(1.0, 1.0, 1.0);
+	//					if (chan_num == 0)
+	//						color = fluo::Color(1.0, 0.0, 0.0);
+	//					else if (chan_num == 1)
+	//						color = fluo::Color(0.0, 1.0, 0.0);
+	//					else if (chan_num == 2)
+	//						color = fluo::Color(0.0, 0.0, 1.0);
 
-						if (chan_num >= 0 && chan_num < 3)
-							vd_add->setValue(gstColor, color);
+	//					if (chan_num >= 0 && chan_num < 3)
+	//						vd_add->setValue(gstColor, color);
 
-						view->AddVolumeData(vd_add);
-					}
-				}
-			}
-		}
-		//update
-		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-		vrv->UpdateView();
-	}
+	//					view->AddVolumeData(vd_add);
+	//				}
+	//			}
+	//		}
+	//	}
+	//	//update
+	//	view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+	//	vrv->UpdateView();
+	//}
 
 	UpdateTree();
 
@@ -1059,7 +1065,7 @@ RenderCanvas* VRenderFrame::GetView(int index)
 	{
 		VRenderView* v = m_vrv_list[index];
 		if (v)
-			return v->m_glview;
+			return v->GetCanvas();
 	}
 	return 0;
 }
@@ -1070,7 +1076,7 @@ RenderCanvas* VRenderFrame::GetView(const wxString& name)
 	{
 		VRenderView* v = m_vrv_list[i];
 		if (v && v->GetName() == name)
-			return v->m_glview;
+			return v->GetCanvas();
 	}
 	return 0;
 }
@@ -1503,99 +1509,99 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanva
 			else if (suffix == ".lof")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
 
-			if (ch_num > 1)
-			{
-				fluo::VolumeGroup* group = v->AddOrGetGroup();
-				if (group)
-				{
-					for (int i=ch_num; i>0; i--)
-					{
-						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(ch_num-i);
-						if (vd)
-						{
-							v->AddVolumeData(vd, group->getName());
-							wxString vol_name = vd->getName();
-							if (vol_name.Find("_1ch")!=-1 &&
-								(i==1 || i==2))
-								vd->setValue(gstDisplay, false);
-							if (vol_name.Find("_2ch")!=-1 && i==1)
-								vd->setValue(gstDisplay, false);
+			//if (ch_num > 1)
+			//{
+			//	fluo::VolumeGroup* group = v->AddOrGetGroup();
+			//	if (group)
+			//	{
+			//		for (int i=ch_num; i>0; i--)
+			//		{
+			//			fluo::VolumeData* vd = m_data_mgr.GetVolumeData(ch_num-i);
+			//			if (vd)
+			//			{
+			//				v->AddVolumeData(vd, group->getName());
+			//				wxString vol_name = vd->getName();
+			//				if (vol_name.Find("_1ch")!=-1 &&
+			//					(i==1 || i==2))
+			//					vd->setValue(gstDisplay, false);
+			//				if (vol_name.Find("_2ch")!=-1 && i==1)
+			//					vd->setValue(gstDisplay, false);
 
-							if (i==ch_num)
-							{
-								vd_sel = vd;
-								group_sel = group;
-							}
+			//				if (i==ch_num)
+			//				{
+			//					vd_sel = vd;
+			//					group_sel = group;
+			//				}
 
-							if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
-								enable_4d = true;
-						}
-					}
-					if (j > 0)
-						group->setValue(gstDisplay, false);
-				}
-			}
-			else if (ch_num == 1)
-			{
-				fluo::VolumeData* vd = m_data_mgr.GetVolumeData(0);
-				if (vd)
-				{
-					int chan_num = v->GetDispVolumeNum();
-					fluo::Color color(1.0, 1.0, 1.0);
-					if (chan_num == 0)
-						color = fluo::Color(1.0, 0.0, 0.0);
-					else if (chan_num == 1)
-						color = fluo::Color(0.0, 1.0, 0.0);
-					else if (chan_num == 2)
-						color = fluo::Color(0.0, 0.0, 1.0);
+			//				if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
+			//					enable_4d = true;
+			//			}
+			//		}
+			//		if (j > 0)
+			//			group->setValue(gstDisplay, false);
+			//	}
+			//}
+			//else if (ch_num == 1)
+			//{
+			//	fluo::VolumeData* vd = m_data_mgr.GetVolumeData(0);
+			//	if (vd)
+			//	{
+			//		int chan_num = v->GetDispVolumeNum();
+			//		fluo::Color color(1.0, 1.0, 1.0);
+			//		if (chan_num == 0)
+			//			color = fluo::Color(1.0, 0.0, 0.0);
+			//		else if (chan_num == 1)
+			//			color = fluo::Color(0.0, 1.0, 0.0);
+			//		else if (chan_num == 2)
+			//			color = fluo::Color(0.0, 0.0, 1.0);
 
-					bool bval;
-					if (chan_num >=0 && chan_num <3)
-						vd->setValue(gstColor, color);
-					else
-						vd->toggleValue(gstRandomizeColor, bval);
+			//		bool bval;
+			//		if (chan_num >=0 && chan_num <3)
+			//			vd->setValue(gstColor, color);
+			//		else
+			//			vd->toggleValue(gstRandomizeColor, bval);
 
-					v->AddVolumeData(vd);
-					vd_sel = vd;
+			//		v->AddVolumeData(vd);
+			//		vd_sel = vd;
 
-					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
-						v->m_tseq_cur_num = vd->GetReader()->GetCurTime();
-						enable_4d = true;
-					}
-				}
-			}
-			else { //TODO: Consult Wan here.
+			//		if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
+			//			v->m_tseq_cur_num = vd->GetReader()->GetCurTime();
+			//			enable_4d = true;
+			//		}
+			//	}
+			//}
+			//else { //TODO: Consult Wan here.
 
-			}
+			//}
 		}
 
-		UpdateList();
-		if (vd_sel)
-			UpdateTree(vd_sel->getName());
-		else
-			UpdateTree();
-		v->RefreshGL(39);
+		//UpdateList();
+		//if (vd_sel)
+		//	UpdateTree(vd_sel->getName());
+		//else
+		//	UpdateTree();
+		//v->RefreshGL(39);
 
-		v->InitView(INIT_BOUNDS|INIT_CENTER);
-		v->m_vrv->UpdateScaleFactor(false);
+		//v->InitView(INIT_BOUNDS|INIT_CENTER);
+		//v->m_vrv->UpdateScaleFactor(false);
 
-		if (enable_4d)
-		{
-			m_movie_view->SetTimeSeq(true);
-			m_movie_view->SetRotate(false);
-			m_movie_view->SetCurrentTime(v->m_tseq_cur_num);
-		}
+		//if (enable_4d)
+		//{
+		//	m_movie_view->SetTimeSeq(true);
+		//	m_movie_view->SetRotate(false);
+		//	m_movie_view->SetCurrentTime(v->m_tseq_cur_num);
+		//}
 
 		delete prg_diag;
 	}
 
-	v->RefreshGL(39);//added by Takashi
+	//v->RefreshGL(39);//added by Takashi
 }
 
 void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
 {
-	if (m_vrv_list[0])
-		m_vrv_list[0]->m_glview->Init();
+	//if (m_vrv_list[0])
+	//	m_vrv_list[0]->m_glview->Init();
 
 	if (files.Count())
 	{
@@ -1641,53 +1647,53 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 
 void VRenderFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
 {
-	if (!view)
-		view = GetView(0);
+	//if (!view)
+	//	view = GetView(0);
 
-	fluo::MeshData* md_sel = 0;
+	//fluo::MeshData* md_sel = 0;
 
-	wxProgressDialog *prg_diag = new wxProgressDialog(
-		"FluoRender: Loading mesh data...",
-		"Reading and processing selected mesh data. Please wait.",
-		100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
+	//wxProgressDialog *prg_diag = new wxProgressDialog(
+	//	"FluoRender: Loading mesh data...",
+	//	"Reading and processing selected mesh data. Please wait.",
+	//	100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-	fluo::MeshGroup* group = 0;
-	if (files.Count() > 1)
-		group = view->AddOrGetMGroup();
+	//fluo::MeshGroup* group = 0;
+	//if (files.Count() > 1)
+	//	group = view->AddOrGetMGroup();
 
-	for (int i=0; i<(int)files.Count(); i++)
-	{
-		prg_diag->Update(90*(i+1)/(int)files.Count());
+	//for (int i=0; i<(int)files.Count(); i++)
+	//{
+	//	prg_diag->Update(90*(i+1)/(int)files.Count());
 
-		wxString filename = files[i];
-		m_data_mgr.LoadMeshData(filename);
+	//	wxString filename = files[i];
+	//	m_data_mgr.LoadMeshData(filename);
 
-		fluo::MeshData* md = m_data_mgr.GetLastMeshData();
-		if (view && md)
-		{
-			if (group)
-			{
-				group->insertChild(group->getNumChildren()-1, md);
-				view->SetMeshPopDirty();
-			}
-			else
-				view->AddMeshData(md);
+	//	fluo::MeshData* md = m_data_mgr.GetLastMeshData();
+	//	if (view && md)
+	//	{
+	//		if (group)
+	//		{
+	//			group->insertChild(group->getNumChildren()-1, md);
+	//			view->SetMeshPopDirty();
+	//		}
+	//		else
+	//			view->AddMeshData(md);
 
-			if (i==int(files.Count()-1))
-				md_sel = md;
-		}
-	}
+	//		if (i==int(files.Count()-1))
+	//			md_sel = md;
+	//	}
+	//}
 
-	UpdateList();
-	if (md_sel)
-		UpdateTree(md_sel->getName());
-	else
-		UpdateTree();
+	//UpdateList();
+	//if (md_sel)
+	//	UpdateTree(md_sel->getName());
+	//else
+	//	UpdateTree();
 
-	if (view)
-		view->InitView(INIT_BOUNDS|INIT_CENTER);
+	//if (view)
+	//	view->InitView(INIT_BOUNDS|INIT_CENTER);
 
-	delete prg_diag;
+	//delete prg_diag;
 }
 
 void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
@@ -1793,336 +1799,336 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 
 void VRenderFrame::UpdateTreeIcons()
 {
-	int i, j, k;
-	if (!m_tree_panel || !m_tree_panel->GetTreeCtrl())
-		return;
+	//int i, j, k;
+	//if (!m_tree_panel || !m_tree_panel->GetTreeCtrl())
+	//	return;
 
-	DataTreeCtrl* treectrl = m_tree_panel->GetTreeCtrl();
-	wxTreeItemId root = treectrl->GetRootItem();
-	wxTreeItemIdValue ck_view;
-	int counter = 0;
-	for (i=0; i<GetViewNum(); i++)
-	{
-		RenderCanvas *view = GetView(i);
-		wxTreeItemId vrv_item;
-		if (i==0)
-			vrv_item = treectrl->GetFirstChild(root, ck_view);
-		else
-			vrv_item = treectrl->GetNextChild(root, ck_view);
+	//DataTreeCtrl* treectrl = m_tree_panel->GetTreeCtrl();
+	//wxTreeItemId root = treectrl->GetRootItem();
+	//wxTreeItemIdValue ck_view;
+	//int counter = 0;
+	//for (i=0; i<GetViewNum(); i++)
+	//{
+	//	RenderCanvas *view = GetView(i);
+	//	wxTreeItemId vrv_item;
+	//	if (i==0)
+	//		vrv_item = treectrl->GetFirstChild(root, ck_view);
+	//	else
+	//		vrv_item = treectrl->GetNextChild(root, ck_view);
 
-		if (!vrv_item.IsOk())
-			continue;
+	//	if (!vrv_item.IsOk())
+	//		continue;
 
-		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
+	//	m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
 
-		wxTreeItemIdValue ck_layer;
-		for (j=0; j< view->GetLayerNum(); j++)
-		{
-			fluo::Object* layer = view->GetLayer(j);
-			wxTreeItemId layer_item;
-			if (j==0)
-				layer_item = treectrl->GetFirstChild(vrv_item, ck_layer);
-			else
-				layer_item = treectrl->GetNextChild(vrv_item, ck_layer);
+	//	wxTreeItemIdValue ck_layer;
+	//	for (j=0; j< view->GetLayerNum(); j++)
+	//	{
+	//		fluo::Object* layer = view->GetLayer(j);
+	//		wxTreeItemId layer_item;
+	//		if (j==0)
+	//			layer_item = treectrl->GetFirstChild(vrv_item, ck_layer);
+	//		else
+	//			layer_item = treectrl->GetNextChild(vrv_item, ck_layer);
 
-			if (!layer_item.IsOk())
-				continue;
+	//		if (!layer_item.IsOk())
+	//			continue;
 
-			if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
-			{
-				counter++;
-				bool disp;
-				vd->getValue(gstDisplay, disp);
-				m_tree_panel->SetVolItemImage(layer_item, disp?2*counter+1:2*counter);
-			}
-			else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
-			{
-				counter++;
-				bool disp;
-				md->getValue(gstDisplay, disp);
-				m_tree_panel->SetMeshItemImage(layer_item, disp?2*counter+1:2*counter);
-			}
-			else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
-			{
-				counter++;
-				bool disp;
-				ann->getValue(gstDisplay, disp);
-				m_tree_panel->SetAnnotationItemImage(layer_item, disp?2*counter+1:2*counter);
-			}
-			else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
-			{
-				bool disp;
-				group->getValue(gstDisplay, disp);
-				m_tree_panel->SetGroupItemImage(layer_item, int(disp));
-				wxTreeItemIdValue ck_volume;
-				for (k=0; k<group->getNumChildren(); k++)
-				{
-					fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
-					if (!vd)
-						continue;
-					wxTreeItemId volume_item;
-					if (k==0)
-						volume_item = treectrl->GetFirstChild(layer_item, ck_volume);
-					else
-						volume_item = treectrl->GetNextChild(layer_item, ck_volume);
-					if (!volume_item.IsOk())
-						continue;
-					counter++;
-					vd->getValue(gstDisplay, disp);
-					m_tree_panel->SetVolItemImage(volume_item, disp?2*counter+1:2*counter);
-				}
-			}
-			else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
-			{
-				bool disp;
-				group->getValue(gstDisplay, disp);
-				m_tree_panel->SetMGroupItemImage(layer_item, int(disp));
-				wxTreeItemIdValue ck_mesh;
-				for (k=0; k<group->getNumChildren(); k++)
-				{
-					fluo::MeshData* md = group->getChild(k)->asMeshData();
-					if (!md)
-						continue;
-					wxTreeItemId mesh_item;
-					if (k==0)
-						mesh_item = treectrl->GetFirstChild(layer_item, ck_mesh);
-					else
-						mesh_item = treectrl->GetNextChild(layer_item, ck_mesh);
-					if (!mesh_item.IsOk())
-						continue;
-					counter++;
-					bool disp;
-					md->getValue(gstDisplay, disp);
-					m_tree_panel->SetMeshItemImage(mesh_item, disp?2*counter+1:2*counter);
-				}
-			}
-		}
-	}
-	m_tree_panel->Refresh(false);
+	//		if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
+	//		{
+	//			counter++;
+	//			bool disp;
+	//			vd->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetVolItemImage(layer_item, disp?2*counter+1:2*counter);
+	//		}
+	//		else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
+	//		{
+	//			counter++;
+	//			bool disp;
+	//			md->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetMeshItemImage(layer_item, disp?2*counter+1:2*counter);
+	//		}
+	//		else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
+	//		{
+	//			counter++;
+	//			bool disp;
+	//			ann->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetAnnotationItemImage(layer_item, disp?2*counter+1:2*counter);
+	//		}
+	//		else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
+	//		{
+	//			bool disp;
+	//			group->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetGroupItemImage(layer_item, int(disp));
+	//			wxTreeItemIdValue ck_volume;
+	//			for (k=0; k<group->getNumChildren(); k++)
+	//			{
+	//				fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
+	//				if (!vd)
+	//					continue;
+	//				wxTreeItemId volume_item;
+	//				if (k==0)
+	//					volume_item = treectrl->GetFirstChild(layer_item, ck_volume);
+	//				else
+	//					volume_item = treectrl->GetNextChild(layer_item, ck_volume);
+	//				if (!volume_item.IsOk())
+	//					continue;
+	//				counter++;
+	//				vd->getValue(gstDisplay, disp);
+	//				m_tree_panel->SetVolItemImage(volume_item, disp?2*counter+1:2*counter);
+	//			}
+	//		}
+	//		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
+	//		{
+	//			bool disp;
+	//			group->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetMGroupItemImage(layer_item, int(disp));
+	//			wxTreeItemIdValue ck_mesh;
+	//			for (k=0; k<group->getNumChildren(); k++)
+	//			{
+	//				fluo::MeshData* md = group->getChild(k)->asMeshData();
+	//				if (!md)
+	//					continue;
+	//				wxTreeItemId mesh_item;
+	//				if (k==0)
+	//					mesh_item = treectrl->GetFirstChild(layer_item, ck_mesh);
+	//				else
+	//					mesh_item = treectrl->GetNextChild(layer_item, ck_mesh);
+	//				if (!mesh_item.IsOk())
+	//					continue;
+	//				counter++;
+	//				bool disp;
+	//				md->getValue(gstDisplay, disp);
+	//				m_tree_panel->SetMeshItemImage(mesh_item, disp?2*counter+1:2*counter);
+	//			}
+	//		}
+	//	}
+	//}
+	//m_tree_panel->Refresh(false);
 }
 
 void VRenderFrame::UpdateTreeColors()
 {
-	int i, j, k;
-	int counter = 0;
-	for (i=0 ; i<GetViewNum() ; i++)
-	{
-		RenderCanvas *view = GetView(i);
+	//int i, j, k;
+	//int counter = 0;
+	//for (i=0 ; i<GetViewNum() ; i++)
+	//{
+	//	RenderCanvas *view = GetView(i);
 
-		for (j=0; j< view->GetLayerNum(); j++)
-		{
-			fluo::Object* layer = view->GetLayer(j);
-			if (fluo::Node* vd = dynamic_cast<fluo::Node*>(layer))
-			{
-				fluo::Color c;
-				vd->getValue(gstColor, c);
-				wxColor wxc(
-					(unsigned char)(c.r()*255),
-					(unsigned char)(c.g()*255),
-					(unsigned char)(c.b()*255));
-				m_tree_panel->ChangeIconColor(counter+1, wxc);
-				counter++;
-			}
-			else if (fluo::Group* group = dynamic_cast<fluo::Group*>(layer))
-			{
-				for (k=0; k<group->getNumChildren(); k++)
-				{
-					fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
-					if (!vd)
-						break;
-					fluo::Color c;
-					vd->getValue(gstColor, c);
-					wxColor wxc(
-						(unsigned char)(c.r()*255),
-						(unsigned char)(c.g()*255),
-						(unsigned char)(c.b()*255));
-					m_tree_panel->ChangeIconColor(counter+1, wxc);
-					counter++;
-				}
-			}
-		}
-	}
-	m_tree_panel->Refresh(false);
+	//	for (j=0; j< view->GetLayerNum(); j++)
+	//	{
+	//		fluo::Object* layer = view->GetLayer(j);
+	//		if (fluo::Node* vd = dynamic_cast<fluo::Node*>(layer))
+	//		{
+	//			fluo::Color c;
+	//			vd->getValue(gstColor, c);
+	//			wxColor wxc(
+	//				(unsigned char)(c.r()*255),
+	//				(unsigned char)(c.g()*255),
+	//				(unsigned char)(c.b()*255));
+	//			m_tree_panel->ChangeIconColor(counter+1, wxc);
+	//			counter++;
+	//		}
+	//		else if (fluo::Group* group = dynamic_cast<fluo::Group*>(layer))
+	//		{
+	//			for (k=0; k<group->getNumChildren(); k++)
+	//			{
+	//				fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
+	//				if (!vd)
+	//					break;
+	//				fluo::Color c;
+	//				vd->getValue(gstColor, c);
+	//				wxColor wxc(
+	//					(unsigned char)(c.r()*255),
+	//					(unsigned char)(c.g()*255),
+	//					(unsigned char)(c.b()*255));
+	//				m_tree_panel->ChangeIconColor(counter+1, wxc);
+	//				counter++;
+	//			}
+	//		}
+	//	}
+	//}
+	//m_tree_panel->Refresh(false);
 }
 
 void VRenderFrame::UpdateTree(wxString name)
 {
-	if (!m_tree_panel)
-		return;
+	//if (!m_tree_panel)
+	//	return;
 
-	m_tree_panel->DeleteAll();
-	m_tree_panel->ClearIcons();
+	//m_tree_panel->DeleteAll();
+	//m_tree_panel->ClearIcons();
 
-	wxString root_str = "Active Datasets";
-	wxTreeItemId root_item = m_tree_panel->AddRootItem(root_str);
-	if (name == root_str)
-		m_tree_panel->SelectItem(root_item);
-	//append non-color icons for views
-	m_tree_panel->AppendIcon();
-	m_tree_panel->Expand(root_item);
-	m_tree_panel->ChangeIconColor(0, wxColor(255, 255, 255));
+	//wxString root_str = "Active Datasets";
+	//wxTreeItemId root_item = m_tree_panel->AddRootItem(root_str);
+	//if (name == root_str)
+	//	m_tree_panel->SelectItem(root_item);
+	////append non-color icons for views
+	//m_tree_panel->AppendIcon();
+	//m_tree_panel->Expand(root_item);
+	//m_tree_panel->ChangeIconColor(0, wxColor(255, 255, 255));
 
-	wxTreeItemId sel_item;
+	//wxTreeItemId sel_item;
 
-	for (int i = 0; i < GetViewNum(); i++)
-	{
-		RenderCanvas* view = GetView(i);
-		if (!view)
-			continue;
-		int j, k;
+	//for (int i = 0; i < GetViewNum(); i++)
+	//{
+	//	RenderCanvas* view = GetView(i);
+	//	if (!view)
+	//		continue;
+	//	int j, k;
 
-		wxString view_name = view->m_vrv->GetName();
-		view->OrganizeLayers();
-		wxTreeItemId vrv_item = m_tree_panel->AddViewItem(view_name);
-		m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
-		if (name == view_name)
-			m_tree_panel->SelectItem(vrv_item);
+	//	wxString view_name = view->m_vrv->GetName();
+	//	view->OrganizeLayers();
+	//	wxTreeItemId vrv_item = m_tree_panel->AddViewItem(view_name);
+	//	m_tree_panel->SetViewItemImage(vrv_item, view->GetDraw());
+	//	if (name == view_name)
+	//		m_tree_panel->SelectItem(vrv_item);
 
-		for (j=0; j< view->GetLayerNum(); j++)
-		{
-			fluo::Object* layer = view->GetLayer(j);
-			if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
-			{
-				//append icon for volume
-				m_tree_panel->AppendIcon();
-				fluo::Color c;
-				vd->getValue(gstColor, c);
-				wxColor wxc(
-					(unsigned char)(c.r()*255),
-					(unsigned char)(c.g()*255),
-					(unsigned char)(c.b()*255));
-				int ii = m_tree_panel->GetIconNum()-1;
-				m_tree_panel->ChangeIconColor(ii, wxc);
-				wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->getName());
-				bool disp;
-				vd->getValue(gstDisplay, disp);
-				m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
-				if (name == vd->getName())
-				{
-					sel_item = item;
-					view->SetVolumeA(vd);
-					GetBrushToolDlg()->GetSettings(view);
-					GetMeasureDlg()->GetSettings(view);
-					GetTraceDlg()->GetSettings(view);
-					GetOclDlg()->GetSettings(view);
-					GetComponentDlg()->SetView(view);
-					GetColocalizationDlg()->SetView(view);
-				}
-			}
-			else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
-			{
-				//append icon for mesh
-				m_tree_panel->AppendIcon();
-				fluo::Color color;
-				md->getValue(gstColor, color);
-				wxColor wxc(
-					(unsigned char)(color.r()*255),
-					(unsigned char)(color.g()*255),
-					(unsigned char)(color.b()*255));
-				int ii = m_tree_panel->GetIconNum()-1;
-				m_tree_panel->ChangeIconColor(ii, wxc);
-				wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->getName());
-				bool disp;
-				md->getValue(gstDisplay, disp);
-				m_tree_panel->SetMeshItemImage(item, disp ?2*ii+1:2*ii);
-				if (name == md->getName())
-					sel_item = item;
-			}
-			else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
-			{
-				//append icon for annotations
-				m_tree_panel->AppendIcon();
-				wxColor wxc(255, 255, 255);
-				int ii = m_tree_panel->GetIconNum()-1;
-				m_tree_panel->ChangeIconColor(ii, wxc);
-				wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->getName());
-				bool disp;
-				ann->getValue(gstDisplay, disp);
-				m_tree_panel->SetAnnotationItemImage(item, disp?2*ii+1:2*ii);
-				if (name == ann->getName())
-					sel_item = item;
-			}
-			else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
-			{
-				//append group item to tree
-				wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->getName());
-				bool disp;
-				group->getValue(gstDisplay, disp);
-				m_tree_panel->SetGroupItemImage(group_item, int(disp));
-				//append volume data to group
-				for (k=0; k<group->getNumChildren(); k++)
-				{
-					fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
-					if (!vd)
-						continue;
-					//add icon
-					m_tree_panel->AppendIcon();
-					fluo::Color c;
-					vd->getValue(gstColor, c);
-					wxColor wxc(
-						(unsigned char)(c.r()*255),
-						(unsigned char)(c.g()*255),
-						(unsigned char)(c.b()*255));
-					int ii = m_tree_panel->GetIconNum()-1;
-					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->getName());
-					bool disp;
-					vd->getValue(gstDisplay, disp);
-					m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
-					if (name == vd->getName())
-					{
-						sel_item = item;
-						view->SetVolumeA(vd);
-						GetBrushToolDlg()->GetSettings(view);
-						GetMeasureDlg()->GetSettings(view);
-						GetTraceDlg()->GetSettings(view);
-						GetOclDlg()->GetSettings(view);
-						GetComponentDlg()->SetView(view);
-						GetColocalizationDlg()->SetView(view);
-					}
-				}
-				if (name == group->getName())
-					sel_item = group_item;
-			}
-			else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
-			{
-				//append group item to tree
-				wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->getName());
-				bool disp;
-				group->getValue(gstDisplay, disp);
-				m_tree_panel->SetMGroupItemImage(group_item, int(disp));
-				//append mesh data to group
-				for (k=0; k<group->getNumChildren(); k++)
-				{
-					fluo::MeshData* md = group->getChild(k)->asMeshData();
-					if (!md)
-						continue;
-					//add icon
-					m_tree_panel->AppendIcon();
-					fluo::Color color;
-					md->getValue(gstColor, color);
-					wxColor wxc(
-						(unsigned char)(color.r()*255),
-						(unsigned char)(color.g()*255),
-						(unsigned char)(color.b()*255));
-					int ii = m_tree_panel->GetIconNum()-1;
-					m_tree_panel->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->getName());
-					bool disp;
-					md->getValue(gstDisplay, disp);
-					m_tree_panel->SetMeshItemImage(item, disp?2*ii+1:2*ii);
-					if (name == md->getName())
-						sel_item = item;
-				}
-				if (name == group->getName())
-					sel_item = group_item;
-			}
-		}
-	}
+	//	for (j=0; j< view->GetLayerNum(); j++)
+	//	{
+	//		fluo::Object* layer = view->GetLayer(j);
+	//		if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
+	//		{
+	//			//append icon for volume
+	//			m_tree_panel->AppendIcon();
+	//			fluo::Color c;
+	//			vd->getValue(gstColor, c);
+	//			wxColor wxc(
+	//				(unsigned char)(c.r()*255),
+	//				(unsigned char)(c.g()*255),
+	//				(unsigned char)(c.b()*255));
+	//			int ii = m_tree_panel->GetIconNum()-1;
+	//			m_tree_panel->ChangeIconColor(ii, wxc);
+	//			wxTreeItemId item = m_tree_panel->AddVolItem(vrv_item, vd->getName());
+	//			bool disp;
+	//			vd->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
+	//			if (name == vd->getName())
+	//			{
+	//				sel_item = item;
+	//				view->SetVolumeA(vd);
+	//				GetBrushToolDlg()->GetSettings(view);
+	//				GetMeasureDlg()->GetSettings(view);
+	//				GetTraceDlg()->GetSettings(view);
+	//				GetOclDlg()->GetSettings(view);
+	//				GetComponentDlg()->SetView(view);
+	//				GetColocalizationDlg()->SetView(view);
+	//			}
+	//		}
+	//		else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
+	//		{
+	//			//append icon for mesh
+	//			m_tree_panel->AppendIcon();
+	//			fluo::Color color;
+	//			md->getValue(gstColor, color);
+	//			wxColor wxc(
+	//				(unsigned char)(color.r()*255),
+	//				(unsigned char)(color.g()*255),
+	//				(unsigned char)(color.b()*255));
+	//			int ii = m_tree_panel->GetIconNum()-1;
+	//			m_tree_panel->ChangeIconColor(ii, wxc);
+	//			wxTreeItemId item = m_tree_panel->AddMeshItem(vrv_item, md->getName());
+	//			bool disp;
+	//			md->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetMeshItemImage(item, disp ?2*ii+1:2*ii);
+	//			if (name == md->getName())
+	//				sel_item = item;
+	//		}
+	//		else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
+	//		{
+	//			//append icon for annotations
+	//			m_tree_panel->AppendIcon();
+	//			wxColor wxc(255, 255, 255);
+	//			int ii = m_tree_panel->GetIconNum()-1;
+	//			m_tree_panel->ChangeIconColor(ii, wxc);
+	//			wxTreeItemId item = m_tree_panel->AddAnnotationItem(vrv_item, ann->getName());
+	//			bool disp;
+	//			ann->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetAnnotationItemImage(item, disp?2*ii+1:2*ii);
+	//			if (name == ann->getName())
+	//				sel_item = item;
+	//		}
+	//		else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
+	//		{
+	//			//append group item to tree
+	//			wxTreeItemId group_item = m_tree_panel->AddGroupItem(vrv_item, group->getName());
+	//			bool disp;
+	//			group->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetGroupItemImage(group_item, int(disp));
+	//			//append volume data to group
+	//			for (k=0; k<group->getNumChildren(); k++)
+	//			{
+	//				fluo::VolumeData* vd = group->getChild(k)->asVolumeData();
+	//				if (!vd)
+	//					continue;
+	//				//add icon
+	//				m_tree_panel->AppendIcon();
+	//				fluo::Color c;
+	//				vd->getValue(gstColor, c);
+	//				wxColor wxc(
+	//					(unsigned char)(c.r()*255),
+	//					(unsigned char)(c.g()*255),
+	//					(unsigned char)(c.b()*255));
+	//				int ii = m_tree_panel->GetIconNum()-1;
+	//				m_tree_panel->ChangeIconColor(ii, wxc);
+	//				wxTreeItemId item = m_tree_panel->AddVolItem(group_item, vd->getName());
+	//				bool disp;
+	//				vd->getValue(gstDisplay, disp);
+	//				m_tree_panel->SetVolItemImage(item, disp?2*ii+1:2*ii);
+	//				if (name == vd->getName())
+	//				{
+	//					sel_item = item;
+	//					view->SetVolumeA(vd);
+	//					GetBrushToolDlg()->GetSettings(view);
+	//					GetMeasureDlg()->GetSettings(view);
+	//					GetTraceDlg()->GetSettings(view);
+	//					GetOclDlg()->GetSettings(view);
+	//					GetComponentDlg()->SetView(view);
+	//					GetColocalizationDlg()->SetView(view);
+	//				}
+	//			}
+	//			if (name == group->getName())
+	//				sel_item = group_item;
+	//		}
+	//		else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
+	//		{
+	//			//append group item to tree
+	//			wxTreeItemId group_item = m_tree_panel->AddMGroupItem(vrv_item, group->getName());
+	//			bool disp;
+	//			group->getValue(gstDisplay, disp);
+	//			m_tree_panel->SetMGroupItemImage(group_item, int(disp));
+	//			//append mesh data to group
+	//			for (k=0; k<group->getNumChildren(); k++)
+	//			{
+	//				fluo::MeshData* md = group->getChild(k)->asMeshData();
+	//				if (!md)
+	//					continue;
+	//				//add icon
+	//				m_tree_panel->AppendIcon();
+	//				fluo::Color color;
+	//				md->getValue(gstColor, color);
+	//				wxColor wxc(
+	//					(unsigned char)(color.r()*255),
+	//					(unsigned char)(color.g()*255),
+	//					(unsigned char)(color.b()*255));
+	//				int ii = m_tree_panel->GetIconNum()-1;
+	//				m_tree_panel->ChangeIconColor(ii, wxc);
+	//				wxTreeItemId item = m_tree_panel->AddMeshItem(group_item, md->getName());
+	//				bool disp;
+	//				md->getValue(gstDisplay, disp);
+	//				m_tree_panel->SetMeshItemImage(item, disp?2*ii+1:2*ii);
+	//				if (name == md->getName())
+	//					sel_item = item;
+	//			}
+	//			if (name == group->getName())
+	//				sel_item = group_item;
+	//		}
+	//	}
+	//}
 
-	if (sel_item.IsOk())
-		m_tree_panel->SelectItem(sel_item);
-	m_tree_panel->ExpandAll();
+	//if (sel_item.IsOk())
+	//	m_tree_panel->SelectItem(sel_item);
+	//m_tree_panel->ExpandAll();
 }
 
 void VRenderFrame::UpdateList()
@@ -2188,7 +2194,7 @@ ListPanel *VRenderFrame::GetList()
 
 //on selections
 void VRenderFrame::OnSelection(int type,
-	RenderCanvas* view,
+	fluo::Renderview* view,
 	fluo::VolumeGroup* group,
 	fluo::VolumeData* vd,
 	fluo::MeshData* md,
@@ -2294,7 +2300,7 @@ void VRenderFrame::OnSelection(int type,
 				RenderCanvas* v = GetView(i);
 				if (!v)
 					continue;
-				v->m_cur_vol = vd;
+				//v->m_cur_vol = vd;
 			}
 
 			if (m_volume_prop)
@@ -2459,39 +2465,39 @@ void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 
 void VRenderFrame::DeleteVRenderView(int i)
 {
-	if (m_vrv_list[i])
-	{
-		int j;
-		wxString str = m_vrv_list[i]->GetName();
+	//if (m_vrv_list[i])
+	//{
+	//	int j;
+	//	wxString str = m_vrv_list[i]->GetName();
 
-		for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
-			GetView(i)->GetAllVolumeData(j)->setValue(gstDisplay, true);
-		for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
-			GetView(i)->GetMeshData(j)->setValue(gstDisplay, true);
-		VRenderView* vrv = m_vrv_list[i];
-		m_vrv_list.erase(m_vrv_list.begin()+i);
-		m_aui_mgr.DetachPane(vrv);
-		vrv->Close();
-		delete vrv;
-		m_aui_mgr.Update();
-		UpdateTree();
+	//	for (j=0 ; j<GetView(i)->GetAllVolumeNum() ; j++)
+	//		GetView(i)->GetAllVolumeData(j)->setValue(gstDisplay, true);
+	//	for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
+	//		GetView(i)->GetMeshData(j)->setValue(gstDisplay, true);
+	//	VRenderView* vrv = m_vrv_list[i];
+	//	m_vrv_list.erase(m_vrv_list.begin()+i);
+	//	m_aui_mgr.DetachPane(vrv);
+	//	vrv->Close();
+	//	delete vrv;
+	//	m_aui_mgr.Update();
+	//	UpdateTree();
 
-		if (m_movie_view)
-			m_movie_view->DeleteView(str);
-	}
+	//	if (m_movie_view)
+	//		m_movie_view->DeleteView(str);
+	//}
 }
 
 void VRenderFrame::DeleteVRenderView(const wxString &name)
 {
-	for (int i=0; i<GetViewNum(); i++)
-	{
-		RenderCanvas* view = GetView(i);
-		if (view && name == view->m_vrv->GetName() && view->m_vrv->m_id > 1)
-		{
-			DeleteVRenderView(i);
-			return;
-		}
-	}
+	//for (int i=0; i<GetViewNum(); i++)
+	//{
+	//	RenderCanvas* view = GetView(i);
+	//	if (view && name == view->m_vrv->GetName() && view->m_vrv->m_id > 1)
+	//	{
+	//		DeleteVRenderView(i);
+	//		return;
+	//	}
+	//}
 }
 
 AdjustView* VRenderFrame::GetAdjustView()
@@ -3178,188 +3184,188 @@ void VRenderFrame::SaveProject(wxString& filename)
 			//view layers
 			str = wxString::Format("/views/%d/layers", i);
 			fconfig.SetPath(str);
-			fconfig.Write("num", view->GetLayerNum());
-			for (j=0; j< view->GetLayerNum(); j++)
-			{
-				fluo::Object* layer = view->GetLayer(j);
-				if (!layer)
-					continue;
-				str = wxString::Format("/views/%d/layers/%d", i, j);
-				fconfig.SetPath(str);
-				if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
-				{
-					fconfig.Write("type", 2);
-					fconfig.Write("name", layer->getName());
-				}
-				else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
-				{
-					fconfig.Write("type", 3);
-					fconfig.Write("name", layer->getName());
-				}
-				else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
-				{
-					fconfig.Write("type", 4);
-					fconfig.Write("name", layer->getName());
-				}
-				else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
-				{
-					fconfig.Write("type", 5);
-					fconfig.Write("name", group->getName());
-					fconfig.Write("id", group->getId());
-					//dispaly
-					group->getValue(gstDisplay, bval);
-					fconfig.Write("display", bval);
-					//2d adjustment
-					group->getValue(gstGammaR, dx);
-					group->getValue(gstGammaG, dy);
-					group->getValue(gstGammaB, dz);
-					str = wxString::Format("%f %f %f", dx, dy, dz);
-					fconfig.Write("gamma", str);
-					group->getValue(gstBrightnessR, dx);
-					group->getValue(gstBrightnessG, dy);
-					group->getValue(gstBrightnessB, dz);
-					str = wxString::Format("%f %f %f", dx, dy, dz);
-					fconfig.Write("brightness", str);
-					group->getValue(gstEqualizeR, dx);
-					group->getValue(gstEqualizeG, dy);
-					group->getValue(gstEqualizeB, dz);
-					str = wxString::Format("%f %f %f", dx, dy, dz);
-					fconfig.Write("hdr", str);
-					group->getValue(gstSyncR, bval);
-					fconfig.Write("sync_r", bval);
-					group->getValue(gstSyncG, bval);
-					fconfig.Write("sync_g", bval);
-					group->getValue(gstSyncB, bval);
-					fconfig.Write("sync_b", bval);
-					//sync volume properties
-					group->getValue(gstSyncGroup, bval);
-					fconfig.Write("sync_vp", bval);
-					//volumes
-					str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
-					fconfig.SetPath(str);
-					fconfig.Write("num", group->getNumChildren());
-					for (k=0; k<group->getNumChildren(); k++)
-						fconfig.Write(wxString::Format("vol_%d", k), group->getChild(k)->getName());
-				}
-				else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
-				{
-					fconfig.Write("type", 6);
-					fconfig.Write("name", layer->getName());
-					//fconfig.Write("id", MeshGroup::GetID());
-					//display
-					group->getValue(gstDisplay, bval);
-					fconfig.Write("display", bval);
-					//sync mesh properties
-					group->getValue(gstSyncGroup, bval);
-					fconfig.Write("sync_mp", bval);
-					//meshes
-					str = wxString::Format("/views/%d/layers/%d/meshes", i, j);
-					fconfig.SetPath(str);
-					fconfig.Write("num", group->getNumChildren());
-					for (k=0; k<group->getNumChildren(); k++)
-						fconfig.Write(wxString::Format("mesh_%d", k), group->getChild(k)->getName());
-				}
-			}
+			//fconfig.Write("num", view->GetLayerNum());
+			//for (j=0; j< view->GetLayerNum(); j++)
+			//{
+			//	fluo::Object* layer = view->GetLayer(j);
+			//	if (!layer)
+			//		continue;
+			//	str = wxString::Format("/views/%d/layers/%d", i, j);
+			//	fconfig.SetPath(str);
+			//	if (fluo::VolumeData* vd = dynamic_cast<fluo::VolumeData*>(layer))
+			//	{
+			//		fconfig.Write("type", 2);
+			//		fconfig.Write("name", layer->getName());
+			//	}
+			//	else if (fluo::MeshData* md = dynamic_cast<fluo::MeshData*>(layer))
+			//	{
+			//		fconfig.Write("type", 3);
+			//		fconfig.Write("name", layer->getName());
+			//	}
+			//	else if (fluo::Annotations* ann = dynamic_cast<fluo::Annotations*>(layer))
+			//	{
+			//		fconfig.Write("type", 4);
+			//		fconfig.Write("name", layer->getName());
+			//	}
+			//	else if (fluo::VolumeGroup* group = dynamic_cast<fluo::VolumeGroup*>(layer))
+			//	{
+			//		fconfig.Write("type", 5);
+			//		fconfig.Write("name", group->getName());
+			//		fconfig.Write("id", group->getId());
+			//		//dispaly
+			//		group->getValue(gstDisplay, bval);
+			//		fconfig.Write("display", bval);
+			//		//2d adjustment
+			//		group->getValue(gstGammaR, dx);
+			//		group->getValue(gstGammaG, dy);
+			//		group->getValue(gstGammaB, dz);
+			//		str = wxString::Format("%f %f %f", dx, dy, dz);
+			//		fconfig.Write("gamma", str);
+			//		group->getValue(gstBrightnessR, dx);
+			//		group->getValue(gstBrightnessG, dy);
+			//		group->getValue(gstBrightnessB, dz);
+			//		str = wxString::Format("%f %f %f", dx, dy, dz);
+			//		fconfig.Write("brightness", str);
+			//		group->getValue(gstEqualizeR, dx);
+			//		group->getValue(gstEqualizeG, dy);
+			//		group->getValue(gstEqualizeB, dz);
+			//		str = wxString::Format("%f %f %f", dx, dy, dz);
+			//		fconfig.Write("hdr", str);
+			//		group->getValue(gstSyncR, bval);
+			//		fconfig.Write("sync_r", bval);
+			//		group->getValue(gstSyncG, bval);
+			//		fconfig.Write("sync_g", bval);
+			//		group->getValue(gstSyncB, bval);
+			//		fconfig.Write("sync_b", bval);
+			//		//sync volume properties
+			//		group->getValue(gstSyncGroup, bval);
+			//		fconfig.Write("sync_vp", bval);
+			//		//volumes
+			//		str = wxString::Format("/views/%d/layers/%d/volumes", i, j);
+			//		fconfig.SetPath(str);
+			//		fconfig.Write("num", group->getNumChildren());
+			//		for (k=0; k<group->getNumChildren(); k++)
+			//			fconfig.Write(wxString::Format("vol_%d", k), group->getChild(k)->getName());
+			//	}
+			//	else if (fluo::MeshGroup* group = dynamic_cast<fluo::MeshGroup*>(layer))
+			//	{
+			//		fconfig.Write("type", 6);
+			//		fconfig.Write("name", layer->getName());
+			//		//fconfig.Write("id", MeshGroup::GetID());
+			//		//display
+			//		group->getValue(gstDisplay, bval);
+			//		fconfig.Write("display", bval);
+			//		//sync mesh properties
+			//		group->getValue(gstSyncGroup, bval);
+			//		fconfig.Write("sync_mp", bval);
+			//		//meshes
+			//		str = wxString::Format("/views/%d/layers/%d/meshes", i, j);
+			//		fconfig.SetPath(str);
+			//		fconfig.Write("num", group->getNumChildren());
+			//		for (k=0; k<group->getNumChildren(); k++)
+			//			fconfig.Write(wxString::Format("mesh_%d", k), group->getChild(k)->getName());
+			//	}
+			//}
 
-			//properties
-			fconfig.SetPath(wxString::Format("/views/%d/properties", i));
-			fconfig.Write("drawall", view->GetDraw());
-			fconfig.Write("persp", view->GetPersp());
-			fconfig.Write("free", view->GetFree());
-			fconfig.Write("aov", view->GetAov());
-			fconfig.Write("nearclip", view->GetNearClip());
-			fconfig.Write("farclip", view->GetFarClip());
-			fluo::Color bkcolor;
-			bkcolor = view->GetBackgroundColor();
-			str = wxString::Format("%f %f %f", bkcolor.r(), bkcolor.g(), bkcolor.b());
-			fconfig.Write("backgroundcolor", str);
-			fconfig.Write("drawtype", view->GetDrawType());
-			fconfig.Write("volmethod", view->GetVolMethod());
-			fconfig.Write("peellayers", view->GetPeelingLayers());
-			fconfig.Write("fog", view->GetFog());
-			fconfig.Write("fogintensity", (double)view->GetFogIntensity());
-			fconfig.Write("draw_camctr", view->m_draw_camctr);
-			fconfig.Write("draw_info", view->m_draw_info);
-			fconfig.Write("draw_legend", view->m_draw_legend);
+			////properties
+			//fconfig.SetPath(wxString::Format("/views/%d/properties", i));
+			//fconfig.Write("drawall", view->GetDraw());
+			//fconfig.Write("persp", view->GetPersp());
+			//fconfig.Write("free", view->GetFree());
+			//fconfig.Write("aov", view->GetAov());
+			//fconfig.Write("nearclip", view->GetNearClip());
+			//fconfig.Write("farclip", view->GetFarClip());
+			//fluo::Color bkcolor;
+			//bkcolor = view->GetBackgroundColor();
+			//str = wxString::Format("%f %f %f", bkcolor.r(), bkcolor.g(), bkcolor.b());
+			//fconfig.Write("backgroundcolor", str);
+			//fconfig.Write("drawtype", view->GetDrawType());
+			//fconfig.Write("volmethod", view->GetVolMethod());
+			//fconfig.Write("peellayers", view->GetPeelingLayers());
+			//fconfig.Write("fog", view->GetFog());
+			//fconfig.Write("fogintensity", (double)view->GetFogIntensity());
+			//fconfig.Write("draw_camctr", view->m_draw_camctr);
+			//fconfig.Write("draw_info", view->m_draw_info);
+			//fconfig.Write("draw_legend", view->m_draw_legend);
 
-			double x, y, z;
-			//camera
-			view->GetTranslations(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig.Write("translation", str);
-			view->GetRotations(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig.Write("rotation", str);
-			fluo::Quaternion q = view->GetZeroQuat();
-			str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
-			fconfig.Write("zero_quat", str);
-			view->GetCenters(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig.Write("center", str);
-			fconfig.Write("centereyedist", view->GetCenterEyeDist());
-			fconfig.Write("radius", view->GetRadius());
-			fconfig.Write("initdist", view->GetInitDist());
-			fconfig.Write("scale_mode", view->m_scale_mode);
-			fconfig.Write("scale", view->m_scale_factor);
-			fconfig.Write("pin_rot_center", view->m_pin_rot_center);
-			//object
-			view->GetObjCenters(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig.Write("obj_center", str);
-			view->GetObjTrans(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig.Write("obj_trans", str);
-			view->GetObjRot(x, y, z);
-			str = wxString::Format("%f %f %f", x, y, z);
-			fconfig.Write("obj_rot", str);
-			//scale bar
-			fconfig.Write("disp_scale_bar", view->m_disp_scale_bar);
-			fconfig.Write("disp_scale_bar_text", view->m_disp_scale_bar_text);
-			fconfig.Write("sb_length", view->m_sb_length);
-			str = view->m_sb_text;
-			fconfig.Write("sb_text", str);
-			str = view->m_sb_num;
-			fconfig.Write("sb_num", str);
-			fconfig.Write("sb_unit", view->m_sb_unit);
+			//double x, y, z;
+			////camera
+			//view->GetTranslations(x, y, z);
+			//str = wxString::Format("%f %f %f", x, y, z);
+			//fconfig.Write("translation", str);
+			//view->GetRotations(x, y, z);
+			//str = wxString::Format("%f %f %f", x, y, z);
+			//fconfig.Write("rotation", str);
+			//fluo::Quaternion q = view->GetZeroQuat();
+			//str = wxString::Format("%f %f %f %f", q.x, q.y, q.z, q.w);
+			//fconfig.Write("zero_quat", str);
+			//view->GetCenters(x, y, z);
+			//str = wxString::Format("%f %f %f", x, y, z);
+			//fconfig.Write("center", str);
+			//fconfig.Write("centereyedist", view->GetCenterEyeDist());
+			//fconfig.Write("radius", view->GetRadius());
+			//fconfig.Write("initdist", view->GetInitDist());
+			//fconfig.Write("scale_mode", view->m_scale_mode);
+			//fconfig.Write("scale", view->m_scale_factor);
+			//fconfig.Write("pin_rot_center", view->m_pin_rot_center);
+			////object
+			//view->GetObjCenters(x, y, z);
+			//str = wxString::Format("%f %f %f", x, y, z);
+			//fconfig.Write("obj_center", str);
+			//view->GetObjTrans(x, y, z);
+			//str = wxString::Format("%f %f %f", x, y, z);
+			//fconfig.Write("obj_trans", str);
+			//view->GetObjRot(x, y, z);
+			//str = wxString::Format("%f %f %f", x, y, z);
+			//fconfig.Write("obj_rot", str);
+			////scale bar
+			//fconfig.Write("disp_scale_bar", view->m_disp_scale_bar);
+			//fconfig.Write("disp_scale_bar_text", view->m_disp_scale_bar_text);
+			//fconfig.Write("sb_length", view->m_sb_length);
+			//str = view->m_sb_text;
+			//fconfig.Write("sb_text", str);
+			//str = view->m_sb_num;
+			//fconfig.Write("sb_num", str);
+			//fconfig.Write("sb_unit", view->m_sb_unit);
 
-			//2d adjustment
-			str = wxString::Format("%f %f %f", view->GetGamma().r(),
-				view->GetGamma().g(), view->GetGamma().b());
-			fconfig.Write("gamma", str);
-			str = wxString::Format("%f %f %f", view->GetBrightness().r(),
-				view->GetBrightness().g(), view->GetBrightness().b());
-			fconfig.Write("brightness", str);
-			str = wxString::Format("%f %f %f", view->GetHdr().r(),
-				view->GetHdr().g(), view->GetHdr().b());
-			fconfig.Write("hdr", str);
-			fconfig.Write("sync_r", view->GetSyncR());
-			fconfig.Write("sync_g", view->GetSyncG());
-			fconfig.Write("sync_b", view->GetSyncB());
+			////2d adjustment
+			//str = wxString::Format("%f %f %f", view->GetGamma().r(),
+			//	view->GetGamma().g(), view->GetGamma().b());
+			//fconfig.Write("gamma", str);
+			//str = wxString::Format("%f %f %f", view->GetBrightness().r(),
+			//	view->GetBrightness().g(), view->GetBrightness().b());
+			//fconfig.Write("brightness", str);
+			//str = wxString::Format("%f %f %f", view->GetHdr().r(),
+			//	view->GetHdr().g(), view->GetHdr().b());
+			//fconfig.Write("hdr", str);
+			//fconfig.Write("sync_r", view->GetSyncR());
+			//fconfig.Write("sync_g", view->GetSyncG());
+			//fconfig.Write("sync_b", view->GetSyncB());
 
-			//clipping plane rotations
-			fconfig.Write("clip_mode", view->GetClipMode());
-			double rotx_cl, roty_cl, rotz_cl;
-			view->GetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
-			fconfig.Write("rotx_cl", rotx_cl);
-			fconfig.Write("roty_cl", roty_cl);
-			fconfig.Write("rotz_cl", rotz_cl);
+			////clipping plane rotations
+			//fconfig.Write("clip_mode", view->GetClipMode());
+			//double rotx_cl, roty_cl, rotz_cl;
+			//view->GetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
+			//fconfig.Write("rotx_cl", rotx_cl);
+			//fconfig.Write("roty_cl", roty_cl);
+			//fconfig.Write("rotz_cl", rotz_cl);
 
-			//painting parameters
-			flrd::VolumeSelector* selector = view->GetVolumeSelector();
-			if (selector)
-			{
-				fconfig.Write("brush_use_pres", selector->GetBrushUsePres());
-				fconfig.Write("brush_size_1", selector->GetBrushSize1());
-				fconfig.Write("brush_size_2", selector->GetBrushSize2());
-				fconfig.Write("brush_spacing", selector->GetBrushSpacing());
-				fconfig.Write("brush_iteration", selector->GetBrushIteration());
-				fconfig.Write("brush_translate", selector->GetBrushSclTranslate());
-				fconfig.Write("w2d", selector->GetW2d());
-			}
+			////painting parameters
+			//flrd::VolumeSelector* selector = view->GetVolumeSelector();
+			//if (selector)
+			//{
+			//	fconfig.Write("brush_use_pres", selector->GetBrushUsePres());
+			//	fconfig.Write("brush_size_1", selector->GetBrushSize1());
+			//	fconfig.Write("brush_size_2", selector->GetBrushSize2());
+			//	fconfig.Write("brush_spacing", selector->GetBrushSpacing());
+			//	fconfig.Write("brush_iteration", selector->GetBrushIteration());
+			//	fconfig.Write("brush_translate", selector->GetBrushSclTranslate());
+			//	fconfig.Write("w2d", selector->GetW2d());
+			//}
 
-			//rulers
-			fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-			view->GetRulerHandler()->Save(fconfig, i);
+			////rulers
+			//fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
+			//view->GetRulerHandler()->Save(fconfig, i);
 		}
 	}
 	//clipping planes
@@ -3403,7 +3409,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 		std::wstring wstr = new_folder + GETSLASH() + GET_NAME(filename.ToStdWstring()) + L".track";
 		m_trace_dlg->SaveTrackFile(wstr);
 	}
-	fconfig.Write("track_file", m_trace_dlg->GetTrackFile());
+	fconfig.Write("track_file", wxString(m_trace_dlg->GetTrackFile()));
 /*	//brushtool diag
 	fconfig.SetPath("/brush_diag");
 	fconfig.Write("ca_min", m_brush_tool_dlg->GetDftCAMin());
@@ -3518,7 +3524,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 {
 	m_data_mgr.SetProjectPath(filename);
 
-	int iVal;
+	long iVal;
 	int i, j, k;
 	//clear
 	m_data_mgr.ClearAll();
@@ -3527,7 +3533,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	m_adjust_view->SetVolumeData(0);
 	m_adjust_view->SetGroup(0);
 	m_adjust_view->SetGroupLink(0);
-	GetView(0)->ClearAll();
+	glbin_root->getCurrentRenderview()->Clear();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
 	//VRenderView::ResetID();
@@ -4127,14 +4133,14 @@ void VRenderFrame::OpenProject(wxString& filename)
 		{
 			if (i>0)
 				CreateView();
-			RenderCanvas* view = GetLastView();
+			fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
 			if (!view)
 				continue;
 
-			view->ClearAll();
+			view->Clear();
 
-			if (i==0 && m_setting_dlg && m_setting_dlg->GetTestMode(1))
-				view->m_test_speed = true;
+			if (i == 0 && m_setting_dlg && m_setting_dlg->GetTestMode(1))
+				view->setValue(gstTestSpeed, true);
 
 			wxString str;
 			//old
@@ -4150,10 +4156,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 					{
 						fluo::VolumeData* vd = glbin_volf->findFirst(str.ToStdString());
 						if (vd)
-							view->AddVolumeData(vd);
+							view->addVolumeData(vd, 0);
 					}
 				}
-				view->SetVolPopDirty();
 			}
 			//meshes
 			str = wxString::Format("/views/%d/meshes", i);
@@ -4167,7 +4172,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 					{
 						fluo::MeshData* md = m_data_mgr.GetMeshData(str.ToStdString());
 						if (md)
-							view->AddMeshData(md);
+							view->addMeshData(md, 0);
 					}
 				}
 			}
@@ -4196,7 +4201,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										fluo::VolumeData* vd = glbin_volf->findFirst(str.ToStdString());
 										if (vd)
-											view->AddVolumeData(vd);
+											view->addVolumeData(vd, 0);
 									}
 								}
 								break;
@@ -4206,7 +4211,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										fluo::MeshData* md = m_data_mgr.GetMeshData(str.ToStdString());
 										if (md)
-											view->AddMeshData(md);
+											view->addMeshData(md, 0);
 									}
 								}
 								break;
@@ -4216,7 +4221,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 									{
 										fluo::Annotations* ann = m_data_mgr.GetAnnotations(str.ToStdString());
 										if (ann)
-											view->AddAnnotations(ann);
+											view->addAnnotations(ann);
 									}
 								}
 								break;
@@ -4227,8 +4232,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										//if (fconfig.Read("id", &id))
 										//	fluo::VolumeGroup::SetID(id);
-										str = view->AddGroup(str.ToStdString());
-										fluo::VolumeGroup* group = view->GetGroup(str.ToStdString());
+										fluo::VolumeGroup* group = view->addVolumeGroup(str.ToStdString());
 										if (group)
 										{
 											//display
@@ -4281,13 +4285,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 													if (fconfig.Read(wxString::Format("vol_%d", k), &str))
 													{
 														fluo::VolumeData* vd = glbin_volf->findFirst(str.ToStdString());
-														if (vd)
-															group->addChild(vd);
+														view->addVolumeData(vd, group);
 													}
 												}
 											}
 										}
-										view->SetVolPopDirty();
 									}
 								}
 								break;
@@ -4298,8 +4300,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 										int id;
 										//if (fconfig.Read("id", &id))
 										//	MeshGroup::SetID(id);
-										str = view->AddMGroup(str.ToStdString());
-										fluo::MeshGroup* group = view->GetMGroup(str.ToStdString());
+										fluo::MeshGroup* group = view->addMeshGroup(str.ToStdString());
 										if (group)
 										{
 											//display
@@ -4318,13 +4319,11 @@ void VRenderFrame::OpenProject(wxString& filename)
 													if (fconfig.Read(wxString::Format("mesh_%d", k), &str))
 													{
 														fluo::MeshData* md = m_data_mgr.GetMeshData(str.ToStdString());
-														if (md)
-															group->insertChild(k-1, md);
+														view->addMeshData(md, group);
 													}
 												}
 											}
 										}
-										view->SetMeshPopDirty();
 									}
 								}
 								break;
@@ -4341,223 +4340,224 @@ void VRenderFrame::OpenProject(wxString& filename)
 				fconfig.SetPath(wxString::Format("/views/%d/properties", i));
 				bool draw;
 				if (fconfig.Read("drawall", &draw))
-					view->SetDraw(draw);
+					view->setValue(gstDrawAll, draw);
 				//properties
 				bool persp;
 				if (fconfig.Read("persp", &persp))
-					view->SetPersp(persp);
+					view->setValue(gstPerspective, persp);
 				else
-					view->SetPersp(true);
+					view->setValue(gstPerspective, true);
 				bool free;
 				if (fconfig.Read("free", &free))
-					view->SetFree(free);
+					view->setValue(gstFree, free);
 				else
-					view->SetFree(false);
+					view->setValue(gstFree, false);
 				double aov;
 				if (fconfig.Read("aov", &aov))
-					view->SetAov(aov);
+					view->setValue(gstAov, aov);
 				double nearclip;
 				if (fconfig.Read("nearclip", &nearclip))
-					view->SetNearClip(nearclip);
+					view->setValue(gstDaStart, nearclip);
 				double farclip;
 				if (fconfig.Read("farclip", &farclip))
-					view->SetFarClip(farclip);
+					view->setValue(gstDaEnd, farclip);
 				if (fconfig.Read("backgroundcolor", &str))
 				{
 					float r, g, b;
 					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
 						fluo::Color col(r,g,b);
-						view->SetBackgroundColor(col);
+						view->setValue(gstBgColor, col);
 					}
 				}
-				int volmethod;
+				long volmethod;
 				if (fconfig.Read("volmethod", &volmethod))
-					view->SetVolMethod(volmethod);
-				int peellayers;
+					view->setValue(gstMixMethod, volmethod);
+				long peellayers;
 				if (fconfig.Read("peellayers", &peellayers))
-					view->SetPeelingLayers(peellayers);
+					view->setValue(gstPeelNum, peellayers);
 				bool fog;
 				if (fconfig.Read("fog", &fog))
-					view->SetFog(fog);
+					view->setValue(gstDepthAtten, fog);
 				double fogintensity;
 				if (fconfig.Read("fogintensity", &fogintensity))
-					view->m_vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
+					view->setValue(gstDaInt, fogintensity);
+					//view->m_vrv->m_depth_atten_factor_text->SetValue(wxString::Format("%.2f",fogintensity));
 				if (fconfig.Read("draw_camctr", &bVal))
 				{
-					view->m_draw_camctr = bVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
+					view->setValue(gstDrawCamCtr, bVal);
+					//view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
 				}
 				if (fconfig.Read("draw_info", &iVal))
 				{
-					view->m_draw_info = iVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
+					view->setValue(gstDrawInfo, iVal);
+					//view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
-					view->m_draw_legend = bVal;
-					view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
+					view->setValue(gstDrawLegend, bVal);
+					//view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
 				}
 
 				//camera
-				if (fconfig.Read("translation", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						view->SetTranslations(x, y, z);
-				}
-				if (fconfig.Read("rotation", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						view->SetRotations(x, y, z);
-				}
-				if (fconfig.Read("zero_quat", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f%f", &x, &y, &z, &w))
-						view->SetZeroQuat(x, y, z, w);
-				}
-				if (fconfig.Read("center", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						view->SetCenters(x, y, z);
-				}
-				double dist;
-				if (fconfig.Read("centereyedist", &dist))
-					view->SetCenterEyeDist(dist);
-				double radius = 5.0;
-				if (fconfig.Read("radius", &radius))
-					view->SetRadius(radius);
-				double initdist;
-				if (fconfig.Read("initdist", &initdist))
-					view->SetInitDist(initdist);
-				else
-					view->SetInitDist(radius/tan(d2r(view->GetAov()/2.0)));
-				int scale_mode;
-				if (fconfig.Read("scale_mode", &scale_mode))
-					view->m_vrv->SetScaleMode(scale_mode, false);
-				double scale;
-				if (!fconfig.Read("scale", &scale))
-					scale = radius / tan(d2r(view->GetAov() / 2.0)) / dist;
-				view->m_scale_factor = scale;
-				view->m_vrv->UpdateScaleFactor(false);
-				bool pin_rot_center;
-				if (fconfig.Read("pin_rot_center", &pin_rot_center))
-				{
-					view->m_pin_rot_center = pin_rot_center;
-					if (pin_rot_center)
-						view->m_rot_center_dirty = true;
-				}
-				//object
-				if (fconfig.Read("obj_center", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						view->SetObjCenters(x, y, z);
-				}
-				if (fconfig.Read("obj_trans", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-						view->SetObjTrans(x, y, z);
-				}
-				if (fconfig.Read("obj_rot", &str))
-				{
-					if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
-					{
-						if (l_major <= 2 && d_minor < 24.3)
-							view->SetObjRot(x, y+180.0, z+180.0);
-						else
-							view->SetObjRot(x, y, z);
-					}
-				}
-				//scale bar
-				bool disp;
-				if (fconfig.Read("disp_scale_bar", &disp))
-					view->m_disp_scale_bar = disp;
-				if (fconfig.Read("disp_scale_bar_text", &disp))
-					view->m_disp_scale_bar_text = disp;
-				double length;
-				if (fconfig.Read("sb_length", &length))
-					view->m_sb_length = length;
-				if (fconfig.Read("sb_text", &str))
-					view->m_sb_text = str;
-				if (fconfig.Read("sb_num", &str))
-					view->m_sb_num = str;
-				int unit;
-				if (fconfig.Read("sb_unit", &unit))
-					view->m_sb_unit = unit;
+				//if (fconfig.Read("translation", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+				//		view->SetTranslations(x, y, z);
+				//}
+				//if (fconfig.Read("rotation", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+				//		view->SetRotations(x, y, z);
+				//}
+				//if (fconfig.Read("zero_quat", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f%f", &x, &y, &z, &w))
+				//		view->SetZeroQuat(x, y, z, w);
+				//}
+				//if (fconfig.Read("center", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+				//		view->SetCenters(x, y, z);
+				//}
+				//double dist;
+				//if (fconfig.Read("centereyedist", &dist))
+				//	view->SetCenterEyeDist(dist);
+				//double radius = 5.0;
+				//if (fconfig.Read("radius", &radius))
+				//	view->SetRadius(radius);
+				//double initdist;
+				//if (fconfig.Read("initdist", &initdist))
+				//	view->SetInitDist(initdist);
+				//else
+				//	view->SetInitDist(radius/tan(d2r(view->GetAov()/2.0)));
+				//int scale_mode;
+				//if (fconfig.Read("scale_mode", &scale_mode))
+				//	view->m_vrv->SetScaleMode(scale_mode, false);
+				//double scale;
+				//if (!fconfig.Read("scale", &scale))
+				//	scale = radius / tan(d2r(view->GetAov() / 2.0)) / dist;
+				//view->m_scale_factor = scale;
+				//view->m_vrv->UpdateScaleFactor(false);
+				//bool pin_rot_center;
+				//if (fconfig.Read("pin_rot_center", &pin_rot_center))
+				//{
+				//	view->m_pin_rot_center = pin_rot_center;
+				//	if (pin_rot_center)
+				//		view->m_rot_center_dirty = true;
+				//}
+				////object
+				//if (fconfig.Read("obj_center", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+				//		view->SetObjCenters(x, y, z);
+				//}
+				//if (fconfig.Read("obj_trans", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+				//		view->SetObjTrans(x, y, z);
+				//}
+				//if (fconfig.Read("obj_rot", &str))
+				//{
+				//	if (SSCANF(str.c_str(), "%f%f%f", &x, &y, &z))
+				//	{
+				//		if (l_major <= 2 && d_minor < 24.3)
+				//			view->SetObjRot(x, y+180.0, z+180.0);
+				//		else
+				//			view->SetObjRot(x, y, z);
+				//	}
+				//}
+				////scale bar
+				//bool disp;
+				//if (fconfig.Read("disp_scale_bar", &disp))
+				//	view->m_disp_scale_bar = disp;
+				//if (fconfig.Read("disp_scale_bar_text", &disp))
+				//	view->m_disp_scale_bar_text = disp;
+				//double length;
+				//if (fconfig.Read("sb_length", &length))
+				//	view->m_sb_length = length;
+				//if (fconfig.Read("sb_text", &str))
+				//	view->m_sb_text = str;
+				//if (fconfig.Read("sb_num", &str))
+				//	view->m_sb_num = str;
+				//int unit;
+				//if (fconfig.Read("sb_unit", &unit))
+				//	view->m_sb_unit = unit;
 
-				//2d sdjustment settings
-				if (fconfig.Read("gamma", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						fluo::Color col(r,g,b);
-						view->SetGamma(col);
-					}
-				}
-				if (fconfig.Read("brightness", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						fluo::Color col(r,g,b);
-						view->SetBrightness(col);
-					}
-				}
-				if (fconfig.Read("hdr", &str))
-				{
-					float r, g, b;
-					if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
-						fluo::Color col(r,g,b);
-						view->SetHdr(col);
-					}
-				}
-				if (fconfig.Read("sync_r", &bVal))
-					view->SetSyncR(bVal);
-				if (fconfig.Read("sync_g", &bVal))
-					view->SetSyncG(bVal);
-				if (fconfig.Read("sync_b", &bVal))
-					view->SetSyncB(bVal);
+				////2d sdjustment settings
+				//if (fconfig.Read("gamma", &str))
+				//{
+				//	float r, g, b;
+				//	if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
+				//		fluo::Color col(r,g,b);
+				//		view->SetGamma(col);
+				//	}
+				//}
+				//if (fconfig.Read("brightness", &str))
+				//{
+				//	float r, g, b;
+				//	if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
+				//		fluo::Color col(r,g,b);
+				//		view->SetBrightness(col);
+				//	}
+				//}
+				//if (fconfig.Read("hdr", &str))
+				//{
+				//	float r, g, b;
+				//	if (SSCANF(str.c_str(), "%f%f%f", &r, &g, &b)){
+				//		fluo::Color col(r,g,b);
+				//		view->SetHdr(col);
+				//	}
+				//}
+				//if (fconfig.Read("sync_r", &bVal))
+				//	view->SetSyncR(bVal);
+				//if (fconfig.Read("sync_g", &bVal))
+				//	view->SetSyncG(bVal);
+				//if (fconfig.Read("sync_b", &bVal))
+				//	view->SetSyncB(bVal);
 
-				//clipping plane rotations
-				int clip_mode;
-				if (fconfig.Read("clip_mode", &clip_mode))
-					view->SetClipMode(clip_mode);
-				double rotx_cl, roty_cl, rotz_cl;
-				if (fconfig.Read("rotx_cl", &rotx_cl) &&
-					fconfig.Read("roty_cl", &roty_cl) &&
-					fconfig.Read("rotz_cl", &rotz_cl))
-				{
-					view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
-					m_clip_view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
-				}
+				////clipping plane rotations
+				//int clip_mode;
+				//if (fconfig.Read("clip_mode", &clip_mode))
+				//	view->SetClipMode(clip_mode);
+				//double rotx_cl, roty_cl, rotz_cl;
+				//if (fconfig.Read("rotx_cl", &rotx_cl) &&
+				//	fconfig.Read("roty_cl", &roty_cl) &&
+				//	fconfig.Read("rotz_cl", &rotz_cl))
+				//{
+				//	view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
+				//	m_clip_view->SetClippingPlaneRotations(rotx_cl, roty_cl, rotz_cl);
+				//}
 
-				//painting parameters
-				double dVal;
-				flrd::VolumeSelector* selector = view->GetVolumeSelector();
-				if (selector)
-				{
-					if (fconfig.Read("brush_use_pres", &bVal))
-						selector->SetBrushUsePres(bVal);
-					double size1, size2;
-					if (fconfig.Read("brush_size_1", &size1) &&
-						fconfig.Read("brush_size_2", &size2))
-						selector->SetBrushSize(size1, size2);
-					if (fconfig.Read("brush_spacing", &dVal))
-						selector->SetBrushSpacing(dVal);
-					if (fconfig.Read("brush_iteration", &dVal))
-						selector->SetBrushIteration(dVal);
-					if (fconfig.Read("brush_size_data", &bVal))
-						selector->SetBrushSizeData(bVal);
-					if (fconfig.Read("brush_translate", &dVal))
-						selector->SetBrushSclTranslate(dVal);
-					if (fconfig.Read("w2d", &dVal))
-						selector->SetW2d(dVal);
-				}
+				////painting parameters
+				//double dVal;
+				//flrd::VolumeSelector* selector = view->GetVolumeSelector();
+				//if (selector)
+				//{
+				//	if (fconfig.Read("brush_use_pres", &bVal))
+				//		selector->SetBrushUsePres(bVal);
+				//	double size1, size2;
+				//	if (fconfig.Read("brush_size_1", &size1) &&
+				//		fconfig.Read("brush_size_2", &size2))
+				//		selector->SetBrushSize(size1, size2);
+				//	if (fconfig.Read("brush_spacing", &dVal))
+				//		selector->SetBrushSpacing(dVal);
+				//	if (fconfig.Read("brush_iteration", &dVal))
+				//		selector->SetBrushIteration(dVal);
+				//	if (fconfig.Read("brush_size_data", &bVal))
+				//		selector->SetBrushSizeData(bVal);
+				//	if (fconfig.Read("brush_translate", &dVal))
+				//		selector->SetBrushSclTranslate(dVal);
+				//	if (fconfig.Read("w2d", &dVal))
+				//		selector->SetW2d(dVal);
+				//}
 
-				//rulers
-				if (view->GetRulerList() &&
-					fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
-				{
-					fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
-					view->GetRulerHandler()->Read(fconfig, i);
-				}
+				////rulers
+				//if (view->GetRulerList() &&
+				//	fconfig.Exists(wxString::Format("/views/%d/rulers", i)))
+				//{
+				//	fconfig.SetPath(wxString::Format("/views/%d/rulers", i));
+				//	view->GetRulerHandler()->Read(fconfig, i);
+				//}
 			}
 		}
 	}
@@ -4716,8 +4716,8 @@ void VRenderFrame::OpenProject(wxString& filename)
 		wxString sVal;
 		if (fconfig.Read("track_file", &sVal))
 		{
-			m_trace_dlg->GetSettings(m_vrv_list[0]->m_glview);
-			m_trace_dlg->LoadTrackFile(sVal.ToStdWstring());
+			//m_trace_dlg->GetSettings(m_vrv_list[0]->GetCanvas());
+			//m_trace_dlg->LoadTrackFile(sVal.ToStdWstring());
 		}
 	}
 	/*	//brushtool diag

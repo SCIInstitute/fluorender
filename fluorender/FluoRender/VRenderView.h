@@ -126,10 +126,11 @@ public:
 	//set full screen
 	void SetFullScreen();
 	void SetCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
+	RenderCanvas* GetCanvas() { return m_canvas; }
 	void SetFullFrame(wxFrame* ff) { m_full_frame = ff; }
 	wxFrame* GetFullFrame() { return m_full_frame; }
 	void HideFullFrame() { m_full_frame->Hide(); }
-	void AddCanvas(RenderCanvas* canvas) { m_view_sizer->Add(canvas, 1, wxEXPAND); }
+	void AddCanvas(RenderCanvas* canvas);
 
 private:
 	static int m_max_id;
@@ -139,6 +140,7 @@ private:
 	wxWindow* m_frame;
 	//render view///////////////////////////////////////////////
 	RenderCanvas *m_canvas;
+	bool m_mouse_focus;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;
 

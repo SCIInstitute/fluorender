@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeFactory.hpp>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/TextureRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <Selection/PaintBoxes.h>
 #include <Selection/MaskBorder.h>
 #include <wx/wx.h>
@@ -152,7 +153,7 @@ void VolumeSelector::Segment(int mx, int my)
 	double r = m_brush_radius2 - m_brush_radius1;
 	if (m_select_multi == 1)
 	{
-		fluo::VolumeGroup* group = m_view->GetGroup(m_vd);
+		fluo::VolumeGroup* group = m_vd->getParentVolumeGroup();
 		if (group && group->getNumChildren() > 1)
 		{
 			fluo::VolumeData* save = m_vd;

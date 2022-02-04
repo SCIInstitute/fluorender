@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Annotations.hpp>
 #include <RenderviewFactory.hpp>
 #include <VolumeFactory.hpp>
+#include <MeshFactory.hpp>
 #include <NodeVisitor.hpp>
 #include <Global.hpp>
 #include <SearchVisitor.hpp>
@@ -251,11 +252,36 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 	return group;
 }
 
-void Renderview::addMeshData(MeshData* md)
+MeshGroup* Renderview::addMeshGroup(const std::string &group_name)
 {
-	addChild(md);
+	MeshGroup* group = glbin_mshf->buildGroup();
+	if (group && group_name != "")
+		group->setName(group_name);
+	addChild(group);
+	return group;
+}
+
+MeshGroup* Renderview::addMeshData(MeshData* md, MeshGroup* group)
+{
+	if (!group)
+	{
+		group = glbin_mshf->buildGroup();
+		if (!group)
+			return nullptr;
+		addChild(group);
+	}
+
+	group->addChild(md);
+
 	setValue(gstMshListDirty, true);
 	setValue(gstFullMshListDirty, true);
+
+	return group;
+}
+
+void Renderview::addAnnotations(Annotations* an)
+{
+	addChild(an);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8680,7 +8706,15 @@ void Renderview::HandleMouse()
 	}
 
 	//update properties
-	//...
+	setValue(gstInteractive, interactive);
+	setValue(gstPaintEnable, paint_enable);
+	setValue(gstClearPaint, clear_paint);
+	setValue(gstRetainFb, retain_fb);
+	setValue(gstPick, pick);
+	setValue(gstCamLockPick, pick_lock_center);
+	setValue(gstForceClear, force_clear);
+	setValue(gstGrowEnable, grow_on);
+	setValue(gstRotCtrDirty, rot_center_dirty);
 	//actually draw everything
 	if (refresh)
 	{

@@ -370,7 +370,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 			{
 				int chan_num = view->GetFullVolListSize() + view->GetFullMeshListSize();
 				view_empty = chan_num > 0 ? false : view_empty;
-				view->addMeshData(md);
+				view->addMeshData(md, 0);
 			}
 		}
 	}
@@ -393,9 +393,15 @@ void DataListCtrl::AddToView(int menu_index, long item)
 	if (view)
 	{
 		if (view_empty)
-			view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+			view->InitView(
+				fluo::Renderview::INIT_BOUNDS |
+				fluo::Renderview::INIT_CENTER |
+				fluo::Renderview::INIT_TRANSL |
+				fluo::Renderview::INIT_ROTATE);
 		else
-			view->InitView(INIT_BOUNDS | INIT_CENTER);
+			view->InitView(
+				fluo::Renderview::INIT_BOUNDS |
+				fluo::Renderview::INIT_CENTER);
 		view->RefreshGL(39);
 	}
 	m_frame->UpdateTree(name);
@@ -656,7 +662,10 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				m_vd = glbin_volf->findFirst(name.ToStdString());
 			else
 				return;
-			fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
+			fluo::Quaternion q;
+			fluo::Renderview* view = glbin_root->getCurrentRenderview();
+			if (view)
+				view->getValue(gstClipRotQ, q);
 			if (m_vd)
 			{
 				m_vd->setValue(gstResize, false);
@@ -780,7 +789,10 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 
 			if (m_frame)
 			{
-				fluo::Quaternion q = m_frame->GetView(0)->GetClipRotation();
+				fluo::Quaternion q;
+				fluo::Renderview* view = glbin_root->getCurrentRenderview();
+				if (view)
+					view->getValue(gstClipRotQ, q);
 				fluo::VolumeData* vd = glbin_volf->findFirst(name.ToStdString());
 				if (vd)
 				{

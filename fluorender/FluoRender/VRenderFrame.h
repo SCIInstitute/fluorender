@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include "TreePanel.h"
 #include "ListPanel.h"
 #include "VRenderView.h"
+#include "RenderCanvas.h"
 #include "VPropView.h"
 #include "MPropView.h"
 #include "APropView.h"
@@ -210,7 +211,7 @@ public:
 
 	//on selections
 	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		RenderCanvas* view=0,
+		fluo::Renderview* view=0,
 		fluo::VolumeGroup* group=0,
 		fluo::VolumeData* vd=0,
 		fluo::MeshData* md=0,
@@ -476,7 +477,7 @@ private:
 private:
 	//views
 	wxString CreateView(int row=1);
-	RenderCanvas* GetLastView() {return m_vrv_list[m_vrv_list.size()-1]->m_glview;}
+	//RenderCanvas* GetLastView() {return m_vrv_list[m_vrv_list.size()-1]->m_glview;}
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
 	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
 	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);

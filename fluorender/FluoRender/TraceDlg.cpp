@@ -31,11 +31,14 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.hpp>
 #include <lbl_reader.h>
 #include <msk_writer.h>
-#include <FLIVR/VertexArray.h>
 #include <Components/CompSelector.h>
 #include <Components/CompAnalyzer.h>
 #include <Components/CompEditor.h>
 #include <Tracking/Tracks.h>
+#include <FLIVR/VertexArray.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/TextureRenderer.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>

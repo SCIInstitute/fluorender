@@ -57,6 +57,8 @@ public:
 	//initialization
 	void Init();
 
+	void ResetGl() { m_set_gl = false; }
+
 	//public mouse
 	void OnMouse(wxMouseEvent& event);
 

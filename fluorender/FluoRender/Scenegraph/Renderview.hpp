@@ -156,8 +156,9 @@ namespace fluo
 		VolumeGroup* addVolumeGroup(const std::string &group_name = "", const std::string &prv_group_name = "");
 		VolumeGroup* addVolumeData(VolumeData* vd, const std::string &group_name);
 		VolumeGroup* addVolumeData(VolumeData* vd, VolumeGroup* group);
-		void addMeshData(fluo::MeshData* md);
-
+		MeshGroup* addMeshGroup(const std::string &group_name = "");
+		MeshGroup* addMeshData(MeshData* md, MeshGroup* group);
+		void addAnnotations(Annotations* an);
 
 		//migrated from the RenderCanvas class
 		//initialization

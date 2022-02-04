@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <Global.hpp>
 #include <Root.hpp>
+#include <FLIVR/TextureRenderer.h>
 #include <tiffio.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>

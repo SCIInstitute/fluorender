@@ -76,7 +76,7 @@ void RenderCanvasAgent::OnBoundsChanged(Event& event)
 {
 	Renderview* view = getObject();
 	if (!view) return;
-	view->InitView(INIT_BOUNDS | INIT_CENTER);
+	view->InitView(Renderview::INIT_BOUNDS | Renderview::INIT_CENTER);
 }
 
 void RenderCanvasAgent::OnSceneChanged(Event& event)

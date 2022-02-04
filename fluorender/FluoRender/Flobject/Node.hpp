@@ -110,6 +110,42 @@ namespace fluo
 
 		inline unsigned int getNumParents() const { return static_cast<unsigned int>(m_parents.size()); }
 
+		inline Group* getParentGroup()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asGroup()) return i->asGroup();
+			}
+			return nullptr;
+		}
+
+		inline VolumeGroup* getParentVolumeGroup()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asVolumeGroup()) return i->asVolumeGroup();
+			}
+			return nullptr;
+		}
+
+		inline MeshGroup* getParentMeshGroup()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asMeshGroup()) return i->asMeshGroup();
+			}
+			return nullptr;
+		}
+
+		inline Renderview* getParentRenderview()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asRenderview()) return i->asRenderview();
+			}
+			return nullptr;
+		}
+
 		typedef unsigned int NodeMask;
 		inline void setNodeMask(NodeMask nm) { m_node_mask = nm; }
 		inline NodeMask getNodeMask() const { return m_node_mask; }

@@ -27,9 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
 #include "VRenderFrame.h"
+#include <Global.hpp>
+#include <Root.hpp>
+#include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <MeshData.hpp>
 #include <Converters/VolumeMeshConv.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <wx/progdlg.h>
 #include <wx/valnum.h>
 
@@ -300,10 +305,11 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		DataManager* mgr = m_frame->GetDataManager();
 		mgr->LoadMeshData(mesh);
 		fluo::MeshData* md = mgr->GetLastMeshData();
-		if (md && m_frame->GetView(0))
+		fluo::Renderview* view = glbin_root->getCurrentRenderview();
+		if (md && view)
 		{
-			m_frame->GetView(0)->AddMeshData(md);
-			m_frame->GetView(0)->RefreshGL(39);
+			view->addMeshData(md, 0);
+			view->RefreshGL(39);
 		}
 		m_frame->UpdateList();
 		m_frame->UpdateTree();
