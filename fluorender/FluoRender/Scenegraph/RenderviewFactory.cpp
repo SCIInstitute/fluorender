@@ -245,13 +245,6 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstCamLockCtr, Point());
 		view->addValue(gstCamLockPick, bool(false));
 		view->addValue(gstRadius, double(348));
-		view->addValue(gstMouseX, long(-1));
-		view->addValue(gstMouseY, long(-1));
-		view->addValue(gstMousePrvX, long(-1));
-		view->addValue(gstMousePrvY, long(-1));
-		view->addValue(gstMouseClientX, long(-1));
-		view->addValue(gstMouseClientY, long(-1));
-		view->addValue(gstMouseIn, bool(true));
 		view->addValue(gstMovInitAng, double(0));
 		view->addValue(gstMovStartAng, double(0));
 		view->addValue(gstMovEndAng, double(0));
@@ -262,6 +255,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMovRewind, bool(false));
 		view->addValue(gstMovStage, long(0));
 		view->addValue(gstMovRewind4d, bool(false));
+		view->addValue(gstMovRunning, bool(false));
 		view->addValue(gstCropX, long(-1));
 		view->addValue(gstCropY, long(-1));
 		view->addValue(gstCropW, long(-1));
@@ -290,17 +284,6 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstNodrawCount, long(0));
 		view->addValue(gstLoadMainThread, bool(false));
 		view->addValue(gstResMode, long(1));
-		view->addValue(gstTouchEnable, bool(false));
-		view->addValue(gstPtr1Id, long(-1));
-		view->addValue(gstPtr1X, long(0));
-		view->addValue(gstPtr1Y, long(0));
-		view->addValue(gstPtr1XSave, long(0));
-		view->addValue(gstPtr1YSave, long(0));
-		view->addValue(gstPtr2Id, long(-1));
-		view->addValue(gstPtr2X, long(0));
-		view->addValue(gstPtr2Y, long(0));
-		view->addValue(gstPtr2XSave, long(0));
-		view->addValue(gstPtr2YSave, long(0));
 		view->addValue(gstFullScreen, bool(false));
 		view->addValue(gstVrEnable, bool(false));
 		view->addValue(gstOpenvrEnable, bool(false));
@@ -319,6 +302,26 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstSelectedMshName, std::string());
 		view->addValue(gstSelectedVolName, std::string());
 		view->addValue(gstSelPointVolume, Point());
+		view->addValue(gstMouseX, long(-1));
+		view->addValue(gstMouseY, long(-1));
+		view->addValue(gstMousePrvX, long(-1));
+		view->addValue(gstMousePrvY, long(-1));
+		view->addValue(gstMouseClientX, long(-1));
+		view->addValue(gstMouseClientY, long(-1));
+		view->addValue(gstMouseIn, bool(true));
+		view->addValue(gstMouseLeftDown, bool(false));
+		view->addValue(gstMouseRightDown, bool(false));
+		view->addValue(gstMouseMiddleDown, bool(false));
+		view->addValue(gstMouseLeftUp, bool(false));
+		view->addValue(gstMouseRightUp, bool(false));
+		view->addValue(gstMouseMiddleUp, bool(false));
+		view->addValue(gstMouseLeftHold, bool(false));
+		view->addValue(gstMouseRightHold, bool(false));
+		view->addValue(gstMouseMiddleHold, bool(false));
+		view->addValue(gstMouseDrag, bool(false));
+		view->addValue(gstMouseWheel, long(0));
+		view->addValue(gstKbAltDown, bool(false));
+		view->addValue(gstKbCtrlDown, bool(false));
 	}
 }
 

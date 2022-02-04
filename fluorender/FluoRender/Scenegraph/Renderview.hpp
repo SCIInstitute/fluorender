@@ -457,6 +457,9 @@ namespace fluo
 		//tablet and touch
 		void SetPressure(int, int);
 
+		//handle mouse interactions
+		void HandleMouse();
+
 		friend class RenderviewFactory;
 
 	protected:
@@ -504,7 +507,6 @@ namespace fluo
 		//wacom support
 		static HCTX m_hTab;
 		static LOGCONTEXTA m_lc;
-		decltype(GetPointerInfo)* GetPI;
 		vr::IVRSystem *m_vr_system;
 #ifdef USE_XINPUT
 		XboxController* m_controller;

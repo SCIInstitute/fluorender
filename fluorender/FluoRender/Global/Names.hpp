@@ -457,13 +457,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstCamLockCtr "cam lock ctr"
 #define gstCamLockPick "cam lock pick"//camera locking center by picking
 #define gstRadius "radius"//scene size in terms of radius of a sphere
-#define gstMouseX "mouse x"//mouse pos
-#define gstMouseY "mouse y"
-#define gstMousePrvX "mouse prv x"
-#define gstMousePrvY "mouse prv y"
-#define gstMouseClientX "mouse client x"//from screentoclient()
-#define gstMouseClientY "mouse client y"
-#define gstMouseIn "mouse in"
 #define gstMovInitAng "mov init ang"//movie properties
 #define gstMovStartAng "mov start ang"
 #define gstMovEndAng "mov end ang"
@@ -474,6 +467,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovRewind "mov rewind"
 #define gstMovStage "mov stage"//0-moving to start angle; 1-moving to end; 2-rewind
 #define gstMovRewind4d "mov rewind 4d"
+#define gstMovRunning "mov running"//movie is currently running
 #define gstCropX "crop x"//movie frame properties
 #define gstCropY "crop y"
 #define gstCropW "crop w"
@@ -502,17 +496,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstNodrawCount "nodraw count"
 #define gstLoadMainThread "load main thread"
 #define gstResMode "res mode"
-#define gstTouchEnable "touch enable"
-#define gstPtr1Id "ptr1 id"
-#define gstPtr1X "ptr1 x"
-#define gstPtr1Y "ptr1 y"
-#define gstPtr1XSave "ptr1 x save"
-#define gstPtr1YSave "ptr1 y save"
-#define gstPtr2Id "ptr2 id"
-#define gstPtr2X "ptr2 x"
-#define gstPtr2Y "ptr2 y"
-#define gstPtr2XSave "ptr2 x save"
-#define gstPtr2YSave "ptr2 y save"
 #define gstFullScreen "full screen"
 #define gstVrEnable "vr enable"
 #define gstOpenvrEnable "openvr enable"
@@ -530,5 +513,25 @@ DEALINGS IN THE SOFTWARE.
 #define gstSelectedMshName "selected msh name"
 #define gstSelectedVolName "selected vol name"
 #define gstSelPointVolume "sel point volume"
+#define gstMouseX "mouse x"//mouse pos from os
+#define gstMouseY "mouse y"
+#define gstMousePrvX "mouse prv x"
+#define gstMousePrvY "mouse prv y"
+#define gstMouseClientX "mouse client x"//from screentoclient()
+#define gstMouseClientY "mouse client y"
+#define gstMouseIn "mouse in"
+#define gstMouseLeftDown "mouse left down"
+#define gstMouseRightDown "mouse right down"
+#define gstMouseMiddleDown "mouse middle down"
+#define gstMouseLeftUp "mouse left up"
+#define gstMouseRightUp "mouse right up"
+#define gstMouseMiddleUp "mouse middle up"
+#define gstMouseLeftHold "mouse left hold"
+#define gstMouseRightHold "mouse right hold"
+#define gstMouseMiddleHold "mouse middle hold"
+#define gstMouseDrag "mouse drag"
+#define gstMouseWheel "mouse wheel"
+#define gstKbAltDown "kb alt down"
+#define gstKbCtrlDown "kb ctrl down"
 
 #endif//NAMES_HPP

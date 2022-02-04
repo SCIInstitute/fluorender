@@ -282,15 +282,6 @@ void Renderview::Init()
 				m_selector->SetBrushUsePres(false);
 		}
 
-		//check touch
-		HMODULE user32 = LoadLibrary(L"user32");
-		GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
-			(GetProcAddress(user32, "GetPointerInfo"));
-		if (GetPI != NULL)
-			setValue(gstTouchEnable, true);
-		else
-			setValue(gstTouchEnable, false);
-
 		//xbox controller
 #ifdef USE_XINPUT
 		m_controller = new XboxController(1);
@@ -8085,8 +8076,8 @@ bool Renderview::UpdateController()
 			setValue(gstCamTransX, cam_pos2.x);
 			setValue(gstCamTransY, cam_pos2.y);
 			setValue(gstCamTransZ, cam_pos2.z);
-			Quaternion up(0.0, 1.0, 0.0, 0.0);
-			Quaternion up2 = (-q) * up * q;
+			Quaternion up2(0.0, 1.0, 0.0, 0.0);
+			up2 = (-q) * up2 * q;
 			Vector up(up2.x, up2.y, up2.z);
 			setValue(gstCamUp, up);
 			double dx, dy, dz;
@@ -8152,6 +8143,564 @@ void Renderview::SetPressure(int np, int tp)
 {
 	if (m_selector->GetBrushUsePres())
 		m_selector->SetPressure(np, tp);
+}
+
+//handle mouse interactions
+void Renderview::HandleMouse()
+{
+	bool refresh = false;
+
+	//properties need update in the end
+	bool interactive = false;
+	bool paint_enable = false;
+	bool clear_paint = false;
+	bool retain_fb = false;
+	bool pick = false;
+	bool pick_lock_center = false;
+	bool force_clear = false;
+	bool grow_on = false;
+	bool rot_center_dirty = false;
+
+	//properties from os
+	long nx, ny;
+	getValue(gstSizeX, nx);
+	getValue(gstSizeY, ny);
+	long lx, ly;
+	getValue(gstMouseX, lx);
+	getValue(gstMouseY, ly);
+	bool left_hold, middle_hold, right_hold;
+	getValue(gstMouseLeftHold, left_hold);
+	getValue(gstMouseMiddleHold, middle_hold);
+	getValue(gstMouseRightHold, right_hold);
+	bool alt_down;
+	getValue(gstKbAltDown, alt_down);
+	bool ctrl_down;
+	getValue(gstKbCtrlDown, ctrl_down);
+
+	//other properties for reading and updating
+	long int_mode;
+	getValue(gstInterMode, int_mode);
+	long lpx, lpy;
+	getValue(gstMousePrvX, lpx);
+	getValue(gstMousePrvY, lpy);
+	//other properties without updating
+	bool geared_rot;
+	getValue(gstGearedEnable, geared_rot);
+
+	//mouse button down operations
+	bool bval;
+	getValue(gstMouseLeftDown, bval);
+	if (bval)
+	{
+		bool found_rp = false;
+
+		if (int_mode == 6 ||
+			int_mode == 9 ||
+			int_mode == 11 ||
+			int_mode == 14)
+		{
+			found_rp = m_ruler_handler->FindEditingRuler(lx, ly);
+		}
+		if (found_rp)
+		{
+			if (int_mode == 11)
+			{
+				flrd::RulerPoint *p = m_ruler_handler->GetPoint();
+				if (p) p->ToggleLocked();
+			}
+			if (int_mode == 14)
+				m_ruler_handler->DeletePoint();
+			//if (m_frame && m_frame->GetMeasureDlg())
+			//	m_frame->GetMeasureDlg()->GetSettings(this);
+			refresh = true;
+			//RefreshGL(41);
+		}
+
+		if (int_mode == 1 ||
+			(int_mode == 5 && alt_down) ||
+			((int_mode == 6 ||
+			int_mode == 9 ||
+			int_mode == 11 ||
+			int_mode == 14) &&
+			!found_rp))
+		{
+			pick = true;
+		}
+		else if (int_mode == 2 || int_mode == 7)
+		{
+			//old_mouse_X = event.GetX();
+			//old_mouse_Y = event.GetY();
+			lpx = lx;
+			lpy = ly;
+			//prv_mouse_X = old_mouse_X;
+			//prv_mouse_Y = old_mouse_Y;
+			paint_enable = true;
+			clear_paint = true;
+			m_selector->SetBrushPressPeak(0.0);
+			refresh = true;
+			//RefreshGL(26);
+		}
+
+		if (int_mode == 10 ||
+			int_mode == 12)
+		{
+			m_selector->ResetMousePos();
+			m_selector->SetInitMask(1);
+			Segment();
+			m_selector->SetInitMask(3);
+			if (int_mode == 12)
+				GetCurrentVolume()->AddEmptyLabel(0, false);
+			force_clear = true;
+			grow_on = true;
+		}
+	}
+	getValue(gstMouseRightDown, bval);
+	if (bval)
+	{
+		//nothing so far
+	}
+	getValue(gstMouseMiddleDown, bval);
+	if (bval)
+	{
+		//nothing so far
+	}
+
+	//mouse button up operations
+	getValue(gstMouseLeftUp, bval);
+	if (bval)
+	{
+		if (int_mode == 1)
+		{
+			//pick stuff
+			getValue(gstPick, bval);
+			if (bval)
+			{
+				Pick();
+				pick_lock_center = false;
+			}
+		}
+		else if (int_mode == 2)
+		{
+			//segment volumes
+			paint_enable = true;
+			Segment();
+			int_mode = 4;
+			force_clear = true;
+			refresh = true;
+			//RefreshGL(27);
+			//return;
+		}
+		else if (int_mode == 5 && !alt_down)
+		{
+			//add one point to a ruler
+			m_ruler_handler->AddRulerPoint(lx, ly, true);
+			//if (m_frame && m_frame->GetMeasureDlg())
+			//	m_frame->GetMeasureDlg()->GetSettings(this);
+			refresh = true;
+			//RefreshGL(27);
+			//return;
+		}
+		else if (int_mode == 6 ||
+			int_mode == 9 ||
+			int_mode == 11)
+		{
+			m_ruler_handler->SetPoint(0);
+		}
+		else if (int_mode == 7)
+		{
+			//segment volume, calculate center, add ruler point
+			paint_enable = true;
+			Segment();
+			if (m_ruler_handler->GetType() == 3)
+				m_ruler_handler->AddRulerPoint(lx, ly, true);
+			else
+				m_ruler_handler->AddPaintRulerPoint();
+			int_mode = 8;
+			force_clear = true;
+			refresh = true;
+			//RefreshGL(27);
+			//if (m_frame && m_frame->GetMeasureDlg())
+			//	m_frame->GetMeasureDlg()->GetSettings(this);
+			//return;
+		}
+		else if (int_mode == 10 ||
+			int_mode == 12)
+		{
+			grow_on = false;
+			//return;
+		}
+		else if (int_mode == 13)
+		{
+			//relax ruler function needs to be added
+			refresh = true;
+			//if (m_frame && m_frame->GetMeasureDlg())
+			//{
+			//	if (m_ruler_autorelax)
+			//	{
+			//		m_frame->GetMeasureDlg()->SetEdit();
+			//		m_frame->GetMeasureDlg()->Relax(
+			//			m_ruler_handler.GetRulerIndex());
+			//	}
+			//	m_frame->GetMeasureDlg()->GetSettings(this);
+			//}
+			//RefreshGL(29);
+			//return;
+		}
+	}
+	getValue(gstMouseMiddleUp, bval);
+	if (bval)
+	{
+		//SetSortBricks();
+		//RefreshGL(28);
+		//return;
+	}
+	getValue(gstMouseRightUp, bval);
+	if (bval)
+	{
+		if (int_mode == 1)
+		{
+			//RefreshGL(27);
+			//return;
+		}
+		if (int_mode == 5 && !alt_down)
+		{
+			if (m_ruler_handler->GetRulerFinished())
+			{
+				int_mode = 1;
+				//SetIntMode(1);
+			}
+			else
+			{
+				m_ruler_handler->AddRulerPoint(lx, ly, true);
+				m_ruler_handler->FinishRuler();
+			}
+			//ruler relax function needs to be added
+			//if (m_frame && m_frame->GetMeasureDlg())
+			//{
+			//	if (m_ruler_autorelax)
+			//	{
+			//		m_frame->GetMeasureDlg()->SetEdit();
+			//		m_frame->GetMeasureDlg()->Relax(
+			//			m_ruler_handler.GetRulerIndex());
+			//	}
+			//	m_frame->GetMeasureDlg()->GetSettings(this);
+			//}
+			refresh = true;
+			//RefreshGL(29);
+			//return;
+		}
+		//SetSortBricks();
+	}
+
+	//mouse dragging
+	getValue(gstMouseDrag, bval);
+	if (bval)
+	{
+		flvr::TextureRenderer::set_cor_up_time(
+			int(sqrt(double(lpx - lx)*
+				double(lpx - lx) +
+				double(lpy - ly)*
+				double(lpy - ly))));
+
+		flrd::RulerPoint *p0 = m_ruler_handler->GetPoint();
+		bool hold_old = false;
+		if (int_mode == 1 ||
+			(int_mode == 5 && alt_down) ||
+			((int_mode == 6 ||
+			int_mode == 9 ||
+			int_mode == 10 ||
+			int_mode == 11 ||
+			int_mode == 12 ||
+			int_mode == 14) &&
+			!p0))
+		{
+			//disable picking
+			pick = false;
+
+			if (lpx != -1 && lpx != -1 &&
+				abs(lpx - lx) + abs(lpy - ly) < 200)
+			{
+				if (left_hold &&
+					!ctrl_down &&
+					int_mode != 10 &&
+					int_mode != 12)
+				{
+					Quaternion q_delta = Trackball(lx - lpx, lpy - ly);
+					if (geared_rot && q_delta.IsIdentity())
+						hold_old = true;
+					Quaternion q;
+					getValue(gstCamRotQ, q);
+					q *= q_delta;
+					q.Normalize();
+					setValue(gstCamRotQ, q);
+					double dist;
+					getValue(gstCamDist, dist);
+					Quaternion cam_pos(0.0, 0.0, dist, 0.0);
+					Quaternion cam_pos2 = (-q) * cam_pos * q;
+					setValue(gstCamTransX, cam_pos2.x);
+					setValue(gstCamTransY, cam_pos2.y);
+					setValue(gstCamTransZ, cam_pos2.z);
+
+					Quaternion up(0.0, 1.0, 0.0, 0.0);
+					up = (-q) * up * q;
+					setValue(gstCamUp, up);
+
+					Q2A();
+
+					//wxString str = wxString::Format("%.1f", m_rotx);
+					//m_vrv->m_x_rot_text->ChangeValue(str);
+					//str = wxString::Format("%.1f", m_roty);
+					//m_vrv->m_y_rot_text->ChangeValue(str);
+					//str = wxString::Format("%.1f", m_rotz);
+					//m_vrv->m_z_rot_text->ChangeValue(str);
+					//if (!m_vrv->m_rot_slider)
+					//{
+					//	m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
+					//	m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
+					//	m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+					//}
+
+					interactive = true;
+
+					//if (m_linked_rot)
+					//	m_master_linked_view = this;
+
+					if (!hold_old)
+						refresh = true;
+					//RefreshGL(30);
+				}
+				if (middle_hold || (ctrl_down && left_hold))
+				{
+					long distx = lx - lpx;
+					long disty = ly - lpy;
+
+					double dx, dy, dz;
+					getValue(gstCamTransX, dx);
+					getValue(gstCamTransY, dy);
+					getValue(gstCamTransZ, dz);
+					Vector head(-dx, -dy, -dz);
+					head.normalize();
+					setValue(gstCamHead, head);
+					Vector up;
+					getValue(gstCamUp, up);
+					Vector side = Cross(up, head);
+					double dl, dr, dt, db;
+					getValue(gstOrthoLeft, dl);
+					getValue(gstOrthoRight, dr);
+					getValue(gstOrthoTop, dt);
+					getValue(gstOrthoBottom, db);
+					Vector trans = -(side*(distx*(dr - dl) / nx) +
+						up * (disty*(dt - db) / ny));
+					getValue(gstObjTransX, dx);
+					getValue(gstObjTransY, dy);
+					getValue(gstObjTransZ, dz);
+					setValue(gstObjTransX, dx + trans.x());
+					setValue(gstObjTransY, dy + trans.y());
+					setValue(gstObjTransZ, dz + trans.z());
+
+					interactive = true;
+					rot_center_dirty = true;
+					refresh = true;
+
+					//SetSortBricks();
+					//RefreshGL(31);
+				}
+				if (right_hold)
+				{
+					long distx = lx - lpx;
+					long disty = ly - lpy;
+
+					double delta = abs(distx) > abs(disty) ?
+						(double)distx / (double)nx :
+						(double)-disty / (double)ny;
+					double scale_factor;
+					getValue(gstScaleFactor, scale_factor);
+					scale_factor += scale_factor * delta;
+					setValue(gstScaleFactor, scale_factor);
+					//m_vrv->UpdateScaleFactor(false);
+					//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+					//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+					//m_vrv->m_scale_factor_text->ChangeValue(str);
+
+					getValue(gstFree, bval);
+					if (bval)
+					{
+						double dx, dy, dz;
+						getValue(gstCamTransX, dx);
+						getValue(gstCamTransY, dy);
+						getValue(gstCamTransZ, dz);
+						Vector pos(dx, dy, dz);
+						pos.normalize();
+						getValue(gstCamCtrX, dx);
+						getValue(gstCamCtrY, dy);
+						getValue(gstCamCtrZ, dz);
+						Vector ctr(dx, dy, dz);
+						ctr -= delta * pos * 1000;
+						setValue(gstCamCtrX, ctr.x());
+						setValue(gstCamCtrY, ctr.y());
+						setValue(gstCamCtrZ, ctr.z());
+					}
+
+					interactive = true;
+					refresh = true;
+
+					//SetSortBricks();
+					//RefreshGL(32);
+				}
+			}
+		}
+		else if (int_mode == 2 || int_mode == 7)
+		{
+			paint_enable = true;
+			refresh = true;
+			//RefreshGL(33);
+		}
+		else if (int_mode == 3)
+		{
+			if (lpx != -1 && lpy != -1 &&
+				abs(lpx - lx) + abs(lpy - ly) < 200)
+			{
+				if (left_hold)
+				{
+					Quaternion q_delta = TrackballClip(lpx, ly, lx, lpy);
+					Quaternion q_cl;
+					getValue(gstClipRotQ, q_cl);
+					q_cl = q_delta * q_cl;
+					q_cl.Normalize();
+					setValue(gstClipRotQ, q_cl);
+					refresh = true;
+					//SetRotations(m_rotx, m_roty, m_rotz);
+					//RefreshGL(34);
+				}
+			}
+		}
+		else if (int_mode == 6 || int_mode == 9)
+		{
+			bool rval = false;
+			if (int_mode == 6)
+				rval = m_ruler_handler->EditPoint(lx, ly, alt_down);
+			else if (int_mode == 9)
+				rval = m_ruler_handler->MoveRuler(lx, ly);
+			if (rval)
+			{
+				refresh = true;
+				//RefreshGL(35);
+				//if (m_frame && m_frame->GetMeasureDlg())
+				//{
+				//	m_frame->GetMeasureDlg()->GetSettings(this);
+				//	m_frame->GetMeasureDlg()->SetEdit();
+				//}
+			}
+		}
+		else if (int_mode == 13)
+		{
+			if (m_ruler_handler->GetMouseDist(lx, ly, 35))
+			{
+				//add one point to a ruler
+				m_ruler_handler->AddRulerPoint(lx, ly, true);
+				refresh = true;
+				//if (m_frame && m_frame->GetMeasureDlg())
+				//	m_frame->GetMeasureDlg()->GetSettings(this);
+				//RefreshGL(27);
+			}
+		}
+
+		//else
+		//{
+		//	old_mouse_X = event.GetX();
+		//	old_mouse_Y = event.GetY();
+		//	prv_mouse_X = old_mouse_X;
+		//	prv_mouse_Y = old_mouse_Y;
+		//}
+		//return;
+	}
+
+	//wheel operations
+	long wheel;
+	getValue(gstMouseWheel, wheel);
+	if (wheel)  //if rotation
+	{
+		if (int_mode == 2 || int_mode == 7)
+		{
+			//ChangeBrushSize(wheel);
+		}
+		else
+		{
+			interactive = true;
+			rot_center_dirty = true;
+			double scale_factor;
+			getValue(gstScaleFactor, scale_factor);
+			double value = wheel * scale_factor / 1000.0;
+			if (scale_factor + value > 0.01)
+				scale_factor += value;
+			setValue(gstScaleFactor, scale_factor);
+			//if (m_scale_factor < 0.01)
+			//	m_scale_factor = 0.01;
+			//m_vrv->UpdateScaleFactor(false);
+			//wxString str = wxString::Format("%.0f", m_scale_factor*100.0);
+			//m_vrv->m_scale_factor_sldr->SetValue(m_scale_factor*100);
+			//m_vrv->m_scale_factor_text->ChangeValue(str);
+		}
+		refresh = true;
+		//RefreshGL(36);
+		//return;
+	}
+
+	// draw the strokes into a framebuffer texture
+	//not actually for displaying it
+	//getValue(gstDrawBrush, bval);
+	//if (bval)
+	//{
+	//	//old_mouse_X = event.GetX();
+	//	//old_mouse_Y = event.GetY();
+	//	//RefreshGL(37);
+	//	//return;
+	//}
+
+	long draw_info;
+	getValue(gstDrawInfo, draw_info);
+	if (draw_info & INFO_DISP)
+	{
+		bool movie_running, vr_enable;
+		getValue(gstMovRunning, movie_running);
+		getValue(gstVrEnable, vr_enable);
+		if (!movie_running && !vr_enable)
+		{
+			retain_fb = true;
+			refresh = true;
+		}
+		//if (m_frame && m_frame->GetMovieView() &&
+		//	m_frame->GetMovieView()->GetRunning())
+		//	return;
+		//if (m_enable_vr)
+		//	return;
+
+		//retain_fb = true;
+		//return;
+	}
+
+	//update properties
+	//...
+	//actually draw everything
+	if (refresh)
+	{
+#ifdef _WIN32
+		RefreshGL(38, false, false);
+#else
+		RefreshGL(38, false, true);
+#endif
+	}
+	//update mouse position
+	if (lpx >= 0 && lpy >= 0)
+	{
+		setValue(gstMousePrvX, lx);
+		setValue(gstMousePrvY, ly);
+		//if (!hold_old)
+		//{
+		//	old_mouse_X = event.GetX();
+		//	old_mouse_Y = event.GetY();
+		//}
+		}
 }
 
 //event functions/////////////////////////////////////////////////////////////////////////////////

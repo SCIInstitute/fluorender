@@ -87,6 +87,22 @@ private:
 	//is full screen
 	bool m_full_screen;
 
+	//touch pointer ids
+	bool m_enable_touch;
+#ifdef _WIN32
+	decltype(GetPointerInfo)* GetPI;
+#endif
+	int m_ptr_id1;
+	int m_ptr1_x;
+	int m_ptr1_y;
+	int m_ptr1_x_save;
+	int m_ptr1_y_save;
+	int m_ptr_id2;
+	int m_ptr2_x;
+	int m_ptr2_y;
+	int m_ptr2_x_save;
+	int m_ptr2_y_save;
+
 	//flags in idle event handling
 	bool ks_v_mask;
 	bool ks_ctrl_left;

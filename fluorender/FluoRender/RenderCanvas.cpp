@@ -79,6 +79,10 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	m_fullscreen_trigger(this, ID_ftrigger),
 	//set gl
 	m_set_gl(false),
+	//touch
+	m_enable_touch(false),
+	m_ptr_id1(-1),
+	m_ptr_id2(-1),
 	//flags for idle
 	ks_v_mask(false),
 	ks_ctrl_left(false),
@@ -209,6 +213,16 @@ void RenderCanvas::Init()
 		}
 		////glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		//glEnable(GL_MULTISAMPLE);
+#ifdef _WIN32
+		//check touch
+		HMODULE user32 = LoadLibrary(L"user32");
+		GetPI = reinterpret_cast<decltype(GetPointerInfo)*>
+			(GetProcAddress(user32, "GetPointerInfo"));
+		if (GetPI != NULL)
+			m_enable_touch = true;
+		else
+			m_enable_touch = false;
+#endif
 
 		m_initialized = true;
 
@@ -1780,6 +1794,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 #ifdef _WIN32
 WXLRESULT RenderCanvas::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
+	//handle wacom messages
 	if (message == WT_PACKET)
 	{
 		PACKET pkt;
@@ -1787,6 +1802,7 @@ WXLRESULT RenderCanvas::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM 
 			m_agent->getObject()->SetPressure(pkt.pkNormalPressure, pkt.pkTangentPressure);
 	}
 
+	//map touch messages to mouse events
 	if (m_enable_touch)
 	{
 		if (message == WM_POINTERDOWN)
@@ -1896,8 +1912,12 @@ WXLRESULT RenderCanvas::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM 
 
 void RenderCanvas::OnMouse(wxMouseEvent& event)
 {
-	if (m_interactive && !m_rot_lock)
+	bool interactive, geared_rot;
+	m_agent->getValue(gstInteractive, interactive);
+	m_agent->getValue(gstGearedEnable, geared_rot);
+	if (interactive && !geared_rot)
 		return;
+
 	//if (m_drawing) return;
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
@@ -1914,13 +1934,6 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 				event.Dragging() ||
 				event.GetWheelRotation()))
 		SetFocus();
-
-	m_interactive = false;
-
-	m_paint_enable = false;
-	m_retain_finalbuffer = false;
-	int nx = GetGLSize().x;
-	int ny = GetGLSize().y;
 
 	//mouse button down operations
 	if (event.LeftDown())
