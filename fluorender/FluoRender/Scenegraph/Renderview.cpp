@@ -49,6 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/RulerRenderer.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/Cov.h>
+#include <Distance/SegGrow.h>
 #include <Tracking/Tracks.h>
 #include <FLIVR/TextureRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
@@ -250,7 +251,7 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 	return group;
 }
 
-void Renderview::addMeshData(fluo::MeshData* md)
+void Renderview::addMeshData(MeshData* md)
 {
 	addChild(md);
 	setValue(gstMshListDirty, true);
@@ -1660,6 +1661,23 @@ void Renderview::Segment()
 	//	if (colocal && m_frame->GetColocalizationDlg())
 	//		m_frame->GetColocalizationDlg()->Colocalize();
 	//}
+}
+
+void Renderview::Grow(long sz)
+{
+	m_selector->SetInitMask(2);
+	Segment();
+	m_selector->SetInitMask(3);
+	long int_mode;
+	getValue(gstInterMode, int_mode);
+	if (int_mode == 12)
+	{
+		flrd::SegGrow sg(GetCurrentVolume());
+		sg.SetRulerHandler(m_ruler_handler);
+		sg.SetIter(m_selector->GetIter() * 3);
+		sg.SetSizeThresh(sz);
+		sg.Compute();
+	}
 }
 
 void Renderview::ForceDraw()
@@ -7511,31 +7529,20 @@ void Renderview::PickMesh()
 	getValue(gstCurFramebuffer, ulval);
 	glBindFramebuffer(GL_FRAMEBUFFER, ulval);
 
+	std::string str;
 	if (choose > 0 && choose <= m_msh_list.size())
 	{
 		MeshData* md = m_msh_list[choose - 1].get();
 		if (md)
-		{
-			//if (m_frame && m_frame->GetTree())
-			//{
-			//	m_frame->GetTree()->SetFocus();
-			//	m_frame->GetTree()->Select(m_vrv->GetName(), md->getName());
-			//}
-			RefreshGL(27);
-		}
+			str = md->getName();
 	}
-	else
-	{
-		//if (m_frame && m_frame->GetCurSelType() == 3 &&
-		//	m_frame->GetTree())
-		//	m_frame->GetTree()->Select(m_vrv->GetName(), "");
-	}
+	setValue(gstSelectedMshName, str);
 	m_mv_mat = mv_temp;
 }
 
 void Renderview::PickVolume()
 {
-	int kmode = 0;// wxGetKeyState(WXK_CONTROL) ? 1 : 0;
+	//int kmode = 0;// wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
 	double min_dist = -1.0;
 	Point p, ip, pp;
@@ -7588,21 +7595,81 @@ void Renderview::PickVolume()
 		}
 	}
 
+	std::string str;
 	if (picked_vd)
 	{
-		//if (m_frame && m_frame->GetTree())
-		//{
-		//	m_frame->GetTree()->SetFocus();
-		//	m_frame->GetTree()->Select(m_vrv->GetName(), picked_vd->getName());
-		//}
-		//update label selection
-		//SetCompSelection(ip, kmode);
-
+		str = picked_vd->getName();
+		setValue(gstSelPointVolume, ip);
 		bool bval;
 		getValue(gstCamLockPick, bval);
 		if (bval)
 			setValue(gstCamLockCtr, pp);
 	}
+	setValue(gstSelectedVolName, str);
+}
+
+bool Renderview::PinRotCtr()
+{
+	//pin rotation center
+	bool pin_rot_ctr, rot_ctr_dirty, free;
+	VolumeData* cur_vol = GetCurrentVolume();
+	getValue(gstPinRotCtr, pin_rot_ctr);
+	getValue(gstRotCtrDirty, rot_ctr_dirty);
+	getValue(gstFree, free);
+	if (pin_rot_ctr && rot_ctr_dirty &&
+		cur_vol && !free)
+	{
+		Point p, ip;
+		long nx, ny;
+		getValue(gstSizeX, nx);
+		getValue(gstSizeY, ny);
+		long mode = 2;
+		long mip_mode;
+		cur_vol->getValue(gstMipMode, mip_mode);
+		if (mip_mode == 1) mode = 1;
+		m_volume_point->SetVolumeData(cur_vol);
+		double dval;
+		getValue(gstPinThresh, dval);
+		double dist = m_volume_point->GetPointVolume(nx / 2.0, ny / 2.0,
+			mode, true, dval, p, ip);
+		if (dist <= 0.0)
+			dist = m_volume_point->GetPointVolumeBox(
+				nx / 2.0, ny / 2.0,
+				true, p);
+		if (dist > 0.0)
+		{
+			setValue(gstRotCtrPin, p);
+			double dx, dy, dz;
+			getValue(gstObjCtrX, dx);
+			getValue(gstObjCtrY, dy);
+			getValue(gstObjCtrZ, dz);
+			p = Point(dx - p.x(), p.y() - dy, p.z() - dz);
+			dx = p.x();
+			dy = p.y();
+			dz = p.z();
+			double thresh = 10.0;
+			double spcx, spcy, spcz;
+			cur_vol->getValue(gstSpcX, spcx);
+			cur_vol->getValue(gstSpcY, spcy);
+			cur_vol->getValue(gstSpcZ, spcz);
+			thresh *= spcx;
+			double dx2, dy2, dz2;
+			getValue(gstObjTransX, dx2);
+			getValue(gstObjTransY, dy2);
+			getValue(gstObjTransZ, dz2);
+			if (sqrt((dx2 - dx)*(dx2 - dx) +
+				(dy2 - dy)*(dy2 - dy) +
+				(dz2 - dz)*(dz2 - dz)) > thresh)
+			{
+				setValue(gstObjTransX, dx);
+				setValue(gstObjTransY, dy);
+				setValue(gstObjTransZ, dz);
+			}
+		}
+		setValue(gstRotCtrDirty, false);
+		return true;
+	}
+	return false;
 }
 
 void Renderview::SetCenter()
@@ -7673,7 +7740,7 @@ void Renderview::SetLockCenterVol()
 	VolumeData* vd = GetCurrentVolume();
 	if (!vd)
 		return;
-	fluo::BBox box;
+	BBox box;
 	vd->getValue(gstClipBounds, box);
 	setValue(gstCamLockCtr, box.center());
 }
@@ -7914,9 +7981,178 @@ void Renderview::InitOpenVR()
 		//m_vr_eye_offset = std::sqrt(eye_x*eye_x+eye_y*eye_y+eye_z*eye_z)*100.0;
 	}//otherwise use default settings
 }
+
+bool Renderview::UpdateController()
+{
+	bool refresh = false;
+	if (m_controller->IsConnected())
+	{
+		XINPUT_STATE xstate = m_controller->GetState();
+		double dzone = 0.2;
+		double sclr = 15.0;
+		double leftx = double(xstate.Gamepad.sThumbLX) / 32767.0;
+		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
+		double lefty = double(xstate.Gamepad.sThumbLY) / 32767.0;
+		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
+		double rghtx = double(xstate.Gamepad.sThumbRX) / 32767.0;
+		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
+		double rghty = double(xstate.Gamepad.sThumbRY) / 32767.0;
+		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
+		int px = 0;
+		int py = 0;
+		int inc = 5;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) py = -inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) py = inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
+		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
+
+		long nx, ny;
+		getValue(gstSizeX, nx);
+		getValue(gstSizeY, ny);
+		//horizontal move
+		if (leftx != 0.0)
+		{
+			double dx, dy, dz;
+			getValue(gstCamTransX, dx);
+			getValue(gstCamTransY, dy);
+			getValue(gstCamTransZ, dz);
+			Vector head(-dx, -dy, -dz);
+			head.normalize();
+			setValue(gstCamHead, head);
+			Vector up;
+			getValue(gstCamUp, up);
+			Vector side = Cross(up, head);
+			double dr, dl;
+			getValue(gstOrthoLeft, dl);
+			getValue(gstOrthoRight, dr);
+			Vector trans = side * (leftx*sclr*(dr - dl) / double(nx));
+			getValue(gstObjTransX, dx);
+			getValue(gstObjTransY, dy);
+			getValue(gstObjTransZ, dz);
+			dx += trans.x();
+			dy += trans.y();
+			dz += trans.z();
+			setValue(gstObjTransX, dx);
+			setValue(gstObjTransY, dy);
+			setValue(gstObjTransZ, dz);
+			setValue(gstInteractive, true);
+			setValue(gstRotCtrDirty, true);
+			refresh = true;
+		}
+		//zoom/dolly
+		if (lefty != 0.0)
+		{
+			double delta = lefty * sclr / (double)ny;
+			double scale_factor;
+			getValue(gstScaleFactor, scale_factor);
+			scale_factor += scale_factor * delta;
+			//m_vrv->UpdateScaleFactor(false);
+			bool bval;
+			getValue(gstFree, bval);
+			if (bval)
+			{
+				double dx, dy, dz;
+				getValue(gstCamTransX, dx);
+				getValue(gstCamTransY, dy);
+				getValue(gstCamTransZ, dz);
+				Vector pos(dx, dy, dz);
+				pos.normalize();
+				getValue(gstCamCtrX, dx);
+				getValue(gstCamCtrY, dy);
+				getValue(gstCamCtrZ, dz);
+				Vector ctr(dx, dy, dz);
+				ctr -= delta * pos * 1000;
+				setValue(gstCamCtrX, ctr.x());
+				setValue(gstCamCtrY, ctr.y());
+				setValue(gstCamCtrZ, ctr.z());
+			}
+			setValue(gstInteractive, true);
+			refresh = true;
+		}
+		//rotate
+		if (rghtx != 0.0 || rghty != 0.0)
+		{
+			Quaternion q_delta = Trackball(rghtx*sclr, rghty*sclr);
+			Quaternion q;
+			getValue(gstCamRotQ, q);
+			q *= q_delta;
+			q.Normalize();
+			setValue(gstCamRotQ, q);
+			double dist;
+			getValue(gstCamDist, dist);
+			Quaternion cam_pos(0.0, 0.0, dist, 0.0);
+			Quaternion cam_pos2 = (-q) * cam_pos * q;
+			setValue(gstCamTransX, cam_pos2.x);
+			setValue(gstCamTransY, cam_pos2.y);
+			setValue(gstCamTransZ, cam_pos2.z);
+			Quaternion up(0.0, 1.0, 0.0, 0.0);
+			Quaternion up2 = (-q) * up * q;
+			Vector up(up2.x, up2.y, up2.z);
+			setValue(gstCamUp, up);
+			double dx, dy, dz;
+			q.ToEuler(dx, dy, dz);
+			setValue(gstCamRotX, dx);
+			setValue(gstCamRotY, dy);
+			setValue(gstCamRotZ, dz);
+			//wxString str = wxString::Format("%.1f", m_rotx);
+			//m_vrv->m_x_rot_text->ChangeValue(str);
+			//str = wxString::Format("%.1f", m_roty);
+			//m_vrv->m_y_rot_text->ChangeValue(str);
+			//str = wxString::Format("%.1f", m_rotz);
+			//m_vrv->m_z_rot_text->ChangeValue(str);
+			//if (!m_vrv->m_rot_slider)
+			//{
+			//	m_vrv->m_x_rot_sldr->SetThumbPosition(int(m_rotx));
+			//	m_vrv->m_y_rot_sldr->SetThumbPosition(int(m_roty));
+			//	m_vrv->m_z_rot_sldr->SetThumbPosition(int(m_rotz));
+			//}
+			setValue(gstInteractive, true);
+			refresh = true;
+		}
+		//pan
+		if (px != 0 || py != 0)
+		{
+			double dx, dy, dz;
+			getValue(gstCamTransX, dx);
+			getValue(gstCamTransY, dy);
+			getValue(gstCamTransZ, dz);
+			Vector head(-dx, -dy, -dz);
+			head.normalize();
+			setValue(gstCamHead, head);
+			Vector up;
+			getValue(gstCamUp, up);
+			Vector side = Cross(up, head);
+			double dr, dl, dt, db;
+			getValue(gstOrthoLeft, dl);
+			getValue(gstOrthoRight, dr);
+			getValue(gstOrthoTop, dt);
+			getValue(gstOrthoBottom, db);
+			Vector trans =
+				side * (double(px)*(dr - dl) / double(nx)) +
+				up * (double(py)*(dt - db) / double(ny));
+			getValue(gstObjTransX, dx);
+			getValue(gstObjTransY, dy);
+			getValue(gstObjTransZ, dz);
+			dx += trans.x();
+			dy += trans.y();
+			dz += trans.z();
+			setValue(gstObjTransX, dx);
+			setValue(gstObjTransY, dy);
+			setValue(gstObjTransZ, dz);
+			setValue(gstInteractive, true);
+			setValue(gstRotCtrDirty, true);
+			refresh = true;
+		}
+	}
+	return refresh;
+}
 #endif
 
-
+void Renderview::SetPressure(int np, int tp)
+{
+	if (m_selector->GetBrushUsePres())
+		m_selector->SetPressure(np, tp);
+}
 
 //event functions/////////////////////////////////////////////////////////////////////////////////
 void Renderview::OnSizeXChanged(Event& event)

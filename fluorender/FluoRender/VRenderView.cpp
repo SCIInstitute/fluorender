@@ -920,6 +920,12 @@ void VRenderView::SetPinThreshold(double value)
 	m_agent->setValue(gstPinThresh, value);
 }
 
+void VRenderView::UpdateOrientCmb(int index)
+{
+	if (!m_ortho_view_cmb->HasFocus())
+		m_ortho_view_cmb->Select(index);
+}
+
 //reset counter
 void VRenderView::ResetID()
 {

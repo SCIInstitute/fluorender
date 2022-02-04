@@ -527,5 +527,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstBmRuntime "bm runtime"//benchmark runtime in msec
 #define gstBmFrames "bm frames"//benchmark frames ran
 #define gstBmFps "bm fps"//benchmark fps
+#define gstSelectedMshName "selected msh name"
+#define gstSelectedVolName "selected vol name"
+#define gstSelPointVolume "sel point volume"
 
 #endif//NAMES_HPP

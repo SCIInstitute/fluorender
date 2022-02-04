@@ -106,8 +106,11 @@ public:
 	void SetScaleMode(int mode, bool update);
 	//rot center anchor thresh
 	void SetPinThreshold(double value);
+	//orient cmb
+	void UpdateOrientCmb(int index);
 
 	//reset counter
+	int GetID() { return m_id; }
 	static void ResetID();
 
 	//get rendering context
@@ -124,6 +127,9 @@ public:
 	void SetFullScreen();
 	void SetCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
 	void SetFullFrame(wxFrame* ff) { m_full_frame = ff; }
+	wxFrame* GetFullFrame() { return m_full_frame; }
+	void HideFullFrame() { m_full_frame->Hide(); }
+	void AddCanvas(RenderCanvas* canvas) { m_view_sizer->Add(canvas, 1, wxEXPAND); }
 
 private:
 	static int m_max_id;

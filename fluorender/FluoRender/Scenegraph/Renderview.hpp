@@ -227,6 +227,7 @@ namespace fluo
 
 		//segment volumes in current view
 		void Segment();
+		void Grow(long sz);
 
 		//kernel executor
 		flrd::KernelExecutor* GetKernelExecutor() { return m_kernel_executor; }
@@ -434,7 +435,8 @@ namespace fluo
 		void Pick();
 		void PickMesh();
 		void PickVolume();
-		//void SetCompSelection(Point& p, long mode);//node: 0-exclusive; 1-add or remove
+		//pin rot ctr
+		bool PinRotCtr();
 
 		void SetCenter();
 		//camera lock
@@ -449,7 +451,11 @@ namespace fluo
 		//wacom tablet
 		HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
 		void InitOpenVR();
+		//xbox controller
+		bool UpdateController();//returns if update
 #endif
+		//tablet and touch
+		void SetPressure(int, int);
 
 		friend class RenderviewFactory;
 

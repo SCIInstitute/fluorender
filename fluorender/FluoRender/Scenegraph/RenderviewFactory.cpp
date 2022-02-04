@@ -316,6 +316,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstBmRuntime, unsigned long long(0));
 		view->addValue(gstBmFrames, unsigned long long(0));
 		view->addValue(gstBmFps, double(0));
+		view->addValue(gstSelectedMshName, std::string());
+		view->addValue(gstSelectedVolName, std::string());
+		view->addValue(gstSelPointVolume, Point());
 	}
 }
 
