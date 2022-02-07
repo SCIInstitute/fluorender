@@ -2396,9 +2396,9 @@ void Renderview::RefreshGL(int debug_code,
 	if (start_loop)
 		StartLoopUpdate();
 	SetSortBricks();
-	setValue(gstRefresh, true);
+	//setValue(gstRefresh, true);
 	setValue(gstRefreshErase, erase);
-	toggleValue(gstRefreshNotify, bval);
+	//toggleValue(gstRefreshNotify, bval);
 	//Refresh(erase);
 }
 

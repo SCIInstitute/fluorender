@@ -46,7 +46,7 @@ using namespace fluo;
 
 AgentFactory::AgentFactory()
 {
-	m_name = "agent factory";
+	m_name = gstAgentFactory;
 }
 
 AgentFactory::~AgentFactory()

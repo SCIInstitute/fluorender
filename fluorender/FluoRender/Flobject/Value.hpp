@@ -337,6 +337,7 @@ namespace fluo
 			}
 			else
 			{
+				*value = nullptr;
 				return false;
 			}
 

@@ -50,8 +50,8 @@ Renderview* RenderCanvasAgent::getObject()
 
 void RenderCanvasAgent::UpdateAllSettings()
 {
-	setValue(gstForceClear, true);
-	setValue(gstInteractive, false);
+	setValue(gstForceClear, true, Event(Event::NOTIFY_NONE));
+	setValue(gstInteractive, false, Event(Event::NOTIFY_NONE));
 	Renderview* view = getObject();
 	if (!view) return;
 	view->RefreshGL(41);
@@ -65,8 +65,8 @@ RenderCanvas &RenderCanvasAgent::getCanvas()
 void RenderCanvasAgent::handleValueChanged(Event& event)
 {
 	Object::handleValueChanged(event);
-	setValue(gstForceClear, true);
-	setValue(gstInteractive, false);
+	setValue(gstForceClear, true, Event(Event::NOTIFY_NONE));
+	setValue(gstInteractive, false, Event(Event::NOTIFY_NONE));
 	Renderview* view = getObject();
 	if (!view) return;
 	view->RefreshGL(41);
