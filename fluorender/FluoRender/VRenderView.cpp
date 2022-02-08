@@ -301,9 +301,6 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	//check ret. this is an error code when the pixel format is invalid.
 	int ret = m_canvas->GetPixelFormat(&pfd);
 #endif
-	m_agent->getObject()->InitView();
-	UpdateView();
-	
 	//get actual version
 	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
 	glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
@@ -322,6 +319,9 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	LoadSettings();
 	m_x_rotating = m_y_rotating = m_z_rotating = false;
 	m_skip_thumb = false;
+
+	m_agent->getObject()->InitView();
+	UpdateView();
 }
 
 VRenderView::~VRenderView()
@@ -963,13 +963,13 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	switch (sender_id)
 	{
 	case ID_VolumeSeqRd:
-		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_SEQ);
+		m_agent->setValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_SEQ));
 		break;
 	case ID_VolumeMultiRd:
-		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_MULTI);
+		m_agent->setValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_MULTI));
 		break;
 	case ID_VolumeCompRd:
-		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_COMP);
+		m_agent->setValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_COMP));
 		break;
 	}
 
@@ -2403,11 +2403,11 @@ void VRenderView::LoadSettings()
 	double dval;
 	long lval;
 	if (fconfig.Read("volume_seq_rd", &bval) && bval)
-		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_SEQ);
+		m_agent->setValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_SEQ));
 	if (fconfig.Read("volume_multi_rd", &bval) && bval)
-		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_MULTI);
+		m_agent->setValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_MULTI));
 	if (fconfig.Read("volume_comp_rd", &bval) && bval)
-		m_agent->setValue(gstMixMethod, fluo::Renderview::MIX_METHOD_COMP);
+		m_agent->setValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_COMP));
 
 	wxString str;
 	if (fconfig.Read("bg_color_picker", &str))

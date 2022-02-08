@@ -1702,9 +1702,9 @@ void Renderview::ForceDraw()
 	bool bval;
 	getValue(gstRefresh, bval);
 	if (!bval)
-		setValue(gstRetainFb, true);
+		setValue(gstRetainFb, true, Event(Event::NOTIFY_NONE));
 	else
-		setValue(gstRefresh, false);
+		setValue(gstRefresh, false, Event(Event::NOTIFY_NONE));
 //#ifdef _WIN32
 //	if (!m_set_gl)
 //	{
@@ -1731,7 +1731,7 @@ void Renderview::ForceDraw()
 
 	getValue(gstResize, bval);
 	if (bval)
-		setValue(gstRetainFb, false);
+		setValue(gstRetainFb, false, Event(Event::NOTIFY_NONE));
 
 	long nx, ny;
 	GetRenderSize(nx, ny);
@@ -1742,9 +1742,9 @@ void Renderview::ForceDraw()
 		draw_type = 1;
 	else
 		draw_type = 2;
-	setValue(gstDrawType, draw_type);
+	setValue(gstDrawType, draw_type, Event(Event::NOTIFY_NONE));
 
-	setValue(gstDrawing, true);
+	setValue(gstDrawing, true, Event(Event::NOTIFY_NONE));
 	PreDraw();
 
 	getValue(gstVrEnable, bval);
@@ -1796,9 +1796,9 @@ void Renderview::ForceDraw()
 		if (bval && bval2) DisplayStroke();//show the paint strokes
 	}
 	else if (int_mode == 4)
-		setValue(gstInterMode, 2);
+		setValue(gstInterMode, 2, Event(Event::NOTIFY_NONE));
 	else if (int_mode == 8)
-		setValue(gstInterMode, 7);
+		setValue(gstInterMode, 7, Event(Event::NOTIFY_NONE));
 
 
 #ifdef _WIN32
@@ -1827,28 +1827,28 @@ void Renderview::ForceDraw()
 		if (lval)
 		{
 			DrawVRBuffer();
-			setValue(gstVrEyeIdx, long(0));
+			setValue(gstVrEyeIdx, long(0), Event(Event::NOTIFY_NONE));
 			toggleValue(gstSwapBuffers, bval);
 			//SwapBuffers();
 		}
 		else
 		{
-			setValue(gstVrEyeIdx, long(1));
-			RefreshGL(99);
+			setValue(gstVrEyeIdx, long(1), Event(Event::NOTIFY_NONE));
+			//RefreshGL(99);
 		}
 	}
 	else
-		toggleValue(gstSwapBuffers, bval);
+		toggleValue(gstSwapBuffers, bval, Event(Event::NOTIFY_NONE));
 		//SwapBuffers();
 
 	glbin_timer->sample();
-	setValue(gstDrawing, false);
+	setValue(gstDrawing, false, Event(Event::NOTIFY_NONE));
 
 	getValue(gstInteractive, bval);
 	DBGPRINT(L"buffer swapped\t%d\n", bval);
 
 	getValue(gstResize, bval);
-	if (bval) setValue(gstResize, false);
+	if (bval) setValue(gstResize, false, Event(Event::NOTIFY_NONE));
 	getValue(gstEnlarge, bval);
 	if (bval)
 		ResetEnlarge();

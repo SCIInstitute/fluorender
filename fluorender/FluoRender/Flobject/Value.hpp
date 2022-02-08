@@ -781,7 +781,7 @@ namespace fluo
 			for (auto it = vs->getValues().begin();
 				it != vs->getValues().end(); ++it)
 			{
-				Event notifyNone(Event::NOTIFY_NONE); // this needed to be created before hand
+				Event notifyNone(Event::NOTIFY_NONE); // this needs to be created before hand
 				ValueTuple vt;
 				std::get<0>(vt) = it->second->getName();
 				vs->getValue(vt);
@@ -799,7 +799,7 @@ namespace fluo
 			for (auto it = vs->getValues().begin();
 				it != vs->getValues().end(); ++it)
 			{
-				Event notifyAll; // this needed to be created before hand
+				Event notifyAll(Event::NOTIFY_ALL); // this needs to be created before hand
 				ValueTuple vt;
 				std::get<0>(vt) = it->second->getName();
 				vs->getValue(vt);

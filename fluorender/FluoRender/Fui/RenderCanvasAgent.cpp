@@ -55,6 +55,10 @@ void RenderCanvasAgent::UpdateAllSettings()
 	Renderview* view = getObject();
 	if (!view) return;
 	view->RefreshGL(41);
+	canvas_.SwapBuffers();
+	bool bval;
+	getValue(gstRefreshErase, bval);
+	canvas_.Refresh(bval);
 }
 
 RenderCanvas &RenderCanvasAgent::getCanvas()
@@ -65,11 +69,16 @@ RenderCanvas &RenderCanvasAgent::getCanvas()
 void RenderCanvasAgent::handleValueChanged(Event& event)
 {
 	Object::handleValueChanged(event);
-	setValue(gstForceClear, true, Event(Event::NOTIFY_NONE));
-	setValue(gstInteractive, false, Event(Event::NOTIFY_NONE));
-	Renderview* view = getObject();
-	if (!view) return;
-	view->RefreshGL(41);
+	UpdateAllSettings();
+	//setValue(gstForceClear, true, Event(Event::NOTIFY_NONE));
+	//setValue(gstInteractive, false, Event(Event::NOTIFY_NONE));
+	//Renderview* view = getObject();
+	//if (!view) return;
+	//view->RefreshGL(41);
+	//canvas_.SwapBuffers();
+	//bool bval;
+	//getValue(gstRefreshErase, bval);
+	//canvas_.Refresh(bval);
 }
 
 void RenderCanvasAgent::OnBoundsChanged(Event& event)
@@ -86,4 +95,8 @@ void RenderCanvasAgent::OnSceneChanged(Event& event)
 	view->PopMeshList();
 	view->PopVolumeList();
 	view->RefreshGL(41);
+	canvas_.SwapBuffers();
+	bool bval;
+	getValue(gstRefreshErase, bval);
+	canvas_.Refresh(bval);
 }
