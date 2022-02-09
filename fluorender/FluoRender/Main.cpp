@@ -124,8 +124,8 @@ bool VRenderApp::OnInit()
 	//global init
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
-	wxString dft = expath + "/Defaults/volume_data.dftx";
-	glbin_volf->setValue(gstDefaultFile, dft.ToStdString());
+	//wxString dft = expath + "/Defaults/volume_data.dftx";
+	//glbin_volf->setValue(gstDefaultFile, dft.ToStdString());
 
 	return true;
 }

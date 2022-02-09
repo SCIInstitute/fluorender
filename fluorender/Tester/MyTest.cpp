@@ -31,7 +31,7 @@ protected:
 	{
 		double dval;
 		if (getValue("value1", dval))
-			setValue("value2", dval + 1, event);
+			setValueEvt("value2", dval + 1, event);
 	}
 };
 

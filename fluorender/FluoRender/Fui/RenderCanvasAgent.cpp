@@ -52,8 +52,9 @@ void RenderCanvasAgent::UpdateAllSettings()
 {
 	holdoffObserverNotification();
 
-	setValue(gstForceClear, true, Event(Event::NOTIFY_NONE));
-	setValue(gstInteractive, false, Event(Event::NOTIFY_NONE));
+	setValue(gstForceClear, true);
+	setValue(gstInteractive, false);
+	setValue(gstRefresh, true);
 	Renderview* view = getObject();
 	if (!view) return;
 	view->Update(41);

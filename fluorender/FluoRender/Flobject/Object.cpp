@@ -111,7 +111,7 @@ void Object::processNotification(Event& event)
 }
 
 //toggle value for bool
-bool Object::toggleValue(const std::string &name, bool &value, Event& event)
+bool Object::toggleValueEvt(const std::string &name, bool &value, Event& event)
 {
 	bool result = false;
 	if (_value_set)

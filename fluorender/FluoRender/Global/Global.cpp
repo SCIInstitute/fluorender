@@ -73,7 +73,7 @@ void Global::BuildFactories()
 	//BUILD_AND_ADD(Renderer3DFactory, factory_group);
 	
 	//create default
-	//getVolumeFactory()->createDefault();
+	getVolumeFactory()->createDefault();
 	getMeshFactory()->createDefault();
 	getAnnotationFactory()->createDefault();
 	getRenderviewFactory()->createDefault();

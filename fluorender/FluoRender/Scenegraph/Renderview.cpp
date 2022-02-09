@@ -234,8 +234,8 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 		//}
 	}
 
-	setValue(gstVolListDirty, true);
-	setValue(gstFullVolListDirty, true);
+	setValueEvt(gstVolListDirty, true, Event());
+	setValueEvt(gstFullVolListDirty, true, Event());
 
 	//if (m_frame)
 	//{
@@ -365,8 +365,8 @@ void Renderview::InitView(unsigned int type)
 			double near_clip = radius / 1000.0;
 			double far_clip = radius * 100.0;
 			setValue(gstRadius, radius);
-			setValue(gstDaStart, near_clip);
-			setValue(gstDaEnd, far_clip);
+			setValue(gstNearClip, near_clip);
+			setValue(gstFarClip, far_clip);
 		}
 	}
 
@@ -393,9 +393,9 @@ void Renderview::InitView(unsigned int type)
 		double distance = radius / tan(d2r(aov / 2.0));
 		setValue(gstCamDist, distance);
 		setValue(gstCamDistIni, distance);
-		setValue(gstTransX, double(0));
-		setValue(gstTransY, double(0));
-		setValue(gstTransZ, distance);
+		setValue(gstCamTransX, double(0));
+		setValue(gstCamTransY, double(0));
+		setValue(gstCamTransZ, distance);
 		getValue(gstUseDefault, bval);
 		if (!bval)
 			setValue(gstScaleFactor, double(1));
@@ -817,9 +817,9 @@ void Renderview::HandleProjection(int nx, int ny, bool vr)
 void Renderview::HandleCamera(bool vr)
 {
 	double dx, dy, dz;
-	getValue(gstTransX, dx);
-	getValue(gstTransY, dy);
-	getValue(gstTransZ, dz);
+	getValue(gstCamTransX, dx);
+	getValue(gstCamTransY, dy);
+	getValue(gstCamTransZ, dz);
 	Vector pos(dx, dy, dz);
 	pos.normalize();
 	bool bval;
@@ -832,6 +832,10 @@ void Renderview::HandleCamera(bool vr)
 		getValue(gstCamDist, distance);
 		pos *= distance;
 	}
+	setValue(gstCamTransX, pos.x());
+	setValue(gstCamTransY, pos.y());
+	setValue(gstCamTransZ, pos.z());
+
 	glm::vec3 eye(pos.x(), pos.y(), pos.z());
 	glm::vec3 center(0.0);
 	Vector vval;
@@ -1172,7 +1176,7 @@ void Renderview::SetParams(double t)
 	//	int index = interpolator->GetKeyIndexFromTime(t);
 	//	m_frame->GetRecorderDlg()->SetSelection(index);
 	//}
-	setValue(gstVolListDirty, true);
+	setValueEvt(gstVolListDirty, true, Event());
 }
 
 void Renderview::ResetMovieAngle()
@@ -1702,36 +1706,15 @@ void Renderview::ForceDraw()
 	bool bval;
 	getValue(gstRefresh, bval);
 	if (!bval)
-		setValue(gstRetainFb, true, Event(Event::NOTIFY_NONE));
+		setValue(gstRetainFb, true);
 	else
-		setValue(gstRefresh, false, Event(Event::NOTIFY_NONE));
-//#ifdef _WIN32
-//	if (!m_set_gl)
-//	{
-//		SetCurrent(*m_glRC);
-//		m_set_gl = true;
-//		if (m_frame)
-//		{
-//			for (int i = 0; i < m_frame->GetViewNum(); i++)
-//			{
-//				RenderCanvas* view = m_frame->GetView(i);
-//				if (view && view != this)
-//				{
-//					view->m_set_gl = false;
-//				}
-//			}
-//		}
-//	}
-//#endif
-//#if defined(_DARWIN) || defined(__linux__)
-//	SetCurrent(*m_glRC);
-//#endif
+		setValue(gstRefresh, false);
+
 	Init();
-	//wxPaintDC dc(this);
 
 	getValue(gstResize, bval);
 	if (bval)
-		setValue(gstRetainFb, false, Event(Event::NOTIFY_NONE));
+		setValue(gstRetainFb, false);
 
 	long nx, ny;
 	GetRenderSize(nx, ny);
@@ -1742,9 +1725,9 @@ void Renderview::ForceDraw()
 		draw_type = 1;
 	else
 		draw_type = 2;
-	setValue(gstDrawType, draw_type, Event(Event::NOTIFY_NONE));
+	setValue(gstDrawType, draw_type);
 
-	setValue(gstDrawing, true, Event(Event::NOTIFY_NONE));
+	setValue(gstDrawing, true);
 	PreDraw();
 
 	getValue(gstVrEnable, bval);
@@ -1796,9 +1779,9 @@ void Renderview::ForceDraw()
 		if (bval && bval2) DisplayStroke();//show the paint strokes
 	}
 	else if (int_mode == 4)
-		setValue(gstInterMode, 2, Event(Event::NOTIFY_NONE));
+		setValue(gstInterMode, 2);
 	else if (int_mode == 8)
-		setValue(gstInterMode, 7, Event(Event::NOTIFY_NONE));
+		setValue(gstInterMode, 7);
 
 
 #ifdef _WIN32
@@ -1827,28 +1810,28 @@ void Renderview::ForceDraw()
 		if (lval)
 		{
 			DrawVRBuffer();
-			setValue(gstVrEyeIdx, long(0), Event(Event::NOTIFY_NONE));
+			setValue(gstVrEyeIdx, long(0));
 			toggleValue(gstSwapBuffers, bval);
 			//SwapBuffers();
 		}
 		else
 		{
-			setValue(gstVrEyeIdx, long(1), Event(Event::NOTIFY_NONE));
+			setValue(gstVrEyeIdx, long(1));
 			//RefreshGL(99);
 		}
 	}
 	else
-		toggleValue(gstSwapBuffers, bval, Event(Event::NOTIFY_NONE));
+		toggleValue(gstSwapBuffers, bval);
 		//SwapBuffers();
 
 	glbin_timer->sample();
-	setValue(gstDrawing, false, Event(Event::NOTIFY_NONE));
+	setValue(gstDrawing, false);
 
 	getValue(gstInteractive, bval);
 	DBGPRINT(L"buffer swapped\t%d\n", bval);
 
 	getValue(gstResize, bval);
-	if (bval) setValue(gstResize, false, Event(Event::NOTIFY_NONE));
+	if (bval) setValue(gstResize, false);
 	getValue(gstEnlarge, bval);
 	if (bval)
 		ResetEnlarge();

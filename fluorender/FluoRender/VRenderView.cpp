@@ -320,7 +320,11 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	m_x_rotating = m_y_rotating = m_z_rotating = false;
 	m_skip_thumb = false;
 
-	m_agent->getObject()->InitView();
+	m_agent->getObject()->InitView(
+		fluo::Renderview::INIT_BOUNDS |
+		fluo::Renderview::INIT_CENTER |
+		fluo::Renderview::INIT_TRANSL |
+		fluo::Renderview::INIT_ROTATE);
 	UpdateView();
 }
 

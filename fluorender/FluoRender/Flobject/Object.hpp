@@ -206,11 +206,11 @@ namespace fluo
 		template<typename V>
 		bool setValue(const string &name, const V &value)
 		{
-			Event event;
-			return setValue(name, value, event);
+			Event event(Event::NOTIFY_NONE);
+			return setValueEvt(name, value, event);
 		}
 		template<typename V>
-		bool setValue(const string &name, const V &value, Event &event)
+		bool setValueEvt(const string &name, const V &value, Event &event)
 		{
 			V old_value;
 			if (getValue(name, old_value) && value != old_value)
@@ -232,10 +232,10 @@ namespace fluo
 		}
 		bool setValueTuple(ValueTuple& vt)
 		{
-			Event event;
-			return setValueTuple(vt, event);
+			Event event(Event::NOTIFY_NONE);
+			return setValueTupleEvt(vt, event);
 		}
-		bool setValueTuple(ValueTuple& vt, Event& event)
+		bool setValueTupleEvt(ValueTuple& vt, Event& event)
 		{
 			ValueTuple old_vt;
 			std::string name = std::get<0>(vt);
@@ -256,10 +256,10 @@ namespace fluo
 		}
 		bool setRvalu(const std::string& name, Referenced* value)
 		{
-			Event event;
-			return setRvalu(name, value, event);
+			Event event(Event::NOTIFY_NONE);
+			return setRvaluEvt(name, value, event);
 		}
-		bool setRvalu(const std::string& name, Referenced* value, Event& event)
+		bool setRvaluEvt(const std::string& name, Referenced* value, Event& event)
 		{
 			Referenced* old_value;
 			if (getRvalu(name, &old_value) && value != old_value)
@@ -323,10 +323,10 @@ namespace fluo
 		//toggle value for bool
 		bool toggleValue(const std::string &name, bool &value)
 		{
-			Event event;
-			return toggleValue(name, value, event);
+			Event event(Event::NOTIFY_NONE);
+			return toggleValueEvt(name, value, event);
 		}
-		bool toggleValue(const std::string &name, bool &value, Event& event);
+		bool toggleValueEvt(const std::string &name, bool &value, Event& event);
 
 		//sync value only sets a state but doesn't change values when called
 		//observer's value updates when the value of this changes (data flow is one-way: this -> obj)

@@ -149,9 +149,9 @@ void MeshData::OnBoundsChanged(Event& event)
 
 	//res
 	Vector diag = bounds.diagonal();
-	setValue(gstResX, long(diag.x()+0.5), event);
-	setValue(gstResY, long(diag.y()+0.5), event);
-	setValue(gstResZ, long(diag.z()+0.5), event);
+	setValueEvt(gstResX, long(diag.x()+0.5), event);
+	setValueEvt(gstResY, long(diag.y()+0.5), event);
+	setValueEvt(gstResZ, long(diag.z()+0.5), event);
 
 	//transformed bounds
 	Point p[8];
@@ -196,15 +196,15 @@ void MeshData::OnBoundsChanged(Event& event)
 		p[i] = Point(temp.x() + trans_x, temp.y() + trans_y, temp.z() + trans_z);
 		bounds.extend(p[i]);
 	}
-	setValue(gstBoundsTf, bounds, event);
+	setValueEvt(gstBoundsTf, bounds, event);
 }
 
 void MeshData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
-	setValue(gstColor, color, event);
-	setValue(gstMatAmb, 0.3, event);
+	setValueEvt(gstColor, color, event);
+	setValueEvt(gstMatAmb, 0.3, event);
 }
 
 int MeshData::LoadData(GLMmodel* mesh)
