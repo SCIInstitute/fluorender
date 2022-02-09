@@ -108,6 +108,7 @@ using namespace std;
 
 namespace fluo
 {
+	class Renderview;
 	class VolumeData;
 	class VolumeGroup;
 	class MeshData;
@@ -280,7 +281,7 @@ public:
 	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 	void OpenProject(wxString& filename);
 	void SaveProject(wxString& filename);
-	void LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view = 0);
+	void LoadVolumes(wxArrayString files, bool withImageJ, fluo::Renderview* view = 0);
 	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
 
 	//crop

@@ -110,6 +110,7 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 	fluo::Renderview* view = glbin_revf->build();
 	view->setName(m_vrv->GetName().ToStdString());
 	glbin_root->addChild(view);
+	glbin_root->setRvalu(gstCurrentView, view);
 	m_agent = glbin_agtf->getOrAddRenderCanvasAgent(view->getName(), *this);
 	m_agent->setObject(view);
 	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());

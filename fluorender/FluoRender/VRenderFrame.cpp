@@ -1374,11 +1374,11 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		RenderCanvas* view = GetView(0);
+		//RenderCanvas* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, false, view);
+		LoadVolumes(paths, false, 0);
 
 		if (m_setting_dlg)
 		{
@@ -1407,11 +1407,11 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		RenderCanvas* view = GetView(0);
+		//RenderCanvas* view = GetView(0);
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, true, view);
+		LoadVolumes(paths, true, 0);
 
 		if (m_setting_dlg)
 		{
@@ -1424,18 +1424,18 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanvas* view)
+void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, fluo::Renderview* view)
 {
 	int j;
 
 	fluo::VolumeData* vd_sel = 0;
 	fluo::VolumeGroup* group_sel = 0;
-	RenderCanvas* v = 0;
+	fluo::Renderview* v = 0;
 
 	if (view)
 		v = view;
 	else
-		v = GetView(0);
+		v = glbin_root->getCurrentRenderview();
 
 	wxProgressDialog *prg_diag = 0;
 	if (v)
@@ -1509,88 +1509,93 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, RenderCanva
 			else if (suffix == ".lof")
 				ch_num = m_data_mgr.LoadVolumeData(filename, LOAD_TYPE_LOF, false);
 
-			//if (ch_num > 1)
-			//{
-			//	fluo::VolumeGroup* group = v->AddOrGetGroup();
-			//	if (group)
-			//	{
-			//		for (int i=ch_num; i>0; i--)
-			//		{
-			//			fluo::VolumeData* vd = m_data_mgr.GetVolumeData(ch_num-i);
-			//			if (vd)
-			//			{
-			//				v->AddVolumeData(vd, group->getName());
-			//				wxString vol_name = vd->getName();
-			//				if (vol_name.Find("_1ch")!=-1 &&
-			//					(i==1 || i==2))
-			//					vd->setValue(gstDisplay, false);
-			//				if (vol_name.Find("_2ch")!=-1 && i==1)
-			//					vd->setValue(gstDisplay, false);
+			if (ch_num > 1)
+			{
+				fluo::VolumeGroup* group = v->addVolumeGroup();
+				if (group)
+				{
+					for (int i=ch_num; i>0; i--)
+					{
+						fluo::VolumeData* vd = m_data_mgr.GetVolumeData(ch_num-i);
+						if (vd)
+						{
+							v->addVolumeData(vd, group);
+							wxString vol_name = vd->getName();
+							if (vol_name.Find("_1ch")!=-1 &&
+								(i==1 || i==2))
+								vd->setValue(gstDisplay, false);
+							if (vol_name.Find("_2ch")!=-1 && i==1)
+								vd->setValue(gstDisplay, false);
 
-			//				if (i==ch_num)
-			//				{
-			//					vd_sel = vd;
-			//					group_sel = group;
-			//				}
+							if (i==ch_num)
+							{
+								vd_sel = vd;
+								group_sel = group;
+							}
 
-			//				if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
-			//					enable_4d = true;
-			//			}
-			//		}
-			//		if (j > 0)
-			//			group->setValue(gstDisplay, false);
-			//	}
-			//}
-			//else if (ch_num == 1)
-			//{
-			//	fluo::VolumeData* vd = m_data_mgr.GetVolumeData(0);
-			//	if (vd)
-			//	{
-			//		int chan_num = v->GetDispVolumeNum();
-			//		fluo::Color color(1.0, 1.0, 1.0);
-			//		if (chan_num == 0)
-			//			color = fluo::Color(1.0, 0.0, 0.0);
-			//		else if (chan_num == 1)
-			//			color = fluo::Color(0.0, 1.0, 0.0);
-			//		else if (chan_num == 2)
-			//			color = fluo::Color(0.0, 0.0, 1.0);
+							if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
+								enable_4d = true;
+						}
+					}
+					if (j > 0)
+						group->setValue(gstDisplay, false);
+				}
+			}
+			else if (ch_num == 1)
+			{
+				fluo::VolumeData* vd = m_data_mgr.GetVolumeData(0);
+				if (vd)
+				{
+					int chan_num = v->GetVolListSize();
+					fluo::Color color(1.0, 1.0, 1.0);
+					if (chan_num == 0)
+						color = fluo::Color(1.0, 0.0, 0.0);
+					else if (chan_num == 1)
+						color = fluo::Color(0.0, 1.0, 0.0);
+					else if (chan_num == 2)
+						color = fluo::Color(0.0, 0.0, 1.0);
 
-			//		bool bval;
-			//		if (chan_num >=0 && chan_num <3)
-			//			vd->setValue(gstColor, color);
-			//		else
-			//			vd->toggleValue(gstRandomizeColor, bval);
+					bool bval;
+					if (chan_num >=0 && chan_num <3)
+						vd->setValue(gstColor, color);
+					else
+						vd->toggleValue(gstRandomizeColor, bval);
 
-			//		v->AddVolumeData(vd);
-			//		vd_sel = vd;
+					v->addVolumeData(vd, 0);
+					vd_sel = vd;
 
-			//		if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1){
-			//			v->m_tseq_cur_num = vd->GetReader()->GetCurTime();
-			//			enable_4d = true;
-			//		}
-			//	}
-			//}
-			//else { //TODO: Consult Wan here.
+					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
+					{
+						v->setValue(gstCurrentFrame,
+							long(vd->GetReader()->GetCurTime()));
+						enable_4d = true;
+					}
+				}
+			}
+			else { //TODO: other cases?
 
-			//}
+			}
 		}
 
-		//UpdateList();
-		//if (vd_sel)
-		//	UpdateTree(vd_sel->getName());
-		//else
-		//	UpdateTree();
+		UpdateList();
+		if (vd_sel)
+			UpdateTree(vd_sel->getName());
+		else
+			UpdateTree();
 		//v->RefreshGL(39);
 
-		//v->InitView(INIT_BOUNDS|INIT_CENTER);
+		v->InitView(fluo::Renderview::INIT_BOUNDS|
+			fluo::Renderview::INIT_CENTER);
 		//v->m_vrv->UpdateScaleFactor(false);
 
-		//if (enable_4d)
-		//{
-		//	m_movie_view->SetTimeSeq(true);
-		//	m_movie_view->SetRotate(false);
-		//	m_movie_view->SetCurrentTime(v->m_tseq_cur_num);
-		//}
+		if (enable_4d)
+		{
+			m_movie_view->SetTimeSeq(true);
+			m_movie_view->SetRotate(false);
+			long lval;
+			v->getValue(gstCurrentFrame, lval);
+			m_movie_view->SetCurrentTime(lval);
+		}
 
 		delete prg_diag;
 	}
