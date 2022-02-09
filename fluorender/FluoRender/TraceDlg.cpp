@@ -1140,7 +1140,7 @@ void TraceDlg::OnGhostNumText(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetGhostNum(ival);
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -1155,7 +1155,7 @@ void TraceDlg::OnGhostShowTail(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetDrawTail(show);
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -1170,7 +1170,7 @@ void TraceDlg::OnGhostShowLead(wxCommandEvent &event)
 		if (trace_group)
 		{
 			trace_group->SetDrawLead(show);
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -1437,7 +1437,7 @@ void TraceDlg::OnConvertToRulers(wxCommandEvent& event)
 		(*iter)->Scale(spcx, spcy, spcz);
 		m_view->GetRulerList()->push_back(*iter);
 	}
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 	if (m_frame && m_frame->GetMeasureDlg())
 		m_frame->GetMeasureDlg()->GetSettings(m_view);
 	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
@@ -1820,7 +1820,7 @@ void TraceDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	vd->IncShuffle();
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void TraceDlg::OnCompFull(wxCommandEvent &event)
@@ -1934,7 +1934,7 @@ void TraceDlg::CellUpdate()
 			m_view->CreateTraceGroup();
 
 		m_view->GetTraces(false);
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 		GetSettings(m_view);
 	}
 }
@@ -2225,7 +2225,7 @@ void TraceDlg::CellLink(bool exclusive)
 		m_cur_time, m_prv_time, exclusive);
 
 	//update view
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void TraceDlg::OnCellLink(wxCommandEvent &event)
@@ -2308,7 +2308,7 @@ void TraceDlg::OnCellIsolate(wxCommandEvent &event)
 	trace_group->IsolateCells(list_cur, m_cur_time);
 
 	//update view
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void TraceDlg::OnCellUnlink(wxCommandEvent &event)
@@ -2383,7 +2383,7 @@ void TraceDlg::OnCellUnlink(wxCommandEvent &event)
 		m_cur_time, m_prv_time);
 
 	//update view
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 //ID edit controls

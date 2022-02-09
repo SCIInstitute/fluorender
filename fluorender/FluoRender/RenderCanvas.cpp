@@ -177,15 +177,19 @@ RenderCanvas::~RenderCanvas()
 
 void RenderCanvas::OnResize(wxSizeEvent& event)
 {
+	m_agent->holdoffObserverNotification();
+
 	double dval = 1;
 #ifdef _DARWIN
 	dval = GetDPIScaleFactor();
 #endif
 	wxSize size = GetSize() * dval;
+	m_vrv->UpdateScaleFactor(false);
 	m_agent->setValue(gstSizeX, long(size.x));
 	m_agent->setValue(gstSizeY, long(size.y));
-	m_vrv->UpdateScaleFactor(false);
-	m_agent->getObject()->RefreshGL(1);
+
+	m_agent->resumeObserverNotificationAndUpdate();
+	//m_agent->getObject()->RefreshGL(1);
 	//RefreshGL(1);
 }
 
@@ -265,7 +269,7 @@ void RenderCanvas::UpdateBrushState()
 			if (view)
 			{
 				view->SetBrush(2);
-				view->RefreshGL(6);
+				view->Update(6);
 			}
 		}
 		else if (wxGetKeyState(wxKeyCode('Z')))
@@ -277,7 +281,7 @@ void RenderCanvas::UpdateBrushState()
 			if (view)
 			{
 				view->SetBrush(4);
-				view->RefreshGL(7);
+				view->Update(7);
 			}
 		}
 		else if (wxGetKeyState(wxKeyCode('X')))
@@ -289,7 +293,7 @@ void RenderCanvas::UpdateBrushState()
 			if (view)
 			{
 				view->SetBrush(3);
-				view->RefreshGL(8);
+				view->Update(8);
 			}
 		}
 	}
@@ -309,7 +313,7 @@ void RenderCanvas::UpdateBrushState()
 				if (view)
 				{
 					view->SetBrush(2);
-					view->RefreshGL(9);
+					view->Update(9);
 				}
 			}
 			else if (wxGetKeyState(wxKeyCode('Z')))
@@ -322,7 +326,7 @@ void RenderCanvas::UpdateBrushState()
 				if (view)
 				{
 					view->SetBrush(4);
-					view->RefreshGL(10);
+					view->Update(10);
 				}
 			}
 			else if (wxGetKeyState(wxKeyCode('X')))
@@ -335,7 +339,7 @@ void RenderCanvas::UpdateBrushState()
 				if (view)
 				{
 					view->SetBrush(3);
-					view->RefreshGL(11);
+					view->Update(11);
 				}
 			}
 			else
@@ -343,7 +347,7 @@ void RenderCanvas::UpdateBrushState()
 				if (view)
 				{
 					view->SetBrush(lval);
-					view->RefreshGL(12);
+					view->Update(12);
 				}
 			}
 		}
@@ -365,7 +369,7 @@ void RenderCanvas::UpdateBrushState()
 				tree_panel->SelectBrush(0);
 			if (brush_dlg)
 				brush_dlg->SelectBrush(0);
-			view->RefreshGL(13);
+			view->Update(13);
 
 			if (m_prev_focus)
 			{
@@ -391,7 +395,7 @@ void RenderCanvas::PickMesh()
 			m_frame->GetTree()->SetFocus();
 			m_frame->GetTree()->Select(m_vrv->GetName(), str);
 		}
-		m_agent->getObject()->RefreshGL(27);
+		m_agent->getObject()->Update(27);
 	}
 	else
 	{
@@ -433,8 +437,9 @@ void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
+	m_agent->holdoffObserverNotification();
+
 	bool refresh = false;
-	bool ref_stat = false;
 	bool start_loop = true;
 	bool set_focus = false;
 	bool retain_fb = false;
@@ -884,18 +889,19 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			SetFocus();
 			if (m_frame && m_frame->GetStatusBar())
 				m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
-			wxSizeEvent e;
-			OnResize(e);
+			//wxSizeEvent e;
+			//OnResize(e);
 
-			m_agent->setValue(gstClearBuffer, true);
-			m_agent->setValue(gstUpdating, true);
-			m_agent->setValue(gstPreDraw, pre_draw);
-			m_agent->setValue(gstRetainFb, retain_fb);
-			m_agent->getObject()->RefreshGL(14);
+			//m_agent->setValue(gstClearBuffer, true);
+			//m_agent->setValue(gstUpdating, true);
+			//m_agent->setValue(gstPreDraw, pre_draw);
+			//m_agent->setValue(gstRetainFb, retain_fb);
+			//m_agent->getObject()->Update(14);
 
 			if (m_frame && m_frame->GetStatusBar())
 				m_frame->GetStatusBar()->PopStatusText();
-			return;
+			//return;
+			refresh = true;
 		}
 	}
 
@@ -934,8 +940,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_agent->setValue(gstUpdating, true);
 		m_agent->setValue(gstPreDraw, pre_draw);
 		m_agent->setValue(gstRetainFb, retain_fb);
-		m_agent->getObject()->RefreshGL(15, ref_stat, start_loop);
+		//m_agent->getObject()->RefreshGL(15, start_loop);
+		m_agent->resumeObserverNotificationAndUpdate();
 	}
+	else
+		m_agent->resumeObserverNotification();
 }
 
 void RenderCanvas::OnKeyDown(wxKeyEvent& event)
@@ -976,7 +985,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Raise();
 			m_frame->Show();
 		}
-		m_agent->getObject()->RefreshGL(40);
+		m_agent->getObject()->Update(40);
 	}
 }
 
@@ -992,6 +1001,7 @@ void RenderCanvas::OnClose(wxCloseEvent &event)
 //draw
 void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
+	if (!m_glRC) return;
 #ifdef _WIN32
 	if (!m_set_gl)
 	{
@@ -1016,6 +1026,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 	wxPaintDC dc(this);
 	Init();
 	m_agent->getObject()->ForceDraw();
+	SwapBuffers();
 	//if (!m_refresh)
 	//	m_retain_finalbuffer = true;
 	//else

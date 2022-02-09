@@ -745,7 +745,7 @@ void VMovieView::SetCrop(bool value)
 	else
 		m_view->setValue(gstDrawCropFrame, false);
 
-	m_view->RefreshGL(39);
+	//m_view->RefreshGL(39);
 }
 
 void VMovieView::UpdateCrop()
@@ -757,8 +757,8 @@ void VMovieView::UpdateCrop()
 	m_view->setValue(gstCropY, long(m_crop_y - m_crop_h / 2.0 + 0.5));
 	m_view->setValue(gstCropW, m_crop_w);
 	m_view->setValue(gstCropH, m_crop_h);
-	if (m_crop)
-		m_view->RefreshGL(39);
+	//if (m_crop)
+	//	m_view->RefreshGL(39);
 }
 
 void VMovieView::OnTimer(wxTimerEvent& event)
@@ -781,7 +781,7 @@ void VMovieView::OnTimer(wxTimerEvent& event)
 	{
 		if (!m_view) return;
 		m_view->setValue(gstInteractive, false);
-		m_view->RefreshGL(39, false, false);
+		//m_view->RefreshGL(39, false);
 		return;
 	}
 
@@ -1068,7 +1068,7 @@ void VMovieView::OnRunScriptChk(wxCommandEvent &event)
 		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 		m_notebook->SetPageText(4, "Script");
 	}
-	m_view->RefreshGL(39);
+	//m_view->RefreshGL(39);
 }
 
 void VMovieView::OnScriptFileEdit(wxCommandEvent &event)
@@ -1185,7 +1185,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 			int end_frame = int(interpolator->GetLastT());
 			m_view->SetParams(pcnt * end_frame);
 			m_view->setValue(gstInteractive, false);
-			m_view->RefreshGL(39);
+			//m_view->RefreshGL(39);
 			return;
 		}
 	}
@@ -1229,7 +1229,7 @@ void VMovieView::SetRendering(double pcnt, bool rewind)
 	}
 
 	m_view->setValue(gstInteractive, false);
-	m_view->RefreshGL(39);
+	//m_view->RefreshGL(39);
 }
 
 void VMovieView::OnRotateChecked(wxCommandEvent& event)

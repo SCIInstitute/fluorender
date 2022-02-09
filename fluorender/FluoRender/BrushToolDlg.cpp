@@ -785,7 +785,7 @@ void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 	if (m_selector)
 		m_selector->UndoMask();
 	if (m_view)
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	UpdateUndoRedo();
 }
 
@@ -794,7 +794,7 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 	if (m_selector)
 		m_selector->RedoMask();
 	if (m_view)
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	UpdateUndoRedo();
 }
 
@@ -874,7 +874,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -905,7 +905,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -935,7 +935,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -964,7 +964,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -992,7 +992,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 		{
 			m_selector->PopMask();
 			m_view->Segment();
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -1039,7 +1039,7 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 		long lval;
 		m_view->getValue(gstInterMode, lval);
 		if (lval == 2)
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 	}
 }
 
@@ -1061,7 +1061,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 		{
 			m_selector->SetUseBrushSize2(true);
 			m_selector->SetBrushSize(val1, val2);
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 	else
@@ -1072,7 +1072,7 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 		{
 			m_selector->SetUseBrushSize2(false);
 			m_selector->SetBrushSize(val1, val2);
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -1099,7 +1099,7 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 		long lval;
 		m_view->getValue(gstInterMode, lval);
 		if (lval == 2)
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 	}
 }
 

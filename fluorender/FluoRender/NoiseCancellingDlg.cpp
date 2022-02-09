@@ -196,7 +196,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 	comp_selector.SetAnalyzer(&ca);
 	comp_selector.CompFull();
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 //threshold

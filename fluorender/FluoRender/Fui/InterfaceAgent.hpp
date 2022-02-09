@@ -213,6 +213,12 @@ namespace fluo
 		}
 
 		virtual void UpdateAllSettings() {};
+		virtual void resumeObserverNotificationAndUpdate()
+		{
+			UpdateAllSettings();
+			Referenced::resumeObserverNotification();
+		}
+
 
 	protected:
 	};

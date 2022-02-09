@@ -247,7 +247,7 @@ namespace fluo
 		//start loop update
 		void StartLoopUpdate();
 		void HaltLoopUpdate();
-		void RefreshGL(int debug_code, bool erase = false, bool start_loop = true);
+		void Update(int debug_code, bool start_loop = true);
 
 		//rulers
 		void DrawRulers();

@@ -1199,7 +1199,7 @@ void Renderview::ResetMovieAngle()
 	setValue(gstCapture, false);
 	setValue(gstCaptureRot, false);
 
-	RefreshGL(16);
+	//RefreshGL(16);
 }
 
 void Renderview::StopMovie()
@@ -1280,7 +1280,7 @@ void Renderview::Set4DSeqFrame(long frame, long start_frame, long end_frame, boo
 	m_selector->SetVolume(vd);
 	m_calculator->SetVolumeA(vd);
 
-	RefreshGL(17);
+	//RefreshGL(17);
 }
 
 void Renderview::UpdateVolumeData(long frame, VolumeData* vd)
@@ -1555,7 +1555,7 @@ void Renderview::Set3DBatFrame(long frame, long start_frame, long end_frame, boo
 	m_selector->SetVolume(vd);
 	m_calculator->SetVolumeA(vd);
 
-	RefreshGL(18);
+	//RefreshGL(18);
 }
 
 void Renderview::CalculateCrop()
@@ -2381,9 +2381,7 @@ void Renderview::HaltLoopUpdate()
 }
 
 //new function to refresh
-void Renderview::RefreshGL(int debug_code,
-	bool erase,
-	bool start_loop)
+void Renderview::Update(int debug_code, bool start_loop)
 {
 	//m_force_clear = force_clear;
 	//m_interactive = interactive;
@@ -2397,7 +2395,7 @@ void Renderview::RefreshGL(int debug_code,
 		StartLoopUpdate();
 	SetSortBricks();
 	//setValue(gstRefresh, true);
-	setValue(gstRefreshErase, erase);
+	//setValue(gstRefreshErase, erase);
 	//toggleValue(gstRefreshNotify, bval);
 	//Refresh(erase);
 }
@@ -5256,7 +5254,7 @@ void Renderview::DrawVolumes(long peel)
 		//	return;
 		setValue(gstInteractive, false);
 		setValue(gstClearBuffer, true);
-		RefreshGL(2);
+		//RefreshGL(2);
 	}
 
 	//if (TextureRenderer::get_mem_swap())
@@ -7141,7 +7139,7 @@ void Renderview::PaintStroke()
 	//bind back the window frame buffer
 	BindRenderBuffer();
 	glBlendEquation(GL_FUNC_ADD);
-	RefreshGL(3);
+	//RefreshGL(3);
 }
 
 //show the stroke buffer
@@ -7437,7 +7435,7 @@ void Renderview::ResetEnlarge()
 	double text_size;
 	getValue(gstTextSize, text_size);
 	flvr::TextRenderer::text_texture_manager_.SetSize(text_size);
-	RefreshGL(19);
+	//RefreshGL(19);
 }
 
 void Renderview::SetBrush(long mode)
@@ -7728,7 +7726,7 @@ void Renderview::SetCenter()
 
 		//SetSortBricks();
 
-		RefreshGL(20);
+		//RefreshGL(20);
 	}
 }
 
@@ -8717,12 +8715,12 @@ void Renderview::HandleMouse()
 	setValue(gstRotCtrDirty, rot_center_dirty);
 	//actually draw everything
 	if (refresh)
-	{
-#ifdef _WIN32
-		RefreshGL(38, false, false);
-#else
-		RefreshGL(38, false, true);
-#endif
+	{//todo: refresh only when necessary
+//#ifdef _WIN32
+//		Update(38, false);
+//#else
+//		Update(38, true);
+//#endif
 	}
 	//update mouse position
 	if (lpx >= 0 && lpy >= 0)
@@ -8734,7 +8732,7 @@ void Renderview::HandleMouse()
 		//	old_mouse_X = event.GetX();
 		//	old_mouse_Y = event.GetY();
 		//}
-		}
+	}
 }
 
 //event functions/////////////////////////////////////////////////////////////////////////////////

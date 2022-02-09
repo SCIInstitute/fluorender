@@ -240,7 +240,7 @@ void KeyListCtrl::OnAct(wxListEvent &event)
 	if (view)
 	{
 		view->SetParams(time);
-		view->RefreshGL(39);
+		//view->Update(39);
 	}
 }
 

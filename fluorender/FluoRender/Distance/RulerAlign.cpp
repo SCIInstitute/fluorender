@@ -79,7 +79,7 @@ void RulerAlign::AlignRuler(int axis_type)
 	m_view->setValue(gstCamRotX, qx);
 	m_view->setValue(gstCamRotY, -qy);
 	m_view->setValue(gstCamRotZ, -qz);
-	m_view->RefreshGL(50);
+	//m_view->RefreshGL(50);
 }
 
 void RulerAlign::AlignPca(int axis_type, bool cov)
@@ -161,5 +161,5 @@ void RulerAlign::AlignPca(int axis_type, bool cov)
 	m_view->setValue(gstCamRotX, qx);
 	m_view->setValue(gstCamRotY, -qy);
 	m_view->setValue(gstCamRotZ, -qz);
-	m_view->RefreshGL(50);
+	//m_view->RefreshGL(50);
 }

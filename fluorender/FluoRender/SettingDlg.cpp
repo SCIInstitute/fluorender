@@ -1634,7 +1634,7 @@ void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 		if (!view) continue;
 		view->setValue(gstAdaptive, m_mouse_int);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1661,7 +1661,7 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 		if (!view) continue;
 		view->setValue(gstPeelNum, ival);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1677,7 +1677,7 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 		if (!view) continue;
 		view->setValue(gstMicroBlendEnable, m_micro_blend);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1712,7 +1712,7 @@ void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 		view->setValue(gstShadowDirEnable, m_shadow_dir);
 		view->setValue(gstShadowDirX, m_shadow_dir_x);
 		view->setValue(gstShadowDirY, m_shadow_dir);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1739,7 +1739,7 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 		view->setValue(gstShadowDirEnable, m_shadow_dir);
 		view->setValue(gstShadowDirX, m_shadow_dir_x);
 		view->setValue(gstShadowDirY, m_shadow_dir);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1807,7 +1807,7 @@ void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 		if (!view) continue;
 		view->setValue(gstGradBg, m_grad_bg);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1877,7 +1877,7 @@ void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 	fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
 	if (!view) return;
 	view->setValue(gstVrEnable, m_stereo);
-	view->RefreshGL(39);
+	//view->RefreshGL(39);
 }
 
 void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
@@ -1899,7 +1899,7 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
 	if (!view) return;
 	view->setValue(gstVrEyeOffset, m_eye_dist);
-	view->RefreshGL(39);
+	//view->RefreshGL(39);
 }
 
 //override vox
@@ -2128,7 +2128,7 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 		if (!view) continue;
 		view->setValue(gstLevelOffset, val);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -2151,7 +2151,7 @@ void SettingDlg::OnFontChange(wxCommandEvent &event)
 			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 			if (!view) continue;
 			view->setValue(gstTextSize, m_text_size);
-			view->RefreshGL(39);
+			//view->RefreshGL(39);
 		}
 	}
 }
@@ -2170,7 +2170,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 			if (!view) continue;
 			view->setValue(gstTextSize, m_text_size);
-			view->RefreshGL(39);
+			//view->RefreshGL(39);
 		}
 	}
 }
@@ -2183,7 +2183,7 @@ void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 		if (!view) continue;
 		view->setValue(gstTextColorMode, m_text_color);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -2209,7 +2209,7 @@ void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 			if (!view) continue;
 			view->setValue(gstLineWidth, m_line_width);
-			view->RefreshGL(39);
+			//view->RefreshGL(39);
 		}
 	}
 }

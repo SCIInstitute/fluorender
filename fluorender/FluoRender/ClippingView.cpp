@@ -951,7 +951,7 @@ void ClippingView::OnClipResetBtn(wxCommandEvent &event)
 		if (!view) continue;
 		view->setValue(gstClipMask, long(-1));
 		view->UpdateClips();
-		view->RefreshGL(39);
+		//view->Update(39);
 	}
 }
 
@@ -1736,7 +1736,7 @@ void ClippingView::OnSetZeroBtn(wxCommandEvent &event)
 		if (!view) continue;
 
 		view->setValue(gstClipMode, long(2));
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 		double rotx, roty, rotz;
 		view->getValue(gstClipRotX, rotx);
 		view->getValue(gstClipRotY, roty);
@@ -1761,7 +1761,7 @@ void ClippingView::OnRotResetBtn(wxCommandEvent &event)
 		view->setValue(gstClipRotX, double(0));
 		view->setValue(gstClipRotY, double(0));
 		view->setValue(gstClipRotZ, double(0));
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 	wxString str = "0.0";
 	m_x_rot_sldr->SetValue(0);
@@ -1793,7 +1793,7 @@ void ClippingView::OnXRotEdit(wxCommandEvent &event)
 		if (!view) continue;
 
 		view->setValue(gstClipRotX, val);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1818,7 +1818,7 @@ void ClippingView::OnYRotEdit(wxCommandEvent &event)
 		if (!view) continue;
 
 		view->setValue(gstClipRotY, val);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 
@@ -1843,7 +1843,7 @@ void ClippingView::OnZRotEdit(wxCommandEvent &event)
 		if (!view) continue;
 
 		view->setValue(gstClipRotZ, val);
-		view->RefreshGL(39);
+		//view->RefreshGL(39);
 	}
 }
 

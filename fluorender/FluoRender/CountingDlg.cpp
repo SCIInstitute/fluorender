@@ -213,7 +213,7 @@ void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 
 	flrd::ComponentAnalyzer ca(vd);
 	ca.Analyze(select, true, false);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	flrd::CelpList *list = ca.GetCelpList();
 	if (!list || list->empty())

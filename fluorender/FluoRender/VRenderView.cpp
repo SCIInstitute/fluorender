@@ -776,7 +776,7 @@ void VRenderView::UpdateView(bool ui_update)
 	m_agent->setValue(gstCamRotX, rotx);
 	m_agent->setValue(gstCamRotY, roty);
 	m_agent->setValue(gstCamRotZ, rotz);
-	RefreshGL(true);
+	//RefreshGL(true);
 }
 
 void VRenderView::UpdateScaleFactor(bool update_text)
@@ -942,13 +942,6 @@ wxGLContext* VRenderView::GetContext()
 		return 0;
 }
 
-void VRenderView::RefreshGL(bool interactive, bool start_loop)
-{
-	m_agent->setValue(gstForceClear, true);
-	m_agent->setValue(gstInteractive, interactive);
-	m_agent->getObject()->RefreshGL(39, false, start_loop);
-}
-
 //bar top
 void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 {
@@ -1101,7 +1094,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	vr_frame->GetTree()->UpdateSelection();
 	}*/
 
-	RefreshGL();
+	//RefreshGL();
 }
 
 //ch1
@@ -1319,7 +1312,7 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 		wxString cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
 		m_agent->setValue(gstCaptureFile, cap_file.ToStdWstring());
 		m_agent->setValue(gstCapture, true);
-		RefreshGL();
+		//RefreshGL();
 
 		if (vr_frame && vr_frame->GetSettingDlg())
 		{
@@ -1358,7 +1351,7 @@ void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
 			wxGetBitmapFromMemory(no_depth_atten));
 	}
 
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnDepthAttenFactorChange(wxScrollEvent& event)
@@ -1376,7 +1369,7 @@ void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	str.ToDouble(&val);
 	m_agent->setValue(gstDaInt, val);
 	m_depth_atten_factor_sldr->SetValue(int(val*100.0));
-	RefreshGL(true);
+	//RefreshGL(true);
 }
 
 void VRenderView::OnDepthAttenReset(wxCommandEvent &event)
@@ -1449,7 +1442,7 @@ void VRenderView::OnPin(wxCommandEvent &event)
 void VRenderView::OnCenter(wxCommandEvent &event)
 {
 	m_agent->getObject()->SetCenter();
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnScale121(wxCommandEvent &event)
@@ -1459,7 +1452,7 @@ void VRenderView::OnScale121(wxCommandEvent &event)
 	wxString str = wxString::Format("%.0f", dval*100.0);
 	m_scale_factor_sldr->SetValue(dval * 100);
 	m_scale_factor_text->ChangeValue(str);
-	RefreshGL();
+	//RefreshGL();
 	if (m_mouse_focus)
 		m_canvas->SetFocus();
 }
@@ -1482,7 +1475,7 @@ void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
 		m_scale_factor_sldr->SetValue(val);
 		SetScaleFactor(val/100.0, false);
 		//m_canvas->SetSortBricks();
-		RefreshGL(true);
+		//RefreshGL(true);
 	}
 }
 
@@ -1630,7 +1623,7 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
 	m_agent->setValue(gstCamRotX, double(0));
 	m_agent->setValue(gstCamRotY, double(0));
 	m_agent->setValue(gstCamRotZ, double(0));
-	RefreshGL(true);
+	//RefreshGL(true);
 	if (m_mouse_focus)
 		m_canvas->SetFocus();
 }
@@ -1964,7 +1957,7 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 			wxGetBitmapFromMemory(gear_dark));
 		m_agent->setValue(gstGearedEnable, false);
 	}
-	RefreshGL();
+	//RefreshGL();
 }
 
 //top
@@ -1973,7 +1966,7 @@ void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	m_agent->setValue(gstBgColor, color);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnBgInvBtn(wxCommandEvent& event)
@@ -1982,14 +1975,14 @@ void VRenderView::OnBgInvBtn(wxCommandEvent& event)
 	m_agent->getValue(gstBgColor, c);
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
 	m_agent->setValue(gstBgColor, c);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_CamCtrChk);
 	m_agent->setValue(gstDrawCamCtr, bval);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnFpsCheck(wxCommandEvent& event)
@@ -2001,21 +1994,21 @@ void VRenderView::OnFpsCheck(wxCommandEvent& event)
 	else
 		lval &= ~1;
 	m_agent->setValue(gstDrawInfo, lval);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnLegendCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
 	m_agent->setValue(gstDrawLegend, bval);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnColormapCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_ColormapChk);
 	m_agent->setValue(gstDrawColormap, bval);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
@@ -2044,7 +2037,7 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
 	m_agent->setValue(gstScaleBarLen, len);
 	m_agent->setValue(gstScaleBarNum, num_text.ToStdWstring());
 	m_agent->setValue(gstScaleBarUnit, lval);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnScaleUnitSelected(wxCommandEvent& event) {
@@ -2085,7 +2078,7 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 		break;
 	}
 	OnScaleTextEditing(event);
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
@@ -2110,7 +2103,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		{
 			m_agent->setValue(gstDrawClip, true);
 			m_agent->setValue(gstClipMask, long(-1));
-			RefreshGL(true);
+			//RefreshGL(true);
 			m_draw_clip = true;
 		}
 	}
@@ -2119,7 +2112,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 		if (m_draw_clip)
 		{
 			m_agent->setValue(gstDrawClip, false);
-			RefreshGL(true);
+			//RefreshGL(true);
 			m_draw_clip = false;
 		}
 	}
@@ -2141,7 +2134,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 	{
 		m_agent->setValue(gstPerspective, false);
 		m_aov_sldr->SetValue(10);
-		RefreshGL(true);
+		//RefreshGL(true);
 		return;
 	}
 	long val;
@@ -2169,7 +2162,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 		m_agent->setValue(gstAov, double(val));
 		m_aov_sldr->SetValue(val);
 	}
-	RefreshGL(true);
+	//RefreshGL(true);
 }
 
 void VRenderView::OnFreeChk(wxCommandEvent& event)
@@ -2185,7 +2178,7 @@ void VRenderView::OnFreeChk(wxCommandEvent& event)
 		else
 			m_agent->setValue(gstPerspective, true);
 	}
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::SetFullScreen()
@@ -2214,7 +2207,7 @@ void VRenderView::SetFullScreen()
 		m_full_frame->Show();
 		m_canvas->m_full_screen = true;
 		m_canvas->SetFocus();
-		RefreshGL();
+		//RefreshGL();
 	}
 	else
 	{
@@ -2560,7 +2553,7 @@ void VRenderView::LoadSettings()
 	}
 
 	m_use_dft_settings = true;
-	RefreshGL();
+	//RefreshGL();
 }
 
 void VRenderView::OnKeyDown(wxKeyEvent& event)

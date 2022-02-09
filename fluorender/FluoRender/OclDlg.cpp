@@ -378,7 +378,7 @@ void OclDlg::Execute()
 		}
 	}
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)

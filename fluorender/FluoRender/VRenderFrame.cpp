@@ -2451,11 +2451,11 @@ void VRenderFrame::OnSelection(int type,
 
 void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 {
-	for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
-	{
-		if (m_vrv_list[i])
-			m_vrv_list[i]->RefreshGL(interactive);
-	}
+	//for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
+	//{
+	//	if (m_vrv_list[i])
+	//		m_vrv_list[i]->RefreshGL(interactive);
+	//}
 
 	//incase volume color changes
 	//change icon color of the tree panel

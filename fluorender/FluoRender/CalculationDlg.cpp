@@ -375,7 +375,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent &event)
 		//}
 		m_frame->UpdateList();
 		m_frame->UpdateTree(m_group->getName());
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	}
 
 }

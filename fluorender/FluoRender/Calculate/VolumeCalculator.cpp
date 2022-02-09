@@ -143,7 +143,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::string &prev_group, 
 			glbin_volf->remove(vd);
 			//m_frame->GetPropView()->SetVolumeData(vd_a);
 		}
-		m_view->RefreshGL(5);
+		m_view->Update(5);
 	}
 }
 

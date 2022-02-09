@@ -2351,7 +2351,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 		comp_selector.SetAnalyzer(&m_comp_analyzer);
 		comp_selector.Exclusive();
 
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 
 		//frame
 		if (m_frame)
@@ -2403,7 +2403,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 	comp_selector.SetAnalyzer(&m_comp_analyzer);
 	comp_selector.Select(get_all);
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	//frame
 	bool bval;
@@ -2435,7 +2435,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.All();
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	//frame
 	bool bval;
@@ -2467,7 +2467,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	flrd::ComponentSelector comp_selector(vd);
 	comp_selector.Clear();
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	//frame
 	if (m_frame && m_frame->GetBrushToolDlg())
@@ -2485,7 +2485,7 @@ void ComponentDlg::OnShuffle(wxCommandEvent &event)
 		return;
 
 	vd->IncShuffle();
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 //modify
@@ -2533,7 +2533,7 @@ void ComponentDlg::OnCompNew(wxCommandEvent& event)
 	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
 		m_cell_new_id_empty, false);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
@@ -2544,7 +2544,7 @@ void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 	editor.SetView(m_view);
 	editor.NewId(m_cell_new_id,
 		m_cell_new_id_empty, true);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
@@ -2555,7 +2555,7 @@ void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 	editor.SetView(m_view);
 	editor.Replace(m_cell_new_id,
 		m_cell_new_id_empty);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
@@ -2565,7 +2565,7 @@ void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 	flrd::ComponentEditor editor;
 	editor.SetVolume(m_view->GetCurrentVolume());
 	editor.Clean(0);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
@@ -2575,7 +2575,7 @@ void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 	flrd::ComponentEditor editor;
 	editor.SetView(m_view);
 	editor.Combine();
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
@@ -2693,7 +2693,7 @@ void ComponentDlg::OutputMulti(int color_type)
 			//}
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->getName());
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -2737,7 +2737,7 @@ void ComponentDlg::OutputRgb(int color_type)
 			//}
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->getName());
-			m_view->RefreshGL(39);
+			m_view->Update(39);
 		}
 	}
 }
@@ -2780,7 +2780,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 			m_frame->UpdateList();
 			m_frame->UpdateTree(vd->getName());
 		}
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	}
 }
 
@@ -3355,7 +3355,7 @@ void ComponentDlg::Cluster()
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
 		vd->GetRenderer()->clear_tex_label();
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	}
 
 	delete method;
@@ -3525,7 +3525,7 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	SetOutput(m_titles, m_values);
 
 	//update
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	if (command && m_record_cmd)
 		AddCmd("generate");
@@ -3581,7 +3581,7 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	if (bn > 1)
 		cg.FillBorders(0.1);
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	if (command && m_record_cmd)
 		AddCmd("clean");
@@ -3614,7 +3614,7 @@ void ComponentDlg::SelectFullComp()
 		OnCompAppend(e);
 	}
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 
 	//frame
 	bool bval;
@@ -3679,7 +3679,7 @@ void ComponentDlg::Analyze(bool sel)
 	{
 		//invalidate label mask in gpu
 		vd->GetRenderer()->clear_tex_label();
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	}
 
 	if (m_comp_analyzer.GetListSize() > 10000)
@@ -4252,7 +4252,7 @@ void ComponentDlg::GetCompSelection()
 		GetCellList(cl);
 		m_view->SetCellList(cl);
 		m_view->setValue(gstInteractive, false);
-		m_view->RefreshGL(39);
+		//m_view->Update(39);
 	}
 }
 
@@ -4353,7 +4353,7 @@ void ComponentDlg::IncludeComps()
 		cl.clear();
 		m_view->SetCellList(cl);
 		m_view->setValue(gstInteractive, false);
-		m_view->RefreshGL(39);
+		//m_view->Update(39);
 
 		//frame
 		bool bval;
@@ -4413,7 +4413,7 @@ void ComponentDlg::ExcludeComps()
 		cl.clear();
 		m_view->SetCellList(cl);
 		m_view->setValue(gstInteractive, false);
-		m_view->RefreshGL(39);
+		//m_view->RefreshGL(39);
 
 		//frame
 		bool bval;

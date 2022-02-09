@@ -402,7 +402,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 			view->InitView(
 				fluo::Renderview::INIT_BOUNDS |
 				fluo::Renderview::INIT_CENTER);
-		view->RefreshGL(39);
+		//view->Update(39);
 	}
 	m_frame->UpdateTree(name);
 }

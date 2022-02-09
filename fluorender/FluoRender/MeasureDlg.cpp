@@ -345,7 +345,7 @@ void RulerListCtrl::DeleteSelection()
 	GetCurrSelection(sel);
 	m_rhdl->DeleteSelection(sel);
 	UpdateRulers();
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void RulerListCtrl::DeleteAll(bool cur_time)
@@ -354,7 +354,7 @@ void RulerListCtrl::DeleteAll(bool cur_time)
 		return;
 	m_rhdl->DeleteAll(cur_time);
 	UpdateRulers();
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void RulerListCtrl::Export(wxString filename)
@@ -668,7 +668,7 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 	if (!ruler) return;
 	ruler->SetName(str);
 	SetText(m_editing_item, 0, str);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void RulerListCtrl::OnCenterText(wxCommandEvent& event)
@@ -722,7 +722,7 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 		x, y, z);
 	SetText(m_editing_item, 7, str);
 	SetText(m_editing_item, 9, str);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
@@ -753,7 +753,7 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 		ruler->SetColor(color);
 	}
 
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void RulerListCtrl::OnScroll(wxScrollWinEvent& event)
@@ -793,7 +793,7 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 	m_center_text->Hide();
 	m_color_picker->Hide();
 	SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
@@ -843,7 +843,7 @@ void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
 	//m_center_text->Hide();
 	//m_color_picker->Hide();
 	//SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1615,7 +1615,7 @@ void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 
 	if (count)
 	{
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 		GetSettings(m_view);
 	}
 	m_edited = true;
@@ -1749,7 +1749,7 @@ void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 		m_view->getValue(gstCurrentFrame, lval);
 		ruler->SetTime(lval);
 		ruler_list->push_back(ruler);
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 		GetSettings(m_view);
 	}
 }
@@ -1957,7 +1957,7 @@ void MeasureDlg::Relax(int idx)
 	m_calculator->SetVolume(m_view->GetCurrentVolume());
 	m_calculator->CenterRuler(type, m_edited, iter);
 	m_edited = false;
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 	GetSettings(m_view);
 }
 
@@ -1970,7 +1970,7 @@ void MeasureDlg::Prune(int len)
 			Prune(sel[i], len);
 	}
 	if (m_view)
-		m_view->RefreshGL(39);
+		m_view->Update(39);
 	GetSettings(m_view);
 }
 
@@ -2209,7 +2209,7 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 				m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
 		}
 	}
-	m_view->RefreshGL(39);
+	m_view->Update(39);
 }
 
 void MeasureDlg::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
