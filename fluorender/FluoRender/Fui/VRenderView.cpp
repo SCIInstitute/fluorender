@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <algorithm>
 #include <limits>
-#include "png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 #include <wx/stdpaths.h>
 

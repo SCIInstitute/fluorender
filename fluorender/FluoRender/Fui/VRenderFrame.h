@@ -56,7 +56,7 @@ DEALINGS IN THE SOFTWARE.
 #include "CalculationDlg.h"
 #include "Tester.h"
 #include "Animator/Interpolator.h"
-#include "compatibility.h"
+#include <compatibility.h>
 #include "JVMInitializer.h"
 
 #include <wx/wx.h>

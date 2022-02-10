@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeFactory.hpp>
 #include <MeshFactory.hpp>
 #include <AnnotationFactory.hpp>
-#include "Formats/png_resource.h"
+#include <png_resource.h>
 #include <wx/valnum.h>
 
 //resources

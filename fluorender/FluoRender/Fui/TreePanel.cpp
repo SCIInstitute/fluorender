@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Annotations.hpp>
 #include <compatibility.h>
 //resources
-#include "Formats/png_resource.h"
+#include <png_resource.h>
 #include "tick.xpm"
 #include "cross.xpm"
 #include "img/icons.h"

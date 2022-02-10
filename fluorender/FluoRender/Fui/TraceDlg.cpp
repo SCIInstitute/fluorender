@@ -44,7 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/dirdlg.h>
-#include "png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 #include <chrono>
 #include <set>

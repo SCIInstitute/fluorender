@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VRenderFrame.h"
-#include "compatibility.h"
 #include "DragDrop.h"
 #include <Global.hpp>
 #include <Root.hpp>
@@ -37,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshGroup.hpp>
 #include <Annotations.hpp>
 #include <VolumeFactory.hpp>
-#include <Formats/png_resource.h>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
 #include <Converters/VolumeMeshConv.h>
@@ -52,6 +50,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/MultiVolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <compatibility.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
@@ -59,6 +58,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/progdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
+#include <png_resource.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>

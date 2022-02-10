@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
-#include "png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VMovieView, wxPanel)

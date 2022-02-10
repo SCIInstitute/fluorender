@@ -28,8 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <jni.h>
 #include <iostream>
-#include "../compatibility.h"
-//#include "VRenderFrame.h"
+#include <compatibility.h>
 
 #ifdef __linux__
   #include <dlfcn.h>

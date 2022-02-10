@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VMovieView_H_
 #define _VMovieView_H_
 
-#include "compatibility.h"
-#include "QVideoEncoder.h"
+#include <QVideoEncoder.h>
+#include <compatibility.h>
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>

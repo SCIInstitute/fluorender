@@ -347,8 +347,7 @@ add_library(FORMATS_OBJ OBJECT
 # Fui
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Fui)
 file(GLOB fui_src fluorender/FluoRender/Fui/*.cpp)
-file(GLOB fui_hdr fluorender/FluoRender/Fui/*.hpp)
-file(GLOB fui_hdr fluorender/FluoRender/Fui/*.h)
+file(GLOB fui_hdr fluorender/FluoRender/Fui/*.hpp fluorender/FluoRender/Fui/*.h)
 add_library(FUI_OBJ OBJECT
 	${fui_src} ${fui_hdr})
 

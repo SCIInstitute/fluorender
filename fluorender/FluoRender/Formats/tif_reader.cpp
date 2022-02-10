@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "tif_reader.h"
+#include <compatibility.h>
 #include <boost/filesystem.hpp>
-#include "../compatibility.h"
 #include <sstream>
 #include <iomanip>
 

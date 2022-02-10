@@ -38,8 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Color.h>
 #include <Types/BBox.h>
 #include <Types/Point.h>
-#include "png_resource.h"
-#include "img/icons.h"
 #include <wx/wfstream.h>
 #include <wx/fileconf.h>
 #include <wx/aboutdlg.h>
@@ -48,6 +46,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/hyperlink.h>
 #include <wx/stdpaths.h>
 #include <limits>
+#include <png_resource.h>
+#include "img/icons.h"
 
 BEGIN_EVENT_TABLE(VPropView, wxPanel)
 	//1

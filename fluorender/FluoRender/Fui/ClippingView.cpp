@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolumeRenderer.h>
 #include <compatibility.h>
 #include <wx/valnum.h>
-#include "png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(ClippingView, wxPanel)

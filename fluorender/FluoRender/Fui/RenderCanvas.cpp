@@ -48,7 +48,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/stdpaths.h>
 #include <wx/msw/private.h>
-#include "png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 
 bool RenderCanvas::m_linked_rot = false;

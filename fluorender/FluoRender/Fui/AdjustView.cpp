@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeFactory.hpp>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
-#include "png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 
 BEGIN_EVENT_TABLE(AdjustView, wxPanel)

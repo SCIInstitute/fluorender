@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 //resources
-#include "Formats/png_resource.h"
+#include <png_resource.h>
 #include "img/icons.h"
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
