@@ -234,8 +234,8 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 		//}
 	}
 
-	setValueEvt(gstVolListDirty, true, Event());
-	setValueEvt(gstFullVolListDirty, true, Event());
+	updateValue(gstVolListDirty, true, Event());
+	updateValue(gstFullVolListDirty, true, Event());
 
 	//if (m_frame)
 	//{
@@ -1176,7 +1176,7 @@ void Renderview::SetParams(double t)
 	//	int index = interpolator->GetKeyIndexFromTime(t);
 	//	m_frame->GetRecorderDlg()->SetSelection(index);
 	//}
-	setValueEvt(gstVolListDirty, true, Event());
+	updateValue(gstVolListDirty, true, Event());
 }
 
 void Renderview::ResetMovieAngle()
@@ -1811,7 +1811,7 @@ void Renderview::ForceDraw()
 		{
 			DrawVRBuffer();
 			setValue(gstVrEyeIdx, long(0));
-			toggleValue(gstSwapBuffers, bval);
+			flipValue(gstSwapBuffers, bval);
 			//SwapBuffers();
 		}
 		else
@@ -1821,7 +1821,7 @@ void Renderview::ForceDraw()
 		}
 	}
 	else
-		toggleValue(gstSwapBuffers, bval);
+		flipValue(gstSwapBuffers, bval);
 		//SwapBuffers();
 
 	glbin_timer->sample();
@@ -2379,7 +2379,7 @@ void Renderview::Update(int debug_code, bool start_loop)
 	SetSortBricks();
 	//setValue(gstRefresh, true);
 	//setValue(gstRefreshErase, erase);
-	//toggleValue(gstRefreshNotify, bval);
+	flupValue(gstRefreshNotify, bval);
 	//Refresh(erase);
 }
 
@@ -4891,7 +4891,7 @@ void Renderview::DrawMeshes(long peel)
 				md->setValue(gstDaInt, fog_intensity);
 				md->setValue(gstDaStart, fog_start);
 				md->setValue(gstDaEnd, fog_end);
-				md->setValue(gstViewport, Vector4i(vp));
+				md->updateValue(gstViewport, Vector4i(vp));
 				md->Draw(peel);
 			}
 		}
@@ -4914,7 +4914,7 @@ void Renderview::DrawMeshes(long peel)
 						md->setValue(gstDaInt, fog_intensity);
 						md->setValue(gstDaStart, fog_start);
 						md->setValue(gstDaEnd, fog_end);
-						md->setValue(gstViewport, Vector4i(vp));
+						md->updateValue(gstViewport, Vector4i(vp));
 						md->Draw(peel);
 					}
 				}
@@ -5936,7 +5936,7 @@ void Renderview::DrawMIP(VolumeData* vd, long peel)
 		//draw
 		vd->setValue(gstStreamMode, long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->setValue(gstViewport, Vector4i(vp));
+		vd->updateValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
 		propValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
@@ -6245,7 +6245,7 @@ void Renderview::DrawOVER(VolumeData* vd, bool mask, int peel)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
 		propValues(fog, vd);
-		vd->setValue(gstViewport, Vector4i(vp));
+		vd->updateValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
 		propValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
@@ -6561,7 +6561,7 @@ void Renderview::DrawOLShadows(VolumeList &vlist)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
 		propValues(fog, vd);
-		vd->setValue(gstViewport, Vector4i(vp));
+		vd->updateValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
 		propValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
@@ -7452,7 +7452,7 @@ void Renderview::SetBrush(long mode)
 	}
 	else
 	{
-		setValue(gstInterMode, 2);
+		setValue(gstInterMode, long(2));
 		m_selector->SetMode(mode);
 	}
 	setValue(gstPaintDisplay, true);
@@ -8450,7 +8450,7 @@ void Renderview::HandleMouse()
 
 					Quaternion up(0.0, 1.0, 0.0, 0.0);
 					up = (-q) * up * q;
-					setValue(gstCamUp, up);
+					setValue(gstCamUp, Vector(up.x, up.y, up.z));
 
 					Q2A();
 
@@ -8699,14 +8699,14 @@ void Renderview::HandleMouse()
 	//actually draw everything
 	if (refresh)
 	{//todo: refresh only when necessary
-//#ifdef _WIN32
-//		Update(38, false);
-//#else
-//		Update(38, true);
-//#endif
+#ifdef _WIN32
+		Update(38, false);
+#else
+		Update(38, true);
+#endif
 	}
 	//update mouse position
-	if (lpx >= 0 && lpy >= 0)
+	//if (lpx >= 0 && lpy >= 0)
 	{
 		setValue(gstMousePrvX, lx);
 		setValue(gstMousePrvY, ly);

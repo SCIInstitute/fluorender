@@ -930,7 +930,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	//	if (vd)
 	//	{
 	//		bool rc;
-	//		vd->toggleValue(gstRandomizeColor, rc);
+	//		vd->flipValue(gstRandomizeColor, rc);
 	//	}
 	//}
 	//else if (item_data->type == 3)
@@ -940,7 +940,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	//	if (md)
 	//	{
 	//		bool bval;
-	//		md->toggleValue(gstRandomizeColor, bval);
+	//		md->flipValue(gstRandomizeColor, bval);
 	//	}
 	//}
 	//else if (item_data->type == 5)
@@ -954,7 +954,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	//		if (group)
 	//		{
 	//			bool rc;
-	//			group->toggleValue(gstRandomizeColor, rc);
+	//			group->flipValue(gstRandomizeColor, rc);
 	//		}
 	//	}
 	//}
@@ -969,7 +969,7 @@ void DataTreeCtrl::OnRandomizeColor(wxCommandEvent& event)
 	//		if (group)
 	//		{
 	//			bool bval;
-	//			group->toggleValue(gstRandomizeColor, bval);
+	//			group->flipValue(gstRandomizeColor, bval);
 	//		}
 	//	}
 	//}
@@ -1297,10 +1297,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	//				if (vd)
 	//				{
 	//					if (rc)
-	//						vd->toggleValue(gstRandomizeColor, bval);
+	//						vd->flipValue(gstRandomizeColor, bval);
 	//					else
 	//					{
-	//						vd->toggleValue(gstDisplay, bval);
+	//						vd->flipValue(gstDisplay, bval);
 	//						for (int i=0; i< m_frame->GetViewNum(); i++)
 	//						{
 	//							RenderCanvas* view = m_frame->GetView(i);
@@ -1318,11 +1318,11 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	//				{
 	//					if (rc)
 	//					{
-	//						md->toggleValue(gstRandomizeColor, bval);
+	//						md->flipValue(gstRandomizeColor, bval);
 	//					}
 	//					else
 	//					{
-	//						md->toggleValue(gstDisplay, bval);
+	//						md->flipValue(gstDisplay, bval);
 	//						for (int i=0; i< m_frame->GetViewNum(); i++)
 	//						{
 	//							RenderCanvas* view = m_frame->GetView(i);
@@ -1338,7 +1338,7 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	//				fluo::Annotations* ann = m_frame->GetDataManager()->GetAnnotations(name.ToStdString());
 	//				if (ann)
 	//				{
-	//					ann->toggleValue(gstDisplay, bval);
+	//					ann->flipValue(gstDisplay, bval);
 	//				}
 	//			}
 	//			break;
@@ -1352,10 +1352,10 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	//					if (group)
 	//					{
 	//						if (rc)
-	//							group->toggleValue(gstRandomizeColor, bval);
+	//							group->flipValue(gstRandomizeColor, bval);
 	//						else
 	//						{
-	//							group->toggleValue(gstDisplay, bval);
+	//							group->flipValue(gstDisplay, bval);
 	//							view->SetVolPopDirty();
 	//						}
 	//					}
@@ -1373,11 +1373,11 @@ void DataTreeCtrl::OnAct(wxTreeEvent &event)
 	//					{
 	//						if (rc)
 	//						{
-	//							group->toggleValue(gstRandomizeColor, bval);
+	//							group->flipValue(gstRandomizeColor, bval);
 	//						}
 	//						else
 	//						{
-	//							group->toggleValue(gstDisplay, bval);
+	//							group->flipValue(gstDisplay, bval);
 	//							view->SetMeshPopDirty();
 	//						}
 	//					}

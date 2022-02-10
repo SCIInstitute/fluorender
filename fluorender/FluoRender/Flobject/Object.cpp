@@ -111,7 +111,7 @@ void Object::processNotification(Event& event)
 }
 
 //toggle value for bool
-bool Object::toggleValueEvt(const std::string &name, bool &value, Event& event)
+bool Object::flupValue(const std::string &name, bool &value, Event& event)
 {
 	bool result = false;
 	if (_value_set)
@@ -121,7 +121,7 @@ bool Object::toggleValueEvt(const std::string &name, bool &value, Event& event)
 				this, getValuePointer(name), true);
 		else
 			event.push(this);
-		result = _value_set->toggleValue(name, value, event);
+		result = _value_set->flipValue(name, value, event);
 		event.pop();
 	}
 	return result;

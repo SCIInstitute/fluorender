@@ -895,7 +895,7 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 }
 
 //toggle
-bool ValueSet::toggleValue(const std::string &name, bool &value, Event& event)
+bool ValueSet::flipValue(const std::string &name, bool &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_bool)

@@ -167,9 +167,9 @@ void ObjectTest3()
 	bool bval2;
 	obj1->getValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
-	obj1->toggleValue("boolean", bval2);
+	obj1->flipValue("boolean", bval2);
 	ASSERT_EQ(!bval, bval2);
-	obj1->toggleValue("boolean", bval2);
+	obj1->flipValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
 }
 

@@ -64,7 +64,7 @@ void MeshGroup::OnRandomizeColor(Event& event)
 		it != m_children.end(); ++it)
 	{
 		bool bval;
-		(*it)->toggleValueEvt("randomize color", bval, event);
+		(*it)->flupValue("randomize color", bval, event);
 	}
 }
 

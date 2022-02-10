@@ -1559,7 +1559,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, fluo::Rende
 					if (chan_num >=0 && chan_num <3)
 						vd->setValue(gstColor, color);
 					else
-						vd->toggleValue(gstRandomizeColor, bval);
+						vd->flipValue(gstRandomizeColor, bval);
 
 					v->addVolumeData(vd, 0);
 					vd_sel = vd;

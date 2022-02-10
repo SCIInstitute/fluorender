@@ -207,10 +207,16 @@ namespace fluo
 		bool setValue(const string &name, const V &value)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return setValueEvt(name, value, event);
+			return updateValue(name, value, event);
 		}
 		template<typename V>
-		bool setValueEvt(const string &name, const V &value, Event &event)
+		bool updateValue(const string &name, const V &value)
+		{
+			Event event;
+			return updateValue(name, value, event);
+		}
+		template<typename V>
+		bool updateValue(const string &name, const V &value, Event &event)
 		{
 			V old_value;
 			if (getValue(name, old_value) && value != old_value)
@@ -233,9 +239,14 @@ namespace fluo
 		bool setValueTuple(ValueTuple& vt)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return setValueTupleEvt(vt, event);
+			return updateValueTuple(vt, event);
 		}
-		bool setValueTupleEvt(ValueTuple& vt, Event& event)
+		bool updateValueTuple(ValueTuple& vt)
+		{
+			Event event;
+			return updateValueTuple(vt, event);
+		}
+		bool updateValueTuple(ValueTuple& vt, Event& event)
 		{
 			ValueTuple old_vt;
 			std::string name = std::get<0>(vt);
@@ -257,9 +268,14 @@ namespace fluo
 		bool setRvalu(const std::string& name, Referenced* value)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return setRvaluEvt(name, value, event);
+			return updateRvalu(name, value, event);
 		}
-		bool setRvaluEvt(const std::string& name, Referenced* value, Event& event)
+		bool updateRvalu(const std::string& name, Referenced* value)
+		{
+			Event event;
+			return updateRvalu(name, value, event);
+		}
+		bool updateRvalu(const std::string& name, Referenced* value, Event& event)
 		{
 			Referenced* old_value;
 			if (getRvalu(name, &old_value) && value != old_value)
@@ -321,12 +337,17 @@ namespace fluo
 		}
 
 		//toggle value for bool
-		bool toggleValue(const std::string &name, bool &value)
+		bool flipValue(const std::string &name, bool &value)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return toggleValueEvt(name, value, event);
+			return flupValue(name, value, event);
 		}
-		bool toggleValueEvt(const std::string &name, bool &value, Event& event);
+		bool flupValue(const std::string &name, bool &value)
+		{
+			Event event;
+			return flupValue(name, value, event);
+		}
+		bool flupValue(const std::string &name, bool &value, Event& event);
 
 		//sync value only sets a state but doesn't change values when called
 		//observer's value updates when the value of this changes (data flow is one-way: this -> obj)

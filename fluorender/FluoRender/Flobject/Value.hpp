@@ -323,7 +323,7 @@ namespace fluo
 		}
 
 		//toggle value for bool, result in value
-		bool toggleValue(const std::string &name, bool &value, Event& event);
+		bool flipValue(const std::string &name, bool &value, Event& event);
 
 		/** All the get value functions */
 		bool getValue(ValueTuple&);
