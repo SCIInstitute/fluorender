@@ -26,8 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Global.hpp"
-#include "Names.hpp"
+#include <Global.hpp>
 #include <Timer.h>
 #include <AnnotationFactory.hpp>
 #include <MeshFactory.hpp>

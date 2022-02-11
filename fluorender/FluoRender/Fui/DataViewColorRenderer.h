@@ -37,91 +37,88 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <sstream>
 
-namespace fluo
+class DataViewColorRenderer : public wxDataViewCustomRenderer
 {
-	class DataViewColorRenderer : public wxDataViewCustomRenderer
+public:
+	explicit DataViewColorRenderer(wxDataViewCellMode mode) :
+		wxDataViewCustomRenderer("string"/*GetDefaultType()*/, mode, wxALIGN_LEFT)
+	{}
+
+	virtual bool Render(wxRect rect, wxDC* dc, int state) override
 	{
-	public:
-		explicit DataViewColorRenderer(wxDataViewCellMode mode) :
-			wxDataViewCustomRenderer("string"/*GetDefaultType()*/, mode, wxALIGN_LEFT)
-		{}
-
-		virtual bool Render(wxRect rect, wxDC* dc, int state) override
+		if (color_.IsOk())
 		{
-			if (color_.IsOk())
-			{
-				wxBrush brush(color_, wxBRUSHSTYLE_SOLID);
-				dc->SetBrush(brush);
-				dc->SetPen(*wxBLACK_PEN);
-			}
-			else
-			{
-				wxBrush brush(color_, wxBRUSHSTYLE_CROSSDIAG_HATCH);
-				dc->SetBrush(brush);
-				//dc->SetPen(*wxBLACK_PEN);
-			}
-			rect.Deflate(1);
-			dc->DrawRectangle(rect);
-			return true;
+			wxBrush brush(color_, wxBRUSHSTYLE_SOLID);
+			dc->SetBrush(brush);
+			dc->SetPen(*wxBLACK_PEN);
 		}
-
-		//virtual bool ActivateCell(const wxRect& cell,
-		//	wxDataViewModel *model,
-		//	const wxDataViewItem &item,
-		//	unsigned int col,
-		//	const wxMouseEvent *mouseEvent) override
-		//{
-		//	wxString position;
-		//	if (mouseEvent)
-		//		position = wxString::Format("via mouse at %d, %d", mouseEvent->m_x, mouseEvent->m_y);
-		//	else
-		//		position = "from keyboard";
-		//	return false;
-		//}
-
-		virtual wxSize GetSize() const override
+		else
 		{
-			return wxSize(20, 20);
+			wxBrush brush(color_, wxBRUSHSTYLE_CROSSDIAG_HATCH);
+			dc->SetBrush(brush);
+			//dc->SetPen(*wxBLACK_PEN);
 		}
+		rect.Deflate(1);
+		dc->DrawRectangle(rect);
+		return true;
+	}
 
-		virtual bool SetValue(const wxVariant &value) override
+	//virtual bool ActivateCell(const wxRect& cell,
+	//	wxDataViewModel *model,
+	//	const wxDataViewItem &item,
+	//	unsigned int col,
+	//	const wxMouseEvent *mouseEvent) override
+	//{
+	//	wxString position;
+	//	if (mouseEvent)
+	//		position = wxString::Format("via mouse at %d, %d", mouseEvent->m_x, mouseEvent->m_y);
+	//	else
+	//		position = "from keyboard";
+	//	return false;
+	//}
+
+	virtual wxSize GetSize() const override
+	{
+		return wxSize(20, 20);
+	}
+
+	virtual bool SetValue(const wxVariant &value) override
+	{
+		if (!value.IsNull())
 		{
-			if (!value.IsNull())
-			{
-				std::string str = value.GetString().ToStdString();
-				std::istringstream iss(str);
-				Color color;
-				iss >> color;
-				color_ = wxColor((unsigned char)(color.r() * 255 + 0.5),
-					(unsigned char)(color.g() * 255 + 0.5),
-					(unsigned char)(color.b() * 255 + 0.5));
-			}
-			else
-			{
-				color_ = wxColor();
-			}
-			return true;
+			std::string str = value.GetString().ToStdString();
+			std::istringstream iss(str);
+			fluo::Color color;
+			iss >> color;
+			color_ = wxColor((unsigned char)(color.r() * 255 + 0.5),
+				(unsigned char)(color.g() * 255 + 0.5),
+				(unsigned char)(color.b() * 255 + 0.5));
 		}
-
-		virtual bool GetValue(wxVariant &value) const override
+		else
 		{
-			value << color_;
-			return true;
+			color_ = wxColor();
 		}
+		return true;
+	}
 
-		virtual wxString GetAccessibleDescription() const override
-		{
-			return color_.GetAsString();
-		}
+	virtual bool GetValue(wxVariant &value) const override
+	{
+		value << color_;
+		return true;
+	}
 
-		virtual bool HasEditorCtrl() const override
-		{
-			return false;
-		}
+	virtual wxString GetAccessibleDescription() const override
+	{
+		return color_.GetAsString();
+	}
 
-	private:
-		wxColor color_;
-	};
-}
+	virtual bool HasEditorCtrl() const override
+	{
+		return false;
+	}
+
+private:
+	wxColor color_;
+};
 
 #endif//_DATAVIEWCOLORRENDERER_H_

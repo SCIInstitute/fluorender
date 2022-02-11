@@ -89,23 +89,23 @@ void TreeModel::GetValue(wxVariant &variant,
 {
 	if (!item.IsOk())
 		return;
-	FL::Node* node = (FL::Node*)item.GetID();
+	Node* node = (Node*)item.GetID();
 	if (!node)
 		return;
 	bool display = true;
-	node->getValue("display", display);
+	node->getValue(gstDisplay, display);
 	switch (col)
 	{
 	case 0:
 		variant << wxDataViewIconText(
 			wxString(node->getName()),
-			FL::Global::instance().getIconList(display).
+			glbin.getIconList(display).
 			get(node->className()));
 		break;
 	case 1:
 	{
-		FLTYPE::Color color;
-		if (node->getValue("color", color))
+		Color color;
+		if (node->getValue(gstColor, color))
 		{
 			//wxColor wxc((unsigned char)(color.r() * 255 + 0.5),
 			//	(unsigned char)(color.g() * 255 + 0.5),
@@ -124,7 +124,7 @@ bool TreeModel::SetValue(const wxVariant &variant,
 {
 	if (!item.IsOk())
 		return false;
-	FL::Node* node = (FL::Node*)item.GetID();
+	Node* node = (Node*)item.GetID();
 	if (!node)
 		return false;
 	switch (col)
@@ -153,7 +153,7 @@ bool TreeModel::IsContainer(const wxDataViewItem &item) const
 	//return false;
 	if (!item.IsOk())
 		return wxDataViewItem(0);
-	FL::Node *node = (FL::Node*)item.GetID();
+	Node *node = (Node*)item.GetID();
 	return node->asGroup();
 }
 
@@ -161,7 +161,7 @@ bool TreeModel::HasContainerColumns(const wxDataViewItem & item) const
 {
 	if (!item.IsOk())
 		return wxDataViewItem(0);
-	FL::Referenced *refd = (FL::Referenced*)item.GetID();
+	Referenced *refd = (Referenced*)item.GetID();
 	if (refd->className() == std::string("Root"))
 		return false;
 	else
@@ -172,7 +172,7 @@ wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
 {
 	if (!item.IsOk())
 		return wxDataViewItem(0);
-	FL::Node *node = (FL::Node*)item.GetID();
+	Node *node = (Node*)item.GetID();
 	if (node->getNumParents())
 		return wxDataViewItem((void*)node->getParent(0));
 	else
@@ -182,22 +182,22 @@ wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
 unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	wxDataViewItemArray &array) const
 {
-	FL::Node *node = (FL::Node*)parent.GetID();
+	Node *node = (Node*)parent.GetID();
 	if (!node)
 	{
-		FL::Node* root = const_cast<TreeModel*>(this)->getObject();
+		Node* root = const_cast<TreeModel*>(this)->getObject();
 		array.Add(wxDataViewItem((void*)root));
 		return 1;
 	}
 
-	FL::Group* group = node->asGroup();
+	Group* group = node->asGroup();
 	if (!group)
 		return 0;
 
 	unsigned int size = group->getNumChildren();
 	for (size_t i = 0; i < group->getNumChildren(); ++i)
 	{
-		FL::Node* child = group->getChild(i);
+		Node* child = group->getChild(i);
 		array.Add(wxDataViewItem((void*)child));
 	}
 
@@ -205,37 +205,37 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 }
 
 //operations
-void TreeModel::MoveNode(const std::string &source, FL::Node* target)
+void TreeModel::MoveNode(const std::string &source, Node* target)
 {
-	FL::Node* root = getObject();
+	Node* root = getObject();
 	if (!root)
 		return;
-	FL::SearchVisitor visitor;
+	SearchVisitor visitor;
 	visitor.matchName(source);
 	root->accept(visitor);
-	FL::ObjectList* list = visitor.getResult();
+	ObjectList* list = visitor.getResult();
 }
 
-void TreeModel::UpdateSelections(FL::NodeSet &nodes)
+void TreeModel::UpdateSelections(NodeSet &nodes)
 {
-	class SelUpdater : public FL::NodeVisitor
+	class SelUpdater : public NodeVisitor
 	{
 	public:
-		SelUpdater(FL::NodeSet &nodes) : NodeVisitor(), nodes_(nodes)
+		SelUpdater(NodeSet &nodes) : NodeVisitor(), nodes_(nodes)
 		{
-			setTraversalMode(FL::NodeVisitor::TRAVERSE_ALL_CHILDREN);
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
 		}
 
 		virtual void reset() {}
 
-		virtual void apply(FL::Node& node)
+		virtual void apply(Node& node)
 		{
 			bool selected = nodes_.find(&node) != nodes_.end();
 			node.setValue("selected", selected);
 			traverse(node);
 		}
 
-		virtual void apply(FL::Group& group)
+		virtual void apply(Group& group)
 		{
 			bool selected = nodes_.find(&group) != nodes_.end();
 			group.setValue("selected", selected);
@@ -243,22 +243,22 @@ void TreeModel::UpdateSelections(FL::NodeSet &nodes)
 		}
 
 	private:
-		FL::NodeSet nodes_;
+		NodeSet nodes_;
 	};
 
 	SelUpdater updater(nodes);
-	FL::Node* root = getObject();
+	Node* root = getObject();
 	if (!root)
 		return;
 	root->accept(updater);
 }
 
-void TreeModel::OnSelectionChanged(FL::Event& event)
+void TreeModel::OnSelectionChanged(Event& event)
 {
 
 }
 
-void TreeModel::OnItemAdded(FL::Event& event)
+void TreeModel::OnItemAdded(Event& event)
 {
 	if (event.parent && event.child)
 	{
@@ -269,7 +269,7 @@ void TreeModel::OnItemAdded(FL::Event& event)
 	}
 }
 
-void TreeModel::OnItemRemoved(FL::Event& event)
+void TreeModel::OnItemRemoved(Event& event)
 {
 	if (event.parent && event.child)
 	{
@@ -279,14 +279,14 @@ void TreeModel::OnItemRemoved(FL::Event& event)
 	}
 }
 
-void TreeModel::OnDisplayChanged(FL::Event& event)
+void TreeModel::OnDisplayChanged(Event& event)
 {
-	FL::Node* node = dynamic_cast<FL::Node*>(event.origin);
-	if (node)
-	{
-		wxDataViewItem item = wxDataViewItem(event.origin);
-		ItemChanged(item);
-	}
-	panel_.m_tree_ctrl->Refresh();
+	//Node* node = dynamic_cast<Node*>(event.origin);
+	//if (node)
+	//{
+	//	wxDataViewItem item = wxDataViewItem(event.origin);
+	//	ItemChanged(item);
+	//}
+	//panel_.m_tree_ctrl->Refresh();
 }
 

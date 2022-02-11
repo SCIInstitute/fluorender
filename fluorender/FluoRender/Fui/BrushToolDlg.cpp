@@ -727,8 +727,8 @@ void BrushToolDlg::OnGrow(wxCommandEvent &event)
 		if (m_view)
 			m_view->setValue(gstInterMode, long(1));
 	}
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
+	//if (m_frame && m_frame->GetTree())
+	//	m_frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
 	GetSettings(m_view);
 }
 
@@ -801,49 +801,49 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 //mask tools
 void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);
+	//if (m_frame && m_frame->GetTree() &&
+	//	m_frame->GetTree()->GetTreeCtrl())
+	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);
 	UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->CopyMask(true);
+	//if (m_frame && m_frame->GetTree() &&
+	//	m_frame->GetTree()->GetTreeCtrl())
+	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(true);
 	UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(0);
+	//if (m_frame && m_frame->GetTree() &&
+	//	m_frame->GetTree()->GetTreeCtrl())
+	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(0);
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(1);
+	//if (m_frame && m_frame->GetTree() &&
+	//	m_frame->GetTree()->GetTreeCtrl())
+	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(1);
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(2);
+	//if (m_frame && m_frame->GetTree() &&
+	//	m_frame->GetTree()->GetTreeCtrl())
+	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(2);
 	UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
 {
-	if (m_frame && m_frame->GetTree() &&
-		m_frame->GetTree()->GetTreeCtrl())
-		m_frame->GetTree()->GetTreeCtrl()->PasteMask(3);
+	//if (m_frame && m_frame->GetTree() &&
+	//	m_frame->GetTree()->GetTreeCtrl())
+	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(3);
 	UpdateUndoRedo();
 }
 

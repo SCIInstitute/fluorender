@@ -211,12 +211,13 @@ public:
 	void ShowPane(wxPanel* pane, bool show=true);
 
 	//on selections
-	void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-		fluo::Renderview* view=0,
-		fluo::VolumeGroup* group=0,
-		fluo::VolumeData* vd=0,
-		fluo::MeshData* md=0,
-		fluo::Annotations* ann=0);
+	void OnSelection(fluo::Node *node);
+	//void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
+	//	fluo::Renderview* view=0,
+	//	fluo::VolumeGroup* group=0,
+	//	fluo::VolumeData* vd=0,
+	//	fluo::MeshData* md=0,
+	//	fluo::Annotations* ann=0);
 
 	//prop view
 	AdjustView* GetAdjustView();

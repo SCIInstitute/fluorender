@@ -33,10 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Node.hpp>
 #include <NodeVisitor.hpp>
 
+class TreePanel;
 namespace fluo
 {
 	class AgentFactory;
-	class TreePanel;
 	class TreeModel : public wxDataViewModel, public InterfaceAgent
 	{
 	public:

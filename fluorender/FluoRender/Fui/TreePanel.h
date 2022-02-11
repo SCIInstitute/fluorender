@@ -29,23 +29,76 @@ DEALINGS IN THE SOFTWARE.
 #define _TREEPANEL_H_
 
 #include <wx/wx.h>
-#include <wx/treectrl.h>
+#include <wx/dataview.h>
+#include <TreeModel.h>
 
-//tree icon
-#define icon_change	1
-#define icon_key	"None"
-
-//tree item data
-class LayerInfo : public wxTreeItemData
+class TreePanel : public wxPanel
 {
 public:
-	int type;	//0-root; 1-view; 
-				//2-volume data; 3-mesh data;
-				//5-group; 6-mesh group
+	enum
+	{
+		ID_TreeCtrl = ID_TREE_PANEL1,
+		ID_ToggleView = ID_TREE_PANEL2,
+		ID_AddGroup,
+		ID_AddMGroup,
+		ID_RemoveData,
+		ID_BrushAppend,
+		ID_BrushDesel,
+		ID_BrushDiffuse,
+		ID_BrushErase,
+		ID_BrushClear,
+		ID_BrushCreate
+	};
+
+	TreePanel(
+		wxWindow* parent,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0,
+		const wxString& name = "TreePanel");
+	~TreePanel();
+
+	void SetScenegraph(fluo::Node* root);
+
+	//seelction
+	void UpdateSelection();
+	wxString GetCurrentSel();
+	void Select(wxString view, wxString name);
+
+	//set the brush icon down
+	void SelectBrush(int id);
+	int GetBrushSelected();
+	//control from outside
+	void BrushAppend();
+	void BrushDiffuse();
+	void BrushDesel();
+	void BrushClear();
+	void BrushErase();
+	void BrushCreate();
+	void BrushSolid(bool state);
+
+	friend class fluo::TreeModel;
+
+private:
+	wxWindow* m_frame;
+	wxToolBar* m_toolbar;
+
+	wxDataViewCtrl* m_tree_ctrl;
+	fluo::TreeModel* m_tree_model;
+
+private:
+	void OnSelectionChanged(wxDataViewEvent &event);
+	void OnBeginDrag(wxDataViewEvent &event);
+	void OnDropPossible(wxDataViewEvent &event);
+	void OnDrop(wxDataViewEvent &event);
+	void OnActivated(wxDataViewEvent &event);
+	void OnSorted(wxDataViewEvent &event);
+	void OnHeaderRightClick(wxDataViewEvent &event);
+
+	DECLARE_EVENT_TABLE()
 };
 
-class VRenderFrame;
-class DataTreeCtrl: public wxTreeCtrl
+/*class DataTreeCtrl: public wxTreeCtrl
 {
 	enum
 	{
@@ -286,6 +339,6 @@ private:
 	void OnBrushCreate(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
-};
+};*/
 
 #endif//_TREEPANEL_H_

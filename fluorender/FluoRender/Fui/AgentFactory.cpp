@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentFactory.hpp>
 #include <RenderCanvas.h>
 #include <ListModel.h>
-//#include <Fui/TreeModel.h>
-//#include <Fui/TreePanel.h>
+#include <TreeModel.h>
+#include <TreePanel.h>
 //#include <Fui/VolumePropAgent.h>
 //#include <Fui/VolumePropPanel.h>
 //#include <Fui/OutAdjustAgent.h>
@@ -115,38 +115,38 @@ ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &wi
 	return list_model;
 }
 
-//TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<TreeModel*>(result);
-//
-//	//not found
-//	TreeModel* tree_model =
-//			new TreeModel(static_cast<TreePanel&>(window));
-//	if (tree_model)
-//	{
-//		tree_model->setName(name);
-//		//may need to consider how to handle remote/indirect value changes by names
-//		tree_model->setDefaultValueChangedFunction(
-//			std::bind(&TreeModel::OnDisplayChanged,
-//				tree_model, std::placeholders::_1));
-//		tree_model->setNodeAddedFunction(
-//			std::bind(&TreeModel::OnItemAdded,
-//				tree_model, std::placeholders::_1));
-//		tree_model->setNodeRemovedFunction(
-//			std::bind(&TreeModel::OnItemRemoved,
-//				tree_model, std::placeholders::_1));
-//		objects_.push_front(tree_model);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, tree_model);
-//		notifyObservers(event);
-//	}
-//
-//	return tree_model;
-//}
-//
+TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<TreeModel*>(result);
+
+	//not found
+	TreeModel* tree_model =
+			new TreeModel(static_cast<TreePanel&>(window));
+	if (tree_model)
+	{
+		tree_model->setName(name);
+		//may need to consider how to handle remote/indirect value changes by names
+		tree_model->setDefaultValueChangedFunction(
+			std::bind(&TreeModel::OnDisplayChanged,
+				tree_model, std::placeholders::_1));
+		tree_model->setNodeAddedFunction(
+			std::bind(&TreeModel::OnItemAdded,
+				tree_model, std::placeholders::_1));
+		tree_model->setNodeRemovedFunction(
+			std::bind(&TreeModel::OnItemRemoved,
+				tree_model, std::placeholders::_1));
+		objects_.push_front(tree_model);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, tree_model);
+		notifyObservers(event);
+	}
+
+	return tree_model;
+}
+
 //VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
 //{
 //	InterfaceAgent* result = findFirst(name);

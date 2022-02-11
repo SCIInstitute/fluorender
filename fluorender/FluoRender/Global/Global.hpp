@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
+#include <Names.hpp>
 #include <Group.hpp>
 #include <IconList.hpp>
 #include <string>
