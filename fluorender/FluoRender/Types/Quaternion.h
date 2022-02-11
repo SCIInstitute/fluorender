@@ -3,7 +3,7 @@
 
    The MIT License
 
-   Copyright (c) 2018 Scientific Computing and Imaging Institute,
+   Copyright (c) 2022 Scientific Computing and Imaging Institute,
    University of Utah.
 
    

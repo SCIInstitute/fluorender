@@ -25,25 +25,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _LISTMODEL_H_
-#define _LISTMODEL_H_
+#ifndef _TREEMODEL_H_
+#define _TREEMODEL_H_
 
 #include <wx/dataview.h>
 #include <InterfaceAgent.hpp>
 #include <Node.hpp>
+#include <NodeVisitor.hpp>
 
 namespace fluo
 {
 	class AgentFactory;
-	class ListModel : public wxDataViewModel, public InterfaceAgent
+	class TreePanel;
+	class TreeModel : public wxDataViewModel, public InterfaceAgent
 	{
 	public:
-		ListModel();
+		TreeModel(TreePanel &panel);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
 
-		//model definition
 		virtual unsigned int GetColumnCount() const override;
 
 		virtual wxString GetColumnType(unsigned int col) const override;
@@ -66,26 +67,35 @@ namespace fluo
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 
+		//ref
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const ListModel*>(obj) != NULL;
+			return dynamic_cast<const TreeModel*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "ListModel"; }
+		virtual const char* className() const { return "TreeModel"; }
 
 		//interface agent functions
-		virtual void setObject(Node* root);
+		virtual void setObject(Node* root)
+		{ InterfaceAgent::setObject(root); }
 		virtual Node* getObject()
-		{
-			return dynamic_cast<Node*>(InterfaceAgent::getObject());
-		}
+		{ return dynamic_cast<Node*>(InterfaceAgent::getObject()); }
+
+		//operations
+		void MoveNode(const std::string &source, Node* target);
+		void UpdateSelections(NodeSet &nodes);
 
 		friend class AgentFactory;
 
 	protected:
+		TreePanel &panel_;
+
+		void OnSelectionChanged(Event& event);
 		void OnItemAdded(Event& event);
 		void OnItemRemoved(Event& event);
+		void OnDisplayChanged(Event& event);
 	};
+
 }
 
-#endif//_LISTMODEL_H_
+#endif//_TREEMODEL_H_
