@@ -94,7 +94,7 @@ void ListModel::GetValue(wxVariant &variant,
 	case 0:
 		variant << wxDataViewIconText(
 			wxString(node->getName()),
-			Global::instance().getIconList(true).
+			glbin.getIconList(true).
 			get(node->className()));
 		break;
 	case 1:
@@ -164,10 +164,10 @@ unsigned int ListModel::GetChildren(const wxDataViewItem &parent,
 	Node *node = (Node*)parent.GetID();
 	if (!node)
 	{
-		size_t size = Global::instance().getNum();
+		size_t size = glbin.getObjNumInList();
 		for (size_t i = 0; i < size; ++i)
 		{
-			Object* obj = Global::instance().get(i);
+			Object* obj = glbin.getObjInList(i);
 			array.Add(wxDataViewItem((void*)obj));
 		}
 		return size;
@@ -178,7 +178,7 @@ unsigned int ListModel::GetChildren(const wxDataViewItem &parent,
 
 void ListModel::setObject(Node* root)
 {
-	Global::instance().addListObserver(this);
+	glbin.addListObserver(this);
 }
 
 void ListModel::OnItemAdded(Event& event)

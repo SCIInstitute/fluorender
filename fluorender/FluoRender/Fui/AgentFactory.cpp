@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <AgentFactory.hpp>
 #include <RenderCanvas.h>
-//#include <Fui/ListModel.h>
+#include <ListModel.h>
 //#include <Fui/TreeModel.h>
 //#include <Fui/TreePanel.h>
 //#include <Fui/VolumePropAgent.h>
@@ -88,33 +88,33 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	return render_canvas_agent;
 }
 
-//ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<ListModel*>(result);
-//
-//	//not found
-//	ListModel* list_model = new ListModel();
-//	if (list_model)
-//	{
-//		list_model->setName(name);
-//		list_model->setNodeAddedFunction(
-//			std::bind(&ListModel::OnItemAdded,
-//				list_model, std::placeholders::_1));
-//		list_model->setNodeRemovedFunction(
-//			std::bind(&ListModel::OnItemRemoved,
-//				list_model, std::placeholders::_1));
-//		objects_.push_front(list_model);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, list_model);
-//		notifyObservers(event);
-//	}
-//
-//	return list_model;
-//}
-//
+ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<ListModel*>(result);
+
+	//not found
+	ListModel* list_model = new ListModel();
+	if (list_model)
+	{
+		list_model->setName(name);
+		list_model->setNodeAddedFunction(
+			std::bind(&ListModel::OnItemAdded,
+				list_model, std::placeholders::_1));
+		list_model->setNodeRemovedFunction(
+			std::bind(&ListModel::OnItemRemoved,
+				list_model, std::placeholders::_1));
+		objects_.push_front(list_model);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, list_model);
+		notifyObservers(event);
+	}
+
+	return list_model;
+}
+
 //TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &window)
 //{
 //	InterfaceAgent* result = findFirst(name);

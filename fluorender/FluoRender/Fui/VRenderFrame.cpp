@@ -190,6 +190,8 @@ VRenderFrame::VRenderFrame(
 	icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));
 	SetIcon(icon);
 
+	glbin.initIcons();
+
 	// create the main toolbar
 	m_main_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
@@ -2138,48 +2140,48 @@ void VRenderFrame::UpdateTree(wxString name)
 
 void VRenderFrame::UpdateList()
 {
-	m_list_panel->DeleteAllItems();
+	//m_list_panel->DeleteAllItems();
 
-	for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
-	{
-		fluo::VolumeData* vd = m_data_mgr.GetVolumeData(i);
-		bool dup;
-		vd->getValue(gstDuplicate, dup);
-		if (vd && !dup)
-		{
-			wxString name = vd->getName();
-			std::wstring str;
-			vd->getValue(gstDataPath, str);
-			wxString path = str;
-			m_list_panel->Append(1, name, path);
-		}
-	}
+	//for (int i=0 ; i<m_data_mgr.GetVolumeNum() ; i++)
+	//{
+	//	fluo::VolumeData* vd = m_data_mgr.GetVolumeData(i);
+	//	bool dup;
+	//	vd->getValue(gstDuplicate, dup);
+	//	if (vd && !dup)
+	//	{
+	//		wxString name = vd->getName();
+	//		std::wstring str;
+	//		vd->getValue(gstDataPath, str);
+	//		wxString path = str;
+	//		m_list_panel->Append(1, name, path);
+	//	}
+	//}
 
-	for (int i=0 ; i<m_data_mgr.GetMeshNum() ; i++)
-	{
-		fluo::MeshData* md = m_data_mgr.GetMeshData(i);
-		if (md)
-		{
-			wxString name = md->getName();
-			std::wstring wstr;
-			md->getValue(gstDataPath, wstr);
-			wxString path = wstr;
-			m_list_panel->Append(2, name, path);
-		}
-	}
+	//for (int i=0 ; i<m_data_mgr.GetMeshNum() ; i++)
+	//{
+	//	fluo::MeshData* md = m_data_mgr.GetMeshData(i);
+	//	if (md)
+	//	{
+	//		wxString name = md->getName();
+	//		std::wstring wstr;
+	//		md->getValue(gstDataPath, wstr);
+	//		wxString path = wstr;
+	//		m_list_panel->Append(2, name, path);
+	//	}
+	//}
 
-	for (int i=0; i<m_data_mgr.GetAnnotationNum(); i++)
-	{
-		fluo::Annotations* ann = m_data_mgr.GetAnnotations(i);
-		if (ann)
-		{
-			wxString name = ann->getName();
-			std::wstring wstr;
-			ann->getValue(gstDataPath, wstr);
-			wxString path = wstr;
-			m_list_panel->Append(3, name, path);
-		}
-	}
+	//for (int i=0; i<m_data_mgr.GetAnnotationNum(); i++)
+	//{
+	//	fluo::Annotations* ann = m_data_mgr.GetAnnotations(i);
+	//	if (ann)
+	//	{
+	//		wxString name = ann->getName();
+	//		std::wstring wstr;
+	//		ann->getValue(gstDataPath, wstr);
+	//		wxString path = wstr;
+	//		m_list_panel->Append(3, name, path);
+	//	}
+	//}
 }
 
 DataManager* VRenderFrame::GetDataManager()

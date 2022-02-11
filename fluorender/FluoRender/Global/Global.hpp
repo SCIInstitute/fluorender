@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_HPP
 
 #include <Group.hpp>
+#include <IconList.hpp>
 #include <string>
 
 #define glbin fluo::Global::instance()
@@ -68,6 +69,10 @@ namespace fluo
 		//Renderer2DFactory* getRenderer2DFactory();
 		//Renderer3DFactory* getRenderer3DFactory();
 		Root* getRoot();
+		IconList& getIconList(bool shown)
+		{
+			return shown ? shown_icon_list_ : hidden_icon_list_;
+		}
 
 		//check name duplication
 		bool checkName(const std::string &name);
@@ -76,31 +81,16 @@ namespace fluo
 		void setExecutablePath(const std::wstring &path);
 		std::wstring getExecutablePath();
 
-/*		inline size_t getNum()
-		{
-			size_t volume_num = volume_factory_->getNum();
-			size_t mesh_num = mesh_factory_->getNum();
-			size_t annotations_num = annotation_factory_->getNum();
+		//icons
+		void initIcons();
 
-			return volume_num + mesh_num + annotations_num;
-		}
+		//list panel operations
+		size_t getObjNumInList();
+		Object* getObjInList(size_t i);
+		void addListObserver(Observer* obsrvr);
+		void saveAllMasks();
 
-		inline Object* get(size_t i)
-		{
-			size_t volume_num = volume_factory_->getNum();
-			size_t mesh_num = mesh_factory_->getNum();
-			size_t annotations_num = annotation_factory_->getNum();
-
-			if (i < volume_num)
-				return volume_factory_->get(i);
-			else if (i < volume_num + mesh_num)
-				return mesh_factory_->get(i - volume_num);
-			else if (i < volume_num + mesh_num + annotations_num)
-				return annotation_factory_->get(i - volume_num - mesh_num);
-			return 0;
-		}
-
-		inline size_t getIndex(const Object* object) const
+/*		inline size_t getIndex(const Object* object) const
 		{
 			size_t volume_num = volume_factory_->getNum();
 			size_t mesh_num = mesh_factory_->getNum();
@@ -124,28 +114,6 @@ namespace fluo
 			return volume_num + mesh_num + annotations_num;
 		}
 
-		VolumeFactory& getVolumeFactory()
-		{ return *volume_factory_; }
-
-		MeshFactory& getMeshFactory()
-		{ return *mesh_factory_; }
-
-		AnnotationFactory& getAnnotationFactory()
-		{ return *annotation_factory_;}
-
-        AgentFactory& getAgentFactory()
-		{ return *agent_factory_; }
-
-		FUI::IconList& getIconList(bool shown)
-		{ return shown?shown_icon_list_:hidden_icon_list_; }
-
-		void addListObserver(Observer* obsrvr)
-		{
-			volume_factory_->addObserver(obsrvr);
-			mesh_factory_->addObserver(obsrvr);
-			annotation_factory_->addObserver(obsrvr);
-		}
-
 		ProcessorFactory& getProcessorFactory()
 		{ return *processor_factory_; }
 */
@@ -155,6 +123,10 @@ namespace fluo
 		static Global instance_;
 
 		ref_ptr<Group> origin_;//the root of everything else
+
+		//icon list
+		IconList shown_icon_list_;
+		IconList hidden_icon_list_;
 
 	private:
 #define BUILD_AND_ADD(cls, par) \

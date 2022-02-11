@@ -790,8 +790,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		if (wxGetKeyState(wxKeyCode('m')) &&
 			!ks_m_svmask)
 		{
-			if (m_frame && m_frame->GetList())
-				m_frame->GetList()->SaveAllMasks();
+			glbin.saveAllMasks();
 			ks_m_svmask = true;
 			set_focus = true;
 		}

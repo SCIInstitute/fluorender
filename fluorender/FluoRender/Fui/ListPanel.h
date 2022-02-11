@@ -29,14 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #define _LISTPANEL_H_
 
 #include <wx/wx.h>
-#include <wx/listctrl.h>
+#include <wx/dataview.h>
+#include <ListModel.h>
 
-class VRenderFrame;
-namespace fluo
-{
-	class VolumeData;
-}
-class DataListCtrl : public wxListCtrl
+/*class DataListCtrl : public wxListCtrl
 {
 	enum
 	{
@@ -111,11 +107,52 @@ protected: //Possible TODO
 	wxSize GetSizeAvailableForScrollTarget(const wxSize& size) {
 		return size - GetEffectiveMinSize();
 	}
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
+};*/
 
 class ListPanel : public wxPanel
+{
+public:
+	enum
+	{
+		ID_ListCtrl = ID_LIST_PANEL2,
+		ID_AddToView,
+		ID_Rename,
+		ID_Save,
+		ID_Bake,
+		ID_SaveMask,
+		ID_Delete,
+		ID_DeleteAll
+	};
+	ListPanel(
+		wxWindow* parent,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0,
+		const wxString& name = "ListPanel");
+	~ListPanel();
+
+private:
+	wxToolBar* m_toolbar;
+
+	wxDataViewCtrl* m_list_ctrl;
+	fluo::ListModel* m_list_model;
+
+	void OnAddToView(wxCommandEvent& event);
+	void OnRename(wxCommandEvent& event);
+	void OnSave(wxCommandEvent& event);
+	void OnBake(wxCommandEvent& event);
+	void OnSaveMask(wxCommandEvent& event);
+	void OnDelete(wxCommandEvent& event);
+	void OnDeleteAll(wxCommandEvent& event);
+	void OnBeginDrag(wxDataViewEvent &event);
+	void OnDropPossible(wxDataViewEvent &event);
+	void OnDrop(wxDataViewEvent &event);
+	void OnListSorted(wxDataViewEvent &event);
+
+	DECLARE_EVENT_TABLE()
+};
+
+/*class ListPanel : public wxPanel
 {
 	enum
 	{
@@ -155,6 +192,6 @@ private:
 	void OnDeleteAll(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
-};
+};*/
 
 #endif//_LISTPANEL_H_

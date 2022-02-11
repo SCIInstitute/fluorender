@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include "img/icons_playback.h"
 #include "img/icons_volume_props.h"
 #include "img/icons_track_diag.h"
+#include "img/icons_scenegraph.h"
 
 //common icons
 /* icon_32.png - 2507 bytes */

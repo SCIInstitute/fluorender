@@ -100,6 +100,12 @@ void Global::BuildRoot()
 	origin_->addChild(root);
 }
 
+void Global::initIcons()
+{
+	shown_icon_list_.init(true);
+	hidden_icon_list_.init(false);
+}
+
 Object* Global::get(const std::string &name, Group* start)
 {
 	SearchVisitor visitor;
@@ -208,4 +214,40 @@ std::wstring Global::getExecutablePath()
 	std::wstring path;
 	paths->getValue(gstExecutablePath, path);
 	return path;
+}
+
+//list panel operations
+size_t Global::getObjNumInList()
+{
+	size_t volume_num = getVolumeFactory()->getNum();
+	size_t mesh_num = getMeshFactory()->getNum();
+	size_t annotations_num = getAnnotationFactory()->getNum();
+
+	return volume_num + mesh_num + annotations_num;
+}
+
+Object* Global::getObjInList(size_t i)
+{
+	size_t volume_num = getVolumeFactory()->getNum();
+	size_t mesh_num = getMeshFactory()->getNum();
+	size_t annotations_num = getAnnotationFactory()->getNum();
+
+	if (i < volume_num)
+		return getVolumeFactory()->get(i);
+	else if (i < volume_num + mesh_num)
+		return getMeshFactory()->get(i - volume_num);
+	else if (i < volume_num + mesh_num + annotations_num)
+		return getAnnotationFactory()->get(i - volume_num - mesh_num);
+	return 0;
+}
+
+void Global::addListObserver(Observer* obsrvr)
+{
+	getVolumeFactory()->addObserver(obsrvr);
+	getMeshFactory()->addObserver(obsrvr);
+	getAnnotationFactory()->addObserver(obsrvr);
+}
+
+void Global::saveAllMasks()
+{
 }
