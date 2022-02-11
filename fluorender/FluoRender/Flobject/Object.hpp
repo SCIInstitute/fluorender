@@ -206,17 +206,17 @@ namespace fluo
 		template<typename V>
 		bool setValue(const string &name, const V &value)
 		{
-			Event event(Event::NOTIFY_NONE);
-			return updateValue(name, value, event);
+			Event event(Event::NOTIFY_SELF);
+			return updValue(name, value, event);
 		}
 		template<typename V>
-		bool updateValue(const string &name, const V &value)
+		bool updValue(const string &name, const V &value)
 		{
 			Event event;
-			return updateValue(name, value, event);
+			return updValue(name, value, event);
 		}
 		template<typename V>
-		bool updateValue(const string &name, const V &value, Event &event)
+		bool updValue(const string &name, const V &value, Event &event)
 		{
 			V old_value;
 			if (getValue(name, old_value) && value != old_value)
@@ -238,15 +238,15 @@ namespace fluo
 		}
 		bool setValueTuple(ValueTuple& vt)
 		{
-			Event event(Event::NOTIFY_NONE);
-			return updateValueTuple(vt, event);
+			Event event(Event::NOTIFY_SELF);
+			return updValueTuple(vt, event);
 		}
-		bool updateValueTuple(ValueTuple& vt)
+		bool updValueTuple(ValueTuple& vt)
 		{
 			Event event;
-			return updateValueTuple(vt, event);
+			return updValueTuple(vt, event);
 		}
-		bool updateValueTuple(ValueTuple& vt, Event& event)
+		bool updValueTuple(ValueTuple& vt, Event& event)
 		{
 			ValueTuple old_vt;
 			std::string name = std::get<0>(vt);
@@ -267,15 +267,15 @@ namespace fluo
 		}
 		bool setRvalu(const std::string& name, Referenced* value)
 		{
-			Event event(Event::NOTIFY_NONE);
-			return updateRvalu(name, value, event);
+			Event event(Event::NOTIFY_SELF);
+			return updRvalu(name, value, event);
 		}
-		bool updateRvalu(const std::string& name, Referenced* value)
+		bool updRvalu(const std::string& name, Referenced* value)
 		{
 			Event event;
-			return updateRvalu(name, value, event);
+			return updRvalu(name, value, event);
 		}
-		bool updateRvalu(const std::string& name, Referenced* value, Event& event)
+		bool updRvalu(const std::string& name, Referenced* value, Event& event)
 		{
 			Referenced* old_value;
 			if (getRvalu(name, &old_value) && value != old_value)
@@ -339,7 +339,7 @@ namespace fluo
 		//toggle value for bool
 		bool flipValue(const std::string &name, bool &value)
 		{
-			Event event(Event::NOTIFY_NONE);
+			Event event(Event::NOTIFY_SELF);
 			return flupValue(name, value, event);
 		}
 		bool flupValue(const std::string &name, bool &value)

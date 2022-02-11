@@ -234,8 +234,8 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 		//}
 	}
 
-	updateValue(gstVolListDirty, true, Event());
-	updateValue(gstFullVolListDirty, true, Event());
+	updValue(gstVolListDirty, true, Event());
+	updValue(gstFullVolListDirty, true, Event());
 
 	//if (m_frame)
 	//{
@@ -1176,7 +1176,7 @@ void Renderview::SetParams(double t)
 	//	int index = interpolator->GetKeyIndexFromTime(t);
 	//	m_frame->GetRecorderDlg()->SetSelection(index);
 	//}
-	updateValue(gstVolListDirty, true, Event());
+	updValue(gstVolListDirty, true, Event());
 }
 
 void Renderview::ResetMovieAngle()
@@ -4891,7 +4891,7 @@ void Renderview::DrawMeshes(long peel)
 				md->setValue(gstDaInt, fog_intensity);
 				md->setValue(gstDaStart, fog_start);
 				md->setValue(gstDaEnd, fog_end);
-				md->updateValue(gstViewport, Vector4i(vp));
+				md->setValue(gstViewport, Vector4i(vp));
 				md->Draw(peel);
 			}
 		}
@@ -4914,7 +4914,7 @@ void Renderview::DrawMeshes(long peel)
 						md->setValue(gstDaInt, fog_intensity);
 						md->setValue(gstDaStart, fog_start);
 						md->setValue(gstDaEnd, fog_end);
-						md->updateValue(gstViewport, Vector4i(vp));
+						md->setValue(gstViewport, Vector4i(vp));
 						md->Draw(peel);
 					}
 				}
@@ -5936,7 +5936,7 @@ void Renderview::DrawMIP(VolumeData* vd, long peel)
 		//draw
 		vd->setValue(gstStreamMode, long(1));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->updateValue(gstViewport, Vector4i(vp));
+		vd->setValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
 		propValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
@@ -6245,7 +6245,7 @@ void Renderview::DrawOVER(VolumeData* vd, bool mask, int peel)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
 		propValues(fog, vd);
-		vd->updateValue(gstViewport, Vector4i(vp));
+		vd->setValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
 		propValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
@@ -6561,7 +6561,7 @@ void Renderview::DrawOLShadows(VolumeList &vlist)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
 		propValues(fog, vd);
-		vd->updateValue(gstViewport, Vector4i(vp));
+		vd->setValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
 		propValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;

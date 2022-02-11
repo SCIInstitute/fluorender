@@ -102,8 +102,26 @@ void Object::handleEvent(Event& event)
 
 void Object::processNotification(Event& event)
 {
-	//handle event
-	handleEvent(event);
+	//determine if self or others
+	bool flag = false;
+	Event::NotifyFlags notify = event.getNotifyFlags();
+	Object* obj = dynamic_cast<Object*>(event.sender);
+	if (notify & Event::NOTIFY_SELF)
+	{
+		if (obj == this)
+			flag = true;
+	}
+	if (notify & Event::NOTIFY_OTHERS)
+	{
+		if (obj != this)
+			flag = true;
+	}
+	if (flag)
+	{
+		//handle event
+		handleEvent(event);
+	}
+
 	//notify observers
 	if (event.type == Event::EVENT_VALUE_CHANGING)
 		return;
