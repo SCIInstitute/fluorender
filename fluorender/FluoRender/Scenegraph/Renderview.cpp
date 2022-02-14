@@ -146,8 +146,8 @@ Renderview::~Renderview()
 		double dval = glbin_timer->total_fps();
 		setValue(gstBmFps, dval);
 	}
-	glbin_timer->stop();
-	m_selector->SaveBrushSettings();
+	//glbin_timer->stop();
+	//m_selector->SaveBrushSettings();
 	m_loader->StopAll();
 
 	//temporary, dynamic data will be managed by global

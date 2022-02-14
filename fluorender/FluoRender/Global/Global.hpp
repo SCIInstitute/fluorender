@@ -60,6 +60,8 @@ namespace fluo
 	public:
 		static Global& instance() { return instance_; }
 
+		void decycle();
+		void clear();
 		Object* get(const std::string &name, Group* start = nullptr);
 		Fltimer* getTimer();
 		VolumeFactory* getVolumeFactory();

@@ -306,13 +306,12 @@ void TreeModel::OnItemRemoved(Event& event)
 void TreeModel::OnDisplayChanged(Event& event)
 {
 	Node* node = dynamic_cast<Node*>(event.origin);
+	if (!node)
+		return;
 	if (node->asRoot())
 		return;
-	if (node)
-	{
-		wxDataViewItem item = wxDataViewItem(event.origin);
-		ItemChanged(item);
-	}
+	wxDataViewItem item = wxDataViewItem(event.origin);
+	ItemChanged(item);
 	panel_.m_tree_ctrl->Refresh();
 }
 

@@ -137,28 +137,28 @@ RenderCanvas::RenderCanvas(VRenderFrame* frame,
 
 RenderCanvas::~RenderCanvas()
 {
-	bool bval;
-	m_agent->getValue(gstBenchmark, bval);
-	if (bval)
-	{
-		unsigned long long msec, frames;
-		double fps;
-		m_agent->getValue(gstBmRuntime, msec);
-		m_agent->getValue(gstBmFrames, frames);
-		m_agent->getValue(gstBmFps, fps);
-		long lx, ly;
-		m_agent->getValue(gstSizeX, lx);
-		m_agent->getValue(gstSizeY, ly);
-		wxString string = wxString("FluoRender has finished benchmarking.\n") +
-			wxString("Results:\n") +
-			wxString("Render size: ") + wxString::Format("%d X %d\n", lx, ly) +
-			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", frames) +
-			wxString("FPS: ") + wxString::Format("%.2f", fps);
-		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
-			wxOK | wxICON_INFORMATION);
-		diag->ShowModal();
-	}
+	//bool bval;
+	//m_agent->getValue(gstBenchmark, bval);
+	//if (bval)
+	//{
+	//	unsigned long long msec, frames;
+	//	double fps;
+	//	m_agent->getValue(gstBmRuntime, msec);
+	//	m_agent->getValue(gstBmFrames, frames);
+	//	m_agent->getValue(gstBmFps, fps);
+	//	long lx, ly;
+	//	m_agent->getValue(gstSizeX, lx);
+	//	m_agent->getValue(gstSizeY, ly);
+	//	wxString string = wxString("FluoRender has finished benchmarking.\n") +
+	//		wxString("Results:\n") +
+	//		wxString("Render size: ") + wxString::Format("%d X %d\n", lx, ly) +
+	//		wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
+	//		wxString("Frames: ") + wxString::Format("%llu\n", frames) +
+	//		wxString("FPS: ") + wxString::Format("%.2f", fps);
+	//	wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
+	//		wxOK | wxICON_INFORMATION);
+	//	diag->ShowModal();
+	//}
 
 	if (m_full_screen)
 	{

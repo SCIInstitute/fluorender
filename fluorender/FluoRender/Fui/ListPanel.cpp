@@ -145,7 +145,6 @@ ListPanel::ListPanel(
 
 ListPanel::~ListPanel()
 {
-
 }
 
 void ListPanel::OnAddToView(wxCommandEvent& event)

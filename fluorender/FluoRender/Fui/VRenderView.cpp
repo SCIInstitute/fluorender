@@ -330,8 +330,6 @@ VRenderView::VRenderView(VRenderFrame* frame,
 
 VRenderView::~VRenderView()
 {
-	if (m_canvas)
-		delete m_canvas;
 	if (m_full_frame)
 		delete m_full_frame;
 }

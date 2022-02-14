@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 //#include <Renderer3DFactory.hpp>
 #include <Root.hpp>
 #include <SearchVisitor.hpp>
+#include <DecycleVisitor.hpp>
 
 using namespace fluo;
 
@@ -103,6 +104,18 @@ void Global::initIcons()
 {
 	shown_icon_list_.init(true);
 	hidden_icon_list_.init(false);
+}
+
+void Global::decycle()
+{
+	DecycleVisitor decycle(*origin_);
+	decycle.removeCycle();
+}
+
+void Global::clear()
+{
+	decycle();
+	origin_->removeAllChildren();
 }
 
 Object* Global::get(const std::string &name, Group* start)
