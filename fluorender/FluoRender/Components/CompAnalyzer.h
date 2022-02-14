@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompAnalyzer_h
 
 #include <Tracking/Cell.h>
+#include <boost/graph/connected_components.hpp>
+#include <boost/graph/filtered_graph.hpp>
 #include <boost/signals2.hpp>
 #include <string>
 #include <vector>

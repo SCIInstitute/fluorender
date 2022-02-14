@@ -923,11 +923,6 @@ VRenderFrame::~VRenderFrame()
 	flvr::TextureRenderer::cal_shader_factory_.clear();
 	flvr::TextureRenderer::img_shader_factory_.clear();
 	flvr::TextRenderer::text_texture_manager_.clear();
-	//for (int i=0; i<GetViewNum(); i++)
-	//{
-	//	RenderCanvas* view = GetView(i);
-	//	if (view) view->ClearAll();
-	//}
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
 }

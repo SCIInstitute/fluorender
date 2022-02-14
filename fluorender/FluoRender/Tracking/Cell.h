@@ -205,7 +205,7 @@ namespace flrd
 		void AddVertex(Verp &vertex);
 		Verw GetVertex();
 		unsigned int GetVertexId();
-		Pca &GetPca();
+		Pca GetPca();
 
 		//get
 		//size

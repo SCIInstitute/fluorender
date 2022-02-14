@@ -58,7 +58,7 @@ namespace fluo
 					"MeshGroup", icon));
 				icon.CopyFromBitmap(wxGetBitmapFromMemory(render_view_shown));
 				list_.insert(std::pair<std::string, wxIcon>(
-					"RenderView", icon));
+					"Renderview", icon));
 				icon.CopyFromBitmap(wxGetBitmapFromMemory(default_shown));
 				list_.insert(std::pair<std::string, wxIcon>(
 					"default", icon));
@@ -79,7 +79,7 @@ namespace fluo
 					"MeshGroup", icon));
 				icon.CopyFromBitmap(wxGetBitmapFromMemory(render_view_hidden));
 				list_.insert(std::pair<std::string, wxIcon>(
-					"RenderView", icon));
+					"Renderview", icon));
 				icon.CopyFromBitmap(wxGetBitmapFromMemory(default_hidden));
 				list_.insert(std::pair<std::string, wxIcon>(
 					"default", icon));

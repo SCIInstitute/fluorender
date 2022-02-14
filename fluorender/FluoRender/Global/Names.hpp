@@ -74,7 +74,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstDefaultProcessor "default processor"
 
 //root
-#define gstRoot "root"
+#define gstRoot "Active Datasets"
 #define gstSortValue "sort value"
 #define gstSortMethod "sort method"
 #define gstActivated "activated"

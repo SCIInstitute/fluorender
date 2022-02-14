@@ -28,9 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeModel.h>
 #include <TreePanel.h>
 #include <DataViewColorRenderer.h>
+#include <Global.hpp>
+#include <Root.hpp>
 #include <Group.hpp>
 #include <SearchVisitor.hpp>
-#include <Global.hpp>
 
 using namespace fluo;
 
@@ -173,10 +174,33 @@ wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
 	if (!item.IsOk())
 		return wxDataViewItem(0);
 	Node *node = (Node*)item.GetID();
-	if (node->getNumParents())
-		return wxDataViewItem((void*)node->getParent(0));
-	else
+	if (node->asRoot())
 		return wxDataViewItem(0);
+	if (node->asRenderview())
+		return wxDataViewItem((void*)(glbin_root));
+	if (node->asVolumeGroup())
+		return wxDataViewItem((void*)node->getParentRenderview());
+	if (node->asMeshGroup())
+		return wxDataViewItem((void*)node->getParentRenderview());
+	if (node->asVolumeData())
+	{
+		VolumeGroup* group = node->getParentVolumeGroup();
+		if (group)
+			return wxDataViewItem((void*)group);
+		else
+			return wxDataViewItem((void*)node->getParentRenderview());
+	}
+	if (node->asMeshData())
+	{
+		MeshGroup* group = node->getParentMeshGroup();
+		if (group)
+			return wxDataViewItem((void*)group);
+		else
+			return wxDataViewItem((void*)node->getParentRenderview());
+	}
+	if (node->asAnnotations())
+		return wxDataViewItem((void*)node->getParentRenderview());
+	return wxDataViewItem(0);
 }
 
 unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
@@ -281,12 +305,14 @@ void TreeModel::OnItemRemoved(Event& event)
 
 void TreeModel::OnDisplayChanged(Event& event)
 {
-	//Node* node = dynamic_cast<Node*>(event.origin);
-	//if (node)
-	//{
-	//	wxDataViewItem item = wxDataViewItem(event.origin);
-	//	ItemChanged(item);
-	//}
-	//panel_.m_tree_ctrl->Refresh();
+	Node* node = dynamic_cast<Node*>(event.origin);
+	if (node->asRoot())
+		return;
+	if (node)
+	{
+		wxDataViewItem item = wxDataViewItem(event.origin);
+		ItemChanged(item);
+	}
+	panel_.m_tree_ctrl->Refresh();
 }
 

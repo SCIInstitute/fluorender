@@ -150,7 +150,7 @@ namespace flrd
 			return 0;
 	}
 
-	inline Pca &Cell::GetPca()
+	inline Pca Cell::GetPca()
 	{
 		return m_pca;
 	}

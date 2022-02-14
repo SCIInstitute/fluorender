@@ -142,7 +142,6 @@ TreePanel::TreePanel(
 
 TreePanel::~TreePanel()
 {
-
 }
 
 void TreePanel::SetScenegraph(fluo::Node* root)
