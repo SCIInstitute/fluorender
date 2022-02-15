@@ -34,20 +34,20 @@ DEALINGS IN THE SOFTWARE.
 #include "ListPanel.h"
 #include "VRenderView.h"
 #include "RenderCanvas.h"
-#include "VPropView.h"
-#include "MPropView.h"
+#include "VolumePropPanel.h"
+#include "MeshPropPanel.h"
 #include "APropView.h"
 #include "MManipulator.h"
 #include "VMovieView.h"
-#include "ClippingView.h"
-#include "AdjustView.h"
+#include "ClipPlanePanel.h"
+#include "OutAdjustPanel.h"
 #include "SettingDlg.h"
 #include "HelpDlg.h"
 #include "BrushToolDlg.h"
 #include "NoiseCancellingDlg.h"
 #include "CountingDlg.h"
 #include "ConvertDlg.h"
-#include "ColocalizationDlg.h"
+#include "ColocalDlg.h"
 #include "RecorderDlg.h"
 #include "MeasureDlg.h"
 #include "TraceDlg.h"
@@ -220,9 +220,9 @@ public:
 	//	fluo::Annotations* ann=0);
 
 	//prop view
-	AdjustView* GetAdjustView();
+	OutAdjustPanel* GetAdjustView();
 	//tool views
-	VPropView* GetPropView()
+	VolumePropPanel* GetPropView()
 	{ return m_volume_prop; }
 	//movie view
 	VMovieView* GetMovieView()
@@ -234,7 +234,7 @@ public:
 	HelpDlg* GetHelpDlg()
 	{ return m_help_dlg; }
 	//clipping view
-	ClippingView* GetClippingView()
+	ClipPlanePanel* GetClippingView()
 	{ return m_clip_view; }
 	//brush dialog
 	BrushToolDlg* GetBrushToolDlg()
@@ -248,7 +248,7 @@ public:
 	//convert dialog
 	ConvertDlg* GetConvertDlg()
 	{ return m_convert_dlg; }
-	ColocalizationDlg* GetColocalizationDlg()
+	ColocalDlg* GetColocalizationDlg()
 	{ return m_colocalization_dlg; }
 	//recorder dialog
 	RecorderDlg* GetRecorderDlg()
@@ -402,15 +402,15 @@ private:
 	vector <VRenderView*> m_vrv_list;
 	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;
-	ClippingView *m_clip_view;
-	AdjustView* m_adjust_view;
+	ClipPlanePanel *m_clip_view;
+	OutAdjustPanel* m_adjust_view;
 	SettingDlg* m_setting_dlg;
 	HelpDlg* m_help_dlg;
 	BrushToolDlg* m_brush_tool_dlg;
 	NoiseCancellingDlg* m_noise_cancelling_dlg;
 	CountingDlg* m_counting_dlg;
 	ConvertDlg* m_convert_dlg;
-	ColocalizationDlg* m_colocalization_dlg;
+	ColocalDlg* m_colocalization_dlg;
 	MeasureDlg* m_measure_dlg;
 	TraceDlg* m_trace_dlg;
 	OclDlg* m_ocl_dlg;
@@ -418,8 +418,8 @@ private:
 	CalculationDlg* m_calculation_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
-	VPropView* m_volume_prop;
-	MPropView* m_mesh_prop;
+	VolumePropPanel* m_volume_prop;
+	MeshPropPanel* m_mesh_prop;
 	MManipulator* m_mesh_manip;
 	APropView* m_annotation_prop;
 	//tester

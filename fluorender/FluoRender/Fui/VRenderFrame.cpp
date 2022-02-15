@@ -435,8 +435,8 @@ VRenderFrame::VRenderFrame(
 		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VPropView(this, m_prop_panel);
-	m_mesh_prop = new MPropView(this, m_prop_panel);
+	m_volume_prop = new VolumePropPanel(this, m_prop_panel);
+	m_mesh_prop = new MeshPropPanel(this, m_prop_panel);
 	m_mesh_manip = new MManipulator(this, m_prop_panel);
 	m_annotation_prop = new APropView(this, m_prop_panel);
 	m_prop_panel->SetSizer(m_prop_sizer);
@@ -450,14 +450,14 @@ VRenderFrame::VRenderFrame(
 	m_annotation_prop->Show(false);
 
 	//clipping view
-	m_clip_view = new ClippingView(this,
+	m_clip_view = new ClipPlanePanel(this,
 		wxDefaultPosition, wxSize(130,700));
 	m_clip_view->SetDataManager(&m_data_mgr);
 	m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
 		m_setting_dlg->GetPlaneMode()));
 
 	//adjust view
-	m_adjust_view = new AdjustView(this,
+	m_adjust_view = new OutAdjustPanel(this,
 		wxDefaultPosition, wxSize(130, 700));
 
 	wxString font_file = m_setting_dlg->GetFontFile();
@@ -522,7 +522,7 @@ VRenderFrame::VRenderFrame(
 	m_convert_dlg = new ConvertDlg(this);
 
 	//colocalization dialog
-	m_colocalization_dlg = new ColocalizationDlg(this);
+	m_colocalization_dlg = new ColocalDlg(this);
 
 	//measure dialog
 	m_measure_dlg = new MeasureDlg(this);
@@ -1560,7 +1560,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, fluo::Rende
 					else
 						vd->flipValue(gstRandomizeColor, bval);
 
-					v->addVolumeData(vd, 0);
+					group_sel = v->addVolumeData(vd, group_sel);
 					vd_sel = vd;
 
 					if (vd->GetReader() && vd->GetReader()->GetTimeNum()>1)
@@ -2776,7 +2776,7 @@ void VRenderFrame::DeleteVRenderView(const wxString &name)
 	//}
 }
 
-AdjustView* VRenderFrame::GetAdjustView()
+OutAdjustPanel* VRenderFrame::GetAdjustView()
 {
 	return m_adjust_view;
 }
@@ -5738,9 +5738,9 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 		m_tb_menu_ui->Check(ID_UIMovieView, false);
 	else if (name == "PropPanel")
 		m_tb_menu_ui->Check(ID_UIPropView, false);
-	else if (name == "AdjustView")
+	else if (name == "OutAdjustPanel")
 		m_tb_menu_ui->Check(ID_UIAdjView, false);
-	else if (name == "ClippingView")
+	else if (name == "ClipPlanePanel")
 		m_tb_menu_ui->Check(ID_UIClipView, false);
 }
 

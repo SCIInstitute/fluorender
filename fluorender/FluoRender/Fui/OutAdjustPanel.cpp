@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "AdjustView.h"
+#include "OutAdjustPanel.h"
 #include "VRenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
@@ -37,41 +37,41 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include "img/icons.h"
 
-BEGIN_EVENT_TABLE(AdjustView, wxPanel)
+BEGIN_EVENT_TABLE(OutAdjustPanel, wxPanel)
 	//set gamma
-	EVT_COMMAND_SCROLL(ID_RGammaSldr, AdjustView::OnRGammaChange)
-	EVT_TEXT(ID_RGammaText, AdjustView::OnRGammaText)
-	EVT_COMMAND_SCROLL(ID_GGammaSldr, AdjustView::OnGGammaChange)
-	EVT_TEXT(ID_GGammaText, AdjustView::OnGGammaText)
-	EVT_COMMAND_SCROLL(ID_BGammaSldr, AdjustView::OnBGammaChange)
-	EVT_TEXT(ID_BGammaText, AdjustView::OnBGammaText)
+	EVT_COMMAND_SCROLL(ID_RGammaSldr, OutAdjustPanel::OnRGammaChange)
+	EVT_TEXT(ID_RGammaText, OutAdjustPanel::OnRGammaText)
+	EVT_COMMAND_SCROLL(ID_GGammaSldr, OutAdjustPanel::OnGGammaChange)
+	EVT_TEXT(ID_GGammaText, OutAdjustPanel::OnGGammaText)
+	EVT_COMMAND_SCROLL(ID_BGammaSldr, OutAdjustPanel::OnBGammaChange)
+	EVT_TEXT(ID_BGammaText, OutAdjustPanel::OnBGammaText)
 	//set brightness
-	EVT_COMMAND_SCROLL(ID_RBrightnessSldr, AdjustView::OnRBrightnessChange)
-	EVT_TEXT(ID_RBrightnessText, AdjustView::OnRBrightnessText)
-	EVT_COMMAND_SCROLL(ID_GBrightnessSldr, AdjustView::OnGBrightnessChange)
-	EVT_TEXT(ID_GBrightnessText, AdjustView::OnGBrightnessText)
-	EVT_COMMAND_SCROLL(ID_BBrightnessSldr, AdjustView::OnBBrightnessChange)
-	EVT_TEXT(ID_BBrightnessText, AdjustView::OnBBrightnessText)
+	EVT_COMMAND_SCROLL(ID_RBrightnessSldr, OutAdjustPanel::OnRBrightnessChange)
+	EVT_TEXT(ID_RBrightnessText, OutAdjustPanel::OnRBrightnessText)
+	EVT_COMMAND_SCROLL(ID_GBrightnessSldr, OutAdjustPanel::OnGBrightnessChange)
+	EVT_TEXT(ID_GBrightnessText, OutAdjustPanel::OnGBrightnessText)
+	EVT_COMMAND_SCROLL(ID_BBrightnessSldr, OutAdjustPanel::OnBBrightnessChange)
+	EVT_TEXT(ID_BBrightnessText, OutAdjustPanel::OnBBrightnessText)
 	//set hdr
-	EVT_COMMAND_SCROLL(ID_RHdrSldr, AdjustView::OnRHdrChange)
-	EVT_TEXT(ID_RHdrText, AdjustView::OnRHdrText)
-	EVT_COMMAND_SCROLL(ID_GHdrSldr, AdjustView::OnGHdrChange)
-	EVT_TEXT(ID_GHdrText, AdjustView::OnGHdrText)
-	EVT_COMMAND_SCROLL(ID_BHdrSldr, AdjustView::OnBHdrChange)
-	EVT_TEXT(ID_BHdrText, AdjustView::OnBHdrText)
+	EVT_COMMAND_SCROLL(ID_RHdrSldr, OutAdjustPanel::OnRHdrChange)
+	EVT_TEXT(ID_RHdrText, OutAdjustPanel::OnRHdrText)
+	EVT_COMMAND_SCROLL(ID_GHdrSldr, OutAdjustPanel::OnGHdrChange)
+	EVT_TEXT(ID_GHdrText, OutAdjustPanel::OnGHdrText)
+	EVT_COMMAND_SCROLL(ID_BHdrSldr, OutAdjustPanel::OnBHdrChange)
+	EVT_TEXT(ID_BHdrText, OutAdjustPanel::OnBHdrText)
 	//reset
-	EVT_BUTTON(ID_RResetBtn, AdjustView::OnRReset)
-	EVT_BUTTON(ID_GResetBtn, AdjustView::OnGReset)
-	EVT_BUTTON(ID_BResetBtn, AdjustView::OnBReset)
+	EVT_BUTTON(ID_RResetBtn, OutAdjustPanel::OnRReset)
+	EVT_BUTTON(ID_GResetBtn, OutAdjustPanel::OnGReset)
+	EVT_BUTTON(ID_BResetBtn, OutAdjustPanel::OnBReset)
 	//set sync
-	EVT_TOOL(ID_SyncRChk, AdjustView::OnSyncRCheck)
-	EVT_TOOL(ID_SyncGChk, AdjustView::OnSyncGCheck)
-	EVT_TOOL(ID_SyncBChk, AdjustView::OnSyncBCheck)
+	EVT_TOOL(ID_SyncRChk, OutAdjustPanel::OnSyncRCheck)
+	EVT_TOOL(ID_SyncGChk, OutAdjustPanel::OnSyncGCheck)
+	EVT_TOOL(ID_SyncBChk, OutAdjustPanel::OnSyncBCheck)
 	//set default
-	EVT_BUTTON(ID_DefaultBtn, AdjustView::OnSaveDefault)
+	EVT_BUTTON(ID_DefaultBtn, OutAdjustPanel::OnSaveDefault)
 END_EVENT_TABLE()
 
-AdjustView::AdjustView(VRenderFrame* frame,
+OutAdjustPanel::OutAdjustPanel(VRenderFrame* frame,
 					   const wxPoint& pos,
 					   const wxSize& size,
 					   long style,
@@ -342,17 +342,17 @@ m_dft_sync_b(false)
 	LoadSettings();
 }
 
-AdjustView::~AdjustView()
+OutAdjustPanel::~OutAdjustPanel()
 {
 }
 
-void AdjustView::RefreshVRenderViews(bool interactive)
+void OutAdjustPanel::RefreshVRenderViews(bool interactive)
 {
 	//if (m_frame)
 	//	m_frame->RefreshVRenderViews(false, interactive);
 }
 
-void AdjustView::GetSettings()
+void OutAdjustPanel::GetSettings()
 {
 	//red
 	bool sync_r = false;
@@ -474,7 +474,7 @@ void AdjustView::GetSettings()
 		DisableAll();
 }
 
-void AdjustView::DisableAll()
+void OutAdjustPanel::DisableAll()
 {
 	//red
 	m_sync_r_chk->Disable();
@@ -508,7 +508,7 @@ void AdjustView::DisableAll()
 	m_dft_btn->Disable();
 }
 
-void AdjustView::EnableAll()
+void OutAdjustPanel::EnableAll()
 {
 	//red
 	m_sync_r_chk->Enable();
@@ -543,7 +543,7 @@ void AdjustView::EnableAll()
 }
 
 //set view
-void AdjustView::SetView(fluo::Renderview *view)
+void OutAdjustPanel::SetView(fluo::Renderview *view)
 {
 	if (view)
 	{
@@ -558,13 +558,13 @@ void AdjustView::SetView(fluo::Renderview *view)
 	}
 }
 
-fluo::Renderview* AdjustView::GetView()
+fluo::Renderview* OutAdjustPanel::GetView()
 {
 	return m_view;
 }
 
 //set volume data
-void AdjustView::SetVolumeData(fluo::VolumeData* vd)
+void OutAdjustPanel::SetVolumeData(fluo::VolumeData* vd)
 {
 	if (vd)
 	{
@@ -579,13 +579,13 @@ void AdjustView::SetVolumeData(fluo::VolumeData* vd)
 	}
 }
 
-fluo::VolumeData* AdjustView::GetVolumeData()
+fluo::VolumeData* OutAdjustPanel::GetVolumeData()
 {
 	return m_vd;
 }
 
 //set group
-void AdjustView::SetGroup(fluo::VolumeGroup *group)
+void OutAdjustPanel::SetGroup(fluo::VolumeGroup *group)
 {
 	if (group)
 	{
@@ -600,13 +600,13 @@ void AdjustView::SetGroup(fluo::VolumeGroup *group)
 	}
 }
 
-fluo::VolumeGroup* AdjustView::GetGroup()
+fluo::VolumeGroup* OutAdjustPanel::GetGroup()
 {
 	return m_group;
 }
 
 //set volume adjustment to link to group
-void AdjustView::SetGroupLink(fluo::VolumeGroup *group)
+void OutAdjustPanel::SetGroupLink(fluo::VolumeGroup *group)
 {
 	if (group)
 	{
@@ -620,7 +620,7 @@ void AdjustView::SetGroupLink(fluo::VolumeGroup *group)
 	}
 }
 
-void AdjustView::OnRGammaChange(wxScrollEvent & event)
+void OutAdjustPanel::OnRGammaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -628,7 +628,7 @@ void AdjustView::OnRGammaChange(wxScrollEvent & event)
 		m_r_gamma_text->SetValue(str);
 }
 
-void AdjustView::OnRGammaText(wxCommandEvent& event)
+void OutAdjustPanel::OnRGammaText(wxCommandEvent& event)
 {
 	wxString str = m_r_gamma_text->GetValue();
 	double val;
@@ -698,7 +698,7 @@ void AdjustView::OnRGammaText(wxCommandEvent& event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnGGammaChange(wxScrollEvent & event)
+void OutAdjustPanel::OnGGammaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -706,7 +706,7 @@ void AdjustView::OnGGammaChange(wxScrollEvent & event)
 		m_g_gamma_text->SetValue(str);
 }
 
-void AdjustView::OnGGammaText(wxCommandEvent& event)
+void OutAdjustPanel::OnGGammaText(wxCommandEvent& event)
 {
 	wxString str = m_g_gamma_text->GetValue();
 	double val;
@@ -774,7 +774,7 @@ void AdjustView::OnGGammaText(wxCommandEvent& event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnBGammaChange(wxScrollEvent & event)
+void OutAdjustPanel::OnBGammaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -782,7 +782,7 @@ void AdjustView::OnBGammaChange(wxScrollEvent & event)
 		m_b_gamma_text->SetValue(str);
 }
 
-void AdjustView::OnBGammaText(wxCommandEvent& event)
+void OutAdjustPanel::OnBGammaText(wxCommandEvent& event)
 {
 	wxString str = m_b_gamma_text->GetValue();
 	double val;
@@ -851,7 +851,7 @@ void AdjustView::OnBGammaText(wxCommandEvent& event)
 }
 
 //brightness
-void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
+void OutAdjustPanel::OnRBrightnessChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition();
 	wxString str = wxString::Format("%d", int(val));
@@ -859,7 +859,7 @@ void AdjustView::OnRBrightnessChange(wxScrollEvent & event)
 		m_r_brightness_text->SetValue(str);
 }
 
-void AdjustView::OnRBrightnessText(wxCommandEvent& event)
+void OutAdjustPanel::OnRBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_r_brightness_text->GetValue();
 	double val;
@@ -927,7 +927,7 @@ void AdjustView::OnRBrightnessText(wxCommandEvent& event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
+void OutAdjustPanel::OnGBrightnessChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition();
 	wxString str = wxString::Format("%d", int(val));
@@ -935,7 +935,7 @@ void AdjustView::OnGBrightnessChange(wxScrollEvent & event)
 		m_g_brightness_text->SetValue(str);
 }
 
-void AdjustView::OnGBrightnessText(wxCommandEvent& event)
+void OutAdjustPanel::OnGBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_g_brightness_text->GetValue();
 	double val;
@@ -1003,7 +1003,7 @@ void AdjustView::OnGBrightnessText(wxCommandEvent& event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
+void OutAdjustPanel::OnBBrightnessChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition();
 	wxString str = wxString::Format("%d", int(val));
@@ -1011,7 +1011,7 @@ void AdjustView::OnBBrightnessChange(wxScrollEvent & event)
 		m_b_brightness_text->SetValue(str);
 }
 
-void AdjustView::OnBBrightnessText(wxCommandEvent& event)
+void OutAdjustPanel::OnBBrightnessText(wxCommandEvent& event)
 {
 	wxString str = m_b_brightness_text->GetValue();
 	double val;
@@ -1079,7 +1079,7 @@ void AdjustView::OnBBrightnessText(wxCommandEvent& event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnRHdrChange(wxScrollEvent &event)
+void OutAdjustPanel::OnRHdrChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1087,7 +1087,7 @@ void AdjustView::OnRHdrChange(wxScrollEvent &event)
 		m_r_hdr_text->SetValue(str);
 }
 
-void AdjustView::OnRHdrText(wxCommandEvent &event)
+void OutAdjustPanel::OnRHdrText(wxCommandEvent &event)
 {
 	wxString str = m_r_hdr_text->GetValue();
 	double val;
@@ -1155,7 +1155,7 @@ void AdjustView::OnRHdrText(wxCommandEvent &event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnGHdrChange(wxScrollEvent &event)
+void OutAdjustPanel::OnGHdrChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1163,7 +1163,7 @@ void AdjustView::OnGHdrChange(wxScrollEvent &event)
 		m_g_hdr_text->SetValue(str);
 }
 
-void AdjustView::OnGHdrText(wxCommandEvent &event)
+void OutAdjustPanel::OnGHdrText(wxCommandEvent &event)
 {
 	wxString str = m_g_hdr_text->GetValue();
 	double val;
@@ -1231,7 +1231,7 @@ void AdjustView::OnGHdrText(wxCommandEvent &event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnBHdrChange(wxScrollEvent &event)
+void OutAdjustPanel::OnBHdrChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -1239,7 +1239,7 @@ void AdjustView::OnBHdrChange(wxScrollEvent &event)
 		m_b_hdr_text->SetValue(str);
 }
 
-void AdjustView::OnBHdrText(wxCommandEvent &event)
+void OutAdjustPanel::OnBHdrText(wxCommandEvent &event)
 {
 	wxString str = m_b_hdr_text->GetValue();
 	double val;
@@ -1307,7 +1307,7 @@ void AdjustView::OnBHdrText(wxCommandEvent &event)
 	RefreshVRenderViews(true);
 }
 
-void AdjustView::OnSyncRCheck(wxCommandEvent &event)
+void OutAdjustPanel::OnSyncRCheck(wxCommandEvent &event)
 {
 	m_sync_r = m_sync_r_chk->GetToolState(ID_SyncRChk);
 	m_sync_r_chk->SetToolNormalBitmap(ID_SyncRChk,
@@ -1333,7 +1333,7 @@ void AdjustView::OnSyncRCheck(wxCommandEvent &event)
 	//	m_group->SetSyncRAll(m_sync_r);
 }
 
-void AdjustView::OnSyncGCheck(wxCommandEvent &event)
+void OutAdjustPanel::OnSyncGCheck(wxCommandEvent &event)
 {
 	m_sync_g = m_sync_g_chk->GetToolState(ID_SyncGChk);
 	m_sync_g_chk->SetToolNormalBitmap(ID_SyncGChk,
@@ -1359,7 +1359,7 @@ void AdjustView::OnSyncGCheck(wxCommandEvent &event)
 	//	m_group->SetSyncGAll(m_sync_g);
 }
 
-void AdjustView::OnSyncBCheck(wxCommandEvent &event)
+void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
 {
 	m_sync_b = m_sync_b_chk->GetToolState(ID_SyncBChk);
 	m_sync_b_chk->SetToolNormalBitmap(ID_SyncBChk,
@@ -1385,7 +1385,7 @@ void AdjustView::OnSyncBCheck(wxCommandEvent &event)
 	//	m_group->SetSyncBAll(m_sync_b);
 }
 
-void AdjustView::OnSaveDefault(wxCommandEvent &event)
+void OutAdjustPanel::OnSaveDefault(wxCommandEvent &event)
 {
 	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
@@ -1443,7 +1443,7 @@ void AdjustView::OnSaveDefault(wxCommandEvent &event)
 	SaveConfig(fconfig, dft);
 }
 
-void AdjustView::LoadSettings()
+void OutAdjustPanel::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
 	expath = wxPathOnly(expath);
@@ -1504,7 +1504,7 @@ void AdjustView::LoadSettings()
 
 }
 
-void AdjustView::GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
+void OutAdjustPanel::GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
 							 bool &sync_r, bool &sync_g, bool &sync_b)
 {
 	GammaUI2(m_dft_gamma.r(), gamma[0]);
@@ -1520,82 +1520,82 @@ void AdjustView::GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::
 }
 
 //change settings externally
-void AdjustView::ChangeRGamma(double gamma_r)
+void OutAdjustPanel::ChangeRGamma(double gamma_r)
 {
 	Gamma2UI(gamma_r, gamma_r);
 	m_r_gamma_text->SetValue(wxString::Format("%.2f", gamma_r));
 }
 
-void AdjustView::ChangeGGamma(double gamma_g)
+void OutAdjustPanel::ChangeGGamma(double gamma_g)
 {
 	Gamma2UI(gamma_g, gamma_g);
 	m_g_gamma_text->SetValue(wxString::Format("%.2f", gamma_g));
 }
 
-void AdjustView::ChangeBGamma(double gamma_b)
+void OutAdjustPanel::ChangeBGamma(double gamma_b)
 {
 	Gamma2UI(gamma_b, gamma_b);
 	m_b_gamma_text->SetValue(wxString::Format("%.2f", gamma_b));
 }
 
-void AdjustView::ChangeRBrightness(double brightness_r)
+void OutAdjustPanel::ChangeRBrightness(double brightness_r)
 {
 	Brightness2UI(brightness_r, brightness_r);
 	m_r_brightness_text->SetValue(wxString::Format("%.0f", brightness_r));
 }
 
-void AdjustView::ChangeGBrightness(double brightness_g)
+void OutAdjustPanel::ChangeGBrightness(double brightness_g)
 {
 	Brightness2UI(brightness_g, brightness_g);
 	m_g_brightness_text->SetValue(wxString::Format("%.0f", brightness_g));
 }
 
-void AdjustView::ChangeBBrightness(double brightness_b)
+void OutAdjustPanel::ChangeBBrightness(double brightness_b)
 {
 	Brightness2UI(brightness_b, brightness_b);
 	m_b_brightness_text->SetValue(wxString::Format("%.0f", brightness_b));
 }
 
-void AdjustView::ChangeRHdr(double hdr_r)
+void OutAdjustPanel::ChangeRHdr(double hdr_r)
 {
 	Hdr2UI(hdr_r, hdr_r);
 	m_r_hdr_text->SetValue(wxString::Format("%.2f", hdr_r));
 }
 
-void AdjustView::ChangeGHdr(double hdr_g)
+void OutAdjustPanel::ChangeGHdr(double hdr_g)
 {
 	Hdr2UI(hdr_g, hdr_g);
 	m_g_hdr_text->SetValue(wxString::Format("%.2f", hdr_g));
 }
 
-void AdjustView::ChangeBHdr(double hdr_b)
+void OutAdjustPanel::ChangeBHdr(double hdr_b)
 {
 	Hdr2UI(hdr_b, hdr_b);
 	m_b_hdr_text->SetValue(wxString::Format("%.2f", hdr_b));
 }
 
-void AdjustView::ChangeRSync(bool sync_r)
+void OutAdjustPanel::ChangeRSync(bool sync_r)
 {
 	m_sync_r_chk->ToggleTool(ID_SyncRChk,sync_r);
 	wxCommandEvent event;
 	OnSyncRCheck(event);
 }
 
-void AdjustView::ChangeGSync(bool sync_g)
+void OutAdjustPanel::ChangeGSync(bool sync_g)
 {
 	m_sync_g_chk->ToggleTool(ID_SyncGChk,sync_g);
 	wxCommandEvent event;
 	OnSyncGCheck(event);
 }
 
-void AdjustView::ChangeBSync(bool sync_b)
+void OutAdjustPanel::ChangeBSync(bool sync_b)
 {
 	m_sync_b_chk->ToggleTool(ID_SyncBChk,sync_b);
 	wxCommandEvent event;
 	OnSyncBCheck(event);
 }
 
-void AdjustView::UpdateSync()
+void OutAdjustPanel::UpdateSync()
 {
 	int i;
 	int cnt;
@@ -1764,7 +1764,7 @@ void AdjustView::UpdateSync()
 
 }
 
-void AdjustView::OnRReset(wxCommandEvent &event)
+void OutAdjustPanel::OnRReset(wxCommandEvent &event)
 {
 	//reset gamma
 	double dft_value = 1.0;
@@ -1957,7 +1957,7 @@ void AdjustView::OnRReset(wxCommandEvent &event)
 	RefreshVRenderViews();
 }
 
-void AdjustView::OnGReset(wxCommandEvent &event)
+void OutAdjustPanel::OnGReset(wxCommandEvent &event)
 {
 	//reset gamma
 	double dft_value = 1.0;
@@ -2150,7 +2150,7 @@ void AdjustView::OnGReset(wxCommandEvent &event)
 	RefreshVRenderViews();
 }
 
-void AdjustView::OnBReset(wxCommandEvent &event)
+void OutAdjustPanel::OnBReset(wxCommandEvent &event)
 {
 	//reset gamma
 	double dft_value = 1.0;

@@ -51,7 +51,7 @@ namespace fluo
 	class VolumeData;
 	class MeshData;
 }
-class ClippingView: public wxPanel
+class ClipPlanePanel: public wxPanel
 {
 	enum
 	{
@@ -97,12 +97,12 @@ class ClippingView: public wxPanel
 	};
 
 public:
-	ClippingView(VRenderFrame* frame,
+	ClipPlanePanel(VRenderFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
-		const wxString& name="ClippingView");
-	~ClippingView();
+		const wxString& name="ClipPlanePanel");
+	~ClipPlanePanel();
 
 	void SetVolumeData(fluo::VolumeData* vd);
 	void SetMeshData(fluo::MeshData* md);

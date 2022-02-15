@@ -1468,7 +1468,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 //
 //	if (m_frame)
 //	{
-//		AdjustView* adjust_view = m_frame->GetAdjustView();
+//		OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 //		if (adjust_view)
 //		{
 //			adjust_view->SetVolumeData(src_vd);
@@ -1690,7 +1690,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 //	//set default settings
 //	if (m_frame)
 //	{
-//		AdjustView* adjust_view = m_frame->GetAdjustView();
+//		OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 //		if (adjust_view && group)
 //		{
 //			fluo::Color gamma, brightness, hdr;
@@ -1734,7 +1734,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 //	//set default settings
 //	if (m_frame)
 //	{
-//		AdjustView* adjust_view = m_frame->GetAdjustView();
+//		OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 //		if (adjust_view)
 //		{
 //			fluo::Color gamma, brightness, hdr;

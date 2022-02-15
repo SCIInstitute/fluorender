@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/dataview.h>
-#include <TreeModel.h>
+#include <TreeModel.hpp>
 
 class TreePanel : public wxPanel
 {

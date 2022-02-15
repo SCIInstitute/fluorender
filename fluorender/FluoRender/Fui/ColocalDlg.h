@@ -42,7 +42,7 @@ namespace fluo
 	class VolumeData;
 	class VolumeGroup;
 }
-class ColocalizationDlg : public wxPanel
+class ColocalDlg : public wxPanel
 {
 public:
 	enum
@@ -66,8 +66,8 @@ public:
 		ID_OutputGrid
 	};
 
-	ColocalizationDlg(VRenderFrame* frame);
-	~ColocalizationDlg();
+	ColocalDlg(VRenderFrame* frame);
+	~ColocalDlg();
 
 	void SetView(fluo::Renderview* view)
 	{

@@ -239,7 +239,7 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 
 	//if (m_frame)
 	//{
-	//	AdjustView* adjust_view = m_frame->GetAdjustView();
+	//	OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 	//	if (adjust_view)
 	//	{
 	//		adjust_view->SetGroupLink(group);

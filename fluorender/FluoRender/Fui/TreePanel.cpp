@@ -534,7 +534,7 @@ void DataTreeCtrl::DeleteSelection()
 	//							view->RemoveVolumeData(name_data.ToStdString());
 	//							if (view->GetVolMethod() == VOL_METHOD_MULTI)
 	//							{
-	//								AdjustView* adjust_view = m_frame->GetAdjustView();
+	//								OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 	//								if (adjust_view)
 	//								{
 	//									adjust_view->SetView(view);
@@ -591,7 +591,7 @@ void DataTreeCtrl::DeleteSelection()
 
 	//				if (view->GetVolMethod() == VOL_METHOD_MULTI)
 	//				{
-	//					AdjustView* adjust_view = m_frame->GetAdjustView();
+	//					OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 	//					if (adjust_view)
 	//					{
 	//						adjust_view->SetView(view);

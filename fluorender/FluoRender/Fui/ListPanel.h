@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/dataview.h>
-#include <ListModel.h>
+#include <ListModel.hpp>
 
 class ListPanel : public wxPanel
 {

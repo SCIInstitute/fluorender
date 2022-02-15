@@ -25,38 +25,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ColocalizationDlg.h"
+#include "ColocalDlg.h"
 #include "VRenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
 #include <Calculate/Compare.h>
 
-BEGIN_EVENT_TABLE(ColocalizationDlg, wxPanel)
-	EVT_BUTTON(ID_ColocalizeBtn, ColocalizationDlg::OnColocalizenBtn)
-	EVT_CHECKBOX(ID_UseSelChk, ColocalizationDlg::OnUseSelChk)
-	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ColocalizationDlg::OnAutoUpdate)
+BEGIN_EVENT_TABLE(ColocalDlg, wxPanel)
+	EVT_BUTTON(ID_ColocalizeBtn, ColocalDlg::OnColocalizenBtn)
+	EVT_CHECKBOX(ID_UseSelChk, ColocalDlg::OnUseSelChk)
+	EVT_TOGGLEBUTTON(ID_AutoUpdateBtn, ColocalDlg::OnAutoUpdate)
 	//settings
-	EVT_RADIOBUTTON(ID_ProductRdb, ColocalizationDlg::OnMethodRdb)
-	EVT_RADIOBUTTON(ID_MinValueRdb, ColocalizationDlg::OnMethodRdb)
-	EVT_RADIOBUTTON(ID_LogicalAndRdb, ColocalizationDlg::OnMethodRdb)
+	EVT_RADIOBUTTON(ID_ProductRdb, ColocalDlg::OnMethodRdb)
+	EVT_RADIOBUTTON(ID_MinValueRdb, ColocalDlg::OnMethodRdb)
+	EVT_RADIOBUTTON(ID_LogicalAndRdb, ColocalDlg::OnMethodRdb)
 	//format
-	EVT_TOGGLEBUTTON(ID_IntWeightBtn, ColocalizationDlg::OnIntWeightBtn)
-	EVT_TOGGLEBUTTON(ID_RatioBtn, ColocalizationDlg::OnRatioBtn)
-	EVT_TOGGLEBUTTON(ID_PhysicalBtn, ColocalizationDlg::OnPhysicalBtn)
-	EVT_TOGGLEBUTTON(ID_ColorMapBtn, ColocalizationDlg::OnColorMapBtn)
+	EVT_TOGGLEBUTTON(ID_IntWeightBtn, ColocalDlg::OnIntWeightBtn)
+	EVT_TOGGLEBUTTON(ID_RatioBtn, ColocalDlg::OnRatioBtn)
+	EVT_TOGGLEBUTTON(ID_PhysicalBtn, ColocalDlg::OnPhysicalBtn)
+	EVT_TOGGLEBUTTON(ID_ColorMapBtn, ColocalDlg::OnColorMapBtn)
 	//output
-	EVT_CHECKBOX(ID_HistoryChk, ColocalizationDlg::OnHistoryChk)
-	EVT_BUTTON(ID_ClearHistBtn, ColocalizationDlg::OnClearHistBtn)
-	EVT_KEY_DOWN(ColocalizationDlg::OnKeyDown)
-	EVT_GRID_SELECT_CELL(ColocalizationDlg::OnSelectCell)
-	EVT_GRID_LABEL_LEFT_CLICK(ColocalizationDlg::OnGridLabelClick)
+	EVT_CHECKBOX(ID_HistoryChk, ColocalDlg::OnHistoryChk)
+	EVT_BUTTON(ID_ClearHistBtn, ColocalDlg::OnClearHistBtn)
+	EVT_KEY_DOWN(ColocalDlg::OnKeyDown)
+	EVT_GRID_SELECT_CELL(ColocalDlg::OnSelectCell)
+	EVT_GRID_LABEL_LEFT_CLICK(ColocalDlg::OnGridLabelClick)
 END_EVENT_TABLE()
 
-ColocalizationDlg::ColocalizationDlg(VRenderFrame* frame) :
+ColocalDlg::ColocalDlg(VRenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(500, 500),
-0, "ColocalizationDlg"),
+0, "ColocalDlg"),
 m_frame(frame),
 m_view(0),
 m_group(0),
@@ -171,11 +171,11 @@ m_test_speed(false)
 	GetSettings();
 }
 
-ColocalizationDlg::~ColocalizationDlg()
+ColocalDlg::~ColocalDlg()
 {
 }
 
-void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
+void ColocalDlg::SetOutput(wxString &titles, wxString &values)
 {
 	wxString copy_data;
 	wxString cur_field;
@@ -246,7 +246,7 @@ void ColocalizationDlg::SetOutput(wxString &titles, wxString &values)
 	m_output_grid->ClearSelection();
 }
 
-void ColocalizationDlg::CopyData()
+void ColocalDlg::CopyData()
 {
 	int i, k;
 	wxString copy_data;
@@ -290,11 +290,11 @@ void ColocalizationDlg::CopyData()
 	}
 }
 
-void ColocalizationDlg::PasteData()
+void ColocalDlg::PasteData()
 {
 }
 
-void ColocalizationDlg::GetSettings()
+void ColocalDlg::GetSettings()
 {
 	m_use_mask = false;
 	m_auto_update = false;
@@ -306,7 +306,7 @@ void ColocalizationDlg::GetSettings()
 }
 
 //execute
-void ColocalizationDlg::Colocalize()
+void ColocalDlg::Colocalize()
 {
 	if (!m_group)
 		return;
@@ -390,10 +390,10 @@ void ColocalizationDlg::Colocalize()
 				compare.SetIntWeighted(m_int_weighted);
 				boost::signals2::connection preconn =
 					compare.prework.connect(std::bind(
-						&ColocalizationDlg::StartTimer, this, std::placeholders::_1));
+						&ColocalDlg::StartTimer, this, std::placeholders::_1));
 				boost::signals2::connection postconn =
 					compare.postwork.connect(std::bind(
-						&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
+						&ColocalDlg::StopTimer, this, std::placeholders::_1));
 				switch (m_method)
 				{
 				case 0://dot product
@@ -441,10 +441,10 @@ void ColocalizationDlg::Colocalize()
 			compare.SetIntWeighted(m_int_weighted);
 			boost::signals2::connection preconn =
 				compare.prework.connect(std::bind(
-					&ColocalizationDlg::StartTimer, this, std::placeholders::_1));
+					&ColocalDlg::StartTimer, this, std::placeholders::_1));
 			boost::signals2::connection postconn =
 				compare.postwork.connect(std::bind(
-					&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
+					&ColocalDlg::StopTimer, this, std::placeholders::_1));
 			//get threshold values
 			double th1, th2, th3, th4;
 			vd1->getValue(gstLowThreshold, th1);
@@ -528,7 +528,7 @@ void ColocalizationDlg::Colocalize()
 	SetOutput(m_titles, m_values);
 }
 
-void ColocalizationDlg::StartTimer(std::string str)
+void ColocalDlg::StartTimer(std::string str)
 {
 	if (m_test_speed)
 	{
@@ -536,7 +536,7 @@ void ColocalizationDlg::StartTimer(std::string str)
 	}
 }
 
-void ColocalizationDlg::StopTimer(std::string str)
+void ColocalDlg::StopTimer(std::string str)
 {
 	if (m_test_speed)
 	{
@@ -552,12 +552,12 @@ void ColocalizationDlg::StopTimer(std::string str)
 	}
 }
 
-void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent &event)
+void ColocalDlg::OnColocalizenBtn(wxCommandEvent &event)
 {
 	Colocalize();
 }
 
-void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
+void ColocalDlg::OnUseSelChk(wxCommandEvent &event)
 {
 	m_use_mask = m_use_sel_chk->GetValue();
 
@@ -565,14 +565,14 @@ void ColocalizationDlg::OnUseSelChk(wxCommandEvent &event)
 		Colocalize();
 }
 
-void ColocalizationDlg::OnAutoUpdate(wxCommandEvent &event)
+void ColocalDlg::OnAutoUpdate(wxCommandEvent &event)
 {
 	m_auto_update = m_auto_update_btn->GetValue();
 	if (m_view)
 		m_view->setValue(gstPaintColocalize, m_auto_update);
 }
 
-void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)
+void ColocalDlg::OnMethodRdb(wxCommandEvent &event)
 {
 	if (m_product_rdb->GetValue())
 		m_method = 0;
@@ -586,7 +586,7 @@ void ColocalizationDlg::OnMethodRdb(wxCommandEvent &event)
 }
 
 //format
-void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent &event)
+void ColocalDlg::OnIntWeightBtn(wxCommandEvent &event)
 {
 	m_int_weighted = m_int_weight_btn->GetValue();
 
@@ -594,7 +594,7 @@ void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent &event)
 		Colocalize();
 }
 
-void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
+void ColocalDlg::OnRatioBtn(wxCommandEvent &event)
 {
 	m_get_ratio = m_ratio_btn->GetValue();
 
@@ -602,7 +602,7 @@ void ColocalizationDlg::OnRatioBtn(wxCommandEvent &event)
 		Colocalize();
 }
 
-void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
+void ColocalDlg::OnPhysicalBtn(wxCommandEvent &event)
 {
 	m_physical_size = m_physical_btn->GetValue();
 
@@ -610,7 +610,7 @@ void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent &event)
 		Colocalize();
 }
 
-void ColocalizationDlg::OnColorMapBtn(wxCommandEvent &event)
+void ColocalDlg::OnColorMapBtn(wxCommandEvent &event)
 {
 	m_colormap = m_colormap_btn->GetValue();
 
@@ -618,17 +618,17 @@ void ColocalizationDlg::OnColorMapBtn(wxCommandEvent &event)
 		Colocalize();
 }
 
-void ColocalizationDlg::OnHistoryChk(wxCommandEvent& event)
+void ColocalDlg::OnHistoryChk(wxCommandEvent& event)
 {
 	m_hold_history = m_history_chk->GetValue();
 }
 
-void ColocalizationDlg::OnClearHistBtn(wxCommandEvent& event)
+void ColocalDlg::OnClearHistBtn(wxCommandEvent& event)
 {
 	m_output_grid->DeleteRows(0, m_output_grid->GetNumberRows());
 }
 
-void ColocalizationDlg::OnKeyDown(wxKeyEvent& event)
+void ColocalDlg::OnKeyDown(wxKeyEvent& event)
 {
 	if (wxGetKeyState(WXK_CONTROL))
 	{
@@ -640,7 +640,7 @@ void ColocalizationDlg::OnKeyDown(wxKeyEvent& event)
 	event.Skip();
 }
 
-void ColocalizationDlg::OnSelectCell(wxGridEvent& event)
+void ColocalDlg::OnSelectCell(wxGridEvent& event)
 {
 	int r = event.GetRow();
 	int c = event.GetCol();
@@ -648,7 +648,7 @@ void ColocalizationDlg::OnSelectCell(wxGridEvent& event)
 	event.Skip();
 }
 
-void ColocalizationDlg::OnGridLabelClick(wxGridEvent& event)
+void ColocalDlg::OnGridLabelClick(wxGridEvent& event)
 {
 	m_output_grid->SetFocus();
 	event.Skip();

@@ -43,7 +43,7 @@ namespace fluo
 	class VolumeData;
 	class VolumeGroup;
 }
-class VPropView: public wxPanel
+class VolumePropPanel: public wxPanel
 {
 	enum
 	{
@@ -114,13 +114,13 @@ class VPropView: public wxPanel
 };
 
 public:
-	VPropView(VRenderFrame* frame,
+	VolumePropPanel(VRenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "VPropView");
-	~VPropView();
+		const wxString& name = "VolumePropPanel");
+	~VolumePropPanel();
 
 	void SetVolumeData(fluo::VolumeData* vd);
 	fluo::VolumeData* GetVolumeData();

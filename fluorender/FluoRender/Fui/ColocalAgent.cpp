@@ -1,0 +1,226 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2018 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+
+#include <ColocalAgent.hpp>
+#include <ColocalDlg.h>
+#include <Compare.h>
+#include <VolumeData.hpp>
+#include <fstream>
+
+using namespace fluo;
+
+ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
+	InterfaceAgent(),
+	dlg_(dlg)
+{
+
+}
+
+void ColocalAgent::setObject(Root* root)
+{
+	InterfaceAgent::setObject(root);
+	addValue("output file", std::wstring(L"colocalization_result.txt"));
+}
+
+Root* ColocalAgent::getObject()
+{
+	return dynamic_cast<Root*>(InterfaceAgent::getObject());
+}
+
+void ColocalAgent::UpdateAllSettings()
+{
+
+}
+
+void ColocalAgent::Run()
+{
+	Root* root = getObject();
+	if (!root)
+		return;
+	//get selections
+	class SelRetriever : public NodeVisitor
+	{
+	public:
+		SelRetriever() : NodeVisitor()
+		{
+			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
+		}
+
+		virtual void reset()
+		{
+			nodes_.clear();
+		}
+
+		virtual void apply(Node& node)
+		{
+			if (std::string("VolumeData") == node.className())
+			{
+				bool selected = false;
+				node.getValue("selected", selected);
+				if (selected)
+					nodes_.push_back(&node);
+			}
+			traverse(node);
+		}
+
+		virtual void apply(Group& group)
+		{
+			traverse(group);
+		}
+
+		NodePath &getResult()
+		{
+			return nodes_;
+		}
+
+	private:
+		NodePath nodes_;
+	};
+
+	SelRetriever retriever;
+	root->accept(retriever);
+	NodePath nodes = retriever.getResult();
+
+	size_t num = nodes.size();
+	if (num < 2)
+		return;
+
+	//result
+	std::vector<std::vector<double>> rm;//result matrix
+	rm.reserve(num);
+	for (size_t i = 0; i < num; ++i)
+	{
+		rm.push_back(std::vector<double>());
+		rm[i].reserve(num);
+		for (size_t j = 0; j < num; ++j)
+			rm[i].push_back(0);
+	}
+
+	size_t x = 0, y = 0;
+	for (auto it1 = nodes.begin();
+		it1 != nodes.end(); ++it1)
+	{
+		y = x;
+		for (auto it2 = it1;
+			it2 != nodes.end(); ++it2)
+		{
+			VolumeData* vd1 = (*it1)->asVolumeData();
+			VolumeData* vd2 = (*it2)->asVolumeData();
+			if (!vd1 || !vd2)
+				continue;
+
+			ChannelCompare compare(vd1, vd2);
+			//get threshold values
+			double th1, th2;
+			vd1->getValue("low threshold", th1);
+			vd2->getValue("low threshold", th2);
+			compare.Compare(th1, th2);
+			rm[x][y] = compare.Result();
+			rm[y][x] = compare.Result();
+			y++;
+		}
+		x++;
+	}
+
+	//output
+	std::wstring filename;
+	getValue("output file", filename);
+	std::ofstream outfile;
+	//print names
+	size_t pos = filename.find_last_of(L".");
+	std::wstring filename_names = filename;
+	if (pos != std::wstring::npos)
+		filename_names.insert(pos, L"_names");
+	else
+		filename_names += L"_names";
+	outfile.open(filename_names, std::ofstream::out);
+	int counter = 1;//excel starts from 1
+	for (auto it = nodes.begin();
+		it != nodes.end(); ++it)
+	{
+		outfile << counter++;
+		outfile << "\t";
+		outfile << (*it)->getName();
+		outfile << "\n";
+	}
+	outfile.close();
+	//print adj matrix
+	outfile.open(filename, std::ofstream::out);
+	for (size_t i = 0; i < num; ++i)
+	{
+		for (size_t j = 0; j < num; ++j)
+		{
+			outfile << rm[i][j];
+			if (j < num - 1)
+				outfile << "\t";
+		}
+		outfile << "\n";
+	}
+	outfile.close();
+
+	//nomralize
+	bool norm = false;
+	getValue("normalize", norm);
+	if (norm)
+	{
+		for (size_t i = 0; i < num; ++i)
+		{
+			//sum
+			double sum = 0;
+			for (size_t j = 0; j < num; ++j)
+			{
+				sum += rm[i][j];
+			}
+			//divide
+			if (sum < 1)
+				continue;
+			for (size_t j = 0; j < num; ++j)
+			{
+				rm[i][j] /= sum;
+			}
+		}
+		//output
+		std::wstring filename_markov = filename;
+		if (pos != std::wstring::npos)
+			filename_markov.insert(pos, L"_markov");
+		else
+			filename_markov += L"_markov";
+		outfile.open(filename_markov, std::ofstream::out);
+		for (size_t i = 0; i < num; ++i)
+		{
+			for (size_t j = 0; j < num; ++j)
+			{
+				outfile << rm[i][j];
+				if (j < num - 1)
+					outfile << "\t";
+			}
+			outfile << "\n";
+		}
+		outfile.close();
+	}
+}

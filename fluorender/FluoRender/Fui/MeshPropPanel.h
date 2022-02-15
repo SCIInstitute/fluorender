@@ -41,7 +41,7 @@ namespace fluo
 	class Renderview;
 	class MeshData;
 }
-class MPropView: public wxPanel
+class MeshPropPanel: public wxPanel
 {
 	enum
 	{
@@ -63,13 +63,13 @@ class MPropView: public wxPanel
 	};
 
 public:
-	MPropView(VRenderFrame* frame,
+	MeshPropPanel(VRenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "MPropView");
-	~MPropView();
+		const wxString& name = "MeshPropPanel");
+	~MeshPropPanel();
 
 	void SetView(fluo::Renderview* view);
 	void SetMeshData(fluo::MeshData* md);

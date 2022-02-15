@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <AgentFactory.hpp>
 #include <RenderCanvas.h>
-#include <ListModel.h>
-#include <TreeModel.h>
+#include <ListModel.hpp>
+#include <TreeModel.hpp>
 #include <TreePanel.h>
 //#include <Fui/VolumePropAgent.h>
 //#include <Fui/VolumePropPanel.h>

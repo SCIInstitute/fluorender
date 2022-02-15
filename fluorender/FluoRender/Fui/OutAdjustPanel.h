@@ -60,7 +60,7 @@ namespace fluo
 	class VolumeData;
 	class VolumeGroup;
 }
-class AdjustView: public wxPanel
+class OutAdjustPanel: public wxPanel
 {
 	enum
 	{
@@ -97,12 +97,12 @@ class AdjustView: public wxPanel
 	};
 
 public:
-	AdjustView(VRenderFrame* frame,
+	OutAdjustPanel(VRenderFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
-		const wxString& name="AdjustView");
-	~AdjustView();
+		const wxString& name="OutAdjustPanel");
+	~OutAdjustPanel();
 
 	//refresh
 	void RefreshVRenderViews(bool interactive=false);

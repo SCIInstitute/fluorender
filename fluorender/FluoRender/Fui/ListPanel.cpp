@@ -545,7 +545,7 @@ void DataListCtrl::AddToView(int menu_index, long item)
 				view->getValue(gstMixMethod, lval);
 				if (lval == fluo::Renderview::MIX_METHOD_MULTI)
 				{
-					AdjustView* adjust_view = m_frame->GetAdjustView();
+					OutAdjustPanel* adjust_view = m_frame->GetAdjustView();
 					if (adjust_view)
 					{
 						adjust_view->SetView(view);
