@@ -31,16 +31,16 @@ DEALINGS IN THE SOFTWARE.
 #include <ListModel.hpp>
 #include <TreeModel.hpp>
 #include <TreePanel.h>
-//#include <Fui/VolumePropAgent.h>
-//#include <Fui/VolumePropPanel.h>
-//#include <Fui/OutAdjustAgent.h>
-//#include <Fui/OutAdjustPanel.h>
-//#include <Fui/ClipPlaneAgent.h>
-//#include <Fui/ClipPlanePanel.h>
-//#include <Fui/MeshPropAgent.h>
-//#include <Fui/MeshPropPanel.h>
-//#include <Fui/ColocalAgent.h>
-//#include <Fui/ColocalDlg.h>
+#include <VolumePropAgent.hpp>
+#include <VolumePropPanel.h>
+#include <OutAdjustAgent.hpp>
+#include <OutAdjustPanel.h>
+#include <ClipPlaneAgent.hpp>
+#include <ClipPlanePanel.h>
+#include <MeshPropAgent.hpp>
+#include <MeshPropPanel.h>
+#include <ColocalAgent.hpp>
+#include <ColocalDlg.h>
 
 using namespace fluo;
 
@@ -66,7 +66,7 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	if (render_canvas_agent)
 	{
 		render_canvas_agent->setName(name);
-		render_canvas_agent->setValueChangedFunction("bounds",
+		render_canvas_agent->setValueChangedFunction(gstBounds,
 			std::bind(&RenderCanvasAgent::OnBoundsChanged,
 				render_canvas_agent, std::placeholders::_1));
 		render_canvas_agent->setDefaultValueChangedFunction(
@@ -147,190 +147,190 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	return tree_model;
 }
 
-//VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<VolumePropAgent*>(result);
-//
-//	//not found
-//	VolumePropAgent* volume_prop_agent =
-//			new VolumePropAgent(static_cast<VolumePropPanel&>(window));
-//	if (volume_prop_agent)
-//	{
-//		volume_prop_agent->setName(name);
-//		volume_prop_agent->setValueChangedFunction("luminance",
-//			std::bind(&VolumePropAgent::OnLuminanceChanged,
-//				volume_prop_agent, std::placeholders::_1));
-//		volume_prop_agent->setValueChangedFunction("color",
-//			std::bind(&VolumePropAgent::OnColorChanged,
-//				volume_prop_agent, std::placeholders::_1));
-//		objects_.push_front(volume_prop_agent);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, volume_prop_agent);
-//		notifyObservers(event);
-//	}
-//
-//	return volume_prop_agent;
-//}
-//
-//OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<OutAdjustAgent*>(result);
-//
-//	//not found
-//	OutAdjustAgent* out_adjust_agent =
-//		new OutAdjustAgent(static_cast<OutAdjustPanel&>(window));
-//	if (out_adjust_agent)
-//	{
-//		out_adjust_agent->setName(name);
-//		out_adjust_agent->setValueChangedFunction("gamma r",
-//			std::bind(&OutAdjustAgent::OnGammaRChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("gamma g",
-//			std::bind(&OutAdjustAgent::OnGammaGChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("gamma b",
-//			std::bind(&OutAdjustAgent::OnGammaBChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("brightness r",
-//			std::bind(&OutAdjustAgent::OnBrightnessRChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("brightness g",
-//			std::bind(&OutAdjustAgent::OnBrightnessGChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("brightness b",
-//			std::bind(&OutAdjustAgent::OnBrightnessBChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("equalize r",
-//			std::bind(&OutAdjustAgent::OnEqualizeRChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("equalize g",
-//			std::bind(&OutAdjustAgent::OnEqualizeGChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		out_adjust_agent->setValueChangedFunction("equalize b",
-//			std::bind(&OutAdjustAgent::OnEqualizeBChanged,
-//				out_adjust_agent, std::placeholders::_1));
-//		objects_.push_front(out_adjust_agent);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, out_adjust_agent);
-//		notifyObservers(event);
-//	}
-//
-//	return out_adjust_agent;
-//}
-//
-//ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<ClipPlaneAgent*>(result);
-//
-//	//not found
-//	ClipPlaneAgent* clip_plane_agent =
-//		new ClipPlaneAgent(static_cast<ClipPlanePanel&>(window));
-//	if (clip_plane_agent)
-//	{
-//		clip_plane_agent->setName(name);
-//		clip_plane_agent->setValueChangedFunction("clip x1",
-//			std::bind(&ClipPlaneAgent::OnClipXChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip x2",
-//			std::bind(&ClipPlaneAgent::OnClipXChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip y1",
-//			std::bind(&ClipPlaneAgent::OnClipYChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip y2",
-//			std::bind(&ClipPlaneAgent::OnClipYChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip z1",
-//			std::bind(&ClipPlaneAgent::OnClipZChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip z2",
-//			std::bind(&ClipPlaneAgent::OnClipZChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip dist x",
-//			std::bind(&ClipPlaneAgent::OnClipDistXChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip dist y",
-//			std::bind(&ClipPlaneAgent::OnClipDistYChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip dist z",
-//			std::bind(&ClipPlaneAgent::OnClipDistZChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip link x",
-//			std::bind(&ClipPlaneAgent::OnClipLinkXChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip link y",
-//			std::bind(&ClipPlaneAgent::OnClipLinkYChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip link z",
-//			std::bind(&ClipPlaneAgent::OnClipLinkZChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip rot x",
-//			std::bind(&ClipPlaneAgent::OnClipRotXChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip rot y",
-//			std::bind(&ClipPlaneAgent::OnClipRotYChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		clip_plane_agent->setValueChangedFunction("clip rot z",
-//			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
-//				clip_plane_agent, std::placeholders::_1));
-//		objects_.push_front(clip_plane_agent);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, clip_plane_agent);
-//		notifyObservers(event);
-//	}
-//
-//	return clip_plane_agent;
-//}
-//
-//MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<MeshPropAgent*>(result);
-//
-//	//not found
-//	MeshPropAgent* mesh_prop_agent =
-//		new MeshPropAgent(static_cast<MeshPropPanel&>(window));
-//	if (mesh_prop_agent)
-//	{
-//		mesh_prop_agent->setName(name);
-//		objects_.push_front(mesh_prop_agent);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, mesh_prop_agent);
-//		notifyObservers(event);
-//	}
-//
-//	return mesh_prop_agent;
-//}
-//
-//ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWindow &window)
-//{
-//	InterfaceAgent* result = findFirst(name);
-//	if (result)
-//		return dynamic_cast<ColocalAgent*>(result);
-//
-//	//not found
-//	ColocalAgent* colocal_agent =
-//		new ColocalAgent(static_cast<ColocalDlg&>(window));
-//	if (colocal_agent)
-//	{
-//		colocal_agent->setName(name);
-//		objects_.push_front(colocal_agent);
-//		FL::Event event;
-//		event.init(FL::Event::EVENT_NODE_ADDED,
-//			this, colocal_agent);
-//		notifyObservers(event);
-//	}
-//
-//	return colocal_agent;
-//}
+VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<VolumePropAgent*>(result);
+
+	//not found
+	VolumePropAgent* volume_prop_agent =
+			new VolumePropAgent(static_cast<VolumePropPanel&>(window));
+	if (volume_prop_agent)
+	{
+		volume_prop_agent->setName(name);
+		volume_prop_agent->setValueChangedFunction(gstLuminance,
+			std::bind(&VolumePropAgent::OnLuminanceChanged,
+				volume_prop_agent, std::placeholders::_1));
+		volume_prop_agent->setValueChangedFunction(gstColor,
+			std::bind(&VolumePropAgent::OnColorChanged,
+				volume_prop_agent, std::placeholders::_1));
+		objects_.push_front(volume_prop_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, volume_prop_agent);
+		notifyObservers(event);
+	}
+
+	return volume_prop_agent;
+}
+
+OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<OutAdjustAgent*>(result);
+
+	//not found
+	OutAdjustAgent* out_adjust_agent =
+		new OutAdjustAgent(static_cast<OutAdjustPanel&>(window));
+	if (out_adjust_agent)
+	{
+		out_adjust_agent->setName(name);
+		out_adjust_agent->setValueChangedFunction(gstGammaR,
+			std::bind(&OutAdjustAgent::OnGammaRChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstGammaG,
+			std::bind(&OutAdjustAgent::OnGammaGChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstGammaB,
+			std::bind(&OutAdjustAgent::OnGammaBChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstBrightnessR,
+			std::bind(&OutAdjustAgent::OnBrightnessRChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstBrightnessG,
+			std::bind(&OutAdjustAgent::OnBrightnessGChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstBrightnessB,
+			std::bind(&OutAdjustAgent::OnBrightnessBChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstEqualizeR,
+			std::bind(&OutAdjustAgent::OnEqualizeRChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstEqualizeG,
+			std::bind(&OutAdjustAgent::OnEqualizeGChanged,
+				out_adjust_agent, std::placeholders::_1));
+		out_adjust_agent->setValueChangedFunction(gstEqualizeB,
+			std::bind(&OutAdjustAgent::OnEqualizeBChanged,
+				out_adjust_agent, std::placeholders::_1));
+		objects_.push_front(out_adjust_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, out_adjust_agent);
+		notifyObservers(event);
+	}
+
+	return out_adjust_agent;
+}
+
+ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<ClipPlaneAgent*>(result);
+
+	//not found
+	ClipPlaneAgent* clip_plane_agent =
+		new ClipPlaneAgent(static_cast<ClipPlanePanel&>(window));
+	if (clip_plane_agent)
+	{
+		clip_plane_agent->setName(name);
+		clip_plane_agent->setValueChangedFunction(gstClipX1,
+			std::bind(&ClipPlaneAgent::OnClipXChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip x2",
+			std::bind(&ClipPlaneAgent::OnClipXChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip y1",
+			std::bind(&ClipPlaneAgent::OnClipYChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip y2",
+			std::bind(&ClipPlaneAgent::OnClipYChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip z1",
+			std::bind(&ClipPlaneAgent::OnClipZChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip z2",
+			std::bind(&ClipPlaneAgent::OnClipZChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip dist x",
+			std::bind(&ClipPlaneAgent::OnClipDistXChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip dist y",
+			std::bind(&ClipPlaneAgent::OnClipDistYChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip dist z",
+			std::bind(&ClipPlaneAgent::OnClipDistZChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip link x",
+			std::bind(&ClipPlaneAgent::OnClipLinkXChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip link y",
+			std::bind(&ClipPlaneAgent::OnClipLinkYChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip link z",
+			std::bind(&ClipPlaneAgent::OnClipLinkZChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip rot x",
+			std::bind(&ClipPlaneAgent::OnClipRotXChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip rot y",
+			std::bind(&ClipPlaneAgent::OnClipRotYChanged,
+				clip_plane_agent, std::placeholders::_1));
+		clip_plane_agent->setValueChangedFunction("clip rot z",
+			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
+				clip_plane_agent, std::placeholders::_1));
+		objects_.push_front(clip_plane_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, clip_plane_agent);
+		notifyObservers(event);
+	}
+
+	return clip_plane_agent;
+}
+
+MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<MeshPropAgent*>(result);
+
+	//not found
+	MeshPropAgent* mesh_prop_agent =
+		new MeshPropAgent(static_cast<MeshPropPanel&>(window));
+	if (mesh_prop_agent)
+	{
+		mesh_prop_agent->setName(name);
+		objects_.push_front(mesh_prop_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, mesh_prop_agent);
+		notifyObservers(event);
+	}
+
+	return mesh_prop_agent;
+}
+
+ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<ColocalAgent*>(result);
+
+	//not found
+	ColocalAgent* colocal_agent =
+		new ColocalAgent(static_cast<ColocalDlg&>(window));
+	if (colocal_agent)
+	{
+		colocal_agent->setName(name);
+		objects_.push_front(colocal_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, colocal_agent);
+		notifyObservers(event);
+	}
+
+	return colocal_agent;
+}
