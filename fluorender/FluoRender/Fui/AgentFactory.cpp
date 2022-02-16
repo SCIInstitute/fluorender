@@ -239,46 +239,46 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 		clip_plane_agent->setValueChangedFunction(gstClipX1,
 			std::bind(&ClipPlaneAgent::OnClipXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip x2",
+		clip_plane_agent->setValueChangedFunction(gstClipX2,
 			std::bind(&ClipPlaneAgent::OnClipXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip y1",
+		clip_plane_agent->setValueChangedFunction(gstClipY1,
 			std::bind(&ClipPlaneAgent::OnClipYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip y2",
+		clip_plane_agent->setValueChangedFunction(gstClipY2,
 			std::bind(&ClipPlaneAgent::OnClipYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip z1",
+		clip_plane_agent->setValueChangedFunction(gstClipZ1,
 			std::bind(&ClipPlaneAgent::OnClipZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip z2",
+		clip_plane_agent->setValueChangedFunction(gstClipZ2,
 			std::bind(&ClipPlaneAgent::OnClipZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip dist x",
+		clip_plane_agent->setValueChangedFunction(gstClipDistX,
 			std::bind(&ClipPlaneAgent::OnClipDistXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip dist y",
+		clip_plane_agent->setValueChangedFunction(gstClipDistY,
 			std::bind(&ClipPlaneAgent::OnClipDistYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip dist z",
+		clip_plane_agent->setValueChangedFunction(gstClipDistZ,
 			std::bind(&ClipPlaneAgent::OnClipDistZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip link x",
+		clip_plane_agent->setValueChangedFunction(gstClipLinkX,
 			std::bind(&ClipPlaneAgent::OnClipLinkXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip link y",
+		clip_plane_agent->setValueChangedFunction(gstClipLinkY,
 			std::bind(&ClipPlaneAgent::OnClipLinkYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip link z",
+		clip_plane_agent->setValueChangedFunction(gstClipLinkZ,
 			std::bind(&ClipPlaneAgent::OnClipLinkZChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip rot x",
+		clip_plane_agent->setValueChangedFunction(gstClipRotX,
 			std::bind(&ClipPlaneAgent::OnClipRotXChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip rot y",
+		clip_plane_agent->setValueChangedFunction(gstClipRotY,
 			std::bind(&ClipPlaneAgent::OnClipRotYChanged,
 				clip_plane_agent, std::placeholders::_1));
-		clip_plane_agent->setValueChangedFunction("clip rot z",
+		clip_plane_agent->setValueChangedFunction(gstClipRotZ,
 			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
 				clip_plane_agent, std::placeholders::_1));
 		objects_.push_front(clip_plane_agent);

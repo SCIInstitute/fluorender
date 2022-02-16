@@ -31,10 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Root.hpp>
 
+class ColocalDlg;
 namespace fluo
 {
 	class AgentFactory;
-	class ColocalDlg;
 	class ColocalAgent : public InterfaceAgent
 	{
 	public:

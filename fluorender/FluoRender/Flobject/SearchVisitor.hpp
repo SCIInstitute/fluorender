@@ -31,6 +31,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <NodeVisitor.hpp>
 #include <Group.hpp>
+#include <VolumeData.hpp>
+#include <VolumeGroup.hpp>
+#include <MeshData.hpp>
+#include <MeshGroup.hpp>
+#include <Annotations.hpp>
+#include <Renderview.hpp>
 
 #include <iostream>
 #include <string>
@@ -73,18 +79,82 @@ namespace fluo
 
 		Node* getNode()
 		{
-			if (!results_.empty())
-				return dynamic_cast<Node*>(results_[0]);
-			else
-				return 0;
+			for (auto i : results_)
+			{
+				Node* node = dynamic_cast<Node*>(i);
+				if (node) return node;
+			}
+			return nullptr;
 		}
 
 		Group* getGroup()
 		{
-			if (!results_.empty())
-				return dynamic_cast<Group*>(results_[0]);
-			else
-				return 0;
+			for (auto i : results_)
+			{
+				Group* group = dynamic_cast<Group*>(i);
+				if (group) return group;
+			}
+			return nullptr;
+		}
+
+		VolumeData* getVolumeData()
+		{
+			for (auto i : results_)
+			{
+				VolumeData* vd = dynamic_cast<VolumeData*>(i);
+				if (vd) return vd;
+			}
+			return nullptr;
+		}
+
+		VolumeGroup* getVolumeGroup()
+		{
+			for (auto i : results_)
+			{
+				VolumeGroup* group = dynamic_cast<VolumeGroup*>(i);
+				if (group) return group;
+			}
+			return nullptr;
+		}
+
+		MeshData* getMeshData()
+		{
+			for (auto i : results_)
+			{
+				MeshData* md = dynamic_cast<MeshData*>(i);
+				if (md) return md;
+			}
+			return nullptr;
+		}
+
+		MeshGroup* getMeshGroup()
+		{
+			for (auto i : results_)
+			{
+				MeshGroup* group = dynamic_cast<MeshGroup*>(i);
+				if (group) return group;
+			}
+			return nullptr;
+		}
+
+		Annotations* getAnnotations()
+		{
+			for (auto i : results_)
+			{
+				Annotations* an = dynamic_cast<Annotations*>(i);
+				if (an) return an;
+			}
+			return nullptr;
+		}
+
+		Renderview* getRenderview()
+		{
+			for (auto i : results_)
+			{
+				Renderview* view = dynamic_cast<Renderview*>(i);
+				if (view) return view;
+			}
+			return nullptr;
 		}
 
 		void matchName(const std::string &name)

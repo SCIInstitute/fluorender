@@ -428,7 +428,7 @@ ClipPlanePanel::~ClipPlanePanel()
 {
 }
 
-void ClipPlanePanel::AssociateNode(FL::Node* node)
+void ClipPlanePanel::AssociateNode(fluo::Node* node)
 {
 	m_agent->setObject(node);
 }
@@ -436,7 +436,7 @@ void ClipPlanePanel::AssociateNode(FL::Node* node)
 void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
-	FL::ValueCollection names{
+	fluo::ValueCollection names{
 		"clip hold",
 		"clip render mode",
 		"clip mask",
@@ -479,33 +479,33 @@ void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 
 	switch (render_mode)
 	{
-	case FLTYPE::PRMNormal:
-		m_agent->setValue("clip render mode", long(FLTYPE::PRMFrame));
+	case fluo::PRMNormal:
+		m_agent->setValue("clip render mode", long(fluo::PRMFrame));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_frame));
 		break;
-	case FLTYPE::PRMFrame:
-		m_agent->setValue("clip render mode", long(FLTYPE::PRMLowTrans));
+	case fluo::PRMFrame:
+		m_agent->setValue("clip render mode", long(fluo::PRMLowTrans));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_low));
 		break;
-	case FLTYPE::PRMLowTrans:
-		m_agent->setValue("clip render mode", long(FLTYPE::PRMLowTransBack));
+	case fluo::PRMLowTrans:
+		m_agent->setValue("clip render mode", long(fluo::PRMLowTransBack));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_low_back));
 		break;
-	case FLTYPE::PRMLowTransBack:
-		m_agent->setValue("clip render mode", long(FLTYPE::PRMNormalBack));
+	case fluo::PRMLowTransBack:
+		m_agent->setValue("clip render mode", long(fluo::PRMNormalBack));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal_back));
 		break;
-	case FLTYPE::PRMNormalBack:
-		m_agent->setValue("clip render mode", long(FLTYPE::PRMNone));
+	case fluo::PRMNormalBack:
+		m_agent->setValue("clip render mode", long(fluo::PRMNone));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_none));
 		break;
-	case FLTYPE::PRMNone:
-		m_agent->setValue("clip render mode", long(FLTYPE::PRMNormal));
+	case fluo::PRMNone:
+		m_agent->setValue("clip render mode", long(fluo::PRMNormal));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal));
 		break;

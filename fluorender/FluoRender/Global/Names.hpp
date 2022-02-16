@@ -49,7 +49,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstCurVolIdx "cur vol idx"
 #define gstCurMshIdx "cur msh idx"
 
-
 //factories & defaults
 #define gstDefaultFile "default file"
 #define gstDefaultObject "default object"

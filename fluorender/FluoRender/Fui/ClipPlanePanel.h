@@ -140,7 +140,7 @@ private:
 	wxScrollBar *m_y_rot_sldr;
 	wxScrollBar *m_z_rot_sldr;
 
-	friend class ClipPlaneAgent;
+	friend class fluo::ClipPlaneAgent;
 
 private:
 	void OnResize(wxSizeEvent &event);
