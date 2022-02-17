@@ -28,8 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COLOCALAGENT_H_
 #define _COLOCALAGENT_H_
 
+#include <Names.hpp>
 #include <InterfaceAgent.hpp>
-#include <Root.hpp>
+#include <VolumeGroup.hpp>
+#include <limits>
 
 class ColocalDlg;
 namespace fluo
@@ -47,8 +49,8 @@ namespace fluo
 
 		virtual const char* className() const { return "ColocalAgent"; }
 
-		virtual void setObject(Root*);
-		virtual Root* getObject();
+		virtual void setObject(VolumeGroup*);
+		virtual VolumeGroup* getObject();
 
 		virtual void UpdateAllSettings();
 
@@ -58,6 +60,28 @@ namespace fluo
 
 	protected:
 		ColocalDlg &dlg_;
+
+	private:
+		void ResetMinMax()
+		{
+			double dval = std::numeric_limits<double>::max();
+			setValue(gstColormapLow, dval);
+			setValue(gstColormapHigh, -dval);
+		}
+		void SetMinMax(double v)
+		{
+			double dval;
+			getValue(gstColormapLow, dval);
+			dval = std::min(v, dval);
+			setValue(gstColormapLow, dval);
+			getValue(gstColormapHigh, dval);
+			dval = std::max(v, dval);
+			setValue(gstColormapHigh, dval);
+		}
+		//output
+		void SetOutput(const std::string &titles, const std::string &values);
+		void CopyData();
+		void PasteData();
 	};
 }
 

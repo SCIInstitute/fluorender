@@ -533,4 +533,15 @@ DEALINGS IN THE SOFTWARE.
 #define gstKbAltDown "kb alt down"
 #define gstKbCtrlDown "kb ctrl down"
 
+//dialog agent common
+#define gstUseSelection "use selection"//use mask selection
+#define gstAutoUpdate "auto update"
+#define gstHoldHistory "hold history"
+//colocal agent
+#define gstColocalMethod "colocal method"//0:dot product; 1:min value; 2:threshold
+#define gstIntWeighted "int weighted"
+#define gstGetRatio "get ratio"
+#define gstPhysSize "phys size"
+
+
 #endif//NAMES_HPP

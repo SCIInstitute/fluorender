@@ -28,8 +28,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ColocalAgent.hpp>
 #include <ColocalDlg.h>
-#include <Compare.h>
 #include <VolumeData.hpp>
+#include <Renderview.hpp>
+#include <SearchVisitor.hpp>
+#include <Calculate/Compare.h>
+#include <vector>
+#include <string>
 #include <fstream>
 
 using namespace fluo;
@@ -41,15 +45,25 @@ ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 
 }
 
-void ColocalAgent::setObject(Root* root)
+void ColocalAgent::setObject(VolumeGroup* vg)
 {
-	InterfaceAgent::setObject(root);
-	addValue("output file", std::wstring(L"colocalization_result.txt"));
+	InterfaceAgent::setObject(vg);
+	//additiona settings
+	addValue(gstUseSelection, false);
+	addValue(gstAutoUpdate, false);
+	addValue(gstHoldHistory, false);
+	addValue(gstColocalMethod, long(0));
+	addValue(gstIntWeighted, false);
+	addValue(gstGetRatio, false);
+	addValue(gstPhysSize, false);
+	addValue(gstColormapEnable, false);
+	addValue(gstColormapLow, double(0));
+	addValue(gstColormapHigh, double(1));
 }
 
-Root* ColocalAgent::getObject()
+VolumeGroup* ColocalAgent::getObject()
 {
-	return dynamic_cast<Root*>(InterfaceAgent::getObject());
+	return dynamic_cast<VolumeGroup*>(InterfaceAgent::getObject());
 }
 
 void ColocalAgent::UpdateAllSettings()
@@ -59,56 +73,56 @@ void ColocalAgent::UpdateAllSettings()
 
 void ColocalAgent::Run()
 {
-	Root* root = getObject();
-	if (!root)
+	//get volume group
+	VolumeGroup* group = getObject();
+	if (!group)
 		return;
-	//get selections
-	class SelRetriever : public NodeVisitor
-	{
-	public:
-		SelRetriever() : NodeVisitor()
-		{
-			setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
-		}
-
-		virtual void reset()
-		{
-			nodes_.clear();
-		}
-
-		virtual void apply(Node& node)
-		{
-			if (std::string("VolumeData") == node.className())
-			{
-				bool selected = false;
-				node.getValue("selected", selected);
-				if (selected)
-					nodes_.push_back(&node);
-			}
-			traverse(node);
-		}
-
-		virtual void apply(Group& group)
-		{
-			traverse(group);
-		}
-
-		NodePath &getResult()
-		{
-			return nodes_;
-		}
-
-	private:
-		NodePath nodes_;
-	};
-
-	SelRetriever retriever;
-	root->accept(retriever);
-	NodePath nodes = retriever.getResult();
-
-	size_t num = nodes.size();
+	int num = group->getNumChildren();
 	if (num < 2)
 		return;
+	//get view of group
+	SearchVisitor visitor;
+	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+	visitor.matchClassName("Renderview");
+	group->accept(visitor);
+	Renderview* view = visitor.getRenderview();
+	if (!view)
+		return;
+
+	//spacings, assuming they are all same for channels
+	double spcx, spcy, spcz;
+	double spc;
+	std::string unit;
+	VolumeData* vd = group->getChild(0)->asVolumeData();
+	if (!vd)
+	{
+		spc = spcx = spcy = spcz = 1.0;
+	}
+	else
+	{
+		vd->getValue(gstSpcX, spcx);
+		vd->getValue(gstSpcY, spcy);
+		vd->getValue(gstSpcZ, spcz);
+		spc = spcx * spcy * spcz;
+	}
+	if (view)
+	{
+		long sb_unit;
+		view->getValue(gstScaleBarUnit, sb_unit);
+		switch (sb_unit)
+		{
+		case 0:
+			unit = "nm\u00B3";
+			break;
+		case 1:
+		default:
+			unit = "\u03BCm\u00B3";
+			break;
+		case 2:
+			unit = "mm\u00B3";
+			break;
+		}
+	}
 
 	//result
 	std::vector<std::vector<double>> rm;//result matrix
@@ -121,106 +135,287 @@ void ColocalAgent::Run()
 			rm[i].push_back(0);
 	}
 
-	size_t x = 0, y = 0;
-	for (auto it1 = nodes.begin();
-		it1 != nodes.end(); ++it1)
+	std::string titles;
+	std::string values;
+	long method;
+	getValue(gstColocalMethod, method);
+	bool int_weighted, use_sel;
+	getValue(gstIntWeighted, int_weighted);
+	getValue(gstUseSelection, use_sel);
+
+	//fill the matrix
+	if (method == 0 || method == 1 ||
+		(method == 2 && !int_weighted))
 	{
-		y = x;
-		for (auto it2 = it1;
-			it2 != nodes.end(); ++it2)
+		//dot product and min value
+		//symmetric matrix
+		for (int it1 = 0; it1 < num; ++it1)
 		{
-			VolumeData* vd1 = (*it1)->asVolumeData();
-			VolumeData* vd2 = (*it2)->asVolumeData();
-			if (!vd1 || !vd2)
-				continue;
+			for (int it2 = it1; it2 < num; ++it2)
+			{
+				VolumeData* vd1 = group->getChild(it1)->asVolumeData();
+				VolumeData* vd2 = group->getChild(it2)->asVolumeData();
+				if (!vd1 || !vd2)
+					continue;
+				bool disp1, disp2;
+				vd1->getValue(gstDisplay, disp1);
+				vd2->getValue(gstDisplay, disp2);
+				if (!disp1 || !disp2)
+					continue;
 
-			ChannelCompare compare(vd1, vd2);
-			//get threshold values
-			double th1, th2;
-			vd1->getValue("low threshold", th1);
-			vd2->getValue("low threshold", th2);
-			compare.Compare(th1, th2);
-			rm[x][y] = compare.Result();
-			rm[y][x] = compare.Result();
-			y++;
+				flrd::ChannelCompare compare(vd1, vd2);
+				compare.SetUseMask(use_sel);
+				compare.SetIntWeighted(int_weighted);
+				//boost::signals2::connection preconn =
+				//	compare.prework.connect(std::bind(
+				//		&ColocalDlg::StartTimer, this, std::placeholders::_1));
+				//boost::signals2::connection postconn =
+				//	compare.postwork.connect(std::bind(
+				//		&ColocalDlg::StopTimer, this, std::placeholders::_1));
+				switch (method)
+				{
+				case 0://dot product
+					compare.Product();
+					break;
+				case 1://min value
+					compare.MinValue();
+					break;
+				case 2://threshold
+				{
+					//get threshold values
+					double th1, th2, th3, th4;
+					vd1->getValue(gstLowThreshold, th1);
+					vd1->getValue(gstHighThreshold, th2);
+					vd2->getValue(gstLowThreshold, th3);
+					vd2->getValue(gstHighThreshold, th4);
+					compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
+				}
+				break;
+				}
+				rm[it1][it2] = compare.Result();
+				if (it1 != it2)
+					rm[it2][it1] = compare.Result();
+			}
 		}
-		x++;
+	}
+	else if (method == 2 && int_weighted)
+	{
+		//threshold, asymmetrical
+		for (int it1 = 0; it1 < num; ++it1)
+			for (int it2 = 0; it2 < num; ++it2)
+			{
+				VolumeData* vd1 = group->getChild(it1)->asVolumeData();
+				VolumeData* vd2 = group->getChild(it2)->asVolumeData();
+				if (!vd1 || !vd2)
+					continue;
+				bool disp1, disp2;
+				vd1->getValue(gstDisplay, disp1);
+				vd2->getValue(gstDisplay, disp2);
+				if (!disp1 || !disp2)
+					continue;
+
+				flrd::ChannelCompare compare(vd1, vd2);
+				compare.SetUseMask(use_sel);
+				compare.SetIntWeighted(int_weighted);
+				//boost::signals2::connection preconn =
+				//	compare.prework.connect(std::bind(
+				//		&ColocalDlg::StartTimer, this, std::placeholders::_1));
+				//boost::signals2::connection postconn =
+				//	compare.postwork.connect(std::bind(
+				//		&ColocalDlg::StopTimer, this, std::placeholders::_1));
+				//get threshold values
+				double th1, th2, th3, th4;
+				vd1->getValue(gstLowThreshold, th1);
+				vd1->getValue(gstHighThreshold, th2);
+				vd2->getValue(gstLowThreshold, th3);
+				vd2->getValue(gstHighThreshold, th4);
+				compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
+				rm[it1][it2] = compare.Result();
+			}
 	}
 
-	//output
-	std::wstring filename;
-	getValue("output file", filename);
-	std::ofstream outfile;
-	//print names
-	size_t pos = filename.find_last_of(L".");
-	std::wstring filename_names = filename;
-	if (pos != std::wstring::npos)
-		filename_names.insert(pos, L"_names");
-	else
-		filename_names += L"_names";
-	outfile.open(filename_names, std::ofstream::out);
-	int counter = 1;//excel starts from 1
-	for (auto it = nodes.begin();
-		it != nodes.end(); ++it)
-	{
-		outfile << counter++;
-		outfile << "\t";
-		outfile << (*it)->getName();
-		outfile << "\n";
-	}
-	outfile.close();
-	//print adj matrix
-	outfile.open(filename, std::ofstream::out);
+	std::string name;
+	double v;
+	bool get_ratio, phys_size;
+	getValue(gstGetRatio, get_ratio);
+	getValue(gstPhysSize, phys_size);
+	ResetMinMax();
 	for (size_t i = 0; i < num; ++i)
 	{
-		for (size_t j = 0; j < num; ++j)
-		{
-			outfile << rm[i][j];
-			if (j < num - 1)
-				outfile << "\t";
-		}
-		outfile << "\n";
-	}
-	outfile.close();
-
-	//nomralize
-	bool norm = false;
-	getValue("normalize", norm);
-	if (norm)
-	{
-		for (size_t i = 0; i < num; ++i)
-		{
-			//sum
-			double sum = 0;
-			for (size_t j = 0; j < num; ++j)
-			{
-				sum += rm[i][j];
-			}
-			//divide
-			if (sum < 1)
-				continue;
-			for (size_t j = 0; j < num; ++j)
-			{
-				rm[i][j] /= sum;
-			}
-		}
-		//output
-		std::wstring filename_markov = filename;
-		if (pos != std::wstring::npos)
-			filename_markov.insert(pos, L"_markov");
+		titles += std::to_string(int(i + 1));
+		if (get_ratio)
+			titles += " (%%)";
+		VolumeData* vd = group->getChild(i)->asVolumeData();
+		if (vd)
+			name = vd->getName();
 		else
-			filename_markov += L"_markov";
-		outfile.open(filename_markov, std::ofstream::out);
-		for (size_t i = 0; i < num; ++i)
+			name = "";
+		titles += ": " + name;
+		if (i < num - 1)
+			titles += "\t";
+		else
+			titles += "\n";
+	}
+	for (int it1 = 0; it1 < num; ++it1)
+	for (int it2 = 0; it2 < num; ++it2)
+	{
+		if (get_ratio)
 		{
-			for (size_t j = 0; j < num; ++j)
+			if (rm[it2][it2])
 			{
-				outfile << rm[i][j];
-				if (j < num - 1)
-					outfile << "\t";
+				v = rm[it1][it2] * 100.0 / rm[it1][it1];
+				SetMinMax(v);
+				values += std::to_string(v);
 			}
-			outfile << "\n";
+			else
+			{
+				SetMinMax(0.0);
+				values += "0";
+			}
 		}
-		outfile.close();
+		else
+		{
+			if (phys_size)
+			{
+				v = rm[it1][it2] * spc;
+				SetMinMax(v);
+				values += std::to_string(v);
+				values += unit;
+			}
+			else
+			{
+				v = rm[it1][it2];
+				SetMinMax(v);
+				if (int_weighted)
+					values += std::to_string(v);
+				else
+					values += std::to_string(int(v));
+			}
+		}
+		if (it2 < num - 1)
+			values += "\t";
+		else
+			values += "\n";
+	}
+	SetOutput(titles, values);
+}
+
+void ColocalAgent::SetOutput(const std::string &titles, const std::string &values)
+{
+	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k;
+
+	k = 0;
+	cur_line = titles;
+	do
+	{
+		cur_field = cur_line.BeforeFirst('\t');
+		cur_line = cur_line.AfterFirst('\t');
+		if (m_output_grid->GetNumberCols() <= k)
+			m_output_grid->InsertCols(k);
+		m_output_grid->SetColLabelValue(k, cur_field);
+		++k;
+	} while (cur_line.IsEmpty() == false);
+
+	fluo::Color c;
+	double val;
+	wxColor color;
+	fluo::VolumeData* vd = 0;
+	if (m_colormap && m_view)
+		vd = m_view->GetCurrentVolume();
+	bool colormap = m_colormap && vd && (m_cm_max - m_cm_min) > 0.0;
+
+	i = 0;
+	copy_data = values;
+	do
+	{
+		k = 0;
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		if (m_output_grid->GetNumberRows() <= i ||
+			m_hold_history)
+			m_output_grid->InsertRows(i);
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			m_output_grid->SetCellValue(i, k, cur_field);
+			if (colormap && cur_field.ToDouble(&val))
+			{
+				c = vd->GetColorFromColormap((val - m_cm_min) / (m_cm_max - m_cm_min));
+				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+				m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			else
+			{
+				color = *wxWHITE;
+				m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			++k;
+		} while (cur_line.IsEmpty() == false);
+		++i;
+	} while (copy_data.IsEmpty() == false);
+
+	if (m_output_grid->GetNumberCols() > k)
+		m_output_grid->DeleteCols(k,
+			m_output_grid->GetNumberCols() - k);
+
+	//m_output_grid->AutoSizeColumns(false);
+	if (m_physical_size && !m_get_ratio)
+		m_output_grid->SetDefaultColSize(100, true);
+	else
+		m_output_grid->SetDefaultColSize(70, true);
+	m_output_grid->ForceRefresh();
+	m_output_grid->ClearSelection();
+}
+
+void ColocalDlg::CopyData()
+{
+	int i, k;
+	wxString copy_data;
+	bool something_in_this_line;
+
+	copy_data.Clear();
+
+	bool t = m_output_grid->IsSelection();
+
+	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
+	{
+		something_in_this_line = false;
+		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
+		{
+			if (m_output_grid->IsInSelection(i, k))
+			{
+				if (something_in_this_line == false)
+				{  // first field in this line => may need a linefeed
+					if (copy_data.IsEmpty() == false)
+					{     // ... if it is not the very first field
+						copy_data = copy_data + wxT("\n");  // next LINE
+					}
+					something_in_this_line = true;
+				}
+				else
+				{
+					// if not the first field in this line we need a field seperator (TAB)
+					copy_data = copy_data + wxT("\t");  // next COLUMN
+				}
+				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
+			}
+		}
+	}
+
+	if (wxTheClipboard->Open())
+	{
+		// This data objects are held by the clipboard,
+		// so do not delete them in the app.
+		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
+		wxTheClipboard->Close();
 	}
 }
+
+void ColocalDlg::PasteData()
+{
+}
+

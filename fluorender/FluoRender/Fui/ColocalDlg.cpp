@@ -25,8 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ColocalDlg.h"
-#include "VRenderFrame.h"
+#include <ColocalDlg.h>
+#include <VRenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
@@ -54,19 +56,17 @@ BEGIN_EVENT_TABLE(ColocalDlg, wxPanel)
 END_EVENT_TABLE()
 
 ColocalDlg::ColocalDlg(VRenderFrame* frame) :
-wxPanel(frame, wxID_ANY,
-wxDefaultPosition, wxSize(500, 500),
-0, "ColocalDlg"),
-m_frame(frame),
-m_view(0),
-m_group(0),
-m_hold_history(false),
-m_test_speed(false)
+	wxPanel(frame, wxID_ANY,
+	wxDefaultPosition, wxSize(500, 500),
+	0, "ColocalDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-	wxStaticText* st = 0;
 
+	m_agent = glbin_agtf->getOrAddColocalAgent("ColocalDlg", *this);
+
+
+	wxStaticText* st = 0;
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 
 	//controls
@@ -175,357 +175,14 @@ ColocalDlg::~ColocalDlg()
 {
 }
 
-void ColocalDlg::SetOutput(wxString &titles, wxString &values)
-{
-	wxString copy_data;
-	wxString cur_field;
-	wxString cur_line;
-	int i, k;
-
-	k = 0;
-	cur_line = titles;
-	do
-	{
-		cur_field = cur_line.BeforeFirst('\t');
-		cur_line = cur_line.AfterFirst('\t');
-		if (m_output_grid->GetNumberCols() <= k)
-			m_output_grid->InsertCols(k);
-		m_output_grid->SetColLabelValue(k, cur_field);
-		++k;
-	} while (cur_line.IsEmpty() == false);
-
-	fluo::Color c;
-	double val;
-	wxColor color;
-	fluo::VolumeData* vd = 0;
-	if (m_colormap && m_view)
-		vd = m_view->GetCurrentVolume();
-	bool colormap = m_colormap && vd && (m_cm_max - m_cm_min) > 0.0;
-
-	i = 0;
-	copy_data = values;
-	do
-	{
-		k = 0;
-		cur_line = copy_data.BeforeFirst('\n');
-		copy_data = copy_data.AfterFirst('\n');
-		if (m_output_grid->GetNumberRows() <= i ||
-			m_hold_history)
-			m_output_grid->InsertRows(i);
-		do
-		{
-			cur_field = cur_line.BeforeFirst('\t');
-			cur_line = cur_line.AfterFirst('\t');
-			m_output_grid->SetCellValue(i, k, cur_field);
-			if (colormap && cur_field.ToDouble(&val))
-			{
-				c = vd->GetColorFromColormap((val - m_cm_min)/(m_cm_max - m_cm_min));
-				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-				m_output_grid->SetCellBackgroundColour(i, k, color);
-			}
-			else
-			{
-				color = *wxWHITE;
-				m_output_grid->SetCellBackgroundColour(i, k, color);
-			}
-			++k;
-		} while (cur_line.IsEmpty() == false);
-		++i;
-	} while (copy_data.IsEmpty() == false);
-
-	if (m_output_grid->GetNumberCols() > k)
-		m_output_grid->DeleteCols(k,
-			m_output_grid->GetNumberCols() - k);
-
-	//m_output_grid->AutoSizeColumns(false);
-	if (m_physical_size && !m_get_ratio)
-		m_output_grid->SetDefaultColSize(100, true);
-	else
-		m_output_grid->SetDefaultColSize(70, true);
-	m_output_grid->ForceRefresh();
-	m_output_grid->ClearSelection();
-}
-
-void ColocalDlg::CopyData()
-{
-	int i, k;
-	wxString copy_data;
-	bool something_in_this_line;
-
-	copy_data.Clear();
-
-	bool t = m_output_grid->IsSelection();
-
-	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
-	{
-		something_in_this_line = false;
-		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
-		{
-			if (m_output_grid->IsInSelection(i, k))
-			{
-				if (something_in_this_line == false)
-				{  // first field in this line => may need a linefeed
-					if (copy_data.IsEmpty() == false)
-					{     // ... if it is not the very first field
-						copy_data = copy_data + wxT("\n");  // next LINE
-					}
-					something_in_this_line = true;
-				}
-				else
-				{
-					// if not the first field in this line we need a field seperator (TAB)
-					copy_data = copy_data + wxT("\t");  // next COLUMN
-				}
-				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
-			}
-		}
-	}
-
-	if (wxTheClipboard->Open())
-	{
-		// This data objects are held by the clipboard,
-		// so do not delete them in the app.
-		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
-		wxTheClipboard->Close();
-	}
-}
-
-void ColocalDlg::PasteData()
-{
-}
-
 void ColocalDlg::GetSettings()
 {
-	m_use_mask = false;
-	m_auto_update = false;
-	m_method = 2;
-	m_int_weighted = false;
-	m_get_ratio = false;
-	m_physical_size = false;
-	m_colormap = false;
 }
 
 //execute
 void ColocalDlg::Colocalize()
 {
-	if (!m_group)
-		return;
-
-	int num = m_group->getNumChildren();
-	if (num < 2)
-		return;
-
-	//spacings, assuming they are all same for channels
-	double spcx, spcy, spcz;
-	double spc;
-	wxString unit;
-	fluo::VolumeData* vd = m_group->getChild(0)->asVolumeData();
-	if (!vd)
-	{
-		spc = spcx = spcy = spcz = 1.0;
-	}
-	else
-	{
-		vd->getValue(gstSpcX, spcx);
-		vd->getValue(gstSpcY, spcy);
-		vd->getValue(gstSpcZ, spcz);
-		spc = spcx * spcy * spcz;
-	}
-	if (m_view)
-	{
-		long sb_unit;
-		m_view->getValue(gstScaleBarUnit, sb_unit);
-		switch (sb_unit)
-		{
-		case 0:
-			unit = L"nm\u00B3";
-			break;
-		case 1:
-		default:
-			unit = L"\u03BCm\u00B3";
-			break;
-		case 2:
-			unit = L"mm\u00B3";
-			break;
-		}
-	}
-
-	//result
-	std::vector<std::vector<double>> rm;//result matrix
-	rm.reserve(num);
-	for (size_t i = 0; i < num; ++i)
-	{
-		rm.push_back(std::vector<double>());
-		rm[i].reserve(num);
-		for (size_t j = 0; j < num; ++j)
-			rm[i].push_back(0);
-	}
-
-	m_titles.Clear();
-	m_values.Clear();
-	m_tps.clear();
-
-	//fill the matrix
-	if (m_method == 0 || m_method == 1 ||
-		(m_method == 2 && !m_int_weighted))
-	{
-		//dot product and min value
-		//symmetric matrix
-		for (int it1 = 0; it1 < num; ++it1)
-		{
-			for (int it2 = it1; it2 < num; ++it2)
-			{
-				fluo::VolumeData* vd1 = m_group->getChild(it1)->asVolumeData();
-				fluo::VolumeData* vd2 = m_group->getChild(it2)->asVolumeData();
-				if (!vd1 || !vd2)
-					continue;
-				bool disp1, disp2;
-				vd1->getValue(gstDisplay, disp1);
-				vd2->getValue(gstDisplay, disp2);
-				if (!disp1 || !disp2)
-					continue;
-
-				flrd::ChannelCompare compare(vd1, vd2);
-				compare.SetUseMask(m_use_mask);
-				compare.SetIntWeighted(m_int_weighted);
-				boost::signals2::connection preconn =
-					compare.prework.connect(std::bind(
-						&ColocalDlg::StartTimer, this, std::placeholders::_1));
-				boost::signals2::connection postconn =
-					compare.postwork.connect(std::bind(
-						&ColocalDlg::StopTimer, this, std::placeholders::_1));
-				switch (m_method)
-				{
-				case 0://dot product
-					compare.Product();
-					break;
-				case 1://min value
-					compare.MinValue();
-					break;
-				case 2://threshold
-				{
-					//get threshold values
-					double th1, th2, th3, th4;
-					vd1->getValue(gstLowThreshold, th1);
-					vd1->getValue(gstHighThreshold, th2);
-					vd2->getValue(gstLowThreshold, th3);
-					vd2->getValue(gstHighThreshold, th4);
-					compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
-				}
-				break;
-				}
-				rm[it1][it2] = compare.Result();
-				if (it1 != it2)
-					rm[it2][it1] = compare.Result();
-			}
-		}
-	}
-	else if (m_method == 2 && m_int_weighted)
-	{
-		//threshold, asymmetrical
-		for (int it1 = 0; it1 < num; ++it1)
-		for (int it2 = 0; it2 < num; ++it2)
-		{
-			fluo::VolumeData* vd1 = m_group->getChild(it1)->asVolumeData();
-			fluo::VolumeData* vd2 = m_group->getChild(it2)->asVolumeData();
-			if (!vd1 || !vd2)
-				continue;
-			bool disp1, disp2;
-			vd1->getValue(gstDisplay, disp1);
-			vd2->getValue(gstDisplay, disp2);
-			if (!disp1 || !disp2)
-				continue;
-
-			flrd::ChannelCompare compare(vd1, vd2);
-			compare.SetUseMask(m_use_mask);
-			compare.SetIntWeighted(m_int_weighted);
-			boost::signals2::connection preconn =
-				compare.prework.connect(std::bind(
-					&ColocalDlg::StartTimer, this, std::placeholders::_1));
-			boost::signals2::connection postconn =
-				compare.postwork.connect(std::bind(
-					&ColocalDlg::StopTimer, this, std::placeholders::_1));
-			//get threshold values
-			double th1, th2, th3, th4;
-			vd1->getValue(gstLowThreshold, th1);
-			vd1->getValue(gstHighThreshold, th2);
-			vd2->getValue(gstLowThreshold, th3);
-			vd2->getValue(gstHighThreshold, th4);
-			compare.Threshold((float)th1, (float)th2, (float)th3, (float)th4);
-			rm[it1][it2] = compare.Result();
-		}
-	}
-
-	if (m_test_speed)
-	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
-	}
-	else
-	{
-		wxString name;
-		double v;
-		ResetMinMax();
-		for (size_t i = 0; i < num; ++i)
-		{
-			if (m_get_ratio)
-				m_titles += wxString::Format("%d (%%)", int(i + 1));
-			else
-				m_titles += wxString::Format("%d", int(i + 1));
-			fluo::VolumeData* vd = m_group->getChild(i)->asVolumeData();
-			if (vd)
-				name = vd->getName();
-			else
-				name = "";
-			m_titles += ": " + name;
-			if (i < num - 1)
-				m_titles += "\t";
-			else
-				m_titles += "\n";
-		}
-		for (int it1 = 0; it1 < num; ++it1)
-			for (int it2 = 0; it2 < num; ++it2)
-			{
-				if (m_get_ratio)
-				{
-					if (rm[it2][it2])
-					{
-						v = rm[it1][it2] * 100.0 / rm[it1][it1];
-						SetMinMax(v);
-						m_values += wxString::Format("%f", v);
-					}
-					else
-					{
-						SetMinMax(0.0);
-						m_values += "0";
-					}
-				}
-				else
-				{
-					if (m_physical_size)
-					{
-						v = rm[it1][it2] * spc;
-						SetMinMax(v);
-						m_values += wxString::Format("%f", v);
-						m_values += unit;
-					}
-					else
-					{
-						v = rm[it1][it2];
-						SetMinMax(v);
-						if (m_int_weighted)
-							m_values += wxString::Format("%f", v);
-						else
-							m_values += wxString::Format("%.0f", v);
-					}
-				}
-				if (it2 < num - 1)
-					m_values += "\t";
-				else
-					m_values += "\n";
-			}
-	}
-	SetOutput(m_titles, m_values);
+	m_agent->Run();
 }
 
 void ColocalDlg::StartTimer(std::string str)

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
+#include <ColocalAgent.hpp>
 #include <limits>
 #include <chrono>
 
@@ -69,58 +70,21 @@ public:
 	ColocalDlg(VRenderFrame* frame);
 	~ColocalDlg();
 
-	void SetView(fluo::Renderview* view)
-	{
-		m_view = view;
-	}
 	void SetGroup(fluo::VolumeGroup* group)
 	{
-		m_group = group;
+		m_agent->setObject(group);
 	}
 
 	//execute
 	void Colocalize();
 
-	//output
-	void SetOutput(wxString &titles, wxString &values);
-	void CopyData();
-	void PasteData();
-
 	//settings
 	void GetSettings();
 
-	bool GetThreshUpdate()
-	{
-		return m_auto_update && (m_method == 2);
-	}
-	bool GetColormapUpdate()
-	{
-		return m_auto_update && m_colormap;
-	}
+	friend class fluo::ColocalAgent;
 
 private:
-	VRenderFrame* m_frame;
-	//current view
-	fluo::Renderview* m_view;
-	fluo::VolumeGroup *m_group;
-
-	wxString m_output_file;
-
-	//use selection
-	bool m_use_mask;
-	bool m_auto_update;
-	//method
-	int m_method;//0:dot product; 1:min value; 2:threshold
-	//format
-	bool m_int_weighted;
-	bool m_get_ratio;
-	bool m_physical_size;
-	bool m_colormap;
-	//output
-	bool m_hold_history;
-	//colormap
-	double m_cm_min;
-	double m_cm_max;
+	fluo::ColocalAgent* m_agent;
 
 	//speed test
 	bool m_test_speed;
@@ -148,17 +112,6 @@ private:
 	wxGrid *m_output_grid;
 
 private:
-	//reset min max
-	void ResetMinMax()
-	{
-		m_cm_min = std::numeric_limits<double>::max();
-		m_cm_max = -m_cm_min;
-	}
-	void SetMinMax(double v)
-	{
-		m_cm_min = std::min(v, m_cm_min);
-		m_cm_max = std::max(v, m_cm_max);
-	}
 	//speed test
 	void StartTimer(std::string str);
 	void StopTimer(std::string str);

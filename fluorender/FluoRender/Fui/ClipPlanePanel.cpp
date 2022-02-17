@@ -437,24 +437,24 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 {
 	bool sync = m_toolbar->GetToolState(ID_LinkChannelsBtn);
 	fluo::ValueCollection names{
-		"clip hold",
-		"clip render mode",
-		"clip mask",
-		"clip dist x",
-		"clip dist y",
-		"clip dist z",
-		"clip x1",
-		"clip x2",
-		"clip y1",
-		"clip y2",
-		"clip z1",
-		"clip z2",
-		"clip link x",
-		"clip link y",
-		"clip link z",
-		"clip rot x",
-		"clip rot y",
-		"clip rot z"
+		gstClipHold,
+		gstClipRenderMode,
+		gstClipMask,
+		gstClipDistX,
+		gstClipDistY,
+		gstClipDistZ,
+		gstClipX1,
+		gstClipX2,
+		gstClipY1,
+		gstClipY2,
+		gstClipZ1,
+		gstClipZ2,
+		gstClipLinkX,
+		gstClipLinkY,
+		gstClipLinkZ,
+		gstClipRotX,
+		gstClipRotY,
+		gstClipRotZ
 	};
 	if (sync)
 	{
@@ -468,44 +468,44 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 void ClipPlanePanel::OnHoldPlanesBtn(wxCommandEvent &event)
 {
 	bool bval = m_toolbar->GetToolState(ID_HoldPlanesBtn);
-	m_agent->setValue("clip hold", bval);
-	m_agent->setValue("clip mask", long(-1));
+	m_agent->setValue(gstClipHold, bval);
+	m_agent->setValue(gstClipMask, long(-1));
 }
 
 void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 {
 	long render_mode;
-	m_agent->getValue("clip render mode", render_mode);
+	m_agent->getValue(gstClipRenderMode, render_mode);
 
 	switch (render_mode)
 	{
 	case fluo::PRMNormal:
-		m_agent->setValue("clip render mode", long(fluo::PRMFrame));
+		m_agent->setValue(gstClipRenderMode, long(fluo::PRMFrame));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_frame));
 		break;
 	case fluo::PRMFrame:
-		m_agent->setValue("clip render mode", long(fluo::PRMLowTrans));
+		m_agent->setValue(gstClipRenderMode, long(fluo::PRMLowTrans));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_low));
 		break;
 	case fluo::PRMLowTrans:
-		m_agent->setValue("clip render mode", long(fluo::PRMLowTransBack));
+		m_agent->setValue(gstClipRenderMode, long(fluo::PRMLowTransBack));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_low_back));
 		break;
 	case fluo::PRMLowTransBack:
-		m_agent->setValue("clip render mode", long(fluo::PRMNormalBack));
+		m_agent->setValue(gstClipRenderMode, long(fluo::PRMNormalBack));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal_back));
 		break;
 	case fluo::PRMNormalBack:
-		m_agent->setValue("clip render mode", long(fluo::PRMNone));
+		m_agent->setValue(gstClipRenderMode, long(fluo::PRMNone));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_none));
 		break;
 	case fluo::PRMNone:
-		m_agent->setValue("clip render mode", long(fluo::PRMNormal));
+		m_agent->setValue(gstClipRenderMode, long(fluo::PRMNormal));
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal));
 		break;
@@ -514,18 +514,18 @@ void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
 {
-	m_agent->setValue("clip link x", false);
-	m_agent->setValue("clip link y", false);
-	m_agent->setValue("clip link z", false);
+	m_agent->setValue(gstClipLinkX, false);
+	m_agent->setValue(gstClipLinkY, false);
+	m_agent->setValue(gstClipLinkZ, false);
 
-	m_agent->setValue("clip x1", double(0));
-	m_agent->setValue("clip x2", double(1));
-	m_agent->setValue("clip y1", double(0));
-	m_agent->setValue("clip y2", double(1));
-	m_agent->setValue("clip z1", double(0));
-	m_agent->setValue("clip z2", double(1));
+	m_agent->setValue(gstClipX1, double(0));
+	m_agent->setValue(gstClipX2, double(1));
+	m_agent->setValue(gstClipY1, double(0));
+	m_agent->setValue(gstClipY2, double(1));
+	m_agent->setValue(gstClipZ1, double(0));
+	m_agent->setValue(gstClipZ2, double(1));
 
-	m_agent->setValue("clip mask", long(-1));
+	m_agent->setValue(gstClipMask, long(-1));
 }
 
 void ClipPlanePanel::OnX1ClipChange(wxScrollEvent &event)
@@ -541,7 +541,7 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 	if (str.ToLong(&ival))
 	{
 		bool clip_link;
-		m_agent->getValue("clip link x", clip_link);
+		m_agent->getValue(gstClipLinkX, clip_link);
 		if (!clip_link)
 		{
 			str = m_x2_clip_text->GetValue();
@@ -551,15 +551,15 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 				ival = ival2 - 1;
 		}
 		long resx;
-		m_agent->getValue("res x", resx);
+		m_agent->getValue(gstResX, resx);
 		m_x1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resx;
-		m_agent->setValue("clip x1", dval);
+		m_agent->setValue(gstClipX1, dval);
 
 		if (clip_link)
-			m_agent->setValue("clip mask", long(3));
+			m_agent->setValue(gstClipMask, long(3));
 		else
-			m_agent->setValue("clip mask", long(1));
+			m_agent->setValue(gstClipMask, long(1));
 	}
 }
 
@@ -576,7 +576,7 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 	if (str.ToLong(&ival))
 	{
 		bool clip_link;
-		m_agent->getValue("clip link x", clip_link);
+		m_agent->getValue(gstClipLinkX, clip_link);
 		if (!clip_link)
 		{
 			str = m_x1_clip_text->GetValue();
@@ -586,15 +586,15 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 				ival = ival2 + 1;
 		}
 		long resx;
-		m_agent->getValue("res x", resx);
+		m_agent->getValue(gstResX, resx);
 		m_x2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resx;
-		m_agent->setValue("clip x2", dval);
+		m_agent->setValue(gstClipX2, dval);
 
 		if (clip_link)
-			m_agent->setValue("clip mask", long(3));
+			m_agent->setValue(gstClipMask, long(3));
 		else
-			m_agent->setValue("clip mask", long(2));
+			m_agent->setValue(gstClipMask, long(2));
 	}
 }
 
@@ -611,7 +611,7 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 	if (str.ToLong(&ival))
 	{
 		bool clip_link;
-		m_agent->getValue("clip link y", clip_link);
+		m_agent->getValue(gstClipLinkY, clip_link);
 		if (!clip_link)
 		{
 			str = m_y2_clip_text->GetValue();
@@ -621,15 +621,15 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 				ival = ival2 - 1;
 		}
 		long resy;
-		m_agent->getValue("res y", resy);
+		m_agent->getValue(gstResY, resy);
 		m_y1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resy;
-		m_agent->setValue("clip y1", dval);
+		m_agent->setValue(gstClipY1, dval);
 
 		if (clip_link)
-			m_agent->setValue("clip mask", long(12));
+			m_agent->setValue(gstClipMask, long(12));
 		else
-			m_agent->setValue("clip mask", long(4));
+			m_agent->setValue(gstClipMask, long(4));
 	}
 }
 
@@ -646,7 +646,7 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 	if (str.ToLong(&ival))
 	{
 		bool clip_link;
-		m_agent->getValue("clip link y", clip_link);
+		m_agent->getValue(gstClipLinkY, clip_link);
 		if (!clip_link)
 		{
 			str = m_y1_clip_text->GetValue();
@@ -656,15 +656,15 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 				ival = ival2 + 1;
 		}
 		long resy;
-		m_agent->getValue("res y", resy);
+		m_agent->getValue(gstResY, resy);
 		m_y2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resy;
-		m_agent->setValue("clip y2", dval);
+		m_agent->setValue(gstClipY2, dval);
 
 		if (clip_link)
-			m_agent->setValue("clip mask", long(12));
+			m_agent->setValue(gstClipMask, long(12));
 		else
-			m_agent->setValue("clip mask", long(8));
+			m_agent->setValue(gstClipMask, long(8));
 	}
 }
 
@@ -681,7 +681,7 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 	if (str.ToLong(&ival))
 	{
 		bool clip_link;
-		m_agent->getValue("clip link z", clip_link);
+		m_agent->getValue(gstClipLinkZ, clip_link);
 		if (!clip_link)
 		{
 			str = m_z2_clip_text->GetValue();
@@ -691,15 +691,15 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 				ival = ival2 - 1;
 		}
 		long resz;
-		m_agent->getValue("res z", resz);
+		m_agent->getValue(gstResZ, resz);
 		m_z1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resz;
-		m_agent->setValue("clip z1", dval);
+		m_agent->setValue(gstClipZ1, dval);
 
 		if (clip_link)
-			m_agent->setValue("clip mask", long(48));
+			m_agent->setValue(gstClipMask, long(48));
 		else
-			m_agent->setValue("clip mask", long(16));
+			m_agent->setValue(gstClipMask, long(16));
 	}
 }
 
@@ -716,7 +716,7 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 	if (str.ToLong(&ival))
 	{
 		bool clip_link;
-		m_agent->getValue("clip link z", clip_link);
+		m_agent->getValue(gstClipLinkZ, clip_link);
 		if (!clip_link)
 		{
 			str = m_z1_clip_text->GetValue();
@@ -726,15 +726,15 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 				ival = ival2 + 1;
 		}
 		long resz;
-		m_agent->getValue("res z", resz);
+		m_agent->getValue(gstResZ, resz);
 		m_z2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resz;
-		m_agent->setValue("clip z2", dval);
+		m_agent->setValue(gstClipZ2, dval);
 
 		if (clip_link)
-			m_agent->setValue("clip mask", long(48));
+			m_agent->setValue(gstClipMask, long(48));
 		else
-			m_agent->setValue("clip mask", long(32));
+			m_agent->setValue(gstClipMask, long(32));
 	}
 }
 
@@ -805,17 +805,17 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	wxWindow *window = wxWindow::FindFocus();
 	if (window && reg.Contains(pos))
 	{
-		if (m_agent->setValue("clip display", true))
-			m_agent->setValue("clip mask", long(-1));
+		if (m_agent->setValue(gstClipDisplay, true))
+			m_agent->setValue(gstClipMask, long(-1));
 	}
 	else
-		m_agent->setValue("clip display", false);
+		m_agent->setValue(gstClipDisplay, false);
 }
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent &event)
 {
 	bool bval = m_link_x_tb->GetToolState(ID_LinkXChk);
-	m_agent->setValue("clip link x", bval);
+	m_agent->setValue(gstClipLinkX, bval);
 	if (bval)
 		m_link_x_tb->SetToolNormalBitmap(ID_LinkXChk,
 			wxGetBitmapFromMemory(link));
@@ -827,7 +827,7 @@ void ClipPlanePanel::OnLinkXCheck(wxCommandEvent &event)
 void ClipPlanePanel::OnLinkYCheck(wxCommandEvent &event)
 {
 	bool bval = m_link_y_tb->GetToolState(ID_LinkYChk);
-	m_agent->setValue("clip link y", bval);
+	m_agent->setValue(gstClipLinkY, bval);
 	if (bval)
 		m_link_y_tb->SetToolNormalBitmap(ID_LinkYChk,
 			wxGetBitmapFromMemory(link));
@@ -839,7 +839,7 @@ void ClipPlanePanel::OnLinkYCheck(wxCommandEvent &event)
 void ClipPlanePanel::OnLinkZCheck(wxCommandEvent &event)
 {
 	bool bval = m_link_z_tb->GetToolState(ID_LinkZChk);
-	m_agent->setValue("clip link z", bval);
+	m_agent->setValue(gstClipLinkZ, bval);
 	if (bval)
 		m_link_z_tb->SetToolNormalBitmap(ID_LinkZChk,
 			wxGetBitmapFromMemory(link));
@@ -855,9 +855,9 @@ void ClipPlanePanel::OnClipDistXEdit(wxCommandEvent &event)
 	if (str.ToLong(&lval))
 	{
 		long res;
-		m_agent->getValue("res x", res);
+		m_agent->getValue(gstResX, res);
 		double clip_dist = double(lval) / double(res);
-		m_agent->setValue("clip dist x", clip_dist);
+		m_agent->setValue(gstClipDistX, clip_dist);
 	}
 }
 
@@ -868,9 +868,9 @@ void ClipPlanePanel::OnClipDistYEdit(wxCommandEvent &event)
 	if (str.ToLong(&lval))
 	{
 		long res;
-		m_agent->getValue("res y", res);
+		m_agent->getValue(gstResY, res);
 		double clip_dist = double(lval) / double(res);
-		m_agent->setValue("clip dist y", clip_dist);
+		m_agent->setValue(gstClipDistY, clip_dist);
 	}
 }
 
@@ -881,9 +881,9 @@ void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent &event)
 	if (str.ToLong(&lval))
 	{
 		long res;
-		m_agent->getValue("res z", res);
+		m_agent->getValue(gstResZ, res);
 		double clip_dist = double(lval) / double(res);
-		m_agent->setValue("clip dist z", clip_dist);
+		m_agent->setValue(gstClipDistZ, clip_dist);
 	}
 }
 
@@ -895,9 +895,9 @@ void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnRotResetBtn(wxCommandEvent &event)
 {
-	m_agent->setValue("clip rot x", double(0));
-	m_agent->setValue("clip rot y", double(0));
-	m_agent->setValue("clip rot z", double(0));
+	m_agent->setValue(gstClipRotX, double(0));
+	m_agent->setValue(gstClipRotY, double(0));
+	m_agent->setValue(gstClipRotZ, double(0));
 }
 
 void ClipPlanePanel::OnXRotChange(wxScrollEvent &event)
@@ -913,7 +913,7 @@ void ClipPlanePanel::OnXRotEdit(wxCommandEvent &event)
 	wxString str = m_x_rot_text->GetValue();
 	double dval = 0.0;
 	if (str.ToDouble(&dval))
-		m_agent->setValue("clip rot x", dval);
+		m_agent->setValue(gstClipRotX, dval);
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent &event)
@@ -929,7 +929,7 @@ void ClipPlanePanel::OnYRotEdit(wxCommandEvent &event)
 	wxString str = m_y_rot_text->GetValue();
 	double dval = 0.0;
 	if (str.ToDouble(&dval))
-		m_agent->setValue("clip rot y", dval);
+		m_agent->setValue(gstClipRotY, dval);
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent &event)
@@ -945,7 +945,7 @@ void ClipPlanePanel::OnZRotEdit(wxCommandEvent &event)
 	wxString str = m_z_rot_text->GetValue();
 	double dval = 0.0;
 	if (str.ToDouble(&dval))
-		m_agent->setValue("clip rot z", dval);
+		m_agent->setValue(gstClipRotZ, dval);
 }
 
 void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
@@ -957,47 +957,47 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 		win->SetFocus();
 
 	long resx, resy, resz;
-	m_agent->getValue("res x", resx);
-	m_agent->getValue("res y", resy);
-	m_agent->getValue("res z", resz);
+	m_agent->getValue(gstResX, resx);
+	m_agent->getValue(gstResY, resy);
+	m_agent->getValue(gstResZ, resz);
 
 	switch (id)
 	{
 	case ID_X1ClipSldr:
 	case ID_X2ClipSldr:
-		m_agent->setValue("clip dist x", 1.0 / resx);
-		m_agent->setValue("clip link x", true);
-		m_agent->setValue("clip link y", false);
-		m_agent->setValue("clip link z", false);
-		m_agent->setValue("clip y1", double(0));
-		m_agent->setValue("clip y2", double(1));
-		m_agent->setValue("clip z1", double(0));
-		m_agent->setValue("clip z2", double(1));
-		m_agent->setValue("clip mask", long(3));
+		m_agent->setValue(gstClipDistX, 1.0 / resx);
+		m_agent->setValue(gstClipLinkX, true);
+		m_agent->setValue(gstClipLinkY, false);
+		m_agent->setValue(gstClipLinkZ, false);
+		m_agent->setValue(gstClipY1, double(0));
+		m_agent->setValue(gstClipY2, double(1));
+		m_agent->setValue(gstClipZ1, double(0));
+		m_agent->setValue(gstClipZ2, double(1));
+		m_agent->setValue(gstClipMask, long(3));
 		break;
 	case ID_Y1ClipSldr:
 	case ID_Y2ClipSldr:
-		m_agent->setValue("clip dist y", 1.0 / resy);
-		m_agent->setValue("clip link y", true);
-		m_agent->setValue("clip link x", false);
-		m_agent->setValue("clip link z", false);
-		m_agent->setValue("clip x1", double(0));
-		m_agent->setValue("clip x2", double(1));
-		m_agent->setValue("clip z1", double(0));
-		m_agent->setValue("clip z2", double(1));
-		m_agent->setValue("clip mask", long(12));
+		m_agent->setValue(gstClipDistY, 1.0 / resy);
+		m_agent->setValue(gstClipLinkY, true);
+		m_agent->setValue(gstClipLinkX, false);
+		m_agent->setValue(gstClipLinkZ, false);
+		m_agent->setValue(gstClipX1, double(0));
+		m_agent->setValue(gstClipX2, double(1));
+		m_agent->setValue(gstClipZ1, double(0));
+		m_agent->setValue(gstClipZ2, double(1));
+		m_agent->setValue(gstClipMask, long(12));
 		break;
 	case ID_Z1ClipSldr:
 	case ID_Z2ClipSldr:
-		m_agent->setValue("clip dist z", 1.0 / resz);
-		m_agent->setValue("clip link z", true);
-		m_agent->setValue("clip link x", false);
-		m_agent->setValue("clip link y", false);
-		m_agent->setValue("clip x1", double(0));
-		m_agent->setValue("clip x2", double(1));
-		m_agent->setValue("clip y1", double(0));
-		m_agent->setValue("clip y2", double(1));
-		m_agent->setValue("clip mask", long(48));
+		m_agent->setValue(gstClipDistZ, 1.0 / resz);
+		m_agent->setValue(gstClipLinkZ, true);
+		m_agent->setValue(gstClipLinkX, false);
+		m_agent->setValue(gstClipLinkY, false);
+		m_agent->setValue(gstClipX1, double(0));
+		m_agent->setValue(gstClipX2, double(1));
+		m_agent->setValue(gstClipY1, double(0));
+		m_agent->setValue(gstClipY2, double(1));
+		m_agent->setValue(gstClipMask, long(48));
 		break;
 	}
 }
