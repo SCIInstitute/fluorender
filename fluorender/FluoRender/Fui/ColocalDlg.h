@@ -81,6 +81,11 @@ public:
 	//settings
 	void GetSettings();
 
+	//output
+	void SetOutput(const std::string &titles, const std::string &values);
+	void CopyData();
+	void PasteData();
+
 	friend class fluo::ColocalAgent;
 
 private:

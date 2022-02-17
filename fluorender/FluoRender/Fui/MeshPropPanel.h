@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/panel.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
+#include <MeshPropAgent.hpp>
 
 using namespace std;
 
@@ -77,6 +78,8 @@ public:
 	void RefreshVRenderViews(bool tree=false);
 
 	void GetSettings();
+
+	friend class fluo::MeshPropAgent;
 
 private:
 	VRenderFrame* m_frame;

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/slider.h>
+#include <OutAdjustAgent.hpp>
 
 //all convert v1 to v2
 #define GammaUI2(v1, v2) \
@@ -154,6 +155,8 @@ public:
 	bool GetBSync() {return m_sync_b;}
 
 	void UpdateSync();
+
+	friend class fluo::OutAdjustAgent;
 
 private:
 	int m_type;

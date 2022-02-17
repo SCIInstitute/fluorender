@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 #include <wx/tglbtn.h>
+#include <VolumePropAgent.hpp>
 
 using namespace std;
 
@@ -134,6 +135,8 @@ public:
 	//sync view in depth mode
 	void SetView(fluo::Renderview* view);
 	fluo::Renderview* GetView();
+
+	friend class fluo::VolumePropAgent;
 
 private:
 	VRenderFrame* m_frame;

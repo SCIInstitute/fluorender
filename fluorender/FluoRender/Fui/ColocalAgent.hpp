@@ -78,10 +78,6 @@ namespace fluo
 			dval = std::max(v, dval);
 			setValue(gstColormapHigh, dval);
 		}
-		//output
-		void SetOutput(const std::string &titles, const std::string &values);
-		void CopyData();
-		void PasteData();
 	};
 }
 

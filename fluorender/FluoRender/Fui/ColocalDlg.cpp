@@ -179,6 +179,125 @@ void ColocalDlg::GetSettings()
 {
 }
 
+void ColocalDlg::SetOutput(const std::string &titles, const std::string &values)
+{
+	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k;
+
+	k = 0;
+	cur_line = titles;
+	do
+	{
+		cur_field = cur_line.BeforeFirst('\t');
+		cur_line = cur_line.AfterFirst('\t');
+		if (m_output_grid->GetNumberCols() <= k)
+			m_output_grid->InsertCols(k);
+		m_output_grid->SetColLabelValue(k, cur_field);
+		++k;
+	} while (cur_line.IsEmpty() == false);
+
+	fluo::Color c;
+	double val;
+	wxColor color;
+	fluo::VolumeData* vd = 0;
+	if (m_colormap && m_view)
+		vd = m_view->GetCurrentVolume();
+	bool colormap = m_colormap && vd && (m_cm_max - m_cm_min) > 0.0;
+
+	i = 0;
+	copy_data = values;
+	do
+	{
+		k = 0;
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		if (m_output_grid->GetNumberRows() <= i ||
+			m_hold_history)
+			m_output_grid->InsertRows(i);
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			m_output_grid->SetCellValue(i, k, cur_field);
+			if (colormap && cur_field.ToDouble(&val))
+			{
+				c = vd->GetColorFromColormap((val - m_cm_min) / (m_cm_max - m_cm_min));
+				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+				m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			else
+			{
+				color = *wxWHITE;
+				m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			++k;
+		} while (cur_line.IsEmpty() == false);
+		++i;
+	} while (copy_data.IsEmpty() == false);
+
+	if (m_output_grid->GetNumberCols() > k)
+		m_output_grid->DeleteCols(k,
+			m_output_grid->GetNumberCols() - k);
+
+	//m_output_grid->AutoSizeColumns(false);
+	if (m_physical_size && !m_get_ratio)
+		m_output_grid->SetDefaultColSize(100, true);
+	else
+		m_output_grid->SetDefaultColSize(70, true);
+	m_output_grid->ForceRefresh();
+	m_output_grid->ClearSelection();
+}
+
+void ColocalDlg::CopyData()
+{
+	int i, k;
+	wxString copy_data;
+	bool something_in_this_line;
+
+	copy_data.Clear();
+
+	bool t = m_output_grid->IsSelection();
+
+	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
+	{
+		something_in_this_line = false;
+		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
+		{
+			if (m_output_grid->IsInSelection(i, k))
+			{
+				if (something_in_this_line == false)
+				{  // first field in this line => may need a linefeed
+					if (copy_data.IsEmpty() == false)
+					{     // ... if it is not the very first field
+						copy_data = copy_data + wxT("\n");  // next LINE
+					}
+					something_in_this_line = true;
+				}
+				else
+				{
+					// if not the first field in this line we need a field seperator (TAB)
+					copy_data = copy_data + wxT("\t");  // next COLUMN
+				}
+				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
+			}
+		}
+	}
+
+	if (wxTheClipboard->Open())
+	{
+		// This data objects are held by the clipboard,
+		// so do not delete them in the app.
+		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
+		wxTheClipboard->Close();
+	}
+}
+
+void ColocalDlg::PasteData()
+{
+}
+
 //execute
 void ColocalDlg::Colocalize()
 {
