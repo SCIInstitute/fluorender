@@ -297,6 +297,91 @@ void ColocalAgent::Run()
 		else
 			values += "\n";
 	}
-	dlg_.SetOutput(titles, values);
+	SetOutput(titles, values);
+}
+
+void ColocalAgent::SetOutput(const std::string &titles, const std::string &values)
+{
+	wxString copy_data;
+	wxString cur_field;
+	wxString cur_line;
+	int i, k;
+
+	k = 0;
+	cur_line = titles;
+	do
+	{
+		cur_field = cur_line.BeforeFirst('\t');
+		cur_line = cur_line.AfterFirst('\t');
+		if (dlg_.m_output_grid->GetNumberCols() <= k)
+			dlg_.m_output_grid->InsertCols(k);
+		dlg_.m_output_grid->SetColLabelValue(k, cur_field);
+		++k;
+	} while (cur_line.IsEmpty() == false);
+
+	fluo::Color c;
+	double val;
+	wxColor color;
+	fluo::VolumeData* vd = 0;
+	bool colormap;
+	getValue(gstColormapEnable, colormap);
+	if (colormap)
+	{
+		VolumeGroup* group = getObject();
+		if (group)
+			vd = group->getChild(0)->asVolumeData();
+	}
+	double dmin, dmax;
+	getValue(gstColormapLow, dmin);
+	getValue(gstColormapHigh, dmax);
+	colormap = colormap && vd && (dmax - dmin) > 0.0;
+	bool hold_history;
+	getValue(gstHoldHistory, hold_history);
+
+	i = 0;
+	copy_data = values;
+	do
+	{
+		k = 0;
+		cur_line = copy_data.BeforeFirst('\n');
+		copy_data = copy_data.AfterFirst('\n');
+		if (dlg_.m_output_grid->GetNumberRows() <= i ||
+			hold_history)
+			dlg_.m_output_grid->InsertRows(i);
+		do
+		{
+			cur_field = cur_line.BeforeFirst('\t');
+			cur_line = cur_line.AfterFirst('\t');
+			dlg_.m_output_grid->SetCellValue(i, k, cur_field);
+			if (colormap && cur_field.ToDouble(&val))
+			{
+				c = vd->GetColorFromColormap((val - dmin) / (dmax - dmin));
+				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
+				dlg_.m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			else
+			{
+				color = *wxWHITE;
+				dlg_.m_output_grid->SetCellBackgroundColour(i, k, color);
+			}
+			++k;
+		} while (cur_line.IsEmpty() == false);
+		++i;
+	} while (copy_data.IsEmpty() == false);
+
+	if (dlg_.m_output_grid->GetNumberCols() > k)
+		dlg_.m_output_grid->DeleteCols(k,
+			dlg_.m_output_grid->GetNumberCols() - k);
+
+	//dlg_.m_output_grid->AutoSizeColumns(false);
+	bool phys_size, get_ratio;
+	getValue(gstPhysSize, phys_size);
+	getValue(gstGetRatio, get_ratio);
+	if (phys_size && !get_ratio)
+		dlg_.m_output_grid->SetDefaultColSize(100, true);
+	else
+		dlg_.m_output_grid->SetDefaultColSize(70, true);
+	dlg_.m_output_grid->ForceRefresh();
+	dlg_.m_output_grid->ClearSelection();
 }
 

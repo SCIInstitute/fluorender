@@ -81,8 +81,7 @@ public:
 	//settings
 	void GetSettings();
 
-	//output
-	void SetOutput(const std::string &titles, const std::string &values);
+	//grid data ops
 	void CopyData();
 	void PasteData();
 

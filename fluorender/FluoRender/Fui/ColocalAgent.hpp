@@ -62,6 +62,7 @@ namespace fluo
 		ColocalDlg &dlg_;
 
 	private:
+		void SetOutput(const std::string &titles, const std::string &values);
 		void ResetMinMax()
 		{
 			double dval = std::numeric_limits<double>::max();
