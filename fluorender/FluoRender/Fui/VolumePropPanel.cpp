@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
+#include <VolumeFactory.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
@@ -1141,256 +1142,144 @@ void VolumePropPanel::OnRightThreshText(wxCommandEvent &event)
 //3
 void VolumePropPanel::OnLuminanceSync(wxMouseEvent& event)
 {
-	wxString str = m_luminance_text->GetValue();
-	long iVal;
-	str.ToLong(&iVal);
-	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->setValue(gstLuminance, dVal);
-	RefreshVRenderViews(true, true);
+	m_agent->propParentValue(gstLuminance);
 }
 
 void VolumePropPanel::OnLuminanceChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	if (str != m_luminance_text->GetValue())
-		m_luminance_text->SetValue(str);
+	m_luminance_text->SetValue(str);
 }
 
 void VolumePropPanel::OnLuminanceText(wxCommandEvent &event)
 {
 	wxString str = m_luminance_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_luminance_text->ChangeValue(str);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_luminance_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		m_luminance_sldr->SetValue(ival);
+
+		m_agent->setValue(gstLuminance, val);
 	}
-	double val = double(ival) / m_max_val;
-	m_luminance_sldr->SetValue(ival);
-
-	if (m_sync_group && m_group)
-		m_group->setValue(gstLuminance, val);
-	else if (m_vd)
-		m_vd->setValue(gstLuminance, val);
-
-	if (m_vd)
-	{
-		fluo::Color color;
-		m_vd->getValue(gstColor, color);
-		wxColor wxc((unsigned char)(color.r()*255),
-			(unsigned char)(color.g()*255),
-			(unsigned char)(color.b()*255));
-		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color_btn->SetBackgroundColour(wxc);
-		m_lumi_change = true;
-	}
-
-	RefreshVRenderViews(true, true);
 }
 
 //shadow
 void VolumePropPanel::OnShadowSync(wxMouseEvent& event)
 {
-	bool bVal = m_shadow_tool->GetToolState(ID_ShadowChk);
-	wxString str = m_shadow_text->GetValue();
-	double dVal;
-	str.ToDouble(&dVal);
-	if (m_group)
-	{
-		m_group->setValue(gstShadowEnable, bVal);
-		m_group->setValue(gstShadowInt, dVal);
-	}
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstShadowEnable);
+	m_agent->propParentValue(gstShadowInt);
 }
 
 void VolumePropPanel::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
-	long lval;
-	m_group->getValue(gstBlendMode, lval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstShadowEnable, shadow);
-	else if (m_group && lval ==2)
-		m_vd->setValue(gstShadowEnable, shadow);
-	else if (m_vd)
-		m_vd->setValue(gstShadowEnable, shadow);
-
+	m_agent->setValue(gstShadowEnable, shadow);
 	if (shadow)
 		EnableShadow();
 	else
 		DisableShadow();
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnShadowChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_shadow_text->GetValue())
-		m_shadow_text->SetValue(str);
+	m_shadow_text->SetValue(str);
 }
 
 void VolumePropPanel::OnShadowText(wxCommandEvent &event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	m_shadow_sldr->SetValue(int(val*100.0+0.5));
-	long lval;
-	m_group->getValue(gstBlendMode, lval);
-
-	//set shadow darkness
-	if (m_sync_group && m_group)
-		m_group->setValue(gstShadowInt, val);
-	else if (m_group && lval ==2)
-		m_group->setValue(gstShadowInt, val);
-	else if (m_vd)
-		m_vd->setValue(gstShadowInt, val);
-
-	RefreshVRenderViews(false, true);
+	if (str.ToDouble(&val))
+	{
+		m_shadow_sldr->SetValue(int(val*100.0 + 0.5));
+		m_agent->setValue(gstShadowInt, val);
+	}
 }
 
 //4
 void VolumePropPanel::OnAlphaSync(wxMouseEvent& event)
 {
-	wxString str = m_alpha_text->GetValue();
-	long iVal;
-	str.ToLong(&iVal);
-	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->setValue(gstAlpha, dVal);
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstAlphaEnable);
+	m_agent->propParentValue(gstAlpha);
 }
 
 void VolumePropPanel::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstAlphaEnable, alpha);
-	else if (m_vd)
-		m_vd->setValue(gstAlphaEnable, alpha);
-
+	m_agent->setValue(gstAlphaEnable, alpha);
 	if (alpha)
 		EnableAlpha();
 	else
 		DisableAlpha();
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnAlphaChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	if (str != m_alpha_text->GetValue())
-		m_alpha_text->SetValue(str);
+	m_alpha_text->SetValue(str);
 }
 
 void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_alpha_text->ChangeValue(str);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_alpha_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		m_alpha_sldr->SetValue(ival);
+
+		m_agent->setValue(gstAlpha, val);
 	}
-	double val = double(ival) / m_max_val;
-	m_alpha_sldr->SetValue(ival);
-
-	//set alpha value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstAlpha, val);
-	else if (m_vd)
-		m_vd->setValue(gstAlpha, val);
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnSampleSync(wxMouseEvent& event)
 {
-	wxString str = m_sample_text->GetValue();
-	double srate = 0.0;
-	str.ToDouble(&srate);
-	if (m_group)
-		m_group->setValue(gstSampleRate, srate);
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstSampleRate);
 }
 
 void VolumePropPanel::OnSampleChange(wxScrollEvent & event)
 {
 	double val = event.GetPosition() / 10.0;
 	wxString str = wxString::Format("%.1f", val);
-	if (str != m_sample_text->GetValue())
-		m_sample_text->SetValue(str);
+	m_sample_text->SetValue(str);
 }
 
 void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 {
 	wxString str = m_sample_text->GetValue();
 	double srate = 0.0;
-	str.ToDouble(&srate);
-	double val = srate*10.0;
-	m_sample_sldr->SetValue(int(val));
-
-	//set sample rate value
-	bool bval = false;
-	if (m_view)
+	if (str.ToDouble(&srate))
 	{
-		long lval;
-		m_view->getValue(gstMixMethod, lval);
-		if (lval == fluo::Renderview::MIX_METHOD_MULTI)
-			bval = true;
+		double val = srate * 10.0;
+		m_sample_sldr->SetValue(int(val));
+		m_agent->setValue(gstSampleRate, srate);
+		//maybe to synchronize sample rates among volumes in the depth mode
 	}
-	if (bval)
-	{
-		fluo::VolumeList list = m_view->GetFullVolList();
-		for (auto vd : list)
-		{
-			if (vd)
-				vd->setValue(gstSampleRate, srate);
-		}
-	}
-	else
-	{
-		long lval;
-		m_group->getValue(gstBlendMode, lval);
-		if (m_sync_group && m_group)
-			m_group->setValue(gstSampleRate, srate);
-		else if (m_group && lval ==2)
-			m_group->setValue(gstSampleRate, srate);
-		else if (m_vd)
-			m_vd->setValue(gstSampleRate, srate);
-	}
-
-	RefreshVRenderViews(false, true);
 }
 
 //5
 void VolumePropPanel::OnShadingSync(wxMouseEvent& event)
 {
-	bool bVal = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	wxString str = m_low_shading_text->GetValue();
-	double dVal;
-	str.ToDouble(&dVal);
-	str = m_hi_shading_text->GetValue();
-	double dVal2;
-	str.ToDouble(&dVal2);
-	if (m_group)
-	{
-		m_group->setValue(gstShadingEnable, bVal);
-		m_group->setValue(gstLowShading, dVal);
-		m_group->setValue(gstHighShading, dVal2);
-	}
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstShadingEnable);
+	m_agent->propParentValue(gstLowShading);
+	m_agent->propParentValue(gstHighShading);
 }
 
 //hi shading
@@ -1398,96 +1287,57 @@ void VolumePropPanel::OnHiShadingChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 10.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_hi_shading_text->GetValue())
-		m_hi_shading_text->SetValue(str);
+	m_hi_shading_text->SetValue(str);
 }
 
 void VolumePropPanel::OnHiShadingText(wxCommandEvent &event)
 {
 	wxString str = m_hi_shading_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
-
-	//set high shading value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstHighShading, val);
-	else if (m_vd)
-		m_vd->setValue(gstHighShading, val);
-
-	RefreshVRenderViews(false, true);
+	if (str.ToDouble(&val))
+	{
+		m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
+		m_agent->setValue(gstHighShading, val);
+	}
 }
 
 void VolumePropPanel::OnLowShadingChange(wxScrollEvent &event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_low_shading_text->GetValue())
-		m_low_shading_text->SetValue(str);
+	m_low_shading_text->SetValue(str);
 }
 
 void VolumePropPanel::OnLowShadingText(wxCommandEvent &event)
 {
 	wxString str = m_low_shading_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	m_low_shading_sldr->SetValue(int(val*100.0+0.5));
-
-	//set low shading value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstLowShading, val);
-	else if (m_vd)
-		m_vd->setValue(gstLowShading, val);
-
-	RefreshVRenderViews(false, true);
+	if (str.ToDouble(&val))
+	{
+		m_low_shading_sldr->SetValue(int(val*100.0 + 0.5));
+		m_agent->setValue(gstLowShading, val);
+	}
 }
 
 void VolumePropPanel::OnShadingEnable(wxCommandEvent &event)
 {
 	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstShadingEnable, shading);
-	else if (m_vd)
-		m_vd->setValue(gstShadingEnable, shading);
-
+	m_agent->setValue(gstShadingEnable, shading);
 	if (shading)
 		EnableShading();
 	else
 		DisableShading();
-
-	RefreshVRenderViews(false, true);
 }
 
 //colormap controls
 void VolumePropPanel::OnColormapSync(wxMouseEvent& event)
 {
-	if (m_group)
-	{
-		bool bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
-		long lval = bVal ? 1 : 0;
-		m_group->setValue(gstColormapMode, lval);
-		m_group->setValue(gstColormapEnable, bVal);
-		long iVal;
-		double dVal1, dVal2;
-		wxString str = m_colormap_low_value_text->GetValue();
-		str.ToLong(&iVal);
-		dVal1 = double(iVal) / m_max_val;
-		str = m_colormap_high_value_text->GetValue();
-		str.ToLong(&iVal);
-		dVal2 = double(iVal) / m_max_val;
-		m_group->setValue(gstColormapLow, dVal1);
-		m_group->setValue(gstColormapHigh, dVal2);
-		//colormap
-		iVal = m_colormap_combo->GetCurrentSelection();
-		m_group->setValue(gstColormapType, iVal);
-		//colormap inv
-		bVal = m_colormap_inv_btn->GetValue();
-		m_group->setValue(gstColormapInv, bVal?-1.0:1.0);
-		//colormap proj
-		iVal = m_colormap_combo2->GetCurrentSelection();
-		m_group->setValue(gstColormapProj, iVal);
-	}
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstColormapEnable);
+	m_agent->propParentValue(gstColormapMode);
+	m_agent->propParentValue(gstColormapLow);
+	m_agent->propParentValue(gstColormapHigh);
+	m_agent->propParentValue(gstColormapType);
+	m_agent->propParentValue(gstColormapProj);
 }
 
 void VolumePropPanel::OnEnableColormap(wxCommandEvent &event)
@@ -1496,30 +1346,12 @@ void VolumePropPanel::OnEnableColormap(wxCommandEvent &event)
 		m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 
 	long lval = colormap ? 1 : 0;
-	if (m_sync_group && m_group)
-	{
-		m_group->setValue(gstColormapMode, lval);
-		m_group->setValue(gstColormapEnable, colormap);
-	}
-	else if (m_vd)
-	{
-		m_vd->setValue(gstColormapMode, lval);
-		m_vd->setValue(gstColormapEnable, colormap);
-	}
-
-	if (m_frame)
-	{
-		OutAdjustPanel *adjust_view = m_frame->GetAdjustView();
-		if (adjust_view)
-			adjust_view->UpdateSync();
-	}
-
+	m_agent->setValue(gstColormapEnable, colormap);
+	m_agent->setValue(gstColormapMode, lval);
 	if (colormap)
 		EnableColormap();
 	else
 		DisableColormap();
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnColormapHighValueChange(wxScrollEvent &event)
@@ -1533,35 +1365,31 @@ void VolumePropPanel::OnColormapHighValueChange(wxScrollEvent &event)
 		m_colormap_high_value_sldr->SetValue(iVal);
 	}
 	wxString str = wxString::Format("%d", iVal);
-	if (str != m_colormap_high_value_text->GetValue())
-		m_colormap_high_value_text->SetValue(str);
+	m_colormap_high_value_text->SetValue(str);
 }
 
 void VolumePropPanel::OnColormapHighValueText(wxCommandEvent &event)
 {
 	wxString str = m_colormap_high_value_text->GetValue();
 	long iVal = 0;
-	str.ToLong(&iVal);
-	if (double(iVal) > m_max_val)
+	if (str.ToLong(&iVal))
 	{
-		UpdateMaxVal(iVal);
-		str = wxString::Format("%d", iVal);
-		m_colormap_high_value_text->ChangeValue(str);
-	}
-	long iVal2 = m_colormap_low_value_sldr->GetValue();
+		if (double(iVal) > m_max_val)
+		{
+			UpdateMaxVal(iVal);
+			str = wxString::Format("%d", iVal);
+			m_colormap_high_value_text->ChangeValue(str);
+		}
+		long iVal2 = m_colormap_low_value_sldr->GetValue();
 
-	if (iVal >= iVal2)
-	{
-		m_colormap_high_value_sldr->SetValue(iVal);
+		if (iVal >= iVal2)
+		{
+			m_colormap_high_value_sldr->SetValue(iVal);
 
-		double val = double(iVal)/m_max_val;
+			double val = double(iVal) / m_max_val;
 
-		if (m_sync_group && m_group)
-			m_group->setValue(gstColormapHigh, val);
-		else if (m_vd)
-			m_vd->setValue(gstColormapHigh, val);
-
-		RefreshVRenderViews(false, true);
+			m_agent->setValue(gstColormapHigh, val);
+		}
 	}
 }
 
@@ -1569,276 +1397,74 @@ void VolumePropPanel::OnColormapLowValueChange(wxScrollEvent &event)
 {
 	int iVal = m_colormap_low_value_sldr->GetValue();
 	wxString str = wxString::Format("%d", iVal);
-	if (str != m_colormap_low_value_text->GetValue())
-		m_colormap_low_value_text->SetValue(str);
+	m_colormap_low_value_text->SetValue(str);
 }
 
 void VolumePropPanel::OnColormapLowValueText(wxCommandEvent &event)
 {
 	wxString str = m_colormap_low_value_text->GetValue();
 	long iVal = 0;
-	str.ToLong(&iVal);
-	if (double(iVal) > m_max_val)
+	if (str.ToLong(&iVal))
 	{
-		UpdateMaxVal(iVal);
-		str = wxString::Format("%d", iVal);
-		m_colormap_low_value_text->ChangeValue(str);
+		if (double(iVal) > m_max_val)
+		{
+			UpdateMaxVal(iVal);
+			str = wxString::Format("%d", iVal);
+			m_colormap_low_value_text->ChangeValue(str);
+		}
+		long iVal2 = m_colormap_high_value_sldr->GetValue();
+
+		if (iVal > iVal2)
+		{
+			iVal = iVal2;
+			str = wxString::Format("%d", iVal);
+			m_colormap_low_value_text->ChangeValue(str);
+		}
+		m_colormap_low_value_sldr->SetValue(iVal);
+
+		double val = double(iVal) / m_max_val;
+
+		m_agent->setValue(gstColormapLow, val);
 	}
-	long iVal2 = m_colormap_high_value_sldr->GetValue();
-
-	if (iVal > iVal2)
-	{
-		iVal = iVal2;
-		str = wxString::Format("%d", iVal);
-		m_colormap_low_value_text->ChangeValue(str);
-	}
-	m_colormap_low_value_sldr->SetValue(iVal);
-
-	double val = double(iVal)/m_max_val;
-
-	if (m_sync_group && m_group)
-		m_group->setValue(gstColormapLow, val);
-	else if (m_vd)
-		m_vd->setValue(gstColormapLow, val);
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 {
 	bool val = m_colormap_inv_btn->GetValue();
-
-	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
-	OnEnableColormap(event);
-
-	double dval = val ? -1.0 : 1.0;
-	if (m_sync_group && m_group)
-		m_group->setValue(gstColormapInv, dval);
-	else if (m_vd)
-		m_vd->setValue(gstColormapInv, dval);
-
-	RefreshVRenderViews(false, true);
-
+	m_agent->setValue(gstColormapInv, val);
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetColormapUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 {
 	long colormap = m_colormap_combo->GetCurrentSelection();
-
-	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
-	OnEnableColormap(event);
-	if (colormap >= 5)
-	{
-		m_options_toolbar->ToggleTool(ID_TranspChk, true);
-		OnTranspChk(event);
-	}
-
-	if (m_sync_group && m_group)
-		m_group->setValue(gstColormapType, colormap);
-	else if (m_vd)
-		m_vd->setValue(gstColormapType, colormap);
-
-	RefreshVRenderViews(false, true);
-
+	m_agent->setValue(gstColormapType, colormap);
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetColormapUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 {
 	long colormap_proj = m_colormap_combo2->GetCurrentSelection();
-
-	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, true);
-	OnEnableColormap(event);
-
-	if (m_sync_group && m_group)
-		m_group->setValue(gstColormapProj, colormap_proj);
-	else if (m_vd)
-		m_vd->setValue(gstColormapProj, colormap_proj);
-
-	RefreshVRenderViews(false, true);
+	m_agent->setValue(gstColormapProj, colormap_proj);
 }
 
 //6
 void VolumePropPanel::OnColorChange(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	if (m_vd)
-	{
-		m_vd->setValue(gstColor, color);
-
-		double lum;
-		m_vd->getValue(gstLuminance, lum);
-		int ilum = int(lum*m_max_val+0.5);
-		m_luminance_sldr->SetValue(ilum);
-		wxString str = wxString::Format("%d", ilum);
-		m_luminance_text->ChangeValue(str);
-
-		bool bval;
-		m_vd->getValue(gstSecColorSet, bval);
-		if (!bval)
-		{
-			m_vd->getValue(gstSecColor, color);
-			wxColor wxc((unsigned char)(color.r()*255),
-				(unsigned char)(color.g()*255),
-				(unsigned char)(color.b()*255));
-			m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
-				wxc.Red(), wxc.Green(), wxc.Blue()));
-			m_color2_btn->SetColour(wxc);
-		}
-
-		if (m_frame)
-		{
-			OutAdjustPanel *adjust_view = m_frame->GetAdjustView();
-			if (adjust_view)
-				adjust_view->UpdateSync();
-		}
-
-		RefreshVRenderViews(true, true);
-	}
+	m_agent->setValue(gstColor, color);
 }
 
 void VolumePropPanel::OnColor2Change(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	if (m_vd)
-	{
-		m_vd->setValue(gstSecColor, color);
-		RefreshVRenderViews(true, true);
-	}
-}
-
-int VolumePropPanel::GetColorString(wxString& str, wxColor& wxc)
-{
-	int filled = 3;
-	if (str == "a" || str == "A")
-		wxc = wxColor(0, 127, 255);
-	else if (str == "b" || str == "B")
-		wxc = wxColor(0, 0, 255);
-	else if (str == "c" || str == "C")
-		wxc = wxColor(0, 255, 255);
-	else if (str == "d" || str == "D")
-		wxc = wxColor(193, 154, 107);
-	else if (str == "e" || str == "E")
-		wxc = wxColor(80, 200, 120);
-	else if (str == "f" || str == "F")
-		wxc = wxColor(226, 88, 34);
-	else if (str == "g" || str == "G")
-		wxc = wxColor(0, 255, 0);
-	else if (str == "h" || str == "H")
-		wxc = wxColor(70, 255, 0);
-	else if (str == "i" || str == "I")
-		wxc = wxColor(75, 0, 130);
-	else if (str == "j" || str == "J")
-		wxc = wxColor(0, 168, 107);
-	else if (str == "k" || str == "K")
-		wxc = wxColor(0, 0, 0);
-	else if (str == "l" || str == "L")
-		wxc = wxColor(181, 126, 220);
-	else if (str == "m" || str == "M")
-		wxc = wxColor(255, 0, 255);
-	else if (str == "n" || str == "N")
-		wxc = wxColor(0, 0, 128);
-	else if (str == "o" || str == "O")
-		wxc = wxColor(0, 119, 190);
-	else if (str == "p" || str == "P")
-		wxc = wxColor(254, 40, 162);
-	else if (str == "q" || str == "Q")
-		wxc = wxColor(232, 204, 215);
-	else if (str == "r" || str == "R")
-		wxc = wxColor(255, 0, 0);
-	else if (str == "s" || str == "S")
-		wxc = wxColor(236, 213, 64);
-	else if (str == "t" || str == "T")
-		wxc = wxColor(255, 99, 71);
-	else if (str == "u" || str == "U")
-		wxc = wxColor(211, 0, 63);
-	else if (str == "v" || str == "V")
-		wxc = wxColor(143, 0, 255);
-	else if (str == "w" || str == "W")
-		wxc = wxColor(255, 255, 255);
-	else if (str == "x" || str == "X")
-		wxc = wxColor(115, 134, 120);
-	else if (str == "y" || str == "Y")
-		wxc = wxColor(255, 255, 0);
-	else if (str == "z" || str == "Z")
-		wxc = wxColor(57, 167, 142);
-	else
-	{
-		int index = 0;//1-red; 2-green; 3-blue;
-		int state = 0;//0-idle; 1-reading digit; 3-finished
-		wxString sColor;
-		long r = 255;
-		long g = 255;
-		long b = 255;
-		for (unsigned int i=0; i<str.length(); i++)
-		{
-			wxChar c = str[i];
-			if (isdigit(c) || c=='.')
-			{
-				if (state == 0 || state == 3)
-				{
-					sColor += c;
-					index++;
-					state = 1;
-				}
-				else if (state == 1)
-				{
-					sColor += c;
-				}
-
-				if (i == str.length()-1)  //last one
-				{
-					switch (index)
-					{
-					case 1:
-						sColor.ToLong(&r);
-						filled = 1;
-						break;
-					case 2:
-						sColor.ToLong(&g);
-						filled = 2;
-						break;
-					case 3:
-						sColor.ToLong(&b);
-						filled = 3;
-						break;
-					}
-				}
-			}
-			else
-			{
-				if (state == 1)
-				{
-					switch (index)
-					{
-					case 1:
-						sColor.ToLong(&r);
-						filled = 1;
-						break;
-					case 2:
-						sColor.ToLong(&g);
-						filled = 2;
-						break;
-					case 3:
-						sColor.ToLong(&b);
-						filled = 3;
-						break;
-					}
-					state = 3;
-					sColor = "";
-				}
-			}
-		}
-		wxc = wxColor(fluo::Clamp(r,0,255), fluo::Clamp(g,0,255), fluo::Clamp(b,0,255));
-	}
-	return filled;
+	m_agent->setValue(gstSecColor, color);
 }
 
 void VolumePropPanel::OnColorTextChange(wxCommandEvent& event)
@@ -1913,22 +1539,13 @@ void VolumePropPanel::OnInvCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
 		wxGetBitmapFromMemory(invert_off));
 
-	if (m_sync_group && m_group)
-		m_group->setValue(gstInvert, inv);
-	else if (m_vd)
-		m_vd->setValue(gstInvert, inv);
-
-	RefreshVRenderViews(false, true);
+	m_agent->setValue(gstInvert, inv);
 }
 
 void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 {
 	long val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
-
-	if (m_sync_group && m_group)
-		m_group->setValue(gstMipMode, val);
-	else if (m_vd)
-		m_vd->setValue(gstMipMode, val);
+	m_agent->setValue(gstMipMode, val);
 
 	if (val==1)
 	{
@@ -1944,8 +1561,6 @@ void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 	}
 
 	Layout();
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnTranspChk(wxCommandEvent &event)
@@ -1955,22 +1570,14 @@ void VolumePropPanel::OnTranspChk(wxCommandEvent &event)
 	{
 		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
 			wxGetBitmapFromMemory(transphi));
-		if (m_sync_group && m_group)
-			m_group->setValue(gstAlphaPower, 2.0);
-		else if (m_vd)
-			m_vd->setValue(gstAlphaPower, 2.0);
 	}
 	else
 	{
 		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
 			wxGetBitmapFromMemory(transplo));
-		if (m_sync_group && m_group)
-			m_group->setValue(gstAlphaPower, 1.0);
-		else if (m_vd)
-			m_vd->setValue(gstAlphaPower, 1.0);
 	}
-
-	RefreshVRenderViews(false, true);
+	double alpha_power = bval ? 2 : 1;
+	m_agent->setValue(gstAlphaPower, alpha_power);
 }
 
 void VolumePropPanel::OnCompChk(wxCommandEvent &event)
@@ -1980,22 +1587,14 @@ void VolumePropPanel::OnCompChk(wxCommandEvent &event)
 	{
 		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
 			wxGetBitmapFromMemory(comp));
-		if (m_sync_group && m_group)
-			m_group->setValue(gstLabelMode, long(1));
-		else if (m_vd)
-			m_vd->setValue(gstLabelMode, long(1));
 	}
 	else
 	{
 		m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
 			wxGetBitmapFromMemory(comp_off));
-		if (m_sync_group && m_group)
-			m_group->setValue(gstLabelMode, long(0));
-		else if (m_vd)
-			m_vd->setValue(gstLabelMode, long(0));
 	}
-
-	RefreshVRenderViews(false, true);
+	long label_mode = bval ? 1 : 0;
+	m_agent->setValue(gstLabelMode, label_mode);
 }
 
 //noise reduction
@@ -2009,42 +1608,8 @@ void VolumePropPanel::OnNRCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth_off));
 
-	bool bval = false;
-	if (m_view)
-	{
-		long lval;
-		m_view->getValue(gstMixMethod, lval);
-		if (lval == fluo::Renderview::MIX_METHOD_MULTI)
-			bval = true;
-	}
-	if (bval)
-	{
-		fluo::VolumeList list = m_view->GetFullVolList();
-		for (auto vd : list)
-		{
-			if (vd)
-				vd->setValue(gstNoiseRedct, val);
-		}
-	}
-	else
-	{
-		long lval;
-		m_group->getValue(gstBlendMode, lval);
-		if (m_sync_group && m_group)
-			m_group->setValue(gstNoiseRedct, val);
-		else if (m_group && lval==2)
-			m_group->setValue(gstNoiseRedct, val);
-		else if (m_vd)
-			m_vd->setValue(gstNoiseRedct, val);
-	}
-
-	RefreshVRenderViews(false, true);
-}
-
-void VolumePropPanel::OnFluoRender(wxCommandEvent &event)
-{
-	if (!m_frame) return;
-	m_frame->OnInfo(event);
+	m_agent->setValue(gstNoiseRedct, val);
+	//synchronize in view?
 }
 
 //depth mode
@@ -2056,97 +1621,37 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
 
-	if (val)
-	{
-		if (m_group)
-		{
-			m_group->setValue(gstBlendMode, long(2));
-			if (m_vd)
-			{
-				fluo::ValueCollection names{
-					gstNoiseRedct,
-					gstSampleRate,
-					gstShadowEnable,
-					gstShadowInt
-				};
-				m_group->propValues(names, m_vd);
-			}
-		}
-	}
-	else
-	{
-		if (m_group)
-			m_group->setValue(gstBlendMode, long(0));
-	}
+	//if (val)
+	//{
+	//	if (m_group)
+	//	{
+	//		m_group->setValue(gstBlendMode, long(2));
+	//		if (m_vd)
+	//		{
+	//			fluo::ValueCollection names{
+	//				gstNoiseRedct,
+	//				gstSampleRate,
+	//				gstShadowEnable,
+	//				gstShadowInt
+	//			};
+	//			m_group->propValues(names, m_vd);
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	if (m_group)
+	//		m_group->setValue(gstBlendMode, long(0));
+	//}
 
-	RefreshVRenderViews(false, true);
-}
-
-bool VolumePropPanel::SetSpacings()
-{
-	if (!m_space_x_text || !m_space_y_text || !m_space_z_text)
-		return false;
-
-	wxString str, str_new;
-	double spcx = 0.0;
-	double spcy = 0.0;
-	double spcz = 0.0;
-
-	str = m_space_x_text->GetValue();
-	str.ToDouble(&spcx);
-	if (spcx<=0.0)
-		return false;
-
-	str = m_space_y_text->GetValue();
-	str.ToDouble(&spcy);
-	if (spcy<=0.0)
-		return false;
-
-	str = m_space_z_text->GetValue();
-	str.ToDouble(&spcz);
-	if (spcz<=0.0)
-		return false;
-	bool override_vox = true;
-	if (m_frame && m_frame->GetSettingDlg())
-		override_vox = m_frame->GetSettingDlg()->GetOverrideVox();
-
-	if ((m_sync_group || override_vox) && m_group)
-	{
-		for (int i = 0; i < m_group->getNumChildren(); i++)
-		{
-			fluo::Object* obj = m_group->getChild(i);
-			obj->setValue(gstSpcX, spcx);
-			obj->setValue(gstSpcY, spcy);
-			obj->setValue(gstSpcZ, spcz);
-			obj->setValue(gstBaseSpcX, spcx);
-			obj->setValue(gstBaseSpcY, spcy);
-			obj->setValue(gstBaseSpcZ, spcz);
-		}
-	}
-	else if (m_vd)
-	{
-		m_vd->setValue(gstSpcX, spcx);
-		m_vd->setValue(gstSpcY, spcy);
-		m_vd->setValue(gstSpcZ, spcz);
-		m_vd->setValue(gstBaseSpcX, spcx);
-		m_vd->setValue(gstBaseSpcY, spcy);
-		m_vd->setValue(gstBaseSpcZ, spcz);
-	}
-	else return false;
-
-	return true;
+	//RefreshVRenderViews(false, true);
 }
 
 //enable/disable
 void VolumePropPanel::EnableAlpha()
 {
-	long lval;
-	m_vd->getValue(gstMipMode, lval);
-	if (lval != 1)
-	{
-		m_alpha_sldr->Enable();
-		m_alpha_text->Enable();
-	}
+	m_alpha_sldr->Enable();
+	m_alpha_text->Enable();
 }
 
 void VolumePropPanel::DisableAlpha()
@@ -2161,15 +1666,6 @@ void VolumePropPanel::EnableShading()
 	m_low_shading_text->Enable();
 	m_hi_shading_sldr->Enable();
 	m_hi_shading_text->Enable();
-	long lval;
-	m_vd->getValue(gstMipMode, lval);
-	if (lval == 1)
-	{
-		m_left_thresh_sldr->Enable();
-		m_left_thresh_text->Enable();
-		m_right_thresh_sldr->Enable();
-		m_right_thresh_text->Enable();
-	}
 }
 
 void VolumePropPanel::DisableShading()
@@ -2178,49 +1674,18 @@ void VolumePropPanel::DisableShading()
 	m_low_shading_text->Disable();
 	m_hi_shading_sldr->Disable();
 	m_hi_shading_text->Disable();
-	long lval;
-	m_vd->getValue(gstMipMode, lval);
-	bool bval;
-	m_vd->getValue(gstShadowEnable, bval);
-	if (lval == 1 && !bval)
-	{
-		m_left_thresh_sldr->Disable();
-		m_left_thresh_text->Disable();
-		m_right_thresh_sldr->Disable();
-		m_right_thresh_text->Disable();
-	}
 }
 
 void VolumePropPanel::EnableShadow()
 {
 	m_shadow_sldr->Enable();
 	m_shadow_text->Enable();
-	long lval;
-	m_vd->getValue(gstMipMode, lval);
-	if (lval == 1)
-	{
-		m_left_thresh_sldr->Enable();
-		m_left_thresh_text->Enable();
-		m_right_thresh_sldr->Enable();
-		m_right_thresh_text->Enable();
-	}
 }
 
 void VolumePropPanel::DisableShadow()
 {
 	m_shadow_sldr->Disable();
 	m_shadow_text->Disable();
-	long lval;
-	m_vd->getValue(gstMipMode, lval);
-	bool bval;
-	m_vd->getValue(gstShadingEnable, bval);
-	if (lval == 1 && !bval)
-	{
-		m_left_thresh_sldr->Disable();
-		m_left_thresh_text->Disable();
-		m_right_thresh_sldr->Disable();
-		m_right_thresh_text->Disable();
-	}
 }
 
 void VolumePropPanel::EnableColormap()
@@ -2241,50 +1706,49 @@ void VolumePropPanel::DisableColormap()
 
 void VolumePropPanel::EnableMip()
 {
-	DisableAlpha();
-	m_boundary_sldr->Disable();
-	m_boundary_text->Disable();
-	m_luminance_sldr->Disable();
-	m_luminance_text->Disable();
-	bool bval1, bval2;
-	m_vd->getValue(gstShadingEnable, bval1);
-	m_vd->getValue(gstShadowEnable, bval2);
-	if (bval1 || bval2)
-		EnableShading();
-	else
-		DisableShading();
+	//DisableAlpha();
+	//m_boundary_sldr->Disable();
+	//m_boundary_text->Disable();
+	//m_luminance_sldr->Disable();
+	//m_luminance_text->Disable();
+	//bool bval1, bval2;
+	//m_vd->getValue(gstShadingEnable, bval1);
+	//m_vd->getValue(gstShadowEnable, bval2);
+	//if (bval1 || bval2)
+	//	EnableShading();
+	//else
+	//	DisableShading();
 }
 
 void VolumePropPanel::DisableMip()
 {
-	bool bval1, bval2;
-	m_vd->getValue(gstAlphaEnable, bval1);
-	if (bval1)
-		EnableAlpha();
-	else
-		DisableAlpha();
-	m_boundary_sldr->Enable();
-	m_boundary_text->Enable();
-	m_luminance_sldr->Enable();
-	m_luminance_text->Enable();
-	m_vd->getValue(gstShadingEnable, bval1);
-	m_vd->getValue(gstShadowEnable, bval2);
-	if (bval1 || bval2)
-		EnableShading();
-	else
-		DisableShading();
-	m_left_thresh_sldr->Enable();
-	m_left_thresh_text->Enable();
-	m_right_thresh_sldr->Enable();
-	m_right_thresh_text->Enable();
+	//bool bval1, bval2;
+	//m_vd->getValue(gstAlphaEnable, bval1);
+	//if (bval1)
+	//	EnableAlpha();
+	//else
+	//	DisableAlpha();
+	//m_boundary_sldr->Enable();
+	//m_boundary_text->Enable();
+	//m_luminance_sldr->Enable();
+	//m_luminance_text->Enable();
+	//m_vd->getValue(gstShadingEnable, bval1);
+	//m_vd->getValue(gstShadowEnable, bval2);
+	//if (bval1 || bval2)
+	//	EnableShading();
+	//else
+	//	DisableShading();
+	//m_left_thresh_sldr->Enable();
+	//m_left_thresh_text->Enable();
+	//m_right_thresh_sldr->Enable();
+	//m_right_thresh_text->Enable();
 }
 
 //update max value
 void VolumePropPanel::UpdateMaxVal(double value)
 {
-	if (!m_vd) return;
 	long bits;
-	m_vd->getValue(gstBits, bits);
+	m_agent->getValue(gstBits, bits);
 	if (bits == 8)
 		return;
 	else if (bits > 8)
@@ -2295,25 +1759,44 @@ void VolumePropPanel::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_vd->setValue(gstMaxInt, m_max_val);
-	m_vd->setValue(gstIntScale, 65535.0 / m_max_val);
-	GetSettings();
+	m_agent->setValue(gstMaxInt, m_max_val);
+	m_agent->setValue(gstIntScale, 65535.0 / m_max_val);
 }
 
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
-	if (SetSpacings())
-		InitVRenderViews(fluo::Renderview::INIT_BOUNDS| fluo::Renderview::INIT_CENTER);
+	//if (SetSpacings())
+	//	InitVRenderViews(fluo::Renderview::INIT_BOUNDS| fluo::Renderview::INIT_CENTER);
+	wxString str;
+	double dval;
+	//x
+	str = m_space_x_text->GetValue();
+	if (str.ToDouble(&dval) && dval > 0.0)
+	{
+		m_agent->setValue(gstSpcX, dval);
+		m_agent->setValue(gstBaseSpcX, dval);
+	}
+	//y
+	str = m_space_y_text->GetValue();
+	if (str.ToDouble(&dval) && dval > 0.0)
+	{
+		m_agent->setValue(gstSpcY, dval);
+		m_agent->setValue(gstBaseSpcY, dval);
+	}
+	//z
+	str = m_space_z_text->GetValue();
+	if (str.ToDouble(&dval) && dval > 0.0)
+	{
+		m_agent->setValue(gstSpcZ, dval);
+		m_agent->setValue(gstBaseSpcZ, dval);
+	}
 }
 
 //legend
 void VolumePropPanel::OnLegendCheck(wxCommandEvent& event)
 {
-	bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
-	if (m_vd)
-		m_vd->setValue(gstLegend, leg);
-
-	RefreshVRenderViews(false, true);
+	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
+	m_agent->setValue(gstLegend, bval);
 }
 
 //interpolation
@@ -2326,517 +1809,108 @@ void VolumePropPanel::OnInterpolateCheck(wxCommandEvent& event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
 		wxGetBitmapFromMemory(interpolate_off));
-	if (m_sync_group && m_group)
-		m_group->setValue(gstInterpolate, inv);
-	else if (m_vd)
-		m_vd->setValue(gstInterpolate, inv);
-	if (m_view)
-		m_view->setValue(gstInterpolate, inv);
-
-	RefreshVRenderViews(false, true);
+	m_agent->setValue(gstInterpolate, inv);
+	//synch with view?
 }
 
 //sync within group
 void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 {
-	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
-	if (m_group)
-		m_group->setValue(gstSyncGroup, m_sync_group);
-
-	if (m_sync_group && m_group)
+	bool sync = m_options_toolbar->GetToolState(ID_SyncGroupChk);
+	fluo::ValueCollection names{
+		gstGamma3d,
+		gstExtractBoundary,
+		gstSaturation,
+		gstLowThreshold,
+		gstHighThreshold,
+		gstShadowEnable,
+		gstShadowInt,
+		gstAlpha,
+		gstAlphaEnable,
+		gstSampleRate,
+		gstShadingEnable,
+		gstLowShading,
+		gstHighShading,
+		gstColormapEnable,
+		gstColormapMode,
+		gstColormapType,
+		gstColormapLow,
+		gstColormapHigh,
+		gstColormapProj,
+		gstInvert,
+		gstInterpolate,
+		gstMipMode,
+		gstNoiseRedct
+	};
+	if (sync)
 	{
-		wxString str;
-		double dVal;
-		long iVal;
-		bool bVal;
-
-		//gamma
-		str = m_gamma_text->GetValue();
-		str.ToDouble(&dVal);
-		m_group->setValue(gstGamma3d, dVal);
-		//boundary
-		str = m_boundary_text->GetValue();
-		str.ToDouble(&dVal);
-		m_group->setValue(gstExtractBoundary, dVal);
-		//saturation
-		str = m_saturation_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal) / m_max_val;
-		m_group->setValue(gstSaturation, dVal);
-		//left threshold
-		str = m_left_thresh_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal) / m_max_val;
-		m_group->setValue(gstLowThreshold, dVal);
-		//right thresh
-		str = m_right_thresh_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal) / m_max_val;
-		m_group->setValue(gstHighThreshold, dVal);
-		//luminance
-		//str = m_luminance_text->GetValue();
-		//str.ToLong(&iVal);
-		//dVal = double(iVal)/m_max_val;
-		//m_group->SetLuminance(dVal);
-		//shadow
-		bVal = m_shadow_tool->GetToolState(ID_ShadowChk);
-		m_group->setValue(gstShadowEnable, bVal);
-		str = m_shadow_text->GetValue();
-		str.ToDouble(&dVal);
-		m_group->setValue(gstShadowInt, dVal);
-		//high shading
-		str = m_hi_shading_text->GetValue();
-		str.ToDouble(&dVal);
-		m_group->setValue(gstHighShading, dVal);
-		//alpha
-		str = m_alpha_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal) / m_max_val;
-		m_group->setValue(gstAlpha, dVal);
-		//sample rate
-		str = m_sample_text->GetValue();
-		str.ToDouble(&dVal);
-		m_group->setValue(gstSampleRate, dVal);
-		//shading
-		bVal = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-		m_group->setValue(gstShadingEnable, bVal);
-		str = m_low_shading_text->GetValue();
-		str.ToDouble(&dVal);
-		m_group->setValue(gstLowShading, dVal);
-		//inversion
-		bVal = m_options_toolbar->GetToolState(ID_InvChk);
-		m_group->setValue(gstInvert, bVal);
-		//interpolation
-		bVal = m_options_toolbar->GetToolState(ID_InterpolateChk);
-		m_group->setValue(gstInterpolate, bVal);
-		if (m_view)
-			m_view->setValue(gstInterpolate, bVal);
-		//MIP
-		bVal = m_options_toolbar->GetToolState(ID_MipChk);
-		m_group->setValue(gstMipMode, long(bVal?1:0));
-		//transp
-		bVal = m_options_toolbar->GetToolState(ID_TranspChk);
-		m_group->setValue(gstAlphaPower, bVal ? 2.0 : 1.0);
-		//noise reduction
-		bVal = m_options_toolbar->GetToolState(ID_InvChk);
-		m_group->setValue(gstNoiseRedct, bVal);
-		//colormap low
-		str = m_colormap_low_value_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal) / m_max_val;
-		m_group->setValue(gstColormapLow, dVal);
-		//colormap high
-		str = m_colormap_high_value_text->GetValue();
-		str.ToLong(&iVal);
-		dVal = double(iVal) / m_max_val;
-		m_group->setValue(gstColormapHigh, dVal);
-		//colormap mode
-		bVal = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
-		m_group->setValue(gstColormapMode, long(bVal?1:0));
-		//colormap
-		iVal = m_colormap_combo->GetCurrentSelection();
-		m_group->setValue(gstColormapType, iVal);
-		//colormap inv
-		bVal = m_colormap_inv_btn->GetValue();
-		m_group->setValue(gstColormapInv, bVal ? -1.0 : 1.0);
-		//colormap proj
-		iVal = m_colormap_combo2->GetCurrentSelection();
-		m_group->setValue(gstColormapProj, iVal);
+		m_agent->propParentValues(names);
+		m_agent->syncParentValues(names);
 	}
-
-	RefreshVRenderViews(false, true);
+	else
+		m_agent->unsyncParentValues(names);
 }
 
 void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 {
-	if (!m_frame)
-		return;
-	DataManager *mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
-
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_volume_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	wxString str;
-	double val;
-	int ival;
-	//extract boundary
-	str = m_boundary_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("extract_boundary", val);
-	mgr->m_vol_exb = val;
-	//gamma
-	str = m_gamma_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("gamma", val);
-	mgr->m_vol_gam = val;
-	//low offset
-	str = m_saturation_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("low_offset", val);
-	mgr->m_vol_of1 = val;
-	//high offset
-	val = 1.0;
-	fconfig.Write("high_offset", val);
-	mgr->m_vol_of2 = val;
-	//low thresholding
-	str = m_left_thresh_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("low_thresholding", val);
-	mgr->m_vol_lth = val;
-	//high thresholding
-	str = m_right_thresh_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("high_thresholding", val);
-	mgr->m_vol_hth = val;
-	//low shading
-	str = m_low_shading_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("low_shading", val);
-	mgr->m_vol_lsh = val;
-	//high shading
-	str = m_hi_shading_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("high_shading", val);
-	mgr->m_vol_hsh = val;
-	//alpha
-	str = m_alpha_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("alpha", val);
-	mgr->m_vol_alf = val;
-	//sample rate
-	str = m_sample_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("sample_rate", val);
-	mgr->m_vol_spr = val;
-	//x spacing
-	str = m_space_x_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("x_spacing", val);
-	mgr->m_vol_xsp = val;
-	//y spacing
-	str = m_space_y_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("y_spacing", val);
-	mgr->m_vol_ysp = val;
-	//z spacing
-	str = m_space_z_text->GetValue();
-	str.ToDouble(&val);
-	fconfig.Write("z_spacing", val);
-	mgr->m_vol_zsp = val;
-	//luminance
-	str = m_luminance_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("luminance", val);
-	mgr->m_vol_lum = val;
-	//colormap enable
-	bool bval = m_colormap_tool->GetToolState(ID_ColormapEnableChk);
-	fconfig.Write("colormap_mode", bval);
-	mgr->m_vol_cmm = bval;
-	//colormap inv
-	bval = m_colormap_inv_btn->GetValue();
-	fconfig.Write("colormap_inv", bval);
-	mgr->m_vol_cmi = bval;
-	//colormap type
-	ival = m_colormap_combo->GetCurrentSelection();
-	fconfig.Write("colormap", ival);
-	mgr->m_vol_cmp = ival;
-	//colormap projection
-	ival = m_colormap_combo2->GetCurrentSelection();
-	fconfig.Write("colormap_proj", ival);
-	mgr->m_vol_cmj = ival;
-	//colormap low value
-	str = m_colormap_low_value_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("colormap_low", val);
-	mgr->m_vol_lcm = val;
-	//colormap high value
-	str = m_colormap_high_value_text->GetValue();
-	str.ToDouble(&val);
-	val /= m_max_val;
-	fconfig.Write("colormap_hi", val);
-	mgr->m_vol_hcm = val;
-	//alpha
-	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-	fconfig.Write("enable_alpha", alpha);
-	mgr->m_vol_eap = alpha;
-	//enable shading
-	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	fconfig.Write("enable_shading", shading);
-	mgr->m_vol_esh = shading;
-	//inversion
-	bool interp = m_options_toolbar->GetToolState(ID_InterpolateChk);
-	fconfig.Write("enable_interp", interp);
-	mgr->m_vol_interp = interp;
-	//inversion
-	bool inv = m_options_toolbar->GetToolState(ID_InvChk);
-	fconfig.Write("enable_inv", inv);
-	mgr->m_vol_inv = inv;
-	//enable mip
-	bool mip = m_options_toolbar->GetToolState(ID_MipChk);
-	fconfig.Write("enable_mip", mip);
-	mgr->m_vol_mip = mip;
-	//enable hi transp
-	bool trp = m_options_toolbar->GetToolState(ID_TranspChk);
-	fconfig.Write("enable_trp", trp);
-	mgr->m_vol_trp = trp;
-	//enable component display
-	int comp = m_options_toolbar->GetToolState(ID_CompChk);
-	fconfig.Write("enable_comp", comp);
-	mgr->m_vol_com = comp;
-	//noise reduction
-	bool nrd = m_options_toolbar->GetToolState(ID_NRChk);
-	fconfig.Write("noise_rd", nrd);
-	mgr->m_vol_nrd = nrd;
-	//shadow
-	bool shw = m_shadow_tool->GetToolState(ID_ShadowChk);
-	fconfig.Write("enable_shadow", shw);
-	mgr->m_vol_shw = shw;
-	//shadow intensity
-	str = m_shadow_text->GetValue();
-	str.ToDouble(&val);
-	double swi = val;
-	fconfig.Write("shadow_intensity", swi);
-	mgr->m_vol_swi = swi;
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_volume_settings.dft";
-	SaveConfig(fconfig, dft);
+	fluo::ValueCollection names{
+		gstGamma3d,
+		gstExtractBoundary,
+		gstSaturation,
+		gstLowThreshold,
+		gstHighThreshold,
+		gstShadowEnable,
+		gstShadowInt,
+		gstAlpha,
+		gstAlphaEnable,
+		gstSampleRate,
+		gstShadingEnable,
+		gstLowShading,
+		gstHighShading,
+		gstColormapEnable,
+		gstColormapMode,
+		gstColormapType,
+		gstColormapLow,
+		gstColormapHigh,
+		gstColormapProj,
+		gstInvert,
+		gstInterpolate,
+		gstMipMode,
+		gstNoiseRedct
+		gstSpcX,
+		gstSpcY,
+		gstSpcZ
+	};
+	glbin_volf->propValuesToDefault(m_agent, names);
+	glbin_volf->writeDefault(names);
 }
 
 void VolumePropPanel::OnResetDefault(wxCommandEvent &event)
 {
-	if (!m_frame)
-		return;
-	DataManager *mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
-	if (!m_vd)
-		return;
-
-	wxString str;
-	double dval;
-	long ival;
-	bool bval;
-
-	//gamma
-	dval = mgr->m_vol_gam;
-	str = wxString::Format("%.2f", dval);
-	m_gamma_text->ChangeValue(str);
-	ival = int(dval*100.0+0.5);
-	m_gamma_sldr->SetValue(ival);
-	m_vd->setValue(gstGamma3d, dval);
-	//extract boundary
-	dval = mgr->m_vol_exb;
-	str = wxString::Format("%.4f", dval);
-	m_boundary_text->ChangeValue(str);
-	ival = int(dval*2000.0+0.5);
-	m_boundary_sldr->SetValue(ival);
-	m_vd->setValue(gstExtractBoundary, dval);
-	//low offset
-	dval = mgr->m_vol_of1;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_saturation_text->ChangeValue(str);
-	m_saturation_sldr->SetValue(ival);
-	m_vd->setValue(gstSaturation, dval);
-	//low thresholding
-	dval = mgr->m_vol_lth;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_left_thresh_text->ChangeValue(str);
-	m_left_thresh_sldr->SetValue(ival);
-	m_vd->setValue(gstLowThreshold, dval);
-	//high thresholding
-	dval = mgr->m_vol_hth;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_right_thresh_text->ChangeValue(str);
-	m_right_thresh_sldr->SetValue(ival);
-	m_vd->setValue(gstHighThreshold, dval);
-	//low shading
-	dval = mgr->m_vol_lsh;
-	str = wxString::Format("%.2f", dval);
-	m_low_shading_text->ChangeValue(str);
-	ival = int(dval*100.0+0.5);
-	m_low_shading_sldr->SetValue(ival);
-	m_vd->setValue(gstMatAmb, dval);
-	//high shading
-	dval = mgr->m_vol_hsh;
-	str = wxString::Format("%.2f", dval);
-	m_hi_shading_text->ChangeValue(str);
-	ival = int(dval*10.0+0.5);
-	m_hi_shading_sldr->SetValue(ival);
-	m_vd->setValue(gstMatShine, dval);
-	//alpha
-	dval = mgr->m_vol_alf;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_alpha_text->ChangeValue(str);
-	m_alpha_sldr->SetValue(ival);
-	m_vd->setValue(gstAlpha, dval);
-	//sample rate
-	dval = mgr->m_vol_spr;
-	str = wxString::Format("%.1f", dval);
-	m_sample_text->ChangeValue(str);
-	ival = int(dval*10.0+0.5);
-	m_sample_sldr->SetValue(ival);
-	m_vd->setValue(gstSampleRate, dval);
-	//luminance
-	dval = mgr->m_vol_lum;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_luminance_text->ChangeValue(str);
-	m_luminance_sldr->SetValue(ival);
-	fluo::HSVColor hsv;
-	m_vd->getValue(gstHsv, hsv);
-	fluo::Color color(hsv);
-	m_vd->setValue(gstSecColorSet, false);
-	m_vd->setValue(gstColor, color);
-	wxColor wxc((unsigned char)(color.r()*255),
-		(unsigned char)(color.g()*255),
-		(unsigned char)(color.b()*255));
-	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-		wxc.Red(), wxc.Green(), wxc.Blue()));
-	m_color_btn->SetColour(wxc);
-	m_vd->getValue(gstSecColor, color);
-	wxc = wxColor((unsigned char)(color.r()*255),
-		(unsigned char)(color.g()*255),
-		(unsigned char)(color.b()*255));
-	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
-		wxc.Red(), wxc.Green(), wxc.Blue()));
-	m_color2_btn->SetColour(wxc);
-	//colormap mode
-	m_vd->setValue(gstColormapMode, long(mgr->m_vol_cmm));
-	bool colormap = mgr->m_vol_cmm == 1;
-	m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap);
-	//colormap inv
-	m_colormap_inv_btn->SetValue(mgr->m_vol_cmi);
-	m_vd->setValue(gstColormapInv, mgr->m_vol_cmi?-1.0:1.0);
-	//colormap
-	m_colormap_combo->SetSelection(mgr->m_vol_cmp);
-	m_vd->setValue(gstColormapType, long(mgr->m_vol_cmp));
-	//colormap projection
-	m_colormap_combo2->SetSelection(mgr->m_vol_cmj);
-	m_vd->setValue(gstColormapProj, long(mgr->m_vol_cmj));
-	//colormap low value
-	dval = mgr->m_vol_lcm;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_colormap_low_value_text->ChangeValue(str);
-	m_colormap_low_value_sldr->SetValue(ival);
-	double lcm = dval;
-	dval = mgr->m_vol_hcm;
-	ival = int(dval*m_max_val+0.5);
-	str = wxString::Format("%d", ival);
-	m_colormap_high_value_text->ChangeValue(str);
-	m_colormap_high_value_sldr->SetValue(ival);
-	m_vd->setValue(gstColormapLow, lcm);
-	m_vd->setValue(gstColormapHigh, dval);
-	//shadow intensity
-	dval = mgr->m_vol_swi;
-	str = wxString::Format("%.2f", dval);
-	ival = int(dval*100.0+0.5);
-	m_shadow_text->ChangeValue(str);
-	m_shadow_sldr->SetValue(ival);
-	m_vd->setValue(gstShadowInt, dval);
-
-	//enable alpha
-	bval = mgr->m_vol_eap;
-	m_alpha_tool->ToggleTool(ID_AlphaChk,bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstAlphaEnable, bval);
-	else
-		m_vd->setValue(gstAlphaEnable, bval);
-	//enable shading
-	bval = mgr->m_vol_esh;
-	m_shade_tool->ToggleTool(ID_ShadingEnableChk,bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstShadingEnable, bval);
-	else
-		m_vd->setValue(gstShadingEnable, bval);
-	//inversion
-	bval = mgr->m_vol_inv;
-	m_options_toolbar->ToggleTool(ID_InvChk,bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstInvert, bval);
-	else
-		m_vd->setValue(gstInvert, bval);
-	//enable mip
-	bval = mgr->m_vol_mip;
-	m_options_toolbar->ToggleTool(ID_MipChk,bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstMipMode, long(bval?1:0));
-	else
-		m_vd->setValue(gstMipMode, long(bval ? 1 : 0));
-	//enable transp
-	bval = mgr->m_vol_trp;
-	m_options_toolbar->ToggleTool(ID_TranspChk, bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstAlphaPower, bval ? 2.0 : 1.0);
-	else
-		m_vd->setValue(gstAlphaPower, bval ? 2.0 : 1.0);
-	//component display
-	ival = mgr->m_vol_com;
-	m_options_toolbar->ToggleTool(ID_CompChk, ival?true:false);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstLabelMode, ival);
-	else
-		m_vd->setValue(gstLabelMode, ival);
-	//noise reduction
-	bval = mgr->m_vol_nrd;
-	m_options_toolbar->ToggleTool(ID_NRChk,bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstNoiseRedct, bval);
-	else
-		m_vd->setValue(gstNoiseRedct, bval);
-	//shadow
-	bval = mgr->m_vol_shw;
-	m_shadow_tool->ToggleTool(ID_ShadowChk,bval);
-	if (m_sync_group && m_group)
-		m_group->setValue(gstShadowEnable, bval);
-	else
-		m_vd->setValue(gstShadowEnable, bval);
-	//colormap
-	if (m_sync_group && m_group)
-		m_group->setValue(gstColormapMode, long(mgr->m_vol_cmm));
-
-	m_vd->getValue(gstAlphaEnable, bval);
-	if (bval)
-		EnableAlpha();
-	else
-		DisableAlpha();
-	m_vd->getValue(gstShadingEnable, bval);
-	if (bval)
-		EnableShading();
-	else
-		DisableShading();
-	m_vd->getValue(gstShadowEnable, bval);
-	if (bval)
-		EnableShadow();
-	else
-		DisableShadow();
-	m_vd->getValue(gstColormapMode, ival);
-	if (ival == 1)
-		EnableColormap();
-	else
-		DisableColormap();
-	m_vd->getValue(gstMipMode, ival);
-	if (ival == 1)
-		EnableMip();
-	else
-		DisableMip();
-
-	//apply all
-	RefreshVRenderViews(false, true);
+	fluo::ValueCollection names{
+		gstGamma3d,
+		gstExtractBoundary,
+		gstSaturation,
+		gstLowThreshold,
+		gstHighThreshold,
+		gstShadowEnable,
+		gstShadowInt,
+		gstAlpha,
+		gstAlphaEnable,
+		gstSampleRate,
+		gstShadingEnable,
+		gstLowShading,
+		gstHighShading,
+		gstColormapEnable,
+		gstColormapMode,
+		gstColormapType,
+		gstColormapLow,
+		gstColormapHigh,
+		gstColormapProj,
+		gstInvert,
+		gstInterpolate,
+		gstMipMode,
+		gstNoiseRedct
+	};
+	glbin_volf->propValuesFromDefault(m_agent, names);
 }
