@@ -80,7 +80,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstOutAdjustAgent "OutAdjustPanel"
 #define gstClipPlaneAgent "ClipPlanePanel"
 #define gstVolumePropAgent "VolumePropPanel"
-#define gstMehsPropAgent "MeshPropPanel"
+#define gstMeshPropAgent "MeshPropPanel"
 #define gstColocalAgent "ColocalDlg"
 
 //root

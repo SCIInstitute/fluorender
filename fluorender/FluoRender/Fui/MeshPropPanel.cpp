@@ -25,10 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "MeshPropPanel.h"
-#include "VRenderFrame.h"
-#include <Renderview.hpp>
+#include <MeshPropPanel.h>
+#include <VRenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <MeshData.hpp>
+#include <MeshGroup.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MeshPropPanel, wxPanel)
@@ -58,13 +60,12 @@ MeshPropPanel::MeshPropPanel(VRenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size,style, name),
-	m_frame(frame),
-	m_md(0),
-	m_view(0)
+	wxPanel(parent, wxID_ANY, pos, size,style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_agent = glbin_agtf->getOrAddMeshPropAgent(gstMeshPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -188,149 +189,51 @@ MeshPropPanel::~MeshPropPanel()
 {
 }
 
-void MeshPropPanel::GetSettings()
+void MeshPropPanel::AssociateMeshData(fluo::MeshData* md)
 {
-	if (!m_md)
-		return;
-
-	wxString str;
-	fluo::Color color;
-	double amb, diff, spec;
-	double shine, alpha;
-	m_md->getValue(gstColor, color);
-	m_md->getValue(gstMatAmb, amb);
-	m_md->getValue(gstMatDiff, diff);
-	m_md->getValue(gstMatSpec, spec);
-	m_md->getValue(gstMatShine, shine);
-	m_md->getValue(gstAlpha, alpha);
-
-	wxColor c;
-	c = wxColor(diff*color.r()*255, diff*color.g()*255, diff*color.b()*255);
-	m_diff_picker->SetColour(c);
-	c = wxColor(spec*color.r()*255, spec*color.g()*255, spec*color.b()*255);
-	m_spec_picker->SetColour(c);
-
-	//lighting
-	bool bval;
-	m_md->getValue(gstShadingEnable, bval);
-	m_light_chk->SetValue(bval);
-	//shine
-	m_shine_sldr->SetValue(int(shine));
-	str = wxString::Format("%.0f", shine);
-	m_shine_text->ChangeValue(str);
-	//alpha
-	m_alpha_sldr->SetValue(int(alpha*255));
-	str = wxString::Format("%.2f", alpha);
-	m_alpha_text->ChangeValue(str);
-	//scaling
-	double sx, sy, sz;
-	m_md->getValue(gstScaleX, sx);
-	m_md->getValue(gstScaleY, sy);
-	m_md->getValue(gstScaleZ, sz);
-	m_scale_sldr->SetValue(int(sx*100.0+0.5));
-	str = wxString::Format("%.2f", sx);
-	m_scale_text->ChangeValue(str);
-	//shadow
-	double dval;
-	m_md->getValue(gstShadowEnable, bval);
-	m_shadow_chk->SetValue(bval);
-	m_md->getValue(gstShadowInt, dval);
-	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
-	str = wxString::Format("%.2f", dval);
-	m_shadow_text->ChangeValue(str);
-	//size limiter
-	long lval;
-	m_md->getValue(gstLimitEnable, bval);
-	m_size_chk->SetValue(bval);
-	m_md->getValue(gstLimit, lval);
-	m_size_sldr->SetValue(lval);
-	m_size_text->SetValue(wxString::Format("%d", lval));
-}
-
-void MeshPropPanel::SetView(fluo::Renderview* view)
-{
-	m_view = view;
-}
-
-void MeshPropPanel::SetMeshData(fluo::MeshData* md)
-{
-	m_md = md;
-	GetSettings();
-}
-
-fluo::MeshData* MeshPropPanel::GetMeshData()
-{
-	return m_md;
-}
-
-void MeshPropPanel::RefreshVRenderViews(bool tree)
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews(tree);
+	m_agent->setObject(md);
 }
 
 //lighting
 void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 {
-	if (m_md && m_view)
-	{
-		bool val = m_light_chk->GetValue();
-		m_md->setValue(gstShadingEnable, val);
-		fluo::MeshList list = m_view->GetMeshList();
-		for (auto md : list)
-		{
-			if (md)
-				md->setValue(gstShadingEnable, val);
-		}
-		RefreshVRenderViews();
-	}
+	bool val = m_light_chk->GetValue();
+	m_agent->setValue(gstShadingEnable, val);
 }
 
 void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
-	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	if (m_md)
-	{
-		m_md->setValue(gstColor, color);
-		fluo::HSVColor hsv(color);
-		m_md->setValue(gstMatAmb, hsv.val());
-		RefreshVRenderViews(true);
-	}
+	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
+	m_agent->setValue(gstColor, color);
+	fluo::HSVColor hsv(color);
+	m_agent->setValue(gstMatAmb, hsv.val());
 }
 
 void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
-	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	if (m_md)
-	{
-		m_md->setValue(gstColor, color);
-		fluo::HSVColor hsv(color);
-		m_md->setValue(gstMatSpec, hsv.val());
-		RefreshVRenderViews();
-	}
+	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
+	m_agent->setValue(gstColor, color);
+	fluo::HSVColor hsv(color);
+	m_agent->setValue(gstMatSpec, hsv.val());
 }
 
 void MeshPropPanel::OnShineChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition();
 	wxString str = wxString::Format("%.0f", val);
-	if (str != m_shine_text->GetValue())
-		m_shine_text->SetValue(str);
+	m_shine_text->SetValue(str);
 }
 
 void MeshPropPanel::OnShineText(wxCommandEvent& event)
 {
 	wxString str = m_shine_text->GetValue();
 	double shine;
-	str.ToDouble(&shine);
-	m_shine_sldr->SetValue(int(shine));
-
-	if (m_md)
+	if (str.ToDouble(&shine))
 	{
-		m_md->setValue(gstMatShine, shine);
-		RefreshVRenderViews();
+		m_shine_sldr->SetValue(int(shine));
+		m_agent->setValue(gstMatShine, shine);
 	}
 }
 
@@ -338,21 +241,17 @@ void MeshPropPanel::OnAlphaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 255.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_alpha_text->GetValue())
-		m_alpha_text->SetValue(str);
+	m_alpha_text->SetValue(str);
 }
 
 void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 {
 	wxString str = m_alpha_text->GetValue();
 	double alpha;
-	str.ToDouble(&alpha);
-	m_alpha_sldr->SetValue(int(alpha*255.0+0.5));
-
-	if (m_md)
+	if (str.ToDouble(&alpha))
 	{
-		m_md->setValue(gstAlpha, alpha);
-		RefreshVRenderViews();
+		m_alpha_sldr->SetValue(int(alpha*255.0 + 0.5));
+		m_agent->setValue(gstAlpha, alpha);
 	}
 }
 
@@ -360,68 +259,44 @@ void MeshPropPanel::OnScaleChange(wxScrollEvent & event)
 {
 	double val = event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_scale_text->GetValue())
-		m_scale_text->SetValue(str);
+	m_scale_text->SetValue(str);
 }
 
 void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 {
 	wxString str = m_scale_text->GetValue();
 	double dval;
-	str.ToDouble(&dval);
-	m_scale_sldr->SetValue(int(dval*100.0+0.5));
-
-	if (m_md)
+	if (str.ToDouble(&dval))
 	{
-		m_md->setValue(gstScaleX, dval);
-		m_md->setValue(gstScaleY, dval);
-		m_md->setValue(gstScaleZ, dval);
-		RefreshVRenderViews();
+		m_scale_sldr->SetValue(int(dval*100.0 + 0.5));
+		m_agent->setValue(gstScaleX, dval);
+		m_agent->setValue(gstScaleY, dval);
+		m_agent->setValue(gstScaleZ, dval);
 	}
 }
 
 //shadow
 void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 {
-	if (m_md && m_view)
-	{
-		bool val = m_shadow_chk->GetValue();
-		m_md->setValue(gstShadowEnable, val);
-		fluo::MeshList list = m_view->GetMeshList();
-		for (auto md : list)
-		{
-			if (md)
-				md->setValue(gstShadowEnable, val);
-		}
-		RefreshVRenderViews();
-	}
+	bool val = m_shadow_chk->GetValue();
+	m_agent->setValue(gstShadowEnable, val);
 }
 
 void MeshPropPanel::OnShadowChange(wxScrollEvent& event)
 {
 	double val = event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_shadow_text->GetValue())
-		m_shadow_text->SetValue(str);
+	m_shadow_text->SetValue(str);
 }
 
 void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 {
 	wxString str = m_shadow_text->GetValue();
 	double dval;
-	str.ToDouble(&dval);
-	m_shadow_sldr->SetValue(int(dval*100.0+0.5));
-
-	if (m_md && m_view)
+	if (str.ToDouble(&dval))
 	{
-		m_md->setValue(gstShadowInt, dval);
-		fluo::MeshList list = m_view->GetMeshList();
-		for (auto md : list)
-		{
-			if (md)
-				md->setValue(gstShadowInt, dval);
-		}
-		RefreshVRenderViews();
+		m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
+		m_agent->setValue(gstShadowInt, dval);
 	}
 }
 
@@ -429,34 +304,23 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 void MeshPropPanel::OnSizeCheck(wxCommandEvent& event)
 {
 	bool bval = m_size_chk->GetValue();
-	if (m_md)
-	{
-		m_md->setValue(gstLimitEnable, bval);
-		RefreshVRenderViews();
-	}
+	m_agent->setValue(gstLimitEnable, bval);
 }
 
 void MeshPropPanel::OnSizeChange(wxScrollEvent& event)
 {
 	int val = event.GetPosition();
 	wxString str = wxString::Format("%d", val);
-	if (str != m_size_text->GetValue())
-		m_size_text->SetValue(str);
+	m_size_text->SetValue(str);
 }
 
 void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 {
 	wxString str = m_size_text->GetValue();
 	long val;
-	str.ToLong(&val);
-	m_size_sldr->SetValue(val);
-
-	if (m_md)
+	if (str.ToLong(&val))
 	{
-		m_md->setValue(gstLimit, val);
-		bool bval;
-		m_md->getValue(gstLimitEnable, bval);
-		if (bval)
-			RefreshVRenderViews();
+		m_size_sldr->SetValue(val);
+		m_agent->setValue(gstLimit, val);
 	}
 }

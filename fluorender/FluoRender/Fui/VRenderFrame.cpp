@@ -2459,10 +2459,10 @@ void VRenderFrame::OnSelection(fluo::Node *node)
 	if (!node)
 		return;
 
-	//if (m_adjust_view)
-	//	m_adjust_view->AssociateNode(node);
-	//if (m_clip_view)
-	//	m_clip_view->AssociateNode(node);
+	if (m_adjust_view)
+		m_adjust_view->AssociateNode(node);
+	if (m_clip_view)
+		m_clip_view->AssociateNode(node);
 
 	//clip plane renderer
 	//FLR::ClipPlaneRenderer* renderer =
@@ -2523,7 +2523,7 @@ void VRenderFrame::OnSelection(fluo::Node *node)
 			vd->getValue(gstDisplay, display);
 		if (display)
 		{
-			//m_volume_prop->AssociateVolumeData(vd);
+			m_volume_prop->AssociateVolumeData(vd);
 			//m_volume_prop->SetGroup(group);
 			//m_volume_prop->SetView(vrv);
 			if (!m_volume_prop->IsShown())
@@ -2540,13 +2540,13 @@ void VRenderFrame::OnSelection(fluo::Node *node)
 			//wxString str = vd->getName();
 			//m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
-			for (int i = 0; i < (int)m_vrv_list.size(); i++)
+			glbin_root->setRvalu(gstCurrentVolume, vd);
+			for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 			{
-				VRenderView* vrv = m_vrv_list[i];
-				if (!vrv)
+				fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+				if (!view)
 					continue;
-				glbin_root->setRvalu(gstCurrentVolume, vd);
-				//vrv->m_glview->m_cur_vol = vd;
+				view->setRvalu(gstCurrentVolume, vd);
 			}
 
 			if (m_volume_prop)
@@ -2584,7 +2584,7 @@ void VRenderFrame::OnSelection(fluo::Node *node)
 			md->getValue(gstDisplay, display);
 		if (display)
 		{
-			//m_mesh_prop->AssociateMeshData(md);
+			m_mesh_prop->AssociateMeshData(md);
 			if (!m_mesh_prop->IsShown())
 			{
 				m_mesh_prop->Show(true);
@@ -2596,7 +2596,7 @@ void VRenderFrame::OnSelection(fluo::Node *node)
 			m_aui_mgr.GetPane(m_prop_panel).Caption(
 				wxString(UITEXT_PROPERTIES) + wxString(" - ") + md->getName());
 			m_aui_mgr.Update();
-			md->setValue("draw bounds", true);
+			md->setValue(gstDrawBounds, true);
 
 			if (m_volume_prop)
 				m_volume_prop->Show(false);
@@ -2735,8 +2735,8 @@ void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 
 	//incase volume color changes
 	//change icon color of the tree panel
-	if (tree)
-		UpdateTreeColors();
+	//if (tree)
+	//	UpdateTreeColors();
 }
 
 void VRenderFrame::DeleteVRenderView(int i)
@@ -3806,9 +3806,9 @@ void VRenderFrame::OpenProject(wxString& filename)
 	m_data_mgr.ClearAll();
 	//fluo::VolumeGroup::ResetID();
 	//MeshGroup::ResetID();
-	m_adjust_view->SetVolumeData(0);
-	m_adjust_view->SetGroup(0);
-	m_adjust_view->SetGroupLink(0);
+	//m_adjust_view->SetVolumeData(0);
+	//m_adjust_view->SetGroup(0);
+	//m_adjust_view->SetGroupLink(0);
 	glbin_root->getCurrentRenderview()->Clear();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);

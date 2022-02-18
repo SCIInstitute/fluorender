@@ -39,7 +39,6 @@ using namespace std;
 class VRenderFrame;
 namespace fluo
 {
-	class Renderview;
 	class MeshData;
 }
 class MeshPropPanel: public wxPanel
@@ -72,19 +71,12 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void SetView(fluo::Renderview* view);
-	void SetMeshData(fluo::MeshData* md);
-	fluo::MeshData* GetMeshData();
-	void RefreshVRenderViews(bool tree=false);
-
-	void GetSettings();
+	void AssociateMeshData(fluo::MeshData* md);
 
 	friend class fluo::MeshPropAgent;
 
 private:
-	VRenderFrame* m_frame;
-	fluo::Renderview* m_view;
-	fluo::MeshData* m_md;
+	fluo::MeshPropAgent* m_agent;
 
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;

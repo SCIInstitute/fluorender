@@ -105,79 +105,15 @@ public:
 		const wxString& name="OutAdjustPanel");
 	~OutAdjustPanel();
 
-	//refresh
-	void RefreshVRenderViews(bool interactive=false);
-	//get settings
-	void GetSettings();
+	void AssociateNode(fluo::Node* node);
+
 	//disable/enable
 	void DisableAll();
 	void EnableAll();
-	//get type
-	int GetType()
-	{
-		return m_type;
-	}
-	//set view
-	void SetView(fluo::Renderview *view);
-	fluo::Renderview* GetView();
-	//set volume data
-	void SetVolumeData(fluo::VolumeData* vd);
-	fluo::VolumeData* GetVolumeData();
-	//set group
-	void SetGroup(fluo::VolumeGroup *group);
-	fluo::VolumeGroup* GetGroup();
-	//set volume adjustment to link to group
-	void SetGroupLink(fluo::VolumeGroup *group);
-
-	//load default settings
-	void LoadSettings();
-
-	//get defaults
-	void GetDefaults(fluo::Color &gamma, fluo::Color &brightness, fluo::Color &hdr,
-		bool &snyc_r, bool &sync_g, bool &sync_b);
-
-	//change settings externally
-	void ChangeRGamma(double gamma_r);
-	void ChangeGGamma(double gamma_g);
-	void ChangeBGamma(double gamma_b);
-	void ChangeRBrightness(double brightness_r);
-	void ChangeGBrightness(double brightness_g);
-	void ChangeBBrightness(double brightness_b);
-	void ChangeRHdr(double hdr_r);
-	void ChangeGHdr(double hdr_g);
-	void ChangeBHdr(double hdr_b);
-	void ChangeRSync(bool sync_r);
-	void ChangeGSync(bool sync_g);
-	void ChangeBSync(bool sync_b);
-
-	bool GetRSync() {return m_sync_r;}
-	bool GetGSync() {return m_sync_g;}
-	bool GetBSync() {return m_sync_b;}
-
-	void UpdateSync();
-
 	friend class fluo::OutAdjustAgent;
 
 private:
-	int m_type;
-	fluo::Renderview *m_view;
-	fluo::VolumeData* m_vd;
-	fluo::VolumeGroup* m_group;
-	bool m_link_group;
-
-	//sync flags
-	bool m_sync_r;
-	bool m_sync_g;
-	bool m_sync_b;
-
-	//default values
-	bool m_use_dft_settings;
-	fluo::Color m_dft_gamma;
-	fluo::Color m_dft_brightness;
-	fluo::Color m_dft_hdr;
-	bool m_dft_sync_r;
-	bool m_dft_sync_g;
-	bool m_dft_sync_b;
+	fluo::OutAdjustAgent* m_agent;
 
 	//sync red
 	wxToolBar *m_sync_r_chk;
