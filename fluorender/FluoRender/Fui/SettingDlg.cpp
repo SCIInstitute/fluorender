@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <ClipPlaneAgent.hpp>
 #include <FLIVR/ShaderProgram.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/TextRenderer.h>
@@ -1532,8 +1534,14 @@ void SettingDlg::SaveSettings()
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
-	if (m_frame && m_frame->GetClippingView())
-		m_plane_mode = m_frame->GetClippingView()->GetPlaneMode();
+	fluo::ClipPlaneAgent* agent =
+		glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+	if (agent)
+	{
+		long lval;
+		agent->getValue(gstClipPlaneMode, lval);
+		m_plane_mode = lval;
+	}
 	fconfig.Write("mode", m_plane_mode);
 
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();

@@ -708,8 +708,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('s')))
 		{
 			ks_s_up = true;
-			if (m_frame && m_frame->GetClippingView())
-				m_frame->GetClippingView()->MoveLinkedClippingPlanes(1);
+			fluo::ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+			if (agent)
+			{
+				double z, res;
+				agent->getValue(gstClipZ1, z);
+				agent->getValue(gstResZ, res);
+				agent->setValue(gstClipZ1, z + 1 / res);
+			}
 			refresh = true;
 			set_focus = true;
 		}
@@ -721,8 +727,14 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			wxGetKeyState(wxKeyCode('w')))
 		{
 			ks_w_down = true;
-			if (m_frame && m_frame->GetClippingView())
-				m_frame->GetClippingView()->MoveLinkedClippingPlanes(0);
+			fluo::ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+			if (agent)
+			{
+				double z, res;
+				agent->getValue(gstClipZ1, z);
+				agent->getValue(gstResZ, res);
+				agent->setValue(gstClipZ1, z - 1 / res);
+			}
 			refresh = true;
 			set_focus = true;
 		}
@@ -876,8 +888,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 				if (bval && m_frame->GetBrushToolDlg())
 					m_frame->GetBrushToolDlg()->Update(0);
 				m_agent->getValue(gstPaintColocalize, bval);
-				if (bval && m_frame->GetColocalizationDlg())
-					m_frame->GetColocalizationDlg()->Colocalize();
+				if (bval)
+				{
+					fluo::ColocalAgent* agent = glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent();
+					if (agent) agent->Run();
+				}
 				if (int_mode == 12 && m_frame->GetMeasureDlg())
 					m_frame->GetMeasureDlg()->GetSettings(m_agent->getObject());
 			}
