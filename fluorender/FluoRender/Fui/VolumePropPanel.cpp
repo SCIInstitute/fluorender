@@ -25,13 +25,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VolumePropPanel.h"
-#include "VRenderFrame.h"
+#include <VolumePropPanel.h>
+#include <VRenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <Root.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
-#include <Global.hpp>
-#include <Root.hpp>
 #include <FLIVR/MultiVolumeRenderer.h>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/VolShaderCode.h>
@@ -129,19 +130,14 @@ VolumePropPanel::VolumePropPanel(VRenderFrame* frame,
 	long style,
 	const wxString& name) :
 	wxPanel(parent, wxID_ANY, pos, size,style, name),
-	m_frame(frame),
-	m_vd(0),
-	m_lumi_change(false),
-	m_sync_group(false),
-	m_group(0),
-	m_view(0),
-	m_max_val(255.0),
 	m_space_x_text(0),
 	m_space_y_text(0),
 	m_space_z_text(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_agent = glbin_agtf->getOrAddVolumePropAgent(gstVolumePropAgent, *this);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);
@@ -603,7 +599,12 @@ VolumePropPanel::~VolumePropPanel()
 {
 }
 
-void VolumePropPanel::GetSettings()
+void VolumePropPanel::AssociateVolumeData(fluo::VolumeData* vd)
+{
+	m_agent->setObject(vd);
+}
+
+/*void VolumePropPanel::GetSettings()
 {
 	if (!m_vd)
 		return;
@@ -967,181 +968,132 @@ void VolumePropPanel::SetView(fluo::Renderview *view)
 fluo::Renderview* VolumePropPanel::GetView()
 {
 	return m_view;
-}
+}*/
 
 //1
 void VolumePropPanel::OnGammaSync(wxMouseEvent& event)
 {
-	wxString str = m_gamma_text->GetValue();
-	double dVal;
-	str.ToDouble(&dVal);
-	if (m_group)
-		m_group->setValue(gstGamma3d, dVal);
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstGamma3d);
 }
 
 void VolumePropPanel::OnGammaChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_gamma_text->GetValue())
-		m_gamma_text->SetValue(str);
+	m_gamma_text->SetValue(str);
 }
 
 void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 {
 	wxString str = m_gamma_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	int ival = int(val*100.0+0.5);
-	m_gamma_sldr->SetValue(ival);
-
-	//set gamma value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstGamma3d, val);
-	else if (m_vd)
-		m_vd->setValue(gstGamma3d, val);
-
-	RefreshVRenderViews(false, true);
+	if (str.ToDouble(&val))
+	{
+		int ival = int(val*100.0 + 0.5);
+		m_gamma_sldr->SetValue(ival);
+		m_agent->setValue(gstGamma3d, val);
+	}
 }
 
 void VolumePropPanel::OnBoundarySync(wxMouseEvent& event)
 {
-	wxString str = m_boundary_text->GetValue();
-	double dVal;
-	str.ToDouble(&dVal);
-	if (m_group)
-		m_group->setValue(gstExtractBoundary, dVal);
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstExtractBoundary);
 }
 
 void VolumePropPanel::OnBoundaryChange(wxScrollEvent & event)
 {
 	double val = (double)event.GetPosition() / 2000.0;
 	wxString str = wxString::Format("%.4f", val);
-	if (str != m_boundary_text->GetValue())
-		m_boundary_text->SetValue(str);
+	m_boundary_text->SetValue(str);
 }
 
 void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 {
 	wxString str = m_boundary_text->GetValue();
 	double val = 0.0;
-	str.ToDouble(&val);
-	int ival = int(val*2000.0+0.5);
-	m_boundary_sldr->SetValue(ival);
-
-	//set boundary value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstExtractBoundary, val);
-	else if (m_vd)
-		m_vd->setValue(gstExtractBoundary, val);
-
-	RefreshVRenderViews(false, true);
+	if (str.ToDouble(&val))
+	{
+		int ival = int(val*2000.0 + 0.5);
+		m_boundary_sldr->SetValue(ival);
+		m_agent->setValue(gstExtractBoundary, val);
+	}
 }
 
 //2
 void VolumePropPanel::OnSaturationSync(wxMouseEvent& event)
 {
-	wxString str = m_saturation_text->GetValue();
-	long iVal;
-	str.ToLong(&iVal);
-	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->setValue(gstSaturation, dVal);
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstSaturation);
 }
 
 void VolumePropPanel::OnSaturationChange(wxScrollEvent & event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	if (str != m_saturation_text->GetValue())
-		m_saturation_text->SetValue(str);
+	m_saturation_text->SetValue(str);
 }
 
 void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
 {
 	wxString str = m_saturation_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_saturation_text->ChangeValue(str);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_saturation_text->ChangeValue(str);
+		}
+		m_saturation_sldr->SetValue(ival);
+		double val = double(ival) / m_max_val;
+
+		m_agent->setValue(gstSaturation, val);
 	}
-	m_saturation_sldr->SetValue(ival);
-	double val = double(ival) / m_max_val;
-
-	//set contrast value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstSaturation, val);
-	else if (m_vd)
-		m_vd->setValue(gstSaturation, val);
-
-	RefreshVRenderViews(false, true);
 }
 
 void VolumePropPanel::OnThreshSync(wxMouseEvent& event)
 {
-	wxString str = m_left_thresh_text->GetValue();
-	long iVal;
-	str.ToLong(&iVal);
-	double dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->setValue(gstLowThreshold, dVal);
-	str = m_right_thresh_text->GetValue();
-	str.ToLong(&iVal);
-	dVal = double(iVal) / m_max_val;
-	if (m_group)
-		m_group->setValue(gstHighThreshold, dVal);
-	RefreshVRenderViews(false, true);
+	m_agent->propParentValue(gstLowThreshold);
+	m_agent->propParentValue(gstHighThreshold);
 }
 
 void VolumePropPanel::OnLeftThreshChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
-	if (str != m_left_thresh_text->GetValue())
-		m_left_thresh_text->SetValue(str);
+	m_left_thresh_text->SetValue(str);
 }
 
 void VolumePropPanel::OnLeftThreshText(wxCommandEvent &event)
 {
 	wxString str = m_left_thresh_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_left_thresh_text->ChangeValue(str);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_left_thresh_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		double right_val = (double)m_right_thresh_sldr->GetValue() / m_max_val;
+
+		if (val > right_val)
+		{
+			val = right_val;
+			ival = int(val*m_max_val + 0.5);
+			wxString str2 = wxString::Format("%d", ival);
+			m_left_thresh_text->ChangeValue(str2);
+		}
+		m_left_thresh_sldr->SetValue(ival);
+
+		m_agent->setValue(gstLowThreshold, val);
 	}
-	double val = double(ival) / m_max_val;
-	double right_val = (double)m_right_thresh_sldr->GetValue() / m_max_val;
-
-	if (val > right_val)
-	{
-		val = right_val;
-		ival = int(val*m_max_val+0.5);
-		wxString str2 = wxString::Format("%d", ival);
-		m_left_thresh_text->ChangeValue(str2);
-	}
-	m_left_thresh_sldr->SetValue(ival);
-
-	//set left threshold value
-	if (m_sync_group && m_group)
-		m_group->setValue(gstLowThreshold, val);
-	else if (m_vd)
-		m_vd->setValue(gstLowThreshold, val);
-
-	RefreshVRenderViews(false, true);
-
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetThreshUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetThreshUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 void VolumePropPanel::OnRightThreshChange(wxScrollEvent & event)
@@ -1155,42 +1107,35 @@ void VolumePropPanel::OnRightThreshChange(wxScrollEvent & event)
 		m_right_thresh_sldr->SetValue(ival);
 	}
 	wxString str = wxString::Format("%d", ival);
-	if (str != m_right_thresh_text->GetValue())
-		m_right_thresh_text->SetValue(str);
+	m_right_thresh_text->SetValue(str);
 }
 
 void VolumePropPanel::OnRightThreshText(wxCommandEvent &event)
 {
 	wxString str = m_right_thresh_text->GetValue();
 	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
+	if (str.ToLong(&ival))
 	{
-		UpdateMaxVal(ival);
-		str = wxString::Format("%d", ival);
-		m_right_thresh_text->ChangeValue(str);
+		if (double(ival) > m_max_val)
+		{
+			UpdateMaxVal(ival);
+			str = wxString::Format("%d", ival);
+			m_right_thresh_text->ChangeValue(str);
+		}
+		double val = double(ival) / m_max_val;
+		double left_val = (double)m_left_thresh_sldr->GetValue() / m_max_val;
+
+		if (val >= left_val)
+		{
+			m_right_thresh_sldr->SetValue(ival);
+
+			m_agent->setValue(gstHighThreshold, val);
+		}
 	}
-	double val = double(ival) / m_max_val;
-	double left_val = (double)m_left_thresh_sldr->GetValue() / m_max_val;
-
-	if (val >= left_val)
-	{
-		m_right_thresh_sldr->SetValue(ival);
-
-		//set right threshold value
-		if (m_sync_group && m_group)
-			m_group->setValue(gstHighThreshold, val);
-		else if (m_vd)
-			m_vd->setValue(gstHighThreshold, val);
-
-		RefreshVRenderViews(false, true);
-	}
-
 	//update colocalization
-	if (m_frame && m_frame->GetColocalizationDlg() &&
-		m_frame->GetColocalizationDlg()->GetThreshUpdate())
-		m_frame->GetColocalizationDlg()->Colocalize();
-
+	//if (m_frame && m_frame->GetColocalizationDlg() &&
+	//	m_frame->GetColocalizationDlg()->GetThreshUpdate())
+	//	m_frame->GetColocalizationDlg()->Colocalize();
 }
 
 //3

@@ -75,9 +75,6 @@ public:
 		m_agent->setObject(group);
 	}
 
-	//execute
-	void Colocalize();
-
 	//settings
 	void GetSettings();
 

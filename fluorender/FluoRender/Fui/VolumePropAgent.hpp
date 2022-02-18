@@ -52,6 +52,9 @@ namespace fluo
 
 		virtual void UpdateAllSettings();
 
+		virtual VolumePropAgent* asVolumePropAgent() { return this; }
+		virtual const VolumePropAgent* asVolumePropAgent() const { return this; }
+
 		friend class AgentFactory;
 
 	protected:

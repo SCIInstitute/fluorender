@@ -54,6 +54,9 @@ namespace fluo
 
 		virtual void UpdateAllSettings();
 
+		virtual ColocalAgent* asColocalAgent() { return this; }
+		virtual const ColocalAgent* asColocalAgent() const { return this; }
+
 		void Run();
 
 		friend class AgentFactory;
@@ -79,6 +82,10 @@ namespace fluo
 			dval = std::max(v, dval);
 			setValue(gstColormapHigh, dval);
 		}
+
+		//event functions
+		void OnAutoUpdateChanged(Event& event);
+		void OnSettingChanged(Event& event);
 	};
 }
 

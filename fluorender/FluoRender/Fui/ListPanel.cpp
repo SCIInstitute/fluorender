@@ -101,7 +101,7 @@ ListPanel::ListPanel(
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
 	m_list_ctrl->SetIndent(1);
-	m_list_model = glbin_agtf->getOrAddListModel("ListPanel", *this);
+	m_list_model = glbin_agtf->getOrAddListModel(gstListModel, *this);
 	//append columns
 	//name
 	wxDataViewIconTextRenderer *itr =

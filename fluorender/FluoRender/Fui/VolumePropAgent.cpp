@@ -122,7 +122,7 @@ void VolumePropAgent::UpdateAllSettings()
 	panel_.m_luminance_sldr->SetValue(ival);
 	panel_.m_luminance_text->ChangeValue(str);
 	//color
-	FLTYPE::Color c;
+	Color c;
 	getValue("color", c);
 	wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
 		(unsigned char)(c.g() * 255 + 0.5),

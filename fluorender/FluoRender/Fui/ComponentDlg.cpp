@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeGroup.hpp>
 #include <Annotations.hpp>
 #include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <AnnotationFactory.hpp>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
@@ -2367,7 +2368,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 			{
 				m_view->getValue(gstPaintColocalize, bval);
 				if (bval)
-					m_frame->GetColocalizationDlg()->Colocalize();
+					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 			}
 		}
 	}
@@ -2420,7 +2421,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 		{
 			m_view->getValue(gstPaintColocalize, bval);
 			if (bval)
-				m_frame->GetColocalizationDlg()->Colocalize();
+				glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 		}
 	}
 }
@@ -2452,7 +2453,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 		{
 			m_view->getValue(gstPaintColocalize, bval);
 			if (bval)
-				m_frame->GetColocalizationDlg()->Colocalize();
+				glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 		}
 	}
 }
@@ -3631,7 +3632,7 @@ void ComponentDlg::SelectFullComp()
 		{
 			m_view->getValue(gstPaintColocalize, bval);
 			if (bval)
-				m_frame->GetColocalizationDlg()->Colocalize();
+				glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 		}
 	}
 }
@@ -4370,7 +4371,7 @@ void ComponentDlg::IncludeComps()
 			{
 				m_view->getValue(gstPaintColocalize, bval);
 				if (bval)
-					m_frame->GetColocalizationDlg()->Colocalize();
+					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 			}
 		}
 	}
@@ -4430,7 +4431,7 @@ void ComponentDlg::ExcludeComps()
 			{
 				m_view->getValue(gstPaintColocalize, bval);
 				if (bval)
-					m_frame->GetColocalizationDlg()->Colocalize();
+					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 			}
 		}
 	}

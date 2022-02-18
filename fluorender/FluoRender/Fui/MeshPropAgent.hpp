@@ -51,6 +51,9 @@ namespace fluo
 
 		virtual void UpdateAllSettings();
 
+		virtual MeshPropAgent* asMeshPropAgent() { return this; }
+		virtual const MeshPropAgent* asMeshPropAgent() const { return this; }
+
 	protected:
 		MeshPropPanel &panel_;
 

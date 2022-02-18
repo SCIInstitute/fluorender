@@ -28,12 +28,21 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _INTERFACEAGENT_H_
 #define _INTERFACEAGENT_H_
 
+#include <Names.hpp>
 #include <Object.hpp>
 #include <Node.hpp>
 #include <ValueUpdateVisitor.hpp>
 
 namespace fluo
 {
+	class RenderCanvasAgent;
+	class ListModel;
+	class TreeModel;
+	class VolumePropAgent;
+	class OutAdjustAgent;
+	class ClipPlaneAgent;
+	class MeshPropAgent;
+	class ColocalAgent;
 	class InterfaceAgent : public Object
 	{
 	public:
@@ -62,7 +71,7 @@ namespace fluo
 		virtual void setObject(Object* obj)
 		{
 			Referenced* ref;
-			getRvalu("asset", &ref);
+			getRvalu(gstAgentAsset, &ref);
 			Object* old_obj = dynamic_cast<Object*>(ref);
 			if (old_obj  &&
 				old_obj == obj)
@@ -71,7 +80,7 @@ namespace fluo
 			if (old_obj)
 				old_obj->removeObserver(this);
 			clearValues();
-			addRvalu("asset", obj);
+			addRvalu(gstAgentAsset, obj);
 			if (obj)
 			{
 				copyValues(*obj);//shallow copy to share values
@@ -82,11 +91,11 @@ namespace fluo
 		virtual Object* getObject()
 		{
 			Referenced* ref;
-			getRvalu("asset", &ref);
+			getRvalu(gstAgentAsset, &ref);
 			return dynamic_cast<Object*>(ref);
 		}
 
-		virtual Node* getObjParent()
+		virtual Node* getFirstParent()
 		{
 			Object* obj = getObject();
 			if (obj)
@@ -98,10 +107,31 @@ namespace fluo
 			return 0;
 		}
 
+		virtual Node* getParent()
+		{
+			Object* obj = getObject();
+			if (obj)
+			{
+				Node* node = dynamic_cast<Node*>(obj);
+				if (node)
+				{
+					ParentList list = node->getParents();
+					for (auto i : list)
+					{
+						if (i->asVolumeGroup() ||
+							i->asMeshGroup() ||
+							i->asRenderview())
+							return i;
+					}
+				}
+			}
+			return 0;
+		}
+
 		virtual bool testSyncParentValue(const std::string& name)
 		{
 			Object* obj = getObject();
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (obj && parent)
 			{
 				Value* value1 = obj->getValuePointer(name);
@@ -115,7 +145,7 @@ namespace fluo
 		virtual bool testSyncParentValues(const ValueCollection &names)
 		{
 			Object* obj = getObject();
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (obj && parent)
 			{
 				for (auto it = names.begin();
@@ -135,7 +165,7 @@ namespace fluo
 		virtual void syncParentValue(const std::string& name)
 		{
 			//get obj parent
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (parent)
 			{
 				ValueUpdateVisitor update;
@@ -148,7 +178,7 @@ namespace fluo
 		virtual void unsyncParentValue(const std::string& name)
 		{
 			//get obj parent
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (parent)
 			{
 				ValueUpdateVisitor update;
@@ -161,7 +191,7 @@ namespace fluo
 		virtual void syncParentValues(const ValueCollection &names)
 		{
 			//get obj parent
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (parent)
 			{
 				ValueUpdateVisitor update;
@@ -174,7 +204,7 @@ namespace fluo
 		virtual void unsyncParentValues(const ValueCollection &names)
 		{
 			//get obj parent
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (parent)
 			{
 				ValueUpdateVisitor update;
@@ -187,7 +217,7 @@ namespace fluo
 		virtual void propParentValue(const std::string& name)
 		{
 			//get obj parent
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (parent)
 			{
 				ValueUpdateVisitor update;
@@ -201,7 +231,7 @@ namespace fluo
 		virtual void propParentValues(const ValueCollection &names)
 		{
 			//get obj parent
-			Node* parent = getObjParent();
+			Node* parent = getParent();
 			if (parent)
 			{
 				ValueUpdateVisitor update;
@@ -219,6 +249,23 @@ namespace fluo
 			Referenced::resumeObserverNotification();
 		}
 
+		//convenient conversions
+		virtual RenderCanvasAgent* asRenderCanvasAgent() { return 0; }
+		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return 0; }
+		virtual ListModel* asListModel() { return 0; }
+		virtual const ListModel* asListModel() const { return 0; }
+		virtual TreeModel* asTreeModel() { return 0; }
+		virtual const TreeModel* asTreeModel() const { return 0; }
+		virtual VolumePropAgent* asVolumePropAgent() { return 0; }
+		virtual const VolumePropAgent* asVolumePropAgent() const { return 0; }
+		virtual OutAdjustAgent* asOutAdjustAgent() { return 0; }
+		virtual const OutAdjustAgent* asOutAdjustAgent() const { return 0; }
+		virtual ClipPlaneAgent* asClipPlaneAgent() { return 0; }
+		virtual const ClipPlaneAgent* asClipPlaneAgent() const { return 0; }
+		virtual MeshPropAgent* asMeshPropAgent() { return 0; }
+		virtual const MeshPropAgent* asMeshPropAgent() const { return 0; }
+		virtual ColocalAgent* asColocalAgent() { return 0; }
+		virtual const ColocalAgent* asColocalAgent() const { return 0; }
 
 	protected:
 	};

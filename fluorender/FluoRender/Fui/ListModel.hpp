@@ -80,6 +80,9 @@ namespace fluo
 			return dynamic_cast<Node*>(InterfaceAgent::getObject());
 		}
 
+		virtual ListModel* asListModel() { return this; }
+		virtual const ListModel* asListModel() const { return this; }
+
 		friend class AgentFactory;
 
 	protected:

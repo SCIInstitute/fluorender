@@ -385,3 +385,27 @@ void ColocalAgent::SetOutput(const std::string &titles, const std::string &value
 	dlg_.m_output_grid->ClearSelection();
 }
 
+void ColocalAgent::OnAutoUpdateChanged(Event& event)
+{
+	bool bval;
+	getValue(gstAutoUpdate, bval);
+	VolumeGroup* group = getObject();
+	if (!group) return;
+	//get view of group
+	SearchVisitor visitor;
+	visitor.setTraversalMode(NodeVisitor::TRAVERSE_PARENTS);
+	visitor.matchClassName("Renderview");
+	group->accept(visitor);
+	Renderview* view = visitor.getRenderview();
+	if (!view)
+		return;
+	view->setValue(gstPaintColocalize, bval);
+}
+
+void ColocalAgent::OnSettingChanged(Event& event)
+{
+	bool bval;
+	getValue(gstAutoUpdate, bval);
+	if (bval) Run();
+}
+

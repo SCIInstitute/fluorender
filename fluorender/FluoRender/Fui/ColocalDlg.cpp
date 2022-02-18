@@ -63,7 +63,7 @@ ColocalDlg::ColocalDlg(VRenderFrame* frame) :
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddColocalAgent("ColocalDlg", *this);
+	m_agent = glbin_agtf->getOrAddColocalAgent(gstColocalAgent, *this);
 
 
 	wxStaticText* st = 0;
@@ -227,12 +227,6 @@ void ColocalDlg::PasteData()
 {
 }
 
-//execute
-void ColocalDlg::Colocalize()
-{
-	m_agent->Run();
-}
-
 void ColocalDlg::StartTimer(std::string str)
 {
 	if (m_test_speed)
@@ -259,73 +253,62 @@ void ColocalDlg::StopTimer(std::string str)
 
 void ColocalDlg::OnColocalizenBtn(wxCommandEvent &event)
 {
-	Colocalize();
-}
-
-void ColocalDlg::OnUseSelChk(wxCommandEvent &event)
-{
-	m_use_mask = m_use_sel_chk->GetValue();
-
-	if (m_auto_update)
-		Colocalize();
+	m_agent->Run();
 }
 
 void ColocalDlg::OnAutoUpdate(wxCommandEvent &event)
 {
-	m_auto_update = m_auto_update_btn->GetValue();
-	if (m_view)
-		m_view->setValue(gstPaintColocalize, m_auto_update);
+	bool bval = m_auto_update_btn->GetValue();
+	m_agent->setValue(gstAutoUpdate, bval);
+}
+
+void ColocalDlg::OnUseSelChk(wxCommandEvent &event)
+{
+	bool bval = m_use_sel_chk->GetValue();
+	m_agent->setValue(gstUseSelection, bval);
 }
 
 void ColocalDlg::OnMethodRdb(wxCommandEvent &event)
 {
+	long method = 0;
 	if (m_product_rdb->GetValue())
-		m_method = 0;
+		method = 0;
 	else if (m_min_value_rdb->GetValue())
-		m_method = 1;
+		method = 1;
 	else if (m_logical_and_rdb->GetValue())
-		m_method = 2;
-
-	if (m_auto_update)
-		Colocalize();
+		method = 2;
+	m_agent->setValue(gstColocalMethod, method);
 }
 
 //format
 void ColocalDlg::OnIntWeightBtn(wxCommandEvent &event)
 {
-	m_int_weighted = m_int_weight_btn->GetValue();
-
-	if (m_auto_update)
-		Colocalize();
+	bool bval = m_int_weight_btn->GetValue();
+	m_agent->setValue(gstIntWeighted, bval);
 }
 
 void ColocalDlg::OnRatioBtn(wxCommandEvent &event)
 {
-	m_get_ratio = m_ratio_btn->GetValue();
-
-	if (m_auto_update)
-		Colocalize();
+	bool bval = m_ratio_btn->GetValue();
+	m_agent->setValue(gstGetRatio, bval);
 }
 
 void ColocalDlg::OnPhysicalBtn(wxCommandEvent &event)
 {
-	m_physical_size = m_physical_btn->GetValue();
-
-	if (m_auto_update)
-		Colocalize();
+	bool bval = m_physical_btn->GetValue();
+	m_agent->setValue(gstPhysSize, bval);
 }
 
 void ColocalDlg::OnColorMapBtn(wxCommandEvent &event)
 {
-	m_colormap = m_colormap_btn->GetValue();
-
-	if (m_auto_update)
-		Colocalize();
+	bool bval = m_colormap_btn->GetValue();
+	m_agent->setValue(gstColormapEnable, bval);
 }
 
 void ColocalDlg::OnHistoryChk(wxCommandEvent& event)
 {
-	m_hold_history = m_history_chk->GetValue();
+	bool bval = m_history_chk->GetValue();
+	m_agent->setValue(gstHoldHistory, bval);
 }
 
 void ColocalDlg::OnClearHistBtn(wxCommandEvent& event)

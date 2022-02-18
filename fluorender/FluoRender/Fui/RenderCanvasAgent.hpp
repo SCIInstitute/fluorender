@@ -51,6 +51,9 @@ namespace fluo
 
 		virtual void UpdateAllSettings();
 
+		virtual RenderCanvasAgent* asRenderCanvasAgent() { return this; }
+		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return this; }
+
 		RenderCanvas &getCanvas();
 
 		friend class AgentFactory;

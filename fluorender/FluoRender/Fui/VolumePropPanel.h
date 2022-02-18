@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VPROPVIEW_H_
-#define _VPROPVIEW_H_
+#ifndef _VOLUMEPROPPANEL_H_
+#define _VOLUMEPROPPANEL_H_
 
 #include <wx/wx.h>
 #include <wx/panel.h>
@@ -123,29 +123,13 @@ public:
 		const wxString& name = "VolumePropPanel");
 	~VolumePropPanel();
 
-	void SetVolumeData(fluo::VolumeData* vd);
-	fluo::VolumeData* GetVolumeData();
-	void RefreshVRenderViews(bool tree=false, bool interactive=false);
-	void InitVRenderViews(unsigned int type);
-
-	//sync group
-	void SetGroup(fluo::VolumeGroup* group);
-	fluo::VolumeGroup* GetGroup();
-
-	//sync view in depth mode
-	void SetView(fluo::Renderview* view);
-	fluo::Renderview* GetView();
+	void AssociateVolumeData(fluo::VolumeData* vd);
 
 	friend class fluo::VolumePropAgent;
 
 private:
-	VRenderFrame* m_frame;
-	fluo::VolumeData* m_vd;
+	fluo::VolumePropAgent* m_agent;
 
-	bool m_lumi_change;
-	bool m_sync_group;
-	fluo::VolumeGroup* m_group;
-	fluo::Renderview* m_view;
 	double m_max_val;
 
 	//1st line
@@ -223,9 +207,6 @@ private:
 	wxToolBar *m_options_toolbar;
 
 private:
-	void GetSettings();
-	bool SetSpacings();
-
 	//enable/disable
 	void EnableAlpha();
 	void DisableAlpha();
@@ -331,4 +312,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_VPROPVIEW_H_
+#endif//_VOLUMEPROPPANEL_H_

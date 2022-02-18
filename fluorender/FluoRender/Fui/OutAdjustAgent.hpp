@@ -31,6 +31,19 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Node.hpp>
 
+#define Gamma2UiS(v) \
+	int(100.0/v+0.5)
+#define Brigt2UiS(v) \
+	int((v-1.0)*256.0+0.5)
+#define Equal2UiS(v) \
+	int(v*100.0+0.5)
+#define Gamma2UiT(v) \
+	1.0/v
+#define Brigt2UiT(v) \
+	(v-1.0)*256.0
+#define Equal2UiT(v) \
+	v
+
 class OutAdjustPanel;
 namespace fluo
 {
@@ -51,6 +64,9 @@ namespace fluo
 		virtual Node* getObject();
 
 		virtual void UpdateAllSettings();
+
+		virtual OutAdjustAgent* asOutAdjustAgent() { return this; }
+		virtual const OutAdjustAgent* asOutAdjustAgent() const { return this; }
 
 		friend class AgentFactory;
 

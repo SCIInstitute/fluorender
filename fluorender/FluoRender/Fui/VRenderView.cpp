@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VRenderView.h>
 #include <VRenderFrame.h>
 #include <RenderCanvas.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <VolumeData.hpp>
 #include <tiffio.h>
 #include <wx/utils.h>
@@ -2085,16 +2087,21 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 
 void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 {
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetClippingView())
-	{
-		if (vr_frame->GetClippingView()->GetHoldPlanes())
-			return;
-	}
+	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//if (vr_frame && vr_frame->GetClippingView())
+	//{
+	//	if (vr_frame->GetClippingView()->GetHoldPlanes())
+	//		return;
+	//}
 	bool bval;
 	m_agent->getValue(gstCapture, bval);
-	if (bval)
-		return;
+	if (bval) return;
+	fluo::ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+	if (agent)
+	{
+		agent->getValue(gstClipHold, bval);
+		if (bval) return;
+	}
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = m_aov_sldr->GetScreenRect();

@@ -146,7 +146,7 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(fluo::Node* root)
 {
-	m_tree_model = glbin_agtf->getOrAddTreeModel("TreePanel", *this);
+	m_tree_model = glbin_agtf->getOrAddTreeModel(gstTreeModel, *this);
 	if (!m_tree_model)
 		return;
 	m_tree_model->setObject(root);

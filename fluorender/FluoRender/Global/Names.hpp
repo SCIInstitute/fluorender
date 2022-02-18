@@ -72,6 +72,17 @@ DEALINGS IN THE SOFTWARE.
 #define gstProcessorFactory "processor factory"
 #define gstDefaultProcessor "default processor"
 
+//agent names
+#define gstAgentAsset "asset"
+#define gstRenderCanvasAgent "Render View:"//plus a serial number
+#define gstListModel "ListPanel"
+#define gstTreeModel "TreePanel"
+#define gstOutAdjustAgent "OutAdjustPanel"
+#define gstClipPlaneAgent "ClipPlanePanel"
+#define gstVolumePropAgent "VolumePropPanel"
+#define gstMehsPropAgent "MeshPropPanel"
+#define gstColocalAgent "ColocalDlg"
+
 //root
 #define gstRoot "Active Datasets"
 #define gstSortValue "sort value"

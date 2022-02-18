@@ -325,6 +325,27 @@ ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWind
 	if (colocal_agent)
 	{
 		colocal_agent->setName(name);
+		colocal_agent->setValueChangedFunction(gstAutoUpdate,
+			std::bind(&ColocalAgent::OnAutoUpdateChanged,
+				colocal_agent, std::placeholders::_1));
+		colocal_agent->setValueChangedFunction(gstUseSelection,
+			std::bind(&ColocalAgent::OnSettingChanged,
+				colocal_agent, std::placeholders::_1));
+		colocal_agent->setValueChangedFunction(gstColocalMethod,
+			std::bind(&ColocalAgent::OnSettingChanged,
+				colocal_agent, std::placeholders::_1));
+		colocal_agent->setValueChangedFunction(gstIntWeighted,
+			std::bind(&ColocalAgent::OnSettingChanged,
+				colocal_agent, std::placeholders::_1));
+		colocal_agent->setValueChangedFunction(gstGetRatio,
+			std::bind(&ColocalAgent::OnSettingChanged,
+				colocal_agent, std::placeholders::_1));
+		colocal_agent->setValueChangedFunction(gstPhysSize,
+			std::bind(&ColocalAgent::OnSettingChanged,
+				colocal_agent, std::placeholders::_1));
+		colocal_agent->setValueChangedFunction(gstColormapEnable,
+			std::bind(&ColocalAgent::OnSettingChanged,
+				colocal_agent, std::placeholders::_1));
 		objects_.push_front(colocal_agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

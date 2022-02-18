@@ -52,6 +52,9 @@ namespace fluo
 
 		virtual void UpdateAllSettings();
 
+		virtual ClipPlaneAgent* asClipPlaneAgent() { return this; }
+		virtual const ClipPlaneAgent* asClipPlaneAgent() const { return this; }
+
 		void alignRenderViewRot();
 
 		friend class AgentFactory;
