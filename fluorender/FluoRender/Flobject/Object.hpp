@@ -210,6 +210,12 @@ namespace fluo
 			return updValue(name, value, event);
 		}
 		template<typename V>
+		bool chgValue(const string &name, const V &value)
+		{
+			Event event(Event::NOTIFY_NONE);
+			return updValue(name, value, event);
+		}
+		template<typename V>
 		bool updValue(const string &name, const V &value)
 		{
 			Event event;
@@ -241,6 +247,11 @@ namespace fluo
 			Event event(Event::NOTIFY_SELF);
 			return updValueTuple(vt, event);
 		}
+		bool chgValueTuple(ValueTuple& vt)
+		{
+			Event event(Event::NOTIFY_NONE);
+			return updValueTuple(vt, event);
+		}
 		bool updValueTuple(ValueTuple& vt)
 		{
 			Event event;
@@ -268,6 +279,11 @@ namespace fluo
 		bool setRvalu(const std::string& name, Referenced* value)
 		{
 			Event event(Event::NOTIFY_SELF);
+			return updRvalu(name, value, event);
+		}
+		bool chgRvalu(const std::string& name, Referenced* value)
+		{
+			Event event(Event::NOTIFY_NONE);
 			return updRvalu(name, value, event);
 		}
 		bool updRvalu(const std::string& name, Referenced* value)
@@ -340,6 +356,11 @@ namespace fluo
 		bool flipValue(const std::string &name, bool &value)
 		{
 			Event event(Event::NOTIFY_SELF);
+			return flupValue(name, value, event);
+		}
+		bool flngValue(const std::string &name, bool &value)
+		{
+			Event event(Event::NOTIFY_NONE);
 			return flupValue(name, value, event);
 		}
 		bool flupValue(const std::string &name, bool &value)

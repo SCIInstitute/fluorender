@@ -64,7 +64,8 @@ namespace fluo
 
 		virtual void processNotification(Event& event)
 		{
-			if (event.getNotifyFlags() & Event::NOTIFY_AGENT)
+			if (event.getNotifyFlags() & Event::NOTIFY_AGENT ||
+				event.getNotifyFlags() & Event::NOTIFY_SELF)
 				Object::processNotification(event);
 		}
 

@@ -312,7 +312,7 @@ void ClipPlaneAgent::alignRenderViewRot()
 	if (rot_z > 180.0) rot_z -= 360.0;
 	setValue(gstClipRotX, rot_x);
 	setValue(gstClipRotX, rot_y);
-	setValue(gstClipRotX, rot_z);
+	updValue(gstClipRotX, rot_z);
 }
 
 void ClipPlaneAgent::OnClipXChanged(Event& event)

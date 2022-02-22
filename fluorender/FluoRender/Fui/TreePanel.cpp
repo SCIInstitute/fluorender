@@ -380,7 +380,7 @@ void TreePanel::OnSorted(wxDataViewEvent &event)
 		sort_method = is_asc ? 1 : 2;
 	else
 		sort_method = 0;
-	m_tree_model->setValue(gstSortValue, sort_value);
+	m_tree_model->updValue(gstSortValue, sort_value);
 	m_tree_model->updValue(gstSortMethod, sort_method);
 }
 

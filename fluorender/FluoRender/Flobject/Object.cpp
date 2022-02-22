@@ -105,7 +105,7 @@ void Object::processNotification(Event& event)
 	//determine if self or others
 	bool flag = false;
 	Event::NotifyFlags notify = event.getNotifyFlags();
-	Object* obj = dynamic_cast<Object*>(event.sender);
+	Object* obj = dynamic_cast<Object*>(event.origin);
 	if (notify & Event::NOTIFY_SELF)
 	{
 		if (obj == this)

@@ -980,7 +980,7 @@ void VolumePropPanel::OnEnableColormap(wxCommandEvent &event)
 		m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 
 	long lval = colormap ? 1 : 0;
-	m_agent->setValue(gstColormapEnable, colormap);
+	m_agent->updValue(gstColormapEnable, colormap);
 	m_agent->updValue(gstColormapMode, lval);
 	if (colormap)
 		EnableColormap();
@@ -1259,7 +1259,7 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//{
 	//	if (m_group)
 	//	{
-	//		m_group->setValue(gstBlendMode, long(2));
+	//		m_group->updValue(gstBlendMode, long(2));
 	//		if (m_vd)
 	//		{
 	//			fluo::ValueCollection names{
@@ -1275,7 +1275,7 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//else
 	//{
 	//	if (m_group)
-	//		m_group->setValue(gstBlendMode, long(0));
+	//		m_group->updValue(gstBlendMode, long(0));
 	//}
 
 	//RefreshVRenderViews(false, true);
@@ -1393,7 +1393,7 @@ void VolumePropPanel::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_agent->setValue(gstMaxInt, m_max_val);
+	m_agent->updValue(gstMaxInt, m_max_val);
 	m_agent->updValue(gstIntScale, 65535.0 / m_max_val);
 }
 
@@ -1407,21 +1407,21 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 	str = m_space_x_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->setValue(gstSpcX, dval);
+		m_agent->updValue(gstSpcX, dval);
 		m_agent->updValue(gstBaseSpcX, dval);
 	}
 	//y
 	str = m_space_y_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->setValue(gstSpcY, dval);
+		m_agent->updValue(gstSpcY, dval);
 		m_agent->updValue(gstBaseSpcY, dval);
 	}
 	//z
 	str = m_space_z_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->setValue(gstSpcZ, dval);
+		m_agent->updValue(gstSpcZ, dval);
 		m_agent->updValue(gstBaseSpcZ, dval);
 	}
 }

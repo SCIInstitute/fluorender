@@ -205,7 +205,7 @@ void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
-	m_agent->setValue(gstColor, color);
+	m_agent->updValue(gstColor, color);
 	fluo::HSVColor hsv(color);
 	m_agent->updValue(gstMatAmb, hsv.val());
 }
@@ -214,7 +214,7 @@ void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
-	m_agent->setValue(gstColor, color);
+	m_agent->updValue(gstColor, color);
 	fluo::HSVColor hsv(color);
 	m_agent->updValue(gstMatSpec, hsv.val());
 }
@@ -269,8 +269,8 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 	if (str.ToDouble(&dval))
 	{
 		m_scale_sldr->SetValue(int(dval*100.0 + 0.5));
-		m_agent->setValue(gstScaleX, dval);
-		m_agent->setValue(gstScaleY, dval);
+		m_agent->updValue(gstScaleX, dval);
+		m_agent->updValue(gstScaleY, dval);
 		m_agent->updValue(gstScaleZ, dval);
 	}
 }

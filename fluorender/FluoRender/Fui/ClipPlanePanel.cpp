@@ -468,7 +468,7 @@ void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)
 void ClipPlanePanel::OnHoldPlanesBtn(wxCommandEvent &event)
 {
 	bool bval = m_toolbar->GetToolState(ID_HoldPlanesBtn);
-	m_agent->setValue(gstClipHold, bval);
+	m_agent->updValue(gstClipHold, bval);
 	m_agent->updValue(gstClipMask, long(-1));
 }
 
@@ -514,16 +514,16 @@ void ClipPlanePanel::OnPlaneModesBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent &event)
 {
-	m_agent->setValue(gstClipLinkX, false);
-	m_agent->setValue(gstClipLinkY, false);
-	m_agent->setValue(gstClipLinkZ, false);
+	m_agent->updValue(gstClipLinkX, false);
+	m_agent->updValue(gstClipLinkY, false);
+	m_agent->updValue(gstClipLinkZ, false);
 
-	m_agent->setValue(gstClipX1, double(0));
-	m_agent->setValue(gstClipX2, double(1));
-	m_agent->setValue(gstClipY1, double(0));
-	m_agent->setValue(gstClipY2, double(1));
-	m_agent->setValue(gstClipZ1, double(0));
-	m_agent->setValue(gstClipZ2, double(1));
+	m_agent->updValue(gstClipX1, double(0));
+	m_agent->updValue(gstClipX2, double(1));
+	m_agent->updValue(gstClipY1, double(0));
+	m_agent->updValue(gstClipY2, double(1));
+	m_agent->updValue(gstClipZ1, double(0));
+	m_agent->updValue(gstClipZ2, double(1));
 
 	m_agent->updValue(gstClipMask, long(-1));
 }
@@ -554,7 +554,7 @@ void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent &event)
 		m_agent->getValue(gstResX, resx);
 		m_x1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resx;
-		m_agent->setValue(gstClipX1, dval);
+		m_agent->updValue(gstClipX1, dval);
 
 		if (clip_link)
 			m_agent->updValue(gstClipMask, long(3));
@@ -589,7 +589,7 @@ void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent &event)
 		m_agent->getValue(gstResX, resx);
 		m_x2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resx;
-		m_agent->setValue(gstClipX2, dval);
+		m_agent->updValue(gstClipX2, dval);
 
 		if (clip_link)
 			m_agent->updValue(gstClipMask, long(3));
@@ -624,7 +624,7 @@ void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent &event)
 		m_agent->getValue(gstResY, resy);
 		m_y1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resy;
-		m_agent->setValue(gstClipY1, dval);
+		m_agent->updValue(gstClipY1, dval);
 
 		if (clip_link)
 			m_agent->updValue(gstClipMask, long(12));
@@ -659,7 +659,7 @@ void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent &event)
 		m_agent->getValue(gstResY, resy);
 		m_y2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resy;
-		m_agent->setValue(gstClipY2, dval);
+		m_agent->updValue(gstClipY2, dval);
 
 		if (clip_link)
 			m_agent->updValue(gstClipMask, long(12));
@@ -694,7 +694,7 @@ void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent &event)
 		m_agent->getValue(gstResZ, resz);
 		m_z1_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resz;
-		m_agent->setValue(gstClipZ1, dval);
+		m_agent->updValue(gstClipZ1, dval);
 
 		if (clip_link)
 			m_agent->updValue(gstClipMask, long(48));
@@ -729,7 +729,7 @@ void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent &event)
 		m_agent->getValue(gstResZ, resz);
 		m_z2_clip_sldr->SetValue(ival);
 		double dval = (double)ival / (double)resz;
-		m_agent->setValue(gstClipZ2, dval);
+		m_agent->updValue(gstClipZ2, dval);
 
 		if (clip_link)
 			m_agent->updValue(gstClipMask, long(48));
@@ -805,7 +805,7 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	wxWindow *window = wxWindow::FindFocus();
 	if (window && reg.Contains(pos))
 	{
-		if (m_agent->setValue(gstDrawClip, true))
+		if (m_agent->updValue(gstDrawClip, true))
 			m_agent->updValue(gstClipMask, long(-1));
 	}
 	else
@@ -895,8 +895,8 @@ void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent &event)
 
 void ClipPlanePanel::OnRotResetBtn(wxCommandEvent &event)
 {
-	m_agent->setValue(gstClipRotX, double(0));
-	m_agent->setValue(gstClipRotY, double(0));
+	m_agent->updValue(gstClipRotX, double(0));
+	m_agent->updValue(gstClipRotY, double(0));
 	m_agent->updValue(gstClipRotZ, double(0));
 }
 
@@ -965,38 +965,38 @@ void ClipPlanePanel::OnSliderRClick(wxCommandEvent& event)
 	{
 	case ID_X1ClipSldr:
 	case ID_X2ClipSldr:
-		m_agent->setValue(gstClipDistX, 1.0 / resx);
-		m_agent->setValue(gstClipLinkX, true);
-		m_agent->setValue(gstClipLinkY, false);
-		m_agent->setValue(gstClipLinkZ, false);
-		m_agent->setValue(gstClipY1, double(0));
-		m_agent->setValue(gstClipY2, double(1));
-		m_agent->setValue(gstClipZ1, double(0));
-		m_agent->setValue(gstClipZ2, double(1));
+		m_agent->updValue(gstClipDistX, 1.0 / resx);
+		m_agent->updValue(gstClipLinkX, true);
+		m_agent->updValue(gstClipLinkY, false);
+		m_agent->updValue(gstClipLinkZ, false);
+		m_agent->updValue(gstClipY1, double(0));
+		m_agent->updValue(gstClipY2, double(1));
+		m_agent->updValue(gstClipZ1, double(0));
+		m_agent->updValue(gstClipZ2, double(1));
 		m_agent->updValue(gstClipMask, long(3));
 		break;
 	case ID_Y1ClipSldr:
 	case ID_Y2ClipSldr:
-		m_agent->setValue(gstClipDistY, 1.0 / resy);
-		m_agent->setValue(gstClipLinkY, true);
-		m_agent->setValue(gstClipLinkX, false);
-		m_agent->setValue(gstClipLinkZ, false);
-		m_agent->setValue(gstClipX1, double(0));
-		m_agent->setValue(gstClipX2, double(1));
-		m_agent->setValue(gstClipZ1, double(0));
-		m_agent->setValue(gstClipZ2, double(1));
+		m_agent->updValue(gstClipDistY, 1.0 / resy);
+		m_agent->updValue(gstClipLinkY, true);
+		m_agent->updValue(gstClipLinkX, false);
+		m_agent->updValue(gstClipLinkZ, false);
+		m_agent->updValue(gstClipX1, double(0));
+		m_agent->updValue(gstClipX2, double(1));
+		m_agent->updValue(gstClipZ1, double(0));
+		m_agent->updValue(gstClipZ2, double(1));
 		m_agent->updValue(gstClipMask, long(12));
 		break;
 	case ID_Z1ClipSldr:
 	case ID_Z2ClipSldr:
-		m_agent->setValue(gstClipDistZ, 1.0 / resz);
-		m_agent->setValue(gstClipLinkZ, true);
-		m_agent->setValue(gstClipLinkX, false);
-		m_agent->setValue(gstClipLinkY, false);
-		m_agent->setValue(gstClipX1, double(0));
-		m_agent->setValue(gstClipX2, double(1));
-		m_agent->setValue(gstClipY1, double(0));
-		m_agent->setValue(gstClipY2, double(1));
+		m_agent->updValue(gstClipDistZ, 1.0 / resz);
+		m_agent->updValue(gstClipLinkZ, true);
+		m_agent->updValue(gstClipLinkX, false);
+		m_agent->updValue(gstClipLinkY, false);
+		m_agent->updValue(gstClipX1, double(0));
+		m_agent->updValue(gstClipX2, double(1));
+		m_agent->updValue(gstClipY1, double(0));
+		m_agent->updValue(gstClipY2, double(1));
 		m_agent->updValue(gstClipMask, long(48));
 		break;
 	}
