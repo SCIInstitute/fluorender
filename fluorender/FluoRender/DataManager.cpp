@@ -435,14 +435,16 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 			vd->getValue(gstResZ, zres);
 			double zspcfac = (double)std::max(xres, yres) / 256.0;
 			if (zspcfac < 1.0) zspcfac = 1.0;
-			double tester = reader->GetXSpc();
-			vd->setValue(gstBaseSpcX, reader->GetXSpc());
-			vd->setValue(gstBaseSpcY, reader->GetYSpc());
-			if (zres == 1)
-				vd->setValue(gstBaseSpcZ, reader->GetXSpc()*zspcfac);
-			else
-				vd->setValue(gstBaseSpcZ, reader->GetZSpc());
 			vd->setValue(gstSpcFromFile, valid_spc);
+			if (valid_spc)
+			{
+				vd->setValue(gstBaseSpcX, reader->GetXSpc());
+				vd->setValue(gstBaseSpcY, reader->GetYSpc());
+				if (zres == 1)
+					vd->setValue(gstBaseSpcZ, reader->GetXSpc()*zspcfac);
+				else
+					vd->setValue(gstBaseSpcZ, reader->GetZSpc());
+			}
 			vd->setValue(gstIntScale, reader->GetScalarScale());
 			vd->setValue(gstMaxInt, reader->GetMaxValue());
 			vd->setValue(gstTime, reader->GetCurTime());
