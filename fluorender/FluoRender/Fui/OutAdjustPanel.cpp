@@ -418,7 +418,7 @@ void OutAdjustPanel::OnRGammaText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_r_gamma_sldr->SetValue(int(val * 100));
-		m_agent->setValue(gstGammaR, 1 / val);
+		m_agent->updValue(gstGammaR, 1 / val);
 	}
 }
 
@@ -436,7 +436,7 @@ void OutAdjustPanel::OnGGammaText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_g_gamma_sldr->SetValue(int(val * 100));
-		m_agent->setValue(gstGammaG, 1 / val);
+		m_agent->updValue(gstGammaG, 1 / val);
 	}
 }
 
@@ -454,7 +454,7 @@ void OutAdjustPanel::OnBGammaText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_b_gamma_sldr->SetValue(int(val * 100));
-		m_agent->setValue(gstGammaB, 1 / val);
+		m_agent->updValue(gstGammaB, 1 / val);
 	}
 }
 
@@ -473,7 +473,7 @@ void OutAdjustPanel::OnRBrightnessText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_r_brightness_sldr->SetValue(int(val));
-		m_agent->setValue(gstBrightnessR, val / 256 + 1);
+		m_agent->updValue(gstBrightnessR, val / 256 + 1);
 	}
 }
 
@@ -491,7 +491,7 @@ void OutAdjustPanel::OnGBrightnessText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_g_brightness_sldr->SetValue(int(val));
-		m_agent->setValue(gstBrightnessG, val / 256 + 1);
+		m_agent->updValue(gstBrightnessG, val / 256 + 1);
 	}
 }
 
@@ -509,7 +509,7 @@ void OutAdjustPanel::OnBBrightnessText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_b_brightness_sldr->SetValue(int(val));
-		m_agent->setValue(gstBrightnessB, double(val / 256.0 + 1.0));
+		m_agent->updValue(gstBrightnessB, double(val / 256.0 + 1.0));
 	}
 }
 
@@ -527,7 +527,7 @@ void OutAdjustPanel::OnRHdrText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_r_hdr_sldr->SetValue(int(val * 100));
-		m_agent->setValue(gstEqualizeR, val);
+		m_agent->updValue(gstEqualizeR, val);
 	}
 }
 
@@ -545,7 +545,7 @@ void OutAdjustPanel::OnGHdrText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_g_hdr_sldr->SetValue(int(val * 100));
-		m_agent->setValue(gstEqualizeG, val);
+		m_agent->updValue(gstEqualizeG, val);
 	}
 }
 
@@ -563,7 +563,7 @@ void OutAdjustPanel::OnBHdrText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_b_hdr_sldr->SetValue(int(val * 100));
-		m_agent->setValue(gstEqualizeB, val);
+		m_agent->updValue(gstEqualizeB, val);
 	}
 }
 
@@ -572,7 +572,7 @@ void OutAdjustPanel::OnSyncRCheck(wxCommandEvent &event)
 	bool bval = m_sync_r_chk->GetToolState(ID_SyncRChk);
 	m_sync_r_chk->SetToolNormalBitmap(ID_SyncRChk,
 		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	m_agent->setValue(gstSyncR, bval);
+	m_agent->updValue(gstSyncR, bval);
 }
 
 void OutAdjustPanel::OnSyncGCheck(wxCommandEvent &event)
@@ -580,7 +580,7 @@ void OutAdjustPanel::OnSyncGCheck(wxCommandEvent &event)
 	bool bval = m_sync_g_chk->GetToolState(ID_SyncGChk);
 	m_sync_g_chk->SetToolNormalBitmap(ID_SyncGChk,
 		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	m_agent->setValue(gstSyncG, bval);
+	m_agent->updValue(gstSyncG, bval);
 }
 
 void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
@@ -588,7 +588,7 @@ void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
 	bool bval = m_sync_b_chk->GetToolState(ID_SyncBChk);
 	m_sync_b_chk->SetToolNormalBitmap(ID_SyncBChk,
 		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-	m_agent->setValue(gstSyncB, bval);
+	m_agent->updValue(gstSyncB, bval);
 }
 
 void OutAdjustPanel::OnRReset(wxCommandEvent &event)

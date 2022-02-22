@@ -1184,14 +1184,14 @@ void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 	if (val==1)
 	{
 		EnableMip();
-		if (m_threh_st)
-			m_threh_st->SetLabel("Shade Threshold : ");
+		//if (m_threh_st)
+		//	m_threh_st->SetLabel("Shade Threshold : ");
 	}
 	else
 	{
 		DisableMip();
-		if (m_threh_st)
-			m_threh_st->SetLabel("Threshold : ");
+		//if (m_threh_st)
+		//	m_threh_st->SetLabel("Threshold : ");
 	}
 
 	Layout();

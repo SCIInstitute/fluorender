@@ -198,7 +198,7 @@ void MeshPropPanel::AssociateMeshData(fluo::MeshData* md)
 void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 {
 	bool val = m_light_chk->GetValue();
-	m_agent->setValue(gstShadingEnable, val);
+	m_agent->updValue(gstShadingEnable, val);
 }
 
 void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
@@ -207,7 +207,7 @@ void MeshPropPanel::OnDiffChange(wxColourPickerEvent& event)
 	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
 	m_agent->setValue(gstColor, color);
 	fluo::HSVColor hsv(color);
-	m_agent->setValue(gstMatAmb, hsv.val());
+	m_agent->updValue(gstMatAmb, hsv.val());
 }
 
 void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
@@ -216,7 +216,7 @@ void MeshPropPanel::OnSpecChange(wxColourPickerEvent& event)
 	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
 	m_agent->setValue(gstColor, color);
 	fluo::HSVColor hsv(color);
-	m_agent->setValue(gstMatSpec, hsv.val());
+	m_agent->updValue(gstMatSpec, hsv.val());
 }
 
 void MeshPropPanel::OnShineChange(wxScrollEvent & event)
@@ -233,7 +233,7 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 	if (str.ToDouble(&shine))
 	{
 		m_shine_sldr->SetValue(int(shine));
-		m_agent->setValue(gstMatShine, shine);
+		m_agent->updValue(gstMatShine, shine);
 	}
 }
 
@@ -251,7 +251,7 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 	if (str.ToDouble(&alpha))
 	{
 		m_alpha_sldr->SetValue(int(alpha*255.0 + 0.5));
-		m_agent->setValue(gstAlpha, alpha);
+		m_agent->updValue(gstAlpha, alpha);
 	}
 }
 
@@ -271,7 +271,7 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 		m_scale_sldr->SetValue(int(dval*100.0 + 0.5));
 		m_agent->setValue(gstScaleX, dval);
 		m_agent->setValue(gstScaleY, dval);
-		m_agent->setValue(gstScaleZ, dval);
+		m_agent->updValue(gstScaleZ, dval);
 	}
 }
 
@@ -279,7 +279,7 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 {
 	bool val = m_shadow_chk->GetValue();
-	m_agent->setValue(gstShadowEnable, val);
+	m_agent->updValue(gstShadowEnable, val);
 }
 
 void MeshPropPanel::OnShadowChange(wxScrollEvent& event)
@@ -296,7 +296,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 	if (str.ToDouble(&dval))
 	{
 		m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
-		m_agent->setValue(gstShadowInt, dval);
+		m_agent->updValue(gstShadowInt, dval);
 	}
 }
 
@@ -304,7 +304,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 void MeshPropPanel::OnSizeCheck(wxCommandEvent& event)
 {
 	bool bval = m_size_chk->GetValue();
-	m_agent->setValue(gstLimitEnable, bval);
+	m_agent->updValue(gstLimitEnable, bval);
 }
 
 void MeshPropPanel::OnSizeChange(wxScrollEvent& event)
@@ -321,6 +321,6 @@ void MeshPropPanel::OnSizeText(wxCommandEvent& event)
 	if (str.ToLong(&val))
 	{
 		m_size_sldr->SetValue(val);
-		m_agent->setValue(gstLimit, val);
+		m_agent->updValue(gstLimit, val);
 	}
 }

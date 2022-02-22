@@ -123,7 +123,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipRotX "clip rot x"
 #define gstClipRotY "clip rot y"
 #define gstClipRotZ "clip rot z"
-#define gstClipDisplay "clip display"
 #define gstClipHold "clip hold"
 #define gstClipMask "clip mask"
 #define gstClipRenderMode "clip render mode"

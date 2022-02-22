@@ -98,7 +98,7 @@ void VolumeFactory::createDefault()
 		vd->addValue(gstClipRotY, double(0));
 		vd->addValue(gstClipRotZ, double(0));
 		//clip plane rendering
-		vd->addValue(gstClipDisplay, bool(false));
+		vd->addValue(gstDrawClip, bool(false));
 		vd->addValue(gstClipHold, bool(false));
 		vd->addValue(gstClipMask, long(-1));
 		vd->addValue(gstClipRenderMode, long(PRMNormal));

@@ -381,7 +381,7 @@ void TreePanel::OnSorted(wxDataViewEvent &event)
 	else
 		sort_method = 0;
 	m_tree_model->setValue(gstSortValue, sort_value);
-	m_tree_model->setValue(gstSortMethod, sort_method);
+	m_tree_model->updValue(gstSortMethod, sort_method);
 }
 
 void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
@@ -390,7 +390,7 @@ void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
 	if (!col)
 		return;
 	col->UnsetAsSortKey();
-	m_tree_model->setValue(gstSortMethod, long(0));
+	m_tree_model->updValue(gstSortMethod, long(0));
 	event.Skip();
 }
 
