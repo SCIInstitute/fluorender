@@ -54,7 +54,7 @@ DEALINGS IN THE SOFTWARE.
 #define Hdr2UIP(v) \
 	int(v*100.0+0.5)
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -98,7 +98,7 @@ class OutAdjustPanel: public wxPanel
 	};
 
 public:
-	OutAdjustPanel(VRenderFrame* frame,
+	OutAdjustPanel(RenderFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,

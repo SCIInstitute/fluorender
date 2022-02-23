@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "BrushToolDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/Count.h>
@@ -114,7 +114,7 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(
-	VRenderFrame *frame)
+	RenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	wxSize(500, 620),

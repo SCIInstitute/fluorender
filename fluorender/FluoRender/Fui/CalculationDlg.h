@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -59,13 +59,13 @@ public:
 		ID_CalcCombineBtn
 	};
 
-	CalculationDlg(VRenderFrame* frame);
+	CalculationDlg(RenderFrame* frame);
 	~CalculationDlg();
 
 	void SetGroup(fluo::VolumeGroup* group);
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview *m_view;
 	//current volume

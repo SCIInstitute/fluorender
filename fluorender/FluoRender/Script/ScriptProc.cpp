@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
-#include <VRenderFrame.h>
+#include <RenderFrame.h>
 #include <InfoVisitor.hpp>
 #include <Renderview.hpp>
 #include <Global.hpp>

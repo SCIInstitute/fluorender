@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include "DragDrop.h"
 #include <Global.hpp>
 #include <Root.hpp>
@@ -67,77 +67,77 @@ DEALINGS IN THE SOFTWARE.
 //resources
 #include "img/icons.h"
 
-BEGIN_EVENT_TABLE(VRenderFrame, wxFrame)
-	EVT_MENU(wxID_EXIT, VRenderFrame::OnExit)
-	EVT_MENU(ID_ViewNew, VRenderFrame::OnNewView)
-	EVT_MENU(ID_Layout, VRenderFrame::OnLayout)
-	EVT_MENU(ID_FullScreen, VRenderFrame::OnFullScreen)
-	EVT_MENU(ID_OpenVolume, VRenderFrame::OnOpenVolume)
-	EVT_MENU(ID_OpenMesh, VRenderFrame::OnOpenMesh)
-	EVT_MENU(ID_ViewOrganize, VRenderFrame::OnOrganize)
-	EVT_MENU(ID_CheckUpdates, VRenderFrame::OnCheckUpdates)
-	EVT_MENU(ID_Info, VRenderFrame::OnInfo)
-	EVT_MENU(ID_CreateCube, VRenderFrame::OnCreateCube)
-	EVT_MENU(ID_CreateSphere, VRenderFrame::OnCreateSphere)
-	EVT_MENU(ID_CreateCone, VRenderFrame::OnCreateCone)
-	EVT_MENU(ID_SaveProject, VRenderFrame::OnSaveProject)
-	EVT_MENU(ID_OpenProject, VRenderFrame::OnOpenProject)
-	EVT_MENU(ID_Settings, VRenderFrame::OnSettings)
-	EVT_MENU(ID_ImportVolume, VRenderFrame::OnImportVolume)
+BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
+	EVT_MENU(wxID_EXIT, RenderFrame::OnExit)
+	EVT_MENU(ID_ViewNew, RenderFrame::OnNewView)
+	EVT_MENU(ID_Layout, RenderFrame::OnLayout)
+	EVT_MENU(ID_FullScreen, RenderFrame::OnFullScreen)
+	EVT_MENU(ID_OpenVolume, RenderFrame::OnOpenVolume)
+	EVT_MENU(ID_OpenMesh, RenderFrame::OnOpenMesh)
+	EVT_MENU(ID_ViewOrganize, RenderFrame::OnOrganize)
+	EVT_MENU(ID_CheckUpdates, RenderFrame::OnCheckUpdates)
+	EVT_MENU(ID_Info, RenderFrame::OnInfo)
+	EVT_MENU(ID_CreateCube, RenderFrame::OnCreateCube)
+	EVT_MENU(ID_CreateSphere, RenderFrame::OnCreateSphere)
+	EVT_MENU(ID_CreateCone, RenderFrame::OnCreateCone)
+	EVT_MENU(ID_SaveProject, RenderFrame::OnSaveProject)
+	EVT_MENU(ID_OpenProject, RenderFrame::OnOpenProject)
+	EVT_MENU(ID_Settings, RenderFrame::OnSettings)
+	EVT_MENU(ID_ImportVolume, RenderFrame::OnImportVolume)
 	//tools
-	EVT_MENU(ID_LastTool, VRenderFrame::OnLastTool)
-	EVT_MENU(ID_PaintTool, VRenderFrame::OnPaintTool)
-	EVT_MENU(ID_Measure, VRenderFrame::OnMeasure)
-	EVT_MENU(ID_Trace, VRenderFrame::OnTrace)
-	EVT_MENU(ID_NoiseCancelling, VRenderFrame::OnNoiseCancelling)
-	EVT_MENU(ID_Counting, VRenderFrame::OnCounting)
-	EVT_MENU(ID_Colocalization, VRenderFrame::OnColocalization)
-	EVT_MENU(ID_Convert, VRenderFrame::OnConvert)
-	EVT_MENU(ID_Ocl, VRenderFrame::OnOcl)
-	EVT_MENU(ID_Component, VRenderFrame::OnComponent)
-	EVT_MENU(ID_Calculations, VRenderFrame::OnCalculations)
+	EVT_MENU(ID_LastTool, RenderFrame::OnLastTool)
+	EVT_MENU(ID_PaintTool, RenderFrame::OnPaintTool)
+	EVT_MENU(ID_Measure, RenderFrame::OnMeasure)
+	EVT_MENU(ID_Trace, RenderFrame::OnTrace)
+	EVT_MENU(ID_NoiseCancelling, RenderFrame::OnNoiseCancelling)
+	EVT_MENU(ID_Counting, RenderFrame::OnCounting)
+	EVT_MENU(ID_Colocalization, RenderFrame::OnColocalization)
+	EVT_MENU(ID_Convert, RenderFrame::OnConvert)
+	EVT_MENU(ID_Ocl, RenderFrame::OnOcl)
+	EVT_MENU(ID_Component, RenderFrame::OnComponent)
+	EVT_MENU(ID_Calculations, RenderFrame::OnCalculations)
 	//
-	EVT_MENU(ID_Youtube, VRenderFrame::OnYoutube)
-	EVT_MENU(ID_Twitter, VRenderFrame::OnTwitter)
-	EVT_MENU(ID_Facebook, VRenderFrame::OnFacebook)
-	EVT_MENU(ID_Manual, VRenderFrame::OnManual)
-	EVT_MENU(ID_Tutorial, VRenderFrame::OnTutorial)
-	EVT_MENU(ID_ShowHideUI, VRenderFrame::OnShowHideUI)
-	EVT_MENU(ID_ShowHideToolbar, VRenderFrame::OnShowHideToolbar)
+	EVT_MENU(ID_Youtube, RenderFrame::OnYoutube)
+	EVT_MENU(ID_Twitter, RenderFrame::OnTwitter)
+	EVT_MENU(ID_Facebook, RenderFrame::OnFacebook)
+	EVT_MENU(ID_Manual, RenderFrame::OnManual)
+	EVT_MENU(ID_Tutorial, RenderFrame::OnTutorial)
+	EVT_MENU(ID_ShowHideUI, RenderFrame::OnShowHideUI)
+	EVT_MENU(ID_ShowHideToolbar, RenderFrame::OnShowHideToolbar)
 	//ui menu events
-	EVT_MENU(ID_UIListView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UITreeView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIMovieView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIAdjView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIClipView, VRenderFrame::OnShowHideView)
-	EVT_MENU(ID_UIPropView, VRenderFrame::OnShowHideView)
+	EVT_MENU(ID_UIListView, RenderFrame::OnShowHideView)
+	EVT_MENU(ID_UITreeView, RenderFrame::OnShowHideView)
+	EVT_MENU(ID_UIMovieView, RenderFrame::OnShowHideView)
+	EVT_MENU(ID_UIAdjView, RenderFrame::OnShowHideView)
+	EVT_MENU(ID_UIClipView, RenderFrame::OnShowHideView)
+	EVT_MENU(ID_UIPropView, RenderFrame::OnShowHideView)
 	//panes
-	EVT_AUI_PANE_CLOSE(VRenderFrame::OnPaneClose)
+	EVT_AUI_PANE_CLOSE(RenderFrame::OnPaneClose)
 	//draw background
-	EVT_PAINT(VRenderFrame::OnDraw)
+	EVT_PAINT(RenderFrame::OnDraw)
 	//process key event
-	EVT_KEY_DOWN(VRenderFrame::OnKeyDown)
+	EVT_KEY_DOWN(RenderFrame::OnKeyDown)
 	//close
-	EVT_CLOSE(VRenderFrame::OnClose)
+	EVT_CLOSE(RenderFrame::OnClose)
 END_EVENT_TABLE()
 
-bool VRenderFrame::m_sliceSequence = false;
-bool VRenderFrame::m_channSequence = false;
-int VRenderFrame::m_digitOrder = 0;
-int VRenderFrame::m_ser_num = 0;
-bool VRenderFrame::m_compression = false;
-bool VRenderFrame::m_skip_brick = false;
-wxString VRenderFrame::m_time_id = "_T";
-bool VRenderFrame::m_load_mask = true;
-bool VRenderFrame::m_save_crop = false;
-int VRenderFrame::m_save_filter = 0;
-bool VRenderFrame::m_save_compress = true;
-bool VRenderFrame::m_vrp_embed = false;
-bool VRenderFrame::m_save_project = false;
-bool VRenderFrame::m_save_alpha = false;
-bool VRenderFrame::m_save_float = false;
+bool RenderFrame::m_sliceSequence = false;
+bool RenderFrame::m_channSequence = false;
+int RenderFrame::m_digitOrder = 0;
+int RenderFrame::m_ser_num = 0;
+bool RenderFrame::m_compression = false;
+bool RenderFrame::m_skip_brick = false;
+wxString RenderFrame::m_time_id = "_T";
+bool RenderFrame::m_load_mask = true;
+bool RenderFrame::m_save_crop = false;
+int RenderFrame::m_save_filter = 0;
+bool RenderFrame::m_save_compress = true;
+bool RenderFrame::m_vrp_embed = false;
+bool RenderFrame::m_save_project = false;
+bool RenderFrame::m_save_alpha = false;
+bool RenderFrame::m_save_float = false;
 
-VRenderFrame::VRenderFrame(
+RenderFrame::RenderFrame(
 	wxFrame* frame,
 	const wxString& title,
 	int x, int y,
@@ -407,7 +407,7 @@ VRenderFrame::VRenderFrame(
 	m_main_tb->Realize();
 
 	//create render view
-	VRenderView *vrv = new VRenderView(this);
+	RenderviewPanel *vrv = new RenderviewPanel(this);
 	//vrv->m_glview->InitView();
 	//vrv->UpdateView();
 	m_vrv_list.push_back(vrv);
@@ -912,7 +912,7 @@ VRenderFrame::VRenderFrame(
 	
 }
 
-VRenderFrame::~VRenderFrame()
+RenderFrame::~RenderFrame()
 {
 	//release?
 	flvr::TextureRenderer::vol_kernel_factory_.clear();
@@ -927,12 +927,12 @@ VRenderFrame::~VRenderFrame()
 	flvr::KernelProgram::release();
 }
 
-void VRenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 {
 	Close(true);
 }
 
-void VRenderFrame::OnClose(wxCloseEvent &event)
+void RenderFrame::OnClose(wxCloseEvent &event)
 {
 	m_setting_dlg->SaveSettings();
 	bool vrv_saved = false;
@@ -949,17 +949,17 @@ void VRenderFrame::OnClose(wxCloseEvent &event)
 	event.Skip();
 }
 
-wxString VRenderFrame::CreateView(int row)
+wxString RenderFrame::CreateView(int row)
 {
-	VRenderView* vrv = 0;
+	RenderviewPanel* vrv = 0;
 	if (m_vrv_list.size()>0)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
-		vrv = new VRenderView(this, sharedContext);
+		vrv = new RenderviewPanel(this, sharedContext);
 	}
 	else
 	{
-		vrv = new VRenderView(this);
+		vrv = new RenderviewPanel(this);
 	}
 
 	if (!vrv)
@@ -1053,44 +1053,44 @@ wxString VRenderFrame::CreateView(int row)
 }
 
 //views
-int VRenderFrame::GetViewNum()
+int RenderFrame::GetViewNum()
 {
 	return m_vrv_list.size();
 }
 
-RenderCanvas* VRenderFrame::GetView(int index)
+RenderCanvas* RenderFrame::GetView(int index)
 {
 	if (index >= 0 && index < (int)m_vrv_list.size())
 	{
-		VRenderView* v = m_vrv_list[index];
+		RenderviewPanel* v = m_vrv_list[index];
 		if (v)
 			return v->GetCanvas();
 	}
 	return 0;
 }
 
-RenderCanvas* VRenderFrame::GetView(const wxString& name)
+RenderCanvas* RenderFrame::GetView(const wxString& name)
 {
 	for (size_t i=0; i < m_vrv_list.size(); ++i)
 	{
-		VRenderView* v = m_vrv_list[i];
+		RenderviewPanel* v = m_vrv_list[i];
 		if (v && v->GetName() == name)
 			return v->GetCanvas();
 	}
 	return 0;
 }
 
-void VRenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnNewView(wxCommandEvent& WXUNUSED(event))
 {
 	wxString str = CreateView();
 }
 
-void VRenderFrame::OnLayout(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnLayout(wxCommandEvent& WXUNUSED(event))
 {
 	OrganizeVRenderViews(1);
 }
 
-void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
 {
 	if (IsFullScreen())
 	{
@@ -1111,35 +1111,35 @@ void VRenderFrame::OnFullScreen(wxCommandEvent& WXUNUSED(event))
 }
 
 //open dialog options
-void VRenderFrame::OnCh11Check(wxCommandEvent &event)
+void RenderFrame::OnCh11Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
 	if (ch11)
 		m_sliceSequence = ch11->GetValue();
 }
 
-void VRenderFrame::OnCh12Check(wxCommandEvent &event)
+void RenderFrame::OnCh12Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
 	if (ch12)
 		m_channSequence = ch12->GetValue();
 }
 
-void VRenderFrame::OnCmbChange(wxCommandEvent &event)
+void RenderFrame::OnCmbChange(wxCommandEvent &event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
 		m_digitOrder = combo->GetSelection();
 }
 
-void VRenderFrame::OnTxt1Change(wxCommandEvent &event)
+void RenderFrame::OnTxt1Change(wxCommandEvent &event)
 {
 	wxTextCtrl* txt1 = (wxTextCtrl*)event.GetEventObject();
 	if (txt1)
 		m_time_id = txt1->GetValue();
 }
 
-void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
+void RenderFrame::OnTxt2Change(wxCommandEvent &event)
 {
 	wxTextCtrl* txt2 = (wxTextCtrl*)event.GetEventObject();
 	if (txt2)
@@ -1151,21 +1151,21 @@ void VRenderFrame::OnTxt2Change(wxCommandEvent &event)
 	}
 }
 
-void VRenderFrame::OnCh2Check(wxCommandEvent &event)
+void RenderFrame::OnCh2Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
 		m_compression = ch2->GetValue();
 }
 
-void VRenderFrame::OnCh3Check(wxCommandEvent &event)
+void RenderFrame::OnCh3Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
 		m_skip_brick = ch3->GetValue();
 }
 
-wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
+wxWindow* RenderFrame::CreateExtraControlVolume(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -1180,14 +1180,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxCheckBox* ch11 = new wxCheckBox(panel, ID_READ_ZSLICE,
 		"Read file# as Z sections");
 	ch11->Connect(ch11->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh11Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh11Check), NULL, panel);
 	ch11->SetValue(m_sliceSequence);
 
 	//slice sequence check box
 	wxCheckBox* ch12 = new wxCheckBox(panel, ID_READ_CHANN,
 		"Read file# as channels");
 	ch12->Connect(ch12->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh12Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh12Check), NULL, panel);
 	ch12->SetValue(m_channSequence);
 
 	//digit order
@@ -1196,7 +1196,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
 		"Order", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
-		wxCommandEventHandler(VRenderFrame::OnCmbChange), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCmbChange), NULL, panel);
 	std::vector<std::string> combo_list;
 	combo_list.push_back("Channel first");
 	combo_list.push_back("Z section first");
@@ -1210,7 +1210,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
 		"", wxDefaultPosition, wxDefaultSize);
 	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderFrame::OnTxt2Change), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnTxt2Change), NULL, panel);
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1->Add(ch11);
@@ -1229,14 +1229,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh2Check), NULL, panel);
 	ch2->SetValue(m_compression);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh3Check), NULL, panel);
 	ch3->SetValue(m_skip_brick);
 
 	//time sequence identifier
@@ -1245,7 +1245,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		"", wxDefaultPosition, wxDefaultSize);
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnTxt1Change), NULL, panel);
 	st1 = new wxStaticText(panel, 0,
 		"Time sequence identifier (digits after the identifier in filenames are used as time index)\n");
 	sizer2->Add(txt1);
@@ -1268,7 +1268,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	return panel;
 }
 
-wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
+wxWindow* RenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -1282,7 +1282,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	wxCheckBox* ch1 = new wxCheckBox(panel, ID_READ_ZSLICES,
 		"Read a sequence as Z slices (the last digits in filenames are used to identify the sequence)");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh1Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh1Check), NULL, panel);
 	ch1->SetValue(m_sliceSequence);
 	*/
 
@@ -1290,14 +1290,14 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh2Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh2Check), NULL, panel);
 	ch2->SetValue(m_compression);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnCh3Check), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnCh3Check), NULL, panel);
 	ch3->SetValue(m_skip_brick);
 
 	//time sequence identifier. TODO: Not supported as of now.
@@ -1307,7 +1307,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 		"", wxDefaultPosition, wxSize(80, 20));
 	txt1->SetValue(m_time_id);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderFrame::OnTxt1Change), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnTxt1Change), NULL, panel);
 	wxStaticText* st = new wxStaticText(panel, 0,
 		"Time sequence identifier (digits after the identifier in filenames are used as time index)");
 	sizer1->Add(txt1);
@@ -1331,7 +1331,7 @@ wxWindow* VRenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 	return panel;
 }
 
-void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 {
 	if (m_setting_dlg)
 	{
@@ -1390,7 +1390,7 @@ void VRenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 {
 	if (m_setting_dlg)
 	{
@@ -1423,7 +1423,7 @@ void VRenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, fluo::Renderview* view)
+void RenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, fluo::Renderview* view)
 {
 	int j;
 
@@ -1602,7 +1602,7 @@ void VRenderFrame::LoadVolumes(wxArrayString files, bool withImageJ, fluo::Rende
 	//v->RefreshGL(39);//added by Takashi
 }
 
-void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
+void RenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
 {
 	//if (m_vrv_list[0])
 	//	m_vrv_list[0]->m_glview->Init();
@@ -1649,7 +1649,7 @@ void VRenderFrame::StartupLoad(wxArrayString files, bool run_mov, bool with_imag
 		m_movie_view->Run();
 }
 
-void VRenderFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
+void RenderFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
 {
 	//if (!view)
 	//	view = GetView(0);
@@ -1700,7 +1700,7 @@ void VRenderFrame::LoadMeshes(wxArrayString files, RenderCanvas* view)
 	//delete prg_diag;
 }
 
-void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose the mesh data file",
@@ -1720,7 +1720,7 @@ void VRenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
 		delete fopendlg;
 }
 
-void VRenderFrame::OnOrganize(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnOrganize(wxCommandEvent& WXUNUSED(event))
 {
 	int w, h;
 	GetClientSize(&w, &h);
@@ -1735,12 +1735,12 @@ void VRenderFrame::OnOrganize(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
-void VRenderFrame::OnCheckUpdates(wxCommandEvent &)
+void RenderFrame::OnCheckUpdates(wxCommandEvent &)
 {
 	::wxLaunchDefaultBrowser(VERSION_UPDATES);
 }
 
-void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 {
 
 	wxString time = wxNow();
@@ -1801,7 +1801,7 @@ void VRenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	d->ShowModal();
 }
 
-void VRenderFrame::UpdateTreeIcons()
+void RenderFrame::UpdateTreeIcons()
 {
 	//int i, j, k;
 	//if (!m_tree_panel || !m_tree_panel->GetTreeCtrl())
@@ -1911,7 +1911,7 @@ void VRenderFrame::UpdateTreeIcons()
 	//m_tree_panel->Refresh(false);
 }
 
-void VRenderFrame::UpdateTreeColors()
+void RenderFrame::UpdateTreeColors()
 {
 	//int i, j, k;
 	//int counter = 0;
@@ -1955,7 +1955,7 @@ void VRenderFrame::UpdateTreeColors()
 	//m_tree_panel->Refresh(false);
 }
 
-void VRenderFrame::UpdateTree(wxString name)
+void RenderFrame::UpdateTree(wxString name)
 {
 	//if (!m_tree_panel)
 	//	return;
@@ -2135,7 +2135,7 @@ void VRenderFrame::UpdateTree(wxString name)
 	//m_tree_panel->ExpandAll();
 }
 
-void VRenderFrame::UpdateList()
+void RenderFrame::UpdateList()
 {
 	//m_list_panel->DeleteAllItems();
 
@@ -2181,23 +2181,23 @@ void VRenderFrame::UpdateList()
 	//}
 }
 
-DataManager* VRenderFrame::GetDataManager()
+DataManager* RenderFrame::GetDataManager()
 {
 	return &m_data_mgr;
 }
 
-TreePanel *VRenderFrame::GetTree()
+TreePanel *RenderFrame::GetTree()
 {
 	return m_tree_panel;
 }
 
-ListPanel *VRenderFrame::GetList()
+ListPanel *RenderFrame::GetList()
 {
 	return m_list_panel;
 }
 
 //on selections
-//void VRenderFrame::OnSelection(int type,
+//void RenderFrame::OnSelection(int type,
 //	fluo::Renderview* view,
 //	fluo::VolumeGroup* group,
 //	fluo::VolumeData* vd,
@@ -2454,7 +2454,7 @@ ListPanel *VRenderFrame::GetList()
 //}
 
 //on selections
-void VRenderFrame::OnSelection(fluo::Node *node)
+void RenderFrame::OnSelection(fluo::Node *node)
 {
 	if (!node)
 		return;
@@ -2725,7 +2725,7 @@ void VRenderFrame::OnSelection(fluo::Node *node)
 	RefreshVRenderViews();
 }
 
-void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
+void RenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 {
 	//for (int i=0 ; i<(int)m_vrv_list.size() ; i++)
 	//{
@@ -2739,7 +2739,7 @@ void VRenderFrame::RefreshVRenderViews(bool tree, bool interactive)
 	//	UpdateTreeColors();
 }
 
-void VRenderFrame::DeleteVRenderView(int i)
+void RenderFrame::DeleteVRenderView(int i)
 {
 	//if (m_vrv_list[i])
 	//{
@@ -2750,7 +2750,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 	//		GetView(i)->GetAllVolumeData(j)->setValue(gstDisplay, true);
 	//	for (j=0 ; j< GetView(i)->GetMeshNum() ; j++)
 	//		GetView(i)->GetMeshData(j)->setValue(gstDisplay, true);
-	//	VRenderView* vrv = m_vrv_list[i];
+	//	RenderviewPanel* vrv = m_vrv_list[i];
 	//	m_vrv_list.erase(m_vrv_list.begin()+i);
 	//	m_aui_mgr.DetachPane(vrv);
 	//	vrv->Close();
@@ -2763,7 +2763,7 @@ void VRenderFrame::DeleteVRenderView(int i)
 	//}
 }
 
-void VRenderFrame::DeleteVRenderView(const wxString &name)
+void RenderFrame::DeleteVRenderView(const wxString &name)
 {
 	//for (int i=0; i<GetViewNum(); i++)
 	//{
@@ -2776,13 +2776,13 @@ void VRenderFrame::DeleteVRenderView(const wxString &name)
 	//}
 }
 
-OutAdjustPanel* VRenderFrame::GetAdjustView()
+OutAdjustPanel* RenderFrame::GetAdjustView()
 {
 	return m_adjust_view;
 }
 
 //organize render views
-void VRenderFrame::OrganizeVRenderViews(int mode)
+void RenderFrame::OrganizeVRenderViews(int mode)
 {
 	int width = 800;
 	int height = 600;
@@ -2795,7 +2795,7 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 	//get total area
 	for (i = 0; i < paneNum; i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
+		RenderviewPanel* vrv = m_vrv_list[i];
 		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
 		{
 			wxPoint pos = vrv->GetPosition();
@@ -2828,14 +2828,14 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 	//detach all panes
 	for (i = 0; i < paneNum; ++i)
 	{
-		VRenderView* vrv = m_vrv_list[i];
+		RenderviewPanel* vrv = m_vrv_list[i];
 		if (vrv)
 			m_aui_mgr.DetachPane(vrv);
 	}
 	//add back
 	for (i=0; i<paneNum; i++)
 	{
-		VRenderView* vrv = m_vrv_list[i];
+		RenderviewPanel* vrv = m_vrv_list[i];
 		if (vrv)
 		{
 			switch (mode)
@@ -2879,7 +2879,7 @@ void VRenderFrame::OrganizeVRenderViews(int mode)
 }
 
 //hide/show tools
-void VRenderFrame::ToggleAllTools(bool cur_state)
+void RenderFrame::ToggleAllTools(bool cur_state)
 {
 	if (cur_state)
 	{
@@ -2951,7 +2951,7 @@ void VRenderFrame::ToggleAllTools(bool cur_state)
 	m_aui_mgr.Update();
 }
 
-void VRenderFrame::ShowPane(wxPanel* pane, bool show)
+void RenderFrame::ShowPane(wxPanel* pane, bool show)
 {
 	if (m_aui_mgr.GetPane(pane).IsOk())
 	{
@@ -2963,21 +2963,21 @@ void VRenderFrame::ShowPane(wxPanel* pane, bool show)
 	}
 }
 
-void VRenderFrame::OnChEmbedCheck(wxCommandEvent &event)
+void RenderFrame::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
 		m_vrp_embed = ch_embed->GetValue();
 }
 
-void VRenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
+void RenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
 	if (ch_cmp)
 		m_save_compress = ch_cmp->GetValue();
 }
 
-wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
+wxWindow* RenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -2990,14 +2990,14 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	wxCheckBox* ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 		"Embed all files in the project folder");
 	ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnChEmbedCheck), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnChEmbedCheck), NULL, panel);
 	ch_embed->SetValue(m_vrp_embed);
 
 	//compressed
 	wxCheckBox* ch_cmp = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch_cmp->Connect(ch_cmp->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderFrame::OnChSaveCmpCheck), NULL, panel);
+		wxCommandEventHandler(RenderFrame::OnChSaveCmpCheck), NULL, panel);
 	if (ch_cmp)
 		ch_cmp->SetValue(m_save_compress);
 
@@ -3014,7 +3014,7 @@ wxWindow* VRenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 	return panel;
 }
 
-void VRenderFrame::OnSaveProject(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnSaveProject(wxCommandEvent& WXUNUSED(event))
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Project File",
@@ -3031,7 +3031,7 @@ void VRenderFrame::OnSaveProject(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Choose Project File",
@@ -3047,7 +3047,7 @@ void VRenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 	delete fopendlg;
 }
 
-void VRenderFrame::SaveProject(wxString& filename)
+void RenderFrame::SaveProject(wxString& filename)
 {
 	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
@@ -3120,7 +3120,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->getName() + ".tif";
 				fluo::Quaternion qtemp;
-				vd->SaveData(str.ToStdWstring(), 0, false, 0, false, VRenderFrame::GetCompression(), qtemp);
+				vd->SaveData(str.ToStdWstring(), 0, false, 0, false, RenderFrame::GetCompression(), qtemp);
 				fconfig.Write("path", str);
 				new_chan = true;
 			}
@@ -3796,7 +3796,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 	delete prg_diag;
 }
 
-void VRenderFrame::OpenProject(wxString& filename)
+void RenderFrame::OpenProject(wxString& filename)
 {
 	m_data_mgr.SetProjectPath(filename);
 
@@ -3812,7 +3812,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	glbin_root->getCurrentRenderview()->Clear();
 	for (i = m_vrv_list.size() - 1; i > 0; i--)
 		DeleteVRenderView(i);
-	//VRenderView::ResetID();
+	//RenderviewPanel::ResetID();
 	//fluo::VolumeGroup::ResetID();
 	//MeshGroup::ResetID();
 	double dx, dy, dz;
@@ -4661,17 +4661,17 @@ void VRenderFrame::OpenProject(wxString& filename)
 				if (fconfig.Read("draw_camctr", &bVal))
 				{
 					view->setValue(gstDrawCamCtr, bVal);
-					//view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_CamCtrChk,bVal);
+					//view->m_vrv->m_options_toolbar->ToggleTool(RenderviewPanel::ID_CamCtrChk,bVal);
 				}
 				if (fconfig.Read("draw_info", &iVal))
 				{
 					view->setValue(gstDrawInfo, iVal);
-					//view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_FpsChk, iVal & INFO_DISP);
+					//view->m_vrv->m_options_toolbar->ToggleTool(RenderviewPanel::ID_FpsChk, iVal & INFO_DISP);
 				}
 				if (fconfig.Read("draw_legend", &bVal))
 				{
 					view->setValue(gstDrawLegend, bVal);
-					//view->m_vrv->m_options_toolbar->ToggleTool(VRenderView::ID_LegendChk,bVal);
+					//view->m_vrv->m_options_toolbar->ToggleTool(RenderviewPanel::ID_LegendChk,bVal);
 				}
 
 				//camera
@@ -5339,7 +5339,7 @@ void VRenderFrame::OpenProject(wxString& filename)
 	RefreshVRenderViews(true, true);
 }
 
-void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 {
 	m_setting_dlg->UpdateDeviceTree();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
@@ -5348,7 +5348,7 @@ void VRenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 }
 
 //tools
-void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 {
 	if (!m_setting_dlg)
 	{
@@ -5394,57 +5394,57 @@ void VRenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 	}
 }
 
-void VRenderFrame::OnPaintTool(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnPaintTool(wxCommandEvent& WXUNUSED(event))
 {
 	ShowPaintTool();
 }
 
-void VRenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnMeasure(wxCommandEvent& WXUNUSED(event))
 {
 	ShowMeasureDlg();
 }
 
-void VRenderFrame::OnNoiseCancelling(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnNoiseCancelling(wxCommandEvent& WXUNUSED(event))
 {
 	ShowNoiseCancellingDlg();
 }
 
-void VRenderFrame::OnCounting(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnCounting(wxCommandEvent& WXUNUSED(event))
 {
 	ShowCountingDlg();
 }
 
-void VRenderFrame::OnColocalization(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnColocalization(wxCommandEvent& WXUNUSED(event))
 {
 	ShowColocalizationDlg();
 }
 
-void VRenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnConvert(wxCommandEvent& WXUNUSED(event))
 {
 	ShowConvertDlg();
 }
 
-void VRenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnTrace(wxCommandEvent& WXUNUSED(event))
 {
 	ShowTraceDlg();
 }
 
-void VRenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnOcl(wxCommandEvent& WXUNUSED(event))
 {
 	ShowOclDlg();
 }
 
-void VRenderFrame::OnComponent(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnComponent(wxCommandEvent& WXUNUSED(event))
 {
 	ShowComponentDlg();
 }
 
-void VRenderFrame::OnCalculations(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnCalculations(wxCommandEvent& WXUNUSED(event))
 {
 	ShowCalculationDlg();
 }
 
-void VRenderFrame::ShowPaintTool()
+void RenderFrame::ShowPaintTool()
 {
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
 	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
@@ -5455,7 +5455,7 @@ void VRenderFrame::ShowPaintTool()
 		wxGetBitmapFromMemory(icon_paint_brush));
 }
 
-void VRenderFrame::ShowMeasureDlg()
+void RenderFrame::ShowMeasureDlg()
 {
 	m_aui_mgr.GetPane(m_measure_dlg).Show();
 	m_aui_mgr.GetPane(m_measure_dlg).Float();
@@ -5466,7 +5466,7 @@ void VRenderFrame::ShowMeasureDlg()
 		wxGetBitmapFromMemory(icon_measurement));
 }
 
-void VRenderFrame::ShowTraceDlg()
+void RenderFrame::ShowTraceDlg()
 {
 	m_aui_mgr.GetPane(m_trace_dlg).Show();
 	m_aui_mgr.GetPane(m_trace_dlg).Float();
@@ -5477,7 +5477,7 @@ void VRenderFrame::ShowTraceDlg()
 		wxGetBitmapFromMemory(icon_tracking));
 }
 
-void VRenderFrame::ShowNoiseCancellingDlg()
+void RenderFrame::ShowNoiseCancellingDlg()
 {
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
 	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
@@ -5488,7 +5488,7 @@ void VRenderFrame::ShowNoiseCancellingDlg()
 		wxGetBitmapFromMemory(icon_noise_reduc));
 }
 
-void VRenderFrame::ShowCountingDlg()
+void RenderFrame::ShowCountingDlg()
 {
 	m_aui_mgr.GetPane(m_counting_dlg).Show();
 	m_aui_mgr.GetPane(m_counting_dlg).Float();
@@ -5499,7 +5499,7 @@ void VRenderFrame::ShowCountingDlg()
 		wxGetBitmapFromMemory(icon_volume_size));
 }
 
-void VRenderFrame::ShowColocalizationDlg()
+void RenderFrame::ShowColocalizationDlg()
 {
 	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
 	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
@@ -5510,7 +5510,7 @@ void VRenderFrame::ShowColocalizationDlg()
 		wxGetBitmapFromMemory(icon_colocalization));
 }
 
-void VRenderFrame::ShowConvertDlg()
+void RenderFrame::ShowConvertDlg()
 {
 	m_aui_mgr.GetPane(m_convert_dlg).Show();
 	m_aui_mgr.GetPane(m_convert_dlg).Float();
@@ -5521,7 +5521,7 @@ void VRenderFrame::ShowConvertDlg()
 		wxGetBitmapFromMemory(icon_convert));
 }
 
-void VRenderFrame::ShowOclDlg()
+void RenderFrame::ShowOclDlg()
 {
 	m_aui_mgr.GetPane(m_ocl_dlg).Show();
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
@@ -5532,7 +5532,7 @@ void VRenderFrame::ShowOclDlg()
 		wxGetBitmapFromMemory(icon_opencl));
 }
 
-void VRenderFrame::ShowComponentDlg()
+void RenderFrame::ShowComponentDlg()
 {
 	m_aui_mgr.GetPane(m_component_dlg).Show();
 	m_aui_mgr.GetPane(m_component_dlg).Float();
@@ -5543,7 +5543,7 @@ void VRenderFrame::ShowComponentDlg()
 		wxGetBitmapFromMemory(icon_components));
 }
 
-void VRenderFrame::ShowCalculationDlg()
+void RenderFrame::ShowCalculationDlg()
 {
 	m_aui_mgr.GetPane(m_calculation_dlg).Show();
 	m_aui_mgr.GetPane(m_calculation_dlg).Float();
@@ -5554,13 +5554,13 @@ void VRenderFrame::ShowCalculationDlg()
 		wxGetBitmapFromMemory(icon_calculations));
 }
 
-void VRenderFrame::SetTextureUndos()
+void RenderFrame::SetTextureUndos()
 {
 	if (m_setting_dlg)
 		flvr::Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
 }
 
-void VRenderFrame::SetTextureRendererSettings()
+void RenderFrame::SetTextureRendererSettings()
 {
 	if (!m_setting_dlg)
 		return;
@@ -5592,38 +5592,38 @@ void VRenderFrame::SetTextureRendererSettings()
 	flvr::TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
 }
 
-void VRenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
 {
 	::wxLaunchDefaultBrowser(FACEBOOK_URL);
 }
 
-void VRenderFrame::OnManual(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnManual(wxCommandEvent& WXUNUSED(event))
 {
 	::wxLaunchDefaultBrowser(HELP_MANUAL);
 }
 
 
-void VRenderFrame::OnTutorial(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnTutorial(wxCommandEvent& WXUNUSED(event))
 {
 	::wxLaunchDefaultBrowser(HELP_TUTORIAL);
 }
 
-void VRenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnTwitter(wxCommandEvent& WXUNUSED(event))
 {
 	::wxLaunchDefaultBrowser(TWITTER_URL);
 }
 
-void VRenderFrame::OnYoutube(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnYoutube(wxCommandEvent& WXUNUSED(event))
 {
 	::wxLaunchDefaultBrowser(YOUTUBE_URL);
 }
 
-void VRenderFrame::OnShowHideUI(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnShowHideUI(wxCommandEvent& WXUNUSED(event))
 {
 	ToggleAllTools(true);
 }
 
-void VRenderFrame::OnShowHideToolbar(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnShowHideToolbar(wxCommandEvent& WXUNUSED(event))
 {
 	if (m_aui_mgr.GetPane(m_main_tb).IsShown()) {
 		m_aui_mgr.GetPane(m_main_tb).Hide();
@@ -5635,7 +5635,7 @@ void VRenderFrame::OnShowHideToolbar(wxCommandEvent& WXUNUSED(event))
 	m_aui_mgr.Update();
 }
 
-void VRenderFrame::OnShowHideView(wxCommandEvent &event)
+void RenderFrame::OnShowHideView(wxCommandEvent &event)
 {
 	int id = event.GetId();
 
@@ -5725,7 +5725,7 @@ void VRenderFrame::OnShowHideView(wxCommandEvent &event)
 }
 
 //panes
-void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
+void RenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 {
 	wxWindow* wnd = event.pane->window;
 	wxString name = wnd->GetName();
@@ -5745,19 +5745,19 @@ void VRenderFrame::OnPaneClose(wxAuiManagerEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void VRenderFrame::OnCreateCube(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnCreateCube(wxCommandEvent& WXUNUSED(event))
 {
 }
 
-void VRenderFrame::OnCreateSphere(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnCreateSphere(wxCommandEvent& WXUNUSED(event))
 {
 }
 
-void VRenderFrame::OnCreateCone(wxCommandEvent& WXUNUSED(event))
+void RenderFrame::OnCreateCone(wxCommandEvent& WXUNUSED(event))
 {
 }
 
-void VRenderFrame::OnDraw(wxPaintEvent& event)
+void RenderFrame::OnDraw(wxPaintEvent& event)
 {
 	//wxPaintDC dc(this);
 
@@ -5766,7 +5766,7 @@ void VRenderFrame::OnDraw(wxPaintEvent& event)
 	//dc.DrawRectangle(windowRect);
 }
 
-void VRenderFrame::OnKeyDown(wxKeyEvent& event)
+void RenderFrame::OnKeyDown(wxKeyEvent& event)
 {
 	event.Skip();
 }

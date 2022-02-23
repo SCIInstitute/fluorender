@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -61,7 +61,7 @@ class RulerListCtrl : public wxListCtrl
 	};
 
 public:
-	RulerListCtrl(VRenderFrame *frame,
+	RulerListCtrl(RenderFrame *frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -182,7 +182,7 @@ public:
 		ID_AlignZYX,
 	};
 
-	MeasureDlg(VRenderFrame* frame);
+	MeasureDlg(RenderFrame* frame);
 	~MeasureDlg();
 
 	void GetSettings(fluo::Renderview* view);
@@ -198,7 +198,7 @@ public:
 	void Prune(int idx, int len);
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview* m_view;
 	flrd::RulerHandler *m_rhdl;

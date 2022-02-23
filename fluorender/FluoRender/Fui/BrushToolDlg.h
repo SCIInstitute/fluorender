@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -128,7 +128,7 @@ public:
 		ID_OutputGrid
 	};
 
-	BrushToolDlg(VRenderFrame* frame);
+	BrushToolDlg(RenderFrame* frame);
 	~BrushToolDlg();
 
 	void GetSettings(fluo::Renderview* view);
@@ -148,7 +148,7 @@ public:
 	void PasteData();
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview *m_view;
 	flrd::VolumeSelector *m_selector;

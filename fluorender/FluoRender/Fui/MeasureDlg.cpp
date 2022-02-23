@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MeasureDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <FLIVR/VertexArray.h>
@@ -65,7 +65,7 @@ BEGIN_EVENT_TABLE(RulerListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 
 RulerListCtrl::RulerListCtrl(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -900,7 +900,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_BUTTON(ID_AlignZYX, MeasureDlg::OnAlignPca)
 END_EVENT_TABLE()
 
-MeasureDlg::MeasureDlg(VRenderFrame* frame)
+MeasureDlg::MeasureDlg(RenderFrame* frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(500, 600),
 	0, "MeasureDlg"),

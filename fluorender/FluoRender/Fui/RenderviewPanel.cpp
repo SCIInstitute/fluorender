@@ -27,8 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <FLIVR/ShaderProgram.h>
-#include <VRenderView.h>
-#include <VRenderFrame.h>
+#include <RenderviewPanel.h>
+#include <RenderFrame.h>
 #include <RenderCanvas.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
@@ -42,68 +42,68 @@ DEALINGS IN THE SOFTWARE.
 #include "img/icons.h"
 #include <wx/stdpaths.h>
 
-int VRenderView::m_max_id = 1;
+int RenderviewPanel::m_max_id = 1;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BEGIN_EVENT_TABLE(VRenderView, wxPanel)
+BEGIN_EVENT_TABLE(RenderviewPanel, wxPanel)
 	//bar top
-	EVT_TOOL(ID_VolumeSeqRd, VRenderView::OnVolumeMethodCheck)
-	EVT_TOOL(ID_VolumeMultiRd, VRenderView::OnVolumeMethodCheck)
-	EVT_TOOL(ID_VolumeCompRd, VRenderView::OnVolumeMethodCheck)
-	EVT_BUTTON(ID_CaptureBtn, VRenderView::OnCapture)
-	EVT_COLOURPICKER_CHANGED(ID_BgColorPicker, VRenderView::OnBgColorChange)
-	EVT_BUTTON(ID_BgInvBtn, VRenderView::OnBgInvBtn)
-	EVT_TOOL(ID_CamCtrChk, VRenderView::OnCamCtrCheck)
-	EVT_TOOL(ID_FpsChk, VRenderView::OnFpsCheck)
-	EVT_TOOL(ID_LegendChk, VRenderView::OnLegendCheck)
-	EVT_TOOL(ID_ColormapChk, VRenderView::OnColormapCheck)
+	EVT_TOOL(ID_VolumeSeqRd, RenderviewPanel::OnVolumeMethodCheck)
+	EVT_TOOL(ID_VolumeMultiRd, RenderviewPanel::OnVolumeMethodCheck)
+	EVT_TOOL(ID_VolumeCompRd, RenderviewPanel::OnVolumeMethodCheck)
+	EVT_BUTTON(ID_CaptureBtn, RenderviewPanel::OnCapture)
+	EVT_COLOURPICKER_CHANGED(ID_BgColorPicker, RenderviewPanel::OnBgColorChange)
+	EVT_BUTTON(ID_BgInvBtn, RenderviewPanel::OnBgInvBtn)
+	EVT_TOOL(ID_CamCtrChk, RenderviewPanel::OnCamCtrCheck)
+	EVT_TOOL(ID_FpsChk, RenderviewPanel::OnFpsCheck)
+	EVT_TOOL(ID_LegendChk, RenderviewPanel::OnLegendCheck)
+	EVT_TOOL(ID_ColormapChk, RenderviewPanel::OnColormapCheck)
 	//scale bar
-	EVT_TOOL(ID_ScaleBar, VRenderView::OnScaleBar)
-	EVT_TEXT(ID_ScaleText, VRenderView::OnScaleTextEditing)
-	EVT_COMBOBOX(ID_ScaleCmb, VRenderView::OnScaleTextEditing)
+	EVT_TOOL(ID_ScaleBar, RenderviewPanel::OnScaleBar)
+	EVT_TEXT(ID_ScaleText, RenderviewPanel::OnScaleTextEditing)
+	EVT_COMBOBOX(ID_ScaleCmb, RenderviewPanel::OnScaleTextEditing)
 	//other tools
-	EVT_COMMAND_SCROLL(ID_AovSldr, VRenderView::OnAovChange)
-	EVT_TEXT(ID_AovText, VRenderView::OnAovText)
-	EVT_TOOL(ID_FreeChk, VRenderView::OnFreeChk)
-	EVT_TOOL(ID_FullScreenBtn, VRenderView::OnFullScreen)
+	EVT_COMMAND_SCROLL(ID_AovSldr, RenderviewPanel::OnAovChange)
+	EVT_TEXT(ID_AovText, RenderviewPanel::OnAovText)
+	EVT_TOOL(ID_FreeChk, RenderviewPanel::OnFreeChk)
+	EVT_TOOL(ID_FullScreenBtn, RenderviewPanel::OnFullScreen)
 	//bar left
-	EVT_TOOL(ID_DepthAttenChk, VRenderView::OnDepthAttenCheck)
-	EVT_COMMAND_SCROLL(ID_DepthAttenFactorSldr, VRenderView::OnDepthAttenFactorChange)
-	EVT_TEXT(ID_DepthAttenFactorText, VRenderView::OnDepthAttenFactorEdit)
-	EVT_TOOL(ID_DepthAttenResetBtn, VRenderView::OnDepthAttenReset)
+	EVT_TOOL(ID_DepthAttenChk, RenderviewPanel::OnDepthAttenCheck)
+	EVT_COMMAND_SCROLL(ID_DepthAttenFactorSldr, RenderviewPanel::OnDepthAttenFactorChange)
+	EVT_TEXT(ID_DepthAttenFactorText, RenderviewPanel::OnDepthAttenFactorEdit)
+	EVT_TOOL(ID_DepthAttenResetBtn, RenderviewPanel::OnDepthAttenReset)
 	//bar right
-	EVT_TOOL(ID_PinBtn, VRenderView::OnPin)
-	EVT_TOOL(ID_CenterBtn, VRenderView::OnCenter)
-	EVT_TOOL(ID_Scale121Btn, VRenderView::OnScale121)
-	EVT_COMMAND_SCROLL(ID_ScaleFactorSldr, VRenderView::OnScaleFactorChange)
-	EVT_TEXT(ID_ScaleFactorText, VRenderView::OnScaleFactorEdit)
-	EVT_TOOL(ID_ScaleModeBtn, VRenderView::OnScaleMode)
-	EVT_TOOL(ID_ScaleResetBtn, VRenderView::OnScaleReset)
-	EVT_SPIN_UP(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinDown)
-	EVT_SPIN_DOWN(ID_ScaleFactorSpin, VRenderView::OnScaleFactorSpinUp)
+	EVT_TOOL(ID_PinBtn, RenderviewPanel::OnPin)
+	EVT_TOOL(ID_CenterBtn, RenderviewPanel::OnCenter)
+	EVT_TOOL(ID_Scale121Btn, RenderviewPanel::OnScale121)
+	EVT_COMMAND_SCROLL(ID_ScaleFactorSldr, RenderviewPanel::OnScaleFactorChange)
+	EVT_TEXT(ID_ScaleFactorText, RenderviewPanel::OnScaleFactorEdit)
+	EVT_TOOL(ID_ScaleModeBtn, RenderviewPanel::OnScaleMode)
+	EVT_TOOL(ID_ScaleResetBtn, RenderviewPanel::OnScaleReset)
+	EVT_SPIN_UP(ID_ScaleFactorSpin, RenderviewPanel::OnScaleFactorSpinDown)
+	EVT_SPIN_DOWN(ID_ScaleFactorSpin, RenderviewPanel::OnScaleFactorSpinUp)
 	//bar bottom
-	EVT_TOOL(ID_ZeroRotBtn, VRenderView::OnZeroRot)
-	EVT_TOOL(ID_RotResetBtn, VRenderView::OnRotReset)
-	EVT_TEXT(ID_XRotText, VRenderView::OnValueEdit)
-	EVT_TEXT(ID_YRotText, VRenderView::OnValueEdit)
-	EVT_TEXT(ID_ZRotText, VRenderView::OnValueEdit)
-	EVT_COMMAND_SCROLL(ID_XRotSldr, VRenderView::OnXRotScroll)
-	EVT_COMMAND_SCROLL(ID_YRotSldr, VRenderView::OnYRotScroll)
-	EVT_COMMAND_SCROLL(ID_ZRotSldr, VRenderView::OnZRotScroll)
-	EVT_TOOL(ID_RotLockChk, VRenderView::OnRotLockCheck)
-	EVT_TOOL(ID_RotSliderType, VRenderView::OnRotSliderType)
-	EVT_COMBOBOX(ID_OrthoViewCmb, VRenderView::OnOrthoViewSelected)
+	EVT_TOOL(ID_ZeroRotBtn, RenderviewPanel::OnZeroRot)
+	EVT_TOOL(ID_RotResetBtn, RenderviewPanel::OnRotReset)
+	EVT_TEXT(ID_XRotText, RenderviewPanel::OnValueEdit)
+	EVT_TEXT(ID_YRotText, RenderviewPanel::OnValueEdit)
+	EVT_TEXT(ID_ZRotText, RenderviewPanel::OnValueEdit)
+	EVT_COMMAND_SCROLL(ID_XRotSldr, RenderviewPanel::OnXRotScroll)
+	EVT_COMMAND_SCROLL(ID_YRotSldr, RenderviewPanel::OnYRotScroll)
+	EVT_COMMAND_SCROLL(ID_ZRotSldr, RenderviewPanel::OnZRotScroll)
+	EVT_TOOL(ID_RotLockChk, RenderviewPanel::OnRotLockCheck)
+	EVT_TOOL(ID_RotSliderType, RenderviewPanel::OnRotSliderType)
+	EVT_COMBOBOX(ID_OrthoViewCmb, RenderviewPanel::OnOrthoViewSelected)
 	//timer
-	EVT_TIMER(ID_RotateTimer, VRenderView::OnTimer)
+	EVT_TIMER(ID_RotateTimer, RenderviewPanel::OnTimer)
 	//save default
-	EVT_TOOL(ID_DefaultBtn, VRenderView::OnSaveDefault)
+	EVT_TOOL(ID_DefaultBtn, RenderviewPanel::OnSaveDefault)
 
-	EVT_KEY_DOWN(VRenderView::OnKeyDown)
+	EVT_KEY_DOWN(RenderviewPanel::OnKeyDown)
 END_EVENT_TABLE()
 
-VRenderView::VRenderView(VRenderFrame* frame,
+RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -147,7 +147,7 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	int gl_minor_ver = 4;
 	int gl_profile_mask = 1;
 	int api_type = 0;
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	RenderFrame* vr_frame = (RenderFrame*)m_frame;
 	if (vr_frame && vr_frame->GetSettingDlg())
 	{
 		api_type = vr_frame->GetSettingDlg()->GetApiType();
@@ -330,13 +330,13 @@ VRenderView::VRenderView(VRenderFrame* frame,
 	UpdateView();
 }
 
-VRenderView::~VRenderView()
+RenderviewPanel::~RenderviewPanel()
 {
 	if (m_full_frame)
 		delete m_full_frame;
 }
 
-void VRenderView::CreateBar()
+void RenderviewPanel::CreateBar()
 {
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
@@ -515,7 +515,7 @@ void VRenderView::CreateBar()
 	m_agent->getValue(gstAov, aov);
 	m_aov_sldr->SetValue(persp ? aov : 10);
 	m_aov_sldr->Connect(wxID_ANY, wxEVT_IDLE,
-		wxIdleEventHandler(VRenderView::OnAovSldrIdle),
+		wxIdleEventHandler(RenderviewPanel::OnAovSldrIdle),
 		NULL, this);
 	m_aov_text = new wxTextCtrl(m_options_toolbar, ID_AovText, "",
 		wxDefaultPosition, wxSize(60, 20), 0, vald_int);
@@ -768,7 +768,7 @@ void VRenderView::CreateBar()
 
 }
 
-void VRenderView::UpdateView(bool ui_update)
+void RenderviewPanel::UpdateView(bool ui_update)
 {
 	double rotx, roty, rotz;
 	wxString str_val = m_x_rot_text->GetValue();
@@ -783,7 +783,7 @@ void VRenderView::UpdateView(bool ui_update)
 	//RefreshGL(true);
 }
 
-void VRenderView::UpdateScaleFactor(bool update_text)
+void RenderviewPanel::UpdateScaleFactor(bool update_text)
 {
 	double dval;
 	double scale;
@@ -850,7 +850,7 @@ void VRenderView::UpdateScaleFactor(bool update_text)
 	}
 }
 
-void VRenderView::SetScaleFactor(double s, bool update)
+void RenderviewPanel::SetScaleFactor(double s, bool update)
 {
 	double dval;
 	long lval;
@@ -885,7 +885,7 @@ void VRenderView::SetScaleFactor(double s, bool update)
 		UpdateScaleFactor();
 }
 
-void VRenderView::SetScaleMode(int mode, bool update)
+void RenderviewPanel::SetScaleMode(int mode, bool update)
 {
 	switch (mode)
 	{
@@ -920,25 +920,25 @@ void VRenderView::SetScaleMode(int mode, bool update)
 }
 
 //rot center anchor thresh
-void VRenderView::SetPinThreshold(double value)
+void RenderviewPanel::SetPinThreshold(double value)
 {
 	m_agent->setValue(gstPinThresh, value);
 }
 
-void VRenderView::UpdateOrientCmb(int index)
+void RenderviewPanel::UpdateOrientCmb(int index)
 {
 	if (!m_ortho_view_cmb->HasFocus())
 		m_ortho_view_cmb->Select(index);
 }
 
 //reset counter
-void VRenderView::ResetID()
+void RenderviewPanel::ResetID()
 {
 	m_max_id = 1;
 }
 
 //get rendering context
-wxGLContext* VRenderView::GetContext()
+wxGLContext* RenderviewPanel::GetContext()
 {
 	if (m_canvas)
 		return m_canvas->m_glRC/*GetContext()*/;
@@ -947,7 +947,7 @@ wxGLContext* VRenderView::GetContext()
 }
 
 //bar top
-void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
+void RenderviewPanel::OnVolumeMethodCheck(wxCommandEvent& event)
 {
 	//mode switch type
 	//0 - didn't change
@@ -979,7 +979,7 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 	old_mode == VOL_METHOD_MULTI)
 	mode_switch_type = 2;
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	RenderFrame* vr_frame = (RenderFrame*)m_frame;
 	if (vr_frame)
 	{
 	if (mode_switch_type == 1)
@@ -1102,39 +1102,39 @@ void VRenderView::OnVolumeMethodCheck(wxCommandEvent& event)
 }
 
 //ch1
-void VRenderView::OnCh1Check(wxCommandEvent &event)
+void RenderviewPanel::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		RenderFrame::SetCompression(ch1->GetValue());
 }
 
 //save alpha
-void VRenderView::OnChAlphaCheck(wxCommandEvent &event)
+void RenderviewPanel::OnChAlphaCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_alpha = (wxCheckBox*)event.GetEventObject();
 	if (ch_alpha)
-		VRenderFrame::SetSaveAlpha(ch_alpha->GetValue());
+		RenderFrame::SetSaveAlpha(ch_alpha->GetValue());
 }
 
 //save float
-void VRenderView::OnChFloatCheck(wxCommandEvent &event)
+void RenderviewPanel::OnChFloatCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_float = (wxCheckBox*)event.GetEventObject();
 	if (ch_float)
-		VRenderFrame::SetSaveFloat(ch_float->GetValue());
+		RenderFrame::SetSaveFloat(ch_float->GetValue());
 }
 
 //embde project
-void VRenderView::OnChEmbedCheck(wxCommandEvent &event)
+void RenderviewPanel::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
-		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
+		RenderFrame::SetEmbedProject(ch_embed->GetValue());
 }
 
 //enlarge output image
-void VRenderView::OnChEnlargeCheck(wxCommandEvent &event)
+void RenderviewPanel::OnChEnlargeCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_enlarge = (wxCheckBox*)event.GetEventObject();
 	if (ch_enlarge)
@@ -1166,7 +1166,7 @@ void VRenderView::OnChEnlargeCheck(wxCommandEvent &event)
 	}
 }
 
-void VRenderView::OnSlEnlargeScroll(wxScrollEvent &event)
+void RenderviewPanel::OnSlEnlargeScroll(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxSlider* sl_enlarge = (wxSlider*)event.GetEventObject();
@@ -1183,7 +1183,7 @@ void VRenderView::OnSlEnlargeScroll(wxScrollEvent &event)
 	}
 }
 
-void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
+void RenderviewPanel::OnTxEnlargeText(wxCommandEvent &event)
 {
 	wxString str = event.GetString();
 	double dval;
@@ -1202,7 +1202,7 @@ void VRenderView::OnTxEnlargeText(wxCommandEvent &event)
 }
 
 
-wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
+wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 {
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
@@ -1215,25 +1215,25 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderView::OnCh1Check), NULL, panel);
+		wxCommandEventHandler(RenderviewPanel::OnCh1Check), NULL, panel);
 	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+		ch1->SetValue(RenderFrame::GetCompression());
 
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//save alpha
 	wxCheckBox* ch_alpha = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha channel");
 	ch_alpha->Connect(ch_alpha->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderView::OnChAlphaCheck), NULL, panel);
+		wxCommandEventHandler(RenderviewPanel::OnChAlphaCheck), NULL, panel);
 	if (ch_alpha)
-		ch_alpha->SetValue(VRenderFrame::GetSaveAlpha());
+		ch_alpha->SetValue(RenderFrame::GetSaveAlpha());
 	//save float
 	wxCheckBox* ch_float = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch_float->Connect(ch_float->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderView::OnChFloatCheck), NULL, panel);
+		wxCommandEventHandler(RenderviewPanel::OnChFloatCheck), NULL, panel);
 	if (ch_float)
-		ch_float->SetValue(VRenderFrame::GetSaveFloat());
+		ch_float->SetValue(RenderFrame::GetSaveFloat());
 	sizer_1->Add(ch_alpha, 0, wxALIGN_CENTER);
 	sizer_1->Add(10, 10);
 	sizer_1->Add(ch_float, 0, wxALIGN_CENTER);
@@ -1243,17 +1243,17 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
 		"Enlarge output image");
 	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(VRenderView::OnChEnlargeCheck), NULL, panel);
+		wxCommandEventHandler(RenderviewPanel::OnChEnlargeCheck), NULL, panel);
 	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
 		10, 10, 100);
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
-		wxScrollEventHandler(VRenderView::OnSlEnlargeScroll), NULL, panel);
+		wxScrollEventHandler(RenderviewPanel::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Disable();
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
 		"1.0", wxDefaultPosition, wxSize(60, 23), 0, vald_fp);
 	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(VRenderView::OnTxEnlargeText), NULL, panel);
+		wxCommandEventHandler(RenderviewPanel::OnTxEnlargeText), NULL, panel);
 	tx_enlarge->Disable();
 	sizer_2->Add(ch_enlarge, 0, wxALIGN_CENTER);
 	sizer_2->Add(10, 10);
@@ -1263,13 +1263,13 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 
 	//copy all files check box
 	wxCheckBox* ch_embed = 0;
-	if (VRenderFrame::GetSaveProject())
+	if (RenderFrame::GetSaveProject())
 	{
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-			wxCommandEventHandler(VRenderView::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+			wxCommandEventHandler(RenderviewPanel::OnChEmbedCheck), NULL, panel);
+		ch_embed->SetValue(RenderFrame::GetEmbedProject());
 	}
 
 	//group
@@ -1279,7 +1279,7 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	group1->Add(sizer_1);
 	group1->Add(10, 10);
 	group1->Add(sizer_2);
-	if (VRenderFrame::GetSaveProject() &&
+	if (RenderFrame::GetSaveProject() &&
 		ch_embed)
 	{
 		group1->Add(10, 10);
@@ -1293,19 +1293,19 @@ wxWindow* VRenderView::CreateExtraCaptureControl(wxWindow* parent)
 	return panel;
 }
 
-void VRenderView::OnCapture(wxCommandEvent& event)
+void RenderviewPanel::OnCapture(wxCommandEvent& event)
 {
 	//reset enlargement
 	m_agent->setValue(gstEnlarge, false);
 	m_agent->setValue(gstEnlargeScale, 1.0);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	RenderFrame* vr_frame = (RenderFrame*)m_frame;
 
 	if (vr_frame && vr_frame->GetSettingDlg())
 	{
-		VRenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
-		VRenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
-		VRenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
+		RenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
+		RenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+		RenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
 	}
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
@@ -1328,15 +1328,15 @@ void VRenderView::OnCapture(wxCommandEvent& event)
 				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
 				vr_frame->SaveProject(prop_file);
 			}
-			vr_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
-			vr_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
+			vr_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
+			vr_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
 		}
 	}
 }
 
 
 //bar left
-void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
+void RenderviewPanel::OnDepthAttenCheck(wxCommandEvent& event)
 {
 	if (m_left_toolbar->GetToolState(ID_DepthAttenChk))
 	{
@@ -1358,7 +1358,7 @@ void VRenderView::OnDepthAttenCheck(wxCommandEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::OnDepthAttenFactorChange(wxScrollEvent& event)
+void RenderviewPanel::OnDepthAttenFactorChange(wxScrollEvent& event)
 {
 	double atten_factor = m_depth_atten_factor_sldr->GetValue()/100.0;
 	wxString str = wxString::Format("%.2f", atten_factor);
@@ -1366,7 +1366,7 @@ void VRenderView::OnDepthAttenFactorChange(wxScrollEvent& event)
 		m_depth_atten_factor_text->SetValue(str);
 }
 
-void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
+void RenderviewPanel::OnDepthAttenFactorEdit(wxCommandEvent& event)
 {
 	wxString str = m_depth_atten_factor_text->GetValue();
 	double val;
@@ -1376,7 +1376,7 @@ void VRenderView::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	//RefreshGL(true);
 }
 
-void VRenderView::OnDepthAttenReset(wxCommandEvent &event)
+void RenderviewPanel::OnDepthAttenReset(wxCommandEvent &event)
 {
 	if (m_use_dft_settings)
 	{
@@ -1391,7 +1391,7 @@ void VRenderView::OnDepthAttenReset(wxCommandEvent &event)
 }
 
 //bar right
-void VRenderView::OnPin(wxCommandEvent &event)
+void RenderviewPanel::OnPin(wxCommandEvent &event)
 {
 	double dval;
 	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
@@ -1443,13 +1443,13 @@ void VRenderView::OnPin(wxCommandEvent &event)
 	}
 }
 
-void VRenderView::OnCenter(wxCommandEvent &event)
+void RenderviewPanel::OnCenter(wxCommandEvent &event)
 {
 	m_agent->getObject()->SetCenter();
 	//RefreshGL();
 }
 
-void VRenderView::OnScale121(wxCommandEvent &event)
+void RenderviewPanel::OnScale121(wxCommandEvent &event)
 {
 	double dval;
 	m_agent->getValue(gstScaleFactor121, dval);
@@ -1461,7 +1461,7 @@ void VRenderView::OnScale121(wxCommandEvent &event)
 		m_canvas->SetFocus();
 }
 
-void VRenderView::OnScaleFactorChange(wxScrollEvent& event)
+void RenderviewPanel::OnScaleFactorChange(wxScrollEvent& event)
 {
 	int scale_factor = m_scale_factor_sldr->GetValue();
 	wxString str = wxString::Format("%d", scale_factor);
@@ -1469,7 +1469,7 @@ void VRenderView::OnScaleFactorChange(wxScrollEvent& event)
 		m_scale_factor_text->SetValue(str);
 }
 
-void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
+void RenderviewPanel::OnScaleFactorEdit(wxCommandEvent& event)
 {
 	wxString str = m_scale_factor_text->GetValue();
 	long val;
@@ -1483,7 +1483,7 @@ void VRenderView::OnScaleFactorEdit(wxCommandEvent& event)
 	}
 }
 
-void VRenderView::OnScaleMode(wxCommandEvent& event)
+void RenderviewPanel::OnScaleMode(wxCommandEvent& event)
 {
 	long mode;
 	m_agent->getValue(gstScaleMode, mode);
@@ -1520,7 +1520,7 @@ void VRenderView::OnScaleMode(wxCommandEvent& event)
 	UpdateScaleFactor(false);
 }
 
-void VRenderView::OnScaleFactorSpinUp(wxSpinEvent& event)
+void RenderviewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
 {
 	wxString str_val = m_scale_factor_text->GetValue();
 	long val;
@@ -1530,7 +1530,7 @@ void VRenderView::OnScaleFactorSpinUp(wxSpinEvent& event)
 	m_scale_factor_text->SetValue(str_val);
 }
 
-void VRenderView::OnScaleFactorSpinDown(wxSpinEvent& event)
+void RenderviewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
 {
 	wxString str_val = m_scale_factor_text->GetValue();
 	long val;
@@ -1540,7 +1540,7 @@ void VRenderView::OnScaleFactorSpinDown(wxSpinEvent& event)
 	m_scale_factor_text->SetValue(str_val);
 }
 
-void VRenderView::OnScaleReset(wxCommandEvent &event)
+void RenderviewPanel::OnScaleReset(wxCommandEvent &event)
 {
 	m_agent->resetValue(gstScaleFactor);
 	UpdateScaleFactor();
@@ -1549,7 +1549,7 @@ void VRenderView::OnScaleReset(wxCommandEvent &event)
 }
 
 //bar bottom
-void VRenderView::OnValueEdit(wxCommandEvent& event)
+void RenderviewPanel::OnValueEdit(wxCommandEvent& event)
 {
 	UpdateView(false);
 	if (!m_rot_slider)
@@ -1564,17 +1564,17 @@ void VRenderView::OnValueEdit(wxCommandEvent& event)
 	}
 }
 
-/*void VRenderView::OnRotLink(bool b)
+/*void RenderviewPanel::OnRotLink(bool b)
 {
 	m_canvas->m_linked_rot = true;
 	double rotx, roty, rotz;
 	m_canvas->GetRotations(rotx, roty, rotz);
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	RenderFrame* vr_frame = (RenderFrame*)m_frame;
 	if (vr_frame)
 	{
 		for (int i=0; i<vr_frame->GetViewNum(); i++)
 		{
-			VRenderView* view = vr_frame->GetView(i);
+			RenderviewPanel* view = vr_frame->GetView(i);
 			if (view)
 			{
 				view->m_canvas->m_linked_rot = b;
@@ -1585,7 +1585,7 @@ void VRenderView::OnValueEdit(wxCommandEvent& event)
 	}
 }*/
 
-void VRenderView::OnZeroRot(wxCommandEvent& event)
+void RenderviewPanel::OnZeroRot(wxCommandEvent& event)
 {
 	double rotx, roty, rotz;
 	m_agent->getValue(gstCamRotX, rotx);
@@ -1613,7 +1613,7 @@ void VRenderView::OnZeroRot(wxCommandEvent& event)
 	}
 }
 
-void VRenderView::OnRotReset(wxCommandEvent &event)
+void RenderviewPanel::OnRotReset(wxCommandEvent &event)
 {
 	//if (m_rot_slider)
 	//{
@@ -1633,7 +1633,7 @@ void VRenderView::OnRotReset(wxCommandEvent &event)
 }
 
 //timer used for rotation scrollbars
-void VRenderView::OnTimer(wxTimerEvent& event)
+void RenderviewPanel::OnTimer(wxTimerEvent& event)
 {
 	wxString str;
 	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
@@ -1686,7 +1686,7 @@ void VRenderView::OnTimer(wxTimerEvent& event)
 	}
 }
 
-void VRenderView::OnXRotScroll(wxScrollEvent& event)
+void RenderviewPanel::OnXRotScroll(wxScrollEvent& event)
 {
 	if (m_skip_thumb)
 	{
@@ -1741,7 +1741,7 @@ void VRenderView::OnXRotScroll(wxScrollEvent& event)
 	}
 }
 
-void VRenderView::OnYRotScroll(wxScrollEvent& event)
+void RenderviewPanel::OnYRotScroll(wxScrollEvent& event)
 {
 	if (m_skip_thumb)
 	{
@@ -1797,7 +1797,7 @@ void VRenderView::OnYRotScroll(wxScrollEvent& event)
 	}
 }
 
-void VRenderView::OnZRotScroll(wxScrollEvent& event)
+void RenderviewPanel::OnZRotScroll(wxScrollEvent& event)
 {
 	if (m_skip_thumb)
 	{
@@ -1853,7 +1853,7 @@ void VRenderView::OnZRotScroll(wxScrollEvent& event)
 	}
 }
 
-void VRenderView::OnRotLockCheck(wxCommandEvent& event)
+void RenderviewPanel::OnRotLockCheck(wxCommandEvent& event)
 {
 	bool lock = m_rot_lock_btn->GetToolState(ID_RotLockChk);
 	double rotx, roty, rotz;
@@ -1882,7 +1882,7 @@ void VRenderView::OnRotLockCheck(wxCommandEvent& event)
 	m_z_rot_text->SetValue(str);
 }
 
-void VRenderView::OnRotSliderType(wxCommandEvent& event)
+void RenderviewPanel::OnRotSliderType(wxCommandEvent& event)
 {
 	m_rot_slider = m_rot_lock_btn->GetToolState(ID_RotSliderType);
 	if (m_rot_slider)
@@ -1909,7 +1909,7 @@ void VRenderView::OnRotSliderType(wxCommandEvent& event)
 	}
 }
 
-void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
+void RenderviewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 {
 	int sel = 6;
 	if (m_ortho_view_cmb)
@@ -1965,7 +1965,7 @@ void VRenderView::OnOrthoViewSelected(wxCommandEvent& event)
 }
 
 //top
-void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
+void RenderviewPanel::OnBgColorChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
@@ -1973,7 +1973,7 @@ void VRenderView::OnBgColorChange(wxColourPickerEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::OnBgInvBtn(wxCommandEvent& event)
+void RenderviewPanel::OnBgInvBtn(wxCommandEvent& event)
 {
 	fluo::Color c;
 	m_agent->getValue(gstBgColor, c);
@@ -1982,14 +1982,14 @@ void VRenderView::OnBgInvBtn(wxCommandEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::OnCamCtrCheck(wxCommandEvent& event)
+void RenderviewPanel::OnCamCtrCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_CamCtrChk);
 	m_agent->setValue(gstDrawCamCtr, bval);
 	//RefreshGL();
 }
 
-void VRenderView::OnFpsCheck(wxCommandEvent& event)
+void RenderviewPanel::OnFpsCheck(wxCommandEvent& event)
 {
 	long lval;
 	m_agent->getValue(gstDrawInfo, lval);
@@ -2001,21 +2001,21 @@ void VRenderView::OnFpsCheck(wxCommandEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::OnLegendCheck(wxCommandEvent& event)
+void RenderviewPanel::OnLegendCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
 	m_agent->setValue(gstDrawLegend, bval);
 	//RefreshGL();
 }
 
-void VRenderView::OnColormapCheck(wxCommandEvent& event)
+void RenderviewPanel::OnColormapCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_ColormapChk);
 	m_agent->setValue(gstDrawColormap, bval);
 	//RefreshGL();
 }
 
-void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
+void RenderviewPanel::OnScaleTextEditing(wxCommandEvent& event)
 {
 	wxString str, num_text, unit_text;
 	num_text = m_scale_text->GetValue();
@@ -2044,10 +2044,10 @@ void VRenderView::OnScaleTextEditing(wxCommandEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::OnScaleUnitSelected(wxCommandEvent& event) {
+void RenderviewPanel::OnScaleUnitSelected(wxCommandEvent& event) {
 }
 
-void VRenderView::OnScaleBar(wxCommandEvent& event)
+void RenderviewPanel::OnScaleBar(wxCommandEvent& event)
 {
 	switch (m_draw_scalebar)
 	{
@@ -2085,9 +2085,9 @@ void VRenderView::OnScaleBar(wxCommandEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
+void RenderviewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
-	//VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	//RenderFrame* vr_frame = (RenderFrame*)m_frame;
 	//if (vr_frame && vr_frame->GetClippingView())
 	//{
 	//	if (vr_frame->GetClippingView()->GetHoldPlanes())
@@ -2128,7 +2128,7 @@ void VRenderView::OnAovSldrIdle(wxIdleEvent& event)
 	event.Skip();
 }
 
-void VRenderView::OnAovChange(wxScrollEvent& event)
+void RenderviewPanel::OnAovChange(wxScrollEvent& event)
 {
 	int val = m_aov_sldr->GetValue();
 	wxString str = wxString::Format("%d", val);
@@ -2136,7 +2136,7 @@ void VRenderView::OnAovChange(wxScrollEvent& event)
 		m_aov_text->SetValue(str);
 }
 
-void VRenderView::OnAovText(wxCommandEvent& event)
+void RenderviewPanel::OnAovText(wxCommandEvent& event)
 {
 	wxString str = m_aov_text->GetValue();
 	if (str == "Ortho")
@@ -2174,7 +2174,7 @@ void VRenderView::OnAovText(wxCommandEvent& event)
 	//RefreshGL(true);
 }
 
-void VRenderView::OnFreeChk(wxCommandEvent& event)
+void RenderviewPanel::OnFreeChk(wxCommandEvent& event)
 {
 	if (m_options_toolbar->GetToolState(ID_FreeChk))
 		m_agent->setValue(gstFree, true);
@@ -2190,7 +2190,7 @@ void VRenderView::OnFreeChk(wxCommandEvent& event)
 	//RefreshGL();
 }
 
-void VRenderView::SetFullScreen()
+void RenderviewPanel::SetFullScreen()
 {
 	if (m_canvas->GetParent() != m_full_frame)
 	{
@@ -2199,7 +2199,7 @@ void VRenderView::SetFullScreen()
 		m_full_frame->ShowFullScreen(true);
 		m_canvas->SetPosition(wxPoint(0, 0));
 		m_canvas->SetSize(m_full_frame->GetSize());
-		VRenderFrame* frame = (VRenderFrame*)m_frame;
+		RenderFrame* frame = (RenderFrame*)m_frame;
 		if (frame && frame->GetSettingDlg())
 		{
 			if (frame->GetSettingDlg()->GetStayTop())
@@ -2224,17 +2224,17 @@ void VRenderView::SetFullScreen()
 	}
 }
 
-void VRenderView::AddCanvas(RenderCanvas* canvas)
+void RenderviewPanel::AddCanvas(RenderCanvas* canvas)
 {
 	m_view_sizer->Add(canvas, 1, wxEXPAND);
 }
 
-void VRenderView::OnFullScreen(wxCommandEvent& event)
+void RenderviewPanel::OnFullScreen(wxCommandEvent& event)
 {
 	SetFullScreen();
 }
 
-void VRenderView::SaveDefault(unsigned int mask)
+void RenderviewPanel::SaveDefault(unsigned int mask)
 {
 	wxString app_name = "FluoRender " +
 		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
@@ -2379,12 +2379,12 @@ void VRenderView::SaveDefault(unsigned int mask)
 	m_default_saved = true;
 }
 
-void VRenderView::OnSaveDefault(wxCommandEvent &event)
+void RenderviewPanel::OnSaveDefault(wxCommandEvent &event)
 {
 	SaveDefault();
 }
 
-void VRenderView::LoadSettings()
+void RenderviewPanel::LoadSettings()
 {
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();
     expath = wxPathOnly(expath);
@@ -2565,7 +2565,7 @@ void VRenderView::LoadSettings()
 	//RefreshGL();
 }
 
-void VRenderView::OnKeyDown(wxKeyEvent& event)
+void RenderviewPanel::OnKeyDown(wxKeyEvent& event)
 {
 	event.Skip();
 }

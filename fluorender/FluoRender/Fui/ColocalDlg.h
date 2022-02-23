@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <chrono>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -67,7 +67,7 @@ public:
 		ID_OutputGrid
 	};
 
-	ColocalDlg(VRenderFrame* frame);
+	ColocalDlg(RenderFrame* frame);
 	~ColocalDlg();
 
 	void SetGroup(fluo::VolumeGroup* group)

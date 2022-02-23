@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ComponentDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <VolumeGroup.hpp>
@@ -193,7 +193,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_SPLITTER_DCLICK(wxID_ANY, ComponentDlg::OnSplitterDclick)
 END_EVENT_TABLE()
 
-ComponentDlg::ComponentDlg(VRenderFrame *frame)
+ComponentDlg::ComponentDlg(RenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition,
 		wxSize(600, 800),

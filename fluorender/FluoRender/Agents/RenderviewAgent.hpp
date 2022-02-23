@@ -25,45 +25,43 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _RENDERCANVASAGENT_H_
-#define _RENDERCANVASAGENT_H_
+#ifndef _RENDERVIEWAGENT_H_
+#define _RENDERVIEWAGENT_H_
 
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
 
-class RenderCanvas;
+class RenderviewPanel;
 namespace fluo
 {
-	class RenderCanvasAgent : public InterfaceAgent
+	class RenderviewAgent : public InterfaceAgent
 	{
 	public:
-		RenderCanvasAgent(RenderCanvas &canvas);
+		RenderviewAgent(RenderviewPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const RenderCanvasAgent*>(obj) != NULL;
+			return dynamic_cast<const RenderviewAgent*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "RenderCanvasAgent"; }
+		virtual const char* className() const { return "RenderviewAgent"; }
 
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 
-		virtual RenderCanvasAgent* asRenderCanvasAgent() { return this; }
-		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return this; }
-
-		RenderCanvas &getCanvas();
+		virtual RenderviewAgent* asRenderviewAgent() { return this; }
+		virtual const RenderviewAgent* asRenderviewAgent() const { return this; }
 
 		friend class AgentFactory;
 
 	protected:
-		RenderCanvas &canvas_;
+		RenderviewPanel &panel_;
 
-		virtual void handleValueChanged(Event& event);
-		void OnBoundsChanged(Event& event);
-		void OnSceneChanged(Event& event);
+		//virtual void handleValueChanged(Event& event);
+		//void OnBoundsChanged(Event& event);
+		//void OnSceneChanged(Event& event);
 	};
 }
-#endif//_RENDERCANVASAGENT_H_
+#endif//_RENDERVIEWAGENT_H_

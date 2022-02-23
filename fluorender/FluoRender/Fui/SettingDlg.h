@@ -44,7 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #define TOOL_CALCULATIONS	10
 
 //enum BitmapFontType;
-class VRenderFrame;
+class RenderFrame;
 class SettingDlg : public wxPanel
 {
 	enum
@@ -128,7 +128,7 @@ class SettingDlg : public wxPanel
 	};
 
 public:
-	SettingDlg(VRenderFrame* frame);
+	SettingDlg(RenderFrame* frame);
 	~SettingDlg();
 
 	void GetSettings();
@@ -306,7 +306,7 @@ public:
 	bool getIJMode() { return m_ij_mode; }
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 
 	int m_gmc_mode;			//1-pre-calculated (removed);
 							//2-real-time 7 sample;

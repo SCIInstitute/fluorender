@@ -280,6 +280,13 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/fluorender)
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender)
 
+# Agents
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Agents)
+file(GLOB agt_src fluorender/FluoRender/Agents/*.cpp)
+file(GLOB agt_hdr fluorender/FluoRender/Agents/*.hpp)
+add_library(AGENTS_OBJ OBJECT
+  ${agt_src} ${agt_hdr})
+
 # Animators
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Animators)
 file(GLOB ani_src fluorender/FluoRender/Animator/*.cpp)
@@ -519,6 +526,7 @@ if(APPLE)
   include(BundleUtilities)
   add_executable(FluoRender MACOSX_BUNDLE
     ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:AGENTS_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
@@ -559,6 +567,7 @@ elseif(UNIX OR MINGW)
   #include(BundleUtilities)
   add_executable(FluoRender
     ${src} ${hdr} ${rsc} ${icns}
+    $<TARGET_OBJECTS:AGENTS_OBJ>
     $<TARGET_OBJECTS:ANIMATORS_OBJ>
     $<TARGET_OBJECTS:CALCULATE_OBJ>
     $<TARGET_OBJECTS:CLUSTER_OBJ>
@@ -626,6 +635,7 @@ elseif(WIN32)
     if (USE_XINPUT)
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:AGENTS_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>
@@ -654,6 +664,7 @@ elseif(WIN32)
     else()
     add_executable(FluoRender WIN32
       ${src} ${hdr} ${rsc} ${icns}
+      $<TARGET_OBJECTS:AGENTS_OBJ>
       $<TARGET_OBJECTS:ANIMATORS_OBJ>
       $<TARGET_OBJECTS:CALCULATE_OBJ>
       $<TARGET_OBJECTS:CLUSTER_OBJ>

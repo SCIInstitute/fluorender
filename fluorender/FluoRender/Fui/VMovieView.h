@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 #define PROG_SLDR_MAX	361
 
-class VRenderFrame;
+class RenderFrame;
 class RecorderDlg;
 namespace fluo
 {
@@ -111,7 +111,7 @@ class VMovieView : public wxPanel
 	};
 
 public:
-	VMovieView(VRenderFrame* frame,
+	VMovieView(RenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -291,7 +291,7 @@ private:
 	static double m_Mbitrate;
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	RecorderDlg* m_advanced_movie;
 	fluo::Renderview* m_view;
 	int m_view_idx;//index to current renderview

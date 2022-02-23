@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/fileconf.h>
 #include <vector>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -69,7 +69,7 @@ namespace flrd
 		ScriptProc();
 		~ScriptProc();
 
-		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
+		void SetFrame(RenderFrame* frame) { m_frame = frame; }
 		void SetView(fluo::Renderview* view) { m_view = view; }
 
 		//run 4d script
@@ -78,7 +78,7 @@ namespace flrd
 		void ClearResults() { m_output->removeAllChildren(); }
 
 	private:
-		VRenderFrame* m_frame;
+		RenderFrame* m_frame;
 		fluo::Renderview *m_view;
 
 		wxString m_type;

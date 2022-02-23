@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class MeshData;
@@ -63,7 +63,7 @@ class MeshPropPanel: public wxPanel
 	};
 
 public:
-	MeshPropPanel(VRenderFrame* frame,
+	MeshPropPanel(RenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

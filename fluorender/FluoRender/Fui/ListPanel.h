@@ -91,7 +91,7 @@ private:
 	};
 
 public:
-	DataListCtrl(VRenderFrame *frame,
+	DataListCtrl(RenderFrame *frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -108,7 +108,7 @@ public:
 	friend class ListPanel;
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	static fluo::VolumeData* m_vd;
 
 	wxTextCtrl *m_rename_text;
@@ -165,7 +165,7 @@ protected: //Possible TODO
 		ID_DeleteAll
 	};
 public:
-	ListPanel(VRenderFrame* frame,
+	ListPanel(RenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,

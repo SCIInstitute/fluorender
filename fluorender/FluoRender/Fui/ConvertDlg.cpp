@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "ConvertDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Global.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
@@ -49,7 +49,7 @@ BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
 	EVT_BUTTON(ID_CnvVolMeshConvertBtn, ConvertDlg::OnCnvVolMeshConvert)
 END_EVENT_TABLE()
 
-ConvertDlg::ConvertDlg(VRenderFrame *frame) :
+ConvertDlg::ConvertDlg(RenderFrame *frame) :
 wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 300),
 	0, "ConvertDlg"),

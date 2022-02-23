@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class MeshData;
@@ -62,7 +62,7 @@ class MManipulator: public wxPanel
 	};
 
 public:
-	MManipulator(VRenderFrame* frame,
+	MManipulator(RenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -77,7 +77,7 @@ public:
 	void UpdateData();
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	fluo::MeshData* m_md;
 
 	wxStaticText* m_trans_st;

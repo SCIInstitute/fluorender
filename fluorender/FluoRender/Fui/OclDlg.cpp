@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "OclDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/KernelExecutor.h>
@@ -47,7 +47,7 @@ BEGIN_EVENT_TABLE(OclDlg, wxPanel)
 	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
 END_EVENT_TABLE()
 
-OclDlg::OclDlg(VRenderFrame* frame) :
+OclDlg::OclDlg(RenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(550, 600),
 0, "OclDlg"),

@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CountingDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <wx/valnum.h>
@@ -38,7 +38,7 @@ BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	EVT_BUTTON(ID_CAAnalyzeBtn, CountingDlg::OnCAAnalyzeBtn)
 END_EVENT_TABLE()
 
-CountingDlg::CountingDlg(VRenderFrame *frame)
+CountingDlg::CountingDlg(RenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(400, 150),
 0, "CountingDlg"),

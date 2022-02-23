@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <Types/Color.h>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -51,7 +51,7 @@ public:
 		ID_EnhanceSelChk
 	};
 
-	NoiseCancellingDlg(VRenderFrame* frame);
+	NoiseCancellingDlg(RenderFrame* frame);
 	~NoiseCancellingDlg();
 
 	void GetSettings(fluo::Renderview* view);
@@ -61,7 +61,7 @@ public:
 	void Preview(bool select, double size, double thresh);
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview *m_view;
 

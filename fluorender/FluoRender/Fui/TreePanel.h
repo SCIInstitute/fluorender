@@ -131,7 +131,7 @@ private:
 	};
 
 public:
-	DataTreeCtrl(VRenderFrame* frame,
+	DataTreeCtrl(RenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
@@ -194,7 +194,7 @@ public:
 	friend class TreePanel;
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 
 	//drag
 	wxTreeItemId m_drag_item;
@@ -267,7 +267,7 @@ public:
 		ID_BrushCreate
 	};
 
-	TreePanel(VRenderFrame* frame,
+	TreePanel(RenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -322,7 +322,7 @@ public:
 	void BrushGrow(bool state);
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
 

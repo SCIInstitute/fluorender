@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include "TreePanel.h"
 #include "ListPanel.h"
-#include "VRenderView.h"
+#include "RenderviewPanel.h"
 #include "RenderCanvas.h"
 #include "VolumePropPanel.h"
 #include "MeshPropPanel.h"
@@ -115,7 +115,7 @@ namespace fluo
 	class MeshGroup;
 	class Annotations;
 }
-class VRenderFrame: public wxFrame
+class RenderFrame: public wxFrame
 {
 	enum
 	{
@@ -175,7 +175,7 @@ class VRenderFrame: public wxFrame
 	};
 
 public:
-	VRenderFrame(wxFrame* frame,
+	RenderFrame(wxFrame* frame,
 		const wxString& title,
 		int x, int y,
 		int w, int h,
@@ -183,7 +183,7 @@ public:
 		bool fullscreen,
 		bool windowed,
 		bool hidepanels);
-	~VRenderFrame();
+	~RenderFrame();
 
 	TreePanel *GetTree();
 	ListPanel *GetList();
@@ -399,7 +399,7 @@ private:
 
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	vector <VRenderView*> m_vrv_list;
+	vector <RenderviewPanel*> m_vrv_list;
 	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;
 	ClipPlanePanel *m_clip_view;

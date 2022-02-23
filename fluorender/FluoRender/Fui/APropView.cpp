@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "APropView.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Annotations.hpp>
 #include <wx/valnum.h>
 
@@ -34,7 +34,7 @@ BEGIN_EVENT_TABLE(APropView, wxPanel)
 	EVT_BUTTON(ID_MemoUpdateBtn, APropView::OnMemoUpdateBtn)
 END_EVENT_TABLE()
 
-APropView::APropView(VRenderFrame* frame,
+APropView::APropView(RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

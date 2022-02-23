@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -54,7 +54,7 @@ class TraceListCtrl : public wxListCtrl
 	};
 
 public:
-	TraceListCtrl(VRenderFrame *frame,
+	TraceListCtrl(RenderFrame *frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxSize(100, 100),
@@ -166,7 +166,7 @@ public:
 		ID_StatText
 	};
 
-	TraceDlg(VRenderFrame* frame);
+	TraceDlg(RenderFrame* frame);
 	~TraceDlg();
 
 	void GetSettings(fluo::Renderview* vrv);
@@ -211,7 +211,7 @@ private:
 		int contact_num;
 	} comp_info;
 
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview* m_view;
 	//tab control

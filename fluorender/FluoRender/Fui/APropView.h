@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Annotations;
@@ -49,7 +49,7 @@ class APropView : public wxPanel
 	};
 
 public:
-	APropView(VRenderFrame* frame,
+	APropView(RenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -64,7 +64,7 @@ public:
 	void GetSettings();
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	fluo::Annotations* m_ann;
 
 	wxTextCtrl* m_memo_text;

@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <lbl_reader.h>
@@ -58,7 +58,7 @@ EVT_MENU(Menu_Delete, TraceListCtrl::OnDeleteSelection)
 END_EVENT_TABLE()
 
 TraceListCtrl::TraceListCtrl(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -778,7 +778,7 @@ wxWindow* TraceDlg::CreateAnalysisPage(wxWindow *parent)
 	return page;
 }
 
-TraceDlg::TraceDlg(VRenderFrame* frame)
+TraceDlg::TraceDlg(RenderFrame* frame)
 	: wxPanel(frame, wxID_ANY,
 		wxDefaultPosition, wxSize(550, 650),
 		0, "TraceDlg"),

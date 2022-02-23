@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 #include <ClipPlaneAgent.hpp>
 
-class VRenderFrame;
+class RenderFrame;
 class ClipPlanePanel : public wxPanel
 {
 	enum
@@ -79,7 +79,7 @@ class ClipPlanePanel : public wxPanel
 	};
 
 public:
-	ClipPlanePanel(VRenderFrame* frame,
+	ClipPlanePanel(RenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -89,7 +89,7 @@ public:
 	void AssociateNode(fluo::Node* node);
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 
 	fluo::ClipPlaneAgent* m_agent;
 
@@ -202,7 +202,7 @@ enum PLANE_MODES
 	kNone
 };
 
-class VRenderFrame;
+class RenderFrame;
 class DataManager;
 namespace fluo
 {
@@ -255,7 +255,7 @@ class ClipPlanePanel: public wxPanel
 	};
 
 public:
-	ClipPlanePanel(VRenderFrame* frame,
+	ClipPlanePanel(RenderFrame* frame,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,
@@ -329,7 +329,7 @@ public:
 	void MoveLinkedClippingPlanes(int dir);
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	int m_sel_type;		//curent selection type
 	fluo::VolumeData* m_vd;	//current volume data
 	fluo::MeshData* m_md;		//current mesh data

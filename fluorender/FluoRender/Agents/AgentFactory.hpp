@@ -30,11 +30,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <ObjectFactory.hpp>
 #include <InterfaceAgent.hpp>
-#include <RenderCanvasAgent.hpp>
 #include <wx/window.h>
 
 namespace fluo
 {
+	class RenderCanvasAgent;
+	class RenderviewAgent;
 	class ListModel;
 	class TreeModel;
 	class VolumePropAgent;
@@ -91,6 +92,7 @@ namespace fluo
 
 		//each agent type has a function
 		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
+		RenderviewAgent* getOrAddRenderviewAgent(const std::string &name, wxWindow &window);
 		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
 		TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
 		VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);

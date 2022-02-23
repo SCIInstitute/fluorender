@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
 #include <RenderCanvas.h>
-#include <VRenderView.h>
-#include <VRenderFrame.h>
+#include <RenderviewPanel.h>
+#include <RenderFrame.h>
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <RenderviewFactory.hpp>
@@ -64,8 +64,8 @@ EVT_TIMER(ID_ftrigger, RenderCanvas::OnQuitFscreen)
 EVT_CLOSE(RenderCanvas::OnClose)
 END_EVENT_TABLE()
 
-RenderCanvas::RenderCanvas(VRenderFrame* frame,
-	VRenderView* parent,
+RenderCanvas::RenderCanvas(RenderFrame* frame,
+	RenderviewPanel* parent,
 	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,

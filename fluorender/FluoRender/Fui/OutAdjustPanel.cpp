@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <OutAdjustPanel.h>
-#include <VRenderFrame.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <Renderview.hpp>
@@ -71,7 +71,7 @@ BEGIN_EVENT_TABLE(OutAdjustPanel, wxPanel)
 	EVT_BUTTON(ID_DefaultBtn, OutAdjustPanel::OnSaveDefault)
 END_EVENT_TABLE()
 
-OutAdjustPanel::OutAdjustPanel(VRenderFrame* frame,
+OutAdjustPanel::OutAdjustPanel(RenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,

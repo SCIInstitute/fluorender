@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <string>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -56,14 +56,14 @@ public:
 		ID_OutputTxt
 	};
 
-	OclDlg(VRenderFrame* frame);
+	OclDlg(RenderFrame* frame);
 	~OclDlg();
 
 	void GetSettings(fluo::Renderview* view);
 	fluo::Renderview* GetView();
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	fluo::Renderview* m_view;
 
 	//ui

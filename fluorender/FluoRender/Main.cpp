@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Main.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Timer.h>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
@@ -93,7 +93,7 @@ bool VRenderApp::OnInit()
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
-	wxFrame* frame = new VRenderFrame(
+	wxFrame* frame = new RenderFrame(
 		(wxFrame*)NULL,
 		wxString(title),
 		-1, -1,
@@ -105,21 +105,21 @@ bool VRenderApp::OnInit()
 	bool run_mov = false;
 	if (m_mov_file != "")
 	{
-		VRenderFrame::SetCompression(m_lzw);
-		VRenderFrame::SetSaveAlpha(m_save_alpha);
-		VRenderFrame::SetSaveFloat(m_save_float);
-		if (((VRenderFrame*)frame)->GetMovieView())
+		RenderFrame::SetCompression(m_lzw);
+		RenderFrame::SetSaveAlpha(m_save_alpha);
+		RenderFrame::SetSaveFloat(m_save_float);
+		if (((RenderFrame*)frame)->GetMovieView())
 		{
-			((VRenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
-			((VRenderFrame*)frame)->GetMovieView()->SetFileName(m_mov_file);
+			((RenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
+			((RenderFrame*)frame)->GetMovieView()->SetFileName(m_mov_file);
 		}
 		run_mov = true;
 	}
 	if (m_file_num > 0)
-		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
+		((RenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	JVMInitializer*	pInstance = JVMInitializer::getInstance((((VRenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
+	JVMInitializer*	pInstance = JVMInitializer::getInstance((((RenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
 	
 	//global init
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();

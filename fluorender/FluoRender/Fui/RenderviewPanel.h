@@ -36,13 +36,13 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 
 class wxGLContext;
-class VRenderFrame;
+class RenderFrame;
 class RenderCanvas;
 namespace fluo
 {
 	class RenderCanvasAgent;
 }
-class VRenderView: public wxPanel
+class RenderviewPanel: public wxPanel
 {
 public:
 	enum
@@ -92,12 +92,12 @@ public:
 		ID_FreeChk
 	};
 
-	VRenderView(VRenderFrame* frame,
+	RenderviewPanel(RenderFrame* frame,
 		wxGLContext* sharedContext=0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0);
-	~VRenderView();
+	~RenderviewPanel();
 
 	//update
 	void UpdateView(bool ui_update = true);

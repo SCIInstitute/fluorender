@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ClipPlanePanel.h>
-#include <VRenderFrame.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <wx/valnum.h>
@@ -77,7 +77,7 @@ EVT_TEXT(ID_ZRotText, ClipPlanePanel::OnZRotEdit)
 END_EVENT_TABLE()
 
 ClipPlanePanel::ClipPlanePanel(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
@@ -786,13 +786,13 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 
 	//hide clipping planes when in capture mode
 	//int i;
-	//VRenderFrame* vrender_frame = (VRenderFrame*)m_frame;
+	//RenderFrame* vrender_frame = (RenderFrame*)m_frame;
 	//if (!vrender_frame)
 	//	return;
 
 	//for (i = 0; i<vrender_frame->GetViewNum(); i++)
 	//{
-	//	VRenderView *vrv = vrender_frame->GetView(i);
+	//	RenderviewPanel *vrv = vrender_frame->GetView(i);
 	//	if (vrv)
 	//	{
 	//		if (vrv->m_glview->m_capture)
@@ -1116,7 +1116,7 @@ void ClipPlanePanel::DisableAll()
 END_EVENT_TABLE()
 
 ClipPlanePanel::ClipPlanePanel(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,

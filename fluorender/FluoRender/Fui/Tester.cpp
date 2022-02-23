@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Tester.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include "Formats/tif_reader.h"
 
 BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
 	EVT_BUTTON(ID_B1Btn, TesterDlg::OnB1)
 END_EVENT_TABLE()
 
-TesterDlg::TesterDlg(VRenderFrame *frame)
+TesterDlg::TesterDlg(RenderFrame *frame)
 : wxDialog(frame, wxID_ANY, wxString("Tester"),
 		   wxDefaultPosition, wxSize(600, 600),
 		   wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|

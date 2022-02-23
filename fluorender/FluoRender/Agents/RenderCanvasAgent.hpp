@@ -25,26 +25,43 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _HELPDLG_H_
-#define _HELPDLG_H_
+#ifndef _RENDERCANVASAGENT_H_
+#define _RENDERCANVASAGENT_H_
 
-#include <wx/wx.h>
-#include <wx/html/htmlwin.h>
+#include <InterfaceAgent.hpp>
+#include <Renderview.hpp>
 
-class RenderFrame;
-class HelpDlg : public wxPanel
+class RenderCanvas;
+namespace fluo
 {
-public:
-	HelpDlg(RenderFrame* frame);
-	~HelpDlg();
+	class RenderCanvasAgent : public InterfaceAgent
+	{
+	public:
+		RenderCanvasAgent(RenderCanvas &canvas);
 
-	void LoadPage(wxString name);
+		virtual bool isSameKindAs(const Object* obj) const
+		{
+			return dynamic_cast<const RenderCanvasAgent*>(obj) != NULL;
+		}
 
-private:
-	wxHtmlWindow *m_html;
-	wxString m_name;
+		virtual const char* className() const { return "RenderCanvasAgent"; }
 
-	DECLARE_EVENT_TABLE()
-};
+		virtual void setObject(Renderview* view);
+		virtual Renderview* getObject();
 
-#endif//_HELPDLG_H_
+		virtual void UpdateAllSettings();
+
+		virtual RenderCanvasAgent* asRenderCanvasAgent() { return this; }
+		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return this; }
+
+		friend class AgentFactory;
+
+	protected:
+		RenderCanvas &canvas_;
+
+		virtual void handleValueChanged(Event& event);
+		void OnBoundsChanged(Event& event);
+		void OnSceneChanged(Event& event);
+	};
+}
+#endif//_RENDERCANVASAGENT_H_

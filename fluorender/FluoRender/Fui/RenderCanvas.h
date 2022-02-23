@@ -36,13 +36,13 @@ DEALINGS IN THE SOFTWARE.
 
 #define ID_ftrigger	ID_VRENDER_VIEW1
 
-class VRenderFrame;
-class VRenderView;
+class RenderFrame;
+class RenderviewPanel;
 class RenderCanvas : public wxGLCanvas
 {
 public:
-	RenderCanvas(VRenderFrame* frame,
-		VRenderView* parent,
+	RenderCanvas(RenderFrame* frame,
+		RenderviewPanel* parent,
 		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,
@@ -64,8 +64,8 @@ public:
 
 private:
 	fluo::RenderCanvasAgent* m_agent;
-	VRenderFrame* m_frame;
-	VRenderView* m_vrv;
+	RenderFrame* m_frame;
+	RenderviewPanel* m_vrv;
 	//set gl context
 	bool m_set_gl;
 
@@ -143,7 +143,7 @@ private:
 #endif
 	DECLARE_EVENT_TABLE()
 
-	friend class VRenderView;
+	friend class RenderviewPanel;
 	friend class fluo::RenderCanvasAgent;
 };
 

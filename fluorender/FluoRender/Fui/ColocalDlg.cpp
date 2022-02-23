@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ColocalDlg.h>
-#include <VRenderFrame.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <Renderview.hpp>
@@ -55,7 +55,7 @@ BEGIN_EVENT_TABLE(ColocalDlg, wxPanel)
 	EVT_GRID_LABEL_LEFT_CLICK(ColocalDlg::OnGridLabelClick)
 END_EVENT_TABLE()
 
-ColocalDlg::ColocalDlg(VRenderFrame* frame) :
+ColocalDlg::ColocalDlg(RenderFrame* frame) :
 	wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(500, 500),
 	0, "ColocalDlg")

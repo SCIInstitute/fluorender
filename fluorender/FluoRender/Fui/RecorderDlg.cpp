@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "RecorderDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Global.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
@@ -55,7 +55,7 @@ BEGIN_EVENT_TABLE(KeyListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 
 KeyListCtrl::KeyListCtrl(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	RecorderDlg* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -524,7 +524,7 @@ BEGIN_EVENT_TABLE(RecorderDlg, wxPanel)
 	EVT_BUTTON(ID_CamLockBtn, RecorderDlg::OnCamLockBtn)
 END_EVENT_TABLE()
 
-RecorderDlg::RecorderDlg(VRenderFrame* frame, wxWindow* parent)
+RecorderDlg::RecorderDlg(RenderFrame* frame, wxWindow* parent)
 : wxPanel(parent, wxID_ANY,
 wxPoint(500, 150), wxSize(450, 650),
 0, "RecorderDlg"),
@@ -1053,7 +1053,7 @@ void RecorderDlg::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		RenderFrame::SetCompression(ch1->GetValue());
 }
 
 wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
@@ -1071,7 +1071,7 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RecorderDlg::OnCh1Check), NULL, panel);
 	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+		ch1->SetValue(RenderFrame::GetCompression());
 
 	//group
 	group1->Add(10, 10);

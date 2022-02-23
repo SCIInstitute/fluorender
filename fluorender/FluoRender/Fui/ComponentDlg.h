@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <set>
 
-class VRenderFrame;
+class RenderFrame;
 namespace fluo
 {
 	class Renderview;
@@ -200,7 +200,7 @@ public:
 		ID_OutputGrid
 	};
 
-	ComponentDlg(VRenderFrame* frame);
+	ComponentDlg(RenderFrame* frame);
 	~ComponentDlg();
 
 	void Update();
@@ -246,7 +246,7 @@ public:
 	void ExcludeComps();
 
 private:
-	VRenderFrame* m_frame;
+	RenderFrame* m_frame;
 	fluo::Renderview* m_view;
 
 	//progress

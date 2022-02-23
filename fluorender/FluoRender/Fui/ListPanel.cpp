@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ListPanel.h>
-#include <VRenderFrame.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
@@ -258,7 +258,7 @@ END_EVENT_TABLE()
 fluo::VolumeData* DataListCtrl::m_vd = 0;
 
 DataListCtrl::DataListCtrl(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -652,7 +652,7 @@ void DataListCtrl::OnCropCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCrop(ch1->GetValue());
+		RenderFrame::SetCrop(ch1->GetValue());
 }
 
 //compress
@@ -660,7 +660,7 @@ void DataListCtrl::OnCompCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		RenderFrame::SetCompression(ch1->GetValue());
 }
 
 void DataListCtrl::OnResizeCheck(wxCommandEvent &event)
@@ -736,7 +736,7 @@ void DataListCtrl::OnFilterChange(wxCommandEvent &event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
-		VRenderFrame::SetFilter(combo->GetSelection());
+		RenderFrame::SetFilter(combo->GetSelection());
 }
 
 wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
@@ -756,7 +756,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		"Lempel-Ziv-Welch Compression");
 	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCompCheck), NULL, panel);
-	comp_chk->SetValue(VRenderFrame::GetCompression());
+	comp_chk->SetValue(RenderFrame::GetCompression());
 	sizer1->Add(10, 10);
 	sizer1->Add(comp_chk);
 	//crop
@@ -765,7 +765,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 		"Use Clipping Planes to Crop");
 	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(DataListCtrl::OnCropCheck), NULL, panel);
-	crop_chk->SetValue(VRenderFrame::GetCrop());
+	crop_chk->SetValue(RenderFrame::GetCrop());
 	sizer2->Add(10, 10);
 	sizer2->Add(crop_chk);
 	//resize
@@ -797,7 +797,7 @@ wxWindow* DataListCtrl::CreateExtraControl(wxWindow* parent)
 	combo_list.push_back("Box");
 	for (size_t i = 0; i < combo_list.size(); ++i)
 		combo->Append(combo_list[i]);
-	combo->SetSelection(VRenderFrame::GetFilter());
+	combo->SetSelection(RenderFrame::GetFilter());
 
 	if (m_vd)
 	{
@@ -885,8 +885,8 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				if (m_vd)
 				{
 					m_vd->SaveData(filename.ToStdWstring(), fopendlg->GetFilterIndex(),
-						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
-						false, VRenderFrame::GetCompression(), q);
+						RenderFrame::GetCrop(), RenderFrame::GetFilter(),
+						false, RenderFrame::GetCompression(), q);
 					std::wstring str;
 					m_vd->getValue(gstDataPath, str);
 					SetText(item, 2, str);
@@ -992,8 +992,8 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 				if (vd)
 				{
 					vd->SaveData(filename.ToStdWstring(), fopendlg->GetFilterIndex(),
-						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
-						true, VRenderFrame::GetCompression(), q);
+						RenderFrame::GetCrop(), RenderFrame::GetFilter(),
+						true, RenderFrame::GetCompression(), q);
 					std::wstring str;
 					vd->getValue(gstDataPath, str);
 					SetText(item, 2, str);
@@ -1246,7 +1246,7 @@ EVT_TOOL(ID_Delete, ListPanel::OnDelete)
 EVT_TOOL(ID_DeleteAll, ListPanel::OnDeleteAll)
 END_EVENT_TABLE()
 
-ListPanel::ListPanel(VRenderFrame *frame,
+ListPanel::ListPanel(RenderFrame *frame,
 	const wxPoint &pos,
 	const wxSize &size,
 	long style,

@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "SettingDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <Global.hpp>
@@ -758,7 +758,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	return page;
 }
 
-SettingDlg::SettingDlg(VRenderFrame *frame) :
+SettingDlg::SettingDlg(RenderFrame *frame) :
 	wxPanel(frame, wxID_ANY,
 		wxDefaultPosition, wxSize(450, 750),
 		0, "SettingDlg"),
@@ -1002,7 +1002,7 @@ void SettingDlg::GetSettings()
 		bool save_cmp;
 		fconfig.SetPath("/save cmp");
 		fconfig.Read("value", &save_cmp);
-		VRenderFrame::SetCompression(save_cmp);
+		RenderFrame::SetCompression(save_cmp);
 	}
 	//override vox
 	if (fconfig.Exists("/override vox"))
@@ -1419,7 +1419,7 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("value", m_soft_threshold);
 
 	fconfig.SetPath("/save cmp");
-	fconfig.Write("value", VRenderFrame::GetCompression());
+	fconfig.Write("value", RenderFrame::GetCompression());
 
 	fconfig.SetPath("/run script");
 	fconfig.Write("value", m_run_script);
@@ -1627,7 +1627,7 @@ void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)
 	else
 		m_realtime_compress = false;
 
-	VRenderFrame::SetRealtimeCompression(m_realtime_compress);
+	RenderFrame::SetRealtimeCompression(m_realtime_compress);
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)

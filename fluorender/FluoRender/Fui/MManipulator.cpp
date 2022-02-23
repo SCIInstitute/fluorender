@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "MManipulator.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <MeshData.hpp>
 #include <compatibility.h>
 
@@ -36,7 +36,7 @@ BEGIN_EVENT_TABLE(MManipulator, wxPanel)
 	EVT_TEXT_ENTER(wxID_ANY, MManipulator::OnValueEnter)
 END_EVENT_TABLE()
 
-MManipulator::MManipulator(VRenderFrame* frame,
+MManipulator::MManipulator(RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

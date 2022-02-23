@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CalculationDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Global.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
@@ -52,7 +52,7 @@ BEGIN_EVENT_TABLE(CalculationDlg, wxPanel)
 	EVT_BUTTON(ID_CalcCombineBtn, CalculationDlg::OnCalcCombine)
 END_EVENT_TABLE()
 
-CalculationDlg::CalculationDlg(VRenderFrame *frame)
+CalculationDlg::CalculationDlg(RenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	wxSize(500, 350),

@@ -66,11 +66,6 @@ void RenderCanvasAgent::UpdateAllSettings()
 	resumeObserverNotification();
 }
 
-RenderCanvas &RenderCanvasAgent::getCanvas()
-{
-	return canvas_;
-}
-
 void RenderCanvasAgent::handleValueChanged(Event& event)
 {
 	Object::handleValueChanged(event);

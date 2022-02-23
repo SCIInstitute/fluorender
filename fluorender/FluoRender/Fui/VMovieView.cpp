@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "VMovieView.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include "RecorderDlg.h"
 #include <Renderview.hpp>
 #include <Global.hpp>
@@ -417,7 +417,7 @@ wxWindow* VMovieView::CreateScriptPage(wxWindow *parent)
 	return page;
 }
 
-VMovieView::VMovieView(VRenderFrame* frame,
+VMovieView::VMovieView(RenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
@@ -1329,8 +1329,8 @@ void VMovieView::WriteFrameToFile(int total_frames)
 
 	//capture
 	bool bmov = filetype_.IsSameAs(".mov");
-	int chann = VRenderFrame::GetSaveAlpha() ? 4 : 3;
-	bool fp32 = bmov?false:VRenderFrame::GetSaveFloat();
+	int chann = RenderFrame::GetSaveAlpha() ? 4 : 3;
+	bool fp32 = bmov?false:RenderFrame::GetSaveFloat();
 	long x, y, w, h;
 	void* image = 0;
 	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
@@ -1370,7 +1370,7 @@ void VMovieView::WriteFrameToFile(int total_frames)
 		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		if (VRenderFrame::GetCompression())
+		if (RenderFrame::GetCompression())
 			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 
 		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
@@ -1428,9 +1428,9 @@ void VMovieView::Run()
 
 	if (m_frame->GetSettingDlg())
 	{
-		VRenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
-		VRenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
-		VRenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
+		RenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
+		RenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
+		RenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
 	}
 
 	Rewind();
@@ -1464,8 +1464,8 @@ void VMovieView::Run()
 	m_record = true;
 	if (m_frame->GetSettingDlg())
 	{
-		m_frame->GetSettingDlg()->SetSaveAlpha(VRenderFrame::GetSaveAlpha());
-		m_frame->GetSettingDlg()->SetSaveFloat(VRenderFrame::GetSaveFloat());
+		m_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
+		m_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
 		if (m_frame->GetSettingDlg()->GetProjSave())
 		{
 			wxString new_folder;
@@ -1535,19 +1535,19 @@ void VMovieView::OnFpsEdit(wxCommandEvent& event)
 void VMovieView::OnCh1Check(wxCommandEvent &event) {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		VRenderFrame::SetCompression(ch1->GetValue());
+		RenderFrame::SetCompression(ch1->GetValue());
 }
 //ch2
 void VMovieView::OnCh2Check(wxCommandEvent &event) {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
-		VRenderFrame::SetSaveAlpha(ch2->GetValue());
+		RenderFrame::SetSaveAlpha(ch2->GetValue());
 }
 //ch3
 void VMovieView::OnCh3Check(wxCommandEvent &event) {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
-		VRenderFrame::SetSaveFloat(ch3->GetValue());
+		RenderFrame::SetSaveFloat(ch3->GetValue());
 }
 //enlarge output image
 void VMovieView::OnChEnlargeCheck(wxCommandEvent &event)
@@ -1631,7 +1631,7 @@ void VMovieView::OnMovieQuality(wxCommandEvent &event)
 void VMovieView::OnChEmbedCheck(wxCommandEvent &event) {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
-		VRenderFrame::SetEmbedProject(ch_embed->GetValue());
+		RenderFrame::SetEmbedProject(ch_embed->GetValue());
 }
 
 wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
@@ -1654,19 +1654,19 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh1Check), NULL, panel);
 	if (ch1)
-		ch1->SetValue(VRenderFrame::GetCompression());
+		ch1->SetValue(RenderFrame::GetCompression());
 	wxCheckBox *ch2 = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh2Check), NULL, panel);
 	if (ch2)
-		ch2->SetValue(VRenderFrame::GetSaveAlpha());
+		ch2->SetValue(RenderFrame::GetSaveAlpha());
 	wxCheckBox *ch3 = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(VMovieView::OnCh3Check), NULL, panel);
 	if (ch3)
-		ch3->SetValue(VRenderFrame::GetSaveFloat());
+		ch3->SetValue(RenderFrame::GetSaveFloat());
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
 	line1->Add(ch1, 0, wxALIGN_CENTER);
 	line1->Add(10, 10);
@@ -1732,15 +1732,15 @@ wxWindow* VMovieView::CreateExtraCaptureControl(wxWindow* parent)
 	line3->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
 	wxCheckBox *ch_embed;
-	if (VRenderFrame::GetSaveProject()) {
+	if (RenderFrame::GetSaveProject()) {
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(VMovieView::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(VRenderFrame::GetEmbedProject());
+		ch_embed->SetValue(RenderFrame::GetEmbedProject());
 	}
 	//group
-	if (VRenderFrame::GetSaveProject() && ch_embed) {
+	if (RenderFrame::GetSaveProject() && ch_embed) {
 		wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
 		line3->Add(ch_embed, 0, wxALIGN_CENTER);
 		group1->Add(line3);

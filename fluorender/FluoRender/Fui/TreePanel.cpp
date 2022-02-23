@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <TreePanel.h>
-#include <VRenderFrame.h>
+#include <RenderFrame.h>
 #include <DataViewColorRenderer.h>
 #include <Global.hpp>
 #include <Root.hpp>
@@ -260,7 +260,7 @@ void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
 	}
 	m_tree_model->UpdateSelections(nodes);
 
-	VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+	RenderFrame* vr_frame = (RenderFrame*)m_frame;
 
 	if (!vr_frame)
 		return;
@@ -341,7 +341,7 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 			node->flupValue(gstDisplay, display);
 			//for showing/hiding the property panel
 			//this should be improved when frame has its agent
-			VRenderFrame* vr_frame = (VRenderFrame*)m_frame;
+			RenderFrame* vr_frame = (RenderFrame*)m_frame;
 			if (vr_frame)
 				vr_frame->OnSelection(node);
 		}
@@ -432,7 +432,7 @@ void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
 END_EVENT_TABLE()
 
 DataTreeCtrl::DataTreeCtrl(
-	VRenderFrame* frame,
+	RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -2529,7 +2529,7 @@ BEGIN_EVENT_TABLE(TreePanel, wxPanel)
 	EVT_TOOL(ID_BrushCreate, TreePanel::OnBrushCreate)
 	END_EVENT_TABLE()
 
-TreePanel::TreePanel(VRenderFrame* frame,
+TreePanel::TreePanel(RenderFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,

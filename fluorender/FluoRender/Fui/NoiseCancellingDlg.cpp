@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "NoiseCancellingDlg.h"
-#include "VRenderFrame.h"
+#include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include "Components/CompSelector.h"
@@ -42,7 +42,7 @@ BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
 	EVT_CHECKBOX(ID_EnhanceSelChk, NoiseCancellingDlg::OnEnhanceSelChk)
 END_EVENT_TABLE()
 
-NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
+NoiseCancellingDlg::NoiseCancellingDlg(RenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 150),
 	0, "NoiseCancellingDlg"),

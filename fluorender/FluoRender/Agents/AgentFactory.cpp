@@ -27,19 +27,23 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <AgentFactory.hpp>
-#include <RenderCanvas.h>
+#include <RenderCanvasAgent.hpp>
+#include <RenderviewAgent.hpp>
 #include <ListModel.hpp>
 #include <TreeModel.hpp>
-#include <TreePanel.h>
-#include <VolumePropAgent.hpp>
-#include <VolumePropPanel.h>
 #include <OutAdjustAgent.hpp>
-#include <OutAdjustPanel.h>
 #include <ClipPlaneAgent.hpp>
-#include <ClipPlanePanel.h>
+#include <VolumePropAgent.hpp>
 #include <MeshPropAgent.hpp>
-#include <MeshPropPanel.h>
 #include <ColocalAgent.hpp>
+//windows
+#include <RenderCanvas.h>
+#include <RenderviewPanel.h>
+#include <TreePanel.h>
+#include <OutAdjustPanel.h>
+#include <ClipPlanePanel.h>
+#include <VolumePropPanel.h>
+#include <MeshPropPanel.h>
 #include <ColocalDlg.h>
 
 using namespace fluo;
@@ -86,6 +90,28 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	}
 
 	return render_canvas_agent;
+}
+
+RenderviewAgent* AgentFactory::getOrAddRenderviewAgent(const std::string &name, wxWindow &window)
+{
+	InterfaceAgent* result = findFirst(name);
+	if (result)
+		return dynamic_cast<RenderviewAgent*>(result);
+
+	//not found
+	RenderviewAgent* renderview_agent =
+		new RenderviewAgent(static_cast<RenderviewPanel&>(window));
+	if (renderview_agent)
+	{
+		renderview_agent->setName(name);
+		objects_.push_front(renderview_agent);
+		Event event;
+		event.init(Event::EVENT_NODE_ADDED,
+			this, renderview_agent);
+		notifyObservers(event);
+	}
+
+	return renderview_agent;
 }
 
 ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
