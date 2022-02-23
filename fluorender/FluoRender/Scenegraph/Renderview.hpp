@@ -461,6 +461,11 @@ namespace fluo
 		//handle mouse interactions
 		void HandleMouse();
 
+		//handle keyboard etc
+		void HandleIdle();
+		void UpdateBrushState();
+		void ChangeBrushSize(int value);
+
 		friend class RenderviewFactory;
 
 	protected:

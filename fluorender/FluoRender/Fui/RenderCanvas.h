@@ -126,8 +126,6 @@ private:
 	bool ms_lb_grow;
 
 private:
-	void ChangeBrushSize(int value);
-	void UpdateBrushState();
 	void PickMesh();
 	void PickVolume();
 	void SetCompSelection(fluo::Point& p, int mode);

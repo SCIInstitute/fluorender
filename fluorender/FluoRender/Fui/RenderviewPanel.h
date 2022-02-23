@@ -34,14 +34,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/panel.h>
 #include <wx/clrpicker.h>
 #include <wx/spinbutt.h>
+#include <RenderviewAgent.hpp>
 
 class wxGLContext;
 class RenderFrame;
 class RenderCanvas;
-namespace fluo
-{
-	class RenderCanvasAgent;
-}
 class RenderviewPanel: public wxPanel
 {
 public:
@@ -129,11 +126,13 @@ public:
 	void HideFullFrame() { m_full_frame->Hide(); }
 	void AddCanvas(RenderCanvas* canvas);
 
+	friend class fluo::RenderviewAgent;
+
 private:
 	static int m_max_id;
 	int m_id;
 
-	fluo::RenderCanvasAgent* m_agent;
+	fluo::RenderviewAgent* m_agent;
 	wxWindow* m_frame;
 	//render view///////////////////////////////////////////////
 	RenderCanvas *m_canvas;

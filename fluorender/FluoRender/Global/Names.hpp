@@ -75,6 +75,7 @@ DEALINGS IN THE SOFTWARE.
 //agent names
 #define gstAgentAsset "asset"
 #define gstRenderCanvasAgent "Render View:"//plus a serial number
+#define gstRenderviewAgent "RenderviewPanel"//plus a serial number
 #define gstListModel "ListPanel"
 #define gstTreeModel "TreePanel"
 #define gstOutAdjustAgent "OutAdjustPanel"
