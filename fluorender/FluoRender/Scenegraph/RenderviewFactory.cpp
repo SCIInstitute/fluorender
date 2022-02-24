@@ -342,6 +342,8 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstKbSDown, bool(false));
 		view->addValue(gstKbVDown, bool(false));
 		view->addValue(gstKbWDown, bool(false));
+		view->addValue(gstKbXDown, bool(false));
+		view->addValue(gstKbZDown, bool(false));
 		view->addValue(gstKbLbrktDown, bool(false));
 		view->addValue(gstKbRbrktDown, bool(false));
 		view->addValue(gstKbBslshDown, bool(false));

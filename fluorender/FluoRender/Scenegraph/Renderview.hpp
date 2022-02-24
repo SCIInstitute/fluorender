@@ -463,7 +463,7 @@ namespace fluo
 
 		//handle keyboard etc
 		void HandleIdle();
-		void UpdateBrushState();
+		bool UpdateBrushState();//return if need to refresh
 		void ChangeBrushSize(int value);
 
 		friend class RenderviewFactory;

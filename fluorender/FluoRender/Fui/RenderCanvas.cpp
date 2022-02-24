@@ -297,6 +297,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	m_agent->setValue(gstKbSDown, wxGetKeyState(wxKeyCode('S')));
 	m_agent->setValue(gstKbVDown, wxGetKeyState(wxKeyCode('V')));
 	m_agent->setValue(gstKbWDown, wxGetKeyState(wxKeyCode('W')));
+	m_agent->setValue(gstKbXDown, wxGetKeyState(wxKeyCode('X')));
+	m_agent->setValue(gstKbZDown, wxGetKeyState(wxKeyCode('Z')));
 	m_agent->setValue(gstKbLbrktDown, wxGetKeyState(wxKeyCode('[')));
 	m_agent->setValue(gstKbRbrktDown, wxGetKeyState(wxKeyCode(']')));
 	m_agent->setValue(gstKbBslshDown, wxGetKeyState(wxKeyCode('\\')));
@@ -305,7 +307,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	wxWindow *window = wxWindow::FindFocus();
 	bool mouse_in = window && view_reg.Contains(mouse_pos);
 	m_agent->setValue(gstMouseIn, mouse_in);
-	m_agent->setValue(gstMouseLeftDown, wxGetMouseState().LeftIsDown());
+	m_agent->setValue(gstMouseLeftHold, wxGetMouseState().LeftIsDown());
 	m_agent->setValue(gstRenderviewPanelId, long(m_vrv->GetID()));
 	m_agent->getObject()->HandleIdle();
 

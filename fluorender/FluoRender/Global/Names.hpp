@@ -563,6 +563,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstKbSDown "kd s down"
 #define gstKbVDown "kb v down"
 #define gstKbWDown "kb w down"
+#define gstKbXDown "kb x donw"
+#define gstKbZDown "kb z down"
 #define gstKbLbrktDown "kb kbrkt down"//[
 #define gstKbRbrktDown "kb rbrkt down"//]
 #define gstKbBslshDown "kb bslsh down"//backslash

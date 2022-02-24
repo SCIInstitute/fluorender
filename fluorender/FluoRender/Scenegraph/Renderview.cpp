@@ -8795,7 +8795,7 @@ void Renderview::HandleIdle()
 		bool spc_down;
 		getValue(gstKbSpaceDown, spc_down);
 
-		UpdateBrushState();
+		refresh = refresh || UpdateBrushState();
 
 		//draw_mask
 		getValue(gstKbVDown, bval);
@@ -9079,7 +9079,7 @@ void Renderview::HandleIdle()
 		getValue(gstInterMode, int_mode);
 		bool grow_on;
 		getValue(gstGrowEnable, grow_on);
-		getValue(gstMouseLeftDown, bval);
+		getValue(gstMouseLeftHold, bval);
 		//grow
 		if ((int_mode == 10 ||
 			int_mode == 12) &&
@@ -9175,62 +9175,61 @@ void Renderview::HandleIdle()
 //change brush display
 void Renderview::ChangeBrushSize(int value)
 {
-	getObject()->GetVolumeSelector()->ChangeBrushSize(
-		value, wxGetKeyState(WXK_CONTROL));
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->GetSettings(getObject());
+	bool bval;
+	getValue(gstKbCtrlDown, bval);
+	GetVolumeSelector()->ChangeBrushSize(value, bval);
+	//if (m_frame && m_frame->GetBrushToolDlg())
+	//	m_frame->GetBrushToolDlg()->GetSettings(getObject());
 }
 
-void Renderview::UpdateBrushState()
+bool Renderview::UpdateBrushState()
 {
-	TreePanel* tree_panel = 0;
-	BrushToolDlg* brush_dlg = 0;
-	if (m_frame)
-	{
-		tree_panel = m_frame->GetTree();
-		brush_dlg = m_frame->GetBrushToolDlg();
-	}
+	//TreePanel* tree_panel = 0;
+	//BrushToolDlg* brush_dlg = 0;
+	//if (m_frame)
+	//{
+	//	tree_panel = m_frame->GetTree();
+	//	brush_dlg = m_frame->GetBrushToolDlg();
+	//}
 
-	Renderview* view = getObject();
+	bool refresh = false;
+	bool bval;
 	long int_mode;
 	getValue(gstInterMode, int_mode);
 	if (int_mode != 2 && int_mode != 7)
 	{
-		if (wxGetKeyState(WXK_SHIFT))
+		getValue(gstKbShiftDown, bval);
+		if (bval)
 		{
-			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-			if (view)
-			{
-				view->SetBrush(2);
-				view->Update(6);
-			}
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
+			SetBrush(2);
+			refresh = true;
+			//Update(6);
 		}
-		else if (wxGetKeyState(wxKeyCode('Z')))
+		getValue(gstKbZDown, bval);
+		if (!refresh && bval)
 		{
-			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-			if (view)
-			{
-				view->SetBrush(4);
-				view->Update(7);
-			}
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+			SetBrush(4);
+			refresh = true;
+			//Update(7);
 		}
-		else if (wxGetKeyState(wxKeyCode('X')))
+		getValue(gstKbXDown, bval);
+		if (!refresh && bval)
 		{
-			if (tree_panel)
-				tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-			if (view)
-			{
-				view->SetBrush(3);
-				view->Update(8);
-			}
+			//if (tree_panel)
+			//	tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+			//if (brush_dlg)
+			//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
+			SetBrush(3);
+			refresh = true;
+			//view->Update(8);
 		}
 	}
 	else
@@ -9239,81 +9238,86 @@ void Renderview::UpdateBrushState()
 		getValue(gstBrushState, lval);
 		if (lval)
 		{
-			if (wxGetKeyState(WXK_SHIFT))
+			getValue(gstKbShiftDown, bval);
+			if (bval)
 			{
 				setValue(gstBrushState, long(0));
-				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
-				if (brush_dlg)
-					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
-				if (view)
-				{
-					view->SetBrush(2);
-					view->Update(9);
-				}
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushAppend);
+				SetBrush(2);
+				refresh = true;
+				//view->Update(9);
 			}
-			else if (wxGetKeyState(wxKeyCode('Z')))
+			getValue(gstKbZDown, bval);
+			if (!refresh && bval)
 			{
 				setValue(gstBrushState, long(0));
-				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
-				if (brush_dlg)
-					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
-				if (view)
-				{
-					view->SetBrush(4);
-					view->Update(10);
-				}
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDiffuse);
+				SetBrush(4);
+				refresh = true;
+				//view->Update(10);
 			}
-			else if (wxGetKeyState(wxKeyCode('X')))
+			getValue(gstKbXDown, bval);
+			if (!refresh && bval)
 			{
 				setValue(gstBrushState, long(0));
-				if (tree_panel)
-					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
-				if (brush_dlg)
-					brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
-				if (view)
-				{
-					view->SetBrush(3);
-					view->Update(11);
-				}
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(BrushToolDlg::ID_BrushDesel);
+				SetBrush(3);
+				refresh = true;
+				//view->Update(11);
 			}
-			else
+			if (!refresh)
 			{
-				if (view)
-				{
-					view->SetBrush(lval);
-					view->Update(12);
-				}
+				SetBrush(lval);
+				refresh = true;
+				//view->Update(12);
 			}
 		}
-		else if (!wxGetKeyState(WXK_SHIFT) &&
-			!wxGetKeyState(wxKeyCode('Z')) &&
-			!wxGetKeyState(wxKeyCode('X')))
+		else
 		{
-			if (wxGetMouseState().LeftIsDown())
-				view->Segment();
-			long lval;
-			getValue(gstInterMode, lval);
-			if (lval == 7)
-				setValue(gstInterMode, 5);
-			else
-				setValue(gstInterMode, 1);
-			setValue(gstPaintDisplay, false);
-			setValue(gstDrawBrush, false);
-			if (tree_panel)
-				tree_panel->SelectBrush(0);
-			if (brush_dlg)
-				brush_dlg->SelectBrush(0);
-			view->Update(13);
-
-			if (m_prev_focus)
+			bool shift_down, z_down, x_down;
+			getValue(gstKbShiftDown, shift_down);
+			getValue(gstKbZDown, z_down);
+			getValue(gstKbXDown, x_down);
+			if (!shift_down &&
+				!z_down &&
+				!x_down)
 			{
-				m_prev_focus->SetFocus();
-				m_prev_focus = 0;
+				getValue(gstMouseLeftHold, bval);
+				if (bval)
+					Segment();
+				long lval;
+				getValue(gstInterMode, lval);
+				if (lval == 7)
+					setValue(gstInterMode, 5);
+				else
+					setValue(gstInterMode, 1);
+				setValue(gstPaintDisplay, false);
+				setValue(gstDrawBrush, false);
+				//if (tree_panel)
+				//	tree_panel->SelectBrush(0);
+				//if (brush_dlg)
+				//	brush_dlg->SelectBrush(0);
+				refresh = true;
+				//view->Update(13);
+
+				//if (m_prev_focus)
+				//{
+				//	m_prev_focus->SetFocus();
+				//	m_prev_focus = 0;
+				//}
 			}
 		}
 	}
+	return refresh;
 }
 
 //event functions/////////////////////////////////////////////////////////////////////////////////
