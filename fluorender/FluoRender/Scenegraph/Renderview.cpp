@@ -9126,6 +9126,7 @@ void Renderview::HandleIdle()
 			//if (m_frame && m_frame->GetStatusBar())
 			//	m_frame->GetStatusBar()->PopStatusText();
 			//return;
+			set_focus = true;
 			refresh = true;
 		}
 	}
@@ -9159,6 +9160,7 @@ void Renderview::HandleIdle()
 
 	//if (set_focus)
 	//	SetFocus();
+	setValue(gstFocus, set_focus);
 	if (refresh)
 	{
 		setValue(gstClearBuffer, true);

@@ -86,3 +86,14 @@ void RenderCanvasAgent::OnSceneChanged(Event& event)
 	view->PopMeshList();
 	view->PopVolumeList();
 }
+
+void RenderCanvasAgent::OnFocusChanged(Event& event)
+{
+	bool focus;
+	getValue(gstFocus, focus);
+	if (focus)
+	{
+		canvas_.SetFocus();
+		setValue(gstFocus, false);
+	}
+}

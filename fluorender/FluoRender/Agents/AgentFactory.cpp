@@ -73,6 +73,9 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 		render_canvas_agent->setValueChangedFunction(gstBounds,
 			std::bind(&RenderCanvasAgent::OnBoundsChanged,
 				render_canvas_agent, std::placeholders::_1));
+		render_canvas_agent->setValueChangedFunction(gstFocus,
+			std::bind(&RenderCanvasAgent::OnFocusChanged,
+				render_canvas_agent, std::placeholders::_1));
 		render_canvas_agent->setDefaultValueChangedFunction(
 			std::bind(&RenderCanvasAgent::handleValueChanged,
 				render_canvas_agent, std::placeholders::_1));

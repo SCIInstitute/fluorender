@@ -75,6 +75,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstSyncG, bool(false));
 		view->addValue(gstSyncB, bool(false));
 		//special
+		view->addValue(gstFocus, bool(false));
 		view->addValue(gstSizeX, long(800));
 		view->addValue(gstSizeY, long(600));
 		view->addValue(gstUseDefault, bool(false));

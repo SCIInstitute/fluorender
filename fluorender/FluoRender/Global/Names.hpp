@@ -284,6 +284,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstInfo	"info"
 
 //specific to renderview
+#define gstFocus "focus"//set focus to panel
 #define gstSizeX "size x"
 #define gstSizeY "size y"
 #define gstUseDefault "use default"
