@@ -27,6 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Renderview.hpp"
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <ClipPlaneAgent.hpp>
+#include <ColocalAgent.hpp>
 #include <Group.hpp>
 #include <Timer.h>
 #include <Root.hpp>
@@ -35,7 +39,6 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeFactory.hpp>
 #include <MeshFactory.hpp>
 #include <NodeVisitor.hpp>
-#include <Global.hpp>
 #include <SearchVisitor.hpp>
 #include <VolumeLoader.h>
 #include <compatibility.h>
@@ -8720,6 +8723,8 @@ void Renderview::HandleMouse()
 
 void Renderview::HandleIdle()
 {
+	bool bval;
+	long lval;
 	bool refresh = false;
 	bool start_loop = true;
 	bool set_focus = false;
@@ -8731,17 +8736,18 @@ void Renderview::HandleIdle()
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		if (flvr::TextureRenderer::active_view_ == m_vrv->GetID())
+		getValue(gstRenderviewPanelId, lval);
+		if (flvr::TextureRenderer::active_view_ == lval)
 		{
 			refresh = true;
 			start_loop = false;
 		}
 	}
 	bool capture_rotat, capture_tsequ, capture_param, test_speed;
-	m_agent->getValue(gstCaptureRot, capture_rotat);
-	m_agent->getValue(gstCaptureTime, capture_tsequ);
-	m_agent->getValue(gstCaptureParam, capture_param);
-	m_agent->getValue(gstTestSpeed, test_speed);
+	getValue(gstCaptureRot, capture_rotat);
+	getValue(gstCaptureTime, capture_tsequ);
+	getValue(gstCaptureParam, capture_param);
+	getValue(gstTestSpeed, test_speed);
 	if (capture_rotat ||
 		capture_tsequ ||
 		capture_param ||
@@ -8753,24 +8759,24 @@ void Renderview::HandleIdle()
 			pre_draw = true;
 	}
 
-	bool openvr_enable;
-	m_agent->getValue(gstOpenvrEnable, openvr_enable);
-	if (openvr_enable)
+	getValue(gstOpenvrEnable, bval);
+	if (bval)
 	{
-		event.RequestMore();
+		//event.RequestMore();
 		refresh = true;
 		//m_retain_finalbuffer = true;
 	}
 
-	if (m_frame && m_frame->GetBenchmark())
+	getValue(gstBenchmark, bval);
+	if (bval)
 	{
 		double fps = 1.0 / glbin_timer->average();
-		wxString title = wxString(FLUORENDER_TITLE) +
-			" " + wxString(VERSION_MAJOR_TAG) +
-			"." + wxString(VERSION_MINOR_TAG) +
-			" Benchmarking... FPS = " +
-			wxString::Format("%.2f", fps);
-		m_frame->SetTitle(title);
+		//wxString title = wxString(FLUORENDER_TITLE) +
+		//	" " + wxString(VERSION_MAJOR_TAG) +
+		//	"." + wxString(VERSION_MINOR_TAG) +
+		//	" Benchmarking... FPS = " +
+		//	wxString::Format("%.2f", fps);
+		//m_frame->SetTitle(title);
 
 		refresh = true;
 		if (flvr::TextureRenderer::get_mem_swap() &&
@@ -8779,216 +8785,182 @@ void Renderview::HandleIdle()
 	}
 
 	//pin rotation center
-	refresh = refresh || m_agent->getObject()->PinRotCtr();
+	refresh = refresh || PinRotCtr();
 
-	wxPoint mouse_pos = wxGetMousePosition();
-	wxRect view_reg = GetScreenRect();
-
-	wxWindow *window = wxWindow::FindFocus();
-	if (window && view_reg.Contains(mouse_pos))
+	getValue(gstMouseIn, bval);
+	if (bval)
 	{
+		bool ctrl_down;
+		getValue(gstKbCtrlDown, ctrl_down);
+		bool spc_down;
+		getValue(gstKbSpaceDown, spc_down);
+
 		UpdateBrushState();
 
 		//draw_mask
-		if (wxGetKeyState(wxKeyCode('V')) &&
-			ks_v_mask)
+		getValue(gstKbVDown, bval);
+		if (bval)
 		{
-			ks_v_mask = false;
+			setValue(gstDrawMask, false);
 			refresh = true;
 			set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('V')) &&
-			!ks_v_mask)
+		else
 		{
-			ks_v_mask = true;
+			setValue(gstDrawMask, true);
 			refresh = true;
 		}
 
 		//move view
 		//left
-		if (!ks_ctrl_left &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_LEFT))
+		getValue(gstKbLeftDown, bval);
+		if (bval && ctrl_down)
 		{
-			ks_ctrl_left = true;
 			double dx, dy, dz;
-			m_agent->getValue(gstCamTransX, dx);
-			m_agent->getValue(gstCamTransY, dy);
-			m_agent->getValue(gstCamTransZ, dz);
-			fluo::Vector head(-dx, -dy, -dz);
+			getValue(gstCamTransX, dx);
+			getValue(gstCamTransY, dy);
+			getValue(gstCamTransZ, dz);
+			Vector head(-dx, -dy, -dz);
 			head.normalize();
-			m_agent->setValue(gstCamHead, head);
-			fluo::Vector up;
-			m_agent->getValue(gstCamUp, up);
-			fluo::Vector side = fluo::Cross(up, head);
+			setValue(gstCamHead, head);
+			Vector up;
+			getValue(gstCamUp, up);
+			Vector side = Cross(up, head);
 			double dr, dl;
-			m_agent->getValue(gstOrthoLeft, dl);
-			m_agent->getValue(gstOrthoRight, dr);
-			fluo::Vector trans = -(side*(int(0.8*(dr - dl))));
-			m_agent->getValue(gstObjTransX, dx);
-			m_agent->getValue(gstObjTransY, dy);
-			m_agent->getValue(gstObjTransZ, dz);
+			getValue(gstOrthoLeft, dl);
+			getValue(gstOrthoRight, dr);
+			Vector trans = -(side*(int(0.8*(dr - dl))));
+			getValue(gstObjTransX, dx);
+			getValue(gstObjTransY, dy);
+			getValue(gstObjTransZ, dz);
 			dx += trans.x();
 			dy += trans.y();
 			dz += trans.z();
-			m_agent->setValue(gstObjTransX, dx);
-			m_agent->setValue(gstObjTransY, dy);
-			m_agent->setValue(gstObjTransZ, dz);
+			setValue(gstObjTransX, dx);
+			setValue(gstObjTransY, dy);
+			setValue(gstObjTransZ, dz);
 			//if (m_persp) SetSortBricks();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_ctrl_left &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_LEFT)))
-			ks_ctrl_left = false;
 		//right
-		if (!ks_ctrl_right &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_RIGHT))
+		getValue(gstKbRightDown, bval);
+		if (bval && ctrl_down)
 		{
-			ks_ctrl_right = true;
 			double dx, dy, dz;
-			m_agent->getValue(gstCamTransX, dx);
-			m_agent->getValue(gstCamTransY, dy);
-			m_agent->getValue(gstCamTransZ, dz);
-			fluo::Vector head(-dx, -dy, -dz);
+			getValue(gstCamTransX, dx);
+			getValue(gstCamTransY, dy);
+			getValue(gstCamTransZ, dz);
+			Vector head(-dx, -dy, -dz);
 			head.normalize();
-			m_agent->setValue(gstCamHead, head);
-			fluo::Vector up;
-			m_agent->getValue(gstCamUp, up);
-			fluo::Vector side = fluo::Cross(up, head);
+			setValue(gstCamHead, head);
+			Vector up;
+			getValue(gstCamUp, up);
+			Vector side = Cross(up, head);
 			double dr, dl;
-			m_agent->getValue(gstOrthoLeft, dl);
-			m_agent->getValue(gstOrthoRight, dr);
-			fluo::Vector trans = side * (int(0.8*(dr - dl)));
-			m_agent->getValue(gstObjTransX, dx);
-			m_agent->getValue(gstObjTransY, dy);
-			m_agent->getValue(gstObjTransZ, dz);
+			getValue(gstOrthoLeft, dl);
+			getValue(gstOrthoRight, dr);
+			Vector trans = side * (int(0.8*(dr - dl)));
+			getValue(gstObjTransX, dx);
+			getValue(gstObjTransY, dy);
+			getValue(gstObjTransZ, dz);
 			dx += trans.x();
 			dy += trans.y();
 			dz += trans.z();
-			m_agent->setValue(gstObjTransX, dx);
-			m_agent->setValue(gstObjTransY, dy);
-			m_agent->setValue(gstObjTransZ, dz);
+			setValue(gstObjTransX, dx);
+			setValue(gstObjTransY, dy);
+			setValue(gstObjTransZ, dz);
 			//if (m_persp) SetSortBricks();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_ctrl_right &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_RIGHT)))
-			ks_ctrl_right = false;
 		//up
-		if (!ks_ctrl_up &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_UP))
+		getValue(gstKbUpDown, bval);
+		if (bval && ctrl_down)
 		{
-			ks_ctrl_up = true;
 			double dx, dy, dz;
-			m_agent->getValue(gstCamTransX, dx);
-			m_agent->getValue(gstCamTransY, dy);
-			m_agent->getValue(gstCamTransZ, dz);
-			fluo::Vector head(-dx, -dy, -dz);
+			getValue(gstCamTransX, dx);
+			getValue(gstCamTransY, dy);
+			getValue(gstCamTransZ, dz);
+			Vector head(-dx, -dy, -dz);
 			head.normalize();
-			m_agent->setValue(gstCamHead, head);
-			fluo::Vector up;
-			m_agent->getValue(gstCamUp, up);
+			setValue(gstCamHead, head);
+			Vector up;
+			getValue(gstCamUp, up);
 			double dt, db;
-			m_agent->getValue(gstOrthoTop, dt);
-			m_agent->getValue(gstOrthoBottom, db);
-			fluo::Vector trans = -up * (int(0.8*(dt - db)));
-			m_agent->getValue(gstObjTransX, dx);
-			m_agent->getValue(gstObjTransY, dy);
-			m_agent->getValue(gstObjTransZ, dz);
+			getValue(gstOrthoTop, dt);
+			getValue(gstOrthoBottom, db);
+			Vector trans = -up * (int(0.8*(dt - db)));
+			getValue(gstObjTransX, dx);
+			getValue(gstObjTransY, dy);
+			getValue(gstObjTransZ, dz);
 			dx += trans.x();
 			dy += trans.y();
 			dz += trans.z();
-			m_agent->setValue(gstObjTransX, dx);
-			m_agent->setValue(gstObjTransY, dy);
-			m_agent->setValue(gstObjTransZ, dz);
+			setValue(gstObjTransX, dx);
+			setValue(gstObjTransY, dy);
+			setValue(gstObjTransZ, dz);
 			//if (m_persp) SetSortBricks();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_ctrl_up &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_UP)))
-			ks_ctrl_up = false;
 		//down
-		if (!ks_ctrl_down &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_DOWN))
+		getValue(gstKbDownDown, bval);
+		if (bval && ctrl_down)
 		{
-			ks_ctrl_down = true;
 			double dx, dy, dz;
-			m_agent->getValue(gstCamTransX, dx);
-			m_agent->getValue(gstCamTransY, dy);
-			m_agent->getValue(gstCamTransZ, dz);
-			fluo::Vector head(-dx, -dy, -dz);
+			getValue(gstCamTransX, dx);
+			getValue(gstCamTransY, dy);
+			getValue(gstCamTransZ, dz);
+			Vector head(-dx, -dy, -dz);
 			head.normalize();
-			m_agent->setValue(gstCamHead, head);
-			fluo::Vector up;
-			m_agent->getValue(gstCamUp, up);
+			setValue(gstCamHead, head);
+			Vector up;
+			getValue(gstCamUp, up);
 			double dt, db;
-			m_agent->getValue(gstOrthoTop, dt);
-			m_agent->getValue(gstOrthoBottom, db);
-			fluo::Vector trans = up * (int(0.8*(dt - db)));
-			m_agent->getValue(gstObjTransX, dx);
-			m_agent->getValue(gstObjTransY, dy);
-			m_agent->getValue(gstObjTransZ, dz);
+			getValue(gstOrthoTop, dt);
+			getValue(gstOrthoBottom, db);
+			Vector trans = up * (int(0.8*(dt - db)));
+			getValue(gstObjTransX, dx);
+			getValue(gstObjTransY, dy);
+			getValue(gstObjTransZ, dz);
 			dx += trans.x();
 			dy += trans.y();
 			dz += trans.z();
-			m_agent->setValue(gstObjTransX, dx);
-			m_agent->setValue(gstObjTransY, dy);
-			m_agent->setValue(gstObjTransZ, dz);
+			setValue(gstObjTransX, dx);
+			setValue(gstObjTransY, dy);
+			setValue(gstObjTransZ, dz);
 			//if (m_persp) SetSortBricks();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_ctrl_down &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_DOWN)))
-			ks_ctrl_down = false;
 
 		//move time sequence
 		//forward
-		if (!ks_d_spc_forward &&
-			(wxGetKeyState(wxKeyCode('d')) ||
-				wxGetKeyState(WXK_SPACE)))
+		getValue(gstKbDDown, bval);
+		if (bval || spc_down)
 		{
-			ks_d_spc_forward = true;
-			if (m_frame && m_frame->GetMovieView())
-				m_frame->GetMovieView()->UpFrame();
+			//if (m_frame && m_frame->GetMovieView())
+			//	m_frame->GetMovieView()->UpFrame();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_d_spc_forward &&
-			!wxGetKeyState(wxKeyCode('d')) &&
-			!wxGetKeyState(WXK_SPACE))
-			ks_d_spc_forward = false;
 		//backforward
-		if (!ks_a_backward &&
-			wxGetKeyState(wxKeyCode('a')))
+		getValue(gstKbADown, bval);
+		if (bval)
 		{
-			ks_a_backward = true;
-			if (m_frame && m_frame->GetMovieView())
-				m_frame->GetMovieView()->DownFrame();
+			//if (m_frame && m_frame->GetMovieView())
+			//	m_frame->GetMovieView()->DownFrame();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_a_backward &&
-			!wxGetKeyState(wxKeyCode('a')))
-			ks_a_backward = false;
 
-		//move clip
+		//move clip planes
 		//up
-		if (!ks_s_up &&
-			wxGetKeyState(wxKeyCode('s')))
+		getValue(gstKbSDown, bval);
+		if (bval)
 		{
-			ks_s_up = true;
-			fluo::ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+			ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
 			if (agent)
 			{
 				double z, res;
@@ -8999,15 +8971,11 @@ void Renderview::HandleIdle()
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_s_up &&
-			!wxGetKeyState(wxKeyCode('s')))
-			ks_s_up = false;
 		//down
-		if (!ks_w_down &&
-			wxGetKeyState(wxKeyCode('w')))
+		getValue(gstKbWDown, bval);
+		if (bval)
 		{
-			ks_w_down = true;
-			fluo::ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+			ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
 			if (agent)
 			{
 				double z, res;
@@ -9018,183 +8986,145 @@ void Renderview::HandleIdle()
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_w_down &&
-			!wxGetKeyState(wxKeyCode('w')))
-			ks_w_down = false;
 
 		//cell full
-		if (!ks_f_full &&
-			wxGetKeyState(wxKeyCode('f')))
+		getValue(gstKbFDown, bval);
+		if (bval)
 		{
-			ks_f_full = true;
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->SelectFullComp();
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CellUpdate();
+			//if (m_frame && m_frame->GetComponentDlg())
+			//	m_frame->GetComponentDlg()->SelectFullComp();
+			//if (m_frame && m_frame->GetTraceDlg())
+			//	m_frame->GetTraceDlg()->CellUpdate();
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_f_full &&
-			!wxGetKeyState(wxKeyCode('f')))
-			ks_f_full = false;
 		//cell link
-		if (!ks_l_link &&
-			wxGetKeyState(wxKeyCode('l')))
+		getValue(gstKbLDown, bval);
+		if (bval)
 		{
-			ks_l_link = true;
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CellLink(false);
+			//if (m_frame && m_frame->GetTraceDlg())
+			//	m_frame->GetTraceDlg()->CellLink(false);
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_l_link &&
-			!wxGetKeyState(wxKeyCode('l')))
-			ks_l_link = false;
 		//new cell id
-		if (!ks_n_new &&
-			wxGetKeyState(wxKeyCode('n')))
+		getValue(gstKbNDown, bval);
+		if (bval)
 		{
-			ks_n_new = true;
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CellNewID(false);
+			//if (m_frame && m_frame->GetTraceDlg())
+			//	m_frame->GetTraceDlg()->CellNewID(false);
 			refresh = true;
 			set_focus = true;
 		}
-		if (ks_n_new &&
-			!wxGetKeyState(wxKeyCode('n')))
-			ks_n_new = false;
 		//clear
-		if (wxGetKeyState(wxKeyCode('c')) &&
-			!ks_c_clear)
+		getValue(gstKbCDown, bval);
+		if (bval)
 		{
-			if (m_frame && m_frame->GetTree())
-				m_frame->GetTree()->BrushClear();
-			if (m_frame && m_frame->GetTraceDlg())
-				m_frame->GetTraceDlg()->CompClear();
-			ks_c_clear = true;
+			//if (m_frame && m_frame->GetTree())
+			//	m_frame->GetTree()->BrushClear();
+			//if (m_frame && m_frame->GetTraceDlg())
+			//	m_frame->GetTraceDlg()->CompClear();
 			refresh = true;
 			set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('c')) &&
-			ks_c_clear)
-			ks_c_clear = false;
 		//save all masks
-		if (wxGetKeyState(wxKeyCode('m')) &&
-			!ks_m_svmask)
+		getValue(gstKbMDown, bval);
+		if (bval)
 		{
 			glbin.saveAllMasks();
-			ks_m_svmask = true;
 			set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('m')) &&
-			ks_m_svmask)
-			ks_m_svmask = false;
-		//full screen
-		if (wxGetKeyState(WXK_ESCAPE))
-		{
-			m_fullscreen_trigger.Start(10);
-		}
 		//brush size
-		if (wxGetKeyState(wxKeyCode('[')))
+		getValue(gstKbLbrktDown, bval);
+		if (bval)
 		{
 			ChangeBrushSize(-10);
 			set_focus = true;
 		}
-		if (wxGetKeyState(wxKeyCode(']')))
+		getValue(gstKbRbrktDown, bval);
+		if (bval)
 		{
 			ChangeBrushSize(10);
 			set_focus = true;
 		}
 		//comp include
-		if (wxGetKeyState(WXK_RETURN) &&
-			!ks_rtn_include)
+		getValue(gstKbReturnDown, bval);
+		if (bval)
 		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->IncludeComps();
-			ks_rtn_include = true;
+			//if (m_frame && m_frame->GetComponentDlg())
+			//	m_frame->GetComponentDlg()->IncludeComps();
 			refresh = true;
 			set_focus = true;
 		}
-		if (!wxGetKeyState(WXK_RETURN) &&
-			ks_rtn_include)
-			ks_rtn_include = false;
 		//comp exclude
-		if (wxGetKeyState(wxKeyCode('\\')) &&
-			!ks_bksl_exclude)
+		getValue(gstKbBslshDown, bval);
+		if (bval)
 		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->ExcludeComps();
-			ks_bksl_exclude = true;
+			//if (m_frame && m_frame->GetComponentDlg())
+			//	m_frame->GetComponentDlg()->ExcludeComps();
 			refresh = true;
 			set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('\\')) &&
-			ks_bksl_exclude)
-			ks_bksl_exclude = false;
 		//ruler relax
-		if (wxGetKeyState(wxKeyCode('r')) &&
-			!ks_r_relax)
+		getValue(gstKbRDown, bval);
+		if (bval)
 		{
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->Relax();
-			ks_r_relax = true;
+			//if (m_frame && m_frame->GetMeasureDlg())
+			//	m_frame->GetMeasureDlg()->Relax();
 			refresh = true;
 			set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('r')) &&
-			ks_r_relax)
-			ks_r_relax = false;
 
 		long int_mode;
-		m_agent->getValue(gstInterMode, int_mode);
+		getValue(gstInterMode, int_mode);
+		bool grow_on;
+		getValue(gstGrowEnable, grow_on);
+		getValue(gstMouseLeftDown, bval);
 		//grow
 		if ((int_mode == 10 ||
 			int_mode == 12) &&
-			wxGetMouseState().LeftIsDown() &&
-			ms_lb_grow)
+			bval && grow_on)
 		{
 			int sz = 5;
-			if (m_frame && m_frame->GetSettingDlg())
-				sz = m_frame->GetSettingDlg()->GetRulerSizeThresh();
+			//if (m_frame && m_frame->GetSettingDlg())
+			//	sz = m_frame->GetSettingDlg()->GetRulerSizeThresh();
 			//event.RequestMore();
-			m_agent->getObject()->Grow(sz);
+			Grow(sz);
 			refresh = true;
 			start_loop = true;
 			//update
-			if (m_frame)
+			bool bval;
+			getValue(gstPaintCount, bval);
+			//if (bval && m_frame->GetBrushToolDlg())
+			//	m_frame->GetBrushToolDlg()->Update(0);
+			getValue(gstPaintColocalize, bval);
+			if (bval)
 			{
-				bool bval;
-				m_agent->getValue(gstPaintCount, bval);
-				if (bval && m_frame->GetBrushToolDlg())
-					m_frame->GetBrushToolDlg()->Update(0);
-				m_agent->getValue(gstPaintColocalize, bval);
-				if (bval)
-				{
-					fluo::ColocalAgent* agent = glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent();
-					if (agent) agent->Run();
-				}
-				if (int_mode == 12 && m_frame->GetMeasureDlg())
-					m_frame->GetMeasureDlg()->GetSettings(m_agent->getObject());
+				ColocalAgent* agent = glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent();
+				if (agent) agent->Run();
 			}
+			//if (int_mode == 12 && m_frame->GetMeasureDlg())
+			//	m_frame->GetMeasureDlg()->GetSettings(getObject());
 		}
 
 		//forced refresh
-		if (wxGetKeyState(WXK_F5))
+		getValue(gstKbF5Down, bval);
+		if (bval)
 		{
-			SetFocus();
-			if (m_frame && m_frame->GetStatusBar())
-				m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
+			//SetFocus();
+			//if (m_frame && m_frame->GetStatusBar())
+			//	m_frame->GetStatusBar()->PushStatusText("Forced Refresh");
 			//wxSizeEvent e;
 			//OnResize(e);
 
-			//m_agent->setValue(gstClearBuffer, true);
-			//m_agent->setValue(gstUpdating, true);
-			//m_agent->setValue(gstPreDraw, pre_draw);
-			//m_agent->setValue(gstRetainFb, retain_fb);
-			//m_agent->getObject()->Update(14);
+			//setValue(gstClearBuffer, true);
+			//setValue(gstUpdating, true);
+			//setValue(gstPreDraw, pre_draw);
+			//setValue(gstRetainFb, retain_fb);
+			//getObject()->Update(14);
 
-			if (m_frame && m_frame->GetStatusBar())
-				m_frame->GetStatusBar()->PopStatusText();
+			//if (m_frame && m_frame->GetStatusBar())
+			//	m_frame->GetStatusBar()->PopStatusText();
 			//return;
 			refresh = true;
 		}
@@ -9202,40 +9132,40 @@ void Renderview::HandleIdle()
 
 #ifdef _WIN32
 	//update ortho rotation
-	fluo::Quaternion q;
-	m_agent->getValue(gstCamRotQ, q);
+	Quaternion q;
+	getValue(gstCamRotQ, q);
 	int cmb_sel = 6;
-	if (q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	if (q.AlmostEqual(Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 		cmb_sel = 0;
-	else if (q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	else if (q.AlmostEqual(Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 		cmb_sel = 1;
-	else if (q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+	else if (q.AlmostEqual(Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 		cmb_sel = 2;
-	else if (q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+	else if (q.AlmostEqual(Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 		cmb_sel = 3;
-	else if (q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
+	else if (q.AlmostEqual(Quaternion(0, 0, 0, 1)))
 		cmb_sel = 4;
-	else if (q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
+	else if (q.AlmostEqual(Quaternion(0, -1, 0, 0)))
 		cmb_sel = 5;
 	else
 		cmb_sel = 6;
-	m_vrv->UpdateOrientCmb(cmb_sel);
+	//m_vrv->UpdateOrientCmb(cmb_sel);
 #endif
 
 #if defined(_WIN32) && defined(USE_XINPUT)
 	//xinput controller
-	refresh = refresh || m_agent->getObject()->UpdateController();
+	refresh = refresh || UpdateController();
 #endif
 
-	if (set_focus)
-		SetFocus();
+	//if (set_focus)
+	//	SetFocus();
 	if (refresh)
 	{
-		m_agent->setValue(gstClearBuffer, true);
-		m_agent->setValue(gstUpdating, true);
-		m_agent->setValue(gstPreDraw, pre_draw);
-		m_agent->setValue(gstRetainFb, retain_fb);
-		//m_agent->getObject()->RefreshGL(15, start_loop);
+		setValue(gstClearBuffer, true);
+		setValue(gstUpdating, true);
+		setValue(gstPreDraw, pre_draw);
+		setValue(gstRetainFb, retain_fb);
+		//getObject()->RefreshGL(15, start_loop);
 		Update(15, start_loop);
 	}
 }
@@ -9243,10 +9173,10 @@ void Renderview::HandleIdle()
 //change brush display
 void Renderview::ChangeBrushSize(int value)
 {
-	m_agent->getObject()->GetVolumeSelector()->ChangeBrushSize(
+	getObject()->GetVolumeSelector()->ChangeBrushSize(
 		value, wxGetKeyState(WXK_CONTROL));
 	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->GetSettings(m_agent->getObject());
+		m_frame->GetBrushToolDlg()->GetSettings(getObject());
 }
 
 void Renderview::UpdateBrushState()
@@ -9259,9 +9189,9 @@ void Renderview::UpdateBrushState()
 		brush_dlg = m_frame->GetBrushToolDlg();
 	}
 
-	fluo::Renderview* view = m_agent->getObject();
+	Renderview* view = getObject();
 	long int_mode;
-	m_agent->getValue(gstInterMode, int_mode);
+	getValue(gstInterMode, int_mode);
 	if (int_mode != 2 && int_mode != 7)
 	{
 		if (wxGetKeyState(WXK_SHIFT))
@@ -9304,12 +9234,12 @@ void Renderview::UpdateBrushState()
 	else
 	{
 		long lval;
-		m_agent->getValue(gstBrushState, lval);
+		getValue(gstBrushState, lval);
 		if (lval)
 		{
 			if (wxGetKeyState(WXK_SHIFT))
 			{
-				m_agent->setValue(gstBrushState, long(0));
+				setValue(gstBrushState, long(0));
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushAppend);
 				if (brush_dlg)
@@ -9322,7 +9252,7 @@ void Renderview::UpdateBrushState()
 			}
 			else if (wxGetKeyState(wxKeyCode('Z')))
 			{
-				m_agent->setValue(gstBrushState, long(0));
+				setValue(gstBrushState, long(0));
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushDiffuse);
 				if (brush_dlg)
@@ -9335,7 +9265,7 @@ void Renderview::UpdateBrushState()
 			}
 			else if (wxGetKeyState(wxKeyCode('X')))
 			{
-				m_agent->setValue(gstBrushState, long(0));
+				setValue(gstBrushState, long(0));
 				if (tree_panel)
 					tree_panel->SelectBrush(TreePanel::ID_BrushDesel);
 				if (brush_dlg)
@@ -9362,13 +9292,13 @@ void Renderview::UpdateBrushState()
 			if (wxGetMouseState().LeftIsDown())
 				view->Segment();
 			long lval;
-			m_agent->getValue(gstInterMode, lval);
+			getValue(gstInterMode, lval);
 			if (lval == 7)
-				m_agent->setValue(gstInterMode, 5);
+				setValue(gstInterMode, 5);
 			else
-				m_agent->setValue(gstInterMode, 1);
-			m_agent->setValue(gstPaintDisplay, false);
-			m_agent->setValue(gstDrawBrush, false);
+				setValue(gstInterMode, 1);
+			setValue(gstPaintDisplay, false);
+			setValue(gstDrawBrush, false);
 			if (tree_panel)
 				tree_panel->SelectBrush(0);
 			if (brush_dlg)

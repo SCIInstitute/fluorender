@@ -541,8 +541,31 @@ DEALINGS IN THE SOFTWARE.
 #define gstMouseMiddleHold "mouse middle hold"
 #define gstMouseDrag "mouse drag"
 #define gstMouseWheel "mouse wheel"
+#define gstKbF5Down "kb f5 down"//all key states
 #define gstKbAltDown "kb alt down"
 #define gstKbCtrlDown "kb ctrl down"
+#define gstKbShiftDown "kb shift down"
+#define gstKbReturnDown "kb return down"
+#define gstKbSpaceDown "kb space down"
+#define gstKbLeftDown "kb keft down"
+#define gstKbRightDown "kb right down"
+#define gstKbUpDown "kb up down"
+#define gstKbDownDown "kb down down"
+#define gstKbADown "kb a down"
+#define gstKbCDown "kb c down"
+#define gstKbDDown "kb d down"
+#define gstKbFDown "kb f down"
+#define gstKbLDown "kb l down"
+#define gstKbMDown "kb m down"
+#define gstKbNDown "kb n down"
+#define gstKbRDown "kb r down"
+#define gstKbSDown "kd s down"
+#define gstKbVDown "kb v down"
+#define gstKbWDown "kb w down"
+#define gstKbLbrktDown "kb kbrkt down"//[
+#define gstKbRbrktDown "kb rbrkt down"//]
+#define gstKbBslshDown "kb bslsh down"//backslash
+#define gstRenderviewPanelId "renderview panel id"
 
 //dialog agent common
 #define gstUseSelection "use selection"//use mask selection

@@ -105,26 +105,6 @@ private:
 	int m_ptr2_x_save;
 	int m_ptr2_y_save;
 
-	//flags in idle event handling
-	bool ks_v_mask;
-	bool ks_ctrl_left;
-	bool ks_ctrl_right;
-	bool ks_ctrl_up;
-	bool ks_ctrl_down;
-	bool ks_d_spc_forward;
-	bool ks_a_backward;
-	bool ks_s_up;
-	bool ks_w_down;
-	bool ks_f_full;
-	bool ks_l_link;
-	bool ks_n_new;
-	bool ks_c_clear;
-	bool ks_m_svmask;
-	bool ks_rtn_include;
-	bool ks_bksl_exclude;
-	bool ks_r_relax;
-	bool ms_lb_grow;
-
 private:
 	void PickMesh();
 	void PickVolume();

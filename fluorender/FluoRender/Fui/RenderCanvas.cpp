@@ -83,26 +83,7 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	//touch
 	m_enable_touch(false),
 	m_ptr_id1(-1),
-	m_ptr_id2(-1),
-	//flags for idle
-	ks_v_mask(false),
-	ks_ctrl_left(false),
-	ks_ctrl_right(false),
-	ks_ctrl_up(false),
-	ks_ctrl_down(false),
-	ks_d_spc_forward(false),
-	ks_a_backward(false),
-	ks_s_up(false),
-	ks_w_down(false),
-	ks_f_full(false),
-	ks_l_link(false),
-	ks_n_new(false),
-	ks_c_clear(false),
-	ks_m_svmask(false),
-	ks_rtn_include(false),
-	ks_bksl_exclude(false),
-	ks_r_relax(false),
-	ms_lb_grow(false)
+	m_ptr_id2(-1)
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
@@ -294,6 +275,45 @@ void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
+	//key states
+	m_agent->setValue(gstKbF5Down, wxGetKeyState(WXK_F5));
+	m_agent->setValue(gstKbAltDown, wxGetKeyState(WXK_ALT));
+	m_agent->setValue(gstKbCtrlDown, wxGetKeyState(WXK_CONTROL));
+	m_agent->setValue(gstKbShiftDown, wxGetKeyState(WXK_SHIFT));
+	m_agent->setValue(gstKbReturnDown, wxGetKeyState(WXK_RETURN));
+	m_agent->setValue(gstKbSpaceDown, wxGetKeyState(WXK_SPACE));
+	m_agent->setValue(gstKbLeftDown, wxGetKeyState(WXK_LEFT));
+	m_agent->setValue(gstKbRightDown, wxGetKeyState(WXK_RIGHT));
+	m_agent->setValue(gstKbUpDown, wxGetKeyState(WXK_UP));
+	m_agent->setValue(gstKbDownDown, wxGetKeyState(WXK_DOWN));
+	m_agent->setValue(gstKbADown, wxGetKeyState(wxKeyCode('A')));
+	m_agent->setValue(gstKbCDown, wxGetKeyState(wxKeyCode('C')));
+	m_agent->setValue(gstKbDDown, wxGetKeyState(wxKeyCode('D')));
+	m_agent->setValue(gstKbFDown, wxGetKeyState(wxKeyCode('F')));
+	m_agent->setValue(gstKbLDown, wxGetKeyState(wxKeyCode('L')));
+	m_agent->setValue(gstKbMDown, wxGetKeyState(wxKeyCode('M')));
+	m_agent->setValue(gstKbNDown, wxGetKeyState(wxKeyCode('N')));
+	m_agent->setValue(gstKbRDown, wxGetKeyState(wxKeyCode('R')));
+	m_agent->setValue(gstKbSDown, wxGetKeyState(wxKeyCode('S')));
+	m_agent->setValue(gstKbVDown, wxGetKeyState(wxKeyCode('V')));
+	m_agent->setValue(gstKbWDown, wxGetKeyState(wxKeyCode('W')));
+	m_agent->setValue(gstKbLbrktDown, wxGetKeyState(wxKeyCode('[')));
+	m_agent->setValue(gstKbRbrktDown, wxGetKeyState(wxKeyCode(']')));
+	m_agent->setValue(gstKbBslshDown, wxGetKeyState(wxKeyCode('\\')));
+	wxPoint mouse_pos = wxGetMousePosition();
+	wxRect view_reg = GetScreenRect();
+	wxWindow *window = wxWindow::FindFocus();
+	bool mouse_in = window && view_reg.Contains(mouse_pos);
+	m_agent->setValue(gstMouseIn, mouse_in);
+	m_agent->setValue(gstMouseLeftDown, wxGetMouseState().LeftIsDown());
+	m_agent->setValue(gstRenderviewPanelId, long(m_vrv->GetID()));
+	m_agent->getObject()->HandleIdle();
+
+	//full screen
+	if (mouse_in && wxGetKeyState(WXK_ESCAPE))
+	{
+		m_fullscreen_trigger.Start(10);
+	}
 }
 
 void RenderCanvas::OnKeyDown(wxKeyEvent& event)
