@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Main.h"
 #include "RenderFrame.h"
-#include <Timer.h>
+#include <Timer.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include "JVMInitializer.h"

@@ -37,7 +37,7 @@
 #include <FLIVR/VertexArray.h>
 #include <Types/Color.h>
 #include <Types/Utils.h>
-#include <Timer.h>
+#include <Timer.hpp>
 #include <Global.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>

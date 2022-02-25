@@ -35,6 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <set>
 
+class Fltimer;
+class Flinput;
 namespace fluo
 {
 	class Group;
@@ -90,6 +92,10 @@ namespace fluo
 		virtual const Renderview* asRenderview() const { return 0; }
 		virtual Root* asRoot() { return 0; }
 		virtual const Root* asRoot() const { return 0; }
+		virtual Fltimer* asFltimer() { return 0; }
+		virtual const Fltimer* asFltimer() const { return 0; }
+		virtual Flinput* asFlinput() { return 0; }
+		virtual const Flinput* asFlinput() const { return 0; }
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);

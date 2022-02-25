@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ClipPlaneAgent.hpp>
 #include <ColocalAgent.hpp>
 #include <Group.hpp>
-#include <Timer.h>
+#include <Timer.hpp>
+#include <Input.hpp>
 #include <Root.hpp>
 #include <Annotations.hpp>
 #include <RenderviewFactory.hpp>
@@ -8791,14 +8792,14 @@ void Renderview::HandleIdle()
 	if (bval)
 	{
 		bool ctrl_down;
-		getValue(gstKbCtrlDown, ctrl_down);
+		glbin_input->getValue(gstKbCtrlHold, ctrl_down);
 		bool spc_down;
-		getValue(gstKbSpaceDown, spc_down);
+		glbin_input->getValue(gstKbSpaceHold, spc_down);
 
 		refresh = refresh || UpdateBrushState();
 
 		//draw_mask
-		getValue(gstKbVDown, bval);
+		glbin_input->getValue(gstKbVHold, bval);
 		if (bval)
 		{
 			setValue(gstDrawMask, false);
@@ -8813,7 +8814,7 @@ void Renderview::HandleIdle()
 
 		//move view
 		//left
-		getValue(gstKbLeftDown, bval);
+		glbin_input->getValue(gstKbLeftDown, bval);
 		if (bval && ctrl_down)
 		{
 			double dx, dy, dz;
@@ -8844,7 +8845,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//right
-		getValue(gstKbRightDown, bval);
+		glbin_input->getValue(gstKbRightDown, bval);
 		if (bval && ctrl_down)
 		{
 			double dx, dy, dz;
@@ -8875,7 +8876,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//up
-		getValue(gstKbUpDown, bval);
+		glbin_input->getValue(gstKbUpDown, bval);
 		if (bval && ctrl_down)
 		{
 			double dx, dy, dz;
@@ -8905,7 +8906,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//down
-		getValue(gstKbDownDown, bval);
+		glbin_input->getValue(gstKbDownDown, bval);
 		if (bval && ctrl_down)
 		{
 			double dx, dy, dz;
@@ -8937,7 +8938,7 @@ void Renderview::HandleIdle()
 
 		//move time sequence
 		//forward
-		getValue(gstKbDDown, bval);
+		glbin_input->getValue(gstKbDDown, bval);
 		if (bval || spc_down)
 		{
 			//if (m_frame && m_frame->GetMovieView())
@@ -8946,7 +8947,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//backforward
-		getValue(gstKbADown, bval);
+		glbin_input->getValue(gstKbADown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetMovieView())
@@ -8957,7 +8958,7 @@ void Renderview::HandleIdle()
 
 		//move clip planes
 		//up
-		getValue(gstKbSDown, bval);
+		glbin_input->getValue(gstKbSDown, bval);
 		if (bval)
 		{
 			ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
@@ -8972,7 +8973,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//down
-		getValue(gstKbWDown, bval);
+		glbin_input->getValue(gstKbWDown, bval);
 		if (bval)
 		{
 			ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
@@ -8988,7 +8989,7 @@ void Renderview::HandleIdle()
 		}
 
 		//cell full
-		getValue(gstKbFDown, bval);
+		glbin_input->getValue(gstKbFDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetComponentDlg())
@@ -8999,7 +9000,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//cell link
-		getValue(gstKbLDown, bval);
+		glbin_input->getValue(gstKbLDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetTraceDlg())
@@ -9008,7 +9009,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//new cell id
-		getValue(gstKbNDown, bval);
+		glbin_input->getValue(gstKbNDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetTraceDlg())
@@ -9017,7 +9018,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//clear
-		getValue(gstKbCDown, bval);
+		glbin_input->getValue(gstKbCDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetTree())
@@ -9028,27 +9029,27 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//save all masks
-		getValue(gstKbMDown, bval);
+		glbin_input->getValue(gstKbMDown, bval);
 		if (bval)
 		{
 			glbin.saveAllMasks();
 			set_focus = true;
 		}
 		//brush size
-		getValue(gstKbLbrktDown, bval);
+		glbin_input->getValue(gstKbLbrktHold, bval);
 		if (bval)
 		{
 			ChangeBrushSize(-10);
 			set_focus = true;
 		}
-		getValue(gstKbRbrktDown, bval);
+		glbin_input->getValue(gstKbRbrktHold, bval);
 		if (bval)
 		{
 			ChangeBrushSize(10);
 			set_focus = true;
 		}
 		//comp include
-		getValue(gstKbReturnDown, bval);
+		glbin_input->getValue(gstKbReturnDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetComponentDlg())
@@ -9057,7 +9058,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//comp exclude
-		getValue(gstKbBslshDown, bval);
+		glbin_input->getValue(gstKbBslshDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetComponentDlg())
@@ -9066,7 +9067,7 @@ void Renderview::HandleIdle()
 			set_focus = true;
 		}
 		//ruler relax
-		getValue(gstKbRDown, bval);
+		glbin_input->getValue(gstKbRDown, bval);
 		if (bval)
 		{
 			//if (m_frame && m_frame->GetMeasureDlg())
@@ -9108,7 +9109,7 @@ void Renderview::HandleIdle()
 		}
 
 		//forced refresh
-		getValue(gstKbF5Down, bval);
+		glbin_input->getValue(gstKbF5Down, bval);
 		if (bval)
 		{
 			//SetFocus();
@@ -9176,7 +9177,7 @@ void Renderview::HandleIdle()
 void Renderview::ChangeBrushSize(int value)
 {
 	bool bval;
-	getValue(gstKbCtrlDown, bval);
+	glbin_input->getValue(gstKbCtrlHold, bval);
 	GetVolumeSelector()->ChangeBrushSize(value, bval);
 	//if (m_frame && m_frame->GetBrushToolDlg())
 	//	m_frame->GetBrushToolDlg()->GetSettings(getObject());
@@ -9198,7 +9199,7 @@ bool Renderview::UpdateBrushState()
 	getValue(gstInterMode, int_mode);
 	if (int_mode != 2 && int_mode != 7)
 	{
-		getValue(gstKbShiftDown, bval);
+		glbin_input->getValue(gstKbShiftHold, bval);
 		if (bval)
 		{
 			//if (tree_panel)
@@ -9209,7 +9210,7 @@ bool Renderview::UpdateBrushState()
 			refresh = true;
 			//Update(6);
 		}
-		getValue(gstKbZDown, bval);
+		glbin_input->getValue(gstKbZHold, bval);
 		if (!refresh && bval)
 		{
 			//if (tree_panel)
@@ -9220,7 +9221,7 @@ bool Renderview::UpdateBrushState()
 			refresh = true;
 			//Update(7);
 		}
-		getValue(gstKbXDown, bval);
+		glbin_input->getValue(gstKbXHold, bval);
 		if (!refresh && bval)
 		{
 			//if (tree_panel)
@@ -9238,7 +9239,7 @@ bool Renderview::UpdateBrushState()
 		getValue(gstBrushState, lval);
 		if (lval)
 		{
-			getValue(gstKbShiftDown, bval);
+			glbin_input->getValue(gstKbShiftHold, bval);
 			if (bval)
 			{
 				setValue(gstBrushState, long(0));
@@ -9250,7 +9251,7 @@ bool Renderview::UpdateBrushState()
 				refresh = true;
 				//view->Update(9);
 			}
-			getValue(gstKbZDown, bval);
+			glbin_input->getValue(gstKbZHold, bval);
 			if (!refresh && bval)
 			{
 				setValue(gstBrushState, long(0));
@@ -9262,7 +9263,7 @@ bool Renderview::UpdateBrushState()
 				refresh = true;
 				//view->Update(10);
 			}
-			getValue(gstKbXDown, bval);
+			glbin_input->getValue(gstKbXHold, bval);
 			if (!refresh && bval)
 			{
 				setValue(gstBrushState, long(0));
@@ -9284,9 +9285,9 @@ bool Renderview::UpdateBrushState()
 		else
 		{
 			bool shift_down, z_down, x_down;
-			getValue(gstKbShiftDown, shift_down);
-			getValue(gstKbZDown, z_down);
-			getValue(gstKbXDown, x_down);
+			glbin_input->getValue(gstKbShiftHold, shift_down);
+			glbin_input->getValue(gstKbZHold, z_down);
+			glbin_input->getValue(gstKbXHold, x_down);
 			if (!shift_down &&
 				!z_down &&
 				!x_down)

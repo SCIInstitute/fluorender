@@ -31,7 +31,7 @@
 #include "ShaderProgram.h"
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include <Timer.h>
+#include <Timer.hpp>
 #include <Global.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>

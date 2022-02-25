@@ -321,32 +321,6 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMouseMiddleHold, bool(false));
 		view->addValue(gstMouseDrag, bool(false));
 		view->addValue(gstMouseWheel, long(0));
-		view->addValue(gstKbF5Down, bool(false));
-		view->addValue(gstKbAltDown, bool(false));
-		view->addValue(gstKbCtrlDown, bool(false));
-		view->addValue(gstKbShiftDown, bool(false));
-		view->addValue(gstKbReturnDown, bool(false));
-		view->addValue(gstKbSpaceDown, bool(false));
-		view->addValue(gstKbLeftDown, bool(false));
-		view->addValue(gstKbRightDown, bool(false));
-		view->addValue(gstKbUpDown, bool(false));
-		view->addValue(gstKbDownDown, bool(false));
-		view->addValue(gstKbADown, bool(false));
-		view->addValue(gstKbCDown, bool(false));
-		view->addValue(gstKbDDown, bool(false));
-		view->addValue(gstKbFDown, bool(false));
-		view->addValue(gstKbLDown, bool(false));
-		view->addValue(gstKbMDown, bool(false));
-		view->addValue(gstKbNDown, bool(false));
-		view->addValue(gstKbRDown, bool(false));
-		view->addValue(gstKbSDown, bool(false));
-		view->addValue(gstKbVDown, bool(false));
-		view->addValue(gstKbWDown, bool(false));
-		view->addValue(gstKbXDown, bool(false));
-		view->addValue(gstKbZDown, bool(false));
-		view->addValue(gstKbLbrktDown, bool(false));
-		view->addValue(gstKbRbrktDown, bool(false));
-		view->addValue(gstKbBslshDown, bool(false));
 		view->addValue(gstRenderviewPanelId, long(-1));
 	}
 }

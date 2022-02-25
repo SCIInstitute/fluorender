@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 #define glbin fluo::Global::instance()
 #define glbin_timer fluo::Global::instance().getTimer()
+#define glbin_input fluo::Global::instance().getInput()
 #define glbin_volf fluo::Global::instance().getVolumeFactory()
 #define glbin_mshf fluo::Global::instance().getMeshFactory()
 #define glbin_annf fluo::Global::instance().getAnnotationFactory()
@@ -44,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 
 //class AgentFactory;
 class Fltimer;
+class Flinput;
 namespace fluo
 {
 	class VolumeFactory;
@@ -64,6 +66,7 @@ namespace fluo
 		void clear();
 		Object* get(const std::string &name, Group* start = nullptr);
 		Fltimer* getTimer();
+		Flinput* getInput();
 		VolumeFactory* getVolumeFactory();
 		MeshFactory* getMeshFactory();
 		AnnotationFactory* getAnnotationFactory();
@@ -137,6 +140,7 @@ namespace fluo
 		par->addChild(obj);}
 
 		void BuildTimer();
+		void BuildInput();
 		void BuildFactories();
 		void BuildPaths();
 		void BuildRoot();

@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Global.hpp>
-#include <Timer.h>
+#include <Timer.hpp>
+#include <Input.hpp>
 #include <AnnotationFactory.hpp>
 #include <MeshFactory.hpp>
 #include <VolumeFactory.hpp>
@@ -47,6 +48,7 @@ Global::Global()
 	origin_ = ref_ptr<Group>(new Group());
 	origin_->setName(gstOrigin);
 	BuildTimer();
+	BuildInput();
 	BuildFactories();
 	BuildPaths();
 	BuildRoot();
@@ -57,6 +59,13 @@ void Global::BuildTimer()
 	Fltimer* timer = new Fltimer();
 	timer->setName(gstTimer);
 	origin_->addChild(timer);
+}
+
+void Global::BuildInput()
+{
+	Flinput* input = new Flinput();
+	input->setName(gstInput);
+	origin_->addChild(input);
 }
 
 void Global::BuildFactories()
@@ -139,6 +148,14 @@ Fltimer* Global::getTimer()
 	if (!obj)
 		return 0;
 	return dynamic_cast<Fltimer*>(obj);
+}
+
+Flinput* Global::getInput()
+{
+	Object* obj = get(gstInput);
+	if (!obj)
+		return 0;
+	return dynamic_cast<Flinput*>(obj);
 }
 
 VolumeFactory* Global::getVolumeFactory()

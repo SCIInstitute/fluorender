@@ -372,6 +372,13 @@ file(GLOB img_src fluorender/FluoRender/img/*.cpp)
 add_library(IMAGES_OBJ OBJECT
   ${img_hdr} ${img_src})
 
+# Input
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Input)
+file(GLOB input_src fluorender/FluoRender/Input/*.cpp)
+file(GLOB input_hdr fluorender/FluoRender/Input/*.hpp)
+add_library(INPUT_OBJ OBJECT
+  ${input_src} ${input_hdr})
+
 # Scenegraph
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Scenegraph)
 file(GLOB scg_src fluorender/FluoRender/Scenegraph/*.cpp)
@@ -396,7 +403,7 @@ add_library(SELECTION_OBJ OBJECT
 # Timer
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Timer)
 file(GLOB timer_src fluorender/FluoRender/Timer/*.cpp)
-file(GLOB timer_hdr fluorender/FluoRender/Timer/*.h)
+file(GLOB timer_hdr fluorender/FluoRender/Timer/*.hpp)
 add_library(TIMER_OBJ OBJECT
   ${timer_src} ${timer_hdr})
 
@@ -539,6 +546,7 @@ if(APPLE)
     $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
+    $<TARGET_OBJECTS:INPUT_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
@@ -580,6 +588,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:FUI_OBJ>
     $<TARGET_OBJECTS:GLOBAL_OBJ>
     $<TARGET_OBJECTS:IMAGES_OBJ>
+    $<TARGET_OBJECTS:INPUT_OBJ>
     $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
     $<TARGET_OBJECTS:SCRIPT_OBJ>
     $<TARGET_OBJECTS:SELECTION_OBJ>
@@ -648,6 +657,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:INPUT_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
@@ -677,6 +687,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:FUI_OBJ>
       $<TARGET_OBJECTS:GLOBAL_OBJ>
       $<TARGET_OBJECTS:IMAGES_OBJ>
+      $<TARGET_OBJECTS:INPUT_OBJ>
       $<TARGET_OBJECTS:SCENEGRAPH_OBJ>
       $<TARGET_OBJECTS:SCRIPT_OBJ>
       $<TARGET_OBJECTS:SELECTION_OBJ>
