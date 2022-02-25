@@ -427,7 +427,7 @@ RenderFrame::RenderFrame(
 	m_tree_panel->SetScenegraph(glbin_root);
 
 	//create movie view (sets the m_recorder_dlg)
-	m_movie_view = new VMovieView(this,
+	m_movie_view = new MoviePanel(this,
 		wxDefaultPosition, panel_size);
 
 	//create prop panel
@@ -437,8 +437,8 @@ RenderFrame::RenderFrame(
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
 	m_volume_prop = new VolumePropPanel(this, m_prop_panel);
 	m_mesh_prop = new MeshPropPanel(this, m_prop_panel);
-	m_mesh_manip = new MManipulator(this, m_prop_panel);
-	m_annotation_prop = new APropView(this, m_prop_panel);
+	m_mesh_manip = new MeshTransPanel(this, m_prop_panel);
+	m_annotation_prop = new AnnotationPropPanel(this, m_prop_panel);
 	m_prop_panel->SetSizer(m_prop_sizer);
 	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
 	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
@@ -513,7 +513,7 @@ RenderFrame::RenderFrame(
 	m_brush_tool_dlg = new BrushToolDlg(this);
 
 	//noise cancelling dialog
-	m_noise_cancelling_dlg = new NoiseCancellingDlg(this);
+	m_noise_cancelling_dlg = new NoiseReduceDlg(this);
 
 	//counting dialog
 	m_counting_dlg = new CountingDlg(this);
@@ -528,11 +528,11 @@ RenderFrame::RenderFrame(
 	m_measure_dlg = new MeasureDlg(this);
 
 	//trace dialog
-	m_trace_dlg = new TraceDlg(this);
+	m_trace_dlg = new TrackDlg(this);
 	m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
 	//ocl dialog
-	m_ocl_dlg = new OclDlg(this);
+	m_ocl_dlg = new ClKernelDlg(this);
 
 	//component dialog
 	m_component_dlg = new ComponentDlg(this);

@@ -8180,13 +8180,13 @@ void Renderview::HandleMouse()
 	getValue(gstMouseX, lx);
 	getValue(gstMouseY, ly);
 	bool left_hold, middle_hold, right_hold;
-	getValue(gstMouseLeftHold, left_hold);
-	getValue(gstMouseMiddleHold, middle_hold);
-	getValue(gstMouseRightHold, right_hold);
-	bool alt_down;
-	getValue(gstKbAltDown, alt_down);
-	bool ctrl_down;
-	getValue(gstKbCtrlDown, ctrl_down);
+	glbin_input->getValue(gstMouseLeftHold, left_hold);
+	glbin_input->getValue(gstMouseMiddleHold, middle_hold);
+	glbin_input->getValue(gstMouseRightHold, right_hold);
+	bool alt_hold;
+	glbin_input->getValue(gstKbAltHold, alt_hold);
+	bool ctrl_hold;
+	glbin_input->getValue(gstKbCtrlHold, ctrl_hold);
 
 	//other properties for reading and updating
 	long int_mode;
@@ -8200,7 +8200,7 @@ void Renderview::HandleMouse()
 
 	//mouse button down operations
 	bool bval;
-	getValue(gstMouseLeftDown, bval);
+	glbin_input->getValue(gstMouseLeftDown, bval);
 	if (bval)
 	{
 		bool found_rp = false;
@@ -8228,7 +8228,7 @@ void Renderview::HandleMouse()
 		}
 
 		if (int_mode == 1 ||
-			(int_mode == 5 && alt_down) ||
+			(int_mode == 5 && alt_hold) ||
 			((int_mode == 6 ||
 			int_mode == 9 ||
 			int_mode == 11 ||
@@ -8265,19 +8265,19 @@ void Renderview::HandleMouse()
 			grow_on = true;
 		}
 	}
-	getValue(gstMouseRightDown, bval);
+	glbin_input->getValue(gstMouseRightDown, bval);
 	if (bval)
 	{
 		//nothing so far
 	}
-	getValue(gstMouseMiddleDown, bval);
+	glbin_input->getValue(gstMouseMiddleDown, bval);
 	if (bval)
 	{
 		//nothing so far
 	}
 
 	//mouse button up operations
-	getValue(gstMouseLeftUp, bval);
+	glbin_input->getValue(gstMouseLeftUp, bval);
 	if (bval)
 	{
 		if (int_mode == 1)
@@ -8301,7 +8301,7 @@ void Renderview::HandleMouse()
 			//RefreshGL(27);
 			//return;
 		}
-		else if (int_mode == 5 && !alt_down)
+		else if (int_mode == 5 && !alt_hold)
 		{
 			//add one point to a ruler
 			m_ruler_handler->AddRulerPoint(lx, ly, true);
@@ -8358,14 +8358,14 @@ void Renderview::HandleMouse()
 			//return;
 		}
 	}
-	getValue(gstMouseMiddleUp, bval);
+	glbin_input->getValue(gstMouseMiddleUp, bval);
 	if (bval)
 	{
 		//SetSortBricks();
 		//RefreshGL(28);
 		//return;
 	}
-	getValue(gstMouseRightUp, bval);
+	glbin_input->getValue(gstMouseRightUp, bval);
 	if (bval)
 	{
 		if (int_mode == 1)
@@ -8373,7 +8373,7 @@ void Renderview::HandleMouse()
 			//RefreshGL(27);
 			//return;
 		}
-		if (int_mode == 5 && !alt_down)
+		if (int_mode == 5 && !alt_hold)
 		{
 			if (m_ruler_handler->GetRulerFinished())
 			{
@@ -8416,7 +8416,7 @@ void Renderview::HandleMouse()
 		flrd::RulerPoint *p0 = m_ruler_handler->GetPoint();
 		bool hold_old = false;
 		if (int_mode == 1 ||
-			(int_mode == 5 && alt_down) ||
+			(int_mode == 5 && alt_hold) ||
 			((int_mode == 6 ||
 			int_mode == 9 ||
 			int_mode == 10 ||
@@ -8432,7 +8432,7 @@ void Renderview::HandleMouse()
 				abs(lpx - lx) + abs(lpy - ly) < 200)
 			{
 				if (left_hold &&
-					!ctrl_down &&
+					!ctrl_hold &&
 					int_mode != 10 &&
 					int_mode != 12)
 				{
@@ -8480,7 +8480,7 @@ void Renderview::HandleMouse()
 						refresh = true;
 					//RefreshGL(30);
 				}
-				if (middle_hold || (ctrl_down && left_hold))
+				if (middle_hold || (ctrl_hold && left_hold))
 				{
 					long distx = lx - lpx;
 					long disty = ly - lpy;
@@ -8589,7 +8589,7 @@ void Renderview::HandleMouse()
 		{
 			bool rval = false;
 			if (int_mode == 6)
-				rval = m_ruler_handler->EditPoint(lx, ly, alt_down);
+				rval = m_ruler_handler->EditPoint(lx, ly, alt_hold);
 			else if (int_mode == 9)
 				rval = m_ruler_handler->MoveRuler(lx, ly);
 			if (rval)

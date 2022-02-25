@@ -161,4 +161,21 @@ void Flinput::Update()
 	updateState(gstKbUp, wxGetKeyState(WXK_UP));
 	updateState(gstKbDown, wxGetKeyState(WXK_DOWN));
 	//alphabet
+	updateState(gstKbA, wxGetKeyState(wxKeyCode('A')));
+	updateState(gstKbC, wxGetKeyState(wxKeyCode('C')));
+	updateState(gstKbD, wxGetKeyState(wxKeyCode('D')));
+	updateState(gstKbF, wxGetKeyState(wxKeyCode('F')));
+	updateState(gstKbL, wxGetKeyState(wxKeyCode('L')));
+	updateState(gstKbM, wxGetKeyState(wxKeyCode('M')));
+	updateState(gstKbN, wxGetKeyState(wxKeyCode('N')));
+	updateState(gstKbR, wxGetKeyState(wxKeyCode('R')));
+	updateState(gstKbS, wxGetKeyState(wxKeyCode('S')));
+	updateState(gstKbV, wxGetKeyState(wxKeyCode('V')));
+	updateState(gstKbW, wxGetKeyState(wxKeyCode('W')));
+	updateState(gstKbX, wxGetKeyState(wxKeyCode('X')));
+	updateState(gstKbZ, wxGetKeyState(wxKeyCode('Z')));
+	//puctuation marks
+	updateState(gstKbLbrkt, wxGetKeyState(wxKeyCode('[')));
+	updateState(gstKbRbrkt, wxGetKeyState(wxKeyCode(']')));
+	updateState(gstKbBslsh, wxGetKeyState(wxKeyCode('\\')));
 }

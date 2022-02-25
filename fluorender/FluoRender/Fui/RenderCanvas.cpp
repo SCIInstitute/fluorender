@@ -1297,19 +1297,9 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	//set properties
 	m_agent->setValue(gstMouseX, long(event.GetX()));
 	m_agent->setValue(gstMouseY, long(event.GetY()));
-	m_agent->setValue(gstMouseLeftDown, event.LeftDown());
-	m_agent->setValue(gstMouseRightDown, event.RightDown());
-	m_agent->setValue(gstMouseMiddleDown, event.MiddleDown());
-	m_agent->setValue(gstMouseLeftUp, event.LeftUp());
-	m_agent->setValue(gstMouseRightUp, event.RightUp());
-	m_agent->setValue(gstMouseMiddleUp, event.MiddleUp());
-	m_agent->setValue(gstMouseLeftHold, event.LeftIsDown());
-	m_agent->setValue(gstMouseRightHold, event.RightIsDown());
-	m_agent->setValue(gstMouseMiddleHold, event.MiddleIsDown());
 	m_agent->setValue(gstMouseDrag, event.Dragging());
 	m_agent->setValue(gstMouseWheel, long(event.GetWheelRotation()));
-	m_agent->setValue(gstKbAltDown, event.AltDown());
-	m_agent->setValue(gstKbCtrlDown, event.ControlDown());
+	glbin_input->Update();
 	m_agent->getObject()->HandleMouse();
 }
 

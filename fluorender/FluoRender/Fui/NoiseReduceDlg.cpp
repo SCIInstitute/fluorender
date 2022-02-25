@@ -25,27 +25,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "NoiseCancellingDlg.h"
-#include "RenderFrame.h"
+#include <NoiseReduceDlg.h>
+#include <RenderFrame.h>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include "Components/CompSelector.h"
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(NoiseCancellingDlg, wxPanel)
-	EVT_COMMAND_SCROLL(ID_ThresholdSldr, NoiseCancellingDlg::OnThresholdChange)
-	EVT_TEXT(ID_ThresholdText, NoiseCancellingDlg::OnThresholdText)
-	EVT_COMMAND_SCROLL(ID_VoxelSldr, NoiseCancellingDlg::OnVoxelChange)
-	EVT_TEXT(ID_VoxelText, NoiseCancellingDlg::OnVoxelText)
-	EVT_BUTTON(ID_PreviewBtn, NoiseCancellingDlg::OnPreviewBtn)
-	EVT_BUTTON(ID_EraseBtn, NoiseCancellingDlg::OnEraseBtn)
-	EVT_CHECKBOX(ID_EnhanceSelChk, NoiseCancellingDlg::OnEnhanceSelChk)
+BEGIN_EVENT_TABLE(NoiseReduceDlg, wxPanel)
+	EVT_COMMAND_SCROLL(ID_ThresholdSldr, NoiseReduceDlg::OnThresholdChange)
+	EVT_TEXT(ID_ThresholdText, NoiseReduceDlg::OnThresholdText)
+	EVT_COMMAND_SCROLL(ID_VoxelSldr, NoiseReduceDlg::OnVoxelChange)
+	EVT_TEXT(ID_VoxelText, NoiseReduceDlg::OnVoxelText)
+	EVT_BUTTON(ID_PreviewBtn, NoiseReduceDlg::OnPreviewBtn)
+	EVT_BUTTON(ID_EraseBtn, NoiseReduceDlg::OnEraseBtn)
+	EVT_CHECKBOX(ID_EnhanceSelChk, NoiseReduceDlg::OnEnhanceSelChk)
 END_EVENT_TABLE()
 
-NoiseCancellingDlg::NoiseCancellingDlg(RenderFrame *frame)
+NoiseReduceDlg::NoiseReduceDlg(RenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 150),
-	0, "NoiseCancellingDlg"),
+	0, "NoiseReduceDlg"),
 	m_frame(frame),
 	m_view(0),
 	m_max_value(255.0),
@@ -132,11 +132,11 @@ NoiseCancellingDlg::NoiseCancellingDlg(RenderFrame *frame)
 	Layout();
 }
 
-NoiseCancellingDlg::~NoiseCancellingDlg()
+NoiseReduceDlg::~NoiseReduceDlg()
 {
 }
 
-void NoiseCancellingDlg::GetSettings(fluo::Renderview* view)
+void NoiseReduceDlg::GetSettings(fluo::Renderview* view)
 {
 	if (!view)
 		return;
@@ -169,7 +169,7 @@ void NoiseCancellingDlg::GetSettings(fluo::Renderview* view)
 	}
 }
 
-void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
+void NoiseReduceDlg::Preview(bool select, double size, double thresh)
 {
 	if (!m_view)
 		return;
@@ -200,7 +200,7 @@ void NoiseCancellingDlg::Preview(bool select, double size, double thresh)
 }
 
 //threshold
-void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
+void NoiseReduceDlg::OnThresholdChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%.1f", double (ival)/10.0);
@@ -208,7 +208,7 @@ void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent &event)
 		m_threshold_text->SetValue(str);
 }
 
-void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
+void NoiseReduceDlg::OnThresholdText(wxCommandEvent &event)
 {
 	wxString str = m_threshold_text->GetValue();
 	double val;
@@ -226,7 +226,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent &event)
 }
 
 //voxel size
-void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent &event)
+void NoiseReduceDlg::OnVoxelChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
@@ -234,7 +234,7 @@ void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent &event)
 		m_voxel_text->SetValue(str);
 }
 
-void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
+void NoiseReduceDlg::OnVoxelText(wxCommandEvent &event)
 {
 	wxString str = m_voxel_text->GetValue();
 	long ival;
@@ -243,7 +243,7 @@ void NoiseCancellingDlg::OnVoxelText(wxCommandEvent &event)
 	m_voxel_sldr->SetValue(ival);
 }
 
-void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
+void NoiseReduceDlg::OnPreviewBtn(wxCommandEvent &event)
 {
 	bool select = m_ca_select_only_chk->GetValue();
 	Preview(select, m_dft_size, m_dft_thresh);
@@ -251,13 +251,13 @@ void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent &event)
 	OnEnhanceSelChk(event);
 }
 
-void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent &event)
+void NoiseReduceDlg::OnEraseBtn(wxCommandEvent &event)
 {
 	if (m_frame && m_frame->GetTree())
 		m_frame->GetTree()->BrushErase();
 }
 
-void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent &event)
+void NoiseReduceDlg::OnEnhanceSelChk(wxCommandEvent &event)
 {
 	if (!m_previewed)
 		return;

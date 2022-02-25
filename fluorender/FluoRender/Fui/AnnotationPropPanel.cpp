@@ -25,16 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "APropView.h"
-#include "RenderFrame.h"
+#include <AnnotationPropPanel.h>
+#include <RenderFrame.h>
 #include <Annotations.hpp>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(APropView, wxPanel)
-	EVT_BUTTON(ID_MemoUpdateBtn, APropView::OnMemoUpdateBtn)
+BEGIN_EVENT_TABLE(AnnotationPropPanel, wxPanel)
+	EVT_BUTTON(ID_MemoUpdateBtn, AnnotationPropPanel::OnMemoUpdateBtn)
 END_EVENT_TABLE()
 
-APropView::APropView(RenderFrame* frame,
+AnnotationPropPanel::AnnotationPropPanel(RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -75,11 +75,11 @@ APropView::APropView(RenderFrame* frame,
 	Layout();
 }
 
-APropView::~APropView()
+AnnotationPropPanel::~AnnotationPropPanel()
 {
 }
 
-void APropView::GetSettings()
+void AnnotationPropPanel::GetSettings()
 {
 	if (!m_ann)
 		return;
@@ -101,25 +101,25 @@ void APropView::GetSettings()
 	}
 }
 
-void APropView::SetAnnotations(fluo::Annotations* ann)
+void AnnotationPropPanel::SetAnnotations(fluo::Annotations* ann)
 {
 	m_ann = ann;
 
 	GetSettings();
 }
 
-fluo::Annotations* APropView::GetAnnotations()
+fluo::Annotations* AnnotationPropPanel::GetAnnotations()
 {
 	return m_ann;
 }
 
-void APropView::RefreshVRenderViews(bool tree)
+void AnnotationPropPanel::RefreshVRenderViews(bool tree)
 {
 	if (m_frame)
 		m_frame->RefreshVRenderViews(tree);
 }
 
-void APropView::OnMemoUpdateBtn(wxCommandEvent& event)
+void AnnotationPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 {
 	if (m_ann)
 	{

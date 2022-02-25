@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _NOISECANCELLINGDLG_H_
-#define _NOISECANCELLINGDLG_H_
+#ifndef _NOISEREDUCEDLG_H_
+#define _NOISEREDUCEDLG_H_
 
 #include <wx/wx.h>
 #include <Types/Color.h>
@@ -36,7 +36,7 @@ namespace fluo
 {
 	class Renderview;
 }
-class NoiseCancellingDlg : public wxPanel
+class NoiseReduceDlg : public wxPanel
 {
 public:
 	enum
@@ -51,8 +51,8 @@ public:
 		ID_EnhanceSelChk
 	};
 
-	NoiseCancellingDlg(RenderFrame* frame);
-	~NoiseCancellingDlg();
+	NoiseReduceDlg(RenderFrame* frame);
+	~NoiseReduceDlg();
 
 	void GetSettings(fluo::Renderview* view);
 	void SetDftThresh(double thresh) {m_dft_thresh = thresh;}
@@ -103,4 +103,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_NOISECANCELLINGDLG_H_
+#endif//_NOISEREDUCEDLG_H_

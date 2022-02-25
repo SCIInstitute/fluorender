@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _MMANIPULATOR_H_
-#define _MMANIPULATOR_H_
+#ifndef _MESHTRANSPANEL_H_
+#define _MESHTRANSPANEL_H_
 
 #include <wx/wx.h>
 #include <wx/panel.h>
@@ -37,7 +37,7 @@ namespace fluo
 {
 	class MeshData;
 }
-class MManipulator: public wxPanel
+class MeshTransPanel: public wxPanel
 {
 	enum
 	{
@@ -62,13 +62,13 @@ class MManipulator: public wxPanel
 	};
 
 public:
-	MManipulator(RenderFrame* frame,
+	MeshTransPanel(RenderFrame* frame,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "MManipulator");
-	~MManipulator();
+		const wxString& name = "MeshTransPanel");
+	~MeshTransPanel();
 
 	void SetMeshData(fluo::MeshData* md);
 	fluo::MeshData* GetMeshData();
@@ -121,4 +121,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_MMANIPULATOR_H_
+#endif//_MESHTRANSPANEL_H_

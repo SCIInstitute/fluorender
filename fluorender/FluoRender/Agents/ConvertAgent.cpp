@@ -25,54 +25,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _APROPVIEW_H_
-#define _APROPVIEW_H_
 
-#include <wx/wx.h>
-#include <wx/panel.h>
-#include <wx/clrpicker.h>
-#include <wx/slider.h>
+#include <ConvertAgent.hpp>
+#include <ConvertDlg.h>
 
-using namespace std;
+using namespace fluo;
 
-class RenderFrame;
-namespace fluo
+ConvertAgent::ConvertAgent(ConvertDlg &dlg) :
+	InterfaceAgent(),
+	dlg_(dlg)
 {
-	class Annotations;
 }
-class APropView : public wxPanel
+
+void ConvertAgent::setObject(VolumeData* obj)
 {
-	enum
-	{
-		ID_MemoText = ID_APROP_VIEW,
-		ID_MemoUpdateBtn
-	};
+	InterfaceAgent::setObject(obj);
+}
 
-public:
-	APropView(RenderFrame* frame,
-		wxWindow* parent,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = "APropView");
-	~APropView();
+VolumeData* ConvertAgent::getObject()
+{
+	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
+}
 
-	void SetAnnotations(fluo::Annotations* ann);
-	fluo::Annotations* GetAnnotations();
-	void RefreshVRenderViews(bool tree=false);
-
-	void GetSettings();
-
-private:
-	RenderFrame* m_frame;
-	fluo::Annotations* m_ann;
-
-	wxTextCtrl* m_memo_text;
-	wxButton* m_memo_update_btn;
-
-	//memo
-	void OnMemoUpdateBtn(wxCommandEvent& event);
-	DECLARE_EVENT_TABLE()
-};
-
-#endif//_APROPVIEW_H_
+void ConvertAgent::UpdateAllSettings()
+{
+}

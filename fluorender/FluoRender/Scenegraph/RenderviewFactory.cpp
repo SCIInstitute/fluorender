@@ -310,15 +310,6 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMouseClientX, long(-1));
 		view->addValue(gstMouseClientY, long(-1));
 		view->addValue(gstMouseIn, bool(true));
-		view->addValue(gstMouseLeftDown, bool(false));
-		view->addValue(gstMouseRightDown, bool(false));
-		view->addValue(gstMouseMiddleDown, bool(false));
-		view->addValue(gstMouseLeftUp, bool(false));
-		view->addValue(gstMouseRightUp, bool(false));
-		view->addValue(gstMouseMiddleUp, bool(false));
-		view->addValue(gstMouseLeftHold, bool(false));
-		view->addValue(gstMouseRightHold, bool(false));
-		view->addValue(gstMouseMiddleHold, bool(false));
 		view->addValue(gstMouseDrag, bool(false));
 		view->addValue(gstMouseWheel, long(0));
 		view->addValue(gstRenderviewPanelId, long(-1));

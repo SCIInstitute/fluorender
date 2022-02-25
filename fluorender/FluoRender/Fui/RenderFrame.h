@@ -29,35 +29,35 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERFRAME_H_
 #define _VRENDERFRAME_H_
 
-#include "DataManager.h"
-#include "TreePanel.h"
-#include "ListPanel.h"
-#include "RenderviewPanel.h"
-#include "RenderCanvas.h"
-#include "VolumePropPanel.h"
-#include "MeshPropPanel.h"
-#include "APropView.h"
-#include "MManipulator.h"
-#include "VMovieView.h"
-#include "ClipPlanePanel.h"
-#include "OutAdjustPanel.h"
-#include "SettingDlg.h"
-#include "HelpDlg.h"
-#include "BrushToolDlg.h"
-#include "NoiseCancellingDlg.h"
-#include "CountingDlg.h"
-#include "ConvertDlg.h"
-#include "ColocalDlg.h"
-#include "RecorderDlg.h"
-#include "MeasureDlg.h"
-#include "TraceDlg.h"
-#include "OclDlg.h"
-#include "ComponentDlg.h"
-#include "CalculationDlg.h"
-#include "Tester.h"
-#include "Animator/Interpolator.h"
+#include <DataManager.h>
+#include <TreePanel.h>
+#include <ListPanel.h>
+#include <RenderviewPanel.h>
+#include <RenderCanvas.h>
+#include <VolumePropPanel.h>
+#include <MeshPropPanel.h>
+#include <AnnotationPropPanel.h>
+#include <MeshTransPanel.h>
+#include <MoviePanel.h>
+#include <ClipPlanePanel.h>
+#include <OutAdjustPanel.h>
+#include <SettingDlg.h>
+#include <HelpDlg.h>
+#include <BrushToolDlg.h>
+#include <NoiseReduceDlg.h>
+#include <CountingDlg.h>
+#include <ConvertDlg.h>
+#include <ColocalDlg.h>
+#include <RecorderDlg.h>
+#include <MeasureDlg.h>
+#include <TrackDlg.h>
+#include <ClKernelDlg.h>
+#include <ComponentDlg.h>
+#include <CalculationDlg.h>
+#include <Tester.h>
+#include <Animator/Interpolator.h>
 #include <compatibility.h>
-#include "JVMInitializer.h"
+#include <JVMInitializer.h>
 
 #include <wx/wx.h>
 #include <wx/menu.h>
@@ -225,7 +225,7 @@ public:
 	VolumePropPanel* GetPropView()
 	{ return m_volume_prop; }
 	//movie view
-	VMovieView* GetMovieView()
+	MoviePanel* GetMovieView()
 	{ return m_movie_view; }
 	//system settings
 	SettingDlg* GetSettingDlg()
@@ -240,7 +240,7 @@ public:
 	BrushToolDlg* GetBrushToolDlg()
 	{ return m_brush_tool_dlg; }
 	//noise cancelling dialog
-	NoiseCancellingDlg* GetNoiseCancellingDlg()
+	NoiseReduceDlg* GetNoiseCancellingDlg()
 	{ return m_noise_cancelling_dlg; }
 	//counting dialog
 	CountingDlg* GetCountingDlg()
@@ -257,10 +257,10 @@ public:
 	MeasureDlg* GetMeasureDlg()
 	{ return m_measure_dlg; }
 	//trace dialog
-	TraceDlg* GetTraceDlg()
+	TrackDlg* GetTraceDlg()
 	{ return m_trace_dlg; }
 	//ocl dialog
-	OclDlg* GetOclDlg()
+	ClKernelDlg* GetOclDlg()
 	{ return m_ocl_dlg; }
 	//component dialog
 	ComponentDlg* GetComponentDlg()
@@ -380,7 +380,7 @@ public:
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;
-	VMovieView* m_movie_view;
+	MoviePanel* m_movie_view;
 	fluo::VolumeData* m_vd_copy;//for copying mask source
 	bool m_copy_data;//copy data or mask
 
@@ -407,21 +407,21 @@ private:
 	SettingDlg* m_setting_dlg;
 	HelpDlg* m_help_dlg;
 	BrushToolDlg* m_brush_tool_dlg;
-	NoiseCancellingDlg* m_noise_cancelling_dlg;
+	NoiseReduceDlg* m_noise_cancelling_dlg;
 	CountingDlg* m_counting_dlg;
 	ConvertDlg* m_convert_dlg;
 	ColocalDlg* m_colocalization_dlg;
 	MeasureDlg* m_measure_dlg;
-	TraceDlg* m_trace_dlg;
-	OclDlg* m_ocl_dlg;
+	TrackDlg* m_trace_dlg;
+	ClKernelDlg* m_ocl_dlg;
 	ComponentDlg* m_component_dlg;
 	CalculationDlg* m_calculation_dlg;
 	//prop panel children
 	wxBoxSizer* m_prop_sizer;
 	VolumePropPanel* m_volume_prop;
 	MeshPropPanel* m_mesh_prop;
-	MManipulator* m_mesh_manip;
-	APropView* m_annotation_prop;
+	MeshTransPanel* m_mesh_manip;
+	AnnotationPropPanel* m_annotation_prop;
 	//tester
 	TesterDlg* m_tester;
 	//flag for show/hide views

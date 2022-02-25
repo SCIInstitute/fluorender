@@ -25,18 +25,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "MManipulator.h"
-#include "RenderFrame.h"
+#include <MeshTransPanel.h>
+#include <RenderFrame.h>
 #include <MeshData.hpp>
 #include <compatibility.h>
 
-BEGIN_EVENT_TABLE(MManipulator, wxPanel)
-	EVT_SPIN_UP(wxID_ANY, MManipulator::OnSpinUp)
-	EVT_SPIN_DOWN(wxID_ANY, MManipulator::OnSpinDown)
-	EVT_TEXT_ENTER(wxID_ANY, MManipulator::OnValueEnter)
+BEGIN_EVENT_TABLE(MeshTransPanel, wxPanel)
+	EVT_SPIN_UP(wxID_ANY, MeshTransPanel::OnSpinUp)
+	EVT_SPIN_DOWN(wxID_ANY, MeshTransPanel::OnSpinDown)
+	EVT_TEXT_ENTER(wxID_ANY, MeshTransPanel::OnValueEnter)
 END_EVENT_TABLE()
 
-MManipulator::MManipulator(RenderFrame* frame,
+MeshTransPanel::MeshTransPanel(RenderFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -145,27 +145,27 @@ MManipulator::MManipulator(RenderFrame* frame,
 	Layout();
 }
 
-MManipulator::~MManipulator()
+MeshTransPanel::~MeshTransPanel()
 {
 }
 
-void MManipulator::SetMeshData(fluo::MeshData* md)
+void MeshTransPanel::SetMeshData(fluo::MeshData* md)
 {
 	m_md = md;
 }
 
-fluo::MeshData* MManipulator::GetMeshData()
+fluo::MeshData* MeshTransPanel::GetMeshData()
 {
 	return m_md;
 }
 
-void MManipulator::RefreshVRenderViews()
+void MeshTransPanel::RefreshVRenderViews()
 {
 	if (m_frame)
 		m_frame->RefreshVRenderViews();
 }
 
-void MManipulator::GetData()
+void MeshTransPanel::GetData()
 {
 	if (!m_md)
 		return;
@@ -210,7 +210,7 @@ void MManipulator::GetData()
 	m_z_scl_text->SetValue(str);
 }
 
-void MManipulator::OnSpinUp(wxSpinEvent& event)
+void MeshTransPanel::OnSpinUp(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -253,7 +253,7 @@ void MManipulator::OnSpinUp(wxSpinEvent& event)
 	}
 }
 
-void MManipulator::OnSpinDown(wxSpinEvent& event)
+void MeshTransPanel::OnSpinDown(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
@@ -296,7 +296,7 @@ void MManipulator::OnSpinDown(wxSpinEvent& event)
 	}
 }
 
-void MManipulator::UpdateData()
+void MeshTransPanel::UpdateData()
 {
 	if (!m_md)
 		return;
@@ -335,7 +335,7 @@ void MManipulator::UpdateData()
 	RefreshVRenderViews();
 }
 
-void MManipulator::OnValueEnter(wxCommandEvent& event)
+void MeshTransPanel::OnValueEnter(wxCommandEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;

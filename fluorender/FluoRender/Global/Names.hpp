@@ -606,60 +606,60 @@ DEALINGS IN THE SOFTWARE.
 #define gstKbDownUp "kb down up"
 #define gstKbDownHold "kb down hold"
 //alphabet
-#define gstKbA "kb a"
+#define gstKbA "kb a"//A
 #define gstKbADown "kb a down"
 #define gstKbAUp "kb a up"
 #define gstKbAHold "kb a hold"
-#define gstKbC "kb c"
+#define gstKbC "kb c"//C
 #define gstKbCDown "kb c down"
 #define gstKbCUp "kb c up"
 #define gstKbCHold "kb c hold"
-#define gstKbD "kb d"
+#define gstKbD "kb d"//D
 #define gstKbDDown "kb d down"
 #define gstKbDUp "kb d up"
 #define gstKbDHold "kb d hold"
-#define gstKbF "kb f"
+#define gstKbF "kb f"//F
 #define gstKbFDown "kb f down"
-#define gstKbFUp "kb f Up"
-#define gstKbFHold "kb f Hold"
-#define gstKbL "kb l"
+#define gstKbFUp "kb f up"
+#define gstKbFHold "kb f hold"
+#define gstKbL "kb l"//L
 #define gstKbLDown "kb l down"
 #define gstKbLUp "kb l up"
 #define gstKbLHold "kb l hold"
-#define gstKbM "kb m"
+#define gstKbM "kb m"//M
 #define gstKbMDown "kb m down"
 #define gstKbMUp "kb m up"
 #define gstKbMHold "kb m hold"
-#define gstKbN "kb n"
+#define gstKbN "kb n"//N
 #define gstKbNDown "kb n down"
 #define gstKbNUp "kb n up"
 #define gstKbNHold "kb n hold"
-#define gstKbR "kb r"
+#define gstKbR "kb r"//R
 #define gstKbRDown "kb r down"
 #define gstKbRUp "kb r up"
 #define gstKbRHold "kb r hold"
-#define gstKbS "kd s"
+#define gstKbS "kd s"//S
 #define gstKbSDown "kd s down"
 #define gstKbSUp "kd s up"
 #define gstKbSHold "kd s hold"
-#define gstKbV "kb v"
+#define gstKbV "kb v"//V
 #define gstKbVDown "kb v down"
 #define gstKbVUp "kb v up"
 #define gstKbVHold "kb v hold"
-#define gstKbW "kb w"
+#define gstKbW "kb w"//W
 #define gstKbWDown "kb w down"
 #define gstKbWUp "kb w up"
 #define gstKbWHold "kb w hold"
-#define gstKbX "kb x"
+#define gstKbX "kb x"//X
 #define gstKbXDown "kb x down"
 #define gstKbXUp "kb x up"
 #define gstKbXHold "kb x hold"
-#define gstKbZ "kb z"
+#define gstKbZ "kb z"//Z
 #define gstKbZDown "kb z down"
 #define gstKbZUp "kb z up"
 #define gstKbZHold "kb z hold"
 //digit
-//mark
+//punctuation mark
 #define gstKbLbrkt "kb kbrkt"//[
 #define gstKbLbrktDown "kb kbrkt down"
 #define gstKbLbrktUp "kb kbrkt up"

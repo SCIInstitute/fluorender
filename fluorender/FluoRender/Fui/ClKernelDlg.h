@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _OCLDLG_H_
-#define _OCLDLG_H_
+#ifndef _CLKERNELDLG_H_
+#define _CLKERNELDLG_H_
 
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
@@ -38,7 +38,7 @@ namespace fluo
 {
 	class Renderview;
 }
-class OclDlg : public wxPanel
+class ClKernelDlg : public wxPanel
 {
 public:
 	enum
@@ -56,8 +56,8 @@ public:
 		ID_OutputTxt
 	};
 
-	OclDlg(RenderFrame* frame);
-	~OclDlg();
+	ClKernelDlg(RenderFrame* frame);
+	~ClKernelDlg();
 
 	void GetSettings(fluo::Renderview* view);
 	fluo::Renderview* GetView();
@@ -120,4 +120,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif
+#endif//_CLKERNELDLG_H_

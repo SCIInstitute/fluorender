@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _VMovieView_H_
-#define _VMovieView_H_
+#ifndef _MOVIEPANEL_H_
+#define _MOVIEPANEL_H_
 
 #include <wx/wx.h>
 #include <QVideoEncoder.h>
@@ -45,7 +45,7 @@ namespace fluo
 {
 	class Renderview;
 }
-class VMovieView : public wxPanel
+class MoviePanel : public wxPanel
 {
 	enum
 	{
@@ -111,12 +111,12 @@ class VMovieView : public wxPanel
 	};
 
 public:
-	VMovieView(RenderFrame* frame,
+	MoviePanel(RenderFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "VMovieView");
-	~VMovieView();
+		const wxString& name = "MoviePanel");
+	~MoviePanel();
 
 	void AddView(wxString view);
 	void DeleteView(wxString view);
@@ -425,4 +425,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_VMovieView_H_
+#endif//_MOVIEPANEL_H_

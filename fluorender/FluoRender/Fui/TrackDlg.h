@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TRACEDLG_H_
-#define _TRACEDLG_H_
+#ifndef _TRACKDLG_H_
+#define _TRACKDLG_H_
 
 #include "Main.h"
 #include <Tracking/Cell.h>
@@ -67,7 +67,7 @@ public:
 	void DeleteSelection();
 	wxString GetText(long item, int col);
 
-	friend class TraceDlg;
+	friend class TrackDlg;
 
 private:
 	fluo::Renderview *m_view;
@@ -84,7 +84,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 DECLARE_APP(VRenderApp)
-class TraceDlg : public wxPanel
+class TrackDlg : public wxPanel
 {
 public:
 	enum
@@ -166,8 +166,8 @@ public:
 		ID_StatText
 	};
 
-	TraceDlg(RenderFrame* frame);
-	~TraceDlg();
+	TrackDlg(RenderFrame* frame);
+	~TrackDlg();
 
 	void GetSettings(fluo::Renderview* vrv);
 	fluo::Renderview* GetView();
@@ -422,4 +422,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-#endif//_TRACEDLG_H_
+#endif//_TRACKDLG_H_

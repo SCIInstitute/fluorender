@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "OclDlg.h"
-#include "RenderFrame.h"
+#include <ClKernelDlg.h>
+#include <RenderFrame.h>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/KernelExecutor.h>
@@ -36,21 +36,21 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <wx/valnum.h>
 
-BEGIN_EVENT_TABLE(OclDlg, wxPanel)
-	EVT_BUTTON(ID_BrowseBtn, OclDlg::OnBrowseBtn)
-	EVT_BUTTON(ID_SaveBtn, OclDlg::OnSaveBtn)
-	EVT_BUTTON(ID_SaveAsBtn, OclDlg::OnSaveAsBtn)
-	EVT_BUTTON(ID_ExecuteBtn, OclDlg::OnExecuteBtn)
-	EVT_BUTTON(ID_ExecuteNBtn, OclDlg::OnExecuteNBtn)
-	EVT_COMMAND_SCROLL(ID_IterationsSldr, OclDlg::OnIterationsChange)
-	EVT_TEXT(ID_IterationsTxt, OclDlg::OnIterationsEdit)
-	EVT_LIST_ITEM_SELECTED(ID_KernelList, OclDlg::OnKernelListSelected)
+BEGIN_EVENT_TABLE(ClKernelDlg, wxPanel)
+	EVT_BUTTON(ID_BrowseBtn, ClKernelDlg::OnBrowseBtn)
+	EVT_BUTTON(ID_SaveBtn, ClKernelDlg::OnSaveBtn)
+	EVT_BUTTON(ID_SaveAsBtn, ClKernelDlg::OnSaveAsBtn)
+	EVT_BUTTON(ID_ExecuteBtn, ClKernelDlg::OnExecuteBtn)
+	EVT_BUTTON(ID_ExecuteNBtn, ClKernelDlg::OnExecuteNBtn)
+	EVT_COMMAND_SCROLL(ID_IterationsSldr, ClKernelDlg::OnIterationsChange)
+	EVT_TEXT(ID_IterationsTxt, ClKernelDlg::OnIterationsEdit)
+	EVT_LIST_ITEM_SELECTED(ID_KernelList, ClKernelDlg::OnKernelListSelected)
 END_EVENT_TABLE()
 
-OclDlg::OclDlg(RenderFrame* frame) :
+ClKernelDlg::ClKernelDlg(RenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(550, 600),
-0, "OclDlg"),
+0, "ClKernelDlg"),
 m_frame(frame),
 m_view(0)
 {
@@ -188,11 +188,11 @@ m_view(0)
 	Layout();
 }
 
-OclDlg::~OclDlg()
+ClKernelDlg::~ClKernelDlg()
 {
 }
 
-void OclDlg::GetSettings(fluo::Renderview* view)
+void ClKernelDlg::GetSettings(fluo::Renderview* view)
 {
 	if (!view) return;
 	m_view = view;
@@ -200,12 +200,12 @@ void OclDlg::GetSettings(fluo::Renderview* view)
 	AddKernelsToList();
 }
 
-fluo::Renderview* OclDlg::GetView()
+fluo::Renderview* ClKernelDlg::GetView()
 {
 	return m_view;
 }
 
-void OclDlg::OnBrowseBtn(wxCommandEvent& event)
+void ClKernelDlg::OnBrowseBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose an OpenCL kernel file", 
@@ -224,7 +224,7 @@ void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void OclDlg::OnSaveBtn(wxCommandEvent& event)
+void ClKernelDlg::OnSaveBtn(wxCommandEvent& event)
 {
 	wxString filename = m_kernel_file_txt->GetValue();
 	if (filename == "")
@@ -236,7 +236,7 @@ void OclDlg::OnSaveBtn(wxCommandEvent& event)
 		m_kernel_edit_stc->SaveFile(filename);
 }
 
-void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
+void ClKernelDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
 		m_frame, "Choose an OpenCL kernel file", 
@@ -264,12 +264,12 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 		delete fopendlg;
 }
 
-void OclDlg::OnExecuteBtn(wxCommandEvent& event)
+void ClKernelDlg::OnExecuteBtn(wxCommandEvent& event)
 {
 	Execute();
 }
 
-void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
+void ClKernelDlg::OnExecuteNBtn(wxCommandEvent& event)
 {
 	wxString str = m_iterations_txt->GetValue();
 	unsigned long ival;
@@ -279,7 +279,7 @@ void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
 		Execute();
 }
 
-void OclDlg::OnIterationsChange(wxScrollEvent &event)
+void ClKernelDlg::OnIterationsChange(wxScrollEvent &event)
 {
 	int ival = event.GetPosition();
 	wxString str = wxString::Format("%d", ival);
@@ -287,7 +287,7 @@ void OclDlg::OnIterationsChange(wxScrollEvent &event)
 		m_iterations_txt->SetValue(str);
 }
 
-void OclDlg::OnIterationsEdit(wxCommandEvent &event)
+void ClKernelDlg::OnIterationsEdit(wxCommandEvent &event)
 {
 	wxString str = m_iterations_txt->GetValue();
 	unsigned long ival;
@@ -295,7 +295,7 @@ void OclDlg::OnIterationsEdit(wxCommandEvent &event)
 	m_iterations_sldr->SetValue(ival);
 }
 
-void OclDlg::AddKernelsToList()
+void ClKernelDlg::AddKernelsToList()
 {
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
@@ -319,7 +319,7 @@ void OclDlg::AddKernelsToList()
 			list[i]);
 }
 
-void OclDlg::Execute()
+void ClKernelDlg::Execute()
 {
 	m_output_txt->SetValue("");
 
@@ -381,7 +381,7 @@ void OclDlg::Execute()
 	m_view->Update(39);
 }
 
-void OclDlg::OnKernelListSelected(wxListEvent& event)
+void ClKernelDlg::OnKernelListSelected(wxListEvent& event)
 {
 	long item = m_kernel_list->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -400,7 +400,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 	}
 }
 
-void OclDlg::copy_filter(void* data, void* result,
+void ClKernelDlg::copy_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	for (int bi=0; bi<brick_x; ++bi)
@@ -414,7 +414,7 @@ void OclDlg::copy_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::box_filter(void* data, void* result,
+void ClKernelDlg::box_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
@@ -451,7 +451,7 @@ void OclDlg::box_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::gauss_filter(void* data, void* result,
+void ClKernelDlg::gauss_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
@@ -490,7 +490,7 @@ void OclDlg::gauss_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::median_filter(void* data, void* result,
+void ClKernelDlg::median_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
@@ -547,7 +547,7 @@ void OclDlg::median_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::min_filter(void* data, void* result,
+void ClKernelDlg::min_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
@@ -584,7 +584,7 @@ void OclDlg::min_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::max_filter(void* data, void* result,
+void ClKernelDlg::max_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
@@ -621,7 +621,7 @@ void OclDlg::max_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::sobel_filter(void* data, void* result,
+void ClKernelDlg::sobel_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
@@ -694,7 +694,7 @@ void OclDlg::sobel_filter(void* data, void* result,
 	}
 }
 
-void OclDlg::morph_filter(void* data, void* result,
+void ClKernelDlg::morph_filter(void* data, void* result,
 	int brick_x, int brick_y, int brick_z)
 {
 	int kx = 3;
