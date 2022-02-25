@@ -54,6 +54,8 @@ public:
 		const wxString& name = "ListPanel");
 	~ListPanel();
 
+	friend class fluo::ListModel;
+
 private:
 	wxToolBar* m_toolbar;
 

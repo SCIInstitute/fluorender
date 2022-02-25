@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _CLKERNELAGENT_H_
 
 #include <InterfaceAgent.hpp>
-#include <VolumeData.hpp>
+#include <Renderview.hpp>
 
 class ClKernelDlg;
 namespace fluo
@@ -46,8 +46,8 @@ namespace fluo
 
 		virtual const char* className() const { return "ClKernelAgent"; }
 
-		virtual void setObject(VolumeData* an);
-		virtual VolumeData* getObject();
+		virtual void setObject(Renderview* an);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 

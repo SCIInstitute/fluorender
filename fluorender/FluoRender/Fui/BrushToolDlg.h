@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 #include <wx/clipbrd.h>
+#include <BrushToolAgent.hpp>
 
 class RenderFrame;
 namespace fluo
@@ -131,6 +132,10 @@ public:
 	BrushToolDlg(RenderFrame* frame);
 	~BrushToolDlg();
 
+	void AssociateRenderview(fluo::Renderview* view);
+
+	friend class fluo::BrushToolAgent;
+
 	void GetSettings(fluo::Renderview* view);
 
 	//set the brush icon down
@@ -148,6 +153,8 @@ public:
 	void PasteData();
 
 private:
+	fluo::BrushToolAgent* m_agent;
+
 	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview *m_view;

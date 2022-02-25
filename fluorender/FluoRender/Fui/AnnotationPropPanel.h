@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/panel.h>
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
+#include <AnnotationPropAgent.hpp>
 
 using namespace std;
 
@@ -57,6 +58,10 @@ public:
 		const wxString& name = "AnnotationPropPanel");
 	~AnnotationPropPanel();
 
+	void AssociateAnnotations(fluo::Annotations* ann);
+
+	friend class fluo::AnnotationPropAgent;
+
 	void SetAnnotations(fluo::Annotations* ann);
 	fluo::Annotations* GetAnnotations();
 	void RefreshVRenderViews(bool tree=false);
@@ -64,6 +69,8 @@ public:
 	void GetSettings();
 
 private:
+	fluo::AnnotationPropAgent* m_agent;
+
 	RenderFrame* m_frame;
 	fluo::Annotations* m_ann;
 

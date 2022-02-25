@@ -37,14 +37,14 @@ ClKernelAgent::ClKernelAgent(ClKernelDlg &dlg) :
 {
 }
 
-void ClKernelAgent::setObject(VolumeData* obj)
+void ClKernelAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
 }
 
-VolumeData* ClKernelAgent::getObject()
+Renderview* ClKernelAgent::getObject()
 {
-	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
+	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
 void ClKernelAgent::UpdateAllSettings()

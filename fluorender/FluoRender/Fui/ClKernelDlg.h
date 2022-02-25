@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stc/stc.h>
 #include <wx/listctrl.h>
 #include <string>
+#include <ClKernelAgent.hpp>
 
 class RenderFrame;
 namespace fluo
@@ -59,10 +60,16 @@ public:
 	ClKernelDlg(RenderFrame* frame);
 	~ClKernelDlg();
 
+	void AssociateRenderview(fluo::Renderview* view);
+
+	friend class fluo::ClKernelAgent;
+
 	void GetSettings(fluo::Renderview* view);
 	fluo::Renderview* GetView();
 
 private:
+	fluo::ClKernelAgent* m_agent;
+
 	RenderFrame* m_frame;
 	fluo::Renderview* m_view;
 

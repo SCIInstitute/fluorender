@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/slider.h>
 #include <MeshPropAgent.hpp>
 
-using namespace std;
-
 class RenderFrame;
 namespace fluo
 {

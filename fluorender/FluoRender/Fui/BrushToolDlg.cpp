@@ -25,8 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "BrushToolDlg.h"
-#include "RenderFrame.h"
+#include <BrushToolDlg.h>
+#include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/Count.h>
@@ -127,9 +129,12 @@ BrushToolDlg::BrushToolDlg(
 	m_dft_scl_translate(0.0),
 	m_hold_history(false)
 {
-	m_aligner = new flrd::RulerAlign();
 	// temporarily block events during constructor:
-	wxEventBlocker blocker(this);
+	wxEventBlocker block(this);
+
+	m_agent = glbin_agtf->getOrAddBrushToolAgent(gstBrushToolAgent, *this);
+
+	m_aligner = new flrd::RulerAlign();
 
 	wxStaticText *st = 0;
 	//validator: floating point 1

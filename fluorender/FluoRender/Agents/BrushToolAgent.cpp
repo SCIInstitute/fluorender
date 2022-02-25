@@ -37,14 +37,14 @@ BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg) :
 {
 }
 
-void BrushToolAgent::setObject(VolumeData* obj)
+void BrushToolAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
 }
 
-VolumeData* BrushToolAgent::getObject()
+Renderview* BrushToolAgent::getObject()
 {
-	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
+	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
 void BrushToolAgent::UpdateAllSettings()

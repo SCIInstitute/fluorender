@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ClKernelDlg.h>
 #include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/KernelExecutor.h>
@@ -56,6 +58,8 @@ m_view(0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_agent = glbin_agtf->getOrAddClKernelAgent(gstClKernelAgent, *this);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -190,6 +194,11 @@ m_view(0)
 
 ClKernelDlg::~ClKernelDlg()
 {
+}
+
+void ClKernelDlg::AssociateRenderview(fluo::Renderview* view)
+{
+	m_agent->setObject(view);
 }
 
 void ClKernelDlg::GetSettings(fluo::Renderview* view)

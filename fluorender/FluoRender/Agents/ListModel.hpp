@@ -32,13 +32,14 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Node.hpp>
 
+class ListPanel;
 namespace fluo
 {
 	class AgentFactory;
 	class ListModel : public wxDataViewModel, public InterfaceAgent
 	{
 	public:
-		ListModel();
+		ListModel(ListPanel &panel);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
@@ -85,7 +86,8 @@ namespace fluo
 
 		friend class AgentFactory;
 
-	protected:
+	private:
+		ListPanel &panel_;
 		void OnItemAdded(Event& event);
 		void OnItemRemoved(Event& event);
 	};

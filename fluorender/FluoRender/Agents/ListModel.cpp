@@ -27,10 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ListModel.hpp>
 #include <Global.hpp>
+#include <ListPanel.h>
 
 using namespace fluo;
 
-ListModel::ListModel()
+ListModel::ListModel(ListPanel &panel) :
+	panel_(panel)
 {
 
 }

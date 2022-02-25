@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _BRUSHTOOLAGENT_H_
 
 #include <InterfaceAgent.hpp>
-#include <VolumeData.hpp>
+#include <Renderview.hpp>
 
 class BrushToolDlg;
 namespace fluo
@@ -46,8 +46,8 @@ namespace fluo
 
 		virtual const char* className() const { return "BrushToolAgent"; }
 
-		virtual void setObject(VolumeData* vd);
-		virtual VolumeData* getObject();
+		virtual void setObject(Renderview* obj);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 

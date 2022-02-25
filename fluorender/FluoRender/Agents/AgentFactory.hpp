@@ -34,15 +34,30 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class RenderCanvasAgent;
-	class RenderviewAgent;
+	class AnnotationPropAgent;
+	class BrushToolAgent;
+	class CalculationAgent;
+	class ClipPlaneAgent;
+	class ClKernelAgent;
+	class ColocalAgent;
+	class ComponentAgent;
+	class ConvertAgent;
+	class CountingAgent;
 	class ListModel;
+	class MeasureAgent;
+	class MeshPropAgent;
+	class MeshTransAgent;
+	class MovieAgent;
+	class NoiseReduceAgent;
+	class OutAdjustAgent;
+	class RecorderAgent;
+	class RenderCanvasAgent;
+	class RenderFrameAgent;
+	class RenderviewAgent;
+	class SettingAgent;
+	class TrackAgent;
 	class TreeModel;
 	class VolumePropAgent;
-	class OutAdjustAgent;
-	class ClipPlaneAgent;
-	class MeshPropAgent;
-	class ColocalAgent;
 	class AgentFactory : public ObjectFactory
 	{
 	public:
@@ -91,15 +106,30 @@ namespace fluo
 		}
 
 		//each agent type has a function
-		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
-		RenderviewAgent* getOrAddRenderviewAgent(const std::string &name, wxWindow &window);
+		AnnotationPropAgent* getOrAddAnnotationPropAgent(const std::string &name, wxWindow &window);
+		BrushToolAgent* getOrAddBrushToolAgent(const std::string &name, wxWindow &window);
+		CalculationAgent* getOrAddCalculationAgent(const std::string &name, wxWindow &window);
+		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
+		ClKernelAgent* getOrAddClKernelAgent(const std::string &name, wxWindow &window);
+		ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
+		ComponentAgent* getOrAddComponentAgent(const std::string &name, wxWindow &window);
+		ConvertAgent* getOrAddConvertAgent(const std::string &name, wxWindow &window);
+		CountingAgent* getOrAddCountingAgent(const std::string &name, wxWindow &window);
 		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
+		MeasureAgent* getOrAddMeasureAgent(const std::string &name, wxWindow &window);
+		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
+		MeshTransAgent* getOrAddMeshTransAgent(const std::string &name, wxWindow &window);
+		MovieAgent* getOrAddMovieAgent(const std::string &name, wxWindow &window);
+		NoiseReduceAgent* getOrAddNoiseReduceAgent(const std::string &name, wxWindow &window);
+		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
+		RecorderAgent* getOrAddRecorderAgent(const std::string &name, wxWindow &window);
+		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
+		RenderFrameAgent* getOrAddRenderFrameAgent(const std::string &name, wxWindow &window);
+		RenderviewAgent* getOrAddRenderviewAgent(const std::string &name, wxWindow &window);
+		SettingAgent* getOrAddSettingAgent(const std::string &name, wxWindow &window);
+		TrackAgent* getOrAddTrackAgent(const std::string &name, wxWindow &window);
 		TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
 		VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
-		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
-		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
-		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
-		ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
 
 	protected:
 		virtual ~AgentFactory();

@@ -25,9 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "CalculationDlg.h"
-#include "RenderFrame.h"
+#include <CalculationDlg.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
@@ -62,6 +63,8 @@ CalculationDlg::CalculationDlg(RenderFrame *frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_agent = glbin_agtf->getOrAddCalculationAgent(gstCalculationAgent, *this);
 
 	wxStaticText *st = 0;
 

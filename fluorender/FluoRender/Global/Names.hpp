@@ -76,15 +76,29 @@ DEALINGS IN THE SOFTWARE.
 
 //agent names
 #define gstAgentAsset "asset"
-#define gstRenderCanvasAgent "Render View:"//plus a serial number
-#define gstRenderviewAgent "RenderviewPanel"//plus a serial number
-#define gstListModel "ListPanel"
-#define gstTreeModel "TreePanel"
-#define gstOutAdjustAgent "OutAdjustPanel"
+#define gstAnnotationPropAgent "AnnotationPropPanel"
+#define gstBrushToolAgent "BrushToolDlg"
+#define gstCalculationAgent "CalculationDlg"
 #define gstClipPlaneAgent "ClipPlanePanel"
-#define gstVolumePropAgent "VolumePropPanel"
-#define gstMeshPropAgent "MeshPropPanel"
+#define gstClKernelAgent "ClKernelDlg"
 #define gstColocalAgent "ColocalDlg"
+#define gstComponentAgent "ComponentDlg"
+#define gstConvertAgent "ConvertDlg"
+#define gstListModel "ListPanel"
+#define gstMeasureAgent "MeasureDlg"
+#define gstMeshPropAgent "MeshPropPanel"
+#define gstMeshTransAgent "MeshTransPanel"
+#define gstMovieAgent "MovieDlg"
+#define gstNoiseReduceAgent "NoiseReduceDlg"
+#define gstOutAdjustAgent "OutAdjustPanel"
+#define gstRecorderAgent "RecorderDlg"
+#define gstRenderCanvasAgent "Render View:"//plus a serial number
+#define gstRenderFrameAgent "RenderFrame"
+#define gstRenderviewAgent "RenderviewPanel"//plus a serial number
+#define gstSettingAgent "SettingDlg"
+#define gstTrackAgent "TrackDlg"
+#define gstTreeModel "TreePanel"
+#define gstVolumePropAgent "VolumePropPanel"
 
 //root
 #define gstRoot "Active Datasets"

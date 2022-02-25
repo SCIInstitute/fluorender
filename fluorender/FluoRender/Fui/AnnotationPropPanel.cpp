@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <AnnotationPropPanel.h>
 #include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Annotations.hpp>
 #include <wx/valnum.h>
 
@@ -46,6 +48,8 @@ AnnotationPropPanel::AnnotationPropPanel(RenderFrame* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	m_agent = glbin_agtf->getOrAddAnnotationPropAgent(gstAnnotationPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxStaticText* st = 0;
@@ -77,6 +81,11 @@ AnnotationPropPanel::AnnotationPropPanel(RenderFrame* frame,
 
 AnnotationPropPanel::~AnnotationPropPanel()
 {
+}
+
+void AnnotationPropPanel::AssociateAnnotations(fluo::Annotations* ann)
+{
+	m_agent->setObject(ann);
 }
 
 void AnnotationPropPanel::GetSettings()

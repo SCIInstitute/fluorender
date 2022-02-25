@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _CALCULATIONDLG_H_
 
 #include <wx/wx.h>
+#include <CalculationAgent.hpp>
 
 class RenderFrame;
 namespace fluo
@@ -62,9 +63,13 @@ public:
 	CalculationDlg(RenderFrame* frame);
 	~CalculationDlg();
 
+	friend class fluo::CalculationAgent;
+
 	void SetGroup(fluo::VolumeGroup* group);
 
 private:
+	fluo::CalculationAgent* m_agent;
+
 	RenderFrame* m_frame;
 	//current view
 	fluo::Renderview *m_view;
