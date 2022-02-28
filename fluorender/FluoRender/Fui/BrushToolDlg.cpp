@@ -32,17 +32,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <Calculate/Count.h>
-#include <Distance/Cov.h>
-#include <Distance/RulerAlign.h>
-#include <Selection/VolumeSelector.h>
 #include <FLIVR/Texture.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 //resources
 #include <png_resource.h>
 #include "img/icons.h"
-
-#define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 
 BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 	//paint tools
@@ -121,9 +116,6 @@ BrushToolDlg::BrushToolDlg(
 	wxDefaultPosition,
 	wxSize(500, 620),
 	0, "BrushToolDlg"),
-	m_frame(frame),
-	m_view(0),
-	m_selector(0),
 	m_max_value(255.0),
 	m_dft_gm_falloff(0.0),
 	m_dft_scl_translate(0.0),
@@ -133,8 +125,6 @@ BrushToolDlg::BrushToolDlg(
 	wxEventBlocker block(this);
 
 	m_agent = glbin_agtf->getOrAddBrushToolAgent(gstBrushToolAgent, *this);
-
-	m_aligner = new flrd::RulerAlign();
 
 	wxStaticText *st = 0;
 	//validator: floating point 1
@@ -490,140 +480,6 @@ BrushToolDlg::BrushToolDlg(
 
 BrushToolDlg::~BrushToolDlg()
 {
-	if (m_aligner)
-		delete m_aligner;
-}
-
-void BrushToolDlg::GetSettings(fluo::Renderview* view)
-{
-	if (!view)
-		return;
-	m_view = view;
-	m_aligner->SetView(m_view);
-	m_selector = m_view->GetVolumeSelector();
-	if (!m_selector)
-		return;
-
-	fluo::VolumeData* sel_vol = 0;
-	if (m_frame)
-	{
-		sel_vol = m_frame->GetCurSelVol();
-		m_frame->GetNoiseCancellingDlg()->GetSettings(m_view);
-		m_frame->GetCountingDlg()->GetSettings(m_view);
-		//vr_frame->GetColocalizationDlg()->GetSettings(m_view);
-	}
-
-	double dval = 0.0;
-	int ival = 0;
-	bool bval = false;
-
-	//threshold range
-	if (sel_vol)
-	{
-		sel_vol->getValue(gstMaxInt, m_max_value);
-		//falloff
-		m_brush_scl_translate_sldr->SetRange(0, int(m_max_value*10.0+0.5));
-		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
-	}
-	//selection strength
-	dval = m_selector->GetBrushSclTranslate();
-	m_dft_scl_translate = dval;
-	m_brush_scl_translate_sldr->SetValue(int(dval*m_max_value*10.0+0.5));
-	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", m_dft_scl_translate*m_max_value));
-	//gm falloff
-	dval = m_selector->GetBrushGmFalloff();
-	m_dft_gm_falloff = dval;
-	m_brush_gm_falloff_sldr->SetValue(int(GM_2_ESTR(dval)*1000.0 + 0.5));
-	m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
-	//2d influence
-	dval = m_selector->GetW2d();
-	m_brush_2dinfl_sldr->SetValue(int(dval*100.0+0.5));
-	m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
-	//edge detect
-	bval = m_selector->GetEdgeDetect();
-	m_edge_detect_chk->SetValue(bval);
-	if (bval)
-	{
-		m_brush_gm_falloff_sldr->Enable();
-		m_brush_gm_falloff_text->Enable();
-	}
-	else
-	{
-		m_brush_gm_falloff_sldr->Disable();
-		m_brush_gm_falloff_text->Disable();
-	}
-	//hidden removal
-	bval = m_selector->GetHiddenRemoval();
-	m_hidden_removal_chk->SetValue(bval);
-	//select group
-	bval = m_selector->GetSelectGroup();
-	m_select_group_chk->SetValue(bval);
-	//estimate threshold
-	bval = m_selector->GetEstimateThreshold();
-	m_estimate_thresh_chk->SetValue(bval);
-	//brick acuracy
-	bval = m_selector->GetUpdateOrder();
-	m_accurate_bricks_chk->SetValue(bval);
-
-	//size1
-	dval = m_selector->GetBrushSize1();
-	m_brush_size1_sldr->SetValue(int(dval));
-	m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
-	//size2
-	m_brush_size2_chk->SetValue(m_selector->GetUseBrushSize2());
-	if (m_selector->GetUseBrushSize2())
-	{
-		m_brush_size2_sldr->Enable();
-		m_brush_size2_text->Enable();
-	}
-	else
-	{
-		m_brush_size2_sldr->Disable();
-		m_brush_size2_text->Disable();
-	}
-	dval = m_selector->GetBrushSize2();
-	m_brush_size2_sldr->SetValue(int(dval));
-	m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
-
-	//iteration number
-	ival = m_selector->GetBrushIteration();
-	if (ival<=BRUSH_TOOL_ITER_WEAK)
-	{
-		m_brush_iterw_rb->SetValue(true);
-		m_brush_iters_rb->SetValue(false);
-		m_brush_iterss_rb->SetValue(false);
-	}
-	else if (ival<=BRUSH_TOOL_ITER_NORMAL)
-	{
-		m_brush_iterw_rb->SetValue(false);
-		m_brush_iters_rb->SetValue(true);
-		m_brush_iterss_rb->SetValue(false);
-	}
-	else
-	{
-		m_brush_iterw_rb->SetValue(false);
-		m_brush_iters_rb->SetValue(false);
-		m_brush_iterss_rb->SetValue(true);
-	}
-
-	//brush size relation
-	bval = m_selector->GetBrushSizeData();
-	if (bval)
-	{
-		m_brush_size_data_rb->SetValue(true);
-		m_brush_size_screen_rb->SetValue(false);
-	}
-	else
-	{
-		m_brush_size_data_rb->SetValue(false);
-		m_brush_size_screen_rb->SetValue(true);
-	}
-
-	//output
-	m_history_chk->SetValue(m_hold_history);
-
-	UpdateUndoRedo();
-	UpdateMaskTb();
 }
 
 void BrushToolDlg::SelectBrush(int id)
@@ -639,30 +495,6 @@ void BrushToolDlg::SelectBrush(int id)
 		m_toolbar->ToggleTool(id, true);
 
 	GetSettings(m_view);
-}
-
-void BrushToolDlg::UpdateUndoRedo()
-{
-	if (m_frame)
-	{
-		fluo::VolumeData* vd = m_frame->GetCurSelVol();
-		if (vd && vd->GetTexture())
-		{
-			m_toolbar->EnableTool(ID_BrushUndo,
-				vd->GetTexture()->get_undo());
-			m_toolbar->EnableTool(ID_BrushRedo,
-				vd->GetTexture()->get_redo());
-		}
-	}
-}
-
-void BrushToolDlg::UpdateMaskTb()
-{
-	bool bval = m_frame && m_frame->m_vd_copy;
-	m_mask_tb->EnableTool(ID_MaskPaste, bval);
-	m_mask_tb->EnableTool(ID_MaskMerge, bval);
-	m_mask_tb->EnableTool(ID_MaskExclude, bval);
-	m_mask_tb->EnableTool(ID_MaskIntersect, bval);
 }
 
 //brush commands

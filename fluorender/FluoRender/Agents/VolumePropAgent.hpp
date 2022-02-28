@@ -60,11 +60,10 @@ namespace fluo
 	protected:
 		VolumePropPanel &panel_;
 
+	private:
 		//update functions
 		void OnLuminanceChanged(Event& event);
 		void OnColorChanged(Event& event);
-
-	private:
 	};
 }
 

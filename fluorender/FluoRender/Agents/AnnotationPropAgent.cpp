@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <AnnotationPropAgent.hpp>
 #include <AnnotationPropPanel.h>
+#include <string>
 
 using namespace fluo;
 
@@ -49,4 +50,19 @@ Annotations* AnnotationPropAgent::getObject()
 
 void AnnotationPropAgent::UpdateAllSettings()
 {
+	std::string memo;
+	getValue(gstMemo, memo);
+	panel_.m_memo_text->SetValue(memo);
+	bool bval;
+	getValue(gstMemoRo, bval);
+	if (bval)
+	{
+		panel_.m_memo_text->SetEditable(false);
+		panel_.m_memo_update_btn->Disable();
+	}
+	else
+	{
+		panel_.m_memo_text->SetEditable(true);
+		panel_.m_memo_update_btn->Enable();
+	}
 }

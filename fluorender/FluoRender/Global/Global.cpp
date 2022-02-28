@@ -106,6 +106,9 @@ void Global::BuildRoot()
 	root->addRvalu(gstCurrentVolumeGroup, (Referenced*)(0));
 	root->addRvalu(gstCurrentMeshGroup, (Referenced*)(0));
 	root->addRvalu(gstCurrentAnnotations, (Referenced*)(0));
+	//copy source
+	root->addRvalu(gstSourceVolume, (Referenced*)(0));
+	root->addValue(gstSourceMode, long(0));
 	origin_->addChild(root);
 }
 

@@ -50,6 +50,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstCurrentAnnotations "current annotations"
 #define gstCurVolIdx "cur vol idx"
 #define gstCurMshIdx "cur msh idx"
+//copy source
+#define gstSourceVolume "source volume"//for mask copying
+#define gstSourceMode "source mode"//copy 0:data; 1:mask
 
 //factories & defaults
 #define gstDefaultFile "default file"

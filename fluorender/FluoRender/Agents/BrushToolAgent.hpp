@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
 
+#define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
+
 class BrushToolDlg;
 namespace fluo
 {
@@ -50,6 +52,9 @@ namespace fluo
 		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
+		//update undo status
+		void UpdateUndoRedo();
+		void UpdateMaskTb();
 
 		virtual BrushToolAgent* asBrushToolAgent() { return this; }
 		virtual const BrushToolAgent* asBrushToolAgent() const { return this; }
@@ -58,6 +63,8 @@ namespace fluo
 		BrushToolDlg &dlg_;
 
 	private:
+		//update functions
+		void OnInterModeChanged(Event& event);
 	};
 }
 

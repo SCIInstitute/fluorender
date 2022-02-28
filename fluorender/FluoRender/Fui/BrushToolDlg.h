@@ -40,11 +40,6 @@ namespace fluo
 	class Renderview;
 	class VolumeData;
 }
-namespace flrd
-{
-	class RulerAlign;
-	class VolumeSelector;
-}
 struct GridData
 {
 	int voxel_sum;
@@ -136,13 +131,8 @@ public:
 
 	friend class fluo::BrushToolAgent;
 
-	void GetSettings(fluo::Renderview* view);
-
 	//set the brush icon down
 	void SelectBrush(int id);
-	//update undo status
-	void UpdateUndoRedo();
-	void UpdateMaskTb();
 
 	//output
 	void Update(int mode);//mode: 0-size; 1-speed
@@ -155,11 +145,6 @@ public:
 private:
 	fluo::BrushToolAgent* m_agent;
 
-	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview *m_view;
-	flrd::VolumeSelector *m_selector;
-
 	//max volume value
 	double m_max_value;
 	//default brush properties
@@ -167,8 +152,6 @@ private:
 	double m_dft_scl_translate;
 	//output
 	bool m_hold_history;
-
-	flrd::RulerAlign* m_aligner;
 
 	//paint tools
 	//toolbar

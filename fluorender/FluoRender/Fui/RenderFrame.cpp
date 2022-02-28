@@ -172,9 +172,7 @@ RenderFrame::RenderFrame(
 	m_cur_sel_type(-1),
 	m_cur_sel_vol(-1),
 	m_cur_sel_mesh(-1),
-	m_benchmark(benchmark),
-	m_vd_copy(0),
-	m_copy_data(false)
+	m_benchmark(benchmark)
 {
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);

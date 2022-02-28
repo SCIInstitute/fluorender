@@ -73,6 +73,7 @@ namespace flrd
 	class RulerList;
 	class RulerHandler;
 	class RulerRenderer;
+	class RulerAlign;
 	class Tracks;
 	class ScriptProc;
 	class VolumePoint;
@@ -255,6 +256,7 @@ namespace fluo
 		flrd::RulerList* GetRulerList() { return m_ruler_list; }
 		flrd::RulerHandler* GetRulerHandler() { return m_ruler_handler; }
 		flrd::RulerRenderer* GetRulerRenderer() { return m_ruler_renderer; }
+		flrd::RulerAlign* GetRulerAlign() { return m_ruler_align; }
 
 		flrd::VolumePoint* GetVolumePoint() { return m_volume_point; }
 
@@ -498,6 +500,7 @@ namespace fluo
 		//handle rulers
 		flrd::RulerHandler *m_ruler_handler;
 		flrd::RulerRenderer *m_ruler_renderer;
+		flrd::RulerAlign *m_ruler_align;
 		flrd::VolumePoint *m_volume_point;
 		VolumeLoader *m_loader;
 		Interpolator* m_interpolator;

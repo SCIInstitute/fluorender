@@ -62,17 +62,8 @@ public:
 
 	friend class fluo::AnnotationPropAgent;
 
-	void SetAnnotations(fluo::Annotations* ann);
-	fluo::Annotations* GetAnnotations();
-	void RefreshVRenderViews(bool tree=false);
-
-	void GetSettings();
-
 private:
 	fluo::AnnotationPropAgent* m_agent;
-
-	RenderFrame* m_frame;
-	fluo::Annotations* m_ann;
 
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

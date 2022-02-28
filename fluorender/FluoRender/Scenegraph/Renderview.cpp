@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Distance/RulerRenderer.h>
 #include <Distance/RulerHandler.h>
+#include <Distance/RulerAlign.h>
 #include <Distance/Cov.h>
 #include <Distance/SegGrow.h>
 #include <Tracking/Tracks.h>
@@ -91,6 +92,7 @@ Renderview::Renderview()
 	m_scriptor = new flrd::ScriptProc();
 	m_ruler_handler = new flrd::RulerHandler();
 	m_ruler_renderer = new flrd::RulerRenderer();
+	m_ruler_align = new flrd::RulerAlign(); m_ruler_align->SetView(this);
 	m_volume_point = new flrd::VolumePoint();
 	m_loader = new VolumeLoader();
 	m_interpolator = new Interpolator();
@@ -111,6 +113,7 @@ Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	m_scriptor = new flrd::ScriptProc();
 	m_ruler_handler = new flrd::RulerHandler();
 	m_ruler_renderer = new flrd::RulerRenderer();
+	m_ruler_align = new flrd::RulerAlign(); m_ruler_align->SetView(this);
 	m_volume_point = new flrd::VolumePoint();
 	m_loader = new VolumeLoader();
 	m_interpolator = new Interpolator();
@@ -166,6 +169,7 @@ Renderview::~Renderview()
 	delete m_scriptor;
 	delete m_ruler_handler;
 	delete m_ruler_renderer;
+	delete m_ruler_align;
 	delete m_volume_point;
 	delete m_loader;
 	delete m_interpolator;

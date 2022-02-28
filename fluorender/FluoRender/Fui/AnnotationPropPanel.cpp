@@ -42,9 +42,7 @@ AnnotationPropPanel::AnnotationPropPanel(RenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size, style, name),
-	m_frame(frame),
-	m_ann(0)
+	wxPanel(parent, wxID_ANY, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -88,52 +86,9 @@ void AnnotationPropPanel::AssociateAnnotations(fluo::Annotations* ann)
 	m_agent->setObject(ann);
 }
 
-void AnnotationPropPanel::GetSettings()
-{
-	if (!m_ann)
-		return;
-
-	std::string memo;
-	m_ann->getValue(gstMemo, memo);
-	m_memo_text->SetValue(memo);
-	bool bval;
-	m_ann->getValue(gstMemoRo, bval);
-	if (bval)
-	{
-		m_memo_text->SetEditable(false);
-		m_memo_update_btn->Disable();
-	}
-	else
-	{
-		m_memo_text->SetEditable(true);
-		m_memo_update_btn->Enable();
-	}
-}
-
-void AnnotationPropPanel::SetAnnotations(fluo::Annotations* ann)
-{
-	m_ann = ann;
-
-	GetSettings();
-}
-
-fluo::Annotations* AnnotationPropPanel::GetAnnotations()
-{
-	return m_ann;
-}
-
-void AnnotationPropPanel::RefreshVRenderViews(bool tree)
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews(tree);
-}
-
 void AnnotationPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 {
-	if (m_ann)
-	{
-		wxString memo = m_memo_text->GetValue();
-		std::string str = memo.ToStdString();
-		m_ann->updValue(gstMemo, str);
-	}
+	wxString memo = m_memo_text->GetValue();
+	std::string str = memo.ToStdString();
+	m_agent->updValue(gstMemo, str);
 }
