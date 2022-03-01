@@ -352,6 +352,7 @@ namespace flvr
 
 	bool KernelProgram::executeKernel(int index, cl_uint dim, size_t *global_size, size_t *local_size)
 	{
+		bool result = false;
 		if (!valid())
 			return false;
 		if (index < 0 || index >= kernels_.size())
@@ -369,13 +370,13 @@ namespace flvr
 			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
 				if (err != CL_SUCCESS)
-					return false;
+					result = false;
 			}
 		}
 		err = clEnqueueNDRangeKernel(queue_, kernels_[index].kernel, dim, NULL, global_size,
 			local_size, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
-			return false;
+			result = false;
 		for (i=0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].find_kernel(index) &&
@@ -385,12 +386,12 @@ namespace flvr
 			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
 				if (err != CL_SUCCESS)
-					return false;
+					result = false;
 			}
 		}
 		clFlush(queue_);
 		clFinish(queue_);
-		return true;
+		return result;
 	}
 
 	bool KernelProgram::executeKernel(std::string &name, cl_uint dim, size_t *global_size, size_t *local_size)
