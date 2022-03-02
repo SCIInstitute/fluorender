@@ -1415,6 +1415,8 @@ const char* str_cl_distdens_field_3d = \
 "	__global unsigned char* densf,\n" \
 "	unsigned int nxy,\n" \
 "	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
 "	unsigned int dnxy,\n" \
 "	unsigned int dnx,\n" \
 "	int dsize,\n" \
@@ -1425,7 +1427,8 @@ const char* str_cl_distdens_field_3d = \
 "	int3 ijk = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
-"	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"	unsigned int index = nxy*clamp(ijk.z, 0, (int)(nz-1)) +\n" \
+"		nx*clamp(ijk.y, 0, (int)(ny-1)) + clamp(ijk.x, 0, (int)(nx-1));\n" \
 "	float distv = distscl * distf[index];\n" \
 "	density = density * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \

@@ -940,6 +940,8 @@ void ComponentGenerator::DistDensityField(
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&dsize2));
