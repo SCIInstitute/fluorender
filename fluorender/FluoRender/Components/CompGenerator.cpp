@@ -424,29 +424,32 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 	unsigned char* val = 0;
 	std::ofstream ofs;
 #endif
+
 	if (!CheckBricks())
 		return;
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
+	//prog density
+	flvr::KernelProgram* kernel_prog_dens = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_field_3d);
-	if (!kernel_prog)
+	if (!kernel_prog_dens)
 		return;
+	int kernel_dens_index0 = kernel_prog_dens->createKernel("kernel_0");
+	int kernel_dens_index1 = kernel_prog_dens->createKernel("kernel_1");
+	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
-	int kernel_index0 = kernel_prog->createKernel("kernel_0");
-	int kernel_index1 = kernel_prog->createKernel("kernel_1");
-	int kernel_index2 = kernel_prog->createKernel("kernel_2");
-
-	flvr::KernelProgram* kernel2_prog = flvr::VolumeRenderer::
+	//prog grow
+	flvr::KernelProgram* kernel_prog_grow = flvr::VolumeRenderer::
 		vol_kernel_factory_.kernel(str_cl_density_grow_3d);
-	if (!kernel2_prog)
+	if (!kernel_prog_grow)
 		return;
-	int kernel2_index0;
+	int kernel_grow_index0;
 	if (m_use_mask)
-		kernel2_index0 = kernel2_prog->createKernel("kernel_1");
+		kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_1");
 	else
-		kernel2_index0 = kernel2_prog->createKernel("kernel_0");
+		kernel_grow_index0 = kernel_prog_grow->createKernel("kernel_0");
 
+	//processing by brick
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
 	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
@@ -470,6 +473,7 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		unsigned int gsx, gsy, gsz;//pixel number in group
 		int ngx, ngy, ngz;//number of groups
 		int dnx, dny, dnz;//adjusted n size
+		int dnxy, ngxy;//precalculate
 		gsx = wsize >= nx ? nx : wsize;
 		gsy = wsize >= ny ? ny : wsize;
 		gsz = wsize >= nz ? nz : wsize;
@@ -479,100 +483,102 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 		dnx = gsx * ngx;
 		dny = gsy * ngy;
 		dnz = gsz * ngz;
-		//set
-		//kernel 0
-		int dnxy = dnx * dny;
-		kernel_prog->setKernelArgBegin(kernel_index0);
-		flvr::Argument arg_img =
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_df =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&dsize));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		//kernel 1
-		int ngxy = ngy * ngx;
-		kernel_prog->setKernelArgBegin(kernel_index1);
-		kernel_prog->setKernelArgument(arg_df);
-		flvr::Argument arg_gavg =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
-		flvr::Argument arg_gvar =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ngxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		//kernel 2
-		kernel_prog->setKernelArgBegin(kernel_index2, 2);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ngy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ngz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-
+		dnxy = dnx * dny;
+		ngxy = ngy * ngx;
+		//sizes
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
+		//generate density field arg_densf
+		//set
+		//kernel 0
+		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
+		flvr::Argument arg_img =
+			kernel_prog_dens->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		flvr::Argument arg_densf =
+			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&dsize));
+		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&sscale));
+		//kernel 1
+		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
+		kernel_prog_dens->setKernelArgument(arg_densf);
+		flvr::Argument arg_gavg =
+			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
+		flvr::Argument arg_gvar =
+			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngxy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		//kernel 2
+		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2, 2);
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+
 		//init
-		kernel_prog->executeKernel(kernel_index0, 3, global_size2, local_size);
+		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog->readBuffer(arg_df, val);
+		//kernel_prog_dens->readBuffer(arg_densf, val);
 		//ofs.open("E:/DATA/Test/density_field/df.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//delete[] val;
 		//ofs.close();
 		//group avg and var
 		global_size[0] = size_t(ngx); global_size[1] = size_t(ngy); global_size[2] = size_t(ngz);
-		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
+		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
 		//debug
 		//val = new unsigned char[ngx*ngy*ngz];
-		//kernel_prog->readBuffer(arg_gavg, val);
+		//kernel_prog_dens->readBuffer(arg_gavg, val);
 		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
-		//kernel_prog->readBuffer(arg_gvar, val);
+		//kernel_prog_dens->readBuffer(arg_gvar, val);
 		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
 		//delete[] val;
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
-		kernel_prog->setKernelArgBegin(kernel_index2);
+		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
 		flvr::Argument arg_avg =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
-		kernel_prog->setKernelArgument(arg_gavg);
-		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
+		kernel_prog_dens->setKernelArgument(arg_gavg);
+		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		//compute var
-		kernel_prog->setKernelArgBegin(kernel_index2);
+		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
 		flvr::Argument arg_var =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
-		kernel_prog->setKernelArgument(arg_gvar);
-		kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
+			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
+		kernel_prog_dens->setKernelArgument(arg_gvar);
+		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog->readBuffer(arg_avg, val);
+		//kernel_prog_dens->readBuffer(arg_avg, val);
 		//ofs.open("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
-		//kernel_prog->readBuffer(arg_var, val);
+		//kernel_prog_dens->readBuffer(arg_var, val);
 		//ofs.open("E:/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
 		//delete[] val;
 
 		//release buffer
-		kernel_prog->releaseMemObject(arg_gavg);
-		kernel_prog->releaseMemObject(arg_gvar);
+		kernel_prog_dens->releaseMemObject(arg_gavg);
+		kernel_prog_dens->releaseMemObject(arg_gvar);
 
 		//density grow
 		unsigned int rcnt = 0;
@@ -582,40 +588,40 @@ void ComponentGenerator::DensityField(int dsize, int wsize,
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel2_prog->setKernelArgBegin(kernel2_index0);
-		kernel2_prog->setKernelArgument(arg_img);
+		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
+		kernel_prog_grow->setKernelArgument(arg_img);
 		flvr::Argument arg_label =
-			kernel2_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
-		kernel2_prog->setKernelArgument(arg_df);
-		kernel2_prog->setKernelArgument(arg_avg);
-		kernel2_prog->setKernelArgument(arg_var);
-		kernel2_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
-		kernel2_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel2_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel2_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel2_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel2_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel2_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&tran));
-		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
-		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&density));
-		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&varth));
-		kernel2_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
+			kernel_prog_grow->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+		kernel_prog_grow->setKernelArgument(arg_densf);
+		kernel_prog_grow->setKernelArgument(arg_avg);
+		kernel_prog_grow->setKernelArgument(arg_var);
+		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&tran));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
+		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&sscale));
 		if (m_use_mask)
-			kernel2_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < iter; ++j)
-			kernel2_prog->executeKernel(kernel2_index0, 3, global_size, local_size);
+			kernel_prog_grow->executeKernel(kernel_grow_index0, 3, global_size, local_size);
 
 		//read back
-		kernel2_prog->copyBufTex3D(arg_label, lid,
+		kernel_prog_grow->copyBufTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel2_prog->releaseAll();
-		kernel_prog->releaseAll(false);
+		kernel_prog_grow->releaseAll();
+		kernel_prog_dens->releaseAll(false);
 
 		postwork(__FUNCTION__);
 	}
@@ -851,7 +857,26 @@ void ComponentGenerator::DistDensityField(
 			mid = m_vd->GetVR()->load_brick_mask(b);
 		GLint lid = m_vd->GetVR()->load_brick_label(b);
 
+		//divide
+		unsigned int gsx, gsy, gsz;//pixel number in group
+		int ngx, ngy, ngz;//number of groups
+		int dnx, dny, dnz;//adjusted n size
+		int nxy, dnxy, ngxy;//precalculate
+		gsx = wsize >= nx ? nx : wsize;
+		gsy = wsize >= ny ? ny : wsize;
+		gsz = wsize >= nz ? nz : wsize;
+		ngx = nx / gsx + (nx % gsx ? 1 : 0);
+		ngy = ny / gsy + (ny % gsy ? 1 : 0);
+		ngz = nz / gsz + (nz % gsz ? 1 : 0);
+		dnx = gsx * ngx;
+		dny = gsy * ngy;
+		dnz = gsz * ngz;
+		nxy = nx * ny;
+		dnxy = dnx * dny;
+		ngxy = ngy * ngx;
+		//sizes
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//generate distance field arg_distf
@@ -905,24 +930,8 @@ void ComponentGenerator::DistDensityField(
 		//ofs.close();
 
 		//generate density field arg_densf
-		//divide
-		unsigned int gsx, gsy, gsz;//pixel number in group
-		int ngx, ngy, ngz;//number of groups
-		int dnx, dny, dnz;//adjusted n size
-		gsx = wsize >= nx ? nx : wsize;
-		gsy = wsize >= ny ? ny : wsize;
-		gsz = wsize >= nz ? nz : wsize;
-		ngx = nx / gsx + (nx % gsx ? 1 : 0);
-		ngy = ny / gsy + (ny % gsy ? 1 : 0);
-		ngz = nz / gsz + (nz % gsz ? 1 : 0);
-		dnx = gsx * ngx;
-		dny = gsy * ngy;
-		dnz = gsz * ngz;
-		size_t global_size2[3] = { size_t(dnx), size_t(dny), size_t(dnz) };
 		//set
 		//kernel 0
-		int nxy = nx * ny;
-		int dnxy = dnx * dny;
 		float distscl = 5.0f / max_dist;
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
 		kernel_prog_dens->setKernelArgument(arg_img);
@@ -938,7 +947,6 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&distscl));
 		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
 		//kernel 1
-		int ngxy = ngy * ngx;
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
 		kernel_prog_dens->setKernelArgument(arg_densf);
 		flvr::Argument arg_gavg =
@@ -977,11 +985,11 @@ void ComponentGenerator::DistDensityField(
 		kernel_prog_dens->executeKernel(kernel_dens_index1, 3, global_size, local_size);
 		//debug
 		//val = new unsigned char[ngx*ngy*ngz];
-		//kernel_prog->readBuffer(arg_gavg, val);
+		//kernel_prog_dens->readBuffer(arg_gavg, val);
 		//ofs.open("E:/DATA/Test/density_field/arg_gavg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
-		//kernel_prog->readBuffer(arg_gvar, val);
+		//kernel_prog_dens->readBuffer(arg_gvar, val);
 		//ofs.open("E:/DATA/Test/density_field/arg_gvar.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, ngx*ngy*ngz);
 		//ofs.close();
@@ -1002,11 +1010,11 @@ void ComponentGenerator::DistDensityField(
 
 		//debug
 		//val = new unsigned char[dnx*dny*dnz];
-		//kernel_prog->readBuffer(arg_avg, val);
+		//kernel_prog_dens->readBuffer(arg_avg, val);
 		//ofs.open("E:/DATA/Test/density_field/avg.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
-		//kernel_prog->readBuffer(arg_var, val);
+		//kernel_prog_dens->readBuffer(arg_var, val);
 		//ofs.open("E:/DATA/Test/density_field/var.bin", std::ios::out | std::ios::binary);
 		//ofs.write((char*)val, dnx*dny*dnz);
 		//ofs.close();
