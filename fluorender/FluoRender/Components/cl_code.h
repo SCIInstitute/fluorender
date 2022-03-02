@@ -601,8 +601,8 @@ const char* str_cl_density_field_3d = \
 "	int3 ub = (int3)(lb.x + gsx, lb.y + gsy, lb.z + gsz);\n" \
 "	int3 ijk = (int3)(0);\n" \
 "	float gnum = (float)(gsx * gsy * gsz);\n" \
-"	float sum = 0.0;\n" \
-"	float sum2 = 0.0;\n" \
+"	float sum = 0.0f;\n" \
+"	float sum2 = 0.0f;\n" \
 "	unsigned int index;\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
@@ -656,7 +656,7 @@ const char* str_cl_density_field_3d = \
 "	gcrd = clamp(gid + (int3)(1, 1, 1), (int3)(0), (int3)(ngx-1, ngy-1, ngz-1));\n" \
 "	uchar c111 = gd[ngx*ngy*gcrd.z + ngx*gcrd.y + gcrd.x];\n" \
 "	float3 d = ((float3)(gijk.x, gijk.y, gijk.z) - (float3)(gsx/2.0f, gsy/2.0f, gsz/2.0f)) / (float3)(gsx, gsy, gsz);\n" \
-"	int3 delta = isless(d, (float3)(0.0));\n" \
+"	int3 delta = isless(d, (float3)(0.0f));\n" \
 "	d -= (float3)(delta.x, delta.y, delta.z);\n" \
 "	float c00 = (float)(c000)*(1.0f-d.x) + (float)(c100)*d.x;\n" \
 "	float c01 = (float)(c001)*(1.0f-d.x) + (float)(c101)*d.x;\n" \
@@ -1427,9 +1427,9 @@ const char* str_cl_distdens_field_3d = \
 "	float density = get_2d_density(data, (int4)(ijk, 1), dsize) * sscale;\n" \
 "	unsigned int index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "	float distv = distscl * distf[index];\n" \
-"	density = density * (1.0 - dist_strength) + distv * dist_strength;\n" \
+"	density = density * (1.0f - dist_strength) + distv * dist_strength;\n" \
 "	index = dnxy*ijk.z + dnx*ijk.y + ijk.x;\n" \
-"	densf[index] = (unsigned char)(density * 255.0);\n" \
+"	densf[index] = (unsigned char)(density * 255.0f);\n" \
 "}\n" \
 "\n" \
 "//compute statistics on density field\n" \
@@ -2315,7 +2315,7 @@ const char* str_cl_order_id_2d = \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001)\n" \
+"	if (value < 0.001f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
