@@ -57,7 +57,7 @@ const char* str_cl_shuffle_id_3d = \
 "		return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001f)\n" \
+"	if (value < 1e-4f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -118,7 +118,7 @@ const char* str_cl_shuffle_id_3d = \
 "		return;\n" \
 "	}\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001f)\n" \
+"	if (value < 1e-4f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -155,7 +155,7 @@ const char* str_cl_shuffle_id_3d = \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001f)\n" \
+"	if (value < 1e-4f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -467,7 +467,7 @@ const char* str_cl_brainbow_3d = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -523,7 +523,7 @@ const char* str_cl_brainbow_3d = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -735,7 +735,7 @@ const char* str_cl_density_grow_3d = \
 "	\n" \
 "	//max filter\n" \
 "	atomic_inc(rcnt);\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -811,7 +811,7 @@ const char* str_cl_density_grow_3d = \
 "	\n" \
 "	//max filter\n" \
 "	atomic_inc(rcnt);\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -1304,7 +1304,7 @@ const char* str_cl_dist_grow_3d = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -1365,7 +1365,7 @@ const char* str_cl_dist_grow_3d = \
 "		(value>value_t?1.0f:(value_f>0.0f?(value<value_t-sqrt(value_f)*2.12f?0.0f:exp(-(value-value_t)*(value-value_t)/value_f)):0.0f));\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -2039,7 +2039,7 @@ const char* str_cl_slice_brainbow = \
 "	\n" \
 "	//max filter\n" \
 "	atomic_inc(rcnt);\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int2 max_nb_coord = coord;\n" \
@@ -2215,7 +2215,7 @@ const char* str_cl_brainbow_3d_sized = \
 "	\n" \
 "	//max filter\n" \
 "	atomic_inc(rcnt);\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int3 nb_coord;\n" \
@@ -2318,7 +2318,7 @@ const char* str_cl_order_id_2d = \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001f)\n" \
+"	if (value < 1e-4f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -2363,7 +2363,7 @@ const char* str_cl_shuffle_id_2d = \
 "	unsigned int k = (unsigned int)(get_global_id(2));\n" \
 "	unsigned int index = nx*ny*k + nx*j + i;\n" \
 "	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value < 0.001f)\n" \
+"	if (value < 1e-4f)\n" \
 "		atomic_xchg(label+index, 0);\n" \
 "	else if (i<1 || i>nx-2 ||\n" \
 "			j<1 || j>ny-2)\n" \
@@ -2546,7 +2546,7 @@ const char* str_cl_grow_size = \
 "		(av_f>0.0f?(angle_var>sqrt(av_f)*2.12f?0.0f:exp(-angle_var*angle_var/av_f)):1.0f);\n" \
 "	\n" \
 "	//max filter\n" \
-"	float random = (float)((*rcnt) % seed)/(float)(seed)+0.001f;\n" \
+"	float random = (float)((*rcnt) % seed)/(float)(seed)+1e-4f;\n" \
 "	if (stop < random)\n" \
 "		return;\n" \
 "	int2 max_nb_coord = coord;\n" \
