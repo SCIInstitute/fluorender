@@ -580,6 +580,7 @@ public:
 	//get size, considering enlargement
 	wxSize GetGLSize();
 	fluo::Point GetMousePos(wxMouseEvent& e);
+	bool GetMouseIn(wxPoint& p);
 	glm::mat4 GetModelView()
 	{
 		return m_mv_mat;
@@ -1176,5 +1177,16 @@ inline fluo::Point VRenderGLView::GetMousePos(wxMouseEvent& e)
 	if (m_enlarge)
 		pnt = pnt * m_enlarge_scale;
 	return pnt;
+}
+
+inline bool VRenderGLView::GetMouseIn(wxPoint& p)
+{
+	double dval = 1;
+#ifdef _DARWIN
+	dval = GetDPIScaleFactor();
+#endif
+	wxRect rect = GetClientRect();
+	rect.SetSize(rect.GetSize() * dval);
+	return rect.Contains(p);
 }
 #endif//_VRENDERGLVIEW_H_

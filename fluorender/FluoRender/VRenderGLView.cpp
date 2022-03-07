@@ -1857,8 +1857,7 @@ void VRenderGLView::DrawBrush()
 	double pressure = m_selector.GetNormPress();
 
 	wxPoint pos1(old_mouse_X, old_mouse_Y);
-	wxRect reg = GetClientRect();
-	if (reg.Contains(pos1))
+	if (GetMouseIn(pos1))
 	{
 		int nx, ny;
 		GetRenderSize(nx, ny);
