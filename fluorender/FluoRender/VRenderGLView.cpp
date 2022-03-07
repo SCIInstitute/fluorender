@@ -9839,6 +9839,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	m_retain_finalbuffer = false;
 	int nx = GetGLSize().x;
 	int ny = GetGLSize().y;
+	fluo::Point mp = GetMousePos(event);
 
 	//mouse button down operations
 	if (event.LeftDown())
@@ -9850,7 +9851,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 14)
 		{
 			found_rp = m_ruler_handler.FindEditingRuler(
-				event.GetX(), event.GetY());
+				mp.x(), mp.y());
 		}
 		if (found_rp)
 		{
@@ -9875,14 +9876,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_int_mode == 14) &&
 			!found_rp))
 		{
-			old_mouse_X = event.GetX();
-			old_mouse_Y = event.GetY();
+			old_mouse_X = mp.x();
+			old_mouse_Y = mp.y();
 			m_pick = true;
 		}
 		else if (m_int_mode == 2 || m_int_mode == 7)
 		{
-			old_mouse_X = event.GetX();
-			old_mouse_Y = event.GetY();
+			old_mouse_X = mp.x();
+			old_mouse_Y = mp.y();
 			prv_mouse_X = old_mouse_X;
 			prv_mouse_Y = old_mouse_Y;
 			m_paint_enable = true;
@@ -9908,14 +9909,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	}
 	if (event.RightDown())
 	{
-		old_mouse_X = event.GetX();
-		old_mouse_Y = event.GetY();
+		old_mouse_X = mp.x();
+		old_mouse_Y = mp.y();
 		return;
 	}
 	if (event.MiddleDown())
 	{
-		old_mouse_X = event.GetX();
-		old_mouse_Y = event.GetY();
+		old_mouse_X = mp.x();
+		old_mouse_Y = mp.y();
 		return;
 	}
 
@@ -9951,7 +9952,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			!event.AltDown())
 		{
 			//add one point to a ruler
-			m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
+			m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			if (m_frame && m_frame->GetMeasureDlg())
 				m_frame->GetMeasureDlg()->GetSettings(this);
 			RefreshGL(27);
@@ -9969,7 +9970,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			m_paint_enable = true;
 			Segment();
 			if (m_ruler_handler.GetType() == 3)
-				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
+				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 			else
 				m_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = 8;
@@ -10023,7 +10024,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			}
 			else
 			{
-				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
+				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 				m_ruler_handler.FinishRuler();
 			}
 			if (m_frame && m_frame->GetMeasureDlg())
@@ -10046,10 +10047,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	if (event.Dragging())
 	{
 		flvr::TextureRenderer::set_cor_up_time(
-			int(sqrt(double(old_mouse_X - event.GetX())*
-				double(old_mouse_X - event.GetX()) +
-				double(old_mouse_Y - event.GetY())*
-				double(old_mouse_Y - event.GetY()))));
+			int(sqrt(double(old_mouse_X - mp.x())*
+				double(old_mouse_X - mp.x()) +
+				double(old_mouse_Y - mp.y())*
+				double(old_mouse_Y - mp.y()))));
 
 		flrd::RulerPoint *p0 = m_ruler_handler.GetPoint();
 		bool hold_old = false;
@@ -10069,8 +10070,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 
 			if (old_mouse_X != -1 &&
 				old_mouse_Y != -1 &&
-				abs(old_mouse_X - event.GetX()) +
-				abs(old_mouse_Y - event.GetY())<200)
+				abs(old_mouse_X - mp.x()) +
+				abs(old_mouse_Y - mp.y())<200)
 			{
 				if (event.LeftIsDown() &&
 					!event.ControlDown() &&
@@ -10078,7 +10079,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 					m_int_mode != 12)
 				{
 					fluo::Quaternion q_delta = Trackball(
-						event.GetX() - old_mouse_X, old_mouse_Y - event.GetY());
+						mp.x() - old_mouse_X, old_mouse_Y - mp.y());
 					if (m_rot_lock && q_delta.IsIdentity())
 						hold_old = true;
 					m_q *= q_delta;
@@ -10118,8 +10119,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				}
 				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
 				{
-					long dx = event.GetX() - old_mouse_X;
-					long dy = event.GetY() - old_mouse_Y;
+					long dx = mp.x() - old_mouse_X;
+					long dy = mp.y() - old_mouse_Y;
 
 					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 					m_head.normalize();
@@ -10140,8 +10141,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 				}
 				if (event.RightIsDown())
 				{
-					long dx = event.GetX() - old_mouse_X;
-					long dy = event.GetY() - old_mouse_Y;
+					long dx = mp.x() - old_mouse_X;
+					long dy = mp.y() - old_mouse_Y;
 
 					double delta = abs(dx)>abs(dy) ?
 						(double)dx / (double)nx :
@@ -10179,12 +10180,12 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		{
 			if (old_mouse_X != -1 &&
 				old_mouse_Y != -1 &&
-				abs(old_mouse_X - event.GetX()) +
-				abs(old_mouse_Y - event.GetY())<200)
+				abs(old_mouse_X - mp.x()) +
+				abs(old_mouse_Y - mp.y())<200)
 			{
 				if (event.LeftIsDown())
 				{
-					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, event.GetY(), event.GetX(), old_mouse_Y);
+					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(m_rotx, m_roty, m_rotz);
@@ -10197,10 +10198,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			bool rval = false;
 			if (m_int_mode == 6)
 				rval = m_ruler_handler.EditPoint(
-					event.GetX(), event.GetY(), event.AltDown());
+					mp.x(), mp.y(), event.AltDown());
 			else if (m_int_mode == 9)
 				rval = m_ruler_handler.MoveRuler(
-					event.GetX(), event.GetY());
+					mp.x(), mp.y());
 			if (rval)
 			{
 				RefreshGL(35);
@@ -10213,10 +10214,10 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 		}
 		else if (m_int_mode == 13)
 		{
-			if (m_ruler_handler.GetMouseDist(event.GetX(), event.GetY(), 35))
+			if (m_ruler_handler.GetMouseDist(mp.x(), mp.y(), 35))
 			{
 				//add one point to a ruler
-				m_ruler_handler.AddRulerPoint(event.GetX(), event.GetY(), true);
+				m_ruler_handler.AddRulerPoint(mp.x(), mp.y(), true);
 				if (m_frame && m_frame->GetMeasureDlg())
 					m_frame->GetMeasureDlg()->GetSettings(this);
 				RefreshGL(27);
@@ -10230,14 +10231,14 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 			prv_mouse_Y = old_mouse_Y;
 			if (!hold_old)
 			{
-				old_mouse_X = event.GetX();
-				old_mouse_Y = event.GetY();
+				old_mouse_X = mp.x();
+				old_mouse_Y = mp.y();
 			}
 		}
 		else
 		{
-			old_mouse_X = event.GetX();
-			old_mouse_Y = event.GetY();
+			old_mouse_X = mp.x();
+			old_mouse_Y = mp.y();
 			prv_mouse_X = old_mouse_X;
 			prv_mouse_Y = old_mouse_Y;
 		}
@@ -10275,8 +10276,8 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	//not actually for displaying it
 	if (m_draw_brush)
 	{
-		old_mouse_X = event.GetX();
-		old_mouse_Y = event.GetY();
+		old_mouse_X = mp.x();
+		old_mouse_Y = mp.y();
 		RefreshGL(37);
 		return;
 	}

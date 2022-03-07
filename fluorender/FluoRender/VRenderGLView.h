@@ -579,6 +579,7 @@ public:
 	//get view info for external ops
 	//get size, considering enlargement
 	wxSize GetGLSize();
+	fluo::Point GetMousePos(wxMouseEvent& e);
 	glm::mat4 GetModelView()
 	{
 		return m_mv_mat;
@@ -1164,4 +1165,16 @@ inline wxSize VRenderGLView::GetGLSize()
 	return size;
 }
 
+inline fluo::Point VRenderGLView::GetMousePos(wxMouseEvent& e)
+{
+	double dval = 1;
+#ifdef _DARWIN
+	dval = GetDPIScaleFactor();
+#endif
+	fluo::Point pnt(e.GetPosition().x, e.GetPosition().y, 0);
+	pnt *= dval;
+	if (m_enlarge)
+		pnt = pnt * m_enlarge_scale;
+	return pnt;
+}
 #endif//_VRENDERGLVIEW_H_
