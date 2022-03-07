@@ -34,7 +34,12 @@ VOID _DBGPRINT(LPCWSTR kwszFunction, INT iLineNumber, LPCWSTR kwszDebugFormatStr
 
 #else//_WIN32
 
-void DBGPRINT(...)
-{}
+void DBGPRINT(const wchar_t* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	vwprintf(format, args);
+	va_end(args);
+}
 
 #endif//_WIN32
