@@ -2044,7 +2044,7 @@ void VRenderGLView::PaintStroke()
 	//bind back the window frame buffer
 	BindRenderBuffer();
 	glBlendEquation(GL_FUNC_ADD);
-	RefreshGL(3);
+	//RefreshGL(3);
 }
 
 //show the stroke buffer
