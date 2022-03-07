@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 class BrushToolDlg;
 namespace fluo
 {
+	class AgentFactory;
 	class BrushToolAgent : public InterfaceAgent
 	{
 	public:
@@ -58,6 +59,8 @@ namespace fluo
 
 		virtual BrushToolAgent* asBrushToolAgent() { return this; }
 		virtual const BrushToolAgent* asBrushToolAgent() const { return this; }
+
+		friend class AgentFactory;
 
 	protected:
 		BrushToolDlg &dlg_;
