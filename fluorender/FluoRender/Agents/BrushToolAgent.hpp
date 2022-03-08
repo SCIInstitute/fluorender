@@ -57,6 +57,16 @@ namespace fluo
 		//update undo status
 		void UpdateUndoRedo();
 		void UpdateMaskTb();
+		//brush ops
+		void BrushClear();
+		void BrushErase();
+		void BrushCreate();
+		void MaskCopy();
+		void MaskCopyData();
+		void MaskPaste();
+		void MaskMerge();
+		void MaskExclude();
+		void MaskIntersect();
 
 		virtual BrushToolAgent* asBrushToolAgent() { return this; }
 		virtual const BrushToolAgent* asBrushToolAgent() const { return this; }

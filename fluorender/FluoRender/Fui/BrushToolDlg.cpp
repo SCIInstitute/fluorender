@@ -495,50 +495,44 @@ void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-
-	if (m_frame && m_frame->GetTree())
+	bool bval = m_toolbar->GetToolState(ID_BrushAppend);
+	if (bval)
 	{
-		if (m_toolbar->GetToolState(ID_BrushAppend))
-			m_frame->GetTree()->SelectBrush(TreePanel::ID_BrushAppend);
-		else
-			m_frame->GetTree()->SelectBrush(0);
-		m_frame->GetTree()->BrushAppend();
+		m_agent->setValue(gstInterMode, long(2));
+		m_agent->setValue(gstPaintMode, long(2));
 	}
-	GetSettings(m_view);
+	else
+	{
+		m_agent->setValue(gstInterMode, long(1));
+	}
 }
 
 void BrushToolDlg::OnBrushDiffuse(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-
-	if (m_frame && m_frame->GetTree())
+	bool bval = m_toolbar->GetToolState(ID_BrushDiffuse);
+	if (bval)
 	{
-		if (m_toolbar->GetToolState(ID_BrushDiffuse))
-			m_frame->GetTree()->SelectBrush(TreePanel::ID_BrushDiffuse);
-		else
-			m_frame->GetTree()->SelectBrush(0);
-		m_frame->GetTree()->BrushDiffuse();
+		m_agent->setValue(gstInterMode, long(2));
+		m_agent->setValue(gstPaintMode, long(4));
 	}
-	GetSettings(m_view);
+	else
+	{
+		m_agent->setValue(gstInterMode, long(1));
+	}
 }
 
 void BrushToolDlg::OnBrushSolid(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushSolid(m_toolbar->GetToolState(ID_BrushSolid));
-	GetSettings(m_view);
+	bool bval = m_toolbar->GetToolState(ID_BrushSolid);
+	if (bval)
+	{
+		m_agent->setValue(gstInterMode, long(2));
+		m_agent->setValue(gstPaintMode, long(8));
+	}
+	else
+	{
+		m_agent->setValue(gstInterMode, long(1));
+	}
 }
 
 void BrushToolDlg::OnGrow(wxCommandEvent &event)
@@ -546,40 +540,26 @@ void BrushToolDlg::OnGrow(wxCommandEvent &event)
 	bool bval = m_toolbar->GetToolState(ID_Grow);
 	if (bval)
 	{
-		m_toolbar->ToggleTool(ID_BrushAppend, false);
-		m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-		m_toolbar->ToggleTool(ID_BrushDesel, false);
-		m_toolbar->ToggleTool(ID_BrushSolid, false);
-
-		if (m_view)
-			m_view->setValue(gstInterMode, long(10));
+		m_agent->setValue(gstInterMode, long(10));
 	}
 	else
 	{
-		if (m_view)
-			m_view->setValue(gstInterMode, long(1));
+		m_agent->setValue(gstInterMode, long(1));
 	}
-	//if (m_frame && m_frame->GetTree())
-	//	m_frame->GetTree()->BrushGrow(m_toolbar->GetToolState(ID_Grow));
-	GetSettings(m_view);
 }
 
 void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-
-	if (m_frame && m_frame->GetTree())
+	bool bval = m_toolbar->GetToolState(ID_BrushDesel);
+	if (bval)
 	{
-		if (m_toolbar->GetToolState(ID_BrushDesel))
-			m_frame->GetTree()->SelectBrush(TreePanel::ID_BrushDesel);
-		else
-			m_frame->GetTree()->SelectBrush(0);
-		m_frame->GetTree()->BrushDesel();
+		m_agent->setValue(gstInterMode, long(2));
+		m_agent->setValue(gstPaintMode, long(3));
 	}
-	GetSettings(m_view);
+	else
+	{
+		m_agent->setValue(gstInterMode, long(1));
+	}
 }
 
 void BrushToolDlg::OnBrushClear(wxCommandEvent &event)
@@ -615,6 +595,7 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 //mask tools
 void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 {
+	m_agent->UpdateMaskTb()
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);

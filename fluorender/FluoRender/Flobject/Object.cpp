@@ -36,6 +36,7 @@ Object::Object() :
 	_id(0)
 {
 	_value_set = new ValueSet();
+	_value_bank = new ValueSet();
 	setDefaultValueChangingFunction(
 		std::bind(&Object::handleValueChanging,
 			this, std::placeholders::_1));
@@ -50,6 +51,7 @@ Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values) :
 	m_name(obj.m_name)
 {
 	_value_set = new ValueSet();
+	_value_bank = new ValueSet();
 	if (copy_values)
 		copyValues(obj, copyop);
 	setDefaultValueChangingFunction(
@@ -379,6 +381,63 @@ bool Object::propValues(const std::string &name1, const ValueCollection &names)
 		Value* value2 = getValuePointer(*it);
 		if (value2 && value2 != value1)
 			result |= value2->sync(event);
+	}
+	return result;
+}
+
+//save and restore
+bool Object::saveValue(const std::string &name)
+{
+	bool result = false;
+	if (_value_set && _value_bank)
+	{
+		Value* value = getValuePointer(name);
+		if (!value) return result;
+		_value_bank->removeValue(name);
+		value = value->clone();
+		result = _value_bank->addValue(value);
+	}
+	return result;
+}
+
+bool Object::drawValue(const std::string &name)
+{
+	bool result = false;
+	if (_value_set && _value_bank)
+	{
+		Value* save = _value_bank->findValue(name);
+		if (!save) return result;
+		Value* value = getValuePointer(name);
+		if (value)
+		{
+			Event event;
+			event.init(Event::EVENT_SYNC_VALUE,
+				save, save, true);
+			value->sync(event);
+			result = true;
+		}
+	}
+	return result;
+}
+
+bool Object::saveValues(const ValueCollection &names)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= saveValue(*it);
+	}
+	return result;
+}
+
+bool Object::drawValues(const ValueCollection &names)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= drawValue(*it);
 	}
 	return result;
 }

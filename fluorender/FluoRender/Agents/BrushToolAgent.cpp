@@ -200,6 +200,56 @@ void BrushToolAgent::UpdateMaskTb()
 	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskIntersect, bval);
 }
 
+//brush ops
+void BrushToolAgent::BrushClear()
+{
+	ValueCollection names{ gstInterMode, gstPaintMode };
+	saveValues(names);
+	chgValue(gstPaintMode, long(6));
+	getObject()->Segment();
+	drawValues(names);
+}
+
+void BrushToolAgent::BrushErase()
+{
+
+}
+
+void BrushToolAgent::BrushCreate()
+{
+
+}
+
+void BrushToolAgent::MaskCopy()
+{
+
+}
+
+void BrushToolAgent::MaskCopyData()
+{
+
+}
+
+void BrushToolAgent::MaskPaste()
+{
+
+}
+
+void BrushToolAgent::MaskMerge()
+{
+
+}
+
+void BrushToolAgent::MaskExclude()
+{
+
+}
+
+void BrushToolAgent::MaskIntersect()
+{
+
+}
+
 void BrushToolAgent::OnInterModeChanged(Event& event)
 {
 	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushAppend, false);

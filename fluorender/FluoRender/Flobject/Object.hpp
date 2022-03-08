@@ -90,7 +90,7 @@ namespace fluo
 					value = it->second->clone();
 				else
 					value = it->second.get();
-				ref_ptr<Value> pvalue(value);
+				//ref_ptr<Value> pvalue(value);
 				addValue(value);
 			}
 		}
@@ -391,6 +391,12 @@ namespace fluo
 		bool propValues(const std::string &name1, const std::string &name2);
 		bool propValues(const std::string &name1, const ValueCollection &names);
 
+		//save and restore
+		bool saveValue(const std::string &name);
+		bool drawValue(const std::string &name);
+		bool saveValues(const ValueCollection &names);
+		bool drawValues(const ValueCollection &names);
+
 		//reset values from factory
 		virtual bool resetValue(const std::string &name);
 		virtual bool resetValues(const ValueCollection &names);
@@ -537,6 +543,7 @@ namespace fluo
 		std::string m_name;
 
 		ref_ptr<ValueSet> _value_set;
+		ref_ptr<ValueSet> _value_bank;//for temporary backup and restore
 
 		//inputs and outputs are just value names for ui display
 		//value names in the collections are to be shown in ui
