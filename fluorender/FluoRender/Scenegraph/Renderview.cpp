@@ -9548,3 +9548,15 @@ void Renderview::OnPaintModeChanged(Event& event)
 	setValue(gstBrushState, lval);
 	m_selector->ChangeBrushSetsIndex();
 }
+
+void Renderview::OnSelUndo(Event& event)
+{
+	m_selector->UndoMask();
+	chgValue(gstSelUndo, false);
+}
+
+void Renderview::OnSelRedo(Event& event)
+{
+	m_selector->RedoMask();
+	chgValue(gstSelRedo, false);
+}

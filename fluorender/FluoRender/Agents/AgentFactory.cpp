@@ -126,6 +126,12 @@ BrushToolAgent* AgentFactory::getOrAddBrushToolAgent(const std::string &name, wx
 		agent->setValueChangedFunction(gstInterMode,
 			std::bind(&BrushToolAgent::OnInterModeChanged,
 				agent, std::placeholders::_1));
+		agent->setValueChangedFunction(gstSelUndo,
+			std::bind(&BrushToolAgent::OnSelUndo,
+				agent, std::placeholders::_1));
+		agent->setValueChangedFunction(gstSelRedo,
+			std::bind(&BrushToolAgent::OnSelRedo,
+				agent, std::placeholders::_1));
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

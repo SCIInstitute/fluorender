@@ -313,6 +313,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstMouseDrag, bool(false));
 		view->addValue(gstMouseWheel, long(0));
 		view->addValue(gstRenderviewPanelId, long(-1));
+		//processor properties should be moved in the future
+		view->addValue(gstSelUndo, bool(false));
+		view->addValue(gstSelRedo, bool(false));
 	}
 }
 
@@ -344,6 +347,8 @@ void RenderviewFactory::setEventHandler(Renderview* view)
 	ADD_AFTER_EVENT(view, gstTextColorMode, OnTextColorModeChanged);
 	ADD_AFTER_EVENT(view, gstInterMode, OnInterModeChanged);
 	ADD_AFTER_EVENT(view, gstPaintMode, OnPaintModeChanged);
+	ADD_AFTER_EVENT(view, gstSelUndo, OnSelUndo);
+	ADD_AFTER_EVENT(view, gstSelRedo, OnSelRedo);
 }
 
 Renderview* RenderviewFactory::build(Renderview* view)

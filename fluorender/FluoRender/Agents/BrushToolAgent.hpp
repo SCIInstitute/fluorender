@@ -53,6 +53,7 @@ namespace fluo
 		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
+
 		//update undo status
 		void UpdateUndoRedo();
 		void UpdateMaskTb();
@@ -68,6 +69,8 @@ namespace fluo
 	private:
 		//update functions
 		void OnInterModeChanged(Event& event);
+		void OnSelUndo(Event& event);
+		void OnSelRedo(Event& event);
 	};
 }
 

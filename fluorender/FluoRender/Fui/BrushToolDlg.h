@@ -131,9 +131,6 @@ public:
 
 	friend class fluo::BrushToolAgent;
 
-	//set the brush icon down
-	void SelectBrush(int id);
-
 	//output
 	void Update(int mode);//mode: 0-size; 1-speed
 	void UpdateSize();

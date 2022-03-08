@@ -482,22 +482,17 @@ BrushToolDlg::~BrushToolDlg()
 {
 }
 
-void BrushToolDlg::SelectBrush(int id)
+//brush commands
+void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 {
-	//disable all
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
-	//enable brush
-	if (id > 0)
-		m_toolbar->ToggleTool(id, true);
-
-	GetSettings(m_view);
+	m_agent->setValue(gstSelUndo, true);
 }
 
-//brush commands
+void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
+{
+	m_agent->setValue(gstSelRedo, true);
+}
+
 void BrushToolDlg::OnBrushAppend(wxCommandEvent &event)
 {
 	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
@@ -615,24 +610,6 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 
 	if (m_frame && m_frame->GetTree())
 		m_frame->GetTree()->BrushCreate();
-}
-
-void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
-{
-	if (m_selector)
-		m_selector->UndoMask();
-	if (m_view)
-		m_view->Update(39);
-	UpdateUndoRedo();
-}
-
-void BrushToolDlg::OnBrushRedo(wxCommandEvent &event)
-{
-	if (m_selector)
-		m_selector->RedoMask();
-	if (m_view)
-		m_view->Update(39);
-	UpdateUndoRedo();
 }
 
 //mask tools

@@ -537,6 +537,9 @@ namespace fluo
 		void OnTextColorModeChanged(Event& event);
 		void OnInterModeChanged(Event& event);
 		void OnPaintModeChanged(Event& event);
+		//selector events
+		void OnSelUndo(Event& event);
+		void OnSelRedo(Event& event);
 	};
 }
 

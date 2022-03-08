@@ -1295,8 +1295,15 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		SetFocus();
 
 	//set properties
-	m_agent->setValue(gstMouseX, long(event.GetX()));
-	m_agent->setValue(gstMouseY, long(event.GetY()));
+	double dval = 1;
+	long mx, my;
+#ifdef _DARWIN
+	dval = GetDPIScaleFactor();
+#endif
+	mx = long(event.GetX() * dval + 0.5);
+	my = long(event.GetY() * dval + 0.5);
+	m_agent->setValue(gstMouseX, mx);
+	m_agent->setValue(gstMouseY, my);
 	m_agent->setValue(gstMouseDrag, event.Dragging());
 	m_agent->setValue(gstMouseWheel, long(event.GetWheelRotation()));
 	glbin_input->Update();

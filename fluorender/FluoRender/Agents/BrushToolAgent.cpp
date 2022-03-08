@@ -237,3 +237,13 @@ void BrushToolAgent::OnInterModeChanged(Event& event)
 		break;
 	}
 }
+
+void BrushToolAgent::OnSelUndo(Event& event)
+{
+	UpdateUndoRedo();
+}
+
+void BrushToolAgent::OnSelRedo(Event& event)
+{
+	UpdateUndoRedo();
+}

@@ -551,6 +551,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstMouseClientY "mouse client y"
 #define gstMouseIn "mouse in"
 #define gstRenderviewPanelId "renderview panel id"
+//processor properties should be moved in the future
+#define gstSelUndo "sel undo"//selector undo
+#define gstSelRedo "sel redo"
 
 //dialog agent common
 #define gstUseSelection "use selection"//use mask selection
