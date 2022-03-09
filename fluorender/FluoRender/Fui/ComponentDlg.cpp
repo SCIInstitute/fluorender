@@ -2362,7 +2362,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 				m_view->getValue(gstPaintCount, bval);
 				if (bval)
 					m_frame->GetBrushToolDlg()->Update(0);
-				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 			}
 			if (m_frame->GetColocalizationDlg())
 			{
@@ -2415,7 +2415,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 			m_view->getValue(gstPaintCount, bval);
 			if (bval)
 				m_frame->GetBrushToolDlg()->Update(0);
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 		}
 		if (m_frame->GetColocalizationDlg())
 		{
@@ -2447,7 +2447,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent &event)
 			m_view->getValue(gstPaintCount, bval);
 			if (bval)
 				m_frame->GetBrushToolDlg()->Update(0);
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 		}
 		if (m_frame->GetColocalizationDlg())
 		{
@@ -2471,8 +2471,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent &event)
 	m_view->Update(39);
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
@@ -3626,7 +3625,7 @@ void ComponentDlg::SelectFullComp()
 			m_view->getValue(gstPaintCount, bval);
 			if (bval)
 				m_frame->GetBrushToolDlg()->Update(0);
-			m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+			glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 		}
 		if (m_frame->GetColocalizationDlg())
 		{
@@ -4365,7 +4364,7 @@ void ComponentDlg::IncludeComps()
 				m_view->getValue(gstPaintCount, bval);
 				if (bval)
 					m_frame->GetBrushToolDlg()->Update(0);
-				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 			}
 			if (m_frame->GetColocalizationDlg())
 			{
@@ -4425,7 +4424,7 @@ void ComponentDlg::ExcludeComps()
 				m_view->getValue(gstPaintCount, bval);
 				if (bval)
 					m_frame->GetBrushToolDlg()->Update(0);
-				m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 			}
 			if (m_frame->GetColocalizationDlg())
 			{

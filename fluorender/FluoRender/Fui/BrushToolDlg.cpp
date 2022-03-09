@@ -564,42 +564,41 @@ void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushClear(wxCommandEvent &event)
 {
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushClear();
+	//if (m_frame && m_frame->GetTree())
+	//	m_frame->GetTree()->BrushClear();
 }
 
 void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
+	//m_toolbar->ToggleTool(ID_BrushAppend, false);
+	//m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+	//m_toolbar->ToggleTool(ID_BrushDesel, false);
+	//m_toolbar->ToggleTool(ID_BrushSolid, false);
+	//m_toolbar->ToggleTool(ID_Grow, false);
 
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushErase();
+	//if (m_frame && m_frame->GetTree())
+	//	m_frame->GetTree()->BrushErase();
 }
 
 void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 {
-	m_toolbar->ToggleTool(ID_BrushAppend, false);
-	m_toolbar->ToggleTool(ID_BrushDiffuse, false);
-	m_toolbar->ToggleTool(ID_BrushDesel, false);
-	m_toolbar->ToggleTool(ID_BrushSolid, false);
-	m_toolbar->ToggleTool(ID_Grow, false);
+	//m_toolbar->ToggleTool(ID_BrushAppend, false);
+	//m_toolbar->ToggleTool(ID_BrushDiffuse, false);
+	//m_toolbar->ToggleTool(ID_BrushDesel, false);
+	//m_toolbar->ToggleTool(ID_BrushSolid, false);
+	//m_toolbar->ToggleTool(ID_Grow, false);
 
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushCreate();
+	//if (m_frame && m_frame->GetTree())
+	//	m_frame->GetTree()->BrushCreate();
 }
 
 //mask tools
 void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 {
-	m_agent->UpdateMaskTb()
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);
-	UpdateMaskTb();
+	//UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
@@ -607,7 +606,7 @@ void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(true);
-	UpdateMaskTb();
+	//UpdateMaskTb();
 }
 
 void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
@@ -615,7 +614,7 @@ void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(0);
-	UpdateUndoRedo();
+	//UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
@@ -623,7 +622,7 @@ void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(1);
-	UpdateUndoRedo();
+	//UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
@@ -631,7 +630,7 @@ void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(2);
-	UpdateUndoRedo();
+	//UpdateUndoRedo();
 }
 
 void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
@@ -639,7 +638,7 @@ void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(3);
-	UpdateUndoRedo();
+	//UpdateUndoRedo();
 }
 
 //selection adjustment
@@ -662,16 +661,16 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 	m_brush_scl_translate_sldr->SetValue(int(val*10.0+0.5));
 
 	//set translate
-	if (m_selector)
-	{
-		m_selector->SetBrushSclTranslate(m_dft_scl_translate);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->Update(39);
-		}
-	}
+	//if (m_selector)
+	//{
+	//	m_selector->SetBrushSclTranslate(m_dft_scl_translate);
+	//	if (m_view && m_selector->GetThUpdate())
+	//	{
+	//		m_selector->PopMask();
+	//		m_view->Segment();
+	//		m_view->Update(39);
+	//	}
+	//}
 }
 
 //gm falloff
@@ -693,16 +692,16 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent &event)
 	m_brush_gm_falloff_sldr->SetValue(int(val*1000.0+0.5));
 
 	//set gm falloff
-	if (m_selector)
-	{
-		m_selector->SetBrushGmFalloff(m_dft_gm_falloff);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->Update(39);
-		}
-	}
+	//if (m_selector)
+	//{
+	//	m_selector->SetBrushGmFalloff(m_dft_gm_falloff);
+	//	if (m_view && m_selector->GetThUpdate())
+	//	{
+	//		m_selector->PopMask();
+	//		m_view->Segment();
+	//		m_view->Update(39);
+	//	}
+	//}
 }
 
 //2d influence
@@ -723,16 +722,16 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent &event)
 	m_brush_2dinfl_sldr->SetValue(int(val*100.0));
 
 	//set 2d weight
-	if (m_selector)
-	{
-		m_selector->SetW2d(val);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->Update(39);
-		}
-	}
+	//if (m_selector)
+	//{
+	//	m_selector->SetW2d(val);
+	//	if (m_view && m_selector->GetThUpdate())
+	//	{
+	//		m_selector->PopMask();
+	//		m_view->Segment();
+	//		m_view->Update(39);
+	//	}
+	//}
 }
 
 //edge detect
@@ -752,16 +751,16 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent &event)
 	}
 
 	//set edge detect
-	if (m_selector)
-	{
-		m_selector->SetEdgeDetect(edge_detect);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->Update(39);
-		}
-	}
+	//if (m_selector)
+	//{
+	//	m_selector->SetEdgeDetect(edge_detect);
+	//	if (m_view && m_selector->GetThUpdate())
+	//	{
+	//		m_selector->PopMask();
+	//		m_view->Segment();
+	//		m_view->Update(39);
+	//	}
+	//}
 }
 
 //hidden removal
@@ -770,8 +769,8 @@ void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent &event)
 	bool hidden_removal = m_hidden_removal_chk->GetValue();
 
 	//set hidden removal
-	if (m_selector)
-		m_selector->SetHiddenRemoval(hidden_removal);
+	//if (m_selector)
+	//	m_selector->SetHiddenRemoval(hidden_removal);
 }
 
 //select group
@@ -780,16 +779,16 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent &event)
 	bool select_group = m_select_group_chk->GetValue();
 
 	//set select group
-	if (m_selector)
-	{
-		m_selector->SetSelectGroup(select_group);
-		if (m_view && m_selector->GetThUpdate())
-		{
-			m_selector->PopMask();
-			m_view->Segment();
-			m_view->Update(39);
-		}
-	}
+	//if (m_selector)
+	//{
+	//	m_selector->SetSelectGroup(select_group);
+	//	if (m_view && m_selector->GetThUpdate())
+	//	{
+	//		m_selector->PopMask();
+	//		m_view->Segment();
+	//		m_view->Update(39);
+	//	}
+	//}
 }
 
 //estimate threshold
@@ -797,9 +796,8 @@ void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent &event)
 {
 	bool value = m_estimate_thresh_chk->GetValue();
 
-	//
-	if (m_selector)
-		m_selector->SetEstimateThreshold(value);
+	//if (m_selector)
+	//	m_selector->SetEstimateThreshold(value);
 }
 
 //brick accuracy
@@ -807,8 +805,8 @@ void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent &event)
 {
 	bool value = m_accurate_bricks_chk->GetValue();
 
-	if (m_selector)
-		m_selector->SetUpdateOrder(value);
+	//if (m_selector)
+	//	m_selector->SetUpdateOrder(value);
 }
 
 //brush size 1
@@ -828,14 +826,14 @@ void BrushToolDlg::OnBrushSize1Text(wxCommandEvent &event)
 	m_brush_size1_sldr->SetValue(int(val));
 
 	//set size1
-	if (m_view && m_selector)
-	{
-		m_selector->SetBrushSize(val, -1.0);
-		long lval;
-		m_view->getValue(gstInterMode, lval);
-		if (lval == 2)
-			m_view->Update(39);
-	}
+	//if (m_view && m_selector)
+	//{
+	//	m_selector->SetBrushSize(val, -1.0);
+	//	long lval;
+	//	m_view->getValue(gstInterMode, lval);
+	//	if (lval == 2)
+	//		m_view->Update(39);
+	//}
 }
 
 //brush size 2
@@ -852,23 +850,23 @@ void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent &event)
 	{
 		m_brush_size2_sldr->Enable();
 		m_brush_size2_text->Enable();
-		if (m_view && m_selector)
-		{
-			m_selector->SetUseBrushSize2(true);
-			m_selector->SetBrushSize(val1, val2);
-			m_view->Update(39);
-		}
+		//if (m_view && m_selector)
+		//{
+		//	m_selector->SetUseBrushSize2(true);
+		//	m_selector->SetBrushSize(val1, val2);
+		//	m_view->Update(39);
+		//}
 	}
 	else
 	{
 		m_brush_size2_sldr->Disable();
 		m_brush_size2_text->Disable();
-		if (m_view && m_selector)
-		{
-			m_selector->SetUseBrushSize2(false);
-			m_selector->SetBrushSize(val1, val2);
-			m_view->Update(39);
-		}
+		//if (m_view && m_selector)
+		//{
+		//	m_selector->SetUseBrushSize2(false);
+		//	m_selector->SetBrushSize(val1, val2);
+		//	m_view->Update(39);
+		//}
 	}
 }
 
@@ -888,14 +886,14 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 	m_brush_size2_sldr->SetValue(int(val));
 
 	//set size2
-	if (m_view && m_selector)
-	{
-		m_selector->SetBrushSize(-1.0, val);
-		long lval;
-		m_view->getValue(gstInterMode, lval);
-		if (lval == 2)
-			m_view->Update(39);
-	}
+	//if (m_view && m_selector)
+	//{
+	//	m_selector->SetBrushSize(-1.0, val);
+	//	long lval;
+	//	m_view->getValue(gstInterMode, lval);
+	//	if (lval == 2)
+	//		m_view->Update(39);
+	//}
 }
 
 //brush iterations
@@ -903,18 +901,18 @@ void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 {
 	if (m_brush_iterw_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushIteration(BRUSH_TOOL_ITER_WEAK);
+		//if (m_selector)
+		//	m_selector->SetBrushIteration(BRUSH_TOOL_ITER_WEAK);
 	}
 	else if (m_brush_iters_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushIteration(BRUSH_TOOL_ITER_NORMAL);
+		//if (m_selector)
+		//	m_selector->SetBrushIteration(BRUSH_TOOL_ITER_NORMAL);
 	}
 	else if (m_brush_iterss_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushIteration(BRUSH_TOOL_ITER_STRONG);
+		//if (m_selector)
+		//	m_selector->SetBrushIteration(BRUSH_TOOL_ITER_STRONG);
 	}
 }
 
@@ -923,13 +921,13 @@ void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 {
 	if (m_brush_size_data_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushSizeData(true);
+		//if (m_selector)
+		//	m_selector->SetBrushSizeData(true);
 	}
 	else if (m_brush_size_screen_rb->GetValue())
 	{
-		if (m_selector)
-			m_selector->SetBrushSizeData(false);
+		//if (m_selector)
+		//	m_selector->SetBrushSizeData(false);
 	}
 }
 
@@ -959,34 +957,34 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 		break;
 	}
 
-	if (m_frame && m_view)
-	{
-		fluo::VolumeData* vd = m_frame->GetCurSelVol();
-		if (vd && vd->GetTexture())
-		{
-			flrd::Cov cover(vd);
-			if (cover.Compute(0))
-			{
-				std::vector<double> cov = cover.GetCov();
-				fluo::Point center = cover.GetCenter();
-				m_aligner->SetCovMat(cov);
-				m_aligner->AlignPca(axis_type, false);
-				if (m_align_center->GetValue())
-				{
-					double tx, ty, tz;
-					m_view->getValue(gstObjCtrX, tx);
-					m_view->getValue(gstObjCtrY, ty);
-					m_view->getValue(gstObjCtrZ, tz);
-					tx = tx - center.x();
-					ty = center.y() - ty;
-					tz = center.z() - tz;
-					m_view->setValue(gstObjTransX, tx);
-					m_view->setValue(gstObjTransY, ty);
-					m_view->setValue(gstObjTransZ, tz);
-				}
-			}
-		}
-	}
+	//if (m_frame && m_view)
+	//{
+	//	fluo::VolumeData* vd = m_frame->GetCurSelVol();
+	//	if (vd && vd->GetTexture())
+	//	{
+	//		flrd::Cov cover(vd);
+	//		if (cover.Compute(0))
+	//		{
+	//			std::vector<double> cov = cover.GetCov();
+	//			fluo::Point center = cover.GetCenter();
+	//			m_aligner->SetCovMat(cov);
+	//			m_aligner->AlignPca(axis_type, false);
+	//			if (m_align_center->GetValue())
+	//			{
+	//				double tx, ty, tz;
+	//				m_view->getValue(gstObjCtrX, tx);
+	//				m_view->getValue(gstObjCtrY, ty);
+	//				m_view->getValue(gstObjCtrZ, tz);
+	//				tx = tx - center.x();
+	//				ty = center.y() - ty;
+	//				tz = center.z() - tz;
+	//				m_view->setValue(gstObjTransX, tx);
+	//				m_view->setValue(gstObjTransY, ty);
+	//				m_view->setValue(gstObjTransZ, tz);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 //update
@@ -1005,75 +1003,75 @@ void BrushToolDlg::Update(int mode)
 
 void BrushToolDlg::UpdateSize()
 {
-	GridData data;
-	fluo::VolumeData* sel_vol = 0;
-	if (!m_frame)
-		return;
-	sel_vol = m_frame->GetCurSelVol();
-	if (!sel_vol)
-		return;
+	//GridData data;
+	//fluo::VolumeData* sel_vol = 0;
+	//if (!m_frame)
+	//	return;
+	//sel_vol = m_frame->GetCurSelVol();
+	//if (!sel_vol)
+	//	return;
 
-	flrd::CountVoxels counter(sel_vol);
-	counter.SetUseMask(true);
-	counter.Count();
-	data.voxel_sum = counter.GetSum();
-	double scale;
-	sel_vol->getValue(gstIntScale, scale);
-	data.voxel_wsum = counter.GetWeightedSum() * scale;
-	if (data.voxel_sum)
-	{
-		data.avg_int = data.voxel_wsum / data.voxel_sum;
-		long bits;
-		sel_vol->getValue(gstBits, bits);
-		if (bits == 8)
-			data.avg_int *= 255.0;
-		else if (bits == 16)
-		{
-			double maxint;
-			sel_vol->getValue(gstMaxInt, maxint);
-			data.avg_int *= maxint;
-		}
-	}
-	double spcx, spcy, spcz;
-	sel_vol->getValue(gstSpcX, spcx);
-	sel_vol->getValue(gstSpcY, spcy);
-	sel_vol->getValue(gstSpcZ, spcz);
-	double vvol = spcx * spcy * spcz;
-	vvol = vvol == 0.0 ? 1.0 : vvol;
-	data.size = data.voxel_sum * vvol;
-	data.wsize = data.voxel_wsum * vvol;
-	wxString unit;
-	if (m_view)
-	{
-		long lval;
-		m_view->getValue(gstScaleBarUnit, lval);
-		switch (lval)
-		{
-		case 0:
-			unit = L"nm\u00B3";
-			break;
-		case 1:
-		default:
-			unit = L"\u03BCm\u00B3";
-			break;
-		case 2:
-			unit = L"mm\u00B3";
-			break;
-		}
-	}
+	//flrd::CountVoxels counter(sel_vol);
+	//counter.SetUseMask(true);
+	//counter.Count();
+	//data.voxel_sum = counter.GetSum();
+	//double scale;
+	//sel_vol->getValue(gstIntScale, scale);
+	//data.voxel_wsum = counter.GetWeightedSum() * scale;
+	//if (data.voxel_sum)
+	//{
+	//	data.avg_int = data.voxel_wsum / data.voxel_sum;
+	//	long bits;
+	//	sel_vol->getValue(gstBits, bits);
+	//	if (bits == 8)
+	//		data.avg_int *= 255.0;
+	//	else if (bits == 16)
+	//	{
+	//		double maxint;
+	//		sel_vol->getValue(gstMaxInt, maxint);
+	//		data.avg_int *= maxint;
+	//	}
+	//}
+	//double spcx, spcy, spcz;
+	//sel_vol->getValue(gstSpcX, spcx);
+	//sel_vol->getValue(gstSpcY, spcy);
+	//sel_vol->getValue(gstSpcZ, spcz);
+	//double vvol = spcx * spcy * spcz;
+	//vvol = vvol == 0.0 ? 1.0 : vvol;
+	//data.size = data.voxel_sum * vvol;
+	//data.wsize = data.voxel_wsum * vvol;
+	//wxString unit;
+	//if (m_view)
+	//{
+	//	long lval;
+	//	m_view->getValue(gstScaleBarUnit, lval);
+	//	switch (lval)
+	//	{
+	//	case 0:
+	//		unit = L"nm\u00B3";
+	//		break;
+	//	case 1:
+	//	default:
+	//		unit = L"\u03BCm\u00B3";
+	//		break;
+	//	case 2:
+	//		unit = L"mm\u00B3";
+	//		break;
+	//	}
+	//}
 
-	SetOutput(data, unit);
+	//SetOutput(data, unit);
 }
 
 void BrushToolDlg::UpdateSpeed()
 {
-	if (!m_selector || !m_selector->m_test_speed)
-		return;
-	GridData data;
-	data.size = m_selector->GetSpanSec();
-	data.wsize = data.size;
-	wxString unit = "Sec.";
-	SetOutput(data, unit);
+	//if (!m_selector || !m_selector->m_test_speed)
+	//	return;
+	//GridData data;
+	//data.size = m_selector->GetSpanSec();
+	//data.wsize = data.size;
+	//wxString unit = "Sec.";
+	//SetOutput(data, unit);
 }
 
 //output
@@ -1106,8 +1104,8 @@ void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 
 void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
 {
-	if (m_view)
-		m_view->setValue(gstPaintCount, m_auto_update_btn->GetValue());
+	//if (m_view)
+	//	m_view->setValue(gstPaintCount, m_auto_update_btn->GetValue());
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)

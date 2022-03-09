@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <TrackDlg.h>
 #include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <BrushToolAgent.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <lbl_reader.h>
@@ -1260,8 +1263,7 @@ void TrackDlg::UncertainFilter(bool input)
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackDlg::OnCompUncertainBtn(wxCommandEvent &event)
@@ -1759,8 +1761,7 @@ void TrackDlg::CompDelete()
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackDlg::CompClear()
@@ -1778,8 +1779,7 @@ void TrackDlg::CompClear()
 	m_trace_list_prev->DeleteAllItems();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackDlg::OnCompIDText(wxCommandEvent &event)
@@ -1881,8 +1881,7 @@ void TrackDlg::OnCompAppend(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackDlg::OnCompExclusive(wxCommandEvent &event)
@@ -1915,8 +1914,7 @@ void TrackDlg::OnCompExclusive(wxCommandEvent &event)
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 //ID link controls
@@ -1958,8 +1956,7 @@ void TrackDlg::CellFull()
 	CellUpdate();
 
 	//frame
-	if (m_frame && m_frame->GetBrushToolDlg())
-		m_frame->GetBrushToolDlg()->UpdateUndoRedo();
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackDlg::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list)

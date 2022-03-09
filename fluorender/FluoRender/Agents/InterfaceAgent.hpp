@@ -35,14 +35,30 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class RenderCanvasAgent;
+	class AnnotationPropAgent;
+	class BrushToolAgent;
+	class CalculationAgent;
+	class ClipPlaneAgent;
+	class ClKernelAgent;
+	class ColocalAgent;
+	class ComponentAgent;
+	class ConvertAgent;
+	class CountingAgent;
 	class ListModel;
+	class MeasureAgent;
+	class MeshPropAgent;
+	class MeshTransAgent;
+	class MovieAgent;
+	class NoiseReduceAgent;
+	class OutAdjustAgent;
+	class RecorderAgent;
+	class RenderCanvasAgent;
+	class RenderFrameAgent;
+	class RenderviewAgent;
+	class SettingAgent;
+	class TrackAgent;
 	class TreeModel;
 	class VolumePropAgent;
-	class OutAdjustAgent;
-	class ClipPlaneAgent;
-	class MeshPropAgent;
-	class ColocalAgent;
 	class InterfaceAgent : public Object
 	{
 	public:
@@ -251,22 +267,54 @@ namespace fluo
 		}
 
 		//convenient conversions
-		virtual RenderCanvasAgent* asRenderCanvasAgent() { return 0; }
-		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return 0; }
+		virtual AnnotationPropAgent* asAnnotationPropAgent() { return 0; }
+		virtual const AnnotationPropAgent* asAnnotationPropAgent() const { return 0; }
+		virtual BrushToolAgent* asBrushToolAgent() { return 0; }
+		virtual const BrushToolAgent* asBrushToolAgent() const { return 0; }
+		virtual CalculationAgent* asCalculationAgent() { return 0; }
+		virtual const CalculationAgent* asCalculationAgent() const { return 0; }
+		virtual ClipPlaneAgent* asClipPlaneAgent() { return 0; }
+		virtual const ClipPlaneAgent* asClipPlaneAgent() const { return 0; }
+		virtual ClKernelAgent* asClKernelAgent() { return 0; }
+		virtual const ClKernelAgent* asClKernelAgent() const { return 0; }
+		virtual ColocalAgent* asColocalAgent() { return 0; }
+		virtual const ColocalAgent* asColocalAgent() const { return 0; }
+		virtual ComponentAgent* asComponentAgent() { return 0; }
+		virtual const ComponentAgent* asComponentAgent() const { return 0; }
+		virtual ConvertAgent* asConvertAgent() { return 0; }
+		virtual const ConvertAgent* asConvertAgent() const { return 0; }
+		virtual CountingAgent* asCountingAgent() { return 0; }
+		virtual const CountingAgent* asCountingAgent() const { return 0; }
 		virtual ListModel* asListModel() { return 0; }
 		virtual const ListModel* asListModel() const { return 0; }
+		virtual MeasureAgent* asMeasureAgent() { return 0; }
+		virtual const MeasureAgent* asMeasureAgent() const { return 0; }
+		virtual MeshPropAgent* asMeshPropAgent() { return 0; }
+		virtual const MeshPropAgent* asMeshPropAgent() const { return 0; }
+		virtual MeshTransAgent* asMeshTransAgent() { return 0; }
+		virtual const MeshTransAgent* asMeshTransAgent() const { return 0; }
+		virtual MovieAgent* asMovieAgent() { return 0; }
+		virtual const MovieAgent* asMovieAgent() const { return 0; }
+		virtual NoiseReduceAgent* asNoiseReduceAgent() { return 0; }
+		virtual const NoiseReduceAgent* asNoiseReduceAgent() const { return 0; }
+		virtual OutAdjustAgent* asOutAdjustAgent() { return 0; }
+		virtual const OutAdjustAgent* asOutAdjustAgent() const { return 0; }
+		virtual RecorderAgent* asRecorderAgent() { return 0; }
+		virtual const RecorderAgent* asRecorderAgent() const { return 0; }
+		virtual RenderCanvasAgent* asRenderCanvasAgent() { return 0; }
+		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return 0; }
+		virtual RenderFrameAgent* asRenderFrameAgent() { return 0; }
+		virtual const RenderFrameAgent* asRenderFrameAgent() const { return 0; }
+		virtual RenderviewAgent* asRenderviewAgent() { return 0; }
+		virtual const RenderviewAgent* asRenderviewAgent() const { return 0; }
+		virtual SettingAgent* asSettingAgent() { return 0; }
+		virtual const SettingAgent* asSettingAgent() const { return 0; }
+		virtual TrackAgent* asTrackAgent() { return 0; }
+		virtual const TrackAgent* asTrackAgent() const { return 0; }
 		virtual TreeModel* asTreeModel() { return 0; }
 		virtual const TreeModel* asTreeModel() const { return 0; }
 		virtual VolumePropAgent* asVolumePropAgent() { return 0; }
 		virtual const VolumePropAgent* asVolumePropAgent() const { return 0; }
-		virtual OutAdjustAgent* asOutAdjustAgent() { return 0; }
-		virtual const OutAdjustAgent* asOutAdjustAgent() const { return 0; }
-		virtual ClipPlaneAgent* asClipPlaneAgent() { return 0; }
-		virtual const ClipPlaneAgent* asClipPlaneAgent() const { return 0; }
-		virtual MeshPropAgent* asMeshPropAgent() { return 0; }
-		virtual const MeshPropAgent* asMeshPropAgent() const { return 0; }
-		virtual ColocalAgent* asColocalAgent() { return 0; }
-		virtual const ColocalAgent* asColocalAgent() const { return 0; }
 
 	protected:
 	};
