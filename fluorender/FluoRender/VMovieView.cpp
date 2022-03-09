@@ -474,7 +474,7 @@ VMovieView::VMovieView(VRenderFrame* frame,
 	wxBoxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
 	m_play_btn = new wxButton(this, ID_PlayPause, "",
 		wxDefaultPosition, wxSize(30, 30));
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+	//m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
 	sizerH->Add(m_play_btn, 0, wxEXPAND);
 	m_rewind_btn = new wxButton(this, ID_Rewind, "",
 		wxDefaultPosition, wxSize(30, 30));
@@ -841,7 +841,8 @@ void VMovieView::Prev()
 		Interpolator *interpolator = m_frame->GetInterpolator();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
-			int frames = int(interpolator->GetLastT());
+			int frames = int(interpolator->GetLastT() + 1);
+			m_start_frame = 0; m_end_frame = frames;
 			m_movie_len = (double)frames / m_fps;
 			m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
 		}

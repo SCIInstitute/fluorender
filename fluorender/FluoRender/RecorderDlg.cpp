@@ -701,28 +701,25 @@ void RecorderDlg::OnInsKey(wxCommandEvent &event)
 	double duration = 0.0;
 	if (is_4d)
 	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
-		if (interpolator && m_view)
-		{
-			double ct = vd->GetCurTime();
-			FlKeyCode keycode;
-			keycode.l0 = 1;
-			keycode.l0_name = m_view->m_vrv->GetName();
-			keycode.l1 = 2;
-			keycode.l1_name = vd->GetName();
-			keycode.l2 = 0;
-			keycode.l2_name = "frame";
-			double frame;
-			if (interpolator->GetDouble(keycode, 
-				interpolator->GetLastIndex(), frame))
-				duration = fabs(ct - frame);
-		}
+		//Interpolator *interpolator = m_frame->GetInterpolator();
+		//if (interpolator && m_view)
+		//{
+		//	double ct = vd->GetCurTime();
+		//	FlKeyCode keycode;
+		//	keycode.l0 = 1;
+		//	keycode.l0_name = m_view->m_vrv->GetName();
+		//	keycode.l1 = 2;
+		//	keycode.l1_name = vd->GetName();
+		//	keycode.l2 = 0;
+		//	keycode.l2_name = "frame";
+		//	double frame;
+		//	if (interpolator->GetDouble(keycode, 
+		//		interpolator->GetLastIndex(), frame))
+		//		duration = fabs(ct - frame);
+		//}
 	}
-	else
-	{
-		str = m_duration_text->GetValue();
-		str.ToDouble(&duration);
-	}
+	str = m_duration_text->GetValue();
+	str.ToDouble(&duration);
 	int interpolation = m_interpolation_cmb->GetSelection();
 	InsertKey(index, duration, interpolation);
 
