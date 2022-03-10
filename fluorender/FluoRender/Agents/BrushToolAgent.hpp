@@ -63,12 +63,22 @@ namespace fluo
 		void BrushCreate();
 		void MaskCopy();
 		void MaskCopyData();
-		void MaskPaste();
-		void MaskMerge();
-		void MaskExclude();
-		void MaskIntersect();
-		//selector properties
+		void MaskPaste(int op);
+		//selector properties (move to selector once it becomes an object)
 		void SetBrushSclTranslate(double v);
+		void SetBrushGmFalloff(double v);
+		void SetW2d(double v);
+		void SetEdgeDetect(bool v);
+		void SetHiddenRemoval(bool v);
+		void SetSelectGroup(bool v);
+		void SetEstimateThreshold(bool v);
+		void SetUpdateOrder(bool v);
+		void SetBrushSize(double v1, double v2);
+		void SetUseBrushSize2(bool v);
+		void SetBrushIteration(int v);
+		void SetBrushSizeData(bool v);
+		//other operations
+		void AlignPca(int type, bool ac);
 
 		virtual BrushToolAgent* asBrushToolAgent() { return this; }
 		virtual const BrushToolAgent* asBrushToolAgent() const { return this; }

@@ -34,10 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <chrono>
 
-#define BRUSH_TOOL_ITER_WEAK	10
-#define BRUSH_TOOL_ITER_NORMAL	30
-#define BRUSH_TOOL_ITER_STRONG	60
-
 namespace fluo
 {
 	class Renderview;
@@ -48,6 +44,12 @@ namespace flrd
 	class VolumeSelector
 	{
 	public:
+		enum BrushIters
+		{
+			BRUSH_TOOL_ITER_WEAK = 10,
+			BRUSH_TOOL_ITER_NORMAL = 30,
+			BRUSH_TOOL_ITER_STRONG = 60
+		};
 		VolumeSelector();
 		~VolumeSelector();
 

@@ -29,8 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include <BrushToolAgent.hpp>
 #include <BrushToolDlg.h>
 #include <VolumeSelector.h>
+#include <VolumeCalculator.h>
+#include <RulerAlign.h>
 #include <Global.hpp>
 #include <Root.hpp>
+#include <Distance/Cov.h>
 #include <FLIVR/Texture.h>
 
 using namespace fluo;
@@ -138,13 +141,13 @@ void BrushToolAgent::UpdateAllSettings()
 
 	//iteration number
 	lval = selector->GetBrushIteration();
-	if (lval <= BRUSH_TOOL_ITER_WEAK)
+	if (lval <= flrd::VolumeSelector::BRUSH_TOOL_ITER_WEAK)
 	{
 		dlg_.m_brush_iterw_rb->SetValue(true);
 		dlg_.m_brush_iters_rb->SetValue(false);
 		dlg_.m_brush_iterss_rb->SetValue(false);
 	}
-	else if (lval <= BRUSH_TOOL_ITER_NORMAL)
+	else if (lval <= flrd::VolumeSelector::BRUSH_TOOL_ITER_NORMAL)
 	{
 		dlg_.m_brush_iterw_rb->SetValue(false);
 		dlg_.m_brush_iters_rb->SetValue(true);
@@ -212,42 +215,69 @@ void BrushToolAgent::BrushClear()
 
 void BrushToolAgent::BrushErase()
 {
-
+	flrd::VolumeCalculator* cal = getObject()->GetVolumeCalculator();
+	if (!cal) return;
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	cal->SetVolumeA(vd);
+	cal->CalculateGroup(6);
 }
 
 void BrushToolAgent::BrushCreate()
 {
-
+	flrd::VolumeCalculator* cal = getObject()->GetVolumeCalculator();
+	if (!cal) return;
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	cal->SetVolumeA(vd);
+	cal->CalculateGroup(5);
 }
 
 void BrushToolAgent::MaskCopy()
 {
-
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	glbin_root->setRvalu(gstSourceVolume, vd);
+	glbin_root->setValue(gstSourceMode, long(1));
+	UpdateMaskTb();
 }
 
 void BrushToolAgent::MaskCopyData()
 {
-
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	glbin_root->setRvalu(gstSourceVolume, vd);
+	glbin_root->setValue(gstSourceMode, long(0));
+	UpdateMaskTb();
 }
 
-void BrushToolAgent::MaskPaste()
+void BrushToolAgent::MaskPaste(int op)
 {
-
-}
-
-void BrushToolAgent::MaskMerge()
-{
-
-}
-
-void BrushToolAgent::MaskExclude()
-{
-
-}
-
-void BrushToolAgent::MaskIntersect()
-{
-
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	Referenced* ref;
+	glbin_root->getRvalu(gstSourceVolume, &ref);
+	VolumeData* vd_src = dynamic_cast<VolumeData*>(ref);
+	if (!vd_src || vd == vd_src)
+		return;
+	long lval;
+	glbin_root->getValue(gstSourceMode, lval);
+	//undo/redo
+	if (flvr::Texture::mask_undo_num_ > 0 &&
+		vd->GetTexture())
+		vd->GetTexture()->push_mask();
+	if (lval == 0)
+	{
+		Nrrd* data = vd_src->GetData(false);
+		long bits;
+		vd_src->getValue(gstBits, bits);
+		if (bits == 16)
+		{
+			double scale;
+			vd_src->getValue(gstIntScale, scale);
+			vd->AddMask16(data, op, scale);
+		}
+		else
+			vd->AddMask(data, op);
+	}
+	else
+		vd->AddMask(vd_src->GetMask(false), op);
+	UpdateUndoRedo();
 }
 
 void BrushToolAgent::SetBrushSclTranslate(double v)
@@ -262,6 +292,146 @@ void BrushToolAgent::SetBrushSclTranslate(double v)
 		selector->PopMask();
 		getObject()->Segment();
 		//m_view->Update(39);
+	}
+}
+
+void BrushToolAgent::SetBrushGmFalloff(double v)
+{
+	//set gm falloff
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (!selector) return;
+
+	selector->SetBrushGmFalloff(v);
+	if (selector->GetThUpdate())
+	{
+		selector->PopMask();
+		getObject()->Segment();
+		//m_view->Update(39);
+	}
+}
+
+void BrushToolAgent::SetW2d(double v)
+{
+	//set 2d weight
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (!selector) return;
+
+	selector->SetW2d(v);
+	if (selector->GetThUpdate())
+	{
+		selector->PopMask();
+		getObject()->Segment();
+		//m_view->Update(39);
+	}
+}
+
+void BrushToolAgent::SetEdgeDetect(bool v)
+{
+	//set edge detect
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (!selector) return;
+
+	selector->SetEdgeDetect(v);
+	if (selector->GetThUpdate())
+	{
+		selector->PopMask();
+		getObject()->Segment();
+		//m_view->Update(39);
+	}
+}
+
+void BrushToolAgent::SetHiddenRemoval(bool v)
+{
+	//set hidden removal
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetHiddenRemoval(v);
+}
+
+void BrushToolAgent::SetSelectGroup(bool v)
+{
+	//set select group
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (!selector) return;
+
+	selector->SetSelectGroup(v);
+	if (selector->GetThUpdate())
+	{
+		selector->PopMask();
+		getObject()->Segment();
+		//m_view->Update(39);
+	}
+}
+
+void BrushToolAgent::SetEstimateThreshold(bool v)
+{
+	//set estimate threshold
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetEstimateThreshold(v);
+}
+
+void BrushToolAgent::SetUpdateOrder(bool v)
+{
+	//set update order
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetUpdateOrder(v);
+}
+
+void BrushToolAgent::SetBrushSize(double v1, double v2)
+{
+	//set size
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetBrushSize(v1, v2);
+	//	long lval;
+	//	m_view->getValue(gstInterMode, lval);
+	//	if (lval == 2)
+	//		m_view->Update(39);
+}
+
+void BrushToolAgent::SetUseBrushSize2(bool v)
+{
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetUseBrushSize2(v);
+}
+
+void BrushToolAgent::SetBrushIteration(int v)
+{
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetBrushIteration(v);
+}
+
+void BrushToolAgent::SetBrushSizeData(bool v)
+{
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (selector) selector->SetBrushSizeData(v);
+}
+
+void BrushToolAgent::AlignPca(int type, bool ac)
+{
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	flrd::RulerAlign* aligner = getObject()->GetRulerAlign();
+	if (vd && vd->GetTexture())
+	{
+		flrd::Cov cover(vd);
+		if (cover.Compute(0))
+		{
+			std::vector<double> cov = cover.GetCov();
+			fluo::Point center = cover.GetCenter();
+			aligner->SetCovMat(cov);
+			aligner->AlignPca(type, false);
+			if (ac)
+			{
+				double tx, ty, tz;
+				getValue(gstObjCtrX, tx);
+				getValue(gstObjCtrY, ty);
+				getValue(gstObjCtrZ, tz);
+				tx = tx - center.x();
+				ty = center.y() - ty;
+				tz = center.z() - tz;
+				updValue(gstObjTransX, tx);
+				updValue(gstObjTransY, ty);
+				updValue(gstObjTransZ, tz);
+			}
+		}
 	}
 }
 
