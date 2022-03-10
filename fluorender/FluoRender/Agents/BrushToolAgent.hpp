@@ -67,6 +67,8 @@ namespace fluo
 		void MaskMerge();
 		void MaskExclude();
 		void MaskIntersect();
+		//selector properties
+		void SetBrushSclTranslate(double v);
 
 		virtual BrushToolAgent* asBrushToolAgent() { return this; }
 		virtual const BrushToolAgent* asBrushToolAgent() const { return this; }

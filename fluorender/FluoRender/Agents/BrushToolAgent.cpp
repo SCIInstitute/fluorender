@@ -250,6 +250,21 @@ void BrushToolAgent::MaskIntersect()
 
 }
 
+void BrushToolAgent::SetBrushSclTranslate(double v)
+{
+	//set translate
+	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+	if (!selector) return;
+
+	selector->SetBrushSclTranslate(v);
+	if (selector->GetThUpdate())
+	{
+		selector->PopMask();
+		getObject()->Segment();
+		//m_view->Update(39);
+	}
+}
+
 void BrushToolAgent::OnInterModeChanged(Event& event)
 {
 	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushAppend, false);

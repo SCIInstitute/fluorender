@@ -564,12 +564,14 @@ void BrushToolDlg::OnBrushDesel(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushClear(wxCommandEvent &event)
 {
+	m_agent->BrushClear();
 	//if (m_frame && m_frame->GetTree())
 	//	m_frame->GetTree()->BrushClear();
 }
 
 void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
 {
+	m_agent->BrushErase();
 	//m_toolbar->ToggleTool(ID_BrushAppend, false);
 	//m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	//m_toolbar->ToggleTool(ID_BrushDesel, false);
@@ -582,6 +584,7 @@ void BrushToolDlg::OnBrushErase(wxCommandEvent &event)
 
 void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 {
+	m_agent->BrushCreate();
 	//m_toolbar->ToggleTool(ID_BrushAppend, false);
 	//m_toolbar->ToggleTool(ID_BrushDiffuse, false);
 	//m_toolbar->ToggleTool(ID_BrushDesel, false);
@@ -595,6 +598,7 @@ void BrushToolDlg::OnBrushCreate(wxCommandEvent &event)
 //mask tools
 void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 {
+	m_agent->MaskCopy();
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(false);
@@ -603,6 +607,7 @@ void BrushToolDlg::OnMaskCopy(wxCommandEvent& event)
 
 void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
 {
+	m_agent->MaskCopyData();
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->CopyMask(true);
@@ -611,6 +616,7 @@ void BrushToolDlg::OnMaskCopyData(wxCommandEvent& event)
 
 void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
 {
+	m_agent->MaskPaste();
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(0);
@@ -619,6 +625,7 @@ void BrushToolDlg::OnMaskPaste(wxCommandEvent& event)
 
 void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
 {
+	m_agent->MaskMerge();
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(1);
@@ -627,6 +634,7 @@ void BrushToolDlg::OnMaskMerge(wxCommandEvent& event)
 
 void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
 {
+	m_agent->MaskExclude();
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(2);
@@ -635,6 +643,7 @@ void BrushToolDlg::OnMaskExclude(wxCommandEvent& event)
 
 void BrushToolDlg::OnMaskIntersect(wxCommandEvent& event)
 {
+	m_agent->MaskIntersect();
 	//if (m_frame && m_frame->GetTree() &&
 	//	m_frame->GetTree()->GetTreeCtrl())
 	//	m_frame->GetTree()->GetTreeCtrl()->PasteMask(3);
@@ -659,6 +668,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent &event)
 	str.ToDouble(&val);
 	m_dft_scl_translate = val/m_max_value;
 	m_brush_scl_translate_sldr->SetValue(int(val*10.0+0.5));
+	m_agent->SetBrushSclTranslate(m_dft_scl_translate);
 
 	//set translate
 	//if (m_selector)
