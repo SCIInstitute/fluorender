@@ -112,7 +112,8 @@ BEGIN_EVENT_TABLE(BrushToolDlg, wxPanel)
 END_EVENT_TABLE()
 
 BrushToolDlg::BrushToolDlg(
-	RenderFrame *frame)
+	RenderFrame *frame,
+	TreePanel *tree)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	wxSize(500, 620),
@@ -125,7 +126,7 @@ BrushToolDlg::BrushToolDlg(
 	// temporarily block events during constructor:
 	wxEventBlocker block(this);
 
-	m_agent = glbin_agtf->getOrAddBrushToolAgent(gstBrushToolAgent, *this);
+	m_agent = glbin_agtf->addBrushToolAgent(gstBrushToolAgent, *this, *tree);
 
 	wxStaticText *st = 0;
 	//validator: floating point 1

@@ -93,7 +93,7 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	view->setName(m_vrv->GetName().ToStdString());
 	glbin_root->addChild(view);
 	glbin_root->setRvalu(gstCurrentView, view);
-	m_agent = glbin_agtf->getOrAddRenderCanvasAgent(view->getName(), *this);
+	m_agent = glbin_agtf->addRenderCanvasAgent(view->getName(), *this);
 	m_agent->setObject(view);
 	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());
 	m_agent->setValue(gstHinstance, (unsigned long long)::wxGetInstance());

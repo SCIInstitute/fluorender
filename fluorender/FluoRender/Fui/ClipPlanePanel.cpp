@@ -88,7 +88,7 @@ ClipPlanePanel::ClipPlanePanel(
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddClipPlaneAgent(gstClipPlaneAgent, *this);
+	m_agent = glbin_agtf->addClipPlaneAgent(gstClipPlaneAgent, *this);
 
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);

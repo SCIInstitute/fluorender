@@ -37,15 +37,15 @@ CalculationAgent::CalculationAgent(CalculationDlg &dlg) :
 {
 }
 
-//void CalculationAgent::setObject(Annotations* obj)
-//{
-//	InterfaceAgent::setObject(obj);
-//}
-//
-//Annotations* CalculationAgent::getObject()
-//{
-//	return dynamic_cast<Annotations*>(InterfaceAgent::getObject());
-//}
+void CalculationAgent::setObject(Renderview* obj)
+{
+	InterfaceAgent::setObject(obj);
+}
+
+Renderview* CalculationAgent::getObject()
+{
+	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
+}
 
 void CalculationAgent::UpdateAllSettings()
 {

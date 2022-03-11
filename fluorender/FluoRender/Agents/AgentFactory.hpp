@@ -106,30 +106,56 @@ namespace fluo
 		}
 
 		//each agent type has a function
-		AnnotationPropAgent* getOrAddAnnotationPropAgent(const std::string &name, wxWindow &window);
-		BrushToolAgent* getOrAddBrushToolAgent(const std::string &name, wxWindow &window);
-		CalculationAgent* getOrAddCalculationAgent(const std::string &name, wxWindow &window);
-		ClipPlaneAgent* getOrAddClipPlaneAgent(const std::string &name, wxWindow &window);
-		ClKernelAgent* getOrAddClKernelAgent(const std::string &name, wxWindow &window);
-		ColocalAgent* getOrAddColocalAgent(const std::string &name, wxWindow &window);
-		ComponentAgent* getOrAddComponentAgent(const std::string &name, wxWindow &window);
-		ConvertAgent* getOrAddConvertAgent(const std::string &name, wxWindow &window);
-		CountingAgent* getOrAddCountingAgent(const std::string &name, wxWindow &window);
-		ListModel* getOrAddListModel(const std::string &name, wxWindow &window);
-		MeasureAgent* getOrAddMeasureAgent(const std::string &name, wxWindow &window);
-		MeshPropAgent* getOrAddMeshPropAgent(const std::string &name, wxWindow &window);
-		MeshTransAgent* getOrAddMeshTransAgent(const std::string &name, wxWindow &window);
-		MovieAgent* getOrAddMovieAgent(const std::string &name, wxWindow &window);
-		NoiseReduceAgent* getOrAddNoiseReduceAgent(const std::string &name, wxWindow &window);
-		OutAdjustAgent* getOrAddOutAdjustAgent(const std::string &name, wxWindow &window);
-		RecorderAgent* getOrAddRecorderAgent(const std::string &name, wxWindow &window);
-		RenderCanvasAgent* getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window);
-		RenderFrameAgent* getOrAddRenderFrameAgent(const std::string &name, wxWindow &window);
-		RenderviewAgent* getOrAddRenderviewAgent(const std::string &name, wxWindow &window);
-		SettingAgent* getOrAddSettingAgent(const std::string &name, wxWindow &window);
-		TrackAgent* getOrAddTrackAgent(const std::string &name, wxWindow &window);
-		TreeModel* getOrAddTreeModel(const std::string &name, wxWindow &window);
-		VolumePropAgent* getOrAddVolumePropAgent(const std::string &name, wxWindow &window);
+		//add
+		AnnotationPropAgent* addAnnotationPropAgent(const std::string &name, wxWindow &window);
+		BrushToolAgent* addBrushToolAgent(const std::string &name, wxWindow &window, wxWindow &window2);
+		CalculationAgent* addCalculationAgent(const std::string &name, wxWindow &window);
+		ClipPlaneAgent* addClipPlaneAgent(const std::string &name, wxWindow &window);
+		ClKernelAgent* addClKernelAgent(const std::string &name, wxWindow &window);
+		ColocalAgent* addColocalAgent(const std::string &name, wxWindow &window);
+		ComponentAgent* addComponentAgent(const std::string &name, wxWindow &window);
+		ConvertAgent* addConvertAgent(const std::string &name, wxWindow &window);
+		CountingAgent* addCountingAgent(const std::string &name, wxWindow &window);
+		ListModel* addListModel(const std::string &name, wxWindow &window);
+		MeasureAgent* addMeasureAgent(const std::string &name, wxWindow &window);
+		MeshPropAgent* addMeshPropAgent(const std::string &name, wxWindow &window);
+		MeshTransAgent* addMeshTransAgent(const std::string &name, wxWindow &window);
+		MovieAgent* addMovieAgent(const std::string &name, wxWindow &window);
+		NoiseReduceAgent* addNoiseReduceAgent(const std::string &name, wxWindow &window);
+		OutAdjustAgent* addOutAdjustAgent(const std::string &name, wxWindow &window);
+		RecorderAgent* addRecorderAgent(const std::string &name, wxWindow &window);
+		RenderCanvasAgent* addRenderCanvasAgent(const std::string &name, wxWindow &window);
+		RenderFrameAgent* addRenderFrameAgent(const std::string &name, wxWindow &window);
+		RenderviewAgent* addRenderviewAgent(const std::string &name, wxWindow &window);
+		SettingAgent* addSettingAgent(const std::string &name, wxWindow &window);
+		TrackAgent* addTrackAgent(const std::string &name, wxWindow &window);
+		TreeModel* addTreeModel(const std::string &name, wxWindow &window);
+		VolumePropAgent* addVolumePropAgent(const std::string &name, wxWindow &window);
+		//get
+		AnnotationPropAgent* getAnnotationPropAgent(const std::string &name);
+		BrushToolAgent* getBrushToolAgent(const std::string &name);
+		CalculationAgent* getCalculationAgent(const std::string &name);
+		ClipPlaneAgent* getClipPlaneAgent(const std::string &name);
+		ClKernelAgent* getClKernelAgent(const std::string &name);
+		ColocalAgent* getColocalAgent(const std::string &name);
+		ComponentAgent* getComponentAgent(const std::string &name);
+		ConvertAgent* getConvertAgent(const std::string &name);
+		CountingAgent* getCountingAgent(const std::string &name);
+		ListModel* getListModel(const std::string &name);
+		MeasureAgent* getMeasureAgent(const std::string &name);
+		MeshPropAgent* getMeshPropAgent(const std::string &name);
+		MeshTransAgent* getMeshTransAgent(const std::string &name);
+		MovieAgent* getMovieAgent(const std::string &name);
+		NoiseReduceAgent* getNoiseReduceAgent(const std::string &name);
+		OutAdjustAgent* getOutAdjustAgent(const std::string &name);
+		RecorderAgent* getRecorderAgent(const std::string &name);
+		RenderCanvasAgent* getRenderCanvasAgent(const std::string &name);
+		RenderFrameAgent* getRenderFrameAgent(const std::string &name);
+		RenderviewAgent* getRenderviewAgent(const std::string &name);
+		SettingAgent* getSettingAgent(const std::string &name);
+		TrackAgent* getTrackAgent(const std::string &name);
+		TreeModel* getTreeModel(const std::string &name);
+		VolumePropAgent* getVolumePropAgent(const std::string &name);
 
 	protected:
 		virtual ~AgentFactory();

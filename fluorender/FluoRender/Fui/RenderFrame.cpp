@@ -508,7 +508,8 @@ RenderFrame::RenderFrame(
 	VolumeMeshConv::SetSoftThreshold(m_setting_dlg->GetSoftThreshold());
 
 	//brush tool dialog
-	m_brush_tool_dlg = new BrushToolDlg(this);
+	m_brush_tool_dlg = new BrushToolDlg(this, m_tree_panel);
+	m_tree_panel->SetBrushToolAgent();
 
 	//noise cancelling dialog
 	m_noise_cancelling_dlg = new NoiseReduceDlg(this);
@@ -540,7 +541,6 @@ RenderFrame::RenderFrame(
 
 	//help dialog
 	m_help_dlg = new HelpDlg(this);
-	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
 
 	//tester
 	//shown for testing parameters

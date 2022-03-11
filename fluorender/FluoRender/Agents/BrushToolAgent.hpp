@@ -34,13 +34,14 @@ DEALINGS IN THE SOFTWARE.
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 
 class BrushToolDlg;
+class TreePanel;
 namespace fluo
 {
 	class AgentFactory;
 	class BrushToolAgent : public InterfaceAgent
 	{
 	public:
-		BrushToolAgent(BrushToolDlg &dlg);
+		BrushToolAgent(BrushToolDlg &dlg, TreePanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
@@ -87,6 +88,7 @@ namespace fluo
 
 	protected:
 		BrushToolDlg &dlg_;
+		TreePanel &tree_panel_;//secondary ui
 
 	private:
 		//update functions

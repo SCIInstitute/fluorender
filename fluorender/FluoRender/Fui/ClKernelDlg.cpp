@@ -59,7 +59,7 @@ m_view(0)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddClKernelAgent(gstClKernelAgent, *this);
+	m_agent = glbin_agtf->addClKernelAgent(gstClKernelAgent, *this);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;

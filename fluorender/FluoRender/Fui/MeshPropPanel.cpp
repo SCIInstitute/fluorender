@@ -65,7 +65,7 @@ MeshPropPanel::MeshPropPanel(RenderFrame* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddMeshPropAgent(gstMeshPropAgent, *this);
+	m_agent = glbin_agtf->addMeshPropAgent(gstMeshPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);

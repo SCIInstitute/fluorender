@@ -138,7 +138,7 @@ VolumePropPanel::VolumePropPanel(RenderFrame* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddVolumePropAgent(gstVolumePropAgent, *this);
+	m_agent = glbin_agtf->addVolumePropAgent(gstVolumePropAgent, *this);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);

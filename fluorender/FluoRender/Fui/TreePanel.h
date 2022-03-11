@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/dataview.h>
 #include <TreeModel.hpp>
+#include <BrushToolAgent.hpp>
 
 class TreePanel : public wxPanel
 {
@@ -59,6 +60,7 @@ public:
 	~TreePanel();
 
 	void SetScenegraph(fluo::Node* root);
+	void SetBrushToolAgent();
 
 	//seelction
 	void UpdateSelection();
@@ -68,14 +70,6 @@ public:
 	//set the brush icon down
 	void SelectBrush(int id);
 	int GetBrushSelected();
-	//control from outside
-	void BrushAppend();
-	void BrushDiffuse();
-	void BrushDesel();
-	void BrushClear();
-	void BrushErase();
-	void BrushCreate();
-	void BrushSolid(bool state);
 
 	friend class fluo::TreeModel;
 
@@ -85,6 +79,7 @@ private:
 
 	wxDataViewCtrl* m_tree_ctrl;
 	fluo::TreeModel* m_tree_model;
+	fluo::BrushToolAgent* m_brushtool_agent;
 
 private:
 	void OnSelectionChanged(wxDataViewEvent &event);
@@ -94,6 +89,18 @@ private:
 	void OnActivated(wxDataViewEvent &event);
 	void OnSorted(wxDataViewEvent &event);
 	void OnHeaderRightClick(wxDataViewEvent &event);
+
+	void OnToggleView(wxCommandEvent& event);
+	void OnAddGroup(wxCommandEvent& event);
+	void OnAddMGroup(wxCommandEvent& event);
+	void OnRemoveData(wxCommandEvent& event);
+	//brush commands
+	void OnBrushAppend(wxCommandEvent& event);
+	void OnBrushDesel(wxCommandEvent& event);
+	void OnBrushDiffuse(wxCommandEvent& event);
+	void OnBrushErase(wxCommandEvent& event);
+	void OnBrushClear(wxCommandEvent& event);
+	void OnBrushCreate(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()
 };

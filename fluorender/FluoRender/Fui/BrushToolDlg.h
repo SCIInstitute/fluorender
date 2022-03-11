@@ -35,10 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <BrushToolAgent.hpp>
 
 class RenderFrame;
+class TreePanel;
 namespace fluo
 {
 	class Renderview;
-	class VolumeData;
 }
 struct GridData
 {
@@ -124,7 +124,7 @@ public:
 		ID_OutputGrid
 	};
 
-	BrushToolDlg(RenderFrame* frame);
+	BrushToolDlg(RenderFrame* frame, TreePanel* tree);
 	~BrushToolDlg();
 
 	void AssociateRenderview(fluo::Renderview* view);

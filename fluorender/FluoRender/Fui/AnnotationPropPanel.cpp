@@ -47,7 +47,7 @@ AnnotationPropPanel::AnnotationPropPanel(RenderFrame* frame,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddAnnotationPropAgent(gstAnnotationPropAgent, *this);
+	m_agent = glbin_agtf->addAnnotationPropAgent(gstAnnotationPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxStaticText* st = 0;

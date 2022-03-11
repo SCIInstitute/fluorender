@@ -38,9 +38,10 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg) :
+BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg, TreePanel &panel) :
 	InterfaceAgent(),
-	dlg_(dlg)
+	dlg_(dlg),
+	tree_panel_(panel)
 {
 }
 

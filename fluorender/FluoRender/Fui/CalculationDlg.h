@@ -32,12 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-	class VolumeData;
-	class VolumeGroup;
-}
 class CalculationDlg : public wxPanel
 {
 public:
@@ -65,18 +59,8 @@ public:
 
 	friend class fluo::CalculationAgent;
 
-	void SetGroup(fluo::VolumeGroup* group);
-
 private:
 	fluo::CalculationAgent* m_agent;
-
-	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview *m_view;
-	//current volume
-	fluo::VolumeData *m_vol1;
-	fluo::VolumeData *m_vol2;
-	fluo::VolumeGroup *m_group;
 
 	//calculations
 	//operands

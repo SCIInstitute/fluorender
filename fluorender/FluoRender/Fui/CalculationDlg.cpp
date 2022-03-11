@@ -57,14 +57,12 @@ CalculationDlg::CalculationDlg(RenderFrame *frame)
 	: wxPanel(frame, wxID_ANY,
 	wxDefaultPosition,
 	wxSize(500, 350),
-	0, "CalculationDlg"),
-	m_frame(frame),
-	m_group(0)
+	0, "CalculationDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddCalculationAgent(gstCalculationAgent, *this);
+	m_agent = glbin_agtf->addCalculationAgent(gstCalculationAgent, *this);
 
 	wxStaticText *st = 0;
 
@@ -137,11 +135,6 @@ CalculationDlg::CalculationDlg(RenderFrame *frame)
 CalculationDlg::~CalculationDlg()
 {
 
-}
-
-void CalculationDlg::SetGroup(fluo::VolumeGroup* group)
-{
-	m_group = group;
 }
 
 //calculations

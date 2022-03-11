@@ -52,6 +52,17 @@ EVT_DATAVIEW_ITEM_DROP(ID_TreeCtrl, TreePanel::OnDrop)
 EVT_DATAVIEW_ITEM_ACTIVATED(ID_TreeCtrl, TreePanel::OnActivated)
 EVT_DATAVIEW_COLUMN_SORTED(ID_TreeCtrl, TreePanel::OnSorted)
 EVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK(ID_TreeCtrl, TreePanel::OnHeaderRightClick)
+EVT_TOOL(ID_ToggleView, TreePanel::OnToggleView)
+EVT_TOOL(ID_AddGroup, TreePanel::OnAddGroup)
+EVT_TOOL(ID_AddMGroup, TreePanel::OnAddMGroup)
+EVT_TOOL(ID_RemoveData, TreePanel::OnRemoveData)
+//brush commands
+EVT_TOOL(ID_BrushAppend, TreePanel::OnBrushAppend)
+EVT_TOOL(ID_BrushDesel, TreePanel::OnBrushDesel)
+EVT_TOOL(ID_BrushDiffuse, TreePanel::OnBrushDiffuse)
+EVT_TOOL(ID_BrushClear, TreePanel::OnBrushClear)
+EVT_TOOL(ID_BrushErase, TreePanel::OnBrushErase)
+EVT_TOOL(ID_BrushCreate, TreePanel::OnBrushCreate)
 END_EVENT_TABLE()
 
 TreePanel::TreePanel(
@@ -146,7 +157,7 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(fluo::Node* root)
 {
-	m_tree_model = glbin_agtf->getOrAddTreeModel(gstTreeModel, *this);
+	m_tree_model = glbin_agtf->addTreeModel(gstTreeModel, *this);
 	if (!m_tree_model)
 		return;
 	m_tree_model->setObject(root);
@@ -156,6 +167,11 @@ void TreePanel::SetScenegraph(fluo::Node* root)
 		wxDataViewItem(0),
 		wxDataViewItem((void*)m_tree_model->getObject()));
 	m_tree_ctrl->Expand(wxDataViewItem((void*)root));
+}
+
+void TreePanel::SetBrushToolAgent()
+{
+	m_brushtool_agent = glbin_agtf->getBrushToolAgent(gstBrushToolAgent);
 }
 
 //seelction
@@ -208,41 +224,6 @@ int TreePanel::GetBrushSelected()
 		return ID_BrushDesel;
 	else
 		return 0;
-}
-
-void TreePanel::BrushAppend()
-{
-
-}
-
-void TreePanel::BrushDiffuse()
-{
-
-}
-
-void TreePanel::BrushDesel()
-{
-
-}
-
-void TreePanel::BrushClear()
-{
-
-}
-
-void TreePanel::BrushErase()
-{
-
-}
-
-void TreePanel::BrushCreate()
-{
-
-}
-
-void TreePanel::BrushSolid(bool state)
-{
-
 }
 
 void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
@@ -392,6 +373,79 @@ void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
 	col->UnsetAsSortKey();
 	m_tree_model->updValue(gstSortMethod, long(0));
 	event.Skip();
+}
+
+void TreePanel::OnToggleView(wxCommandEvent &event)
+{
+}
+
+void TreePanel::OnAddGroup(wxCommandEvent &event)
+{
+}
+
+void TreePanel::OnAddMGroup(wxCommandEvent &event)
+{
+}
+
+void TreePanel::OnRemoveData(wxCommandEvent &event)
+{
+}
+
+void TreePanel::OnBrushAppend(wxCommandEvent &event)
+{
+	bool bval = m_toolbar->GetToolState(ID_BrushAppend);
+	if (bval)
+	{
+		m_brushtool_agent->setValue(gstInterMode, long(2));
+		m_brushtool_agent->setValue(gstPaintMode, long(2));
+	}
+	else
+	{
+		m_brushtool_agent->setValue(gstInterMode, long(1));
+	}
+}
+
+void TreePanel::OnBrushDiffuse(wxCommandEvent &event)
+{
+	bool bval = m_toolbar->GetToolState(ID_BrushDiffuse);
+	if (bval)
+	{
+		m_brushtool_agent->setValue(gstInterMode, long(2));
+		m_brushtool_agent->setValue(gstPaintMode, long(4));
+	}
+	else
+	{
+		m_brushtool_agent->setValue(gstInterMode, long(1));
+	}
+}
+
+void TreePanel::OnBrushDesel(wxCommandEvent &event)
+{
+	bool bval = m_toolbar->GetToolState(ID_BrushDesel);
+	if (bval)
+	{
+		m_brushtool_agent->setValue(gstInterMode, long(2));
+		m_brushtool_agent->setValue(gstPaintMode, long(3));
+	}
+	else
+	{
+		m_brushtool_agent->setValue(gstInterMode, long(1));
+	}
+}
+
+void TreePanel::OnBrushClear(wxCommandEvent &event)
+{
+	m_brushtool_agent->BrushClear();
+}
+
+void TreePanel::OnBrushErase(wxCommandEvent &event)
+{
+	m_brushtool_agent->BrushErase();
+}
+
+void TreePanel::OnBrushCreate(wxCommandEvent &event)
+{
+	m_brushtool_agent->BrushCreate();
 }
 
 /*BEGIN_EVENT_TABLE(DataTreeCtrl, wxTreeCtrl)

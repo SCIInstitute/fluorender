@@ -81,7 +81,7 @@ wxPanel(frame, wxID_ANY, pos, size, style, name)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddOutAdjustAgent(gstOutAdjustAgent, *this);
+	m_agent = glbin_agtf->addOutAdjustAgent(gstOutAdjustAgent, *this);
 
 	this->SetSize(75,-1);
 	//validator: floating point 2

@@ -89,7 +89,7 @@ AgentFactory::~AgentFactory()
 
 }
 
-AnnotationPropAgent* AgentFactory::getOrAddAnnotationPropAgent(const std::string &name, wxWindow &window)
+AnnotationPropAgent* AgentFactory::addAnnotationPropAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -111,7 +111,7 @@ AnnotationPropAgent* AgentFactory::getOrAddAnnotationPropAgent(const std::string
 	return agent;
 }
 
-BrushToolAgent* AgentFactory::getOrAddBrushToolAgent(const std::string &name, wxWindow &window)
+BrushToolAgent* AgentFactory::addBrushToolAgent(const std::string &name, wxWindow &window, wxWindow &window2)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -119,7 +119,7 @@ BrushToolAgent* AgentFactory::getOrAddBrushToolAgent(const std::string &name, wx
 
 	//not found
 	BrushToolAgent* agent =
-		new BrushToolAgent(static_cast<BrushToolDlg&>(window));
+		new BrushToolAgent(static_cast<BrushToolDlg&>(window), static_cast<TreePanel&>(window2));
 	if (agent)
 	{
 		agent->setName(name);
@@ -142,7 +142,7 @@ BrushToolAgent* AgentFactory::getOrAddBrushToolAgent(const std::string &name, wx
 	return agent;
 }
 
-CalculationAgent* AgentFactory::getOrAddCalculationAgent(const std::string &name, wxWindow &window)
+CalculationAgent* AgentFactory::addCalculationAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -164,7 +164,7 @@ CalculationAgent* AgentFactory::getOrAddCalculationAgent(const std::string &name
 	return agent;
 }
 
-ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wxWindow &window)
+ClipPlaneAgent* AgentFactory::addClipPlaneAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -231,7 +231,7 @@ ClipPlaneAgent* AgentFactory::getOrAddClipPlaneAgent(const std::string &name, wx
 	return agent;
 }
 
-ClKernelAgent* AgentFactory::getOrAddClKernelAgent(const std::string &name, wxWindow &window)
+ClKernelAgent* AgentFactory::addClKernelAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -253,7 +253,7 @@ ClKernelAgent* AgentFactory::getOrAddClKernelAgent(const std::string &name, wxWi
 	return agent;
 }
 
-ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWindow &window)
+ColocalAgent* AgentFactory::addColocalAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -296,7 +296,7 @@ ColocalAgent* AgentFactory::getOrAddColocalAgent(const std::string &name, wxWind
 	return agent;
 }
 
-ComponentAgent* AgentFactory::getOrAddComponentAgent(const std::string &name, wxWindow &window)
+ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -318,7 +318,7 @@ ComponentAgent* AgentFactory::getOrAddComponentAgent(const std::string &name, wx
 	return agent;
 }
 
-ConvertAgent* AgentFactory::getOrAddConvertAgent(const std::string &name, wxWindow &window)
+ConvertAgent* AgentFactory::addConvertAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -340,7 +340,7 @@ ConvertAgent* AgentFactory::getOrAddConvertAgent(const std::string &name, wxWind
 	return agent;
 }
 
-CountingAgent* AgentFactory::getOrAddCountingAgent(const std::string &name, wxWindow &window)
+CountingAgent* AgentFactory::addCountingAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -362,7 +362,7 @@ CountingAgent* AgentFactory::getOrAddCountingAgent(const std::string &name, wxWi
 	return agent;
 }
 
-ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &window)
+ListModel* AgentFactory::addListModel(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -390,7 +390,7 @@ ListModel* AgentFactory::getOrAddListModel(const std::string &name, wxWindow &wi
 	return agent;
 }
 
-MeasureAgent* AgentFactory::getOrAddMeasureAgent(const std::string &name, wxWindow &window)
+MeasureAgent* AgentFactory::addMeasureAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -412,7 +412,7 @@ MeasureAgent* AgentFactory::getOrAddMeasureAgent(const std::string &name, wxWind
 	return agent;
 }
 
-MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWindow &window)
+MeshPropAgent* AgentFactory::addMeshPropAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -434,7 +434,7 @@ MeshPropAgent* AgentFactory::getOrAddMeshPropAgent(const std::string &name, wxWi
 	return agent;
 }
 
-MeshTransAgent* AgentFactory::getOrAddMeshTransAgent(const std::string &name, wxWindow &window)
+MeshTransAgent* AgentFactory::addMeshTransAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -456,7 +456,7 @@ MeshTransAgent* AgentFactory::getOrAddMeshTransAgent(const std::string &name, wx
 	return agent;
 }
 
-MovieAgent* AgentFactory::getOrAddMovieAgent(const std::string &name, wxWindow &window)
+MovieAgent* AgentFactory::addMovieAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -478,7 +478,7 @@ MovieAgent* AgentFactory::getOrAddMovieAgent(const std::string &name, wxWindow &
 	return agent;
 }
 
-NoiseReduceAgent* AgentFactory::getOrAddNoiseReduceAgent(const std::string &name, wxWindow &window)
+NoiseReduceAgent* AgentFactory::addNoiseReduceAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -500,7 +500,7 @@ NoiseReduceAgent* AgentFactory::getOrAddNoiseReduceAgent(const std::string &name
 	return agent;
 }
 
-OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wxWindow &window)
+OutAdjustAgent* AgentFactory::addOutAdjustAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -549,7 +549,7 @@ OutAdjustAgent* AgentFactory::getOrAddOutAdjustAgent(const std::string &name, wx
 	return agent;
 }
 
-RecorderAgent* AgentFactory::getOrAddRecorderAgent(const std::string &name, wxWindow &window)
+RecorderAgent* AgentFactory::addRecorderAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -571,7 +571,7 @@ RecorderAgent* AgentFactory::getOrAddRecorderAgent(const std::string &name, wxWi
 	return agent;
 }
 
-RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &name, wxWindow &window)
+RenderCanvasAgent* AgentFactory::addRenderCanvasAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -608,7 +608,7 @@ RenderCanvasAgent* AgentFactory::getOrAddRenderCanvasAgent(const std::string &na
 	return agent;
 }
 
-RenderFrameAgent* AgentFactory::getOrAddRenderFrameAgent(const std::string &name, wxWindow &window)
+RenderFrameAgent* AgentFactory::addRenderFrameAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -630,7 +630,7 @@ RenderFrameAgent* AgentFactory::getOrAddRenderFrameAgent(const std::string &name
 	return agent;
 }
 
-RenderviewAgent* AgentFactory::getOrAddRenderviewAgent(const std::string &name, wxWindow &window)
+RenderviewAgent* AgentFactory::addRenderviewAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -652,7 +652,7 @@ RenderviewAgent* AgentFactory::getOrAddRenderviewAgent(const std::string &name, 
 	return agent;
 }
 
-SettingAgent* AgentFactory::getOrAddSettingAgent(const std::string &name, wxWindow &window)
+SettingAgent* AgentFactory::addSettingAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -674,7 +674,7 @@ SettingAgent* AgentFactory::getOrAddSettingAgent(const std::string &name, wxWind
 	return agent;
 }
 
-TrackAgent* AgentFactory::getOrAddTrackAgent(const std::string &name, wxWindow &window)
+TrackAgent* AgentFactory::addTrackAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -696,7 +696,7 @@ TrackAgent* AgentFactory::getOrAddTrackAgent(const std::string &name, wxWindow &
 	return agent;
 }
 
-TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &window)
+TreeModel* AgentFactory::addTreeModel(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -728,7 +728,7 @@ TreeModel* AgentFactory::getOrAddTreeModel(const std::string &name, wxWindow &wi
 	return tree_model;
 }
 
-VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, wxWindow &window)
+VolumePropAgent* AgentFactory::addVolumePropAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
@@ -754,5 +754,150 @@ VolumePropAgent* AgentFactory::getOrAddVolumePropAgent(const std::string &name, 
 	}
 
 	return volume_prop_agent;
+}
+
+//get
+AnnotationPropAgent* AgentFactory::getAnnotationPropAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<AnnotationPropAgent*>(result);
+}
+
+BrushToolAgent* AgentFactory::getBrushToolAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<BrushToolAgent*>(result);
+}
+
+CalculationAgent* AgentFactory::getCalculationAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<CalculationAgent*>(result);
+}
+
+ClipPlaneAgent* AgentFactory::getClipPlaneAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<ClipPlaneAgent*>(result);
+}
+
+ClKernelAgent* AgentFactory::getClKernelAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<ClKernelAgent*>(result);
+}
+
+ColocalAgent* AgentFactory::getColocalAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<ColocalAgent*>(result);
+}
+
+ComponentAgent* AgentFactory::getComponentAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<ComponentAgent*>(result);
+}
+
+ConvertAgent* AgentFactory::getConvertAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<ConvertAgent*>(result);
+}
+
+CountingAgent* AgentFactory::getCountingAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<CountingAgent*>(result);
+}
+
+ListModel* AgentFactory::getListModel(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<ListModel*>(result);
+}
+
+MeasureAgent* AgentFactory::getMeasureAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<MeasureAgent*>(result);
+}
+
+MeshPropAgent* AgentFactory::getMeshPropAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<MeshPropAgent*>(result);
+}
+
+MeshTransAgent* AgentFactory::getMeshTransAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<MeshTransAgent*>(result);
+}
+
+MovieAgent* AgentFactory::getMovieAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<MovieAgent*>(result);
+}
+
+NoiseReduceAgent* AgentFactory::getNoiseReduceAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<NoiseReduceAgent*>(result);
+}
+
+OutAdjustAgent* AgentFactory::getOutAdjustAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<OutAdjustAgent*>(result);
+}
+
+RecorderAgent* AgentFactory::getRecorderAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<RecorderAgent*>(result);
+}
+
+RenderCanvasAgent* AgentFactory::getRenderCanvasAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<RenderCanvasAgent*>(result);
+}
+
+RenderFrameAgent* AgentFactory::getRenderFrameAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<RenderFrameAgent*>(result);
+}
+
+RenderviewAgent* AgentFactory::getRenderviewAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<RenderviewAgent*>(result);
+}
+
+SettingAgent* AgentFactory::getSettingAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<SettingAgent*>(result);
+}
+
+TrackAgent* AgentFactory::getTrackAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<TrackAgent*>(result);
+}
+
+TreeModel* AgentFactory::getTreeModel(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<TreeModel*>(result);
+}
+
+VolumePropAgent* AgentFactory::getVolumePropAgent(const std::string &name)
+{
+	InterfaceAgent* result = findFirst(name);
+	return dynamic_cast<VolumePropAgent*>(result);
 }
 

@@ -63,7 +63,7 @@ ColocalDlg::ColocalDlg(RenderFrame* frame) :
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-	m_agent = glbin_agtf->getOrAddColocalAgent(gstColocalAgent, *this);
+	m_agent = glbin_agtf->addColocalAgent(gstColocalAgent, *this);
 
 
 	wxStaticText* st = 0;

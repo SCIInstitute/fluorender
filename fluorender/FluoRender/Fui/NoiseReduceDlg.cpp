@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <NoiseReduceDlg.h>
 #include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <BrushToolAgent.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include "Components/CompSelector.h"
@@ -253,8 +256,7 @@ void NoiseReduceDlg::OnPreviewBtn(wxCommandEvent &event)
 
 void NoiseReduceDlg::OnEraseBtn(wxCommandEvent &event)
 {
-	if (m_frame && m_frame->GetTree())
-		m_frame->GetTree()->BrushErase();
+	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->BrushErase();
 }
 
 void NoiseReduceDlg::OnEnhanceSelChk(wxCommandEvent &event)

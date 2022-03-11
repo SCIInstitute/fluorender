@@ -133,7 +133,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	wxString name = wxString::Format("Render View:%d", m_max_id);
 	SetName(name);
 	std::string str_name = gstRenderviewAgent + std::to_string(m_max_id);
-	m_agent = glbin_agtf->getOrAddRenderviewAgent(str_name, *this);
+	m_agent = glbin_agtf->addRenderviewAgent(str_name, *this);
 
 	wxLogNull logNo;
 	//full frame

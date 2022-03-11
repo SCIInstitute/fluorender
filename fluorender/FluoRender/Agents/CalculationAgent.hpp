@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _CALCULATIONAGENT_H_
 
 #include <InterfaceAgent.hpp>
+#include <Renderview.hpp>
 
 class CalculationDlg;
 namespace fluo
@@ -45,8 +46,8 @@ namespace fluo
 
 		virtual const char* className() const { return "CalculationAgent"; }
 
-		//virtual void setObject(Annotations* an);
-		//virtual Annotations* getObject();
+		virtual void setObject(Renderview* obj);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 
