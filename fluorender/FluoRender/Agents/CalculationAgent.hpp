@@ -34,6 +34,9 @@ DEALINGS IN THE SOFTWARE.
 class CalculationDlg;
 namespace fluo
 {
+	class Renderview;
+	class VolumeData;
+	class VolumeGroup;
 	class CalculationAgent : public InterfaceAgent
 	{
 	public:
@@ -53,6 +56,15 @@ namespace fluo
 
 		virtual CalculationAgent* asCalculationAgent() { return this; }
 		virtual const CalculationAgent* asCalculationAgent() const { return this; }
+
+		void LoadVolA();
+		void LoadVolB();
+		void CalcSub();
+		void CalcAdd();
+		void CalcDiv();
+		void CalcIsc();
+		void CalcFill();
+		void CalcCombine();
 
 	protected:
 		CalculationDlg &dlg_;

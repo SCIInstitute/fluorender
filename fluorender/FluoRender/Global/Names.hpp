@@ -693,4 +693,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstKbBslshUp "kb bslsh up"
 #define gstKbBslshHold "kb bslsh hold"
 
+//calculation agent
+#define gstVolumeA "volume a"
+#define gstVolumeB "volume b"
+
 #endif//NAMES_HPP
