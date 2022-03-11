@@ -54,6 +54,26 @@ namespace fluo
 		virtual ClKernelAgent* asClKernelAgent() { return this; }
 		virtual const ClKernelAgent* asClKernelAgent() const { return this; }
 
+		void RunKernel(int v);
+		void RunKernel();
+
+		void copy_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void box_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void gauss_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void median_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void min_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void max_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void sobel_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+		void morph_filter(void* data, void* result,
+			int brick_x, int brick_y, int brick_z);
+
 	protected:
 		ClKernelDlg &dlg_;
 

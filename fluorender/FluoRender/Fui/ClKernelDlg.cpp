@@ -52,9 +52,7 @@ END_EVENT_TABLE()
 ClKernelDlg::ClKernelDlg(RenderFrame* frame) :
 wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(550, 600),
-0, "ClKernelDlg"),
-m_frame(frame),
-m_view(0)
+0, "ClKernelDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -201,23 +199,10 @@ void ClKernelDlg::AssociateRenderview(fluo::Renderview* view)
 	m_agent->setObject(view);
 }
 
-void ClKernelDlg::GetSettings(fluo::Renderview* view)
-{
-	if (!view) return;
-	m_view = view;
-
-	AddKernelsToList();
-}
-
-fluo::Renderview* ClKernelDlg::GetView()
-{
-	return m_view;
-}
-
 void ClKernelDlg::OnBrowseBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose an OpenCL kernel file", 
+		this, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg->ShowModal();
@@ -248,7 +233,7 @@ void ClKernelDlg::OnSaveBtn(wxCommandEvent& event)
 void ClKernelDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
 	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose an OpenCL kernel file", 
+		this, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg->ShowModal();
@@ -275,17 +260,15 @@ void ClKernelDlg::OnSaveAsBtn(wxCommandEvent& event)
 
 void ClKernelDlg::OnExecuteBtn(wxCommandEvent& event)
 {
-	Execute();
+	m_agent->RunKernel(1);
 }
 
 void ClKernelDlg::OnExecuteNBtn(wxCommandEvent& event)
 {
 	wxString str = m_iterations_txt->GetValue();
 	unsigned long ival;
-	str.ToULong(&ival);
-
-	for (int i=0; i<ival; ++i)
-		Execute();
+	if (str.ToULong(&ival))
+		m_agent->RunKernel(ival);
 }
 
 void ClKernelDlg::OnIterationsChange(wxScrollEvent &event)
@@ -304,92 +287,6 @@ void ClKernelDlg::OnIterationsEdit(wxCommandEvent &event)
 	m_iterations_sldr->SetValue(ival);
 }
 
-void ClKernelDlg::AddKernelsToList()
-{
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	m_kernel_list->DeleteAllItems();
-	wxString loc = exePath + GETSLASH() + "CL_code" +
-		GETSLASH() + "*.cl";
-	wxLogNull logNo;
-	wxArrayString list;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
-	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		list.Add(file);
-		file = wxFindNextFile();
-	}
-	list.Sort();
-	for (size_t i = 0; i < list.GetCount(); ++i)
-		m_kernel_list->InsertItem(
-			m_kernel_list->GetItemCount(),
-			list[i]);
-}
-
-void ClKernelDlg::Execute()
-{
-	m_output_txt->SetValue("");
-
-	if (!m_view)
-		return;
-	flrd::KernelExecutor* executor = m_view->GetKernelExecutor();
-	if (!executor)
-		return;
-
-	//currently, this is expected to be a convolution/filering kernel
-	//get cl code
-	wxString code = m_kernel_edit_stc->GetText();
-
-	//get volume currently selected
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-	bool dup = true;
-	wxString vd_name = vd->getName();
-	if (vd_name.Find("_CL") != wxNOT_FOUND)
-		dup = false;
-
-	executor->SetVolume(vd);
-	executor->SetCode(code.ToStdString());
-	executor->SetDuplicate(dup);
-	executor->Execute();
-
-	/*	Texture* tex = vd->GetTexture();
-	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
-	int res_x, res_y, res_z;
-	vd->GetResolution(res_x, res_y, res_z);
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	min_filter(tex->get_nrrd(0)->data, result,
-	res_x, res_y, res_z);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
-
-	std::string str;
-	executor->GetMessage(str);
-	(*m_output_txt) << str;
-
-	//add result for rendering
-	if (dup)
-	{
-		fluo::VolumeData* vd_r = executor->GetResult(true);
-		if (!vd_r)
-			return;
-		if (m_frame)
-		{
-			//m_frame->GetDataManager()->AddVolumeData(vd_r);
-			m_view->addVolumeData(vd_r, 0);
-			vd->setValue(gstDisplay, false);
-			m_frame->UpdateList();
-			m_frame->UpdateTree(vd_r->getName());
-		}
-	}
-
-	m_view->Update(39);
-}
-
 void ClKernelDlg::OnKernelListSelected(wxListEvent& event)
 {
 	long item = m_kernel_list->GetNextItem(-1,
@@ -406,340 +303,6 @@ void ClKernelDlg::OnKernelListSelected(wxListEvent& event)
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->SetValue(file);
-	}
-}
-
-void ClKernelDlg::copy_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	for (int bi=0; bi<brick_x; ++bi)
-	for (int bj=0; bj<brick_y; ++bj)
-	for (int bk=0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		unsigned char rvalue = ((unsigned char*)data)[index];
-		((unsigned char*)result)[index] = rvalue;
-	}
-}
-
-void ClKernelDlg::box_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	for (int bi=0; bi<brick_x; ++bi)
-	for (int bj=0; bj<brick_y; ++bj)
-	for (int bk=0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		double rvalue = 0;
-		for (int i=0; i<kx; ++i)
-		for (int j=0; j<ky; ++j)
-		for (int k=0; k<kz; ++k)
-		{
-			int cx = bi+i-kx/2;
-			int cy = bj+j-ky/2;
-			int cz = bk+k-kz/2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x-1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y-1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z-1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue += 1.0/(kx*ky*kz) * dvalue;
-		}
-		((unsigned char*)result)[index] = rvalue;
-	}
-}
-
-void ClKernelDlg::gauss_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	for (int bi=0; bi<brick_x; ++bi)
-	for (int bj=0; bj<brick_y; ++bj)
-	for (int bk=0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		double rvalue = 0;
-		for (int i=0; i<kx; ++i)
-		for (int j=0; j<ky; ++j)
-		for (int k=0; k<kz; ++k)
-		{
-			int cx = bi+i-kx/2;
-			int cy = bj+j-ky/2;
-			int cz = bk+k-kz/2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x-1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y-1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z-1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			double s = 10.0;
-			double r = (i-kx/2)*(i-kx/2)+(j-ky/2)*(j-ky/2)+(k-kz/2)*(k-kz/2);
-			rvalue += exp(-r/s)/pow(3.1415*s, 1.5) * dvalue;
-		}
-		((unsigned char*)result)[index] = rvalue;
-	}
-}
-
-void ClKernelDlg::median_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	for (int bi=0; bi<brick_x; ++bi)
-	for (int bj=0; bj<brick_y; ++bj)
-	for (int bk=0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		unsigned char* rvalue = new unsigned char[kx*ky*kz];
-		int id = 0;
-		int c;
-		unsigned char temp;
-		for (int i=0; i<kx; ++i)
-		for (int j=0; j<ky; ++j)
-		for (int k=0; k<kz; ++k)
-		{
-			int cx = bi+i-kx/2;
-			int cy = bj+j-ky/2;
-			int cz = bk+k-kz/2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x-1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y-1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z-1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue[id] = dvalue;
-			if (id > 0)
-			{
-				c = id;
-				while (c > 0)
-				{
-					if (rvalue[c] < rvalue[c-1])
-					{
-						temp = rvalue[c];
-						rvalue[c] = rvalue[c-1];
-						rvalue[c-1] = temp;
-					}
-					else break;
-					c--;
-				}
-			}
-			id++;
-		}
-		((unsigned char*)result)[index] = rvalue[kx*ky*kz/2-1];
-		delete []rvalue;
-	}
-}
-
-void ClKernelDlg::min_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	for (int bi=0; bi<brick_x; ++bi)
-	for (int bj=0; bj<brick_y; ++bj)
-	for (int bk=0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		unsigned char rvalue = 255;
-		for (int i=0; i<kx; ++i)
-		for (int j=0; j<ky; ++j)
-		for (int k=0; k<kz; ++k)
-		{
-			int cx = bi+i-kx/2;
-			int cy = bj+j-ky/2;
-			int cz = bk+k-kz/2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x-1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y-1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z-1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue = min(rvalue, dvalue);
-		}
-		((unsigned char*)result)[index] = rvalue;
-	}
-}
-
-void ClKernelDlg::max_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	for (int bi=0; bi<brick_x; ++bi)
-	for (int bj=0; bj<brick_y; ++bj)
-	for (int bk=0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		unsigned char rvalue = 0;
-		for (int i=0; i<kx; ++i)
-		for (int j=0; j<ky; ++j)
-		for (int k=0; k<kz; ++k)
-		{
-			int cx = bi+i-kx/2;
-			int cy = bj+j-ky/2;
-			int cz = bk+k-kz/2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x-1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y-1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z-1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue = max(rvalue, dvalue);
-		}
-		((unsigned char*)result)[index] = rvalue;
-	}
-}
-
-void ClKernelDlg::sobel_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	int krnx[] = 
-	{ 1, 0, -1,
-		2, 0, -2,
-		1, 0, -1,
-		2, 0, -2,
-		4, 0, -4,
-		2, 0, -2,
-		1, 0, -1,
-		2, 0, -2,
-		1, 0, -1 };
-	int krny[] =
-	{ 1, 2, 1,
-		0, 0, 0,
-		-1, -2, -1,
-		2, 4, 2,
-		0, 0, 0,
-		-2, -4, -2,
-		1, 2, 1,
-		0, 0, 0,
-		-1, -2, -1 };
-	int krnz[] =
-	{ 1, 2, 1,
-		2, 4, 2,
-		1, 2, 1,
-		0, 0, 0,
-		0, 0, 0,
-		0, 0, 0,
-		-1, -2, -1,
-		-2, -4, -2,
-		-1, -2, -1 };
-
-	for (int bi = 0; bi<brick_x; ++bi)
-	for (int bj = 0; bj<brick_y; ++bj)
-	for (int bk = 0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		double rx = 0;
-		double ry = 0;
-		double rz = 0;
-		for (int i = 0; i<kx; ++i)
-		for (int j = 0; j<ky; ++j)
-		for (int k = 0; k<kz; ++k)
-		{
-			int cx = bi + i - kx / 2;
-			int cy = bj + j - ky / 2;
-			int cz = bk + k - kz / 2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x - 1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y - 1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z - 1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rx += krnx[kx*ky*k + kx*j + i] * dvalue;
-			ry += krny[kx*ky*k + kx*j + i] * dvalue;
-			rz += krnz[kx*ky*k + kx*j + i] * dvalue;
-		}
-		double rvalue = sqrt(rx*rx + ry*ry + rz*rz);
-		((unsigned char*)result)[index] = rvalue;
-	}
-}
-
-void ClKernelDlg::morph_filter(void* data, void* result,
-	int brick_x, int brick_y, int brick_z)
-{
-	int kx = 3;
-	int ky = 3;
-	int kz = 3;
-
-	for (int bi = 0; bi<brick_x; ++bi)
-	for (int bj = 0; bj<brick_y; ++bj)
-	for (int bk = 0; bk<brick_z; ++bk)
-	{
-		unsigned int index = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		unsigned char rvalue = 0;
-		for (int i = 0; i<kx; ++i)
-		for (int j = 0; j<ky; ++j)
-		for (int k = 0; k<kz; ++k)
-		{
-			int cx = bi + i - kx / 2;
-			int cy = bj + j - ky / 2;
-			int cz = bk + k - kz / 2;
-			if (cx < 0) cx = 0;
-			if (cx >= brick_x) cx = brick_x - 1;
-			if (cy < 0) cy = 0;
-			if (cy >= brick_y) cy = brick_y - 1;
-			if (cz < 0) cz = 0;
-			if (cz >= brick_z) cz = brick_z - 1;
-
-			unsigned int kc = brick_x*brick_y*cz +
-				brick_x*cy + cx;
-			unsigned char dvalue = ((unsigned char*)data)[kc];
-			rvalue = max(rvalue, dvalue);
-		}
-		unsigned int kc = brick_x*brick_y*bk +
-			brick_x*bj + bi;
-		unsigned char dvalue = ((unsigned char*)data)[kc];
-		((unsigned char*)result)[index] = rvalue - dvalue;
 	}
 }
 
