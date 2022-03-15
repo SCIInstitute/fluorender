@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Stencil_h
 #define FL_Stencil_h
 
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 #include "exmax1.h"
 #include <Types/BBox.h>
 #include <unordered_map>
@@ -231,6 +234,10 @@ namespace flrd
 		em1.SetSpacings(spcx, spcy, spcz);
 		em1.SetIter(iter, eps);
 		size_t i, j, k, ti, tj, tk;
+#ifdef _DEBUG
+		DBMIFLOAT32 mi(maxx - minx + 1,
+			maxy - miny + 1, 1);
+#endif
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
@@ -248,9 +255,10 @@ namespace flrd
 			};
 			em1.AddClusterPoint(
 					pnt, p);
-//#ifdef _DEBUG
-//			ofs.write((char*)(&p), sizeof(float));
-//#endif
+#ifdef _DEBUG
+			mi.set(i-minx, j-miny, p);
+			//ofs.write((char*)(&p), sizeof(float));
+#endif
 		}
 
 		em1.Execute();
