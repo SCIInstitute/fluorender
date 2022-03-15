@@ -180,6 +180,10 @@ namespace flrd
 		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
 		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
+//#ifdef _DEBUG
+//		DBMIFLOAT32 mi(maxx - minx + 1,
+//			maxy - miny + 1, 1);
+//#endif
 		float v1, v2, d1, d2, w;
 		size_t index;
 		size_t i, i2, j, j2, k, k2;
@@ -193,7 +197,10 @@ namespace flrd
 			v2 = s2.getfilter(i2, j2, k2);
 			//get d weighted
 			d1 = fabs(v1 - v2);
-			d2 = 1.0 - std::min(v1, v2);
+//#ifdef _DEBUG
+//			mi.set(i - minx, j - miny, d1);
+//#endif
+			d2 = 1.0;// -std::min(v1, v2);
 			w = d1 * d2;
 			result += w;
 		}
