@@ -200,7 +200,7 @@ namespace flrd
 //#ifdef _DEBUG
 //			mi.set(i - minx, j - miny, d1);
 //#endif
-			d2 = 1.0;// -std::min(v1, v2);
+			d2 = 1.0 - std::min(v1, v2);
 			w = d1 * d2;
 			result += w;
 		}
@@ -213,15 +213,10 @@ namespace flrd
 		int iter, float eps, float spcx,
 		float spcy, float spcz)
 	{
-//#ifdef _DEBUG
-//		std::ofstream ofs;
-//		ofs.open("E:/Data/Test/pattern_tracking/test.data",
-//			std::ios::out | std::ios::binary);
-//#endif
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
-		range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
-			fluo::Point(s2.nx, s2.ny, s2.nz)));
+		//range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
+		//	fluo::Point(s2.nx, s2.ny, s2.nz)));
 		fluo::Vector vmax = range.Max() - s1.box.size();
 
 		size_t minx = size_t(range.Min().x() + 0.5);
@@ -241,10 +236,10 @@ namespace flrd
 		em1.SetSpacings(spcx, spcy, spcz);
 		em1.SetIter(iter, eps);
 		size_t i, j, k, ti, tj, tk;
-#ifdef _DEBUG
-		DBMIFLOAT32 mi(maxx - minx + 1,
-			maxy - miny + 1, 1);
-#endif
+//#ifdef _DEBUG
+//		DBMIFLOAT32 mi(maxx - minx + 1,
+//			maxy - miny + 1, 1);
+//#endif
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
@@ -262,10 +257,9 @@ namespace flrd
 			};
 			em1.AddClusterPoint(
 					pnt, p);
-#ifdef _DEBUG
-			mi.set(i-minx, j-miny, p);
-			//ofs.write((char*)(&p), sizeof(float));
-#endif
+//#ifdef _DEBUG
+//			mi.set(i-minx, j-miny, p);
+//#endif
 		}
 
 		em1.Execute();
@@ -276,9 +270,6 @@ namespace flrd
 		s2.id = s1.id;
 		prob = em1.GetProb();
 
-//#ifdef _DEBUG
-//		ofs.close();
-//#endif
 		return true;
 	}
 
