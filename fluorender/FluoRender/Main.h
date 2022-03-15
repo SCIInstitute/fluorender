@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-//#include "Debug.h"
 #include <wx/wx.h>
 
 class VRenderApp : public wxApp

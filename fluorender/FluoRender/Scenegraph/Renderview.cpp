@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <SearchVisitor.hpp>
 #include <VolumeLoader.h>
 #include <compatibility.h>
-#include <Debug.h>
+#include <Debug.hpp>
 #include <Animator/Interpolator.h>
 #include <Script/ScriptProc.h>
 #include <Selection/VolumeSelector.h>

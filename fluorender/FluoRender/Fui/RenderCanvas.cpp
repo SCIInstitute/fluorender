@@ -45,7 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <VolumeCalculator.h>
 #include <ScriptProc.h>
-#include <Debug.h>
+#include <Debug.hpp>
 
 #include <wx/stdpaths.h>
 #include <wx/msw/private.h>

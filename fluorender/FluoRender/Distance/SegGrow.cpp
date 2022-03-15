@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FLIVR/VolKernel.h>
 #include <algorithm>
 #include <unordered_map>
-#include <Debug.h>
+#include <Debug.hpp>
 #ifdef _DEBUG
 #include <fstream>
 #endif

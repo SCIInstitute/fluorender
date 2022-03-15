@@ -322,6 +322,13 @@ file(GLOB cvt_hdr fluorender/FluoRender/Converters/*.h)
 add_library(CONVERTERS_OBJ OBJECT
   ${cvt_src} ${cvt_hdr})
 
+# Debug
+include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Debug)
+file(GLOB dbg_src fluorender/FluoRender/Debug/*.cpp)
+file(GLOB dbg_hdr fluorender/FluoRender/Debug/*.hpp)
+add_library(DEBUG_OBJ OBJECT
+  ${dbg_src} ${dbg_hdr})
+
 # Distance
 include_directories(${FluoRender_SOURCE_DIR}/fluorender/FluoRender/Distance)
 file(GLOB dist_src fluorender/FluoRender/Distance/*.cpp)
@@ -539,6 +546,7 @@ if(APPLE)
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:DEBUG_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -581,6 +589,7 @@ elseif(UNIX OR MINGW)
     $<TARGET_OBJECTS:CLUSTER_OBJ>
     $<TARGET_OBJECTS:COMPONENTS_OBJ>
     $<TARGET_OBJECTS:CONVERTERS_OBJ>
+    $<TARGET_OBJECTS:DEBUG_OBJ>
     $<TARGET_OBJECTS:DISTANCE_OBJ>
     $<TARGET_OBJECTS:FLIVR_OBJ>
     $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -650,6 +659,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:DEBUG_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
@@ -680,6 +690,7 @@ elseif(WIN32)
       $<TARGET_OBJECTS:CLUSTER_OBJ>
       $<TARGET_OBJECTS:COMPONENTS_OBJ>
       $<TARGET_OBJECTS:CONVERTERS_OBJ>
+      $<TARGET_OBJECTS:DEBUG_OBJ>
       $<TARGET_OBJECTS:DISTANCE_OBJ>
       $<TARGET_OBJECTS:FLIVR_OBJ>
       $<TARGET_OBJECTS:FLOBJECT_OBJ>
