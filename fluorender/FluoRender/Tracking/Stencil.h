@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Stencil_h
 #define FL_Stencil_h
 
+#ifdef _DEBUG
+#include <Debug.hpp>
+#endif
 #include "exmax1.h"
 #include <Types/BBox.h>
 #include <unordered_map>
@@ -177,6 +180,10 @@ namespace flrd
 		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
 		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
+//#ifdef _DEBUG
+//		DBMIFLOAT32 mi(maxx - minx + 1,
+//			maxy - miny + 1, 1);
+//#endif
 		float v1, v2, d1, d2, w;
 		size_t index;
 		size_t i, i2, j, j2, k, k2;
@@ -190,7 +197,10 @@ namespace flrd
 			v2 = s2.getfilter(i2, j2, k2);
 			//get d weighted
 			d1 = fabs(v1 - v2);
-			d2 = 1.0 - std::min(v1, v2);
+//#ifdef _DEBUG
+//			mi.set(i - minx, j - miny, d1);
+//#endif
+			d2 = 1.0;// -std::min(v1, v2);
 			w = d1 * d2;
 			result += w;
 		}
@@ -231,6 +241,10 @@ namespace flrd
 		em1.SetSpacings(spcx, spcy, spcz);
 		em1.SetIter(iter, eps);
 		size_t i, j, k, ti, tj, tk;
+#ifdef _DEBUG
+		DBMIFLOAT32 mi(maxx - minx + 1,
+			maxy - miny + 1, 1);
+#endif
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
@@ -248,9 +262,10 @@ namespace flrd
 			};
 			em1.AddClusterPoint(
 					pnt, p);
-//#ifdef _DEBUG
-//			ofs.write((char*)(&p), sizeof(float));
-//#endif
+#ifdef _DEBUG
+			mi.set(i-minx, j-miny, p);
+			//ofs.write((char*)(&p), sizeof(float));
+#endif
 		}
 
 		em1.Execute();

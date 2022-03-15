@@ -28,7 +28,7 @@ struct DBMIUINT8
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new unsigned char[(unsigned long long)nx*ny];
+		data = new unsigned char[(unsigned long long)nx*ny]();
 		nt = x * c;
 	}
 	~DBMIUINT8()
@@ -54,7 +54,7 @@ struct DBMIINT8
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new char[(unsigned long long)nx*ny];
+		data = new char[(unsigned long long)nx*ny]();
 		nt = x * c;
 	}
 	~DBMIINT8()
@@ -80,7 +80,7 @@ struct DBMIUINT16
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new unsigned short[(unsigned long long)nx*ny];
+		data = new unsigned short[(unsigned long long)nx*ny]();
 		nt = x * c * 2;
 	}
 	~DBMIUINT16()
@@ -106,7 +106,7 @@ struct DBMIINT16
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new short[(unsigned long long)nx*ny];
+		data = new short[(unsigned long long)nx*ny]();
 		nt = x * c * 2;
 	}
 	~DBMIINT16()
@@ -132,7 +132,7 @@ struct DBMIINT32
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new unsigned int[(unsigned long long)nx*ny];
+		data = new unsigned int[(unsigned long long)nx*ny]();
 		nt = x * c * 4;
 	}
 	~DBMIINT32()
@@ -158,7 +158,7 @@ struct DBMIFLOAT32
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new float[(unsigned long long)nx*ny];
+		data = new float[(unsigned long long)nx*ny]();
 		nt = x * c * 4;
 	}
 	~DBMIFLOAT32()
@@ -184,7 +184,7 @@ struct DBMIFLOAT64
 		nx = x;
 		ny = y;
 		nc = c;
-		data = new double[(unsigned long long)nx*ny];
+		data = new double[(unsigned long long)nx*ny]();
 		nt = x * c * 8;
 	}
 	~DBMIFLOAT64()

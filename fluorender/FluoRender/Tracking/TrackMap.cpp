@@ -4571,6 +4571,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	s2.nz = nz;
 	s2.bits = m_map->m_data_bits;
 	s2.scale = m_map->m_scale;
+	s2.fsize = m_filter;
 	for (iter = stencil_list.begin(); iter != stencil_list.end(); ++iter)
 	{
 		s1 = iter->second;

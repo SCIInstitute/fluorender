@@ -8,7 +8,7 @@ ext_y=0.3
 ext_z=0.3
 iter=50
 eps=1e-3
-fsize=1
+fsize=5
 compare=1
 [tasks/task1]
 type=fetch_mask
