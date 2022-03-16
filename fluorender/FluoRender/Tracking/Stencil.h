@@ -259,7 +259,6 @@ namespace flrd
 					pnt, p);
 //#ifdef _DEBUG
 //			mi.set(i-minx, j-miny, p);
-//			//ofs.write((char*)(&p), sizeof(float));
 //#endif
 		}
 

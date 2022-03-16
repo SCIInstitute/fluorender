@@ -815,6 +815,8 @@ void VMovieView::Prev()
 		return;
 	}
 	m_running = true;
+	if (m_view)
+		m_view->m_begin_play_frame = m_cur_frame;
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
 	int slider_pos = m_progress_sldr->GetValue();

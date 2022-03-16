@@ -85,6 +85,7 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_capture_param(false),
 	//begin and end frame
 	m_begin_frame(0),
+	m_begin_play_frame(0),
 	m_end_frame(0),
 	//counters
 	m_tseq_cur_num(0),

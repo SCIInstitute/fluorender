@@ -647,6 +647,7 @@ public:
 	bool m_capture_param;
 	//begin and end frame
 	int m_begin_frame;
+	int m_begin_play_frame;//frame number when the play button is clicked
 	int m_end_frame;
 	//counters
 	int m_tseq_cur_num;

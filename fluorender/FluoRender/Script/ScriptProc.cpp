@@ -579,7 +579,7 @@ void ScriptProc::RunMaskTracking()
 		m_view->m_tseq_prv_num,
 		m_view->m_tseq_cur_num,
 		ext, mode,
-		m_view->m_begin_frame);
+		m_view->m_begin_play_frame);
 
 	UpdateTraceDlg();
 }
