@@ -196,12 +196,12 @@ namespace flrd
 			//get v2
 			v2 = s2.getfilter(i2, j2, k2);
 			//get d weighted
-			d1 = fabs(v1 - v2);
+			d1 = v1 - v2;
 //#ifdef _DEBUG
 //			mi.set(i - minx, j - miny, d1);
 //#endif
-			d2 = 1.0 - std::min(v1, v2);
-			w = d1 * d2;
+			//d2 = 1.0 - std::min(v1, v2);
+			w = d1 * d1;
 			result += w;
 		}
 		return result;
@@ -213,11 +213,6 @@ namespace flrd
 		int iter, float eps, float spcx,
 		float spcy, float spcz)
 	{
-//#ifdef _DEBUG
-//		std::ofstream ofs;
-//		ofs.open("E:/Data/Test/pattern_tracking/test.data",
-//			std::ios::out | std::ios::binary);
-//#endif
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
 		//range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
@@ -276,9 +271,6 @@ namespace flrd
 		s2.id = s1.id;
 		prob = em1.GetProb();
 
-//#ifdef _DEBUG
-//		ofs.close();
-//#endif
 		return true;
 	}
 
