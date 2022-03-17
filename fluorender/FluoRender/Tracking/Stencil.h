@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
-#include "exmax1.h"
+#include <ExGauss.h>
 #include <Types/BBox.h>
 #include <unordered_map>
 
@@ -232,14 +232,8 @@ namespace flrd
 		fluo::Point s2min(minx, miny, minz);
 		s2.box = fluo::BBox(s2min, s2min);
 		fluo::BBox s2temp = s2.box;
-		ExMax1 em1;
-		em1.SetSpacings(spcx, spcy, spcz);
-		em1.SetIter(iter, eps);
+		ExGauss eg(maxx - minx + 1, maxy - miny + 1, maxz - minz + 1);
 		size_t i, j, k, ti, tj, tk;
-//#ifdef _DEBUG
-//		DBMIFLOAT32 mi(maxx - minx + 1,
-//			maxy - miny + 1, 1);
-//#endif
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
@@ -249,26 +243,16 @@ namespace flrd
 			s2.box.translate(off);
 			//p = s1 * s2;
 			p = similar(s1, s2);
-
-			EmVec pnt = {
-				static_cast<double>(s2.box.Min().x()),
-				static_cast<double>(s2.box.Min().y()),
-				static_cast<double>(s2.box.Min().z())
-			};
-			em1.AddClusterPoint(
-					pnt, p);
-//#ifdef _DEBUG
-//			mi.set(i-minx, j-miny, p);
-//#endif
+			eg.SetData(ti, tj, tk, p);
 		}
 
-		em1.Execute();
-		center = em1.GetCenter();
+		eg.Execute();
+		center = eg.GetCenter(minx, miny, minz);
 		//center is actually the corner
 		s2.box = fluo::BBox(center,
 			fluo::Point(center + s1.box.size()));
 		s2.id = s1.id;
-		prob = em1.GetProb();
+		prob = eg.GetProb();
 
 		return true;
 	}

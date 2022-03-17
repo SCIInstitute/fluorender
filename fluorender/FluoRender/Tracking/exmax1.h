@@ -100,6 +100,8 @@ namespace flrd
 		//membership probabilities
 		std::vector<double> m_mem_prob;//0-idx: comps; 1-idx: points
 		double m_cov_eps;
+		//init center
+		fluo::Point m_init_mean;
 
 		void Initialize();
 		void Expectation();

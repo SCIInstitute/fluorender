@@ -23,6 +23,10 @@ VOID _DBGPRINT(LPCWSTR kwszFunction, INT iLineNumber, LPCWSTR kwszDebugFormatStr
 //visualizer structures
 struct DBMIUINT8
 {
+	DBMIUINT8()
+	{
+		release_data = false;
+	}
 	DBMIUINT8(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -30,10 +34,12 @@ struct DBMIUINT8
 		nc = c;
 		data = new unsigned char[(unsigned long long)nx*ny]();
 		nt = x * c;
+		release_data = true;
 	}
 	~DBMIUINT8()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, unsigned char v)
 	{
@@ -44,11 +50,16 @@ struct DBMIUINT8
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	unsigned char* data;
 };
 
 struct DBMIINT8
 {
+	DBMIINT8()
+	{
+		release_data = false;
+	}
 	DBMIINT8(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -56,10 +67,12 @@ struct DBMIINT8
 		nc = c;
 		data = new char[(unsigned long long)nx*ny]();
 		nt = x * c;
+		release_data = true;
 	}
 	~DBMIINT8()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, char v)
 	{
@@ -70,11 +83,16 @@ struct DBMIINT8
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	char* data;
 };
 
 struct DBMIUINT16
 {
+	DBMIUINT16()
+	{
+		release_data = false;
+	}
 	DBMIUINT16(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -82,10 +100,12 @@ struct DBMIUINT16
 		nc = c;
 		data = new unsigned short[(unsigned long long)nx*ny]();
 		nt = x * c * 2;
+		release_data = true;
 	}
 	~DBMIUINT16()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, unsigned short v)
 	{
@@ -96,11 +116,16 @@ struct DBMIUINT16
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	unsigned short* data;
 };
 
 struct DBMIINT16
 {
+	DBMIINT16()
+	{
+		release_data = false;
+	}
 	DBMIINT16(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -108,10 +133,12 @@ struct DBMIINT16
 		nc = c;
 		data = new short[(unsigned long long)nx*ny]();
 		nt = x * c * 2;
+		release_data = true;
 	}
 	~DBMIINT16()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, short v)
 	{
@@ -122,11 +149,16 @@ struct DBMIINT16
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	short* data;
 };
 
 struct DBMIINT32
 {
+	DBMIINT32()
+	{
+		release_data = false;
+	}
 	DBMIINT32(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -134,10 +166,12 @@ struct DBMIINT32
 		nc = c;
 		data = new unsigned int[(unsigned long long)nx*ny]();
 		nt = x * c * 4;
+		release_data = true;
 	}
 	~DBMIINT32()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, unsigned int v)
 	{
@@ -148,11 +182,16 @@ struct DBMIINT32
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	unsigned int* data;
 };
 
 struct DBMIFLOAT32
 {
+	DBMIFLOAT32()
+	{
+		release_data = false;
+	}
 	DBMIFLOAT32(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -160,10 +199,12 @@ struct DBMIFLOAT32
 		nc = c;
 		data = new float[(unsigned long long)nx*ny]();
 		nt = x * c * 4;
+		release_data = true;
 	}
 	~DBMIFLOAT32()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, float v)
 	{
@@ -174,11 +215,16 @@ struct DBMIFLOAT32
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	float* data;
 };
 
 struct DBMIFLOAT64
 {
+	DBMIFLOAT64()
+	{
+		release_data = false;
+	}
 	DBMIFLOAT64(unsigned int x, unsigned int y, unsigned int c)
 	{
 		nx = x;
@@ -186,10 +232,12 @@ struct DBMIFLOAT64
 		nc = c;
 		data = new double[(unsigned long long)nx*ny]();
 		nt = x * c * 8;
+		release_data = true;
 	}
 	~DBMIFLOAT64()
 	{
-		delete[] data;
+		if (release_data)
+			delete[] data;
 	}
 	void set(unsigned int x, unsigned int y, double v)
 	{
@@ -200,6 +248,7 @@ struct DBMIFLOAT64
 	unsigned int ny;
 	unsigned int nc;
 	unsigned int nt;
+	bool release_data;
 	double* data;
 };
 

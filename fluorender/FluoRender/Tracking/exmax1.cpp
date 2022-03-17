@@ -25,6 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 #include "exmax1.h"
 #include <algorithm>
 #include <fstream>
@@ -54,8 +57,14 @@ bool ExMax1::Execute()
 {
 	if (m_data.empty())
 		return false;
-
+#ifdef _DEBUG
+	DBMIFLOAT64 mi;
+	mi.nx = 69; mi.ny = 69; mi.nc = 1; mi.nt = mi.nx * mi.nc * 8;
+#endif
 	Initialize();
+#ifdef _DEBUG
+	mi.data = m_mem_prob.data();
+#endif
 
 	if (m_max_iter)
 	{
@@ -78,10 +87,13 @@ bool ExMax1::Execute()
 
 fluo::Point ExMax1::GetCenter()
 {
-	return fluo::Point(
-		A0(m_params.mean),
-		A1(m_params.mean),
-		A2(m_params.mean));
+	if (GetProb() > 0.5)
+		return fluo::Point(
+			A0(m_params.mean),
+			A1(m_params.mean),
+			A2(m_params.mean));
+	else
+		return m_init_mean;
 }
 
 double ExMax1::GetProb()
@@ -158,6 +170,12 @@ void ExMax1::Initialize()
 	//limit
 	m_eps = m_eps == 0.0 ? m_l : m_eps * m_l;
 	m_inc_counter = 0;
+
+	//mean
+	m_init_mean = fluo::Point(
+		A0(m_params.mean),
+		A1(m_params.mean),
+		A2(m_params.mean));
 }
 
 void ExMax1::Expectation()
