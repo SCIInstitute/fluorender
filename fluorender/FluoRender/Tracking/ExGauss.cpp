@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -36,9 +36,9 @@ using namespace flrd;
 void ExGauss::Execute()
 {
 //#ifdef _DEBUG
-//	DBMIINT32 mi;
-//	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
-//	mi.data = front;
+//	//DBMIINT32 mi;
+//	//mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+//	//mi.data = front;
 //	DBMIFLOAT32 mi2;
 //	mi2.nx = nx; mi2.ny = ny; mi2.nc = 1; mi2.nt = mi2.nx * mi2.nc * 4;
 //	mi2.data = data;
@@ -57,8 +57,16 @@ void ExGauss::Execute()
 
 fluo::Point ExGauss::GetCenter()
 {
-	if (prob > 0.5 && m_max_iter)
-		return mean;
+	if (m_max_iter)
+	{
+		if (prob > 0.5)
+			return mean;
+		else
+			return fluo::Point(
+				nx > 1 ? double(nx) / 2 : 0,
+				ny > 1 ? double(ny) / 2 : 0,
+				nz > 1 ? double(nz) / 2 : 0);
+	}
 	return exetr;
 }
 
