@@ -4592,7 +4592,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 			if (temp)
 				off = fluo::Vector(temp->GetCenter()) - off;
 		}
-		if (match_stencils(s1, s2, ext, off, center, prob))
+		if (match_stencils(s1, s2, ext, off, center, prob, m_max_iter, m_eps))
 		{
 			//if (prob > 0.5f)
 			//	continue;

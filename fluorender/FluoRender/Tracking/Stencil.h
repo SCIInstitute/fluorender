@@ -209,7 +209,7 @@ namespace flrd
 
 	inline bool match_stencils(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext, const fluo::Vector &off,
-		fluo::Point &center, float &prob)
+		fluo::Point &center, float &prob, int iter, float eps)
 	{
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
@@ -244,6 +244,7 @@ namespace flrd
 			eg.SetData(ti, tj, tk, p);
 		}
 
+		eg.SetIter(iter, eps);
 		eg.Execute();
 		center = eg.GetCenter();
 		center = fluo::Point(center + off + s2min);

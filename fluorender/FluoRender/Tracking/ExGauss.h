@@ -37,7 +37,10 @@ namespace flrd
 	{
 	public:
 		ExGauss(unsigned int x, unsigned int y, unsigned int z) :
-			nx(x), ny(y), nz(z)
+			nx(x), ny(y), nz(z),
+			m_l(1e-3),
+			m_max_iter(0),
+			prob(0)
 		{
 			data = new float[(unsigned long long)nx * ny * nz]();
 			front = new unsigned int[(unsigned long long)nx * ny * nz]();
@@ -48,6 +51,11 @@ namespace flrd
 			delete[] front;
 		};
 
+		void SetIter(size_t iter, float eps)
+		{
+			m_max_iter = iter;
+			m_l = eps;
+		}
 		void SetData(unsigned int x, unsigned int y, unsigned int z, float v)
 		{
 			unsigned long long idx = (unsigned long long)z * nx * ny + y * nx + x;
@@ -71,8 +79,12 @@ namespace flrd
 			unsigned int z;
 		};
 		std::list<Coord> cl;
-		fluo::Point mean;
 		fluo::Point exetr;
+		fluo::Point mean;
+		double prob;
+		//maximum iteration number
+		size_t m_max_iter;
+		float m_l;
 
 	private:
 		void FindExetr();

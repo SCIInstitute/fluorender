@@ -57,14 +57,14 @@ bool ExMax1::Execute()
 {
 	if (m_data.empty())
 		return false;
-#ifdef _DEBUG
-	DBMIFLOAT64 mi;
-	mi.nx = 69; mi.ny = 69; mi.nc = 1; mi.nt = mi.nx * mi.nc * 8;
-#endif
+//#ifdef _DEBUG
+//	DBMIFLOAT64 mi;
+//	mi.nx = 69; mi.ny = 69; mi.nc = 1; mi.nt = mi.nx * mi.nc * 8;
+//#endif
 	Initialize();
-#ifdef _DEBUG
-	mi.data = m_mem_prob.data();
-#endif
+//#ifdef _DEBUG
+//	mi.data = m_mem_prob.data();
+//#endif
 
 	if (m_max_iter)
 	{
@@ -109,39 +109,44 @@ double ExMax1::GetProb()
 
 void ExMax1::Initialize()
 {
-	float minint, maxint;
+	//float minint, maxint;
 	double count = 0;
+	m_params.mean = { 0, 0, 0 };
 	for (ClusterIter iter = m_data.begin();
 		iter != m_data.end(); ++iter)
 	{
-		if (iter == m_data.begin())
-		{
-			minint = (*iter)->intensity;
-			maxint = (*iter)->intensity;
-			m_params.mean = (*iter)->centerf;
-		}
-		else if ((*iter)->intensity < minint)
-		{
-			minint = (*iter)->intensity;
-			m_params.mean = (*iter)->centerf;
-		}
-		else if ((*iter)->intensity > maxint)
-		{
-			maxint = (*iter)->intensity;
-		}
+		//if (iter == m_data.begin())
+		//{
+		//	minint = (*iter)->intensity;
+		//	maxint = (*iter)->intensity;
+		//	m_params.mean = (*iter)->centerf;
+		//}
+		//else if ((*iter)->intensity < minint)
+		//{
+		//	minint = (*iter)->intensity;
+		//	m_params.mean = (*iter)->centerf;
+		//}
+		//else if ((*iter)->intensity > maxint)
+		//{
+		//	maxint = (*iter)->intensity;
+		//}
+		m_params.mean += (*iter)->centerf * (*iter)->intensity;
 		count += (*iter)->intensity;
 	}
+	if (count == 0)
+		return;
+	m_params.mean /= count;
 
 	//normalize
-	float range = maxint - minint;
-	if (range > 0.0f)
-	{
-		for (ClusterIter iter = m_data.begin();
-			iter != m_data.end(); ++iter)
-		{
-			(*iter)->intensity = 1.0 - ((*iter)->intensity - minint) / range;
-		}
-	}
+	//float range = maxint - minint;
+	//if (range > 0.0f)
+	//{
+	//	for (ClusterIter iter = m_data.begin();
+	//		iter != m_data.end(); ++iter)
+	//	{
+	//		(*iter)->intensity = 1.0 - ((*iter)->intensity - minint) / range;
+	//	}
+	//}
 
 	EmVec trace = { 0, 0, 0 };
 	EmVec vec;

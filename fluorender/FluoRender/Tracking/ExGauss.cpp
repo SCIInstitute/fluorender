@@ -29,33 +29,42 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #endif
 #include <ExGauss.h>
+#include <exmax1.h>
 
 using namespace flrd;
 
 void ExGauss::Execute()
 {
-#ifdef _DEBUG
-	DBMIFLOAT32 mi;
-	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
-	mi.data = data;
-#endif
+//#ifdef _DEBUG
+//	DBMIINT32 mi;
+//	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+//	mi.data = front;
+//	DBMIFLOAT32 mi2;
+//	mi2.nx = nx; mi2.ny = ny; mi2.nc = 1; mi2.nt = mi2.nx * mi2.nc * 4;
+//	mi2.data = data;
+//#endif
 	FindExetr();
-	for (unsigned int i = 1; ; ++i)
+	if (m_max_iter > 0)
 	{
-		if (Flood(i))
-			break;
+		for (unsigned int i = 1; ; ++i)
+		{
+			if (Flood(i))
+				break;
+		}
+		FitGauss();
 	}
-	FitGauss();
 }
 
 fluo::Point ExGauss::GetCenter()
 {
+	if (prob > 0.5 && m_max_iter)
+		return mean;
 	return exetr;
 }
 
 double ExGauss::GetProb()
 {
-	return 0.0;
+	return prob;
 }
 
 void ExGauss::FindExetr()
@@ -174,11 +183,11 @@ bool ExGauss::Flood(unsigned int i)
 
 void ExGauss::FitGauss()
 {
-	double cx = 0, cy = 0, cz = 0, cw = 0;
-	double v;
+	float v;
 	unsigned int i, j, k;
 	unsigned long long idx;
 
+	//find range
 	float minint, maxint, range;
 	bool setmm = false;
 	unsigned long long data_size = (unsigned long long)nx * ny * nz;
@@ -198,21 +207,30 @@ void ExGauss::FitGauss()
 		}
 	}
 	range = maxint - minint;
-	for (k = 0; k < nz; ++k)
-	for (j = 0; j < ny; ++j)
-	for (i = 0; i < nx; ++i)
+	if (range == 0) return;
+
+	//normalize
+	for (idx = 0; idx < data_size; ++idx)
+		data[idx] = (data[idx] - minint) / range;
+
+	//get gauss
+	ExMax1 em;
+	for (unsigned int k = 0; k < nz; ++k)
+	for (unsigned int j = 0; j < ny; ++j)
+	for (unsigned int i = 0; i < nx; ++i)
 	{
 		idx = (unsigned long long)k * nx * ny + j * nx + i;
-		if (front[idx] > 0)
-		{
-			v = (data[idx] - minint) / range;
-			cx += v * i;
-			cy += v * j;
-			cz += v * k;
-			cw += v;
-		}
+		if (front[idx] == 0) continue;
+		v = data[idx];
+		EmVec pnt = {
+			static_cast<double>(i),
+			static_cast<double>(j),
+			static_cast<double>(k) };
+		em.AddClusterPoint(pnt, v);
 	}
-	if (cw > 0)
-		mean = fluo::Point(cx, cy, cz) / cw;
+	em.SetIter(m_max_iter, m_l);
+	em.Execute();
+	mean = em.GetCenter();
+	prob = em.GetProb();
 }
 
