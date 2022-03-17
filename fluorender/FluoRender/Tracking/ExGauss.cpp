@@ -1,0 +1,236 @@
+/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2021 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
+#include <ExGauss.h>
+#include <exmax1.h>
+
+using namespace flrd;
+
+void ExGauss::Execute()
+{
+//#ifdef _DEBUG
+//	DBMIINT32 mi;
+//	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+//	mi.data = front;
+//	DBMIFLOAT32 mi2;
+//	mi2.nx = nx; mi2.ny = ny; mi2.nc = 1; mi2.nt = mi2.nx * mi2.nc * 4;
+//	mi2.data = data;
+//#endif
+	FindExetr();
+	if (m_max_iter > 0)
+	{
+		for (unsigned int i = 1; ; ++i)
+		{
+			if (Flood(i))
+				break;
+		}
+		FitGauss();
+	}
+}
+
+fluo::Point ExGauss::GetCenter()
+{
+	if (prob > 0.5 && m_max_iter)
+		return mean;
+	return exetr;
+}
+
+double ExGauss::GetProb()
+{
+	return prob;
+}
+
+void ExGauss::FindExetr()
+{
+	float v = data[0];
+	Coord c = { 0, 0, 0 };
+	cl.clear();
+	unsigned int i, j, k;
+	unsigned long long idx;
+	for (k = 0; k < nz; ++k)
+	for (j = 0; j < ny; ++j)
+	for (i = 0; i < nx; ++i)
+	{
+		idx = (unsigned long long)k * nx * ny + j * nx + i;
+		if (data[idx] > v)
+		{
+			v = data[idx];
+			c.z = k;
+			c.y = j;
+			c.x = i;
+		}
+	}
+	idx = Index(c);
+	front[idx] = 1;
+	cl.push_back(c);
+	exetr = fluo::Point(c.x, c.y, c.z);
+}
+
+bool ExGauss::Flood(unsigned int i)
+{
+	std::list<Coord> cl2;
+	for (auto it : cl)
+	{
+		unsigned long long idx;
+		Coord c = it;
+		float v = data[Index(c)];
+		Coord nb;
+		float nv;
+		//-x
+		nb.x = c.x - 1; nb.y = c.y; nb.z = c.z;
+		idx = Index(nb);
+		if (Valid(nb) && !front[idx])
+		{
+			nv = data[idx];
+			if (nv < v)
+			{
+				cl2.push_back(nb);
+				front[idx] = i + 1;
+			}
+		}
+		//+x
+		nb.x = c.x + 1; nb.y = c.y; nb.z = c.z;
+		idx = Index(nb);
+		if (Valid(nb) && !front[idx])
+		{
+			nv = data[idx];
+			if (nv < v)
+			{
+				cl2.push_back(nb);
+				front[idx] = i + 1;
+			}
+		}
+		//-y
+		nb.x = c.x; nb.y = c.y - 1; nb.z = c.z;
+		idx = Index(nb);
+		if (Valid(nb) && !front[idx])
+		{
+			nv = data[idx];
+			if (nv < v)
+			{
+				cl2.push_back(nb);
+				front[idx] = i + 1;
+			}
+		}
+		//+y
+		nb.x = c.x; nb.y = c.y + 1; nb.z = c.z;
+		idx = Index(nb);
+		if (Valid(nb) && !front[idx])
+		{
+			nv = data[idx];
+			if (nv < v)
+			{
+				cl2.push_back(nb);
+				front[idx] = i + 1;
+			}
+		}
+		//-z
+		nb.x = c.x; nb.y = c.y; nb.z = c.z - 1;
+		idx = Index(nb);
+		if (Valid(nb) && !front[idx])
+		{
+			nv = data[idx];
+			if (nv < v)
+			{
+				cl2.push_back(nb);
+				front[idx] = i + 1;
+			}
+		}
+		//+z
+		nb.x = c.x; nb.y = c.y; nb.z = c.z + 1;
+		idx = Index(nb);
+		if (Valid(nb) && !front[idx])
+		{
+			nv = data[idx];
+			if (nv < v)
+			{
+				cl2.push_back(nb);
+				front[idx] = i + 1;
+			}
+		}
+	}
+
+	cl = cl2;
+	return cl.empty();
+}
+
+void ExGauss::FitGauss()
+{
+	float v;
+	unsigned int i, j, k;
+	unsigned long long idx;
+
+	//find range
+	float minint, maxint, range;
+	bool setmm = false;
+	unsigned long long data_size = (unsigned long long)nx * ny * nz;
+	for (idx = 0; idx < data_size; ++idx)
+	{
+		if (front[idx] > 0)
+		{
+			if (!setmm)
+			{
+				minint = data[idx];
+				maxint = data[idx];
+				setmm = true;
+				continue;
+			}
+			minint = data[idx] < minint ? data[idx] : minint;
+			maxint = data[idx] > maxint ? data[idx] : maxint;
+		}
+	}
+	range = maxint - minint;
+	if (range == 0) return;
+
+	//normalize
+	for (idx = 0; idx < data_size; ++idx)
+		data[idx] = (data[idx] - minint) / range;
+
+	//get gauss
+	ExMax1 em;
+	for (unsigned int k = 0; k < nz; ++k)
+	for (unsigned int j = 0; j < ny; ++j)
+	for (unsigned int i = 0; i < nx; ++i)
+	{
+		idx = (unsigned long long)k * nx * ny + j * nx + i;
+		if (front[idx] == 0) continue;
+		v = data[idx];
+		EmVec pnt = {
+			static_cast<double>(i),
+			static_cast<double>(j),
+			static_cast<double>(k) };
+		em.AddClusterPoint(pnt, v);
+	}
+	em.SetIter(m_max_iter, m_l);
+	em.Execute();
+	mean = em.GetCenter();
+	prob = em.GetProb();
+}
+
