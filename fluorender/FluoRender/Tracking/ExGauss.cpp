@@ -34,12 +34,12 @@ using namespace flrd;
 
 void ExGauss::Execute()
 {
-//#ifdef _DEBUG
-//	DBMIINT32 mi;
-//	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
-//	mi.data = front;
-//#endif
-	FindMin();
+#ifdef _DEBUG
+	DBMIFLOAT32 mi;
+	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+	mi.data = data;
+#endif
+	FindExetr();
 	for (unsigned int i = 1; ; ++i)
 	{
 		if (Flood(i))
@@ -48,9 +48,9 @@ void ExGauss::Execute()
 	FitGauss();
 }
 
-fluo::Point ExGauss::GetCenter(double x, double y, double z)
+fluo::Point ExGauss::GetCenter()
 {
-	return fluo::Point(min_init.x() + x, min_init.y() + y, min_init.z() +z);
+	return exetr;
 }
 
 double ExGauss::GetProb()
@@ -58,10 +58,10 @@ double ExGauss::GetProb()
 	return 0.0;
 }
 
-void ExGauss::FindMin()
+void ExGauss::FindExetr()
 {
-	float minv = data[0];
-	Coord minc = { 0, 0, 0 };
+	float v = data[0];
+	Coord c = { 0, 0, 0 };
 	cl.clear();
 	unsigned int i, j, k;
 	unsigned long long idx;
@@ -70,18 +70,18 @@ void ExGauss::FindMin()
 	for (i = 0; i < nx; ++i)
 	{
 		idx = (unsigned long long)k * nx * ny + j * nx + i;
-		if (data[idx] < minv)
+		if (data[idx] > v)
 		{
-			minv = data[idx];
-			minc.z = k;
-			minc.y = j;
-			minc.x = i;
+			v = data[idx];
+			c.z = k;
+			c.y = j;
+			c.x = i;
 		}
 	}
-	idx = Index(minc);
+	idx = Index(c);
 	front[idx] = 1;
-	cl.push_back(minc);
-	min_init = fluo::Point(minc.x, minc.y, minc.z);
+	cl.push_back(c);
+	exetr = fluo::Point(c.x, c.y, c.z);
 }
 
 bool ExGauss::Flood(unsigned int i)
@@ -100,7 +100,7 @@ bool ExGauss::Flood(unsigned int i)
 		if (Valid(nb) && !front[idx])
 		{
 			nv = data[idx];
-			if (nv > v)
+			if (nv < v)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;
@@ -112,7 +112,7 @@ bool ExGauss::Flood(unsigned int i)
 		if (Valid(nb) && !front[idx])
 		{
 			nv = data[idx];
-			if (nv > v)
+			if (nv < v)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;
@@ -124,7 +124,7 @@ bool ExGauss::Flood(unsigned int i)
 		if (Valid(nb) && !front[idx])
 		{
 			nv = data[idx];
-			if (nv > v)
+			if (nv < v)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;
@@ -136,7 +136,7 @@ bool ExGauss::Flood(unsigned int i)
 		if (Valid(nb) && !front[idx])
 		{
 			nv = data[idx];
-			if (nv > v)
+			if (nv < v)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;
@@ -148,7 +148,7 @@ bool ExGauss::Flood(unsigned int i)
 		if (Valid(nb) && !front[idx])
 		{
 			nv = data[idx];
-			if (nv > v)
+			if (nv < v)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;
@@ -160,7 +160,7 @@ bool ExGauss::Flood(unsigned int i)
 		if (Valid(nb) && !front[idx])
 		{
 			nv = data[idx];
-			if (nv > v)
+			if (nv < v)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;

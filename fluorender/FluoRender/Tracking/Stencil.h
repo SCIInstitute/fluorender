@@ -196,12 +196,12 @@ namespace flrd
 			//get v2
 			v2 = s2.getfilter(i2, j2, k2);
 			//get d weighted
-			d1 = v1 - v2;
+			//d1 = v1 - v2;
 //#ifdef _DEBUG
 //			mi.set(i - minx, j - miny, d1);
 //#endif
 			//d2 = 1.0 - std::min(v1, v2);
-			w = d1 * d1;
+			w = v1 * v2;
 			result += w;
 		}
 		return result;
@@ -209,9 +209,7 @@ namespace flrd
 
 	inline bool match_stencils(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext, const fluo::Vector &off,
-		fluo::Point &center, float &prob,
-		int iter, float eps, float spcx,
-		float spcy, float spcz)
+		fluo::Point &center, float &prob)
 	{
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
@@ -219,21 +217,21 @@ namespace flrd
 		//	fluo::Point(s2.nx, s2.ny, s2.nz)));
 		fluo::Vector vmax = range.Max() - s1.box.size();
 
-		size_t minx = size_t(range.Min().x() + 0.5);
-		size_t miny = size_t(range.Min().y() + 0.5);
-		size_t minz = size_t(range.Min().z() + 0.5);
-		size_t maxx = size_t(vmax.x() + 0.5);
-		size_t maxy = size_t(vmax.y() + 0.5);
-		size_t maxz = size_t(vmax.z() + 0.5);
+		int minx = int(range.Min().x() + 0.5);
+		int miny = int(range.Min().y() + 0.5);
+		int minz = int(range.Min().z() + 0.5);
+		int maxx = int(vmax.x() + 0.5);
+		int maxy = int(vmax.y() + 0.5);
+		int maxz = int(vmax.z() + 0.5);
 
-		size_t total = (maxx - minx + 1) *
-			(maxy - miny + 1) * (maxz - minz + 1);
+		//size_t total = (maxx - minx + 1) *
+		//	(maxy - miny + 1) * (maxz - minz + 1);
 		float p;
 		fluo::Point s2min(minx, miny, minz);
 		s2.box = fluo::BBox(s2min, s2min);
 		fluo::BBox s2temp = s2.box;
 		ExGauss eg(maxx - minx + 1, maxy - miny + 1, maxz - minz + 1);
-		size_t i, j, k, ti, tj, tk;
+		int i, j, k, ti, tj, tk;
 		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
 		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
@@ -247,7 +245,8 @@ namespace flrd
 		}
 
 		eg.Execute();
-		center = eg.GetCenter(minx, miny, minz);
+		center = eg.GetCenter();
+		center = fluo::Point(center + off + s2min);
 		//center is actually the corner
 		s2.box = fluo::BBox(center,
 			fluo::Point(center + s1.box.size()));

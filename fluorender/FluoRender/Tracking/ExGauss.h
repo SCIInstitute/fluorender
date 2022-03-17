@@ -55,7 +55,7 @@ namespace flrd
 		}
 
 		void Execute();
-		fluo::Point GetCenter(double x, double y, double z);
+		fluo::Point GetCenter();
 		double GetProb();
 
 	private:
@@ -72,10 +72,10 @@ namespace flrd
 		};
 		std::list<Coord> cl;
 		fluo::Point mean;
-		fluo::Point min_init;
+		fluo::Point exetr;
 
 	private:
-		void FindMin();
+		void FindExetr();
 		bool Flood(unsigned int i);
 		void FitGauss();
 		unsigned long long Index(Coord &c)

@@ -498,11 +498,17 @@ void ScriptProc::RunPostTracking()
 	Nrrd* mask_nrrd = cur_vol->GetMask(false);
 	Nrrd* label_nrrd = cur_vol->GetLabel(false);
 	if (!mask_nrrd || !label_nrrd)
+	{
 		UpdateTraceDlg();
+		return;
+	}
 	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
 	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
 	if (!mask_data || !label_data)
+	{
 		UpdateTraceDlg();
+		return;
+	}
 	int nx, ny, nz;
 	cur_vol->GetResolution(nx, ny, nz);
 	//update the mask according to the new label
