@@ -77,6 +77,9 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <VolumePropPanel.h>
 
+#define ADD_AFTER_EVENT(obj, name, agt, funct) \
+	obj->setValueChangedFunction(name, std::bind(&agt::funct, obj, std::placeholders::_1))
+
 using namespace fluo;
 
 AgentFactory::AgentFactory()
@@ -123,15 +126,9 @@ BrushToolAgent* AgentFactory::addBrushToolAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
-		agent->setValueChangedFunction(gstInterMode,
-			std::bind(&BrushToolAgent::OnInterModeChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstSelUndo,
-			std::bind(&BrushToolAgent::OnSelUndo,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstSelRedo,
-			std::bind(&BrushToolAgent::OnSelRedo,
-				agent, std::placeholders::_1));
+		ADD_AFTER_EVENT(agent, gstInterMode, BrushToolAgent, OnInterModeChanged);
+		ADD_AFTER_EVENT(agent, gstSelUndo, BrushToolAgent, OnSelUndo);
+		ADD_AFTER_EVENT(agent, gstSelRedo, BrushToolAgent, OnSelRedo);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -176,51 +173,21 @@ ClipPlaneAgent* AgentFactory::addClipPlaneAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
-		agent->setValueChangedFunction(gstClipX1,
-			std::bind(&ClipPlaneAgent::OnClipXChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipX2,
-			std::bind(&ClipPlaneAgent::OnClipXChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipY1,
-			std::bind(&ClipPlaneAgent::OnClipYChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipY2,
-			std::bind(&ClipPlaneAgent::OnClipYChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipZ1,
-			std::bind(&ClipPlaneAgent::OnClipZChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipZ2,
-			std::bind(&ClipPlaneAgent::OnClipZChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipDistX,
-			std::bind(&ClipPlaneAgent::OnClipDistXChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipDistY,
-			std::bind(&ClipPlaneAgent::OnClipDistYChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipDistZ,
-			std::bind(&ClipPlaneAgent::OnClipDistZChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipLinkX,
-			std::bind(&ClipPlaneAgent::OnClipLinkXChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipLinkY,
-			std::bind(&ClipPlaneAgent::OnClipLinkYChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipLinkZ,
-			std::bind(&ClipPlaneAgent::OnClipLinkZChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipRotX,
-			std::bind(&ClipPlaneAgent::OnClipRotXChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipRotY,
-			std::bind(&ClipPlaneAgent::OnClipRotYChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstClipRotZ,
-			std::bind(&ClipPlaneAgent::OnClipRotZChanged,
-				agent, std::placeholders::_1));
+		ADD_AFTER_EVENT(agent, gstClipX1, ClipPlaneAgent, OnClipXChanged);
+		ADD_AFTER_EVENT(agent, gstClipX2, ClipPlaneAgent, OnClipXChanged);
+		ADD_AFTER_EVENT(agent, gstClipY1, ClipPlaneAgent, OnClipYChanged);
+		ADD_AFTER_EVENT(agent, gstClipY2, ClipPlaneAgent, OnClipYChanged);
+		ADD_AFTER_EVENT(agent, gstClipZ1, ClipPlaneAgent, OnClipZChanged);
+		ADD_AFTER_EVENT(agent, gstClipZ2, ClipPlaneAgent, OnClipZChanged);
+		ADD_AFTER_EVENT(agent, gstClipDistX, ClipPlaneAgent, OnClipDistXChanged);
+		ADD_AFTER_EVENT(agent, gstClipDistY, ClipPlaneAgent, OnClipDistYChanged);
+		ADD_AFTER_EVENT(agent, gstClipDistZ, ClipPlaneAgent, OnClipDistZChanged);
+		ADD_AFTER_EVENT(agent, gstClipLinkX, ClipPlaneAgent, OnClipLinkXChanged);
+		ADD_AFTER_EVENT(agent, gstClipLinkY, ClipPlaneAgent, OnClipLinkYChanged);
+		ADD_AFTER_EVENT(agent, gstClipLinkZ, ClipPlaneAgent, OnClipLinkZChanged);
+		ADD_AFTER_EVENT(agent, gstClipRotX, ClipPlaneAgent, OnClipRotXChanged);
+		ADD_AFTER_EVENT(agent, gstClipRotY, ClipPlaneAgent, OnClipRotYChanged);
+		ADD_AFTER_EVENT(agent, gstClipRotZ, ClipPlaneAgent, OnClipRotZChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -265,27 +232,13 @@ ColocalAgent* AgentFactory::addColocalAgent(const std::string &name, wxWindow &w
 	if (agent)
 	{
 		agent->setName(name);
-		agent->setValueChangedFunction(gstAutoUpdate,
-			std::bind(&ColocalAgent::OnAutoUpdateChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstUseSelection,
-			std::bind(&ColocalAgent::OnSettingChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstColocalMethod,
-			std::bind(&ColocalAgent::OnSettingChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstIntWeighted,
-			std::bind(&ColocalAgent::OnSettingChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstGetRatio,
-			std::bind(&ColocalAgent::OnSettingChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstPhysSize,
-			std::bind(&ColocalAgent::OnSettingChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstColormapEnable,
-			std::bind(&ColocalAgent::OnSettingChanged,
-				agent, std::placeholders::_1));
+		ADD_AFTER_EVENT(agent, gstAutoUpdate, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(agent, gstUseSelection, ColocalAgent, OnSettingChanged);
+		ADD_AFTER_EVENT(agent, gstColocalMethod, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(agent, gstIntWeighted, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(agent, gstGetRatio, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(agent, gstPhysSize, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(agent, gstColormapEnable, ColocalAgent, OnAutoUpdateChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -308,6 +261,20 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_AFTER_EVENT(agent, gstIteration, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstThreshold, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstUseDistField, ComponentAgent, OnUseDistField);
+		ADD_AFTER_EVENT(agent, gstUseDiffusion, ComponentAgent, OnUseDiffusion);
+		ADD_AFTER_EVENT(agent, gstDistFieldStrength, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstDistFieldFilterSize, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstMaxDist, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstDistFieldThresh, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstDiffusionFalloff, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstUseDensityField, ComponentAgent, OnUseDensityField);
+		ADD_AFTER_EVENT(agent, gstDensityFieldThresh, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstDensityVarThresh, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstDensityWindowSize, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(agent, gstDensityStatsSize, ComponentAgent, OnAutoUpdate);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -512,33 +479,15 @@ OutAdjustAgent* AgentFactory::addOutAdjustAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
-		agent->setValueChangedFunction(gstGammaR,
-			std::bind(&OutAdjustAgent::OnGammaRChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstGammaG,
-			std::bind(&OutAdjustAgent::OnGammaGChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstGammaB,
-			std::bind(&OutAdjustAgent::OnGammaBChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstBrightnessR,
-			std::bind(&OutAdjustAgent::OnBrightnessRChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstBrightnessG,
-			std::bind(&OutAdjustAgent::OnBrightnessGChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstBrightnessB,
-			std::bind(&OutAdjustAgent::OnBrightnessBChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstEqualizeR,
-			std::bind(&OutAdjustAgent::OnEqualizeRChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstEqualizeG,
-			std::bind(&OutAdjustAgent::OnEqualizeGChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstEqualizeB,
-			std::bind(&OutAdjustAgent::OnEqualizeBChanged,
-				agent, std::placeholders::_1));
+		ADD_AFTER_EVENT(agent, gstGammaR, OutAdjustAgent, OnGammaRChanged);
+		ADD_AFTER_EVENT(agent, gstGammaG, OutAdjustAgent, OnGammaGChanged);
+		ADD_AFTER_EVENT(agent, gstGammaB, OutAdjustAgent, OnGammaBChanged);
+		ADD_AFTER_EVENT(agent, gstBrightnessR, OutAdjustAgent, OnBrightnessRChanged);
+		ADD_AFTER_EVENT(agent, gstBrightnessG, OutAdjustAgent, OnBrightnessGChanged);
+		ADD_AFTER_EVENT(agent, gstBrightnessB, OutAdjustAgent, OnBrightnessBChanged);
+		ADD_AFTER_EVENT(agent, gstEqualizeR, OutAdjustAgent, OnEqualizeRChanged);
+		ADD_AFTER_EVENT(agent, gstEqualizeG, OutAdjustAgent, OnEqualizeGChanged);
+		ADD_AFTER_EVENT(agent, gstEqualizeB, OutAdjustAgent, OnEqualizeBChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -583,12 +532,8 @@ RenderCanvasAgent* AgentFactory::addRenderCanvasAgent(const std::string &name, w
 	if (agent)
 	{
 		agent->setName(name);
-		agent->setValueChangedFunction(gstBounds,
-			std::bind(&RenderCanvasAgent::OnBoundsChanged,
-				agent, std::placeholders::_1));
-		agent->setValueChangedFunction(gstFocus,
-			std::bind(&RenderCanvasAgent::OnFocusChanged,
-				agent, std::placeholders::_1));
+		ADD_AFTER_EVENT(agent, gstBounds, RenderCanvasAgent, OnBoundsChanged);
+		ADD_AFTER_EVENT(agent, gstFocus, RenderCanvasAgent, OnFocusChanged);
 		agent->setDefaultValueChangedFunction(
 			std::bind(&RenderCanvasAgent::handleValueChanged,
 				agent, std::placeholders::_1));
@@ -735,25 +680,21 @@ VolumePropAgent* AgentFactory::addVolumePropAgent(const std::string &name, wxWin
 		return dynamic_cast<VolumePropAgent*>(result);
 
 	//not found
-	VolumePropAgent* volume_prop_agent =
+	VolumePropAgent* agent =
 			new VolumePropAgent(static_cast<VolumePropPanel&>(window));
-	if (volume_prop_agent)
+	if (agent)
 	{
-		volume_prop_agent->setName(name);
-		volume_prop_agent->setValueChangedFunction(gstLuminance,
-			std::bind(&VolumePropAgent::OnLuminanceChanged,
-				volume_prop_agent, std::placeholders::_1));
-		volume_prop_agent->setValueChangedFunction(gstColor,
-			std::bind(&VolumePropAgent::OnColorChanged,
-				volume_prop_agent, std::placeholders::_1));
-		objects_.push_front(volume_prop_agent);
+		agent->setName(name);
+		ADD_AFTER_EVENT(agent, gstLuminance, VolumePropAgent, OnLuminanceChanged);
+		ADD_AFTER_EVENT(agent, gstColor, VolumePropAgent, OnColorChanged);
+		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
-			this, volume_prop_agent);
+			this, agent);
 		notifyObservers(event);
 	}
 
-	return volume_prop_agent;
+	return agent;
 }
 
 //get

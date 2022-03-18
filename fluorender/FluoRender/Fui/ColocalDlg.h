@@ -70,13 +70,10 @@ public:
 	ColocalDlg(RenderFrame* frame);
 	~ColocalDlg();
 
-	void SetGroup(fluo::VolumeGroup* group)
+	void AssociateVolumeGroup(fluo::VolumeGroup* group)
 	{
 		m_agent->setObject(group);
 	}
-
-	//settings
-	void GetSettings();
 
 	//grid data ops
 	void CopyData();

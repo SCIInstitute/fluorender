@@ -28,10 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMPONENTDLG_H_
 #define _COMPONENTDLG_H_
 
-#include "Main.h"
-#include <Components/CompGenerator.h>
-#include <Components/CompAnalyzer.h>
-#include <Distance/RulerAlign.h>
+#include <ComponentAgent.hpp>
+#include <Main.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -203,22 +201,13 @@ public:
 	ComponentDlg(RenderFrame* frame);
 	~ComponentDlg();
 
-	void Update();
-	void GetSettings();
-	void LoadSettings(wxString filename);
-	void SaveSettings(wxString filename);
-	void SetView(fluo::Renderview* view);
-	fluo::Renderview* GetView() { return m_view; }
+	void AssociateRenderview(fluo::Renderview* view);
 
-	void GenerateComp(bool use_sel, bool command=true);
+	friend class fluo::ComponentAgent;
+
 	void Fixate(bool command = true);
 	void Clean(bool use_sel, bool command = true);
 	void SelectFullComp();
-
-	flrd::ComponentAnalyzer* GetAnalyzer()
-	{
-		return &m_comp_analyzer;
-	}
 
 	//command
 	void LoadCmd(const wxString &filename);
@@ -246,8 +235,7 @@ public:
 	void ExcludeComps();
 
 private:
-	RenderFrame* m_frame;
-	fluo::Renderview* m_view;
+	fluo::ComponentAgent* m_agent;
 
 	//progress
 	float m_prog_bit;
@@ -318,12 +306,6 @@ private:
 	//auto udate
 	bool m_auto_update;
 
-	//record
-	bool m_record_cmd;
-	flrd::CompCommand m_command;
-
-	flrd::ComponentAnalyzer m_comp_analyzer;
-	flrd::RulerAlign m_aligner;
 
 	//in and out cell lists for tracking
 	flrd::CelpList m_in_cells;
@@ -508,13 +490,6 @@ private:
 	wxWindow* CreateClusteringPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
-	//load/save settings
-	void OnLoadSettings(wxCommandEvent &event);
-	void OnSaveSettings(wxCommandEvent &event);
-	void OnSaveasSettings(wxCommandEvent &event);
-	//void OnPaneChange(wxCollapsiblePaneEvent& event);
-	//wxCollapsiblePane* CreateInitialGrowPane(wxWindow *parent);
-
 	//comp generate page
 	void OnIterSldr(wxScrollEvent &event);
 	void OnIterText(wxCommandEvent &event);
@@ -522,7 +497,6 @@ private:
 	void OnThreshText(wxCommandEvent &event);
 	//dist field
 	void OnUseDistFieldCheck(wxCommandEvent &event);
-	void EnableUseDistField(bool value);
 	void OnDistStrengthSldr(wxScrollEvent &event);
 	void OnDistStrengthText(wxCommandEvent &event);
 	void OnDistFilterSizeSldr(wxScrollEvent &event);
@@ -532,16 +506,13 @@ private:
 	void OnDistThreshSldr(wxScrollEvent &event);
 	void OnDistThreshText(wxCommandEvent &event);
 	//diff
-	void EnableDiff(bool value);
 	void OnDiffCheck(wxCommandEvent &event);
 	void OnFalloffSldr(wxScrollEvent &event);
 	void OnFalloffText(wxCommandEvent &event);
-	void EnableSize(bool value);
 	void OnSizeCheck(wxCommandEvent &event);
 	void OnSizeSldr(wxScrollEvent &event);
 	void OnSizeText(wxCommandEvent &event);
 	//density
-	void EnableDensity(bool value);
 	void OnDensityCheck(wxCommandEvent &event);
 	void OnDensitySldr(wxScrollEvent &event);
 	void OnDensityText(wxCommandEvent &event);
@@ -553,12 +524,10 @@ private:
 	void OnDensityStatsSizeText(wxCommandEvent &event);
 	//fixate
 	void OnFixateCheck(wxCommandEvent &event);
-	void EnableFixate(bool value);
 	void OnFixUpdateBtn(wxCommandEvent &event);
 	void OnFixSizeSldr(wxScrollEvent &event);
 	void OnFixSizeText(wxCommandEvent &event);
 	//clean
-	void EnableClean(bool value);
 	void OnCleanCheck(wxCommandEvent &event);
 	void OnCleanBtn(wxCommandEvent &event);
 	void OnCleanIterSldr(wxScrollEvent &event);
@@ -573,7 +542,6 @@ private:
 	void OnLoadCmd(wxCommandEvent &event);
 
 	//clustering page
-	void UpdateClusterMethod();
 	void OnClusterMethodExmaxCheck(wxCommandEvent &event);
 	void OnClusterMethodDbscanCheck(wxCommandEvent &event);
 	void OnClusterMethodKmeansCheck(wxCommandEvent &event);
@@ -633,7 +601,6 @@ private:
 	void OnAlignPca(wxCommandEvent& event);
 
 	//execute
-	void EnableGenerate();
 	void OnNotebook(wxBookCtrlEvent &event);
 	void OnUseSelChk(wxCommandEvent &event);
 	void OnGenerate(wxCommandEvent &event);
@@ -641,7 +608,6 @@ private:
 	void OnCluster(wxCommandEvent &event);
 	void OnAnalyze(wxCommandEvent &event);
 	void OnAnalyzeSel(wxCommandEvent &event);
-	void Analyze(bool sel);
 
 	//output
 	void OnIncludeBtn(wxCommandEvent &event);

@@ -42,12 +42,6 @@ ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
 {
-
-}
-
-void ColocalAgent::setObject(VolumeGroup* vg)
-{
-	InterfaceAgent::setObject(vg);
 	//additiona settings
 	addValue(gstUseSelection, false);
 	addValue(gstAutoUpdate, false);
@@ -59,6 +53,11 @@ void ColocalAgent::setObject(VolumeGroup* vg)
 	addValue(gstColormapEnable, false);
 	addValue(gstColormapLow, double(0));
 	addValue(gstColormapHigh, double(1));
+}
+
+void ColocalAgent::setObject(VolumeGroup* vg)
+{
+	InterfaceAgent::setObject(vg);
 }
 
 VolumeGroup* ColocalAgent::getObject()

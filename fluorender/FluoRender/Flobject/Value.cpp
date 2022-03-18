@@ -149,9 +149,17 @@ ValueSet::~ValueSet()
 {
 }
 
-void ValueSet::clear()
+void ValueSet::clear(int ref_count)
 {
-	_values.clear();
+	Values::iterator it;
+	while (it != _values.end())
+	{
+		if (it->second->referenceCount() > ref_count)
+			it = _values.erase(it);
+		else
+			++it;
+	}
+	//_values.clear();
 }
 
 Value* ValueSet::findValue(const std::string &name)

@@ -167,15 +167,9 @@ ColocalDlg::ColocalDlg(RenderFrame* frame) :
 
 	SetSizer(sizerV);
 	Layout();
-
-	GetSettings();
 }
 
 ColocalDlg::~ColocalDlg()
-{
-}
-
-void ColocalDlg::GetSettings()
 {
 }
 

@@ -95,7 +95,7 @@ namespace fluo
 			}
 		}
 
-		inline void clearValues()
+		inline void clearValues(int ref_count = 0)
 		{
 			if (!_value_set)
 				return;
@@ -104,10 +104,10 @@ namespace fluo
 				it != _value_set->getValues().end(); ++it)
 			{
 				Value * value = it->second.get();
-				if (value)
+				if (value && value->referenceCount() > ref_count)
 					value->removeObserver(this);
 			}
-			_value_set->clear();
+			_value_set->clear(ref_count);
 		}
 
 		//compare by values

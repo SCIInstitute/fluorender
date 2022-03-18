@@ -25,22 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ComponentDlg.h"
-#include "RenderFrame.h"
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <Annotations.hpp>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <AnnotationFactory.hpp>
-#include <Components/CompSelector.h>
-#include <Components/CompEditor.h>
-#include <Cluster/dbscan.h>
-#include <Cluster/kmeans.h>
-#include <Cluster/exmax.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
+#include <ComponentDlg.h>
+#include <RenderFrame.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
@@ -50,11 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
-	//EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, ComponentDlg::OnPaneChange)
-	//load save settings
-	EVT_BUTTON(ID_LoadSettingsBtn, ComponentDlg::OnLoadSettings)
-	EVT_BUTTON(ID_SaveSettingsBtn, ComponentDlg::OnSaveSettings)
-	EVT_BUTTON(ID_SaveasSettingsBtn, ComponentDlg::OnSaveasSettings)
 	//comp gen page
 	EVT_COMMAND_SCROLL(ID_IterSldr, ComponentDlg::OnIterSldr)
 	EVT_TEXT(ID_IterText, ComponentDlg::OnIterText)
@@ -198,8 +179,6 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 		wxDefaultPosition,
 		wxSize(600, 800),
 		0, "ComponentDlg"),
-	m_frame(frame),
-	m_view(0),
 	m_hold_history(false),
 	m_test_speed(false),
 	m_cell_new_id(0),
@@ -297,13 +276,16 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 	SetSizer(mainsizer);
 	panel_top->Layout();
 	panel_bot->Layout();
-
-	GetSettings();
 }
 
 ComponentDlg::~ComponentDlg()
 {
-	SaveSettings("");
+	m_agent->SaveSettings("");
+}
+
+void ComponentDlg::AssociateRenderview(fluo::Renderview* view)
+{
+	m_agent->setObject(view);
 }
 
 wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
@@ -1082,349 +1064,6 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	return page;
 }
 
-void ComponentDlg::Update()
-{
-	//update ui
-	m_use_sel_chk->SetValue(m_use_sel);
-	//comp generate page
-	m_iter_text->SetValue(wxString::Format("%d", m_iter));
-	m_thresh_text->SetValue(wxString::Format("%.3f", m_thresh));
-	//dist
-	m_use_dist_field_check->SetValue(m_use_dist_field);
-	EnableUseDistField(m_use_dist_field);
-	m_dist_strength_text->SetValue(wxString::Format("%.3f", m_dist_strength));
-	m_dist_filter_size_text->SetValue(wxString::Format("%d", m_dist_filter_size));
-	m_max_dist_text->SetValue(wxString::Format("%d", m_max_dist));
-	m_dist_thresh_text->SetValue(wxString::Format("%.3f", m_dist_thresh));
-	m_diff_check->SetValue(m_diff);
-	EnableDiff(m_diff);
-	m_falloff_text->SetValue(wxString::Format("%.3f", m_falloff));
-	//m_size_check->SetValue(m_size);
-	EnableSize(m_size);
-	//m_size_text->SetValue(wxString::Format("%d", m_size_lm));
-	EnableDensity(m_density);
-	m_density_check->SetValue(m_density);
-	m_density_text->SetValue(wxString::Format("%.3f", m_density_thresh));
-	m_varth_text->SetValue(wxString::Format("%.4f", m_varth));
-	m_density_window_size_text->SetValue(wxString::Format("%d", m_density_window_size));
-	m_density_stats_size_text->SetValue(wxString::Format("%d", m_density_stats_size));
-	//fixate
-	m_fixate_check->SetValue(m_fixate);
-	EnableFixate(m_fixate);
-	m_fix_size_text->SetValue(wxString::Format("%d", m_fix_size));
-	//clean
-	EnableClean(m_clean);
-	m_clean_check->SetValue(m_clean);
-	m_clean_iter_text->SetValue(wxString::Format("%d", m_clean_iter));
-	m_clean_limit_text->SetValue(wxString::Format("%d", m_clean_size_vl));
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
-
-	//cluster page
-	m_cluster_method_exmax_rd->SetValue(m_cluster_method_exmax);
-	m_cluster_method_dbscan_rd->SetValue(m_cluster_method_dbscan);
-	m_cluster_method_kmeans_rd->SetValue(m_cluster_method_kmeans);
-	//parameters
-	m_cluster_clnum_text->SetValue(wxString::Format("%d", m_cluster_clnum));
-	m_cluster_maxiter_text->SetValue(wxString::Format("%d", m_cluster_maxiter));
-	m_cluster_tol_text->SetValue(wxString::Format("%.2f", m_cluster_tol));
-	m_cluster_size_text->SetValue(wxString::Format("%d", m_cluster_size));
-	m_cluster_eps_text->SetValue(wxString::Format("%.1f", m_cluster_eps));
-	UpdateClusterMethod();
-
-	//selection
-	if (m_use_min)
-	{
-		m_analysis_min_check->SetValue(true);
-		m_analysis_min_spin->Enable();
-	}
-	else
-	{
-		m_analysis_min_check->SetValue(false);
-		m_analysis_min_spin->Disable();
-	}
-	m_analysis_min_spin->SetValue(m_min_num);
-	if (m_use_max)
-	{
-		m_analysis_max_check->SetValue(true);
-		m_analysis_max_spin->Enable();
-	}
-	else
-	{
-		m_analysis_max_check->SetValue(false);
-		m_analysis_max_spin->Disable();
-	}
-	m_analysis_max_spin->SetValue(m_max_num);
-
-	//options
-	m_consistent_check->SetValue(m_consistent);
-	m_colocal_check->SetValue(m_colocal);
-
-	//output type
-	m_output_multi_rb->SetValue(false);
-	m_output_rgb_rb->SetValue(false);
-	if (m_output_type == 1)
-		m_output_multi_rb->SetValue(true);
-	else if (m_output_type == 2)
-		m_output_rgb_rb->SetValue(true);
-
-	m_dist_neighbor_check->SetValue(m_use_dist_neighbor);
-	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
-	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
-	m_dist_all_chan_check->SetValue(m_use_dist_allchan);
-
-	//generate
-	EnableGenerate();
-
-	//output
-	m_history_chk->SetValue(m_hold_history);
-}
-
-void ComponentDlg::GetSettings()
-{
-	//defaults
-	//comp generate page
-	m_use_sel = false;
-	m_iter = 50;
-	m_thresh = 0.5;
-	m_tfactor = 1.0;
-	m_use_dist_field = false;
-	m_dist_strength = 0.5;
-	m_max_dist = 30;
-	m_dist_thresh = 0.25;
-	m_dist_filter_size = 3;
-	m_diff = false;
-	m_falloff = 0.01;
-	m_size = false;
-	m_size_lm = 100;
-	m_density = false;
-	m_density_thresh = 1.0;
-	m_varth = 0.0001;
-	m_density_window_size = 5;
-	m_density_stats_size = 15;
-	m_fixate = false;
-	m_fix_size = 50;
-	m_clean = false;
-	m_clean_iter = 5;
-	m_clean_size_vl = 5;
-
-	//cluster
-	m_cluster_method_kmeans = true;
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = false;
-	m_cluster_clnum = 2;
-	m_cluster_maxiter = 200;
-	m_cluster_tol = 0.9f;
-	m_cluster_size = 60;
-	m_cluster_eps = 2.5;
-
-	//selection
-	m_use_min = false;
-	m_min_num = 0;
-	m_use_max = false;
-	m_max_num = 0;
-	//colocalization
-	m_colocal = false;
-	m_consistent = false;
-
-	//distance
-	m_use_dist_neighbor = false;
-	m_dist_neighbor = 1;
-	m_use_dist_allchan = false;
-
-	//update
-	m_auto_update = false;
-
-	//record
-	m_record_cmd = false;
-
-	//output
-	m_output_type = 1;
-
-	//read values
-	LoadSettings("");
-	Update();
-}
-
-void ComponentDlg::LoadSettings(wxString filename)
-{
-	bool get_basic = false;
-	if (!wxFileExists(filename))
-	{
-		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = wxPathOnly(expath);
-		filename = expath + GETSLASH() + "default_component_settings.dft";
-		get_basic = true;
-	}
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	//basic settings
-	fconfig.Read("use_sel", &m_use_sel);
-	fconfig.Read("iter", &m_iter);
-	fconfig.Read("thresh", &m_thresh);
-	fconfig.Read("use_dist_field", &m_use_dist_field);
-	fconfig.Read("dist_strength", &m_dist_strength);
-	fconfig.Read("dist_filter_size", &m_dist_filter_size);
-	fconfig.Read("max_dist", &m_max_dist);
-	fconfig.Read("dist_thresh", &m_dist_thresh);
-	fconfig.Read("diff", &m_diff);
-	fconfig.Read("falloff", &m_falloff);
-	fconfig.Read("size", &m_size);
-	fconfig.Read("size_lm", &m_size_lm);
-	fconfig.Read("density", &m_density);
-	fconfig.Read("density_thresh", &m_density_thresh);
-	fconfig.Read("varth", &m_varth);
-	fconfig.Read("density_window_size", &m_density_window_size);
-	fconfig.Read("density_stats_size", &m_density_stats_size);
-	fconfig.Read("clean", &m_clean);
-	fconfig.Read("clean_iter", &m_clean_iter);
-	fconfig.Read("clean_size_vl", &m_clean_size_vl);
-
-	//cluster
-	fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
-	fconfig.Read("cluster_method_exmax", &m_cluster_method_exmax);
-	fconfig.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
-	//parameters
-	fconfig.Read("cluster_clnum", &m_cluster_clnum);
-	fconfig.Read("cluster_maxiter", &m_cluster_maxiter);
-	fconfig.Read("cluster_tol", &m_cluster_tol);
-	fconfig.Read("cluster_size", &m_cluster_size);
-	fconfig.Read("cluster_eps", &m_cluster_eps);
-
-	//selection
-	fconfig.Read("use_min", &m_use_min);
-	fconfig.Read("min_num", &m_min_num);
-	fconfig.Read("use_max", &m_use_max);
-	fconfig.Read("max_num", &m_max_num);
-	//colocalization
-	fconfig.Read("colocal", &m_colocal);
-	//output
-	fconfig.Read("output_type", &m_output_type);
-
-	//m_load_settings_text->SetValue(filename);
-}
-
-void ComponentDlg::SaveSettings(wxString filename)
-{
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "default_component_settings.dft";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-
-	//comp generate settings
-	fconfig.Write("use_sel", m_use_sel);
-	fconfig.Write("iter", m_iter);
-	fconfig.Write("thresh", m_thresh);
-	fconfig.Write("use_dist_field", m_use_dist_field);
-	fconfig.Write("dist_strength", m_dist_strength);
-	fconfig.Write("dist_filter_size", m_dist_filter_size);
-	fconfig.Write("max_dist", m_max_dist);
-	fconfig.Write("dist_thresh", m_dist_thresh);
-	fconfig.Write("diff", m_diff);
-	fconfig.Write("falloff", m_falloff);
-	fconfig.Write("size", m_size);
-	fconfig.Write("size_lm", m_size_lm);
-	fconfig.Write("density", m_density);
-	fconfig.Write("density_thresh", m_density_thresh);
-	fconfig.Write("varth", m_varth);
-	fconfig.Write("density_window_size", m_density_window_size);
-	fconfig.Write("density_stats_size", m_density_stats_size);
-	fconfig.Write("clean", m_clean);
-	fconfig.Write("clean_iter", m_clean_iter);
-	fconfig.Write("clean_size_vl", m_clean_size_vl);
-
-	//cluster
-	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
-	fconfig.Write("cluster_method_exmax", m_cluster_method_exmax);
-	fconfig.Write("cluster_method_dbscan", m_cluster_method_dbscan);
-	//parameters
-	fconfig.Write("cluster_clnum", m_cluster_clnum);
-	fconfig.Write("cluster_maxiter", m_cluster_maxiter);
-	fconfig.Write("cluster_tol", m_cluster_tol);
-	fconfig.Write("cluster_size", m_cluster_size);
-	fconfig.Write("cluster_eps", m_cluster_eps);
-
-	//selection
-	fconfig.Write("use_min", m_use_min);
-	fconfig.Write("min_num", m_min_num);
-	fconfig.Write("use_max", m_use_max);
-	fconfig.Write("max_num", m_max_num);
-	//colocalization
-	fconfig.Write("colocal", m_colocal);
-	//output
-	fconfig.Write("output_type", m_output_type);
-
-	if (filename == "")
-	{
-		wxString expath = wxStandardPaths::Get().GetExecutablePath();
-		expath = wxPathOnly(expath);
-		filename = expath + GETSLASH() + "default_component_settings.dft";
-	}
-
-	SaveConfig(fconfig, filename);
-}
-
-void ComponentDlg::OnLoadSettings(wxCommandEvent& event)
-{
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Choose a FluoRender component generator setting file",
-		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		LoadSettings(filename);
-		Update();
-	}
-
-	if (fopendlg)
-		delete fopendlg;
-}
-
-void ComponentDlg::OnSaveSettings(wxCommandEvent& event)
-{
-	wxString filename = m_load_settings_text->GetValue();
-	if (wxFileExists(filename))
-		SaveSettings(filename);
-	else
-	{
-		wxCommandEvent e;
-		OnSaveasSettings(e);
-	}
-}
-
-void ComponentDlg::OnSaveasSettings(wxCommandEvent& event)
-{
-	wxFileDialog *fopendlg = new wxFileDialog(
-		m_frame, "Save a FluoRender component generator setting file",
-		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-	int rval = fopendlg->ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg->GetPath();
-		SaveSettings(filename);
-		m_load_settings_text->SetValue(filename);
-	}
-
-	if (fopendlg)
-		delete fopendlg;
-}
-
-void ComponentDlg::SetView(fluo::Renderview* view)
-{
-	m_view = view;
-	if (m_view)
-		m_aligner.SetView(m_view);
-}
-
 //comp generate page
 void ComponentDlg::OnIterSldr(wxScrollEvent &event)
 {
@@ -1438,11 +1077,8 @@ void ComponentDlg::OnIterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
-	m_iter = val;
 	m_iter_sldr->SetValue(m_iter);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstIteration, val);
 }
 
 void ComponentDlg::OnThreshSldr(wxScrollEvent &event)
@@ -1457,53 +1093,8 @@ void ComponentDlg::OnThreshText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
-	m_thresh = val;
 	m_thresh_sldr->SetValue(int(m_thresh * 1000.0 + 0.5));
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
-}
-
-void ComponentDlg::EnableUseDistField(bool value)
-{
-	m_use_dist_field = value;
-	if (m_use_dist_field)
-	{
-		m_dist_strength_sldr->Enable();
-		m_dist_strength_text->Enable();
-		m_dist_filter_size_sldr->Enable();
-		m_dist_filter_size_text->Enable();
-		m_max_dist_sldr->Enable();
-		m_max_dist_text->Enable();
-		m_dist_thresh_sldr->Enable();
-		m_dist_thresh_text->Enable();
-	}
-	else
-	{
-		m_dist_strength_sldr->Disable();
-		m_dist_strength_text->Disable();
-		m_dist_filter_size_sldr->Disable();
-		m_dist_filter_size_text->Disable();
-		m_max_dist_sldr->Disable();
-		m_max_dist_text->Disable();
-		m_dist_thresh_sldr->Disable();
-		m_dist_thresh_text->Disable();
-	}
-}
-
-void ComponentDlg::EnableDiff(bool value)
-{
-	m_diff = value;
-	if (m_diff)
-	{
-		m_falloff_sldr->Enable();
-		m_falloff_text->Enable();
-	}
-	else
-	{
-		m_falloff_sldr->Disable();
-		m_falloff_text->Disable();
-	}
+	m_agent->setValue(gstThreshold, val);
 }
 
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent &event)
@@ -1518,19 +1109,14 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
-	m_dist_strength = val;
 	m_dist_strength_sldr->SetValue(int(m_dist_strength * 1000.0 + 0.5));
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstDistFieldStrength, val);
 }
 
 void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent &event)
 {
-	EnableUseDistField(m_use_dist_field_check->GetValue());
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	bool bval = m_use_dist_field_check->GetValue();
+	m_agent->setValue(gstUseDistField, bval);
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent &event)
@@ -1545,11 +1131,8 @@ void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
-	m_dist_filter_size = val;
 	m_dist_filter_size_sldr->SetValue(m_dist_filter_size);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstDistFieldFilterSize, val);
 }
 
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent &event)
@@ -1566,11 +1149,8 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
 	m_max_dist_text->GetValue().ToLong(&val);
 	if (val > 255)
 		val = 255;
-	m_max_dist = val;
 	m_max_dist_sldr->SetValue(m_max_dist);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstMaxDist, val);
 }
 
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent &event)
@@ -1585,19 +1165,14 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
-	m_dist_thresh = val;
 	m_dist_thresh_sldr->SetValue(int(m_dist_thresh * 1000.0 + 0.5));
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstDistFieldThresh, val);
 }
 
 void ComponentDlg::OnDiffCheck(wxCommandEvent &event)
 {
-	EnableDiff(m_diff_check->GetValue());
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	bool bval = m_diff_check->GetValue();
+	m_agent->setValue(gstUseDiffusion, bval);
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent &event)
@@ -1612,80 +1187,26 @@ void ComponentDlg::OnFalloffText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
-	m_falloff = val;
 	m_falloff_sldr->SetValue(int(m_falloff * 1000.0 + 0.5));
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
-}
-
-void ComponentDlg::EnableSize(bool value)
-{
-	m_size = value;
-	if (m_size)
-	{
-		//m_size_sldr->Enable();
-		//m_size_text->Enable();
-	}
-	else
-	{
-		//m_size_sldr->Disable();
-		//m_size_text->Disable();
-	}
+	m_agent->setValue(gstDiffusionFalloff, val);
 }
 
 void ComponentDlg::OnSizeCheck(wxCommandEvent &event)
 {
-	//EnableSize(m_size_check->GetValue());
 }
 
 void ComponentDlg::OnSizeSldr(wxScrollEvent &event)
 {
-	//int val = event.GetPosition();
-	//m_size_text->SetValue(wxString::Format("%d", val));
 }
 
 void ComponentDlg::OnSizeText(wxCommandEvent &event)
 {
-	//long val = 0;
-	//m_size_text->GetValue().ToLong(&val);
-	//m_size_lm = (int)val;
-	//m_size_sldr->SetValue(m_size_lm);
-}
-
-void ComponentDlg::EnableDensity(bool value)
-{
-	m_density = value;
-	if (m_density)
-	{
-		m_density_sldr->Enable();
-		m_density_text->Enable();
-		m_varth_sldr->Enable();
-		m_varth_text->Enable();
-		m_density_window_size_sldr->Enable();
-		m_density_window_size_text->Enable();
-		m_density_stats_size_sldr->Enable();
-		m_density_stats_size_text->Enable();
-	}
-	else
-	{
-		m_density_sldr->Disable();
-		m_density_text->Disable();
-		m_varth_sldr->Disable();
-		m_varth_text->Disable();
-		m_density_window_size_sldr->Disable();
-		m_density_window_size_text->Disable();
-		m_density_stats_size_sldr->Disable();
-		m_density_stats_size_text->Disable();
-	}
 }
 
 void ComponentDlg::OnDensityCheck(wxCommandEvent &event)
 {
-	EnableDensity(m_density_check->GetValue());
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	bool bval = m_density_check->GetValue();
+	m_agent->setValue(gstUseDensityField, bval);
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent &event)
@@ -1700,11 +1221,8 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
-	m_density_thresh = val;
 	m_density_sldr->SetValue(int(m_density_thresh * 1000.0 + 0.5));
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstDensityFieldThresh, val);
 }
 
 void ComponentDlg::OnVarthSldr(wxScrollEvent &event)
@@ -1719,11 +1237,8 @@ void ComponentDlg::OnVarthText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
-	m_varth = val;
 	m_varth_sldr->SetValue(int(m_varth * 10000.0 + 0.5));
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstDensityVarThresh, val);
 }
 
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent &event)
@@ -1738,11 +1253,8 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
-	m_density_window_size = val;
 	m_density_window_size_sldr->SetValue(m_density_window_size);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_agent->setValue(gstDensityWindowSize, val);
 }
 
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent &event)
@@ -1757,27 +1269,8 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
-	m_density_stats_size = val;
 	m_density_stats_size_sldr->SetValue(m_density_stats_size);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
-}
-
-void ComponentDlg::EnableFixate(bool value)
-{
-	if (value)
-	{
-		m_fix_update_btn->Enable();
-		m_fix_size_sldr->Enable();
-		m_fix_size_text->Enable();
-	}
-	else
-	{
-		m_fix_update_btn->Disable();
-		m_fix_size_sldr->Disable();
-		m_fix_size_text->Disable();
-	}
+	m_agent->setValue(gstDensityStatsSize, val);
 }
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
@@ -2110,29 +1603,6 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 }
 
 //clustering page
-void ComponentDlg::UpdateClusterMethod()
-{
-	if (m_cluster_method_exmax ||
-		m_cluster_method_kmeans)
-	{
-		m_cluster_clnum_sldr->Enable();
-		m_cluster_clnum_text->Enable();
-		m_cluster_size_sldr->Disable();
-		m_cluster_size_text->Disable();
-		m_cluster_eps_sldr->Disable();
-		m_cluster_eps_text->Disable();
-	}
-	if (m_cluster_method_dbscan)
-	{
-		m_cluster_clnum_sldr->Disable();
-		m_cluster_clnum_text->Disable();
-		m_cluster_size_sldr->Enable();
-		m_cluster_size_text->Enable();
-		m_cluster_eps_sldr->Enable();
-		m_cluster_eps_text->Enable();
-	}
-}
-
 void ComponentDlg::OnClusterMethodExmaxCheck(wxCommandEvent &event)
 {
 	m_cluster_method_exmax = true;
@@ -3395,140 +2865,6 @@ bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	}
 	brick_id = 0;
 	return true;
-}
-
-void ComponentDlg::GenerateComp(bool use_sel, bool command)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	int clean_iter = m_clean_iter;
-	int clean_size = m_clean_size_vl;
-	if (!m_clean)
-	{
-		clean_iter = 0;
-		clean_size = 0;
-	}
-
-	//get brick number
-	int bn = vd->GetAllBrickNum();
-	double scale;
-	vd->getValue(gstIntScale, scale);
-
-	flrd::ComponentGenerator cg(vd);
-	boost::signals2::connection preconn =
-		cg.prework.connect(std::bind(
-			&ComponentDlg::StartTimer, this, std::placeholders::_1));
-	boost::signals2::connection postconn =
-		cg.postwork.connect(std::bind(
-			&ComponentDlg::StopTimer, this, std::placeholders::_1));
-	m_titles.Clear();
-	m_values.Clear();
-	m_tps.clear();
-	m_tps.push_back(std::chrono::high_resolution_clock::now());
-
-	cg.SetUseMask(use_sel);
-
-	vd->AddEmptyMask(cg.GetUseMask()?2:1, true);//select all if no mask, otherwise keep
-	if (m_fixate && vd->GetLabel(false))
-	{
-		vd->LoadLabel2();
-		cg.SetIDBit(m_fix_size);
-	}
-	else
-	{
-		vd->AddEmptyLabel(0, !use_sel);
-		cg.ShuffleID();
-	}
-
-	if (m_use_dist_field)
-	{
-		if (m_density)
-		{
-			cg.DistDensityField(
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_dist_filter_size,
-				m_max_dist,
-				m_dist_thresh,
-				m_dist_strength,
-				m_density_window_size,
-				m_density_stats_size,
-				m_density_thresh,
-				m_varth,
-				scale);
-		}
-		else
-		{
-			cg.DistGrow(
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff ,
-				m_dist_filter_size,
-				m_max_dist,
-				m_dist_thresh,
-				scale,
-				m_dist_strength);
-		}
-	}
-	else
-	{
-		if (m_density)
-		{
-			cg.DensityField(
-				m_density_window_size,
-				m_density_stats_size,
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_density_thresh,
-				m_varth,
-				scale);
-		}
-		else
-		{
-			cg.Grow(
-				m_diff,
-				m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				scale);
-		}
-	}
-
-	if (clean_iter > 0)
-		cg.Cleanup(clean_iter, clean_size);
-
-	if (bn > 1)
-		cg.FillBorders(0.1);
-
-	m_tps.push_back(std::chrono::high_resolution_clock::now());
-	std::chrono::duration<double> time_span =
-		std::chrono::duration_cast<std::chrono::duration<double>>(
-			m_tps.back() - m_tps.front());
-	if (m_test_speed)
-	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
-		m_values += "Total\t";
-	}
-	else
-	{
-		m_titles += "Total time\n";
-	}
-	m_values += wxString::Format("%.4f", time_span.count());
-	m_values += " sec.\n";
-	SetOutput(m_titles, m_values);
-
-	//update
-	m_view->Update(39);
-
-	if (command && m_record_cmd)
-		AddCmd("generate");
 }
 
 void ComponentDlg::Fixate(bool command)

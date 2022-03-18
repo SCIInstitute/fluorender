@@ -252,7 +252,7 @@ namespace fluo
 		inline bool operator == (const ValueSet& vs) const;
 		inline bool operator != (const ValueSet& vs) const;
 
-		void clear();
+		void clear(int ref_count = 0);//remove values with ref count greater than ref_count
 
 		Value* findValue(const std::string &name);
 		bool containsValue(Value* value);

@@ -43,15 +43,14 @@ CalculationAgent::CalculationAgent(CalculationDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
 {
+	//own values
+	addRvalu(gstVolumeA, (Referenced*)(0));
+	addRvalu(gstVolumeB, (Referenced*)(0));
 }
 
 void CalculationAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
-
-	//own values
-	addRvalu(gstVolumeA, (Referenced*)(0));
-	addRvalu(gstVolumeB, (Referenced*)(0));
 }
 
 Renderview* CalculationAgent::getObject()

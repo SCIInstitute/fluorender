@@ -484,6 +484,11 @@ BrushToolDlg::~BrushToolDlg()
 {
 }
 
+void BrushToolDlg::AssociateRenderview(fluo::Renderview* view)
+{
+	m_agent->setObject(view);
+}
+
 //brush commands
 void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 {

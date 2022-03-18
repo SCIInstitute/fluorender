@@ -64,6 +64,7 @@ namespace fluo
 	public:
 		InterfaceAgent()
 		{
+			addRvalu(gstAgentAsset, (Referenced*)0);
 		}
 
 		virtual InterfaceAgent* clone(const CopyOp& copyop) const { return 0; }
@@ -96,8 +97,8 @@ namespace fluo
 
 			if (old_obj)
 				old_obj->removeObserver(this);
-			clearValues();
-			addRvalu(gstAgentAsset, obj);
+			clearValues(1);
+			//addRvalu(gstAgentAsset, obj);
 			if (obj)
 			{
 				copyValues(*obj);//shallow copy to share values

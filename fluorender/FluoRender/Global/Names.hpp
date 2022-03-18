@@ -564,6 +564,26 @@ DEALINGS IN THE SOFTWARE.
 #define gstIntWeighted "int weighted"
 #define gstGetRatio "get ratio"
 #define gstPhysSize "phys size"
+//component agent
+#define gstRecordCmd "record cmd"//record command for comps
+#define gstRunCmd "run cmd"//run command
+#define gstClusterMethod "cluster method"//0:k-means; 1:em; 2:dbscan
+#define gstThreshold "threshold"
+#define gstIteration "iteration"//number of iterations
+#define gstUseDiffusion "use diffusion"//diffusion settings
+#define gstDiffusionFalloff "diffusion falloff"
+#define gstUseDensityField "use density field"//density field settings
+#define gstDensityFieldThresh "density field thresh"
+#define gstDensityVarThresh "density var thresh"
+#define gstDensityWindowSize "density window size"
+#define gstDensityStatsSize "density stats size"
+#define gstUseDistField "use dist field"//dist field settings
+#define gstDistFieldStrength "dist field strength"
+#define gstDistFieldFilterSize "dist field filter size"
+#define gstMaxDist "max dist"
+#define gstDistFieldThresh "dist field thresh"
+#define gstFixateEnable "fixate enable"//fixate settings
+#define gstCleanGrow "clean grow"
 
 //input
 //mouse
