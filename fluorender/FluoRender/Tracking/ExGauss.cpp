@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #ifdef _DEBUG
-#include <Debug.h>
+#include <Debug.hpp>
 #endif
 #include <ExGauss.h>
 #include <exmax1.h>
