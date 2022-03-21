@@ -163,7 +163,7 @@ namespace flrd
 		return result;
 	}
 
-	inline float similar(const Stencil& s1, const Stencil& s2)
+	inline float similar(const Stencil& s1, const Stencil& s2, int sim)
 	{
 		float result = 0.0f;
 
@@ -180,36 +180,52 @@ namespace flrd
 		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
 		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
 
-//#ifdef _DEBUG
-//		DBMIFLOAT32 mi(maxx - minx + 1,
-//			maxy - miny + 1, 1);
-//#endif
 		float v1, v2, d1, d2, w;
 		size_t index;
 		size_t i, i2, j, j2, k, k2;
-		for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
-		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
-		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
+		if (sim == 0)
 		{
-			//get v1
-			v1 = s1.getfilter(i, j, k);
-			//get v2
-			v2 = s2.getfilter(i2, j2, k2);
-			//get d weighted
-			//d1 = v1 - v2;
-//#ifdef _DEBUG
-//			mi.set(i - minx, j - miny, d1);
-//#endif
-			//d2 = 1.0 - std::min(v1, v2);
-			w = v1 * v2;
-			result += w;
+			//dot product
+			for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
+			for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
+			for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
+			{
+				//get v1
+				v1 = s1.getfilter(i, j, k);
+				//get v2
+				v2 = s2.getfilter(i2, j2, k2);
+				//get d weighted
+				//d1 = v1 - v2;
+				//d2 = 1.0 - std::min(v1, v2);
+				w = v1 * v2;
+				result += w;
+			}
+		}
+		else if (sim == 1)
+		{
+			//diff squared
+			for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
+			for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
+			for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
+			{
+				//get v1
+				v1 = s1.getfilter(i, j, k);
+				//get v2
+				v2 = s2.getfilter(i2, j2, k2);
+				//get d weighted
+				d1 = v1 - v2;
+				//d2 = 1.0 - std::min(v1, v2);
+				w = 1.0 - d1 * d1;
+				result += w;
+			}
 		}
 		return result;
 	}
 
 	inline bool match_stencils(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext, const fluo::Vector &off,
-		fluo::Point &center, float &prob, int iter, float eps)
+		fluo::Point &center, float &prob, int iter, float eps,
+		int sim)
 	{
 		fluo::BBox range = s1.box;
 		range.extend_ani(ext);
@@ -240,7 +256,7 @@ namespace flrd
 			s2.box.translate(fluo::Vector(ti, tj, tk));
 			s2.box.translate(off);
 			//p = s1 * s2;
-			p = similar(s1, s2);
+			p = similar(s1, s2, sim);
 			eg.SetData(ti, tj, tk, p);
 		}
 

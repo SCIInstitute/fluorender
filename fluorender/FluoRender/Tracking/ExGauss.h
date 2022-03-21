@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -74,12 +74,13 @@ namespace flrd
 		unsigned int* front;
 		struct Coord
 		{
-			unsigned int x;
-			unsigned int y;
-			unsigned int z;
+			int x;
+			int y;
+			int z;
 		};
 		std::list<Coord> cl;
 		fluo::Point exetr;
+		float exetrval;
 		fluo::Point mean;
 		double prob;
 		//maximum iteration number

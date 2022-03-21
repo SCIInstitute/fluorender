@@ -577,6 +577,8 @@ void ScriptProc::RunMaskTracking()
 	m_fconfig->Read("compare", &mode, 0);
 	int stsize;
 	m_fconfig->Read("stsize", &stsize, 2);
+	int sim;
+	m_fconfig->Read("sim", &sim, 0);
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
@@ -609,7 +611,7 @@ void ScriptProc::RunMaskTracking()
 	m_view->getValue(gstCurrentFrame, curf);
 	m_view->getValue(gstPreviousFrame, prvf);
 	m_view->getValue(gstBeginFrame, beginf);
-	tm_processor.TrackStencils(prvf, curf, ext, mode, beginf);
+	tm_processor.TrackStencils(prvf, curf, ext, mode, beginf, sim);
 
 	UpdateTraceDlg();
 }

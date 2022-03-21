@@ -36,9 +36,9 @@ using namespace flrd;
 void ExGauss::Execute()
 {
 //#ifdef _DEBUG
-//	//DBMIINT32 mi;
-//	//mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
-//	//mi.data = front;
+//	DBMIINT32 mi;
+//	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+//	mi.data = front;
 //	DBMIFLOAT32 mi2;
 //	mi2.nx = nx; mi2.ny = ny; mi2.nc = 1; mi2.nt = mi2.nx * mi2.nc * 4;
 //	mi2.data = data;
@@ -77,7 +77,8 @@ double ExGauss::GetProb()
 
 void ExGauss::FindExetr()
 {
-	float v = data[0];
+	float v = data[0];//max
+	float v2 = data[0];//min
 	Coord c = { 0, 0, 0 };
 	cl.clear();
 	unsigned int i, j, k;
@@ -94,15 +95,19 @@ void ExGauss::FindExetr()
 			c.y = j;
 			c.x = i;
 		}
+		if (data[idx] < v2)
+			v2 = data[idx];
 	}
 	idx = Index(c);
 	front[idx] = 1;
 	cl.push_back(c);
 	exetr = fluo::Point(c.x, c.y, c.z);
+	exetrval = v - v2;
 }
 
 bool ExGauss::Flood(unsigned int i)
 {
+	float eps = -1e-2 * exetrval;
 	std::list<Coord> cl2;
 	for (auto it : cl)
 	{
@@ -111,73 +116,22 @@ bool ExGauss::Flood(unsigned int i)
 		float v = data[Index(c)];
 		Coord nb;
 		float nv;
-		//-x
-		nb.x = c.x - 1; nb.y = c.y; nb.z = c.z;
-		idx = Index(nb);
-		if (Valid(nb) && !front[idx])
+		for (int ii = -1; ii < 2; ++ii)
+		for (int j = -1; j < 2; ++j)
+		for (int k = -1; k < 2; ++k)
 		{
+			if (ii == 0 && j == 0 && k == 0)
+				continue;
+			nb.x = c.x + ii;
+			nb.y = c.y + j;
+			nb.z = c.z + k;
+			if (!Valid(nb))
+				continue;
+			idx = Index(nb);
+			if (front[idx])
+				continue;
 			nv = data[idx];
-			if (nv < v)
-			{
-				cl2.push_back(nb);
-				front[idx] = i + 1;
-			}
-		}
-		//+x
-		nb.x = c.x + 1; nb.y = c.y; nb.z = c.z;
-		idx = Index(nb);
-		if (Valid(nb) && !front[idx])
-		{
-			nv = data[idx];
-			if (nv < v)
-			{
-				cl2.push_back(nb);
-				front[idx] = i + 1;
-			}
-		}
-		//-y
-		nb.x = c.x; nb.y = c.y - 1; nb.z = c.z;
-		idx = Index(nb);
-		if (Valid(nb) && !front[idx])
-		{
-			nv = data[idx];
-			if (nv < v)
-			{
-				cl2.push_back(nb);
-				front[idx] = i + 1;
-			}
-		}
-		//+y
-		nb.x = c.x; nb.y = c.y + 1; nb.z = c.z;
-		idx = Index(nb);
-		if (Valid(nb) && !front[idx])
-		{
-			nv = data[idx];
-			if (nv < v)
-			{
-				cl2.push_back(nb);
-				front[idx] = i + 1;
-			}
-		}
-		//-z
-		nb.x = c.x; nb.y = c.y; nb.z = c.z - 1;
-		idx = Index(nb);
-		if (Valid(nb) && !front[idx])
-		{
-			nv = data[idx];
-			if (nv < v)
-			{
-				cl2.push_back(nb);
-				front[idx] = i + 1;
-			}
-		}
-		//+z
-		nb.x = c.x; nb.y = c.y; nb.z = c.z + 1;
-		idx = Index(nb);
-		if (Valid(nb) && !front[idx])
-		{
-			nv = data[idx];
-			if (nv < v)
+			if (v - nv > eps)
 			{
 				cl2.push_back(nb);
 				front[idx] = i + 1;

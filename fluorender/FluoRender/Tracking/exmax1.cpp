@@ -87,7 +87,7 @@ bool ExMax1::Execute()
 
 fluo::Point ExMax1::GetCenter()
 {
-	if (GetProb() > 0.5)
+	if (GetProb() < 0.5)
 		return fluo::Point(
 			A0(m_params.mean),
 			A1(m_params.mean),
@@ -98,13 +98,7 @@ fluo::Point ExMax1::GetCenter()
 
 double ExMax1::GetProb()
 {
-	if (m_mem_prob.empty())
-		return 0.0f;
-
-	double sum = 0;
-	for (auto& n : m_mem_prob)
-		sum += n;
-	return sum / m_mem_prob.size();
+	return m_likelihood;
 }
 
 void ExMax1::Initialize()
@@ -181,6 +175,8 @@ void ExMax1::Initialize()
 		A0(m_params.mean),
 		A1(m_params.mean),
 		A2(m_params.mean));
+
+	m_likelihood_sum = 0;
 }
 
 void ExMax1::Expectation()
@@ -255,6 +251,7 @@ bool ExMax1::Converge()
 	//compute likelihood
 	//m_likelihood = GetProb();
 	m_likelihood = mag(m_params.mean - m_params_prv.mean);
+	m_likelihood_sum += m_likelihood;
 	if (m_likelihood >= m_likelihood_prv)
 		m_inc_counter++;
 	if (fabs(m_likelihood) > m_eps)
