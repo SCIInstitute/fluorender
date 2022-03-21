@@ -44,6 +44,7 @@ iter=0
 eps=1e-2
 fsize=5
 compare=1
+sim=0
 [tasks/task6]
 type=fetch_mask
 time_mode=TM_ALL_POST_REWIND

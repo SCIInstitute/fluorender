@@ -97,6 +97,7 @@ namespace flrd
 		//likelihood
 		double m_likelihood;
 		double m_likelihood_prv;
+		double m_likelihood_sum;
 		//membership probabilities
 		std::vector<double> m_mem_prob;//0-idx: comps; 1-idx: points
 		double m_cov_eps;

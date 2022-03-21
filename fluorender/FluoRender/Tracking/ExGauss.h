@@ -74,12 +74,13 @@ namespace flrd
 		unsigned int* front;
 		struct Coord
 		{
-			unsigned int x;
-			unsigned int y;
-			unsigned int z;
+			int x;
+			int y;
+			int z;
 		};
 		std::list<Coord> cl;
 		fluo::Point exetr;
+		float exetrval;
 		fluo::Point mean;
 		double prob;
 		//maximum iteration number

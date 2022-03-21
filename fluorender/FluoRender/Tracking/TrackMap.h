@@ -164,8 +164,9 @@ namespace flrd
 
 		//tracking by matching user input
 		//mode: 0-compare adj; 1-compare start;
+		//sim: 0-dot product; 1-diff squared
 		bool TrackStencils(size_t frame1, size_t frame2,
-			fluo::Vector &ext, int mode, size_t start);
+			fluo::Vector &ext, int mode, size_t start, int sim);
 
 		//connect and disconnect functions for cache queue
 		typedef boost::function<void (VolCache&)> func_cache;
