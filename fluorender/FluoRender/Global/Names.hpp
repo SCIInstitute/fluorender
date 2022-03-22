@@ -567,7 +567,6 @@ DEALINGS IN THE SOFTWARE.
 //component agent
 #define gstRecordCmd "record cmd"//record command for comps
 #define gstRunCmd "run cmd"//run command
-#define gstClusterMethod "cluster method"//0:k-means; 1:em; 2:dbscan
 #define gstThreshold "threshold"
 #define gstIteration "iteration"//number of iterations
 #define gstUseDiffusion "use diffusion"//diffusion settings
@@ -583,7 +582,16 @@ DEALINGS IN THE SOFTWARE.
 #define gstMaxDist "max dist"
 #define gstDistFieldThresh "dist field thresh"
 #define gstFixateEnable "fixate enable"//fixate settings
-#define gstCleanGrow "clean grow"
+#define gstFixateSize "fixate size"
+#define gstCleanEnable "clean enable"//clean settings
+#define gstCleanIteration "clean iteration"
+#define gstCleanSize "clean size"
+#define gstClusterMethod "cluster method"//0:k-means; 1:em; 2:dbscan
+#define gstClusterNum "cluster num"
+#define gstClusterMaxIter "cluster max iter"
+#define gstClusterTol "cluster tol"
+#define gstClusterSize "cluster size"
+#define gstClusterEps "cluster eps"
 
 //input
 //mouse

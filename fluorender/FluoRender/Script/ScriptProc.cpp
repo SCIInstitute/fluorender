@@ -32,12 +32,14 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
+#include <AgentFactory.hpp>
 #include <msk_reader.h>
 #include <msk_writer.h>
 #include <lbl_reader.h>
 #include <Calculate/BackgStat.h>
 #include <Calculate/VolumeCalculator.h>
 #include <Calculate/KernelExecutor.h>
+#include <Components/CompAnalyzer.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
 #include <Distance/RulerHandler.h>
@@ -1091,8 +1093,6 @@ void ScriptProc::RunGenerateComp()
 	fluo::VolumeList vlist;
 	if (!GetVolumes(vlist))
 		return;
-	if (!(m_frame->GetComponentDlg()))
-		return;
 
 	bool use_sel;
 	m_fconfig->Read("use_sel", &use_sel);
@@ -1102,15 +1102,16 @@ void ScriptProc::RunGenerateComp()
 	m_fconfig->Read("comp_command", &cmdfile);
 	cmdfile = GetInputFile(cmdfile, "Commands");
 	if (cmdfile.IsEmpty())
-		m_frame->GetComponentDlg()->ResetCmd();
+		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->ResetCmd();
 	else
-		m_frame->GetComponentDlg()->LoadCmd(cmdfile);
+		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->LoadCmd(cmdfile);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
 		m_view->setRvalu(gstCurrentVolume, *i);
-		m_frame->GetComponentDlg()->PlayCmd(use_sel, tfac);
+		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->setValue(gstUseSelection, use_sel);
+		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->PlayCmd(tfac);
 	}
 }
 

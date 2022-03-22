@@ -209,13 +209,6 @@ public:
 	void Clean(bool use_sel, bool command = true);
 	void SelectFullComp();
 
-	//command
-	void LoadCmd(const wxString &filename);
-	void SaveCmd(const wxString &filename);
-	void AddCmd(const std::string &type);
-	void ResetCmd();
-	void PlayCmd(bool use_sel, double tfactor);
-
 	//in and out cell lists
 	flrd::CelpList &GetInCells()
 	{ return m_in_cells; }
@@ -240,47 +233,6 @@ private:
 	//progress
 	float m_prog_bit;
 	float m_prog;
-
-	//generate settings
-	bool m_use_sel;
-	int m_iter;
-	double m_thresh;
-	double m_tfactor;
-	//distance field
-	bool m_use_dist_field;
-	double m_dist_strength;
-	int m_dist_filter_size;
-	int m_max_dist;
-	double m_dist_thresh;
-	//diffusion
-	bool m_diff;
-	double m_falloff;
-	bool m_size;
-	int m_size_lm;
-	//density
-	bool m_density;
-	double m_density_thresh;
-	double m_varth;//variance threshold
-	int m_density_window_size;
-	int m_density_stats_size;
-	//fixate
-	bool m_fixate;
-	int m_fix_size;
-	//clean
-	bool m_clean;
-	int m_clean_iter;
-	int m_clean_size_vl;
-
-	//cluster settings
-	bool m_cluster_method_exmax;
-	bool m_cluster_method_dbscan;
-	bool m_cluster_method_kmeans;
-	//parameters
-	int m_cluster_clnum;
-	int m_cluster_maxiter;
-	float m_cluster_tol;
-	int m_cluster_size;
-	double m_cluster_eps;
 
 	//selection
 	bool m_use_min;
@@ -489,6 +441,8 @@ private:
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
+	//generate
+	void EnableGenerate();
 
 	//comp generate page
 	void OnIterSldr(wxScrollEvent &event);

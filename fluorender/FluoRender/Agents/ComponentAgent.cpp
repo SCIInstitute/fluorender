@@ -36,27 +36,6 @@ ComponentAgent::ComponentAgent(ComponentDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
 {
-	addValue(gstUseSelection, false);
-	addValue(gstAutoUpdate, false);
-	addValue(gstHoldHistory, false);
-	addValue(gstRecordCmd, false);
-	addValue(gstRunCmd, false);
-	addValue(gstClusterMethod, long(0));
-	addValue(gstIteration, long(0));
-	addValue(gstThreshold, double(0));
-	addValue(gstUseDistField, bool(false));
-	addValue(gstUseDiffusion, bool(false));
-	addValue(gstDistFieldStrength, double(0));
-	addValue(gstDistFieldFilterSize, long(0));
-	addValue(gstMaxDist, long(0));
-	addValue(gstDistFieldThresh, double(0));
-	addValue(gstDiffusionFalloff, double(0));
-	addValue(gstUseDensityField, bool(false));
-	addValue(gstDensityFieldThresh, double(0));
-	addValue(gstDensityVarThresh, double(0));
-	addValue(gstDensityWindowSize, long(0));
-	addValue(gstDensityStatsSize, long(0));
-	addValue(gstFixateEnable, bool(false));
 }
 
 void ComponentAgent::setObject(Renderview* obj)
@@ -121,7 +100,6 @@ void ComponentAgent::UpdateAllSettings()
 	dlg_.m_cluster_tol_text->SetValue(wxString::Format("%.2f", m_cluster_tol));
 	dlg_.m_cluster_size_text->SetValue(wxString::Format("%d", m_cluster_size));
 	dlg_.m_cluster_eps_text->SetValue(wxString::Format("%.1f", m_cluster_eps));
-	UpdateClusterMethod();
 
 	//selection
 	if (m_use_min)
@@ -164,38 +142,9 @@ void ComponentAgent::UpdateAllSettings()
 	dlg_.m_dist_neighbor_text->Enable(m_use_dist_neighbor);
 	dlg_.m_dist_all_chan_check->SetValue(m_use_dist_allchan);
 
-	//generate
-	EnableGenerate();
-
 	//output
 	getValue(gstHoldHistory, bval);
 	dlg_.m_history_chk->SetValue(bval);
-}
-
-void ComponentAgent::UpdateClusterMethod()
-{
-	long lval;
-	getValue(gstClusterMethod, lval);
-	switch (lval)
-	{
-	case 0:
-	case 1:
-		dlg_.m_cluster_clnum_sldr->Enable();
-		dlg_.m_cluster_clnum_text->Enable();
-		dlg_.m_cluster_size_sldr->Disable();
-		dlg_.m_cluster_size_text->Disable();
-		dlg_.m_cluster_eps_sldr->Disable();
-		dlg_.m_cluster_eps_text->Disable();
-		break;
-	case 2:
-		dlg_.m_cluster_clnum_sldr->Disable();
-		dlg_.m_cluster_clnum_text->Disable();
-		dlg_.m_cluster_size_sldr->Enable();
-		dlg_.m_cluster_size_text->Enable();
-		dlg_.m_cluster_eps_sldr->Enable();
-		dlg_.m_cluster_eps_text->Enable();
-		break;
-	}
 }
 
 void ComponentAgent::LoadSettings(const wxString &filename)
@@ -331,7 +280,7 @@ void ComponentAgent::GenerateComp()
 	Renderview* view = getObject();
 	if (!view)
 		return;
-	fluo::VolumeData* vd = view->GetCurrentVolume();
+	VolumeData* vd = view->GetCurrentVolume();
 	if (!vd)
 		return;
 	bool use_sel, command;
@@ -464,6 +413,352 @@ void ComponentAgent::GenerateComp()
 		AddCmd("generate");
 }
 
+void ComponentAgent::Fixate(bool command)
+{
+	Renderview* view = getObject();
+	VolumeData* vd = view->GetCurrentVolume();
+	if (!vd)
+		return;
+	vd->PushLabel(true);
+
+	bool bval;
+	getValue(gstRecordCmd, bval);
+	if (command && bval)
+		AddCmd("fixate");
+
+	saveValue(gstCleanEnable);
+	Event event;
+	OnAutoUpdate(event);
+	drawValue(gstCleanEnable);
+}
+
+//command
+void ComponentAgent::LoadCmd(const wxString &filename)
+{
+	wxFileInputStream is(filename);
+	if (!is.IsOk())
+		return;
+	wxFileConfig fconfig(is);
+	dlg_.m_cmd_file_text->SetValue(filename);
+
+	m_command.clear();
+	int cmd_count = 0;
+	wxString str;
+	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
+	while (fconfig.Exists(cmd_str))
+	{
+		flrd::CompCmdParams params;
+		fconfig.SetPath(cmd_str);
+		str = fconfig.Read("type", "");
+		if (str == "generate" ||
+			str == "clean" ||
+			str == "fixate")
+			params.push_back(str.ToStdString());
+		else
+			continue;
+		long lval;
+		if (fconfig.Read("iter", &lval))
+		{
+			params.push_back("iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("use_dist_field", &lval))
+		{
+			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("dist_filter_size", &lval))
+		{
+			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("max_dist", &lval))
+		{
+			params.push_back("max_dist"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("diff", &lval))
+		{
+			params.push_back("diff"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density", &lval))
+		{
+			params.push_back("density"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_window_size", &lval))
+		{
+			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("density_stats_size", &lval))
+		{
+			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("cleanb", &lval))
+		{
+			params.push_back("cleanb"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_iter", &lval))
+		{
+			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("clean_size_vl", &lval))
+		{
+			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
+		}
+		if (fconfig.Read("fix_size", &lval))
+		{
+			params.push_back("fix_size"); params.push_back(std::to_string(lval));
+		}
+		double dval;
+		if (fconfig.Read("thresh", &dval))
+		{
+			params.push_back("thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_strength", &dval))
+		{
+			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("dist_thresh", &dval))
+		{
+			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("falloff", &dval))
+		{
+			params.push_back("falloff"); params.push_back(std::to_string(dval));
+		}
+		if (fconfig.Read("density_thresh", &dval))
+		{
+			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
+		}
+
+		m_command.push_back(params);
+		cmd_count++;
+		cmd_str = "/cmd" + std::to_string(cmd_count);
+	}
+	//record
+	int ival = m_command.size();
+	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+}
+
+void ComponentAgent::SaveCmd(const wxString &filename)
+{
+	if (m_command.empty())
+	{
+		AddCmd("generate");
+	}
+
+	wxFileConfig fconfig("", "", filename, "",
+		wxCONFIG_USE_LOCAL_FILE);
+	fconfig.DeleteAll();
+
+	int cmd_count = 0;
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate" ||
+			(*it)[0] == "clean" ||
+			(*it)[0] == "fixate")
+		{
+			std::string str = "/cmd" + std::to_string(cmd_count++);
+			fconfig.SetPath(str);
+			str = (*it)[0];
+			fconfig.Write("type", wxString(str));
+		}
+		for (auto it2 = it->begin();
+			it2 != it->end(); ++it2)
+		{
+			if (*it2 == "iter" ||
+				*it2 == "use_dist_field" ||
+				*it2 == "dist_filter_size" ||
+				*it2 == "max_dist" ||
+				*it2 == "diff" ||
+				*it2 == "density" ||
+				*it2 == "density_window_size" ||
+				*it2 == "density_stats_size" ||
+				*it2 == "cleanb" ||
+				*it2 == "clean_iter" ||
+				*it2 == "clean_size_vl" ||
+				*it2 == "fix_size")
+			{
+				fconfig.Write(*it2, std::stoi(*(++it2)));
+			}
+			else if (*it2 == "thresh" ||
+				*it2 == "dist_strength" ||
+				*it2 == "dist_thresh" ||
+				*it2 == "falloff" ||
+				*it2 == "density_thresh")
+			{
+				fconfig.Write(*it2, std::stod(*(++it2)));
+			}
+		}
+	}
+
+	SaveConfig(fconfig, filename);
+	dlg_.m_cmd_file_text->SetValue(filename);
+}
+
+//record
+void ComponentAgent::AddCmd(const std::string &type)
+{
+	if (!m_command.empty())
+	{
+		flrd::CompCmdParams &params = m_command.back();
+		if (!params.empty())
+		{
+			if ((params[0] == "generate" ||
+				params[0] == "fixate") &&
+				params[0] == type)
+			{
+				//replace
+				m_command.pop_back();
+			}
+			//else do nothing
+		}
+	}
+	//add
+	flrd::CompCmdParams params;
+	if (type == "generate")
+	{
+		params.push_back("generate");
+		params.push_back("iter"); params.push_back(std::to_string(m_iter));
+		params.push_back("thresh"); params.push_back(std::to_string(m_thresh));
+		params.push_back("use_dist_field"); params.push_back(std::to_string(m_use_dist_field));
+		params.push_back("dist_strength"); params.push_back(std::to_string(m_dist_strength));
+		params.push_back("dist_filter_size"); params.push_back(std::to_string(m_dist_filter_size));
+		params.push_back("max_dist"); params.push_back(std::to_string(m_max_dist));
+		params.push_back("dist_thresh"); params.push_back(std::to_string(m_dist_thresh));
+		params.push_back("diff"); params.push_back(std::to_string(m_diff));
+		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
+		params.push_back("density"); params.push_back(std::to_string(m_density));
+		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
+		params.push_back("varth"); params.push_back(std::to_string(m_varth));
+		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
+		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
+		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
+		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+	}
+	else if (type == "clean")
+	{
+		params.push_back("clean");
+		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
+		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+	}
+	else if (type == "fixate")
+	{
+		params.push_back("fixate");
+		params.push_back("fix_size"); params.push_back(std::to_string(m_fix_size));
+	}
+	m_command.push_back(params);
+
+	//record
+	int ival = m_command.size();
+	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+}
+
+void ComponentAgent::ResetCmd()
+{
+	m_command.clear();
+	dlg_.m_record_cmd_btn->SetValue(false);
+	setValue(gstRecordCmd, false);
+	//m_record_cmd = false;
+	//record
+	//int ival = m_command.size();
+	//dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+}
+
+void ComponentAgent::PlayCmd(double tfactor)
+{
+	//disable first
+	m_fixate = false;
+	m_auto_update = false;
+	m_auto_update_btn->SetValue(false);
+
+	if (m_command.empty())
+	{
+		//the threshold factor is used to lower the threshold value for semi auto segmentation
+		m_tfactor = tfactor;
+		GenerateComp(use_sel, false);
+		m_tfactor = 1.0;
+		return;
+	}
+
+	for (auto it = m_command.begin();
+		it != m_command.end(); ++it)
+	{
+		if (it->empty())
+			continue;
+		if ((*it)[0] == "generate")
+		{
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "iter")
+					m_iter = std::stoi(*(++it2));
+				else if (*it2 == "thresh")
+					m_thresh = std::stod(*(++it2));
+				else if (*it2 == "use_dist_field")
+					m_use_dist_field = std::stoi(*(++it2));
+				else if (*it2 == "dist_strength")
+					m_dist_strength = std::stod(*(++it2));
+				else if (*it2 == "dist_filter_size")
+					m_dist_filter_size = std::stod(*(++it2));
+				else if (*it2 == "max_dist")
+					m_max_dist = std::stoi(*(++it2));
+				else if (*it2 == "dist_thresh")
+					m_dist_thresh = std::stod(*(++it2));
+				else if (*it2 == "diff")
+					m_diff = std::stoi(*(++it2));
+				else if (*it2 == "falloff")
+					m_falloff = std::stod(*(++it2));
+				else if (*it2 == "density")
+					m_density = std::stoi(*(++it2));
+				else if (*it2 == "density_thresh")
+					m_density_thresh = std::stod(*(++it2));
+				else if (*it2 == "varth")
+					m_varth = std::stod(*(++it2));
+				else if (*it2 == "density_window_size")
+					m_density_window_size = std::stoi(*(++it2));
+				else if (*it2 == "density_stats_size")
+					m_density_stats_size = std::stoi(*(++it2));
+				else if (*it2 == "cleanb")
+					m_clean = std::stoi(*(++it2));
+				else if (*it2 == "clean_iter")
+					m_clean_iter = std::stoi(*(++it2));
+				else if (*it2 == "clean_size_vl")
+					m_clean_size_vl = std::stoi(*(++it2));
+			}
+			GenerateComp(use_sel, false);
+		}
+		else if ((*it)[0] == "clean")
+		{
+			m_clean = true;
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "clean_iter")
+					m_clean_iter = std::stoi(*(++it2));
+				else if (*it2 == "clean_size_vl")
+					m_clean_size_vl = std::stoi(*(++it2));
+			}
+			Clean(use_sel, false);
+		}
+		else if ((*it)[0] == "fixate")
+		{
+			m_fixate = true;
+			for (auto it2 = it->begin();
+				it2 != it->end(); ++it2)
+			{
+				if (*it2 == "fix_size")
+					m_fix_size = std::stoi(*(++it2));
+			}
+			//GenerateComp(false);
+			Fixate(false);
+			//return;
+		}
+	}
+	Update();
+}
+
 //update functions
 void ComponentAgent::OnAutoUpdate(Event& event)
 {
@@ -565,7 +860,83 @@ void ComponentAgent::OnFixateEnable(Event& event)
 		dlg_.m_fix_size_text->Disable();
 	}
 
-	saveValue(gstCleanGrow);
-	OnAutoUpdate(event);
-	drawValue(gstCleanGrow);
+	if (bval)
+		Fixate(true);
 }
+
+void ComponentAgent::OnFixateSize(Event& event)
+{
+	OnAutoUpdate(event);
+	bool bval;
+	getValue(gstRecordCmd, bval);
+	if (bval)
+		AddCmd("fixate");
+}
+
+void ComponentAgent::OnCleanEnable(Event& event)
+{
+	bool bval;
+	getValue(gstCleanEnable, bval);
+	if (bval)
+	{
+		dlg_.m_clean_btn->Enable();
+		dlg_.m_clean_iter_sldr->Enable();
+		dlg_.m_clean_iter_text->Enable();
+		dlg_.m_clean_limit_sldr->Enable();
+		dlg_.m_clean_limit_text->Enable();
+	}
+	else
+	{
+		dlg_.m_clean_btn->Disable();
+		dlg_.m_clean_iter_sldr->Disable();
+		dlg_.m_clean_iter_text->Disable();
+		dlg_.m_clean_limit_sldr->Disable();
+		dlg_.m_clean_limit_text->Disable();
+	}
+	OnAutoUpdate(event);
+}
+
+void ComponentAgent::OnClusterMethod(Event& event)
+{
+	long lval;
+	getValue(gstClusterMethod, lval);
+	switch (lval)
+	{
+	case 0:
+		dlg_.m_cluster_method_kmeans_rd->SetValue(true);
+		dlg_.m_cluster_method_exmax_rd->SetValue(false);
+		dlg_.m_cluster_method_dbscan_rd->SetValue(false);
+		break;
+	case 1:
+		dlg_.m_cluster_method_kmeans_rd->SetValue(false);
+		dlg_.m_cluster_method_exmax_rd->SetValue(true);
+		dlg_.m_cluster_method_dbscan_rd->SetValue(false);
+		break;
+	case 2:
+		dlg_.m_cluster_method_kmeans_rd->SetValue(false);
+		dlg_.m_cluster_method_exmax_rd->SetValue(false);
+		dlg_.m_cluster_method_dbscan_rd->SetValue(true);
+		break;
+	}
+	switch (lval)
+	{
+	case 0:
+	case 1:
+		dlg_.m_cluster_clnum_sldr->Enable();
+		dlg_.m_cluster_clnum_text->Enable();
+		dlg_.m_cluster_size_sldr->Disable();
+		dlg_.m_cluster_size_text->Disable();
+		dlg_.m_cluster_eps_sldr->Disable();
+		dlg_.m_cluster_eps_text->Disable();
+		break;
+	case 2:
+		dlg_.m_cluster_clnum_sldr->Disable();
+		dlg_.m_cluster_clnum_text->Disable();
+		dlg_.m_cluster_size_sldr->Enable();
+		dlg_.m_cluster_size_text->Enable();
+		dlg_.m_cluster_eps_sldr->Enable();
+		dlg_.m_cluster_eps_text->Enable();
+		break;
+	}
+}
+

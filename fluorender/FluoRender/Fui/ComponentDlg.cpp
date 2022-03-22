@@ -1275,32 +1275,13 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent &event)
 {
-	m_fixate = m_fixate_check->GetValue();
-	EnableFixate(m_fixate);
-
-	if (m_fixate)
-		Fixate();
-
-	if (m_auto_update)
-	{
-		bool bval = m_clean;
-		m_clean = false;
-		GenerateComp(m_use_sel, false);
-		m_clean = bval;
-	}
+	bool bval = m_fixate_check->GetValue();
+	m_agent->setValue(gstFixateEnable, bval);
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent &event)
 {
-	Fixate();
-
-	if (m_auto_update)
-	{
-		bool bval = m_clean;
-		m_clean = false;
-		GenerateComp(m_use_sel, false);
-		m_clean = bval;
-	}
+	m_agent->Fixate(true);
 }
 
 void ComponentDlg::OnFixSizeSldr(wxScrollEvent &event)
@@ -1315,42 +1296,14 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
-	m_fix_size = val;
-	m_fix_size_sldr->SetValue(m_fix_size);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel, false);
-	if (m_record_cmd)
-		AddCmd("fixate");
-}
-
-void ComponentDlg::EnableClean(bool value)
-{
-	m_clean = value;
-	if (m_clean)
-	{
-		m_clean_btn->Enable();
-		m_clean_iter_sldr->Enable();
-		m_clean_iter_text->Enable();
-		m_clean_limit_sldr->Enable();
-		m_clean_limit_text->Enable();
-	}
-	else
-	{
-		m_clean_btn->Disable();
-		m_clean_iter_sldr->Disable();
-		m_clean_iter_text->Disable();
-		m_clean_limit_sldr->Disable();
-		m_clean_limit_text->Disable();
-	}
+	m_fix_size_sldr->SetValue(val);
+	m_agent->setValue(gstFixateSize, val);
 }
 
 void ComponentDlg::OnCleanCheck(wxCommandEvent &event)
 {
-	EnableClean(m_clean_check->GetValue());
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	bool bval = m_clean_check->GetValue();
+	m_agent->setValue(gstCleanEnable, bval);
 }
 
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent &event)
@@ -1365,11 +1318,8 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
-	m_clean_iter = (int)val;
-	m_clean_iter_sldr->SetValue(m_clean_iter);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	m_clean_iter_sldr->SetValue(val);
+	m_agent->setValue(gstCleanIteration, val);
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent &event)
@@ -1384,188 +1334,24 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
-	m_clean_size_vl = (int)val;
-	m_clean_limit_sldr->SetValue(m_clean_size_vl);
-
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
-}
-
-//record
-void ComponentDlg::AddCmd(const std::string &type)
-{
-	if (!m_command.empty())
-	{
-		flrd::CompCmdParams &params = m_command.back();
-		if (!params.empty())
-		{
-			if ((params[0] == "generate" ||
-				params[0] == "fixate") &&
-				params[0] == type)
-			{
-				//replace
-				m_command.pop_back();
-			}
-			//else do nothing
-		}
-	}
-	//add
-	flrd::CompCmdParams params;
-	if (type == "generate")
-	{
-		params.push_back("generate");
-		params.push_back("iter"); params.push_back(std::to_string(m_iter));
-		params.push_back("thresh"); params.push_back(std::to_string(m_thresh));
-		params.push_back("use_dist_field"); params.push_back(std::to_string(m_use_dist_field));
-		params.push_back("dist_strength"); params.push_back(std::to_string(m_dist_strength));
-		params.push_back("dist_filter_size"); params.push_back(std::to_string(m_dist_filter_size));
-		params.push_back("max_dist"); params.push_back(std::to_string(m_max_dist));
-		params.push_back("dist_thresh"); params.push_back(std::to_string(m_dist_thresh));
-		params.push_back("diff"); params.push_back(std::to_string(m_diff));
-		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
-		params.push_back("density"); params.push_back(std::to_string(m_density));
-		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
-		params.push_back("varth"); params.push_back(std::to_string(m_varth));
-		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
-		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
-		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
-		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
-	}
-	else if (type == "clean")
-	{
-		params.push_back("clean");
-		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
-	}
-	else if (type == "fixate")
-	{
-		params.push_back("fixate");
-		params.push_back("fix_size"); params.push_back(std::to_string(m_fix_size));
-	}
-	m_command.push_back(params);
-
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
-}
-
-void ComponentDlg::ResetCmd()
-{
-	m_command.clear();
-	m_record_cmd_btn->SetValue(false);
-	m_record_cmd = false;
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
-}
-
-void ComponentDlg::PlayCmd(bool use_sel, double tfactor)
-{
-	//disable first
-	m_fixate = false;
-	m_auto_update = false;
-	m_auto_update_btn->SetValue(false);
-
-	if (m_command.empty())
-	{
-		//the threshold factor is used to lower the threshold value for semi auto segmentation
-		m_tfactor = tfactor;
-		GenerateComp(use_sel, false);
-		m_tfactor = 1.0;
-		return;
-	}
-
-	for (auto it = m_command.begin();
-		it != m_command.end(); ++it)
-	{
-		if (it->empty())
-			continue;
-		if ((*it)[0] == "generate")
-		{
-			for (auto it2 = it->begin();
-				it2 != it->end(); ++it2)
-			{
-				if (*it2 == "iter")
-					m_iter = std::stoi(*(++it2));
-				else if (*it2 == "thresh")
-					m_thresh = std::stod(*(++it2));
-				else if (*it2 == "use_dist_field")
-					m_use_dist_field = std::stoi(*(++it2));
-				else if (*it2 == "dist_strength")
-					m_dist_strength = std::stod(*(++it2));
-				else if (*it2 == "dist_filter_size")
-					m_dist_filter_size = std::stod(*(++it2));
-				else if (*it2 == "max_dist")
-					m_max_dist = std::stoi(*(++it2));
-				else if (*it2 == "dist_thresh")
-					m_dist_thresh = std::stod(*(++it2));
-				else if (*it2 == "diff")
-					m_diff = std::stoi(*(++it2));
-				else if (*it2 == "falloff")
-					m_falloff = std::stod(*(++it2));
-				else if (*it2 == "density")
-					m_density = std::stoi(*(++it2));
-				else if (*it2 == "density_thresh")
-					m_density_thresh = std::stod(*(++it2));
-				else if (*it2 == "varth")
-					m_varth = std::stod(*(++it2));
-				else if (*it2 == "density_window_size")
-					m_density_window_size = std::stoi(*(++it2));
-				else if (*it2 == "density_stats_size")
-					m_density_stats_size = std::stoi(*(++it2));
-				else if (*it2 == "cleanb")
-					m_clean = std::stoi(*(++it2));
-				else if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
-				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
-			}
-			GenerateComp(use_sel, false);
-		}
-		else if ((*it)[0] == "clean")
-		{
-			m_clean = true;
-			for (auto it2 = it->begin();
-				it2 != it->end(); ++it2)
-			{
-				if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
-				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
-			}
-			Clean(use_sel, false);
-		}
-		else if ((*it)[0] == "fixate")
-		{
-			m_fixate = true;
-			for (auto it2 = it->begin();
-				it2 != it->end(); ++it2)
-			{
-				if (*it2 == "fix_size")
-					m_fix_size = std::stoi(*(++it2));
-			}
-			//GenerateComp(false);
-			Fixate(false);
-			//return;
-		}
-	}
-	Update();
+	m_clean_limit_sldr->SetValue(val);
+	m_agent->setValue(gstCleanSize, val);
 }
 
 void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 {
-	m_record_cmd = m_record_cmd_btn->GetValue();
+	bool bval = m_record_cmd_btn->GetValue();
+	m_agent->setValue(gstRecordCmd, bval);
 }
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
 {
-	PlayCmd(m_use_sel, 1.0);
+	m_agent->PlayCmd(1.0);
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent &event)
 {
-	ResetCmd();
+	m_agent->ResetCmd();
 }
 
 void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
@@ -1582,7 +1368,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent &event)
 	wxString filename = fopendlg->GetPath();
 	delete fopendlg;
 
-	LoadCmd(filename);
+	m_agent->LoadCmd(filename);
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
@@ -1599,32 +1385,23 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent &event)
 	wxString filename = fopendlg->GetPath();
 	delete fopendlg;
 
-	SaveCmd(filename);
+	m_agent->SaveCmd(filename);
 }
 
 //clustering page
 void ComponentDlg::OnClusterMethodExmaxCheck(wxCommandEvent &event)
 {
-	m_cluster_method_exmax = true;
-	m_cluster_method_dbscan = false;
-	m_cluster_method_kmeans = false;
-	UpdateClusterMethod();
+	m_agent->setValue(gstClusterMethod, long(1));
 }
 
 void ComponentDlg::OnClusterMethodDbscanCheck(wxCommandEvent &event)
 {
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = true;
-	m_cluster_method_kmeans = false;
-	UpdateClusterMethod();
+	m_agent->setValue(gstClusterMethod, long(2));
 }
 
 void ComponentDlg::OnClusterMethodKmeansCheck(wxCommandEvent &event)
 {
-	m_cluster_method_exmax = false;
-	m_cluster_method_dbscan = false;
-	m_cluster_method_kmeans = true;
-	UpdateClusterMethod();
+	m_agent->setValue(gstClusterMethod, long(0));
 }
 
 //parameters
@@ -1640,8 +1417,8 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_clnum_text->GetValue().ToLong(&val);
-	m_cluster_clnum = (int)val;
-	m_cluster_clnum_sldr->SetValue(m_cluster_clnum);
+	m_cluster_clnum_sldr->SetValue(val);
+	m_agent->setValue(gstClusterNum, val);
 }
 
 void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent &event)
@@ -1656,8 +1433,8 @@ void ComponentDlg::OnClusterMaxiterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_maxiter_text->GetValue().ToLong(&val);
-	m_cluster_maxiter = (int)val;
-	m_cluster_maxiter_sldr->SetValue(m_cluster_maxiter);
+	m_cluster_maxiter_sldr->SetValue(val);
+	m_agent->setValue(gstClusterMaxIter, val);
 }
 
 void ComponentDlg::OnClusterTolSldr(wxScrollEvent &event)
@@ -1672,8 +1449,8 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent &event)
 {
 	double val = 0.9;
 	m_cluster_tol_text->GetValue().ToDouble(&val);
-	m_cluster_tol = (float)val;
 	m_cluster_tol_sldr->SetValue(int(val * 100));
+	m_agent->setValue(gstClusterTol, val);
 }
 
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent &event)
@@ -1688,8 +1465,8 @@ void ComponentDlg::OnClusterSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_cluster_size_text->GetValue().ToLong(&val);
-	m_cluster_size = (int)val;
-	m_cluster_size_sldr->SetValue(m_cluster_size);
+	m_cluster_size_sldr->SetValue(val);
+	m_agent->setValue(gstClusterSize, val);
 }
 
 void ComponentDlg::OnClusterEpsSldr(wxScrollEvent &event)
@@ -1704,8 +1481,8 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_cluster_eps_text->GetValue().ToDouble(&val);
-	m_cluster_eps = val;
-	m_cluster_eps_sldr->SetValue(int(m_cluster_eps * 10.0 + 0.5));
+	m_cluster_eps_sldr->SetValue(int(val * 10.0 + 0.5));
+	m_agent->setValue(gstClusterEps, val);
 }
 
 //analysis page
@@ -3390,170 +3167,6 @@ void ComponentDlg::FindCelps(flrd::CelpList &list,
 			}
 		}
 	}
-}
-
-//command
-void ComponentDlg::LoadCmd(const wxString &filename)
-{
-	wxFileInputStream is(filename);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-	m_cmd_file_text->SetValue(filename);
-
-	m_command.clear();
-	int cmd_count = 0;
-	wxString str;
-	std::string cmd_str = "/cmd" + std::to_string(cmd_count);
-	while (fconfig.Exists(cmd_str))
-	{
-		flrd::CompCmdParams params;
-		fconfig.SetPath(cmd_str);
-		str = fconfig.Read("type", "");
-		if (str == "generate" ||
-			str == "clean" ||
-			str == "fixate")
-			params.push_back(str.ToStdString());
-		else
-			continue;
-		long lval;
-		if (fconfig.Read("iter", &lval))
-		{
-			params.push_back("iter"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("use_dist_field", &lval))
-		{
-			params.push_back("use_dist_field"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("dist_filter_size", &lval))
-		{
-			params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("max_dist", &lval))
-		{
-			params.push_back("max_dist"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("diff", &lval))
-		{
-			params.push_back("diff"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("density", &lval))
-		{
-			params.push_back("density"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("density_window_size", &lval))
-		{
-			params.push_back("density_window_size"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("density_stats_size", &lval))
-		{
-			params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("cleanb", &lval))
-		{
-			params.push_back("cleanb"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("clean_iter", &lval))
-		{
-			params.push_back("clean_iter"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("clean_size_vl", &lval))
-		{
-			params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
-		}
-		if (fconfig.Read("fix_size", &lval))
-		{
-			params.push_back("fix_size"); params.push_back(std::to_string(lval));
-		}
-		double dval;
-		if (fconfig.Read("thresh", &dval))
-		{
-			params.push_back("thresh"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("dist_strength", &dval))
-		{
-			params.push_back("dist_strength"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("dist_thresh", &dval))
-		{
-			params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("falloff", &dval))
-		{
-			params.push_back("falloff"); params.push_back(std::to_string(dval));
-		}
-		if (fconfig.Read("density_thresh", &dval))
-		{
-			params.push_back("density_thresh"); params.push_back(std::to_string(dval));
-		}
-
-		m_command.push_back(params);
-		cmd_count++;
-		cmd_str = "/cmd" + std::to_string(cmd_count);
-	}
-	//record
-	int ival = m_command.size();
-	m_cmd_count_text->SetValue(wxString::Format("%d", ival));
-}
-
-void ComponentDlg::SaveCmd(const wxString &filename)
-{
-	if (m_command.empty())
-	{
-		AddCmd("generate");
-	}
-
-	wxFileConfig fconfig("", "", filename, "",
-		wxCONFIG_USE_LOCAL_FILE);
-	fconfig.DeleteAll();
-
-	int cmd_count = 0;
-
-	for (auto it = m_command.begin();
-		it != m_command.end(); ++it)
-	{
-		if (it->empty())
-			continue;
-		if ((*it)[0] == "generate" ||
-			(*it)[0] == "clean" ||
-			(*it)[0] == "fixate")
-		{
-			std::string str = "/cmd" + std::to_string(cmd_count++);
-			fconfig.SetPath(str);
-			str = (*it)[0];
-			fconfig.Write("type", wxString(str));
-		}
-		for (auto it2 = it->begin();
-			it2 != it->end(); ++it2)
-		{
-			if (*it2 == "iter" ||
-				*it2 == "use_dist_field" ||
-				*it2 == "dist_filter_size" ||
-				*it2 == "max_dist" ||
-				*it2 == "diff" ||
-				*it2 == "density" ||
-				*it2 == "density_window_size" ||
-				*it2 == "density_stats_size" ||
-				*it2 == "cleanb" ||
-				*it2 == "clean_iter" ||
-				*it2 == "clean_size_vl" ||
-				*it2 == "fix_size")
-			{
-				fconfig.Write(*it2, std::stoi(*(++it2)));
-			}
-			else if (*it2 == "thresh" ||
-				*it2 == "dist_strength" ||
-				*it2 == "dist_thresh" ||
-				*it2 == "falloff" ||
-				*it2 == "density_thresh")
-			{
-				fconfig.Write(*it2, std::stod(*(++it2)));
-			}
-		}
-	}
-
-	SaveConfig(fconfig, filename);
-	m_cmd_file_text->SetValue(filename);
 }
 
 void ComponentDlg::StartTimer(std::string str)

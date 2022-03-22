@@ -61,8 +61,16 @@ namespace fluo
 
 		void LoadSettings(const wxString &filename);
 		void SaveSettings(const wxString &filename);
-		void Analyze(bool sel);
+		void Analyze();
 		void GenerateComp();
+		void Fixate(bool command);
+
+		//command
+		void LoadCmd(const wxString &filename);
+		void SaveCmd(const wxString &filename);
+		void AddCmd(const std::string &type);
+		void ResetCmd();
+		void PlayCmd(double tfactor);
 
 	protected:
 		ComponentDlg &dlg_;
@@ -71,10 +79,6 @@ namespace fluo
 		flrd::CompCommand m_command;
 
 	private:
-		void EnableFixate(bool value);
-		void EnableClean(bool value);
-		void EnableGenerate();
-		void UpdateClusterMethod();
 
 		//update functions
 		void OnAutoUpdate(Event& event);
@@ -82,6 +86,9 @@ namespace fluo
 		void OnUseDiffusion(Event& event);
 		void OnUseDensityField(Event& event);
 		void OnFixateEnable(Event& event);
+		void OnFixateSize(Event& event);
+		void OnCleanEnable(Event& event);
+		void OnClusterMethod(Event& event);
 	};
 }
 
