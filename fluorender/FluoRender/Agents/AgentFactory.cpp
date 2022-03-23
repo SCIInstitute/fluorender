@@ -305,6 +305,19 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 		agent->addValue(gstClusterTol, double(0));
 		agent->addValue(gstClusterSize, long(0));
 		agent->addValue(gstClusterEps, double(0));
+		agent->addValue(gstUseMin, bool(false));
+		agent->addValue(gstMinValue, long(0));
+		agent->addValue(gstUseMax, bool(false));
+		agent->addValue(gstMaxValue, long(0));
+		agent->addValue(gstCompId, unsigned long(0));
+		agent->addValue(gstCompIdStr, std::string(""));
+		agent->addValue(gstCompSizeLimit, long(0));
+		agent->addValue(gstCompConsistent, bool(false));
+		agent->addValue(gstCompColocal, bool(false));
+		agent->addValue(gstCompOutputType, long(0));
+		agent->addValue(gstDistAllChan, bool(false));
+		agent->addValue(gstDistNeighbor, bool(false));
+		agent->addValue(gstDistNeighborValue, long(0));
 		ADD_AFTER_EVENT(agent, gstIteration, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstThreshold, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstUseDistField, ComponentAgent, OnUseDistField);
@@ -325,6 +338,8 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 		ADD_AFTER_EVENT(agent, gstCleanIteration, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstCleanSize, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstClusterMethod, ComponentAgent, OnClusterMethod);
+		ADD_AFTER_EVENT(agent, gstUseMin, ComponentAgent, OnUseMin);
+		ADD_AFTER_EVENT(agent, gstUseMax, ComponentAgent, OnUseMax);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

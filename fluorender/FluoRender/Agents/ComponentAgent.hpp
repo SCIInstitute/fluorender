@@ -64,6 +64,17 @@ namespace fluo
 		void Analyze();
 		void GenerateComp();
 		void Fixate(bool command);
+		void Clean(bool use_sel, bool command = true);
+		void CompFull();
+		void CompAppend();
+		void CompExclusive();
+		void CompAll();
+		void CompClear();
+		void CompNew();
+		void CompAdd();
+		void CompReplace();
+		void CompCleanBkg();
+		void CompCombine();
 
 		//command
 		void LoadCmd(const wxString &filename);
@@ -72,6 +83,20 @@ namespace fluo
 		void ResetCmd();
 		void PlayCmd(double tfactor);
 
+		//shuffle value
+		void ShuffleCurVolume();
+		int GetShuffle();
+
+		//output
+		void CompOutput(int color_type);
+		void OutputMulti(int color_type);
+		void OutputRgb(int color_type);
+		void OutputAnnotation(int type);
+
+		//dist
+		int GetDistMatSize();
+		void DistOutput();
+
 	protected:
 		ComponentDlg &dlg_;
 
@@ -79,6 +104,7 @@ namespace fluo
 		flrd::CompCommand m_command;
 
 	private:
+		bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 
 		//update functions
 		void OnAutoUpdate(Event& event);
@@ -89,6 +115,8 @@ namespace fluo
 		void OnFixateSize(Event& event);
 		void OnCleanEnable(Event& event);
 		void OnClusterMethod(Event& event);
+		void OnUseMin(Event& event);
+		void OnUseMax(Event& event);
 	};
 }
 

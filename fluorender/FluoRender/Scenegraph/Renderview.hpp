@@ -77,6 +77,7 @@ namespace flrd
 	class Tracks;
 	class ScriptProc;
 	class VolumePoint;
+	class ComponentAnalyzer;
 }
 namespace flvr
 {
@@ -259,6 +260,9 @@ namespace fluo
 		flrd::RulerAlign* GetRulerAlign() { return m_ruler_align; }
 
 		flrd::VolumePoint* GetVolumePoint() { return m_volume_point; }
+
+		//comps
+		flrd::ComponentAnalyzer* GetCompAnalyzer() { return m_comp_analyzer; }
 
 		//draw highlighted comps
 		void DrawCells();
@@ -502,6 +506,8 @@ namespace fluo
 		flrd::RulerRenderer *m_ruler_renderer;
 		flrd::RulerAlign *m_ruler_align;
 		flrd::VolumePoint *m_volume_point;
+		//comps
+		flrd::ComponentAnalyzer *m_comp_analyzer;
 		VolumeLoader *m_loader;
 		Interpolator* m_interpolator;
 		//text renderer

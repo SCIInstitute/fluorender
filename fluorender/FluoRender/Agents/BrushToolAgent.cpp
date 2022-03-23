@@ -436,6 +436,93 @@ void BrushToolAgent::AlignPca(int type, bool ac)
 	}
 }
 
+//update
+void BrushToolAgent::Update(int mode)
+{
+	switch (mode)
+	{
+	case 0:
+	default:
+		UpdateSize();
+		break;
+	case 1:
+		UpdateSpeed();
+	}
+}
+
+void BrushToolAgent::UpdateSize()
+{
+	//GridData data;
+	//fluo::VolumeData* sel_vol = 0;
+	//if (!m_frame)
+	//	return;
+	//sel_vol = m_frame->GetCurSelVol();
+	//if (!sel_vol)
+	//	return;
+
+	//flrd::CountVoxels counter(sel_vol);
+	//counter.SetUseMask(true);
+	//counter.Count();
+	//data.voxel_sum = counter.GetSum();
+	//double scale;
+	//sel_vol->getValue(gstIntScale, scale);
+	//data.voxel_wsum = counter.GetWeightedSum() * scale;
+	//if (data.voxel_sum)
+	//{
+	//	data.avg_int = data.voxel_wsum / data.voxel_sum;
+	//	long bits;
+	//	sel_vol->getValue(gstBits, bits);
+	//	if (bits == 8)
+	//		data.avg_int *= 255.0;
+	//	else if (bits == 16)
+	//	{
+	//		double maxint;
+	//		sel_vol->getValue(gstMaxInt, maxint);
+	//		data.avg_int *= maxint;
+	//	}
+	//}
+	//double spcx, spcy, spcz;
+	//sel_vol->getValue(gstSpcX, spcx);
+	//sel_vol->getValue(gstSpcY, spcy);
+	//sel_vol->getValue(gstSpcZ, spcz);
+	//double vvol = spcx * spcy * spcz;
+	//vvol = vvol == 0.0 ? 1.0 : vvol;
+	//data.size = data.voxel_sum * vvol;
+	//data.wsize = data.voxel_wsum * vvol;
+	//wxString unit;
+	//if (m_view)
+	//{
+	//	long lval;
+	//	m_view->getValue(gstScaleBarUnit, lval);
+	//	switch (lval)
+	//	{
+	//	case 0:
+	//		unit = L"nm\u00B3";
+	//		break;
+	//	case 1:
+	//	default:
+	//		unit = L"\u03BCm\u00B3";
+	//		break;
+	//	case 2:
+	//		unit = L"mm\u00B3";
+	//		break;
+	//	}
+	//}
+
+	//SetOutput(data, unit);
+}
+
+void BrushToolAgent::UpdateSpeed()
+{
+	//if (!m_selector || !m_selector->m_test_speed)
+	//	return;
+	//GridData data;
+	//data.size = m_selector->GetSpanSec();
+	//data.wsize = data.size;
+	//wxString unit = "Sec.";
+	//SetOutput(data, unit);
+}
+
 void BrushToolAgent::OnInterModeChanged(Event& event)
 {
 	dlg_.m_toolbar->ToggleTool(BrushToolDlg::ID_BrushAppend, false);

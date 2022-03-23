@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Script/ScriptProc.h>
 #include <Selection/VolumeSelector.h>
 #include <Selection/VolumePoint.h>
+#include <Components/CompAnalyzer.h>
 #include <Calculate/VolumeCalculator.h>
 #include <Calculate/KernelExecutor.h>
 #include <Distance/Ruler.h>
@@ -94,6 +95,7 @@ Renderview::Renderview()
 	m_ruler_renderer = new flrd::RulerRenderer();
 	m_ruler_align = new flrd::RulerAlign(); m_ruler_align->SetView(this);
 	m_volume_point = new flrd::VolumePoint();
+	m_comp_analyzer = new flrd::ComponentAnalyzer();
 	m_loader = new VolumeLoader();
 	m_interpolator = new Interpolator();
 	m_text_renderer = new flvr::TextRenderer();
@@ -171,6 +173,7 @@ Renderview::~Renderview()
 	delete m_ruler_renderer;
 	delete m_ruler_align;
 	delete m_volume_point;
+	delete m_comp_analyzer;
 	delete m_loader;
 	delete m_interpolator;
 	delete m_text_renderer;

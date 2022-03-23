@@ -179,10 +179,8 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 		wxDefaultPosition,
 		wxSize(600, 800),
 		0, "ComponentDlg"),
-	m_hold_history(false),
-	m_test_speed(false),
-	m_cell_new_id(0),
-	m_cell_new_id_empty(true)
+	m_frame(frame),
+	m_test_speed(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -1077,7 +1075,7 @@ void ComponentDlg::OnIterText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
-	m_iter_sldr->SetValue(m_iter);
+	m_iter_sldr->SetValue(val);
 	m_agent->setValue(gstIteration, val);
 }
 
@@ -1093,7 +1091,7 @@ void ComponentDlg::OnThreshText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
-	m_thresh_sldr->SetValue(int(m_thresh * 1000.0 + 0.5));
+	m_thresh_sldr->SetValue(int(val * 1000.0 + 0.5));
 	m_agent->setValue(gstThreshold, val);
 }
 
@@ -1109,7 +1107,7 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
-	m_dist_strength_sldr->SetValue(int(m_dist_strength * 1000.0 + 0.5));
+	m_dist_strength_sldr->SetValue(int(val * 1000.0 + 0.5));
 	m_agent->setValue(gstDistFieldStrength, val);
 }
 
@@ -1131,7 +1129,7 @@ void ComponentDlg::OnDistFitlerSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
-	m_dist_filter_size_sldr->SetValue(m_dist_filter_size);
+	m_dist_filter_size_sldr->SetValue(val);
 	m_agent->setValue(gstDistFieldFilterSize, val);
 }
 
@@ -1149,7 +1147,7 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent &event)
 	m_max_dist_text->GetValue().ToLong(&val);
 	if (val > 255)
 		val = 255;
-	m_max_dist_sldr->SetValue(m_max_dist);
+	m_max_dist_sldr->SetValue(val);
 	m_agent->setValue(gstMaxDist, val);
 }
 
@@ -1165,7 +1163,7 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
-	m_dist_thresh_sldr->SetValue(int(m_dist_thresh * 1000.0 + 0.5));
+	m_dist_thresh_sldr->SetValue(int(val * 1000.0 + 0.5));
 	m_agent->setValue(gstDistFieldThresh, val);
 }
 
@@ -1187,7 +1185,7 @@ void ComponentDlg::OnFalloffText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
-	m_falloff_sldr->SetValue(int(m_falloff * 1000.0 + 0.5));
+	m_falloff_sldr->SetValue(int(val * 1000.0 + 0.5));
 	m_agent->setValue(gstDiffusionFalloff, val);
 }
 
@@ -1221,7 +1219,7 @@ void ComponentDlg::OnDensityText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
-	m_density_sldr->SetValue(int(m_density_thresh * 1000.0 + 0.5));
+	m_density_sldr->SetValue(int(val * 1000.0 + 0.5));
 	m_agent->setValue(gstDensityFieldThresh, val);
 }
 
@@ -1237,7 +1235,7 @@ void ComponentDlg::OnVarthText(wxCommandEvent &event)
 {
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
-	m_varth_sldr->SetValue(int(m_varth * 10000.0 + 0.5));
+	m_varth_sldr->SetValue(int(val * 10000.0 + 0.5));
 	m_agent->setValue(gstDensityVarThresh, val);
 }
 
@@ -1253,7 +1251,7 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
-	m_density_window_size_sldr->SetValue(m_density_window_size);
+	m_density_window_size_sldr->SetValue(val);
 	m_agent->setValue(gstDensityWindowSize, val);
 }
 
@@ -1269,7 +1267,7 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
-	m_density_stats_size_sldr->SetValue(m_density_stats_size);
+	m_density_stats_size_sldr->SetValue(val);
 	m_agent->setValue(gstDensityStatsSize, val);
 }
 
@@ -1488,10 +1486,7 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent &event)
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 {
-	if (!m_view) return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd) return;
-	int shuffle = vd->GetShuffle();
+	int shuffle = m_agent->GetShuffle();
 
 	wxString str = m_comp_id_text->GetValue();
 	unsigned long id;
@@ -1508,240 +1503,89 @@ void ComponentDlg::OnCompIdText(wxCommandEvent &event)
 	}
 	m_comp_id_text->SetBackgroundColour(color);
 	m_comp_id_text->Refresh();
+	m_agent->setValue(gstCompIdStr, str.ToStdString());
+	unsigned long ulval;
+	if (str.ToULong(&ulval))
+		m_agent->setValue(gstCompId, ulval);
 }
 
 void ComponentDlg::OnCompIdXBtn(wxCommandEvent &event)
 {
 	m_comp_id_text->Clear();
+	m_agent->setValue(gstCompIdStr, std::string(""));
+	m_agent->setValue(gstCompId, unsigned long(0));
 }
 
 void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
 {
-	if (m_analysis_min_check->GetValue())
-	{
-		m_analysis_min_spin->Enable();
-		m_use_min = true;
-	}
-	else
-	{
-		m_analysis_min_spin->Disable();
-		m_use_min = false;
-	}
+	bool bval = m_analysis_min_check->GetValue();
+	m_agent->setValue(gstUseMin, bval);
 }
 
 void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent &event)
 {
-	m_min_num = m_analysis_min_spin->GetValue();
+	long lval = m_analysis_min_spin->GetValue();
+	m_agent->setValue(gstMinValue, lval);
 }
 
 void ComponentDlg::OnAnalysisMinText(wxCommandEvent &event)
 {
-	m_min_num = m_analysis_min_spin->GetValue();
+	long lval = m_analysis_min_spin->GetValue();
+	m_agent->setValue(gstMinValue, lval);
 }
 
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent &event)
 {
-	if (m_analysis_max_check->GetValue())
-	{
-		m_analysis_max_spin->Enable();
-		m_use_max = true;
-	}
-	else
-	{
-		m_analysis_max_spin->Disable();
-		m_use_max = false;
-	}
+	bool bval = m_analysis_max_check->GetValue();
+	m_agent->setValue(gstUseMax, bval);
 }
 
 void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent &event)
 {
-	m_max_num = m_analysis_max_spin->GetValue();
+	bool lval = m_analysis_max_spin->GetValue();
+	m_agent->setValue(gstMaxValue, lval);
 }
 
 void ComponentDlg::OnAnalysisMaxText(wxCommandEvent &event)
 {
-	m_max_num = m_analysis_max_spin->GetValue();
+	bool lval = m_analysis_max_spin->GetValue();
+	m_agent->setValue(gstMaxValue, lval);
 }
 
 void ComponentDlg::OnCompFull(wxCommandEvent &event)
 {
-	SelectFullComp();
+	m_agent->CompFull();
 }
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	bool bval;
-	wxString str;
-	std::string sstr;
-	//get id
-	unsigned int id;
-	int brick_id;
-	str = m_comp_id_text->GetValue();
-	sstr = str.ToStdString();
-
-	if (GetIds(sstr, id, brick_id))
-	{
-		//get current mask
-		fluo::VolumeData* vd = m_view->GetCurrentVolume();
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
-
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		comp_selector.SetMaxNum(use, num);
-		comp_selector.SetAnalyzer(&m_comp_analyzer);
-		comp_selector.Exclusive();
-
-		m_view->Update(39);
-
-		//frame
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				m_view->getValue(gstPaintCount, bval);
-				if (bval)
-					m_frame->GetBrushToolDlg()->Update(0);
-				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg())
-			{
-				m_view->getValue(gstPaintColocalize, bval);
-				if (bval)
-					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-			}
-		}
-	}
+	m_agent->CompExclusive();
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	wxString str;
-	std::string sstr;
-	//get id
-	unsigned int id;
-	int brick_id;
-	str = m_comp_id_text->GetValue();
-	sstr = str.ToStdString();
-	bool get_all = GetIds(sstr, id, brick_id);
-	get_all = !get_all;
-
-	//get current mask
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
-
-	//cell size filter
-	bool use = m_analysis_min_check->GetValue();
-	unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-	comp_selector.SetMinNum(use, num);
-	use = m_analysis_max_check->GetValue();
-	num = (unsigned int)(m_analysis_max_spin->GetValue());
-	comp_selector.SetMaxNum(use, num);
-	comp_selector.SetAnalyzer(&m_comp_analyzer);
-	comp_selector.Select(get_all);
-
-	m_view->Update(39);
-
-	//frame
-	bool bval;
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-		{
-			m_view->getValue(gstPaintCount, bval);
-			if (bval)
-				m_frame->GetBrushToolDlg()->Update(0);
-			glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-		}
-		if (m_frame->GetColocalizationDlg())
-		{
-			m_view->getValue(gstPaintColocalize, bval);
-			if (bval)
-				glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-		}
-	}
+	m_agent->CompAppend();
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//get current vd
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.All();
-
-	m_view->Update(39);
-
-	//frame
-	bool bval;
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-		{
-			m_view->getValue(gstPaintCount, bval);
-			if (bval)
-				m_frame->GetBrushToolDlg()->Update(0);
-			glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-		}
-		if (m_frame->GetColocalizationDlg())
-		{
-			m_view->getValue(gstPaintColocalize, bval);
-			if (bval)
-				glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-		}
-	}
+	m_agent->CompAll();
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//get current vd
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	flrd::ComponentSelector comp_selector(vd);
-	comp_selector.Clear();
-
-	m_view->Update(39);
-
-	//frame
-	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+	m_agent->CompClear();
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	//get current vd
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	vd->IncShuffle();
-	m_view->Update(39);
+	m_agent->ShuffleCurVolume();
 }
 
 //modify
 void ComponentDlg::OnNewIDText(wxCommandEvent &event)
 {
-	if (!m_view) return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd) return;
-	int shuffle = vd->GetShuffle();
+	int shuffle = m_agent->GetShuffle();
 
 	wxString str = m_new_id_text->GetValue();
 	unsigned long id;
@@ -1755,74 +1599,48 @@ void ComponentDlg::OnNewIDText(wxCommandEvent &event)
 			fluo::Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
-		m_new_id_text->SetBackgroundColour(color);
-		m_cell_new_id = id;
-		m_cell_new_id_empty = false;
+		//m_cell_new_id = id;
+		//m_cell_new_id_empty = false;
 	}
-	else
-	{
-		m_new_id_text->SetBackgroundColour(color);
-		m_cell_new_id_empty = true;
-	}
+	m_new_id_text->SetBackgroundColour(color);
+	//m_cell_new_id_empty = true;
 	m_new_id_text->Refresh();
+	m_agent->setValue(gstCompIdStr, str.ToStdString());
+	unsigned long ulval;
+	if (str.ToULong(&ulval))
+		m_agent->setValue(gstCompId, ulval);
 }
 
 void ComponentDlg::OnNewIDX(wxCommandEvent& event)
 {
 	m_new_id_text->Clear();
+	m_agent->setValue(gstCompIdStr, std::string(""));
+	m_agent->setValue(gstCompId, unsigned long(0));
 }
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, false);
-	m_view->Update(39);
+	m_agent->CompNew();
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.NewId(m_cell_new_id,
-		m_cell_new_id_empty, true);
-	m_view->Update(39);
+	m_agent->CompAdd();
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.Replace(m_cell_new_id,
-		m_cell_new_id_empty);
-	m_view->Update(39);
+	m_agent->CompReplace();
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetVolume(m_view->GetCurrentVolume());
-	editor.Clean(0);
-	m_view->Update(39);
+	m_agent->CompCleanBkg();
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-	flrd::ComponentEditor editor;
-	editor.SetView(m_view);
-	editor.Combine();
-	m_view->Update(39);
+	m_agent->CompCombine();
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent &event)
@@ -1838,17 +1656,20 @@ void ComponentDlg::OnConSizeText(wxCommandEvent &event)
 	long val = 0;
 	m_con_size_text->GetValue().ToLong(&val);
 	m_con_size_sldr->SetValue(val);
-	m_comp_analyzer.SetSizeLimit(val);
+	m_agent->setValue(gstCompSizeLimit, val);
+	//m_comp_analyzer.SetSizeLimit(val);
 }
 
 void ComponentDlg::OnConsistentCheck(wxCommandEvent &event)
 {
-	m_consistent = m_consistent_check->GetValue();
+	bool bval = m_consistent_check->GetValue();
+	m_agent->setValue(gstCompConsistent, bval);
 }
 
 void ComponentDlg::OnColocalCheck(wxCommandEvent &event)
 {
-	m_colocal = m_colocal_check->GetValue();
+	bool bval = m_colocal_check->GetValue();
+	m_agent->setValue(gstCompColocal, bval);
 }
 
 void ComponentDlg::EnableGenerate()
@@ -1889,104 +1710,18 @@ void ComponentDlg::EnableGenerate()
 //output
 void ComponentDlg::OnOutputTypeRadio(wxCommandEvent &event)
 {
+	long lval = 0;
 	int id = event.GetId();
 	switch (id)
 	{
 	case ID_OutputMultiRb:
-		m_output_type = 1;
+		lval = 1;
 		break;
 	case ID_OutputRgbRb:
-		m_output_type = 2;
+		lval = 2;
 		break;
 	}
-}
-
-void ComponentDlg::OutputMulti(int color_type)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	m_comp_analyzer.SetVolume(vd);
-	list<fluo::VolumeData*> channs;
-	if (m_comp_analyzer.GenMultiChannels(channs, color_type, m_consistent))
-	{
-		if (m_frame)
-		{
-			fluo::VolumeGroup* group = 0;
-			for (auto i = channs.begin(); i != channs.end(); ++i)
-			{
-				fluo::VolumeData* vd = *i;
-				if (vd)
-				{
-					m_frame->GetDataManager()->AddVolumeData(vd);
-					if (i == channs.begin())
-					{
-						group = m_view->addVolumeGroup("");
-					}
-					m_view->addVolumeData(vd, group);
-				}
-			}
-			//if (group)
-			//{
-			//	//group->SetSyncRAll(true);
-			//	//group->SetSyncGAll(true);
-			//	//group->SetSyncBAll(true);
-			//	fluo::Color col = vd->GetGamma();
-			//	group->SetGammaAll(col);
-			//	col = vd->GetBrightness();
-			//	group->SetBrightnessAll(col);
-			//	col = vd->GetHdr();
-			//	group->SetHdrAll(col);
-			//}
-			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->getName());
-			m_view->Update(39);
-		}
-	}
-}
-
-void ComponentDlg::OutputRgb(int color_type)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	m_comp_analyzer.SetVolume(vd);
-	list<fluo::VolumeData*> channs;
-	if (m_comp_analyzer.GenRgbChannels(channs, color_type, m_consistent))
-	{
-		if (m_frame)
-		{
-			fluo::VolumeGroup* group = 0;
-			for (auto i = channs.begin(); i != channs.end(); ++i)
-			{
-				fluo::VolumeData* vd = *i;
-				if (vd)
-				{
-					//m_frame->GetDataManager()->AddVolumeData(vd);
-					if (i == channs.begin())
-					{
-						group = m_view->addVolumeGroup("");
-					}
-					m_view->addVolumeData(vd, group);
-				}
-			}
-			//if (group)
-			//{
-			//	//group->SetSyncRAll(true);
-			//	//group->SetSyncGAll(true);
-			//	//group->SetSyncBAll(true);
-			//	fluo::Color col = vd->GetGamma();
-			//	group->SetGammaAll(col);
-			//	col = vd->GetBrightness();
-			//	group->SetBrightnessAll(col);
-			//	col = vd->GetHdr();
-			//	group->SetHdrAll(col);
-			//}
-			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->getName());
-			m_view->Update(39);
-		}
-	}
+	m_agent->setValue(gstCompOutputType, lval);
 }
 
 void ComponentDlg::OnOutputChannels(wxCommandEvent &event)
@@ -1997,11 +1732,7 @@ void ComponentDlg::OnOutputChannels(wxCommandEvent &event)
 		color_type = 1;
 	else if (id == ID_OutputSizeBtn)
 		color_type = 2;
-
-	if (m_output_type == 1)
-		OutputMulti(color_type);
-	else if (m_output_type == 2)
-		OutputRgb(color_type);
+	m_agent->CompOutput(color_type);
 }
 
 void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
@@ -2009,39 +1740,22 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent &event)
 	int type = 0;
 	if (event.GetId() == ID_OutputSnBtn)
 		type = 1;
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	m_comp_analyzer.SetVolume(vd);
-	fluo::Annotations* ann = glbin_annf->build();
-	if (m_comp_analyzer.GenAnnotations(ann, m_consistent, type))
-	{
-		ann->setRvalu(gstVolume, vd);
-		ann->setValue(gstTransform, vd->GetTexture()->transform());
-		if (m_frame)
-		{
-			//DataManager* mgr = m_frame->GetDataManager();
-			//if (mgr)
-			//	mgr->AddAnnotations(ann);
-			m_view->addChild(ann);
-			m_frame->UpdateList();
-			m_frame->UpdateTree(vd->getName());
-		}
-		m_view->Update(39);
-	}
+	m_agent->OutputAnnotation(type);
 }
 
 //distance
 void ComponentDlg::OnDistNeighborCheck(wxCommandEvent &event)
 {
-	m_use_dist_neighbor = m_dist_neighbor_check->GetValue();
-	m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
-	m_dist_neighbor_text->Enable(m_use_dist_neighbor);
+	bool bval = m_dist_neighbor_check->GetValue();
+	m_dist_neighbor_sldr->Enable(bval);
+	m_dist_neighbor_text->Enable(bval);
+	m_agent->setValue(gstDistNeighbor, bval);
 }
 
 void ComponentDlg::OnDistAllChanCheck(wxCommandEvent &event)
 {
-	m_use_dist_allchan = m_dist_all_chan_check->GetValue();
+	bool bval = m_dist_all_chan_check->GetValue();
+	m_agent->setValue(gstDistAllChan, bval);
 }
 
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent &event)
@@ -2056,32 +1770,8 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
 {
 	long val = 0;
 	m_dist_neighbor_text->GetValue().ToLong(&val);
-	m_dist_neighbor = (int)val;
-	m_dist_neighbor_sldr->SetValue(m_dist_neighbor);
-}
-
-int ComponentDlg::GetDistMatSize()
-{
-	int gsize = m_comp_analyzer.GetCompGroupSize();
-	if (m_use_dist_allchan && gsize > 1)
-	{
-		int matsize = 0;
-		for (int i = 0; i < gsize; ++i)
-		{
-			flrd::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
-			if (!compgroup)
-				continue;
-			matsize += compgroup->celps.size();
-		}
-		return matsize;
-	}
-	else
-	{
-		flrd::CelpList* list = m_comp_analyzer.GetCelpList();
-		if (!list)
-			return 0;
-		return list->size();
-	}
+	m_dist_neighbor_sldr->SetValue(val);
+	m_agent->setValue(gstDistNeighborValue, val);
 }
 
 void ComponentDlg::OnDistOutput(wxCommandEvent &event)
@@ -2608,147 +2298,6 @@ void ComponentDlg::Cluster()
 	delete method;
 }
 
-bool ComponentDlg::GetIds(std::string &str, unsigned int &id, int &brick_id)
-{
-	std::string::size_type sz;
-	try
-	{
-		id = std::stoul(str, &sz);
-	}
-	catch (...)
-	{
-		return false;
-	}
-	std::string str2;
-	if (sz < str.size())
-	{
-		brick_id = id;
-		for (size_t i = sz; i< str.size() - 1; ++i)
-		{
-			if (std::isdigit(static_cast<unsigned char>(str[i])))
-			{
-				str2 = str.substr(i);
-				try
-				{
-					id = std::stoul(str2);
-				}
-				catch(...)
-				{
-					return false;
-				}
-				return true;
-			}
-		}
-	}
-	brick_id = 0;
-	return true;
-}
-
-void ComponentDlg::Fixate(bool command)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-	vd->PushLabel(true);
-
-	if (command && m_record_cmd)
-		AddCmd("fixate");
-}
-
-void ComponentDlg::Clean(bool use_sel, bool command)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	int clean_iter = m_clean_iter;
-	int clean_size = m_clean_size_vl;
-	//if (!m_clean)
-	//{
-	//	clean_iter = 0;
-	//	clean_size = 0;
-	//}
-
-	//get brick number
-	int bn = vd->GetAllBrickNum();
-
-	flrd::ComponentGenerator cg(vd);
-	//boost::signals2::connection connection =
-	//	cg.m_sig_progress.connect(std::bind(
-	//		&ComponentDlg::UpdateProgress, this));
-
-	cg.SetUseMask(use_sel);
-
-	vd->AddEmptyMask(1, !use_sel);
-
-	if (bn > 1)
-		cg.ClearBorders();
-
-	if (clean_iter > 0)
-		cg.Cleanup(clean_iter, clean_size);
-
-	if (bn > 1)
-		cg.FillBorders(0.1);
-
-	m_view->Update(39);
-
-	if (command && m_record_cmd)
-		AddCmd("clean");
-}
-
-void ComponentDlg::SelectFullComp()
-{
-	//get id
-	wxString str = m_comp_id_text->GetValue();
-	if (str.empty())
-	{
-		if (!m_view)
-			return;
-		//get current mask
-		fluo::VolumeData* vd = m_view->GetCurrentVolume();
-		flrd::ComponentSelector comp_selector(vd);
-		//cell size filter
-		bool use = m_analysis_min_check->GetValue();
-		unsigned int num = (unsigned int)(m_analysis_min_spin->GetValue());
-		comp_selector.SetMinNum(use, num);
-		use = m_analysis_max_check->GetValue();
-		num = (unsigned int)(m_analysis_max_spin->GetValue());
-		comp_selector.SetMaxNum(use, num);
-		comp_selector.SetAnalyzer(&m_comp_analyzer);
-		comp_selector.CompFull();
-	}
-	else
-	{
-		wxCommandEvent e;
-		OnCompAppend(e);
-	}
-
-	m_view->Update(39);
-
-	//frame
-	bool bval;
-	if (m_frame)
-	{
-		if (m_frame->GetBrushToolDlg())
-		{
-			m_view->getValue(gstPaintCount, bval);
-			if (bval)
-				m_frame->GetBrushToolDlg()->Update(0);
-			glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-		}
-		if (m_frame->GetColocalizationDlg())
-		{
-			m_view->getValue(gstPaintColocalize, bval);
-			if (bval)
-				glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-		}
-	}
-}
-
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 {
 	Analyze(false);
@@ -2757,70 +2306,6 @@ void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
 {
 	Analyze(true);
-}
-
-void ComponentDlg::Analyze(bool sel)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent?1:0));
-	m_prog = 0.0f;
-
-	//boost::signals2::connection connection =
-	//	m_comp_analyzer.m_sig_progress.connect(std::bind(
-	//	&ComponentDlg::UpdateProgress, this));
-
-	m_comp_analyzer.SetVolume(vd);
-	if (m_colocal)
-	{
-		m_comp_analyzer.ClearCoVolumes();
-		fluo::VolumeList list = m_view->GetVolList();
-		for (auto vdi : list)
-		{
-			if (vdi != vd)
-				m_comp_analyzer.AddCoVolume(vdi);
-		}
-	}
-	m_comp_analyzer.Analyze(sel, m_consistent, m_colocal);
-
-	if (m_consistent)
-	{
-		//invalidate label mask in gpu
-		vd->GetRenderer()->clear_tex_label();
-		m_view->Update(39);
-	}
-
-	if (m_comp_analyzer.GetListSize() > 10000)
-	{
-		wxFileDialog *fopendlg = new wxFileDialog(
-			this, "Save Analysis Data", "", "",
-			"Text file (*.txt)|*.txt",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		int rval = fopendlg->ShowModal();
-		if (rval == wxID_OK)
-		{
-			wxString filename = fopendlg->GetPath();
-			string str = filename.ToStdString();
-			m_comp_analyzer.OutputCompListFile(str, 1);
-		}
-		if (fopendlg)
-			delete fopendlg;
-	}
-	else
-	{
-		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
-	}
-
-	//connection.disconnect();
 }
 
 void ComponentDlg::SetOutput(wxString &titles, wxString &values)
@@ -2910,7 +2395,8 @@ void ComponentDlg::OnExcludeBtn(wxCommandEvent &event)
 
 void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
 {
-	m_hold_history = m_history_chk->GetValue();
+	bool bval = m_history_chk->GetValue();
+	m_agent->setValue(gstHoldHistory, bval);
 }
 
 void ComponentDlg::OnClearHistBtn(wxCommandEvent& event)

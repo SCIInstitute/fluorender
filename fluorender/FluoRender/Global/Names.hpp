@@ -592,6 +592,19 @@ DEALINGS IN THE SOFTWARE.
 #define gstClusterTol "cluster tol"
 #define gstClusterSize "cluster size"
 #define gstClusterEps "cluster eps"
+#define gstUseMin "use min"//analysis settings
+#define gstMinValue "min value"
+#define gstUseMax "use max"
+#define gstMaxValue "max value"
+#define gstCompId "comp id"
+#define gstCompIdStr "comp id str"
+#define gstCompSizeLimit "comp size limit"
+#define gstCompConsistent "comp consistent"
+#define gstCompColocal "comp colocal"
+#define gstCompOutputType "comp output type"//1-multi; 2-rgb;
+#define gstDistAllChan "dist all chan"
+#define gstDistNeighbor "dist neighbor"
+#define gstDistNeighborValue "dist neighbor value"
 
 //input
 //mouse

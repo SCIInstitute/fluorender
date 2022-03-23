@@ -205,10 +205,6 @@ public:
 
 	friend class fluo::ComponentAgent;
 
-	void Fixate(bool command = true);
-	void Clean(bool use_sel, bool command = true);
-	void SelectFullComp();
-
 	//in and out cell lists
 	flrd::CelpList &GetInCells()
 	{ return m_in_cells; }
@@ -228,36 +224,12 @@ public:
 	void ExcludeComps();
 
 private:
+	RenderFrame* m_frame;
 	fluo::ComponentAgent* m_agent;
 
 	//progress
 	float m_prog_bit;
 	float m_prog;
-
-	//selection
-	bool m_use_min;
-	int m_min_num;
-	bool m_use_max;
-	int m_max_num;
-	//options
-	bool m_consistent;
-	bool m_colocal;
-
-	//modify
-	unsigned int m_cell_new_id;
-	bool m_cell_new_id_empty;
-
-	//distance
-	bool m_use_dist_neighbor;
-	int m_dist_neighbor;
-	bool m_use_dist_allchan;
-
-	//output
-	int m_output_type;//1-multi; 2-rgb;
-
-	//auto udate
-	bool m_auto_update;
-
 
 	//in and out cell lists for tracking
 	flrd::CelpList m_in_cells;
@@ -267,9 +239,6 @@ private:
 	bool m_test_speed;
 	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
 	wxString m_titles, m_values;
-
-	//output
-	bool m_hold_history;
 
 	//split window
 	wxPanel *panel_top;
@@ -423,10 +392,8 @@ private:
 
 private:
 	void Cluster();
-	bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 	void AlignCenter(flrd::Ruler* ruler);
 	void ClearOutputGrid();
-	int GetDistMatSize();
 	void AddSelArrayInt(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
@@ -541,8 +508,6 @@ private:
 	void OnColocalCheck(wxCommandEvent &event);
 	//output
 	void OnOutputTypeRadio(wxCommandEvent &event);
-	void OutputMulti(int color_type);
-	void OutputRgb(int color_type);
 	void OnOutputChannels(wxCommandEvent &event);
 	void OnOutputAnnotation(wxCommandEvent &event);
 	//distance

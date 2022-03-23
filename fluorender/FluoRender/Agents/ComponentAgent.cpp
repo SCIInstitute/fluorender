@@ -29,6 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentAgent.hpp>
 #include <ComponentDlg.h>
 #include <Global.hpp>
+#include <AnnotationFactory.hpp>
+#include <VolumeData.hpp>
+#include <CompAnalyzer.h>
+#include <CompSelector.h>
+#include <CompEditor.h>
+#include <cctype>
 
 using namespace fluo;
 
@@ -275,6 +281,70 @@ void ComponentAgent::SaveSettings(const wxString &filename)
 	SaveConfig(fconfig, str);
 }
 
+void ComponentAgent::Analyze(bool sel)
+{
+	if (!m_view)
+		return;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd)
+		return;
+
+	int bn = vd->GetAllBrickNum();
+	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent ? 1 : 0));
+	m_prog = 0.0f;
+
+	//boost::signals2::connection connection =
+	//	m_comp_analyzer.m_sig_progress.connect(std::bind(
+	//	&ComponentDlg::UpdateProgress, this));
+
+	m_comp_analyzer.SetVolume(vd);
+	if (m_colocal)
+	{
+		m_comp_analyzer.ClearCoVolumes();
+		fluo::VolumeList list = m_view->GetVolList();
+		for (auto vdi : list)
+		{
+			if (vdi != vd)
+				m_comp_analyzer.AddCoVolume(vdi);
+		}
+	}
+	m_comp_analyzer.Analyze(sel, m_consistent, m_colocal);
+
+	if (m_consistent)
+	{
+		//invalidate label mask in gpu
+		vd->GetRenderer()->clear_tex_label();
+		m_view->Update(39);
+	}
+
+	if (m_comp_analyzer.GetListSize() > 10000)
+	{
+		wxFileDialog *fopendlg = new wxFileDialog(
+			this, "Save Analysis Data", "", "",
+			"Text file (*.txt)|*.txt",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		int rval = fopendlg->ShowModal();
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg->GetPath();
+			string str = filename.ToStdString();
+			m_comp_analyzer.OutputCompListFile(str, 1);
+		}
+		if (fopendlg)
+			delete fopendlg;
+	}
+	else
+	{
+		string titles, values;
+		m_comp_analyzer.OutputFormHeader(titles);
+		m_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+	}
+
+	//connection.disconnect();
+}
+
 void ComponentAgent::GenerateComp()
 {
 	Renderview* view = getObject();
@@ -430,6 +500,230 @@ void ComponentAgent::Fixate(bool command)
 	Event event;
 	OnAutoUpdate(event);
 	drawValue(gstCleanEnable);
+}
+
+void ComponentAgent::Clean(bool use_sel, bool command)
+{
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	if (!vd) return;
+
+	long clean_iter, clean_size;
+	getValue(gstCleanIteration, clean_iter);
+	getValue(gstCleanSize, clean_size);
+
+	//get brick number
+	int bn = vd->GetAllBrickNum();
+
+	flrd::ComponentGenerator cg(vd);
+	cg.SetUseMask(use_sel);
+	vd->AddEmptyMask(1, !use_sel);
+	if (bn > 1)
+		cg.ClearBorders();
+	if (clean_iter > 0)
+		cg.Cleanup(clean_iter, clean_size);
+	if (bn > 1)
+		cg.FillBorders(0.1);
+
+	//m_view->Update(39);
+	bool bval;
+	getValue(gstRecordCmd, bval);
+	if (command && bval)
+		AddCmd("clean");
+}
+
+void ComponentAgent::CompFull()
+{
+	bool bval;
+	//get id
+	std::string str;
+	getValue(gstCompIdStr, str);
+	if (str.empty())
+	{
+		//get current mask
+		VolumeData* vd = getObject()->GetCurrentVolume();
+		flrd::ComponentSelector comp_selector(vd);
+		//cell size filter
+		long lval;
+		getValue(gstUseMin, bval);
+		getValue(gstMinValue, lval);
+		comp_selector.SetMinNum(bval, lval);
+		getValue(gstUseMax, bval);
+		getValue(gstMaxValue, lval);
+		comp_selector.SetMaxNum(bval, lval);
+		flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+		comp_selector.SetAnalyzer(analyzer);
+		comp_selector.CompFull();
+	}
+	else
+	{
+		CompAppend();
+	}
+
+	//m_view->Update(39);
+
+	getObject()->getValue(gstPaintCount, bval);
+	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+	getObject->getValue(gstPaintColocalize, bval);
+	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
+}
+
+void ComponentAgent::CompAppend()
+{
+	std::string str;
+	getValue(gstCompIdStr, str);
+	//get id
+	unsigned int id;
+	int brick_id;
+	bool get_all = GetIds(str, id, brick_id);
+	get_all = !get_all;
+
+	//get current mask
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	flrd::ComponentSelector comp_selector(vd);
+	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
+
+	//cell size filter
+	bool bval;
+	long lval;
+	getValue(gstUseMin, bval);
+	getValue(gstMinValue, lval);
+	comp_selector.SetMinNum(bval, lval);
+	getValue(gstUseMax, bval);
+	getValue(gstMaxValue, lval);
+	comp_selector.SetMaxNum(bval, lval);
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	comp_selector.SetAnalyzer(analyzer);
+	comp_selector.Select(get_all);
+
+	//m_view->Update(39);
+
+	getObject()->getValue(gstPaintCount, bval);
+	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+	getObject->getValue(gstPaintColocalize, bval);
+	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
+}
+
+void ComponentAgent::CompExclusive()
+{
+	bool bval;
+	std::string str;
+	getValue(gstCompIdStr, str);
+	//get id
+	unsigned int id;
+	int brick_id;
+
+	if (!GetIds(str, id, brick_id))
+		return;
+	//get current mask
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	flrd::ComponentSelector comp_selector(vd);
+	comp_selector.SetId(flrd::Cell::GetKey(id, brick_id));
+
+	//cell size filter
+	long lval;
+	getValue(gstUseMin, bval);
+	getValue(gstMinValue, lval);
+	comp_selector.SetMinNum(bval, lval);
+	getValue(gstUseMax, bval);
+	getValue(gstMaxValue, lval);
+	comp_selector.SetMaxNum(bval, lval);
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	comp_selector.SetAnalyzer(analyzer);
+	comp_selector.Exclusive();
+
+	//m_view->Update(39);
+
+	getObject()->getValue(gstPaintCount, bval);
+	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+	getObject->getValue(gstPaintColocalize, bval);
+	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
+}
+
+void ComponentAgent::CompAll()
+{
+	//get current vd
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	flrd::ComponentSelector comp_selector(vd);
+	comp_selector.All();
+
+	//m_view->Update(39);
+
+	getObject()->getValue(gstPaintCount, bval);
+	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+	getObject->getValue(gstPaintColocalize, bval);
+	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
+}
+
+void ComponentAgent::CompClear()
+{
+	//get current vd
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	flrd::ComponentSelector comp_selector(vd);
+	comp_selector.Clear();
+
+	//m_view->Update(39);
+
+	//frame
+	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+}
+
+void ComponentAgent::CompNew()
+{
+	flrd::ComponentEditor editor;
+	editor.SetView(getObject());
+	unsigned long ulval;
+	std::string str;
+	bool bval;
+	getValue(gstCompIdStr, str);
+	getValue(gstCompId, ulval);
+	editor.NewId(ulval, str.empty(), false);
+	//m_view->Update(39);
+}
+
+void ComponentAgent::CompAdd()
+{
+	flrd::ComponentEditor editor;
+	editor.SetView(getObject());
+	unsigned long ulval;
+	std::string str;
+	bool bval;
+	getValue(gstCompIdStr, str);
+	getValue(gstCompId, ulval);
+	editor.NewId(ulval, str.empty(), true);
+	//m_view->Update(39);
+}
+
+void ComponentAgent::CompReplace()
+{
+	flrd::ComponentEditor editor;
+	editor.SetView(getObject());
+	unsigned long ulval;
+	std::string str;
+	bool bval;
+	getValue(gstCompIdStr, str);
+	getValue(gstCompId, ulval);
+	editor.Replace(ulval, str.empty());
+	//m_view->Update(39);
+}
+
+void ComponentAgent::CompCleanBkg()
+{
+	flrd::ComponentEditor editor;
+	editor.SetVolume(getObject()->GetCurrentVolume());
+	editor.Clean(0);
+	//m_view->Update(39);
+}
+
+void ComponentAgent::CompCombine()
+{
+	flrd::ComponentEditor editor;
+	editor.SetView(getObject());
+	editor.Combine();
+	//m_view->Update(39);
 }
 
 //command
@@ -759,6 +1053,213 @@ void ComponentAgent::PlayCmd(double tfactor)
 	Update();
 }
 
+void ComponentAgent::ShuffleCurVolume()
+{
+	//get current vd
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	if (!vd)
+		return;
+
+	vd->IncShuffle();
+	//m_view->Update(39);
+}
+
+int ComponentAgent::GetShuffle()
+{
+	VolumeData* vd = getObject()->GetCurrentVolume();
+	if (vd)
+		return vd->GetShuffle();
+	return 0;
+}
+
+void ComponentAgent::CompOutput(int color_type)
+{
+	long lval;
+	getValue(gstCompOutputType, lval);
+	if (lval == 1)
+		OutputMulti(color_type);
+	else if (lval == 2)
+		OutputRgb(color_type);
+}
+
+void ComponentAgent::OutputMulti(int color_type)
+{
+	Renderview* view = getObject();
+	VolumeData* vd = view->GetCurrentVolume();
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!vd || !analyzer) return;
+	analyzer->SetVolume(vd);
+	bool bval;
+	getValue(gstCompConsistent, bval);
+	std::list<VolumeData*> channs;
+	if (analyzer->GenMultiChannels(channs, color_type, bval))
+	{
+		VolumeGroup* group = 0;
+		for (auto i = channs.begin(); i != channs.end(); ++i)
+		{
+			VolumeData* vd = *i;
+			if (vd)
+			{
+				//m_frame->GetDataManager()->AddVolumeData(vd);
+				if (i == channs.begin())
+					group = view->addVolumeGroup("");
+				view->addVolumeData(vd, group);
+			}
+		}
+		//if (group)
+		//{
+		//	//group->SetSyncRAll(true);
+		//	//group->SetSyncGAll(true);
+		//	//group->SetSyncBAll(true);
+		//	Color col = vd->GetGamma();
+		//	group->SetGammaAll(col);
+		//	col = vd->GetBrightness();
+		//	group->SetBrightnessAll(col);
+		//	col = vd->GetHdr();
+		//	group->SetHdrAll(col);
+		//}
+		//m_frame->UpdateList();
+		//m_frame->UpdateTree(vd->getName());
+		//m_view->Update(39);
+	}
+}
+
+void ComponentAgent::OutputRgb(int color_type)
+{
+	Renderview* view = getObject();
+	VolumeData* vd = view->GetCurrentVolume();
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!vd || !analyzer) return;
+	analyzer->SetVolume(vd);
+	bool bval;
+	getValue(gstCompConsistent, bval);
+	std::list<VolumeData*> channs;
+	if (analyzer->GenRgbChannels(channs, color_type, bval))
+	{
+		VolumeGroup* group = 0;
+		for (auto i = channs.begin(); i != channs.end(); ++i)
+		{
+			VolumeData* vd = *i;
+			if (vd)
+			{
+				//m_frame->GetDataManager()->AddVolumeData(vd);
+				if (i == channs.begin())
+					group = view->addVolumeGroup("");
+				view->addVolumeData(vd, group);
+			}
+		}
+		//if (group)
+		//{
+		//	//group->SetSyncRAll(true);
+		//	//group->SetSyncGAll(true);
+		//	//group->SetSyncBAll(true);
+		//	Color col = vd->GetGamma();
+		//	group->SetGammaAll(col);
+		//	col = vd->GetBrightness();
+		//	group->SetBrightnessAll(col);
+		//	col = vd->GetHdr();
+		//	group->SetHdrAll(col);
+		//}
+		//m_frame->UpdateList();
+		//m_frame->UpdateTree(vd->getName());
+		//m_view->Update(39);
+	}
+}
+
+void ComponentAgent::OutputAnnotation(int type)
+{
+	Renderview* view = getObject();
+	VolumeData* vd = view->GetCurrentVolume();
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!vd || !analyzer) return;
+	analyzer->SetVolume(vd);
+	Annotations* ann = glbin_annf->build();
+	bool bval;
+	getValue(gstCompConsistent, bval);
+	if (analyzer->GenAnnotations(ann, bval, type))
+	{
+		ann->setRvalu(gstVolume, vd);
+		ann->setValue(gstTransform, vd->GetTexture()->transform());
+		//DataManager* mgr = m_frame->GetDataManager();
+		//if (mgr)
+		//	mgr->AddAnnotations(ann);
+		view->addChild(ann);
+		//m_frame->UpdateList();
+		//m_frame->UpdateTree(vd->getName());
+		//m_view->Update(39);
+	}
+}
+
+int ComponentAgent::GetDistMatSize()
+{
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	if (!analyzer) return;
+
+	int gsize = analyzer->GetCompGroupSize();
+	bool bval;
+	getValue(gstDistAllChan, bval);
+	if (bval && gsize > 1)
+	{
+		int matsize = 0;
+		for (int i = 0; i < gsize; ++i)
+		{
+			flrd::CompGroup* compgroup = analyzer->GetCompGroup(i);
+			if (!compgroup)
+				continue;
+			matsize += compgroup->celps.size();
+		}
+		return matsize;
+	}
+	else
+	{
+		flrd::CelpList* list = analyzer->GetCelpList();
+		if (!list)
+			return 0;
+		return list->size();
+	}
+}
+
+void ComponentAgent::DistOutput()
+{
+
+}
+
+bool ComponentAgent::GetIds(std::string &str, unsigned int &id, int &brick_id)
+{
+	std::string::size_type sz;
+	try
+	{
+		id = std::stoul(str, &sz);
+	}
+	catch (...)
+	{
+		return false;
+	}
+	std::string str2;
+	if (sz < str.size())
+	{
+		brick_id = id;
+		for (size_t i = sz; i < str.size() - 1; ++i)
+		{
+			if (std::isdigit(static_cast<unsigned char>(str[i])))
+			{
+				str2 = str.substr(i);
+				try
+				{
+					id = std::stoul(str2);
+				}
+				catch (...)
+				{
+					return false;
+				}
+				return true;
+			}
+		}
+	}
+	brick_id = 0;
+	return true;
+}
+
 //update functions
 void ComponentAgent::OnAutoUpdate(Event& event)
 {
@@ -940,3 +1441,22 @@ void ComponentAgent::OnClusterMethod(Event& event)
 	}
 }
 
+void ComponentAgent::OnUseMin(Event& event)
+{
+	bool bval;
+	getValue(gstUseMin, bval);
+	if (bval)
+		dlg_.m_analysis_min_spin->Enable();
+	else
+		dlg_.m_analysis_min_spin->Disable();
+}
+
+void ComponentAgent::OnUseMax(Event& event)
+{
+	bool bval;
+	getValue(gstUseMax, bval);
+	if (bval)
+		dlg_.m_analysis_max_spin->Enable();
+	else
+		dlg_.m_analysis_max_spin->Disable();
+}

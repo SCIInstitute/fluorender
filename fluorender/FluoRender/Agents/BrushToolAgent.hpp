@@ -80,6 +80,10 @@ namespace fluo
 		void SetBrushSizeData(bool v);
 		//other operations
 		void AlignPca(int type, bool ac);
+		//output
+		void Update(int mode);//mode: 0-size; 1-speed
+		void UpdateSize();
+		void UpdateSpeed();
 
 		virtual BrushToolAgent* asBrushToolAgent() { return this; }
 		virtual const BrushToolAgent* asBrushToolAgent() const { return this; }
