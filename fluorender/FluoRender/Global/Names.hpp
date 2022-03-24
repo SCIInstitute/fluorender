@@ -605,6 +605,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstDistAllChan "dist all chan"
 #define gstDistNeighbor "dist neighbor"
 #define gstDistNeighborValue "dist neighbor value"
+#define gstAlignAxisType "align axis type"//xyz:0; yxz:1; zxy:2; xzy:3; yzx:4; zyx:5;
+#define gstAlignCenter "align center"
 
 //input
 //mouse

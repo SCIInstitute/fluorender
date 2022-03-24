@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePoint.h>
 #include <VolumeSelector.h>
 #include <VolumeCalculator.h>
+#include <CompAnalyzer.h>
 #include <ScriptProc.h>
 #include <Debug.hpp>
 
@@ -266,12 +267,9 @@ void RenderCanvas::PickVolume()
 void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
-	if (m_frame && m_frame->GetComponentDlg())
-	{
 		std::set<unsigned long long> ids;
-		m_frame->GetComponentDlg()->GetAnalyzer()->GetCompsPoint(p, ids);
-		m_frame->GetComponentDlg()->SetCompSelection(ids, mode);
-	}
+	m_agent->getObject()->GetCompAnalyzer()->GetCompsPoint(p, ids);
+	glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->SetCompSelection(ids, mode);
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)

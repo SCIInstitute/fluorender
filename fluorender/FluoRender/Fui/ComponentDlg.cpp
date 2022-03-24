@@ -31,9 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/stdpaths.h>
 #include <boost/signals2.hpp>
 #include <limits>
-#include <string>
-#include <cctype>
-#include <fstream>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//comp gen page
@@ -146,6 +143,7 @@ BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	EVT_TEXT(ID_DistNeighborText, ComponentDlg::OnDistNeighborText)
 	EVT_BUTTON(ID_DistOutputBtn, ComponentDlg::OnDistOutput)
 	//align
+	EVT_CHECKBOX(ID_AlignCenter, ComponentDlg::OnAlignCenter)
 	EVT_BUTTON(ID_AlignXYZ, ComponentDlg::OnAlignPca)
 	EVT_BUTTON(ID_AlignYXZ, ComponentDlg::OnAlignPca)
 	EVT_BUTTON(ID_AlignZXY, ComponentDlg::OnAlignPca)
@@ -1776,169 +1774,6 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent &event)
 
 void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 {
-	int num = GetDistMatSize();
-	if (num <= 0)
-		return;
-	int gsize = m_comp_analyzer.GetCompGroupSize();
-	int bn = m_comp_analyzer.GetBrickNum();
-
-	//result
-	std::string str;
-	std::vector<std::vector<double>> rm;//result matrix
-	std::vector<std::string> nl;//name list
-	std::vector<int> gn;//group number
-	rm.reserve(num);
-	nl.reserve(num);
-	if (gsize > 1)
-		gn.reserve(num);
-	for (size_t i = 0; i < num; ++i)
-	{
-		rm.push_back(std::vector<double>());
-		rm[i].reserve(num);
-		for (size_t j = 0; j < num; ++j)
-			rm[i].push_back(0);
-	}
-
-	//compute
-	double sx, sy, sz;
-	std::vector<fluo::Point> pos;
-	pos.reserve(num);
-	int num2 = 0;//actual number
-	if (m_use_dist_allchan && gsize > 1)
-	{
-		for (int i = 0; i < gsize; ++i)
-		{
-			flrd::CompGroup* compgroup = m_comp_analyzer.GetCompGroup(i);
-			if (!compgroup)
-				continue;
-
-			flrd::CellGraph &graph = compgroup->graph;
-			flrd::CelpList* list = &(compgroup->celps);
-			sx = list->sx;
-			sy = list->sy;
-			sz = list->sz;
-			if (bn > 1)
-				graph.ClearVisited();
-
-			for (auto it = list->begin();
-				it != list->end(); ++it)
-			{
-				if (bn > 1)
-				{
-					if (graph.Visited(it->second))
-						continue;
-					flrd::CelpList links;
-					graph.GetLinkedComps(it->second, links,
-						m_comp_analyzer.GetSizeLimit());
-				}
-
-				pos.push_back(it->second->GetCenter(sx, sy, sz));
-				str = std::to_string(i + 1);
-				str += ":";
-				str += std::to_string(it->second->Id());
-				nl.push_back(str);
-				gn.push_back(i);
-				num2++;
-			}
-		}
-	}
-	else
-	{
-		flrd::CellGraph &graph = m_comp_analyzer.GetCompGroup(0)->graph;
-		flrd::CelpList* list = m_comp_analyzer.GetCelpList();
-		sx = list->sx;
-		sy = list->sy;
-		sz = list->sz;
-		if (bn > 1)
-			graph.ClearVisited();
-
-		for (auto it = list->begin();
-			it != list->end(); ++it)
-		{
-			if (bn > 1)
-			{
-				if (graph.Visited(it->second))
-					continue;
-				flrd::CelpList links;
-				graph.GetLinkedComps(it->second, links,
-					m_comp_analyzer.GetSizeLimit());
-			}
-
-			pos.push_back(it->second->GetCenter(sx, sy, sz));
-			str = std::to_string(it->second->Id());
-			nl.push_back(str);
-			num2++;
-		}
-	}
-	double dist = 0;
-	for (int i = 0; i < num2; ++i)
-	{
-		for (int j = i; j < num2; ++j)
-		{
-			dist = (pos[i] - pos[j]).length();
-			rm[i][j] = dist;
-			rm[j][i] = dist;
-		}
-	}
-
-	bool bdist = m_use_dist_neighbor &&
-		m_dist_neighbor > 0 &&
-		m_dist_neighbor < num2-1;
-
-	std::vector<double> in_group;//distances with in a group
-	std::vector<double> out_group;//distance between groups
-	in_group.reserve(num2*num2 / 2);
-	out_group.reserve(num2*num2 / 2);
-	std::vector<std::vector<int>> im;//index matrix
-	if (bdist)
-	{
-		//sort with indices
-		im.reserve(num2);
-		for (size_t i = 0; i < num2; ++i)
-		{
-			im.push_back(std::vector<int>());
-			im[i].reserve(num2);
-			for (size_t j = 0; j < num2; ++j)
-				im[i].push_back(j);
-		}
-		//copy rm
-		std::vector<std::vector<double>> rm2 = rm;
-		//sort
-		for (size_t i = 0; i < num2; ++i)
-		{
-			std::sort(im[i].begin(), im[i].end(),
-				[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
-		}
-		//fill rm
-		for (size_t i = 0; i < num2; ++i)
-			for (size_t j = 0; j < num2; ++j)
-			{
-				rm[i][j] = rm2[i][im[i][j]];
-				if (gsize > 1 && j > 0 &&
-					j <= m_dist_neighbor)
-				{
-					if (gn[i] == gn[im[i][j]])
-						in_group.push_back(rm[i][j]);
-					else
-						out_group.push_back(rm[i][j]);
-				}
-			}
-	}
-	else
-	{
-		if (gsize > 1)
-		{
-			for (int i = 0; i < num2; ++i)
-				for (int j = i + 1; j < num2; ++j)
-				{
-					if (gn[i] == gn[j])
-						in_group.push_back(rm[i][j]);
-					else
-						out_group.push_back(rm[i][j]);
-				}
-		}
-	}
-
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
@@ -1947,100 +1782,22 @@ void ComponentDlg::OnDistOutput(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		string str = filename.ToStdString();
-		std::ofstream outfile;
-		outfile.open(str, std::ofstream::out);
-		//output result matrix
-		size_t dnum = bdist ? (m_dist_neighbor+1) : num2;
-		for (size_t i = 0; i < num2; ++i)
-		{
-			outfile << nl[i] << "\t";
-			for (size_t j = bdist?1:0; j < dnum; ++j)
-			{
-				outfile << rm[i][j];
-				if (j < dnum - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-		}
-		//index matrix
-		if (bdist)
-		{
-			outfile << "\n";
-			for (size_t i = 0; i < num2; ++i)
-			{
-				outfile << nl[i] << "\t";
-				for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
-				{
-					outfile << im[i][j] + 1;
-					if (j < dnum - 1)
-						outfile << "\t";
-				}
-				outfile << "\n";
-			}
-		}
-		//output in_group and out_group distances
-		if (gsize > 1)
-		{
-			outfile << "\nIn group Distances\t";
-			for (size_t i = 0; i < in_group.size(); ++i)
-			{
-				outfile << in_group[i];
-				if (i < in_group.size() - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-			outfile << "Out group Distances\t";
-			for (size_t i = 0; i < out_group.size(); ++i)
-			{
-				outfile << out_group[i];
-				if (i < out_group.size() - 1)
-					outfile << "\t";
-			}
-			outfile << "\n";
-		}
-		outfile.close();
+		std::wstring str = filename.ToStdWstring();
+		m_agent->DistOutput(str);
 	}
 	if (fopendlg)
 		delete fopendlg;
 }
 
-void ComponentDlg::AlignCenter(flrd::Ruler* ruler)
+void ComponentDlg::OnAlignCenter(wxCommandEvent &event)
 {
-	if (!ruler)
-		return;
-	fluo::Point center = ruler->GetCenter();
-	double tx, ty, tz;
-	m_view->getValue(gstObjCtrX, tx);
-	m_view->getValue(gstObjCtrY, ty);
-	m_view->getValue(gstObjCtrZ, tz);
-	m_view->setValue(gstObjTransX, tx - center.x());
-	m_view->setValue(gstObjTransY, center.y() - ty);
-	m_view->setValue(gstObjTransZ, center.z() - tz);
+	bool bval = m_align_center->GetValue();
+	m_agent->setValue(gstAlignCenter, bval);
 }
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
-	flrd::CelpList* list = m_comp_analyzer.GetCelpList();
-	if (!list || list->size() < 3)
-		return;
-
-	double sx = list->sx;
-	double sy = list->sy;
-	double sz = list->sz;
-	flrd::RulerList rulerlist;
-	flrd::Ruler ruler;
-	ruler.SetRulerType(1);
-	fluo::Point pt;
-	for (auto it = list->begin();
-		it != list->end(); ++it)
-	{
-		pt = it->second->GetCenter(sx, sy, sz);
-		ruler.AddPoint(pt);
-	}
-	ruler.SetFinished();
-
-	int axis_type = 0;
+	long axis_type = 0;
 	switch (event.GetId())
 	{
 	case ID_AlignXYZ:
@@ -2062,11 +1819,8 @@ void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	rulerlist.push_back(&ruler);
-	m_aligner.SetRulerList(&rulerlist);
-	m_aligner.AlignPca(axis_type);
-	if (m_align_center->GetValue())
-		AlignCenter(&ruler);
+	m_agent->setValue(gstAlignAxisType, axis_type);
+	m_agent->AlignPca();
 }
 
 void ComponentDlg::ClearOutputGrid()
@@ -2082,230 +1836,39 @@ void ComponentDlg::OnNotebook(wxBookCtrlEvent &event)
 
 void ComponentDlg::OnUseSelChk(wxCommandEvent &event)
 {
-	m_use_sel = m_use_sel_chk->GetValue();
+	bool bval = m_use_sel_chk->GetValue();
+	m_agent->setValue(gstUseSelection, bval);
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent &event)
 {
-	GenerateComp(m_use_sel);
+	m_agent->GenerateComp();
 }
 
 void ComponentDlg::OnAutoUpdate(wxCommandEvent &event)
 {
-	m_auto_update = m_auto_update_btn->GetValue();
-	if (m_auto_update)
-		GenerateComp(m_use_sel);
+	bool bval = m_auto_update_btn->GetValue();
+	m_agent->setValue(gstAutoUpdate, bval);
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent &event)
 {
-	Cluster();
+	m_agent->Cluster();
 }
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent &event)
 {
-	Clean(m_use_sel);
-}
-
-void ComponentDlg::Cluster()
-{
-	m_in_cells.clear();
-	m_out_cells.clear();
-
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data)
-		return;
-	long bits;
-	vd->getValue(gstBits, bits);
-	void* data_data = nrrd_data->data;
-	if (!data_data)
-		return;
-	//get mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
-	{
-		vd->AddEmptyLabel(0, true);
-		nrrd_label = tex->get_nrrd(tex->nlabel());
-	}
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
-
-	long nx, ny, nz;
-	vd->getValue(gstResX, nx);
-	vd->getValue(gstResY, ny);
-	vd->getValue(gstResZ, nz);
-	double scale;
-	vd->getValue(gstIntScale, scale);
-	double spcx, spcy, spcz;
-	vd->getValue(gstSpcX, spcx);
-	vd->getValue(gstSpcY, spcy);
-	vd->getValue(gstSpcZ, spcz);
-
-	flrd::ClusterMethod* method = 0;
-	//switch method
-	if (m_cluster_method_exmax)
-	{
-		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
-		method_exmax->SetClnum(m_cluster_clnum);
-		method_exmax->SetMaxiter(m_cluster_maxiter);
-		method_exmax->SetProbTol(m_cluster_tol);
-		method = method_exmax;
-	}
-	else if (m_cluster_method_dbscan)
-	{
-		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
-		method_dbscan->SetSize(m_cluster_size);
-		method_dbscan->SetEps(m_cluster_eps);
-		method = method_dbscan;
-	}
-	else if (m_cluster_method_kmeans)
-	{
-		flrd::ClusterKmeans* method_kmeans = new flrd::ClusterKmeans();
-		method_kmeans->SetClnum(m_cluster_clnum);
-		method_kmeans->SetMaxiter(m_cluster_maxiter);
-		method = method_kmeans;
-	}
-
-	if (!method)
-		return;
-
-	method->SetSpacings(spcx, spcy, spcz);
-
-	//add cluster points
-	size_t i, j, k;
-	size_t index;
-	size_t nxyz = nx * ny * nz;
-	unsigned char mask_value;
-	float data_value;
-	unsigned int label_value;
-	bool use_init_cluster = false;
-	struct CmpCnt
-	{
-		unsigned int id;
-		unsigned int size;
-		bool operator<(const CmpCnt &cc) const
-		{
-			return size > cc.size;
-		}
-	};
-	std::unordered_map<unsigned int, CmpCnt> init_clusters;
-	std::set<CmpCnt> ordered_clusters;
-	if (m_cluster_method_exmax)
-	{
-		for (index = 0; index < nxyz; ++index)
-		{
-			mask_value = data_mask[index];
-			if (!mask_value)
-				continue;
-			label_value = data_label[index];
-			if (!label_value)
-				continue;
-			auto it = init_clusters.find(label_value);
-			if (it == init_clusters.end())
-			{
-				CmpCnt cc = { label_value, 1 };
-				init_clusters.insert(std::pair<unsigned int, CmpCnt>(
-					label_value, cc));
-			}
-			else
-			{
-				it->second.size++;
-			}
-		}
-		if (init_clusters.size() >= m_cluster_clnum)
-		{
-			for (auto it = init_clusters.begin();
-				it != init_clusters.end(); ++it)
-				ordered_clusters.insert(it->second);
-			use_init_cluster = true;
-		}
-	}
-
-	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx * ny*k + nx * j + i;
-		mask_value = data_mask[index];
-		if (mask_value)
-		{
-			if (bits == 8)
-				data_value = ((unsigned char*)data_data)[index] / 255.0f;
-			else if (bits == 16)
-				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
-			flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
-			label_value = data_label[index];
-			int cid = -1;
-			if (use_init_cluster)
-			{
-				cid = 0;
-				bool found = false;
-				for (auto it = ordered_clusters.begin();
-					it != ordered_clusters.end(); ++it)
-				{
-					if (label_value == it->id)
-					{
-						found = true;
-						break;
-					}
-					cid++;
-				}
-				if (!found)
-					cid = -1;
-			}
-			method->AddClusterPoint(
-				pnt, data_value, cid);
-
-			//add to list
-			auto iter = m_in_cells.find(label_value);
-			if (iter != m_in_cells.end())
-			{
-				iter->second->Inc(i, j, k, data_value);
-			}
-			else
-			{
-				flrd::Cell* cell = new flrd::Cell(label_value);
-				cell->Inc(i, j, k, data_value);
-				m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
-					(label_value, flrd::Celp(cell)));
-			}
-		}
-	}
-
-	if (method->Execute())
-	{
-		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
-		m_out_cells = method->GetCellList();
-		vd->GetRenderer()->clear_tex_label();
-		m_view->Update(39);
-	}
-
-	delete method;
+	m_agent->Clean();
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent &event)
 {
-	Analyze(false);
+	m_agent->Analyze(false);
 }
 
 void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
 {
-	Analyze(true);
+	m_agent->Analyze(true);
 }
 
 void ComponentDlg::SetOutput(wxString &titles, wxString &values)
@@ -2331,11 +1894,11 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	} while (cur_line.IsEmpty() == false);
 
 	fluo::Color c;
-	fluo::VolumeData* vd = 0;
-	if (m_view)
-		vd = m_view->GetCurrentVolume();
-	unsigned long lval;
 	wxColor color;
+	unsigned long lval;
+	int shuffle = m_agent->GetShuffle();
+	bool hold_history;
+	m_agent->getValue(gstHoldHistory, hold_history);
 
 	i = 0;
 	copy_data = values;
@@ -2345,18 +1908,18 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 		cur_line = copy_data.BeforeFirst('\n');
 		copy_data = copy_data.AfterFirst('\n');
 		if (m_output_grid->GetNumberRows() <= i ||
-			m_hold_history)
+			hold_history)
 			m_output_grid->InsertRows(i);
 		do
 		{
 			cur_field = cur_line.BeforeFirst('\t');
 			cur_line = cur_line.AfterFirst('\t');
 			m_output_grid->SetCellValue(i, k, cur_field);
-			if (k == id_idx && vd)
+			if (k == id_idx)
 			{
 				if (cur_field.ToULong(&lval))
 				{
-					c = fluo::Color(lval, vd->GetShuffle());
+					c = fluo::Color(lval, shuffle);
 					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 				}
 				else
@@ -2369,7 +1932,7 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 	} while (copy_data.IsEmpty() == false);
 
 	//delete columnsand rows if the old has more
-	if (!m_hold_history)
+	if (!hold_history)
 	{
 		if (m_output_grid->GetNumberCols() > k)
 			m_output_grid->DeleteCols(k,
@@ -2385,12 +1948,12 @@ void ComponentDlg::SetOutput(wxString &titles, wxString &values)
 
 void ComponentDlg::OnIncludeBtn(wxCommandEvent &event)
 {
-	IncludeComps();
+	m_agent->IncludeComps();
 }
 
 void ComponentDlg::OnExcludeBtn(wxCommandEvent &event)
 {
-	ExcludeComps();
+	m_agent->ExcludeComps();
 }
 
 void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
@@ -2422,14 +1985,14 @@ void ComponentDlg::OnSelectCell(wxGridEvent& event)
 	//int c = event.GetCol();
 	//m_output_grid->SelectBlock(r, c, r, c);
 
-	GetCompSelection();
+	m_agent->GetCompSelection();
 
 	event.Skip();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 {
-	GetCompSelection();
+	m_agent->GetCompSelection();
 
 	event.Skip();
 }
@@ -2528,71 +2091,6 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-bool ComponentDlg::GetCellList(flrd::CelpList &cl, bool links)
-{
-	flrd::CelpList* list = m_comp_analyzer.GetCelpList();
-	if (!list || list->empty())
-		return false;
-
-	cl.min = list->min;
-	cl.max = list->max;
-	cl.sx = list->sx;
-	cl.sy = list->sy;
-	cl.sz = list->sz;
-
-	bool sel_all = false;
-	std::vector<unsigned int> ids;
-	std::vector<unsigned int> bids;
-	int bn = m_comp_analyzer.GetBrickNum();
-
-	//selected cells are retrieved using different functions
-	wxArrayInt seli = m_output_grid->GetSelectedCols();
-	if (seli.GetCount() > 0)
-		sel_all = true;
-	if (!sel_all)
-	{
-		seli = m_output_grid->GetSelectedRows();
-		AddSelArrayInt(ids, bids, seli, bn > 1);
-		//wxGridCellCoordsArray sela =
-		//	m_output_grid->GetSelectionBlockBottomRight();
-		//AddSelCoordArray(ids, bids, sela, bn > 1);
-		//sela = m_output_grid->GetSelectionBlockTopLeft();
-		//AddSelCoordArray(ids, bids, sela, bn > 1);
-		//sela = m_output_grid->GetSelectedCells();
-		//AddSelCoordArray(ids, bids, sela, bn > 1);
-	}
-
-	double sx = list->sx;
-	double sy = list->sy;
-	double sz = list->sz;
-	if (sel_all)
-	{
-		for (auto it = list->begin(); it != list->end(); ++it)
-			FindCelps(cl, it, links);
-	}
-	else
-	{
-		for (size_t i = 0; i < ids.size(); ++i)
-		{
-			unsigned long long key = ids[i];
-			unsigned int bid = 0;
-			if (bn > 1)
-			{
-				key = bids[i];
-				key = (key << 32) | ids[i];
-				bid = bids[i];
-			}
-			auto it = list->find(key);
-			if (it != list->end())
-				FindCelps(cl, it, links);
-		}
-	}
-
-	if (cl.empty())
-		return false;
-	return true;
-}
-
 void ComponentDlg::AddSelArrayInt(std::vector<unsigned int> &ids,
 	std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks)
 {
@@ -2631,30 +2129,6 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 	}
 }
 
-void ComponentDlg::FindCelps(flrd::CelpList &list,
-	flrd::CelpListIter &it, bool links)
-{
-	list.insert(std::pair<unsigned long long, flrd::Celp>
-		(it->second->GetEId(), it->second));
-
-	if (links)
-	{
-		flrd::CellGraph* graph = m_comp_analyzer.GetCellGraph();
-		graph->ClearVisited();
-		flrd::CelpList links;
-		if (graph->GetLinkedComps(it->second, links,
-			m_comp_analyzer.GetSizeLimit()))
-		{
-			for (auto it2 = links.begin();
-				it2 != links.end(); ++it2)
-			{
-				list.insert(std::pair<unsigned long long, flrd::Celp>
-					(it2->second->GetEId(), it2->second));
-			}
-		}
-	}
-}
-
 void ComponentDlg::StartTimer(std::string str)
 {
 	if (m_test_speed)
@@ -2679,194 +2153,3 @@ void ComponentDlg::StopTimer(std::string str)
 	}
 }
 
-void ComponentDlg::GetCompSelection()
-{
-	if (m_view)
-	{
-		flrd::CelpList cl;
-		GetCellList(cl);
-		m_view->SetCellList(cl);
-		m_view->setValue(gstInteractive, false);
-		//m_view->Update(39);
-	}
-}
-
-void ComponentDlg::SetCompSelection(std::set<unsigned long long>& ids, int mode)
-{
-	if (ids.empty())
-		return;
-
-	int bn = m_comp_analyzer.GetBrickNum();
-
-	wxString str;
-	unsigned long ulv;
-	unsigned long long ull;
-	bool flag = mode==1;
-	int lasti = -1;
-	wxArrayInt sel = m_output_grid->GetSelectedRows();
-	std::set<int> rows;
-	for (int i = 0; i < sel.GetCount(); ++i)
-		rows.insert(sel[i]);
-	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
-	{
-		str = m_output_grid->GetCellValue(i, 0);
-		if (!str.ToULong(&ulv))
-			continue;
-		if (bn > 1)
-		{
-			str = m_output_grid->GetCellValue(i, 1);
-			if (!str.ToULongLong(&ull))
-				continue;
-			ull = (ull << 32) | ulv;
-		}
-		else
-			ull = ulv;
-		if (ids.find(ull) != ids.end())
-		{
-			if (!flag)
-			{
-				m_output_grid->ClearSelection();
-				flag = true;
-			}
-			if (mode == 0)
-			{
-				m_output_grid->SelectRow(i, true);
-				lasti = i;
-			}
-			else
-			{
-				if (rows.find(i) != rows.end())
-					m_output_grid->DeselectRow(i);
-				else
-				{
-					m_output_grid->SelectRow(i, true);
-					lasti = i;
-				}
-			}
-		}
-	}
-
-	if (flag)
-	{
-		GetCompSelection();
-		if (lasti >= 0)
-			m_output_grid->GoToCell(lasti, 0);
-	}
-}
-
-void ComponentDlg::IncludeComps()
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	flrd::CelpList cl;
-	if (GetCellList(cl, true))
-	{
-		//clear complist
-		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
-		for (auto it = list->begin();
-			it != list->end();)
-		{
-			if (cl.find(it->second->GetEId()) == cl.end())
-				it = list->erase(it);
-			else
-				++it;
-		}
-		//select cl
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SelectList(cl);
-		ClearOutputGrid();
-		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
-
-		cl.clear();
-		m_view->SetCellList(cl);
-		m_view->setValue(gstInteractive, false);
-		//m_view->Update(39);
-
-		//frame
-		bool bval;
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				m_view->getValue(gstPaintCount, bval);
-				if (bval)
-					m_frame->GetBrushToolDlg()->Update(0);
-				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg())
-			{
-				m_view->getValue(gstPaintColocalize, bval);
-				if (bval)
-					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-			}
-		}
-	}
-}
-
-void ComponentDlg::ExcludeComps()
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	flrd::CelpList cl;
-	if (GetCellList(cl, true))
-	{
-		//clear complist
-		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
-		for (auto it = list->begin();
-			it != list->end();)
-		{
-			if (cl.find(it->second->GetEId()) != cl.end())
-				it = list->erase(it);
-			else
-				++it;
-		}
-		flrd::ComponentSelector comp_selector(vd);
-		std::vector<unsigned long long> ids;
-		for (auto it = list->begin();
-			it != list->end(); ++it)
-			ids.push_back(it->second->GetEId());
-		comp_selector.Delete(ids);
-		ClearOutputGrid();
-		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
-
-		cl.clear();
-		m_view->SetCellList(cl);
-		m_view->setValue(gstInteractive, false);
-		//m_view->RefreshGL(39);
-
-		//frame
-		bool bval;
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				m_view->getValue(gstPaintCount, bval);
-				if (bval)
-					m_frame->GetBrushToolDlg()->Update(0);
-				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg())
-			{
-				m_view->getValue(gstPaintColocalize, bval);
-				if (bval)
-					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-			}
-		}
-	}
-}

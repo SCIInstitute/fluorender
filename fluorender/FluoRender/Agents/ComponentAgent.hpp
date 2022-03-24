@@ -62,8 +62,10 @@ namespace fluo
 		void LoadSettings(const wxString &filename);
 		void SaveSettings(const wxString &filename);
 		void Analyze();
+		void Analyze(bool use_sel);
 		void GenerateComp();
 		void Fixate(bool command);
+		void Clean();
 		void Clean(bool use_sel, bool command = true);
 		void CompFull();
 		void CompAppend();
@@ -83,6 +85,9 @@ namespace fluo
 		void ResetCmd();
 		void PlayCmd(double tfactor);
 
+		//cluster
+		void Cluster();
+
 		//shuffle value
 		void ShuffleCurVolume();
 		int GetShuffle();
@@ -95,16 +100,42 @@ namespace fluo
 
 		//dist
 		int GetDistMatSize();
-		void DistOutput();
+		void DistOutput(const std::wstring &filename);
+
+		//align
+		void AlignCenter(flrd::Ruler* ruler);
+		void AlignPca();
+
+		//select comps
+		bool GetCellList(flrd::CelpList &cl, bool links = false);
+		void GetCompSelection();
+		void SetCompSelection(std::set<unsigned long long>& ids, int mode);
+		void IncludeComps();
+		void ExcludeComps();
+
+		//in and out cell lists
+		flrd::CelpList &GetInCells()
+		{
+			return m_in_cells;
+		}
+		flrd::CelpList &GetOutCells()
+		{
+			return m_out_cells;
+		}
 
 	protected:
 		ComponentDlg &dlg_;
 
 	private:
 		flrd::CompCommand m_command;
+		//in and out cell lists for tracking
+		flrd::CelpList m_in_cells;
+		flrd::CelpList m_out_cells;
 
 	private:
 		bool GetIds(std::string &str, unsigned int &id, int &brick_id);
+		void FindCelps(flrd::CelpList &list,
+			flrd::CelpListIter &it, bool links = false);
 
 		//update functions
 		void OnAutoUpdate(Event& event);

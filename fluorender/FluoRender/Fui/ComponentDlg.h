@@ -205,23 +205,10 @@ public:
 
 	friend class fluo::ComponentAgent;
 
-	//in and out cell lists
-	flrd::CelpList &GetInCells()
-	{ return m_in_cells; }
-	flrd::CelpList &GetOutCells()
-	{ return m_out_cells; }
-
 	//output
 	void SetOutput(wxString &titles, wxString &values);
 	void CopyData();
 	void PasteData();
-
-	//select comps
-	bool GetCellList(flrd::CelpList &cl, bool links=false);
-	void GetCompSelection();
-	void SetCompSelection(std::set<unsigned long long>& ids, int mode);
-	void IncludeComps();
-	void ExcludeComps();
 
 private:
 	RenderFrame* m_frame;
@@ -230,10 +217,6 @@ private:
 	//progress
 	float m_prog_bit;
 	float m_prog;
-
-	//in and out cell lists for tracking
-	flrd::CelpList m_in_cells;
-	flrd::CelpList m_out_cells;
 
 	//speed test
 	bool m_test_speed;
@@ -391,16 +374,11 @@ private:
 	wxGrid *m_output_grid;
 
 private:
-	void Cluster();
-	void AlignCenter(flrd::Ruler* ruler);
 	void ClearOutputGrid();
 	void AddSelArrayInt(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
-	void FindCelps(flrd::CelpList &list,
-		flrd::CelpListIter &it, bool links = false);
-
 	//speed test
 	void StartTimer(std::string str);
 	void StopTimer(std::string str);
@@ -517,6 +495,7 @@ private:
 	void OnDistNeighborText(wxCommandEvent &event);
 	void OnDistOutput(wxCommandEvent &event);
 	//align
+	void OnAlignCenter(wxCommandEvent &event);
 	void OnAlignPca(wxCommandEvent& event);
 
 	//execute

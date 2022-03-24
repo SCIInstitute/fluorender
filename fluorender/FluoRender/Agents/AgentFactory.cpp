@@ -318,6 +318,9 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 		agent->addValue(gstDistAllChan, bool(false));
 		agent->addValue(gstDistNeighbor, bool(false));
 		agent->addValue(gstDistNeighborValue, long(0));
+		agent->addValue(gstAlignAxisType, long(0));
+		agent->addValue(gstAlignCenter, bool(false));
+		ADD_AFTER_EVENT(agent, gstAutoUpdate, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstIteration, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstThreshold, ComponentAgent, OnAutoUpdate);
 		ADD_AFTER_EVENT(agent, gstUseDistField, ComponentAgent, OnUseDistField);

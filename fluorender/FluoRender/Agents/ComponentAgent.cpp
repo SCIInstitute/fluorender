@@ -34,7 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <CompSelector.h>
 #include <CompEditor.h>
+#include <Ruler.h>
+#include <RulerAlign.h>
 #include <cctype>
+#include <fstream>
 
 using namespace fluo;
 
@@ -58,96 +61,103 @@ void ComponentAgent::UpdateAllSettings()
 {
 	bool bval;
 	int ival;
+	long lval;
+	double dval;
 	//update ui
 	getValue(gstUseSelection, bval);
 	dlg_.m_use_sel_chk->SetValue(bval);
 	//comp generate page
-	dlg_.m_iter_text->SetValue(wxString::Format("%d", m_iter));
-	dlg_.m_thresh_text->SetValue(wxString::Format("%.3f", m_thresh));
+	getValue(gstIteration, lval);
+	dlg_.m_iter_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstThreshold, dval);
+	dlg_.m_thresh_text->SetValue(wxString::Format("%.3f", dval));
 	//dist
-	dlg_.m_use_dist_field_check->SetValue(m_use_dist_field);
-	EnableUseDistField(m_use_dist_field);
-	dlg_.m_dist_strength_text->SetValue(wxString::Format("%.3f", m_dist_strength));
-	dlg_.m_dist_filter_size_text->SetValue(wxString::Format("%d", m_dist_filter_size));
-	dlg_.m_max_dist_text->SetValue(wxString::Format("%d", m_max_dist));
-	dlg_.m_dist_thresh_text->SetValue(wxString::Format("%.3f", m_dist_thresh));
-	dlg_.m_diff_check->SetValue(m_diff);
-	EnableDiff(m_diff);
-	dlg_.m_falloff_text->SetValue(wxString::Format("%.3f", m_falloff));
-	//m_size_check->SetValue(m_size);
-	EnableSize(m_size);
-	//m_size_text->SetValue(wxString::Format("%d", m_size_lm));
-	EnableDensity(m_density);
-	dlg_.m_density_check->SetValue(m_density);
-	dlg_.m_density_text->SetValue(wxString::Format("%.3f", m_density_thresh));
-	dlg_.m_varth_text->SetValue(wxString::Format("%.4f", m_varth));
-	dlg_.m_density_window_size_text->SetValue(wxString::Format("%d", m_density_window_size));
-	dlg_.m_density_stats_size_text->SetValue(wxString::Format("%d", m_density_stats_size));
+	getValue(gstUseDistField, bval);
+	dlg_.m_use_dist_field_check->SetValue(bval);
+	getValue(gstDistFieldStrength, dval);
+	dlg_.m_dist_strength_text->SetValue(wxString::Format("%.3f", dval));
+	getValue(gstDistFieldFilterSize, lval);
+	dlg_.m_dist_filter_size_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstMaxDist, lval);
+	dlg_.m_max_dist_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstDistFieldThresh, dval);
+	dlg_.m_dist_thresh_text->SetValue(wxString::Format("%.3f", dval));
+	//diffusion
+	getValue(gstUseDiffusion, bval);
+	dlg_.m_diff_check->SetValue(bval);
+	getValue(gstDiffusionFalloff, dval);
+	dlg_.m_falloff_text->SetValue(wxString::Format("%.3f", dval));
+	//density
+	getValue(gstUseDensityField, bval);
+	dlg_.m_density_check->SetValue(bval);
+	getValue(gstDensityFieldThresh, dval);
+	dlg_.m_density_text->SetValue(wxString::Format("%.3f", dval));
+	getValue(gstDensityVarThresh, dval);
+	dlg_.m_varth_text->SetValue(wxString::Format("%.4f", dval));
+	getValue(gstDensityWindowSize, lval);
+	dlg_.m_density_window_size_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstDensityStatsSize, lval);
+	dlg_.m_density_stats_size_text->SetValue(wxString::Format("%d", lval));
 	//fixate
-	dlg_.m_fixate_check->SetValue(m_fixate);
-	EnableFixate(m_fixate);
-	dlg_.m_fix_size_text->SetValue(wxString::Format("%d", m_fix_size));
+	getValue(gstFixateEnable, bval);
+	dlg_.m_fixate_check->SetValue(bval);
+	getValue(gstFixateSize, lval);
+	dlg_.m_fix_size_text->SetValue(wxString::Format("%d", lval));
 	//clean
-	EnableClean(m_clean);
-	dlg_.m_clean_check->SetValue(m_clean);
-	dlg_.m_clean_iter_text->SetValue(wxString::Format("%d", m_clean_iter));
-	dlg_.m_clean_limit_text->SetValue(wxString::Format("%d", m_clean_size_vl));
+	getValue(gstCleanEnable, bval);
+	dlg_.m_clean_check->SetValue(bval);
+	getValue(gstCleanIteration, lval);
+	dlg_.m_clean_iter_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstCleanSize, lval);
+	dlg_.m_clean_limit_text->SetValue(wxString::Format("%d", lval));
 	//record
 	ival = m_command.size();
 	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
-
 	//cluster page
-	dlg_.m_cluster_method_exmax_rd->SetValue(m_cluster_method_exmax);
-	dlg_.m_cluster_method_dbscan_rd->SetValue(m_cluster_method_dbscan);
-	dlg_.m_cluster_method_kmeans_rd->SetValue(m_cluster_method_kmeans);
+	getValue(gstClusterMethod, lval);
+	dlg_.m_cluster_method_kmeans_rd->SetValue(lval==0);
+	dlg_.m_cluster_method_exmax_rd->SetValue(lval==1);
+	dlg_.m_cluster_method_dbscan_rd->SetValue(lval==2);
 	//parameters
-	dlg_.m_cluster_clnum_text->SetValue(wxString::Format("%d", m_cluster_clnum));
-	dlg_.m_cluster_maxiter_text->SetValue(wxString::Format("%d", m_cluster_maxiter));
-	dlg_.m_cluster_tol_text->SetValue(wxString::Format("%.2f", m_cluster_tol));
-	dlg_.m_cluster_size_text->SetValue(wxString::Format("%d", m_cluster_size));
-	dlg_.m_cluster_eps_text->SetValue(wxString::Format("%.1f", m_cluster_eps));
-
+	getValue(gstClusterNum, lval);
+	dlg_.m_cluster_clnum_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstClusterMaxIter, lval);
+	dlg_.m_cluster_maxiter_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstClusterTol, dval);
+	dlg_.m_cluster_tol_text->SetValue(wxString::Format("%.2f", dval));
+	getValue(gstClusterSize, lval);
+	dlg_.m_cluster_size_text->SetValue(wxString::Format("%d", lval));
+	getValue(gstClusterEps, dval);
+	dlg_.m_cluster_eps_text->SetValue(wxString::Format("%.1f", dval));
 	//selection
-	if (m_use_min)
-	{
-		dlg_.m_analysis_min_check->SetValue(true);
-		dlg_.m_analysis_min_spin->Enable();
-	}
-	else
-	{
-		dlg_.m_analysis_min_check->SetValue(false);
-		dlg_.m_analysis_min_spin->Disable();
-	}
-	dlg_.m_analysis_min_spin->SetValue(m_min_num);
-	if (m_use_max)
-	{
-		dlg_.m_analysis_max_check->SetValue(true);
-		dlg_.m_analysis_max_spin->Enable();
-	}
-	else
-	{
-		dlg_.m_analysis_max_check->SetValue(false);
-		dlg_.m_analysis_max_spin->Disable();
-	}
-	dlg_.m_analysis_max_spin->SetValue(m_max_num);
-
+	getValue(gstUseMin, bval);
+	dlg_.m_analysis_min_check->SetValue(bval);
+	dlg_.m_analysis_min_spin->Enable(bval);
+	getValue(gstMinValue, lval);
+	dlg_.m_analysis_min_spin->SetValue(lval);
+	getValue(gstUseMax, bval);
+	dlg_.m_analysis_max_check->SetValue(bval);
+	dlg_.m_analysis_max_spin->Enable(bval);
+	getValue(gstMaxValue, lval);
+	dlg_.m_analysis_max_spin->SetValue(lval);
 	//options
-	dlg_.m_consistent_check->SetValue(m_consistent);
-	dlg_.m_colocal_check->SetValue(m_colocal);
-
+	getValue(gstCompConsistent, bval);
+	dlg_.m_consistent_check->SetValue(bval);
+	getValue(gstCompColocal, bval);
+	dlg_.m_colocal_check->SetValue(bval);
 	//output type
-	dlg_.m_output_multi_rb->SetValue(false);
-	dlg_.m_output_rgb_rb->SetValue(false);
-	if (m_output_type == 1)
-		dlg_.m_output_multi_rb->SetValue(true);
-	else if (m_output_type == 2)
-		dlg_.m_output_rgb_rb->SetValue(true);
-
-	dlg_.m_dist_neighbor_check->SetValue(m_use_dist_neighbor);
-	dlg_.m_dist_neighbor_sldr->Enable(m_use_dist_neighbor);
-	dlg_.m_dist_neighbor_text->Enable(m_use_dist_neighbor);
-	dlg_.m_dist_all_chan_check->SetValue(m_use_dist_allchan);
-
+	getValue(gstCompOutputType, lval);
+	dlg_.m_output_multi_rb->SetValue(lval==1);
+	dlg_.m_output_rgb_rb->SetValue(lval==2);
+	//neighbors
+	getValue(gstDistNeighbor, bval);
+	dlg_.m_dist_neighbor_check->SetValue(bval);
+	dlg_.m_dist_neighbor_sldr->Enable(bval);
+	dlg_.m_dist_neighbor_text->Enable(bval);
+	getValue(gstDistNeighborValue, lval);
+	dlg_.m_dist_neighbor_sldr->SetValue(lval);
+	getValue(gstDistAllChan, bval);
+	dlg_.m_dist_all_chan_check->SetValue(bval);
 	//output
 	getValue(gstHoldHistory, bval);
 	dlg_.m_history_chk->SetValue(bval);
@@ -171,6 +181,10 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 		return;
 	wxFileConfig fconfig(is);
 
+	bool bval;
+	int ival;
+	long lval;
+	double dval;
 	//basic settings
 	fconfig.Read("use_sel", &m_use_sel);
 	fconfig.Read("iter", &m_iter);
@@ -192,7 +206,6 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 	fconfig.Read("clean", &m_clean);
 	fconfig.Read("clean_iter", &m_clean_iter);
 	fconfig.Read("clean_size_vl", &m_clean_size_vl);
-
 	//cluster
 	fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
 	fconfig.Read("cluster_method_exmax", &m_cluster_method_exmax);
@@ -203,7 +216,6 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 	fconfig.Read("cluster_tol", &m_cluster_tol);
 	fconfig.Read("cluster_size", &m_cluster_size);
 	fconfig.Read("cluster_eps", &m_cluster_eps);
-
 	//selection
 	fconfig.Read("use_min", &m_use_min);
 	fconfig.Read("min_num", &m_min_num);
@@ -213,8 +225,6 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 	fconfig.Read("colocal", &m_colocal);
 	//output
 	fconfig.Read("output_type", &m_output_type);
-
-	//m_load_settings_text->SetValue(filename);
 }
 
 void ComponentAgent::SaveSettings(const wxString &filename)
@@ -281,11 +291,18 @@ void ComponentAgent::SaveSettings(const wxString &filename)
 	SaveConfig(fconfig, str);
 }
 
+void ComponentAgent::Analyze()
+{
+	bool bval;
+	getValue(gstUseSelection, bval);
+	Analyze(bval);
+}
+
 void ComponentAgent::Analyze(bool sel)
 {
 	if (!m_view)
 		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	VolumeData* vd = m_view->GetCurrentVolume();
 	if (!vd)
 		return;
 
@@ -301,7 +318,7 @@ void ComponentAgent::Analyze(bool sel)
 	if (m_colocal)
 	{
 		m_comp_analyzer.ClearCoVolumes();
-		fluo::VolumeList list = m_view->GetVolList();
+		VolumeList list = m_view->GetVolList();
 		for (auto vdi : list)
 		{
 			if (vdi != vd)
@@ -500,6 +517,14 @@ void ComponentAgent::Fixate(bool command)
 	Event event;
 	OnAutoUpdate(event);
 	drawValue(gstCleanEnable);
+}
+
+void ComponentAgent::Clean()
+{
+	bool use_sel, run_command;
+	getValue(gstUseSelection, use_sel);
+	getValue(gstRunCmd, run_command);
+	Clean(use_sel, run_command);
 }
 
 void ComponentAgent::Clean(bool use_sel, bool command)
@@ -1053,6 +1078,197 @@ void ComponentAgent::PlayCmd(double tfactor)
 	Update();
 }
 
+void ComponentAgent::Cluster()
+{
+	m_in_cells.clear();
+	m_out_cells.clear();
+
+	if (!m_view)
+		return;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd)
+		return;
+	flvr::Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+	Nrrd* nrrd_data = tex->get_nrrd(0);
+	if (!nrrd_data)
+		return;
+	long bits;
+	vd->getValue(gstBits, bits);
+	void* data_data = nrrd_data->data;
+	if (!data_data)
+		return;
+	//get mask
+	Nrrd* nrrd_mask = vd->GetMask(true);
+	if (!nrrd_mask)
+		return;
+	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	if (!data_mask)
+		return;
+	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
+	if (!nrrd_label)
+	{
+		vd->AddEmptyLabel(0, true);
+		nrrd_label = tex->get_nrrd(tex->nlabel());
+	}
+	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	if (!data_label)
+		return;
+
+	long nx, ny, nz;
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
+	double scale;
+	vd->getValue(gstIntScale, scale);
+	double spcx, spcy, spcz;
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
+
+	flrd::ClusterMethod* method = 0;
+	//switch method
+	if (m_cluster_method_exmax)
+	{
+		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
+		method_exmax->SetClnum(m_cluster_clnum);
+		method_exmax->SetMaxiter(m_cluster_maxiter);
+		method_exmax->SetProbTol(m_cluster_tol);
+		method = method_exmax;
+	}
+	else if (m_cluster_method_dbscan)
+	{
+		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
+		method_dbscan->SetSize(m_cluster_size);
+		method_dbscan->SetEps(m_cluster_eps);
+		method = method_dbscan;
+	}
+	else if (m_cluster_method_kmeans)
+	{
+		flrd::ClusterKmeans* method_kmeans = new flrd::ClusterKmeans();
+		method_kmeans->SetClnum(m_cluster_clnum);
+		method_kmeans->SetMaxiter(m_cluster_maxiter);
+		method = method_kmeans;
+	}
+
+	if (!method)
+		return;
+
+	method->SetSpacings(spcx, spcy, spcz);
+
+	//add cluster points
+	size_t i, j, k;
+	size_t index;
+	size_t nxyz = nx * ny * nz;
+	unsigned char mask_value;
+	float data_value;
+	unsigned int label_value;
+	bool use_init_cluster = false;
+	struct CmpCnt
+	{
+		unsigned int id;
+		unsigned int size;
+		bool operator<(const CmpCnt &cc) const
+		{
+			return size > cc.size;
+		}
+	};
+	std::unordered_map<unsigned int, CmpCnt> init_clusters;
+	std::set<CmpCnt> ordered_clusters;
+	if (m_cluster_method_exmax)
+	{
+		for (index = 0; index < nxyz; ++index)
+		{
+			mask_value = data_mask[index];
+			if (!mask_value)
+				continue;
+			label_value = data_label[index];
+			if (!label_value)
+				continue;
+			auto it = init_clusters.find(label_value);
+			if (it == init_clusters.end())
+			{
+				CmpCnt cc = { label_value, 1 };
+				init_clusters.insert(std::pair<unsigned int, CmpCnt>(
+					label_value, cc));
+			}
+			else
+			{
+				it->second.size++;
+			}
+		}
+		if (init_clusters.size() >= m_cluster_clnum)
+		{
+			for (auto it = init_clusters.begin();
+				it != init_clusters.end(); ++it)
+				ordered_clusters.insert(it->second);
+			use_init_cluster = true;
+		}
+	}
+
+	for (i = 0; i < nx; ++i)
+		for (j = 0; j < ny; ++j)
+			for (k = 0; k < nz; ++k)
+			{
+				index = nx * ny*k + nx * j + i;
+				mask_value = data_mask[index];
+				if (mask_value)
+				{
+					if (bits == 8)
+						data_value = ((unsigned char*)data_data)[index] / 255.0f;
+					else if (bits == 16)
+						data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+					flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+					label_value = data_label[index];
+					int cid = -1;
+					if (use_init_cluster)
+					{
+						cid = 0;
+						bool found = false;
+						for (auto it = ordered_clusters.begin();
+							it != ordered_clusters.end(); ++it)
+						{
+							if (label_value == it->id)
+							{
+								found = true;
+								break;
+							}
+							cid++;
+						}
+						if (!found)
+							cid = -1;
+					}
+					method->AddClusterPoint(
+						pnt, data_value, cid);
+
+					//add to list
+					auto iter = m_in_cells.find(label_value);
+					if (iter != m_in_cells.end())
+					{
+						iter->second->Inc(i, j, k, data_value);
+					}
+					else
+					{
+						flrd::Cell* cell = new flrd::Cell(label_value);
+						cell->Inc(i, j, k, data_value);
+						m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
+							(label_value, flrd::Celp(cell)));
+					}
+				}
+			}
+
+	if (method->Execute())
+	{
+		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
+		m_out_cells = method->GetCellList();
+		vd->GetRenderer()->clear_tex_label();
+		m_view->Update(39);
+	}
+
+	delete method;
+}
+
 void ComponentAgent::ShuffleCurVolume()
 {
 	//get current vd
@@ -1219,9 +1435,535 @@ int ComponentAgent::GetDistMatSize()
 	}
 }
 
-void ComponentAgent::DistOutput()
+void ComponentAgent::DistOutput(const std::wstring &filename)
 {
+	int num = GetDistMatSize();
+	if (num <= 0)
+		return;
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	if (!analyzer)
+		return;
+	int gsize = analyzer->GetCompGroupSize();
+	int bn = analyzer->GetBrickNum();
 
+	//result
+	std::string str;
+	std::vector<std::vector<double>> rm;//result matrix
+	std::vector<std::string> nl;//name list
+	std::vector<int> gn;//group number
+	rm.reserve(num);
+	nl.reserve(num);
+	if (gsize > 1)
+		gn.reserve(num);
+	for (size_t i = 0; i < num; ++i)
+	{
+		rm.push_back(std::vector<double>());
+		rm[i].reserve(num);
+		for (size_t j = 0; j < num; ++j)
+			rm[i].push_back(0);
+	}
+
+	//compute
+	double sx, sy, sz;
+	std::vector<Point> pos;
+	pos.reserve(num);
+	int num2 = 0;//actual number
+	bool bval;
+	getValue(gstDistAllChan, bval);
+	if (bval && gsize > 1)
+	{
+		for (int i = 0; i < gsize; ++i)
+		{
+			flrd::CompGroup* compgroup = analyzer->GetCompGroup(i);
+			if (!compgroup)
+				continue;
+
+			flrd::CellGraph &graph = compgroup->graph;
+			flrd::CelpList* list = &(compgroup->celps);
+			sx = list->sx;
+			sy = list->sy;
+			sz = list->sz;
+			if (bn > 1)
+				graph.ClearVisited();
+
+			for (auto it = list->begin();
+				it != list->end(); ++it)
+			{
+				if (bn > 1)
+				{
+					if (graph.Visited(it->second))
+						continue;
+					flrd::CelpList links;
+					graph.GetLinkedComps(it->second, links,
+						analyzer->GetSizeLimit());
+				}
+
+				pos.push_back(it->second->GetCenter(sx, sy, sz));
+				str = std::to_string(i + 1);
+				str += ":";
+				str += std::to_string(it->second->Id());
+				nl.push_back(str);
+				gn.push_back(i);
+				num2++;
+			}
+		}
+	}
+	else
+	{
+		flrd::CellGraph &graph = analyzer->GetCompGroup(0)->graph;
+		flrd::CelpList* list = analyzer->GetCelpList();
+		sx = list->sx;
+		sy = list->sy;
+		sz = list->sz;
+		if (bn > 1)
+			graph.ClearVisited();
+
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+		{
+			if (bn > 1)
+			{
+				if (graph.Visited(it->second))
+					continue;
+				flrd::CelpList links;
+				graph.GetLinkedComps(it->second, links,
+					analyzer->GetSizeLimit());
+			}
+
+			pos.push_back(it->second->GetCenter(sx, sy, sz));
+			str = std::to_string(it->second->Id());
+			nl.push_back(str);
+			num2++;
+		}
+	}
+	double dist = 0;
+	for (int i = 0; i < num2; ++i)
+	{
+		for (int j = i; j < num2; ++j)
+		{
+			dist = (pos[i] - pos[j]).length();
+			rm[i][j] = dist;
+			rm[j][i] = dist;
+		}
+	}
+
+	bool dist_neighbor;
+	getValue(gstDistNeighbor, dist_neighbor);
+	long lval;
+	getValue(gstDistNeighborValue, lval);
+	bool bdist = dist_neighbor && lval > 0 && lval < num2 - 1;
+
+	std::vector<double> in_group;//distances with in a group
+	std::vector<double> out_group;//distance between groups
+	in_group.reserve(num2*num2 / 2);
+	out_group.reserve(num2*num2 / 2);
+	std::vector<std::vector<int>> im;//index matrix
+	if (bdist)
+	{
+		//sort with indices
+		im.reserve(num2);
+		for (size_t i = 0; i < num2; ++i)
+		{
+			im.push_back(std::vector<int>());
+			im[i].reserve(num2);
+			for (size_t j = 0; j < num2; ++j)
+				im[i].push_back(j);
+		}
+		//copy rm
+		std::vector<std::vector<double>> rm2 = rm;
+		//sort
+		for (size_t i = 0; i < num2; ++i)
+		{
+			std::sort(im[i].begin(), im[i].end(),
+				[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
+		}
+		//fill rm
+		for (size_t i = 0; i < num2; ++i)
+			for (size_t j = 0; j < num2; ++j)
+			{
+				rm[i][j] = rm2[i][im[i][j]];
+				if (gsize > 1 && j > 0 &&
+					j <= dist_neighbor)
+				{
+					if (gn[i] == gn[im[i][j]])
+						in_group.push_back(rm[i][j]);
+					else
+						out_group.push_back(rm[i][j]);
+				}
+			}
+	}
+	else
+	{
+		if (gsize > 1)
+		{
+			for (int i = 0; i < num2; ++i)
+				for (int j = i + 1; j < num2; ++j)
+				{
+					if (gn[i] == gn[j])
+						in_group.push_back(rm[i][j]);
+					else
+						out_group.push_back(rm[i][j]);
+				}
+		}
+	}
+
+	std::ofstream outfile;
+	outfile.open(filename, std::ofstream::out);
+	//output result matrix
+	size_t dnum = bdist ? (dist_neighbor + 1) : num2;
+	for (size_t i = 0; i < num2; ++i)
+	{
+		outfile << nl[i] << "\t";
+		for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
+		{
+			outfile << rm[i][j];
+			if (j < dnum - 1)
+				outfile << "\t";
+		}
+		outfile << "\n";
+	}
+	//index matrix
+	if (bdist)
+	{
+		outfile << "\n";
+		for (size_t i = 0; i < num2; ++i)
+		{
+			outfile << nl[i] << "\t";
+			for (size_t j = bdist ? 1 : 0; j < dnum; ++j)
+			{
+				outfile << im[i][j] + 1;
+				if (j < dnum - 1)
+					outfile << "\t";
+			}
+			outfile << "\n";
+		}
+	}
+	//output in_group and out_group distances
+	if (gsize > 1)
+	{
+		outfile << "\nIn group Distances\t";
+		for (size_t i = 0; i < in_group.size(); ++i)
+		{
+			outfile << in_group[i];
+			if (i < in_group.size() - 1)
+				outfile << "\t";
+		}
+		outfile << "\n";
+		outfile << "Out group Distances\t";
+		for (size_t i = 0; i < out_group.size(); ++i)
+		{
+			outfile << out_group[i];
+			if (i < out_group.size() - 1)
+				outfile << "\t";
+		}
+		outfile << "\n";
+	}
+	outfile.close();
+}
+
+void ComponentAgent::AlignCenter(flrd::Ruler* ruler)
+{
+	if (!ruler)
+		return;
+	Point center = ruler->GetCenter();
+	double tx, ty, tz;
+	Renderview* view = getObject();
+	view->getValue(gstObjCtrX, tx);
+	view->getValue(gstObjCtrY, ty);
+	view->getValue(gstObjCtrZ, tz);
+	view->setValue(gstObjTransX, tx - center.x());
+	view->setValue(gstObjTransY, center.y() - ty);
+	view->setValue(gstObjTransZ, center.z() - tz);
+}
+
+void ComponentAgent::AlignPca()
+{
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	flrd::CelpList* list = analyzer->GetCelpList();
+	if (!list || list->size() < 3)
+		return;
+
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	flrd::RulerList rulerlist;
+	flrd::Ruler ruler;
+	ruler.SetRulerType(1);
+	Point pt;
+	for (auto it = list->begin();
+		it != list->end(); ++it)
+	{
+		pt = it->second->GetCenter(sx, sy, sz);
+		ruler.AddPoint(pt);
+	}
+	ruler.SetFinished();
+
+	flrd::RulerAlign* aligner = getObject()->GetRulerAlign();
+	rulerlist.push_back(&ruler);
+	aligner->SetRulerList(&rulerlist);
+	long lval;
+	getValue(gstAlignAxisType, lval);
+	aligner->AlignPca(lval);
+	bool bval;
+	getValue(gstAlignCenter, bval);
+	if (bval) AlignCenter(&ruler);
+}
+
+bool ComponentAgent::GetCellList(flrd::CelpList &cl, bool links)
+{
+	flrd::CelpList* list = m_comp_analyzer.GetCelpList();
+	if (!list || list->empty())
+		return false;
+
+	cl.min = list->min;
+	cl.max = list->max;
+	cl.sx = list->sx;
+	cl.sy = list->sy;
+	cl.sz = list->sz;
+
+	bool sel_all = false;
+	std::vector<unsigned int> ids;
+	std::vector<unsigned int> bids;
+	int bn = m_comp_analyzer.GetBrickNum();
+
+	//selected cells are retrieved using different functions
+	wxArrayInt seli = m_output_grid->GetSelectedCols();
+	if (seli.GetCount() > 0)
+		sel_all = true;
+	if (!sel_all)
+	{
+		seli = m_output_grid->GetSelectedRows();
+		AddSelArrayInt(ids, bids, seli, bn > 1);
+		//wxGridCellCoordsArray sela =
+		//	m_output_grid->GetSelectionBlockBottomRight();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+		//sela = m_output_grid->GetSelectionBlockTopLeft();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+		//sela = m_output_grid->GetSelectedCells();
+		//AddSelCoordArray(ids, bids, sela, bn > 1);
+	}
+
+	double sx = list->sx;
+	double sy = list->sy;
+	double sz = list->sz;
+	if (sel_all)
+	{
+		for (auto it = list->begin(); it != list->end(); ++it)
+			FindCelps(cl, it, links);
+	}
+	else
+	{
+		for (size_t i = 0; i < ids.size(); ++i)
+		{
+			unsigned long long key = ids[i];
+			unsigned int bid = 0;
+			if (bn > 1)
+			{
+				key = bids[i];
+				key = (key << 32) | ids[i];
+				bid = bids[i];
+			}
+			auto it = list->find(key);
+			if (it != list->end())
+				FindCelps(cl, it, links);
+		}
+	}
+
+	if (cl.empty())
+		return false;
+	return true;
+}
+
+void ComponentAgent::GetCompSelection()
+{
+	if (m_view)
+	{
+		flrd::CelpList cl;
+		GetCellList(cl);
+		m_view->SetCellList(cl);
+		m_view->setValue(gstInteractive, false);
+		//m_view->Update(39);
+	}
+}
+
+void ComponentAgent::SetCompSelection(std::set<unsigned long long>& ids, int mode)
+{
+	if (ids.empty())
+		return;
+
+	int bn = m_comp_analyzer.GetBrickNum();
+
+	wxString str;
+	unsigned long ulv;
+	unsigned long long ull;
+	bool flag = mode == 1;
+	int lasti = -1;
+	wxArrayInt sel = m_output_grid->GetSelectedRows();
+	std::set<int> rows;
+	for (int i = 0; i < sel.GetCount(); ++i)
+		rows.insert(sel[i]);
+	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
+	{
+		str = m_output_grid->GetCellValue(i, 0);
+		if (!str.ToULong(&ulv))
+			continue;
+		if (bn > 1)
+		{
+			str = m_output_grid->GetCellValue(i, 1);
+			if (!str.ToULongLong(&ull))
+				continue;
+			ull = (ull << 32) | ulv;
+		}
+		else
+			ull = ulv;
+		if (ids.find(ull) != ids.end())
+		{
+			if (!flag)
+			{
+				m_output_grid->ClearSelection();
+				flag = true;
+			}
+			if (mode == 0)
+			{
+				m_output_grid->SelectRow(i, true);
+				lasti = i;
+			}
+			else
+			{
+				if (rows.find(i) != rows.end())
+					m_output_grid->DeselectRow(i);
+				else
+				{
+					m_output_grid->SelectRow(i, true);
+					lasti = i;
+				}
+			}
+		}
+	}
+
+	if (flag)
+	{
+		GetCompSelection();
+		if (lasti >= 0)
+			m_output_grid->GoToCell(lasti, 0);
+	}
+}
+
+void ComponentAgent::IncludeComps()
+{
+	if (!m_view)
+		return;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd)
+		return;
+
+	flrd::CelpList cl;
+	if (GetCellList(cl, true))
+	{
+		//clear complist
+		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
+		for (auto it = list->begin();
+			it != list->end();)
+		{
+			if (cl.find(it->second->GetEId()) == cl.end())
+				it = list->erase(it);
+			else
+				++it;
+		}
+		//select cl
+		flrd::ComponentSelector comp_selector(vd);
+		comp_selector.SelectList(cl);
+		ClearOutputGrid();
+		string titles, values;
+		m_comp_analyzer.OutputFormHeader(titles);
+		m_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+
+		cl.clear();
+		m_view->SetCellList(cl);
+		m_view->setValue(gstInteractive, false);
+		//m_view->Update(39);
+
+		//frame
+		bool bval;
+		if (m_frame)
+		{
+			if (m_frame->GetBrushToolDlg())
+			{
+				m_view->getValue(gstPaintCount, bval);
+				if (bval)
+					m_frame->GetBrushToolDlg()->Update(0);
+				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+			}
+			if (m_frame->GetColocalizationDlg())
+			{
+				m_view->getValue(gstPaintColocalize, bval);
+				if (bval)
+					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
+			}
+		}
+	}
+}
+
+void ComponentAgent::ExcludeComps()
+{
+	if (!m_view)
+		return;
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd)
+		return;
+
+	flrd::CelpList cl;
+	if (GetCellList(cl, true))
+	{
+		//clear complist
+		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
+		for (auto it = list->begin();
+			it != list->end();)
+		{
+			if (cl.find(it->second->GetEId()) != cl.end())
+				it = list->erase(it);
+			else
+				++it;
+		}
+		flrd::ComponentSelector comp_selector(vd);
+		std::vector<unsigned long long> ids;
+		for (auto it = list->begin();
+			it != list->end(); ++it)
+			ids.push_back(it->second->GetEId());
+		comp_selector.Delete(ids);
+		ClearOutputGrid();
+		string titles, values;
+		m_comp_analyzer.OutputFormHeader(titles);
+		m_comp_analyzer.OutputCompListStr(values, 0);
+		wxString str1(titles), str2(values);
+		SetOutput(str1, str2);
+
+		cl.clear();
+		m_view->SetCellList(cl);
+		m_view->setValue(gstInteractive, false);
+		//m_view->RefreshGL(39);
+
+		//frame
+		bool bval;
+		if (m_frame)
+		{
+			if (m_frame->GetBrushToolDlg())
+			{
+				m_view->getValue(gstPaintCount, bval);
+				if (bval)
+					m_frame->GetBrushToolDlg()->Update(0);
+				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+			}
+			if (m_frame->GetColocalizationDlg())
+			{
+				m_view->getValue(gstPaintColocalize, bval);
+				if (bval)
+					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
+			}
+		}
+	}
 }
 
 bool ComponentAgent::GetIds(std::string &str, unsigned int &id, int &brick_id)
@@ -1258,6 +2000,30 @@ bool ComponentAgent::GetIds(std::string &str, unsigned int &id, int &brick_id)
 	}
 	brick_id = 0;
 	return true;
+}
+
+void ComponentAgent::FindCelps(flrd::CelpList &list,
+	flrd::CelpListIter &it, bool links)
+{
+	list.insert(std::pair<unsigned long long, flrd::Celp>
+		(it->second->GetEId(), it->second));
+
+	if (links)
+	{
+		flrd::CellGraph* graph = m_comp_analyzer.GetCellGraph();
+		graph->ClearVisited();
+		flrd::CelpList links;
+		if (graph->GetLinkedComps(it->second, links,
+			m_comp_analyzer.GetSizeLimit()))
+		{
+			for (auto it2 = links.begin();
+				it2 != links.end(); ++it2)
+			{
+				list.insert(std::pair<unsigned long long, flrd::Celp>
+					(it2->second->GetEId(), it2->second));
+			}
+		}
+	}
 }
 
 //update functions
