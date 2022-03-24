@@ -347,7 +347,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstDrawInfo "draw info"
 #define gstLoadUpdate "load update"
 #define gstDrawCropFrame "draw crop frame"
-#define gstTestSpeed "test speed"
 #define gstDrawClip "draw clip"
 #define gstDrawLegend "draw legend"
 #define gstDrawColormap "draw colormap"
@@ -559,6 +558,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstUseSelection "use selection"//use mask selection
 #define gstAutoUpdate "auto update"
 #define gstHoldHistory "hold history"
+#define gstTestSpeed "test speed"
 //colocal agent
 #define gstColocalMethod "colocal method"//0:dot product; 1:min value; 2:threshold
 #define gstIntWeighted "int weighted"
@@ -568,6 +568,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRecordCmd "record cmd"//record command for comps
 #define gstRunCmd "run cmd"//run command
 #define gstThreshold "threshold"
+#define gstThreshScale "thresh scale"
 #define gstIteration "iteration"//number of iterations
 #define gstUseDiffusion "use diffusion"//diffusion settings
 #define gstDiffusionFalloff "diffusion falloff"

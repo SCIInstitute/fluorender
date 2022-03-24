@@ -1111,7 +1111,7 @@ void ScriptProc::RunGenerateComp()
 	{
 		m_view->setRvalu(gstCurrentVolume, *i);
 		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->setValue(gstUseSelection, use_sel);
-		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->PlayCmd(tfac);
+		glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->PlayCmd(use_sel, tfac);
 	}
 }
 

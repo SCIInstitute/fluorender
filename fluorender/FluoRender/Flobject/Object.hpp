@@ -319,6 +319,13 @@ namespace fluo
 			else
 				return setValue(name, value);
 		}
+		bool addSetRvalu(const std::string& name, Referenced* value)
+		{
+			if (addRvalu(name, value))
+				return true;
+			else
+				return setRvalu(name, value);
+		}
 
 		bool getValue(ValueTuple &vt)
 		{

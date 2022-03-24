@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <BrushToolAgent.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
-#include "Components/CompSelector.h"
+#include <Components/CompSelector.h>
+#include <Components/CompAnalyzer.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(NoiseReduceDlg, wxPanel)
@@ -189,14 +190,15 @@ void NoiseReduceDlg::Preview(bool select, double size, double thresh)
 	vd->getValue(gstIntScale, scale);
 	cg.Grow(false, -1, thresh, 0.0, scale);
 
-	flrd::ComponentAnalyzer ca(vd);
-	ca.Analyze(select, true, false);
+	flrd::ComponentAnalyzer* ca = m_view->GetCompAnalyzer();
+	ca->SetVolume(vd);
+	ca->Analyze(select, true, false);
 
 	flrd::ComponentSelector comp_selector(vd);
 	//cell size filter
 	comp_selector.SetMinNum(false, 0);
 	comp_selector.SetMaxNum(true, size);
-	comp_selector.SetAnalyzer(&ca);
+	comp_selector.SetAnalyzer(ca);
 	comp_selector.CompFull();
 
 	m_view->Update(39);

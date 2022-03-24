@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RenderFrame.h"
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
+#include <CompAnalyzer.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 

@@ -2247,8 +2247,8 @@ void TrackDlg::OnCellLinkAll(wxCommandEvent &event)
 		std::bind(&TrackDlg::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&TrackDlg::DelVolCache, this, std::placeholders::_1));
 	tm_processor.SetVolCacheSize(3);
-	flrd::CelpList in = m_frame->GetComponentDlg()->GetInCells();
-	flrd::CelpList out = m_frame->GetComponentDlg()->GetOutCells();
+	flrd::CelpList in = glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->GetInCells();
+	flrd::CelpList out = glbin_agtf->findFirst(gstComponentAgent)->asComponentAgent()->GetOutCells();
 	tm_processor.RelinkCells(in, out, m_cur_time);
 
 	CellUpdate();

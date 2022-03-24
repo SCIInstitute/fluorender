@@ -275,6 +275,7 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
+		agent->addValue(gstTestSpeed, bool(false));
 		agent->addValue(gstUseSelection, false);
 		agent->addValue(gstAutoUpdate, false);
 		agent->addValue(gstHoldHistory, false);
@@ -282,6 +283,7 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 		agent->addValue(gstRunCmd, false);
 		agent->addValue(gstIteration, long(0));
 		agent->addValue(gstThreshold, double(0));
+		agent->addValue(gstThreshScale, double(1));
 		agent->addValue(gstUseDistField, bool(false));
 		agent->addValue(gstUseDiffusion, bool(false));
 		agent->addValue(gstDistFieldStrength, double(0));

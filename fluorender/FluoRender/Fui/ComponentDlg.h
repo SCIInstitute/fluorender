@@ -38,8 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
-#include <chrono>
-#include <set>
 
 class RenderFrame;
 namespace fluo
@@ -206,22 +204,13 @@ public:
 	friend class fluo::ComponentAgent;
 
 	//output
-	void SetOutput(wxString &titles, wxString &values);
+	void SetOutput(const wxString &titles, const wxString &values);
 	void CopyData();
 	void PasteData();
 
 private:
 	RenderFrame* m_frame;
 	fluo::ComponentAgent* m_agent;
-
-	//progress
-	float m_prog_bit;
-	float m_prog;
-
-	//speed test
-	bool m_test_speed;
-	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
-	wxString m_titles, m_values;
 
 	//split window
 	wxPanel *panel_top;
@@ -379,9 +368,6 @@ private:
 		std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int> &ids,
 		std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks);
-	//speed test
-	void StartTimer(std::string str);
-	void StopTimer(std::string str);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

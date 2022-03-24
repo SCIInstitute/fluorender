@@ -151,7 +151,7 @@ ValueSet::~ValueSet()
 
 void ValueSet::clear(int ref_count)
 {
-	Values::iterator it;
+	Values::iterator it = _values.begin();
 	while (it != _values.end())
 	{
 		if (it->second->referenceCount() > ref_count)

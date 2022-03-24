@@ -29,13 +29,21 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentAgent.hpp>
 #include <ComponentDlg.h>
 #include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <AnnotationFactory.hpp>
+#include <BrushToolAgent.hpp>
+#include <ColocalAgent.hpp>
 #include <VolumeData.hpp>
 #include <CompAnalyzer.h>
 #include <CompSelector.h>
 #include <CompEditor.h>
 #include <Ruler.h>
 #include <RulerAlign.h>
+#include <ClusterMethod.h>
+#include <kmeans.h>
+#include <exmax.h>
+#include <dbscan.h>
+#include <VolumeRenderer.h>
 #include <cctype>
 #include <fstream>
 
@@ -186,45 +194,41 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 	long lval;
 	double dval;
 	//basic settings
-	fconfig.Read("use_sel", &m_use_sel);
-	fconfig.Read("iter", &m_iter);
-	fconfig.Read("thresh", &m_thresh);
-	fconfig.Read("use_dist_field", &m_use_dist_field);
-	fconfig.Read("dist_strength", &m_dist_strength);
-	fconfig.Read("dist_filter_size", &m_dist_filter_size);
-	fconfig.Read("max_dist", &m_max_dist);
-	fconfig.Read("dist_thresh", &m_dist_thresh);
-	fconfig.Read("diff", &m_diff);
-	fconfig.Read("falloff", &m_falloff);
-	fconfig.Read("size", &m_size);
-	fconfig.Read("size_lm", &m_size_lm);
-	fconfig.Read("density", &m_density);
-	fconfig.Read("density_thresh", &m_density_thresh);
-	fconfig.Read("varth", &m_varth);
-	fconfig.Read("density_window_size", &m_density_window_size);
-	fconfig.Read("density_stats_size", &m_density_stats_size);
-	fconfig.Read("clean", &m_clean);
-	fconfig.Read("clean_iter", &m_clean_iter);
-	fconfig.Read("clean_size_vl", &m_clean_size_vl);
+	fconfig.Read("use_sel", &bval); setValue(gstUseSelection, bval);
+	fconfig.Read("iter", &lval); setValue(gstIteration, lval);
+	fconfig.Read("thresh", &dval); setValue(gstThreshold, dval);
+	fconfig.Read("use_dist_field", &bval); setValue(gstUseDistField, bval);
+	fconfig.Read("dist_strength", &dval); setValue(gstDistFieldStrength, dval);
+	fconfig.Read("dist_filter_size", &lval); setValue(gstDistFieldFilterSize, lval);
+	fconfig.Read("max_dist", &lval); setValue(gstMaxDist, lval);
+	fconfig.Read("dist_thresh", &dval); setValue(gstDistFieldThresh, dval);
+	fconfig.Read("diff", &bval); setValue(gstUseDiffusion, bval);
+	fconfig.Read("falloff", &dval); setValue(gstDiffusionFalloff, dval);
+	fconfig.Read("density", &bval); setValue(gstUseDensityField, bval);
+	fconfig.Read("density_thresh", &dval); setValue(gstDensityFieldThresh, dval);
+	fconfig.Read("varth", &dval); setValue(gstDensityVarThresh, dval);
+	fconfig.Read("density_window_size", &lval); setValue(gstDensityWindowSize, lval);
+	fconfig.Read("density_stats_size", &lval); setValue(gstDensityStatsSize, lval);
+	fconfig.Read("clean", &bval); setValue(gstCleanEnable, bval);
+	fconfig.Read("clean_iter", &lval); setValue(gstCleanIteration, lval);
+	fconfig.Read("clean_size_vl", &lval); setValue(gstCleanSize, lval);
 	//cluster
-	fconfig.Read("cluster_method_kmeans", &m_cluster_method_kmeans);
-	fconfig.Read("cluster_method_exmax", &m_cluster_method_exmax);
-	fconfig.Read("cluster_method_dbscan", &m_cluster_method_dbscan);
+	fconfig.Read("cluster_method", &lval); setValue(gstClusterMethod, lval);
 	//parameters
-	fconfig.Read("cluster_clnum", &m_cluster_clnum);
-	fconfig.Read("cluster_maxiter", &m_cluster_maxiter);
-	fconfig.Read("cluster_tol", &m_cluster_tol);
-	fconfig.Read("cluster_size", &m_cluster_size);
-	fconfig.Read("cluster_eps", &m_cluster_eps);
+	fconfig.Read("cluster_clnum", &lval); setValue(gstClusterNum, lval);
+	fconfig.Read("cluster_maxiter", &lval); setValue(gstClusterMaxIter, lval);
+	fconfig.Read("cluster_tol", &dval); setValue(gstClusterTol, dval);
+	fconfig.Read("cluster_size", &lval); setValue(gstClusterSize, lval);
+	fconfig.Read("cluster_eps", &dval); setValue(gstClusterEps, dval);
 	//selection
-	fconfig.Read("use_min", &m_use_min);
-	fconfig.Read("min_num", &m_min_num);
-	fconfig.Read("use_max", &m_use_max);
-	fconfig.Read("max_num", &m_max_num);
+	fconfig.Read("use_min", &bval); setValue(gstUseMin, bval);
+	fconfig.Read("min_num", &lval); setValue(gstMinValue, lval);
+	fconfig.Read("use_max", &bval); setValue(gstUseMax, bval);
+	fconfig.Read("max_num", &lval); setValue(gstMaxValue, lval);
 	//colocalization
-	fconfig.Read("colocal", &m_colocal);
+	fconfig.Read("colocal", &bval); setValue(gstCompColocal, bval);
 	//output
-	fconfig.Read("output_type", &m_output_type);
+	fconfig.Read("output_type", &lval); setValue(gstCompOutputType, lval);
 }
 
 void ComponentAgent::SaveSettings(const wxString &filename)
@@ -236,48 +240,46 @@ void ComponentAgent::SaveSettings(const wxString &filename)
 	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
 		wxCONFIG_USE_LOCAL_FILE);
 
+	bool bval;
+	int ival;
+	long lval;
+	double dval;
 	//comp generate settings
-	fconfig.Write("use_sel", m_use_sel);
-	fconfig.Write("iter", m_iter);
-	fconfig.Write("thresh", m_thresh);
-	fconfig.Write("use_dist_field", m_use_dist_field);
-	fconfig.Write("dist_strength", m_dist_strength);
-	fconfig.Write("dist_filter_size", m_dist_filter_size);
-	fconfig.Write("max_dist", m_max_dist);
-	fconfig.Write("dist_thresh", m_dist_thresh);
-	fconfig.Write("diff", m_diff);
-	fconfig.Write("falloff", m_falloff);
-	fconfig.Write("size", m_size);
-	fconfig.Write("size_lm", m_size_lm);
-	fconfig.Write("density", m_density);
-	fconfig.Write("density_thresh", m_density_thresh);
-	fconfig.Write("varth", m_varth);
-	fconfig.Write("density_window_size", m_density_window_size);
-	fconfig.Write("density_stats_size", m_density_stats_size);
-	fconfig.Write("clean", m_clean);
-	fconfig.Write("clean_iter", m_clean_iter);
-	fconfig.Write("clean_size_vl", m_clean_size_vl);
-
+	getValue(gstUseSelection, bval); fconfig.Write("use_sel", bval);
+	getValue(gstIteration, lval); fconfig.Write("iter", lval);
+	getValue(gstThreshold, dval); fconfig.Write("thresh", dval);
+	getValue(gstUseDistField, bval); fconfig.Write("use_dist_field", bval);
+	getValue(gstDistFieldStrength, dval); fconfig.Write("dist_strength", dval);
+	getValue(gstDistFieldFilterSize, lval); fconfig.Write("dist_filter_size", lval);
+	getValue(gstMaxDist, lval); fconfig.Write("max_dist", lval);
+	getValue(gstDistFieldThresh, dval); fconfig.Write("dist_thresh", dval);
+	getValue(gstUseDiffusion, bval); fconfig.Write("diff", bval);
+	getValue(gstDiffusionFalloff, dval); fconfig.Write("falloff", dval);
+	getValue(gstUseDensityField, bval); fconfig.Write("density", bval);
+	getValue(gstDensityFieldThresh, dval); fconfig.Write("density_thresh", dval);
+	getValue(gstDensityVarThresh, dval); fconfig.Write("varth", dval);
+	getValue(gstDensityWindowSize, lval); fconfig.Write("density_window_size", lval);
+	getValue(gstDensityStatsSize, lval); fconfig.Write("density_stats_size", lval);
+	getValue(gstCleanEnable, bval); fconfig.Write("clean", bval);
+	getValue(gstCleanIteration, lval); fconfig.Write("clean_iter", lval);
+	getValue(gstCleanSize, lval); fconfig.Write("clean_size_vl", lval);
 	//cluster
-	fconfig.Write("cluster_method_kmeans", m_cluster_method_kmeans);
-	fconfig.Write("cluster_method_exmax", m_cluster_method_exmax);
-	fconfig.Write("cluster_method_dbscan", m_cluster_method_dbscan);
+	getValue(gstClusterMethod, lval); fconfig.Write("cluster_method", lval);
 	//parameters
-	fconfig.Write("cluster_clnum", m_cluster_clnum);
-	fconfig.Write("cluster_maxiter", m_cluster_maxiter);
-	fconfig.Write("cluster_tol", m_cluster_tol);
-	fconfig.Write("cluster_size", m_cluster_size);
-	fconfig.Write("cluster_eps", m_cluster_eps);
-
+	getValue(gstClusterNum, lval); fconfig.Write("cluster_clnum", lval);
+	getValue(gstClusterMaxIter, lval); fconfig.Write("cluster_maxiter", lval);
+	getValue(gstClusterTol, dval); fconfig.Write("cluster_tol", dval);
+	getValue(gstClusterSize, lval); fconfig.Write("cluster_size", lval);
+	getValue(gstClusterEps, dval); fconfig.Write("cluster_eps", dval);
 	//selection
-	fconfig.Write("use_min", m_use_min);
-	fconfig.Write("min_num", m_min_num);
-	fconfig.Write("use_max", m_use_max);
-	fconfig.Write("max_num", m_max_num);
+	getValue(gstUseMin, bval); fconfig.Write("use_min", bval);
+	getValue(gstMinValue, lval); fconfig.Write("min_num", lval);
+	getValue(gstUseMax, bval); fconfig.Write("use_max", bval);
+	getValue(gstMaxValue, lval); fconfig.Write("max_num", lval);
 	//colocalization
-	fconfig.Write("colocal", m_colocal);
+	getValue(gstCompColocal, bval); fconfig.Write("colocal", bval);
 	//output
-	fconfig.Write("output_type", m_output_type);
+	getValue(gstCompOutputType, lval); fconfig.Write("output_type", lval);
 
 	wxString str;
 	if (filename == "")
@@ -300,63 +302,65 @@ void ComponentAgent::Analyze()
 
 void ComponentAgent::Analyze(bool sel)
 {
-	if (!m_view)
-		return;
-	VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
+	Renderview* view = getObject();
+	if (!view) return;
+	VolumeData* vd = view->GetCurrentVolume();
+	if (!vd) return;
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!analyzer) return;
+	analyzer->SetVolume(vd);
 	int bn = vd->GetAllBrickNum();
-	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent ? 1 : 0));
-	m_prog = 0.0f;
+	//m_prog_bit = 97.0f / float(bn * 2 + (m_consistent ? 1 : 0));
+	//m_prog = 0.0f;
 
 	//boost::signals2::connection connection =
 	//	m_comp_analyzer.m_sig_progress.connect(std::bind(
 	//	&ComponentDlg::UpdateProgress, this));
 
-	m_comp_analyzer.SetVolume(vd);
-	if (m_colocal)
+	bool colocal, consistent;
+	getValue(gstCompColocal, colocal);
+	getValue(gstCompConsistent, consistent);
+	if (colocal)
 	{
-		m_comp_analyzer.ClearCoVolumes();
-		VolumeList list = m_view->GetVolList();
+		analyzer->ClearCoVolumes();
+		VolumeList list = view->GetVolList();
 		for (auto vdi : list)
 		{
 			if (vdi != vd)
-				m_comp_analyzer.AddCoVolume(vdi);
+				analyzer->AddCoVolume(vdi);
 		}
 	}
-	m_comp_analyzer.Analyze(sel, m_consistent, m_colocal);
+	analyzer->Analyze(sel, consistent, colocal);
 
-	if (m_consistent)
+	if (consistent)
 	{
 		//invalidate label mask in gpu
 		vd->GetRenderer()->clear_tex_label();
-		m_view->Update(39);
+		//m_view->Update(39);
 	}
 
-	if (m_comp_analyzer.GetListSize() > 10000)
-	{
-		wxFileDialog *fopendlg = new wxFileDialog(
-			this, "Save Analysis Data", "", "",
-			"Text file (*.txt)|*.txt",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		int rval = fopendlg->ShowModal();
-		if (rval == wxID_OK)
-		{
-			wxString filename = fopendlg->GetPath();
-			string str = filename.ToStdString();
-			m_comp_analyzer.OutputCompListFile(str, 1);
-		}
-		if (fopendlg)
-			delete fopendlg;
-	}
-	else
+	if (analyzer->GetListSize() < 10000)
+	//{
+	//	wxFileDialog *fopendlg = new wxFileDialog(
+	//		this, "Save Analysis Data", "", "",
+	//		"Text file (*.txt)|*.txt",
+	//		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	//	int rval = fopendlg->ShowModal();
+	//	if (rval == wxID_OK)
+	//	{
+	//		wxString filename = fopendlg->GetPath();
+	//		string str = filename.ToStdString();
+	//		m_comp_analyzer.OutputCompListFile(str, 1);
+	//	}
+	//	if (fopendlg)
+	//		delete fopendlg;
+	//}
+	//else
 	{
 		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
+		analyzer->OutputFormHeader(titles);
+		analyzer->OutputCompListStr(values, 0);
+		dlg_.SetOutput(titles, values);
 	}
 
 	//connection.disconnect();
@@ -364,19 +368,26 @@ void ComponentAgent::Analyze(bool sel)
 
 void ComponentAgent::GenerateComp()
 {
-	Renderview* view = getObject();
-	if (!view)
-		return;
-	VolumeData* vd = view->GetCurrentVolume();
-	if (!vd)
-		return;
-	bool use_sel, command;
+	bool use_sel, run_cmd;
 	getValue(gstUseSelection, use_sel);
-	getValue(gstRunCmd, command);
+	getValue(gstRunCmd, run_cmd);
+	GenerateComp(use_sel, run_cmd);
+}
 
-	int clean_iter = m_clean_iter;
-	int clean_size = m_clean_size_vl;
-	if (!m_clean)
+void ComponentAgent::GenerateComp(bool use_sel, bool run_cmd)
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	VolumeData* vd = view->GetCurrentVolume();
+	if (!vd) return;
+	bool rec_cmd;
+	getValue(gstRecordCmd, rec_cmd);
+
+	bool clean; long clean_iter, clean_size;
+	getValue(gstCleanEnable, clean);
+	getValue(gstCleanIteration, clean_iter);
+	getValue(gstCleanSize, clean_size);
+	if (!clean)
 	{
 		clean_iter = 0;
 		clean_size = 0;
@@ -387,25 +398,27 @@ void ComponentAgent::GenerateComp()
 	double scale;
 	vd->getValue(gstIntScale, scale);
 
+	std::string titles, values;
 	flrd::ComponentGenerator cg(vd);
-	boost::signals2::connection preconn =
-		cg.prework.connect(std::bind(
-			&ComponentDlg::StartTimer, this, std::placeholders::_1));
-	boost::signals2::connection postconn =
-		cg.postwork.connect(std::bind(
-			&ComponentDlg::StopTimer, this, std::placeholders::_1));
-	m_titles.Clear();
-	m_values.Clear();
-	m_tps.clear();
+	//boost::signals2::connection preconn =
+	//	cg.prework.connect(std::bind(
+	//		&ComponentAgent::StartTimer, this, std::placeholders::_1));
+	//boost::signals2::connection postconn =
+	//	cg.postwork.connect(std::bind(
+	//		&ComponentAgent::StopTimer, this, std::placeholders::_1));
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
 	cg.SetUseMask(use_sel);
 
 	vd->AddEmptyMask(cg.GetUseMask() ? 2 : 1, true);//select all if no mask, otherwise keep
-	if (m_fixate && vd->GetLabel(false))
+	bool fixate;
+	getValue(gstFixateEnable, fixate);
+	if (fixate && vd->GetLabel(false))
 	{
 		vd->LoadLabel2();
-		cg.SetIDBit(m_fix_size);
+		long lval;
+		getValue(gstFixateSize, lval);
+		cg.SetIDBit(lval);
 	}
 	else
 	{
@@ -413,58 +426,112 @@ void ComponentAgent::GenerateComp()
 		cg.ShuffleID();
 	}
 
-	if (m_use_dist_field)
+	bool use_dist_field, use_density_field;
+	getValue(gstUseDistField, use_dist_field);
+	getValue(gstUseDensityField, use_density_field);
+	if (use_dist_field)
 	{
-		if (m_density)
+		if (use_density_field)
 		{
+			bool use_diff;
+			long iteration, dist_filter_size, max_dist, density_window_size, density_stat_size;
+			double threshold, thresh_scale, falloff, dist_thresh, dist_strength, density_thresh, density_var;
+			getValue(gstUseDiffusion, use_diff);
+			getValue(gstIteration, iteration);
+			getValue(gstThreshold, threshold);
+			getValue(gstThreshScale, thresh_scale);
+			getValue(gstDiffusionFalloff, falloff);
+			getValue(gstDistFieldFilterSize, dist_filter_size);
+			getValue(gstMaxDist, max_dist);
+			getValue(gstDistFieldThresh, dist_thresh);
+			getValue(gstDistFieldStrength, dist_strength);
+			getValue(gstDensityWindowSize, density_window_size);
+			getValue(gstDensityStatsSize, density_stat_size);
+			getValue(gstDensityFieldThresh, density_thresh);
+			getValue(gstDensityVarThresh, density_var);
 			cg.DistDensityField(
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_dist_filter_size,
-				m_max_dist,
-				m_dist_thresh,
-				m_dist_strength,
-				m_density_window_size,
-				m_density_stats_size,
-				m_density_thresh,
-				m_varth,
+				use_diff,
+				iteration,
+				threshold*thresh_scale,
+				falloff,
+				dist_filter_size,
+				max_dist,
+				dist_thresh,
+				dist_strength,
+				density_window_size,
+				density_stat_size,
+				density_thresh,
+				density_var,
 				scale);
 		}
 		else
 		{
+			bool use_diff;
+			long iteration, dist_filter_size, max_dist;
+			double threshold, thresh_scale, falloff, dist_thresh, dist_strength;
+			getValue(gstUseDiffusion, use_diff);
+			getValue(gstIteration, iteration);
+			getValue(gstThreshold, threshold);
+			getValue(gstThreshScale, thresh_scale);
+			getValue(gstDiffusionFalloff, falloff);
+			getValue(gstDistFieldFilterSize, dist_filter_size);
+			getValue(gstMaxDist, max_dist);
+			getValue(gstDistFieldThresh, dist_thresh);
+			getValue(gstDistFieldStrength, dist_strength);
 			cg.DistGrow(
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_dist_filter_size,
-				m_max_dist,
-				m_dist_thresh,
+				use_diff,
+				iteration,
+				threshold*thresh_scale,
+				falloff,
+				dist_filter_size,
+				max_dist,
+				dist_thresh,
 				scale,
-				m_dist_strength);
+				dist_strength);
 		}
 	}
 	else
 	{
-		if (m_density)
+		if (use_density_field)
 		{
+			bool use_diff;
+			long iteration, density_window_size, density_stat_size;
+			double threshold, thresh_scale, falloff, density_thresh, density_var;
+			getValue(gstUseDiffusion, use_diff);
+			getValue(gstIteration, iteration);
+			getValue(gstThreshold, threshold);
+			getValue(gstThreshScale, thresh_scale);
+			getValue(gstDiffusionFalloff, falloff);
+			getValue(gstDensityWindowSize, density_window_size);
+			getValue(gstDensityStatsSize, density_stat_size);
+			getValue(gstDensityFieldThresh, density_thresh);
+			getValue(gstDensityVarThresh, density_var);
 			cg.DensityField(
-				m_density_window_size,
-				m_density_stats_size,
-				m_diff, m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
-				m_density_thresh,
-				m_varth,
+				density_window_size,
+				density_stat_size,
+				use_diff,
+				iteration,
+				threshold*thresh_scale,
+				falloff,
+				density_thresh,
+				density_var,
 				scale);
 		}
 		else
 		{
+			bool use_diff;
+			long iteration;
+			double threshold, thresh_scale, falloff;
+			getValue(gstUseDiffusion, use_diff);
+			getValue(gstIteration, iteration);
+			getValue(gstThreshold, threshold);
+			getValue(gstThreshScale, thresh_scale);
+			getValue(gstDiffusionFalloff, falloff);
 			cg.Grow(
-				m_diff,
-				m_iter,
-				m_thresh*m_tfactor,
-				m_falloff,
+				use_diff,
+				iteration,
+				threshold*thresh_scale,
+				falloff,
 				scale);
 		}
 	}
@@ -479,24 +546,26 @@ void ComponentAgent::GenerateComp()
 	std::chrono::duration<double> time_span =
 		std::chrono::duration_cast<std::chrono::duration<double>>(
 			m_tps.back() - m_tps.front());
-	if (m_test_speed)
+	bool bval;
+	getValue(gstTestSpeed, bval);
+	if (bval)
 	{
-		m_titles += "Function\t";
-		m_titles += "Time\n";
-		m_values += "Total\t";
+		titles += "Function\t";
+		titles += "Time\n";
+		values += "Total\t";
 	}
 	else
 	{
-		m_titles += "Total time\n";
+		titles += "Total time\n";
 	}
-	m_values += wxString::Format("%.4f", time_span.count());
-	m_values += " sec.\n";
-	SetOutput(m_titles, m_values);
+	values += wxString::Format("%.4f", time_span.count());
+	values += " sec.\n";
+	dlg_.SetOutput(titles, values);
 
 	//update
 	//m_view->Update(39);
 
-	if (command && m_record_cmd)
+	if (run_cmd && rec_cmd)
 		AddCmd("generate");
 }
 
@@ -589,7 +658,7 @@ void ComponentAgent::CompFull()
 	getObject()->getValue(gstPaintCount, bval);
 	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
 	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-	getObject->getValue(gstPaintColocalize, bval);
+	getObject()->getValue(gstPaintColocalize, bval);
 	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 }
 
@@ -626,7 +695,7 @@ void ComponentAgent::CompAppend()
 	getObject()->getValue(gstPaintCount, bval);
 	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
 	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-	getObject->getValue(gstPaintColocalize, bval);
+	getObject()->getValue(gstPaintColocalize, bval);
 	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 }
 
@@ -663,7 +732,7 @@ void ComponentAgent::CompExclusive()
 	getObject()->getValue(gstPaintCount, bval);
 	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
 	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-	getObject->getValue(gstPaintColocalize, bval);
+	getObject()->getValue(gstPaintColocalize, bval);
 	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 }
 
@@ -676,10 +745,11 @@ void ComponentAgent::CompAll()
 
 	//m_view->Update(39);
 
+	bool bval;
 	getObject()->getValue(gstPaintCount, bval);
 	if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
 	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-	getObject->getValue(gstPaintColocalize, bval);
+	getObject()->getValue(gstPaintColocalize, bval);
 	if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 }
 
@@ -933,44 +1003,48 @@ void ComponentAgent::AddCmd(const std::string &type)
 			//else do nothing
 		}
 	}
+	bool bval;
+	int ival;
+	long lval;
+	double dval;
 	//add
 	flrd::CompCmdParams params;
 	if (type == "generate")
 	{
 		params.push_back("generate");
-		params.push_back("iter"); params.push_back(std::to_string(m_iter));
-		params.push_back("thresh"); params.push_back(std::to_string(m_thresh));
-		params.push_back("use_dist_field"); params.push_back(std::to_string(m_use_dist_field));
-		params.push_back("dist_strength"); params.push_back(std::to_string(m_dist_strength));
-		params.push_back("dist_filter_size"); params.push_back(std::to_string(m_dist_filter_size));
-		params.push_back("max_dist"); params.push_back(std::to_string(m_max_dist));
-		params.push_back("dist_thresh"); params.push_back(std::to_string(m_dist_thresh));
-		params.push_back("diff"); params.push_back(std::to_string(m_diff));
-		params.push_back("falloff"); params.push_back(std::to_string(m_falloff));
-		params.push_back("density"); params.push_back(std::to_string(m_density));
-		params.push_back("density_thresh"); params.push_back(std::to_string(m_density_thresh));
-		params.push_back("varth"); params.push_back(std::to_string(m_varth));
-		params.push_back("density_window_size"); params.push_back(std::to_string(m_density_window_size));
-		params.push_back("density_stats_size"); params.push_back(std::to_string(m_density_stats_size));
-		params.push_back("cleanb"); params.push_back(std::to_string(m_clean));
-		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+		getValue(gstIteration, lval); params.push_back("iter"); params.push_back(std::to_string(lval));
+		getValue(gstThreshold, dval); params.push_back("thresh"); params.push_back(std::to_string(dval));
+		getValue(gstUseDistField, bval); params.push_back("use_dist_field"); params.push_back(std::to_string(bval));
+		getValue(gstDistFieldStrength, dval); params.push_back("dist_strength"); params.push_back(std::to_string(dval));
+		getValue(gstDistFieldFilterSize, lval); params.push_back("dist_filter_size"); params.push_back(std::to_string(lval));
+		getValue(gstMaxDist, lval); params.push_back("max_dist"); params.push_back(std::to_string(lval));
+		getValue(gstDistFieldThresh, dval); params.push_back("dist_thresh"); params.push_back(std::to_string(dval));
+		getValue(gstUseDiffusion, bval); params.push_back("diff"); params.push_back(std::to_string(bval));
+		getValue(gstDiffusionFalloff, dval); params.push_back("falloff"); params.push_back(std::to_string(dval));
+		getValue(gstUseDensityField, bval); params.push_back("density"); params.push_back(std::to_string(bval));
+		getValue(gstDensityFieldThresh, dval); params.push_back("density_thresh"); params.push_back(std::to_string(dval));
+		getValue(gstDensityVarThresh, dval); params.push_back("varth"); params.push_back(std::to_string(dval));
+		getValue(gstDensityWindowSize, lval); params.push_back("density_window_size"); params.push_back(std::to_string(lval));
+		getValue(gstDensityStatsSize, lval); params.push_back("density_stats_size"); params.push_back(std::to_string(lval));
+		getValue(gstCleanEnable, bval); params.push_back("cleanb"); params.push_back(std::to_string(bval));
+		getValue(gstCleanIteration, lval); params.push_back("clean_iter"); params.push_back(std::to_string(lval));
+		getValue(gstCleanSize, lval); params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
 	}
 	else if (type == "clean")
 	{
 		params.push_back("clean");
-		params.push_back("clean_iter"); params.push_back(std::to_string(m_clean_iter));
-		params.push_back("clean_size_vl"); params.push_back(std::to_string(m_clean_size_vl));
+		getValue(gstCleanIteration, lval); params.push_back("clean_iter"); params.push_back(std::to_string(lval));
+		getValue(gstCleanSize, lval); params.push_back("clean_size_vl"); params.push_back(std::to_string(lval));
 	}
 	else if (type == "fixate")
 	{
 		params.push_back("fixate");
-		params.push_back("fix_size"); params.push_back(std::to_string(m_fix_size));
+		getValue(gstFixateSize, lval); params.push_back("fix_size"); params.push_back(std::to_string(lval));
 	}
 	m_command.push_back(params);
 
 	//record
-	int ival = m_command.size();
+	ival = m_command.size();
 	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
@@ -985,19 +1059,23 @@ void ComponentAgent::ResetCmd()
 	//dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
 }
 
-void ComponentAgent::PlayCmd(double tfactor)
+void ComponentAgent::PlayCmd(bool use_selection, double tfactor)
 {
+	bool bval;
+	int ival;
+	long lval;
+	double dval;
 	//disable first
-	m_fixate = false;
-	m_auto_update = false;
-	m_auto_update_btn->SetValue(false);
+	setValue(gstFixateEnable, false);
+	setValue(gstAutoUpdate, false);
+	dlg_.m_auto_update_btn->SetValue(false);
 
 	if (m_command.empty())
 	{
 		//the threshold factor is used to lower the threshold value for semi auto segmentation
-		m_tfactor = tfactor;
-		GenerateComp(use_sel, false);
-		m_tfactor = 1.0;
+		setValue(gstThreshScale, tfactor);
+		GenerateComp(use_selection, false);
+		setValue(gstThreshScale, 1.0);
 		return;
 	}
 
@@ -1012,70 +1090,70 @@ void ComponentAgent::PlayCmd(double tfactor)
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "iter")
-					m_iter = std::stoi(*(++it2));
+					setValue(gstIteration, std::stol(*(++it2)));
 				else if (*it2 == "thresh")
-					m_thresh = std::stod(*(++it2));
+					setValue(gstThreshold, std::stod(*(++it2)));
 				else if (*it2 == "use_dist_field")
-					m_use_dist_field = std::stoi(*(++it2));
+					setValue(gstUseDistField, bool(std::stoi(*(++it2))));
 				else if (*it2 == "dist_strength")
-					m_dist_strength = std::stod(*(++it2));
+					setValue(gstDistFieldStrength, std::stod(*(++it2)));
 				else if (*it2 == "dist_filter_size")
-					m_dist_filter_size = std::stod(*(++it2));
+					setValue(gstDistFieldFilterSize, std::stod(*(++it2)));
 				else if (*it2 == "max_dist")
-					m_max_dist = std::stoi(*(++it2));
+					setValue(gstMaxDist, std::stol(*(++it2)));
 				else if (*it2 == "dist_thresh")
-					m_dist_thresh = std::stod(*(++it2));
+					setValue(gstDistFieldThresh, std::stod(*(++it2)));
 				else if (*it2 == "diff")
-					m_diff = std::stoi(*(++it2));
+					setValue(gstUseDiffusion, bool(std::stoi(*(++it2))));
 				else if (*it2 == "falloff")
-					m_falloff = std::stod(*(++it2));
+					setValue(gstDiffusionFalloff, std::stod(*(++it2)));
 				else if (*it2 == "density")
-					m_density = std::stoi(*(++it2));
+					setValue(gstUseDensityField, bool(std::stoi(*(++it2))));
 				else if (*it2 == "density_thresh")
-					m_density_thresh = std::stod(*(++it2));
+					setValue(gstDensityFieldThresh, std::stod(*(++it2)));
 				else if (*it2 == "varth")
-					m_varth = std::stod(*(++it2));
+					setValue(gstDensityVarThresh, std::stod(*(++it2)));
 				else if (*it2 == "density_window_size")
-					m_density_window_size = std::stoi(*(++it2));
+					setValue(gstDensityWindowSize, std::stol(*(++it2)));
 				else if (*it2 == "density_stats_size")
-					m_density_stats_size = std::stoi(*(++it2));
+					setValue(gstDensityStatsSize, std::stol(*(++it2)));
 				else if (*it2 == "cleanb")
-					m_clean = std::stoi(*(++it2));
+					setValue(gstCleanEnable, bool(std::stoi(*(++it2))));
 				else if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
+					setValue(gstCleanIteration, std::stol(*(++it2)));
 				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
+					setValue(gstCleanSize, std::stol(*(++it2)));
 			}
-			GenerateComp(use_sel, false);
+			GenerateComp(use_selection, false);
 		}
 		else if ((*it)[0] == "clean")
 		{
-			m_clean = true;
+			setValue(gstCleanEnable, true);
 			for (auto it2 = it->begin();
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
+					setValue(gstCleanIteration, std::stol(*(++it2)));
 				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
+					setValue(gstCleanSize, std::stol(*(++it2)));
 			}
-			Clean(use_sel, false);
+			Clean(use_selection, false);
 		}
 		else if ((*it)[0] == "fixate")
 		{
-			m_fixate = true;
+			setValue(gstFixateEnable, true);
 			for (auto it2 = it->begin();
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "fix_size")
-					m_fix_size = std::stoi(*(++it2));
+					setValue(gstFixateSize, std::stol(*(++it2)));
 			}
 			//GenerateComp(false);
 			Fixate(false);
 			//return;
 		}
 	}
-	Update();
+	//Update();
 }
 
 void ComponentAgent::Cluster()
@@ -1083,29 +1161,23 @@ void ComponentAgent::Cluster()
 	m_in_cells.clear();
 	m_out_cells.clear();
 
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
+	Renderview* view = getObject();
+	if (!view) return;
+	fluo::VolumeData* vd = view->GetCurrentVolume();
+	if (!vd) return;
 	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
+	if (!tex) return;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data)
-		return;
+	if (!nrrd_data) return;
 	long bits;
 	vd->getValue(gstBits, bits);
 	void* data_data = nrrd_data->data;
-	if (!data_data)
-		return;
+	if (!data_data) return;
 	//get mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
-		return;
+	if (!nrrd_mask) return;
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
-		return;
+	if (!data_mask) return;
 	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
 	if (!nrrd_label)
 	{
@@ -1113,8 +1185,7 @@ void ComponentAgent::Cluster()
 		nrrd_label = tex->get_nrrd(tex->nlabel());
 	}
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
-		return;
+	if (!data_label) return;
 
 	long nx, ny, nz;
 	vd->getValue(gstResX, nx);
@@ -1129,27 +1200,37 @@ void ComponentAgent::Cluster()
 
 	flrd::ClusterMethod* method = 0;
 	//switch method
-	if (m_cluster_method_exmax)
-	{
-		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
-		method_exmax->SetClnum(m_cluster_clnum);
-		method_exmax->SetMaxiter(m_cluster_maxiter);
-		method_exmax->SetProbTol(m_cluster_tol);
-		method = method_exmax;
-	}
-	else if (m_cluster_method_dbscan)
-	{
-		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
-		method_dbscan->SetSize(m_cluster_size);
-		method_dbscan->SetEps(m_cluster_eps);
-		method = method_dbscan;
-	}
-	else if (m_cluster_method_kmeans)
+	long clm, lval;
+	double dval;
+	getValue(gstClusterMethod, clm);
+	if (clm == 0)
 	{
 		flrd::ClusterKmeans* method_kmeans = new flrd::ClusterKmeans();
-		method_kmeans->SetClnum(m_cluster_clnum);
-		method_kmeans->SetMaxiter(m_cluster_maxiter);
+		getValue(gstClusterNum, lval);
+		method_kmeans->SetClnum(lval);
+		getValue(gstClusterMaxIter, lval);
+		method_kmeans->SetMaxiter(lval);
 		method = method_kmeans;
+	}
+	else if (clm == 1)
+	{
+		flrd::ClusterExmax* method_exmax = new flrd::ClusterExmax();
+		getValue(gstClusterNum, lval);
+		method_exmax->SetClnum(lval);
+		getValue(gstClusterMaxIter, lval);
+		method_exmax->SetMaxiter(lval);
+		getValue(gstClusterTol, dval);
+		method_exmax->SetProbTol(dval);
+		method = method_exmax;
+	}
+	else if (clm == 2)
+	{
+		flrd::ClusterDbscan* method_dbscan = new flrd::ClusterDbscan();
+		getValue(gstClusterSize, lval);
+		method_dbscan->SetSize(lval);
+		getValue(gstClusterEps, dval);
+		method_dbscan->SetEps(dval);
+		method = method_dbscan;
 	}
 
 	if (!method)
@@ -1176,7 +1257,7 @@ void ComponentAgent::Cluster()
 	};
 	std::unordered_map<unsigned int, CmpCnt> init_clusters;
 	std::set<CmpCnt> ordered_clusters;
-	if (m_cluster_method_exmax)
+	if (clm == 1)
 	{
 		for (index = 0; index < nxyz; ++index)
 		{
@@ -1198,7 +1279,8 @@ void ComponentAgent::Cluster()
 				it->second.size++;
 			}
 		}
-		if (init_clusters.size() >= m_cluster_clnum)
+		getValue(gstClusterNum, lval);
+		if (init_clusters.size() >= lval)
 		{
 			for (auto it = init_clusters.begin();
 				it != init_clusters.end(); ++it)
@@ -1207,63 +1289,61 @@ void ComponentAgent::Cluster()
 		}
 	}
 
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
+	for (i = 0; i < nx; ++i) for (j = 0; j < ny; ++j) for (k = 0; k < nz; ++k)
+	{
+		index = nx * ny*k + nx * j + i;
+		mask_value = data_mask[index];
+		if (mask_value)
+		{
+			if (bits == 8)
+				data_value = ((unsigned char*)data_data)[index] / 255.0f;
+			else if (bits == 16)
+				data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
+			flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
+			label_value = data_label[index];
+			int cid = -1;
+			if (use_init_cluster)
 			{
-				index = nx * ny*k + nx * j + i;
-				mask_value = data_mask[index];
-				if (mask_value)
+				cid = 0;
+				bool found = false;
+				for (auto it = ordered_clusters.begin();
+					it != ordered_clusters.end(); ++it)
 				{
-					if (bits == 8)
-						data_value = ((unsigned char*)data_data)[index] / 255.0f;
-					else if (bits == 16)
-						data_value = ((unsigned short*)data_data)[index] * scale / 65535.0f;
-					flrd::EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
-					label_value = data_label[index];
-					int cid = -1;
-					if (use_init_cluster)
+					if (label_value == it->id)
 					{
-						cid = 0;
-						bool found = false;
-						for (auto it = ordered_clusters.begin();
-							it != ordered_clusters.end(); ++it)
-						{
-							if (label_value == it->id)
-							{
-								found = true;
-								break;
-							}
-							cid++;
-						}
-						if (!found)
-							cid = -1;
+						found = true;
+						break;
 					}
-					method->AddClusterPoint(
-						pnt, data_value, cid);
-
-					//add to list
-					auto iter = m_in_cells.find(label_value);
-					if (iter != m_in_cells.end())
-					{
-						iter->second->Inc(i, j, k, data_value);
-					}
-					else
-					{
-						flrd::Cell* cell = new flrd::Cell(label_value);
-						cell->Inc(i, j, k, data_value);
-						m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
-							(label_value, flrd::Celp(cell)));
-					}
+					cid++;
 				}
+				if (!found)
+					cid = -1;
 			}
+			method->AddClusterPoint(
+				pnt, data_value, cid);
+
+			//add to list
+			auto iter = m_in_cells.find(label_value);
+			if (iter != m_in_cells.end())
+			{
+				iter->second->Inc(i, j, k, data_value);
+			}
+			else
+			{
+				flrd::Cell* cell = new flrd::Cell(label_value);
+				cell->Inc(i, j, k, data_value);
+				m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
+					(label_value, flrd::Celp(cell)));
+			}
+		}
+	}
 
 	if (method->Execute())
 	{
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
 		m_out_cells = method->GetCellList();
 		vd->GetRenderer()->clear_tex_label();
-		m_view->Update(39);
+		//m_view->Update(39);
 	}
 
 	delete method;
@@ -1409,7 +1489,7 @@ void ComponentAgent::OutputAnnotation(int type)
 int ComponentAgent::GetDistMatSize()
 {
 	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
-	if (!analyzer) return;
+	if (!analyzer) return 0;
 
 	int gsize = analyzer->GetCompGroupSize();
 	bool bval;
@@ -1549,9 +1629,9 @@ void ComponentAgent::DistOutput(const std::wstring &filename)
 
 	bool dist_neighbor;
 	getValue(gstDistNeighbor, dist_neighbor);
-	long lval;
-	getValue(gstDistNeighborValue, lval);
-	bool bdist = dist_neighbor && lval > 0 && lval < num2 - 1;
+	long dist_neighbor_value;
+	getValue(gstDistNeighborValue, dist_neighbor_value);
+	bool bdist = dist_neighbor && dist_neighbor_value > 0 && dist_neighbor_value < num2 - 1;
 
 	std::vector<double> in_group;//distances with in a group
 	std::vector<double> out_group;//distance between groups
@@ -1578,32 +1658,30 @@ void ComponentAgent::DistOutput(const std::wstring &filename)
 				[&](int ii, int jj) {return rm2[i][ii] < rm2[i][jj]; });
 		}
 		//fill rm
-		for (size_t i = 0; i < num2; ++i)
-			for (size_t j = 0; j < num2; ++j)
+		for (size_t i = 0; i < num2; ++i) for (size_t j = 0; j < num2; ++j)
+		{
+			rm[i][j] = rm2[i][im[i][j]];
+			if (gsize > 1 && j > 0 &&
+				j <= dist_neighbor_value)
 			{
-				rm[i][j] = rm2[i][im[i][j]];
-				if (gsize > 1 && j > 0 &&
-					j <= dist_neighbor)
-				{
-					if (gn[i] == gn[im[i][j]])
-						in_group.push_back(rm[i][j]);
-					else
-						out_group.push_back(rm[i][j]);
-				}
+				if (gn[i] == gn[im[i][j]])
+					in_group.push_back(rm[i][j]);
+				else
+					out_group.push_back(rm[i][j]);
 			}
+		}
 	}
 	else
 	{
 		if (gsize > 1)
 		{
-			for (int i = 0; i < num2; ++i)
-				for (int j = i + 1; j < num2; ++j)
-				{
-					if (gn[i] == gn[j])
-						in_group.push_back(rm[i][j]);
-					else
-						out_group.push_back(rm[i][j]);
-				}
+			for (int i = 0; i < num2; ++i) for (int j = i + 1; j < num2; ++j)
+			{
+				if (gn[i] == gn[j])
+					in_group.push_back(rm[i][j]);
+				else
+					out_group.push_back(rm[i][j]);
+			}
 		}
 	}
 
@@ -1711,7 +1789,9 @@ void ComponentAgent::AlignPca()
 
 bool ComponentAgent::GetCellList(flrd::CelpList &cl, bool links)
 {
-	flrd::CelpList* list = m_comp_analyzer.GetCelpList();
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	if (!analyzer) return false;
+	flrd::CelpList* list = analyzer->GetCelpList();
 	if (!list || list->empty())
 		return false;
 
@@ -1724,16 +1804,16 @@ bool ComponentAgent::GetCellList(flrd::CelpList &cl, bool links)
 	bool sel_all = false;
 	std::vector<unsigned int> ids;
 	std::vector<unsigned int> bids;
-	int bn = m_comp_analyzer.GetBrickNum();
+	int bn = analyzer->GetBrickNum();
 
 	//selected cells are retrieved using different functions
-	wxArrayInt seli = m_output_grid->GetSelectedCols();
+	wxArrayInt seli = dlg_.m_output_grid->GetSelectedCols();
 	if (seli.GetCount() > 0)
 		sel_all = true;
 	if (!sel_all)
 	{
-		seli = m_output_grid->GetSelectedRows();
-		AddSelArrayInt(ids, bids, seli, bn > 1);
+		seli = dlg_.m_output_grid->GetSelectedRows();
+		dlg_.AddSelArrayInt(ids, bids, seli, bn > 1);
 		//wxGridCellCoordsArray sela =
 		//	m_output_grid->GetSelectionBlockBottomRight();
 		//AddSelCoordArray(ids, bids, sela, bn > 1);
@@ -1776,40 +1856,40 @@ bool ComponentAgent::GetCellList(flrd::CelpList &cl, bool links)
 
 void ComponentAgent::GetCompSelection()
 {
-	if (m_view)
-	{
-		flrd::CelpList cl;
-		GetCellList(cl);
-		m_view->SetCellList(cl);
-		m_view->setValue(gstInteractive, false);
-		//m_view->Update(39);
-	}
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::CelpList cl;
+	GetCellList(cl);
+	view->SetCellList(cl);
+	view->setValue(gstInteractive, false);
+	//m_view->Update(39);
 }
 
 void ComponentAgent::SetCompSelection(std::set<unsigned long long>& ids, int mode)
 {
-	if (ids.empty())
-		return;
+	if (ids.empty()) return;
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	if (!analyzer) return;
 
-	int bn = m_comp_analyzer.GetBrickNum();
+	int bn = analyzer->GetBrickNum();
 
 	wxString str;
 	unsigned long ulv;
 	unsigned long long ull;
 	bool flag = mode == 1;
 	int lasti = -1;
-	wxArrayInt sel = m_output_grid->GetSelectedRows();
+	wxArrayInt sel = dlg_.m_output_grid->GetSelectedRows();
 	std::set<int> rows;
 	for (int i = 0; i < sel.GetCount(); ++i)
 		rows.insert(sel[i]);
-	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
+	for (int i = 0; i < dlg_.m_output_grid->GetNumberRows(); ++i)
 	{
-		str = m_output_grid->GetCellValue(i, 0);
+		str = dlg_.m_output_grid->GetCellValue(i, 0);
 		if (!str.ToULong(&ulv))
 			continue;
 		if (bn > 1)
 		{
-			str = m_output_grid->GetCellValue(i, 1);
+			str = dlg_.m_output_grid->GetCellValue(i, 1);
 			if (!str.ToULongLong(&ull))
 				continue;
 			ull = (ull << 32) | ulv;
@@ -1820,21 +1900,21 @@ void ComponentAgent::SetCompSelection(std::set<unsigned long long>& ids, int mod
 		{
 			if (!flag)
 			{
-				m_output_grid->ClearSelection();
+				dlg_.m_output_grid->ClearSelection();
 				flag = true;
 			}
 			if (mode == 0)
 			{
-				m_output_grid->SelectRow(i, true);
+				dlg_.m_output_grid->SelectRow(i, true);
 				lasti = i;
 			}
 			else
 			{
 				if (rows.find(i) != rows.end())
-					m_output_grid->DeselectRow(i);
+					dlg_.m_output_grid->DeselectRow(i);
 				else
 				{
-					m_output_grid->SelectRow(i, true);
+					dlg_.m_output_grid->SelectRow(i, true);
 					lasti = i;
 				}
 			}
@@ -1845,23 +1925,24 @@ void ComponentAgent::SetCompSelection(std::set<unsigned long long>& ids, int mod
 	{
 		GetCompSelection();
 		if (lasti >= 0)
-			m_output_grid->GoToCell(lasti, 0);
+			dlg_.m_output_grid->GoToCell(lasti, 0);
 	}
 }
 
 void ComponentAgent::IncludeComps()
 {
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
+	Renderview* view = getObject();
+	if (!view) return;
+	fluo::VolumeData* vd = view->GetCurrentVolume();
+	if (!vd) return;
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!analyzer) return;
 
 	flrd::CelpList cl;
 	if (GetCellList(cl, true))
 	{
 		//clear complist
-		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
+		flrd::CelpList *list = analyzer->GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
@@ -1873,52 +1954,40 @@ void ComponentAgent::IncludeComps()
 		//select cl
 		flrd::ComponentSelector comp_selector(vd);
 		comp_selector.SelectList(cl);
-		ClearOutputGrid();
+		dlg_.ClearOutputGrid();
 		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
+		analyzer->OutputFormHeader(titles);
+		analyzer->OutputCompListStr(values, 0);
+		dlg_.SetOutput(titles, values);
 
 		cl.clear();
-		m_view->SetCellList(cl);
-		m_view->setValue(gstInteractive, false);
+		view->SetCellList(cl);
+		view->setValue(gstInteractive, false);
 		//m_view->Update(39);
 
-		//frame
 		bool bval;
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				m_view->getValue(gstPaintCount, bval);
-				if (bval)
-					m_frame->GetBrushToolDlg()->Update(0);
-				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg())
-			{
-				m_view->getValue(gstPaintColocalize, bval);
-				if (bval)
-					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-			}
-		}
+		getObject()->getValue(gstPaintCount, bval);
+		if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
+		glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+		getObject()->getValue(gstPaintColocalize, bval);
+		if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 	}
 }
 
 void ComponentAgent::ExcludeComps()
 {
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
+	Renderview* view = getObject();
+	if (!view) return;
+	fluo::VolumeData* vd = view->GetCurrentVolume();
+	if (!vd) return;
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!analyzer) return;
 
 	flrd::CelpList cl;
 	if (GetCellList(cl, true))
 	{
 		//clear complist
-		flrd::CelpList *list = m_comp_analyzer.GetCelpList();
+		flrd::CelpList *list = analyzer->GetCelpList();
 		for (auto it = list->begin();
 			it != list->end();)
 		{
@@ -1933,37 +2002,48 @@ void ComponentAgent::ExcludeComps()
 			it != list->end(); ++it)
 			ids.push_back(it->second->GetEId());
 		comp_selector.Delete(ids);
-		ClearOutputGrid();
+		dlg_.ClearOutputGrid();
 		string titles, values;
-		m_comp_analyzer.OutputFormHeader(titles);
-		m_comp_analyzer.OutputCompListStr(values, 0);
-		wxString str1(titles), str2(values);
-		SetOutput(str1, str2);
+		analyzer->OutputFormHeader(titles);
+		analyzer->OutputCompListStr(values, 0);
+		dlg_.SetOutput(titles, values);
 
 		cl.clear();
-		m_view->SetCellList(cl);
-		m_view->setValue(gstInteractive, false);
+		view->SetCellList(cl);
+		view->setValue(gstInteractive, false);
 		//m_view->RefreshGL(39);
 
-		//frame
 		bool bval;
-		if (m_frame)
-		{
-			if (m_frame->GetBrushToolDlg())
-			{
-				m_view->getValue(gstPaintCount, bval);
-				if (bval)
-					m_frame->GetBrushToolDlg()->Update(0);
-				glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
-			}
-			if (m_frame->GetColocalizationDlg())
-			{
-				m_view->getValue(gstPaintColocalize, bval);
-				if (bval)
-					glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
-			}
-		}
+		getObject()->getValue(gstPaintCount, bval);
+		if (bval) glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->Update(0);
+		glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+		getObject()->getValue(gstPaintColocalize, bval);
+		if (bval) glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent()->Run();
 	}
+}
+
+void ComponentAgent::StartTimer()
+{
+	bool bval;
+	getValue(gstTestSpeed, bval);
+	if (!bval) return;
+	m_tps.push_back(std::chrono::high_resolution_clock::now());
+}
+
+void ComponentAgent::StopTimer(std::string &values, const std::string &str)
+{
+	bool bval;
+	getValue(gstTestSpeed, bval);
+	if (!bval) return;
+	auto t0 = m_tps.back();
+	m_tps.push_back(std::chrono::high_resolution_clock::now());
+	std::chrono::duration<double> time_span =
+		std::chrono::duration_cast<std::chrono::duration<double>>(
+			m_tps.back() - t0);
+
+	values += str + "\t";
+	values += std::to_string(time_span.count());
+	values += " sec.\n";
 }
 
 bool ComponentAgent::GetIds(std::string &str, unsigned int &id, int &brick_id)
@@ -2005,16 +2085,19 @@ bool ComponentAgent::GetIds(std::string &str, unsigned int &id, int &brick_id)
 void ComponentAgent::FindCelps(flrd::CelpList &list,
 	flrd::CelpListIter &it, bool links)
 {
+	flrd::ComponentAnalyzer* analyzer = getObject()->GetCompAnalyzer();
+	if (!analyzer) return;
+
 	list.insert(std::pair<unsigned long long, flrd::Celp>
 		(it->second->GetEId(), it->second));
 
 	if (links)
 	{
-		flrd::CellGraph* graph = m_comp_analyzer.GetCellGraph();
+		flrd::CellGraph* graph = analyzer->GetCellGraph();
 		graph->ClearVisited();
 		flrd::CelpList links;
 		if (graph->GetLinkedComps(it->second, links,
-			m_comp_analyzer.GetSizeLimit()))
+			analyzer->GetSizeLimit()))
 		{
 			for (auto it2 = links.begin();
 				it2 != links.end(); ++it2)

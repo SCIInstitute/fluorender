@@ -28,9 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlg.h>
 #include <RenderFrame.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
-#include <boost/signals2.hpp>
-#include <limits>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
 	//comp gen page
@@ -177,8 +174,7 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 		wxDefaultPosition,
 		wxSize(600, 800),
 		0, "ComponentDlg"),
-	m_frame(frame),
-	m_test_speed(false)
+	m_frame(frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -276,7 +272,7 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 
 ComponentDlg::~ComponentDlg()
 {
-	m_agent->SaveSettings("");
+	//m_agent->SaveSettings("");
 }
 
 void ComponentDlg::AssociateRenderview(fluo::Renderview* view)
@@ -1342,7 +1338,9 @@ void ComponentDlg::OnRecordCmd(wxCommandEvent &event)
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent &event)
 {
-	m_agent->PlayCmd(1.0);
+	bool bval;
+	m_agent->getValue(gstUseSelection, bval);
+	m_agent->PlayCmd(bval, 1.0);
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent &event)
@@ -1871,7 +1869,7 @@ void ComponentDlg::OnAnalyzeSel(wxCommandEvent &event)
 	m_agent->Analyze(true);
 }
 
-void ComponentDlg::SetOutput(wxString &titles, wxString &values)
+void ComponentDlg::SetOutput(const wxString &titles, const wxString &values)
 {
 	wxString copy_data;
 	wxString cur_field;
@@ -2126,30 +2124,6 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 			if (str.ToULong(&ulval))
 				bids.push_back(ulval);
 		}
-	}
-}
-
-void ComponentDlg::StartTimer(std::string str)
-{
-	if (m_test_speed)
-	{
-		m_tps.push_back(std::chrono::high_resolution_clock::now());
-	}
-}
-
-void ComponentDlg::StopTimer(std::string str)
-{
-	if (m_test_speed)
-	{
-		auto t0 = m_tps.back();
-		m_tps.push_back(std::chrono::high_resolution_clock::now());
-		std::chrono::duration<double> time_span =
-			std::chrono::duration_cast<std::chrono::duration<double>>(
-				m_tps.back() - t0);
-
-		m_values += str + "\t";
-		m_values += wxString::Format("%.4f", time_span.count());
-		m_values += " sec.\n";
 	}
 }
 

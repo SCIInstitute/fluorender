@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <CompGenerator.h>
 #include <wx/string.h>
+#include <chrono>
+#include <set>
 
 class ComponentDlg;
 namespace fluo
@@ -64,6 +66,7 @@ namespace fluo
 		void Analyze();
 		void Analyze(bool use_sel);
 		void GenerateComp();
+		void GenerateComp(bool use_selection, bool command);
 		void Fixate(bool command);
 		void Clean();
 		void Clean(bool use_sel, bool command = true);
@@ -83,7 +86,7 @@ namespace fluo
 		void SaveCmd(const wxString &filename);
 		void AddCmd(const std::string &type);
 		void ResetCmd();
-		void PlayCmd(double tfactor);
+		void PlayCmd(bool use_selection, double tfactor);
 
 		//cluster
 		void Cluster();
@@ -127,12 +130,19 @@ namespace fluo
 		ComponentDlg &dlg_;
 
 	private:
+		//speed test
+		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
+
 		flrd::CompCommand m_command;
 		//in and out cell lists for tracking
 		flrd::CelpList m_in_cells;
 		flrd::CelpList m_out_cells;
 
 	private:
+		//speed test
+		void StartTimer();
+		void StopTimer(std::string &values, const std::string &str);
+
 		bool GetIds(std::string &str, unsigned int &id, int &brick_id);
 		void FindCelps(flrd::CelpList &list,
 			flrd::CelpListIter &it, bool links = false);

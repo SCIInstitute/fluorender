@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
 #include <FLIVR/VertexArray.h>
+#include <Components/CompAnalyzer.h>
 #include <Distance/RulerHandler.h>
 #include <Distance/RulerRenderer.h>
 #include <Distance/DistCalculator.h>
@@ -1785,7 +1786,7 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 		return;
 
 	flrd::ComponentAnalyzer* analyzer =
-		m_frame->GetComponentDlg()->GetAnalyzer();
+		m_view->GetCompAnalyzer();
 	if (!analyzer)
 		return;
 	m_rhdl->SetCompAnalyzer(analyzer);
@@ -1857,7 +1858,7 @@ void MeasureDlg::Project(int idx)
 		return;
 	flrd::Ruler* ruler = ruler_list->at(idx);
 	flrd::ComponentAnalyzer* analyzer =
-		m_frame->GetComponentDlg()->GetAnalyzer();
+		m_view->GetCompAnalyzer();
 	flrd::CelpList* list = 0;
 	if (!analyzer)
 		return;
@@ -1932,8 +1933,7 @@ void MeasureDlg::Relax(int idx)
 		return;
 	flrd::Ruler* ruler = ruler_list->at(idx);
 	flrd::ComponentAnalyzer* analyzer = 0;
-	if (m_frame && m_frame->GetComponentDlg())
-		analyzer = m_frame->GetComponentDlg()->GetAnalyzer();
+	analyzer = m_view->GetCompAnalyzer();
 	if (!analyzer)
 		return;
 	flrd::CelpList* list = 0;
