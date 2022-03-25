@@ -85,6 +85,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipPlaneAgent "ClipPlanePanel"
 #define gstClKernelAgent "ClKernelDlg"
 #define gstColocalAgent "ColocalDlg"
+#define gstCountingAgent "CountingDlg"
 #define gstComponentAgent "ComponentDlg"
 #define gstConvertAgent "ConvertDlg"
 #define gstListModel "ListPanel"
@@ -615,6 +616,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolMeshDownZ "vol mesh down z"
 #define gstVolMeshWeld "vol mesh weld"
 //counting agent
+//measure agent
+#define gstRulerEdited "ruler edited"
 
 //input
 //mouse

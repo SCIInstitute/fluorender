@@ -33,22 +33,12 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
-#include <Types/Color.h>
-
-using namespace std;
+#include <MeasureAgent.hpp>
 
 class RenderFrame;
 namespace fluo
 {
 	class Renderview;
-}
-namespace flrd
-{
-	class DistCalculator;
-	class Ruler;
-	class RulerList;
-	class RulerAlign;
-	class RulerHandler;
 }
 class RulerListCtrl : public wxListCtrl
 {
@@ -61,7 +51,7 @@ class RulerListCtrl : public wxListCtrl
 	};
 
 public:
-	RulerListCtrl(RenderFrame *frame,
+	RulerListCtrl(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -74,35 +64,26 @@ public:
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
 	void AdjustSize();
-	void UpdateRulers(fluo::Renderview* view=0);
 
 	bool GetCurrSelection(std::vector<int> &sel);
 	void ClearSelection();
-	void SelectGroup(unsigned int group);
-	void DeleteSelection();
-	void DeleteAll(bool cur_time=false);
-
-	void Export(wxString filename);
-
 	wxString GetText(long item, int col);
 	void SetText(long item, int col, wxString &str);
 
 	friend class MeasureDlg;
+	friend class fluo::MeasureAgent;
 
 private:
-	wxWindow* m_frame;
-	fluo::Renderview *m_view;
+	fluo::MeasureAgent* m_agent;
+
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
 	bool m_ruler_df_f;
-	flrd::RulerHandler *m_rhdl;
 
 private:
-	void EndEdit(bool update=true);
-
 	void OnContextMenu(wxContextMenuEvent &event);
 	void OnToggleDisp(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);
@@ -185,23 +166,16 @@ public:
 	MeasureDlg(RenderFrame* frame);
 	~MeasureDlg();
 
-	void GetSettings(fluo::Renderview* view);
-	fluo::Renderview* GetView();
-	void UpdateList();
+	void AssociateRenderview(fluo::Renderview* view)
+	{
+		m_agent->setObject(view);
+	}
 
-	//processing
-	void Relax();
-	void Relax(int idx);
-	void Project(int idx);
-	void SetEdit() { m_edited = true; }
-	void Prune(int len);//remove branches with length equal to or smaller than len
-	void Prune(int idx, int len);
+	friend class fluo::MeasureAgent;
 
 private:
+	fluo::MeasureAgent* m_agent;
 	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview* m_view;
-	flrd::RulerHandler *m_rhdl;
 
 	//list ctrl
 	wxButton* m_new_group;
@@ -239,13 +213,7 @@ private:
 	wxButton* m_align_yzx;
 	wxButton* m_align_zyx;
 
-	flrd::DistCalculator* m_calculator;
-	flrd::RulerAlign* m_aligner;
-	bool m_edited;
-
 private:
-	void AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list);
-
 	void OnNewLocator(wxCommandEvent& event);
 	void OnNewProbe(wxCommandEvent& event);
 	void OnNewProtractor(wxCommandEvent& event);

@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ComponentDlg.h>
 #include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(ComponentDlg, wxPanel)
@@ -176,6 +178,7 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 		0, "ComponentDlg"),
 	m_frame(frame)
 {
+	m_agent = glbin_agtf->addComponentAgent(gstComponentAgent, *this);
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetMinSize(wxSize(100, 100));

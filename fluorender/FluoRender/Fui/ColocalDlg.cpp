@@ -60,11 +60,10 @@ ColocalDlg::ColocalDlg(RenderFrame* frame) :
 	wxDefaultPosition, wxSize(500, 500),
 	0, "ColocalDlg")
 {
-	// temporarily block events during constructor:
-	wxEventBlocker blocker(this);
-
 	m_agent = glbin_agtf->addColocalAgent(gstColocalAgent, *this);
 
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
 
 	wxStaticText* st = 0;
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);

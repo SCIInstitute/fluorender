@@ -29,9 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #define _MEASUREAGENT_H_
 
 #include <InterfaceAgent.hpp>
-#include <VolumeData.hpp>
+#include <Renderview.hpp>
 
 class MeasureDlg;
+namespace flrd
+{
+	class DistCalculator;
+	class Ruler;
+	class RulerList;
+	class RulerAlign;
+	class RulerHandler;
+}
 namespace fluo
 {
 	class MeasureAgent : public InterfaceAgent
@@ -46,18 +54,42 @@ namespace fluo
 
 		virtual const char* className() const { return "MeasureAgent"; }
 
-		virtual void setObject(VolumeData* an);
-		virtual VolumeData* getObject();
+		virtual void setObject(Renderview* an);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 
 		virtual MeasureAgent* asMeasureAgent() { return this; }
 		virtual const MeasureAgent* asMeasureAgent() const { return this; }
 
+		friend class AgentFactory;
+
+		void UpdateRulers();
+		//processing
+		void Relax();
+		void Relax(int idx);
+		void Project(int idx);
+		void Prune(int len);//remove branches with length equal to or smaller than len
+		void Prune(int idx, int len);
+		void AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list);
+		//list
+		void SelectGroup(unsigned int group);
+		void DeleteSelection();
+		void DeleteAll(bool cur_time);
+		void Export(const std::string &filename);
+		void EndEdit(bool update);
+
 	protected:
 		MeasureDlg &dlg_;
 
+	protected:
+		virtual ~MeasureAgent();
+
 	private:
+		flrd::DistCalculator* m_calculator;
+
+	private:
+		//update functions
 	};
 }
 
