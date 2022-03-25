@@ -29,11 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define _COUNTINGDLG_H_
 
 #include <wx/wx.h>
+#include <CountingAgent.hpp>
 
 class RenderFrame;
 namespace fluo
 {
-	class Renderview;
+	class VolumeData;
 }
 class CountingDlg : public wxPanel
 {
@@ -53,15 +54,15 @@ public:
 	CountingDlg(RenderFrame* frame);
 	~CountingDlg();
 
-	void GetSettings(fluo::Renderview* view);
+	void AssociateVolumeData(fluo::VolumeData* vd)
+	{
+		m_agent->setObject(vd);
+	}
+
+	friend class fluo::CountingAgent;
 
 private:
-	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview *m_view;
-
-	//max volume value
-	double m_max_value;
+	fluo::CountingAgent* m_agent;
 
 	//component analyzer
 	wxCheckBox *m_ca_select_only_chk;
@@ -74,11 +75,11 @@ private:
 	wxTextCtrl *m_ca_vol_unit_text;
 
 private:
-	void LoadDefault();
-
-	//component analyzer
-	void OnCAAnalyzeBtn(wxCommandEvent &event);
+	void OnCASelectOnlyChk(wxCommandEvent& event);
+	void OnCAMinChange(wxCommandEvent& event);
+	void OnCAMaxChange(wxCommandEvent& event);
 	void OnCAIgnoreMaxChk(wxCommandEvent &event);
+	void OnCAAnalyzeBtn(wxCommandEvent &event);
 
 	DECLARE_EVENT_TABLE()
 };

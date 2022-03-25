@@ -54,10 +54,16 @@ namespace fluo
 		virtual CountingAgent* asCountingAgent() { return this; }
 		virtual const CountingAgent* asCountingAgent() const { return this; }
 
+		friend class AgentFactory;
+
+		void Analyze();
+
 	protected:
 		CountingDlg &dlg_;
 
 	private:
+		//update functions
+		void OnUseMax(Event& event);
 	};
 }
 

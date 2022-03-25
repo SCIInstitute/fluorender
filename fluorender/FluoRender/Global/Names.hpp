@@ -559,6 +559,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstAutoUpdate "auto update"
 #define gstHoldHistory "hold history"
 #define gstTestSpeed "test speed"
+#define gstUseTransferFunc "use transfer func"
 //colocal agent
 #define gstColocalMethod "colocal method"//0:dot product; 1:min value; 2:threshold
 #define gstIntWeighted "int weighted"
@@ -608,6 +609,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstDistNeighborValue "dist neighbor value"
 #define gstAlignAxisType "align axis type"//xyz:0; yxz:1; zxy:2; xzy:3; yzx:4; zyx:5;
 #define gstAlignCenter "align center"
+//conver agent
+#define gstVolMeshThresh "vol mesh thresh"
+#define gstVolMeshDownXY "vol mesh down xy"
+#define gstVolMeshDownZ "vol mesh down z"
+#define gstVolMeshWeld "vol mesh weld"
+//counting agent
 
 //input
 //mouse

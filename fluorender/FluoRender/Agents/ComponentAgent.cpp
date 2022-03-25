@@ -2294,18 +2294,12 @@ void ComponentAgent::OnUseMin(Event& event)
 {
 	bool bval;
 	getValue(gstUseMin, bval);
-	if (bval)
-		dlg_.m_analysis_min_spin->Enable();
-	else
-		dlg_.m_analysis_min_spin->Disable();
+	dlg_.m_analysis_min_spin->Enable(bval);
 }
 
 void ComponentAgent::OnUseMax(Event& event)
 {
 	bool bval;
 	getValue(gstUseMax, bval);
-	if (bval)
-		dlg_.m_analysis_max_spin->Enable();
-	else
-		dlg_.m_analysis_max_spin->Disable();
+	dlg_.m_analysis_max_spin->Enable(bval);
 }

@@ -29,8 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #define _CONVERTDLG_H_
 
 #include <wx/wx.h>
+#include <ConvertAgent.hpp>
 
 class RenderFrame;
+namespace fluo
+{
+	class VolumeData;
+	class VolumeGroup;
+}
 class ConvertDlg : public wxPanel
 {
 public:
@@ -53,8 +59,15 @@ public:
 	ConvertDlg(RenderFrame* frame);
 	~ConvertDlg();
 
+	void AssociateVolumeData(fluo::VolumeData* vd)
+	{
+		m_agent->setObject(vd);
+	}
+
+	friend class fluo::ConvertAgent;
+
 private:
-	RenderFrame* m_frame;
+	fluo::ConvertAgent* m_agent;
 
 	//convert from volume to polygon mesh
 	wxSlider* m_cnv_vol_mesh_thresh_sldr;
@@ -77,6 +90,9 @@ private:
 	void OnCnvVolMeshDownsampleText(wxCommandEvent &event);
 	void OnCnvVolMeshDownsampleZChange(wxScrollEvent &event);
 	void OnCnvVolMeshDownsampleZText(wxCommandEvent &event);
+	void OnCnvVolMeshUseTransfChk(wxCommandEvent &event);
+	void OnCnvVolMeshUseSelectionChk(wxCommandEvent &event);
+	void OnCnvVolMeshWeldChk(wxCommandEvent &event);
 	void OnCnvVolMeshConvert(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE()

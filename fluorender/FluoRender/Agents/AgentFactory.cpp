@@ -77,8 +77,10 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <VolumePropPanel.h>
 
-#define ADD_AFTER_EVENT(obj, name, agt, funct) \
-	obj->setValueChangedFunction(name, std::bind(&agt::funct, obj, std::placeholders::_1))
+#define ADD_VALUE(name, v) \
+	agent->addValue(name, v)
+#define ADD_AFTER_EVENT(name, agtcls, funct) \
+	agent->setValueChangedFunction(name, std::bind(&agtcls::funct, agent, std::placeholders::_1))
 
 using namespace fluo;
 
@@ -126,9 +128,9 @@ BrushToolAgent* AgentFactory::addBrushToolAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
-		ADD_AFTER_EVENT(agent, gstInterMode, BrushToolAgent, OnInterModeChanged);
-		ADD_AFTER_EVENT(agent, gstSelUndo, BrushToolAgent, OnSelUndo);
-		ADD_AFTER_EVENT(agent, gstSelRedo, BrushToolAgent, OnSelRedo);
+		ADD_AFTER_EVENT(gstInterMode, BrushToolAgent, OnInterModeChanged);
+		ADD_AFTER_EVENT(gstSelUndo, BrushToolAgent, OnSelUndo);
+		ADD_AFTER_EVENT(gstSelRedo, BrushToolAgent, OnSelRedo);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -176,21 +178,21 @@ ClipPlaneAgent* AgentFactory::addClipPlaneAgent(const std::string &name, wxWindo
 		//own values
 		agent->addRvalu(gstVolumeA, (Referenced*)(0));
 		agent->addRvalu(gstVolumeB, (Referenced*)(0));
-		ADD_AFTER_EVENT(agent, gstClipX1, ClipPlaneAgent, OnClipXChanged);
-		ADD_AFTER_EVENT(agent, gstClipX2, ClipPlaneAgent, OnClipXChanged);
-		ADD_AFTER_EVENT(agent, gstClipY1, ClipPlaneAgent, OnClipYChanged);
-		ADD_AFTER_EVENT(agent, gstClipY2, ClipPlaneAgent, OnClipYChanged);
-		ADD_AFTER_EVENT(agent, gstClipZ1, ClipPlaneAgent, OnClipZChanged);
-		ADD_AFTER_EVENT(agent, gstClipZ2, ClipPlaneAgent, OnClipZChanged);
-		ADD_AFTER_EVENT(agent, gstClipDistX, ClipPlaneAgent, OnClipDistXChanged);
-		ADD_AFTER_EVENT(agent, gstClipDistY, ClipPlaneAgent, OnClipDistYChanged);
-		ADD_AFTER_EVENT(agent, gstClipDistZ, ClipPlaneAgent, OnClipDistZChanged);
-		ADD_AFTER_EVENT(agent, gstClipLinkX, ClipPlaneAgent, OnClipLinkXChanged);
-		ADD_AFTER_EVENT(agent, gstClipLinkY, ClipPlaneAgent, OnClipLinkYChanged);
-		ADD_AFTER_EVENT(agent, gstClipLinkZ, ClipPlaneAgent, OnClipLinkZChanged);
-		ADD_AFTER_EVENT(agent, gstClipRotX, ClipPlaneAgent, OnClipRotXChanged);
-		ADD_AFTER_EVENT(agent, gstClipRotY, ClipPlaneAgent, OnClipRotYChanged);
-		ADD_AFTER_EVENT(agent, gstClipRotZ, ClipPlaneAgent, OnClipRotZChanged);
+		ADD_AFTER_EVENT(gstClipX1, ClipPlaneAgent, OnClipXChanged);
+		ADD_AFTER_EVENT(gstClipX2, ClipPlaneAgent, OnClipXChanged);
+		ADD_AFTER_EVENT(gstClipY1, ClipPlaneAgent, OnClipYChanged);
+		ADD_AFTER_EVENT(gstClipY2, ClipPlaneAgent, OnClipYChanged);
+		ADD_AFTER_EVENT(gstClipZ1, ClipPlaneAgent, OnClipZChanged);
+		ADD_AFTER_EVENT(gstClipZ2, ClipPlaneAgent, OnClipZChanged);
+		ADD_AFTER_EVENT(gstClipDistX, ClipPlaneAgent, OnClipDistXChanged);
+		ADD_AFTER_EVENT(gstClipDistY, ClipPlaneAgent, OnClipDistYChanged);
+		ADD_AFTER_EVENT(gstClipDistZ, ClipPlaneAgent, OnClipDistZChanged);
+		ADD_AFTER_EVENT(gstClipLinkX, ClipPlaneAgent, OnClipLinkXChanged);
+		ADD_AFTER_EVENT(gstClipLinkY, ClipPlaneAgent, OnClipLinkYChanged);
+		ADD_AFTER_EVENT(gstClipLinkZ, ClipPlaneAgent, OnClipLinkZChanged);
+		ADD_AFTER_EVENT(gstClipRotX, ClipPlaneAgent, OnClipRotXChanged);
+		ADD_AFTER_EVENT(gstClipRotY, ClipPlaneAgent, OnClipRotYChanged);
+		ADD_AFTER_EVENT(gstClipRotZ, ClipPlaneAgent, OnClipRotZChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -236,23 +238,23 @@ ColocalAgent* AgentFactory::addColocalAgent(const std::string &name, wxWindow &w
 	{
 		agent->setName(name);
 		//additiona settings
-		agent->addValue(gstUseSelection, false);
-		agent->addValue(gstAutoUpdate, false);
-		agent->addValue(gstHoldHistory, false);
-		agent->addValue(gstColocalMethod, long(0));
-		agent->addValue(gstIntWeighted, false);
-		agent->addValue(gstGetRatio, false);
-		agent->addValue(gstPhysSize, false);
-		agent->addValue(gstColormapEnable, false);
-		agent->addValue(gstColormapLow, double(0));
-		agent->addValue(gstColormapHigh, double(1));
-		ADD_AFTER_EVENT(agent, gstAutoUpdate, ColocalAgent, OnAutoUpdateChanged);
-		ADD_AFTER_EVENT(agent, gstUseSelection, ColocalAgent, OnSettingChanged);
-		ADD_AFTER_EVENT(agent, gstColocalMethod, ColocalAgent, OnAutoUpdateChanged);
-		ADD_AFTER_EVENT(agent, gstIntWeighted, ColocalAgent, OnAutoUpdateChanged);
-		ADD_AFTER_EVENT(agent, gstGetRatio, ColocalAgent, OnAutoUpdateChanged);
-		ADD_AFTER_EVENT(agent, gstPhysSize, ColocalAgent, OnAutoUpdateChanged);
-		ADD_AFTER_EVENT(agent, gstColormapEnable, ColocalAgent, OnAutoUpdateChanged);
+		ADD_VALUE(gstUseSelection, false);
+		ADD_VALUE(gstAutoUpdate, false);
+		ADD_VALUE(gstHoldHistory, false);
+		ADD_VALUE(gstColocalMethod, long(0));
+		ADD_VALUE(gstIntWeighted, false);
+		ADD_VALUE(gstGetRatio, false);
+		ADD_VALUE(gstPhysSize, false);
+		ADD_VALUE(gstColormapEnable, false);
+		ADD_VALUE(gstColormapLow, double(0));
+		ADD_VALUE(gstColormapHigh, double(1));
+		ADD_AFTER_EVENT(gstAutoUpdate, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(gstUseSelection, ColocalAgent, OnSettingChanged);
+		ADD_AFTER_EVENT(gstColocalMethod, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(gstIntWeighted, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(gstGetRatio, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(gstPhysSize, ColocalAgent, OnAutoUpdateChanged);
+		ADD_AFTER_EVENT(gstColormapEnable, ColocalAgent, OnAutoUpdateChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -275,76 +277,76 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
-		agent->addValue(gstTestSpeed, bool(false));
-		agent->addValue(gstUseSelection, false);
-		agent->addValue(gstAutoUpdate, false);
-		agent->addValue(gstHoldHistory, false);
-		agent->addValue(gstRecordCmd, false);
-		agent->addValue(gstRunCmd, false);
-		agent->addValue(gstIteration, long(0));
-		agent->addValue(gstThreshold, double(0));
-		agent->addValue(gstThreshScale, double(1));
-		agent->addValue(gstUseDistField, bool(false));
-		agent->addValue(gstUseDiffusion, bool(false));
-		agent->addValue(gstDistFieldStrength, double(0));
-		agent->addValue(gstDistFieldFilterSize, long(0));
-		agent->addValue(gstMaxDist, long(0));
-		agent->addValue(gstDistFieldThresh, double(0));
-		agent->addValue(gstDiffusionFalloff, double(0));
-		agent->addValue(gstUseDensityField, bool(false));
-		agent->addValue(gstDensityFieldThresh, double(0));
-		agent->addValue(gstDensityVarThresh, double(0));
-		agent->addValue(gstDensityWindowSize, long(0));
-		agent->addValue(gstDensityStatsSize, long(0));
-		agent->addValue(gstFixateEnable, bool(false));
-		agent->addValue(gstFixateSize, long(0));
-		agent->addValue(gstCleanEnable, bool(false));
-		agent->addValue(gstCleanIteration, long(0));
-		agent->addValue(gstCleanSize, long(0));
-		agent->addValue(gstClusterMethod, long(0));
-		agent->addValue(gstClusterNum, long(0));
-		agent->addValue(gstClusterMaxIter, long(0));
-		agent->addValue(gstClusterTol, double(0));
-		agent->addValue(gstClusterSize, long(0));
-		agent->addValue(gstClusterEps, double(0));
-		agent->addValue(gstUseMin, bool(false));
-		agent->addValue(gstMinValue, long(0));
-		agent->addValue(gstUseMax, bool(false));
-		agent->addValue(gstMaxValue, long(0));
-		agent->addValue(gstCompId, unsigned long(0));
-		agent->addValue(gstCompIdStr, std::string(""));
-		agent->addValue(gstCompSizeLimit, long(0));
-		agent->addValue(gstCompConsistent, bool(false));
-		agent->addValue(gstCompColocal, bool(false));
-		agent->addValue(gstCompOutputType, long(0));
-		agent->addValue(gstDistAllChan, bool(false));
-		agent->addValue(gstDistNeighbor, bool(false));
-		agent->addValue(gstDistNeighborValue, long(0));
-		agent->addValue(gstAlignAxisType, long(0));
-		agent->addValue(gstAlignCenter, bool(false));
-		ADD_AFTER_EVENT(agent, gstAutoUpdate, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstIteration, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstThreshold, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstUseDistField, ComponentAgent, OnUseDistField);
-		ADD_AFTER_EVENT(agent, gstUseDiffusion, ComponentAgent, OnUseDiffusion);
-		ADD_AFTER_EVENT(agent, gstDistFieldStrength, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstDistFieldFilterSize, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstMaxDist, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstDistFieldThresh, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstDiffusionFalloff, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstUseDensityField, ComponentAgent, OnUseDensityField);
-		ADD_AFTER_EVENT(agent, gstDensityFieldThresh, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstDensityVarThresh, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstDensityWindowSize, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstDensityStatsSize, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstFixateEnable, ComponentAgent, OnFixateEnable);
-		ADD_AFTER_EVENT(agent, gstFixateSize, ComponentAgent, OnFixateSize);
-		ADD_AFTER_EVENT(agent, gstCleanEnable, ComponentAgent, OnCleanEnable);
-		ADD_AFTER_EVENT(agent, gstCleanIteration, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstCleanSize, ComponentAgent, OnAutoUpdate);
-		ADD_AFTER_EVENT(agent, gstClusterMethod, ComponentAgent, OnClusterMethod);
-		ADD_AFTER_EVENT(agent, gstUseMin, ComponentAgent, OnUseMin);
-		ADD_AFTER_EVENT(agent, gstUseMax, ComponentAgent, OnUseMax);
+		ADD_VALUE(gstTestSpeed, bool(false));
+		ADD_VALUE(gstUseSelection, false);
+		ADD_VALUE(gstAutoUpdate, false);
+		ADD_VALUE(gstHoldHistory, false);
+		ADD_VALUE(gstRecordCmd, false);
+		ADD_VALUE(gstRunCmd, false);
+		ADD_VALUE(gstIteration, long(0));
+		ADD_VALUE(gstThreshold, double(0));
+		ADD_VALUE(gstThreshScale, double(1));
+		ADD_VALUE(gstUseDistField, bool(false));
+		ADD_VALUE(gstUseDiffusion, bool(false));
+		ADD_VALUE(gstDistFieldStrength, double(0));
+		ADD_VALUE(gstDistFieldFilterSize, long(0));
+		ADD_VALUE(gstMaxDist, long(0));
+		ADD_VALUE(gstDistFieldThresh, double(0));
+		ADD_VALUE(gstDiffusionFalloff, double(0));
+		ADD_VALUE(gstUseDensityField, bool(false));
+		ADD_VALUE(gstDensityFieldThresh, double(0));
+		ADD_VALUE(gstDensityVarThresh, double(0));
+		ADD_VALUE(gstDensityWindowSize, long(0));
+		ADD_VALUE(gstDensityStatsSize, long(0));
+		ADD_VALUE(gstFixateEnable, bool(false));
+		ADD_VALUE(gstFixateSize, long(0));
+		ADD_VALUE(gstCleanEnable, bool(false));
+		ADD_VALUE(gstCleanIteration, long(0));
+		ADD_VALUE(gstCleanSize, long(0));
+		ADD_VALUE(gstClusterMethod, long(0));
+		ADD_VALUE(gstClusterNum, long(0));
+		ADD_VALUE(gstClusterMaxIter, long(0));
+		ADD_VALUE(gstClusterTol, double(0));
+		ADD_VALUE(gstClusterSize, long(0));
+		ADD_VALUE(gstClusterEps, double(0));
+		ADD_VALUE(gstUseMin, bool(false));
+		ADD_VALUE(gstMinValue, long(0));
+		ADD_VALUE(gstUseMax, bool(false));
+		ADD_VALUE(gstMaxValue, long(0));
+		ADD_VALUE(gstCompId, unsigned long(0));
+		ADD_VALUE(gstCompIdStr, std::string(""));
+		ADD_VALUE(gstCompSizeLimit, long(0));
+		ADD_VALUE(gstCompConsistent, bool(false));
+		ADD_VALUE(gstCompColocal, bool(false));
+		ADD_VALUE(gstCompOutputType, long(0));
+		ADD_VALUE(gstDistAllChan, bool(false));
+		ADD_VALUE(gstDistNeighbor, bool(false));
+		ADD_VALUE(gstDistNeighborValue, long(0));
+		ADD_VALUE(gstAlignAxisType, long(0));
+		ADD_VALUE(gstAlignCenter, bool(false));
+		ADD_AFTER_EVENT(gstAutoUpdate, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstIteration, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstThreshold, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstUseDistField, ComponentAgent, OnUseDistField);
+		ADD_AFTER_EVENT(gstUseDiffusion, ComponentAgent, OnUseDiffusion);
+		ADD_AFTER_EVENT(gstDistFieldStrength, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstDistFieldFilterSize, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstMaxDist, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstDistFieldThresh, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstDiffusionFalloff, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstUseDensityField, ComponentAgent, OnUseDensityField);
+		ADD_AFTER_EVENT(gstDensityFieldThresh, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstDensityVarThresh, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstDensityWindowSize, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstDensityStatsSize, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstFixateEnable, ComponentAgent, OnFixateEnable);
+		ADD_AFTER_EVENT(gstFixateSize, ComponentAgent, OnFixateSize);
+		ADD_AFTER_EVENT(gstCleanEnable, ComponentAgent, OnCleanEnable);
+		ADD_AFTER_EVENT(gstCleanIteration, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstCleanSize, ComponentAgent, OnAutoUpdate);
+		ADD_AFTER_EVENT(gstClusterMethod, ComponentAgent, OnClusterMethod);
+		ADD_AFTER_EVENT(gstUseMin, ComponentAgent, OnUseMin);
+		ADD_AFTER_EVENT(gstUseMax, ComponentAgent, OnUseMax);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -367,6 +369,12 @@ ConvertAgent* AgentFactory::addConvertAgent(const std::string &name, wxWindow &w
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_VALUE(gstVolMeshThresh, double(0));
+		ADD_VALUE(gstUseTransferFunc, bool(false));
+		ADD_VALUE(gstUseSelection, bool(false));
+		ADD_VALUE(gstVolMeshDownXY, long(1));
+		ADD_VALUE(gstVolMeshDownZ, long(1));
+		ADD_VALUE(gstVolMeshWeld, bool(false));
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -389,6 +397,11 @@ CountingAgent* AgentFactory::addCountingAgent(const std::string &name, wxWindow 
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_VALUE(gstUseSelection, bool(false));
+		ADD_VALUE(gstMinValue, long(0));
+		ADD_VALUE(gstMaxValue, long(0));
+		ADD_VALUE(gstUseMax, bool(false));
+		ADD_AFTER_EVENT(gstUseMax, CountingAgent, OnUseMax);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -549,15 +562,15 @@ OutAdjustAgent* AgentFactory::addOutAdjustAgent(const std::string &name, wxWindo
 	if (agent)
 	{
 		agent->setName(name);
-		ADD_AFTER_EVENT(agent, gstGammaR, OutAdjustAgent, OnGammaRChanged);
-		ADD_AFTER_EVENT(agent, gstGammaG, OutAdjustAgent, OnGammaGChanged);
-		ADD_AFTER_EVENT(agent, gstGammaB, OutAdjustAgent, OnGammaBChanged);
-		ADD_AFTER_EVENT(agent, gstBrightnessR, OutAdjustAgent, OnBrightnessRChanged);
-		ADD_AFTER_EVENT(agent, gstBrightnessG, OutAdjustAgent, OnBrightnessGChanged);
-		ADD_AFTER_EVENT(agent, gstBrightnessB, OutAdjustAgent, OnBrightnessBChanged);
-		ADD_AFTER_EVENT(agent, gstEqualizeR, OutAdjustAgent, OnEqualizeRChanged);
-		ADD_AFTER_EVENT(agent, gstEqualizeG, OutAdjustAgent, OnEqualizeGChanged);
-		ADD_AFTER_EVENT(agent, gstEqualizeB, OutAdjustAgent, OnEqualizeBChanged);
+		ADD_AFTER_EVENT(gstGammaR, OutAdjustAgent, OnGammaRChanged);
+		ADD_AFTER_EVENT(gstGammaG, OutAdjustAgent, OnGammaGChanged);
+		ADD_AFTER_EVENT(gstGammaB, OutAdjustAgent, OnGammaBChanged);
+		ADD_AFTER_EVENT(gstBrightnessR, OutAdjustAgent, OnBrightnessRChanged);
+		ADD_AFTER_EVENT(gstBrightnessG, OutAdjustAgent, OnBrightnessGChanged);
+		ADD_AFTER_EVENT(gstBrightnessB, OutAdjustAgent, OnBrightnessBChanged);
+		ADD_AFTER_EVENT(gstEqualizeR, OutAdjustAgent, OnEqualizeRChanged);
+		ADD_AFTER_EVENT(gstEqualizeG, OutAdjustAgent, OnEqualizeGChanged);
+		ADD_AFTER_EVENT(gstEqualizeB, OutAdjustAgent, OnEqualizeBChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -602,8 +615,8 @@ RenderCanvasAgent* AgentFactory::addRenderCanvasAgent(const std::string &name, w
 	if (agent)
 	{
 		agent->setName(name);
-		ADD_AFTER_EVENT(agent, gstBounds, RenderCanvasAgent, OnBoundsChanged);
-		ADD_AFTER_EVENT(agent, gstFocus, RenderCanvasAgent, OnFocusChanged);
+		ADD_AFTER_EVENT(gstBounds, RenderCanvasAgent, OnBoundsChanged);
+		ADD_AFTER_EVENT(gstFocus, RenderCanvasAgent, OnFocusChanged);
 		agent->setDefaultValueChangedFunction(
 			std::bind(&RenderCanvasAgent::handleValueChanged,
 				agent, std::placeholders::_1));
@@ -755,8 +768,8 @@ VolumePropAgent* AgentFactory::addVolumePropAgent(const std::string &name, wxWin
 	if (agent)
 	{
 		agent->setName(name);
-		ADD_AFTER_EVENT(agent, gstLuminance, VolumePropAgent, OnLuminanceChanged);
-		ADD_AFTER_EVENT(agent, gstColor, VolumePropAgent, OnColorChanged);
+		ADD_AFTER_EVENT(gstLuminance, VolumePropAgent, OnLuminanceChanged);
+		ADD_AFTER_EVENT(gstColor, VolumePropAgent, OnColorChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

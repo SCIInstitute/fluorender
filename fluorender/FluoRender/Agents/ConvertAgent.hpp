@@ -54,6 +54,8 @@ namespace fluo
 		virtual ConvertAgent* asConvertAgent() { return this; }
 		virtual const ConvertAgent* asConvertAgent() const { return this; }
 
+		void Convert();
+
 	protected:
 		ConvertDlg &dlg_;
 

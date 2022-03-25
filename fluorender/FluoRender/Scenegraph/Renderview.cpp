@@ -117,6 +117,7 @@ Renderview::Renderview(const Renderview& view, const CopyOp& copyop) :
 	m_ruler_renderer = new flrd::RulerRenderer();
 	m_ruler_align = new flrd::RulerAlign(); m_ruler_align->SetView(this);
 	m_volume_point = new flrd::VolumePoint();
+	m_comp_analyzer = new flrd::ComponentAnalyzer();
 	m_loader = new VolumeLoader();
 	m_interpolator = new Interpolator();
 	m_text_renderer = new flvr::TextRenderer();

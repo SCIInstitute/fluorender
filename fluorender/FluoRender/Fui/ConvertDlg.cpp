@@ -25,17 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "ConvertDlg.h"
-#include "RenderFrame.h"
-#include <Global.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <MeshData.hpp>
-#include <Converters/VolumeMeshConv.h>
-#include <FLIVR/Texture.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <wx/progdlg.h>
+#include <ConvertDlg.h>
+#include <RenderFrame.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
@@ -47,13 +38,15 @@ BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
 	EVT_COMMAND_SCROLL(ID_CnvVolMeshDownsampleZSldr, ConvertDlg::OnCnvVolMeshDownsampleZChange)
 	EVT_TEXT(ID_CnvVolMeshDownsampleZText, ConvertDlg::OnCnvVolMeshDownsampleZText)
 	EVT_BUTTON(ID_CnvVolMeshConvertBtn, ConvertDlg::OnCnvVolMeshConvert)
+	EVT_CHECKBOX(ID_CnvVolMeshUsetransfChk, ConvertDlg::OnCnvVolMeshUseTransfChk)
+	EVT_CHECKBOX(ID_CnvVolMeshSelectedChk, ConvertDlg::OnCnvVolMeshUseSelectionChk)
+	EVT_CHECKBOX(ID_CnvVolMeshWeldChk, ConvertDlg::OnCnvVolMeshWeldChk)
 END_EVENT_TABLE()
 
 ConvertDlg::ConvertDlg(RenderFrame *frame) :
 wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 300),
-	0, "ConvertDlg"),
-	m_frame(frame)
+	0, "ConvertDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -183,6 +176,7 @@ void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent &event)
 	double val;
 	str.ToDouble(&val);
 	m_cnv_vol_mesh_thresh_sldr->SetValue(int(val*100.0+0.5));
+	m_agent->setValue(gstVolMeshThresh, val);
 }
 
 //downsampling
@@ -200,6 +194,7 @@ void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent &event)
 	long ival;
 	str.ToLong(&ival);
 	m_cnv_vol_mesh_downsample_sldr->SetValue(ival);
+	m_agent->setValue(gstVolMeshDownXY, ival);
 }
 
 //downsampling Z
@@ -217,108 +212,28 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent &event)
 	long ival;
 	str.ToLong(&ival);
 	m_cnv_vol_mesh_downsample_z_sldr->SetValue(ival);
+	m_agent->setValue(gstVolMeshDownZ, ival);
+}
+
+void ConvertDlg::OnCnvVolMeshUseTransfChk(wxCommandEvent &event)
+{
+	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
+	m_agent->setValue(gstUseTransferFunc, bval);
+}
+
+void ConvertDlg::OnCnvVolMeshUseSelectionChk(wxCommandEvent &event)
+{
+	bool bval = m_cnv_vol_mesh_selected_chk->GetValue();
+	m_agent->setValue(gstUseSelection, bval);
+}
+
+void ConvertDlg::OnCnvVolMeshWeldChk(wxCommandEvent &event)
+{
+	bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
+	m_agent->setValue(gstVolMeshWeld, bval);
 }
 
 void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 {
-	fluo::VolumeData* sel_vol = 0;
-	if (!m_frame)
-		return;
-
-	sel_vol = m_frame->GetCurSelVol();
-
-	if (!sel_vol)
-		return;
-
-	wxProgressDialog *prog_diag = new wxProgressDialog(
-		"FluoRender: Convert volume to polygon data",
-		"Converting... Please wait.",
-		100, 0,
-		wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
-	int progress = 0;
-
-	progress = 50;
-	prog_diag->Update(progress);
-
-	VolumeMeshConv converter;
-	converter.SetVolume(sel_vol->GetTexture()->get_nrrd(0));
-	double spcx, spcy, spcz;
-	sel_vol->getValue(gstSpcX, spcx);
-	sel_vol->getValue(gstSpcY, spcy);
-	sel_vol->getValue(gstSpcZ, spcz);
-	converter.SetVolumeSpacings(spcx, spcy, spcz);
-	double int_max;
-	sel_vol->getValue(gstMaxInt, int_max);
-	converter.SetMaxValue(int_max);
-	wxString str;
-	//get iso value
-	str = m_cnv_vol_mesh_thresh_text->GetValue();
-	double iso_value;
-	str.ToDouble(&iso_value);
-	converter.SetIsoValue(iso_value);
-	//get downsampling
-	str = m_cnv_vol_mesh_downsample_text->GetValue();
-	long downsample;
-	str.ToLong(&downsample);
-	converter.SetDownsample(downsample);
-	//get downsampling Z
-	str = m_cnv_vol_mesh_downsample_z_text->GetValue();
-	str.ToLong(&downsample);
-	converter.SetDownsampleZ(downsample);
-	//get use transfer function
-	if (m_cnv_vol_mesh_usetransf_chk->GetValue())
-	{
-		double gamma, lo_thresh, hi_thresh, offset, gm_thresh;
-		sel_vol->getValue(gstGamma3d, gamma);
-		sel_vol->getValue(gstLowThreshold, lo_thresh);
-		sel_vol->getValue(gstHighThreshold, hi_thresh);
-		sel_vol->getValue(gstSaturation, offset);
-		sel_vol->getValue(gstExtractBoundary, gm_thresh);
-		converter.SetVolumeTransfer(gamma, lo_thresh, hi_thresh, offset, gm_thresh);
-		converter.SetVolumeUseTrans(true);
-	}
-	else
-		converter.SetVolumeUseTrans(false);
-	//get use selection
-	if (m_cnv_vol_mesh_selected_chk->GetValue())
-	{
-		sel_vol->GetRenderer()->return_mask();
-		converter.SetVolumeMask(sel_vol->GetTexture()->get_nrrd(sel_vol->GetTexture()->nmask()));
-		converter.SetVolumeUseMask(true);
-	}
-	else
-		converter.SetVolumeUseMask(false);
-	//start converting
-	converter.Convert();
-	GLMmodel* mesh = converter.GetMesh();
-
-	progress = 90;
-	prog_diag->Update(progress);
-
-	if (mesh)
-	{
-		if (m_cnv_vol_mesh_weld_chk->GetValue())
-			glmWeld(mesh, 0.001 * fluo::Min(spcx, spcy, spcz));
-		float area;
-		float scale[3] = {1.0f, 1.0f, 1.0f};
-		glmArea(mesh, scale, &area);
-		DataManager* mgr = m_frame->GetDataManager();
-		mgr->LoadMeshData(mesh);
-		fluo::MeshData* md = mgr->GetLastMeshData();
-		fluo::Renderview* view = glbin_root->getCurrentRenderview();
-		if (md && view)
-		{
-			view->addMeshData(md, 0);
-			//view->RefreshGL(39);
-		}
-		m_frame->UpdateList();
-		m_frame->UpdateTree();
-		(*m_stat_text) <<
-			"The surface area of mesh object " <<
-			md->getName() << " is " <<
-			wxString::Format("%f", area) << "\n";
-	}
-
-	delete prog_diag;
-
+	m_agent->Convert();
 }

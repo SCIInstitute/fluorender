@@ -25,13 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "CountingDlg.h"
-#include "RenderFrame.h"
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <CompAnalyzer.h>
+#include <CountingDlg.h>
+#include <RenderFrame.h>
 #include <wx/valnum.h>
-#include <wx/stdpaths.h>
 
 BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
 	//component analyzer
@@ -42,10 +38,7 @@ END_EVENT_TABLE()
 CountingDlg::CountingDlg(RenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 wxDefaultPosition, wxSize(400, 150),
-0, "CountingDlg"),
-m_frame(frame),
-m_view(0),
-m_max_value(255.0)
+0, "CountingDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -123,155 +116,43 @@ m_max_value(255.0)
 
 	SetSizer(sizerV);
 	Layout();
-
-	LoadDefault();
 }
 
 CountingDlg::~CountingDlg()
 {
 }
 
-//load default
-void CountingDlg::LoadDefault()
+void CountingDlg::OnCASelectOnlyChk(wxCommandEvent& event)
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "default_brush_settings.dft";
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	wxString str;
-	int ival;
-	bool bval;
-
-	//component analyzer
-	//selected only
-	if (fconfig.Read("ca_select_only", &bval))
-		m_ca_select_only_chk->SetValue(bval);
-	//min voxel
-	if (fconfig.Read("ca_min", &ival))
-	{
-		str = wxString::Format("%d", ival);
-		m_ca_min_text->SetValue(str);
-	}
-	//max voxel
-	if (fconfig.Read("ca_max", &ival))
-	{
-		str = wxString::Format("%d", ival);
-		m_ca_max_text->SetValue(str);
-	}
-	//ignore max
-	if (fconfig.Read("ca_ignore_max", &bval))
-	{
-		m_ca_ignore_max_chk->SetValue(bval);
-		if (bval)
-			m_ca_max_text->Disable();
-		else
-			m_ca_max_text->Enable();
-	}
+	bool bval = m_ca_select_only_chk->GetValue();
+	m_agent->setValue(gstUseSelection, bval);
 }
 
-void CountingDlg::GetSettings(fluo::Renderview* view)
+void CountingDlg::OnCAMinChange(wxCommandEvent& event)
 {
-	if (!view)
-		return;
-	m_view = view;
+	long lval;
+	wxString str = m_ca_min_text->GetValue();
+	if (str.ToLong(&lval))
+		m_agent->setValue(gstMinValue, lval);
+}
 
-	fluo::VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
+void CountingDlg::OnCAMaxChange(wxCommandEvent& event)
+{
+	long lval;
+	wxString str = m_ca_max_text->GetValue();
+	if (str.ToLong(&lval))
+		m_agent->setValue(gstMaxValue, lval);
 }
 
 void CountingDlg::OnCAIgnoreMaxChk(wxCommandEvent &event)
 {
-	if (m_ca_ignore_max_chk->GetValue())
-		m_ca_max_text->Disable();
-	else
-		m_ca_max_text->Enable();
+	bool bval = m_ca_ignore_max_chk->GetValue();
+	m_agent->setValue(gstUseMax, !bval);
 }
 
 //component analyze
 void CountingDlg::OnCAAnalyzeBtn(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	bool select = m_ca_select_only_chk->GetValue();
-
-	flrd::ComponentGenerator cg(vd);
-	cg.SetUseMask(select);
-	vd->AddEmptyMask(cg.GetUseMask() ? 2 : 1, true);
-	vd->AddEmptyLabel(0, !cg.GetUseMask());
-	cg.ShuffleID();
-	double scale;
-	vd->getValue(gstIntScale, scale);
-	cg.Grow(false, -1, 0.0, 0.0, scale);
-
-	flrd::ComponentAnalyzer ca(vd);
-	ca.Analyze(select, true, false);
-	m_view->Update(39);
-
-	flrd::CelpList *list = ca.GetCelpList();
-	if (!list || list->empty())
-		return;
-
-	double min_voxels, max_voxels;
-	wxString str = m_ca_min_text->GetValue();
-	str.ToDouble(&min_voxels);
-	str = m_ca_max_text->GetValue();
-	str.ToDouble(&max_voxels);
-	bool ignore_max = m_ca_ignore_max_chk->GetValue();
-
-	int count = 0;
-	unsigned int vox = 0;
-	for (auto it = list->begin();
-		it != list->end(); ++it)
-	{
-		unsigned int sumi = it->second->GetSizeUi();
-		if (sumi > min_voxels &&
-			(ignore_max ||
-			(!ignore_max && sumi < max_voxels)))
-		{
-			++count;
-			vox += sumi;
-		}
-	}
-
-	if (count > 0)
-	{
-		m_ca_comps_text->SetValue(wxString::Format("%d", count));
-		m_ca_volume_text->SetValue(wxString::Format("%d", vox));
-
-		double spcx, spcy, spcz;
-		vd->getValue(gstSpcX, spcx);
-		vd->getValue(gstSpcY, spcy);
-		vd->getValue(gstSpcZ, spcz);
-		double vol_unit = vox * spcx*spcy*spcz;
-		wxString vol_unit_text;
-		vol_unit_text = wxString::Format("%.0f", vol_unit);
-		vol_unit_text += " ";
-		long sb_unit;
-		m_view->getValue(gstScaleBarUnit, sb_unit);
-		switch (sb_unit)
-		{
-		case 0:
-			vol_unit_text += L"nm\u00B3";
-			break;
-		case 1:
-		default:
-			vol_unit_text += L"\u03BCm\u00B3";
-			break;
-		case 2:
-			vol_unit_text += L"mm\u00B3";
-			break;
-		}
-
-		m_ca_vol_unit_text->SetValue(vol_unit_text);
-	}
+	m_agent->Analyze();
 }
 
