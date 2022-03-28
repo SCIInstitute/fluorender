@@ -453,6 +453,10 @@ MeasureAgent* AgentFactory::addMeasureAgent(const std::string &name, wxWindow &w
 	{
 		agent->setName(name);
 		ADD_VALUE(gstRulerEdited, bool(false));
+		ADD_VALUE(gstRulerRelaxIter, long(0));
+		ADD_VALUE(gstRulerInfr, double(0));
+		ADD_VALUE(gstRulerF1, double(0));
+		ADD_VALUE(gstRulerRelaxType, long(0));
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

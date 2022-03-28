@@ -618,6 +618,10 @@ DEALINGS IN THE SOFTWARE.
 //counting agent
 //measure agent
 #define gstRulerEdited "ruler edited"
+#define gstRulerRelaxIter "ruler relax iter"
+#define gstRulerInfr "ruler infr"
+#define gstRulerF1 "ruler f1"
+#define gstRulerRelaxType "ruler relax type"
 
 //input
 //mouse
