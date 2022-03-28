@@ -457,6 +457,10 @@ MeasureAgent* AgentFactory::addMeasureAgent(const std::string &name, wxWindow &w
 		ADD_VALUE(gstRulerInfr, double(0));
 		ADD_VALUE(gstRulerF1, double(0));
 		ADD_VALUE(gstRulerRelaxType, long(0));
+		ADD_VALUE(gstRulerDfoverf, bool(false));
+		ADD_VALUE(gstAlignCenter, bool(false));
+		ADD_VALUE(gstAlignAxisType, long(0));
+		ADD_AFTER_EVENT(gstRulerF1, MeasureAgent, OnRulerF1);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

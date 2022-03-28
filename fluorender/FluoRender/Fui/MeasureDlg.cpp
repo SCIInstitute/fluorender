@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
-#include <Renderview.hpp>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -223,17 +222,13 @@ void RulerListCtrl::OnKeyDown(wxKeyEvent& event)
 			wxLIST_STATE_SELECTED);
 		if (item != -1)
 		{
-			flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-			if (ruler)
+			fluo::Point cp = m_agent->GetRulerCenter(GetItemData(item));
+			wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
+				cp.x(), cp.y(), cp.z());
+			if (wxTheClipboard->Open())
 			{
-				fluo::Point cp = ruler->GetCenter();
-				wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
-					cp.x(), cp.y(), cp.z());
-				if (wxTheClipboard->Open())
-				{
-					wxTheClipboard->SetData(new wxTextDataObject(center));
-					wxTheClipboard->Close();
-				}
+				wxTheClipboard->SetData(new wxTextDataObject(center));
+				wxTheClipboard->Close();
 			}
 		}
 	}
@@ -267,42 +262,7 @@ void RulerListCtrl::OnSelection(wxListEvent &event)
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
 	m_editing_item = item;
-	if (!m_view)
-		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-	if (!ruler || !ruler->GetDisp())
-		return;
-
-	wxRect rect;
-	wxString str;
-	//add frame text
-	GetSubItemRect(item, 0, rect);
-	str = GetText(item, 0);
-	m_name_text->SetPosition(rect.GetTopLeft());
-	m_name_text->SetSize(rect.GetSize());
-	m_name_text->SetValue(str);
-	m_name_text->Show();
-	//add color picker
-	GetSubItemRect(item, 3, rect);
-	m_color_picker->SetPosition(rect.GetTopLeft());
-	m_color_picker->SetSize(rect.GetSize());
-	if (ruler->GetRulerType() == 2)
-	{
-		//locator
-		GetSubItemRect(item, 7, rect);
-		str = GetText(item, 7);
-		m_center_text->SetPosition(rect.GetTopLeft());
-		m_center_text->SetSize(rect.GetSize());
-		m_center_text->SetValue(str);
-		m_center_text->Show();
-	}
-	if (ruler->GetUseColor())
-	{
-		fluo::Color color = ruler->GetColor();
-		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
-		m_color_picker->SetColour(c);
-	}
-	m_color_picker->Show();
+	m_agent->SelectRuler(item);
 }
 
 void RulerListCtrl::OnEndSelection(wxListEvent &event)
@@ -312,28 +272,17 @@ void RulerListCtrl::OnEndSelection(wxListEvent &event)
 
 void RulerListCtrl::OnNameText(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
 	if (m_editing_item == -1)
 		return;
 
 	wxString str = m_name_text->GetValue();
-
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
-	if (!ruler) return;
-	ruler->SetName(str);
-	SetText(m_editing_item, 0, str);
-	m_view->Update(39);
+	m_agent->SetRulerName(GetItemData(m_editing_item), str.ToStdString());
 }
 
 void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
 	if (m_editing_item == -1)
 		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(m_editing_item));
-	if (!ruler || ruler->GetRulerType() != 2) return;
 
 	wxString str = m_center_text->GetValue();
 	wxString old_str = GetText(m_editing_item, 4);
@@ -369,21 +318,11 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 				return;
 		}
 	}
-	if (!ruler->GetPoint(0))
-		return;
-	fluo::Point tmp(x, y, z);
-	ruler->GetPoint(0)->SetPoint(tmp);
-	str = wxString::Format("(%.2f, %.2f, %.2f)",
-		x, y, z);
-	SetText(m_editing_item, 7, str);
-	SetText(m_editing_item, 9, str);
-	m_view->Update(39);
+	m_agent->SetRulerCenter(GetItemData(m_editing_item), fluo::Point(x, y, z));
 }
 
 void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 {
-	if (!m_view)
-		return;
 	if (m_editing_item == -1)
 		return;
 	std::vector<int> sel;
@@ -400,26 +339,20 @@ void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
 	SetText(m_editing_item, 3, str_color);
 
 	for (size_t i = 0; i < sel.size(); ++i)
-	{
-		int index = sel[i];
-		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(index));
-		if (!ruler)
-			continue;
-		ruler->SetColor(color);
-	}
+		m_agent->SetRulerColor(GetItemData(sel[i]), color);
 
-	m_view->Update(39);
+	//m_view->Update(39);
 }
 
 void RulerListCtrl::OnScroll(wxScrollWinEvent& event)
 {
-	EndEdit(false);
+	m_agent->EndEdit(false);
 	event.Skip(true);
 }
 
 void RulerListCtrl::OnScroll(wxMouseEvent& event)
 {
-	EndEdit(false);
+	m_agent->EndEdit(false);
 	event.Skip(true);
 }
 
@@ -434,12 +367,7 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 	long item = GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
-	if (!m_view)
-		return;
-	flrd::Ruler* ruler = m_view->GetRuler(GetItemData(item));
-	if (!ruler) return;
-	ruler->ToggleDisp();
-	bool disp = ruler->GetDisp();
+	bool disp = m_agent->ToggleRulerDisp(GetItemData(item));
 	if (disp)
 		SetItemBackgroundColour(item, wxColour(255, 255, 255));
 	else
@@ -448,7 +376,7 @@ void RulerListCtrl::OnAct(wxListEvent &event)
 	m_center_text->Hide();
 	m_color_picker->Hide();
 	SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->Update(39);
+	//m_view->Update(39);
 }
 
 void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
@@ -476,8 +404,6 @@ void RulerListCtrl::OnContextMenu(wxContextMenuEvent &event)
 
 void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
 	std::vector<int> sel;
 	if (!GetCurrSelection(sel))
 		return;
@@ -485,10 +411,7 @@ void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
 	for (size_t i = 0; i < sel.size(); ++i)
 	{
 		int index = sel[i];
-		flrd::Ruler* ruler = m_view->GetRuler(GetItemData(index));
-		if (!ruler) continue;
-		ruler->ToggleDisp();
-		bool disp = ruler->GetDisp();
+		bool disp = m_agent->ToggleRulerDisp(GetItemData(index));
 		if (disp)
 			SetItemBackgroundColour(index, wxColour(255, 255, 255));
 		else
@@ -498,7 +421,7 @@ void RulerListCtrl::OnToggleDisp(wxCommandEvent& event)
 	//m_center_text->Hide();
 	//m_color_picker->Hide();
 	//SetItemState(item, 0, wxLIST_STATE_SELECTED);
-	m_view->Update(39);
+	//m_view->Update(39);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -541,6 +464,7 @@ BEGIN_EVENT_TABLE(MeasureDlg, wxPanel)
 	EVT_BUTTON(ID_SelGroup, MeasureDlg::OnSelGroup)
 	EVT_BUTTON(ID_DispTglGroup, MeasureDlg::OnDispTglGroup)
 	//align
+	EVT_CHECKBOX(ID_AlignCenter, MeasureDlg::OnAlignCenter)
 	EVT_BUTTON(ID_AlignX, MeasureDlg::OnAlignRuler)
 	EVT_BUTTON(ID_AlignY, MeasureDlg::OnAlignRuler)
 	EVT_BUTTON(ID_AlignZ, MeasureDlg::OnAlignRuler)
@@ -769,7 +693,7 @@ MeasureDlg::MeasureDlg(RenderFrame* frame)
 	sizer21->Add(m_chg_group, 0, wxALIGN_CENTER);
 	sizer21->Add(m_sel_group, 0, wxALIGN_CENTER);
 	sizer21->Add(m_disptgl_group, 0, wxALIGN_CENTER);
-	m_rulerlist = new RulerListCtrl(frame, this,
+	m_rulerlist = new RulerListCtrl(this,
 		wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 	sizer_2->Add(sizer21, 0, wxEXPAND);
 	sizer_2->Add(5, 5);
@@ -864,466 +788,76 @@ MeasureDlg::~MeasureDlg()
 
 void MeasureDlg::OnNewLocator(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_LocatorBtn))
-	{
-		m_view->setValue(gstInterMode, long(5));
-		m_rhdl->SetType(2);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-	}
+	m_agent->Locator();
 }
 
 void MeasureDlg::OnNewProbe(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_ProbeBtn))
-	{
-		m_view->setValue(gstInterMode, long(5));
-		m_rhdl->SetType(3);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-	}
+	m_agent->Probe();
 }
 
 void MeasureDlg::OnNewProtractor(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_ProtractorBtn))
-	{
-		m_view->setValue(gstInterMode, long(5));
-		m_rhdl->SetType(4);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-	}
+	m_agent->Protractor();
 }
 
 void MeasureDlg::OnNewRuler(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_RulerBtn))
-	{
-		m_view->setValue(gstInterMode, long(5));
-		m_rhdl->SetType(0);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-	}
+	m_agent->Ruler();
 }
 
 void MeasureDlg::OnNewRulerMP(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-	{
-		m_view->setValue(gstInterMode, long(5));
-		m_rhdl->SetType(1);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-		m_rhdl->FinishRuler();
-	}
+	m_agent->RulerMP();
 }
 
 void MeasureDlg::OnEllipse(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_EllipseBtn))
-	{
-		m_view->setValue(gstInterMode, long(5));
-		m_rhdl->SetType(5);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-	}
+	m_agent->Ellipse();
 }
 
 void MeasureDlg::OnGrow(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_GrowBtn))
-	{
-		m_view->setValue(gstInterMode, long(12));
-		m_rhdl->SetType(1);
-		if (m_view->GetRulerRenderer())
-			m_view->GetRulerRenderer()->SetDrawText(false);
-		//reset label volume
-		fluo::VolumeData* vd = m_view->GetCurrentVolume();
-		if (vd)
-		{
-			vd->GetRenderer()->clear_tex_mask();
-			vd->GetRenderer()->clear_tex_label();
-			vd->AddEmptyMask(0, true);
-			vd->AddEmptyLabel(0, true);
-		}
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-		if (m_view->GetRulerRenderer())
-			m_view->GetRulerRenderer()->SetDrawText(true);
-	}
+	m_agent->Grow();
 }
 
 void MeasureDlg::OnPencil(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar1->GetToolState(ID_PencilBtn))
-	{
-		m_view->setValue(gstInterMode, long(13));
-		m_rhdl->SetType(1);
-		//if (m_view->m_glview->GetRulerRenderer())
-		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(false);
-	}
-	else
-	{
-		m_view->setValue(gstInterMode, long(1));
-		//if (m_view->m_glview->GetRulerRenderer())
-		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(true);
-	}
+	m_agent->Pencil();
 }
 
 void MeasureDlg::OnRulerFlip(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	int count = 0;
-	std::vector<int> sel;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (m_rulerlist->GetCurrSelection(sel))
-	{
-		for (size_t i = 0; i < sel.size(); ++i)
-		{
-			int index = sel[i];
-			if (0 > index || ruler_list->size() <= index)
-				continue;
-			flrd::Ruler* r = (*ruler_list)[index];
-			if (r)
-				r->Reverse();
-			count++;
-		}
-	}
-	else
-	{
-		for (size_t i = 0; i < ruler_list->size(); ++i)
-		{
-			flrd::Ruler* r = (*ruler_list)[i];
-			if (r)
-				r->Reverse();
-			count++;
-		}
-	}
-
-	if (count)
-	{
-		m_view->Update(39);
-		GetSettings(m_view);
-	}
-	m_edited = true;
+	m_agent->RulerFlip();
 }
 
 void MeasureDlg::OnRulerEdit(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar2->GetToolState(ID_RulerEditBtn))
-		m_view->setValue(gstInterMode, long(6));
-	else
-		m_view->setValue(gstInterMode, long(1));
-
-	//m_edited = true;
+	m_agent->RulerEdit();
 }
 
 void MeasureDlg::OnRulerDel(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar2->GetToolState(ID_RulerDelBtn))
-		m_view->setValue(gstInterMode, long(14));
-	else
-		m_view->setValue(gstInterMode, long(1));
-
-	//m_edited = true;
+	m_agent->RulerDelete();
 }
 
 void MeasureDlg::OnRulerMove(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_LockBtn, false);
-
-	if (m_toolbar2->GetToolState(ID_RulerMoveBtn))
-		m_view->setValue(gstInterMode, long(9));
-	else
-		m_view->setValue(gstInterMode, long(1));
-
-	//m_edited = true;
+	m_agent->RulerMove();
 }
 
 void MeasureDlg::OnRulerAvg(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	fluo::Point avg;
-	int count = 0;
-	std::vector<int> sel;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (m_rulerlist->GetCurrSelection(sel))
-	{
-		for (size_t i = 0; i < sel.size(); ++i)
-		{
-			int index = sel[i];
-			if (0 > index || ruler_list->size() <= index)
-				continue;
-			flrd::Ruler* r = (*ruler_list)[index];
-			avg += r->GetCenter();
-			count++;
-		}
-	}
-	else
-	{
-		for (size_t i = 0; i < ruler_list->size(); ++i)
-		{
-			flrd::Ruler* r = (*ruler_list)[i];
-			if (r->GetDisp())
-			{
-				avg += r->GetCenter();
-				count++;
-			}
-		}
-	}
-
-	if (count)
-	{
-		avg /= double(count);
-		flrd::Ruler* ruler = new flrd::Ruler();
-		ruler->SetRulerType(2);
-		ruler->SetName("Average");
-		ruler->AddPoint(avg);
-		bool bval;
-		m_view->getValue(gstRulerTransient, bval);
-		ruler->SetTimeDep(bval);
-		long lval;
-		m_view->getValue(gstCurrentFrame, lval);
-		ruler->SetTime(lval);
-		ruler_list->push_back(ruler);
-		m_view->Update(39);
-		GetSettings(m_view);
-	}
+	m_agent->RulerAvg();
 }
 
 void MeasureDlg::OnProfile(wxCommandEvent& event)
 {
-	if (m_view)
-	{
-		m_rhdl->SetVolumeData(m_view->GetCurrentVolume());
-		std::vector<int> sel;
-		if (m_rulerlist->GetCurrSelection(sel))
-		{
-			//export selected
-			for (size_t i = 0; i < sel.size(); ++i)
-				m_rhdl->Profile(sel[i]);
-		}
-		else
-		{
-			//export all
-			flrd::RulerList* ruler_list = m_view->GetRulerList();
-			for (size_t i = 0; i < ruler_list->size(); ++i)
-			{
-				if ((*ruler_list)[i]->GetDisp())
-					m_rhdl->Profile(i);
-			}
-		}
-	}
+	m_agent->Profile();
 }
 
 void MeasureDlg::OnDistance(wxCommandEvent& event)
 {
-	if (!m_view || !m_frame)
-		return;
-
-	flrd::ComponentAnalyzer* analyzer =
-		m_view->GetCompAnalyzer();
-	if (!analyzer)
-		return;
-	m_rhdl->SetCompAnalyzer(analyzer);
-
 	std::string filename;
 	wxFileDialog *fopendlg = new wxFileDialog(
 		this, "Save Analysis Data", "", "",
@@ -1338,29 +872,7 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 		filename = filename.substr(0, filename.find_last_of('.'));
 	}
 
-	std::vector<int> sel;
-	std::string fi;
-	if (m_rulerlist->GetCurrSelection(sel))
-	{
-		//export selected
-		for (size_t i = 0; i < sel.size(); ++i)
-		{
-			fi = filename + std::to_string(i) + ".txt";
-			m_rhdl->Distance(sel[i], fi);
-		}
-	}
-	else
-	{
-		flrd::RulerList* ruler_list = m_view->GetRulerList();
-		for (size_t i = 0; i < ruler_list->size(); ++i)
-		{
-			if ((*ruler_list)[i]->GetDisp())
-			{
-				fi = filename + std::to_string(i) + ".txt";
-				m_rhdl->Distance(i, fi);
-			}
-		}
-	}
+	m_agent->Distance(filename);
 
 	if (fopendlg)
 		delete fopendlg;
@@ -1368,61 +880,32 @@ void MeasureDlg::OnDistance(wxCommandEvent& event)
 
 void MeasureDlg::OnProject(wxCommandEvent& event)
 {
-	if (m_view)
-	{
-		std::vector<int> sel;
-		if (m_rulerlist->GetCurrSelection(sel))
-		{
-			//export selected
-			for (size_t i = 0; i < sel.size(); ++i)
-				Project(sel[i]);
-		}
-	}
+	m_agent->Project();
 }
 
 void MeasureDlg::OnLock(wxCommandEvent& event)
 {
-	if (!m_view) return;
-
-	if (m_toolbar1->GetToolState(ID_RulerMPBtn))
-		m_rhdl->FinishRuler();
-
-	m_toolbar1->ToggleTool(ID_LocatorBtn, false);
-	m_toolbar1->ToggleTool(ID_ProbeBtn, false);
-	m_toolbar1->ToggleTool(ID_ProtractorBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerBtn, false);
-	m_toolbar1->ToggleTool(ID_RulerMPBtn, false);
-	m_toolbar1->ToggleTool(ID_EllipseBtn, false);
-	m_toolbar1->ToggleTool(ID_GrowBtn, false);
-	m_toolbar1->ToggleTool(ID_PencilBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerEditBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerDelBtn, false);
-	m_toolbar2->ToggleTool(ID_RulerMoveBtn, false);
-
-	if (m_toolbar2->GetToolState(ID_LockBtn))
-		m_view->setValue(gstInterMode, long(11));
-	else
-		m_view->setValue(gstInterMode, long(1));
+	m_agent->Lock();
 }
 
 void MeasureDlg::OnPrune(wxCommandEvent& event)
 {
-	Prune(1);
+	m_agent->Prune(1);
 }
 
 void MeasureDlg::OnRelax(wxCommandEvent& event)
 {
-	Relax();
+	m_agent->Relax();
 }
 
 void MeasureDlg::OnDelete(wxCommandEvent& event)
 {
-	m_rulerlist->DeleteSelection();
+	m_agent->DeleteSelection();
 }
 
 void MeasureDlg::OnDeleteAll(wxCommandEvent& event)
 {
-	m_rulerlist->DeleteAll();
+	m_agent->DeleteAll(0);
 }
 
 void MeasureDlg::OnExport(wxCommandEvent& event)
@@ -1437,7 +920,7 @@ void MeasureDlg::OnExport(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		m_rulerlist->Export(filename);
+		m_agent->Export(filename.ToStdString());
 	}
 
 	if (fopendlg)
@@ -1446,9 +929,6 @@ void MeasureDlg::OnExport(wxCommandEvent& event)
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
 	long mode = 0;
 	int sender_id = event.GetId();
 	switch (sender_id)
@@ -1463,61 +943,51 @@ void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 		mode = 2;
 		break;
 	}
-	m_view->setValue(gstPointVolumeMode, mode);
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetPointVolumeMode(mode);
+	m_agent->setValue(gstPointVolumeMode, mode);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetPointVolumeMode(mode);
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
 	bool use_transfer = m_use_transfer_chk->GetValue();
-	m_view->setValue(gstRulerUseTransf, use_transfer);
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
+	m_agent->setValue(gstRulerUseTransf, use_transfer);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetRulerUseTransf(use_transfer);
 }
 
 void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
 	bool val = m_transient_chk->GetValue();
-	m_view->setValue(gstRulerTransient, val);
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerTimeDep(val);
+	m_agent->setValue(gstRulerTransient, val);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetRulerTimeDep(val);
 }
 
 void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
 	bool val = m_df_f_chk->GetValue();
-	m_rulerlist->m_ruler_df_f = val;
-
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerDF_F(val);
+	m_agent->setValue(gstRulerDfoverf, val);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetRulerDF_F(val);
 }
 
 void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
 {
 	bool bval = m_auto_relax_btn->GetValue();
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerAutoRelax(bval);
-	if (m_view)
-		m_view->setValue(gstRulerRelax, bval);
+	m_agent->setValue(gstRulerRelax, bval);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetRulerAutoRelax(bval);
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
-	m_calculator->SetF1(dval);
+	m_agent->setValue(gstRulerF1, dval);
+	//m_calculator->SetF1(dval);
 	//relax
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 }
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
@@ -1526,51 +996,31 @@ void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 	double dval;
 	if (str.ToDouble(&dval))
 	{
-		m_calculator->SetF1(dval);
+		m_agent->setValue(gstRulerF1, dval);
 		//relax
-		if (m_frame && m_frame->GetSettingDlg())
-			m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
+		//if (m_frame && m_frame->GetSettingDlg())
+		//	m_frame->GetSettingDlg()->SetRulerRelaxF1(dval);
 	}
 }
 
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 {
 	int ival = m_relax_data_cmb->GetSelection();
-	if (m_frame && m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRulerRelaxType(ival);
+	//if (m_frame && m_frame->GetSettingDlg())
+	//	m_frame->GetSettingDlg()->SetRulerRelaxType(ival);
 }
 
 //ruler list
 void MeasureDlg::OnNewGroup(wxCommandEvent& event)
 {
-	if (m_rhdl)
-		m_rhdl->NewGroup();
+	m_agent->NewGroup();
 }
 
 void MeasureDlg::OnChgGroup(wxCommandEvent& event)
 {
-	if (!m_rhdl)
-		return;
 	unsigned long ival;
 	if (m_group_text->GetValue().ToULong(&ival))
-		m_rhdl->SetGroup(ival);
-
-	//update group
-	if (!m_view)
-		return;
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
-		return;
-	for (size_t i = 0; i < sel.size(); ++i)
-	{
-		int index = sel[i];
-		flrd::Ruler* ruler = m_view->GetRuler(
-			m_rulerlist->GetItemData(index));
-		if (!ruler)
-			continue;
-		ruler->Group(ival);
-	}
-	m_rulerlist->UpdateRulers(m_view);
+		m_agent->ChangeGroup(ival);
 }
 
 void MeasureDlg::OnSelGroup(wxCommandEvent& event)
@@ -1578,7 +1028,7 @@ void MeasureDlg::OnSelGroup(wxCommandEvent& event)
 	unsigned long ival;
 	if (!m_group_text->GetValue().ToULong(&ival))
 		return;
-	m_rulerlist->SelectGroup(ival);
+	m_agent->SelectGroup(ival);
 }
 
 void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
@@ -1586,46 +1036,17 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 	unsigned long ival;
 	if (!m_group_text->GetValue().ToULong(&ival))
 		return;
-	if (!m_view)
-		return;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (!ruler_list) return;
-	bool disp;
-	bool first = true;
-	for (int i = 0; i < (int)ruler_list->size(); i++)
-	{
-		flrd::Ruler* ruler = (*ruler_list)[i];
-		if (!ruler) continue;
-		if (ruler->Group() == ival)
-		{
-			if (first)
-			{
-				first = false;
-				disp = !ruler->GetDisp();
-			}
-			ruler->SetDisp(disp);
-			if (disp)
-				m_rulerlist->SetItemBackgroundColour(i, wxColour(255, 255, 255));
-			else
-				m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
-		}
-	}
-	m_view->Update(39);
+	m_agent->ToggleGroupDisp(ival);
+}
+
+void MeasureDlg::OnAlignCenter(wxCommandEvent& event)
+{
+	bool bval = m_align_center->GetValue();
+	m_agent->setValue(gstAlignCenter, bval);
 }
 
 void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
-		return;
-	if (!m_view)
-		return;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (!ruler_list)
-		return;
-	flrd::Ruler* ruler = ruler_list->at(sel[0]);
-	m_aligner->SetRuler(ruler);
-
 	int axis_type = 0;
 	switch (event.GetId())
 	{
@@ -1648,26 +1069,12 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	m_aligner->AlignRuler(axis_type);
-	if (m_align_center->GetValue())
-		AlignCenter(ruler, 0);
+	m_agent->setValue(gstAlignAxisType, long(axis_type));
+	m_agent->AlignRuler();
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 {
-	flrd::RulerList list;
-	std::vector<int> sel;
-	if (!m_rulerlist->GetCurrSelection(sel))
-		return;
-	if (!m_view)
-		return;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (!ruler_list)
-		return;
-	for (int i = 0; i < sel.size(); ++i)
-		list.push_back((*ruler_list)[sel[i]]);
-	m_aligner->SetRulerList(&list);
-
 	int axis_type = 0;
 	switch (event.GetId())
 	{
@@ -1690,8 +1097,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 		axis_type = 5;
 		break;
 	}
-	m_aligner->AlignPca(axis_type);
-	if (m_align_center->GetValue())
-		AlignCenter(0, &list);
+	m_agent->setValue(gstAlignAxisType, long(axis_type));
+	m_agent->AlignPca();
 }
 

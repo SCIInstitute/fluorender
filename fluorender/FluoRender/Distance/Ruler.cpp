@@ -39,7 +39,7 @@ Ruler::Ruler()
 	m_id = m_num;
 	m_group = 0;
 	m_num++;
-	m_name = wxString::Format("Ruler %d", m_num);
+	m_name = "Ruler " + std::to_string(m_num);
 	m_disp = true;
 	m_tform = 0;
 	m_ruler_type = 0;
@@ -522,9 +522,9 @@ void Ruler::Reverse()
 		std::reverse(std::begin(m_ruler[0]), std::end(m_ruler[0]));
 }
 
-wxString Ruler::GetDelInfoValues(wxString del)
+std::string Ruler::GetDelInfoValues(const std::string &del)
 {
-	wxString output;
+	std::string output;
 
 	for (size_t i = 0; i < m_info_values.length(); i++)
 	{
@@ -537,9 +537,9 @@ wxString Ruler::GetDelInfoValues(wxString del)
 	return output;
 }
 
-wxString Ruler::GetPosValues()
+std::string Ruler::GetPosValues()
 {
-	wxString output;
+	std::string output;
 
 	//x string
 	output += "x\t";
@@ -578,9 +578,9 @@ wxString Ruler::GetPosValues()
 	return output;
 }
 
-wxString Ruler::GetPosNames()
+std::string Ruler::GetPosNames()
 {
-	wxString output;
+	std::string output;
 
 	output += "Coords\t";
 
@@ -598,7 +598,7 @@ wxString Ruler::GetPosNames()
 	return output;
 }
 
-void Ruler::SaveProfile(wxString &filename)
+void Ruler::SaveProfile(const std::string &filename)
 {
 }
 

@@ -402,16 +402,16 @@ void RulerHandler::AddPaintRulerPoint()
 	fluo::Point center = cover.GetCenter();
 	double size = counter.GetSum();
 
-	wxString str;
+	std::string str;
 	bool new_ruler = true;
 	if (m_ruler &&
 		m_ruler->GetDisp() &&
 		!m_ruler->GetFinished())
 	{
 		m_ruler->AddPoint(center);
-		str = wxString::Format("\tv%d", m_ruler->GetNumPoint() - 1);
+		str = "\tv" + std::to_string(m_ruler->GetNumPoint() - 1);
 		m_ruler->AddInfoNames(str);
-		str = wxString::Format("\t%.0f", size);
+		str = "\t" + std::to_string(int(size));
 		m_ruler->AddInfoValues(str);
 		new_ruler = false;
 	}
@@ -425,7 +425,7 @@ void RulerHandler::AddPaintRulerPoint()
 		m_ruler->SetTime(cur_frame);
 		str = "v0";
 		m_ruler->AddInfoNames(str);
-		str = wxString::Format("%.0f", size);
+		str = std::to_string(int(size));
 		m_ruler->AddInfoValues(str);
 		m_ruler_list->push_back(m_ruler);
 	}
@@ -638,14 +638,14 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			Ruler* ruler = (*m_ruler_list)[ri];
 			if (!ruler) continue;
 			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
-			fconfig.Write("name", ruler->GetName());
+			fconfig.Write("name", wxString(ruler->GetName()));
 			fconfig.Write("group", ruler->Group());
 			fconfig.Write("type", ruler->GetRulerType());
 			fconfig.Write("display", ruler->GetDisp());
 			fconfig.Write("transient", ruler->GetTimeDep());
 			fconfig.Write("time", ruler->GetTime());
-			fconfig.Write("info_names", ruler->GetInfoNames());
-			fconfig.Write("info_values", ruler->GetInfoValues());
+			fconfig.Write("info_names", wxString(ruler->GetInfoNames()));
+			fconfig.Write("info_values", wxString(ruler->GetInfoValues()));
 			fconfig.Write("use_color", ruler->GetUseColor());
 			fconfig.Write("color", wxString::Format("%f %f %f",
 				ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
@@ -693,7 +693,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 				fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
 				Ruler* ruler = new Ruler();
 				if (fconfig.Read("name", &str))
-					ruler->SetName(str);
+					ruler->SetName(str.ToStdString());
 				if (fconfig.Read("group", &ival))
 					ruler->Group(ival);
 				if (fconfig.Read("type", &ival))
@@ -705,9 +705,9 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 				if (fconfig.Read("time", &ival))
 					ruler->SetTime(ival);
 				if (fconfig.Read("info_names", &str))
-					ruler->SetInfoNames(str);
+					ruler->SetInfoNames(str.ToStdString());
 				if (fconfig.Read("info_values", &str))
-					ruler->SetInfoValues(str);
+					ruler->SetInfoValues(str.ToStdString());
 				if (fconfig.Read("use_color", &bval))
 				{
 					if (bval)

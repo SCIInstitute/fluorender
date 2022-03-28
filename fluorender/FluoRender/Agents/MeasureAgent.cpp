@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <compatibility.h>
 #include <MeasureAgent.hpp>
 #include <MeasureDlg.h>
 #include <DistCalculator.h>
@@ -378,19 +379,65 @@ void MeasureAgent::Project(int idx)
 void MeasureAgent::Prune(int len)
 {
 	std::vector<int> sel;
-	if (m_rulerlist->GetCurrSelection(sel))
+	if (dlg_.m_rulerlist->GetCurrSelection(sel))
 	{
 		for (size_t i = 0; i < sel.size(); ++i)
 			Prune(sel[i], len);
 	}
-	if (m_view)
-		m_view->Update(39);
-	GetSettings(m_view);
+	//if (m_view)
+	//	m_view->Update(39);
+	//GetSettings(m_view);
 }
 
 void MeasureAgent::Prune(int idx, int len)
 {
-	m_rhdl->Prune(idx, len);
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+	handler->Prune(idx, len);
+}
+
+void MeasureAgent::AlignRuler()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerList* ruler_list = view->GetRulerList();
+	if (!ruler_list) return;
+	flrd::RulerAlign* aligner = view->GetRulerAlign();
+	if (!aligner) return;
+
+	std::vector<int> sel;
+	if (!dlg_.m_rulerlist->GetCurrSelection(sel))
+		return;
+	flrd::Ruler* ruler = ruler_list->at(sel[0]);
+	aligner->SetRuler(ruler);
+	long lval;
+	getValue(gstAlignAxisType, lval);
+	aligner->AlignRuler(lval);
+	bool bval;
+	getValue(gstAlignCenter, bval);
+	if (bval)
+		AlignCenter(ruler, 0);
+}
+
+void MeasureAgent::AlignPca()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerList* ruler_list = view->GetRulerList();
+	if (!ruler_list) return;
+	flrd::RulerAlign* aligner = view->GetRulerAlign();
+	if (!aligner) return;
+
+	aligner->SetRulerList(ruler_list);
+	long lval;
+	getValue(gstAlignAxisType, lval);
+	aligner->AlignPca(lval);
+	bool bval;
+	getValue(gstAlignCenter, bval);
+	if (bval)
+		AlignCenter(0, ruler_list);
 }
 
 void MeasureAgent::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
@@ -414,247 +461,894 @@ void MeasureAgent::AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list)
 	}
 	if (valid_center)
 	{
+		Renderview* view = getObject();
 		double tx, ty, tz;
-		m_view->getValue(gstObjCtrX, tx);
-		m_view->getValue(gstObjCtrY, ty);
-		m_view->getValue(gstObjCtrZ, tz);
-		m_view->setValue(gstObjTransX, tx - center.x());
-		m_view->setValue(gstObjTransY, center.y() - ty);
-		m_view->setValue(gstObjTransZ, center.z() - tz);
+		view->getValue(gstObjCtrX, tx);
+		view->getValue(gstObjCtrY, ty);
+		view->getValue(gstObjCtrZ, tz);
+		view->setValue(gstObjTransX, tx - center.x());
+		view->setValue(gstObjTransY, center.y() - ty);
+		view->setValue(gstObjTransZ, center.z() - tz);
 	}
 }
 
 void MeasureAgent::SelectGroup(unsigned int group)
 {
-	ClearSelection();
-	if (!m_view)
-		return;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
+	dlg_.m_rulerlist->ClearSelection();
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerList* ruler_list = view->GetRulerList();
 	if (!ruler_list) return;
 	for (int i = 0; i < (int)ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->Group() == group)
-			SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			dlg_.m_rulerlist->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 	}
 }
 
 void MeasureAgent::DeleteSelection()
 {
-	if (!m_rhdl)
-		return;
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
 	std::vector<int> sel;
-	GetCurrSelection(sel);
-	m_rhdl->DeleteSelection(sel);
+	dlg_.m_rulerlist->GetCurrSelection(sel);
+	handler->DeleteSelection(sel);
 	UpdateRulers();
-	m_view->Update(39);
+	//m_view->Update(39);
 }
 
 void MeasureAgent::DeleteAll(bool cur_time)
 {
-	if (!m_rhdl)
-		return;
-	m_rhdl->DeleteAll(cur_time);
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+	handler->DeleteAll(cur_time);
 	UpdateRulers();
-	m_view->Update(39);
+	//m_view->Update(39);
 }
 
 void MeasureAgent::Export(const std::string &filename)
 {
-	if (!m_view) return;
-	flrd::RulerList* ruler_list = m_view->GetRulerList();
-	if (ruler_list)
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerList* ruler_list = view->GetRulerList();
+	if (!ruler_list) return;
+
+	std::ofstream os;
+	OutputStreamOpen(os, filename);
+
+	wxString str;
+	wxString unit;
+	int num_points;
+	fluo::Point p;
+	flrd::Ruler* ruler;
+	long sb_unit;
+	view->getValue(gstScaleBarUnit, sb_unit);
+	switch (sb_unit)
 	{
-		std::ofstream os;
-		OutputStreamOpen(os, filename.ToStdString());
-
-		wxString str;
-		wxString unit;
-		int num_points;
-		fluo::Point p;
-		flrd::Ruler* ruler;
-		long sb_unit;
-		m_view->getValue(gstScaleBarUnit, sb_unit);
-		switch (sb_unit)
-		{
-		case 0:
-			unit = "nm";
-			break;
-		case 1:
-		default:
-			unit = L"\u03BCm";
-			break;
-		case 2:
-			unit = "mm";
-			break;
-		}
-
-		int ruler_num = ruler_list->size();
-		std::vector<unsigned int> groups;
-		std::vector<int> counts;
-		int group_num = ruler_list->GetGroupNumAndCount(groups, counts);
-		std::vector<int> group_count(group_num, 0);
-
-		if (ruler_num > 1)
-			os << "Ruler Count:\t" << ruler_num << "\n";
-		if (group_num > 1)
-		{
-			//group count
-			os << "Group Count:\t" << group_num << "\n";
-			for (int i = 0; i < group_num; ++i)
-			{
-				os << "Group " << groups[i];
-				if (i < group_num - 1)
-					os << "\t";
-				else
-					os << "\n";
-			}
-			for (int i = 0; i < group_num; ++i)
-			{
-				os << counts[i];
-				if (i < group_num - 1)
-					os << "\t";
-				else
-					os << "\n";
-			}
-		}
-
-		os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
-
-		double f = 0.0;
-		fluo::Color color;
-		for (size_t i = 0; i < ruler_list->size(); i++)
-		{
-			//for each ruler
-			ruler = (*ruler_list)[i];
-			if (!ruler) continue;
-
-			os << ruler->GetName() << "\t";
-
-			//group and count
-			unsigned int group = ruler->Group();
-			os << group << "\t";
-			int count = 0;
-			auto iter = std::find(groups.begin(), groups.end(), group);
-			if (iter != groups.end())
-			{
-				int index = std::distance(groups.begin(), iter);
-				count = ++group_count[index];
-			}
-			os << count << "\t";
-
-			//color
-			if (ruler->GetUseColor())
-			{
-				color = ruler->GetColor();
-				str = wxString::Format("RGB(%d, %d, %d)",
-					int(color.r() * 255), int(color.g() * 255), int(color.b() * 255));
-			}
-			else
-				str = "N/A";
-			os << str << "\t";
-
-			//branch count
-			str = wxString::Format("%d", ruler->GetNumBranch());
-			os << str << "\t";
-			//length
-			str = wxString::Format("%.2f", ruler->GetLength());
-			os << str << "\t";
-			//angle
-			str = wxString::Format("%.1f", ruler->GetAngle());
-			os << str << "\t";
-
-			str = "";
-			//start and end points
-			num_points = ruler->GetNumPoint();
-			if (num_points > 0)
-			{
-				p = ruler->GetPoint(0)->GetPoint();
-				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
-			}
-			if (num_points > 1)
-			{
-				p = ruler->GetPoint(num_points - 1)->GetPoint();
-				str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
-			}
-			else
-				str += "\t\t\t";
-			os << str;
-
-			//time
-			if (ruler->GetTimeDep())
-				str = wxString::Format("%d", ruler->GetTime());
-			else
-				str = "N/A";
-			os << str << "\t";
-
-			//info values v1 v2
-			os << ruler->GetInfoValues() << "\n";
-
-			//export points
-			if (ruler->GetNumPoint() > 2)
-			{
-				os << ruler->GetPosNames();
-				os << ruler->GetPosValues();
-			}
-
-			//export profile
-			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
-			if (profile && profile->size())
-			{
-				double sumd = 0.0;
-				unsigned long long sumull = 0;
-				os << ruler->GetInfoProfile() << "\n";
-				for (size_t j = 0; j < profile->size(); ++j)
-				{
-					//for each profile
-					int pixels = (*profile)[j].m_pixels;
-					if (pixels <= 0)
-						os << "0.0\t";
-					else
-					{
-						os << (*profile)[j].m_accum / pixels << "\t";
-						sumd += (*profile)[j].m_accum;
-						sumull += pixels;
-					}
-				}
-				if (m_ruler_df_f)
-				{
-					double avg = 0.0;
-					if (sumull != 0)
-						avg = sumd / double(sumull);
-					if (i == 0)
-					{
-						f = avg;
-						os << "\t" << f << "\t";
-					}
-					else
-					{
-						double df = avg - f;
-						if (f == 0.0)
-							os << "\t" << df << "\t";
-						else
-							os << "\t" << df / f << "\t";
-					}
-				}
-				os << "\n";
-			}
-		}
-
-		os.close();
+	case 0:
+		unit = "nm";
+		break;
+	case 1:
+	default:
+		unit = L"\u03BCm";
+		break;
+	case 2:
+		unit = "mm";
+		break;
 	}
+
+	int ruler_num = ruler_list->size();
+	std::vector<unsigned int> groups;
+	std::vector<int> counts;
+	int group_num = ruler_list->GetGroupNumAndCount(groups, counts);
+	std::vector<int> group_count(group_num, 0);
+
+	if (ruler_num > 1)
+		os << "Ruler Count:\t" << ruler_num << "\n";
+	if (group_num > 1)
+	{
+		//group count
+		os << "Group Count:\t" << group_num << "\n";
+		for (int i = 0; i < group_num; ++i)
+		{
+			os << "Group " << groups[i];
+			if (i < group_num - 1)
+				os << "\t";
+			else
+				os << "\n";
+		}
+		for (int i = 0; i < group_num; ++i)
+		{
+			os << counts[i];
+			if (i < group_num - 1)
+				os << "\t";
+			else
+				os << "\n";
+		}
+	}
+
+	os << "Name\tGroup\tCount\tColor\tBranch\tLength(" << unit << ")\tAngle/Pitch(Deg)\tx1\ty1\tz1\txn\tyn\tzn\tTime\tv1\tv2\n";
+
+	double f = 0.0;
+	fluo::Color color;
+	bool dfoverf;
+	getValue(gstRulerDfoverf, dfoverf);
+	for (size_t i = 0; i < ruler_list->size(); i++)
+	{
+		//for each ruler
+		ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+
+		os << ruler->GetName() << "\t";
+
+		//group and count
+		unsigned int group = ruler->Group();
+		os << group << "\t";
+		int count = 0;
+		auto iter = std::find(groups.begin(), groups.end(), group);
+		if (iter != groups.end())
+		{
+			int index = std::distance(groups.begin(), iter);
+			count = ++group_count[index];
+		}
+		os << count << "\t";
+
+		//color
+		if (ruler->GetUseColor())
+		{
+			color = ruler->GetColor();
+			str = wxString::Format("RGB(%d, %d, %d)",
+				int(color.r() * 255), int(color.g() * 255), int(color.b() * 255));
+		}
+		else
+			str = "N/A";
+		os << str << "\t";
+
+		//branch count
+		str = wxString::Format("%d", ruler->GetNumBranch());
+		os << str << "\t";
+		//length
+		str = wxString::Format("%.2f", ruler->GetLength());
+		os << str << "\t";
+		//angle
+		str = wxString::Format("%.1f", ruler->GetAngle());
+		os << str << "\t";
+
+		str = "";
+		//start and end points
+		num_points = ruler->GetNumPoint();
+		if (num_points > 0)
+		{
+			p = ruler->GetPoint(0)->GetPoint();
+			str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+		}
+		if (num_points > 1)
+		{
+			p = ruler->GetPoint(num_points - 1)->GetPoint();
+			str += wxString::Format("%.2f\t%.2f\t%.2f\t", p.x(), p.y(), p.z());
+		}
+		else
+			str += "\t\t\t";
+		os << str;
+
+		//time
+		if (ruler->GetTimeDep())
+			str = wxString::Format("%d", ruler->GetTime());
+		else
+			str = "N/A";
+		os << str << "\t";
+
+		//info values v1 v2
+		os << ruler->GetInfoValues() << "\n";
+
+		//export points
+		if (ruler->GetNumPoint() > 2)
+		{
+			os << ruler->GetPosNames();
+			os << ruler->GetPosValues();
+		}
+
+		//export profile
+		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
+		if (profile && profile->size())
+		{
+			double sumd = 0.0;
+			unsigned long long sumull = 0;
+			os << ruler->GetInfoProfile() << "\n";
+			for (size_t j = 0; j < profile->size(); ++j)
+			{
+				//for each profile
+				int pixels = (*profile)[j].m_pixels;
+				if (pixels <= 0)
+					os << "0.0\t";
+				else
+				{
+					os << (*profile)[j].m_accum / pixels << "\t";
+					sumd += (*profile)[j].m_accum;
+					sumull += pixels;
+				}
+			}
+			if (dfoverf)
+			{
+				double avg = 0.0;
+				if (sumull != 0)
+					avg = sumd / double(sumull);
+				if (i == 0)
+				{
+					f = avg;
+					os << "\t" << f << "\t";
+				}
+				else
+				{
+					double df = avg - f;
+					if (f == 0.0)
+						os << "\t" << df << "\t";
+					else
+						os << "\t" << df / f << "\t";
+				}
+			}
+			os << "\n";
+		}
+	}
+
+	os.close();
 }
 
 void MeasureAgent::EndEdit(bool update)
 {
-	if (m_name_text->IsShown())
+	if (dlg_.m_rulerlist->m_name_text->IsShown())
 	{
-		m_name_text->Hide();
-		m_center_text->Hide();
-		m_color_picker->Hide();
-		m_editing_item = -1;
+		dlg_.m_rulerlist->m_name_text->Hide();
+		dlg_.m_rulerlist->m_center_text->Hide();
+		dlg_.m_rulerlist->m_color_picker->Hide();
+		dlg_.m_rulerlist->m_editing_item = -1;
 		if (update) UpdateRulers();
 	}
 }
 
+void MeasureAgent::SelectRuler(long i)
+{
+	flrd::Ruler* ruler = GetRuler(dlg_.m_rulerlist->GetItemData(i));
+	if (!ruler || !ruler->GetDisp())
+		return;
+
+	wxRect rect;
+	wxString str;
+	//add frame text
+	dlg_.m_rulerlist->GetSubItemRect(i, 0, rect);
+	str = dlg_.m_rulerlist->GetText(i, 0);
+	dlg_.m_rulerlist->m_name_text->SetPosition(rect.GetTopLeft());
+	dlg_.m_rulerlist->m_name_text->SetSize(rect.GetSize());
+	dlg_.m_rulerlist->m_name_text->SetValue(str);
+	dlg_.m_rulerlist->m_name_text->Show();
+	//add color picker
+	dlg_.m_rulerlist->GetSubItemRect(i, 3, rect);
+	dlg_.m_rulerlist->m_color_picker->SetPosition(rect.GetTopLeft());
+	dlg_.m_rulerlist->m_color_picker->SetSize(rect.GetSize());
+	if (ruler->GetRulerType() == 2)
+	{
+		//locator
+		dlg_.m_rulerlist->GetSubItemRect(i, 7, rect);
+		str = dlg_.m_rulerlist->GetText(i, 7);
+		dlg_.m_rulerlist->m_center_text->SetPosition(rect.GetTopLeft());
+		dlg_.m_rulerlist->m_center_text->SetSize(rect.GetSize());
+		dlg_.m_rulerlist->m_center_text->SetValue(str);
+		dlg_.m_rulerlist->m_center_text->Show();
+	}
+	if (ruler->GetUseColor())
+	{
+		fluo::Color color = ruler->GetColor();
+		wxColor c(int(color.r()*255.0), int(color.g()*255.0), int(color.b()*255.0));
+		dlg_.m_rulerlist->m_color_picker->SetColour(c);
+	}
+	dlg_.m_rulerlist->m_color_picker->Show();
+}
+
+Point MeasureAgent::GetRulerCenter(unsigned int i)
+{
+	flrd::Ruler* ruler = GetRuler(i);
+	if (!ruler) return Point();
+	return ruler->GetCenter();
+}
+
+flrd::Ruler* MeasureAgent::GetRuler(unsigned int i)
+{
+	Renderview* view = getObject();
+	if (!view) return 0;
+	return view->GetRuler(i);
+}
+
+void MeasureAgent::SetRulerName(unsigned int i, const std::string &name)
+{
+	flrd::Ruler* ruler = GetRuler(i);
+	if (!ruler) return;
+	ruler->SetName(name);
+	wxString str(name);
+	dlg_.m_rulerlist->SetText(dlg_.m_rulerlist->m_editing_item, 0, str);
+	//m_view->Update(39);
+}
+
+void MeasureAgent::SetRulerCenter(unsigned int i, const Point &p)
+{
+	flrd::Ruler* ruler = GetRuler(i);
+	if (!ruler || ruler->GetRulerType() != 2) return;
+	if (!ruler->GetPoint(0)) return;
+	ruler->GetPoint(0)->SetPoint(p);
+	wxString str = wxString::Format("(%.2f, %.2f, %.2f)",
+		p.x(), p.y(), p.z());
+	dlg_.m_rulerlist->SetText(dlg_.m_rulerlist->m_editing_item, 7, str);
+	dlg_.m_rulerlist->SetText(dlg_.m_rulerlist->m_editing_item, 9, str);
+	//m_view->Update(39);
+}
+
+void MeasureAgent::SetRulerColor(unsigned int i, const Color &c)
+{
+	flrd::Ruler* ruler = GetRuler(i);
+	if (!ruler) return;
+	ruler->SetColor(c);
+}
+
+bool MeasureAgent::ToggleRulerDisp(unsigned int i)
+{
+	flrd::Ruler* ruler = GetRuler(i);
+	if (!ruler) return false;
+	ruler->ToggleDisp();
+	return ruler->GetDisp();
+}
+
+void MeasureAgent::ToggleToolBtns(bool val)
+{
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, val);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, val);
+	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, val);
+	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, val);
+	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, val);
+	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, val);
+}
+
+void MeasureAgent::Locator()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_LocatorBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(5));
+		handler->SetType(2);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+	}
+}
+
+void MeasureAgent::Probe()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_ProbeBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(5));
+		handler->SetType(3);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+	}
+}
+
+void MeasureAgent::Protractor()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_ProtractorBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(5));
+		handler->SetType(4);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+	}
+}
+
+void MeasureAgent::Ruler()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(5));
+		handler->SetType(0);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+	}
+}
+
+void MeasureAgent::RulerMP()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(5));
+		handler->SetType(1);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+		handler->FinishRuler();
+	}
+}
+
+void MeasureAgent::Ellipse()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_EllipseBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(5));
+		handler->SetType(5);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+	}
+}
+
+void MeasureAgent::Grow()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_GrowBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(12));
+		handler->SetType(1);
+		if (view->GetRulerRenderer())
+			view->GetRulerRenderer()->SetDrawText(false);
+		//reset label volume
+		fluo::VolumeData* vd = view->GetCurrentVolume();
+		if (vd)
+		{
+			vd->GetRenderer()->clear_tex_mask();
+			vd->GetRenderer()->clear_tex_label();
+			vd->AddEmptyMask(0, true);
+			vd->AddEmptyLabel(0, true);
+		}
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+		if (view->GetRulerRenderer())
+			view->GetRulerRenderer()->SetDrawText(true);
+	}
+}
+
+void MeasureAgent::Pencil()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_PencilBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, bval);
+
+	if (bval)
+	{
+		view->setValue(gstInterMode, long(13));
+		handler->SetType(1);
+		//if (m_view->m_glview->GetRulerRenderer())
+		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(false);
+	}
+	else
+	{
+		view->setValue(gstInterMode, long(1));
+		//if (m_view->m_glview->GetRulerRenderer())
+		//	m_view->m_glview->GetRulerRenderer()->SetDrawText(true);
+	}
+}
+
+void MeasureAgent::RulerFlip()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+
+	int count = 0;
+	std::vector<int> sel;
+	flrd::RulerList* ruler_list = view->GetRulerList();
+	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			int index = sel[i];
+			if (0 > index || ruler_list->size() <= index)
+				continue;
+			flrd::Ruler* r = (*ruler_list)[index];
+			if (r)
+				r->Reverse();
+			count++;
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			flrd::Ruler* r = (*ruler_list)[i];
+			if (r)
+				r->Reverse();
+			count++;
+		}
+	}
+
+	//if (count)
+	//{
+	//	m_view->Update(39);
+	//	GetSettings(m_view);
+	//}
+	setValue(gstRulerEdited, true);
+}
+
+void MeasureAgent::RulerEdit()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerEditBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerEditBtn, bval);
+
+	if (bval)
+		view->setValue(gstInterMode, long(6));
+	else
+		view->setValue(gstInterMode, long(1));
+
+	//m_edited = true;
+}
+
+void MeasureAgent::RulerDelete()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerDelBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerDelBtn, bval);
+
+	if (bval)
+		view->setValue(gstInterMode, long(14));
+	else
+		view->setValue(gstInterMode, long(1));
+
+	//m_edited = true;
+}
+
+void MeasureAgent::RulerMove()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMoveBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMoveBtn, bval);
+
+	if (bval)
+		view->setValue(gstInterMode, long(9));
+	else
+		view->setValue(gstInterMode, long(1));
+
+	//m_edited = true;
+}
+
+void MeasureAgent::RulerAvg()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+
+	fluo::Point avg;
+	int count = 0;
+	std::vector<int> sel;
+	flrd::RulerList* ruler_list = view->GetRulerList();
+	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+	{
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			int index = sel[i];
+			if (0 > index || ruler_list->size() <= index)
+				continue;
+			flrd::Ruler* r = (*ruler_list)[index];
+			avg += r->GetCenter();
+			count++;
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			flrd::Ruler* r = (*ruler_list)[i];
+			if (r->GetDisp())
+			{
+				avg += r->GetCenter();
+				count++;
+			}
+		}
+	}
+
+	if (count)
+	{
+		avg /= double(count);
+		flrd::Ruler* ruler = new flrd::Ruler();
+		ruler->SetRulerType(2);
+		ruler->SetName("Average");
+		ruler->AddPoint(avg);
+		bool bval;
+		view->getValue(gstRulerTransient, bval);
+		ruler->SetTimeDep(bval);
+		long lval;
+		view->getValue(gstCurrentFrame, lval);
+		ruler->SetTime(lval);
+		ruler_list->push_back(ruler);
+		//m_view->Update(39);
+		//GetSettings(m_view);
+	}
+}
+
+void MeasureAgent::Profile()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	handler->SetVolumeData(view->GetCurrentVolume());
+	std::vector<int> sel;
+	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+	{
+		//export selected
+		for (size_t i = 0; i < sel.size(); ++i)
+			handler->Profile(sel[i]);
+	}
+	else
+	{
+		//export all
+		flrd::RulerList* ruler_list = view->GetRulerList();
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			if ((*ruler_list)[i]->GetDisp())
+				handler->Profile(i);
+		}
+	}
+}
+
+void MeasureAgent::Distance(const std::string& filename)
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+	flrd::ComponentAnalyzer* analyzer = view->GetCompAnalyzer();
+	if (!analyzer) return;
+	handler->SetCompAnalyzer(analyzer);
+
+	std::vector<int> sel;
+	std::string fi;
+	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+	{
+		//export selected
+		for (size_t i = 0; i < sel.size(); ++i)
+		{
+			fi = filename + std::to_string(i) + ".txt";
+			handler->Distance(sel[i], fi);
+		}
+	}
+	else
+	{
+		flrd::RulerList* ruler_list = view->GetRulerList();
+		for (size_t i = 0; i < ruler_list->size(); ++i)
+		{
+			if ((*ruler_list)[i]->GetDisp())
+			{
+				fi = filename + std::to_string(i) + ".txt";
+				handler->Distance(i, fi);
+			}
+		}
+	}
+}
+
+void MeasureAgent::Project()
+{
+	std::vector<int> sel;
+	if (dlg_.m_rulerlist->GetCurrSelection(sel))
+	{
+		//export selected
+		for (size_t i = 0; i < sel.size(); ++i)
+			Project(sel[i]);
+	}
+}
+
+void MeasureAgent::Lock()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	if (dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_RulerMPBtn))
+		handler->FinishRuler();
+
+	bool bval = dlg_.m_toolbar1->GetToolState(MeasureDlg::ID_LockBtn);
+	ToggleToolBtns(false);
+	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LockBtn, bval);
+
+	if (bval)
+		view->setValue(gstInterMode, long(11));
+	else
+		view->setValue(gstInterMode, long(1));
+}
+
+void MeasureAgent::NewGroup()
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+	handler->NewGroup();
+}
+
+void MeasureAgent::ChangeGroup(unsigned int ival)
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerHandler* handler = view->GetRulerHandler();
+	if (!handler) return;
+
+	//update group
+	std::vector<int> sel;
+	if (!dlg_.m_rulerlist->GetCurrSelection(sel))
+		return;
+	for (size_t i = 0; i < sel.size(); ++i)
+	{
+		int index = sel[i];
+		flrd::Ruler* ruler = view->GetRuler(
+			dlg_.m_rulerlist->GetItemData(index));
+		if (!ruler)
+			continue;
+		ruler->Group(ival);
+	}
+	UpdateRulers();
+}
+
+void MeasureAgent::ToggleGroupDisp(unsigned int ival)
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	flrd::RulerList* ruler_list = view->GetRulerList();
+	if (!ruler_list) return;
+	bool disp;
+	bool first = true;
+	for (int i = 0; i < (int)ruler_list->size(); i++)
+	{
+		flrd::Ruler* ruler = (*ruler_list)[i];
+		if (!ruler) continue;
+		if (ruler->Group() == ival)
+		{
+			if (first)
+			{
+				first = false;
+				disp = !ruler->GetDisp();
+			}
+			ruler->SetDisp(disp);
+			if (disp)
+				dlg_.m_rulerlist->SetItemBackgroundColour(i, wxColour(255, 255, 255));
+			else
+				dlg_.m_rulerlist->SetItemBackgroundColour(i, wxColour(200, 200, 200));
+		}
+	}
+	//m_view->Update(39);
+}
+
+void MeasureAgent::OnRulerF1(Event& event)
+{
+	Renderview* view = getObject();
+	if (!view) return;
+	double dval;
+	getValue(gstRulerF1, dval);
+	m_calculator->SetF1(dval);
+}

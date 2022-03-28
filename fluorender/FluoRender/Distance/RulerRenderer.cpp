@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <compatibility.h>
 #include "RulerRenderer.h"
 #include <Renderview.hpp>
 #include <Types/Vector.h>
@@ -542,7 +543,7 @@ void RulerRenderer::DrawText(int tseq_cur_num, int nx, int ny)
 			p2x = p2.x()*nx / 2.0;
 			p2y = p2.y()*ny / 2.0;
 			text_renderer->RenderText(
-				ruler->GetName().ToStdWstring(),
+				s2ws(ruler->GetName()),
 				c,
 				(p2x + w)*sx, (p2y + w)*sy, sx, sy);
 		}

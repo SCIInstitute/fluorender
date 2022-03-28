@@ -1440,8 +1440,8 @@ void TrackDlg::OnConvertToRulers(wxCommandEvent& event)
 		m_view->GetRulerList()->push_back(*iter);
 	}
 	m_view->Update(39);
-	if (m_frame && m_frame->GetMeasureDlg())
-		m_frame->GetMeasureDlg()->GetSettings(m_view);
+	//if (m_frame && m_frame->GetMeasureDlg())
+	//	m_frame->GetMeasureDlg()->GetSettings(m_view);
 	flvr::TextureRenderer::vertex_array_manager_.set_dirty(flvr::VA_Rulers);
 }
 

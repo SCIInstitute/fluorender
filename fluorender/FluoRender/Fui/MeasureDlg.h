@@ -250,6 +250,8 @@ private:
 	void OnSelGroup(wxCommandEvent& event);
 	void OnDispTglGroup(wxCommandEvent& event);
 	//align
+	void OnAlignCenter(wxCommandEvent& event);
+	void OnAlignAxis(wxCommandEvent& event);
 	void OnAlignRuler(wxCommandEvent& event);
 	void OnAlignPca(wxCommandEvent& event);
 

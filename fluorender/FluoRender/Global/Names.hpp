@@ -622,6 +622,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerInfr "ruler infr"
 #define gstRulerF1 "ruler f1"
 #define gstRulerRelaxType "ruler relax type"
+#define gstRulerDfoverf "ruler dfoverf"
 
 //input
 //mouse
