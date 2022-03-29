@@ -31,8 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
+#include <MeshTransAgent.hpp>
 
-class RenderFrame;
 namespace fluo
 {
 	class MeshData;
@@ -62,7 +62,7 @@ class MeshTransPanel: public wxPanel
 	};
 
 public:
-	MeshTransPanel(RenderFrame* frame,
+	MeshTransPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -70,15 +70,15 @@ public:
 		const wxString& name = "MeshTransPanel");
 	~MeshTransPanel();
 
-	void SetMeshData(fluo::MeshData* md);
-	fluo::MeshData* GetMeshData();
-	void RefreshVRenderViews();
-	void GetData();
-	void UpdateData();
+	void AssociateMeshData(fluo::MeshData* md)
+	{
+		m_agent->setObject(md);
+	}
+
+	friend class fluo::MeshTransAgent;
 
 private:
-	RenderFrame* m_frame;
-	fluo::MeshData* m_md;
+	fluo::MeshTransAgent* m_agent;
 
 	wxStaticText* m_trans_st;
 	wxStaticText* m_x_trans_st;

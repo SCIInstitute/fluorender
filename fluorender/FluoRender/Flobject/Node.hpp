@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <set>
 
-class Fltimer;
 class Flinput;
 namespace fluo
 {
@@ -50,6 +49,8 @@ namespace fluo
 	class NodeVisitor;
 	class Renderview;
 	class Root;
+	class StopWatch;
+	class AsyncTimer;
 
 	typedef std::vector<Node*> ParentList;
     typedef std::vector<ref_ptr<Node>> NodeList;
@@ -92,8 +93,10 @@ namespace fluo
 		virtual const Renderview* asRenderview() const { return 0; }
 		virtual Root* asRoot() { return 0; }
 		virtual const Root* asRoot() const { return 0; }
-		virtual Fltimer* asFltimer() { return 0; }
-		virtual const Fltimer* asFltimer() const { return 0; }
+		virtual StopWatch* asStopWatch() { return 0; }
+		virtual const StopWatch* asStopWatch() const { return 0; }
+		virtual AsyncTimer* asAsyncTimer() { return 0; }
+		virtual const AsyncTimer* asAsyncTimer() const { return 0; }
 		virtual Flinput* asFlinput() { return 0; }
 		virtual const Flinput* asFlinput() const { return 0; }
 

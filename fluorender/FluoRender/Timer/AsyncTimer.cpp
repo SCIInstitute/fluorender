@@ -25,42 +25,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _MOVIEAGENT_H_
-#define _MOVIEAGENT_H_
+#include <AsyncTimer.hpp>
 
-#include <InterfaceAgent.hpp>
-#include <Renderview.hpp>
+using namespace fluo;
 
-class MoviePanel;
-namespace fluo
+AsyncTimer::AsyncTimer()
 {
-	class MovieAgent : public InterfaceAgent
-	{
-	public:
-		MovieAgent(MoviePanel &panel);
-
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const MovieAgent*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "MovieAgent"; }
-
-		virtual void setObject(Renderview* an);
-		virtual Renderview* getObject();
-
-		virtual void UpdateAllSettings();
-
-		virtual MovieAgent* asMovieAgent() { return this; }
-		virtual const MovieAgent* asMovieAgent() const { return this; }
-
-		friend class AgentFactory;
-
-	protected:
-		MoviePanel &panel_;
-
-	private:
-	};
+	addValue(gstTimerInterval, long(1000));
+	addValue(gstTimerRunning, bool(false));
 }
 
-#endif//_MOVIEAGENT_H_
+AsyncTimer::AsyncTimer(std::function<void(void)> func, const long &interval)
+{
+	m_func = func;
+	addValue(gstTimerInterval, interval);
+	addValue(gstTimerRunning, bool(false));
+}
+
+AsyncTimer::AsyncTimer(const AsyncTimer& data, const CopyOp& copyop, bool copy_values) :
+	Node(data, copyop, false)
+{
+	if (copy_values)
+		copyValues(data, copyop);
+}
+
+AsyncTimer::~AsyncTimer()
+{
+	stop();
+}

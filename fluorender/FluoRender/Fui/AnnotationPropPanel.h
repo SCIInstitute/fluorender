@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class RenderFrame;
 namespace fluo
 {
 	class Annotations;
@@ -50,7 +49,7 @@ class AnnotationPropPanel : public wxPanel
 	};
 
 public:
-	AnnotationPropPanel(RenderFrame* frame,
+	AnnotationPropPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

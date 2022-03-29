@@ -37,12 +37,9 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class RenderFrame;
 namespace fluo
 {
-	class Renderview;
 	class VolumeData;
-	class VolumeGroup;
 }
 class VolumePropPanel: public wxPanel
 {
@@ -115,7 +112,7 @@ class VolumePropPanel: public wxPanel
 };
 
 public:
-	VolumePropPanel(RenderFrame* frame,
+	VolumePropPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

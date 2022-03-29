@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <AnnotationPropPanel.h>
-#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <Annotations.hpp>
@@ -36,7 +35,7 @@ BEGIN_EVENT_TABLE(AnnotationPropPanel, wxPanel)
 	EVT_BUTTON(ID_MemoUpdateBtn, AnnotationPropPanel::OnMemoUpdateBtn)
 END_EVENT_TABLE()
 
-AnnotationPropPanel::AnnotationPropPanel(RenderFrame* frame,
+AnnotationPropPanel::AnnotationPropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

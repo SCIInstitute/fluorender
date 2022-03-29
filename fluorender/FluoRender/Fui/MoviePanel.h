@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/notebook.h>
 #include <wx/listctrl.h>
+#include <MovieAgent.hpp>
 
 #define PROG_SLDR_MAX	361
 
@@ -117,6 +118,13 @@ public:
 		long style = 0,
 		const wxString& name = "MoviePanel");
 	~MoviePanel();
+
+	void AssociateRenderview(fluo::Renderview* view)
+	{
+		m_agent->setObject(view);
+	}
+
+	friend class fluo::MovieAgent;
 
 	void AddView(wxString view);
 	void DeleteView(wxString view);
@@ -235,6 +243,8 @@ public:
 	}
 
 private:
+	fluo::MovieAgent* m_agent;
+
 	//controls
 	wxTextCtrl *m_fps_text;
 	wxComboBox *m_views_cmb;
@@ -244,6 +254,9 @@ private:
 	wxSlider *m_progress_sldr;
 	wxTextCtrl *m_progress_text;
 	wxButton *m_save_btn;
+
+	wxNotebook* m_notebook;
+	int m_current_page;
 
 	//basic movie controls
 	wxCheckBox *m_seq_chk;
@@ -293,11 +306,7 @@ private:
 private:
 	RenderFrame* m_frame;
 	RecorderDlg* m_advanced_movie;
-	fluo::Renderview* m_view;
-	int m_view_idx;//index to current renderview
 
-	wxNotebook* m_notebook;
-	int m_current_page;
 	wxTimer m_timer;
 
 	//basic

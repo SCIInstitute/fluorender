@@ -49,4 +49,45 @@ MeshData* MeshTransAgent::getObject()
 
 void MeshTransAgent::UpdateAllSettings()
 {
+	MeshData* md = getObject();
+	if (!md) return;
+
+	wxString str;
+	double x, y, z;
+	md->getValue(gstTransX, x);
+	md->getValue(gstTransY, y);
+	md->getValue(gstTransZ, z);
+	//sprintf(str, "%.2f", x);
+	str = wxString::Format("%.2f", x);
+	panel_.m_x_trans_text->SetValue(str);
+	//sprintf(str, "%.2f", y);
+	str = wxString::Format("%.2f", y);
+	panel_.m_y_trans_text->SetValue(str);
+	//sprintf(str, "%.2f", z);
+	str = wxString::Format("%.2f", z);
+	panel_.m_z_trans_text->SetValue(str);
+	md->getValue(gstRotX, x);
+	md->getValue(gstRotY, y);
+	md->getValue(gstRotZ, z);
+	//sprintf(str, "%.2f", x);
+	str = wxString::Format("%.2f", x);
+	panel_.m_x_rot_text->SetValue(str);
+	//sprintf(str, "%.2f", y);
+	str = wxString::Format("%.2f", y);
+	panel_.m_y_rot_text->SetValue(str);
+	//sprintf(str, "%.2f", z);
+	str = wxString::Format("%.2f", z);
+	panel_.m_z_rot_text->SetValue(str);
+	md->getValue(gstScaleX, x);
+	md->getValue(gstScaleY, y);
+	md->getValue(gstScaleZ, z);
+	//sprintf(str, "%.2f", x);
+	str = wxString::Format("%.2f", x);
+	panel_.m_x_scl_text->SetValue(str);
+	//sprintf(str, "%.2f", y);
+	str = wxString::Format("%.2f", y);
+	panel_.m_y_scl_text->SetValue(str);
+	//sprintf(str, "%.2f", z);
+	str = wxString::Format("%.2f", z);
+	panel_.m_z_scl_text->SetValue(str);
 }

@@ -47,18 +47,18 @@ Global::Global()
 {
 	origin_ = ref_ptr<Group>(new Group());
 	origin_->setName(gstOrigin);
-	BuildTimer();
+	BuildStopWatch();
 	BuildInput();
 	BuildFactories();
 	BuildPaths();
 	BuildRoot();
 }
 
-void Global::BuildTimer()
+void Global::BuildStopWatch()
 {
-	Fltimer* timer = new Fltimer();
-	timer->setName(gstTimer);
-	origin_->addChild(timer);
+	StopWatch* sw = new StopWatch();
+	sw->setName(gstStopWatch);
+	origin_->addChild(sw);
 }
 
 void Global::BuildInput()
@@ -145,12 +145,12 @@ Object* Global::get(const std::string &name, Group* start)
 		return (*list)[0];
 }
 
-Fltimer* Global::getTimer()
+StopWatch* Global::getStopWatch()
 {
-	Object* obj = get(gstTimer);
+	Object* obj = get(gstStopWatch);
 	if (!obj)
 		return 0;
-	return dynamic_cast<Fltimer*>(obj);
+	return dynamic_cast<StopWatch*>(obj);
 }
 
 Flinput* Global::getInput()

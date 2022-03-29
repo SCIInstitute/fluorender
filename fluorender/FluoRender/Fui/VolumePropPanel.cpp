@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolumePropPanel.h>
-#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <VolumeFactory.hpp>
@@ -124,7 +123,7 @@ BEGIN_EVENT_TABLE(VolumePropPanel, wxPanel)
 	EVT_TOOL(ID_CompChk, VolumePropPanel::OnCompChk)
 END_EVENT_TABLE()
 
-VolumePropPanel::VolumePropPanel(RenderFrame* frame,
+VolumePropPanel::VolumePropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

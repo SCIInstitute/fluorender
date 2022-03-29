@@ -433,10 +433,10 @@ RenderFrame::RenderFrame(
 		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
 	//prop panel chidren
 	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VolumePropPanel(this, m_prop_panel);
-	m_mesh_prop = new MeshPropPanel(this, m_prop_panel);
-	m_mesh_manip = new MeshTransPanel(this, m_prop_panel);
-	m_annotation_prop = new AnnotationPropPanel(this, m_prop_panel);
+	m_volume_prop = new VolumePropPanel(m_prop_panel);
+	m_mesh_prop = new MeshPropPanel(m_prop_panel);
+	m_mesh_manip = new MeshTransPanel(m_prop_panel);
+	m_annotation_prop = new AnnotationPropPanel(m_prop_panel);
 	m_prop_panel->SetSizer(m_prop_sizer);
 	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
 	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);

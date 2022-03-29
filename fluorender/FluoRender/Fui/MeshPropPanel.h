@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/slider.h>
 #include <MeshPropAgent.hpp>
 
-class RenderFrame;
 namespace fluo
 {
 	class MeshData;
@@ -61,7 +60,7 @@ class MeshPropPanel: public wxPanel
 	};
 
 public:
-	MeshPropPanel(RenderFrame* frame,
+	MeshPropPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

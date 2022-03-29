@@ -25,13 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <Timer.hpp>
-#include <chrono>
+#include <StopWatch.hpp>
 
+using namespace fluo;
 using namespace std::chrono;
 // Default constructor
 //
-Fltimer::Fltimer(unsigned int nBoxFilterSize) :
+StopWatch::StopWatch(unsigned int nBoxFilterSize) :
 	_nStartCount(0),
 	_nStopCount(0),
 	_nFrequency(0),
@@ -53,7 +53,7 @@ Fltimer::Fltimer(unsigned int nBoxFilterSize) :
 		_aIntervals[iInterval] = 0.0;
 }
 
-Fltimer::Fltimer(const Fltimer& data, const fluo::CopyOp& copyop, bool copy_values) :
+StopWatch::StopWatch(const StopWatch& data, const CopyOp& copyop, bool copy_values) :
 	_nStartCount(data._nStartCount),
 	_nStopCount(data._nStopCount),
 	_nFrequency(data._nFrequency),
@@ -76,7 +76,7 @@ Fltimer::Fltimer(const Fltimer& data, const fluo::CopyOp& copyop, bool copy_valu
 
 // Destructor
 //
-Fltimer::~Fltimer()
+StopWatch::~StopWatch()
 {
 	stop();
 	delete[] _aIntervals;
@@ -89,7 +89,7 @@ Fltimer::~Fltimer()
 // start
 //
 void
-Fltimer::start()
+StopWatch::start()
 {
 	if (_bClockRuns) return;
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -100,7 +100,7 @@ Fltimer::start()
 // stop
 //
 void
-Fltimer::stop()
+StopWatch::stop()
 {
 	if (!_bClockRuns) return;
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -118,7 +118,7 @@ Fltimer::stop()
 // sample
 //
 void
-Fltimer::sample()
+StopWatch::sample()
 {
 	if (!_bClockRuns) return;
 	unsigned long long nCurrentCount;
@@ -146,7 +146,7 @@ Fltimer::sample()
 //      Time interval in ms
 //
 double
-Fltimer::time()
+StopWatch::time()
 const
 {
 	return _nLastPeriod;
@@ -161,14 +161,14 @@ const
 //      the result is undetermined.
 //
 double
-Fltimer::average()
+StopWatch::average()
 const
 {
 	return _nSum / _nBoxFilterSize;
 }
 
 unsigned long long
-Fltimer::count() const
+StopWatch::count() const
 {
 	if (_nCount >= _nBoxFilterSize)
 		return _nCount - _nBoxFilterSize;
@@ -177,13 +177,13 @@ Fltimer::count() const
 }
 
 double
-Fltimer::total_time() const
+StopWatch::total_time() const
 {
 	return _nTotal;
 }
 
 double
-Fltimer::total_fps() const
+StopWatch::total_fps() const
 {
 	if (_nCount >= _nBoxFilterSize)
 		return static_cast<double>(_nCount) / _nTotal;
@@ -191,12 +191,12 @@ Fltimer::total_fps() const
 		return 0;
 }
 
-unsigned long long Fltimer::sys_time()
+unsigned long long StopWatch::sys_time()
 {
 	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
 }
 
-unsigned long long Fltimer::get_ticks()
+unsigned long long StopWatch::get_ticks()
 {
 	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
 }

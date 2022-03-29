@@ -32,7 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #define gstOrigin "origin"
 
 //timer
-#define gstTimer "default timer"
+#define gstStopWatch "default stop watch"
+#define gstAsyncTimer "default aync timer"
+#define gstTimerInterval "timer interval"//in millisec
+#define gstTimerRunning "timer running"
 //input
 #define gstInput "default input"
 //paths
@@ -623,6 +626,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerF1 "ruler f1"
 #define gstRulerRelaxType "ruler relax type"
 #define gstRulerDfoverf "ruler dfoverf"
+//movie agent
+
 
 //input
 //mouse

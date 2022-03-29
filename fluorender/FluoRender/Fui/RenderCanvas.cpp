@@ -216,7 +216,7 @@ void RenderCanvas::Init()
 
 		m_initialized = true;
 
-		//glbin_timer->start();
+		//glbin_stopwatch->start();
 	}
 }
 

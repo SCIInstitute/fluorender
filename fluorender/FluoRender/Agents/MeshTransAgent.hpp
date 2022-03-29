@@ -54,6 +54,8 @@ namespace fluo
 		virtual MeshTransAgent* asMeshTransAgent() { return this; }
 		virtual const MeshTransAgent* asMeshTransAgent() const { return this; }
 
+		friend class AgentFactory;
+
 	protected:
 		MeshTransPanel &panel_;
 

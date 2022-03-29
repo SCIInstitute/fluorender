@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MeshPropPanel.h>
-#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <MeshData.hpp>
@@ -54,7 +53,7 @@ BEGIN_EVENT_TABLE(MeshPropPanel, wxPanel)
 	EVT_TEXT(ID_size_text, MeshPropPanel::OnSizeText)
 END_EVENT_TABLE()
 
-MeshPropPanel::MeshPropPanel(RenderFrame* frame,
+MeshPropPanel::MeshPropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

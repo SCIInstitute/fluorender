@@ -26,7 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MeshTransPanel.h>
-#include <RenderFrame.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <MeshData.hpp>
 #include <compatibility.h>
 
@@ -36,15 +37,13 @@ BEGIN_EVENT_TABLE(MeshTransPanel, wxPanel)
 	EVT_TEXT_ENTER(wxID_ANY, MeshTransPanel::OnValueEnter)
 END_EVENT_TABLE()
 
-MeshTransPanel::MeshTransPanel(RenderFrame* frame,
+MeshTransPanel::MeshTransPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(parent, wxID_ANY, pos, size, style, name),
-	m_frame(frame),
-	m_md(0)
+	wxPanel(parent, wxID_ANY, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -149,107 +148,57 @@ MeshTransPanel::~MeshTransPanel()
 {
 }
 
-void MeshTransPanel::SetMeshData(fluo::MeshData* md)
-{
-	m_md = md;
-}
-
-fluo::MeshData* MeshTransPanel::GetMeshData()
-{
-	return m_md;
-}
-
-void MeshTransPanel::RefreshVRenderViews()
-{
-	if (m_frame)
-		m_frame->RefreshVRenderViews();
-}
-
-void MeshTransPanel::GetData()
-{
-	if (!m_md)
-		return;
-
-	wxString str;
-	double x, y, z;
-	m_md->getValue(gstTransX, x);
-	m_md->getValue(gstTransY, y);
-	m_md->getValue(gstTransZ, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	m_x_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	m_y_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	m_z_trans_text->SetValue(str);
-	m_md->getValue(gstRotX, x);
-	m_md->getValue(gstRotY, y);
-	m_md->getValue(gstRotZ, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	m_x_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	m_y_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	m_z_rot_text->SetValue(str);
-	m_md->getValue(gstScaleX, x);
-	m_md->getValue(gstScaleY, y);
-	m_md->getValue(gstScaleZ, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	m_x_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	m_y_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	m_z_scl_text->SetValue(str);
-}
-
 void MeshTransPanel::OnSpinUp(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
+	std::string name;
 	switch (sender_id)
 	{
 	case ID_XTransSpin:
 		text_ctrl = m_x_trans_text;
+		name = gstTransX;
 		break;
 	case ID_YTransSpin:
 		text_ctrl = m_y_trans_text;
+		name = gstTransY;
 		break;
 	case ID_ZTransSpin:
 		text_ctrl = m_z_trans_text;
+		name = gstTransZ;
 		break;
 	case ID_XRotSpin:
 		text_ctrl = m_x_rot_text;
+		name = gstRotX;
 		break;
 	case ID_YRotSpin:
 		text_ctrl = m_y_rot_text;
+		name = gstRotY;
 		break;
 	case ID_ZRotSpin:
 		text_ctrl = m_z_rot_text;
+		name = gstRotZ;
 		break;
 	case ID_XScalSpin:
 		text_ctrl = m_x_scl_text;
+		name = gstScaleX;
 		break;
 	case ID_YScalSpin:
 		text_ctrl = m_y_scl_text;
+		name = gstScaleY;
 		break;
 	case ID_ZScalSpin:
 		text_ctrl = m_z_scl_text;
+		name = gstScaleZ;
 		break;
 	}
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())+1.0);
+		double dval = STOD(str_val.fn_str()) + 1.0;
+		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->SetValue(str);
-		UpdateData();
+		m_agent->updValue(name, dval);
 	}
 }
 
@@ -257,125 +206,107 @@ void MeshTransPanel::OnSpinDown(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
+	std::string name;
 	switch (sender_id)
 	{
 	case ID_XTransSpin:
 		text_ctrl = m_x_trans_text;
+		name = gstTransX;
 		break;
 	case ID_YTransSpin:
 		text_ctrl = m_y_trans_text;
+		name = gstTransY;
 		break;
 	case ID_ZTransSpin:
 		text_ctrl = m_z_trans_text;
+		name = gstTransZ;
 		break;
 	case ID_XRotSpin:
 		text_ctrl = m_x_rot_text;
+		name = gstRotX;
 		break;
 	case ID_YRotSpin:
 		text_ctrl = m_y_rot_text;
+		name = gstRotY;
 		break;
 	case ID_ZRotSpin:
 		text_ctrl = m_z_rot_text;
+		name = gstRotZ;
 		break;
 	case ID_XScalSpin:
 		text_ctrl = m_x_scl_text;
+		name = gstScaleX;
 		break;
 	case ID_YScalSpin:
 		text_ctrl = m_y_scl_text;
+		name = gstScaleY;
 		break;
 	case ID_ZScalSpin:
 		text_ctrl = m_z_scl_text;
+		name = gstScaleZ;
 		break;
 	}
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str())-1.0);
+		double dval = STOD(str_val.fn_str()) - 1.0;
+		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->SetValue(str);
-		UpdateData();
+		m_agent->updValue(name, dval);
 	}
-}
-
-void MeshTransPanel::UpdateData()
-{
-	if (!m_md)
-		return;
-
-	double x, y, z;
-	wxString str = m_x_trans_text->GetValue();
-	x = STOD(str.fn_str());
-	str = m_y_trans_text->GetValue();
-	y = STOD(str.fn_str());
-	str = m_z_trans_text->GetValue();
-	z = STOD(str.fn_str());
-	m_md->setValue(gstTransX, x);
-	m_md->setValue(gstTransY, y);
-	m_md->setValue(gstTransZ, z);
-
-	str = m_x_rot_text->GetValue();
-	x = STOD(str.fn_str());
-	str = m_y_rot_text->GetValue();
-	y = STOD(str.fn_str());
-	str = m_z_rot_text->GetValue();
-	z = STOD(str.fn_str());
-	m_md->setValue(gstRotX, x);
-	m_md->setValue(gstRotY, y);
-	m_md->setValue(gstRotZ, z);
-
-	str = m_x_scl_text->GetValue();
-	x = STOD(str.fn_str());
-	str = m_y_scl_text->GetValue();
-	y = STOD(str.fn_str());
-	str = m_z_scl_text->GetValue();
-	z = STOD(str.fn_str());
-	m_md->setValue(gstScaleX, x);
-	m_md->setValue(gstScaleY, y);
-	m_md->setValue(gstScaleZ, z);
-
-	RefreshVRenderViews();
 }
 
 void MeshTransPanel::OnValueEnter(wxCommandEvent& event)
 {
 	int sender_id = event.GetId();
 	wxTextCtrl* text_ctrl = 0;
+	std::string name;
 	switch (sender_id)
 	{
 	case ID_XTransText:
 		text_ctrl = m_x_trans_text;
+		name = gstTransX;
 		break;
 	case ID_YTransText:
 		text_ctrl = m_y_trans_text;
+		name = gstTransY;
 		break;
 	case ID_ZTransText:
 		text_ctrl = m_z_trans_text;
+		name = gstTransZ;
 		break;
 	case ID_XRotText:
 		text_ctrl = m_x_rot_text;
+		name = gstRotX;
 		break;
 	case ID_YRotText:
 		text_ctrl = m_y_rot_text;
+		name = gstRotY;
 		break;
 	case ID_ZRotText:
 		text_ctrl = m_z_rot_text;
+		name = gstRotZ;
 		break;
 	case ID_XScalText:
 		text_ctrl = m_x_scl_text;
+		name = gstScaleX;
 		break;
 	case ID_YScalText:
 		text_ctrl = m_y_scl_text;
+		name = gstScaleY;
 		break;
 	case ID_ZScalText:
 		text_ctrl = m_z_scl_text;
+		name = gstScaleZ;
 		break;
 	}
 
 	if (text_ctrl)
 	{
 		wxString str_val = text_ctrl->GetValue();
-		wxString str = wxString::Format("%.3f", STOD(str_val.fn_str()));
-		text_ctrl->SetValue(str);
-		UpdateData();
+		double dval;
+		if (str_val.ToDouble(&dval))
+			m_agent->updValue(name, dval);
 	}
 }
 
