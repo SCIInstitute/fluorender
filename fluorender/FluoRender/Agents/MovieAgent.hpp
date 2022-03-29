@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
+#include <QVideoEncoder.h>
 
 class MoviePanel;
 namespace fluo
@@ -46,7 +47,7 @@ namespace fluo
 
 		virtual const char* className() const { return "MovieAgent"; }
 
-		virtual void setObject(Renderview* an);
+		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
@@ -60,6 +61,15 @@ namespace fluo
 		MoviePanel &panel_;
 
 	private:
+		QVideoEncoder encoder_;
+
+	private:
+		void OnMovTimeSeqEnable(Event& event);
+		void OnMovSeqMode(Event& event);
+		void OnMovRotEnable(Event& event);
+		void OnMovRotAxis(Event& event);
+		void OnMovRotAng(Event& event);
+
 	};
 }
 

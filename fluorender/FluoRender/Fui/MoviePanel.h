@@ -29,8 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _MOVIEPANEL_H_
 
 #include <wx/wx.h>
-#include <QVideoEncoder.h>
-#include <compatibility.h>
 #include <wx/panel.h>
 #include <wx/spinbutt.h>
 #include <wx/clrpicker.h>
@@ -126,54 +124,10 @@ public:
 
 	friend class fluo::MovieAgent;
 
-	void AddView(wxString view);
-	void DeleteView(wxString view);
-	void SetView(int index);
-	int GetView() { return m_view_idx; }
-
 	void UpFrame();
 	void DownFrame();
 	void SetCurrentTime(size_t t);
 
-	void SetRotate(bool value)
-	{
-		m_rotate = value;
-		if (m_rotate)
-		{
-			m_x_rd->Enable();
-			m_y_rd->Enable();
-			m_z_rd->Enable();
-			m_degree_text->Enable();
-			m_rot_chk->SetValue(true);
-		}
-		else
-		{
-			m_x_rd->Disable();
-			m_y_rd->Disable();
-			m_z_rd->Disable();
-			m_degree_text->Disable();
-			m_rot_chk->SetValue(false);
-		}
-	}
-	bool GetRotate() { return m_rotate; }
-	void SetTimeSeq(bool value);
-	bool GetTimeSeq() { return m_time_seq; }
-	void SetRotAxis(int value)
-	{
-		m_rot_axis = value;
-		if (m_rot_axis == 0)
-			m_x_rd->SetValue(true);
-		else if (m_rot_axis == 1)
-			m_y_rd->SetValue(true);
-		else if (m_rot_axis == 2)
-			m_z_rd->SetValue(true);
-	}
-	int GetRotAxis() { return m_rot_axis; }
-	void SetRotDeg(int value)
-	{
-		m_rot_deg = value;
-		m_degree_text->SetValue(wxString::Format("%d", m_rot_deg));
-	}
 	int GetRotDeg() { return m_rot_deg; }
 	void SetMovieLen(double value)
 	{
@@ -338,7 +292,6 @@ private:
 	bool m_timer_run;//for temporary hold
 	//save
 	wxString m_filename;
-	QVideoEncoder encoder_;
 	wxString filetype_;
 
 private:

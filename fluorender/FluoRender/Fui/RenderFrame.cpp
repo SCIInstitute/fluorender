@@ -3715,7 +3715,7 @@ void RenderFrame::SaveProject(wxString& filename)
 	fconfig.Write("ui_prop_view_float", m_aui_mgr.GetPane(m_prop_panel).IsOk()?
 		m_aui_mgr.GetPane(m_prop_panel).IsFloating():false);
 	//interpolator
-	fconfig.SetPath("/interpolator");
+/*	fconfig.SetPath("/interpolator");
 	fconfig.Write("max_id", Interpolator::m_id);
 	int group_num = m_interpolator.GetKeyNum();
 	fconfig.Write("num", group_num);
@@ -3786,7 +3786,7 @@ void RenderFrame::SaveProject(wxString& filename)
 				}
 			}
 		}
-	}
+	}*/
 
 	SaveConfig(fconfig, filename);
 	UpdateList();
@@ -5181,7 +5181,7 @@ void RenderFrame::OpenProject(wxString& filename)
 	}
 
 	//interpolator
-	if (fconfig.Exists("/interpolator"))
+/*	if (fconfig.Exists("/interpolator"))
 	{
 		wxString str;
 		wxString sVal;
@@ -5297,7 +5297,7 @@ void RenderFrame::OpenProject(wxString& filename)
 			}
 		}
 		m_recorder_dlg->UpdateList();
-	}
+	}*/
 
 	UpdateList();
 	if (m_cur_sel_type != -1)

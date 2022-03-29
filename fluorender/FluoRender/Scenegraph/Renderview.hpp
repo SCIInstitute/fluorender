@@ -218,12 +218,12 @@ namespace fluo
 		void ResetMovieAngle();
 		void StopMovie();
 		//4d movie frame calculation
-		void Get4DSeqRange(long &start_frame, long &end_frame);
+		void Get4DSeqRange();
 		void Set4DSeqFrame(long frame, long start_frame, long end_frame, bool rewind);
 		void UpdateVolumeData(long frame, VolumeData* vd);
 		void ReloadVolumeData(int frame);
 		//3d batch file calculation
-		void Get3DBatRange(long &start_frame, long &end_frame);
+		void Get3DBatRange();
 		void Set3DBatFrame(long frame, long start_frame, long end_frame, bool rewind);
 		//crop for capturing
 		void CalculateCrop();
@@ -242,6 +242,7 @@ namespace fluo
 		flrd::ScriptProc* GetScriptProc() { return m_scriptor; }
 		//text renderer
 		flvr::TextRenderer* GetTextRenderer() { return m_text_renderer; }
+		Interpolator* GetInterpolator() { return m_interpolator; }
 
 		//force draw
 		void ForceDraw();

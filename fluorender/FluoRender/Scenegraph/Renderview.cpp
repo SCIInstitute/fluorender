@@ -1227,8 +1227,9 @@ void Renderview::StopMovie()
 	setValue(gstCaptureParam, false);
 }
 
-void Renderview::Get4DSeqRange(long &start_frame, long &end_frame)
+void Renderview::Get4DSeqRange()
 {
+	long start_frame, end_frame;
 	int i = 0;//counter
 	for (auto vd : m_vol_list)
 	{
@@ -1255,6 +1256,8 @@ void Renderview::Get4DSeqRange(long &start_frame, long &end_frame)
 		}
 		i++;
 	}
+	setValue(gstBeginFrame, start_frame);
+	setValue(gstEndFrame, end_frame);
 }
 
 void Renderview::Set4DSeqFrame(long frame, long start_frame, long end_frame, bool rewind)
@@ -1492,8 +1495,9 @@ void Renderview::ReloadVolumeData(int frame)
 	//}
 }
 
-void Renderview::Get3DBatRange(long &start_frame, long &end_frame)
+void Renderview::Get3DBatRange()
 {
+	long start_frame, end_frame;
 	int i = 0;//counter
 	std::wstring bat_folder;
 
@@ -1531,6 +1535,8 @@ void Renderview::Get3DBatRange(long &start_frame, long &end_frame)
 	}
 	end_frame -= start_frame;
 	start_frame = 0;
+	setValue(gstBeginFrame, start_frame);
+	setValue(gstEndFrame, end_frame);
 }
 
 void Renderview::Set3DBatFrame(long frame, long start_frame, long end_frame, bool rewind)

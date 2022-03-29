@@ -55,7 +55,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlg.h>
 #include <CalculationDlg.h>
 #include <Tester.h>
-#include <Animator/Interpolator.h>
 #include <compatibility.h>
 #include <JVMInitializer.h>
 
@@ -342,10 +341,6 @@ public:
 	void ShowComponentDlg();
 	void ShowCalculationDlg();
 
-	//get interpolator
-	Interpolator* GetInterpolator()
-	{ return &m_interpolator; }
-
 	//tex renderer settings
 	void SetTextureRendererSettings();
 	void SetTextureUndos();
@@ -424,10 +419,6 @@ private:
 	TesterDlg* m_tester;
 	//flag for show/hide views
 	bool m_ui_state;
-	//interpolator
-	//it stores all keys
-	//and does interpolaions too
-	Interpolator m_interpolator;
 
 	//current selection (allow only one)
 	//selection type

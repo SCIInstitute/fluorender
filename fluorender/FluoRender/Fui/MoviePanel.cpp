@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RecorderDlg.h>
 #include <Renderview.hpp>
 #include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Root.hpp>
 #include <FLIVR/TextureRenderer.h>
 #include <tiffio.h>
@@ -422,31 +423,12 @@ MoviePanel::MoviePanel(RenderFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	wxPanel(frame, wxID_ANY, pos, size, style, name),
-	m_frame(frame),
-	m_view_idx(0),
-	m_rotate(true),
-	m_time_seq(false),
-	m_rot_axis(1),
-	m_rot_deg(360),
-	m_start_frame(0),
-	m_cur_frame(0),
-	m_starting_rot(0.),
-	m_cur_time(0.0),
-	m_running(false),
-	m_record(false),
-	m_current_page(0),
-	m_rot_int_type(0),
-	m_delayed_stop(false),
-	m_seq_mode(0),
-	m_fps(30),
-	m_timer(this, ID_Timer),
-	m_crop(false)
+	wxPanel(frame, wxID_ANY, pos, size, style, name)
 {
+	m_agent = glbin_agtf->addMovieAgent(gstMovieAgent, *this);
+
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-
-	m_view = glbin_root->getChild(m_view_idx)->asRenderview();
 
 	//notebook
 	m_notebook = new wxNotebook(this, ID_Notebook);
@@ -504,34 +486,23 @@ MoviePanel::MoviePanel(RenderFrame* frame,
 	sizerV->Add(sizerH, 0, wxEXPAND);
 	SetSizerAndFit(sizerV);
 	Layout();
-	Init();
+	//Init();
 }
 
 MoviePanel::~MoviePanel() {}
 
 void MoviePanel::OnViewSelected(wxCommandEvent& event)
 {
-	m_view_idx = m_views_cmb->GetCurrentSelection();
-	m_view = glbin_root->getChild(m_view_idx)->asRenderview();;
-	GetSettings();
+	int ival = m_views_cmb->GetCurrentSelection();
+	fluo::Renderview* view = glbin_root->getChild(ival)->asRenderview();
+	AssociateRenderview(view);
+	//GetSettings();
 }
 
 void MoviePanel::GetSettings()
 {
 	if (!m_view) return;
 
-	SetTimeSeq(m_time_seq);
-	SetRotate(m_rotate);
-	SetRotAxis(m_rot_axis);
-	SetRotDeg(m_rot_deg);
-	SetCurrentTime(m_start_frame);
-	bool bval;
-	m_view->getValue(gstDrawCropFrame, bval);
-	SetCrop(bval);
-	AddScriptToList();
-	GetScriptSettings();
-	if (m_advanced_movie)
-		m_advanced_movie->GetSettings(m_view);
 }
 
 void MoviePanel::GetScriptSettings()
@@ -684,42 +655,6 @@ void MoviePanel::SetView(int index)
 {
 	if (m_views_cmb)
 		m_views_cmb->SetSelection(index);
-}
-
-void MoviePanel::SetTimeSeq(bool value)
-{
-	m_time_seq = value;
-	if (m_time_seq)
-	{
-		if (!m_seq_mode)
-			m_seq_mode = 1;
-
-		if (m_seq_mode == 1)
-		{
-			m_seq_chk->SetValue(true);
-			m_bat_chk->SetValue(false);
-			if (m_view)
-				m_view->Get4DSeqRange(m_start_frame, m_end_frame);
-		}
-		else if (m_seq_mode == 2)
-		{
-			m_seq_chk->SetValue(false);
-			m_bat_chk->SetValue(true);
-			if (m_view)
-				m_view->Get3DBatRange(m_start_frame, m_end_frame);
-		}
-	}
-	else
-	{
-		m_seq_chk->SetValue(false);
-		m_bat_chk->SetValue(false);
-		m_start_frame = 0;
-		m_end_frame = m_rot_deg;
-	}
-	m_movie_len = (m_end_frame - m_start_frame + 1) / m_fps;
-	m_start_frame_text->ChangeValue(wxString::Format("%d", m_start_frame));
-	m_end_frame_text->ChangeValue(wxString::Format("%d", m_end_frame));
-	m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
 }
 
 void MoviePanel::SetCrop(bool value)
