@@ -26,14 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Renderview.hpp"
+#include <Renderview.hpp>
 #include <Global.hpp>
+#include <Input.hpp>
+#include <StopWatch.hpp>
 #include <AgentFactory.hpp>
 #include <ClipPlaneAgent.hpp>
 #include <ColocalAgent.hpp>
 #include <Group.hpp>
-#include <Timer.hpp>
-#include <Input.hpp>
 #include <Root.hpp>
 #include <Annotations.hpp>
 #include <RenderviewFactory.hpp>
@@ -149,14 +149,15 @@ Renderview::~Renderview()
 	getValue(gstBenchmark, bval);
 	if (bval)
 	{
-		unsigned long long ullval = (unsigned long long)(glbin_stopwatch->total_time() * 1000.0);
+		unsigned long long ullval =
+			(unsigned long long)(glbin.getStopWatch(gstStopWatch)->total_time() * 1000.0);
 		setValue(gstBmRuntime, ullval);
-		ullval = glbin_stopwatch->count();
+		ullval = glbin.getStopWatch(gstStopWatch)->count();
 		setValue(gstBmFrames, ullval);
-		double dval = glbin_stopwatch->total_fps();
+		double dval = glbin.getStopWatch(gstStopWatch)->total_fps();
 		setValue(gstBmFps, dval);
 	}
-	//glbin_stopwatch->stop();
+	//glbin.getStopWatch(gstStopWatch)->stop();
 	//m_selector->SaveBrushSettings();
 	m_loader->StopAll();
 
@@ -332,7 +333,7 @@ void Renderview::Init()
 
 		setValue(gstInitialized, true);
 
-		glbin_stopwatch->start();
+		glbin.getStopWatch(gstStopWatch)->start();
 	}
 }
 
@@ -1836,7 +1837,7 @@ void Renderview::ForceDraw()
 		flipValue(gstSwapBuffers, bval);
 		//SwapBuffers();
 
-	glbin_stopwatch->sample();
+	glbin.getStopWatch(gstStopWatch)->sample();
 	setValue(gstDrawing, false);
 
 	getValue(gstInteractive, bval);
@@ -4252,7 +4253,7 @@ void Renderview::DrawInfo()
 	float gapw = flvr::TextRenderer::text_texture_manager_.GetSize();
 	float gaph = gapw * 2;
 
-	double fps = 1.0 / glbin_stopwatch->average();
+	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 	std::wstring wstr;
 	wstr = L"FPS: ";
 	wstr += std::to_wstring(fps);
@@ -5012,7 +5013,7 @@ void Renderview::DrawVolumes(long peel)
 		if (flvr::TextureRenderer::get_mem_swap())
 		{
 			//set start time for the texture renderer
-			flvr::TextureRenderer::set_st_time(glbin_stopwatch->get_ticks());
+			flvr::TextureRenderer::set_st_time(glbin.getStopWatch(gstStopWatch)->get_ticks());
 
 			flvr::TextureRenderer::set_interactive(interactive);
 			//if in interactive mode, do interactive bricking also
@@ -5234,7 +5235,7 @@ void Renderview::DrawVolumes(long peel)
 
 	if (flvr::TextureRenderer::get_mem_swap())
 	{
-		flvr::TextureRenderer::set_consumed_time(glbin_stopwatch->get_ticks() - flvr::TextureRenderer::get_st_time());
+		flvr::TextureRenderer::set_consumed_time(glbin.getStopWatch(gstStopWatch)->get_ticks() - flvr::TextureRenderer::get_st_time());
 		if (flvr::TextureRenderer::get_start_update_loop() &&
 			flvr::TextureRenderer::get_done_update_loop())
 			flvr::TextureRenderer::reset_update_loop();
@@ -5837,7 +5838,7 @@ void Renderview::DrawMIP(VolumeData* vd, long peel)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = glbin_stopwatch->get_ticks();
+		unsigned int rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -6172,7 +6173,7 @@ void Renderview::DrawOVER(VolumeData* vd, bool mask, int peel)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = glbin_stopwatch->get_ticks();
+		unsigned int rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -6386,7 +6387,7 @@ void Renderview::DrawOLShading(VolumeData* vd)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = glbin_stopwatch->get_ticks();
+		unsigned int rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -6510,7 +6511,7 @@ void Renderview::DrawOLShadows(VolumeList &vlist)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = glbin_stopwatch->get_ticks();
+		unsigned int rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -8779,7 +8780,7 @@ void Renderview::HandleIdle()
 	getValue(gstBenchmark, bval);
 	if (bval)
 	{
-		double fps = 1.0 / glbin_stopwatch->average();
+		double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 		//wxString title = wxString(FLUORENDER_TITLE) +
 		//	" " + wxString(VERSION_MAJOR_TAG) +
 		//	"." + wxString(VERSION_MINOR_TAG) +

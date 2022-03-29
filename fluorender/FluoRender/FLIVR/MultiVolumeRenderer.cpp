@@ -26,13 +26,13 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include "MultiVolumeRenderer.h"
-#include "VolShader.h"
-#include "ShaderProgram.h"
+#include <MultiVolumeRenderer.h>
+#include <VolShader.h>
+#include <ShaderProgram.h>
+#include <Global.hpp>
+#include <StopWatch.hpp>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include <Timer.hpp>
-#include <Global.hpp>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -297,7 +297,7 @@ namespace flvr
 			{
 				if (TextureRenderer::mem_swap_)
 				{
-					unsigned long long rn_time = glbin_stopwatch->get_ticks();
+					unsigned long long rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
 						break;
 				}

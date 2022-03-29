@@ -47,7 +47,7 @@ namespace fluo
 
 		virtual void createDefault();
 
-		virtual StopWatch* build(StopWatch* ann = 0);
+		virtual StopWatch* build(StopWatch* sw = 0);
 
 		virtual StopWatch* clone(StopWatch*);
 

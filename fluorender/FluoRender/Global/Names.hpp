@@ -79,6 +79,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstDefaultProcessorNode "default processor node"
 #define gstProcessorFactory "processor factory"
 #define gstDefaultProcessor "default processor"
+#define gstAsyncTimerFactory "async timer factory"
+#define gstStopWatchFactory "stop watch factory"
 
 //agent names
 #define gstAgentAsset "asset"

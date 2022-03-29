@@ -151,6 +151,8 @@ void MeshFactory::setEventHandler(MeshData* md)
 
 MeshData* MeshFactory::build(MeshData* md)
 {
+	if (md)
+		return clone(md);
 	unsigned int default_id = 0;
 	return clone(default_id);
 }

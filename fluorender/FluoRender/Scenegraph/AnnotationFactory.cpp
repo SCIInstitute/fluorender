@@ -64,6 +64,8 @@ void AnnotationFactory::createDefault()
 
 Annotations* AnnotationFactory::build(Annotations* ann)
 {
+	if (ann)
+		return clone(ann);
 	unsigned int default_id = 0;
 	return clone(default_id);
 }

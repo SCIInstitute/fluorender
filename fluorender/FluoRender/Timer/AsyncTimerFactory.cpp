@@ -33,8 +33,8 @@ using namespace fluo;
 
 AsyncTimerFactory::AsyncTimerFactory()
 {
-	m_name = gstAnnotationFactory;
-	default_object_name_ = gstDefaultAnnotations;
+	m_name = gstAsyncTimerFactory;
+	default_object_name_ = gstAsyncTimer;
 }
 
 AsyncTimerFactory::~AsyncTimerFactory()
@@ -46,41 +46,37 @@ void AsyncTimerFactory::createDefault()
 {
 	if (!getDefault())
 	{
-		AsyncTimer* ad = new AsyncTimer();
-		ad->setName(default_object_name_);
-		objects_.push_front(ad);
+		AsyncTimer* at = new AsyncTimer();
+		at->setName(default_object_name_);
+		objects_.push_front(at);
 
 		//add default values here
-		ad->addValue(gstColor, Color());
-		ad->addRvalu(gstVolume, (Referenced*)0);
-		ad->addValue(gstTransform, Transform());
-		ad->addValue(gstDisplay, bool(true));
-		ad->addValue(gstMemo, std::string());
-		ad->addValue(gstMemoRo, bool(true));//memo is read only
-		ad->addValue(gstDataPath, std::wstring());
-		ad->addValue(gstInfoHeader, std::string());
+		at->addValue(gstTimerInterval, long(1000));
+		at->addValue(gstTimerRunning, bool(false));
 	}
 }
 
-AsyncTimer* AsyncTimerFactory::build(AsyncTimer* ann)
+AsyncTimer* AsyncTimerFactory::build(AsyncTimer* at)
 {
+	if (at)
+		return clone(at);
 	unsigned int default_id = 0;
 	return clone(default_id);
 }
 
-AsyncTimer* AsyncTimerFactory::clone(AsyncTimer* ad)
+AsyncTimer* AsyncTimerFactory::clone(AsyncTimer* at)
 {
 	incCounter();
 
-	Object* new_ad = ad->clone(CopyOp::DEEP_COPY_ALL);
-	new_ad->setId(global_id_);
-	std::string name = "annotations" + std::to_string(local_id_);
-	new_ad->setName(name);
-	new_ad->addRvalu(gstFactory, this);
+	Object* new_at = at->clone(CopyOp::DEEP_COPY_ALL);
+	new_at->setId(global_id_);
+	std::string name = "async timer" + std::to_string(local_id_);
+	new_at->setName(name);
+	new_at->addRvalu(gstFactory, this);
 
-	objects_.push_front(new_ad);
+	objects_.push_front(new_at);
 
-	return dynamic_cast<AsyncTimer*>(new_ad);
+	return dynamic_cast<AsyncTimer*>(new_at);
 }
 
 AsyncTimer* AsyncTimerFactory::clone(const unsigned int id)
@@ -88,9 +84,9 @@ AsyncTimer* AsyncTimerFactory::clone(const unsigned int id)
 	Object* object = find(id);
 	if (object)
 	{
-		AsyncTimer* ad = dynamic_cast<AsyncTimer*>(object);
-		if (ad)
-			return clone(ad);
+		AsyncTimer* at = dynamic_cast<AsyncTimer*>(object);
+		if (at)
+			return clone(at);
 	}
 	return 0;
 }

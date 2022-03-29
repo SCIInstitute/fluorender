@@ -27,13 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Global.hpp>
-#include <Timer.hpp>
 #include <Input.hpp>
 #include <AnnotationFactory.hpp>
 #include <MeshFactory.hpp>
 #include <VolumeFactory.hpp>
 #include <RenderviewFactory.hpp>
 #include <AgentFactory.hpp>
+#include <AsyncTimerFactory.hpp>
+#include <StopWatchFactory.hpp>
 //#include <Renderer2DFactory.hpp>
 //#include <Renderer3DFactory.hpp>
 #include <Root.hpp>
@@ -47,18 +48,10 @@ Global::Global()
 {
 	origin_ = ref_ptr<Group>(new Group());
 	origin_->setName(gstOrigin);
-	BuildStopWatch();
 	BuildInput();
 	BuildFactories();
 	BuildPaths();
 	BuildRoot();
-}
-
-void Global::BuildStopWatch()
-{
-	StopWatch* sw = new StopWatch();
-	sw->setName(gstStopWatch);
-	origin_->addChild(sw);
 }
 
 void Global::BuildInput()
@@ -78,6 +71,8 @@ void Global::BuildFactories()
 	BUILD_AND_ADD(AnnotationFactory, factory_group);
 	BUILD_AND_ADD(RenderviewFactory, factory_group);
 	BUILD_AND_ADD(AgentFactory, factory_group);
+	BUILD_AND_ADD(AsyncTimerFactory, factory_group);
+	BUILD_AND_ADD(StopWatchFactory, factory_group);
 	//BUILD_AND_ADD(Renderer2DFactory, factory_group);
 	//BUILD_AND_ADD(Renderer3DFactory, factory_group);
 	
@@ -86,6 +81,8 @@ void Global::BuildFactories()
 	getMeshFactory()->createDefault();
 	getAnnotationFactory()->createDefault();
 	getRenderviewFactory()->createDefault();
+	getAsyncTimerFactory()->createDefault();
+	getStopWatchFactory()->createDefault();
 }
 
 void Global::BuildPaths()
@@ -145,9 +142,17 @@ Object* Global::get(const std::string &name, Group* start)
 		return (*list)[0];
 }
 
-StopWatch* Global::getStopWatch()
+AsyncTimer* Global::getAsyncTimer(const std::string &name)
 {
-	Object* obj = get(gstStopWatch);
+	Object* obj = get(name);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AsyncTimer*>(obj);
+}
+
+StopWatch* Global::getStopWatch(const std::string &name)
+{
+	Object* obj = get(name);
 	if (!obj)
 		return 0;
 	return dynamic_cast<StopWatch*>(obj);
@@ -199,6 +204,22 @@ AgentFactory* Global::getAgentFactory()
 	if (!obj)
 		return 0;
 	return dynamic_cast<AgentFactory*>(obj);
+}
+
+AsyncTimerFactory* Global::getAsyncTimerFactory()
+{
+	Object* obj = get(gstAsyncTimerFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<AsyncTimerFactory*>(obj);
+}
+
+StopWatchFactory* Global::getStopWatchFactory()
+{
+	Object* obj = get(gstStopWatchFactory);
+	if (!obj)
+		return 0;
+	return dynamic_cast<StopWatchFactory*>(obj);
 }
 
 //Renderer2DFactory* Global::getRenderer2DFactory()

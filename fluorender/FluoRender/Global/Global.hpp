@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 #define glbin fluo::Global::instance()
-#define glbin_stopwatch fluo::Global::instance().getStopWatch()
 #define glbin_input fluo::Global::instance().getInput()
 #define glbin_volf fluo::Global::instance().getVolumeFactory()
 #define glbin_mshf fluo::Global::instance().getMeshFactory()
@@ -42,6 +41,8 @@ DEALINGS IN THE SOFTWARE.
 #define glbin_revf fluo::Global::instance().getRenderviewFactory()
 #define glbin_agtf fluo::Global::instance().getAgentFactory()
 #define glbin_root fluo::Global::instance().getRoot()
+#define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
+#define glbin_swhf fluo::Global::instance().getStopWatchFactory()
 
 //class AgentFactory;
 class Flinput;
@@ -53,6 +54,8 @@ namespace fluo
 	class AnnotationFactory;
 	class RenderviewFactory;
 	class AgentFactory;
+	class AsyncTimerFactory;
+	class StopWatchFactory;
 	//class Renderer2DFactory;
 	//class Renderer3DFactory;
 	class Root;
@@ -65,13 +68,16 @@ namespace fluo
 		void decycle();
 		void clear();
 		Object* get(const std::string &name, Group* start = nullptr);
-		StopWatch* getStopWatch();
+		AsyncTimer* getAsyncTimer(const std::string &name);
+		StopWatch* getStopWatch(const std::string &name);
 		Flinput* getInput();
 		VolumeFactory* getVolumeFactory();
 		MeshFactory* getMeshFactory();
 		AnnotationFactory* getAnnotationFactory();
 		RenderviewFactory* getRenderviewFactory();
 		AgentFactory* getAgentFactory();
+		AsyncTimerFactory* getAsyncTimerFactory();
+		StopWatchFactory* getStopWatchFactory();
 		//Renderer2DFactory* getRenderer2DFactory();
 		//Renderer3DFactory* getRenderer3DFactory();
 		Root* getRoot();
@@ -139,7 +145,6 @@ namespace fluo
 		{cls* obj = new cls();\
 		par->addChild(obj);}
 
-		void BuildStopWatch();
 		void BuildInput();
 		void BuildFactories();
 		void BuildPaths();

@@ -33,21 +33,21 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class AyncTimerFactory : public ObjectFactory
+	class AsyncTimerFactory : public ObjectFactory
 	{
 	public:
-		AyncTimerFactory();
+		AsyncTimerFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const AyncTimerFactory*>(obj) != NULL;
+			return dynamic_cast<const AsyncTimerFactory*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "AyncTimerFactory"; }
+		virtual const char* className() const { return "AsyncTimerFactory"; }
 
 		virtual void createDefault();
 
-		virtual AsyncTimer* build(AsyncTimer* ann = 0);
+		virtual AsyncTimer* build(AsyncTimer* at = 0);
 
 		virtual AsyncTimer* clone(AsyncTimer*);
 
@@ -84,7 +84,7 @@ namespace fluo
 		}
 
 	protected:
-		virtual ~AyncTimerFactory();
+		virtual ~AsyncTimerFactory();
 	};
 }
 

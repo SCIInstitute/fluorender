@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderviewFactory.hpp>
 #include <AgentFactory.hpp>
 #include <Global.hpp>
-#include <Timer.hpp>
 #include <Input.hpp>
 #include <TextureRenderer.h>
 #include <RulerHandler.h>

@@ -31,15 +31,11 @@ using namespace fluo;
 
 AsyncTimer::AsyncTimer()
 {
-	addValue(gstTimerInterval, long(1000));
-	addValue(gstTimerRunning, bool(false));
 }
 
 AsyncTimer::AsyncTimer(std::function<void(void)> func, const long &interval)
 {
 	m_func = func;
-	addValue(gstTimerInterval, interval);
-	addValue(gstTimerRunning, bool(false));
 }
 
 AsyncTimer::AsyncTimer(const AsyncTimer& data, const CopyOp& copyop, bool copy_values) :

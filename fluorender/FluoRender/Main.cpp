@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include "Main.h"
 #include "RenderFrame.h"
-#include <Timer.hpp>
+#include <StopWatch.hpp>
 #include <Global.hpp>
 #include <VolumeFactory.hpp>
 #include "JVMInitializer.h"
@@ -87,7 +87,7 @@ bool VRenderApp::OnInit()
 	//add png handler
 	wxImage::AddHandler(new wxPNGHandler);
 	//random numbers
-	srand((unsigned int)glbin_stopwatch->sys_time());
+	srand((unsigned int)glbin.getStopWatch(gstStopWatch)->sys_time());
 
 	//the frame
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
