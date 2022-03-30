@@ -358,20 +358,7 @@ public:
 	{ m_vrv_list.clear(); }
 
 	wxString ScriptDialog(const wxString& title,
-		const wxString& wildcard, long style)
-	{
-		m_movie_view->HoldRun();
-		wxString result;
-		wxFileDialog *dlg = new wxFileDialog(
-			this, title, "", "",
-			wildcard, style);
-		int rval = dlg->ShowModal();
-		if (rval == wxID_OK)
-			result = dlg->GetPath();
-		delete dlg;
-		m_movie_view->ResumeRun();
-		return result;
-	}
+		const wxString& wildcard, long style);
 
 public: //public so export window can see it and set it. 
 	RecorderDlg* m_recorder_dlg;

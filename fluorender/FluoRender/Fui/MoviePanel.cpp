@@ -90,14 +90,10 @@ EVT_SPIN_DOWN(ID_CenterXSpin, MoviePanel::OnCropSpinDown)
 EVT_SPIN_DOWN(ID_CenterYSpin, MoviePanel::OnCropSpinDown)
 EVT_SPIN_DOWN(ID_WidthSpin, MoviePanel::OnCropSpinDown)
 EVT_SPIN_DOWN(ID_HeightSpin, MoviePanel::OnCropSpinDown)
-//timer
-EVT_TIMER(ID_Timer, MoviePanel::OnTimer)
 //notebook
 EVT_NOTEBOOK_PAGE_CHANGED(ID_Notebook, MoviePanel::OnNbPageChange)
 END_EVENT_TABLE()
 
-double MoviePanel::m_Mbitrate = 1;
-double MoviePanel::m_movie_len = 5;
 wxTextCtrl * MoviePanel::m_estimated_size_text = 0;
 
 wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
@@ -505,59 +501,12 @@ void MoviePanel::OnNbPageChange(wxBookCtrlEvent& event)
 	int sel = event.GetSelection();
 	int old_sel = event.GetOldSelection();
 	if (sel <=1)
-		m_current_page = sel;
-}
-
-void MoviePanel::Prev()
-{
-	if (m_running)
-	{
-		Stop();
-		return;
-	}
-	m_running = true;
-	flvr::TextureRenderer::maximize_uptime_ = true;
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-	int slider_pos = m_progress_sldr->GetValue();
-	if (slider_pos < PROG_SLDR_MAX && slider_pos > 0 &&
-		!(m_movie_len - m_cur_time < 0.1 / m_fps ||
-			m_cur_time > m_movie_len))
-	{
-		TimerRun();
-		return;
-	}
-
-	if (!m_frame || !m_view)
-		return;
-	//basic options
-	double rval[3];
-	m_view->getValue(gstCamRotX, rval[0]);
-	m_view->getValue(gstCamRotY, rval[1]);
-	m_view->getValue(gstCamRotZ, rval[2]);
-	m_starting_rot = rval[m_rot_axis];
-	while (m_starting_rot > 360.) m_starting_rot -= 360.;
-	while (m_starting_rot < -360.) m_starting_rot += 360.;
-	if (360. - std::abs(m_starting_rot) < 0.001)
-		m_starting_rot = 0.;
-	if (m_current_page == 1)
-	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
-		if (interpolator && interpolator->GetLastIndex() > 0)
-		{
-			int frames = int(interpolator->GetLastT());
-			m_movie_len = (double)frames / m_fps;
-			m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
-		}
-	}
-	SetProgress(0.);
-	SetRendering(0.);
-	m_last_frame = 0;
-	TimerRun();
+		m_agent->setValue(gstMovCurrentPage, long(sel));
 }
 
 void MoviePanel::OnPrev(wxCommandEvent& event)
 {
-	Prev();
+	m_agent->Prev();
 }
 
 void MoviePanel::OnRun(wxCommandEvent& event)
@@ -571,44 +520,33 @@ void MoviePanel::OnRun(wxCommandEvent& event)
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
-		m_filename = fopendlg->GetPath();
-		if (m_view)
-			m_view->setValue(gstKeepEnlarge, true);
-		Run();
+		wxString filename = fopendlg->GetPath();
+		m_agent->setValue(gstMovFilename, filename.ToStdWstring());
+		m_agent->setValue(gstKeepEnlarge, true);
+		m_agent->Run();
 	}
 	delete fopendlg;
 }
 
 void MoviePanel::OnStop(wxCommandEvent& event)
 {
-	Stop();
-}
-
-void MoviePanel::Rewind()
-{
-	if (!m_view)
-		return;
-	m_view->SetParams(0.);
-	Stop();
-	m_cur_frame = m_start_frame;
-	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-	SetProgress(0.);
-	SetRendering(0., false);
+	m_agent->Stop();
 }
 
 void MoviePanel::OnRewind(wxCommandEvent& event)
 {
-	Rewind();
+	m_agent->Rewind();
 }
 
 void MoviePanel::OnCropCheck(wxCommandEvent& event)
 {
-	SetCrop(m_crop_chk->GetValue());
+	bool bval = m_crop_chk->GetValue();
+	m_agent->setValue(gstDrawCropFrame, bval);
 }
 
 void MoviePanel::OnResetCrop(wxCommandEvent& event)
 {
-	SetCrop(true);
+	m_agent->setValue(gstDrawCropFrame, true);
 }
 
 void MoviePanel::OnEditCrop(wxCommandEvent& event)
@@ -688,80 +626,28 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 	}
 }
 
-void MoviePanel::UpFrame()
-{
-	if (m_running) return;
-	if (m_cur_frame < m_start_frame)
-		m_cur_frame = m_start_frame;
-	m_cur_frame++;
-	bool rewind = false;
-	if (m_cur_frame > m_end_frame)
-	{
-		m_cur_frame = m_start_frame;
-		rewind = true;
-	}
-	int time = m_end_frame - m_start_frame + 1;
-	double pcnt = (double)(m_cur_frame - m_start_frame) / (double)time;
-	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-	SetProgress(pcnt);
-	SetRendering(pcnt, rewind);
-}
-
-void MoviePanel::DownFrame()
-{
-	if (m_running) return;
-	if (m_cur_frame > m_end_frame)
-		m_cur_frame = m_end_frame;
-	m_cur_frame--;
-	if (m_cur_frame < m_start_frame) m_cur_frame = m_end_frame;
-	int time = m_end_frame - m_start_frame + 1;
-	double pcnt = (double)(m_cur_frame - m_start_frame) / (double)time;
-	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-	SetProgress(pcnt);
-	SetRendering(pcnt);
-}
-
 void MoviePanel::OnListItemAct(wxListEvent &event)
 {
-	GenKey();
+	long item = m_auto_key_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	m_agent->setValue(gstAutoKeyIndex, item);
+	m_agent->AutoKey();
 }
 
 //script
 void MoviePanel::OnRunScriptChk(wxCommandEvent &event)
 {
-	if (!m_frame || !m_view)
-		return;
 	bool run_script = m_run_script_chk->GetValue();
-	if (m_frame->GetSettingDlg())
-		m_frame->GetSettingDlg()->SetRunScript(run_script);
-	m_view->setValue(gstRunScript, run_script);
-	wxString str = m_script_file_text->GetValue();
-	if (!str.IsEmpty())
-	{
-		m_frame->GetSettingDlg()->SetScriptFile(str);
-		m_view->setValue(gstScriptFile, str.ToStdWstring());
-	}
-	if (run_script)
-	{
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-		m_notebook->SetPageText(4, "Script (Enabled)");
-	}
-	else
-	{
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-		m_notebook->SetPageText(4, "Script");
-	}
+	m_agent->setValue(gstRunScript, run_script);
 	//m_view->RefreshGL(39);
 }
 
 void MoviePanel::OnScriptFileEdit(wxCommandEvent &event)
 {
-	if (!m_frame || !m_frame->GetSettingDlg())
-		return;
-
 	wxString str = m_script_file_text->GetValue();
-	m_frame->GetSettingDlg()->SetScriptFile(str);
-	m_view->setValue(gstScriptFile, str.ToStdWstring());
+	if (!str.IsEmpty())
+		m_agent->setValue(gstScriptFile, str.ToStdWstring());
 }
 
 void MoviePanel::OnScriptClearBtn(wxCommandEvent &event)
@@ -780,17 +666,7 @@ void MoviePanel::OnScriptFileBtn(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString file = fopendlg->GetPath();
-		if (m_frame && m_frame->GetSettingDlg())
-			m_frame->GetSettingDlg()->SetScriptFile(file);
-		m_view->setValue(gstScriptFile, file.ToStdWstring());
 		m_script_file_text->SetValue(file);
-
-		//enable script if not
-		if (!m_run_script_chk->GetValue())
-		{
-			m_run_script_chk->SetValue(true);
-			OnRunScriptChk(event);
-		}
 	}
 
 	delete fopendlg;
@@ -810,106 +686,88 @@ void MoviePanel::OnScriptListSelected(wxListEvent &event)
 		file = exePath + GETSLASH() + "Scripts" +
 			GETSLASH() + file + ".txt";
 		m_script_file_text->SetValue(file);
-
-		//enable script if not
-		if (!m_run_script_chk->GetValue())
-		{
-			m_run_script_chk->SetValue(true);
-			OnRunScriptChk(event);
-		}
 	}
 }
 
 //auto key
-void MoviePanel::OnGenKey(wxCommandEvent& event) {
-	GenKey();
+void MoviePanel::OnGenKey(wxCommandEvent& event)
+{
+	long item = m_auto_key_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	m_agent->setValue(gstAutoKeyIndex, item);
+	m_agent->AutoKey();
 }
 
 void MoviePanel::OnTimeChange(wxScrollEvent &event)
 {
-	if (m_running) return;
+	//if (m_running) return;
 	int prg = event.GetPosition();
-	double pcnt = (double)prg / PROG_SLDR_MAX;
-	m_cur_time = pcnt * m_movie_len;
-	wxString str = wxString::Format("%.2f", m_cur_time);
+	long sldr_range;
+	m_agent->getValue(gstMovSliderRange, sldr_range);
+	double pcnt = (double)prg / sldr_range;
+	double len;
+	m_agent->getValue(gstMovLength, len);
+	double cur_time = pcnt * len;
+	wxString str = wxString::Format("%.2f", cur_time);
 	if (str != m_progress_text->GetValue())
 		m_progress_text->SetValue(str);
 }
 
 void MoviePanel::OnTimeText(wxCommandEvent& event)
 {
-	if (m_running) return;
+	//if (m_running) return;
+	double cur_time;
 	wxString str = m_progress_text->GetValue();
-	if (!str.ToDouble(&m_cur_time))
-		m_cur_time = 0;
-	double pcnt = (m_cur_time / m_movie_len);
-	m_progress_sldr->SetValue(PROG_SLDR_MAX * pcnt);
-	int time = m_end_frame - m_start_frame + 1;
-	m_cur_frame = (int)(m_start_frame + time * pcnt);
-	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-
-	SetRendering(pcnt);
+	if (!str.ToDouble(&cur_time))
+		cur_time = 0;
+	m_agent->setValue(gstMovCurTime, cur_time);
 }
 
 
 void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 {
-	m_rotate = m_rot_chk->GetValue();
-	if (m_rotate)
-	{
-		m_x_rd->Enable();
-		m_y_rd->Enable();
-		m_z_rd->Enable();
-		m_degree_text->Enable();
-		m_rot_int_cmb->Enable();
-	}
-	else
-	{
-		m_x_rd->Disable();
-		m_y_rd->Disable();
-		m_z_rd->Disable();
-		m_degree_text->Disable();
-		m_rot_int_cmb->Disable();
-		//enable time seq if not
-		if (m_seq_mode == 0)
-			SetTimeSeq(true);
-	}
+	bool bval = m_rot_chk->GetValue();
+	m_agent->setValue(gstMovRotEnable, bval);
 }
 
 void MoviePanel::OnRotAxis(wxCommandEvent& event)
 {
+	long lval;
 	if (m_x_rd->GetValue())
-		m_rot_axis = 0;
+		lval = 0;
 	else if (m_y_rd->GetValue())
-		m_rot_axis = 1;
+		lval = 1;
 	else if (m_z_rd->GetValue())
-		m_rot_axis = 2;
+		lval = 2;
+	m_agent->setValue(gstMovRotAxis, lval);
 }
 
 void MoviePanel::OnDegreeText(wxCommandEvent &event)
 {
 	wxString str = m_degree_text->GetValue();
-	long ival = 0;
-	str.ToLong(&ival);
-	m_rot_deg = ival;
+	long lval = 0;
+	str.ToLong(&lval);
+	m_agent->setValue(gstMovRotAng, lval);
 }
 
 void MoviePanel::OnRotIntCmb(wxCommandEvent& event)
 {
-	m_rot_int_type = m_rot_int_cmb->GetCurrentSelection();
+	long lval = m_rot_int_cmb->GetCurrentSelection();
+	m_agent->setValue(gstMovIntrpMode, lval);
 }
 
 void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 {
 	if (m_seq_chk->GetValue())
 	{
-		m_seq_mode = 1;
-		SetTimeSeq(true);
+		m_agent->setValue(gstMovSeqMode, long(1));
+		m_agent->setValue(gstMovTimeSeqEnable, true);
 	}
 	else
 	{
-		m_seq_mode = 0;
-		SetTimeSeq(false);
+		m_agent->setValue(gstMovSeqMode, long(0));
+		m_agent->setValue(gstMovTimeSeqEnable, false);
 	}
 }
 
@@ -917,97 +775,33 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 {
 	if (m_bat_chk->GetValue())
 	{
-		m_seq_mode = 2;
-		SetTimeSeq(true);
+		m_agent->setValue(gstMovSeqMode, long(2));
+		m_agent->setValue(gstMovTimeSeqEnable, true);
 	}
 	else
 	{
-		m_seq_mode = 0;
-		SetTimeSeq(false);
+		m_agent->setValue(gstMovSeqMode, long(0));
+		m_agent->setValue(gstMovTimeSeqEnable, false);
 	}
 }
 
 void MoviePanel::OnUpFrame(wxCommandEvent& event)
 {
-	UpFrame();
+	m_agent->UpFrame();
 }
 
 void MoviePanel::OnDownFrame(wxCommandEvent& event)
 {
-	DownFrame();
-}
-
-void MoviePanel::Run()
-{
-	if (!m_frame || !m_view)
-		return;
-
-	if (m_frame->GetSettingDlg())
-	{
-		RenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
-		RenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
-		RenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
-	}
-
-	Rewind();
-
-	filetype_ = m_filename.SubString(m_filename.Len() - 4,
-		m_filename.Len() - 1);
-	if (filetype_.IsSameAs(wxString(".mov")))
-	{
-		if (!m_crop)
-		{
-			m_crop_x = 0;
-			m_crop_y = 0;
-			m_view->getValue(gstSizeX, m_crop_w);
-			m_view->getValue(gstSizeY, m_crop_h);
-		}
-		bool bval = false;
-		if (m_view)
-			m_view->getValue(gstEnlarge, bval);
-		if (bval)
-		{
-			double scale;
-			m_view->getValue(gstEnlargeScale, scale);
-			m_crop_w *= scale;
-			m_crop_h *= scale;
-		}
-
-		encoder_.open(m_filename.ToStdString(), m_crop_w, m_crop_h, m_fps,
-			m_Mbitrate * 1e6);
-	}
-	m_filename = m_filename.SubString(0, m_filename.Len() - 5);
-	m_record = true;
-	if (m_frame->GetSettingDlg())
-	{
-		m_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
-		m_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
-		if (m_frame->GetSettingDlg()->GetProjSave())
-		{
-			wxString new_folder;
-			new_folder = m_filename + "_project";
-			MkDirW(new_folder.ToStdWstring());
-			wstring name = m_filename.ToStdWstring();
-			name = GET_NAME(name);
-			wxString prop_file = new_folder + GETSLASH()
-				+ name + "_project.vrp";
-			m_frame->SaveProject(prop_file);
-		}
-	}
-
-	Prev();
+	m_agent->DownFrame();
 }
 
 void MoviePanel::OnCurFrameText(wxCommandEvent& event)
 {
-	if (m_running) return;
-	m_cur_frame = STOI(m_cur_frame_text->GetValue().fn_str());
-	if (m_cur_frame < m_start_frame) m_cur_frame = m_end_frame;
-	if (m_cur_frame > m_end_frame) m_cur_frame = m_start_frame;
-	int time = m_end_frame - m_start_frame + 1;
-	double pcnt = (double)(m_cur_frame - m_start_frame) / (double)time;
-	SetProgress(pcnt);
-	SetRendering(pcnt);
+	//if (m_running) return;
+	wxString str = m_cur_frame_text->GetValue();
+	long lval;
+	if (str.ToLong(&lval))
+		m_agent->setValue(gstCurrentFrame, lval);
 }
 
 void MoviePanel::OnStartFrameText(wxCommandEvent& event)
@@ -1015,8 +809,7 @@ void MoviePanel::OnStartFrameText(wxCommandEvent& event)
 	wxString str = m_start_frame_text->GetValue();
 	long lval;
 	if (str.ToLong(&lval))
-		m_start_frame = lval;
-	OnFpsEdit(event);
+		m_agent->setValue(gstBeginFrame, lval);
 }
 
 void MoviePanel::OnEndFrameText(wxCommandEvent& event)
@@ -1024,47 +817,49 @@ void MoviePanel::OnEndFrameText(wxCommandEvent& event)
 	wxString str = m_end_frame_text->GetValue();
 	long lval;
 	if (str.ToLong(&lval))
-		m_end_frame = lval;
-	OnFpsEdit(event);
+		m_agent->setValue(gstEndFrame, lval);
 }
 
 void MoviePanel::OnMovieLenText(wxCommandEvent& event)
 {
 	wxString str = m_movie_len_text->GetValue();
-	str.ToDouble(&m_movie_len);
-
-	//update fps
-	m_fps = double(m_end_frame - m_start_frame + 1) / m_movie_len;
-	m_fps_text->ChangeValue(wxString::Format("%.0f", m_fps));
+	double dval;
+	if (str.ToDouble(&dval))
+		m_agent->setValue(gstMovLength, dval);
 }
 
 void MoviePanel::OnFpsEdit(wxCommandEvent& event)
 {
-	m_fps_text->GetValue().ToDouble(&m_fps);
-
-	//update length
-	m_movie_len = double(m_end_frame - m_start_frame + 1) / m_fps;
-	m_movie_len_text->ChangeValue(wxString::Format("%.2f", m_movie_len));
+	wxString str = m_fps_text->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+		m_agent->setValue(gstMovFps, dval);
 }
 
 //ch1
-void MoviePanel::OnCh1Check(wxCommandEvent &event) {
+void MoviePanel::OnCh1Check(wxCommandEvent &event)
+{
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
 		RenderFrame::SetCompression(ch1->GetValue());
 }
+
 //ch2
-void MoviePanel::OnCh2Check(wxCommandEvent &event) {
+void MoviePanel::OnCh2Check(wxCommandEvent &event)
+{
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
 		RenderFrame::SetSaveAlpha(ch2->GetValue());
 }
+
 //ch3
-void MoviePanel::OnCh3Check(wxCommandEvent &event) {
+void MoviePanel::OnCh3Check(wxCommandEvent &event)
+{
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
 		RenderFrame::SetSaveFloat(ch3->GetValue());
 }
+
 //enlarge output image
 void MoviePanel::OnChEnlargeCheck(wxCommandEvent &event)
 {
@@ -1072,8 +867,7 @@ void MoviePanel::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		if (m_view)
-			m_view->setValue(gstEnlarge, enlarge);
+		m_agent->setValue(gstEnlarge, enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1121,8 +915,7 @@ void MoviePanel::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	if (m_view)
-		m_view->setValue(gstEnlargeScale, dval);
+	m_agent->setValue(gstEnlargeScale, dval);
 	int ival = int(dval * 10 + 0.5);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
@@ -1138,13 +931,21 @@ void MoviePanel::OnTxEnlargeText(wxCommandEvent &event)
 //movie quality
 void MoviePanel::OnMovieQuality(wxCommandEvent &event)
 {
-	m_Mbitrate = STOD(((wxTextCtrl*)event.GetEventObject())
-		->GetValue().fn_str());
-	double size = m_Mbitrate * m_movie_len / 8.;
-	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
+	wxString str = ((wxTextCtrl*)event.GetEventObject())->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+	{
+		m_agent->setValue(gstMovBitrate, dval);
+		double len;
+		m_agent->getValue(gstMovLength, len);
+		double size = dval * len / 8.;
+		m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
+	}
 }
+
 //embed project
-void MoviePanel::OnChEmbedCheck(wxCommandEvent &event) {
+void MoviePanel::OnChEmbedCheck(wxCommandEvent &event)
+{
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
 		RenderFrame::SetEmbedProject(ch_embed->GetValue());
@@ -1229,9 +1030,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	m_estimated_size_text = new wxTextCtrl(panel, ID_BitrateText, "2.5",
 		wxDefaultPosition, wxDefaultSize);
 	m_estimated_size_text->Disable();
-	m_Mbitrate = STOD(bitrate_text->GetValue().fn_str());
-	double size = m_Mbitrate * m_movie_len / 8.;
-	m_estimated_size_text->SetValue(wxString::Format("%.2f", size));
+	m_estimated_size_text->SetValue(wxString::Format("%.2f", 20.0));
 
 	line3->Add(MOVopts, 0, wxALIGN_CENTER);
 	line3->Add(st, 0, wxALIGN_CENTER);

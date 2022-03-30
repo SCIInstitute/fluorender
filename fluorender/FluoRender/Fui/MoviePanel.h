@@ -125,56 +125,7 @@ public:
 	void UpFrame();
 	void DownFrame();
 
-	int GetRotDeg() { return m_rot_deg; }
-	void SetMovieLen(double value)
-	{
-		m_movie_len = value;
-		m_movie_len_text->SetValue(wxString::Format("%.2f", m_movie_len));
-	}
-	double GetMovieLen() { return m_movie_len; }
-	void SetFps(double value)
-	{
-		m_fps = value;
-		m_fps_text->SetValue(wxString::Format("%.0f", m_fps));
-	}
-	double GetFps() { return m_fps; }
-	//frames
-	void SetStartFrame(int value)
-	{
-		m_start_frame = value;
-		m_start_frame_text->SetValue(wxString::Format("%d", m_start_frame));
-	}
-	int GetStartFrame() { return m_start_frame; }
-	void SetEndFrame(int value)
-	{
-		m_end_frame = value;
-		m_end_frame_text->SetValue(wxString::Format("%d", m_end_frame));
-	}
-	int GetEndFrame() { return m_end_frame; }
-	void SetBitRate(double value) { m_Mbitrate = value; }
-	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
-
-	//timer
-	void TimerRun()
-	{
-		m_timer.Start(int(1000.0 / m_fps + 0.5));
-	}
-	void ResumeRun()
-	{
-		if (m_timer_run)
-			TimerRun();
-	}
-	void HoldRun()
-	{
-		if (m_timer.IsRunning())
-		{
-			m_timer_run = true;
-			m_timer.Stop();
-		}
-		else
-			m_timer_run = false;
-	}
 
 private:
 	fluo::MovieAgent* m_agent;
@@ -190,7 +141,6 @@ private:
 	wxButton *m_save_btn;
 
 	wxNotebook* m_notebook;
-	int m_current_page;
 
 	//basic movie controls
 	wxCheckBox *m_seq_chk;
@@ -235,44 +185,10 @@ private:
 	wxSpinButton* m_height_spin;
 
 	static wxTextCtrl *m_estimated_size_text;
-	static double m_Mbitrate;
 
 private:
 	RenderFrame* m_frame;
 	RecorderDlg* m_advanced_movie;
-
-	wxTimer m_timer;
-
-	//basic
-	bool m_rotate;
-	bool m_time_seq;
-	int m_seq_mode;//0:none; 1:4d; 2:bat
-	int m_rot_axis;	//0-x;1-y;2-z
-	int m_rot_deg;
-	int m_rot_int_type;//0-linear; 1-smooth
-	static double m_movie_len;//length in sec
-	double m_cur_time;//time in sec
-	double m_fps;
-	long m_start_frame;
-	long m_end_frame;
-	long m_cur_frame;
-
-	//save controls
-	int m_last_frame;//last frame nunmber to save
-	double m_starting_rot;//starting degree of rotation
-	bool m_running, m_record;
-	bool m_delayed_stop;
-	bool m_timer_run;//for temporary hold
-	//save
-	wxString m_filename;
-	wxString filetype_;
-
-private:
-	//set the renderview and progress bars/text
-	void SetRendering(double pcnt, bool rewind=false);
-
-	//write frames to file
-	void WriteFrameToFile(int total_frames);
 
 private:
 	wxWindow* CreateSimplePage(wxWindow *parent);
@@ -280,8 +196,6 @@ private:
 	wxWindow* CreateAutoKeyPage(wxWindow *parent);
 	wxWindow* CreateCroppingPage(wxWindow *parent);
 	wxWindow* CreateScriptPage(wxWindow *parent);
-	void Init();
-	void GenKey();
 
 	//basic rotation
 	void OnRotateChecked(wxCommandEvent& event);
@@ -292,9 +206,7 @@ private:
 
 	//left column
 	void OnRun(wxCommandEvent& event);
-	void Prev();
 	void OnPrev(wxCommandEvent& event);
-	void Stop();
 	void OnStop(wxCommandEvent& event);
 	void Rewind();
 	void OnRewind(wxCommandEvent& event);
@@ -345,9 +257,6 @@ private:
 	//checkboxes
 	void OnSequenceChecked(wxCommandEvent& event);
 	void OnBatchChecked(wxCommandEvent& event);
-
-	//timer for playback.
-	void OnTimer(wxTimerEvent& event);
 
 	//notebook page change
 	void OnNbPageChange(wxBookCtrlEvent& event);

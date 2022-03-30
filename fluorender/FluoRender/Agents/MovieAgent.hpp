@@ -58,13 +58,24 @@ namespace fluo
 
 		friend class AgentFactory;
 
-		void SetProgress(double pcnt);
 		int GetScriptFiles(wxArrayString& list);
 		void AddScriptToList();
 		void GetScriptSettings();
+		void SetProgress(double pcnt);
+		void SetRendering(double pcnt, bool rewind);
 		void WriteFrameToFile(int total_frames);
+		void Prev();
 		void Stop();
-		void SetRendering(double pcnt, bool rewind)
+		void Run();
+		void Rewind();
+		void UpFrame();
+		void DownFrame();
+		void AutoKey();
+
+		//timer
+		void TimerRun();
+		void ResumeRun();
+		void HoldRun();
 
 	protected:
 		MoviePanel &panel_;
@@ -73,6 +84,7 @@ namespace fluo
 		QVideoEncoder encoder_;
 
 	private:
+		void OnTimer();
 		void OnMovTimeSeqEnable(Event& event);
 		void OnMovSeqMode(Event& event);
 		void OnMovRotEnable(Event& event);
@@ -81,8 +93,13 @@ namespace fluo
 		void OnCurrentFrame(Event& event);
 		void OnDrawCropFrame(Event& event);
 		void OnMovCurrentPage(Event& event);
-		void OnAutoKeyIndex(Event& event);
-		void OnTimer();
+		void OnMovLength(Event& event);
+		void OnMovFps(Event& event);
+		void OnBeginFrame(Event& event);
+		void OnEndFrame(Event& event);
+		void OnScriptFile(Event& event);
+		void OnRunScript(Event& event);
+		void OnMovCurTime(Event& event);
 	};
 }
 

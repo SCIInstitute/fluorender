@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.hpp>
 #include <AsyncTimer.hpp>
 #include <AsyncTimerFactory.hpp>
+#include <Animator/Interpolator.h>
 #include <TextureRenderer.h>
 #include <tiffio.h>
 #include <img/icons.h>
@@ -303,40 +304,53 @@ void MovieAgent::Stop()
 
 void MovieAgent::SetRendering(double pcnt, bool rewind)
 {
+	Renderview* view = getObject();
+	if (!view) return;
+
 	setValue(gstCamLockObjEnable, false);
 	//advanced options
-	if (m_current_page == 1)
+	long page;
+	getValue(gstMovCurrentPage, page);
+	if (page == 1)
 	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
+		Interpolator *interpolator = view->GetInterpolator();
 		if (interpolator && interpolator->GetLastIndex() > 0)
 		{
-			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
-				m_view->setValue(gstCamLockObjEnable, true);
+			//bool cam_lock, mov_running;
+			//getValue(gstCamLockObjEnable, cam_lock);
+			//getValue(gstMovRunning, mov_running);
+			//if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
+			//	m_view->setValue(gstCamLockObjEnable, true);
 			int end_frame = int(interpolator->GetLastT());
-			m_view->SetParams(pcnt * end_frame);
-			m_view->setValue(gstInteractive, false);
+			view->SetParams(pcnt * end_frame);
+			setValue(gstInteractive, false);
 			//m_view->RefreshGL(39);
 			return;
 		}
 	}
-	//basic options
-	int time = m_end_frame - m_start_frame + 1;
-	time = int(m_start_frame + time * pcnt + 0.5);
 
-	if (m_seq_mode == 1)
-	{
-		m_view->Set4DSeqFrame(time, m_start_frame, m_end_frame, rewind);
-	}
-	else if (m_seq_mode == 2)
-	{
-		m_view->Set3DBatFrame(time, m_start_frame, m_end_frame, rewind);
-	}
+	//basic options
+	long sf, ef;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	int time = ef - sf + 1;
+	time = int(sf + time * pcnt + 0.5);
+	long lval;
+	getValue(gstMovSeqMode, lval);
+	if (lval == 1)
+		view->Set4DSeqFrame(time, sf, ef, rewind);
+	else if (lval == 2)
+		view->Set3DBatFrame(time, sf, ef, rewind);
 
 	//rotate animation
-	if (m_rotate)
+	std::string sval;
+	double dval;
+	bool bval;
+	getValue(gstMovRotEnable, bval);
+	if (bval)
 	{
-		std::string sval;
-		switch (m_rot_axis)
+		getValue(gstMovRotAxis, lval);
+		switch (lval)
 		{
 		case 0:
 			sval = gstCamRotX;
@@ -348,149 +362,233 @@ void MovieAgent::SetRendering(double pcnt, bool rewind)
 			sval = gstCamRotZ;
 			break;
 		}
-		double dval;
-		m_view->getValue(sval, dval);
-		if (m_rot_int_type == 0)
-			dval = m_starting_rot + pcnt * m_rot_deg;
-		else if (m_rot_int_type == 1)
-			dval = m_starting_rot +
-			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * m_rot_deg;
-		m_view->setValue(sval, dval);
+		getValue(gstMovIntrpMode, lval);
+		double start_ang, rot_ang;
+		getValue(gstMovStartAng, start_ang);
+		getValue(gstMovRotAng, rot_ang);
+		if (lval == 0)
+			dval = start_ang + pcnt * rot_ang;
+		else if (lval == 1)
+			dval = start_ang +
+			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * rot_ang;
+		setValue(sval, dval);
 	}
 
-	m_view->setValue(gstInteractive, false);
+	setValue(gstInteractive, false);
 	//m_view->RefreshGL(39);
 }
 
-void MovieAgent::OnMovTimeSeqEnable(Event& event)
+void MovieAgent::Prev()
 {
 	bool bval;
-	long lval;
-	double dval;
-	getValue(gstMovTimeSeqEnable, bval);
+	getValue(gstMovRunning, bval);
 	if (bval)
 	{
-		getValue(gstMovSeqMode, lval);
-		if (lval == 0)
-			setValue(gstMovSeqMode, long(1));
+		Stop();
+		return;
 	}
 	else
-	{
-		panel_.m_seq_chk->SetValue(false);
-		panel_.m_bat_chk->SetValue(false);
-		setValue(gstBeginFrame, long(0));
-		getValue(gstMovRotAng, dval);
-		setValue(gstEndFrame, long(dval));
-	}
-	long bf, ef;
-	double fps;
-	getValue(gstBeginFrame, bf);
-	getValue(gstEndFrame, ef);
-	getValue(gstMovFps, fps);
-	dval = (ef - bf + 1) / fps;
-	setValue(gstMovLength, dval);
-	panel_.m_start_frame_text->ChangeValue(wxString::Format("%d", bf));
-	panel_.m_end_frame_text->ChangeValue(wxString::Format("%d", ef));
-	panel_.m_movie_len_text->ChangeValue(wxString::Format("%.2f", dval));
-}
+		setValue(gstMovRunning, true);
 
-void MovieAgent::OnMovSeqMode(Event& event)
-{
+	flvr::TextureRenderer::maximize_uptime_ = true;
+	panel_.m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+	int slider_pos = panel_.m_progress_sldr->GetValue();
 	long lval;
-	getValue(gstMovSeqMode, lval);
+	getValue(gstMovSliderRange, lval);
+	double len, cur_time, fps;
+	getValue(gstMovLength, len);
+	getValue(gstMovCurTime, cur_time);
+	getValue(gstMovFps, fps);
+	if (slider_pos < lval && slider_pos > 0 &&
+		!(len - cur_time < 0.1 / fps ||
+			cur_time > len))
+	{
+		TimerRun();
+		return;
+	}
+
+	//basic options
+	double rval[3];
+	getValue(gstCamRotX, rval[0]);
+	getValue(gstCamRotY, rval[1]);
+	getValue(gstCamRotZ, rval[2]);
+	getValue(gstMovRotAxis, lval);
+	double start_ang = rval[lval];
+	while (start_ang > 360.) start_ang -= 360.;
+	while (start_ang < -360.) start_ang += 360.;
+	if (360. - std::abs(start_ang) < 0.001)
+		start_ang = 0.;
+	setValue(gstMovStartAng, start_ang);
+	getValue(gstMovCurrentPage, lval);
 	if (lval == 1)
 	{
-		panel_.m_seq_chk->SetValue(true);
-		panel_.m_bat_chk->SetValue(false);
-		getObject()->Get4DSeqRange();
+		Interpolator *interpolator = getObject()->GetInterpolator();
+		if (interpolator && interpolator->GetLastIndex() > 0)
+		{
+			int frames = int(interpolator->GetLastT());
+			len = (double)frames / fps;
+			setValue(gstMovLength, len);
+			panel_.m_movie_len_text->ChangeValue(wxString::Format("%.2f", len));
+		}
 	}
-	else if (lval == 2)
+	SetProgress(0.);
+	SetRendering(0., false);
+	setValue(gstLastFrame, long(0));
+	TimerRun();
+}
+
+void MovieAgent::Run()
+{
+	//if (m_frame->GetSettingDlg())
+	//{
+	//	RenderFrame::SetSaveProject(m_frame->GetSettingDlg()->GetProjSave());
+	//	RenderFrame::SetSaveAlpha(m_frame->GetSettingDlg()->GetSaveAlpha());
+	//	RenderFrame::SetSaveFloat(m_frame->GetSettingDlg()->GetSaveFloat());
+	//}
+
+	Rewind();
+	std::wstring wfilename;
+	std::string filetype;
+	getValue(gstMovFilename, wfilename);
+	filetype = GET_SUFFIX(ws2s(wfilename));
+	if (filetype == ".mov")
 	{
-		panel_.m_seq_chk->SetValue(false);
-		panel_.m_bat_chk->SetValue(true);
-		getObject()->Get3DBatRange();
+		//if (!m_crop)
+		//{
+		//	m_crop_x = 0;
+		//	m_crop_y = 0;
+		//	m_view->getValue(gstSizeX, m_crop_w);
+		//	m_view->getValue(gstSizeY, m_crop_h);
+		//}
+		//bool bval = false;
+		//if (m_view)
+		//	m_view->getValue(gstEnlarge, bval);
+		//if (bval)
+		//{
+		//	double scale;
+		//	m_view->getValue(gstEnlargeScale, scale);
+		//	m_crop_w *= scale;
+		//	m_crop_h *= scale;
+		//}
+		long w, h;
+		double fps, bitrate;
+		getValue(gstCropW, w);
+		getValue(gstCropH, h);
+		getValue(gstMovFps, fps);
+		getValue(gstMovBitrate, bitrate);
+		encoder_.open(ws2s(wfilename), w, h, fps, bitrate * 1e6);
 	}
+	setValue(gstMovRecord, true);
+	//m_filename = m_filename.SubString(0, m_filename.Len() - 5);
+	//m_record = true;
+	//if (m_frame->GetSettingDlg())
+	//{
+	//	m_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
+	//	m_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
+	//	if (m_frame->GetSettingDlg()->GetProjSave())
+	//	{
+	//		wxString new_folder;
+	//		new_folder = m_filename + "_project";
+	//		MkDirW(new_folder.ToStdWstring());
+	//		wstring name = m_filename.ToStdWstring();
+	//		name = GET_NAME(name);
+	//		wxString prop_file = new_folder + GETSLASH()
+	//			+ name + "_project.vrp";
+	//		m_frame->SaveProject(prop_file);
+	//	}
+	//}
+
+	Prev();
 }
 
-void MovieAgent::OnMovRotEnable(Event& event)
+void MovieAgent::Rewind()
 {
-	bool bval;
-	getValue(gstMovRotEnable, bval);
-	panel_.m_x_rd->Enable(bval);
-	panel_.m_y_rd->Enable(bval);
-	panel_.m_z_rd->Enable(bval);
-	panel_.m_degree_text->Enable(bval);
-	panel_.m_rot_chk->SetValue(bval);
-}
-
-void MovieAgent::OnMovRotAxis(Event& event)
-{
+	getObject()->SetParams(0.);
+	Stop();
 	long lval;
-	getValue(gstMovRotAxis, lval);
-	if (lval == 0)
-		panel_.m_x_rd->SetValue(true);
-	else if (lval == 1)
-		panel_.m_y_rd->SetValue(true);
-	else if (lval == 2)
-		panel_.m_z_rd->SetValue(true);
+	getValue(gstBeginFrame, lval);
+	setValue(gstCurrentFrame, lval);
+	SetProgress(0.);
+	SetRendering(0., false);
 }
 
-void MovieAgent::OnMovRotAng(Event& event)
+void MovieAgent::UpFrame()
 {
-	double dval;
-	getValue(gstMovRotAng, dval);
-	panel_.m_degree_text->SetValue(wxString::Format("%d", dval));
-}
-
-void MovieAgent::OnCurrentFrame(Event& event)
-{
-	long cf;
+	//if (m_running) return;
+	long cf, sf, ef;
 	getValue(gstCurrentFrame, cf);
-	long sf, ef;
 	getValue(gstBeginFrame, sf);
 	getValue(gstEndFrame, ef);
-	if (cf < sf) cf = ef;
-	if (cf > ef) cf = sf;
-	long time = ef - sf + 1;
-	double pcnt = (double)(cf - sf) / (double)time;
-
-	panel_.m_cur_frame_text->ChangeValue(wxString::Format("%d", cf));
-	chgValue(gstCurrentFrame, cf);
-	SetProgress(pcnt);
+	if (cf < sf)
+		cf = sf;
+	cf++;
+	bool rewind = false;
+	if (cf > ef)
+	{
+		cf = sf;
+		rewind = true;
+	}
+	setValue(gstMovRewind, rewind);
+	setValue(gstCurrentFrame, cf);
 }
 
-void MovieAgent::OnDrawCropFrame(Event& event)
+void MovieAgent::DownFrame()
+{
+	//if (m_running) return;
+	long cf, sf, ef;
+	getValue(gstCurrentFrame, cf);
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	if (cf > ef)
+		cf = ef;
+	cf--;
+	if (cf < sf) cf = ef;
+	setValue(gstCurrentFrame, cf);
+}
+
+void MovieAgent::TimerRun()
+{
+	std::string name;
+	getValue(gstMovTimerName, name);
+	AsyncTimer* timer = glbin_atmf->findFirst(name);
+	if (timer)
+	{
+		double dval;
+		getValue(gstMovFps, dval);
+		long lval = long(1000.0 / dval + 0.5);
+		timer->setValue(gstTimerInterval, lval);
+		timer->restart();
+	}
+}
+
+void MovieAgent::ResumeRun()
 {
 	bool bval;
-	getValue(gstDrawCropFrame, bval);
-	panel_.m_crop_chk->SetValue(bval);
-
+	getValue(gstMovTimerState, bval);
 	if (bval)
-	{
-		getObject()->CalculateCrop();
-		long x, y, w, h;
-		getValue(gstCropX, x); getValue(gstCropY, y);
-		getValue(gstCropW, w); getValue(gstCropH, h);
-		x = long(x + w / 2.0 + 0.5);
-		y = long(y + h / 2.0 + 0.5);
-		panel_.m_center_x_text->ChangeValue(wxString::Format("%d", x));
-		panel_.m_center_y_text->ChangeValue(wxString::Format("%d", y));
-		panel_.m_width_text->ChangeValue(wxString::Format("%d", w));
-		panel_.m_height_text->ChangeValue(wxString::Format("%d", h));
-	}
-
-	//m_view->RefreshGL(39);
+		TimerRun();
 }
 
-void MovieAgent::OnMovCurrentPage(Event& event)
+void MovieAgent::HoldRun()
 {
-	long lval;
-	getValue(gstMovCurrentPage, lval);
-	if (panel_.m_notebook)
-		panel_.m_notebook->SetSelection(lval);
+	std::string name;
+	getValue(gstMovTimerName, name);
+	AsyncTimer* timer = glbin_atmf->findFirst(name);
+	if (timer)
+	{
+		bool bval;
+		timer->getValue(gstTimerRunning, bval);
+		if (bval)
+		{
+			setValue(gstMovTimerState, true);
+			timer->stop();
+		}
+		else
+			setValue(gstMovTimerState, false);
+	}
 }
 
-void MovieAgent::OnAutoKeyIndex(Event& event)
+void MovieAgent::AutoKey()
 {
 	long lval;
 	getValue(gstAutoKeyIndex, lval);
@@ -559,10 +657,245 @@ void MovieAgent::OnTimer()
 		if (record)
 			WriteFrameToFile(int(fps*len + 0.5));
 		setValue(gstLastFrame, cf);
-		SetRendering(cur_time / len);
+		SetRendering(cur_time / len, false);
 	}
 	if (len - cur_time < 0.1 / fps ||
 		cur_time > len)
 		setValue(gstMovDelayedStop, true);
 }
 
+void MovieAgent::OnMovTimeSeqEnable(Event& event)
+{
+	bool bval;
+	long lval;
+	double dval;
+	getValue(gstMovTimeSeqEnable, bval);
+	if (bval)
+	{
+		getValue(gstMovSeqMode, lval);
+		if (lval == 0)
+			setValue(gstMovSeqMode, long(1));
+	}
+	else
+	{
+		panel_.m_seq_chk->SetValue(false);
+		panel_.m_bat_chk->SetValue(false);
+		setValue(gstBeginFrame, long(0));
+		getValue(gstMovRotAng, dval);
+		setValue(gstEndFrame, long(dval));
+	}
+	long bf, ef;
+	double fps;
+	getValue(gstBeginFrame, bf);
+	getValue(gstEndFrame, ef);
+	getValue(gstMovFps, fps);
+	dval = (ef - bf + 1) / fps;
+	setValue(gstMovLength, dval);
+	panel_.m_start_frame_text->ChangeValue(wxString::Format("%d", bf));
+	panel_.m_end_frame_text->ChangeValue(wxString::Format("%d", ef));
+	panel_.m_movie_len_text->ChangeValue(wxString::Format("%.2f", dval));
+}
+
+void MovieAgent::OnMovSeqMode(Event& event)
+{
+	long lval;
+	getValue(gstMovSeqMode, lval);
+	if (lval == 1)
+	{
+		panel_.m_seq_chk->SetValue(true);
+		panel_.m_bat_chk->SetValue(false);
+		getObject()->Get4DSeqRange();
+	}
+	else if (lval == 2)
+	{
+		panel_.m_seq_chk->SetValue(false);
+		panel_.m_bat_chk->SetValue(true);
+		getObject()->Get3DBatRange();
+	}
+}
+
+void MovieAgent::OnMovRotEnable(Event& event)
+{
+	bool bval;
+	getValue(gstMovRotEnable, bval);
+	panel_.m_x_rd->Enable(bval);
+	panel_.m_y_rd->Enable(bval);
+	panel_.m_z_rd->Enable(bval);
+	panel_.m_degree_text->Enable(bval);
+	panel_.m_rot_int_cmb->Enable(bval);
+	panel_.m_rot_chk->SetValue(bval);
+	if (!bval)
+	{
+		long lval;
+		getValue(gstMovSeqMode, lval);
+		if (lval == 0)
+			setValue(gstMovTimeSeqEnable, true);
+	}
+}
+
+void MovieAgent::OnMovRotAxis(Event& event)
+{
+	long lval;
+	getValue(gstMovRotAxis, lval);
+	if (lval == 0)
+		panel_.m_x_rd->SetValue(true);
+	else if (lval == 1)
+		panel_.m_y_rd->SetValue(true);
+	else if (lval == 2)
+		panel_.m_z_rd->SetValue(true);
+}
+
+void MovieAgent::OnMovRotAng(Event& event)
+{
+	double dval;
+	getValue(gstMovRotAng, dval);
+	panel_.m_degree_text->SetValue(wxString::Format("%d", dval));
+}
+
+void MovieAgent::OnCurrentFrame(Event& event)
+{
+	long cf;
+	getValue(gstCurrentFrame, cf);
+	long sf, ef;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	if (cf < sf) cf = ef;
+	if (cf > ef) cf = sf;
+	long time = ef - sf + 1;
+	double pcnt = (double)(cf - sf) / (double)time;
+
+	panel_.m_cur_frame_text->ChangeValue(wxString::Format("%d", cf));
+	chgValue(gstCurrentFrame, cf);
+	SetProgress(pcnt);
+	SetRendering(pcnt, false);
+}
+
+void MovieAgent::OnDrawCropFrame(Event& event)
+{
+	bool bval;
+	getValue(gstDrawCropFrame, bval);
+	panel_.m_crop_chk->SetValue(bval);
+
+	if (bval)
+	{
+		getObject()->CalculateCrop();
+		long x, y, w, h;
+		getValue(gstCropX, x); getValue(gstCropY, y);
+		getValue(gstCropW, w); getValue(gstCropH, h);
+		x = long(x + w / 2.0 + 0.5);
+		y = long(y + h / 2.0 + 0.5);
+		panel_.m_center_x_text->ChangeValue(wxString::Format("%d", x));
+		panel_.m_center_y_text->ChangeValue(wxString::Format("%d", y));
+		panel_.m_width_text->ChangeValue(wxString::Format("%d", w));
+		panel_.m_height_text->ChangeValue(wxString::Format("%d", h));
+	}
+
+	//m_view->RefreshGL(39);
+}
+
+void MovieAgent::OnMovCurrentPage(Event& event)
+{
+	long lval;
+	getValue(gstMovCurrentPage, lval);
+	if (panel_.m_notebook)
+		panel_.m_notebook->SetSelection(lval);
+}
+
+void MovieAgent::OnMovLength(Event& event)
+{
+	double dval;
+	getValue(gstMovLength, dval);
+	panel_.m_movie_len_text->SetValue(wxString::Format("%.2f", dval));
+	//update fps
+	long sf, ef;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	double fps = double(ef - sf + 1) / dval;
+	setValue(gstMovFps, fps);
+}
+
+void MovieAgent::OnMovFps(Event& event)
+{
+	double dval;
+	getValue(gstMovFps, dval);
+	panel_.m_fps_text->SetValue(wxString::Format("%.0f", dval));
+
+	//update length
+	long sf, ef;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	double len = double(ef - sf + 1) / dval;
+	setValue(gstMovLength, len);
+}
+
+void MovieAgent::OnBeginFrame(Event& event)
+{
+	long sf, ef;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	panel_.m_start_frame_text->SetValue(wxString::Format("%d", sf));
+	double fps;
+	getValue(gstMovFps, fps);
+	//update length
+	double len = double(ef - sf + 1) / fps;
+	setValue(gstMovLength, len);
+}
+
+void MovieAgent::OnEndFrame(Event& event)
+{
+	long sf, ef;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	panel_.m_end_frame_text->SetValue(wxString::Format("%d", ef));
+	double fps;
+	getValue(gstMovFps, fps);
+	//update length
+	double len = double(ef - sf + 1) / fps;
+	setValue(gstMovLength, len);
+}
+
+void MovieAgent::OnScriptFile(Event& event)
+{
+	bool bval;
+	getValue(gstRunScript, bval);
+	//enable script if not
+	if (!bval)
+		setValue(gstRunScript, true);
+}
+
+void MovieAgent::OnRunScript(Event& event)
+{
+	bool bval;
+	getValue(gstRunScript, bval);
+	panel_.m_run_script_chk->SetValue(bval);
+	if (bval)
+	{
+		panel_.m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
+		panel_.m_notebook->SetPageText(4, "Script (Enabled)");
+	}
+	else
+	{
+		panel_.m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+		panel_.m_notebook->SetPageText(4, "Script");
+	}
+}
+
+void MovieAgent::OnMovCurTime(Event& event)
+{
+	double cur_time;
+	getValue(gstMovCurTime, cur_time);
+	long sldr_range;
+	getValue(gstMovSliderRange, sldr_range);
+	double len;
+	getValue(gstMovLength, len);
+	double pcnt = (cur_time / len);
+	panel_.m_progress_sldr->SetValue(sldr_range * pcnt + 0.5);
+	long sf, ef, cf;
+	getValue(gstBeginFrame, sf);
+	getValue(gstEndFrame, ef);
+	long time = ef - sf + 1;
+	cf = (int)(sf + time * pcnt);
+	setValue(gstCurrentFrame, cf);
+
+	SetRendering(pcnt, false);
+}

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "RenderFrame.h"
 #include "DragDrop.h"
 #include <Global.hpp>
+#include <AgentFactory.hpp>
 #include <Root.hpp>
 #include <Renderview.hpp>
 #include <VolumeData.hpp>
@@ -967,8 +968,8 @@ wxString RenderFrame::CreateView(int row)
 	//	return "NO_NAME";
 
 	m_vrv_list.push_back(vrv);
-	if (m_movie_view)
-		m_movie_view->AddView(vrv->GetName());
+	//if (m_movie_view)
+	//	m_movie_view->AddView(vrv->GetName());
 	//if (m_setting_dlg->GetTestMode(3))
 	//{
 	//	view->m_test_wiref = true;
@@ -1797,6 +1798,23 @@ void RenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	main->Add(right,0,wxEXPAND);
 	d->SetSizer(main);
 	d->ShowModal();
+}
+
+wxString RenderFrame::ScriptDialog(const wxString& title,
+	const wxString& wildcard, long style)
+{
+	fluo::MovieAgent* agent = glbin_agtf->findFirst(gstMovieAgent)->asMovieAgent();
+	if (agent) agent->HoldRun();
+	wxString result;
+	wxFileDialog *dlg = new wxFileDialog(
+		this, title, "", "",
+		wildcard, style);
+	int rval = dlg->ShowModal();
+	if (rval == wxID_OK)
+		result = dlg->GetPath();
+	delete dlg;
+	if (agent) agent->ResumeRun();
+	return result;
 }
 
 void RenderFrame::UpdateTreeIcons()
@@ -3655,23 +3673,23 @@ void RenderFrame::SaveProject(wxString& filename)
 	//fconfig.Write("z_link", m_clip_view->GetZLink());
 	//movie view
 	fconfig.SetPath("/movie_panel");
-	fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
-	fconfig.Write("views_cmb", m_movie_view->GetView());
-	fconfig.Write("rot_check", m_movie_view->GetRotate());
-	fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
-	fconfig.Write("rot_axis", m_movie_view->GetRotAxis());
-	fconfig.Write("rot_deg", m_movie_view->GetRotDeg());
-	fconfig.Write("movie_len", m_movie_view->GetMovieLen());
-	fconfig.Write("fps", m_movie_view->GetFps());
-	fconfig.Write("crop", m_movie_view->GetCrop());
-	fconfig.Write("crop_x", m_movie_view->GetCropX());
-	fconfig.Write("crop_y", m_movie_view->GetCropY());
-	fconfig.Write("crop_w", m_movie_view->GetCropW());
-	fconfig.Write("crop_h", m_movie_view->GetCropH());
-	fconfig.Write("start_frame", m_movie_view->GetStartFrame());
-	fconfig.Write("end_frame", m_movie_view->GetEndFrame());
-	fconfig.Write("run_script", m_setting_dlg->GetRunScript());
-	fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
+	//fconfig.Write("cur_page", m_movie_view->GetCurrentPage());
+	//fconfig.Write("views_cmb", m_movie_view->GetView());
+	//fconfig.Write("rot_check", m_movie_view->GetRotate());
+	//fconfig.Write("seq_check", m_movie_view->GetTimeSeq());
+	//fconfig.Write("rot_axis", m_movie_view->GetRotAxis());
+	//fconfig.Write("rot_deg", m_movie_view->GetRotDeg());
+	//fconfig.Write("movie_len", m_movie_view->GetMovieLen());
+	//fconfig.Write("fps", m_movie_view->GetFps());
+	//fconfig.Write("crop", m_movie_view->GetCrop());
+	//fconfig.Write("crop_x", m_movie_view->GetCropX());
+	//fconfig.Write("crop_y", m_movie_view->GetCropY());
+	//fconfig.Write("crop_w", m_movie_view->GetCropW());
+	//fconfig.Write("crop_h", m_movie_view->GetCropH());
+	//fconfig.Write("start_frame", m_movie_view->GetStartFrame());
+	//fconfig.Write("end_frame", m_movie_view->GetEndFrame());
+	//fconfig.Write("run_script", m_setting_dlg->GetRunScript());
+	//fconfig.Write("script_file", m_setting_dlg->GetScriptFile());
 	//tracking diag
 	fconfig.SetPath("/track_diag");
 	int ival = m_trace_dlg->GetTrackFileExist(true);

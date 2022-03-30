@@ -532,10 +532,11 @@ MovieAgent* AgentFactory::addMovieAgent(const std::string &name, wxWindow &windo
 		ADD_VALUE(gstMovTimeSeqEnable, bool(false));
 		ADD_VALUE(gstMovSeqMode, long(0));
 		ADD_VALUE(gstMovRotAng, double(360));
-		ADD_VALUE(gstMovIntrpMode, long(360));
+		ADD_VALUE(gstMovIntrpMode, long(0));
 		ADD_VALUE(gstMovLength, double(0));
 		ADD_VALUE(gstMovCurTime, double(0));
 		ADD_VALUE(gstMovFps, double(1));
+		ADD_VALUE(gstMovBitrate, double(20));
 		ADD_VALUE(gstLastFrame, long(0));
 		ADD_VALUE(gstMovRecord, bool(false));
 		ADD_VALUE(gstMovDelayedStop, bool(false));
@@ -553,7 +554,13 @@ MovieAgent* AgentFactory::addMovieAgent(const std::string &name, wxWindow &windo
 		ADD_AFTER_EVENT(gstCurrentFrame, MovieAgent, OnCurrentFrame);
 		ADD_AFTER_EVENT(gstDrawCropFrame, MovieAgent, OnDrawCropFrame);
 		ADD_AFTER_EVENT(gstMovCurrentPage, MovieAgent, OnMovCurrentPage);
-		ADD_AFTER_EVENT(gstAutoKeyIndex, MovieAgent, gstAutoKeyIndex);
+		ADD_AFTER_EVENT(gstMovLength, MovieAgent, OnMovLength);
+		ADD_AFTER_EVENT(gstMovFps, MovieAgent, OnMovFps);
+		ADD_AFTER_EVENT(gstBeginFrame, MovieAgent, OnBeginFrame);
+		ADD_AFTER_EVENT(gstEndFrame, MovieAgent, OnEndFrame);
+		ADD_AFTER_EVENT(gstScriptFile, MovieAgent, OnScriptFile);
+		ADD_AFTER_EVENT(gstRunScript, MovieAgent, OnRunScript);
+		ADD_AFTER_EVENT(gstMovCurTime, MovieAgent, OnMovCurTime);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

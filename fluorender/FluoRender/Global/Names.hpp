@@ -638,6 +638,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovLength "mov length"//length in sec
 #define gstMovCurTime "mov cur time"//time in sec
 #define gstMovFps "mov fps"
+#define gstMovBitrate "mov bitrate"//megabits per sec
 #define gstLastFrame "last frame"//last frame nunmber to save
 #define gstMovRecord "mov record"
 #define gstMovDelayedStop "mov delayed stop"
