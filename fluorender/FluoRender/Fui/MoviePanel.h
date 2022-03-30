@@ -36,8 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <MovieAgent.hpp>
 
-#define PROG_SLDR_MAX	361
-
 class RenderFrame;
 class RecorderDlg;
 namespace fluo
@@ -126,7 +124,6 @@ public:
 
 	void UpFrame();
 	void DownFrame();
-	void SetCurrentTime(size_t t);
 
 	int GetRotDeg() { return m_rot_deg; }
 	void SetMovieLen(double value)
@@ -154,26 +151,9 @@ public:
 		m_end_frame_text->SetValue(wxString::Format("%d", m_end_frame));
 	}
 	int GetEndFrame() { return m_end_frame; }
-	//cropping
-	void SetCrop(bool value);
-	bool GetCrop() { return m_crop; }
-	void SetCropX(int value) { m_crop_x = value; }
-	int GetCropX() { return m_crop_x; }
-	void SetCropY(int value) { m_crop_y = value; }
-	int GetCropY() { return m_crop_y; }
-	void SetCropW(int value) { m_crop_w = value; }
-	int GetCropW() { return m_crop_w; }
-	void SetCropH(int value) { m_crop_h = value; }
-	int GetCropH() { return m_crop_h; }
-	void UpdateCrop();
-
 	void SetBitRate(double value) { m_Mbitrate = value; }
 	void SetFileName(wxString &filename) { m_filename = filename; }
 	void Run();
-	bool GetRunning() { return m_running; }
-	void GetScriptSettings();
-	int GetCurrentPage() { return m_current_page; }
-	void SetCurrentPage(int page);
 
 	//timer
 	void TimerRun()
@@ -277,13 +257,6 @@ private:
 	long m_end_frame;
 	long m_cur_frame;
 
-	//cropping
-	bool m_crop;//enable cropping
-	long m_crop_x;
-	long m_crop_y;
-	long m_crop_w;
-	long m_crop_h;
-
 	//save controls
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation
@@ -295,13 +268,8 @@ private:
 	wxString filetype_;
 
 private:
-	void GetSettings();
-	int GetScriptFiles(wxArrayString& list);
-	void AddScriptToList();
-
 	//set the renderview and progress bars/text
 	void SetRendering(double pcnt, bool rewind=false);
-	void SetProgress(double pcnt);
 
 	//write frames to file
 	void WriteFrameToFile(int total_frames);

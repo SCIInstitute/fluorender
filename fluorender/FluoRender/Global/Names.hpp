@@ -638,7 +638,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovLength "mov length"//length in sec
 #define gstMovCurTime "mov cur time"//time in sec
 #define gstMovFps "mov fps"
-#define gstCropEnable "crop enable"
 #define gstLastFrame "last frame"//last frame nunmber to save
 #define gstMovRecord "mov record"
 #define gstMovDelayedStop "mov delayed stop"
@@ -646,6 +645,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovFilename "mov file name"
 #define gstMovFileType "mov file type"
 #define gstMovSliderRange "mov slider range"
+#define gstMovCurrentPage "mov current page"
+#define gstAutoKeyIndex "auto key index"
 
 //input
 //mouse

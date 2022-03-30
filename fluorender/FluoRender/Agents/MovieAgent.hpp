@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
 #include <QVideoEncoder.h>
+#include <wx/arrstr.h>
 
 class MoviePanel;
 namespace fluo
@@ -57,6 +58,14 @@ namespace fluo
 
 		friend class AgentFactory;
 
+		void SetProgress(double pcnt);
+		int GetScriptFiles(wxArrayString& list);
+		void AddScriptToList();
+		void GetScriptSettings();
+		void WriteFrameToFile(int total_frames);
+		void Stop();
+		void SetRendering(double pcnt, bool rewind)
+
 	protected:
 		MoviePanel &panel_;
 
@@ -69,7 +78,11 @@ namespace fluo
 		void OnMovRotEnable(Event& event);
 		void OnMovRotAxis(Event& event);
 		void OnMovRotAng(Event& event);
-
+		void OnCurrentFrame(Event& event);
+		void OnDrawCropFrame(Event& event);
+		void OnMovCurrentPage(Event& event);
+		void OnAutoKeyIndex(Event& event);
+		void OnTimer();
 	};
 }
 

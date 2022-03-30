@@ -4884,7 +4884,7 @@ void RenderFrame::OpenProject(wxString& filename)
 	}
 
 	//movie panel
-	if (fconfig.Exists("/movie_panel"))
+/*	if (fconfig.Exists("/movie_panel"))
 	{
 		fconfig.SetPath("/movie_panel");
 		wxString sVal;
@@ -4981,7 +4981,7 @@ void RenderFrame::OpenProject(wxString& filename)
 		if (fconfig.Read("script_file", &sVal))
 			m_setting_dlg->SetScriptFile(sVal);
 		m_movie_view->GetScriptSettings();
-	}
+	}*/
 
 	//tracking diag
 	if (fconfig.Exists("/track_diag"))

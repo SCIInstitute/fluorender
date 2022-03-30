@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentFactory.hpp>
 #include <Root.hpp>
 #include <FLIVR/TextureRenderer.h>
-#include <tiffio.h>
 #include <png_resource.h>
 #include <img/icons.h>
 #include <wx/aboutdlg.h>
@@ -465,7 +464,9 @@ MoviePanel::MoviePanel(RenderFrame* frame,
 		wxDefaultPosition, wxSize(30, 30));
 	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
 	sizerH->Add(m_rewind_btn, 0, wxEXPAND);
-	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, PROG_SLDR_MAX);
+	long lval;
+	m_agent->getValue(gstMovSliderRange, lval);
+	m_progress_sldr = new wxSlider(this, ID_ProgressSldr, 0, 0, lval);
 	sizerH->Add(m_progress_sldr, 1, wxEXPAND);
 	m_progress_text = new wxTextCtrl(this, ID_ProgressText, "0.00",
 		wxDefaultPosition, wxSize(50, -1));
@@ -497,248 +498,6 @@ void MoviePanel::OnViewSelected(wxCommandEvent& event)
 	fluo::Renderview* view = glbin_root->getChild(ival)->asRenderview();
 	AssociateRenderview(view);
 	//GetSettings();
-}
-
-void MoviePanel::GetSettings()
-{
-	if (!m_view) return;
-
-}
-
-void MoviePanel::GetScriptSettings()
-{
-	//script
-	if (!m_view || !m_frame || !m_frame->GetSettingDlg())
-		return;
-
-	bool run_script = m_frame->GetSettingDlg()->GetRunScript();
-	m_view->setValue(gstRunScript, run_script);
-	m_run_script_chk->SetValue(run_script);
-	wxString script_file =
-		m_frame->GetSettingDlg()->GetScriptFile();
-	m_script_file_text->SetValue(script_file);
-	m_view->setValue(gstScriptFile, script_file.ToStdWstring());
-	//highlight if builtin
-	wxArrayString list;
-	if (GetScriptFiles(list))
-	{
-		int idx = -1;
-		for (size_t i = 0; i < list.GetCount(); ++i)
-		{
-			if (script_file == list[i])
-			{
-				idx = i;
-				break;
-			}
-		}
-		if (idx >= 0)
-		{
-			m_script_list->SetItemState(idx,
-				wxLIST_STATE_SELECTED,
-				wxLIST_STATE_SELECTED);
-			//wxSize ss = m_script_list->GetItemSpacing();
-			//m_script_list->ScrollList(0, ss.y*idx);
-		}
-	}
-	//change icon
-	if (run_script)
-	{
-		if (m_running)
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-		else
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-		m_notebook->SetPageText(4, "Script (Enabled)");
-	}
-	else
-	{
-		if (m_running)
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
-		else
-			m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-		m_notebook->SetPageText(4, "Script");
-	}
-}
-
-void MoviePanel::SetCurrentPage(int page)
-{
-	if (m_notebook)
-		m_notebook->SetSelection(page);
-}
-
-int MoviePanel::GetScriptFiles(wxArrayString& list)
-{
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	wxString loc = exePath + GETSLASH() + "Scripts" +
-		GETSLASH() + "*.txt";
-	wxLogNull logNo;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
-	{
-		list.Add(file);
-		file = wxFindNextFile();
-	}
-	list.Sort();
-	return list.GetCount();
-}
-
-void MoviePanel::AddScriptToList()
-{
-	m_script_list->DeleteAllItems();
-	wxArrayString list;
-	wxString filename;
-	if (GetScriptFiles(list))
-	{
-		for (size_t i = 0; i < list.GetCount(); ++i)
-		{
-			filename = wxFileNameFromPath(list[i]);
-			filename = filename.BeforeLast('.');
-			m_script_list->InsertItem(
-				m_script_list->GetItemCount(), filename);
-		}
-	}
-}
-
-void MoviePanel::Init()
-{
-	if (!m_frame) return;
-	m_views_cmb->Clear();
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (view)
-			m_views_cmb->Append(view->getName());
-	}
-	if (glbin_root->getNumChildren() > 0)
-		m_views_cmb->Select(0);
-	GetSettings();
-}
-
-void MoviePanel::GenKey()
-{
-	long item = m_auto_key_list->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item != -1)
-	{
-		if (item == 0)
-			m_advanced_movie->AutoKeyChanComb(1);
-		else if (item == 1)
-			m_advanced_movie->AutoKeyChanComb(2);
-		else if (item == 2)
-			m_advanced_movie->AutoKeyChanComb(3);
-
-		m_notebook->SetSelection(1);
-	}
-}
-
-void MoviePanel::AddView(wxString view)
-{
-	if (m_views_cmb)
-		m_views_cmb->Append(view);
-}
-
-void MoviePanel::DeleteView(wxString view)
-{
-	if (!m_views_cmb)
-		return;
-	int cur_sel = m_views_cmb->GetCurrentSelection();
-	int del = m_views_cmb->FindString(view, true);
-	if (del != wxNOT_FOUND)
-		m_views_cmb->Delete(del);
-	if (cur_sel == del)
-		m_views_cmb->Select(0);
-}
-
-void MoviePanel::SetView(int index)
-{
-	if (m_views_cmb)
-		m_views_cmb->SetSelection(index);
-}
-
-void MoviePanel::SetCrop(bool value)
-{
-	m_crop = value;
-	m_crop_chk->SetValue(m_crop);
-
-	if (!m_view)
-		return;
-	if (m_crop)
-	{
-		m_view->CalculateCrop();
-		m_view->getValue(gstCropX, m_crop_x); m_view->getValue(gstCropY, m_crop_y);
-		m_view->getValue(gstCropW, m_crop_w); m_view->getValue(gstCropH, m_crop_h);
-		m_crop_x = long(m_crop_x + m_crop_w / 2.0 + 0.5);
-		m_crop_y = long(m_crop_y + m_crop_h / 2.0 + 0.5);
-		m_center_x_text->ChangeValue(wxString::Format("%d", m_crop_x));
-		m_center_y_text->ChangeValue(wxString::Format("%d", m_crop_y));
-		m_width_text->ChangeValue(wxString::Format("%d", m_crop_w));
-		m_height_text->ChangeValue(wxString::Format("%d", m_crop_h));
-		m_view->setValue(gstDrawCropFrame, true);
-	}
-	else
-		m_view->setValue(gstDrawCropFrame, false);
-
-	//m_view->RefreshGL(39);
-}
-
-void MoviePanel::UpdateCrop()
-{
-	if (!m_view)
-		return;
-
-	m_view->setValue(gstCropX, long(m_crop_x - m_crop_w / 2.0 + 0.5));
-	m_view->setValue(gstCropY, long(m_crop_y - m_crop_h / 2.0 + 0.5));
-	m_view->setValue(gstCropW, m_crop_w);
-	m_view->setValue(gstCropH, m_crop_h);
-	//if (m_crop)
-	//	m_view->RefreshGL(39);
-}
-
-void MoviePanel::OnTimer(wxTimerEvent& event)
-{
-	//get all of the progress info
-	if (m_delayed_stop)
-	{
-		if (m_record)
-			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
-		m_delayed_stop = false;
-		Stop();
-		if (m_view)
-			m_view->setValue(gstKeepEnlarge, false);
-		return;
-	}
-
-	if (flvr::TextureRenderer::get_mem_swap() &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		if (!m_view) return;
-		m_view->setValue(gstInteractive, false);
-		//m_view->RefreshGL(39, false);
-		return;
-	}
-
-	//move forward in time (limits FPS usability to 100 FPS)
-	m_cur_time += 1.0 / m_fps;
-	//frame only increments when time passes a whole number
-	int time = m_end_frame - m_start_frame + 1;
-	m_cur_frame = (int)(m_start_frame + time * m_cur_time / m_movie_len + 0.5);
-	double pcnt = (double)(m_cur_frame - m_start_frame) / (double)time;
-	SetProgress(pcnt);
-	//update the rendering frame since we have advanced.
-	if (m_last_frame != m_cur_frame)
-	{
-		m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-		if (m_record)
-			WriteFrameToFile(int(m_fps*m_movie_len + 0.5));
-		m_last_frame = m_cur_frame;
-		SetRendering(m_cur_time / m_movie_len);
-	}
-	if (m_movie_len - m_cur_time < 0.1 / m_fps ||
-		m_cur_time > m_movie_len)
-		m_delayed_stop = true;
 }
 
 void MoviePanel::OnNbPageChange(wxBookCtrlEvent& event)
@@ -820,21 +579,6 @@ void MoviePanel::OnRun(wxCommandEvent& event)
 	delete fopendlg;
 }
 
-void MoviePanel::Stop()
-{
-	bool run_script = m_run_script_chk->GetValue();
-	if (run_script)
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(playscript));
-	else
-		m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
-
-	m_timer.Stop();
-	m_running = false;
-	m_record = false;
-	encoder_.close();
-	flvr::TextureRenderer::maximize_uptime_ = false;
-}
-
 void MoviePanel::OnStop(wxCommandEvent& event)
 {
 	Stop();
@@ -869,17 +613,21 @@ void MoviePanel::OnResetCrop(wxCommandEvent& event)
 
 void MoviePanel::OnEditCrop(wxCommandEvent& event)
 {
+	long x, y, w, h;
 	wxString temp;
 	temp = m_center_x_text->GetValue();
-	m_crop_x = STOI(temp.fn_str());
+	x = STOI(temp.fn_str());
 	temp = m_center_y_text->GetValue();
-	m_crop_y = STOI(temp.fn_str());
+	y = STOI(temp.fn_str());
 	temp = m_width_text->GetValue();
-	m_crop_w = STOI(temp.fn_str());
+	w = STOI(temp.fn_str());
 	temp = m_height_text->GetValue();
-	m_crop_h = STOI(temp.fn_str());
+	h = STOI(temp.fn_str());
 
-	UpdateCrop();
+	m_agent->setValue(gstCropX, long(x - w / 2.0 + 0.5));
+	m_agent->setValue(gstCropY, long(y - h / 2.0 + 0.5));
+	m_agent->setValue(gstCropW, w);
+	m_agent->setValue(gstCropH, h);
 }
 
 void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
@@ -1103,69 +851,6 @@ void MoviePanel::OnTimeText(wxCommandEvent& event)
 	SetRendering(pcnt);
 }
 
-void MoviePanel::SetRendering(double pcnt, bool rewind)
-{
-	if (!m_frame || !m_view)
-		return;
-
-	m_view->setValue(gstCamLockObjEnable, false);
-	//advanced options
-	if (m_current_page == 1)
-	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
-		if (interpolator && interpolator->GetLastIndex() > 0)
-		{
-			if (m_advanced_movie->GetCamLock() && m_timer.IsRunning())
-				m_view->setValue(gstCamLockObjEnable, true);
-			int end_frame = int(interpolator->GetLastT());
-			m_view->SetParams(pcnt * end_frame);
-			m_view->setValue(gstInteractive, false);
-			//m_view->RefreshGL(39);
-			return;
-		}
-	}
-	//basic options
-	int time = m_end_frame - m_start_frame + 1;
-	time = int(m_start_frame + time * pcnt + 0.5);
-
-	if (m_seq_mode == 1)
-	{
-		m_view->Set4DSeqFrame(time, m_start_frame, m_end_frame, rewind);
-	}
-	else if (m_seq_mode == 2)
-	{
-		m_view->Set3DBatFrame(time, m_start_frame, m_end_frame, rewind);
-	}
-
-	//rotate animation
-	if (m_rotate)
-	{
-		std::string sval;
-		switch (m_rot_axis)
-		{
-		case 0:
-			sval = gstCamRotX;
-			break;
-		case 1:
-			sval = gstCamRotY;
-			break;
-		case 2:
-			sval = gstCamRotZ;
-			break;
-		}
-		double dval;
-		m_view->getValue(sval, dval);
-		if (m_rot_int_type == 0)
-			dval = m_starting_rot + pcnt * m_rot_deg;
-		else if (m_rot_int_type == 1)
-			dval = m_starting_rot +
-			(-2.0*pcnt*pcnt*pcnt + 3.0*pcnt*pcnt) * m_rot_deg;
-		m_view->setValue(sval, dval);
-	}
-
-	m_view->setValue(gstInteractive, false);
-	//m_view->RefreshGL(39);
-}
 
 void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 {
@@ -1242,99 +927,6 @@ void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 	}
 }
 
-void MoviePanel::SetProgress(double pcnt)
-{
-	pcnt = std::abs(pcnt);
-	m_progress_sldr->SetValue(pcnt * PROG_SLDR_MAX);
-	m_cur_time = pcnt*m_movie_len;
-	wxString st = wxString::Format("%.2f", m_cur_time);
-	m_progress_text->ChangeValue(st);
-}
-
-void MoviePanel::WriteFrameToFile(int total_frames)
-{
-	if (!m_view)
-		return;
-
-	wxString s_length = wxString::Format("%d", total_frames);
-	int length = s_length.Length();
-	wxString format = wxString::Format("_%%0%dd", length);
-	wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
-		m_last_frame, ".tif");
-
-	//capture
-	bool bmov = filetype_.IsSameAs(".mov");
-	int chann = RenderFrame::GetSaveAlpha() ? 4 : 3;
-	bool fp32 = bmov?false:RenderFrame::GetSaveFloat();
-	long x, y, w, h;
-	void* image = 0;
-	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
-
-	string str_fn = outputfilename.ToStdString();
-	if (bmov)
-	{
-		//flip vertically 
-		unsigned char *flip = new unsigned char[w*h * 3];
-		for (size_t yy = 0; yy < (size_t)h; yy++)
-			for (size_t xx = 0; xx < (size_t)w; xx++)
-				memcpy(flip + 3 * (w * yy + xx), (unsigned char*)image + chann * (w * (h - yy - 1) + xx), 3);
-		bool worked = encoder_.set_frame_rgb_data(flip);
-		worked = encoder_.write_video_frame(m_last_frame);
-		if (flip)
-			delete[]flip;
-		if (image)
-			delete[]image;
-	}
-	else
-	{
-		TIFF *out = TIFFOpen(str_fn.c_str(), "wb");
-		if (!out) return;
-		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
-		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
-		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
-		if (fp32)
-		{
-			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 32);
-			TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-		}
-		else
-		{
-			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
-			//TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-		}
-		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		if (RenderFrame::GetCompression())
-			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-
-		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
-		void *buf = NULL;
-		buf = _TIFFmalloc(linebytes);
-		TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
-		for (uint32 row = 0; row < (uint32)h; row++)
-		{
-			if (fp32)
-			{
-				float* line = ((float*)image) + (h - row - 1) * chann * w;
-				memcpy(buf, line, linebytes);
-			}
-			else
-			{// check the index here, and figure out why not using h*linebytes
-				unsigned char* line = ((unsigned char*)image) + (h - row - 1) * chann * w;
-				memcpy(buf, line, linebytes);
-			}
-			if (TIFFWriteScanline(out, buf, row, 0) < 0)
-				break;
-		}
-		TIFFClose(out);
-		if (buf)
-			_TIFFfree(buf);
-		if (image)
-			delete[]image;
-	}
-}
-
 void MoviePanel::OnUpFrame(wxCommandEvent& event)
 {
 	UpFrame();
@@ -1343,17 +935,6 @@ void MoviePanel::OnUpFrame(wxCommandEvent& event)
 void MoviePanel::OnDownFrame(wxCommandEvent& event)
 {
 	DownFrame();
-}
-
-void MoviePanel::SetCurrentTime(size_t t)
-{
-	m_cur_frame = t;
-	m_cur_frame_text->ChangeValue(wxString::Format("%d", m_cur_frame));
-	if (m_cur_frame < m_start_frame) m_cur_frame = m_end_frame;
-	if (m_cur_frame > m_end_frame) m_cur_frame = m_start_frame;
-	int time = m_end_frame - m_start_frame + 1;
-	double pcnt = (double)(m_cur_frame - m_start_frame) / (double)time;
-	SetProgress(pcnt);
 }
 
 void MoviePanel::Run()
