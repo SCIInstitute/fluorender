@@ -25,17 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "RecorderDlg.h"
-#include "RenderFrame.h"
+#include <RecorderDlg.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <Global.hpp>
-#include <VolumeFactory.hpp>
-#include <base_reader.h>
-#include <FLIVR/VolumeRenderer.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <key.xpm>
@@ -118,128 +111,9 @@ KeyListCtrl::~KeyListCtrl()
 {
 }
 
-void KeyListCtrl::Append(int id, int time, int duration, int interp, string &description)
-{
-	long tmp = InsertItem(GetItemCount(), wxString::Format("%d", id), 0);
-	SetItem(tmp, 1, wxString::Format("%d", time));
-	SetItem(tmp, 2, wxString::Format("%d", duration));
-	SetItem(tmp, 3, interp==0?"Linear":"Smooth");
-	SetItem(tmp, 4, description);
-}
-
-void KeyListCtrl::DeleteSel()
-{
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item == -1)
-		return;
-	wxString str = GetItemText(item);
-	long id;
-	str.ToLong(&id);
-
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-	interpolator->RemoveKey(id);
-	Update();
-}
-
-void KeyListCtrl::DeleteAll()
-{
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-	interpolator->Clear();
-	Update();
-}
-
-void KeyListCtrl::Update()
-{
-	m_frame_text->Hide();
-	m_duration_text->Hide();
-	m_interpolation_cmb->Hide();
-	m_description_text->Hide();
-	m_editing_item = -1;
-
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	DeleteAllItems();
-	for (int i=0; i<interpolator->GetKeyNum(); i++)
-	{
-		int id = interpolator->GetKeyID(i);
-		int time = interpolator->GetKeyTime(i);
-		int duration = interpolator->GetKeyDuration(i);
-		int interp = interpolator->GetKeyType(i);
-		string desc = interpolator->GetKeyDesc(i);
-		Append(id, time, duration, interp, desc);
-	}
-}
-
-void KeyListCtrl::UpdateText()
-{
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	wxString str;
-
-	for (int i=0; i<interpolator->GetKeyNum(); i++)
-	{
-		int id = interpolator->GetKeyID(i);
-		int time = interpolator->GetKeyTime(i);
-		int duration = interpolator->GetKeyDuration(i);
-		int interp = interpolator->GetKeyType(i);
-		string desc = interpolator->GetKeyDesc(i);
-		
-        wxString wx_id = wxString::Format("%d", id);
-        wxString wx_time = wxString::Format("%d", time);
-        wxString wx_duration = wxString::Format("%d", duration);
-		SetText(i, 0, wx_id);
-		SetText(i, 1, wx_time);
-		SetText(i, 2, wx_duration);
-		str = interp==0?"Linear":"Smooth";
-		SetText(i, 3, str);
-		str = desc;
-		SetText(i, 4, str);
-	}
-}
-
 void KeyListCtrl::OnAct(wxListEvent &event)
 {
-	long item = GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item == -1)
-		return;
-	wxString str = GetItemText(item);
-	long id;
-	str.ToLong(&id);
-
-	if (!m_frame || !m_recdlg)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	double time = interpolator->GetKeyTime(index);
-	fluo::Renderview* view = m_recdlg->GetView();
-	if (view)
-	{
-		view->SetParams(time);
-		//view->Update(39);
-	}
+	m_agent->GotoKey();
 }
 
 wxString KeyListCtrl::GetText(long item, int col)
@@ -268,11 +142,15 @@ void KeyListCtrl::OnSelection(wxListEvent &event)
 	long item = GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
+	wxString str = GetItemText(item);
+	long lval;
+	str.ToLong(&lval);
+	m_agent->setValue(gstSelectedKey, lval);
+
 	m_editing_item = item;
 	if (item != -1 && m_dragging_to_item==-1)
 	{
 		wxRect rect;
-		wxString str;
 		//add frame text
 		GetSubItemRect(item, 1, rect);
 		str = GetText(item, 1);
@@ -318,7 +196,7 @@ void KeyListCtrl::EndEdit(bool update)
 		m_interpolation_cmb->Hide();
 		m_description_text->Hide();
 		m_editing_item = -1;
-		if (update) UpdateText();
+		if (update) m_agent->UpdateText();
 	}
 }
 
@@ -329,109 +207,43 @@ void KeyListCtrl::OnEndSelection(wxListEvent &event)
 
 void KeyListCtrl::OnFrameText(wxCommandEvent& event)
 {
-	if (m_editing_item == -1)
-		return;
-
-	wxString str = GetItemText(m_editing_item);
-	long id;
-	str.ToLong(&id);
-
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	str = m_frame_text->GetValue();
+	wxString str = m_frame_text->GetValue();
 	double time;
 	if (str.ToDouble(&time))
-	{
-		interpolator->ChangeTime(index, time);
-	}
+		m_agent->ChangeTime(time);
 }
 
 void KeyListCtrl::OnDurationText(wxCommandEvent& event)
 {
-	if (m_editing_item == -1)
-		return;
-
-	wxString str = GetItemText(m_editing_item);
-	long id;
-	str.ToLong(&id);
-
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	str = m_duration_text->GetValue();
-	double duration;
-	if (str.ToDouble(&duration))
+	wxString str = m_frame_text->GetValue();
+	double time;
+	if (str.ToDouble(&time))
 	{
-		interpolator->ChangeDuration(index, duration);
+		m_agent->ChangeDuration(time);
 		SetText(m_editing_item, 2, str);
 	}
 }
 
 void KeyListCtrl::OnInterpoCmb(wxCommandEvent& event)
 {
-	if (m_editing_item == -1)
-		return;
-
-	wxString str = GetItemText(m_editing_item);
-	long id;
-	str.ToLong(&id);
-
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	FlKeyGroup* keygroup = interpolator->GetKeyGroup(index);
-	if (keygroup)
-	{
-		int sel = m_interpolation_cmb->GetSelection();
-		keygroup->type = sel;
-		str = sel==0?"Linear":"Smooth";
-		SetText(m_editing_item, 3, str);
-	}
+	int sel = m_interpolation_cmb->GetSelection();
+	m_agent->ChangeInterpolation(sel);
+	wxString str = sel==0?"Linear":"Smooth";
+	SetText(m_editing_item, 3, str);
 }
 
 void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
 {
-	if (m_editing_item == -1)
-		return;
-
-	wxString str = GetItemText(m_editing_item);
-	long id;
-	str.ToLong(&id);
-
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	int index = interpolator->GetKeyIndex(int(id));
-	FlKeyGroup* keygroup = interpolator->GetKeyGroup(index);
-	if (keygroup)
-	{
-		str = m_description_text->GetValue();
-		keygroup->desc = str.ToStdString();
-		SetText(m_editing_item, 4, str);
-	}
+	wxString str = m_description_text->GetValue();
+	m_agent->ChangeDescription(str.ToStdString());
+	SetText(m_editing_item, 4, str);
 }
 
 void KeyListCtrl::OnKeyDown(wxKeyEvent& event)
 {
 	if ( event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		DeleteSel();
+		m_agent->DeleteSel();
 	event.Skip();
 }
 
@@ -465,23 +277,17 @@ void KeyListCtrl::OnDragging(wxMouseEvent& event)
 	long index = HitTest(pos, flags, NULL); // got to use it at last
 	if (index >=0 && index != m_editing_item && index != m_dragging_to_item)
 	{
-		if (!m_frame)
-			return;
-		Interpolator* interpolator = m_frame->GetInterpolator();
-		if (!interpolator)
-			return;
-
 		m_dragging_to_item = index;
 
 		//change the content in the interpolator
 		if (m_editing_item > m_dragging_to_item)
-			interpolator->MoveKeyBefore(m_editing_item, m_dragging_to_item);
+			m_agent->MoveKeyBefore(m_editing_item, m_dragging_to_item);
 		else
-			interpolator->MoveKeyAfter(m_editing_item, m_dragging_to_item);
+			m_agent->MoveKeyAfter(m_editing_item, m_dragging_to_item);
 
 		DeleteItem(m_editing_item);
 		InsertItem(m_dragging_to_item, "", 0);
-		UpdateText();
+		m_agent->UpdateText();
 
 		m_editing_item = m_dragging_to_item;
 		SetItemState(m_editing_item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);

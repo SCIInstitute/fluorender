@@ -60,8 +60,18 @@ namespace fluo
 		void AddKey();
 		void InsertKey(int index, double duration, int interpolation);
 		bool MoveOne(std::vector<bool>& chan_mask, int lv = 1);
+		void Append(int id, int time, int duration, int interp, string &description);
 		void DeleteSel();
 		void DeleteAll();
+		void Update();
+		void UpdateText();
+		void GotoKey();
+		void ChangeTime(double time);
+		void ChangeDuration(double time);
+		void ChangeInterpolation(int val);
+		void ChangeDescription(const std::string &str);
+		void MoveKeyBefore(long, long);
+		void MoveKeyAfter(long, long);
 
 	protected:
 		RecorderDlg &dlg_;

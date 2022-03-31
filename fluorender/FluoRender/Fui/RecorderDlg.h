@@ -55,14 +55,6 @@ public:
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 	~KeyListCtrl();
 
-	void Append(int id, int time, int duration, int interp, string &description);
-	void DeleteSel();
-	void DeleteAll();
-	wxString GetText(long item, int col);
-	void SetText(long item, int col, wxString &str);
-	void Update();
-	void UpdateText();
-
 	friend class RecorderDlg;
 	friend class fluo::RecorderAgent;
 
@@ -81,6 +73,8 @@ private:
 
 private:
 	void EndEdit(bool update = true);
+	wxString GetText(long item, int col);
+	void SetText(long item, int col, wxString &str);
 
 private:
 	void OnAct(wxListEvent &event);

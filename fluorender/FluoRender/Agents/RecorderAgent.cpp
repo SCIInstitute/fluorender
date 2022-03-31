@@ -28,6 +28,13 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RecorderAgent.hpp>
 #include <RecorderDlg.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <VolumeFactory.hpp>
+#include <Animator/Interpolator.h>
+#include <base_reader.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <wx/wx.h>
 
 using namespace fluo;
 
@@ -53,21 +60,12 @@ void RecorderAgent::UpdateAllSettings()
 
 void RecorderAgent::AutoKeyChanComb(int comb)
 {
-	if (!m_frame)
-		return;
-	if (!m_view)
-	{
-		m_view = glbin_root->getChild(0)->asRenderview();
-	}
+	Renderview* view = getObject();
+	if (!view) return;
+	Interpolator *interpolator = view->GetInterpolator();
+	if (!interpolator) return;
 
-	DataManager* mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
-	Interpolator *interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-
-	wxString str = m_duration_text->GetValue();
+	wxString str = dlg_.m_duration_text->GetValue();
 	double duration;
 	str.ToDouble(&duration);
 
@@ -79,7 +77,7 @@ void RecorderAgent::AutoKeyChanComb(int comb)
 	if (t > 0.0) t += duration;
 
 	int i;
-	fluo::VolumeList list = m_view->GetFullVolList();
+	fluo::VolumeList list = view->GetFullVolList();
 	int numChan = int(list.size());
 	vector<bool> chan_mask;
 	//initiate mask
@@ -100,7 +98,7 @@ void RecorderAgent::AutoKeyChanComb(int comb)
 		{
 			if (!vd) continue;
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->getName();
+			keycode.l0_name = view->getName();
 			keycode.l1 = 2;
 			keycode.l1_name = vd->getName();
 			//display only
@@ -114,24 +112,24 @@ void RecorderAgent::AutoKeyChanComb(int comb)
 		t += duration;
 	} while (MoveOne(chan_mask));
 
-	m_keylist->Update();
+	dlg_.m_keylist->Update();
 }
 
 void RecorderAgent::AddKey()
 {
+	Renderview* view = getObject();
+	if (!view) return;
+	Interpolator* interpolator = view->GetInterpolator();
+	if (!interpolator) return;
+
 	wxString str;
-	if (!m_frame)
-		return;
-	Interpolator* interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
-	long item = m_keylist->GetNextItem(-1,
+	long item = dlg_.m_keylist->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
 	int index = -1;
 	if (item != -1)
 	{
-		str = m_keylist->GetItemText(item);
+		str = dlg_.m_keylist->GetItemText(item);
 		long id;
 		str.ToLong(&id);
 		index = interpolator->GetKeyIndex(id);
@@ -152,51 +150,39 @@ void RecorderAgent::AddKey()
 	double duration = 0.0;
 	if (is_4d)
 	{
-		Interpolator *interpolator = m_frame->GetInterpolator();
-		if (interpolator && m_view)
-		{
-			long ct;
-			vd->getValue(gstTime, ct);
-			FlKeyCode keycode;
-			keycode.l0 = 1;
-			keycode.l0_name = m_view->getName();
-			keycode.l1 = 2;
-			keycode.l1_name = vd->getName();
-			keycode.l2 = 0;
-			keycode.l2_name = "frame";
-			double frame;
-			if (interpolator->GetDouble(keycode,
-				interpolator->GetLastIndex(), frame))
-				duration = fabs(ct - frame);
-		}
+		long ct;
+		vd->getValue(gstTime, ct);
+		FlKeyCode keycode;
+		keycode.l0 = 1;
+		keycode.l0_name = view->getName();
+		keycode.l1 = 2;
+		keycode.l1_name = vd->getName();
+		keycode.l2 = 0;
+		keycode.l2_name = "frame";
+		double frame;
+		if (interpolator->GetDouble(keycode,
+			interpolator->GetLastIndex(), frame))
+			duration = fabs(ct - frame);
 	}
 	else
 	{
-		str = m_duration_text->GetValue();
+		str = dlg_.m_duration_text->GetValue();
 		str.ToDouble(&duration);
 	}
-	int interpolation = m_interpolation_cmb->GetSelection();
+	int interpolation = dlg_.m_interpolation_cmb->GetSelection();
 	InsertKey(index, duration, interpolation);
 
-	m_keylist->Update();
-	m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	dlg_.m_keylist->Update();
+	dlg_.m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 {
-	if (!m_frame)
-		return;
-	if (!m_view)
-	{
-		m_view = glbin_root->getChild(0)->asRenderview();
-	}
+	Renderview* view = getObject();
+	if (!view) return;
+	Interpolator* interpolator = view->GetInterpolator();
+	if (!interpolator) return;
 
-	DataManager* mgr = m_frame->GetDataManager();
-	if (!mgr)
-		return;
-	Interpolator *interpolator = m_frame->GetInterpolator();
-	if (!interpolator)
-		return;
 	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyQuaternion* flkeyQ = 0;
@@ -213,7 +199,7 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	{
 		fluo::VolumeData* vd = glbin_volf->get(i);
 		keycode.l0 = 1;
-		keycode.l0_name = m_view->getName();
+		keycode.l0_name = view->getName();
 		keycode.l1 = 2;
 		keycode.l1_name = vd->getName();
 		//display
@@ -283,21 +269,21 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->getName();
+	keycode.l0_name = view->getName();
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->getName();
+	keycode.l1_name = view->getName();
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
 	fluo::Quaternion q;
-	m_view->getValue(gstCamRotQ, q);
+	view->getValue(gstCamRotQ, q);
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	interpolator->AddKey(flkeyQ);
 	//translation
 	double tx, ty, tz;
-	m_view->getValue(gstCamTransX, tx);
-	m_view->getValue(gstCamTransY, ty);
-	m_view->getValue(gstCamTransZ, tz);
+	view->getValue(gstCamTransX, tx);
+	view->getValue(gstCamTransY, ty);
+	view->getValue(gstCamTransZ, tz);
 	//x
 	keycode.l2_name = "translation_x";
 	flkey = new FlKeyDouble(keycode, tx);
@@ -311,9 +297,9 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//centers
-	m_view->getValue(gstCamCtrX, tx);
-	m_view->getValue(gstCamCtrY, ty);
-	m_view->getValue(gstCamCtrZ, tz);
+	view->getValue(gstCamCtrX, tx);
+	view->getValue(gstCamCtrY, ty);
+	view->getValue(gstCamCtrZ, tz);
 	//x
 	keycode.l2_name = "center_x";
 	flkey = new FlKeyDouble(keycode, tx);
@@ -327,9 +313,9 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	flkey = new FlKeyDouble(keycode, tz);
 	interpolator->AddKey(flkey);
 	//obj traslation
-	m_view->getValue(gstObjTransX, tx);
-	m_view->getValue(gstObjTransY, ty);
-	m_view->getValue(gstObjTransZ, tz);
+	view->getValue(gstObjTransX, tx);
+	view->getValue(gstObjTransY, ty);
+	view->getValue(gstObjTransZ, tz);
 	//x
 	keycode.l2_name = "obj_trans_x";
 	flkey = new FlKeyDouble(keycode, tx);
@@ -344,21 +330,21 @@ void RecorderAgent::InsertKey(int index, double duration, int interpolation)
 	interpolator->AddKey(flkey);
 	//scale
 	double scale;
-	m_view->getValue(gstScaleFactor, scale);
+	view->getValue(gstScaleFactor, scale);
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
 	interpolator->AddKey(flkey);
 	//intermixing mode
 	long lval;
-	m_view->getValue(gstMixMethod, lval);
+	view->getValue(gstMixMethod, lval);
 	keycode.l2_name = "volmethod";
 	flkeyI = new FlKeyInt(keycode, lval);
 	interpolator->AddKey(flkeyI);
 	//perspective angle
 	bool persp;
-	m_view->getValue(gstPerspective, persp);
+	view->getValue(gstPerspective, persp);
 	double aov;
-	m_view->getValue(gstAov, aov);
+	view->getValue(gstAov, aov);
 	if (!persp)
 		aov = 9.9;
 	keycode.l2_name = "aov";
@@ -416,14 +402,159 @@ bool RecorderAgent::MoveOne(vector<bool>& chan_mask, int lv)
 	else return false;
 }
 
+void RecorderAgent::Append(int id, int time, int duration, int interp, string &description)
+{
+	long tmp = dlg_.m_keylist->InsertItem(dlg_.m_keylist->GetItemCount(), wxString::Format("%d", id), 0);
+	dlg_.m_keylist->SetItem(tmp, 1, wxString::Format("%d", time));
+	dlg_.m_keylist->SetItem(tmp, 2, wxString::Format("%d", duration));
+	dlg_.m_keylist->SetItem(tmp, 3, interp == 0 ? "Linear" : "Smooth");
+	dlg_.m_keylist->SetItem(tmp, 4, description);
+}
+
 void RecorderAgent::DeleteSel()
 {
-
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+	long lval;
+	getValue(gstSelectedKey, lval);
+	interpolator->RemoveKey(lval);
+	Update();
 }
 
 void RecorderAgent::DeleteAll()
 {
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+	long lval;
+	getValue(gstSelectedKey, lval);
+	interpolator->Clear();
+	Update();
+}
 
+void RecorderAgent::Update()
+{
+	dlg_.m_keylist->m_frame_text->Hide();
+	dlg_.m_keylist->m_duration_text->Hide();
+	dlg_.m_keylist->m_interpolation_cmb->Hide();
+	dlg_.m_keylist->m_description_text->Hide();
+	dlg_.m_keylist->m_editing_item = -1;
+
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+
+	dlg_.m_keylist->DeleteAllItems();
+	for (int i = 0; i < interpolator->GetKeyNum(); i++)
+	{
+		int id = interpolator->GetKeyID(i);
+		int time = interpolator->GetKeyTime(i);
+		int duration = interpolator->GetKeyDuration(i);
+		int interp = interpolator->GetKeyType(i);
+		string desc = interpolator->GetKeyDesc(i);
+		Append(id, time, duration, interp, desc);
+	}
+}
+
+void RecorderAgent::UpdateText()
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+
+	wxString str;
+
+	for (int i = 0; i < interpolator->GetKeyNum(); i++)
+	{
+		int id = interpolator->GetKeyID(i);
+		int time = interpolator->GetKeyTime(i);
+		int duration = interpolator->GetKeyDuration(i);
+		int interp = interpolator->GetKeyType(i);
+		string desc = interpolator->GetKeyDesc(i);
+
+		wxString wx_id = wxString::Format("%d", id);
+		wxString wx_time = wxString::Format("%d", time);
+		wxString wx_duration = wxString::Format("%d", duration);
+		dlg_.m_keylist->SetText(i, 0, wx_id);
+		dlg_.m_keylist->SetText(i, 1, wx_time);
+		dlg_.m_keylist->SetText(i, 2, wx_duration);
+		str = interp == 0 ? "Linear" : "Smooth";
+		dlg_.m_keylist->SetText(i, 3, str);
+		str = desc;
+		dlg_.m_keylist->SetText(i, 4, str);
+	}
+}
+
+void RecorderAgent::GotoKey()
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+	
+	long lval;
+	getValue(gstSelectedKey, lval);
+	int index = interpolator->GetKeyIndex(lval);
+	double time = interpolator->GetKeyTime(index);
+	getObject()->SetParams(time);
+	//view->Update(39);
+}
+
+void RecorderAgent::ChangeTime(double time)
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+
+	long lval;
+	getValue(gstSelectedKey, lval);
+	int index = interpolator->GetKeyIndex(lval);
+	interpolator->ChangeTime(index, time);
+}
+
+void RecorderAgent::ChangeDuration(double time)
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+
+	long lval;
+	getValue(gstSelectedKey, lval);
+	int index = interpolator->GetKeyIndex(lval);
+	interpolator->ChangeDuration(index, time);
+}
+
+void RecorderAgent::ChangeInterpolation(int val)
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+
+	long lval;
+	getValue(gstSelectedKey, lval);
+	int index = interpolator->GetKeyIndex(lval);
+	FlKeyGroup* keygroup = interpolator->GetKeyGroup(index);
+	if (keygroup)
+		keygroup->type = val;
+}
+
+void RecorderAgent::ChangeDescription(const std::string &str)
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (!interpolator) return;
+
+	long lval;
+	getValue(gstSelectedKey, lval);
+	int index = interpolator->GetKeyIndex(lval);
+	FlKeyGroup* keygroup = interpolator->GetKeyGroup(index);
+	if (keygroup)
+		keygroup->desc = str;
+}
+
+void RecorderAgent::MoveKeyBefore(long edit, long drag)
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (interpolator)
+		interpolator->MoveKeyBefore(edit, drag);
+}
+
+void RecorderAgent::MoveKeyAfter(long edit, long drag)
+{
+	Interpolator* interpolator = getObject()->GetInterpolator();
+	if (interpolator)
+		interpolator->MoveKeyAfter(edit, drag);
 }
 
 void RecorderAgent::OnSelectedKey(Event& event)
