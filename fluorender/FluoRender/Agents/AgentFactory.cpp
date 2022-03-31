@@ -583,6 +583,16 @@ NoiseReduceAgent* AgentFactory::addNoiseReduceAgent(const std::string &name, wxW
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_VALUE(gstUseSelection, bool(false));
+		ADD_VALUE(gstThreshold, double(0));
+		ADD_VALUE(gstCompSizeLimit, long(0));
+		ADD_VALUE(gstEnhance, bool(false));
+		ADD_VALUE(gstEqualizeSavedR, double(0));
+		ADD_VALUE(gstEqualizeSavedG, double(0));
+		ADD_VALUE(gstEqualizeSavedB, double(0));
+		ADD_AFTER_EVENT(gstThreshold, NoiseReduceAgent, OnThreshold);
+		ADD_AFTER_EVENT(gstCompSizeLimit, NoiseReduceAgent, OnCompSizeLimit);
+		ADD_AFTER_EVENT(gstEnhance, NoiseReduceAgent, OnEnhance);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

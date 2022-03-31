@@ -648,6 +648,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstMovSliderRange "mov slider range"
 #define gstMovCurrentPage "mov current page"
 #define gstAutoKeyIndex "auto key index"
+//noise reduct agent
+#define gstEnhance "enhance"
+#define gstEqualizeSavedR "equalize saved r"
+#define gstEqualizeSavedG "equalize saved g"
+#define gstEqualizeSavedB "equalize saved b"
 
 //input
 //mouse

@@ -122,11 +122,6 @@ public:
 
 	friend class fluo::MovieAgent;
 
-	void UpFrame();
-	void DownFrame();
-
-	void Run();
-
 private:
 	fluo::MovieAgent* m_agent;
 

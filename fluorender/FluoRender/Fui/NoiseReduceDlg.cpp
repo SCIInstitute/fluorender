@@ -29,11 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
-#include <BrushToolAgent.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <Components/CompSelector.h>
-#include <Components/CompAnalyzer.h>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(NoiseReduceDlg, wxPanel)
@@ -49,14 +44,10 @@ END_EVENT_TABLE()
 NoiseReduceDlg::NoiseReduceDlg(RenderFrame *frame)
 : wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 150),
-	0, "NoiseReduceDlg"),
-	m_frame(frame),
-	m_view(0),
-	m_max_value(255.0),
-	m_dft_thresh(0.5),
-	m_dft_size(50),
-	m_previewed(false)
+	0, "NoiseReduceDlg")
 {
+	m_agent = glbin_agtf->addNoiseReduceAgent(gstNoiseReduceAgent, *this);
+
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -140,68 +131,10 @@ NoiseReduceDlg::~NoiseReduceDlg()
 {
 }
 
-void NoiseReduceDlg::GetSettings(fluo::Renderview* view)
+void NoiseReduceDlg::OnSelectOnlyChk(wxCommandEvent &event)
 {
-	if (!view)
-		return;
-	m_view = view;
-
-	fluo::VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
-	else
-		return;
-
-
-	//threshold range
-	if (sel_vol)
-	{
-		sel_vol->getValue(gstMaxInt, m_max_value);
-		//threshold
-		m_threshold_sldr->SetRange(0, int(m_max_value*10.0));
-		m_threshold_sldr->SetValue(int(m_dft_thresh*m_max_value*10.0+0.5));
-		m_threshold_text->ChangeValue(wxString::Format("%.1f", m_dft_thresh*m_max_value));
-		//voxel
-		long nx, ny, nz;
-		sel_vol->getValue(gstResX, nx);
-		sel_vol->getValue(gstResY, ny);
-		sel_vol->getValue(gstResZ, nz);
-		m_voxel_sldr->SetRange(1, nx);
-		m_voxel_sldr->SetValue(int(m_dft_size));
-		m_voxel_text->ChangeValue(wxString::Format("%d", int(m_dft_size)));
-		m_previewed = false;
-	}
-}
-
-void NoiseReduceDlg::Preview(bool select, double size, double thresh)
-{
-	if (!m_view)
-		return;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-
-	flrd::ComponentGenerator cg(vd);
-	cg.SetUseMask(select);
-	vd->AddEmptyMask(cg.GetUseMask()?1:2, true);
-	vd->AddEmptyLabel(0, !cg.GetUseMask());
-	cg.ShuffleID();
-	double scale;
-	vd->getValue(gstIntScale, scale);
-	cg.Grow(false, -1, thresh, 0.0, scale);
-
-	flrd::ComponentAnalyzer* ca = m_view->GetCompAnalyzer();
-	ca->SetVolume(vd);
-	ca->Analyze(select, true, false);
-
-	flrd::ComponentSelector comp_selector(vd);
-	//cell size filter
-	comp_selector.SetMinNum(false, 0);
-	comp_selector.SetMaxNum(true, size);
-	comp_selector.SetAnalyzer(ca);
-	comp_selector.CompFull();
-
-	m_view->Update(39);
+	bool bval = m_ca_select_only_chk->GetValue();
+	m_agent->setValue(gstUseSelection, bval);
 }
 
 //threshold
@@ -218,16 +151,7 @@ void NoiseReduceDlg::OnThresholdText(wxCommandEvent &event)
 	wxString str = m_threshold_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_dft_thresh = val/m_max_value;
-	m_threshold_sldr->SetValue(int(val*10.0+0.5));
-
-	//change mask threshold
-	fluo::VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
-	if (sel_vol)
-		sel_vol->setValue(gstMaskThresh, m_dft_thresh);
-	m_frame->RefreshVRenderViews();
+	m_agent->setValue(gstThreshold, val);
 }
 
 //voxel size
@@ -242,18 +166,14 @@ void NoiseReduceDlg::OnVoxelChange(wxScrollEvent &event)
 void NoiseReduceDlg::OnVoxelText(wxCommandEvent &event)
 {
 	wxString str = m_voxel_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	m_dft_size = ival;
-	m_voxel_sldr->SetValue(ival);
+	long lval;
+	str.ToLong(&lval);
+	m_agent->setValue(gstCompSizeLimit, lval);
 }
 
 void NoiseReduceDlg::OnPreviewBtn(wxCommandEvent &event)
 {
-	bool select = m_ca_select_only_chk->GetValue();
-	Preview(select, m_dft_size, m_dft_thresh);
-	m_previewed = true;
-	OnEnhanceSelChk(event);
+	m_agent->Preview();
 }
 
 void NoiseReduceDlg::OnEraseBtn(wxCommandEvent &event)
@@ -263,42 +183,6 @@ void NoiseReduceDlg::OnEraseBtn(wxCommandEvent &event)
 
 void NoiseReduceDlg::OnEnhanceSelChk(wxCommandEvent &event)
 {
-	if (!m_previewed)
-		return;
-
-	bool enhance = m_enhance_sel_chk->GetValue();
-
-	fluo::VolumeData* sel_vol = 0;
-	if (m_frame)
-		sel_vol = m_frame->GetCurSelVol();
-	if (enhance && sel_vol)
-	{
-		fluo::Color mask_color;
-		sel_vol->getValue(gstSecColor, mask_color);
-		double hdr_r = 0.0;
-		double hdr_g = 0.0;
-		double hdr_b = 0.0;
-		if (mask_color.r() > 0.0)
-			hdr_r = 0.4;
-		if (mask_color.g() > 0.0)
-			hdr_g = 0.4;
-		if (mask_color.b() > 0.0)
-			hdr_b = 0.4;
-		fluo::Color hdr_color(hdr_r, hdr_g, hdr_b);
-		sel_vol->getValue(gstEqualizeR, hdr_r);
-		sel_vol->getValue(gstEqualizeG, hdr_g);
-		sel_vol->getValue(gstEqualizeB, hdr_b);
-		m_hdr = fluo::Color(hdr_r, hdr_g, hdr_b);
-		sel_vol->setValue(gstEqualizeR, hdr_color.r());
-		sel_vol->setValue(gstEqualizeG, hdr_color.g());
-		sel_vol->setValue(gstEqualizeB, hdr_color.b());
-	}
-	else if (!enhance && sel_vol)
-	{
-		sel_vol->setValue(gstEqualizeR, m_hdr.r());
-		sel_vol->setValue(gstEqualizeG, m_hdr.g());
-		sel_vol->setValue(gstEqualizeB, m_hdr.b());
-	}
-	if (m_frame)
-		m_frame->RefreshVRenderViews();
+	bool bval = m_enhance_sel_chk->GetValue();
+	m_agent->setValue(gstEnhance, bval);
 }

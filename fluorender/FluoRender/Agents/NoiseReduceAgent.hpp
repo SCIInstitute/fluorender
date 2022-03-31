@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NOISEREDUCE_H_
 
 #include <InterfaceAgent.hpp>
-#include <VolumeData.hpp>
+#include <Renderview.hpp>
 
 class NoiseReduceDlg;
 namespace fluo
@@ -46,18 +46,26 @@ namespace fluo
 
 		virtual const char* className() const { return "NoiseReduceAgent"; }
 
-		virtual void setObject(VolumeData* an);
-		virtual VolumeData* getObject();
+		virtual void setObject(Renderview* an);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 
 		virtual NoiseReduceAgent* asNoiseReduceAgent() { return this; }
 		virtual const NoiseReduceAgent* asNoiseReduceAgent() const { return this; }
 
+		friend class AgentFactory;
+
+		void Preview();
+		void Enhance();
+
 	protected:
 		NoiseReduceDlg &dlg_;
 
 	private:
+		void OnThreshold(Event& event);
+		void OnCompSizeLimit(Event& event);
+		void OnEnhance(Event& event);
 	};
 }
 

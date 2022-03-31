@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NOISEREDUCEDLG_H_
 
 #include <wx/wx.h>
-#include <Types/Color.h>
+#include <NoiseReduceAgent.hpp>
 
 class RenderFrame;
 namespace fluo
@@ -54,27 +54,15 @@ public:
 	NoiseReduceDlg(RenderFrame* frame);
 	~NoiseReduceDlg();
 
-	void GetSettings(fluo::Renderview* view);
-	void SetDftThresh(double thresh) {m_dft_thresh = thresh;}
-	void SetDftSize(double size) {m_dft_size = size;}
+	void AssociateRenderview(fluo::Renderview* view)
+	{
+		m_agent->setObject(view);
+	}
 
-	void Preview(bool select, double size, double thresh);
+	friend class fluo::NoiseReduceAgent;
 
 private:
-	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview *m_view;
-
-	//max volume value
-	double m_max_value;
-	//default cs thresh
-	double m_dft_thresh;
-	//default nr size
-	double m_dft_size;
-
-	//remember previous hdr
-	bool m_previewed;
-	fluo::Color m_hdr;
+	fluo::NoiseReduceAgent* m_agent;
 
 	wxCheckBox *m_ca_select_only_chk;
 	//threshold
@@ -92,6 +80,7 @@ private:
 
 private:
 	//threhsold
+	void OnSelectOnlyChk(wxCommandEvent &event);
 	void OnThresholdChange(wxScrollEvent &event);
 	void OnThresholdText(wxCommandEvent &event);
 	void OnVoxelChange(wxScrollEvent &event);

@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include "RenderFrame.h"
 #include <StopWatch.hpp>
 #include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <MovieAgent.hpp>
 #include <VolumeFactory.hpp>
 #include "JVMInitializer.h"
 #include <wx/cmdline.h>
@@ -108,10 +110,11 @@ bool VRenderApp::OnInit()
 		RenderFrame::SetCompression(m_lzw);
 		RenderFrame::SetSaveAlpha(m_save_alpha);
 		RenderFrame::SetSaveFloat(m_save_float);
-		if (((RenderFrame*)frame)->GetMovieView())
+		fluo::MovieAgent* agent = glbin_agtf->findFirst(gstMovieAgent)->asMovieAgent();
+		if (agent)
 		{
-			((RenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
-			((RenderFrame*)frame)->GetMovieView()->SetFileName(m_mov_file);
+			agent->setValue(gstMovBitrate, m_bitrate);
+			agent->setValue(gstMovFilename, m_mov_file.ToStdWstring());
 		}
 		run_mov = true;
 	}
