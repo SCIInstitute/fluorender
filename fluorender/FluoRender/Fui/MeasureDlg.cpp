@@ -123,8 +123,6 @@ RulerListCtrl::RulerListCtrl(
 	m_color_picker = new wxColourPickerCtrl(this,
 		ID_ColorPicker);
 	m_color_picker->Hide();
-
-	m_ruler_df_f = false;
 }
 
 RulerListCtrl::~RulerListCtrl()

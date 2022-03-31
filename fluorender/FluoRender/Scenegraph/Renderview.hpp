@@ -448,7 +448,7 @@ namespace fluo
 
 		void SetCenter();
 		//camera lock
-		void SetLockCenter(int type);
+		void SetLockCenter();
 		void SetLockCenterVol();
 		void SetLockCenterRuler();
 		void SetLockCenterSel();

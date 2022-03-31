@@ -30,12 +30,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
-#include <vector>
-
-using namespace std;
+#include <RecorderAgent.hpp>
 
 class RenderFrame;
-class RecorderDlg;
 namespace fluo
 {
 	class Renderview;
@@ -51,8 +48,8 @@ class KeyListCtrl : public wxListCtrl
 	};
 
 public:
-	KeyListCtrl(RenderFrame *frame,
-		RecorderDlg* parent,
+	KeyListCtrl(
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -67,10 +64,11 @@ public:
 	void UpdateText();
 
 	friend class RecorderDlg;
+	friend class fluo::RecorderAgent;
 
 private:
-	RenderFrame* m_frame;
-	RecorderDlg* m_recdlg;
+	fluo::RecorderAgent* m_agent;
+
 	wxImageList *m_images;
 
 	wxTextCtrl *m_frame_text;
@@ -131,29 +129,15 @@ public:
 		wxWindow* parent);
 	~RecorderDlg();
 
-	void GetSettings(fluo::Renderview* view);
-	fluo::Renderview* GetView()
+	void AssociateRenderview(fluo::Renderview* view)
 	{
-		return m_view;
+		m_agent->setObject(view);
 	}
-	void UpdateList()
-	{
-		m_keylist->Update();
-	}
-	void SetSelection(int index);
 
-	void AutoKeyChanComb(int comb);
-
-	bool GetCamLock() { return m_cam_lock; }
+	friend class fluo::RecorderAgent;
 
 private:
-	bool m_cam_lock;
-	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
-
-private:
-	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview* m_view;
+	fluo::RecorderAgent* m_agent;
 
 	//automatic keys
 	wxComboBox *m_auto_key_cmb;
@@ -181,15 +165,9 @@ private:
 	wxButton *m_cam_lock_btn;
 
 private:
-	//insert/append key
-	void InsertKey(int index, double duration, int interpolation);
-	bool MoveOne(vector<bool>& chan_mask, int lv);
-	bool GetMask(vector<bool>& chan_mask);
-
 	void OnCh1Check(wxCommandEvent &event);
 	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 	void OnAutoKey(wxCommandEvent &event);
-	void OnSetKey(wxCommandEvent &event);
 	void OnInsKey(wxCommandEvent &event);
 	void OnDelKey(wxCommandEvent &event);
 	void OnDelAll(wxCommandEvent &event);

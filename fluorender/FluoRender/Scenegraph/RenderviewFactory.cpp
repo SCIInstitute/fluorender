@@ -243,6 +243,7 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstObjRotZ, double(180));
 		view->addValue(gstGearedEnable, bool(false));
 		view->addValue(gstCamLockObjEnable, bool(false));
+		view->addValue(gstCamLockType, long(0));
 		view->addValue(gstCamLockCtr, Point());
 		view->addValue(gstCamLockPick, bool(false));
 		view->addValue(gstRadius, double(348));

@@ -54,7 +54,7 @@ namespace fluo
 
 		virtual const char* className() const { return "MeasureAgent"; }
 
-		virtual void setObject(Renderview* an);
+		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();

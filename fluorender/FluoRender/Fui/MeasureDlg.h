@@ -81,7 +81,6 @@ private:
 	wxTextCtrl *m_center_text;
 	wxColourPickerCtrl *m_color_picker;
 	long m_editing_item;
-	bool m_ruler_df_f;
 
 private:
 	void OnContextMenu(wxContextMenuEvent &event);

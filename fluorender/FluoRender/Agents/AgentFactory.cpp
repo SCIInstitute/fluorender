@@ -646,6 +646,8 @@ RecorderAgent* AgentFactory::addRecorderAgent(const std::string &name, wxWindow 
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_VALUE(gstSelectedKey, long(0));
+		ADD_AFTER_EVENT(gstSelectedKey, RecorderAgent, OnSelectedKey);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

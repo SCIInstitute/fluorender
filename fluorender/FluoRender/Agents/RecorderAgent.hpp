@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RECORDERAGENT_H_
 
 #include <InterfaceAgent.hpp>
+#include <Renderview.hpp>
 
 class RecorderDlg;
 namespace fluo
@@ -45,18 +46,28 @@ namespace fluo
 
 		virtual const char* className() const { return "RecorderAgent"; }
 
-		//virtual void setObject(Annotations* an);
-		//virtual Annotations* getObject();
+		virtual void setObject(Renderview* view);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 
 		virtual RecorderAgent* asRecorderAgent() { return this; }
 		virtual const RecorderAgent* asRecorderAgent() const { return this; }
 
+		friend class AgentFactory;
+
+		void AutoKeyChanComb(int comb);
+		void AddKey();
+		void InsertKey(int index, double duration, int interpolation);
+		bool MoveOne(std::vector<bool>& chan_mask, int lv = 1);
+		void DeleteSel();
+		void DeleteAll();
+
 	protected:
 		RecorderDlg &dlg_;
 
 	private:
+		void OnSelectedKey(Event& event);
 	};
 }
 

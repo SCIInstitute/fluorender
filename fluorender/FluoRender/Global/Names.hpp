@@ -489,6 +489,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstObjRotZ "obj rot z"
 #define gstGearedEnable "geared enable"//enable geared rotation
 #define gstCamLockObjEnable "cam lock obj enable"//enable locking camera on a point
+#define gstCamLockType "cam lock type"//1:volume center; 2:pick by clicking; 3:ruler center; 4:selection mask center
 #define gstCamLockCtr "cam lock ctr"
 #define gstCamLockPick "cam lock pick"//camera locking center by picking
 #define gstRadius "radius"//scene size in terms of radius of a sphere
@@ -653,6 +654,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstEqualizeSavedR "equalize saved r"
 #define gstEqualizeSavedG "equalize saved g"
 #define gstEqualizeSavedB "equalize saved b"
+//recorder agent
+#define gstSelectedKey "selected key"
 
 //input
 //mouse

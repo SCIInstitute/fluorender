@@ -7732,9 +7732,11 @@ void Renderview::SetCenter()
 	}
 }
 
-void Renderview::SetLockCenter(int type)
+void Renderview::SetLockCenter()
 {
-	switch (type)
+	long lval;
+	getValue(gstCamLockType, lval);
+	switch (lval)
 	{
 	case 1:
 	default:
