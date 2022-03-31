@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _SETTINGAGENT_H_
 
 #include <InterfaceAgent.hpp>
+#include <Root.hpp>
 
 class SettingDlg;
 namespace fluo
@@ -45,13 +46,21 @@ namespace fluo
 
 		virtual const char* className() const { return "SettingAgent"; }
 
-		//virtual void setObject(Annotations* an);
-		//virtual Annotations* getObject();
+		virtual void setObject(Root* obj);
+		virtual Root* getObject();
 
 		virtual void UpdateAllSettings();
 
 		virtual SettingAgent* asSettingAgent() { return this; }
 		virtual const SettingAgent* asSettingAgent() const { return this; }
+
+		friend class AgentFactory;
+
+		void ReadSettings();
+		void SaveSettings();
+		void UpdateDeviceTree();
+		void UpdateTextureSize();
+		std::vector<std::string> GetJvmArgs();
 
 	protected:
 		SettingDlg &dlg_;

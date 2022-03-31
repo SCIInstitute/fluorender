@@ -25,17 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "SettingDlg.h"
-#include "RenderFrame.h"
-#include <Root.hpp>
-#include <Renderview.hpp>
+#include <SettingDlg.h>
+#include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
-#include <ClipPlaneAgent.hpp>
-#include <FLIVR/ShaderProgram.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/TextRenderer.h>
-#include <Types/Utils.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>
@@ -678,13 +671,13 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 {
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
-	
+
 	//JVM settings.
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
 	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);	
+	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
 
 	m_java_jvm_text = new wxTextCtrl(page, ID_JavaJVMText);
 	m_java_ij_text = new wxTextCtrl(page, ID_JavaIJText);
@@ -699,7 +692,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	sizer1_2->Add(m_browse_ij_btn, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_java_bioformats_text, 1, wxEXPAND);
 	sizer1_3->Add(m_browse_bioformats_btn, 0, wxALIGN_CENTER);
-	
+
 	group1->Add(5, 5);
 
 	//Added the radio button
@@ -716,13 +709,13 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 	group1->Add(10, 5);
 #ifdef _WIN32
-    st = new wxStaticText(page, 0, "Path to the root folder of ImageJ or Fiji (e.g., \"ImageJ\" or \"Fiji.app\")");
+	st = new wxStaticText(page, 0, "Path to the root folder of ImageJ or Fiji (e.g., \"ImageJ\" or \"Fiji.app\")");
 #else
-    st = new wxStaticText(page, 0, "Path to folder \"ImageJ.app\" or \"Fiji.app\" (e.g., \"ImageJ/ImageJ.app\" or \"Fiji.app\") :");
+	st = new wxStaticText(page, 0, "Path to folder \"ImageJ.app\" or \"Fiji.app\" (e.g., \"ImageJ/ImageJ.app\" or \"Fiji.app\") :");
 #endif
-    group1->Add(st);
-    group1->Add(sizer1_2, 0, wxEXPAND);
-    group1->Add(10, 10);
+	group1->Add(st);
+	group1->Add(sizer1_2, 0, wxEXPAND);
+	group1->Add(10, 10);
 
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"jvm.dll\" (e.g., \"ImageJ\\jre\\bin\\server\\jvm.dll\"):");
@@ -732,7 +725,7 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(st);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 10);
-    
+
 #ifdef _WIN32
 	st = new wxStaticText(page, 0, "Path to file \"bioformats_package.jar\" (e.g., \"ImageJ\\plugins\\bioformats_package.jar\"):");
 #else
@@ -764,6 +757,8 @@ SettingDlg::SettingDlg(RenderFrame *frame) :
 		0, "SettingDlg"),
 	m_frame(frame)
 {
+	m_agent = glbin_agtf->addSettingAgent(gstSettingAgent, *this);
+
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -791,812 +786,16 @@ SettingDlg::SettingDlg(RenderFrame *frame) :
 	sizerV->Add(group_b, 0, wxEXPAND);
 	SetSizerAndFit(sizerV);
 	Layout();
-
-	GetSettings();
 }
 
 SettingDlg::~SettingDlg()
 {
 }
 
-void SettingDlg::GetSettings()
-{
-	m_gmc_mode = 2;
-	m_prj_save = false;
-	m_save_alpha = false;
-	m_save_float = false;
-	m_realtime_compress = false;
-	m_skip_bricks = false;
-	m_test_speed = false;
-	m_test_param = false;
-	m_test_wiref = false;
-	m_peeling_layers = 1;
-	m_micro_blend = false;
-	m_shadow_dir = false;
-	m_shadow_dir_x = 0.0;
-	m_shadow_dir_y = 0.0;
-	m_mouse_int = true;
-	m_wav_color1 = 5;
-	m_wav_color2 = 5;
-	m_wav_color3 = 5;
-	m_wav_color4 = 5;
-	m_time_id = "_T";
-	m_grad_bg = false;
-	m_pin_threshold = 10.0;
-	m_stereo = false;
-	m_eye_dist = 20.0;
-	m_override_vox = true;
-	m_soft_threshold = 0.0;
-	m_run_script = false;
-	m_script_file = "";
-	m_text_size = 12;
-	m_text_color = 0;
-	m_font_file = "";
-	m_line_width = 3.0;
-	m_mem_swap = false;
-	m_graphics_mem = 1000.0;
-	m_large_data_size = 1000.0;
-	m_force_brick_size = 128;
-	m_up_time = 100;
-	m_update_order = 0;
-	m_invalidate_tex = false;
-	m_detail_level_offset = 0;
-	m_point_volume_mode = 0;
-	m_ruler_use_transf = false;
-	m_ruler_time_dep = true;
-	m_ruler_relax_f1 = 2.0;
-	m_ruler_infr = 2.0;
-	m_ruler_relax_iter = 10;
-	m_ruler_auto_relax = false;
-	m_ruler_relax_type = 1;
-	m_ruler_df_f = false;
-	m_ruler_size_thresh = 5;
-	m_pvxml_flip_x = false;
-	m_pvxml_flip_y = false;
-	m_pvxml_seq_type = 1;
-	m_api_type = 0;
-	m_red_bit = 8;
-	m_green_bit = 8;
-	m_blue_bit = 8;
-	m_alpha_bit = 8;
-	m_depth_bit = 24;
-	m_samples = 0;
-	m_gl_major_ver = 4;
-	m_gl_minor_ver = 4;
-	m_gl_profile_mask = 2;
-	m_cl_platform_id = 0;
-	m_cl_device_id = 0;
-	m_paint_hist_depth = 0;
-	m_stay_top = false;
-	m_show_cursor = true;
-	m_last_tool = 0;
-	//tracking settings
-	m_track_iter = 3;
-	m_component_size = 25.0;
-	m_consistent_color = true;
-	m_try_merge = false;
-	m_try_split = false;
-	m_contact_factor = 0.6;
-	m_similarity = 0.5;
-	m_use_max_texture_size = false;
-	m_max_texture_size = 2048;
-	m_no_tex_pack = false;
-	m_plane_mode = 0;
-	m_ij_mode = 0;
-
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "fluorender.set";
-	wxFileInputStream is(dft);
-	if (!is.IsOk())
-		return;
-	wxFileConfig fconfig(is);
-
-	//gradient magnitude
-	if (fconfig.Exists("/gm calculation"))
-	{
-		fconfig.SetPath("/gm calculation");
-		m_gmc_mode = fconfig.Read("mode", 2l);
-	}
-	//depth peeling
-	if (fconfig.Exists("/peeling layers"))
-	{
-		fconfig.SetPath("/peeling layers");
-		m_peeling_layers = fconfig.Read("value", 1l);
-	}
-	//micro blending
-	if (fconfig.Exists("/micro blend"))
-	{
-		fconfig.SetPath("/micro blend");
-		fconfig.Read("mode", &m_micro_blend, false);
-	}
-	//save project
-	if (fconfig.Exists("/save project"))
-	{
-		fconfig.SetPath("/save project");
-		fconfig.Read("mode", &m_prj_save, false);
-	}
-	//save alpha
-	if (fconfig.Exists("/save alpha"))
-	{
-		fconfig.SetPath("/save alpha");
-		fconfig.Read("mode", &m_save_alpha, false);
-	}
-	//save float
-	if (fconfig.Exists("/save float"))
-	{
-		fconfig.SetPath("/save float");
-		fconfig.Read("mode", &m_save_float, false);
-	}
-	//realtime compression
-	if (fconfig.Exists("/realtime compress"))
-	{
-		fconfig.SetPath("/realtime compress");
-		fconfig.Read("mode", &m_realtime_compress, false);
-	}
-	//skip empty bricks
-	if (fconfig.Exists("/skip bricks"))
-	{
-		fconfig.SetPath("/skip bricks");
-		fconfig.Read("mode", &m_skip_bricks, false);
-	}
-	//mouse interactions
-	if (fconfig.Exists("/mouse int"))
-	{
-		fconfig.SetPath("/mouse int");
-		fconfig.Read("mode", &m_mouse_int, true);
-	}
-	//shadow
-	if (fconfig.Exists("/dir shadow"))
-	{
-		fconfig.SetPath("/dir shadow");
-		fconfig.Read("mode", &m_shadow_dir, false);
-		fconfig.Read("x", &m_shadow_dir_x, 0.0);
-		fconfig.Read("y", &m_shadow_dir_y, 0.0);
-	}
-	//rot center anchor thresh
-	if (fconfig.Exists("/pin threshold"))
-	{
-		fconfig.SetPath("/pin threshold");
-		fconfig.Read("value", &m_pin_threshold, 10.0);
-	}
-	//stereo
-	if (fconfig.Exists("/stereo"))
-	{
-		fconfig.SetPath("/stereo");
-		fconfig.Read("enable_stereo", &m_stereo, false);
-		fconfig.Read("eye dist", &m_eye_dist, 20.0);
-	}
-	//test mode
-	if (fconfig.Exists("/test mode"))
-	{
-		fconfig.SetPath("/test mode");
-		fconfig.Read("speed", &m_test_speed, false);
-		fconfig.Read("param", &m_test_param, false);
-		fconfig.Read("wiref", &m_test_wiref, false);
-	}
-	//wavelength to color
-	if (fconfig.Exists("/wavelength to color"))
-	{
-		fconfig.SetPath("/wavelength to color");
-		fconfig.Read("c1", &m_wav_color1, 5);
-		fconfig.Read("c2", &m_wav_color2, 5);
-		fconfig.Read("c3", &m_wav_color3, 5);
-		fconfig.Read("c4", &m_wav_color4, 5);
-	}
-	//time sequence identifier
-	if (fconfig.Exists("/time id"))
-	{
-		fconfig.SetPath("/time id");
-		fconfig.Read("value", &m_time_id);
-	}
-	//gradient background
-	if (fconfig.Exists("/grad bg"))
-	{
-		fconfig.SetPath("/grad bg");
-		fconfig.Read("value", &m_grad_bg);
-	}
-	//save compressed
-	if (fconfig.Exists("/save cmp"))
-	{
-		bool save_cmp;
-		fconfig.SetPath("/save cmp");
-		fconfig.Read("value", &save_cmp);
-		RenderFrame::SetCompression(save_cmp);
-	}
-	//override vox
-	if (fconfig.Exists("/override vox"))
-	{
-		fconfig.SetPath("/override vox");
-		fconfig.Read("value", &m_override_vox);
-	}
-	//soft threshold
-	if (fconfig.Exists("/soft threshold"))
-	{
-		fconfig.SetPath("/soft threshold");
-		fconfig.Read("value", &m_soft_threshold);
-	}
-	//run script
-	if (fconfig.Exists("/run script"))
-	{
-		fconfig.SetPath("/run script");
-		fconfig.Read("value", &m_run_script);
-		fconfig.Read("file", &m_script_file);
-	}
-	//paint history depth
-	if (fconfig.Exists("/paint history"))
-	{
-		fconfig.SetPath("/paint history");
-		fconfig.Read("value", &m_paint_hist_depth);
-	}
-	//text font
-	if (fconfig.Exists("/text font"))
-	{
-		fconfig.SetPath("/text font");
-		fconfig.Read("file", &m_font_file);
-		fconfig.Read("value", &m_text_size);
-		fconfig.Read("color", &m_text_color);
-	}
-	//line width
-	if (fconfig.Exists("/line width"))
-	{
-		fconfig.SetPath("/line width");
-		fconfig.Read("value", &m_line_width);
-	}
-	//full screen
-	if (fconfig.Exists("/full screen"))
-	{
-		fconfig.SetPath("/full screen");
-		fconfig.Read("stay top", &m_stay_top);
-		fconfig.Read("show cursor", &m_show_cursor);
-	}
-	//last tool
-	if (fconfig.Exists("/last tool"))
-	{
-		fconfig.SetPath("/last tool");
-		fconfig.Read("value", &m_last_tool);
-	}
-	//memory settings
-	if (fconfig.Exists("/memory settings"))
-	{
-		fconfig.SetPath("/memory settings");
-		//enable mem swap
-		fconfig.Read("mem swap", &m_mem_swap);
-		//graphics memory limit
-		fconfig.Read("graphics mem", &m_graphics_mem);
-		//large data size
-		fconfig.Read("large data size", &m_large_data_size);
-		//force brick size
-		fconfig.Read("force brick size", &m_force_brick_size);
-		//response time
-		fconfig.Read("up time", &m_up_time);
-		//detail level offset
-		fconfig.Read("detail level offset", &m_detail_level_offset);
-	}
-	EnableStreaming(m_mem_swap);
-	//update order
-	if (fconfig.Exists("/update order"))
-	{
-		fconfig.SetPath("/update order");
-		fconfig.Read("value", &m_update_order);
-	}
-	//invalidate texture
-	if (fconfig.Exists("/invalidate tex"))
-	{
-		fconfig.SetPath("/invalidate tex");
-		fconfig.Read("value", &m_invalidate_tex);
-	}
-	//point volume mode
-	if (fconfig.Exists("/point volume mode"))
-	{
-		fconfig.SetPath("/point volume mode");
-		fconfig.Read("value", &m_point_volume_mode);
-	}
-	//ruler settings
-	if (fconfig.Exists("/ruler"))
-	{
-		fconfig.SetPath("/ruler");
-		fconfig.Read("use transf", &m_ruler_use_transf);
-		fconfig.Read("time dep", &m_ruler_time_dep);
-		fconfig.Read("relax f1", &m_ruler_relax_f1);
-		fconfig.Read("infr", &m_ruler_infr);
-		fconfig.Read("df_f", &m_ruler_df_f);
-		fconfig.Read("relax iter", &m_ruler_relax_iter);
-		fconfig.Read("auto relax", &m_ruler_auto_relax);
-		fconfig.Read("relax type", &m_ruler_relax_type);
-		fconfig.Read("size thresh", &m_ruler_size_thresh);
-	}
-	//flags for pvxml flipping
-	if (fconfig.Exists("/pvxml"))
-	{
-		fconfig.SetPath("/pvxml");
-		fconfig.Read("flip_x", &m_pvxml_flip_x);
-		fconfig.Read("flip_y", &m_pvxml_flip_y);
-		fconfig.Read("seq_type", &m_pvxml_seq_type);
-	}
-	//pixel format
-	if (fconfig.Exists("/pixel format"))
-	{
-		fconfig.SetPath("/pixel format");
-		fconfig.Read("api_type", &m_api_type);
-		fconfig.Read("red_bit", &m_red_bit);
-		fconfig.Read("green_bit", &m_green_bit);
-		fconfig.Read("blue_bit", &m_blue_bit);
-		fconfig.Read("alpha_bit", &m_alpha_bit);
-		fconfig.Read("depth_bit", &m_depth_bit);
-		fconfig.Read("samples", &m_samples);
-	}
-	//tracking settings
-	if (fconfig.Exists("/tracking"))
-	{
-		fconfig.SetPath("/tracking");
-		fconfig.Read("track_iter", &m_track_iter);
-		fconfig.Read("component_size", &m_component_size);
-		fconfig.Read("consistent_color", &m_consistent_color);
-		fconfig.Read("try_merge", &m_try_merge);
-		fconfig.Read("try_split", &m_try_split);
-		fconfig.Read("contact_factor", &m_contact_factor);
-		fconfig.Read("similarity", &m_similarity);
-	}
-	//context attrib
-	if (fconfig.Exists("/context attrib"))
-	{
-		fconfig.SetPath("/context attrib");
-		fconfig.Read("gl_major_ver", &m_gl_major_ver);
-		fconfig.Read("gl_minor_ver", &m_gl_minor_ver);
-		fconfig.Read("gl_profile_mask", &m_gl_profile_mask);
-	}
-	//max texture size
-	if (fconfig.Exists("/max texture size"))
-	{
-		fconfig.SetPath("/max texture size");
-		fconfig.Read("use_max_texture_size", &m_use_max_texture_size);
-		fconfig.Read("max_texture_size", &m_max_texture_size);
-	}
-	//no tex pack
-	if (fconfig.Exists("/no tex pack"))
-	{
-		fconfig.SetPath("/no tex pack");
-		fconfig.Read("no_tex_pack", &m_no_tex_pack);
-	}
-	//cl device
-	if (fconfig.Exists("/cl device"))
-	{
-		fconfig.SetPath("/cl device");
-		fconfig.Read("platform_id", &m_cl_platform_id);
-		fconfig.Read("device_id", &m_cl_device_id);
-	}
-	//clipping plane display mode
-	if (fconfig.Exists("/clipping planes"))
-	{
-		fconfig.SetPath("/clipping planes");
-		fconfig.Read("mode", &m_plane_mode);
-	}
-
-	// java paths load.
-	if (fconfig.Exists("/Java")) 
-	{
-		fconfig.SetPath("/Java");
-		fconfig.Read("jvm_path", &m_jvm_path);
-		fconfig.Read("ij_path", &m_ij_path);
-		fconfig.Read("bioformats_path", &m_bioformats_path);
-		fconfig.Read("ij_mode", &m_ij_mode);
-	}
-    
-	UpdateUI();
-}
-
-void SettingDlg::UpdateUI()
-{
-	//update user interface
-	//save project
-	m_prj_save_chk->SetValue(m_prj_save);
-	//realtime compression
-	m_realtime_cmp_chk->SetValue(m_realtime_compress);
-	//mouse interactions
-	m_mouse_int_chk->SetValue(m_mouse_int);
-	//depth peeling
-	m_peeling_layers_sldr->SetValue(m_peeling_layers);
-	m_peeling_layers_text->ChangeValue(wxString::Format("%d", m_peeling_layers));
-	//micro blending
-	m_micro_blend_chk->SetValue(m_micro_blend);
-	//shadow direction
-	if (m_shadow_dir)
-	{
-		m_shadow_dir_chk->SetValue(true);
-		m_shadow_dir_sldr->Enable();
-		m_shadow_dir_text->Enable();
-	}
-	else
-	{
-		m_shadow_dir_chk->SetValue(false);
-		m_shadow_dir_sldr->Disable();
-		m_shadow_dir_text->Disable();
-		m_shadow_dir_x = 0.0;
-		m_shadow_dir_y = 0.0;
-	}
-	double deg = GetShadowDir();
-	m_shadow_dir_sldr->SetValue(int(deg + 0.5));
-	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
-	//rot center anchor thresh
-	m_pin_threshold_sldr->SetValue(int(m_pin_threshold*10.0));
-	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", m_pin_threshold*100.0));
-	//gradient background
-	m_grad_bg_chk->SetValue(m_grad_bg);
-	//stereo
-	m_stereo_chk->SetValue(m_stereo);
-	m_eye_dist_sldr->SetValue(int(m_eye_dist*10.0));
-	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", m_eye_dist));
-	//override vox
-	m_override_vox_chk->SetValue(m_override_vox);
-	//wavelength to color
-	m_wav_color1_cmb->Select(m_wav_color1 - 1);
-	m_wav_color2_cmb->Select(m_wav_color2 - 1);
-	m_wav_color3_cmb->Select(m_wav_color3 - 1);
-	m_wav_color4_cmb->Select(m_wav_color4 - 1);
-	//max texture size
-	m_max_texture_size_chk->SetValue(m_use_max_texture_size);
-	if (m_use_max_texture_size)
-	{
-		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
-		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", m_max_texture_size));
-		m_max_texture_size_text->Enable();
-	}
-	else
-	{
-		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", flvr::ShaderProgram::
-				max_texture_size()));
-		m_max_texture_size_text->Disable();
-	}
-	//no tex pack
-	flvr::ShaderProgram::set_no_tex_upack(m_no_tex_pack);
-	//font
-	wxString str = m_font_file.BeforeLast('.');
-	int font_sel = m_font_cmb->FindString(str);
-	if (font_sel != wxNOT_FOUND)
-		m_font_cmb->Select(font_sel);
-	long font_size;
-	for (unsigned int i = 0; i < m_font_size_cmb->GetCount(); ++i)
-	{
-		str = m_font_size_cmb->GetString(i);
-		if (str.ToLong(&font_size) &&
-			font_size <= m_text_size)
-			m_font_size_cmb->Select(i);
-	}
-	m_text_color_cmb->Select(m_text_color);
-	//line width
-	m_line_width_text->SetValue(wxString::Format("%.0f", m_line_width));
-	m_line_width_sldr->SetValue(int(m_line_width+0.5));
-	//paint history depth
-	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", m_paint_hist_depth));
-	m_paint_hist_depth_sldr->SetValue(m_paint_hist_depth);
-	//memory settings
-	m_streaming_chk->SetValue(m_mem_swap);
-	EnableStreaming(m_mem_swap);
-	m_update_order_rbox->SetSelection(m_update_order);
-	m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)m_graphics_mem));
-	m_graphics_mem_sldr->SetValue((int)(m_graphics_mem / 100.0));
-	m_large_data_text->ChangeValue(wxString::Format("%d", (int)m_large_data_size));
-	m_large_data_sldr->SetValue((int)(m_large_data_size / 10.0));
-	m_block_size_text->ChangeValue(wxString::Format("%d", m_force_brick_size));
-	m_block_size_sldr->SetValue(int(log(m_force_brick_size) / log(2.0) + 0.5));
-	m_response_time_text->ChangeValue(wxString::Format("%d", m_up_time));
-	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
-	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
-	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
-
-	//java
-	m_java_jvm_text->SetValue(m_jvm_path);
-	m_java_ij_text->SetValue(m_ij_path);
-	m_java_bioformats_text->SetValue(m_bioformats_path);
-	switch (m_ij_mode)
-	{
-	case 0:
-		mp_radio_button_imagej->SetValue(true);
-		m_java_jvm_text->Enable(true);
-		m_java_bioformats_text->Enable(true);
-		m_browse_jvm_btn->Enable(true);
-		m_browse_bioformats_btn->Enable(true);
-		break;
-	case 1:
-		mp_radio_button_fiji->SetValue(true);
-		m_java_jvm_text->Enable(false);
-		m_java_bioformats_text->Enable(false);
-		m_browse_jvm_btn->Enable(false);
-		m_browse_bioformats_btn->Enable(false);
-		break;
-	}
-}
-
-void SettingDlg::UpdateDeviceTree()
-{
-	m_device_tree->DeleteAllItems();
-	//cl device tree
-	std::vector<flvr::CLPlatform>* devices = flvr::KernelProgram::GetDeviceList();
-	int pid = flvr::KernelProgram::get_platform_id();
-	int did = flvr::KernelProgram::get_device_id();
-	wxTreeItemId root = m_device_tree->AddRoot("Computer");
-	std::string name;
-	if (devices)
-	{
-		for (int i = 0; i < devices->size(); ++i)
-		{
-			flvr::CLPlatform* platform = &((*devices)[i]);
-			name = platform->vendor;
-			name.back() = ';';
-			name += " " + platform->name;
-			wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
-			for (int j = 0; j < platform->devices.size(); ++j)
-			{
-				flvr::CLDevice* device = &(platform->devices[j]);
-				name = device->vendor;
-				name.back() = ';';
-				name += " " + device->name;
-				wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
-				if (i == pid && j == did)
-					m_device_tree->SelectItem(dvitem);
-			}
-		}
-	}
-	m_device_tree->ExpandAll();
-	m_device_tree->SetFocus();
-}
-
-void SettingDlg::SaveSettings()
-{
-	wxString app_name = "FluoRender " +
-		wxString::Format("%d.%.1f", VERSION_MAJOR, float(VERSION_MINOR));
-	wxString vendor_name = "FluoRender";
-	wxString local_name = "fluorender.set";
-	wxFileConfig fconfig(app_name, vendor_name, local_name, "",
-		wxCONFIG_USE_LOCAL_FILE);
-
-	fconfig.Write("ver_major", VERSION_MAJOR_TAG);
-	fconfig.Write("ver_minor", VERSION_MINOR_TAG);
-
-	fconfig.SetPath("/gm calculation");
-	fconfig.Write("mode", m_gmc_mode);
-
-	fconfig.SetPath("/peeling layers");
-	fconfig.Write("value", m_peeling_layers);
-
-	fconfig.SetPath("/micro blend");
-	fconfig.Write("mode", m_micro_blend);
-
-	fconfig.SetPath("/save project");
-	fconfig.Write("mode", m_prj_save);
-
-	fconfig.SetPath("/save alpha");
-	fconfig.Write("mode", m_save_alpha);
-
-	fconfig.SetPath("/save float");
-	fconfig.Write("mode", m_save_float);
-
-	fconfig.SetPath("/realtime compress");
-	fconfig.Write("mode", m_realtime_compress);
-
-	fconfig.SetPath("/skip bricks");
-	fconfig.Write("mode", m_skip_bricks);
-
-	fconfig.SetPath("/mouse int");
-	fconfig.Write("mode", m_mouse_int);
-
-	fconfig.SetPath("/dir shadow");
-	fconfig.Write("mode", m_shadow_dir);
-	fconfig.Write("x", m_shadow_dir_x);
-	fconfig.Write("y", m_shadow_dir_y);
-
-	fconfig.SetPath("/pin threshold");
-	fconfig.Write("value", m_pin_threshold);
-
-	fconfig.SetPath("/stereo");
-	fconfig.Write("enable_stereo", m_stereo);
-	fconfig.Write("eye dist", m_eye_dist);
-
-	fconfig.SetPath("/test mode");
-	fconfig.Write("speed", m_test_speed);
-	fconfig.Write("param", m_test_param);
-	fconfig.Write("wiref", m_test_wiref);
-
-	fconfig.SetPath("/wavelength to color");
-	fconfig.Write("c1", m_wav_color1);
-	fconfig.Write("c2", m_wav_color2);
-	fconfig.Write("c3", m_wav_color3);
-	fconfig.Write("c4", m_wav_color4);
-
-	fconfig.SetPath("/time id");
-	fconfig.Write("value", m_time_id);
-
-	fconfig.SetPath("/grad bg");
-	fconfig.Write("value", m_grad_bg);
-
-	fconfig.SetPath("/override vox");
-	fconfig.Write("value", m_override_vox);
-
-	fconfig.SetPath("/soft threshold");
-	fconfig.Write("value", m_soft_threshold);
-
-	fconfig.SetPath("/save cmp");
-	fconfig.Write("value", RenderFrame::GetCompression());
-
-	fconfig.SetPath("/run script");
-	fconfig.Write("value", m_run_script);
-	fconfig.Write("file", m_script_file);
-
-	fconfig.SetPath("/paint history");
-	fconfig.Write("value", m_paint_hist_depth);
-
-	fconfig.SetPath("/text font");
-	fconfig.Write("file", m_font_file);
-	fconfig.Write("value", m_text_size);
-	fconfig.Write("color", m_text_color);
-
-	fconfig.SetPath("/line width");
-	fconfig.Write("value", m_line_width);
-
-	//full screen
-	fconfig.SetPath("/full screen");
-	fconfig.Write("stay top", m_stay_top);
-	fconfig.Write("show cursor", m_show_cursor);
-
-	//last tool
-	fconfig.SetPath("/last tool");
-	fconfig.Write("value", m_last_tool);
-
-	//components
-	fconfig.SetPath("/tracking");
-	fconfig.Write("track_iter", m_track_iter);
-	fconfig.Write("component_size", m_component_size);
-	fconfig.Write("consistent_color", m_consistent_color);
-	fconfig.Write("try_merge", m_try_merge);
-	fconfig.Write("try_split", m_try_split);
-	fconfig.Write("contact_factor", m_contact_factor);
-	fconfig.Write("similarity", m_similarity);
-
-	//memory settings
-	fconfig.SetPath("/memory settings");
-	fconfig.Write("mem swap", m_mem_swap);
-	fconfig.Write("graphics mem", m_graphics_mem);
-	fconfig.Write("large data size", m_large_data_size);
-	fconfig.Write("force brick size", m_force_brick_size);
-	fconfig.Write("up time", m_up_time);
-	fconfig.Write("detail level offset", m_detail_level_offset);
-	EnableStreaming(m_mem_swap);
-
-	//update order
-	fconfig.SetPath("/update order");
-	fconfig.Write("value", m_update_order);
-
-	//invalidate texture
-	fconfig.SetPath("/invalidate tex");
-	fconfig.Write("value", m_invalidate_tex);
-
-	//point volume mode
-	fconfig.SetPath("/point volume mode");
-	fconfig.Write("value", m_point_volume_mode);
-
-	//ruler settings
-	fconfig.SetPath("/ruler");
-	fconfig.Write("use transf", m_ruler_use_transf);
-	fconfig.Write("time dep", m_ruler_time_dep);
-	fconfig.Write("relax f1", m_ruler_relax_f1);
-	fconfig.Write("infr", m_ruler_infr);
-	fconfig.Write("df_f", m_ruler_df_f);
-	fconfig.Write("relax iter", m_ruler_relax_iter);
-	fconfig.Write("auto relax", m_ruler_auto_relax);
-	fconfig.Write("relax type", m_ruler_relax_type);
-	fconfig.Write("size thresh", m_ruler_size_thresh);
-
-	//flags for flipping pvxml
-	fconfig.SetPath("/pvxml");
-	fconfig.Write("flip_x", m_pvxml_flip_x);
-	fconfig.Write("flip_y", m_pvxml_flip_y);
-	fconfig.Write("seq_type", m_pvxml_seq_type);
-
-	//pixel format
-	fconfig.SetPath("/pixel format");
-	fconfig.Write("api_type", m_api_type);
-	fconfig.Write("red_bit", m_red_bit);
-	fconfig.Write("green_bit", m_green_bit);
-	fconfig.Write("blue_bit", m_blue_bit);
-	fconfig.Write("alpha_bit", m_alpha_bit);
-	fconfig.Write("depth_bit", m_depth_bit);
-	fconfig.Write("samples", m_samples);
-
-	//context attrib
-	fconfig.SetPath("/context attrib");
-	fconfig.Write("gl_major_ver", m_gl_major_ver);
-	fconfig.Write("gl_minor_ver", m_gl_minor_ver);
-	fconfig.Write("gl_profile_mask", m_gl_profile_mask);
-
-	//max texture size
-	fconfig.SetPath("/max texture size");
-	fconfig.Write("use_max_texture_size", m_use_max_texture_size);
-	fconfig.Write("max_texture_size", m_max_texture_size);
-
-	//no tex pack
-	fconfig.SetPath("/no tex pack");
-	fconfig.Write("no_tex_pack", m_no_tex_pack);
-
-	//cl device
-	fconfig.SetPath("/cl device");
-	fconfig.Write("platform_id", m_cl_platform_id);
-	fconfig.Write("device_id", m_cl_device_id);
-
-	// java paths
-	fconfig.SetPath("/Java");	
- 	fconfig.Write("jvm_path", getJVMPath());
-	fconfig.Write("ij_path", getIJPath());
-	fconfig.Write("bioformats_path", getBioformatsPath());
-	fconfig.Write("ij_mode", getIJMode());
-
-	//clipping plane mode
-	fconfig.SetPath("/clipping planes");
-	fluo::ClipPlaneAgent* agent =
-		glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
-	if (agent)
-	{
-		long lval;
-		agent->getValue(gstClipPlaneMode, lval);
-		m_plane_mode = lval;
-	}
-	fconfig.Write("mode", m_plane_mode);
-
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	wxString dft = expath + GETSLASH() + "fluorender.set";
-	SaveConfig(fconfig, dft);
-}
-
-void SettingDlg::UpdateTextureSize()
-{
-	if (!m_use_max_texture_size)
-	{
-		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", flvr::ShaderProgram::
-				max_texture_size()));
-	}
-	else
-		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
-}
-
-bool SettingDlg::GetTestMode(int type)
-{
-	switch (type)
-	{
-	case 1:	//speed test
-		return m_test_speed;
-	case 2:	//param test
-		return m_test_param;
-	case 3:	//wireframe mode
-		return m_test_wiref;
-	default:
-		return false;
-	}
-}
-
-int SettingDlg::GetPeelingLyers()
-{
-	return m_peeling_layers;
-}
-
-bool SettingDlg::GetMicroBlend()
-{
-	return m_micro_blend;
-}
-
-void SettingDlg::GetShadowDir(double& x, double &y)
-{
-	x = m_shadow_dir_x;
-	y = m_shadow_dir_y;
-}
-
 //events
 void SettingDlg::OnSave(wxCommandEvent &event)
 {
-	SaveSettings();
+	m_agent->SaveSettings();
 	if (m_frame)
 		m_frame->ShowPane(this, false);
 }
@@ -1614,36 +813,30 @@ void SettingDlg::OnShow(wxShowEvent &event)
 
 void SettingDlg::OnProjectSaveCheck(wxCommandEvent &event)
 {
-	if (m_prj_save_chk->GetValue())
-		m_prj_save = true;
-	else
-		m_prj_save = false;
+	bool bval = m_prj_save_chk->GetValue();
+	m_agent->setValue(gstSaveProjectEnable, bval);
 }
 
 void SettingDlg::OnRealtimeCompressCheck(wxCommandEvent &event)
 {
-	if (m_realtime_cmp_chk->GetValue())
-		m_realtime_compress = true;
-	else
-		m_realtime_compress = false;
+	bool bval = m_realtime_cmp_chk->GetValue();
+	m_agent->setValue(gstHardwareCompress, bval);
 
-	RenderFrame::SetRealtimeCompression(m_realtime_compress);
+	//RenderFrame::SetRealtimeCompression(m_realtime_compress);
 }
 
 void SettingDlg::OnMouseIntCheck(wxCommandEvent &event)
 {
-	if (m_mouse_int_chk->GetValue())
-		m_mouse_int = true;
-	else
-		m_mouse_int = false;
+	bool bval = m_mouse_int_chk->GetValue();
+	m_agent->setValue(gstAdaptive, bval);
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstAdaptive, m_mouse_int);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstAdaptive, m_mouse_int);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 void SettingDlg::OnPeelingLayersChange(wxScrollEvent &event)
@@ -1662,66 +855,48 @@ void SettingDlg::OnPeelingLayersEdit(wxCommandEvent &event)
 	if (ival <= 0)
 		return;
 	m_peeling_layers_sldr->SetValue(ival);
-	m_peeling_layers = ival;
+	m_agent->setValue(gstPeelNum, ival);
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstPeelNum, ival);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstPeelNum, ival);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 void SettingDlg::OnMicroBlendCheck(wxCommandEvent &event)
 {
-	if (m_micro_blend_chk->GetValue())
-		m_micro_blend = true;
-	else
-		m_micro_blend = false;
+	bool bval = m_micro_blend_chk->GetValue();
+	m_agent->setValue(gstMicroBlendEnable, bval);
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstMicroBlendEnable, m_micro_blend);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstMicroBlendEnable, m_micro_blend);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 //shadow direction
 void SettingDlg::OnShadowDirCheck(wxCommandEvent &event)
 {
-	if (m_shadow_dir_chk->GetValue())
-	{
-		m_shadow_dir_sldr->Enable();
-		m_shadow_dir_text->Enable();
+	bool bval = m_shadow_dir_chk->GetValue();
+	m_shadow_dir_sldr->Enable(bval);
+	m_shadow_dir_text->Enable(bval);
+	m_agent->setValue(gstShadowDirEnable, bval);
 
-		wxString str;
-		str = m_shadow_dir_text->GetValue();
-		double deg;
-		str.ToDouble(&deg);
-		SetShadowDir(deg);
-		m_shadow_dir = true;
-	}
-	else
-	{
-		m_shadow_dir_sldr->Disable();
-		m_shadow_dir_text->Disable();
-		m_shadow_dir_x = 0.0;
-		m_shadow_dir_y = 0.0;
-		m_shadow_dir = false;
-	}
-
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstShadowDirEnable, m_shadow_dir);
-		view->setValue(gstShadowDirX, m_shadow_dir_x);
-		view->setValue(gstShadowDirY, m_shadow_dir);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstShadowDirEnable, m_shadow_dir);
+	//	view->setValue(gstShadowDirX, m_shadow_dir_x);
+	//	view->setValue(gstShadowDirY, m_shadow_dir);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 void SettingDlg::OnShadowDirChange(wxScrollEvent &event)
@@ -1738,17 +913,18 @@ void SettingDlg::OnShadowDirEdit(wxCommandEvent &event)
 	double deg;
 	str.ToDouble(&deg);
 	m_shadow_dir_sldr->SetValue(int(deg));
-	SetShadowDir(deg);
+	m_agent->setValue(gstShadowDirX, cos(fluo::d2r(deg)));
+	m_agent->setValue(gstShadowDirY, sin(fluo::d2r(deg)));
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstShadowDirEnable, m_shadow_dir);
-		view->setValue(gstShadowDirX, m_shadow_dir_x);
-		view->setValue(gstShadowDirY, m_shadow_dir);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstShadowDirEnable, m_shadow_dir);
+	//	view->setValue(gstShadowDirX, m_shadow_dir_x);
+	//	view->setValue(gstShadowDirY, m_shadow_dir);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 void SettingDlg::EnableStreaming(bool enable)
@@ -1783,60 +959,27 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_detail_level_offset_sldr->Disable();
 		m_detail_level_offset_text->Disable();
 	}
-	if (m_frame)
-	{
-		m_frame->SetTextureRendererSettings();
-		m_frame->RefreshVRenderViews();
-	}
-}
-
-void SettingDlg::SetShadowDir(double deg)
-{
-	m_shadow_dir_x = cos(fluo::d2r(deg));
-	m_shadow_dir_y = sin(fluo::d2r(deg));
-}
-
-double SettingDlg::GetShadowDir()
-{
-	double deg = fluo::r2d(atan2(m_shadow_dir_y, m_shadow_dir_x));
-	return deg;
+	//if (m_frame)
+	//{
+	//	m_frame->SetTextureRendererSettings();
+	//	m_frame->RefreshVRenderViews();
+	//}
 }
 
 //gradient background
 void SettingDlg::OnGradBgCheck(wxCommandEvent &event)
 {
-	if (m_grad_bg_chk->GetValue())
-		m_grad_bg = true;
-	else
-		m_grad_bg = false;
+	bool bval = m_grad_bg_chk->GetValue();
+	m_agent->setValue(gstGradBg, bval);
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstGradBg, m_grad_bg);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstGradBg, m_grad_bg);
+	//	//view->RefreshGL(39);
+	//}
 }
-
-// Get jvm paths.
-wxString SettingDlg::getJVMPath() {
-	return m_java_jvm_text->GetValue(); 
-}
-wxString SettingDlg::getIJPath() {
-	return m_java_ij_text->GetValue(); 
-}
-wxString SettingDlg::getBioformatsPath() {
-	return m_java_bioformats_text->GetValue(); 
-}
-std::vector<std::string> SettingDlg::GetJvmArgs() {
-	std::vector<std::string> args;
-	args.push_back(getJVMPath().ToStdString());
-	args.push_back(getIJPath().ToStdString());
-	args.push_back(getBioformatsPath().ToStdString());
-	return args;
-}
-
 
 //rot center anchor thresh
 void SettingDlg::OnPinThresholdChange(wxScrollEvent &event)
@@ -1853,14 +996,14 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent &event)
 	double dval;
 	str.ToDouble(&dval);
 	m_pin_threshold_sldr->SetValue(int(dval/10.0));
-	m_pin_threshold = dval / 100.0;
+	m_agent->setValue(gstPinThresh, dval);
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstPinThresh, m_pin_threshold);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstPinThresh, m_pin_threshold);
+	//}
 }
 
 //link rotations
@@ -1881,17 +1024,18 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 //stereo
 void SettingDlg::OnStereoCheck(wxCommandEvent &event)
 {
-	m_stereo = m_stereo_chk->GetValue();
-	fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
-	if (!view) return;
-	view->setValue(gstVrEnable, m_stereo);
+	bool bval = m_stereo_chk->GetValue();
+	m_agent->setValue(gstVrEnable, bval);
+	//fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
+	//if (!view) return;
+	//view->setValue(gstVrEnable, bval);
 	//view->RefreshGL(39);
 }
 
 void SettingDlg::OnEyeDistChange(wxScrollEvent &event)
 {
-	m_eye_dist = double(m_eye_dist_sldr->GetValue()) / 10.0;
-	wxString str = wxString::Format("%.1f", m_eye_dist);
+	double dval = double(m_eye_dist_sldr->GetValue()) / 10.0;
+	wxString str = wxString::Format("%.1f", dval);
 	if (str != m_eye_dist_text->GetValue())
 		m_eye_dist_text->SetValue(str);
 }
@@ -1902,94 +1046,73 @@ void SettingDlg::OnEyeDistEdit(wxCommandEvent &event)
 	double dval;
 	str.ToDouble(&dval);
 	m_eye_dist_sldr->SetValue(int(dval * 10.0));
-	m_eye_dist = dval;
-
-	fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
-	if (!view) return;
-	view->setValue(gstVrEyeOffset, m_eye_dist);
+	m_agent->setValue(gstVrEyeOffset, dval);
+	//fluo::Renderview* view = glbin_root->getChild(0)->asRenderview();
+	//if (!view) return;
+	//view->setValue(gstVrEyeOffset, dval);
 	//view->RefreshGL(39);
 }
 
 //override vox
 void SettingDlg::OnOverrideVoxCheck(wxCommandEvent &event)
 {
-	if (m_override_vox_chk->GetValue())
-		m_override_vox = true;
-	else
-		m_override_vox = false;
+	bool bval = m_override_vox_chk->GetValue();
+	m_agent->setValue(gstOverrideVoxSpc, bval);
 
-	if (m_frame)
-		m_frame->GetDataManager()->SetOverrideVox(m_override_vox);
-}
-
-//wavelength to color
-int SettingDlg::GetWavelengthColor(int n)
-{
-	switch (n)
-	{
-	case 1:
-		return m_wav_color1;
-	case 2:
-		return m_wav_color2;
-	case 3:
-		return m_wav_color3;
-	case 4:
-		return m_wav_color4;
-	default:
-		return 0;
-	}
+	//if (m_frame)
+	//	m_frame->GetDataManager()->SetOverrideVox(m_override_vox);
 }
 
 void SettingDlg::OnWavColor1Change(wxCommandEvent &event)
 {
-	if (m_wav_color1_cmb)
-		m_wav_color1 = m_wav_color1_cmb->GetCurrentSelection() + 1;
+	long lval = m_wav_color1_cmb->GetCurrentSelection() + 1;
+	m_agent->setValue(gstWaveColor1, lval);
 
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+	//if (m_frame && m_frame->GetDataManager())
+	//	m_frame->GetDataManager()->SetWavelengthColor(
+	//		m_wav_color1,
+	//		m_wav_color2,
+	//		m_wav_color3,
+	//		m_wav_color4);
 }
 
 void SettingDlg::OnWavColor2Change(wxCommandEvent &event)
 {
-	if (m_wav_color2_cmb)
-		m_wav_color2 = m_wav_color2_cmb->GetCurrentSelection() + 1;
+	long lval = m_wav_color2_cmb->GetCurrentSelection() + 1;
+	m_agent->setValue(gstWaveColor2, lval);
 
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+	//if (m_frame && m_frame->GetDataManager())
+	//	m_frame->GetDataManager()->SetWavelengthColor(
+	//		m_wav_color1,
+	//		m_wav_color2,
+	//		m_wav_color3,
+	//		m_wav_color4);
 }
 
 void SettingDlg::OnWavColor3Change(wxCommandEvent &event)
 {
-	if (m_wav_color3_cmb)
-		m_wav_color3 = m_wav_color3_cmb->GetCurrentSelection() + 1;
+	long lval = m_wav_color3_cmb->GetCurrentSelection() + 1;
+	m_agent->setValue(gstWaveColor3, lval);
 
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+	//if (m_frame && m_frame->GetDataManager())
+	//	m_frame->GetDataManager()->SetWavelengthColor(
+	//		m_wav_color1,
+	//		m_wav_color2,
+	//		m_wav_color3,
+	//		m_wav_color4);
 }
 
 void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 {
-	if (m_wav_color4_cmb)
-		m_wav_color4 = m_wav_color4_cmb->GetCurrentSelection() + 1;
+	long lval = m_wav_color4_cmb->GetCurrentSelection() + 1;
+	m_agent->setValue(gstWaveColor4, lval);
 
-	if (m_frame && m_frame->GetDataManager())
-		m_frame->GetDataManager()->SetWavelengthColor(
-			m_wav_color1,
-			m_wav_color2,
-			m_wav_color3,
-			m_wav_color4);
+	//if (m_frame && m_frame->GetDataManager())
+	//	m_frame->GetDataManager()->SetWavelengthColor(
+	//		m_wav_color1,
+	//		m_wav_color2,
+	//		m_wav_color3,
+	//		m_wav_color4);
 }
 
 //texture size

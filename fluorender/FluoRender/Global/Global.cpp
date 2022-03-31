@@ -92,6 +92,9 @@ void Global::BuildPaths()
 	origin_->addChild(paths);
 }
 
+#define ADD_VALUE(name, v) \
+	root->addValue(name, v)
+
 void Global::BuildRoot()
 {
 	Root* root = new Root();
@@ -106,6 +109,89 @@ void Global::BuildRoot()
 	//copy source
 	root->addRvalu(gstSourceVolume, (Referenced*)(0));
 	root->addValue(gstSourceMode, long(0));
+	//others to sync with children
+	ADD_VALUE(gstSaveProjectEnable, bool(false));
+	ADD_VALUE(gstCaptureAlpha, bool(false));
+	ADD_VALUE(gstCaptureFloat, bool(false));
+	ADD_VALUE(gstHardwareCompress, bool(false));
+	ADD_VALUE(gstSkipBrick, bool(false));
+	ADD_VALUE(gstTestSpeed, bool(false));
+	ADD_VALUE(gstTestParam, bool(false));
+	ADD_VALUE(gstTestWiref, bool(false));
+	ADD_VALUE(gstPeelNum, long(1));
+	ADD_VALUE(gstMicroBlendEnable, bool(false));
+	ADD_VALUE(gstShadowDirEnable, bool(false));
+	ADD_VALUE(gstShadowDirX, double(0));
+	ADD_VALUE(gstShadowDirY, double(0));
+	ADD_VALUE(gstAdaptive, bool(true));
+	ADD_VALUE(gstWaveColor1, long(5));
+	ADD_VALUE(gstWaveColor2, long(5));
+	ADD_VALUE(gstWaveColor3, long(5));
+	ADD_VALUE(gstWaveColor4, long(5));
+	ADD_VALUE(gstTimeFileId, std::string("_T"));
+	ADD_VALUE(gstGradBg, bool(false));
+	ADD_VALUE(gstPinThresh, double(10));
+	ADD_VALUE(gstVrEnable, bool(false));
+	ADD_VALUE(gstVrEyeOffset, double(20));
+	ADD_VALUE(gstOverrideVoxSpc, bool(true));
+	ADD_VALUE(gstSoftThresh, double(0));
+	ADD_VALUE(gstRunScript, bool(false));
+	ADD_VALUE(gstScriptFile, std::wstring(L""));
+	ADD_VALUE(gstTextSize, double(14));
+	ADD_VALUE(gstTextColor, Color());
+	ADD_VALUE(gstFontFile, std::string(""));
+	ADD_VALUE(gstLineWidth, double(3));
+	ADD_VALUE(gstSteamEnable, bool(false));
+	ADD_VALUE(gstGpuMemSize, double(1000));
+	ADD_VALUE(gstLargeDataSize, double(1000));
+	ADD_VALUE(gstBrickSize, long(128));
+	ADD_VALUE(gstResponseTime, long(100));
+	ADD_VALUE(gstStreamOrder, long(0));
+	ADD_VALUE(gstLodOffset, long(0));
+	ADD_VALUE(gstPointVolumeMode, long(0));
+	ADD_VALUE(gstRulerUseTransf, bool(false));
+	ADD_VALUE(gstRulerTransient, bool(true));
+	ADD_VALUE(gstRulerF1, double(2));
+	ADD_VALUE(gstRulerInfr, double(2));
+	ADD_VALUE(gstRulerRelaxIter, long(10));
+	ADD_VALUE(gstRulerRelax, bool(false));
+	ADD_VALUE(gstRulerRelaxType, long(1));
+	ADD_VALUE(gstRulerDfoverf, bool(false));
+	ADD_VALUE(gstRulerSizeThresh, long(5));
+	ADD_VALUE(gstPvxmlFlipX, bool(false));
+	ADD_VALUE(gstPvxmlFlipY, bool(false));
+	ADD_VALUE(gstPvxmlSeqType, long(1));
+	ADD_VALUE(gstApiType, long(0));
+	ADD_VALUE(gstOutputBitR, long(8));
+	ADD_VALUE(gstOutputBitG, long(8));
+	ADD_VALUE(gstOutputBitB, long(8));
+	ADD_VALUE(gstOutputBitA, long(8));
+	ADD_VALUE(gstOutputBitD, long(24));
+	ADD_VALUE(gstOutputSamples, long(0));
+	ADD_VALUE(gstGlVersionMajor, long(4));
+	ADD_VALUE(gstGlVersionMinor, long(6));
+	ADD_VALUE(gstGlProfileMask, long(2));
+	ADD_VALUE(gstClPlatformId, long(0));
+	ADD_VALUE(gstClDeviceId, long(0));
+	ADD_VALUE(gstPaintHistory, long(0));
+	ADD_VALUE(gstStayOnTop, bool(false));
+	ADD_VALUE(gstShowCursor, bool(true));
+	ADD_VALUE(gstLastTool, long(0));
+	ADD_VALUE(gstTrackIter, long(3));
+	ADD_VALUE(gstCompSizeLimit, long(5));
+	ADD_VALUE(gstCompConsistent, bool(true));
+	ADD_VALUE(gstTryMerge, bool(false));
+	ADD_VALUE(gstTrySplit, bool(false));
+	ADD_VALUE(gstContactFactor, double(0.6));
+	ADD_VALUE(gstSimilarity, double(0.5));
+	ADD_VALUE(gstMaxTextureSizeEnable, bool(false));
+	ADD_VALUE(gstMaxTextureSize, long(2048));
+	ADD_VALUE(gstNoTexPack, bool(false));
+	ADD_VALUE(gstClipPlaneMode, long(0));
+	ADD_VALUE(gstImagejMode, long(0));
+	ADD_VALUE(gstJvmPath, std::string(""));
+	ADD_VALUE(gstImagejPath, std::string(""));
+	ADD_VALUE(gstBioformatsPath, std::string(""));
 	origin_->addChild(root);
 }
 
