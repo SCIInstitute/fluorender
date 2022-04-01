@@ -59,7 +59,6 @@ namespace fluo
 		void ReadSettings();
 		void SaveSettings();
 		void UpdateDeviceTree();
-		void UpdateTextureSize();
 		std::vector<std::string> GetJvmArgs();
 
 	protected:

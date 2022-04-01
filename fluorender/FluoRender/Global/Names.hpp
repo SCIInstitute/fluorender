@@ -239,7 +239,7 @@ DEALINGS IN THE SOFTWARE.
 #define gst2dWeight2Id "2d weight2 id"
 #define gst2dDmapId "2d dmap id"
 //compress
-#define gstCompression "compression"
+#define gstHardwareCompress "hardware compress"
 //resize
 #define gstResize "resize"
 #define gstResizeX "resize x"
@@ -658,7 +658,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstSelectedKey "selected key"
 //setting agent/root
 #define gstSaveProjectEnable "save project enable"
-#define gstHardwareCompress "hardware compress"
 #define gstTestParam "test param"
 #define gstWaveColor1 "wave color1"
 #define gstWaveColor2 "wave color2"

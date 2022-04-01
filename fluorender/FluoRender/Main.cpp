@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.hpp>
 #include <AgentFactory.hpp>
 #include <MovieAgent.hpp>
+#include <SettingAgent.hpp>
 #include <VolumeFactory.hpp>
 #include "JVMInitializer.h"
 #include <wx/cmdline.h>
@@ -122,7 +123,9 @@ bool VRenderApp::OnInit()
 		((RenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	JVMInitializer*	pInstance = JVMInitializer::getInstance((((RenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
+	fluo::SettingAgent* agent = glbin_agtf->findFirst(gstSettingAgent)->asSettingAgent();
+	if (agent)
+		JVMInitializer*	pInstance = JVMInitializer::getInstance(agent->GetJvmArgs());
 	
 	//global init
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();

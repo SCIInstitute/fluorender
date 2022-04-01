@@ -113,6 +113,7 @@ void Global::BuildRoot()
 	ADD_VALUE(gstSaveProjectEnable, bool(false));
 	ADD_VALUE(gstCaptureAlpha, bool(false));
 	ADD_VALUE(gstCaptureFloat, bool(false));
+	ADD_VALUE(gstCaptureCompress, bool(false));
 	ADD_VALUE(gstHardwareCompress, bool(false));
 	ADD_VALUE(gstSkipBrick, bool(false));
 	ADD_VALUE(gstTestSpeed, bool(false));

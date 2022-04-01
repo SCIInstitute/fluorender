@@ -203,7 +203,7 @@ void VolumeFactory::createDefault()
 		vd->addValue(gst2dDmapId, (unsigned long)(0));//2d depth map texture for rendering shadows
 
 		//compression
-		vd->addValue(gstCompression, bool(false));
+		vd->addValue(gstHardwareCompress, bool(false));
 
 		//resize
 		vd->addValue(gstResize, bool(false));
@@ -278,7 +278,7 @@ void VolumeFactory::setEventHandler(VolumeData* vd)
 	ADD_AFTER_EVENT(vd, gstViewport, OnViewportChanged);
 	ADD_AFTER_EVENT(vd, gstClearColor, OnClearColorChanged);
 	ADD_AFTER_EVENT(vd, gstCurFramebuffer, OnCurFramebufferChanged);
-	ADD_AFTER_EVENT(vd, gstCompression, OnCompressionChanged);
+	ADD_AFTER_EVENT(vd, gstHardwareCompress, OnCompressionChanged);
 	ADD_AFTER_EVENT(vd, gstInvert, OnInvertChanged);
 	ADD_AFTER_EVENT(vd, gstMaskMode, OnMaskModeChanged);
 	ADD_AFTER_EVENT(vd, gstNoiseRedct, OnNoiseRedctChanged);

@@ -271,7 +271,7 @@ void VolumeData::OnCompressionChanged(Event& event)
 		return;
 
 	bool compression;
-	getValue(gstCompression, compression);
+	getValue(gstHardwareCompress, compression);
 	m_vr->set_compression(compression);
 }
 

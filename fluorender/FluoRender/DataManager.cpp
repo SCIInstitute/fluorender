@@ -405,7 +405,7 @@ int DataManager::LoadVolumeData(wxString &filename, int type, bool withImageJ, i
 		}
 
 		vd->SetReader(reader);
-		vd->setValue(gstCompression, m_compression);
+		vd->setValue(gstHardwareCompress, m_compression);
 
 		bool valid_spc = reader->IsSpcInfoValid();
 		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))

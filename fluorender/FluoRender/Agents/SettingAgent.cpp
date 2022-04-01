@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.hpp>
 #include <ShaderProgram.h>
 #include <TextRenderer.h>
+#include <KernelProgram.h>
 
 using namespace fluo;
 
@@ -204,7 +205,7 @@ void SettingAgent::UpdateAllSettings()
 
 void SettingAgent::ReadSettings()
 {
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	wxString expath = glbin.getExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "fluorender.set";
 	wxFileInputStream is(dft);
@@ -212,295 +213,289 @@ void SettingAgent::ReadSettings()
 		return;
 	wxFileConfig fconfig(is);
 
+	bool bval; long lval; double dval;
+	wxString sval;
 	//gradient magnitude
-	if (fconfig.Exists("/gm calculation"))
-	{
-		fconfig.SetPath("/gm calculation");
-		m_gmc_mode = fconfig.Read("mode", 2l);
-	}
 	//depth peeling
 	if (fconfig.Exists("/peeling layers"))
 	{
 		fconfig.SetPath("/peeling layers");
-		m_peeling_layers = fconfig.Read("value", 1l);
+		if (fconfig.Read("value", &lval)) setValue(gstPeelNum, lval);
 	}
 	//micro blending
 	if (fconfig.Exists("/micro blend"))
 	{
 		fconfig.SetPath("/micro blend");
-		fconfig.Read("mode", &m_micro_blend, false);
+		if (fconfig.Read("mode", &bval)) setValue(gstMicroBlendEnable, bval);
 	}
 	//save project
 	if (fconfig.Exists("/save project"))
 	{
 		fconfig.SetPath("/save project");
-		fconfig.Read("mode", &m_prj_save, false);
+		if (fconfig.Read("mode", &bval)) setValue(gstSaveProjectEnable, bval);
 	}
 	//save alpha
 	if (fconfig.Exists("/save alpha"))
 	{
 		fconfig.SetPath("/save alpha");
-		fconfig.Read("mode", &m_save_alpha, false);
+		if (fconfig.Read("mode", &bval)) setValue(gstCaptureAlpha, bval);
 	}
 	//save float
 	if (fconfig.Exists("/save float"))
 	{
 		fconfig.SetPath("/save float");
-		fconfig.Read("mode", &m_save_float, false);
+		if (fconfig.Read("mode", &bval)) setValue(gstCaptureFloat, bval);
 	}
 	//realtime compression
 	if (fconfig.Exists("/realtime compress"))
 	{
 		fconfig.SetPath("/realtime compress");
-		fconfig.Read("mode", &m_realtime_compress, false);
+		if (fconfig.Read("mode", &bval)) setValue(gstHardwareCompress, bval);
 	}
 	//skip empty bricks
 	if (fconfig.Exists("/skip bricks"))
 	{
 		fconfig.SetPath("/skip bricks");
-		fconfig.Read("mode", &m_skip_bricks, false);
+		if (fconfig.Read("mode", &bval)) setValue(gstSkipBrick, bval);
 	}
 	//mouse interactions
 	if (fconfig.Exists("/mouse int"))
 	{
 		fconfig.SetPath("/mouse int");
-		fconfig.Read("mode", &m_mouse_int, true);
+		if (fconfig.Read("mode", &bval)) setValue(gstAdaptive, bval);
 	}
 	//shadow
 	if (fconfig.Exists("/dir shadow"))
 	{
 		fconfig.SetPath("/dir shadow");
-		fconfig.Read("mode", &m_shadow_dir, false);
-		fconfig.Read("x", &m_shadow_dir_x, 0.0);
-		fconfig.Read("y", &m_shadow_dir_y, 0.0);
+		if (fconfig.Read("mode", &bval)) setValue(gstShadowDirEnable, bval);
+		if (fconfig.Read("x", &dval)) setValue(gstShadowDirX, dval);
+		if (fconfig.Read("y", &dval)) setValue(gstShadowDirY, dval);
 	}
 	//rot center anchor thresh
 	if (fconfig.Exists("/pin threshold"))
 	{
 		fconfig.SetPath("/pin threshold");
-		fconfig.Read("value", &m_pin_threshold, 10.0);
+		if (fconfig.Read("value", &dval)) setValue(gstPinThresh, dval);
 	}
 	//stereo
 	if (fconfig.Exists("/stereo"))
 	{
 		fconfig.SetPath("/stereo");
-		fconfig.Read("enable_stereo", &m_stereo, false);
-		fconfig.Read("eye dist", &m_eye_dist, 20.0);
+		if (fconfig.Read("enable_stereo", &bval)) setValue(gstVrEnable, bval);
+		if (fconfig.Read("eye dist", &dval)) setValue(gstVrEyeOffset, dval);
 	}
 	//test mode
 	if (fconfig.Exists("/test mode"))
 	{
 		fconfig.SetPath("/test mode");
-		fconfig.Read("speed", &m_test_speed, false);
-		fconfig.Read("param", &m_test_param, false);
-		fconfig.Read("wiref", &m_test_wiref, false);
+		if (fconfig.Read("speed", &bval)) setValue(gstTestSpeed, bval);
+		if (fconfig.Read("param", &bval)) setValue(gstTestParam, bval);
+		if (fconfig.Read("wiref", &bval)) setValue(gstTestWiref, bval);
 	}
 	//wavelength to color
 	if (fconfig.Exists("/wavelength to color"))
 	{
 		fconfig.SetPath("/wavelength to color");
-		fconfig.Read("c1", &m_wav_color1, 5);
-		fconfig.Read("c2", &m_wav_color2, 5);
-		fconfig.Read("c3", &m_wav_color3, 5);
-		fconfig.Read("c4", &m_wav_color4, 5);
+		if (fconfig.Read("c1", &lval)) setValue(gstWaveColor1, lval);
+		if (fconfig.Read("c2", &lval)) setValue(gstWaveColor2, lval);
+		if (fconfig.Read("c3", &lval)) setValue(gstWaveColor3, lval);
+		if (fconfig.Read("c4", &lval)) setValue(gstWaveColor4, lval);
 	}
 	//time sequence identifier
 	if (fconfig.Exists("/time id"))
 	{
 		fconfig.SetPath("/time id");
-		fconfig.Read("value", &m_time_id);
+		if (fconfig.Read("value", &sval)) setValue(gstTimeFileId, sval.ToStdString());
 	}
 	//gradient background
 	if (fconfig.Exists("/grad bg"))
 	{
 		fconfig.SetPath("/grad bg");
-		fconfig.Read("value", &m_grad_bg);
+		if (fconfig.Read("value", &bval)) setValue(gstGradBg, bval);
 	}
 	//save compressed
 	if (fconfig.Exists("/save cmp"))
 	{
 		bool save_cmp;
 		fconfig.SetPath("/save cmp");
-		fconfig.Read("value", &save_cmp);
-		RenderFrame::SetCompression(save_cmp);
+		if (fconfig.Read("value", &bval)) setValue(gstCaptureCompress, bval);
 	}
 	//override vox
 	if (fconfig.Exists("/override vox"))
 	{
 		fconfig.SetPath("/override vox");
-		fconfig.Read("value", &m_override_vox);
+		if (fconfig.Read("value", &bval)) setValue(gstOverrideVoxSpc, bval);
 	}
 	//soft threshold
 	if (fconfig.Exists("/soft threshold"))
 	{
 		fconfig.SetPath("/soft threshold");
-		fconfig.Read("value", &m_soft_threshold);
+		if (fconfig.Read("value", &dval)) setValue(gstSoftThresh, dval);
 	}
 	//run script
 	if (fconfig.Exists("/run script"))
 	{
 		fconfig.SetPath("/run script");
-		fconfig.Read("value", &m_run_script);
-		fconfig.Read("file", &m_script_file);
+		if (fconfig.Read("value", &bval)) setValue(gstRunScript, bval);
+		if (fconfig.Read("file", &sval)) setValue(gstScriptFile, sval.ToStdWstring());
 	}
 	//paint history depth
 	if (fconfig.Exists("/paint history"))
 	{
 		fconfig.SetPath("/paint history");
-		fconfig.Read("value", &m_paint_hist_depth);
+		if (fconfig.Read("value", &lval)) setValue(gstPaintHistory, lval);
 	}
 	//text font
 	if (fconfig.Exists("/text font"))
 	{
 		fconfig.SetPath("/text font");
-		fconfig.Read("file", &m_font_file);
-		fconfig.Read("value", &m_text_size);
-		fconfig.Read("color", &m_text_color);
+		if (fconfig.Read("file", &sval)) setValue(gstFontFile, sval.ToStdString());
+		if (fconfig.Read("value", &dval)) setValue(gstTextSize, dval);
+		if (fconfig.Read("color", &lval)) setValue(gstTextColorMode, lval);
 	}
 	//line width
 	if (fconfig.Exists("/line width"))
 	{
 		fconfig.SetPath("/line width");
-		fconfig.Read("value", &m_line_width);
+		if (fconfig.Read("value", &dval)) setValue(gstLineWidth, dval);
 	}
 	//full screen
 	if (fconfig.Exists("/full screen"))
 	{
 		fconfig.SetPath("/full screen");
-		fconfig.Read("stay top", &m_stay_top);
-		fconfig.Read("show cursor", &m_show_cursor);
+		if (fconfig.Read("stay top", &bval)) setValue(gstStayOnTop, bval);
+		if (fconfig.Read("show cursor", &bval)) setValue(gstShowCursor, bval);
 	}
 	//last tool
 	if (fconfig.Exists("/last tool"))
 	{
 		fconfig.SetPath("/last tool");
-		fconfig.Read("value", &m_last_tool);
+		if (fconfig.Read("value", &lval)) setValue(gstLastTool, lval);
+	}
+	//tracking settings
+	if (fconfig.Exists("/tracking"))
+	{
+		fconfig.SetPath("/tracking");
+		if (fconfig.Read("track_iter", &lval)) setValue(gstTrackIter, lval);
+		if (fconfig.Read("component_size", &lval)) setValue(gstCompSizeLimit, lval);
+		if (fconfig.Read("consistent_color", &bval)) setValue(gstCompConsistent, bval);
+		if (fconfig.Read("try_merge", &bval)) setValue(gstTryMerge, bval);
+		if (fconfig.Read("try_split", &bval)) setValue(gstTrySplit, bval);
+		if (fconfig.Read("contact_factor", &dval)) setValue(gstContactFactor, dval);
+		if (fconfig.Read("similarity", &dval)) setValue(gstSimilarity, dval);
 	}
 	//memory settings
 	if (fconfig.Exists("/memory settings"))
 	{
 		fconfig.SetPath("/memory settings");
 		//enable mem swap
-		fconfig.Read("mem swap", &m_mem_swap);
+		if (fconfig.Read("mem swap", &bval))
+		{
+			setValue(gstStreamEnable, bval);
+			dlg_.EnableStreaming(bval);
+		}
 		//graphics memory limit
-		fconfig.Read("graphics mem", &m_graphics_mem);
+		if (fconfig.Read("graphics mem", &dval)) setValue(gstGpuMemSize, dval);
 		//large data size
-		fconfig.Read("large data size", &m_large_data_size);
+		if (fconfig.Read("large data size", &dval)) setValue(gstLargeDataSize, dval);
 		//force brick size
-		fconfig.Read("force brick size", &m_force_brick_size);
+		if (fconfig.Read("force brick size", &lval)) setValue(gstBrickSize, lval);
 		//response time
-		fconfig.Read("up time", &m_up_time);
+		if (fconfig.Read("up time", &lval)) setValue(gstResponseTime, lval);
 		//detail level offset
-		fconfig.Read("detail level offset", &m_detail_level_offset);
+		if (fconfig.Read("detail level offset", &lval)) setValue(gstLodOffset, lval);
 	}
-	EnableStreaming(m_mem_swap);
 	//update order
 	if (fconfig.Exists("/update order"))
 	{
 		fconfig.SetPath("/update order");
-		fconfig.Read("value", &m_update_order);
+		if (fconfig.Read("value", &lval)) setValue(gstStreamOrder, lval);
 	}
 	//invalidate texture
-	if (fconfig.Exists("/invalidate tex"))
-	{
-		fconfig.SetPath("/invalidate tex");
-		fconfig.Read("value", &m_invalidate_tex);
-	}
 	//point volume mode
 	if (fconfig.Exists("/point volume mode"))
 	{
 		fconfig.SetPath("/point volume mode");
-		fconfig.Read("value", &m_point_volume_mode);
+		if (fconfig.Read("value", &lval)) setValue(gstPointVolumeMode, lval);
 	}
 	//ruler settings
 	if (fconfig.Exists("/ruler"))
 	{
 		fconfig.SetPath("/ruler");
-		fconfig.Read("use transf", &m_ruler_use_transf);
-		fconfig.Read("time dep", &m_ruler_time_dep);
-		fconfig.Read("relax f1", &m_ruler_relax_f1);
-		fconfig.Read("infr", &m_ruler_infr);
-		fconfig.Read("df_f", &m_ruler_df_f);
-		fconfig.Read("relax iter", &m_ruler_relax_iter);
-		fconfig.Read("auto relax", &m_ruler_auto_relax);
-		fconfig.Read("relax type", &m_ruler_relax_type);
-		fconfig.Read("size thresh", &m_ruler_size_thresh);
+		if (fconfig.Read("use transf", &bval)) setValue(gstRulerUseTransf, bval);
+		if (fconfig.Read("time dep", &bval)) setValue(gstRulerTransient, bval);
+		if (fconfig.Read("relax f1", &dval)) setValue(gstRulerF1, dval);
+		if (fconfig.Read("infr", &dval)) setValue(gstRulerInfr, dval);
+		if (fconfig.Read("df_f", &bval)) setValue(gstRulerDfoverf, bval);
+		if (fconfig.Read("relax iter", &lval)) setValue(gstRulerRelaxIter, lval);
+		if (fconfig.Read("auto relax", &bval)) setValue(gstRulerRelax, bval);
+		if (fconfig.Read("relax type", &lval)) setValue(gstRulerRelaxType, lval);
+		if (fconfig.Read("size thresh", &lval)) setValue(gstRulerSizeThresh, lval);
 	}
 	//flags for pvxml flipping
 	if (fconfig.Exists("/pvxml"))
 	{
 		fconfig.SetPath("/pvxml");
-		fconfig.Read("flip_x", &m_pvxml_flip_x);
-		fconfig.Read("flip_y", &m_pvxml_flip_y);
-		fconfig.Read("seq_type", &m_pvxml_seq_type);
+		if (fconfig.Read("flip_x", &bval)) setValue(gstPvxmlFlipX, bval);
+		if (fconfig.Read("flip_y", &bval)) setValue(gstPvxmlFlipY, bval);
+		if (fconfig.Read("seq_type", &lval)) setValue(gstPvxmlSeqType, lval);
 	}
 	//pixel format
 	if (fconfig.Exists("/pixel format"))
 	{
 		fconfig.SetPath("/pixel format");
-		fconfig.Read("api_type", &m_api_type);
-		fconfig.Read("red_bit", &m_red_bit);
-		fconfig.Read("green_bit", &m_green_bit);
-		fconfig.Read("blue_bit", &m_blue_bit);
-		fconfig.Read("alpha_bit", &m_alpha_bit);
-		fconfig.Read("depth_bit", &m_depth_bit);
-		fconfig.Read("samples", &m_samples);
-	}
-	//tracking settings
-	if (fconfig.Exists("/tracking"))
-	{
-		fconfig.SetPath("/tracking");
-		fconfig.Read("track_iter", &m_track_iter);
-		fconfig.Read("component_size", &m_component_size);
-		fconfig.Read("consistent_color", &m_consistent_color);
-		fconfig.Read("try_merge", &m_try_merge);
-		fconfig.Read("try_split", &m_try_split);
-		fconfig.Read("contact_factor", &m_contact_factor);
-		fconfig.Read("similarity", &m_similarity);
+		if (fconfig.Read("api_type", &lval)) setValue(gstApiType, lval);
+		if (fconfig.Read("red_bit", &lval)) setValue(gstOutputBitR, lval);
+		if (fconfig.Read("green_bit", &lval)) setValue(gstOutputBitG, lval);
+		if (fconfig.Read("blue_bit", &lval)) setValue(gstOutputBitB, lval);
+		if (fconfig.Read("alpha_bit", &lval)) setValue(gstOutputBitA, lval);
+		if (fconfig.Read("depth_bit", &lval)) setValue(gstOutputBitD, lval);
+		if (fconfig.Read("samples", &lval)) setValue(gstOutputSamples, lval);
 	}
 	//context attrib
 	if (fconfig.Exists("/context attrib"))
 	{
 		fconfig.SetPath("/context attrib");
-		fconfig.Read("gl_major_ver", &m_gl_major_ver);
-		fconfig.Read("gl_minor_ver", &m_gl_minor_ver);
-		fconfig.Read("gl_profile_mask", &m_gl_profile_mask);
+		if (fconfig.Read("gl_major_ver", &lval)) setValue(gstGlVersionMajor, lval);
+		if (fconfig.Read("gl_minor_ver", &lval)) setValue(gstGlVersionMinor, lval);
+		if (fconfig.Read("gl_profile_mask", &lval)) setValue(gstGlProfileMask, lval);
 	}
 	//max texture size
 	if (fconfig.Exists("/max texture size"))
 	{
 		fconfig.SetPath("/max texture size");
-		fconfig.Read("use_max_texture_size", &m_use_max_texture_size);
-		fconfig.Read("max_texture_size", &m_max_texture_size);
+		if (fconfig.Read("use_max_texture_size", &bval)) setValue(gstMaxTextureSizeEnable, bval);
+		if (fconfig.Read("max_texture_size", &lval)) setValue(gstMaxTextureSize, lval);
 	}
 	//no tex pack
 	if (fconfig.Exists("/no tex pack"))
 	{
 		fconfig.SetPath("/no tex pack");
-		fconfig.Read("no_tex_pack", &m_no_tex_pack);
+		if (fconfig.Read("no_tex_pack", &bval)) setValue(gstNoTexPack, bval);
 	}
 	//cl device
 	if (fconfig.Exists("/cl device"))
 	{
 		fconfig.SetPath("/cl device");
-		fconfig.Read("platform_id", &m_cl_platform_id);
-		fconfig.Read("device_id", &m_cl_device_id);
+		if (fconfig.Read("platform_id", &lval)) setValue(gstClPlatformId, lval);
+		if (fconfig.Read("device_id", &lval)) setValue(gstClDeviceId, lval);
 	}
 	//clipping plane display mode
 	if (fconfig.Exists("/clipping planes"))
 	{
 		fconfig.SetPath("/clipping planes");
-		fconfig.Read("mode", &m_plane_mode);
+		if (fconfig.Read("mode", &lval)) setValue(gstClipPlaneMode, lval);
 	}
 
 	// java paths load.
 	if (fconfig.Exists("/Java"))
 	{
 		fconfig.SetPath("/Java");
-		fconfig.Read("jvm_path", &m_jvm_path);
-		fconfig.Read("ij_path", &m_ij_path);
-		fconfig.Read("bioformats_path", &m_bioformats_path);
-		fconfig.Read("ij_mode", &m_ij_mode);
+		if (fconfig.Read("jvm_path", &sval)) setValue(gstJvmPath, sval.ToStdString());
+		if (fconfig.Read("ij_path", &sval)) setValue(gstImagejPath, sval.ToStdString());
+		if (fconfig.Read("bioformats_path", &sval)) setValue(gstBioformatsPath, sval.ToStdString());
+		if (fconfig.Read("ij_mode", &lval)) setValue(gstImagejMode, lval);
 	}
 }
 
@@ -516,195 +511,182 @@ void SettingAgent::SaveSettings()
 	fconfig.Write("ver_major", VERSION_MAJOR_TAG);
 	fconfig.Write("ver_minor", VERSION_MINOR_TAG);
 
-	fconfig.SetPath("/gm calculation");
-	fconfig.Write("mode", m_gmc_mode);
+	bool bval; long lval; double dval;
+	std::wstring wsval; std::string sval;
 
 	fconfig.SetPath("/peeling layers");
-	fconfig.Write("value", m_peeling_layers);
+	getValue(gstPeelNum, lval); fconfig.Write("value", lval);
 
 	fconfig.SetPath("/micro blend");
-	fconfig.Write("mode", m_micro_blend);
+	getValue(gstMicroBlendEnable, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/save project");
-	fconfig.Write("mode", m_prj_save);
+	getValue(gstSaveProjectEnable, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/save alpha");
-	fconfig.Write("mode", m_save_alpha);
+	getValue(gstCaptureAlpha, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/save float");
-	fconfig.Write("mode", m_save_float);
+	getValue(gstCaptureFloat, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/realtime compress");
-	fconfig.Write("mode", m_realtime_compress);
+	getValue(gstHardwareCompress, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/skip bricks");
-	fconfig.Write("mode", m_skip_bricks);
+	getValue(gstSkipBrick, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/mouse int");
-	fconfig.Write("mode", m_mouse_int);
+	getValue(gstAdaptive, bval); fconfig.Write("mode", bval);
 
 	fconfig.SetPath("/dir shadow");
-	fconfig.Write("mode", m_shadow_dir);
-	fconfig.Write("x", m_shadow_dir_x);
-	fconfig.Write("y", m_shadow_dir_y);
+	getValue(gstShadowDirEnable, bval); fconfig.Write("mode", bval);
+	getValue(gstShadowDirX, dval); fconfig.Write("x", dval);
+	getValue(gstShadowDirY, dval); fconfig.Write("y", dval);
 
 	fconfig.SetPath("/pin threshold");
-	fconfig.Write("value", m_pin_threshold);
+	getValue(gstPinThresh, dval); fconfig.Write("value", dval);
 
 	fconfig.SetPath("/stereo");
-	fconfig.Write("enable_stereo", m_stereo);
-	fconfig.Write("eye dist", m_eye_dist);
+	getValue(gstVrEnable, bval); fconfig.Write("enable_stereo", bval);
+	getValue(gstVrEyeOffset, dval); fconfig.Write("eye dist", dval);
 
 	fconfig.SetPath("/test mode");
-	fconfig.Write("speed", m_test_speed);
-	fconfig.Write("param", m_test_param);
-	fconfig.Write("wiref", m_test_wiref);
+	getValue(gstTestSpeed, bval); fconfig.Write("speed", bval);
+	getValue(gstTestParam, bval); fconfig.Write("param", bval);
+	getValue(gstTestWiref, bval); fconfig.Write("wiref", bval);
 
 	fconfig.SetPath("/wavelength to color");
-	fconfig.Write("c1", m_wav_color1);
-	fconfig.Write("c2", m_wav_color2);
-	fconfig.Write("c3", m_wav_color3);
-	fconfig.Write("c4", m_wav_color4);
+	getValue(gstWaveColor1, lval); fconfig.Write("c1", lval);
+	getValue(gstWaveColor2, lval); fconfig.Write("c2", lval);
+	getValue(gstWaveColor3, lval); fconfig.Write("c3", lval);
+	getValue(gstWaveColor4, lval); fconfig.Write("c4", lval);
 
 	fconfig.SetPath("/time id");
-	fconfig.Write("value", m_time_id);
+	getValue(gstTimeFileId, sval); fconfig.Write("value", wxString(sval));
 
 	fconfig.SetPath("/grad bg");
-	fconfig.Write("value", m_grad_bg);
-
-	fconfig.SetPath("/override vox");
-	fconfig.Write("value", m_override_vox);
-
-	fconfig.SetPath("/soft threshold");
-	fconfig.Write("value", m_soft_threshold);
+	getValue(gstGradBg, bval); fconfig.Write("value", bval);
 
 	fconfig.SetPath("/save cmp");
-	fconfig.Write("value", RenderFrame::GetCompression());
+	getValue(gstCaptureCompress, bval); fconfig.Write("value", bval);
+
+	fconfig.SetPath("/override vox");
+	getValue(gstOverrideVoxSpc, bval); fconfig.Write("value", bval);
+
+	fconfig.SetPath("/soft threshold");
+	getValue(gstSoftThresh, dval); fconfig.Write("value", dval);
 
 	fconfig.SetPath("/run script");
-	fconfig.Write("value", m_run_script);
-	fconfig.Write("file", m_script_file);
+	getValue(gstRunScript, bval); fconfig.Write("value", bval);
+	getValue(gstScriptFile, wsval); fconfig.Write("file", wxString(wsval));
 
 	fconfig.SetPath("/paint history");
-	fconfig.Write("value", m_paint_hist_depth);
+	getValue(gstPaintHistory, lval); fconfig.Write("value", lval);
 
 	fconfig.SetPath("/text font");
-	fconfig.Write("file", m_font_file);
-	fconfig.Write("value", m_text_size);
-	fconfig.Write("color", m_text_color);
+	getValue(gstFontFile, sval); fconfig.Write("file", wxString(sval));
+	getValue(gstTextSize, dval); fconfig.Write("value", dval);
+	getValue(gstTextColorMode, lval); fconfig.Write("color", lval);
 
 	fconfig.SetPath("/line width");
-	fconfig.Write("value", m_line_width);
+	getValue(gstLineWidth, dval); fconfig.Write("value", dval);
 
 	//full screen
 	fconfig.SetPath("/full screen");
-	fconfig.Write("stay top", m_stay_top);
-	fconfig.Write("show cursor", m_show_cursor);
+	getValue(gstStayOnTop, bval); fconfig.Write("stay top", bval);
+	getValue(gstShowCursor, bval); fconfig.Write("show cursor", bval);
 
 	//last tool
 	fconfig.SetPath("/last tool");
-	fconfig.Write("value", m_last_tool);
+	getValue(gstLastTool, lval); fconfig.Write("value", lval);
 
 	//components
 	fconfig.SetPath("/tracking");
-	fconfig.Write("track_iter", m_track_iter);
-	fconfig.Write("component_size", m_component_size);
-	fconfig.Write("consistent_color", m_consistent_color);
-	fconfig.Write("try_merge", m_try_merge);
-	fconfig.Write("try_split", m_try_split);
-	fconfig.Write("contact_factor", m_contact_factor);
-	fconfig.Write("similarity", m_similarity);
+	getValue(gstTrackIter, lval); fconfig.Write("track_iter", lval);
+	getValue(gstCompSizeLimit, lval); fconfig.Write("component_size", lval);
+	getValue(gstCompConsistent, bval); fconfig.Write("consistent_color", bval);
+	getValue(gstTryMerge, bval); fconfig.Write("try_merge", bval);
+	getValue(gstTrySplit, bval); fconfig.Write("try_split", bval);
+	getValue(gstContactFactor, dval); fconfig.Write("contact_factor", dval);
+	getValue(gstSimilarity, dval); fconfig.Write("similarity", dval);
 
 	//memory settings
 	fconfig.SetPath("/memory settings");
-	fconfig.Write("mem swap", m_mem_swap);
-	fconfig.Write("graphics mem", m_graphics_mem);
-	fconfig.Write("large data size", m_large_data_size);
-	fconfig.Write("force brick size", m_force_brick_size);
-	fconfig.Write("up time", m_up_time);
-	fconfig.Write("detail level offset", m_detail_level_offset);
-	EnableStreaming(m_mem_swap);
+	getValue(gstStreamEnable, bval); fconfig.Write("mem swap", bval);
+	getValue(gstGpuMemSize, dval); fconfig.Write("graphics mem", dval);
+	getValue(gstLargeDataSize, dval); fconfig.Write("large data size", dval);
+	getValue(gstBrickSize, lval); fconfig.Write("force brick size", lval);
+	getValue(gstResponseTime, lval); fconfig.Write("up time", lval);
+	getValue(gstLodOffset, lval); fconfig.Write("detail level offset", lval);
 
 	//update order
 	fconfig.SetPath("/update order");
-	fconfig.Write("value", m_update_order);
-
-	//invalidate texture
-	fconfig.SetPath("/invalidate tex");
-	fconfig.Write("value", m_invalidate_tex);
+	getValue(gstStreamOrder, lval); fconfig.Write("value", lval);
 
 	//point volume mode
 	fconfig.SetPath("/point volume mode");
-	fconfig.Write("value", m_point_volume_mode);
+	getValue(gstPointVolumeMode, lval); fconfig.Write("value", lval);
 
 	//ruler settings
 	fconfig.SetPath("/ruler");
-	fconfig.Write("use transf", m_ruler_use_transf);
-	fconfig.Write("time dep", m_ruler_time_dep);
-	fconfig.Write("relax f1", m_ruler_relax_f1);
-	fconfig.Write("infr", m_ruler_infr);
-	fconfig.Write("df_f", m_ruler_df_f);
-	fconfig.Write("relax iter", m_ruler_relax_iter);
-	fconfig.Write("auto relax", m_ruler_auto_relax);
-	fconfig.Write("relax type", m_ruler_relax_type);
-	fconfig.Write("size thresh", m_ruler_size_thresh);
+	getValue(gstRulerUseTransf, bval); fconfig.Write("use transf", bval);
+	getValue(gstRulerTransient, bval); fconfig.Write("time dep", bval);
+	getValue(gstRulerF1, dval); fconfig.Write("relax f1", dval);
+	getValue(gstRulerInfr, dval); fconfig.Write("infr", dval);
+	getValue(gstRulerDfoverf, bval); fconfig.Write("df_f", bval);
+	getValue(gstRulerRelaxIter, lval); fconfig.Write("relax iter", lval);
+	getValue(gstRulerRelax, bval); fconfig.Write("auto relax", bval);
+	getValue(gstRulerRelaxType, lval); fconfig.Write("relax type", lval);
+	getValue(gstRulerSizeThresh, lval); fconfig.Write("size thresh", lval);
 
 	//flags for flipping pvxml
 	fconfig.SetPath("/pvxml");
-	fconfig.Write("flip_x", m_pvxml_flip_x);
-	fconfig.Write("flip_y", m_pvxml_flip_y);
-	fconfig.Write("seq_type", m_pvxml_seq_type);
+	getValue(gstPvxmlFlipX, bval); fconfig.Write("flip_x", bval);
+	getValue(gstPvxmlFlipY, bval); fconfig.Write("flip_y", bval);
+	getValue(gstPvxmlSeqType, lval); fconfig.Write("seq_type", lval);
 
 	//pixel format
 	fconfig.SetPath("/pixel format");
-	fconfig.Write("api_type", m_api_type);
-	fconfig.Write("red_bit", m_red_bit);
-	fconfig.Write("green_bit", m_green_bit);
-	fconfig.Write("blue_bit", m_blue_bit);
-	fconfig.Write("alpha_bit", m_alpha_bit);
-	fconfig.Write("depth_bit", m_depth_bit);
-	fconfig.Write("samples", m_samples);
+	getValue(gstApiType, lval); fconfig.Write("api_type", lval);
+	getValue(gstOutputBitR, lval); fconfig.Write("red_bit", lval);
+	getValue(gstOutputBitG, lval); fconfig.Write("green_bit", lval);
+	getValue(gstOutputBitB, lval); fconfig.Write("blue_bit", lval);
+	getValue(gstOutputBitA, lval); fconfig.Write("alpha_bit", lval);
+	getValue(gstOutputBitD, lval); fconfig.Write("depth_bit", lval);
+	getValue(gstOutputSamples, lval); fconfig.Write("samples", lval);
 
 	//context attrib
 	fconfig.SetPath("/context attrib");
-	fconfig.Write("gl_major_ver", m_gl_major_ver);
-	fconfig.Write("gl_minor_ver", m_gl_minor_ver);
-	fconfig.Write("gl_profile_mask", m_gl_profile_mask);
+	getValue(gstGlVersionMajor, lval); fconfig.Write("gl_major_ver", lval);
+	getValue(gstGlVersionMinor, lval); fconfig.Write("gl_minor_ver", lval);
+	getValue(gstGlProfileMask, lval); fconfig.Write("gl_profile_mask", lval);
 
 	//max texture size
 	fconfig.SetPath("/max texture size");
-	fconfig.Write("use_max_texture_size", m_use_max_texture_size);
-	fconfig.Write("max_texture_size", m_max_texture_size);
+	getValue(gstMaxTextureSizeEnable, bval); fconfig.Write("use_max_texture_size", bval);
+	getValue(gstMaxTextureSize, lval); fconfig.Write("max_texture_size", lval);
 
 	//no tex pack
 	fconfig.SetPath("/no tex pack");
-	fconfig.Write("no_tex_pack", m_no_tex_pack);
+	getValue(gstNoTexPack, bval); fconfig.Write("no_tex_pack", bval);
 
 	//cl device
 	fconfig.SetPath("/cl device");
-	fconfig.Write("platform_id", m_cl_platform_id);
-	fconfig.Write("device_id", m_cl_device_id);
-
-	// java paths
-	fconfig.SetPath("/Java");
-	fconfig.Write("jvm_path", getJVMPath());
-	fconfig.Write("ij_path", getIJPath());
-	fconfig.Write("bioformats_path", getBioformatsPath());
-	fconfig.Write("ij_mode", getIJMode());
+	getValue(gstClPlatformId, lval); fconfig.Write("platform_id", lval);
+	getValue(gstClDeviceId, lval); fconfig.Write("device_id", lval);
 
 	//clipping plane mode
 	fconfig.SetPath("/clipping planes");
-	fluo::ClipPlaneAgent* agent =
-		glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
-	if (agent)
-	{
-		long lval;
-		agent->getValue(gstClipPlaneMode, lval);
-		m_plane_mode = lval;
-	}
-	fconfig.Write("mode", m_plane_mode);
+	getValue(gstClipPlaneMode, lval); fconfig.Write("mode", lval);
 
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	// java paths
+	fconfig.SetPath("/Java");
+	getValue(gstJvmPath, sval); fconfig.Write("jvm_path", wxString(sval));
+	getValue(gstImagejPath, sval); fconfig.Write("ij_path", wxString(sval));
+	getValue(gstBioformatsPath, sval); fconfig.Write("bioformats_path", wxString(sval));
+	getValue(gstImagejMode, lval); fconfig.Write("ij_mode", lval);
+
+	wxString expath = glbin.getExecutablePath();
 	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "fluorender.set";
 	SaveConfig(fconfig, dft);
@@ -712,12 +694,12 @@ void SettingAgent::SaveSettings()
 
 void SettingAgent::UpdateDeviceTree()
 {
-	m_device_tree->DeleteAllItems();
+	dlg_.m_device_tree->DeleteAllItems();
 	//cl device tree
 	std::vector<flvr::CLPlatform>* devices = flvr::KernelProgram::GetDeviceList();
 	int pid = flvr::KernelProgram::get_platform_id();
 	int did = flvr::KernelProgram::get_device_id();
-	wxTreeItemId root = m_device_tree->AddRoot("Computer");
+	wxTreeItemId root = dlg_.m_device_tree->AddRoot("Computer");
 	std::string name;
 	if (devices)
 	{
@@ -727,33 +709,21 @@ void SettingAgent::UpdateDeviceTree()
 			name = platform->vendor;
 			name.back() = ';';
 			name += " " + platform->name;
-			wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
+			wxTreeItemId pfitem = dlg_.m_device_tree->AppendItem(root, name);
 			for (int j = 0; j < platform->devices.size(); ++j)
 			{
 				flvr::CLDevice* device = &(platform->devices[j]);
 				name = device->vendor;
 				name.back() = ';';
 				name += " " + device->name;
-				wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
+				wxTreeItemId dvitem = dlg_.m_device_tree->AppendItem(pfitem, name);
 				if (i == pid && j == did)
-					m_device_tree->SelectItem(dvitem);
+					dlg_.m_device_tree->SelectItem(dvitem);
 			}
 		}
 	}
-	m_device_tree->ExpandAll();
-	m_device_tree->SetFocus();
-}
-
-void SettingAgent::UpdateTextureSize()
-{
-	if (!m_use_max_texture_size)
-	{
-		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", flvr::ShaderProgram::
-				max_texture_size()));
-	}
-	else
-		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
+	dlg_.m_device_tree->ExpandAll();
+	dlg_.m_device_tree->SetFocus();
 }
 
 std::vector<std::string> SettingAgent::GetJvmArgs()
@@ -798,6 +768,8 @@ void SettingAgent::OnMaxTextureSize(Event& event)
 		long lval;
 		getValue(gstMaxTextureSize, lval);
 		flvr::ShaderProgram::set_max_texture_size(lval);
+		dlg_.m_max_texture_size_text->SetValue(
+			wxString::Format("%d", lval));
 	}
 }
 
