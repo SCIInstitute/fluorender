@@ -66,6 +66,9 @@ namespace fluo
 		SettingDlg &dlg_;
 
 	private:
+		void OnMaxTextureSizeEnable(Event& event);
+		void OnMaxTextureSize(Event& event);
+		void OnFontFile(Event& event);
 	};
 }
 

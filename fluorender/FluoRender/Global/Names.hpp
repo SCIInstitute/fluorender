@@ -667,7 +667,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstTimeFileId "time file id"
 #define gstOverrideVoxSpc "override vox spc"
 #define gstFontFile "font file"
-#define gstSteamEnable "stream enable"
+#define gstStreamEnable "stream enable"
 #define gstGpuMemSize "gpu mem size"
 #define gstLargeDataSize "large data size"
 #define gstBrickSize "brick size"

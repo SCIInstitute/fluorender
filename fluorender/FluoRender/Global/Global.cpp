@@ -138,10 +138,10 @@ void Global::BuildRoot()
 	ADD_VALUE(gstRunScript, bool(false));
 	ADD_VALUE(gstScriptFile, std::wstring(L""));
 	ADD_VALUE(gstTextSize, double(14));
-	ADD_VALUE(gstTextColor, Color());
+	ADD_VALUE(gstTextColorMode, long(0));
 	ADD_VALUE(gstFontFile, std::string(""));
 	ADD_VALUE(gstLineWidth, double(3));
-	ADD_VALUE(gstSteamEnable, bool(false));
+	ADD_VALUE(gstStreamEnable, bool(false));
 	ADD_VALUE(gstGpuMemSize, double(1000));
 	ADD_VALUE(gstLargeDataSize, double(1000));
 	ADD_VALUE(gstBrickSize, long(128));

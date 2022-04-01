@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <SettingAgent.hpp>
 #include <SettingDlg.h>
+#include <Global.hpp>
+#include <ShaderProgram.h>
+#include <TextRenderer.h>
 
 using namespace fluo;
 
@@ -49,125 +52,152 @@ Root* SettingAgent::getObject()
 
 void SettingAgent::UpdateAllSettings()
 {
+	bool bval; long lval; double dval;
+	std::string sval;
 	//update user interface
 	//save project
-	m_prj_save_chk->SetValue(m_prj_save);
+	getValue(gstSaveProjectEnable, bval);
+	dlg_.m_prj_save_chk->SetValue(bval);
 	//realtime compression
-	m_realtime_cmp_chk->SetValue(m_realtime_compress);
+	getValue(gstHardwareCompress, bval);
+	dlg_.m_realtime_cmp_chk->SetValue(bval);
 	//mouse interactions
-	m_mouse_int_chk->SetValue(m_mouse_int);
+	getValue(gstAdaptive, bval);
+	dlg_.m_mouse_int_chk->SetValue(bval);
 	//depth peeling
-	m_peeling_layers_sldr->SetValue(m_peeling_layers);
-	m_peeling_layers_text->ChangeValue(wxString::Format("%d", m_peeling_layers));
+	getValue(gstPeelNum, lval);
+	dlg_.m_peeling_layers_sldr->SetValue(lval);
+	dlg_.m_peeling_layers_text->ChangeValue(wxString::Format("%d", lval));
 	//micro blending
-	m_micro_blend_chk->SetValue(m_micro_blend);
+	getValue(gstMicroBlendEnable, bval);
+	dlg_.m_micro_blend_chk->SetValue(bval);
 	//shadow direction
-	if (m_shadow_dir)
-	{
-		m_shadow_dir_chk->SetValue(true);
-		m_shadow_dir_sldr->Enable();
-		m_shadow_dir_text->Enable();
-	}
-	else
-	{
-		m_shadow_dir_chk->SetValue(false);
-		m_shadow_dir_sldr->Disable();
-		m_shadow_dir_text->Disable();
-		m_shadow_dir_x = 0.0;
-		m_shadow_dir_y = 0.0;
-	}
-	double deg = GetShadowDir();
-	//	double deg = fluo::r2d(atan2(m_shadow_dir_y, m_shadow_dir_x));
-	m_shadow_dir_sldr->SetValue(int(deg + 0.5));
-	m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
+	getValue(gstShadowDirEnable, bval);
+	dlg_.m_shadow_dir_chk->SetValue(bval);
+	dlg_.m_shadow_dir_sldr->Enable(bval);
+	dlg_.m_shadow_dir_text->Enable(bval);
+	double dx, dy;
+	getValue(gstShadowDirX, dx); getValue(gstShadowDirY, dy);
+	double deg = fluo::r2d(atan2(dy, dx));
+	dlg_.m_shadow_dir_sldr->SetValue(int(deg + 0.5));
+	dlg_.m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
 	//rot center anchor thresh
-	m_pin_threshold_sldr->SetValue(int(m_pin_threshold*10.0));
-	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", m_pin_threshold*100.0));
+	getValue(gstPinThresh, dval);
+	dlg_.m_pin_threshold_sldr->SetValue(int(dval*10.0));
+	dlg_.m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", dval*100.0));
 	//gradient background
-	m_grad_bg_chk->SetValue(m_grad_bg);
+	getValue(gstGradBg, bval);
+	dlg_.m_grad_bg_chk->SetValue(bval);
 	//stereo
-	m_stereo_chk->SetValue(m_stereo);
-	m_eye_dist_sldr->SetValue(int(m_eye_dist*10.0));
-	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", m_eye_dist));
+	getValue(gstVrEnable, bval);
+	dlg_.m_stereo_chk->SetValue(bval);
+	getValue(gstVrEyeOffset, dval);
+	dlg_.m_eye_dist_sldr->SetValue(int(dval*10.0));
+	dlg_.m_eye_dist_text->ChangeValue(wxString::Format("%.1f", dval));
 	//override vox
-	m_override_vox_chk->SetValue(m_override_vox);
+	getValue(gstOverrideVoxSpc, bval);
+	dlg_.m_override_vox_chk->SetValue(bval);
 	//wavelength to color
-	m_wav_color1_cmb->Select(m_wav_color1 - 1);
-	m_wav_color2_cmb->Select(m_wav_color2 - 1);
-	m_wav_color3_cmb->Select(m_wav_color3 - 1);
-	m_wav_color4_cmb->Select(m_wav_color4 - 1);
+	getValue(gstWaveColor1, lval);
+	dlg_.m_wav_color1_cmb->Select(lval - 1);
+	getValue(gstWaveColor2, lval);
+	dlg_.m_wav_color2_cmb->Select(lval - 1);
+	getValue(gstWaveColor3, lval);
+	dlg_.m_wav_color3_cmb->Select(lval - 1);
+	getValue(gstWaveColor4, lval);
+	dlg_.m_wav_color4_cmb->Select(lval - 1);
 	//max texture size
-	m_max_texture_size_chk->SetValue(m_use_max_texture_size);
-	if (m_use_max_texture_size)
+	getValue(gstMaxTextureSizeEnable, bval);
+	dlg_.m_max_texture_size_chk->SetValue(bval);
+	if (bval)
 	{
-		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
-		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", m_max_texture_size));
-		m_max_texture_size_text->Enable();
+		getValue(gstMaxTextureSize, lval);
+		flvr::ShaderProgram::set_max_texture_size(lval);
+		dlg_.m_max_texture_size_text->SetValue(
+			wxString::Format("%d", lval));
+		dlg_.m_max_texture_size_text->Enable();
 	}
 	else
 	{
-		m_max_texture_size_text->SetValue(
+		dlg_.m_max_texture_size_text->SetValue(
 			wxString::Format("%d", flvr::ShaderProgram::
 				max_texture_size()));
-		m_max_texture_size_text->Disable();
+		dlg_.m_max_texture_size_text->Disable();
 	}
 	//no tex pack
-	flvr::ShaderProgram::set_no_tex_upack(m_no_tex_pack);
+	getValue(gstNoTexPack, bval);
+	flvr::ShaderProgram::set_no_tex_upack(bval);
 	//font
-	wxString str = m_font_file.BeforeLast('.');
-	int font_sel = m_font_cmb->FindString(str);
+	getValue(gstFontFile, sval);
+	wxString str = sval;
+	str = str.BeforeLast('.');
+	int font_sel = dlg_.m_font_cmb->FindString(str);
 	if (font_sel != wxNOT_FOUND)
-		m_font_cmb->Select(font_sel);
+		dlg_.m_font_cmb->Select(font_sel);
 	long font_size;
-	for (unsigned int i = 0; i < m_font_size_cmb->GetCount(); ++i)
+	getValue(gstTextSize, dval);
+	for (unsigned int i = 0; i < dlg_.m_font_size_cmb->GetCount(); ++i)
 	{
-		str = m_font_size_cmb->GetString(i);
+		str = dlg_.m_font_size_cmb->GetString(i);
 		if (str.ToLong(&font_size) &&
-			font_size <= m_text_size)
-			m_font_size_cmb->Select(i);
+			font_size <= long(dval))
+			dlg_.m_font_size_cmb->Select(i);
 	}
-	m_text_color_cmb->Select(m_text_color);
+	getValue(gstTextColorMode, lval);
+	dlg_.m_text_color_cmb->Select(lval);
 	//line width
-	m_line_width_text->SetValue(wxString::Format("%.0f", m_line_width));
-	m_line_width_sldr->SetValue(int(m_line_width + 0.5));
+	getValue(gstLineWidth, dval);
+	dlg_.m_line_width_text->SetValue(wxString::Format("%.0f", dval));
+	dlg_.m_line_width_sldr->SetValue(int(dval + 0.5));
 	//paint history depth
-	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", m_paint_hist_depth));
-	m_paint_hist_depth_sldr->SetValue(m_paint_hist_depth);
+	getValue(gstPaintHistory, lval);
+	dlg_.m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", lval));
+	dlg_.m_paint_hist_depth_sldr->SetValue(lval);
 	//memory settings
-	m_streaming_chk->SetValue(m_mem_swap);
-	EnableStreaming(m_mem_swap);
-	m_update_order_rbox->SetSelection(m_update_order);
-	m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)m_graphics_mem));
-	m_graphics_mem_sldr->SetValue((int)(m_graphics_mem / 100.0));
-	m_large_data_text->ChangeValue(wxString::Format("%d", (int)m_large_data_size));
-	m_large_data_sldr->SetValue((int)(m_large_data_size / 10.0));
-	m_block_size_text->ChangeValue(wxString::Format("%d", m_force_brick_size));
-	m_block_size_sldr->SetValue(int(log(m_force_brick_size) / log(2.0) + 0.5));
-	m_response_time_text->ChangeValue(wxString::Format("%d", m_up_time));
-	m_response_time_sldr->SetValue(int(m_up_time / 10.0));
-	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -m_detail_level_offset));
-	m_detail_level_offset_sldr->SetValue(-m_detail_level_offset);
+	getValue(gstStreamEnable, bval);
+	dlg_.m_streaming_chk->SetValue(bval);
+	dlg_.EnableStreaming(bval);
+	getValue(gstStreamOrder, lval);
+	dlg_.m_update_order_rbox->SetSelection(lval);
+	getValue(gstGpuMemSize, dval);
+	dlg_.m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)dval));
+	dlg_.m_graphics_mem_sldr->SetValue((int)(dval / 100.0));
+	getValue(gstLargeDataSize, dval);
+	dlg_.m_large_data_text->ChangeValue(wxString::Format("%d", (int)dval));
+	dlg_.m_large_data_sldr->SetValue((int)(dval / 10.0));
+	getValue(gstBrickSize, lval);
+	dlg_.m_block_size_text->ChangeValue(wxString::Format("%d", lval));
+	dlg_.m_block_size_sldr->SetValue(int(log(double(lval)) / log(2.0) + 0.5));
+	getValue(gstResponseTime, lval);
+	dlg_.m_response_time_text->ChangeValue(wxString::Format("%d", lval));
+	dlg_.m_response_time_sldr->SetValue(int(lval / 10.0));
+	getValue(gstLodOffset, lval);
+	dlg_.m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -lval));
+	dlg_.m_detail_level_offset_sldr->SetValue(-lval);
 
 	//java
-	m_java_jvm_text->SetValue(m_jvm_path);
-	m_java_ij_text->SetValue(m_ij_path);
-	m_java_bioformats_text->SetValue(m_bioformats_path);
-	switch (m_ij_mode)
+	getValue(gstJvmPath, sval);
+	dlg_.m_java_jvm_text->SetValue(gstJvmPath);
+	getValue(gstImagejPath, sval);
+	dlg_.m_java_ij_text->SetValue(sval);
+	getValue(gstBioformatsPath, sval);
+	dlg_.m_java_bioformats_text->SetValue(sval);
+	getValue(gstImagejMode, lval);
+	switch (lval)
 	{
 	case 0:
-		mp_radio_button_imagej->SetValue(true);
-		m_java_jvm_text->Enable(true);
-		m_java_bioformats_text->Enable(true);
-		m_browse_jvm_btn->Enable(true);
-		m_browse_bioformats_btn->Enable(true);
+		dlg_.mp_radio_button_imagej->SetValue(true);
+		dlg_.m_java_jvm_text->Enable(true);
+		dlg_.m_java_bioformats_text->Enable(true);
+		dlg_.m_browse_jvm_btn->Enable(true);
+		dlg_.m_browse_bioformats_btn->Enable(true);
 		break;
 	case 1:
-		mp_radio_button_fiji->SetValue(true);
-		m_java_jvm_text->Enable(false);
-		m_java_bioformats_text->Enable(false);
-		m_browse_jvm_btn->Enable(false);
-		m_browse_bioformats_btn->Enable(false);
+		dlg_.mp_radio_button_fiji->SetValue(true);
+		dlg_.m_java_jvm_text->Enable(false);
+		dlg_.m_java_bioformats_text->Enable(false);
+		dlg_.m_browse_jvm_btn->Enable(false);
+		dlg_.m_browse_bioformats_btn->Enable(false);
 		break;
 	}
 }
@@ -739,3 +769,55 @@ std::vector<std::string> SettingAgent::GetJvmArgs()
 	return args;
 }
 
+void SettingAgent::OnMaxTextureSizeEnable(Event& event)
+{
+	bool bval;
+	getValue(gstMaxTextureSizeEnable, bval);
+	if (bval)
+	{
+		long lval;
+		getValue(gstMaxTextureSize, lval);
+		flvr::ShaderProgram::set_max_texture_size(lval);
+		dlg_.m_max_texture_size_text->SetValue(
+			wxString::Format("%d", lval));
+		dlg_.m_max_texture_size_text->Enable();
+	}
+	else
+	{
+		flvr::ShaderProgram::reset_max_texture_size();
+		dlg_.m_max_texture_size_text->Disable();
+	}
+}
+
+void SettingAgent::OnMaxTextureSize(Event& event)
+{
+	bool bval;
+	getValue(gstMaxTextureSizeEnable, bval);
+	if (bval)
+	{
+		long lval;
+		getValue(gstMaxTextureSize, lval);
+		flvr::ShaderProgram::set_max_texture_size(lval);
+	}
+}
+
+void SettingAgent::OnFontFile(Event& event)
+{
+	std::string sval;
+	getValue(gstFontFile, sval);
+	wxString exePath = glbin.getExecutablePath();
+	exePath = wxPathOnly(exePath);
+	wxString loc = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + sval;
+	flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
+	double dval;
+	getValue(gstTextSize, dval);
+	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstTextSize, m_text_size);
+	//	//view->RefreshGL(39);
+	//}
+}

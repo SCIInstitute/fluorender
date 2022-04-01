@@ -1118,48 +1118,30 @@ void SettingDlg::OnWavColor4Change(wxCommandEvent &event)
 //texture size
 void SettingDlg::OnMaxTextureSizeChk(wxCommandEvent &event)
 {
-	m_use_max_texture_size = m_max_texture_size_chk->GetValue();
-	if (m_use_max_texture_size)
-	{
-		flvr::ShaderProgram::set_max_texture_size(m_max_texture_size);
-		m_max_texture_size_text->SetValue(
-			wxString::Format("%d", m_max_texture_size));
-		m_max_texture_size_text->Enable();
-	}
-	else
-	{
-		flvr::ShaderProgram::reset_max_texture_size();
-		m_max_texture_size_text->Disable();
-	}
+	bool bval = m_max_texture_size_chk->GetValue();
+	m_agent->setValue(gstMaxTextureSizeEnable, bval);
 }
 
 void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent &event)
 {
-	if (m_use_max_texture_size)
-	{
-		wxString str = m_max_texture_size_text->GetValue();
-		long size;
-		if (str.ToLong(&size))
-		{
-			m_max_texture_size = size;
-			flvr::ShaderProgram::set_max_texture_size(size);
-		}
-	}
+	wxString str = m_max_texture_size_text->GetValue();
+	long size;
+	if (str.ToLong(&size))
+		m_agent->setValue(gstMaxTextureSize, size);
 }
 
 //memory settings
 void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 {
-	if (m_streaming_chk->GetValue())
-		m_mem_swap = true;
-	else
-		m_mem_swap = false;
-	EnableStreaming(m_mem_swap);
+	bool bval = m_streaming_chk->GetValue();
+	m_agent->setValue(gstStreamEnable, bval);
+	EnableStreaming(bval);
 }
 
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
 {
-	m_update_order = m_update_order_rbox->GetSelection();
+	long lval = m_update_order_rbox->GetSelection();
+	m_agent->setValue(gstStreamOrder, lval);
 }
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)
@@ -1178,7 +1160,7 @@ void SettingDlg::OnGraphicsMemEdit(wxCommandEvent &event)
 	if (val <= 0.0)
 		return;
 	m_graphics_mem_sldr->SetValue(int(val / 100.0));
-	m_graphics_mem = val;
+	m_agent->setValue(gstGpuMemSize, val);
 }
 
 void SettingDlg::OnLargeDataChange(wxScrollEvent &event)
@@ -1197,7 +1179,7 @@ void SettingDlg::OnLargeDataEdit(wxCommandEvent &event)
 	if (val < 0.0)
 		return;
 	m_large_data_sldr->SetValue(int(val / 10.0));
-	m_large_data_size = val;
+	m_agent->setValue(gstLargeDataSize, val);
 }
 
 void SettingDlg::OnBlockSizeChange(wxScrollEvent &event)
@@ -1216,7 +1198,7 @@ void SettingDlg::OnBlockSizeEdit(wxCommandEvent &event)
 	if (val <= 0.0)
 		return;
 	m_block_size_sldr->SetValue(int(log(val) / log(2.0) + 0.5));
-	m_force_brick_size = val;
+	m_agent->setValue(gstBrickSize, long(val));
 }
 
 void SettingDlg::OnResponseTimeChange(wxScrollEvent &event)
@@ -1235,7 +1217,7 @@ void SettingDlg::OnResponseTimeEdit(wxCommandEvent &event)
 	if (val <= 0.0)
 		return;
 	m_response_time_sldr->SetValue(int(val / 10.0));
-	m_up_time = val;
+	m_agent->setValue(gstResponseTime, long(val));
 }
 
 void SettingDlg::OnDetailLevelOffsetChange(wxScrollEvent &event)
@@ -1252,39 +1234,24 @@ void SettingDlg::OnDetailLevelOffsetEdit(wxCommandEvent &event)
 	long val;
 	str.ToLong(&val);
 	m_detail_level_offset_sldr->SetValue(val);
-	m_detail_level_offset = -val;
+	m_agent->setValue(gstLodOffset, val);
 
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstLevelOffset, val);
-		//view->RefreshGL(39);
-	}
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstLevelOffset, val);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 //font
 void SettingDlg::OnFontChange(wxCommandEvent &event)
 {
 	wxString str = m_font_cmb->GetValue();
-	if (str != "")
-	{
-		m_font_file = str + ".ttf";
-		wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-		exePath = wxPathOnly(exePath);
-		wxString loc = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + str + ".ttf";
-
-		flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());
-		flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-		{
-			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-			if (!view) continue;
-			view->setValue(gstTextSize, m_text_size);
-			//view->RefreshGL(39);
-		}
-	}
+	if (str.IsEmpty()) return;
+	std::string sval = str.ToStdString() + ".tff";
+	m_agent->setValue(gstFontFile, sval);
 }
 
 void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
@@ -1292,30 +1259,32 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent &event)
 	wxString str = m_font_size_cmb->GetValue();
 	long size;
 	if (str.ToLong(&size))
-	{
-		m_text_size = size;
+		m_agent->setValue(gstTextSize, double(size));
+	//{
+	//	m_text_size = size;
 
-		flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
-		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-		{
-			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-			if (!view) continue;
-			view->setValue(gstTextSize, m_text_size);
-			//view->RefreshGL(39);
-		}
-	}
+	//	flvr::TextRenderer::text_texture_manager_.SetSize(m_text_size);
+	//	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//	{
+	//		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//		if (!view) continue;
+	//		view->setValue(gstTextSize, m_text_size);
+	//		//view->RefreshGL(39);
+	//	}
+	//}
 }
 
 void SettingDlg::OnTextColorChange(wxCommandEvent &event)
 {
-	m_text_color = m_text_color_cmb->GetCurrentSelection();
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		view->setValue(gstTextColorMode, m_text_color);
-		//view->RefreshGL(39);
-	}
+	long lval = m_text_color_cmb->GetCurrentSelection();
+	m_agent->setValue(gstTextColorMode, lval);
+	//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	//{
+	//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+	//	if (!view) continue;
+	//	view->setValue(gstTextColorMode, m_text_color);
+	//	//view->RefreshGL(39);
+	//}
 }
 
 //line width
@@ -1330,18 +1299,19 @@ void SettingDlg::OnLineWidthSldr(wxScrollEvent &event)
 void SettingDlg::OnLineWidthText(wxCommandEvent &event)
 {
 	wxString str = m_line_width_text->GetValue();
-	unsigned long ival;
-	if (str.ToULong(&ival))
+	long ival;
+	if (str.ToLong(&ival))
 	{
+		m_agent->setValue(gstLineWidth, double(ival));
 		m_line_width_sldr->SetValue(ival);
-		m_line_width = ival;
-		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-		{
-			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-			if (!view) continue;
-			view->setValue(gstLineWidth, m_line_width);
-			//view->RefreshGL(39);
-		}
+		//m_line_width = ival;
+		//for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+		//{
+		//	fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+		//	if (!view) continue;
+		//	view->setValue(gstLineWidth, m_line_width);
+		//	//view->RefreshGL(39);
+		//}
 	}
 }
 
@@ -1357,34 +1327,33 @@ void SettingDlg::OnPaintHistDepthChange(wxScrollEvent &event)
 void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent &event)
 {
 	wxString str = m_paint_hist_depth_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
-	m_paint_hist_depth_sldr->SetValue(ival);
-	m_paint_hist_depth = ival;
-	if (m_frame)
-		m_frame->SetTextureUndos();
+	long ival;
+	if (str.ToLong(&ival))
+	{
+		m_agent->setValue(gstPaintHistory, ival);
+		m_paint_hist_depth_sldr->SetValue(ival);
+	}
+	//if (m_frame)
+	//	m_frame->SetTextureUndos();
 }
 
 // Java settings.
 void SettingDlg::OnJavaJvmEdit(wxCommandEvent &event)
 {
 	wxString str = m_java_jvm_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
+	m_agent->setValue(gstJvmPath, str.ToStdString());
 }
 
 void SettingDlg::OnJavaIJEdit(wxCommandEvent &event)
 {
 	wxString str = m_java_ij_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
+	m_agent->setValue(gstImagejPath, str.ToStdString());
 }
 
 void SettingDlg::OnJavaBioformatsEdit(wxCommandEvent &event)
 {
 	wxString str = m_java_bioformats_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
+	m_agent->setValue(gstBioformatsPath, str.ToStdString());
 }
 
 void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
@@ -1394,11 +1363,11 @@ void SettingDlg::onJavaJvmBrowse(wxCommandEvent &event)
 		m_frame, "Choose the jvm dll file",
 		"", "", "*.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #else
-    wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the libjvm.dylib file",
-                                              "", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose the libjvm.dylib file",
+		"", "", "*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
-    
+
 	int rval = fopendlg->ShowModal();
 	if (rval == wxID_OK)
 	{
@@ -1420,9 +1389,9 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 		m_frame, "Choose the imageJ/fiji directory",
 		"", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 #else
-    wxFileDialog *fopendlg = new wxFileDialog(
-                                              m_frame, "Choose the imageJ/fiji app",
-                                              "", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog *fopendlg = new wxFileDialog(
+		m_frame, "Choose the imageJ/fiji app",
+		"", "", "*.app", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 #endif
 
 	int rval = fopendlg->ShowModal();
@@ -1430,7 +1399,7 @@ void SettingDlg::onJavaIJBrowse(wxCommandEvent &event)
 	{
 		wxString filename = fopendlg->GetPath();
 #ifdef _DARWIN
-        //filename = filename + "/Contents/Java/ij.jar";
+		//filename = filename + "/Contents/Java/ij.jar";
 #endif
 		m_java_ij_text->SetValue(filename);
 	}
@@ -1456,12 +1425,13 @@ void SettingDlg::onJavaBioformatsBrowse(wxCommandEvent &event)
 		delete fopendlg;
 }
 
-void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event) {
+void SettingDlg::onJavaRadioButtonImageJ(wxCommandEvent &event)
+{
 	m_java_jvm_text->Enable(true);
 	m_java_bioformats_text->Enable(true);
 	m_browse_jvm_btn->Enable(true);
 	m_browse_bioformats_btn->Enable(true);
-	m_ij_mode = 0;
+	m_agent->setValue(gstImagejMode, long(0));
 }
 
 void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
@@ -1469,7 +1439,7 @@ void SettingDlg::onJavaRadioButtonFiji(wxCommandEvent &event) {
 	m_java_bioformats_text->Enable(false);
 	m_browse_jvm_btn->Enable(false);
 	m_browse_bioformats_btn->Enable(false);
-	m_ij_mode = 1;
+	m_agent->setValue(gstImagejMode, long(1));
 }
 
 //device tree
@@ -1479,6 +1449,7 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 	if (!sel.IsOk())
 		return;
 	int i = 0, j = 0;
+	int pid = 0, did = 0;
 	wxTreeItemIdValue pfck;
 	wxTreeItemId root = m_device_tree->GetRootItem();
 	if (root.IsOk())
@@ -1493,8 +1464,8 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 			{
 				if (dvitem == sel)
 				{
-					SetCLPlatformID(i);
-					SetCLDeviceID(j);
+					pid = i;
+					did = j;
 				}
 				dvitem = m_device_tree->GetNextChild(pfitem, dvck);
 				j++;
@@ -1503,4 +1474,6 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 			i++;
 		}
 	}
+	m_agent->setValue(gstClPlatformId, long(pid));
+	m_agent->setValue(gstClDeviceId, long(did));
 }

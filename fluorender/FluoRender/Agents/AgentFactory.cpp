@@ -747,6 +747,9 @@ SettingAgent* AgentFactory::addSettingAgent(const std::string &name, wxWindow &w
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_AFTER_EVENT(gstMaxTextureSizeEnable, SettingAgent, OnMaxTextureSizeEnable);
+		ADD_AFTER_EVENT(gstMaxTextureSize, SettingAgent, OnMaxTextureSize);
+		ADD_AFTER_EVENT(gstFontFile, SettingAgent, OnFontFile);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
