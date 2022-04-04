@@ -693,11 +693,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstStayOnTop "stay on top"
 #define gstShowCursor "show cursor"
 #define gstLastTool "last tool"
-#define gstTrackIter "track iter"
-#define gstTryMerge "try merge"
-#define gstTrySplit "try split"
-#define gstContactFactor "contact factor"
-#define gstSimilarity "similarity"
 #define gstMaxTextureSizeEnable "max texture size enable"
 #define gstMaxTextureSize "max texture size"
 #define gstNoTexPack "no tex pack"
@@ -705,6 +700,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstJvmPath "jvm path"
 #define gstImagejPath "imagej path"
 #define gstBioformatsPath "bioformats path"
+//track agent
+#define gstTrackIter "track iter"
+#define gstTryMerge "try merge"
+#define gstTrySplit "try split"
+#define gstContactFactor "contact factor"
+#define gstSimilarity "similarity"
+#define gstTrackFile "track file"
 
 //input
 //mouse

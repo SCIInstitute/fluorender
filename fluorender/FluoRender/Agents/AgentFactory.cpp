@@ -772,6 +772,7 @@ TrackAgent* AgentFactory::addTrackAgent(const std::string &name, wxWindow &windo
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_VALUE(gstTrackFile, std::wstring(L""));
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

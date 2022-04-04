@@ -29,7 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _TRACKAGENT_H_
 
 #include <InterfaceAgent.hpp>
-#include <VolumeData.hpp>
+#include <Renderview.hpp>
+#include <Tracking/Cell.h>
+#include <Tracking/VolCache.h>
 
 class TrackDlg;
 namespace fluo
@@ -46,18 +48,57 @@ namespace fluo
 
 		virtual const char* className() const { return "TrackAgent"; }
 
-		virtual void setObject(VolumeData* an);
-		virtual VolumeData* getObject();
+		virtual void setObject(Renderview* view);
+		virtual Renderview* getObject();
 
 		virtual void UpdateAllSettings();
 
 		virtual TrackAgent* asTrackAgent() { return this; }
 		virtual const TrackAgent* asTrackAgent() const { return this; }
 
+		friend class AgentFactory;
+
+		void UpdateTraces();
+		void UpdateList();
+
+		//cell operations
+		void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list);
+		void CellUpdate();
+		void CellFull();
+		void CellLink(bool exclusive);
+		void CellNewID(bool append);
+		void CellEraseID();
+		void CellReplaceID();
+		void CellCombineID();
+		void CompDelete();
+		void CompClear();
+		//uncertain filtering
+		void UncertainFilter(bool input = false);
+		//link for external call
+		void LinkAddedCells(flrd::CelpList &list);
+
+		//measurement
+		void SaveOutputResult(wxString &filename);
+
+		//automatic tracking
+		void GenMap();
+		void RefineMap(int t = -1, bool erase_v = true);
+
+		//track map file
+		int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
+		std::wstring GetTrackFile();
+		void LoadTrackFile(const std::wstring &file);
+		void SaveTrackFile(const std::wstring &file);
+
+
 	protected:
 		TrackDlg &dlg_;
 
 	private:
+		//read/delete volume cache from file
+		void ReadVolCache(flrd::VolCache& vol_cache);
+		void DelVolCache(flrd::VolCache& vol_cache);
+
 	};
 }
 

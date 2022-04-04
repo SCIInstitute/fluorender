@@ -28,17 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACKDLG_H_
 #define _TRACKDLG_H_
 
-#include "Main.h"
-#include <Tracking/Cell.h>
-#include <Tracking/VolCache.h>
+//#include "Main.h"
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/notebook.h>
 #include <wx/tglbtn.h>
 #include <vector>
-
-using namespace std;
+#include <TrackAgent.hpp>
 
 class RenderFrame;
 namespace fluo
@@ -63,14 +60,13 @@ public:
 
 	void Append(wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
-	void UpdateTraces(fluo::Renderview* view=0);
-	void DeleteSelection();
 	wxString GetText(long item, int col);
+	void DeleteSelection();
 
 	friend class TrackDlg;
+	friend class fluo::TrackAgent;
 
 private:
-	fluo::Renderview *m_view;
 	int m_type;//0-current; 1-previous
 
 private:
@@ -83,7 +79,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-DECLARE_APP(VRenderApp)
+//DECLARE_APP(VRenderApp)
 class TrackDlg : public wxPanel
 {
 public:
@@ -169,75 +165,19 @@ public:
 	TrackDlg(RenderFrame* frame);
 	~TrackDlg();
 
-	void GetSettings(fluo::Renderview* vrv);
-	fluo::Renderview* GetView();
-	void UpdateList();
-	void SetCellSize(int size);
+	void AssociateRenderview(fluo::Renderview* view)
+	{
+		m_agent->setObject(view);
+	}
 
-	//cell operations
-	void CellUpdate();
-	void CellFull();
-	void CellLink(bool exclusive);
-	void CellNewID(bool append);
-	void CellEraseID();
-	void CellReplaceID();
-	void CellCombineID();
-	void CompDelete();
-	void CompClear();
-	//uncertain filtering
-	void UncertainFilter(bool input = false);
-	//link for external call
-	void LinkAddedCells(flrd::CelpList &list);
-
-	//measurement
-	void SaveOutputResult(wxString &filename);
-
-	//automatic tracking
-	void GenMap();
-	void RefineMap(int t=-1, bool erase_v=true);
-
-	//track map file
-	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
-	std::wstring GetTrackFile();
-	void LoadTrackFile(const std::wstring &file);
-	void SaveTrackFile(const std::wstring &file);
+	friend class fluo::TrackAgent;
 
 private:
-	typedef struct
-	{
-		unsigned int id;
-		int total_num;
-		int surface_num;
-		int contact_num;
-	} comp_info;
-
+	fluo::TrackAgent* m_agent;
 	RenderFrame* m_frame;
-	//current view
-	fluo::Renderview* m_view;
+	
 	//tab control
 	wxNotebook *m_notebook;
-
-	//time sequence setting
-	long m_cur_time;
-	long m_prv_time;
-
-	//cluster number
-	int m_clnum;
-
-	//settings
-	size_t m_iter_num;
-	double m_size_thresh;
-	bool m_consistent_color;
-	bool m_try_merge;
-	bool m_try_split;
-	double m_similarity;
-	double m_contact_factor;
-
-	std::wstring m_track_file;
-
-	//ids
-	unsigned int m_cell_new_id;
-	bool m_cell_new_id_empty;
 
 	//map page
 	//load/save trace
@@ -331,16 +271,11 @@ private:
 	wxTextCtrl* m_stat_text;
 
 private:
-	void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list);
 	wxWindow* CreateMapPage(wxWindow *parent);
 	wxWindow* CreateSelectPage(wxWindow *parent);
 	wxWindow* CreateLinkPage(wxWindow *parent);
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
-
-	//read/delete volume cache from file
-	void ReadVolCache(flrd::VolCache& vol_cache);
-	void DelVolCache(flrd::VolCache& vol_cache);
 
 private:
 	//map page
