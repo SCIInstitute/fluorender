@@ -68,6 +68,7 @@ public:
 
 private:
 	int m_type;//0-current; 1-previous
+	fluo::TrackAgent* m_agent;
 
 private:
 	void OnKeyDown(wxKeyEvent& event);

@@ -77,16 +77,30 @@ namespace fluo
 		//link for external call
 		void LinkAddedCells(flrd::CelpList &list);
 
+		void ClearTrack();
+
 		//measurement
 		void SaveOutputResult(wxString &filename);
 
 		//automatic tracking
 		void GenMap();
-		void RefineMap(int t = -1, bool erase_v = true);
+		void RefineMap(bool cur_time = true, bool erase_v = true);
+
+		//convert
+		void ConvertToRulers();
+		void ConvertConsistent();
+		
+		//analyze
+		void AnalyzeComp();
+		void AnalyzeLink();
+		void AnalyzeUncertainHist();
+		void AnalyzePath();
+
+		//
+		void Shuffle();
 
 		//track map file
 		int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
-		std::wstring GetTrackFile();
 		void LoadTrackFile(const std::wstring &file);
 		void SaveTrackFile(const std::wstring &file);
 
@@ -99,6 +113,12 @@ namespace fluo
 		void ReadVolCache(flrd::VolCache& vol_cache);
 		void DelVolCache(flrd::VolCache& vol_cache);
 
+		//event functions
+		void OnTrackCellSize(Event& event);
+		void OnGhostNum(Event& event);
+		void OnGhostTailEnable(Event& event);
+		void OnGhostLeadEnable(Event& event);
+		void OnCompUncertainLow(Event& event);
 	};
 }
 

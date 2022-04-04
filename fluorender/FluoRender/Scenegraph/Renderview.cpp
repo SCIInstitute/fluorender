@@ -8978,7 +8978,7 @@ void Renderview::HandleIdle()
 		glbin_input->getValue(gstKbSDown, bval);
 		if (bval)
 		{
-			ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+			ClipPlaneAgent* agent = glbin_agtf->getClipPlaneAgent(gstClipPlaneAgent);
 			if (agent)
 			{
 				double z, res;
@@ -8993,7 +8993,7 @@ void Renderview::HandleIdle()
 		glbin_input->getValue(gstKbWDown, bval);
 		if (bval)
 		{
-			ClipPlaneAgent* agent = glbin_agtf->findFirst(gstClipPlaneAgent)->asClipPlaneAgent();
+			ClipPlaneAgent* agent = glbin_agtf->getClipPlaneAgent(gstClipPlaneAgent);
 			if (agent)
 			{
 				double z, res;
@@ -9118,7 +9118,7 @@ void Renderview::HandleIdle()
 			getValue(gstPaintColocalize, bval);
 			if (bval)
 			{
-				ColocalAgent* agent = glbin_agtf->findFirst(gstColocalAgent)->asColocalAgent();
+				ColocalAgent* agent = glbin_agtf->getColocalAgent(gstColocalAgent);
 				if (agent) agent->Run();
 			}
 			//if (int_mode == 12 && m_frame->GetMeasureDlg())

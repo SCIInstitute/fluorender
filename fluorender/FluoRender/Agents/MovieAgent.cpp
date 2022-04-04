@@ -89,7 +89,7 @@ void MovieAgent::UpdateAllSettings()
 
 	AddScriptToList();
 	GetScriptSettings();
-	glbin_agtf->findFirst(gstRecorderAgent)->asRecorderAgent()->UpdateAllSettings();
+	glbin_agtf->getRecorderAgent(gstRecorderAgent)->UpdateAllSettings();
 }
 
 void MovieAgent::SetProgress(double pcnt)

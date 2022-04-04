@@ -701,12 +701,17 @@ DEALINGS IN THE SOFTWARE.
 #define gstImagejPath "imagej path"
 #define gstBioformatsPath "bioformats path"
 //track agent
+#define gstTrackCellSize "track cell size"
 #define gstTrackIter "track iter"
 #define gstTryMerge "try merge"
 #define gstTrySplit "try split"
 #define gstContactFactor "contact factor"
 #define gstSimilarity "similarity"
 #define gstTrackFile "track file"
+#define gstGhostNum "ghost num"
+#define gstGhostTailEnable "ghost tail enable"
+#define gstGhostLeadEnable "ghost lead enable"
+#define gstCompUncertainLow "comp uncertain low"
 
 //input
 //mouse

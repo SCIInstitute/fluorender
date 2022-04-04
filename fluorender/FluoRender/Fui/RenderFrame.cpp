@@ -1803,7 +1803,7 @@ void RenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 wxString RenderFrame::ScriptDialog(const wxString& title,
 	const wxString& wildcard, long style)
 {
-	fluo::MovieAgent* agent = glbin_agtf->findFirst(gstMovieAgent)->asMovieAgent();
+	fluo::MovieAgent* agent = glbin_agtf->getMovieAgent(gstMovieAgent);
 	if (agent) agent->HoldRun();
 	wxString result;
 	wxFileDialog *dlg = new wxFileDialog(

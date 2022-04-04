@@ -293,10 +293,7 @@ void ClipPlaneAgent::alignRenderViewRot()
 	Renderview* rv = visitor.getRenderview();
 	if (!rv)
 		return;
-	InterfaceAgent* rv_agent = glbin_agtf->findFirst(rv->getName());
-	if (!rv_agent)
-		return;
-	RenderCanvasAgent* agent = dynamic_cast<RenderCanvasAgent*>(rv_agent);
+	RenderCanvasAgent* agent = glbin_agtf->getRenderCanvasAgent(rv->getName());
 	if (!agent)
 		return;
 	double rot_x, rot_y, rot_z;

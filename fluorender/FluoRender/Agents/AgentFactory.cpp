@@ -772,7 +772,23 @@ TrackAgent* AgentFactory::addTrackAgent(const std::string &name, wxWindow &windo
 	if (agent)
 	{
 		agent->setName(name);
+		ADD_VALUE(gstTrackCellSize, long(0));
+		ADD_VALUE(gstTrackIter, long(0));
+		ADD_VALUE(gstCompSizeLimit, long(0));
+		ADD_VALUE(gstTryMerge, bool(false));
+		ADD_VALUE(gstTrySplit, bool(false));
+		ADD_VALUE(gstContactFactor, double(0));
+		ADD_VALUE(gstSimilarity, double(0));
 		ADD_VALUE(gstTrackFile, std::wstring(L""));
+		ADD_VALUE(gstGhostNum, long(0));
+		ADD_VALUE(gstGhostTailEnable, bool(false));
+		ADD_VALUE(gstGhostLeadEnable, bool(false));
+		ADD_VALUE(gstCompUncertainLow, long(0));
+		ADD_AFTER_EVENT(gstTrackCellSize, TrackAgent, OnGhostNum);
+		ADD_AFTER_EVENT(gstGhostNum, TrackAgent, OnGhostNum);
+		ADD_AFTER_EVENT(gstGhostTailEnable, TrackAgent, OnGhostTailEnable);
+		ADD_AFTER_EVENT(gstGhostLeadEnable, TrackAgent, OnGhostLeadEnable);
+		ADD_AFTER_EVENT(gstCompUncertainLow, TrackAgent, OnCompUncertainLow);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
