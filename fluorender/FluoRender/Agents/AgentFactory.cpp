@@ -784,7 +784,9 @@ TrackAgent* AgentFactory::addTrackAgent(const std::string &name, wxWindow &windo
 		ADD_VALUE(gstGhostTailEnable, bool(false));
 		ADD_VALUE(gstGhostLeadEnable, bool(false));
 		ADD_VALUE(gstCompUncertainLow, long(0));
-		ADD_AFTER_EVENT(gstTrackCellSize, TrackAgent, OnGhostNum);
+		ADD_VALUE(gstClusterNum, long(0));
+		ADD_AFTER_EVENT(gstTrackCellSize, TrackAgent, OnTrackCellSize);
+		ADD_AFTER_EVENT(gstTrackFile, TrackAgent, OnTrackFile);
 		ADD_AFTER_EVENT(gstGhostNum, TrackAgent, OnGhostNum);
 		ADD_AFTER_EVENT(gstGhostTailEnable, TrackAgent, OnGhostTailEnable);
 		ADD_AFTER_EVENT(gstGhostLeadEnable, TrackAgent, OnGhostLeadEnable);

@@ -178,7 +178,7 @@ void NoiseReduceDlg::OnPreviewBtn(wxCommandEvent &event)
 
 void NoiseReduceDlg::OnEraseBtn(wxCommandEvent &event)
 {
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->BrushErase();
+	glbin_agtf->getBrushToolAgent()->BrushErase();
 }
 
 void NoiseReduceDlg::OnEnhanceSelChk(wxCommandEvent &event)

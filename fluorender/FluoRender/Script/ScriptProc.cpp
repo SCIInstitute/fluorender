@@ -1102,16 +1102,16 @@ void ScriptProc::RunGenerateComp()
 	m_fconfig->Read("comp_command", &cmdfile);
 	cmdfile = GetInputFile(cmdfile, "Commands");
 	if (cmdfile.IsEmpty())
-		glbin_agtf->getComponentAgent(gstComponentAgent)->ResetCmd();
+		glbin_agtf->getComponentAgent()->ResetCmd();
 	else
-		glbin_agtf->getComponentAgent(gstComponentAgent)->LoadCmd(cmdfile);
+		glbin_agtf->getComponentAgent()->LoadCmd(cmdfile);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
 		m_view->setRvalu(gstCurrentVolume, *i);
-		glbin_agtf->getComponentAgent(gstComponentAgent)->setValue(gstUseSelection, use_sel);
-		glbin_agtf->getComponentAgent(gstComponentAgent)->PlayCmd(use_sel, tfac);
+		glbin_agtf->getComponentAgent()->setValue(gstUseSelection, use_sel);
+		glbin_agtf->getComponentAgent()->PlayCmd(use_sel, tfac);
 	}
 }
 

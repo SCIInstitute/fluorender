@@ -2102,7 +2102,7 @@ void RenderviewPanel::OnAovSldrIdle(wxIdleEvent& event)
 	bool bval;
 	m_agent->getValue(gstCapture, bval);
 	if (bval) return;
-	fluo::ClipPlaneAgent* agent = glbin_agtf->getClipPlaneAgent(gstClipPlaneAgent);
+	fluo::ClipPlaneAgent* agent = glbin_agtf->getClipPlaneAgent();
 	if (agent)
 	{
 		agent->getValue(gstClipHold, bval);

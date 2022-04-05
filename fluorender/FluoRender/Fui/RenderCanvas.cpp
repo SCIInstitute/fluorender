@@ -268,7 +268,7 @@ void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 	//update selection
 		std::set<unsigned long long> ids;
 	m_agent->getObject()->GetCompAnalyzer()->GetCompsPoint(p, ids);
-	glbin_agtf->getComponentAgent(gstComponentAgent)->SetCompSelection(ids, mode);
+	glbin_agtf->getComponentAgent()->SetCompSelection(ids, mode);
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)

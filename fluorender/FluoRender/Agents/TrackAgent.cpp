@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TrackAgent.hpp>
 #include <TrackDlg.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <ComponentAgent.hpp>
 #include <Tracks.h>
 #include <TextureRenderer.h>
 
@@ -51,67 +54,63 @@ Renderview* TrackAgent::getObject()
 
 void TrackAgent::UpdateAllSettings()
 {
-	m_view = vrv;
-	if (!m_view)
-		return;
+	Renderview* view = getObject();
+	if (!view) return;
 
-	m_view->getValue(gstCurrentFrame, m_cur_time);
-	m_view->getValue(gstPreviousFrame, m_prv_time);
+	long cf, pf;
+	view->getValue(gstCurrentFrame, cf);
+	view->getValue(gstPreviousFrame, pf);
 
-	flrd::Tracks* trace_group = m_view->GetTraceGroup();
+	flrd::Tracks* trace_group = view->GetTraceGroup();
 	if (trace_group)
 	{
-		wxString str;
-		//cell size filter
-		str = m_cell_size_text->GetValue();
-		unsigned long ival;
-		str.ToULong(&ival);
-		trace_group->SetCellSize(ival);
+		long lval;
+		getValue(gstTrackCellSize, lval);
+		trace_group->SetCellSize(lval);
 
-		str = trace_group->GetPath();
-		if (str != "")
-			m_load_trace_text->SetValue(str);
-		else
-			m_load_trace_text->SetValue("Track map created but not saved");
+		std::wstring str = trace_group->GetPath();
+		setValue(gstTrackFile, str);
 		UpdateList();
 
-		int ghost_num = trace_group->GetGhostNum();
-		m_ghost_num_text->ChangeValue(wxString::Format("%d", ghost_num));
-		m_ghost_num_sldr->SetValue(ghost_num);
-		m_ghost_show_tail_chk->SetValue(trace_group->GetDrawTail());
-		m_ghost_show_lead_chk->SetValue(trace_group->GetDrawLead());
+		lval = trace_group->GetGhostNum();
+		setValue(gstGhostNum, lval);
+		bool bval;
+		bval = trace_group->GetDrawTail();
+		setValue(gstGhostTailEnable, bval);
+		bval = trace_group->GetDrawLead();
+		setValue(gstGhostLeadEnable, bval);
 	}
 	else
 	{
-		m_load_trace_text->SetValue("No Track map");
+		dlg_.m_load_trace_text->SetValue("No Track map");
 	}
 
 	//settings for tracking
-	if (m_frame && m_frame->GetSettingDlg())
-	{
-		m_iter_num =
-			m_frame->GetSettingDlg()->GetTrackIter();
-		m_size_thresh =
-			m_frame->GetSettingDlg()->GetComponentSize();
-		m_consistent_color =
-			m_frame->GetSettingDlg()->GetConsistentColor();
-		m_try_merge =
-			m_frame->GetSettingDlg()->GetTryMerge();
-		m_try_split =
-			m_frame->GetSettingDlg()->GetTrySplit();
-		m_similarity =
-			m_frame->GetSettingDlg()->GetSimilarity();
-		m_contact_factor =
-			m_frame->GetSettingDlg()->GetContactFactor();
-		//
-		m_map_iter_spin->SetValue(m_iter_num);
-		m_map_size_spin->SetValue(m_size_thresh);
-		m_map_consistent_btn->SetValue(m_consistent_color);
-		m_map_merge_btn->SetValue(m_try_merge);
-		m_map_split_btn->SetValue(m_try_split);
-		m_map_similar_spin->SetValue(m_similarity);
-		m_map_contact_spin->SetValue(m_contact_factor);
-	}
+	//if (m_frame && m_frame->GetSettingDlg())
+	//{
+	//	m_iter_num =
+	//		m_frame->GetSettingDlg()->GetTrackIter();
+	//	m_size_thresh =
+	//		m_frame->GetSettingDlg()->GetComponentSize();
+	//	m_consistent_color =
+	//		m_frame->GetSettingDlg()->GetConsistentColor();
+	//	m_try_merge =
+	//		m_frame->GetSettingDlg()->GetTryMerge();
+	//	m_try_split =
+	//		m_frame->GetSettingDlg()->GetTrySplit();
+	//	m_similarity =
+	//		m_frame->GetSettingDlg()->GetSimilarity();
+	//	m_contact_factor =
+	//		m_frame->GetSettingDlg()->GetContactFactor();
+	//	//
+	//	m_map_iter_spin->SetValue(m_iter_num);
+	//	m_map_size_spin->SetValue(m_size_thresh);
+	//	m_map_consistent_btn->SetValue(m_consistent_color);
+	//	m_map_merge_btn->SetValue(m_try_merge);
+	//	m_map_split_btn->SetValue(m_try_split);
+	//	m_map_similar_spin->SetValue(m_similarity);
+	//	m_map_contact_spin->SetValue(m_contact_factor);
+	//}
 }
 
 void TrackAgent::UpdateTraces()
@@ -199,14 +198,8 @@ void TrackAgent::UpdateTraces()
 
 void TrackAgent::UpdateList()
 {
-	if (!m_view)
-		return;
-
-	int shuffle = 0;
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (vd)
-		shuffle = vd->GetShuffle();
-	flrd::Tracks* trace_group = m_view->GetTraceGroup();
+	int shuffle = glbin_agtf->getComponentAgent()->GetShuffle();
+	flrd::Tracks* trace_group = getObject()->GetTraceGroup();
 	if (trace_group)
 	{
 		int cur_time = trace_group->GetCurTime();
@@ -269,22 +262,23 @@ void TrackAgent::UpdateList()
 	dlg_.Layout();
 }
 
-void TrackAgent::AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list)
+void TrackAgent::AddLabel(long item, int type, flrd::CelpList &list)
 {
 	wxString str;
 	unsigned long id;
 	unsigned long size;
 	double x, y, z;
+	TraceListCtrl* ctrl = type == 0 ? dlg_.m_trace_list_curr : dlg_.m_trace_list_prev;
 
-	str = trace_list_ctrl->GetText(item, 1);
+	str = ctrl->GetText(item, 1);
 	str.ToULong(&id);
-	str = trace_list_ctrl->GetText(item, 2);
+	str = ctrl->GetText(item, 2);
 	str.ToULong(&size);
-	str = trace_list_ctrl->GetText(item, 3);
+	str = ctrl->GetText(item, 3);
 	str.ToDouble(&x);
-	str = trace_list_ctrl->GetText(item, 4);
+	str = ctrl->GetText(item, 4);
 	str.ToDouble(&y);
-	str = trace_list_ctrl->GetText(item, 5);
+	str = ctrl->GetText(item, 5);
 	str.ToDouble(&z);
 
 	flrd::Celp cell(new flrd::Cell(id));
@@ -335,7 +329,7 @@ void TrackAgent::CellFull()
 	CellUpdate();
 
 	//frame
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackAgent::CellLink(bool exclusive)
@@ -414,6 +408,280 @@ void TrackAgent::CellLink(bool exclusive)
 
 	//update view
 	m_view->Update(39);
+}
+
+void TrackAgent::CellLinkAll()
+{
+	if (!m_frame || !m_frame->GetComponentDlg())
+		return;
+	if (!m_view)
+		return;
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	flrd::pTrackMap track_map = trace_group->GetTrackMap();
+	flrd::TrackMapProcessor tm_processor(track_map);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		std::bind(&TrackDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TrackDlg::DelVolCache, this, std::placeholders::_1));
+	tm_processor.SetVolCacheSize(3);
+	flrd::CelpList in = glbin_agtf->getComponentAgent()->GetInCells();
+	flrd::CelpList out = glbin_agtf->getComponentAgent()->GetOutCells();
+	tm_processor.RelinkCells(in, out, m_cur_time);
+
+	CellUpdate();
+}
+
+void TrackAgent::CellIsolate()
+{
+	if (!m_view)
+		return;
+
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//get selections
+	long item;
+	//current T
+	flrd::CelpList list_cur;
+
+	//current list
+	item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+
+	if (list_cur.size() == 0)
+		return;
+
+	//isolate
+	trace_group->IsolateCells(list_cur, m_cur_time);
+
+	//update view
+	m_view->Update(39);
+}
+
+void TrackAgent::CellUnlink()
+{
+	if (!m_view)
+		return;
+
+	flrd::Tracks* trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//get selections
+	long item;
+	//current T
+	flrd::CelpList list_cur;
+	//previous T
+	flrd::CelpList list_prv;
+	//current list
+	item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	//previous list
+	item = -1;
+	while (true)
+	{
+		item = m_trace_list_prev->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_prev, list_prv);
+	}
+	if (list_prv.size() == 0)
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_prev->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_prev, list_prv);
+		}
+	}
+	if (list_cur.size() == 0 ||
+		list_prv.size() == 0)
+		return;
+
+	//unlink them
+	trace_group->UnlinkCells(list_cur, list_prv,
+		m_cur_time, m_prv_time);
+
+	//update view
+	m_view->Update(39);
+}
+
+void TrackAgent::CellSeparate()
+{
+	if (!m_view)
+		return;
+
+	//trace group
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	//current T
+	flrd::CelpList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	if (list_cur.size() <= 1)
+		//nothing to divide
+		return;
+
+	//modify graphs
+	trace_group->DivideCells(list_cur, m_cur_time);
+}
+
+void TrackAgent::CellSegment()
+{
+	if (m_clnum < 1)
+		return;
+	else if (m_clnum == 1)
+	{
+		OnCellCombineID(event);
+		return;
+	}
+	if (!m_view)
+		return;
+
+	//current T
+	flrd::CelpList list_cur;
+	//fill current list
+	long item = -1;
+	while (true)
+	{
+		item = m_trace_list_curr->GetNextItem(
+			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+		if (item == -1)
+			break;
+		else
+			AddLabel(item, m_trace_list_curr, list_cur);
+	}
+	if (list_cur.empty())
+	{
+		item = -1;
+		while (true)
+		{
+			item = m_trace_list_curr->GetNextItem(
+				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+			if (item == -1)
+				break;
+			else
+				AddLabel(item, m_trace_list_curr, list_cur);
+		}
+	}
+	if (list_cur.size() == 0)
+		//nothing to segment
+		return;
+
+	//modify graphs
+	fluo::VolumeData* vd = m_view->GetCurrentVolume();
+	if (!vd)
+		return;
+	long resx, resy, resz;
+	vd->getValue(gstResX, resx);
+	vd->getValue(gstResY, resy);
+	vd->getValue(gstResZ, resz);
+	flvr::Texture* tex = vd->GetTexture();
+	if (!tex)
+		return;
+
+	flrd::Tracks *trace_group = m_view->GetTraceGroup();
+	if (!trace_group)
+		return;
+
+	flrd::pTrackMap track_map = trace_group->GetTrackMap();
+	flrd::TrackMapProcessor tm_processor(track_map);
+	long lval;
+	vd->getValue(gstBits, lval);
+	tm_processor.SetBits(lval);
+	double dval;
+	vd->getValue(gstIntScale, dval);
+	tm_processor.SetScale(dval);
+	tm_processor.SetSizes(resx, resy, resz);
+	//register file reading and deleteing functions
+	tm_processor.RegisterCacheQueueFuncs(
+		std::bind(&TrackDlg::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&TrackDlg::DelVolCache, this, std::placeholders::_1));
+	tm_processor.SetVolCacheSize(3);
+	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
+
+	//invalidate label mask in gpu
+	vd->GetRenderer()->clear_tex_current();
+	//m_view->RefreshGL();
+	//update view
+	//CellUpdate();
+	m_agent->RefineMap();
 }
 
 void TrackAgent::CellNewID(bool append)
@@ -622,7 +890,7 @@ void TrackAgent::CompDelete()
 	CellUpdate();
 
 	//frame
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackAgent::CompClear()
@@ -641,6 +909,12 @@ void TrackAgent::CompClear()
 
 	//frame
 	glbin_agtf->findFirst(gstBrushToolAgent)->asBrushToolAgent()->UpdateUndoRedo();
+}
+
+void TrackAgent::CompAppend()
+{
+	ComponentAgent* agent = glbin_agtf->getComponentAgent();
+	if (agent) agent->CompAppend();
 }
 
 //uncertainty filter
@@ -702,7 +976,7 @@ void TrackAgent::UncertainFilter(bool input)
 	CellUpdate();
 
 	//frame
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 }
 
 void TrackAgent::LinkAddedCells(flrd::CelpList &list)
@@ -1156,6 +1430,16 @@ void TrackAgent::OnTrackCellSize(Event& event)
 	trace_group->SetCellSize(lval);
 }
 
+void TrackAgent::OnTrackFile(Event& event)
+{
+	std::wstring str;
+	getValue(gstTrackFile, str);
+	if (str != L"")
+		dlg_.m_load_trace_text->SetValue(str);
+	else
+		dlg_.m_load_trace_text->SetValue("Track map created but not saved");
+}
+
 void TrackAgent::OnGhostNum(Event& event)
 {
 	flrd::Tracks* trace_group = getObject()->GetTraceGroup();
@@ -1164,6 +1448,8 @@ void TrackAgent::OnGhostNum(Event& event)
 	long lval;
 	getValue(gstGhostNum, lval);
 	trace_group->SetGhostNum(lval);
+	dlg_.m_ghost_num_text->ChangeValue(wxString::Format("%d", lval));
+	dlg_.m_ghost_num_sldr->SetValue(lval);
 	//m_view->Update(39);
 }
 
@@ -1175,6 +1461,7 @@ void TrackAgent::OnGhostTailEnable(Event& event)
 	bool bval;
 	getValue(gstGhostTailEnable, bval);
 	trace_group->SetDrawTail(bval);
+	dlg_.m_ghost_show_tail_chk->SetValue(bval);
 	//m_view->Update(39);
 }
 
@@ -1186,6 +1473,7 @@ void TrackAgent::OnGhostLeadEnable(Event& event)
 	bool bval;
 	getValue(gstGhostLeadEnable, bval);
 	trace_group->SetDrawLead(bval);
+	dlg_.m_ghost_show_lead_chk->SetValue(bval);
 	//m_view->Update(39);
 }
 

@@ -36,6 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <vector>
 #include <TrackAgent.hpp>
+#include <ComponentAgent.hpp>
+#include <MovieAgent.hpp>
 
 class RenderFrame;
 namespace fluo
@@ -171,10 +173,15 @@ public:
 		m_agent->setObject(view);
 	}
 
+	void SetComponentAgent();
+	void SetMovieAgent();
+
 	friend class fluo::TrackAgent;
 
 private:
 	fluo::TrackAgent* m_agent;
+	fluo::ComponentAgent* m_compagent;
+	fluo::MovieAgent* m_movieagent;
 	RenderFrame* m_frame;
 	
 	//tab control

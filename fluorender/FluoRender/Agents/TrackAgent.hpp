@@ -62,16 +62,16 @@ namespace fluo
 		void UpdateList();
 
 		//cell operations
-		void AddLabel(long item, TraceListCtrl* trace_list_ctrl, flrd::CelpList &list);
+		void AddLabel(long item, int type, flrd::CelpList &list);
 		void CellUpdate();
-		void CellFull();
 		void CellLink(bool exclusive);
-		void CellNewID(bool append);
-		void CellEraseID();
-		void CellReplaceID();
-		void CellCombineID();
+		void CellLinkAll();
+		void CellIsolate();
+		void CellUnlink();
+		void CellSeparate();
+		void CellSegment();
+
 		void CompDelete();
-		void CompClear();
 		//uncertain filtering
 		void UncertainFilter(bool input = false);
 		//link for external call
@@ -96,14 +96,10 @@ namespace fluo
 		void AnalyzeUncertainHist();
 		void AnalyzePath();
 
-		//
-		void Shuffle();
-
 		//track map file
 		int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
 		void LoadTrackFile(const std::wstring &file);
 		void SaveTrackFile(const std::wstring &file);
-
 
 	protected:
 		TrackDlg &dlg_;
@@ -115,6 +111,7 @@ namespace fluo
 
 		//event functions
 		void OnTrackCellSize(Event& event);
+		void OnTrackFile(Event& event);
 		void OnGhostNum(Event& event);
 		void OnGhostTailEnable(Event& event);
 		void OnGhostLeadEnable(Event& event);

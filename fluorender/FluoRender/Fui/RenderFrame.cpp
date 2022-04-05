@@ -527,15 +527,17 @@ RenderFrame::RenderFrame(
 	//measure dialog
 	m_measure_dlg = new MeasureDlg(this);
 
-	//trace dialog
-	m_trace_dlg = new TrackDlg(this);
-	m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
-
 	//ocl dialog
 	m_ocl_dlg = new ClKernelDlg(this);
 
 	//component dialog
 	m_component_dlg = new ComponentDlg(this);
+
+	//trace dialog
+	m_trace_dlg = new TrackDlg(this);
+	m_trace_dlg->SetComponentAgent();
+	m_trace_dlg->SetMovieAgent();
+	//m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
 	//calculation dialog
 	m_calculation_dlg = new CalculationDlg(this);
@@ -1803,7 +1805,7 @@ void RenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 wxString RenderFrame::ScriptDialog(const wxString& title,
 	const wxString& wildcard, long style)
 {
-	fluo::MovieAgent* agent = glbin_agtf->getMovieAgent(gstMovieAgent);
+	fluo::MovieAgent* agent = glbin_agtf->getMovieAgent();
 	if (agent) agent->HoldRun();
 	wxString result;
 	wxFileDialog *dlg = new wxFileDialog(

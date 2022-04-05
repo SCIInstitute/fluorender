@@ -656,10 +656,10 @@ void ComponentAgent::CompFull()
 	//m_view->Update(39);
 
 	getObject()->getValue(gstPaintCount, bval);
-	if (bval) glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->Update(0);
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	if (bval) glbin_agtf->getBrushToolAgent()->Update(0);
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 	getObject()->getValue(gstPaintColocalize, bval);
-	if (bval) glbin_agtf->getColocalAgent(gstColocalAgent)->Run();
+	if (bval) glbin_agtf->getColocalAgent()->Run();
 }
 
 void ComponentAgent::CompAppend()
@@ -693,10 +693,10 @@ void ComponentAgent::CompAppend()
 	//m_view->Update(39);
 
 	getObject()->getValue(gstPaintCount, bval);
-	if (bval) glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->Update(0);
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	if (bval) glbin_agtf->getBrushToolAgent()->Update(0);
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 	getObject()->getValue(gstPaintColocalize, bval);
-	if (bval) glbin_agtf->getColocalAgent(gstColocalAgent)->Run();
+	if (bval) glbin_agtf->getColocalAgent()->Run();
 }
 
 void ComponentAgent::CompExclusive()
@@ -730,10 +730,10 @@ void ComponentAgent::CompExclusive()
 	//m_view->Update(39);
 
 	getObject()->getValue(gstPaintCount, bval);
-	if (bval) glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->Update(0);
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	if (bval) glbin_agtf->getBrushToolAgent()->Update(0);
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 	getObject()->getValue(gstPaintColocalize, bval);
-	if (bval) glbin_agtf->getColocalAgent(gstColocalAgent)->Run();
+	if (bval) glbin_agtf->getColocalAgent()->Run();
 }
 
 void ComponentAgent::CompAll()
@@ -747,10 +747,10 @@ void ComponentAgent::CompAll()
 
 	bool bval;
 	getObject()->getValue(gstPaintCount, bval);
-	if (bval) glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->Update(0);
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	if (bval) glbin_agtf->getBrushToolAgent()->Update(0);
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 	getObject()->getValue(gstPaintColocalize, bval);
-	if (bval) glbin_agtf->getColocalAgent(gstColocalAgent)->Run();
+	if (bval) glbin_agtf->getColocalAgent()->Run();
 }
 
 void ComponentAgent::CompClear()
@@ -763,7 +763,7 @@ void ComponentAgent::CompClear()
 	//m_view->Update(39);
 
 	//frame
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 }
 
 void ComponentAgent::CompNew()
@@ -1967,10 +1967,10 @@ void ComponentAgent::IncludeComps()
 
 		bool bval;
 		getObject()->getValue(gstPaintCount, bval);
-		if (bval) glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->Update(0);
-		glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+		if (bval) glbin_agtf->getBrushToolAgent()->Update(0);
+		glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 		getObject()->getValue(gstPaintColocalize, bval);
-		if (bval) glbin_agtf->getColocalAgent(gstColocalAgent)->Run();
+		if (bval) glbin_agtf->getColocalAgent()->Run();
 	}
 }
 
@@ -2015,10 +2015,10 @@ void ComponentAgent::ExcludeComps()
 
 		bool bval;
 		getObject()->getValue(gstPaintCount, bval);
-		if (bval) glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->Update(0);
-		glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+		if (bval) glbin_agtf->getBrushToolAgent()->Update(0);
+		glbin_agtf->getBrushToolAgent()->UpdateUndoRedo();
 		getObject()->getValue(gstPaintColocalize, bval);
-		if (bval) glbin_agtf->getColocalAgent(gstColocalAgent)->Run();
+		if (bval) glbin_agtf->getColocalAgent()->Run();
 	}
 }
 

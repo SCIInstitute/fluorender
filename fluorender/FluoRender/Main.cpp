@@ -111,7 +111,7 @@ bool VRenderApp::OnInit()
 		RenderFrame::SetCompression(m_lzw);
 		RenderFrame::SetSaveAlpha(m_save_alpha);
 		RenderFrame::SetSaveFloat(m_save_float);
-		fluo::MovieAgent* agent = glbin_agtf->getMovieAgent(gstMovieAgent);
+		fluo::MovieAgent* agent = glbin_agtf->getMovieAgent();
 		if (agent)
 		{
 			agent->setValue(gstMovBitrate, m_bitrate);
@@ -123,7 +123,7 @@ bool VRenderApp::OnInit()
 		((RenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent(gstSettingAgent);
+	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent();
 	if (agent)
 		JVMInitializer*	pInstance = JVMInitializer::getInstance(agent->GetJvmArgs());
 	

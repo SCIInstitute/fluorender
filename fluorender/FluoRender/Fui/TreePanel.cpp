@@ -171,7 +171,7 @@ void TreePanel::SetScenegraph(fluo::Node* root)
 
 void TreePanel::SetBrushToolAgent()
 {
-	m_brushtool_agent = glbin_agtf->getBrushToolAgent(gstBrushToolAgent);
+	m_brushtool_agent = glbin_agtf->getBrushToolAgent();
 }
 
 //seelction

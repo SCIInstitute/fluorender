@@ -789,6 +789,16 @@ TrackDlg::~TrackDlg()
 	//}
 }
 
+void TrackDlg::SetComponentAgent()
+{
+	m_compagent = glbin_agtf->getComponentAgent();
+}
+
+void TrackDlg::SetMovieAgent()
+{
+	m_movieagent = glbin_agtf->getMovieAgent();
+}
+
 void TrackDlg::OnClearTrace(wxCommandEvent& event)
 {
 	m_agent->ClearTrack();
@@ -883,7 +893,6 @@ void TrackDlg::OnCellSizeText(wxCommandEvent &event)
 	str.ToLong(&ival);
 	m_cell_size_sldr->SetValue(ival);
 	m_agent->setValue(gstTrackCellSize, ival);
-
 }
 
 void TrackDlg::OnCompUncertainBtn(wxCommandEvent &event)
@@ -1066,276 +1075,64 @@ void TrackDlg::OnCompIDXBtn(wxCommandEvent &event)
 
 void TrackDlg::OnCompClear(wxCommandEvent &event)
 {
-	m_agent->CompClear();
+	m_compagent->CompClear();
+	m_agent->CellUpdate();
 }
 
 void TrackDlg::OnShuffle(wxCommandEvent &event)
 {
-	m_agent->Shuffle();
+	m_compagent->ShuffleCurVolume();
+	m_agent->CellUpdate();
 }
 
 void TrackDlg::OnCompFull(wxCommandEvent &event)
 {
-	//get id
-	wxString str = m_comp_id_text->GetValue();
-	if (str.empty())
-		CellFull();
-	else
-	{
-		wxCommandEvent e;
-		OnCompAppend(e);
-	}
+	m_compagent->CompFull();
+	m_agent->CellUpdate();
 }
 
 void TrackDlg::OnCompAppend(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	wxString str;
-	//cell size filter
-	str = m_cell_size_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
-	unsigned int slimit = (unsigned int)ival;
-
-	//get id
-	if (event.GetId() == ID_CompAppend2Btn ||
-		event.GetId() == ID_CellNewIDText)
-		str = m_cell_new_id_text->GetValue();
-	else
-		str = m_comp_id_text->GetValue();
-
-	if (!str.empty())
-	{
-		bool get_all = false;
-		ival = 0;
-		if (str.Lower() == "all")
-			get_all = true;
-		else
-		{
-			str.ToULong(&ival);
-			if (ival == 0)
-				return;
-		}
-
-		unsigned int id = (unsigned int)ival;
-		//get current mask
-		fluo::VolumeData* vd = m_view->GetCurrentVolume();
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(id);
-		comp_selector.SetMinNum(true, slimit);
-		comp_selector.Select(get_all);
-	}
-
-	//update view
-	CellUpdate();
-
-	//frame
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	m_compagent->CompAppend();
+	m_agent->CellUpdate();
 }
 
 void TrackDlg::OnCompExclusive(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	wxString str;
-	//cell size filter
-	str = m_cell_size_text->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
-	unsigned int slimit = (unsigned int)ival;
-
-	//get id
-	str = m_comp_id_text->GetValue();
-	str.ToULong(&ival);
-	if (ival != 0)
-	{
-		unsigned int id = ival;
-		//get current mask
-		fluo::VolumeData* vd = m_view->GetCurrentVolume();
-		flrd::ComponentSelector comp_selector(vd);
-		comp_selector.SetId(id);
-		comp_selector.SetMinNum(true, slimit);
-		comp_selector.Exclusive();
-	}
-
-	//update view
-	CellUpdate();
-
-	//frame
-	glbin_agtf->getBrushToolAgent(gstBrushToolAgent)->UpdateUndoRedo();
+	m_compagent->CompExclusive();
+	m_agent->CellUpdate();
 }
 
 void TrackDlg::OnCellLink(wxCommandEvent &event)
 {
-	CellLink(false);
+	m_agent->CellLink(false);
 }
 
 void TrackDlg::OnCellLinkAll(wxCommandEvent &event)
 {
-	if (!m_frame || !m_frame->GetComponentDlg())
-		return;
-	if (!m_view)
-		return;
-	flrd::Tracks *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
-	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TrackDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TrackDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(3);
-	flrd::CelpList in = glbin_agtf->getComponentAgent(gstComponentAgent)->GetInCells();
-	flrd::CelpList out = glbin_agtf->getComponentAgent(gstComponentAgent)->GetOutCells();
-	tm_processor.RelinkCells(in, out, m_cur_time);
-
-	CellUpdate();
+	m_agent->CellLinkAll();
 }
 
 void TrackDlg::OnCellExclusiveLink(wxCommandEvent &event)
 {
-	CellLink(true);
+	m_agent->CellLink(true);
 }
 
 void TrackDlg::OnCellIsolate(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	flrd::Tracks* trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	//get selections
-	long item;
-	//current T
-	flrd::CelpList list_cur;
-
-	//current list
-	item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-
-	if (list_cur.size() == 0)
-		return;
-
-	//isolate
-	trace_group->IsolateCells(list_cur, m_cur_time);
-
-	//update view
-	m_view->Update(39);
+	m_agent->CellIsolate();
 }
 
 void TrackDlg::OnCellUnlink(wxCommandEvent &event)
 {
-	if (!m_view)
-		return;
-
-	flrd::Tracks* trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	//get selections
-	long item;
-	//current T
-	flrd::CelpList list_cur;
-	//previous T
-	flrd::CelpList list_prv;
-	//current list
-	item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	//previous list
-	item = -1;
-	while (true)
-	{
-		item = m_trace_list_prev->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_prev, list_prv);
-	}
-	if (list_prv.size() == 0)
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_prev->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_prev, list_prv);
-		}
-	}
-	if (list_cur.size() == 0 ||
-		list_prv.size() == 0)
-		return;
-
-	//unlink them
-	trace_group->UnlinkCells(list_cur, list_prv,
-		m_cur_time, m_prv_time);
-
-	//update view
-	m_view->Update(39);
+	m_agent->CellUnlink();
 }
 
 //ID edit controls
 void TrackDlg::OnCellNewIDText(wxCommandEvent &event)
 {
-	int shuffle = 0;
-	if (m_view)
-	{
-		fluo::VolumeData* vd = m_view->GetCurrentVolume();
-		if (vd)
-			shuffle = vd->GetShuffle();
-	}
+	int shuffle = m_compagent->GetShuffle();
+
 	wxString str = m_cell_new_id_text->GetValue();
 	unsigned long id;
 	wxColor color(255, 255, 255);
@@ -1348,190 +1145,75 @@ void TrackDlg::OnCellNewIDText(wxCommandEvent &event)
 			fluo::Color c(id, shuffle);
 			color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
 		}
-		m_cell_new_id_text->SetBackgroundColour(color);
-		m_cell_new_id = id;
-		m_cell_new_id_empty = false;
+		//m_cell_new_id = id;
+		//m_cell_new_id_empty = false;
 	}
-	else
-	{
-		m_cell_new_id_text->SetBackgroundColour(color);
-		m_cell_new_id_empty = true;
-	}
+	m_cell_new_id_text->SetBackgroundColour(color);
+	//m_cell_new_id_empty = true;
 	m_cell_new_id_text->Refresh();
+	m_compagent->setValue(gstCompIdStr, str.ToStdString());
+	unsigned long ulval;
+	if (str.ToULong(&ulval))
+		m_compagent->setValue(gstCompId, ulval);
 }
 
 void TrackDlg::OnCellNewIDX(wxCommandEvent &event)
 {
 	m_cell_new_id_text->Clear();
+	m_compagent->setValue(gstCompIdStr, std::string(""));
+	m_compagent->setValue(gstCompId, unsigned long(0));
 }
 
 void TrackDlg::OnCellNewID(wxCommandEvent &event)
 {
-	CellNewID(false);
+	m_compagent->CompNew();
 }
 
 void TrackDlg::OnCellAppendID(wxCommandEvent &event)
 {
-	CellNewID(true);
+	m_compagent->CompAdd();
 }
 
 void TrackDlg::OnCellReplaceID(wxCommandEvent &event)
 {
-	CellReplaceID();
+	m_compagent->CompReplace();
 }
 
 void TrackDlg::OnCellCombineID(wxCommandEvent &event)
 {
-	CellCombineID();
+	m_compagent->CompCombine();
 }
 
 void TrackDlg::OnCellSeparateID(wxCommandEvent& event)
 {
-	if (!m_view)
-		return;
-
-	//trace group
-	flrd::Tracks *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	if (list_cur.size() <= 1)
-		//nothing to divide
-		return;
-
-	//modify graphs
-	trace_group->DivideCells(list_cur, m_cur_time);
-
+	m_agent->CellSeparate();
 }
 
 void TrackDlg::OnCellSegSpin(wxSpinEvent& event)
 {
-	m_clnum = m_cell_segment_text->GetValue();
+	long lval = m_cell_segment_text->GetValue();
+	m_agent->setValue(gstClusterNum, lval);
 }
 
 void TrackDlg::OnCellSegText(wxCommandEvent& event)
 {
-	m_clnum = m_cell_segment_text->GetValue();
+	long lval = m_cell_segment_text->GetValue();
+	m_agent->setValue(gstClusterNum, lval);
 }
 
 void TrackDlg::OnCellSegment(wxCommandEvent& event)
 {
-	if (m_clnum < 1)
-		return;
-	else if (m_clnum == 1)
-	{
-		OnCellCombineID(event);
-		return;
-	}
-	if (!m_view)
-		return;
-
-	//current T
-	flrd::CelpList list_cur;
-	//fill current list
-	long item = -1;
-	while (true)
-	{
-		item = m_trace_list_curr->GetNextItem(
-			item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-		if (item == -1)
-			break;
-		else
-			AddLabel(item, m_trace_list_curr, list_cur);
-	}
-	if (list_cur.empty())
-	{
-		item = -1;
-		while (true)
-		{
-			item = m_trace_list_curr->GetNextItem(
-				item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-			if (item == -1)
-				break;
-			else
-				AddLabel(item, m_trace_list_curr, list_cur);
-		}
-	}
-	if (list_cur.size() == 0)
-		//nothing to segment
-		return;
-
-	//modify graphs
-	fluo::VolumeData* vd = m_view->GetCurrentVolume();
-	if (!vd)
-		return;
-	long resx, resy, resz;
-	vd->getValue(gstResX, resx);
-	vd->getValue(gstResY, resy);
-	vd->getValue(gstResZ, resz);
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-
-	flrd::Tracks *trace_group = m_view->GetTraceGroup();
-	if (!trace_group)
-		return;
-
-	flrd::pTrackMap track_map = trace_group->GetTrackMap();
-	flrd::TrackMapProcessor tm_processor(track_map);
-	long lval;
-	vd->getValue(gstBits, lval);
-	tm_processor.SetBits(lval);
-	double dval;
-	vd->getValue(gstIntScale, dval);
-	tm_processor.SetScale(dval);
-	tm_processor.SetSizes(resx, resy, resz);
-	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TrackDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TrackDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(3);
-	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
-
-	//invalidate label mask in gpu
-	vd->GetRenderer()->clear_tex_current();
-	//m_view->RefreshGL();
-	//update view
-	//CellUpdate();
-	m_agent->RefineMap();
+	m_agent->CellSegment();
 }
 
 //read/delete volume cache
 void TrackDlg::OnCellPrev(wxCommandEvent &event)
 {
-	if (m_frame && m_frame->GetMovieView())
-		m_frame->GetMovieView()->DownFrame();
+	m_movieagent->DownFrame();
 }
 
 void TrackDlg::OnCellNext(wxCommandEvent &event)
 {
-	if (m_frame && m_frame->GetMovieView())
-		m_frame->GetMovieView()->UpFrame();
+	m_movieagent->UpFrame();
 }
 
