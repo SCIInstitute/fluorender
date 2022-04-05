@@ -775,6 +775,7 @@ TrackAgent* AgentFactory::addTrackAgent(const std::string &name, wxWindow &windo
 		ADD_VALUE(gstTrackCellSize, long(0));
 		ADD_VALUE(gstTrackIter, long(0));
 		ADD_VALUE(gstCompSizeLimit, long(0));
+		ADD_VALUE(gstCompConsistent, bool(false));
 		ADD_VALUE(gstTryMerge, bool(false));
 		ADD_VALUE(gstTrySplit, bool(false));
 		ADD_VALUE(gstContactFactor, double(0));

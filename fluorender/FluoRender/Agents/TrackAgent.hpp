@@ -60,9 +60,10 @@ namespace fluo
 
 		void UpdateTraces();
 		void UpdateList();
+		void MoveCurToPrv();
+		void AddLabel(long item, int type, flrd::CelpList &list);
 
 		//cell operations
-		void AddLabel(long item, int type, flrd::CelpList &list);
 		void CellUpdate();
 		void CellLink(bool exclusive);
 		void CellLinkAll();
@@ -80,7 +81,7 @@ namespace fluo
 		void ClearTrack();
 
 		//measurement
-		void SaveOutputResult(wxString &filename);
+		void SaveOutputResult(const std::string &filename);
 
 		//automatic tracking
 		void GenMap();
