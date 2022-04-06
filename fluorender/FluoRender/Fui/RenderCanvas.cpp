@@ -98,8 +98,8 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());
 	m_agent->setValue(gstHinstance, (unsigned long long)::wxGetInstance());
 
-	bool bval = m_frame && m_frame->GetBenchmark();
-	m_agent->setValue(gstBenchmark, bval);
+	//bool bval = m_frame && m_frame->GetBenchmark();
+	//m_agent->setValue(gstBenchmark, bval);
 
 	view->GetRulerHandler()->SetView(view);
 	m_agent->getObject()->GetRulerHandler()->SetRulerList(

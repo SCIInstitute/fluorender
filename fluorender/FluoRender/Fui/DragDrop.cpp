@@ -25,8 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "DragDrop.h"
-#include "RenderFrame.h"
+#include <DragDrop.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <RenderFrameAgent.hpp>
 
 DnDFile::DnDFile(wxWindow *frame, wxWindow *view)
 : m_frame(frame),
@@ -47,8 +49,8 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 {
 	if (filenames.Count())
 	{
-		RenderFrame* vr_frame = (RenderFrame*)m_frame;
-		if (vr_frame)
+		fluo::RenderFrameAgent* agent = glbin_agtf->getRenderFrameAgent();
+		if (agent)
 		{
 			wxString filename = filenames[0];
 			wxString suffix = filename.Mid(filename.Find('.', true)).MakeLower();
@@ -60,7 +62,7 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					wxMessageBox("For project files, drag and drop to regions other than render views.");
 					return false;
 				}
-				vr_frame->OpenProject(filename);
+				agent->OpenProject(filename.ToStdWstring());
 			}
 			else if (suffix == ".nrrd" ||
 					 suffix == ".msk" ||
@@ -79,15 +81,15 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == ".lif" ||
 					 suffix == ".lof")
 			{
-				vr_frame->LoadVolumes(filenames, false);
+				agent->LoadVolumes(filenames, false);
 			}
 			else if (suffix == ".obj")
 			{
-				vr_frame->LoadMeshes(filenames);
+				agent->LoadMeshes(filenames);
 			}
 			else
 			{
-				vr_frame->LoadVolumes(filenames, true);
+				agent->LoadVolumes(filenames, true);
 			}
 		}
 	}

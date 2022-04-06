@@ -726,19 +726,6 @@ void SettingAgent::UpdateDeviceTree()
 	dlg_.m_device_tree->SetFocus();
 }
 
-std::vector<std::string> SettingAgent::GetJvmArgs()
-{
-	std::vector<std::string> args;
-	std::string jvm_path, ij_path, bioformats_path;
-	getValue(gstJvmPath, jvm_path);
-	getValue(gstImagejPath, ij_path);
-	getValue(gstBioformatsPath, bioformats_path);
-	args.push_back(jvm_path);
-	args.push_back(ij_path);
-	args.push_back(bioformats_path);
-	return args;
-}
-
 void SettingAgent::OnMaxTextureSizeEnable(Event& event)
 {
 	bool bval;

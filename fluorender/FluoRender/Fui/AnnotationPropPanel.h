@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/slider.h>
 #include <AnnotationPropAgent.hpp>
 
-using namespace std;
-
 namespace fluo
 {
 	class Annotations;

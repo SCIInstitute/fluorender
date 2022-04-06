@@ -758,6 +758,7 @@ SettingDlg::SettingDlg(RenderFrame *frame) :
 	m_frame(frame)
 {
 	m_agent = glbin_agtf->addSettingAgent(gstSettingAgent, *this);
+	m_agent->setObject(glbin_root);
 
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

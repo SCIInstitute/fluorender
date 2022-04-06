@@ -35,8 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <VolumePropAgent.hpp>
 
-using namespace std;
-
 namespace fluo
 {
 	class VolumeData;

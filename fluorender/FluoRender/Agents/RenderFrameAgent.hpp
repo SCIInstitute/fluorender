@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _RENDERFRAMEAGENT_H_
 
 #include <InterfaceAgent.hpp>
+#include <Root.hpp>
+#include <wx/arrstr.h>
 
 class RenderFrame;
 namespace fluo
@@ -45,13 +47,23 @@ namespace fluo
 
 		virtual const char* className() const { return "RenderFrameAgent"; }
 
-		//virtual void setObject(Annotations* an);
-		//virtual Annotations* getObject();
+		virtual void setObject(Root* obj);
+		virtual Root* getObject();
 
 		virtual void UpdateAllSettings();
 
 		virtual RenderFrameAgent* asRenderFrameAgent() { return this; }
 		virtual const RenderFrameAgent* asRenderFrameAgent() const { return this; }
+
+		friend class AgentFactory;
+
+		std::vector<std::string> GetJvmArgs();
+
+		void SaveProject(const std::wstring &filename);
+		void OpenProject(const std::wstring &filename);
+		void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
+		void LoadVolumes(wxArrayString files, bool withImageJ);
+		void LoadMeshes(wxArrayString files);
 
 	protected:
 		RenderFrame &frame_;

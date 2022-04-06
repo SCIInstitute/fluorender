@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VRENDERFRAME_H_
 #define _VRENDERFRAME_H_
 
+#include <wx/wx.h>
+#include <wx/menu.h>
+#include <wx/aui/aui.h>
 #include <DataManager.h>
 #include <TreePanel.h>
 #include <ListPanel.h>
@@ -57,14 +60,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Tester.h>
 #include <compatibility.h>
 #include <JVMInitializer.h>
-
-#include <wx/wx.h>
-#include <wx/menu.h>
-#include <wx/aui/aui.h>
-
+#include <RenderFrameAgent.hpp>
 #include <vector>
-
-using namespace std;
 
 #define VERSION_CONTACT "http://www.sci.utah.edu/software/fluorender.html"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
@@ -107,12 +104,7 @@ using namespace std;
 
 namespace fluo
 {
-	class Renderview;
-	class VolumeData;
-	class VolumeGroup;
-	class MeshData;
-	class MeshGroup;
-	class Annotations;
+	class Root;
 }
 class RenderFrame: public wxFrame
 {
@@ -184,20 +176,15 @@ public:
 		bool hidepanels);
 	~RenderFrame();
 
+	friend class fluo::RenderFrameAgent;
+
 	TreePanel *GetTree();
 	ListPanel *GetList();
-	void UpdateTree(wxString name = "");
-	void UpdateTreeColors();
-	void UpdateTreeIcons();
-	void UpdateList();
 
 	//data manager
 	DataManager* GetDataManager();
 	
 	//views
-	int GetViewNum();
-	RenderCanvas* GetView(int index);
-	RenderCanvas* GetView(const wxString& name);
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
 	void DeleteVRenderView(const wxString &name);
@@ -212,7 +199,7 @@ public:
 	//on selections
 	void OnSelection(fluo::Node *node);
 	//void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-	//	fluo::Renderview* view=0,
+	//	fluo::root* view=0,
 	//	fluo::VolumeGroup* group=0,
 	//	fluo::VolumeData* vd=0,
 	//	fluo::MeshData* md=0,
@@ -268,67 +255,6 @@ public:
 	CalculationDlg* GetCalculationDlg()
 	{ return m_calculation_dlg; }
 
-	//selection
-	int GetCurSelType()
-	{ return m_cur_sel_type; }
-	//get current selected volume
-	fluo::VolumeData* GetCurSelVol()
-	{ return m_data_mgr.GetVolumeData(m_cur_sel_vol); }
-	//get current selected mesh
-	fluo::MeshData* GetCurSelMesh()
-	{ return m_data_mgr.GetMeshData(m_cur_sel_mesh); }
-
-	void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
-	void OpenProject(wxString& filename);
-	void SaveProject(wxString& filename);
-	void LoadVolumes(wxArrayString files, bool withImageJ, fluo::Renderview* view = 0);
-	void LoadMeshes(wxArrayString files, RenderCanvas* view = 0);
-
-	//crop
-	static void SetCrop(bool value)
-	{ m_save_crop = value; }
-	static bool GetCrop()
-	{ return m_save_crop; }
-	static void SetFilter(int value)
-	{ m_save_filter = value; }
-	static int GetFilter()
-	{ return m_save_filter; }
-	//compression
-	static void SetCompression(bool value)
-	{ m_save_compress = value; }
-	static bool GetCompression()
-	{ return m_save_compress; }
-	//realtime compression
-	static void SetRealtimeCompression(bool value)
-	{ m_compression = value; }
-	static bool GetRealtimeCompression()
-	{ return m_compression; }
-	//skip brick
-	static void SetSkipBrick(bool value)
-	{ m_skip_brick = value; }
-	static bool GetSkipBrick()
-	{ return m_skip_brick;}
-	//save project
-	static void SetSaveProject(bool value)
-	{ m_save_project = value; }
-	static bool GetSaveProject()
-	{ return m_save_project; }
-	//embed project
-	static void SetEmbedProject(bool value)
-	{ m_vrp_embed = value; }
-	static bool GetEmbedProject()
-	{ return m_vrp_embed; }
-	//save alpha
-	static void SetSaveAlpha(bool value)
-	{ m_save_alpha = value; }
-	static bool GetSaveAlpha()
-	{ return m_save_alpha; }
-	//save flaot
-	static void SetSaveFloat(bool value)
-	{ m_save_float = value; }
-	static bool GetSaveFloat()
-	{ return m_save_float; }
-
 	//show dialogs
 	void ShowPaintTool();
 	void ShowMeasureDlg();
@@ -342,8 +268,8 @@ public:
 	void ShowCalculationDlg();
 
 	//tex renderer settings
-	void SetTextureRendererSettings();
-	void SetTextureUndos();
+	//void SetTextureRendererSettings();
+	//void SetTextureUndos();
 
 	//quit option
 	void OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -351,20 +277,15 @@ public:
 	//show info
 	void OnInfo(wxCommandEvent& WXUNUSED(event));
 
-	bool GetBenchmark()
-	{ return m_benchmark; }
-
 	void ClearVrvList()
 	{ m_vrv_list.clear(); }
 
 	wxString ScriptDialog(const wxString& title,
 		const wxString& wildcard, long style);
 
-public: //public so export window can see it and set it. 
-	RecorderDlg* m_recorder_dlg;
-	MoviePanel* m_movie_view;
-
 private:
+	fluo::RenderFrameAgent* m_agent;
+
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;
@@ -377,9 +298,9 @@ private:
 	wxMenu* m_top_window;
 	wxMenu* m_top_help;
 
+	std::vector <RenderviewPanel*> m_vrv_list;
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	vector <RenderviewPanel*> m_vrv_list;
 	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;
 	ClipPlanePanel *m_clip_view;
@@ -402,55 +323,12 @@ private:
 	MeshPropPanel* m_mesh_prop;
 	MeshTransPanel* m_mesh_manip;
 	AnnotationPropPanel* m_annotation_prop;
+	RecorderDlg* m_recorder_dlg;
+	MoviePanel* m_movie_view;
 	//tester
 	TesterDlg* m_tester;
 	//flag for show/hide views
 	bool m_ui_state;
-
-	//current selection (allow only one)
-	//selection type
-	int m_cur_sel_type; //0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
-	//current selected volume index
-	int m_cur_sel_vol;
-	//mesh index
-	int m_cur_sel_mesh;
-
-	//if slices are sequence
-	static bool m_sliceSequence;
-	//read channels
-	static bool m_channSequence;
-	//digit order
-	static int m_digitOrder;
-	//series number
-	static int m_ser_num;
-	//compression
-	static bool m_compression;
-	//brick skipping
-	static bool m_skip_brick;
-	//string for time id
-	static wxString m_time_id;
-	//load volume mask
-	static bool m_load_mask;
-	//save crop
-	static bool m_save_crop;
-	//filter
-	static int m_save_filter;
-	//save compressed
-	static bool m_save_compress;
-	//embed files in project
-	static bool m_vrp_embed;
-	//save project
-	static bool m_save_project;
-	//save alpha
-	static bool m_save_alpha;
-	//save float
-	static bool m_save_float;
-
-	//mac address
-	wxString m_address;
-
-	//benchmark mode
-	bool m_benchmark;
 
 private:
 	//views

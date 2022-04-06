@@ -59,7 +59,6 @@ namespace fluo
 		void ReadSettings();
 		void SaveSettings();
 		void UpdateDeviceTree();
-		std::vector<std::string> GetJvmArgs();
 
 	protected:
 		SettingDlg &dlg_;

@@ -131,11 +131,6 @@ public:
 	SettingDlg(RenderFrame* frame);
 	~SettingDlg();
 
-	void AssociateRoot(fluo::Root* root)
-	{
-		m_agent->setObject(root);
-	}
-
 	friend class fluo::SettingAgent;
 
 private:
