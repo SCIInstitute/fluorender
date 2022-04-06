@@ -193,6 +193,11 @@ void Global::BuildRoot()
 	ADD_VALUE(gstJvmPath, std::string(""));
 	ADD_VALUE(gstImagejPath, std::string(""));
 	ADD_VALUE(gstBioformatsPath, std::string(""));
+	ADD_VALUE(gstOpenSlices, bool(false));
+	ADD_VALUE(gstOpenChanns, bool(false));
+	ADD_VALUE(gstOpenDigitOrder, long(0));
+	ADD_VALUE(gstOpenSeriesNum, long(0));
+	ADD_VALUE(gstEmbedDataInProject, bool(false));
 	origin_->addChild(root);
 }
 

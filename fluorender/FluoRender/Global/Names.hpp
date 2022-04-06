@@ -700,6 +700,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstJvmPath "jvm path"
 #define gstImagejPath "imagej path"
 #define gstBioformatsPath "bioformats path"
+//from render frame
+#define gstOpenSlices "open slices"
+#define gstOpenChanns "open channs"
+#define gstOpenDigitOrder "open digit order"
+#define gstOpenSeriesNum "open series num"
+#define gstEmbedDataInProject "embed data in project"
 //track agent
 #define gstTrackCellSize "track cell size"
 #define gstTrackIter "track iter"

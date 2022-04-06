@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <InterfaceAgent.hpp>
 #include <Root.hpp>
+#include <glm.h>
 #include <wx/arrstr.h>
 
 class RenderFrame;
@@ -38,6 +39,22 @@ namespace fluo
 	class RenderFrameAgent : public InterfaceAgent
 	{
 	public:
+		enum VolumeLoadType
+		{
+			VLT_ImageJ = 0,
+			VLT_NRRD,
+			VLT_TIFF,
+			VLT_OIB,
+			VLT_OIF,
+			VLT_LSM,
+			VLT_PVXML,
+			VLT_BRKXML,
+			VLT_CZI,
+			VLT_ND2,
+			VLT_LIF,
+			VLT_LOF,
+		};
+
 		RenderFrameAgent(RenderFrame &frame);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -64,6 +81,12 @@ namespace fluo
 		void StartupLoad(wxArrayString files, bool run_mov, bool with_imagej);
 		void LoadVolumes(wxArrayString files, bool withImageJ);
 		void LoadMeshes(wxArrayString files);
+		wxString SearchProjectPath(const wxString &filename);
+		int LoadVolumeData(const wxString &filename, int type, bool withImageJ, int ch_num = -1, int t_num = -1);
+		int LoadMeshData(const wxString &filename);
+		int LoadMeshData(GLMmodel* mesh);
+		void SetTextureUndos();
+		void SetTextureRendererSettings();
 
 	protected:
 		RenderFrame &frame_;

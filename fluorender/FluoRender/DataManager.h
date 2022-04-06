@@ -34,19 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #include <wx/string.h>
 
-#define LOAD_TYPE_IMAGEJ	0
-#define LOAD_TYPE_NRRD		1
-#define LOAD_TYPE_TIFF		2
-#define LOAD_TYPE_OIB		3
-#define LOAD_TYPE_OIF		4
-#define LOAD_TYPE_LSM		5
-#define LOAD_TYPE_PVXML		6
-#define LOAD_TYPE_BRKXML	7
-#define LOAD_TYPE_CZI		8
-#define LOAD_TYPE_ND2		9
-#define LOAD_TYPE_LIF		10
-#define LOAD_TYPE_LOF		11
-
 namespace fluo
 {
 	class VolumeData;

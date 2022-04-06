@@ -1045,7 +1045,7 @@ void TrackDlg::OnSaveResult(wxCommandEvent &event)
 	if (rval == wxID_OK)
 	{
 		wxString filename = fopendlg->GetPath();
-		m_agent->SaveOutputResult(filename);
+		m_agent->SaveOutputResult(filename.ToStdString());
 	}
 	if (fopendlg)
 		delete fopendlg;

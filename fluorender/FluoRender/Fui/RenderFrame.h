@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/menu.h>
 #include <wx/aui/aui.h>
-#include <DataManager.h>
 #include <TreePanel.h>
 #include <ListPanel.h>
 #include <RenderviewPanel.h>
@@ -181,9 +180,6 @@ public:
 	TreePanel *GetTree();
 	ListPanel *GetList();
 
-	//data manager
-	DataManager* GetDataManager();
-	
 	//views
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
 	void DeleteVRenderView(int i);
@@ -205,55 +201,55 @@ public:
 	//	fluo::MeshData* md=0,
 	//	fluo::Annotations* ann=0);
 
-	//prop view
-	OutAdjustPanel* GetAdjustView();
-	//tool views
-	VolumePropPanel* GetPropView()
-	{ return m_volume_prop; }
-	//movie view
-	MoviePanel* GetMovieView()
-	{ return m_movie_view; }
-	//system settings
-	SettingDlg* GetSettingDlg()
-	{ return m_setting_dlg; }
-	//help dialog
-	HelpDlg* GetHelpDlg()
-	{ return m_help_dlg; }
-	//clipping view
-	ClipPlanePanel* GetClippingView()
-	{ return m_clip_view; }
-	//brush dialog
-	BrushToolDlg* GetBrushToolDlg()
-	{ return m_brush_tool_dlg; }
-	//noise cancelling dialog
-	NoiseReduceDlg* GetNoiseCancellingDlg()
-	{ return m_noise_cancelling_dlg; }
-	//counting dialog
-	CountingDlg* GetCountingDlg()
-	{ return m_counting_dlg; }
-	//convert dialog
-	ConvertDlg* GetConvertDlg()
-	{ return m_convert_dlg; }
-	ColocalDlg* GetColocalizationDlg()
-	{ return m_colocalization_dlg; }
-	//recorder dialog
-	RecorderDlg* GetRecorderDlg()
-	{ return m_recorder_dlg; }
-	//measure dialog
-	MeasureDlg* GetMeasureDlg()
-	{ return m_measure_dlg; }
-	//trace dialog
-	TrackDlg* GetTraceDlg()
-	{ return m_trace_dlg; }
-	//ocl dialog
-	ClKernelDlg* GetOclDlg()
-	{ return m_ocl_dlg; }
-	//component dialog
-	ComponentDlg* GetComponentDlg()
-	{ return m_component_dlg; }
-	//calculation dialog
-	CalculationDlg* GetCalculationDlg()
-	{ return m_calculation_dlg; }
+	////prop view
+	//OutAdjustPanel* GetAdjustView();
+	////tool views
+	//VolumePropPanel* GetPropView()
+	//{ return m_volume_prop; }
+	////movie view
+	//MoviePanel* GetMovieView()
+	//{ return m_movie_view; }
+	////system settings
+	//SettingDlg* GetSettingDlg()
+	//{ return m_setting_dlg; }
+	////help dialog
+	//HelpDlg* GetHelpDlg()
+	//{ return m_help_dlg; }
+	////clipping view
+	//ClipPlanePanel* GetClippingView()
+	//{ return m_clip_view; }
+	////brush dialog
+	//BrushToolDlg* GetBrushToolDlg()
+	//{ return m_brush_tool_dlg; }
+	////noise cancelling dialog
+	//NoiseReduceDlg* GetNoiseCancellingDlg()
+	//{ return m_noise_cancelling_dlg; }
+	////counting dialog
+	//CountingDlg* GetCountingDlg()
+	//{ return m_counting_dlg; }
+	////convert dialog
+	//ConvertDlg* GetConvertDlg()
+	//{ return m_convert_dlg; }
+	//ColocalDlg* GetColocalizationDlg()
+	//{ return m_colocalization_dlg; }
+	////recorder dialog
+	//RecorderDlg* GetRecorderDlg()
+	//{ return m_recorder_dlg; }
+	////measure dialog
+	//MeasureDlg* GetMeasureDlg()
+	//{ return m_measure_dlg; }
+	////trace dialog
+	//TrackDlg* GetTraceDlg()
+	//{ return m_trace_dlg; }
+	////ocl dialog
+	//ClKernelDlg* GetOclDlg()
+	//{ return m_ocl_dlg; }
+	////component dialog
+	//ComponentDlg* GetComponentDlg()
+	//{ return m_component_dlg; }
+	////calculation dialog
+	//CalculationDlg* GetCalculationDlg()
+	//{ return m_calculation_dlg; }
 
 	//show dialogs
 	void ShowPaintTool();
@@ -301,7 +297,6 @@ private:
 	std::vector <RenderviewPanel*> m_vrv_list;
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	DataManager m_data_mgr;
 	wxPanel *m_prop_panel;
 	ClipPlanePanel *m_clip_view;
 	OutAdjustPanel* m_adjust_view;

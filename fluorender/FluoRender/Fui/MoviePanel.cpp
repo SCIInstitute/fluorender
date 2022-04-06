@@ -231,7 +231,7 @@ wxWindow* MoviePanel::CreateAdvancedPage(wxWindow *parent)
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	m_advanced_movie = new RecorderDlg(m_frame, page);
-	m_frame->m_recorder_dlg = m_advanced_movie;
+	//m_frame->m_recorder_dlg = m_advanced_movie;
 	sizer_v->Add(m_advanced_movie, 0, wxEXPAND);
 	page->SetSizer(sizer_v);
 	return page;

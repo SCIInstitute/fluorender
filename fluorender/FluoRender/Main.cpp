@@ -105,27 +105,31 @@ bool VRenderApp::OnInit()
 		m_windowed, m_hidepanels);
 	SetTopWindow(frame);
 	frame->Show();
+
+	fluo::RenderFrameAgent* renderframeagent = glbin_agtf->getRenderFrameAgent();
 	bool run_mov = false;
 	if (m_mov_file != "")
 	{
-		RenderFrame::SetCompression(m_lzw);
-		RenderFrame::SetSaveAlpha(m_save_alpha);
-		RenderFrame::SetSaveFloat(m_save_float);
-		fluo::MovieAgent* agent = glbin_agtf->getMovieAgent();
-		if (agent)
+		if (renderframeagent)
 		{
-			agent->setValue(gstMovBitrate, m_bitrate);
-			agent->setValue(gstMovFilename, m_mov_file.ToStdWstring());
+			renderframeagent->setValue(gstCaptureCompress, m_lzw);
+			renderframeagent->setValue(gstCaptureAlpha, m_save_alpha);
+			renderframeagent->setValue(gstCaptureFloat, m_save_float);
+		}
+		fluo::MovieAgent* movieagent = glbin_agtf->getMovieAgent();
+		if (movieagent)
+		{
+			movieagent->setValue(gstMovBitrate, m_bitrate);
+			movieagent->setValue(gstMovFilename, m_mov_file.ToStdWstring());
 		}
 		run_mov = true;
 	}
-	if (m_file_num > 0)
-		((RenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
+	if (m_file_num > 0 && renderframeagent)
+		renderframeagent->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent();
-	if (agent)
-		JVMInitializer*	pInstance = JVMInitializer::getInstance(agent->GetJvmArgs());
+	if (renderframeagent)
+		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
 	
 	//global init
 	wxString expath = wxStandardPaths::Get().GetExecutablePath();

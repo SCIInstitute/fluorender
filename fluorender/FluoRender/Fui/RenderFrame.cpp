@@ -467,15 +467,7 @@ RenderFrame::RenderFrame(
 	//if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	//m_time_id = m_setting_dlg->GetTimeId();
 	bool bval;
-	m_agent->getValue(gstOverrideVoxSpc, bval);
-	m_data_mgr.SetOverrideVox(bval);
-	m_agent->getValue(gstPvxmlFlipX, bval);
-	m_data_mgr.SetPvxmlFlipX(bval);
-	m_agent->getValue(gstPvxmlFlipY, bval);
-	m_data_mgr.SetPvxmlFlipY(bval);
 	long lval;
-	m_agent->getValue(gstPvxmlSeqType, lval);
-	m_data_mgr.SetPvxmlSeqType(lval);
 	m_agent->getValue(gstSoftThresh, dval);
 	flvr::VolumeRenderer::set_soft_threshold(dval);
 	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
@@ -1061,28 +1053,40 @@ void RenderFrame::OnCh11Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
 	if (ch11)
-		m_sliceSequence = ch11->GetValue();
+	{
+		bool bval = ch11->GetValue();
+		m_agent->setValue(gstOpenSlices, bval);
+	}
 }
 
 void RenderFrame::OnCh12Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
 	if (ch12)
-		m_channSequence = ch12->GetValue();
+	{
+		bool bval = ch12->GetValue();
+		m_agent->setValue(gstOpenChanns, bval);
+	}
 }
 
 void RenderFrame::OnCmbChange(wxCommandEvent &event)
 {
 	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
 	if (combo)
-		m_digitOrder = combo->GetSelection();
+	{
+		long lval = combo->GetSelection();
+		m_agent->setValue(gstOpenDigitOrder, lval);
+	}
 }
 
 void RenderFrame::OnTxt1Change(wxCommandEvent &event)
 {
 	wxTextCtrl* txt1 = (wxTextCtrl*)event.GetEventObject();
 	if (txt1)
-		m_time_id = txt1->GetValue();
+	{
+		std::string sval = txt1->GetValue().ToStdString();
+		m_agent->setValue(gstTimeFileId, sval);
+	}
 }
 
 void RenderFrame::OnTxt2Change(wxCommandEvent &event)
@@ -1093,7 +1097,7 @@ void RenderFrame::OnTxt2Change(wxCommandEvent &event)
 		wxString str = txt2->GetValue();
 		long lval;
 		if (str.ToLong(&lval))
-			m_ser_num = lval;
+			m_agent->setValue(gstOpenSeriesNum, lval);
 	}
 }
 
@@ -1101,18 +1105,27 @@ void RenderFrame::OnCh2Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
 	if (ch2)
-		m_compression = ch2->GetValue();
+	{
+		bool bval = ch2->GetValue();
+		m_agent->setValue(gstHardwareCompress, bval);
+	}
 }
 
 void RenderFrame::OnCh3Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
 	if (ch3)
-		m_skip_brick = ch3->GetValue();
+	{
+		bool bval = ch3->GetValue();
+		m_agent->setValue(gstSkipBrick, bval);
+	}
 }
 
 wxWindow* RenderFrame::CreateExtraControlVolume(wxWindow* parent)
 {
+	fluo::RenderFrameAgent* agent = glbin_agtf->getRenderFrameAgent();
+	bool bval; long lval; std::string sval;
+
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -1127,14 +1140,16 @@ wxWindow* RenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		"Read file# as Z sections");
 	ch11->Connect(ch11->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnCh11Check), NULL, panel);
-	ch11->SetValue(m_sliceSequence);
+	agent->getValue(gstOpenSlices, bval);
+	ch11->SetValue(bval);
 
 	//slice sequence check box
 	wxCheckBox* ch12 = new wxCheckBox(panel, ID_READ_CHANN,
 		"Read file# as channels");
 	ch12->Connect(ch12->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnCh12Check), NULL, panel);
-	ch12->SetValue(m_channSequence);
+	agent->getValue(gstOpenChanns, bval);
+	ch12->SetValue(bval);
 
 	//digit order
 	st1 = new wxStaticText(panel, 0,
@@ -1148,7 +1163,8 @@ wxWindow* RenderFrame::CreateExtraControlVolume(wxWindow* parent)
 	combo_list.push_back("Z section first");
 	for (size_t i = 0; i < combo_list.size(); ++i)
 		combo->Append(combo_list[i]);
-	combo->SetSelection(m_digitOrder);
+	agent->getValue(gstOpenDigitOrder, lval);
+	combo->SetSelection(lval);
 
 	//series number
 	st2 = new wxStaticText(panel, 0,
@@ -1176,20 +1192,23 @@ wxWindow* RenderFrame::CreateExtraControlVolume(wxWindow* parent)
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnCh2Check), NULL, panel);
-	ch2->SetValue(m_compression);
+	agent->getValue(gstHardwareCompress, bval);
+	ch2->SetValue(bval);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnCh3Check), NULL, panel);
-	ch3->SetValue(m_skip_brick);
+	agent->getValue(gstSkipBrick, bval);
+	ch3->SetValue(bval);
 
 	//time sequence identifier
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
 		"", wxDefaultPosition, wxDefaultSize);
-	txt1->SetValue(m_time_id);
+	agent->getValue(gstTimeFileId, sval);
+	txt1->SetValue(sval);
 	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
 		wxCommandEventHandler(RenderFrame::OnTxt1Change), NULL, panel);
 	st1 = new wxStaticText(panel, 0,
@@ -1216,6 +1235,9 @@ wxWindow* RenderFrame::CreateExtraControlVolume(wxWindow* parent)
 
 wxWindow* RenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 {
+	fluo::RenderFrameAgent* agent = glbin_agtf->getRenderFrameAgent();
+	bool bval;
+
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -1237,14 +1259,16 @@ wxWindow* RenderFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 		"Compress data (loading will take longer time and data are compressed in graphics memory)");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnCh2Check), NULL, panel);
-	ch2->SetValue(m_compression);
+	agent->getValue(gstHardwareCompress, bval);
+	ch2->SetValue(bval);
 
 	//empty brick skipping
 	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
 		"Skip empty bricks during rendering (loading takes longer time)");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnCh3Check), NULL, panel);
-	ch3->SetValue(m_skip_brick);
+	agent->getValue(gstSkipBrick, bval);
+	ch3->SetValue(bval);
 
 	//time sequence identifier. TODO: Not supported as of now.
 	/*
@@ -1323,7 +1347,7 @@ void RenderFrame::OnOpenVolume(wxCommandEvent& WXUNUSED(event))
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, false, 0);
+		m_agent->LoadVolumes(paths, false);
 
 		//if (m_setting_dlg)
 		//{
@@ -1356,14 +1380,14 @@ void RenderFrame::OnImportVolume(wxCommandEvent& WXUNUSED(event))
 
 		wxArrayString paths;
 		fopendlg->GetPaths(paths);
-		LoadVolumes(paths, true, 0);
+		m_agent->LoadVolumes(paths, true);
 
-		if (m_setting_dlg)
-		{
-			m_setting_dlg->SetRealtimeCompress(m_compression);
-			m_setting_dlg->SetSkipBricks(m_skip_brick);
-			m_setting_dlg->UpdateUI();
-		}
+		//if (m_setting_dlg)
+		//{
+		//	m_setting_dlg->SetRealtimeCompress(m_compression);
+		//	m_setting_dlg->SetSkipBricks(m_skip_brick);
+		//	m_setting_dlg->UpdateUI();
+		//}
 	}
 
 	delete fopendlg;
@@ -1382,7 +1406,7 @@ void RenderFrame::OnOpenMesh(wxCommandEvent& WXUNUSED(event))
 		wxArrayString files;
 		fopendlg->GetPaths(files);
 
-		LoadMeshes(files);
+		m_agent->LoadMeshes(files);
 	}
 
 	if (fopendlg)
@@ -1485,11 +1509,6 @@ wxString RenderFrame::ScriptDialog(const wxString& title,
 	delete dlg;
 	if (agent) agent->ResumeRun();
 	return result;
-}
-
-DataManager* RenderFrame::GetDataManager()
-{
-	return &m_data_mgr;
 }
 
 TreePanel *RenderFrame::GetTree()
@@ -1825,11 +1844,6 @@ void RenderFrame::DeleteVRenderView(const wxString &name)
 	//}
 }
 
-OutAdjustPanel* RenderFrame::GetAdjustView()
-{
-	return m_adjust_view;
-}
-
 //organize render views
 void RenderFrame::OrganizeVRenderViews(int mode)
 {
@@ -2016,18 +2030,27 @@ void RenderFrame::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
-		m_vrp_embed = ch_embed->GetValue();
+	{
+		bool bval = ch_embed->GetValue();
+		m_agent->setValue(gstEmbedDataInProject, bval);
+	}
 }
 
 void RenderFrame::OnChSaveCmpCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
 	if (ch_cmp)
-		m_save_compress = ch_cmp->GetValue();
+	{
+		bool bval = ch_cmp->GetValue();
+		m_agent->setValue(gstCaptureCompress, bval);
+	}
 }
 
 wxWindow* RenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 {
+	fluo::RenderFrameAgent* agent = glbin_agtf->getRenderFrameAgent();
+	bool bval;
+
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -2040,15 +2063,16 @@ wxWindow* RenderFrame::CreateExtraControlProjectSave(wxWindow* parent)
 		"Embed all files in the project folder");
 	ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnChEmbedCheck), NULL, panel);
-	ch_embed->SetValue(m_vrp_embed);
+	agent->getValue(gstEmbedDataInProject, bval);
+	ch_embed->SetValue(bval);
 
 	//compressed
 	wxCheckBox* ch_cmp = new wxCheckBox(panel, ID_LZW_COMP,
 		"Lempel-Ziv-Welch Compression");
 	ch_cmp->Connect(ch_cmp->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderFrame::OnChSaveCmpCheck), NULL, panel);
-	if (ch_cmp)
-		ch_cmp->SetValue(m_save_compress);
+	agent->getValue(gstCaptureCompress, bval);
+	ch_cmp->SetValue(bval);
 
 	//group
 	group1->Add(10, 10);
@@ -2098,7 +2122,8 @@ void RenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 
 void RenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 {
-	m_setting_dlg->UpdateDeviceTree();
+	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent();
+	if (agent) agent->UpdateAllSettings();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();
@@ -2113,8 +2138,9 @@ void RenderFrame::OnLastTool(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 
-	unsigned int tool = m_setting_dlg->GetLastTool();
-	switch (tool)
+	long lval;
+	m_agent->getValue(gstLastTool, lval);
+	switch (lval)
 	{
 	case 0:
 	case TOOL_PAINT_BRUSH:
@@ -2299,44 +2325,6 @@ void RenderFrame::ShowCalculationDlg()
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
 	m_agent->setValue(gstLastTool, long(TOOL_CALCULATIONS));
-}
-
-void RenderFrame::SetTextureUndos()
-{
-	if (m_setting_dlg)
-		flvr::Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
-}
-
-void RenderFrame::SetTextureRendererSettings()
-{
-	if (!m_setting_dlg)
-		return;
-
-	flvr::TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
-	bool use_mem_limit = false;
-	GLenum error = glGetError();
-	GLint mem_info[4] = {0, 0, 0, 0};
-	glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
-	error = glGetError();
-	if (error == GL_INVALID_ENUM)
-	{
-		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
-		error = glGetError();
-		if (error == GL_INVALID_ENUM)
-			use_mem_limit = true;
-	}
-	if (m_setting_dlg->GetGraphicsMem() > mem_info[0]/1024.0)
-		use_mem_limit = true;
-	flvr::TextureRenderer::set_use_mem_limit(use_mem_limit);
-	flvr::TextureRenderer::set_mem_limit(use_mem_limit?
-		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-	flvr::TextureRenderer::set_available_mem(use_mem_limit?
-		m_setting_dlg->GetGraphicsMem():mem_info[0]/1024.0);
-	flvr::TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
-	flvr::TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
-	flvr::TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
-	flvr::TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
-	flvr::TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
 }
 
 void RenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))
