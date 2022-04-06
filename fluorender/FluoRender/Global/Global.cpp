@@ -111,6 +111,7 @@ void Global::BuildRoot()
 	root->addValue(gstSourceMode, long(0));
 	//others to sync with children
 	ADD_VALUE(gstSaveProjectEnable, bool(false));
+	ADD_VALUE(gstProjectPath, std::wstring(L""));
 	ADD_VALUE(gstCaptureAlpha, bool(false));
 	ADD_VALUE(gstCaptureFloat, bool(false));
 	ADD_VALUE(gstCaptureCompress, bool(false));
@@ -198,6 +199,8 @@ void Global::BuildRoot()
 	ADD_VALUE(gstOpenDigitOrder, long(0));
 	ADD_VALUE(gstOpenSeriesNum, long(0));
 	ADD_VALUE(gstEmbedDataInProject, bool(false));
+	ADD_VALUE(gstLoadMask, bool(true));
+	ADD_VALUE(gstLoadLabel, bool(true));
 	origin_->addChild(root);
 }
 

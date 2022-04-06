@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <sstream>
 
-using namespace std;
-
 #ifdef STATIC_COMPILE
 	#define nrrdWrap nrrdWrap_va
 	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
@@ -76,9 +74,9 @@ public:
 	virtual int GetType() = 0;	//get reader type
 
 	//set the file name and path to open and read
-	virtual void SetFile(string &file) = 0;
+	virtual void SetFile(const std::string &file) = 0;
 	//set the file name and path to open and read (in wide string for foreign languages)
-	virtual void SetFile(wstring &file) = 0;
+	virtual void SetFile(const std::wstring &file) = 0;
 	//set reader flag to read a 3D stack as a file sequence, each file being a slice
 	//in UI, it is set in the open file dialog as "read a sequence as z slices..."
 	//not all reader types use this flag, basically for a tiff sequence
@@ -95,9 +93,9 @@ public:
 	//time identifier is a string to identify each file in a sequence as a time point
 	//in UI, it is set in the open file dialog as option "time sequence identifier"
 	//default value is "_T", which means any digits after the string in a file name is used as its time value
-	virtual void SetTimeId(wstring &id) = 0;
+	virtual void SetTimeId(const std::wstring &id) = 0;
 	//get current time identifier
-	virtual wstring GetTimeId() = 0;
+	virtual std::wstring GetTimeId() = 0;
 	//preprocess the file
 	//get the structure of the data without reading actual volume
 	virtual int Preprocess() = 0;
@@ -128,16 +126,16 @@ public:
 	//t is the time point value to load
 	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;
 	//for a time sequence, get the file name for specified time and channel
-	virtual wstring GetCurDataName(int t, int c) = 0;
+	virtual std::wstring GetCurDataName(int t, int c) = 0;
 	//for a 4d sequence, get the file name for the mask of specified time and channel
-	virtual wstring GetCurMaskName(int t, int c) = 0;
+	virtual std::wstring GetCurMaskName(int t, int c) = 0;
 	//for a 4d sequence, get the file name for the label of specified time and channel
-	virtual wstring GetCurLabelName(int t, int c) = 0;
+	virtual std::wstring GetCurLabelName(int t, int c) = 0;
 
 	//get a string for only the path of the file
-	virtual wstring GetPathName() = 0;
+	virtual std::wstring GetPathName() = 0;
 	//get a string for only the file name without its path
-	virtual wstring GetDataName() = 0;
+	virtual std::wstring GetDataName() = 0;
 	//get the total number of time points
 	virtual int GetTimeNum() = 0;
 	//get the time point value of last/current loaded file
@@ -182,7 +180,7 @@ public:
 		return m_id_string == reader.m_id_string;
 	}
 	//another way to check if two readers are the same
-	bool Match(wstring &id_string)
+	bool Match(const std::wstring &id_string)
 	{
 		return m_id_string == id_string;
 	}
@@ -219,10 +217,10 @@ public:
 		return m_alignment;
 	}
 
-	static string GetError(int code);
+	static std::string GetError(int code);
 
 protected:
-	wstring m_id_string;	//the path and file name used to read files
+	std::wstring m_id_string;	//the path and file name used to read files
 	//resizing
 	int m_resize_type;		//0: no resizing; 1: padding; 2: resampling
 	int m_resample_type;	//0: nearest neighbour; 1: linear
@@ -230,12 +228,12 @@ protected:
 
 	//3d batch
 	bool m_batch;
-	vector<wstring> m_batch_list;
+	std::vector<std::wstring> m_batch_list;
 	int m_cur_batch;
 	
-	wstring m_path_name;
+	std::wstring m_path_name;
 
-	wstring m_info;
+	std::wstring m_info;
 
 	//all the lzw decoding stuff
 	#define MAXCODE(n)	((1L<<(n))-1)
@@ -321,7 +319,7 @@ protected:
 	void DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride);
 
 	//read number after a position in a string
-	int get_number(string &str, int64_t pos);
+	int get_number(std::string &str, int64_t pos);
 };
 
 #endif//_BASE_READER_H_

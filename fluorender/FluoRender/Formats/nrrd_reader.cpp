@@ -57,7 +57,7 @@ NRRDReader::~NRRDReader()
 {
 }
 
-void NRRDReader::SetFile(string &file)
+void NRRDReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -69,7 +69,7 @@ void NRRDReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void NRRDReader::SetFile(wstring &file)
+void NRRDReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -80,7 +80,7 @@ int NRRDReader::Preprocess()
 	m_4d_seq.clear();
 
 	//separate path and name
-	wstring path, name;
+	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 
@@ -171,12 +171,12 @@ int NRRDReader::GetDigitOrder()
 	return 0;
 }
 
-void NRRDReader::SetTimeId(wstring &id)
+void NRRDReader::SetTimeId(const std::wstring &id)
 {
 	m_time_id = id;
 }
 
-wstring NRRDReader::GetTimeId()
+std::wstring NRRDReader::GetTimeId()
 {
 	return m_time_id;
 }
@@ -186,7 +186,7 @@ void NRRDReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		wstring search_path = GET_PATH(m_path_name);
+		std::wstring search_path = GET_PATH(m_path_name);
 		FIND_FILES(search_path,L"*.nrrd",m_batch_list,m_cur_batch);
 		m_batch = true;
 	}
@@ -229,7 +229,7 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 			return 0;
 	}
 
-	wstring str_name = m_4d_seq[t].filename;
+	std::wstring str_name = m_4d_seq[t].filename;
 	m_data_name = GET_NAME(str_name);
 	FILE* nrrd_file = 0;
 	if (!WFOPEN(&nrrd_file, str_name.c_str(), L"rb"))
@@ -389,19 +389,19 @@ bool NRRDReader::nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)
 	return info1.filenumber < info2.filenumber;
 }
 
-wstring NRRDReader::GetCurDataName(int t, int c)
+std::wstring NRRDReader::GetCurDataName(int t, int c)
 {
 	if (t >= 0 && t < (int)m_4d_seq.size())
 		return m_4d_seq[t].filename;
 	return m_path_name;
 }
 
-wstring NRRDReader::GetCurMaskName(int t, int c)
+std::wstring NRRDReader::GetCurMaskName(int t, int c)
 {
-	wstring mask_name;
+	std::wstring mask_name;
 	if (t >= 0 && t < (int)m_4d_seq.size())
 	{
-		wstring data_name = m_4d_seq[t].filename;
+		std::wstring data_name = m_4d_seq[t].filename;
 		mask_name = data_name.substr(0, data_name.find_last_of('.')) + L".msk";
 		return mask_name;
 	}
@@ -412,13 +412,13 @@ wstring NRRDReader::GetCurMaskName(int t, int c)
 	return mask_name;
 }
 
-wstring NRRDReader::GetCurLabelName(int t, int c)
+std::wstring NRRDReader::GetCurLabelName(int t, int c)
 {
-	wstring label_name;
+	std::wstring label_name;
 	if (t >= 0 && t < (int)m_4d_seq.size())
 	{
-		wstring data_name = m_4d_seq[t].filename;
-		wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
+		std::wstring data_name = m_4d_seq[t].filename;
+		std::wstring label_name = data_name.substr(0, data_name.find_last_of('.')) + L".lbl";
 		return label_name;
 	}
 	label_name = m_path_name.substr(0, m_path_name.find_last_of('.'));

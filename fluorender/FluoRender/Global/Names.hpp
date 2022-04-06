@@ -658,6 +658,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSelectedKey "selected key"
 //setting agent/root
 #define gstSaveProjectEnable "save project enable"
+#define gstProjectPath "project path"
 #define gstTestParam "test param"
 #define gstWaveColor1 "wave color1"
 #define gstWaveColor2 "wave color2"
@@ -706,6 +707,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstOpenDigitOrder "open digit order"
 #define gstOpenSeriesNum "open series num"
 #define gstEmbedDataInProject "embed data in project"
+#define gstLoadMask "load mask"
+#define gstLoadLabel "load label"
 //track agent
 #define gstTrackCellSize "track cell size"
 #define gstTrackIter "track iter"

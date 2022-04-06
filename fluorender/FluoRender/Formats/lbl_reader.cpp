@@ -39,7 +39,7 @@ LBLReader::~LBLReader()
 {
 }
 
-void LBLReader::SetFile(string &file)
+void LBLReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -50,7 +50,7 @@ void LBLReader::SetFile(string &file)
 	}
 }
 
-void LBLReader::SetFile(wstring &file)
+void LBLReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 }
@@ -89,13 +89,13 @@ int LBLReader::GetDigitOrder()
 	return 0;
 }
 
-void LBLReader::SetTimeId(wstring &id)
+void LBLReader::SetTimeId(const std::wstring &id)
 {
 }
 
-wstring LBLReader::GetTimeId()
+std::wstring LBLReader::GetTimeId()
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
 void LBLReader::SetBatch(bool batch)
@@ -112,8 +112,8 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 	int64_t pos = m_path_name.find_last_of('.');
 	if (pos == -1)
 		return 0;
-	wstring str_name = m_path_name.substr(0, pos);
-	wostringstream strs;
+	std::wstring str_name = m_path_name.substr(0, pos);
+	std::wostringstream strs;
 	strs << str_name /*<< "_t" << t << "_c" << c*/ << ".lbl";
 	str_name = strs.str();
 	FILE* lbl_file = 0;
@@ -155,17 +155,17 @@ Nrrd* LBLReader::Convert(int t, int c, bool get_max)
 	return output;
 }
 
-wstring LBLReader::GetCurDataName(int t, int c)
+std::wstring LBLReader::GetCurDataName(int t, int c)
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
-wstring LBLReader::GetCurMaskName(int t, int c)
+std::wstring LBLReader::GetCurMaskName(int t, int c)
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
-wstring LBLReader::GetCurLabelName(int t, int c)
+std::wstring LBLReader::GetCurLabelName(int t, int c)
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }

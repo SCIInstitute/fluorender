@@ -1136,8 +1136,8 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 	if (m_reader && m_reader->GetType() == READER_BRKXML_TYPE)
 	{
 		BRKXMLReader *breader = (BRKXMLReader*)m_reader;
-		vector<flvr::Pyramid_Level> pyramid;
-		vector<vector<vector<vector<flvr::FileLocInfo *>>>> fnames;
+		std::vector<flvr::Pyramid_Level> pyramid;
+		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo *>>>> fnames;
 		int ftype = BRICK_FILE_TYPE_NONE;
 
 		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
@@ -1146,7 +1146,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		int lmnum = breader->GetLandmarkNum();
 		for (int j = 0; j < lmnum; j++)
 		{
-			wstring name;
+			std::wstring name;
 			VD_Landmark vlm;
 			breader->GetLandmark(j, vlm.name, vlm.x, vlm.y, vlm.z, vlm.spcx, vlm.spcy, vlm.spcz);
 			m_landmarks.push_back(vlm);
@@ -1168,7 +1168,7 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 		PlaneSet planeset;
 		getValue(gstClipPlanes, planeset);
 		//this needs to be made consistent in the future
-		vector<Plane*> planelist(0);
+		std::vector<Plane*> planelist(0);
 		for (int i = 0; i < planeset.GetSize(); ++i)
 		{
 			Plane* plane = new Plane(planeset.Get(i));
@@ -1177,8 +1177,8 @@ int VolumeData::LoadData(Nrrd* data, const std::string &name, const std::wstring
 
 		m_vr = new flvr::VolumeRenderer(m_tex, planelist);
 		BBox bounds;
-        Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
-        Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
+		Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
+		Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
 		bounds.extend(pmin);
 		bounds.extend(pmax);
 		setValue(gstBounds, bounds);
@@ -1394,7 +1394,7 @@ void VolumeData::AddEmptyData(int bits,
 	//this needs to be made consistent in the future
 	PlaneSet planeset;
 	getValue(gstClipPlanes, planeset);
-	vector<Plane*> planelist(0);
+	std::vector<Plane*> planelist(0);
 	for (int i = 0; i < planeset.GetSize(); ++i)
 	{
 		Plane* plane = new Plane(planeset.Get(0));
@@ -2249,7 +2249,7 @@ void VolumeData::SaveMask(bool use_reader, long t, long c)
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
-			wstring filename, tex_path;
+			std::wstring filename, tex_path;
 			getValue(gstDataPath, tex_path);
 			if (use_reader && m_reader)
 				filename = m_reader->GetCurMaskName(t, c);
@@ -2315,7 +2315,7 @@ void VolumeData::SaveLabel(bool use_reader, long t, long c)
 			MSKWriter msk_writer;
 			msk_writer.SetData(data);
 			msk_writer.SetSpacings(spcx, spcy, spcz);
-			wstring filename, tex_path;
+			std::wstring filename, tex_path;
 			getValue(gstDataPath, tex_path);
 			if (use_reader && m_reader)
 				filename = m_reader->GetCurLabelName(t, c);

@@ -61,7 +61,7 @@ void MSKWriter::SetCompression(bool value)
 {
 }
 
-void MSKWriter::Save(wstring filename, int mode)
+void MSKWriter::Save(const std::wstring &filename, int mode)
 {
 	if (!m_data)
 		return;
@@ -87,7 +87,7 @@ void MSKWriter::Save(wstring filename, int mode)
 			m_spcz*m_data->axis[2].size);
 	}
 
-	string str;
+	std::string str;
 	str.assign(filename.length(), 0);
 	for (int i=0; i<(int)filename.length(); i++)
 		str[i] = (char)filename[i];

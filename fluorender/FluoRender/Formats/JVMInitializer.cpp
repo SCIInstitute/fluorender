@@ -195,12 +195,11 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
     std::cout << jvm_ij_path << "IJ\n";
     std::cout << jvm_bioformats_path << "BIO\n";
     std::cout << "\n";
-	using namespace std;
 	JavaVMOption* options = new JavaVMOption[1];
 	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
-	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
+	std::string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
     
@@ -226,7 +225,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 	}
     std::cout << "JVM created successfully." << std::endl;
     jint ver = m_pEnv->GetVersion();
-    cout << ((ver>>16)&0x0f) << "."<<(ver&0x0f) << endl;
+	std::cout << ((ver>>16)&0x0f) << "."<<(ver&0x0f) << std::endl;
     std::cout.flush();
 	return true;
 }

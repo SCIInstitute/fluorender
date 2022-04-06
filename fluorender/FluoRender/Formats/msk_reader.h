@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <base_reader.h>
 
-using namespace std;
-
 class MSKReader : public BaseReader
 {
 public:
@@ -40,26 +38,26 @@ public:
 
 	int GetType() { return READER_MSK_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return L"";}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return L"";}
 	int GetTimeNum() {return 0;}
 	int GetCurTime() {return 0;}
 	int GetChanNum() {return 0;}

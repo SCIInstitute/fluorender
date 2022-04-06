@@ -59,7 +59,7 @@ LIFReader::~LIFReader()
 {
 }
 
-void LIFReader::SetFile(string &file)
+void LIFReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -71,7 +71,7 @@ void LIFReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void LIFReader::SetFile(wstring &file)
+void LIFReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -139,14 +139,14 @@ int LIFReader::GetDigitOrder()
 	return 0;
 }
 
-void LIFReader::SetTimeId(wstring &id)
+void LIFReader::SetTimeId(const std::wstring &id)
 {
 	//do nothing
 }
 
-wstring LIFReader::GetTimeId()
+std::wstring LIFReader::GetTimeId()
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
 void LIFReader::SetBatch(bool batch)
@@ -253,30 +253,30 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring LIFReader::GetCurDataName(int t, int c)
+std::wstring LIFReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring LIFReader::GetCurMaskName(int t, int c)
+std::wstring LIFReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring LIFReader::GetCurLabelName(int t, int c)
+std::wstring LIFReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }
 

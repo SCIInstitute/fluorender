@@ -581,7 +581,7 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 			return;
 		vol_cache.nrrd_data = data;
 		vol_cache.data = data->data;
-		wstring lblname = reader->GetCurLabelName(frame, chan);
+		std::wstring lblname = reader->GetCurLabelName(frame, chan);
 		lbl_reader.SetFile(lblname);
 		Nrrd* label = lbl_reader.Convert(frame, chan, true);
 		if (!label)
@@ -618,7 +618,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 		vd->getValue(gstSpcY, spcy);
 		vd->getValue(gstSpcZ, spcz);
 		msk_writer.SetSpacings(spcx, spcy, spcz);
-		wstring filename = reader->GetCurLabelName(frame, chan);
+		std::wstring filename = reader->GetCurLabelName(frame, chan);
 		msk_writer.Save(filename, 1);
 	}
 

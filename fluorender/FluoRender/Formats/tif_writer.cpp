@@ -62,7 +62,7 @@ void TIFWriter::SetCompression(bool value)
 	m_compression = value;
 }
 
-void TIFWriter::Save(wstring filename, int mode)
+void TIFWriter::Save(const std::wstring &filename, int mode)
 {
 	switch (mode)
 	{
@@ -75,7 +75,7 @@ void TIFWriter::Save(wstring filename, int mode)
 	}
 }
 
-void TIFWriter::SaveSingleFile(wstring filename)
+void TIFWriter::SaveSingleFile(const std::wstring &filename)
 {
 	if (!m_data || !m_data->data || m_data->dim!=3)
 		return;
@@ -130,13 +130,13 @@ void TIFWriter::SaveSingleFile(wstring filename)
 		TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
 		if (m_compression)
 			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-		ostringstream strs;
+		std::ostringstream strs;
 		strs << "ImageJ=1.52a\n";
 		strs << "spacing=" << z_res << "\n";
 		strs << "images=" << numPages << "\n";
 		strs << "slices=" << numPages << "\n";
 		strs << "loop=false";
-		string desc = strs.str();
+		std::string desc = strs.str();
 		TIFFSetField(outfile, TIFFTAG_IMAGEDESCRIPTION, desc.c_str());
 
 		for (int j=0; j<height; j++)
@@ -163,14 +163,14 @@ void TIFWriter::SaveSingleFile(wstring filename)
 		_TIFFfree(buf8);
 }
 
-void TIFWriter::SaveSequence(wstring filename)
+void TIFWriter::SaveSequence(const std::wstring &filename)
 {
 	if (!m_data || !m_data->data || m_data->dim!=3)
 		return;
-
-	int64_t pos = filename.find_last_of(L'.');
+	std::wstring fstr = filename;
+	int64_t pos = fstr.find_last_of(L'.');
 	if (pos != -1)
-		filename = filename.substr(0, pos);
+		fstr = fstr.substr(0, pos);
 
 	int numPages = int(m_data->axis[2].size);
 	int width = int(m_data->axis[0].size);
@@ -212,7 +212,7 @@ void TIFWriter::SaveSequence(wstring filename)
 		int ndigit = int(log10(double(numPages))) + 1;
 		swprintf_s(format, 32, L"%%0%dd", ndigit);
 		swprintf_s(fileindex, 32, format, i+1);
-		wstring pagefilename = filename + fileindex + L".tif";
+		std::wstring pagefilename = fstr + fileindex + L".tif";
 		TIFF* outfile = TIFFOpenW(pagefilename, "wb");
 
 		TIFFSetField(outfile, TIFFTAG_IMAGEWIDTH, width);
@@ -227,13 +227,13 @@ void TIFWriter::SaveSequence(wstring filename)
 		TIFFSetField(outfile, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
 		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, 0);
 		TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
-		ostringstream strs;
+		std::ostringstream strs;
 		strs << "ImageJ=1.52a\n";
 		strs << "spacing=" << z_res << "\n";
 		strs << "images=" << 1 << "\n";
 		strs << "slices=" << 1 << "\n";
 		strs << "loop=false";
-		string desc = strs.str();
+		std::string desc = strs.str();
 		TIFFSetField(outfile, TIFFTAG_IMAGEDESCRIPTION, desc.c_str());
 		if (m_compression)
 			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);

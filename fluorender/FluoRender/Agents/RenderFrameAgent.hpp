@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <InterfaceAgent.hpp>
 #include <Root.hpp>
+#include <base_reader.h>
 #include <glm.h>
 #include <wx/arrstr.h>
 
@@ -87,11 +88,15 @@ namespace fluo
 		int LoadMeshData(GLMmodel* mesh);
 		void SetTextureUndos();
 		void SetTextureRendererSettings();
+		Color GetWavelengthColor(double wavelength);
+		Color GetColor(int c);
+		bool CheckNames(const std::string &name);
 
 	protected:
 		RenderFrame &frame_;
 
 	private:
+		std::vector<BaseReader*> m_reader_list;
 	};
 }
 

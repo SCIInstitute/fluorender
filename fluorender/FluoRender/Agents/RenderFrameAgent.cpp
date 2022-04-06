@@ -30,10 +30,27 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderFrame.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
+#include <VolumeFactory.hpp>
+#include <MeshFactory.hpp>
+#include <AnnotationFactory.hpp>
 #include <MovieAgent.hpp>
 #include <VolumeData.hpp>
-#include <base_reader.h>
 #include <Texture.h>
+#include <TextureRenderer.h>
+#include <imageJ_reader.h>
+#include <tif_reader.h>
+#include <nrrd_reader.h>
+#include <oib_reader.h>
+#include <oif_reader.h>
+#include <lsm_reader.h>
+#include <pvxml_reader.h>
+#include <brkxml_reader.h>
+#include <czi_reader.h>
+#include <nd2_reader.h>
+#include <lif_reader.h>
+#include <lof_reader.h>
+#include <msk_reader.h>
+#include <lbl_reader.h>
 #include <wx/string.h>
 #include <wx/progdlg.h>
 
@@ -79,7 +96,8 @@ void RenderFrameAgent::SaveProject(const std::wstring &filename)
 
 void RenderFrameAgent::OpenProject(const std::wstring &filename)
 {
-
+	std::wstring wsval = GET_PATH(filename);
+	setValue(gstProjectPath, wsval);
 }
 
 void RenderFrameAgent::StartupLoad(wxArrayString files, bool run_mov, bool with_imagej)
@@ -133,9 +151,9 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 {
 	int j;
 
-	fluo::VolumeData* vd_sel = 0;
-	fluo::VolumeGroup* group_sel = 0;
-	fluo::Renderview* view = glbin_root->getCurrentRenderview();
+	VolumeData* vd_sel = 0;
+	VolumeGroup* group_sel = 0;
+	Renderview* view = glbin_root->getCurrentRenderview();
 
 	wxProgressDialog *prg_diag = 0;
 	if (view)
@@ -201,15 +219,15 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 
 			if (ch_num > 1)
 			{
-				fluo::VolumeGroup* group = v->addVolumeGroup();
+				VolumeGroup* group = view->addVolumeGroup();
 				if (group)
 				{
 					for (int i = ch_num; i > 0; i--)
 					{
-						fluo::VolumeData* vd = GetVolumeData(ch_num - i);
+						VolumeData* vd = glbin_volf->get(ch_num - i);
 						if (vd)
 						{
-							v->addVolumeData(vd, group);
+							view->addVolumeData(vd, group);
 							wxString vol_name = vd->getName();
 							if (vol_name.Find("_1ch") != -1 &&
 								(i == 1 || i == 2))
@@ -233,17 +251,17 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 			}
 			else if (ch_num == 1)
 			{
-				fluo::VolumeData* vd = GetVolumeData(0);
+				VolumeData* vd = glbin_volf->get(0);
 				if (vd)
 				{
-					int chan_num = v->GetVolListSize();
-					fluo::Color color(1.0, 1.0, 1.0);
+					int chan_num = view->GetVolListSize();
+					Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
-						color = fluo::Color(1.0, 0.0, 0.0);
+						color = Color(1.0, 0.0, 0.0);
 					else if (chan_num == 1)
-						color = fluo::Color(0.0, 1.0, 0.0);
+						color = Color(0.0, 1.0, 0.0);
 					else if (chan_num == 2)
-						color = fluo::Color(0.0, 0.0, 1.0);
+						color = Color(0.0, 0.0, 1.0);
 
 					bool bval;
 					if (chan_num >= 0 && chan_num < 3)
@@ -251,12 +269,12 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 					else
 						vd->flipValue(gstRandomizeColor, bval);
 
-					group_sel = v->addVolumeData(vd, group_sel);
+					group_sel = view->addVolumeData(vd, group_sel);
 					vd_sel = vd;
 
 					if (vd->GetReader() && vd->GetReader()->GetTimeNum() > 1)
 					{
-						v->setValue(gstCurrentFrame,
+						view->setValue(gstCurrentFrame,
 							long(vd->GetReader()->GetCurTime()));
 						enable_4d = true;
 					}
@@ -274,8 +292,8 @@ void RenderFrameAgent::LoadVolumes(wxArrayString files, bool withImageJ)
 		//	UpdateTree();
 		//v->RefreshGL(39);
 
-		v->InitView(fluo::Renderview::INIT_BOUNDS |
-			fluo::Renderview::INIT_CENTER);
+		view->InitView(Renderview::INIT_BOUNDS |
+			Renderview::INIT_CENTER);
 		//v->m_vrv->UpdateScaleFactor(false);
 
 		if (enable_4d)
@@ -298,14 +316,14 @@ void RenderFrameAgent::LoadMeshes(wxArrayString files)
 	//if (!view)
 	//	view = GetView(0);
 
-	//fluo::MeshData* md_sel = 0;
+	//MeshData* md_sel = 0;
 
 	//wxProgressDialog *prg_diag = new wxProgressDialog(
 	//	"FluoRender: Loading mesh data...",
 	//	"Reading and processing selected mesh data. Please wait.",
 	//	100, 0, wxPD_SMOOTH|wxPD_ELAPSED_TIME|wxPD_AUTO_HIDE);
 
-	//fluo::MeshGroup* group = 0;
+	//MeshGroup* group = 0;
 	//if (files.Count() > 1)
 	//	group = view->AddOrGetMGroup();
 
@@ -316,7 +334,7 @@ void RenderFrameAgent::LoadMeshes(wxArrayString files)
 	//	wxString filename = files[i];
 	//	LoadMeshData(filename);
 
-	//	fluo::MeshData* md = GetLastMeshData();
+	//	MeshData* md = GetLastMeshData();
 	//	if (view && md)
 	//	{
 	//		if (group)
@@ -350,15 +368,16 @@ wxString RenderFrameAgent::SearchProjectPath(const wxString &filename)
 
 	wxString pathname = filename;
 
-	if (m_prj_path == "")
-		return "";
+	std::wstring wsval;
+	getValue(gstProjectPath, wsval);
+	if (wsval.empty()) return "";
 	wxString search_str;
 	for (i = pathname.Length() - 1; i >= 0; i--)
 	{
 		if (pathname[i] == '\\' || pathname[i] == '/')
 		{
 			search_str.Prepend(GETSLASH());
-			wxString name_temp = m_prj_path + search_str;
+			wxString name_temp = wsval + search_str;
 			if (wxFileExists(name_temp))
 				return name_temp;
 		}
@@ -370,12 +389,6 @@ wxString RenderFrameAgent::SearchProjectPath(const wxString &filename)
 
 int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool withImageJ, int ch_num, int t_num)
 {
-	bool isURL = false;
-	bool downloaded = false;
-	wxString downloaded_filepath;
-	bool downloaded_metadata = false;
-	wxString downloaded_metadatafilepath;
-
 	wxString pathname = filename;
 	if (!wxFileExists(pathname))
 	{
@@ -390,7 +403,7 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 
 	for (i = 0; i < (int)m_reader_list.size(); i++)
 	{
-		wstring wstr = pathname.ToStdWstring();
+		std::wstring wstr = pathname.ToStdWstring();
 		if (m_reader_list[i]->Match(wstr))
 		{
 			reader = m_reader_list[i];
@@ -399,28 +412,33 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 	}
 
 	int reader_return = -1;
+	bool bval; long lval; std::string sval; std::wstring wsval;
 	if (reader)
 	{
 		bool preprocess = false;
-		if (reader->GetSliceSeq() != m_sliceSequence)
+		getValue(gstOpenSlices, bval);
+		if (reader->GetSliceSeq() != bval)
 		{
-			reader->SetSliceSeq(m_sliceSequence);
+			reader->SetSliceSeq(bval);
 			preprocess = true;
 		}
-		if (reader->GetChannSeq() != m_channSequence)
+		getValue(gstOpenChanns, bval);
+		if (reader->GetChannSeq() != bval)
 		{
-			reader->SetChannSeq(m_channSequence);
+			reader->SetChannSeq(bval);
 			preprocess = true;
 		}
-		if (reader->GetDigitOrder() != m_digitOrder)
+		getValue(gstOpenDigitOrder, lval);
+		if (reader->GetDigitOrder() != lval)
 		{
-			reader->SetDigitOrder(m_digitOrder);
+			reader->SetDigitOrder(lval);
 			preprocess = true;
 		}
-		if (reader->GetTimeId() != m_timeId.ToStdWstring())
+		getValue(gstTimeFileId, sval);
+		wsval = s2ws(sval);
+		if (reader->GetTimeId() != wsval)
 		{
-			wstring str_w = m_timeId.ToStdWstring();
-			reader->SetTimeId(str_w);
+			reader->SetTimeId(wsval);
 			preprocess = true;
 		}
 		if (preprocess)
@@ -433,44 +451,48 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 		if (withImageJ == true)
 			reader = new ImageJReader();
 		else {
-			if (type == LOAD_TYPE_TIFF)
+			if (type == VLT_TIFF)
 				reader = new TIFReader();
-			else if (type == LOAD_TYPE_NRRD)
+			else if (type == VLT_NRRD)
 				reader = new NRRDReader();
-			else if (type == LOAD_TYPE_OIB)
+			else if (type == VLT_OIB)
 				reader = new OIBReader();
-			else if (type == LOAD_TYPE_OIF)
+			else if (type == VLT_OIF)
 				reader = new OIFReader();
-			else if (type == LOAD_TYPE_LSM)
+			else if (type == VLT_LSM)
 				reader = new LSMReader();
-			else if (type == LOAD_TYPE_PVXML)
+			else if (type == VLT_PVXML)
 			{
 				reader = new PVXMLReader();
-				((PVXMLReader*)reader)->SetFlipX(m_pvxml_flip_x);
-				((PVXMLReader*)reader)->SetFlipY(m_pvxml_flip_y);
-				((PVXMLReader*)reader)->SetSeqType(m_pvxml_seq_type);
+				getValue(gstPvxmlFlipX, bval);
+				((PVXMLReader*)reader)->SetFlipX(bval);
+				getValue(gstPvxmlFlipY, bval);
+				((PVXMLReader*)reader)->SetFlipY(bval);
+				getValue(gstPvxmlSeqType, lval);
+				((PVXMLReader*)reader)->SetSeqType(lval);
 			}
-			else if (type == LOAD_TYPE_BRKXML)
+			else if (type == VLT_BRKXML)
 				reader = new BRKXMLReader();
-			else if (type == LOAD_TYPE_CZI)
+			else if (type == VLT_CZI)
 				reader = new CZIReader();
-			else if (type == LOAD_TYPE_ND2)
+			else if (type == VLT_ND2)
 				reader = new ND2Reader();
-			else if (type == LOAD_TYPE_LIF)
+			else if (type == VLT_LIF)
 				reader = new LIFReader();
-			else if (type == LOAD_TYPE_LOF)
+			else if (type == VLT_LOF)
 				reader = new LOFReader();
 		}
 
-
 		m_reader_list.push_back(reader);
-		wstring str_w = pathname.ToStdWstring();
-		reader->SetFile(str_w);
-		reader->SetSliceSeq(m_sliceSequence);
-		reader->SetChannSeq(m_channSequence);
-		reader->SetDigitOrder(m_digitOrder);
-		str_w = m_timeId.ToStdWstring();
-		reader->SetTimeId(str_w);
+		reader->SetFile(pathname.ToStdWstring());
+		getValue(gstOpenSlices, bval);
+		reader->SetSliceSeq(bval);
+		getValue(gstOpenChanns, bval);
+		reader->SetChannSeq(bval);
+		getValue(gstOpenDigitOrder, lval);
+		reader->SetDigitOrder(lval);
+		getValue(gstTimeFileId, sval);
+		reader->SetTimeId(s2ws(sval));
 		reader_return = reader->Preprocess();
 	}
 
@@ -487,29 +509,36 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 	}
 
 	//align data for compression if vtc is not supported
-	if (!GLEW_NV_texture_compression_vtc && m_compression)
+	bool hard_comp;
+	getValue(gstHardwareCompress, hard_comp);
+	if (!GLEW_NV_texture_compression_vtc && hard_comp)
 	{
 		reader->SetResize(1);
 		reader->SetAlignment(4);
 	}
 
-	if (m_ser_num > 0)
-		reader->LoadBatch(m_ser_num);
+	getValue(gstOpenSeriesNum, lval);
+	if (lval > 0)
+		reader->LoadBatch(lval);
+	bool skip_brick;
+	getValue(gstSkipBrick, skip_brick);
+	bool load_mask, load_label;
+	getValue(gstLoadMask, load_mask);
+	getValue(gstLoadLabel, load_label);
 	int chan = reader->GetChanNum();
 	for (i = (ch_num >= 0 ? ch_num : 0);
 		i < (ch_num >= 0 ? ch_num + 1 : chan); i++)
 	{
-		fluo::VolumeData *vd = glbin_volf->build();
+		VolumeData *vd = glbin_volf->build();
 		if (!vd)
 			continue;
 
-		vd->setValue(gstSkipBrick, m_skip_brick);
+		vd->setValue(gstSkipBrick, skip_brick);
 		Nrrd* data = reader->Convert(t_num >= 0 ? t_num : reader->GetCurTime(), i, true);
-		if (!data)
-			continue;
+		if (!data) continue;
 
 		wxString name;
-		if (type != LOAD_TYPE_BRKXML)
+		if (type != VLT_BRKXML)
 		{
 			name = wxString(reader->GetDataName());
 			if (chan > 1)
@@ -527,12 +556,12 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 		}
 
 		vd->SetReader(reader);
-		vd->setValue(gstHardwareCompress, m_compression);
+		vd->setValue(gstHardwareCompress, hard_comp);
 
 		bool valid_spc = reader->IsSpcInfoValid();
 		if (vd->LoadData(data, name.ToStdString(), pathname.ToStdWstring()))
 		{
-			if (m_load_mask)
+			if (load_mask)
 			{
 				//mask
 				MSKReader msk_reader;
@@ -549,7 +578,7 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 				if (label)
 					vd->LoadLabel(label);
 			}
-			if (type == LOAD_TYPE_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
+			if (type == VLT_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
 			//for 2D data
 			long xres, yres, zres;
 			vd->getValue(gstResX, xres);
@@ -580,25 +609,25 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 			continue;
 		}
 
-		SetVolumeDefault(vd);
-		AddVolumeData(vd);
+		glbin_volf->propValuesToDefault(vd);
+		//AddVolumeData(vd);
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);
 		if (wavelength > 0.0) {
-			fluo::Color col = GetWavelengthColor(wavelength);
+			Color col = GetWavelengthColor(wavelength);
 			vd->setValue(gstColor, col);
 		}
 		else if (wavelength < 0.) {
-			fluo::Color white(1.0, 1.0, 1.0);
+			Color white(1.0, 1.0, 1.0);
 			vd->setValue(gstColor, white);
 		}
 		else
 		{
-			fluo::Color white(1.0, 1.0, 1.0);
-			fluo::Color red(1.0, 0.0, 0.0);
-			fluo::Color green(0.0, 1.0, 0.0);
-			fluo::Color blue(0.0, 0.0, 1.0);
+			Color white(1.0, 1.0, 1.0);
+			Color red(1.0, 0.0, 0.0);
+			Color green(0.0, 1.0, 0.0);
+			Color blue(0.0, 0.0, 1.0);
 			if (chan == 1) {
 				vd->setValue(gstColor, white);
 			}
@@ -630,16 +659,16 @@ int RenderFrameAgent::LoadMeshData(const wxString &filename)
 			return 0;
 	}
 
-	fluo::MeshData *md = glbin_mshf->build();
+	MeshData *md = glbin_mshf->build();
 	md->LoadData(pathname.ToStdWstring());
 
-	wxString name = md->getName();
-	wxString new_name = name;
+	std::string name = md->getName();
+	std::string new_name = name;
 	int i;
 	for (i = 1; CheckNames(new_name); i++)
-		new_name = name + wxString::Format("_%d", i);
+		new_name = name + std::to_string(i);
 	if (i > 1)
-		md->setName(new_name.ToStdString());
+		md->setName(new_name);
 	//m_md_list.push_back(md);
 
 	return 1;
@@ -649,16 +678,16 @@ int RenderFrameAgent::LoadMeshData(GLMmodel* mesh)
 {
 	if (!mesh) return 0;
 
-	fluo::MeshData *md = glbin_mshf->build();
+	MeshData *md = glbin_mshf->build();
 	md->LoadData(mesh);
 
-	wxString name = md->getName();
-	wxString new_name = name;
+	std::string name = md->getName();
+	std::string new_name = name;
 	int i;
 	for (i = 1; CheckNames(new_name); i++)
-		new_name = name + wxString::Format("_%d", i);
+		new_name = name + std::to_string(i);
 	if (i > 1)
-		md->setName(new_name.ToStdString());
+		md->setName(new_name);
 	//m_md_list.push_back(md);
 
 	return 1;
@@ -666,16 +695,16 @@ int RenderFrameAgent::LoadMeshData(GLMmodel* mesh)
 
 void RenderFrameAgent::SetTextureUndos()
 {
-	if (m_setting_dlg)
-		flvr::Texture::mask_undo_num_ = (size_t)(m_setting_dlg->GetPaintHistDepth());
+	long lval;
+	getValue(gstPaintHistory, lval);
+	flvr::Texture::mask_undo_num_ = size_t(lval);
 }
 
 void RenderFrameAgent::SetTextureRendererSettings()
 {
-	if (!m_setting_dlg)
-		return;
-
-	flvr::TextureRenderer::set_mem_swap(m_setting_dlg->GetMemSwap());
+	bool bval;
+	getValue(gstStreamEnable, bval);
+	flvr::TextureRenderer::set_mem_swap(bval);
 	bool use_mem_limit = false;
 	GLenum error = glGetError();
 	GLint mem_info[4] = { 0, 0, 0, 0 };
@@ -688,17 +717,95 @@ void RenderFrameAgent::SetTextureRendererSettings()
 		if (error == GL_INVALID_ENUM)
 			use_mem_limit = true;
 	}
-	if (m_setting_dlg->GetGraphicsMem() > mem_info[0] / 1024.0)
+	double dval; long lval;
+	getValue(gstGpuMemSize, dval);
+	if (dval > mem_info[0] / 1024.0)
 		use_mem_limit = true;
 	flvr::TextureRenderer::set_use_mem_limit(use_mem_limit);
-	flvr::TextureRenderer::set_mem_limit(use_mem_limit ?
-		m_setting_dlg->GetGraphicsMem() : mem_info[0] / 1024.0);
-	flvr::TextureRenderer::set_available_mem(use_mem_limit ?
-		m_setting_dlg->GetGraphicsMem() : mem_info[0] / 1024.0);
-	flvr::TextureRenderer::set_large_data_size(m_setting_dlg->GetLargeDataSize());
-	flvr::TextureRenderer::set_force_brick_size(m_setting_dlg->GetForceBrickSize());
-	flvr::TextureRenderer::set_up_time(m_setting_dlg->GetResponseTime());
-	flvr::TextureRenderer::set_update_order(m_setting_dlg->GetUpdateOrder());
-	flvr::TextureRenderer::set_invalidate_tex(m_setting_dlg->GetInvalidateTex());
+	flvr::TextureRenderer::set_mem_limit(use_mem_limit ? dval : mem_info[0] / 1024.0);
+	flvr::TextureRenderer::set_available_mem(use_mem_limit ? dval : mem_info[0] / 1024.0);
+	getValue(gstLargeDataSize, dval);
+	flvr::TextureRenderer::set_large_data_size(dval);
+	getValue(gstBrickSize, lval);
+	flvr::TextureRenderer::set_force_brick_size(lval);
+	getValue(gstResponseTime, lval);
+	flvr::TextureRenderer::set_up_time(lval);
+	getValue(gstUpdateOrder, lval);
+	flvr::TextureRenderer::set_update_order(lval);
+	flvr::TextureRenderer::set_invalidate_tex(false);
+}
+
+Color RenderFrameAgent::GetWavelengthColor(double wavelength)
+{
+	long lval;
+	if (wavelength < 340.0)
+		return Color(1.0, 1.0, 1.0);
+	else if (wavelength < 440.0)
+	{
+		getValue(gstWaveColor1, lval);
+		return GetColor(lval);
+	}
+	else if (wavelength < 500.0)
+	{
+		getValue(gstWaveColor2, lval);
+		return GetColor(lval);
+	}
+	else if (wavelength < 600.0)
+	{
+		getValue(gstWaveColor3, lval);
+		return GetColor(lval);
+	}
+	else if (wavelength < 750.0)
+	{
+		getValue(gstWaveColor4, lval);
+		return GetColor(lval);
+	}
+	else
+		return Color(1.0, 1.0, 1.0);
+}
+
+Color RenderFrameAgent::GetColor(int c)
+{
+	Color result(1.0, 1.0, 1.0);
+	switch (c)
+	{
+	case 1://red
+		result = Color(1.0, 0.0, 0.0);
+		break;
+	case 2://green
+		result = Color(0.0, 1.0, 0.0);
+		break;
+	case 3://blue
+		result = Color(0.0, 0.0, 1.0);
+		break;
+	case 4://cyan
+		result = Color(0.0, 1.0, 1.0);
+		break;
+	case 5://magenta
+		result = Color(1.0, 0.0, 1.0);
+		break;
+	case 6://yellow
+		result = Color(1.0, 1.0, 0.0);
+		break;
+	case 7://orange
+		result = Color(1.0, 0.5, 0.0);
+		break;
+	case 8://white
+		result = Color(1.0, 1.0, 1.0);
+		break;
+	}
+	return result;
+}
+
+bool RenderFrameAgent::CheckNames(const std::string &name)
+{
+	bool result = false;
+	if (glbin_volf->findFirst(name))
+		result = true;
+	if (glbin_mshf->findFirst(name))
+		result = true;
+	if (glbin_annf->findFirst(name))
+		result = true;
+	return result;
 }
 

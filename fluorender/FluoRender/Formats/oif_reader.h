@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <iostream>
 
-using namespace std;
-
 class OIFReader : public BaseReader
 {
 public:
@@ -44,26 +42,26 @@ public:
 
 	int GetType() { return READER_OIF_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return m_data_name;}
 	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
 	int GetChanNum() {return m_chan_num;}
@@ -82,20 +80,20 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 
 private:
-	wstring m_data_name;
-	wstring m_subdir_name;
+	std::wstring m_data_name;
+	std::wstring m_subdir_name;
 
 	int m_type;	//0-time data in a single file; 1-time data in a file sequence
-	typedef vector<wstring> ChannelInfo;	//slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;//channels form dataset
+	typedef std::vector<std::wstring> ChannelInfo;	//slices form a channel
+	typedef std::vector<ChannelInfo> DatasetInfo;//channels form dataset
 	struct TimeDataInfo
 	{
 		int filenumber;		//if type is 1, file number for time data
-		wstring filename;	//if type is 1, file name for current time data
-		wstring subdirname;	//subdirectory name
+		std::wstring filename;	//if type is 1, file name for current time data
+		std::wstring subdirname;	//subdirectory name
 		DatasetInfo dataset;//a list of the channels
 	};
-	vector<TimeDataInfo> m_oif_info;		//time data form the complete oif dataset
+	std::vector<TimeDataInfo> m_oif_info;		//time data form the complete oif dataset
 	int m_oif_t;	//current time point in oib info for reading
 
 	int m_time_num;
@@ -106,7 +104,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 	int m_slice_num;
 	int m_x_size;
 	int m_y_size;
@@ -121,9 +119,9 @@ private:
 	static bool oif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	void ReadSingleOif();
 	void ReadSequenceOif();
-	void ReadTifSequence(wstring file_name, int t=0);
+	void ReadTifSequence(std::wstring file_name, int t=0);
 	void ReadOif();
-	void ReadOifLine(wstring oneline);
+	void ReadOifLine(std::wstring oneline);
 	void ReadTiff(char* pbyData, unsigned short *val, int z);
 
 	//axis count
@@ -133,15 +131,15 @@ private:
 	int chan_num;
 	int cur_chan;
 	//axis info
-	wstring axis_code;
-	wstring pix_unit;
-	wstring max_size;
-	wstring start_pos;
-	wstring end_pos;
-	wstring light_type;
+	std::wstring axis_code;
+	std::wstring pix_unit;
+	std::wstring max_size;
+	std::wstring start_pos;
+	std::wstring end_pos;
+	std::wstring light_type;
 
 	//time sequence id
-	wstring m_time_id;
+	std::wstring m_time_id;
 };
 
 #endif//_OIF_READER_H_

@@ -39,7 +39,7 @@ public:
 	void SetData(Nrrd* data);
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void SetCompression(bool value);
-	void Save(wstring filename, int mode);//mode: 0-normal mask; 1-label mask
+	void Save(const std::wstring &filename, int mode);//mode: 0-normal mask; 1-label mask
 
 	void SetTC(int t, int c);
 

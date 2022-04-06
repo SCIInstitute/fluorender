@@ -39,7 +39,7 @@ MSKReader::~MSKReader()
 {
 }
 
-void MSKReader::SetFile(string &file)
+void MSKReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -50,7 +50,7 @@ void MSKReader::SetFile(string &file)
 	}
 }
 
-void MSKReader::SetFile(wstring &file)
+void MSKReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 }
@@ -89,13 +89,13 @@ int MSKReader::GetDigitOrder()
 	return 0;
 }
 
-void MSKReader::SetTimeId(wstring &id)
+void MSKReader::SetTimeId(const std::wstring &id)
 {
 }
 
-wstring MSKReader::GetTimeId()
+std::wstring MSKReader::GetTimeId()
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
 void MSKReader::SetBatch(bool batch)
@@ -154,17 +154,17 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 	return output;
 }
 
-wstring MSKReader::GetCurDataName(int t, int c)
+std::wstring MSKReader::GetCurDataName(int t, int c)
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
-wstring MSKReader::GetCurMaskName(int t, int c)
+std::wstring MSKReader::GetCurMaskName(int t, int c)
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
-wstring MSKReader::GetCurLabelName(int t, int c)
+std::wstring MSKReader::GetCurLabelName(int t, int c)
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }

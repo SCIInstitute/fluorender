@@ -288,9 +288,9 @@ int BaseReader::LoadOffset(int offset)
 
 int BaseReader::GetOffset() { return m_cur_batch; }
 
-int BaseReader::get_number(string &str, int64_t pos)
+int BaseReader::get_number(std::string &str, int64_t pos)
 {
-	string num_str;
+	std::string num_str;
 	for (int64_t i = pos; i < str.length(); ++i)
 	{
 		if (isdigit(str[i]))
@@ -304,9 +304,9 @@ int BaseReader::get_number(string &str, int64_t pos)
 		return 0;
 }
 
-string BaseReader::GetError(int code)
+std::string BaseReader::GetError(int code)
 {
-	string err_str;
+	std::string err_str;
 	switch (code)
 	{
 	case READER_OK:
