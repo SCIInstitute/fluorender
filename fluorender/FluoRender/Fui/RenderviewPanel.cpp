@@ -278,7 +278,8 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 			//sharedContext->SetCurrent(*m_canvas);
 			m_canvas->SetCurrent(*sharedContext);
 			m_canvas->m_glRC = sharedContext;
-			m_canvas->m_set_gl = true;
+			glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->chgValue(gstSetGl, true);
+			//m_canvas->m_set_gl = true;
 		}
 	}
 	m_canvas->SetCanFocus(false);

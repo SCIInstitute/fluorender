@@ -57,8 +57,6 @@ public:
 	//initialization
 	void Init();
 
-	void ResetGl() { m_set_gl = false; }
-
 	//public mouse
 	void OnMouse(wxMouseEvent& event);
 
@@ -66,8 +64,6 @@ private:
 	fluo::RenderCanvasAgent* m_agent;
 	RenderFrame* m_frame;
 	RenderviewPanel* m_vrv;
-	//set gl context
-	bool m_set_gl;
 
 	//linked rotation
 	static bool m_linked_rot;

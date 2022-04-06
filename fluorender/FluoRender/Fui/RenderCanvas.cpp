@@ -79,8 +79,6 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	m_initialized(false),
 	//timer for fullscreen
 	m_fullscreen_trigger(this, ID_ftrigger),
-	//set gl
-	m_set_gl(false),
 	//touch
 	m_enable_touch(false),
 	m_ptr_id1(-1),
@@ -181,24 +179,23 @@ void RenderCanvas::Init()
 	if (!m_initialized)
 	{
 		flvr::ShaderProgram::init_shaders_supported();
-		if (m_frame && m_frame->GetSettingDlg())
-		{
-			flvr::KernelProgram::set_platform_id(m_frame->
-				GetSettingDlg()->GetCLPlatformID());
-			flvr::KernelProgram::set_device_id(m_frame->
-				GetSettingDlg()->GetCLDeviceID());
-		}
+		long lval;
+		glbin_root->getValue(gstClPlatformId, lval);
+		flvr::KernelProgram::set_platform_id(lval);
+		glbin_root->getValue(gstClDeviceId, lval);
+		flvr::KernelProgram::set_device_id(lval);
 		flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
 		CGLContextObj ctx = CGLGetCurrentContext();
 		if (ctx != flvr::TextureRenderer::gl_context_)
 			flvr::TextureRenderer::gl_context_ = ctx;
 #endif
-		if (m_frame)
+		fluo::RenderFrameAgent* agent = glbin_agtf->getRenderFrameAgent();
+		if (agent)
 		{
-			m_frame->SetTextureRendererSettings();
-			m_frame->SetTextureUndos();
-			m_frame->GetSettingDlg()->UpdateTextureSize();
+			agent->SetTextureRendererSettings();
+			agent->SetTextureUndos();
+			//m_frame->GetSettingDlg()->UpdateTextureSize();
 		}
 		////glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
 		//glEnable(GL_MULTISAMPLE);
@@ -229,18 +226,18 @@ void RenderCanvas::PickMesh()
 	m_agent->getValue(gstSelectedMshName, str);
 	if (!str.empty())
 	{
-		if (m_frame && m_frame->GetTree())
-		{
-			m_frame->GetTree()->SetFocus();
-			m_frame->GetTree()->Select(m_vrv->GetName(), str);
-		}
+		//if (m_frame && m_frame->GetTree())
+		//{
+		//	m_frame->GetTree()->SetFocus();
+		//	m_frame->GetTree()->Select(m_vrv->GetName(), str);
+		//}
 		m_agent->getObject()->Update(27);
 	}
 	else
 	{
-		if (m_frame && m_frame->GetCurSelType() == 3 &&
-			m_frame->GetTree())
-			m_frame->GetTree()->Select(m_vrv->GetName(), "");
+		//if (m_frame && m_frame->GetCurSelType() == 3 &&
+		//	m_frame->GetTree())
+		//	m_frame->GetTree()->Select(m_vrv->GetName(), "");
 	}
 }
 
@@ -253,11 +250,11 @@ void RenderCanvas::PickVolume()
 	m_agent->getValue(gstSelPointVolume, ip);
 	if (!str.empty())
 	{
-		if (m_frame && m_frame->GetTree())
-		{
-			m_frame->GetTree()->SetFocus();
-			m_frame->GetTree()->Select(m_vrv->GetName(), str);
-		}
+		//if (m_frame && m_frame->GetTree())
+		//{
+		//	m_frame->GetTree()->SetFocus();
+		//	m_frame->GetTree()->Select(m_vrv->GetName(), str);
+		//}
 		//update label selection
 		SetCompSelection(ip, kmode);
 	}
@@ -319,9 +316,11 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 		if (m_frame)
 		{
 #ifdef _WIN32
-			if (m_frame->GetSettingDlg() &&
-				!m_frame->GetSettingDlg()->GetShowCursor())
-				ShowCursor(true);
+			//if (m_frame->GetSettingDlg() &&
+			//	!m_frame->GetSettingDlg()->GetShowCursor())
+			bool bval;
+			glbin_root->getValue(gstShowCursor, bval);
+			ShowCursor(bval);
 #endif
 			m_frame->Iconize(false);
 			m_frame->SetFocus();
@@ -346,21 +345,12 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
 	if (!m_glRC) return;
 #ifdef _WIN32
-	if (!m_set_gl)
+	bool set_gl;
+	m_agent->getValue(gstSetGl, set_gl);
+	if (!set_gl)
 	{
 		SetCurrent(*m_glRC);
-		m_set_gl = true;
-		if (m_frame)
-		{
-			for (int i = 0; i < m_frame->GetViewNum(); i++)
-			{
-				RenderCanvas* view = m_frame->GetView(i);
-				if (view && view != this)
-				{
-					view->m_set_gl = false;
-				}
-			}
-		}
+		m_agent->setValue(gstSetGl, true);
 	}
 #endif
 #if defined(_DARWIN) || defined(__linux__)

@@ -224,8 +224,8 @@ bool ScriptProc::GetVolumes(fluo::VolumeList &list)
 //add traces to trace dialog
 void ScriptProc::UpdateTraceDlg()
 {
-	if (m_view && m_frame && m_frame->GetTraceDlg())
-		m_frame->GetTraceDlg()->GetSettings(m_view);
+	//if (m_view && m_frame && m_frame->GetTraceDlg())
+	//	m_frame->GetTraceDlg()->GetSettings(m_view);
 }
 
 int ScriptProc::TimeMode(std::string &str)
@@ -436,7 +436,6 @@ void ScriptProc::RunNoiseReduction()
 	if (!GetVolumes(vlist))
 		return;
 
-	if (!m_frame) return;
 	VolumeCalculator* calculator = m_view->GetVolumeCalculator();
 	if (!calculator) return;
 
@@ -451,8 +450,7 @@ void ScriptProc::RunNoiseReduction()
 		calculator->SetVolumeA(*i);
 
 		//selection
-		if (m_frame->GetNoiseCancellingDlg())
-			m_frame->GetNoiseCancellingDlg()->Preview(false, size, thresh);
+		glbin_agtf->getNoiseReduceAgent()->Preview();
 		//delete
 		calculator->CalculateGroup(6, "", false);
 	}
@@ -1087,7 +1085,6 @@ void ScriptProc::RunCompAnalysis()
 
 void ScriptProc::RunGenerateComp()
 {
-	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
@@ -1117,7 +1114,6 @@ void ScriptProc::RunGenerateComp()
 
 void ScriptProc::RunRulerProfile()
 {
-	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
 	fluo::VolumeList vlist;
@@ -1137,8 +1133,7 @@ void ScriptProc::RunRulerProfile()
 
 	//get df/f setting
 	bool df_f = false;
-	if (m_frame->GetSettingDlg())
-		df_f = m_frame->GetSettingDlg()->GetRulerDF_F();
+	glbin_agtf->getMeasureAgent()->getValue(gstRulerDfoverf, df_f);
 
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
@@ -1240,11 +1235,9 @@ void ScriptProc::RunLinkCells()
 	if (!TimeCondition())
 		return;
 
-	if (!m_frame || !m_frame->GetTraceDlg())
-		return;
-
-	m_frame->GetTraceDlg()->GetSettings(m_view);
-	m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
+	glbin_agtf->getTrackAgent()->LinkAddedCells(m_sel_labels);
+	//m_frame->GetTraceDlg()->GetSettings(m_view);
+	//m_frame->GetTraceDlg()->LinkAddedCells(m_sel_labels);
 }
 
 void ScriptProc::RunUnlinkCells()
@@ -1337,7 +1330,6 @@ void ScriptProc::RunBackgroundStat()
 
 void ScriptProc::ExportAnalysis()
 {
-	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
 

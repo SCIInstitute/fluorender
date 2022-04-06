@@ -63,6 +63,7 @@ namespace fluo
 		void OnBoundsChanged(Event& event);
 		void OnSceneChanged(Event& event);
 		void OnFocusChanged(Event& event);
+		void OnSetGl(Event& event);
 	};
 }
 #endif//_RENDERCANVASAGENT_H_

@@ -448,8 +448,8 @@ void RecorderDlg::OnDelAll(wxCommandEvent &event)
 void RecorderDlg::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		RenderFrame::SetCompression(ch1->GetValue());
+	bool bval = ch1->GetValue();
+	glbin_root->setValue(gstCaptureCompress, bval);
 }
 
 wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
@@ -466,8 +466,9 @@ wxWindow* RecorderDlg::CreateExtraCaptureControl(wxWindow* parent)
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RecorderDlg::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(RenderFrame::GetCompression());
+	bool bval;
+	glbin_root->getValue(gstCaptureCompress, bval);
+	ch1->SetValue(bval);
 
 	//group
 	group1->Add(10, 10);

@@ -953,11 +953,7 @@ wxString RenderFrame::CreateView(int row)
 	//vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 
 	//reset gl
-	for (int i = 0; i < m_vrv_list.size(); ++i)
-	{
-		if (m_vrv_list[i]->GetCanvas())
-			m_vrv_list[i]->GetCanvas()->ResetGl();
-	}
+	glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->setValue(gstSetGl, false);
 
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
@@ -1509,16 +1505,6 @@ wxString RenderFrame::ScriptDialog(const wxString& title,
 	delete dlg;
 	if (agent) agent->ResumeRun();
 	return result;
-}
-
-TreePanel *RenderFrame::GetTree()
-{
-	return m_tree_panel;
-}
-
-ListPanel *RenderFrame::GetList()
-{
-	return m_list_panel;
 }
 
 //on selections

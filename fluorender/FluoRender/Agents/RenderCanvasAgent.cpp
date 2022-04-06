@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RenderCanvasAgent.hpp>
 #include <RenderCanvas.h>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
 
 using namespace fluo;
 
@@ -95,5 +97,15 @@ void RenderCanvasAgent::OnFocusChanged(Event& event)
 	{
 		canvas_.SetFocus();
 		setValue(gstFocus, false);
+	}
+}
+
+void RenderCanvasAgent::OnSetGl(Event& event)
+{
+	for (size_t i = 0; i < glbin_agtf->getNum(); ++i)
+	{
+		InterfaceAgent* agent = glbin_agtf->get(i);
+		if (agent->asRenderCanvasAgent() && agent != this)
+			agent->chgValue(gstSetGl, false);
 	}
 }

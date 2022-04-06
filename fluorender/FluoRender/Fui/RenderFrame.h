@@ -177,8 +177,8 @@ public:
 
 	friend class fluo::RenderFrameAgent;
 
-	TreePanel *GetTree();
-	ListPanel *GetList();
+	//TreePanel *GetTree();
+	//ListPanel *GetList();
 
 	//views
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);

@@ -840,24 +840,24 @@ void MoviePanel::OnFpsEdit(wxCommandEvent& event)
 void MoviePanel::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		RenderFrame::SetCompression(ch1->GetValue());
+	bool bval = ch1->GetValue();
+	glbin_root->setValue(gstCaptureCompress, bval);
 }
 
 //ch2
 void MoviePanel::OnCh2Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
-	if (ch2)
-		RenderFrame::SetSaveAlpha(ch2->GetValue());
+	bool bval = ch2->GetValue();
+	glbin_root->setValue(gstCaptureAlpha, bval);
 }
 
 //ch3
 void MoviePanel::OnCh3Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
-	if (ch3)
-		RenderFrame::SetSaveFloat(ch3->GetValue());
+	bool bval = ch3->GetValue();
+	glbin_root->setValue(gstCaptureFloat, bval);
 }
 
 //enlarge output image
@@ -947,12 +947,13 @@ void MoviePanel::OnMovieQuality(wxCommandEvent &event)
 void MoviePanel::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
-	if (ch_embed)
-		RenderFrame::SetEmbedProject(ch_embed->GetValue());
+	bool bval = ch_embed->GetValue();
+	glbin_root->setValue(gstEmbedDataInProject, bval);
 }
 
 wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 {
+	bool bval;
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -970,20 +971,20 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(RenderFrame::GetCompression());
+	glbin_root->getValue(gstCaptureCompress, bval);
+	ch1->SetValue(bval);
 	wxCheckBox *ch2 = new wxCheckBox(panel, ID_SAVE_ALPHA,
 		"Save alpha");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
-	if (ch2)
-		ch2->SetValue(RenderFrame::GetSaveAlpha());
+	glbin_root->getValue(gstCaptureAlpha, bval);
+	ch2->SetValue(bval);
 	wxCheckBox *ch3 = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
-	if (ch3)
-		ch3->SetValue(RenderFrame::GetSaveFloat());
+	glbin_root->getValue(gstCaptureFloat, bval);
+	ch3->SetValue(bval);
 	line1->Add(tiffopts, 0, wxALIGN_CENTER);
 	line1->Add(ch1, 0, wxALIGN_CENTER);
 	line1->Add(10, 10);
@@ -1047,15 +1048,18 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	line3->Add(st2, 0, wxALIGN_CENTER);
 	//copy all files check box
 	wxCheckBox *ch_embed;
-	if (RenderFrame::GetSaveProject()) {
+	glbin_root->getValue(gstSaveProjectEnable, bval);
+	if (bval)
+	{
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(MoviePanel::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(RenderFrame::GetEmbedProject());
+		ch_embed->SetValue(bval);
 	}
 	//group
-	if (RenderFrame::GetSaveProject() && ch_embed) {
+	if (bval && ch_embed)
+	{
 		wxBoxSizer *line3 = new wxBoxSizer(wxHORIZONTAL);
 		line3->Add(ch_embed, 0, wxALIGN_CENTER);
 		group1->Add(line3);
