@@ -142,30 +142,26 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 
 	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
 	//render view/////////////////////////////////////////////////
-	int red_bit = 8;
-	int green_bit = 8;
-	int blue_bit = 8;
-	int alpha_bit = 8;
-	int depth_bit = 24;
-	int samples = 0;
-	int gl_major_ver = 4;
-	int gl_minor_ver = 4;
-	int gl_profile_mask = 1;
-	int api_type = 0;
-	RenderFrame* vr_frame = (RenderFrame*)m_frame;
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		api_type = vr_frame->GetSettingDlg()->GetApiType();
-		red_bit = vr_frame->GetSettingDlg()->GetRedBit();
-		green_bit = vr_frame->GetSettingDlg()->GetGreenBit();
-		blue_bit = vr_frame->GetSettingDlg()->GetBlueBit();
-		alpha_bit = vr_frame->GetSettingDlg()->GetAlphaBit();
-		depth_bit = vr_frame->GetSettingDlg()->GetDepthBit();
-		samples = vr_frame->GetSettingDlg()->GetSamples();
-		gl_major_ver = vr_frame->GetSettingDlg()->GetGLMajorVer();
-		gl_minor_ver = vr_frame->GetSettingDlg()->GetGLMinorVer();
-		gl_profile_mask = vr_frame->GetSettingDlg()->GetGLProfileMask();
-	}
+	long red_bit = 8;
+	long green_bit = 8;
+	long blue_bit = 8;
+	long alpha_bit = 8;
+	long depth_bit = 24;
+	long samples = 0;
+	long gl_major_ver = 4;
+	long gl_minor_ver = 4;
+	long gl_profile_mask = 1;
+	long api_type = 0;
+	glbin_root->getValue(gstApiType, api_type);
+	glbin_root->getValue(gstOutputBitR, red_bit);
+	glbin_root->getValue(gstOutputBitG, green_bit);
+	glbin_root->getValue(gstOutputBitB, blue_bit);
+	glbin_root->getValue(gstOutputBitA, alpha_bit);
+	glbin_root->getValue(gstOutputBitD, depth_bit);
+	glbin_root->getValue(gstOutputSamples, samples);
+	glbin_root->getValue(gstGlVersionMajor, gl_major_ver);
+	glbin_root->getValue(gstGlVersionMinor, gl_minor_ver);
+	glbin_root->getValue(gstGlProfileMask, gl_profile_mask);
 
 	wxGLAttributes attriblist;
 #ifdef _WIN32
@@ -263,15 +259,15 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 				"Graphics card error", wxOK | wxICON_ERROR, this);
 			delete sharedContext;
 			sharedContext = 0;
-			if (vr_frame && vr_frame->GetSettingDlg())
-			{
-				//could be that color bits are incorrectly set
-				vr_frame->GetSettingDlg()->SetRedBit(8);
-				vr_frame->GetSettingDlg()->SetGreenBit(8);
-				vr_frame->GetSettingDlg()->SetBlueBit(8);
-				vr_frame->GetSettingDlg()->SetAlphaBit(8);
-				vr_frame->GetSettingDlg()->SaveSettings();
-			}
+			//if (vr_frame && vr_frame->GetSettingDlg())
+			//{
+			//	//could be that color bits are incorrectly set
+			//	vr_frame->GetSettingDlg()->SetRedBit(8);
+			//	vr_frame->GetSettingDlg()->SetGreenBit(8);
+			//	vr_frame->GetSettingDlg()->SetBlueBit(8);
+			//	vr_frame->GetSettingDlg()->SetAlphaBit(8);
+			//	vr_frame->GetSettingDlg()->SaveSettings();
+			//}
 		}
 		if (sharedContext)
 		{
@@ -311,13 +307,13 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	int ret = m_canvas->GetPixelFormat(&pfd);
 #endif
 	//get actual version
-	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
-	glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		vr_frame->GetSettingDlg()->SetGLMajorVer(gl_major_ver);
-		vr_frame->GetSettingDlg()->SetGLMinorVer(gl_minor_ver);
-	}
+	//glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
+	//glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
+	//if (vr_frame && vr_frame->GetSettingDlg())
+	//{
+	//	vr_frame->GetSettingDlg()->SetGLMajorVer(gl_major_ver);
+	//	vr_frame->GetSettingDlg()->SetGLMinorVer(gl_minor_ver);
+	//}
 
 	CreateBar();
 	//if (m_canvas)
@@ -1113,7 +1109,10 @@ void RenderviewPanel::OnCh1Check(wxCommandEvent &event)
 {
 	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
 	if (ch1)
-		RenderFrame::SetCompression(ch1->GetValue());
+	{
+		bool bval = ch1->GetValue();
+		glbin_root->setValue(gstCaptureCompress, bval);
+	}
 }
 
 //save alpha
@@ -1121,7 +1120,10 @@ void RenderviewPanel::OnChAlphaCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_alpha = (wxCheckBox*)event.GetEventObject();
 	if (ch_alpha)
-		RenderFrame::SetSaveAlpha(ch_alpha->GetValue());
+	{
+		bool bval = ch_alpha->GetValue();
+		glbin_root->setValue(gstCaptureAlpha, bval);
+	}
 }
 
 //save float
@@ -1129,7 +1131,10 @@ void RenderviewPanel::OnChFloatCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_float = (wxCheckBox*)event.GetEventObject();
 	if (ch_float)
-		RenderFrame::SetSaveFloat(ch_float->GetValue());
+	{
+		bool bval = ch_float->GetValue();
+		glbin_root->setValue(gstCaptureFloat, bval);
+	}
 }
 
 //embde project
@@ -1137,7 +1142,10 @@ void RenderviewPanel::OnChEmbedCheck(wxCommandEvent &event)
 {
 	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
 	if (ch_embed)
-		RenderFrame::SetEmbedProject(ch_embed->GetValue());
+	{
+		bool bval = ch_embed->GetValue();
+		glbin_root->setValue(gstEmbedDataInProject, bval);
+	}
 }
 
 //enlarge output image
@@ -1211,6 +1219,7 @@ void RenderviewPanel::OnTxEnlargeText(wxCommandEvent &event)
 
 wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 {
+	bool bval;
 	wxPanel* panel = new wxPanel(parent);
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -1223,8 +1232,8 @@ wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 		"Lempel-Ziv-Welch Compression");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderviewPanel::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(RenderFrame::GetCompression());
+	glbin_root->getValue(gstCaptureCompress, bval);
+	ch1->SetValue(bval);
 
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	//save alpha
@@ -1232,15 +1241,15 @@ wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 		"Save alpha channel");
 	ch_alpha->Connect(ch_alpha->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderviewPanel::OnChAlphaCheck), NULL, panel);
-	if (ch_alpha)
-		ch_alpha->SetValue(RenderFrame::GetSaveAlpha());
+	glbin_root->getValue(gstCaptureAlpha, bval);
+	ch_alpha->SetValue(bval);
 	//save float
 	wxCheckBox* ch_float = new wxCheckBox(panel, ID_SAVE_FLOAT,
 		"Save float channel");
 	ch_float->Connect(ch_float->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderviewPanel::OnChFloatCheck), NULL, panel);
-	if (ch_float)
-		ch_float->SetValue(RenderFrame::GetSaveFloat());
+	glbin_root->getValue(gstCaptureFloat, bval);
+	ch_float->SetValue(bval);
 	sizer_1->Add(ch_alpha, 0, wxALIGN_CENTER);
 	sizer_1->Add(10, 10);
 	sizer_1->Add(ch_float, 0, wxALIGN_CENTER);
@@ -1270,13 +1279,16 @@ wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 
 	//copy all files check box
 	wxCheckBox* ch_embed = 0;
-	if (RenderFrame::GetSaveProject())
+	bool save_project;
+	glbin_root->getValue(gstSaveProjectEnable, save_project);
+	if (save_project)
 	{
 		ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
 			"Embed all files in the project folder");
 		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 			wxCommandEventHandler(RenderviewPanel::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(RenderFrame::GetEmbedProject());
+		glbin_root->getValue(gstEmbedDataInProject, bval);
+		ch_embed->SetValue(bval);
 	}
 
 	//group
@@ -1286,8 +1298,7 @@ wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	group1->Add(sizer_1);
 	group1->Add(10, 10);
 	group1->Add(sizer_2);
-	if (RenderFrame::GetSaveProject() &&
-		ch_embed)
+	if (save_project && ch_embed)
 	{
 		group1->Add(10, 10);
 		group1->Add(ch_embed);
@@ -1306,14 +1317,13 @@ void RenderviewPanel::OnCapture(wxCommandEvent& event)
 	m_agent->updValue(gstEnlarge, false);
 	m_agent->updValue(gstEnlargeScale, 1.0);
 
-	RenderFrame* vr_frame = (RenderFrame*)m_frame;
-
-	if (vr_frame && vr_frame->GetSettingDlg())
-	{
-		RenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
-		RenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
-		RenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
-	}
+	//RenderFrame* vr_frame = (RenderFrame*)m_frame;
+	//if (vr_frame && vr_frame->GetSettingDlg())
+	//{
+	//	RenderFrame::SetSaveProject(vr_frame->GetSettingDlg()->GetProjSave());
+	//	RenderFrame::SetSaveAlpha(vr_frame->GetSettingDlg()->GetSaveAlpha());
+	//	RenderFrame::SetSaveFloat(vr_frame->GetSettingDlg()->GetSaveFloat());
+	//}
 
 	wxFileDialog file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
@@ -1325,19 +1335,18 @@ void RenderviewPanel::OnCapture(wxCommandEvent& event)
 		m_agent->updValue(gstCapture, true);
 		//RefreshGL();
 
-		if (vr_frame && vr_frame->GetSettingDlg())
+		bool bval;
+		glbin_root->getValue(gstSaveProjectEnable, bval);
+		if (bval)
 		{
-			if (vr_frame->GetSettingDlg()->GetProjSave())
-			{
-				wxString new_folder;
-				new_folder = cap_file + "_project";
-				MkDirW(new_folder.ToStdWstring());
-				wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
-				vr_frame->SaveProject(prop_file);
-			}
-			vr_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
-			vr_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
+			wxString new_folder;
+			new_folder = cap_file + "_project";
+			MkDirW(new_folder.ToStdWstring());
+			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
+			glbin_agtf->getRenderFrameAgent()->SaveProject(prop_file.ToStdWstring());
 		}
+			//vr_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
+			//vr_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
 	}
 }
 
@@ -2206,18 +2215,17 @@ void RenderviewPanel::SetFullScreen()
 		m_full_frame->ShowFullScreen(true);
 		m_canvas->SetPosition(wxPoint(0, 0));
 		m_canvas->SetSize(m_full_frame->GetSize());
-		RenderFrame* frame = (RenderFrame*)m_frame;
-		if (frame && frame->GetSettingDlg())
-		{
-			if (frame->GetSettingDlg()->GetStayTop())
-				m_full_frame->SetWindowStyle(wxBORDER_NONE|wxSTAY_ON_TOP);
-			else
-				m_full_frame->SetWindowStyle(wxBORDER_NONE);
+		bool bval;
+		glbin_root->getValue(gstStayOnTop, bval);
+		if (bval)
+			m_full_frame->SetWindowStyle(wxBORDER_NONE|wxSTAY_ON_TOP);
+		else
+			m_full_frame->SetWindowStyle(wxBORDER_NONE);
 #ifdef _WIN32
-			if (!frame->GetSettingDlg()->GetShowCursor())
-				ShowCursor(false);
+		glbin_root->getValue(gstShowCursor, bval);
+		if (!bval)
+			ShowCursor(false);
 #endif
-		}
 		m_full_frame->Iconize(false);
 		m_full_frame->Raise();
 		m_full_frame->Show();

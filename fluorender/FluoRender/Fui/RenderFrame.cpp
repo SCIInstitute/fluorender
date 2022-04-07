@@ -133,10 +133,9 @@ RenderFrame::RenderFrame(
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE)
 {
 	m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *this);
-	m_agent->setObject(glbin_root);
 
 	// temporarily block events during constructor:
-	wxEventBlocker blocker(this);
+	//wxEventBlocker blocker(this);
 
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -439,6 +438,7 @@ RenderFrame::RenderFrame(
 
 	//settings dialog
 	m_setting_dlg = new SettingDlg(this);
+	m_setting_dlg->AssociateRoot();
 	//if (m_setting_dlg->GetTestMode(1))
 	//	m_vrv_list[0]->m_glview->m_test_speed = true;
 	//if (m_setting_dlg->GetTestMode(3))
@@ -875,7 +875,6 @@ RenderFrame::RenderFrame(
 	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
-	
 }
 
 RenderFrame::~RenderFrame()
@@ -891,6 +890,11 @@ RenderFrame::~RenderFrame()
 	flvr::TextRenderer::text_texture_manager_.clear();
 	m_aui_mgr.UnInit();
 	flvr::KernelProgram::release();
+}
+
+void RenderFrame::AssociateRoot()
+{
+	m_agent->setObject(glbin_root);
 }
 
 void RenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))

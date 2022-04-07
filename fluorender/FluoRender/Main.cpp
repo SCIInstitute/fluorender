@@ -96,13 +96,14 @@ bool VRenderApp::OnInit()
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
-	wxFrame* frame = new RenderFrame(
+	RenderFrame* frame = new RenderFrame(
 		(wxFrame*)NULL,
 		wxString(title),
 		-1, -1,
 		m_win_width, m_win_height,
 		m_benchmark, m_fullscreen,
 		m_windowed, m_hidepanels);
+	frame->AssociateRoot();
 	SetTopWindow(frame);
 	frame->Show();
 

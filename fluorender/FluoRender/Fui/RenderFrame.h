@@ -175,6 +175,8 @@ public:
 		bool hidepanels);
 	~RenderFrame();
 
+	void AssociateRoot();
+
 	friend class fluo::RenderFrameAgent;
 
 	//TreePanel *GetTree();

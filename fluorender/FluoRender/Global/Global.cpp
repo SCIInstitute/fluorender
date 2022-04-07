@@ -239,18 +239,12 @@ Object* Global::get(const std::string &name, Group* start)
 
 AsyncTimer* Global::getAsyncTimer(const std::string &name)
 {
-	Object* obj = get(name);
-	if (!obj)
-		return 0;
-	return dynamic_cast<AsyncTimer*>(obj);
+	return glbin_atmf->findFirst(name);
 }
 
 StopWatch* Global::getStopWatch(const std::string &name)
 {
-	Object* obj = get(name);
-	if (!obj)
-		return 0;
-	return dynamic_cast<StopWatch*>(obj);
+	return glbin_swhf->findFirst(name);
 }
 
 Flinput* Global::getInput()
