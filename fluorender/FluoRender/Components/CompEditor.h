@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,12 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompEditor_h
 #define FL_CompEditor_h
 
-#include <vector>
 #include <Cell.h>
-#include <wx/string.h>
+#include <vector>
+#include <string>
 
-class VRenderGLView;
-class VolumeData;
+namespace fluo
+{
+	class Renderview;
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolCache;
@@ -44,23 +47,23 @@ namespace flrd
 		ComponentEditor();
 		~ComponentEditor();
 
-		void SetView(VRenderGLView* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 		}
-		VRenderGLView* GetView()
+		fluo::Renderview* GetView()
 		{
 			return m_view;
 		}
-		void SetVolume(VolumeData* vd)
+		void SetVolume(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 		}
-		VolumeData* GetVolume()
+		fluo::VolumeData* GetVolume()
 		{
 			return m_vd;
 		}
-		wxString GetOutput();
+		std::string GetOutput();
 
 		void Clean(int mode);
 		void NewId(unsigned int id, bool id_empty, bool append);
@@ -70,11 +73,12 @@ namespace flrd
 		void Combine(CelpList &list);
 
 	private:
-		VolumeData* m_vd;
-		VRenderGLView* m_view;
-		wxString m_output;
+		fluo::VolumeData* m_vd;
+		fluo::Renderview* m_view;
+		std::string m_output;
 
 	private:
+		fluo::VolumeData* GetCurrentVolume();
 		//read/delete volume cache from file
 		void ReadVolCache(VolCache& vol_cache);
 		void DelVolCache(VolCache& vol_cache);

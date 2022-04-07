@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -205,7 +205,7 @@ namespace flrd
 		void AddVertex(Verp &vertex);
 		Verw GetVertex();
 		unsigned int GetVertexId();
-		Pca &GetPca();
+		Pca GetPca();
 
 		//get
 		//size

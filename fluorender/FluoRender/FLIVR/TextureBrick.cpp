@@ -3,7 +3,7 @@
 //
 //  The MIT License
 //
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2022 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //
 //
@@ -26,12 +26,12 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include "../compatibility.h"
 #include "Texture.h"
 #include <math.h>
 #include <FLIVR/TextureBrick.h>
 #include <FLIVR/TextureRenderer.h>
 #include <Types/Utils.h>
+#include <compatibility.h>
 #include <utility>
 #include <iostream>
 #include <fstream>

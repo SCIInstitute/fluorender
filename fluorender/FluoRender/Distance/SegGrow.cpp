@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,11 +26,18 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "SegGrow.h"
-#include <Distance/RulerHandler.h>
+#include <RulerHandler.h>
+#include <VolumeData.hpp>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <algorithm>
 #include <unordered_map>
-#include <Debug.h>
+#include <Debug.hpp>
+#ifdef _DEBUG
+#include <fstream>
+#endif
 
 using namespace flrd;
 
@@ -579,7 +586,7 @@ const char* str_cl_sg_check_borders = \
 "}\n" \
 ;
 
-SegGrow::SegGrow(VolumeData* vd):
+SegGrow::SegGrow(fluo::VolumeData* vd):
 	m_vd(vd),
 	m_branches(10),
 	m_iter(0),
@@ -601,7 +608,7 @@ bool SegGrow::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return false;
 	return true;
@@ -621,8 +628,9 @@ void SegGrow::Compute()
 		return;
 
 	m_list.clear();
-	bool clear_label = m_vd->GetMaskClear();
-	m_vd->SetMaskClear(false);
+	bool clear_label;
+	m_vd->getValue(gstMaskClear, clear_label);
+	m_vd->setValue(gstMaskClear, false);
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = flvr::VolumeRenderer::
@@ -641,7 +649,7 @@ void SegGrow::Compute()
 
 	int bnum = 0;
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
@@ -652,8 +660,8 @@ void SegGrow::Compute()
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
-		GLint lid = m_vd->GetVR()->load_brick_label(b);
+		GLint mid = m_vd->GetRenderer()->load_brick_mask(b);
+		GLint lid = m_vd->GetRenderer()->load_brick_label(b);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -972,7 +980,7 @@ void SegGrow::Compute()
 			int nx = b->nx();
 			int ny = b->ny();
 			int nz = b->nz();
-			GLint lid = m_vd->GetVR()->load_brick_label(b);
+			GLint lid = m_vd->GetRenderer()->load_brick_label(b);
 			unsigned bid;
 			bid = b->get_id();
 			kernel_prog->setKernelArgBegin(kernel_0);
@@ -1074,7 +1082,7 @@ void SegGrow::Compute()
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint lid = m_vd->GetVR()->load_brick_label(b);
+		GLint lid = m_vd->GetRenderer()->load_brick_label(b);
 		//compute workload
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1103,7 +1111,9 @@ void SegGrow::Compute()
 
 	//add ruler points
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	m_vd->getValue(gstSpcX, spcx);
+	m_vd->getValue(gstSpcY, spcy);
+	m_vd->getValue(gstSpcZ, spcz);
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{
@@ -1227,7 +1237,7 @@ void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	size_t global_size[2] = { 1, 1 };
 	size_t local_size[2] = { 1, 1 };
 
-	nlid = m_vd->GetVR()->load_brick_label(nb);
+	nlid = m_vd->GetRenderer()->load_brick_label(nb);
 	//set
 	//unsigned int d0 = nx - 1;
 	//unsigned int d1 = 0;

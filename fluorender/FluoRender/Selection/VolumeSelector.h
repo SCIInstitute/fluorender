@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -34,23 +34,28 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <chrono>
 
-#define BRUSH_TOOL_ITER_WEAK	10
-#define BRUSH_TOOL_ITER_NORMAL	30
-#define BRUSH_TOOL_ITER_STRONG	60
-
-class VRenderGLView;
-class VolumeData;
+namespace fluo
+{
+	class Renderview;
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolumeSelector
 	{
 	public:
+		enum BrushIters
+		{
+			BRUSH_TOOL_ITER_WEAK = 10,
+			BRUSH_TOOL_ITER_NORMAL = 30,
+			BRUSH_TOOL_ITER_STRONG = 60
+		};
 		VolumeSelector();
 		~VolumeSelector();
 
-		void SetView(VRenderGLView* view) { m_view = view; }
-		void SetVolume(VolumeData *vd) { m_vd = vd; }
-		VolumeData* GetVolume() { return m_vd; }
+		void SetView(fluo::Renderview* view) { m_view = view; }
+		void SetVolume(fluo::VolumeData *vd) { m_vd = vd; }
+		fluo::VolumeData* GetVolume() { return m_vd; }
 		//modes
 		void SetMode(int mode) { m_mode = mode; }
 		int GetMode() { return m_mode; }
@@ -205,8 +210,8 @@ namespace flrd
 
 		void Segment(int mx = 0, int my = 0);
 		void Select(double radius);
-		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
-		VolumeData* GetResult(bool pop);
+		void CompExportRandomColor(int hmode, fluo::VolumeData* vd_r, fluo::VolumeData* vd_g, fluo::VolumeData* vd_b, bool select, bool hide);
+		fluo::VolumeData* GetResult(bool pop);
 
 		//mask
 		void PopMask();
@@ -225,8 +230,8 @@ namespace flrd
 		double GetSpanSec() { return m_span_sec; }
 
 	private:
-		VRenderGLView *m_view;
-		VolumeData *m_vd;	//volume data for segmentation
+		fluo::Renderview *m_view;
+		fluo::VolumeData *m_vd;	//volume data for segmentation
 		unsigned int m_2d_mask;	//2d mask from painting
 		unsigned int m_2d_weight1;//2d weight map (after tone mapping)
 		unsigned int m_2d_weight2;//2d weight map	(before tone mapping)
@@ -283,7 +288,7 @@ namespace flrd
 		bool m_brush_size_data;
 
 		//exported volumes
-		std::vector<VolumeData*> m_result_vols;
+		std::vector<fluo::VolumeData*> m_result_vols;
 
 		//a random variable
 		int m_randv;

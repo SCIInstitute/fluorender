@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -35,8 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Transform.h>
 #include <vector>
 
-class VRenderGLView;
-
+namespace fluo
+{
+	class Renderview;
+}
 namespace flrd
 {
 	class RulerRenderer
@@ -45,7 +47,7 @@ namespace flrd
 		RulerRenderer();
 		~RulerRenderer();
 
-		void SetView(VRenderGLView* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 		}
@@ -73,7 +75,7 @@ namespace flrd
 		void Draw();
 
 	private:
-		VRenderGLView *m_view;
+		fluo::Renderview *m_view;
 		RulerList *m_ruler_list;
 		double m_line_size;
 		bool m_draw_text;

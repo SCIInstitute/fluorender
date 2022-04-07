@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -27,14 +27,19 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Main.h"
-#include <cstdio>
-#include <iostream>
+#include "RenderFrame.h"
+#include <StopWatch.hpp>
+#include <Global.hpp>
+#include <AgentFactory.hpp>
+#include <MovieAgent.hpp>
+#include <SettingAgent.hpp>
+#include <VolumeFactory.hpp>
+#include "JVMInitializer.h"
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
 #include <wx/filefn.h>
-#include "VRenderFrame.h"
-#include "compatibility.h"
-#include "JVMInitializer.h"
+#include <cstdio>
+#include <iostream>
 
 IMPLEMENT_APP(VRenderApp)
 
@@ -78,20 +83,24 @@ bool VRenderApp::OnInit()
 
 	char cpath[FILENAME_MAX];
 	GETCURRENTDIR(cpath, sizeof(cpath));
-	::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+	std::wstring wstr_path = s2ws(std::string(cpath));
+	::wxSetWorkingDirectory(wstr_path);
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	glbin.setExecutablePath(expath.ToStdWstring());
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
 		return false;
 	//add png handler
 	wxImage::AddHandler(new wxPNGHandler);
 	//random numbers
-	srand((unsigned int)TIME());
+	srand((unsigned int)glbin.getStopWatch(gstStopWatch)->sys_time());
 
 	//the frame
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
-	wxFrame* frame = new VRenderFrame(
+	RenderFrame* frame = new RenderFrame(
 		(wxFrame*)NULL,
 		wxString(title),
 		-1, -1,
@@ -100,24 +109,38 @@ bool VRenderApp::OnInit()
 		m_windowed, m_hidepanels);
 	SetTopWindow(frame);
 	frame->Show();
+
+	fluo::RenderFrameAgent* renderframeagent = glbin_agtf->getRenderFrameAgent();
 	bool run_mov = false;
 	if (m_mov_file != "")
 	{
-		VRenderFrame::SetCompression(m_lzw);
-		VRenderFrame::SetSaveAlpha(m_save_alpha);
-		VRenderFrame::SetSaveFloat(m_save_float);
-		if (((VRenderFrame*)frame)->GetMovieView())
+		if (renderframeagent)
 		{
-			((VRenderFrame*)frame)->GetMovieView()->SetBitRate(m_bitrate);
-			((VRenderFrame*)frame)->GetMovieView()->SetFileName(m_mov_file);
+			renderframeagent->setValue(gstCaptureCompress, m_lzw);
+			renderframeagent->setValue(gstCaptureAlpha, m_save_alpha);
+			renderframeagent->setValue(gstCaptureFloat, m_save_float);
+		}
+		fluo::MovieAgent* movieagent = glbin_agtf->getMovieAgent();
+		if (movieagent)
+		{
+			movieagent->setValue(gstMovBitrate, m_bitrate);
+			movieagent->setValue(gstMovFilename, m_mov_file.ToStdWstring());
 		}
 		run_mov = true;
 	}
-	if (m_file_num > 0)
-		((VRenderFrame*)frame)->StartupLoad(m_files, run_mov, m_imagej);
+	if (m_file_num > 0 && renderframeagent)
+		renderframeagent->StartupLoad(m_files, run_mov, m_imagej);
 
 	// Adding JVm initialization.
-	JVMInitializer*	pInstance = JVMInitializer::getInstance((((VRenderFrame*)frame)->GetSettingDlg())->GetJvmArgs());
+	if (renderframeagent)
+		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
+	
+	//global init
+	//wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	//expath = wxPathOnly(expath);
+	//wxString dft = expath + "/Defaults/volume_data.dftx";
+	//glbin_volf->setValue(gstDefaultFile, dft.ToStdString());
+
 	return true;
 }
 

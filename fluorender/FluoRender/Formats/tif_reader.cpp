@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "tif_reader.h"
+#include <compatibility.h>
 #include <boost/filesystem.hpp>
-#include "../compatibility.h"
 #include <sstream>
 #include <iomanip>
 
@@ -72,7 +72,7 @@ TIFReader::~TIFReader()
 		tiff_stream.close();
 }
 
-void TIFReader::SetFile(string &file)
+void TIFReader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -84,7 +84,7 @@ void TIFReader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void TIFReader::SetFile(wstring &file)
+void TIFReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -104,13 +104,13 @@ int TIFReader::Preprocess()
 	InvalidatePageInfo();
 
 	//separate path and name
-	wstring path, name;
+	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
 		return READER_OPEN_FAIL;
 	//std::wstring suffix = GET_SUFFIX(m_path_name);
 
 	//determine if it is an ImageJ hyperstack
-	string img_desc;
+	std::string img_desc;
 	OpenTiff(m_path_name.c_str());
 	uint64_t bits = GetTiffField(kBitsPerSampleTag);
 	if (bits > 16)
@@ -119,7 +119,7 @@ int TIFReader::Preprocess()
 		return READER_FP32_DATA;
 	}
 	GetImageDescription(img_desc);
-	string search_str = "hyperstack=true";
+	std::string search_str = "hyperstack=true";
 	int64_t str_pos = img_desc.find(search_str);
 	bool hyperstack = str_pos != -1;
 	search_str = "frames=";
@@ -317,7 +317,7 @@ int TIFReader::Preprocess()
 		//build 3d slice sequence
 		for (int t = 0; t < (int)m_4d_seq.size(); t++)
 		{
-			wstring slice_str = m_4d_seq[t].slices[0].slice;
+			std::wstring slice_str = m_4d_seq[t].slices[0].slice;
 			int tv = GetPatternNumber(slice_str, 2);
 
 			if (m_slice_seq || m_chann_seq)
@@ -371,7 +371,7 @@ int TIFReader::Preprocess()
 			m_cur_time < (int)m_4d_seq.size() &&
 			m_4d_seq[m_cur_time].slices.size()>0)
 		{
-			wstring tiff_name = m_4d_seq[m_cur_time].slices[0].slice;
+			std::wstring tiff_name = m_4d_seq[m_cur_time].slices[0].slice;
 			if (tiff_name.size() > 0)
 			{
 				InvalidatePageInfo();
@@ -619,7 +619,7 @@ void TIFReader::SetPageInfo(uint16_t tag, uint64_t answer)
 
 void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, void* data)
 {
-	vector<unsigned long long>* v = 0;
+	std::vector<unsigned long long>* v = 0;
 	if (tag == kStripOffsetsTag)
 	{
 		m_page_info.b_strip_offsets = true;
@@ -1052,12 +1052,12 @@ int TIFReader::GetDigitOrder()
 	return m_digit_order;
 }
 
-void TIFReader::SetTimeId(wstring &id)
+void TIFReader::SetTimeId(const std::wstring &id)
 {
 	m_time_id = id;
 }
 
-wstring TIFReader::GetTimeId()
+std::wstring TIFReader::GetTimeId()
 {
 	return m_time_id;
 }
@@ -1067,8 +1067,8 @@ void TIFReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//separate path and name
-		wstring search_path = GET_PATH(m_path_name);
-		wstring suffix = L"*" + GET_SUFFIX(m_path_name);
+		std::wstring search_path = GET_PATH(m_path_name);
+		std::wstring suffix = L"*" + GET_SUFFIX(m_path_name);
 		FIND_FILES(search_path, suffix, m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
@@ -1076,7 +1076,7 @@ void TIFReader::SetBatch(bool batch)
 		m_batch = false;
 }
 
-bool TIFReader::IsNewBatchFile(wstring name)
+bool TIFReader::IsNewBatchFile(std::wstring name)
 {
 	if (m_batch_list.size() == 0)
 		return true;
@@ -1090,14 +1090,14 @@ bool TIFReader::IsNewBatchFile(wstring name)
 	return true;
 }
 
-bool TIFReader::IsBatchFileIdentical(wstring name1, wstring name2)
+bool TIFReader::IsBatchFileIdentical(std::wstring name1, std::wstring name2)
 {
 	if (m_4d_seq.size() > 1)
 	{
 		int64_t pos = name1.find(m_time_id);
 		if (pos == -1)
 			return false;
-		wstring find_str = name1.substr(0, pos + 2);
+		std::wstring find_str = name1.substr(0, pos + 2);
 		pos = name2.find(find_str);
 		if (pos == -1)
 			return false;
@@ -1123,7 +1123,7 @@ bool TIFReader::IsBatchFileIdentical(wstring name1, wstring name2)
 			return false;
 		else
 		{
-			wstring find_str = name1.substr(0, begin + 1);
+			std::wstring find_str = name1.substr(0, begin + 1);
 			pos = name2.find(find_str);
 			if (pos == -1)
 				return false;
@@ -1187,7 +1187,7 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring TIFReader::GetCurDataName(int t, int c)
+std::wstring TIFReader::GetCurDataName(int t, int c)
 {
 	if (isHsTimeSeq_ && !isHyperstack_)
 		if (t >= 0 && t < (int)m_4d_seq.size())
@@ -1195,15 +1195,15 @@ wstring TIFReader::GetCurDataName(int t, int c)
 	return m_path_name;
 }
 
-wstring TIFReader::GetCurMaskName(int t, int c)
+std::wstring TIFReader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
-	wstring mask_name;
+	std::wostringstream woss;
+	std::wstring mask_name;
 	if (!isHyperstack_)
 	{
 		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
-			wstring data_name = (m_4d_seq[t].slices)[0].slice;
+			std::wstring data_name = (m_4d_seq[t].slices)[0].slice;
 			woss << data_name.substr(0, data_name.find_last_of('.'));
 			if (m_chan_num > 1) woss << "_C" << c;
 			woss << ".msk";
@@ -1219,15 +1219,15 @@ wstring TIFReader::GetCurMaskName(int t, int c)
 	return mask_name;
 }
 
-wstring TIFReader::GetCurLabelName(int t, int c)
+std::wstring TIFReader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
-	wstring label_name;
+	std::wostringstream woss;
+	std::wstring label_name;
 	if (!isHyperstack_)
 	{
 		if (t >= 0 && t < (int)m_4d_seq.size())
 		{
-			wstring data_name = (m_4d_seq[t].slices)[0].slice;
+			std::wstring data_name = (m_4d_seq[t].slices)[0].slice;
 			woss << data_name.substr(0, data_name.find_last_of('.'));
 			if (m_chan_num > 1) woss << "_C" << c;
 			woss << ".lbl";
@@ -1450,7 +1450,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 {
 	if (filelist.empty())
 		return 0;
-	wstring filename;
+	std::wstring filename;
 	if (isHyperstack_ && !isHsTimeSeq_)
 		filename = m_path_name;
 	else
@@ -1502,11 +1502,11 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	x_res = GetTiffXResolution();
 	y_res = GetTiffYResolution();
 
-	string img_desc;
+	std::string img_desc;
 	GetImageDescription(img_desc);
 	int64_t start = img_desc.find("spacing=");
 	if (start != -1) {
-		string spacing = img_desc.substr(start + 8);
+		std::string spacing = img_desc.substr(start + 8);
 		int64_t end = spacing.find("\n");
 		if (end != -1)
 			z_res = static_cast<float>(

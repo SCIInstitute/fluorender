@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -96,6 +96,11 @@ namespace fluo
 				return false;
 		}
 
+		inline bool remove(const std::string &name)
+		{
+			return remove(findFirst(name));
+		}
+
 		inline bool remove(size_t pos, size_t num = 1)
 		{
 			if (pos < objects_.size() && num > 0)
@@ -119,6 +124,14 @@ namespace fluo
 			return false;
 		}
 
+		inline bool removeAll()
+		{
+			size_t n = objects_.size();
+			if (n > 1)
+				objects_.erase(objects_.begin(), objects_.begin() + n - 2);
+			return false;
+		}
+
 		inline size_t getNum(bool include_default = false) const
 		{
 			if (include_default)
@@ -139,9 +152,24 @@ namespace fluo
 			return result;
 		}
 
-		inline virtual Object* get(size_t i) { return objects_[i].get(); }
+		inline virtual Object* get(size_t i)
+		{
+			if (i < objects_.size())
+				return objects_[i].get();
+			return nullptr;
+		}
 
-		inline virtual const Object* get(size_t i) const { return objects_[i].get(); }
+		inline virtual const Object* get(size_t i) const
+		{
+			if (i < objects_.size())
+				return objects_[i].get();
+			return nullptr;
+		}
+
+		inline virtual Object* getLast()
+		{
+			return objects_.front().get();
+		}
 
 		inline bool contains(const Object* object) const
 		{
@@ -162,6 +190,11 @@ namespace fluo
 					return i;
 			}
 			return objects_.size();
+		}
+
+		inline size_t getIndex(const std::string &name)
+		{
+			return getIndex(findFirst(name));
 		}
 
 		inline virtual Object* find(const unsigned int id)
@@ -279,7 +312,6 @@ namespace fluo
 		bool replaceDefaultValues(boost::property_tree::ptree &pt, const ValueCollection &names);
 
 		std::string default_object_name_;
-		std::string default_setting_filename_value_name_;
 		static unsigned int global_id_;
 		unsigned int local_id_;
 

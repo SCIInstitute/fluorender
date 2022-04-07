@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,10 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESAMPLER_H_
 #define _VOLUMESAMPLER_H_
 
-#include "DataManager.h"
 #include <Types/Vector.h>
 #include <Types/Quaternion.h>
+#include <Nrrd/nrrd.h>
 
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	enum SampDataType
@@ -47,9 +51,9 @@ namespace flrd
 		VolumeSampler();
 		~VolumeSampler();
 
-		void SetInput(VolumeData *data);
-		VolumeData* GetInput();
-		VolumeData* GetResult();
+		void SetInput(fluo::VolumeData *data);
+		fluo::VolumeData* GetInput();
+		fluo::VolumeData* GetResult();
 		void SetSize(int nx, int ny, int nz);
 		void SetFilter(int type);
 		void SetFilterSize(int fx, int fy, int fz);
@@ -60,8 +64,8 @@ namespace flrd
 		unsigned int SampleInt(double x, double y, double z);
 
 	private:
-		VolumeData *m_input;	//input
-		VolumeData *m_result;	//result
+		fluo::VolumeData *m_input;	//input
+		fluo::VolumeData *m_result;	//result
 		void* m_raw_input;		//
 		void* m_raw_result;		//
 
@@ -102,8 +106,8 @@ namespace flrd
 						//2:mirror
 
 	private:
-		Nrrd* GetNrrd(VolumeData* vd, SampDataType type);
-		void* GetRaw(VolumeData* vd, SampDataType type);
+		Nrrd* GetNrrd(fluo::VolumeData* vd, SampDataType type);
+		void* GetRaw(fluo::VolumeData* vd, SampDataType type);
 		double SampleNearestNeighbor(double x, double y, double z);
 		double SampleBiLinear(double x, double y, double z);
 		double SampleTriLinear(double x, double y, double z);

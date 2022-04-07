@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,7 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Relax.h"
-#include <DataManager.h>
+#include <VolumeData.hpp>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
+#include <FLIVR/VolumeRenderer.h>
 
 using namespace flrd;
 
@@ -196,7 +199,9 @@ bool Relax::Compute()
 	BuildSpring();
 
 	double dx, dy, dz;
-	m_vd->GetSpacings(dx, dy, dz);
+	m_vd->getValue(gstSpcX, dx);
+	m_vd->getValue(gstSpcY, dy);
+	m_vd->getValue(gstSpcZ, dz);
 	cl_float3 scl = { (float)dx, (float)dy, (float)dz };
 
 	m_dsp.assign(m_snum * 3, 0.0);
@@ -210,7 +215,7 @@ bool Relax::Compute()
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
@@ -223,9 +228,9 @@ bool Relax::Compute()
 		cl_float3 org = { (float)ox, (float)oy, (float)oz };
 		GLint tid;
 		if (m_use_mask)
-			tid = m_vd->GetVR()->load_brick_mask(b);
+			tid = m_vd->GetRenderer()->load_brick_mask(b);
 		else
-			tid = m_vd->GetVR()->load_brick(b);
+			tid = m_vd->GetRenderer()->load_brick(b);
 
 		//compute workload
 		flvr::GroupSize gsize;

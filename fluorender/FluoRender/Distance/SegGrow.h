@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,12 +28,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_SegGrow_h
 #define FL_SegGrow_h
 
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
 #include <Types/Point.h>
 #include <set>
+#include <unordered_map>
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	class TextureBrick;
+	class KernelProgram;
+	struct Argument;
+}
 namespace flrd
 {
 	class RulerHandler;
@@ -49,7 +57,7 @@ namespace flrd
 	class SegGrow
 	{
 	public:
-		SegGrow(VolumeData* vd);
+		SegGrow(fluo::VolumeData* vd);
 		~SegGrow();
 
 		void SetBranches(int val) { m_branches = val; }
@@ -59,7 +67,7 @@ namespace flrd
 		void Compute();
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		RulerHandler *m_handler;
 		int m_branches;//max number of branches to detect
 		int m_iter;//iterations

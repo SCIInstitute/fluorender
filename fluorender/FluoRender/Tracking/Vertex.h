@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -150,7 +150,7 @@ namespace flrd
 			return 0;
 	}
 
-	inline Pca &Cell::GetPca()
+	inline Pca Cell::GetPca()
 	{
 		return m_pca;
 	}

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2019 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -27,17 +27,20 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "RulerHandler.h"
-#include "VRenderGLView.h"
+#include <Renderview.hpp>
+#include <VolumeData.hpp>
+#include <Cov.h>
 #include <FLIVR/Texture.h>
-#include <DataManager.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <Components/CompAnalyzer.h>
 #include <Selection/VolumePoint.h>
 #include <Selection/VolumeSelector.h>
-#include <Distance/Cov.h>
 #include <Calculate/Count.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
+#include <string>
+#include <compatibility.h>
 
 using namespace flrd;
 
@@ -66,9 +69,9 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 		return false;
 
 	//get view size
-	wxSize view_size = m_view->GetGLSize();
-	int nx = view_size.x;
-	int ny = view_size.y;
+	long nx, ny;
+	m_view->getValue(gstSizeX, nx);
+	m_view->getValue(gstSizeY, ny);
 	if (nx <= 0 || ny <= 0)
 		return false;
 
@@ -79,7 +82,8 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	double aspect = (double)nx / (double)ny;
 
 	//get persp
-	bool persp = m_view->GetPersp();
+	bool persp;
+	m_view->getValue(gstPerspective, persp);
 
 	//get transform
 	glm::mat4 mv_temp = m_view->GetObjectMat();
@@ -211,8 +215,12 @@ void RulerHandler::AddRulerPoint(fluo::Point &p)
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(p);
-		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		bool bval;
+		m_view->getValue(gstRulerTransient, bval);
+		m_ruler->SetTimeDep(bval);
+		long lval;
+		m_view->getValue(gstCurrentFrame, lval);
+		m_ruler->SetTime(lval);
 		m_ruler_list->push_back(m_ruler);
 	}
 }
@@ -231,8 +239,12 @@ void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPointAfterId(p, id, cid, bid);
-		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		bool bval;
+		m_view->getValue(gstRulerTransient, bval);
+		m_ruler->SetTimeDep(bval);
+		long lval;
+		m_view->getValue(gstCurrentFrame, lval);
+		m_ruler->SetTime(lval);
 		m_ruler_list->push_back(m_ruler);
 	}
 }
@@ -250,7 +262,12 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	if (!m_view)
 		return;
 
-	int point_volume_mode = m_view->m_point_volume_mode;
+	long point_volume_mode;
+	m_view->getValue(gstPointVolumeMode, point_volume_mode);
+	bool ruler_transient;
+	m_view->getValue(gstRulerTransient, ruler_transient);
+	long cur_frame;
+	m_view->getValue(gstCurrentFrame, cur_frame);
 
 	if (m_type == 1 && branch)
 	{
@@ -272,12 +289,12 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		Ruler* ruler = new Ruler();
 		ruler->Group(m_group);
 		ruler->SetRulerType(m_type);
-		m_vp.SetVolumeData(m_view->m_cur_vol);
+		m_vp.SetVolumeData(m_view->GetCurrentVolume());
 		m_vp.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
-		ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler->SetTimeDep(ruler_transient);
+		m_ruler->SetTime(cur_frame);
 		m_ruler_list->push_back(ruler);
 		//store brush size in ruler
 		flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
@@ -310,9 +327,11 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 		}
 		if (point_volume_mode)
 		{
-			m_vp.SetVolumeData(m_view->m_cur_vol);
+			m_vp.SetVolumeData(m_view->GetCurrentVolume());
+			bool bval;
+			m_view->getValue(gstRulerUseTransf, bval);
 			double t = m_vp.GetPointVolume(mx, my,
-				point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+				point_volume_mode, bval, 0.5,
 				p, ip);
 			if (t <= 0.0)
 			{
@@ -350,8 +369,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 			m_ruler->Group(m_group);
 			m_ruler->SetRulerType(m_type);
 			m_ruler->AddPoint(p);
-			m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-			m_ruler->SetTime(m_view->m_tseq_cur_num);
+			m_ruler->SetTimeDep(ruler_transient);
+			m_ruler->SetTime(cur_frame);
 			m_ruler_list->push_back(m_ruler);
 		}
 	}
@@ -366,9 +385,14 @@ void RulerHandler::AddPaintRulerPoint()
 	flrd::VolumeSelector* selector = m_view->GetVolumeSelector();
 	if (!selector)
 		return;
-	VolumeData* vd = selector->GetVolume();
+	fluo::VolumeData* vd = selector->GetVolume();
 	if (!vd)
 		return;
+
+	bool ruler_transient;
+	m_view->getValue(gstRulerTransient, ruler_transient);
+	long cur_frame;
+	m_view->getValue(gstCurrentFrame, cur_frame);
 
 	flrd::Cov cover(vd);
 	cover.Compute(1);
@@ -378,16 +402,16 @@ void RulerHandler::AddPaintRulerPoint()
 	fluo::Point center = cover.GetCenter();
 	double size = counter.GetSum();
 
-	wxString str;
+	std::string str;
 	bool new_ruler = true;
 	if (m_ruler &&
 		m_ruler->GetDisp() &&
 		!m_ruler->GetFinished())
 	{
 		m_ruler->AddPoint(center);
-		str = wxString::Format("\tv%d", m_ruler->GetNumPoint() - 1);
+		str = "\tv" + std::to_string(m_ruler->GetNumPoint() - 1);
 		m_ruler->AddInfoNames(str);
-		str = wxString::Format("\t%.0f", size);
+		str = "\t" + std::to_string(int(size));
 		m_ruler->AddInfoValues(str);
 		new_ruler = false;
 	}
@@ -397,11 +421,11 @@ void RulerHandler::AddPaintRulerPoint()
 		m_ruler->Group(m_group);
 		m_ruler->SetRulerType(m_type);
 		m_ruler->AddPoint(center);
-		m_ruler->SetTimeDep(m_view->m_ruler_time_dep);
-		m_ruler->SetTime(m_view->m_tseq_cur_num);
+		m_ruler->SetTimeDep(ruler_transient);
+		m_ruler->SetTime(cur_frame);
 		str = "v0";
 		m_ruler->AddInfoNames(str);
-		str = wxString::Format("%.0f", size);
+		str = std::to_string(int(size));
 		m_ruler->AddInfoValues(str);
 		m_ruler_list->push_back(m_ruler);
 	}
@@ -411,13 +435,17 @@ bool RulerHandler::MoveRuler(int mx, int my)
 {
 	if (!m_point || !m_view || !m_ruler)
 		return false;
+	long point_volume_mode;
+	m_view->getValue(gstPointVolumeMode, point_volume_mode);
+	bool ruler_use_transf;
+	m_view->getValue(gstRulerUseTransf, ruler_use_transf);
 
 	fluo::Point point, ip, tmp;
-	if (m_view->m_point_volume_mode)
+	if (point_volume_mode)
 	{
-		m_vp.SetVolumeData(m_view->m_cur_vol);
+		m_vp.SetVolumeData(m_view->GetCurrentVolume());
 		double t = m_vp.GetPointVolume(mx, my,
-			m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+			point_volume_mode, ruler_use_transf, 0.5,
 			point, ip);
 		if (t <= 0.0)
 		{
@@ -449,13 +477,17 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 {
 	if (!m_point || !m_view || !m_ruler)
 		return false;
+	long point_volume_mode;
+	m_view->getValue(gstPointVolumeMode, point_volume_mode);
+	bool ruler_use_transf;
+	m_view->getValue(gstRulerUseTransf, ruler_use_transf);
 
 	fluo::Point point, ip, tmp;
-	if (m_view->m_point_volume_mode)
+	if (point_volume_mode)
 	{
-		m_vp.SetVolumeData(m_view->m_cur_vol);
+		m_vp.SetVolumeData(m_view->GetCurrentVolume());
 		double t = m_vp.GetPointVolume(mx, my,
-			m_view->m_point_volume_mode, m_view->m_ruler_use_transf, 0.5,
+			point_volume_mode, ruler_use_transf, 0.5,
 			point, ip);
 		if (t <= 0.0)
 		{
@@ -565,7 +597,8 @@ void RulerHandler::DeleteAll(bool cur_time)
 
 	if (cur_time)
 	{
-		int tseq = m_view->m_tseq_cur_num;
+		long tseq;
+		m_view->getValue(gstCurrentFrame, tseq);
 		for (int i = m_ruler_list->size() - 1; i >= 0; i--)
 		{
 			flrd::Ruler* ruler = (*m_ruler_list)[i];
@@ -605,14 +638,14 @@ void RulerHandler::Save(wxFileConfig &fconfig, int vi)
 			Ruler* ruler = (*m_ruler_list)[ri];
 			if (!ruler) continue;
 			fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, (int)ri));
-			fconfig.Write("name", ruler->GetName());
+			fconfig.Write("name", wxString(ruler->GetName()));
 			fconfig.Write("group", ruler->Group());
 			fconfig.Write("type", ruler->GetRulerType());
 			fconfig.Write("display", ruler->GetDisp());
 			fconfig.Write("transient", ruler->GetTimeDep());
 			fconfig.Write("time", ruler->GetTime());
-			fconfig.Write("info_names", ruler->GetInfoNames());
-			fconfig.Write("info_values", ruler->GetInfoValues());
+			fconfig.Write("info_names", wxString(ruler->GetInfoNames()));
+			fconfig.Write("info_values", wxString(ruler->GetInfoValues()));
 			fconfig.Write("use_color", ruler->GetUseColor());
 			fconfig.Write("color", wxString::Format("%f %f %f",
 				ruler->GetColor().r(), ruler->GetColor().g(), ruler->GetColor().b()));
@@ -660,7 +693,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 				fconfig.SetPath(wxString::Format("/views/%d/rulers/%d", vi, ri));
 				Ruler* ruler = new Ruler();
 				if (fconfig.Read("name", &str))
-					ruler->SetName(str);
+					ruler->SetName(str.ToStdString());
 				if (fconfig.Read("group", &ival))
 					ruler->Group(ival);
 				if (fconfig.Read("type", &ival))
@@ -672,9 +705,9 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 				if (fconfig.Read("time", &ival))
 					ruler->SetTime(ival);
 				if (fconfig.Read("info_names", &str))
-					ruler->SetInfoNames(str);
+					ruler->SetInfoNames(str.ToStdString());
 				if (fconfig.Read("info_values", &str))
-					ruler->SetInfoValues(str);
+					ruler->SetInfoValues(str.ToStdString());
 				if (fconfig.Read("use_color", &bval))
 				{
 					if (bval)
@@ -763,14 +796,18 @@ int RulerHandler::Profile(int index)
 		return 0;
 
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	m_vd->getValue(gstSpcX, spcx);
+	m_vd->getValue(gstSpcY, spcy);
+	m_vd->getValue(gstSpcZ, spcz);
+	long nx, ny, nz;
+	m_vd->getValue(gstResX, nx);
+	m_vd->getValue(gstResY, ny);
+	m_vd->getValue(gstResZ, nz);
 	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
 		nx <= 0 || ny <= 0 || nz <= 0)
 		return 0;
 	//get data
-	m_vd->GetVR()->return_mask();
+	m_vd->GetRenderer()->return_mask();
 	flvr::Texture* tex = m_vd->GetTexture();
 	if (!tex) return 0;
 	Nrrd* nrrd_data = tex->get_nrrd(0);
@@ -782,7 +819,8 @@ int RulerHandler::Profile(int index)
 	void* mask = 0;
 	if (nrrd_mask)
 		mask = nrrd_mask->data;
-	double scale = m_vd->GetScalarScale();
+	double scale;
+	m_vd->getValue(gstIntScale, scale);
 
 	if (ruler->GetRulerType() == 3 && mask)
 	{
@@ -796,7 +834,7 @@ int RulerHandler::Profile(int index)
 		p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
 		fluo::Vector dir = p2 - p1;
 		double dist = dir.length();
-		if (dist < EPS)
+		if (dist < fluo::Epsilon())
 			return 0;
 		dir.normalize();
 
@@ -938,8 +976,8 @@ int RulerHandler::Profile(int index)
 				profile->erase(profile->begin() + total_dist, profile->begin() + bins - 1);
 		}
 	}
-	wxString str("Profile of volume ");
-	str = str + m_vd->GetName();
+	std::string str("Profile of volume ");
+	str = str + std::string(m_vd->getName());
 	ruler->SetInfoProfile(str);
 	return 1;
 }

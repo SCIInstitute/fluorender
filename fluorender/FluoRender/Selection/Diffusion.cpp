@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,9 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Diffusion.h"
-#include <DataManager.h>
+#include <VolumeData.hpp>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <vector>
 #ifdef _DEBUG
 #include <fstream>
@@ -179,7 +182,7 @@ const char* str_cl_diffusion = \
 "}\n" \
 ;
 
-Diffusion::Diffusion(VolumeData* vd)
+Diffusion::Diffusion(fluo::VolumeData* vd)
 	: m_vd(vd)
 {
 }
@@ -292,9 +295,9 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 	//clipping planes
 	cl_float4 p[6];
-	if (m_vd && m_vd->GetVR())
+	if (m_vd && m_vd->GetRenderer())
 	{
-		std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+		std::vector<fluo::Plane*> *planes = m_vd->GetRenderer()->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -315,7 +318,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(b);
+		GLint did = m_vd->GetRenderer()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
 
@@ -389,11 +392,11 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	//clipping planes
 	cl_float4 p[6];
 	bool inv;
-	float scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
+	double scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
 		offset, sw;
-	if (m_vd && m_vd->GetVR())
+	if (m_vd && m_vd->GetRenderer())
 	{
-		flvr::VolumeRenderer* vr = m_vd->GetVR();
+		flvr::VolumeRenderer* vr = m_vd->GetRenderer();
 		std::vector<fluo::Plane*> *planes = vr->get_planes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
@@ -405,14 +408,14 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 				float(abcd[3]) };
 		}
 		//params
-		inv = m_vd->GetInvert();
-		scalar_scale = m_vd->GetScalarScale();
-		lo_thresh = m_vd->GetLeftThresh();
-		hi_thresh = m_vd->GetRightThresh();
-		gamma3d = m_vd->Get3DGamma();
-		gm_thresh = m_vd->GetBoundary();
-		offset = m_vd->GetOffset();
-		sw = m_vd->GetSoftThreshold();
+		m_vd->getValue(gstInvert, inv);
+		m_vd->getValue(gstIntScale, scalar_scale);
+		m_vd->getValue(gstLowThreshold, lo_thresh);
+		m_vd->getValue(gstHighThreshold, hi_thresh);
+		m_vd->getValue(gstGamma3d, gamma3d);
+		m_vd->getValue(gstExtractBoundary, gm_thresh);
+		m_vd->getValue(gstSaturation, offset);
+		m_vd->getValue(gstSoftThresh, sw);
 	}
 
 
@@ -425,7 +428,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		int nx = b->nx();
 		int ny = b->ny();
 		int nz = b->nz();
-		GLint did = m_vd->GetVR()->load_brick(b);
+		GLint did = m_vd->GetRenderer()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
 
@@ -443,8 +446,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z()) };
-		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, 1.0, lo_thresh, hi_thresh };
-		cl_float4 loc3 = { 1.0f / gamma3d, gm_thresh, offset, sw };
+		cl_float4 loc2 = { float(inv ? -scalar_scale : scalar_scale), float(1.0), float(lo_thresh), float(hi_thresh) };
+		cl_float4 loc3 = { float(1.0f / gamma3d), float(gm_thresh), float(offset), float(sw) };
 		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);

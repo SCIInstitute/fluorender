@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -78,6 +78,10 @@ namespace fluo
 		inline double hue() const {return hue_;}
 		inline double sat() const {return sat_;}
 		inline double val() const {return val_;}
+
+		inline void hue(const double v) { hue_ = v; }
+		inline void sat(const double v) { sat_ = v; }
+		inline void val(const double v) { val_ = v; }
 
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{

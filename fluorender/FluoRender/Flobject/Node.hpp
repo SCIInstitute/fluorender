@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -32,11 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <CopyOp.hpp>
 #include <Object.hpp>
 
-
 #include <vector>
 #include <set>
 
-
+class Flinput;
 namespace fluo
 {
 	class Group;
@@ -48,8 +47,10 @@ namespace fluo
 	class Annotations;
 	class Node;
 	class NodeVisitor;
-	class View;
+	class Renderview;
 	class Root;
+	class StopWatch;
+	class AsyncTimer;
 
 	typedef std::vector<Node*> ParentList;
     typedef std::vector<ref_ptr<Node>> NodeList;
@@ -88,10 +89,16 @@ namespace fluo
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
 		virtual Annotations* asAnnotations() { return 0; }
 		virtual const Annotations* asAnnotations() const { return 0; }
-		virtual View* asView() { return 0; }
-		virtual const View* asView() const { return 0; }
+		virtual Renderview* asRenderview() { return 0; }
+		virtual const Renderview* asRenderview() const { return 0; }
 		virtual Root* asRoot() { return 0; }
 		virtual const Root* asRoot() const { return 0; }
+		virtual StopWatch* asStopWatch() { return 0; }
+		virtual const StopWatch* asStopWatch() const { return 0; }
+		virtual AsyncTimer* asAsyncTimer() { return 0; }
+		virtual const AsyncTimer* asAsyncTimer() const { return 0; }
+		virtual Flinput* asFlinput() { return 0; }
+		virtual const Flinput* asFlinput() const { return 0; }
 
 		virtual void accept(NodeVisitor& nv);
 		virtual void ascend(NodeVisitor& nv);
@@ -111,6 +118,42 @@ namespace fluo
 		inline Node* getParent(unsigned int i) { if (getNumParents()) return m_parents[i]; else return 0; }
 
 		inline unsigned int getNumParents() const { return static_cast<unsigned int>(m_parents.size()); }
+
+		inline Group* getParentGroup()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asGroup()) return i->asGroup();
+			}
+			return nullptr;
+		}
+
+		inline VolumeGroup* getParentVolumeGroup()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asVolumeGroup()) return i->asVolumeGroup();
+			}
+			return nullptr;
+		}
+
+		inline MeshGroup* getParentMeshGroup()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asMeshGroup()) return i->asMeshGroup();
+			}
+			return nullptr;
+		}
+
+		inline Renderview* getParentRenderview()
+		{
+			for (auto i : m_parents)
+			{
+				if (i->asRenderview()) return i->asRenderview();
+			}
+			return nullptr;
+		}
 
 		typedef unsigned int NodeMask;
 		inline void setNodeMask(NodeMask nm) { m_node_mask = nm; }

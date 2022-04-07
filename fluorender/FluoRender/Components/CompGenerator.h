@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,15 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompGenerator_h
 
 #include <vector>
-#include <boost/unordered_map.hpp>
 #include <boost/signals2.hpp>
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 
-using namespace std;
-
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	typedef std::vector<std::string> CompCmdParams;
@@ -46,7 +43,7 @@ namespace flrd
 	class ComponentGenerator
 	{
 	public:
-		ComponentGenerator(VolumeData* vd);
+		ComponentGenerator(fluo::VolumeData* vd);
 		~ComponentGenerator();
 
 		void SetUseMask(bool use_mask)
@@ -87,7 +84,7 @@ namespace flrd
 		boost::signals2::signal<void(std::string)> postwork;
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
 
 	private:

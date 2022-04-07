@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2022 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -28,7 +28,7 @@
 
 #include "ShaderProgram.h"
 #include <Types/Utils.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <ctime>
 #include <cstdio>
 #include <sstream>

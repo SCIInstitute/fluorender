@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,11 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_DistCalculator_h
 #define FL_DistCalculator_h
 
+#include <Ruler.h>
+#include <Relax.h>
 #include <Tracking/Cell.h>
-#include <Distance/Ruler.h>
-#include <Distance/Relax.h>
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class DistCalculator
@@ -66,7 +69,7 @@ namespace flrd
 		{
 			return m_celps;
 		}
-		void SetVolume(VolumeData* vd)
+		void SetVolume(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 			m_relax.SetVolume(vd);
@@ -90,7 +93,7 @@ namespace flrd
 		//components
 		CelpList *m_celps;
 		//volume
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		//Ruler
 		Ruler *m_ruler;
 		//spring properties

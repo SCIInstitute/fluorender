@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Count.h"
+#include <VolumeData.hpp>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -76,7 +77,7 @@ const char* str_cl_count_voxels = \
 "	atomic_xchg(wcount+index, lwsum);\n" \
 "}\n";
 
-CountVoxels::CountVoxels(VolumeData* vd)
+CountVoxels::CountVoxels(fluo::VolumeData* vd)
 	: m_vd(vd),
 	m_use_mask(false),
 	m_sum(0),
@@ -147,15 +148,13 @@ void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
 	return (void*)temp;
 }
 
-void* CountVoxels::GetVolData(VolumeData* vd)
+void* CountVoxels::GetVolData(fluo::VolumeData* vd)
 {
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
 	Nrrd* nrrd_data = 0;
 	if (m_use_mask)
 		nrrd_data = vd->GetMask(false);
 	if (!nrrd_data)
-		nrrd_data = vd->GetVolume(false);
+		nrrd_data = vd->GetData(false);
 	if (!nrrd_data)
 		return 0;
 	return nrrd_data->data;
@@ -174,14 +173,14 @@ void CountVoxels::Count()
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
-	string name = "kernel_0";
+	std::string name = "kernel_0";
 	if (kernel_prog->valid())
 		kernel_index = kernel_prog->findKernel(name);
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	m_sum = 0; m_wsum = 0.0;
 	for (size_t i = 0; i < brick_num; ++i)
@@ -191,8 +190,8 @@ void CountVoxels::Count()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint tid = m_vd->GetRenderer()->load_brick(b);
+		GLint mid = m_vd->GetRenderer()->load_brick_mask(b);
 
 		//compute workload
 		flvr::GroupSize gsize;

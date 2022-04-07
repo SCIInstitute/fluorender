@@ -3,7 +3,7 @@
 //
 //  The MIT License
 //
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2022 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //
 //  
@@ -36,8 +36,8 @@
 #include <FLIVR/VolKernel.h>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include "utility.h"
-#include "../compatibility.h"
+#include <utility.h>
+#include <compatibility.h>
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>

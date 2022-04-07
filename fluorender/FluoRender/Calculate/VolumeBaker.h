@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,8 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEBAKER_H_
 #define _VOLUMEBAKER_H_
 
-#include "DataManager.h"
+#include <Nrrd/nrrd.h>
 
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolumeBaker
@@ -38,14 +42,14 @@ namespace flrd
 		VolumeBaker();
 		~VolumeBaker();
 
-		void SetInput(VolumeData *data);
-		VolumeData* GetInput();
-		VolumeData* GetResult();
+		void SetInput(fluo::VolumeData *data);
+		fluo::VolumeData* GetInput();
+		fluo::VolumeData* GetResult();
 		void Bake(bool replace);
 
 	private:
-		VolumeData *m_input;	//input
-		VolumeData *m_result;	//result
+		fluo::VolumeData *m_input;	//input
+		fluo::VolumeData *m_result;	//result
 		void* m_raw_input;		//
 		void* m_raw_result;		//
 
@@ -57,8 +61,8 @@ namespace flrd
 		int m_bits;
 
 	private:
-		Nrrd* GetNrrd(VolumeData* vd);
-		void* GetRaw(VolumeData* vd);
+		Nrrd* GetNrrd(fluo::VolumeData* vd);
+		void* GetRaw(fluo::VolumeData* vd);
 	};
 }
 #endif//_VOLUMEBAKER_H_

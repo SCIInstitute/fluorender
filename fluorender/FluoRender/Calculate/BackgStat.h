@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -34,7 +34,10 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace std;
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flvr
 {
 	class TextureBrick;
@@ -44,7 +47,7 @@ namespace flrd
 	class BackgStat
 	{
 	public:
-		BackgStat(VolumeData* vd);
+		BackgStat(fluo::VolumeData* vd);
 		~BackgStat();
 
 		void SetUseMask(bool use_mask)
@@ -174,7 +177,7 @@ namespace flrd
 		}
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
 		int m_type;//0-mean; 1-minmax; 2-median
 		int m_kx, m_ky, m_kz;

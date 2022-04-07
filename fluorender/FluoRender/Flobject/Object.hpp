@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -90,12 +90,12 @@ namespace fluo
 					value = it->second->clone();
 				else
 					value = it->second.get();
-				ref_ptr<Value> pvalue(value);
+				//ref_ptr<Value> pvalue(value);
 				addValue(value);
 			}
 		}
 
-		inline void clearValues()
+		inline void clearValues(int ref_count = 0)
 		{
 			if (!_value_set)
 				return;
@@ -104,10 +104,10 @@ namespace fluo
 				it != _value_set->getValues().end(); ++it)
 			{
 				Value * value = it->second.get();
-				if (value)
+				if (value && value->referenceCount() > ref_count)
 					value->removeObserver(this);
 			}
-			_value_set->clear();
+			_value_set->clear(ref_count);
 		}
 
 		//compare by values
@@ -206,11 +206,23 @@ namespace fluo
 		template<typename V>
 		bool setValue(const string &name, const V &value)
 		{
-			Event event;
-			return setValue(name, value, event);
+			Event event(Event::NOTIFY_SELF);
+			return updValue(name, value, event);
 		}
 		template<typename V>
-		bool setValue(const string &name, const V &value, Event &event)
+		bool chgValue(const string &name, const V &value)
+		{
+			Event event(Event::NOTIFY_NONE);
+			return updValue(name, value, event);
+		}
+		template<typename V>
+		bool updValue(const string &name, const V &value)
+		{
+			Event event;
+			return updValue(name, value, event);
+		}
+		template<typename V>
+		bool updValue(const string &name, const V &value, Event &event)
 		{
 			V old_value;
 			if (getValue(name, old_value) && value != old_value)
@@ -232,10 +244,20 @@ namespace fluo
 		}
 		bool setValueTuple(ValueTuple& vt)
 		{
-			Event event;
-			return setValueTuple(vt, event);
+			Event event(Event::NOTIFY_SELF);
+			return updValueTuple(vt, event);
 		}
-		bool setValueTuple(ValueTuple& vt, Event& event)
+		bool chgValueTuple(ValueTuple& vt)
+		{
+			Event event(Event::NOTIFY_NONE);
+			return updValueTuple(vt, event);
+		}
+		bool updValueTuple(ValueTuple& vt)
+		{
+			Event event;
+			return updValueTuple(vt, event);
+		}
+		bool updValueTuple(ValueTuple& vt, Event& event)
 		{
 			ValueTuple old_vt;
 			std::string name = std::get<0>(vt);
@@ -256,10 +278,20 @@ namespace fluo
 		}
 		bool setRvalu(const std::string& name, Referenced* value)
 		{
-			Event event;
-			return setRvalu(name, value, event);
+			Event event(Event::NOTIFY_SELF);
+			return updRvalu(name, value, event);
 		}
-		bool setRvalu(const std::string& name, Referenced* value, Event& event)
+		bool chgRvalu(const std::string& name, Referenced* value)
+		{
+			Event event(Event::NOTIFY_NONE);
+			return updRvalu(name, value, event);
+		}
+		bool updRvalu(const std::string& name, Referenced* value)
+		{
+			Event event;
+			return updRvalu(name, value, event);
+		}
+		bool updRvalu(const std::string& name, Referenced* value, Event& event)
 		{
 			Referenced* old_value;
 			if (getRvalu(name, &old_value) && value != old_value)
@@ -286,6 +318,13 @@ namespace fluo
 				return true;
 			else
 				return setValue(name, value);
+		}
+		bool addSetRvalu(const std::string& name, Referenced* value)
+		{
+			if (addRvalu(name, value))
+				return true;
+			else
+				return setRvalu(name, value);
 		}
 
 		bool getValue(ValueTuple &vt)
@@ -321,12 +360,22 @@ namespace fluo
 		}
 
 		//toggle value for bool
-		bool toggleValue(const std::string &name, bool &value)
+		bool flipValue(const std::string &name, bool &value)
+		{
+			Event event(Event::NOTIFY_SELF);
+			return flupValue(name, value, event);
+		}
+		bool flngValue(const std::string &name, bool &value)
+		{
+			Event event(Event::NOTIFY_NONE);
+			return flupValue(name, value, event);
+		}
+		bool flupValue(const std::string &name, bool &value)
 		{
 			Event event;
-			return toggleValue(name, value, event);
+			return flupValue(name, value, event);
 		}
-		bool toggleValue(const std::string &name, bool &value, Event& event);
+		bool flupValue(const std::string &name, bool &value, Event& event);
 
 		//sync value only sets a state but doesn't change values when called
 		//observer's value updates when the value of this changes (data flow is one-way: this -> obj)
@@ -348,6 +397,17 @@ namespace fluo
 		//propagate values belonging to the same object (1 -> 2)
 		bool propValues(const std::string &name1, const std::string &name2);
 		bool propValues(const std::string &name1, const ValueCollection &names);
+
+		//save and restore
+		bool saveValue(const std::string &name);
+		bool drawValue(const std::string &name);
+		bool saveValues(const ValueCollection &names);
+		bool drawValues(const ValueCollection &names);
+
+		//reset values from factory
+		virtual bool resetValue(const std::string &name);
+		virtual bool resetValues(const ValueCollection &names);
+		virtual bool resetAllValues();
 
 		//directly add
 		bool addValue(Value* value)
@@ -490,6 +550,7 @@ namespace fluo
 		std::string m_name;
 
 		ref_ptr<ValueSet> _value_set;
+		ref_ptr<ValueSet> _value_bank;//for temporary backup and restore
 
 		//inputs and outputs are just value names for ui display
 		//value names in the collections are to be shown in ui

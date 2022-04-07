@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include "nd2_reader.h"
 #include <json.hpp>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <stdio.h>
 
 ND2Reader::ND2Reader()
@@ -61,7 +61,7 @@ ND2Reader::~ND2Reader()
 {
 }
 
-void ND2Reader::SetFile(string &file)
+void ND2Reader::SetFile(const std::string &file)
 {
 	if (!file.empty())
 	{
@@ -73,7 +73,7 @@ void ND2Reader::SetFile(string &file)
 	m_id_string = m_path_name;
 }
 
-void ND2Reader::SetFile(wstring &file)
+void ND2Reader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -133,14 +133,14 @@ int ND2Reader::GetDigitOrder()
 	return 0;
 }
 
-void ND2Reader::SetTimeId(wstring &id)
+void ND2Reader::SetTimeId(const std::wstring &id)
 {
 	//do nothing
 }
 
-wstring ND2Reader::GetTimeId()
+std::wstring ND2Reader::GetTimeId()
 {
-	return wstring(L"");
+	return std::wstring(L"");
 }
 
 void ND2Reader::SetBatch(bool batch)
@@ -240,30 +240,30 @@ Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 	return data;
 }
 
-wstring ND2Reader::GetCurDataName(int t, int c)
+std::wstring ND2Reader::GetCurDataName(int t, int c)
 {
 	return m_path_name;
 }
 
-wstring ND2Reader::GetCurMaskName(int t, int c)
+std::wstring ND2Reader::GetCurMaskName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".msk";
-	wstring mask_name = woss.str();
+	std::wstring mask_name = woss.str();
 	return mask_name;
 }
 
-wstring ND2Reader::GetCurLabelName(int t, int c)
+std::wstring ND2Reader::GetCurLabelName(int t, int c)
 {
-	wostringstream woss;
+	std::wostringstream woss;
 	woss << m_path_name.substr(0, m_path_name.find_last_of('.'));
 	if (m_time_num > 1) woss << "_T" << t;
 	if (m_chan_num > 1) woss << "_C" << c;
 	woss << ".lbl";
-	wstring label_name = woss.str();
+	std::wstring label_name = woss.str();
 	return label_name;
 }
 
@@ -416,7 +416,7 @@ void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
 	nlohmann::json j = nlohmann::json::parse(limstr);
 	Lim_FileFreeString(limstr);
 	auto it = j.find("channels");
-	string str;
+	std::string str;
 	if (it != j.end())
 	{
 		str = it->dump();
@@ -429,7 +429,7 @@ void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
 		size_t pos2 = str.find("]", pos);
 		if (pos2 == std::string::npos)
 			return;
-		string x, y, z;
+		std::string x, y, z;
 		int count = 0;
 		bool flag = false;
 		for (size_t i = pos; i < pos2; ++i)

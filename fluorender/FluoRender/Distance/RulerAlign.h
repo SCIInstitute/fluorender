@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2019 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -31,8 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Distance/Ruler.h>
 #include <Types/Vector.h>
 
-class VRenderGLView;
-
+namespace fluo
+{
+	class Renderview;
+}
 namespace flrd
 {
 	class RulerAlign
@@ -43,7 +45,7 @@ namespace flrd
 			m_axis_type(0) {};
 		~RulerAlign() {};
 
-		void SetView(VRenderGLView* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 		}
@@ -93,7 +95,7 @@ namespace flrd
 		void AlignPca(int axis_type, bool cov=true);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
 
 	private:
-		VRenderGLView *m_view;
+		fluo::Renderview *m_view;
 		std::vector<fluo::Point> m_point_list;
 		int m_axis_type;
 		fluo::Vector m_axis;

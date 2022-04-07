@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -384,6 +384,33 @@ public:
 	const static unsigned char full_screen_back_menu_png[921];
 	/* full_screen_menu.png - 952 bytes */
 	const static unsigned char full_screen_menu_png[952];
+
+	//scenegraph icons
+	/* volume_data_hidden.png - 633 bytes */
+	const static unsigned char volume_data_hidden_png[633];
+	/* volume_data_shown.png - 711 bytes */
+	const static unsigned char icons::volume_data_shown_png[711];
+	/* mesh_data_hidden.png - 692 bytes */
+	const static unsigned char icons::mesh_data_hidden_png[692];
+	/* mesh_data_shown.png - 521 bytes */
+	const static unsigned char icons::mesh_data_shown_png[521];
+	/* volume_group_hidden.png - 529 bytes */
+	const static unsigned char icons::volume_group_hidden_png[529];
+	/* volume_group_shown.png - 703 bytes */
+	const static unsigned char icons::volume_group_shown_png[703];
+	/* mesh_group_hidden.png - 565 bytes */
+	const static unsigned char icons::mesh_group_hidden_png[565];
+	/* mesh_group_shown.png - 641 bytes */
+	const static unsigned char icons::mesh_group_shown_png[641];
+	/* render_view_hidden.png - 621 bytes */
+	const static unsigned char icons::render_view_hidden_png[621];
+	/* render_view_shown.png - 731 bytes */
+	const static unsigned char icons::render_view_shown_png[731];
+	/* default_hidden.png - 794 bytes */
+	const static unsigned char icons::default_hidden_png[794];
+	/* default_shown.png - 761 bytes */
+	const static unsigned char icons::default_shown_png[761];
+
 };
 
 #endif//_ICONS_H_

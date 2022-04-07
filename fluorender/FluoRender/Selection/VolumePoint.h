@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -31,9 +31,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Types/Point.h>
 
-class VRenderGLView;
-class VolumeData;
-
+namespace fluo
+{
+	class Renderview;
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolumePoint
@@ -42,12 +44,12 @@ namespace flrd
 		VolumePoint() : m_view(0), m_vd(0) {}
 		~VolumePoint() {}
 
-		void SetView(VRenderGLView* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 		}
 
-		void SetVolumeData(VolumeData* vd)
+		void SetVolumeData(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 		}
@@ -70,8 +72,8 @@ namespace flrd
 			fluo::Point &mp);
 
 	private:
-		VRenderGLView* m_view;
-		VolumeData* m_vd;
+		fluo::Renderview* m_view;
+		fluo::VolumeData* m_vd;
 	};
 }
 

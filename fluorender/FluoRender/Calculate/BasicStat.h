@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,20 +28,26 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_BasicStat_h
 #define FL_BasicStat_h
 
-#include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
 #include <map>
 
 using namespace std;
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class BasicStat
 	{
 	public:
-		BasicStat(VolumeData* vd);
+		BasicStat(fluo::VolumeData* vd);
 		~BasicStat();
 
 		void SetUseMask(bool use_mask)
@@ -122,7 +128,7 @@ namespace flrd
 		}
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
 		int m_type;//0-mean; 1-minmax; 2-median
 		//result

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2020 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTPROC_H_
 #define _SCRIPTPROC_H_
 
+#include <VolumeData.hpp>
 #include <Flobject/Group.hpp>
 #include <Tracking/VolCache.h>
 #include <Tracking/Cell.h>
@@ -35,9 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/fileconf.h>
 #include <vector>
 
-class VRenderFrame;
-class VRenderGLView;
-class VolumeData;
+class RenderFrame;
+namespace fluo
+{
+	class Renderview;
+}
 namespace flrd
 {
 	class ScriptProc
@@ -66,17 +69,17 @@ namespace flrd
 		ScriptProc();
 		~ScriptProc();
 
-		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetFrame(RenderFrame* frame) { m_frame = frame; }
+		void SetView(fluo::Renderview* view) { m_view = view; }
 
 		//run 4d script
-		void Run4DScript(TimeMask tm, wxString &scriptname, bool rewind);
+		void Run4DScript(TimeMask tm, const wxString &scriptname, bool rewind);
 
 		void ClearResults() { m_output->removeAllChildren(); }
 
 	private:
-		VRenderFrame* m_frame;
-		VRenderGLView *m_view;
+		RenderFrame* m_frame;
+		fluo::Renderview *m_view;
 
 		wxString m_type;
 		TimeMask m_time_mask;
@@ -95,7 +98,7 @@ namespace flrd
 
 	private:
 		bool TimeCondition();
-		bool GetVolumes(std::vector<VolumeData*> &list);
+		bool GetVolumes(fluo::VolumeList &list);
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -39,7 +39,7 @@ public:
 	void SetData(Nrrd* data);
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void SetCompression(bool value);
-	void Save(wstring filename, int mode);
+	void Save(const std::wstring &filename, int mode);
 
 private:
 	Nrrd* m_data;

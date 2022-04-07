@@ -3,7 +3,7 @@
 //
 //  The MIT License
 //
-//  Copyright (c) 2004 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2022 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //
 //
@@ -26,12 +26,13 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include "MultiVolumeRenderer.h"
-#include "VolShader.h"
-#include "ShaderProgram.h"
+#include <MultiVolumeRenderer.h>
+#include <VolShader.h>
+#include <ShaderProgram.h>
+#include <Global.hpp>
+#include <StopWatch.hpp>
 #include <FLIVR/Framebuffer.h>
 #include <FLIVR/VertexArray.h>
-#include "../compatibility.h"
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -296,7 +297,7 @@ namespace flvr
 			{
 				if (TextureRenderer::mem_swap_)
 				{
-					unsigned long long rn_time = GET_TICK_COUNT();
+					unsigned long long rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
 						break;
 				}

@@ -3,7 +3,7 @@
 //  
 //  The MIT License
 //  
-//  Copyright (c) 2018 Scientific Computing and Imaging Institute,
+//  Copyright (c) 2022 Scientific Computing and Imaging Institute,
 //  University of Utah.
 //  
 //  
@@ -274,6 +274,13 @@ inline void sinCos(double *returnSin, double *returnCos, double theta)
 
     *returnSin = std::sin(theta);
     *returnCos = std::cos(theta);
+}
+
+inline double RoundDeg(double d)
+{
+	if (d > 360.0) return d - int(d / 360) * 360;
+	if (d < 0.0) return d - int(d / 360 - 1) * 360;
+	return d;
 }
 
 } // namespace fluo

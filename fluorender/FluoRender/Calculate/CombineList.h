@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,10 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define _COMBINELIST_H_
 
 #include <list>
-#include <wx/string.h>
+#include <string>
 
-class VolumeData;
-
+namespace fluo
+{
+	class VolumeData;
+}
 namespace flrd
 {
 	class CombineList
@@ -41,18 +43,18 @@ namespace flrd
 		CombineList() {};
 		~CombineList() {};
 
-		void SetName(wxString &name);
-		void SetVolumes(std::list<VolumeData*> &channs);
-		void GetResults(std::list<VolumeData*> &results);
+		void SetName(const std::string &name);
+		void SetVolumes(std::list<fluo::VolumeData*> &channs);
+		void GetResults(std::list<fluo::VolumeData*> &results);
 		int Execute();
 
 	private:
-		std::list<VolumeData*> m_channs;
-		std::list<VolumeData*> m_results;
-		int m_resx, m_resy, m_resz;
+		std::list<fluo::VolumeData*> m_channs;
+		std::list<fluo::VolumeData*> m_results;
+		long m_resx, m_resy, m_resz;
 		double m_spcx, m_spcy, m_spcz;
-		int m_bits;
-		wxString m_name;
+		long m_bits;
+		std::string m_name;
 
 	private:
 		unsigned char Inc(unsigned char base, unsigned char inc);

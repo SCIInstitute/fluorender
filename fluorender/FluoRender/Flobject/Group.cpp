@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -103,6 +103,19 @@ bool Group::insertChild(size_t index, Node* child)
 	return true;
 }
 
+bool Group::insertChildAfter(Node* prv_child, Node* child)
+{
+	if (prv_child == nullptr || child == nullptr)
+		return false;
+
+	for (size_t i = 0; i < m_children.size(); ++i)
+	{
+		if (m_children[i].get() == prv_child)
+			return insertChild(i + 1, child);
+	}
+	return addChild(child);
+}
+
 bool Group::removeChildren(size_t pos, size_t num)
 {
 	if (pos < m_children.size() && num > 0)
@@ -140,6 +153,14 @@ bool Group::replaceChild(Node* orig_child, Node* new_child)
 	if (pos < m_children.size())
 		return setChild(pos, new_child);
 	return false;
+}
+
+bool Group::replaceChild(size_t pos, Node* new_child)
+{
+	Node* child = getChild(pos);
+	if (!child)
+		return false;
+	return replaceChild(child, new_child);
 }
 
 bool Group::setChild(size_t i, Node* node)

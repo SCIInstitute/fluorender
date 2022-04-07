@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -41,10 +41,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include "JVMInitializer.h"
 
-using namespace std;
-
-//extern JVMInitializer m_jvmInstance;
-
 class ImageJReader : public BaseReader
 {
 public:
@@ -53,27 +49,27 @@ public:
 
 	int GetType() { return READER_IMAGEJ_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return m_data_name;}
 	int GetCurTime() {return m_cur_time;}
 	int GetTimeNum() {return m_time_num;}
 	int GetChanNum() {return m_chan_num;}
@@ -98,7 +94,7 @@ private:
 	jclass m_imageJ_cls;
 	bool m_eight_bit;
 
-	wstring m_data_name;	
+	std::wstring m_data_name;
 
 	bool m_slice_seq;
 	int m_time_num;
@@ -116,7 +112,7 @@ private:
 	double m_scalar_scale;	
 
 	//time sequence id
-	wstring m_time_id;	
+	std::wstring m_time_id;
 
 private:	
 	// read from imageJ

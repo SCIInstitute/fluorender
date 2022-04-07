@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,21 +26,24 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CombineList.h"
-#include "DataManager.h"
+#include <VolumeData.hpp>
+#include <VolumeFactory.hpp>
+#include <Global.hpp>
+#include <FLIVR/Texture.h>
 
 using namespace flrd;
 
-void CombineList::SetName(wxString &name)
+void CombineList::SetName(const std::string &name)
 {
 	m_name = name;
 }
 
-void CombineList::SetVolumes(std::list<VolumeData*> &channs)
+void CombineList::SetVolumes(std::list<fluo::VolumeData*> &channs)
 {
 	m_channs = channs;
 }
 
-void CombineList::GetResults(std::list<VolumeData*> &results)
+void CombineList::GetResults(std::list<fluo::VolumeData*> &results)
 {
 	results = m_results;
 }
@@ -51,37 +54,42 @@ int CombineList::Execute()
 	if (m_channs.empty())
 		return 0;
 
-	(*m_channs.begin())->GetResolution(m_resx, m_resy, m_resz);
-	(*m_channs.begin())->GetSpacings(m_spcx, m_spcy, m_spcz);
-	m_bits = (*m_channs.begin())->GetBits();
-	int brick_size = (*m_channs.begin())->GetTexture()->get_build_max_tex_size();
+	fluo::VolumeData* fvd = *m_channs.begin();
+	fvd->getValue(gstResX, m_resx);
+	fvd->getValue(gstResY, m_resy);
+	fvd->getValue(gstResZ, m_resz);
+	fvd->getValue(gstSpcX, m_spcx);
+	fvd->getValue(gstSpcY, m_spcy);
+	fvd->getValue(gstSpcZ, m_spcz);
+	fvd->getValue(gstBits, m_bits);
+	int brick_size = fvd->GetTexture()->get_build_max_tex_size();
 	if (m_name == "")
 		m_name = "combined_volume";
 
 	//red volume
-	VolumeData* vd_r = new VolumeData();
+	fluo::VolumeData* vd_r = glbin_volf->build(fvd);
 	vd_r->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
-	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(m_name + wxString::Format("_CH_R"));
+	vd_r->setValue(gstSpcFromFile, true);
+	vd_r->setName(m_name + "_CH_R");
 	//green volume
-	VolumeData* vd_g = new VolumeData();
+	fluo::VolumeData* vd_g = glbin_volf->build(fvd);
 	vd_g->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
-	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(m_name + wxString::Format("_CH_G"));
+	vd_g->setValue(gstSpcFromFile, true);
+	vd_g->setName(m_name + "_CH_G");
 	//blue volume
-	VolumeData* vd_b = new VolumeData();
+	fluo::VolumeData* vd_b = glbin_volf->build(fvd);
 	vd_b->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
 		brick_size);
-	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(m_name + wxString::Format("_CH_B"));
+	vd_b->setValue(gstSpcFromFile, true);
+	vd_b->setName(m_name + "_CH_B");
 
 	//get new data
 	//red volume
@@ -109,16 +117,18 @@ int CombineList::Execute()
 	unsigned long long for_size = (unsigned long long)m_resx *
 		(unsigned long long)m_resy * (unsigned long long)m_resz;
 	unsigned long long index;
-	VolumeData* vd = 0;
 	for (auto iter = m_channs.begin();
 		iter != m_channs.end(); ++iter)
 	{
-		int nx, ny, nz;
-		(*iter)->GetResolution(nx, ny, nz);
+		long nx, ny, nz;
+		(*iter)->getValue(gstResX, nx);
+		(*iter)->getValue(gstResY, ny);
+		(*iter)->getValue(gstResZ, nz);
 		if (!(nx == m_resx && ny == m_resy && nz == m_resz))
 			continue;
-		fluo::Color color = (*iter)->GetColor();
-		Nrrd* nrrd_iter = (*iter)->GetVolume(false);
+		fluo::Color color;
+		(*iter)->getValue(gstColor, color);
+		Nrrd* nrrd_iter = (*iter)->GetData(false);
 		if (!nrrd_iter)
 			continue;
 		void* data_iter = nrrd_iter->data;
@@ -151,64 +161,14 @@ int CombineList::Execute()
 					(unsigned short)(color.b()*((unsigned short*)data_iter)[index] + 0.5));
 			}
 		}
-		if (!vd) vd = *iter;
 	}
 
 	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
 	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);
 	fluo::Color blue = fluo::Color(0.0, 0.0, 1.0);
-	vd_r->SetColor(red);
-	vd_g->SetColor(green);
-	vd_b->SetColor(blue);
-
-	if (vd)
-	{
-		bool bval = vd->GetEnableAlpha();
-		vd_r->SetEnableAlpha(bval);
-		vd_g->SetEnableAlpha(bval);
-		vd_b->SetEnableAlpha(bval);
-		bval = vd->GetShading();
-		vd_r->SetShading(bval);
-		vd_g->SetShading(bval);
-		vd_b->SetShading(bval);
-		vd_r->SetShadow(false);
-		vd_g->SetShadow(false);
-		vd_b->SetShadow(false);
-		//other settings
-		double dval = vd->Get3DGamma();
-		vd_r->Set3DGamma(dval);
-		vd_g->Set3DGamma(dval);
-		vd_b->Set3DGamma(dval);
-		dval = vd->GetBoundary();
-		vd_r->SetBoundary(dval);
-		vd_g->SetBoundary(dval);
-		vd_b->SetBoundary(dval);
-		dval = vd->GetOffset();
-		vd_r->SetOffset(dval);
-		vd_g->SetOffset(dval);
-		vd_b->SetOffset(dval);
-		dval = vd->GetLeftThresh();
-		vd_r->SetLeftThresh(dval);
-		vd_g->SetLeftThresh(dval);
-		vd_b->SetLeftThresh(dval);
-		dval = vd->GetRightThresh();
-		vd_r->SetRightThresh(dval);
-		vd_g->SetRightThresh(dval);
-		vd_b->SetRightThresh(dval);
-		dval = vd->GetAlpha();
-		vd_r->SetAlpha(dval);
-		vd_g->SetAlpha(dval);
-		vd_b->SetAlpha(dval);
-		dval = vd->GetSampleRate();
-		vd_r->SetSampleRate(dval);
-		vd_g->SetSampleRate(dval);
-		vd_b->SetSampleRate(dval);
-		double amb, diff, spec, shine;
-		vd->GetMaterial(amb, diff, spec, shine);
-		vd_r->SetMaterial(amb, diff, spec, shine);
-		vd_g->SetMaterial(amb, diff, spec, shine);
-		vd_b->SetMaterial(amb, diff, spec, shine);
-	}
+	vd_r->setValue(gstColor, red);
+	vd_g->setValue(gstColor, green);
+	vd_b->setValue(gstColor, blue);
 
 	m_results.push_back(vd_r);
 	m_results.push_back(vd_g);

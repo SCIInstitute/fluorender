@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -369,5 +369,38 @@ namespace fluo
 		return planes_[index];
 	}
 
+	//translate the plane by a vector
+	void PlaneSet::Translate(Vector &v)
+	{
+		for (auto &it : planes_)
+			it.Translate(v);
+	}
+
+	//rotate the plane around origin by a quaternion
+	void PlaneSet::Rotate(Quaternion &q)
+	{
+		for (auto &it : planes_)
+			it.Rotate(q);
+	}
+
+	//scale the plane from the origin by a vector
+	void PlaneSet::Scale(Vector &v)
+	{
+		for (auto &it : planes_)
+			it.Scale(v);
+	}
+
+	//remember and restore
+	void PlaneSet::Remember()
+	{
+		for (auto &it : planes_)
+			it.Remember();
+	}
+
+	void PlaneSet::Restore()
+	{
+		for (auto &it : planes_)
+			it.Restore();
+	}
 } // End namespace fluo
 

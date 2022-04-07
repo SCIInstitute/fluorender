@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -39,7 +39,7 @@ public:
 	void SetData(Nrrd* data);
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void SetCompression(bool value);
-	void Save(wstring filename, int mode);	//mode: 0-single file
+	void Save(const std::wstring &filename, int mode);	//mode: 0-single file
 											//1-file sequence
 
 private:
@@ -49,8 +49,8 @@ private:
 	bool m_compression;
 
 private:
-	void SaveSingleFile(wstring filename);
-	void SaveSequence(wstring filename);
+	void SaveSingleFile(const std::wstring &filename);
+	void SaveSequence(const std::wstring &filename);
 };
 
 #endif//_TIF_WRITER_H_

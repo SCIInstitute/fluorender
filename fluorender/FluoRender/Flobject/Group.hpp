@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -60,6 +60,7 @@ namespace fluo
 		*/
 		virtual bool addChild(Node* child);
 		virtual bool insertChild(size_t index, Node* child);
+		virtual bool insertChildAfter(Node* prv_child, Node* child);
 		inline bool removeChild(Node* child)
 		{
 			size_t pos = getChildIndex(child);
@@ -78,6 +79,7 @@ namespace fluo
 		inline bool removeAllChildren() { return removeChildren(0, getNumChildren()); }
 		virtual bool removeChildren(size_t pos, size_t num);
 		virtual bool replaceChild(Node* orig_child, Node* new_child);
+		virtual bool replaceChild(size_t pos, Node* new_child);
 		inline size_t getNumChildren() const { return m_children.size(); }
 		virtual bool setChild(size_t i, Node* node);
 		inline Node* getChild(size_t i) { return m_children[i].get(); }
@@ -113,6 +115,90 @@ namespace fluo
 			}
 			return m_children.size();
 		}
+		inline size_t getChildIndex(const std::string &name)
+		{
+			return getChildIndex(findFirstChild(name));
+		}
+		inline virtual Node* findChild(const unsigned int id)
+		{
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if ((*it)->getId() == id)
+					return (*it).get();
+			}
+			return nullptr;
+		}
+
+		inline virtual Node* findFirstChild(const std::string &name)
+		{
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+			return nullptr;
+		}
+
+		inline virtual Node* findLastChild(const std::string &name)
+		{
+			for (auto it = m_children.rbegin();
+				it != m_children.rend(); ++it)
+			{
+				if ((*it)->getName() == name)
+					return (*it).get();
+			}
+			return nullptr;
+		}
+
+		inline ObjectList find(const std::string &name)
+		{
+			ObjectList result;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if ((*it)->getName() == name)
+					result.push_back((*it).get());
+			}
+			return result;
+		}
+
+		//find by matching values of two objects
+		inline ObjectList findByValues(const Object& obj)
+		{
+			ObjectList result;
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					result.push_back(it->get());
+			}
+			return result;
+		}
+
+		inline virtual Object* findFirstByValues(const Object& obj)
+		{
+			for (auto it = m_children.begin();
+				it != m_children.end(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+			return nullptr;
+		}
+
+		inline virtual Object* findLastByValues(const Object& obj)
+		{
+			for (auto it = m_children.rbegin();
+				it != m_children.rend(); ++it)
+			{
+				if (it->get()->cmpValues(obj))
+					return it->get();
+			}
+			return nullptr;
+		}
+
 		virtual Node* getOrAddNode(const std::string& child_name)
 		{
 			Node* node = getChild(child_name);

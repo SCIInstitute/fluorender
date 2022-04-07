@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <base_reader.h>
 #include <vector>
 
-using namespace std;
-
 class LSMReader : public BaseReader
 {
 public:
@@ -41,26 +39,26 @@ public:
 
 	int GetType() { return READER_LSM_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return m_data_name;}
 	int GetTimeNum() {return m_time_num;}
 	int GetCurTime() {return m_cur_time;}
 	int GetChanNum() {return m_chan_num;}
@@ -79,7 +77,7 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 
 private:
-	wstring m_data_name;
+	std::wstring m_data_name;
 
 	struct SliceInfo
 	{
@@ -87,9 +85,9 @@ private:
 		unsigned int offset_high;//if it is larger than 4GB, this is the high 32 bits of the 64-bit address
 		unsigned int size;		//size in lsm file
 	};
-	typedef vector<SliceInfo> ChannelInfo;		//all slices form a channel
-	typedef vector<ChannelInfo> DatasetInfo;	//channels form a dataset
-	vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
+	typedef std::vector<SliceInfo> ChannelInfo;		//all slices form a channel
+	typedef std::vector<ChannelInfo> DatasetInfo;	//channels form a dataset
+	std::vector<DatasetInfo> m_lsm_info;				//datasets of different time points form an lsm file
 
 
 	int m_time_num;
@@ -118,7 +116,7 @@ private:
 		int chan_num;
 		double wavelength;
 	};
-	vector<WavelengthInfo> m_excitation_wavelength_list;
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 
 private:
 	void ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size);

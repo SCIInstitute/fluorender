@@ -1,0 +1,3 @@
+FluoRender->TARGETS->FluoRender->Build Settings->All/Combined->Signing->Other Code Signing Flags
+Debug->Any SDK: --deep
+Release->Any SDK: --deep

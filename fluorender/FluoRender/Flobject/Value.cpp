@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -149,9 +149,17 @@ ValueSet::~ValueSet()
 {
 }
 
-void ValueSet::clear()
+void ValueSet::clear(int ref_count)
 {
-	_values.clear();
+	Values::iterator it = _values.begin();
+	while (it != _values.end())
+	{
+		if (it->second->referenceCount() > ref_count)
+			it = _values.erase(it);
+		else
+			++it;
+	}
+	//_values.clear();
 }
 
 Value* ValueSet::findValue(const std::string &name)
@@ -895,7 +903,7 @@ bool ValueSet::setValue(ValueTuple& vt, Event& event)
 }
 
 //toggle
-bool ValueSet::toggleValue(const std::string &name, bool &value, Event& event)
+bool ValueSet::flipValue(const std::string &name, bool &value, Event& event)
 {
 	Value* val = findValue(name);
 	if (val && val->_etype == Value::vt_bool)

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include "VolumeMeshConv.h"
 #include "MCTable.h"
 #include <Types/Utils.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 
 double VolumeMeshConv::m_sw = 0.0;
 

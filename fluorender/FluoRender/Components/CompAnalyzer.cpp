@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -25,17 +25,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include "CompAnalyzer.h"
+#include <CompAnalyzer.h>
+#include <VolumeData.hpp>
+#include <Annotations.hpp>
+#include <Global.hpp>
+#include <VolumeFactory.hpp>
+#include <Distance/Pca.h>
+#include <FLIVR/TextureBrick.h>
+#include <FLIVR/Texture.h>
+#include <FLIVR/VolumeRenderer.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <limits>
-#include <boost/graph/connected_components.hpp>
-#include <boost/graph/filtered_graph.hpp>
 
 using namespace flrd;
 
-ComponentAnalyzer::ComponentAnalyzer(VolumeData* vd)
+ComponentAnalyzer::ComponentAnalyzer(fluo::VolumeData* vd)
 	: m_analyzed(false),
 	m_colocal(false),
 	m_bn(0),
@@ -93,12 +99,15 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
 	double sx, sy, sz;
-	vd->GetSpacings(sx, sy, sz);
-	vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
+	vd->getValue(gstSpcX, sx);
+	vd->getValue(gstSpcY, sy);
+	vd->getValue(gstSpcZ, sz);
+	std::vector<flvr::TextureBrick*> *bricks =
+		vd->GetTexture()->get_bricks();
 	if (!bricks || bricks->size() == 0)
 		return;
 	size_t bn = bricks->size();
@@ -117,9 +126,9 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 	graph.clear();
 	m_analyzed = false;
 
-	vd->GetVR()->return_label();
+	vd->GetRenderer()->return_label();
 	if (sel)
-		vd->GetVR()->return_mask();
+		vd->GetRenderer()->return_mask();
 
 	int bits;
 	for (size_t bi = 0; bi < bn; ++bi)
@@ -127,7 +136,7 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		void* data_data = 0;
 		unsigned char* data_mask = 0;
 		unsigned int* data_label = 0;
-		int nx, ny, nz;
+		long nx, ny, nz;
 		flvr::TextureBrick* b = (*bricks)[bi];
 		int c = 0;
 		int nb = 1;
@@ -216,8 +225,10 @@ void ComponentAnalyzer::Analyze(bool sel, bool consistent, bool colocal)
 		else
 		{
 			// get data if there is only one brick
-			vd->GetResolution(nx, ny, nz);
-			Nrrd* nrrd_data = vd->GetVolume(false);
+			vd->getValue(gstResX, nx);
+			vd->getValue(gstResY, ny);
+			vd->getValue(gstResZ, nz);
+			Nrrd* nrrd_data = vd->GetData(false);
 			if (nrrd_data)
 			{
 				bits = nrrd_data->type;
@@ -371,11 +382,11 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
-	vector<flvr::TextureBrick*> *bricks = tex->get_bricks_id();
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks_id();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
@@ -545,11 +556,11 @@ void ComponentAnalyzer::MakeColorConsistent()
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
-	vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
 	if (!bricks || bricks->size() <= 1)
 		return;
 	//comp list
@@ -645,7 +656,7 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd || ! vd->GetTexture())
 		return;
 
@@ -656,8 +667,10 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
 	if (!data_label)
 		return;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	long nx, ny, nz;
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	int ix = (int)(p.x() + 0.5);
 	int iy = (int)(p.y() + 0.5);
 	int iz = (int)(p.z() + 0.5);
@@ -670,7 +683,8 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 	unsigned int id = data_label[index];
 	if (!id)
 		return;
-	int bn = vd->GetBrickNum();
+	long bn;
+	vd->getValue(gstBrickNum, bn);
 
 	unsigned long long ull;
 	if (bn > 1)
@@ -712,7 +726,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd)
 		return;
 
@@ -725,7 +739,8 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (m_colocal)
 	{
 		for (size_t i = 0; i < m_vd_list.size(); ++i)
-			str += "\t" + m_vd_list[i]->GetName() + "\t";
+			str += "\t" + std::string(
+				m_vd_list[i]->getName()) + "\t";
 	}
 	str += "\n";
 }
@@ -734,7 +749,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd)
 		return;
 	//comp list
@@ -759,8 +774,10 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 	double sy = comps.sy;
 	double sz = comps.sz;
 	double size_scale = sx * sy * sz;
-	double maxscale = vd->GetMaxScale();
-	double scalarscale = vd->GetScalarScale();
+	double maxscale;
+	vd->getValue(gstMaxScale, maxscale);
+	double intscale;
+	vd->getValue(gstIntScale, intscale);
 	fluo::Vector lens;
 
 	graph.ClearVisited();
@@ -809,11 +826,11 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << center.y() << "\t";
 		stream << center.z() << "\t";
 		stream << i->second->GetSizeUi() << "\t";
-		stream << i->second->GetSizeD(scalarscale) << "\t";
+		stream << i->second->GetSizeD(intscale) << "\t";
 		stream << size_scale * i->second->GetSizeUi() << "\t";
-		stream << i->second->GetSizeD(size_scale * scalarscale) << "\t";
+		stream << i->second->GetSizeD(size_scale * intscale) << "\t";
 		stream << i->second->GetExtUi() << "\t";
-		stream << i->second->GetExtD(scalarscale) << "\t";
+		stream << i->second->GetExtD(intscale) << "\t";
 		stream << i->second->GetMean(maxscale) << "\t";
 		stream << i->second->GetStd(maxscale) << "\t";
 		stream << i->second->GetMin(maxscale) << "\t";
@@ -832,7 +849,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 
 void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, std::string comp_header)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 	OutputCompListStream(oss, verbose, comp_header);
 	str = oss.str();
 }
@@ -973,11 +990,11 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	return surface_vox ? 1 : 0;
 }
 
-bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int type)
+bool ComponentAnalyzer::GenAnnotations(fluo::Annotations *ann, bool consistent, int type)
 {
 	if (!m_compgroup)
 		return false;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd)
 		return false;
 
@@ -994,9 +1011,13 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 	else if (bits == nrrdTypeUShort)
 		scale = 65535.0;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
+	long nx, ny, nz;
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 
 	//comp list
 	CelpList &comps = m_compgroup->celps;
@@ -1008,7 +1029,7 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 		Analyze(true, consistent);
 
 	std::string sinfo;
-	ostringstream oss;
+	std::ostringstream oss;
 	std::string str;
 
 	int bn = vd->GetAllBrickNum();
@@ -1039,17 +1060,17 @@ bool ComponentAnalyzer::GenAnnotations(Annotations &ann, bool consistent, int ty
 			str = std::to_string(count);
 		}
 		fluo::Point p = i->second->GetCenter(1.0 / nx, 1.0 / ny, 1.0 / nz);
-		ann.AddText(str, p, sinfo);
+		ann->addText(p, str, sinfo);
 		++count;
 	}
 	return true;
 }
 
-bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int color_type, bool consistent)
+bool ComponentAnalyzer::GenMultiChannels(std::list<fluo::VolumeData*>& channs, int color_type, bool consistent)
 {
 	if (!m_compgroup)
 		return false;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd)
 		return false;
 	//comp list
@@ -1081,11 +1102,13 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	if (!data_label)
 		return false;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	double amb, diff, spec, shine;
-	vd->GetMaterial(amb, diff, spec, shine);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
+	long nx, ny, nz;
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	unsigned int count = 1;
@@ -1099,6 +1122,7 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 	//graph for linking multiple bricks
 	CellGraph &graph = m_compgroup->graph;
 	graph.ClearVisited();
+	std::string name;
 	for (auto i = comps.begin();
 		i != comps.end(); ++i)
 	{
@@ -1108,14 +1132,16 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 				continue;
 		}
 
-		VolumeData* vdn = new VolumeData();
+		fluo::VolumeData* vdn = glbin_volf->build(vd);
 		vdn->AddEmptyData(bits,
 			nx, ny, nz,
 			spcx, spcy, spcz,
 			brick_size);
-		vdn->SetSpcFromFile(true);
-		vdn->SetName(vd->GetName() +
-			wxString::Format("_COMP%d_SIZE%d", count++, i->second->GetSizeUi()));
+		vdn->setValue(gstSpcFromFile, true);
+		name = vd->getName();
+		name += "_COMP" + std::to_string(count++);
+		name += "_SIZE" + std::to_string(i->second->GetSizeUi());
+		vdn->setName(name);
 
 		//populate the volume
 		//the actual data
@@ -1219,33 +1245,20 @@ bool ComponentAnalyzer::GenMultiChannels(std::list<VolumeData*>& channs, int col
 		fluo::Color c;
 		if (GetColor(i->second->Id(), i->second->BrickId(), vd, color_type, c))
 		{
-			vdn->SetColor(c);
-			vdn->SetEnableAlpha(vd->GetEnableAlpha());
-			vdn->SetShading(vd->GetShading());
-			vdn->SetShadow(false);
-			//other settings
-			vdn->Set3DGamma(vd->Get3DGamma());
-			vdn->SetBoundary(vd->GetBoundary());
-			vdn->SetOffset(vd->GetOffset());
-			vdn->SetLeftThresh(vd->GetLeftThresh());
-			vdn->SetRightThresh(vd->GetRightThresh());
-			vdn->SetAlpha(vd->GetAlpha());
-			vdn->SetSampleRate(vd->GetSampleRate());
-			vdn->SetMaterial(amb, diff, spec, shine);
-
+			vdn->setValue(gstColor, c);
 			channs.push_back(vdn);
 		}
 		else
-			delete vdn;
+			glbin_volf->remove(vdn);
 	}
 	return true;
 }
 
-bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent)
+bool ComponentAnalyzer::GenRgbChannels(std::list<fluo::VolumeData*> &channs, int color_type, bool consistent)
 {
 	if (!m_compgroup)
 		return false;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd)
 		return false;
 	//comp list
@@ -1277,40 +1290,39 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	if (!data_label)
 		return false;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	double amb, diff, spec, shine;
-	vd->GetMaterial(amb, diff, spec, shine);
+	vd->getValue(gstSpcX, spcx);
+	vd->getValue(gstSpcY, spcy);
+	vd->getValue(gstSpcZ, spcz);
+	long nx, ny, nz;
+	vd->getValue(gstResX, nx);
+	vd->getValue(gstResY, ny);
+	vd->getValue(gstResZ, nz);
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume
-	VolumeData* vd_r = new VolumeData();
+	fluo::VolumeData* vd_r = glbin_volf->build(vd);
 	vd_r->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
 		brick_size);
-	vd_r->SetSpcFromFile(true);
-	vd_r->SetName(vd->GetName() +
-		wxString::Format("_CH_R"));
+	vd_r->setValue(gstSpcFromFile, true);
+	vd_r->setName(std::string(vd->getName()) + "_CH_R");
 	//green volume
-	VolumeData* vd_g = new VolumeData();
+	fluo::VolumeData* vd_g = glbin_volf->build(vd);
 	vd_g->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
 		brick_size);
-	vd_g->SetSpcFromFile(true);
-	vd_g->SetName(vd->GetName() +
-		wxString::Format("_CH_G"));
+	vd_g->setValue(gstSpcFromFile, true);
+	vd_g->setName(std::string(vd->getName()) + "_CH_G");
 	//blue volume
-	VolumeData* vd_b = new VolumeData();
+	fluo::VolumeData* vd_b = glbin_volf->build(vd);
 	vd_b->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
 		brick_size);
-	vd_b->SetSpcFromFile(true);
-	vd_b->SetName(vd->GetName() +
-		wxString::Format("_CH_B"));
+	vd_b->setValue(gstSpcFromFile, true);
+	vd_b->setName(std::string(vd->getName()) + "_CH_B");
 
 	//get new data
 	//red volume
@@ -1340,7 +1352,8 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	unsigned long long index;
 	unsigned int value_label;
 	fluo::Color color;
-	double max_value = vd->GetMaxValue();
+	double max_value;
+	vd->getValue(gstMaxInt, max_value);
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
@@ -1361,53 +1374,9 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 	fluo::Color red(1.0, 0.0, 0.0);
 	fluo::Color green(0.0, 1.0, 0.0);
 	fluo::Color blue(0.0, 0.0, 1.0);
-	vd_r->SetColor(red);
-	vd_g->SetColor(green);
-	vd_b->SetColor(blue);
-
-	bool bval = vd->GetEnableAlpha();
-	vd_r->SetEnableAlpha(bval);
-	vd_g->SetEnableAlpha(bval);
-	vd_b->SetEnableAlpha(bval);
-	bval = vd->GetShading();
-	vd_r->SetShading(bval);
-	vd_g->SetShading(bval);
-	vd_b->SetShading(bval);
-	vd_r->SetShadow(false);
-	vd_g->SetShadow(false);
-	vd_b->SetShadow(false);
-	//other settings
-	double dval = vd->Get3DGamma();
-	vd_r->Set3DGamma(dval);
-	vd_g->Set3DGamma(dval);
-	vd_b->Set3DGamma(dval);
-	dval = vd->GetBoundary();
-	vd_r->SetBoundary(dval);
-	vd_g->SetBoundary(dval);
-	vd_b->SetBoundary(dval);
-	dval = vd->GetOffset();
-	vd_r->SetOffset(dval);
-	vd_g->SetOffset(dval);
-	vd_b->SetOffset(dval);
-	dval = vd->GetLeftThresh();
-	vd_r->SetLeftThresh(dval);
-	vd_g->SetLeftThresh(dval);
-	vd_b->SetLeftThresh(dval);
-	dval = vd->GetRightThresh();
-	vd_r->SetRightThresh(dval);
-	vd_g->SetRightThresh(dval);
-	vd_b->SetRightThresh(dval);
-	dval = vd->GetAlpha();
-	vd_r->SetAlpha(dval);
-	vd_g->SetAlpha(dval);
-	vd_b->SetAlpha(dval);
-	dval = vd->GetSampleRate();
-	vd_r->SetSampleRate(dval);
-	vd_g->SetSampleRate(dval);
-	vd_b->SetSampleRate(dval);
-	vd_r->SetMaterial(amb, diff, spec, shine);
-	vd_g->SetMaterial(amb, diff, spec, shine);
-	vd_b->SetMaterial(amb, diff, spec, shine);
+	vd_r->setValue(gstColor, red);
+	vd_g->setValue(gstColor, green);
+	vd_b->setValue(gstColor, blue);
 
 	channs.push_back(vd_r);
 	channs.push_back(vd_g);
@@ -1418,7 +1387,7 @@ bool ComponentAnalyzer::GenRgbChannels(std::list<VolumeData*> &channs, int color
 
 bool ComponentAnalyzer::GetColor(
 	unsigned int id, int brick_id,
-	VolumeData* vd, int color_type,
+	fluo::VolumeData* vd, int color_type,
 	fluo::Color &color)
 {
 	if (!id)
@@ -1430,7 +1399,10 @@ bool ComponentAnalyzer::GetColor(
 	{
 	case 1:
 	default:
-		color = fluo::Color(id, vd->GetShuffle());
+		{
+			int shuffle = vd->GetShuffle();
+			color = fluo::Color(id, shuffle);
+		}
 		return true;
 	case 2:
 		if (vd)
@@ -1474,7 +1446,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	fluo::VolumeData* vd = m_compgroup->vd;
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Stencil_h
 
 #ifdef _DEBUG
-#include <Debug.h>
+#include <Debug.hpp>
 #endif
 #include <ExGauss.h>
 #include <Types/BBox.h>

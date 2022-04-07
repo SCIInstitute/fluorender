@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,109 +29,107 @@ DEALINGS IN THE SOFTWARE.
 #define _OIB_READER_H_
 
 #include <stdio.h>
-#include "../compatibility.h"
+#include <compatibility.h>
 #include <vector>
 #include "pole/pole.h"
 #include "base_reader.h"
 
-using namespace std;
-
 class OIBReader : public BaseReader
 {
-   public:
-      OIBReader();
-      ~OIBReader();
+public:
+	OIBReader();
+	~OIBReader();
 
-	  int GetType() { return READER_OIB_TYPE; }
+	int GetType() { return READER_OIB_TYPE; }
 
-	  void SetFile(string &file);
-      void SetFile(wstring &file);
-      void SetSliceSeq(bool ss);
-      bool GetSliceSeq();
-	  void SetChannSeq(bool cs);
-	  bool GetChannSeq();
-	  void SetDigitOrder(int order);
-	  int GetDigitOrder();
-	  void SetTimeId(wstring &id);
-      wstring GetTimeId();
-      int Preprocess();
-      void SetBatch(bool batch);
-	  int LoadBatch(int index);
-      Nrrd* Convert(int t, int c, bool get_max);
-	  wstring GetCurDataName(int t, int c);
-	  wstring GetCurMaskName(int t, int c);
-	  wstring GetCurLabelName(int t, int c);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
+	void SetSliceSeq(bool ss);
+	bool GetSliceSeq();
+	void SetChannSeq(bool cs);
+	bool GetChannSeq();
+	void SetDigitOrder(int order);
+	int GetDigitOrder();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
+	int Preprocess();
+	void SetBatch(bool batch);
+	int LoadBatch(int index);
+	Nrrd* Convert(int t, int c, bool get_max);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-      wstring GetPathName() {return m_path_name;}
-      wstring GetDataName() {return m_data_name;}
-      int GetTimeNum() {return m_time_num;}
-      int GetCurTime() {return m_cur_time;}
-      int GetChanNum() {return m_chan_num;}
-      double GetExcitationWavelength(int chan);
-      int GetSliceNum() {return m_slice_num;}
-      int GetXSize() {return m_x_size;}
-      int GetYSize() {return m_y_size;}
-      bool IsSpcInfoValid() {return m_valid_spc;}
-      double GetXSpc() {return m_xspc;}
-      double GetYSpc() {return m_yspc;}
-      double GetZSpc() {return m_zspc;}
-      double GetMaxValue() {return m_max_value;}
-      double GetScalarScale() {return m_scalar_scale;}
-      bool GetBatch() {return m_batch;}
-      int GetBatchNum() {return (int)m_batch_list.size();}
-      int GetCurBatch() {return m_cur_batch;}
+	std::wstring GetPathName() { return m_path_name; }
+	std::wstring GetDataName() { return m_data_name; }
+	int GetTimeNum() { return m_time_num; }
+	int GetCurTime() { return m_cur_time; }
+	int GetChanNum() { return m_chan_num; }
+	double GetExcitationWavelength(int chan);
+	int GetSliceNum() { return m_slice_num; }
+	int GetXSize() { return m_x_size; }
+	int GetYSize() { return m_y_size; }
+	bool IsSpcInfoValid() { return m_valid_spc; }
+	double GetXSpc() { return m_xspc; }
+	double GetYSpc() { return m_yspc; }
+	double GetZSpc() { return m_zspc; }
+	double GetMaxValue() { return m_max_value; }
+	double GetScalarScale() { return m_scalar_scale; }
+	bool GetBatch() { return m_batch; }
+	int GetBatchNum() { return (int)m_batch_list.size(); }
+	int GetCurBatch() { return m_cur_batch; }
 
-   private:
-      wstring m_data_name;
-      wstring m_oif_name;
-      wstring m_substg_name;
-	wstring light_type;
+private:
+	std::wstring m_data_name;
+	std::wstring m_oif_name;
+	std::wstring m_substg_name;
+	std::wstring light_type;
 
-      int m_type;  //0-time data in a single file; 1-time data in a file sequence
-      struct SliceInfo
-      {
-         wstring stream_name;
-         wstring file_name;
-      };
-      typedef vector<SliceInfo> ChannelInfo;    //slices form a channel
-      typedef vector<ChannelInfo> DatasetInfo;  //channels form a dataset
-      struct TimeDataInfo              //
-      {
-         int filenumber;    //if type is 1, file number for current time data
-         wstring filename;  //if type is 1, file name for current time data
-         wstring substgname;  //substorage name
-         DatasetInfo dataset;  //a list of the channels
-      };
-      vector<TimeDataInfo> m_oib_info;      // time data form the complete oib dataset
-      int m_oib_t;  //current time point in oib info for reading
+	int m_type;  //0-time data in a single file; 1-time data in a file sequence
+	struct SliceInfo
+	{
+		std::wstring stream_name;
+		std::wstring file_name;
+	};
+	typedef std::vector<SliceInfo> ChannelInfo;    //slices form a channel
+	typedef std::vector<ChannelInfo> DatasetInfo;  //channels form a dataset
+	struct TimeDataInfo              //
+	{
+		int filenumber;    //if type is 1, file number for current time data
+		std::wstring filename;  //if type is 1, file name for current time data
+		std::wstring substgname;  //substorage name
+		DatasetInfo dataset;  //a list of the channels
+	};
+	std::vector<TimeDataInfo> m_oib_info;      // time data form the complete oib dataset
+	int m_oib_t;  //current time point in oib info for reading
 
-      int m_time_num;
-      int m_cur_time;
-      int m_chan_num;
-      struct WavelengthInfo
-      {
-         int chan_num;
-         double wavelength;
-      };
-      vector<WavelengthInfo> m_excitation_wavelength_list;
-      int m_slice_num;
-      int m_x_size;
-      int m_y_size;
-      bool m_valid_spc;
-      double m_xspc;
-      double m_yspc;
-      double m_zspc;
-      double m_max_value;
-      double m_scalar_scale;
+	int m_time_num;
+	int m_cur_time;
+	int m_chan_num;
+	struct WavelengthInfo
+	{
+		int chan_num;
+		double wavelength;
+	};
+	std::vector<WavelengthInfo> m_excitation_wavelength_list;
+	int m_slice_num;
+	int m_x_size;
+	int m_y_size;
+	bool m_valid_spc;
+	double m_xspc;
+	double m_yspc;
+	double m_zspc;
+	double m_max_value;
+	double m_scalar_scale;
 
-      //time sequence id
-      wstring m_time_id;
+	//time sequence id
+	std::wstring m_time_id;
 
-   private:
-      static bool oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
-      void ReadSingleOib();
-      void ReadSequenceOib();
-	void ReadStream(POLE::Storage &pStg, wstring &stream_name);
+private:
+	static bool oib_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
+	void ReadSingleOib();
+	void ReadSequenceOib();
+	void ReadStream(POLE::Storage &pStg, std::wstring &stream_name);
 	void ReadOibInfo(unsigned char* pbyData, size_t size);
 	void ReadOif(unsigned char* pbyData, size_t size);
 	void ReadTiff(unsigned char* pbyData, unsigned short *val, int z);

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -48,7 +48,6 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <locale>
 #include <vector>
-#include <chrono>
 #include <sys/types.h>
 #include <ctype.h>
 #include <tiffio.h>
@@ -60,10 +59,51 @@ DEALINGS IN THE SOFTWARE.
 #define FSEEK64     _fseeki64
 #define SSCANF    sscanf
 
+inline char GETSLASHA() { return '\\'; }
+inline char GETSLASHALTA() { return '/'; }
 inline wchar_t GETSLASH() { return L'\\'; }
 inline wchar_t GETSLASHALT() { return L'/'; }
 
-inline std::wstring GET_SUFFIX(std::wstring &pathname)
+inline std::string GET_SUFFIX(const std::string &pathname)
+{
+	int64_t pos = pathname.find_last_of('.');
+	if (pos != std::string::npos)
+		return pathname.substr(pos);
+	else
+		return "";
+}
+
+inline std::string GET_NAME(const std::string &pathname)
+{
+	int64_t pos1 = pathname.find_last_of(GETSLASHA());
+	int64_t pos2 = pathname.find_last_of(GETSLASHALTA());
+	if (pos1 != std::string::npos &&
+		pos2 != std::string::npos)
+		return pathname.substr((pos1 > pos2 ? pos1 : pos2) + 1);
+	else if (pos1 != std::string::npos)
+		return pathname.substr(pos1 + 1);
+	else if (pos2 != std::string::npos)
+		return pathname.substr(pos2 + 1);
+	else
+		return pathname;
+}
+
+inline std::string GET_PATH(const std::string &pathname)
+{
+	int64_t pos1 = pathname.find_last_of(GETSLASHA());
+	int64_t pos2 = pathname.find_last_of(GETSLASHALTA());
+	if (pos1 != std::string::npos &&
+		pos2 != std::string::npos)
+		return pathname.substr(0, (pos1 > pos2 ? pos1 : pos2) + 1);
+	else if (pos1 != std::string::npos)
+		return pathname.substr(0, pos1 + 1);
+	else if (pos2 != std::string::npos)
+		return pathname.substr(0, pos2 + 1);
+	else
+		return pathname;
+}
+
+inline std::wstring GET_SUFFIX(const std::wstring &pathname)
 {
 	int64_t pos = pathname.find_last_of(L'.');
 	if (pos != std::wstring::npos)
@@ -72,7 +112,7 @@ inline std::wstring GET_SUFFIX(std::wstring &pathname)
 		return L"";
 }
 
-inline std::wstring GET_NAME(std::wstring &pathname)
+inline std::wstring GET_NAME(const std::wstring &pathname)
 {
 	int64_t pos1 = pathname.find_last_of(GETSLASH());
 	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
@@ -87,7 +127,7 @@ inline std::wstring GET_NAME(std::wstring &pathname)
 		return pathname;
 }
 
-inline std::wstring GET_PATH(std::wstring &pathname)
+inline std::wstring GET_PATH(const std::wstring &pathname)
 {
 	int64_t pos1 = pathname.find_last_of(GETSLASH());
 	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
@@ -102,7 +142,7 @@ inline std::wstring GET_PATH(std::wstring &pathname)
 		return pathname;
 }
 
-inline bool SEP_PATH_NAME(std::wstring &pathname, std::wstring &path, std::wstring &name)
+inline bool SEP_PATH_NAME(const std::wstring &pathname, std::wstring &path, std::wstring &name)
 {
 	int64_t pos1 = pathname.find_last_of(GETSLASH());
 	int64_t pos2 = pathname.find_last_of(GETSLASHALT());
@@ -212,18 +252,6 @@ inline int STOI(wxChar * s) { return (s ? _wtoi(s) : 0); }
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 inline double STOD(wxChar * s) { return (s ? _wtof(s) : 0.0); }
 inline double STOD(const wxChar * s) { return (s ? _wtof(s) : 0.0); }
-
-inline unsigned long long TIME()
-{
-	using namespace std::chrono;
-	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
-}
-
-inline unsigned long long GET_TICK_COUNT()
-{
-	using namespace std::chrono;
-	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
-}
 
 inline std::string STR_DIR_SEP(const std::string pathname)
 {
@@ -335,6 +363,17 @@ inline void FIND_FILES(std::wstring m_path_name,
 		}
 	}
 	FindClose(hFind);
+}
+
+inline bool FILE_EXISTS(const std::string& name)
+{
+	if (FILE *file = fopen(name.c_str(), "r"))
+	{
+		fclose(file);
+		return true;
+	}
+	else
+		return false;
 }
 
 inline void SaveConfig(wxFileConfig &file, wxString str)
@@ -500,8 +539,6 @@ inline int STOI(const char * s) { return (s ? atoi(s) : 0); }
 
 inline double STOD(const char * s) { return (s ? atof(s) : 0.0); }
 
-inline time_t TIME() { return time(NULL); }
-
 typedef union _LARGE_INTEGER {
 	struct {
 		unsigned int LowPart;
@@ -659,10 +696,10 @@ inline int MkDirW(std::wstring dirname)
 	return mkdir(ws2s(dirname).c_str(), 0777);
 }
 
-inline uint32_t GET_TICK_COUNT() {
-	struct timeval ts;
-	gettimeofday(&ts, NULL);
-	return ts.tv_sec * 1000 + ts.tv_usec / 1000;
+inline bool FILE_EXISTS(const std::string& name)
+{
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
 }
 
 inline void SaveConfig(wxFileConfig &file, wxString str)

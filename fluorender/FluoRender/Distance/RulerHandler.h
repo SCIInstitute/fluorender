@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2019 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,15 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerHandler_H_
 #define _RulerHandler_H_
 
-#include <Distance/Ruler.h>
+#include <Ruler.h>
 #include <Selection/VolumePoint.h>
 #include <string>
 #include <algorithm>
 
-class VRenderGLView;
 class wxFileConfig;
-class VolumeData;
-
+namespace fluo
+{
+	class Renderview;
+	class VolumeData;
+}
 namespace flrd
 {
 	class ComponentAnalyzer;
@@ -67,13 +69,13 @@ namespace flrd
 			m_group = group;
 		}
 
-		void SetView(VRenderGLView* view)
+		void SetView(fluo::Renderview* view)
 		{
 			m_view = view;
 			m_vp.SetView(view);
 		}
 
-		void SetVolumeData(VolumeData* vd)
+		void SetVolumeData(fluo::VolumeData* vd)
 		{
 			m_vd = vd;
 			m_vp.SetVolumeData(vd);
@@ -161,8 +163,8 @@ namespace flrd
 
 	private:
 		unsigned int m_group;
-		VRenderGLView *m_view;
-		VolumeData * m_vd;
+		fluo::Renderview *m_view;
+		fluo::VolumeData * m_vd;
 		ComponentAnalyzer* m_ca;
 		VolumePoint m_vp;
 		Ruler *m_ruler;

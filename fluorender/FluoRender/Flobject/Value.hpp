@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -252,7 +252,7 @@ namespace fluo
 		inline bool operator == (const ValueSet& vs) const;
 		inline bool operator != (const ValueSet& vs) const;
 
-		void clear();
+		void clear(int ref_count = 0);//remove values with ref count greater than ref_count
 
 		Value* findValue(const std::string &name);
 		bool containsValue(Value* value);
@@ -323,7 +323,7 @@ namespace fluo
 		}
 
 		//toggle value for bool, result in value
-		bool toggleValue(const std::string &name, bool &value, Event& event);
+		bool flipValue(const std::string &name, bool &value, Event& event);
 
 		/** All the get value functions */
 		bool getValue(ValueTuple&);
@@ -337,6 +337,7 @@ namespace fluo
 			}
 			else
 			{
+				*value = nullptr;
 				return false;
 			}
 
@@ -780,7 +781,7 @@ namespace fluo
 			for (auto it = vs->getValues().begin();
 				it != vs->getValues().end(); ++it)
 			{
-				Event notifyNone(Event::NOTIFY_NONE); // this needed to be created before hand
+				Event notifyNone(Event::NOTIFY_NONE); // this needs to be created before hand
 				ValueTuple vt;
 				std::get<0>(vt) = it->second->getName();
 				vs->getValue(vt);
@@ -798,7 +799,7 @@ namespace fluo
 			for (auto it = vs->getValues().begin();
 				it != vs->getValues().end(); ++it)
 			{
-				Event notifyAll; // this needed to be created before hand
+				Event notifyAll(Event::NOTIFY_ALL); // this needs to be created before hand
 				ValueTuple vt;
 				std::get<0>(vt) = it->second->getName();
 				vs->getValue(vt);

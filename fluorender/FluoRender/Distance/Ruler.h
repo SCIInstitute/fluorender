@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,13 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Ruler_h
 #define FL_Ruler_h
 
-#include <memory>
-#include <vector>
-#include <set>
 #include <Types/Point.h>
 #include <Types/Color.h>
 #include <Types/Transform.h>
-#include <wx/string.h>
+#include <memory>
+#include <vector>
+#include <set>
+#include <string>
 
 namespace flrd
 {
@@ -91,7 +91,7 @@ namespace flrd
 			m_id(id)
 		{}
 
-		void SetPoint(fluo::Point& p)
+		void SetPoint(const fluo::Point& p)
 		{
 			m_p = p;
 		}
@@ -173,11 +173,15 @@ namespace flrd
 		}
 
 		//name
-		wxString GetName()
+		std::string GetName()
 		{
 			return m_name;
 		}
-		void SetName(wxString name)
+		void SetName(std::string &name)
+		{
+			m_name = name;
+		}
+		void SetName(const std::string &name)
 		{
 			m_name = name;
 		}
@@ -262,40 +266,48 @@ namespace flrd
 		}
 
 		//extra info
-		void AddInfoNames(wxString &str)
+		void AddInfoNames(const std::string &str)
 		{
 			m_info_names += str;
 		}
-		void SetInfoNames(wxString &str)
+		void SetInfoNames(std::string &str)
 		{
 			m_info_names = str;
 		}
-		wxString &GetInfoNames()
+		void SetInfoNames(const std::string &str)
+		{
+			m_info_names = str;
+		}
+		std::string GetInfoNames()
 		{
 			return m_info_names;
 		}
-		void AddInfoValues(wxString &str)
+		void AddInfoValues(const std::string &str)
 		{
 			m_info_values += str;
 		}
-		void SetInfoValues(wxString &str)
+		void SetInfoValues(std::string &str)
 		{
 			m_info_values = str;
 		}
-		wxString &GetInfoValues()
+		void SetInfoValues(const std::string &str)
+		{
+			m_info_values = str;
+		}
+		std::string GetInfoValues()
 		{
 			return m_info_values;
 		}
-		wxString GetDelInfoValues(wxString del = ",");
-		wxString GetPosValues();
-		wxString GetPosNames();
+		std::string GetDelInfoValues(const std::string &del = ",");
+		std::string GetPosValues();
+		std::string GetPosNames();
 
 		//profile
-		void SetInfoProfile(wxString &str)
+		void SetInfoProfile(const std::string &str)
 		{
 			m_info_profile = str;
 		}
-		wxString &GetInfoProfile()
+		std::string GetInfoProfile()
 		{
 			return m_info_profile;
 		}
@@ -303,10 +315,10 @@ namespace flrd
 		{
 			return &m_profile;
 		}
-		void SaveProfile(wxString &filename);
+		void SaveProfile(const std::string &filename);
 
 		//color
-		void SetColor(fluo::Color& color)
+		void SetColor(const fluo::Color& color)
 		{
 			m_color = color; m_use_color = true;
 		}
@@ -314,7 +326,7 @@ namespace flrd
 		{
 			return m_use_color;
 		}
-		fluo::Color &GetColor()
+		fluo::Color GetColor()
 		{
 			return m_color;
 		}
@@ -334,7 +346,7 @@ namespace flrd
 
 	private:
 		static int m_num;
-		wxString m_name;
+		std::string m_name;
 		unsigned int m_id;
 		unsigned int m_group;//group number
 		int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
@@ -344,7 +356,7 @@ namespace flrd
 		bool m_disp;
 		fluo::Transform *m_tform;
 		//a profile
-		wxString m_info_profile;
+		std::string m_info_profile;
 		std::vector<ProfileBin> m_profile;
 		//color
 		bool m_use_color;
@@ -355,8 +367,8 @@ namespace flrd
 		int m_time;
 
 		//extra info
-		wxString m_info_names;
-		wxString m_info_values;
+		std::string m_info_names;
+		std::string m_info_values;
 
 		//brush size if brush is used along with the ruler
 		double m_brush_size;

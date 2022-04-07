@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Object.hpp>
+#include <ObjectFactory.hpp>
+#include <Names.hpp>
 
 using namespace fluo;
 
@@ -34,6 +36,7 @@ Object::Object() :
 	_id(0)
 {
 	_value_set = new ValueSet();
+	_value_bank = new ValueSet();
 	setDefaultValueChangingFunction(
 		std::bind(&Object::handleValueChanging,
 			this, std::placeholders::_1));
@@ -48,6 +51,7 @@ Object::Object(const Object& obj, const CopyOp& copyop, bool copy_values) :
 	m_name(obj.m_name)
 {
 	_value_set = new ValueSet();
+	_value_bank = new ValueSet();
 	if (copy_values)
 		copyValues(obj, copyop);
 	setDefaultValueChangingFunction(
@@ -100,8 +104,26 @@ void Object::handleEvent(Event& event)
 
 void Object::processNotification(Event& event)
 {
-	//handle event
-	handleEvent(event);
+	//determine if self or others
+	bool flag = false;
+	Event::NotifyFlags notify = event.getNotifyFlags();
+	Object* obj = dynamic_cast<Object*>(event.origin);
+	if (notify & Event::NOTIFY_SELF)
+	{
+		if (obj == this)
+			flag = true;
+	}
+	if (notify & Event::NOTIFY_OTHERS)
+	{
+		if (obj != this)
+			flag = true;
+	}
+	if (flag)
+	{
+		//handle event
+		handleEvent(event);
+	}
+
 	//notify observers
 	if (event.type == Event::EVENT_VALUE_CHANGING)
 		return;
@@ -109,7 +131,7 @@ void Object::processNotification(Event& event)
 }
 
 //toggle value for bool
-bool Object::toggleValue(const std::string &name, bool &value, Event& event)
+bool Object::flupValue(const std::string &name, bool &value, Event& event)
 {
 	bool result = false;
 	if (_value_set)
@@ -119,7 +141,7 @@ bool Object::toggleValue(const std::string &name, bool &value, Event& event)
 				this, getValuePointer(name), true);
 		else
 			event.push(this);
-		result = _value_set->toggleValue(name, value, event);
+		result = _value_set->flipValue(name, value, event);
 		event.pop();
 	}
 	return result;
@@ -361,4 +383,95 @@ bool Object::propValues(const std::string &name1, const ValueCollection &names)
 			result |= value2->sync(event);
 	}
 	return result;
+}
+
+//save and restore
+bool Object::saveValue(const std::string &name)
+{
+	bool result = false;
+	if (_value_set && _value_bank)
+	{
+		Value* value = getValuePointer(name);
+		if (!value) return result;
+		_value_bank->removeValue(name);
+		value = value->clone();
+		result = _value_bank->addValue(value);
+	}
+	return result;
+}
+
+bool Object::drawValue(const std::string &name)
+{
+	bool result = false;
+	if (_value_set && _value_bank)
+	{
+		Value* save = _value_bank->findValue(name);
+		if (!save) return result;
+		Value* value = getValuePointer(name);
+		if (value)
+		{
+			Event event;
+			event.init(Event::EVENT_SYNC_VALUE,
+				save, save, true);
+			value->sync(event);
+			result = true;
+		}
+	}
+	return result;
+}
+
+bool Object::saveValues(const ValueCollection &names)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= saveValue(*it);
+	}
+	return result;
+}
+
+bool Object::drawValues(const ValueCollection &names)
+{
+	bool result = false;
+	for (auto it = names.begin();
+		it != names.end(); ++it)
+	{
+		result |= drawValue(*it);
+	}
+	return result;
+}
+
+//reset values from factory
+bool Object::resetValue(const std::string &name)
+{
+	Referenced* ref;
+	getRvalu(gstFactory, &ref);
+	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
+	if (!fac) return false;
+	Object* dobj = fac->getDefault();
+	if (!dobj) return false;
+	return dobj->propValue(name, this);
+}
+
+bool Object::resetValues(const ValueCollection &names)
+{
+	Referenced* ref;
+	getRvalu(gstFactory, &ref);
+	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
+	if (!fac) return false;
+	Object* dobj = fac->getDefault();
+	if (!dobj) return false;
+	return dobj->propValues(names, this);
+}
+
+bool Object::resetAllValues()
+{
+	Referenced* ref;
+	getRvalu(gstFactory, &ref);
+	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
+	if (!fac) return false;
+	Object* dobj = fac->getDefault();
+	if (!dobj) return false;
+	return dobj->propAllValues(this);
 }

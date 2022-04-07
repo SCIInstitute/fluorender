@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2021 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #ifdef _DEBUG
-#include <Debug.h>
+#include <Debug.hpp>
 #endif
 #include <ExGauss.h>
 #include <exmax1.h>
@@ -35,14 +35,14 @@ using namespace flrd;
 
 void ExGauss::Execute()
 {
-#ifdef _DEBUG
-	DBMIINT32 mi;
-	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
-	mi.data = front;
-	DBMIFLOAT32 mi2;
-	mi2.nx = nx; mi2.ny = ny; mi2.nc = 1; mi2.nt = mi2.nx * mi2.nc * 4;
-	mi2.data = data;
-#endif
+//#ifdef _DEBUG
+//	DBMIINT32 mi;
+//	mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = mi.nx * mi.nc * 4;
+//	mi.data = front;
+//	DBMIFLOAT32 mi2;
+//	mi2.nx = nx; mi2.ny = ny; mi2.nc = 1; mi2.nt = mi2.nx * mi2.nc * 4;
+//	mi2.data = data;
+//#endif
 	FindExetr();
 	if (m_max_iter > 0)
 	{

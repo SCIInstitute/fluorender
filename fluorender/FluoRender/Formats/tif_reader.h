@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -40,8 +40,6 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <set>
 
-using namespace std;
-
 class TIFReader : public BaseReader
 {
 public:
@@ -50,16 +48,16 @@ public:
 
 	int GetType() { return READER_TIF_TYPE; }
 
-	void SetFile(string &file);
-	void SetFile(wstring &file);
+	void SetFile(const std::string &file);
+	void SetFile(const std::wstring &file);
 	void SetSliceSeq(bool ss);
 	bool GetSliceSeq();
 	void SetChannSeq(bool cs);
 	bool GetChannSeq();
 	void SetDigitOrder(int order);
 	int GetDigitOrder();
-	void SetTimeId(wstring &id);
-	wstring GetTimeId();
+	void SetTimeId(const std::wstring &id);
+	std::wstring GetTimeId();
 	int Preprocess();
 	/**
 	 * Finds the tag value given by \@tag of a tiff on the current page.
@@ -81,7 +79,7 @@ public:
 	uint64_t GetTiffNextPageOffset();
 	uint64_t TurnToPage(uint64_t page);
 	//get description
-	inline bool GetImageDescription(string &desc);
+	inline bool GetImageDescription(std::string &desc);
 	/**
 	* Gets the specified offset for the strip offset or count.
 	* @param tag The tag for either the offset or the count.
@@ -160,12 +158,12 @@ public:
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
 	Nrrd* Convert(int t, int c, bool get_max);
-	wstring GetCurDataName(int t, int c);
-	wstring GetCurMaskName(int t, int c);
-	wstring GetCurLabelName(int t, int c);
+	std::wstring GetCurDataName(int t, int c);
+	std::wstring GetCurMaskName(int t, int c);
+	std::wstring GetCurLabelName(int t, int c);
 
-	wstring GetPathName() {return m_path_name;}
-	wstring GetDataName() {return m_data_name;}
+	std::wstring GetPathName() {return m_path_name;}
+	std::wstring GetDataName() {return m_data_name;}
 	int GetCurTime() {return m_cur_time;}
 	int GetTimeNum() {return m_time_num;}
 	int GetChanNum() {return m_chan_num;}
@@ -184,7 +182,7 @@ public:
 	int GetCurBatch() {return m_cur_batch;}
 
 private:
-	wstring m_data_name;
+	std::wstring m_data_name;
 	bool isBig_;
 	bool isHyperstack_;		//true if it is a hyperstack tiff saved by ImageJ
 	bool isHsTimeSeq_;		//true if it is a time sequence of hyperstack files
@@ -192,7 +190,7 @@ private:
 	struct SliceInfo
 	{
 		int slicenumber;	//slice number for sorting
-		wstring slice;		//slice file name
+		std::wstring slice;		//slice file name
 		int pagenumber;		//used to find the slice if it's in a hyperstack
 							//for a multichannel data set, this is the number of the first channel
 	};
@@ -200,9 +198,9 @@ private:
 	{
 		int type;	//0-single file;1-sequence
 		int filenumber;	//filenumber for sorting
-		vector<SliceInfo> slices;
+		std::vector<SliceInfo> slices;
 	};
-	vector<TimeDataInfo> m_4d_seq;
+	std::vector<TimeDataInfo> m_4d_seq;
 
 	struct NamePattern
 	{
@@ -211,11 +209,11 @@ private:
 		size_t len;//0:indefinite
 		int type;//0:string; 1:digits
 		int use;//0:z sections; 1:channels; 2:time
-		wstring str;//content
+		std::wstring str;//content
 	};
-	deque<NamePattern> m_name_patterns;
-	set<int> m_slice_count;
-	set<int> m_chann_count;//counting total numbers in preprocessing
+	std::deque<NamePattern> m_name_patterns;
+	std::set<int> m_slice_count;
+	std::set<int> m_chann_count;//counting total numbers in preprocessing
 
 	bool m_slice_seq;
 	bool m_chann_seq;
@@ -264,16 +262,16 @@ private:
 		unsigned short us_planar_config;
 		//image desc
 		bool b_image_desc;
-		string s_image_desc;
+		std::string s_image_desc;
 		//strip number
 		bool b_strip_num;
 		unsigned long ul_strip_num;
 		//strip offsets
 		bool b_strip_offsets;
-		vector<unsigned long long> ull_strip_offsets;
+		std::vector<unsigned long long> ull_strip_offsets;
 		//strip byte counts
 		bool b_strip_byte_counts;
-		vector<unsigned long long> ull_strip_byte_counts;
+		std::vector<unsigned long long> ull_strip_byte_counts;
 		//rows per strip
 		bool b_rows_per_strip;
 		unsigned long ul_rows_per_strip;
@@ -299,10 +297,10 @@ private:
 		unsigned long ul_tile_num;
 		//tile offsets
 		bool b_tile_offsets;
-		vector<unsigned long long> ull_tile_offsets;
+		std::vector<unsigned long long> ull_tile_offsets;
 		//tile byte counts
 		bool b_tile_byte_counts;
-		vector<unsigned long long> ull_tile_byte_counts;
+		std::vector<unsigned long long> ull_tile_byte_counts;
 		//next page offset
 		bool b_next_page_offset;
 		unsigned long long ull_next_page_offset;
@@ -310,7 +308,7 @@ private:
 	PageInfo m_page_info;
 
 	//time sequence id
-	wstring m_time_id;
+	std::wstring m_time_id;
 	/** The input stream for reading the tiff */
 	std::ifstream tiff_stream;
 	/** This keeps track of what page we are on in the tiff */
@@ -389,13 +387,13 @@ private:
 	static const uint8_t kBigTiff = 43;
 
 private:
-	bool IsNewBatchFile(wstring name);
-	bool IsBatchFileIdentical(wstring name1, wstring name2);
+	bool IsNewBatchFile(std::wstring name);
+	bool IsBatchFileIdentical(std::wstring name1, std::wstring name2);
 
 	static bool tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
 	//read tiff
-	Nrrd* ReadTiff(vector<SliceInfo> &filelist, int c, bool get_max);
+	Nrrd* ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max);
 
 	//name pattern
 	void AnalyzeNamePattern(std::wstring &path_name);
@@ -444,7 +442,7 @@ void TIFReader::InvalidatePageInfo()
 }
 
 //get description
-bool TIFReader::GetImageDescription(string &desc)
+bool TIFReader::GetImageDescription(std::string &desc)
 {
 	if (m_page_info.b_valid && m_page_info.b_image_desc)
 	{

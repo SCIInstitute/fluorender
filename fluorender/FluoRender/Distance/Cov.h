@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2019 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,21 +28,25 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Cov_h
 #define FL_Cov_h
 
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <Types/Point.h>
 #include <vector>
 
 using namespace std;
 
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class Cov
 	{
 	public:
-		Cov(VolumeData* vd);
+		Cov(fluo::VolumeData* vd);
 		~Cov();
 
 		void SetUseMask(bool use_mask)
@@ -56,48 +60,12 @@ namespace flrd
 
 		bool Compute(int type);//type: 0-cov; 1-center only
 
-		std::vector<double> GetCov()
-		{
-			if (m_vd)
-			{
-				//set to correct spacings
-				double spcx, spcy, spcz;
-				m_vd->GetSpacings(spcx, spcy, spcz);
-				m_cov[0] *= spcx * spcx;
-				m_cov[1] *= spcx * spcy;
-				m_cov[2] *= spcx * spcz;
-				m_cov[3] *= spcy * spcy;
-				m_cov[4] *= spcy * spcz;
-				m_cov[5] *= spcz * spcz;
-			}
+		std::vector<double> GetCov();
 
-			std::vector<double> cov;
-			for (int i = 0; i < 6; ++i)
-				cov.push_back(m_cov[i]);
-			return cov;
-		}
-
-		fluo::Point GetCenter()
-		{
-			if (m_vd)
-			{
-				//set to correct spacings
-				double spcx, spcy, spcz;
-				m_vd->GetSpacings(spcx, spcy, spcz);
-				m_center[0] *= spcx;
-				m_center[1] *= spcy;
-				m_center[2] *= spcz;
-			}
-
-			fluo::Point center;
-			center.x(m_center[0]);
-			center.y(m_center[1]);
-			center.z(m_center[2]);
-			return center;
-		}
+		fluo::Point GetCenter();
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
 		bool m_use_int;//use intensity values as weights
 		//result

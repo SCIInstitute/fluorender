@@ -42,7 +42,7 @@ char JVMInitializer::getPathSeparator(){
 #endif
 }
 
-bool JVMInitializer::create_JVM(std::vector<std::string> args){
+bool JVMInitializer::create_JVM(std::vector<std::string> args) {
 	wxString jvm_path;
 	wxString ij_path;
 	wxString bioformats_path;
@@ -54,17 +54,17 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 		jvm_path = args[0]; //inp_settingDlg->getJVMPath();
 		ij_path = args[1]; //inp_settingDlg->getIJPath();
 		bioformats_path = args[2]; //inp_settingDlg->getBioformatsPath();
-        std::string name = ij_path;
-        // For Mac: ij_path is going to be ij.app or fiji.app.
-        
+		std::string name = ij_path;
+		// For Mac: ij_path is going to be ij.app or fiji.app.
+
 #ifdef _WIN32
 #else
-        name = name + GETSLASH() + "Contents" + GETSLASH() + "Java";
+		name = name + GETSLASH() + "Contents" + GETSLASH() + "Java";
 #endif
-		if(FILE *file = fopen((name + GETSLASH() +"ij.jar").c_str(), "r")) {
-            std::cout << "Inside here.";
+		if (FILE *file = fopen((name + GETSLASH() + "ij.jar").c_str(), "r")) {
+			std::cout << "Inside here.";
 			m_with_fiji = false;
-			jvm_ij_path = name + GETSLASH() +"ij.jar";
+			jvm_ij_path = name + GETSLASH() + "ij.jar";
 			jvm_bioformats_path = bioformats_path;
 			fclose(file);
 		}
@@ -75,7 +75,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 				m_with_fiji = false;
 				return false;
 			}
-			else {			
+			else {
 				m_with_fiji = true;
 				wxString filename;
 				bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
@@ -105,7 +105,7 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 						filename.Matches("netcdf-*.jar") || filename.Matches("objenesis-*.jar") ||
 						filename.Matches("perf4j-*.jar") || filename.Matches("slf4j-api-*.jar") ||
 						filename.Matches("snakeyaml-*.jar") || filename.Matches("xercesImpl-*.jar") ||
-						filename.Matches("xml-apis-ext-*.jar") || filename.Matches("xmpcore-*.jar")){
+						filename.Matches("xml-apis-ext-*.jar") || filename.Matches("xmpcore-*.jar")) {
 						if (jvm_bioformats_path == "")
 							jvm_bioformats_path = dir.GetNameWithSep() + filename;
 						else
@@ -122,90 +122,89 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 				{
 					if (filename.Matches("bio-formats_plugins-*.jar"))
 						jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
-					cont = dir.GetNext(&filename); 
+					cont = dir.GetNext(&filename);
 				}
-                //Checking for jvm path.
-                if(wxIsEmpty(jvm_path)){
+				//Checking for jvm path.
+				if (wxIsEmpty(jvm_path)) {
 #ifdef _DARWIN
-                    jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "macosx";
+					jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "macosx";
 #else
 					jvm_path = ij_path + GETSLASH() + "java" + GETSLASH() + "win64";
 #endif
-                    dir.Open(jvm_path);
-                    cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
-                    while (cont)
-                    {
-                        if (filename.Matches("*jdk*")){
-                            jvm_path = dir.GetNameWithSep() + filename + GETSLASH();
-                        }
-                        cont = dir.GetNext(&filename);
-                    }
+					dir.Open(jvm_path);
+					cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
+					while (cont)
+					{
+						if (filename.Matches("*jdk*")) {
+							jvm_path = dir.GetNameWithSep() + filename + GETSLASH();
+						}
+						cont = dir.GetNext(&filename);
+					}
 #ifdef _DARWIN
-                    jvm_path = jvm_path + "jre" + GETSLASH() + "Contents" + GETSLASH() + "HOME" + GETSLASH() + "lib" + GETSLASH() + "server" + GETSLASH() + "libjvm.dylib";
+					jvm_path = jvm_path + "jre" + GETSLASH() + "Contents" + GETSLASH() + "HOME" + GETSLASH() + "lib" + GETSLASH() + "server" + GETSLASH() + "libjvm.dylib";
 #else
 					jvm_path = jvm_path + "jre" + GETSLASH() + "bin" + GETSLASH() + "server" + GETSLASH() + "jvm.dll";
 #endif
-                }
+				}
 			}
 		}
 	}
-    
-    // The jvm lib is inside the fiji.app. So we actually need only the first path.
+
+	// The jvm lib is inside the fiji.app. So we actually need only the first path.
 
 	//Loading JVM library and methods.
 #ifdef _DARWIN
-    if (const char *error = dlerror())
-        std::cout << "Flushed existing error: " << error << std::endl;
+	if (const char *error = dlerror())
+		std::cout << "Flushed existing error: " << error << std::endl;
 #endif
-    
-    //jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
+
+	//jvm_path = "/Users/dev/Downloads/ImageJ/jre/lib/server/libjvm.dylib";
 #ifdef _WIN32
 	m_jvm_dll = LoadLibraryW(jvm_path.ToStdWstring().c_str());
 #else
-    m_jvm_dll = dlopen((const char*)jvm_path.mb_str(wxConvUTF8), RTLD_NOW);
+	m_jvm_dll = dlopen((const char*)jvm_path.mb_str(wxConvUTF8), RTLD_NOW);
 #endif
-    if (m_jvm_dll == nullptr){
-        std::cout << "Error while opening jvm library." << std::endl;
-        return false;
-    }
-    
+	if (m_jvm_dll == nullptr) {
+		std::cout << "Error while opening jvm library." << std::endl;
+		return false;
+	}
+
 #ifdef _DARWIN
-    if (const char *error = dlerror())
-        std::cout << "Err: " << error << std::endl;
+	if (const char *error = dlerror())
+		std::cout << "Err: " << error << std::endl;
 #endif
 
 #ifdef _WIN32
 	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(m_jvm_dll, "JNI_CreateJavaVM");
 #else
-    m_createJVM_Ptr = (CreateJavaVM_t*) dlsym(m_jvm_dll, "JNI_CreateJavaVM");
+	m_createJVM_Ptr = (CreateJavaVM_t*)dlsym(m_jvm_dll, "JNI_CreateJavaVM");
 #endif
-    if (m_createJVM_Ptr == nullptr){
-        std::cout << "Error while getting JNI_CreateJavaVM funciton address." << std::endl;
-        return false;
-    }
+	if (m_createJVM_Ptr == nullptr) {
+		std::cout << "Error while getting JNI_CreateJavaVM funciton address." << std::endl;
+		return false;
+	}
 
 #ifdef _DARWIN
-    if (const char *error = dlerror())
-        std::cout << "Err: " << error << std::endl;
+	if (const char *error = dlerror())
+		std::cout << "Err: " << error << std::endl;
 #endif
 
-    
-    std::cout << "\n";
-    std::cout << jvm_path << "JVM\n";
-    std::cout << jvm_ij_path << "IJ\n";
-    std::cout << jvm_bioformats_path << "BIO\n";
-    std::cout << "\n";
-	using namespace std;
+
+	std::cout << "\n";
+	std::cout << jvm_path << "JVM\n";
+	std::cout << jvm_ij_path << "IJ\n";
+	std::cout << jvm_bioformats_path << "BIO\n";
+	std::cout << "\n";
 	JavaVMOption* options = new JavaVMOption[1];
 	//Geting absolute path to class file.
 	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 	exePath = wxPathOnly(exePath);
-	string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
+	std::string imageJPath = "-Djava.class.path=" + exePath + GETSLASH() + "Java_Code" + GETSLASH() + getPathSeparator();
 	imageJPath.append(jvm_ij_path + getPathSeparator());
 	imageJPath.append(jvm_bioformats_path);
-    
-    std::cout << imageJPath << std::endl;
-    
+
+	std::cout << imageJPath << std::endl;
+
 	options[0].optionString = const_cast<char*>(imageJPath.c_str());
 
 	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
@@ -224,10 +223,10 @@ bool JVMInitializer::create_JVM(std::vector<std::string> args){
 	catch (...) {
 		std::cout << "Excption while creating jvm. Nothing to worry about!";
 	}
-    std::cout << "JVM created successfully." << std::endl;
-    jint ver = m_pEnv->GetVersion();
-    cout << ((ver>>16)&0x0f) << "."<<(ver&0x0f) << endl;
-    std::cout.flush();
+	std::cout << "JVM created successfully." << std::endl;
+	jint ver = m_pEnv->GetVersion();
+	std::cout << ((ver >> 16) & 0x0f) << "." << (ver & 0x0f) << std::endl;
+	std::cout.flush();
 	return true;
 }
 

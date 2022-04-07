@@ -167,9 +167,9 @@ void ObjectTest3()
 	bool bval2;
 	obj1->getValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
-	obj1->toggleValue("boolean", bval2);
+	obj1->flipValue("boolean", bval2);
 	ASSERT_EQ(!bval, bval2);
-	obj1->toggleValue("boolean", bval2);
+	obj1->flipValue("boolean", bval2);
 	ASSERT_EQ(bval, bval2);
 }
 
@@ -206,4 +206,22 @@ void ObjectTest4()
 	ref_ptr<Object> obj2 = obj;
 
 	obj2 = ref_ptr<Object>(new Object());
+}
+
+//test value bank
+void ObjectTest5()
+{
+	ref_ptr<Object> obj1 = new Object();
+	obj1->addValue("value 1", double(0));
+	double dval;
+	obj1->setValue("value 1", 1.0);
+	obj1->getValue("value 1", dval);
+	ASSERT_EQ(dval, 1);
+	obj1->saveValue("value 1");
+	obj1->setValue("value 1", 2.0);
+	obj1->getValue("value 1", dval);
+	ASSERT_EQ(dval, 2);
+	obj1->drawValue("value 1");
+	obj1->getValue("value 1", dval);
+	ASSERT_EQ(dval, 1);
 }

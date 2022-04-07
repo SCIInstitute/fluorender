@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -29,11 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMECALCULATOR_H_
 
 #include <vector>
-#include <wx/string.h>
+#include <string>
 
-class VolumeData;
-class VRenderFrame;
-class VRenderGLView;
+namespace fluo
+{
+	class Root;
+	class Renderview;
+	class VolumeData;
+}
 namespace flrd
 {
 	class VolumeSelector;
@@ -43,33 +46,33 @@ namespace flrd
 		VolumeCalculator();
 		~VolumeCalculator();
 
-		void SetFrame(VRenderFrame* frame) { m_frame = frame; }
-		void SetView(VRenderGLView* view) { m_view = view; }
+		void SetRoot(fluo::Root* root) { m_root = root; }
+		void SetView(fluo::Renderview* view) { m_view = view; }
 		void SetVolumeSelector(VolumeSelector* selector) { m_selector = selector; }
 
-		void SetVolumeA(VolumeData *vd);
-		void SetVolumeB(VolumeData *vd);
+		void SetVolumeA(fluo::VolumeData *vd);
+		void SetVolumeB(fluo::VolumeData *vd);
 
 		void SetThreshold(double thresh)
 		{ m_threshold = thresh; }
 
-		VolumeData* GetVolumeA();
-		VolumeData* GetVolumeB();
-		VolumeData* GetResult(bool pop);
+		fluo::VolumeData* GetVolumeA();
+		fluo::VolumeData* GetVolumeB();
+		fluo::VolumeData* GetResult(bool pop);
 
 		//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
-		void CalculateGroup(int type, wxString prev_group = "", bool add = true);
-		void CalculateSingle(int type, wxString prev_group, bool add);
+		void CalculateGroup(int type, const std::string &prev_group = "", bool add = true);
+		void CalculateSingle(int type, const std::string &prev_group, bool add);
 		void Calculate(int type);
 
 	private:
-		VRenderFrame* m_frame;
-		VRenderGLView* m_view;
+		fluo::Root* m_root;
+		fluo::Renderview* m_view;
 		VolumeSelector* m_selector;
-		std::vector<VolumeData*> m_vd_r;//result volume data (stack)
+		std::vector<fluo::VolumeData*> m_vd_r;//result volume data (stack)
 
-		VolumeData *m_vd_a;	//volume data A
-		VolumeData *m_vd_b;	//volume data B
+		fluo::VolumeData *m_vd_a;	//volume data A
+		fluo::VolumeData *m_vd_b;	//volume data B
 
 		int m_type;	//calculation type
 					//1:substraction;

@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -28,19 +28,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Count_h
 #define FL_Count_h
 
-#include "DataManager.h"
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
-
-using namespace std;
-
-class VolumeData;
+namespace fluo
+{
+	class VolumeData;
+}
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class CountVoxels
 	{
 	public:
-		CountVoxels(VolumeData* vd);
+		CountVoxels(fluo::VolumeData* vd);
 		~CountVoxels();
 
 		void SetUseMask(bool use_mask)
@@ -55,7 +56,7 @@ namespace flrd
 		{ return m_wsum; }
 
 	private:
-		VolumeData *m_vd;
+		fluo::VolumeData *m_vd;
 		bool m_use_mask;//use mask instead of data
 		//result
 		unsigned int m_sum;
@@ -65,7 +66,7 @@ namespace flrd
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz);
 		void* GetVolDataBrick(flvr::TextureBrick* b);
-		void* GetVolData(VolumeData* vd);
+		void* GetVolData(fluo::VolumeData* vd);
 	};
 
 }

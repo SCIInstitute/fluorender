@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2018 Scientific Computing and Imaging Institute,
+Copyright (c) 2022 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "Compare.h"
+#include <VolumeData.hpp>
 #include <FLIVR/VolumeRenderer.h>
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -527,7 +528,7 @@ const char* str_cl_chann_sum = \
 "	sum[index] += value1 * w1 + value2 * w2;\n" \
 "}\n";
 
-ChannelCompare::ChannelCompare(VolumeData* vd1, VolumeData* vd2)
+ChannelCompare::ChannelCompare(fluo::VolumeData* vd1, fluo::VolumeData* vd2)
 	: m_vd1(vd1), m_vd2(vd2),
 	m_use_mask(false),
 	m_int_weighted(false),
@@ -611,15 +612,13 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	return (void*)temp;
 }
 
-void* ChannelCompare::GetVolData(VolumeData* vd)
+void* ChannelCompare::GetVolData(fluo::VolumeData* vd)
 {
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
 	Nrrd* nrrd_data = 0;
 	if (m_use_mask)
 		nrrd_data = vd->GetMask(false);
 	if (!nrrd_data)
-		nrrd_data = vd->GetVolume(false);
+		nrrd_data = vd->GetData(false);
 	if (!nrrd_data)
 		return 0;
 	return nrrd_data->data;
@@ -663,8 +662,12 @@ void ChannelCompare::Product()
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	float ss1, ss2;
+	double dval;
+	m_vd1->getValue(gstIntScale, dval);
+	ss1 = (float)dval;
+	m_vd2->getValue(gstIntScale, dval);
+	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -680,13 +683,13 @@ void ChannelCompare::Product()
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = m_vd1->GetRenderer()->load_brick(b1);
+		GLint tid2 = m_vd2->GetRenderer()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
-			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
+			mid1 = m_vd1->GetRenderer()->load_brick_mask(b1);
+			mid2 = m_vd2->GetRenderer()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -772,8 +775,12 @@ void ChannelCompare::MinValue()
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	float ss1, ss2;
+	double dval;
+	m_vd1->getValue(gstIntScale, dval);
+	ss1 = (float)dval;
+	m_vd2->getValue(gstIntScale, dval);
+	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -789,13 +796,13 @@ void ChannelCompare::MinValue()
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = m_vd1->GetRenderer()->load_brick(b1);
+		GLint tid2 = m_vd2->GetRenderer()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
-			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
+			mid1 = m_vd1->GetRenderer()->load_brick_mask(b1);
+			mid2 = m_vd2->GetRenderer()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -881,8 +888,12 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	float ss1, ss2;
+	double dval;
+	m_vd1->getValue(gstIntScale, dval);
+	ss1 = (float)dval;
+	m_vd2->getValue(gstIntScale, dval);
+	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -900,13 +911,13 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = m_vd1->GetRenderer()->load_brick(b1);
+		GLint tid2 = m_vd2->GetRenderer()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
-			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
+			mid1 = m_vd1->GetRenderer()->load_brick_mask(b1);
+			mid2 = m_vd2->GetRenderer()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -982,8 +993,12 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
 	vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	float ss1, ss2;
+	double dval;
+	m_vd1->getValue(gstIntScale, dval);
+	ss1 = (float)dval;
+	m_vd2->getValue(gstIntScale, dval);
+	ss2 = (float)dval;
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -1001,8 +1016,8 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = m_vd1->GetRenderer()->load_brick(b1);
+		GLint tid2 = m_vd2->GetRenderer()->load_brick(b2);
 
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
