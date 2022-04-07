@@ -5736,8 +5736,7 @@ void Renderview::DrawVolumesMulti(VolumeList &list, long peel)
 //peel==true -- depth peeling
 void Renderview::DrawVolumesComp(VolumeList &list, bool mask, long peel)
 {
-	if (list.empty()
-		)
+	if (list.empty())
 		return;
 
 	int i;

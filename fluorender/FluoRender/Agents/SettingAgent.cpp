@@ -158,7 +158,7 @@ void SettingAgent::UpdateAllSettings()
 	getValue(gstStreamEnable, bval);
 	dlg_.m_streaming_chk->SetValue(bval);
 	dlg_.EnableStreaming(bval);
-	getValue(gstStreamOrder, lval);
+	getValue(gstUpdateOrder, lval);
 	dlg_.m_update_order_rbox->SetSelection(lval);
 	getValue(gstGpuMemSize, dval);
 	dlg_.m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)dval));
@@ -409,7 +409,7 @@ void SettingAgent::ReadSettings()
 	if (fconfig.Exists("/update order"))
 	{
 		fconfig.SetPath("/update order");
-		if (fconfig.Read("value", &lval)) setValue(gstStreamOrder, lval);
+		if (fconfig.Read("value", &lval)) setValue(gstUpdateOrder, lval);
 	}
 	//invalidate texture
 	//point volume mode
@@ -620,7 +620,7 @@ void SettingAgent::SaveSettings()
 
 	//update order
 	fconfig.SetPath("/update order");
-	getValue(gstStreamOrder, lval); fconfig.Write("value", lval);
+	getValue(gstUpdateOrder, lval); fconfig.Write("value", lval);
 
 	//point volume mode
 	fconfig.SetPath("/point volume mode");

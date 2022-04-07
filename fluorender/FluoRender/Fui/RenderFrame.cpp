@@ -464,8 +464,7 @@ RenderFrame::RenderFrame(
 	std::string sval;
 	m_agent->getValue(gstFontFile, sval);
 	wxString font_file = sval;
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
+	wxString exePath = glbin.getExecutablePath();
 	if (font_file != "")
 		font_file = exePath + GETSLASH() + "Fonts" +
 		GETSLASH() + font_file;

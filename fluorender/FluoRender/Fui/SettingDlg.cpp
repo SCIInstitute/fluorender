@@ -1146,7 +1146,7 @@ void SettingDlg::OnStreamingChk(wxCommandEvent &event)
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent &event)
 {
 	long lval = m_update_order_rbox->GetSelection();
-	m_agent->setValue(gstStreamOrder, lval);
+	m_agent->setValue(gstUpdateOrder, lval);
 }
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent &event)

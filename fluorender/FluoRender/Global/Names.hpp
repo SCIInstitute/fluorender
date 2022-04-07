@@ -672,7 +672,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstLargeDataSize "large data size"
 #define gstBrickSize "brick size"
 #define gstResponseTime "response time"
-#define gstStreamOrder "stream order"
 #define gstLodOffset "lod offset"
 #define gstRulerSizeThresh "ruler size thresh"
 #define gstPvxmlFlipX "pvxml flip x"

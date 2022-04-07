@@ -148,7 +148,7 @@ void Global::BuildRoot()
 	ADD_VALUE(gstLargeDataSize, double(1000));
 	ADD_VALUE(gstBrickSize, long(128));
 	ADD_VALUE(gstResponseTime, long(100));
-	ADD_VALUE(gstStreamOrder, long(0));
+	ADD_VALUE(gstUpdateOrder, long(0));
 	ADD_VALUE(gstLodOffset, long(0));
 	ADD_VALUE(gstPointVolumeMode, long(0));
 	ADD_VALUE(gstRulerUseTransf, bool(false));
