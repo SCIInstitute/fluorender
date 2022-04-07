@@ -54,7 +54,6 @@ Renderview* ClKernelAgent::getObject()
 void ClKernelAgent::UpdateAllSettings()
 {
 	wxString exePath = glbin.getExecutablePath();
-	exePath = wxPathOnly(exePath);
 	dlg_.m_kernel_list->DeleteAllItems();
 	wxString loc = exePath + GETSLASH() + "CL_code" +
 		GETSLASH() + "*.cl";

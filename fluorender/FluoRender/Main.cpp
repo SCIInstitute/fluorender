@@ -83,7 +83,11 @@ bool VRenderApp::OnInit()
 
 	char cpath[FILENAME_MAX];
 	GETCURRENTDIR(cpath, sizeof(cpath));
-	::wxSetWorkingDirectory(wxString(s2ws(std::string(cpath))));
+	std::wstring wstr_path = s2ws(std::string(cpath));
+	::wxSetWorkingDirectory(wstr_path);
+	wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	expath = wxPathOnly(expath);
+	glbin.setExecutablePath(expath.ToStdWstring());
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
 		return false;
@@ -103,7 +107,6 @@ bool VRenderApp::OnInit()
 		m_win_width, m_win_height,
 		m_benchmark, m_fullscreen,
 		m_windowed, m_hidepanels);
-	frame->AssociateRoot();
 	SetTopWindow(frame);
 	frame->Show();
 
@@ -133,8 +136,8 @@ bool VRenderApp::OnInit()
 		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
 	
 	//global init
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
+	//wxString expath = wxStandardPaths::Get().GetExecutablePath();
+	//expath = wxPathOnly(expath);
 	//wxString dft = expath + "/Defaults/volume_data.dftx";
 	//glbin_volf->setValue(gstDefaultFile, dft.ToStdString());
 

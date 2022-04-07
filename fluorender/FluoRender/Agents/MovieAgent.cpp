@@ -109,7 +109,6 @@ void MovieAgent::SetProgress(double pcnt)
 int MovieAgent::GetScriptFiles(wxArrayString& list)
 {
 	wxString exePath = glbin.getExecutablePath();
-	exePath = wxPathOnly(exePath);
 	wxString loc = exePath + GETSLASH() + "Scripts" +
 		GETSLASH() + "*.txt";
 	wxLogNull logNo;

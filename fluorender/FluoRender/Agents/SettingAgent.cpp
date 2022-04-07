@@ -206,7 +206,6 @@ void SettingAgent::UpdateAllSettings()
 void SettingAgent::ReadSettings()
 {
 	wxString expath = glbin.getExecutablePath();
-	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "fluorender.set";
 	wxFileInputStream is(dft);
 	if (!is.IsOk())
@@ -687,7 +686,6 @@ void SettingAgent::SaveSettings()
 	getValue(gstImagejMode, lval); fconfig.Write("ij_mode", lval);
 
 	wxString expath = glbin.getExecutablePath();
-	expath = wxPathOnly(expath);
 	wxString dft = expath + GETSLASH() + "fluorender.set";
 	SaveConfig(fconfig, dft);
 }
@@ -765,7 +763,6 @@ void SettingAgent::OnFontFile(Event& event)
 	std::string sval;
 	getValue(gstFontFile, sval);
 	wxString exePath = glbin.getExecutablePath();
-	exePath = wxPathOnly(exePath);
 	wxString loc = exePath + GETSLASH() + "Fonts" +
 		GETSLASH() + sval;
 	flvr::TextRenderer::text_texture_manager_.load_face(loc.ToStdString());

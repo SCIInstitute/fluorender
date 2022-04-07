@@ -178,7 +178,6 @@ void ComponentAgent::LoadSettings(const wxString &filename)
 	if (!wxFileExists(filename))
 	{
 		wxString expath = glbin.getExecutablePath();
-		expath = wxPathOnly(expath);
 		str = expath + GETSLASH() + "default_component_settings.dft";
 		get_basic = true;
 	}
@@ -285,7 +284,6 @@ void ComponentAgent::SaveSettings(const wxString &filename)
 	if (filename == "")
 	{
 		wxString expath = glbin.getExecutablePath();
-		expath = wxPathOnly(expath);
 		str = expath + GETSLASH() + "default_component_settings.dft";
 	}
 	else

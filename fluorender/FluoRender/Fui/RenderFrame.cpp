@@ -133,6 +133,7 @@ RenderFrame::RenderFrame(
 	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE)
 {
 	m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *this);
+	AssociateRoot();
 
 	// temporarily block events during constructor:
 	//wxEventBlocker blocker(this);
@@ -420,25 +421,11 @@ RenderFrame::RenderFrame(
 	m_adjust_view = new OutAdjustPanel(this,
 		wxDefaultPosition, wxSize(130, 700));
 
-	std::string sval;
-	m_agent->getValue(gstFontFile, sval);
-	wxString font_file = sval;
-	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-	exePath = wxPathOnly(exePath);
-	if (font_file != "")
-		font_file = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + font_file;
-	else
-		font_file = exePath + GETSLASH() + "Fonts" +
-			GETSLASH() + "FreeSans.ttf";
-	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
-	double dval;
-	m_agent->getValue(gstTextSize, dval);
-	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
-
+	bool bval; long lval; double dval;
 	//settings dialog
 	m_setting_dlg = new SettingDlg(this);
 	m_setting_dlg->AssociateRoot();
+	glbin_agtf->getSettingAgent()->ReadSettings();
 	//if (m_setting_dlg->GetTestMode(1))
 	//	m_vrv_list[0]->m_glview->m_test_speed = true;
 	//if (m_setting_dlg->GetTestMode(3))
@@ -466,12 +453,29 @@ RenderFrame::RenderFrame(
 	//m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
 	//if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	//m_time_id = m_setting_dlg->GetTimeId();
-	bool bval;
-	long lval;
+	m_agent->getValue(gstSoftThresh, dval);
+	flvr::VolumeRenderer::set_soft_threshold(dval);
+	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
+
 	m_agent->getValue(gstSoftThresh, dval);
 	flvr::VolumeRenderer::set_soft_threshold(dval);
 	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
 	VolumeMeshConv::SetSoftThreshold(dval);
+	std::string sval;
+	m_agent->getValue(gstFontFile, sval);
+	wxString font_file = sval;
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+	exePath = wxPathOnly(exePath);
+	if (font_file != "")
+		font_file = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + font_file;
+	else
+		font_file = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + "FreeSans.ttf";
+	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
+	m_agent->getValue(gstTextSize, dval);
+	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
+
 
 	//brush tool dialog
 	m_brush_tool_dlg = new BrushToolDlg(this, m_tree_panel);
