@@ -827,6 +827,12 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Settings"
   "$<TARGET_FILE_DIR:FluoRender>")
+if(APPLE)
+	add_custom_command(TARGET FluoRender POST_BUILD
+	  COMMAND ${CMAKE_COMMAND} -E copy
+	  "${FluoRender_SOURCE_DIR}/Settings_Mac/fluorender.set"
+	  "$<TARGET_FILE_DIR:FluoRender>")
+endif()
 
 # copy data dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
