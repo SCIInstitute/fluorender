@@ -247,8 +247,8 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 		//}
 	}
 
-	updValue(gstVolListDirty, true, Event());
-	updValue(gstFullVolListDirty, true, Event());
+	updValue(gstVolListDirty, true);
+	updValue(gstFullVolListDirty, true);
 
 	//if (m_frame)
 	//{
@@ -304,8 +304,8 @@ void Renderview::Init()
 	getValue(gstInitialized, bval);
 	if (!bval)
 	{
-		m_controller = 0;
 #ifdef _WIN32
+		m_controller = 0;
 		//tablet initialization
 		if (m_selector->GetBrushUsePres())
 		{
@@ -1189,7 +1189,7 @@ void Renderview::SetParams(double t)
 	//	int index = interpolator->GetKeyIndexFromTime(t);
 	//	m_frame->GetRecorderDlg()->SetSelection(index);
 	//}
-	updValue(gstVolListDirty, true, Event());
+	updValue(gstVolListDirty, true);
 }
 
 void Renderview::ResetMovieAngle()
@@ -5149,10 +5149,16 @@ void Renderview::DrawVolumes(long peel)
 				quota_vd_list.size() > 0)
 				DrawVolumesMulti(quota_vd_list, peel);
 			else
-				DrawVolumesMulti(GetVolList(), peel);
+			{
+				VolumeList l = GetVolList();
+				DrawVolumesMulti(l, peel);
+			}
 			//draw masks
 			if (draw_mask)
-				DrawVolumesComp(GetVolList(), true, peel);
+			{
+				VolumeList l = GetVolList();
+				DrawVolumesComp(l, true, peel);
+			}
 		}
 		else
 		{

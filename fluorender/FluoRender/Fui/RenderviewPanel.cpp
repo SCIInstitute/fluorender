@@ -42,6 +42,9 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include "img/icons.h"
 #include <wx/stdpaths.h>
+#ifdef _DARWIN
+#include <OpenGL/CGLTypes.h>
+#endif
 
 int RenderviewPanel::m_max_id = 1;
 

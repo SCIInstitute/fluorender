@@ -1684,7 +1684,7 @@ void ComponentAgent::DistOutput(const std::wstring &filename)
 	}
 
 	std::ofstream outfile;
-	outfile.open(filename, std::ofstream::out);
+	outfile.open(ws2s(filename), std::ofstream::out);
 	//output result matrix
 	size_t dnum = bdist ? (dist_neighbor + 1) : num2;
 	for (size_t i = 0; i < num2; ++i)

@@ -1512,7 +1512,7 @@ void ComponentDlg::OnCompIdXBtn(wxCommandEvent &event)
 {
 	m_comp_id_text->Clear();
 	m_agent->setValue(gstCompIdStr, std::string(""));
-	m_agent->setValue(gstCompId, unsigned long(0));
+	m_agent->setValue(gstCompId, (unsigned long)(0));
 }
 
 void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent &event)
@@ -1614,7 +1614,7 @@ void ComponentDlg::OnNewIDX(wxCommandEvent& event)
 {
 	m_new_id_text->Clear();
 	m_agent->setValue(gstCompIdStr, std::string(""));
-	m_agent->setValue(gstCompId, unsigned long(0));
+	m_agent->setValue(gstCompId, (unsigned long)(0));
 }
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)

@@ -1161,7 +1161,7 @@ void TrackDlg::OnCellNewIDX(wxCommandEvent &event)
 {
 	m_cell_new_id_text->Clear();
 	m_compagent->setValue(gstCompIdStr, std::string(""));
-	m_compagent->setValue(gstCompId, unsigned long(0));
+	m_compagent->setValue(gstCompId, (unsigned long)(0));
 }
 
 void TrackDlg::OnCellNewID(wxCommandEvent &event)
