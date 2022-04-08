@@ -48,7 +48,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.hpp>
 
 #include <wx/stdpaths.h>
+#ifdef _WIN32
 #include <wx/msw/private.h>
+#endif
 #include <png_resource.h>
 #include "img/icons.h"
 
@@ -93,8 +95,10 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	glbin_root->setRvalu(gstCurrentView, view);
 	m_agent = glbin_agtf->addRenderCanvasAgent(view->getName(), *this);
 	m_agent->setObject(view);
+#ifdef _WIN32
 	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());
 	m_agent->setValue(gstHinstance, (unsigned long long)::wxGetInstance());
+#endif
 
 	//bool bval = m_frame && m_frame->GetBenchmark();
 	//m_agent->setValue(gstBenchmark, bval);

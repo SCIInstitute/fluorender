@@ -389,27 +389,27 @@ public:
 	/* volume_data_hidden.png - 633 bytes */
 	const static unsigned char volume_data_hidden_png[633];
 	/* volume_data_shown.png - 711 bytes */
-	const static unsigned char icons::volume_data_shown_png[711];
+	const static unsigned char volume_data_shown_png[711];
 	/* mesh_data_hidden.png - 692 bytes */
-	const static unsigned char icons::mesh_data_hidden_png[692];
+	const static unsigned char mesh_data_hidden_png[692];
 	/* mesh_data_shown.png - 521 bytes */
-	const static unsigned char icons::mesh_data_shown_png[521];
+	const static unsigned char mesh_data_shown_png[521];
 	/* volume_group_hidden.png - 529 bytes */
-	const static unsigned char icons::volume_group_hidden_png[529];
+	const static unsigned char volume_group_hidden_png[529];
 	/* volume_group_shown.png - 703 bytes */
-	const static unsigned char icons::volume_group_shown_png[703];
+	const static unsigned char volume_group_shown_png[703];
 	/* mesh_group_hidden.png - 565 bytes */
-	const static unsigned char icons::mesh_group_hidden_png[565];
+	const static unsigned char mesh_group_hidden_png[565];
 	/* mesh_group_shown.png - 641 bytes */
-	const static unsigned char icons::mesh_group_shown_png[641];
+	const static unsigned char mesh_group_shown_png[641];
 	/* render_view_hidden.png - 621 bytes */
-	const static unsigned char icons::render_view_hidden_png[621];
+	const static unsigned char render_view_hidden_png[621];
 	/* render_view_shown.png - 731 bytes */
-	const static unsigned char icons::render_view_shown_png[731];
+	const static unsigned char render_view_shown_png[731];
 	/* default_hidden.png - 794 bytes */
-	const static unsigned char icons::default_hidden_png[794];
+	const static unsigned char default_hidden_png[794];
 	/* default_shown.png - 761 bytes */
-	const static unsigned char icons::default_shown_png[761];
+	const static unsigned char default_shown_png[761];
 
 };
 

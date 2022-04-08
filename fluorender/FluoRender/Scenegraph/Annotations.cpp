@@ -58,7 +58,7 @@ Annotations::~Annotations()
 
 int Annotations::LoadData(const std::wstring &filename)
 {
-	std::ifstream fis(filename, std::ios::in);
+	std::ifstream fis(ws2s(filename), std::ios::in);
 	if (fis.bad())
 		return 0;
 

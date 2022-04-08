@@ -313,7 +313,7 @@ ComponentAgent* AgentFactory::addComponentAgent(const std::string &name, wxWindo
 		ADD_VALUE(gstMinValue, long(0));
 		ADD_VALUE(gstUseMax, bool(false));
 		ADD_VALUE(gstMaxValue, long(0));
-		ADD_VALUE(gstCompId, unsigned long(0));
+		ADD_VALUE(gstCompId, (unsigned long)(0));
 		ADD_VALUE(gstCompIdStr, std::string(""));
 		ADD_VALUE(gstCompSizeLimit, long(0));
 		ADD_VALUE(gstCompConsistent, bool(false));

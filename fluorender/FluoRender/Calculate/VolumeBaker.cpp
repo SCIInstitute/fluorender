@@ -118,9 +118,9 @@ void VolumeBaker::Bake(bool replace)
 			double(k) / double(m_nz));
 		double new_value = m_input->GetTransferValue(i, j, k);
 		if (m_bits == 8)
-			((unsigned char*)m_raw_result)[index] = unsigned char(new_value*255.0+0.5);
+			((unsigned char*)m_raw_result)[index] = (unsigned char)(new_value*255.0+0.5);
 		else if (m_bits == 16)
-			((unsigned short*)m_raw_result)[index] = unsigned short(new_value*65535.0+0.5);
+			((unsigned short*)m_raw_result)[index] = (unsigned short)(new_value*65535.0+0.5);
 	}
 
 	//write to nrrd

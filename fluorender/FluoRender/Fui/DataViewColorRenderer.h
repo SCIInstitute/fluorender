@@ -106,12 +106,12 @@ public:
 		value << color_;
 		return true;
 	}
-
+#ifdef _WIN32
 	virtual wxString GetAccessibleDescription() const override
 	{
 		return color_.GetAsString();
 	}
-
+#endif
 	virtual bool HasEditorCtrl() const override
 	{
 		return false;

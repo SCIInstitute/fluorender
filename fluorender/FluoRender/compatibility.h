@@ -437,13 +437,22 @@ inline bool STR_MATCH(std::wstring &pattern, std::wstring &search)
 	return str_mat(pattern, 0, search, 0);
 }
 
-inline std::wstring GET_SUFFIX(std::wstring &pathname)
+inline std::wstring GET_SUFFIX(const std::wstring &pathname)
 {
 	int64_t pos = pathname.find_last_of(L'.');
 	if (pos != std::wstring::npos)
 		return pathname.substr(pos);
 	else
 		return L"";
+}
+
+inline std::string GET_SUFFIX(const std::string &pathname)
+{
+    int64_t pos = pathname.find_last_of('.');
+    if (pos != std::string::npos)
+        return pathname.substr(pos);
+    else
+        return "";
 }
 
 inline std::wstring GET_NAME(std::wstring &pathname)
@@ -455,7 +464,7 @@ inline std::wstring GET_NAME(std::wstring &pathname)
 		return pathname;
 }
 
-inline std::wstring GET_PATH(std::wstring &pathname)
+inline std::wstring GET_PATH(const std::wstring &pathname)
 {
 	int64_t pos = pathname.find_last_of(GETSLASH());
 	if (pos != std::wstring::npos)
