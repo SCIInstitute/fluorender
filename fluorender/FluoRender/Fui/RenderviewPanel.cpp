@@ -42,6 +42,9 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include "img/icons.h"
 #include <wx/stdpaths.h>
+#ifdef _DARWIN
+#include <OpenGL/CGLTypes.h>
+#endif
 
 int RenderviewPanel::m_max_id = 1;
 
@@ -211,7 +214,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	attriblist.Depth(depth_bit);
 	attriblist.SampleBuffers(1);
 	attriblist.Samplers(samples);
-	/*if (gl_major_ver == 3)
+	if (gl_major_ver == 3)
 	{
 		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
 		attriblist.AddAttribute(kCGLOGLPVersion_GL3_Core);
@@ -220,7 +223,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	{
 		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
 		attriblist.AddAttribute(kCGLOGLPVersion_GL4_Core);
-	}*/
+	}
 #endif
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
