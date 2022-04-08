@@ -313,6 +313,11 @@ namespace flrd
 		return m_celvrtx;
 	}
 
+	inline Pca Cell::GetPca()
+	{
+		return m_pca;
+	}
+
 	inline void Cell::SetCelVrtx(CelVrtx intra_vert)
 	{
 		m_celvrtx = intra_vert;

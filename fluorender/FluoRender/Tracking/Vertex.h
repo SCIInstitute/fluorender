@@ -150,11 +150,6 @@ namespace flrd
 			return 0;
 	}
 
-	inline Pca Cell::GetPca()
-	{
-		return m_pca;
-	}
-
 	inline unsigned int Vertex::Id()
 	{
 		return m_id;
