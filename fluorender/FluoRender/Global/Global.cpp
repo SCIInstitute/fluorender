@@ -47,7 +47,7 @@ Global Global::instance_;
 Global::Global()
 {
 	origin_ = ref_ptr<Group>(new Group());
-	origin_->setName(gstOrigin);
+	origin_->setName(gst::Origin);
 	BuildInput();
 	BuildFactories();
 	BuildPaths();

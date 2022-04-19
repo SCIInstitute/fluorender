@@ -34,7 +34,7 @@ if (USE_XINPUT)
   add_definitions(-DUSE_XINPUT=1)
 endif()
 
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 # for MSVC builds
 if(WIN32)
@@ -85,6 +85,7 @@ add_definitions(-DVERSION_COPYRIGHT="December 2021")	# Up to here!
 #windows
 if(WIN32)
 add_definitions(-D_WIN32_WINNT=0x0602)
+add_definitions(-D_HAS_STD_BYTE=0)
 endif()
 
 #UI IDs
@@ -157,7 +158,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # wxWidgets

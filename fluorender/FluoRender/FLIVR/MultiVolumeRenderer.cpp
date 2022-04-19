@@ -297,7 +297,7 @@ namespace flvr
 			{
 				if (TextureRenderer::mem_swap_)
 				{
-					unsigned long long rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
+					unsigned long long rn_time = glbin.getStopWatch(gst::StopWatch)->get_ticks();
 					if (rn_time - TextureRenderer::st_time_ > TextureRenderer::get_up_time())
 						break;
 				}
