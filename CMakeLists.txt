@@ -34,7 +34,7 @@ if (USE_XINPUT)
   add_definitions(-DUSE_XINPUT=1)
 endif()
 
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 # for MSVC builds
 if(WIN32)
@@ -673,7 +673,7 @@ endif()
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
   # make sure png is static linked
   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
     wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
