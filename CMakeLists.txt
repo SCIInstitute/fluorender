@@ -803,6 +803,18 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	"${FluoRender_SOURCE_DIR}/fluorender/nd2/bin/zlib1.dll"
 	"$<TARGET_FILE_DIR:FluoRender>"
 	)
+elseif(APPLE)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/libNd2File.dylib"
+	"$<TARGET_FILE_DIR:FluoRender>"
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/libNd2ReadSdk.dylib"
+	"$<TARGET_FILE_DIR:FluoRender>"
+	)
+add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
+    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
+    $<TARGET_FILE:FluoRender>)
 endif()
 
 # make the Executable dir
