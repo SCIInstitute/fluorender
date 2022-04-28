@@ -37,11 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <functional>
 
-namespace FluoUI
-{
-	class InterfaceAgent;
-}
-
 namespace fluo
 {
 	class Object;
