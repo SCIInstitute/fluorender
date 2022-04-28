@@ -51,8 +51,9 @@ DEALINGS IN THE SOFTWARE.
 //#include <Formats/imageJ_reader.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-
 using namespace fluo;
+
+#define gstColor "color"//redefinition needs to be the same as original
 
 VolumeData::VolumeData() :
 	m_vr(0),

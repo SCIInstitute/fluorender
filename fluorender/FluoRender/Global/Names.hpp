@@ -28,15 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef NAMES_HPP
 #define NAMES_HPP
 
-namespace gst
-{
-	//origin
-	const char Origin[] = "origin";
-}
-
-inline const char gst::Origin[] = "origin";
+//origin
+#define gstOrigin "origin"
 
 //timer
+#define gstStopWatch "default stop watch"
 #define gstAsyncTimer "default aync timer"
 #define gstTimerInterval "timer interval"//in millisec
 #define gstTimerRunning "timer running"

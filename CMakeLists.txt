@@ -741,7 +741,7 @@ endif()
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.9 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.11 -DWX_PRECOMP -std=c++11 -stdlib=libc++")
   # make sure png is static linked
   string(REGEX REPLACE "-lpng" "/usr/local/lib/libpng.a"
     wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES})
@@ -871,6 +871,18 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	"${FluoRender_SOURCE_DIR}/FluoRender/nd2/bin/zlib1.dll"
 	"$<TARGET_FILE_DIR:FluoRender>"
 	)
+elseif(APPLE)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/libNd2File.dylib"
+	"$<TARGET_FILE_DIR:FluoRender>"
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${FluoRender_SOURCE_DIR}/fluorender/nd2/lib/libNd2ReadSdk.dylib"
+	"$<TARGET_FILE_DIR:FluoRender>"
+	)
+add_custom_command(TARGET FluoRender POST_BUILD COMMAND 
+    ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
+    $<TARGET_FILE:FluoRender>)
 endif()
 
 # make the Executable dir

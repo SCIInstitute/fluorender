@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "MeshData.hpp"
-
+#include <Names.hpp>
 #include <FLIVR/MeshRenderer.h>
 #include <FLIVR/glm.h>
 #include <compatibility.h>

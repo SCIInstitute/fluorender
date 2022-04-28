@@ -30,12 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Flobject/Node.hpp>
 
-namespace gst
-{
-	inline constexpr char StopWatch[] = "default stop watch";
-	inline constexpr double dv{ 1.0 };
-}
-
 namespace fluo
 {
 	class StopWatch : public Node

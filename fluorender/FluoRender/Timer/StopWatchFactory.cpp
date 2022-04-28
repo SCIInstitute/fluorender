@@ -34,7 +34,7 @@ using namespace fluo;
 StopWatchFactory::StopWatchFactory()
 {
 	m_name = gstStopWatchFactory;
-	default_object_name_ = gst::StopWatch;
+	default_object_name_ = gstStopWatch;
 }
 
 StopWatchFactory::~StopWatchFactory()

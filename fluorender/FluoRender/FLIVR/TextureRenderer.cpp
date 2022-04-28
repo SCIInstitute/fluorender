@@ -872,7 +872,7 @@ namespace flvr
 								unsigned long elapsed;
 								long t;
 								do {
-									rn_time = glbin.getStopWatch(gst::StopWatch)->get_ticks();
+									rn_time = glbin.getStopWatch(gstStopWatch)->get_ticks();
 									elapsed = rn_time - st_time_;
 									t = up_time_ - elapsed;
 									if (t > 0) wxMilliSleep(t);
