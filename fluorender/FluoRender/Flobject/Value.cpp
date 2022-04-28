@@ -388,7 +388,7 @@ bool ValueSet::addValue(ValueTuple& vt)
 	return false;
 }
 
-bool ValueSet::addRvalu(const std::string &name, Referenced* value)
+bool ValueSet::addRefValue(const std::string &name, Referenced* value)
 {
 	if (!findValue(name))
 	{
@@ -935,7 +935,7 @@ bool ValueSet::getValue(ValueTuple& vt)
 				//tentative:
 				//get id if it's an object
 				Referenced* v;
-				if (getRvalu(name, &v))
+				if (getRefValue(name, &v))
 				{
 					Object* obj = dynamic_cast<Object*>(v);
 					if (obj)

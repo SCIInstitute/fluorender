@@ -180,9 +180,9 @@ void ObjectFactory::propValuesToDefault(Object* obj, const ValueCollection &name
 		return;
 
 	if (names.empty())
-		obj->propAllValues(def_obj);
+		obj->propagateAllValues(def_obj);
 	else
-		obj->propValues(names, def_obj);
+		obj->propagateValues(names, def_obj);
 }
 
 void ObjectFactory::propValuesFromDefault(Object* obj, const ValueCollection &names)
@@ -192,9 +192,9 @@ void ObjectFactory::propValuesFromDefault(Object* obj, const ValueCollection &na
 		return;
 
 	if (names.empty())
-		def_obj->propAllValues(obj);
+		def_obj->propagateAllValues(obj);
 	else
-		def_obj->propValues(names, obj);
+		def_obj->propagateValues(names, obj);
 }
 
 bool ObjectFactory::readDefault(std::istream &is, const ValueCollection &names)

@@ -106,6 +106,6 @@ void RenderCanvasAgent::OnSetGl(Event& event)
 	{
 		InterfaceAgent* agent = glbin_agtf->get(i);
 		if (agent->asRenderCanvasAgent() && agent != this)
-			agent->chgValue(gstSetGl, false);
+			agent->changeValue(gstSetGl, false);
 	}
 }

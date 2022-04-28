@@ -97,41 +97,41 @@ bool Root::setChild(size_t i, Node* node)
 Renderview* Root::getCurrentRenderview()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentView, &ref);
+	getRefValue(gstCurrentView, &ref);
 	return dynamic_cast<Renderview*>(ref);
 }
 
 VolumeData* Root::getCurrentVolumeData()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentVolume, &ref);
+	getRefValue(gstCurrentVolume, &ref);
 	return dynamic_cast<VolumeData*>(ref);
 }
 
 VolumeGroup* Root::getCurrentVolumeGroup()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentVolumeGroup, &ref);
+	getRefValue(gstCurrentVolumeGroup, &ref);
 	return dynamic_cast<VolumeGroup*>(ref);
 }
 
 MeshData* Root::getCurrentMeshData()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentMesh, &ref);
+	getRefValue(gstCurrentMesh, &ref);
 	return dynamic_cast<MeshData*>(ref);
 }
 
 MeshGroup* Root::getCurrentMeshGroup()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentMeshGroup, &ref);
+	getRefValue(gstCurrentMeshGroup, &ref);
 	return dynamic_cast<MeshGroup*>(ref);
 }
 
 Annotations* Root::getCurrentAnnotations()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentAnnotations, &ref);
+	getRefValue(gstCurrentAnnotations, &ref);
 	return dynamic_cast<Annotations*>(ref);
 }

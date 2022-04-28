@@ -1472,7 +1472,7 @@ void ComponentAgent::OutputAnnotation(int type)
 	getValue(gstCompConsistent, bval);
 	if (analyzer->GenAnnotations(ann, bval, type))
 	{
-		ann->setRvalu(gstVolume, vd);
+		ann->setRefValue(gstVolume, vd);
 		ann->setValue(gstTransform, vd->GetTexture()->transform());
 		//DataManager* mgr = m_frame->GetDataManager();
 		//if (mgr)

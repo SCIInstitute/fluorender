@@ -375,9 +375,9 @@ void VolumeData::OnColorChanged(Event& event)
 	m_vr->set_color(color);
 	HSVColor hsv(color);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstHsv, hsv, event);
+	updateValue(gstHsv, hsv, event);
 	event.setNotifyFlags(Event::NOTIFY_SELF | Event::NOTIFY_AGENT);
-	updValue(gstLuminance, hsv.val(), event);
+	updateValue(gstLuminance, hsv.val(), event);
 }
 
 void VolumeData::OnSecColorChanged(Event& event)
@@ -389,7 +389,7 @@ void VolumeData::OnSecColorChanged(Event& event)
 	getValue(gstSecColor, sec_color);
 	m_vr->set_mask_color(sec_color);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstSecColorSet, bool(true), event);
+	updateValue(gstSecColorSet, bool(true), event);
 }
 
 void VolumeData::OnSecColorSetChanged(Event& event)
@@ -415,7 +415,7 @@ void VolumeData::OnLuminanceChanged(Event& event)
 	hsv.val(luminance);
 	Color color(hsv);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstColor, color, event);
+	updateValue(gstColor, color, event);
 	m_vr->set_color(color);
 }
 
@@ -506,7 +506,7 @@ void VolumeData::OnLowShadingChanged(Event& event)
 	double low_shading;
 	getValue(gstLowShading, low_shading);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstMatAmb, low_shading, event);
+	updateValue(gstMatAmb, low_shading, event);
 }
 
 void VolumeData::OnHighShadingChanged(Event& event)
@@ -514,7 +514,7 @@ void VolumeData::OnHighShadingChanged(Event& event)
 	double high_shading;
 	getValue(gstHighShading, high_shading);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstMatShine, high_shading, event);
+	updateValue(gstMatShine, high_shading, event);
 }
 
 void VolumeData::OnSampleRateChanged(Event& event)
@@ -582,19 +582,19 @@ void VolumeData::OnSpacingChanged(Event& event)
 	BBox bbox;
 	m_tex->get_bounds(bbox);
 	event.setNotifyFlags(Event::NOTIFY_PARENT | Event::NOTIFY_AGENT);
-	updValue(gstBounds, bbox, event);
+	updateValue(gstBounds, bbox, event);
 
 	//m_tex->get_base_spacings(spc_x, spc_y, spc_z);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstBaseSpcX, spc_x, event);
-	updValue(gstBaseSpcY, spc_y, event);
-	updValue(gstBaseSpcZ, spc_z, event);
+	updateValue(gstBaseSpcX, spc_x, event);
+	updateValue(gstBaseSpcY, spc_y, event);
+	updateValue(gstBaseSpcZ, spc_z, event);
 
 	//tex transform
 	Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    updValue(gstTexTransform, *temp, texTransform);
+    updateValue(gstTexTransform, *temp, texTransform);
 }
 
 void VolumeData::OnBaseSpacingChanged(Event& event)
@@ -611,15 +611,15 @@ void VolumeData::OnBaseSpacingChanged(Event& event)
 	getValue(gstLevel, level);
 	m_tex->get_spacings(spc_x, spc_y, spc_z, level);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstSpcX, spc_x, event);
-	updValue(gstSpcY, spc_y, event);
-	updValue(gstSpcZ, spc_z, event);
+	updateValue(gstSpcX, spc_x, event);
+	updateValue(gstSpcY, spc_y, event);
+	updateValue(gstSpcZ, spc_z, event);
 
 	//tex transform
 	Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    updValue(gstTexTransform, *temp, texTransform);
+    updateValue(gstTexTransform, *temp, texTransform);
 }
 
 void VolumeData::OnSpacingScaleChanged(Event& event)
@@ -647,13 +647,13 @@ void VolumeData::OnLevelChanged(Event& event)
 	BBox bbox;
 	m_tex->get_bounds(bbox);
 	event.setNotifyFlags(Event::NOTIFY_SELF);
-	updValue(gstBounds, bbox, event);
+	updateValue(gstBounds, bbox, event);
 
 	//tex transform
 	Transform *temp = m_tex->transform();
     Event texTransform;
     texTransform.setNotifyFlags(Event::NOTIFY_NONE);
-    updValue(gstTexTransform, *temp, texTransform);
+    updateValue(gstTexTransform, *temp, texTransform);
 }
 
 void VolumeData::OnDisplayChanged(Event& event)
@@ -822,11 +822,11 @@ void VolumeData::OnClipX1Changed(Event& event)
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			updValue(gstClipX1, 1.0 - clip_dist, event);
-			updValue(gstClipX2, 1.0, event);
+			updateValue(gstClipX1, 1.0 - clip_dist, event);
+			updateValue(gstClipX2, 1.0, event);
 		}
 		else
-			updValue(gstClipX2, value2, event);
+			updateValue(gstClipX2, value2, event);
 	}
 	else
 	{
@@ -840,7 +840,7 @@ void VolumeData::OnClipX1Changed(Event& event)
 			setValue(gstClipX1, value1);
 		}
 		clip_dist = value2 - value1;
-		updValue(gstClipDistX, clip_dist, event);
+		updateValue(gstClipDistX, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -859,11 +859,11 @@ void VolumeData::OnClipX2Changed(Event& event)
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			updValue(gstClipX1, 0.0, event);
-			updValue(gstClipX2, clip_dist, event);
+			updateValue(gstClipX1, 0.0, event);
+			updateValue(gstClipX2, clip_dist, event);
 		}
 		else
-			updValue(gstClipX1, value1, event);
+			updateValue(gstClipX1, value1, event);
 	}
 	else
 	{
@@ -877,7 +877,7 @@ void VolumeData::OnClipX2Changed(Event& event)
 			setValue(gstClipX2, value2);
 		}
 		clip_dist = value2 - value1;
-		updValue(gstClipDistX, clip_dist, event);
+		updateValue(gstClipDistX, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -896,11 +896,11 @@ void VolumeData::OnClipY1Changed(Event& event)
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			updValue(gstClipY1, 1.0 - clip_dist, event);
-			updValue(gstClipY2, 1.0, event);
+			updateValue(gstClipY1, 1.0 - clip_dist, event);
+			updateValue(gstClipY2, 1.0, event);
 		}
 		else
-			updValue(gstClipY2, value2, event);
+			updateValue(gstClipY2, value2, event);
 	}
 	else
 	{
@@ -914,7 +914,7 @@ void VolumeData::OnClipY1Changed(Event& event)
 			setValue(gstClipY1, value1);
 		}
 		clip_dist = value2 - value1;
-		updValue(gstClipDistY, clip_dist, event);
+		updateValue(gstClipDistY, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -933,11 +933,11 @@ void VolumeData::OnClipY2Changed(Event& event)
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			updValue(gstClipY1, 0.0, event);
-			updValue(gstClipY2, clip_dist, event);
+			updateValue(gstClipY1, 0.0, event);
+			updateValue(gstClipY2, clip_dist, event);
 		}
 		else
-			updValue(gstClipY1, value1, event);
+			updateValue(gstClipY1, value1, event);
 	}
 	else
 	{
@@ -951,7 +951,7 @@ void VolumeData::OnClipY2Changed(Event& event)
 			setValue(gstClipY2, value2);
 		}
 		clip_dist = value2 - value1;
-		updValue(gstClipDistY, clip_dist, event);
+		updateValue(gstClipDistY, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -970,11 +970,11 @@ void VolumeData::OnClipZ1Changed(Event& event)
 		value2 = value1 + clip_dist;
 		if (value2 > 1.0)
 		{
-			updValue(gstClipZ1, 1.0 - clip_dist, event);
-			updValue(gstClipZ2, 1.0, event);
+			updateValue(gstClipZ1, 1.0 - clip_dist, event);
+			updateValue(gstClipZ2, 1.0, event);
 		}
 		else
-			updValue(gstClipZ2, value2, event);
+			updateValue(gstClipZ2, value2, event);
 	}
 	else
 	{
@@ -988,7 +988,7 @@ void VolumeData::OnClipZ1Changed(Event& event)
 			setValue(gstClipZ1, value1);
 		}
 		clip_dist = value2 - value1;
-		updValue(gstClipDistZ, clip_dist, event);
+		updateValue(gstClipDistZ, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -1007,11 +1007,11 @@ void VolumeData::OnClipZ2Changed(Event& event)
 		value1 = value2 - clip_dist;
 		if (value1 < 0.0)
 		{
-			updValue(gstClipZ1, 0.0, event);
-			updValue(gstClipZ2, clip_dist, event);
+			updateValue(gstClipZ1, 0.0, event);
+			updateValue(gstClipZ2, clip_dist, event);
 		}
 		else
-			updValue(gstClipZ1, value1, event);
+			updateValue(gstClipZ1, value1, event);
 	}
 	else
 	{
@@ -1025,7 +1025,7 @@ void VolumeData::OnClipZ2Changed(Event& event)
 			setValue(gstClipZ2, value2);
 		}
 		clip_dist = value2 - value1;
-		updValue(gstClipDistZ, clip_dist, event);
+		updateValue(gstClipDistZ, clip_dist, event);
 	}
 
 	UpdateClippingPlanes(event);
@@ -1088,7 +1088,7 @@ void VolumeData::UpdateClippingPlanes(Event& event)
 	planes.Scale(scale);
 	planes.Translate(trans2);
 	//set and update to the renderer
-	updValue(gstClipPlanes, planes, event);
+	updateValue(gstClipPlanes, planes, event);
 }
 
 //randomize color
@@ -1096,7 +1096,7 @@ void VolumeData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
-	updValue(gstColor, color, event);
+	updateValue(gstColor, color, event);
 }
 
 //functions from old class
@@ -1294,7 +1294,7 @@ int VolumeData::ReplaceData(VolumeData* data)
 	m_tex = data->GetTexture();
 	data->SetTexture();
 	ValueCollection names{ gstIntScale, gstGmScale, gstMaxInt };
-	data->propValues(names, this);
+	data->propagateValues(names, this);
 	if (m_vr)
 		m_vr->set_texture(m_tex);
 	else
@@ -2419,7 +2419,7 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 			double est_thresh = m_vr->get_estimated_thresh();
             Event estimateThreshEvent;
             estimateThreshEvent.setNotifyFlags(Event::NOTIFY_SELF);
-            updValue(gstEstimateThresh, est_thresh, estimateThreshEvent);
+            updateValue(gstEstimateThresh, est_thresh, estimateThreshEvent);
 		}
 	}
 }

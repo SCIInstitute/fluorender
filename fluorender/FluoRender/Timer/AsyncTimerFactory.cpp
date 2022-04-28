@@ -72,7 +72,7 @@ AsyncTimer* AsyncTimerFactory::clone(AsyncTimer* at)
 	new_at->setId(global_id_);
 	std::string name = "async timer" + std::to_string(local_id_);
 	new_at->setName(name);
-	new_at->addRvalu(gstFactory, this);
+	new_at->addRefValue(gstFactory, this);
 
 	objects_.push_front(new_at);
 

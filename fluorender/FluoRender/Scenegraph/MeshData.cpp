@@ -26,8 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "MeshData.hpp"
-#include <Names.hpp>
+#include <MeshData.hpp>
 #include <FLIVR/MeshRenderer.h>
 #include <FLIVR/glm.h>
 #include <compatibility.h>
@@ -149,9 +148,9 @@ void MeshData::OnBoundsChanged(Event& event)
 
 	//res
 	Vector diag = bounds.diagonal();
-	updValue(gstResX, long(diag.x()+0.5), event);
-	updValue(gstResY, long(diag.y()+0.5), event);
-	updValue(gstResZ, long(diag.z()+0.5), event);
+	updateValue(gstResX, long(diag.x()+0.5), event);
+	updateValue(gstResY, long(diag.y()+0.5), event);
+	updateValue(gstResZ, long(diag.z()+0.5), event);
 
 	//transformed bounds
 	Point p[8];
@@ -196,15 +195,15 @@ void MeshData::OnBoundsChanged(Event& event)
 		p[i] = Point(temp.x() + trans_x, temp.y() + trans_y, temp.z() + trans_z);
 		bounds.extend(p[i]);
 	}
-	updValue(gstBoundsTf, bounds, event);
+	updateValue(gstBoundsTf, bounds, event);
 }
 
 void MeshData::OnRandomizeColor(Event& event)
 {
 	double hue = (double)rand() / (RAND_MAX) * 360.0;
 	Color color(HSVColor(hue, 1.0, 1.0));
-	updValue(gstColor, color, event);
-	updValue(gstMatAmb, 0.3, event);
+	updateValue(gstColor, color, event);
+	updateValue(gstMatAmb, 0.3, event);
 }
 
 int MeshData::LoadData(GLMmodel* mesh)

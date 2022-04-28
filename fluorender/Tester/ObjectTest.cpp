@@ -65,12 +65,12 @@ void ObjectTest()
 
 	//adding the first object as a value to the second
 	//obj2 is observing obj1
-	ASSERT_TRUE(obj_list[1]->addRvalu("friend", obj_list[0].get()));
+	ASSERT_TRUE(obj_list[1]->addRefValue("friend", obj_list[0].get()));
 	//setting the same value fails
-	ASSERT_FALSE(obj_list[1]->setRvalu("friend", obj_list[0].get()));
+	ASSERT_FALSE(obj_list[1]->setRefValue("friend", obj_list[0].get()));
 	Referenced* ref;
 	//confirming the value has been added
-	ASSERT_TRUE(obj_list[1]->getRvalu("friend", &ref));
+	ASSERT_TRUE(obj_list[1]->getRefValue("friend", &ref));
 	Object* obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(obj1, obj);
 	//modify obj2's value
@@ -79,7 +79,7 @@ void ObjectTest()
 	//erasing the first object
 	obj_list.erase(obj_list.begin());
 	//confirming the value pointing to the first object is reset
-	ASSERT_TRUE(obj_list[0]->getRvalu("friend", &ref));
+	ASSERT_TRUE(obj_list[0]->getRefValue("friend", &ref));
 	obj = dynamic_cast<Object*>(ref);
 	ASSERT_EQ(0, obj);
 }
@@ -125,12 +125,12 @@ void ObjectTest2()
 	obj2->setValue("value2", 0.0);
 	obj2->setValue("value3", 0.0);
 	obj1->setValue("value1", 7.0);
-	obj1->propValue("value1", obj2);
+	obj1->propagateValue("value1", obj2);
 	obj2->getValue("value1", value);
 	ASSERT_EQ(7.0, value);
 	obj1->setValue("value1", 8.0);
 	obj1->setValue("value2", 9.0);
-	obj1->propValues(names, obj2);
+	obj1->propagateValues(names, obj2);
 	obj2->getValue("value1", value);
 	ASSERT_EQ(8.0, value);
 	obj2->getValue("value2", value);
@@ -138,7 +138,7 @@ void ObjectTest2()
 	obj1->setValue("value1", 10.0);
 	obj1->setValue("value2", 11.0);
 	obj1->setValue("value3", 12.0);
-	obj1->propAllValues(obj2);
+	obj1->propagateAllValues(obj2);
 	obj2->getValue("value1", value);
 	ASSERT_EQ(10.0, value);
 	obj2->getValue("value2", value);

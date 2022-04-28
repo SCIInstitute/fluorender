@@ -277,7 +277,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 			//sharedContext->SetCurrent(*m_canvas);
 			m_canvas->SetCurrent(*sharedContext);
 			m_canvas->m_glRC = sharedContext;
-			glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->chgValue(gstSetGl, true);
+			glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->changeValue(gstSetGl, true);
 			//m_canvas->m_set_gl = true;
 		}
 	}
@@ -783,9 +783,9 @@ void RenderviewPanel::UpdateView(bool ui_update)
 	roty = STOD(str_val.fn_str());
 	str_val = m_z_rot_text->GetValue();
 	rotz = STOD(str_val.fn_str());
-	m_agent->updValue(gstCamRotX, rotx);
-	m_agent->updValue(gstCamRotY, roty);
-	m_agent->updValue(gstCamRotZ, rotz);
+	m_agent->updateValue(gstCamRotX, rotx);
+	m_agent->updateValue(gstCamRotY, roty);
+	m_agent->updateValue(gstCamRotZ, rotz);
 	//RefreshGL(true);
 }
 
@@ -831,7 +831,7 @@ void RenderviewPanel::UpdateScaleFactor(bool update_text)
 	m_agent->getValue(gstPinRotCtr, pin_rc);
 	if (auto_pin)
 	{
-		m_agent->updValue(gstPinThresh, dval);
+		m_agent->updateValue(gstPinThresh, dval);
 		if (scale > dval)
 		{
 			if (!pin_rc)
@@ -839,8 +839,8 @@ void RenderviewPanel::UpdateScaleFactor(bool update_text)
 				m_pin_btn->ToggleTool(ID_PinBtn, true);
 				m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 					wxGetBitmapFromMemory(pin));
-				m_agent->updValue(gstPinRotCtr, true);
-				m_agent->updValue(gstRotCtrDirty, true);
+				m_agent->updateValue(gstPinRotCtr, true);
+				m_agent->updateValue(gstRotCtrDirty, true);
 			}
 		}
 		else
@@ -850,7 +850,7 @@ void RenderviewPanel::UpdateScaleFactor(bool update_text)
 				m_pin_btn->ToggleTool(ID_PinBtn, false);
 				m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 					wxGetBitmapFromMemory(anchor_dark));
-				m_agent->updValue(gstPinRotCtr, false);
+				m_agent->updateValue(gstPinRotCtr, false);
 			}
 		}
 	}
@@ -864,11 +864,11 @@ void RenderviewPanel::SetScaleFactor(double s, bool update)
 	switch (lval)
 	{
 	case 0:
-		m_agent->updValue(gstScaleFactor, s);
+		m_agent->updateValue(gstScaleFactor, s);
 		break;
 	case 1:
 		m_agent->getValue(gstScaleFactor121, dval);
-		m_agent->updValue(gstScaleFactor, s * dval);
+		m_agent->updateValue(gstScaleFactor, s * dval);
 		break;
 	case 2:
 		{
@@ -880,7 +880,7 @@ void RenderviewPanel::SetScaleFactor(double s, bool update)
 			if (spcx > 0.0)
 			{
 				m_agent->getValue(gstScaleFactor121, dval);
-				m_agent->updValue(gstScaleFactor, s * dval * spcx);
+				m_agent->updateValue(gstScaleFactor, s * dval * spcx);
 			}
 		}
 		}
@@ -920,7 +920,7 @@ void RenderviewPanel::SetScaleMode(int mode, bool update)
 			"Data-based zoom ratio (View with consistent scale bar sizes)");
 		break;
 	}
-	m_agent->updValue(gstScaleMode, long(mode));
+	m_agent->updateValue(gstScaleMode, long(mode));
 	if (update)
 		UpdateScaleFactor();
 }
@@ -928,7 +928,7 @@ void RenderviewPanel::SetScaleMode(int mode, bool update)
 //rot center anchor thresh
 void RenderviewPanel::SetPinThreshold(double value)
 {
-	m_agent->updValue(gstPinThresh, value);
+	m_agent->updateValue(gstPinThresh, value);
 }
 
 void RenderviewPanel::UpdateOrientCmb(int index)
@@ -966,13 +966,13 @@ void RenderviewPanel::OnVolumeMethodCheck(wxCommandEvent& event)
 	switch (sender_id)
 	{
 	case ID_VolumeSeqRd:
-		m_agent->updValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_SEQ));
+		m_agent->updateValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_SEQ));
 		break;
 	case ID_VolumeMultiRd:
-		m_agent->updValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_MULTI));
+		m_agent->updateValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_MULTI));
 		break;
 	case ID_VolumeCompRd:
-		m_agent->updValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_COMP));
+		m_agent->updateValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_COMP));
 		break;
 	}
 
@@ -1158,7 +1158,7 @@ void RenderviewPanel::OnChEnlargeCheck(wxCommandEvent &event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		m_agent->updValue(gstEnlarge, enlarge);
+		m_agent->updateValue(gstEnlarge, enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -1206,7 +1206,7 @@ void RenderviewPanel::OnTxEnlargeText(wxCommandEvent &event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	m_agent->updValue(gstEnlargeScale, dval);
+	m_agent->updateValue(gstEnlargeScale, dval);
 	int ival = int(dval * 10 + 0.5);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
@@ -1317,8 +1317,8 @@ wxWindow* RenderviewPanel::CreateExtraCaptureControl(wxWindow* parent)
 void RenderviewPanel::OnCapture(wxCommandEvent& event)
 {
 	//reset enlargement
-	m_agent->updValue(gstEnlarge, false);
-	m_agent->updValue(gstEnlargeScale, 1.0);
+	m_agent->updateValue(gstEnlarge, false);
+	m_agent->updateValue(gstEnlargeScale, 1.0);
 
 	//RenderFrame* vr_frame = (RenderFrame*)m_frame;
 	//if (vr_frame && vr_frame->GetSettingDlg())
@@ -1334,8 +1334,8 @@ void RenderviewPanel::OnCapture(wxCommandEvent& event)
 	if (rval == wxID_OK)
 	{
 		wxString cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
-		m_agent->updValue(gstCaptureFile, cap_file.ToStdWstring());
-		m_agent->updValue(gstCapture, true);
+		m_agent->updateValue(gstCaptureFile, cap_file.ToStdWstring());
+		m_agent->updateValue(gstCapture, true);
 		//RefreshGL();
 
 		bool bval;
@@ -1359,7 +1359,7 @@ void RenderviewPanel::OnDepthAttenCheck(wxCommandEvent& event)
 {
 	if (m_left_toolbar->GetToolState(ID_DepthAttenChk))
 	{
-		m_agent->updValue(gstDepthAtten, true);
+		m_agent->updateValue(gstDepthAtten, true);
 		m_depth_atten_factor_sldr->Enable();
 		m_depth_atten_factor_text->Enable();
 		m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
@@ -1367,7 +1367,7 @@ void RenderviewPanel::OnDepthAttenCheck(wxCommandEvent& event)
 	}
 	else
 	{
-		m_agent->updValue(gstDepthAtten, false);
+		m_agent->updateValue(gstDepthAtten, false);
 		m_depth_atten_factor_sldr->Disable();
 		m_depth_atten_factor_text->Disable();
 		m_left_toolbar->SetToolNormalBitmap (ID_DepthAttenChk,
@@ -1390,7 +1390,7 @@ void RenderviewPanel::OnDepthAttenFactorEdit(wxCommandEvent& event)
 	wxString str = m_depth_atten_factor_text->GetValue();
 	double val;
 	str.ToDouble(&val);
-	m_agent->updValue(gstDaInt, val);
+	m_agent->updateValue(gstDaInt, val);
 	m_depth_atten_factor_sldr->SetValue(int(val*100.0));
 	//RefreshGL(true);
 }
@@ -1414,7 +1414,7 @@ void RenderviewPanel::OnPin(wxCommandEvent &event)
 {
 	double dval;
 	bool pin = m_pin_btn->GetToolState(ID_PinBtn);
-	m_agent->updValue(gstPinRotCtr, pin);
+	m_agent->updateValue(gstPinRotCtr, pin);
 	double scale;
 	m_agent->getValue(gstScaleFactor, scale);
 	long lval;
@@ -1447,18 +1447,18 @@ void RenderviewPanel::OnPin(wxCommandEvent &event)
 		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 			wxGetBitmapFromMemory(pin));
 		if (scale > dval)
-			m_agent->updValue(gstAutoPinRotCtr, true);
+			m_agent->updateValue(gstAutoPinRotCtr, true);
 		else
-			m_agent->updValue(gstAutoPinRotCtr, false);
+			m_agent->updateValue(gstAutoPinRotCtr, false);
 	}
 	else
 	{
 		m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
 			wxGetBitmapFromMemory(anchor_dark));
 		if (scale > dval)
-			m_agent->updValue(gstAutoPinRotCtr, false);
+			m_agent->updateValue(gstAutoPinRotCtr, false);
 		else
-			m_agent->updValue(gstAutoPinRotCtr, true);
+			m_agent->updateValue(gstAutoPinRotCtr, true);
 	}
 }
 
@@ -1535,7 +1535,7 @@ void RenderviewPanel::OnScaleMode(wxCommandEvent& event)
 			"Data-based zoom ratio (View with consistent scale bar sizes)");
 		break;
 	}
-	m_agent->updValue(gstScaleMode, mode);
+	m_agent->updateValue(gstScaleMode, mode);
 	UpdateScaleFactor(false);
 }
 
@@ -1615,19 +1615,19 @@ void RenderviewPanel::OnZeroRot(wxCommandEvent& event)
 		rotz == 0.0)
 	{
 		//reset
-		m_agent->updValue(gstCamRotZeroQ, fluo::Quaternion());
+		m_agent->updateValue(gstCamRotZeroQ, fluo::Quaternion());
 		fluo::Quaternion q;
 		m_agent->getValue(gstCamRotQ, q);
 		q.ToEuler(rotx, roty, rotz);
-		m_agent->updValue(gstCamRotX, rotx);
-		m_agent->updValue(gstCamRotY, roty);
-		m_agent->updValue(gstCamRotZ, rotz);
+		m_agent->updateValue(gstCamRotX, rotx);
+		m_agent->updateValue(gstCamRotY, roty);
+		m_agent->updateValue(gstCamRotZ, rotz);
 	}
 	else
 	{
 		fluo::Quaternion q;
 		m_agent->getValue(gstCamRotQ, q);
-		m_agent->updValue(gstCamRotZeroQ, q);
+		m_agent->updateValue(gstCamRotZeroQ, q);
 		OnRotReset(event);
 	}
 }
@@ -1643,9 +1643,9 @@ void RenderviewPanel::OnRotReset(wxCommandEvent &event)
 	m_x_rot_text->ChangeValue("0.0");
 	m_y_rot_text->ChangeValue("0.0");
 	m_z_rot_text->ChangeValue("0.0");
-	m_agent->updValue(gstCamRotX, double(0));
-	m_agent->updValue(gstCamRotY, double(0));
-	m_agent->updValue(gstCamRotZ, double(0));
+	m_agent->updateValue(gstCamRotX, double(0));
+	m_agent->updateValue(gstCamRotY, double(0));
+	m_agent->updateValue(gstCamRotZ, double(0));
 	//RefreshGL(true);
 	if (m_mouse_focus)
 		m_canvas->SetFocus();
@@ -1892,7 +1892,7 @@ void RenderviewPanel::OnRotLockCheck(wxCommandEvent& event)
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 			wxGetBitmapFromMemory(gear_dark));
 	}
-	m_agent->updValue(gstGearedEnable, lock);
+	m_agent->updateValue(gstGearedEnable, lock);
 	wxString str = wxString::Format("%.1f", rotx);
 	m_x_rot_text->SetValue(str);
 	str = wxString::Format("%.1f", roty);
@@ -1936,34 +1936,34 @@ void RenderviewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 	switch (sel)
 	{
 	case 0://+X
-		m_agent->updValue(gstCamRotX, double(0));
-		m_agent->updValue(gstCamRotY, double(90));
-		m_agent->updValue(gstCamRotZ, double(0));
+		m_agent->updateValue(gstCamRotX, double(0));
+		m_agent->updateValue(gstCamRotY, double(90));
+		m_agent->updateValue(gstCamRotZ, double(0));
 		break;
 	case 1://-X
-		m_agent->updValue(gstCamRotX, double(0));
-		m_agent->updValue(gstCamRotY, double(270));
-		m_agent->updValue(gstCamRotZ, double(0));
+		m_agent->updateValue(gstCamRotX, double(0));
+		m_agent->updateValue(gstCamRotY, double(270));
+		m_agent->updateValue(gstCamRotZ, double(0));
 		break;
 	case 2://+Y
-		m_agent->updValue(gstCamRotX, double(90));
-		m_agent->updValue(gstCamRotY, double(0));
-		m_agent->updValue(gstCamRotZ, double(0));
+		m_agent->updateValue(gstCamRotX, double(90));
+		m_agent->updateValue(gstCamRotY, double(0));
+		m_agent->updateValue(gstCamRotZ, double(0));
 		break;
 	case 3://-Y
-		m_agent->updValue(gstCamRotX, double(270));
-		m_agent->updValue(gstCamRotY, double(0));
-		m_agent->updValue(gstCamRotZ, double(0));
+		m_agent->updateValue(gstCamRotX, double(270));
+		m_agent->updateValue(gstCamRotY, double(0));
+		m_agent->updateValue(gstCamRotZ, double(0));
 		break;
 	case 4://+Z
-		m_agent->updValue(gstCamRotX, double(0));
-		m_agent->updValue(gstCamRotY, double(0));
-		m_agent->updValue(gstCamRotZ, double(0));
+		m_agent->updateValue(gstCamRotX, double(0));
+		m_agent->updateValue(gstCamRotY, double(0));
+		m_agent->updateValue(gstCamRotZ, double(0));
 		break;
 	case 5:
-		m_agent->updValue(gstCamRotX, double(0));
-		m_agent->updValue(gstCamRotY, double(180));
-		m_agent->updValue(gstCamRotZ, double(0));
+		m_agent->updateValue(gstCamRotX, double(0));
+		m_agent->updateValue(gstCamRotY, double(180));
+		m_agent->updateValue(gstCamRotZ, double(0));
 		break;
 	}
 	if (sel < 6)
@@ -1971,14 +1971,14 @@ void RenderviewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, true);
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 			wxGetBitmapFromMemory(gear_45));
-		m_agent->updValue(gstGearedEnable, true);
+		m_agent->updateValue(gstGearedEnable, true);
 	}
 	else
 	{
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, false);
 		m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 			wxGetBitmapFromMemory(gear_dark));
-		m_agent->updValue(gstGearedEnable, false);
+		m_agent->updateValue(gstGearedEnable, false);
 	}
 	//RefreshGL();
 }
@@ -1988,7 +1988,7 @@ void RenderviewPanel::OnBgColorChange(wxColourPickerEvent& event)
 {
 	wxColor c = event.GetColour();
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_agent->updValue(gstBgColor, color);
+	m_agent->updateValue(gstBgColor, color);
 	//RefreshGL();
 }
 
@@ -1997,14 +1997,14 @@ void RenderviewPanel::OnBgInvBtn(wxCommandEvent& event)
 	fluo::Color c;
 	m_agent->getValue(gstBgColor, c);
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	m_agent->updValue(gstBgColor, c);
+	m_agent->updateValue(gstBgColor, c);
 	//RefreshGL();
 }
 
 void RenderviewPanel::OnCamCtrCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_CamCtrChk);
-	m_agent->updValue(gstDrawCamCtr, bval);
+	m_agent->updateValue(gstDrawCamCtr, bval);
 	//RefreshGL();
 }
 
@@ -2016,21 +2016,21 @@ void RenderviewPanel::OnFpsCheck(wxCommandEvent& event)
 		lval |= 1;
 	else
 		lval &= ~1;
-	m_agent->updValue(gstDrawInfo, lval);
+	m_agent->updateValue(gstDrawInfo, lval);
 	//RefreshGL();
 }
 
 void RenderviewPanel::OnLegendCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
-	m_agent->updValue(gstDrawLegend, bval);
+	m_agent->updateValue(gstDrawLegend, bval);
 	//RefreshGL();
 }
 
 void RenderviewPanel::OnColormapCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_ColormapChk);
-	m_agent->updValue(gstDrawColormap, bval);
+	m_agent->updateValue(gstDrawColormap, bval);
 	//RefreshGL();
 }
 
@@ -2056,10 +2056,10 @@ void RenderviewPanel::OnScaleTextEditing(wxCommandEvent& event)
 	}
 	str += unit_text;
 	long lval = m_scale_cmb->GetSelection();
-	m_agent->updValue(gstScaleBarText, str.ToStdWstring());
-	m_agent->updValue(gstScaleBarLen, len);
-	m_agent->updValue(gstScaleBarNum, num_text.ToStdWstring());
-	m_agent->updValue(gstScaleBarUnit, lval);
+	m_agent->updateValue(gstScaleBarText, str.ToStdWstring());
+	m_agent->updateValue(gstScaleBarLen, len);
+	m_agent->updateValue(gstScaleBarNum, num_text.ToStdWstring());
+	m_agent->updateValue(gstScaleBarUnit, lval);
 	//RefreshGL();
 }
 
@@ -2072,8 +2072,8 @@ void RenderviewPanel::OnScaleBar(wxCommandEvent& event)
 	{
 	case kOff:
 		m_draw_scalebar = kOn;
-		m_agent->updValue(gstDrawScaleBar, true);
-		m_agent->updValue(gstDrawScaleBarText, false);
+		m_agent->updateValue(gstDrawScaleBar, true);
+		m_agent->updateValue(gstDrawScaleBarText, false);
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmapFromMemory(scale_text_off));
 		m_scale_text->Enable();
@@ -2081,8 +2081,8 @@ void RenderviewPanel::OnScaleBar(wxCommandEvent& event)
 		break;
 	case kOn:
 		m_draw_scalebar = kText;
-		m_agent->updValue(gstDrawScaleBar, true);
-		m_agent->updValue(gstDrawScaleBarText, true);
+		m_agent->updateValue(gstDrawScaleBar, true);
+		m_agent->updateValue(gstDrawScaleBarText, true);
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmapFromMemory(scale_text));
 		m_scale_text->Enable();
@@ -2090,8 +2090,8 @@ void RenderviewPanel::OnScaleBar(wxCommandEvent& event)
 		break;
 	case kText:
 		m_draw_scalebar = kOff;
-		m_agent->updValue(gstDrawScaleBar, false);
-		m_agent->updValue(gstDrawScaleBarText, false);
+		m_agent->updateValue(gstDrawScaleBar, false);
+		m_agent->updateValue(gstDrawScaleBarText, false);
 		m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 			wxGetBitmapFromMemory(scalebar));
 		m_scale_text->Disable();
@@ -2129,8 +2129,8 @@ void RenderviewPanel::OnAovSldrIdle(wxIdleEvent& event)
 	{
 		if (!m_draw_clip)
 		{
-			m_agent->updValue(gstDrawClip, true);
-			m_agent->updValue(gstClipMask, long(-1));
+			m_agent->updateValue(gstDrawClip, true);
+			m_agent->updateValue(gstClipMask, long(-1));
 			//RefreshGL(true);
 			m_draw_clip = true;
 		}
@@ -2139,7 +2139,7 @@ void RenderviewPanel::OnAovSldrIdle(wxIdleEvent& event)
 	{
 		if (m_draw_clip)
 		{
-			m_agent->updValue(gstDrawClip, false);
+			m_agent->updateValue(gstDrawClip, false);
 			//RefreshGL(true);
 			m_draw_clip = false;
 		}
@@ -2160,7 +2160,7 @@ void RenderviewPanel::OnAovText(wxCommandEvent& event)
 	wxString str = m_aov_text->GetValue();
 	if (str == "Ortho")
 	{
-		m_agent->updValue(gstPerspective, false);
+		m_agent->updateValue(gstPerspective, false);
 		m_aov_sldr->SetValue(10);
 		//RefreshGL(true);
 		return;
@@ -2170,7 +2170,7 @@ void RenderviewPanel::OnAovText(wxCommandEvent& event)
 		return;
 	if (val ==0 || val == 10)
 	{
-		m_agent->updValue(gstPerspective, false);
+		m_agent->updateValue(gstPerspective, false);
 		m_aov_text->ChangeValue("Ortho");
 		m_aov_sldr->SetValue(10);
 	}
@@ -2186,8 +2186,8 @@ void RenderviewPanel::OnAovText(wxCommandEvent& event)
 			m_aov_text->ChangeValue("100");
 			m_aov_sldr->SetValue(100);
 		}
-		m_agent->updValue(gstPerspective, true);
-		m_agent->updValue(gstAov, double(val));
+		m_agent->updateValue(gstPerspective, true);
+		m_agent->updateValue(gstAov, double(val));
 		m_aov_sldr->SetValue(val);
 	}
 	//RefreshGL(true);
@@ -2196,15 +2196,15 @@ void RenderviewPanel::OnAovText(wxCommandEvent& event)
 void RenderviewPanel::OnFreeChk(wxCommandEvent& event)
 {
 	if (m_options_toolbar->GetToolState(ID_FreeChk))
-		m_agent->updValue(gstFree, true);
+		m_agent->updateValue(gstFree, true);
 	else
 	{
-		m_agent->updValue(gstFree, false);
+		m_agent->updateValue(gstFree, false);
 		int val = m_aov_sldr->GetValue();
 		if (val == 10)
-			m_agent->updValue(gstPerspective, false);
+			m_agent->updateValue(gstPerspective, false);
 		else
-			m_agent->updValue(gstPerspective, true);
+			m_agent->updateValue(gstPerspective, true);
 	}
 	//RefreshGL();
 }
@@ -2423,11 +2423,11 @@ void RenderviewPanel::LoadSettings()
 	double dval;
 	long lval;
 	if (fconfig.Read("volume_seq_rd", &bval) && bval)
-		m_agent->updValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_SEQ));
+		m_agent->updateValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_SEQ));
 	if (fconfig.Read("volume_multi_rd", &bval) && bval)
-		m_agent->updValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_MULTI));
+		m_agent->updateValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_MULTI));
 	if (fconfig.Read("volume_comp_rd", &bval) && bval)
-		m_agent->updValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_COMP));
+		m_agent->updateValue(gstMixMethod, long(fluo::Renderview::MIX_METHOD_COMP));
 
 	wxString str;
 	if (fconfig.Read("bg_color_picker", &str))
@@ -2437,31 +2437,31 @@ void RenderviewPanel::LoadSettings()
 		wxColor cVal(r, g, b);
 		m_bg_color_picker->SetColour(cVal);
 		fluo::Color c(r/255.0, g/255.0, b/255.0);
-		m_agent->updValue(gstBgColor, c);
+		m_agent->updateValue(gstBgColor, c);
 	}
 	if (fconfig.Read("cam_ctr_chk", &bval))
 	{
 		m_options_toolbar->ToggleTool(ID_CamCtrChk,bval);
-		m_agent->updValue(gstDrawCamCtr, bval);
+		m_agent->updateValue(gstDrawCamCtr, bval);
 	}
 	if (fconfig.Read("camctr_size", &dval))
 	{
-		m_agent->updValue(gstCamCtrSize, dval);
+		m_agent->updateValue(gstCamCtrSize, dval);
 	}
 	if (fconfig.Read("info_chk", &lval))
 	{
 		m_options_toolbar->ToggleTool(ID_FpsChk, lval&fluo::Renderview::INFO_DISP);
-		m_agent->updValue(gstDrawInfo, lval);
+		m_agent->updateValue(gstDrawInfo, lval);
 	}
 	if (fconfig.Read("legend_chk", &bval))
 	{
 		m_options_toolbar->ToggleTool(ID_LegendChk,bval);
-		m_agent->updValue(gstDrawLegend, bval);
+		m_agent->updateValue(gstDrawLegend, bval);
 	}
 	if (fconfig.Read("colormap_chk", &bval))
 	{
 		m_options_toolbar->ToggleTool(ID_ColormapChk, bval);
-		m_agent->updValue(gstDrawColormap, bval);
+		m_agent->updateValue(gstDrawColormap, bval);
 	}
 	if (fconfig.Read("mouse_focus", &bval))
 	{
@@ -2469,16 +2469,16 @@ void RenderviewPanel::LoadSettings()
 	}
 	if (fconfig.Read("persp", &bval))
 	{
-		m_agent->updValue(gstPerspective, bval);
+		m_agent->updateValue(gstPerspective, bval);
 	}
 	if (fconfig.Read("aov", &dval))
 	{
-		m_agent->updValue(gstAov, dval);
+		m_agent->updateValue(gstAov, dval);
 	}
 	if (fconfig.Read("free_rd", &bval))
 	{
 		m_options_toolbar->ToggleTool(ID_FreeChk,bval);
-		m_agent->updValue(gstFree, bval);
+		m_agent->updateValue(gstFree, bval);
 	}
 	if (fconfig.Read("x_rot", &str))
 	{
@@ -2504,7 +2504,7 @@ void RenderviewPanel::LoadSettings()
 		else
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmapFromMemory(gear_dark));
-		m_agent->updValue(gstGearedEnable, bval);
+		m_agent->updateValue(gstGearedEnable, bval);
 	}
 	if (fconfig.Read("rot_slider", &m_rot_slider))
 	{
@@ -2525,9 +2525,9 @@ void RenderviewPanel::LoadSettings()
 	//}
 	if (fconfig.Read("pin_rot_center", &bval))
 	{
-		m_agent->updValue(gstPinRotCtr, bval);
+		m_agent->updateValue(gstPinRotCtr, bval);
 		if (bval)
-			m_agent->updValue(gstRotCtrDirty, true);
+			m_agent->updateValue(gstRotCtrDirty, true);
 		m_pin_btn->ToggleTool(ID_PinBtn, bval);
 		if (bval)
 			m_pin_btn->SetToolNormalBitmap(ID_PinBtn,
@@ -2544,13 +2544,13 @@ void RenderviewPanel::LoadSettings()
 	if (fconfig.Read("scale_factor", &dval))
 	{
 		m_dft_scale_factor = dval;
-		m_agent->updValue(gstScaleFactor, dval);
+		m_agent->updateValue(gstScaleFactor, dval);
 		UpdateScaleFactor(false);
 	}
 	if (fconfig.Read("depth_atten_chk", &bval))
 	{
 		//m_left_toolbar->ToggleTool(ID_DepthAttenChk,bVal);
-		m_agent->updValue(gstDepthAtten, bval);
+		m_agent->updateValue(gstDepthAtten, bval);
 		if (bval)
 		{
 			m_depth_atten_factor_sldr->Enable();
@@ -2567,16 +2567,16 @@ void RenderviewPanel::LoadSettings()
 		m_depth_atten_factor_text->ChangeValue(str);
 		str.ToDouble(&dval);
 		m_depth_atten_factor_sldr->SetValue(int(dval*100));
-		m_agent->updValue(gstDaInt, dval);
+		m_agent->updateValue(gstDaInt, dval);
 		m_dft_depth_atten_factor = dval;
 	}
 	if (fconfig.Read("center", &str))
 	{
 		float x, y, z;
 		SSCANF(str.c_str(), "%f%f%f", &x, &y, &z);
-		m_agent->updValue(gstCamCtrX, double(x));
-		m_agent->updValue(gstCamCtrY, double(y));
-		m_agent->updValue(gstCamCtrZ, double(z));
+		m_agent->updateValue(gstCamCtrX, double(x));
+		m_agent->updateValue(gstCamCtrY, double(y));
+		m_agent->updateValue(gstCamCtrZ, double(z));
 	}
 
 	m_use_dft_settings = true;

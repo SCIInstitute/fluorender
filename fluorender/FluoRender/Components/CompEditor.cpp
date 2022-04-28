@@ -535,7 +535,7 @@ void ComponentEditor::Combine(CelpList &list)
 fluo::VolumeData* ComponentEditor::GetCurrentVolume()
 {
 	fluo::Referenced* ref;
-	m_view->getRvalu(gstCurrentVolume, &ref);
+	m_view->getRefValue(gstCurrentVolume, &ref);
 	return dynamic_cast<fluo::VolumeData*>(ref);
 }
 

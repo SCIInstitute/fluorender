@@ -89,5 +89,5 @@ void AnnotationPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 {
 	wxString memo = m_memo_text->GetValue();
 	std::string str = memo.ToStdString();
-	m_agent->updValue(gstMemo, str);
+	m_agent->updateValue(gstMemo, str);
 }

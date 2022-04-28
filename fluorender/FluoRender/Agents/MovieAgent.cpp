@@ -620,9 +620,9 @@ void MovieAgent::OnTimer()
 	{
 		if (record)
 			WriteFrameToFile(int(fps*len + 0.5));
-		chgValue(gstMovDelayedStop, false);
+		changeValue(gstMovDelayedStop, false);
 		Stop();
-		chgValue(gstKeepEnlarge, false);
+		changeValue(gstKeepEnlarge, false);
 		return;
 	}
 
@@ -764,7 +764,7 @@ void MovieAgent::OnCurrentFrame(Event& event)
 	double pcnt = (double)(cf - sf) / (double)time;
 
 	panel_.m_cur_frame_text->ChangeValue(wxString::Format("%d", cf));
-	chgValue(gstCurrentFrame, cf);
+	changeValue(gstCurrentFrame, cf);
 	SetProgress(pcnt);
 	SetRendering(pcnt, false);
 }

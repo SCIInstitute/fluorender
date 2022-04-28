@@ -173,7 +173,7 @@ void NoiseReduceAgent::OnThreshold(Event& event)
 	if (!vd) return;
 	double max_int;
 	vd->getValue(gstMaxInt, max_int);
-	vd->updValue(gstMaskThresh, max_int*dval);
+	vd->updateValue(gstMaskThresh, max_int*dval);
 	//m_frame->RefreshVRenderViews();
 }
 

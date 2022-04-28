@@ -31,7 +31,7 @@ protected:
 	{
 		double dval;
 		if (getValue("value1", dval))
-			updValue("value2", dval + 1, event);
+			updateValue("value2", dval + 1, event);
 	}
 };
 
@@ -54,7 +54,7 @@ void MyTest()
 	obj1->addValue("value1", double(0));
 	obj1->addValue("value2", double(0));
 	obj1->addValue("value3", double(0));
-	obj1->addRvalu("object", (Referenced*)(0));
+	obj1->addRefValue("object", (Referenced*)(0));
 	auto names = obj1->getValueNames();
 
 	//allocate memory for a group and add object as its child
@@ -90,7 +90,7 @@ void MyTest()
 	obj1->setValue("value1", 1.0);							cout << "obj1->setValue(\"value1\", 1.0);" << endl;
 	obj1->setValue("value2", 2.0);							cout << "obj1->setValue(\"value2\", 2.0);" << endl;
 	obj1->setValue("value3", 3.0);							cout << "obj1->setValue(\"value3\", 3.0);" << endl;
-	obj1->setRvalu("object", obj1);							cout << "obj1->setValue(\"object\", obj1);" << endl;
+	obj1->setRefValue("object", obj1);							cout << "obj1->setValue(\"object\", obj1);" << endl;
 	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl; cin.get();
 
@@ -121,12 +121,12 @@ void MyTest()
 	group->syncAllValues(obj3);								cout << "group->syncAllValues(obj3);" << endl;
 	obj1->setValue("value1", 11.0);							cout << "obj1->setValue(\"value1\", 11.0);" << endl;
 	obj3->setValue("value3", 10.0);							cout << "obj1->setValue(\"value3\", 10.0);" << endl;
-	obj1->setRvalu("object", obj2);							cout << "obj1->setValue(\"object\", obj2);" << endl;
+	obj1->setRefValue("object", obj2);							cout << "obj1->setValue(\"object\", obj2);" << endl;
 	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	/*Level 5: a bonus for going so far*/					cout << "Level 5: a bonus for going so far" << endl;
-	obj2->setRvalu("object", obj1);							cout << "obj2->setValue(\"object\", obj1);" << endl;
+	obj2->setRefValue("object", obj1);							cout << "obj2->setValue(\"object\", obj1);" << endl;
 	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
@@ -136,7 +136,7 @@ void MyTest()
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();
 
 	/*Level 7: directly set a self-referencing value!*/		cout << "Level 7: directly set a self-referencing value!" << endl;
-	obj3->setRvalu("object", obj3);							cout << "obj3->setValue(\"object\", obj3);" << endl;
+	obj3->setRefValue("object", obj3);							cout << "obj3->setValue(\"object\", obj3);" << endl;
 	obj3->setValue("value1", 12.0);							cout << "obj3->setValue(\"value1\", 12.0);" << endl;
 	/*Results:*/											cout << "Results:" << endl;
 	group->accept(visitor);									cout << "Press Enter to continue." << endl;	cin.get();

@@ -198,7 +198,7 @@ void MeshTransPanel::OnSpinUp(wxSpinEvent& event)
 		double dval = STOD(str_val.fn_str()) + 1.0;
 		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->SetValue(str);
-		m_agent->updValue(name, dval);
+		m_agent->updateValue(name, dval);
 	}
 }
 
@@ -252,7 +252,7 @@ void MeshTransPanel::OnSpinDown(wxSpinEvent& event)
 		double dval = STOD(str_val.fn_str()) - 1.0;
 		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->SetValue(str);
-		m_agent->updValue(name, dval);
+		m_agent->updateValue(name, dval);
 	}
 }
 
@@ -306,7 +306,7 @@ void MeshTransPanel::OnValueEnter(wxCommandEvent& event)
 		wxString str_val = text_ctrl->GetValue();
 		double dval;
 		if (str_val.ToDouble(&dval))
-			m_agent->updValue(name, dval);
+			m_agent->updateValue(name, dval);
 	}
 }
 

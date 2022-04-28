@@ -252,13 +252,13 @@ void ColocalDlg::OnColocalizenBtn(wxCommandEvent &event)
 void ColocalDlg::OnAutoUpdate(wxCommandEvent &event)
 {
 	bool bval = m_auto_update_btn->GetValue();
-	m_agent->updValue(gstAutoUpdate, bval);
+	m_agent->updateValue(gstAutoUpdate, bval);
 }
 
 void ColocalDlg::OnUseSelChk(wxCommandEvent &event)
 {
 	bool bval = m_use_sel_chk->GetValue();
-	m_agent->updValue(gstUseSelection, bval);
+	m_agent->updateValue(gstUseSelection, bval);
 }
 
 void ColocalDlg::OnMethodRdb(wxCommandEvent &event)
@@ -270,38 +270,38 @@ void ColocalDlg::OnMethodRdb(wxCommandEvent &event)
 		method = 1;
 	else if (m_logical_and_rdb->GetValue())
 		method = 2;
-	m_agent->updValue(gstColocalMethod, method);
+	m_agent->updateValue(gstColocalMethod, method);
 }
 
 //format
 void ColocalDlg::OnIntWeightBtn(wxCommandEvent &event)
 {
 	bool bval = m_int_weight_btn->GetValue();
-	m_agent->updValue(gstIntWeighted, bval);
+	m_agent->updateValue(gstIntWeighted, bval);
 }
 
 void ColocalDlg::OnRatioBtn(wxCommandEvent &event)
 {
 	bool bval = m_ratio_btn->GetValue();
-	m_agent->updValue(gstGetRatio, bval);
+	m_agent->updateValue(gstGetRatio, bval);
 }
 
 void ColocalDlg::OnPhysicalBtn(wxCommandEvent &event)
 {
 	bool bval = m_physical_btn->GetValue();
-	m_agent->updValue(gstPhysSize, bval);
+	m_agent->updateValue(gstPhysSize, bval);
 }
 
 void ColocalDlg::OnColorMapBtn(wxCommandEvent &event)
 {
 	bool bval = m_colormap_btn->GetValue();
-	m_agent->updValue(gstColormapEnable, bval);
+	m_agent->updateValue(gstColormapEnable, bval);
 }
 
 void ColocalDlg::OnHistoryChk(wxCommandEvent& event)
 {
 	bool bval = m_history_chk->GetValue();
-	m_agent->updValue(gstHoldHistory, bval);
+	m_agent->updateValue(gstHoldHistory, bval);
 }
 
 void ColocalDlg::OnClearHistBtn(wxCommandEvent& event)

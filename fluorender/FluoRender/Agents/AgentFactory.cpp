@@ -176,8 +176,8 @@ ClipPlaneAgent* AgentFactory::addClipPlaneAgent(const std::string &name, wxWindo
 	{
 		agent->setName(name);
 		//own values
-		agent->addRvalu(gstVolumeA, (Referenced*)(0));
-		agent->addRvalu(gstVolumeB, (Referenced*)(0));
+		agent->addRefValue(gstVolumeA, (Referenced*)(0));
+		agent->addRefValue(gstVolumeB, (Referenced*)(0));
 		ADD_AFTER_EVENT(gstClipX1, ClipPlaneAgent, OnClipXChanged);
 		ADD_AFTER_EVENT(gstClipX2, ClipPlaneAgent, OnClipXChanged);
 		ADD_AFTER_EVENT(gstClipY1, ClipPlaneAgent, OnClipYChanged);

@@ -92,7 +92,7 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	fluo::Renderview* view = glbin_revf->build();
 	view->setName(m_vrv->GetName().ToStdString());
 	glbin_root->addChild(view);
-	glbin_root->setRvalu(gstCurrentView, view);
+	glbin_root->setRefValue(gstCurrentView, view);
 	m_agent = glbin_agtf->addRenderCanvasAgent(view->getName(), *this);
 	m_agent->setObject(view);
 #ifdef _WIN32
@@ -740,7 +740,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 //		gstBrightnessR, gstBrightnessG, gstBrightnessB,
 //		gstEqualizeR, gstEqualizeG, gstEqualizeB,
 //		gstSyncR, gstSyncG, gstSyncB };
-//	src_vd->propValues(names, group);
+//	src_vd->propagateValues(names, group);
 //
 //	m_vd_pop_dirty = true;
 //	m_md_pop_dirty = true;
@@ -798,7 +798,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 //		gstBrightnessR, gstBrightnessG, gstBrightnessB,
 //		gstEqualizeR, gstEqualizeG, gstEqualizeB,
 //		gstSyncR, gstSyncG, gstSyncB };
-//	src_vd->propValues(names, dst_group);
+//	src_vd->propagateValues(names, dst_group);
 //
 //	m_vd_pop_dirty = true;
 //	m_md_pop_dirty = true;
