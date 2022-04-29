@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Flobject/Node.hpp>
 #include <string>
 
+#define gstInput "default input"
+
 class Flinput : public fluo::Node
 {
 public:

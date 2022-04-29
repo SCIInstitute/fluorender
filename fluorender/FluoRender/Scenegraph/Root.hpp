@@ -32,6 +32,21 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.hpp>
 #include <Group.hpp>
 
+//current object
+#define gstCurrent "current"
+#define gstCurrentSelect "current select"//0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group; 7:annotations
+#define gstCurrentView "current view"
+#define gstCurrentVolume "current volume"
+#define gstCurrentMesh "current mesh"
+#define gstCurrentVolumeGroup "current volume group"
+#define gstCurrentMeshGroup "current mesh group"
+#define gstCurrentAnnotations "current annotations"
+#define gstCurVolIdx "cur vol idx"
+#define gstCurMshIdx "cur msh idx"
+//copy source
+#define gstSourceVolume "source volume"//for mask copying
+#define gstSourceMode "source mode"//copy 0:data; 1:mask
+
 namespace fluo
 {
 	class Renderview;
