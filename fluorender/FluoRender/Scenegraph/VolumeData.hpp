@@ -35,6 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <vector>
 
+#define gstColor "color"//redefinition needs to be the same as original
+
 namespace flvr
 {
 	class VolumeRenderer;

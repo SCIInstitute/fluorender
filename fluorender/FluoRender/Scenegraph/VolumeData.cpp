@@ -53,8 +53,6 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-#define gstColor "color"//redefinition needs to be the same as original
-
 VolumeData::VolumeData() :
 	m_vr(0),
 	m_tex(0),
