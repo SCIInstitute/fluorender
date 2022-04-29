@@ -98,7 +98,7 @@ namespace fluo
 			if (old_obj)
 				old_obj->removeObserver(this);
 			clearValues(1);
-			addSetRvalu(gstAgentAsset, obj);
+			addSetRefValue(gstAgentAsset, obj);
 			if (obj)
 			{
 				copyValues(*obj);//shallow copy to share values

@@ -314,7 +314,7 @@ namespace fluo
 			else
 				return setValue(name, value);
 		}
-		bool addSetRvalu(const std::string& name, Referenced* value)
+		bool addSetRefValue(const std::string& name, Referenced* value)
 		{
 			if (addRefValue(name, value))
 				return true;
