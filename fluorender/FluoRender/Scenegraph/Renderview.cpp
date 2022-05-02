@@ -247,8 +247,8 @@ VolumeGroup* Renderview::addVolumeData(VolumeData* vd, VolumeGroup* group)
 		//}
 	}
 
-	updValue(gstVolListDirty, true);
-	updValue(gstFullVolListDirty, true);
+	updateValue(gstVolListDirty, true);
+	updateValue(gstFullVolListDirty, true);
 
 	//if (m_frame)
 	//{
@@ -342,7 +342,7 @@ void Renderview::Clear()
 	m_loader->RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
 
-	setRvalu(gstCurrentVolume, (Referenced*)(0));
+	setRefValue(gstCurrentVolume, (Referenced*)(0));
 }
 
 void Renderview::InitView(unsigned int type)
@@ -676,14 +676,14 @@ void Renderview::ClearMeshList()
 VolumeData* Renderview::GetCurrentVolume()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentVolume, &ref);
+	getRefValue(gstCurrentVolume, &ref);
 	return dynamic_cast<VolumeData*>(ref);
 }
 
 MeshData* Renderview::GetCurrentMesh()
 {
 	Referenced* ref;
-	getRvalu(gstCurrentMesh, &ref);
+	getRefValue(gstCurrentMesh, &ref);
 	return dynamic_cast<MeshData*>(ref);
 }
 
@@ -1189,7 +1189,7 @@ void Renderview::SetParams(double t)
 	//	int index = interpolator->GetKeyIndexFromTime(t);
 	//	m_frame->GetRecorderDlg()->SetSelection(index);
 	//}
-	updValue(gstVolListDirty, true);
+	updateValue(gstVolListDirty, true);
 }
 
 void Renderview::ResetMovieAngle()
@@ -1296,7 +1296,7 @@ void Renderview::Set4DSeqFrame(long frame, long start_frame, long end_frame, boo
 		m_scriptor->Run4DScript(flrd::ScriptProc::TM_ALL_POST, script_file, rewind);
 
 	//restore currently selected volume
-	setRvalu(gstCurrentVolume, vd);
+	setRefValue(gstCurrentVolume, vd);
 	m_selector->SetVolume(vd);
 	m_calculator->SetVolumeA(vd);
 
@@ -2398,7 +2398,7 @@ void Renderview::Update(int debug_code, bool start_loop)
 	SetSortBricks();
 	//setValue(gstRefresh, true);
 	//setValue(gstRefreshErase, erase);
-	flupValue(gstRefreshNotify, bval);
+	flipUpdateValue(gstRefreshNotify, bval);
 	//Refresh(erase);
 }
 
@@ -3239,10 +3239,10 @@ void Renderview::DrawLegend()
 	switch (current_sel)
 	{
 	case 2:
-		getRvalu(gstCurrentVolume, &ref);
+		getRefValue(gstCurrentVolume, &ref);
 		break;
 	case 3:
-		getRvalu(gstCurrentMesh, &ref);
+		getRefValue(gstCurrentMesh, &ref);
 		break;
 	}
 	for (auto vd : m_vol_list)
@@ -5952,7 +5952,7 @@ void Renderview::DrawMIP(VolumeData* vd, long peel)
 		{
 			vd->setValue(gstMipMode, long(1));
 			ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
-			propValues(fog, vd);
+			propagateValues(fog, vd);
 		}
 		//turn off alpha
 		if (color_mode == 1)
@@ -5962,7 +5962,7 @@ void Renderview::DrawMIP(VolumeData* vd, long peel)
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->setValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
-		propValue(gstCurFramebuffer, vd);
+		propagateValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
 		double scale_factor;
 		getValue(gstAdaptive, adaptive);
@@ -6268,10 +6268,10 @@ void Renderview::DrawOVER(VolumeData* vd, bool mask, int peel)
 			vd->setValue(gstStreamMode, long(0));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
-		propValues(fog, vd);
+		propagateValues(fog, vd);
 		vd->setValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
-		propValue(gstCurFramebuffer, vd);
+		propagateValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
 		double scale_factor;
 		getValue(gstAdaptive, adaptive);
@@ -6430,7 +6430,7 @@ void Renderview::DrawOLShading(VolumeData* vd)
 	vd->setValue(gstStreamMode, long(2));
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
-	propValues(fog, vd);
+	propagateValues(fog, vd);
 	bool adaptive, interactive, persp;
 	double scale_factor;
 	getValue(gstAdaptive, adaptive);
@@ -6584,10 +6584,10 @@ void Renderview::DrawOLShadows(VolumeList &vlist)
 		vd->setValue(gstStreamMode, long(3));
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
-		propValues(fog, vd);
+		propagateValues(fog, vd);
 		vd->setValue(gstViewport, Vector4i(vp));
 		vd->setValue(gstClearColor, Vector4f(clear_color));
-		propValue(gstCurFramebuffer, vd);
+		propagateValue(gstCurFramebuffer, vd);
 		bool adaptive, interactive, persp;
 		double scale_factor;
 		getValue(gstAdaptive, adaptive);
@@ -6619,7 +6619,7 @@ void Renderview::DrawOLShadows(VolumeList &vlist)
 			{
 				list[i]->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				ValueCollection fog = { gstDepthAtten, gstDaInt, gstDaStart, gstDaEnd };
-				propValues(fog, list[i]);
+				propagateValues(fog, list[i]);
 				m_mvr->add_vr(vr);
 				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -9482,7 +9482,7 @@ void Renderview::OnFullMshListDirtyChanged(Event& event)
 void Renderview::OnCurrentVolumeChanged(Event& event)
 {
 	Referenced* ref;
-	getRvalu(gstCurrentVolume, &ref);
+	getRefValue(gstCurrentVolume, &ref);
 	VolumeData* cvol = dynamic_cast<VolumeData*>(ref);
 	if (!cvol) return;
 	long idx = -1, i = 0;
@@ -9501,7 +9501,7 @@ void Renderview::OnCurrentVolumeChanged(Event& event)
 void Renderview::OnCurrentMeshChanged(Event& event)
 {
 	Referenced* ref;
-	getRvalu(gstCurrentMesh, &ref);
+	getRefValue(gstCurrentMesh, &ref);
 	MeshData* cmsh = dynamic_cast<MeshData*>(ref);
 	if (!cmsh) return;
 	long idx = -1, i = 0;
@@ -9570,11 +9570,11 @@ void Renderview::OnPaintModeChanged(Event& event)
 void Renderview::OnSelUndo(Event& event)
 {
 	m_selector->UndoMask();
-	chgValue(gstSelUndo, false);
+	changeValue(gstSelUndo, false);
 }
 
 void Renderview::OnSelRedo(Event& event)
 {
 	m_selector->RedoMask();
-	chgValue(gstSelRedo, false);
+	changeValue(gstSelRedo, false);
 }

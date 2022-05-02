@@ -114,9 +114,9 @@ void CalculationAgent::LoadVolB()
 void CalculationAgent::CalcSub()
 {
 	Referenced* ref;
-	getRvalu(gstVolumeA, &ref);
+	getRefValue(gstVolumeA, &ref);
 	VolumeData* vd1 = dynamic_cast<VolumeData*>(ref);
-	getRvalu(gstVolumeB, &ref);
+	getRefValue(gstVolumeB, &ref);
 	VolumeData* vd2 = dynamic_cast<VolumeData*>(ref);
 	if (!vd1 || !vd2)
 		return;
@@ -130,9 +130,9 @@ void CalculationAgent::CalcSub()
 void CalculationAgent::CalcAdd()
 {
 	Referenced* ref;
-	getRvalu(gstVolumeA, &ref);
+	getRefValue(gstVolumeA, &ref);
 	VolumeData* vd1 = dynamic_cast<VolumeData*>(ref);
-	getRvalu(gstVolumeB, &ref);
+	getRefValue(gstVolumeB, &ref);
 	VolumeData* vd2 = dynamic_cast<VolumeData*>(ref);
 	if (!vd1 || !vd2)
 		return;
@@ -146,9 +146,9 @@ void CalculationAgent::CalcAdd()
 void CalculationAgent::CalcDiv()
 {
 	Referenced* ref;
-	getRvalu(gstVolumeA, &ref);
+	getRefValue(gstVolumeA, &ref);
 	VolumeData* vd1 = dynamic_cast<VolumeData*>(ref);
-	getRvalu(gstVolumeB, &ref);
+	getRefValue(gstVolumeB, &ref);
 	VolumeData* vd2 = dynamic_cast<VolumeData*>(ref);
 	if (!vd1 || !vd2)
 		return;
@@ -162,9 +162,9 @@ void CalculationAgent::CalcDiv()
 void CalculationAgent::CalcIsc()
 {
 	Referenced* ref;
-	getRvalu(gstVolumeA, &ref);
+	getRefValue(gstVolumeA, &ref);
 	VolumeData* vd1 = dynamic_cast<VolumeData*>(ref);
-	getRvalu(gstVolumeB, &ref);
+	getRefValue(gstVolumeB, &ref);
 	VolumeData* vd2 = dynamic_cast<VolumeData*>(ref);
 	if (!vd1 || !vd2)
 		return;
@@ -178,9 +178,9 @@ void CalculationAgent::CalcIsc()
 void CalculationAgent::CalcFill()
 {
 	Referenced* ref;
-	getRvalu(gstVolumeA, &ref);
+	getRefValue(gstVolumeA, &ref);
 	VolumeData* vd1 = dynamic_cast<VolumeData*>(ref);
-	getRvalu(gstVolumeB, &ref);
+	getRefValue(gstVolumeB, &ref);
 	VolumeData* vd2 = dynamic_cast<VolumeData*>(ref);
 	if (!vd1 && !vd2)
 		return;

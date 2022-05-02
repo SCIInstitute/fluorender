@@ -68,7 +68,7 @@ StopWatch* StopWatchFactory::clone(StopWatch* sw)
 	new_sw->setId(global_id_);
 	std::string name = "stop watch" + std::to_string(local_id_);
 	new_sw->setName(name);
-	new_sw->addRvalu(gstFactory, this);
+	new_sw->addRefValue(gstFactory, this);
 
 	objects_.push_front(new_sw);
 

@@ -309,7 +309,7 @@ void ClipPlaneAgent::alignRenderViewRot()
 	if (rot_z > 180.0) rot_z -= 360.0;
 	setValue(gstClipRotX, rot_x);
 	setValue(gstClipRotX, rot_y);
-	updValue(gstClipRotX, rot_z);
+	updateValue(gstClipRotX, rot_z);
 }
 
 void ClipPlaneAgent::OnClipXChanged(Event& event)
@@ -427,9 +427,9 @@ void ClipPlaneAgent::OnClipDistXChanged(Event& event)
 		x1 = x2 - clip_dist;
 	}
 
-	if (set_dist) updValue(gstClipDistX, clip_dist, event);
-	updValue(gstClipX1, x1, event);
-	updValue(gstClipX2, x2, event);
+	if (set_dist) updateValue(gstClipDistX, clip_dist, event);
+	updateValue(gstClipX1, x1, event);
+	updateValue(gstClipX2, x2, event);
 	if (!panel_.m_yz_dist_text->HasFocus())
 		panel_.m_yz_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
@@ -474,9 +474,9 @@ void ClipPlaneAgent::OnClipDistYChanged(Event& event)
 		y1 = y2 - clip_dist;
 	}
 
-	if (set_dist) updValue(gstClipDistY, clip_dist, event);
-	updValue(gstClipY1, y1, event);
-	updValue(gstClipY2, y2, event);
+	if (set_dist) updateValue(gstClipDistY, clip_dist, event);
+	updateValue(gstClipY1, y1, event);
+	updateValue(gstClipY2, y2, event);
 	if (!panel_.m_xz_dist_text->HasFocus())
 		panel_.m_xz_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));
@@ -521,9 +521,9 @@ void ClipPlaneAgent::OnClipDistZChanged(Event& event)
 		z1 = z2 - clip_dist;
 	}
 
-	if (set_dist) updValue(gstClipDistZ, clip_dist, event);
-	updValue(gstClipZ1, z1, event);
-	updValue(gstClipZ2, z2, event);
+	if (set_dist) updateValue(gstClipDistZ, clip_dist, event);
+	updateValue(gstClipZ1, z1, event);
+	updateValue(gstClipZ2, z2, event);
 	if (!panel_.m_xy_dist_text->HasFocus())
 		panel_.m_xy_dist_text->ChangeValue(
 			wxString::Format("%d", int(clip_dist * res + 0.5)));

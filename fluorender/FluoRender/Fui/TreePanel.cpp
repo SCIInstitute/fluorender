@@ -319,7 +319,7 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 		if (node)
 		{
 			bool display;
-			node->flupValue(gstDisplay, display);
+			node->flipUpdateValue(gstDisplay, display);
 			//for showing/hiding the property panel
 			//this should be improved when frame has its agent
 			RenderFrame* vr_frame = (RenderFrame*)m_frame;
@@ -334,7 +334,7 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 		if (node)
 		{
 			bool rc;
-			node->flupValue(gstRandomizeColor, rc);
+			node->flipUpdateValue(gstRandomizeColor, rc);
 		}
 	}
 	break;
@@ -361,8 +361,8 @@ void TreePanel::OnSorted(wxDataViewEvent &event)
 		sort_method = is_asc ? 1 : 2;
 	else
 		sort_method = 0;
-	m_tree_model->updValue(gstSortValue, sort_value);
-	m_tree_model->updValue(gstSortMethod, sort_method);
+	m_tree_model->updateValue(gstSortValue, sort_value);
+	m_tree_model->updateValue(gstSortMethod, sort_method);
 }
 
 void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
@@ -371,7 +371,7 @@ void TreePanel::OnHeaderRightClick(wxDataViewEvent &event)
 	if (!col)
 		return;
 	col->UnsetAsSortKey();
-	m_tree_model->updValue(gstSortMethod, long(0));
+	m_tree_model->updateValue(gstSortMethod, long(0));
 	event.Skip();
 }
 

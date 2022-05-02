@@ -34,6 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <thread>
 
+#define gstAsyncTimer "default aync timer"
+#define gstTimerInterval "timer interval"//in millisec
+#define gstTimerRunning "timer running"
+
 namespace fluo
 {
 	/**

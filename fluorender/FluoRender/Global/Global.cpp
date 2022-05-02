@@ -100,14 +100,14 @@ void Global::BuildRoot()
 	Root* root = new Root();
 	root->setName(gstRoot);
 	root->addValue(gstCurrentSelect, long(0));
-	root->addRvalu(gstCurrentView, (Referenced*)(0));
-	root->addRvalu(gstCurrentVolume, (Referenced*)(0));
-	root->addRvalu(gstCurrentMesh, (Referenced*)(0));
-	root->addRvalu(gstCurrentVolumeGroup, (Referenced*)(0));
-	root->addRvalu(gstCurrentMeshGroup, (Referenced*)(0));
-	root->addRvalu(gstCurrentAnnotations, (Referenced*)(0));
+	root->addRefValue(gstCurrentView, (Referenced*)(0));
+	root->addRefValue(gstCurrentVolume, (Referenced*)(0));
+	root->addRefValue(gstCurrentMesh, (Referenced*)(0));
+	root->addRefValue(gstCurrentVolumeGroup, (Referenced*)(0));
+	root->addRefValue(gstCurrentMeshGroup, (Referenced*)(0));
+	root->addRefValue(gstCurrentAnnotations, (Referenced*)(0));
 	//copy source
-	root->addRvalu(gstSourceVolume, (Referenced*)(0));
+	root->addRefValue(gstSourceVolume, (Referenced*)(0));
 	root->addValue(gstSourceMode, long(0));
 	//others to sync with children
 	ADD_VALUE(gstSaveProjectEnable, bool(false));

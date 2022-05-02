@@ -35,6 +35,17 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
+//color
+#define gstColor "color"
+#define gstVolume "volume"
+#define gstTransform "transform"
+//display
+#define gstDisplay "display"
+#define gstMemo "memo"
+#define gstMemoRo "memo ro"
+#define gstInfoHeader "info header"
+#define gstDataPath "data path"
+
 namespace fluo
 {
 	struct Atext

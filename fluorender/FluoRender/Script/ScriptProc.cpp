@@ -446,7 +446,7 @@ void ScriptProc::RunNoiseReduction()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		m_view->setRvalu(gstCurrentVolume, *i);
+		m_view->setRefValue(gstCurrentVolume, *i);
 		calculator->SetVolumeA(*i);
 
 		//selection
@@ -1106,7 +1106,7 @@ void ScriptProc::RunGenerateComp()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		m_view->setRvalu(gstCurrentVolume, *i);
+		m_view->setRefValue(gstCurrentVolume, *i);
 		glbin_agtf->getComponentAgent()->setValue(gstUseSelection, use_sel);
 		glbin_agtf->getComponentAgent()->PlayCmd(use_sel, tfac);
 	}

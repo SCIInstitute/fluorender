@@ -99,7 +99,7 @@ int Annotations::LoadData(const std::wstring &filename)
 			fluo::VolumeData* vd = glbin_volf->findFirst(str);
 			if (vd)
 			{
-				setRvalu(gstVolume, vd);
+				setRefValue(gstVolume, vd);
 				setValue(gstTransform,
 					vd->GetTexture()->transform());
 			}
@@ -150,7 +150,7 @@ void Annotations::SaveData(const std::wstring &filename)
 	long resy = 1;
 	long resz = 1;
 	Referenced* ref;
-	getRvalu(gstVolume, &ref);
+	getRefValue(gstVolume, &ref);
 	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
 	if (vd)
 	{
@@ -285,7 +285,7 @@ Atext Annotations::buildAtext(const std::string str)
 		long resy = 1;
 		long resz = 1;
 		Referenced* ref;
-		getRvalu(gstVolume, &ref);
+		getRefValue(gstVolume, &ref);
 		VolumeData* vd = dynamic_cast<VolumeData*>(ref);
 		if (vd)
 		{
@@ -309,7 +309,7 @@ Atext Annotations::buildAtext(const std::string str)
 bool Annotations::insideClippingPlanes(Point &pos)
 {
 	Referenced* ref;
-	getRvalu(gstVolume, &ref);
+	getRefValue(gstVolume, &ref);
 	VolumeData* vd = dynamic_cast<VolumeData*>(ref);
 	if (!vd)
 		return true;

@@ -196,7 +196,7 @@ void BrushToolAgent::UpdateUndoRedo()
 void BrushToolAgent::UpdateMaskTb()
 {
 	Referenced* ref;
-	glbin_root->getRvalu(gstSourceVolume, &ref);
+	glbin_root->getRefValue(gstSourceVolume, &ref);
 	bool bval = ref != nullptr;
 	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskPaste, bval);
 	dlg_.m_mask_tb->EnableTool(BrushToolDlg::ID_MaskMerge, bval);
@@ -209,7 +209,7 @@ void BrushToolAgent::BrushClear()
 {
 	ValueCollection names{ gstInterMode, gstPaintMode };
 	saveValues(names);
-	chgValue(gstPaintMode, long(6));
+	changeValue(gstPaintMode, long(6));
 	getObject()->Segment();
 	drawValues(names);
 }
@@ -235,7 +235,7 @@ void BrushToolAgent::BrushCreate()
 void BrushToolAgent::MaskCopy()
 {
 	VolumeData* vd = getObject()->GetCurrentVolume();
-	glbin_root->setRvalu(gstSourceVolume, vd);
+	glbin_root->setRefValue(gstSourceVolume, vd);
 	glbin_root->setValue(gstSourceMode, long(1));
 	UpdateMaskTb();
 }
@@ -243,7 +243,7 @@ void BrushToolAgent::MaskCopy()
 void BrushToolAgent::MaskCopyData()
 {
 	VolumeData* vd = getObject()->GetCurrentVolume();
-	glbin_root->setRvalu(gstSourceVolume, vd);
+	glbin_root->setRefValue(gstSourceVolume, vd);
 	glbin_root->setValue(gstSourceMode, long(0));
 	UpdateMaskTb();
 }
@@ -252,7 +252,7 @@ void BrushToolAgent::MaskPaste(int op)
 {
 	VolumeData* vd = getObject()->GetCurrentVolume();
 	Referenced* ref;
-	glbin_root->getRvalu(gstSourceVolume, &ref);
+	glbin_root->getRefValue(gstSourceVolume, &ref);
 	VolumeData* vd_src = dynamic_cast<VolumeData*>(ref);
 	if (!vd_src || vd == vd_src)
 		return;
@@ -428,9 +428,9 @@ void BrushToolAgent::AlignPca(int type, bool ac)
 				tx = tx - center.x();
 				ty = center.y() - ty;
 				tz = center.z() - tz;
-				updValue(gstObjTransX, tx);
-				updValue(gstObjTransY, ty);
-				updValue(gstObjTransZ, tz);
+				updateValue(gstObjTransX, tx);
+				updateValue(gstObjTransY, ty);
+				updateValue(gstObjTransZ, tz);
 			}
 		}
 	}

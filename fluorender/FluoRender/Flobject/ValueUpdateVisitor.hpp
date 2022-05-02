@@ -102,11 +102,11 @@ namespace fluo
 			case PROP_VALUE:
 			case PROP_VALUES:
 				if (object_)
-					object_->propValues(value_names_, &node);
+					object_->propagateValues(value_names_, &node);
 				break;
 			case PROP_ALL_VALUES:
 				if (object_)
-					object_->propAllValues(&node);
+					object_->propagateAllValues(&node);
 				break;
 				break;
 			}
@@ -134,11 +134,11 @@ namespace fluo
 			case PROP_VALUE:
 			case PROP_VALUES:
 				if (object_)
-					object_->propValues(value_names_, &group);
+					object_->propagateValues(value_names_, &group);
 				break;
 			case PROP_ALL_VALUES:
 				if (object_)
-					object_->propAllValues(&group);
+					object_->propagateAllValues(&group);
 				break;
 				break;
 			}

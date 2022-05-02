@@ -39,7 +39,7 @@ MeshFactory::MeshFactory()
 	m_name = gstMeshFactory;
 	default_object_name_ = gstDefaultMesh;
 
-	addRvalu(gstCurrent, (MeshData*)(0));//current mesh data (for processing etc)
+	addRefValue(gstCurrent, (MeshData*)(0));//current mesh data (for processing etc)
 }
 
 MeshFactory::~MeshFactory()
@@ -168,10 +168,10 @@ MeshData* MeshFactory::clone(MeshData* md)
 	new_md->setId(global_id_);
 	std::string name = "mesh" + std::to_string(local_id_);
 	new_md->setName(name);
-	new_md->addRvalu(gstFactory, this);
+	new_md->addRefValue(gstFactory, this);
 
 	objects_.push_front(new_md);
-	setRvalu(gstCurrent, new_md);
+	setRefValue(gstCurrent, new_md);
 
 
 	setEventHandler(dynamic_cast<MeshData*>(new_md));

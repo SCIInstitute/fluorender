@@ -625,7 +625,7 @@ void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 	{
 		int ival = int(val*100.0 + 0.5);
 		m_gamma_sldr->SetValue(ival);
-		m_agent->updValue(gstGamma3d, val);
+		m_agent->updateValue(gstGamma3d, val);
 	}
 }
 
@@ -649,7 +649,7 @@ void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 	{
 		int ival = int(val*2000.0 + 0.5);
 		m_boundary_sldr->SetValue(ival);
-		m_agent->updValue(gstExtractBoundary, val);
+		m_agent->updateValue(gstExtractBoundary, val);
 	}
 }
 
@@ -681,7 +681,7 @@ void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
 		m_saturation_sldr->SetValue(ival);
 		double val = double(ival) / m_max_val;
 
-		m_agent->updValue(gstSaturation, val);
+		m_agent->updateValue(gstSaturation, val);
 	}
 }
 
@@ -722,7 +722,7 @@ void VolumePropPanel::OnLeftThreshText(wxCommandEvent &event)
 		}
 		m_left_thresh_sldr->SetValue(ival);
 
-		m_agent->updValue(gstLowThreshold, val);
+		m_agent->updateValue(gstLowThreshold, val);
 	}
 	//update colocalization
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -763,7 +763,7 @@ void VolumePropPanel::OnRightThreshText(wxCommandEvent &event)
 		{
 			m_right_thresh_sldr->SetValue(ival);
 
-			m_agent->updValue(gstHighThreshold, val);
+			m_agent->updateValue(gstHighThreshold, val);
 		}
 	}
 	//update colocalization
@@ -800,7 +800,7 @@ void VolumePropPanel::OnLuminanceText(wxCommandEvent &event)
 		double val = double(ival) / m_max_val;
 		m_luminance_sldr->SetValue(ival);
 
-		m_agent->updValue(gstLuminance, val);
+		m_agent->updateValue(gstLuminance, val);
 	}
 }
 
@@ -814,7 +814,7 @@ void VolumePropPanel::OnShadowSync(wxMouseEvent& event)
 void VolumePropPanel::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
-	m_agent->updValue(gstShadowEnable, shadow);
+	m_agent->updateValue(gstShadowEnable, shadow);
 	if (shadow)
 		EnableShadow();
 	else
@@ -835,7 +835,7 @@ void VolumePropPanel::OnShadowText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_shadow_sldr->SetValue(int(val*100.0 + 0.5));
-		m_agent->updValue(gstShadowInt, val);
+		m_agent->updateValue(gstShadowInt, val);
 	}
 }
 
@@ -849,7 +849,7 @@ void VolumePropPanel::OnAlphaSync(wxMouseEvent& event)
 void VolumePropPanel::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-	m_agent->updValue(gstAlphaEnable, alpha);
+	m_agent->updateValue(gstAlphaEnable, alpha);
 	if (alpha)
 		EnableAlpha();
 	else
@@ -878,7 +878,7 @@ void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 		double val = double(ival) / m_max_val;
 		m_alpha_sldr->SetValue(ival);
 
-		m_agent->updValue(gstAlpha, val);
+		m_agent->updateValue(gstAlpha, val);
 	}
 }
 
@@ -902,7 +902,7 @@ void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 	{
 		double val = srate * 10.0;
 		m_sample_sldr->SetValue(int(val));
-		m_agent->updValue(gstSampleRate, srate);
+		m_agent->updateValue(gstSampleRate, srate);
 		//maybe to synchronize sample rates among volumes in the depth mode
 	}
 }
@@ -930,7 +930,7 @@ void VolumePropPanel::OnHiShadingText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
-		m_agent->updValue(gstHighShading, val);
+		m_agent->updateValue(gstHighShading, val);
 	}
 }
 
@@ -948,14 +948,14 @@ void VolumePropPanel::OnLowShadingText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_low_shading_sldr->SetValue(int(val*100.0 + 0.5));
-		m_agent->updValue(gstLowShading, val);
+		m_agent->updateValue(gstLowShading, val);
 	}
 }
 
 void VolumePropPanel::OnShadingEnable(wxCommandEvent &event)
 {
 	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	m_agent->updValue(gstShadingEnable, shading);
+	m_agent->updateValue(gstShadingEnable, shading);
 	if (shading)
 		EnableShading();
 	else
@@ -979,8 +979,8 @@ void VolumePropPanel::OnEnableColormap(wxCommandEvent &event)
 		m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 
 	long lval = colormap ? 1 : 0;
-	m_agent->updValue(gstColormapEnable, colormap);
-	m_agent->updValue(gstColormapMode, lval);
+	m_agent->updateValue(gstColormapEnable, colormap);
+	m_agent->updateValue(gstColormapMode, lval);
 	if (colormap)
 		EnableColormap();
 	else
@@ -1021,7 +1021,7 @@ void VolumePropPanel::OnColormapHighValueText(wxCommandEvent &event)
 
 			double val = double(iVal) / m_max_val;
 
-			m_agent->updValue(gstColormapHigh, val);
+			m_agent->updateValue(gstColormapHigh, val);
 		}
 	}
 }
@@ -1057,14 +1057,14 @@ void VolumePropPanel::OnColormapLowValueText(wxCommandEvent &event)
 
 		double val = double(iVal) / m_max_val;
 
-		m_agent->updValue(gstColormapLow, val);
+		m_agent->updateValue(gstColormapLow, val);
 	}
 }
 
 void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 {
 	bool val = m_colormap_inv_btn->GetValue();
-	m_agent->updValue(gstColormapInv, val);
+	m_agent->updateValue(gstColormapInv, val);
 	//update colocalization
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
 	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
@@ -1074,7 +1074,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 {
 	long colormap = m_colormap_combo->GetCurrentSelection();
-	m_agent->updValue(gstColormapType, colormap);
+	m_agent->updateValue(gstColormapType, colormap);
 	//update colocalization
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
 	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
@@ -1084,20 +1084,20 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 {
 	long colormap_proj = m_colormap_combo2->GetCurrentSelection();
-	m_agent->updValue(gstColormapProj, colormap_proj);
+	m_agent->updateValue(gstColormapProj, colormap_proj);
 }
 
 //6
 void VolumePropPanel::OnColorChange(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_agent->updValue(gstColor, color);
+	m_agent->updateValue(gstColor, color);
 }
 
 void VolumePropPanel::OnColor2Change(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_agent->updValue(gstSecColor, color);
+	m_agent->updateValue(gstSecColor, color);
 }
 
 void VolumePropPanel::OnColorTextChange(wxCommandEvent& event)
@@ -1172,13 +1172,13 @@ void VolumePropPanel::OnInvCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
 		wxGetBitmapFromMemory(invert_off));
 
-	m_agent->updValue(gstInvert, inv);
+	m_agent->updateValue(gstInvert, inv);
 }
 
 void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 {
 	long val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
-	m_agent->updValue(gstMipMode, val);
+	m_agent->updateValue(gstMipMode, val);
 
 	if (val==1)
 	{
@@ -1210,7 +1210,7 @@ void VolumePropPanel::OnTranspChk(wxCommandEvent &event)
 			wxGetBitmapFromMemory(transplo));
 	}
 	double alpha_power = bval ? 2 : 1;
-	m_agent->updValue(gstAlphaPower, alpha_power);
+	m_agent->updateValue(gstAlphaPower, alpha_power);
 }
 
 void VolumePropPanel::OnCompChk(wxCommandEvent &event)
@@ -1227,7 +1227,7 @@ void VolumePropPanel::OnCompChk(wxCommandEvent &event)
 			wxGetBitmapFromMemory(comp_off));
 	}
 	long label_mode = bval ? 1 : 0;
-	m_agent->updValue(gstLabelMode, label_mode);
+	m_agent->updateValue(gstLabelMode, label_mode);
 }
 
 //noise reduction
@@ -1241,7 +1241,7 @@ void VolumePropPanel::OnNRCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth_off));
 
-	m_agent->updValue(gstNoiseRedct, val);
+	m_agent->updateValue(gstNoiseRedct, val);
 	//synchronize in view?
 }
 
@@ -1258,7 +1258,7 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//{
 	//	if (m_group)
 	//	{
-	//		m_group->updValue(gstBlendMode, long(2));
+	//		m_group->updateValue(gstBlendMode, long(2));
 	//		if (m_vd)
 	//		{
 	//			fluo::ValueCollection names{
@@ -1267,14 +1267,14 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//				gstShadowEnable,
 	//				gstShadowInt
 	//			};
-	//			m_group->propValues(names, m_vd);
+	//			m_group->propagateValues(names, m_vd);
 	//		}
 	//	}
 	//}
 	//else
 	//{
 	//	if (m_group)
-	//		m_group->updValue(gstBlendMode, long(0));
+	//		m_group->updateValue(gstBlendMode, long(0));
 	//}
 
 	//RefreshVRenderViews(false, true);
@@ -1392,8 +1392,8 @@ void VolumePropPanel::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_agent->updValue(gstMaxInt, m_max_val);
-	m_agent->updValue(gstIntScale, 65535.0 / m_max_val);
+	m_agent->updateValue(gstMaxInt, m_max_val);
+	m_agent->updateValue(gstIntScale, 65535.0 / m_max_val);
 }
 
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
@@ -1406,22 +1406,22 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 	str = m_space_x_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->updValue(gstSpcX, dval);
-		m_agent->updValue(gstBaseSpcX, dval);
+		m_agent->updateValue(gstSpcX, dval);
+		m_agent->updateValue(gstBaseSpcX, dval);
 	}
 	//y
 	str = m_space_y_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->updValue(gstSpcY, dval);
-		m_agent->updValue(gstBaseSpcY, dval);
+		m_agent->updateValue(gstSpcY, dval);
+		m_agent->updateValue(gstBaseSpcY, dval);
 	}
 	//z
 	str = m_space_z_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->updValue(gstSpcZ, dval);
-		m_agent->updValue(gstBaseSpcZ, dval);
+		m_agent->updateValue(gstSpcZ, dval);
+		m_agent->updateValue(gstBaseSpcZ, dval);
 	}
 }
 
@@ -1429,7 +1429,7 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 void VolumePropPanel::OnLegendCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
-	m_agent->updValue(gstLegend, bval);
+	m_agent->updateValue(gstLegend, bval);
 }
 
 //interpolation
@@ -1442,7 +1442,7 @@ void VolumePropPanel::OnInterpolateCheck(wxCommandEvent& event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
 		wxGetBitmapFromMemory(interpolate_off));
-	m_agent->updValue(gstInterpolate, inv);
+	m_agent->updateValue(gstInterpolate, inv);
 	//synch with view?
 }
 

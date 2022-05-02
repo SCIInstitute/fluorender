@@ -84,9 +84,9 @@ void RenderviewFactory::createDefault()
 		view->addValue(gstInitialized, bool(false));
 		view->addValue(gstInitView, bool(false));
 		view->addValue(gstCurrentSelect, long(0));//0:root; 1:view; 2:volume; 3:mesh; 5:volume group; 6:mesh group
-		view->addRvalu(gstCurrentVolume, (Referenced*)(0));
+		view->addRefValue(gstCurrentVolume, (Referenced*)(0));
 		view->addValue(gstCurVolIdx, long(-1));
-		view->addRvalu(gstCurrentMesh, (Referenced*)(0));
+		view->addRefValue(gstCurrentMesh, (Referenced*)(0));
 		view->addValue(gstCurMshIdx, long(-1));
 		view->addValue(gstSetGl, bool(false));
 		view->addValue(gstRunScript, bool(false));
@@ -368,7 +368,7 @@ Renderview* RenderviewFactory::clone(Renderview* view)
 	new_view->setId(global_id_);
 	std::string name = "renderview" + std::to_string(local_id_);
 	new_view->setName(name);
-	new_view->addRvalu(gstFactory, this);
+	new_view->addRefValue(gstFactory, this);
 
 	objects_.push_front(new_view);
 

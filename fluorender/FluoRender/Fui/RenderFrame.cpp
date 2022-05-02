@@ -1601,13 +1601,13 @@ void RenderFrame::OnSelection(fluo::Node *node)
 			//wxString str = vd->getName();
 			//m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
 
-			glbin_root->setRvalu(gstCurrentVolume, vd);
+			glbin_root->setRefValue(gstCurrentVolume, vd);
 			for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
 			{
 				fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
 				if (!view)
 					continue;
-				view->setRvalu(gstCurrentVolume, vd);
+				view->setRefValue(gstCurrentVolume, vd);
 			}
 
 			if (m_volume_prop)

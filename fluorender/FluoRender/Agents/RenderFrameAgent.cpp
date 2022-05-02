@@ -598,8 +598,8 @@ int RenderFrameAgent::LoadVolumeData(const wxString &filename, int type, bool wi
 			}
 			vd->setValue(gstIntScale, reader->GetScalarScale());
 			vd->setValue(gstMaxInt, reader->GetMaxValue());
-			vd->setValue(gstTime, reader->GetCurTime());
-			vd->setValue(gstChannel, i);
+			vd->setValue(gstTime, long(reader->GetCurTime()));
+			vd->setValue(gstChannel, long(i));
 			//++
 			result++;
 		}

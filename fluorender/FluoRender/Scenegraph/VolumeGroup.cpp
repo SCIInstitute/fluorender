@@ -159,7 +159,7 @@ void VolumeGroup::OnRandomizeColor(Event& event)
 		it != m_children.end(); ++it)
 	{
 		bool bval;
-		(*it)->flupValue(gstRandomizeColor, bval, event);
+		(*it)->flipUpdateValue(gstRandomizeColor, bval, event);
 	}
 }
 

@@ -37,11 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <functional>
 
-namespace FluoUI
-{
-	class InterfaceAgent;
-}
-
 namespace fluo
 {
 	class Object;
@@ -180,11 +175,11 @@ namespace fluo
 			else
 				return false;
 		}
-		bool addRvalu(const string &name, Referenced* value)
+		bool addRefValue(const string &name, Referenced* value)
 		{
 			if (_value_set)
 			{
-				bool result = _value_set->addRvalu(name, value);
+				bool result = _value_set->addRefValue(name, value);
 				if (result)
 				{
 					Value* vs_value = _value_set->findValue(name);
@@ -207,22 +202,22 @@ namespace fluo
 		bool setValue(const string &name, const V &value)
 		{
 			Event event(Event::NOTIFY_SELF);
-			return updValue(name, value, event);
+			return updateValue(name, value, event);
 		}
 		template<typename V>
-		bool chgValue(const string &name, const V &value)
+		bool changeValue(const string &name, const V &value)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return updValue(name, value, event);
+			return updateValue(name, value, event);
 		}
 		template<typename V>
-		bool updValue(const string &name, const V &value)
+		bool updateValue(const string &name, const V &value)
 		{
 			Event event;
-			return updValue(name, value, event);
+			return updateValue(name, value, event);
 		}
 		template<typename V>
-		bool updValue(const string &name, const V &value, Event &event)
+		bool updateValue(const string &name, const V &value, Event &event)
 		{
 			V old_value;
 			if (getValue(name, old_value) && value != old_value)
@@ -245,19 +240,19 @@ namespace fluo
 		bool setValueTuple(ValueTuple& vt)
 		{
 			Event event(Event::NOTIFY_SELF);
-			return updValueTuple(vt, event);
+			return updateValueTuple(vt, event);
 		}
-		bool chgValueTuple(ValueTuple& vt)
+		bool changeValueTuple(ValueTuple& vt)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return updValueTuple(vt, event);
+			return updateValueTuple(vt, event);
 		}
-		bool updValueTuple(ValueTuple& vt)
+		bool updateValueTuple(ValueTuple& vt)
 		{
 			Event event;
-			return updValueTuple(vt, event);
+			return updateValueTuple(vt, event);
 		}
-		bool updValueTuple(ValueTuple& vt, Event& event)
+		bool updateValueTuple(ValueTuple& vt, Event& event)
 		{
 			ValueTuple old_vt;
 			std::string name = std::get<0>(vt);
@@ -276,25 +271,25 @@ namespace fluo
 			}
 			return false;
 		}
-		bool setRvalu(const std::string& name, Referenced* value)
+		bool setRefValue(const std::string& name, Referenced* value)
 		{
 			Event event(Event::NOTIFY_SELF);
-			return updRvalu(name, value, event);
+			return updateRefValue(name, value, event);
 		}
-		bool chgRvalu(const std::string& name, Referenced* value)
+		bool changeRefValue(const std::string& name, Referenced* value)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return updRvalu(name, value, event);
+			return updateRefValue(name, value, event);
 		}
-		bool updRvalu(const std::string& name, Referenced* value)
+		bool updateRefValue(const std::string& name, Referenced* value)
 		{
 			Event event;
-			return updRvalu(name, value, event);
+			return updateRefValue(name, value, event);
 		}
-		bool updRvalu(const std::string& name, Referenced* value, Event& event)
+		bool updateRefValue(const std::string& name, Referenced* value, Event& event)
 		{
 			Referenced* old_value;
-			if (getRvalu(name, &old_value) && value != old_value)
+			if (getRefValue(name, &old_value) && value != old_value)
 			{
 				bool result = false;
 				if (_value_set)
@@ -304,7 +299,7 @@ namespace fluo
 							this, getValuePointer(name), true);
 					else
 						event.push(this);
-					result = _value_set->setRvalu(name, value, event);
+					result = _value_set->setRefValue(name, value, event);
 					event.pop();
 				}
 				return result;
@@ -319,12 +314,12 @@ namespace fluo
 			else
 				return setValue(name, value);
 		}
-		bool addSetRvalu(const std::string& name, Referenced* value)
+		bool addSetRefValue(const std::string& name, Referenced* value)
 		{
-			if (addRvalu(name, value))
+			if (addRefValue(name, value))
 				return true;
 			else
-				return setRvalu(name, value);
+				return setRefValue(name, value);
 		}
 
 		bool getValue(ValueTuple &vt)
@@ -334,10 +329,10 @@ namespace fluo
 			else
 				return false;
 		}
-		bool getRvalu(const string &name, Referenced** value)
+		bool getRefValue(const string &name, Referenced** value)
 		{
 			if (_value_set)
-				return _value_set->getRvalu(name, value);
+				return _value_set->getRefValue(name, value);
 			else
 				return false;
 		}
@@ -363,19 +358,19 @@ namespace fluo
 		bool flipValue(const std::string &name, bool &value)
 		{
 			Event event(Event::NOTIFY_SELF);
-			return flupValue(name, value, event);
+			return flipUpdateValue(name, value, event);
 		}
-		bool flngValue(const std::string &name, bool &value)
+		bool flipChangeValue(const std::string &name, bool &value)
 		{
 			Event event(Event::NOTIFY_NONE);
-			return flupValue(name, value, event);
+			return flipUpdateValue(name, value, event);
 		}
-		bool flupValue(const std::string &name, bool &value)
+		bool flipUpdateValue(const std::string &name, bool &value)
 		{
 			Event event;
-			return flupValue(name, value, event);
+			return flipUpdateValue(name, value, event);
 		}
-		bool flupValue(const std::string &name, bool &value, Event& event);
+		bool flipUpdateValue(const std::string &name, bool &value, Event& event);
 
 		//sync value only sets a state but doesn't change values when called
 		//observer's value updates when the value of this changes (data flow is one-way: this -> obj)
@@ -386,17 +381,17 @@ namespace fluo
 		bool syncAllValues(Object* obj);
 		bool unsyncAllValues(Object* obj);
 		//propagate value (this -> object)
-		bool propValue(const std::string &name, Object* obj);
-		bool propValues(const ValueCollection &names, Object* obj);
-		bool propAllValues(Object* obj);
+		bool propagateValue(const std::string &name, Object* obj);
+		bool propagateValues(const ValueCollection &names, Object* obj);
+		bool propagateAllValues(Object* obj);
 		//sync values belonging to the same object (mutual!)
 		bool syncValues(const std::string &name1, const std::string &name2);
 		bool unsyncValues(const std::string &name1, const std::string &name2);
 		bool syncValues(const ValueCollection &names);
 		bool unsyncValues(const ValueCollection &names);
 		//propagate values belonging to the same object (1 -> 2)
-		bool propValues(const std::string &name1, const std::string &name2);
-		bool propValues(const std::string &name1, const ValueCollection &names);
+		bool propagateValues(const std::string &name1, const std::string &name2);
+		bool propagateValues(const std::string &name1, const ValueCollection &names);
 
 		//save and restore
 		bool saveValue(const std::string &name);

@@ -37,7 +37,7 @@ VolumeFactory::VolumeFactory()
 	m_name = gstVolumeFactory;
 	default_object_name_ = gstDefaultVolume;
 
-	addRvalu(gstCurrent, (VolumeData*)(0));//current volume data
+	addRefValue(gstCurrent, (VolumeData*)(0));//current volume data
 
 	setValueChangedFunction(gstDefaultFile,
 		std::bind(&VolumeFactory::OnSetDefault,
@@ -362,11 +362,11 @@ VolumeData* VolumeFactory::clone(VolumeData* vd)
 	new_vd->setId(global_id_);
 	std::string name = "volume" + std::to_string(local_id_);
 	new_vd->setName(name);
-	new_vd->addRvalu(gstFactory, this);
+	new_vd->addRefValue(gstFactory, this);
 
 	objects_.push_front(new_vd);
 
-	setRvalu(gstCurrent, new_vd);
+	setRefValue(gstCurrent, new_vd);
 	setEventHandler(new_vd);
 
 	//notify observers

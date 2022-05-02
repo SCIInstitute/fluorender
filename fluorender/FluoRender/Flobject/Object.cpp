@@ -131,7 +131,7 @@ void Object::processNotification(Event& event)
 }
 
 //toggle value for bool
-bool Object::flupValue(const std::string &name, bool &value, Event& event)
+bool Object::flipUpdateValue(const std::string &name, bool &value, Event& event)
 {
 	bool result = false;
 	if (_value_set)
@@ -245,7 +245,7 @@ bool Object::unsyncAllValues(Object* obj)
 }
 
 //propagate a value
-bool Object::propValue(const std::string &name, Object* obj)
+bool Object::propagateValue(const std::string &name, Object* obj)
 {
 	Value* value = getValuePointer(name);
 	if (value)
@@ -264,19 +264,19 @@ bool Object::propValue(const std::string &name, Object* obj)
 }
 
 //propagate a list of values
-bool Object::propValues(const ValueCollection &names, Object* obj)
+bool Object::propagateValues(const ValueCollection &names, Object* obj)
 {
 	bool result = false;
 	for (auto it = names.begin();
 		it != names.end(); ++it)
 	{
-		result |= propValue(*it, obj);
+		result |= propagateValue(*it, obj);
 	}
 	return result;
 }
 
 //propagate all values
-bool Object::propAllValues(Object* obj)
+bool Object::propagateAllValues(Object* obj)
 {
 	bool result = false;
 	if (_value_set)
@@ -286,7 +286,7 @@ bool Object::propAllValues(Object* obj)
 		{
 			if (it->second)
 			{
-				propValue(it->second->getName(), obj);
+				propagateValue(it->second->getName(), obj);
 				result = true;
 			}
 		}
@@ -350,7 +350,7 @@ bool Object::unsyncValues(const ValueCollection &names)
 }
 
 //propagate values belonging to the same object (1 -> 2)
-bool Object::propValues(const std::string &name1, const std::string &name2)
+bool Object::propagateValues(const std::string &name1, const std::string &name2)
 {
 	Value* value1 = getValuePointer(name1);
 	Value* value2 = getValuePointer(name2);
@@ -366,7 +366,7 @@ bool Object::propValues(const std::string &name1, const std::string &name2)
 	return false;
 }
 
-bool Object::propValues(const std::string &name1, const ValueCollection &names)
+bool Object::propagateValues(const std::string &name1, const ValueCollection &names)
 {
 	bool result = false;
 	Value* value1 = getValuePointer(name1);
@@ -446,32 +446,32 @@ bool Object::drawValues(const ValueCollection &names)
 bool Object::resetValue(const std::string &name)
 {
 	Referenced* ref;
-	getRvalu(gstFactory, &ref);
+	getRefValue(gstFactory, &ref);
 	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
 	if (!fac) return false;
 	Object* dobj = fac->getDefault();
 	if (!dobj) return false;
-	return dobj->propValue(name, this);
+	return dobj->propagateValue(name, this);
 }
 
 bool Object::resetValues(const ValueCollection &names)
 {
 	Referenced* ref;
-	getRvalu(gstFactory, &ref);
+	getRefValue(gstFactory, &ref);
 	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
 	if (!fac) return false;
 	Object* dobj = fac->getDefault();
 	if (!dobj) return false;
-	return dobj->propValues(names, this);
+	return dobj->propagateValues(names, this);
 }
 
 bool Object::resetAllValues()
 {
 	Referenced* ref;
-	getRvalu(gstFactory, &ref);
+	getRefValue(gstFactory, &ref);
 	ObjectFactory* fac = dynamic_cast<ObjectFactory*>(ref);
 	if (!fac) return false;
 	Object* dobj = fac->getDefault();
 	if (!dobj) return false;
-	return dobj->propAllValues(this);
+	return dobj->propagateAllValues(this);
 }

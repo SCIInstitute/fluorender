@@ -64,7 +64,7 @@ namespace fluo
 	public:
 		InterfaceAgent()
 		{
-			addRvalu(gstAgentAsset, (Referenced*)0);
+			addRefValue(gstAgentAsset, (Referenced*)0);
 		}
 
 		virtual InterfaceAgent* clone(const CopyOp& copyop) const { return 0; }
@@ -89,7 +89,7 @@ namespace fluo
 		virtual void setObject(Object* obj)
 		{
 			Referenced* ref;
-			getRvalu(gstAgentAsset, &ref);
+			getRefValue(gstAgentAsset, &ref);
 			Object* old_obj = dynamic_cast<Object*>(ref);
 			if (old_obj  &&
 				old_obj == obj)
@@ -98,7 +98,7 @@ namespace fluo
 			if (old_obj)
 				old_obj->removeObserver(this);
 			clearValues(1);
-			addSetRvalu(gstAgentAsset, obj);
+			addSetRefValue(gstAgentAsset, obj);
 			if (obj)
 			{
 				copyValues(*obj);//shallow copy to share values
@@ -109,7 +109,7 @@ namespace fluo
 		virtual Object* getObject()
 		{
 			Referenced* ref;
-			getRvalu(gstAgentAsset, &ref);
+			getRefValue(gstAgentAsset, &ref);
 			return dynamic_cast<Object*>(ref);
 		}
 

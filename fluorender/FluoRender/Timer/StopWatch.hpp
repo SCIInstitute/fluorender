@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _STOPWATCH_H_
 
 #include <Flobject/Node.hpp>
+
+#define gstStopWatch "default stop watch"
+
 namespace fluo
 {
 	class StopWatch : public Node

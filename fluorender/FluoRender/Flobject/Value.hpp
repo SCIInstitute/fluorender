@@ -263,7 +263,7 @@ namespace fluo
 		//add value functions
 		bool addValue(ValueTuple&);
 		//generic types
-		bool addRvalu(const std::string &name, Referenced* value);
+		bool addRefValue(const std::string &name, Referenced* value);
 		bool addValue(const std::string &name, bool value);
 		bool addValue(const std::string &name, char value);
 		bool addValue(const std::string &name, unsigned char value);
@@ -293,7 +293,7 @@ namespace fluo
 
 		/** All the set value functions */
 		bool setValue(ValueTuple& vt, Event& event);
-		bool setRvalu(const std::string &name, Referenced* value, Event& event)
+		bool setRefValue(const std::string &name, Referenced* value, Event& event)
 		{
 			Value* val = findValue(name);
 			if (val && val->_etype == Value::vt_pReferenced)
@@ -327,7 +327,7 @@ namespace fluo
 
 		/** All the get value functions */
 		bool getValue(ValueTuple&);
-		bool getRvalu(const std::string &name, Referenced** value)
+		bool getRefValue(const std::string &name, Referenced** value)
 		{
 			Value* val = findValue(name);
 			if (val)

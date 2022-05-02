@@ -52,7 +52,7 @@ void AnnotationFactory::createDefault()
 
 		//add default values here
 		ad->addValue(gstColor, Color());
-		ad->addRvalu(gstVolume, (Referenced*)0);
+		ad->addRefValue(gstVolume, (Referenced*)0);
 		ad->addValue(gstTransform, Transform());
 		ad->addValue(gstDisplay, bool(true));
 		ad->addValue(gstMemo, std::string());
@@ -78,7 +78,7 @@ Annotations* AnnotationFactory::clone(Annotations* ad)
 	new_ad->setId(global_id_);
 	std::string name = "annotations" + std::to_string(local_id_);
 	new_ad->setName(name);
-	new_ad->addRvalu(gstFactory, this);
+	new_ad->addRefValue(gstFactory, this);
 
 	objects_.push_front(new_ad);
 
