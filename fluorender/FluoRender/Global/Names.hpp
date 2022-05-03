@@ -101,6 +101,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstTrackAgent "TrackDlg"
 #define gstTreeModel "TreePanel"
 #define gstVolumePropAgent "VolumePropPanel"
+#define gstNonObjectValues "non object values"//values not from the managed object
 
 //root
 #define gstRoot "Active Datasets"

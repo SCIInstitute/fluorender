@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Annotations.hpp>
 
-#define gstMemo "memo"
+#define gstMemo "memo"	//Memo (user added text)
 
 class AnnotationPropPanel;
 namespace fluo
@@ -51,13 +51,21 @@ namespace fluo
 		virtual void setObject(Annotations* an);
 		virtual Annotations* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual AnnotationPropAgent* asAnnotationPropAgent() { return this; }
 		virtual const AnnotationPropAgent* asAnnotationPropAgent() const { return this; }
 
 	protected:
 		AnnotationPropPanel &panel_;
+
+		virtual void setupInputs()
+		{
+			inputs_ = ValueCollection
+			{
+				gstMemo
+			};
+		}
 
 	private:
 	};

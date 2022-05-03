@@ -53,7 +53,7 @@ namespace fluo
 		virtual void setObject(Renderview* obj);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		//update undo status
 		void UpdateUndoRedo();

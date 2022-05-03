@@ -47,7 +47,7 @@ MeshData* MeshTransAgent::getObject()
 	return dynamic_cast<MeshData*>(InterfaceAgent::getObject());
 }
 
-void MeshTransAgent::UpdateAllSettings()
+void MeshTransAgent::UpdateFui(const ValueCollection &names)
 {
 	MeshData* md = getObject();
 	if (!md) return;

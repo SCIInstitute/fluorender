@@ -51,7 +51,7 @@ namespace fluo
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual MovieAgent* asMovieAgent() { return this; }
 		virtual const MovieAgent* asMovieAgent() const { return this; }

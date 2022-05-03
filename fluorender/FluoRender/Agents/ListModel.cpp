@@ -183,6 +183,11 @@ void ListModel::setObject(Node* root)
 	glbin.addListObserver(this);
 }
 
+void ListModel::UpdateFui(const ValueCollection &names)
+{
+
+}
+
 void ListModel::OnItemAdded(Event& event)
 {
 	if (event.child)

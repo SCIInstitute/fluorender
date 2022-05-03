@@ -63,7 +63,7 @@ namespace fluo
 		virtual void setObject(Node* vd);
 		virtual Node* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual OutAdjustAgent* asOutAdjustAgent() { return this; }
 		virtual const OutAdjustAgent* asOutAdjustAgent() const { return this; }

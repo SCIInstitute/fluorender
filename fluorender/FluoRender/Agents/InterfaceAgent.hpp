@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Node.hpp>
 #include <ValueUpdateVisitor.hpp>
 
+#define FOUND_VALUE(v) names.find(v) != names.end()
+
 namespace fluo
 {
 	class AnnotationPropAgent;
@@ -102,7 +104,7 @@ namespace fluo
 			if (obj)
 			{
 				copyValues(*obj);//shallow copy to share values
-				UpdateAllSettings();
+				UpdateFui();
 				obj->addObserver(this);
 			}
 		}
@@ -260,10 +262,10 @@ namespace fluo
 			}
 		}
 
-		virtual void UpdateAllSettings() {};
+		virtual void UpdateFui(const ValueCollection &names = {}) = 0;
 		virtual void resumeObserverNotificationAndUpdate()
 		{
-			UpdateAllSettings();
+			UpdateFui();
 			Referenced::resumeObserverNotification();
 		}
 
@@ -318,6 +320,16 @@ namespace fluo
 		virtual const VolumePropAgent* asVolumePropAgent() const { return 0; }
 
 	protected:
+		virtual void handleValueChanged(Event& event)
+		{
+			Referenced* refd = event.sender;
+			Value* value = dynamic_cast<Value*>(refd);
+			if (value)
+			{
+				ValueCollection names{ value->getName() };
+				UpdateFui(names);
+			}
+		}
 	};
 }
 

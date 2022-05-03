@@ -60,7 +60,7 @@ namespace fluo
 		virtual void setObject(MeshData* an);
 		virtual MeshData* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual MeshTransAgent* asMeshTransAgent() { return this; }
 		virtual const MeshTransAgent* asMeshTransAgent() const { return this; }

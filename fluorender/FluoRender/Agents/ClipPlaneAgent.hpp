@@ -50,7 +50,7 @@ namespace fluo
 		virtual void setObject(Node* vd);
 		virtual Node* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual ClipPlaneAgent* asClipPlaneAgent() { return this; }
 		virtual const ClipPlaneAgent* asClipPlaneAgent() const { return this; }

@@ -51,7 +51,7 @@ Node* OutAdjustAgent::getObject()
 	return dynamic_cast<Node*>(InterfaceAgent::getObject());
 }
 
-void OutAdjustAgent::UpdateAllSettings()
+void OutAdjustAgent::UpdateFui(const ValueCollection &names)
 {
 	double dval = 0.0;
 	bool bval = false;

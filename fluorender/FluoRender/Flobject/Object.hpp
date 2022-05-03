@@ -531,6 +531,14 @@ namespace fluo
 			return false;
 		}
 
+		//input info
+		virtual size_t numInputs() { return inputs_.size(); }
+		virtual ValueCollection& getInput() { return inputs_; }
+		//output info
+		//input info
+		virtual size_t numOutputs() { return outputs_.size(); }
+		virtual ValueCollection& getOutput() { return outputs_; }
+
 	protected:
 		virtual ~Object();
 

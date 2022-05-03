@@ -54,7 +54,7 @@ Renderview* RecorderAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void RecorderAgent::UpdateAllSettings()
+void RecorderAgent::UpdateFui(const ValueCollection &names)
 {
 }
 

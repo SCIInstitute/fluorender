@@ -91,7 +91,7 @@ namespace fluo
 		virtual void setObject(VolumeData* vd);
 		virtual VolumeData* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual VolumePropAgent* asVolumePropAgent() { return this; }
 		virtual const VolumePropAgent* asVolumePropAgent() const { return this; }
@@ -100,6 +100,48 @@ namespace fluo
 
 	protected:
 		VolumePropPanel &panel_;
+
+		virtual void setupInputs()
+		{
+			inputs_ = ValueCollection
+			{
+				gstGamma3d,
+				gstExtractBoundary,
+				gstSaturation,
+				gstLowThreshold,
+				gstHighThreshold,
+				gstLuminance,
+				gstShadowEnable,
+				gstShadowInt,
+				gstAlphaEnable,
+				gstAlpha,
+				gstSampleRate,
+				gstShadingEnable,
+				gstHighShading,
+				gstLowShading,
+				gstAlphaPower,
+				gstMipMode,
+				gstInvert,
+				gstLabelMode,
+				gstInterpolate,
+				gstNoiseRedct,
+				gstLegend,
+				gstSpcX,
+				gstSpcY,
+				gstSpcZ,
+				gstColor,
+				gstHsv,
+				gstSecColor,
+				gstSecColorSet,
+				gstColormapEnable,
+				gstColormapLow,
+				gstColormapHigh,
+				gstColormapMode,
+				gstColormapType,
+				gstColormapProj,
+				gstColormapInv
+			};
+		}
 
 	private:
 		//update functions

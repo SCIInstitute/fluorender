@@ -57,7 +57,7 @@ Node* ClipPlaneAgent::getObject()
 	return dynamic_cast<Node*>(InterfaceAgent::getObject());
 }
 
-void ClipPlaneAgent::UpdateAllSettings()
+void ClipPlaneAgent::UpdateFui(const ValueCollection &names)
 {
 	if (!getObject())
 	{

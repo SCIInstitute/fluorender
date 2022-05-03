@@ -81,6 +81,8 @@ namespace fluo
 			return dynamic_cast<Node*>(InterfaceAgent::getObject());
 		}
 
+		virtual void UpdateFui(const ValueCollection &names = {});
+
 		virtual ListModel* asListModel() { return this; }
 		virtual const ListModel* asListModel() const { return this; }
 

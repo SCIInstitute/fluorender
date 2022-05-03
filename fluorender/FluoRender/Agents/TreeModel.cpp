@@ -228,6 +228,11 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	return size;
 }
 
+void TreeModel::UpdateFui(const ValueCollection &names)
+{
+
+}
+
 //operations
 void TreeModel::MoveNode(const std::string &source, Node* target)
 {

@@ -67,7 +67,7 @@ Renderview* MovieAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void MovieAgent::UpdateAllSettings()
+void MovieAgent::UpdateFui(const ValueCollection &names)
 {
 	//update views
 	panel_.m_views_cmb->Clear();
@@ -89,7 +89,7 @@ void MovieAgent::UpdateAllSettings()
 
 	AddScriptToList();
 	GetScriptSettings();
-	glbin_agtf->getRecorderAgent()->UpdateAllSettings();
+	glbin_agtf->getRecorderAgent()->UpdateFui();
 }
 
 void MovieAgent::SetProgress(double pcnt)

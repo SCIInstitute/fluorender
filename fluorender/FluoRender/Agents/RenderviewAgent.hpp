@@ -78,7 +78,7 @@ namespace fluo
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual RenderviewAgent* asRenderviewAgent() { return this; }
 		virtual const RenderviewAgent* asRenderviewAgent() const { return this; }
@@ -88,7 +88,6 @@ namespace fluo
 	protected:
 		RenderviewPanel &panel_;
 
-		//virtual void handleValueChanged(Event& event);
 		//void OnBoundsChanged(Event& event);
 		//void OnSceneChanged(Event& event);
 	};

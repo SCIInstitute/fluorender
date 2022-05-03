@@ -48,7 +48,7 @@ Renderview* RenderviewAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void RenderviewAgent::UpdateAllSettings()
+void RenderviewAgent::UpdateFui(const ValueCollection &names)
 {
 	//holdoffObserverNotification();
 
@@ -66,12 +66,6 @@ void RenderviewAgent::UpdateAllSettings()
 	//resumeObserverNotification();
 }
 
-//void RenderviewAgent::handleValueChanged(Event& event)
-//{
-//	Object::handleValueChanged(event);
-//	UpdateAllSettings();
-//}
-//
 //void RenderviewAgent::OnBoundsChanged(Event& event)
 //{
 //	Renderview* view = getObject();

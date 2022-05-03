@@ -66,7 +66,7 @@ Renderview* MeasureAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void MeasureAgent::UpdateAllSettings()
+void MeasureAgent::UpdateFui(const ValueCollection &names)
 {
 	Renderview* view = getObject();
 	if (!view) return;

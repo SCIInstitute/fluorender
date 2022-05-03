@@ -57,7 +57,7 @@ VolumeData* ConvertAgent::getObject()
 	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
 }
 
-void ConvertAgent::UpdateAllSettings()
+void ConvertAgent::UpdateFui(const ValueCollection &names)
 {
 	bool bval;
 	long lval;

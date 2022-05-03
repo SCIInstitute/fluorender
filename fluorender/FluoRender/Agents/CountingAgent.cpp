@@ -54,7 +54,7 @@ VolumeData* CountingAgent::getObject()
 	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
 }
 
-void CountingAgent::UpdateAllSettings()
+void CountingAgent::UpdateFui(const ValueCollection &names)
 {
 	bool bval;
 	long lval;

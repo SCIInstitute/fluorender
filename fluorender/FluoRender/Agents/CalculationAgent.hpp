@@ -52,7 +52,7 @@ namespace fluo
 		virtual void setObject(Renderview* obj);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual CalculationAgent* asCalculationAgent() { return this; }
 		virtual const CalculationAgent* asCalculationAgent() const { return this; }

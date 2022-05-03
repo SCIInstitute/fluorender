@@ -49,7 +49,7 @@ namespace fluo
 		virtual void setObject(Renderview* an);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual ClKernelAgent* asClKernelAgent() { return this; }
 		virtual const ClKernelAgent* asClKernelAgent() const { return this; }

@@ -52,7 +52,7 @@ Renderview* NoiseReduceAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void NoiseReduceAgent::UpdateAllSettings()
+void NoiseReduceAgent::UpdateFui(const ValueCollection &names)
 {
 	Renderview* view = getObject();
 	if (!view) return;

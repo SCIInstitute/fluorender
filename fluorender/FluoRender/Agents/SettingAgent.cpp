@@ -51,7 +51,7 @@ Root* SettingAgent::getObject()
 	return dynamic_cast<Root*>(InterfaceAgent::getObject());
 }
 
-void SettingAgent::UpdateAllSettings()
+void SettingAgent::UpdateFui(const ValueCollection &names)
 {
 	bool bval; long lval; double dval;
 	std::string sval;

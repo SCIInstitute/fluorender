@@ -48,21 +48,27 @@ Annotations* AnnotationPropAgent::getObject()
 	return dynamic_cast<Annotations*>(InterfaceAgent::getObject());
 }
 
-void AnnotationPropAgent::UpdateAllSettings()
+void AnnotationPropAgent::UpdateFui(const ValueCollection &names)
 {
-	std::string memo;
-	getValue(gstMemo, memo);
-	panel_.m_memo_text->SetValue(memo);
-	bool bval;
-	getValue(gstMemoRo, bval);
-	if (bval)
+	bool update_all = names.empty();
+
+	//memo
+	if (update_all || FOUND_VALUE(gstMemo))
 	{
-		panel_.m_memo_text->SetEditable(false);
-		panel_.m_memo_update_btn->Disable();
-	}
-	else
-	{
-		panel_.m_memo_text->SetEditable(true);
-		panel_.m_memo_update_btn->Enable();
+		std::string memo;
+		getValue(gstMemo, memo);
+		panel_.m_memo_text->SetValue(memo);
+		bool bval;
+		getValue(gstMemoRo, bval);
+		if (bval)
+		{
+			panel_.m_memo_text->SetEditable(false);
+			panel_.m_memo_update_btn->Disable();
+		}
+		else
+		{
+			panel_.m_memo_text->SetEditable(true);
+			panel_.m_memo_update_btn->Enable();
+		}
 	}
 }

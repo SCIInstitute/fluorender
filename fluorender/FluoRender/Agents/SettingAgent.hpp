@@ -93,7 +93,7 @@ namespace fluo
 		virtual void setObject(Root* obj);
 		virtual Root* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual SettingAgent* asSettingAgent() { return this; }
 		virtual const SettingAgent* asSettingAgent() const { return this; }

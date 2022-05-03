@@ -65,7 +65,7 @@ Renderview* ComponentAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void ComponentAgent::UpdateAllSettings()
+void ComponentAgent::UpdateFui(const ValueCollection &names)
 {
 	bool bval;
 	int ival;

@@ -54,7 +54,7 @@ VolumeGroup* ColocalAgent::getObject()
 	return dynamic_cast<VolumeGroup*>(InterfaceAgent::getObject());
 }
 
-void ColocalAgent::UpdateAllSettings()
+void ColocalAgent::UpdateFui(const ValueCollection &names)
 {
 
 }

@@ -51,7 +51,7 @@ Renderview* ClKernelAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void ClKernelAgent::UpdateAllSettings()
+void ClKernelAgent::UpdateFui(const ValueCollection &names)
 {
 	wxString exePath = glbin.getExecutablePath();
 	dlg_.m_kernel_list->DeleteAllItems();

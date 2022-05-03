@@ -674,9 +674,6 @@ RenderCanvasAgent* AgentFactory::addRenderCanvasAgent(const std::string &name, w
 		ADD_AFTER_EVENT(gstBounds, RenderCanvasAgent, OnBoundsChanged);
 		ADD_AFTER_EVENT(gstFocus, RenderCanvasAgent, OnFocusChanged);
 		ADD_AFTER_EVENT(gstSetGl, RenderCanvasAgent, OnSetGl);
-		agent->setDefaultValueChangedFunction(
-			std::bind(&RenderCanvasAgent::handleValueChanged,
-				agent, std::placeholders::_1));
 		agent->setNodeAddedFunction(
 			std::bind(&RenderCanvasAgent::OnSceneChanged,
 				agent, std::placeholders::_1));

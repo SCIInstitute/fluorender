@@ -63,7 +63,7 @@ Renderview* TrackAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void TrackAgent::UpdateAllSettings()
+void TrackAgent::UpdateFui(const ValueCollection &names)
 {
 	Renderview* view = getObject();
 	if (!view) return;
@@ -322,7 +322,7 @@ void TrackAgent::CellUpdate()
 	view->GetTraces(false);
 	//m_view->Update(39);
 	//GetSettings(m_view);
-	UpdateAllSettings();
+	UpdateFui();
 }
 
 void TrackAgent::CellLink(bool exclusive)
@@ -979,7 +979,7 @@ void TrackAgent::GenMap()
 		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	(*dlg_.m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
-	UpdateAllSettings();
+	UpdateFui();
 	//GetSettings(m_view);
 
 	//CellUpdate();

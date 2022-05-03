@@ -55,7 +55,7 @@ Renderview* BrushToolAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void BrushToolAgent::UpdateAllSettings()
+void BrushToolAgent::UpdateFui(const ValueCollection &names)
 {
 	double dval = 0.0;
 	long lval = 0;

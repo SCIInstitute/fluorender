@@ -55,7 +55,7 @@ Renderview* CalculationAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void CalculationAgent::UpdateAllSettings()
+void CalculationAgent::UpdateFui(const ValueCollection &names)
 {
 }
 

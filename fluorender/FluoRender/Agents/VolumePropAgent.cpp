@@ -38,7 +38,7 @@ VolumePropAgent::VolumePropAgent(VolumePropPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
 {
-
+	setupInputs();
 }
 
 void VolumePropAgent::setObject(VolumeData* obj)
@@ -51,7 +51,7 @@ VolumeData* VolumePropAgent::getObject()
 	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
 }
 
-void VolumePropAgent::UpdateAllSettings()
+void VolumePropAgent::UpdateFui(const ValueCollection &names)
 {
 	wxString str;
 	double dval = 0.0;

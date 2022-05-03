@@ -49,7 +49,7 @@ MeshData* MeshPropAgent::getObject()
 	return dynamic_cast<MeshData*>(InterfaceAgent::getObject());
 }
 
-void MeshPropAgent::UpdateAllSettings()
+void MeshPropAgent::UpdateFui(const ValueCollection &names)
 {
 	wxString str;
 	Color amb, diff, spec;

@@ -65,7 +65,7 @@ namespace fluo
 		virtual void setObject(MeshData* vd);
 		virtual MeshData* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual MeshPropAgent* asMeshPropAgent() { return this; }
 		virtual const MeshPropAgent* asMeshPropAgent() const { return this; }

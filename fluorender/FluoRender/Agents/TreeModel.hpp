@@ -81,6 +81,8 @@ namespace fluo
 		virtual Node* getObject()
 		{ return dynamic_cast<Node*>(InterfaceAgent::getObject()); }
 
+		virtual void UpdateFui(const ValueCollection &names = {});
+
 		virtual TreeModel* asTreeModel() { return this; }
 		virtual const TreeModel* asTreeModel() const { return this; }
 

@@ -49,7 +49,7 @@ namespace fluo
 		virtual void setObject(VolumeData* an);
 		virtual VolumeData* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual CountingAgent* asCountingAgent() { return this; }
 		virtual const CountingAgent* asCountingAgent() const { return this; }

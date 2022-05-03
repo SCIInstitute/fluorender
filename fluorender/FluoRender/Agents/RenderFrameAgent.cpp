@@ -72,7 +72,7 @@ Root* RenderFrameAgent::getObject()
 	return dynamic_cast<Root*>(InterfaceAgent::getObject());
 }
 
-void RenderFrameAgent::UpdateAllSettings()
+void RenderFrameAgent::UpdateFui(const ValueCollection &names)
 {
 }
 
