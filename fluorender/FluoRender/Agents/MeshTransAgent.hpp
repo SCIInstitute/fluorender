@@ -31,6 +31,17 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <MeshData.hpp>
 
+//transformation
+#define gstTransX "trans x"
+#define gstTransY "trans y"
+#define gstTransZ "trans z"
+#define gstRotX "rot x"
+#define gstRotY "rot y"
+#define gstRotZ "rot z"
+#define gstScaleX "scale x"
+#define gstScaleY "scale y"
+#define gstScaleZ "scale z"
+
 class MeshTransPanel;
 namespace fluo
 {

@@ -31,6 +31,47 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <VolumeData.hpp>
 
+//trasnfer function
+#define gstGamma3d "gamma 3d"					//Gamma
+#define gstExtractBoundary "extract boundary"	//Extract Boundary
+#define gstSaturation "saturation"				//Saturation
+#define gstLowThreshold "low threshold"			//Threshold 1
+#define gstHighThreshold "high threshold"		//Threshold 2
+#define gstLuminance "luminance"				//Luminance
+#define gstShadowEnable "shadow enable"			//Shadow (button)
+#define gstShadowInt "shadow int"				//Shadow
+#define gstAlphaEnable "alpha enable"			//Alpha (button)
+#define gstAlpha "alpha"						//Alpha
+#define gstSampleRate "sample rate"				//Sample Rate
+#define gstShadingEnable "shding enable"		//Shading (button)
+#define gstHighShading "high shading"			//Shading 1
+#define gstLowShading "low shading"				//Shading 2
+//modes
+#define gstAlphaPower "alpha power"				//High Transparency (1-normal; 2-high)
+#define gstMipMode "mip mode"					//MIP
+#define gstInvert "invert"						//Invert
+#define gstLabelMode "label mode"				//Show Components
+#define gstInterpolate "interpolate"			//Interpolation
+#define gstNoiseRedct "noise redct"				//Smoothing
+#define gstLegend "legend"						//Legend
+//voxel sizes
+#define gstSpcX "spc x"
+#define gstSpcY "spc y"
+#define gstSpcZ "spc z"
+//color
+#define gstColor "color"						//Primary Color
+#define gstHsv "hsv"							//HSV of primary color
+#define gstSecColor "sec color"					//Secondary Color
+#define gstSecColorSet "sec color set"			//secondary color set by user, otherwise the invert of primary
+//colormaps
+#define gstColormapEnable "colormap enable"		//Colormap (button)
+#define gstColormapLow "colormap low"			//Colormap 1
+#define gstColormapHigh "colormap high"			//Colormap 2
+#define gstColormapMode "colormap mode"			//1-enabled; 0-disabled
+#define gstColormapType "colormap type"			//Rainbow, etc
+#define gstColormapProj "colormap proj"			//Intensity, etc
+#define gstColormapInv "colormap inv"			//Invert (button)
+
 class VolumePropPanel;
 namespace fluo
 {

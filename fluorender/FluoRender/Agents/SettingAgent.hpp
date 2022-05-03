@@ -31,6 +31,50 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Root.hpp>
 
+//project page
+#define gstSaveProjectEnable "save project enable"	//Save Project
+#define gstHardwareCompress "hardware compress"		//Compress in graphics memory
+#define gstFontFile "font file"						//Font
+#define gstTextSize "text size"						//Size
+#define gstTextColorMode "text color mode"			//Color: 0- contrast to bg; 1-same as bg; 2-volume sec color
+#define gstLineWidth "line width"					//Line Width
+#define gstPaintHistory "paint history"				//Paint History
+//rendering page
+#define gstMicroBlendEnable "micro blend enable"	//Micro Blending
+#define gstPeelNum "peel num"						//Mesh Transparency Quality
+#define gstShadowDirEnable "shadow dir enable"		//Enable direcrional shadow
+#define gstShadowDirX "shadow dir x"				//convert to angle in deg
+#define gstShadowDirY "shadow dir y"
+#define gstPinThresh "pin thresh"					//ray casting threshold value
+#define gstLinkedRot "linked rot"					//link rotation to views
+#define gstGradBg "gradient background"				//Gradient Background
+#define gstVrEnable "vr enable"						//Enable stereo
+#define gstVrEyeOffset "vr eye offset"				//Eye distance
+//Performance
+#define gstAdaptive "adaptive"						//Variable Sample Rate
+#define gstStreamEnable "stream enable"				//Enable streaming
+#define gstUpdateOrder "update order"				//Update Order: front to back (1) or back to front (0)
+#define gstGpuMemSize "gpu mem size"				//Graphics Memory
+#define gstLargeDataSize "large data size"			//Large Data Size
+#define gstBrickSize "brick size"					//Brick Size
+#define gstResponseTime "response time"				//Response Time
+#define gstLodOffset "lod offset"					//Detail Level Offset
+//Format
+#define gstOverrideVoxSpc "override vox spc"		//Override Voxel Size
+#define gstWaveColor1 "wave color1"					//Default Colors for Excitation Wavelengths 1
+#define gstWaveColor2 "wave color2"					//Default Colors for Excitation Wavelengths 2
+#define gstWaveColor3 "wave color3"					//Default Colors for Excitation Wavelengths 3
+#define gstWaveColor4 "wave color4"					//Default Colors for Excitation Wavelengths 4
+#define gstMaxTextureSizeEnable "max texture size enable"//Max Texture Size (check)
+#define gstMaxTextureSize "max texture size"		//Max Texture Size
+#define gstClPlatformId "cl platform id"			//OpenCL Devices (platform id)
+#define gstClDeviceId "cl device id"				//OpenCL Devices (device id)
+//Java
+#define gstImagejMode "imagej mode"					//Package
+#define gstJvmPath "jvm path"						//Path 1
+#define gstImagejPath "imagej path"					//Path 2
+#define gstBioformatsPath "bioformats path"			//Path 3
+
 class SettingDlg;
 namespace fluo
 {

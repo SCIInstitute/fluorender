@@ -31,6 +31,35 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Renderview.hpp>
 
+//top settings
+#define gstMixMethod "mix method"		//Renderview::MixMethods
+#define gstDrawInfo "draw info"			//Info
+#define gstDrawCamCtr "draw cam ctr"	//Axis
+#define gstDrawLegend "draw legend"		//Legend
+#define gstDrawColormap "draw colormap"	//Color Map
+#define gstDrawScaleBar "draw scale bar"//Show scale bar
+#define gstDrawScaleBarText "draw scale bar text"//Show scale bar text
+#define gstBgColor "background color"	//Background
+#define gstAov "aov"					//Projection
+#define gstPerspective "perspective"	//perspective projection enable
+#define gstFree "free"					//free fly enable
+#define gstFullScreen "full screen"		//flag only
+//left settings
+#define gstDepthAtten "depth atten"		//Depth Attenuation (check)
+#define gstDaInt "da int"				//Depth Attenuation
+//right settings
+#define gstPinRotCtr "pin rot ctr"		//Pin
+#define gstScaleFactor121 "scale factor 121"//Scale factor at 121
+#define gstScaleFactor "scale factor"	//scale factor
+#define gstScaleMode "scale mode"		//Zoom ratio mode: 0-view; 1-pixel; 2-data(pixel*xy spc)
+//bottom settings
+#define gstGearedEnable "geared enable"	//enable geared rotation
+#define gstCamRotX "cam rot x"			//camera rotation
+#define gstCamRotY "cam rot y"
+#define gstCamRotZ "cam rot z"
+#define gstCamRotQ "cam rot q"			//rotation in quaternion
+#define gstCamRotZeroQ "cam rot zero q"	//rotation at zero setting
+
 class RenderviewPanel;
 namespace fluo
 {

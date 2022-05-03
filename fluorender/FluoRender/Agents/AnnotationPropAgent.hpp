@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Annotations.hpp>
 
+#define gstMemo "memo"
+
 class AnnotationPropPanel;
 namespace fluo
 {

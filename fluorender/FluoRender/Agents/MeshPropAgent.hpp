@@ -31,6 +31,22 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <MeshData.hpp>
 
+#define gstAlpha "alpha"					//Transparency
+#define gstShadowEnable "shadow enable"		//Shadow (check)
+#define gstShadowInt "shadow int"			//Shadow
+#define gstShadingEnable "shding enable"	//Lighting (check)
+#define gstColor "color"					//Color (linked to material colors)
+#define gstMatAmb "mat amb"					//Diffuse Color
+#define gstMatSpec "mat spec"				//Specular Color
+#define gstMatShine "mat shine"				//Shininess
+//scaling
+#define gstScaleX "scale x"
+#define gstScaleY "scale y"
+#define gstScaleZ "scale z"
+//size limiter
+#define gstLimitEnable "limit enable"		//size limit (check)
+#define gstLimit "limit"					//Size Limit
+
 class MeshPropPanel;
 namespace fluo
 {
