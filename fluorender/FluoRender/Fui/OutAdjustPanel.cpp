@@ -83,6 +83,8 @@ wxPanel(frame, wxID_ANY, pos, size, style, name)
 
 	m_agent = glbin_agtf->addOutAdjustAgent(gstOutAdjustAgent, *this);
 
+	SetDoubleBuffered(true);
+
 	this->SetSize(75,-1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);

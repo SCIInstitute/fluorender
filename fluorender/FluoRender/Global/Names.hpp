@@ -86,7 +86,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCountingAgent "CountingDlg"
 #define gstComponentAgent "ComponentDlg"
 #define gstConvertAgent "ConvertDlg"
-#define gstListModel "ListPanel"
+#define gstListAgent "ListPanel"
 #define gstMeasureAgent "MeasureDlg"
 #define gstMeshPropAgent "MeshPropPanel"
 #define gstMeshTransAgent "MeshTransPanel"
@@ -99,7 +99,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRenderviewAgent "RenderviewPanel"//plus a serial number
 #define gstSettingAgent "SettingDlg"
 #define gstTrackAgent "TrackDlg"
-#define gstTreeModel "TreePanel"
+#define gstTreeAgent "TreePanel"
 #define gstVolumePropAgent "VolumePropPanel"
 #define gstNonObjectValues "non object values"//values not from the managed object
 

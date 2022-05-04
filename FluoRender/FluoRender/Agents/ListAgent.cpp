@@ -25,19 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <ListModel.hpp>
+#include <ListAgent.hpp>
 #include <Global.hpp>
 #include <ListPanel.h>
 
 using namespace fluo;
 
-ListModel::ListModel(ListPanel &panel) :
+ListAgent::ListAgent(ListPanel &panel) :
 	panel_(panel)
 {
 
 }
 
-int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
+int ListAgent::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
 	//return wxDataViewModel::Compare(item1, item2, column, ascending);
@@ -64,12 +64,12 @@ int ListModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 }
 
 //model definition
-unsigned int ListModel::GetColumnCount() const
+unsigned int ListAgent::GetColumnCount() const
 {
 	return 3;
 }
 
-wxString ListModel::GetColumnType(unsigned int col) const
+wxString ListAgent::GetColumnType(unsigned int col) const
 {
 	switch (col)
 	{
@@ -83,7 +83,7 @@ wxString ListModel::GetColumnType(unsigned int col) const
 	return "string";
 }
 
-void ListModel::GetValue(wxVariant &variant,
+void ListAgent::GetValue(wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col) const
 {
 	//if (!item.IsOk())
@@ -113,7 +113,7 @@ void ListModel::GetValue(wxVariant &variant,
 	}
 }
 
-bool ListModel::SetValue(const wxVariant &variant,
+bool ListAgent::SetValue(const wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col)
 {
 	if (!item.IsOk())
@@ -139,28 +139,28 @@ bool ListModel::SetValue(const wxVariant &variant,
 }
 
 
-bool ListModel::IsEnabled(const wxDataViewItem &item,
+bool ListAgent::IsEnabled(const wxDataViewItem &item,
 	unsigned int col) const
 {
 	return true;
 }
 
-bool ListModel::IsContainer(const wxDataViewItem &item) const
+bool ListAgent::IsContainer(const wxDataViewItem &item) const
 {
 	return false;
 }
 
-bool ListModel::HasContainerColumns(const wxDataViewItem & item) const
+bool ListAgent::HasContainerColumns(const wxDataViewItem & item) const
 {
 	return true;
 }
 
-wxDataViewItem ListModel::GetParent(const wxDataViewItem &item) const
+wxDataViewItem ListAgent::GetParent(const wxDataViewItem &item) const
 {
 	return wxDataViewItem(0);
 }
 
-unsigned int ListModel::GetChildren(const wxDataViewItem &parent,
+unsigned int ListAgent::GetChildren(const wxDataViewItem &parent,
 	wxDataViewItemArray &array) const
 {
 	Node *node = (Node*)parent.GetID();
@@ -178,17 +178,17 @@ unsigned int ListModel::GetChildren(const wxDataViewItem &parent,
 		return 0;
 }
 
-void ListModel::setObject(Node* root)
+void ListAgent::setObject(Node* root)
 {
 	glbin.addListObserver(this);
 }
 
-void ListModel::UpdateFui(const ValueCollection &names)
+void ListAgent::UpdateFui(const ValueCollection &names)
 {
-
+	bool update_all = names.empty();
 }
 
-void ListModel::OnItemAdded(Event& event)
+void ListAgent::OnItemAdded(Event& event)
 {
 	if (event.child)
 	{
@@ -198,7 +198,7 @@ void ListModel::OnItemAdded(Event& event)
 	}
 }
 
-void ListModel::OnItemRemoved(Event& event)
+void ListAgent::OnItemRemoved(Event& event)
 {
 	if (event.child)
 	{

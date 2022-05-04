@@ -59,21 +59,40 @@ VolumeData* ConvertAgent::getObject()
 
 void ConvertAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 	bool bval;
 	long lval;
 	double dval;
-	getValue(gstVolMeshThresh, dval);
-	dlg_.m_cnv_vol_mesh_thresh_text->SetValue(wxString::Format("%.2f", dval));
-	getValue(gstUseTransferFunc, bval);
-	dlg_.m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
-	getValue(gstUseSelection, bval);
-	dlg_.m_cnv_vol_mesh_selected_chk->SetValue(bval);
-	getValue(gstVolMeshDownXY, lval);
-	dlg_.m_cnv_vol_mesh_downsample_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstVolMeshDownZ, lval);
-	dlg_.m_cnv_vol_mesh_downsample_z_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstVolMeshWeld, bval);
-	dlg_.m_cnv_vol_mesh_weld_chk->SetValue(bval);
+	if (update_all || FOUND_VALUE(gstVolMeshThresh))
+	{
+		getValue(gstVolMeshThresh, dval);
+		dlg_.m_cnv_vol_mesh_thresh_text->SetValue(wxString::Format("%.2f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstUseTransferFunc))
+	{
+		getValue(gstUseTransferFunc, bval);
+		dlg_.m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstUseSelection))
+	{
+		getValue(gstUseSelection, bval);
+		dlg_.m_cnv_vol_mesh_selected_chk->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstVolMeshDownXY))
+	{
+		getValue(gstVolMeshDownXY, lval);
+		dlg_.m_cnv_vol_mesh_downsample_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstVolMeshDownZ))
+	{
+		getValue(gstVolMeshDownZ, lval);
+		dlg_.m_cnv_vol_mesh_downsample_z_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstVolMeshWeld))
+	{
+		getValue(gstVolMeshWeld, bval);
+		dlg_.m_cnv_vol_mesh_weld_chk->SetValue(bval);
+	}
 }
 
 void ConvertAgent::Convert()

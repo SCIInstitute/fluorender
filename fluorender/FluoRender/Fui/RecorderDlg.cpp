@@ -60,6 +60,8 @@ m_dragging_to_item(-1)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	SetDoubleBuffered(true);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 

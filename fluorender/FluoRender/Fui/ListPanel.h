@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/dataview.h>
-#include <ListModel.hpp>
+#include <ListAgent.hpp>
 
 class ListPanel : public wxPanel
 {
@@ -54,13 +54,13 @@ public:
 		const wxString& name = "ListPanel");
 	~ListPanel();
 
-	friend class fluo::ListModel;
+	friend class fluo::ListAgent;
 
 private:
 	wxToolBar* m_toolbar;
 
 	wxDataViewCtrl* m_list_ctrl;
-	fluo::ListModel* m_list_model;
+	fluo::ListAgent* m_list_model;
 
 	void OnAddToView(wxCommandEvent& event);
 	void OnRename(wxCommandEvent& event);

@@ -53,7 +53,7 @@ VolumeData* VolumePropAgent::getObject()
 
 void VolumePropAgent::UpdateFui(const ValueCollection &names)
 {
-	wxString str;
+/*	wxString str;
 	double dval = 0.0;
 	int ival = 0;
 	bool bval = false;
@@ -323,7 +323,7 @@ void VolumePropAgent::UpdateFui(const ValueCollection &names)
 	else
 		panel_.DisableMip();
 
-	//panel_.Layout();
+	//panel_.Layout();*/
 }
 
 void VolumePropAgent::OnLuminanceChanged(Event& event)

@@ -48,6 +48,8 @@ MeshTransPanel::MeshTransPanel(
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	SetDoubleBuffered(true);
+
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);

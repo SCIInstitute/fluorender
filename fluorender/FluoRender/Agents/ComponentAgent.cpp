@@ -67,108 +67,224 @@ Renderview* ComponentAgent::getObject()
 
 void ComponentAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 	bool bval;
 	int ival;
 	long lval;
 	double dval;
+
 	//update ui
-	getValue(gstUseSelection, bval);
-	dlg_.m_use_sel_chk->SetValue(bval);
+	if (update_all || FOUND_VALUE(gstUseSelection))
+	{
+		getValue(gstUseSelection, bval);
+		dlg_.m_use_sel_chk->SetValue(bval);
+	}
 	//comp generate page
-	getValue(gstIteration, lval);
-	dlg_.m_iter_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstThreshold, dval);
-	dlg_.m_thresh_text->SetValue(wxString::Format("%.3f", dval));
+	if (update_all || FOUND_VALUE(gstIteration))
+	{
+		getValue(gstIteration, lval);
+		dlg_.m_iter_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstThreshold))
+	{
+		getValue(gstThreshold, dval);
+		dlg_.m_thresh_text->SetValue(wxString::Format("%.3f", dval));
+	}
 	//dist
-	getValue(gstUseDistField, bval);
-	dlg_.m_use_dist_field_check->SetValue(bval);
-	getValue(gstDistFieldStrength, dval);
-	dlg_.m_dist_strength_text->SetValue(wxString::Format("%.3f", dval));
-	getValue(gstDistFieldFilterSize, lval);
-	dlg_.m_dist_filter_size_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstMaxDist, lval);
-	dlg_.m_max_dist_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstDistFieldThresh, dval);
-	dlg_.m_dist_thresh_text->SetValue(wxString::Format("%.3f", dval));
+	if (update_all || FOUND_VALUE(gstUseDistField))
+	{
+		getValue(gstUseDistField, bval);
+		dlg_.m_use_dist_field_check->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstDistFieldStrength))
+	{
+		getValue(gstDistFieldStrength, dval);
+		dlg_.m_dist_strength_text->SetValue(wxString::Format("%.3f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstDistFieldFilterSize))
+	{
+		getValue(gstDistFieldFilterSize, lval);
+		dlg_.m_dist_filter_size_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstMaxDist))
+	{
+		getValue(gstMaxDist, lval);
+		dlg_.m_max_dist_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstDistFieldThresh))
+	{
+		getValue(gstDistFieldThresh, dval);
+		dlg_.m_dist_thresh_text->SetValue(wxString::Format("%.3f", dval));
+	}
 	//diffusion
-	getValue(gstUseDiffusion, bval);
-	dlg_.m_diff_check->SetValue(bval);
-	getValue(gstDiffusionFalloff, dval);
-	dlg_.m_falloff_text->SetValue(wxString::Format("%.3f", dval));
+	if (update_all || FOUND_VALUE(gstUseDiffusion))
+	{
+		getValue(gstUseDiffusion, bval);
+		dlg_.m_diff_check->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstDiffusionFalloff))
+	{
+		getValue(gstDiffusionFalloff, dval);
+		dlg_.m_falloff_text->SetValue(wxString::Format("%.3f", dval));
+	}
 	//density
-	getValue(gstUseDensityField, bval);
-	dlg_.m_density_check->SetValue(bval);
-	getValue(gstDensityFieldThresh, dval);
-	dlg_.m_density_text->SetValue(wxString::Format("%.3f", dval));
-	getValue(gstDensityVarThresh, dval);
-	dlg_.m_varth_text->SetValue(wxString::Format("%.4f", dval));
-	getValue(gstDensityWindowSize, lval);
-	dlg_.m_density_window_size_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstDensityStatsSize, lval);
-	dlg_.m_density_stats_size_text->SetValue(wxString::Format("%d", lval));
+	if (update_all || FOUND_VALUE(gstUseDensityField))
+	{
+		getValue(gstUseDensityField, bval);
+		dlg_.m_density_check->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstDensityFieldThresh))
+	{
+		getValue(gstDensityFieldThresh, dval);
+		dlg_.m_density_text->SetValue(wxString::Format("%.3f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstDensityVarThresh))
+	{
+		getValue(gstDensityVarThresh, dval);
+		dlg_.m_varth_text->SetValue(wxString::Format("%.4f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstDensityWindowSize))
+	{
+		getValue(gstDensityWindowSize, lval);
+		dlg_.m_density_window_size_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstDensityStatsSize))
+	{
+		getValue(gstDensityStatsSize, lval);
+		dlg_.m_density_stats_size_text->SetValue(wxString::Format("%d", lval));
+	}
 	//fixate
-	getValue(gstFixateEnable, bval);
-	dlg_.m_fixate_check->SetValue(bval);
-	getValue(gstFixateSize, lval);
-	dlg_.m_fix_size_text->SetValue(wxString::Format("%d", lval));
+	if (update_all || FOUND_VALUE(gstFixateEnable))
+	{
+		getValue(gstFixateEnable, bval);
+		dlg_.m_fixate_check->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstFixateSize))
+	{
+		getValue(gstFixateSize, lval);
+		dlg_.m_fix_size_text->SetValue(wxString::Format("%d", lval));
+	}
 	//clean
-	getValue(gstCleanEnable, bval);
-	dlg_.m_clean_check->SetValue(bval);
-	getValue(gstCleanIteration, lval);
-	dlg_.m_clean_iter_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstCleanSize, lval);
-	dlg_.m_clean_limit_text->SetValue(wxString::Format("%d", lval));
+	if (update_all || FOUND_VALUE(gstCleanEnable))
+	{
+		getValue(gstCleanEnable, bval);
+		dlg_.m_clean_check->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstCleanIteration))
+	{
+		getValue(gstCleanIteration, lval);
+		dlg_.m_clean_iter_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstCleanSize))
+	{
+		getValue(gstCleanSize, lval);
+		dlg_.m_clean_limit_text->SetValue(wxString::Format("%d", lval));
+	}
 	//record
-	ival = m_command.size();
-	dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
+	{
+		ival = m_command.size();
+		dlg_.m_cmd_count_text->SetValue(wxString::Format("%d", ival));
+	}
 	//cluster page
-	getValue(gstClusterMethod, lval);
-	dlg_.m_cluster_method_kmeans_rd->SetValue(lval==0);
-	dlg_.m_cluster_method_exmax_rd->SetValue(lval==1);
-	dlg_.m_cluster_method_dbscan_rd->SetValue(lval==2);
+	if (update_all || FOUND_VALUE(gstClusterMethod))
+	{
+		getValue(gstClusterMethod, lval);
+		dlg_.m_cluster_method_kmeans_rd->SetValue(lval == 0);
+		dlg_.m_cluster_method_exmax_rd->SetValue(lval == 1);
+		dlg_.m_cluster_method_dbscan_rd->SetValue(lval == 2);
+	}
 	//parameters
-	getValue(gstClusterNum, lval);
-	dlg_.m_cluster_clnum_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstClusterMaxIter, lval);
-	dlg_.m_cluster_maxiter_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstClusterTol, dval);
-	dlg_.m_cluster_tol_text->SetValue(wxString::Format("%.2f", dval));
-	getValue(gstClusterSize, lval);
-	dlg_.m_cluster_size_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstClusterEps, dval);
-	dlg_.m_cluster_eps_text->SetValue(wxString::Format("%.1f", dval));
+	if (update_all || FOUND_VALUE(gstClusterNum))
+	{
+		getValue(gstClusterNum, lval);
+		dlg_.m_cluster_clnum_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstClusterMaxIter))
+	{
+		getValue(gstClusterMaxIter, lval);
+		dlg_.m_cluster_maxiter_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstClusterTol))
+	{
+		getValue(gstClusterTol, dval);
+		dlg_.m_cluster_tol_text->SetValue(wxString::Format("%.2f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstClusterSize))
+	{
+		getValue(gstClusterSize, lval);
+		dlg_.m_cluster_size_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstClusterEps))
+	{
+		getValue(gstClusterEps, dval);
+		dlg_.m_cluster_eps_text->SetValue(wxString::Format("%.1f", dval));
+	}
 	//selection
-	getValue(gstUseMin, bval);
-	dlg_.m_analysis_min_check->SetValue(bval);
-	dlg_.m_analysis_min_spin->Enable(bval);
-	getValue(gstMinValue, lval);
-	dlg_.m_analysis_min_spin->SetValue(lval);
-	getValue(gstUseMax, bval);
-	dlg_.m_analysis_max_check->SetValue(bval);
-	dlg_.m_analysis_max_spin->Enable(bval);
-	getValue(gstMaxValue, lval);
-	dlg_.m_analysis_max_spin->SetValue(lval);
+	if (update_all || FOUND_VALUE(gstUseMin))
+	{
+		getValue(gstUseMin, bval);
+		dlg_.m_analysis_min_check->SetValue(bval);
+		dlg_.m_analysis_min_spin->Enable(bval);
+	}
+	if (update_all || FOUND_VALUE(gstMinValue))
+	{
+		getValue(gstMinValue, lval);
+		dlg_.m_analysis_min_spin->SetValue(lval);
+	}
+	if (update_all || FOUND_VALUE(gstUseMax))
+	{
+		getValue(gstUseMax, bval);
+		dlg_.m_analysis_max_check->SetValue(bval);
+		dlg_.m_analysis_max_spin->Enable(bval);
+	}
+	if (update_all || FOUND_VALUE(gstMaxValue))
+	{
+		getValue(gstMaxValue, lval);
+		dlg_.m_analysis_max_spin->SetValue(lval);
+	}
 	//options
-	getValue(gstCompConsistent, bval);
-	dlg_.m_consistent_check->SetValue(bval);
-	getValue(gstCompColocal, bval);
-	dlg_.m_colocal_check->SetValue(bval);
+	if (update_all || FOUND_VALUE(gstCompConsistent))
+	{
+		getValue(gstCompConsistent, bval);
+		dlg_.m_consistent_check->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstCompColocal))
+	{
+		getValue(gstCompColocal, bval);
+		dlg_.m_colocal_check->SetValue(bval);
+	}
 	//output type
-	getValue(gstCompOutputType, lval);
-	dlg_.m_output_multi_rb->SetValue(lval==1);
-	dlg_.m_output_rgb_rb->SetValue(lval==2);
+	if (update_all || FOUND_VALUE(gstCompOutputType))
+	{
+		getValue(gstCompOutputType, lval);
+		dlg_.m_output_multi_rb->SetValue(lval == 1);
+		dlg_.m_output_rgb_rb->SetValue(lval == 2);
+	}
 	//neighbors
-	getValue(gstDistNeighbor, bval);
-	dlg_.m_dist_neighbor_check->SetValue(bval);
-	dlg_.m_dist_neighbor_sldr->Enable(bval);
-	dlg_.m_dist_neighbor_text->Enable(bval);
-	getValue(gstDistNeighborValue, lval);
-	dlg_.m_dist_neighbor_sldr->SetValue(lval);
-	getValue(gstDistAllChan, bval);
-	dlg_.m_dist_all_chan_check->SetValue(bval);
+	if (update_all || FOUND_VALUE(gstDistNeighbor))
+	{
+		getValue(gstDistNeighbor, bval);
+		dlg_.m_dist_neighbor_check->SetValue(bval);
+		dlg_.m_dist_neighbor_sldr->Enable(bval);
+		dlg_.m_dist_neighbor_text->Enable(bval);
+	}
+	if (update_all || FOUND_VALUE(gstDistNeighborValue))
+	{
+		getValue(gstDistNeighborValue, lval);
+		dlg_.m_dist_neighbor_sldr->SetValue(lval);
+	}
+	if (update_all || FOUND_VALUE(gstDistAllChan))
+	{
+		getValue(gstDistAllChan, bval);
+		dlg_.m_dist_all_chan_check->SetValue(bval);
+	}
 	//output
-	getValue(gstHoldHistory, bval);
-	dlg_.m_history_chk->SetValue(bval);
+	if (update_all || FOUND_VALUE(gstHoldHistory))
+	{
+		getValue(gstHoldHistory, bval);
+		dlg_.m_history_chk->SetValue(bval);
+	}
 }
 
 void ComponentAgent::LoadSettings(const wxString &filename)

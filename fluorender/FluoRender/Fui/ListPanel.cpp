@@ -65,6 +65,10 @@ ListPanel::ListPanel(
 	const wxString& name) :
 	wxPanel(parent, wxID_ANY, pos, size, style, name)
 {
+	wxEventBlocker blocker(this);
+
+	SetDoubleBuffered(true);
+
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
@@ -101,7 +105,7 @@ ListPanel::ListPanel(
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
 	m_list_ctrl->SetIndent(1);
-	m_list_model = glbin_agtf->addListModel(gstListModel, *this);
+	m_list_model = glbin_agtf->addListAgent(gstListAgent, *this);
 	//append columns
 	//name
 	wxDataViewIconTextRenderer *itr =

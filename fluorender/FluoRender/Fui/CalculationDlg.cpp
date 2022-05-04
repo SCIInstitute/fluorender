@@ -60,6 +60,8 @@ CalculationDlg::CalculationDlg(RenderFrame *frame)
 
 	wxStaticText *st = 0;
 
+	SetDoubleBuffered(true);
+
 	//operand A
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand A:",

@@ -689,6 +689,8 @@ TrackDlg::TrackDlg(RenderFrame* frame)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	SetDoubleBuffered(true);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 

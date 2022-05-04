@@ -56,7 +56,7 @@ VolumeGroup* ColocalAgent::getObject()
 
 void ColocalAgent::UpdateFui(const ValueCollection &names)
 {
-
+	bool update_all = names.empty();
 }
 
 void ColocalAgent::Run()

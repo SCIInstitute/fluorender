@@ -46,7 +46,7 @@ namespace fluo
 	class ComponentAgent;
 	class ConvertAgent;
 	class CountingAgent;
-	class ListModel;
+	class ListAgent;
 	class MeasureAgent;
 	class MeshPropAgent;
 	class MeshTransAgent;
@@ -59,7 +59,7 @@ namespace fluo
 	class RenderviewAgent;
 	class SettingAgent;
 	class TrackAgent;
-	class TreeModel;
+	class TreeAgent;
 	class VolumePropAgent;
 	class InterfaceAgent : public Object
 	{
@@ -288,8 +288,8 @@ namespace fluo
 		virtual const ConvertAgent* asConvertAgent() const { return 0; }
 		virtual CountingAgent* asCountingAgent() { return 0; }
 		virtual const CountingAgent* asCountingAgent() const { return 0; }
-		virtual ListModel* asListModel() { return 0; }
-		virtual const ListModel* asListModel() const { return 0; }
+		virtual ListAgent* asListAgent() { return 0; }
+		virtual const ListAgent* asListAgent() const { return 0; }
 		virtual MeasureAgent* asMeasureAgent() { return 0; }
 		virtual const MeasureAgent* asMeasureAgent() const { return 0; }
 		virtual MeshPropAgent* asMeshPropAgent() { return 0; }
@@ -314,21 +314,19 @@ namespace fluo
 		virtual const SettingAgent* asSettingAgent() const { return 0; }
 		virtual TrackAgent* asTrackAgent() { return 0; }
 		virtual const TrackAgent* asTrackAgent() const { return 0; }
-		virtual TreeModel* asTreeModel() { return 0; }
-		virtual const TreeModel* asTreeModel() const { return 0; }
+		virtual TreeAgent* asTreeAgent() { return 0; }
+		virtual const TreeAgent* asTreeAgent() const { return 0; }
 		virtual VolumePropAgent* asVolumePropAgent() { return 0; }
 		virtual const VolumePropAgent* asVolumePropAgent() const { return 0; }
 
 	protected:
 		virtual void handleValueChanged(Event& event)
 		{
+			ValueCollection names{gstNonObjectValues};
 			Referenced* refd = event.sender;
 			Value* value = dynamic_cast<Value*>(refd);
-			if (value)
-			{
-				ValueCollection names{ value->getName() };
-				UpdateFui(names);
-			}
+			if (value) names.insert(value->getName());
+			UpdateFui(names);
 		}
 	};
 }

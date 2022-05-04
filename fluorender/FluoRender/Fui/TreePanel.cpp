@@ -74,6 +74,9 @@ TreePanel::TreePanel(
 	wxPanel(parent, wxID_ANY, pos, size, style, name),
 	m_frame(parent)
 {
+	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
+
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
@@ -157,7 +160,7 @@ TreePanel::~TreePanel()
 
 void TreePanel::SetScenegraph(fluo::Node* root)
 {
-	m_tree_model = glbin_agtf->addTreeModel(gstTreeModel, *this);
+	m_tree_model = glbin_agtf->addTreeAgent(gstTreeAgent, *this);
 	if (!m_tree_model)
 		return;
 	m_tree_model->setObject(root);

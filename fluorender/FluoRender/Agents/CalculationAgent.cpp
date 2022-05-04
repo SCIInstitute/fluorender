@@ -57,6 +57,7 @@ Renderview* CalculationAgent::getObject()
 
 void CalculationAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 }
 
 void CalculationAgent::LoadVolA()
