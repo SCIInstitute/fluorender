@@ -53,6 +53,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(VRenderFrame *frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);

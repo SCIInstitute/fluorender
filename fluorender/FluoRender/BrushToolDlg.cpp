@@ -127,6 +127,7 @@ BrushToolDlg::BrushToolDlg(
 	m_aligner = new flrd::RulerAlign();
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	wxStaticText *st = 0;
 	//validator: floating point 1

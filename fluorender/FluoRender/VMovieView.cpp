@@ -441,6 +441,7 @@ VMovieView::VMovieView(VRenderFrame* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	if (m_frame)
 		m_view = m_frame->GetView(m_view_idx);

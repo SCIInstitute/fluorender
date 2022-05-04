@@ -757,6 +757,7 @@ SettingDlg::SettingDlg(VRenderFrame *frame) :
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	//notebook
 	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);

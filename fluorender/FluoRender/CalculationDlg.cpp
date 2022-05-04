@@ -54,6 +54,7 @@ CalculationDlg::CalculationDlg(VRenderFrame *frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	wxStaticText *st = 0;
 

@@ -69,6 +69,7 @@ RulerListCtrl::RulerListCtrl(
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	wxListItem itemCol;
 	itemCol.SetText("Name");

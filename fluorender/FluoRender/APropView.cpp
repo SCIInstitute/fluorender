@@ -46,6 +46,7 @@ APropView::APropView(VRenderFrame* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxStaticText* st = 0;

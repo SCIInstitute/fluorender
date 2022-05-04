@@ -60,6 +60,7 @@ m_dragging_to_item(-1)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	//SetDoubleBuffered(true);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -104,8 +105,6 @@ m_dragging_to_item(-1)
 	m_description_text = new wxTextCtrl(this, ID_DescriptionText, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_description_text->Hide();
-
-	//SetDoubleBuffered(true);
 }
 
 KeyListCtrl::~KeyListCtrl()

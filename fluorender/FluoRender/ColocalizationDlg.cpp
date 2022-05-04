@@ -63,6 +63,8 @@ m_test_speed(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
+
 	wxStaticText* st = 0;
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);

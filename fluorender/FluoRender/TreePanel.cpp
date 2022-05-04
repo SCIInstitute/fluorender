@@ -84,6 +84,7 @@ wxTreeCtrl(parent, wxID_ANY, pos, size, style),
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	wxImageList *images = new wxImageList(16, 16, true);
 	wxIcon icons[2];
@@ -92,7 +93,7 @@ wxTreeCtrl(parent, wxID_ANY, pos, size, style),
 	images->Add(icons[0]);
 	images->Add(icons[1]);
 	AssignImageList(images);
-	SetDoubleBuffered(true); 
+	SetDoubleBuffered(true);
 }
 
 DataTreeCtrl::~DataTreeCtrl()
@@ -2173,6 +2174,8 @@ TreePanel::TreePanel(VRenderFrame* frame,
 	wxPanel(frame, wxID_ANY, pos, size, style, name),
 	m_frame(frame)
 {
+	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 	//create data tree
 	m_datatree = new DataTreeCtrl(frame, this);
 

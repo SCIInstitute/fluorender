@@ -138,6 +138,7 @@ VPropView::VPropView(VRenderFrame* frame,
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);

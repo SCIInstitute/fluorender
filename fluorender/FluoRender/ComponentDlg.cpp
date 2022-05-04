@@ -200,6 +200,7 @@ ComponentDlg::ComponentDlg(VRenderFrame *frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 	SetMinSize(wxSize(100, 100));
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);

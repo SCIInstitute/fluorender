@@ -92,6 +92,7 @@ m_dft_sync_b(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	SetDoubleBuffered(true);
 
 	this->SetSize(75,-1);
 	//validator: floating point 2
