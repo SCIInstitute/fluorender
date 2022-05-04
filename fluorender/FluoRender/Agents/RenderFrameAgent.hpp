@@ -95,6 +95,8 @@ namespace fluo
 	protected:
 		RenderFrame &frame_;
 
+		virtual void setupInputs();
+
 	private:
 		std::vector<BaseReader*> m_reader_list;
 	};

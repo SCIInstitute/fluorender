@@ -95,6 +95,8 @@ namespace fluo
 	protected:
 		TreePanel &panel_;
 
+		virtual void setupInputs();
+
 		void OnSelectionChanged(Event& event);
 		void OnItemAdded(Event& event);
 		void OnItemRemoved(Event& event);

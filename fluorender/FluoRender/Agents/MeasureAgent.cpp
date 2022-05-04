@@ -56,6 +56,11 @@ MeasureAgent::~MeasureAgent()
 	delete m_calculator;
 }
 
+void MeasureAgent::setupInputs()
+{
+
+}
+
 void MeasureAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);

@@ -31,47 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <VolumeData.hpp>
 
-//trasnfer function
-#define gstGamma3d "gamma 3d"					//Gamma
-#define gstExtractBoundary "extract boundary"	//Extract Boundary
-#define gstSaturation "saturation"				//Saturation
-#define gstLowThreshold "low threshold"			//Threshold 1
-#define gstHighThreshold "high threshold"		//Threshold 2
-#define gstLuminance "luminance"				//Luminance
-#define gstShadowEnable "shadow enable"			//Shadow (button)
-#define gstShadowInt "shadow int"				//Shadow
-#define gstAlphaEnable "alpha enable"			//Alpha (button)
-#define gstAlpha "alpha"						//Alpha
-#define gstSampleRate "sample rate"				//Sample Rate
-#define gstShadingEnable "shding enable"		//Shading (button)
-#define gstHighShading "high shading"			//Shading 1
-#define gstLowShading "low shading"				//Shading 2
-//modes
-#define gstAlphaPower "alpha power"				//High Transparency (1-normal; 2-high)
-#define gstMipMode "mip mode"					//MIP
-#define gstInvert "invert"						//Invert
-#define gstLabelMode "label mode"				//Show Components
-#define gstInterpolate "interpolate"			//Interpolation
-#define gstNoiseRedct "noise redct"				//Smoothing
-#define gstLegend "legend"						//Legend
-//voxel sizes
-#define gstSpcX "spc x"
-#define gstSpcY "spc y"
-#define gstSpcZ "spc z"
-//color
-#define gstColor "color"						//Primary Color
-#define gstHsv "hsv"							//HSV of primary color
-#define gstSecColor "sec color"					//Secondary Color
-#define gstSecColorSet "sec color set"			//secondary color set by user, otherwise the invert of primary
-//colormaps
-#define gstColormapEnable "colormap enable"		//Colormap (button)
-#define gstColormapLow "colormap low"			//Colormap 1
-#define gstColormapHigh "colormap high"			//Colormap 2
-#define gstColormapMode "colormap mode"			//1-enabled; 0-disabled
-#define gstColormapType "colormap type"			//Rainbow, etc
-#define gstColormapProj "colormap proj"			//Intensity, etc
-#define gstColormapInv "colormap inv"			//Invert (button)
-
 class VolumePropPanel;
 namespace fluo
 {
@@ -79,6 +38,50 @@ namespace fluo
 	class VolumePropAgent : public InterfaceAgent
 	{
 	public:
+		//trasnfer function
+		DEFINE_ATTR(MaxInt);
+		DEFINE_ATTR(Gamma3d);
+		DEFINE_ATTR(ExtractBoundary);
+		DEFINE_ATTR(Saturation);
+		DEFINE_ATTR(LowThreshold);
+		DEFINE_ATTR(HighThreshold);
+		DEFINE_ATTR(Luminance);
+		DEFINE_ATTR(ShadowEnable);
+		DEFINE_ATTR(ShadowInt);
+		DEFINE_ATTR(AlphaEnable);
+		DEFINE_ATTR(Alpha);
+		DEFINE_ATTR(SampleRate);
+		DEFINE_ATTR(ShadingEnable);
+		DEFINE_ATTR(HighShading);
+		DEFINE_ATTR(LowShading);
+		//modes
+		DEFINE_ATTR(AlphaPower);
+		DEFINE_ATTR(BlendMode);
+		DEFINE_ATTR(MipMode);
+		DEFINE_ATTR(Invert);
+		DEFINE_ATTR(LabelMode);
+		DEFINE_ATTR(Interpolate);
+		DEFINE_ATTR(SyncGroup);
+		DEFINE_ATTR(NoiseRedct);
+		DEFINE_ATTR(Legend);
+		//voxel sizes
+		DEFINE_ATTR(SpcX);
+		DEFINE_ATTR(SpcY);
+		DEFINE_ATTR(SpcZ);
+		//color
+		DEFINE_ATTR(Color);
+		DEFINE_ATTR(Hsv);
+		DEFINE_ATTR(SecColor);
+		DEFINE_ATTR(SecColorSet);
+		//colormaps
+		DEFINE_ATTR(ColormapEnable);
+		DEFINE_ATTR(ColormapLow);
+		DEFINE_ATTR(ColormapHigh);
+		DEFINE_ATTR(ColormapMode);
+		DEFINE_ATTR(ColormapType);
+		DEFINE_ATTR(ColormapProj);
+		DEFINE_ATTR(ColormapInv);
+
 		VolumePropAgent(VolumePropPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -101,47 +104,7 @@ namespace fluo
 	protected:
 		VolumePropPanel &panel_;
 
-		virtual void setupInputs()
-		{
-			inputs_ = ValueCollection
-			{
-				gstGamma3d,
-				gstExtractBoundary,
-				gstSaturation,
-				gstLowThreshold,
-				gstHighThreshold,
-				gstLuminance,
-				gstShadowEnable,
-				gstShadowInt,
-				gstAlphaEnable,
-				gstAlpha,
-				gstSampleRate,
-				gstShadingEnable,
-				gstHighShading,
-				gstLowShading,
-				gstAlphaPower,
-				gstMipMode,
-				gstInvert,
-				gstLabelMode,
-				gstInterpolate,
-				gstNoiseRedct,
-				gstLegend,
-				gstSpcX,
-				gstSpcY,
-				gstSpcZ,
-				gstColor,
-				gstHsv,
-				gstSecColor,
-				gstSecColorSet,
-				gstColormapEnable,
-				gstColormapLow,
-				gstColormapHigh,
-				gstColormapMode,
-				gstColormapType,
-				gstColormapProj,
-				gstColormapInv
-			};
-		}
+		virtual void setupInputs();
 
 	private:
 		//update functions

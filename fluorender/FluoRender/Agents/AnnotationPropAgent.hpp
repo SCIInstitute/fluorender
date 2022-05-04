@@ -31,14 +31,16 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <Annotations.hpp>
 
-#define gstMemo "memo"	//Memo (user added text)
-
 class AnnotationPropPanel;
 namespace fluo
 {
 	class AnnotationPropAgent : public InterfaceAgent
 	{
 	public:
+		//Memo (user added text)
+		DEFINE_ATTR(Memo);
+		DEFINE_ATTR(MemoRo);
+
 		AnnotationPropAgent(AnnotationPropPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -59,13 +61,7 @@ namespace fluo
 	protected:
 		AnnotationPropPanel &panel_;
 
-		virtual void setupInputs()
-		{
-			inputs_ = ValueCollection
-			{
-				gstMemo
-			};
-		}
+		virtual void setupInputs();
 
 	private:
 	};

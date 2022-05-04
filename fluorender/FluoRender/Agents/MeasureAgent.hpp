@@ -117,6 +117,8 @@ namespace fluo
 	protected:
 		MeasureDlg &dlg_;
 
+		virtual void setupInputs();
+
 	protected:
 		virtual ~MeasureAgent();
 

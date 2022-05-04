@@ -80,6 +80,8 @@ namespace fluo
 	protected:
 		MoviePanel &panel_;
 
+		virtual void setupInputs();
+
 	private:
 		QVideoEncoder encoder_;
 

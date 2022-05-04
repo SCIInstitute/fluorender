@@ -560,9 +560,6 @@ namespace fluo
 		ValueCollection inputs_;
 		ValueCollection outputs_;
 
-		virtual void setupInputs() {}
-		virtual void setupOutputs() {}
-
 		friend class ObjectFactory;
 
 	private:

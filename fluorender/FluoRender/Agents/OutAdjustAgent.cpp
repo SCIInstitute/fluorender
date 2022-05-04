@@ -41,6 +41,11 @@ OutAdjustAgent::OutAdjustAgent(OutAdjustPanel &panel) :
 
 }
 
+void OutAdjustAgent::setupInputs()
+{
+
+}
+
 void OutAdjustAgent::setObject(Node* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -55,129 +60,133 @@ void OutAdjustAgent::UpdateFui(const ValueCollection &names)
 {
 	double dval = 0.0;
 	bool bval = false;
+	if (getValue(gstGammaR, dval))
+		panel_.EnableAll();
+	else
+	{
+		panel_.DisableAll();
+		return;
+	}
+
+	bool update_all = names.empty();
 
 	//values
-	bool result = getValue("gamma r", dval);
-	panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
-	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
-	getValue("gamma g", dval);
-	panel_.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
-	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
-	getValue("gamma b", dval);
-	panel_.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
-	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
-	getValue("brightness r", dval);
-	panel_.m_r_brightness_sldr->SetValue(Brigt2UiS(dval));
-	panel_.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
-	getValue("brightness g", dval);
-	panel_.m_g_brightness_sldr->SetValue(Brigt2UiS(dval));
-	panel_.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
-	getValue("brightness b", dval);
-	panel_.m_b_brightness_sldr->SetValue(Brigt2UiS(dval));
-	panel_.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
-	getValue("equalize r", dval);
-	panel_.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
-	panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
-	getValue("equalize g", dval);
-	panel_.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
-	panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
-	getValue("equalize b", dval);
-	panel_.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
-	panel_.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	if (update_all || FOUND_VALUE(gstGammaR))
+	{
+		getValue(gstGammaR, dval);
+		panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
+		panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	}
+	if (update_all || FOUND_VALUE(gstGammaG))
+	{
+		getValue(gstGammaG, dval);
+		panel_.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
+		panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	}
+	if (update_all || FOUND_VALUE(gstGammaB))
+	{
+		getValue(gstGammaB, dval);
+		panel_.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
+		panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
+	}
+	if (update_all || FOUND_VALUE(gstBrightnessR))
+	{
+		getValue(gstBrightnessR, dval);
+		panel_.m_r_brightness_sldr->SetValue(Brigt2UiS(dval));
+		panel_.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	}
+	if (update_all || FOUND_VALUE(gstBrightnessG))
+	{
+		getValue(gstBrightnessG, dval);
+		panel_.m_g_brightness_sldr->SetValue(Brigt2UiS(dval));
+		panel_.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	}
+	if (update_all || FOUND_VALUE(gstBrightnessB))
+	{
+		getValue(gstBrightnessB, dval);
+		panel_.m_b_brightness_sldr->SetValue(Brigt2UiS(dval));
+		panel_.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
+	}
+	if (update_all || FOUND_VALUE(gstEqualizeR))
+	{
+		getValue(gstEqualizeR, dval);
+		panel_.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
+		panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstEqualizeG))
+	{
+		getValue(gstEqualizeG, dval);
+		panel_.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
+		panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	}
+	if (update_all || FOUND_VALUE(gstEqualizeB))
+	{
+		getValue(gstEqualizeB, dval);
+		panel_.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
+		panel_.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
+	}
 
 	//sync
 	//r
-	getValue("sync r", bval);
-	panel_.m_sync_r_chk->ToggleTool(OutAdjustPanel::ID_SyncRChk, bval);
-	panel_.m_sync_r_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncRChk,
-		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	if (update_all || FOUND_VALUE(gstSyncR))
+	{
+		getValue(gstSyncR, bval);
+		panel_.m_sync_r_chk->ToggleTool(OutAdjustPanel::ID_SyncRChk, bval);
+		panel_.m_sync_r_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncRChk,
+			bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	}
 	//g
-	getValue("sync g", bval);
-	panel_.m_sync_g_chk->ToggleTool(OutAdjustPanel::ID_SyncGChk, bval);
-	panel_.m_sync_g_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncGChk,
-		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	if (update_all || FOUND_VALUE(gstSyncG))
+	{
+		getValue(gstSyncG, bval);
+		panel_.m_sync_g_chk->ToggleTool(OutAdjustPanel::ID_SyncGChk, bval);
+		panel_.m_sync_g_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncGChk,
+			bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	}
 	//b
-	getValue("sync b", bval);
-	panel_.m_sync_b_chk->ToggleTool(OutAdjustPanel::ID_SyncBChk, bval);
-	panel_.m_sync_b_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncBChk,
-		bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
-
-	if (result)
-		panel_.EnableAll();
-	else
-		panel_.DisableAll();
+	if (update_all || FOUND_VALUE(gstSyncB))
+	{
+		getValue(gstSyncB, bval);
+		panel_.m_sync_b_chk->ToggleTool(OutAdjustPanel::ID_SyncBChk, bval);
+		panel_.m_sync_b_chk->SetToolNormalBitmap(OutAdjustPanel::ID_SyncBChk,
+			bval ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+	}
 
 	//panel_.Layout();
 }
 
 void OutAdjustAgent::OnGammaRChanged(Event& event)
 {
-	double dval;
-	getValue("gamma r", dval);
-	panel_.m_r_gamma_sldr->SetValue(Gamma2UiS(dval));
-	panel_.m_r_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }
 
 void OutAdjustAgent::OnGammaGChanged(Event& event)
 {
-	double dval;
-	getValue("gamma g", dval);
-	panel_.m_g_gamma_sldr->SetValue(Gamma2UiS(dval));
-	panel_.m_g_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }
 
 void OutAdjustAgent::OnGammaBChanged(Event& event)
 {
-	double dval;
-	getValue("gamma b", dval);
-	panel_.m_b_gamma_sldr->SetValue(Gamma2UiS(dval));
-	panel_.m_b_gamma_text->ChangeValue(wxString::Format("%.2f", Gamma2UiT(dval)));
 }
 
 void OutAdjustAgent::OnBrightnessRChanged(Event& event)
 {
-	double dval;
-	getValue("brightness r", dval);
-	panel_.m_r_brightness_sldr->SetValue(Brigt2UiS(dval));
-	panel_.m_r_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 }
 
 void OutAdjustAgent::OnBrightnessGChanged(Event& event)
 {
-	double dval;
-	getValue("brightness g", dval);
-	panel_.m_g_brightness_sldr->SetValue(Brigt2UiS(dval));
-	panel_.m_g_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 }
 
 void OutAdjustAgent::OnBrightnessBChanged(Event& event)
 {
-	double dval;
-	getValue("brightness b", dval);
-	panel_.m_b_brightness_sldr->SetValue(Brigt2UiS(dval));
-	panel_.m_b_brightness_text->ChangeValue(wxString::Format("%.0f", Brigt2UiT(dval)));
 }
 
 void OutAdjustAgent::OnEqualizeRChanged(Event& event)
 {
-	double dval;
-	getValue("equalize r", dval);
-	panel_.m_r_hdr_sldr->SetValue(Equal2UiS(dval));
-	panel_.m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 }
 
 void OutAdjustAgent::OnEqualizeGChanged(Event& event)
 {
-	double dval;
-	getValue("equalize g", dval);
-	panel_.m_g_hdr_sldr->SetValue(Equal2UiS(dval));
-	panel_.m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 }
 
 void OutAdjustAgent::OnEqualizeBChanged(Event& event)
 {
-	double dval;
-	getValue("equalize b", dval);
-	panel_.m_b_hdr_sldr->SetValue(Equal2UiS(dval));
-	panel_.m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
 }

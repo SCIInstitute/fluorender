@@ -41,6 +41,11 @@ ClKernelAgent::ClKernelAgent(ClKernelDlg &dlg) :
 {
 }
 
+void ClKernelAgent::setupInputs()
+{
+
+}
+
 void ClKernelAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);

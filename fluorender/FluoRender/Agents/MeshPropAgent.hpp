@@ -31,28 +31,29 @@ DEALINGS IN THE SOFTWARE.
 #include <InterfaceAgent.hpp>
 #include <MeshData.hpp>
 
-#define gstAlpha "alpha"					//Transparency
-#define gstShadowEnable "shadow enable"		//Shadow (check)
-#define gstShadowInt "shadow int"			//Shadow
-#define gstShadingEnable "shding enable"	//Lighting (check)
-#define gstColor "color"					//Color (linked to material colors)
-#define gstMatAmb "mat amb"					//Diffuse Color
-#define gstMatSpec "mat spec"				//Specular Color
-#define gstMatShine "mat shine"				//Shininess
-//scaling
-#define gstScaleX "scale x"
-#define gstScaleY "scale y"
-#define gstScaleZ "scale z"
-//size limiter
-#define gstLimitEnable "limit enable"		//size limit (check)
-#define gstLimit "limit"					//Size Limit
-
 class MeshPropPanel;
 namespace fluo
 {
 	class MeshPropAgent : public InterfaceAgent
 	{
 	public:
+		//material
+		DEFINE_ATTR(Alpha);
+		DEFINE_ATTR(ShadowEnable);
+		DEFINE_ATTR(ShadowInt);
+		DEFINE_ATTR(ShadingEnable);
+		DEFINE_ATTR(Color);
+		DEFINE_ATTR(MatAmb);
+		DEFINE_ATTR(MatSpec);
+		DEFINE_ATTR(MatShine);
+		//scaling
+		DEFINE_ATTR(ScaleX);
+		DEFINE_ATTR(ScaleY);
+		DEFINE_ATTR(ScaleZ);
+		//size limiter
+		DEFINE_ATTR(LimitEnable);
+		DEFINE_ATTR(Limit);
+
 		MeshPropAgent(MeshPropPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -72,6 +73,8 @@ namespace fluo
 
 	protected:
 		MeshPropPanel &panel_;
+
+		virtual void setupInputs();
 
 	private:
 	};

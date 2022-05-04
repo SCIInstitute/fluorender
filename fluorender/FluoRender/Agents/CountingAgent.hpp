@@ -61,6 +61,8 @@ namespace fluo
 	protected:
 		CountingDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 		//update functions
 		void OnUseMax(Event& event);

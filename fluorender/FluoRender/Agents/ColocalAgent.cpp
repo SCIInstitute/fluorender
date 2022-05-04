@@ -44,6 +44,11 @@ ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 {
 }
 
+void ColocalAgent::setupInputs()
+{
+
+}
+
 void ColocalAgent::setObject(VolumeGroup* vg)
 {
 	InterfaceAgent::setObject(vg);

@@ -40,6 +40,11 @@ RenderCanvasAgent::RenderCanvasAgent(RenderCanvas &canvas) :
 
 }
 
+void RenderCanvasAgent::setupInputs()
+{
+
+}
+
 void RenderCanvasAgent::setObject(Renderview* view)
 {
 	InterfaceAgent::setObject(view);

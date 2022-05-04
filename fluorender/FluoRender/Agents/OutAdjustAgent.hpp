@@ -73,6 +73,8 @@ namespace fluo
 	protected:
 		OutAdjustPanel &panel_;
 
+		virtual void setupInputs();
+
 		//update functions
 		void OnGammaRChanged(Event& event);
 		void OnGammaGChanged(Event& event);

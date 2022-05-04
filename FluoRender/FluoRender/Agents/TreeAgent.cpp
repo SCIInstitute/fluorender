@@ -42,6 +42,11 @@ TreeAgent::TreeAgent(TreePanel &panel):
 
 }
 
+void TreeAgent::setupInputs()
+{
+
+}
+
 int TreeAgent::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
@@ -230,7 +235,7 @@ unsigned int TreeAgent::GetChildren(const wxDataViewItem &parent,
 
 void TreeAgent::UpdateFui(const ValueCollection &names)
 {
-
+	bool update_all = names.empty();
 }
 
 //operations

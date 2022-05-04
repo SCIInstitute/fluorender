@@ -47,6 +47,11 @@ ConvertAgent::ConvertAgent(ConvertDlg &dlg) :
 {
 }
 
+void ConvertAgent::setupInputs()
+{
+
+}
+
 void ConvertAgent::setObject(VolumeData* obj)
 {
 	InterfaceAgent::setObject(obj);

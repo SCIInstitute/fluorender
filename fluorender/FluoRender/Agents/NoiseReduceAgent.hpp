@@ -62,6 +62,8 @@ namespace fluo
 	protected:
 		NoiseReduceDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 		void OnThreshold(Event& event);
 		void OnCompSizeLimit(Event& event);

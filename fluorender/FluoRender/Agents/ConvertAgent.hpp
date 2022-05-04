@@ -59,6 +59,8 @@ namespace fluo
 	protected:
 		ConvertDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 	};
 }

@@ -59,6 +59,8 @@ namespace fluo
 	protected:
 		RenderCanvas &canvas_;
 
+		virtual void setupInputs();
+
 		void OnBoundsChanged(Event& event);
 		void OnSceneChanged(Event& event);
 		void OnFocusChanged(Event& event);

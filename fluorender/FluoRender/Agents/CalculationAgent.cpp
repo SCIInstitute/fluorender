@@ -45,6 +45,11 @@ CalculationAgent::CalculationAgent(CalculationDlg &dlg) :
 {
 }
 
+void CalculationAgent::setupInputs()
+{
+
+}
+
 void CalculationAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);

@@ -62,6 +62,8 @@ namespace fluo
 	protected:
 		ClipPlanePanel &panel_;
 
+		virtual void setupInputs();
+
 		//update functions
 		void OnClipXChanged(Event& event);
 		void OnClipYChanged(Event& event);

@@ -35,7 +35,42 @@ RenderviewAgent::RenderviewAgent(RenderviewPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
 {
+	setupInputs();
+}
 
+void RenderviewAgent::setupInputs()
+{
+	inputs_ = ValueCollection
+	{
+		//top settings
+		MixMethod,
+		DrawInfo,
+		DrawCamCtr,
+		DrawLegend,
+		DrawColormap,
+		DrawScaleBar,
+		DrawScaleBarText,
+		BgColor,
+		Aov,
+		Perspective,
+		Free,
+		FullScreen,
+		//left settings
+		DepthAtten,
+		DaInt,
+		//right settings
+		PinRotCtr,
+		ScaleFactor121,
+		ScaleFactor,
+		ScaleMode,
+		//bottom settings
+		GearedEnable,
+		CamRotX,
+		CamRotY,
+		CamRotZ,
+		CamRotQ,
+		CamRotZeroQ
+	};
 }
 
 void RenderviewAgent::setObject(Renderview* view)
@@ -50,20 +85,7 @@ Renderview* RenderviewAgent::getObject()
 
 void RenderviewAgent::UpdateFui(const ValueCollection &names)
 {
-	//holdoffObserverNotification();
-
-	//setValue(gstForceClear, true);
-	//setValue(gstInteractive, false);
-	//setValue(gstRefresh, true);
-	//Renderview* view = getObject();
-	//if (!view) return;
-	//view->Update(41);
-	//bool bval = false;
-	//getValue(gstRefreshErase, bval);
-	//canvas_.Refresh(bval);
-	//setValue(gstRefreshErase, false);
-
-	//resumeObserverNotification();
+	bool update_all = names.empty();
 }
 
 //void RenderviewAgent::OnBoundsChanged(Event& event)

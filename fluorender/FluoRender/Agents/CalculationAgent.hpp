@@ -69,6 +69,8 @@ namespace fluo
 	protected:
 		CalculationDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 	};
 }

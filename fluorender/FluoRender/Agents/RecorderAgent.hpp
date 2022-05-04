@@ -76,6 +76,8 @@ namespace fluo
 	protected:
 		RecorderDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 		void OnSelectedKey(Event& event);
 	};

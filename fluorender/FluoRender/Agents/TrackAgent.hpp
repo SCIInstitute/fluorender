@@ -105,6 +105,8 @@ namespace fluo
 	protected:
 		TrackDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 		//read/delete volume cache from file
 		void ReadVolCache(flrd::VolCache& vol_cache);

@@ -47,6 +47,11 @@ ClipPlaneAgent::ClipPlaneAgent(ClipPlanePanel &panel) :
 
 }
 
+void ClipPlaneAgent::setupInputs()
+{
+
+}
+
 void ClipPlaneAgent::setObject(Node* obj)
 {
 	InterfaceAgent::setObject(obj);

@@ -62,6 +62,11 @@ RenderFrameAgent::RenderFrameAgent(RenderFrame &frame) :
 {
 }
 
+void RenderFrameAgent::setupInputs()
+{
+
+}
+
 void RenderFrameAgent::setObject(Root* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -74,6 +79,7 @@ Root* RenderFrameAgent::getObject()
 
 void RenderFrameAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 }
 
 std::vector<std::string> RenderFrameAgent::GetJvmArgs()

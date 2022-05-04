@@ -37,6 +37,11 @@ ListAgent::ListAgent(ListPanel &panel) :
 
 }
 
+void ListAgent::setupInputs()
+{
+
+}
+
 int ListAgent::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
@@ -105,7 +110,7 @@ void ListAgent::GetValue(wxVariant &variant,
 	case 2:
 	{
 		std::wstring path;
-		node->getValue("data path", path);
+		node->getValue(gstDataPath, path);
 		variant = wxString(path);
 		break;
 

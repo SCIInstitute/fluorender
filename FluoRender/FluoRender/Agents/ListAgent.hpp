@@ -88,8 +88,12 @@ namespace fluo
 
 		friend class AgentFactory;
 
-	private:
+	protected:
 		ListPanel &panel_;
+
+		virtual void setupInputs();
+
+	private:
 		void OnItemAdded(Event& event);
 		void OnItemRemoved(Event& event);
 	};

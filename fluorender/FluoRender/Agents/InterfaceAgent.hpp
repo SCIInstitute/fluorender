@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ValueUpdateVisitor.hpp>
 
 #define FOUND_VALUE(v) names.find(v) != names.end()
+#define DEFINE_ATTR(v) inline static const std::string v = gst ## v
 
 namespace fluo
 {
@@ -320,6 +321,8 @@ namespace fluo
 		virtual const VolumePropAgent* asVolumePropAgent() const { return 0; }
 
 	protected:
+		virtual void setupInputs() = 0;
+
 		virtual void handleValueChanged(Event& event)
 		{
 			ValueCollection names{gstNonObjectValues};

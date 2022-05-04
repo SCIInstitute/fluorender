@@ -94,6 +94,8 @@ namespace fluo
 		BrushToolDlg &dlg_;
 		TreePanel &tree_panel_;//secondary ui
 
+		virtual void setupInputs();
+
 	private:
 		//update functions
 		void OnInterModeChanged(Event& event);

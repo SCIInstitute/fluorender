@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <AnnotationPropAgent.hpp>
 #include <AnnotationPropPanel.h>
-#include <string>
 
 using namespace fluo;
 
@@ -36,6 +35,16 @@ AnnotationPropAgent::AnnotationPropAgent(AnnotationPropPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
 {
+	setupInputs();
+}
+
+void AnnotationPropAgent::setupInputs()
+{
+	inputs_ = ValueCollection
+	{
+		Memo,
+		MemoRo
+	};
 }
 
 void AnnotationPropAgent::setObject(Annotations* obj)
@@ -53,13 +62,13 @@ void AnnotationPropAgent::UpdateFui(const ValueCollection &names)
 	bool update_all = names.empty();
 
 	//memo
-	if (update_all || FOUND_VALUE(gstMemo))
+	if (update_all || FOUND_VALUE(Memo))
 	{
 		std::string memo;
-		getValue(gstMemo, memo);
+		getValue(Memo, memo);
 		panel_.m_memo_text->SetValue(memo);
 		bool bval;
-		getValue(gstMemoRo, bval);
+		getValue(MemoRo, bval);
 		if (bval)
 		{
 			panel_.m_memo_text->SetEditable(false);

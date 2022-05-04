@@ -44,6 +44,11 @@ CountingAgent::CountingAgent(CountingDlg &dlg) :
 {
 }
 
+void CountingAgent::setupInputs()
+{
+
+}
+
 void CountingAgent::setObject(VolumeData* obj)
 {
 	InterfaceAgent::setObject(obj);

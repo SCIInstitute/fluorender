@@ -129,6 +129,8 @@ namespace fluo
 	protected:
 		ComponentDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 		//speed test
 		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;

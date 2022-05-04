@@ -39,6 +39,57 @@ SettingAgent::SettingAgent(SettingDlg &dlg) :
 	InterfaceAgent(),
 	dlg_(dlg)
 {
+	setupInputs();
+}
+
+void SettingAgent::setupInputs()
+{
+	inputs_ = ValueCollection
+	{
+		//project page
+		SaveProjectEnable,
+		HardwareCompress,
+		FontFile,
+		TextSize,
+		TextColorMode,
+		LineWidth,
+		PaintHistory,
+		//rendering page
+		MicroBlendEnable,
+		PeelNum,
+		ShadowDirEnable,
+		ShadowDirX,
+		ShadowDirY,
+		PinThresh,
+		LinkedRot,
+		GradBg,
+		VrEnable,
+		VrEyeOffset,
+		//Performance
+		Adaptive,
+		StreamEnable,
+		UpdateOrder,
+		GpuMemSize,
+		LargeDataSize,
+		BrickSize,
+		ResponseTime,
+		LodOffset,
+		//Format
+		OverrideVoxSpc,
+		WaveColor1,
+		WaveColor2,
+		WaveColor3,
+		WaveColor4,
+		MaxTextureSizeEnable,
+		MaxTextureSize,
+		ClPlatformId,
+		ClDeviceId,
+		//Java
+		ImagejMode,
+		JvmPath,
+		ImagejPath,
+		BioformatsPath,
+	};
 }
 
 void SettingAgent::setObject(Root* obj)
@@ -55,151 +106,259 @@ void SettingAgent::UpdateFui(const ValueCollection &names)
 {
 	bool bval; long lval; double dval;
 	std::string sval;
+	bool update_all = names.empty();
+
 	//update user interface
 	//save project
-	getValue(gstSaveProjectEnable, bval);
-	dlg_.m_prj_save_chk->SetValue(bval);
-	//realtime compression
-	getValue(gstHardwareCompress, bval);
-	dlg_.m_realtime_cmp_chk->SetValue(bval);
-	//mouse interactions
-	getValue(gstAdaptive, bval);
-	dlg_.m_mouse_int_chk->SetValue(bval);
-	//depth peeling
-	getValue(gstPeelNum, lval);
-	dlg_.m_peeling_layers_sldr->SetValue(lval);
-	dlg_.m_peeling_layers_text->ChangeValue(wxString::Format("%d", lval));
-	//micro blending
-	getValue(gstMicroBlendEnable, bval);
-	dlg_.m_micro_blend_chk->SetValue(bval);
-	//shadow direction
-	getValue(gstShadowDirEnable, bval);
-	dlg_.m_shadow_dir_chk->SetValue(bval);
-	dlg_.m_shadow_dir_sldr->Enable(bval);
-	dlg_.m_shadow_dir_text->Enable(bval);
-	double dx, dy;
-	getValue(gstShadowDirX, dx); getValue(gstShadowDirY, dy);
-	double deg = fluo::r2d(atan2(dy, dx));
-	dlg_.m_shadow_dir_sldr->SetValue(int(deg + 0.5));
-	dlg_.m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
-	//rot center anchor thresh
-	getValue(gstPinThresh, dval);
-	dlg_.m_pin_threshold_sldr->SetValue(int(dval*10.0));
-	dlg_.m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", dval*100.0));
-	//gradient background
-	getValue(gstGradBg, bval);
-	dlg_.m_grad_bg_chk->SetValue(bval);
-	//stereo
-	getValue(gstVrEnable, bval);
-	dlg_.m_stereo_chk->SetValue(bval);
-	getValue(gstVrEyeOffset, dval);
-	dlg_.m_eye_dist_sldr->SetValue(int(dval*10.0));
-	dlg_.m_eye_dist_text->ChangeValue(wxString::Format("%.1f", dval));
-	//override vox
-	getValue(gstOverrideVoxSpc, bval);
-	dlg_.m_override_vox_chk->SetValue(bval);
-	//wavelength to color
-	getValue(gstWaveColor1, lval);
-	dlg_.m_wav_color1_cmb->Select(lval - 1);
-	getValue(gstWaveColor2, lval);
-	dlg_.m_wav_color2_cmb->Select(lval - 1);
-	getValue(gstWaveColor3, lval);
-	dlg_.m_wav_color3_cmb->Select(lval - 1);
-	getValue(gstWaveColor4, lval);
-	dlg_.m_wav_color4_cmb->Select(lval - 1);
-	//max texture size
-	getValue(gstMaxTextureSizeEnable, bval);
-	dlg_.m_max_texture_size_chk->SetValue(bval);
-	if (bval)
+	if (update_all || FOUND_VALUE(SaveProjectEnable))
 	{
-		getValue(gstMaxTextureSize, lval);
-		flvr::ShaderProgram::set_max_texture_size(lval);
-		dlg_.m_max_texture_size_text->SetValue(
-			wxString::Format("%d", lval));
-		dlg_.m_max_texture_size_text->Enable();
+		getValue(SaveProjectEnable, bval);
+		dlg_.m_prj_save_chk->SetValue(bval);
 	}
-	else
+	//realtime compression
+	if (update_all || FOUND_VALUE(HardwareCompress))
 	{
-		dlg_.m_max_texture_size_text->SetValue(
-			wxString::Format("%d", flvr::ShaderProgram::
-				max_texture_size()));
-		dlg_.m_max_texture_size_text->Disable();
+		getValue(HardwareCompress, bval);
+		dlg_.m_realtime_cmp_chk->SetValue(bval);
+	}
+	//mouse interactions
+	if (update_all || FOUND_VALUE(Adaptive))
+	{
+		getValue(Adaptive, bval);
+		dlg_.m_mouse_int_chk->SetValue(bval);
+	}
+	//depth peeling
+	if (update_all || FOUND_VALUE(PeelNum))
+	{
+		getValue(PeelNum, lval);
+		dlg_.m_peeling_layers_sldr->SetValue(lval);
+		dlg_.m_peeling_layers_text->ChangeValue(wxString::Format("%d", lval));
+	}
+	//micro blending
+	if (update_all || FOUND_VALUE(MicroBlendEnable))
+	{
+		getValue(MicroBlendEnable, bval);
+		dlg_.m_micro_blend_chk->SetValue(bval);
+	}
+	//shadow direction
+	if (update_all || FOUND_VALUE(ShadowDirEnable))
+	{
+		getValue(ShadowDirEnable, bval);
+		dlg_.m_shadow_dir_chk->SetValue(bval);
+		dlg_.m_shadow_dir_sldr->Enable(bval);
+		dlg_.m_shadow_dir_text->Enable(bval);
+	}
+	if (update_all || FOUND_VALUE(ShadowDirX) || FOUND_VALUE(ShadowDirY))
+	{
+		double dx, dy;
+		getValue(ShadowDirX, dx); getValue(ShadowDirY, dy);
+		double deg = fluo::r2d(atan2(dy, dx));
+		dlg_.m_shadow_dir_sldr->SetValue(int(deg + 0.5));
+		dlg_.m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
+	}
+	//rot center anchor thresh
+	if (update_all || FOUND_VALUE(PinThresh))
+	{
+		getValue(PinThresh, dval);
+		dlg_.m_pin_threshold_sldr->SetValue(int(dval*10.0));
+		dlg_.m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", dval*100.0));
+	}
+	//gradient background
+	if (update_all || FOUND_VALUE(GradBg))
+	{
+		getValue(GradBg, bval);
+		dlg_.m_grad_bg_chk->SetValue(bval);
+	}
+	//stereo
+	if (update_all || FOUND_VALUE(VrEnable))
+	{
+		getValue(VrEnable, bval);
+		dlg_.m_stereo_chk->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(VrEyeOffset))
+	{
+		getValue(VrEyeOffset, dval);
+		dlg_.m_eye_dist_sldr->SetValue(int(dval*10.0));
+		dlg_.m_eye_dist_text->ChangeValue(wxString::Format("%.1f", dval));
+	}
+	//override vox
+	if (update_all || FOUND_VALUE(OverrideVoxSpc))
+	{
+		getValue(OverrideVoxSpc, bval);
+		dlg_.m_override_vox_chk->SetValue(bval);
+	}
+	//wavelength to color
+	if (update_all || FOUND_VALUE(WaveColor1))
+	{
+		getValue(WaveColor1, lval);
+		dlg_.m_wav_color1_cmb->Select(lval - 1);
+	}
+	if (update_all || FOUND_VALUE(WaveColor2))
+	{
+		getValue(WaveColor2, lval);
+		dlg_.m_wav_color2_cmb->Select(lval - 1);
+	}
+	if (update_all || FOUND_VALUE(WaveColor3))
+	{
+		getValue(WaveColor3, lval);
+		dlg_.m_wav_color3_cmb->Select(lval - 1);
+	}
+	if (update_all || FOUND_VALUE(WaveColor4))
+	{
+		getValue(WaveColor4, lval);
+		dlg_.m_wav_color4_cmb->Select(lval - 1);
+	}
+	//max texture size
+	if (update_all || FOUND_VALUE(MaxTextureSizeEnable))
+	{
+		getValue(MaxTextureSizeEnable, bval);
+		dlg_.m_max_texture_size_chk->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(MaxTextureSize))
+	{
+		getValue(MaxTextureSizeEnable, bval);
+		if (bval)
+		{
+			getValue(MaxTextureSize, lval);
+			dlg_.m_max_texture_size_text->SetValue(
+				wxString::Format("%d", lval));
+			dlg_.m_max_texture_size_text->Enable();
+		}
+		else
+		{
+			dlg_.m_max_texture_size_text->SetValue(
+				wxString::Format("%d", flvr::ShaderProgram::
+					max_texture_size()));
+			dlg_.m_max_texture_size_text->Disable();
+		}
 	}
 	//no tex pack
-	getValue(gstNoTexPack, bval);
-	flvr::ShaderProgram::set_no_tex_upack(bval);
+	//if (update_all || FOUND_VALUE(NoTexPack))
+	//{
+	//	getValue(NoTexPack, bval);
+	//	flvr::ShaderProgram::set_no_tex_upack(bval);
+	//}
 	//font
-	getValue(gstFontFile, sval);
-	wxString str = sval;
-	str = str.BeforeLast('.');
-	int font_sel = dlg_.m_font_cmb->FindString(str);
-	if (font_sel != wxNOT_FOUND)
-		dlg_.m_font_cmb->Select(font_sel);
-	long font_size;
-	getValue(gstTextSize, dval);
-	for (unsigned int i = 0; i < dlg_.m_font_size_cmb->GetCount(); ++i)
+	if (update_all || FOUND_VALUE(FontFile))
 	{
-		str = dlg_.m_font_size_cmb->GetString(i);
-		if (str.ToLong(&font_size) &&
-			font_size <= long(dval))
-			dlg_.m_font_size_cmb->Select(i);
+		getValue(FontFile, sval);
+		wxString str = sval;
+		str = str.BeforeLast('.');
+		int font_sel = dlg_.m_font_cmb->FindString(str);
+		if (font_sel != wxNOT_FOUND)
+			dlg_.m_font_cmb->Select(font_sel);
 	}
-	getValue(gstTextColorMode, lval);
-	dlg_.m_text_color_cmb->Select(lval);
+	if (update_all || FOUND_VALUE(TextSize))
+	{
+		long font_size;
+		getValue(TextSize, dval);
+		wxString str = sval;
+		for (unsigned int i = 0; i < dlg_.m_font_size_cmb->GetCount(); ++i)
+		{
+			str = dlg_.m_font_size_cmb->GetString(i);
+			if (str.ToLong(&font_size) &&
+				font_size <= long(dval))
+				dlg_.m_font_size_cmb->Select(i);
+		}
+	}
+	if (update_all || FOUND_VALUE(TextColorMode))
+	{
+		getValue(TextColorMode, lval);
+		dlg_.m_text_color_cmb->Select(lval);
+	}
 	//line width
-	getValue(gstLineWidth, dval);
-	dlg_.m_line_width_text->SetValue(wxString::Format("%.0f", dval));
-	dlg_.m_line_width_sldr->SetValue(int(dval + 0.5));
+	if (update_all || FOUND_VALUE(LineWidth))
+	{
+		getValue(LineWidth, dval);
+		dlg_.m_line_width_text->SetValue(wxString::Format("%.0f", dval));
+		dlg_.m_line_width_sldr->SetValue(int(dval + 0.5));
+	}
 	//paint history depth
-	getValue(gstPaintHistory, lval);
-	dlg_.m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", lval));
-	dlg_.m_paint_hist_depth_sldr->SetValue(lval);
+	if (update_all || FOUND_VALUE(PaintHistory))
+	{
+		getValue(PaintHistory, lval);
+		dlg_.m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", lval));
+		dlg_.m_paint_hist_depth_sldr->SetValue(lval);
+	}
 	//memory settings
-	getValue(gstStreamEnable, bval);
-	dlg_.m_streaming_chk->SetValue(bval);
-	dlg_.EnableStreaming(bval);
-	getValue(gstUpdateOrder, lval);
-	dlg_.m_update_order_rbox->SetSelection(lval);
-	getValue(gstGpuMemSize, dval);
-	dlg_.m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)dval));
-	dlg_.m_graphics_mem_sldr->SetValue((int)(dval / 100.0));
-	getValue(gstLargeDataSize, dval);
-	dlg_.m_large_data_text->ChangeValue(wxString::Format("%d", (int)dval));
-	dlg_.m_large_data_sldr->SetValue((int)(dval / 10.0));
-	getValue(gstBrickSize, lval);
-	dlg_.m_block_size_text->ChangeValue(wxString::Format("%d", lval));
-	dlg_.m_block_size_sldr->SetValue(int(log(double(lval)) / log(2.0) + 0.5));
-	getValue(gstResponseTime, lval);
-	dlg_.m_response_time_text->ChangeValue(wxString::Format("%d", lval));
-	dlg_.m_response_time_sldr->SetValue(int(lval / 10.0));
-	getValue(gstLodOffset, lval);
-	dlg_.m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -lval));
-	dlg_.m_detail_level_offset_sldr->SetValue(-lval);
+	if (update_all || FOUND_VALUE(StreamEnable))
+	{
+		getValue(StreamEnable, bval);
+		dlg_.m_streaming_chk->SetValue(bval);
+		dlg_.EnableStreaming(bval);
+	}
+	if (update_all || FOUND_VALUE(UpdateOrder))
+	{
+		getValue(UpdateOrder, lval);
+		dlg_.m_update_order_rbox->SetSelection(lval);
+	}
+	if (update_all || FOUND_VALUE(GpuMemSize))
+	{
+		getValue(GpuMemSize, dval);
+		dlg_.m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)dval));
+		dlg_.m_graphics_mem_sldr->SetValue((int)(dval / 100.0));
+	}
+	if (update_all || FOUND_VALUE(LargeDataSize))
+	{
+		getValue(LargeDataSize, dval);
+		dlg_.m_large_data_text->ChangeValue(wxString::Format("%d", (int)dval));
+		dlg_.m_large_data_sldr->SetValue((int)(dval / 10.0));
+	}
+	if (update_all || FOUND_VALUE(BrickSize))
+	{
+		getValue(BrickSize, lval);
+		dlg_.m_block_size_text->ChangeValue(wxString::Format("%d", lval));
+		dlg_.m_block_size_sldr->SetValue(int(log(double(lval)) / log(2.0) + 0.5));
+	}
+	if (update_all || FOUND_VALUE(ResponseTime))
+	{
+		getValue(ResponseTime, lval);
+		dlg_.m_response_time_text->ChangeValue(wxString::Format("%d", lval));
+		dlg_.m_response_time_sldr->SetValue(int(lval / 10.0));
+	}
+	if (update_all || FOUND_VALUE(LodOffset))
+	{
+		getValue(LodOffset, lval);
+		dlg_.m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -lval));
+		dlg_.m_detail_level_offset_sldr->SetValue(-lval);
+	}
 
 	//java
-	getValue(gstJvmPath, sval);
-	dlg_.m_java_jvm_text->SetValue(gstJvmPath);
-	getValue(gstImagejPath, sval);
-	dlg_.m_java_ij_text->SetValue(sval);
-	getValue(gstBioformatsPath, sval);
-	dlg_.m_java_bioformats_text->SetValue(sval);
-	getValue(gstImagejMode, lval);
-	switch (lval)
+	if (update_all || FOUND_VALUE(JvmPath))
 	{
-	case 0:
-		dlg_.mp_radio_button_imagej->SetValue(true);
-		dlg_.m_java_jvm_text->Enable(true);
-		dlg_.m_java_bioformats_text->Enable(true);
-		dlg_.m_browse_jvm_btn->Enable(true);
-		dlg_.m_browse_bioformats_btn->Enable(true);
-		break;
-	case 1:
-		dlg_.mp_radio_button_fiji->SetValue(true);
-		dlg_.m_java_jvm_text->Enable(false);
-		dlg_.m_java_bioformats_text->Enable(false);
-		dlg_.m_browse_jvm_btn->Enable(false);
-		dlg_.m_browse_bioformats_btn->Enable(false);
-		break;
+		getValue(JvmPath, sval);
+		dlg_.m_java_jvm_text->SetValue(JvmPath);
+	}
+	if (update_all || FOUND_VALUE(ImagejPath))
+	{
+		getValue(ImagejPath, sval);
+		dlg_.m_java_ij_text->SetValue(sval);
+	}
+	if (update_all || FOUND_VALUE(BioformatsPath))
+	{
+		getValue(BioformatsPath, sval);
+		dlg_.m_java_bioformats_text->SetValue(sval);
+	}
+	if (update_all || FOUND_VALUE(ImagejMode))
+	{
+		getValue(ImagejMode, lval);
+		switch (lval)
+		{
+		case 0:
+			dlg_.mp_radio_button_imagej->SetValue(true);
+			dlg_.m_java_jvm_text->Enable(true);
+			dlg_.m_java_bioformats_text->Enable(true);
+			dlg_.m_browse_jvm_btn->Enable(true);
+			dlg_.m_browse_bioformats_btn->Enable(true);
+			break;
+		case 1:
+			dlg_.mp_radio_button_fiji->SetValue(true);
+			dlg_.m_java_jvm_text->Enable(false);
+			dlg_.m_java_bioformats_text->Enable(false);
+			dlg_.m_browse_jvm_btn->Enable(false);
+			dlg_.m_browse_bioformats_btn->Enable(false);
+			break;
+		}
 	}
 }
 
@@ -733,15 +892,9 @@ void SettingAgent::OnMaxTextureSizeEnable(Event& event)
 		long lval;
 		getValue(gstMaxTextureSize, lval);
 		flvr::ShaderProgram::set_max_texture_size(lval);
-		dlg_.m_max_texture_size_text->SetValue(
-			wxString::Format("%d", lval));
-		dlg_.m_max_texture_size_text->Enable();
 	}
 	else
-	{
 		flvr::ShaderProgram::reset_max_texture_size();
-		dlg_.m_max_texture_size_text->Disable();
-	}
 }
 
 void SettingAgent::OnMaxTextureSize(Event& event)
@@ -753,8 +906,6 @@ void SettingAgent::OnMaxTextureSize(Event& event)
 		long lval;
 		getValue(gstMaxTextureSize, lval);
 		flvr::ShaderProgram::set_max_texture_size(lval);
-		dlg_.m_max_texture_size_text->SetValue(
-			wxString::Format("%d", lval));
 	}
 }
 

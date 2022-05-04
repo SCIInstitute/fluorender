@@ -45,6 +45,11 @@ BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg, TreePanel &panel) :
 {
 }
 
+void BrushToolAgent::setupInputs()
+{
+	
+}
+
 void BrushToolAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);

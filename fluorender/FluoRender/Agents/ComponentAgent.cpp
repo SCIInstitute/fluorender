@@ -55,6 +55,11 @@ ComponentAgent::ComponentAgent(ComponentDlg &dlg) :
 {
 }
 
+void ComponentAgent::setupInputs()
+{
+
+}
+
 void ComponentAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);

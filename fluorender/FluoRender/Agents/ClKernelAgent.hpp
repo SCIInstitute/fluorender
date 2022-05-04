@@ -77,6 +77,8 @@ namespace fluo
 	protected:
 		ClKernelDlg &dlg_;
 
+		virtual void setupInputs();
+
 	private:
 	};
 }
