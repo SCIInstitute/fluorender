@@ -38,33 +38,33 @@ namespace fluo
 	{
 	public:
 		//top settings
-		DEFINE_ATTR(MixMethod);
-		DEFINE_ATTR(DrawInfo);
-		DEFINE_ATTR(DrawCamCtr);
-		DEFINE_ATTR(DrawLegend);
-		DEFINE_ATTR(DrawColormap);
-		DEFINE_ATTR(DrawScaleBar);
-		DEFINE_ATTR(DrawScaleBarText);
-		DEFINE_ATTR(BgColor);
-		DEFINE_ATTR(Aov);
-		DEFINE_ATTR(Perspective);
-		DEFINE_ATTR(Free);
-		DEFINE_ATTR(FullScreen);
+		DEFINE_ATTR(MixMethod);				//Renderview::MixMethods
+		DEFINE_ATTR(DrawInfo);				//Info
+		DEFINE_ATTR(DrawCamCtr);			//Axis
+		DEFINE_ATTR(DrawLegend);			//Legend
+		DEFINE_ATTR(DrawColormap);			//Color Map
+		DEFINE_ATTR(DrawScaleBar);			//Show scale bar
+		DEFINE_ATTR(DrawScaleBarText);		//Show scale bar text
+		DEFINE_ATTR(BgColor);				//Background
+		DEFINE_ATTR(Aov);					//Projection
+		DEFINE_ATTR(Perspective);			//perspective projection enable
+		DEFINE_ATTR(Free);					//free fly enable
+		DEFINE_ATTR(FullScreen);			//flag only
 		//left settings
-		DEFINE_ATTR(DepthAtten);
-		DEFINE_ATTR(DaInt);
+		DEFINE_ATTR(DepthAtten);			//Depth Attenuation (check)
+		DEFINE_ATTR(DaInt);					//Depth Attenuation
 		//right settings
-		DEFINE_ATTR(PinRotCtr);
-		DEFINE_ATTR(ScaleFactor121);
-		DEFINE_ATTR(ScaleFactor);
-		DEFINE_ATTR(ScaleMode);
+		DEFINE_ATTR(PinRotCtr);				//Pin
+		DEFINE_ATTR(ScaleFactor121);		//Scale factor at 121
+		DEFINE_ATTR(ScaleFactor);			//scale factor
+		DEFINE_ATTR(ScaleMode);				//Zoom ratio mode: 0-view; 1-pixel; 2-data(pixel*xy spc)
 		//bottom settings
-		DEFINE_ATTR(GearedEnable);
-		DEFINE_ATTR(CamRotX);
+		DEFINE_ATTR(GearedEnable);			//enable geared rotation
+		DEFINE_ATTR(CamRotX);				//camera rotation
 		DEFINE_ATTR(CamRotY);
 		DEFINE_ATTR(CamRotZ);
-		DEFINE_ATTR(CamRotQ);
-		DEFINE_ATTR(CamRotZeroQ);
+		DEFINE_ATTR(CamRotQ);				//rotation in quaternion
+		DEFINE_ATTR(CamRotZeroQ);			//rotation at zero setting
 
 		RenderviewAgent(RenderviewPanel &panel);
 

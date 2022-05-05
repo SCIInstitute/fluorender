@@ -38,21 +38,21 @@ namespace fluo
 	{
 	public:
 		//material
-		DEFINE_ATTR(Alpha);
-		DEFINE_ATTR(ShadowEnable);
-		DEFINE_ATTR(ShadowInt);
-		DEFINE_ATTR(ShadingEnable);
-		DEFINE_ATTR(Color);
-		DEFINE_ATTR(MatAmb);
-		DEFINE_ATTR(MatSpec);
-		DEFINE_ATTR(MatShine);
+		DEFINE_ATTR(Alpha);						//Transparency
+		DEFINE_ATTR(ShadowEnable);				//Shadow (check)
+		DEFINE_ATTR(ShadowInt);					//Shadow
+		DEFINE_ATTR(ShadingEnable);				//Lighting (check)
+		DEFINE_ATTR(Color);						//Color (linked to material colors)
+		DEFINE_ATTR(MatAmb);					//Diffuse Color
+		DEFINE_ATTR(MatSpec);					//Specular Color
+		DEFINE_ATTR(MatShine);					//Shininess
 		//scaling
-		DEFINE_ATTR(ScaleX);
-		DEFINE_ATTR(ScaleY);
-		DEFINE_ATTR(ScaleZ);
+		DEFINE_ATTR(ScaleX);					//scaling x
+		DEFINE_ATTR(ScaleY);					//scaling y
+		DEFINE_ATTR(ScaleZ);					//scaling z
 		//size limiter
-		DEFINE_ATTR(LimitEnable);
-		DEFINE_ATTR(Limit);
+		DEFINE_ATTR(LimitEnable);				//size limit (check)
+		DEFINE_ATTR(Limit);						//Size Limit
 
 		MeshPropAgent(MeshPropPanel &panel);
 

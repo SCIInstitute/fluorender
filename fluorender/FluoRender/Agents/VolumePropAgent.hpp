@@ -39,48 +39,48 @@ namespace fluo
 	{
 	public:
 		//trasnfer function
-		DEFINE_ATTR(MaxInt);
-		DEFINE_ATTR(Gamma3d);
-		DEFINE_ATTR(ExtractBoundary);
-		DEFINE_ATTR(Saturation);
-		DEFINE_ATTR(LowThreshold);
-		DEFINE_ATTR(HighThreshold);
-		DEFINE_ATTR(Luminance);
-		DEFINE_ATTR(ShadowEnable);
-		DEFINE_ATTR(ShadowInt);
-		DEFINE_ATTR(AlphaEnable);
-		DEFINE_ATTR(Alpha);
-		DEFINE_ATTR(SampleRate);
-		DEFINE_ATTR(ShadingEnable);
-		DEFINE_ATTR(HighShading);
-		DEFINE_ATTR(LowShading);
+		DEFINE_ATTR(MaxInt);						//Max intensity value for range settings
+		DEFINE_ATTR(Gamma3d);						//Gamma
+		DEFINE_ATTR(ExtractBoundary);				//Extract Boundary
+		DEFINE_ATTR(Saturation);					//Saturation
+		DEFINE_ATTR(LowThreshold);					//Threshold 1
+		DEFINE_ATTR(HighThreshold);					//Threshold 2
+		DEFINE_ATTR(Luminance);						//Luminance
+		DEFINE_ATTR(ShadowEnable);					//Shadow (button)
+		DEFINE_ATTR(ShadowInt);						//Shadow
+		DEFINE_ATTR(AlphaEnable);					//Alpha (button)
+		DEFINE_ATTR(Alpha);							//Alpha
+		DEFINE_ATTR(SampleRate);					//Sample Rate
+		DEFINE_ATTR(ShadingEnable);					//Shading (button)
+		DEFINE_ATTR(HighShading);					//Shading 1
+		DEFINE_ATTR(LowShading);					//Shading 2
 		//modes
-		DEFINE_ATTR(AlphaPower);
-		DEFINE_ATTR(BlendMode);
-		DEFINE_ATTR(MipMode);
-		DEFINE_ATTR(Invert);
-		DEFINE_ATTR(LabelMode);
-		DEFINE_ATTR(Interpolate);
-		DEFINE_ATTR(SyncGroup);
-		DEFINE_ATTR(NoiseRedct);
-		DEFINE_ATTR(Legend);
+		DEFINE_ATTR(AlphaPower);					//High Transparency (1-normal; 2-high)
+		DEFINE_ATTR(BlendMode);						//blend mode for group
+		DEFINE_ATTR(MipMode);						//MIP
+		DEFINE_ATTR(Invert);						//Invert
+		DEFINE_ATTR(LabelMode);						//Show Components
+		DEFINE_ATTR(Interpolate);					//Interpolation
+		DEFINE_ATTR(SyncGroup);						//synchronize settings for group
+		DEFINE_ATTR(NoiseRedct);					//Smoothing
+		DEFINE_ATTR(Legend);						//Legend
 		//voxel sizes
-		DEFINE_ATTR(SpcX);
-		DEFINE_ATTR(SpcY);
-		DEFINE_ATTR(SpcZ);
-		//color
-		DEFINE_ATTR(Color);
-		DEFINE_ATTR(Hsv);
-		DEFINE_ATTR(SecColor);
-		DEFINE_ATTR(SecColorSet);
-		//colormaps
-		DEFINE_ATTR(ColormapEnable);
-		DEFINE_ATTR(ColormapLow);
-		DEFINE_ATTR(ColormapHigh);
-		DEFINE_ATTR(ColormapMode);
-		DEFINE_ATTR(ColormapType);
-		DEFINE_ATTR(ColormapProj);
-		DEFINE_ATTR(ColormapInv);
+		DEFINE_ATTR(SpcX);							//space setting x
+		DEFINE_ATTR(SpcY);							//space setting y
+		DEFINE_ATTR(SpcZ);							//space setting z
+		//color										
+		DEFINE_ATTR(Color);							//Primary Color
+		DEFINE_ATTR(Hsv);							//HSV of primary color
+		DEFINE_ATTR(SecColor);						//Secondary Color
+		DEFINE_ATTR(SecColorSet);					//secondary color set by user, otherwise the invert of primary
+		//colormaps									
+		DEFINE_ATTR(ColormapEnable);				//Colormap (button)
+		DEFINE_ATTR(ColormapLow);					//Colormap 1
+		DEFINE_ATTR(ColormapHigh);					//Colormap 2
+		DEFINE_ATTR(ColormapMode);					//1-enabled; 0-disabled
+		DEFINE_ATTR(ColormapType);					//Rainbow, etc
+		DEFINE_ATTR(ColormapProj);					//Intensity, etc
+		DEFINE_ATTR(ColormapInv);					//Invert (button)
 
 		VolumePropAgent(VolumePropPanel &panel);
 

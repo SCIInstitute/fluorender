@@ -608,6 +608,35 @@ void VolumePropPanel::AssociateVolumeData(fluo::VolumeData* vd)
 
 void VolumePropPanel::UpdateWindow(const fluo::ValueCollection &names)
 {
+	////examples to loop through attributes when they can be handled using the same code
+	////For example, if there is an updateValue function that can handle different types of values
+	//for (auto it : m_agent->getInput())
+	//{
+	//	if (FOUND_VALUE(it))
+	//	{
+	//		fluo::Value* value = m_agent->getValuePointer(it);
+	//		//processing value...
+	//		if (value)
+	//		{
+	//			//ui_widget->updateValue(value);//for example
+	//		}
+	//		
+	//		//alternatively
+	//		fluo::ValueTuple vt;
+	//		std::get<0>(vt) = it;
+	//		if (m_agent->getValue(vt))
+	//		{
+	//			std::string name = std::get<0>(vt);
+	//			if (!names.empty() && names.find(name) == names.end())
+	//				continue;
+	//			std::string type = std::get<1>(vt);
+	//			std::string val = std::get<2>(vt);
+	//			//processing value...
+	//			//ui_widgets->updateValue(val);//for example
+	//		}
+	//	}
+	//}
+
 	bool update_all = names.empty();
 	wxString str;
 	double dval = 0.0;

@@ -38,15 +38,15 @@ namespace fluo
 	{
 	public:
 		//transformation
-		DEFINE_ATTR(TransX);
-		DEFINE_ATTR(TransY);
-		DEFINE_ATTR(TransZ);
-		DEFINE_ATTR(RotX);
-		DEFINE_ATTR(RotY);
-		DEFINE_ATTR(RotZ);
-		DEFINE_ATTR(ScaleX);
-		DEFINE_ATTR(ScaleY);
-		DEFINE_ATTR(ScaleZ);
+		DEFINE_ATTR(TransX);				//translation x
+		DEFINE_ATTR(TransY);				//translation y
+		DEFINE_ATTR(TransZ);				//translation z
+		DEFINE_ATTR(RotX);					//rotation x
+		DEFINE_ATTR(RotY);					//rotation y
+		DEFINE_ATTR(RotZ);					//rotation z
+		DEFINE_ATTR(ScaleX);				//scaling x
+		DEFINE_ATTR(ScaleY);				//scaling y
+		DEFINE_ATTR(ScaleZ);				//scaling z
 
 		MeshTransAgent(MeshTransPanel &panel);
 

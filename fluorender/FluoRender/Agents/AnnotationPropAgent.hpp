@@ -37,9 +37,8 @@ namespace fluo
 	class AnnotationPropAgent : public InterfaceAgent
 	{
 	public:
-		//Memo (user added text)
-		DEFINE_ATTR(Memo);
-		DEFINE_ATTR(MemoRo);
+		DEFINE_ATTR(Memo);				//Memo (user added text)
+		DEFINE_ATTR(MemoRo);			//Memo is readonly
 
 		AnnotationPropAgent(AnnotationPropPanel &panel);
 
