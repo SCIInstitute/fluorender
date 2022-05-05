@@ -37,6 +37,23 @@ namespace fluo
 	class MeshPropAgent : public InterfaceAgent
 	{
 	public:
+		//material
+		DEFINE_ATTR(Alpha);						//Transparency
+		DEFINE_ATTR(ShadowEnable);				//Shadow (check)
+		DEFINE_ATTR(ShadowInt);					//Shadow
+		DEFINE_ATTR(ShadingEnable);				//Lighting (check)
+		DEFINE_ATTR(Color);						//Color (linked to material colors)
+		DEFINE_ATTR(MatAmb);					//Diffuse Color
+		DEFINE_ATTR(MatSpec);					//Specular Color
+		DEFINE_ATTR(MatShine);					//Shininess
+		//scaling
+		DEFINE_ATTR(ScaleX);					//scaling x
+		DEFINE_ATTR(ScaleY);					//scaling y
+		DEFINE_ATTR(ScaleZ);					//scaling z
+		//size limiter
+		DEFINE_ATTR(LimitEnable);				//size limit (check)
+		DEFINE_ATTR(Limit);						//Size Limit
+
 		MeshPropAgent(MeshPropPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -49,13 +66,15 @@ namespace fluo
 		virtual void setObject(MeshData* vd);
 		virtual MeshData* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual MeshPropAgent* asMeshPropAgent() { return this; }
 		virtual const MeshPropAgent* asMeshPropAgent() const { return this; }
 
 	protected:
 		MeshPropPanel &panel_;
+
+		virtual void setupInputs();
 
 	private:
 	};

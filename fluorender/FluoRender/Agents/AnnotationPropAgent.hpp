@@ -37,6 +37,9 @@ namespace fluo
 	class AnnotationPropAgent : public InterfaceAgent
 	{
 	public:
+		DEFINE_ATTR(Memo);				//Memo (user added text)
+		DEFINE_ATTR(MemoRo);			//Memo is readonly
+
 		AnnotationPropAgent(AnnotationPropPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -49,13 +52,15 @@ namespace fluo
 		virtual void setObject(Annotations* an);
 		virtual Annotations* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual AnnotationPropAgent* asAnnotationPropAgent() { return this; }
 		virtual const AnnotationPropAgent* asAnnotationPropAgent() const { return this; }
 
 	protected:
 		AnnotationPropPanel &panel_;
+
+		virtual void setupInputs();
 
 	private:
 	};

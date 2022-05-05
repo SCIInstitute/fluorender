@@ -42,6 +42,11 @@ NoiseReduceAgent::NoiseReduceAgent(NoiseReduceDlg &dlg) :
 {
 }
 
+void NoiseReduceAgent::setupInputs()
+{
+
+}
+
 void NoiseReduceAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -52,32 +57,41 @@ Renderview* NoiseReduceAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void NoiseReduceAgent::UpdateAllSettings()
+void NoiseReduceAgent::UpdateFui(const ValueCollection &names)
 {
-	Renderview* view = getObject();
-	if (!view) return;
+	bool update_all = names.empty();
 
-	VolumeData* sel_vol = view->GetCurrentVolume();
-	if (!sel_vol) return;
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
+	{
+		Renderview* view = getObject();
+		if (!view) return;
+		VolumeData* sel_vol = view->GetCurrentVolume();
+		if (!sel_vol) return;
 
-	//threshold range
-	double max_int, thresh;
-	long size;
-	sel_vol->getValue(gstMaxInt, max_int);
-	//threshold
-	dlg_.m_threshold_sldr->SetRange(0, int(max_int*10.0));
-	getValue(gstThreshold, thresh);
-	dlg_.m_threshold_sldr->SetValue(int(thresh*10.0 + 0.5));
-	dlg_.m_threshold_text->ChangeValue(wxString::Format("%.1f", thresh));
-	//voxel
-	long nx, ny, nz;
-	sel_vol->getValue(gstResX, nx);
-	sel_vol->getValue(gstResY, ny);
-	sel_vol->getValue(gstResZ, nz);
-	dlg_.m_voxel_sldr->SetRange(1, nx);
-	getValue(gstCompSizeLimit, size);
-	dlg_.m_voxel_sldr->SetValue(size);
-	dlg_.m_voxel_text->ChangeValue(wxString::Format("%d", size));
+		double max_int;
+		sel_vol->getValue(gstMaxInt, max_int);
+		//threshold
+		dlg_.m_threshold_sldr->SetRange(0, int(max_int*10.0));
+		//voxel
+		long nx;
+		sel_vol->getValue(gstResX, nx);
+		dlg_.m_voxel_sldr->SetRange(1, nx);
+	}
+
+	if (update_all || FOUND_VALUE(gstThreshold))
+	{
+		double thresh;
+		getValue(gstThreshold, thresh);
+		dlg_.m_threshold_sldr->SetValue(int(thresh*10.0 + 0.5));
+		dlg_.m_threshold_text->ChangeValue(wxString::Format("%.1f", thresh));
+	}
+	if (update_all || FOUND_VALUE(gstCompSizeLimit))
+	{
+		long size;
+		getValue(gstCompSizeLimit, size);
+		dlg_.m_voxel_sldr->SetValue(size);
+		dlg_.m_voxel_text->ChangeValue(wxString::Format("%d", size));
+	}
 }
 
 void NoiseReduceAgent::Preview()
@@ -165,8 +179,8 @@ void NoiseReduceAgent::OnThreshold(Event& event)
 {
 	double dval;
 	getValue(gstThreshold, dval);
-	dlg_.m_threshold_sldr->SetValue(int(dval*10.0 + 0.5));
-	dlg_.m_threshold_text->ChangeValue(wxString::Format("%.1f", dval));
+	//dlg_.m_threshold_sldr->SetValue(int(dval*10.0 + 0.5));
+	//dlg_.m_threshold_text->ChangeValue(wxString::Format("%.1f", dval));
 
 	//change mask threshold
 	VolumeData* vd = getObject()->GetCurrentVolume();
@@ -179,9 +193,9 @@ void NoiseReduceAgent::OnThreshold(Event& event)
 
 void NoiseReduceAgent::OnCompSizeLimit(Event& event)
 {
-	long lval;
-	getValue(gstCompSizeLimit, lval);
-	dlg_.m_voxel_sldr->SetValue(lval);
+	//long lval;
+	//getValue(gstCompSizeLimit, lval);
+	//dlg_.m_voxel_sldr->SetValue(lval);
 }
 
 void NoiseReduceAgent::OnEnhance(Event& event)

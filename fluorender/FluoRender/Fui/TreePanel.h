@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 #include <wx/dataview.h>
-#include <TreeModel.hpp>
+#include <TreeAgent.hpp>
 #include <BrushToolAgent.hpp>
 
 class TreePanel : public wxPanel
@@ -71,14 +71,14 @@ public:
 	void SelectBrush(int id);
 	int GetBrushSelected();
 
-	friend class fluo::TreeModel;
+	friend class fluo::TreeAgent;
 
 private:
 	wxWindow* m_frame;
 	wxToolBar* m_toolbar;
 
 	wxDataViewCtrl* m_tree_ctrl;
-	fluo::TreeModel* m_tree_model;
+	fluo::TreeAgent* m_tree_model;
 	fluo::BrushToolAgent* m_brushtool_agent;
 
 private:

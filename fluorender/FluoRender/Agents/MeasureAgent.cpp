@@ -56,6 +56,11 @@ MeasureAgent::~MeasureAgent()
 	delete m_calculator;
 }
 
+void MeasureAgent::setupInputs()
+{
+
+}
+
 void MeasureAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -66,87 +71,103 @@ Renderview* MeasureAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void MeasureAgent::UpdateAllSettings()
+void MeasureAgent::UpdateFui(const ValueCollection &names)
 {
-	Renderview* view = getObject();
-	if (!view) return;
-	flrd::RulerHandler* rhandler = view->GetRulerHandler();
-	if (!rhandler) return;
-	flrd::RulerList* rlist = view->GetRulerList();
-	if (!rlist) return;
+	bool update_all = names.empty();
 
-	UpdateRulers();
-
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, false);
-	dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, false);
-	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, false);
-	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, false);
-	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, false);
-	dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, false);
-
-	long int_mode;
-	view->getValue(gstInterMode, int_mode);
-	if (int_mode == 5 || int_mode == 7)
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
-		int ruler_type = rhandler->GetType();
-		if (ruler_type == 0)
-			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, true);
-		else if (ruler_type == 1)
-			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, true);
-		else if (ruler_type == 2)
-			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, true);
-		else if (ruler_type == 3)
-			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, true);
-		else if (ruler_type == 4)
-			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, true);
-		else if (ruler_type == 5)
-			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, true);
-	}
-	else if (int_mode == 6)
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, true);
-	else if (int_mode == 9)
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, true);
-	else if (int_mode == 11)
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, true);
-	else if (int_mode == 12)
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, true);
-	else if (int_mode == 13)
-		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, true);
-	else if (int_mode == 14)
-		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, true);
-
-	long point_volume_mode;
-	view->getValue(gstPointVolumeMode, point_volume_mode);
-	switch (point_volume_mode)
-	{
-	case 0:
-		dlg_.m_view_plane_rd->SetValue(true);
-		dlg_.m_max_intensity_rd->SetValue(false);
-		dlg_.m_acc_intensity_rd->SetValue(false);
-		break;
-	case 1:
-		dlg_.m_view_plane_rd->SetValue(false);
-		dlg_.m_max_intensity_rd->SetValue(true);
-		dlg_.m_acc_intensity_rd->SetValue(false);
-		break;
-	case 2:
-		dlg_.m_view_plane_rd->SetValue(false);
-		dlg_.m_max_intensity_rd->SetValue(false);
-		dlg_.m_acc_intensity_rd->SetValue(true);
-		break;
+		UpdateRulers();
 	}
 
-	bool bval;
-	view->getValue(gstRulerUseTransf, bval);
-	dlg_.m_use_transfer_chk->SetValue(bval);
-	view->getValue(gstRulerTransient, bval);
-	dlg_.m_transient_chk->SetValue(bval);
+	if (update_all || FOUND_VALUE(gstInterMode))
+	{
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, false);
+		dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, false);
+		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, false);
+		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, false);
+		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, false);
+		dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, false);
+
+		long int_mode;
+		getValue(gstInterMode, int_mode);
+		if (int_mode == 5 || int_mode == 7)
+		{
+			Renderview* view = getObject();
+			if (!view) return;
+			flrd::RulerHandler* rhandler = view->GetRulerHandler();
+			if (!rhandler) return;
+
+			int ruler_type = rhandler->GetType();
+			if (ruler_type == 0)
+				dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerBtn, true);
+			else if (ruler_type == 1)
+				dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_RulerMPBtn, true);
+			else if (ruler_type == 2)
+				dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_LocatorBtn, true);
+			else if (ruler_type == 3)
+				dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProbeBtn, true);
+			else if (ruler_type == 4)
+				dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_ProtractorBtn, true);
+			else if (ruler_type == 5)
+				dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_EllipseBtn, true);
+		}
+		else if (int_mode == 6)
+			dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerEditBtn, true);
+		else if (int_mode == 9)
+			dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerMoveBtn, true);
+		else if (int_mode == 11)
+			dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_LockBtn, true);
+		else if (int_mode == 12)
+			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_GrowBtn, true);
+		else if (int_mode == 13)
+			dlg_.m_toolbar1->ToggleTool(MeasureDlg::ID_PencilBtn, true);
+		else if (int_mode == 14)
+			dlg_.m_toolbar2->ToggleTool(MeasureDlg::ID_RulerDelBtn, true);
+	}
+
+	if (update_all || FOUND_VALUE(gstPointVolumeMode))
+	{
+		long point_volume_mode;
+		getValue(gstPointVolumeMode, point_volume_mode);
+		switch (point_volume_mode)
+		{
+		case 0:
+			dlg_.m_view_plane_rd->SetValue(true);
+			dlg_.m_max_intensity_rd->SetValue(false);
+			dlg_.m_acc_intensity_rd->SetValue(false);
+			break;
+		case 1:
+			dlg_.m_view_plane_rd->SetValue(false);
+			dlg_.m_max_intensity_rd->SetValue(true);
+			dlg_.m_acc_intensity_rd->SetValue(false);
+			break;
+		case 2:
+			dlg_.m_view_plane_rd->SetValue(false);
+			dlg_.m_max_intensity_rd->SetValue(false);
+			dlg_.m_acc_intensity_rd->SetValue(true);
+			break;
+		}
+	}
+
+	if (update_all || FOUND_VALUE(gstRulerUseTransf))
+	{
+		bool bval;
+		getValue(gstRulerUseTransf, bval);
+		dlg_.m_use_transfer_chk->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstRulerTransient))
+	{
+		bool bval;
+		getValue(gstRulerTransient, bval);
+		dlg_.m_transient_chk->SetValue(bval);
+	}
 	//if (m_frame && m_frame->GetSettingDlg())
 	//{
 	//	//ruler exports df/f

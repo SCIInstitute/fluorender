@@ -52,7 +52,7 @@ namespace fluo
 		virtual void setObject(VolumeGroup*);
 		virtual VolumeGroup* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual ColocalAgent* asColocalAgent() { return this; }
 		virtual const ColocalAgent* asColocalAgent() const { return this; }
@@ -63,6 +63,8 @@ namespace fluo
 
 	protected:
 		ColocalDlg &dlg_;
+
+		virtual void setupInputs();
 
 	private:
 		void SetOutput(const std::string &titles, const std::string &values);

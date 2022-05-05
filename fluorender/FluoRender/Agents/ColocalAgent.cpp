@@ -44,6 +44,11 @@ ColocalAgent::ColocalAgent(ColocalDlg &dlg) :
 {
 }
 
+void ColocalAgent::setupInputs()
+{
+
+}
+
 void ColocalAgent::setObject(VolumeGroup* vg)
 {
 	InterfaceAgent::setObject(vg);
@@ -54,9 +59,9 @@ VolumeGroup* ColocalAgent::getObject()
 	return dynamic_cast<VolumeGroup*>(InterfaceAgent::getObject());
 }
 
-void ColocalAgent::UpdateAllSettings()
+void ColocalAgent::UpdateFui(const ValueCollection &names)
 {
-
+	bool update_all = names.empty();
 }
 
 void ColocalAgent::Run()

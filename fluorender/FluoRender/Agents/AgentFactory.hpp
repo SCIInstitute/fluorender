@@ -43,7 +43,7 @@ namespace fluo
 	class ComponentAgent;
 	class ConvertAgent;
 	class CountingAgent;
-	class ListModel;
+	class ListAgent;
 	class MeasureAgent;
 	class MeshPropAgent;
 	class MeshTransAgent;
@@ -56,7 +56,7 @@ namespace fluo
 	class RenderviewAgent;
 	class SettingAgent;
 	class TrackAgent;
-	class TreeModel;
+	class TreeAgent;
 	class VolumePropAgent;
 	class AgentFactory : public ObjectFactory
 	{
@@ -116,7 +116,7 @@ namespace fluo
 		ComponentAgent* addComponentAgent(const std::string &name, wxWindow &window);
 		ConvertAgent* addConvertAgent(const std::string &name, wxWindow &window);
 		CountingAgent* addCountingAgent(const std::string &name, wxWindow &window);
-		ListModel* addListModel(const std::string &name, wxWindow &window);
+		ListAgent* addListAgent(const std::string &name, wxWindow &window);
 		MeasureAgent* addMeasureAgent(const std::string &name, wxWindow &window);
 		MeshPropAgent* addMeshPropAgent(const std::string &name, wxWindow &window);
 		MeshTransAgent* addMeshTransAgent(const std::string &name, wxWindow &window);
@@ -129,7 +129,7 @@ namespace fluo
 		RenderviewAgent* addRenderviewAgent(const std::string &name, wxWindow &window);
 		SettingAgent* addSettingAgent(const std::string &name, wxWindow &window);
 		TrackAgent* addTrackAgent(const std::string &name, wxWindow &window);
-		TreeModel* addTreeModel(const std::string &name, wxWindow &window);
+		TreeAgent* addTreeAgent(const std::string &name, wxWindow &window);
 		VolumePropAgent* addVolumePropAgent(const std::string &name, wxWindow &window);
 		//get
 		AnnotationPropAgent* getAnnotationPropAgent(const std::string &name = gstAnnotationPropAgent);
@@ -141,7 +141,7 @@ namespace fluo
 		ComponentAgent* getComponentAgent(const std::string &name = gstComponentAgent);
 		ConvertAgent* getConvertAgent(const std::string &name = gstConvertAgent);
 		CountingAgent* getCountingAgent(const std::string &name = gstCountingAgent);
-		ListModel* getListModel(const std::string &name = gstListModel);
+		ListAgent* getListAgent(const std::string &name = gstListAgent);
 		MeasureAgent* getMeasureAgent(const std::string &name = gstMeasureAgent);
 		MeshPropAgent* getMeshPropAgent(const std::string &name = gstMeshPropAgent);
 		MeshTransAgent* getMeshTransAgent(const std::string &name = gstMeshTransAgent);
@@ -154,7 +154,7 @@ namespace fluo
 		RenderviewAgent* getRenderviewAgent(const std::string &name = gstRenderviewAgent);
 		SettingAgent* getSettingAgent(const std::string &name = gstSettingAgent);
 		TrackAgent* getTrackAgent(const std::string &name = gstTrackAgent);
-		TreeModel* getTreeModel(const std::string &name = gstTreeModel);
+		TreeAgent* getTreeAgent(const std::string &name = gstTreeAgent);
 		VolumePropAgent* getVolumePropAgent(const std::string &name = gstVolumePropAgent);
 
 	protected:

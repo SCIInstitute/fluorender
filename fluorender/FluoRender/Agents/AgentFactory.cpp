@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentAgent.hpp>
 #include <ConvertAgent.hpp>
 #include <CountingAgent.hpp>
-#include <ListModel.hpp>
+#include <ListAgent.hpp>
 #include <MeasureAgent.hpp>
 #include <MeshPropAgent.hpp>
 #include <MeshTransAgent.hpp>
@@ -49,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderviewAgent.hpp>
 #include <SettingAgent.hpp>
 #include <TrackAgent.hpp>
-#include <TreeModel.hpp>
+#include <TreeAgent.hpp>
 #include <VolumePropAgent.hpp>
 //windows
 #include <AnnotationPropPanel.h>
@@ -412,23 +412,23 @@ CountingAgent* AgentFactory::addCountingAgent(const std::string &name, wxWindow 
 	return agent;
 }
 
-ListModel* AgentFactory::addListModel(const std::string &name, wxWindow &window)
+ListAgent* AgentFactory::addListAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
-		return dynamic_cast<ListModel*>(result);
+		return dynamic_cast<ListAgent*>(result);
 
 	//not found
-	ListModel* agent =
-		new ListModel(static_cast<ListPanel&>(window));
+	ListAgent* agent =
+		new ListAgent(static_cast<ListPanel&>(window));
 	if (agent)
 	{
 		agent->setName(name);
 		agent->setNodeAddedFunction(
-			std::bind(&ListModel::OnItemAdded,
+			std::bind(&ListAgent::OnItemAdded,
 				agent, std::placeholders::_1));
 		agent->setNodeRemovedFunction(
-			std::bind(&ListModel::OnItemRemoved,
+			std::bind(&ListAgent::OnItemRemoved,
 				agent, std::placeholders::_1));
 		objects_.push_front(agent);
 		Event event;
@@ -674,9 +674,6 @@ RenderCanvasAgent* AgentFactory::addRenderCanvasAgent(const std::string &name, w
 		ADD_AFTER_EVENT(gstBounds, RenderCanvasAgent, OnBoundsChanged);
 		ADD_AFTER_EVENT(gstFocus, RenderCanvasAgent, OnFocusChanged);
 		ADD_AFTER_EVENT(gstSetGl, RenderCanvasAgent, OnSetGl);
-		agent->setDefaultValueChangedFunction(
-			std::bind(&RenderCanvasAgent::handleValueChanged,
-				agent, std::placeholders::_1));
 		agent->setNodeAddedFunction(
 			std::bind(&RenderCanvasAgent::OnSceneChanged,
 				agent, std::placeholders::_1));
@@ -804,27 +801,27 @@ TrackAgent* AgentFactory::addTrackAgent(const std::string &name, wxWindow &windo
 	return agent;
 }
 
-TreeModel* AgentFactory::addTreeModel(const std::string &name, wxWindow &window)
+TreeAgent* AgentFactory::addTreeAgent(const std::string &name, wxWindow &window)
 {
 	InterfaceAgent* result = findFirst(name);
 	if (result)
-		return dynamic_cast<TreeModel*>(result);
+		return dynamic_cast<TreeAgent*>(result);
 
 	//not found
-	TreeModel* tree_model =
-			new TreeModel(static_cast<TreePanel&>(window));
+	TreeAgent* tree_model =
+			new TreeAgent(static_cast<TreePanel&>(window));
 	if (tree_model)
 	{
 		tree_model->setName(name);
 		//may need to consider how to handle remote/indirect value changes by names
 		tree_model->setDefaultValueChangedFunction(
-			std::bind(&TreeModel::OnDisplayChanged,
+			std::bind(&TreeAgent::OnDisplayChanged,
 				tree_model, std::placeholders::_1));
 		tree_model->setNodeAddedFunction(
-			std::bind(&TreeModel::OnItemAdded,
+			std::bind(&TreeAgent::OnItemAdded,
 				tree_model, std::placeholders::_1));
 		tree_model->setNodeRemovedFunction(
-			std::bind(&TreeModel::OnItemRemoved,
+			std::bind(&TreeAgent::OnItemRemoved,
 				tree_model, std::placeholders::_1));
 		objects_.push_front(tree_model);
 		Event event;
@@ -848,8 +845,6 @@ VolumePropAgent* AgentFactory::addVolumePropAgent(const std::string &name, wxWin
 	if (agent)
 	{
 		agent->setName(name);
-		ADD_AFTER_EVENT(gstLuminance, VolumePropAgent, OnLuminanceChanged);
-		ADD_AFTER_EVENT(gstColor, VolumePropAgent, OnColorChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,
@@ -915,10 +910,10 @@ CountingAgent* AgentFactory::getCountingAgent(const std::string &name)
 	return dynamic_cast<CountingAgent*>(result);
 }
 
-ListModel* AgentFactory::getListModel(const std::string &name)
+ListAgent* AgentFactory::getListAgent(const std::string &name)
 {
 	InterfaceAgent* result = findFirst(name);
-	return dynamic_cast<ListModel*>(result);
+	return dynamic_cast<ListAgent*>(result);
 }
 
 MeasureAgent* AgentFactory::getMeasureAgent(const std::string &name)
@@ -993,10 +988,10 @@ TrackAgent* AgentFactory::getTrackAgent(const std::string &name)
 	return dynamic_cast<TrackAgent*>(result);
 }
 
-TreeModel* AgentFactory::getTreeModel(const std::string &name)
+TreeAgent* AgentFactory::getTreeAgent(const std::string &name)
 {
 	InterfaceAgent* result = findFirst(name);
-	return dynamic_cast<TreeModel*>(result);
+	return dynamic_cast<TreeAgent*>(result);
 }
 
 VolumePropAgent* AgentFactory::getVolumePropAgent(const std::string &name)

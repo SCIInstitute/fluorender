@@ -25,26 +25,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TREEMODEL_H_
-#define _TREEMODEL_H_
+#ifndef _LISTAGENT_H_
+#define _LISTAGENT_H_
 
 #include <wx/dataview.h>
 #include <InterfaceAgent.hpp>
 #include <Node.hpp>
-#include <NodeVisitor.hpp>
 
-class TreePanel;
+class ListPanel;
 namespace fluo
 {
 	class AgentFactory;
-	class TreeModel : public wxDataViewModel, public InterfaceAgent
+	class ListAgent : public wxDataViewModel, public InterfaceAgent
 	{
 	public:
-		TreeModel(TreePanel &panel);
+		ListAgent(ListPanel &panel);
 
 		int Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 			unsigned int column, bool ascending) const override;
 
+		//model definition
 		virtual unsigned int GetColumnCount() const override;
 
 		virtual wxString GetColumnType(unsigned int col) const override;
@@ -67,38 +67,36 @@ namespace fluo
 		virtual unsigned int GetChildren(const wxDataViewItem &parent,
 			wxDataViewItemArray &array) const override;
 
-		//ref
 		virtual bool isSameKindAs(const Object* obj) const
 		{
-			return dynamic_cast<const TreeModel*>(obj) != NULL;
+			return dynamic_cast<const ListAgent*>(obj) != NULL;
 		}
 
-		virtual const char* className() const { return "TreeModel"; }
+		virtual const char* className() const { return "ListAgent"; }
 
 		//interface agent functions
-		virtual void setObject(Node* root)
-		{ InterfaceAgent::setObject(root); }
+		virtual void setObject(Node* root);
 		virtual Node* getObject()
-		{ return dynamic_cast<Node*>(InterfaceAgent::getObject()); }
+		{
+			return dynamic_cast<Node*>(InterfaceAgent::getObject());
+		}
 
-		virtual TreeModel* asTreeModel() { return this; }
-		virtual const TreeModel* asTreeModel() const { return this; }
+		virtual void UpdateFui(const ValueCollection &names = {});
 
-		//operations
-		void MoveNode(const std::string &source, Node* target);
-		void UpdateSelections(NodeSet &nodes);
+		virtual ListAgent* asListAgent() { return this; }
+		virtual const ListAgent* asListAgent() const { return this; }
 
 		friend class AgentFactory;
 
 	protected:
-		TreePanel &panel_;
+		ListPanel &panel_;
 
-		void OnSelectionChanged(Event& event);
+		virtual void setupInputs();
+
+	private:
 		void OnItemAdded(Event& event);
 		void OnItemRemoved(Event& event);
-		void OnDisplayChanged(Event& event);
 	};
-
 }
 
-#endif//_TREEMODEL_H_
+#endif//_LISTAGENT_H_

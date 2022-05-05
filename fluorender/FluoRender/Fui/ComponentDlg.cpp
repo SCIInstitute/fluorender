@@ -181,6 +181,9 @@ ComponentDlg::ComponentDlg(RenderFrame *frame)
 	m_agent = glbin_agtf->addComponentAgent(gstComponentAgent, *this);
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+
+	SetDoubleBuffered(true);
+
 	SetMinSize(wxSize(100, 100));
 
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);

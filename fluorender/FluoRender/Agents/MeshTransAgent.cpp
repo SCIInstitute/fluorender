@@ -35,6 +35,23 @@ MeshTransAgent::MeshTransAgent(MeshTransPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
 {
+	setupInputs();
+}
+
+void MeshTransAgent::setupInputs()
+{
+	inputs_ = ValueCollection
+	{
+		TransX,
+		TransY,
+		TransZ,
+		RotX,
+		RotY,
+		RotZ,
+		ScaleX,
+		ScaleY,
+		ScaleZ
+	};
 }
 
 void MeshTransAgent::setObject(MeshData* obj)
@@ -47,47 +64,72 @@ MeshData* MeshTransAgent::getObject()
 	return dynamic_cast<MeshData*>(InterfaceAgent::getObject());
 }
 
-void MeshTransAgent::UpdateAllSettings()
+void MeshTransAgent::UpdateFui(const ValueCollection &names)
 {
-	MeshData* md = getObject();
-	if (!md) return;
-
+	bool update_all = names.empty();
 	wxString str;
-	double x, y, z;
-	md->getValue(gstTransX, x);
-	md->getValue(gstTransY, y);
-	md->getValue(gstTransZ, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	panel_.m_x_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	panel_.m_y_trans_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	panel_.m_z_trans_text->SetValue(str);
-	md->getValue(gstRotX, x);
-	md->getValue(gstRotY, y);
-	md->getValue(gstRotZ, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	panel_.m_x_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	panel_.m_y_rot_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	panel_.m_z_rot_text->SetValue(str);
-	md->getValue(gstScaleX, x);
-	md->getValue(gstScaleY, y);
-	md->getValue(gstScaleZ, z);
-	//sprintf(str, "%.2f", x);
-	str = wxString::Format("%.2f", x);
-	panel_.m_x_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", y);
-	str = wxString::Format("%.2f", y);
-	panel_.m_y_scl_text->SetValue(str);
-	//sprintf(str, "%.2f", z);
-	str = wxString::Format("%.2f", z);
-	panel_.m_z_scl_text->SetValue(str);
+
+	if (update_all || FOUND_VALUE(TransX))
+	{
+		double x;
+		getValue(TransX, x);
+		str = wxString::Format("%.2f", x);
+		panel_.m_x_trans_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(TransY))
+	{
+		double y;
+		getValue(TransY, y);
+		str = wxString::Format("%.2f", y);
+		panel_.m_y_trans_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(TransZ))
+	{
+		double z;
+		getValue(TransZ, z);
+		str = wxString::Format("%.2f", z);
+		panel_.m_z_trans_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(RotX))
+	{
+		double x;
+		getValue(RotX, x);
+		str = wxString::Format("%.2f", x);
+		panel_.m_x_rot_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(RotY))
+	{
+		double y;
+		getValue(RotY, y);
+		str = wxString::Format("%.2f", y);
+		panel_.m_y_rot_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(RotZ))
+	{
+		double z;
+		getValue(RotZ, z);
+		str = wxString::Format("%.2f", z);
+		panel_.m_z_rot_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(ScaleX))
+	{
+		double x;
+		getValue(ScaleX, x);
+		str = wxString::Format("%.2f", x);
+		panel_.m_x_scl_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(ScaleY))
+	{
+		double y;
+		getValue(ScaleY, y);
+		str = wxString::Format("%.2f", y);
+		panel_.m_y_scl_text->SetValue(str);
+	}
+	if (update_all || FOUND_VALUE(ScaleZ))
+	{
+		double z;
+		getValue(ScaleZ, z);
+		str = wxString::Format("%.2f", z);
+		panel_.m_z_scl_text->SetValue(str);
+	}
 }

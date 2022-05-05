@@ -54,6 +54,8 @@ wxPanel(frame, wxID_ANY,
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	SetDoubleBuffered(true);
+
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer

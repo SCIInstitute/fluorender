@@ -59,6 +59,8 @@ wxDefaultPosition, wxSize(550, 600),
 
 	m_agent = glbin_agtf->addClKernelAgent(gstClKernelAgent, *this);
 
+	SetDoubleBuffered(true);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 

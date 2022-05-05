@@ -44,6 +44,11 @@ RecorderAgent::RecorderAgent(RecorderDlg &dlg) :
 {
 }
 
+void RecorderAgent::setupInputs()
+{
+
+}
+
 void RecorderAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -54,8 +59,9 @@ Renderview* RecorderAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void RecorderAgent::UpdateAllSettings()
+void RecorderAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 }
 
 void RecorderAgent::AutoKeyChanComb(int comb)

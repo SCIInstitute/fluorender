@@ -49,7 +49,7 @@ namespace fluo
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual RecorderAgent* asRecorderAgent() { return this; }
 		virtual const RecorderAgent* asRecorderAgent() const { return this; }
@@ -75,6 +75,8 @@ namespace fluo
 
 	protected:
 		RecorderDlg &dlg_;
+
+		virtual void setupInputs();
 
 	private:
 		void OnSelectedKey(Event& event);

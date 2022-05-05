@@ -68,7 +68,7 @@ namespace fluo
 		virtual void setObject(Root* obj);
 		virtual Root* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual RenderFrameAgent* asRenderFrameAgent() { return this; }
 		virtual const RenderFrameAgent* asRenderFrameAgent() const { return this; }
@@ -94,6 +94,8 @@ namespace fluo
 
 	protected:
 		RenderFrame &frame_;
+
+		virtual void setupInputs();
 
 	private:
 		std::vector<BaseReader*> m_reader_list;

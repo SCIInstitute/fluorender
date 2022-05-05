@@ -37,6 +37,17 @@ namespace fluo
 	class MeshTransAgent : public InterfaceAgent
 	{
 	public:
+		//transformation
+		DEFINE_ATTR(TransX);				//translation x
+		DEFINE_ATTR(TransY);				//translation y
+		DEFINE_ATTR(TransZ);				//translation z
+		DEFINE_ATTR(RotX);					//rotation x
+		DEFINE_ATTR(RotY);					//rotation y
+		DEFINE_ATTR(RotZ);					//rotation z
+		DEFINE_ATTR(ScaleX);				//scaling x
+		DEFINE_ATTR(ScaleY);				//scaling y
+		DEFINE_ATTR(ScaleZ);				//scaling z
+
 		MeshTransAgent(MeshTransPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -49,7 +60,7 @@ namespace fluo
 		virtual void setObject(MeshData* an);
 		virtual MeshData* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual MeshTransAgent* asMeshTransAgent() { return this; }
 		virtual const MeshTransAgent* asMeshTransAgent() const { return this; }
@@ -58,6 +69,8 @@ namespace fluo
 
 	protected:
 		MeshTransPanel &panel_;
+
+		virtual void setupInputs();
 
 	private:
 	};

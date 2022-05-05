@@ -37,6 +37,30 @@ MeshPropAgent::MeshPropAgent(MeshPropPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
 {
+	setupInputs();
+}
+
+void MeshPropAgent::setupInputs()
+{
+	inputs_ = ValueCollection
+	{
+		//material
+		Alpha,
+		ShadowEnable,
+		ShadowInt,
+		ShadingEnable,
+		Color,
+		MatAmb,
+		MatSpec,
+		MatShine,
+		//scaling
+		ScaleX,
+		ScaleY,
+		ScaleZ,
+		//size limiter
+		LimitEnable,
+		Limit
+	};
 }
 
 void MeshPropAgent::setObject(MeshData* obj)
@@ -49,60 +73,87 @@ MeshData* MeshPropAgent::getObject()
 	return dynamic_cast<MeshData*>(InterfaceAgent::getObject());
 }
 
-void MeshPropAgent::UpdateAllSettings()
+void MeshPropAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 	wxString str;
-	Color amb, diff, spec;
-	double shine, alpha;
-	//m_md->GetMaterial(amb, diff, spec, shine, alpha);
-	getValue("mat amb", amb);
-	getValue("color", diff);
-	getValue("mat spec", spec);
-	getValue("mat shine", shine);
-	getValue("alpha", alpha);
 
-	wxColor c;
-	c = wxColor(diff.r()*255, diff.g()*255, diff.b()*255);
-	panel_.m_diff_picker->SetColour(c);
-	c = wxColor(spec.r()*255, spec.g()*255, spec.b()*255);
-	panel_.m_spec_picker->SetColour(c);
+	if (update_all || FOUND_VALUE(Color))
+	{
+		fluo::Color diff;
+		getValue(Color, diff);
+		wxColor c = wxColor(diff.r()*255, diff.g()*255, diff.b()*255);
+		panel_.m_diff_picker->SetColour(c);
+	}
+	if (update_all || FOUND_VALUE(MatSpec))
+	{
+		fluo::Color spec;
+		getValue(MatSpec, spec);
+		wxColor c = wxColor(spec.r() * 255, spec.g() * 255, spec.b() * 255);
+		panel_.m_spec_picker->SetColour(c);
+	}
 
 	//lighting
-	bool light_enable;
-	getValue("light enable", light_enable);
-	panel_.m_light_chk->SetValue(light_enable);
+	if (update_all || FOUND_VALUE(ShadingEnable))
+	{
+		bool light_enable;
+		getValue(ShadingEnable, light_enable);
+		panel_.m_light_chk->SetValue(light_enable);
+	}
 	//shine
-	panel_.m_shine_sldr->SetValue(int(shine));
-	str = wxString::Format("%.0f", shine);
-	panel_.m_shine_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(MatShine))
+	{
+		double shine;
+		getValue(MatShine, shine);
+		panel_.m_shine_sldr->SetValue(int(shine));
+		str = wxString::Format("%.0f", shine);
+		panel_.m_shine_text->ChangeValue(str);
+	}
 	//alpha
-	panel_.m_alpha_sldr->SetValue(int(alpha*255));
-	str = wxString::Format("%.2f", alpha);
-	panel_.m_alpha_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(Alpha))
+	{
+		double alpha;
+		getValue(Alpha, alpha);
+		panel_.m_alpha_sldr->SetValue(int(alpha * 255));
+		str = wxString::Format("%.2f", alpha);
+		panel_.m_alpha_text->ChangeValue(str);
+	}
 	//scaling
-	double sx, sy, sz;
-	//m_md->GetScaling(sx, sy, sz);
-	getValue("scale x", sx);
-	getValue("scale y", sy);
-	getValue("scale z", sz);
-	panel_.m_scale_sldr->SetValue(int(sx*100.0+0.5));
-	str = wxString::Format("%.2f", sx);
-	panel_.m_scale_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(ScaleX))
+	{
+		double sx;
+		getValue(ScaleX, sx);
+		panel_.m_scale_sldr->SetValue(int(sx*100.0 + 0.5));
+		str = wxString::Format("%.2f", sx);
+		panel_.m_scale_text->ChangeValue(str);
+	}
 	//shadow
-	double shadow_int;
-	bool shadow_enable;
-	getValue("shadow enable", shadow_enable);
-	getValue("shadow int", shadow_int);
-	panel_.m_shadow_chk->SetValue(shadow_enable);
-	panel_.m_shadow_sldr->SetValue(int(shadow_int*100.0+0.5));
-	str = wxString::Format("%.2f", shadow_int);
-	panel_.m_shadow_text->ChangeValue(str);
+	if (update_all || FOUND_VALUE(ShadowEnable))
+	{
+		bool shadow_enable;
+		getValue(ShadowEnable, shadow_enable);
+		panel_.m_shadow_chk->SetValue(shadow_enable);
+	}
+	if (update_all || FOUND_VALUE(ShadowInt))
+	{
+		double shadow_int;
+		getValue(ShadowInt, shadow_int);
+		panel_.m_shadow_sldr->SetValue(int(shadow_int*100.0 + 0.5));
+		str = wxString::Format("%.2f", shadow_int);
+		panel_.m_shadow_text->ChangeValue(str);
+	}
 	//size limiter
-	bool limit_enable;
-	long limit;
-	getValue("limit enable", limit_enable);
-	getValue("limit", limit);
-	panel_.m_size_chk->SetValue(limit_enable);
-	panel_.m_size_sldr->SetValue(limit);
-	panel_.m_size_text->SetValue(wxString::Format("%d", limit));
+	if (update_all || FOUND_VALUE(LimitEnable))
+	{
+		bool limit_enable;
+		getValue(LimitEnable, limit_enable);
+		panel_.m_size_chk->SetValue(limit_enable);
+	}
+	if (update_all || FOUND_VALUE(Limit))
+	{
+		long limit;
+		getValue(Limit, limit);
+		panel_.m_size_sldr->SetValue(limit);
+		panel_.m_size_text->SetValue(wxString::Format("%d", limit));
+	}
 }

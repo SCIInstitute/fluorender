@@ -100,6 +100,8 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
 
+	SetDoubleBuffered(true);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 

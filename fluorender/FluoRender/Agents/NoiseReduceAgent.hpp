@@ -49,7 +49,7 @@ namespace fluo
 		virtual void setObject(Renderview* an);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual NoiseReduceAgent* asNoiseReduceAgent() { return this; }
 		virtual const NoiseReduceAgent* asNoiseReduceAgent() const { return this; }
@@ -61,6 +61,8 @@ namespace fluo
 
 	protected:
 		NoiseReduceDlg &dlg_;
+
+		virtual void setupInputs();
 
 	private:
 		void OnThreshold(Event& event);

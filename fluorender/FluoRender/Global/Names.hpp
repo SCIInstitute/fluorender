@@ -46,6 +46,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstCurrentAnnotations "current annotations"
 #define gstCurVolIdx "cur vol idx"
 #define gstCurMshIdx "cur msh idx"
+//copy source
+#define gstSourceVolume "source volume"//for mask copying
+#define gstSourceMode "source mode"//copy 0:data; 1:mask
 
 //factories & defaults
 #define gstDefaultFile "default file"
@@ -83,7 +86,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCountingAgent "CountingDlg"
 #define gstComponentAgent "ComponentDlg"
 #define gstConvertAgent "ConvertDlg"
-#define gstListModel "ListPanel"
+#define gstListAgent "ListPanel"
 #define gstMeasureAgent "MeasureDlg"
 #define gstMeshPropAgent "MeshPropPanel"
 #define gstMeshTransAgent "MeshTransPanel"
@@ -96,8 +99,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstRenderviewAgent "RenderviewPanel"//plus a serial number
 #define gstSettingAgent "SettingDlg"
 #define gstTrackAgent "TrackDlg"
-#define gstTreeModel "TreePanel"
+#define gstTreeAgent "TreePanel"
 #define gstVolumePropAgent "VolumePropPanel"
+#define gstNonObjectValues "non object values"//values not from the managed object
 
 //root
 #define gstRoot "Active Datasets"

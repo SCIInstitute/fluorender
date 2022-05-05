@@ -128,6 +128,8 @@ BrushToolDlg::BrushToolDlg(
 
 	m_agent = glbin_agtf->addBrushToolAgent(gstBrushToolAgent, *this, *tree);
 
+	SetDoubleBuffered(true);
+
 	wxStaticText *st = 0;
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);

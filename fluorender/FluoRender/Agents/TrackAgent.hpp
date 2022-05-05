@@ -51,7 +51,7 @@ namespace fluo
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual TrackAgent* asTrackAgent() { return this; }
 		virtual const TrackAgent* asTrackAgent() const { return this; }
@@ -104,6 +104,8 @@ namespace fluo
 
 	protected:
 		TrackDlg &dlg_;
+
+		virtual void setupInputs();
 
 	private:
 		//read/delete volume cache from file

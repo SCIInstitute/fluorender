@@ -45,6 +45,11 @@ BrushToolAgent::BrushToolAgent(BrushToolDlg &dlg, TreePanel &panel) :
 {
 }
 
+void BrushToolAgent::setupInputs()
+{
+	
+}
+
 void BrushToolAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -55,130 +60,135 @@ Renderview* BrushToolAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void BrushToolAgent::UpdateAllSettings()
+void BrushToolAgent::UpdateFui(const ValueCollection &names)
 {
-	double dval = 0.0;
-	long lval = 0;
-	bool bval = false;
+	bool update_all = names.empty();
 
-	flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
-	if (!selector) return;
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
+	{
+		double dval = 0.0;
+		long lval = 0;
+		bool bval = false;
 
-	VolumeData* vd = getObject()->GetCurrentVolume();
-	if (!vd) return;
-	//if (m_frame)
-	//{
-	//	vd = m_frame->GetCurSelVol();
-	//	m_frame->GetNoiseCancellingDlg()->GetSettings(m_view);
-	//	m_frame->GetCountingDlg()->GetSettings(m_view);
-	//	//vr_frame->GetColocalizationDlg()->GetSettings(m_view);
-	//}
+		flrd::VolumeSelector* selector = getObject()->GetVolumeSelector();
+		if (!selector) return;
 
-	//threshold range
-	double max_int;
-	vd->getValue(gstMaxInt, max_int);
-	//falloff
-	dlg_.m_brush_scl_translate_sldr->SetRange(0, int(max_int*10.0 + 0.5));
-	//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*max_int));
-	//selection strength
-	dval = selector->GetBrushSclTranslate();
-	//m_dft_scl_translate = dval;
-	dlg_.m_brush_scl_translate_sldr->SetValue(int(dval*max_int*10.0 + 0.5));
-	dlg_.m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", dval*max_int));
-	//gm falloff
-	dval = selector->GetBrushGmFalloff();
-	//m_dft_gm_falloff = dval;
-	dlg_.m_brush_gm_falloff_sldr->SetValue(int(GM_2_ESTR(dval)*1000.0 + 0.5));
-	dlg_.m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
-	//2d influence
-	dval = selector->GetW2d();
-	dlg_.m_brush_2dinfl_sldr->SetValue(int(dval*100.0 + 0.5));
-	dlg_.m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
-	//edge detect
-	bval = selector->GetEdgeDetect();
-	dlg_.m_edge_detect_chk->SetValue(bval);
-	if (bval)
-	{
-		dlg_.m_brush_gm_falloff_sldr->Enable();
-		dlg_.m_brush_gm_falloff_text->Enable();
-	}
-	else
-	{
-		dlg_.m_brush_gm_falloff_sldr->Disable();
-		dlg_.m_brush_gm_falloff_text->Disable();
-	}
-	//hidden removal
-	bval = selector->GetHiddenRemoval();
-	dlg_.m_hidden_removal_chk->SetValue(bval);
-	//select group
-	bval = selector->GetSelectGroup();
-	dlg_.m_select_group_chk->SetValue(bval);
-	//estimate threshold
-	bval = selector->GetEstimateThreshold();
-	dlg_.m_estimate_thresh_chk->SetValue(bval);
-	//brick acuracy
-	bval = selector->GetUpdateOrder();
-	dlg_.m_accurate_bricks_chk->SetValue(bval);
+		VolumeData* vd = getObject()->GetCurrentVolume();
+		if (!vd) return;
+		//if (m_frame)
+		//{
+		//	vd = m_frame->GetCurSelVol();
+		//	m_frame->GetNoiseCancellingDlg()->GetSettings(m_view);
+		//	m_frame->GetCountingDlg()->GetSettings(m_view);
+		//	//vr_frame->GetColocalizationDlg()->GetSettings(m_view);
+		//}
 
-	//size1
-	dval = selector->GetBrushSize1();
-	dlg_.m_brush_size1_sldr->SetValue(int(dval));
-	dlg_.m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
-	//size2
-	dlg_.m_brush_size2_chk->SetValue(selector->GetUseBrushSize2());
-	if (selector->GetUseBrushSize2())
-	{
-		dlg_.m_brush_size2_sldr->Enable();
-		dlg_.m_brush_size2_text->Enable();
-	}
-	else
-	{
-		dlg_.m_brush_size2_sldr->Disable();
-		dlg_.m_brush_size2_text->Disable();
-	}
-	dval = selector->GetBrushSize2();
-	dlg_.m_brush_size2_sldr->SetValue(int(dval));
-	dlg_.m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
+		//threshold range
+		double max_int;
+		vd->getValue(gstMaxInt, max_int);
+		//falloff
+		dlg_.m_brush_scl_translate_sldr->SetRange(0, int(max_int*10.0 + 0.5));
+		//m_brush_scl_translate_text->SetValue(wxString::Format("%.1f", m_dft_scl_translate*max_int));
+		//selection strength
+		dval = selector->GetBrushSclTranslate();
+		//m_dft_scl_translate = dval;
+		dlg_.m_brush_scl_translate_sldr->SetValue(int(dval*max_int*10.0 + 0.5));
+		dlg_.m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", dval*max_int));
+		//gm falloff
+		dval = selector->GetBrushGmFalloff();
+		//m_dft_gm_falloff = dval;
+		dlg_.m_brush_gm_falloff_sldr->SetValue(int(GM_2_ESTR(dval)*1000.0 + 0.5));
+		dlg_.m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
+		//2d influence
+		dval = selector->GetW2d();
+		dlg_.m_brush_2dinfl_sldr->SetValue(int(dval*100.0 + 0.5));
+		dlg_.m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
+		//edge detect
+		bval = selector->GetEdgeDetect();
+		dlg_.m_edge_detect_chk->SetValue(bval);
+		if (bval)
+		{
+			dlg_.m_brush_gm_falloff_sldr->Enable();
+			dlg_.m_brush_gm_falloff_text->Enable();
+		}
+		else
+		{
+			dlg_.m_brush_gm_falloff_sldr->Disable();
+			dlg_.m_brush_gm_falloff_text->Disable();
+		}
+		//hidden removal
+		bval = selector->GetHiddenRemoval();
+		dlg_.m_hidden_removal_chk->SetValue(bval);
+		//select group
+		bval = selector->GetSelectGroup();
+		dlg_.m_select_group_chk->SetValue(bval);
+		//estimate threshold
+		bval = selector->GetEstimateThreshold();
+		dlg_.m_estimate_thresh_chk->SetValue(bval);
+		//brick acuracy
+		bval = selector->GetUpdateOrder();
+		dlg_.m_accurate_bricks_chk->SetValue(bval);
 
-	//iteration number
-	lval = selector->GetBrushIteration();
-	if (lval <= flrd::VolumeSelector::BRUSH_TOOL_ITER_WEAK)
-	{
-		dlg_.m_brush_iterw_rb->SetValue(true);
-		dlg_.m_brush_iters_rb->SetValue(false);
-		dlg_.m_brush_iterss_rb->SetValue(false);
-	}
-	else if (lval <= flrd::VolumeSelector::BRUSH_TOOL_ITER_NORMAL)
-	{
-		dlg_.m_brush_iterw_rb->SetValue(false);
-		dlg_.m_brush_iters_rb->SetValue(true);
-		dlg_.m_brush_iterss_rb->SetValue(false);
-	}
-	else
-	{
-		dlg_.m_brush_iterw_rb->SetValue(false);
-		dlg_.m_brush_iters_rb->SetValue(false);
-		dlg_.m_brush_iterss_rb->SetValue(true);
-	}
+		//size1
+		dval = selector->GetBrushSize1();
+		dlg_.m_brush_size1_sldr->SetValue(int(dval));
+		dlg_.m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
+		//size2
+		dlg_.m_brush_size2_chk->SetValue(selector->GetUseBrushSize2());
+		if (selector->GetUseBrushSize2())
+		{
+			dlg_.m_brush_size2_sldr->Enable();
+			dlg_.m_brush_size2_text->Enable();
+		}
+		else
+		{
+			dlg_.m_brush_size2_sldr->Disable();
+			dlg_.m_brush_size2_text->Disable();
+		}
+		dval = selector->GetBrushSize2();
+		dlg_.m_brush_size2_sldr->SetValue(int(dval));
+		dlg_.m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
 
-	//brush size relation
-	bval = selector->GetBrushSizeData();
-	if (bval)
-	{
-		dlg_.m_brush_size_data_rb->SetValue(true);
-		dlg_.m_brush_size_screen_rb->SetValue(false);
-	}
-	else
-	{
-		dlg_.m_brush_size_data_rb->SetValue(false);
-		dlg_.m_brush_size_screen_rb->SetValue(true);
-	}
+		//iteration number
+		lval = selector->GetBrushIteration();
+		if (lval <= flrd::VolumeSelector::BRUSH_TOOL_ITER_WEAK)
+		{
+			dlg_.m_brush_iterw_rb->SetValue(true);
+			dlg_.m_brush_iters_rb->SetValue(false);
+			dlg_.m_brush_iterss_rb->SetValue(false);
+		}
+		else if (lval <= flrd::VolumeSelector::BRUSH_TOOL_ITER_NORMAL)
+		{
+			dlg_.m_brush_iterw_rb->SetValue(false);
+			dlg_.m_brush_iters_rb->SetValue(true);
+			dlg_.m_brush_iterss_rb->SetValue(false);
+		}
+		else
+		{
+			dlg_.m_brush_iterw_rb->SetValue(false);
+			dlg_.m_brush_iters_rb->SetValue(false);
+			dlg_.m_brush_iterss_rb->SetValue(true);
+		}
 
-	//output
-	dlg_.m_history_chk->SetValue(dlg_.m_hold_history);
+		//brush size relation
+		bval = selector->GetBrushSizeData();
+		if (bval)
+		{
+			dlg_.m_brush_size_data_rb->SetValue(true);
+			dlg_.m_brush_size_screen_rb->SetValue(false);
+		}
+		else
+		{
+			dlg_.m_brush_size_data_rb->SetValue(false);
+			dlg_.m_brush_size_screen_rb->SetValue(true);
+		}
 
-	UpdateUndoRedo();
-	UpdateMaskTb();
+		//output
+		dlg_.m_history_chk->SetValue(dlg_.m_hold_history);
+
+		UpdateUndoRedo();
+		UpdateMaskTb();
+	}
 }
 
 void BrushToolAgent::UpdateUndoRedo()

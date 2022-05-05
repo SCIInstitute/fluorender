@@ -64,6 +64,8 @@ MeshPropPanel::MeshPropPanel(
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	SetDoubleBuffered(true);
+
 	m_agent = glbin_agtf->addMeshPropAgent(gstMeshPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);

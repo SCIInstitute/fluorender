@@ -37,6 +37,35 @@ namespace fluo
 	class RenderviewAgent : public InterfaceAgent
 	{
 	public:
+		//top settings
+		DEFINE_ATTR(MixMethod);				//Renderview::MixMethods
+		DEFINE_ATTR(DrawInfo);				//Info
+		DEFINE_ATTR(DrawCamCtr);			//Axis
+		DEFINE_ATTR(DrawLegend);			//Legend
+		DEFINE_ATTR(DrawColormap);			//Color Map
+		DEFINE_ATTR(DrawScaleBar);			//Show scale bar
+		DEFINE_ATTR(DrawScaleBarText);		//Show scale bar text
+		DEFINE_ATTR(BgColor);				//Background
+		DEFINE_ATTR(Aov);					//Projection
+		DEFINE_ATTR(Perspective);			//perspective projection enable
+		DEFINE_ATTR(Free);					//free fly enable
+		DEFINE_ATTR(FullScreen);			//flag only
+		//left settings
+		DEFINE_ATTR(DepthAtten);			//Depth Attenuation (check)
+		DEFINE_ATTR(DaInt);					//Depth Attenuation
+		//right settings
+		DEFINE_ATTR(PinRotCtr);				//Pin
+		DEFINE_ATTR(ScaleFactor121);		//Scale factor at 121
+		DEFINE_ATTR(ScaleFactor);			//scale factor
+		DEFINE_ATTR(ScaleMode);				//Zoom ratio mode: 0-view; 1-pixel; 2-data(pixel*xy spc)
+		//bottom settings
+		DEFINE_ATTR(GearedEnable);			//enable geared rotation
+		DEFINE_ATTR(CamRotX);				//camera rotation
+		DEFINE_ATTR(CamRotY);
+		DEFINE_ATTR(CamRotZ);
+		DEFINE_ATTR(CamRotQ);				//rotation in quaternion
+		DEFINE_ATTR(CamRotZeroQ);			//rotation at zero setting
+
 		RenderviewAgent(RenderviewPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const
@@ -49,7 +78,7 @@ namespace fluo
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual RenderviewAgent* asRenderviewAgent() { return this; }
 		virtual const RenderviewAgent* asRenderviewAgent() const { return this; }
@@ -59,7 +88,8 @@ namespace fluo
 	protected:
 		RenderviewPanel &panel_;
 
-		//virtual void handleValueChanged(Event& event);
+		virtual void setupInputs();
+
 		//void OnBoundsChanged(Event& event);
 		//void OnSceneChanged(Event& event);
 	};

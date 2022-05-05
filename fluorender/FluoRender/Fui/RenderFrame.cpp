@@ -2116,7 +2116,7 @@ void RenderFrame::OnOpenProject(wxCommandEvent& WXUNUSED(event))
 void RenderFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
 {
 	fluo::SettingAgent* agent = glbin_agtf->getSettingAgent();
-	if (agent) agent->UpdateAllSettings();
+	if (agent) agent->UpdateFui();
 	m_aui_mgr.GetPane(m_setting_dlg).Show();
 	m_aui_mgr.GetPane(m_setting_dlg).Float();
 	m_aui_mgr.Update();

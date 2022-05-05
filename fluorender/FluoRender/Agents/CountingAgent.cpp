@@ -44,6 +44,11 @@ CountingAgent::CountingAgent(CountingDlg &dlg) :
 {
 }
 
+void CountingAgent::setupInputs()
+{
+
+}
+
 void CountingAgent::setObject(VolumeData* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -54,19 +59,32 @@ VolumeData* CountingAgent::getObject()
 	return dynamic_cast<VolumeData*>(InterfaceAgent::getObject());
 }
 
-void CountingAgent::UpdateAllSettings()
+void CountingAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 	bool bval;
 	long lval;
-	getValue(gstUseSelection, bval);
-	dlg_.m_ca_select_only_chk->SetValue(bval);
-	getValue(gstMinValue, lval);
-	dlg_.m_ca_min_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstMaxValue, lval);
-	dlg_.m_ca_max_text->SetValue(wxString::Format("%d", lval));
-	getValue(gstUseMax, bval);
-	dlg_.m_ca_ignore_max_chk->SetValue(!bval);
-	dlg_.m_ca_max_text->Enable(!bval);
+	if (update_all || FOUND_VALUE(gstUseSelection))
+	{
+		getValue(gstUseSelection, bval);
+		dlg_.m_ca_select_only_chk->SetValue(bval);
+	}
+	if (update_all || FOUND_VALUE(gstMinValue))
+	{
+		getValue(gstMinValue, lval);
+		dlg_.m_ca_min_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstMaxValue))
+	{
+		getValue(gstMaxValue, lval);
+		dlg_.m_ca_max_text->SetValue(wxString::Format("%d", lval));
+	}
+	if (update_all || FOUND_VALUE(gstUseMax))
+	{
+		getValue(gstUseMax, bval);
+		dlg_.m_ca_ignore_max_chk->SetValue(!bval);
+		dlg_.m_ca_max_text->Enable(!bval);
+	}
 }
 
 void CountingAgent::Analyze()

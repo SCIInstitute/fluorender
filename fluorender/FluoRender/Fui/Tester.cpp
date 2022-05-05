@@ -60,7 +60,9 @@ m_frame(frame)
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
-/*	wxStaticText *st;
+	SetDoubleBuffered(true);
+
+	/*	wxStaticText *st;
 
 	//p1
 	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);

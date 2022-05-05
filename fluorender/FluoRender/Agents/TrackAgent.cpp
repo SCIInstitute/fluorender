@@ -53,6 +53,11 @@ TrackAgent::TrackAgent(TrackDlg &dlg) :
 {
 }
 
+void TrackAgent::setupInputs()
+{
+
+}
+
 void TrackAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -63,37 +68,42 @@ Renderview* TrackAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void TrackAgent::UpdateAllSettings()
+void TrackAgent::UpdateFui(const ValueCollection &names)
 {
-	Renderview* view = getObject();
-	if (!view) return;
+	bool update_all = names.empty();
 
-	long cf, pf;
-	view->getValue(gstCurrentFrame, cf);
-	view->getValue(gstPreviousFrame, pf);
-
-	flrd::Tracks* trace_group = view->GetTraceGroup();
-	if (trace_group)
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
-		long lval;
-		getValue(gstTrackCellSize, lval);
-		trace_group->SetCellSize(lval);
+		Renderview* view = getObject();
+		if (!view) return;
 
-		std::wstring str = trace_group->GetPath();
-		setValue(gstTrackFile, str);
-		UpdateList();
+		//long cf, pf;
+		//view->getValue(gstCurrentFrame, cf);
+		//view->getValue(gstPreviousFrame, pf);
 
-		lval = trace_group->GetGhostNum();
-		setValue(gstGhostNum, lval);
-		bool bval;
-		bval = trace_group->GetDrawTail();
-		setValue(gstGhostTailEnable, bval);
-		bval = trace_group->GetDrawLead();
-		setValue(gstGhostLeadEnable, bval);
-	}
-	else
-	{
-		dlg_.m_load_trace_text->SetValue("No Track map");
+		flrd::Tracks* trace_group = view->GetTraceGroup();
+		if (trace_group)
+		{
+			long lval;
+			getValue(gstTrackCellSize, lval);
+			trace_group->SetCellSize(lval);
+
+			std::wstring str = trace_group->GetPath();
+			setValue(gstTrackFile, str);
+			UpdateList();
+
+			lval = trace_group->GetGhostNum();
+			setValue(gstGhostNum, lval);
+			bool bval;
+			bval = trace_group->GetDrawTail();
+			setValue(gstGhostTailEnable, bval);
+			bval = trace_group->GetDrawLead();
+			setValue(gstGhostLeadEnable, bval);
+		}
+		else
+		{
+			dlg_.m_load_trace_text->SetValue("No Track map");
+		}
 	}
 
 	//settings for tracking
@@ -322,7 +332,7 @@ void TrackAgent::CellUpdate()
 	view->GetTraces(false);
 	//m_view->Update(39);
 	//GetSettings(m_view);
-	UpdateAllSettings();
+	UpdateFui();
 }
 
 void TrackAgent::CellLink(bool exclusive)
@@ -979,7 +989,7 @@ void TrackAgent::GenMap()
 		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	(*dlg_.m_stat_text) << wxString::Format("Wall clock time: %.4fs\n", time_span.count());
 
-	UpdateAllSettings();
+	UpdateFui();
 	//GetSettings(m_view);
 
 	//CellUpdate();

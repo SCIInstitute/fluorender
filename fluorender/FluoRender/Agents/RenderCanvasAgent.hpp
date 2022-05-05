@@ -49,7 +49,7 @@ namespace fluo
 		virtual void setObject(Renderview* view);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		virtual RenderCanvasAgent* asRenderCanvasAgent() { return this; }
 		virtual const RenderCanvasAgent* asRenderCanvasAgent() const { return this; }
@@ -59,7 +59,8 @@ namespace fluo
 	protected:
 		RenderCanvas &canvas_;
 
-		virtual void handleValueChanged(Event& event);
+		virtual void setupInputs();
+
 		void OnBoundsChanged(Event& event);
 		void OnSceneChanged(Event& event);
 		void OnFocusChanged(Event& event);

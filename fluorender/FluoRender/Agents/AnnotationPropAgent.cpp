@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <AnnotationPropAgent.hpp>
 #include <AnnotationPropPanel.h>
-#include <string>
 
 using namespace fluo;
 
@@ -36,6 +35,16 @@ AnnotationPropAgent::AnnotationPropAgent(AnnotationPropPanel &panel) :
 	InterfaceAgent(),
 	panel_(panel)
 {
+	setupInputs();
+}
+
+void AnnotationPropAgent::setupInputs()
+{
+	inputs_ = ValueCollection
+	{
+		Memo,
+		MemoRo
+	};
 }
 
 void AnnotationPropAgent::setObject(Annotations* obj)
@@ -48,21 +57,27 @@ Annotations* AnnotationPropAgent::getObject()
 	return dynamic_cast<Annotations*>(InterfaceAgent::getObject());
 }
 
-void AnnotationPropAgent::UpdateAllSettings()
+void AnnotationPropAgent::UpdateFui(const ValueCollection &names)
 {
-	std::string memo;
-	getValue(gstMemo, memo);
-	panel_.m_memo_text->SetValue(memo);
-	bool bval;
-	getValue(gstMemoRo, bval);
-	if (bval)
+	bool update_all = names.empty();
+
+	//memo
+	if (update_all || FOUND_VALUE(Memo))
 	{
-		panel_.m_memo_text->SetEditable(false);
-		panel_.m_memo_update_btn->Disable();
-	}
-	else
-	{
-		panel_.m_memo_text->SetEditable(true);
-		panel_.m_memo_update_btn->Enable();
+		std::string memo;
+		getValue(Memo, memo);
+		panel_.m_memo_text->SetValue(memo);
+		bool bval;
+		getValue(MemoRo, bval);
+		if (bval)
+		{
+			panel_.m_memo_text->SetEditable(false);
+			panel_.m_memo_update_btn->Disable();
+		}
+		else
+		{
+			panel_.m_memo_text->SetEditable(true);
+			panel_.m_memo_update_btn->Enable();
+		}
 	}
 }

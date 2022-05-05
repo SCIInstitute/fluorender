@@ -51,6 +51,8 @@ AnnotationPropPanel::AnnotationPropPanel(
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxStaticText* st = 0;
 
+	SetDoubleBuffered(true);
+
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Memo:",
 		wxDefaultPosition, wxDefaultSize);

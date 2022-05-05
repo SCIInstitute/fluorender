@@ -54,6 +54,11 @@ MovieAgent::MovieAgent(MoviePanel &panel) :
 	}
 }
 
+void MovieAgent::setupInputs()
+{
+
+}
+
 void MovieAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -67,29 +72,34 @@ Renderview* MovieAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void MovieAgent::UpdateAllSettings()
+void MovieAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
+
 	//update views
-	panel_.m_views_cmb->Clear();
-	int sel = 0;
-	for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
-		fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-		if (!view) continue;
-		panel_.m_views_cmb->Append(view->getName());
-		if (view == getObject())
-			sel = i;
+		panel_.m_views_cmb->Clear();
+		int sel = 0;
+		for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
+		{
+			fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
+			if (!view) continue;
+			panel_.m_views_cmb->Append(view->getName());
+			if (view == getObject())
+				sel = i;
+		}
+		if (panel_.m_views_cmb->GetCount() > 0)
+			panel_.m_views_cmb->Select(0);
+
+		AddScriptToList();
+		GetScriptSettings();
+		glbin_agtf->getRecorderAgent()->UpdateFui();
 	}
-	if (panel_.m_views_cmb->GetCount() > 0)
-		panel_.m_views_cmb->Select(0);
 
-	bool bval;
-	getValue(gstMovTimeSeqEnable, bval);
-	getValue(gstDrawCropFrame, bval);
-
-	AddScriptToList();
-	GetScriptSettings();
-	glbin_agtf->getRecorderAgent()->UpdateAllSettings();
+	//bool bval;
+	//getValue(gstMovTimeSeqEnable, bval);
+	//getValue(gstDrawCropFrame, bval);
 }
 
 void MovieAgent::SetProgress(double pcnt)

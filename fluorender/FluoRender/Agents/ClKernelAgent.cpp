@@ -41,6 +41,11 @@ ClKernelAgent::ClKernelAgent(ClKernelDlg &dlg) :
 {
 }
 
+void ClKernelAgent::setupInputs()
+{
+
+}
+
 void ClKernelAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -51,27 +56,32 @@ Renderview* ClKernelAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void ClKernelAgent::UpdateAllSettings()
+void ClKernelAgent::UpdateFui(const ValueCollection &names)
 {
-	wxString exePath = glbin.getExecutablePath();
-	dlg_.m_kernel_list->DeleteAllItems();
-	wxString loc = exePath + GETSLASH() + "CL_code" +
-		GETSLASH() + "*.cl";
-	wxLogNull logNo;
-	wxArrayString list;
-	wxString file = wxFindFirstFile(loc);
-	while (!file.empty())
+	bool update_all = names.empty();
+
+	if (update_all || FOUND_VALUE(gstNonObjectValues))
 	{
-		file = wxFileNameFromPath(file);
-		file = file.BeforeLast('.');
-		list.Add(file);
-		file = wxFindNextFile();
+		wxString exePath = glbin.getExecutablePath();
+		dlg_.m_kernel_list->DeleteAllItems();
+		wxString loc = exePath + GETSLASH() + "CL_code" +
+			GETSLASH() + "*.cl";
+		wxLogNull logNo;
+		wxArrayString list;
+		wxString file = wxFindFirstFile(loc);
+		while (!file.empty())
+		{
+			file = wxFileNameFromPath(file);
+			file = file.BeforeLast('.');
+			list.Add(file);
+			file = wxFindNextFile();
+		}
+		list.Sort();
+		for (size_t i = 0; i < list.GetCount(); ++i)
+			dlg_.m_kernel_list->InsertItem(
+				dlg_.m_kernel_list->GetItemCount(),
+				list[i]);
 	}
-	list.Sort();
-	for (size_t i = 0; i < list.GetCount(); ++i)
-		dlg_.m_kernel_list->InsertItem(
-			dlg_.m_kernel_list->GetItemCount(),
-			list[i]);
 }
 
 void ClKernelAgent::RunKernel(int v)

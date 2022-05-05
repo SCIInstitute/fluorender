@@ -53,7 +53,7 @@ namespace fluo
 		virtual void setObject(Renderview* obj);
 		virtual Renderview* getObject();
 
-		virtual void UpdateAllSettings();
+		virtual void UpdateFui(const ValueCollection &names = {});
 
 		//update undo status
 		void UpdateUndoRedo();
@@ -93,6 +93,8 @@ namespace fluo
 	protected:
 		BrushToolDlg &dlg_;
 		TreePanel &tree_panel_;//secondary ui
+
+		virtual void setupInputs();
 
 	private:
 		//update functions

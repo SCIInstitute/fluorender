@@ -46,6 +46,8 @@ wxDefaultPosition, wxSize(400, 150),
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
+	SetDoubleBuffered(true);
+
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: integer

@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <TreeModel.hpp>
+#include <TreeAgent.hpp>
 #include <TreePanel.h>
 #include <DataViewColorRenderer.h>
 #include <Global.hpp>
@@ -35,14 +35,19 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace fluo;
 
-TreeModel::TreeModel(TreePanel &panel):
+TreeAgent::TreeAgent(TreePanel &panel):
 	InterfaceAgent(),
 	panel_(panel)
 {
 
 }
 
-int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
+void TreeAgent::setupInputs()
+{
+
+}
+
+int TreeAgent::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	unsigned int column, bool ascending) const
 {
 	//return wxDataViewModel::Compare(item1, item2, column, ascending);
@@ -68,12 +73,12 @@ int TreeModel::Compare(const wxDataViewItem &item1, const wxDataViewItem &item2,
 	return ascending ? str1.CmpNoCase(str2) : str2.CmpNoCase(str1);
 }
 
-unsigned int TreeModel::GetColumnCount() const
+unsigned int TreeAgent::GetColumnCount() const
 {
 	return 2;
 }
 
-wxString TreeModel::GetColumnType(unsigned int col) const
+wxString TreeAgent::GetColumnType(unsigned int col) const
 {
 	switch (col)
 	{
@@ -85,7 +90,7 @@ wxString TreeModel::GetColumnType(unsigned int col) const
 	return "string";
 }
 
-void TreeModel::GetValue(wxVariant &variant,
+void TreeAgent::GetValue(wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col) const
 {
 	if (!item.IsOk())
@@ -120,7 +125,7 @@ void TreeModel::GetValue(wxVariant &variant,
 	}
 }
 
-bool TreeModel::SetValue(const wxVariant &variant,
+bool TreeAgent::SetValue(const wxVariant &variant,
 	const wxDataViewItem &item, unsigned int col)
 {
 	if (!item.IsOk())
@@ -143,13 +148,13 @@ bool TreeModel::SetValue(const wxVariant &variant,
 	return false;
 }
 
-bool TreeModel::IsEnabled(const wxDataViewItem &item,
+bool TreeAgent::IsEnabled(const wxDataViewItem &item,
 	unsigned int col) const
 {
 	return true;
 }
 
-bool TreeModel::IsContainer(const wxDataViewItem &item) const
+bool TreeAgent::IsContainer(const wxDataViewItem &item) const
 {
 	//return false;
 	if (!item.IsOk())
@@ -158,7 +163,7 @@ bool TreeModel::IsContainer(const wxDataViewItem &item) const
 	return node->asGroup();
 }
 
-bool TreeModel::HasContainerColumns(const wxDataViewItem & item) const
+bool TreeAgent::HasContainerColumns(const wxDataViewItem & item) const
 {
 	if (!item.IsOk())
 		return wxDataViewItem(0);
@@ -169,7 +174,7 @@ bool TreeModel::HasContainerColumns(const wxDataViewItem & item) const
 		return true;
 }
 
-wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
+wxDataViewItem TreeAgent::GetParent(const wxDataViewItem &item) const
 {
 	if (!item.IsOk())
 		return wxDataViewItem(0);
@@ -203,13 +208,13 @@ wxDataViewItem TreeModel::GetParent(const wxDataViewItem &item) const
 	return wxDataViewItem(0);
 }
 
-unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
+unsigned int TreeAgent::GetChildren(const wxDataViewItem &parent,
 	wxDataViewItemArray &array) const
 {
 	Node *node = (Node*)parent.GetID();
 	if (!node)
 	{
-		Node* root = const_cast<TreeModel*>(this)->getObject();
+		Node* root = const_cast<TreeAgent*>(this)->getObject();
 		array.Add(wxDataViewItem((void*)root));
 		return 1;
 	}
@@ -228,8 +233,13 @@ unsigned int TreeModel::GetChildren(const wxDataViewItem &parent,
 	return size;
 }
 
+void TreeAgent::UpdateFui(const ValueCollection &names)
+{
+	bool update_all = names.empty();
+}
+
 //operations
-void TreeModel::MoveNode(const std::string &source, Node* target)
+void TreeAgent::MoveNode(const std::string &source, Node* target)
 {
 	Node* root = getObject();
 	if (!root)
@@ -240,7 +250,7 @@ void TreeModel::MoveNode(const std::string &source, Node* target)
 	ObjectList* list = visitor.getResult();
 }
 
-void TreeModel::UpdateSelections(NodeSet &nodes)
+void TreeAgent::UpdateSelections(NodeSet &nodes)
 {
 	class SelUpdater : public NodeVisitor
 	{
@@ -277,12 +287,12 @@ void TreeModel::UpdateSelections(NodeSet &nodes)
 	root->accept(updater);
 }
 
-void TreeModel::OnSelectionChanged(Event& event)
+void TreeAgent::OnSelectionChanged(Event& event)
 {
 
 }
 
-void TreeModel::OnItemAdded(Event& event)
+void TreeAgent::OnItemAdded(Event& event)
 {
 	if (event.parent && event.child)
 	{
@@ -293,7 +303,7 @@ void TreeModel::OnItemAdded(Event& event)
 	}
 }
 
-void TreeModel::OnItemRemoved(Event& event)
+void TreeAgent::OnItemRemoved(Event& event)
 {
 	if (event.parent && event.child)
 	{
@@ -303,7 +313,7 @@ void TreeModel::OnItemRemoved(Event& event)
 	}
 }
 
-void TreeModel::OnDisplayChanged(Event& event)
+void TreeAgent::OnDisplayChanged(Event& event)
 {
 	Node* node = dynamic_cast<Node*>(event.origin);
 	if (!node)

@@ -45,6 +45,11 @@ CalculationAgent::CalculationAgent(CalculationDlg &dlg) :
 {
 }
 
+void CalculationAgent::setupInputs()
+{
+
+}
+
 void CalculationAgent::setObject(Renderview* obj)
 {
 	InterfaceAgent::setObject(obj);
@@ -55,8 +60,9 @@ Renderview* CalculationAgent::getObject()
 	return dynamic_cast<Renderview*>(InterfaceAgent::getObject());
 }
 
-void CalculationAgent::UpdateAllSettings()
+void CalculationAgent::UpdateFui(const ValueCollection &names)
 {
+	bool update_all = names.empty();
 }
 
 void CalculationAgent::LoadVolA()
