@@ -119,6 +119,7 @@ public:
 	~VolumePropPanel();
 
 	void AssociateVolumeData(fluo::VolumeData* vd);
+	void UpdateWindow(const fluo::ValueCollection &names);
 
 	friend class fluo::VolumePropAgent;
 

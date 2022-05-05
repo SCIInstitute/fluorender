@@ -845,8 +845,6 @@ VolumePropAgent* AgentFactory::addVolumePropAgent(const std::string &name, wxWin
 	if (agent)
 	{
 		agent->setName(name);
-		ADD_AFTER_EVENT(gstLuminance, VolumePropAgent, OnLuminanceChanged);
-		ADD_AFTER_EVENT(gstColor, VolumePropAgent, OnColorChanged);
 		objects_.push_front(agent);
 		Event event;
 		event.init(Event::EVENT_NODE_ADDED,

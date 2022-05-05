@@ -606,6 +606,376 @@ void VolumePropPanel::AssociateVolumeData(fluo::VolumeData* vd)
 	m_agent->setObject(vd);
 }
 
+void VolumePropPanel::UpdateWindow(const fluo::ValueCollection &names)
+{
+	bool update_all = names.empty();
+	wxString str;
+	double dval = 0.0;
+	int ival = 0;
+	bool bval = false;
+	long lval = 0;
+
+	//set range
+	wxFloatingPointValidator<double>* vald_fp;
+	wxIntegerValidator<unsigned int>* vald_i;
+
+	//maximum value
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::MaxInt))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::MaxInt, dval);
+		dval = std::max(255.0, dval);
+		m_max_val = dval;
+	}
+
+	//volume properties
+	//transfer function
+	//gamma
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Gamma3d))
+	{
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
+			vald_fp->SetRange(0.0, 10.0);
+		m_agent->getValue(fluo::VolumePropAgent::Gamma3d, dval);
+		m_gamma_sldr->SetValue(int(dval*100.0 + 0.5));
+		str = wxString::Format("%.2f", dval);
+		m_gamma_text->ChangeValue(str);
+	}
+	//boundary
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ExtractBoundary))
+	{
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_text->GetValidator()))
+			vald_fp->SetRange(0.0, 1.0);
+		m_agent->getValue(fluo::VolumePropAgent::ExtractBoundary, dval);
+		m_boundary_sldr->SetValue(int(dval*2000.0 + 0.5));
+		str = wxString::Format("%.4f", dval);
+		m_boundary_text->ChangeValue(str);
+	}
+	//contrast
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Saturation))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::Saturation, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_saturation_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_saturation_sldr->SetValue(ival);
+		m_saturation_text->ChangeValue(str);
+	}
+	//left threshold
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::LowThreshold))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::LowThreshold, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_left_thresh_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_left_thresh_sldr->SetValue(ival);
+		m_left_thresh_text->ChangeValue(str);
+	}
+	//right threshold
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::HighThreshold))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::HighThreshold, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_right_thresh_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_right_thresh_sldr->SetValue(ival);
+		m_right_thresh_text->ChangeValue(str);
+	}
+	//luminance
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Luminance))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::Luminance, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_luminance_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_luminance_sldr->SetValue(ival);
+		m_luminance_text->ChangeValue(str);
+	}
+	//color
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Color))
+	{
+		fluo::Color c;
+		m_agent->getValue(fluo::VolumePropAgent::Color, c);
+		wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
+			(unsigned char)(c.g() * 255 + 0.5),
+			(unsigned char)(c.b() * 255 + 0.5));
+		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+			wxc.Red(), wxc.Green(), wxc.Blue()));
+		m_color_btn->SetColour(wxc);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::SecColor))
+	{
+		fluo::Color c;
+		m_agent->getValue(fluo::VolumePropAgent::SecColor, c);
+		wxColor wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
+			(unsigned char)(c.g() * 255 + 0.5),
+			(unsigned char)(c.b() * 255 + 0.5));
+		m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+			wxc.Red(), wxc.Green(), wxc.Blue()));
+		m_color2_btn->SetColour(wxc);
+	}
+	//alpha
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Alpha))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::Alpha, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_alpha_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_alpha_sldr->SetValue(ival);
+		m_alpha_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::AlphaEnable))
+	{
+		bool alpha_enable;
+		m_agent->getValue(fluo::VolumePropAgent::AlphaEnable, alpha_enable);
+		m_alpha_tool->ToggleTool(ID_AlphaChk, alpha_enable);
+		if (alpha_enable)
+			EnableAlpha();
+		else
+			DisableAlpha();
+	}
+
+	//shadings
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::LowShading))
+	{
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_low_shading_text->GetValidator()))
+			vald_fp->SetRange(0.0, 10.0);
+		double amb;
+		m_agent->getValue(fluo::VolumePropAgent::LowShading, amb);
+		m_low_shading_sldr->SetValue(amb*100.0);
+		str = wxString::Format("%.2f", amb);
+		m_low_shading_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::HighShading))
+	{
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_hi_shading_text->GetValidator()))
+			vald_fp->SetRange(0.0, 100.0);
+		double shine;
+		m_agent->getValue(fluo::VolumePropAgent::HighShading, shine);
+		m_hi_shading_sldr->SetValue(shine*10.0);
+		str = wxString::Format("%.2f", shine);
+		m_hi_shading_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ShadingEnable))
+	{
+		bool shading_enable;
+		m_agent->getValue(fluo::VolumePropAgent::ShadingEnable, shading_enable);
+		m_shade_tool->ToggleTool(ID_ShadingEnableChk, shading_enable);
+		if (shading_enable)
+			EnableShading();
+		else
+			DisableShading();
+	}
+
+	//shadow
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ShadowEnable))
+	{
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
+			vald_fp->SetRange(0.0, 1.0);
+		bool shadow_enable;
+		m_agent->getValue(fluo::VolumePropAgent::ShadowEnable, shadow_enable);
+		m_shadow_tool->ToggleTool(ID_ShadowChk, shadow_enable);
+		if (shadow_enable)
+			EnableShadow();
+		else
+			DisableShadow();
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ShadowInt))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::ShadowInt, dval);
+		m_shadow_sldr->SetValue(int(dval*100.0 + 0.5));
+		str = wxString::Format("%.2f", dval);
+		m_shadow_text->ChangeValue(str);
+	}
+
+	//smaple rate
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::SampleRate))
+	{
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
+			vald_fp->SetRange(0.0, 100.0);
+		m_agent->getValue(fluo::VolumePropAgent::SampleRate, dval);
+		m_sample_sldr->SetValue(dval*10.0);
+		str = wxString::Format("%.1f", dval);
+		m_sample_text->ChangeValue(str);
+	}
+
+	//spacings
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::SpcX))
+	{
+		double spcx;
+		m_agent->getValue(fluo::VolumePropAgent::SpcX, spcx);
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
+			vald_fp->SetMin(0.0);
+		str = wxString::Format("%.3f", spcx);
+		m_space_x_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::SpcY))
+	{
+		double spcy;
+		m_agent->getValue(fluo::VolumePropAgent::SpcY, spcy);
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_y_text->GetValidator()))
+			vald_fp->SetMin(0.0);
+		str = wxString::Format("%.3f", spcy);
+		m_space_y_text->ChangeValue(str);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::SpcZ))
+	{
+		double spcz;
+		m_agent->getValue(fluo::VolumePropAgent::SpcZ, spcz);
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_z_text->GetValidator()))
+			vald_fp->SetMin(0.0);
+		str = wxString::Format("%.3f", spcz);
+		m_space_z_text->ChangeValue(str);
+	}
+
+	//legend
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Legend))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::Legend, bval);
+		m_options_toolbar->ToggleTool(ID_LegendChk, bval);
+	}
+
+	//interpolate
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Interpolate))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::Interpolate, bval);
+		m_options_toolbar->ToggleTool(ID_InterpolateChk, bval);
+		if (bval)
+			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
+				wxGetBitmapFromMemory(interpolate));
+		else
+			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
+				wxGetBitmapFromMemory(interpolate_off));
+	}
+
+	//sync group
+	//if (m_group)
+	//	m_sync_group = m_group->GetVolumeSyncProp();
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::SyncGroup))
+	{
+		bool sync = m_agent->testSyncParentValue(fluo::VolumePropAgent::Gamma3d);
+		m_options_toolbar->ToggleTool(ID_SyncGroupChk, sync);
+	}
+
+	//colormap
+	//double low, high;
+	//vd->GetColormapValues(low, high);
+	//low
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ColormapLow))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_value_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::ColormapLow, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_colormap_low_value_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_colormap_low_value_sldr->SetValue(ival);
+		m_colormap_low_value_text->ChangeValue(str);
+	}
+	//high
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ColormapHigh))
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_high_value_text->GetValidator()))
+			vald_i->SetMin(0);
+		m_agent->getValue(fluo::VolumePropAgent::ColormapHigh, dval);
+		ival = int(dval*m_max_val + 0.5);
+		m_colormap_high_value_sldr->SetRange(0, int(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_colormap_high_value_sldr->SetValue(ival);
+		m_colormap_high_value_text->ChangeValue(str);
+	}
+	//colormap
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ColormapType))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::ColormapType, lval);
+		m_colormap_combo->SetSelection(lval);
+	}
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ColormapProj))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::ColormapProj, lval);
+		m_colormap_combo2->SetSelection(lval);
+	}
+	//mode
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::ColormapMode))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::ColormapMode, lval);
+		bool colormap_enable = lval == 1;
+		m_colormap_tool->ToggleTool(ID_ColormapEnableChk, colormap_enable);
+		if (colormap_enable)
+			EnableColormap();
+		else
+			DisableColormap();
+	}
+
+	//inversion
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::Invert))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::Invert, bval);
+		m_options_toolbar->ToggleTool(ID_InvChk, bval);
+		if (bval)
+			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
+				wxGetBitmapFromMemory(invert));
+		else
+			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
+				wxGetBitmapFromMemory(invert_off));
+	}
+
+	//MIP
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::MipMode))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::MipMode, lval);
+		bool mip_enable = lval == 1;
+		m_options_toolbar->ToggleTool(ID_MipChk, mip_enable);
+		if (mip_enable)
+			m_threh_st->SetLabel("Shade Threshold : ");
+		else
+			m_threh_st->SetLabel("Threshold : ");
+		if (mip_enable)
+			EnableMip();
+		else
+			DisableMip();
+	}
+
+	//noise reduction
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::NoiseRedct))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::NoiseRedct, bval);
+		m_options_toolbar->ToggleTool(ID_NRChk, bval);
+		if (bval)
+			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
+				wxGetBitmapFromMemory(smooth));
+		else
+			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
+				wxGetBitmapFromMemory(smooth_off));
+	}
+
+	//blend mode
+	if (update_all || FOUND_VALUE(fluo::VolumePropAgent::BlendMode))
+	{
+		m_agent->getValue(fluo::VolumePropAgent::BlendMode, lval);
+		if (lval == 2)
+		{
+			m_options_toolbar->ToggleTool(ID_DepthChk, true);
+			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth));
+		}
+		else
+		{
+			m_options_toolbar->ToggleTool(ID_DepthChk, false);
+			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
+		}
+	}
+
+	//Layout();
+}
+
 //1
 void VolumePropPanel::OnGammaSync(wxMouseEvent& event)
 {
