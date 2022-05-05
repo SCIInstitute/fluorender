@@ -82,6 +82,13 @@ namespace fluo
 		DEFINE_ATTR(ColormapProj);					//Intensity, etc
 		DEFINE_ATTR(ColormapInv);					//Invert (button)
 
+		//other attributes
+		DEFINE_ATTR(Bits);
+		DEFINE_ATTR(IntScale);
+		DEFINE_ATTR(BaseSpcX);
+		DEFINE_ATTR(BaseSpcY);
+		DEFINE_ATTR(BaseSpcZ);
+
 		VolumePropAgent(VolumePropPanel &panel);
 
 		virtual bool isSameKindAs(const Object* obj) const

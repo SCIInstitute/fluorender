@@ -1008,7 +1008,7 @@ void VolumePropPanel::UpdateWindow(const fluo::ValueCollection &names)
 //1
 void VolumePropPanel::OnGammaSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstGamma3d);
+	m_agent->propParentValue(fluo::VolumePropAgent::Gamma3d);
 }
 
 void VolumePropPanel::OnGammaChange(wxScrollEvent & event)
@@ -1026,13 +1026,13 @@ void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 	{
 		int ival = int(val*100.0 + 0.5);
 		m_gamma_sldr->SetValue(ival);
-		m_agent->updateValue(gstGamma3d, val);
+		m_agent->updateValue(fluo::VolumePropAgent::Gamma3d, val);
 	}
 }
 
 void VolumePropPanel::OnBoundarySync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstExtractBoundary);
+	m_agent->propParentValue(fluo::VolumePropAgent::ExtractBoundary);
 }
 
 void VolumePropPanel::OnBoundaryChange(wxScrollEvent & event)
@@ -1050,14 +1050,14 @@ void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 	{
 		int ival = int(val*2000.0 + 0.5);
 		m_boundary_sldr->SetValue(ival);
-		m_agent->updateValue(gstExtractBoundary, val);
+		m_agent->updateValue(fluo::VolumePropAgent::ExtractBoundary, val);
 	}
 }
 
 //2
 void VolumePropPanel::OnSaturationSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstSaturation);
+	m_agent->propParentValue(fluo::VolumePropAgent::Saturation);
 }
 
 void VolumePropPanel::OnSaturationChange(wxScrollEvent & event)
@@ -1082,14 +1082,14 @@ void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
 		m_saturation_sldr->SetValue(ival);
 		double val = double(ival) / m_max_val;
 
-		m_agent->updateValue(gstSaturation, val);
+		m_agent->updateValue(fluo::VolumePropAgent::Saturation, val);
 	}
 }
 
 void VolumePropPanel::OnThreshSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstLowThreshold);
-	m_agent->propParentValue(gstHighThreshold);
+	m_agent->propParentValue(fluo::VolumePropAgent::LowThreshold);
+	m_agent->propParentValue(fluo::VolumePropAgent::HighThreshold);
 }
 
 void VolumePropPanel::OnLeftThreshChange(wxScrollEvent &event)
@@ -1123,7 +1123,7 @@ void VolumePropPanel::OnLeftThreshText(wxCommandEvent &event)
 		}
 		m_left_thresh_sldr->SetValue(ival);
 
-		m_agent->updateValue(gstLowThreshold, val);
+		m_agent->updateValue(fluo::VolumePropAgent::LowThreshold, val);
 	}
 	//update colocalization
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
@@ -1164,7 +1164,7 @@ void VolumePropPanel::OnRightThreshText(wxCommandEvent &event)
 		{
 			m_right_thresh_sldr->SetValue(ival);
 
-			m_agent->updateValue(gstHighThreshold, val);
+			m_agent->updateValue(fluo::VolumePropAgent::HighThreshold, val);
 		}
 	}
 	//update colocalization
@@ -1176,7 +1176,7 @@ void VolumePropPanel::OnRightThreshText(wxCommandEvent &event)
 //3
 void VolumePropPanel::OnLuminanceSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstLuminance);
+	m_agent->propParentValue(fluo::VolumePropAgent::Luminance);
 }
 
 void VolumePropPanel::OnLuminanceChange(wxScrollEvent &event)
@@ -1201,21 +1201,21 @@ void VolumePropPanel::OnLuminanceText(wxCommandEvent &event)
 		double val = double(ival) / m_max_val;
 		m_luminance_sldr->SetValue(ival);
 
-		m_agent->updateValue(gstLuminance, val);
+		m_agent->updateValue(fluo::VolumePropAgent::Luminance, val);
 	}
 }
 
 //shadow
 void VolumePropPanel::OnShadowSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstShadowEnable);
-	m_agent->propParentValue(gstShadowInt);
+	m_agent->propParentValue(fluo::VolumePropAgent::ShadowEnable);
+	m_agent->propParentValue(fluo::VolumePropAgent::ShadowInt);
 }
 
 void VolumePropPanel::OnShadowEnable(wxCommandEvent &event)
 {
 	bool shadow = m_shadow_tool->GetToolState(ID_ShadowChk);
-	m_agent->updateValue(gstShadowEnable, shadow);
+	m_agent->updateValue(fluo::VolumePropAgent::ShadowEnable, shadow);
 	if (shadow)
 		EnableShadow();
 	else
@@ -1236,21 +1236,21 @@ void VolumePropPanel::OnShadowText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_shadow_sldr->SetValue(int(val*100.0 + 0.5));
-		m_agent->updateValue(gstShadowInt, val);
+		m_agent->updateValue(fluo::VolumePropAgent::ShadowInt, val);
 	}
 }
 
 //4
 void VolumePropPanel::OnAlphaSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstAlphaEnable);
-	m_agent->propParentValue(gstAlpha);
+	m_agent->propParentValue(fluo::VolumePropAgent::AlphaEnable);
+	m_agent->propParentValue(fluo::VolumePropAgent::Alpha);
 }
 
 void VolumePropPanel::OnAlphaCheck(wxCommandEvent &event)
 {
 	bool alpha = m_alpha_tool->GetToolState(ID_AlphaChk);
-	m_agent->updateValue(gstAlphaEnable, alpha);
+	m_agent->updateValue(fluo::VolumePropAgent::AlphaEnable, alpha);
 	if (alpha)
 		EnableAlpha();
 	else
@@ -1279,13 +1279,13 @@ void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 		double val = double(ival) / m_max_val;
 		m_alpha_sldr->SetValue(ival);
 
-		m_agent->updateValue(gstAlpha, val);
+		m_agent->updateValue(fluo::VolumePropAgent::Alpha, val);
 	}
 }
 
 void VolumePropPanel::OnSampleSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstSampleRate);
+	m_agent->propParentValue(fluo::VolumePropAgent::SampleRate);
 }
 
 void VolumePropPanel::OnSampleChange(wxScrollEvent & event)
@@ -1303,7 +1303,7 @@ void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 	{
 		double val = srate * 10.0;
 		m_sample_sldr->SetValue(int(val));
-		m_agent->updateValue(gstSampleRate, srate);
+		m_agent->updateValue(fluo::VolumePropAgent::SampleRate, srate);
 		//maybe to synchronize sample rates among volumes in the depth mode
 	}
 }
@@ -1311,9 +1311,9 @@ void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 //5
 void VolumePropPanel::OnShadingSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstShadingEnable);
-	m_agent->propParentValue(gstLowShading);
-	m_agent->propParentValue(gstHighShading);
+	m_agent->propParentValue(fluo::VolumePropAgent::ShadingEnable);
+	m_agent->propParentValue(fluo::VolumePropAgent::LowShading);
+	m_agent->propParentValue(fluo::VolumePropAgent::HighShading);
 }
 
 //hi shading
@@ -1331,7 +1331,7 @@ void VolumePropPanel::OnHiShadingText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_hi_shading_sldr->SetValue(int(val*10.0 + 0.5));
-		m_agent->updateValue(gstHighShading, val);
+		m_agent->updateValue(fluo::VolumePropAgent::HighShading, val);
 	}
 }
 
@@ -1349,14 +1349,14 @@ void VolumePropPanel::OnLowShadingText(wxCommandEvent &event)
 	if (str.ToDouble(&val))
 	{
 		m_low_shading_sldr->SetValue(int(val*100.0 + 0.5));
-		m_agent->updateValue(gstLowShading, val);
+		m_agent->updateValue(fluo::VolumePropAgent::LowShading, val);
 	}
 }
 
 void VolumePropPanel::OnShadingEnable(wxCommandEvent &event)
 {
 	bool shading = m_shade_tool->GetToolState(ID_ShadingEnableChk);
-	m_agent->updateValue(gstShadingEnable, shading);
+	m_agent->updateValue(fluo::VolumePropAgent::ShadingEnable, shading);
 	if (shading)
 		EnableShading();
 	else
@@ -1366,12 +1366,12 @@ void VolumePropPanel::OnShadingEnable(wxCommandEvent &event)
 //colormap controls
 void VolumePropPanel::OnColormapSync(wxMouseEvent& event)
 {
-	m_agent->propParentValue(gstColormapEnable);
-	m_agent->propParentValue(gstColormapMode);
-	m_agent->propParentValue(gstColormapLow);
-	m_agent->propParentValue(gstColormapHigh);
-	m_agent->propParentValue(gstColormapType);
-	m_agent->propParentValue(gstColormapProj);
+	m_agent->propParentValue(fluo::VolumePropAgent::ColormapEnable);
+	m_agent->propParentValue(fluo::VolumePropAgent::ColormapMode);
+	m_agent->propParentValue(fluo::VolumePropAgent::ColormapLow);
+	m_agent->propParentValue(fluo::VolumePropAgent::ColormapHigh);
+	m_agent->propParentValue(fluo::VolumePropAgent::ColormapType);
+	m_agent->propParentValue(fluo::VolumePropAgent::ColormapProj);
 }
 
 void VolumePropPanel::OnEnableColormap(wxCommandEvent &event)
@@ -1380,8 +1380,8 @@ void VolumePropPanel::OnEnableColormap(wxCommandEvent &event)
 		m_colormap_tool->GetToolState(ID_ColormapEnableChk);
 
 	long lval = colormap ? 1 : 0;
-	m_agent->updateValue(gstColormapEnable, colormap);
-	m_agent->updateValue(gstColormapMode, lval);
+	m_agent->updateValue(fluo::VolumePropAgent::ColormapEnable, colormap);
+	m_agent->updateValue(fluo::VolumePropAgent::ColormapMode, lval);
 	if (colormap)
 		EnableColormap();
 	else
@@ -1422,7 +1422,7 @@ void VolumePropPanel::OnColormapHighValueText(wxCommandEvent &event)
 
 			double val = double(iVal) / m_max_val;
 
-			m_agent->updateValue(gstColormapHigh, val);
+			m_agent->updateValue(fluo::VolumePropAgent::ColormapHigh, val);
 		}
 	}
 }
@@ -1458,14 +1458,14 @@ void VolumePropPanel::OnColormapLowValueText(wxCommandEvent &event)
 
 		double val = double(iVal) / m_max_val;
 
-		m_agent->updateValue(gstColormapLow, val);
+		m_agent->updateValue(fluo::VolumePropAgent::ColormapLow, val);
 	}
 }
 
 void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 {
 	bool val = m_colormap_inv_btn->GetValue();
-	m_agent->updateValue(gstColormapInv, val);
+	m_agent->updateValue(fluo::VolumePropAgent::ColormapInv, val);
 	//update colocalization
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
 	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
@@ -1475,7 +1475,7 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent &event)
 void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 {
 	long colormap = m_colormap_combo->GetCurrentSelection();
-	m_agent->updateValue(gstColormapType, colormap);
+	m_agent->updateValue(fluo::VolumePropAgent::ColormapType, colormap);
 	//update colocalization
 	//if (m_frame && m_frame->GetColocalizationDlg() &&
 	//	m_frame->GetColocalizationDlg()->GetColormapUpdate())
@@ -1485,20 +1485,20 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent &event)
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent &event)
 {
 	long colormap_proj = m_colormap_combo2->GetCurrentSelection();
-	m_agent->updateValue(gstColormapProj, colormap_proj);
+	m_agent->updateValue(fluo::VolumePropAgent::ColormapProj, colormap_proj);
 }
 
 //6
 void VolumePropPanel::OnColorChange(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_agent->updateValue(gstColor, color);
+	m_agent->updateValue(fluo::VolumePropAgent::Color, color);
 }
 
 void VolumePropPanel::OnColor2Change(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	m_agent->updateValue(gstSecColor, color);
+	m_agent->updateValue(fluo::VolumePropAgent::SecColor, color);
 }
 
 void VolumePropPanel::OnColorTextChange(wxCommandEvent& event)
@@ -1573,13 +1573,13 @@ void VolumePropPanel::OnInvCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_InvChk, 
 		wxGetBitmapFromMemory(invert_off));
 
-	m_agent->updateValue(gstInvert, inv);
+	m_agent->updateValue(fluo::VolumePropAgent::Invert, inv);
 }
 
 void VolumePropPanel::OnMIPCheck(wxCommandEvent &event)
 {
 	long val = m_options_toolbar->GetToolState(ID_MipChk)?1:0;
-	m_agent->updateValue(gstMipMode, val);
+	m_agent->updateValue(fluo::VolumePropAgent::MipMode, val);
 
 	if (val==1)
 	{
@@ -1611,7 +1611,7 @@ void VolumePropPanel::OnTranspChk(wxCommandEvent &event)
 			wxGetBitmapFromMemory(transplo));
 	}
 	double alpha_power = bval ? 2 : 1;
-	m_agent->updateValue(gstAlphaPower, alpha_power);
+	m_agent->updateValue(fluo::VolumePropAgent::AlphaPower, alpha_power);
 }
 
 void VolumePropPanel::OnCompChk(wxCommandEvent &event)
@@ -1628,7 +1628,7 @@ void VolumePropPanel::OnCompChk(wxCommandEvent &event)
 			wxGetBitmapFromMemory(comp_off));
 	}
 	long label_mode = bval ? 1 : 0;
-	m_agent->updateValue(gstLabelMode, label_mode);
+	m_agent->updateValue(fluo::VolumePropAgent::LabelMode, label_mode);
 }
 
 //noise reduction
@@ -1642,7 +1642,7 @@ void VolumePropPanel::OnNRCheck(wxCommandEvent &event)
 		m_options_toolbar->SetToolNormalBitmap(ID_NRChk, 
 		wxGetBitmapFromMemory(smooth_off));
 
-	m_agent->updateValue(gstNoiseRedct, val);
+	m_agent->updateValue(fluo::VolumePropAgent::NoiseRedct, val);
 	//synchronize in view?
 }
 
@@ -1659,14 +1659,14 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//{
 	//	if (m_group)
 	//	{
-	//		m_group->updateValue(gstBlendMode, long(2));
+	//		m_group->updateValue(BlendMode, long(2));
 	//		if (m_vd)
 	//		{
 	//			fluo::ValueCollection names{
-	//				gstNoiseRedct,
-	//				gstSampleRate,
-	//				gstShadowEnable,
-	//				gstShadowInt
+	//				NoiseRedct,
+	//				SampleRate,
+	//				ShadowEnable,
+	//				ShadowInt
 	//			};
 	//			m_group->propagateValues(names, m_vd);
 	//		}
@@ -1675,7 +1675,7 @@ void VolumePropPanel::OnDepthCheck(wxCommandEvent &event)
 	//else
 	//{
 	//	if (m_group)
-	//		m_group->updateValue(gstBlendMode, long(0));
+	//		m_group->updateValue(BlendMode, long(0));
 	//}
 
 	//RefreshVRenderViews(false, true);
@@ -1746,8 +1746,8 @@ void VolumePropPanel::EnableMip()
 	//m_luminance_sldr->Disable();
 	//m_luminance_text->Disable();
 	//bool bval1, bval2;
-	//m_vd->getValue(gstShadingEnable, bval1);
-	//m_vd->getValue(gstShadowEnable, bval2);
+	//m_vd->getValue(ShadingEnable, bval1);
+	//m_vd->getValue(ShadowEnable, bval2);
 	//if (bval1 || bval2)
 	//	EnableShading();
 	//else
@@ -1757,7 +1757,7 @@ void VolumePropPanel::EnableMip()
 void VolumePropPanel::DisableMip()
 {
 	//bool bval1, bval2;
-	//m_vd->getValue(gstAlphaEnable, bval1);
+	//m_vd->getValue(AlphaEnable, bval1);
 	//if (bval1)
 	//	EnableAlpha();
 	//else
@@ -1766,8 +1766,8 @@ void VolumePropPanel::DisableMip()
 	//m_boundary_text->Enable();
 	//m_luminance_sldr->Enable();
 	//m_luminance_text->Enable();
-	//m_vd->getValue(gstShadingEnable, bval1);
-	//m_vd->getValue(gstShadowEnable, bval2);
+	//m_vd->getValue(ShadingEnable, bval1);
+	//m_vd->getValue(ShadowEnable, bval2);
 	//if (bval1 || bval2)
 	//	EnableShading();
 	//else
@@ -1782,7 +1782,7 @@ void VolumePropPanel::DisableMip()
 void VolumePropPanel::UpdateMaxVal(double value)
 {
 	long bits;
-	m_agent->getValue(gstBits, bits);
+	m_agent->getValue(fluo::VolumePropAgent::Bits, bits);
 	if (bits == 8)
 		return;
 	else if (bits > 8)
@@ -1793,8 +1793,8 @@ void VolumePropPanel::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_agent->updateValue(gstMaxInt, m_max_val);
-	m_agent->updateValue(gstIntScale, 65535.0 / m_max_val);
+	m_agent->updateValue(fluo::VolumePropAgent::MaxInt, m_max_val);
+	m_agent->updateValue(fluo::VolumePropAgent::IntScale, 65535.0 / m_max_val);
 }
 
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
@@ -1807,22 +1807,22 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 	str = m_space_x_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->updateValue(gstSpcX, dval);
-		m_agent->updateValue(gstBaseSpcX, dval);
+		m_agent->updateValue(fluo::VolumePropAgent::SpcX, dval);
+		m_agent->updateValue(fluo::VolumePropAgent::BaseSpcX, dval);
 	}
 	//y
 	str = m_space_y_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->updateValue(gstSpcY, dval);
-		m_agent->updateValue(gstBaseSpcY, dval);
+		m_agent->updateValue(fluo::VolumePropAgent::SpcY, dval);
+		m_agent->updateValue(fluo::VolumePropAgent::BaseSpcY, dval);
 	}
 	//z
 	str = m_space_z_text->GetValue();
 	if (str.ToDouble(&dval) && dval > 0.0)
 	{
-		m_agent->updateValue(gstSpcZ, dval);
-		m_agent->updateValue(gstBaseSpcZ, dval);
+		m_agent->updateValue(fluo::VolumePropAgent::SpcZ, dval);
+		m_agent->updateValue(fluo::VolumePropAgent::BaseSpcZ, dval);
 	}
 }
 
@@ -1830,7 +1830,7 @@ void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 void VolumePropPanel::OnLegendCheck(wxCommandEvent& event)
 {
 	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
-	m_agent->updateValue(gstLegend, bval);
+	m_agent->updateValue(fluo::VolumePropAgent::Legend, bval);
 }
 
 //interpolation
@@ -1843,7 +1843,7 @@ void VolumePropPanel::OnInterpolateCheck(wxCommandEvent& event)
 	else
 		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk, 
 		wxGetBitmapFromMemory(interpolate_off));
-	m_agent->updateValue(gstInterpolate, inv);
+	m_agent->updateValue(fluo::VolumePropAgent::Interpolate, inv);
 	//synch with view?
 }
 
@@ -1852,29 +1852,29 @@ void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 {
 	bool sync = m_options_toolbar->GetToolState(ID_SyncGroupChk);
 	fluo::ValueCollection names{
-		gstGamma3d,
-		gstExtractBoundary,
-		gstSaturation,
-		gstLowThreshold,
-		gstHighThreshold,
-		gstShadowEnable,
-		gstShadowInt,
-		gstAlpha,
-		gstAlphaEnable,
-		gstSampleRate,
-		gstShadingEnable,
-		gstLowShading,
-		gstHighShading,
-		gstColormapEnable,
-		gstColormapMode,
-		gstColormapType,
-		gstColormapLow,
-		gstColormapHigh,
-		gstColormapProj,
-		gstInvert,
-		gstInterpolate,
-		gstMipMode,
-		gstNoiseRedct
+		fluo::VolumePropAgent::Gamma3d,
+		fluo::VolumePropAgent::ExtractBoundary,
+		fluo::VolumePropAgent::Saturation,
+		fluo::VolumePropAgent::LowThreshold,
+		fluo::VolumePropAgent::HighThreshold,
+		fluo::VolumePropAgent::ShadowEnable,
+		fluo::VolumePropAgent::ShadowInt,
+		fluo::VolumePropAgent::Alpha,
+		fluo::VolumePropAgent::AlphaEnable,
+		fluo::VolumePropAgent::SampleRate,
+		fluo::VolumePropAgent::ShadingEnable,
+		fluo::VolumePropAgent::LowShading,
+		fluo::VolumePropAgent::HighShading,
+		fluo::VolumePropAgent::ColormapEnable,
+		fluo::VolumePropAgent::ColormapMode,
+		fluo::VolumePropAgent::ColormapType,
+		fluo::VolumePropAgent::ColormapLow,
+		fluo::VolumePropAgent::ColormapHigh,
+		fluo::VolumePropAgent::ColormapProj,
+		fluo::VolumePropAgent::Invert,
+		fluo::VolumePropAgent::Interpolate,
+		fluo::VolumePropAgent::MipMode,
+		fluo::VolumePropAgent::NoiseRedct
 	};
 	if (sync)
 	{
@@ -1888,32 +1888,32 @@ void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 {
 	fluo::ValueCollection names{
-		gstGamma3d,
-		gstExtractBoundary,
-		gstSaturation,
-		gstLowThreshold,
-		gstHighThreshold,
-		gstShadowEnable,
-		gstShadowInt,
-		gstAlpha,
-		gstAlphaEnable,
-		gstSampleRate,
-		gstShadingEnable,
-		gstLowShading,
-		gstHighShading,
-		gstColormapEnable,
-		gstColormapMode,
-		gstColormapType,
-		gstColormapLow,
-		gstColormapHigh,
-		gstColormapProj,
-		gstInvert,
-		gstInterpolate,
-		gstMipMode,
-		gstNoiseRedct
-		gstSpcX,
-		gstSpcY,
-		gstSpcZ
+		fluo::VolumePropAgent::Gamma3d,
+		fluo::VolumePropAgent::ExtractBoundary,
+		fluo::VolumePropAgent::Saturation,
+		fluo::VolumePropAgent::LowThreshold,
+		fluo::VolumePropAgent::HighThreshold,
+		fluo::VolumePropAgent::ShadowEnable,
+		fluo::VolumePropAgent::ShadowInt,
+		fluo::VolumePropAgent::Alpha,
+		fluo::VolumePropAgent::AlphaEnable,
+		fluo::VolumePropAgent::SampleRate,
+		fluo::VolumePropAgent::ShadingEnable,
+		fluo::VolumePropAgent::LowShading,
+		fluo::VolumePropAgent::HighShading,
+		fluo::VolumePropAgent::ColormapEnable,
+		fluo::VolumePropAgent::ColormapMode,
+		fluo::VolumePropAgent::ColormapType,
+		fluo::VolumePropAgent::ColormapLow,
+		fluo::VolumePropAgent::ColormapHigh,
+		fluo::VolumePropAgent::ColormapProj,
+		fluo::VolumePropAgent::Invert,
+		fluo::VolumePropAgent::Interpolate,
+		fluo::VolumePropAgent::MipMode,
+		fluo::VolumePropAgent::NoiseRedct,
+		fluo::VolumePropAgent::SpcX,
+		fluo::VolumePropAgent::SpcY,
+		fluo::VolumePropAgent::SpcZ
 	};
 	glbin_volf->propValuesToDefault(m_agent, names);
 	glbin_volf->writeDefault(names);
@@ -1922,29 +1922,29 @@ void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 void VolumePropPanel::OnResetDefault(wxCommandEvent &event)
 {
 	fluo::ValueCollection names{
-		gstGamma3d,
-		gstExtractBoundary,
-		gstSaturation,
-		gstLowThreshold,
-		gstHighThreshold,
-		gstShadowEnable,
-		gstShadowInt,
-		gstAlpha,
-		gstAlphaEnable,
-		gstSampleRate,
-		gstShadingEnable,
-		gstLowShading,
-		gstHighShading,
-		gstColormapEnable,
-		gstColormapMode,
-		gstColormapType,
-		gstColormapLow,
-		gstColormapHigh,
-		gstColormapProj,
-		gstInvert,
-		gstInterpolate,
-		gstMipMode,
-		gstNoiseRedct
+		fluo::VolumePropAgent::Gamma3d,
+		fluo::VolumePropAgent::ExtractBoundary,
+		fluo::VolumePropAgent::Saturation,
+		fluo::VolumePropAgent::LowThreshold,
+		fluo::VolumePropAgent::HighThreshold,
+		fluo::VolumePropAgent::ShadowEnable,
+		fluo::VolumePropAgent::ShadowInt,
+		fluo::VolumePropAgent::Alpha,
+		fluo::VolumePropAgent::AlphaEnable,
+		fluo::VolumePropAgent::SampleRate,
+		fluo::VolumePropAgent::ShadingEnable,
+		fluo::VolumePropAgent::LowShading,
+		fluo::VolumePropAgent::HighShading,
+		fluo::VolumePropAgent::ColormapEnable,
+		fluo::VolumePropAgent::ColormapMode,
+		fluo::VolumePropAgent::ColormapType,
+		fluo::VolumePropAgent::ColormapLow,
+		fluo::VolumePropAgent::ColormapHigh,
+		fluo::VolumePropAgent::ColormapProj,
+		fluo::VolumePropAgent::Invert,
+		fluo::VolumePropAgent::Interpolate,
+		fluo::VolumePropAgent::MipMode,
+		fluo::VolumePropAgent::NoiseRedct
 	};
 	glbin_volf->propValuesFromDefault(m_agent, names);
 }
