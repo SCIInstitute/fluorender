@@ -124,7 +124,7 @@ void TIFWriter::SaveSingleFile(const std::wstring &filename)
 		TIFFSetField(outfile, TIFFTAG_YRESOLUTION, y_res);
 		TIFFSetField(outfile, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 		TIFFSetField(outfile, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(outfile, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		TIFFSetField(outfile, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 		TIFFSetField(outfile, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
 		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, i);
 		TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
