@@ -309,6 +309,58 @@ namespace flrd
 		}
 	}
 
+	inline bool match_stencils_dsc(const Stencil& s1, Stencil& s2,
+		const fluo::Vector &ext, const fluo::Vector &off,
+		fluo::Point &center, int iter, int sim)
+	{
+		fluo::Vector range = s1.box.diagonal();
+		int maxx = int(std::min(ext.x(), range.x()) + 0.5);
+		int maxy = int(std::min(ext.y(), range.y()) + 0.5);
+		int maxz = int(std::min(ext.z(), range.z()) + 0.5);
+		int minx = -maxx;
+		int miny = -maxy;
+		int minz = -maxz;
+
+		float p, maxp;
+		maxp = 0;
+		center = fluo::Point();
+		fluo::Point c;
+		int i, j, k;
+		int counter = 0;
+		while (true)
+		{
+			bool foundp = false;
+			for (k = minz; k <= maxz; ++k) for (j = miny; j <= maxy; ++j) for (i = minx; i <= maxx; ++i)
+			{
+				s2.box = s1.box;
+				s2.box.translate(off);
+				s2.box.translate(fluo::Vector(center));
+				s2.box.translate(fluo::Vector(i, j, k));
+
+				//p = s1 * s2;
+				p = similar(s1, s2, sim);
+				if (p > maxp)
+				{
+					maxp = p;
+					c = fluo::Point(i, j, k);
+					foundp = true;
+				}
+			}
+			if (!foundp) break;
+			counter++;
+			if (counter > iter) break;
+			center += c;
+		}
+
+		center = fluo::Point(center + off + s1.box.Min());
+		//center is actually the corner
+		s2.box = fluo::BBox(center,
+			fluo::Point(center + s1.box.size()));
+		s2.id = s1.id;
+
+		return true;
+	}
+
 }//namespace flrd
 
 #endif//FL_Stencil_h

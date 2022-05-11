@@ -65,6 +65,17 @@ void BBox::scale(double sx, double sy, double sz)
 	cmax_.scale(sx, sy, sz);
 }
 
+void BBox::scale_center(double sx, double sy, double sz)
+{
+	Point c = center();
+	cmin_ -= c;
+	cmax_ -= c;
+	cmin_.scale(sx, sy, sz);
+	cmax_.scale(sx, sy, sz);
+	cmin_ += c;
+	cmax_ += c;
+}
+
 bool BBox::overlaps(const BBox & bb) const
 {
 	if( bb.cmin_.x() > cmax_.x() || bb.cmax_.x() < cmin_.x())

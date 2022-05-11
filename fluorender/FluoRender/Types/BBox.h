@@ -233,6 +233,8 @@ namespace fluo
 		void scale(double s, const Vector &o);
 		//scale around origin
 		void scale(double sx, double sy, double sz);
+		//scale around center
+		void scale_center(double sx, double sy, double sz);
 
 		inline Point Min() const
 		{ return cmin_; }
