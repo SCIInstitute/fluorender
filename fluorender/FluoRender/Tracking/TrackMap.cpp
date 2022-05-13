@@ -4539,12 +4539,13 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		iter = stencil_list.find(label_value);
 		if (iter != stencil_list.end())
 		{
-			iter->second.extend(i, j, k);
+			iter->second.extend(fluo::Point(i, j, k));
 		}
 		else
 		{
 			Stencil stencil;
 			stencil.data = data1;
+			stencil.label = label1;
 			stencil.id = label_value;
 			stencil.nx = nx;
 			stencil.ny = ny;
@@ -4563,6 +4564,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	float prob;
 	Stencil s1, s2;
 	s2.data = data2;
+	s2.label = label2;
 	s2.nx = nx;
 	s2.ny = ny;
 	s2.nz = nz;
@@ -4599,7 +4601,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 			//	continue;
 
 			//label stencil 2
-			label_stencil(s1, s2, label1, label2);
+			label_stencil(s1, s2);
 
 			//add s1 to track map
 			CelpListIter iter;

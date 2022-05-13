@@ -106,6 +106,11 @@ namespace fluo
 		inline double y() const;
 		inline void z(double);
 		inline double z() const;
+		inline int intx() const;
+		inline int inty() const;
+		inline int intz() const;
+
+		inline Vector unit_sign() const;
 
 		inline double volume() const;//product of all
 		inline int min() const;//index to min, least index if equal
@@ -422,6 +427,29 @@ namespace fluo
 	inline double Vector::z() const
 	{
 		return z_;
+	}
+
+	inline int Vector::intx() const
+	{
+		return int(std::round(x_));
+	}
+
+	inline int Vector::inty() const
+	{
+		return int(std::round(y_));
+	}
+
+	inline int Vector::intz() const
+	{
+		return int(std::round(z_));
+	}
+
+	inline Vector Vector::unit_sign() const
+	{
+		return Vector(
+			(x_ > 0) - (x_ < 0),
+			(y_ > 0) - (y_ < 0),
+			(z_ > 0) - (z_ < 0));
 	}
 
 	inline double Vector::volume() const

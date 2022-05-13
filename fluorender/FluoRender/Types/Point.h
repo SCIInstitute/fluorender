@@ -78,8 +78,13 @@ namespace fluo {
 		inline double y() const;
 		inline void z(const double);
 		inline double z() const;
+		inline int intx() const;
+		inline int inty() const;
+		inline int intz() const;
 		inline const Vector &vector() const;
 		inline Vector &asVector() const;
+
+		inline Point unit_sign() const;
 
 		inline string get_string() const;
 
@@ -373,6 +378,29 @@ namespace fluo
 	inline double Point::z() const
 	{
 		return z_;
+	}
+
+	inline int Point::intx() const
+	{
+		return int(std::round(x_));
+	}
+
+	inline int Point::inty() const
+	{
+		return int(std::round(y_));
+	}
+
+	inline int Point::intz() const
+	{
+		return int(std::round(z_));
+	}
+
+	inline Point Point::unit_sign() const
+	{
+		return Point(
+			(x_ > 0) - (x_ < 0),
+			(y_ > 0) - (y_ < 0),
+			(z_ > 0) - (z_ < 0));
 	}
 
 	inline const Vector &Point::vector() const

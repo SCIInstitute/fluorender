@@ -33,6 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #endif
 #include <ExGauss.h>
 #include <Types/BBox.h>
+#include <Types/Point.h>
+#include <Types/Vector.h>
+#include <Types/Transform.h>
+#include <Types/Neighbor.h>
 #include <unordered_map>
 
 namespace flrd
@@ -52,37 +56,40 @@ namespace flrd
 				return false;
 			return true;
 		}
-		bool valid(size_t i, size_t j, size_t k) const
+		bool valid(const fluo::Point &p, fluo::Point &tfp) const
 		{
-			if (i >= nx || j >= ny || k >= nz)
+			tf.project(p, tfp);
+			if (tfp.intx() >= nx || tfp.inty() >= ny || tfp.intz() >= nz)
 				return false;
 			else
 				return true;
 		}
-		void extend(size_t i, size_t j, size_t k)
+		void extend(const fluo::Point &p)
 		{
-			box.extend(fluo::Point(i, j, k));
+			box.extend(p);
 		}
-		float get(size_t i, size_t j, size_t k) const
+		float get(const fluo::Point &p) const
 		{
 			if (!data)
 				return 0.0f;
-			if (!valid(i, j, k))
+			fluo::Point tfp;
+			if (!valid(p, tfp))
 				return 0.0f;
 			unsigned long long index =
-				(unsigned long long)nx*ny*k +
-				(unsigned long long)nx*j +
-				(unsigned long long)i;
+				(unsigned long long)nx*ny*tfp.intz() +
+				(unsigned long long)nx*tfp.inty() +
+				(unsigned long long)tfp.intx();
 			if (bits == 8)
 				return ((unsigned char*)data)[index] / 255.0f;
 			else
 				return ((unsigned short*)data)[index] * scale / 65535.0f;
 		}
-		float getfilter(size_t i, size_t j, size_t k) const
+		float getfilter(const fluo::Point &p) const
 		{
 			if (!data)
 				return 0.0f;
-			if (!valid(i, j, k))
+			fluo::Point tfp;
+			if (!valid(p, tfp))
 				return 0.0f;
 			if (fsize > 1)
 			{
@@ -95,7 +102,7 @@ namespace flrd
 				for (int jj = -lb; jj <= ub; ++jj)
 				//for (int kk = -lb; kk <= ub; ++kk)
 				{
-					val = get(i + ii, j + jj, k);
+					val = get(p + fluo::Vector(ii, jj, 0));
 					if (val > 0.0)
 					{
 						sum += val;
@@ -107,13 +114,46 @@ namespace flrd
 			}
 			else
 			{
-				return get(i, j, k);
+				return get(p);
 			}
 			return 0.0f;
+		}
+		unsigned int getlabel(const fluo::Point &p) const
+		{
+			if (!label)
+				return 0;
+			fluo::Point tfp;
+			if (!valid(p, tfp))
+				return 0;
+			unsigned long long index =
+				(unsigned long long)nx*ny*tfp.intz() +
+				(unsigned long long)nx*tfp.inty() +
+				(unsigned long long)tfp.intx();
+			return ((unsigned int*)label)[index];
+		}
+		void setlabel(const fluo::Point &p, unsigned int l)
+		{
+			if (!label)
+				return;
+			fluo::Point tfp;
+			if (!valid(p, tfp))
+				return;
+			unsigned long long index =
+				(unsigned long long)nx*ny*tfp.intz() +
+				(unsigned long long)nx*tfp.inty() +
+				(unsigned long long)tfp.intx();
+			((unsigned int*)label)[index] = l;
+		}
+
+		//transformation
+		void translate(const fluo::Vector &v)
+		{
+			tf.post_translate(v);
 		}
 
 		//pointer to the entire data
 		void* data;
+		void* label;
 		unsigned int id;
 		size_t nx;
 		size_t ny;
@@ -121,6 +161,7 @@ namespace flrd
 		size_t bits;
 		float scale;
 		fluo::BBox box;
+		fluo::Transform tf;
 		size_t fsize;//filter size (box)
 	};
 
@@ -132,32 +173,13 @@ namespace flrd
 	{
 		float result = 0.0f;
 
-		//sum of products in the overlap region
-		//with two stencils aligned at center
-		size_t minx = size_t(s1.box.Min().x() + 0.5);
-		size_t maxx = size_t(s1.box.Max().x() + 0.5);
-		size_t miny = size_t(s1.box.Min().y() + 0.5);
-		size_t maxy = size_t(s1.box.Max().y() + 0.5);
-		size_t minz = size_t(s1.box.Min().z() + 0.5);
-		size_t maxz = size_t(s1.box.Max().z() + 0.5);
-		//s2
-		size_t minx2 = size_t(s2.box.Min().x() + 0.5);
-		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
-		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
-
 		float v1, v2, d;
-		size_t index;
-		size_t i, i2, j, j2, k, k2;
-		for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
-		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
-		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
+		fluo::Range nb(s1.box);
+		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
 		{
-			//get v1
-			v1 = s1.getfilter(i, j, k);
-			//get v2
-			v2 = s2.getfilter(i2, j2, k2);
-			//get d
-			d = fabs(v1 - v2);
+			v1 = s1.getfilter(i);
+			v2 = s2.getfilter(i);
+			d = std::abs(v1 - v2);
 			result += d;
 		}
 		return result;
@@ -167,33 +189,17 @@ namespace flrd
 	{
 		float result = 0.0f;
 
-		//sum of products in the overlap region
-		//with two stencils aligned at center
-		size_t minx = size_t(s1.box.Min().x() + 0.5);
-		size_t maxx = size_t(s1.box.Max().x() + 0.5);
-		size_t miny = size_t(s1.box.Min().y() + 0.5);
-		size_t maxy = size_t(s1.box.Max().y() + 0.5);
-		size_t minz = size_t(s1.box.Min().z() + 0.5);
-		size_t maxz = size_t(s1.box.Max().z() + 0.5);
-		//s2
-		size_t minx2 = size_t(s2.box.Min().x() + 0.5);
-		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
-		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
-
 		float v1, v2, d1, d2, w;
-		size_t index;
-		size_t i, i2, j, j2, k, k2;
+		fluo::Range nb(s1.box);
 		if (sim == 0)
 		{
 			//dot product
-			for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
-			for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
-			for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
+			for (fluo::Point i = nb.begin(); i != nb.end(); i=++nb)
 			{
 				//get v1
-				v1 = s1.getfilter(i, j, k);
+				v1 = s1.getfilter(i);
 				//get v2
-				v2 = s2.getfilter(i2, j2, k2);
+				v2 = s2.getfilter(i);
 				//get d weighted
 				//d1 = v1 - v2;
 				//d2 = 1.0 - std::min(v1, v2);
@@ -204,14 +210,12 @@ namespace flrd
 		else if (sim == 1)
 		{
 			//diff squared
-			for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
-			for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
-			for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
+			for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
 			{
 				//get v1
-				v1 = s1.getfilter(i, j, k);
+				v1 = s1.getfilter(i);
 				//get v2
-				v2 = s2.getfilter(i2, j2, k2);
+				v2 = s2.getfilter(i);
 				//get d weighted
 				d1 = v1 - v2;
 				//d2 = 1.0 - std::min(v1, v2);
@@ -220,6 +224,24 @@ namespace flrd
 			}
 		}
 		return result;
+	}
+
+	inline void label_stencil(const Stencil& s1, Stencil& s2)
+	{
+		fluo::Range nb(s1.box);
+
+		unsigned int l;
+		fluo::Point tfp1, tfp2;
+		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+		{
+			if (!s1.valid(i, tfp1) || !s2.valid(i, tfp2))
+				continue;
+			//get v1
+			l = s1.getlabel(i);
+			//set s2
+			if (l == s1.id)
+				s2.setlabel(i, l);
+		}
 	}
 
 	inline bool match_stencils(const Stencil& s1, Stencil& s2,
@@ -253,8 +275,8 @@ namespace flrd
 		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
 		{
 			s2.box = s2temp;
-			s2.box.translate(fluo::Vector(ti, tj, tk));
-			s2.box.translate(off);
+			s2.translate(fluo::Vector(ti, tj, tk) + off);
+			//s2.box.translate(off);
 			//p = s1 * s2;
 			p = similar(s1, s2, sim);
 			eg.SetData(ti, tj, tk, p);
@@ -273,76 +295,36 @@ namespace flrd
 		return true;
 	}
 
-	inline void label_stencil(const Stencil& s1,
-		const Stencil& s2, void* label1, void* label2)
-	{
-		size_t minx = size_t(s1.box.Min().x() + 0.5);
-		size_t maxx = size_t(s1.box.Max().x() + 0.5);
-		size_t miny = size_t(s1.box.Min().y() + 0.5);
-		size_t maxy = size_t(s1.box.Max().y() + 0.5);
-		size_t minz = size_t(s1.box.Min().z() + 0.5);
-		size_t maxz = size_t(s1.box.Max().z() + 0.5);
-		//s2
-		size_t minx2 = size_t(s2.box.Min().x() + 0.5);
-		size_t miny2 = size_t(s2.box.Min().y() + 0.5);
-		size_t minz2 = size_t(s2.box.Min().z() + 0.5);
-
-		unsigned int l;
-		size_t index;
-		size_t i, i2, j, j2, k, k2;
-		for (i = minx, i2 = minx2; i <= maxx; ++i, ++i2)
-		for (j = miny, j2 = miny2; j <= maxy; ++j, ++j2)
-		for (k = minz, k2 = minz2; k <= maxz; ++k, ++k2)
-		{
-			if (!s1.valid(i, j, k) ||
-				!s2.valid(i2, j2, k2))
-				continue;
-			//get v1
-			index = s1.nx*s1.ny*k + s1.nx*j + i;
-			l = ((unsigned int*)label1)[index];
-			if (l == s1.id)
-			{
-				//get v2
-				index = s2.nx*s2.ny*k2 + s2.nx*j2 + i2;
-				((unsigned int*)label2)[index] = l;
-			}
-		}
-	}
-
 	inline bool match_stencils_dsc(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext, const fluo::Vector &off,
 		fluo::Point &center, int iter, int sim)
 	{
 		fluo::Vector range = s1.box.diagonal();
-		int maxx = int(std::min(ext.x(), range.x()) + 0.5);
-		int maxy = int(std::min(ext.y(), range.y()) + 0.5);
-		int maxz = int(std::min(ext.z(), range.z()) + 0.5);
-		int minx = -maxx;
-		int miny = -maxy;
-		int minz = -maxz;
+		range = fluo::Min(range, ext);
+		fluo::Neighbor nb(fluo::Point(), range);
 
 		float p, maxp;
 		maxp = 0;
 		center = fluo::Point();
 		fluo::Point c;
-		int i, j, k;
 		int counter = 0;
+		s2.box = s1.box;
 		while (true)
 		{
 			bool foundp = false;
-			for (k = minz; k <= maxz; ++k) for (j = miny; j <= maxy; ++j) for (i = minx; i <= maxx; ++i)
+			for (fluo::Point i = nb.begin(); i != nb.end(); i=++nb)
 			{
-				s2.box = s1.box;
-				s2.box.translate(off);
-				s2.box.translate(fluo::Vector(center));
-				s2.box.translate(fluo::Vector(i, j, k));
+				s2.tf.load_identity();
+				s2.translate(off + center + i);
+				//s2.box.translate(off);
+				//s2.box.translate(fluo::Vector(center));
+				//s2.box.translate(fluo::Vector(i));
 
-				//p = s1 * s2;
 				p = similar(s1, s2, sim);
 				if (p > maxp)
 				{
 					maxp = p;
-					c = fluo::Point(i, j, k);
+					c = fluo::Point(i);
 					foundp = true;
 				}
 			}
@@ -352,10 +334,12 @@ namespace flrd
 			center += c;
 		}
 
+		s2.tf.load_identity();
+		s2.translate(fluo::Vector(center + off));
 		center = fluo::Point(center + off + s1.box.Min());
 		//center is actually the corner
-		s2.box = fluo::BBox(center,
-			fluo::Point(center + s1.box.size()));
+		//s2.box = fluo::BBox(center,
+		//	fluo::Point(center + s1.box.size()));
 		s2.id = s1.id;
 
 		return true;
