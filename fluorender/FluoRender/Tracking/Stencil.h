@@ -146,9 +146,19 @@ namespace flrd
 		}
 
 		//transformation
+		void load_identity()
+		{
+			tf.load_identity();
+		}
 		void translate(const fluo::Vector &v)
 		{
 			tf.post_translate(v);
+		}
+		void rotate(const fluo::Vector &v)
+		{
+			if (v.x() != 0.0) tf.post_rotate(fluo::d2r(v.x()), fluo::Vector(1, 0, 0));
+			if (v.y() != 0.0) tf.post_rotate(fluo::d2r(v.y()), fluo::Vector(0, 1, 0));
+			if (v.z() != 0.0) tf.post_rotate(fluo::d2r(v.z()), fluo::Vector(0, 0, 1));
 		}
 
 		//pointer to the entire data
@@ -296,35 +306,38 @@ namespace flrd
 	}
 
 	inline bool match_stencils_dsc(const Stencil& s1, Stencil& s2,
-		const fluo::Vector &ext, const fluo::Vector &off,
-		fluo::Point &center, int iter, int sim)
+		const fluo::Vector &ext1, const fluo::Vector &ext2,
+		const fluo::Vector &off1, const fluo::Vector &off2,
+		int iter, int sim)
 	{
 		fluo::Vector range = s1.box.diagonal();
-		range = fluo::Min(range, ext);
-		fluo::Neighbor nb(fluo::Point(), range);
+		range = fluo::Min(range, ext1);
+		fluo::Neighbor nbt(fluo::Point(), range);
+		range = fluo::Min(fluo::Vector(range.z(), range.z(), 180), ext2);
+		fluo::Neighbor nbr(fluo::Point(), range);
 
 		float p, maxp;
 		maxp = 0;
-		center = fluo::Point();
-		fluo::Point c;
+		fluo::Point center, euler;//for out loop
+		fluo::Point c, e;//for inner loops
 		int counter = 0;
-		s2.box = s1.box;
+		//s2.box = s1.box;
 		while (true)
 		{
 			bool foundp = false;
-			for (fluo::Point i = nb.begin(); i != nb.end(); i=++nb)
+			for (fluo::Point i = nbt.begin(); i != nbt.end(); i=++nbt)
+			for (fluo::Point j = nbr.begin(); j != nbr.end(); j=++nbr)
 			{
-				s2.tf.load_identity();
-				s2.translate(off + center + i);
-				//s2.box.translate(off);
-				//s2.box.translate(fluo::Vector(center));
-				//s2.box.translate(fluo::Vector(i));
+				s2.load_identity();
+				s2.rotate(off2 + euler + j);
+				s2.translate(off1 + center + i);
 
 				p = similar(s1, s2, sim);
 				if (p > maxp)
 				{
 					maxp = p;
-					c = fluo::Point(i);
+					c = i;
+					e = j;
 					foundp = true;
 				}
 			}
@@ -332,14 +345,14 @@ namespace flrd
 			counter++;
 			if (counter > iter) break;
 			center += c;
+			euler += e;
 		}
 
-		s2.tf.load_identity();
-		s2.translate(fluo::Vector(center + off));
-		center = fluo::Point(center + off + s1.box.Min());
+		s2.load_identity();
+		s2.rotate(fluo::Vector(euler + off2));
+		s2.translate(fluo::Vector(center + off1));
 		//center is actually the corner
-		//s2.box = fluo::BBox(center,
-		//	fluo::Point(center + s1.box.size()));
+		//center = fluo::Point(center + off1 + s1.box.Min());
 		s2.id = s1.id;
 
 		return true;
