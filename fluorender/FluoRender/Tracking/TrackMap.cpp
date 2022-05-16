@@ -4484,7 +4484,8 @@ void TrackMapProcessor::GetPaths(CelpList &cell_list, PathList &path_list, size_
 }
 
 bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
-	fluo::Vector &ext, int mode, size_t start, int sim)
+	fluo::Vector &extt, fluo::Vector &exta,
+	int mode, size_t start, int sim)
 {
 	//check validity
 	if (!m_map->ExtendFrameNum(std::max(f1, f2)))
@@ -4596,13 +4597,13 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		}
 		//if (match_stencils(s1, s2, ext, off, center, prob, m_max_iter, m_eps, sim))
 		s2.box = s1.box;
-		if (match_stencils_dsc(s1, s2, ext, fluo::Vector(1), off, fluo::Vector(), m_max_iter, sim))
+		if (match_stencils_dsc(s1, s2, extt, exta, off, m_max_iter, sim))
 		{
 			//if (prob > 0.5f)
 			//	continue;
 
 			//label stencil 2
-			label_stencil(s1, s2);
+			label_stencil_lookup(s1, s2);
 
 			//add s1 to track map
 			CelpListIter iter;

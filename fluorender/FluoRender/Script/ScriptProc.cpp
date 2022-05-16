@@ -546,11 +546,15 @@ void ScriptProc::RunMaskTracking()
 		tg = m_view->GetTraceGroup();
 	}
 
-	double extx, exty, extz;
-	m_fconfig->Read("ext_x", &extx, 0.1);
-	m_fconfig->Read("ext_y", &exty, 0.1);
-	m_fconfig->Read("ext_z", &extz, 0);
-	fluo::Vector ext(extx, exty, extz);
+	double exttx, extty, exttz;
+	m_fconfig->Read("ext_x", &exttx, 0.1);
+	m_fconfig->Read("ext_y", &extty, 0.1);
+	m_fconfig->Read("ext_z", &exttz, 0);
+	fluo::Vector extt(exttx, extty, exttz);
+	m_fconfig->Read("ext_a", &exttx, 0.1);
+	m_fconfig->Read("ext_b", &extty, 0.1);
+	m_fconfig->Read("ext_c", &exttz, 0);
+	fluo::Vector exta(exttx, extty, exttz);
 	int iter;
 	m_fconfig->Read("iter", &iter, 25);
 	double eps;
@@ -586,7 +590,8 @@ void ScriptProc::RunMaskTracking()
 	tm_processor.TrackStencils(
 		m_view->m_tseq_prv_num,
 		m_view->m_tseq_cur_num,
-		ext, mode,
+		extt, exta,
+		mode,
 		m_view->m_begin_play_frame,
 		sim);
 

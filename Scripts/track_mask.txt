@@ -3,9 +3,12 @@ tasknum=3
 [tasks/task0]
 type=mask_tracking
 time_mode=TM_ALL_POST
-ext_x=2
-ext_y=2
-ext_z=2
+ext_x=10
+ext_y=10
+ext_z=10
+ext_a=5
+ext_b=5
+ext_c=5
 iter=20
 eps=1e-3
 fsize=5

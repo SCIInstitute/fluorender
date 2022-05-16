@@ -40,6 +40,8 @@ const Point Neighbor::begin()
 
 const Point Neighbor::end()
 {
+	if (n_.length2() == 0.0)
+		return Point(0.1);
 	return c_ + n_ * (h_ + h_.unit_sign() * Vector(0.1));
 }
 

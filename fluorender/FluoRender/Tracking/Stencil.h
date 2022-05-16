@@ -144,6 +144,21 @@ namespace flrd
 				(unsigned long long)tfp.intx();
 			((unsigned int*)label)[index] = l;
 		}
+		unsigned int lookuplabel(const fluo::Point &p, Stencil &s)
+		{
+			fluo::Point tfp;
+			s.tf.unproject(p, tfp);
+			int x = tfp.intx(), y = tfp.inty(), z = tfp.intz();
+			if (x < 0 || x >= nx ||
+				y < 0 || y >= ny ||
+				z < 0 || z >= nz)
+				return 0;
+			unsigned long long index =
+				(unsigned long long)nx*ny*z +
+				(unsigned long long)nx*y +
+				(unsigned long long)x;
+			return ((unsigned int*)label)[index];
+		}
 
 		//transformation
 		void load_identity()
@@ -254,6 +269,20 @@ namespace flrd
 		}
 	}
 
+	inline void label_stencil_lookup(Stencil& s1, Stencil& s2)
+	{
+		fluo::Range all2(fluo::Point(), fluo::Vector(s2.nx, s2.ny, s2.nz));
+		for (fluo::Point i = all2.begin(); i != all2.end(); i = ++all2)
+		{
+			unsigned int l = s1.lookuplabel(i, s2);
+			unsigned long long index =
+				(unsigned long long)s2.nx*s2.ny*i.intz() +
+				(unsigned long long)s2.nx*i.inty() +
+				(unsigned long long)i.intx();
+			((unsigned int*)s2.label)[index] = l;
+		}
+	}
+
 	inline bool match_stencils(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext, const fluo::Vector &off,
 		fluo::Point &center, float &prob, int iter, float eps,
@@ -307,7 +336,7 @@ namespace flrd
 
 	inline bool match_stencils_dsc(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext1, const fluo::Vector &ext2,
-		const fluo::Vector &off1, const fluo::Vector &off2,
+		const fluo::Vector &off,
 		int iter, int sim)
 	{
 		fluo::Vector range = s1.box.diagonal();
@@ -329,8 +358,8 @@ namespace flrd
 			for (fluo::Point j = nbr.begin(); j != nbr.end(); j=++nbr)
 			{
 				s2.load_identity();
-				s2.rotate(off2 + euler + j);
-				s2.translate(off1 + center + i);
+				s2.rotate(euler + j);
+				s2.translate(off + center + i);
 
 				p = similar(s1, s2, sim);
 				if (p > maxp)
@@ -349,8 +378,8 @@ namespace flrd
 		}
 
 		s2.load_identity();
-		s2.rotate(fluo::Vector(euler + off2));
-		s2.translate(fluo::Vector(center + off1));
+		s2.rotate(fluo::Vector(euler));
+		s2.translate(fluo::Vector(center + off));
 		//center is actually the corner
 		//center = fluo::Point(center + off1 + s1.box.Min());
 		s2.id = s1.id;
