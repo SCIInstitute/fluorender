@@ -271,15 +271,18 @@ namespace flrd
 
 	inline void label_stencil_lookup(Stencil& s1, Stencil& s2)
 	{
-		fluo::Range all2(fluo::Point(), fluo::Vector(s2.nx, s2.ny, s2.nz));
+		fluo::Range all2(fluo::Point(), fluo::Vector(s2.nx-1, s2.ny-1, s2.nz-1));
 		for (fluo::Point i = all2.begin(); i != all2.end(); i = ++all2)
 		{
 			unsigned int l = s1.lookuplabel(i, s2);
-			unsigned long long index =
-				(unsigned long long)s2.nx*s2.ny*i.intz() +
-				(unsigned long long)s2.nx*i.inty() +
-				(unsigned long long)i.intx();
-			((unsigned int*)s2.label)[index] = l;
+			if (l == s1.id)
+			{
+				unsigned long long index =
+					(unsigned long long)s2.nx*s2.ny*i.intz() +
+					(unsigned long long)s2.nx*i.inty() +
+					(unsigned long long)i.intx();
+				((unsigned int*)s2.label)[index] = l;
+			}
 		}
 	}
 
