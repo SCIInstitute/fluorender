@@ -32,9 +32,9 @@ using namespace fluo;
 
 const Point Neighbor::begin()
 {
-	x_ = -n_.intx();
-	y_ = -n_.inty();
-	z_ = -n_.intz();
+	x_ = -int(n_.x());
+	y_ = -int(n_.y());
+	z_ = -int(n_.z());
 	return c_ - n_ * h_;
 }
 
@@ -47,9 +47,9 @@ const Point Neighbor::end()
 
 const Point Neighbor::operator++()
 {
-	int nx = n_.intx();
-	int ny = n_.inty();
-	int nz = n_.intz();
+	int nx = int(n_.x());
+	int ny = int(n_.y());
+	int nz = int(n_.z());
 	x_++;
 	if (x_ > nx)
 	{
@@ -70,9 +70,9 @@ const Point Neighbor::operator++()
 
 const Point Neighbor::operator++(int i)
 {
-	int nx = n_.intx();
-	int ny = n_.inty();
-	int nz = n_.intz();
+	int nx = int(n_.x());
+	int ny = int(n_.y());
+	int nz = int(n_.z());
 	x_++;
 	if (x_ > nx)
 	{
@@ -106,9 +106,9 @@ const Point Range::end()
 
 const Point Range::operator++()
 {
-	int nx = n_.intx();
-	int ny = n_.inty();
-	int nz = n_.intz();
+	int nx = int(n_.x());
+	int ny = int(n_.y());
+	int nz = int(n_.z());
 	x_++;
 	if (x_ > nx)
 	{
@@ -129,9 +129,9 @@ const Point Range::operator++()
 
 const Point Range::operator++(int i)
 {
-	int nx = n_.intx();
-	int ny = n_.inty();
-	int nz = n_.intz();
+	int nx = int(n_.x());
+	int ny = int(n_.y());
+	int nz = int(n_.z());
 	x_++;
 	if (x_ > nx)
 	{

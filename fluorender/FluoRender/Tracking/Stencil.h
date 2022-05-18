@@ -169,11 +169,14 @@ namespace flrd
 		{
 			tf.post_translate(v);
 		}
-		void rotate(const fluo::Vector &v)
+		void rotate(fluo::Vector &v, const fluo::Vector &cp)
 		{
+			//rotate around center cp
+			tf.post_translate(cp);
 			if (v.x() != 0.0) tf.post_rotate(fluo::d2r(v.x()), fluo::Vector(1, 0, 0));
 			if (v.y() != 0.0) tf.post_rotate(fluo::d2r(v.y()), fluo::Vector(0, 1, 0));
 			if (v.z() != 0.0) tf.post_rotate(fluo::d2r(v.z()), fluo::Vector(0, 0, 1));
+			tf.post_translate(-cp);
 		}
 
 		//pointer to the entire data
@@ -342,46 +345,74 @@ namespace flrd
 		const fluo::Vector &off,
 		int iter, int sim)
 	{
+		fluo::Vector s1cp(s1.box.center());
 		fluo::Vector range = s1.box.diagonal();
 		range = fluo::Min(range, ext1);
-		fluo::Neighbor nbt(fluo::Point(), range);
+		fluo::Neighbor neighbor_trans(fluo::Point(), range);
 		range = fluo::Min(fluo::Vector(range.z(), range.z(), 180), ext2);
-		fluo::Neighbor nbr(fluo::Point(), range);
+		fluo::Neighbor neighbor_rot(fluo::Point(), range);
 
 		float p, maxp;
 		maxp = 0;
 		fluo::Point center, euler;//for out loop
 		fluo::Point c, e;//for inner loops
 		int counter = 0;
-		//s2.box = s1.box;
+		bool rot = false;
 		while (true)
 		{
 			bool foundp = false;
-			for (fluo::Point i = nbt.begin(); i != nbt.end(); i=++nbt)
-			for (fluo::Point j = nbr.begin(); j != nbr.end(); j=++nbr)
+			fluo::Neighbor nbt;
+			if (rot)
+				nbt = fluo::Neighbor(fluo::Point(), fluo::Vector(1));
+			else
+				nbt = neighbor_trans;
+				//nbt.n(nbt.n() / 2);
+			for (fluo::Point i = nbt.begin(); i != nbt.end(); i = ++nbt)
 			{
-				s2.load_identity();
-				s2.rotate(euler + j);
-				s2.translate(off + center + i);
+				fluo::Neighbor nbr;
+				if (rot)
+					nbr = neighbor_rot;
+				else
+					nbr = fluo::Neighbor(fluo::Point(), fluo::Vector(0));
 
-				p = similar(s1, s2, sim);
-				if (p > maxp)
+				for (fluo::Point j = nbr.begin(); j != nbr.end(); j=++nbr)
 				{
-					maxp = p;
-					c = i;
-					e = j;
-					foundp = true;
+					s2.load_identity();
+					if (rot)
+						s2.rotate(euler + j, s1cp + off + center + i);
+					s2.translate(off + center + i);
+
+					p = similar(s1, s2, sim);
+					if (p > maxp)
+					{
+						maxp = p;
+						c = i;
+						e = j;
+						foundp = true;
+					}
 				}
 			}
-			if (!foundp) break;
+			if (foundp)
+			{
+				center += c;
+				if (rot)
+					euler += e;
+			}
+			else
+			{
+				if (!rot)
+					rot = true;
+				else
+					break;
+			}
+
 			counter++;
-			if (counter > iter) break;
-			center += c;
-			euler += e;
+			if (counter > iter)
+				break;
 		}
 
 		s2.load_identity();
-		s2.rotate(fluo::Vector(euler));
+		s2.rotate(fluo::Vector(euler), fluo::Vector(center + off + s1cp));
 		s2.translate(fluo::Vector(center + off));
 		//center is actually the corner
 		//center = fluo::Point(center + off1 + s1.box.Min());
