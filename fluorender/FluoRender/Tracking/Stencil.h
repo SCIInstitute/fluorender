@@ -191,35 +191,36 @@ namespace flrd
 		fluo::BBox box;
 		fluo::Transform tf;
 		size_t fsize;//filter size (box)
+		int comp_method;//0-dot product; 1-diff squared
 	};
 
 	typedef std::unordered_map<unsigned int, Stencil> StencilList;
 	typedef std::unordered_map<unsigned int, Stencil>::iterator StencilListIter;
 
 	//functions
-	inline float operator*(const Stencil& s1, const Stencil& s2)
-	{
-		float result = 0.0f;
+	//inline float operator*(const Stencil& s1, const Stencil& s2)
+	//{
+	//	float result = 0.0f;
 
-		float v1, v2, d;
-		fluo::Range nb(s1.box);
-		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
-		{
-			v1 = s1.getfilter(i);
-			v2 = s2.getfilter(i);
-			d = std::abs(v1 - v2);
-			result += d;
-		}
-		return result;
-	}
+	//	float v1, v2, d;
+	//	fluo::Range nb(s1.box);
+	//	for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+	//	{
+	//		v1 = s1.getfilter(i);
+	//		v2 = s2.getfilter(i);
+	//		d = std::abs(v1 - v2);
+	//		result += d;
+	//	}
+	//	return result;
+	//}
 
-	inline float similar(const Stencil& s1, const Stencil& s2, int sim)
+	inline float similar(const Stencil& s1, const Stencil& s2)
 	{
 		float result = 0.0f;
 
 		float v1, v2, d1, d2, w;
 		fluo::Range nb(s1.box);
-		if (sim == 0)
+		if (s1.comp_method == 0)
 		{
 			//dot product
 			for (fluo::Point i = nb.begin(); i != nb.end(); i=++nb)
@@ -235,7 +236,7 @@ namespace flrd
 				result += w;
 			}
 		}
-		else if (sim == 1)
+		else if (s1.comp_method == 1)
 		{
 			//diff squared
 			for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
@@ -289,61 +290,61 @@ namespace flrd
 		}
 	}
 
-	inline bool match_stencils(const Stencil& s1, Stencil& s2,
-		const fluo::Vector &ext, const fluo::Vector &off,
-		fluo::Point &center, float &prob, int iter, float eps,
-		int sim)
-	{
-		fluo::BBox range = s1.box;
-		range.extend_ani(ext);
-		//range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
-		//	fluo::Point(s2.nx, s2.ny, s2.nz)));
-		fluo::Vector vmax = range.Max() - s1.box.size();
+	//inline bool match_stencils(const Stencil& s1, Stencil& s2,
+	//	const fluo::Vector &ext, const fluo::Vector &off,
+	//	fluo::Point &center, float &prob, int iter, float eps,
+	//	int sim)
+	//{
+	//	fluo::BBox range = s1.box;
+	//	range.extend_ani(ext);
+	//	//range.clamp(fluo::BBox(fluo::Point(0, 0, 0),
+	//	//	fluo::Point(s2.nx, s2.ny, s2.nz)));
+	//	fluo::Vector vmax = range.Max() - s1.box.size();
 
-		int minx = int(range.Min().x() + 0.5);
-		int miny = int(range.Min().y() + 0.5);
-		int minz = int(range.Min().z() + 0.5);
-		int maxx = int(vmax.x() + 0.5);
-		int maxy = int(vmax.y() + 0.5);
-		int maxz = int(vmax.z() + 0.5);
+	//	int minx = int(range.Min().x() + 0.5);
+	//	int miny = int(range.Min().y() + 0.5);
+	//	int minz = int(range.Min().z() + 0.5);
+	//	int maxx = int(vmax.x() + 0.5);
+	//	int maxy = int(vmax.y() + 0.5);
+	//	int maxz = int(vmax.z() + 0.5);
 
-		//size_t total = (maxx - minx + 1) *
-		//	(maxy - miny + 1) * (maxz - minz + 1);
-		float p;
-		fluo::Point s2min(minx, miny, minz);
-		s2.box = fluo::BBox(s2min, s2min);
-		fluo::BBox s2temp = s2.box;
-		ExGauss eg(maxx - minx + 1, maxy - miny + 1, maxz - minz + 1);
-		int i, j, k, ti, tj, tk;
-		for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
-		for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
-		for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
-		{
-			s2.box = s2temp;
-			s2.translate(fluo::Vector(ti, tj, tk) + off);
-			//s2.box.translate(off);
-			//p = s1 * s2;
-			p = similar(s1, s2, sim);
-			eg.SetData(ti, tj, tk, p);
-		}
+	//	//size_t total = (maxx - minx + 1) *
+	//	//	(maxy - miny + 1) * (maxz - minz + 1);
+	//	float p;
+	//	fluo::Point s2min(minx, miny, minz);
+	//	s2.box = fluo::BBox(s2min, s2min);
+	//	fluo::BBox s2temp = s2.box;
+	//	ExGauss eg(maxx - minx + 1, maxy - miny + 1, maxz - minz + 1);
+	//	int i, j, k, ti, tj, tk;
+	//	for (k = minz, tk = 0; k <= maxz; ++k, ++tk)
+	//	for (j = miny, tj = 0; j <= maxy; ++j, ++tj)
+	//	for (i = minx, ti = 0; i <= maxx; ++i, ++ti)
+	//	{
+	//		s2.box = s2temp;
+	//		s2.translate(fluo::Vector(ti, tj, tk) + off);
+	//		//s2.box.translate(off);
+	//		//p = s1 * s2;
+	//		p = similar(s1, s2, sim);
+	//		eg.SetData(ti, tj, tk, p);
+	//	}
 
-		eg.SetIter(iter, eps);
-		eg.Execute();
-		center = eg.GetCenter();
-		center = fluo::Point(center + off + s2min);
-		//center is actually the corner
-		s2.box = fluo::BBox(center,
-			fluo::Point(center + s1.box.size()));
-		s2.id = s1.id;
-		prob = eg.GetProb();
+	//	eg.SetIter(iter, eps);
+	//	eg.Execute();
+	//	center = eg.GetCenter();
+	//	center = fluo::Point(center + off + s2min);
+	//	//center is actually the corner
+	//	s2.box = fluo::BBox(center,
+	//		fluo::Point(center + s1.box.size()));
+	//	s2.id = s1.id;
+	//	prob = eg.GetProb();
 
-		return true;
-	}
+	//	return true;
+	//}
 
 	inline bool match_stencils_dsc(const Stencil& s1, Stencil& s2,
 		const fluo::Vector &ext1, const fluo::Vector &ext2,//initial sample neighborhood
 		const fluo::Vector &off1, const fluo::Vector &off2,//interframe offsets
-		int iter, int sim)
+		int iter)
 	{
 		//set up initial neighborhoods
 		fluo::Vector s1cp(s1.box.center());
@@ -392,7 +393,7 @@ namespace flrd
 					s2.translate(center + i);
 
 					//compare images
-					p = similar(s1, s2, sim);
+					p = similar(s1, s2);
 					if (p > maxp)
 					{
 						maxp = p;

@@ -4555,6 +4555,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 			stencil.scale = m_map->m_scale;
 			stencil.fsize = m_filter;
 			stencil.box.extend(fluo::Point(i, j, k));
+			stencil.comp_method = sim;
 			stencil_list.insert(std::pair<unsigned int, Stencil>
 				(label_value, stencil));
 		}
@@ -4597,7 +4598,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		}
 		//if (match_stencils(s1, s2, ext, off, center, prob, m_max_iter, m_eps, sim))
 		s2.box = s1.box;
-		if (match_stencils_dsc(s1, s2, extt, exta, off, fluo::Vector(), m_max_iter, sim))
+		if (match_stencils_dsc(s1, s2, extt, exta, off, fluo::Vector(), m_max_iter))
 		{
 			//if (prob > 0.5f)
 			//	continue;
