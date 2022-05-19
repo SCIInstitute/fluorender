@@ -341,47 +341,57 @@ namespace flrd
 	}
 
 	inline bool match_stencils_dsc(const Stencil& s1, Stencil& s2,
-		const fluo::Vector &ext1, const fluo::Vector &ext2,
-		const fluo::Vector &off,
+		const fluo::Vector &ext1, const fluo::Vector &ext2,//initial sample neighborhood
+		const fluo::Vector &off1, const fluo::Vector &off2,//interframe offsets
 		int iter, int sim)
 	{
+		//set up initial neighborhoods
 		fluo::Vector s1cp(s1.box.center());
 		fluo::Vector range = s1.box.diagonal();
 		range = fluo::Min(range, ext1);
-		fluo::Neighbor neighbor_trans(fluo::Point(), range);
+		fluo::Neighbor nb_trans(fluo::Point(), range);
 		range = fluo::Min(fluo::Vector(range.z(), range.z(), 180), ext2);
-		fluo::Neighbor neighbor_rot(fluo::Point(), range);
+		fluo::Neighbor nb_rot(fluo::Point(), range);
+		fluo::Neighbor nb_null(fluo::Point(), fluo::Vector(0));
 
+		//main loop
 		float p, maxp;
 		maxp = 0;
-		fluo::Point center, euler;//for out loop
+		fluo::Point center(off1), euler(off2);//for outer loop
 		fluo::Point c, e;//for inner loops
 		int counter = 0;
-		bool rot = false;
+		bool rot = false;//loop mode
+		int trans_conv = 0; int rot_conv = 0;//convergence conditions
+
+		fluo::Neighbor nbt;
+		fluo::Neighbor nbr;
+		//set up neighborhood
+		if (rot)
+		{
+			nbt = nb_null;
+			nbr = nb_rot;
+		}
+		else
+		{
+			nbt = nb_trans;
+			nbr = nb_null;
+		}
 		while (true)
 		{
 			bool foundp = false;
-			fluo::Neighbor nbt;
-			if (rot)
-				nbt = fluo::Neighbor(fluo::Point(), fluo::Vector(1));
-			else
-				nbt = neighbor_trans;
-				//nbt.n(nbt.n() / 2);
+
+			//trans loop
 			for (fluo::Point i = nbt.begin(); i != nbt.end(); i = ++nbt)
 			{
-				fluo::Neighbor nbr;
-				if (rot)
-					nbr = neighbor_rot;
-				else
-					nbr = fluo::Neighbor(fluo::Point(), fluo::Vector(0));
-
+				//rot loop
 				for (fluo::Point j = nbr.begin(); j != nbr.end(); j=++nbr)
 				{
+					//compute transform
 					s2.load_identity();
-					if (rot)
-						s2.rotate(euler + j, s1cp + off + center + i);
-					s2.translate(off + center + i);
+					s2.rotate(euler + j, s1cp + center + i);
+					s2.translate(center + i);
 
+					//compare images
 					p = similar(s1, s2, sim);
 					if (p > maxp)
 					{
@@ -392,18 +402,53 @@ namespace flrd
 					}
 				}
 			}
+
 			if (foundp)
 			{
-				center += c;
 				if (rot)
+				{
 					euler += e;
+					//update neighborhood
+					nbr.c(e);
+				}
+				else
+				{
+					center += c;
+					//update neighborhood
+					nbt.c(c);
+				}
 			}
 			else
 			{
-				if (!rot)
-					rot = true;
+				//convergence conditions
+				if (rot)
+				{
+					//rot converged
+					rot_conv++;
+					if (trans_conv > 1)
+						break;
+					rot = false;
+					//update neighborhood
+					nbr = nb_null;
+					if (trans_conv > 0)
+						nbt = fluo::Neighbor(fluo::Point(), fluo::Vector(1));
+					else
+						nbt = nb_trans;
+				}
 				else
-					break;
+				{
+					//trans converged
+					trans_conv++;
+					if (rot_conv > 1)
+						break;
+					rot = true;
+					//update neighborhood
+					if (rot_conv > 0)
+						nbr = fluo::Neighbor(fluo::Point(), fluo::Vector(1));
+					else
+						nbr = nb_rot;
+					nbt = nb_null;
+				}
 			}
 
 			counter++;
@@ -412,10 +457,8 @@ namespace flrd
 		}
 
 		s2.load_identity();
-		s2.rotate(fluo::Vector(euler), fluo::Vector(center + off + s1cp));
-		s2.translate(fluo::Vector(center + off));
-		//center is actually the corner
-		//center = fluo::Point(center + off1 + s1.box.Min());
+		s2.rotate(fluo::Vector(euler), fluo::Vector(center) + s1cp);
+		s2.translate(fluo::Vector(center));
 		s2.id = s1.id;
 
 		return true;

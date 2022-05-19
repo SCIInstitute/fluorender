@@ -66,6 +66,9 @@ namespace fluo
 		Vector n() const { return n_; }
 		Vector h() const { return h_; }
 
+		void offset(const Vector& v) { c_ = c_ + v; }
+		void halfn() { n_ = Max(n_ / 2, Vector(1)); }
+
 		const Point begin();
 		const Point end();
 		const Point operator++();
