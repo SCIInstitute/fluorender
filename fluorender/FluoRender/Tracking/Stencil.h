@@ -353,7 +353,10 @@ namespace flrd
 		fluo::Neighbor nb_trans(fluo::Point(), range);
 		range = fluo::Min(fluo::Vector(range.z(), range.z(), 180), ext2);
 		fluo::Neighbor nb_rot(fluo::Point(), range);
+		//constant neighborhoods
 		fluo::Neighbor nb_null(fluo::Point(), fluo::Vector(0));
+		fluo::Neighbor nbt_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_trans.n()));
+		fluo::Neighbor nbr_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_rot.n()));
 
 		//main loop
 		float p, maxp;
@@ -432,7 +435,7 @@ namespace flrd
 					//update neighborhood
 					nbr = nb_null;
 					if (trans_conv > 0)
-						nbt = fluo::Neighbor(fluo::Point(), fluo::Vector(1));
+						nbt = nbt_1;
 					else
 						nbt = nb_trans;
 				}
@@ -445,7 +448,7 @@ namespace flrd
 					rot = true;
 					//update neighborhood
 					if (rot_conv > 0)
-						nbr = fluo::Neighbor(fluo::Point(), fluo::Vector(1));
+						nbr = nbr_1;
 					else
 						nbr = nb_rot;
 					nbt = nb_null;
