@@ -141,8 +141,7 @@ namespace flrd
 		flvr::Argument m_img1;//filtered img
 		flvr::Argument m_img2;
 
-		float Compare0();
-		float Compare1();
+		float Compare(const std::string& name);
 	};
 }
 #endif // !StencilCompare_h
