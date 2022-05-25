@@ -177,6 +177,9 @@ namespace flvr
 		static void release();
 		static std::vector<CLPlatform>* GetDeviceList();
 
+		//finish
+		void finish();
+
 		//info
 		std::string &getInfo();
 

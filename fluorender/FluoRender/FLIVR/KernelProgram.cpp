@@ -230,6 +230,13 @@ namespace flvr
 		return &device_list_;
 	}
 
+	//finish
+	void KernelProgram::finish()
+	{
+		clFlush(queue_);
+		clFinish(queue_);
+	}
+
 	//create a kernel in the program
 	//return kernel index; -1 unsuccessful
 	int KernelProgram::createKernel(const std::string &name)

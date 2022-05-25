@@ -37,7 +37,7 @@ const char* str_cl_compare = \
 "CLK_ADDRESS_CLAMP |\n" \
 "CLK_FILTER_NEAREST;\n" \
 "\n" \
-"//low pass filter"
+"//low pass filter\n" \
 "__kernel void kernel_0(\n" \
 "	__read_only image3d_t img_in,\n" \
 "	__write_only image3d_t img_out,\n" \
@@ -62,7 +62,8 @@ const char* str_cl_compare = \
 "		count++;\n" \
 "	}\n" \
 "	sum = count ? sum / count : sum;\n" \
-"	write_imagef(img_out, int4(gid, 1), sum);\n" \
+"#pragma OPENCL EXTENSION cl_khr_3d_image_writes : enable\n" \
+"	write_imagef(img_out, (int4)(gid.x, gid.y, gid.z, 1), (float4)(1, 1, 1, 1));\n" \
 "}\n"
 "//compare0\n" \
 "__kernel void kernel_1(\n" \
@@ -81,12 +82,12 @@ const char* str_cl_compare = \
 "	float v1, v2;\n" \
 "	int4 ijk = (int4)(gid + bmin, 1);\n" \
 "	v1 = read_imagef(img1, samp, ijk).x;\n" \
-"	float4 ijkf = (float4)(ijk);\n" \
+"	float4 ijkf = convert_float4(ijk);\n" \
 "	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
 "	ijkf /= ijkf.w;\n" \
 "	v2 = read_imagef(img2, samp, ijkf).x;\n" \
 "	v1 = v1 * v2;\n" \
-"	atomic_xchg(sum, sum+v1);\n" \
+"	atomic_xchg(sum, sum[0]+v1);\n" \
 "}\n" \
 "//compare1\n" \
 "__kernel void kernel_2(\n" \
@@ -105,14 +106,14 @@ const char* str_cl_compare = \
 "	float v1, v2;\n" \
 "	int4 ijk = (int4)(gid + bmin, 1);\n" \
 "	v1 = read_imagef(img1, samp, ijk).x;\n" \
-"	float4 ijkf = (float4)(ijk);\n" \
+"	float4 ijkf = convert_float4(ijk);\n" \
 "	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
 "	ijkf /= ijkf.w;\n" \
 "	v2 = read_imagef(img2, samp, ijkf).x;\n" \
 "	v1 = v1 - v2;\n" \
 "	v1 *= v1;\n" \
 "	v1 = 1.0f - v1;\n" \
-"	atomic_xchg(sum, sum+v1);\n" \
+"	atomic_xchg(sum, sum[0]+v1);\n" \
 "}\n"
 ;
 
@@ -168,20 +169,20 @@ void StencilCompare::Prepare()
 	desc.image_width = m_s1->nx;
 	desc.image_height = m_s1->ny;
 	desc.image_depth = m_s1->nz;
-	desc.image_array_size = 0;
 	desc.image_row_pitch = 0;
 	desc.image_slice_pitch = 0;
 	desc.num_mip_levels = 0;
-	desc.mem_object = NULL;
+	desc.num_samples = 0;
+	desc.buffer = NULL;
 	flvr::Argument img[2];
 
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
 	if (m_s1->fsize < 1)
-		m_img1 = m_prog->setKernelArgImage(CL_MEM_READ_ONLY, format, desc, m_s1->data);
+		m_img1 = m_prog->setKernelArgImage(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, format, desc, m_s1->data);
 	else
 	{
-		img[0] = m_prog->setKernelArgImage(CL_MEM_READ_WRITE, format, desc, m_s1->data);
+		img[0] = m_prog->setKernelArgImage(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, format, desc, m_s1->data);
 		img[1] = m_prog->setKernelArgImage(CL_MEM_READ_WRITE, format, desc, NULL);
 		cl_int3 range = { 1, 1, m_s1->nz > 1 ? 1 : 0 };
 		m_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&range));
@@ -196,6 +197,7 @@ void StencilCompare::Prepare()
 				m_prog->setKernelArgument(img[(i+1)%2]);
 			}
 			m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+			m_prog->finish();
 		}
 		m_img1 = img[m_s1->fsize % 2];
 	}
@@ -207,10 +209,10 @@ void StencilCompare::Prepare()
 	desc.image_depth = m_s2->nz;
 	m_prog->setKernelArgBegin(kernel_index);
 	if (m_s2->fsize < 1)
-		m_img2 = m_prog->setKernelArgImage(CL_MEM_READ_ONLY, format, desc, m_s2->data);
+		m_img2 = m_prog->setKernelArgImage(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, format, desc, m_s2->data);
 	else
 	{
-		img[0] = m_prog->setKernelArgImage(CL_MEM_READ_WRITE, format, desc, m_s2->data);
+		img[0] = m_prog->setKernelArgImage(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, format, desc, m_s2->data);
 		img[1] = m_prog->setKernelArgImage(CL_MEM_READ_WRITE, format, desc, NULL);
 		cl_int3 range = { 1, 1, m_s2->nz > 1 ? 1 : 0 };
 		m_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&range));
@@ -369,6 +371,8 @@ bool StencilCompare::Compare()
 	m_s2->rotate(fluo::Vector(euler), fluo::Vector(center) + s1cp);
 	m_s2->translate(fluo::Vector(center));
 	m_s2->id = m_s1->id;
+
+	Clean();
 
 	return true;
 }
