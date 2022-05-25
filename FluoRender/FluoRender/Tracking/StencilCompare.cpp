@@ -69,6 +69,207 @@ const char* str_cl_stencil = \
 "	img_out[index] = convert_uchar(sum);\n" \
 "	//img_in[index] = 10;\n" \
 "}\n"
+"//2d filter 16 bit\n" \
+"__kernel void kernel_1(\n" \
+"	__global unsigned short* img_in,\n" \
+"	__global unsigned short* img_out,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz)\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = gid - (int3)(1, 1, 0);\n" \
+"	int3 ub = gid + (int3)(1, 1, 0);\n" \
+"	lb = clamp(lb, (int3)(0), (int3)(nx-1, ny-1, nz-1));\n" \
+"	ub = clamp(ub, (int3)(0), (int3)(nx-1, ny-1, nz-1));\n" \
+"	int3 ijk;\n" \
+"	float sum = 0.0f;\n" \
+"	int count = 0;\n" \
+"	unsigned int index;\n" \
+"#pragma unroll\n" \
+"	for (ijk.z = lb.z; ijk.z <= ub.z; ++ijk.z)\n" \
+"#pragma unroll\n" \
+"	for (ijk.y = lb.y; ijk.y <= ub.y; ++ijk.y)\n" \
+"#pragma unroll\n" \
+"	for (ijk.x = lb.x; ijk.x <= ub.x; ++ijk.x)\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		sum += img_in[index];\n" \
+"		count++;\n" \
+"	}\n" \
+"	sum = count ? sum / count : sum;\n" \
+"	index = nx*ny*gid.z + nx*gid.y + gid.x;\n" \
+"	img_out[index] = convert_ushort(sum);\n" \
+"}\n"
+"//compare0 8 bit\n" \
+"__kernel void kernel_2(\n" \
+"	__global unsigned char* img1,\n" \
+"	__global unsigned char* img2,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int3 bmin,\n" \
+"	float4 tf0,\n" \
+"	float4 tf1,\n" \
+"	float4 tf2,\n" \
+"	float4 tf3,\n" \
+"	__global float* sum\n" \
+")\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float v1, v2;\n" \
+"	int4 ijk = (int4)(gid + bmin, 1);\n" \
+"	unsigned int index;\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v1 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v1 = convert_float(img1[index]);\n" \
+"	}\n" \
+"	float4 ijkf = convert_float4(ijk);\n" \
+"	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
+"	ijkf /= ijkf.w;\n" \
+"	ijk = convert_int4(ijkf);\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v2 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v2 = convert_float(img2[index]);\n" \
+"	}\n" \
+"	v1 = v1 * v2;\n" \
+"	atomic_xchg(sum, sum[0]+v1);\n" \
+"}\n" \
+"//compare0 16 bit\n" \
+"__kernel void kernel_3(\n" \
+"	__global unsigned short* img1,\n" \
+"	__global unsigned short* img2,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int3 bmin,\n" \
+"	float4 tf0,\n" \
+"	float4 tf1,\n" \
+"	float4 tf2,\n" \
+"	float4 tf3,\n" \
+"	__global float* sum\n" \
+")\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float v1, v2;\n" \
+"	int4 ijk = (int4)(gid + bmin, 1);\n" \
+"	unsigned int index;\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v1 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v1 = convert_float(img1[index]);\n" \
+"	}\n" \
+"	float4 ijkf = convert_float4(ijk);\n" \
+"	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
+"	ijkf /= ijkf.w;\n" \
+"	ijk = convert_int4(ijkf);\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v2 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v2 = convert_float(img2[index]);\n" \
+"	}\n" \
+"	v1 = v1 * v2;\n" \
+"	atomic_xchg(sum, sum[0]+v1);\n" \
+"}\n" \
+"//compare1 8 bit\n" \
+"__kernel void kernel_4(\n" \
+"	__global unsigned char* img1,\n" \
+"	__global unsigned char* img2,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int3 bmin,\n" \
+"	float4 tf0,\n" \
+"	float4 tf1,\n" \
+"	float4 tf2,\n" \
+"	float4 tf3,\n" \
+"	__global float* sum\n" \
+")\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float v1, v2;\n" \
+"	int4 ijk = (int4)(gid + bmin, 1);\n" \
+"	unsigned int index;\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v1 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v1 = convert_float(img1[index]);\n" \
+"	}\n" \
+"	float4 ijkf = convert_float4(ijk);\n" \
+"	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
+"	ijkf /= ijkf.w;\n" \
+"	ijk = convert_int4(ijkf);\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v2 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v2 = convert_float(img2[index]);\n" \
+"	}\n" \
+"	v1 = v1 - v2;\n" \
+"	v1 *= v1;\n" \
+"	v1 = 1.0f - v1;\n" \
+"	atomic_xchg(sum, sum[0]+v1);\n" \
+"}\n" \
+"//compare1 16 bit\n" \
+"__kernel void kernel_5(\n" \
+"	__global unsigned short* img1,\n" \
+"	__global unsigned short* img2,\n" \
+"	unsigned int nx,\n" \
+"	unsigned int ny,\n" \
+"	unsigned int nz,\n" \
+"	int3 bmin,\n" \
+"	float4 tf0,\n" \
+"	float4 tf1,\n" \
+"	float4 tf2,\n" \
+"	float4 tf3,\n" \
+"	__global float* sum\n" \
+")\n" \
+"{\n" \
+"	int3 gid = (int3)(get_global_id(0),\n" \
+"		get_global_id(1), get_global_id(2));\n" \
+"	float v1, v2;\n" \
+"	int4 ijk = (int4)(gid + bmin, 1);\n" \
+"	unsigned int index;\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v1 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v1 = convert_float(img1[index]);\n" \
+"	}\n" \
+"	float4 ijkf = convert_float4(ijk);\n" \
+"	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
+"	ijkf /= ijkf.w;\n" \
+"	ijk = convert_int4(ijkf);\n" \
+"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"		v2 = 0.0f;\n" \
+"	else\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		v2 = convert_float(img2[index]);\n" \
+"	}\n" \
+"	v1 = v1 - v2;\n" \
+"	v1 *= v1;\n" \
+"	v1 = 1.0f - v1;\n" \
+"	atomic_xchg(sum, sum[0]+v1);\n" \
+"}\n" \
 ;
 
 StencilCompare::StencilCompare() :
@@ -119,7 +320,8 @@ void StencilCompare::Prepare()
 	size_t buf_size = m_s1->bits == 8 ?
 		sizeof(unsigned char) : sizeof(unsigned short);
 	buf_size *= m_s1->nx * m_s1->ny * m_s1->nz;
-	DBMIUINT8 mi(m_s1->nx, m_s1->ny, 1);
+	//DBMIUINT8 mi;
+	//mi.nx = m_s1->nx; mi.ny = m_s1->ny; mi.nc = 1; mi.nt = mi.nx * mi.nc;
 
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
@@ -146,6 +348,8 @@ void StencilCompare::Prepare()
 		}
 		m_img1 = img[m_s1->fsize % 2];
 	}
+	//mi.data = (unsigned char*)(m_s1->data);
+	//m_prog->readBuffer(buf_size, m_s1->data, m_s1->data);
 
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
@@ -172,6 +376,8 @@ void StencilCompare::Prepare()
 		}
 		m_img2 = img[m_s2->fsize % 2];
 	}
+	//mi.data = (unsigned char*)(m_s2->data);
+	//m_prog->readBuffer(buf_size, m_s2->data, m_s2->data);
 	//m_prog->readBuffer(m_img1, (void*)(mi.data));
 	//m_prog->readBuffer(m_img2, (void*)(mi.data));
 }
@@ -185,14 +391,22 @@ bool StencilCompare::Compare()
 {
 	Prepare();
 
+	size_t bits = m_s1->bits;
 	std::string name;
 	switch (m_method)
 	{
 	case 0:
-		name = "kernel_1";
+		if (bits == 8)
+			name = "kernel_2";
+		else
+			name = "kernel_3";
 		break;
 	case 1:
-		name = "kernel_2";
+		if (bits == 8)
+			name = "kernel_4";
+		else
+			name = "kernel_5";
+		break;
 		break;
 	}
 
@@ -345,6 +559,9 @@ float StencilCompare::Compare(const std::string& name)
 	m_prog->setKernelArgBegin(kernel_index);
 	m_prog->setKernelArgument(m_img1);
 	m_prog->setKernelArgument(m_img2);
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->nx)));
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->ny)));
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->nz)));
 	cl_int3 bmin{ m_s1->box.Min().intx(), m_s1->box.Min().inty(), m_s1->box.Min().intz() };
 	m_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&bmin));
 	cl_float4 tf0 = { float(m_s2->tf.get_mat_val(0, 0)),
