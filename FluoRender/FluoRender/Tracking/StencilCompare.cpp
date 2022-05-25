@@ -143,8 +143,6 @@ void StencilCompare::Prepare()
 				m_prog->setKernelArgument(img[(i+1)%2]);
 			}
 			m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
-			//m_prog->readBuffer(img[0], (void*)(mi.data));
-			//m_prog->readBuffer(img[1], (void*)(mi.data));
 		}
 		m_img1 = img[m_s1->fsize % 2];
 	}
@@ -174,6 +172,8 @@ void StencilCompare::Prepare()
 		}
 		m_img2 = img[m_s2->fsize % 2];
 	}
+	//m_prog->readBuffer(m_img1, (void*)(mi.data));
+	//m_prog->readBuffer(m_img2, (void*)(mi.data));
 }
 
 void StencilCompare::Clean()
