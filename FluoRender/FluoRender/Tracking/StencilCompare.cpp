@@ -45,10 +45,29 @@ const char* str_cl_stencil = \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
+"	int3 lb = gid - (int3)(1, 1, 0);\n" \
+"	int3 ub = gid + (int3)(1, 1, 0);\n" \
+"	lb = clamp(lb, (int3)(0), (int3)(nx-1, ny-1, nz-1));\n" \
+"	ub = clamp(ub, (int3)(0), (int3)(nx-1, ny-1, nz-1));\n" \
+"	int3 ijk;\n" \
+"	float sum = 0.0f;\n" \
+"	int count = 0;\n" \
 "	unsigned int index;\n" \
+"#pragma unroll\n" \
+"	for (ijk.z = lb.z; ijk.z <= ub.z; ++ijk.z)\n" \
+"#pragma unroll\n" \
+"	for (ijk.y = lb.y; ijk.y <= ub.y; ++ijk.y)\n" \
+"#pragma unroll\n" \
+"	for (ijk.x = lb.x; ijk.x <= ub.x; ++ijk.x)\n" \
+"	{\n" \
+"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
+"		sum += img_in[index];\n" \
+"		count++;\n" \
+"	}\n" \
+"	sum = count ? sum / count : sum;\n" \
 "	index = nx*ny*gid.z + nx*gid.y + gid.x;\n" \
-"	img_in[index] = (unsigned char)(255);\n" \
-"	img_out[index] = (unsigned char)(255);\n" \
+"	img_out[index] = convert_uchar(sum);\n" \
+"	//img_in[index] = 10;\n" \
 "}\n"
 ;
 
@@ -123,10 +142,9 @@ void StencilCompare::Prepare()
 				m_prog->setKernelArgument(img[i%2]);
 				m_prog->setKernelArgument(img[(i+1)%2]);
 			}
-			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
-			m_prog->finish();
-			m_prog->readBuffer(img[0], (void*)(mi.data));
-			m_prog->readBuffer(img[1], (void*)(mi.data));
+			m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+			//m_prog->readBuffer(img[0], (void*)(mi.data));
+			//m_prog->readBuffer(img[1], (void*)(mi.data));
 		}
 		m_img1 = img[m_s1->fsize % 2];
 	}
@@ -138,7 +156,7 @@ void StencilCompare::Prepare()
 	else
 	{
 		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data));
-		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE, buf_size, NULL);
+		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, buf_size, NULL);
 		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s2->nx)));
 		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s2->ny)));
 		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s2->nz)));
