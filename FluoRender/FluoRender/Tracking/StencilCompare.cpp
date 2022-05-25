@@ -46,8 +46,9 @@ const char* str_cl_stencil = \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
 "	unsigned int index;\n" \
-"	img_in[0] = (unsigned char)(255);\n" \
-"	img_out[0] = (unsigned char)(255);\n" \
+"	index = nx*ny*gid.z + nx*gid.y + gid.x;\n" \
+"	img_in[index] = (unsigned char)(255);\n" \
+"	img_out[index] = (unsigned char)(255);\n" \
 "}\n"
 ;
 
@@ -125,6 +126,7 @@ void StencilCompare::Prepare()
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 			m_prog->finish();
 			m_prog->readBuffer(img[0], (void*)(mi.data));
+			m_prog->readBuffer(img[1], (void*)(mi.data));
 		}
 		m_img1 = img[m_s1->fsize % 2];
 	}
