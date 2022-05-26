@@ -191,6 +191,12 @@ const char* str_cl_stencil = \
 "	unsigned int nx,\n" \
 "	unsigned int ny,\n" \
 "	unsigned int nz,\n" \
+"	unsigned int nxy,\n" \
+"	unsigned int ngx,\n" \
+"	unsigned int ngy,\n" \
+"	unsigned int ngz,\n" \
+"	unsigned int gsxy,\n" \
+"	unsigned int gsx,\n" \
 "	int3 bmin,\n" \
 "	float4 tf0,\n" \
 "	float4 tf1,\n" \
@@ -201,32 +207,43 @@ const char* str_cl_stencil = \
 "{\n" \
 "	int3 gid = (int3)(get_global_id(0),\n" \
 "		get_global_id(1), get_global_id(2));\n" \
-"	float v1, v2;\n" \
-"	int4 ijk = (int4)(gid + bmin, 1);\n" \
+"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
+"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
+"	lb += bmin;\n" \
+"	ub += bmin;\n" \
+"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
-"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"		v1 = 0.0f;\n" \
-"	else\n" \
+"	float lsum = 0.0f;\n" \
+"	float v1, v2;\n" \
+"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
-"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		v1 = convert_float(img1[index]);\n" \
+"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"			v1 = 0.0f;\n" \
+"		else\n" \
+"		{\n" \
+"			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"			v1 = convert_float(img1[index]);\n" \
+"		}\n" \
+"		float4 ijkf = convert_float4(ijk);\n" \
+"		ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
+"		ijkf /= ijkf.w;\n" \
+"		ijk = convert_int4(ijkf);\n" \
+"		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
+"			v2 = 0.0f;\n" \
+"		else\n" \
+"		{\n" \
+"			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
+"			v2 = convert_float(img2[index]);\n" \
+"		}\n" \
+"		v1 = (v1 - v2) / 255.0f;\n" \
+"		v1 *= v1;\n" \
+"		v1 = 1.0f - v1;\n" \
+"		lsum += v1;\n" \
 "	}\n" \
-"	float4 ijkf = convert_float4(ijk);\n" \
-"	ijkf = (float4)(dot(ijkf, tf0), dot(ijkf, tf1), dot(ijkf, tf2), dot(ijkf, tf3));\n" \
-"	ijkf /= ijkf.w;\n" \
-"	ijk = convert_int4(ijkf);\n" \
-"	if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
-"		v2 = 0.0f;\n" \
-"	else\n" \
-"	{\n" \
-"		index = nx*ny*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		v2 = convert_float(img2[index]);\n" \
-"	}\n" \
-"	v1 = v1 - v2;\n" \
-"	v1 *= v1;\n" \
-"	v1 = 1.0f - v1;\n" \
-"	//atomic_xchg(sum, sum[0]+v1);\n" \
-"	sum[0] = 1.0f;\n" \
+"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
+"	atomic_xchg(sum+index, lsum);\n" \
 "}\n" \
 "//compare1 16 bit\n" \
 "__kernel void kernel_5(\n" \
@@ -320,7 +337,7 @@ void StencilCompare::Prepare()
 	size_t buf_size = m_s1->bits == 8 ?
 		sizeof(unsigned char) : sizeof(unsigned short);
 	buf_size *= m_s1->nx * m_s1->ny * m_s1->nz;
-	//DBMIUINT8 mi;
+	//DBMIUINT8 mi(m_s1->nx, m_s1->ny, 1);
 	//mi.nx = m_s1->nx; mi.ny = m_s1->ny; mi.nc = 1; mi.nt = mi.nx * mi.nc;
 
 	//set up kernel
@@ -344,9 +361,10 @@ void StencilCompare::Prepare()
 				m_prog->setKernelArgument(img[i%2]);
 				m_prog->setKernelArgument(img[(i+1)%2]);
 			}
-			m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		}
 		m_img1 = img[m_s1->fsize % 2];
+		m_prog->releaseMemObject(img[(m_s1->fsize+1)%2]);
 	}
 	//mi.data = (unsigned char*)(m_s1->data);
 	//m_prog->readBuffer(buf_size, m_s1->data, m_s1->data);
@@ -372,14 +390,16 @@ void StencilCompare::Prepare()
 				m_prog->setKernelArgument(img[i % 2]);
 				m_prog->setKernelArgument(img[(i + 1) % 2]);
 			}
-			m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
+			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		}
 		m_img2 = img[m_s2->fsize % 2];
+		m_prog->releaseMemObject(img[(m_s2->fsize + 1) % 2]);
 	}
 	//mi.data = (unsigned char*)(m_s2->data);
 	//m_prog->readBuffer(buf_size, m_s2->data, m_s2->data);
 	//m_prog->readBuffer(m_img1, (void*)(mi.data));
 	//m_prog->readBuffer(m_img2, (void*)(mi.data));
+	//glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 }
 
 void StencilCompare::Clean()
@@ -554,43 +574,69 @@ float StencilCompare::Compare(const std::string& name)
 	size_t local_size[3] = { 1, 1, 1 };
 	fluo::Vector diag = m_s1->box.diagonal();
 	diag = fluo::Max(diag, fluo::Vector(1));
-	size_t global_size[3] = { size_t(diag.intx()), size_t(diag.inty()), size_t(diag.intz()) };
+	flvr::GroupSize gsize;
+	m_prog->get_group_size(kernel_index, diag.intx(), diag.inty(), diag.intz(), gsize);
+	size_t global_size[3] = { size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 	//set up kernel
+	size_t nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
+	size_t nxy = nx * ny;
+	cl_int3 bmin{
+		m_s1->box.Min().intx(),
+		m_s1->box.Min().inty(),
+		m_s1->box.Min().intz() };
+	cl_float4 tf0 = {
+		float(m_s2->tf.get_mat_val(0, 0)),
+		float(m_s2->tf.get_mat_val(0, 1)),
+		float(m_s2->tf.get_mat_val(0, 2)),
+		float(m_s2->tf.get_mat_val(0, 3)) };
+	cl_float4 tf1 = {
+		float(m_s2->tf.get_mat_val(1, 0)),
+		float(m_s2->tf.get_mat_val(1, 1)),
+		float(m_s2->tf.get_mat_val(1, 2)),
+		float(m_s2->tf.get_mat_val(1, 3)) };
+	cl_float4 tf2 = {
+		float(m_s2->tf.get_mat_val(2, 0)),
+		float(m_s2->tf.get_mat_val(2, 1)),
+		float(m_s2->tf.get_mat_val(2, 2)),
+		float(m_s2->tf.get_mat_val(2, 3)) };
+	cl_float4 tf3 = {
+		float(m_s2->tf.get_mat_val(3, 0)),
+		float(m_s2->tf.get_mat_val(3, 1)),
+		float(m_s2->tf.get_mat_val(3, 2)),
+		float(m_s2->tf.get_mat_val(3, 3)) };
+	float *sum = new float[gsize.gsxyz];
+	//
 	m_prog->setKernelArgBegin(kernel_index);
 	m_prog->setKernelArgument(m_img1);
 	m_prog->setKernelArgument(m_img2);
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->nx)));
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->ny)));
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->nz)));
-	cl_int3 bmin{ m_s1->box.Min().intx(), m_s1->box.Min().inty(), m_s1->box.Min().intz() };
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&nx));
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&ny));
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&nz));
+	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&nxy));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 	m_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&bmin));
-	cl_float4 tf0 = { float(m_s2->tf.get_mat_val(0, 0)),
-		float(m_s2->tf.get_mat_val(1, 0)),
-		float(m_s2->tf.get_mat_val(2, 0)),
-		float(m_s2->tf.get_mat_val(3, 0)) };
-	cl_float4 tf1 = { float(m_s2->tf.get_mat_val(0, 1)),
-		float(m_s2->tf.get_mat_val(1, 1)),
-		float(m_s2->tf.get_mat_val(2, 1)),
-		float(m_s2->tf.get_mat_val(3, 1)) };
-	cl_float4 tf2 = { float(m_s2->tf.get_mat_val(0, 2)),
-		float(m_s2->tf.get_mat_val(1, 2)),
-		float(m_s2->tf.get_mat_val(2, 2)),
-		float(m_s2->tf.get_mat_val(3, 2)) };
-	cl_float4 tf3 = { float(m_s2->tf.get_mat_val(0, 3)),
-		float(m_s2->tf.get_mat_val(1, 3)),
-		float(m_s2->tf.get_mat_val(2, 3)),
-		float(m_s2->tf.get_mat_val(3, 3)) };
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf0));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf1));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf3));
-	m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float), (void*)(&result));
-	
+	flvr::Argument arg_sum = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+
+	glHint(GL_LINE_SMOOTH, GL_DONT_CARE);
 	//execute
 	m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 	//read back
-	m_prog->readBuffer(sizeof(float), &result, &result);
+	m_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
+	m_prog->releaseMemObject(arg_sum);
+
+	//sum
+	for (int i = 0; i < gsize.gsxyz; ++i)
+		result += sum[i];
+	delete[] sum;
 
 	return result;
 }
