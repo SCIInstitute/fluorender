@@ -225,7 +225,8 @@ const char* str_cl_stencil = \
 "	v1 = v1 - v2;\n" \
 "	v1 *= v1;\n" \
 "	v1 = 1.0f - v1;\n" \
-"	atomic_xchg(sum, sum[0]+v1);\n" \
+"	//atomic_xchg(sum, sum[0]+v1);\n" \
+"	sum[0] = 1.0f;\n" \
 "}\n" \
 "//compare1 16 bit\n" \
 "__kernel void kernel_5(\n" \
@@ -287,7 +288,9 @@ m_ext1(ext1), m_ext2(ext2),
 m_off1(off1), m_off2(off2),
 m_iter(iter), m_method(method)
 {
-
+	//create program
+	m_prog = flvr::VolumeRenderer::
+		vol_kernel_factory_.kernel(str_cl_stencil);
 }
 
 StencilCompare::~StencilCompare()
@@ -297,9 +300,6 @@ StencilCompare::~StencilCompare()
 
 void StencilCompare::Prepare()
 {
-	//create program and kernels
-	m_prog = flvr::VolumeRenderer::
-		vol_kernel_factory_.kernel(str_cl_stencil);
 	if (!m_prog)
 		return;
 	int kernel_index = -1;
@@ -553,6 +553,7 @@ float StencilCompare::Compare(const std::string& name)
 
 	size_t local_size[3] = { 1, 1, 1 };
 	fluo::Vector diag = m_s1->box.diagonal();
+	diag = fluo::Max(diag, fluo::Vector(1));
 	size_t global_size[3] = { size_t(diag.intx()), size_t(diag.inty()), size_t(diag.intz()) };
 
 	//set up kernel
