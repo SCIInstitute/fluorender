@@ -48,46 +48,46 @@ namespace flrd
 		void Clean();
 		bool Compare();
 
-		inline float Similar()
-		{
-			float result = 0.0f;
+		//inline float Similar()
+		//{
+		//	float result = 0.0f;
 
-			float v1, v2, d1, d2, w;
-			fluo::Range nb(m_s1->box);
-			if (m_method == 0)
-			{
-				//dot product
-				for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
-				{
-					//get v1
-					v1 = m_s1->getfilter(i);
-					//get v2
-					v2 = m_s2->getfilter(i);
-					//get d weighted
-					//d1 = v1 - v2;
-					//d2 = 1.0 - std::min(v1, v2);
-					w = v1 * v2;
-					result += w;
-				}
-			}
-			else if (m_method == 1)
-			{
-				//diff squared
-				for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
-				{
-					//get v1
-					v1 = m_s1->getfilter(i);
-					//get v2
-					v2 = m_s2->getfilter(i);
-					//get d weighted
-					d1 = v1 - v2;
-					//d2 = 1.0 - std::min(v1, v2);
-					w = 1.0 - d1 * d1;
-					result += w;
-				}
-			}
-			return result;
-		}
+		//	float v1, v2, d1, d2, w;
+		//	fluo::Range nb(m_s1->box);
+		//	if (m_method == 0)
+		//	{
+		//		//dot product
+		//		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+		//		{
+		//			//get v1
+		//			v1 = m_s1->getfilter(i);
+		//			//get v2
+		//			v2 = m_s2->getfilter(i);
+		//			//get d weighted
+		//			//d1 = v1 - v2;
+		//			//d2 = 1.0 - std::min(v1, v2);
+		//			w = v1 * v2;
+		//			result += w;
+		//		}
+		//	}
+		//	else if (m_method == 1)
+		//	{
+		//		//diff squared
+		//		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+		//		{
+		//			//get v1
+		//			v1 = m_s1->getfilter(i);
+		//			//get v2
+		//			v2 = m_s2->getfilter(i);
+		//			//get d weighted
+		//			d1 = v1 - v2;
+		//			//d2 = 1.0 - std::min(v1, v2);
+		//			w = 1.0 - d1 * d1;
+		//			result += w;
+		//		}
+		//	}
+		//	return result;
+		//}
 
 		inline void Label()
 		{
@@ -141,7 +141,7 @@ namespace flrd
 		flvr::Argument m_img1;//filtered img
 		flvr::Argument m_img2;
 
-		float Compare(const std::string& name);
+		float Similar(const std::string& name);
 	};
 }
 #endif // !StencilCompare_h
