@@ -67,7 +67,6 @@ const char* str_cl_stencil = \
 "	sum = count ? sum / count : sum;\n" \
 "	index = nx*ny*gid.z + nx*gid.y + gid.x;\n" \
 "	img_out[index] = convert_uchar(sum);\n" \
-"	//img_in[index] = 10;\n" \
 "}\n"
 "//2d filter 16 bit\n" \
 "__kernel void kernel_1(\n" \
@@ -332,13 +331,13 @@ void StencilCompare::Prepare()
 		kernel_index = m_prog->createKernel(name);
 
 	flvr::Argument img[2];
+	unsigned int nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
 	size_t local_size[3] = { 1, 1, 1 };
-	size_t global_size[3] = { size_t(m_s1->nx), size_t(m_s1->ny), size_t(m_s1->nz) };
+	size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 	size_t buf_size = m_s1->bits == 8 ?
 		sizeof(unsigned char) : sizeof(unsigned short);
-	buf_size *= m_s1->nx * m_s1->ny * m_s1->nz;
+	buf_size *= nx * ny * nz;
 	//DBMIUINT8 mi(m_s1->nx, m_s1->ny, 1);
-	//mi.nx = m_s1->nx; mi.ny = m_s1->ny; mi.nc = 1; mi.nt = mi.nx * mi.nc;
 
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
@@ -348,9 +347,9 @@ void StencilCompare::Prepare()
 	{
 		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s1->data));
 		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, buf_size, NULL);
-		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->nx)));
-		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->ny)));
-		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s1->nz)));
+		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		//filter s1
 		for (int i = 0; i < m_s1->fsize; ++i)
 		{
@@ -366,8 +365,6 @@ void StencilCompare::Prepare()
 		m_img1 = img[m_s1->fsize % 2];
 		m_prog->releaseMemObject(img[(m_s1->fsize+1)%2]);
 	}
-	//mi.data = (unsigned char*)(m_s1->data);
-	//m_prog->readBuffer(buf_size, m_s1->data, m_s1->data);
 
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
@@ -377,9 +374,9 @@ void StencilCompare::Prepare()
 	{
 		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data));
 		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, buf_size, NULL);
-		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s2->nx)));
-		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s2->ny)));
-		m_prog->setKernelArgConst(sizeof(size_t), (void*)(&(m_s2->nz)));
+		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		//filter s2
 		for (int i = 0; i < m_s2->fsize; ++i)
 		{
@@ -395,11 +392,8 @@ void StencilCompare::Prepare()
 		m_img2 = img[m_s2->fsize % 2];
 		m_prog->releaseMemObject(img[(m_s2->fsize + 1) % 2]);
 	}
-	//mi.data = (unsigned char*)(m_s2->data);
-	//m_prog->readBuffer(buf_size, m_s2->data, m_s2->data);
 	//m_prog->readBuffer(m_img1, (void*)(mi.data));
 	//m_prog->readBuffer(m_img2, (void*)(mi.data));
-	//glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
 }
 
 void StencilCompare::Clean()
@@ -579,8 +573,8 @@ float StencilCompare::Compare(const std::string& name)
 	size_t global_size[3] = { size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
 	//set up kernel
-	size_t nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
-	size_t nxy = nx * ny;
+	unsigned int nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
+	unsigned int nxy = nx * ny;
 	cl_int3 bmin{
 		m_s1->box.Min().intx(),
 		m_s1->box.Min().inty(),
@@ -610,10 +604,10 @@ float StencilCompare::Compare(const std::string& name)
 	m_prog->setKernelArgBegin(kernel_index);
 	m_prog->setKernelArgument(m_img1);
 	m_prog->setKernelArgument(m_img2);
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&nx));
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&ny));
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&nz));
-	m_prog->setKernelArgConst(sizeof(size_t), (void*)(&nxy));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
