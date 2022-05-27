@@ -539,7 +539,6 @@ bool StencilCompare::Compare()
 
 				//compare images
 				p = Similar(name);
-				//p = Similar();
 				if (p > maxp)
 				{
 					maxp = p;
@@ -684,7 +683,6 @@ float StencilCompare::Similar(const std::string& name)
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf3));
 
-	glHint(GL_LINE_SMOOTH, GL_DONT_CARE);
 	//execute
 	m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 	//read back
