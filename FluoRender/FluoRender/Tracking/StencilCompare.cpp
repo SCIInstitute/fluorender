@@ -259,8 +259,11 @@ const char* str_cl_stencil = \
 "	float v1, v2;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"#pragma unroll\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
@@ -321,8 +324,11 @@ const char* str_cl_stencil = \
 "	float v1, v2;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
+"#pragma unroll\n" \
 "	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
+"#pragma unroll\n" \
 "	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
+"#pragma unroll\n" \
 "	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
 "	{\n" \
 "		if (ijk.x < 0 || ijk.x >= nx || ijk.y < 0 || ijk.y >= ny || ijk.z < 0 || ijk.z >= nz)\n" \
