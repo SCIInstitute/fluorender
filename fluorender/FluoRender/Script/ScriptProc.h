@@ -125,6 +125,7 @@ namespace flrd
 		void RunLinkCells();
 		void RunUnlinkCells();
 		void RunBackgroundStat();
+		void RunRegistration();
 
 		void ExportAnalysis();
 

@@ -4598,7 +4598,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		}
 		//if (match_stencils(s1, s2, ext, off, center, prob, m_max_iter, m_eps, sim))
 		s2.box = s1.box;
-		flrd::StencilCompare compare(&s1, &s2, extt, exta, off, fluo::Vector(), m_max_iter, sim);
+		StencilCompare compare(&s1, &s2, extt, exta, off, fluo::Vector(), m_max_iter, sim);
 		if (compare.Compare())
 		{
 			//if (prob > 0.5f)

@@ -125,6 +125,15 @@ namespace flrd
 			}
 		}
 
+		fluo::Point GetCenter()
+		{
+			return m_center;
+		}
+		fluo::Point GetEuler()
+		{
+			return m_euler;
+		}
+
 	private:
 		Stencil* m_s1;
 		Stencil* m_s2;
@@ -136,6 +145,10 @@ namespace flrd
 		int m_iter;//iteration limit
 		int m_method;//0-dot product; 1-diff squared
 		int m_fsize;//filer size
+
+		//rigid transform
+		fluo::Point m_center;
+		fluo::Point m_euler;
 
 		flvr::KernelProgram* m_prog;
 		flvr::Argument m_img1;//filtered img

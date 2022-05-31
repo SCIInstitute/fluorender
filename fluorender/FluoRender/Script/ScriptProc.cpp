@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Calculate/BackgStat.h>
 #include <Components/CompSelector.h>
 #include <Components/CompEditor.h>
+#include <Tracking/Registrator.h>
 #include <utility.h>
 #include <wx/filefn.h>
 #include <wx/stdpaths.h>
@@ -129,6 +130,8 @@ void ScriptProc::Run4DScript(TimeMask tm, wxString &scriptname, bool rewind)
 					RunUnlinkCells();
 				else if (str == "backg_stat")
 					RunBackgroundStat();
+				else if (str == "registration")
+					RunRegistration();
 				else if (str == "export_analysis")
 					ExportAnalysis();
 			}
@@ -1285,6 +1288,62 @@ void ScriptProc::RunBackgroundStat()
 		fluo::Node* node = cmdg->getOrAddNode("result");
 		node->addSetValue("type", m_type.ToStdString());
 		node->addSetValue(bgs.GetTypeName(iindx), result);
+	}
+}
+
+void ScriptProc::RunRegistration()
+{
+	if (!TimeCondition())
+		return;
+
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+	TraceGroup* tg = m_view->GetTraceGroup();
+	if (!tg)
+	{
+		m_view->CreateTraceGroup();
+		tg = m_view->GetTraceGroup();
+	}
+
+	double exttx, extty, exttz;
+	m_fconfig->Read("ext_x", &exttx, 0.1);
+	m_fconfig->Read("ext_y", &extty, 0.1);
+	m_fconfig->Read("ext_z", &exttz, 0);
+	fluo::Vector extt(exttx, extty, exttz);
+	m_fconfig->Read("ext_a", &exttx, 0.1);
+	m_fconfig->Read("ext_b", &extty, 0.1);
+	m_fconfig->Read("ext_c", &exttz, 0);
+	fluo::Vector exta(exttx, extty, exttz);
+	int iter;
+	m_fconfig->Read("iter", &iter, 25);
+	double eps;
+	m_fconfig->Read("eps", &eps, 1e-3);
+	int fsize;
+	m_fconfig->Read("fsize", &fsize, 1);
+	int mode;
+	m_fconfig->Read("compare", &mode, 0);
+	int sim;
+	m_fconfig->Read("sim", &sim, 0);
+
+	flrd::Registrator registrator;
+	registrator.SetExtension(extt, exta);
+	registrator.SetMaxIter(iter);
+	registrator.SetMethod(sim);
+	registrator.SetVolumeData(cur_vol);
+	registrator.RegisterCacheQueueFuncs(
+		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
+		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
+
+	if (registrator.Run(
+		m_view->m_tseq_prv_num,
+		m_view->m_tseq_cur_num,
+		mode, m_view->m_begin_play_frame))
+	{
+		fluo::Point center = registrator.GetCenter();
+		fluo::Point euler = registrator.GetEuler();
+		//apply transform to current view
+		m_view->SetObjCenters(center.x(), center.y(), center.z());
+		m_view->SetObjRot(euler.x(), euler.y(), euler.z());
 	}
 }
 
