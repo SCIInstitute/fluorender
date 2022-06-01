@@ -102,9 +102,14 @@ void VolumeSampler::SetCrop(bool crop)
 	m_crop = crop;
 }
 
-void VolumeSampler::SetClipRotation(fluo::Quaternion &q)
+void VolumeSampler::SetClipRotation(const fluo::Quaternion &q)
 {
 	m_q_cl = q;
+}
+
+void VolumeSampler::SetTranslate(const fluo::Point &t)
+{
+	m_trans = t;
 }
 
 void VolumeSampler::Resize(SampDataType type, bool replace)
@@ -149,6 +154,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 
 	//check rotation
 	bool rot = !m_q_cl.IsIdentity();
+	bool trans = m_trans != fluo::Point();
 	//use input size if no resizing
 	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
 	{
@@ -290,6 +296,12 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			x = vec.x();
 			y = vec.y();
 			z = vec.z();
+		}
+		if (trans)
+		{
+			x += m_trans.x();
+			y += m_trans.y();
+			z += m_trans.z();
 		}
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);

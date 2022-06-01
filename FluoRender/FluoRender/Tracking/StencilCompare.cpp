@@ -513,7 +513,10 @@ bool StencilCompare::Compare()
 	fluo::Point c, e;//for inner loops
 	int counter = 0;
 	bool rot = false;//loop mode
-	int trans_conv = 0; int rot_conv = 0;//convergence conditions
+	bool conv = false;//
+	int conv_count = 0, trans_count = 0, rot_count = 0;//conv in a sequence
+	//int trans_conv = 0; int rot_conv = 0;//convergence conditions
+	int liter = 2;
 
 	fluo::Neighbor nbt;
 	fluo::Neighbor nbr;
@@ -569,6 +572,7 @@ bool StencilCompare::Compare()
 				//update neighborhood
 				nbt.c(c);
 			}
+			conv = false;
 		}
 		else
 		{
@@ -576,31 +580,32 @@ bool StencilCompare::Compare()
 			if (rot)
 			{
 				//rot converged
-				rot_conv++;
-				if (trans_conv > 1)
-					break;
+				rot_count++;
 				rot = false;
-				//update neighborhood
-				nbr = nb_null;
-				if (trans_conv > 0)
+				//update trans neighborhood
+				if (trans_count > 0)
 					nbt = nbt_1;
 				else
 					nbt = nb_trans;
+				nbr = nb_null;
 			}
 			else
 			{
 				//trans converged
-				trans_conv++;
-				if (rot_conv > 1)
-					break;
+				trans_count++;
 				rot = true;
-				//update neighborhood
-				if (rot_conv > 0)
+				//update rot neighborhood
+				if (rot_count > 0)
 					nbr = nbr_1;
 				else
 					nbr = nb_rot;
 				nbt = nb_null;
 			}
+			if (conv_count > liter)
+				break;
+			if (conv)
+				conv_count++;
+			conv = true;
 		}
 
 		counter++;
@@ -609,7 +614,7 @@ bool StencilCompare::Compare()
 	}
 
 	m_euler = euler;
-	m_center = center + s1cp;
+	m_center = center;
 	m_s2->load_identity();
 	m_s2->rotate(fluo::Vector(euler), fluo::Vector(center) + s1cp);
 	m_s2->translate(fluo::Vector(center));

@@ -807,7 +807,8 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("savepath", &pathname, "");
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
-
+	fluo::Quaternion rot;
+	fluo::Point trans;
 	std::vector<VolumeData*> vlist;
 	if (source == "channels" ||
 		source == "")
@@ -837,6 +838,17 @@ void ScriptProc::RunSaveVolume()
 		VolumeData* vd = 0;
 		while (vd = executor->GetResult(true))
 			vlist.push_back(vd);
+	}
+	else if (source == "registrator")
+	{
+		GetVolumes(vlist);
+		fluo::Node* regg = m_output->getChild("registrator");
+		if (regg)
+		{
+			regg->getValue("trans", trans);
+			//regg->getValue("rot", rot);
+			crop = true;
+		}
 	}
 	int chan_num = vlist.size();
 	int time_num = GetTimeNum();
@@ -870,8 +882,8 @@ void ScriptProc::RunSaveVolume()
 		}
 		//ext
 		vstr += "." + ext;
-		fluo::Quaternion qtemp;
-		(*i)->Save(vstr, mode, crop, filter, bake, compression, qtemp);
+		(*i)->Save(vstr, mode, crop, filter, bake, compression,
+			rot, trans);
 		if (del_vol)
 			delete *i;
 	}
@@ -1341,9 +1353,14 @@ void ScriptProc::RunRegistration()
 	{
 		fluo::Point center = registrator.GetCenter();
 		fluo::Point euler = registrator.GetEuler();
+		fluo::Quaternion rot;
+		rot.FromEuler(euler.x(), euler.y(), euler.z());
 		//apply transform to current view
-		m_view->SetObjCenters(center.x(), center.y(), center.z());
-		m_view->SetObjRot(euler.x(), euler.y(), euler.z());
+		//m_view->SetObjCenters(center.x(), center.y(), center.z());
+		//m_view->SetObjRot(euler.x(), 180 - euler.y(), 180 - euler.z());
+		fluo::Node* regg = m_output->getOrAddGroup("registrator");
+		regg->addSetValue("trans", center);
+		regg->addSetValue("rot", rot);
 	}
 }
 

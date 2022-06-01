@@ -54,7 +54,8 @@ namespace flrd
 		void SetFilter(int type);
 		void SetFilterSize(int fx, int fy, int fz);
 		void SetCrop(bool crop);
-		void SetClipRotation(fluo::Quaternion &q);
+		void SetClipRotation(const fluo::Quaternion &q);
+		void SetTranslate(const fluo::Point &t);
 		void Resize(SampDataType type, bool replace);
 		double Sample(double x, double y, double z);
 		unsigned int SampleInt(double x, double y, double z);
@@ -85,6 +86,7 @@ namespace flrd
 		int m_ly;
 		int m_lz;
 		fluo::Quaternion m_q_cl;//rotation
+		fluo::Point m_trans;//translate
 
 		int m_filter;	//sampler type
 						//0:nearest neighbor;

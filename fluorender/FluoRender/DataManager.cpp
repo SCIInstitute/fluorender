@@ -1256,8 +1256,8 @@ void VolumeData::GetResize(bool &resize, int &nx, int &ny, int &nz)
 }
 
 //save
-void VolumeData::Save(wxString &filename, int mode, bool crop, int filter,
-	bool bake, bool compress, fluo::Quaternion &q)
+void VolumeData::Save(const wxString &filename, int mode, bool crop, int filter,
+	bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t)
 {
 	if (!m_vr || !m_tex)
 		return;
@@ -1280,6 +1280,7 @@ void VolumeData::Save(wxString &filename, int mode, bool crop, int filter,
 		sampler.SetFilterSize(1, 1, 1);
 		sampler.SetCrop(crop);
 		sampler.SetClipRotation(q);
+		sampler.SetTranslate(t);
 		sampler.Resize(flrd::SDT_All, temp);
 		temp = sampler.GetResult();
 	}
