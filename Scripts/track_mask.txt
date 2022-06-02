@@ -11,7 +11,7 @@ ext_b=5
 ext_c=5
 iter=50
 eps=1e-3
-fsize=0
+fsize=5
 compare=1
 sim=1
 [tasks/task1]

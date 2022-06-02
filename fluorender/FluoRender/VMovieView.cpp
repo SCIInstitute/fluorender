@@ -1359,7 +1359,7 @@ void VMovieView::WriteFrameToFile(int total_frames)
 		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
 		void *buf = NULL;
 		buf = _TIFFmalloc(linebytes);
-		TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
+		//TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
 		for (uint32 row = 0; row < (uint32)h; row++)
 		{
 			if (fp32)

@@ -30,6 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include "Stencil.h"
 #include "StencilCompare.h"
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 
 using namespace flrd;
 

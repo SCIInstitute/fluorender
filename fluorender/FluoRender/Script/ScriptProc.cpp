@@ -846,7 +846,7 @@ void ScriptProc::RunSaveVolume()
 		if (regg)
 		{
 			regg->getValue("trans", trans);
-			//regg->getValue("rot", rot);
+			regg->getValue("rot", rot);
 			crop = true;
 		}
 	}
@@ -1340,6 +1340,7 @@ void ScriptProc::RunRegistration()
 	flrd::Registrator registrator;
 	registrator.SetExtension(extt, exta);
 	registrator.SetMaxIter(iter);
+	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);
 	registrator.RegisterCacheQueueFuncs(

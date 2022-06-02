@@ -127,7 +127,7 @@ void TIFWriter::SaveSingleFile(wstring filename)
 		TIFFSetField(outfile, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 		TIFFSetField(outfile, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
 		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, i);
-		TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
+		//TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
 		if (m_compression)
 			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 		ostringstream strs;
@@ -226,7 +226,7 @@ void TIFWriter::SaveSequence(wstring filename)
 		TIFFSetField(outfile, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 		TIFFSetField(outfile, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
 		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, 0);
-		TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
+		//TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
 		ostringstream strs;
 		strs << "ImageJ=1.52a\n";
 		strs << "spacing=" << z_res << "\n";

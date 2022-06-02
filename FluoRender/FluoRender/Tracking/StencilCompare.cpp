@@ -613,7 +613,7 @@ bool StencilCompare::Compare()
 			break;
 	}
 
-	m_euler = euler;
+	m_euler = -euler;
 	m_center = center;
 	m_s2->load_identity();
 	m_s2->rotate(fluo::Vector(euler), fluo::Vector(center) + s1cp);

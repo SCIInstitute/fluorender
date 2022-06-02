@@ -152,9 +152,6 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		break;
 	}
 
-	//check rotation
-	bool rot = !m_q_cl.IsIdentity();
-	bool trans = m_trans != fluo::Point();
 	//use input size if no resizing
 	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
 	{
@@ -162,6 +159,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_ny = m_ny_in;
 		m_nz = m_nz_in;
 	}
+	//check rotation & translation
+	bool rot = !m_q_cl.IsIdentity();
+	bool trans = m_trans != fluo::Point();
 	fluo::Vector size(m_nx - 0.5, m_ny - 0.5, m_nz - 0.5);
 	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
 	//spacing
@@ -251,6 +251,8 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		m_ly = m_ny;
 		m_lz = m_nz;
 	}
+	//normalized translation
+	fluo::Point ntrans(m_trans.x() / m_nx, m_trans.y() / m_ny, m_trans.z() / m_nz);
 
 	if (spc.x() == 0.0 || spc.y() == 0.0 || spc.z() == 0.0)
 		spc = spc_in * fluo::Vector(double(m_nx_in) / double(m_nx),
@@ -299,9 +301,9 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		}
 		if (trans)
 		{
-			x += m_trans.x();
-			y += m_trans.y();
-			z += m_trans.z();
+			x += ntrans.x();
+			y += ntrans.y();
+			z += ntrans.z();
 		}
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
