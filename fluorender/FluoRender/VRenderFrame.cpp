@@ -2893,7 +2893,7 @@ void VRenderFrame::SaveProject(wxString& filename)
 				MkDirW(new_folder.ToStdWstring());
 				str = new_folder + GETSLASH() + vd->GetName() + ".tif";
 				vd->Save(str, 0, false, 0, false, VRenderFrame::GetCompression(),
-					fluo::Quaternion(), fluo::Point());
+					fluo::Quaternion(), fluo::Point(), false);
 				fconfig.Write("path", str);
 				new_chan = true;
 			}

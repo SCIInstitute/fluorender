@@ -249,7 +249,7 @@ public:
 	void SetResize(int resize, int nx, int ny, int nz);
 	void GetResize(bool &resize, int &nx, int &ny, int &nz);
 	void Save(const wxString &filename, int mode, bool crop, int filter,
-		bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t);
+		bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t, bool fix_size);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);
 

@@ -809,6 +809,7 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("delete", &del_vol, false);
 	fluo::Quaternion rot;
 	fluo::Point trans;
+	bool fix_size = false;
 	std::vector<VolumeData*> vlist;
 	if (source == "channels" ||
 		source == "")
@@ -848,6 +849,7 @@ void ScriptProc::RunSaveVolume()
 			regg->getValue("trans", trans);
 			regg->getValue("rot", rot);
 			crop = true;
+			fix_size = true;
 		}
 	}
 	int chan_num = vlist.size();
@@ -883,7 +885,7 @@ void ScriptProc::RunSaveVolume()
 		//ext
 		vstr += "." + ext;
 		(*i)->Save(vstr, mode, crop, filter, bake, compression,
-			rot, trans);
+			rot, trans, fix_size);
 		if (del_vol)
 			delete *i;
 	}

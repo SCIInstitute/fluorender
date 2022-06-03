@@ -38,6 +38,7 @@ VolumeSampler::VolumeSampler() :
 	m_nx_in(0),
 	m_ny_in(0),
 	m_nz_in(0),
+	m_fix_size(false),
 	m_nx(0),
 	m_ny(0),
 	m_nz(0),
@@ -76,6 +77,11 @@ VolumeData* VolumeSampler::GetInput()
 VolumeData* VolumeSampler::GetResult()
 {
 	return m_result;
+}
+
+void VolumeSampler::SetFixSize(bool bval)
+{
+	m_fix_size = bval;
 }
 
 void VolumeSampler::SetSize(int nx, int ny, int nz)
@@ -153,7 +159,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	}
 
 	//use input size if no resizing
-	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0)
+	if (m_nx <= 0 || m_ny <= 0 || m_nz <= 0 || m_fix_size)
 	{
 		m_nx = m_nx_in;
 		m_ny = m_ny_in;
@@ -173,7 +179,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 
 	if (m_crop || rot)
 	{
-		if (rot &&
+		if (!m_fix_size && rot &&
 			m_nx && m_ny && m_nz)
 		{
 			rotate_scale(size_in, spc_in, size, spc);

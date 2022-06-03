@@ -1257,7 +1257,7 @@ void VolumeData::GetResize(bool &resize, int &nx, int &ny, int &nz)
 
 //save
 void VolumeData::Save(const wxString &filename, int mode, bool crop, int filter,
-	bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t)
+	bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t, bool fix_size)
 {
 	if (!m_vr || !m_tex)
 		return;
@@ -1275,6 +1275,7 @@ void VolumeData::Save(const wxString &filename, int mode, bool crop, int filter,
 	{
 		flrd::VolumeSampler sampler;
 		sampler.SetInput(temp ? temp : this);
+		sampler.SetFixSize(fix_size);
 		sampler.SetSize(m_rnx, m_rny, m_rnz);
 		sampler.SetFilter(filter);
 		sampler.SetFilterSize(1, 1, 1);

@@ -50,6 +50,7 @@ namespace flrd
 		void SetInput(VolumeData *data);
 		VolumeData* GetInput();
 		VolumeData* GetResult();
+		void SetFixSize(bool bval);
 		void SetSize(int nx, int ny, int nz);
 		void SetFilter(int type);
 		void SetFilterSize(int fx, int fy, int fz);
@@ -71,6 +72,7 @@ namespace flrd
 		int m_ny_in;
 		int m_nz_in;
 		//new size (resize)
+		bool m_fix_size;
 		int m_nx;
 		int m_ny;
 		int m_nz;
