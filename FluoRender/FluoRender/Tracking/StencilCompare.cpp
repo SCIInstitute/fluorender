@@ -497,6 +497,7 @@ bool StencilCompare::Compare()
 	//set up initial neighborhoods
 	fluo::Vector s1cp(m_s1->box.center());
 	fluo::Vector range = m_s1->box.diagonal();
+	range = fluo::Min(range, fluo::Vector(m_s1->nx-1, m_s1->ny-1, m_s1->nz-1));
 	range = fluo::Min(range, m_ext1);
 	fluo::Neighbor nb_trans(fluo::Point(), range);
 	range = fluo::Min(fluo::Vector(range.z(), range.z(), 180), m_ext2);

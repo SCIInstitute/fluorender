@@ -78,7 +78,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.bits = s2.bits = m_vd->GetBits();
 	s1.scale = s2.scale = m_vd->GetScalarScale();
 	s1.fsize = s2.fsize = m_fsize;
-	s1.box = s2.box = fluo::BBox(fluo::Point(0), fluo::Point(nx-1, ny-1, nz-1));
+	s1.box = s2.box = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
 
 	fluo::Vector off1, off2;
 	StencilCompare compare(&s1, &s2,
