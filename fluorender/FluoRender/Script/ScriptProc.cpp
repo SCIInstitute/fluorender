@@ -1310,14 +1310,9 @@ void ScriptProc::RunRegistration()
 	if (!TimeCondition())
 		return;
 
+	//always work on the selected volume
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
-	TraceGroup* tg = m_view->GetTraceGroup();
-	if (!tg)
-	{
-		m_view->CreateTraceGroup();
-		tg = m_view->GetTraceGroup();
-	}
 
 	double exttx, extty, exttz;
 	m_fconfig->Read("ext_x", &exttx, 0.1);
