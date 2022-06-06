@@ -1339,6 +1339,18 @@ void ScriptProc::RunRegistration()
 	int sim;
 	m_fconfig->Read("sim", &sim, 0);
 
+	fluo::Point pt, pr;
+	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
+	{
+		//rewind
+		fluo::Node* regg = m_output->getOrAddGroup("registrator");
+		if (regg->getValue("obj center", pt))
+			m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
+		if (regg->getValue("obj rot", pr))
+			m_view->SetObjRot(pr.x(), pr.y(), pr.z());
+		return;
+	}
+
 	flrd::Registrator registrator;
 	registrator.SetExtension(extt, exta);
 	registrator.SetMaxIter(iter);
@@ -1358,12 +1370,31 @@ void ScriptProc::RunRegistration()
 		fluo::Point euler = registrator.GetEuler();
 		fluo::Quaternion rot;
 		rot.FromEuler(euler.x(), euler.y(), euler.z());
-		//apply transform to current view
-		//m_view->SetObjCenters(center.x(), center.y(), center.z());
-		//m_view->SetObjRot(euler.x(), 180 - euler.y(), 180 - euler.z());
 		fluo::Node* regg = m_output->getOrAddGroup("registrator");
 		regg->addSetValue("trans", center);
 		regg->addSetValue("rot", rot);
+		//apply transform to current view
+		if (m_view->m_tseq_prv_num == m_view->m_begin_play_frame)
+		{
+			//remember original center
+			double dx, dy, dz;
+			m_view->GetObjCenters(dx, dy, dz);
+			pt = fluo::Point(dx, dy, dz);
+			regg->addSetValue("obj center", pt);
+			m_view->GetObjRot(dx, dy, dz);
+			pr = fluo::Point(dx, dy, dz);
+			regg->addSetValue("obj rot", pr);
+		}
+		else
+		{
+			//get original center
+			regg->getValue("obj center", pt);
+			regg->getValue("obj rot", pr);
+		}
+		pt += center;
+		m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
+		pr += euler;
+		m_view->SetObjRot(pr.x(), pr.y(), pr.z());
 	}
 }
 
