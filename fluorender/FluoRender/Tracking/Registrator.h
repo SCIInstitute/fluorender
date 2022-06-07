@@ -52,6 +52,10 @@ namespace flrd
 		{
 			m_iter = iter;
 		}
+		void SetConvNum(const int num)
+		{
+			m_conv_num = num;
+		}
 		void SetMethod(const int method)
 		{
 			m_method = method;
@@ -86,6 +90,7 @@ namespace flrd
 		fluo::Vector m_extt;//transform extension
 		fluo::Vector m_exta;//rotation extension
 		int m_iter;//max iteration number
+		int m_conv_num;//max convergence for step size shrink
 		int m_method;//compare method
 		int m_fsize;//filter size
 		VolumeData *m_vd;

@@ -68,6 +68,7 @@ namespace fluo
 
 		void offset(const Vector& v) { c_ = c_ + v; }
 		void halfn() { n_ = Max(n_ / 2, Vector(1)); }
+		void halfh() { h_ = Max(h_ / 2, Vector(Epsilon())); }
 
 		const Point begin();
 		const Point end();

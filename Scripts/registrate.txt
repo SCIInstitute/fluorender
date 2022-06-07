@@ -10,6 +10,7 @@ ext_a=10
 ext_b=10
 ext_c=10
 iter=50
+conv_num=4
 eps=1e-3
 fsize=5
 compare=1

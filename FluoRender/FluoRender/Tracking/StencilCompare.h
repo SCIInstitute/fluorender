@@ -41,7 +41,7 @@ namespace flrd
 		StencilCompare(Stencil* s1, Stencil* s2,
 			const fluo::Vector& ext1, const fluo::Vector& ext2,
 			const fluo::Vector& off1, const fluo::Vector& off2,
-			const int iter, const int method);
+			const int iter, const int conv_num, const int method);
 		~StencilCompare();
 
 		void Prepare();
@@ -143,6 +143,7 @@ namespace flrd
 		fluo::Vector m_off1;//interframe offsets
 		fluo::Vector m_off2;
 		int m_iter;//iteration limit
+		int m_conv_num;//max convergence number for step size shrink
 		int m_method;//0-dot product; 1-diff squared
 		int m_fsize;//filer size
 

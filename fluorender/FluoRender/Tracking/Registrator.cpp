@@ -39,7 +39,8 @@ using namespace flrd;
 Registrator::Registrator() :
 	m_extt(1),
 	m_exta(1),
-	m_iter(20),
+	m_iter(50),
+	m_conv_num(4),
 	m_method(1),//0-dot product; 1-diff squared
 	m_fsize(2)
 {
@@ -83,7 +84,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 	fluo::Vector off1, off2;
 	StencilCompare compare(&s1, &s2,
 		m_extt, m_exta, off1, off2,
-		m_iter, m_method);
+		m_iter, m_conv_num, m_method);
 	if (compare.Compare())
 	{
 		//get transformation

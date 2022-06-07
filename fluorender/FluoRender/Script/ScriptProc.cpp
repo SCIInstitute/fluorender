@@ -1324,15 +1324,17 @@ void ScriptProc::RunRegistration()
 	m_fconfig->Read("ext_c", &exttz, 0);
 	fluo::Vector exta(exttx, extty, exttz);
 	int iter;
-	m_fconfig->Read("iter", &iter, 25);
+	m_fconfig->Read("iter", &iter, 50);
+	int cnum;
+	m_fconfig->Read("conv_num", &cnum, 4);
 	double eps;
 	m_fconfig->Read("eps", &eps, 1e-3);
 	int fsize;
 	m_fconfig->Read("fsize", &fsize, 1);
 	int mode;
-	m_fconfig->Read("compare", &mode, 0);
+	m_fconfig->Read("compare", &mode, 1);
 	int sim;
-	m_fconfig->Read("sim", &sim, 0);
+	m_fconfig->Read("sim", &sim, 1);
 
 	fluo::Point pt, pr;
 	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
@@ -1349,6 +1351,7 @@ void ScriptProc::RunRegistration()
 	flrd::Registrator registrator;
 	registrator.SetExtension(extt, exta);
 	registrator.SetMaxIter(iter);
+	registrator.SetConvNum(cnum);
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);

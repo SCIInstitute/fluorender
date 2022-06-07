@@ -368,11 +368,12 @@ StencilCompare::StencilCompare() :
 StencilCompare::StencilCompare(Stencil* s1, Stencil* s2,
 	const fluo::Vector& ext1, const fluo::Vector& ext2,
 	const fluo::Vector& off1, const fluo::Vector& off2,
-	const int iter, const int method):
+	const int iter, const int conv_num, const int method):
 m_s1(s1), m_s2(s2),
 m_ext1(ext1), m_ext2(ext2),
 m_off1(off1), m_off2(off2),
-m_iter(iter), m_method(method)
+m_iter(iter), m_conv_num(conv_num),
+m_method(method)
 {
 	//create program
 	m_prog = flvr::VolumeRenderer::
@@ -506,6 +507,7 @@ bool StencilCompare::Compare()
 	fluo::Neighbor nb_null(fluo::Point(), fluo::Vector(0));
 	fluo::Neighbor nbt_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_trans.n()));
 	fluo::Neighbor nbr_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_rot.n()));
+	fluo::Vector h(1);//step length
 
 	//main loop
 	float p, maxp;
@@ -516,8 +518,6 @@ bool StencilCompare::Compare()
 	bool rot = false;//loop mode
 	bool conv = false;//
 	int conv_count = 0, trans_count = 0, rot_count = 0;//conv in a sequence
-	//int trans_conv = 0; int rot_conv = 0;//convergence conditions
-	int liter = 2;
 
 	fluo::Neighbor nbt;
 	fluo::Neighbor nbr;
@@ -602,8 +602,14 @@ bool StencilCompare::Compare()
 					nbr = nb_rot;
 				nbt = nb_null;
 			}
-			if (conv_count > liter)
+			if (conv_count > m_conv_num)
 				break;
+			else if (conv_count)
+			{
+				h /= 2;
+				nbt.h(h);
+				nbr.h(h);
+			}
 			if (conv)
 				conv_count++;
 			conv = true;
