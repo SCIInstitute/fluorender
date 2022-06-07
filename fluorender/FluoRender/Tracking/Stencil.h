@@ -169,7 +169,7 @@ namespace flrd
 		{
 			tf.post_translate(v);
 		}
-		void rotate(fluo::Vector &v, const fluo::Vector &cp)
+		void rotate(const fluo::Vector &v, const fluo::Vector &cp)
 		{
 			//rotate around center cp
 			tf.post_translate(cp);
