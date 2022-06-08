@@ -68,6 +68,14 @@ namespace flrd
 		{
 			box.extend(p);
 		}
+		inline fluo::Point center() const
+		{
+			fluo::Point p = box.center();
+			fluo::Point tfp;
+			tf.project(p, tfp);
+			return tfp;
+		}
+
 		float get(const fluo::Point &p) const
 		{
 			if (!data)

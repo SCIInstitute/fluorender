@@ -4612,13 +4612,13 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 			//add s1 to track map
 			CelpListIter iter;
 			Celp celp1(new Cell(s1.id));
-			celp1->SetCenter(s1.box.center());
+			celp1->SetCenter(s1.center());
 			celp1->SetBox(s1.box);
 			celp1->SetCalc();
 			AddCell(celp1, f1, iter);
 			//add s2 id to track map
 			Celp celp2(new Cell(s2.id));
-			celp2->SetCenter(s2.box.center());
+			celp2->SetCenter(s2.center());
 			celp2->SetBox(s2.box);
 			celp2->SetCalc();
 			AddCell(celp2, f2, iter);
