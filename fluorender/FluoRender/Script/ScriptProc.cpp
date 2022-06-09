@@ -1340,11 +1340,13 @@ void ScriptProc::RunRegistration()
 	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
 	{
 		//rewind
-		fluo::Node* regg = m_output->getOrAddGroup("registrator");
-		if (regg->getValue("obj center", pt))
-			m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
-		if (regg->getValue("obj rot", pr))
-			m_view->SetObjRot(pr.x(), pr.y(), pr.z());
+		m_view->SetObjCtrOff(0, 0, 0);
+		m_view->SetObjRotOff(0, 0, 0);
+		//fluo::Node* regg = m_output->getOrAddGroup("registrator");
+		//if (regg->getValue("obj center", pt))
+		//	m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
+		//if (regg->getValue("obj rot", pr))
+		//	m_view->SetObjRot(pr.x(), pr.y(), pr.z());
 		return;
 	}
 
@@ -1372,27 +1374,29 @@ void ScriptProc::RunRegistration()
 		regg->addSetValue("trans", center);
 		regg->addSetValue("rot", rot);
 		//apply transform to current view
-		if (m_view->m_tseq_prv_num == m_view->m_begin_play_frame)
-		{
-			//remember original center
-			double dx, dy, dz;
-			m_view->GetObjCenters(dx, dy, dz);
-			pt = fluo::Point(dx, dy, dz);
-			regg->addSetValue("obj center", pt);
-			m_view->GetObjRot(dx, dy, dz);
-			pr = fluo::Point(dx, dy, dz);
-			regg->addSetValue("obj rot", pr);
-		}
-		else
-		{
-			//get original center
-			regg->getValue("obj center", pt);
-			regg->getValue("obj rot", pr);
-		}
-		pt += center;
-		m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
-		pr += euler;
-		m_view->SetObjRot(pr.x(), pr.y(), pr.z());
+		m_view->SetObjCtrOff(center.x(), center.y(), center.z());
+		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
+		//if (m_view->m_tseq_prv_num == m_view->m_begin_play_frame)
+		//{
+		//	//remember original center
+		//	double dx, dy, dz;
+		//	m_view->GetObjCenters(dx, dy, dz);
+		//	pt = fluo::Point(dx, dy, dz);
+		//	regg->addSetValue("obj center", pt);
+		//	m_view->GetObjRot(dx, dy, dz);
+		//	pr = fluo::Point(dx, dy, dz);
+		//	regg->addSetValue("obj rot", pr);
+		//}
+		//else
+		//{
+		//	//get original center
+		//	regg->getValue("obj center", pt);
+		//	regg->getValue("obj rot", pr);
+		//}
+		//pt += center;
+		//m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
+		//pr += euler;
+		//m_view->SetObjRot(pr.x(), pr.y(), pr.z());
 	}
 }
 
@@ -1505,6 +1509,30 @@ void ScriptProc::ExportAnalysis()
 							*ofs_ << "0";
 						else
 							*ofs_ << vit->second;
+					}
+				}
+				*ofs_ << "\\n\\" << std::endl;
+			}
+			else if (str == "ruler")
+			{
+				if (chnum_ > 1)
+					*ofs_ << "CH-" << ch_ << " ";
+				str = object->getName();
+				*ofs_ << "ID-" << str << "," << t_;
+				fluo::ValueCollection names =
+					object->getValueCollection();
+				for (auto it = names.begin();
+					it != names.end(); ++it)
+				{
+					if (*it == "type" ||
+						*it == "f")
+						continue;
+					fluo::ValueTuple vt;
+					std::get<0>(vt) = *it;
+					if (object->getValue(vt))
+					{
+						*ofs_ << ",";
+						*ofs_ << std::get<2>(vt);
 					}
 				}
 				*ofs_ << "\\n\\" << std::endl;

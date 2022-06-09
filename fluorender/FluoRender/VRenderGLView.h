@@ -290,17 +290,11 @@ public:
 		m_obj_ctry = ctry;
 		m_obj_ctrz = ctrz;
 	}
-	void GetObjTrans(double &transx, double &transy, double &transz)
+	void SetObjCtrOff(double dx, double dy, double dz)
 	{
-		transx = m_obj_transx;
-		transy = m_obj_transy;
-		transz = m_obj_transz;
-	}
-	void SetObjTrans(double transx, double transy, double transz)
-	{
-		m_obj_transx = transx;
-		m_obj_transy = transy;
-		m_obj_transz = transz;
+		m_obj_ctr_offx = dx;
+		m_obj_ctr_offy = dy;
+		m_obj_ctr_offz = dz;
 	}
 	void GetObjRot(double &rotx, double &roty, double &rotz)
 	{
@@ -313,6 +307,24 @@ public:
 		m_obj_rotx = rotx;
 		m_obj_roty = roty;
 		m_obj_rotz = rotz;
+	}
+	void SetObjRotOff(double dx, double dy, double dz)
+	{
+		m_obj_rot_offx = dx;
+		m_obj_rot_offy = dy;
+		m_obj_rot_offz = dz;
+	}
+	void GetObjTrans(double &transx, double &transy, double &transz)
+	{
+		transx = m_obj_transx;
+		transy = m_obj_transy;
+		transz = m_obj_transz;
+	}
+	void SetObjTrans(double transx, double transy, double transz)
+	{
+		m_obj_transx = transx;
+		m_obj_transy = transy;
+		m_obj_transz = transz;
 	}
 	void SetRotLock(bool mode)
 	{
@@ -595,14 +607,29 @@ public:
 		//translate object
 		obj_mat = glm::translate(obj_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 		//rotate object
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty+m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz+m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx+m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
 		//center object
-		obj_mat = glm::translate(obj_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		obj_mat = glm::translate(obj_mat,
+			glm::vec3(-m_obj_ctrx-m_obj_ctr_offx, -m_obj_ctry-m_obj_ctr_offy, -m_obj_ctrz-m_obj_ctr_offz));
 		return obj_mat;
 	}
 	glm::mat4 GetDrawMat()
+	{
+		glm::mat4 drw_mat = m_mv_mat;
+		//translate object
+		drw_mat = glm::translate(drw_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		//rotate object
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		drw_mat = glm::translate(drw_mat,
+			glm::vec3(-m_obj_ctrx - m_obj_ctr_offx, -m_obj_ctry - m_obj_ctr_offy, -m_obj_ctrz - m_obj_ctr_offz));
+		return drw_mat;
+	}
+	glm::mat4 GetDrawWorldMat()
 	{
 		glm::mat4 drw_mat = m_mv_mat;
 		//translate object
@@ -621,11 +648,12 @@ public:
 		//translate object
 		inv_mat = glm::translate(inv_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
 		//rotate object
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
 		//center object
-		inv_mat = glm::translate(inv_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
+		inv_mat = glm::translate(inv_mat,
+			glm::vec3(-m_obj_ctrx - m_obj_ctr_offx, -m_obj_ctry - m_obj_ctr_offy, -m_obj_ctrz - m_obj_ctr_offz));
 		return inv_mat;
 	}
 
@@ -831,12 +859,16 @@ private:
 
 	//object center
 	double m_obj_ctrx, m_obj_ctry, m_obj_ctrz;
+	//object rotation
+	double m_obj_rotx, m_obj_roty, m_obj_rotz;
+	//obj center offset (for registration currently)
+	double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
+	//obj rotation offset (for registration currently)
+	double m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz;
 	//object translation
 	double m_obj_transx, m_obj_transy, m_obj_transz;
 	//saved translation for free flight
 	double m_obj_transx_saved, m_obj_transy_saved, m_obj_transz_saved;
-	//object rotation
-	double m_obj_rotx, m_obj_roty, m_obj_rotz;
 	//rotation lock
 	bool m_rot_lock;
 

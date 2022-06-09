@@ -198,11 +198,15 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_head(0.0, 0.0, -1.0),
 	//object center
 	m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
+	//object rotation
+	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
+	//object center offset
+	m_obj_ctr_offx(0), m_obj_ctr_offy(0), m_obj_ctr_offz(0),
+	//object rotation offset
+	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
 	//object translation
 	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
 	m_obj_transx_saved(0.0), m_obj_transy_saved(0.0), m_obj_transz_saved(0.0),
-	//object rotation
-	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
 	m_rot_lock(false),
 	//lock cam center
 	m_lock_cam_object(false),
@@ -910,13 +914,18 @@ void VRenderGLView::Draw()
 		if (m_draw_annotations)
 			DrawAnnotations();
 
-		if (m_draw_rulers)
-			DrawRulers();
-
 		DrawCells();
 
 		//traces
 		DrawTraces();
+
+		m_mv_mat = mv_temp;
+
+		//obj independent items
+		m_mv_mat = GetDrawWorldMat();
+
+		if (m_draw_rulers)
+			DrawRulers();
 
 		m_mv_mat = mv_temp;
 	}
@@ -3901,9 +3910,9 @@ void VRenderGLView::OnIdle(wxIdleEvent& event)
 		{
 			m_pin_ctr = p;
 			double obj_transx, obj_transy, obj_transz;
-			p = fluo::Point(m_obj_ctrx - p.x(),
-				p.y() - m_obj_ctry,
-				p.z() - m_obj_ctrz);
+			p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
+				p.y() - m_obj_ctry - m_obj_ctr_offy,
+				p.z() - m_obj_ctrz - m_obj_ctr_offz);
 			obj_transx = p.x();
 			obj_transy = p.y();
 			obj_transz = p.z();
