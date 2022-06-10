@@ -762,6 +762,10 @@ int RulerHandler::Profile(int index)
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
+	//set ruler transform
+	fluo::Transform tf = m_view->GetInvOffsetMat();
+	ruler->SetTransform(tf);
+
 	double spcx, spcy, spcz;
 	m_vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
@@ -867,7 +871,7 @@ int RulerHandler::Profile(int index)
 			profile->reserve(size_t(1));
 			profile->push_back(flrd::ProfileBin());
 
-			p = ruler->GetPoint(0)->GetPoint();
+			p = ruler->GetPointTransformed(0);
 			//object space
 			p = fluo::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
 			intensity = 0.0;
@@ -901,8 +905,8 @@ int RulerHandler::Profile(int index)
 			int total_dist = 0;
 			for (unsigned int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
 			{
-				p1 = ruler->GetPoint(pn)->GetPoint();
-				p2 = ruler->GetPoint(pn + 1)->GetPoint();
+				p1 = ruler->GetPointTransformed(pn);
+				p2 = ruler->GetPointTransformed(pn+1);
 				//object space
 				p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 				p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);

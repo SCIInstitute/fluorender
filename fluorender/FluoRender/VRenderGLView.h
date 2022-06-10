@@ -290,6 +290,12 @@ public:
 		m_obj_ctry = ctry;
 		m_obj_ctrz = ctrz;
 	}
+	void GetObjCtrOff(double &dx, double &dy, double &dz)
+	{
+		dx = m_obj_ctr_offx;
+		dy = m_obj_ctr_offy;
+		dz = m_obj_ctr_offz;
+	}
 	void SetObjCtrOff(double dx, double dy, double dz)
 	{
 		m_obj_ctr_offx = dx;
@@ -308,11 +314,21 @@ public:
 		m_obj_roty = roty;
 		m_obj_rotz = rotz;
 	}
+	void GetObjRotOff(double &dx, double &dy, double &dz)
+	{
+		dx = m_obj_rot_offx;
+		dy = m_obj_rot_offy;
+		dz = m_obj_rot_offz;
+	}
 	void SetObjRotOff(double dx, double dy, double dz)
 	{
 		m_obj_rot_offx = dx;
 		m_obj_rot_offy = dy;
 		m_obj_rot_offz = dz;
+	}
+	void SetOffsetTransform(const fluo::Transform &tf)
+	{
+		m_offset_tf = tf;
 	}
 	void GetObjTrans(double &transx, double &transy, double &transz)
 	{
@@ -642,6 +658,12 @@ public:
 		drw_mat = glm::translate(drw_mat, glm::vec3(-m_obj_ctrx, -m_obj_ctry, -m_obj_ctrz));
 		return drw_mat;
 	}
+	fluo::Transform GetInvOffsetMat()
+	{
+		return m_offset_tf;
+		//tf.invert();
+		//return tf;
+	}
 	glm::mat4 GetInvtMat()
 	{
 		glm::mat4 inv_mat = m_mv_mat;
@@ -865,6 +887,8 @@ private:
 	double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
 	//obj rotation offset (for registration currently)
 	double m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz;
+	//offset transform
+	fluo::Transform m_offset_tf;
 	//object translation
 	double m_obj_transx, m_obj_transy, m_obj_transz;
 	//saved translation for free flight

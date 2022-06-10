@@ -90,6 +90,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 		//get transformation
 		m_center = compare.GetCenter();
 		m_euler = compare.GetEuler();
+		m_tf = s2.tf;
 	}
 
 	return true;

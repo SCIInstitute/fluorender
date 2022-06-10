@@ -201,6 +201,14 @@ namespace flrd
 		//data
 		int GetNumBranch();
 		int GetNumPoint();
+		fluo::Point GetPointTransformed(int index)
+		{
+			fluo::Point tfp;
+			RulerPoint* p = GetPoint(index);
+			if (p)
+				m_tform.project(p->GetPoint(), tfp);
+			return tfp;
+		}
 		RulerPoint* GetPoint(int index);
 		RulerPoint* GetLastPoint();
 		pRulerPoint GetPPoint(int index);
@@ -221,7 +229,7 @@ namespace flrd
 		bool AddPoint(fluo::Point &point);
 		bool AddPointAfterId(fluo::Point &point, unsigned int id,
 			std::set<unsigned int> &cid, std::set<unsigned int> &bid);
-		void SetTransform(fluo::Transform *tform);
+		void SetTransform(const fluo::Transform &tform);
 		bool AddBranch(pRulerPoint point);
 		void DeletePoint(pRulerPoint &point);
 		void Prune(int len);
@@ -342,7 +350,7 @@ namespace flrd
 		bool m_finished;
 		std::vector<RulerBranch> m_ruler;
 		bool m_disp;
-		fluo::Transform *m_tform;
+		fluo::Transform m_tform;
 		//a profile
 		wxString m_info_profile;
 		std::vector<ProfileBin> m_profile;

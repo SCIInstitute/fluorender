@@ -41,7 +41,7 @@ Ruler::Ruler()
 	m_num++;
 	m_name = wxString::Format("Ruler %d", m_num);
 	m_disp = true;
-	m_tform = 0;
+	m_tform.load_identity();
 	m_ruler_type = 0;
 	m_finished = false;
 	m_use_color = false;
@@ -422,7 +422,7 @@ bool Ruler::AddPointAfterId(
 	return true;
 }
 
-void Ruler::SetTransform(fluo::Transform *tform)
+void Ruler::SetTransform(const fluo::Transform &tform)
 {
 	m_tform = tform;
 }

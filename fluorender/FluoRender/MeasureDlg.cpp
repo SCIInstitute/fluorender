@@ -2070,6 +2070,21 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 	m_view->m_ruler_time_dep = val;
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerTimeDep(val);
+
+	//change ruler setting
+	std::vector<int> sel;
+	if (!m_rulerlist->GetCurrSelection(sel))
+		return;
+	for (size_t i = 0; i < sel.size(); ++i)
+	{
+		int index = sel[i];
+		flrd::Ruler* ruler = m_view->GetRuler(
+			m_rulerlist->GetItemData(index));
+		if (!ruler)
+			continue;
+		ruler->SetTimeDep(val);
+	}
+	m_rulerlist->UpdateRulers(m_view);
 }
 
 void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)

@@ -1342,6 +1342,9 @@ void ScriptProc::RunRegistration()
 		//rewind
 		m_view->SetObjCtrOff(0, 0, 0);
 		m_view->SetObjRotOff(0, 0, 0);
+		fluo::Transform tf;
+		tf.load_identity();
+		m_view->SetOffsetTransform(tf);
 		//fluo::Node* regg = m_output->getOrAddGroup("registrator");
 		//if (regg->getValue("obj center", pt))
 		//	m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
@@ -1376,6 +1379,7 @@ void ScriptProc::RunRegistration()
 		//apply transform to current view
 		m_view->SetObjCtrOff(center.x(), center.y(), center.z());
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
+		m_view->SetOffsetTransform(registrator.GetTransform());
 		//if (m_view->m_tseq_prv_num == m_view->m_begin_play_frame)
 		//{
 		//	//remember original center

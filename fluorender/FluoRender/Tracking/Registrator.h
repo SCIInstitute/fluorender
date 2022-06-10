@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Types/Vector.h>
 #include <Types/Point.h>
+#include <Types/Transform.h>
 #include <VolCache.h>
 #include <boost/signals2.hpp>
 
@@ -80,6 +81,10 @@ namespace flrd
 		{
 			return m_euler;
 		}
+		fluo::Transform GetTransform()
+		{
+			return m_tf;
+		}
 
 		//connect and disconnect functions for cache queue
 		typedef boost::function<void(VolCache&)> func_cache;
@@ -98,6 +103,7 @@ namespace flrd
 		//output
 		fluo::Point m_center;//rigid transformation
 		fluo::Point m_euler;
+		fluo::Transform m_tf;
 
 		//volume data cache
 		CacheQueue m_vol_cache;
