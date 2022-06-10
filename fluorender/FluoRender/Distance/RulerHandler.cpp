@@ -50,7 +50,8 @@ RulerHandler::RulerHandler() :
 	m_ruler_list(0),
 	m_point(0),
 	m_pindex(-1),
-	m_mouse(fluo::Point(-1))
+	m_mouse(fluo::Point(-1)),
+	m_fsize(1)
 {
 
 }
@@ -787,6 +788,11 @@ int RulerHandler::Profile(int index)
 	if (nrrd_mask)
 		mask = nrrd_mask->data;
 	double scale = m_vd->GetScalarScale();
+	//set up sampler
+	m_data = data;
+	m_nx = nx; m_ny = ny; m_nz = nz;
+	m_bits = m_vd->GetBits();
+	m_scale = m_vd->GetScalarScale();
 
 	if (ruler->GetRulerType() == 3 && mask)
 	{
@@ -840,11 +846,11 @@ int RulerHandler::Profile(int index)
 				if ((p_ruler - p).length() > brush_radius)
 					continue;
 
-				double intensity = 0.0;
-				if (nrrd_data->type == nrrdTypeUChar)
-					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-				else if (nrrd_data->type == nrrdTypeUShort)
-					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+				double intensity = get_filtered_data(i, j, k);
+				//if (nrrd_data->type == nrrdTypeUChar)
+				//	intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+				//else if (nrrd_data->type == nrrdTypeUShort)
+				//	intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
 
 				(*profile)[bin_num].m_pixels++;
 				(*profile)[bin_num].m_accum += intensity;
@@ -861,8 +867,8 @@ int RulerHandler::Profile(int index)
 		profile->clear();
 
 		//sample data through ruler
-		int i, j, k;
-		long long vol_index;
+		//int i, j, k;
+		//long long vol_index;
 		fluo::Point p;
 		double intensity;
 		if (bins == 0)
@@ -874,21 +880,21 @@ int RulerHandler::Profile(int index)
 			p = ruler->GetPointTransformed(0);
 			//object space
 			p = fluo::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
-			intensity = 0.0;
-			i = int(p.x() + 0.5);
-			j = int(p.y() + 0.5);
-			k = int(p.z() + 0.5);
-			if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
-			{
-				if (i == nx) i = nx - 1;
-				if (j == ny) j = ny - 1;
-				if (k == nz) k = nz - 1;
-				vol_index = (long long)nx*ny*k + nx * j + i;
-				if (nrrd_data->type == nrrdTypeUChar)
-					intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-				else if (nrrd_data->type == nrrdTypeUShort)
-					intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
-			}
+			//i = p.intx();
+			//j = int(p.y() + 0.5);
+			//k = int(p.z() + 0.5);
+			intensity = get_filtered_data(p.intx(), p.inty(), p.intz());
+			//if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
+			//{
+			//	if (i == nx) i = nx - 1;
+			//	if (j == ny) j = ny - 1;
+			//	if (k == nz) k = nz - 1;
+			//	vol_index = (long long)nx*ny*k + nx * j + i;
+			//	if (nrrd_data->type == nrrdTypeUChar)
+			//		intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+			//	else if (nrrd_data->type == nrrdTypeUShort)
+			//		intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+			//}
 			(*profile)[0].m_pixels++;
 			(*profile)[0].m_accum += intensity;
 		}
@@ -917,21 +923,22 @@ int RulerHandler::Profile(int index)
 				for (unsigned int dn = 0; dn < (unsigned int)(dist + 0.5); ++dn)
 				{
 					p = p1 + dir * double(dn);
-					intensity = 0.0;
-					i = int(p.x() + 0.5);
-					j = int(p.y() + 0.5);
-					k = int(p.z() + 0.5);
-					if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
-					{
-						if (i == nx) i = nx - 1;
-						if (j == ny) j = ny - 1;
-						if (k == nz) k = nz - 1;
-						vol_index = (long long)nx*ny*k + nx * j + i;
-						if (nrrd_data->type == nrrdTypeUChar)
-							intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-						else if (nrrd_data->type == nrrdTypeUShort)
-							intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
-					}
+					intensity = get_filtered_data(p.intx(), p.inty(), p.intz());
+					//intensity = 0.0;
+					//i = int(p.x() + 0.5);
+					//j = int(p.y() + 0.5);
+					//k = int(p.z() + 0.5);
+					//if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
+					//{
+					//	if (i == nx) i = nx - 1;
+					//	if (j == ny) j = ny - 1;
+					//	if (k == nz) k = nz - 1;
+					//	vol_index = (long long)nx*ny*k + nx * j + i;
+					//	if (nrrd_data->type == nrrdTypeUChar)
+					//		intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
+					//	else if (nrrd_data->type == nrrdTypeUShort)
+					//		intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
+					//}
 					if (total_dist >= bins) break;
 					(*profile)[total_dist].m_pixels++;
 					(*profile)[total_dist].m_accum += intensity;

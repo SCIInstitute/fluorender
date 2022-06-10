@@ -159,6 +159,11 @@ namespace flrd
 		int Profile(int index);
 		int Distance(int index, std::string filename);
 
+		void SetFsize(int ival)
+		{
+			m_fsize = ival;
+		}
+
 	private:
 		unsigned int m_group;
 		VRenderGLView *m_view;
@@ -175,6 +180,60 @@ namespace flrd
 		//get point
 		flrd::pRulerPoint m_point;
 		int m_pindex;//index of point in ruler
+
+		//simple data sampler
+		void* m_data;
+		size_t m_nx, m_ny, m_nz, m_bits, m_fsize;//box filter
+		double m_scale;
+		bool valid(size_t x, size_t y, size_t z)
+		{
+			if (!m_data) return false;
+			if (!m_nx || !m_ny || !m_nz) return false;
+			if (x >= m_nx || y >= m_ny || z >= m_nz) return false;
+			return true;
+		}
+		double get_data(size_t x, size_t y, size_t z)
+		{
+			if (!valid(x, y, z)) return 0;
+			unsigned long long index =
+				(unsigned long long)m_nx * m_ny * z +
+				(unsigned long long)m_nx * y +
+				(unsigned long long)x;
+			if (m_bits == 8)
+				return double(((unsigned char*)m_data)[index]) / 255.0;
+			else
+				return double(((unsigned short*)m_data)[index]) * m_scale / 65535.0;
+		}
+		double get_filtered_data(size_t x, size_t y, size_t z)
+		{
+			if (!valid(x, y, z)) return 0;
+			if (m_fsize > 1)
+			{
+				size_t count = 0;
+				double sum = 0;
+				double val;
+				int lb = m_fsize / 2 + m_fsize % 2 - 1;
+				int ub = m_fsize / 2;
+				for (int ii = -lb; ii <= ub; ++ii)
+				for (int jj = -lb; jj <= ub; ++jj)
+				//for (int kk = -lb; kk <= ub; ++kk)
+				{
+					val = get_data(x + ii, y + jj, z);
+					if (val > 0.0)
+					{
+						sum += val;
+						count++;
+					}
+				}
+				if (count)
+					return sum / count;
+			}
+			else
+			{
+				return get_data(x, y, z);
+			}
+			return 0;
+		}
 
 	private:
 	};
