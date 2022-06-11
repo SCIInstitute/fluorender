@@ -185,12 +185,15 @@ namespace flrd
 		void* m_data;
 		size_t m_nx, m_ny, m_nz, m_bits, m_fsize;//box filter
 		double m_scale;
-		bool valid(size_t x, size_t y, size_t z)
+		bool valid(size_t &x, size_t &y, size_t &z)
 		{
-			if (!m_data) return false;
-			if (!m_nx || !m_ny || !m_nz) return false;
-			if (x >= m_nx || y >= m_ny || z >= m_nz) return false;
-			return true;
+			bool result = true;
+			if (!m_data) result = false;
+			if (!m_nx || !m_ny || !m_nz) result = false;
+			if (x >= m_nx) x = m_nx - 1;
+			if (y >= m_ny) y = m_ny - 1;
+			if (z >= m_nz) z = m_nz - 1;
+			return result;
 		}
 		double get_data(size_t x, size_t y, size_t z)
 		{
