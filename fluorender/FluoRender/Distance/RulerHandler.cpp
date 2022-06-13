@@ -793,6 +793,7 @@ int RulerHandler::Profile(int index)
 	m_nx = nx; m_ny = ny; m_nz = nz;
 	m_bits = m_vd->GetBits();
 	m_scale = m_vd->GetScalarScale();
+	if (!valid()) return 0;
 
 	if (ruler->GetRulerType() == 3 && mask)
 	{
@@ -846,7 +847,7 @@ int RulerHandler::Profile(int index)
 				if ((p_ruler - p).length() > brush_radius)
 					continue;
 
-				double intensity = get_filtered_data(i, j, k);
+				double intensity = get_data(i, j, k);
 				//if (nrrd_data->type == nrrdTypeUChar)
 				//	intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
 				//else if (nrrd_data->type == nrrdTypeUShort)
@@ -883,7 +884,7 @@ int RulerHandler::Profile(int index)
 			//i = p.intx();
 			//j = int(p.y() + 0.5);
 			//k = int(p.z() + 0.5);
-			intensity = get_filtered_data(p.intx(), p.inty(), p.intz());
+			intensity = get_filtered_data(p.x(), p.y(), p.z());
 			//if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
 			//{
 			//	if (i == nx) i = nx - 1;
@@ -923,7 +924,7 @@ int RulerHandler::Profile(int index)
 				for (unsigned int dn = 0; dn < (unsigned int)(dist + 0.5); ++dn)
 				{
 					p = p1 + dir * double(dn);
-					intensity = get_filtered_data(p.intx(), p.inty(), p.intz());
+					intensity = get_filtered_data(p.x(), p.y(), p.z());
 					//intensity = 0.0;
 					//i = int(p.x() + 0.5);
 					//j = int(p.y() + 0.5);

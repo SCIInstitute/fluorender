@@ -185,19 +185,21 @@ namespace flrd
 		void* m_data;
 		size_t m_nx, m_ny, m_nz, m_bits, m_fsize;//box filter
 		double m_scale;
-		bool valid(size_t &x, size_t &y, size_t &z)
+		bool valid()
 		{
-			bool result = true;
-			if (!m_data) result = false;
-			if (!m_nx || !m_ny || !m_nz) result = false;
-			if (x >= m_nx) x = m_nx - 1;
-			if (y >= m_ny) y = m_ny - 1;
-			if (z >= m_nz) z = m_nz - 1;
-			return result;
+			if (!m_data) return false;
+			if (!m_nx || !m_ny || !m_nz) return false;
+			return true;
 		}
-		double get_data(size_t x, size_t y, size_t z)
+		void clampxyz(double &x, double &y, double &z)
 		{
-			if (!valid(x, y, z)) return 0;
+			x = std::round(std::clamp(x, 0.0, double(m_nx - 1)));
+			y = std::round(std::clamp(y, 0.0, double(m_ny - 1)));
+			z = std::round(std::clamp(z, 0.0, double(m_nz - 1)));
+		}
+		double get_data(double x, double y, double z)
+		{
+			clampxyz(x, y, z);
 			unsigned long long index =
 				(unsigned long long)m_nx * m_ny * z +
 				(unsigned long long)m_nx * y +
@@ -207,22 +209,25 @@ namespace flrd
 			else
 				return double(((unsigned short*)m_data)[index]) * m_scale / 65535.0;
 		}
-		double get_filtered_data(size_t x, size_t y, size_t z)
+		double get_filtered_data(double x, double y, double z)
 		{
-			if (!valid(x, y, z)) return 0;
 			if (m_fsize > 1)
 			{
 				size_t count = 0;
 				double sum = 0;
 				double val;
-				int lb = m_fsize / 2 + m_fsize % 2 - 1;
-				int ub = m_fsize / 2;
-				for (int ii = -lb; ii <= ub; ++ii)
-				for (int jj = -lb; jj <= ub; ++jj)
+				int lub = m_fsize / 2 + m_fsize % 2;
+				double r = double(m_fsize) / 2.0; r *= r;
+				double dx, dy;
+				for (int ii = -lub; ii <= lub; ++ii)
+				for (int jj = -lub; jj <= lub; ++jj)
 				//for (int kk = -lb; kk <= ub; ++kk)
 				{
+					dx = ii * ii;
+					dy = jj * jj;
+					if (dx + dy > r + fluo::Epsilon()) continue;
 					val = get_data(x + ii, y + jj, z);
-					if (val > 0.0)
+					if (val > 0)
 					{
 						sum += val;
 						count++;
