@@ -1,6 +1,15 @@
 [tasks]
-tasknum=1
+tasknum=2
 [tasks/task0]
 type=ruler_profile
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
+fsize=0
+[tasks/task1]
+type=export_analysis
+time_mode=TM_LAST_POST
+template=table.html
+output=
+value_num=1
+value_name0=intensity
+js_value=

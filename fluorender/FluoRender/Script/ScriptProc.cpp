@@ -1115,6 +1115,10 @@ void ScriptProc::RunRulerProfile()
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
+	int fsize;
+	m_fconfig->Read("fsize", &fsize, 1);
+	ruler_handler->SetFsize(fsize);
+
 	int curf = m_view->m_tseq_cur_num;
 	int chan_num = vlist.size();
 	int ch = 0;
@@ -1523,8 +1527,8 @@ void ScriptProc::ExportAnalysis()
 					*ofs_ << "CH-" << ch_ << " ";
 				str = object->getName();
 				*ofs_ << "ID-" << str << "," << t_;
-				fluo::ValueCollection names =
-					object->getValueCollection();
+				fluo::ValueVector names =
+					object->getValueNames(3);
 				for (auto it = names.begin();
 					it != names.end(); ++it)
 				{

@@ -445,15 +445,35 @@ namespace fluo
 				std::sort(result.begin(), result.end(),
 					[](const std::string& s1, const std::string& s2)
 					{
-						return std::stoi(s1) < std::stoi(s2);
-					});
+					int i1, i2;
+					try
+					{
+						i1 = std::stoi(s1);
+						i2 = std::stoi(s2);
+					}
+					catch (...)
+					{
+						return s1 < s2;
+					}
+					return i1 < i2;
+				});
 				break;
 			case 4:
 				std::sort(result.begin(), result.end(),
 					[](const std::string& s1, const std::string& s2)
 					{
-						return std::stoi(s1) > std::stoi(s2);
-					});
+					int i1, i2;
+					try
+					{
+						i1 = std::stoi(s1);
+						i2 = std::stoi(s2);
+					}
+					catch (...)
+					{
+						return s1 > s2;
+					}
+					return i1 > i2;
+				});
 				break;
 			}
 			return result;
