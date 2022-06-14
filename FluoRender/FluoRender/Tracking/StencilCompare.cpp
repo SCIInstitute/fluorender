@@ -147,10 +147,10 @@ const char* str_cl_stencil = \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]);\n" \
 "		}\n" \
-"		coord = convert_float4(ijk);\n" \
+"		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
-"		coordi = convert_int4(coord);\n" \
+"		coordi = convert_int4_rtz(coord);\n" \
 "		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
 "			v2 = 0.0f;\n" \
 "		else\n" \
@@ -210,10 +210,10 @@ const char* str_cl_stencil = \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / 65535.0f;\n" \
 "		}\n" \
-"		coord = convert_float4(ijk);\n" \
+"		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
-"		coordi = convert_int4(coord);\n" \
+"		coordi = convert_int4_rtz(coord);\n" \
 "		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
 "			v2 = 0.0f;\n" \
 "		else\n" \
@@ -273,10 +273,10 @@ const char* str_cl_stencil = \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]);\n" \
 "		}\n" \
-"		coord = convert_float4(ijk);\n" \
+"		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
-"		coordi = convert_int4(coord);\n" \
+"		coordi = convert_int4_rtz(coord);\n" \
 "		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
 "			v2 = 0.0f;\n" \
 "		else\n" \
@@ -338,10 +338,10 @@ const char* str_cl_stencil = \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]);\n" \
 "		}\n" \
-"		coord = convert_float4(ijk);\n" \
+"		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
 "		coord /= coord.w;\n" \
-"		coordi = convert_int4(coord);\n" \
+"		coordi = convert_int4_rtz(coord);\n" \
 "		if (coordi.x < 0 || coordi.x >= nx || coordi.y < 0 || coordi.y >= ny || coordi.z < 0 || coordi.z >= nz)\n" \
 "			v2 = 0.0f;\n" \
 "		else\n" \
@@ -507,7 +507,7 @@ bool StencilCompare::Compare()
 	fluo::Neighbor nb_null(fluo::Point(), fluo::Vector(0));
 	fluo::Neighbor nbt_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_trans.n()));
 	fluo::Neighbor nbr_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_rot.n()));
-	fluo::Vector h(1);//step length
+	fluo::Vector ht(1), hr(1);//step length
 
 	//main loop
 	float p, maxp;
@@ -606,9 +606,16 @@ bool StencilCompare::Compare()
 				break;
 			else if (conv_count)
 			{
-				h /= 2;
-				nbt.h(h);
-				nbr.h(h);
+				if (rot)
+				{
+					hr /= 2;
+					nbr.h(hr);
+				}
+				else
+				{
+					ht /= 2;
+					nbt.h(ht);
+				}
 			}
 			if (conv)
 				conv_count++;
