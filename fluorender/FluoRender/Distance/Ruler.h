@@ -230,6 +230,7 @@ namespace flrd
 		bool AddPointAfterId(fluo::Point &point, unsigned int id,
 			std::set<unsigned int> &cid, std::set<unsigned int> &bid);
 		void SetTransform(const fluo::Transform &tform);
+		fluo::Transform GetTransform();
 		bool AddBranch(pRulerPoint point);
 		void DeletePoint(pRulerPoint &point);
 		void Prune(int len);

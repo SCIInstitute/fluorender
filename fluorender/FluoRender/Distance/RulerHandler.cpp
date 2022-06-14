@@ -906,6 +906,8 @@ int RulerHandler::Profile(int index)
 			for (unsigned int b = 0; b < bins; ++b)
 				profile->push_back(flrd::ProfileBin());
 
+			//fluo::Transform tf = ruler->GetTransform();
+
 			fluo::Point p1, p2;
 			fluo::Vector dir;
 			double dist;
@@ -914,6 +916,10 @@ int RulerHandler::Profile(int index)
 			{
 				p1 = ruler->GetPointTransformed(pn);
 				p2 = ruler->GetPointTransformed(pn+1);
+				//p1 = ruler->GetPoint(pn)->GetPoint();
+				//p2 = ruler->GetPoint(pn + 1)->GetPoint();
+				//tf.project_inplace(p1);
+				//tf.project_inplace(p2);
 				//object space
 				p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 				p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);

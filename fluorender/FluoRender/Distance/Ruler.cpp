@@ -427,6 +427,11 @@ void Ruler::SetTransform(const fluo::Transform &tform)
 	m_tform = tform;
 }
 
+fluo::Transform Ruler::GetTransform()
+{
+	return m_tform;
+}
+
 bool Ruler::AddBranch(pRulerPoint point)
 {
 	if (!point ||
