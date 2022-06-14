@@ -193,9 +193,9 @@ namespace flrd
 		}
 		void clampxyz(double &x, double &y, double &z)
 		{
-			x = std::round(std::clamp(x, 0.0, double(m_nx - 1)));
-			y = std::round(std::clamp(y, 0.0, double(m_ny - 1)));
-			z = std::round(std::clamp(z, 0.0, double(m_nz - 1)));
+			x = std::trunc(std::clamp(x, 0.0, double(m_nx - 1)));
+			y = std::trunc(std::clamp(y, 0.0, double(m_ny - 1)));
+			z = std::trunc(std::clamp(z, 0.0, double(m_nz - 1)));
 		}
 		double get_data(double x, double y, double z)
 		{
@@ -223,8 +223,8 @@ namespace flrd
 				for (int jj = -lub; jj <= lub; ++jj)
 				//for (int kk = -lb; kk <= ub; ++kk)
 				{
-					dx = ii * ii;
-					dy = jj * jj;
+					dx = double(ii) + 0.5; dx *= dx;
+					dy = double(jj) + 0.5; dy *= dy;
 					if (dx + dy > r + fluo::Epsilon()) continue;
 					val = get_data(x + ii, y + jj, z);
 					if (val > 0)
