@@ -58,6 +58,12 @@ namespace fluo
 		{
 			n_ = (b.diagonal() - h_) / 2;
 		}
+		Neighbor(const Neighbor& neighbor)
+		{
+			c_ = neighbor.c_;
+			n_ = neighbor.n_;
+			h_ = neighbor.h_;
+		}
 
 		void c(const Point& c) { c_ = c; }
 		void n(const Vector& n) { n_ = n; }
@@ -67,7 +73,13 @@ namespace fluo
 		Vector h() const { return h_; }
 
 		void offset(const Vector& v) { c_ = c_ + v; }
-		void halfn() { n_ = Max(n_ / 2, Vector(1)); }
+		void halfn()
+		{
+			n_.x(n_.x() == 0.0 ? 0 : std::max(1, int(n_.x() / 2)));
+			n_.y(n_.y() == 0.0 ? 0 : std::max(1, int(n_.y() / 2)));
+			n_.z(n_.z() == 0.0 ? 0 : std::max(1, int(n_.z() / 2)));
+			//n_ = Max(n_ / 2, Vector(1));
+		}
 		void halfh() { h_ = Max(h_ / 2, Vector(Epsilon())); }
 
 		const Point begin();

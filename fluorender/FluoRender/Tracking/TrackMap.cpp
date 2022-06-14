@@ -4513,6 +4513,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	if (!data2 || !label2)
 		return false;
 
+	//precision level
+	int plevel = std::max(1, int(-std::log10(m_eps)));
+
 	size_t index;
 	size_t i, j, k;
 	size_t nx = m_map->m_size_x;
@@ -4600,12 +4603,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		s2.box = s1.box;
 		StencilCompare compare(
 			&s1, &s2, extt, exta, off, fluo::Vector(),
-			m_max_iter, 4, sim);
+			m_max_iter, plevel, sim);
 		if (compare.Compare())
 		{
-			//if (prob > 0.5f)
-			//	continue;
-
 			//label stencil 2
 			compare.Lookup();
 

@@ -1329,10 +1329,12 @@ void ScriptProc::RunRegistration()
 	fluo::Vector exta(exttx, extty, exttz);
 	int iter;
 	m_fconfig->Read("iter", &iter, 50);
-	int cnum;
-	m_fconfig->Read("conv_num", &cnum, 4);
+	int plevel;
+	m_fconfig->Read("plevel", &plevel, 4);
 	double eps;
 	m_fconfig->Read("eps", &eps, 1e-3);
+	//precision level
+	plevel = std::max(plevel, int(-std::log10(eps)));
 	int fsize;
 	m_fconfig->Read("fsize", &fsize, 1);
 	int mode;
@@ -1360,7 +1362,7 @@ void ScriptProc::RunRegistration()
 	flrd::Registrator registrator;
 	registrator.SetExtension(extt, exta);
 	registrator.SetMaxIter(iter);
-	registrator.SetConvNum(cnum);
+	registrator.SetConvNum(plevel);
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);

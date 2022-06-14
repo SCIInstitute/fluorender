@@ -505,9 +505,9 @@ bool StencilCompare::Compare()
 	fluo::Neighbor nb_rot(fluo::Point(), range);
 	//constant neighborhoods
 	fluo::Neighbor nb_null(fluo::Point(), fluo::Vector(0));
-	fluo::Neighbor nbt_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_trans.n()));
-	fluo::Neighbor nbr_1(fluo::Point(), fluo::Min(fluo::Vector(1), nb_rot.n()));
-	fluo::Vector ht(1), hr(1);//step length
+	fluo::Neighbor nbt_1(nb_trans);
+	fluo::Neighbor nbr_1(nb_rot);
+	//fluo::Vector ht(1), hr(1);//step length
 
 	//main loop
 	float p, maxp;
@@ -525,11 +525,11 @@ bool StencilCompare::Compare()
 	if (rot)
 	{
 		nbt = nb_null;
-		nbr = nb_rot;
+		nbr = nbr_1;
 	}
 	else
 	{
-		nbt = nb_trans;
+		nbt = nbt_1;
 		nbr = nb_null;
 	}
 	while (true)
@@ -578,6 +578,8 @@ bool StencilCompare::Compare()
 		else
 		{
 			//convergence conditions
+			if (conv_count > m_conv_num)
+				break;
 			if (rot)
 			{
 				//rot converged
@@ -585,9 +587,10 @@ bool StencilCompare::Compare()
 				rot = false;
 				//update trans neighborhood
 				if (trans_count > 0)
-					nbt = nbt_1;
-				else
-					nbt = nb_trans;
+					nbt_1.halfn();
+				if (conv_count)
+					nbt_1.halfh();
+				nbt = nbt_1;
 				nbr = nb_null;
 			}
 			else
@@ -597,34 +600,20 @@ bool StencilCompare::Compare()
 				rot = true;
 				//update rot neighborhood
 				if (rot_count > 0)
-					nbr = nbr_1;
-				else
-					nbr = nb_rot;
+					nbr_1.halfn();
+				if (conv_count)
+					nbr_1.halfh();
+				nbr = nbr_1;
 				nbt = nb_null;
-			}
-			if (conv_count > m_conv_num)
-				break;
-			else if (conv_count)
-			{
-				if (rot)
-				{
-					hr /= 2;
-					nbr.h(hr);
-				}
-				else
-				{
-					ht /= 2;
-					nbt.h(ht);
-				}
 			}
 			if (conv)
 				conv_count++;
 			conv = true;
 		}
 
-		counter++;
 		if (counter > m_iter)
 			break;
+		counter++;
 	}
 
 	m_euler = -euler;
