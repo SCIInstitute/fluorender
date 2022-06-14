@@ -549,6 +549,14 @@ void ScriptProc::RunMaskTracking()
 		tg = m_view->GetTraceGroup();
 	}
 
+	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
+	{
+		//rewind
+		flrd::ComponentSelector comp_selector(cur_vol);
+		comp_selector.All();
+		return;
+	}
+
 	double exttx, extty, exttz;
 	m_fconfig->Read("ext_x", &exttx, 0.1);
 	m_fconfig->Read("ext_y", &extty, 0.1);
