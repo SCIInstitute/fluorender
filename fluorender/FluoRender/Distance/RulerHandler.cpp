@@ -52,7 +52,8 @@ RulerHandler::RulerHandler() :
 	m_pindex(-1),
 	m_mouse(fluo::Point(-1)),
 	m_fsize(1),
-	m_sample_type(1)
+	m_sample_type(1),
+	m_step_length(1)
 {
 
 }
@@ -857,10 +858,9 @@ int RulerHandler::Profile(int index)
 	}
 	else
 	{
-		double h = 1;
 		//calculate length in object space
 		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
-		int bins = int(total_length / h);
+		int bins = int(total_length / m_step_length);
 		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
@@ -903,7 +903,7 @@ int RulerHandler::Profile(int index)
 				dist = dir.length();
 				dir.normalize();
 
-				for (double dn = 0; dn < dist; dn+=h)
+				for (double dn = 0; dn < dist; dn += m_step_length)
 				{
 					p = p1 + dir * dn;
 					intensity = get_filtered_data(p.x(), p.y(), p.z());

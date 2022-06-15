@@ -1123,12 +1123,14 @@ void ScriptProc::RunRulerProfile()
 	RulerList* ruler_list = m_view->GetRulerList();
 	if (!ruler_list || ruler_list->empty()) return;
 
-	int fsize;
-	m_fconfig->Read("fsize", &fsize, 1);
-	ruler_handler->SetFsize(fsize);
-	int stype;
-	m_fconfig->Read("stype", &stype, 1);
-	ruler_handler->SetSampleType(stype);
+	int ival;
+	double dval;
+	m_fconfig->Read("fsize", &ival, 1);
+	ruler_handler->SetFsize(ival);
+	m_fconfig->Read("sample_type", &ival, 1);
+	ruler_handler->SetSampleType(ival);
+	m_fconfig->Read("step_len", &dval, 1);
+	ruler_handler->SetStepLength(dval);
 
 	int curf = m_view->m_tseq_cur_num;
 	int chan_num = vlist.size();

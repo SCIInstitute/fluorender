@@ -167,6 +167,10 @@ namespace flrd
 		{
 			m_sample_type = type;
 		}
+		void SetStepLength(double dval)
+		{
+			m_step_length = dval;
+		}
 
 	private:
 		unsigned int m_group;
@@ -187,6 +191,7 @@ namespace flrd
 
 		//simple data sampler
 		int m_sample_type;//0-nn; 1-bilinear
+		double m_step_length;//for sampling along a ruler
 		void* m_data;
 		size_t m_nx, m_ny, m_nz, m_bits, m_fsize;//box filter
 		double m_scale;
