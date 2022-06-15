@@ -163,6 +163,10 @@ namespace flrd
 		{
 			m_fsize = ival;
 		}
+		void SetSampleType(int type)
+		{
+			m_sample_type = type;
+		}
 
 	private:
 		unsigned int m_group;
@@ -182,6 +186,7 @@ namespace flrd
 		int m_pindex;//index of point in ruler
 
 		//simple data sampler
+		int m_sample_type;//0-nn; 1-bilinear
 		void* m_data;
 		size_t m_nx, m_ny, m_nz, m_bits, m_fsize;//box filter
 		double m_scale;
@@ -199,6 +204,17 @@ namespace flrd
 		}
 		double get_data(double x, double y, double z)
 		{
+			switch (m_sample_type)
+			{
+			case 0:
+				return get_data_nn(x, y, z);
+			case 1:
+			default:
+				return get_data_bl(x, y, z);
+			}
+		}
+		double get_data_nn(double x, double y, double z)
+		{
 			clampxyz(x, y, z);
 			unsigned long long index =
 				(unsigned long long)m_nx * m_ny * z +
@@ -208,6 +224,73 @@ namespace flrd
 				return double(((unsigned char*)m_data)[index]) / 255.0;
 			else
 				return double(((unsigned short*)m_data)[index]) * m_scale / 65535.0;
+		}
+		void xyz2ijkt(
+			double x, double y, double z,
+			int &i, int &j, int &k,
+			double &tx, double &ty, double &tz)
+		{
+			double id = x - 0.5;
+			double jd = y - 0.5;
+			double kd = z - 0.5;
+			i = id >= 0.0 ? int(id) : int(id) - 1;
+			j = jd >= 0.0 ? int(jd) : int(jd) - 1;
+			k = kd >= 0.0 ? int(kd) : int(kd) - 1;
+			tx = id - i;
+			ty = jd - j;
+			tz = kd - k;
+		}
+		double lerp(double t, double q0, double q1)
+		{
+			return (1.0 - t) * q0 + t * q1;
+		}
+		double bilerp(double tx, double ty,
+			double q00, double q01, double q10, double q11)
+		{
+			double r1 = lerp(tx, q00, q10);
+			double r2 = lerp(tx, q01, q11);
+			return lerp(ty, r1, r2);
+		}
+		bool ijk(int &i, int &j, int &k)
+		{
+			if (i < 0) i = 0;
+			if (i > m_nx) i = m_nx - 1;
+			if (j < 0) j = 0;
+			if (j > m_ny) j = m_ny - 1;
+			if (k < 0) k = 0;
+			if (k > m_nz) k = m_nz - 1;
+			return true;
+		}
+		double get_data_bl(double x, double y, double z)
+		{
+			//clampxyz(x, y, z);
+			int i, j, k;
+			double tx, ty, tz;
+			xyz2ijkt(x, y, z, i, j, k, tx, ty, tz);
+			double q[4] = { 0 };
+			int count = 0;
+			int in, jn;
+			unsigned long long index;
+			for (int ii = 0; ii < 2; ++ii)
+			for (int jj = 0; jj < 2; ++jj)
+			{
+				in = i + ii;
+				jn = j + jj;
+				if (ijk(in, jn, k))
+				{
+					index = (unsigned long long)m_nx*m_ny*k +
+						(unsigned long long)m_nx*jn +
+						(unsigned long long)in;
+					if (m_bits == 8)
+						q[count] = double(((unsigned char*)m_data)[index]) / 255.0;
+					else
+						q[count] = double(((unsigned short*)m_data)[index]) / 65535.0;
+				}
+				count++;
+			}
+
+			return bilerp(tx, ty,
+				q[0], q[1], q[2], q[3]);
 		}
 		double get_filtered_data(double x, double y, double z)
 		{

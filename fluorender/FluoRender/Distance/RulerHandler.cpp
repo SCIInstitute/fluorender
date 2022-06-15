@@ -51,7 +51,8 @@ RulerHandler::RulerHandler() :
 	m_point(0),
 	m_pindex(-1),
 	m_mouse(fluo::Point(-1)),
-	m_fsize(1)
+	m_fsize(1),
+	m_sample_type(1)
 {
 
 }
@@ -848,10 +849,6 @@ int RulerHandler::Profile(int index)
 					continue;
 
 				double intensity = get_data(i, j, k);
-				//if (nrrd_data->type == nrrdTypeUChar)
-				//	intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-				//else if (nrrd_data->type == nrrdTypeUShort)
-				//	intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
 
 				(*profile)[bin_num].m_pixels++;
 				(*profile)[bin_num].m_accum += intensity;
@@ -860,16 +857,15 @@ int RulerHandler::Profile(int index)
 	}
 	else
 	{
+		double h = 1;
 		//calculate length in object space
 		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
-		int bins = int(total_length);
+		int bins = int(total_length / h);
 		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
 		profile->clear();
 
 		//sample data through ruler
-		//int i, j, k;
-		//long long vol_index;
 		fluo::Point p;
 		double intensity;
 		if (bins == 0)
@@ -881,21 +877,7 @@ int RulerHandler::Profile(int index)
 			p = ruler->GetPointTransformed(0);
 			//object space
 			p = fluo::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
-			//i = p.intx();
-			//j = int(p.y() + 0.5);
-			//k = int(p.z() + 0.5);
 			intensity = get_filtered_data(p.x(), p.y(), p.z());
-			//if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
-			//{
-			//	if (i == nx) i = nx - 1;
-			//	if (j == ny) j = ny - 1;
-			//	if (k == nz) k = nz - 1;
-			//	vol_index = (long long)nx*ny*k + nx * j + i;
-			//	if (nrrd_data->type == nrrdTypeUChar)
-			//		intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-			//	else if (nrrd_data->type == nrrdTypeUShort)
-			//		intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
-			//}
 			(*profile)[0].m_pixels++;
 			(*profile)[0].m_accum += intensity;
 		}
@@ -906,8 +888,6 @@ int RulerHandler::Profile(int index)
 			for (unsigned int b = 0; b < bins; ++b)
 				profile->push_back(flrd::ProfileBin());
 
-			//fluo::Transform tf = ruler->GetTransform();
-
 			fluo::Point p1, p2;
 			fluo::Vector dir;
 			double dist;
@@ -916,10 +896,6 @@ int RulerHandler::Profile(int index)
 			{
 				p1 = ruler->GetPointTransformed(pn);
 				p2 = ruler->GetPointTransformed(pn+1);
-				//p1 = ruler->GetPoint(pn)->GetPoint();
-				//p2 = ruler->GetPoint(pn + 1)->GetPoint();
-				//tf.project_inplace(p1);
-				//tf.project_inplace(p2);
 				//object space
 				p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 				p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
@@ -927,25 +903,10 @@ int RulerHandler::Profile(int index)
 				dist = dir.length();
 				dir.normalize();
 
-				for (unsigned int dn = 0; dn < (unsigned int)(dist + 0.5); ++dn)
+				for (double dn = 0; dn < dist; dn+=h)
 				{
-					p = p1 + dir * double(dn);
+					p = p1 + dir * dn;
 					intensity = get_filtered_data(p.x(), p.y(), p.z());
-					//intensity = 0.0;
-					//i = int(p.x() + 0.5);
-					//j = int(p.y() + 0.5);
-					//k = int(p.z() + 0.5);
-					//if (i >= 0 && i <= nx && j >= 0 && j <= ny && k >= 0 && k <= nz)
-					//{
-					//	if (i == nx) i = nx - 1;
-					//	if (j == ny) j = ny - 1;
-					//	if (k == nz) k = nz - 1;
-					//	vol_index = (long long)nx*ny*k + nx * j + i;
-					//	if (nrrd_data->type == nrrdTypeUChar)
-					//		intensity = double(((unsigned char*)data)[vol_index]) / 255.0;
-					//	else if (nrrd_data->type == nrrdTypeUShort)
-					//		intensity = double(((unsigned short*)data)[vol_index]) * scale / 65535.0;
-					//}
 					if (total_dist >= bins) break;
 					(*profile)[total_dist].m_pixels++;
 					(*profile)[total_dist].m_accum += intensity;

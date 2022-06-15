@@ -20,6 +20,7 @@ type=ruler_profile
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
 fsize=0
+stype=1
 [tasks/task2]
 type=export_analysis
 time_mode=TM_LAST_POST
