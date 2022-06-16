@@ -72,6 +72,15 @@ inline std::wstring GET_SUFFIX(std::wstring &pathname)
 		return L"";
 }
 
+inline std::string GET_SUFFIX(std::string &pathname)
+{
+	int64_t pos = pathname.find_last_of('.');
+	if (pos != std::string::npos)
+		return pathname.substr(pos);
+	else
+		return "";
+}
+
 inline std::wstring GET_NAME(std::wstring &pathname)
 {
 	int64_t pos1 = pathname.find_last_of(GETSLASH());
@@ -405,6 +414,15 @@ inline std::wstring GET_SUFFIX(std::wstring &pathname)
 		return pathname.substr(pos);
 	else
 		return L"";
+}
+
+inline std::string GET_SUFFIX(std::string &pathname)
+{
+	int64_t pos = pathname.find_last_of('.');
+	if (pos != std::string::npos)
+		return pathname.substr(pos);
+	else
+		return "";
 }
 
 inline std::wstring GET_NAME(std::wstring &pathname)

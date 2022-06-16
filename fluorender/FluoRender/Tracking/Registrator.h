@@ -77,13 +77,26 @@ namespace flrd
 		{
 			return m_center;
 		}
+		fluo::Point GetCenterVol();
+		void SetCenter(const fluo::Point &p)
+		{
+			m_center = p;
+		}
 		fluo::Point GetEuler()
 		{
 			return m_euler;
 		}
+		void SetEuler(const fluo::Point &e)
+		{
+			m_euler = e;
+		}
 		fluo::Transform GetTransform()
 		{
 			return m_tf;
+		}
+		void SetTransform(const fluo::Transform &tf)
+		{
+			m_tf = tf;
 		}
 
 		//connect and disconnect functions for cache queue

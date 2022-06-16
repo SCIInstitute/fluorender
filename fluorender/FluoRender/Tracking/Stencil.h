@@ -196,6 +196,7 @@ namespace flrd
 		size_t nz;
 		size_t bits;
 		float scale;
+		float max_int;
 		fluo::BBox box;
 		fluo::Transform tf;
 		size_t fsize;//filter size (box)

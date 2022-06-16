@@ -116,6 +116,7 @@ const char* str_cl_stencil = \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
 "	int3 bmin,\n" \
+"	float intmax,\n" \
 "	float4 mat0,\n" \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
@@ -145,7 +146,7 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]);\n" \
+"			v1 = convert_float(img1[index]) / 255.0f;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -156,9 +157,9 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
-"			v2 = convert_float(img2[index]);\n" \
+"			v2 = convert_float(img2[index]) / 255.0f;\n" \
 "		}\n" \
-"		v1 = v1 * v2 / 65025.0f;\n" \
+"		v1 = v1 * v2;\n" \
 "		lsum += v1;\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -179,6 +180,7 @@ const char* str_cl_stencil = \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
 "	int3 bmin,\n" \
+"	float intmax,\n" \
 "	float4 mat0,\n" \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
@@ -208,7 +210,7 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]) / 65535.0f;\n" \
+"			v1 = convert_float(img1[index]) / intmax;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -219,9 +221,10 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
-"			v2 = convert_float(img2[index]) / 65535.0f;\n" \
+"			v2 = convert_float(img2[index]) / intmax;\n" \
 "		}\n" \
 "		v1 = v1 * v2;\n" \
+"		//v1 = pown(v1, 2);\n" \
 "		lsum += v1;\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
@@ -242,6 +245,7 @@ const char* str_cl_stencil = \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
 "	int3 bmin,\n" \
+"	float intmax,\n" \
 "	float4 mat0,\n" \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
@@ -271,7 +275,7 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]);\n" \
+"			v1 = convert_float(img1[index]) / 255.0f;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -282,9 +286,9 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
-"			v2 = convert_float(img2[index]);\n" \
+"			v2 = convert_float(img2[index]) / 255.0f;\n" \
 "		}\n" \
-"		v1 = (v1 - v2) / 255.0f;\n" \
+"		v1 = v1 - v2;\n" \
 "		v1 *= v1;\n" \
 "		v1 = 1.0f - v1;\n" \
 "		lsum += v1;\n" \
@@ -307,6 +311,7 @@ const char* str_cl_stencil = \
 "	unsigned int gsxy,\n" \
 "	unsigned int gsx,\n" \
 "	int3 bmin,\n" \
+"	float intmax,\n" \
 "	float4 mat0,\n" \
 "	float4 mat1,\n" \
 "	float4 mat2,\n" \
@@ -336,7 +341,7 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"			v1 = convert_float(img1[index]);\n" \
+"			v1 = convert_float(img1[index]) / intmax;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -347,9 +352,9 @@ const char* str_cl_stencil = \
 "		else\n" \
 "		{\n" \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
-"			v2 = convert_float(img2[index]);\n" \
+"			v2 = convert_float(img2[index]) / intmax;\n" \
 "		}\n" \
-"		v1 = (v1 - v2) / 65535.0f;\n" \
+"		v1 = v1 - v2;\n" \
 "		v1 *= v1;\n" \
 "		v1 = 1.0f - v1;\n" \
 "		lsum += v1;\n" \
@@ -511,7 +516,8 @@ bool StencilCompare::Compare()
 
 	//main loop
 	float p, maxp;
-	maxp = 0;
+	m_s2->load_identity();
+	maxp = Similar(name);//start with origin
 	fluo::Point center(m_off1), euler(m_off2);//for outer loop
 	fluo::Point c, e;//for inner loops
 	int counter = 0;
@@ -654,6 +660,7 @@ float StencilCompare::Similar(const std::string& name)
 	//set up kernel
 	unsigned int nx = m_s1->nx, ny = m_s1->ny, nz = m_s1->nz;
 	unsigned int nxy = nx * ny;
+	cl_float intmax = m_s1->max_int;
 	cl_int3 bmin{
 		m_s1->box.Min().intx(),
 		m_s1->box.Min().inty(),
@@ -694,6 +701,7 @@ float StencilCompare::Similar(const std::string& name)
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 	m_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&bmin));
+	m_prog->setKernelArgConst(sizeof(cl_float), (void*)(&intmax));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf0));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf1));
 	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));

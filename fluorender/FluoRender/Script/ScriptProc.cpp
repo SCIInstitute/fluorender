@@ -301,7 +301,12 @@ wxString ScriptProc::GetSavePath(const wxString &str, const wxString &ext, bool 
 		std::string name;
 		node->getValue("path", name);
 		if (!name.empty())
+		{
+			std::string ext2 = '.' + ext.ToStdString();
+			if (GET_SUFFIX(name) != ext2)
+				name += ext2;
 			return name;
+		}
 	}
 	//not found
 	if (temp.IsEmpty() ||
@@ -1364,11 +1369,6 @@ void ScriptProc::RunRegistration()
 		fluo::Transform tf;
 		tf.load_identity();
 		m_view->SetOffsetTransform(tf);
-		//fluo::Node* regg = m_output->getOrAddGroup("registrator");
-		//if (regg->getValue("obj center", pt))
-		//	m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
-		//if (regg->getValue("obj rot", pr))
-		//	m_view->SetObjRot(pr.x(), pr.y(), pr.z());
 		return;
 	}
 
@@ -1382,44 +1382,35 @@ void ScriptProc::RunRegistration()
 	registrator.RegisterCacheQueueFuncs(
 		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
 		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
+	fluo::Point center, center2, euler;
+	fluo::Transform tf;
+	fluo::Quaternion rot;
+	fluo::Node* regg = m_output->getOrAddGroup("registrator");
+	if (regg->getValue("trans", center))
+		registrator.SetCenter(center);
+	if (regg->getValue("euler", euler))
+		registrator.SetEuler(euler);
+	if (regg->getValue("transform", tf))
+		registrator.SetTransform(tf);
 
 	if (registrator.Run(
 		m_view->m_tseq_prv_num,
 		m_view->m_tseq_cur_num,
 		mode, m_view->m_begin_play_frame))
 	{
-		fluo::Point center = registrator.GetCenter();
-		fluo::Point euler = registrator.GetEuler();
-		fluo::Quaternion rot;
+		center = registrator.GetCenter();
+		center2 = registrator.GetCenterVol();
+		euler = registrator.GetEuler();
 		rot.FromEuler(euler.x(), euler.y(), euler.z());
-		fluo::Node* regg = m_output->getOrAddGroup("registrator");
+		tf = registrator.GetTransform();
 		regg->addSetValue("trans", center);
+		regg->addSetValue("euler", euler);
 		regg->addSetValue("rot", rot);
+		regg->addSetValue("transform", tf);
 		//apply transform to current view
-		m_view->SetObjCtrOff(center.x(), center.y(), center.z());
+		m_view->SetObjCtrOff(center2.x(), center2.y(), center2.z());
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
-		m_view->SetOffsetTransform(registrator.GetTransform());
-		//if (m_view->m_tseq_prv_num == m_view->m_begin_play_frame)
-		//{
-		//	//remember original center
-		//	double dx, dy, dz;
-		//	m_view->GetObjCenters(dx, dy, dz);
-		//	pt = fluo::Point(dx, dy, dz);
-		//	regg->addSetValue("obj center", pt);
-		//	m_view->GetObjRot(dx, dy, dz);
-		//	pr = fluo::Point(dx, dy, dz);
-		//	regg->addSetValue("obj rot", pr);
-		//}
-		//else
-		//{
-		//	//get original center
-		//	regg->getValue("obj center", pt);
-		//	regg->getValue("obj rot", pr);
-		//}
-		//pt += center;
-		//m_view->SetObjCenters(pt.x(), pt.y(), pt.z());
-		//pr += euler;
-		//m_view->SetObjRot(pr.x(), pr.y(), pr.z());
+		m_view->SetOffsetTransform(tf);
 	}
 }
 

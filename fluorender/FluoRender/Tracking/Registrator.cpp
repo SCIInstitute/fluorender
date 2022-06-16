@@ -44,7 +44,7 @@ Registrator::Registrator() :
 	m_method(1),//0-dot product; 1-diff squared
 	m_fsize(2)
 {
-
+	m_tf.load_identity();
 }
 
 Registrator::~Registrator()
@@ -78,6 +78,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.nz = s2.nz = nz;
 	s1.bits = s2.bits = m_vd->GetBits();
 	s1.scale = s2.scale = m_vd->GetScalarScale();
+	s1.max_int = s2.max_int = m_vd->GetMaxValue();
 	s1.fsize = s2.fsize = m_fsize;
 	s1.box = s2.box = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
 
@@ -88,10 +89,31 @@ bool Registrator::Run(size_t f1, size_t f2,
 	if (compare.Compare())
 	{
 		//get transformation
-		m_center = compare.GetCenter();
-		m_euler = compare.GetEuler();
-		m_tf = s2.tf;
+		if (mode == 1)
+		{
+			m_center = compare.GetCenter();
+			m_euler = compare.GetEuler();
+			m_tf = s2.tf;
+		}
+		else
+		{
+			m_center += compare.GetCenter();
+			m_euler += compare.GetEuler();
+			m_tf.post_trans(s2.tf);
+		}
 	}
 
 	return true;
+}
+
+fluo::Point Registrator::GetCenterVol()
+{
+	fluo::Point result = m_center;
+	double dx = 1, dy = 1, dz = 1;
+	if (m_vd)
+		m_vd->GetSpacings(dx, dy, dz);
+	result.x(result.x() * dx);
+	result.y(result.y() * dy);
+	result.z(result.z() * dz);
+	return result;
 }
