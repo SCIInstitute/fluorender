@@ -200,7 +200,7 @@ function peakTime(d) {
     var i = d3.scan(d.values, function (a, b) { return y(b) - y(a); });
     return d.values[i].value;
 };
-data.sort(function (a, b) { return peakTime(b) - peakTime(a); });
+//data.sort(function (a, b) { return peakTime(b) - peakTime(a); });
 
 var xScale = d3.scaleLinear().domain(extx).range([0, width]),
     xValue = function(d) { return xScale(x(d)); },

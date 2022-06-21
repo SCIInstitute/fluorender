@@ -1565,9 +1565,19 @@ void ScriptProc::ExportAnalysis()
 	std::ifstream ifs(tempfile.ToStdString());
 	std::ofstream ofs(outputfile.ToStdString());
 	std::string line;
-	int replace = 0;//1:data;2:value name
+	int replace = 0;//1:data;2:value name;
 	while (std::getline(ifs, line))
 	{
+		if (line.find("<script src=") != std::string::npos)
+		{
+			//source
+			ofs << "    <script src=\"";
+			wxString path = wxStandardPaths::Get().GetExecutablePath();
+			path = wxPathOnly(path);
+			ofs << path.ToStdString();
+			ofs << "/Templates/d3.v4.min.js\"></script>" << std::endl;
+			continue;
+		}
 		if (line.find("#begin data") != std::string::npos)
 		{
 			//data
