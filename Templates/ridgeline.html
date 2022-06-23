@@ -13,29 +13,37 @@
 
         .axis--x text {
             font-size: 15px;
+            font-weight: bold;
             fill: #000;
         }
 
         .axis--x line {
             stroke: #000;
+            stroke-width: 2;
         }
 
         .axis--id .tick line {
             display: none;
         }
 
-        .axis--id text {
+        /*.axis--id text {
             font-size: 15px;
             fill: #000;
+        }*/
+
+        .axis--id text:hover {
+            fill: red;
         }
 
-        .axis--id .tick:nth-child(odd) text {
-            fill: #777;
-        }
-
-        .line {
+        /*.line {
             fill: none;
             stroke: #000;
+        }*/
+
+        .line:hover {
+            fill: none;
+            stroke: red;
+            stroke-width: 3;
         }
 
         .area {
@@ -172,6 +180,7 @@ var roffy = 0.67;
 var magaxx = 5;
 var magaxy = 25;
 var opac = 0.6;
+var divide = 253;
 var line_type =
 	d3.curveMonotoneX;
 	//d3.curveLinear;
@@ -260,19 +269,55 @@ gChart.append('path').attr('class', 'area')
     .attr('d', area)
     .attr('opacity', opac);
 
+function colorCode(d) {
+    var color = d3.rgb(24, 167, 181);
+    var matches = d[0].id.match(/(\d+)(?!.*\d)/);
+    if (matches) {
+        var id = matches[0];
+        var hue = (id % 253) * 60.0 / 45.0;
+        color = d3.hsl(hue, 1, 0.5);
+    }
+    return color;
+}
+
 gChart.append('path').attr('class', 'line')
     .datum(function(d) { return d.values; })
-    .attr('d', line);
+    .attr('d', line)
+    .attr('fill', 'none')
+    .attr('stroke-width', 2)
+    //.attr('stroke', 'green');
+    .attr('stroke', function (d) {
+        var color = d3.rgb(24, 167, 181);
+        var matches = d[0].id.match(/(\d+)(?!.*\d)/);
+        if (matches) {
+            var id = matches[0];
+            var hue = (id % divide) * 60.0 / 45.0;
+            color = d3.hsl(hue, 1, 0.5);
+        }
+        return color;
+    });
 
 count = 0;
 svg.append('g').attr('class', 'axis axis--id')
     .call(idAxis)
     .selectAll("text")
-    .attr('transform', function (d) {
-        var tx = offsetx * (num - count - 1) - magaxy,
-        	ty = 0;
-        count++;
-        return 'translate(' + tx + ',' + ty + ')';
+    //.attr('transform', function (d) {
+    //    var tx = offsetx * (num - count - 1) - magaxy,
+    //    	ty = 0;
+    //    count++;
+    //    return 'translate(' + tx + ',' + ty + ')';
+    //})
+    .attr('font-size', 15)
+    .attr('font-weight', 'bold')
+    .attr('fill', function (d) {
+        var color = d3.rgb(24, 167, 181);
+        var matches = d.match(/(\d+)(?!.*\d)/);
+        if (matches) {
+            var id = matches[0];
+            var hue = (id % divide) * 60.0 / 45.0;
+            color = d3.hsl(hue, 1, 0.5);
+        }
+        return color;
     });
 
 svg.append('g').attr('class', 'axis axis--x')
