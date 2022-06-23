@@ -32,7 +32,7 @@
         }*/
 
         .axis--id text:hover {
-            fill: red;
+            fill: #cc3300;
         }
 
         /*.line {
@@ -42,17 +42,17 @@
 
         .line:hover {
             fill: none;
-            stroke: red;
+            stroke: #cc3300;
             stroke-width: 3;
         }
 
-        .area {
-            fill: #eee;
+        .area:hover {
+            fill: #cc3300;
         }
 
-        .id:nth-child(odd) .area {
+        /*.id:nth-child(odd) .area {
             fill: #ddd;
-        }
+        }*/
     </style>
 </head>
 <body>
@@ -179,8 +179,9 @@ var roffx = 0.2;
 var roffy = 0.67;
 var magaxx = 5;
 var magaxy = 25;
-var opac = 0.6;
+var opac = 0.1;
 var divide = 253;
+var discale = 1;
 var line_type =
 	d3.curveMonotoneX;
 	//d3.curveLinear;
@@ -267,18 +268,17 @@ var gChart = svg.append('g').attr('class', 'ids')
 gChart.append('path').attr('class', 'area')
     .datum(function (d) { return d.values; })
     .attr('d', area)
-    .attr('opacity', opac);
-
-function colorCode(d) {
-    var color = d3.rgb(24, 167, 181);
-    var matches = d[0].id.match(/(\d+)(?!.*\d)/);
-    if (matches) {
-        var id = matches[0];
-        var hue = (id % 253) * 60.0 / 45.0;
-        color = d3.hsl(hue, 1, 0.5);
-    }
-    return color;
-}
+    .attr('opacity', opac)
+    .attr('fill', function (d) {
+        var color = d3.rgb(24, 167, 181);
+        var matches = d[0].id.match(/(\d+)(?!.*\d)/);
+        if (matches) {
+            var id = matches[0];
+            var hue = (id * discale % divide) * 60.0 / 45.0;
+            color = d3.hsl(hue, 1, 0.5);
+        }
+        return color;
+    });
 
 gChart.append('path').attr('class', 'line')
     .datum(function(d) { return d.values; })
@@ -291,7 +291,7 @@ gChart.append('path').attr('class', 'line')
         var matches = d[0].id.match(/(\d+)(?!.*\d)/);
         if (matches) {
             var id = matches[0];
-            var hue = (id % divide) * 60.0 / 45.0;
+            var hue = (id * discale % divide) * 60.0 / 45.0;
             color = d3.hsl(hue, 1, 0.5);
         }
         return color;
@@ -314,7 +314,7 @@ svg.append('g').attr('class', 'axis axis--id')
         var matches = d.match(/(\d+)(?!.*\d)/);
         if (matches) {
             var id = matches[0];
-            var hue = (id % divide) * 60.0 / 45.0;
+            var hue = (id * discale % divide) * 60.0 / 45.0;
             color = d3.hsl(hue, 1, 0.5);
         }
         return color;

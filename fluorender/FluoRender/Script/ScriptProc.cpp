@@ -1170,11 +1170,11 @@ void ScriptProc::RunRulerProfile()
 		for (size_t i = 0; i < ruler_list->size(); ++i)
 		{
 			//for each ruler
-			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(i));
-			ruler_node->addSetValue("type", std::string("ruler"));
 			flrd::Ruler* ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
+			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id()+1));
+			ruler_node->addSetValue("type", std::string("ruler"));
 
 			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
