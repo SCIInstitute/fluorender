@@ -212,9 +212,13 @@ function peakTime(d) {
 };
 //data.sort(function (a, b) { return peakTime(b) - peakTime(a); });
 
+if (extx[1] < 10)
+    xformat = d3.format(".1f");
+else
+    xformat = d3.format("d");
 var xScale = d3.scaleLinear().domain(extx).range([0, width]),
     xValue = function(d) { return xScale(x(d)); },
-    xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
+    xAxis = d3.axisBottom(xScale).ticks(width/100).tickFormat(xformat);
 
 var areaChartHeight = exty2 * scaley;
 var yScale = d3.scaleLinear(),
