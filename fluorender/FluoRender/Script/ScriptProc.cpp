@@ -1568,7 +1568,8 @@ void ScriptProc::ExportAnalysis()
 	int replace = 0;//1:data;2:value name;
 	while (std::getline(ifs, line))
 	{
-		if (line.find("<script src=") != std::string::npos)
+		//if d3 is local, set path to working dir
+		if (line.find("<script src=\"./d3") != std::string::npos)
 		{
 			//source
 			ofs << "    <script src=\"";
