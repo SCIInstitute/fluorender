@@ -7260,6 +7260,9 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		link = m_frame->GetClippingView()->GetChannLink();
 		plane_mode = m_frame->GetClippingView()->GetPlaneMode();
 	}
+	double width = 1.0;
+	if (m_frame && m_frame->GetSettingDlg())
+		width = m_frame->GetSettingDlg()->GetLineWidth();
 
 	if (plane_mode == kNone)
 		return;
@@ -7298,13 +7301,20 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	else if (face_winding == CULL_OFF)
 		glDisable(GL_CULL_FACE);
 
-	flvr::ShaderProgram* shader =
+	flvr::ShaderProgram* shader1 =
 		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_GEOMETRY);
-	if (shader)
+	if (shader1)
 	{
-		if (!shader->valid())
-			shader->create();
-		shader->bind();
+		if (!shader1->valid())
+			shader1->create();
+		shader1->bind();
+	}
+	flvr::ShaderProgram* shader2 =
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+	if (shader2)
+	{
+		if (!shader2->valid())
+			shader2->create();
 	}
 
 	for (i = 0; i<GetDispVolumeNum(); i++)
@@ -7429,7 +7439,14 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 		mv_mat = mv_mat * mv_mat2;
 		glm::mat4 matrix = m_proj_mat * mv_mat;
-		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+		shader1->setLocalParamMatrix(0, glm::value_ptr(matrix));
+		if (border)
+		{
+			shader2->bind();
+			shader2->setLocalParamMatrix(0, glm::value_ptr(matrix));
+			shader2->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
+			shader1->bind();
+		}
 
 		flvr::VertexArray* va_clipp =
 			flvr::TextureRenderer::vertex_array_manager_.vertex_array(flvr::VA_Clip_Planes);
@@ -7446,15 +7463,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			{
 				if (plane_mode == kNormal ||
 					plane_mode == kNormalBack)
-					shader->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
+					shader1->setLocalParam(0, 1.0, 0.5, 0.5, plane_trans);
 				else
-					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(0, false);
 			}
 			if (border)
 			{
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->bind();
+				//shader2->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(16, true);
+				shader1->bind();
 			}
 		}
 		//x2 = (p7, p3, p2, p6)
@@ -7464,15 +7483,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			{
 				if (plane_mode == kNormal ||
 					plane_mode == kNormalBack)
-					shader->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
+					shader1->setLocalParam(0, 1.0, 0.5, 1.0, plane_trans);
 				else
-					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(32, false);
 			}
 			if (border)
 			{
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->bind();
+				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(48, true);
+				shader1->bind();
 			}
 		}
 		//y1 = (p1, p0, p2, p3)
@@ -7482,15 +7503,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			{
 				if (plane_mode == kNormal ||
 					plane_mode == kNormalBack)
-					shader->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
+					shader1->setLocalParam(0, 0.5, 1.0, 0.5, plane_trans);
 				else
-					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(64, false);
 			}
 			if (border)
 			{
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->bind();
+				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(80, true);
+				shader1->bind();
 			}
 		}
 		//y2 = (p4, p5, p7, p6)
@@ -7500,15 +7523,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			{
 				if (plane_mode == kNormal ||
 					plane_mode == kNormalBack)
-					shader->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
+					shader1->setLocalParam(0, 1.0, 1.0, 0.5, plane_trans);
 				else
-					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(96, false);
 			}
 			if (border)
 			{
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->bind();
+				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(112, true);
+				shader1->bind();
 			}
 		}
 		//z1 = (p0, p4, p6, p2)
@@ -7518,15 +7543,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			{
 				if (plane_mode == kNormal ||
 					plane_mode == kNormalBack)
-					shader->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
+					shader1->setLocalParam(0, 0.5, 0.5, 1.0, plane_trans);
 				else
-					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(128, false);
 			}
 			if (border)
 			{
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->bind();
+				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(144, true);
+				shader1->bind();
 			}
 		}
 		//z2 = (p5, p1, p3, p7)
@@ -7536,22 +7563,24 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			{
 				if (plane_mode == kNormal ||
 					plane_mode == kNormalBack)
-					shader->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
+					shader1->setLocalParam(0, 0.5, 1.0, 1.0, plane_trans);
 				else
-					shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(160, false);
 			}
 			if (border)
 			{
-				shader->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->bind();
+				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(176, true);
+				shader1->bind();
 			}
 		}
 		va_clipp->draw_end();
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader1 && shader1->valid())
+		shader1->release();
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);

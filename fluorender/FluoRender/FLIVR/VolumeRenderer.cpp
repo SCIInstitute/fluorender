@@ -1385,6 +1385,9 @@ namespace flvr
 	//for multibrick, copy border to continue diffusion
 	void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 	{
+#ifdef _DARWIN
+		return;
+#endif
 		if (!b || !btex || !order)
 			return;
 		TextureBrick* nb;//neighbor brick
