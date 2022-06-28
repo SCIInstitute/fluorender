@@ -86,6 +86,7 @@ EVT_TEXT(ID_DetailLevelOffsetText, SettingDlg::OnDetailLevelOffsetEdit)
 //font
 EVT_COMBOBOX(ID_FontCmb, SettingDlg::OnFontChange)
 EVT_COMBOBOX(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
+EVT_TEXT(ID_FontSizeCmb, SettingDlg::OnFontSizeChange)
 EVT_COMBOBOX(ID_TextColorCmb, SettingDlg::OnTextColorChange)
 //line width
 EVT_COMMAND_SCROLL(ID_LineWidthSldr, SettingDlg::OnLineWidthSldr)
@@ -159,8 +160,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizer2_1->Add(10, 10);
 	st = new wxStaticText(page, 0, "Size:");
 	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
-		wxDefaultPosition, wxSize(50, -1), 0, NULL, wxCB_READONLY);
-	for (int font_size = 10; font_size < 31; font_size += 2)
+		wxDefaultPosition, wxSize(50, -1), 0, NULL);
+	for (int font_size = 10; font_size < 50; font_size += 2)
 		m_font_size_cmb->Append(wxString::Format("%d", font_size));
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);

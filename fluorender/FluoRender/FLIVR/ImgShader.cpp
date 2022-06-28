@@ -64,6 +64,19 @@ namespace flvr
 	"	gl_Position = matrix0 * vec4(InVertex, 1.0);\n" \
 	"}\n"
 
+#define IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI \
+	"//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3\n" \
+	"layout(location = 0) in vec3 InVertex;\n" \
+	"out vec3 OutColor;\n" \
+	"uniform mat4 matrix0;//transformation\n" \
+	"uniform vec4 loc1; //(color, 1.0)\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	gl_Position = matrix0 * vec4(InVertex, 1.0);\n" \
+	"	OutColor = loc1.xyz;\n" \
+	"}\n"
+
 #define IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3 \
 	"//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
@@ -623,7 +636,8 @@ namespace flvr
 		use_geom_shader_(false),
 		program_(0)
 	{
-		if (type_ == IMG_SHDR_DRAW_THICK_LINES)
+		if (type_ == IMG_SHDR_DRAW_THICK_LINES ||
+			type_ == IMG_SHDR_DRAW_THICK_LINES_COLOR)
 			use_geom_shader_ = true;
 	}
 
@@ -659,6 +673,9 @@ namespace flvr
 		{
 		case IMG_SHDR_DRAW_GEOMETRY:
 			z << IMG_VTX_CODE_DRAW_GEOMETRY;
+			break;
+		case IMG_SHDR_DRAW_THICK_LINES_COLOR:
+			z << IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI;
 			break;
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR3:
 		case IMG_SHDR_DRAW_THICK_LINES:
@@ -733,6 +750,7 @@ namespace flvr
 			z << IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3;
 			break;
 		case IMG_SHDR_DRAW_THICK_LINES:
+		case IMG_SHDR_DRAW_THICK_LINES_COLOR:
 			z << IMG_FRG_CODE_DRAW_THICKLINES;
 			break;
 		case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
@@ -809,6 +827,7 @@ namespace flvr
 		switch (type_)
 		{
 		case IMG_SHDR_DRAW_THICK_LINES:
+		case IMG_SHDR_DRAW_THICK_LINES_COLOR:
 			z << IMG_SHDR_CODE_DRAW_THICK_LINES;
 			break;
 		}

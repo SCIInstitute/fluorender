@@ -54,6 +54,7 @@ namespace flvr
 #define	IMG_SHDR_GRADIENT_PROJ_MAP			17
 #define IMG_SHDR_DRAW_TEXT					18
 #define IMG_SHDR_DRAW_THICK_LINES			19
+#define IMG_SHDR_DRAW_THICK_LINES_COLOR		20
 
 	class ShaderProgram;
 

@@ -7310,7 +7310,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		shader1->bind();
 	}
 	flvr::ShaderProgram* shader2 =
-		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES);
+		flvr::TextureRenderer::img_shader_factory_.shader(IMG_SHDR_DRAW_THICK_LINES_COLOR);
 	if (shader2)
 	{
 		if (!shader2->valid())
@@ -7471,7 +7471,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			if (border)
 			{
 				shader2->bind();
-				//shader2->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(16, true);
 				shader1->bind();
 			}
@@ -7491,7 +7491,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			if (border)
 			{
 				shader2->bind();
-				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(48, true);
 				shader1->bind();
 			}
@@ -7511,7 +7511,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			if (border)
 			{
 				shader2->bind();
-				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(80, true);
 				shader1->bind();
 			}
@@ -7531,7 +7531,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			if (border)
 			{
 				shader2->bind();
-				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(112, true);
 				shader1->bind();
 			}
@@ -7551,7 +7551,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			if (border)
 			{
 				shader2->bind();
-				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(144, true);
 				shader1->bind();
 			}
@@ -7571,7 +7571,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			if (border)
 			{
 				shader2->bind();
-				//shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
+				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(176, true);
 				shader1->bind();
 			}
