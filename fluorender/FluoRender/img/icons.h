@@ -197,8 +197,10 @@ public:
 	const static unsigned char align_png[1470];
 	/* hold_clip.png - 901 bytes */
 	const static unsigned char hold_clip_png[901];
-	/* clip_frame.png - 730 bytes */
-	const static unsigned char clip_frame_png[730];
+	/* clip_frame6.png - 967 bytes */
+	const static unsigned char clip_frame6_png[967];
+	/* clip_frame3.png - 730 bytes */
+	const static unsigned char clip_frame3_png[730];
 	/* clip_low.png - 566 bytes */
 	const static unsigned char clip_low_png[566];
 	/* clip_low_back.png - 609 bytes */

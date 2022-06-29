@@ -7267,7 +7267,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	if (plane_mode == kNone)
 		return;
 
-	bool draw_plane = plane_mode != kFrame;
+	bool draw_plane = plane_mode != kFrame6 && plane_mode != kFrame3;
 	if ((plane_mode == kLowTransBack ||
 		plane_mode == kNormalBack) &&
 		m_clip_mask == -1)
@@ -7281,7 +7281,9 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	else
 		glCullFace(GL_BACK);
 
-	if (!border && plane_mode == kFrame)
+	if (!border &&
+		(plane_mode == kFrame6 ||
+		plane_mode == kFrame3))
 		return;
 
 	glDisable(GL_DEPTH_TEST);
@@ -7385,6 +7387,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		//p7 = l_x2z2 * py2
 		if (!py2->Intersect(lp_x2z2, lv_x2z2, pp[7]))
 			continue;
+		fluo::Vector plane_centers[6];
+		if (m_persp)
+		{
+			//compute plane centers
+			plane_centers[0] = (pp[0] + pp[1] + pp[4] + pp[5]) / 4;
+			plane_centers[1] = (pp[2] + pp[3] + pp[6] + pp[7]) / 4;
+			plane_centers[2] = (pp[0] + pp[1] + pp[2] + pp[3]) / 4;
+			plane_centers[3] = (pp[4] + pp[5] + pp[6] + pp[7]) / 4;
+			plane_centers[4] = (pp[0] + pp[2] + pp[4] + pp[6]) / 4;
+			plane_centers[5] = (pp[1] + pp[3] + pp[5] + pp[7]) / 4;
+		}
 
 		//draw the six planes out of the eight points
 		//get color
@@ -7448,43 +7461,34 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 			shader1->bind();
 		}
 
-		bool draw_plane[6] = {true, true, true, true, true, true};
-		if (m_clip_mask == -1)
+		bool draw_plane_border[6] = {true, true, true, true, true, true};
+		if (m_clip_mask == -1 && plane_mode == kFrame3)
 		{
-			fluo::Point p;
-			fluo::Transform mv;
-			mv.set(glm::value_ptr(mv_mat));
-			mv.invert();
-			p = mv.transform(p);
-			if (px1->eval_point(p) < px2->eval_point(p))
+			fluo::Vector view(0, 0, 1);
+			fluo::Vector normal;
+			//fluo::Transform mv, prj;
+			//mv.set(glm::value_ptr(mv_mat));
+			//prj.set(glm::value_ptr(m_proj_mat));
+			fluo::Transform mv_prj;
+			mv_prj.set(glm::value_ptr(matrix));
+			for (int pi = 0; pi < 6; ++pi)
 			{
-				draw_plane[0] = true;
-				draw_plane[1] = false;
-			}
-			else
-			{
-				draw_plane[0] = false;
-				draw_plane[1] = true;
-			}
-			if (py1->eval_point(p) < py2->eval_point(p))
-			{
-				draw_plane[2] = true;
-				draw_plane[3] = false;
-			}
-			else
-			{
-				draw_plane[2] = false;
-				draw_plane[3] = true;
-			}
-			if (pz1->eval_point(p) < pz2->eval_point(p))
-			{
-				draw_plane[4] = true;
-				draw_plane[5] = false;
-			}
-			else
-			{
-				draw_plane[4] = false;
-				draw_plane[5] = true;
+				if (m_persp)
+				{
+					//look at plane center from origin
+					view = plane_centers[pi];
+					mv_prj.transform_inplace(view);
+					//mv.transform_inplace(view);
+					//prj.transform_inplace(view);
+				}
+				normal = (*planes)[pi]->normal();
+				mv_prj.unproject_inplace(normal);
+				//mv.unproject_inplace(normal);
+				//prj.unproject_inplace(normal);
+				//normal.normalize();
+				//view.normalize();
+				if (fluo::Dot(normal, view) < 0)
+					draw_plane_border[pi] = false;
 			}
 		}
 
@@ -7508,7 +7512,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(0, false);
 			}
-			if (border && draw_plane[0])
+			if (border && draw_plane_border[0])
 			{
 				glDisable(GL_CULL_FACE);
 				shader2->bind();
@@ -7531,7 +7535,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(32, false);
 			}
-			if (border && draw_plane[1])
+			if (border && draw_plane_border[1])
 			{
 				glDisable(GL_CULL_FACE);
 				shader2->bind();
@@ -7554,7 +7558,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(64, false);
 			}
-			if (border && draw_plane[2])
+			if (border && draw_plane_border[2])
 			{
 				glDisable(GL_CULL_FACE);
 				shader2->bind();
@@ -7577,7 +7581,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(96, false);
 			}
-			if (border && draw_plane[3])
+			if (border && draw_plane_border[3])
 			{
 				glDisable(GL_CULL_FACE);
 				shader2->bind();
@@ -7600,7 +7604,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(128, false);
 			}
-			if (border && draw_plane[4])
+			if (border && draw_plane_border[4])
 			{
 				glDisable(GL_CULL_FACE);
 				shader2->bind();
@@ -7623,7 +7627,7 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					shader1->setLocalParam(0, color.r(), color.g(), color.b(), plane_trans);
 				va_clipp->draw_clip_plane(160, false);
 			}
-			if (border && draw_plane[5])
+			if (border && draw_plane_border[5])
 			{
 				glDisable(GL_CULL_FACE);
 				shader2->bind();

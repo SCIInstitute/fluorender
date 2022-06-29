@@ -61,6 +61,7 @@ namespace fluo
 
 		Plane& operator=(const Plane&);
 		double eval_point(const Point &p) const;
+		double dot_normal(const Vector &v) const;
 		Point get_point() const;
 		void flip();
 		Point project(const Point& p) const;

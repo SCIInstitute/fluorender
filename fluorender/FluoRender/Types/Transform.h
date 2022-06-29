@@ -106,6 +106,10 @@ namespace fluo
 		void unproject_inplace(Vector& v) const;
 
 		Point transform(const Point& p) const;
+		Vector transform(const Vector& v) const;
+		void transform_inplace(Point& p) const;
+		void transform_inplace(Vector& v) const;
+
 		Point project(const Point& p) const;
 		void project(const Point& p, Point& res) const;
 		void project_inplace(Point& p) const;

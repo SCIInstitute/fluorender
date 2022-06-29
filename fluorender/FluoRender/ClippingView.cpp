@@ -508,9 +508,13 @@ void ClippingView::SetPlaneMode(PLANE_MODES mode)
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_normal));
 		break;
-	case kFrame:
+	case kFrame6:
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_frame));
+			wxGetBitmapFromMemory(clip_frame6));
+		break;
+	case kFrame3:
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_frame3));
 		break;
 	case kLowTrans:
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
@@ -809,11 +813,16 @@ void ClippingView::OnPlaneModesBtn(wxCommandEvent &event)
 	switch (m_plane_mode)
 	{
 	case kNormal:
-		m_plane_mode = kFrame;
+		m_plane_mode = kFrame6;
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-			wxGetBitmapFromMemory(clip_frame));
+			wxGetBitmapFromMemory(clip_frame6));
 		break;
-	case kFrame:
+	case kFrame6:
+		m_plane_mode = kFrame3;
+		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+			wxGetBitmapFromMemory(clip_frame3));
+		break;
+	case kFrame3:
 		m_plane_mode = kLowTrans;
 		m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 			wxGetBitmapFromMemory(clip_low));

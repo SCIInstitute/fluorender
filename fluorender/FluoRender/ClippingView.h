@@ -37,7 +37,8 @@ DEALINGS IN THE SOFTWARE.
 enum PLANE_MODES
 {
 	kNormal,
-	kFrame,
+	kFrame6,
+	kFrame3,
 	kLowTrans,
 	kLowTransBack,
 	kNormalBack,

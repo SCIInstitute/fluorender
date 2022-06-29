@@ -429,6 +429,34 @@ Point Transform::transform(const Point& p) const
 		mat[0][3]*p.x()+mat[1][3]*p.y()+mat[2][3]*p.z()+mat[3][3]);
 }
 
+Vector Transform::transform(const Vector& v) const
+{
+	double invw = 1. / (mat[0][3] * v.x() + mat[1][3] * v.y() + mat[2][3] * v.z() + mat[3][3]);
+	return Vector(
+		invw * (mat[0][0] * v.x() + mat[1][0] * v.y() + mat[2][0] * v.z() + mat[3][0]),
+		invw * (mat[0][1] * v.x() + mat[1][1] * v.y() + mat[2][1] * v.z() + mat[3][1]),
+		invw * (mat[0][2] * v.x() + mat[1][2] * v.y() + mat[2][2] * v.z() + mat[3][2]));
+}
+
+void Transform::transform_inplace(Point& p) const
+{
+	Point t(mat[0][0] * p.x() + mat[1][0] * p.y() + mat[2][0] * p.z() + mat[3][0],
+		mat[0][1] * p.x() + mat[1][1] * p.y() + mat[2][1] * p.z() + mat[3][1],
+		mat[0][2] * p.x() + mat[1][2] * p.y() + mat[2][2] * p.z() + mat[3][2],
+		mat[0][3] * p.x() + mat[1][3] * p.y() + mat[2][3] * p.z() + mat[3][3]);
+	p = t;
+}
+
+void Transform::transform_inplace(Vector& v) const
+{
+	double invw = 1. / (mat[0][3] * v.x() + mat[1][3] * v.y() + mat[2][3] * v.z() + mat[3][3]);
+	Vector t(
+		invw * (mat[0][0] * v.x() + mat[1][0] * v.y() + mat[2][0] * v.z() + mat[3][0]),
+		invw * (mat[0][1] * v.x() + mat[1][1] * v.y() + mat[2][1] * v.z() + mat[3][1]),
+		invw * (mat[0][2] * v.x() + mat[1][2] * v.y() + mat[2][2] * v.z() + mat[3][2]));
+	v = t;
+}
+
 Point Transform::project(const Point& p) const
 {
 	return Point(mat[0][0]*p.x()+mat[0][1]*p.y()+mat[0][2]*p.z()+mat[0][3],

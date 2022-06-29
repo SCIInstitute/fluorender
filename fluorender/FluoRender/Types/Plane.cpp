@@ -103,6 +103,11 @@ namespace fluo
 		return Dot(p, n_)+d_;
 	}
 
+	double Plane::dot_normal(const Vector &v) const
+	{
+		return Dot(v, n_);
+	}
+
 	Point Plane::get_point() const
 	{
 		return -d_*Point(n_);
