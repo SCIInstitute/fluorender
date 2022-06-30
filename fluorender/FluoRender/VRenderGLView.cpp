@@ -7466,15 +7466,15 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		{
 			fluo::Vector view(0, 0, 1);
 			fluo::Vector normal;
-			fluo::Transform mv, prj;
+			fluo::Transform mv_prj, mv, mvinv;
 			if (m_persp)
 			{
 				mv.set(glm::value_ptr(mv_mat));
-				mv.invert();
-				prj.set(glm::value_ptr(m_proj_mat));
+				mvinv = mv;
+				mvinv.invert();
 			}
-			fluo::Transform mv_prj;
-			mv_prj.set(glm::value_ptr(matrix));
+			else
+				mv_prj.set(glm::value_ptr(matrix));
 			for (int pi = 0; pi < 6; ++pi)
 			{
 				if (m_persp)
@@ -7482,10 +7482,8 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					//look at plane center from origin
 					view = plane_centers[pi];
 					normal = (*planes)[pi]->normal();
-					mv_prj.transform_inplace(view);
-					mv.project_inplace(normal);
-					prj.transform_inplace(normal);
-					normal = -normal;
+					mv.transform_inplace(view);
+					mvinv.project_inplace(normal);
 				}
 				else
 				{

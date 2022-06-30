@@ -161,8 +161,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Size:");
 	m_font_size_cmb = new wxComboBox(page, ID_FontSizeCmb, "",
 		wxDefaultPosition, wxSize(50, -1), 0, NULL);
-	for (int font_size = 10; font_size < 50; font_size += 2)
-		m_font_size_cmb->Append(wxString::Format("%d", font_size));
+	for (int df = 3; df < 18; ++df)
+		m_font_size_cmb->Append(wxString::Format("%d", int(std::pow(df, 1.5))));
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_font_size_cmb);
@@ -1250,14 +1250,7 @@ void SettingDlg::UpdateUI()
 	int font_sel = m_font_cmb->FindString(str);
 	if (font_sel != wxNOT_FOUND)
 		m_font_cmb->Select(font_sel);
-	long font_size;
-	for (unsigned int i = 0; i < m_font_size_cmb->GetCount(); ++i)
-	{
-		str = m_font_size_cmb->GetString(i);
-		if (str.ToLong(&font_size) &&
-			font_size <= m_text_size)
-			m_font_size_cmb->Select(i);
-	}
+	m_font_size_cmb->SetValue(wxString::Format("%d", m_text_size));
 	m_text_color_cmb->Select(m_text_color);
 	//line width
 	m_line_width_text->SetValue(wxString::Format("%.0f", m_line_width));
