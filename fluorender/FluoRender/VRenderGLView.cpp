@@ -895,7 +895,7 @@ void VRenderGLView::Draw()
 			DrawGrid();
 
 		if (m_draw_clip)
-			DrawClippingPlanes(false, BACK_FACE);
+			DrawClippingPlanes(BACK_FACE);
 
 		//setup
 		glEnable(GL_BLEND);
@@ -906,7 +906,7 @@ void VRenderGLView::Draw()
 
 		//draw the clipping planes
 		if (m_draw_clip)
-			DrawClippingPlanes(true, FRONT_FACE);
+			DrawClippingPlanes(FRONT_FACE);
 
 		if (m_draw_bounds)
 			DrawBounds();
@@ -969,7 +969,7 @@ void VRenderGLView::DrawDP()
 			DrawGrid();
 
 		if (m_draw_clip)
-			DrawClippingPlanes(true, BACK_FACE);
+			DrawClippingPlanes(BACK_FACE);
 
 		//setup
 		glDisable(GL_BLEND);
@@ -1188,7 +1188,7 @@ void VRenderGLView::DrawDP()
 			DrawOLShadowsMesh(darkness);
 
 		if (m_draw_clip)
-			DrawClippingPlanes(false, FRONT_FACE);
+			DrawClippingPlanes(FRONT_FACE);
 
 		if (m_draw_bounds)
 			DrawBounds();
@@ -7250,7 +7250,7 @@ void VRenderGLView::DrawBounds()
 	glEnable(GL_BLEND);
 }
 
-void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
+void VRenderGLView::DrawClippingPlanes(int face_winding)
 {
 	int i;
 	bool link = false;
@@ -7268,6 +7268,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		return;
 
 	bool draw_plane = plane_mode != kFrame6 && plane_mode != kFrame3;
+	bool border = plane_mode == kFrame6 ||
+		(m_clip_mask == -1 && face_winding == FRONT_FACE) ||
+		m_clip_mask != -1;
+	if (!border && plane_mode == kFrame3)
+		return;
+
 	if ((plane_mode == kLowTransBack ||
 		plane_mode == kNormalBack) &&
 		m_clip_mask == -1)
@@ -7280,11 +7286,6 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 	}
 	else
 		glCullFace(GL_BACK);
-
-	if (!border &&
-		(plane_mode == kFrame6 ||
-		plane_mode == kFrame3))
-		return;
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -7462,11 +7463,12 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		}
 
 		bool draw_plane_border[6] = {true, true, true, true, true, true};
-		if (m_clip_mask == -1 && plane_mode != kFrame6)
+		//if (m_clip_mask == -1)
 		{
 			fluo::Vector view(0, 0, 1);
 			fluo::Vector normal;
 			fluo::Transform mv_prj, mv, mvinv;
+			double dotp;
 			if (m_persp)
 			{
 				mv.set(glm::value_ptr(mv_mat));
@@ -7490,8 +7492,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 					normal = (*planes)[pi]->normal();
 					mv_prj.unproject_inplace(normal);
 				}
-				if (fluo::Dot(normal, view) < 0)
-					draw_plane_border[pi] = false;
+				dotp = fluo::Dot(normal, view);
+				if (face_winding == FRONT_FACE)
+				{
+					if (dotp < 0)
+						draw_plane_border[pi] = false;
+				}
+				else
+				{
+					if (dotp >= 0)
+						draw_plane_border[pi] = false;
+				}
 			}
 		}
 

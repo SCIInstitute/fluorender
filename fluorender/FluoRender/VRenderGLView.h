@@ -1106,7 +1106,7 @@ private:
 		wxString name, fluo::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
-	void DrawClippingPlanes(bool border, int face_winding);
+	void DrawClippingPlanes(int face_winding);
 	void SetColormapColors(int colormap, fluo::Color &c, double inv);
 	void DrawColormap();
 	void DrawGradBg();
