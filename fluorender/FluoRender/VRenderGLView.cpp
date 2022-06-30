@@ -7462,13 +7462,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 		}
 
 		bool draw_plane_border[6] = {true, true, true, true, true, true};
-		if (m_clip_mask == -1 && plane_mode == kFrame3)
+		if (m_clip_mask == -1 && plane_mode != kFrame6)
 		{
 			fluo::Vector view(0, 0, 1);
 			fluo::Vector normal;
-			//fluo::Transform mv, prj;
-			//mv.set(glm::value_ptr(mv_mat));
-			//prj.set(glm::value_ptr(m_proj_mat));
+			fluo::Transform mv, prj;
+			if (m_persp)
+			{
+				mv.set(glm::value_ptr(mv_mat));
+				mv.invert();
+				prj.set(glm::value_ptr(m_proj_mat));
+			}
 			fluo::Transform mv_prj;
 			mv_prj.set(glm::value_ptr(matrix));
 			for (int pi = 0; pi < 6; ++pi)
@@ -7477,16 +7481,17 @@ void VRenderGLView::DrawClippingPlanes(bool border, int face_winding)
 				{
 					//look at plane center from origin
 					view = plane_centers[pi];
+					normal = (*planes)[pi]->normal();
 					mv_prj.transform_inplace(view);
-					//mv.transform_inplace(view);
-					//prj.transform_inplace(view);
+					mv.project_inplace(normal);
+					prj.transform_inplace(normal);
+					normal = -normal;
 				}
-				normal = (*planes)[pi]->normal();
-				mv_prj.unproject_inplace(normal);
-				//mv.unproject_inplace(normal);
-				//prj.unproject_inplace(normal);
-				//normal.normalize();
-				//view.normalize();
+				else
+				{
+					normal = (*planes)[pi]->normal();
+					mv_prj.unproject_inplace(normal);
+				}
 				if (fluo::Dot(normal, view) < 0)
 					draw_plane_border[pi] = false;
 			}
