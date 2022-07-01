@@ -156,6 +156,7 @@ namespace flrd
 		void Save(wxFileConfig &fconfig, int vi);
 		void Read(wxFileConfig &fconfig, int vi);
 
+		int Profile(flrd::Ruler* ruler);
 		int Profile(int index);
 		int Distance(int index, std::string filename);
 
@@ -228,7 +229,7 @@ namespace flrd
 			if (m_bits == 8)
 				return double(((unsigned char*)m_data)[index]) / 255.0;
 			else
-				return double(((unsigned short*)m_data)[index]) * m_scale / 65535.0;
+				return double(((unsigned short*)m_data)[index]) / 65535.0;
 		}
 		void xyz2ijkt(
 			double x, double y, double z,
@@ -259,11 +260,11 @@ namespace flrd
 		bool ijk(int &i, int &j, int &k)
 		{
 			if (i < 0) i = 0;
-			if (i > m_nx) i = m_nx - 1;
+			if (i >= m_nx) i = m_nx - 1;
 			if (j < 0) j = 0;
-			if (j > m_ny) j = m_ny - 1;
+			if (j >= m_ny) j = m_ny - 1;
 			if (k < 0) k = 0;
-			if (k > m_nz) k = m_nz - 1;
+			if (k >= m_nz) k = m_nz - 1;
 			return true;
 		}
 		double get_data_bl(double x, double y, double z)

@@ -67,7 +67,8 @@ public:
 
 	void Append(bool enable, unsigned int id,
 		wxString name, unsigned int group, int count,
-		wxString &color, int branches, double length, wxString &unit,
+		wxString intensity, wxString &color,
+		int branches, double length, wxString &unit,
 		double angle, wxString &center, bool time_dep,
 		int time, wxString &extra, wxString &points);
 	void AdjustSize();
@@ -242,6 +243,7 @@ private:
 
 private:
 	void AlignCenter(flrd::Ruler* ruler, flrd::RulerList* ruler_list);
+	void SetProfile(int i);
 
 	void OnNewLocator(wxCommandEvent& event);
 	void OnNewProbe(wxCommandEvent& event);

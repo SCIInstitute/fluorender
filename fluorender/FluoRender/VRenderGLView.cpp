@@ -7463,46 +7463,32 @@ void VRenderGLView::DrawClippingPlanes(int face_winding)
 		}
 
 		bool draw_plane_border[6] = {true, true, true, true, true, true};
-		//if (m_clip_mask == -1)
+		fluo::Vector view(0, 0, 1);
+		fluo::Vector normal;
+		fluo::Transform mv;
+		double dotp;
+		mv.set(glm::value_ptr(mv_mat));
+		for (int pi = 0; pi < 6; ++pi)
 		{
-			fluo::Vector view(0, 0, 1);
-			fluo::Vector normal;
-			fluo::Transform mv_prj, mv, mvinv;
-			double dotp;
+			normal = (*planes)[pi]->normal();
 			if (m_persp)
 			{
-				mv.set(glm::value_ptr(mv_mat));
-				mvinv = mv;
-				mvinv.invert();
+				//look at plane center from origin
+				view = plane_centers[pi];
+				mv.transform_inplace(view);
+				normal = -normal;
+			}
+			mv.unproject_inplace(normal);
+			dotp = fluo::Dot(normal, view);
+			if (face_winding == FRONT_FACE)
+			{
+				if (dotp >= 0)
+					draw_plane_border[pi] = false;
 			}
 			else
-				mv_prj.set(glm::value_ptr(matrix));
-			for (int pi = 0; pi < 6; ++pi)
 			{
-				if (m_persp)
-				{
-					//look at plane center from origin
-					view = plane_centers[pi];
-					normal = (*planes)[pi]->normal();
-					mv.transform_inplace(view);
-					mvinv.project_inplace(normal);
-				}
-				else
-				{
-					normal = (*planes)[pi]->normal();
-					mv_prj.unproject_inplace(normal);
-				}
-				dotp = fluo::Dot(normal, view);
-				if (face_winding == FRONT_FACE)
-				{
-					if (dotp < 0)
-						draw_plane_border[pi] = false;
-				}
-				else
-				{
-					if (dotp >= 0)
-						draw_plane_border[pi] = false;
-				}
+				if (dotp < 0)
+					draw_plane_border[pi] = false;
 			}
 		}
 
@@ -9956,6 +9942,7 @@ void VRenderGLView::OnMouse(wxMouseEvent& event)
 	fluo::Point mp = GetMousePos(event);
 
 	//mouse button down operations
+	m_ruler_handler.SetVolumeData(m_cur_vol);
 	if (event.LeftDown())
 	{
 		bool found_rp = false;

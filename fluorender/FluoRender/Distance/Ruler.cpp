@@ -52,6 +52,8 @@ Ruler::Ruler()
 
 	//brush size
 	m_brush_size = 0.0;
+
+	m_scale = 1;
 }
 
 Ruler::~Ruler()
@@ -605,6 +607,26 @@ wxString Ruler::GetPosNames()
 
 void Ruler::SaveProfile(wxString &filename)
 {
+}
+
+double Ruler::GetProfileMaxValue()
+{
+	double dval, max_val = 0.0;
+	if (m_profile.empty())
+		return 0.0;
+	for (size_t i = 0; i < m_profile.size(); ++i)
+	{
+		//for each profile
+		int pixels = m_profile[i].m_pixels;
+		if (pixels <= 0)
+			dval = 0;
+		else
+		{
+			dval = m_profile[i].m_accum / pixels;
+			max_val = std::max(max_val, dval);
+		}
+	}
+	return max_val;
 }
 
 void Ruler::FinishEllipse(fluo::Vector view)

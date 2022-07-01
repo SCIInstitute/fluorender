@@ -218,6 +218,8 @@ void RulerHandler::AddRulerPoint(fluo::Point &p)
 		m_ruler->SetTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);
 	}
+
+	Profile(m_ruler);
 }
 
 void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
@@ -238,6 +240,8 @@ void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 		m_ruler->SetTime(m_view->m_tseq_cur_num);
 		m_ruler_list->push_back(m_ruler);
 	}
+
+	Profile(m_ruler);
 }
 
 bool RulerHandler::GetMouseDist(int mx, int my, double dist)
@@ -360,6 +364,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, bool branch)
 	}
 
 	m_mouse = fluo::Point(mx, my, 0);
+
+	Profile(m_ruler);
 }
 
 void RulerHandler::AddPaintRulerPoint()
@@ -408,6 +414,8 @@ void RulerHandler::AddPaintRulerPoint()
 		m_ruler->AddInfoValues(str);
 		m_ruler_list->push_back(m_ruler);
 	}
+
+	Profile(m_ruler);
 }
 
 bool RulerHandler::MoveRuler(int mx, int my)
@@ -444,6 +452,8 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	{
 		m_ruler->GetPoint(i)->DisplacePoint(displace);
 	}
+
+	Profile(m_ruler);
 
 	return true;
 }
@@ -515,6 +525,8 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 		tmp = c + (c - p0->GetPoint());
 		p1->SetPoint(tmp);
 	}
+
+	Profile(m_ruler);
 
 	return true;
 }
@@ -753,15 +765,10 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 	}
 }
 
-int RulerHandler::Profile(int index)
+int RulerHandler::Profile(flrd::Ruler* ruler)
 {
 	if (!m_view || !m_vd || !m_ruler_list)
 		return 0;
-	if (index < 0 ||
-		index >= m_ruler_list->size())
-		return 0;
-
-	flrd::Ruler* ruler = (*m_ruler_list)[index];
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 
@@ -795,6 +802,7 @@ int RulerHandler::Profile(int index)
 	m_nx = nx; m_ny = ny; m_nz = nz;
 	m_bits = m_vd->GetBits();
 	m_scale = m_vd->GetScalarScale();
+	ruler->SetScalarScale(m_bits == 8 ? 255: 65535);
 	if (!valid()) return 0;
 
 	if (ruler->GetRulerType() == 3 && mask)
@@ -830,31 +838,31 @@ int RulerHandler::Profile(int index)
 		long long vol_index;
 		//go through data
 		for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-		for (k = 0; k < nz; ++k)
-		{
-			vol_index = (long long)nx*ny*k + nx * j + i;
-			unsigned char mask_value = ((unsigned char*)mask)[vol_index];
-			if (mask_value)
-			{
-				//find bin
-				fluo::Point p(i, j, k);
-				fluo::Vector pdir = p - p1;
-				double proj = fluo::Dot(pdir, dir);
-				int bin_num = int(proj / bin_dist);
-				if (bin_num < 0 || bin_num >= bins)
-					continue;
-				//make sure it's within the brush radius
-				fluo::Point p_ruler = p1 + proj * dir;
-				if ((p_ruler - p).length() > brush_radius)
-					continue;
+			for (j = 0; j < ny; ++j)
+				for (k = 0; k < nz; ++k)
+				{
+					vol_index = (long long)nx*ny*k + nx * j + i;
+					unsigned char mask_value = ((unsigned char*)mask)[vol_index];
+					if (mask_value)
+					{
+						//find bin
+						fluo::Point p(i, j, k);
+						fluo::Vector pdir = p - p1;
+						double proj = fluo::Dot(pdir, dir);
+						int bin_num = int(proj / bin_dist);
+						if (bin_num < 0 || bin_num >= bins)
+							continue;
+						//make sure it's within the brush radius
+						fluo::Point p_ruler = p1 + proj * dir;
+						if ((p_ruler - p).length() > brush_radius)
+							continue;
 
-				double intensity = get_data(i, j, k);
+						double intensity = get_data(i, j, k);
 
-				(*profile)[bin_num].m_pixels++;
-				(*profile)[bin_num].m_accum += intensity;
-			}
-		}
+						(*profile)[bin_num].m_pixels++;
+						(*profile)[bin_num].m_accum += intensity;
+					}
+				}
 	}
 	else
 	{
@@ -895,7 +903,7 @@ int RulerHandler::Profile(int index)
 			for (unsigned int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
 			{
 				p1 = ruler->GetPointTransformed(pn);
-				p2 = ruler->GetPointTransformed(pn+1);
+				p2 = ruler->GetPointTransformed(pn + 1);
 				//object space
 				p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
 				p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
@@ -921,6 +929,15 @@ int RulerHandler::Profile(int index)
 	str = str + m_vd->GetName();
 	ruler->SetInfoProfile(str);
 	return 1;
+}
+
+int RulerHandler::Profile(int index)
+{
+	if (index < 0 ||
+		index >= m_ruler_list->size())
+		return 0;
+	flrd::Ruler* ruler = (*m_ruler_list)[index];
+	return Profile(ruler);
 }
 
 int RulerHandler::Distance(int index, std::string filename)

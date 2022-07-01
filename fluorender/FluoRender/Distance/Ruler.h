@@ -313,6 +313,15 @@ namespace flrd
 			return &m_profile;
 		}
 		void SaveProfile(wxString &filename);
+		double GetProfileMaxValue();
+		void SetScalarScale(double dval)
+		{
+			m_scale = dval;
+		}
+		double GetScalarScale()
+		{
+			return m_scale;
+		}
 
 		//color
 		void SetColor(fluo::Color& color)
@@ -355,6 +364,7 @@ namespace flrd
 		//a profile
 		wxString m_info_profile;
 		std::vector<ProfileBin> m_profile;
+		double m_scale;
 		//color
 		bool m_use_color;
 		fluo::Color m_color;
