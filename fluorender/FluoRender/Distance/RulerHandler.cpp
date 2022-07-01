@@ -767,7 +767,7 @@ void RulerHandler::Read(wxFileConfig &fconfig, int vi)
 
 int RulerHandler::Profile(flrd::Ruler* ruler)
 {
-	if (!m_view || !m_vd || !m_ruler_list)
+	if (!m_view || !m_vd || !ruler)
 		return 0;
 	if (ruler->GetNumPoint() < 1)
 		return 0;
@@ -933,6 +933,8 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 
 int RulerHandler::Profile(int index)
 {
+	if (!m_ruler_list)
+		return 0;
 	if (index < 0 ||
 		index >= m_ruler_list->size())
 		return 0;
