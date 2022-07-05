@@ -28,5 +28,5 @@ time_mode=TM_LAST_POST
 template=ridgeline.html
 output=
 value_num=1
-value_name0=intensity
-js_value=(+d.intensity)
+value_name0=max_int
+js_value=(+d.max_int)

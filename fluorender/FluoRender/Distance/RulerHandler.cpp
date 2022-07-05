@@ -895,6 +895,7 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 			intensity = get_filtered_data(p.x(), p.y(), p.z());
 			(*profile)[0].m_pixels++;
 			(*profile)[0].m_accum += intensity;
+			(*profile)[0].dist = 0;
 		}
 		else
 		{
@@ -904,8 +905,9 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 				profile->push_back(flrd::ProfileBin());
 
 			fluo::Point p1, p2;
-			fluo::Vector dir;
+			fluo::Vector dir, dir2;
 			double dist;
+			double real_dist = 0, real_step = 0;
 			int total_dist = 0;
 			for (unsigned int pn = 0; pn < ruler->GetNumPoint() - 1; ++pn)
 			{
@@ -917,6 +919,9 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 				dir = p2 - p1;
 				dist = dir.length();
 				dir.normalize();
+				dir2 = dir * m_step_length;
+				dir2 *= fluo::Vector(spcx, spcy, spcz);
+				real_step = dir2.length();
 
 				for (double dn = 0; dn < dist; dn += m_step_length)
 				{
@@ -925,6 +930,8 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 					if (total_dist >= bins) break;
 					(*profile)[total_dist].m_pixels++;
 					(*profile)[total_dist].m_accum += intensity;
+					(*profile)[total_dist].dist = real_dist;
+					real_dist += real_step;
 					total_dist++;
 				}
 			}

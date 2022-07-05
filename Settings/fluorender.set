@@ -95,8 +95,8 @@ relax\ type=1
 size\ thresh=2
 [bg\ int]
 type=0
-kx=100
-ky=100
+kx=15
+ky=15
 varth=0.0001
 gauth=1
 [pvxml]

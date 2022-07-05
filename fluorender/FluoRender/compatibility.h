@@ -54,6 +54,7 @@ DEALINGS IN THE SOFTWARE.
 #include <tiffio.h>
 #include <direct.h>
 #include <codecvt>
+#include <cctype>
 
 #define GETCURRENTDIR _getcwd
 
@@ -353,6 +354,12 @@ inline void SaveConfig(wxFileConfig &file, wxString str)
 	file.Save(os);
 }
 
+inline bool IS_NUMBER(const std::string& s)
+{
+	return !s.empty() && std::find_if(s.begin(),
+		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
+}
+
 #else // MAC OSX or LINUX
 
 #include <string>
@@ -370,6 +377,7 @@ inline void SaveConfig(wxFileConfig &file, wxString str)
 #include <wx/wx.h>
 #include <wx/fileconf.h>
 #include <wx/wfstream.h>
+#include <cctype>
 
 #define GETCURRENTDIR getcwd
 
@@ -687,6 +695,12 @@ inline void SaveConfig(wxFileConfig &file, wxString str)
 {
 	wxFileOutputStream os(str);
 	file.Save(os);
+}
+
+inline bool IS_NUMBER(const std::string& s)
+{
+	return !s.empty() && std::find_if(s.begin(),
+		s.end(), [](unsigned char c) { return !std::isdigit(int(c)); }) == s.end();
 }
 
 //LINUX SPECIFIC

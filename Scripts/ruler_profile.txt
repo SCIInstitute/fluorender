@@ -10,8 +10,8 @@ step_len=1
 [tasks/task1]
 type=export_analysis
 time_mode=TM_LAST_POST
-template=table.html
+template=ridgeline.html
 output=
 value_num=1
-value_name0=intensity
-js_value=
+value_name0=max_int
+js_value=(+d.max_int)

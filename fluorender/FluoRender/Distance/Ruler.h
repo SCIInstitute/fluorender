@@ -47,6 +47,7 @@ namespace flrd
 		~ProfileBin() {}
 		int m_pixels;
 		double m_accum;
+		double dist;//dist from start
 	};
 
 	class RulerPoint;
@@ -314,6 +315,7 @@ namespace flrd
 		}
 		void SaveProfile(wxString &filename);
 		double GetProfileMaxValue();
+		void GetProfileMaxValue(double &val, double &dist);//return max value and its distance on ruler
 		void SetScalarScale(double dval)
 		{
 			m_scale = dval;

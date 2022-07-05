@@ -1136,16 +1136,13 @@ void ScriptProc::RunRulerProfile()
 	ruler_handler->SetSampleType(ival);
 	m_fconfig->Read("step_len", &dval, 1);
 	ruler_handler->SetStepLength(dval);
+	bool bg_int = ruler_handler->GetBackground();
+	ruler_handler->SetBackground(false);
 
 	int curf = m_view->m_tseq_cur_num;
 	int chan_num = vlist.size();
 	int ch = 0;
 	std::string fn = std::to_string(curf);
-
-	//get df/f setting
-	bool df_f = false;
-	if (m_frame->GetSettingDlg())
-		df_f = m_frame->GetSettingDlg()->GetRulerDF_F();
 
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
@@ -1179,7 +1176,11 @@ void ScriptProc::RunRulerProfile()
 			vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 			if (profile && profile->size())
 			{
-				double dval;
+				double dval, dist;
+				//max intensity
+				ruler->GetProfileMaxValue(dval, dist);
+				ruler_node->addSetValue("max_int", dval);
+				ruler_node->addSetValue("max_dist", dist);
 				double sumd = 0.0;
 				unsigned long long sumull = 0;
 				for (size_t j = 0; j < profile->size(); ++j)
@@ -1196,19 +1197,10 @@ void ScriptProc::RunRulerProfile()
 					}
 					ruler_node->addSetValue(std::to_string(j), dval);
 				}
-				if (df_f)
-				{
-					if (i == 0)
-					{
-						double avg = 0.0;
-						if (sumull != 0)
-							avg = sumd / double(sumull);
-						ruler_node->addSetValue("f", avg);
-					}
-				}
 			}
 		}
 	}
+	ruler_handler->SetBackground(bg_int);
 }
 
 void ScriptProc::RunAddCells()
@@ -1533,20 +1525,40 @@ void ScriptProc::ExportAnalysis()
 					*ofs_ << "CH-" << ch_ << " ";
 				str = object->getName();
 				*ofs_ << "ID-" << str << "," << t_;
-				fluo::ValueVector names =
-					object->getValueNames(3);
-				for (auto it = names.begin();
-					it != names.end(); ++it)
+				for (auto it = vnames_.begin();
+					it != vnames_.end(); ++it)
 				{
-					if (*it == "type" ||
-						*it == "f")
-						continue;
-					fluo::ValueTuple vt;
-					std::get<0>(vt) = *it;
+					*ofs_ << ",";
+					//local value
+					fluo::ValueTuple vt{ *it, "", "" };
 					if (object->getValue(vt))
-					{
-						*ofs_ << ",";
 						*ofs_ << std::get<2>(vt);
+					else
+					{
+						//global value
+						auto vit = gvalues_.find(*it);
+						if (vit == gvalues_.end())
+							*ofs_ << "0";
+						else
+							*ofs_ << vit->second;
+					}
+				}
+				if (vnames_.find("intensity") != vnames_.end())
+				{
+					fluo::ValueVector names =
+						object->getValueNames(3);
+					for (auto it = names.begin();
+						it != names.end(); ++it)
+					{
+						if (!IS_NUMBER(*it))
+							continue;
+						fluo::ValueTuple vt;
+						std::get<0>(vt) = *it;
+						if (object->getValue(vt))
+						{
+							*ofs_ << ",";
+							*ofs_ << std::get<2>(vt);
+						}
 					}
 				}
 				*ofs_ << "\\n\\" << std::endl;

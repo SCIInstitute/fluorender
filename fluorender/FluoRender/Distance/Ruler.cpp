@@ -629,6 +629,31 @@ double Ruler::GetProfileMaxValue()
 	return max_val;
 }
 
+void Ruler::GetProfileMaxValue(double &val, double &dist)
+{
+	val = 0;
+	dist = 0;
+	double dval;
+	if (m_profile.empty())
+		return;
+	for (size_t i = 0; i < m_profile.size(); ++i)
+	{
+		//for each profile
+		int pixels = m_profile[i].m_pixels;
+		if (pixels <= 0)
+			dval = 0;
+		else
+		{
+			dval = m_profile[i].m_accum / pixels;
+			if (dval > val)
+			{
+				val = dval;
+				dist = m_profile[i].dist;
+			}
+		}
+	}
+}
+
 void Ruler::FinishEllipse(fluo::Vector view)
 {
 	if (m_ruler_type != 5 ||
