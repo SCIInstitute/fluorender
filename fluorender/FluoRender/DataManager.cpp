@@ -299,6 +299,10 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//save label
 	m_label_save = 0;
+
+	//background intensity
+	m_bg_valid = false;
+	m_bg_int = 0;
 }
 
 VolumeData::~VolumeData()
@@ -464,6 +468,7 @@ int VolumeData::Load(Nrrd* data, wxString &name, wxString &path)
 		SetMode(m_mode);
 	}
 
+	m_bg_valid = false;
 	return 1;
 }
 
@@ -496,6 +501,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	if (tex)
 		delete tex;
 
+	m_bg_valid = false;
 	return 1;
 }
 
@@ -525,6 +531,7 @@ int VolumeData::Replace(VolumeData* data)
 		m_vr->set_texture(m_tex);
 	else
 		return 0;
+	m_bg_valid = false;
 	return 1;
 }
 
@@ -622,6 +629,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_gm_scale(m_scalar_scale);
 
 	SetMode(m_mode);
+	m_bg_valid = false;
 }
 
 //volume mask

@@ -480,6 +480,24 @@ public:
 	void PopLabel();
 	void LoadLabel2();
 
+	//backgeound intensity
+	bool GetBackgroundValid()
+	{
+		return m_bg_valid;
+	}
+	void SetBackgroundInt(double dval)
+	{
+		m_bg_int = dval;
+		m_bg_valid = true;
+	}
+	double GetBackgroundInt()
+	{
+		if (m_bg_valid)
+			return m_bg_int;
+		else
+			return 0;
+	}
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -601,6 +619,10 @@ private:
 
 	//mask cleared
 	bool m_mask_clear;
+
+	//background intensity
+	bool m_bg_valid;
+	double m_bg_int;
 
 private:
 	//label functions

@@ -843,6 +843,11 @@ void SettingDlg::GetSettings()
 	m_ruler_auto_relax = false;
 	m_ruler_relax_type = 1;
 	m_ruler_df_f = false;
+	m_bg_type = 0;
+	m_kx = 100;
+	m_ky = 100;
+	m_varth = 0.0001;
+	m_gauth = 1;
 	m_ruler_size_thresh = 5;
 	m_pvxml_flip_x = false;
 	m_pvxml_flip_y = false;
@@ -1098,6 +1103,16 @@ void SettingDlg::GetSettings()
 		fconfig.Read("auto relax", &m_ruler_auto_relax);
 		fconfig.Read("relax type", &m_ruler_relax_type);
 		fconfig.Read("size thresh", &m_ruler_size_thresh);
+	}
+	//background paramters
+	if (fconfig.Exists("/bg int"))
+	{
+		fconfig.SetPath("/bg int");
+		fconfig.Read("type", &m_bg_type);
+		fconfig.Read("kx", &m_kx);
+		fconfig.Read("ky", &m_ky);
+		fconfig.Read("varth", &m_varth);
+		fconfig.Read("gauth", &m_gauth);
 	}
 	//flags for pvxml flipping
 	if (fconfig.Exists("/pvxml"))
@@ -1474,6 +1489,14 @@ void SettingDlg::SaveSettings()
 	fconfig.Write("auto relax", m_ruler_auto_relax);
 	fconfig.Write("relax type", m_ruler_relax_type);
 	fconfig.Write("size thresh", m_ruler_size_thresh);
+
+	//background intensity
+	fconfig.SetPath("/bg int");
+	fconfig.Write("type", m_bg_type);
+	fconfig.Write("kx", m_kx);
+	fconfig.Write("ky", m_ky);
+	fconfig.Write("varth", m_varth);
+	fconfig.Write("gauth", m_gauth);
 
 	//flags for flipping pvxml
 	fconfig.SetPath("/pvxml");

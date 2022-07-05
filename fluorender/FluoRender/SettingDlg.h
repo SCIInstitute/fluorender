@@ -237,6 +237,15 @@ public:
 	//ruler exports df/f
 	bool GetRulerDF_F() { return m_ruler_df_f; }
 	void SetRulerDF_F(bool val) { m_ruler_df_f = val; }
+	//background parameters
+	void GetBgParams(int &type, int &kx, int &ky, double &varth, double &gauth)
+	{
+		type = m_bg_type;
+		kx = m_kx;
+		ky = m_ky;
+		varth = m_varth;
+		gauth = m_gauth;
+	}
 	//ruler size thresh
 	int GetRulerSizeThresh() { return m_ruler_size_thresh; }
 	void SetRulerSizeThresh(int val) { m_ruler_size_thresh = val; }
@@ -373,6 +382,10 @@ private:
 	int m_ruler_relax_type;
 	//ruler exports df/f
 	bool m_ruler_df_f;
+	//background parameters
+	int m_bg_type;//0-mean; 1-minmax; 2-median
+	int m_kx, m_ky;//windows size
+	double m_varth, m_gauth;//thresholds
 	//grow ruler size thresh
 	int m_ruler_size_thresh;
 	//flip pvxml frame

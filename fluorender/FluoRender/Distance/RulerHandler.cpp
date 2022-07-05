@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Selection/VolumeSelector.h>
 #include <Distance/Cov.h>
 #include <Calculate/Count.h>
+#include <Calculate/BackgStat.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Nrrd/nrrd.h>
 #include <wx/fileconf.h>
@@ -61,6 +62,12 @@ RulerHandler::RulerHandler() :
 RulerHandler::~RulerHandler()
 {
 
+}
+
+double RulerHandler::GetVolumeBgInt()
+{
+	if (!m_vd) return 0;
+	m_vd->GetBackgroundInt();
 }
 
 bool RulerHandler::FindEditingRuler(double mx, double my)
@@ -928,6 +935,22 @@ int RulerHandler::Profile(flrd::Ruler* ruler)
 	wxString str("Profile of volume ");
 	str = str + m_vd->GetName();
 	ruler->SetInfoProfile(str);
+
+	//get background intensity
+	if (m_background)
+	{
+		if (!m_vd->GetBackgroundValid())
+		{
+			flrd::BackgStat bgs(m_vd);
+			bgs.SetType(m_bg_type);
+			bgs.SetFeatureSize2D(m_kx, m_ky);
+			bgs.SetThreshold(m_varth, m_gauth);
+			bgs.Run();
+			double result = bgs.GetResultf();
+			m_vd->SetBackgroundInt(result);
+		}
+	}
+
 	return 1;
 }
 

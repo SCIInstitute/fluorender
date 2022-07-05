@@ -363,6 +363,12 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 
 	m_ruler_handler.SetView(this);
 	m_ruler_handler.SetRulerList(&m_ruler_list);
+	if (m_frame && m_frame->GetSettingDlg())
+	{
+		int type, kx, ky; double varth, gauth;
+		m_frame->GetSettingDlg()->GetBgParams(type, kx, ky, varth, gauth);
+		m_ruler_handler.SetBgParams(type, kx, ky, varth, gauth);
+	}
 	m_ruler_renderer.SetView(this);
 	m_ruler_renderer.SetRulerList(&m_ruler_list);
 	m_vp.SetView(this);

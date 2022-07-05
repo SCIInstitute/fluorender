@@ -135,8 +135,6 @@ RulerListCtrl::RulerListCtrl(
 	m_color_picker = new wxColourPickerCtrl(this,
 		ID_ColorPicker);
 	m_color_picker->Hide();
-
-	m_ruler_df_f = false;
 }
 
 RulerListCtrl::~RulerListCtrl()
@@ -265,8 +263,15 @@ void RulerListCtrl::UpdateRulers(VRenderGLView* vrv)
 		}
 		double dval = ruler->GetProfileMaxValue();
 		dval *= ruler->GetScalarScale();
-		wxString intensity =
-			wxString::Format("%.0f", dval);
+		wxString intensity;
+		if (m_rhdl->GetBackground())
+		{
+			double bg_int = m_rhdl->GetVolumeBgInt();
+			dval = (dval - bg_int) / bg_int;
+			intensity = wxString::Format("%.4f", dval);
+		}
+		else
+			intensity = wxString::Format("%.0f", dval);
 		wxString color;
 		if (ruler->GetUseColor())
 			color = wxString::Format("RGB(%d, %d, %d)",
@@ -525,25 +530,25 @@ void RulerListCtrl::Export(wxString filename)
 						sumull += pixels;
 					}
 				}
-				if (m_ruler_df_f)
-				{
-					double avg = 0.0;
-					if (sumull != 0)
-						avg = sumd / double(sumull);
-					if (i == 0)
-					{
-						f = avg;
-						os << "\t" << f << "\t";
-					}
-					else
-					{
-						double df = avg - f;
-						if (f == 0.0)
-							os << "\t" << df << "\t";
-						else
-							os << "\t" << df / f << "\t";
-					}
-				}
+				//if (m_ruler_df_f)
+				//{
+				//	double avg = 0.0;
+				//	if (sumull != 0)
+				//		avg = sumd / double(sumull);
+				//	if (i == 0)
+				//	{
+				//		f = avg;
+				//		os << "\t" << f << "\t";
+				//	}
+				//	else
+				//	{
+				//		double df = avg - f;
+				//		if (f == 0.0)
+				//			os << "\t" << df << "\t";
+				//		else
+				//			os << "\t" << df / f << "\t";
+				//	}
+				//}
 				os << "\n";
 			}
 		}
@@ -1306,7 +1311,7 @@ void MeasureDlg::GetSettings(VRenderGLView* vrv)
 			//ruler exports df/f
 			bool bval = m_frame->GetSettingDlg()->GetRulerDF_F();
 			m_df_f_chk->SetValue(bval);
-			m_rulerlist->m_ruler_df_f = bval;
+			m_rhdl->SetBackground(bval);
 			//relax
 			m_relax_value_spin->SetValue(
 				m_frame->GetSettingDlg()->GetRulerRelaxF1());
@@ -2114,11 +2119,14 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 
 void MeasureDlg::OnDF_FCheck(wxCommandEvent& event)
 {
-	if (!m_view)
+	if (!m_rhdl)
 		return;
 
 	bool val = m_df_f_chk->GetValue();
-	m_rulerlist->m_ruler_df_f = val;
+	m_rhdl->SetBackground(val);
+	if (val)
+		OnProfile(event);
+	m_rulerlist->UpdateRulers(m_view);
 
 	if (m_frame && m_frame->GetSettingDlg())
 		m_frame->GetSettingDlg()->SetRulerDF_F(val);
@@ -2272,7 +2280,15 @@ void MeasureDlg::SetProfile(int i)
 	flrd::Ruler* ruler = (*ruler_list)[i];
 	double dval = ruler->GetProfileMaxValue();
 	dval *= ruler->GetScalarScale();
-	wxString str = wxString::Format("%.0f", dval);
+	wxString str;
+	if (m_rhdl->GetBackground())
+	{
+		double bg_int = m_rhdl->GetVolumeBgInt();
+		dval = (dval - bg_int) / bg_int;
+		str = wxString::Format("%.4f", dval);
+	}
+	else
+		str = wxString::Format("%.0f", dval);
 	m_rulerlist->SetText(i, IntCol, str);
 }
 
