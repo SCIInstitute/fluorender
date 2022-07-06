@@ -67,7 +67,7 @@ RulerHandler::~RulerHandler()
 double RulerHandler::GetVolumeBgInt()
 {
 	if (!m_vd) return 0;
-	m_vd->GetBackgroundInt();
+	return m_vd->GetBackgroundInt();
 }
 
 bool RulerHandler::FindEditingRuler(double mx, double my)
