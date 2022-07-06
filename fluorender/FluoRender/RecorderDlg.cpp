@@ -749,6 +749,7 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 	FlKeyQuaternion* flkeyQ = 0;
 	FlKeyBoolean* flkeyB = 0;
 	FlKeyInt* flkeyI = 0;
+	FlKeyColor* flkeyC = 0;
 
 	double t = interpolator->GetLastT();
 	t = t<0.0?0.0:t+duration;
@@ -824,6 +825,12 @@ void RecorderDlg::InsertKey(int index, double duration, int interpolation)
 		keycode.l2_name = "frame";
 		flkey = new FlKeyDouble(keycode, frame);
 		interpolator->AddKey(flkey);
+		//primary color
+		fluo::Color pc = vd->GetColor();
+		keycode.l2 = 0;
+		keycode.l2_name = "color";
+		flkeyC = new FlKeyColor(keycode, pc);
+		interpolator->AddKey(flkeyC);
 	}
 	//for the view
 	keycode.l0 = 1;

@@ -4652,6 +4652,12 @@ void VRenderGLView::SetParams(double t)
 		keycode.l2_name = "frame";
 		if (interpolator->GetDouble(keycode, t, frame))
 			UpdateVolumeData(int(frame + 0.5), vd);
+		//primary color
+		fluo::Color pc;
+		keycode.l2 = 0;
+		keycode.l2_name = "color";
+		if (interpolator->GetColor(keycode, t, pc))
+			vd->SetColor(pc);
 	}
 
 	bool bx, by, bz;

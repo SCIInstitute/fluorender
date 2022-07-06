@@ -28,14 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _INTERPOLATOR_H_
 #define _INTERPOLATOR_H_
 
+#include <Animator/FlKey.h>
+#include <Animator/FlKeyDouble.h>
+#include <Animator/FlKeyQuaternion.h>
+#include <Animator/FlKeyBoolean.h>
+#include <Animator/FlKeyInt.h>
+#include <Animator/FlKeyColor.h>
 #include <vector>
 #include <string>
-#include "FlKey.h"
-#include "FlKeyDouble.h"
-#include "FlKeyQuaternion.h"
-#include "FlKeyBoolean.h"
-#include "FlKeyInt.h"
-#include <Types/Quaternion.h>
 
 using namespace std;
 
@@ -94,11 +94,13 @@ public:
 	bool GetQuaternion(FlKeyCode keycode, double t, fluo::Quaternion &qval);
 	bool GetBoolean(FlKeyCode keycode, double t, bool &bval);
 	bool GetInt(FlKeyCode keycode, double t, int &ival);
+	bool GetColor(FlKeyCode keycode, double t, fluo::Color &cval);
 	//get values at index
 	bool GetDouble(FlKeyCode keycode, int index, double &dval);
 	bool GetQuaternion(FlKeyCode keycode, int index, fluo::Quaternion &qval);
 	bool GetBoolean(FlKeyCode keycode, int index, bool &bval);
 	bool GetInt(FlKeyCode keycode, int index, int &ival);
+	bool GetColor(FlKeyCode keycode, int index, fluo::Color &cval);
 
 	static int m_id;
 
@@ -111,6 +113,8 @@ private:
 	FlKey* SearchKey(FlKeyCode keycode, FlKeyGroup* g);
 	bool StepDouble(FlKeyCode keycode, FlKeyGroup* g, double &dval);
 	bool LinearDouble(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, double &dval);
+	bool StepColor(FlKeyCode keycode, FlKeyGroup* g, fluo::Color &cval);
+	bool LinearColor(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, fluo::Color &cval);
 	bool StepQuaternion(FlKeyCode keycode, FlKeyGroup* g, fluo::Quaternion &qval);
 	bool LinearQuaternion(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, fluo::Quaternion &qval);
 	double Smooth(double ft, bool s1, bool s2);

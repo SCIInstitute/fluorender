@@ -3477,6 +3477,15 @@ void VRenderFrame::SaveProject(wxString& filename)
 							int ival = ((FlKeyInt*)key)->GetValue();
 							fconfig.Write("val", ival);
 						}
+						break;
+					case FLKEY_TYPE_COLOR:
+						{
+							fluo::Color cval = ((FlKeyColor*)key)->GetValue();
+							str = wxString::Format("%lf %lf %lf",
+								cval.r(), cval.g(), cval.b());
+							fconfig.Write("val", str);
+						}
+						break;
 					}
 				}
 			}
@@ -4961,6 +4970,21 @@ void VRenderFrame::OpenProject(wxString& filename)
 										{
 											FlKeyInt* key = new FlKeyInt(code, iVal);
 											key_group->keys.push_back(key);
+										}
+									}
+									break;
+								case FLKEY_TYPE_COLOR:
+									{
+										if (fconfig.Read("val", &sVal))
+										{
+											double r, g, b;
+											if (SSCANF(sVal.c_str(), "%lf%lf%lf",
+												&r, &g, &b))
+											{
+												fluo::Color cval = fluo::Color(r, g, b);
+												FlKeyColor* key = new FlKeyColor(code, cval);
+												key_group->keys.push_back(key);
+											}
 										}
 									}
 									break;

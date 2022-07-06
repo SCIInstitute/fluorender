@@ -461,6 +461,56 @@ bool Interpolator::GetInt(FlKeyCode keycode, double t, int &ival)
 	return false;
 }
 
+bool Interpolator::GetColor(FlKeyCode keycode, double t, fluo::Color &cval)
+{
+	int g1 = -1;
+	int g2 = -1;
+
+	for (int i = 0; i < (int)m_key_list.size(); i++)
+	{
+		if (t > m_key_list[i]->t)
+			g1 = i;
+		else if (t < m_key_list[i]->t)
+		{
+			g2 = i;
+			break;
+		}
+		else
+		{
+			g1 = g2 = i;
+			break;
+		}
+	}
+
+	if (g1 == -1 && g2 == -1)
+	{
+		cval = fluo::Color(1.0);
+		return false;
+	}
+
+	if (g1 > -1 && g2 == -1)
+	{
+		if (g1 == 0)
+			return StepColor(keycode, m_key_list[0], cval);
+		else
+			return LinearColor(keycode, m_key_list[g1 - 1], m_key_list[g1], t, cval);
+	}
+
+	if (g1 == -1 && g2 > -1)
+	{
+		if (g2 == (int64_t)m_key_list.size() - 1)
+			return StepColor(keycode, m_key_list[g2], cval);
+		else
+			return LinearColor(keycode, m_key_list[g2], m_key_list[g2 + 1], t, cval);
+	}
+
+	if (g1 > -1 && g2 > -1)
+		return LinearColor(keycode, m_key_list[g1], m_key_list[g2], t, cval);
+
+	cval = fluo::Color(1.0);
+	return false;
+}
+
 bool Interpolator::GetQuaternion(FlKeyCode keycode, double t, fluo::Quaternion &qval)
 {
 	int g1 = -1;
@@ -632,6 +682,43 @@ bool Interpolator::LinearDouble(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g
 	}
 	double st = Smooth((t-t1)/(t2-t1), g1->type==1, g2->type==1);
 	dval = v1 + st * (v2-v1);
+	return true;
+}
+
+bool Interpolator::StepColor(FlKeyCode keycode, FlKeyGroup* g, fluo::Color &cval)
+{
+	cval = fluo::Color(1.0);
+	if (!g) return false;
+	FlKey *key = SearchKey(keycode, g);
+	if (!key) return false;
+	if (key->GetType() != FLKEY_TYPE_COLOR) return false;
+	cval = ((FlKeyColor*)key)->GetValue();
+	return true;
+}
+
+bool Interpolator::LinearColor(FlKeyCode keycode, FlKeyGroup* g1, FlKeyGroup* g2, double t, fluo::Color &cval)
+{
+	cval = fluo::Color(1.0);
+	if (!g1 || !g2) return false;
+	FlKey *key1 = SearchKey(keycode, g1);
+	FlKey *key2 = SearchKey(keycode, g2);
+	if (!key1 || !key2) return false;
+	if (key1->GetType() != FLKEY_TYPE_COLOR ||
+		key2->GetType() != FLKEY_TYPE_COLOR)
+		return false;
+	fluo::Color v1, v2;
+	double t1, t2;
+	v1 = ((FlKeyColor*)key1)->GetValue();
+	v2 = ((FlKeyColor*)key2)->GetValue();
+	t1 = g1->t;
+	t2 = g2->t;
+	if (t1 == t2)
+	{
+		cval = v1;
+		return true;
+	}
+	double st = Smooth((t - t1) / (t2 - t1), g1->type == 1, g2->type == 1);
+	cval = v1 + (v2 - v1) * st;
 	return true;
 }
 
