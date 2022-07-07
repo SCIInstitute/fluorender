@@ -540,6 +540,7 @@ void VRenderView::CreateBar()
 
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
+	m_full_screen_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmapFromMemory(full_view);
 	m_full_screen_btn->AddTool(
 		ID_FullScreenBtn, "Full Screen",
@@ -555,6 +556,7 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
 	m_left_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_left_toolbar->SetDoubleBuffered(true);
 	bitmap = wxGetBitmapFromMemory(no_depth_atten);
 #ifdef _DARWIN
 	m_left_toolbar->SetToolBitmapSize(bitmap.GetSize());
@@ -668,6 +670,7 @@ void VRenderView::CreateBar()
 	wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_lower_toolbar = new wxToolBar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_lower_toolbar->SetDoubleBuffered(true);
 	st1 = new wxStaticText(this, 0, "X:");
 	m_x_rot_sldr = new wxScrollBar(this, ID_XRotSldr);
 	m_x_rot_sldr->SetScrollbar(180,60,420,15);
