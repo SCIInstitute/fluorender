@@ -3,7 +3,7 @@
 
 #define MyAppName "FluoRender"   
 #define MyAppSetupName 'FluoRender'
-#define MyAppVersion "2.27"
+#define MyAppVersion "2.28"
 #define MyAppPublisher "SCI"
 #define MyAppURL "http://sci.utah.edu"
 #define MyAppExeName "FluoRender.exe"
@@ -13,7 +13,7 @@
 
 [Setup]
 OutputDir=..\build
-OutputBaseFilename=FluoRender2.27_win64
+OutputBaseFilename=FluoRender2.28_win64
 SetupIconFile=.\Images\FluoRenderIcon.ico
 WizardImageFile=.\Images\fluorender_logo_cut.bmp
 WizardSmallImageFile=.\Images\fluorender_logo_square.bmp
@@ -48,16 +48,16 @@ Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\CL_code\thinning_simple.cl"
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Commands\cell_30.txt"; DestDir: "{app}\Commands"; Flags: ignoreversion     
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Commands\cell_50.txt"; DestDir: "{app}\Commands"; Flags: ignoreversion     
 ; Data
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\example01_colormap.vrp"; DestDir: "{app}\Data"; Flags: ignoreversion
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\branches.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\grid.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\zf_ch01.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\zf_ch02.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
-Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\zf_ch03.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\dens_field.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\dens_field_16b.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\dist_field.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\dist_field_16b.tif"; DestDir: "{app}\Data"; Flags: ignoreversion
-Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\example01_colormap.vrp"; DestDir: "{app}\Data"; Flags: ignoreversion
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\grid.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\zf_ch01.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\zf_ch02.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Data\zf_ch03.tif"; DestDir: "{app}\Data"; Flags: ignoreversion  
 ; FONT ITEMS       
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Fonts\FreeMono.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Fonts\FreeMonoBold.ttf"; DestDir: "{app}\Fonts"; Flags: ignoreversion 
@@ -87,6 +87,8 @@ Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\mask_clear.txt"; De
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\mask_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\mask_save_fetch.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\noise_removal.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\reg_ruler_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\registrate.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\ruler_profile.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\track_mask.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\track_mask_analyze.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
@@ -94,8 +96,11 @@ Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\track_selected_resu
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\track_semiauto.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Scripts\volume_save.txt"; DestDir: "{app}\Scripts"; Flags: ignoreversion 
 ; Template directory
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Templates\d3.v4.min.js"; DestDir: "{app}\Templates"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Templates\ridgeline.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Templates\ridgeline_local.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
 Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Templates\table.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "E:\PROJECTS\fluorender_yexp_sln\bin\Release\Templates\table_local.html"; DestDir: "{app}\Templates"; Flags: ignoreversion  
 ; SETTINGS ITEMS
 Source: "E:\PROJECTS\fluorender_yexp\Settings\default_2d_adjustment_settings.dft"; DestDir: "{app}"; Flags: onlyifdoesntexist; Permissions: users-modify
 Source: "E:\PROJECTS\fluorender_yexp\Settings\default_brush_settings.dft"; DestDir: "{app}"; Flags: onlyifdoesntexist; Permissions: users-modify
