@@ -1328,6 +1328,8 @@ void ScriptProc::RunRegistration()
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 
+	bool bval;
+	m_fconfig->Read("use_mask", &bval, false);
 	double exttx, extty, exttz;
 	m_fconfig->Read("ext_x", &exttx, 0.1);
 	m_fconfig->Read("ext_y", &extty, 0.1);

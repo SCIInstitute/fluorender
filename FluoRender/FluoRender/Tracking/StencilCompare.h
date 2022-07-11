@@ -135,6 +135,8 @@ namespace flrd
 		}
 
 	private:
+		bool m_use_mask;
+
 		Stencil* m_s1;
 		Stencil* m_s2;
 

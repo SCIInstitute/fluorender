@@ -126,6 +126,19 @@ namespace flrd
 			}
 			return 0.0f;
 		}
+		float getmask(const fluo::Point &p) const
+		{
+			if (!mask)
+				return 0.0f;
+			fluo::Point tfp;
+			if (!valid(p, tfp))
+				return 0.0f;
+			unsigned long long index =
+				(unsigned long long)nx*ny*tfp.intz() +
+				(unsigned long long)nx*tfp.inty() +
+				(unsigned long long)tfp.intx();
+			return ((unsigned char*)mask)[index] / 255.0f;
+		}
 		unsigned int getlabel(const fluo::Point &p) const
 		{
 			if (!label)
@@ -189,6 +202,7 @@ namespace flrd
 
 		//pointer to the entire data
 		void* data;
+		void* mask;
 		void* label;
 		unsigned int id;
 		size_t nx;

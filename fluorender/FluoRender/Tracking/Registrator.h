@@ -43,6 +43,10 @@ namespace flrd
 		Registrator();
 		~Registrator();
 
+		void SetUseMask(bool bval)
+		{
+			m_use_mask = bval;
+		}
 		void SetExtension(const fluo::Vector& ext1,
 			const fluo::Vector& ext2)
 		{
@@ -105,6 +109,7 @@ namespace flrd
 		void UnregisterCacheQueueFuncs();
 
 	private:
+		bool m_use_mask;//only match img in the mask
 		fluo::Vector m_extt;//transform extension
 		fluo::Vector m_exta;//rotation extension
 		int m_iter;//max iteration number

@@ -59,7 +59,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 	size_t f0 = mode == 1 ? start : f1;
 	m_vol_cache.set_max_size(2);
 	VolCache cache = m_vol_cache.get(f0);
-	m_vol_cache.protect(f0);
+	//m_vol_cache.protect(f0);
 	void* data1 = cache.data;
 	if (!data1)
 		return false;
