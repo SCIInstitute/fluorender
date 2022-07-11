@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "TrackMap.h"
+#include <Global.h>
 #include "Stencil.h"
 #include "Cluster/dbscan.h"
 #include "Cluster/kmeans.h"
@@ -81,15 +82,10 @@ void TrackMapProcessor::SetSpacings(float spcx, float spcy, float spcz)
 	m_map->m_spc_z = spcz;
 }
 
-void TrackMapProcessor::SetVolCacheSize(size_t size)
-{
-	m_vol_cache.set_max_size(size);
-}
-
 bool TrackMapProcessor::InitializeFrame(size_t frame)
 {
 	//get label and data from cache
-	VolCache cache = m_vol_cache.get(frame);
+	VolCache cache = glbin_cache_queue.get(frame);
 	void* data = cache.data;
 	void* label = cache.label;
 	if (!data || !label)
@@ -160,7 +156,7 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 			((unsigned int*)label)[index] = 0;
 	}
 	//label modified, save before delete
-	m_vol_cache.set_modified(frame);
+	glbin_cache_queue.set_modified(frame);
 
 	//build intra graph
 	for (i = 0; i < nx; ++i)
@@ -440,13 +436,13 @@ bool TrackMapProcessor::LinkFrames(
 		return false;
 
 	//get data and label
-	VolCache cache = m_vol_cache.get(f1);
-	m_vol_cache.protect(f1);
+	VolCache cache = glbin_cache_queue.get(f1);
+	glbin_cache_queue.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
 		return false;
-	cache = m_vol_cache.get(f2);
+	cache = glbin_cache_queue.get(f2);
 	void* data2 = cache.data;
 	void* label2 = cache.label;
 	if (!data2 || !label2)
@@ -505,7 +501,7 @@ bool TrackMapProcessor::LinkFrames(
 			std::min(data_value1, data_value2));
 	}
 
-	m_vol_cache.unprotect(f1);
+	glbin_cache_queue.unprotect(f1);
 
 	return true;
 }
@@ -878,7 +874,7 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 		return false;
 
 	//get label
-	VolCache cache = m_vol_cache.get(f);
+	VolCache cache = glbin_cache_queue.get(f);
 	unsigned int* label = (unsigned int*)(cache.label);
 	if (!label)
 		return false;
@@ -921,7 +917,7 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 		}
 	}
 
-	m_vol_cache.set_modified(f);
+	glbin_cache_queue.set_modified(f);
 	return true;
 }
 
@@ -933,7 +929,7 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 		return false;
 
 	//get label
-	VolCache cache = m_vol_cache.get(f2);
+	VolCache cache = glbin_cache_queue.get(f2);
 	unsigned int* label = (unsigned int*)(cache.label);
 	if (!label)
 		return false;
@@ -987,7 +983,7 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 		}
 	}
 
-	m_vol_cache.set_modified(f2);
+	glbin_cache_queue.set_modified(f2);
 
 	return true;
 }
@@ -3468,13 +3464,13 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 		return false;
 
 	//get data and label
-	VolCache cache = m_vol_cache.get(f1);
-	m_vol_cache.protect(f1);
+	VolCache cache = glbin_cache_queue.get(f1);
+	glbin_cache_queue.protect(f1);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
 		return false;
-	cache = m_vol_cache.get(f2);
+	cache = glbin_cache_queue.get(f2);
 	void* data2 = cache.data;
 	void* label2 = cache.label;
 	if (!data2 || !label2)
@@ -3548,7 +3544,7 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 		}
 	}
 
-	m_vol_cache.unprotect(f1);
+	glbin_cache_queue.unprotect(f1);
 
 	//reset counter
 	inter_graph.counter = 0;
@@ -3723,7 +3719,7 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 		return false;
 
 	//get data and label
-	VolCache cache = m_vol_cache.get(frame);
+	VolCache cache = glbin_cache_queue.get(frame);
 	void* data = cache.data;
 	void* label = cache.label;
 	if (!data || !label)
@@ -3794,7 +3790,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 		return false;
 
 	//get data and label
-	VolCache cache = m_vol_cache.get(frame);
+	VolCache cache = glbin_cache_queue.get(frame);
 	void* data = cache.data;
 	void* label = cache.label;
 	if (!data || !label)
@@ -3904,7 +3900,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 		}*/
 
 		//label modified, save before delete
-		m_vol_cache.set_modified(frame);
+		glbin_cache_queue.set_modified(frame);
 
 		return true;
 	}
@@ -3919,7 +3915,7 @@ bool TrackMapProcessor::SegmentCells(
 		return false;
 
 	//get label and data from cache
-	VolCache cache = m_vol_cache.get(frame);
+	VolCache cache = glbin_cache_queue.get(frame);
 	void* data = cache.data;
 	void* label = cache.label;
 	if (!data || !label)
@@ -3980,7 +3976,7 @@ bool TrackMapProcessor::SegmentCells(
 	//cs_proc_em.SetData(cs_proc_km.GetData());
 	cs_proc_km.GenerateNewIDs(id, label, nx, ny, nz, true);
 	//label modified, save before delete
-	m_vol_cache.set_modified(frame);
+	glbin_cache_queue.set_modified(frame);
 
 	CelpList out_cells = cs_proc_km.GetCellList();
 	//modify map
@@ -3994,14 +3990,14 @@ bool TrackMapProcessor::SegmentCells(
 
 void TrackMapProcessor::RelinkCells(CelpList &in, CelpList& out, size_t frame)
 {
-	VolCache cache = m_vol_cache.get(frame);
+	VolCache cache = glbin_cache_queue.get(frame);
 	bool result = false;
 	result |= RemoveCells(in, frame);
 	result |= AddCells(out, frame);
 	result |= LinkAddedCells(out, frame, frame - 1);
 	result |= LinkAddedCells(out, frame, frame + 1);
 	if (result)
-		m_vol_cache.set_modified(frame);
+		glbin_cache_queue.set_modified(frame);
 }
 
 bool TrackMapProcessor::ReplaceCellID(
@@ -4500,14 +4496,14 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 
 	//get data and label
 	size_t f0 = mode == 1?start:f1;
-	m_vol_cache.set_max_size(2);
-	VolCache cache = m_vol_cache.get(f0);
-	m_vol_cache.protect(f0);
+	glbin_cache_queue.set_max_size(2);
+	VolCache cache = glbin_cache_queue.get(f0);
+	glbin_cache_queue.protect(f0);
 	void* data1 = cache.data;
 	void* label1 = cache.label;
 	if (!data1 || !label1)
 		return false;
-	cache = m_vol_cache.get(f2);
+	cache = glbin_cache_queue.get(f2);
 	void* data2 = cache.data;
 	void* label2 = cache.label;
 	if (!data2 || !label2)
@@ -4627,6 +4623,6 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		}
 	}
 
-	m_vol_cache.unprotect(f0);
+	glbin_cache_queue.unprotect(f0);
 	return true;
 }

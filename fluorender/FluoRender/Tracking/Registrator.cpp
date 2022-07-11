@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "Registrator.h"
+#include <Global.h>
 #include <DataManager.h>
 #include "Stencil.h"
 #include "StencilCompare.h"
@@ -49,7 +50,6 @@ Registrator::Registrator() :
 
 Registrator::~Registrator()
 {
-	UnregisterCacheQueueFuncs();
 }
 
 bool Registrator::Run(size_t f1, size_t f2,
@@ -57,13 +57,13 @@ bool Registrator::Run(size_t f1, size_t f2,
 {
 	//get data
 	size_t f0 = mode == 1 ? start : f1;
-	m_vol_cache.set_max_size(2);
-	VolCache cache = m_vol_cache.get(f0);
-	//m_vol_cache.protect(f0);
+	glbin_cache_queue.set_max_size(2);
+	VolCache cache = glbin_cache_queue.get(f0);
+	glbin_cache_queue.protect(f0);
 	void* data1 = cache.data;
 	if (!data1)
 		return false;
-	cache = m_vol_cache.get(f2);
+	cache = glbin_cache_queue.get(f2);
 	void* data2 = cache.data;
 	if (!data2)
 		return false;
@@ -82,27 +82,28 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.fsize = s2.fsize = m_fsize;
 	s1.box = s2.box = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
 
-	fluo::Vector off1, off2;
-	StencilCompare compare(&s1, &s2,
-		m_extt, m_exta, off1, off2,
-		m_iter, m_conv_num, m_method);
-	if (compare.Compare())
-	{
-		//get transformation
-		if (mode == 1)
-		{
-			m_center = compare.GetCenter();
-			m_euler = compare.GetEuler();
-			m_tf = s2.tf;
-		}
-		else
-		{
-			m_center += compare.GetCenter();
-			m_euler += compare.GetEuler();
-			m_tf.post_trans(s2.tf);
-		}
-	}
+	//fluo::Vector off1, off2;
+	//StencilCompare compare(&s1, &s2,
+	//	m_extt, m_exta, off1, off2,
+	//	m_iter, m_conv_num, m_method);
+	//if (compare.Compare())
+	//{
+	//	//get transformation
+	//	if (mode == 1)
+	//	{
+	//		m_center = compare.GetCenter();
+	//		m_euler = compare.GetEuler();
+	//		m_tf = s2.tf;
+	//	}
+	//	else
+	//	{
+	//		m_center += compare.GetCenter();
+	//		m_euler += compare.GetEuler();
+	//		m_tf.post_trans(s2.tf);
+	//	}
+	//}
 
+	glbin_cache_queue.unprotect(f0);
 	return true;
 }
 

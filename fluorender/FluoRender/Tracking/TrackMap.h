@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <deque>
 #include <map>
-#include <boost/signals2.hpp>
 
 namespace flrd
 {
@@ -88,8 +87,6 @@ namespace flrd
 		void SetBits(size_t bits);
 		void SetScale(float scale);
 		void SetSpacings(float spcx, float spcy, float spcz);
-
-		void SetVolCacheSize(size_t size);
 
 		//build cell list and intra graph
 		bool InitializeFrame(size_t frame);
@@ -169,11 +166,6 @@ namespace flrd
 			fluo::Vector &extt, fluo::Vector &exta,
 			int mode, size_t start, int sim);
 
-		//connect and disconnect functions for cache queue
-		typedef boost::function<void (VolCache&)> func_cache;
-		void RegisterCacheQueueFuncs(const func_cache &fnew, const func_cache &fdel);
-		void UnregisterCacheQueueFuncs();
-
 	private:
 		float m_contact_thresh;
 		float m_size_thresh;
@@ -189,10 +181,6 @@ namespace flrd
 		unsigned int m_uncertain_low;
 		//the trackmap
 		pTrackMap m_map;
-		//volume data cache
-		CacheQueue m_vol_cache;
-		boost::signals2::connection m_new_conn;
-		boost::signals2::connection m_del_conn;
 		//cur & neighbor frames for orphan searching
 		size_t m_frame1;
 		size_t m_frame2;
@@ -364,23 +352,6 @@ namespace flrd
 
 	inline TrackMapProcessor::~TrackMapProcessor()
 	{
-		//delete cache queue
-		//volume cache needs to be freed before function unregister
-		m_vol_cache.clear();
-		UnregisterCacheQueueFuncs();
-	}
-
-	inline void TrackMapProcessor::RegisterCacheQueueFuncs(
-		const func_cache &fnew, const func_cache &fdel)
-	{
-		m_new_conn = m_vol_cache.m_new_cache.connect(fnew);
-		m_del_conn = m_vol_cache.m_del_cache.connect(fdel);
-	}
-
-	inline void TrackMapProcessor::UnregisterCacheQueueFuncs()
-	{
-		m_new_conn.disconnect();
-		m_del_conn.disconnect();
 	}
 
 	inline void TrackMapProcessor::SetContactThresh(float value)

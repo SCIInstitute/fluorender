@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "TraceDlg.h"
+#include <Global.h>
 #include "DataManager.h"
 #include "VRenderFrame.h"
 #include <Components/CompSelector.h>
@@ -1459,10 +1460,8 @@ void TraceDlg::OnConvertConsistent(wxCommandEvent &event)
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	tm_processor.SetSpacings(spcx, spcy, spcz);
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(2);
+	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
+	glbin_cache_queue.set_max_size(2);
 
 	(*m_stat_text) << wxString::Format("Frame %d\n", 0);
 	wxGetApp().Yield();
@@ -2225,10 +2224,8 @@ void TraceDlg::OnCellLinkAll(wxCommandEvent &event)
 	flrd::pTrackMap track_map = trace_group->GetTrackMap();
 	flrd::TrackMapProcessor tm_processor(track_map);
 	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(3);
+	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
+	glbin_cache_queue.set_max_size(3);
 	flrd::CelpList in = m_frame->GetComponentDlg()->GetInCells();
 	flrd::CelpList out = m_frame->GetComponentDlg()->GetOutCells();
 	tm_processor.RelinkCells(in, out, m_cur_time);
@@ -2537,10 +2534,8 @@ void TraceDlg::OnCellSegment(wxCommandEvent& event)
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(3);
+	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
+	glbin_cache_queue.set_max_size(3);
 	tm_processor.SegmentCells(list_cur, m_cur_time, m_clnum);
 
 	//invalidate label mask in gpu
@@ -2571,10 +2566,8 @@ void TraceDlg::LinkAddedCells(flrd::CelpList &list)
 	tm_processor.SetScale(vd->GetScalarScale());
 	tm_processor.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(3);
+	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
+	glbin_cache_queue.set_max_size(3);
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time - 1);
 	tm_processor.LinkAddedCells(list, m_cur_time, m_cur_time + 1);
 	RefineMap(m_cur_time, false);
@@ -2735,10 +2728,8 @@ void TraceDlg::GenMap()
 	tm_processor.SetContactThresh(m_contact_factor);
 	tm_processor.SetSimilarThresh(m_similarity);
 	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(4);
+	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
+	glbin_cache_queue.set_max_size(4);
 	//merge/split
 	tm_processor.SetMerge(m_try_merge);
 	tm_processor.SetSplit(m_try_split);
@@ -2864,10 +2855,8 @@ void TraceDlg::RefineMap(int t, bool erase_v)
 	tm_processor.SetContactThresh(m_contact_factor);
 	tm_processor.SetSimilarThresh(m_similarity);
 	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&TraceDlg::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&TraceDlg::DelVolCache, this, std::placeholders::_1));
-	tm_processor.SetVolCacheSize(4);
+	glbin_reg_cache_queue_func(this, TraceDlg::ReadVolCache, TraceDlg::DelVolCache);
+	glbin_cache_queue.set_max_size(4);
 	//merge/split
 	tm_processor.SetMerge(m_try_merge);
 	tm_processor.SetSplit(m_try_split);

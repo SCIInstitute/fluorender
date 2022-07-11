@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "ScriptProc.h"
+#include <Global.h>
 #include <Flobject/InfoVisitor.hpp>
 #include <DataManager.h>
 #include <VRenderGLView.h>
@@ -599,9 +600,7 @@ void ScriptProc::RunMaskTracking()
 	tm_processor.SetFilterSize(fsize);
 	tm_processor.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
-	tm_processor.RegisterCacheQueueFuncs(
-		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
+	glbin_reg_cache_queue_func(this, ScriptProc::ReadVolCache, ScriptProc::DelVolCache);
 
 	tm_processor.TrackStencils(
 		m_view->m_tseq_prv_num,
@@ -1373,9 +1372,7 @@ void ScriptProc::RunRegistration()
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);
-	registrator.RegisterCacheQueueFuncs(
-		std::bind(&ScriptProc::ReadVolCache, this, std::placeholders::_1),
-		std::bind(&ScriptProc::DelVolCache, this, std::placeholders::_1));
+	glbin_reg_cache_queue_func(this, ScriptProc::ReadVolCache, ScriptProc::DelVolCache);
 	fluo::Point center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;

@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include "CompEditor.h"
-#include <Tracking/VolCache.h>
+#include <Global.h>
 #include <VRenderGLView.h>
 #include <DataManager.h>
 
@@ -230,10 +230,10 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 		pTrackMap track_map = trace_group->GetTrackMap();
 		TrackMapProcessor tm_processor(track_map);
 		//register file reading and deleteing functions
-		tm_processor.RegisterCacheQueueFuncs(
+		glbin.RegisterCacheQueueFuncs(
 			std::bind(&ComponentEditor::ReadVolCache, this, std::placeholders::_1),
 			std::bind(&ComponentEditor::DelVolCache, this, std::placeholders::_1));
-		tm_processor.SetVolCacheSize(4);
+		glbin_cache_queue.set_max_size(4);
 		//add
 		cell->Calc();
 		tm_processor.AddCellDup(cell, cur_time);

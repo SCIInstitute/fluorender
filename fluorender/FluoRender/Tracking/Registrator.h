@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Vector.h>
 #include <Types/Point.h>
 #include <Types/Transform.h>
-#include <VolCache.h>
-#include <boost/signals2.hpp>
 
 class VolumeData;
 namespace flrd
@@ -103,11 +101,6 @@ namespace flrd
 			m_tf = tf;
 		}
 
-		//connect and disconnect functions for cache queue
-		typedef boost::function<void(VolCache&)> func_cache;
-		void RegisterCacheQueueFuncs(const func_cache &fnew, const func_cache &fdel);
-		void UnregisterCacheQueueFuncs();
-
 	private:
 		bool m_use_mask;//only match img in the mask
 		fluo::Vector m_extt;//transform extension
@@ -123,25 +116,6 @@ namespace flrd
 		fluo::Point m_euler;
 		fluo::Transform m_tf;
 
-		//volume data cache
-		CacheQueue m_vol_cache;
-		boost::signals2::connection m_new_conn;
-		boost::signals2::connection m_del_conn;
-
 	};
-
-	inline void Registrator::RegisterCacheQueueFuncs(
-		const func_cache &fnew, const func_cache &fdel)
-	{
-		m_new_conn = m_vol_cache.m_new_cache.connect(fnew);
-		m_del_conn = m_vol_cache.m_del_cache.connect(fdel);
-	}
-
-	inline void Registrator::UnregisterCacheQueueFuncs()
-	{
-		m_new_conn.disconnect();
-		m_del_conn.disconnect();
-	}
-
 }
 #endif//REGISTRATOR_H
