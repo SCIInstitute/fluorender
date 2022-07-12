@@ -60,11 +60,15 @@ bool Registrator::Run(size_t f1, size_t f2,
 	glbin_cache_queue.set_max_size(2);
 	VolCache cache = glbin_cache_queue.get(f0);
 	glbin_cache_queue.protect(f0);
-	void* data1 = cache.data;
+	void *data1 = 0, *data2 = 0;
+	if (m_use_mask && cache.mask)
+		data1 = cache.mask;
+	else
+		data1 = cache.data;
 	if (!data1)
 		return false;
 	cache = glbin_cache_queue.get(f2);
-	void* data2 = cache.data;
+	data2 = cache.data;
 	if (!data2)
 		return false;
 

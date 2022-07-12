@@ -1329,8 +1329,8 @@ void ScriptProc::RunRegistration()
 	VolumeData* cur_vol = m_view->m_cur_vol;
 	if (!cur_vol) return;
 
-	bool bval;
-	m_fconfig->Read("use_mask", &bval, false);
+	bool use_mask;
+	m_fconfig->Read("use_mask", &use_mask, false);
 	double exttx, extty, exttz;
 	m_fconfig->Read("ext_x", &exttx, 0.1);
 	m_fconfig->Read("ext_y", &extty, 0.1);
@@ -1368,15 +1368,21 @@ void ScriptProc::RunRegistration()
 	}
 
 	flrd::Registrator registrator;
+	registrator.SetUseMask(use_mask);
 	registrator.SetExtension(extt, exta);
 	registrator.SetMaxIter(iter);
 	registrator.SetConvNum(plevel);
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);
-	glbin_reg_cache_queue_func(this,
-		ScriptProc::ReadVolCacheData,
-		ScriptProc::DelVolCacheData);
+	if (use_mask)
+		glbin_reg_cache_queue_func(this,
+			ScriptProc::ReadVolCacheDataMask,
+			ScriptProc::DelVolCacheData);
+	else
+		glbin_reg_cache_queue_func(this,
+			ScriptProc::ReadVolCacheData,
+			ScriptProc::DelVolCacheData);
 	fluo::Point center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;
@@ -1653,6 +1659,31 @@ void ScriptProc::ReadVolCacheData(flrd::VolCache& vol_cache)
 	Nrrd* data = reader->Convert(frame, chan, true);
 	vol_cache.nrrd_data = data;
 	vol_cache.data = data->data;
+	if (data)
+		vol_cache.valid = true;
+}
+
+void ScriptProc::ReadVolCacheDataMask(flrd::VolCache& vol_cache)
+{
+	if (!m_view) return;
+	//get volume, readers
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+	BaseReader* reader = cur_vol->GetReader();
+	if (!reader)
+		return;
+
+	int chan = cur_vol->GetCurChannel();
+	int frame = vol_cache.frame;
+
+	Nrrd* data = reader->Convert(frame, chan, true);
+	vol_cache.nrrd_data = data;
+	vol_cache.data = data->data;
+
+	Nrrd* mask = cur_vol->GetMask(true);
+	vol_cache.nrrd_mask = mask;
+	vol_cache.mask = mask->data;
+
 	if (data)
 		vol_cache.valid = true;
 }

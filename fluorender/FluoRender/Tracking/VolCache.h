@@ -37,8 +37,10 @@ namespace flrd
 	{
 		VolCache() :
 			nrrd_data(0),
+			nrrd_mask(0),
 			nrrd_label(0),
 			data(0),
+			mask(0),
 			label(0),
 			frame(0),
 			valid(false),
@@ -49,10 +51,13 @@ namespace flrd
 		//don't care releasing here
 		//handles to release
 		void* nrrd_data;
+		void* nrrd_mask;
 		void* nrrd_label;
 		//actual data
 		void* data;
+		void* mask;
 		void* label;
+
 		size_t frame;
 		bool valid;
 		bool modified;

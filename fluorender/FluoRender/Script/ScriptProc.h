@@ -131,6 +131,7 @@ namespace flrd
 
 		//read/delete volume cache
 		void ReadVolCacheData(VolCache& vol_cache);
+		void ReadVolCacheDataMask(VolCache& vol_cache);
 		void ReadVolCacheDataLabel(VolCache& vol_cache);
 		void DelVolCacheData(VolCache& vol_cache);
 		void DelVolCacheDataLabel(VolCache& vol_cache);
