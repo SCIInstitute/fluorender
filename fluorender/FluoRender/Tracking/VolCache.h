@@ -205,8 +205,8 @@ namespace flrd
 			if (!m_queue[index].valid && m_new_cache)
 			{
 				m_new_cache(m_queue[index]);
-				return m_queue[index];
 			}
+			return m_queue[index];
 		}
 		else
 		{
