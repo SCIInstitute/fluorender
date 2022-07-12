@@ -3,6 +3,7 @@ tasknum=2
 [tasks/task0]
 type=registration
 time_mode=TM_ALL_POST_REWIND
+use_mask=0
 ext_x=10
 ext_y=10
 ext_z=10
