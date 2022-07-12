@@ -2346,7 +2346,8 @@ void VRenderGLView::DrawVRBuffer()
 	{
 #ifdef _WIN32
 		vr::Texture_t left_eye = {};
-		left_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		left_eye.handle = reinterpret_cast<void*>(
+			(unsigned long long)(buffer->tex_id(GL_COLOR_ATTACHMENT0)));
 		left_eye.eType = vr::TextureType_OpenGL;
 		left_eye.eColorSpace = vr::ColorSpace_Gamma;
 		vr::VRCompositor()->Submit(vr::Eye_Left, &left_eye, nullptr);
@@ -2367,7 +2368,8 @@ void VRenderGLView::DrawVRBuffer()
 	{
 #ifdef _WIN32
 		vr::Texture_t right_eye = {};
-		right_eye.handle = reinterpret_cast<void*>(buffer->tex_id(GL_COLOR_ATTACHMENT0));
+		right_eye.handle = reinterpret_cast<void*>(
+			(unsigned long long)(buffer->tex_id(GL_COLOR_ATTACHMENT0)));
 		right_eye.eType = vr::TextureType_OpenGL;
 		right_eye.eColorSpace = vr::ColorSpace_Gamma;
 		vr::VRCompositor()->Submit(vr::Eye_Right, &right_eye, nullptr);

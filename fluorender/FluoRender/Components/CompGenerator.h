@@ -29,8 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompGenerator_h
 
 #include <vector>
-#include <boost/unordered_map.hpp>
-#include <boost/signals2.hpp>
+#include <functional>
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
@@ -43,6 +42,7 @@ namespace flrd
 	typedef std::vector<std::string> CompCmdParams;
 	//comand types: generate, clean, fixate
 	typedef std::vector<CompCmdParams> CompCommand;
+	typedef std::function<void(const std::string&)> CompGenFunc;
 	class ComponentGenerator
 	{
 	public:
@@ -83,8 +83,8 @@ namespace flrd
 		void DistField(int iter, float th, int dsize, float sscale);
 
 		//update progress
-		boost::signals2::signal<void(std::string)> prework;
-		boost::signals2::signal<void(std::string)> postwork;
+		CompGenFunc prework;
+		CompGenFunc postwork;
 
 	private:
 		VolumeData *m_vd;

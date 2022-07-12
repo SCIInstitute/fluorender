@@ -34,8 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Cluster/exmax.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
-#include <boost/signals2.hpp>
-#include <boost/bind.hpp>
 #include <limits>
 #include <string>
 #include <cctype>
@@ -3391,12 +3389,10 @@ void ComponentDlg::GenerateComp(bool use_sel, bool command)
 	double scale = vd->GetScalarScale();
 
 	flrd::ComponentGenerator cg(vd);
-	boost::signals2::connection preconn =
-		cg.prework.connect(std::bind(
-			&ComponentDlg::StartTimer, this, std::placeholders::_1));
-	boost::signals2::connection postconn =
-		cg.postwork.connect(std::bind(
-			&ComponentDlg::StopTimer, this, std::placeholders::_1));
+	cg.prework = std::bind(
+			&ComponentDlg::StartTimer, this, std::placeholders::_1);
+	cg.postwork = std::bind(
+			&ComponentDlg::StopTimer, this, std::placeholders::_1);
 	m_titles.Clear();
 	m_values.Clear();
 	m_tps.clear();
@@ -3536,9 +3532,6 @@ void ComponentDlg::Clean(bool use_sel, bool command)
 	int bn = vd->GetAllBrickNum();
 
 	flrd::ComponentGenerator cg(vd);
-	//boost::signals2::connection connection =
-	//	cg.m_sig_progress.connect(std::bind(
-	//		&ComponentDlg::UpdateProgress, this));
 
 	cg.SetUseMask(use_sel);
 
@@ -3624,10 +3617,6 @@ void ComponentDlg::Analyze(bool sel)
 	int bn = vd->GetAllBrickNum();
 	m_prog_bit = 97.0f / float(bn * 2 + (m_consistent?1:0));
 	m_prog = 0.0f;
-
-	//boost::signals2::connection connection =
-	//	m_comp_analyzer.m_sig_progress.connect(std::bind(
-	//	&ComponentDlg::UpdateProgress, this));
 
 	m_comp_analyzer.SetVolume(vd);
 	if (m_colocal)
@@ -4187,7 +4176,7 @@ void ComponentDlg::SaveCmd(const wxString &filename)
 	m_cmd_file_text->SetValue(filename);
 }
 
-void ComponentDlg::StartTimer(std::string str)
+void ComponentDlg::StartTimer(const std::string& str)
 {
 	if (m_test_speed)
 	{
@@ -4195,7 +4184,7 @@ void ComponentDlg::StartTimer(std::string str)
 	}
 }
 
-void ComponentDlg::StopTimer(std::string str)
+void ComponentDlg::StopTimer(const std::string& str)
 {
 	if (m_test_speed)
 	{

@@ -600,7 +600,9 @@ void ScriptProc::RunMaskTracking()
 	tm_processor.SetFilterSize(fsize);
 	tm_processor.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
-	glbin_reg_cache_queue_func(this, ScriptProc::ReadVolCache, ScriptProc::DelVolCache);
+	glbin_reg_cache_queue_func(this,
+		ScriptProc::ReadVolCacheDataLabel,
+		ScriptProc::DelVolCacheDataLabel);
 
 	tm_processor.TrackStencils(
 		m_view->m_tseq_prv_num,
@@ -1372,7 +1374,9 @@ void ScriptProc::RunRegistration()
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);
-	glbin_reg_cache_queue_func(this, ScriptProc::ReadVolCache, ScriptProc::DelVolCache);
+	glbin_reg_cache_queue_func(this,
+		ScriptProc::ReadVolCacheData,
+		ScriptProc::DelVolCacheData);
 	fluo::Point center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;
@@ -1633,7 +1637,27 @@ void ScriptProc::ExportAnalysis()
 }
 
 //read/delete volume cache
-void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
+void ScriptProc::ReadVolCacheData(flrd::VolCache& vol_cache)
+{
+	if (!m_view) return;
+	//get volume, readers
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+	BaseReader* reader = cur_vol->GetReader();
+	if (!reader)
+		return;
+
+	int chan = cur_vol->GetCurChannel();
+	int frame = vol_cache.frame;
+
+	Nrrd* data = reader->Convert(frame, chan, true);
+	vol_cache.nrrd_data = data;
+	vol_cache.data = data->data;
+	if (data)
+		vol_cache.valid = true;
+}
+
+void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers
@@ -1676,7 +1700,22 @@ void ScriptProc::ReadVolCache(flrd::VolCache& vol_cache)
 		vol_cache.valid = true;
 }
 
-void ScriptProc::DelVolCache(flrd::VolCache& vol_cache)
+void ScriptProc::DelVolCacheData(flrd::VolCache& vol_cache)
+{
+	if (!m_view) return;
+	//get volume, readers
+	VolumeData* cur_vol = m_view->m_cur_vol;
+	if (!cur_vol) return;
+	vol_cache.valid = false;
+	if (vol_cache.data)
+	{
+		nrrdNuke((Nrrd*)vol_cache.nrrd_data);
+		vol_cache.data = 0;
+		vol_cache.nrrd_data = 0;
+	}
+}
+
+void ScriptProc::DelVolCacheDataLabel(flrd::VolCache& vol_cache)
 {
 	if (!m_view) return;
 	//get volume, readers

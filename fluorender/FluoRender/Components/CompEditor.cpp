@@ -230,9 +230,7 @@ void ComponentEditor::NewId(unsigned int id, bool id_empty, bool append)
 		pTrackMap track_map = trace_group->GetTrackMap();
 		TrackMapProcessor tm_processor(track_map);
 		//register file reading and deleteing functions
-		glbin.RegisterCacheQueueFuncs(
-			std::bind(&ComponentEditor::ReadVolCache, this, std::placeholders::_1),
-			std::bind(&ComponentEditor::DelVolCache, this, std::placeholders::_1));
+		glbin_reg_cache_queue_func(this, ComponentEditor::ReadVolCache, ComponentEditor::DelVolCache);
 		glbin_cache_queue.set_max_size(4);
 		//add
 		cell->Calc();

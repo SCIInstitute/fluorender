@@ -82,26 +82,26 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.fsize = s2.fsize = m_fsize;
 	s1.box = s2.box = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
 
-	//fluo::Vector off1, off2;
-	//StencilCompare compare(&s1, &s2,
-	//	m_extt, m_exta, off1, off2,
-	//	m_iter, m_conv_num, m_method);
-	//if (compare.Compare())
-	//{
-	//	//get transformation
-	//	if (mode == 1)
-	//	{
-	//		m_center = compare.GetCenter();
-	//		m_euler = compare.GetEuler();
-	//		m_tf = s2.tf;
-	//	}
-	//	else
-	//	{
-	//		m_center += compare.GetCenter();
-	//		m_euler += compare.GetEuler();
-	//		m_tf.post_trans(s2.tf);
-	//	}
-	//}
+	fluo::Vector off1, off2;
+	StencilCompare compare(&s1, &s2,
+		m_extt, m_exta, off1, off2,
+		m_iter, m_conv_num, m_method);
+	if (compare.Compare())
+	{
+		//get transformation
+		if (mode == 1)
+		{
+			m_center = compare.GetCenter();
+			m_euler = compare.GetEuler();
+			m_tf = s2.tf;
+		}
+		else
+		{
+			m_center += compare.GetCenter();
+			m_euler += compare.GetEuler();
+			m_tf.post_trans(s2.tf);
+		}
+	}
 
 	glbin_cache_queue.unprotect(f0);
 	return true;

@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompAnalyzer_h
 #define FL_CompAnalyzer_h
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <set>
-#include <boost/signals2.hpp>
 #include <Tracking/Cell.h>
 #include "DataManager.h"
 
@@ -51,6 +51,9 @@ namespace flrd
 			vd(0), dirty(true)
 		{}
 	};
+
+	typedef std::function<void()> CompAnalyzerFunc;
+
 	class ComponentAnalyzer
 	{
 	public:
@@ -141,7 +144,7 @@ namespace flrd
 		bool GenRgbChannels(std::list<VolumeData*> &channs, int color_type, bool consistent);
 
 		//update progress
-		boost::signals2::signal<void()> m_sig_progress;
+		CompAnalyzerFunc m_sig_progress;
 
 	private:
 		bool m_analyzed;//if used

@@ -29,12 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define GLOBAL_H
 
 #include <Tracking/VolCache.h>
-#include <boost/signals2.hpp>
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
 #define glbin_reg_cache_queue_func(obj, read_func, del_func) \
-	fluo::Global::instance().RegisterCacheQueueFuncs(\
+	fluo::Global::instance().get_cache_queue().\
+	RegisterCacheQueueFuncs(\
 	std::bind(&read_func, obj, std::placeholders::_1),\
 	std::bind(&del_func, obj, std::placeholders::_1))
 
@@ -45,32 +45,13 @@ namespace fluo
 	public:
 		static Global& instance() { return instance_; }
 		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
-		//connect and disconnect functions for cache queue
-		typedef boost::function<void(flrd::VolCache&)> func_cache;
-		void RegisterCacheQueueFuncs(const func_cache &fnew, const func_cache &fdel);
-		void UnregisterCacheQueueFuncs();
 
 	private:
 		Global();
 		static Global instance_;
 
 		flrd::CacheQueue cache_queue_;
-		boost::signals2::connection m_new_conn;
-		boost::signals2::connection m_del_conn;
 	};
-
-	inline void Global::RegisterCacheQueueFuncs(
-		const func_cache &fnew, const func_cache &fdel)
-	{
-		m_new_conn = cache_queue_.m_new_cache.connect(fnew);
-		m_del_conn = cache_queue_.m_del_cache.connect(fdel);
-	}
-
-	inline void Global::UnregisterCacheQueueFuncs()
-	{
-		m_new_conn.disconnect();
-		m_del_conn.disconnect();
-	}
 
 }
 #endif

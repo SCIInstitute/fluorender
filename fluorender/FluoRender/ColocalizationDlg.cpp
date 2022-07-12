@@ -381,12 +381,10 @@ void ColocalizationDlg::Colocalize()
 				flrd::ChannelCompare compare(vd1, vd2);
 				compare.SetUseMask(m_use_mask);
 				compare.SetIntWeighted(m_int_weighted);
-				boost::signals2::connection preconn =
-					compare.prework.connect(std::bind(
-						&ColocalizationDlg::StartTimer, this, std::placeholders::_1));
-				boost::signals2::connection postconn =
-					compare.postwork.connect(std::bind(
-						&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
+				compare.prework = std::bind(
+					&ColocalizationDlg::StartTimer, this, std::placeholders::_1);
+				compare.postwork = std::bind(
+					&ColocalizationDlg::StopTimer, this, std::placeholders::_1);
 				switch (m_method)
 				{
 				case 0://dot product
@@ -429,12 +427,10 @@ void ColocalizationDlg::Colocalize()
 			flrd::ChannelCompare compare(vd1, vd2);
 			compare.SetUseMask(m_use_mask);
 			compare.SetIntWeighted(m_int_weighted);
-			boost::signals2::connection preconn =
-				compare.prework.connect(std::bind(
-					&ColocalizationDlg::StartTimer, this, std::placeholders::_1));
-			boost::signals2::connection postconn =
-				compare.postwork.connect(std::bind(
-					&ColocalizationDlg::StopTimer, this, std::placeholders::_1));
+			compare.prework = std::bind(
+					&ColocalizationDlg::StartTimer, this, std::placeholders::_1);
+			compare.postwork = std::bind(
+					&ColocalizationDlg::StopTimer, this, std::placeholders::_1);
 			//get threshold values
 			float th1, th2, th3, th4;
 			th1 = (float)(vd1->GetLeftThresh());
@@ -518,7 +514,7 @@ void ColocalizationDlg::Colocalize()
 	SetOutput(m_titles, m_values);
 }
 
-void ColocalizationDlg::StartTimer(std::string str)
+void ColocalizationDlg::StartTimer(const std::string& str)
 {
 	if (m_test_speed)
 	{
@@ -526,7 +522,7 @@ void ColocalizationDlg::StartTimer(std::string str)
 	}
 }
 
-void ColocalizationDlg::StopTimer(std::string str)
+void ColocalizationDlg::StopTimer(const std::string& str)
 {
 	if (m_test_speed)
 	{

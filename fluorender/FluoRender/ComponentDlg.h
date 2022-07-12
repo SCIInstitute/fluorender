@@ -499,8 +499,8 @@ private:
 		flrd::CelpListIter &it, bool links = false);
 
 	//speed test
-	void StartTimer(std::string str);
-	void StopTimer(std::string str);
+	void StartTimer(const std::string& str);
+	void StopTimer(const std::string& str);
 
 	wxWindow* CreateCompGenPage(wxWindow *parent);
 	wxWindow* CreateClusteringPage(wxWindow *parent);

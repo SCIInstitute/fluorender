@@ -130,8 +130,10 @@ namespace flrd
 		void ExportAnalysis();
 
 		//read/delete volume cache
-		void ReadVolCache(VolCache& vol_cache);
-		void DelVolCache(VolCache& vol_cache);
+		void ReadVolCacheData(VolCache& vol_cache);
+		void ReadVolCacheDataLabel(VolCache& vol_cache);
+		void DelVolCacheData(VolCache& vol_cache);
+		void DelVolCacheDataLabel(VolCache& vol_cache);
 	};
 }
 #endif//_SCRIPTPROC_H_

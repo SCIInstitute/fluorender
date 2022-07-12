@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_VolCache_h
 
 #include <deque>
-#include <boost/signals2.hpp>
+#include <functional>
 
 namespace flrd
 {
@@ -59,12 +59,16 @@ namespace flrd
 		bool protect;
 	};
 
+	typedef std::function<void(VolCache&)> VolCacheFunc;
+
 	//queue with a max size
 	class CacheQueue
 	{
 	public:
 		CacheQueue():
-		m_max_size(1) {};
+		m_max_size(1),
+		m_new_cache(nullptr),
+		m_del_cache(nullptr) {};
 		~CacheQueue();
 
 		inline void protect(size_t frame);
@@ -73,18 +77,22 @@ namespace flrd
 		inline void set_max_size(size_t size);
 		inline size_t get_max_size();
 		inline size_t size();
-		inline void pop_cache();
-		inline void push_back(const VolCache& val);
 		inline VolCache get(size_t frame);
 		inline void set_modified(size_t frame, bool value = true);
 
+		void RegisterCacheQueueFuncs(const VolCacheFunc &fnew, const VolCacheFunc &fdel);
+		void UnregisterCacheQueueFuncs();
+
 		//external calls
-		boost::signals2::signal<void(VolCache&)> m_new_cache;
-		boost::signals2::signal<void(VolCache&)> m_del_cache;
+		VolCacheFunc m_new_cache;
+		VolCacheFunc m_del_cache;
 
 	private:
 		size_t m_max_size;
 		std::deque<VolCache> m_queue;
+
+		inline void pop_cache();
+		inline void push_cache(const VolCache& val);
 	};
 
 	inline CacheQueue::~CacheQueue()
@@ -120,8 +128,11 @@ namespace flrd
 
 	inline void CacheQueue::clear()
 	{
-		for (size_t i = 0; i < m_queue.size(); ++i)
-			m_del_cache(m_queue[i]);
+		if (m_del_cache)
+		{
+			for (size_t i = 0; i < m_queue.size(); ++i)
+				m_del_cache(m_queue[i]);
+		}
 		m_queue.clear();
 	}
 
@@ -153,7 +164,8 @@ namespace flrd
 			{
 				if (!iter->protect)
 				{
-					m_del_cache(*iter);
+					if (m_del_cache)
+						m_del_cache(*iter);
 					m_queue.erase(iter);
 					break;
 				}
@@ -161,12 +173,13 @@ namespace flrd
 		}
 		else
 		{
-			m_del_cache(m_queue.front());
+			if (m_del_cache)
+				m_del_cache(m_queue.front());
 			m_queue.pop_front();
 		}
 	}
 
-	inline void CacheQueue::push_back(const VolCache& val)
+	inline void CacheQueue::push_cache(const VolCache& val)
 	{
 		while (m_queue.size() > m_max_size - 1)
 			pop_cache();
@@ -175,6 +188,7 @@ namespace flrd
 
 	inline VolCache CacheQueue::get(size_t frame)
 	{
+		VolCache vol_cache;
 		bool found = false;
 		int index = -1;
 		for (size_t i = 0; i < m_queue.size(); ++i)
@@ -188,18 +202,22 @@ namespace flrd
 		}
 		if (found)
 		{
-			if (!m_queue[index].valid)
+			if (!m_queue[index].valid && m_new_cache)
+			{
 				m_new_cache(m_queue[index]);
-			return m_queue[index];
+				return m_queue[index];
+			}
 		}
 		else
 		{
-			VolCache vol_cache;
 			vol_cache.frame = frame;
-			m_new_cache(vol_cache);
-			push_back(vol_cache);
-			return vol_cache;
+			if (m_new_cache)
+			{
+				m_new_cache(vol_cache);
+				push_cache(vol_cache);
+			}
 		}
+		return vol_cache;
 	}
 
 	inline void CacheQueue::set_modified(size_t frame, bool value)
@@ -213,6 +231,19 @@ namespace flrd
 				return;
 			}
 		}
+	}
+
+	inline void CacheQueue::RegisterCacheQueueFuncs(
+		const VolCacheFunc &fnew, const VolCacheFunc &fdel)
+	{
+		m_new_cache = fnew;
+		m_del_cache = fdel;
+	}
+
+	inline void CacheQueue::UnregisterCacheQueueFuncs()
+	{
+		m_new_cache = nullptr;
+		m_del_cache = nullptr;
 	}
 
 }//namespace flrd

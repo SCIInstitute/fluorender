@@ -31,13 +31,15 @@ DEALINGS IN THE SOFTWARE.
 #include "DataManager.h"
 #include <FLIVR/KernelProgram.h>
 #include <FLIVR/VolKernel.h>
-#include <boost/signals2.hpp>
+#include <functional>
 
 using namespace std;
 
 class VolumeData;
 namespace flrd
 {
+	typedef std::function<void(const std::string&)> ChannelCompareFunc;
+
 	class ChannelCompare
 	{
 	public:
@@ -61,8 +63,8 @@ namespace flrd
 		{ return m_result; }
 
 		//update progress
-		boost::signals2::signal<void(std::string)> prework;
-		boost::signals2::signal<void(std::string)> postwork;
+		ChannelCompareFunc prework;
+		ChannelCompareFunc postwork;
 
 	private:
 		VolumeData *m_vd1, *m_vd2;

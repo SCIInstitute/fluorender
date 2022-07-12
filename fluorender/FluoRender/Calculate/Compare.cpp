@@ -531,7 +531,9 @@ ChannelCompare::ChannelCompare(VolumeData* vd1, VolumeData* vd2)
 	: m_vd1(vd1), m_vd2(vd2),
 	m_use_mask(false),
 	m_int_weighted(false),
-	m_init(false)
+	m_init(false),
+	prework(nullptr),
+	postwork(nullptr)
 {
 }
 
@@ -886,7 +888,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		prework("");
+		if (prework) prework("");
 
 		flvr::TextureBrick* b1 = (*bricks1)[i];
 		flvr::TextureBrick* b2 = (*bricks2)[i];
@@ -954,7 +956,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 			m_result += sum[i];
 		delete[] sum;
 
-		postwork(__FUNCTION__);
+		if (postwork) postwork(__FUNCTION__);
 	}
 }
 
@@ -987,7 +989,7 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		prework("");
+		if (prework) prework("");
 
 		flvr::TextureBrick* b1 = (*bricks1)[i];
 		flvr::TextureBrick* b2 = (*bricks2)[i];
@@ -1038,6 +1040,6 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
 		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
 
-		postwork(__FUNCTION__);
+		if (postwork) postwork(__FUNCTION__);
 	}
 }

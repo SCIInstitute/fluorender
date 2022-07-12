@@ -156,8 +156,8 @@ private:
 		m_cm_max = std::max(v, m_cm_max);
 	}
 	//speed test
-	void StartTimer(std::string str);
-	void StopTimer(std::string str);
+	void StartTimer(const std::string& str);
+	void StopTimer(const std::string& str);
 
 	//calculate
 	void OnColocalizenBtn(wxCommandEvent &event);
