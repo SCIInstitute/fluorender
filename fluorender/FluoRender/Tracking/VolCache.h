@@ -102,7 +102,7 @@ namespace flrd
 
 	inline CacheQueue::~CacheQueue()
 	{
-		clear();
+		//clear();
 	}
 
 	inline void CacheQueue::protect(size_t frame)

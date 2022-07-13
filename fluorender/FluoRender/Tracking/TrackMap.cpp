@@ -4599,7 +4599,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		s2.box = s1.box;
 		StencilCompare compare(
 			&s1, &s2, extt, exta, off, fluo::Vector(),
-			m_max_iter, plevel, sim);
+			m_max_iter, plevel, sim, false);
 		if (compare.Compare())
 		{
 			//label stencil 2

@@ -59,37 +59,49 @@ bool Registrator::Run(size_t f1, size_t f2,
 	size_t f0 = mode == 1 ? start : f1;
 	glbin_cache_queue.set_max_size(2);
 	VolCache cache = glbin_cache_queue.get(f0);
+	if (!cache.data)
+		return false;
 	glbin_cache_queue.protect(f0);
-	void *data1 = 0, *data2 = 0;
+	void *data1 = 0, *data2 = 0, *mask1 = 0;
+	data1 = cache.data;
 	if (m_use_mask && cache.mask)
-		data1 = cache.mask;
-	else
-		data1 = cache.data;
-	if (!data1)
-		return false;
+		mask1 = cache.mask;
 	cache = glbin_cache_queue.get(f2);
-	data2 = cache.data;
-	if (!data2)
+	if (!cache.data)
 		return false;
+	data2 = cache.data;
 
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
 	Stencil s1, s2;
 	s1.data = data1;
+	s1.mask = mask1;
 	s2.data = data2;
 	s1.nx = s2.nx = nx;
 	s1.ny = s2.ny = ny;
 	s1.nz = s2.nz = nz;
-	s1.bits = s2.bits = m_vd->GetBits();
+	int bits = m_vd->GetBits();
+	s1.bits = s2.bits = bits;
 	s1.scale = s2.scale = m_vd->GetScalarScale();
 	s1.max_int = s2.max_int = m_vd->GetMaxValue();
 	s1.fsize = s2.fsize = m_fsize;
-	s1.box = s2.box = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
-
+	fluo::BBox extent(fluo::Point(0), fluo::Point(nx, ny, nz));
 	fluo::Vector off1, off2;
+	//if (m_use_mask)
+	//{
+	//	extent = GetExtent(mask1, nx, ny, nz, bits);
+	//	if (!extent.valid())
+	//	{
+	//		extent = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
+	//		m_use_mask = false;
+	//	}
+	//}
+	s1.box = s2.box = extent;
+
 	StencilCompare compare(&s1, &s2,
 		m_extt, m_exta, off1, off2,
-		m_iter, m_conv_num, m_method);
+		m_iter, m_conv_num, m_method,
+		m_use_mask);
 	if (compare.Compare())
 	{
 		//get transformation
@@ -120,5 +132,34 @@ fluo::Point Registrator::GetCenterVol()
 	result.x(result.x() * dx);
 	result.y(result.y() * dy);
 	result.z(result.z() * dz);
+	return result;
+}
+
+fluo::BBox Registrator::GetExtent(void* mask, int nx, int ny, int nz, int bits)
+{
+	fluo::BBox result;
+	unsigned long long index;
+	if (bits == 8)
+	{
+		unsigned char* data = (unsigned char*)mask;
+		for (int k = 0; k < nz; ++k) for (int j = 0; j < ny; ++j) for (int i = 0; i < nx; ++i)
+		{
+			index = (unsigned long long)nx * ny * k +
+				(unsigned long long)nx * j + (unsigned long long)i;
+			if (data[index])
+				result.extend(fluo::Point(i, j, k));
+		}
+	}
+	else
+	{
+		unsigned short* data = (unsigned short*)mask;
+		for (int k = 0; k < nz; ++k) for (int j = 0; j < ny; ++j) for (int i = 0; i < nx; ++i)
+		{
+			index = (unsigned long long)nx * ny * k +
+				(unsigned long long)nx * j + (unsigned long long)i;
+			if (data[index])
+				result.extend(fluo::Point(i, j, k));
+		}
+	}
 	return result;
 }

@@ -645,7 +645,7 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				wxString filename = fopendlg->GetPath();
 				if (m_vd)
 				{
-					m_vd->Save(filename, fopendlg->GetFilterIndex(),
+					m_vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						false, VRenderFrame::GetCompression(), q, fluo::Point(), false);
 					wxString str = m_vd->GetPath();
@@ -741,7 +741,7 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 				VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(name);
 				if (vd)
 				{
-					vd->Save(filename, fopendlg->GetFilterIndex(),
+					vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
 						true, VRenderFrame::GetCompression(), q, fluo::Point(), false);
 					wxString str = vd->GetPath();

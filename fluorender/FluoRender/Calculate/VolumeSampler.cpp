@@ -44,6 +44,7 @@ VolumeSampler::VolumeSampler() :
 	m_nz(0),
 	m_bits(0),
 	m_crop(false),
+	m_neg_mask(false),
 	m_ox(0),
 	m_oy(0),
 	m_oz(0),
@@ -106,6 +107,11 @@ void VolumeSampler::SetFilterSize(int fx, int fy, int fz)
 void VolumeSampler::SetCrop(bool crop)
 {
 	m_crop = crop;
+}
+
+void VolumeSampler::SetNegMask(bool bval)
+{
+	m_neg_mask = bval;
 }
 
 void VolumeSampler::SetClipRotation(const fluo::Quaternion &q)
@@ -259,6 +265,15 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	}
 	//normalized translation
 	fluo::Point ntrans(m_trans.x() / m_nx, m_trans.y() / m_ny, m_trans.z() / m_nz);
+	fluo::Quaternion q_cl = m_q_cl;
+	bool neg = m_neg_mask && (type == SDT_Mask || type == SDT_Label);
+	if (neg)
+	{
+		//ntrans = -ntrans;
+		//q_cl = -q_cl;
+		trans = false;
+		rot = false;
+	}
 
 	if (spc.x() == 0.0 || spc.y() == 0.0 || spc.z() == 0.0)
 		spc = spc_in * fluo::Vector(double(m_nx_in) / double(m_nx),
@@ -292,12 +307,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		x = (double(m_ox+i) + 0.5) / double(m_nx);
 		y = (double(m_oy+j) + 0.5) / double(m_ny);
 		z = (double(m_oz+k) + 0.5) / double(m_nz);
+
 		if (rot)
 		{
 			vec.Set(x, y, z);
 			vec = vec * spcsize - spcsize * 0.5;//scale and center
 			fluo::Quaternion qvec(vec);
-			qvec = (-m_q_cl) * qvec * (m_q_cl);//rotate
+			qvec = (-q_cl) * qvec * (q_cl);//rotate
 			vec = qvec.GetVector();
 			vec += spcsize_in * 0.5;//translate
 			vec /= spcsize_in;//normalize
@@ -311,6 +327,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			y += ntrans.y();
 			z += ntrans.z();
 		}
+
 		if (m_bits == 32)
 			((unsigned int*)m_raw_result)[index] = SampleInt(x, y, z);
 		else

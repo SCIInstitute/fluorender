@@ -37,14 +37,14 @@ namespace flrd
 	class StencilCompare
 	{
 	public:
-		StencilCompare();
 		StencilCompare(Stencil* s1, Stencil* s2,
 			const fluo::Vector& ext1, const fluo::Vector& ext2,
 			const fluo::Vector& off1, const fluo::Vector& off2,
-			const int iter, const int conv_num, const int method);
+			const int iter, const int conv_num, const int method,
+			const bool use_mask);
 		~StencilCompare();
 
-		void Prepare();
+		void Prepare(const std::string& cmp_name);
 		void Clean();
 		bool Compare();
 
@@ -156,6 +156,7 @@ namespace flrd
 		flvr::KernelProgram* m_prog;
 		flvr::Argument m_img1;//filtered img
 		flvr::Argument m_img2;
+		flvr::Argument m_mask1;//mask buffer for img1
 
 		float Similar(const std::string& name);
 	};

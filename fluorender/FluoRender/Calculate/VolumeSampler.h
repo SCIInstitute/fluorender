@@ -55,6 +55,7 @@ namespace flrd
 		void SetFilter(int type);
 		void SetFilterSize(int fx, int fy, int fz);
 		void SetCrop(bool crop);
+		void SetNegMask(bool bval);
 		void SetClipRotation(const fluo::Quaternion &q);
 		void SetTranslate(const fluo::Point &t);
 		void Resize(SampDataType type, bool replace);
@@ -87,6 +88,8 @@ namespace flrd
 		int m_lx;
 		int m_ly;
 		int m_lz;
+		//transform
+		bool m_neg_mask;//use negative transformation for mask
 		fluo::Quaternion m_q_cl;//rotation
 		fluo::Point m_trans;//translate
 

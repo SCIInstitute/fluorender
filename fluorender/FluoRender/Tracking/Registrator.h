@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Types/Vector.h>
 #include <Types/Point.h>
 #include <Types/Transform.h>
+#include <Types/BBox.h>
 
 class VolumeData;
 namespace flrd
@@ -116,6 +117,8 @@ namespace flrd
 		fluo::Point m_euler;
 		fluo::Transform m_tf;
 
+	private:
+		fluo::BBox GetExtent(void* mask, int nx, int ny, int nz, int bits);
 	};
 }
 #endif//REGISTRATOR_H

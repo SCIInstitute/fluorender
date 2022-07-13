@@ -6,6 +6,7 @@ time_mode=TM_ALL_PRE_LAST_BOTH
 source=channels
 chan_mode=2
 format=0
+mask=0
 compress=0
 delete=0
 savepath=

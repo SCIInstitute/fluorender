@@ -248,7 +248,8 @@ public:
 	double GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b=0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void GetResize(bool &resize, int &nx, int &ny, int &nz);
-	void Save(const wxString &filename, int mode, bool crop, int filter,
+	//mask: 0-save none; 1-save mask; 2-save label; 3-save mask and label...
+	void Save(const wxString &filename, int mode, int mask, bool neg_mask, bool crop, int filter,
 		bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t, bool fix_size);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);

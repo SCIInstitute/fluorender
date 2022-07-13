@@ -809,6 +809,9 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("source", &source);
 	int mode;
 	m_fconfig->Read("format", &mode, 0);
+	int mask;
+	m_fconfig->Read("mask", &mask, 0);
+	bool neg_mask = false;
 	bool crop;
 	m_fconfig->Read("crop", &crop, false);
 	int filter;
@@ -864,6 +867,7 @@ void ScriptProc::RunSaveVolume()
 			regg->getValue("rot", rot);
 			crop = true;
 			fix_size = true;
+			neg_mask = true;
 		}
 	}
 	int chan_num = vlist.size();
@@ -898,7 +902,7 @@ void ScriptProc::RunSaveVolume()
 		}
 		//ext
 		vstr += "." + ext;
-		(*i)->Save(vstr, mode, crop, filter, bake, compression,
+		(*i)->Save(vstr, mode, mask, neg_mask, crop, filter, bake, compression,
 			rot, trans, fix_size);
 		if (del_vol)
 			delete *i;
@@ -1355,6 +1359,7 @@ void ScriptProc::RunRegistration()
 	int sim;
 	m_fconfig->Read("sim", &sim, 1);
 
+	fluo::Node* regg = m_output->getOrAddGroup("registrator");
 	fluo::Point pt, pr;
 	if (m_view->m_tseq_cur_num == m_view->m_begin_play_frame)
 	{
@@ -1364,6 +1369,10 @@ void ScriptProc::RunRegistration()
 		fluo::Transform tf;
 		tf.load_identity();
 		m_view->SetOffsetTransform(tf);
+		regg->addSetValue("trans", fluo::Point());
+		regg->addSetValue("euler", fluo::Point());
+		regg->addSetValue("rot", fluo::Quaternion());
+		regg->addSetValue("transform", fluo::Transform());
 		return;
 	}
 
@@ -1386,7 +1395,6 @@ void ScriptProc::RunRegistration()
 	fluo::Point center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;
-	fluo::Node* regg = m_output->getOrAddGroup("registrator");
 	if (regg->getValue("trans", center))
 		registrator.SetCenter(center);
 	if (regg->getValue("euler", euler))
