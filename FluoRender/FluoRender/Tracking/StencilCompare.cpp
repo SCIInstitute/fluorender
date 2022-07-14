@@ -260,7 +260,7 @@ const char* str_cl_stencil = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2;\n" \
+"	float v1, v2, w;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
 "#pragma unroll\n" \
@@ -288,10 +288,11 @@ const char* str_cl_stencil = \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / 255.0f;\n" \
 "		}\n" \
+"		w = min(v1, v2);\n" \
 "		v1 = v1 - v2;\n" \
 "		v1 *= v1;\n" \
 "		v1 = 1.0f - v1;\n" \
-"		lsum += v1;\n" \
+"		lsum += v1 * w;\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -326,7 +327,7 @@ const char* str_cl_stencil = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2;\n" \
+"	float v1, v2, w;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
 "#pragma unroll\n" \
@@ -354,10 +355,11 @@ const char* str_cl_stencil = \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / intmax;\n" \
 "		}\n" \
+"		w = min(v1, v2);\n" \
 "		v1 = v1 - v2;\n" \
 "		v1 *= v1;\n" \
 "		v1 = 1.0f - v1;\n" \
-"		lsum += v1;\n" \
+"		lsum += v1 * w;\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -599,7 +601,7 @@ const char* str_cl_stencil_mask = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2;\n" \
+"	float v1, v2, w;\n" \
 "	unsigned char m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
@@ -630,10 +632,11 @@ const char* str_cl_stencil_mask = \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / 255.0f;\n" \
 "		}\n" \
+"		w = min(v1, v2);\n" \
 "		v1 = v1 - v2;\n" \
 "		v1 *= v1;\n" \
 "		v1 = 1.0f - v1;\n" \
-"		lsum += v1;\n" \
+"		lsum += v1 * w;\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
@@ -669,7 +672,7 @@ const char* str_cl_stencil_mask = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2;\n" \
+"	float v1, v2, w;\n" \
 "	unsigned short m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
@@ -700,10 +703,11 @@ const char* str_cl_stencil_mask = \
 "			index = nxy*coordi.z + nx*coordi.y + coordi.x;\n" \
 "			v2 = convert_float(img2[index]) / intmax;\n" \
 "		}\n" \
+"		w = min(v1, v2);\n" \
 "		v1 = v1 - v2;\n" \
 "		v1 *= v1;\n" \
 "		v1 = 1.0f - v1;\n" \
-"		lsum += v1;\n" \
+"		lsum += v1 * w;\n" \
 "	}\n" \
 "	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
 "	atomic_xchg(sum+index, lsum);\n" \
