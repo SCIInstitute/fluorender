@@ -1264,8 +1264,14 @@ void VolumeData::GetResize(bool &resize, int &nx, int &ny, int &nz)
 }
 
 //save
-void VolumeData::Save(const wxString &filename, int mode, int mask, bool neg_mask, bool crop, int filter,
-	bool bake, bool compress, const fluo::Quaternion &q, const fluo::Point &t, bool fix_size)
+void VolumeData::Save(const wxString &filename, int mode,
+	int mask, bool neg_mask,
+	bool crop, int filter,
+	bool bake, bool compress,
+	const fluo::Point &c,//rotation center
+	const fluo::Quaternion &q,//rotation
+	const fluo::Point &t,//translate
+	bool fix_size)
 {
 	if (!m_vr || !m_tex)
 		return;
@@ -1288,6 +1294,7 @@ void VolumeData::Save(const wxString &filename, int mode, int mask, bool neg_mas
 		sampler.SetFilter(filter);
 		sampler.SetFilterSize(1, 1, 1);
 		sampler.SetCrop(crop);
+		sampler.SetCenter(c);
 		sampler.SetClipRotation(q);
 		sampler.SetTranslate(t);
 		sampler.SetNegMask(neg_mask);

@@ -987,8 +987,11 @@ bool StencilCompare::Compare()
 		counter++;
 	}
 
+	//for read externally
+	m_translate = center;
 	m_euler = -euler;
-	m_center = center;
+	m_center = center + s1cp;
+	//for internal use
 	m_s2->load_identity();
 	m_s2->rotate(fluo::Vector(euler), fluo::Vector(center) + s1cp);
 	m_s2->translate(fluo::Vector(center));

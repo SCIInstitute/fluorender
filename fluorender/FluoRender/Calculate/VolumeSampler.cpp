@@ -119,6 +119,11 @@ void VolumeSampler::SetClipRotation(const fluo::Quaternion &q)
 	m_q_cl = q;
 }
 
+void VolumeSampler::SetCenter(const fluo::Point &p)
+{
+	m_center = p;
+}
+
 void VolumeSampler::SetTranslate(const fluo::Point &t)
 {
 	m_trans = t;
@@ -265,6 +270,11 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	}
 	//normalized translation
 	fluo::Point ntrans(m_trans.x() / m_nx, m_trans.y() / m_ny, m_trans.z() / m_nz);
+	fluo::Vector ncenter;
+	if (m_center == fluo::Point())
+		ncenter = fluo::Vector(0.5);
+	else
+		ncenter = fluo::Vector(m_center.x() / m_nx, m_center.y() / m_ny, m_center.z() / m_nz);
 	fluo::Quaternion q_cl = m_q_cl;
 	bool neg = m_neg_mask && (type == SDT_Mask || type == SDT_Label);
 	if (neg)
@@ -311,11 +321,11 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		if (rot)
 		{
 			vec.Set(x, y, z);
-			vec = vec * spcsize - spcsize * 0.5;//scale and center
+			vec = vec * spcsize - spcsize * ncenter;//scale and center
 			fluo::Quaternion qvec(vec);
 			qvec = (-q_cl) * qvec * (q_cl);//rotate
 			vec = qvec.GetVector();
-			vec += spcsize_in * 0.5;//translate
+			vec += spcsize_in * ncenter;//translate
 			vec /= spcsize_in;//normalize
 			x = vec.x();
 			y = vec.y();

@@ -647,7 +647,8 @@ void DataListCtrl::OnSave(wxCommandEvent& event)
 				{
 					m_vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
-						false, VRenderFrame::GetCompression(), q, fluo::Point(), false);
+						false, VRenderFrame::GetCompression(),
+						fluo::Point(), q, fluo::Point(), false);
 					wxString str = m_vd->GetPath();
 					SetText(item, 2, str);
 				}
@@ -743,7 +744,8 @@ void DataListCtrl::OnBake(wxCommandEvent& event)
 				{
 					vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
 						VRenderFrame::GetCrop(), VRenderFrame::GetFilter(),
-						true, VRenderFrame::GetCompression(), q, fluo::Point(), false);
+						true, VRenderFrame::GetCompression(),
+						fluo::Point(), q, fluo::Point(), false);
 					wxString str = vd->GetPath();
 					SetText(item, 2, str);
 				}

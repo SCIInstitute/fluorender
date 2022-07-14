@@ -825,7 +825,7 @@ void ScriptProc::RunSaveVolume()
 	bool del_vol;
 	m_fconfig->Read("delete", &del_vol, false);
 	fluo::Quaternion rot;
-	fluo::Point trans;
+	fluo::Point transl, center;
 	bool fix_size = false;
 	std::vector<VolumeData*> vlist;
 	if (source == "channels" ||
@@ -863,7 +863,8 @@ void ScriptProc::RunSaveVolume()
 		fluo::Node* regg = m_output->getChild("registrator");
 		if (regg)
 		{
-			regg->getValue("trans", trans);
+			regg->getValue("transl", transl);
+			regg->getValue("center", center);
 			regg->getValue("rot", rot);
 			crop = true;
 			fix_size = true;
@@ -902,8 +903,12 @@ void ScriptProc::RunSaveVolume()
 		}
 		//ext
 		vstr += "." + ext;
-		(*i)->Save(vstr, mode, mask, neg_mask, crop, filter, bake, compression,
-			rot, trans, fix_size);
+		(*i)->Save(vstr, mode,
+			mask, neg_mask,
+			crop, filter,
+			bake, compression,
+			center, rot, transl,
+			fix_size);
 		if (del_vol)
 			delete *i;
 	}
@@ -1369,7 +1374,8 @@ void ScriptProc::RunRegistration()
 		fluo::Transform tf;
 		tf.load_identity();
 		m_view->SetOffsetTransform(tf);
-		regg->addSetValue("trans", fluo::Point());
+		regg->addSetValue("transl", fluo::Point());
+		regg->addSetValue("center", fluo::Point());
 		regg->addSetValue("euler", fluo::Point());
 		regg->addSetValue("rot", fluo::Quaternion());
 		regg->addSetValue("transform", fluo::Transform());
@@ -1392,10 +1398,12 @@ void ScriptProc::RunRegistration()
 		glbin_reg_cache_queue_func(this,
 			ScriptProc::ReadVolCacheData,
 			ScriptProc::DelVolCacheData);
-	fluo::Point center, center2, euler;
+	fluo::Point transl, transl2, center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;
-	if (regg->getValue("trans", center))
+	if (regg->getValue("transl", transl))
+		registrator.SetTranslate(transl);
+	if (regg->getValue("center", center))
 		registrator.SetCenter(center);
 	if (regg->getValue("euler", euler))
 		registrator.SetEuler(euler);
@@ -1407,17 +1415,20 @@ void ScriptProc::RunRegistration()
 		m_view->m_tseq_cur_num,
 		mode, m_view->m_begin_play_frame))
 	{
+		transl = registrator.GetTranslate();
+		transl2 = registrator.GetTranslateVol();
 		center = registrator.GetCenter();
 		center2 = registrator.GetCenterVol();
 		euler = registrator.GetEuler();
 		rot.FromEuler(euler.x(), euler.y(), euler.z());
 		tf = registrator.GetTransform();
-		regg->addSetValue("trans", center);
+		regg->addSetValue("transl", transl);
+		regg->addSetValue("center", center);
 		regg->addSetValue("euler", euler);
 		regg->addSetValue("rot", rot);
 		regg->addSetValue("transform", tf);
 		//apply transform to current view
-		m_view->SetObjCtrOff(center2.x(), center2.y(), center2.z());
+		m_view->SetObjCtrOff(transl2.x(), transl2.y(), transl2.z());
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
 		m_view->SetOffsetTransform(tf);
 	}

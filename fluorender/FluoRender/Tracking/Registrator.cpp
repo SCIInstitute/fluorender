@@ -87,15 +87,15 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.fsize = s2.fsize = m_fsize;
 	fluo::BBox extent(fluo::Point(0), fluo::Point(nx, ny, nz));
 	fluo::Vector off1, off2;
-	//if (m_use_mask)
-	//{
-	//	extent = GetExtent(mask1, nx, ny, nz);
-	//	if (!extent.valid())
-	//	{
-	//		extent = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
-	//		m_use_mask = false;
-	//	}
-	//}
+	if (m_use_mask)
+	{
+		extent = GetExtent(mask1, nx, ny, nz);
+		if (!extent.valid())
+		{
+			extent = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
+			m_use_mask = false;
+		}
+	}
 	s1.box = s2.box = extent;
 
 	StencilCompare compare(&s1, &s2,
@@ -107,13 +107,15 @@ bool Registrator::Run(size_t f1, size_t f2,
 		//get transformation
 		if (mode == 1)
 		{
+			m_translate = compare.GetTranslate();
 			m_center = compare.GetCenter();
 			m_euler = compare.GetEuler();
 			m_tf = s2.tf;
 		}
 		else
 		{
-			m_center += compare.GetCenter();
+			m_translate += compare.GetTranslate();
+			m_center = compare.GetCenter();
 			m_euler += compare.GetEuler();
 			m_tf.post_trans(s2.tf);
 		}
@@ -121,6 +123,18 @@ bool Registrator::Run(size_t f1, size_t f2,
 
 	glbin_cache_queue.unprotect(f0);
 	return true;
+}
+
+fluo::Point Registrator::GetTranslateVol()
+{
+	fluo::Point result = m_translate;
+	double dx = 1, dy = 1, dz = 1;
+	if (m_vd)
+		m_vd->GetSpacings(dx, dy, dz);
+	result.x(result.x() * dx);
+	result.y(result.y() * dy);
+	result.z(result.z() * dz);
+	return result;
 }
 
 fluo::Point Registrator::GetCenterVol()

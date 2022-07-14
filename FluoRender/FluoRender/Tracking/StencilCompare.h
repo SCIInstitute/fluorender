@@ -125,6 +125,10 @@ namespace flrd
 			}
 		}
 
+		fluo::Point GetTranslate()
+		{
+			return m_translate;
+		}
 		fluo::Point GetCenter()
 		{
 			return m_center;
@@ -150,8 +154,9 @@ namespace flrd
 		int m_fsize;//filer size
 
 		//rigid transform
-		fluo::Point m_center;
-		fluo::Point m_euler;
+		fluo::Point m_translate;
+		fluo::Point m_center;//center of rotation
+		fluo::Point m_euler;//rotation
 
 		flvr::KernelProgram* m_prog;
 		flvr::Argument m_img1;//filtered img

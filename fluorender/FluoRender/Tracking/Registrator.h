@@ -76,6 +76,15 @@ namespace flrd
 		bool Run(size_t f1, size_t f2,
 			int mode, size_t start);
 
+		void SetTranslate(const fluo::Point &p)
+		{
+			m_translate = p;
+		}
+		fluo::Point GetTranslate()
+		{
+			return m_translate;
+		}
+		fluo::Point GetTranslateVol();
 		fluo::Point GetCenter()
 		{
 			return m_center;
@@ -113,7 +122,8 @@ namespace flrd
 		VolumeData *m_vd;
 
 		//output
-		fluo::Point m_center;//rigid transformation
+		fluo::Point m_translate;//translate
+		fluo::Point m_center;//center of rotation
 		fluo::Point m_euler;
 		fluo::Transform m_tf;
 
