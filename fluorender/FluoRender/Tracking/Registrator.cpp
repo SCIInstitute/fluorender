@@ -89,7 +89,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 	fluo::Vector off1, off2;
 	//if (m_use_mask)
 	//{
-	//	extent = GetExtent(mask1, nx, ny, nz, bits);
+	//	extent = GetExtent(mask1, nx, ny, nz);
 	//	if (!extent.valid())
 	//	{
 	//		extent = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
@@ -135,31 +135,17 @@ fluo::Point Registrator::GetCenterVol()
 	return result;
 }
 
-fluo::BBox Registrator::GetExtent(void* mask, int nx, int ny, int nz, int bits)
+fluo::BBox Registrator::GetExtent(void* mask, int nx, int ny, int nz)
 {
 	fluo::BBox result;
 	unsigned long long index;
-	if (bits == 8)
+	unsigned char* data = (unsigned char*)mask;
+	for (int k = 0; k < nz; ++k) for (int j = 0; j < ny; ++j) for (int i = 0; i < nx; ++i)
 	{
-		unsigned char* data = (unsigned char*)mask;
-		for (int k = 0; k < nz; ++k) for (int j = 0; j < ny; ++j) for (int i = 0; i < nx; ++i)
-		{
-			index = (unsigned long long)nx * ny * k +
-				(unsigned long long)nx * j + (unsigned long long)i;
-			if (data[index])
-				result.extend(fluo::Point(i, j, k));
-		}
-	}
-	else
-	{
-		unsigned short* data = (unsigned short*)mask;
-		for (int k = 0; k < nz; ++k) for (int j = 0; j < ny; ++j) for (int i = 0; i < nx; ++i)
-		{
-			index = (unsigned long long)nx * ny * k +
-				(unsigned long long)nx * j + (unsigned long long)i;
-			if (data[index])
-				result.extend(fluo::Point(i, j, k));
-		}
+		index = (unsigned long long)nx * ny * k +
+			(unsigned long long)nx * j + (unsigned long long)i;
+		if (data[index])
+			result.extend(fluo::Point(i, j, k));
 	}
 	return result;
 }
