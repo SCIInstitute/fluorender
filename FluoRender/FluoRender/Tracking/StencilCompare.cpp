@@ -462,7 +462,8 @@ const char* str_cl_stencil_mask = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2, m1;\n" \
+"	float v1, v2;\n" \
+"	unsigned char m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
 "#pragma unroll\n" \
@@ -478,8 +479,8 @@ const char* str_cl_stencil_mask = \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / 255.0f;\n" \
-"			m1 = convert_float(mask[index]) / 255.0f;\n" \
-"			v1 *= m1;\n" \
+"			m1 = mask[index];\n" \
+"			v1 = m1 ? v1 : 0.0f;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -529,7 +530,8 @@ const char* str_cl_stencil_mask = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2, m1;\n" \
+"	float v1, v2;\n" \
+"	unsigned short m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
 "#pragma unroll\n" \
@@ -545,8 +547,8 @@ const char* str_cl_stencil_mask = \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / intmax;\n" \
-"			m1 = convert_float(mask[index]) / 255.0f;\n" \
-"			v1 *= m1;\n" \
+"			m1 = mask[index];\n" \
+"			v1 = m1 ? v1 : 0.0f;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -597,7 +599,8 @@ const char* str_cl_stencil_mask = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2, m1;\n" \
+"	float v1, v2;\n" \
+"	unsigned char m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
 "#pragma unroll\n" \
@@ -613,8 +616,8 @@ const char* str_cl_stencil_mask = \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / 255.0f;\n" \
-"			m1 = convert_float(mask[index]) / 255.0f;\n" \
-"			v1 *= m1;\n" \
+"			m1 = mask[index];\n" \
+"			v1 = m1 ? v1 : 0.0f;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
@@ -666,7 +669,8 @@ const char* str_cl_stencil_mask = \
 "	int4 ijk = (int4)(0, 0, 0, 1);\n" \
 "	unsigned int index;\n" \
 "	float lsum = 0.0f;\n" \
-"	float v1, v2, m1;\n" \
+"	float v1, v2;\n" \
+"	unsigned short m1;\n" \
 "	float4 coord;\n" \
 "	int4 coordi;\n" \
 "#pragma unroll\n" \
@@ -682,8 +686,8 @@ const char* str_cl_stencil_mask = \
 "		{\n" \
 "			index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
 "			v1 = convert_float(img1[index]) / intmax;\n" \
-"			m1 = convert_float(mask[index]) / 255.0f;\n" \
-"			v1 *= m1;\n" \
+"			m1 = mask[index];\n" \
+"			v1 = m1 ? v1 : 0.0f;\n" \
 "		}\n" \
 "		coord = convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f);\n" \
 "		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
