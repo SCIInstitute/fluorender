@@ -321,12 +321,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		if (rot)
 		{
 			vec.Set(x, y, z);
-			vec = vec * spcsize - spcsize * ncenter;//scale and center
+			vec -= ncenter;//center
+			vec *= spcsize;//scale
 			fluo::Quaternion qvec(vec);
 			qvec = (-q_cl) * qvec * (q_cl);//rotate
 			vec = qvec.GetVector();
-			vec += spcsize_in * ncenter;//translate
 			vec /= spcsize_in;//normalize
+			vec += ncenter;//translate
 			x = vec.x();
 			y = vec.y();
 			z = vec.z();

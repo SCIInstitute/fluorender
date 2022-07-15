@@ -202,6 +202,8 @@ VRenderGLView::VRenderGLView(VRenderFrame* frame,
 	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
 	//object center offset
 	m_obj_ctr_offx(0), m_obj_ctr_offy(0), m_obj_ctr_offz(0),
+	//object rotation center offset
+	m_obj_rot_ctr_offx(0), m_obj_rot_ctr_offy(0), m_obj_rot_ctr_offz(0),
 	//object rotation offset
 	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
 	//object translation

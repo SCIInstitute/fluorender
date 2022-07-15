@@ -314,6 +314,18 @@ public:
 		m_obj_roty = roty;
 		m_obj_rotz = rotz;
 	}
+	void GetObjRotCtrOff(double &dx, double &dy, double &dz)
+	{
+		dx = m_obj_rot_ctr_offx;
+		dy = m_obj_rot_ctr_offy;
+		dz = m_obj_rot_ctr_offz;
+	}
+	void SetObjRotCtrOff(double dx, double dy, double dz)
+	{
+		m_obj_rot_ctr_offx = dx == 0.0 ? m_obj_ctrx : dx;
+		m_obj_rot_ctr_offy = dy == 0.0 ? m_obj_ctry : dy;
+		m_obj_rot_ctr_offz = dz == 0.0 ? m_obj_ctrz : dz;
+	}
 	void GetObjRotOff(double &dx, double &dy, double &dz)
 	{
 		dx = m_obj_rot_offx;
@@ -635,14 +647,44 @@ public:
 	{
 		glm::mat4 drw_mat = m_mv_mat;
 		//translate object
-		drw_mat = glm::translate(drw_mat, glm::vec3(m_obj_transx, m_obj_transy, m_obj_transz));
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			m_obj_transx,
+			m_obj_transy,
+			m_obj_transz));
+
+		if (m_obj_rot_offx != 0 || m_obj_rot_offy != 0 || m_obj_rot_offz != 0 ||
+			m_obj_ctr_offx != 0 || m_obj_ctr_offy != 0 || m_obj_ctr_offz != 0)
+		{
+			//rotate object
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+			//center object
+			drw_mat = glm::translate(drw_mat, glm::vec3(
+				-m_obj_rot_ctr_offx,
+				-m_obj_rot_ctr_offy,
+				-m_obj_rot_ctr_offz));
+
+			drw_mat = glm::translate(drw_mat, glm::vec3(
+				-m_obj_ctr_offx,
+				-m_obj_ctr_offy,
+				-m_obj_ctr_offz));
+			drw_mat = glm::translate(drw_mat, glm::vec3(
+				m_obj_ctrx,
+				m_obj_ctry,
+				m_obj_ctrz));
+		}
+
 		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
 		//center object
-		drw_mat = glm::translate(drw_mat,
-			glm::vec3(-m_obj_ctrx - m_obj_ctr_offx, -m_obj_ctry - m_obj_ctr_offy, -m_obj_ctrz - m_obj_ctr_offz));
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			-m_obj_ctrx,
+			-m_obj_ctry,
+			-m_obj_ctrz));
+
 		return drw_mat;
 	}
 	glm::mat4 GetDrawWorldMat()
@@ -885,6 +927,8 @@ private:
 	double m_obj_rotx, m_obj_roty, m_obj_rotz;
 	//obj center offset (for registration currently)
 	double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
+	//obj rotation center offset
+	double m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz;
 	//obj rotation offset (for registration currently)
 	double m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz;
 	//offset transform

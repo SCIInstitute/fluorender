@@ -1429,6 +1429,7 @@ void ScriptProc::RunRegistration()
 		regg->addSetValue("transform", tf);
 		//apply transform to current view
 		m_view->SetObjCtrOff(transl2.x(), transl2.y(), transl2.z());
+		m_view->SetObjRotCtrOff(center2.x(), center2.y(), center2.z());
 		m_view->SetObjRotOff(euler.x(), euler.y(), euler.z());
 		m_view->SetOffsetTransform(tf);
 	}
