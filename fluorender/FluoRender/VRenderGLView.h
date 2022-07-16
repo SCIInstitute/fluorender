@@ -656,9 +656,9 @@ public:
 			m_obj_ctr_offx != 0 || m_obj_ctr_offy != 0 || m_obj_ctr_offz != 0)
 		{
 			//rotate object
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
 			//center object
 			drw_mat = glm::translate(drw_mat, glm::vec3(
 				-m_obj_rot_ctr_offx,
@@ -669,21 +669,23 @@ public:
 				-m_obj_ctr_offx,
 				-m_obj_ctr_offy,
 				-m_obj_ctr_offz));
-			drw_mat = glm::translate(drw_mat, glm::vec3(
-				m_obj_ctrx,
-				m_obj_ctry,
-				m_obj_ctrz));
+			//drw_mat = glm::translate(drw_mat, glm::vec3(
+			//	m_obj_ctrx,
+			//	m_obj_ctry,
+			//	m_obj_ctrz));
 		}
-
-		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		drw_mat = glm::translate(drw_mat, glm::vec3(
-			-m_obj_ctrx,
-			-m_obj_ctry,
-			-m_obj_ctrz));
+		else
+		{
+			//rotate object
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+			//center object
+			drw_mat = glm::translate(drw_mat, glm::vec3(
+				-m_obj_ctrx,
+				-m_obj_ctry,
+				-m_obj_ctrz));
+		}
 
 		return drw_mat;
 	}
