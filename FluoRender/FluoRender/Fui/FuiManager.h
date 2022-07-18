@@ -26,24 +26,51 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef FUI_MANAGER_H
+#define FUI_MANAGER_H
 
 #include <wx/wx.h>
-#include <FuiManager.h>
 
-class VRenderApp : public wxApp
+class RenderFrame;
+class FuiManager
 {
 public:
-	virtual bool OnInit();
-	virtual int OnExit();
-	void OnInitCmdLine(wxCmdLineParser& parser);
-	bool OnCmdLineParsed(wxCmdLineParser& parser);
+	FuiManager();
+	~FuiManager();
+
+	RenderFrame* GetFrame();
+
+	void Init();
+
+	void SetBenchmark(bool bval = true) { m_benchmark = bval; }
+	void SetFullscreen(bool bval = true) { m_fullscreen = bval; }
+	void SetWindowed(bool bval = true) { m_windowed = bval; }
+	void SetHidePanels(bool bval = true) { m_hidepanels = bval; }
+	void SetLzw(bool bval = true) { m_lzw = bval; }
+	void SetSaveAlpha(bool bval = true) { m_save_alpha = bval; }
+	void SetSaveFloat(bool bval = true) { m_save_float = bval; }
+	void SetImagej(bool bval = true) { m_imagej = bval; }
+	void SetWinWidth(long lval) { m_win_width = lval; }
+	void SetWinHeight(long lval) { m_win_height = lval; }
+	void SetBitRate(double dval) { m_bitrate = dval; }
+	void SetMovFile(const wxString& sval) { m_mov_file = sval; }
+	void AddFile(const wxString& sval) { m_files.Add(sval); }
 
 private:
-	FuiManager m_manager;
+	RenderFrame* m_frame;
+
+	bool m_benchmark;
+	bool m_fullscreen;
+	bool m_windowed;
+	bool m_hidepanels;
+	bool m_lzw;
+	bool m_save_alpha;
+	bool m_save_float;
+	bool m_imagej;
+	int m_win_width;
+	int m_win_height;
+	double m_bitrate;
+	wxString m_mov_file;
+	wxArrayString m_files;
 };
-
-DECLARE_APP(VRenderApp)
-
-#endif//_MAIN_H_
+#endif//FUI_MANAGER_H

@@ -26,20 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Main.h"
-#include "RenderFrame.h"
-#include <StopWatch.hpp>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <MovieAgent.hpp>
-#include <SettingAgent.hpp>
-#include <VolumeFactory.hpp>
-#include "JVMInitializer.h"
+#include <Main.h>
+#include <RenderFrame.h>
 #include <wx/cmdline.h>
-#include <wx/stdpaths.h>
 #include <wx/filefn.h>
-#include <cstdio>
-#include <iostream>
 
 IMPLEMENT_APP(VRenderApp)
 
@@ -81,72 +71,23 @@ bool VRenderApp::OnInit()
 	//_CrtSetBreakAlloc(331430);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	char cpath[FILENAME_MAX];
-	GETCURRENTDIR(cpath, sizeof(cpath));
-	std::wstring wstr_path = s2ws(std::string(cpath));
-	::wxSetWorkingDirectory(wstr_path);
-	wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	expath = wxPathOnly(expath);
-	glbin.setExecutablePath(expath.ToStdWstring());
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
 		return false;
-	//add png handler
-	wxImage::AddHandler(new wxPNGHandler);
-	//random numbers
-	srand((unsigned int)glbin.getStopWatch(gstStopWatch)->sys_time());
 
-	//the frame
-	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
-		std::string(VERSION_MAJOR_TAG) + std::string(".") +
-		std::string(VERSION_MINOR_TAG);
-	RenderFrame* frame = new RenderFrame(
-		(wxFrame*)NULL,
-		wxString(title),
-		-1, -1,
-		m_win_width, m_win_height,
-		m_benchmark, m_fullscreen,
-		m_windowed, m_hidepanels);
+	m_manager.Init();
+	RenderFrame* frame = m_manager.GetFrame();
+	if (!frame)
+		return false;
+
 	SetTopWindow(frame);
 	frame->Show();
-
-	fluo::RenderFrameAgent* renderframeagent = glbin_agtf->getRenderFrameAgent();
-	bool run_mov = false;
-	if (m_mov_file != "")
-	{
-		if (renderframeagent)
-		{
-			renderframeagent->setValue(gstCaptureCompress, m_lzw);
-			renderframeagent->setValue(gstCaptureAlpha, m_save_alpha);
-			renderframeagent->setValue(gstCaptureFloat, m_save_float);
-		}
-		fluo::MovieAgent* movieagent = glbin_agtf->getMovieAgent();
-		if (movieagent)
-		{
-			movieagent->setValue(gstMovBitrate, m_bitrate);
-			movieagent->setValue(gstMovFilename, m_mov_file.ToStdWstring());
-		}
-		run_mov = true;
-	}
-	if (m_file_num > 0 && renderframeagent)
-		renderframeagent->StartupLoad(m_files, run_mov, m_imagej);
-
-	// Adding JVm initialization.
-	if (renderframeagent)
-		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
-	
-	//global init
-	//wxString expath = wxStandardPaths::Get().GetExecutablePath();
-	//expath = wxPathOnly(expath);
-	//wxString dft = expath + "/Defaults/volume_data.dftx";
-	//glbin_volf->setValue(gstDefaultFile, dft.ToStdString());
 
 	return true;
 }
 
 int VRenderApp::OnExit()
 {
-	JVMInitializer::destroyJVM();
 	return 0;
 }
 
@@ -158,54 +99,39 @@ void VRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
 
 bool VRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 {
-	m_file_num = 0;
-	m_benchmark = false;
-	m_fullscreen = false;
-	m_windowed = false;
-	m_hidepanels = false;
-	m_win_width = 1600;
-	m_win_height = 1000;
-	m_lzw = false;
-	m_save_alpha = false;
-	m_save_float = false;
-	m_bitrate = 10.0;
-	m_mov_file = "";
-	m_imagej = false;
-
 	//control string
 	if (parser.Found("u"))
 		parser.Usage();
 	if (parser.Found("b"))
-		m_benchmark = true;
+		m_manager.SetBenchmark();
 	if (parser.Found("f"))
-		m_fullscreen = true;
+		m_manager.SetFullscreen();
 	if (parser.Found("win"))
-		m_windowed = true;
+		m_manager.SetWindowed();
 	if (parser.Found("hp"))
-		m_hidepanels = true;
+		m_manager.SetHidePanels();
 	if (parser.Found("lzw"))
-		m_lzw = true;
+		m_manager.SetLzw();
 	if (parser.Found("a"))
-		m_save_alpha = true;
+		m_manager.SetSaveAlpha();
 	if (parser.Found("fp"))
-		m_save_float = true;
+		m_manager.SetSaveFloat();
 	if (parser.Found("j"))
-		m_imagej = true;
+		m_manager.SetImagej();
 	long lVal;
 	if (parser.Found("w", &lVal))
-		m_win_width = lVal;
+		m_manager.SetWinWidth(lVal);
 	if (parser.Found("h", &lVal))
-		m_win_height = lVal;
+		m_manager.SetWinHeight(lVal);
 	double dVal;
 	if (parser.Found("br", &dVal))
-		m_bitrate = dVal;
+		m_manager.SetBitRate(dVal);
 	wxString str;
 	if (parser.Found("m", &str))
-		m_mov_file = str;
+		m_manager.SetMovFile(str);
 	//volumes to load
 	for (size_t i = 0; i < parser.GetParamCount(); ++i)
-		m_files.Add(parser.GetParam(i));
-	m_file_num = m_files.GetCount();
+		m_manager.AddFile(parser.GetParam(i));
 
 	return true;
 }
