@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <FuiManager.h>
 
-class VRenderApp : public wxApp
+class FluoRenderApp : public wxApp
 {
 public:
 	virtual bool OnInit();
@@ -44,6 +44,6 @@ private:
 	FuiManager m_manager;
 };
 
-DECLARE_APP(VRenderApp)
+DECLARE_APP(FluoRenderApp)
 
 #endif//_MAIN_H_

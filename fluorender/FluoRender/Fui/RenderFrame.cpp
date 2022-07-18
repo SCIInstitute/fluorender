@@ -122,22 +122,11 @@ BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
 END_EVENT_TABLE()
 
 RenderFrame::RenderFrame(
-	wxFrame* frame,
 	const wxString& title,
 	int x, int y,
-	int w, int h,
-	bool benchmark,
-	bool fullscreen,
-	bool windowed,
-	bool hidepanels)
-	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE)
+	int w, int h)
+	: wxFrame(NULL, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE)
 {
-	m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *this);
-	AssociateRoot();
-
-	// temporarily block events during constructor:
-	//wxEventBlocker blocker(this);
-
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #endif
@@ -150,11 +139,262 @@ RenderFrame::RenderFrame(
 	icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));
 	SetIcon(icon);
 
-	glbin.initIcons();
+	//create render view
+	RenderviewPanel *vrv = new RenderviewPanel(this);
+	//vrv->m_glview->InitView();
+	//vrv->UpdateView();
+	m_vrv_list.push_back(vrv);
+
+#ifdef _WIN32
+	wxSize panel_size(350, 300);
+#else
+	wxSize panel_size(400, 300);
+#endif
+	//create list view
+	m_list_panel = new ListPanel(this,
+		wxDefaultPosition, panel_size);
+
+	//create tree view
+	m_tree_panel = new TreePanel(this,
+		wxDefaultPosition, panel_size);
+	m_tree_panel->SetScenegraph(glbin_root);
+
+	//create movie view (sets the m_recorder_dlg)
+	m_movie_view = new MoviePanel(this,
+		wxDefaultPosition, panel_size);
+
+	//create prop panel
+	m_prop_panel = new wxPanel(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
+	//prop panel chidren
+	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
+	m_volume_prop = new VolumePropPanel(m_prop_panel);
+	m_mesh_prop = new MeshPropPanel(m_prop_panel);
+	m_mesh_manip = new MeshTransPanel(m_prop_panel);
+	m_annotation_prop = new AnnotationPropPanel(m_prop_panel);
+	m_prop_panel->SetSizer(m_prop_sizer);
+	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
+	m_volume_prop->Show(false);
+	m_mesh_prop->Show(false);
+	m_mesh_manip->Show(false);
+	m_annotation_prop->Show(false);
+
+	//clipping view
+	m_clip_view = new ClipPlanePanel(this,
+		wxDefaultPosition, wxSize(130, 700));
+	//m_clip_view->SetDataManager(&m_data_mgr);
+	//m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
+	//	m_setting_dlg->GetPlaneMode()));
+
+	//adjust view
+	m_adjust_view = new OutAdjustPanel(this,
+		wxDefaultPosition, wxSize(130, 700));
+
+	//settings dialog
+	m_setting_dlg = new SettingDlg(this);
+
+	//brush tool dialog
+	m_brush_tool_dlg = new BrushToolDlg(this, m_tree_panel);
+
+	//noise cancelling dialog
+	m_noise_cancelling_dlg = new NoiseReduceDlg(this);
+
+	//counting dialog
+	m_counting_dlg = new CountingDlg(this);
+
+	//convert dialog
+	m_convert_dlg = new ConvertDlg(this);
+
+	//colocalization dialog
+	m_colocalization_dlg = new ColocalDlg(this);
+
+	//measure dialog
+	m_measure_dlg = new MeasureDlg(this);
+
+	//ocl dialog
+	m_ocl_dlg = new ClKernelDlg(this);
+
+	//component dialog
+	m_component_dlg = new ComponentDlg(this);
+
+	//trace dialog
+	m_trace_dlg = new TrackDlg(this);
+
+	//calculation dialog
+	m_calculation_dlg = new CalculationDlg(this);
+
+	//help dialog
+	m_help_dlg = new HelpDlg(this);
+
+	//tester
+	//shown for testing parameters
+	m_tester = new TesterDlg(this);
+
+	//Add to the manager
+	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
+		Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
+		MinSize(wxSize(-1, 49)).MaxSize(wxSize(-1, 50)).
+		Top().CloseButton(false).Layer(4));
+	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
+		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
+	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
+		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
+	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
+		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
+		Left().CloseButton(true).BestSize(panel_size).
+		FloatingSize(wxSize(400, 600)).Layer(3));
+	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
+		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
+		Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
+		FloatingSize(wxSize(1100, 130)).Layer(2));
+	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
+		Name("m_adjust_view").Caption(UITEXT_ADJUST).
+		Left().CloseButton(true).MinSize(wxSize(110, 700)).
+		FloatingSize(wxSize(110, 700)).Layer(1));
+	m_aui_mgr.AddPane(m_clip_view, wxAuiPaneInfo().
+		Name("m_clip_view").Caption(UITEXT_CLIPPING).
+		Right().CloseButton(true).MinSize(wxSize(130, 700)).
+		FloatingSize(wxSize(130, 700)).Layer(1));
+	m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
+		Name(vrv->GetName()).Caption(vrv->GetName()).
+		Dockable(true).CloseButton(false).
+		FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
+		Layer(0).Centre());
+
+	//dialogs
+	//brush tool dialog
+	m_aui_mgr.AddPane(m_brush_tool_dlg, wxAuiPaneInfo().
+		Name("m_brush_tool_dlg").Caption("Paint Brush").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
+	m_aui_mgr.GetPane(m_brush_tool_dlg).Hide();
+	//noise cancelling dialog
+	m_aui_mgr.AddPane(m_noise_cancelling_dlg, wxAuiPaneInfo().
+		Name("m_noise_cancelling_dlg").Caption("Noise Reduction").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
+	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Hide();
+	//counting dialog
+	m_aui_mgr.AddPane(m_counting_dlg, wxAuiPaneInfo().
+		Name("m_counting_dlg").Caption("Volume Size").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_counting_dlg).Float();
+	m_aui_mgr.GetPane(m_counting_dlg).Hide();
+	//convert dialog
+	m_aui_mgr.AddPane(m_convert_dlg, wxAuiPaneInfo().
+		Name("m_convert_dlg").Caption("Convert").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_convert_dlg).Float();
+	m_aui_mgr.GetPane(m_convert_dlg).Hide();
+	//colocalization dialog
+	m_aui_mgr.AddPane(m_colocalization_dlg, wxAuiPaneInfo().
+		Name("m_colocalization_dlg").Caption("Colocalization").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
+	m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
+	//measure dialog
+	m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
+		Name("m_measure_dlg").Caption("Measurement").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_measure_dlg).Float();
+	m_aui_mgr.GetPane(m_measure_dlg).Hide();
+	//trace dialog
+	m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
+		Name("m_trace_dlg").Caption("Tracking").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_trace_dlg).Float();
+	m_aui_mgr.GetPane(m_trace_dlg).Hide();
+	//ocl fialog
+	m_aui_mgr.AddPane(m_ocl_dlg, wxAuiPaneInfo().
+		Name("m_ocl_dlg").Caption("OpenCL Kernel Editor").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_ocl_dlg).Float();
+	m_aui_mgr.GetPane(m_ocl_dlg).Hide();
+	//component dialog
+	m_aui_mgr.AddPane(m_component_dlg, wxAuiPaneInfo().
+		Name("m_component_dlg").Caption("Component Analyzer").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_component_dlg).Float();
+	m_aui_mgr.GetPane(m_component_dlg).Hide();
+	//calculation dialog
+	m_aui_mgr.AddPane(m_calculation_dlg, wxAuiPaneInfo().
+		Name("m_calculation_dlg").Caption("Calculations").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_calculation_dlg).Float();
+	m_aui_mgr.GetPane(m_calculation_dlg).Hide();
+	//settings
+	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
+		Name("m_setting_dlg").Caption("Settings").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_setting_dlg).Float();
+	m_aui_mgr.GetPane(m_setting_dlg).Hide();
+	//help
+	m_aui_mgr.AddPane(m_help_dlg, wxAuiPaneInfo().
+		Name("m_help_dlg").Caption("Help").
+		Dockable(false).CloseButton(true).
+		MaximizeButton(true));
+	m_aui_mgr.GetPane(m_help_dlg).Float();
+	m_aui_mgr.GetPane(m_help_dlg).Hide();
+
+	//drop target
+	SetDropTarget(new DnDFile(this));
+
+#if wxUSE_STATUSBAR
+	CreateStatusBar(2);
+	GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE) +
+		wxString(" started normally."));
+#endif // wxUSE_STATUSBAR
+
+}
+
+RenderFrame::~RenderFrame()
+{
+	//release?
+	flvr::TextureRenderer::vol_kernel_factory_.clear();
+	flvr::TextureRenderer::framebuffer_manager_.clear();
+	flvr::TextureRenderer::vertex_array_manager_.clear();
+	flvr::TextureRenderer::vol_shader_factory_.clear();
+	flvr::TextureRenderer::seg_shader_factory_.clear();
+	flvr::TextureRenderer::cal_shader_factory_.clear();
+	flvr::TextureRenderer::img_shader_factory_.clear();
+	flvr::TextRenderer::text_texture_manager_.clear();
+	m_aui_mgr.UnInit();
+	flvr::KernelProgram::release();
+}
+
+void RenderFrame::Init(
+	bool benchmark,
+	bool fullscreen,
+	bool windowed,
+	bool hidepanels)
+{
+	m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *this);
+	AssociateRoot();
+
+	// temporarily block events during constructor:
+	//wxEventBlocker blocker(this);
 
 	// create the main toolbar
 	m_main_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	//create the menu for UI management
 	m_tb_menu_ui = new wxMenu;
 	m_tb_menu_ui->Append(ID_UIListView, UITEXT_DATAVIEW,
@@ -367,63 +607,7 @@ RenderFrame::RenderFrame(
 
 	m_main_tb->Realize();
 
-	//create render view
-	RenderviewPanel *vrv = new RenderviewPanel(this);
-	//vrv->m_glview->InitView();
-	//vrv->UpdateView();
-	m_vrv_list.push_back(vrv);
-
-#ifdef _WIN32
-	wxSize panel_size(350, 300);
-#else
-	wxSize panel_size(400, 300);
-#endif
-	//create list view
-	m_list_panel = new ListPanel(this,
-		wxDefaultPosition, panel_size);
-
-	//create tree view
-	m_tree_panel = new TreePanel(this,
-		wxDefaultPosition, panel_size);
-	m_tree_panel->SetScenegraph(glbin_root);
-
-	//create movie view (sets the m_recorder_dlg)
-	m_movie_view = new MoviePanel(this,
-		wxDefaultPosition, panel_size);
-
-	//create prop panel
-	m_prop_panel = new wxPanel(this, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, 0, "PropPanel");
-	//prop panel chidren
-	m_prop_sizer = new wxBoxSizer(wxHORIZONTAL);
-	m_volume_prop = new VolumePropPanel(m_prop_panel);
-	m_mesh_prop = new MeshPropPanel(m_prop_panel);
-	m_mesh_manip = new MeshTransPanel(m_prop_panel);
-	m_annotation_prop = new AnnotationPropPanel(m_prop_panel);
-	m_prop_panel->SetSizer(m_prop_sizer);
-	m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
-	m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-	m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-	m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-	m_volume_prop->Show(false);
-	m_mesh_prop->Show(false);
-	m_mesh_manip->Show(false);
-	m_annotation_prop->Show(false);
-
-	//clipping view
-	m_clip_view = new ClipPlanePanel(this,
-		wxDefaultPosition, wxSize(130,700));
-	//m_clip_view->SetDataManager(&m_data_mgr);
-	//m_clip_view->SetPlaneMode(static_cast<PLANE_MODES>(
-	//	m_setting_dlg->GetPlaneMode()));
-
-	//adjust view
-	m_adjust_view = new OutAdjustPanel(this,
-		wxDefaultPosition, wxSize(130, 700));
-
 	bool bval; long lval; double dval;
-	//settings dialog
-	m_setting_dlg = new SettingDlg(this);
 	m_setting_dlg->AssociateRoot();
 	glbin_agtf->getSettingAgent()->ReadSettings();
 	//if (m_setting_dlg->GetTestMode(1))
@@ -476,179 +660,24 @@ RenderFrame::RenderFrame(
 	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
 
 
-	//brush tool dialog
-	m_brush_tool_dlg = new BrushToolDlg(this, m_tree_panel);
 	m_tree_panel->SetBrushToolAgent();
 
-	//noise cancelling dialog
-	m_noise_cancelling_dlg = new NoiseReduceDlg(this);
-
-	//counting dialog
-	m_counting_dlg = new CountingDlg(this);
-
-	//convert dialog
-	m_convert_dlg = new ConvertDlg(this);
-
-	//colocalization dialog
-	m_colocalization_dlg = new ColocalDlg(this);
-
-	//measure dialog
-	m_measure_dlg = new MeasureDlg(this);
-
-	//ocl dialog
-	m_ocl_dlg = new ClKernelDlg(this);
-
-	//component dialog
-	m_component_dlg = new ComponentDlg(this);
-
-	//trace dialog
-	m_trace_dlg = new TrackDlg(this);
 	m_trace_dlg->SetComponentAgent();
 	m_trace_dlg->SetMovieAgent();
 	//m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
-	//calculation dialog
-	m_calculation_dlg = new CalculationDlg(this);
-
-	//help dialog
-	m_help_dlg = new HelpDlg(this);
-
-	//tester
-	//shown for testing parameters
-	m_tester = new TesterDlg(this);
 	m_agent->getValue(gstTestParam, bval);
 	if (bval)
 		m_tester->Show(true);
 	else
 		m_tester->Show(false);
 
-	//Add to the manager
-	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
-		Name("m_main_tb").Caption("Toolbar").CaptionVisible(false).
-		MinSize(wxSize(-1, 49)).MaxSize(wxSize(-1, 50)).
-		Top().CloseButton(false).Layer(4));
-	m_aui_mgr.AddPane(m_list_panel, wxAuiPaneInfo().
-		Name("m_list_panel").Caption(UITEXT_DATAVIEW).
-		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(wxSize(400, 600)).Layer(3));
-	m_aui_mgr.AddPane(m_tree_panel, wxAuiPaneInfo().
-		Name("m_tree_panel").Caption(UITEXT_TREEVIEW).
-		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(wxSize(400, 600)).Layer(3));
-	m_aui_mgr.AddPane(m_movie_view, wxAuiPaneInfo().
-		Name("m_movie_view").Caption(UITEXT_MAKEMOVIE).
-		Left().CloseButton(true).BestSize(panel_size).
-		FloatingSize(wxSize(400, 600)).Layer(3));
-	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
-		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
-		Bottom().CloseButton(true).MinSize(wxSize(300, 130)).
-		FloatingSize(wxSize(1100, 130)).Layer(2));
-	m_aui_mgr.AddPane(m_adjust_view, wxAuiPaneInfo().
-		Name("m_adjust_view").Caption(UITEXT_ADJUST).
-		Left().CloseButton(true).MinSize(wxSize(110, 700)).
-		FloatingSize(wxSize(110, 700)).Layer(1));
-	m_aui_mgr.AddPane(m_clip_view, wxAuiPaneInfo().
-		Name("m_clip_view").Caption(UITEXT_CLIPPING).
-		Right().CloseButton(true).MinSize(wxSize(130, 700)).
-		FloatingSize(wxSize(130, 700)).Layer(1));
-	m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-		Name(vrv->GetName()).Caption(vrv->GetName()).
-		Dockable(true).CloseButton(false).
-		FloatingSize(wxSize(600, 400)).MinSize(wxSize(300, 200)).
-		Layer(0).Centre());
-
-	//dialogs
-	//brush tool dialog
-	m_aui_mgr.AddPane(m_brush_tool_dlg, wxAuiPaneInfo().
-		Name("m_brush_tool_dlg").Caption("Paint Brush").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_brush_tool_dlg).Float();
-	m_aui_mgr.GetPane(m_brush_tool_dlg).Hide();
-	//noise cancelling dialog
-	m_aui_mgr.AddPane(m_noise_cancelling_dlg, wxAuiPaneInfo().
-		Name("m_noise_cancelling_dlg").Caption("Noise Reduction").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Float();
-	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Hide();
-	//counting dialog
-	m_aui_mgr.AddPane(m_counting_dlg, wxAuiPaneInfo().
-		Name("m_counting_dlg").Caption("Volume Size").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_counting_dlg).Float();
-	m_aui_mgr.GetPane(m_counting_dlg).Hide();
-	//convert dialog
-	m_aui_mgr.AddPane(m_convert_dlg, wxAuiPaneInfo().
-		Name("m_convert_dlg").Caption("Convert").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_convert_dlg).Float();
-	m_aui_mgr.GetPane(m_convert_dlg).Hide();
-	//colocalization dialog
-	m_aui_mgr.AddPane(m_colocalization_dlg, wxAuiPaneInfo().
-		Name("m_colocalization_dlg").Caption("Colocalization").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_colocalization_dlg).Float();
-	m_aui_mgr.GetPane(m_colocalization_dlg).Hide();
-	//measure dialog
-	m_aui_mgr.AddPane(m_measure_dlg, wxAuiPaneInfo().
-		Name("m_measure_dlg").Caption("Measurement").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_measure_dlg).Float();
-	m_aui_mgr.GetPane(m_measure_dlg).Hide();
-	//trace dialog
-	m_aui_mgr.AddPane(m_trace_dlg, wxAuiPaneInfo().
-		Name("m_trace_dlg").Caption("Tracking").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_trace_dlg).Float();
-	m_aui_mgr.GetPane(m_trace_dlg).Hide();
-	//ocl fialog
-	m_aui_mgr.AddPane(m_ocl_dlg, wxAuiPaneInfo().
-		Name("m_ocl_dlg").Caption("OpenCL Kernel Editor").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_ocl_dlg).Float();
-	m_aui_mgr.GetPane(m_ocl_dlg).Hide();
-	//component dialog
-	m_aui_mgr.AddPane(m_component_dlg, wxAuiPaneInfo().
-		Name("m_component_dlg").Caption("Component Analyzer").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_component_dlg).Float();
-	m_aui_mgr.GetPane(m_component_dlg).Hide();
-	//calculation dialog
-	m_aui_mgr.AddPane(m_calculation_dlg, wxAuiPaneInfo().
-		Name("m_calculation_dlg").Caption("Calculations").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_calculation_dlg).Float();
-	m_aui_mgr.GetPane(m_calculation_dlg).Hide();
-	//settings
-	m_aui_mgr.AddPane(m_setting_dlg, wxAuiPaneInfo().
-		Name("m_setting_dlg").Caption("Settings").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_setting_dlg).Float();
-	m_aui_mgr.GetPane(m_setting_dlg).Hide();
-	//help
-	m_aui_mgr.AddPane(m_help_dlg, wxAuiPaneInfo().
-		Name("m_help_dlg").Caption("Help").
-		Dockable(false).CloseButton(true).
-		MaximizeButton(true));
-	m_aui_mgr.GetPane(m_help_dlg).Float();
-	m_aui_mgr.GetPane(m_help_dlg).Hide();
-
 	//UpdateTree();
 
-	SetMinSize(wxSize(800,600));
+	SetMinSize(wxSize(800, 600));
 
 	m_aui_mgr.Update();
-	
+
 	if (!windowed)
 		Maximize();
 
@@ -659,8 +688,8 @@ RenderFrame::RenderFrame(
 	}
 
 	//set view default settings
-	if (m_adjust_view && vrv)
-	{
+	//if (m_adjust_view && vrv)
+	//{
 		//Color gamma, brightness, hdr;
 		//bool sync_r, sync_g, sync_b;
 		//m_adjust_view->GetDefaults(gamma, brightness, hdr,
@@ -671,16 +700,7 @@ RenderFrame::RenderFrame(
 		//vrv->m_glview->SetSyncR(true);
 		//vrv->m_glview->SetSyncG(true);
 		//vrv->m_glview->SetSyncB(true);
-	}
-
-	//drop target
-	SetDropTarget(new DnDFile(this));
-
-#if wxUSE_STATUSBAR
-	CreateStatusBar(2);
-	GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE)+
-		wxString(" started normally."));
-#endif // wxUSE_STATUSBAR
+	//}
 
 	//main top menu
 	m_top_menu = new wxMenuBar;
@@ -690,7 +710,7 @@ RenderFrame::RenderFrame(
 	m_top_help = new wxMenu;
 
 	//file options
-	m = new wxMenuItem(m_top_file,ID_OpenVolume, wxT("Open &Volume"));
+	m = new wxMenuItem(m_top_file, ID_OpenVolume, wxT("Open &Volume"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
 
@@ -699,17 +719,17 @@ RenderFrame::RenderFrame(
 		m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
 		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
 		m_top_file->Append(m);
-	}	
+	}
 
-	m = new wxMenuItem(m_top_file,ID_OpenMesh, wxT("Open &Mesh"));
+	m = new wxMenuItem(m_top_file, ID_OpenMesh, wxT("Open &Mesh"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_mesh_mini));
 	m_top_file->Append(m);
 
-	m = new wxMenuItem(m_top_file,ID_OpenProject, wxT("Open &Project"));
+	m = new wxMenuItem(m_top_file, ID_OpenProject, wxT("Open &Project"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_project_mini));
 	m_top_file->Append(m);
 
-	m = new wxMenuItem(m_top_file,ID_SaveProject, wxT("&Save Project"));
+	m = new wxMenuItem(m_top_file, ID_SaveProject, wxT("&Save Project"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_save_project_mini));
 	m_top_file->Append(m);
 
@@ -718,64 +738,64 @@ RenderFrame::RenderFrame(
 	quit->SetBitmap(wxArtProvider::GetBitmap(wxART_QUIT));
 	m_top_file->Append(quit);
 	//tool options
-	m = new wxMenuItem(m_top_tools,ID_PaintTool, wxT("&Paint Brush..."));
+	m = new wxMenuItem(m_top_tools, ID_PaintTool, wxT("&Paint Brush..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Measure, wxT("&Measurement..."));
+	m = new wxMenuItem(m_top_tools, ID_Measure, wxT("&Measurement..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Component, wxT("Component &Analyzer..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Trace, wxT("&Tracking..."));
+	m = new wxMenuItem(m_top_tools, ID_Trace, wxT("&Tracking..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Calculations, wxT("Ca&lculations..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_NoiseCancelling, wxT("Noise &Reduction..."));
+	m = new wxMenuItem(m_top_tools, ID_NoiseCancelling, wxT("Noise &Reduction..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Counting, wxT("&Volume Size..."));
+	m = new wxMenuItem(m_top_tools, ID_Counting, wxT("&Volume Size..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Colocalization, wxT("&Colocalization..."));
+	m = new wxMenuItem(m_top_tools, ID_Colocalization, wxT("&Colocalization..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
 	m_top_tools->Append(m);
-	m = new wxMenuItem(m_top_tools,ID_Convert, wxT("Co&nvert..."));
+	m = new wxMenuItem(m_top_tools, ID_Convert, wxT("Co&nvert..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
 	m_top_tools->Append(m);
 	m = new wxMenuItem(m_top_tools, ID_Ocl, wxT("&OpenCL Kernel Editor..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
 	m_top_tools->Append(m);
 	m_top_tools->Append(wxID_SEPARATOR);
-	m = new wxMenuItem(m_top_tools,ID_Settings, wxT("&Settings..."));
+	m = new wxMenuItem(m_top_tools, ID_Settings, wxT("&Settings..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_settings_mini));
 	m_top_tools->Append(m);
 	//window option
-	m = new wxMenuItem(m_top_window,ID_ShowHideToolbar, wxT("Show/Hide &Toolbar"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_ShowHideToolbar, wxT("Show/Hide &Toolbar"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_ShowHideToolbar, true);
 	m_top_window->Append(wxID_SEPARATOR);
-	m = new wxMenuItem(m_top_window,ID_ShowHideUI, wxT("Show/Hide &UI"));
+	m = new wxMenuItem(m_top_window, ID_ShowHideUI, wxT("Show/Hide &UI"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_show_hide_ui_mini));
 	m_top_window->Append(m);
-	m = new wxMenuItem(m_top_window,ID_UIListView, wxT("&Datasets"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UIListView, wxT("&Datasets"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIListView, true);
-	m = new wxMenuItem(m_top_window,ID_UITreeView, wxT("&Workspace"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UITreeView, wxT("&Workspace"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UITreeView, true);
-	m = new wxMenuItem(m_top_window,ID_UIMovieView, wxT("&Export"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UIMovieView, wxT("&Export"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIMovieView, true);
-	m = new wxMenuItem(m_top_window,ID_UIAdjView, wxT("&Output Adjustments"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UIAdjView, wxT("&Output Adjustments"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIAdjView, true);
-	m = new wxMenuItem(m_top_window,ID_UIClipView, wxT("&Clipping Planes"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UIClipView, wxT("&Clipping Planes"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIClipView, true);
-	m = new wxMenuItem(m_top_window,ID_UIPropView, wxT("&Properties"), wxEmptyString, wxITEM_CHECK);
+	m = new wxMenuItem(m_top_window, ID_UIPropView, wxT("&Properties"), wxEmptyString, wxITEM_CHECK);
 	m_top_window->Append(m);
 	m_top_window->Check(ID_UIPropView, true);
 	m_top_window->Append(wxID_SEPARATOR);
@@ -790,32 +810,32 @@ RenderFrame::RenderFrame(
 	m_top_window->Append(m);
 #endif
 	//help menu
-	m = new wxMenuItem(m_top_help,ID_CheckUpdates, wxT("&Check for Updates"));
+	m = new wxMenuItem(m_top_help, ID_CheckUpdates, wxT("&Check for Updates"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
 	m_top_help->Append(m);
 	m = new wxMenuItem(m_top_help, ID_Youtube, wxT("&Video Tutorials"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Twitter, wxT("&Twitter"));
+	m = new wxMenuItem(m_top_help, ID_Twitter, wxT("&Twitter"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Facebook, wxT("&Facebook"));
+	m = new wxMenuItem(m_top_help, ID_Facebook, wxT("&Facebook"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Manual, wxT("&Online Manual"));
+	m = new wxMenuItem(m_top_help, ID_Manual, wxT("&Online Manual"));
 	m->SetBitmap(wxGetBitmapFromMemory(web_pdf_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Tutorial, wxT("Online T&utorials"));
+	m = new wxMenuItem(m_top_help, ID_Tutorial, wxT("Online T&utorials"));
 	m->SetBitmap(wxGetBitmapFromMemory(web_pdf_mini));
 	m_top_help->Append(m);
-	m = new wxMenuItem(m_top_help,ID_Info, wxT("&About FluoRender..."));
+	m = new wxMenuItem(m_top_help, ID_Info, wxT("&About FluoRender..."));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
 	m_top_help->Append(m);
 	//add the menus
-	m_top_menu->Append(m_top_file,wxT("&File"));
-	m_top_menu->Append(m_top_tools,wxT("&Tools"));
-	m_top_menu->Append(m_top_window,wxT("&Windows"));
-	m_top_menu->Append(m_top_help,wxT("&Help"));
+	m_top_menu->Append(m_top_file, wxT("&File"));
+	m_top_menu->Append(m_top_tools, wxT("&Tools"));
+	m_top_menu->Append(m_top_window, wxT("&Windows"));
+	m_top_menu->Append(m_top_help, wxT("&Help"));
 	SetMenuBar(m_top_menu);
 
 	//set analyze icon
@@ -870,7 +890,7 @@ RenderFrame::RenderFrame(
 
 	if (fullscreen)
 	{
-		vrv->SetFullScreen();
+		m_vrv_list[0]->SetFullScreen();
 		Iconize();
 	}
 
@@ -878,21 +898,6 @@ RenderFrame::RenderFrame(
 	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
-}
-
-RenderFrame::~RenderFrame()
-{
-	//release?
-	flvr::TextureRenderer::vol_kernel_factory_.clear();
-	flvr::TextureRenderer::framebuffer_manager_.clear();
-	flvr::TextureRenderer::vertex_array_manager_.clear();
-	flvr::TextureRenderer::vol_shader_factory_.clear();
-	flvr::TextureRenderer::seg_shader_factory_.clear();
-	flvr::TextureRenderer::cal_shader_factory_.clear();
-	flvr::TextureRenderer::img_shader_factory_.clear();
-	flvr::TextRenderer::text_texture_manager_.clear();
-	m_aui_mgr.UnInit();
-	flvr::KernelProgram::release();
 }
 
 void RenderFrame::AssociateRoot()

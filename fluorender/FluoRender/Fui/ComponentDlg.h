@@ -45,7 +45,6 @@ namespace fluo
 	class Renderview;
 }
 
-DECLARE_APP(VRenderApp)
 class ComponentDlg : public wxPanel
 {
 public:

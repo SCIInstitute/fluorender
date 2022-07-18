@@ -72,5 +72,7 @@ private:
 	double m_bitrate;
 	wxString m_mov_file;
 	wxArrayString m_files;
+
+	void LinkAgents();
 };
 #endif//FUI_MANAGER_H

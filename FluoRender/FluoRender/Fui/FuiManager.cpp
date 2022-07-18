@@ -74,20 +74,25 @@ void FuiManager::Init()
 {
 	//add png handler
 	wxImage::AddHandler(new wxPNGHandler);
+	glbin.initIcons();
 
 	//the frame
 	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
 		std::string(VERSION_MAJOR_TAG) + std::string(".") +
 		std::string(VERSION_MINOR_TAG);
 	m_frame = new RenderFrame(
-		(wxFrame*)NULL,
 		wxString(title),
 		-1, -1,
-		m_win_width, m_win_height,
-		m_benchmark, m_fullscreen,
-		m_windowed, m_hidepanels);
+		m_win_width, m_win_height);
+	LinkAgents();
+	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels);
 
 	fluo::RenderFrameAgent* renderframeagent = glbin_agtf->getRenderFrameAgent();
+
+	// Adding JVm initialization.
+	if (renderframeagent)
+		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
+
 	bool run_mov = false;
 	if (m_mov_file != "")
 	{
@@ -105,11 +110,13 @@ void FuiManager::Init()
 		}
 		run_mov = true;
 	}
+
 	if (m_files.GetCount() > 0 && renderframeagent)
 		renderframeagent->StartupLoad(m_files, run_mov, m_imagej);
 
-	// Adding JVm initialization.
-	if (renderframeagent)
-		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
+}
+
+void FuiManager::LinkAgents()
+{
 
 }

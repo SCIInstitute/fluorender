@@ -165,15 +165,17 @@ class RenderFrame: public wxFrame
 	};
 
 public:
-	RenderFrame(wxFrame* frame,
+	RenderFrame(
 		const wxString& title,
 		int x, int y,
-		int w, int h,
+		int w, int h);
+	~RenderFrame();
+
+	void Init(
 		bool benchmark,
 		bool fullscreen,
 		bool windowed,
 		bool hidepanels);
-	~RenderFrame();
 
 	void AssociateRoot();
 

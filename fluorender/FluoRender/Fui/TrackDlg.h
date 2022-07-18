@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACKDLG_H_
 #define _TRACKDLG_H_
 
-//#include "Main.h"
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
@@ -82,7 +81,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-//DECLARE_APP(VRenderApp)
 class TrackDlg : public wxPanel
 {
 public:
