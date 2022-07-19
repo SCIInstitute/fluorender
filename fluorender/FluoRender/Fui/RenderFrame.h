@@ -58,7 +58,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationDlg.h>
 #include <Tester.h>
 #include <compatibility.h>
-#include <JVMInitializer.h>
 #include <RenderFrameAgent.hpp>
 #include <vector>
 
@@ -175,14 +174,10 @@ public:
 		bool benchmark,
 		bool fullscreen,
 		bool windowed,
-		bool hidepanels);
+		bool hidepanels,
+		bool imagej);
 
-	void AssociateRoot();
-
-	friend class fluo::RenderFrameAgent;
-
-	//TreePanel *GetTree();
-	//ListPanel *GetList();
+	//void AssociateRoot();
 
 	//views
 	void RefreshVRenderViews(bool tree=false, bool interactive=false);
@@ -197,63 +192,52 @@ public:
 	void ShowPane(wxPanel* pane, bool show=true);
 
 	//on selections
-	void OnSelection(fluo::Node *node);
-	//void OnSelection(int type,	//0: nothing; 1:view; 2: volume; 3:mesh; 4:annotations; 5:group; 6:mesh manip
-	//	fluo::root* view=0,
-	//	fluo::VolumeGroup* group=0,
-	//	fluo::VolumeData* vd=0,
-	//	fluo::MeshData* md=0,
-	//	fluo::Annotations* ann=0);
+	void OnSelection(const std::string& name);
 
-	////prop view
-	//OutAdjustPanel* GetAdjustView();
-	////tool views
-	//VolumePropPanel* GetPropView()
-	//{ return m_volume_prop; }
-	////movie view
-	//MoviePanel* GetMovieView()
-	//{ return m_movie_view; }
-	////system settings
-	//SettingDlg* GetSettingDlg()
-	//{ return m_setting_dlg; }
-	////help dialog
-	//HelpDlg* GetHelpDlg()
-	//{ return m_help_dlg; }
-	////clipping view
-	//ClipPlanePanel* GetClippingView()
-	//{ return m_clip_view; }
-	////brush dialog
-	//BrushToolDlg* GetBrushToolDlg()
-	//{ return m_brush_tool_dlg; }
-	////noise cancelling dialog
-	//NoiseReduceDlg* GetNoiseCancellingDlg()
-	//{ return m_noise_cancelling_dlg; }
-	////counting dialog
-	//CountingDlg* GetCountingDlg()
-	//{ return m_counting_dlg; }
-	////convert dialog
-	//ConvertDlg* GetConvertDlg()
-	//{ return m_convert_dlg; }
-	//ColocalDlg* GetColocalizationDlg()
-	//{ return m_colocalization_dlg; }
-	////recorder dialog
-	//RecorderDlg* GetRecorderDlg()
-	//{ return m_recorder_dlg; }
-	////measure dialog
-	//MeasureDlg* GetMeasureDlg()
-	//{ return m_measure_dlg; }
-	////trace dialog
-	//TrackDlg* GetTraceDlg()
-	//{ return m_trace_dlg; }
-	////ocl dialog
-	//ClKernelDlg* GetOclDlg()
-	//{ return m_ocl_dlg; }
-	////component dialog
-	//ComponentDlg* GetComponentDlg()
-	//{ return m_component_dlg; }
-	////calculation dialog
-	//CalculationDlg* GetCalculationDlg()
-	//{ return m_calculation_dlg; }
+	RenderviewPanel* GetRenderview(int i)
+	{
+		if (i >= 0 && i < m_vrv_list.size())
+			return m_vrv_list[i];
+		return nullptr;
+	}
+	TreePanel *GetTree() { return m_tree_panel; }
+	ListPanel *GetList() { return m_list_panel; }
+	//prop view
+	OutAdjustPanel* GetAdjustView() { return m_adjust_view; }
+	//tool views
+	VolumePropPanel* GetPropView() { return m_volume_prop; }
+	//movie view
+	MoviePanel* GetMovieView() { return m_movie_view; }
+	//system settings
+	SettingDlg* GetSettingDlg() { return m_setting_dlg; }
+	//help dialog
+	HelpDlg* GetHelpDlg() { return m_help_dlg; }
+	//clipping view
+	ClipPlanePanel* GetClippingView() { return m_clip_view; }
+	//brush dialog
+	BrushToolDlg* GetBrushToolDlg() { return m_brush_tool_dlg; }
+	//noise cancelling dialog
+	NoiseReduceDlg* GetNoiseCancellingDlg() { return m_noise_cancelling_dlg; }
+	//counting dialog
+	CountingDlg* GetCountingDlg() { return m_counting_dlg; }
+	//convert dialog
+	ConvertDlg* GetConvertDlg() { return m_convert_dlg; }
+	//colocalization analysis dialog
+	ColocalDlg* GetColocalizationDlg() { return m_colocalization_dlg; }
+	//recorder dialog
+	RecorderDlg* GetRecorderDlg() { return m_recorder_dlg; }
+	//measure dialog
+	MeasureDlg* GetMeasureDlg() { return m_measure_dlg; }
+	//trace dialog
+	TrackDlg* GetTraceDlg() { return m_trace_dlg; }
+	//ocl dialog
+	ClKernelDlg* GetOclDlg() { return m_ocl_dlg; }
+	//component dialog
+	ComponentDlg* GetComponentDlg() { return m_component_dlg; }
+	//calculation dialog
+	CalculationDlg* GetCalculationDlg() { return m_calculation_dlg; }
+	//annotation
+	AnnotationPropPanel* GetAnnotationPropPanel() { return m_annotation_prop; }
 
 	//show dialogs
 	void ShowPaintTool();
@@ -283,9 +267,10 @@ public:
 	wxString ScriptDialog(const wxString& title,
 		const wxString& wildcard, long style);
 
-private:
+	friend class fluo::RenderFrameAgent;
 	fluo::RenderFrameAgent* m_agent;
 
+private:
 	wxAuiManager m_aui_mgr;
 	wxMenu* m_tb_menu_ui;
 	wxMenu* m_tb_menu_edit;

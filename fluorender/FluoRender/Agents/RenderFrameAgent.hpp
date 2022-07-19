@@ -92,6 +92,8 @@ namespace fluo
 		Color GetColor(int c);
 		bool CheckNames(const std::string &name);
 
+		void Select(const std::string &name);//name of a node
+
 	protected:
 		RenderFrame &frame_;
 

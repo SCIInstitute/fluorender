@@ -127,17 +127,15 @@ public:
 	BrushToolDlg(RenderFrame* frame, TreePanel* tree);
 	~BrushToolDlg();
 
-	void AssociateRenderview(fluo::Renderview* view);
-
-	friend class fluo::BrushToolAgent;
-
 	//output
 	void SetOutput(const GridData &data, const wxString &unit);
 	void CopyData();
 	void PasteData();
 
-private:
+	friend class fluo::BrushToolAgent;
 	fluo::BrushToolAgent* m_agent;
+
+private:
 
 	//max volume value
 	double m_max_value;

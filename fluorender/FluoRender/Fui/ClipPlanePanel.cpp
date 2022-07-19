@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ClipPlanePanel.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -87,8 +85,6 @@ ClipPlanePanel::ClipPlanePanel(
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-
-	m_agent = glbin_agtf->addClipPlaneAgent(gstClipPlaneAgent, *this);
 
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp1(1);
@@ -426,11 +422,6 @@ ClipPlanePanel::ClipPlanePanel(
 
 ClipPlanePanel::~ClipPlanePanel()
 {
-}
-
-void ClipPlanePanel::AssociateNode(fluo::Node* node)
-{
-	m_agent->setObject(node);
 }
 
 void ClipPlanePanel::OnLinkChannelsBtn(wxCommandEvent &event)

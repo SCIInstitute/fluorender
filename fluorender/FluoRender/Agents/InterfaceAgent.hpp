@@ -31,7 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.hpp>
 #include <Object.hpp>
 #include <Node.hpp>
+#include <Global.hpp>
+#include <Root.hpp>
 #include <ValueUpdateVisitor.hpp>
+#include <SearchVisitor.hpp>
 
 #define FOUND_VALUE(v) names.find(v) != names.end()
 #define DEFINE_ATTR(v) inline static const std::string v = gst ## v
@@ -108,6 +111,16 @@ namespace fluo
 				UpdateFui();
 				obj->addObserver(this);
 			}
+		}
+		virtual void setObject(const std::string& name)
+		{
+			SearchVisitor visitor;
+			visitor.setTraversalMode(NodeVisitor::TRAVERSE_CHILDREN);
+			visitor.matchName(name);
+			glbin_root->accept(visitor);
+			ObjectList* list = visitor.getResult();
+			if (!list->empty())
+				setObject(list->front());
 		}
 		virtual Object* getObject()
 		{

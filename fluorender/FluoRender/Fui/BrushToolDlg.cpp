@@ -27,13 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <BrushToolDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeSelector.h>
-#include <Calculate/Count.h>
-#include <FLIVR/Texture.h>
 #include <wx/valnum.h>
 #include <wx/stdpaths.h>
 //resources
@@ -125,8 +118,6 @@ BrushToolDlg::BrushToolDlg(
 {
 	// temporarily block events during constructor:
 	wxEventBlocker block(this);
-
-	m_agent = glbin_agtf->addBrushToolAgent(gstBrushToolAgent, *this, *tree);
 
 	SetDoubleBuffered(true);
 
@@ -486,11 +477,6 @@ BrushToolDlg::~BrushToolDlg()
 {
 }
 
-void BrushToolDlg::AssociateRenderview(fluo::Renderview* view)
-{
-	m_agent->setObject(view);
-}
-
 //brush commands
 void BrushToolDlg::OnBrushUndo(wxCommandEvent &event)
 {
@@ -787,11 +773,11 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent &event)
 void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
 {
 	if (m_brush_iterw_rb->GetValue())
-		m_agent->SetBrushIteration(flrd::VolumeSelector::BRUSH_TOOL_ITER_WEAK);
+		m_agent->SetBrushIteration(10);
 	else if (m_brush_iters_rb->GetValue())
-		m_agent->SetBrushIteration(flrd::VolumeSelector::BRUSH_TOOL_ITER_NORMAL);
+		m_agent->SetBrushIteration(30);
 	else if (m_brush_iterss_rb->GetValue())
-		m_agent->SetBrushIteration(flrd::VolumeSelector::BRUSH_TOOL_ITER_STRONG);
+		m_agent->SetBrushIteration(60);
 }
 
 //brush size relation

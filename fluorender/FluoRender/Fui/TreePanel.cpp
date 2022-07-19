@@ -28,15 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <RenderFrame.h>
 #include <DataViewColorRenderer.h>
-#include <Global.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <MeshData.hpp>
-#include <MeshGroup.hpp>
-#include <Annotations.hpp>
-#include <AgentFactory.hpp>
 //resources
 #include <png_resource.h>
 #include <img/icons.h>
@@ -158,23 +149,15 @@ TreePanel::~TreePanel()
 {
 }
 
-void TreePanel::SetScenegraph(fluo::Node* root)
+void TreePanel::SetScenegraph(void* root)
 {
-	m_tree_model = glbin_agtf->addTreeAgent(gstTreeAgent, *this);
 	if (!m_tree_model)
 		return;
-	m_tree_model->setObject(root);
-
 	m_tree_ctrl->AssociateModel(m_tree_model);
 	m_tree_model->ItemAdded(
 		wxDataViewItem(0),
 		wxDataViewItem((void*)m_tree_model->getObject()));
-	m_tree_ctrl->Expand(wxDataViewItem((void*)root));
-}
-
-void TreePanel::SetBrushToolAgent()
-{
-	m_brushtool_agent = glbin_agtf->getBrushToolAgent();
+	m_tree_ctrl->Expand(wxDataViewItem(root));
 }
 
 //seelction
@@ -249,7 +232,9 @@ void TreePanel::OnSelectionChanged(wxDataViewEvent &event)
 	if (!vr_frame)
 		return;
 
-	vr_frame->OnSelection(static_cast<fluo::Node*>(cur_item.GetID()));
+	fluo::Node* node = static_cast<fluo::Node*>(cur_item.GetID());
+	std::string name(node->getName());
+	vr_frame->OnSelection(name);
 
 }
 
@@ -327,7 +312,7 @@ void TreePanel::OnActivated(wxDataViewEvent &event)
 			//this should be improved when frame has its agent
 			RenderFrame* vr_frame = (RenderFrame*)m_frame;
 			if (vr_frame)
-				vr_frame->OnSelection(node);
+				vr_frame->OnSelection(node->getName());
 		}
 	}
 	break;

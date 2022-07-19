@@ -86,12 +86,10 @@ public:
 		const wxString& name = "ClipPlanePanel");
 	~ClipPlanePanel();
 
-	void AssociateNode(fluo::Node* node);
+	fluo::ClipPlaneAgent* m_agent;
 
 private:
 	RenderFrame* m_frame;
-
-	fluo::ClipPlaneAgent* m_agent;
 
 	//1st line
 	wxToolBar *m_toolbar;

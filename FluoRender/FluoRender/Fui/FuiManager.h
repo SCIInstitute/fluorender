@@ -73,6 +73,6 @@ private:
 	wxString m_mov_file;
 	wxArrayString m_files;
 
-	void LinkAgents();
+	void SetupAgents();
 };
 #endif//FUI_MANAGER_H

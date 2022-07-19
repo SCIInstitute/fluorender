@@ -55,12 +55,10 @@ public:
 		const wxString& name = "AnnotationPropPanel");
 	~AnnotationPropPanel();
 
-	void AssociateAnnotations(fluo::Annotations* ann);
-
 	friend class fluo::AnnotationPropAgent;
+	fluo::AnnotationPropAgent* m_agent;
 
 private:
-	fluo::AnnotationPropAgent* m_agent;
 
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CalculationDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <string>
 #include <list>
 
@@ -55,8 +53,6 @@ CalculationDlg::CalculationDlg(RenderFrame *frame)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-
-	m_agent = glbin_agtf->addCalculationAgent(gstCalculationAgent, *this);
 
 	wxStaticText *st = 0;
 

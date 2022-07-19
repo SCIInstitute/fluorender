@@ -39,18 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeFactory.hpp>
 #include <Formats/msk_writer.h>
 #include <Formats/msk_reader.h>
-#include <Converters/VolumeMeshConv.h>
 #include <Selection/VolumeSelector.h>
-#include <FLIVR/TextRenderer.h>
-#include <FLIVR/VertexArray.h>
-#include <FLIVR/Framebuffer.h>
-#include <FLIVR/VolShader.h>
-#include <FLIVR/SegShader.h>
-#include <FLIVR/VolCalShader.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <FLIVR/KernelProgram.h>
-#include <FLIVR/VolKernel.h>
 #include <compatibility.h>
 #include <wx/artprov.h>
 #include <wx/wfstream.h>
@@ -139,6 +128,218 @@ RenderFrame::RenderFrame(
 	icon.CopyFromBitmap(wxGetBitmapFromMemory(icon_32));
 	SetIcon(icon);
 
+	// create the main toolbar
+	m_main_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
+	//create the menu for UI management
+	m_tb_menu_ui = new wxMenu;
+	m_tb_menu_ui->Append(ID_UIListView, UITEXT_DATAVIEW,
+		"Show/hide the data list panel", wxITEM_CHECK);
+	m_tb_menu_ui->Append(ID_UITreeView, UITEXT_TREEVIEW,
+		"Show/hide the workspace panel", wxITEM_CHECK);
+	m_tb_menu_ui->Append(ID_UIMovieView, UITEXT_MAKEMOVIE,
+		"Show/hide the movie export panel", wxITEM_CHECK);
+	m_tb_menu_ui->Append(ID_UIAdjView, UITEXT_ADJUST,
+		"Show/hide the output adjustment panel", wxITEM_CHECK);
+	m_tb_menu_ui->Append(ID_UIClipView, UITEXT_CLIPPING,
+		"Show/hide the clipping plane control panel", wxITEM_CHECK);
+	m_tb_menu_ui->Append(ID_UIPropView, UITEXT_PROPERTIES,
+		"Show/hide the property panel", wxITEM_CHECK);
+	//check all the items
+	m_tb_menu_ui->Check(ID_UIListView, true);
+	m_tb_menu_ui->Check(ID_UITreeView, true);
+	m_tb_menu_ui->Check(ID_UIMovieView, true);
+	m_tb_menu_ui->Check(ID_UIAdjView, true);
+	m_tb_menu_ui->Check(ID_UIClipView, true);
+	m_tb_menu_ui->Check(ID_UIPropView, true);
+	//create the menu for edit/convert
+	m_tb_menu_edit = new wxMenu;
+	wxMenuItem *m = new wxMenuItem(m_tb_menu_edit, ID_PaintTool, wxT("Paint Brush..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Measure, wxT("Measurement..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Analyzer..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Calculations, wxT("Calculations..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_NoiseCancelling, wxT("Noise Reduction..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Counting, wxT("Volume Size..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Colocalization, wxT("Colocalization..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Convert, wxT("Convert..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
+	m_tb_menu_edit->Append(m);
+	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
+	m_tb_menu_edit->Append(m);
+	//build the main toolbar
+	//add tools
+	wxBitmap bitmap;
+
+	bitmap = wxGetBitmapFromMemory(icon_open_volume);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Open single or multiple volume data file(s)",
+		"Open single or multiple volume data file(s)");
+
+	bitmap = wxGetBitmapFromMemory(icon_import);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Import single or multiple volume data file(s) using ImageJ",
+		"Import single or multiple volume data file(s) using ImageJ");
+	m_main_tb->AddSeparator();
+
+	bitmap = wxGetBitmapFromMemory(icon_open_project);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_OpenProject, "Open Project",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Open a saved project",
+		"Open a saved project");
+	bitmap = wxGetBitmapFromMemory(icon_save_project);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_SaveProject, "Save Project",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Save current work as a project",
+		"Save current work as a project");
+	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_new_view);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_ViewNew, "New View",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Create a new render viewport",
+		"Create a new render viewport");
+	bitmap = wxGetBitmapFromMemory(icon_show_hide_ui);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
+		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
+		"Show or hide all control panels",
+		"Show or hide all control panels");
+	m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
+	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_open_mesh);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Open single or multiple mesh file(s)",
+		"Open single or multiple mesh file(s)");
+	bitmap = wxGetBitmapFromMemory(icon_paint_brush);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_LastTool, "Analyze",
+		bitmap, wxNullBitmap,
+		wxITEM_DROPDOWN,
+		"Tools for analyzing selected channel",
+		"Tools for analyzing selected channel");
+	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
+	m_main_tb->AddSeparator();
+	bitmap = wxGetBitmapFromMemory(icon_settings);
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(ID_Settings, "Settings",
+		bitmap, wxNullBitmap, wxITEM_NORMAL,
+		"Settings of FluoRender",
+		"Settings of FluoRender");
+
+	m_main_tb->AddStretchableSpace();
+	m_tb_menu_update = new wxMenu;
+	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("Video Tutorials..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Twitter, wxT("Twitter..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
+	m_tb_menu_update->Append(m);
+	m = new wxMenuItem(m_tb_menu_update, ID_Info, wxT("About..."));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
+	m_tb_menu_update->Append(m);
+	//last item
+	int num = rand() % 5;
+	wxString str1, str2, str3;
+	int item_id;
+	switch (num)
+	{
+	case 0:
+		bitmap = wxGetBitmapFromMemory(icon_check_updates);
+		str1 = "Check Updates";
+		str2 = "Check if there is a new release";
+		str3 = "Check if there is a new release (requires Internet connection)";
+		item_id = ID_CheckUpdates;
+		break;
+	case 1:
+		bitmap = wxGetBitmapFromMemory(icon_youtube);
+		str1 = "Video Tutorials";
+		str2 = "FluoRender's YouTube channel & Tutorials";
+		str3 = "FluoRender's YouTube channel & Tutorials (requires Internet connection)";
+		item_id = ID_Youtube;
+		break;
+	case 2:
+		bitmap = wxGetBitmapFromMemory(icon_facebook);
+		str1 = "Facebook";
+		str2 = "FluoRender's facebook page";
+		str3 = "FluoRender's facebook page (requires Internet connection)";
+		item_id = ID_Facebook;
+		break;
+	case 3:
+		bitmap = wxGetBitmapFromMemory(icon_twitter);
+		str1 = "Twitter";
+		str2 = "Follow FluoRender on Twitter";
+		str3 = "Follow FluoRender on Twitter (requires Internet connection)";
+		item_id = ID_Twitter;
+		break;
+	case 4:
+	default:
+		bitmap = wxGetBitmapFromMemory(icon_about);
+		str1 = "About";
+		str2 = "FluoRender information";
+		str3 = "FluoRender information";
+		item_id = ID_Info;
+		break;
+	}
+#ifdef _DARWIN
+	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
+#endif
+	m_main_tb->AddTool(item_id, str1,
+		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
+		str2, str3);
+	m_main_tb->SetDropdownMenu(item_id, m_tb_menu_update);
+
+	m_main_tb->Realize();
+
 	//create render view
 	RenderviewPanel *vrv = new RenderviewPanel(this);
 	//vrv->m_glview->InitView();
@@ -157,7 +358,6 @@ RenderFrame::RenderFrame(
 	//create tree view
 	m_tree_panel = new TreePanel(this,
 		wxDefaultPosition, panel_size);
-	m_tree_panel->SetScenegraph(glbin_root);
 
 	//create movie view (sets the m_recorder_dlg)
 	m_movie_view = new MoviePanel(this,
@@ -354,354 +554,6 @@ RenderFrame::RenderFrame(
 	m_aui_mgr.GetPane(m_help_dlg).Float();
 	m_aui_mgr.GetPane(m_help_dlg).Hide();
 
-	//drop target
-	SetDropTarget(new DnDFile(this));
-
-#if wxUSE_STATUSBAR
-	CreateStatusBar(2);
-	GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE) +
-		wxString(" started normally."));
-#endif // wxUSE_STATUSBAR
-
-}
-
-RenderFrame::~RenderFrame()
-{
-	//release?
-	flvr::TextureRenderer::vol_kernel_factory_.clear();
-	flvr::TextureRenderer::framebuffer_manager_.clear();
-	flvr::TextureRenderer::vertex_array_manager_.clear();
-	flvr::TextureRenderer::vol_shader_factory_.clear();
-	flvr::TextureRenderer::seg_shader_factory_.clear();
-	flvr::TextureRenderer::cal_shader_factory_.clear();
-	flvr::TextureRenderer::img_shader_factory_.clear();
-	flvr::TextRenderer::text_texture_manager_.clear();
-	m_aui_mgr.UnInit();
-	flvr::KernelProgram::release();
-}
-
-void RenderFrame::Init(
-	bool benchmark,
-	bool fullscreen,
-	bool windowed,
-	bool hidepanels)
-{
-	m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *this);
-	AssociateRoot();
-
-	// temporarily block events during constructor:
-	//wxEventBlocker blocker(this);
-
-	// create the main toolbar
-	m_main_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
-	//create the menu for UI management
-	m_tb_menu_ui = new wxMenu;
-	m_tb_menu_ui->Append(ID_UIListView, UITEXT_DATAVIEW,
-		"Show/hide the data list panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UITreeView, UITEXT_TREEVIEW,
-		"Show/hide the workspace panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIMovieView, UITEXT_MAKEMOVIE,
-		"Show/hide the movie export panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIAdjView, UITEXT_ADJUST,
-		"Show/hide the output adjustment panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIClipView, UITEXT_CLIPPING,
-		"Show/hide the clipping plane control panel", wxITEM_CHECK);
-	m_tb_menu_ui->Append(ID_UIPropView, UITEXT_PROPERTIES,
-		"Show/hide the property panel", wxITEM_CHECK);
-	//check all the items
-	m_tb_menu_ui->Check(ID_UIListView, true);
-	m_tb_menu_ui->Check(ID_UITreeView, true);
-	m_tb_menu_ui->Check(ID_UIMovieView, true);
-	m_tb_menu_ui->Check(ID_UIAdjView, true);
-	m_tb_menu_ui->Check(ID_UIClipView, true);
-	m_tb_menu_ui->Check(ID_UIPropView, true);
-	//create the menu for edit/convert
-	m_tb_menu_edit = new wxMenu;
-	wxMenuItem *m = new wxMenuItem(m_tb_menu_edit, ID_PaintTool, wxT("Paint Brush..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_paint_brush_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Measure, wxT("Measurement..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_measurement_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Component, wxT("Component Analyzer..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_components_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Trace, wxT("Tracking..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_tracking_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Calculations, wxT("Calculations..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_calculations_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_NoiseCancelling, wxT("Noise Reduction..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_noise_reduc_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Counting, wxT("Volume Size..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_volume_size_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Colocalization, wxT("Colocalization..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_colocalization_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Convert, wxT("Convert..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_convert_mini));
-	m_tb_menu_edit->Append(m);
-	m = new wxMenuItem(m_tb_menu_edit, ID_Ocl, wxT("OpenCL Kernel Editor..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_opencl_mini));
-	m_tb_menu_edit->Append(m);
-	//build the main toolbar
-	//add tools
-	wxBitmap bitmap;
-
-	bitmap = wxGetBitmapFromMemory(icon_open_volume);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_OpenVolume, "Open Volume",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open single or multiple volume data file(s)",
-		"Open single or multiple volume data file(s)");
-
-	if (JVMInitializer::getInstance(m_agent->GetJvmArgs()) != nullptr)
-	{
-		bitmap = wxGetBitmapFromMemory(icon_import);
-#ifdef _DARWIN
-		m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-		m_main_tb->AddTool(ID_ImportVolume, "Import Volume",
-			bitmap, wxNullBitmap, wxITEM_NORMAL,
-			"Import single or multiple volume data file(s) using ImageJ",
-			"Import single or multiple volume data file(s) using ImageJ");
-		m_main_tb->AddSeparator();
-	}
-
-	bitmap = wxGetBitmapFromMemory(icon_open_project);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_OpenProject, "Open Project",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open a saved project",
-		"Open a saved project");
-	bitmap = wxGetBitmapFromMemory(icon_save_project);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_SaveProject, "Save Project",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Save current work as a project",
-		"Save current work as a project");
-	m_main_tb->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(icon_new_view);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_ViewNew, "New View",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Create a new render viewport",
-		"Create a new render viewport");
-	bitmap = wxGetBitmapFromMemory(icon_show_hide_ui);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_ShowHideUI, "Show/Hide UI",
-		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
-		"Show or hide all control panels",
-		"Show or hide all control panels");
-	m_main_tb->SetDropdownMenu(ID_ShowHideUI, m_tb_menu_ui);
-	m_main_tb->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(icon_open_mesh);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Open single or multiple mesh file(s)",
-		"Open single or multiple mesh file(s)");
-	bitmap = wxGetBitmapFromMemory(icon_paint_brush);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_LastTool, "Analyze",
-		bitmap, wxNullBitmap,
-		wxITEM_DROPDOWN,
-		"Tools for analyzing selected channel",
-		"Tools for analyzing selected channel");
-	m_main_tb->SetDropdownMenu(ID_LastTool, m_tb_menu_edit);
-	m_main_tb->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(icon_settings);
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(ID_Settings, "Settings",
-		bitmap, wxNullBitmap, wxITEM_NORMAL,
-		"Settings of FluoRender",
-		"Settings of FluoRender");
-
-	m_main_tb->AddStretchableSpace();
-	m_tb_menu_update = new wxMenu;
-	m = new wxMenuItem(m_tb_menu_update, ID_CheckUpdates, wxT("Check Updates..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_check_updates_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Youtube, wxT("Video Tutorials..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_youtube_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Facebook, wxT("Facebook..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_facebook_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Twitter, wxT("Twitter..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_twitter_mini));
-	m_tb_menu_update->Append(m);
-	m = new wxMenuItem(m_tb_menu_update, ID_Info, wxT("About..."));
-	m->SetBitmap(wxGetBitmapFromMemory(icon_about_mini));
-	m_tb_menu_update->Append(m);
-	//last item
-	int num = rand() % 5;
-	wxString str1, str2, str3;
-	int item_id;
-	switch (num)
-	{
-	case 0:
-		bitmap = wxGetBitmapFromMemory(icon_check_updates);
-		str1 = "Check Updates";
-		str2 = "Check if there is a new release";
-		str3 = "Check if there is a new release (requires Internet connection)";
-		item_id = ID_CheckUpdates;
-		break;
-	case 1:
-		bitmap = wxGetBitmapFromMemory(icon_youtube);
-		str1 = "Video Tutorials";
-		str2 = "FluoRender's YouTube channel & Tutorials";
-		str3 = "FluoRender's YouTube channel & Tutorials (requires Internet connection)";
-		item_id = ID_Youtube;
-		break;
-	case 2:
-		bitmap = wxGetBitmapFromMemory(icon_facebook);
-		str1 = "Facebook";
-		str2 = "FluoRender's facebook page";
-		str3 = "FluoRender's facebook page (requires Internet connection)";
-		item_id = ID_Facebook;
-		break;
-	case 3:
-		bitmap = wxGetBitmapFromMemory(icon_twitter);
-		str1 = "Twitter";
-		str2 = "Follow FluoRender on Twitter";
-		str3 = "Follow FluoRender on Twitter (requires Internet connection)";
-		item_id = ID_Twitter;
-		break;
-	case 4:
-	default:
-		bitmap = wxGetBitmapFromMemory(icon_about);
-		str1 = "About";
-		str2 = "FluoRender information";
-		str3 = "FluoRender information";
-		item_id = ID_Info;
-		break;
-	}
-#ifdef _DARWIN
-	m_main_tb->SetToolBitmapSize(bitmap.GetSize());
-#endif
-	m_main_tb->AddTool(item_id, str1,
-		bitmap, wxNullBitmap, wxITEM_DROPDOWN,
-		str2, str3);
-	m_main_tb->SetDropdownMenu(item_id, m_tb_menu_update);
-
-	m_main_tb->Realize();
-
-	bool bval; long lval; double dval;
-	m_setting_dlg->AssociateRoot();
-	glbin_agtf->getSettingAgent()->ReadSettings();
-	//if (m_setting_dlg->GetTestMode(1))
-	//	m_vrv_list[0]->m_glview->m_test_speed = true;
-	//if (m_setting_dlg->GetTestMode(3))
-	//{
-	//	m_vrv_list[0]->m_glview->m_test_wiref = true;
-	//	m_vrv_list[0]->m_glview->m_draw_bounds = true;
-	//	m_vrv_list[0]->m_glview->m_draw_grid = true;
-	//	m_data_mgr.m_vol_test_wiref = true;
-	//}
-	//int c1 = m_setting_dlg->GetWavelengthColor(1);
-	//int c2 = m_setting_dlg->GetWavelengthColor(2);
-	//int c3 = m_setting_dlg->GetWavelengthColor(3);
-	//int c4 = m_setting_dlg->GetWavelengthColor(4);
-	//if (c1 && c2 && c3 && c4)
-	//	m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
-	//m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
-	//m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
-	//m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
-	//m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
-	//m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
-	//m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
-	//m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
-	//m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
-	//m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
-	//m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
-	//if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
-	//m_time_id = m_setting_dlg->GetTimeId();
-	m_agent->getValue(gstSoftThresh, dval);
-	flvr::VolumeRenderer::set_soft_threshold(dval);
-	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
-
-	m_agent->getValue(gstSoftThresh, dval);
-	flvr::VolumeRenderer::set_soft_threshold(dval);
-	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
-	VolumeMeshConv::SetSoftThreshold(dval);
-	std::string sval;
-	m_agent->getValue(gstFontFile, sval);
-	wxString font_file = sval;
-	wxString exePath = glbin.getExecutablePath();
-	if (font_file != "")
-		font_file = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + font_file;
-	else
-		font_file = exePath + GETSLASH() + "Fonts" +
-		GETSLASH() + "FreeSans.ttf";
-	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
-	m_agent->getValue(gstTextSize, dval);
-	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
-
-
-	m_tree_panel->SetBrushToolAgent();
-
-	m_trace_dlg->SetComponentAgent();
-	m_trace_dlg->SetMovieAgent();
-	//m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
-
-	m_agent->getValue(gstTestParam, bval);
-	if (bval)
-		m_tester->Show(true);
-	else
-		m_tester->Show(false);
-
-	//UpdateTree();
-
-	SetMinSize(wxSize(800, 600));
-
-	m_aui_mgr.Update();
-
-	if (!windowed)
-		Maximize();
-
-	if (hidepanels)
-	{
-		m_ui_state = true;
-		ToggleAllTools(false);
-	}
-
-	//set view default settings
-	//if (m_adjust_view && vrv)
-	//{
-		//Color gamma, brightness, hdr;
-		//bool sync_r, sync_g, sync_b;
-		//m_adjust_view->GetDefaults(gamma, brightness, hdr,
-		//	sync_r, sync_g, sync_b);
-		//vrv->m_glview->SetGamma(gamma);
-		//vrv->m_glview->SetBrightness(brightness);
-		//vrv->m_glview->SetHdr(hdr);
-		//vrv->m_glview->SetSyncR(true);
-		//vrv->m_glview->SetSyncG(true);
-		//vrv->m_glview->SetSyncB(true);
-	//}
-
 	//main top menu
 	m_top_menu = new wxMenuBar;
 	m_top_file = new wxMenu;
@@ -714,12 +566,9 @@ void RenderFrame::Init(
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_volume_mini));
 	m_top_file->Append(m);
 
-	if (JVMInitializer::getInstance(m_agent->GetJvmArgs()) != nullptr)
-	{
-		m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
-		m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
-		m_top_file->Append(m);
-	}
+	m = new wxMenuItem(m_top_file, ID_ImportVolume, wxT("Import &Volume"));
+	m->SetBitmap(wxGetBitmapFromMemory(icon_import_mini));
+	m_top_file->Append(m);
 
 	m = new wxMenuItem(m_top_file, ID_OpenMesh, wxT("Open &Mesh"));
 	m->SetBitmap(wxGetBitmapFromMemory(icon_open_mesh_mini));
@@ -838,6 +687,107 @@ void RenderFrame::Init(
 	m_top_menu->Append(m_top_help, wxT("&Help"));
 	SetMenuBar(m_top_menu);
 
+	//drop target
+	SetDropTarget(new DnDFile(this));
+
+#if wxUSE_STATUSBAR
+	CreateStatusBar(2);
+	GetStatusBar()->SetStatusText(wxString(FLUORENDER_TITLE) +
+		wxString(" started normally."));
+#endif // wxUSE_STATUSBAR
+
+}
+
+RenderFrame::~RenderFrame()
+{
+	m_aui_mgr.UnInit();
+}
+
+void RenderFrame::Init(
+	bool benchmark,
+	bool fullscreen,
+	bool windowed,
+	bool hidepanels,
+	bool imagej)
+{
+	// temporarily block events during constructor:
+	//wxEventBlocker blocker(this);
+
+	//if (m_setting_dlg->GetTestMode(1))
+	//	m_vrv_list[0]->m_glview->m_test_speed = true;
+	//if (m_setting_dlg->GetTestMode(3))
+	//{
+	//	m_vrv_list[0]->m_glview->m_test_wiref = true;
+	//	m_vrv_list[0]->m_glview->m_draw_bounds = true;
+	//	m_vrv_list[0]->m_glview->m_draw_grid = true;
+	//	m_data_mgr.m_vol_test_wiref = true;
+	//}
+	//int c1 = m_setting_dlg->GetWavelengthColor(1);
+	//int c2 = m_setting_dlg->GetWavelengthColor(2);
+	//int c3 = m_setting_dlg->GetWavelengthColor(3);
+	//int c4 = m_setting_dlg->GetWavelengthColor(4);
+	//if (c1 && c2 && c3 && c4)
+	//	m_data_mgr.SetWavelengthColor(c1, c2, c3, c4);
+	//m_vrv_list[0]->SetPinThreshold(m_setting_dlg->GetPinThreshold());
+	//m_vrv_list[0]->m_glview->SetPeelingLayers(m_setting_dlg->GetPeelingLyers());
+	//m_vrv_list[0]->m_glview->SetBlendSlices(m_setting_dlg->GetMicroBlend());
+	//m_vrv_list[0]->m_glview->SetAdaptive(m_setting_dlg->GetMouseInt());
+	//m_vrv_list[0]->m_glview->SetGradBg(m_setting_dlg->GetGradBg());
+	//m_vrv_list[0]->m_glview->SetPointVolumeMode(m_setting_dlg->GetPointVolumeMode());
+	//m_vrv_list[0]->m_glview->SetRulerUseTransf(m_setting_dlg->GetRulerUseTransf());
+	//m_vrv_list[0]->m_glview->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
+	//m_vrv_list[0]->m_glview->SetStereo(m_setting_dlg->GetStereo());
+	//m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
+	//if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
+	//m_time_id = m_setting_dlg->GetTimeId();
+	bool bval; long lval; double dval;
+
+	m_trace_dlg->SetComponentAgent();
+	m_trace_dlg->SetMovieAgent();
+	//m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
+
+	m_agent->getValue(gstTestParam, bval);
+	if (bval)
+		m_tester->Show(true);
+	else
+		m_tester->Show(false);
+
+	//UpdateTree();
+
+	if (!imagej)
+	{
+		m_main_tb->DeleteTool(ID_ImportVolume);
+		m_top_file->Enable(ID_ImportVolume, false);
+	}
+
+	SetMinSize(wxSize(800, 600));
+
+	m_aui_mgr.Update();
+
+	if (!windowed)
+		Maximize();
+
+	if (hidepanels)
+	{
+		m_ui_state = true;
+		ToggleAllTools(false);
+	}
+
+	//set view default settings
+	//if (m_adjust_view && vrv)
+	//{
+		//Color gamma, brightness, hdr;
+		//bool sync_r, sync_g, sync_b;
+		//m_adjust_view->GetDefaults(gamma, brightness, hdr,
+		//	sync_r, sync_g, sync_b);
+		//vrv->m_glview->SetGamma(gamma);
+		//vrv->m_glview->SetBrightness(brightness);
+		//vrv->m_glview->SetHdr(hdr);
+		//vrv->m_glview->SetSyncR(true);
+		//vrv->m_glview->SetSyncG(true);
+		//vrv->m_glview->SetSyncB(true);
+	//}
+
 	//set analyze icon
 	m_agent->getValue(gstLastTool, lval);
 	switch (lval)
@@ -894,15 +844,6 @@ void RenderFrame::Init(
 		Iconize();
 	}
 
-	wxMemorySize free_mem_size = wxGetFreeMemory();
-	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
-	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
-		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
-}
-
-void RenderFrame::AssociateRoot()
-{
-	m_agent->setObject(glbin_root);
 }
 
 void RenderFrame::OnExit(wxCommandEvent& WXUNUSED(event))
@@ -1520,273 +1461,9 @@ wxString RenderFrame::ScriptDialog(const wxString& title,
 }
 
 //on selections
-void RenderFrame::OnSelection(fluo::Node *node)
+void RenderFrame::OnSelection(const std::string& name)
 {
-	if (!node)
-		return;
-
-	if (m_adjust_view)
-		m_adjust_view->AssociateNode(node);
-	if (m_clip_view)
-		m_clip_view->AssociateNode(node);
-
-	//clip plane renderer
-	//FLR::ClipPlaneRenderer* renderer =
-	//	FL::Global::instance().getProcessorFactory().
-	//	getOrAddClipPlaneRenderer("clip plane renderer");
-	//if (renderer)
-	//	renderer->copyInputValues(*node);
-
-	//{
-	//	m_adjust_view->SetRenderView(vrv);
-	//	if (!vrv || vd)
-	//		m_adjust_view->SetVolumeData(vd);
-	//}
-
-	//if (m_clip_view)
-	//{
-	//	switch (type)
-	//	{
-	//	case 2:
-	//		m_clip_view->SetVolumeData(vd);
-	//		break;
-	//	case 3:
-	//		m_clip_view->SetMeshData(md);
-	//		break;
-	//	case 4:
-	//		if (ann)
-	//		{
-	//			VolumeData* vd_ann = ann->GetVolume();
-	//			m_clip_view->SetVolumeData(vd_ann);
-	//		}
-	//		break;
-	//	}
-	//}
-
-	//m_cur_sel_type = type;
-	//clear mesh boundbox
-	//if (m_data_mgr.GetMeshData(m_cur_sel_mesh))
-	//	m_data_mgr.GetMeshData(m_cur_sel_mesh)->SetDrawBounds(false);
-
-	std::string type(node->className());
-	if (type == "VolumeData")
-	{
-		//	if (m_volume_prop)
-		//		m_volume_prop->Show(false);
-		//	if (m_mesh_prop)
-		//		m_mesh_prop->Show(false);
-		//	if (m_mesh_manip)
-		//		m_mesh_manip->Show(false);
-		//	if (m_annotation_prop)
-		//		m_annotation_prop->Show(false);
-		//	m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		//	m_aui_mgr.Update();
-		//	break;
-		//case 2:  //volume
-		fluo::VolumeData* vd = node->asVolumeData();
-		bool display = false;
-		if (vd)
-			vd->getValue(gstDisplay, display);
-		if (display)
-		{
-			m_volume_prop->AssociateVolumeData(vd);
-			//m_volume_prop->SetGroup(group);
-			//m_volume_prop->SetView(vrv);
-			if (!m_volume_prop->IsShown())
-			{
-				m_volume_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES) + wxString(" - ") + vd->getName());
-			m_aui_mgr.Update();
-			//wxString str = vd->getName();
-			//m_cur_sel_vol = m_data_mgr.GetVolumeIndex(str);
-
-			glbin_root->setRefValue(gstCurrentVolume, vd);
-			for (size_t i = 0; i < glbin_root->getNumChildren(); ++i)
-			{
-				fluo::Renderview* view = glbin_root->getChild(i)->asRenderview();
-				if (!view)
-					continue;
-				view->setRefValue(gstCurrentVolume, vd);
-			}
-
-			if (m_volume_prop)
-				m_volume_prop->Show(true);
-			if (m_mesh_prop)
-				m_mesh_prop->Show(false);
-			if (m_mesh_manip)
-				m_mesh_manip->Show(false);
-			if (m_annotation_prop)
-				m_annotation_prop->Show(false);
-
-			//if (m_adjust_view)
-			//	m_adjust_view->SetVolumeData(vd);
-
-			//if (m_clip_view)
-			//	m_clip_view->SetVolumeData(vd);
-		}
-		else
-		{
-			if (m_volume_prop)
-				m_volume_prop->Show(false);
-			if (m_mesh_prop)
-				m_mesh_prop->Show(false);
-			if (m_mesh_manip)
-				m_mesh_manip->Show(false);
-			if (m_annotation_prop)
-				m_annotation_prop->Show(false);
-		}
-	}
-	else if (type == "MeshData")
-	{
-		fluo::MeshData* md = node->asMeshData();
-		bool display = false;
-		if (md)
-			md->getValue(gstDisplay, display);
-		if (display)
-		{
-			m_mesh_prop->AssociateMeshData(md);
-			if (!m_mesh_prop->IsShown())
-			{
-				m_mesh_prop->Show(true);
-				m_prop_sizer->Clear();
-				m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-				m_prop_panel->SetSizer(m_prop_sizer);
-				m_prop_panel->Layout();
-			}
-			m_aui_mgr.GetPane(m_prop_panel).Caption(
-				wxString(UITEXT_PROPERTIES) + wxString(" - ") + md->getName());
-			m_aui_mgr.Update();
-			md->setValue(gstDrawBounds, true);
-
-			if (m_volume_prop)
-				m_volume_prop->Show(false);
-			if (m_mesh_prop && md)
-				m_mesh_prop->Show(true);
-			if (m_mesh_manip)
-				m_mesh_manip->Show(false);
-			if (m_annotation_prop)
-				m_annotation_prop->Show(false);
-		}
-	}
-	//	break;
-	//case 3:  //mesh
-	//	if (md)
-	//	{
-	//		m_mesh_prop->SetMeshData(md, vrv);
-	//		if (!m_mesh_prop->IsShown())
-	//		{
-	//			m_mesh_prop->Show(true);
-	//			m_prop_sizer->Clear();
-	//			m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
-	//			m_prop_panel->SetSizer(m_prop_sizer);
-	//			m_prop_panel->Layout();
-	//		}
-	//		m_aui_mgr.GetPane(m_prop_panel).Caption(
-	//			wxString(UITEXT_PROPERTIES)+wxString(" - ")+md->GetName());
-	//		m_aui_mgr.Update();
-	//		wxString str = md->GetName();
-	//		m_cur_sel_mesh = m_data_mgr.GetMeshIndex(str);
-	//		md->SetDrawBounds(true);
-	//	}
-
-	//	if (m_volume_prop)
-	//		m_volume_prop->Show(false);
-	//	if (m_mesh_prop && md)
-	//		m_mesh_prop->Show(true);
-	//	if (m_mesh_manip)
-	//		m_mesh_manip->Show(false);
-	//	if (m_annotation_prop)
-	//		m_annotation_prop->Show(false);
-	//	break;
-	//case 4:  //annotations
-	//	if (ann)
-	//	{
-	//		m_annotation_prop->SetAnnotations(ann, vrv);
-	//		if (!m_annotation_prop->IsShown())
-	//		{
-	//			m_annotation_prop->Show(true);
-	//			m_prop_sizer->Clear();
-	//			m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
-	//			m_prop_panel->SetSizer(m_prop_sizer);
-	//			m_prop_panel->Layout();
-	//		}
-	//		m_aui_mgr.GetPane(m_prop_panel).Caption(
-	//			wxString(UITEXT_PROPERTIES)+wxString(" - ")+ann->GetName());
-	//		m_aui_mgr.Update();
-	//	}
-
-	//	if (m_volume_prop)
-	//		m_volume_prop->Show(false);
-	//	if (m_mesh_prop)
-	//		m_mesh_prop->Show(false);
-	//	if (m_mesh_manip)
-	//		m_mesh_manip->Show(false);
-	//	if (m_annotation_prop && ann)
-	//		m_annotation_prop->Show(true);
-	//	break;
-	//case 5:  //group
-	//	if (m_adjust_view)
-	//		m_adjust_view->SetGroup(group);
-	//	if (m_calculation_dlg)
-	//		m_calculation_dlg->SetGroup(group);
-	//	if (m_volume_prop)
-	//		m_volume_prop->Show(false);
-	//	if (m_mesh_prop)
-	//		m_mesh_prop->Show(false);
-	//	if (m_mesh_manip)
-	//		m_mesh_manip->Show(false);
-	//	if (m_annotation_prop)
-	//		m_annotation_prop->Show(false);
-	//	m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-	//	m_aui_mgr.Update();
-	//	break;
-	//case 6:  //mesh manip
-	//	if (md)
-	//	{
-	//		m_mesh_manip->SetMeshData(md);
-	//		m_mesh_manip->GetData();
-	//		if (!m_mesh_manip->IsShown())
-	//		{
-	//			m_mesh_manip->Show(true);
-	//			m_prop_sizer->Clear();
-	//			m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
-	//			m_prop_panel->SetSizer(m_prop_sizer);
-	//			m_prop_panel->Layout();
-	//		}
-	//		m_aui_mgr.GetPane(m_prop_panel).Caption(
-	//			wxString("Manipulations - ")+md->GetName());
-	//		m_aui_mgr.Update();
-	//	}
-
-	//	if (m_volume_prop)
-	//		m_volume_prop->Show(false);
-	//	if (m_mesh_prop)
-	//		m_mesh_prop->Show(false);
-	//	if (m_mesh_manip && md)
-	//		m_mesh_manip->Show(true);
-	//	if (m_annotation_prop)
-	//		m_annotation_prop->Show(false);
-	//	break;
-	//default:
-	else
-	{
-		if (m_volume_prop)
-			m_volume_prop->Show(false);
-		if (m_mesh_prop)
-			m_mesh_prop->Show(false);
-		if (m_mesh_manip)
-			m_mesh_manip->Show(false);
-		if (m_annotation_prop)
-			m_annotation_prop->Show(false);
-		m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
-		m_aui_mgr.Update();
-	}
+	m_agent->Select(name);
 
 	RefreshVRenderViews();
 }

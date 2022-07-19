@@ -32,6 +32,17 @@ DEALINGS IN THE SOFTWARE.
 #include <StopWatch.hpp>
 #include <AgentFactory.hpp>
 #include <RenderFrame.h>
+#include <FLIVR/VolumeRenderer.h>
+#include <FLIVR/KernelProgram.h>
+#include <FLIVR/VolKernel.h>
+#include <FLIVR/Framebuffer.h>
+#include <FLIVR/VertexArray.h>
+#include <FLIVR/VolShader.h>
+#include <FLIVR/SegShader.h>
+#include <FLIVR/VolCalShader.h>
+#include <FLIVR/TextRenderer.h>
+#include <FLIVR/MultiVolumeRenderer.h>
+#include <Converters/VolumeMeshConv.h>
 #include <wx/stdpaths.h>
 
 FuiManager::FuiManager() :
@@ -63,6 +74,16 @@ FuiManager::FuiManager() :
 FuiManager::~FuiManager()
 {
 	JVMInitializer::destroyJVM();
+	//release?
+	flvr::TextureRenderer::vol_kernel_factory_.clear();
+	flvr::TextureRenderer::framebuffer_manager_.clear();
+	flvr::TextureRenderer::vertex_array_manager_.clear();
+	flvr::TextureRenderer::vol_shader_factory_.clear();
+	flvr::TextureRenderer::seg_shader_factory_.clear();
+	flvr::TextureRenderer::cal_shader_factory_.clear();
+	flvr::TextureRenderer::img_shader_factory_.clear();
+	flvr::TextRenderer::text_texture_manager_.clear();
+	flvr::KernelProgram::release();
 }
 
 RenderFrame* FuiManager::GetFrame()
@@ -84,14 +105,45 @@ void FuiManager::Init()
 		wxString(title),
 		-1, -1,
 		m_win_width, m_win_height);
-	LinkAgents();
-	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels);
+
+	SetupAgents();
 
 	fluo::RenderFrameAgent* renderframeagent = glbin_agtf->getRenderFrameAgent();
 
-	// Adding JVm initialization.
+	// Adding JVm initialization
+	JVMInitializer*	pInstance = nullptr;
 	if (renderframeagent)
-		JVMInitializer*	pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
+		pInstance = JVMInitializer::getInstance(renderframeagent->GetJvmArgs());
+
+	wxMemorySize free_mem_size = wxGetFreeMemory();
+	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
+	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
+		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
+
+	bool bval; long lval; double dval;
+	m_frame->m_agent->getValue(gstSoftThresh, dval);
+	flvr::VolumeRenderer::set_soft_threshold(dval);
+	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
+
+	m_frame->m_agent->getValue(gstSoftThresh, dval);
+	flvr::VolumeRenderer::set_soft_threshold(dval);
+	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
+	VolumeMeshConv::SetSoftThreshold(dval);
+	std::string sval;
+	m_frame->m_agent->getValue(gstFontFile, sval);
+	wxString font_file = sval;
+	wxString exePath = glbin.getExecutablePath();
+	if (font_file != "")
+		font_file = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + font_file;
+	else
+		font_file = exePath + GETSLASH() + "Fonts" +
+		GETSLASH() + "FreeSans.ttf";
+	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
+	m_frame->m_agent->getValue(gstTextSize, dval);
+	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
+
+	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels, pInstance!=nullptr);
 
 	bool run_mov = false;
 	if (m_mov_file != "")
@@ -116,7 +168,55 @@ void FuiManager::Init()
 
 }
 
-void FuiManager::LinkAgents()
+void FuiManager::SetupAgents()
 {
+	//renderframe
+	if (m_frame)
+	{
+		m_frame->m_agent = glbin_agtf->addRenderFrameAgent(gstRenderFrameAgent, *m_frame);
+		m_frame->m_agent->setObject(glbin_root);
+	}
+	//settings
+	SettingDlg* setting_dlg = m_frame->GetSettingDlg();
+	if (setting_dlg)
+	{
+		setting_dlg->m_agent = glbin_agtf->addSettingAgent(gstSettingAgent, *setting_dlg);
+		setting_dlg->m_agent->setObject(glbin_root);
+		setting_dlg->m_agent->ReadSettings();
+	}
+	//annotation
+	AnnotationPropPanel* anno_panel = m_frame->GetAnnotationPropPanel();
+	if (anno_panel)
+	{
+		anno_panel->m_agent = glbin_agtf->addAnnotationPropAgent(gstAnnotationPropAgent, *anno_panel);
+	}
+	//tree
+	TreePanel* tree_panel = m_frame->GetTree();
+	if (tree_panel)
+	{
+		tree_panel->m_tree_model = glbin_agtf->addTreeAgent(gstTreeAgent, *tree_panel);
+		tree_panel->m_tree_model->setObject(glbin_root);
+		tree_panel->SetScenegraph(glbin_root);
+	}
+	//brush
+	BrushToolDlg* brush_dlg = m_frame->GetBrushToolDlg();
+	if (brush_dlg && tree_panel)
+	{
+		brush_dlg->m_agent = glbin_agtf->addBrushToolAgent(gstBrushToolAgent, *brush_dlg, *tree_panel);
+		tree_panel->m_brushtool_agent = brush_dlg->m_agent;
+	}
+	//calculation
+	CalculationDlg* calc_dlg = m_frame->GetCalculationDlg();
+	if (calc_dlg)
+	{
+		calc_dlg->m_agent = glbin_agtf->addCalculationAgent(gstCalculationAgent, *calc_dlg);
+	}
+	//clip
+	ClipPlanePanel* clip_panel = m_frame->GetClippingView();
+	if (clip_panel)
+	{
+		clip_panel->m_agent = glbin_agtf->addClipPlaneAgent(gstClipPlaneAgent, *clip_panel);
+	}
+
 
 }

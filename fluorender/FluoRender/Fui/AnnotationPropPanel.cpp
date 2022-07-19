@@ -26,9 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <AnnotationPropPanel.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Annotations.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(AnnotationPropPanel, wxPanel)
@@ -45,8 +42,6 @@ AnnotationPropPanel::AnnotationPropPanel(
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-
-	m_agent = glbin_agtf->addAnnotationPropAgent(gstAnnotationPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxStaticText* st = 0;
@@ -80,11 +75,6 @@ AnnotationPropPanel::AnnotationPropPanel(
 
 AnnotationPropPanel::~AnnotationPropPanel()
 {
-}
-
-void AnnotationPropPanel::AssociateAnnotations(fluo::Annotations* ann)
-{
-	m_agent->setObject(ann);
 }
 
 void AnnotationPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)

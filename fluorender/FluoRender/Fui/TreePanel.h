@@ -59,8 +59,7 @@ public:
 		const wxString& name = "TreePanel");
 	~TreePanel();
 
-	void SetScenegraph(fluo::Node* root);
-	void SetBrushToolAgent();
+	void SetScenegraph(void* root);
 
 	//seelction
 	void UpdateSelection();
@@ -72,14 +71,14 @@ public:
 	int GetBrushSelected();
 
 	friend class fluo::TreeAgent;
+	fluo::TreeAgent* m_tree_model;
+	fluo::BrushToolAgent* m_brushtool_agent;
 
 private:
 	wxWindow* m_frame;
 	wxToolBar* m_toolbar;
 
 	wxDataViewCtrl* m_tree_ctrl;
-	fluo::TreeAgent* m_tree_model;
-	fluo::BrushToolAgent* m_brushtool_agent;
 
 private:
 	void OnSelectionChanged(wxDataViewEvent &event);

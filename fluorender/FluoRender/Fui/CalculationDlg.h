@@ -58,9 +58,9 @@ public:
 	~CalculationDlg();
 
 	friend class fluo::CalculationAgent;
+	fluo::CalculationAgent* m_agent;
 
 private:
-	fluo::CalculationAgent* m_agent;
 
 	//calculations
 	//operands
