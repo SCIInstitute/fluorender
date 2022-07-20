@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <NoiseReduceDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(NoiseReduceDlg, wxPanel)
@@ -46,8 +44,6 @@ NoiseReduceDlg::NoiseReduceDlg(RenderFrame *frame)
 	wxDefaultPosition, wxSize(400, 150),
 	0, "NoiseReduceDlg")
 {
-	m_agent = glbin_agtf->addNoiseReduceAgent(gstNoiseReduceAgent, *this);
-
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -180,7 +176,7 @@ void NoiseReduceDlg::OnPreviewBtn(wxCommandEvent &event)
 
 void NoiseReduceDlg::OnEraseBtn(wxCommandEvent &event)
 {
-	glbin_agtf->getBrushToolAgent()->BrushErase();
+	m_agent->BrushErase();
 }
 
 void NoiseReduceDlg::OnEnhanceSelChk(wxCommandEvent &event)

@@ -40,6 +40,7 @@ class RenderFrame;
 namespace fluo
 {
 	class Renderview;
+	class RenderFrameAgent;
 }
 namespace flrd
 {
@@ -69,7 +70,7 @@ namespace flrd
 		ScriptProc();
 		~ScriptProc();
 
-		void SetFrame(RenderFrame* frame) { m_frame = frame; }
+		void SetFrame(fluo::RenderFrameAgent* frame) { m_frame = frame; }
 		void SetView(fluo::Renderview* view) { m_view = view; }
 
 		//run 4d script
@@ -78,7 +79,7 @@ namespace flrd
 		void ClearResults() { m_output->removeAllChildren(); }
 
 	private:
-		RenderFrame* m_frame;
+		fluo::RenderFrameAgent* m_frame;
 		fluo::Renderview *m_view;
 
 		wxString m_type;

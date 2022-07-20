@@ -28,11 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <RenderFrame.h>
 #include <RecorderDlg.h>
-#include <Renderview.hpp>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Root.hpp>
-#include <FLIVR/TextureRenderer.h>
 #include <png_resource.h>
 #include <img/icons.h>
 #include <wx/aboutdlg.h>
@@ -422,8 +417,6 @@ MoviePanel::MoviePanel(RenderFrame* frame,
 	const wxString& name) :
 	wxPanel(frame, wxID_ANY, pos, size, style, name)
 {
-	m_agent = glbin_agtf->addMovieAgent(gstMovieAgent, *this);
-
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -492,10 +485,8 @@ MoviePanel::~MoviePanel() {}
 
 void MoviePanel::OnViewSelected(wxCommandEvent& event)
 {
-	int ival = m_views_cmb->GetCurrentSelection();
-	fluo::Renderview* view = glbin_root->getChild(ival)->asRenderview();
-	AssociateRenderview(view);
-	//GetSettings();
+	std::string str = m_views_cmb->GetStringSelection().ToStdString();
+	m_agent->Select(str);
 }
 
 void MoviePanel::OnNbPageChange(wxBookCtrlEvent& event)

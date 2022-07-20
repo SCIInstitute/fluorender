@@ -34,10 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/slider.h>
 #include <MeshPropAgent.hpp>
 
-namespace fluo
-{
-	class MeshData;
-}
 class MeshPropPanel: public wxPanel
 {
 	enum
@@ -68,13 +64,10 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void AssociateMeshData(fluo::MeshData* md);
-
 	friend class fluo::MeshPropAgent;
-
-private:
 	fluo::MeshPropAgent* m_agent;
 
+private:
 	wxCheckBox *m_light_chk;
 	wxColourPickerCtrl *m_diff_picker;
 	wxColourPickerCtrl *m_spec_picker;

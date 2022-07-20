@@ -26,9 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MeshTransPanel.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <MeshData.hpp>
 #include <compatibility.h>
 
 BEGIN_EVENT_TABLE(MeshTransPanel, wxPanel)

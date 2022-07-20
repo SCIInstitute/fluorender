@@ -59,16 +59,10 @@ public:
 	ConvertDlg(RenderFrame* frame);
 	~ConvertDlg();
 
-	void AssociateVolumeData(fluo::VolumeData* vd)
-	{
-		m_agent->setObject(vd);
-	}
-
 	friend class fluo::ConvertAgent;
-
-private:
 	fluo::ConvertAgent* m_agent;
 
+private:
 	//convert from volume to polygon mesh
 	wxSlider* m_cnv_vol_mesh_thresh_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_thresh_text;

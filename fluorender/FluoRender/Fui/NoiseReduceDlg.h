@@ -32,10 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <NoiseReduceAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-}
 class NoiseReduceDlg : public wxPanel
 {
 public:
@@ -54,16 +50,10 @@ public:
 	NoiseReduceDlg(RenderFrame* frame);
 	~NoiseReduceDlg();
 
-	void AssociateRenderview(fluo::Renderview* view)
-	{
-		m_agent->setObject(view);
-	}
-
 	friend class fluo::NoiseReduceAgent;
-
-private:
 	fluo::NoiseReduceAgent* m_agent;
 
+private:
 	wxCheckBox *m_ca_select_only_chk;
 	//threshold
 	wxSlider *m_threshold_sldr;

@@ -85,6 +85,9 @@ namespace fluo
 
 		friend class AgentFactory;
 
+		void SaveProject(const std::wstring & dir, const std::wstring &filename);
+		bool GetClipHold();
+
 	protected:
 		RenderviewPanel &panel_;
 

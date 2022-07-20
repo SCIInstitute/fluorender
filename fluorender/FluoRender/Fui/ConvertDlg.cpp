@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ConvertDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(ConvertDlg, wxPanel)
@@ -50,7 +48,6 @@ wxPanel(frame, wxID_ANY,
 	wxDefaultPosition, wxSize(400, 300),
 	0, "ConvertDlg")
 {
-	m_agent = glbin_agtf->addConvertAgent(gstConvertAgent, *this);
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 

@@ -31,21 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderviewPanel.h>
 #include <RenderFrame.h>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <RenderviewFactory.hpp>
-#include <AgentFactory.hpp>
-#include <Global.hpp>
-#include <Input.hpp>
-#include <TextureRenderer.h>
-#include <RulerHandler.h>
-#include <RulerRenderer.h>
-#include <VolumePoint.h>
-#include <VolumeSelector.h>
-#include <VolumeCalculator.h>
-#include <CompAnalyzer.h>
-#include <ScriptProc.h>
-#include <Debug.hpp>
 
 #include <wx/stdpaths.h>
 #ifdef _WIN32
@@ -89,12 +74,6 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 
-	fluo::Renderview* view = glbin_revf->build();
-	view->setName(m_vrv->GetName().ToStdString());
-	glbin_root->addChild(view);
-	glbin_root->setRefValue(gstCurrentView, view);
-	m_agent = glbin_agtf->addRenderCanvasAgent(view->getName(), *this);
-	m_agent->setObject(view);
 #ifdef _WIN32
 	m_agent->setValue(gstHwnd, (unsigned long long)GetHWND());
 	m_agent->setValue(gstHinstance, (unsigned long long)::wxGetInstance());
@@ -103,20 +82,7 @@ RenderCanvas::RenderCanvas(RenderFrame* frame,
 	//bool bval = m_frame && m_frame->GetBenchmark();
 	//m_agent->setValue(gstBenchmark, bval);
 
-	view->GetRulerHandler()->SetView(view);
-	m_agent->getObject()->GetRulerHandler()->SetRulerList(
-		m_agent->getObject()->GetRulerList());
-	m_agent->getObject()->GetRulerRenderer()->SetView(view);
-	m_agent->getObject()->GetRulerRenderer()->SetRulerList(
-		m_agent->getObject()->GetRulerList());
-	m_agent->getObject()->GetVolumePoint()->SetView(view);
-	m_agent->getObject()->GetVolumeSelector()->SetView(view);
-	m_agent->getObject()->GetVolumeCalculator()->SetRoot(glbin_root);
-	m_agent->getObject()->GetVolumeCalculator()->SetView(view);
-	m_agent->getObject()->GetVolumeCalculator()->SetVolumeSelector(
-		m_agent->getObject()->GetVolumeSelector());
-	m_agent->getObject()->GetScriptProc()->SetFrame(m_frame);
-	m_agent->getObject()->GetScriptProc()->SetView(view);
+	m_agent->Init();
 }
 
 RenderCanvas::~RenderCanvas()
@@ -194,15 +160,6 @@ void RenderCanvas::Init()
 		if (ctx != flvr::TextureRenderer::gl_context_)
 			flvr::TextureRenderer::gl_context_ = ctx;
 #endif
-		fluo::RenderFrameAgent* agent = glbin_agtf->getRenderFrameAgent();
-		if (agent)
-		{
-			agent->SetTextureRendererSettings();
-			agent->SetTextureUndos();
-			//m_frame->GetSettingDlg()->UpdateTextureSize();
-		}
-		////glViewport(0, 0, (GLint)(GetSize().x), (GLint)(GetSize().y));
-		//glEnable(GL_MULTISAMPLE);
 #ifdef _WIN32
 		//check touch
 		HMODULE user32 = LoadLibrary(L"user32");
@@ -267,9 +224,7 @@ void RenderCanvas::PickVolume()
 void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
-		std::set<unsigned long long> ids;
-	m_agent->getObject()->GetCompAnalyzer()->GetCompsPoint(p, ids);
-	glbin_agtf->getComponentAgent()->SetCompSelection(ids, mode);
+	m_agent->CompSelection(p, mode);
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
@@ -281,7 +236,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	bool mouse_in = window && view_reg.Contains(mouse_pos);
 	m_agent->setValue(gstMouseIn, mouse_in);
 	m_agent->setValue(gstRenderviewPanelId, long(m_vrv->GetID()));
-	glbin_input->Update();
+	m_agent->UpdateInput();
 	m_agent->getObject()->HandleIdle();
 
 	//full screen
@@ -1297,7 +1252,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	m_agent->setValue(gstMouseY, my);
 	m_agent->setValue(gstMouseDrag, event.Dragging());
 	m_agent->setValue(gstMouseWheel, long(event.GetWheelRotation()));
-	glbin_input->Update();
+	m_agent->UpdateInput();
 	m_agent->getObject()->HandleMouse();
 }
 

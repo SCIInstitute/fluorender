@@ -55,12 +55,6 @@ DEALINGS IN THE SOFTWARE.
 	int(v*100.0+0.5)
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-	class VolumeData;
-	class VolumeGroup;
-}
 class OutAdjustPanel: public wxPanel
 {
 	enum
@@ -105,16 +99,13 @@ public:
 		const wxString& name="OutAdjustPanel");
 	~OutAdjustPanel();
 
-	void AssociateNode(fluo::Node* node);
-
 	//disable/enable
 	void DisableAll();
 	void EnableAll();
 	friend class fluo::OutAdjustAgent;
-
-private:
 	fluo::OutAdjustAgent* m_agent;
 
+private:
 	//sync red
 	wxToolBar *m_sync_r_chk;
 	//red sliders

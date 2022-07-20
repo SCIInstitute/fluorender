@@ -27,12 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <OutAdjustPanel.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <VolumeFactory.hpp>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -80,8 +74,6 @@ wxPanel(frame, wxID_ANY, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-
-	m_agent = glbin_agtf->addOutAdjustAgent(gstOutAdjustAgent, *this);
 
 	SetDoubleBuffered(true);
 
@@ -331,11 +323,6 @@ wxPanel(frame, wxID_ANY, pos, size, style, name)
 
 OutAdjustPanel::~OutAdjustPanel()
 {
-}
-
-void OutAdjustPanel::AssociateNode(fluo::Node* node)
-{
-	m_agent->setObject(node);
 }
 
 void OutAdjustPanel::DisableAll()
@@ -595,30 +582,21 @@ void OutAdjustPanel::OnSyncBCheck(wxCommandEvent &event)
 
 void OutAdjustPanel::OnRReset(wxCommandEvent &event)
 {
-	fluo::ValueCollection names{ gstGammaR, gstBrightnessR, gstEqualizeR };
-	glbin_volf->propValuesFromDefault(m_agent, names);
+	m_agent->ResetRed();
 }
 
 void OutAdjustPanel::OnGReset(wxCommandEvent &event)
 {
-	fluo::ValueCollection names{ gstGammaB, gstBrightnessB, gstEqualizeB };
-	glbin_volf->propValuesFromDefault(m_agent, names);
+	m_agent->ResetGreen();
 }
 
 void OutAdjustPanel::OnBReset(wxCommandEvent &event)
 {
-	fluo::ValueCollection names{ gstGammaB, gstBrightnessB, gstEqualizeB };
-	glbin_volf->propValuesFromDefault(m_agent, names);
+	m_agent->ResetBlue();
 }
 
 void OutAdjustPanel::OnSaveDefault(wxCommandEvent &event)
 {
-	std::string ss[] = {
-		gstGammaR, gstGammaG, gstGammaB,
-		gstBrightnessR, gstBrightnessG, gstBrightnessB,
-		gstEqualizeR, gstEqualizeG, gstEqualizeB };
-	fluo::ValueCollection names(std::begin(ss), std::end(ss));//values to save
-	glbin_volf->propValuesToDefault(m_agent, names);
-	glbin_volf->writeDefault(names);
+	m_agent->SaveDefault();
 }
 

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <NoiseReduceAgent.hpp>
 #include <NoiseReduceDlg.h>
+#include <AgentFactory.hpp>
 #include <BrushToolAgent.hpp>
 #include <VolumeData.hpp>
 #include <CompSelector.h>
@@ -173,6 +174,11 @@ void NoiseReduceAgent::Enhance()
 	}
 	//if (m_frame)
 	//	m_frame->RefreshVRenderViews();
+}
+
+void NoiseReduceAgent::BrushErase()
+{
+	glbin_agtf->getBrushToolAgent()->BrushErase();
 }
 
 void NoiseReduceAgent::OnThreshold(Event& event)

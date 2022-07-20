@@ -116,6 +116,17 @@ void MovieAgent::SetProgress(double pcnt)
 	panel_.m_progress_text->ChangeValue(st);
 }
 
+void MovieAgent::Select(const std::string& name)
+{
+	Node* node = glbin_root->findFirstChild(name);
+	if (!node)
+		return;
+	Renderview* view = node->asRenderview();
+	if (!view)
+		return;
+	setObject(view);
+}
+
 int MovieAgent::GetScriptFiles(wxArrayString& list)
 {
 	wxString exePath = glbin.getExecutablePath();

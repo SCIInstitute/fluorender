@@ -58,6 +58,7 @@ namespace fluo
 
 		void Preview();
 		void Enhance();
+		void BrushErase();
 
 	protected:
 		NoiseReduceDlg &dlg_;

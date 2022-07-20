@@ -122,10 +122,9 @@ public:
 	void UpdateWindow(const fluo::ValueCollection &names);
 
 	friend class fluo::VolumePropAgent;
-
-private:
 	fluo::VolumePropAgent* m_agent;
 
+private:
 	double m_max_val;
 
 	//1st line

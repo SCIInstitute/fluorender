@@ -108,6 +108,9 @@ namespace fluo
 
 		friend class AgentFactory;
 
+		void SaveDefault();
+		void ResetDefault();
+
 	protected:
 		VolumePropPanel &panel_;
 

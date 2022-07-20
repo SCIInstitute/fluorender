@@ -127,12 +127,12 @@ public:
 	void AddCanvas(RenderCanvas* canvas);
 
 	friend class fluo::RenderviewAgent;
+	fluo::RenderviewAgent* m_agent;
+	static int m_max_id;
 
 private:
-	static int m_max_id;
 	int m_id;
 
-	fluo::RenderviewAgent* m_agent;
 	wxWindow* m_frame;
 	//render view///////////////////////////////////////////////
 	RenderCanvas *m_canvas;

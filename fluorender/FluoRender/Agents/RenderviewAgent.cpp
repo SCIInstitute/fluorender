@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RenderviewAgent.hpp>
 #include <RenderviewPanel.h>
+#include <AgentFactory.hpp>
+#include <RenderFrameAgent.hpp>
+#include <ClipPlaneAgent.hpp>
 
 using namespace fluo;
 
@@ -86,6 +89,34 @@ Renderview* RenderviewAgent::getObject()
 void RenderviewAgent::UpdateFui(const ValueCollection &names)
 {
 	bool update_all = names.empty();
+}
+
+void RenderviewAgent::SaveProject(const std::wstring & dir, const std::wstring &filename)
+{
+	wxString cap_file = dir + GETSLASH() + filename;
+	updateValue(gstCaptureFile, cap_file.ToStdWstring());
+	updateValue(gstCapture, true);
+	bool bval;
+	glbin_root->getValue(gstSaveProjectEnable, bval);
+	if (bval)
+	{
+		wxString new_folder;
+		new_folder = cap_file + "_project";
+		MkDirW(new_folder.ToStdWstring());
+		wxString prop_file = new_folder + GETSLASH() + filename + "_project.vrp";
+		glbin_agtf->getRenderFrameAgent()->SaveProject(prop_file.ToStdWstring());
+	}
+}
+
+bool RenderviewAgent::GetClipHold()
+{
+	bool bval = false;
+	fluo::ClipPlaneAgent* agent = glbin_agtf->getClipPlaneAgent();
+	if (agent)
+	{
+		agent->getValue(gstClipHold, bval);
+	}
+	return false;
 }
 
 //void RenderviewAgent::OnBoundsChanged(Event& event)

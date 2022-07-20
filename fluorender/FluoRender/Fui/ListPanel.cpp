@@ -27,19 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ListPanel.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <MeshData.hpp>
-#include <Annotations.hpp>
-#include <VolumeFactory.hpp>
-#include <MeshFactory.hpp>
-#include <AnnotationFactory.hpp>
-#include <AgentFactory.hpp>
 #include <png_resource.h>
-#include <boost/algorithm/string.hpp>
 #include <wx/valnum.h>
+#include <boost/algorithm/string.hpp>
 //resources
 #include <img/icons.h>
 
@@ -105,7 +95,6 @@ ListPanel::ListPanel(
 	m_list_ctrl->EnableDropTarget(wxDF_UNICODETEXT);
 	m_list_ctrl->SetDoubleBuffered(true);
 	m_list_ctrl->SetIndent(1);
-	m_list_model = glbin_agtf->addListAgent(gstListAgent, *this);
 	//append columns
 	//name
 	wxDataViewIconTextRenderer *itr =

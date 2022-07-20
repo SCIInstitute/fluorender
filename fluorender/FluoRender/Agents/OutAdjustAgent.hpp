@@ -70,6 +70,11 @@ namespace fluo
 
 		friend class AgentFactory;
 
+		void ResetRed();
+		void ResetGreen();
+		void ResetBlue();
+		void SaveDefault();
+
 	protected:
 		OutAdjustPanel &panel_;
 

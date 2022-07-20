@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/arrstr.h>
 
 class RenderFrame;
+class RenderviewPanel;
 namespace fluo
 {
 	class RenderFrameAgent : public InterfaceAgent
@@ -93,6 +94,10 @@ namespace fluo
 		bool CheckNames(const std::string &name);
 
 		void Select(const std::string &name);//name of a node
+		void AddView(RenderviewPanel* vrv, bool set_gl);
+
+		wxString ScriptDialog(const wxString& title,
+			const wxString& wildcard, long style);
 
 	protected:
 		RenderFrame &frame_;

@@ -58,6 +58,7 @@ namespace fluo
 
 		friend class AgentFactory;
 
+		void Select(const std::string& name);
 		int GetScriptFiles(wxArrayString& list);
 		void AddScriptToList();
 		void GetScriptSettings();

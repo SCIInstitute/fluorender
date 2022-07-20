@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <TrackDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -684,8 +682,6 @@ TrackDlg::TrackDlg(RenderFrame* frame)
 		0, "TrackDlg"),
 	m_frame(frame)
 {
-	m_agent = glbin_agtf->addTrackAgent(gstTrackAgent, *this);
-
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -789,16 +785,6 @@ TrackDlg::~TrackDlg()
 	//	delete[] reinterpret_cast<char*>(m_mask->data);
 	//	nrrdNix(m_mask);
 	//}
-}
-
-void TrackDlg::SetComponentAgent()
-{
-	m_compagent = glbin_agtf->getComponentAgent();
-}
-
-void TrackDlg::SetMovieAgent()
-{
-	m_movieagent = glbin_agtf->getMovieAgent();
 }
 
 void TrackDlg::OnClearTrace(wxCommandEvent& event)

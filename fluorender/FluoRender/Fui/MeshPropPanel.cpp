@@ -26,10 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MeshPropPanel.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <MeshData.hpp>
-#include <MeshGroup.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(MeshPropPanel, wxPanel)
@@ -65,8 +61,6 @@ MeshPropPanel::MeshPropPanel(
 	wxEventBlocker blocker(this);
 
 	SetDoubleBuffered(true);
-
-	m_agent = glbin_agtf->addMeshPropAgent(gstMeshPropAgent, *this);
 
 	wxBoxSizer* sizer_v1 = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -188,11 +182,6 @@ MeshPropPanel::MeshPropPanel(
 
 MeshPropPanel::~MeshPropPanel()
 {
-}
-
-void MeshPropPanel::AssociateMeshData(fluo::MeshData* md)
-{
-	m_agent->setObject(md);
 }
 
 //lighting

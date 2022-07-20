@@ -36,10 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MeasureAgent.hpp>
 
 class RenderFrame;
-namespace fluo
-{
-	class Renderview;
-}
 class RulerListCtrl : public wxListCtrl
 {
 	enum
@@ -72,10 +68,9 @@ public:
 
 	friend class MeasureDlg;
 	friend class fluo::MeasureAgent;
-
-private:
 	fluo::MeasureAgent* m_agent;
 
+private:
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
@@ -165,15 +160,11 @@ public:
 	MeasureDlg(RenderFrame* frame);
 	~MeasureDlg();
 
-	void AssociateRenderview(fluo::Renderview* view)
-	{
-		m_agent->setObject(view);
-	}
-
 	friend class fluo::MeasureAgent;
+	fluo::MeasureAgent* m_agent;
+	RulerListCtrl *m_rulerlist;
 
 private:
-	fluo::MeasureAgent* m_agent;
 	RenderFrame* m_frame;
 
 	//list ctrl
@@ -182,7 +173,6 @@ private:
 	wxButton* m_chg_group;
 	wxButton* m_sel_group;
 	wxButton* m_disptgl_group;
-	RulerListCtrl *m_rulerlist;
 	//tool bar
 	wxToolBar *m_toolbar1;
 	wxToolBar *m_toolbar2;

@@ -238,6 +238,10 @@ public:
 	CalculationDlg* GetCalculationDlg() { return m_calculation_dlg; }
 	//annotation
 	AnnotationPropPanel* GetAnnotationPropPanel() { return m_annotation_prop; }
+	//mesh prop
+	MeshPropPanel* GetMeshPropPanel() { return m_mesh_prop; }
+	//mesh transform
+	MeshTransPanel* GetMeshTransPanel() { return m_mesh_manip; }
 
 	//show dialogs
 	void ShowPaintTool();
@@ -251,6 +255,13 @@ public:
 	void ShowComponentDlg();
 	void ShowCalculationDlg();
 
+	//show prop panel
+	void HidePropPanel();
+	void ShowVolumePropPanel(const std::string& name);
+	void ShowMeshPropPanel(const std::string& name);
+	void ShowMeshManipPanel(const std::string& name);
+	void ShowAnnoPropPanel(const std::string& name);
+
 	//tex renderer settings
 	//void SetTextureRendererSettings();
 	//void SetTextureUndos();
@@ -263,9 +274,6 @@ public:
 
 	void ClearVrvList()
 	{ m_vrv_list.clear(); }
-
-	wxString ScriptDialog(const wxString& title,
-		const wxString& wildcard, long style);
 
 	friend class fluo::RenderFrameAgent;
 	fluo::RenderFrameAgent* m_agent;

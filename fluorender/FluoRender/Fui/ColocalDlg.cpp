@@ -27,12 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ColocalDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <Calculate/Compare.h>
 
 BEGIN_EVENT_TABLE(ColocalDlg, wxPanel)
 	EVT_BUTTON(ID_ColocalizeBtn, ColocalDlg::OnColocalizenBtn)
@@ -60,8 +54,6 @@ ColocalDlg::ColocalDlg(RenderFrame* frame) :
 	wxDefaultPosition, wxSize(500, 500),
 	0, "ColocalDlg")
 {
-	m_agent = glbin_agtf->addColocalAgent(gstColocalAgent, *this);
-
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 

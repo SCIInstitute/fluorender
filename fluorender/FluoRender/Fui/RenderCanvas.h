@@ -60,8 +60,9 @@ public:
 	//public mouse
 	void OnMouse(wxMouseEvent& event);
 
-private:
 	fluo::RenderCanvasAgent* m_agent;
+
+private:
 	RenderFrame* m_frame;
 	RenderviewPanel* m_vrv;
 

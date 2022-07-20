@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CountingDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 
 BEGIN_EVENT_TABLE(CountingDlg, wxPanel)
@@ -42,7 +40,6 @@ CountingDlg::CountingDlg(RenderFrame *frame)
 wxDefaultPosition, wxSize(400, 150),
 0, "CountingDlg")
 {
-	m_agent = glbin_agtf->addCountingAgent(gstCountingAgent, *this);
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 

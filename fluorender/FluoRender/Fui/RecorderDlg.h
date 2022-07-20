@@ -57,9 +57,9 @@ public:
 
 	friend class RecorderDlg;
 	friend class fluo::RecorderAgent;
+	fluo::RecorderAgent* m_agent;
 
 private:
-	fluo::RecorderAgent* m_agent;
 
 	wxImageList *m_images;
 
@@ -123,23 +123,18 @@ public:
 		wxWindow* parent);
 	~RecorderDlg();
 
-	void AssociateRenderview(fluo::Renderview* view)
-	{
-		m_agent->setObject(view);
-	}
-
 	friend class fluo::RecorderAgent;
+	fluo::RecorderAgent* m_agent;
+
+	//list ctrl
+	KeyListCtrl *m_keylist;
 
 private:
-	fluo::RecorderAgent* m_agent;
 
 	//automatic keys
 	wxComboBox *m_auto_key_cmb;
 	//generate
 	//wxButton *m_auto_key_btn;
-
-	//list ctrl
-	KeyListCtrl *m_keylist;
 
 	//default duration
 	wxTextCtrl *m_duration_text;

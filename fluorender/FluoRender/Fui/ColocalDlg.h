@@ -70,20 +70,14 @@ public:
 	ColocalDlg(RenderFrame* frame);
 	~ColocalDlg();
 
-	void AssociateVolumeGroup(fluo::VolumeGroup* group)
-	{
-		m_agent->setObject(group);
-	}
-
 	//grid data ops
 	void CopyData();
 	void PasteData();
 
 	friend class fluo::ColocalAgent;
-
-private:
 	fluo::ColocalAgent* m_agent;
 
+private:
 	//speed test
 	bool m_test_speed;
 	std::vector<std::chrono::high_resolution_clock::time_point> m_tps;

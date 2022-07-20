@@ -171,15 +171,12 @@ public:
 		m_agent->setObject(view);
 	}
 
-	void SetComponentAgent();
-	void SetMovieAgent();
-
 	friend class fluo::TrackAgent;
-
-private:
 	fluo::TrackAgent* m_agent;
 	fluo::ComponentAgent* m_compagent;
 	fluo::MovieAgent* m_movieagent;
+
+private:
 	RenderFrame* m_frame;
 	
 	//tab control

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <VolumePropAgent.hpp>
 #include <VolumePropPanel.h>
+#include <VolumeFactory.hpp>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -104,4 +105,68 @@ VolumeData* VolumePropAgent::getObject()
 void VolumePropAgent::UpdateFui(const ValueCollection &names)
 {
 	panel_.UpdateWindow(names);
+}
+
+void VolumePropAgent::SaveDefault()
+{
+	fluo::ValueCollection names{
+		fluo::VolumePropAgent::Gamma3d,
+		fluo::VolumePropAgent::ExtractBoundary,
+		fluo::VolumePropAgent::Saturation,
+		fluo::VolumePropAgent::LowThreshold,
+		fluo::VolumePropAgent::HighThreshold,
+		fluo::VolumePropAgent::ShadowEnable,
+		fluo::VolumePropAgent::ShadowInt,
+		fluo::VolumePropAgent::Alpha,
+		fluo::VolumePropAgent::AlphaEnable,
+		fluo::VolumePropAgent::SampleRate,
+		fluo::VolumePropAgent::ShadingEnable,
+		fluo::VolumePropAgent::LowShading,
+		fluo::VolumePropAgent::HighShading,
+		fluo::VolumePropAgent::ColormapEnable,
+		fluo::VolumePropAgent::ColormapMode,
+		fluo::VolumePropAgent::ColormapType,
+		fluo::VolumePropAgent::ColormapLow,
+		fluo::VolumePropAgent::ColormapHigh,
+		fluo::VolumePropAgent::ColormapProj,
+		fluo::VolumePropAgent::Invert,
+		fluo::VolumePropAgent::Interpolate,
+		fluo::VolumePropAgent::MipMode,
+		fluo::VolumePropAgent::NoiseRedct,
+		fluo::VolumePropAgent::SpcX,
+		fluo::VolumePropAgent::SpcY,
+		fluo::VolumePropAgent::SpcZ
+	};
+	glbin_volf->propValuesToDefault(this, names);
+	glbin_volf->writeDefault(names);
+}
+
+void VolumePropAgent::ResetDefault()
+{
+	fluo::ValueCollection names{
+		fluo::VolumePropAgent::Gamma3d,
+		fluo::VolumePropAgent::ExtractBoundary,
+		fluo::VolumePropAgent::Saturation,
+		fluo::VolumePropAgent::LowThreshold,
+		fluo::VolumePropAgent::HighThreshold,
+		fluo::VolumePropAgent::ShadowEnable,
+		fluo::VolumePropAgent::ShadowInt,
+		fluo::VolumePropAgent::Alpha,
+		fluo::VolumePropAgent::AlphaEnable,
+		fluo::VolumePropAgent::SampleRate,
+		fluo::VolumePropAgent::ShadingEnable,
+		fluo::VolumePropAgent::LowShading,
+		fluo::VolumePropAgent::HighShading,
+		fluo::VolumePropAgent::ColormapEnable,
+		fluo::VolumePropAgent::ColormapMode,
+		fluo::VolumePropAgent::ColormapType,
+		fluo::VolumePropAgent::ColormapLow,
+		fluo::VolumePropAgent::ColormapHigh,
+		fluo::VolumePropAgent::ColormapProj,
+		fluo::VolumePropAgent::Invert,
+		fluo::VolumePropAgent::Interpolate,
+		fluo::VolumePropAgent::MipMode,
+		fluo::VolumePropAgent::NoiseRedct
+	};
+	glbin_volf->propValuesFromDefault(this, names);
 }

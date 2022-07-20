@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <OutAdjustAgent.hpp>
 #include <OutAdjustPanel.h>
+#include <VolumeFactory.hpp>
 #include <wx/valnum.h>
 #include <png_resource.h>
 #include <img/icons.h>
@@ -153,6 +154,35 @@ void OutAdjustAgent::UpdateFui(const ValueCollection &names)
 	}
 
 	//panel_.Layout();
+}
+
+void OutAdjustAgent::ResetRed()
+{
+	fluo::ValueCollection names{ gstGammaR, gstBrightnessR, gstEqualizeR };
+	glbin_volf->propValuesFromDefault(this, names);
+}
+
+void OutAdjustAgent::ResetGreen()
+{
+	fluo::ValueCollection names{ gstGammaB, gstBrightnessB, gstEqualizeB };
+	glbin_volf->propValuesFromDefault(this, names);
+}
+
+void OutAdjustAgent::ResetBlue()
+{
+	fluo::ValueCollection names{ gstGammaB, gstBrightnessB, gstEqualizeB };
+	glbin_volf->propValuesFromDefault(this, names);
+}
+
+void OutAdjustAgent::SaveDefault()
+{
+	std::string ss[] = {
+		gstGammaR, gstGammaG, gstGammaB,
+		gstBrightnessR, gstBrightnessG, gstBrightnessB,
+		gstEqualizeR, gstEqualizeG, gstEqualizeB };
+	fluo::ValueCollection names(std::begin(ss), std::end(ss));//values to save
+	glbin_volf->propValuesToDefault(this, names);
+	glbin_volf->writeDefault(names);
 }
 
 void OutAdjustAgent::OnGammaRChanged(Event& event)

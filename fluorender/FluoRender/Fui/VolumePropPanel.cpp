@@ -26,16 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolumePropPanel.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <VolumeFactory.hpp>
-#include <Root.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <VolumeGroup.hpp>
-#include <FLIVR/MultiVolumeRenderer.h>
-#include <FLIVR/VolumeRenderer.h>
-#include <FLIVR/VolShaderCode.h>
 #include <Types/Color.h>
 #include <Types/BBox.h>
 #include <Types/Point.h>
@@ -138,8 +128,6 @@ VolumePropPanel::VolumePropPanel(
 	wxEventBlocker blocker(this);
 
 	SetDoubleBuffered(true);
-
-	m_agent = glbin_agtf->addVolumePropAgent(gstVolumePropAgent, *this);
 
 	wxBoxSizer* sizer_all = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* sizer_left = new wxBoxSizer(wxVERTICAL);
@@ -541,7 +529,7 @@ VolumePropPanel::VolumePropPanel(
 	m_colormap_inv_btn->SetFont(font);
 	m_colormap_combo = new wxComboBox(this, ID_ColormapCombo, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
-	vector<string>colormap_list;
+	std::vector<std::string> colormap_list;
 	colormap_list.push_back("Rainbow");
 	colormap_list.push_back("Hot");
 	colormap_list.push_back("Cool");
@@ -554,7 +542,7 @@ VolumePropPanel::VolumePropPanel(
 		m_colormap_combo->Append(colormap_list[i]);
 	m_colormap_combo2 = new wxComboBox(this, ID_ColormapCombo2, "",
 		wxDefaultPosition, wxSize(85, 25), 0, NULL, wxCB_READONLY);
-	vector<string>colormap_list2;
+	std::vector<std::string> colormap_list2;
 	colormap_list2.push_back("Intensity");
 	colormap_list2.push_back("Z Value");
 	colormap_list2.push_back("Y Value");
@@ -1887,64 +1875,10 @@ void VolumePropPanel::OnSyncGroupCheck(wxCommandEvent& event)
 
 void VolumePropPanel::OnSaveDefault(wxCommandEvent& event)
 {
-	fluo::ValueCollection names{
-		fluo::VolumePropAgent::Gamma3d,
-		fluo::VolumePropAgent::ExtractBoundary,
-		fluo::VolumePropAgent::Saturation,
-		fluo::VolumePropAgent::LowThreshold,
-		fluo::VolumePropAgent::HighThreshold,
-		fluo::VolumePropAgent::ShadowEnable,
-		fluo::VolumePropAgent::ShadowInt,
-		fluo::VolumePropAgent::Alpha,
-		fluo::VolumePropAgent::AlphaEnable,
-		fluo::VolumePropAgent::SampleRate,
-		fluo::VolumePropAgent::ShadingEnable,
-		fluo::VolumePropAgent::LowShading,
-		fluo::VolumePropAgent::HighShading,
-		fluo::VolumePropAgent::ColormapEnable,
-		fluo::VolumePropAgent::ColormapMode,
-		fluo::VolumePropAgent::ColormapType,
-		fluo::VolumePropAgent::ColormapLow,
-		fluo::VolumePropAgent::ColormapHigh,
-		fluo::VolumePropAgent::ColormapProj,
-		fluo::VolumePropAgent::Invert,
-		fluo::VolumePropAgent::Interpolate,
-		fluo::VolumePropAgent::MipMode,
-		fluo::VolumePropAgent::NoiseRedct,
-		fluo::VolumePropAgent::SpcX,
-		fluo::VolumePropAgent::SpcY,
-		fluo::VolumePropAgent::SpcZ
-	};
-	glbin_volf->propValuesToDefault(m_agent, names);
-	glbin_volf->writeDefault(names);
+	m_agent->SaveDefault();
 }
 
 void VolumePropPanel::OnResetDefault(wxCommandEvent &event)
 {
-	fluo::ValueCollection names{
-		fluo::VolumePropAgent::Gamma3d,
-		fluo::VolumePropAgent::ExtractBoundary,
-		fluo::VolumePropAgent::Saturation,
-		fluo::VolumePropAgent::LowThreshold,
-		fluo::VolumePropAgent::HighThreshold,
-		fluo::VolumePropAgent::ShadowEnable,
-		fluo::VolumePropAgent::ShadowInt,
-		fluo::VolumePropAgent::Alpha,
-		fluo::VolumePropAgent::AlphaEnable,
-		fluo::VolumePropAgent::SampleRate,
-		fluo::VolumePropAgent::ShadingEnable,
-		fluo::VolumePropAgent::LowShading,
-		fluo::VolumePropAgent::HighShading,
-		fluo::VolumePropAgent::ColormapEnable,
-		fluo::VolumePropAgent::ColormapMode,
-		fluo::VolumePropAgent::ColormapType,
-		fluo::VolumePropAgent::ColormapLow,
-		fluo::VolumePropAgent::ColormapHigh,
-		fluo::VolumePropAgent::ColormapProj,
-		fluo::VolumePropAgent::Invert,
-		fluo::VolumePropAgent::Interpolate,
-		fluo::VolumePropAgent::MipMode,
-		fluo::VolumePropAgent::NoiseRedct
-	};
-	glbin_volf->propValuesFromDefault(m_agent, names);
+	m_agent->ResetDefault();
 }

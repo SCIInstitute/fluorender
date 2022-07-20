@@ -33,10 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 #include <MeshTransAgent.hpp>
 
-namespace fluo
-{
-	class MeshData;
-}
 class MeshTransPanel: public wxPanel
 {
 	enum
@@ -70,16 +66,10 @@ public:
 		const wxString& name = "MeshTransPanel");
 	~MeshTransPanel();
 
-	void AssociateMeshData(fluo::MeshData* md)
-	{
-		m_agent->setObject(md);
-	}
-
 	friend class fluo::MeshTransAgent;
-
-private:
 	fluo::MeshTransAgent* m_agent;
 
+private:
 	wxStaticText* m_trans_st;
 	wxStaticText* m_x_trans_st;
 	wxTextCtrl* m_x_trans_text;

@@ -120,17 +120,20 @@ void FuiManager::Init()
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 
+	renderframeagent->SetTextureRendererSettings();
+	renderframeagent->SetTextureUndos();
+
 	bool bval; long lval; double dval;
 	m_frame->m_agent->getValue(gstSoftThresh, dval);
 	flvr::VolumeRenderer::set_soft_threshold(dval);
 	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
 
-	m_frame->m_agent->getValue(gstSoftThresh, dval);
+	renderframeagent->getValue(gstSoftThresh, dval);
 	flvr::VolumeRenderer::set_soft_threshold(dval);
 	flvr::MultiVolumeRenderer::set_soft_threshold(dval);
 	VolumeMeshConv::SetSoftThreshold(dval);
 	std::string sval;
-	m_frame->m_agent->getValue(gstFontFile, sval);
+	renderframeagent->getValue(gstFontFile, sval);
 	wxString font_file = sval;
 	wxString exePath = glbin.getExecutablePath();
 	if (font_file != "")
@@ -140,7 +143,7 @@ void FuiManager::Init()
 		font_file = exePath + GETSLASH() + "Fonts" +
 		GETSLASH() + "FreeSans.ttf";
 	flvr::TextRenderer::text_texture_manager_.load_face(font_file.ToStdString());
-	m_frame->m_agent->getValue(gstTextSize, dval);
+	renderframeagent->getValue(gstTextSize, dval);
 	flvr::TextRenderer::text_texture_manager_.SetSize(dval);
 
 	m_frame->Init(m_benchmark, m_fullscreen, m_windowed, m_hidepanels, pInstance!=nullptr);
@@ -198,6 +201,12 @@ void FuiManager::SetupAgents()
 		tree_panel->m_tree_model->setObject(glbin_root);
 		tree_panel->SetScenegraph(glbin_root);
 	}
+	//list
+	ListPanel* list_panel = m_frame->GetList();
+	if (list_panel)
+	{
+		list_panel->m_list_model = glbin_agtf->addListAgent(gstListAgent, *list_panel);
+	}
 	//brush
 	BrushToolDlg* brush_dlg = m_frame->GetBrushToolDlg();
 	if (brush_dlg && tree_panel)
@@ -217,6 +226,91 @@ void FuiManager::SetupAgents()
 	{
 		clip_panel->m_agent = glbin_agtf->addClipPlaneAgent(gstClipPlaneAgent, *clip_panel);
 	}
-
-
+	//clkernel
+	ClKernelDlg* cl_dlg = m_frame->GetOclDlg();
+	if (cl_dlg)
+	{
+		cl_dlg->m_agent = glbin_agtf->addClKernelAgent(gstClKernelAgent, *cl_dlg);
+	}
+	//colocalization analysis
+	ColocalDlg* colocal_dlg = m_frame->GetColocalizationDlg();
+	if (colocal_dlg)
+	{
+		colocal_dlg->m_agent = glbin_agtf->addColocalAgent(gstColocalAgent, *colocal_dlg);
+	}
+	//components
+	ComponentDlg* comp_dlg = m_frame->GetComponentDlg();
+	if (comp_dlg)
+	{
+		comp_dlg->m_agent = glbin_agtf->addComponentAgent(gstComponentAgent, *comp_dlg);
+	}
+	//convert
+	ConvertDlg* conv_dlg = m_frame->GetConvertDlg();
+	if (conv_dlg)
+	{
+		conv_dlg->m_agent = glbin_agtf->addConvertAgent(gstConvertAgent, *conv_dlg);
+	}
+	//count
+	CountingDlg* count_dlg = m_frame->GetCountingDlg();
+	if (count_dlg)
+	{
+		count_dlg->m_agent = glbin_agtf->addCountingAgent(gstCountingAgent, *count_dlg);
+	}
+	//measurements
+	MeasureDlg* measure_dlg = m_frame->GetMeasureDlg();
+	{
+		measure_dlg->m_agent = glbin_agtf->addMeasureAgent(gstMeasureAgent, *measure_dlg);
+		measure_dlg->m_rulerlist->m_agent = measure_dlg->m_agent;
+	}
+	//mesh properties
+	MeshPropPanel* mesh_panel = m_frame->GetMeshPropPanel();
+	if (mesh_panel)
+	{
+		mesh_panel->m_agent = glbin_agtf->addMeshPropAgent(gstMeshPropAgent, *mesh_panel);
+	}
+	//mesh transform
+	MeshTransPanel* mtrans_panel = m_frame->GetMeshTransPanel();
+	if (mtrans_panel)
+	{
+		mtrans_panel->m_agent = glbin_agtf->addMeshTransAgent(gstMeshTransAgent, *mtrans_panel);
+	}
+	//movie
+	MoviePanel* movie_panel = m_frame->GetMovieView();
+	if (movie_panel)
+	{
+		movie_panel->m_agent = glbin_agtf->addMovieAgent(gstMovieAgent, *movie_panel);
+	}
+	//noise reduct
+	NoiseReduceDlg* noise_dlg = m_frame->GetNoiseCancellingDlg();
+	if (noise_dlg)
+	{
+		noise_dlg->m_agent = glbin_agtf->addNoiseReduceAgent(gstNoiseReduceAgent, *noise_dlg);
+	}
+	//output adjust
+	OutAdjustPanel* out_panel = m_frame->GetAdjustView();
+	if (out_panel)
+	{
+		out_panel->m_agent = glbin_agtf->addOutAdjustAgent(gstOutAdjustAgent, *out_panel);
+	}
+	//recorder
+	RecorderDlg* rec_dlg = m_frame->GetRecorderDlg();
+	if (rec_dlg)
+	{
+		rec_dlg->m_agent = glbin_agtf->addRecorderAgent(gstRecorderAgent, *rec_dlg);
+		rec_dlg->m_keylist->m_agent = rec_dlg->m_agent;
+	}
+	//track
+	TrackDlg* track_dlg = m_frame->GetTraceDlg();
+	if (track_dlg)
+	{
+		track_dlg->m_agent = glbin_agtf->addTrackAgent(gstTrackAgent, *track_dlg);
+		track_dlg->m_compagent = glbin_agtf->getComponentAgent();
+		track_dlg->m_movieagent = glbin_agtf->getMovieAgent();
+	}
+	//volume properties
+	VolumePropPanel* vol_panel = m_frame->GetPropView();
+	if (vol_panel)
+	{
+		vol_panel->m_agent = glbin_agtf->addVolumePropAgent(gstVolumePropAgent, *vol_panel);
+	}
 }

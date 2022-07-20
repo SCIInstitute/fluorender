@@ -38,10 +38,6 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderFrame;
 class RecorderDlg;
-namespace fluo
-{
-	class Renderview;
-}
 class MoviePanel : public wxPanel
 {
 	enum
@@ -115,16 +111,10 @@ public:
 		const wxString& name = "MoviePanel");
 	~MoviePanel();
 
-	void AssociateRenderview(fluo::Renderview* view)
-	{
-		m_agent->setObject(view);
-	}
-
 	friend class fluo::MovieAgent;
-
-private:
 	fluo::MovieAgent* m_agent;
 
+private:
 	//controls
 	wxTextCtrl *m_fps_text;
 	wxComboBox *m_views_cmb;

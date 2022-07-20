@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include <ComponentAgent.hpp>
-#include <Main.h>
 #include <wx/wx.h>
 #include <wx/collpane.h>
 #include <wx/notebook.h>
@@ -198,18 +197,16 @@ public:
 	ComponentDlg(RenderFrame* frame);
 	~ComponentDlg();
 
-	void AssociateRenderview(fluo::Renderview* view);
-
-	friend class fluo::ComponentAgent;
-
 	//output
 	void SetOutput(const wxString &titles, const wxString &values);
 	void CopyData();
 	void PasteData();
 
+	friend class fluo::ComponentAgent;
+	fluo::ComponentAgent* m_agent;
+
 private:
 	RenderFrame* m_frame;
-	fluo::ComponentAgent* m_agent;
 
 	//split window
 	wxPanel *panel_top;

@@ -740,10 +740,8 @@ void RenderFrame::Init(
 	//m_vrv_list[0]->m_glview->SetEyeDist(m_setting_dlg->GetEyeDist());
 	//if (m_setting_dlg->GetStereo()) m_vrv_list[0]->InitOpenVR();
 	//m_time_id = m_setting_dlg->GetTimeId();
-	bool bval; long lval; double dval;
+	bool bval; long lval;
 
-	m_trace_dlg->SetComponentAgent();
-	m_trace_dlg->SetMovieAgent();
 	//m_trace_dlg->SetCellSize(m_setting_dlg->GetComponentSize());
 
 	m_agent->getValue(gstTestParam, bval);
@@ -871,10 +869,12 @@ void RenderFrame::OnClose(wxCloseEvent &event)
 wxString RenderFrame::CreateView(int row)
 {
 	RenderviewPanel* vrv = 0;
+	bool set_gl = false;
 	if (m_vrv_list.size()>0)
 	{
 		wxGLContext* sharedContext = m_vrv_list[0]->GetContext();
 		vrv = new RenderviewPanel(this, sharedContext);
+		set_gl = true;
 	}
 	else
 	{
@@ -886,7 +886,6 @@ wxString RenderFrame::CreateView(int row)
 	//RenderCanvas* view = vrv->m_glview;
 	//if (!view)
 	//	return "NO_NAME";
-
 	m_vrv_list.push_back(vrv);
 	//if (m_movie_view)
 	//	m_movie_view->AddView(vrv->GetName());
@@ -905,8 +904,7 @@ wxString RenderFrame::CreateView(int row)
 	//view->SetRulerTimeDep(m_setting_dlg->GetRulerTimeDep());
 	//vrv->SetPinThreshold(m_setting_dlg->GetPinThreshold());
 
-	//reset gl
-	glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->setValue(gstSetGl, false);
+	m_agent->AddView(vrv, set_gl);
 
 	//m_aui_mgr.Update();
 	OrganizeVRenderViews(1);
@@ -1441,23 +1439,6 @@ void RenderFrame::OnInfo(wxCommandEvent& WXUNUSED(event))
 	main->Add(right,0,wxEXPAND);
 	d->SetSizer(main);
 	d->ShowModal();
-}
-
-wxString RenderFrame::ScriptDialog(const wxString& title,
-	const wxString& wildcard, long style)
-{
-	fluo::MovieAgent* agent = glbin_agtf->getMovieAgent();
-	if (agent) agent->HoldRun();
-	wxString result;
-	wxFileDialog *dlg = new wxFileDialog(
-		this, title, "", "",
-		wildcard, style);
-	int rval = dlg->ShowModal();
-	if (rval == wxID_OK)
-		result = dlg->GetPath();
-	delete dlg;
-	if (agent) agent->ResumeRun();
-	return result;
 }
 
 //on selections
@@ -2000,6 +1981,121 @@ void RenderFrame::ShowCalculationDlg()
 	m_main_tb->SetToolNormalBitmap(ID_LastTool,
 		wxGetBitmapFromMemory(icon_calculations));
 	m_agent->setValue(gstLastTool, long(TOOL_CALCULATIONS));
+}
+
+//show prop panel
+void RenderFrame::HidePropPanel()
+{
+	if (m_volume_prop)
+		m_volume_prop->Show(false);
+	if (m_mesh_prop)
+		m_mesh_prop->Show(false);
+	if (m_mesh_manip)
+		m_mesh_manip->Show(false);
+	if (m_annotation_prop)
+		m_annotation_prop->Show(false);
+	m_aui_mgr.GetPane(m_prop_panel).Caption(UITEXT_PROPERTIES);
+	m_aui_mgr.Update();
+}
+
+void RenderFrame::ShowVolumePropPanel(const std::string& name)
+{
+	if (!m_volume_prop->IsShown())
+	{
+		m_volume_prop->Show(true);
+		m_prop_sizer->Clear();
+		m_prop_sizer->Add(m_volume_prop, 1, wxEXPAND, 0);
+		m_prop_panel->SetSizer(m_prop_sizer);
+		m_prop_panel->Layout();
+	}
+
+	if (m_volume_prop)
+		m_volume_prop->Show(true);
+	if (m_mesh_prop)
+		m_mesh_prop->Show(false);
+	if (m_mesh_manip)
+		m_mesh_manip->Show(false);
+	if (m_annotation_prop)
+		m_annotation_prop->Show(false);
+
+	m_aui_mgr.GetPane(m_prop_panel).Caption(
+		wxString(UITEXT_PROPERTIES) + wxString(" - ") + name);
+	m_aui_mgr.Update();
+}
+
+void RenderFrame::ShowMeshPropPanel(const std::string& name)
+{
+	if (!m_mesh_prop->IsShown())
+	{
+		m_mesh_prop->Show(true);
+		m_prop_sizer->Clear();
+		m_prop_sizer->Add(m_mesh_prop, 1, wxEXPAND, 0);
+		m_prop_panel->SetSizer(m_prop_sizer);
+		m_prop_panel->Layout();
+	}
+
+	if (m_volume_prop)
+		m_volume_prop->Show(false);
+	if (m_mesh_prop)
+		m_mesh_prop->Show(true);
+	if (m_mesh_manip)
+		m_mesh_manip->Show(false);
+	if (m_annotation_prop)
+		m_annotation_prop->Show(false);
+
+	m_aui_mgr.GetPane(m_prop_panel).Caption(
+		wxString(UITEXT_PROPERTIES) + wxString(" - ") + name);
+	m_aui_mgr.Update();
+}
+
+void RenderFrame::ShowMeshManipPanel(const std::string& name)
+{
+	if (!m_mesh_manip->IsShown())
+	{
+		m_mesh_manip->Show(true);
+		m_prop_sizer->Clear();
+		m_prop_sizer->Add(m_mesh_manip, 1, wxEXPAND, 0);
+		m_prop_panel->SetSizer(m_prop_sizer);
+		m_prop_panel->Layout();
+	}
+
+	if (m_volume_prop)
+		m_volume_prop->Show(false);
+	if (m_mesh_prop)
+		m_mesh_prop->Show(false);
+	if (m_mesh_manip)
+		m_mesh_manip->Show(true);
+	if (m_annotation_prop)
+		m_annotation_prop->Show(false);
+
+	m_aui_mgr.GetPane(m_prop_panel).Caption(
+		wxString(UITEXT_PROPERTIES) + wxString(" - ") + name);
+	m_aui_mgr.Update();
+}
+
+void RenderFrame::ShowAnnoPropPanel(const std::string& name)
+{
+	if (!m_annotation_prop->IsShown())
+	{
+		m_annotation_prop->Show(true);
+		m_prop_sizer->Clear();
+		m_prop_sizer->Add(m_annotation_prop, 1, wxEXPAND, 0);
+		m_prop_panel->SetSizer(m_prop_sizer);
+		m_prop_panel->Layout();
+	}
+
+	if (m_volume_prop)
+		m_volume_prop->Show(false);
+	if (m_mesh_prop)
+		m_mesh_prop->Show(false);
+	if (m_mesh_manip)
+		m_mesh_manip->Show(false);
+	if (m_annotation_prop)
+		m_annotation_prop->Show(true);
+
+	m_aui_mgr.GetPane(m_prop_panel).Caption(
+		wxString(UITEXT_PROPERTIES)+wxString(" - ")+name);
+	m_aui_mgr.Update();
 }
 
 void RenderFrame::OnFacebook(wxCommandEvent& WXUNUSED(event))

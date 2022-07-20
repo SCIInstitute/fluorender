@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <RecorderDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <key.xpm>
@@ -335,8 +333,6 @@ RecorderDlg::RecorderDlg(RenderFrame* frame, wxWindow* parent)
 wxPoint(500, 150), wxSize(450, 650),
 0, "RecorderDlg")
 {
-	m_agent = glbin_agtf->addRecorderAgent(gstRecorderAgent, *this);
-
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -348,7 +344,6 @@ wxPoint(500, 150), wxSize(450, 650),
 	wxBoxSizer *group2 = new wxBoxSizer(wxVERTICAL);
 	st = new wxStaticText(this, wxID_ANY, "Key Frames:");
 	m_keylist = new KeyListCtrl(this);
-	m_keylist->m_agent = m_agent;
 	group2->Add(st, 0, wxEXPAND);
 	group2->Add(5, 5);
 	group2->Add(m_keylist, 1, wxEXPAND);

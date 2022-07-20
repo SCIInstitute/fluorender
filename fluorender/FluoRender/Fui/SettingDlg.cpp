@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <SettingDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/stdpaths.h>

@@ -27,12 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ClKernelDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <Renderview.hpp>
-#include <VolumeData.hpp>
-#include <Calculate/KernelExecutor.h>
-#include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/stdpaths.h>
@@ -56,8 +50,6 @@ wxDefaultPosition, wxSize(550, 600),
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
-
-	m_agent = glbin_agtf->addClKernelAgent(gstClKernelAgent, *this);
 
 	SetDoubleBuffered(true);
 
@@ -194,11 +186,6 @@ wxDefaultPosition, wxSize(550, 600),
 
 ClKernelDlg::~ClKernelDlg()
 {
-}
-
-void ClKernelDlg::AssociateRenderview(fluo::Renderview* view)
-{
-	m_agent->setObject(view);
 }
 
 void ClKernelDlg::OnBrowseBtn(wxCommandEvent& event)

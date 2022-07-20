@@ -27,8 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MeasureDlg.h>
 #include <RenderFrame.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -485,8 +483,6 @@ MeasureDlg::MeasureDlg(RenderFrame* frame)
 	0, "MeasureDlg"),
 	m_frame(frame)
 {
-	m_agent = glbin_agtf->addMeasureAgent(gstMeasureAgent, *this);
-
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	wxIntegerValidator<unsigned int> vald_int;
@@ -698,7 +694,6 @@ MeasureDlg::MeasureDlg(RenderFrame* frame)
 	sizer_2->Add(sizer21, 0, wxEXPAND);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_rulerlist, 1, wxEXPAND);
-	m_rulerlist->m_agent = m_agent;
 
 	//alignment
 	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(

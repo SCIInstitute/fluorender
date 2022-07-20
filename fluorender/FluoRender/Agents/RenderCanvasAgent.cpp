@@ -30,6 +30,16 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <Global.hpp>
 #include <AgentFactory.hpp>
+#include <Renderview.hpp>
+#include <ComponentAgent.hpp>
+#include <CompAnalyzer.h>
+#include <Input.hpp>
+#include <RulerHandler.h>
+#include <Ruler.h>
+#include <RulerRenderer.h>
+#include <VolumeSelector.h>
+#include <VolumeCalculator.h>
+#include <ScriptProc.h>
 
 using namespace fluo;
 
@@ -71,6 +81,36 @@ void RenderCanvasAgent::UpdateFui(const ValueCollection &names)
 	setValue(gstRefreshErase, false);
 
 	resumeObserverNotification();
+}
+
+void RenderCanvasAgent::Init()
+{
+	Renderview* view = getObject();
+	if (!view)
+		return;
+	view->GetRulerHandler()->SetView(view);
+	view->GetRulerHandler()->SetRulerList(view->GetRulerList());
+	view->GetRulerRenderer()->SetView(view);
+	view->GetRulerRenderer()->SetRulerList(view->GetRulerList());
+	view->GetVolumePoint()->SetView(view);
+	view->GetVolumeSelector()->SetView(view);
+	view->GetVolumeCalculator()->SetRoot(glbin_root);
+	view->GetVolumeCalculator()->SetView(view);
+	view->GetVolumeCalculator()->SetVolumeSelector(view->GetVolumeSelector());
+	view->GetScriptProc()->SetFrame(glbin_agtf->getRenderFrameAgent());
+	view->GetScriptProc()->SetView(view);
+}
+
+void RenderCanvasAgent::CompSelection(fluo::Point& p, int mode)
+{
+	std::set<unsigned long long> ids;
+	getObject()->GetCompAnalyzer()->GetCompsPoint(p, ids);
+	glbin_agtf->getComponentAgent()->SetCompSelection(ids, mode);
+}
+
+void RenderCanvasAgent::UpdateInput()
+{
+	glbin_input->Update();
 }
 
 void RenderCanvasAgent::OnBoundsChanged(Event& event)

@@ -60,12 +60,10 @@ public:
 	ClKernelDlg(RenderFrame* frame);
 	~ClKernelDlg();
 
-	void AssociateRenderview(fluo::Renderview* view);
-
 	friend class fluo::ClKernelAgent;
+	fluo::ClKernelAgent* m_agent;
 
 private:
-	fluo::ClKernelAgent* m_agent;
 
 	//ui
 	wxTextCtrl* m_kernel_file_txt;

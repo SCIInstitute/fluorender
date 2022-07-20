@@ -55,12 +55,11 @@ public:
 	~ListPanel();
 
 	friend class fluo::ListAgent;
+	fluo::ListAgent* m_list_model;
 
 private:
 	wxToolBar* m_toolbar;
-
 	wxDataViewCtrl* m_list_ctrl;
-	fluo::ListAgent* m_list_model;
 
 	void OnAddToView(wxCommandEvent& event);
 	void OnRename(wxCommandEvent& event);

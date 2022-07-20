@@ -54,16 +54,10 @@ public:
 	CountingDlg(RenderFrame* frame);
 	~CountingDlg();
 
-	void AssociateVolumeData(fluo::VolumeData* vd)
-	{
-		m_agent->setObject(vd);
-	}
-
 	friend class fluo::CountingAgent;
-
-private:
 	fluo::CountingAgent* m_agent;
 
+private:
 	//component analyzer
 	wxCheckBox *m_ca_select_only_chk;
 	wxTextCtrl *m_ca_min_text;

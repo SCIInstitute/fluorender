@@ -30,10 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderviewPanel.h>
 #include <RenderFrame.h>
 #include <RenderCanvas.h>
-#include <Global.hpp>
-#include <AgentFactory.hpp>
-#include <RenderviewFactory.hpp>
-#include <VolumeData.hpp>
 #include <tiffio.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
@@ -135,8 +131,6 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	m_max_id++;
 	wxString name = wxString::Format("Render View:%d", m_max_id);
 	SetName(name);
-	std::string str_name = gstRenderviewAgent + std::to_string(m_max_id);
-	m_agent = glbin_agtf->addRenderviewAgent(str_name, *this);
 
 	wxLogNull logNo;
 	//full frame
@@ -228,7 +222,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 	attriblist.DoubleBuffer();
 	attriblist.EndList();
 	m_canvas = new RenderCanvas(frame, this, attriblist, sharedContext);
-	m_agent->setObject(glbin_revf->findFirst(name.ToStdString()));
+	//m_agent->setObject(glbin_revf->findFirst(name.ToStdString()));
 	//m_agent = m_canvas->m_agent;
 	if (!sharedContext)
 	{
@@ -277,7 +271,7 @@ RenderviewPanel::RenderviewPanel(RenderFrame* frame,
 			//sharedContext->SetCurrent(*m_canvas);
 			m_canvas->SetCurrent(*sharedContext);
 			m_canvas->m_glRC = sharedContext;
-			glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->changeValue(gstSetGl, true);
+			//glbin_agtf->getRenderCanvasAgent(GetName().ToStdString())->changeValue(gstSetGl, true);
 			//m_canvas->m_set_gl = true;
 		}
 	}
@@ -1333,21 +1327,11 @@ void RenderviewPanel::OnCapture(wxCommandEvent& event)
 	int rval = file_dlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString cap_file = file_dlg.GetDirectory() + GETSLASH() + file_dlg.GetFilename();
-		m_agent->updateValue(gstCaptureFile, cap_file.ToStdWstring());
-		m_agent->updateValue(gstCapture, true);
+		m_agent->SaveProject(
+			file_dlg.GetDirectory().ToStdWstring(),
+			file_dlg.GetFilename().ToStdWstring());
 		//RefreshGL();
 
-		bool bval;
-		glbin_root->getValue(gstSaveProjectEnable, bval);
-		if (bval)
-		{
-			wxString new_folder;
-			new_folder = cap_file + "_project";
-			MkDirW(new_folder.ToStdWstring());
-			wxString prop_file = new_folder + GETSLASH() + file_dlg.GetFilename() + "_project.vrp";
-			glbin_agtf->getRenderFrameAgent()->SaveProject(prop_file.ToStdWstring());
-		}
 			//vr_frame->GetSettingDlg()->SetSaveAlpha(RenderFrame::GetSaveAlpha());
 			//vr_frame->GetSettingDlg()->SetSaveFloat(RenderFrame::GetSaveFloat());
 	}
@@ -2115,12 +2099,8 @@ void RenderviewPanel::OnAovSldrIdle(wxIdleEvent& event)
 	bool bval;
 	m_agent->getValue(gstCapture, bval);
 	if (bval) return;
-	fluo::ClipPlaneAgent* agent = glbin_agtf->getClipPlaneAgent();
-	if (agent)
-	{
-		agent->getValue(gstClipHold, bval);
-		if (bval) return;
-	}
+	bval = m_agent->GetClipHold();
+	if (bval) return;
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = m_aov_sldr->GetScreenRect();
